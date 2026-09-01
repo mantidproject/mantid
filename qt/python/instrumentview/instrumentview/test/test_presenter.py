@@ -17,6 +17,7 @@ from instrumentview.renderers.point_cloud_renderer import PointCloudRenderer
 
 import numpy as np
 from mantid.simpleapi import CreateSampleWorkspace
+from vtkmodules.vtkRenderingCore import vtkCamera
 
 import unittest
 from unittest import mock
@@ -37,6 +38,9 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.get_contour_limits.return_value = (0.0, 1.0)
         self._mock_view.selected_peaks_workspaces.return_value = []
         self._mock_view.run_on_main_thread.side_effect = lambda func, *args, **kwargs: func(*args, **kwargs)
+        # The shape renderers outline picked detectors with a silhouette, which
+        # needs a real camera: the outline depends on where the scene is viewed from.
+        self._mock_view.main_plotter.renderer.GetActiveCamera.return_value = vtkCamera()
         self._ws = CreateSampleWorkspace(OutputWorkspace="TestFullInstrumentViewPresenter", EnableLogging=False)
         self._model = FullInstrumentViewModel(self._ws)
         self._presenter = self._create_test_presenter()

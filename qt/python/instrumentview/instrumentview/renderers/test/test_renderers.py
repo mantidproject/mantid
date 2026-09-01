@@ -6,12 +6,16 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """Unit tests for the PointCloudRenderer and ShapeRenderer classes."""
 
+import gc
 import unittest
+import weakref
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pyvista as pv
 from scipy.spatial.transform import Rotation
+from vtkmodules.vtkFiltersHybrid import vtkPolyDataSilhouette
+from vtkmodules.vtkRenderingCore import vtkCamera
 
 from instrumentview.renderers.base_renderer import InstrumentRenderer
 from instrumentview.renderers.point_cloud_renderer import PointCloudRenderer
@@ -19,6 +23,8 @@ from instrumentview.renderers.shape_renderer import (
     ShapeRenderer,
     _triangles_to_verts_faces,
     _make_fallback_shape,
+    _orient_faces_consistently,
+    _shape_depths,
     _extract_quad_from_cylinder_shapeinfo,
     _extract_quad_from_cuboid_shapeinfo,
 )
@@ -310,6 +316,104 @@ class TestFallbackShape(unittest.TestCase):
         self.assertEqual(verts.shape, (4, 3))
         self.assertEqual(faces.shape, (4, 3))
         self.assertEqual(face_size, 3)
+
+    def test_is_consistently_wound(self):
+        """It is silhouetted like any other shape, so its winding has to agree too."""
+        verts, faces, _ = _make_fallback_shape()
+        self.assertIn(_outward_fraction(verts, faces), (0.0, 1.0))
+
+
+def _outward_fraction(verts, faces):
+    """Fraction of triangles whose normal points away from the shape's centroid.
+
+    A closed convex solid is consistently wound exactly when this is 0 or 1 —
+    all triangles facing out, or all facing in.  Which of the two does not
+    matter to the silhouette, only that they agree.
+    """
+    tri = verts[faces]
+    normals = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
+    outward = np.einsum("ij,ij->i", normals, tri.mean(axis=1) - verts.mean(axis=0))
+    return float(np.count_nonzero(outward > 0)) / len(faces)
+
+
+class TestShapeDepths(unittest.TestCase):
+    """Tests for _shape_depths, which sizes the picked outline's lift."""
+
+    @staticmethod
+    def _cache(*extents):
+        no_faces = np.zeros((0, 3), dtype=np.int64)
+        return {i: (np.array([[0.0, 0.0, 0.0], [e, 0.0, 0.0]]), no_faces, 3) for i, e in enumerate(extents)}
+
+    def test_is_the_whole_across_corner_size(self):
+        """A silhouette runs front to back, so clearing the neighbours takes a whole detector."""
+        self.assertEqual(_shape_depths(self._cache(0.5, 2.0)), {0: 0.5, 1: 2.0})
+
+    def test_measures_across_the_corners(self):
+        """A detector can be turned any way round, so its longest axis is the one that counts."""
+        cache = {0: (np.array([[0.0, 0.0, 0.0], [3.0, 4.0, 0.0]]), np.zeros((0, 3), dtype=np.int64), 3)}
+        self.assertAlmostEqual(_shape_depths(cache)[0], 5.0)
+
+    def test_keeps_shapes_apart(self):
+        """One outsized shape must not set the lift for every other detector."""
+        self.assertEqual(_shape_depths(self._cache(0.02, 40.0))[0], 0.02)
+
+    def test_is_empty_without_shapes(self):
+        self.assertEqual(_shape_depths({}), {})
+
+
+class TestOrientFacesConsistently(unittest.TestCase):
+    """Tests for _orient_faces_consistently."""
+
+    @staticmethod
+    def _mixed_wound_cube():
+        """A cube with every other triangle flipped, as getMesh() returns them."""
+        cube = pv.Cube().triangulate().clean()
+        verts = np.asarray(cube.points, dtype=np.float64)
+        faces = cube.faces.reshape(-1, 4)[:, 1:].astype(np.int64)
+        faces[::2] = faces[::2][:, ::-1]
+        return verts, faces
+
+    def test_rewinds_a_mixed_wound_solid(self):
+        verts, faces = self._mixed_wound_cube()
+        self.assertNotIn(_outward_fraction(verts, faces), (0.0, 1.0))
+
+        oriented = _orient_faces_consistently(verts, faces)
+
+        self.assertIn(_outward_fraction(verts, oriented), (0.0, 1.0))
+        self.assertEqual(oriented.shape, faces.shape)
+
+    def test_keeps_the_same_triangles(self):
+        """The caller tiles these vertex indices per detector, so they must still index the same points."""
+        verts, faces = self._mixed_wound_cube()
+
+        oriented = _orient_faces_consistently(verts, faces)
+
+        np.testing.assert_array_equal(np.sort(oriented, axis=1), np.sort(faces, axis=1))
+
+    def test_mixed_winding_makes_a_cube_report_its_interior_edges_as_outline(self):
+        """The defect this exists to prevent: the picked marker drawing a wireframe box.
+
+        A silhouette takes an edge to be outline when the two triangles either
+        side of it face opposite ways, so a cube seen from a corner should give
+        the six edges of its hexagonal outline and no more.
+        """
+        verts, faces = self._mixed_wound_cube()
+        camera = vtkCamera()
+        camera.SetPosition(4.0, 3.0, 5.0)
+        camera.SetFocalPoint(0.0, 0.0, 0.0)
+
+        def silhouette_edges(face_array):
+            vtk_faces = np.hstack([np.full((len(face_array), 1), 3, dtype=np.int64), face_array])
+            sil = vtkPolyDataSilhouette()
+            sil.SetInputData(pv.PolyData(verts, vtk_faces))
+            sil.SetCamera(camera)
+            sil.SetBorderEdges(True)
+            sil.SetEnableFeatureAngle(False)
+            sil.Update()
+            return sil.GetOutput().GetNumberOfCells()
+
+        self.assertGreater(silhouette_edges(faces), 6)
+        self.assertEqual(silhouette_edges(_orient_faces_consistently(verts, faces)), 6)
 
 
 class TestExtractQuadFromCuboidShapeinfo(unittest.TestCase):
@@ -809,6 +913,20 @@ class TestShapeRenderer(unittest.TestCase):
         # stray back towards the unpicked detector.
         self.assertGreater(float(np.min(outline.points[:, 0])), 0.5)
 
+    def test_build_picked_highlight_mesh_returns_a_surface_to_silhouette(self):
+        """The outline is drawn from the picked surface, not from extracted edges.
+
+        Edges are only right for a flat shape; a Raw Shapes detector is a closed
+        solid whose edges include the ones behind it.  See
+        _add_picked_highlight_actor.
+        """
+        mesh = self._build_two_detector_mesh()
+        highlight = self.renderer._build_picked_highlight_mesh(mesh, np.array([0, 1]))
+
+        self.assertGreater(highlight.n_faces, 0)
+        self.assertEqual(highlight.n_lines, 0)
+        self.assertEqual(highlight.n_verts, 0)
+
     def test_build_picked_highlight_mesh_carries_no_scalar_data(self):
         """Scalars inherited from the pickable mesh would override the solid highlight colour."""
         mesh = self._build_two_detector_mesh()
@@ -842,7 +960,7 @@ class TestShapeRenderer(unittest.TestCase):
         self.assertGreater(float(markers.points[0, 0]), 0.5)
 
     def test_marker_fallback_carries_no_scalar_data(self):
-        """The markers share an actor with the outline, so inherited scalars would recolour them."""
+        """The markers share the highlight mesh with the outline, so inherited scalars would recolour them."""
         mesh = self._build_two_detector_mesh()
         self.renderer.set_pickable_scalars(mesh, np.array([1, 1]), "Visible Picked")
         self.renderer._MAX_OUTLINE_CELLS = 1
@@ -872,10 +990,163 @@ class TestShapeRenderer(unittest.TestCase):
         self.assertEqual(call_kwargs["line_width"], self.renderer._PICKED_OUTLINE_WIDTH)
         self.assertFalse(call_kwargs["pickable"])
         self.renderer._picked_highlight_actor.SetVisibility.assert_called_once_with(False)
-        # The same actor draws the marker-point fallback, so it is styled for both.
-        # Only one applies at a time: the mesh holds lines or vertices, never both.
+
+    def test_picked_outline_is_drawn_from_a_camera_facing_silhouette(self):
+        """The outline has to follow the camera, so the filter stays in the pipeline.
+
+        Evaluating it once would leave the outline tracing edges that rotated out
+        of view.  Border edges are on so a flat quad still outlines; feature
+        edges are off so a closed solid does not draw its interior creases.
+        """
+        plotter = self._make_shape_mock_plotter()
+        camera = plotter.renderer.GetActiveCamera.return_value
+        self.renderer.create_picked_highlight_actor(plotter)
+
+        silhouette = self.renderer._picked_silhouette
+        self.assertIsNotNone(silhouette)
+        self.assertIs(silhouette.GetCamera(), camera)
+        self.assertIs(silhouette.GetInput(), self.renderer._picked_highlight_mesh)
+        self.assertTrue(silhouette.GetBorderEdges())
+        self.assertFalse(silhouette.GetEnableFeatureAngle())
+        outline_mapper = plotter.add_mesh.return_value.mapper
+        outline_mapper.SetInputConnection.assert_called_once_with(silhouette.GetOutputPort())
+
+    def _pick_one_detector_facing_the_camera(self):
+        """Select a detector with the camera looking down -z, and return the plotter."""
+        mesh = self._build_two_detector_mesh()
+        plotter = self._make_shape_mock_plotter()
+        camera = plotter.renderer.GetActiveCamera.return_value
+        camera.SetPosition(0.0, 0.0, 10.0)
+        camera.SetFocalPoint(0.0, 0.0, 0.0)
+        self.renderer.create_picked_highlight_actor(plotter)
+        self.renderer._picked_highlight_actor.reset_mock()
+        self.renderer.update_picked_highlight(plotter, mesh, np.array([0, 1]))
+        return plotter, camera
+
+    def test_outline_is_lifted_towards_the_camera(self):
+        """Level with the bank, most of a picked detector's outline is inside its neighbours.
+
+        A solid's silhouette runs through its full depth, so the detectors flush
+        against its sides cover all but its near edge, and the marker arrives as
+        a couple of stray lines.
+        """
+        self._pick_one_detector_facing_the_camera()
+
+        self.assertGreater(self.renderer._outline_push, 0.0)
+        position = self.renderer._picked_highlight_actor.SetPosition.call_args[0]
+        np.testing.assert_allclose(position, (0.0, 0.0, self.renderer._outline_push), atol=1e-12)
+
+    def test_outline_lift_follows_the_camera(self):
+        """It is a world-space move, so which way it goes changes as the view is rotated."""
+        _, camera = self._pick_one_detector_facing_the_camera()
+        actor = self.renderer._picked_highlight_actor
+        actor.reset_mock()
+
+        camera.SetPosition(10.0, 0.0, 0.0)
+
+        position = actor.SetPosition.call_args[0]
+        np.testing.assert_allclose(position, (self.renderer._outline_push, 0.0, 0.0), atol=1e-12)
+
+    def test_outline_lift_is_sized_from_the_picked_detectors_shape(self):
+        """Not from the instrument's largest shape, which would lift every outline too far."""
+        self._pick_one_detector_facing_the_camera()
+
+        detector = self.renderer._pickable_det_indices[1]
+        key = int(self.renderer._det_shape_keys[detector])
+        scale = float(np.max(np.abs(self.renderer._det_scales[detector])))
+        self.assertAlmostEqual(self.renderer._outline_push, self.renderer._shape_depths[key] * scale)
+
+    def test_rebuilding_the_actor_drops_the_previous_camera_observer(self):
+        """The camera outlives the actors, so the observers would otherwise pile up on it."""
+        mesh = self._build_two_detector_mesh()
+        first = self._make_shape_mock_plotter()
+        camera = first.renderer.GetActiveCamera.return_value
+        second = self._make_shape_mock_plotter()
+        second.renderer.GetActiveCamera.return_value = camera
+
+        self.renderer.create_picked_highlight_actor(first)
+        stale_actor = self.renderer._picked_highlight_actor
+        self.renderer.create_picked_highlight_actor(second)
+        self.renderer.update_picked_highlight(second, mesh, np.array([0, 1]))
+        stale_actor.reset_mock()
+
+        camera.Azimuth(10.0)
+
+        stale_actor.SetPosition.assert_not_called()
+        self.renderer._picked_highlight_actor.SetPosition.assert_called()
+
+    def test_camera_observer_retires_with_the_renderer(self):
+        """A renderer owns a rotation matrix per detector, so an observing camera must not pin it.
+
+        Renderers are replaced wholesale when the workspace changes, while the
+        camera lives on with the view.
+        """
+        renderer = ShapeRenderer(self._workspace)
+        plotter = self._make_shape_mock_plotter()
+        camera = plotter.renderer.GetActiveCamera.return_value
+        renderer.precompute()
+        renderer.create_picked_highlight_actor(plotter)
+        self.assertTrue(camera.HasObserver("ModifiedEvent"))
+
+        collected = weakref.ref(renderer)
+        del renderer
+        gc.collect()
+        self.assertIsNone(collected(), "the camera observer is keeping the renderer alive")
+
+        camera.Azimuth(5.0)  # a retired observer drops itself on its next event
+
+        self.assertFalse(camera.HasObserver("ModifiedEvent"))
+
+    def test_marker_fallback_gets_its_own_actor(self):
+        """A cloud of marker points has no silhouette, so it cannot share the outline's actor."""
+        plotter = self._make_shape_mock_plotter()
+        self.renderer.create_picked_highlight_actor(plotter)
+
+        call_kwargs = plotter.add_points.call_args[1]
+        self.assertEqual(call_kwargs["color"], self.renderer._PICKED_HIGHLIGHT_COLOUR)
         self.assertEqual(call_kwargs["point_size"], self.renderer._PICKED_MARKER_POINT_SIZE)
         self.assertTrue(call_kwargs["render_points_as_spheres"])
+        self.assertFalse(call_kwargs["pickable"])
+        self.assertIsNot(self.renderer._picked_marker_actor, self.renderer._picked_highlight_actor)
+        self.renderer._picked_marker_actor.SetVisibility.assert_called_once_with(False)
+
+    def test_only_the_outline_actor_shows_for_an_outlined_selection(self):
+        mesh = self._build_two_detector_mesh()
+        plotter = self._make_shape_mock_plotter()
+        self.renderer.create_picked_highlight_actor(plotter)
+        self.renderer._picked_highlight_actor.reset_mock()
+        self.renderer._picked_marker_actor.reset_mock()
+
+        self.renderer.update_picked_highlight(plotter, mesh, np.array([0, 1]))
+
+        self.renderer._picked_highlight_actor.SetVisibility.assert_called_once_with(True)
+        self.renderer._picked_marker_actor.SetVisibility.assert_called_once_with(False)
+
+    def test_only_the_marker_actor_shows_above_the_cell_cap(self):
+        mesh = self._build_two_detector_mesh()
+        plotter = self._make_shape_mock_plotter()
+        self.renderer.create_picked_highlight_actor(plotter)
+        self.renderer._MAX_OUTLINE_CELLS = 1
+        self.renderer._picked_highlight_actor.reset_mock()
+        self.renderer._picked_marker_actor.reset_mock()
+
+        self.renderer.update_picked_highlight(plotter, mesh, np.array([1, 1]))
+
+        self.renderer._picked_highlight_actor.SetVisibility.assert_called_once_with(False)
+        self.renderer._picked_marker_actor.SetVisibility.assert_called_once_with(True)
+
+    def test_emptying_the_selection_hides_both_marker_actors(self):
+        mesh = self._build_two_detector_mesh()
+        plotter = self._make_shape_mock_plotter()
+        self.renderer.create_picked_highlight_actor(plotter)
+        self.renderer.update_picked_highlight(plotter, mesh, np.array([0, 1]))
+        self.renderer._picked_highlight_actor.reset_mock()
+        self.renderer._picked_marker_actor.reset_mock()
+
+        self.renderer.update_picked_highlight(plotter, mesh, np.array([0, 0]))
+
+        self.renderer._picked_highlight_actor.SetVisibility.assert_called_once_with(False)
+        self.renderer._picked_marker_actor.SetVisibility.assert_called_once_with(False)
 
     def test_update_picked_highlight_shows_outline(self):
         mesh = self._build_two_detector_mesh()
@@ -904,6 +1175,7 @@ class TestShapeRenderer(unittest.TestCase):
         self.assertIs(self.renderer._picked_highlight_actor, actor)
         plotter.remove_actor.assert_not_called()
         plotter.add_mesh.assert_not_called()
+        plotter.add_points.assert_not_called()
 
     def test_update_picked_highlight_hides_outline_when_selection_emptied(self):
         mesh = self._build_two_detector_mesh()
@@ -927,6 +1199,9 @@ class TestShapeRenderer(unittest.TestCase):
         plotter = MagicMock()
         plotter.off_screen = off_screen
         plotter.iren.get_event_position.return_value = (100, 200)
+        # The silhouette filter behind the picked outline needs a real camera:
+        # the outline it draws depends on where the scene is viewed from.
+        plotter.renderer.GetActiveCamera.return_value = vtkCamera()
         return plotter
 
     @patch("instrumentview.renderers.shape_renderer.vtkCellPicker")

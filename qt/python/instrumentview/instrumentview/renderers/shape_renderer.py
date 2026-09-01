@@ -17,11 +17,14 @@ A cell-to-detector index map is maintained so that VTK cell-picking on the
 surface can be translated back to a logical detector index.
 """
 
+import weakref
+
 import numpy as np
 import pyvista as pv
 from pyvistaqt import BackgroundPlotter
 from scipy.spatial.transform import Rotation
 from typing import Callable, Optional
+from vtkmodules.vtkFiltersHybrid import vtkPolyDataSilhouette
 from vtkmodules.vtkRenderingCore import vtkCellPicker
 
 from instrumentview.Projections.Projection import Projection
@@ -48,10 +51,11 @@ class ShapeRenderer(InstrumentRenderer):
     _PICKED_OUTLINE_WIDTH = 3
     _PICKED_MARKER_POINT_SIZE = 8
     # Above this many picked cells the exact outline is replaced by one marker
-    # point per picked detector.  Edge extraction scales badly -- roughly 90 ms
-    # at this cap but 1.2 s at four times it -- and it runs on the Qt thread,
-    # so it cannot be allowed to grow with the selection.  The fallback is
-    # linear, and costs about 9 ms at this same cap.
+    # point per picked detector.  The silhouette is recomputed whenever the
+    # camera moves, so this bounds a per-frame cost, not just a per-selection
+    # one: roughly 3.5 ms per camera move at this cap, rising to 50 ms at ten
+    # times it, which is the difference between a smooth rotate and a stuttering
+    # one.  The fallback is linear and costs about 9 ms at this same cap.
     _MAX_OUTLINE_CELLS = 50000
 
     def __init__(self, workspace, use_optimised_shapes: bool = True):
@@ -77,6 +81,20 @@ class ShapeRenderer(InstrumentRenderer):
         # Sorted detector-ID arrays for O(M log N) lookup in _resolve_detector_indices
         self._sorted_det_ids: np.ndarray | None = None  # sorted detector IDs
         self._sorted_det_info_indices: np.ndarray | None = None  # detectorInfo index for each sorted ID
+        # Picked-detector marker: the silhouette filter feeding the outline
+        # actor, and the second actor that draws the marker-point fallback.
+        self._picked_silhouette: vtkPolyDataSilhouette | None = None
+        self._picked_marker_actor = None
+        # How far to lift the outline towards the camera, sized from whichever
+        # shapes are picked, plus the camera that decides which way that is and
+        # the observer that keeps the two in step.
+        self._shape_depths: dict[int, float] = {}
+        self._outline_push: float = 0.0
+        self._outline_push_camera = None
+        self._outline_push_observer: tuple | None = None
+        # Detector indices behind the pickable mesh, in its own cell order, so
+        # the picked cells can be traced back to the shapes they were built from.
+        self._pickable_det_indices: np.ndarray | None = None
 
     # -----------------------------------------------------------------
     # Pre-computation: fetch shape meshes and detector transforms once
@@ -141,6 +159,7 @@ class ShapeRenderer(InstrumentRenderer):
         all_rotations = np.asarray(det_info.allRotations())
         self._det_rotations = Rotation.from_quat(all_rotations).as_matrix()
         self._det_scales = det_info.allScaleFactors()
+        self._shape_depths = _shape_depths(shape_cache)
         self._all_positions_3d = det_info.allPositions()
         self._beam_axis = get_beam_axis(self._workspace)
 
@@ -175,7 +194,7 @@ class ShapeRenderer(InstrumentRenderer):
         if raw_mesh.size == 0:
             return _make_fallback_shape()
         verts, faces = _triangles_to_verts_faces(raw_mesh)
-        return verts, faces, 3
+        return verts, _orient_faces_consistently(verts, faces), 3
 
     # -----------------------------------------------------------------
     # Build meshes
@@ -198,6 +217,7 @@ class ShapeRenderer(InstrumentRenderer):
             projection=model.active_projection,
             flip_beam=flip_beam,
         )
+        self._pickable_det_indices = indices
         self._cell_to_detector = c2d
         self._faces_per_detector = fpd
         self._detector_mesh_ref = mesh
@@ -281,22 +301,63 @@ class ShapeRenderer(InstrumentRenderer):
         )
 
     def _add_picked_highlight_actor(self, plotter: BackgroundPlotter, mesh: pv.PolyData):
-        """Add the actor that traces the picked detectors' outline.
+        """Add the actors that mark the picked detectors and return the outline one.
 
         The line width is in screen pixels, so the outline stays visible even
         when each detector covers barely one pixel, and it leaves the detector's
         counts colour showing through in the middle.
 
-        The point styling is for the marker-point fallback used on selections
-        too large to outline (see ``_build_picked_highlight_mesh``).  One actor
-        serves both: the highlight mesh holds either lines or vertices, never
-        both, so only one of the two styles is ever in effect.
+        The outline is the picked shapes' *silhouette* — the boundary of what
+        the camera can see of them — rather than their edges.  Edges are only
+        right for a flat shape.  A "Raw Shapes" cuboid is a closed solid with
+        twelve of them, half behind the detector, which draws a wireframe box
+        floating over the instrument; a raw cylinder has none at all along its
+        length, only the two cap rims, which read as a ring lying across the
+        tube rather than an outline around it.  The silhouette is the shape's
+        real outline in every case, and it still reduces to the four border
+        edges of the single quad the faster shape modes build, so one marker
+        serves all of them.
+
+        ``vtkPolyDataSilhouette`` is left in the pipeline rather than evaluated
+        once because the silhouette depends on the camera and so changes as the
+        view is rotated.  It re-runs only when the camera or the selection
+        actually changes, and ``_MAX_OUTLINE_CELLS`` bounds what it re-runs on.
         """
-        actor = plotter.add_mesh(
+        camera = plotter.renderer.GetActiveCamera()
+        silhouette = vtkPolyDataSilhouette()
+        silhouette.SetInputData(mesh)
+        silhouette.SetCamera(camera)
+        # Border edges catch the flat quads, whose whole boundary is silhouette.
+        # Feature edges are off: they are the crease lines *within* a shape, and
+        # switching them on brings back exactly the wireframe-box look.
+        silhouette.SetBorderEdges(True)
+        silhouette.SetEnableFeatureAngle(False)
+        self._picked_silhouette = silhouette
+
+        outline_actor = plotter.add_mesh(
             mesh,
             color=self._PICKED_HIGHLIGHT_COLOUR,
             line_width=self._PICKED_OUTLINE_WIDTH,
             render_lines_as_tubes=True,
+            lighting=False,
+            pickable=False,
+            show_scalar_bar=False,
+            render=False,
+        )
+        outline_actor.mapper.SetInputConnection(silhouette.GetOutputPort())
+        # The outline traces the detector surface exactly, so it needs the same
+        # polygon offset treatment as the pickable mesh to avoid z-fighting.
+        outline_actor.mapper.SetResolveCoincidentTopologyToPolygonOffset()
+        outline_actor.mapper.SetResolveCoincidentTopologyLineOffsetParameters(-4, -4)
+
+        # A second actor for the marker-point fallback used on selections too
+        # large to outline (see ``_build_picked_highlight_mesh``).  It reads the
+        # same mesh, so only one of the two is ever visible; it cannot share the
+        # outline's actor because that one renders the silhouette filter's
+        # output, and a cloud of marker points has no silhouette.
+        self._picked_marker_actor = plotter.add_points(
+            mesh,
+            color=self._PICKED_HIGHLIGHT_COLOUR,
             point_size=self._PICKED_MARKER_POINT_SIZE,
             render_points_as_spheres=True,
             lighting=False,
@@ -304,24 +365,116 @@ class ShapeRenderer(InstrumentRenderer):
             show_scalar_bar=False,
             render=False,
         )
-        # The outline traces the detector surface exactly, so it needs the same
-        # polygon offset treatment as the pickable mesh to avoid z-fighting.
-        # The marker points sit on that surface too, hence the point offset.
-        mapper = actor.mapper
-        mapper.SetResolveCoincidentTopologyToPolygonOffset()
-        mapper.SetResolveCoincidentTopologyLineOffsetParameters(-4, -4)
-        mapper.SetResolveCoincidentTopologyPointOffsetParameter(-4)
-        return actor
+        # The marker points sit on the detector surface, hence the point offset.
+        self._picked_marker_actor.mapper.SetResolveCoincidentTopologyToPolygonOffset()
+        self._picked_marker_actor.mapper.SetResolveCoincidentTopologyPointOffsetParameter(-4)
+        self._picked_marker_actor.SetVisibility(False)
+
+        self._outline_push_camera = camera
+        self._watch_camera_for_outline_push(camera)
+        self._push_outline_towards_camera(outline_actor)
+        return outline_actor
+
+    def _picked_depth(self, picked_detectors: np.ndarray) -> float:
+        """How deep, at most, the picked detectors are — across their corners, in metres.
+
+        Sized from the shapes actually picked rather than from the instrument's
+        largest, so that one outsized shape somewhere in the instrument does not
+        set the lift for every detector in it.
+        """
+        if self._pickable_det_indices is None or self._det_shape_keys is None or not self._shape_depths:
+            return 0.0
+        det_indices = np.unique(self._pickable_det_indices[picked_detectors])
+        keys = np.unique(self._det_shape_keys[det_indices])
+        depth = max(self._shape_depths.get(int(key), 0.0) for key in keys)
+        scale = float(np.max(np.abs(self._det_scales[det_indices]))) if self._det_scales is not None else 1.0
+        return depth * scale
+
+    def _push_outline_towards_camera(self, actor=None) -> None:
+        """Lift the outline clear of the detectors packed around the picked ones.
+
+        A solid's silhouette runs through that solid's full depth, so most of it
+        is level with, or behind, the detectors sitting flush against its sides.
+        Left where it is, a picked detector in the middle of a bank arrives as
+        two stray lines along its top edge rather than an outline: the rest is
+        inside the neighbours.  A polygon offset cannot reach that far — it is
+        measured in depth-buffer units, and the distance to cover here is a
+        detector's depth in metres, which is a different number at every zoom.
+
+        The distance is one detector across, taken from the shapes that were
+        picked, so it is only ever deep enough to clear that detector's own
+        neighbours.  A detector that really is behind another bank stays hidden,
+        as it should.
+        """
+        actor = actor if actor is not None else self._picked_highlight_actor
+        if actor is None or self._outline_push_camera is None or self._outline_push <= 0.0:
+            return
+        # Towards the camera is the reverse of the direction it looks in.
+        direction = np.asarray(self._outline_push_camera.GetDirectionOfProjection(), dtype=np.float64)
+        actor.SetPosition(*(-self._outline_push * direction))
+
+    def _watch_camera_for_outline_push(self, camera) -> None:
+        """Keep the push pointing at the camera as the view is rotated.
+
+        The push is a translation in world space, so which way it goes has to be
+        recomputed whenever the view direction changes; the silhouette itself
+        follows the camera on its own.  Any previous observer is dropped first:
+        this runs again on every plotter rebuild while the camera outlives the
+        actors, so they would otherwise pile up on it.
+
+        The observer holds only a weak reference back, and retires itself once
+        that goes.  A renderer is replaced wholesale when the workspace changes,
+        and it owns a rotation matrix and a position per detector — tens of
+        megabytes on a large instrument — which an observing camera would
+        otherwise keep alive for as long as the view is open.
+        """
+        if self._outline_push_observer is not None:
+            previous_camera, previous_tag = self._outline_push_observer
+            previous_camera.RemoveObserver(previous_tag)
+
+        renderer = weakref.ref(self)
+        observer: dict = {}
+
+        def on_camera_modified(watched_camera, _event):
+            live_renderer = renderer()
+            if live_renderer is None:
+                watched_camera.RemoveObserver(observer["tag"])
+                return
+            live_renderer._push_outline_towards_camera()
+
+        observer["tag"] = camera.AddObserver("ModifiedEvent", on_camera_modified)
+        self._outline_push_observer = (camera, observer["tag"])
+
+    def _show_picked_highlight(self, highlight: pv.PolyData) -> None:
+        """Show *highlight* on whichever of the two marker actors suits it.
+
+        Both read the persistent highlight mesh, so the choice is only which one
+        is visible.  ``_build_picked_highlight_mesh`` returns surface cells to
+        silhouette, or vertices for the marker-point fallback, and the mesh
+        itself is therefore what says which of the two this is.
+        """
+        self._picked_highlight_mesh.copy_from(highlight)
+        marker_points = highlight.n_verts > 0
+        self._picked_highlight_actor.SetVisibility(not marker_points)
+        if self._picked_marker_actor is not None:
+            self._picked_marker_actor.SetVisibility(marker_points)
+        # The actor can be built before the shapes are, in which case there was
+        # no detector depth to push by at the time.
+        self._push_outline_towards_camera()
+
+    def _hide_picked_highlight(self) -> None:
+        super()._hide_picked_highlight()
+        if self._picked_marker_actor is not None:
+            self._picked_marker_actor.SetVisibility(False)
 
     def _build_picked_highlight_mesh(self, mesh: pv.PolyData, visibility: np.ndarray) -> pv.PolyData | None:
-        """Return the edges bounding the picked detectors, or None if there is nothing to draw.
+        """Return the picked detectors' surface, or None if there is nothing to draw.
 
-        Each detector carries its own copy of its template vertices, so
-        neighbouring detectors do not share points and every detector is
-        outlined individually rather than the selection being outlined as one
-        region.  Both boundary edges (flat quad shapes) and feature edges
-        (closed solids, which have no boundary edges at all) are extracted so
-        that every render mode produces a visible outline.
+        The surface is what gets silhouetted; ``_add_picked_highlight_actor``
+        turns it into the outline actually drawn.  Each detector carries its own
+        copy of its template vertices, so neighbouring detectors do not share
+        points and every detector is outlined individually rather than the
+        selection being outlined as one region.
 
         Past ``_MAX_OUTLINE_CELLS`` the outline is replaced by marker points
         rather than dropped: a whole-bank selection is not necessarily obvious
@@ -338,21 +491,18 @@ class ShapeRenderer(InstrumentRenderer):
         n_picked = int(np.count_nonzero(picked_cells))
         if n_picked == 0:
             return None
+
+        self._outline_push = self._picked_depth(c2d[picked_cells])
         if n_picked > self._MAX_OUTLINE_CELLS:
             return self._build_picked_marker_points(mesh, picked_cells, c2d)
 
-        # remove_cells keeps the result a PolyData, which extract_feature_edges needs.
-        outline = mesh.remove_cells(~picked_cells, inplace=False).extract_feature_edges(
-            boundary_edges=True,
-            feature_edges=True,
-            non_manifold_edges=False,
-            manifold_edges=False,
-        )
-        if outline.number_of_cells == 0:
+        # remove_cells keeps the result a PolyData, which the silhouette needs.
+        picked_surface = mesh.remove_cells(~picked_cells, inplace=False)
+        if picked_surface.number_of_cells == 0:
             return None
         # Drop the inherited counts/visibility arrays so the outline is drawn as a solid colour.
-        outline.clear_data()
-        return outline
+        picked_surface.clear_data()
+        return picked_surface
 
     def _build_picked_marker_points(self, mesh: pv.PolyData, picked_cells: np.ndarray, c2d: np.ndarray) -> pv.PolyData | None:
         """Return one marker point at the centre of each picked detector.
@@ -630,6 +780,50 @@ def _triangles_to_verts_faces(raw_mesh: np.ndarray) -> tuple[np.ndarray, np.ndar
     return unique_verts, faces
 
 
+def _shape_depths(shape_cache: dict) -> dict[int, float]:
+    """The across-corner size of each cached shape, in metres.
+
+    This is how far the picked outline is lifted towards the camera to clear the
+    detectors packed around it — see ``_push_outline_towards_camera``.  A whole
+    detector is what that takes rather than half of one: a solid's silhouette
+    runs from the front of it to the back, and the neighbours it has to clear
+    start at the front, so the lift has to cover the round trip.  Measuring
+    across the corners makes that hold whichever way the detector is turned.
+
+    Kept per shape rather than reduced to one number for the instrument, because
+    instruments carry the odd outsized shape — a monitor, say — and sizing every
+    detector's lift by that would push most outlines far further than they need.
+    """
+    return {key: float(np.linalg.norm(np.ptp(verts, axis=0))) if len(verts) else 0.0 for key, (verts, _, _) in shape_cache.items()}
+
+
+def _orient_faces_consistently(verts: np.ndarray, faces: np.ndarray) -> np.ndarray:
+    """Return *faces* rewound so that neighbouring triangles agree on which side is out.
+
+    ``CSGObject.getMesh()`` makes no promise about winding — for a cuboid only
+    half the triangles come back facing outwards.  The shaded render does not
+    care, but the picked-detector silhouette does: it takes an edge to be part
+    of the outline when the two triangles either side of it face opposite ways,
+    so under mixed winding a solid reports its interior edges as outline too and
+    the marker draws a wireframe box over the detector.
+
+    Only agreement matters here, not which way round the triangles end up
+    facing: flipping a whole shape leaves every edge classified the same way.
+
+    Falls back to the original winding if the filter alters the geometry, which
+    would invalidate the vertex indices the caller tiles per detector.
+    """
+    vtk_faces = np.hstack([np.full((len(faces), 1), 3, dtype=np.int64), faces])
+    oriented = pv.PolyData(verts, vtk_faces).compute_normals(
+        cell_normals=True, point_normals=False, consistent_normals=True, auto_orient_normals=False
+    )
+    if oriented.number_of_points != len(verts) or oriented.number_of_cells != len(faces):
+        return faces
+    if not np.allclose(oriented.points, verts):
+        return faces
+    return oriented.faces.reshape(-1, 4)[:, 1:].astype(np.int64)
+
+
 def _make_fallback_shape() -> tuple[np.ndarray, np.ndarray, int]:
     """A tiny tetrahedron used when a detector has no valid shape."""
     s = 0.002
@@ -643,7 +837,7 @@ def _make_fallback_shape() -> tuple[np.ndarray, np.ndarray, int]:
         dtype=np.float64,
     )
     faces = np.array([[0, 1, 2], [0, 1, 3], [0, 2, 3], [1, 2, 3]], dtype=np.int64)
-    return verts, faces, 3
+    return verts, _orient_faces_consistently(verts, faces), 3
 
 
 def _extract_quad_from_cylinder_shapeinfo(si: ShapeInfo) -> tuple[np.ndarray, np.ndarray] | None:

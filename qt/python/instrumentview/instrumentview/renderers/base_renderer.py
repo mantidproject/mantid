@@ -212,11 +212,24 @@ class InstrumentRenderer(ABC):
                 highlight = self._build_picked_highlight_mesh(mesh, visibility)
 
         if highlight is None or highlight.number_of_points == 0:
-            self._picked_highlight_actor.SetVisibility(False)
+            self._hide_picked_highlight()
         else:
-            self._picked_highlight_mesh.copy_from(highlight)
-            self._picked_highlight_actor.SetVisibility(True)
+            self._show_picked_highlight(highlight)
         plotter.render()
+
+    def _show_picked_highlight(self, highlight: pv.PolyData) -> None:
+        """Point the marker at *highlight* and make it visible.
+
+        Split out from ``update_picked_highlight`` because a renderer may draw
+        the marker with more than one actor and so has to choose between them
+        here; the mesh is shared, only the visibility differs.
+        """
+        self._picked_highlight_mesh.copy_from(highlight)
+        self._picked_highlight_actor.SetVisibility(True)
+
+    def _hide_picked_highlight(self) -> None:
+        """Hide every actor that draws the marker."""
+        self._picked_highlight_actor.SetVisibility(False)
 
     def _add_picked_highlight_actor(self, plotter: BackgroundPlotter, mesh: pv.PolyData):
         """Add the highlight actor for *mesh* to *plotter* and return it.
