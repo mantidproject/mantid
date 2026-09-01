@@ -48,7 +48,9 @@ class TutorialSandbox:
         # register_usage=False: this window is Mantid opening the interface to demonstrate it, not
         # the user opening it to work, and counting it would inflate every real launch
         self.view = TexturePlannerView(parent=parent, register_usage=False)
-        self.presenter = TexturePlannerPresenter(self.model, self.view)
+        # offer_tutorial=False: this planner is the tutorial. Left True it would offer a tutorial
+        # from inside one, and on a first-ever open would launch a second tour recursively
+        self.presenter = TexturePlannerPresenter(self.model, self.view, offer_tutorial=False)
 
         # a window in its own right rather than a panel inside the user's planner, but still owned
         # by it so it stays in front and goes away with it
