@@ -19,11 +19,25 @@ set(PYUNITTEST_RUN_SERIAL ON)
 
 # A UI test replaces a manual test guide, so it uses whatever data that guide told a tester to load - which for most
 # interfaces means the SystemTest set. The built properties file only puts UnitTest and DocTest on the search path, so
-# name the rest here and let the harness add them per test. Their contents are downloaded by the SystemTestData and
-# StandardTestData targets; a test whose files are absent reports a skip through require_files.
+# name the rest here and let the harness add them per test. Their contents are downloaded by the AutomatedUITestData
+# target below; a test whose files are absent reports a skip through require_files.
 set(PYUNITTEST_DATA_DIRS
     ${ExternalData_BINARY_ROOT}/Testing/Data/SystemTest ${ExternalData_BINARY_ROOT}/Testing/Data/DocTest
     ${ExternalData_BINARY_ROOT}/Testing/Data/UnitTest
 )
+
+# The data cannot be a dependency of the tests themselves - pyunittest_add_test_ui only calls add_test, so there is no
+# build target to hang add_dependencies on, and `ctest -L AutomatedUITest` builds nothing. This target is the developer
+# equivalent of what CI already does before it runs them (buildconfig/Jenkins/Conda/build builds StandardTestData and
+# SystemTestData): `cmake --build . --target AutomatedUITestData` downloads everything the suites can ask for, so a
+# local run reports results rather than a page of skips from require_files. Both targets exist by now - SetupDataTargets
+# is included from CommonSetup, long before this directory is added.
+#
+# Guarded because the data targets are themselves conditional: CommonSetup only includes SetupDataTargets when docs or a
+# test framework were found, while this directory is added on ENABLE_WORKBENCH alone.
+if(TARGET StandardTestData AND TARGET SystemTestData)
+  add_custom_target(AutomatedUITestData)
+  add_dependencies(AutomatedUITestData StandardTestData SystemTestData)
+endif()
 
 add_subdirectory(Example)

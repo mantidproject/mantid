@@ -343,196 +343,203 @@ class ExampleUITest(AutomatedUITestBase):
         super(ExampleUITest, self).tearDown()
 
     def test_buttons_and_combo_boxes(self):
-        with self.check("Example / the combo offers every greeting"):
+        with self.subTest("Example / the combo offers every greeting"):
             self.assertEqual(combo_items(self.widget.combo_greeting), list(_GREETINGS))
 
         select_combo(self.widget.combo_greeting, "Goodbye")
         click(self.widget.button_greet)
-        with self.check("Example / clicking Greet uses the selected greeting"):
+        with self.subTest("Example / clicking Greet uses the selected greeting"):
             self.assertEqual(self.widget.label_greeting.text(), "Goodbye, world")
 
-        with self.check("Example / an absent combo entry is reported rather than ignored"):
+        with self.subTest("Example / an absent combo entry is reported rather than ignored"):
             # setCurrentText() would silently do nothing here, which is the trap select_combo exists
             # to close, so the failure has to be an assertion
             self.assertRaises(AssertionError, select_combo, self.widget.combo_greeting, "Bonjour")
 
     def test_check_boxes(self):
         click_checkbox(self.widget.check_shout)
-        with self.check("Example / clicking the indicator toggles the checkbox"):
+        with self.subTest("Example / clicking the indicator toggles the checkbox"):
             self.assertTrue(self.widget.check_shout.isChecked())
 
-        with self.check("Example / a plain click() lands on the indicator too"):
+        with self.subTest("Example / a plain click() lands on the indicator too"):
             # click() dispatches on the widget kind, so reaching for the obvious call is not a trap
             click(self.widget.check_shout)
             self.assertFalse(self.widget.check_shout.isChecked())
             click(self.widget.check_shout)
             self.assertTrue(self.widget.check_shout.isChecked())
 
-        with self.check("Example / setting a checkbox to the state it is already in is a no-op"):
+        with self.subTest("Example / setting a checkbox to the state it is already in is a no-op"):
             self.assertTrue(set_checkbox(self.widget.check_shout, True))
 
         set_checkbox(self.widget.check_shout, False)
         click(self.widget.button_greet)
-        with self.check("Example / an unticked box leaves the greeting unshouted"):
+        with self.subTest("Example / an unticked box leaves the greeting unshouted"):
             self.assertEqual(self.widget.label_greeting.text(), "Hello, world")
 
         set_checkbox(self.widget.check_shout, True)
         click(self.widget.button_greet)
-        with self.check("Example / a ticked box reaches the handler"):
+        with self.subTest("Example / a ticked box reaches the handler"):
             self.assertEqual(self.widget.label_greeting.text(), "HELLO, WORLD")
 
     def test_tables(self):
         table = self.widget.table
-        with self.check("Example / the table has one row per greeting"):
+        with self.subTest("Example / the table has one row per greeting"):
             self.assertEqual(table_column(table, 1), list(_GREETINGS))
 
-        with self.check("Example / rows start unselected"):
+        with self.subTest("Example / rows start unselected"):
             self.assertEqual([table_checkbox(table, row, 0).isChecked() for row in range(table.rowCount())], [False] * 3)
 
         set_checkbox(table_checkbox(table, 1, 0), True)
-        with self.check("Example / a single row can be ticked on its own"):
+        with self.subTest("Example / a single row can be ticked on its own"):
             self.assertEqual([table_checkbox(table, row, 0).isChecked() for row in range(table.rowCount())], [False, True, False])
 
         click(cell_button(table, 2, 2))
-        with self.check("Example / a per-row button acts on its own row"):
+        with self.subTest("Example / a per-row button acts on its own row"):
             self.assertEqual(self.widget.label_greeting.text(), _GREETINGS[2])
 
     def test_line_edits_and_spin_boxes(self):
         set_line_edit(self.widget.edit_threshold, "12.5")
-        with self.check("Example / typing puts the text in the line edit"):
+        with self.subTest("Example / typing puts the text in the line edit"):
             self.assertEqual(self.widget.edit_threshold.text(), "12.5")
-        with self.check("Example / and fires editingFinished, which setText would not"):
+        with self.subTest("Example / and fires editingFinished, which setText would not"):
             # the whole reason set_line_edit replays keystrokes instead of assigning
             self.assertEqual(self.widget.label_threshold.text(), "12.5")
 
-        with self.check("Example / a second entry replaces the first rather than appending"):
+        with self.subTest("Example / a second entry replaces the first rather than appending"):
             set_line_edit(self.widget.edit_threshold, "7")
             self.assertEqual(self.widget.edit_threshold.text(), "7")
 
-        with self.check("Example / a value the validator refuses is reported"):
+        with self.subTest("Example / a value the validator refuses is reported"):
             # the validator caps at 100, so the widget would hold something unexpected and the
             # interface would quietly do nothing - that has to surface here instead
             self.assertRaises(AssertionError, set_line_edit, self.widget.edit_threshold, "999")
 
-        with self.check("Example / a spin box takes a value inside its range"):
+        with self.subTest("Example / a spin box takes a value inside its range"):
             self.assertEqual(set_spin_box(self.widget.spin_count, 4), 4)
 
-        with self.check("Example / a value outside the range is reported, not silently clamped"):
+        with self.subTest("Example / a value outside the range is reported, not silently clamped"):
             self.assertRaises(AssertionError, set_spin_box, self.widget.spin_count, 99)
 
     def test_radio_buttons_and_group_boxes(self):
-        with self.check("Example / a radio button can be selected by its label"):
+        # Whether a helper call sits inside a subTest block is a decision, not a formatting choice.
+        # These helpers assert for themselves - select_radio raises if the button did not end up
+        # checked - so inside a block the raise is recorded as a failed observation and the rest of
+        # the scenario still runs, while outside one it ends the test on the spot. Selecting is the
+        # thing being observed here, so it goes inside; the set_group_box(False) further down is
+        # only setting up the observation after it, and a failure there means the remaining checks
+        # would be meaningless, so it stays outside.
+        with self.subTest("Example / a radio button can be selected by its label"):
             select_radio(self.widget.group_bank, "South")
             self.assertTrue(self.widget.radio_south.isChecked())
-        with self.check("Example / and selecting one deselects the other"):
+        with self.subTest("Example / and selecting one deselects the other"):
             self.assertFalse(self.widget.radio_north.isChecked())
 
-        with self.check("Example / radio buttons can also be found through their parent widget"):
+        with self.subTest("Example / radio buttons can also be found through their parent widget"):
             select_radio(self.widget, "North")
             self.assertTrue(self.widget.radio_north.isChecked())
 
-        with self.check("Example / an absent radio button is reported rather than ignored"):
+        with self.subTest("Example / an absent radio button is reported rather than ignored"):
             self.assertRaises(AssertionError, select_radio, self.widget.group_bank, "East")
 
-        with self.check("Example / a checkable group box can be switched on"):
+        with self.subTest("Example / a checkable group box can be switched on"):
             self.assertTrue(set_group_box(self.widget.box_advanced, True))
-        with self.check("Example / and its toggled handler runs"):
+        with self.subTest("Example / and its toggled handler runs"):
             self.assertEqual(self.widget.label_advanced.text(), "on")
 
         set_group_box(self.widget.box_advanced, False)
-        with self.check("Example / switching a group box off disables what it contains"):
+        with self.subTest("Example / switching a group box off disables what it contains"):
             self.assertFalse(self.widget.check_nested.isEnabled())
 
     def test_tabs_and_lists(self):
         # deliberately no assertion on the whole list of tab titles: that only restates the tab bar
         # and needs updating whenever a tab is added. Selecting a tab is what proves it exists.
         page = select_tab(self.widget.tabs, "Diagnostics")
-        with self.check("Example / a tab is selected by title, not by index"):
+        with self.subTest("Example / a tab is selected by title, not by index"):
             self.assertEqual(self.widget.tabs.tabText(self.widget.tabs.currentIndex()), "Diagnostics")
-        with self.check("Example / and the page it returns is the current one"):
+        with self.subTest("Example / and the page it returns is the current one"):
             self.assertIs(page, self.widget.tabs.currentWidget())
 
-        with self.check("Example / an absent tab title is reported"):
+        with self.subTest("Example / an absent tab title is reported"):
             self.assertRaises(AssertionError, select_tab, self.widget.tabs, "Nonexistent")
 
-        with self.check("Example / every list entry is listed"):
+        with self.subTest("Example / every list entry is listed"):
             self.assertEqual(list_items(self.widget.list_pages), list(_PAGE_NAMES))
 
         select_list_item(self.widget.list_pages, "Masking")
-        with self.check("Example / selecting a list entry drives the stack beside it"):
+        with self.subTest("Example / selecting a list entry drives the stack beside it"):
             self.assertEqual(self.widget.stack_pages.currentIndex(), 1)
 
-        with self.check("Example / an absent list entry is reported"):
+        with self.subTest("Example / an absent list entry is reported"):
             self.assertRaises(AssertionError, select_list_item, self.widget.list_pages, "Nonexistent")
 
     def test_table_items_and_cell_widgets(self):
         table = self.widget.table
 
-        with self.check("Example / a checkable item is not an embedded check box"):
+        with self.subTest("Example / a checkable item is not an embedded check box"):
             # column 3 holds a checkable QTableWidgetItem, so there is no cell widget to find
             self.assertRaises(AssertionError, table_checkbox, table, 0, 3)
 
-        with self.check("Example / checkable items start unticked"):
+        with self.subTest("Example / checkable items start unticked"):
             self.assertEqual([item_check_state(table, row, 3) for row in range(table.rowCount())], [False] * 3)
 
         set_item_checked(table, 2, 3, True)
-        with self.check("Example / a checkable item can be ticked on its own"):
+        with self.subTest("Example / a checkable item can be ticked on its own"):
             self.assertEqual([item_check_state(table, row, 3) for row in range(table.rowCount())], [False, False, True])
 
-        with self.check("Example / a combo box embedded in a cell is reachable"):
+        with self.subTest("Example / a combo box embedded in a cell is reachable"):
             combo = cell_combo(table, 1, 4)
             self.assertEqual(combo_items(combo), ["plain", "bold"])
             select_combo(combo, "bold")
             self.assertEqual(combo.currentText(), "bold")
 
-        with self.check("Example / a cell holding no widget of that kind gives None"):
+        with self.subTest("Example / a cell holding no widget of that kind gives None"):
             self.assertIsNone(cell_combo(table, 1, 1))
 
     def test_item_views(self):
         view = self.widget.table_view
 
-        with self.check("Example / a model-backed column reads like a table column"):
+        with self.subTest("Example / a model-backed column reads like a table column"):
             self.assertEqual(model_column(view, 0), [row[0] for row in _MODEL_ROWS])
-        with self.check("Example / the row count comes from the model"):
+        with self.subTest("Example / the row count comes from the model"):
             self.assertEqual(model_row_count(view), len(_MODEL_ROWS))
 
-        with self.check("Example / the QTableWidget helpers do not work on a QTableView"):
+        with self.subTest("Example / the QTableWidget helpers do not work on a QTableView"):
             # the distinction the two sections of the helper module exist to keep straight
             self.assertRaises(AttributeError, table_column, view, 0)
 
-        with self.check("Example / check states come from the model, not from a cell widget"):
+        with self.subTest("Example / check states come from the model, not from a cell widget"):
             self.assertEqual([index_check_state(view, row, 1) for row in range(3)], [True, False, False])
 
         click_index(view, 2, 0)
-        with self.check("Example / clicking an index selects it"):
+        with self.subTest("Example / clicking an index selects it"):
             # a click on the view rather than its viewport would leave the selection untouched
             self.assertEqual(view.currentIndex().row(), 2)
 
         select_index(view, 0, 2)
-        with self.check("Example / an index can be made current without a click"):
+        with self.subTest("Example / an index can be made current without a click"):
             self.assertEqual((view.currentIndex().row(), view.currentIndex().column()), (0, 2))
 
         click_row_header(view, 1)
-        with self.check("Example / clicking a row header selects the whole row"):
+        with self.subTest("Example / clicking a row header selects the whole row"):
             self.assertEqual(sorted(i.column() for i in view.selectionModel().selectedIndexes()), [0, 1, 2])
 
         click_column_header(view, 2)
-        with self.check("Example / clicking a column header selects the whole column"):
+        with self.subTest("Example / clicking a column header selects the whole column"):
             self.assertEqual(sorted(i.row() for i in view.selectionModel().selectedIndexes()), [0, 1, 2])
 
         edit_index(view, 0, 2, "edited")
-        with self.check("Example / typing into a cell reaches the model through its delegate"):
+        with self.subTest("Example / typing into a cell reaches the model through its delegate"):
             self.assertEqual(model_cell(view, 0, 2), "edited")
 
-        with self.check("Example / an index outside the model is reported"):
+        with self.subTest("Example / an index outside the model is reported"):
             self.assertRaises(AssertionError, model_cell, view, 99, 0)
 
         rows = tree_rows(self.widget.tree_view)
-        with self.check("Example / a tree walks depth-first with its nesting"):
+        with self.subTest("Example / a tree walks depth-first with its nesting"):
             self.assertEqual([(depth, text) for depth, text, _ in rows], [(0, "North"), (1, "N1"), (1, "N2"), (0, "South"), (1, "S1")])
 
         # last, because it leaves an editor open - nothing after it would see a settled view
-        with self.check("Example / double-clicking an editable cell opens its delegate's editor"):
+        with self.subTest("Example / double-clicking an editable cell opens its delegate's editor"):
             # what edit_index is built on: a single click only selects, so there would be nothing to type into
             double_click_index(view, 1, 2)
             editor = view.focusWidget()
@@ -541,19 +548,19 @@ class ExampleUITest(AutomatedUITestBase):
 
     def test_waiting_for_work_that_finishes_on_the_event_loop(self):
         click(self.widget.button_start_task)
-        with self.check("Example / the task has not finished by the time the click returns"):
+        with self.subTest("Example / the task has not finished by the time the click returns"):
             self.assertEqual(self.widget.label_task.text(), "running")
 
         wait_until(lambda: self.widget.label_task.text() == "done", timeout=30.0, msg="the example task")
-        with self.check("Example / waiting pumps the event loop until the task completes"):
+        with self.subTest("Example / waiting pumps the event loop until the task completes"):
             self.assertEqual(self.widget.label_task.text(), "done")
 
     def test_a_failed_check_does_not_hide_the_ones_after_it(self):
         """The property the whole suite relies on, asserted rather than assumed.
 
-        ``check`` has to keep going after a failure, otherwise a run reports one regression at a
-        time. Verified against a throwaway ``TestCase`` so this test can pass while containing a
-        deliberate failure.
+        A scenario has to keep going after a failed observation, otherwise a run reports one
+        regression at a time. Verified against a throwaway ``TestCase`` so this test can pass while
+        containing a deliberate failure.
         """
         observed = []
 
@@ -571,10 +578,10 @@ class ExampleUITest(AutomatedUITestBase):
                 pass
 
             def test_inner(inner_self):
-                with inner_self.check("first"):
+                with inner_self.subTest("first"):
                     observed.append("first")
                     inner_self.fail("deliberate")
-                with inner_self.check("second"):
+                with inner_self.subTest("second"):
                     observed.append("second")
                     raise RuntimeError("deliberate")
                 observed.append("after")
@@ -582,11 +589,11 @@ class ExampleUITest(AutomatedUITestBase):
         result = unittest.TestResult()
         _Inner("test_inner").run(result)
 
-        with self.check("Example / every check runs even after one fails"):
+        with self.subTest("Example / every check runs even after one fails"):
             self.assertEqual(observed, ["first", "second", "after"])
-        with self.check("Example / each failed check is reported separately"):
+        with self.subTest("Example / each failed check is reported separately"):
             self.assertEqual(len(result.failures) + len(result.errors), 2)
-        with self.check("Example / a failed check names the step it belongs to"):
+        with self.subTest("Example / a failed check names the step it belongs to"):
             self.assertIn("[first]", str(result.failures[0][0]))
 
 

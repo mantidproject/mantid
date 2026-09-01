@@ -26,8 +26,12 @@ Four details shape everything here, and each of them contradicts the obvious app
    ``setUp``/``tearDown``, and module scope must stay cheap and free of side effects - in
    particular there must be no module-level ``QApplication``.
 3. A manual test guide is dozens of small observations, and a suite that stopped at the first
-   failure would need as many runs as there are regressions. ``check`` wraps ``subTest`` so one
-   failed observation does not hide the rest of them.
+   failure would need as many runs as there are regressions. Each observation therefore goes in
+   its own ``unittest`` ``subTest`` block, which records a failure against the block's label and
+   carries on, so one failed observation does not hide the rest of them. Preconditions - "the run
+   number resolved", "the worker finished" - stay outside a block, where a failure ends the test
+   rather than producing a cascade of meaningless ones. See ``dev-docs/source/AutomatedUITests.rst``
+   for where the widget helpers fall either side of that line.
 4. ``unittest``'s loader collects every ``TestCase`` subclass visible in a module, imported ones
    included, and falls back to a ``runTest`` method when a class has no ``test_*`` methods. This
    class therefore defines **neither**, which is what keeps it from being collected as a test in
@@ -88,8 +92,8 @@ class AutomatedUITestBase(unittest.TestCase):
 
     Subclasses write one ``test_*`` method per scenario and, usually, override ``setUp`` to build
     their interface after calling ``super().setUp()``. Building the interface is expensive, so a
-    scenario is normally a whole guide section rather than a single observation - use ``check`` to
-    keep the observations inside it independent.
+    scenario is normally a whole guide section rather than a single observation - use ``subTest``
+    to keep the observations inside it independent.
     """
 
     # organisation/application used for the isolated settings store. Deliberately unlike
@@ -99,29 +103,19 @@ class AutomatedUITestBase(unittest.TestCase):
 
     # ------------------------------------------------------------------ test protocol
 
-    def check(self, label):
-        """Report a failed observation without abandoning the rest of them.
-
-        A manual test guide is a long list of largely independent observations, and a test that
-        stopped at the first one would need as many runs as there are regressions. ``subTest``
-        records both assertion failures and unexpected exceptions and then carries on, reporting
-        each one against ``label`` - which should name the step being checked, e.g.
-        "Test 1 / Calibration step 12 (three prm files)".
-
-        Use plain ``self.assertX`` instead for preconditions - "the run number resolved", "the
-        worker finished" - where continuing would only produce a cascade of meaningless failures.
-        """
-        return self.subTest(msg=label)
-
     def record_failure(self, label, message):
-        """Record a failure directly, for checks that are not expressed as an assertion."""
-        with self.check(label):
+        """Record a failure directly, for checks that are not expressed as an assertion.
+
+        The subTest is what keeps it an observation rather than the end of the test: the rest of
+        the scenario still runs, and the failure is reported against ``label``.
+        """
+        with self.subTest(label):
             self.fail(message)
 
     def require_files(self, *filenames):
         """Skip this test unless every named data file can be found.
 
-        The data lives in the ExternalData store and is downloaded by the ``StandardTestData``
+        The data lives in the ExternalData store and is downloaded by the ``AutomatedUITestData``
         target, so a developer who has not built that target gets a clean skip rather than a
         failure inside the interface.
         """
@@ -129,7 +123,7 @@ class AutomatedUITestBase(unittest.TestCase):
 
         missing = [name for name in filenames if not FileFinder.getFullPath(name)]
         if missing:
-            self.skipTest(f"missing data file(s): {', '.join(missing)}. Build the StandardTestData target.")
+            self.skipTest(f"missing data file(s): {', '.join(missing)}. Build the AutomatedUITestData target.")
 
     # ------------------------------------------------------------------ lifecycle
 

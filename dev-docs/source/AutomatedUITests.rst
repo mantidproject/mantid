@@ -16,7 +16,7 @@ come out. The only things mocked are the ones that would otherwise block waiting
 error popups, confirmation prompts and generated algorithm dialogs.
 
 They exist to replace the manual test guides in :ref:`Testing`. A guide section that a developer
-used to work through by hand before a release becomes one test method, with one ``check`` per
+used to work through by hand before a release becomes one test method, with one ``subTest`` per
 observation the guide asked for.
 
 The code lives in ``Testing/AutomatedUITests``:
@@ -71,6 +71,9 @@ directory:
 
 .. code-block:: sh
 
+   # the data the suites load, once - CTest builds nothing itself, so this has to be asked for
+   cmake --build . --target AutomatedUITestData
+
    # everything
    ctest -L AutomatedUITest --output-on-failure
 
@@ -80,9 +83,10 @@ directory:
    # one module
    ctest -R AutomatedUITest.Example.ExampleUITest --output-on-failure
 
-Most suites need data from the ExternalData store; build the ``StandardTestData`` and
-``SystemTestData`` targets first, or they will report a skip. Tests run offscreen (the harness
-*defaults* ``QT_QPA_PLATFORM`` to ``offscreen`` and ``MPLBACKEND`` to ``Agg`` on import, leaving
+Most suites need data from the ExternalData store, which is what the ``AutomatedUITestData`` target
+above downloads (it is nothing more than ``StandardTestData`` and ``SystemTestData`` together);
+without it the tests that need a file report a skip rather than a failure. Tests run offscreen (the
+harness *defaults* ``QT_QPA_PLATFORM`` to ``offscreen`` and ``MPLBACKEND`` to ``Agg`` on import, leaving
 either alone if it is already set), so nothing appears on screen and no display is needed. Set
 ``QT_QPA_PLATFORM`` yourself if you want to watch a test run.
 
@@ -141,9 +145,9 @@ The shape is:
            select_combo(self.gui.combo_instrument, "ENGINX")
            click(self.gui.button_run)
 
-           with self.check("Guide step 4 / the output workspace is created"):
+           with self.subTest("Guide step 4 / the output workspace is created"):
                self.assertTrue(ADS.doesExist("output"))
-           with self.check("Guide step 5 / it is in d-spacing"):
+           with self.subTest("Guide step 5 / it is in d-spacing"):
                self.assertEqual(ADS.retrieve("output").getAxis(0).getUnit().unitID(), "dSpacing")
 
 Points worth knowing before you write one:
@@ -152,11 +156,22 @@ Points worth knowing before you write one:
 a scenario in a manual test guide is a sequence - calibrate, then focus, then look at what was
 written. Split by guide section, not by assertion.
 
-**Use** ``self.check(label)`` **for observations.** It wraps :py:meth:`unittest.TestCase.subTest`,
-so a failed observation is reported against its label and the ones after it still run. A test that
-stopped at the first failure would need as many weekly runs as there are regressions. Use a plain
-``self.assertX`` for preconditions - "the run number resolved", "the worker finished" - where
+**Use** :py:meth:`unittest.TestCase.subTest` **for observations.** A failed observation inside
+``with self.subTest(label)`` is reported against its label and the ones after it still run. A test
+that stopped at the first failure would need as many weekly runs as there are regressions. Use a
+plain ``self.assertX`` for preconditions - "the run number resolved", "the worker finished" - where
 carrying on would only produce a cascade of meaningless failures.
+
+**What goes inside a** ``subTest`` **block is a decision, not a formatting choice.** Most of the
+helpers assert for themselves: ``select_radio`` raises if the button did not become checked,
+``set_group_box``, ``set_line_edit`` and ``set_spin_box`` likewise. Inside a block that raise is
+recorded as a failed observation and the next block still runs; outside one it propagates and ends
+the test there and then. So put a call **inside** when the selection or setting is itself the thing
+under test, and **outside** when it is only getting the interface into the state a later check
+needs - a broken fixture makes the remaining observations meaningless, whereas a failed observation
+should let the others still fire. Note that the block is also the blast radius: a failure skips the
+rest of *that* block too, so only put setup inside a block whose remaining lines you are content to
+lose.
 
 **Never sleep or join.** Anything that finishes on a background thread reports back through a
 queued - sometimes *blocking* queued - Qt connection, which cannot be delivered unless the calling
@@ -197,12 +212,13 @@ something other than what a test wants - usually failing silently rather than lo
    * - Widget
      - Helpers
    * - Anything
-     - ``click``, ``process_events``, ``wait_until``, ``top_level_widget_names``
+     - ``click``, ``process_events``, ``wait_until``, ``top_level_widget_names`` - ``click``
+       aims at the dependable hot-spot for the widget's kind, which for a check box or a radio
+       button is the *indicator* rather than the label
    * - ``QCheckBox``
-     - ``click_checkbox``, ``set_checkbox`` - click the *indicator*, not the label
+     - ``set_checkbox`` - reach a known state without knowing the current one
    * - ``QRadioButton``
-     - ``click_radio``, ``select_radio``, ``radio_buttons`` - by label, from a widget or a
-       ``QButtonGroup``
+     - ``select_radio``, ``radio_buttons`` - by label, from a widget or a ``QButtonGroup``
    * - ``QGroupBox`` (checkable)
      - ``set_group_box``
    * - ``QComboBox``
