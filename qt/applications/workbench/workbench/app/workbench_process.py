@@ -117,6 +117,7 @@ def create_and_launch_workbench(app, command_line_options):
         # backend is not imported too early.
         from workbench.app.mainwindow import MainWindow
         from workbench.widgets.about.presenter import AboutPresenter
+        from workbench.widgets.update_notification.presenter import UpdateNotificationPresenter
 
         # The ordering here is very delicate. Test thoroughly when
         # changing anything!
@@ -143,6 +144,13 @@ def create_and_launch_workbench(app, command_line_options):
         # Setup widget layouts etc. mantid.simple cannot be used before this
         # or the log messages don't get through to the widget
         main_window.setup()
+
+        notify_update_popup = ConfigService.getString("CheckMantidVersion.NotifyUpdateOnStartup") in ("1", "On", "true", "True")
+        if notify_update_popup:
+            # Prevent FrameworkManagerImpl's constructor from also firing its own unobserved CheckMantidVersion run.
+            # Below config change is in-memory only and does not write to .properties file.
+            ConfigService.setString("CheckMantidVersion.OnStartup", "0")
+
         # start mantid
         main_window.set_splash("Initializing mantid framework")
         FrameworkManagerImpl.Instance()
@@ -179,6 +187,10 @@ def create_and_launch_workbench(app, command_line_options):
         if not (command_line_options.execute or command_line_options.quit):
             if AboutPresenter.should_show_on_startup():
                 AboutPresenter(main_window).show()
+
+            if notify_update_popup:
+                main_window.update_notifier = UpdateNotificationPresenter(main_window)
+                main_window.update_notifier.check_for_update()
 
         # lift-off!
         exit_value = app.exec()

@@ -108,6 +108,7 @@ set(TEST_FILES
     workbench/projectrecovery/recoverygui/test/test_projectrecoverypresenter.py
     workbench/projectrecovery/recoverygui/test/test_projectrecoverywidgetview.py
     workbench/projectrecovery/recoverygui/test/test_recoveryfailureview.py
+    workbench/widgets/update_notification/test/test_mantid_update_notification.py
 )
 
 set(PYUNITTEST_RUN_SERIAL ON)
