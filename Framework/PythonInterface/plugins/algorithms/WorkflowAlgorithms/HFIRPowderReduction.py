@@ -677,7 +677,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         iptsNumbers = set()
         runNumbers = []
         for filename in filenames or []:
-            match = re.search(r"IPTS-(\d+)\D.*[/\\]HB2[AC]_(\d+)\.nxs\.h5$", str(filename))
+            match = re.search(r"(?:^|[/\\])IPTS-(\d+)[/\\]nexus[/\\]HB2[AC]_(\d+)\.nxs\.h5$", str(filename))
             if match is None:
                 return None, []
             iptsNumbers.add(int(match.group(1)))
@@ -864,22 +864,28 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             self._checkMetadataConsistency(files, "Sample")
 
         if not self.getProperty("Overwrite").value and not self.getProperty("OutputDirectory").isDefault:
-            output_file = self._resolveOutputFile(self.getPropertyValue("OutputWorkspace"))
-            if os.path.exists(output_file):
-                issues["OutputDirectory"] = f"Output file {output_file} already exists and overwrite is set to False"
+            dat_file, nexus_file = self._resolveOutputFiles(self.getPropertyValue("OutputWorkspace"))
+            for output_file in (dat_file, nexus_file):
+                if os.path.exists(output_file):
+                    issues["OutputDirectory"] = (
+                        f"OutputDirectory destination resolves to existing file {output_file} and overwrite is set to False"
+                    )
 
         return issues
 
-    def _resolveOutputFile(self, workspace_name):
-        """Turn the OutputDirectory property into the full path of the .dat file that will be saved.
-
+    def _resolveOutputFiles(self, workspace_name):
+        """
+        Turn the OutputDirectory property into the full paths of the .dat and .nxs files that will be saved.
         The property normally holds a directory, in which case the output workspace name is used as the
-        file name, but a full file path ending in .dat is also accepted and used as-is.
+        file name, but a full file path ending in .dat is also accepted and used as-is for the ASCII output.
+        The Nexus output uses the same base name with a .nxs extension.
         """
         output_path = self.getProperty("OutputDirectory").value
         if output_path.endswith(".dat"):
-            return output_path
-        return os.path.join(output_path, workspace_name + ".dat")
+            base_path = output_path[:-4]
+            return output_path, base_path + ".nxs"
+        base_path = os.path.join(output_path, workspace_name)
+        return base_path + ".dat", base_path + ".nxs"
 
     def _warn_unset_optional_fields(self):
         """Log warnings for optional fields that are not set (excludes fields already checked by validateInputs)."""
@@ -1025,9 +1031,9 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         if not self.getProperty("OutputDirectory").isDefault:
             # Step 6: Save
             logger.information("Step 6: Saving output to file")
-            output_file = self._resolveOutputFile(outWS.name())
-            SaveAscii(InputWorkspace=outWS, Filename=output_file, EnableLogging=False)
-            SaveNexus(InputWorkspace=outWS, Filename=output_file[: -len(".dat")] + ".nxs")
+            output_dat_file, output_nexus_file = self._resolveOutputFiles(outWS.name())
+            SaveAscii(InputWorkspace=outWS, Filename=output_dat_file, EnableLogging=False)
+            SaveNexus(InputWorkspace=outWS, Filename=output_nexus_file)
 
         # Step 7: Cleanup
         logger.information("Step 7: Cleaning up temporary workspaces")
