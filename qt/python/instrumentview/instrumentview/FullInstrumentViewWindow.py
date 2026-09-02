@@ -348,9 +348,9 @@ class FullInstrumentViewView(QWidget):
             saved_mode = self._RENDER_MODE_POINTS
         self._render_mode_combo_box.setCurrentText(saved_mode)
         self._render_mode_combo_box.setToolTip(
-            "Points: draw detectors as a point cloud.\n"
-            "Shapes (Fast): draw detector shapes with optimised quad approximation.\n"
-            "Full Shapes: draw the full triangulated detector geometry."
+            f"{self._RENDER_MODE_POINTS}: draw detectors as a point cloud.\n"
+            f"{self._RENDER_MODE_SHAPES_FAST}: draw detector shapes with optimised quad approximation.\n"
+            f"{self._RENDER_MODE_RAW_SHAPES}: draw the full triangulated detector geometry."
         )
 
         self._peaks_group_box = QGroupBox("Peaks Workspaces")
