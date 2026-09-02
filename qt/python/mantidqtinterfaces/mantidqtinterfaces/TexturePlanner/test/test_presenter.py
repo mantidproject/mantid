@@ -1084,10 +1084,13 @@ class TestTexturePlannerPresenter_Tutorial(unittest.TestCase):
     def test_opening_it_from_the_toolbar_does_not_mark_it_as_already_seen(
         self, mock_settings_view, mock_settings_presenter, mock_run_tutorial
     ):
-        # asking for the tutorial should not change whether it appears on startup
-        presenter = TexturePlannerPresenter(_make_model(), _make_view(), offer_tutorial=False)
+        # asking for the tutorial should not change whether it appears on startup. The slot the
+        # button gets takes no arguments, so ``clicked(bool)`` cannot be what decides that
+        view = _make_view()
+        with patch(file_path + ".should_show_on_startup", return_value=False):
+            TexturePlannerPresenter(_make_model(), view)
 
-        presenter.open_tutorial()
+        view.set_on_tutorial_clicked.call_args.args[0]()
 
         self.assertFalse(mock_run_tutorial.call_args.kwargs["mark_as_seen"])
 
