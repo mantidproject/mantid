@@ -68,12 +68,26 @@ jobs:
           platforms = ["${{ matrix.platform }}"]
 
           [dependencies]
+          EOF
+
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            cat >> "$project_dir/pixi.toml" <<'EOF'
+          # On osx-arm64, latest nightly mantidworkbench pulls mantidqt ->
+          # qt6-main 6.11.2 -> moltenvk, and pixi currently fails the solve by
+          # reporting no __osx candidate for moltenvk even though `pixi info`
+          # reports one on the runner. Keep the scan environment to nightly
+          # mantid only on macOS until that upstream solve issue is resolved.
+          mantid = { version = "*", channel = "mantid/label/nightly" }
+          EOF
+          else
+            cat >> "$project_dir/pixi.toml" <<'EOF'
           # Take the latest nightly workbench/Mantid stack and allow any
           # compatible mslice release the solver can install alongside it.
           mantidworkbench = { version = "*", channel = "mantid/label/nightly" }
           mslice = ">=2.15"
           pystog = ">=0.6.3"
           EOF
+          fi
 
           echo "project_dir=$project_dir" >> "$GITHUB_OUTPUT"
           echo "environment_dir=$project_dir/.pixi/envs/default" >> "$GITHUB_OUTPUT"
