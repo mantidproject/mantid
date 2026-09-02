@@ -1074,6 +1074,65 @@ class TestTexturePlannerPresenter_Settings(unittest.TestCase):
         mock_settings_presenter.return_value.show.assert_called_with()
 
 
+@patch(file_path + ".run_tutorial")
+@patch(file_path + ".TexturePlannerSettingsPresenter")
+@patch(file_path + ".TexturePlannerSettingsView")
+class TestTexturePlannerPresenter_Tutorial(unittest.TestCase):
+    """The tutorial builds a whole second planner, so every test here stubs ``run_tutorial`` out.
+    What is under test is when the presenter asks for one, not what the tour then does."""
+
+    def test_opening_it_from_the_toolbar_does_not_mark_it_as_already_seen(
+        self, mock_settings_view, mock_settings_presenter, mock_run_tutorial
+    ):
+        # asking for the tutorial should not change whether it appears on startup
+        presenter = TexturePlannerPresenter(_make_model(), _make_view(), offer_tutorial=False)
+
+        presenter.open_tutorial()
+
+        self.assertFalse(mock_run_tutorial.call_args.kwargs["mark_as_seen"])
+
+    def test_a_second_request_raises_the_running_tutorial_rather_than_starting_another(
+        self, mock_settings_view, mock_settings_presenter, mock_run_tutorial
+    ):
+        presenter = TexturePlannerPresenter(_make_model(), _make_view(), offer_tutorial=False)
+        presenter.open_tutorial()
+
+        presenter.open_tutorial()
+
+        mock_run_tutorial.assert_called_once()
+        # the shell is the window; the sandbox interface inside it is only a child widget
+        mock_run_tutorial.return_value.shell.raise_.assert_called_once_with()
+
+    def test_closing_the_planner_closes_a_tutorial_it_started(self, mock_settings_view, mock_settings_presenter, mock_run_tutorial):
+        # the tour drives a second planner, which would otherwise be left with nothing to return to
+        presenter = TexturePlannerPresenter(_make_model(), _make_view(), offer_tutorial=False)
+        presenter.open_tutorial()
+
+        presenter.on_close()
+
+        mock_run_tutorial.return_value.close.assert_called_once_with()
+
+    @patch(file_path + ".should_show_on_startup", return_value=False)
+    def test_it_is_not_offered_once_it_has_been_seen(
+        self, mock_should_show, mock_settings_view, mock_settings_presenter, mock_run_tutorial
+    ):
+        TexturePlannerPresenter(_make_model(), _make_view())
+
+        mock_run_tutorial.assert_not_called()
+
+    @patch(file_path + ".should_show_on_startup", return_value=True)
+    def test_it_is_not_offered_when_the_planner_is_the_tutorials_own(
+        self, mock_should_show, mock_settings_view, mock_settings_presenter, mock_run_tutorial
+    ):
+        # a tutorial inside a tutorial, recursively, on a first ever open
+        view = _make_view()
+
+        TexturePlannerPresenter(_make_model(), view, offer_tutorial=False)
+
+        mock_run_tutorial.assert_not_called()
+        view.set_tutorial_button_visible.assert_called_once_with(False)
+
+
 @patch(file_path + ".TexturePlannerSettingsPresenter")
 @patch(file_path + ".TexturePlannerSettingsView")
 class TestTexturePlannerPresenter_UpdatePlotsAndTable(unittest.TestCase):
