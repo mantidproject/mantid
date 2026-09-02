@@ -17,7 +17,7 @@ interface underneath, so the overlay cannot swallow one and the tour cannot dead
 own decoration.
 """
 
-from qtpy.QtCore import QEvent, QObject, QRect, QRectF, Qt, QTimer
+from qtpy.QtCore import QEvent, QRect, QRectF, Qt, QTimer
 from qtpy.QtGui import QColor, QPainter, QPainterPath, QPen
 from qtpy.QtWidgets import QWidget
 
@@ -170,20 +170,3 @@ class TutorialOverlay(QWidget):
         colour = QColor(self.palette().highlight().color())
         colour.setAlpha(230)
         return colour
-
-
-class _NullOverlay(QObject):
-    """Does nothing, for callers that want the tour's structure without the decoration (a test
-    playing every step headless, say). Keeps the player free of ``if overlay is not None``."""
-
-    def set_target(self, widget):
-        pass
-
-    def show(self):
-        pass
-
-    def hide(self):
-        pass
-
-    def detach(self):
-        pass

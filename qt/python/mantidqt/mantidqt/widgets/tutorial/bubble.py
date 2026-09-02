@@ -180,7 +180,3 @@ class TutorialBubble(QFrame):
         x = max(host_rect.left() + GAP, min(top_left.x(), host_rect.right() - size.width() - GAP))
         y = max(host_rect.top() + GAP, min(top_left.y(), host_rect.bottom() - size.height() - GAP))
         return QPoint(x, y)
-
-    def geometry_in_host(self):
-        """Where the bubble is, for a caller that needs to keep something clear of it."""
-        return QRect(self.pos(), self.size())

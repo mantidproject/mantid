@@ -7,7 +7,7 @@
 #  This file is part of the mantidqt package
 import unittest
 
-from mantidqt.widgets.tutorial.step import TutorialChapter, TutorialStep, total_steps, walk
+from mantidqt.widgets.tutorial.step import TutorialChapter, TutorialStep, walk
 
 
 class TutorialStepTest(unittest.TestCase):
@@ -85,9 +85,6 @@ class TutorialWalkTest(unittest.TestCase):
             TutorialChapter(name="First", steps=[TutorialStep(text="1a"), TutorialStep(text="1b")]),
             TutorialChapter(name="Second", steps=[TutorialStep(text="2a")]),
         )
-
-    def test_total_steps_counts_across_chapters(self):
-        self.assertEqual(total_steps(self.chapters), 3)
 
     def test_walk_visits_every_step_in_play_order(self):
         visited = [(chapter_index, step_index, step.text) for chapter_index, step_index, _chapter, step in walk(self.chapters)]

@@ -62,7 +62,8 @@ class TutorialBubbleTest(unittest.TestCase):
     def _place(self, spotlight, keep_clear=()):
         self.bubble.place_beside(spotlight, keep_clear)
         interaction.process_events()
-        return self.bubble.geometry_in_host()
+        # in the host's coordinates, which is what place_beside was given
+        return QRect(self.bubble.pos(), self.bubble.size())
 
     def test_it_sits_below_a_spotlight_near_the_top(self):
         spotlight = QRect(300, 40, 200, 60)
