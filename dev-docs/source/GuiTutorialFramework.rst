@@ -134,6 +134,25 @@ Two pieces of chrome, and the split between them matters:
 Because the interface becomes a child of the shell, the dimming overlay covers only the interface:
 the tabs and buttons stay bright and usable while everything they act on is dimmed.
 
+**Pointing into another window.** An interface is rarely one window, and a tour that explains a
+settings dialog has to annotate something the interface's own overlay cannot reach into.
+``TutorialAnnotator`` handles that: it owns an overlay and a caption *per window*, builds them as
+they are needed, and shows only the pair belonging to whatever is currently spotlighted. The player
+is given the annotator in place of an overlay and a bubble and never learns how many windows are
+involved.
+
+One rule inside it is worth knowing before changing it: anything inside the primary widget is
+annotated on the **primary itself**, not on its window. The interface is a child of the shell, so
+dimming its window would put the scrim over the chapter tabs and the navigation - the controls the
+user needs to drive the tour. Everything else is annotated on its own window, which is what reaches
+a dialog.
+
+A dialog the tour opens must be **non-modal**, or it blocks the tutorial's own controls until the
+user closes something they did not ask for. Make it non-modal in the sandbox, never in the
+interface itself. And be careful what a dialog writes: the Texture Planner's settings dialog saves
+to Mantid's shared ``QSettings``, so the tour opens it, explains it, and *rejects* it - pressing Ok
+or Apply would change the real interface's saved settings on the user's behalf.
+
 Choosing a chapter tab **rebuilds the sandbox** and fast-forwards through the earlier chapters'
 actions. That is what lets a chapter be entered at all - its steps assume the state the chapters
 before it leave behind - and it is only possible because the tour drives a throwaway interface.

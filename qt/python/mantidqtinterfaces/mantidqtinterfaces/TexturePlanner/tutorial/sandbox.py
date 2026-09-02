@@ -52,11 +52,25 @@ class TutorialSandbox:
         # child and is itself the window, so anything set here would never be seen
         self.model.absorption.mc_kwargs["EventsPerPoint"] = DEMO_MC_EVENTS_PER_POINT
 
+        # The settings chapter opens this dialog and points into it. Left modal it would block the
+        # tutorial's own controls - Next included - until the user closed a dialog the tour had
+        # opened for them. Only ever on the sandbox's copy.
+        self.settings_view.setModal(False)
+
         self._torn_down = False
 
     @property
     def window(self):
         return self.view
+
+    @property
+    def settings_view(self):
+        """The settings dialog, which the settings chapter opens and annotates.
+
+        Note it writes to the *shared* QSettings when applied, so the tour must never press Ok or
+        Apply on it - see the settings chapter.
+        """
+        return self.presenter.settings_presenter.view
 
     def teardown(self):
         """Close the sandbox planner and remove its files. Safe to call more than once.
