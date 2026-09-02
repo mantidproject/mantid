@@ -98,7 +98,8 @@ void IntegratePeaksShapeMD::init() {
 /**
  * @brief Integrates peak intensities from an event or histogram workspace using QLab ellipsoidal peak shapes.
  *
- * @throws std::runtime_error If the input workspace is not an EventWorkspace or Workspace2D, a peak lacks a QLab ellipsoidal shape, or fewer than three indexed peaks are available.
+ * @throws std::runtime_error If the input workspace is not an EventWorkspace or Workspace2D, a peak lacks a QLab
+ * ellipsoidal shape, or fewer than three indexed peaks are available.
  */
 void IntegratePeaksShapeMD::exec() {
   PeaksWorkspace_sptr input_peak_ws = getProperty("PeaksWorkspace");

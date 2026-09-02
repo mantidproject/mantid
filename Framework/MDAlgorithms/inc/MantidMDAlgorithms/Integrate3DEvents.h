@@ -42,12 +42,12 @@ namespace MDAlgorithms {
  *  of peaks using ellipsoidal volumes.
  */
 struct IntegrationParameters {
-  std::vector<Kernel::V3D> E1Vectors;   ///< Vectors for calculating detector edges
-  double backgroundInnerRadius;         ///< Inner radius of background shell
-  double backgroundOuterRadius;         ///< Outer radius of background shell
-  double regionRadius;                  ///< Radius of region to search for events
-  double peakRadius;                    ///< Radius of peak ellipsoid
-  bool specifySize;                     ///< If true, use specified sizes; if false, use data-driven sizes
+  std::vector<Kernel::V3D> E1Vectors; ///< Vectors for calculating detector edges
+  double backgroundInnerRadius;       ///< Inner radius of background shell
+  double backgroundOuterRadius;       ///< Outer radius of background shell
+  double regionRadius;                ///< Radius of region to search for events
+  double peakRadius;                  ///< Radius of peak ellipsoid
+  bool specifySize;                   ///< If true, use specified sizes; if false, use data-driven sizes
 };
 
 /**
