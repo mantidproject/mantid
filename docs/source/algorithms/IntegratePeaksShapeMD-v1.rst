@@ -48,8 +48,11 @@ Integration method
 
 By default (*ProfileFit* = False) each peak is integrated by counting raw
 or weighted events inside the peak ellipsoid, and subtracting a background
-estimate from the ellipsoidal shell, the same approach used by
-:ref:`algm-IntegrateEllipsoidsTwoStep`.
+estimate from the ellipsoidal shell, the same background-subtraction method
+:ref:`algm-IntegrateEllipsoidsTwoStep` uses (based on the ILL program Racer
+and Wilkinson, C., et al. "Integration of single-crystal reflections using
+area multidetectors." *Journal of Applied Crystallography* 21.5 (1988):
+471-478) -- applied here to a supplied, rather than fitted, ellipsoid.
 
 If *ProfileFit* is enabled, each peak is instead integrated by directly
 maximizing the (weighted) Poisson log-likelihood of an unbinned point

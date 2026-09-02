@@ -299,6 +299,13 @@ void solvePoissonMatchedFilter(const std::vector<double> &g, const std::vector<d
                                double &A, double &b, double &sigA) {
   const auto n = g.size();
 
+  auto logLikelihood = [&](double a, double bb) {
+    double ll = -(a * normG + bb * volume);
+    for (size_t i = 0; i < n; ++i)
+      ll += w[i] * std::log(std::max(a * g[i] + bb, 1e-300));
+    return ll;
+  };
+
   auto logLikelihoodGradHess = [&](double a, double bb, double &dA, double &dB, double &dAA, double &dBB, double &dAB) {
     dA = -normG;
     dB = -volume;
@@ -316,17 +323,16 @@ void solvePoissonMatchedFilter(const std::vector<double> &g, const std::vector<d
     }
   };
 
-  // seed from crude percentile-free estimates: total weight split evenly
-  // between a peak (using the largest kernel value seen) and a flat
-  // background over the search volume
-  double sumW = 0.0, gMax = 0.0;
-  for (size_t i = 0; i < n; ++i) {
+  // seed from crude estimates: split total weight evenly between a peak
+  // (using the mean kernel value over events with above-average signal) and
+  // a flat background over the search volume, deliberately conservative so
+  // the backtracking Newton solve below has a well-behaved starting point
+  // regardless of the absolute scale of normG/volume/event counts
+  double sumW = 0.0;
+  for (size_t i = 0; i < n; ++i)
     sumW += w[i];
-    gMax = std::max(gMax, g[i]);
-  }
   b = volume > 0 ? std::max(0.5 * sumW / volume, 1e-10) : 1e-10;
-  const auto aDenom = gMax * normG;
-  A = aDenom > 0 ? std::max(0.5 * sumW / aDenom, 1e-10) : 1e-10;
+  A = normG > 0 ? std::max(0.5 * sumW / normG, 1e-10) : 1e-10;
 
   for (int iter = 0; iter < 100; ++iter) {
     double dA, dB, dAA, dBB, dAB;
@@ -339,18 +345,25 @@ void solvePoissonMatchedFilter(const std::vector<double> &g, const std::vector<d
     const auto deltaA = -(dBB * dA - dAB * dB) / det;
     const auto deltaB = -(-dAB * dA + dAA * dB) / det;
 
-    // backtrack until both parameters stay non-negative
+    // backtrack until both parameters stay non-negative AND the
+    // log-likelihood actually improves -- plain Newton without this can
+    // overshoot and diverge for a poorly-scaled seed
+    const auto llOld = logLikelihood(A, b);
     double step = 1.0;
     double newA = A, newB = b;
-    for (int halving = 0; halving < 30; ++halving) {
+    double llNew = llOld;
+    for (int halving = 0; halving < 60; ++halving) {
       newA = A + step * deltaA;
       newB = b + step * deltaB;
-      if (newA >= 0.0 && newB >= 0.0)
-        break;
+      if (newA >= 0.0 && newB >= 0.0) {
+        llNew = logLikelihood(newA, newB);
+        if (llNew >= llOld)
+          break;
+      }
       step *= 0.5;
     }
-    newA = std::max(newA, 0.0);
-    newB = std::max(newB, 0.0);
+    if (llNew < llOld) // no improving step found within the halving budget
+      break;
 
     const auto converged = std::abs(newA - A) < 1e-12 * (1.0 + A) && std::abs(newB - b) < 1e-12 * (1.0 + b);
     A = newA;

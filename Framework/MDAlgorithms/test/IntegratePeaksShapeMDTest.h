@@ -35,7 +35,8 @@ public:
     TS_ASSERT_EQUALS(alg.name(), "IntegratePeaksShapeMD");
     TS_ASSERT_EQUALS(alg.version(), 1);
     TS_ASSERT_EQUALS(alg.category(), "Crystal\\Integration");
-    TS_ASSERT_EQUALS(alg.getPropertyValue("RegionRadius"), "0.35");
+    const double regionRadius = alg.getProperty("RegionRadius");
+    TS_ASSERT_DELTA(regionRadius, 0.35, 1e-10);
     TS_ASSERT_EQUALS(alg.getPropertyValue("ProfileFit"), "0");
     TS_ASSERT_EQUALS(alg.getPropertyValue("AdjustCenter"), "0");
     TS_ASSERT_THROWS_ANYTHING(alg.setProperty("RegionRadius", -0.01));
@@ -133,9 +134,14 @@ public:
     builder.setRandomSeed(1);
     builder.setNumPixels(100);
     builder.addBackground(false);
+    // Six well-separated peaks (matching test_exec_events_reuses_existing_shape),
+    // rather than the minimum of three, so Optimize_UB has a well-conditioned fit.
     builder.addPeakByHKL(V3D(1, -5, -3), 100, sigmas);
     builder.addPeakByHKL(V3D(1, -4, -4), 100, sigmas);
     builder.addPeakByHKL(V3D(1, -3, -5), 100, sigmas);
+    builder.addPeakByHKL(V3D(1, -4, -2), 100, sigmas);
+    builder.addPeakByHKL(V3D(1, -4, 0), 100, sigmas);
+    builder.addPeakByHKL(V3D(2, -3, -4), 100, sigmas);
 
     auto data = builder.build();
     auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(std::get<0>(data));
