@@ -90,6 +90,12 @@ class PlotsSettingsModelTest(BaseSettingsModelTest):
         )
 
     @patch(GET_SAVED_VALUE_PATCH_PATH)
+    def test_get_axes_label_font_size(self, get_saved_value_mock: MagicMock):
+        self._assert_getter_with_different_values(
+            get_saved_value_mock, self.model.get_axes_label_font_size, ["5", "10"], call(PlotProperties.AXES_LABEL_FONT_SIZE.value)
+        )
+
+    @patch(GET_SAVED_VALUE_PATCH_PATH)
     def test_get_x_min(self, get_saved_value_mock: MagicMock):
         self._assert_getter_with_different_values(get_saved_value_mock, self.model.get_x_min, ["5", "-5"], call(PlotProperties.X_MIN.value))
 
@@ -187,6 +193,12 @@ class PlotsSettingsModelTest(BaseSettingsModelTest):
     def test_get_minor_ticks_direction(self, get_saved_value_mock: MagicMock):
         self._assert_getter_with_different_values(
             get_saved_value_mock, self.model.get_minor_ticks_direction, ["In", "Out"], call(PlotProperties.MINOR_TICKS_DIRECTION.value)
+        )
+
+    @patch(GET_SAVED_VALUE_PATCH_PATH)
+    def test_get_tick_label_font_size(self, get_saved_value_mock: MagicMock):
+        self._assert_getter_with_different_values(
+            get_saved_value_mock, self.model.get_tick_label_font_size, ["5", "10"], call(PlotProperties.TICK_LABEL_FONT_SIZE.value)
         )
 
     @patch(GET_SAVED_VALUE_PATCH_PATH)
@@ -355,6 +367,12 @@ class PlotsSettingsModelTest(BaseSettingsModelTest):
         )
 
     @patch(ADD_CHANGE_PATCH_PATH)
+    def test_set_axes_label_font_size(self, add_change_mock: MagicMock):
+        self._assert_setter_with_different_values(
+            add_change_mock, self.model.set_axes_label_font_size, ["10", "5.7"], PlotProperties.AXES_LABEL_FONT_SIZE.value
+        )
+
+    @patch(ADD_CHANGE_PATCH_PATH)
     def test_set_show_ticks_left(self, add_change_mock: MagicMock):
         self._assert_setter_with_different_values(
             add_change_mock, self.model.set_show_ticks_left, ["Off", "On"], PlotProperties.SHOW_TICKS_LEFT.value
@@ -436,6 +454,12 @@ class PlotsSettingsModelTest(BaseSettingsModelTest):
     def test_set_minor_ticks_direction(self, add_change_mock: MagicMock):
         self._assert_setter_with_different_values(
             add_change_mock, self.model.set_minor_ticks_direction, ["In", "Out"], PlotProperties.MINOR_TICKS_DIRECTION.value
+        )
+
+    @patch(ADD_CHANGE_PATCH_PATH)
+    def test_set_tick_label_font_size(self, add_change_mock: MagicMock):
+        self._assert_setter_with_different_values(
+            add_change_mock, self.model.set_tick_label_font_size, ["10", "5.7"], PlotProperties.TICK_LABEL_FONT_SIZE.value
         )
 
     @patch(ADD_CHANGE_PATCH_PATH)

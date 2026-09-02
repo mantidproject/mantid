@@ -507,6 +507,7 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
                 labelbottom="on" == ConfigService.getString("plots.showLabelsBottom").lower(),
                 labelright="on" == ConfigService.getString("plots.showLabelsRight").lower(),
                 labeltop="on" == ConfigService.getString("plots.showLabelsTop").lower(),
+                labelsize=float(ConfigService.getString("plots.ticks.labelSize")),
             )
             ax.xaxis.set_tick_params(
                 which="major",
@@ -542,6 +543,9 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
             ax.show_minor_gridlines = ConfigService.getString("plots.ShowMinorGridlines").lower() == "on"
             for spine in ["top", "bottom", "left", "right"]:
                 ax.spines[spine].set_linewidth(float(ConfigService.getString("plots.axesLineWidth")))
+            axes_label_font_size = float(ConfigService.getString("plots.axesLabelFontSize"))
+            ax.xaxis.label.set_size(axes_label_font_size)
+            ax.yaxis.label.set_size(axes_label_font_size)
 
         if ConfigService.getString("plots.enableGrid").lower() == "on":
             try:

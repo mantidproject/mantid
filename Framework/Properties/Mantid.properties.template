@@ -270,6 +270,9 @@ plots.y_max =
 # The default width of the lines for the axes
 plots.axesLineWidth = 1.0
 
+# The default font size for axis labels
+plots.axesLabelFontSize = 10.0
+
 # Whether to enable the grid by default
 plots.enableGrid = Off
 
@@ -296,6 +299,9 @@ plots.ticks.major.direction = Out
 plots.ticks.minor.length = 3
 plots.ticks.minor.width = 1
 plots.ticks.minor.direction = Out
+
+# The default font size for tick labels
+plots.ticks.labelSize = 10.0
 
 # Default Line style on 1d plots. Options are solid, dashed, dotted, dashdot
 plots.line.Style = solid

@@ -1,0 +1,1 @@
+- The default font size for axis labels and tick labels on plots can now be set on the :ref:`Plots tab of the Settings <PlotSettings>`. The values are saved to the user properties as ``plots.axesLabelFontSize`` and ``plots.ticks.labelSize``.
