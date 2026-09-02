@@ -203,6 +203,20 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params, cons
   return std::make_pair(shape, std::make_tuple(frac, fracError, max_sigma));
 }
 
+/**
+ * @brief Integrates a weak peak using a supplied ellipsoidal shape and peak fraction.
+ *
+ * Applies background subtraction, detector-edge correction, and fractional-intensity
+ * scaling before returning the scaled integration shape.
+ *
+ * @param params Integration settings used to determine radius factors and detector-edge corrections.
+ * @param shape Supplied peak and background ellipsoid.
+ * @param libPeak Tuple containing the peak fraction, its uncertainty, and the maximum peak width.
+ * @param center Peak center in Q-space.
+ * @param[out] inti Integrated peak intensity.
+ * @param[out] sigi Uncertainty of the integrated peak intensity.
+ * @return The scaled peak shape, or a no-shape result when no events are available.
+ */
 std::shared_ptr<const Geometry::PeakShape>
 Integrate3DEvents::integrateWeakPeak(const IntegrationParameters &params, PeakShapeEllipsoid_const_sptr shape,
                                      const std::tuple<double, double, double> &libPeak, const V3D &center, double &inti,
@@ -270,7 +284,17 @@ namespace {
 /// height 1) Gaussian kernel values at each event; normG is the kernel's
 /// integral over all space; volume is the search region's volume (its
 /// background rate contribution). Also returns the standard error on A
-/// from the observed Fisher information.
+/**
+ * @brief Estimates peak amplitude and background from weighted event data.
+ *
+ * @param g Peak-model values for each event.
+ * @param w Observed event weights.
+ * @param normG Integrated peak-model normalization.
+ * @param volume Search volume used to model the uniform background.
+ * @param A Output peak amplitude estimate.
+ * @param b Output uniform background estimate.
+ * @param sigA Output standard uncertainty of the peak amplitude.
+ */
 void solvePoissonMatchedFilter(const std::vector<double> &g, const std::vector<double> &w, double normG, double volume,
                                double &A, double &b, double &sigA) {
   const auto n = g.size();
@@ -348,7 +372,14 @@ void solvePoissonMatchedFilter(const std::vector<double> &g, const std::vector<d
 
 /// Solve the 3x3 linear system H*x = -g via Cramer's rule, used for the
 /// Gauss-Newton center-refinement step. Returns false (x left unchanged) if
-/// H is singular.
+/**
+ * @brief Solves a 3×3 linear system of the form Hx = -g.
+ *
+ * @param H Coefficient matrix.
+ * @param g Right-hand-side vector before negation.
+ * @param x Output solution vector.
+ * @return true if the matrix is nonsingular and the solution was computed, false otherwise.
+ */
 bool solve3x3(const double H[3][3], const double g[3], double x[3]) {
   const auto det = H[0][0] * (H[1][1] * H[2][2] - H[1][2] * H[2][1]) -
                    H[0][1] * (H[1][0] * H[2][2] - H[1][2] * H[2][0]) +
@@ -413,25 +444,15 @@ void Integrate3DEvents::integrateUsingShape(const PeakShapeEllipsoid &shape, con
 }
 
 /**
- * Integrate a peak using a fixed ellipsoidal shape by maximizing the
- * (weighted) Poisson log-likelihood of an unbinned point process
- * lambda(q) = A*gaussian(q-c) + b over the raw events within m_radius of
- * peak_q, instead of counting events inside/outside ellipsoidal
- * boundaries. The shape's peak radii are interpreted as the Gaussian's
- * standard deviations (1-sigma) along its principal axes. The Gaussian's
- * mass outside the m_radius search sphere is assumed negligible.
+ * Fits a Gaussian peak and constant background within the search radius and
+ * returns the integrated Gaussian intensity.
  *
- * @param shape        The ellipsoid shape (directions and peak radii,
- *                     interpreted as standard deviations) to integrate
- *                     with. Background radii are unused: the background
- *                     rate is fit directly instead.
- * @param peak_q       Q-vector at which to center the shape.
- * @param adjustCenter If true, also refine the center c (initially 0, i.e.
- *                     peak_q) by bounded coordinate-ascent Gauss-Newton
- *                     steps, capped at one standard deviation total shift.
- * @param inti         Returns the fitted (background-subtracted) integrated
- *                     intensity.
- * @param sigi         Returns the standard deviation of inti.
+ * @param shape Ellipsoidal peak shape; its principal radii define the Gaussian
+ *              standard deviations.
+ * @param peak_q Q-vector used as the initial peak center.
+ * @param adjustCenter Whether to refine the peak center during fitting.
+ * @param inti Receives the fitted integrated peak intensity.
+ * @param sigi Receives the standard deviation of the fitted intensity.
  */
 void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &shape, const V3D &peak_q,
                                                       bool adjustCenter, double &inti, double &sigi) {
@@ -555,6 +576,17 @@ void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &
   sigi = sigA * normG;
 }
 
+/**
+ * @brief Estimates the signal-to-noise ratio for a peak at the specified reciprocal-space position.
+ *
+ * @param params Integration parameters that define the analysis region and radius factors.
+ * @param center Reciprocal-space position of the peak.
+ * @param forceSpherical Whether to require and use a spherically symmetric peak shape.
+ * @param sphericityTol Maximum relative difference between the largest and smallest peak widths
+ *                      when spherical symmetry is required.
+ * @return Signal-to-noise ratio after background subtraction, or zero when the peak cannot be
+ *         analyzed or does not meet the requested shape constraints.
+ */
 double Integrate3DEvents::estimateSignalToNoiseRatio(const IntegrationParameters &params, const V3D &center,
                                                      bool forceSpherical, double sphericityTol) {
 

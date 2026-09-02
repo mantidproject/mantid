@@ -30,7 +30,25 @@ class MANTID_MDALGORITHMS_DLL IntegratePeaksShapeMD final : public API::Algorith
 public:
   /// Get the name of this algorithm
   const std::string name() const override;
-  /// Get the version of this algorithm
+  /**
+   * Gets the algorithm version.
+   * @return The algorithm version.
+   */
+  
+  /**
+   * Gets related algorithms.
+   * @return The names of related algorithms.
+   */
+  
+  /**
+   * Gets the algorithm category.
+   * @return The algorithm category.
+   */
+  
+  /**
+   * Describes integration of single-crystal diffraction Bragg peaks using stored ellipsoidal peak shapes.
+   * @return A summary of the algorithm's purpose.
+   */
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
     return {"IntegrateEllipsoids", "IntegrateEllipsoidsTwoStep", "IntegratePeaksMD"};

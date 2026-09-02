@@ -18,6 +18,17 @@
 #include <unordered_map>
 #include <vector>
 
+/**
+ * Fits a Gaussian peak and constant background using the supplied ellipsoidal
+ * shape and event data.
+ *
+ * @param shape Ellipsoidal peak shape whose principal radii define the Gaussian
+ *              standard deviations.
+ * @param peak_q Peak center in Q-space.
+ * @param adjustCenter Whether to apply a bounded center refinement.
+ * @param inti Output fitted peak intensity.
+ * @param sigi Output uncertainty of the fitted intensity.
+ */
 namespace Mantid {
 namespace Geometry {
 class PeakShape;

@@ -40,9 +40,16 @@ const std::string IntegratePeaksShapeMD::name() const { return "IntegratePeaksSh
 /// Algorithm's version for identification. @see Algorithm::version
 int IntegratePeaksShapeMD::version() const { return 1; }
 
-/// Algorithm's category for identification. @see Algorithm::category
+/**
+ * @brief Identifies the algorithm's category.
+ *
+ * @return std::string The category path, "Crystal\\Integration".
+ */
 const std::string IntegratePeaksShapeMD::category() const { return "Crystal\\Integration"; }
 
+/**
+ * @brief Defines the input, integration, fitting, and output properties for the algorithm.
+ */
 void IntegratePeaksShapeMD::init() {
   auto ws_valid = std::make_shared<CompositeValidator>();
   ws_valid->add<InstrumentValidator>();
@@ -88,6 +95,11 @@ void IntegratePeaksShapeMD::init() {
                   "with the peaks' integrated intensities.");
 }
 
+/**
+ * @brief Integrates peak intensities from an event or histogram workspace using QLab ellipsoidal peak shapes.
+ *
+ * @throws std::runtime_error If the input workspace is not an EventWorkspace or Workspace2D, a peak lacks a QLab ellipsoidal shape, or fewer than three indexed peaks are available.
+ */
 void IntegratePeaksShapeMD::exec() {
   PeaksWorkspace_sptr input_peak_ws = getProperty("PeaksWorkspace");
   MatrixWorkspace_sptr input_ws = getProperty("InputWorkspace");
@@ -244,6 +256,17 @@ void IntegratePeaksShapeMD::qListFromEventWS(Integrate3DEvents &integrator, Prog
   PARALLEL_CHECK_INTERRUPT_REGION
 }
 
+/**
+ * @brief Converts histogram workspace data to Q-space events for integration.
+ *
+ * Processes positive-intensity histogram bins and adds their Q-space positions,
+ * intensities, and squared uncertainties to the integrator.
+ *
+ * @param integrator Receives the converted Q-space events.
+ * @param prog Reports processing progress.
+ * @param wksp Histogram workspace containing the data to convert.
+ * @throws std::runtime_error If detector preprocessing results cannot be retrieved.
+ */
 void IntegratePeaksShapeMD::qListFromHistoWS(Integrate3DEvents &integrator, Progress &prog, Workspace2D_sptr &wksp) {
   const std::string ELASTIC("Elastic");
   const std::string Q3D("Q3D");
