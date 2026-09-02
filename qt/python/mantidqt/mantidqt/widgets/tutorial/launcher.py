@@ -21,8 +21,7 @@ than unwound.
 from qtpy.QtCore import QObject, QSettings, Signal
 
 from mantidqt.utils.qt.qsettings_change_aware import QSettingsChangeAware
-from mantidqt.widgets.tutorial.bubble import TutorialBubble
-from mantidqt.widgets.tutorial.overlay import TutorialOverlay
+from mantidqt.widgets.tutorial.annotator import TutorialAnnotator
 from mantidqt.widgets.tutorial.player import TutorialPlayer
 from mantidqt.widgets.tutorial.shell import TutorialShell
 
@@ -97,8 +96,7 @@ class TutorialSession(QObject):
 
         self._sandbox = None
         self._shell = None
-        self._overlay = None
-        self._bubble = None
+        self._annotator = None
         self._player = None
         self._failures = []
         self._closing = False
@@ -112,6 +110,11 @@ class TutorialSession(QObject):
     @property
     def player(self):
         return self._player
+
+    @property
+    def annotator(self):
+        """The spotlight and caption, wherever the tour is currently pointing."""
+        return self._annotator
 
     @property
     def shell(self):
@@ -144,13 +147,12 @@ class TutorialSession(QObject):
             self._shell.setGeometry(geometry)
         self._shell.show()
 
-        self._overlay = TutorialOverlay(interface)
-        self._bubble = TutorialBubble(interface)
-        self._overlay.show()
-        self._bubble.show()
-        self._bubble.raise_()
+        # one annotator, however many windows the tour ends up pointing into - a settings dialog
+        # is a window of its own, and its widgets cannot be spotlighted from the interface's overlay
+        self._annotator = TutorialAnnotator(interface, parent=self)
+        self._annotator.show()
 
-        self._player = TutorialPlayer(self._chapters, self._sandbox, self._overlay, self._bubble, parent=self)
+        self._player = TutorialPlayer(self._chapters, self._sandbox, self._annotator, self._annotator, parent=self)
         self._player.finished.connect(self._on_player_finished)
         self._player.step_failed.connect(self._on_step_failed)
         self._player.step_changed.connect(self._on_step_changed)
@@ -174,13 +176,10 @@ class TutorialSession(QObject):
             self._player.stop()
             self._player.deleteLater()
             self._player = None
-        for decoration in (self._overlay, self._bubble):
-            if decoration is not None:
-                if hasattr(decoration, "detach"):
-                    decoration.detach()
-                decoration.setParent(None)
-                decoration.deleteLater()
-        self._overlay = self._bubble = None
+        if self._annotator is not None:
+            self._annotator.detach()
+            self._annotator.deleteLater()
+            self._annotator = None
         if self._shell is not None:
             shell, self._shell = self._shell, None
             # stop listening to the shell being discarded before discarding it. Deletion is
@@ -236,15 +235,14 @@ class TutorialSession(QObject):
             self._shell.set_busy(busy, message)
 
     def _on_player_finished(self):
-        if self._bubble is not None:
-            self._bubble.show_step(
+        if self._annotator is not None:
+            self._annotator.set_target(None)
+            self._annotator.show_step(
                 "That is the end of the tutorial. Close this window to return to your own session — nothing done here has touched it. "
                 "Use the tabs above to revisit a chapter.",
                 title="Finished",
             )
-            self._bubble.place_beside(None)
-        if self._overlay is not None:
-            self._overlay.set_target(None)
+            self._annotator.place_beside(None)
         if self._shell is not None:
             self._shell.show_finished()
 

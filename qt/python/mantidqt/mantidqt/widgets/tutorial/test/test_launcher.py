@@ -277,7 +277,7 @@ class TutorialSessionTest(unittest.TestCase):
         self.assertTrue(self._play_to_the_end(session))
 
         interaction.process_events(3)
-        text = session._bubble.findChild(QWidget, "tutorial_bubble_text").text()
+        text = session.annotator.active_bubble().findChild(QWidget, "tutorial_bubble_text").text()
         self.assertIn("has touched it", text)
         self.assertFalse(session.shell.btn_next.isEnabled(), "there is nowhere left to go")
 
