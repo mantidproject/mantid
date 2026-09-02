@@ -8,7 +8,7 @@
 
 The tour is written against widget names and presenter methods, so it drifts the moment either is
 renamed - and it drifts silently, because nothing else imports it. This is what makes that loud:
-every chapter is played end to end, and every step has to perform and to find what it points at.
+the tour is played end to end, and every step has to perform and to find what it points at.
 
 The observations are in ``subTest`` blocks so one broken step reports itself without hiding the
 rest. Building the sandbox is not - a failure there makes every following observation meaningless.
@@ -16,6 +16,7 @@ rest. Building the sandbox is not - a failure there makes every following observ
 
 import os
 import unittest
+from dataclasses import replace
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.environ.setdefault("MPLBACKEND", "Agg")
@@ -75,29 +76,24 @@ class RecordingAnnotator:
         pass
 
 
-def _hurry(step):
-    return type(step)(
-        text=step.text,
-        target=step.target,
-        action=step.action,
-        title=step.title,
-        await_=step.await_,
-        await_timeout_s=step.await_timeout_s,
-        await_text=step.await_text,
-        **FAST,
-    )
-
-
 def _hurried_chapters():
-    return tuple(
-        type(chapter)(name=chapter.name, description=chapter.description, steps=[_hurry(s) for s in chapter.steps]) for chapter in CHAPTERS
-    )
+    """The real tour, with only the pauses taken out.
+
+    ``replace`` rather than rebuilding each step field by field: a step written by hand here would
+    quietly stop matching the real one the moment ``TutorialStep`` gained a field, and the test
+    would be playing something subtly different from what ships.
+    """
+    return tuple(replace(chapter, steps=[replace(step, **FAST) for step in chapter.steps]) for chapter in CHAPTERS)
 
 
 @start_qapplication
 class TutorialChaptersTest(unittest.TestCase):
-    """One test per chapter, plus the whole tour, because a chapter is what the user can jump to
-    and so is what has to work on its own."""
+    """The whole tour played once, and then each chapter entered on its own - because a chapter is
+    what the user can jump to, and gets there by a different route (the interface is rebuilt and
+    fast-forwarded rather than walked through).
+
+    Playing the tour runs the interface for real, absorption calculation and all, so it is done as
+    few times as the two paths allow and everything else is asserted against what that recorded."""
 
     @classmethod
     def setUpClass(cls):
@@ -110,9 +106,10 @@ class TutorialChaptersTest(unittest.TestCase):
         self.sandbox.window.show()
         process_events(3)
         self.addCleanup(self._teardown)
+        self._reset_recording()
 
+    def _reset_recording(self):
         self.annotator = RecordingAnnotator()
-
         self.failures = []
         self.finished = []
         self.spotlit = {}
@@ -137,9 +134,9 @@ class TutorialChaptersTest(unittest.TestCase):
         player.step_failed.connect(lambda label, reason: self.failures.append((label, reason)))
         player.finished.connect(lambda: self.finished.append(True))
 
-        # what the tour pointed at, per step. Recorded from the player rather than counted off the
-        # overlay because a step is presented twice - once explained, once refreshed after it has
-        # been performed - and both times set a target.
+        # what the tour pointed at, per step. Keyed off the player's position rather than counted
+        # off the annotator because a step is presented twice - once explained, once refreshed
+        # after it has been performed - and both times set a target.
         def remember(*_args):
             self.spotlit[player.position] = self.annotator.targets[-1] if self.annotator.targets else None
             self.narrated.append(player.position)
@@ -161,74 +158,70 @@ class TutorialChaptersTest(unittest.TestCase):
         self.assertTrue(self.finished, f"the tour did not finish within {PLAY_TIMEOUT_MS / 1000}s")
         return player
 
-    # ------------------------------------------------------------------ per chapter
-
-    def test_each_chapter_plays_on_its_own(self):
-        chapters = _hurried_chapters()
-        for index, chapter in enumerate(chapters):
-            with self.subTest(chapter=chapter.name):
-                self.failures = []
-                self.finished = []
-                # rebuilt for each chapter, exactly as choosing its tab does it
-                self._teardown_and_rebuild()
-                self._play(chapters, chapter_index=index, fast_forward=index > 0)
-                self.assertEqual(self.failures, [], f"steps failed in '{chapter.name}'")
-
-    def _teardown_and_rebuild(self):
-        self.sandbox.teardown()
-        process_events(3)
-        self.sandbox = TutorialSandbox()
-        self.sandbox.window.show()
-        process_events(3)
-        self.annotator = RecordingAnnotator()
-
-        self.spotlit = {}
-        self.narrated = []
-
     # ------------------------------------------------------------------ the whole tour
 
-    def test_the_whole_tour_plays_without_a_step_failing(self):
-        self._play(_hurried_chapters())
+    def test_the_whole_tour_plays_against_a_real_planner(self):
+        """One play, every observation it supports.
+
+        Each observation is its own ``subTest`` so a single broken step reports itself instead of
+        hiding the ones after it - which is the whole point of a test that exists to catch the tour
+        drifting away from a renamed widget.
+        """
+        chapters = _hurried_chapters()
+        self._play(chapters)
+
         for label, reason in self.failures:
             with self.subTest(step=label):
                 self.fail(reason)
-        self.assertEqual(self.failures, [])
-
-    def test_every_step_that_points_at_something_found_a_live_widget(self):
-        chapters = _hurried_chapters()
-        self._play(chapters)
 
         for chapter_index, step_index, chapter, step in walk(chapters):
             if step.target is None:
                 continue
             with self.subTest(chapter=chapter.name, step=step.label):
-                target = self.spotlit.get((chapter_index, step_index))
                 self.assertIsInstance(
-                    target,
+                    self.spotlit.get((chapter_index, step_index)),
                     QWidget,
                     "a step that names a target but highlighted nothing means the interface moved under the tour",
                 )
 
-    def test_the_tour_really_exports_a_file(self):
-        # the export step goes through the interface's own export path, so a tour that stopped
-        # actually producing anything would otherwise still look like it was working
-        self._play(_hurried_chapters())
+        with self.subTest("every step was shown, in order"):
+            # first appearance of each step: a step is presented twice, once explained and once
+            # refreshed after it has been performed
+            first_seen = []
+            for position in self.narrated:
+                if position not in first_seen:
+                    first_seen.append(position)
+            expected = [(chapter_index, step_index) for chapter_index, step_index, _chapter, _step in walk(chapters)]
+            self.assertEqual(first_seen, expected)
 
-        written = os.listdir(self.sandbox.data.save_directory)
-        self.assertTrue(written, "the export chapter should have written a real file to the demo directory")
+        with self.subTest("the export step wrote a real file"):
+            # it goes through the interface's own export path, so a tour that stopped producing
+            # anything would otherwise still look like it was working
+            self.assertTrue(
+                os.listdir(self.sandbox.data.save_directory),
+                "the export chapter should have written a real file to the demo directory",
+            )
 
-    def test_every_step_was_shown_in_order(self):
+    # ------------------------------------------------------------------ entering a chapter
+
+    def test_each_chapter_can_be_entered_on_its_own(self):
+        # what the chapter tabs do: the interface is rebuilt and the earlier chapters' actions
+        # replayed silently, rather than the tour being walked through to get there
         chapters = _hurried_chapters()
-        self._play(chapters)
+        for index, chapter in enumerate(chapters[1:], start=1):
+            with self.subTest(chapter=chapter.name):
+                self._rebuild_sandbox()
+                self._play(chapters, chapter_index=index, fast_forward=True)
+                self.assertEqual(self.failures, [], f"steps failed entering '{chapter.name}'")
 
-        # first appearance of each step, in the order the tour reached them
-        first_seen = []
-        for position in self.narrated:
-            if position not in first_seen:
-                first_seen.append(position)
-
-        expected = [(chapter_index, step_index) for chapter_index, step_index, _chapter, _step in walk(chapters)]
-        self.assertEqual(first_seen, expected)
+    def _rebuild_sandbox(self):
+        """Start over with a fresh interface, exactly as choosing a chapter tab does."""
+        self.sandbox.teardown()
+        process_events(3)
+        self.sandbox = TutorialSandbox()
+        self.sandbox.window.show()
+        process_events(3)
+        self._reset_recording()
 
 
 if __name__ == "__main__":
