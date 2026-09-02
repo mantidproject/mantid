@@ -46,8 +46,23 @@ POLL_INTERVAL_MS = 100
 
 
 # --------------------------------------------------------------------------------------------
-# waiting
+# the event loop
+#
+# Nothing else in this module works without these two: every helper below drains the queue after
+# it touches a widget, because what a tutorial does next is measured against a layout that has to
+# have caught up first.
 # --------------------------------------------------------------------------------------------
+
+
+def process_events(rounds=1):
+    """Drain the Qt event queue.
+
+    Several rounds are sometimes needed because handlers post further events - a queued signal
+    whose slot emits another queued signal. Use this to let a layout catch up before measuring it;
+    use ``wait_for`` for anything that takes real time.
+    """
+    for _ in range(rounds):
+        QApplication.processEvents(QEventLoop.AllEvents, 20)
 
 
 def wait_for(predicate, on_ready, timeout_s, on_timeout=None, interval_ms=POLL_INTERVAL_MS, parent=None):
@@ -133,15 +148,18 @@ def ensure_visible(widget):
     scroll_areas = []
 
     for node in chain:
-        if node is not widget and isinstance(node, (QTabWidget, QStackedWidget)):
-            # only for ancestors: switching the page of a tab widget the step is pointing *at*
-            # would move the interface for a step that is describing the tab bar itself
-            _select_page_containing(node, widget, node.setCurrentIndex)
+        # a container is only opened up when the target is *inside* it. Doing it to the target
+        # itself would move the interface out from under a step that is describing that very
+        # container - switching the page of the tab widget it is pointing at, say. The one
+        # exception is a collapsed group box, which has to be opened to show anything at all.
+        is_ancestor = node is not widget
+        if is_ancestor and isinstance(node, (QTabWidget, QStackedWidget)):
+            _select_page_containing(node, widget)
         elif isinstance(node, QGroupBox) and node.isCheckable() and not node.isChecked():
             # collapsible sections are built this way throughout Mantid's interfaces: the group box
             # is checkable and its contents are hidden while it is unchecked
             node.setChecked(True)
-        elif node is not widget and isinstance(node, QAbstractScrollArea):
+        elif is_ancestor and isinstance(node, QAbstractScrollArea):
             scroll_areas.append(node)
 
     process_events()
@@ -154,24 +172,13 @@ def ensure_visible(widget):
     return widget.isVisible()
 
 
-def _select_page_containing(container, widget, select):
+def _select_page_containing(container, widget):
+    """Bring the page holding ``widget`` to the front of a tab or stacked widget."""
     for index in range(container.count()):
         page = container.widget(index)
         if page is widget or page.isAncestorOf(widget):
-            select(index)
-            return True
-    return False
-
-
-def process_events(rounds=1):
-    """Drain the Qt event queue.
-
-    Several rounds are sometimes needed because handlers post further events - a queued signal
-    whose slot emits another queued signal. Use this to let a layout catch up before measuring it;
-    use ``wait_for`` for anything that takes real time.
-    """
-    for _ in range(rounds):
-        QApplication.processEvents(QEventLoop.AllEvents, 20)
+            container.setCurrentIndex(index)
+            return
 
 
 # --------------------------------------------------------------------------------------------
