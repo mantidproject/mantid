@@ -176,6 +176,17 @@ class TutorialShell(QWidget):
 
     # ------------------------------------------------------------------ plumbing
 
+    def closeEvent(self, event):
+        """Closing the window ends the tour, exactly as *End tutorial* does.
+
+        Without this the two are not the same thing at all: ``close`` on a widget hides it rather
+        than destroying it, so the session - which is watching for the window being *destroyed* -
+        would hear nothing, and the interface being toured would be left alive behind a hidden
+        window, with its workspaces still in the ADS.
+        """
+        self.close_requested.emit()
+        super().closeEvent(event)
+
     def _on_tab_changed(self, index):
         self.chapter_selected.emit(index)
 

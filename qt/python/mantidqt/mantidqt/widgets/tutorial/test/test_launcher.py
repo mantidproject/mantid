@@ -165,6 +165,19 @@ class TutorialSessionTest(unittest.TestCase):
         self.assertTrue(sandbox.torn_down, "the sandbox window and its workspaces must not outlive the tour")
         self.assertEqual(self.finished, [True])
 
+    def test_closing_the_window_tears_the_sandbox_down_as_end_tutorial_does(self):
+        # the title bar's close button is not the End tutorial button, and both have to end the
+        # tour - otherwise the toured interface lives on behind a hidden window, workspaces and all
+        session = self._session()
+        session.start()
+        sandbox = self.built[0]
+
+        session.shell.close()
+        interaction.process_events(3)
+
+        self.assertTrue(sandbox.torn_down)
+        self.assertEqual(self.finished, [True])
+
     def test_closing_twice_is_harmless(self):
         session = self._session()
         session.start()

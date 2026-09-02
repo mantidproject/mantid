@@ -117,6 +117,17 @@ class TutorialShellTest(unittest.TestCase):
         interaction.process_events()
         self.assertEqual(fired, [True])
 
+    def test_closing_the_window_emits_close_too(self):
+        # closing a widget hides it rather than destroying it, so without this the session hears
+        # nothing and the interface being toured is left alive behind a hidden window
+        fired = []
+        self.shell.close_requested.connect(lambda: fired.append(True))
+
+        self.shell.close()
+        interaction.process_events()
+
+        self.assertEqual(fired, [True])
+
     def test_choosing_a_tab_reports_the_chapter(self):
         chosen = []
         self.shell.chapter_selected.connect(chosen.append)

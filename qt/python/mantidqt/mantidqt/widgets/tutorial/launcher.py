@@ -182,9 +182,11 @@ class TutorialSession(QObject):
             self._annotator = None
         if self._shell is not None:
             shell, self._shell = self._shell, None
-            # stop listening to the shell being discarded before discarding it. Deletion is
-            # deferred, so on a chapter jump the old shell's ``destroyed`` would arrive *after* the
-            # replacement was built and would tear the whole session down again
+            # stop listening to the shell before discarding it. It reports both being closed and
+            # being destroyed as the end of the tour, and on a chapter jump - which tears the old
+            # shell down to build a new one - either would arrive after the replacement exists and
+            # take the whole session down with it
+            shell.blockSignals(True)
             try:
                 shell.destroyed.disconnect(self._on_window_destroyed)
             except (RuntimeError, TypeError):
