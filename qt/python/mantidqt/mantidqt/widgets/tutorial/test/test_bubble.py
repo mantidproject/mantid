@@ -12,7 +12,7 @@ from qtpy.QtWidgets import QAbstractButton, QWidget
 
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.tutorial import interaction
-from mantidqt.widgets.tutorial.bubble import GAP, TutorialBubble
+from mantidqt.widgets.tutorial.bubble import GAP, WIDTH, TutorialBubble
 
 
 @start_qapplication
@@ -138,6 +138,44 @@ class TutorialBubbleTest(unittest.TestCase):
 
         self.assertGreaterEqual(slack, 0)
         self.assertLessEqual(slack, 20, f"{slack}px of unused height below the caption")
+
+    def test_no_caption_is_clipped(self):
+        # the box was coming up a line short and cutting off the last one: the frame's border eats
+        # into both the width the text wraps in and the height it is given
+        captions = (
+            "Short.",
+            "A caption that runs on for long enough to need wrapping over two lines or so.",
+            "This is a working copy of the interface, loaded with a demo sample. Everything the "
+            "tutorial does happens here — your own session is untouched.<br><br>"
+            "Each step explains a control first. Press <b>Show me</b> to watch the tutorial use it, "
+            "then <b>Next</b> to move on — nothing happens on its own. <b>Back</b> re-reads a step, "
+            "and the tabs above jump to a chapter.",
+        )
+        for caption in captions:
+            with self.subTest(caption=caption[:40]):
+                self.bubble.show_step(caption, title="Welcome to the Texture Planner")
+                interaction.process_events()
+
+                text = self.window.findChild(QWidget, "tutorial_bubble_text")
+                needed = text.heightForWidth(text.width())
+                self.assertGreaterEqual(text.height(), needed, f"the caption is clipped by {needed - text.height()}px")
+                self.assertLessEqual(text.geometry().bottom(), self.bubble.height(), "the caption runs past the box")
+
+    def test_the_box_leaves_room_for_its_own_border(self):
+        # the frame's border takes from both the width the text wraps in and the height it is
+        # given. Missing from the height, the box lands 2px short of its contents; missing from the
+        # width, the text wraps into a narrower space than was measured and gains a line
+        self.bubble.show_step("A caption that runs on long enough to wrap over a couple of lines. " * 2, title="A step")
+        interaction.process_events()
+
+        title = self.window.findChild(QWidget, "tutorial_bubble_title")
+        text = self.window.findChild(QWidget, "tutorial_bubble_text")
+        margins = self.bubble.layout().contentsMargins()
+        border = 2 * self.bubble.frameWidth()
+
+        expected = border + margins.top() + margins.bottom() + title.height() + self.bubble.layout().spacing() + text.height()
+        self.assertEqual(self.bubble.height(), expected)
+        self.assertEqual(text.width(), WIDTH - margins.left() - margins.right() - border)
 
     def test_a_short_caption_gets_a_short_box(self):
         self.bubble.show_step("Short.", title="A step")

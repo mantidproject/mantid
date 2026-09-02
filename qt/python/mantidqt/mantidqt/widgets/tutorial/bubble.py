@@ -105,9 +105,12 @@ class TutorialBubble(QFrame):
         """
         layout = self.layout()
         margins = layout.contentsMargins()
-        available = WIDTH - margins.left() - margins.right()
+        # the styled panel's border eats into the width the text wraps in and the height it is
+        # given. Left out of either, the box comes up a line short and clips the last one.
+        border = 2 * self.frameWidth()
+        available = WIDTH - margins.left() - margins.right() - border
 
-        height = margins.top() + margins.bottom()
+        height = margins.top() + margins.bottom() + border
         showing = [label for label in (self._title_label, self._text_label) if label.isVisibleTo(self)]
         for label in showing:
             height += label.heightForWidth(available) if label.hasHeightForWidth() else label.sizeHint().height()
