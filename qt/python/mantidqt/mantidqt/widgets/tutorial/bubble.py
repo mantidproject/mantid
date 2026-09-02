@@ -43,24 +43,27 @@ class TutorialBubble(QFrame):
 
         self._title_label = QLabel()
         self._title_label.setObjectName("tutorial_bubble_title")
-        self._title_label.setWordWrap(True)
         title_font = self._title_label.font()
         title_font.setBold(True)
         self._title_label.setFont(title_font)
 
         self._text_label = QLabel()
         self._text_label.setObjectName("tutorial_bubble_text")
-        self._text_label.setWordWrap(True)
         self._text_label.setTextFormat(Qt.RichText)
         # steps explain what a control does, and some of that explanation lives in the docs
         self._text_label.setOpenExternalLinks(True)
         self._text_label.setTextInteractionFlags(Qt.TextBrowserInteraction)
 
-        # Both labels sit at the top of whatever height they are given, and each takes only the
-        # height its text needs. Without this a wrapped QLabel is centred in its slice of the box
+        # the heading and the caption, in the order they are stacked. Named because everything
+        # below treats them as one thing: they are laid out, measured and hidden together
+        self._labels = (self._title_label, self._text_label)
+
+        # Both labels wrap, sit at the top of whatever height they are given, and take only the
+        # height their text needs. Without this a wrapped QLabel is centred in its slice of the box
         # and any spare height is split between the two, which reads as uneven padding above and
         # below the caption - and pushes the heading away from the top edge.
-        for label in (self._title_label, self._text_label):
+        for label in self._labels:
+            label.setWordWrap(True)
             label.setAlignment(Qt.AlignLeft | Qt.AlignTop)
             policy = label.sizePolicy()
             policy.setVerticalPolicy(QSizePolicy.Minimum)
@@ -97,29 +100,36 @@ class TutorialBubble(QFrame):
     def _fit_to_contents(self):
         """Make the box exactly as tall as its text, at the fixed width.
 
-        Added up from the labels rather than taken from ``adjustSize``: a word-wrapped ``QLabel``
-        reports a size hint that assumes a single line, so the box comes out a different height
-        from the text it holds - and the leftover is what shows up as uneven padding around the
-        caption. ``heightForWidth`` is the number that accounts for the wrapping, and asking each
-        label for its own is exact where asking the layout is not.
+        Added up from the labels rather than taken from ``adjustSize``, which measures them the way
+        the layout would - and the layout is what gets this wrong (see ``_height_of``). Asking each
+        label for its own height is exact where asking the layout is not.
         """
         layout = self.layout()
         margins = layout.contentsMargins()
         # the styled panel's border eats into the width the text wraps in and the height it is
         # given. Left out of either, the box comes up a line short and clips the last one.
         border = 2 * self.frameWidth()
-        available = WIDTH - margins.left() - margins.right() - border
+        wrap_width = WIDTH - margins.left() - margins.right() - border
 
-        height = margins.top() + margins.bottom() + border
-        showing = [label for label in (self._title_label, self._text_label) if label.isVisibleTo(self)]
-        for label in showing:
-            height += label.heightForWidth(available) if label.hasHeightForWidth() else label.sizeHint().height()
-        height += layout.spacing() * max(len(showing) - 1, 0)
+        showing = [label for label in self._labels if label.isVisibleTo(self)]
+        chrome = margins.top() + margins.bottom() + border
+        text_height = sum(self._height_of(label, wrap_width) for label in showing)
+        gaps = layout.spacing() * max(len(showing) - 1, 0)
 
         # fixed rather than resized: a word-wrapped label's minimumSizeHint is its *unwrapped*
         # height, which is taller than the text actually needs, and a plain resize cannot go below
         # it - leaving exactly the unused strip this method exists to remove
-        self.setFixedHeight(height)
+        self.setFixedHeight(chrome + text_height + gaps)
+
+    @staticmethod
+    def _height_of(label, width):
+        """How tall ``label`` really is at ``width``, which is not what its size hint claims.
+
+        A word-wrapped ``QLabel`` reports a size hint that assumes a single line, and that hint is
+        exactly what makes a box sized from it come out a different height from the text it holds.
+        ``heightForWidth`` is the number that accounts for the wrapping.
+        """
+        return label.heightForWidth(width) if label.hasHeightForWidth() else label.sizeHint().height()
 
     # ------------------------------------------------------------------ placement
 
@@ -137,31 +147,39 @@ class TutorialBubble(QFrame):
         better than one off the edge of the window.
         """
         self._fit_to_contents()
-        size = self.size()
-        host_rect = self._host.rect()
-        blocked = [rect for rect in keep_clear if rect is not None and not rect.isEmpty()]
-
-        if spotlight is None or spotlight.isEmpty():
-            centred = QPoint(
-                host_rect.center().x() - size.width() // 2,
-                host_rect.center().y() - size.height() // 2,
-            )
-            self.move(self._clamped(centred, size, host_rect))
-            self.raise_()
-            return
-
-        placed = None
-        for candidate in self._candidates(spotlight, size, host_rect):
-            position = self._clamped(candidate, size, host_rect)
-            rect = QRect(position, size)
-            if placed is None:
-                placed = position  # the preferred position, used if nothing is clean
-            if not rect.intersects(spotlight) and not any(rect.intersects(other) for other in blocked):
-                placed = position
-                break
-
-        self.move(placed)
+        self.move(self._position_for(spotlight, keep_clear))
         self.raise_()
+
+    def _position_for(self, spotlight, keep_clear):
+        """Where the caption should sit, in host coordinates. Moves nothing.
+
+        Every candidate is clamped into the window before it is judged, so what is checked for
+        overlap is where the caption would actually end up rather than where it was first put.
+        """
+        size, host_rect = self.size(), self._host.rect()
+        if spotlight is None or spotlight.isEmpty():
+            return self._clamped(self._centred(size, host_rect), size, host_rect)
+
+        blocked = [rect for rect in keep_clear if rect is not None and not rect.isEmpty()]
+        positions = [self._clamped(point, size, host_rect) for point in self._candidates(spotlight, size, host_rect)]
+        for position in positions:
+            if self._is_clear(QRect(position, size), spotlight, blocked):
+                return position
+        # nothing was clean: fall back to the preferred position, because a caption slightly in the
+        # way is better than one off the edge of the window
+        return positions[0]
+
+    @staticmethod
+    def _is_clear(rect, spotlight, blocked):
+        """Whether the caption at ``rect`` covers neither the spotlight nor anything to avoid."""
+        return not rect.intersects(spotlight) and not any(rect.intersects(other) for other in blocked)
+
+    @staticmethod
+    def _centred(size, host_rect):
+        return QPoint(
+            host_rect.center().x() - size.width() // 2,
+            host_rect.center().y() - size.height() // 2,
+        )
 
     @staticmethod
     def _candidates(spotlight, size, host_rect):

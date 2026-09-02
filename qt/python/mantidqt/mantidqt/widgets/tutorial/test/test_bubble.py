@@ -124,6 +124,8 @@ class TutorialBubbleTest(unittest.TestCase):
         spotlight = QRect(300, 300, 40, 40)
         placed = self._place(spotlight, keep_clear=[self.window.rect()])
         self.assertTrue(self.window.rect().contains(placed))
+        # and it is the *preferred* position it settles on - below - not whichever was tried last
+        self.assertGreaterEqual(placed.top(), spotlight.bottom())
 
     # ------------------------------------------------------------------ layout
 
