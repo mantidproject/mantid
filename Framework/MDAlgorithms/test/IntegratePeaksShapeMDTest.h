@@ -115,7 +115,7 @@ public:
     const auto &run = integratedPeaksWS->mutableRun();
     TSM_ASSERT("Output workspace must be integrated", run.hasProperty("PeaksIntegrated"));
 
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < integratedPeaksWS->getNumberPeaks(); ++i) {
       TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(i), integratedPeaksWS->getPeak(i).getIntensity(),
                        numEventsPerPeak, 5);
     }
