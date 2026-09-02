@@ -60,6 +60,9 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self._offer_tutorial = offer_tutorial
         # kept alive for as long as the tour runs: the session owns the sandbox planner it drives
         self._tutorial_session = None
+        # set once this planner has been closed, so the deferred first-open offer below becomes a
+        # no-op rather than building a tour for a window that has already gone
+        self._closed = False
         if offer_tutorial:
             self.view.set_on_tutorial_clicked(self._on_tutorial_clicked)
         else:
@@ -131,6 +134,7 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self._offer_tutorial_on_first_open()
 
     def on_close(self) -> None:
+        self._closed = True
         # the tutorial drives a second planner of its own; closing this one must take that with it,
         # or its window would be left behind with nothing to return to
         if self._tutorial_session is not None:
@@ -161,6 +165,10 @@ class TexturePlannerPresenter(AlgorithmObserver):
         # it from the presenter's own module would be a cycle
         from mantidqtinterfaces.TexturePlanner.tutorial.sandbox import make_sandbox_factory
 
+        if self._closed:
+            # the first-open offer is deferred to the event loop, so it can still arrive after the
+            # planner it belongs to has been closed. There is nothing left to open a tour over.
+            return
         if self._tutorial_session is not None:
             # already running: bring it forward rather than starting a second one. The shell is
             # what has to be raised - the interface it frames is a child widget of it, and raising

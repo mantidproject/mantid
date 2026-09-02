@@ -41,19 +41,20 @@ class TutorialStep:
     :param text: what to tell the user. Rich text - the bubble renders it as HTML.
     :param target: ``context -> widget`` to spotlight, or None to narrate with no highlight
         (an opening or closing remark, say). Returning None is allowed and means the same.
-    :param action: ``context -> None``, performed *before* the step is narrated, so the user reads
-        the caption while looking at the result. Must not block: see ``await_``.
+    :param action: ``context -> None``, performed when the user presses *Show me* - that is, only
+        once the step has been narrated, so they read what a control does and then watch it used.
+        Must not block: see ``await_``.
     :param avoid: ``context -> widget`` (or a sequence of them) the caption must not cover.
         For a step whose effect appears somewhere other than the control it points at - ticking a
         check box while the values it changes are displayed elsewhere - so the explanation does not
         end up sitting on top of the evidence.
     :param title: short heading for the bubble. Falls back to the chapter name when empty.
-    :param settle_ms: how long to let the interface repaint after ``action`` before the target is
-        measured and spotlighted.
+    :param settle_ms: how long to let the interface repaint before the target is measured and
+        spotlighted - both when the step is first shown and again once ``action`` has run.
     :param await_: ``context -> bool``, polled after ``action`` until it holds; the step is not
-        narrated until it does. This is how a step waits for slow work (a fit, an absorption
-        calculation) without blocking the event loop and freezing the very repaints the tour is
-        showing off.
+        reported as done until it does, and the bubble shows ``await_text`` meanwhile. This is how
+        a step waits for slow work (a fit, an absorption calculation) without blocking the event
+        loop and freezing the very repaints the tour is showing off.
     :param await_timeout_s: how long ``await_`` may take. Deliberately explicit whenever it is
         long: a tour that waits on something slow should say so here rather than inherit a
         generous default that would hide a hang.

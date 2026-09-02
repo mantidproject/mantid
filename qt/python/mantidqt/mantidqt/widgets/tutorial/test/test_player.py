@@ -376,7 +376,7 @@ class TutorialPlayerTest(unittest.TestCase):
                             "calculate",
                             await_=lambda _ctx: ready["now"],
                             await_timeout_s=5.0,
-                            await_text="Calculatingâ€¦",
+                            await_text="Calculating…",
                         )
                     ],
                 ),
@@ -386,9 +386,9 @@ class TutorialPlayerTest(unittest.TestCase):
         player.apply_step()
 
         self.assertTrue(self._pump_until(lambda: bool(self.annotator.waiting)))
-        self.assertEqual(self.annotator.waiting, ["Calculatingâ€¦"])
+        self.assertEqual(self.annotator.waiting, ["Calculating…"])
         self.assertTrue(player.is_busy)
-        self.assertIn((True, "Calculatingâ€¦"), self.busy)
+        self.assertIn((True, "Calculating…"), self.busy)
         self.assertEqual(self.applied, [], "not done until the work it started has finished")
 
         ready["now"] = True
