@@ -301,7 +301,8 @@ void solvePoissonMatchedFilter(const std::vector<double> &g, const std::vector<d
     gMax = std::max(gMax, g[i]);
   }
   b = volume > 0 ? std::max(0.5 * sumW / volume, 1e-10) : 1e-10;
-  A = gMax > 0 ? std::max(0.5 * sumW / (gMax * normG > 0 ? normG : 1.0), 1e-10) : 1e-10;
+  const auto aDenom = gMax * normG;
+  A = aDenom > 0 ? std::max(0.5 * sumW / aDenom, 1e-10) : 1e-10;
 
   for (int iter = 0; iter < 100; ++iter) {
     double dA, dB, dAA, dBB, dAB;
