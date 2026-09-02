@@ -153,6 +153,22 @@ class TutorialAnnotatorTest(unittest.TestCase):
         self.annotator.detach()
         self.assertIsNone(self.annotator.active_window())
 
+    def test_the_whole_surface_is_inert_once_detached(self):
+        # the session stops the player before detaching, so nothing should arrive after this - but
+        # every method answering the same way is one less thing to check when reading the class
+        self.annotator.set_target(self.setting)
+        self.annotator.detach()
+
+        self.annotator.set_target(self.button)
+        self.annotator.show_step("anything", title="Step")
+        self.annotator.show_waiting("Working…")
+        self.annotator.place_beside(None)
+        self.annotator.show()
+
+        self.assertIsNone(self.annotator.active_window())
+        self.assertIsNone(self.annotator.target_rect())
+        self.assertIsNone(self.annotator.rect_of(self.button))
+
 
 if __name__ == "__main__":
     unittest.main()
