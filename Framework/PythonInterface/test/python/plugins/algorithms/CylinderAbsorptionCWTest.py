@@ -36,7 +36,7 @@ class CylinderAbsorptionCWTest(unittest.TestCase):
             Radius=0.5,  # cm
             Height=1.0,  # cm
             Wavelength=1.7982,  # Å
-            AttenuationXSection=5.08,  # barn at 1.798 Å
+            AbsorptionXSection=5.08,  # barn at 1.798 Å
             ScatteringXSection=5.1,  # barn
             SampleNumberDensity=0.0723,  # atoms/Å^3
             AbsorptionCorrectionMethod="Sears",
@@ -61,7 +61,7 @@ class CylinderAbsorptionCWTest(unittest.TestCase):
                 Radius=5,  # cm
                 Height=10,  # cm
                 Wavelength=1.7982,  # Å
-                AttenuationXSection=5.08,  # barn at 1.798 Å
+                AbsorptionXSection=5.08,  # barn at 1.798 Å
                 ScatteringXSection=5.1,  # barn
                 SampleNumberDensity=0.0723,  # atoms/Å^3
                 AbsorptionCorrectionMethod="Sears",
@@ -141,7 +141,7 @@ class CylinderAbsorptionCWTest(unittest.TestCase):
                 Radius=0.5,  # cm
                 Height=1.0,  # cm
                 Wavelength=wavelength,
-                AttenuationXSection=material.absorbXSection(PhysicalConstants.ReferenceLambda),  # barn at 1.7982 Å
+                AbsorptionXSection=material.absorbXSection(PhysicalConstants.ReferenceLambda),  # barn at 1.7982 Å
                 ScatteringXSection=material.totalScatterXSection(),  # barn
                 SampleNumberDensity=material.numberDensity,  # atoms/Å^3
                 AbsorptionCorrectionMethod="Sears",
@@ -169,7 +169,7 @@ class CylinderAbsorptionCWTest(unittest.TestCase):
             Radius=0.5,  # cm
             Height=1.0,  # cm
             Wavelength=1.7982,  # Å
-            AttenuationXSection=5.08,  # barn at 1.798 Å
+            AbsorptionXSection=5.08,  # barn at 1.798 Å
             ScatteringXSection=5.1,  # barn
             SampleNumberDensity=0.0723,  # atoms/Å^3
             AbsorptionCorrectionMethod="Sabine",
@@ -190,7 +190,7 @@ class CylinderAbsorptionCWTest(unittest.TestCase):
             Radius=2,  # cm
             Height=10,  # cm
             Wavelength=1.7982,  # Å
-            AttenuationXSection=100,  # barn at 1.798 Å
+            AbsorptionXSection=100,  # barn at 1.798 Å
             ScatteringXSection=5.1,  # barn
             SampleNumberDensity=0.0723,  # atoms/Å^3
             AbsorptionCorrectionMethod="Sabine",
@@ -207,7 +207,7 @@ class CylinderAbsorptionCWTest(unittest.TestCase):
 
         # Choose parameters that gives z = 17 so A_B (2z > 32) uses the asymptotic branch to compare to direct evaluation.
         radius = 2.0  # cm
-        attenuation_xs = 80  # barn at 1.7982 A
+        absorption_xs = 80  # barn at 1.7982 A
         scattering_xs = 5  # barn
         number_density = 0.05  # atoms/A^3
 
@@ -216,7 +216,7 @@ class CylinderAbsorptionCWTest(unittest.TestCase):
             Radius=radius,
             Height=10.0,  # cm
             Wavelength=1.7982,  # A
-            AttenuationXSection=attenuation_xs,
+            AbsorptionXSection=absorption_xs,
             ScatteringXSection=scattering_xs,
             SampleNumberDensity=number_density,
             AbsorptionCorrectionMethod="Sabine",
@@ -227,7 +227,7 @@ class CylinderAbsorptionCWTest(unittest.TestCase):
         spectrum_info = ws.spectrumInfo()
         thetas = np.array([spectrum_info.twoTheta(i) for i in range(spectrum_info.size())]) / 2.0
 
-        z = 2.0 * number_density * (attenuation_xs + scattering_xs) * radius  # equals 17
+        z = 2.0 * number_density * (absorption_xs + scattering_xs) * radius  # equals 17
 
         a_l_direct = 2.0 * ((i0(z) - modstruve(0, z)) - (i1(z) - modstruve(1, z)) / z)
         a_b_direct = (i1(2.0 * z) - modstruve(1, 2.0 * z)) / z
@@ -243,7 +243,7 @@ class CylinderAbsorptionCWTest(unittest.TestCase):
             CylinderAbsorptionCW(
                 InputWorkspace=ws,
                 Wavelength=1.7982,  # Å
-                AttenuationXSection=5.08,  # barn at 1.798 Å
+                AbsorptionXSection=5.08,  # barn at 1.798 Å
                 ScatteringXSection=5.1,  # barn
                 SampleNumberDensity=0.0723,  # atoms/Å^3
                 AbsorptionWorkspace="Absorption",

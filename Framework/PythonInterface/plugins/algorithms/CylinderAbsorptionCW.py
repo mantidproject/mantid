@@ -345,10 +345,10 @@ class CylinderAbsorptionCW(PythonAlgorithm):
             "the workspace sample shape if it is a cylinder.",
         )
         self.declareProperty(
-            "AttenuationXSection",
+            "AbsorptionXSection",
             Property.EMPTY_DBL,
             float_greater_than_zero_validator,
-            doc="Attenuation cross-section in barn at 1.7982 Å. If not provided, it will be inferred from the workspace sample material.",
+            doc="Absorption cross-section in barn at 1.7982 Å. If not provided, it will be inferred from the workspace sample material.",
         )
         self.declareProperty(
             "ScatteringXSection",
@@ -400,7 +400,7 @@ class CylinderAbsorptionCW(PythonAlgorithm):
             issues["Height"] = "Height is required, either provide it or use a workspace with a cylinder sample shape."
 
         if (
-            self.getProperty("AttenuationXSection").isDefault
+            self.getProperty("AbsorptionXSection").isDefault
             and self.getProperty("ScatteringXSection").isDefault
             and self.getProperty("SampleNumberDensity").isDefault
         ):
@@ -415,17 +415,17 @@ class CylinderAbsorptionCW(PythonAlgorithm):
                     "the workspace sample material. Please provide these properties or ensure the sample material has valid values."
                 )
                 issues["InputWorkspace"] = msg
-                issues["AttenuationXSection"] = msg
+                issues["AbsorptionXSection"] = msg
                 issues["ScatteringXSection"] = msg
                 issues["SampleNumberDensity"] = msg
         elif (
-            self.getProperty("AttenuationXSection").isDefault
+            self.getProperty("AbsorptionXSection").isDefault
             or self.getProperty("ScatteringXSection").isDefault
             or self.getProperty("SampleNumberDensity").isDefault
         ):
-            issues["AttenuationXSection"] = "Attenuation and scattering cross-section properties must be provided together."
-            issues["ScatteringXSection"] = "Attenuation and scattering cross-section properties must be provided together."
-            issues["SampleNumberDensity"] = "Attenuation and scattering cross-section properties must be provided together."
+            issues["AbsorptionXSection"] = "Absorption and scattering cross-section properties must be provided together."
+            issues["ScatteringXSection"] = "Absorption and scattering cross-section properties must be provided together."
+            issues["SampleNumberDensity"] = "Absorption and scattering cross-section properties must be provided together."
 
         return issues
 
@@ -436,7 +436,7 @@ class CylinderAbsorptionCW(PythonAlgorithm):
         method = self.getProperty("AbsorptionCorrectionMethod").value
 
         if (
-            self.getProperty("AttenuationXSection").isDefault
+            self.getProperty("AbsorptionXSection").isDefault
             and self.getProperty("ScatteringXSection").isDefault
             and self.getProperty("SampleNumberDensity").isDefault
         ):
@@ -446,9 +446,9 @@ class CylinderAbsorptionCW(PythonAlgorithm):
             totalXSection = absorbXSection + totalScatterXSection
             numberDensity = material.numberDensity
         else:
-            # AttenuationXSection is given at REFERENCE_LAMBDA, so scale it linearly to the
+            # AbsorptionXSection is given at REFERENCE_LAMBDA, so scale it linearly to the
             # requested wavelength exactly as Material::absorbXSection does.
-            absorbXSection = self.getProperty("AttenuationXSection").value * wavelength / REFERENCE_LAMBDA
+            absorbXSection = self.getProperty("AbsorptionXSection").value * wavelength / REFERENCE_LAMBDA
             totalScatterXSection = self.getProperty("ScatteringXSection").value
             totalXSection = absorbXSection + totalScatterXSection
             numberDensity = self.getProperty("SampleNumberDensity").value
