@@ -24,13 +24,19 @@ class PeakShape;
 }
 namespace MDAlgorithms {
 
+/** @struct IntegrationParameters
+ *  @brief Parameters for controlling peak integration
+ *
+ *  This structure contains the parameters needed to control the integration
+ *  of peaks using ellipsoidal volumes.
+ */
 struct IntegrationParameters {
-  std::vector<Kernel::V3D> E1Vectors;
-  double backgroundInnerRadius;
-  double backgroundOuterRadius;
-  double regionRadius;
-  double peakRadius;
-  bool specifySize;
+  std::vector<Kernel::V3D> E1Vectors;   ///< Vectors for calculating detector edges
+  double backgroundInnerRadius;         ///< Inner radius of background shell
+  double backgroundOuterRadius;         ///< Outer radius of background shell
+  double regionRadius;                  ///< Radius of region to search for events
+  double peakRadius;                    ///< Radius of peak ellipsoid
+  bool specifySize;                     ///< If true, use specified sizes; if false, use data-driven sizes
 };
 
 /**
@@ -81,10 +87,13 @@ public:
                             double peak_radius, double back_inner_radius, double back_outer_radius,
                             DataObjects::PeakEllipsoidExtent &axes_radii, double &inti, double &sigi);
 
-  /// Find the net integrated intensity of a peak, using ellipsoidal volumes
+  /// Find the net integrated intensity of a strong peak, using ellipsoidal volumes
+  /// fit from the events, and return peak shape and library peak parameters
   std::pair<std::shared_ptr<const Mantid::Geometry::PeakShape>, std::tuple<double, double, double>>
   integrateStrongPeak(const IntegrationParameters &params, const Kernel::V3D &peak_q, double &inti, double &sigi);
 
+  /// Integrate a weak peak using a shape from a library peak, scaling the
+  /// shape by the fractional intensity from the library peak
   std::shared_ptr<const Geometry::PeakShape> integrateWeakPeak(const IntegrationParameters &params,
                                                                Mantid::DataObjects::PeakShapeEllipsoid_const_sptr shape,
                                                                const std::tuple<double, double, double> &libPeak,
@@ -110,6 +119,8 @@ public:
   void integrateUsingShapeProfileFit(const Mantid::DataObjects::PeakShapeEllipsoid &shape,
                                      const Mantid::Kernel::V3D &peak_q, bool adjustCenter, double &inti, double &sigi);
 
+  /// Estimate the signal-to-noise ratio for a peak at the given position
+  /// by fitting an ellipsoid to the events and comparing peak to background
   double estimateSignalToNoiseRatio(const IntegrationParameters &params, const Mantid::Kernel::V3D &center,
                                     bool forceSpherical = false, double sphericityTol = 0.02);
 
@@ -118,6 +129,8 @@ private:
   const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> *
   getEvents(const Mantid::Kernel::V3D &peak_q);
 
+  /// Correct integration radii if peak extends to detector edges
+  /// and return false if peak center is off detector
   bool correctForDetectorEdges(std::tuple<double, double, double> &radii,
                                const std::vector<Mantid::Kernel::V3D> &E1Vecs, const Mantid::Kernel::V3D &peak_q,
                                const DataObjects::PeakEllipsoidExtent &axesRadii,
