@@ -83,6 +83,14 @@ void ConvertUnits::init() {
  * distance
  */
 void ConvertUnits::exec() {
+#ifdef _WIN32
+  // Deliberate, Windows-only warning demonstrating that the CI compiler warning check
+  // understands MSVC diagnostics: cl reports C4101 'unreferenced local variable'. Remove
+  // this block once the check has been seen to fail the Windows build.
+  // cppcheck-suppress unusedVariable
+  int demonstrationOfMSVCWarningCheck;
+#endif
+
   // Get the workspaces
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   const bool acceptPointData = getProperty("ConvertFromPointData");
