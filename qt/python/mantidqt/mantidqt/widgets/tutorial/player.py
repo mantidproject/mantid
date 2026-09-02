@@ -41,6 +41,70 @@ from mantidqt.widgets.tutorial.step import walk
 FAST_FORWARD_SETTLE_MS = 30
 
 
+class _Cursor:
+    """Where the tour has got to, and the rules for moving through it.
+
+    Separate from the player because they answer different questions: this one knows only what
+    comes next, and the player knows *when* it should happen. Keeping the index arithmetic here is
+    what lets the player be read as a sequence of timers and signals.
+    """
+
+    def __init__(self, chapters):
+        self._chapters = chapters
+        self._chapter_index = 0
+        self._step_index = 0
+
+    @property
+    def position(self):
+        """The pair identifying the current step, used to key what has already been performed."""
+        return self._chapter_index, self._step_index
+
+    @property
+    def chapter_index(self):
+        return self._chapter_index
+
+    def chapter(self):
+        return self._chapters[self._chapter_index]
+
+    def step(self):
+        return self.chapter()[self._step_index]
+
+    def at_start(self):
+        return self.position == (0, 0)
+
+    def at_end(self):
+        return self._chapter_index == len(self._chapters) - 1 and self._step_index == len(self.chapter()) - 1
+
+    def go_to(self, chapter_index):
+        """Jump to the first step of a chapter."""
+        if not 0 <= chapter_index < len(self._chapters):
+            raise IndexError(f"no chapter {chapter_index}; the tour has {len(self._chapters)}")
+        self._chapter_index = chapter_index
+        self._step_index = 0
+
+    def advance(self):
+        """Move to the next step. False when the tour has been walked to its end."""
+        if self._step_index + 1 < len(self.chapter()):
+            self._step_index += 1
+        elif self._chapter_index + 1 < len(self._chapters):
+            self._chapter_index += 1
+            self._step_index = 0
+        else:
+            return False
+        return True
+
+    def retreat(self):
+        """Move back a step, crossing into the previous chapter's last. False at the very start."""
+        if self._step_index > 0:
+            self._step_index -= 1
+        elif self._chapter_index > 0:
+            self._chapter_index -= 1
+            self._step_index = len(self.chapter()) - 1
+        else:
+            return False
+        return True
+
+
 class TutorialPlayer(QObject):
     """Plays ``chapters`` against ``context``, pointing and narrating through ``annotator``.
 
@@ -68,8 +132,7 @@ class TutorialPlayer(QObject):
         self._context = context
         self._annotator = annotator
 
-        self._chapter_index = 0
-        self._step_index = 0
+        self._cursor = _Cursor(self._chapters)
         self._running = False
         self._busy = False
         self._busy_message = ""
@@ -83,7 +146,7 @@ class TutorialPlayer(QObject):
 
     @property
     def position(self):
-        return self._chapter_index, self._step_index
+        return self._cursor.position
 
     @property
     def is_running(self):
@@ -96,10 +159,10 @@ class TutorialPlayer(QObject):
         return self._busy
 
     def current_chapter(self):
-        return self._chapters[self._chapter_index]
+        return self._cursor.chapter()
 
     def current_step(self):
-        return self.current_chapter()[self._step_index]
+        return self._cursor.step()
 
     def current_step_has_action(self):
         return self.current_step().action is not None
@@ -109,10 +172,10 @@ class TutorialPlayer(QObject):
         return not self.current_step_has_action() or self.position in self._applied
 
     def at_start(self):
-        return self._chapter_index == 0 and self._step_index == 0
+        return self._cursor.at_start()
 
     def at_end(self):
-        return self._chapter_index == len(self._chapters) - 1 and self._step_index == len(self.current_chapter()) - 1
+        return self._cursor.at_end()
 
     # ------------------------------------------------------------------ running
 
@@ -123,11 +186,8 @@ class TutorialPlayer(QObject):
         to catch the interface up to the state the chapter assumes. It is only sound on a freshly
         built interface, which is why the session rebuilds before asking for it.
         """
-        if not 0 <= chapter_index < len(self._chapters):
-            raise IndexError(f"no chapter {chapter_index}; the tour has {len(self._chapters)}")
+        self._cursor.go_to(chapter_index)
         self._running = True
-        self._chapter_index = chapter_index
-        self._step_index = 0
 
         if fast_forward and chapter_index > 0:
             self._fast_forward_to(chapter_index)
@@ -163,14 +223,8 @@ class TutorialPlayer(QObject):
         if self._busy:
             return
         self._cancel_pending()
-        if self._step_index > 0:
-            self._step_index -= 1
-        elif self._chapter_index > 0:
-            self._chapter_index -= 1
-            self._step_index = len(self.current_chapter()) - 1
-        else:
-            return  # already at the very start
-        self._present_current_step()
+        if self._cursor.retreat():
+            self._present_current_step()
 
     # ------------------------------------------------------------------ presenting
 
@@ -192,7 +246,7 @@ class TutorialPlayer(QObject):
         # worth reporting once the action has run
         self._point_at(step, report=self.is_applied())
         self._set_busy(False)
-        self.step_changed.emit(self._chapter_index, self._step_index)
+        self.step_changed.emit(*self.position)
 
     def _point_at(self, step, report=True):
         """Spotlight what the step points at and put its caption beside it."""
@@ -228,10 +282,8 @@ class TutorialPlayer(QObject):
         yet, which is legitimate. ``_locate`` resolves it again when the step is shown and reports
         it properly if it is still missing.
         """
-        if step.target is None:
-            return
         try:
-            target = step.target(self._context)
+            target = step.resolve_target(self._context)
             if target is not None:
                 ensure_visible(target)
         except Exception:
@@ -299,12 +351,7 @@ class TutorialPlayer(QObject):
     def _advance(self):
         if not self._running:
             return
-        if self._step_index + 1 < len(self.current_chapter()):
-            self._step_index += 1
-        elif self._chapter_index + 1 < len(self._chapters):
-            self._chapter_index += 1
-            self._step_index = 0
-        else:
+        if not self._cursor.advance():
             self._running = False
             self._set_busy(False)
             self.finished.emit()
