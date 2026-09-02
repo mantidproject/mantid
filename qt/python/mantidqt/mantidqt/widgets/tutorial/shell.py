@@ -100,6 +100,9 @@ class TutorialShell(QWidget):
         self.btn_apply.setToolTip("Perform this step in the interface")
         self.btn_next = QPushButton("Next")
         self.btn_next.setDefault(True)
+        # whether *Show me* still has something to do, which is what decides if it comes back
+        # enabled when the tour stops being busy. True until a step says otherwise.
+        self._action_pending = True
 
         self._position_label = QLabel()
         self._position_label.setObjectName("tutorial_position")
@@ -173,8 +176,12 @@ class TutorialShell(QWidget):
         the two live ones reads as something being broken. Once used it stays visible but disabled,
         so the row does not reflow under the pointer between pressing it and pressing Next.
         """
+        # remembered rather than read back off the button when it is next needed: the button's text
+        # is a label for the user, not a place to keep state, and reading it back would tie whether
+        # the tour can be driven to the wording on a button
+        self._action_pending = has_action and not applied
         self.btn_apply.setVisible(has_action)
-        self.btn_apply.setEnabled(has_action and not applied)
+        self.btn_apply.setEnabled(self._action_pending)
         self.btn_apply.setText("Done" if has_action and applied else "Show me")
 
     def set_busy(self, busy, message=""):
@@ -189,7 +196,7 @@ class TutorialShell(QWidget):
         """
         self.btn_back.setEnabled(not busy)
         self.btn_next.setEnabled(not busy)
-        self.btn_apply.setEnabled(not busy and self.btn_apply.text() == "Show me")
+        self.btn_apply.setEnabled(not busy and self._action_pending)
         self._tabs.setEnabled(not busy)
         self._position_label.setText(message if busy and message else self._position_text)
 
