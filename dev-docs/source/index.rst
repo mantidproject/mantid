@@ -302,6 +302,7 @@ Component Overviews
    IndirectDataAnalysisFileStructure
    InelasticDataProcessorFileStructure
    InstrumentViewer
+   LegacyInstrumentViewer
    ISISReflectometryInterface
    ISISSANSReductionBackend
    LoadAlgorithmHook

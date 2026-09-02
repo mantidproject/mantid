@@ -68,7 +68,7 @@ This was last updated for Release 6.2. Check if the organiser has considered if 
     ,Data Loading, "Load different data types from different facilities"
     ,Save Nexus/Ascii, "Save a few appropriate workspaces (both the algorithm and from the Save button at top of Workspaces Toolbox)"
     ,Show Data, "Display the Data for different workspaces: Workspace2D (Histogram), EventWorkspace, TableWorkspace AND plotBin and plotSpectrum from the Data table"
-    ,Instrument Viewer, "Open Instrument viewer for instruments in different facilities."
+    ,Instrument Viewer, "Open the :ref:`Instrument View <mantid:InstrumentViewer>` (``(Experimental) Show Instrument``) for instruments from different facilities. Try the different projections, pick detectors and banks, overlay a peaks workspace, and add a shape to make a mask and a region of interest. Also check the legacy Instrument Viewer (``Show Instrument``) still opens."
     ,SliceViewer, "Open and make some small changes (full test is separate)"
     ,Show Detectors,
     ,Sample Logs,

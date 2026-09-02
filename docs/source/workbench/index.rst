@@ -43,6 +43,8 @@ completed much faster than they were in MantidPlot.
       and fitting.
     * *Workspace data views*: Display data from a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` or :py:obj:`TableWorkspace <mantid.api.ITableWorkspace>` and edit :py:obj:`TableWorkspace <mantid.api.ITableWorkspace>`.
     * :ref:`InstrumentViewer`: Visualize an instrument attached to a workspace.
+    * :ref:`LegacyInstrumentViewer`: The previous instrument visualisation widget, still available
+      from ``Show Instrument``.
     * :ref:`SliceViewer`: View 2D slices of multi-dimensional workspaces.
     * *Sample log viewer*: Display information, plots and statistics about the sample logs in a workspace.
     * :ref:`WorkbenchWorkspaceHistoryWindow`: Displays the algorithms that have been applied to a workspace.
