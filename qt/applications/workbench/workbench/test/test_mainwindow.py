@@ -253,6 +253,7 @@ class MainWindowTest(unittest.TestCase):
 
         mock_event.ignore.assert_called()
         mock_project.inform_user_not_possible.assert_called()
+        self.assertFalse(self.main_window.shutdown_accepted)
 
     def test_main_window_does_not_close_when_project_is_loading(self):
         mock_event = Mock()
@@ -264,6 +265,7 @@ class MainWindowTest(unittest.TestCase):
 
         mock_event.ignore.assert_called()
         mock_project.inform_user_not_possible.assert_called()
+        self.assertFalse(self.main_window.shutdown_accepted)
 
     def test_main_window_does_not_close_if_project_not_saved_and_user_cancels_project_save(self):
         mock_event = Mock()
@@ -278,6 +280,7 @@ class MainWindowTest(unittest.TestCase):
 
         mock_project.offer_save.assert_called()
         mock_event.ignore.assert_called()
+        self.assertFalse(self.main_window.shutdown_accepted)
 
     @patch("workbench.app.mainwindow.ConfigService")
     @patch("workbench.app.mainwindow.QApplication")
@@ -314,6 +317,7 @@ class MainWindowTest(unittest.TestCase):
         self.assertTrue(self.main_window.project_recovery.closing_workbench)
         self.main_window.interface_manager.closeHelpWindow.assert_called()
         mock_event.accept.assert_called()
+        self.assertTrue(self.main_window.shutdown_accepted)
 
     def test_read_settings_returns_snapshot_without_writing(self):
         from workbench.app.mainwindow import MainWindowSettings
