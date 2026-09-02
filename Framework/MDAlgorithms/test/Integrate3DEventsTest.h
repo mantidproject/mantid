@@ -154,6 +154,74 @@ public:
     TS_ASSERT_DELTA(sigi, std::sqrt(9.0), 1e-10);
   }
 
+  void test_integrateUsingShape_subtracts_weighted_background_and_propagates_errors() {
+    const V3D peak_q(10, 0, 0);
+    const std::vector<std::pair<std::pair<double, double>, V3D>> peak_q_list{{std::make_pair(1., 1.), peak_q}};
+
+    DblMatrix UBinv(3, 3, false);
+    UBinv.setRow(0, V3D(.1, 0, 0));
+    UBinv.setRow(1, V3D(0, .1, 0));
+    UBinv.setRow(2, V3D(0, 0, .1));
+
+    std::vector<std::pair<std::pair<double, double>, V3D>> event_Qs;
+    // Four weighted events in the peak contribute intensity 8 and variance 16.
+    for (int i = 0; i < 4; ++i)
+      event_Qs.emplace_back(std::make_pair(2., 4.), peak_q);
+    // Five events in the background shell contribute intensity 5 and variance 1.25.
+    for (int i = 0; i < 5; ++i)
+      event_Qs.emplace_back(std::make_pair(1., .25), peak_q + V3D(.35, 0, 0));
+
+    // Disable the optional high-background culling so this test isolates the
+    // fixed-shape volume scaling and error propagation.
+    Integrate3DEvents integrator(peak_q_list, UBinv, 1.0, false);
+    integrator.addEvents(event_Qs, false);
+
+    const PeakEllipsoidFrame directions{V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    const PeakEllipsoidExtent peakRadii{.2, .3, .4};
+    const PeakEllipsoidExtent backgroundInnerRadii{.3, .4, .5};
+    const PeakEllipsoidExtent backgroundOuterRadii{.4, .5, .6};
+    const PeakShapeEllipsoid shape(directions, peakRadii, backgroundInnerRadii, backgroundOuterRadii,
+                                   Mantid::Kernel::QLab);
+
+    double inti, sigi;
+    integrator.integrateUsingShape(shape, peak_q, inti, sigi);
+
+    // Peak/background-shell volume ratio = .024 / (.120 - .060) = .4.
+    TS_ASSERT_DELTA(inti, 8.0 - .4 * 5.0, 1e-10);
+    TS_ASSERT_DELTA(sigi, std::sqrt(16.0 + .4 * .4 * 1.25), 1e-10);
+  }
+
+  void test_fixed_shape_integrations_return_zero_with_fewer_than_three_events() {
+    const V3D peak_q(10, 0, 0);
+    const std::vector<std::pair<std::pair<double, double>, V3D>> peak_q_list{{std::make_pair(1., 1.), peak_q}};
+
+    DblMatrix UBinv(3, 3, false);
+    UBinv.setRow(0, V3D(.1, 0, 0));
+    UBinv.setRow(1, V3D(0, .1, 0));
+    UBinv.setRow(2, V3D(0, 0, .1));
+
+    Integrate3DEvents integrator(peak_q_list, UBinv, 1.0);
+    const std::vector<std::pair<std::pair<double, double>, V3D>> event_Qs{
+        {std::make_pair(1., 1.), peak_q}, {std::make_pair(1., 1.), peak_q + V3D(.1, 0, 0)}};
+    integrator.addEvents(event_Qs, false);
+
+    const PeakEllipsoidFrame directions{V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    const PeakEllipsoidExtent radii{.2, .2, .2};
+    const PeakShapeEllipsoid shape(directions, radii, radii, radii, Mantid::Kernel::QLab);
+
+    double inti = 123.0;
+    double sigi = 456.0;
+    integrator.integrateUsingShape(shape, peak_q, inti, sigi);
+    TS_ASSERT_EQUALS(inti, 0.0);
+    TS_ASSERT_EQUALS(sigi, 0.0);
+
+    inti = 123.0;
+    sigi = 456.0;
+    integrator.integrateUsingShapeProfileFit(shape, peak_q, true, inti, sigi);
+    TS_ASSERT_EQUALS(inti, 0.0);
+    TS_ASSERT_EQUALS(sigi, 0.0);
+  }
+
   // Verify integrateUsingShapeProfileFit's fitted amplitude is (very
   // nearly) the joint maximum of the same Poisson log-likelihood it is
   // supposed to optimize, by independently reconstructing that likelihood
