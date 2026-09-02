@@ -152,7 +152,7 @@ class TutorialSession(QObject):
         self._annotator = TutorialAnnotator(interface, parent=self)
         self._annotator.show()
 
-        self._player = TutorialPlayer(self._chapters, self._sandbox, self._annotator, self._annotator, parent=self)
+        self._player = TutorialPlayer(self._chapters, self._sandbox, self._annotator, parent=self)
         self._player.finished.connect(self._on_player_finished)
         self._player.step_failed.connect(self._on_step_failed)
         self._player.step_changed.connect(self._on_step_changed)

@@ -40,11 +40,12 @@ FAST = {"settle_ms": 1}
 PLAY_TIMEOUT_MS = 300000
 
 
-class RecordingOverlay:
-    """Collects what the tour pointed at, instead of painting it."""
+class RecordingAnnotator:
+    """Collects what the tour pointed at and said, instead of painting any of it."""
 
     def __init__(self):
         self.targets = []
+        self.shown = []
 
     def set_target(self, widget):
         self.targets.append(widget)
@@ -52,19 +53,8 @@ class RecordingOverlay:
     def target_rect(self):
         return None
 
-    def show(self):
-        pass
-
-    def hide(self):
-        pass
-
-    def detach(self):
-        pass
-
-
-class RecordingBubble:
-    def __init__(self):
-        self.shown = []
+    def rect_of(self, _widget):
+        return None
 
     def show_step(self, text, title=""):
         self.shown.append((title, text))
@@ -73,6 +63,15 @@ class RecordingBubble:
         pass
 
     def place_beside(self, _spotlight, keep_clear=()):
+        pass
+
+    def show(self):
+        pass
+
+    def hide(self):
+        pass
+
+    def detach(self):
         pass
 
 
@@ -112,8 +111,8 @@ class TutorialChaptersTest(unittest.TestCase):
         process_events(3)
         self.addCleanup(self._teardown)
 
-        self.overlay = RecordingOverlay()
-        self.bubble = RecordingBubble()
+        self.annotator = RecordingAnnotator()
+
         self.failures = []
         self.finished = []
         self.spotlit = {}
@@ -134,7 +133,7 @@ class TutorialChaptersTest(unittest.TestCase):
         player ignores navigation while a step is settling or working, so clicking early would
         simply spin.
         """
-        player = TutorialPlayer(chapters, self.sandbox, self.overlay, self.bubble, parent=self.sandbox.window)
+        player = TutorialPlayer(chapters, self.sandbox, self.annotator, parent=self.sandbox.window)
         player.step_failed.connect(lambda label, reason: self.failures.append((label, reason)))
         player.finished.connect(lambda: self.finished.append(True))
 
@@ -142,7 +141,7 @@ class TutorialChaptersTest(unittest.TestCase):
         # overlay because a step is presented twice - once explained, once refreshed after it has
         # been performed - and both times set a target.
         def remember(*_args):
-            self.spotlit[player.position] = self.overlay.targets[-1] if self.overlay.targets else None
+            self.spotlit[player.position] = self.annotator.targets[-1] if self.annotator.targets else None
             self.narrated.append(player.position)
 
         player.step_changed.connect(remember)
@@ -181,8 +180,8 @@ class TutorialChaptersTest(unittest.TestCase):
         self.sandbox = TutorialSandbox()
         self.sandbox.window.show()
         process_events(3)
-        self.overlay = RecordingOverlay()
-        self.bubble = RecordingBubble()
+        self.annotator = RecordingAnnotator()
+
         self.spotlit = {}
         self.narrated = []
 
