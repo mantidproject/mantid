@@ -153,12 +153,14 @@ class TexturePlannerPresenter(AlgorithmObserver):
         from mantidqtinterfaces.TexturePlanner.tutorial.sandbox import make_sandbox_factory
 
         if self._tutorial_session is not None:
-            # already running; bring its window forward rather than starting a second one
-            window = self._tutorial_session.window
-            if window is not None:
-                window.raise_()
-                window.activateWindow()
-                return
+            # already running: bring it forward rather than starting a second one. The shell is
+            # what has to be raised - the interface it frames is a child widget of it, and raising
+            # a child does nothing to the window it is in
+            shell = self._tutorial_session.shell
+            if shell is not None:
+                shell.raise_()
+                shell.activateWindow()
+            return
         self._tutorial_session = run_tutorial(
             sandbox_factory=make_sandbox_factory(parent=self.view),
             chapters=CHAPTERS,
