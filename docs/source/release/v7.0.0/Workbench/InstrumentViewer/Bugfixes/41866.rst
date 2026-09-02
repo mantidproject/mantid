@@ -1,1 +1,2 @@
 - In the new Instrument View, the tooltip for the render mode now matches the options shown in the drop-down list.
+- Fixed an error when picking detectors in the new Instrument View from a Jupyter notebook.
