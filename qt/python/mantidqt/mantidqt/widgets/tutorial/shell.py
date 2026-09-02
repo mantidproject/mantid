@@ -65,9 +65,13 @@ class TutorialShell(QWidget):
         self._tabs.setDrawBase(True)
         for chapter in self._chapters:
             index = self._tabs.addTab(chapter.name)
-            if chapter.description:
-                self._tabs.setTabToolTip(index, chapter.description)
+            hint = "Click again to start this chapter over."
+            self._tabs.setTabToolTip(index, f"{chapter.description}\n{hint}" if chapter.description else hint)
         self._tabs.currentChanged.connect(self._on_tab_changed)
+        # clicking the chapter already showing restarts it. ``currentChanged`` does not fire for
+        # the current tab, and a chapter jump is a rebuild - which makes "start this chapter again"
+        # the one form of undo the tour can offer that is always exactly right
+        self._tabs.tabBarClicked.connect(self._on_tab_clicked)
 
         # the interface becomes an ordinary child widget. A QMainWindow is happy to be one; it
         # keeps its own toolbars and status bar, it just stops being a top-level window
@@ -174,6 +178,10 @@ class TutorialShell(QWidget):
 
     def _on_tab_changed(self, index):
         self.chapter_selected.emit(index)
+
+    def _on_tab_clicked(self, index):
+        if index == self._tabs.currentIndex():
+            self.chapter_selected.emit(index)
 
     def release_interface(self):
         """Let go of the toured interface so it can be closed independently.

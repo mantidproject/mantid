@@ -75,7 +75,8 @@ Tutorial
 
     The tabs along the top jump to a chapter — the interface is rebuilt and
     brought up to that point, so a chapter always starts from the state it
-    expects.
+    expects. Clicking the tab you are already on starts that chapter again from
+    a fresh interface, which is the way to undo anything the tutorial has done.
 
 .. _Texture_Planner_sample-setup-ref:
 
