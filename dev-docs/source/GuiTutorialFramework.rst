@@ -38,7 +38,7 @@ A tour that typed into the interface the user had open would be unusable — it 
 half-finished setup, and could not be offered on startup without risking someone's work. So the
 tour builds and drives **a second, throwaway instance** of the interface, and closes it at the end.
 
-This is what makes the rest of the design possible, and it has consequences worth knowing:
+Consequences of this:
 
 * The tour can perform genuinely destructive-looking actions — loading files, running algorithms,
   writing exports — because none of it touches anything the user owns.
@@ -69,7 +69,7 @@ to every step as the *context*, so put on it whatever the steps need to reach:
             self.view.deleteLater()
             self.data.cleanup()
 
-Two traps that both instances of this pattern have hit:
+Two traps of this pattern:
 
 * **Usage reporting.** If the view registers a feature usage in its constructor, the sandbox will
   double-count every real launch. Give the view a flag to skip it.
@@ -102,8 +102,8 @@ A tour is a sequence of ``TutorialChapter``, each a sequence of ``TutorialStep``
         ],
     )
 
-``target`` and ``action`` are **callables taking the sandbox**, never captured widgets. Two reasons,
-and both bite: the interesting widgets often do not exist when the tour is written (a matplotlib
+``target`` and ``action`` are **callables taking the sandbox**, never captured widgets. There are
+two good reasons for this: some widgets do not exist for access when the tour is written (a matplotlib
 canvas injected into a placeholder, a table cell widget that appears once there are rows), and a
 chapter is replayed against a freshly built interface whenever the user jumps to it.
 
@@ -121,7 +121,7 @@ missing if it is still absent afterwards.
 Where the controls live
 #######################
 
-Two pieces of chrome, and the split between them matters:
+Two main interface components:
 
 * ``TutorialShell`` wraps the interface. Chapter tabs along the top, ``Back`` / ``Show me`` /
   ``Next`` / ``End tutorial`` and a step counter along the bottom, with the interface reparented in
@@ -129,7 +129,7 @@ Two pieces of chrome, and the split between them matters:
   disabled once the step has been performed.
 * ``TutorialBubble`` is the caption beside the highlight, and carries **no controls at all**. It
   chases whatever is being spotlighted, so a button on it would be somewhere different on every
-  step - the one control the user has to press would be the one they had to hunt for.
+  step.
 
 Because the interface becomes a child of the shell, the dimming overlay covers only the interface:
 the tabs and buttons stay bright and usable while everything they act on is dimmed.
@@ -143,7 +143,7 @@ involved.
 
 One rule inside it is worth knowing before changing it: anything inside the primary widget is
 annotated on the **primary itself**, not on its window. The interface is a child of the shell, so
-dimming its window would put the scrim over the chapter tabs and the navigation - the controls the
+dimming its window would put the dimmer over the chapter tabs and the navigation - the controls the
 user needs to drive the tour. Everything else is annotated on its own window, which is what reaches
 a dialog.
 
@@ -166,10 +166,10 @@ Give a step an action only when it *does* something the user can watch. ``Show m
 whenever a step has one, so an action whose effect is invisible - re-expanding a section the reveal
 has already opened, say - puts a button on screen that appears to do nothing when pressed.
 
-Where a step's effect shows up somewhere other than the control it points at, name that somewhere
+Where a step's effect shows up somewhere other than where the annotation is pointing, name that somewhere
 in ``avoid``. The caption is placed clear of it as well as of the spotlight, so a step that ticks a
-check box while the values it changes are displayed elsewhere does not end up explaining the change
-from on top of the evidence:
+check box while the values it changes are displayed elsewhere does not end up explaining a change that
+is blocked from view:
 
 .. code-block:: python
 
