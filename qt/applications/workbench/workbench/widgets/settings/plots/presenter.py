@@ -527,6 +527,7 @@ class PlotSettings(SettingsPresenterBase):
     def update_properties(self):
         self.load_general_setting_values()
         self.setup_axes_group()
+        self.setup_ticks_group()
         self.setup_line_group()
         self.setup_marker_group()
         self.setup_error_bar_group()
