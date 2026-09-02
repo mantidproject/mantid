@@ -148,10 +148,6 @@ class TutorialChapter:
         return self.steps[index]
 
 
-def total_steps(chapters: Sequence[TutorialChapter]) -> int:
-    return sum(len(chapter) for chapter in chapters)
-
-
 def walk(chapters: Sequence[TutorialChapter]) -> Tuple[Tuple[int, int, TutorialChapter, TutorialStep], ...]:
     """Every step in play order as ``(chapter_index, step_index, chapter, step)``.
 

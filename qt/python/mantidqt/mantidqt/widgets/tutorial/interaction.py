@@ -38,7 +38,6 @@ from qtpy.QtWidgets import (
     QScrollArea,
     QStackedWidget,
     QTabWidget,
-    QWidget,
 )
 
 # how often ``wait_for`` re-runs its predicate. The event loop keeps running throughout, so this
@@ -299,24 +298,3 @@ def set_spin_box(spin_box, value):
             f"its range is {spin_box.minimum()} to {spin_box.maximum()}"
         )
     return spin_box.value()
-
-
-def widget_of_type(parent, widget_type, name=""):
-    """One child widget, found by type and optionally object name.
-
-    For the widgets a tutorial wants to point at that are built in code rather than named in a
-    ``.ui`` file - a matplotlib canvas dropped into a placeholder, a toolbar's buttons.
-    """
-    found = parent.findChildren(widget_type, name) if name else parent.findChildren(widget_type)
-    if not found:
-        raise ValueError(f"no {widget_type.__name__}{f' named {name!r}' if name else ''} under {parent.objectName() or parent}")
-    return found[0]
-
-
-def is_shown(widget):
-    """Whether a widget is really on screen, not merely constructed.
-
-    ``isVisible`` is False for everything while the window itself is hidden, so this is the check a
-    tutorial wants when deciding whether it can point at something.
-    """
-    return isinstance(widget, QWidget) and widget.isVisible() and not widget.visibleRegion().isEmpty()

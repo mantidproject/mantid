@@ -86,12 +86,11 @@ class TutorialSession(QObject):
 
     finished = Signal()
 
-    def __init__(self, sandbox_factory, chapters, parent=None, settings_key=None, title=""):
+    def __init__(self, sandbox_factory, chapters, parent=None, title=""):
         super().__init__(parent)
         self._factory = sandbox_factory
         self._chapters = tuple(chapters)
         self._parent = parent
-        self._settings_key = settings_key
         self._title = title
 
         self._sandbox = None
@@ -277,6 +276,6 @@ def run_tutorial(sandbox_factory, chapters, parent=None, settings_key=None, mark
     """
     if mark_as_seen and settings_key:
         mark_seen(settings_key)
-    session = TutorialSession(sandbox_factory, chapters, parent=parent, settings_key=settings_key, title=title)
+    session = TutorialSession(sandbox_factory, chapters, parent=parent, title=title)
     session.start()
     return session
