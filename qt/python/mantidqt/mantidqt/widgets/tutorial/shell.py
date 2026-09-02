@@ -20,6 +20,11 @@ and buttons stay bright and usable while everything they act on is dimmed.
 from qtpy.QtCore import Qt, Signal
 from qtpy.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QTabBar, QVBoxLayout, QWidget
 
+# a floor for the tutorial window, for an interface whose own size hint is tiny. Below this the
+# chapter tabs and the navigation start competing with the interface for room.
+MIN_WIDTH = 900
+MIN_HEIGHT = 600
+
 
 class TutorialShell(QWidget):
     """Wraps ``interface`` in tutorial chrome.
@@ -30,6 +35,8 @@ class TutorialShell(QWidget):
 
     back_requested = Signal()
     next_requested = Signal()
+    #: perform the current step's action, with its explanation still on screen
+    apply_requested = Signal()
     #: the user picked a chapter from the tab bar
     chapter_selected = Signal(int)
     close_requested = Signal()
@@ -39,8 +46,18 @@ class TutorialShell(QWidget):
         self._interface = interface
         self._chapters = tuple(chapters)
 
+        # Qt.Window is what makes this a window of its own. A QWidget given a parent is otherwise a
+        # *child* of it, and would be drawn as a small panel in the corner of the interface that
+        # launched the tour rather than as the window the tour lives in. Keeping the parent is
+        # still right: it is what keeps the tutorial in front of the window it belongs to and takes
+        # it away with it.
+        self.setWindowFlags(Qt.Window)
         self.setWindowTitle(title or "Tutorial")
         self.setObjectName("tutorial_shell")
+
+        # the interface arrives sized by its own .ui file; the shell has to be at least that big or
+        # the whole point of framing a real interface is lost to scrollbars and clipping
+        interface_size = interface.size()
 
         self._tabs = QTabBar()
         self._tabs.setObjectName("tutorial_chapter_tabs")
@@ -60,6 +77,8 @@ class TutorialShell(QWidget):
 
         self.btn_close = QPushButton("End tutorial")
         self.btn_back = QPushButton("Back")
+        self.btn_apply = QPushButton("Show me")
+        self.btn_apply.setToolTip("Perform this step in the interface")
         self.btn_next = QPushButton("Next")
         self.btn_next.setDefault(True)
 
@@ -76,6 +95,7 @@ class TutorialShell(QWidget):
         controls_layout.addWidget(self._position_label)
         controls_layout.addSpacing(12)
         controls_layout.addWidget(self.btn_back)
+        controls_layout.addWidget(self.btn_apply)
         controls_layout.addWidget(self.btn_next)
 
         layout = QVBoxLayout(self)
@@ -86,8 +106,14 @@ class TutorialShell(QWidget):
         layout.addWidget(controls)
 
         self.btn_back.clicked.connect(self.back_requested)
+        self.btn_apply.clicked.connect(self.apply_requested)
         self.btn_next.clicked.connect(self.next_requested)
         self.btn_close.clicked.connect(self.close_requested)
+
+        self.resize(
+            max(interface_size.width(), MIN_WIDTH),
+            max(interface_size.height() + self._tabs.sizeHint().height() + controls.sizeHint().height(), MIN_HEIGHT),
+        )
 
     # ------------------------------------------------------------------ display
 
@@ -115,6 +141,17 @@ class TutorialShell(QWidget):
         self.btn_back.setEnabled(back)
         self.btn_next.setEnabled(next_)
 
+    def set_action_available(self, has_action, applied):
+        """Offer *Show me* for a step that does something, until it has been done.
+
+        Hidden rather than disabled for a step with no action - a permanently dead button beside
+        the two live ones reads as something being broken. Once used it stays visible but disabled,
+        so the row does not reflow under the pointer between pressing it and pressing Next.
+        """
+        self.btn_apply.setVisible(has_action)
+        self.btn_apply.setEnabled(has_action and not applied)
+        self.btn_apply.setText("Done" if has_action and applied else "Show me")
+
     def set_busy(self, busy, message=""):
         """Disable navigation while a step is waiting on the interface.
 
@@ -123,6 +160,7 @@ class TutorialShell(QWidget):
         """
         self.btn_back.setEnabled(not busy)
         self.btn_next.setEnabled(not busy)
+        self.btn_apply.setEnabled(not busy and self.btn_apply.text() == "Show me")
         self._tabs.setEnabled(not busy)
         if message:
             self._position_label.setText(message)
@@ -130,6 +168,7 @@ class TutorialShell(QWidget):
     def show_finished(self, message="Tutorial complete"):
         self._position_label.setText(message)
         self.btn_next.setEnabled(False)
+        self.btn_apply.setVisible(False)
 
     # ------------------------------------------------------------------ plumbing
 

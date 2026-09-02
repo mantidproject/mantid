@@ -30,20 +30,46 @@ class TutorialShellTest(unittest.TestCase):
         # a QMainWindow, because that is what a Mantid interface is and the shell has to adopt one
         self.interface = QMainWindow()
         self.interface.setCentralWidget(QLabel("the interface"))
-        self.shell = TutorialShell(self.chapters, self.interface, title="Tutorial")
-        self.shell.resize(800, 600)
+        self.interface.resize(1200, 800)
+        # a parent, as the real launcher passes: the tutorial belongs to the window that opened it
+        self.owner = QWidget()
+        self.shell = TutorialShell(self.chapters, self.interface, parent=self.owner, title="Tutorial")
         self.shell.show()
         interaction.process_events(3)
 
     def tearDown(self):
         self.shell.close()
         self.shell.deleteLater()
+        self.owner.deleteLater()
         interaction.process_events()
 
     def _tab_bar(self):
         return self.shell.findChild(QTabBar, "tutorial_chapter_tabs")
 
     # ------------------------------------------------------------------ framing
+
+    def test_it_is_a_window_of_its_own_despite_having_a_parent(self):
+        # a QWidget given a parent is a child widget by default, which would draw the whole tutorial
+        # as a small panel in the corner of the window that launched it
+        self.assertTrue(self.shell.isWindow(), "the tutorial must be a window, not a panel inside its parent")
+        self.assertIs(self.shell.parentWidget(), self.owner, "but still owned by the window it belongs to")
+        self.assertEqual(self.shell.windowTitle(), "Tutorial")
+
+    def test_it_opens_big_enough_to_show_the_interface_it_frames(self):
+        # the interface arrives sized by its .ui file; the shell has to be at least that big plus
+        # room for its own chrome, or framing a real interface achieves nothing
+        self.assertGreaterEqual(self.shell.width(), self.interface.width())
+        self.assertGreater(self.shell.height(), self.interface.height())
+
+    def test_a_tiny_interface_still_gets_a_usable_window(self):
+        small = QMainWindow()
+        small.setCentralWidget(QLabel("small"))
+        small.resize(120, 80)
+        shell = TutorialShell(self.chapters, small, title="Tutorial")
+        self.addCleanup(shell.deleteLater)
+
+        self.assertGreaterEqual(shell.width(), 900)
+        self.assertGreaterEqual(shell.height(), 600)
 
     def test_it_adopts_the_interface_as_a_child(self):
         self.assertIs(self.interface.parentWidget(), self.shell)
@@ -72,7 +98,11 @@ class TutorialShellTest(unittest.TestCase):
     # ------------------------------------------------------------------ controls
 
     def test_back_and_next_emit_their_signals(self):
-        for button, signal_name in ((self.shell.btn_back, "back_requested"), (self.shell.btn_next, "next_requested")):
+        for button, signal_name in (
+            (self.shell.btn_back, "back_requested"),
+            (self.shell.btn_next, "next_requested"),
+            (self.shell.btn_apply, "apply_requested"),
+        ):
             with self.subTest(button=button.text()):
                 fired = []
                 getattr(self.shell, signal_name).connect(lambda: fired.append(True))
@@ -124,11 +154,36 @@ class TutorialShellTest(unittest.TestCase):
         self.assertFalse(self.shell.btn_back.isEnabled())
         self.assertTrue(self.shell.btn_next.isEnabled())
 
+    def test_show_me_is_offered_for_a_step_that_does_something(self):
+        self.shell.set_action_available(has_action=True, applied=False)
+        self.assertTrue(self.shell.btn_apply.isVisible())
+        self.assertTrue(self.shell.btn_apply.isEnabled())
+        self.assertEqual(self.shell.btn_apply.text(), "Show me")
+
+    def test_show_me_is_spent_once_the_step_has_been_performed(self):
+        self.shell.set_action_available(has_action=True, applied=True)
+        self.assertTrue(self.shell.btn_apply.isVisible(), "kept visible so the row does not reflow under the pointer")
+        self.assertFalse(self.shell.btn_apply.isEnabled())
+        self.assertEqual(self.shell.btn_apply.text(), "Done")
+
+    def test_show_me_is_hidden_for_a_step_that_only_explains(self):
+        # a permanently dead button beside two live ones reads as something being broken
+        self.shell.set_action_available(has_action=False, applied=True)
+        self.assertFalse(self.shell.btn_apply.isVisible())
+
+    def test_a_spent_show_me_stays_disabled_when_the_tour_stops_being_busy(self):
+        self.shell.set_action_available(has_action=True, applied=True)
+        self.shell.set_busy(True, "working")
+        self.shell.set_busy(False)
+        self.assertFalse(self.shell.btn_apply.isEnabled())
+
     def test_being_busy_locks_navigation_and_the_tabs(self):
         # pressing Next during a file search would run the next step against an interface that had
         # not finished reacting to this one
+        self.shell.set_action_available(has_action=True, applied=False)
         self.shell.set_busy(True, "Looking for the sample file…")
 
+        self.assertFalse(self.shell.btn_apply.isEnabled())
         self.assertFalse(self.shell.btn_next.isEnabled())
         self.assertFalse(self.shell.btn_back.isEnabled())
         self.assertFalse(self._tab_bar().isEnabled())
@@ -141,6 +196,7 @@ class TutorialShellTest(unittest.TestCase):
     def test_finishing_disables_next_but_leaves_the_tabs(self):
         self.shell.show_finished()
         self.assertFalse(self.shell.btn_next.isEnabled())
+        self.assertFalse(self.shell.btn_apply.isVisible(), "there is nothing left to perform")
         self.assertTrue(self._tab_bar().isEnabled(), "the user should still be able to revisit a chapter")
 
     # ------------------------------------------------------------------ teardown

@@ -154,10 +154,12 @@ class TutorialSession(QObject):
         self._player.finished.connect(self._on_player_finished)
         self._player.step_failed.connect(self._on_step_failed)
         self._player.step_changed.connect(self._on_step_changed)
+        self._player.step_applied.connect(self._on_step_applied)
         self._player.busy_changed.connect(self._on_busy_changed)
 
         self._shell.next_requested.connect(self._player.next_step)
         self._shell.back_requested.connect(self._player.back_step)
+        self._shell.apply_requested.connect(self._player.apply_step)
         self._shell.chapter_selected.connect(self._on_chapter_selected)
         self._shell.close_requested.connect(self.close)
 
@@ -223,6 +225,11 @@ class TutorialSession(QObject):
             back=not self._player.at_start(),
             next_=True,
         )
+        self._shell.set_action_available(self._player.current_step_has_action(), self._player.is_applied())
+
+    def _on_step_applied(self):
+        if self._shell is not None:
+            self._shell.set_action_available(self._player.current_step_has_action(), self._player.is_applied())
 
     def _on_busy_changed(self, busy, message):
         if self._shell is not None:
