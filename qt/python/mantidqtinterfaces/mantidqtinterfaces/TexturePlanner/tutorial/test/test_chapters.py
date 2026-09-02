@@ -72,7 +72,7 @@ class RecordingBubble:
     def show_waiting(self, message):
         pass
 
-    def place_beside(self, _spotlight):
+    def place_beside(self, _spotlight, keep_clear=()):
         pass
 
 

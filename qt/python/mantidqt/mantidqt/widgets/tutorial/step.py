@@ -43,6 +43,10 @@ class TutorialStep:
         (an opening or closing remark, say). Returning None is allowed and means the same.
     :param action: ``context -> None``, performed *before* the step is narrated, so the user reads
         the caption while looking at the result. Must not block: see ``await_``.
+    :param avoid: ``context -> widget`` (or a sequence of them) the caption must not cover.
+        For a step whose effect appears somewhere other than the control it points at - ticking a
+        check box while the values it changes are displayed elsewhere - so the explanation does not
+        end up sitting on top of the evidence.
     :param title: short heading for the bubble. Falls back to the chapter name when empty.
     :param settle_ms: how long to let the interface repaint after ``action`` before the target is
         measured and spotlighted.
@@ -60,6 +64,7 @@ class TutorialStep:
     text: str
     target: Optional[Callable[[Any], Any]] = None
     action: Optional[Callable[[Any], None]] = None
+    avoid: Optional[Callable[[Any], Any]] = None
     title: str = ""
     settle_ms: int = DEFAULT_SETTLE_MS
     await_: Optional[Callable[[Any], bool]] = None
@@ -82,6 +87,24 @@ class TutorialStep:
             return self.title
         flat = " ".join(self.text.split())
         return flat if len(flat) <= 60 else flat[:57] + "…"
+
+    def resolve_avoid(self, context: Any) -> Tuple[Any, ...]:
+        """Widgets the caption must keep clear of. Empty when the step names none.
+
+        Unlike the target, a miss here is swallowed: keeping out of the way of something is a
+        courtesy, and failing at it is not worth interrupting the tour for.
+        """
+        if self.avoid is None:
+            return ()
+        try:
+            found = self.avoid(context)
+        except Exception:
+            return ()
+        if found is None:
+            return ()
+        if isinstance(found, (list, tuple, set)):
+            return tuple(widget for widget in found if widget is not None)
+        return (found,)
 
     def resolve_target(self, context: Any) -> Any:
         """The widget to spotlight, or None for a step that only narrates.

@@ -83,12 +83,22 @@ class TutorialOverlay(QWidget):
         """Where the spotlight currently is, in overlay coordinates. Empty when there is none."""
         return QRect(self._target_rect)
 
-    def _measure(self):
-        target = self._target
-        if target is None or not target.isVisible():
+    def rect_of(self, widget):
+        """Where ``widget`` sits in this overlay's coordinates, or an empty rect.
+
+        Public because the caption needs the same mapping for the widgets it has been asked to keep
+        clear of, and they are not the spotlight.
+        """
+        if widget is None or self._host is None or not widget.isVisible():
             return QRect()
-        top_left = target.mapTo(self._host, target.rect().topLeft())
-        return QRect(top_left, target.size()).adjusted(-PADDING, -PADDING, PADDING, PADDING)
+        if widget is not self._host and not self._host.isAncestorOf(widget):
+            return QRect()
+        top_left = widget.mapTo(self._host, widget.rect().topLeft())
+        return QRect(top_left, widget.size())
+
+    def _measure(self):
+        rect = self.rect_of(self._target)
+        return rect if rect.isEmpty() else rect.adjusted(-PADDING, -PADDING, PADDING, PADDING)
 
     def _retrack(self):
         measured = self._measure()

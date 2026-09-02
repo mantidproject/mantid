@@ -21,8 +21,6 @@ Two conventions worth knowing before adding a step:
   the tour dead.
 """
 
-from qtpy.QtWidgets import QGroupBox
-
 from mantid.simpleapi import SetSampleMaterial
 
 from mantidqt.widgets.tutorial.interaction import (
@@ -231,6 +229,7 @@ SAMPLE_SETUP = TutorialChapter(
                 "quoted in has rotated with the sample."
             ),
             target=lambda s: s.view.chkTransformDirs,
+            avoid=lambda s: (s.view.groupBox_textureVectors, s.view.grpPoleFigure),
             action=lambda s: set_check_state(s.view.chkTransformDirs, True),
             settle_ms=800,
         ),
@@ -242,6 +241,8 @@ SAMPLE_SETUP = TutorialChapter(
                 "frame is still where you edit them."
             ),
             target=lambda s: s.view.chkLabDirs,
+            # the change this makes shows up in the vector fields, not at the check box
+            avoid=lambda s: s.view.groupBox_textureVectors,
             action=lambda s: set_check_state(s.view.chkLabDirs, True),
             settle_ms=600,
         ),
@@ -249,6 +250,7 @@ SAMPLE_SETUP = TutorialChapter(
             title="Back to the sample frame",
             text=("Untick it to edit the directions again. The tutorial is switching back so the next step can change them."),
             target=lambda s: s.view.chkLabDirs,
+            avoid=lambda s: s.view.groupBox_textureVectors,
             action=lambda s: set_check_state(s.view.chkLabDirs, False),
             settle_ms=600,
         ),
@@ -623,149 +625,27 @@ EXPORT = TutorialChapter(
             settle_ms=800,
         ),
         TutorialStep(
+            title="Everything else is in Settings",
+            text=(
+                "The cog holds the options the tour has skipped: how STL files are scaled and rotated "
+                "on load, which axes Euler angles are written about, the Monte Carlo statistics behind "
+                "the transmission estimate, and the wavelength the attenuation is quoted at — including "
+                "the ring around the current orientation you saw a moment ago. They are remembered "
+                "between sessions."
+            ),
+            target=lambda s: s.view.btn_settings,
+        ),
+        TutorialStep(
             title="That is the whole workflow",
             text=(
                 "Describe the sample, describe the instrument and how you will move it, read the pole "
                 "figure, export the plan.<br><br>"
-                "One chapter left: the settings behind the cog."
-            ),
-        ),
-    ],
-)
-
-
-# ------------------------------------------------------------------------------------------------
-# chapter 5 - the settings menu
-# ------------------------------------------------------------------------------------------------
-
-
-def _open_settings(sandbox):
-    """Open the settings dialog so the chapter can point into it.
-
-    The sandbox has already made this dialog non-modal (see ``sandbox.py``); left modal it would
-    block the tutorial's own controls until the user closed a dialog the tour had opened for them.
-    """
-    sandbox.presenter.open_settings()
-    process_events(3)
-
-
-def _close_settings(sandbox):
-    """Dismiss the dialog *without* applying it.
-
-    Ok and Apply write through to Mantid's shared QSettings, so pressing either here would change
-    the real interface's saved settings on the user's behalf. Rejecting leaves them untouched.
-    """
-    sandbox.settings_view.reject()
-    process_events(3)
-
-
-def _settings_group(widget):
-    """The group box a setting sits in, so a step can spotlight the whole section.
-
-    Found by walking up rather than held as an attribute: the dialog builds its groups locally and
-    only keeps references to the individual fields.
-    """
-    node = widget.parentWidget()
-    while node is not None and not isinstance(node, QGroupBox):
-        node = node.parentWidget()
-    return node if node is not None else widget
-
-
-SETTINGS = TutorialChapter(
-    name="Settings",
-    description="What each option behind the cog does.",
-    steps=[
-        TutorialStep(
-            title="The settings menu",
-            text=(
-                "The cog holds everything the main window would be cluttered by. These settings are "
-                "remembered between sessions, so they are worth setting once for your instrument and "
-                "sample."
-            ),
-            target=lambda s: s.view.btn_settings,
-            action=_open_settings,
-            settle_ms=600,
-        ),
-        TutorialStep(
-            title="Visualisation",
-            text=(
-                "What is drawn in the lab view: the sample direction arrows, the goniometer axes and "
-                "rings, the incident beam, the scattering vectors <b>k</b>, and the scattered beams to "
-                "each detector group.<br><br>"
-                "Turning things off is how you make a busy scene readable — with six goniometer axes "
-                "and twenty detector groups the lab view gets crowded."
-            ),
-            target=lambda s: _settings_group(s.settings_view.show_goniometers),
-        ),
-        TutorialStep(
-            title="STL loading",
-            text=(
-                "STL files carry no units and no agreed orientation. <b>Scale</b> says what the numbers "
-                "in the file mean, and the three <b>degrees</b> fields plus the <b>translation "
-                "vector</b> correct a mesh that was exported in the wrong frame.<br><br>"
-                "These apply as the file is loaded, so they are separate from the initial orientation "
-                "in the main window — that describes how a correct sample sits in the beam, these fix "
-                "a file that was wrong to begin with."
-            ),
-            target=lambda s: _settings_group(s.settings_view.stl_scale_combo),
-        ),
-        TutorialStep(
-            title="Orientation files",
-            text=(
-                "When you load a list of orientations from a file, or export Euler angles, these say "
-                "which <b>axes</b> the angles are about and which <b>sense</b> each one turns in — the "
-                "convention your goniometer control software uses.<br><br>"
-                "Get these wrong and every angle is read or written in the wrong convention, which is "
-                "the sort of mistake that only shows up on the beamline."
-            ),
-            target=lambda s: _settings_group(s.settings_view.orient_axes),
-        ),
-        TutorialStep(
-            title="Monte Carlo absorption",
-            text=(
-                "The statistics behind the transmission estimate. <b>Events per point</b> trades "
-                "accuracy for time — raise it for a final answer, lower it while you are still "
-                "planning. <b>Max scatter point attempts</b> guards against a gauge volume that barely "
-                "intersects the sample.<br><br>"
-                "The tutorial has turned the events right down so its own calculation finishes quickly."
-            ),
-            target=lambda s: _settings_group(s.settings_view.mc_events),
-        ),
-        TutorialStep(
-            title="Attenuation",
-            text=(
-                "How the transmission result is reported. <b>Point</b> and <b>unit</b> pick the "
-                "wavelength or d-spacing the factors are quoted at. <b>Use data range scale</b> "
-                "stretches the colour map over the values actually present rather than fixing it to "
-                "0–1, which brings out small differences.<br><br>"
-                "<b>Highlight current orientation</b> is the grey ring around the current orientation "
-                "you saw on the transmission plot."
-            ),
-            target=lambda s: _settings_group(s.settings_view.att_point),
-        ),
-        TutorialStep(
-            title="Applying them",
-            text=(
-                "<b>Ok</b> and <b>Apply</b> save these and redraw; <b>Cancel</b> discards them. The "
-                "tutorial is cancelling — it has been running on a throwaway copy of the interface all "
-                "along, but the settings themselves are shared with your real session, so it will not "
-                "change them on your behalf."
-            ),
-            target=lambda s: s.settings_view.button_box,
-            action=_close_settings,
-            settle_ms=600,
-        ),
-        TutorialStep(
-            title="That is everything",
-            text=(
-                "Describe the sample, describe the instrument and how you will move it, read the pole "
-                "figure, export the plan — and tune the settings to your instrument.<br><br>"
                 "The full documentation is under <b>Help → Mantid Help</b>. Close this window whenever "
-                "you like; nothing here has touched your own session."
+                "you like — nothing here has touched your own session."
             ),
         ),
     ],
 )
 
 
-CHAPTERS = (SAMPLE_SETUP, EXPERIMENTAL_SETUP, RESULTS, EXPORT, SETTINGS)
+CHAPTERS = (SAMPLE_SETUP, EXPERIMENTAL_SETUP, RESULTS, EXPORT)

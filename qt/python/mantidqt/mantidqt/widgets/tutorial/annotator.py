@@ -78,11 +78,18 @@ class TutorialAnnotator(QObject):
         _overlay, bubble = self._active
         bubble.show_waiting(message)
 
-    def place_beside(self, spotlight):
+    def place_beside(self, spotlight, keep_clear=()):
         if self._active is None:
             return
         _overlay, bubble = self._active
-        bubble.place_beside(spotlight)
+        bubble.place_beside(spotlight, keep_clear)
+
+    def rect_of(self, widget):
+        """Where ``widget`` is, in the coordinates of the window currently being annotated."""
+        if self._active is None:
+            return None
+        overlay, _bubble = self._active
+        return overlay.rect_of(widget)
 
     def show(self):
         self._activate(self._primary)

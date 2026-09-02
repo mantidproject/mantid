@@ -50,8 +50,8 @@ class FakeBubble:
     def show_waiting(self, message):
         self.waiting.append(message)
 
-    def place_beside(self, _spotlight):
-        pass
+    def place_beside(self, _spotlight, keep_clear=()):
+        self.kept_clear = keep_clear
 
 
 @start_qapplication
