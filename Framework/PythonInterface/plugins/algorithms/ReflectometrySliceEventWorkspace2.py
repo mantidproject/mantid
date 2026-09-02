@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm
+from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspace
 from mantid.kernel import DateAndTime, Direction
 from mantid.simpleapi import AddSampleLog
 
@@ -78,6 +78,9 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         return self._validate_single_workspace(input_ws, issues)
 
     def _validate_single_workspace(self, workspace, issues):
+        if not isinstance(workspace, MatrixWorkspace):
+            issues["InputWorkspaceName"] = "Input workspaces must be MatrixWorkspaces."
+            return issues  # Stop here so we don't error out by asking more about the workspace.
         if workspace.run().getProtonCharge() < 1e-9:
             issues["InputWorkspaceName"] = "Cannot slice workspace with zero proton charge"
         return issues
