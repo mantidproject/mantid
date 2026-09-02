@@ -29,6 +29,14 @@ from mantidqt.widgets.tutorial.shell import TutorialShell
 # interface's tutorial state is stored the same way as the rest of its state
 SETTINGS_GROUP = "CustomInterfaces"
 
+# what the caption says once the last step has been shown. Here rather than inline because it is
+# the one piece of user-facing prose the framework supplies itself - every other word in a tour
+# comes from the interface being toured.
+FINISHED_TEXT = (
+    "That is the end of the tutorial. Close this window to return to your own session — nothing done here has touched it. "
+    "Use the tabs above to revisit a chapter."
+)
+
 
 # ------------------------------------------------------------------------------------------------
 # "have they seen it?"
@@ -152,6 +160,17 @@ class TutorialSession(QObject):
         self._annotator.show()
 
         self._player = TutorialPlayer(self._chapters, self._sandbox, self._annotator, parent=self)
+        self._wire_up()
+
+        self._shell.set_current_chapter(chapter_index)
+        self._player.start(chapter_index, fast_forward=fast_forward)
+
+    def _wire_up(self):
+        """Connect the shell and the player to each other, through this session.
+
+        They never speak directly: the shell reports what the user pressed, the player reports what
+        the tour did, and everything either of them means for the other is decided here.
+        """
         self._player.finished.connect(self._on_player_finished)
         self._player.step_failed.connect(self._on_step_failed)
         self._player.step_changed.connect(self._on_step_changed)
@@ -164,11 +183,8 @@ class TutorialSession(QObject):
         self._shell.chapter_selected.connect(self._on_chapter_selected)
         self._shell.close_requested.connect(self.close)
 
-        # the user closing the tutorial window is the same as ending the tour
+        # the user closing or destroying the tutorial window is the same as ending the tour
         self._shell.destroyed.connect(self._on_window_destroyed)
-
-        self._shell.set_current_chapter(chapter_index)
-        self._player.start(chapter_index, fast_forward=fast_forward)
 
     def _tear_down_sandbox(self):
         if self._player is not None:
@@ -238,11 +254,7 @@ class TutorialSession(QObject):
     def _on_player_finished(self):
         if self._annotator is not None:
             self._annotator.set_target(None)
-            self._annotator.show_step(
-                "That is the end of the tutorial. Close this window to return to your own session — nothing done here has touched it. "
-                "Use the tabs above to revisit a chapter.",
-                title="Finished",
-            )
+            self._annotator.show_step(FINISHED_TEXT, title="Finished")
             self._annotator.place_beside(None)
         if self._shell is not None:
             self._shell.show_finished()
