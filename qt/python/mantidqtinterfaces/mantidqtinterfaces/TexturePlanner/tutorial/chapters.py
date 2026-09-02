@@ -92,6 +92,14 @@ def _permute_directions(sandbox):
     click(view.updateDirs)
 
 
+def _show_pinned_directions(sandbox):
+    """
+    Update the sample shape and direction to be askew in the lab-frame
+    """
+    set_spin_box(sandbox.view.spnInitX, 30.0)
+    set_check_state(sandbox.view.chkTransformDirs, True)
+
+
 # ------------------------------------------------------------------------------------------------
 # chapter 1 - sample setup
 # ------------------------------------------------------------------------------------------------
@@ -104,19 +112,25 @@ SAMPLE_SETUP = TutorialChapter(
         TutorialStep(
             title="Welcome to the Texture Planner",
             text=(
-                "This is a working copy of the interface, loaded with a demo sample. Everything the "
-                "tutorial does happens here — your own session is untouched.<br><br>"
+                "This is a working copy of the interface, which we will step through as a demo. "
+                "Everything the tutorial does happens in this self-contained window, "
+                "the session which opened this tutorial is untouched.<br><br>"
                 "Each step explains a control first. Press <b>Show me</b> to watch the tutorial use "
-                "it, then <b>Next</b> to move on — nothing happens on its own. <b>Back</b> re-reads a "
-                "step, and the tabs above jump to a chapter."
+                "it, then <b>Next</b> to move on. <b>Back</b> re-reads a "
+                "step, and the tabs at the top of the window allow you to jump to a chapter.<br><br>"
+                "As the whole window is live, you can interact with the widgets being shown "
+                "(and are encouraged to do so) or indeed you can interact with any "
+                "of the interface just note that the more you change the less clear the rest of the tutorial may be!"
             ),
         ),
         TutorialStep(
             title="Two setup tabs",
             text=(
-                "Planning an experiment has two halves. <b>Sample Setup</b> describes what you are "
+                "The setup controls are split into two halves. <b>Sample Setup</b> describes what you are "
                 "measuring; <b>Experimental Setup</b> describes the instrument and how you will move "
-                "the sample. We start with the sample."
+                "the sample. We start with the sample. <br><br>"
+                "(<b>Show me</b> will simply select the <b>Sample Setup</b> tab incase you have changed to "
+                "<b>Experimental Setup</b>)"
             ),
             target=lambda s: s.view.tabSetup,
             action=lambda s: select_tab(s.view.tabSetup, "Sample Setup"),
@@ -124,8 +138,8 @@ SAMPLE_SETUP = TutorialChapter(
         TutorialStep(
             title="Load a sample shape",
             text=(
-                "The sample's shape comes from a file: an <b>STL mesh</b> exported from CAD, or a "
-                "<b>CSG description</b> in Mantid's XML shape format. The tutorial is loading a "
+                "The sample's shape comes from a file: an <b>STL mesh</b> exported from CAD/photo-scanning"
+                ", or a <b>CSG description</b> in Mantid's XML shape format. The tutorial is loading a "
                 "30 × 10 × 20 mm cuboid defined in XML — a deliberately lopsided block, so every "
                 "rotation of it looks different in the lab view."
             ),
@@ -151,7 +165,8 @@ SAMPLE_SETUP = TutorialChapter(
             text=(
                 "Absorption depends on what the sample is made of. <b>Set Material</b> opens Mantid's "
                 "standard <i>SetSampleMaterial</i> dialog, where you give a chemical formula and a "
-                "density. The tutorial is setting copper for you rather than opening the dialog."
+                "density. The tutorial is setting an example copper material for you rather than "
+                "interacting with the dialog."
             ),
             target=lambda s: s.view.btnSetMaterial,
             action=_apply_material,
@@ -168,20 +183,23 @@ SAMPLE_SETUP = TutorialChapter(
         TutorialStep(
             title="How the sample sits in its own frame",
             text=(
-                "A shape file rarely arrives in the orientation you mounted it in. These angles rotate "
-                "the sample once, before any goniometer motion — they describe how the sample sits in "
-                "its holder."
+                "A shape file is not necessarily defined in the same orientation that it is mounted in the beam. "
+                "These angles rotate the sample once, before any goniometer motion,"
+                "they describe how the sample sits in the beam before positioning."
             ),
             target=lambda s: s.view.initOrientation,
-            action=lambda s: set_spin_box(s.view.spnInitX, 30.0),
+            action=lambda s: set_spin_box(s.view.spnInitX, 90.0),
             settle_ms=500,
         ),
         TutorialStep(
-            title="And where it sits in the beam",
+            title="Where the sample sits in the beam",
             text=(
                 "The position offsets move the sample relative to the instrument's origin. Together "
                 "with the gauge volume set up in the next chapter, this is what decides which part of "
-                "the sample is actually being measured."
+                "the sample is actually being measured.<br><br>"
+                "Note that without a gauge volume the <i>whole</i> sample is still assumed to be illuminated"
+                "by the beam, hence the location of the scattering vector and sample directions remaining at "
+                "the sample centre."
             ),
             target=lambda s: s.view.initPosition,
             action=lambda s: set_spin_box(s.view.spnInitPZ, 0.005),
@@ -221,16 +239,15 @@ SAMPLE_SETUP = TutorialChapter(
         TutorialStep(
             title="One rotation aligns both",
             text=(
-                "Tick it and the <b>initial orientation</b> from earlier is applied to the sample "
-                "directions as well as to the shape. So you describe both in the frame they are easy "
-                "to describe in, and the single rotation that puts the shape in the beam carries the "
-                "directions with it.<br><br>"
+                "Tick it and a <b>initial orientation</b> (now set to 30 degrees) is applied to the sample "
+                "directions as well as to the shape. <br><br>"
+                "Try toggling the box yourself to see the lab-frame vs sample-frame definition.<br><br>"
                 "Watch the pole figure: the measurements have not changed, but the frame they are "
-                "quoted in has rotated with the sample."
+                "quoted in rotates with the sample."
             ),
             target=lambda s: s.view.chkTransformDirs,
             avoid=lambda s: (s.view.groupBox_textureVectors, s.view.grpPoleFigure),
-            action=lambda s: set_check_state(s.view.chkTransformDirs, True),
+            action=_show_pinned_directions,
             settle_ms=800,
         ),
         TutorialStep(
@@ -238,7 +255,8 @@ SAMPLE_SETUP = TutorialChapter(
             text=(
                 "<b>View in Lab Frame</b> shows what those directions have become in instrument "
                 "coordinates. The fields go read-only, because these values are derived — the sample "
-                "frame is still where you edit them."
+                "frame is still where you edit them.<br><br>"
+                "Again, try toggling this yourself"
             ),
             target=lambda s: s.view.chkLabDirs,
             # the change this makes shows up in the vector fields, not at the check box
@@ -277,7 +295,7 @@ SAMPLE_SETUP = TutorialChapter(
 # The planner opens on ENGINX, so the tour moves to another instrument: watching the detector
 # geometry and the pole figure change is what shows the control doing something.
 DEMO_INSTRUMENT = "IMAT"
-DEMO_GROUP = "Module1"
+DEMO_GROUP = "Module4"
 DEMO_GAUGE_VOLUME = "4mmCube"
 
 # The angle each added orientation is recorded at. Every one is different, so stepping through the
@@ -343,7 +361,7 @@ EXPERIMENTAL_SETUP = TutorialChapter(
             settle_ms=400,
         ),
         TutorialStep(
-            title="…and a detector grouping",
+            title="Pick a detector grouping",
             text=(
                 "Texture measurements group detectors into banks that each look at the sample from a "
                 "different direction — every group becomes one point per orientation on the pole figure. "
@@ -451,7 +469,7 @@ EXPERIMENTAL_SETUP = TutorialChapter(
             ),
             target=lambda s: s.view.spnIndex,
             action=_step_through_orientations,
-            settle_ms=700,
+            settle_ms=1000,
         ),
     ],
 )
@@ -491,8 +509,10 @@ RESULTS = TutorialChapter(
             title="The pole figure",
             text=(
                 "Every detector group, for every orientation you added, projected into the sample's own "
-                "frame. Gaps here are directions your planned measurement never samples — which is the "
-                "whole reason for planning before beam time."
+                "frame. The gaps here show you directions around your sample the proposed measurement "
+                "don't cover (remembering that the individual points just represent the average position of "
+                "all the detectors in the group and the actual depends on the entire group rather than "
+                "just this centre)"
             ),
             target=lambda s: s.view.grpPoleFigure,
         ),
@@ -515,7 +535,7 @@ RESULTS = TutorialChapter(
                 "• <b>Hollow</b> points — every other included orientation.<br>"
                 "• <b>Faint grey</b> points — the current orientation when it is <i>not</i> included.<br>"
                 "• Orientations that are neither current nor included are not drawn at all.<br><br>"
-                "So stepping the index selector walks the filled points around the figure."
+                "So stepping the index selector walks the filled points around the figure - try doing this now!"
             ),
             target=lambda s: s.view.grpPoleFigure,
         ),
