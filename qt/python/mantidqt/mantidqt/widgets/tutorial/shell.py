@@ -88,6 +88,9 @@ class TutorialShell(QWidget):
 
         self._position_label = QLabel()
         self._position_label.setObjectName("tutorial_position")
+        # what the label says when nothing is being waited for. Kept because a busy message takes
+        # the label over, and the step the tour is on has to come back when the wait ends
+        self._position_text = ""
 
         controls = QFrame()
         controls.setObjectName("tutorial_controls")
@@ -124,7 +127,11 @@ class TutorialShell(QWidget):
     def show_position(self, chapter_index, step_number, step_count):
         """Reflect where the tour has got to. ``step_number`` is 1-based."""
         self.set_current_chapter(chapter_index)
-        self._position_label.setText(f"Step {step_number} of {step_count}")
+        self._show_position_text(f"Step {step_number} of {step_count}")
+
+    def _show_position_text(self, text):
+        self._position_text = text
+        self._position_label.setText(text)
 
     def set_current_chapter(self, chapter_index):
         """Move the tab bar without it reporting the move back as a user request.
@@ -161,16 +168,19 @@ class TutorialShell(QWidget):
 
         Pressing Next in the middle of a file search or an absorption calculation would run the
         following step's action against an interface that had not finished reacting to this one.
+
+        A message borrows the step counter's label rather than adding a second one, so it has to be
+        given back: a wait that ended would otherwise leave "Working…" sitting where the position
+        belongs until the user moved on.
         """
         self.btn_back.setEnabled(not busy)
         self.btn_next.setEnabled(not busy)
         self.btn_apply.setEnabled(not busy and self.btn_apply.text() == "Show me")
         self._tabs.setEnabled(not busy)
-        if message:
-            self._position_label.setText(message)
+        self._position_label.setText(message if busy and message else self._position_text)
 
     def show_finished(self, message="Tutorial complete"):
-        self._position_label.setText(message)
+        self._show_position_text(message)
         self.btn_next.setEnabled(False)
         self.btn_apply.setVisible(False)
 
