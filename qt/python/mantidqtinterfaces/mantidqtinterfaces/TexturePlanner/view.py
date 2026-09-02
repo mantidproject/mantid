@@ -15,6 +15,7 @@ from qtpy.QtWidgets import (
     QToolBar,
     QGroupBox,
     QLineEdit,
+    QSizePolicy,
 )
 from qtpy import QtCore
 from qtpy.QtGui import QCloseEvent
@@ -169,16 +170,23 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def _setup_bottom_toolbar(self) -> None:
         # kept as an attribute rather than a local so the tutorial can point at the toolbar itself
         self.toolbar = QToolBar("Main Toolbar", self)
+        self.btn_settings = QPushButton()
+        self.btn_settings.setIcon(get_icon("mdi.settings", "black", 1.2))
+        self.btn_settings.setToolTip("Settings")
+        self.toolbar.addWidget(self.btn_settings)
+
+        # an expanding blank widget is how a QToolBar is split into a left and a right group; it
+        # has no actions of its own for aligning what comes after it
+        spacer = QWidget()
+        spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self.toolbar.addWidget(spacer)
+
         self.btn_tutorial = QPushButton()
         self.btn_tutorial.setIcon(get_icon("mdi.school", "black", 1.2))
         self.btn_tutorial.setToolTip("Guided tutorial")
         # the action, not the button, is what controls visibility here: a toolbar re-shows the
         # widget of any visible action, so hiding the button alone does not stick
         self._tutorial_action = self.toolbar.addWidget(self.btn_tutorial)
-        self.btn_settings = QPushButton()
-        self.btn_settings.setIcon(get_icon("mdi.settings", "black", 1.2))
-        self.btn_settings.setToolTip("Settings")
-        self.toolbar.addWidget(self.btn_settings)
         self.addToolBar(QtCore.Qt.BottomToolBarArea, self.toolbar)
 
     def set_on_settings_clicked(self, slot: Callable) -> None:
