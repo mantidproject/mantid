@@ -117,7 +117,10 @@ class _FunctionalTestBase(unittest.TestCase):
 
         self.model = TexturePlannerModel()
         self.view = TexturePlannerView()
-        self.presenter = TexturePlannerPresenter(self.model, self.view)
+        # offer_tutorial=False: the first-open offer is scheduled on the event loop, and the
+        # processEvents below would fire it - building a whole second planner in the middle of
+        # every test and writing the "already seen" flag into the developer's real QSettings
+        self.presenter = TexturePlannerPresenter(self.model, self.view, offer_tutorial=False)
         self.view.presenter = self.presenter
 
         self.view.show()
