@@ -955,6 +955,70 @@ class AutoPopulateTests(unittest.TestCase):
             shutil.rmtree(temp_dir, ignore_errors=True)
 
 
+class OutputWorkspaceNameTests(unittest.TestCase):
+    """The default OutputWorkspace name is built from the sample IPTS and run numbers, and the
+    default name of the saved files follows from it."""
+
+    def _auto_populated_name(self, **properties):
+        algo = AlgorithmManager.create("HFIRPowderReduction")
+        algo.initialize()
+        for name, value in properties.items():
+            algo.setProperty(name, value)
+        prop = algo.getProperty("OutputWorkspace")
+        settings = prop.settings if isinstance(prop.settings, list) else [prop.settings]
+        for setting in settings:
+            if hasattr(setting, "_applyChanges"):
+                setting._applyChanges(algo, "OutputWorkspace")
+        return algo.getPropertyValue("OutputWorkspace")
+
+    def test_single_run(self):
+        self.assertEqual(self._auto_populated_name(SampleIPTS=1234, SampleRunNumbers=[456]), "IPTS1234_Run456")
+
+    def test_continuous_range_of_runs(self):
+        self.assertEqual(self._auto_populated_name(SampleIPTS=1234, SampleRunNumbers=[5, 6, 7]), "IPTS1234_Run5-7")
+
+    def test_several_continuous_ranges_of_runs(self):
+        self.assertEqual(self._auto_populated_name(SampleIPTS=1234, SampleRunNumbers=[5, 6, 7, 9, 10]), "IPTS1234_Run5-7_9-10")
+
+    def test_discontinuous_runs(self):
+        self.assertEqual(self._auto_populated_name(SampleIPTS=1234, SampleRunNumbers=[5, 7, 9]), "IPTS1234_Run5_7_9")
+
+    def test_runs_are_sorted_and_deduplicated(self):
+        self.assertEqual(self._auto_populated_name(SampleIPTS=1234, SampleRunNumbers=[10, 6, 5, 6]), "IPTS1234_Run5-6_10")
+
+    def test_name_entered_by_the_user_is_not_overwritten(self):
+        name = self._auto_populated_name(OutputWorkspace="my_workspace", SampleIPTS=1234, SampleRunNumbers=[456])
+        self.assertEqual(name, "my_workspace")
+
+    def test_not_populated_without_ipts_and_run_numbers(self):
+        algo = _create_algo()
+        self.assertEqual(algo._defaultOutputWorkspaceName(), "")
+
+    def test_not_populated_without_ipts(self):
+        algo = _create_algo(SampleRunNumbers=[456])
+        self.assertEqual(algo._defaultOutputWorkspaceName(), "")
+
+    def test_ipts_and_runs_taken_from_filenames(self):
+        # files in the standard HFIR layout carry the IPTS and run numbers in their paths
+        algo = _create_algo()
+        files = [f"/HFIR/HB2C/IPTS-1234/nexus/HB2C_{run}.nxs.h5" for run in (5, 6, 8)]
+        self.assertEqual(algo._iptsAndRunNumbersFromFilenames(files), (1234, [5, 6, 8]))
+
+    def test_midas_filenames(self):
+        algo = _create_algo()
+        self.assertEqual(algo._iptsAndRunNumbersFromFilenames(["/HFIR/HB2A/IPTS-99/nexus/HB2A_7.nxs.h5"]), (99, [7]))
+
+    def test_filenames_outside_the_standard_layout_are_ignored(self):
+        algo = _create_algo()
+        self.assertEqual(algo._iptsAndRunNumbersFromFilenames(["/home/user/my_data.nxs.h5"]), (None, []))
+        self.assertEqual(algo._iptsAndRunNumbersFromFilenames(["/HFIR/HB2C/IPTS-1234/shared/reduced.nxs.h5"]), (None, []))
+
+    def test_filenames_from_different_ipts_are_ignored(self):
+        algo = _create_algo()
+        files = ["/HFIR/HB2C/IPTS-1234/nexus/HB2C_5.nxs.h5", "/HFIR/HB2C/IPTS-5678/nexus/HB2C_6.nxs.h5"]
+        self.assertEqual(algo._iptsAndRunNumbersFromFilenames(files), (None, []))
+
+
 class MetadataConsistencyTests(unittest.TestCase):
     def test_metadata_consistency_single_file(self):
         """Test that single file does not trigger metadata check"""
@@ -1728,6 +1792,31 @@ class ReductionExecutionTests(unittest.TestCase):
         # Load the output file and check it contains a workspace
         output_ws = Load(output_file_name)
         self.assertIsInstance(output_ws, MatrixWorkspace)
+
+    def test_save_to_directory(self):
+        # check that OutputDirectory accepts a directory, naming the files after the output workspace
+
+        data, cal, bkg = self._create_workspaces()
+
+        output_dir = os.path.join(self._test_dir, "reduction_output")
+        os.mkdir(output_dir)
+
+        HFIRPowderReduction(
+            SampleFilename=data,
+            XUnits="2Theta",
+            NormaliseBy="None",
+            Sum=False,
+            XMin=0,
+            XMax=70,
+            Instrument="WAND^2",
+            Wavelength=1.6513,
+            VanadiumDiameter=0.5,
+            OutputWorkspace="output_workspace",
+            OutputDirectory=output_dir,
+        )
+
+        self.assertTrue(os.path.isfile(os.path.join(output_dir, "output_workspace.dat")))
+        self.assertTrue(os.path.isfile(os.path.join(output_dir, "output_workspace.nxs")))
 
 
 class VanadiumAbsorptionCorrectionTests(unittest.TestCase):

@@ -62,6 +62,7 @@ from mantid.simpleapi import (
 import h5py
 import numpy as np
 import os
+import re
 
 logger = Logger(__name__)
 
@@ -243,13 +244,14 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
         self.declareProperty(
             WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
-            doc="Output Workspace",
+            doc="Output Workspace. Defaults to IPTS<ipts>_Run<runs> built from the sample IPTS and run numbers, "
+            "where <runs> collapses consecutive runs into ranges, e.g. IPTS1234_Run5-7_9.",
         )
         self.getProperty("OutputWorkspace").setDisableReplaceWSButton(True)
         self.declareProperty(
-            FileProperty(
-                name="OutputDirectory", defaultValue="~/HFIRPowderReductionOutput", action=FileAction.OptionalSave, extensions=[".dat"]
-            )
+            FileProperty(name="OutputDirectory", defaultValue="~/HFIRPowderReductionOutput", action=FileAction.OptionalDirectory),
+            doc="Directory the reduced data is written to. A full file path ending in .dat may also be entered, "
+            "in which case that name is used for the saved files instead of the output workspace name.",
         )
         self.declareProperty("Overwrite", True, "If True previous file will be overwritten")
 
@@ -645,6 +647,69 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             "VanadiumBackgroundIPTS", SetDefaultWhenProperty("SampleRunNumbers", checkRunNumbersforVanadiumBackgroundIPTS)
         )
 
+        def checkSampleforOutputWorkspace(algo, currentProp, watchedProp):
+            outputName = self._defaultOutputWorkspaceName()
+            if not outputName:
+                return False
+            logger.information(f"Auto-populating OutputWorkspace: {outputName}")
+            self.setPropertyValue("OutputWorkspace", outputName)
+            return True
+
+        self.setPropertySettings("OutputWorkspace", SetDefaultWhenProperty("SampleIPTS", checkSampleforOutputWorkspace))
+        self.setPropertySettings("OutputWorkspace", SetDefaultWhenProperty("SampleRunNumbers", checkSampleforOutputWorkspace))
+        self.setPropertySettings("OutputWorkspace", SetDefaultWhenProperty("SampleFilename", checkSampleforOutputWorkspace))
+
+    def _defaultOutputWorkspaceName(self):
+        """Build the default output workspace name from the sample IPTS and run numbers.
+
+        The name is IPTS<ipts>_Run<runs>, where <runs> is the run numbers collapsed by
+        `_collapseRunNumbers`, so that runs 5, 6, 7 and 9 of IPTS-1234 give IPTS1234_Run5-7_9.
+        The IPTS and run numbers are taken from SampleIPTS and SampleRunNumbers, or, when those
+        are unset, from the paths in SampleFilename.  Returns an empty string when neither
+        provides them.
+        """
+        ipts = self.getProperty("SampleIPTS").value
+        runNumbers = self.getProperty("SampleRunNumbers").value
+        if ipts == Property.EMPTY_INT or len(runNumbers) == 0:
+            ipts, runNumbers = self._iptsAndRunNumbersFromFilenames(self.getProperty("SampleFilename").value)
+        if ipts is None or len(runNumbers) == 0:
+            return ""
+        return f"IPTS{ipts}_Run{self._collapseRunNumbers(runNumbers)}"
+
+    def _iptsAndRunNumbersFromFilenames(self, filenames):
+        """Extract the IPTS number and run numbers from sample file paths.
+
+        Only the standard HFIR layout, /HFIR/HB2?/IPTS-<ipts>/nexus/HB2?_<run>.nxs.h5, is
+        recognised.  Returns (None, []) unless every path matches that layout and they all
+        share the same IPTS number.
+        """
+        iptsNumbers = set()
+        runNumbers = []
+        for filename in filenames or []:
+            match = re.search(r"(?:^|[/\\])IPTS-(\d+)[/\\]nexus[/\\]HB2[AC]_(\d+)\.nxs\.h5$", str(filename))
+            if match is None:
+                return None, []
+            iptsNumbers.add(int(match.group(1)))
+            runNumbers.append(int(match.group(2)))
+        if len(iptsNumbers) != 1:
+            return None, []
+        return iptsNumbers.pop(), runNumbers
+
+    def _collapseRunNumbers(self, runNumbers):
+        """Collapse run numbers into the compact form used in the default output name.
+
+        Runs are sorted and de-duplicated, each group of consecutive runs becomes
+        "<first>-<last>", isolated runs are left as they are, and the groups are joined with
+        "_", so 5, 6, 7, 9, 10 and 12 give "5-7_9-10_12".
+        """
+        groups = []
+        for run in sorted({int(run) for run in runNumbers}):
+            if groups and run == groups[-1][-1] + 1:
+                groups[-1].append(run)
+            else:
+                groups.append([run])
+        return "_".join(str(group[0]) if len(group) == 1 else f"{group[0]}-{group[-1]}" for group in groups)
+
     def _checkMetadataConsistency(self, files, field_name):
         """Check that metadata is consistent across multiple run files."""
         if len(files) <= 1:
@@ -799,11 +864,28 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             self._checkMetadataConsistency(files, "Sample")
 
         if not self.getProperty("Overwrite").value and not self.getProperty("OutputDirectory").isDefault:
-            output_dir = self.getProperty("OutputDirectory").value
-            if os.path.exists(output_dir):
-                issues["OutputDirectory"] = f"Output directory {output_dir} already exists and overwrite is set to False"
+            dat_file, nexus_file = self._resolveOutputFiles(self.getPropertyValue("OutputWorkspace"))
+            for output_file in (dat_file, nexus_file):
+                if os.path.exists(output_file):
+                    issues["OutputDirectory"] = (
+                        f"OutputDirectory destination resolves to existing file {output_file} and overwrite is set to False"
+                    )
 
         return issues
+
+    def _resolveOutputFiles(self, workspace_name):
+        """
+        Turn the OutputDirectory property into the full paths of the .dat and .nxs files that will be saved.
+        The property normally holds a directory, in which case the output workspace name is used as the
+        file name, but a full file path ending in .dat is also accepted and used as-is for the ASCII output.
+        The Nexus output uses the same base name with a .nxs extension.
+        """
+        output_path = self.getProperty("OutputDirectory").value
+        if output_path.endswith(".dat"):
+            base_path = output_path[:-4]
+            return output_path, base_path + ".nxs"
+        base_path = os.path.join(output_path, workspace_name)
+        return base_path + ".dat", base_path + ".nxs"
 
     def _warn_unset_optional_fields(self):
         """Log warnings for optional fields that are not set (excludes fields already checked by validateInputs)."""
@@ -948,16 +1030,9 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         if not self.getProperty("OutputDirectory").isDefault:
             # Step 6: Save
             logger.information("Step 6: Saving output to file")
-            output_dir = self.getProperty("OutputDirectory").value
-            # If directory ends with .dat, user has set the directoy with the browse button and no extra checking is required
-            if not output_dir.endswith(".dat"):
-                if not output_dir.endswith("/"):
-                    output_dir += "/"
-                if not output_dir.endswith(outWS.name()):
-                    output_dir += outWS.name()
-                output_dir += ".dat"
-            SaveAscii(InputWorkspace=outWS, Filename=output_dir, EnableLogging=False)
-            SaveNexus(InputWorkspace=outWS, Filename=output_dir.replace(".dat", ".nxs"))
+            output_dat_file, output_nexus_file = self._resolveOutputFiles(outWS.name())
+            SaveAscii(InputWorkspace=outWS, Filename=output_dat_file, EnableLogging=False)
+            SaveNexus(InputWorkspace=outWS, Filename=output_nexus_file)
 
         # Step 7: Cleanup
         logger.information("Step 7: Cleaning up temporary workspaces")
