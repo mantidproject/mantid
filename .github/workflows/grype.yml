@@ -68,10 +68,10 @@ jobs:
           platforms = ["${{ matrix.platform }}"]
 
           [dependencies]
-          # Take the latest nightly workbench/Mantid stack
-          # Keep mslice on the stable mantid channel so Pixi does not prefer a nightly
+          # Take the latest nightly workbench/Mantid stack and allow any
+          # compatible mslice release the solver can install alongside it.
           mantidworkbench = { version = "*", channel = "mantid/label/nightly" }
-          mslice = { version = "*", channel = "mantid" }
+          mslice = ">=2.15"
           pystog = ">=0.6.3"
           EOF
 
