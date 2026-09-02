@@ -59,26 +59,41 @@ class TutorialShell(QWidget):
         # the whole point of framing a real interface is lost to scrollbars and clipping
         interface_size = interface.size()
 
-        self._tabs = QTabBar()
-        self._tabs.setObjectName("tutorial_chapter_tabs")
-        self._tabs.setExpanding(False)
-        self._tabs.setDrawBase(True)
+        self._tabs = self._build_tabs()
+        controls = self._build_controls()
+        self._adopt(interface)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        layout.addWidget(self._tabs)
+        layout.addWidget(interface, 1)
+        layout.addWidget(controls)
+
+        self.resize(
+            max(interface_size.width(), MIN_WIDTH),
+            max(interface_size.height() + self._tabs.sizeHint().height() + controls.sizeHint().height(), MIN_HEIGHT),
+        )
+
+    def _build_tabs(self):
+        """The chapter tabs along the top."""
+        tabs = QTabBar()
+        tabs.setObjectName("tutorial_chapter_tabs")
+        tabs.setExpanding(False)
+        tabs.setDrawBase(True)
         for chapter in self._chapters:
-            index = self._tabs.addTab(chapter.name)
+            index = tabs.addTab(chapter.name)
             hint = "Click again to start this chapter over."
-            self._tabs.setTabToolTip(index, f"{chapter.description}\n{hint}" if chapter.description else hint)
-        self._tabs.currentChanged.connect(self._on_tab_changed)
+            tabs.setTabToolTip(index, f"{chapter.description}\n{hint}" if chapter.description else hint)
+        tabs.currentChanged.connect(self._on_tab_changed)
         # clicking the chapter already showing restarts it. ``currentChanged`` does not fire for
         # the current tab, and a chapter jump is a rebuild - which makes "start this chapter again"
         # the one form of undo the tour can offer that is always exactly right
-        self._tabs.tabBarClicked.connect(self._on_tab_clicked)
+        tabs.tabBarClicked.connect(self._on_tab_clicked)
+        return tabs
 
-        # the interface becomes an ordinary child widget. A QMainWindow is happy to be one; it
-        # keeps its own toolbars and status bar, it just stops being a top-level window
-        interface.setParent(self)
-        interface.setWindowFlags(Qt.Widget)
-        interface.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
+    def _build_controls(self):
+        """The navigation row along the bottom, and the step counter it shares."""
         self.btn_close = QPushButton("End tutorial")
         self.btn_back = QPushButton("Back")
         self.btn_apply = QPushButton("Show me")
@@ -105,22 +120,21 @@ class TutorialShell(QWidget):
         controls_layout.addWidget(self.btn_apply)
         controls_layout.addWidget(self.btn_next)
 
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        layout.addWidget(self._tabs)
-        layout.addWidget(interface, 1)
-        layout.addWidget(controls)
-
         self.btn_back.clicked.connect(self.back_requested)
         self.btn_apply.clicked.connect(self.apply_requested)
         self.btn_next.clicked.connect(self.next_requested)
         self.btn_close.clicked.connect(self.close_requested)
+        return controls
 
-        self.resize(
-            max(interface_size.width(), MIN_WIDTH),
-            max(interface_size.height() + self._tabs.sizeHint().height() + controls.sizeHint().height(), MIN_HEIGHT),
-        )
+    def _adopt(self, interface):
+        """Take the interface in as an ordinary child widget.
+
+        A QMainWindow is happy to be one; it keeps its own toolbars and status bar, it just stops
+        being a top-level window.
+        """
+        interface.setParent(self)
+        interface.setWindowFlags(Qt.Widget)
+        interface.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
     # ------------------------------------------------------------------ display
 
