@@ -133,7 +133,7 @@ SAMPLE_SETUP = TutorialChapter(
                 "The setup controls are split into two halves. <b>Sample Setup</b> describes what you are "
                 "measuring; <b>Experimental Setup</b> describes the instrument and how you will move "
                 "the sample. We start with the sample. <br><br>"
-                "(<b>Show me</b> will simply select the <b>Sample Setup</b> tab incase you have changed to "
+                "(<b>Show me</b> will simply select the <b>Sample Setup</b> tab in case you have changed to "
                 "<b>Experimental Setup</b>)"
             ),
             target=lambda s: s.view.tabSetup,
@@ -188,7 +188,7 @@ SAMPLE_SETUP = TutorialChapter(
             title="How the sample sits in its own frame",
             text=(
                 "A shape file is not necessarily defined in the same orientation that it is mounted in the beam. "
-                "These angles rotate the sample once, before any goniometer motion,"
+                "These angles rotate the sample once, before any goniometer motion; "
                 "they describe how the sample sits in the beam before positioning."
             ),
             target=lambda s: s.view.initOrientation,
@@ -201,7 +201,7 @@ SAMPLE_SETUP = TutorialChapter(
                 "The position offsets move the sample relative to the instrument's origin. Together "
                 "with the gauge volume set up in the next chapter, this is what decides which part of "
                 "the sample is actually being measured.<br><br>"
-                "Note that without a gauge volume the <i>whole</i> sample is still assumed to be illuminated"
+                "Note that without a gauge volume the <i>whole</i> sample is still assumed to be illuminated "
                 "by the beam, hence the location of the scattering vector and sample directions remaining at "
                 "the sample centre."
             ),
@@ -243,7 +243,7 @@ SAMPLE_SETUP = TutorialChapter(
         TutorialStep(
             title="One rotation aligns both",
             text=(
-                "Tick it and a <b>initial orientation</b> (now set to 30 degrees) is applied to the sample "
+                "Tick it and an <b>initial orientation</b> (now set to 30 degrees) is applied to the sample "
                 "directions as well as to the shape. <br><br>"
                 "Try toggling the box yourself to see the lab-frame vs sample-frame definition.<br><br>"
                 "Watch the pole figure: the measurements have not changed, but the frame they are "

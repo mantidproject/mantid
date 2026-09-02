@@ -1115,6 +1115,19 @@ class TestTexturePlannerPresenter_Tutorial(unittest.TestCase):
 
         mock_run_tutorial.return_value.close.assert_called_once_with()
 
+    @patch(file_path + ".should_show_on_startup", return_value=True)
+    def test_closing_the_planner_before_the_offer_arrives_cancels_it(
+        self, mock_should_show, mock_settings_view, mock_settings_presenter, mock_run_tutorial
+    ):
+        # the first-open offer is deferred to the event loop, so it can arrive after the planner has
+        # been closed - at which point there is no window left to run a tour over
+        presenter = TexturePlannerPresenter(_make_model(), _make_view())
+        presenter.on_close()
+
+        presenter.open_tutorial(mark_as_seen=True)  # what the deferred timer would do
+
+        mock_run_tutorial.assert_not_called()
+
     @patch(file_path + ".should_show_on_startup", return_value=False)
     def test_it_is_not_offered_once_it_has_been_seen(
         self, mock_should_show, mock_settings_view, mock_settings_presenter, mock_run_tutorial
