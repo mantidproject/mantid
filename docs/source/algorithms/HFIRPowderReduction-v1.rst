@@ -165,6 +165,18 @@ molecular mass of ``SampleChemicalFormula``, :math:`\rho_S` is ``SampleCrystalDe
 radii of the vanadium and sample cylinders as above. This requires
 ``VanadiumDiameter``, ``VanadiumHeight`` and ``SampleHeight`` to all be greater than zero.
 
+
+Saving Results
+##############
+
+The default ``OutputWorkspace`` name is built from the sample IPTS and run numbers as ``IPTS<ipts>_Run<runs>``,
+where consecutive runs are collapsed into ranges. For IPTS-1234 this gives ``IPTS1234_Run5`` for the single run 5,
+``IPTS1234_Run5-7`` for the runs 5 to 7, ``IPTS1234_Run5-7_9-10`` for the runs 5 to 7 and 9 to 10, and
+``IPTS1234_Run5_7_9`` for the runs 5, 7 and 9. The IPTS and run numbers are taken from ``SampleIPTS`` and
+``SampleRunNumbers``, or from the paths in ``SampleFilename`` when those files are in the standard HFIR layout.
+When ``OutputDirectory`` is a directory, the saved files are named after the output workspace, so the reduction of
+runs 5 to 7 of IPTS-1234 is saved as ``IPTS1234_Run5-7.dat`` and ``IPTS1234_Run5-7.nxs``.
+
 .. categories::
 
 .. sourcelink::
