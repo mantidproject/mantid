@@ -28,6 +28,13 @@ CORNER_RADIUS = 6
 # around the widget rather than clipping its edge
 PADDING = 4
 
+# how opaque the dimming is, out of 255. Dark enough to push the rest of the interface back
+# without hiding it - the user should still see the context the highlighted widget sits in.
+SCRIM_ALPHA = 130
+
+# how opaque the border around the spotlight is
+HIGHLIGHT_ALPHA = 230
+
 # how often the target's position is re-checked. A target moves for reasons no single event filter
 # catches - an ancestor's layout settling, a scroll area scrolling, a tab animating in - so the
 # rectangle is re-measured rather than only recomputed when something says it changed. It is a
@@ -142,31 +149,35 @@ class TutorialOverlay(QWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing, True)
 
+        spotlight = self._target_rect
+        self._paint_scrim(painter, spotlight)
+        if not spotlight.isEmpty():
+            self._paint_highlight(painter, spotlight)
+
+    def _paint_scrim(self, painter, spotlight):
+        """Dim everything except the spotlight."""
         scrim = QPainterPath()
         scrim.addRect(QRectF(self.rect()))
-
-        spotlight = self._target_rect
         if not spotlight.isEmpty():
             cut_out = QPainterPath()
             cut_out.addRoundedRect(QRectF(spotlight), CORNER_RADIUS, CORNER_RADIUS)
             # subtracting rather than painting the scrim in four strips around the target: this
             # gives one path, so the rounded corners stay clean and there are no seams
             scrim = scrim.subtracted(cut_out)
-
         painter.fillPath(scrim, self._scrim_colour())
 
-        if not spotlight.isEmpty():
-            painter.setPen(QPen(self._highlight_colour(), 2))
-            painter.setBrush(Qt.NoBrush)
-            painter.drawRoundedRect(QRectF(spotlight), CORNER_RADIUS, CORNER_RADIUS)
+    def _paint_highlight(self, painter, spotlight):
+        """Draw the border that picks the spotlight out of the hole in the scrim."""
+        painter.setPen(QPen(self._highlight_colour(), 2))
+        painter.setBrush(Qt.NoBrush)
+        painter.drawRoundedRect(QRectF(spotlight), CORNER_RADIUS, CORNER_RADIUS)
 
-    def _scrim_colour(self):
-        # dark enough to push the rest of the interface back without hiding it - the user should
-        # still see the context the highlighted widget sits in
-        return QColor(0, 0, 0, 130)
+    @staticmethod
+    def _scrim_colour():
+        return QColor(0, 0, 0, SCRIM_ALPHA)
 
     def _highlight_colour(self):
         # the palette's highlight, so the spotlight matches whatever theme the user is running
         colour = QColor(self.palette().highlight().color())
-        colour.setAlpha(230)
+        colour.setAlpha(HIGHLIGHT_ALPHA)
         return colour
