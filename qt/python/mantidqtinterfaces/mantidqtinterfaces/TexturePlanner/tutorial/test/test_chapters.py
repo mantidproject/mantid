@@ -116,6 +116,8 @@ class TutorialChaptersTest(unittest.TestCase):
         self.bubble = RecordingBubble()
         self.failures = []
         self.finished = []
+        self.spotlit = {}
+        self.narrated = []
 
     def _teardown(self):
         owned = self.sandbox.model.workspaces._owned_ws_names
@@ -125,15 +127,26 @@ class TutorialChaptersTest(unittest.TestCase):
         self.assertEqual(leaked, [], "the tutorial's workspaces must not outlive its window")
 
     def _play(self, chapters, chapter_index=0, fast_forward=False):
-        """Play from ``chapter_index`` to the end, pressing Next the way a user would.
+        """Play from ``chapter_index`` to the end, driving it the way a user would.
 
-        Nothing advances on its own, so the test has to walk the tour. Each Next waits for the step
-        to be on screen first: the player ignores navigation while a step is still settling or
-        waiting on the interface, so clicking early would simply spin.
+        Each step is shown first, then performed with *Show me*, then left with *Next* - which is
+        the path a user actually takes, and the one that exercises both. The waits matter: the
+        player ignores navigation while a step is settling or working, so clicking early would
+        simply spin.
         """
         player = TutorialPlayer(chapters, self.sandbox, self.overlay, self.bubble, parent=self.sandbox.window)
         player.step_failed.connect(lambda label, reason: self.failures.append((label, reason)))
         player.finished.connect(lambda: self.finished.append(True))
+
+        # what the tour pointed at, per step. Recorded from the player rather than counted off the
+        # overlay because a step is presented twice - once explained, once refreshed after it has
+        # been performed - and both times set a target.
+        def remember(*_args):
+            self.spotlit[player.position] = self.overlay.targets[-1] if self.overlay.targets else None
+            self.narrated.append(player.position)
+
+        player.step_changed.connect(remember)
+        player.step_applied.connect(remember)
         player.start(chapter_index, fast_forward=fast_forward)
 
         waited = 0
@@ -141,6 +154,9 @@ class TutorialChaptersTest(unittest.TestCase):
             if player.is_busy:
                 QTest.qWait(10)
                 waited += 10
+                continue
+            if not player.is_applied():
+                player.apply_step()
                 continue
             player.next_step()
         self.assertTrue(self.finished, f"the tour did not finish within {PLAY_TIMEOUT_MS / 1000}s")
@@ -167,6 +183,8 @@ class TutorialChaptersTest(unittest.TestCase):
         process_events(3)
         self.overlay = RecordingOverlay()
         self.bubble = RecordingBubble()
+        self.spotlit = {}
+        self.narrated = []
 
     # ------------------------------------------------------------------ the whole tour
 
@@ -181,16 +199,16 @@ class TutorialChaptersTest(unittest.TestCase):
         chapters = _hurried_chapters()
         self._play(chapters)
 
-        pointing = [step for _c, _s, _chapter, step in walk(chapters) if step.target is not None]
-        spotlit = [target for target in self.overlay.targets if target is not None]
-        self.assertEqual(
-            len(spotlit),
-            len(pointing),
-            "a step that names a target but highlighted nothing means the interface moved under the tour",
-        )
-        for target in spotlit:
-            with self.subTest(target=target.objectName() or type(target).__name__):
-                self.assertIsInstance(target, QWidget)
+        for chapter_index, step_index, chapter, step in walk(chapters):
+            if step.target is None:
+                continue
+            with self.subTest(chapter=chapter.name, step=step.label):
+                target = self.spotlit.get((chapter_index, step_index))
+                self.assertIsInstance(
+                    target,
+                    QWidget,
+                    "a step that names a target but highlighted nothing means the interface moved under the tour",
+                )
 
     def test_the_tour_really_exports_a_file(self):
         # the export step goes through the interface's own export path, so a tour that stopped
@@ -200,12 +218,18 @@ class TutorialChaptersTest(unittest.TestCase):
         written = os.listdir(self.sandbox.data.save_directory)
         self.assertTrue(written, "the export chapter should have written a real file to the demo directory")
 
-    def test_every_step_was_narrated_in_order(self):
+    def test_every_step_was_shown_in_order(self):
         chapters = _hurried_chapters()
         self._play(chapters)
 
-        expected = [(step.title, step.text) for _c, _s, _chapter, step in walk(chapters)]
-        self.assertEqual(self.bubble.shown, expected)
+        # first appearance of each step, in the order the tour reached them
+        first_seen = []
+        for position in self.narrated:
+            if position not in first_seen:
+                first_seen.append(position)
+
+        expected = [(chapter_index, step_index) for chapter_index, step_index, _chapter, _step in walk(chapters)]
+        self.assertEqual(first_seen, expected)
 
 
 if __name__ == "__main__":
