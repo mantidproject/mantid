@@ -227,6 +227,16 @@ class TutorialShellTest(unittest.TestCase):
         self.assertTrue(self.shell.btn_next.isEnabled())
         self.assertTrue(self._tab_bar().isEnabled())
 
+    def test_the_step_counter_comes_back_once_the_tour_stops_being_busy(self):
+        # a busy message borrows the counter's label; left there, a finished absorption calculation
+        # reads as the tour still working on it
+        self.shell.show_position(0, 2, 5)
+        self.shell.set_busy(True, "Calculating transmission…")
+
+        self.shell.set_busy(False)
+
+        self.assertEqual(self.shell.findChild(QLabel, "tutorial_position").text(), "Step 2 of 5")
+
     def test_finishing_disables_next_but_leaves_the_tabs(self):
         self.shell.show_finished()
         self.assertFalse(self.shell.btn_next.isEnabled())
