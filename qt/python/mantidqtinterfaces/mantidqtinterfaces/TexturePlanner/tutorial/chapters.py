@@ -21,6 +21,8 @@ Two conventions worth knowing before adding a step:
   the tour dead.
 """
 
+from qtpy.QtWidgets import QGroupBox
+
 from mantid.simpleapi import SetSampleMaterial
 
 from mantidqt.widgets.tutorial.interaction import (
@@ -205,6 +207,50 @@ SAMPLE_SETUP = TutorialChapter(
                 "So which direction you put in the middle row decides which pole you are looking down."
             ),
             target=lambda s: s.view.groupBox_textureVectors,
+        ),
+        TutorialStep(
+            title="Pinning the directions to the shape",
+            text=(
+                "<b>Apply Orientation to Directions</b> is for the common case where the sample "
+                "directions and the shape file are both easy to write down in the <i>sample</i> frame "
+                "and awkward in the lab frame.<br><br>"
+                "Say you know the rolling direction runs along the length of the block. Both the shape "
+                "and the directions are obvious in the sample's own frame — but once the block is "
+                "mounted at some angle in the beam, neither is obvious in the lab frame."
+            ),
+            target=lambda s: s.view.chkTransformDirs,
+        ),
+        TutorialStep(
+            title="One rotation aligns both",
+            text=(
+                "Tick it and the <b>initial orientation</b> from earlier is applied to the sample "
+                "directions as well as to the shape. So you describe both in the frame they are easy "
+                "to describe in, and the single rotation that puts the shape in the beam carries the "
+                "directions with it.<br><br>"
+                "Watch the pole figure: the measurements have not changed, but the frame they are "
+                "quoted in has rotated with the sample."
+            ),
+            target=lambda s: s.view.chkTransformDirs,
+            action=lambda s: set_check_state(s.view.chkTransformDirs, True),
+            settle_ms=800,
+        ),
+        TutorialStep(
+            title="Seeing them in the lab frame",
+            text=(
+                "<b>View in Lab Frame</b> shows what those directions have become in instrument "
+                "coordinates. The fields go read-only, because these values are derived — the sample "
+                "frame is still where you edit them."
+            ),
+            target=lambda s: s.view.chkLabDirs,
+            action=lambda s: set_check_state(s.view.chkLabDirs, True),
+            settle_ms=600,
+        ),
+        TutorialStep(
+            title="Back to the sample frame",
+            text=("Untick it to edit the directions again. The tutorial is switching back so the next step can change them."),
+            target=lambda s: s.view.chkLabDirs,
+            action=lambda s: set_check_state(s.view.chkLabDirs, False),
+            settle_ms=600,
         ),
         TutorialStep(
             title="Permute them and the projection changes",
@@ -428,11 +474,46 @@ RESULTS = TutorialChapter(
             target=lambda s: s.view.grpSampleFigure,
         ),
         TutorialStep(
+            title="The goniometer axes and rings",
+            text=(
+                "Each goniometer is drawn as an <b>arrow</b> along its rotation axis and a <b>ring</b> "
+                "showing the circle it sweeps. The rings nest: an axis is drawn inside the ones it is "
+                "mounted on, so the stack reads outermost-first.<br><br>"
+                "The coloured part of a ring is the angle it has been rotated through; the grey "
+                "remainder is the travel left. The axis you changed most recently is drawn "
+                "<b>solid</b>, the others dashed."
+            ),
+            target=lambda s: s.view.grpSampleFigure,
+        ),
+        TutorialStep(
             title="The pole figure",
             text=(
                 "Every detector group, for every orientation you added, projected into the sample's own "
                 "frame. Gaps here are directions your planned measurement never samples — which is the "
                 "whole reason for planning before beam time."
+            ),
+            target=lambda s: s.view.grpPoleFigure,
+        ),
+        TutorialStep(
+            title="The goniometers appear here too",
+            text=(
+                "Each goniometer axis is projected onto the pole figure as well — as a <b>point</b>, or "
+                "as a <b>line</b> across the figure when the axis lies in its plane.<br><br>"
+                "The fill matches the lab view: the axis you last changed is drawn <b>filled</b> (or "
+                "solid, for a line), the rest hollow and dashed. It is the quickest way to see which "
+                "axis you are currently moving and where it points."
+            ),
+            target=lambda s: s.view.grpPoleFigure,
+        ),
+        TutorialStep(
+            title="Which orientation is which",
+            text=(
+                "The pole figure distinguishes the orientation you have selected from the rest:<br>"
+                "• <b>Filled</b> points — the current orientation, included in the plan.<br>"
+                "• <b>Hollow</b> points — every other included orientation.<br>"
+                "• <b>Faint grey</b> points — the current orientation when it is <i>not</i> included.<br>"
+                "• Orientations that are neither current nor included are not drawn at all.<br><br>"
+                "So stepping the index selector walks the filled points around the figure."
             ),
             target=lambda s: s.view.grpPoleFigure,
         ),
@@ -449,7 +530,11 @@ RESULTS = TutorialChapter(
             title="Now with absorption",
             text=(
                 "Dark points are directions where the beam has a long path through the sample, so they "
-                "will need longer counting times — or a different sample orientation."
+                "will need longer counting times — or a different sample orientation.<br><br>"
+                "With every point coloured by transmission there is no fill left to mark the current "
+                "orientation, so it is <b>ringed</b> with oversized open circles instead. Only included "
+                "orientations are shown at all. The ring can be turned off under "
+                "<i>Attenuation Settings</i> in the settings menu."
             ),
             target=lambda s: s.view.grpPoleFigure,
             action=lambda s: set_check_state(s.view.chkTransmission, True),
@@ -538,25 +623,149 @@ EXPORT = TutorialChapter(
             settle_ms=800,
         ),
         TutorialStep(
-            title="Everything else is in Settings",
-            text=(
-                "The cog holds the options the tour has skipped: how STL files are scaled and rotated on "
-                "load, which axes Euler angles are written about, the Monte Carlo statistics, and the "
-                "wavelength the attenuation is quoted at. They are remembered between sessions."
-            ),
-            target=lambda s: s.view.btn_settings,
-        ),
-        TutorialStep(
             title="That is the whole workflow",
             text=(
                 "Describe the sample, describe the instrument and how you will move it, read the pole "
                 "figure, export the plan.<br><br>"
-                "The full documentation is under <b>Help → Mantid Help</b>. Close this window whenever "
-                "you like — nothing here has touched your own session."
+                "One chapter left: the settings behind the cog."
             ),
         ),
     ],
 )
 
 
-CHAPTERS = (SAMPLE_SETUP, EXPERIMENTAL_SETUP, RESULTS, EXPORT)
+# ------------------------------------------------------------------------------------------------
+# chapter 5 - the settings menu
+# ------------------------------------------------------------------------------------------------
+
+
+def _open_settings(sandbox):
+    """Open the settings dialog so the chapter can point into it.
+
+    The sandbox has already made this dialog non-modal (see ``sandbox.py``); left modal it would
+    block the tutorial's own controls until the user closed a dialog the tour had opened for them.
+    """
+    sandbox.presenter.open_settings()
+    process_events(3)
+
+
+def _close_settings(sandbox):
+    """Dismiss the dialog *without* applying it.
+
+    Ok and Apply write through to Mantid's shared QSettings, so pressing either here would change
+    the real interface's saved settings on the user's behalf. Rejecting leaves them untouched.
+    """
+    sandbox.settings_view.reject()
+    process_events(3)
+
+
+def _settings_group(widget):
+    """The group box a setting sits in, so a step can spotlight the whole section.
+
+    Found by walking up rather than held as an attribute: the dialog builds its groups locally and
+    only keeps references to the individual fields.
+    """
+    node = widget.parentWidget()
+    while node is not None and not isinstance(node, QGroupBox):
+        node = node.parentWidget()
+    return node if node is not None else widget
+
+
+SETTINGS = TutorialChapter(
+    name="Settings",
+    description="What each option behind the cog does.",
+    steps=[
+        TutorialStep(
+            title="The settings menu",
+            text=(
+                "The cog holds everything the main window would be cluttered by. These settings are "
+                "remembered between sessions, so they are worth setting once for your instrument and "
+                "sample."
+            ),
+            target=lambda s: s.view.btn_settings,
+            action=_open_settings,
+            settle_ms=600,
+        ),
+        TutorialStep(
+            title="Visualisation",
+            text=(
+                "What is drawn in the lab view: the sample direction arrows, the goniometer axes and "
+                "rings, the incident beam, the scattering vectors <b>k</b>, and the scattered beams to "
+                "each detector group.<br><br>"
+                "Turning things off is how you make a busy scene readable — with six goniometer axes "
+                "and twenty detector groups the lab view gets crowded."
+            ),
+            target=lambda s: _settings_group(s.settings_view.show_goniometers),
+        ),
+        TutorialStep(
+            title="STL loading",
+            text=(
+                "STL files carry no units and no agreed orientation. <b>Scale</b> says what the numbers "
+                "in the file mean, and the three <b>degrees</b> fields plus the <b>translation "
+                "vector</b> correct a mesh that was exported in the wrong frame.<br><br>"
+                "These apply as the file is loaded, so they are separate from the initial orientation "
+                "in the main window — that describes how a correct sample sits in the beam, these fix "
+                "a file that was wrong to begin with."
+            ),
+            target=lambda s: _settings_group(s.settings_view.stl_scale_combo),
+        ),
+        TutorialStep(
+            title="Orientation files",
+            text=(
+                "When you load a list of orientations from a file, or export Euler angles, these say "
+                "which <b>axes</b> the angles are about and which <b>sense</b> each one turns in — the "
+                "convention your goniometer control software uses.<br><br>"
+                "Get these wrong and every angle is read or written in the wrong convention, which is "
+                "the sort of mistake that only shows up on the beamline."
+            ),
+            target=lambda s: _settings_group(s.settings_view.orient_axes),
+        ),
+        TutorialStep(
+            title="Monte Carlo absorption",
+            text=(
+                "The statistics behind the transmission estimate. <b>Events per point</b> trades "
+                "accuracy for time — raise it for a final answer, lower it while you are still "
+                "planning. <b>Max scatter point attempts</b> guards against a gauge volume that barely "
+                "intersects the sample.<br><br>"
+                "The tutorial has turned the events right down so its own calculation finishes quickly."
+            ),
+            target=lambda s: _settings_group(s.settings_view.mc_events),
+        ),
+        TutorialStep(
+            title="Attenuation",
+            text=(
+                "How the transmission result is reported. <b>Point</b> and <b>unit</b> pick the "
+                "wavelength or d-spacing the factors are quoted at. <b>Use data range scale</b> "
+                "stretches the colour map over the values actually present rather than fixing it to "
+                "0–1, which brings out small differences.<br><br>"
+                "<b>Highlight current orientation</b> is the grey ring around the current orientation "
+                "you saw on the transmission plot."
+            ),
+            target=lambda s: _settings_group(s.settings_view.att_point),
+        ),
+        TutorialStep(
+            title="Applying them",
+            text=(
+                "<b>Ok</b> and <b>Apply</b> save these and redraw; <b>Cancel</b> discards them. The "
+                "tutorial is cancelling — it has been running on a throwaway copy of the interface all "
+                "along, but the settings themselves are shared with your real session, so it will not "
+                "change them on your behalf."
+            ),
+            target=lambda s: s.settings_view.button_box,
+            action=_close_settings,
+            settle_ms=600,
+        ),
+        TutorialStep(
+            title="That is everything",
+            text=(
+                "Describe the sample, describe the instrument and how you will move it, read the pole "
+                "figure, export the plan — and tune the settings to your instrument.<br><br>"
+                "The full documentation is under <b>Help → Mantid Help</b>. Close this window whenever "
+                "you like; nothing here has touched your own session."
+            ),
+        ),
+    ],
+)
+
+
+CHAPTERS = (SAMPLE_SETUP, EXPERIMENTAL_SETUP, RESULTS, EXPORT, SETTINGS)
