@@ -32,7 +32,7 @@ Usage
     AddTimeSeriesLog(input_ws, Name="proton_charge", Time="2010-01-01T00:50:00", Value=100)
     monitor_ws = CreateSampleWorkspace(NumBanks=0, NumMonitors=3, BankPixelWidth=1, NumEvents=10000)
 
-    output = ReflectometrySliceEventWorkspace(version=1, InputWorkspace=input_ws, MonitorWorkspace=monitor_ws,
+    output = ReflectometrySliceEventWorkspace(Version=1, InputWorkspace=input_ws, MonitorWorkspace=monitor_ws,
                                               TimeInterval=600, StartTime='1800', StopTime='3300')
 
     print(str(output.getNumberOfEntries()) + ' slices')
