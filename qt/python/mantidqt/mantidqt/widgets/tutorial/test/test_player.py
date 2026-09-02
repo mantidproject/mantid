@@ -16,12 +16,15 @@ from mantidqt.widgets.tutorial.player import TutorialPlayer
 from mantidqt.widgets.tutorial.step import TutorialChapter, TutorialStep
 
 
-class FakeOverlay:
-    """Records what it was asked to spotlight, so a test can check the tour pointed at the right
-    thing without going near painting."""
+class FakeAnnotator:
+    """Records what the tour pointed at and said, so a test can check both without going near
+    painting. The whole surface the player uses, so nothing has to be probed for."""
 
     def __init__(self):
         self.targets = []
+        self.shown = []
+        self.waiting = []
+        self.kept_clear = ()
 
     def set_target(self, widget):
         self.targets.append(widget)
@@ -29,20 +32,8 @@ class FakeOverlay:
     def target_rect(self):
         return None
 
-    def show(self):
-        pass
-
-    def hide(self):
-        pass
-
-    def detach(self):
-        pass
-
-
-class FakeBubble:
-    def __init__(self):
-        self.shown = []
-        self.waiting = []
+    def rect_of(self, _widget):
+        return None
 
     def show_step(self, text, title=""):
         self.shown.append((title, text))
@@ -52,6 +43,15 @@ class FakeBubble:
 
     def place_beside(self, _spotlight, keep_clear=()):
         self.kept_clear = keep_clear
+
+    def show(self):
+        pass
+
+    def hide(self):
+        pass
+
+    def detach(self):
+        pass
 
 
 @start_qapplication
@@ -68,8 +68,7 @@ class TutorialPlayerTest(unittest.TestCase):
         interaction.process_events(3)
 
         self.performed = []
-        self.overlay = FakeOverlay()
-        self.bubble = FakeBubble()
+        self.annotator = FakeAnnotator()
         self.context = {"window": self.window, "first": self.first, "second": self.second}
 
     def tearDown(self):
@@ -87,7 +86,7 @@ class TutorialPlayerTest(unittest.TestCase):
         return self._step(text, action=lambda _ctx: self.performed.append(text), **kwargs)
 
     def _player(self, chapters):
-        player = TutorialPlayer(chapters, self.context, self.overlay, self.bubble, parent=self.window)
+        player = TutorialPlayer(chapters, self.context, self.annotator, parent=self.window)
         self.finished = []
         self.failures = []
         self.busy = []
@@ -160,7 +159,7 @@ class TutorialPlayerTest(unittest.TestCase):
         self.assertEqual(player.position, (0, 0))
         self.assertEqual(self.performed, [], "the step should be explained before it is performed")
         self.assertFalse(player.is_applied())
-        self.assertEqual(len(self.bubble.shown), 1)
+        self.assertEqual(len(self.annotator.shown), 1)
         self.assertFalse(self.finished)
 
     def test_show_me_performs_the_step_and_leaves_its_explanation_up(self):
@@ -172,7 +171,7 @@ class TutorialPlayerTest(unittest.TestCase):
         self.assertEqual(self.performed, ["load"])
         self.assertEqual(player.position, (0, 0), "performing a step does not move off it")
         self.assertTrue(player.is_applied())
-        self.assertEqual(self.bubble.shown[-1][1], "load", "the caption stays while the action is watched")
+        self.assertEqual(self.annotator.shown[-1][1], "load", "the caption stays while the action is watched")
 
     def test_show_me_twice_does_not_perform_it_twice(self):
         # pressing "Add orientation" a second time would add a second one
@@ -231,11 +230,11 @@ class TutorialPlayerTest(unittest.TestCase):
         player = self._started()
         self._play_to_the_end(player)
 
-        self.assertEqual(self.overlay.targets[:2], [self.first, self.second])
+        self.assertEqual(self.annotator.targets[:2], [self.first, self.second])
 
     def test_a_step_with_no_target_clears_the_spotlight_rather_than_leaving_the_last_one(self):
         self._started((TutorialChapter(name="Only", steps=[self._step("a closing remark")]),))
-        self.assertEqual(self.overlay.targets, [None])
+        self.assertEqual(self.annotator.targets, [None])
 
     def test_it_starts_at_a_named_chapter_without_fast_forwarding(self):
         player = self._started(chapter_index=1)
@@ -275,7 +274,7 @@ class TutorialPlayerTest(unittest.TestCase):
         # the position moves at once but the caption follows after the settle
         self._ready(player)
 
-        self.assertEqual(self.bubble.shown[-1][1], "load")
+        self.assertEqual(self.annotator.shown[-1][1], "load")
         self.assertEqual(self.performed, ["load"], "back must not perform anything again")
         self.assertTrue(player.is_applied(), "the step it returned to has already been performed")
 
@@ -356,12 +355,12 @@ class TutorialPlayerTest(unittest.TestCase):
             (TutorialChapter(name="Setup", steps=[self._step("appears", target=lambda _ctx: made["button"], action=create_it)]),)
         )
         # nothing to point at while the step is only being explained, and that is not a failure
-        self.assertEqual(self.overlay.targets, [None])
+        self.assertEqual(self.annotator.targets, [None])
         self.assertEqual(self.failures, [])
 
         self._apply(player)
 
-        self.assertEqual(self.overlay.targets[-1], made["button"])
+        self.assertEqual(self.annotator.targets[-1], made["button"])
         self.assertEqual(self.failures, [])
 
     # ------------------------------------------------------------------ waiting
@@ -377,7 +376,7 @@ class TutorialPlayerTest(unittest.TestCase):
                             "calculate",
                             await_=lambda _ctx: ready["now"],
                             await_timeout_s=5.0,
-                            await_text="Calculating…",
+                            await_text="Calculatingâ€¦",
                         )
                     ],
                 ),
@@ -386,16 +385,16 @@ class TutorialPlayerTest(unittest.TestCase):
 
         player.apply_step()
 
-        self.assertTrue(self._pump_until(lambda: bool(self.bubble.waiting)))
-        self.assertEqual(self.bubble.waiting, ["Calculating…"])
+        self.assertTrue(self._pump_until(lambda: bool(self.annotator.waiting)))
+        self.assertEqual(self.annotator.waiting, ["Calculatingâ€¦"])
         self.assertTrue(player.is_busy)
-        self.assertIn((True, "Calculating…"), self.busy)
+        self.assertIn((True, "Calculatingâ€¦"), self.busy)
         self.assertEqual(self.applied, [], "not done until the work it started has finished")
 
         ready["now"] = True
         self.assertTrue(self._pump_until(lambda: bool(self.applied)))
         self.assertFalse(player.is_busy)
-        self.assertEqual(self.bubble.shown[-1][1], "calculate", "the caption comes back after the wait")
+        self.assertEqual(self.annotator.shown[-1][1], "calculate", "the caption comes back after the wait")
 
     def test_navigation_is_ignored_while_a_step_is_working(self):
         # advancing mid-calculation would run the next step's action against an interface that had
@@ -498,9 +497,9 @@ class TutorialPlayerTest(unittest.TestCase):
         # the earlier chapter's actions ran, so the interface is in the state this chapter assumes
         self.assertEqual(self.performed, ["load", "material"])
         # ...but only the chapter asked for was narrated, and its own step is not performed yet
-        self.assertEqual(len(self.bubble.shown), 1)
+        self.assertEqual(len(self.annotator.shown), 1)
         self.assertFalse(player.is_applied())
-        self.assertIn("Setting the interface up", self.bubble.waiting[0])
+        self.assertIn("Setting the interface up", self.annotator.waiting[0])
 
     def test_fast_forward_locks_navigation_while_it_catches_up(self):
         player = self._player(self._two_chapters())

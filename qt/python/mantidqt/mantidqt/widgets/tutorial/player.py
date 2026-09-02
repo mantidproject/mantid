@@ -42,7 +42,7 @@ FAST_FORWARD_SETTLE_MS = 30
 
 
 class TutorialPlayer(QObject):
-    """Plays ``chapters`` against ``context``, drawing on ``overlay`` and ``bubble``.
+    """Plays ``chapters`` against ``context``, pointing and narrating through ``annotator``.
 
     The player owns sequencing and nothing else. It does not build or tear down the interface it is
     touring, and it does not decide what the controls mean - a session does both, and calls
@@ -60,14 +60,13 @@ class TutorialPlayer(QObject):
     #: the tour is working and should not be driven; carries a message
     busy_changed = Signal(bool, str)
 
-    def __init__(self, chapters, context, overlay, bubble, parent=None):
+    def __init__(self, chapters, context, annotator, parent=None):
         super().__init__(parent)
         if not chapters:
             raise ValueError("a tutorial needs at least one chapter")
         self._chapters = tuple(chapters)
         self._context = context
-        self._overlay = overlay
-        self._bubble = bubble
+        self._annotator = annotator
 
         self._chapter_index = 0
         self._step_index = 0
@@ -140,8 +139,8 @@ class TutorialPlayer(QObject):
         self._running = False
         self._set_busy(False)
         self._cancel_pending()
-        self._overlay.set_target(None)
-        self._overlay.hide()
+        self._annotator.set_target(None)
+        self._annotator.hide()
 
     def apply_step(self):
         """Perform the current step's action, leaving its explanation on screen to be watched."""
@@ -191,11 +190,15 @@ class TutorialPlayer(QObject):
             return
         # a target the step's own action creates does not exist yet, which is why a miss is only
         # worth reporting once the action has run
-        self._overlay.set_target(self._locate(step, report=self.is_applied()))
-        self._bubble.show_step(text=step.text, title=step.title)
-        self._bubble.place_beside(self._spotlight_rect(), self._keep_clear(step))
+        self._point_at(step, report=self.is_applied())
         self._set_busy(False)
         self.step_changed.emit(self._chapter_index, self._step_index)
+
+    def _point_at(self, step, report=True):
+        """Spotlight what the step points at and put its caption beside it."""
+        self._annotator.set_target(self._locate(step, report=report))
+        self._annotator.show_step(text=step.text, title=step.title)
+        self._annotator.place_beside(self._annotator.target_rect(), self._keep_clear(step))
 
     def _locate(self, step, report=True):
         """The widget to spotlight, or None.
@@ -257,8 +260,8 @@ class TutorialPlayer(QObject):
 
         if step.await_ is not None:
             self._set_busy(True, step.await_text)
-            self._bubble.show_waiting(step.await_text)
-            self._bubble.place_beside(self._spotlight_rect(), self._keep_clear(step))
+            self._annotator.show_waiting(step.await_text)
+            self._annotator.place_beside(self._annotator.target_rect(), self._keep_clear(step))
             self._waiter = wait_for(
                 predicate=lambda: self._await_holds(step),
                 on_ready=lambda: self._schedule(lambda: self._finish_perform(step, advance_after), step.settle_ms),
@@ -278,9 +281,7 @@ class TutorialPlayer(QObject):
             return
         # the caption stays; the highlight is re-measured because the action may have moved,
         # revealed or resized what it points at
-        self._overlay.set_target(self._locate(step))
-        self._bubble.show_step(text=step.text, title=step.title)
-        self._bubble.place_beside(self._spotlight_rect(), self._keep_clear(step))
+        self._point_at(step)
         self._set_busy(False)
         self.step_applied.emit()
 
@@ -321,8 +322,8 @@ class TutorialPlayer(QObject):
         """
         message = "Setting the interface up for this chapter…"
         self._set_busy(True, message)
-        self._bubble.show_waiting(message)
-        self._bubble.place_beside(None)
+        self._annotator.show_waiting(message)
+        self._annotator.place_beside(None)
         preceding = [
             ((chapter_number, step_number), step)
             for chapter_number, step_number, _chapter, step in walk(self._chapters)
@@ -377,17 +378,10 @@ class TutorialPlayer(QObject):
         """Rectangles the caption must not cover: whatever the step asked to stay clear of.
 
         Measured in the coordinates of the window being annotated, which is why it goes through the
-        overlay rather than reading widget geometry directly.
+        annotator rather than reading widget geometry directly.
         """
-        rect_of = getattr(self._overlay, "rect_of", None)
-        if not callable(rect_of):
-            return ()
-        rects = [rect_of(widget) for widget in step.resolve_avoid(self._context)]
+        rects = [self._annotator.rect_of(widget) for widget in step.resolve_avoid(self._context)]
         return tuple(rect for rect in rects if rect is not None and not rect.isEmpty())
-
-    def _spotlight_rect(self):
-        target_rect = getattr(self._overlay, "target_rect", None)
-        return target_rect() if callable(target_rect) else None
 
     def _schedule(self, call, delay_ms):
         """Do something after a delay, keeping the timer so it can be cancelled.
