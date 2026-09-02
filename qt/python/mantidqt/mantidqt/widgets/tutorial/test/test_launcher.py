@@ -177,9 +177,9 @@ class TutorialSessionTest(unittest.TestCase):
         session.start(chapter_index=1)
 
         self._wait_ready(session)
-        # the earlier chapter's actions still ran, so the chapter is played against the state it
-        # expects rather than an empty interface
-        self.assertEqual(self.performed, ["load", "material", "plot"])
+        # the earlier chapter's actions still ran, so the chapter is entered against the state it
+        # expects rather than an empty interface. Its own first step is explained, not performed.
+        self.assertEqual(self.performed, ["load", "material"])
 
     def test_the_shell_buttons_drive_the_player(self):
         session = self._session()
@@ -200,6 +200,29 @@ class TutorialSessionTest(unittest.TestCase):
 
         self.assertIs(session.window.parentWidget(), session.shell)
         self.assertTrue(session.shell.isVisible())
+
+    def test_show_me_performs_the_step_without_moving_off_it(self):
+        session = self._session()
+        session.start()
+        self._wait_ready(session)
+        self.assertEqual(self.performed, [], "a step is explained before it is performed")
+        self.assertTrue(session.shell.btn_apply.isEnabled())
+
+        session.shell.btn_apply.click()
+        self._wait_ready(session)
+
+        self.assertEqual(self.performed, ["load"])
+        self.assertEqual(session.player.position, (0, 0))
+        self.assertEqual(session.shell.btn_apply.text(), "Done")
+        self.assertFalse(session.shell.btn_apply.isEnabled())
+
+    def test_show_me_is_hidden_for_a_step_with_nothing_to_do(self):
+        chapters = (TutorialChapter(name="Setup", steps=[TutorialStep(text="just words", settle_ms=1)]),)
+        session = self._session(chapters)
+        session.start()
+        self._wait_ready(session)
+
+        self.assertFalse(session.shell.btn_apply.isVisible())
 
     def test_the_shell_tracks_which_step_the_tour_is_on(self):
         from qtpy.QtWidgets import QLabel
@@ -233,7 +256,7 @@ class TutorialSessionTest(unittest.TestCase):
         self.assertTrue(first_sandbox.torn_down, "the chapter jump should discard the old interface")
         self.assertEqual(session.player.position, (1, 0))
         # the earlier chapter's actions were replayed so the chapter starts from the right state
-        self.assertEqual(self.performed, ["load", "material", "plot"])
+        self.assertEqual(self.performed, ["load", "material"])
 
     def test_a_chapter_jump_keeps_the_window_where_the_user_put_it(self):
         session = self._session()

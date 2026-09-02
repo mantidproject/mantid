@@ -220,6 +220,24 @@ class InteractionTest(unittest.TestCase):
         self.assertTrue(shown)
         self.assertTrue(target.isVisible())
 
+    def test_ensure_visible_opens_a_collapsed_group_box_it_is_pointed_at(self):
+        # pointing at a shut box while describing what is inside it shows the user nothing
+        window, tabs, group, target = self._nested_window()
+
+        interaction.ensure_visible(group)
+
+        self.assertTrue(group.isChecked())
+        self.assertTrue(target.isVisible(), "the contents should be on show, not just the box")
+
+    def test_ensure_visible_does_not_change_the_page_of_a_tab_widget_it_is_pointed_at(self):
+        # a step describing the tab bar itself should not have the interface move under it
+        window, tabs, _group, _target = self._nested_window()
+        self.assertEqual(tabs.currentIndex(), 0)
+
+        interaction.ensure_visible(tabs)
+
+        self.assertEqual(tabs.currentIndex(), 0)
+
     def test_ensure_visible_leaves_an_already_visible_widget_alone(self):
         button = self._keep(QPushButton("Plain"))
         button.show()

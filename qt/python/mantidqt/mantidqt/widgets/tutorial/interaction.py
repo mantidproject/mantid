@@ -115,31 +115,35 @@ def ancestors(widget):
 
 
 def ensure_visible(widget):
-    """Do whatever it takes to bring ``widget`` into view, and report whether it worked.
+    """Do whatever it takes to bring ``widget`` and its contents into view.
 
     A tutorial points at things, so a target that is on an unselected tab, inside a collapsed
     group box, or scrolled past is not merely awkward - its geometry is stale or empty, and the
     spotlight would be drawn somewhere meaningless. This reveals it the way a user would: select
     the tab it is on, expand the section it is in, scroll to it.
 
+    A target that is *itself* a collapsed section is opened too. Pointing at a closed group box
+    while describing what is inside it - or while setting one of the values inside it - shows the
+    user a shut box and nothing else.
+
     Revealing runs outermost-first, because an inner tab bar does not have a usable geometry until
     the outer tab holding it has been selected. Scrolling is left until last for the same reason:
     where a widget sits inside a scroll area is only known once everything around it is shown.
     """
-    chain = list(reversed(ancestors(widget)))
+    chain = list(reversed(ancestors(widget))) + [widget]
     scroll_areas = []
 
-    for ancestor in chain:
-        if isinstance(ancestor, QTabWidget):
-            _select_page_containing(ancestor, widget, ancestor.setCurrentIndex)
-        elif isinstance(ancestor, QStackedWidget):
-            _select_page_containing(ancestor, widget, ancestor.setCurrentIndex)
-        elif isinstance(ancestor, QGroupBox) and ancestor.isCheckable() and not ancestor.isChecked():
+    for node in chain:
+        if node is not widget and isinstance(node, (QTabWidget, QStackedWidget)):
+            # only for ancestors: switching the page of a tab widget the step is pointing *at*
+            # would move the interface for a step that is describing the tab bar itself
+            _select_page_containing(node, widget, node.setCurrentIndex)
+        elif isinstance(node, QGroupBox) and node.isCheckable() and not node.isChecked():
             # collapsible sections are built this way throughout Mantid's interfaces: the group box
             # is checkable and its contents are hidden while it is unchecked
-            ancestor.setChecked(True)
-        elif isinstance(ancestor, QAbstractScrollArea):
-            scroll_areas.append(ancestor)
+            node.setChecked(True)
+        elif node is not widget and isinstance(node, QAbstractScrollArea):
+            scroll_areas.append(node)
 
     process_events()
 

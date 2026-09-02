@@ -8,7 +8,7 @@
 import unittest
 
 from qtpy.QtTest import QTest
-from qtpy.QtWidgets import QPushButton, QVBoxLayout, QWidget
+from qtpy.QtWidgets import QGroupBox, QPushButton, QSpinBox, QVBoxLayout, QWidget
 
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.tutorial import interaction
@@ -91,9 +91,11 @@ class TutorialPlayerTest(unittest.TestCase):
         self.finished = []
         self.failures = []
         self.busy = []
+        self.applied = []
         player.finished.connect(lambda: self.finished.append(True))
         player.step_failed.connect(lambda label, reason: self.failures.append((label, reason)))
         player.busy_changed.connect(lambda busy, message: self.busy.append((busy, message)))
+        player.step_applied.connect(lambda: self.applied.append(True))
         return player
 
     @staticmethod
@@ -116,123 +118,137 @@ class TutorialPlayerTest(unittest.TestCase):
             TutorialChapter(name="Results", steps=[self._recording_step("plot")]),
         )
 
-    def _next(self, player):
-        """Wait until the current step is on screen, then press Next - as a user would.
+    def _started(self, chapters=None, **kwargs):
+        """A player showing its first step and ready to be driven."""
+        player = self._player(chapters or self._two_chapters())
+        player.start(**kwargs)
+        self._ready(player)
+        return player
 
-        Pressing it before the step has settled is deliberately ignored by the player, so a test
-        that clicked immediately would be testing that guard rather than what it meant to.
+    def _ready(self, player):
+        """Wait until the tour will accept navigation.
+
+        The player ignores Back/Next/Show me while a step is settling or waiting, so a test that
+        clicked immediately would be testing that guard rather than what it meant to.
         """
         self.assertTrue(self._pump_until(lambda: not player.is_busy))
+
+    def _next(self, player):
+        self._ready(player)
         player.next_step()
 
-    def _play_to_the_end(self, player):
-        """Press Next until the tour reports it has finished, as a user would.
+    def _apply(self, player):
+        self._ready(player)
+        player.apply_step()
+        self._ready(player)
 
-        Waits for each step to actually be on screen first - the player refuses to advance until
-        then, so pressing Next early would simply be ignored and the loop would spin.
-        """
-        seen = 0
+    def _play_to_the_end(self, player):
+        """Press Next until the tour finishes, as a user would."""
         for _ in range(50):
             if self.finished:
                 return True
-            self.assertTrue(self._pump_until(lambda: len(self.bubble.shown) > seen))
-            seen = len(self.bubble.shown)
-            player.next_step()
+            self._next(player)
         return bool(self.finished)
 
-    # ------------------------------------------------------------------ user-driven advance
+    # ------------------------------------------------------------------ explain first, act second
 
-    def test_it_does_not_advance_on_its_own(self):
-        # the whole point of the redesign: no timer is counting down behind the caption
-        player = self._player(self._two_chapters())
-        player.start()
-        self.assertTrue(self._pump_until(lambda: bool(self.bubble.shown)))
+    def test_it_explains_a_step_without_doing_anything_to_the_interface(self):
+        player = self._started()
 
-        QTest.qWait(400)
+        QTest.qWait(300)
 
         self.assertEqual(player.position, (0, 0))
-        self.assertEqual(self.performed, ["load"], "only the first step's action should have run")
+        self.assertEqual(self.performed, [], "the step should be explained before it is performed")
+        self.assertFalse(player.is_applied())
         self.assertEqual(len(self.bubble.shown), 1)
         self.assertFalse(self.finished)
 
-    def test_next_moves_one_step_at_a_time(self):
-        player = self._player(self._two_chapters())
-        player.start()
-        self.assertTrue(self._pump_until(lambda: bool(self.bubble.shown)))
+    def test_show_me_performs_the_step_and_leaves_its_explanation_up(self):
+        player = self._started()
 
-        player.next_step()
-        self.assertTrue(self._pump_until(lambda: len(self.bubble.shown) == 2))
-        self.assertEqual(player.position, (0, 1))
-        self.assertEqual(self.performed, ["load", "material"])
+        self._apply(player)
 
-    def test_next_during_the_settle_is_ignored_rather_than_skipping_the_caption(self):
-        # otherwise a step's action would have run while its explanation was never shown
-        chapters = (
-            TutorialChapter(
-                name="Setup",
-                steps=[self._recording_step("one", settle_ms=200), self._recording_step("two", settle_ms=200)],
-            ),
-        )
-        player = self._player(chapters)
-        player.start()
-        self.assertTrue(player.is_busy, "the action has run but the caption is not up yet")
+        self.assertEqual(self.applied, [True])
+        self.assertEqual(self.performed, ["load"])
+        self.assertEqual(player.position, (0, 0), "performing a step does not move off it")
+        self.assertTrue(player.is_applied())
+        self.assertEqual(self.bubble.shown[-1][1], "load", "the caption stays while the action is watched")
 
-        player.next_step()
+    def test_show_me_twice_does_not_perform_it_twice(self):
+        # pressing "Add orientation" a second time would add a second one
+        player = self._started()
 
-        self.assertTrue(self._pump_until(lambda: bool(self.bubble.shown)))
-        self.assertEqual(player.position, (0, 0))
-        self.assertEqual(self.bubble.shown[-1][1], "one")
-        self.assertEqual(self.performed, ["one"])
+        self._apply(player)
+        player.apply_step()
+        QTest.qWait(100)
+
+        self.assertEqual(self.performed, ["load"])
+
+    def test_a_step_with_no_action_is_already_applied(self):
+        player = self._started((TutorialChapter(name="Only", steps=[self._step("just narrating")]),))
+        self.assertFalse(player.current_step_has_action())
+        self.assertTrue(player.is_applied())
+
+    # ------------------------------------------------------------------ user-driven advance
+
+    def test_next_performs_a_step_that_was_not_shown_before_moving_on(self):
+        # chapters are cumulative, so a skipped action would break every later step
+        player = self._started()
+
+        self._next(player)
+
+        self.assertTrue(self._pump_until(lambda: player.position == (0, 1)))
+        self.assertEqual(self.performed, ["load"])
+
+    def test_next_after_show_me_does_not_perform_it_again(self):
+        player = self._started()
+        self._apply(player)
+
+        self._next(player)
+
+        self.assertTrue(self._pump_until(lambda: player.position == (0, 1)))
+        self.assertEqual(self.performed, ["load"])
 
     def test_next_crosses_into_the_following_chapter(self):
-        player = self._player(self._two_chapters())
-        player.start()
-        self.assertTrue(self._pump_until(lambda: bool(self.bubble.shown)))
+        player = self._started()
         self._next(player)
         self.assertTrue(self._pump_until(lambda: player.position == (0, 1)))
 
         self._next(player)
+
         self.assertTrue(self._pump_until(lambda: player.position == (1, 0)))
-        self.assertEqual(self.performed, ["load", "material", "plot"])
+        self.assertEqual(self.performed, ["load", "material"])
 
     def test_next_past_the_last_step_finishes_the_tour(self):
-        player = self._player(self._two_chapters())
-        player.start()
+        player = self._started()
+
         self.assertTrue(self._play_to_the_end(player))
 
-        self.assertEqual(self.performed, ["load", "material", "plot"])
+        self.assertEqual(self.performed, ["load", "material", "plot"], "every action ran on the way through")
         self.assertFalse(player.is_running)
 
     def test_it_spotlights_each_step_target(self):
-        player = self._player(self._two_chapters())
-        player.start()
+        player = self._started()
         self._play_to_the_end(player)
 
         self.assertEqual(self.overlay.targets[:2], [self.first, self.second])
 
     def test_a_step_with_no_target_clears_the_spotlight_rather_than_leaving_the_last_one(self):
-        chapters = (TutorialChapter(name="Only", steps=[self._step("a closing remark")]),)
-        player = self._player(chapters)
-        player.start()
-        self.assertTrue(self._pump_until(lambda: bool(self.bubble.shown)))
-
+        self._started((TutorialChapter(name="Only", steps=[self._step("a closing remark")]),))
         self.assertEqual(self.overlay.targets, [None])
 
     def test_it_starts_at_a_named_chapter_without_fast_forwarding(self):
-        player = self._player(self._two_chapters())
-        player.start(chapter_index=1)
-        self.assertTrue(self._pump_until(lambda: bool(self.bubble.shown)))
+        player = self._started(chapter_index=1)
 
-        self.assertEqual(self.performed, ["plot"])
+        self.assertEqual(player.position, (1, 0))
+        self.assertEqual(self.performed, [], "the chapter's own step is explained, not performed")
 
     def test_starting_beyond_the_last_chapter_is_refused(self):
         player = self._player(self._two_chapters())
         self.assertRaises(IndexError, player.start, 5)
 
     def test_it_knows_when_it_is_at_the_ends_of_the_tour(self):
-        player = self._player(self._two_chapters())
-        player.start()
-        self.assertTrue(self._pump_until(lambda: bool(self.bubble.shown)))
+        player = self._started()
         self.assertTrue(player.at_start())
         self.assertFalse(player.at_end())
 
@@ -246,107 +262,157 @@ class TutorialPlayerTest(unittest.TestCase):
 
     # ------------------------------------------------------------------ back
 
-    def test_back_re_narrates_without_re_running_the_action(self):
+    def test_back_re_shows_the_previous_step_without_re_running_its_action(self):
         # the crux of Back: pressing "Add orientation" a second time would add a second one
-        player = self._player(self._two_chapters())
-        player.start()
-        self.assertTrue(self._pump_until(lambda: bool(self.bubble.shown)))
-        player.next_step()
-        self.assertTrue(self._pump_until(lambda: len(self.bubble.shown) == 2))
-        self.assertEqual(self.performed, ["load", "material"])
+        player = self._started()
+        self._next(player)
+        self.assertTrue(self._pump_until(lambda: player.position == (0, 1)))
+        self.assertEqual(self.performed, ["load"])
 
+        self._ready(player)
         player.back_step()
-        interaction.process_events(3)
+        self.assertTrue(self._pump_until(lambda: player.position == (0, 0)))
+        # the position moves at once but the caption follows after the settle
+        self._ready(player)
 
-        self.assertEqual(player.position, (0, 0))
         self.assertEqual(self.bubble.shown[-1][1], "load")
-        self.assertEqual(self.performed, ["load", "material"], "back must not perform anything again")
+        self.assertEqual(self.performed, ["load"], "back must not perform anything again")
+        self.assertTrue(player.is_applied(), "the step it returned to has already been performed")
+
+    def test_next_after_back_does_not_repeat_the_action(self):
+        player = self._started()
+        self._next(player)
+        self.assertTrue(self._pump_until(lambda: player.position == (0, 1)))
+        self._ready(player)
+        player.back_step()
+        self.assertTrue(self._pump_until(lambda: player.position == (0, 0)))
+
+        self._next(player)
+
+        self.assertTrue(self._pump_until(lambda: player.position == (0, 1)))
+        self.assertEqual(self.performed, ["load"])
 
     def test_back_crosses_into_the_previous_chapter(self):
-        player = self._player(self._two_chapters())
-        player.start()
-        self.assertTrue(self._pump_until(lambda: bool(self.bubble.shown)))
+        player = self._started()
         self._next(player)
         self.assertTrue(self._pump_until(lambda: player.position == (0, 1)))
         self._next(player)
-        self.assertTrue(self._pump_until(lambda: not player.is_busy))
+        self.assertTrue(self._pump_until(lambda: player.position == (1, 0)))
 
+        self._ready(player)
         player.back_step()
-        interaction.process_events(3)
 
-        self.assertEqual(player.position, (0, 1))
+        self.assertTrue(self._pump_until(lambda: player.position == (0, 1)))
 
     def test_back_at_the_very_start_does_nothing(self):
-        player = self._player(self._two_chapters())
-        player.start()
-        self.assertTrue(self._pump_until(lambda: bool(self.bubble.shown)))
+        player = self._started()
 
         player.back_step()
         interaction.process_events(3)
 
         self.assertEqual(player.position, (0, 0))
 
-    # ------------------------------------------------------------------ stopping
+    # ------------------------------------------------------------------ revealing
 
-    def test_stop_ends_the_tour_without_reporting_it_as_finished(self):
-        player = self._player(self._two_chapters())
-        player.start()
-        self.assertTrue(self._pump_until(lambda: bool(self.bubble.shown)))
+    def test_the_target_is_opened_up_before_the_action_runs(self):
+        # otherwise the value is set inside a section the user cannot see, and the box only opens
+        # afterwards to explain a change they never watched happen
+        group = QGroupBox("Section", self.window)
+        group.setCheckable(True)
+        group.setChecked(False)
+        group_layout = QVBoxLayout(group)
+        spin = QSpinBox()
+        spin.setRange(0, 100)
+        group_layout.addWidget(spin)
+        self.window.layout().addWidget(group)
+        interaction.process_events(3)
+        # an unchecked checkable group box disables its contents
+        self.assertFalse(spin.isEnabled())
 
-        player.stop()
-        QTest.qWait(100)
+        state_when_the_action_ran = {}
 
-        self.assertFalse(player.is_running)
-        self.assertEqual(self.finished, [], "stopping is not the same as reaching the end")
+        def set_the_value(_ctx):
+            state_when_the_action_ran["enabled"] = spin.isEnabled()
+            spin.setValue(42)
+
+        player = self._started(
+            (TutorialChapter(name="Setup", steps=[self._step("set it", target=lambda _ctx: group, action=set_the_value)]),)
+        )
+        self.assertTrue(group.isChecked(), "the section should be open before the step is even explained")
+
+        self._apply(player)
+
+        self.assertTrue(state_when_the_action_ran["enabled"], "the section must be open before the action runs")
+        self.assertEqual(spin.value(), 42)
+
+    def test_a_target_that_only_appears_after_the_action_is_highlighted_once_it_is_shown(self):
+        made = {}
+
+        def create_it(_ctx):
+            made["button"] = QPushButton("Made", self.window)
+            made["button"].show()
+
+        player = self._started(
+            (TutorialChapter(name="Setup", steps=[self._step("appears", target=lambda _ctx: made["button"], action=create_it)]),)
+        )
+        # nothing to point at while the step is only being explained, and that is not a failure
+        self.assertEqual(self.overlay.targets, [None])
+        self.assertEqual(self.failures, [])
+
+        self._apply(player)
+
+        self.assertEqual(self.overlay.targets[-1], made["button"])
+        self.assertEqual(self.failures, [])
 
     # ------------------------------------------------------------------ waiting
 
-    def test_a_step_waits_for_its_predicate_before_narrating(self):
+    def test_a_step_waits_for_its_action_to_finish_before_reporting_it_done(self):
         ready = {"now": False}
-        chapters = (
-            TutorialChapter(
-                name="Results",
-                steps=[
-                    self._step(
-                        "the calculation has finished",
-                        await_=lambda _ctx: ready["now"],
-                        await_timeout_s=5.0,
-                        await_text="Calculating…",
-                    )
-                ],
-            ),
+        player = self._started(
+            (
+                TutorialChapter(
+                    name="Results",
+                    steps=[
+                        self._recording_step(
+                            "calculate",
+                            await_=lambda _ctx: ready["now"],
+                            await_timeout_s=5.0,
+                            await_text="Calculating…",
+                        )
+                    ],
+                ),
+            )
         )
-        player = self._player(chapters)
-        player.start()
+
+        player.apply_step()
 
         self.assertTrue(self._pump_until(lambda: bool(self.bubble.waiting)))
         self.assertEqual(self.bubble.waiting, ["Calculating…"])
-        self.assertEqual(self.bubble.shown, [], "it should not narrate until the wait is over")
         self.assertTrue(player.is_busy)
-        # busy is raised as soon as the step starts, then re-announced with the wait's own message
-        self.assertEqual(self.busy[0][0], True)
         self.assertIn((True, "Calculating…"), self.busy)
+        self.assertEqual(self.applied, [], "not done until the work it started has finished")
 
         ready["now"] = True
-        self.assertTrue(self._pump_until(lambda: bool(self.bubble.shown)))
+        self.assertTrue(self._pump_until(lambda: bool(self.applied)))
         self.assertFalse(player.is_busy)
-        self.assertEqual(self.busy[-1][0], False)
+        self.assertEqual(self.bubble.shown[-1][1], "calculate", "the caption comes back after the wait")
 
-    def test_next_is_ignored_while_a_step_is_waiting(self):
-        # advancing mid-wait would run the following action against an interface that had not
-        # finished reacting to this one
+    def test_navigation_is_ignored_while_a_step_is_working(self):
+        # advancing mid-calculation would run the next step's action against an interface that had
+        # not finished reacting to this one
         ready = {"now": False}
-        chapters = (
-            TutorialChapter(
-                name="Setup",
-                steps=[
-                    self._recording_step("slow", await_=lambda _ctx: ready["now"], await_timeout_s=5.0),
-                    self._recording_step("after"),
-                ],
-            ),
+        player = self._started(
+            (
+                TutorialChapter(
+                    name="Setup",
+                    steps=[
+                        self._recording_step("slow", await_=lambda _ctx: ready["now"], await_timeout_s=5.0),
+                        self._recording_step("after"),
+                    ],
+                ),
+            )
         )
-        player = self._player(chapters)
-        player.start()
+        player.apply_step()
         self.assertTrue(self._pump_until(lambda: player.is_busy))
 
         player.next_step()
@@ -357,74 +423,84 @@ class TutorialPlayerTest(unittest.TestCase):
         self.assertEqual(self.performed, ["slow"])
 
         ready["now"] = True
-        self.assertTrue(self._pump_until(lambda: not player.is_busy))
-        player.next_step()
-        self.assertTrue(self._pump_until(lambda: self.performed == ["slow", "after"]))
+        self._next(player)
+        self.assertTrue(self._pump_until(lambda: player.position == (0, 1)))
 
     def test_a_wait_that_times_out_reports_it_and_carries_on(self):
-        chapters = (
-            TutorialChapter(
-                name="Results",
-                steps=[self._step("never ready", await_=lambda _ctx: False, await_timeout_s=0.05)],
-            ),
+        player = self._started(
+            (TutorialChapter(name="Results", steps=[self._recording_step("never ready", await_=lambda _ctx: False, await_timeout_s=0.05)]),)
         )
-        player = self._player(chapters)
-        player.start()
 
-        self.assertTrue(self._pump_until(lambda: bool(self.bubble.shown)))
+        player.apply_step()
+
+        self.assertTrue(self._pump_until(lambda: bool(self.applied)))
         self.assertEqual(len(self.failures), 1)
         self.assertIn("still not ready", self.failures[0][1])
         self.assertFalse(player.is_busy, "a timed-out wait must not leave navigation locked")
 
     # ------------------------------------------------------------------ failure
 
-    def test_a_failing_action_is_reported_and_the_step_is_still_narrated(self):
+    def test_a_failing_action_is_reported_and_the_tour_carries_on(self):
         def explode(_context):
             raise RuntimeError("the button went away")
 
-        chapters = (
-            TutorialChapter(
-                name="Setup",
-                steps=[self._step("broken", action=explode, title="Broken step"), self._recording_step("after")],
-            ),
+        player = self._started(
+            (
+                TutorialChapter(
+                    name="Setup",
+                    steps=[self._step("broken", action=explode, title="Broken step"), self._recording_step("after")],
+                ),
+            )
         )
-        player = self._player(chapters)
-        player.start()
 
-        self.assertTrue(self._pump_until(lambda: bool(self.bubble.shown)))
+        self._apply(player)
+
         self.assertEqual(self.failures, [("Broken step", "the button went away")])
+        self.assertTrue(player.is_applied(), "a step that failed is not retried")
 
-        player.next_step()
-        self.assertTrue(self._pump_until(lambda: self.performed == ["after"]), "the rest of the tour should still run")
+        self._next(player)
+        self.assertTrue(self._pump_until(lambda: player.position == (0, 1)))
 
-    def test_an_unresolvable_target_is_reported_and_the_step_is_still_narrated(self):
-        chapters = (
-            TutorialChapter(
-                name="Setup",
-                steps=[self._step("gone", target=lambda ctx: ctx["nope"], title="Missing target")],
-            ),
+    def test_a_target_still_missing_after_the_action_is_reported(self):
+        player = self._started(
+            (
+                TutorialChapter(
+                    name="Setup",
+                    steps=[self._step("gone", target=lambda ctx: ctx["nope"], title="Missing target", action=lambda _ctx: None)],
+                ),
+            )
         )
-        player = self._player(chapters)
-        player.start()
+        self.assertEqual(self.failures, [], "not a failure while the step is only being explained")
 
-        self.assertTrue(self._pump_until(lambda: bool(self.bubble.shown)))
+        self._apply(player)
+
         self.assertEqual(len(self.failures), 1)
         self.assertIn("could not find what to highlight", self.failures[0][1])
-        self.assertEqual(self.overlay.targets, [None])
+
+    # ------------------------------------------------------------------ stopping
+
+    def test_stop_ends_the_tour_without_reporting_it_as_finished(self):
+        player = self._started()
+
+        player.stop()
+        QTest.qWait(100)
+
+        self.assertFalse(player.is_running)
+        self.assertEqual(self.finished, [], "stopping is not the same as reaching the end")
 
     # ------------------------------------------------------------------ fast forward
 
     def test_fast_forward_runs_earlier_actions_without_narrating_them(self):
         player = self._player(self._two_chapters())
         player.start(chapter_index=1, fast_forward=True)
+        self._ready(player)
 
-        self.assertTrue(self._pump_until(lambda: bool(self.bubble.shown)))
-        # every action ran, so the interface is in the right state for the chapter jumped to...
-        self.assertEqual(self.performed, ["load", "material", "plot"])
-        # ...but only the chapter asked for was narrated
+        # the earlier chapter's actions ran, so the interface is in the state this chapter assumes
+        self.assertEqual(self.performed, ["load", "material"])
+        # ...but only the chapter asked for was narrated, and its own step is not performed yet
         self.assertEqual(len(self.bubble.shown), 1)
+        self.assertFalse(player.is_applied())
         self.assertIn("Setting the interface up", self.bubble.waiting[0])
-        self.assertFalse(player.is_busy)
 
     def test_fast_forward_locks_navigation_while_it_catches_up(self):
         player = self._player(self._two_chapters())
@@ -432,8 +508,22 @@ class TutorialPlayerTest(unittest.TestCase):
 
         self.assertTrue(self.busy)
         self.assertEqual(self.busy[0][0], True)
-        self.assertTrue(self._pump_until(lambda: bool(self.bubble.shown)))
+        self._ready(player)
         self.assertEqual(self.busy[-1][0], False)
+
+    def test_back_into_a_fast_forwarded_chapter_does_not_repeat_its_actions(self):
+        player = self._player(self._two_chapters())
+        player.start(chapter_index=1, fast_forward=True)
+        self._ready(player)
+        self.assertEqual(self.performed, ["load", "material"])
+
+        player.back_step()
+        self.assertTrue(self._pump_until(lambda: player.position == (0, 1)))
+        self.assertTrue(player.is_applied())
+
+        self._next(player)
+        self.assertTrue(self._pump_until(lambda: player.position == (1, 0)))
+        self.assertEqual(self.performed, ["load", "material"])
 
     def test_fast_forward_awaits_an_earlier_chapters_wait(self):
         ready = {"now": False}
@@ -449,9 +539,11 @@ class TutorialPlayerTest(unittest.TestCase):
 
         QTest.qWait(60)
         self.assertEqual(self.performed, ["slow"], "it should be held at the wait, not racing past it")
+        self.assertTrue(player.is_busy)
 
         ready["now"] = True
-        self.assertTrue(self._pump_until(lambda: self.performed == ["slow", "after"]))
+        self._ready(player)
+        self.assertEqual(player.position, (1, 0))
 
 
 if __name__ == "__main__":
