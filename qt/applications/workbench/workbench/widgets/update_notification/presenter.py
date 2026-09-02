@@ -42,16 +42,18 @@ class UpdateNotificationPresenter:
         self._bridge = _UpdateSignalBridge()
         self._bridge.updateAvailable.connect(self._show_prompt, Qt.QueuedConnection)
         self._observer = None  # keep alive for the life of the async call
+        self.alg = None
 
     def check_for_update(self):
         try:
-            alg = AlgorithmManager.create("CheckMantidVersion")
-            alg.setChild(True)
-            alg.setAlgStartupLogging(False)
+            self.alg = AlgorithmManager.create("CheckMantidVersion")
+            self.alg.initialize()
+            self.alg.setChild(True)
+            self.alg.setAlgStartupLogging(False)
             self._observer = UpdateNotificationObserver(self._bridge)
-            self._observer.setAlg(alg)
-            self._observer.observeFinish(alg)
-            alg.execute()
+            self._observer.setAlg(self.alg)
+            self._observer.observeFinish(self.alg)
+            self.alg.execute()
         except Exception as e:
             logger.error(f"Failed to check for updates: {e}")
 
