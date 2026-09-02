@@ -137,6 +137,14 @@ the tabs and buttons stay bright and usable while everything they act on is dimm
 Choosing a chapter tab **rebuilds the sandbox** and fast-forwards through the earlier chapters'
 actions. That is what lets a chapter be entered at all - its steps assume the state the chapters
 before it leave behind - and it is only possible because the tour drives a throwaway interface.
+Clicking the tab already showing restarts that chapter, which is the framework's answer to "undo":
+rebuilding reaches a known state exactly, where a per-step inverse would have to re-implement the
+interface's own logic backwards and could not be written at all for steps that load a file or run
+an algorithm.
+
+Give a step an action only when it *does* something the user can watch. ``Show me`` is offered
+whenever a step has one, so an action whose effect is invisible - re-expanding a section the reveal
+has already opened, say - puts a button on screen that appears to do nothing when pressed.
 
 Navigation is refused while a step is settling or working (``busy_changed``). Without that, Next
 pressed mid-calculation would run the following step's action against an interface that had not

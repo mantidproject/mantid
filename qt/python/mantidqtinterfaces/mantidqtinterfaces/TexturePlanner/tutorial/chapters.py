@@ -23,7 +23,15 @@ Two conventions worth knowing before adding a step:
 
 from mantid.simpleapi import SetSampleMaterial
 
-from mantidqt.widgets.tutorial.interaction import click, select_combo, select_tab, set_check_state, set_spin_box, set_text
+from mantidqt.widgets.tutorial.interaction import (
+    click,
+    process_events,
+    select_combo,
+    select_tab,
+    set_check_state,
+    set_spin_box,
+    set_text,
+)
 from mantidqt.widgets.tutorial.step import TutorialChapter, TutorialStep
 
 # the tour's sample material: deliberately not the interface's default, so the "Current material"
@@ -68,6 +76,22 @@ def _apply_material(sandbox):
     sandbox.presenter.on_material_set()
 
 
+def _permute_directions(sandbox):
+    """Cycle the three texture directions, so a different one lands in the middle row.
+
+    The pole figure is projected about the second direction (see ``get_alpha_beta_from_cart``,
+    whose polar angle is measured from +y, and the second column of the model's ``ax_transform``
+    is what ends up there). Cycling is the clearest demonstration of that: nothing about the
+    measurement changes, only which axis it is viewed down.
+    """
+    view = sandbox.view
+    rd, nd, td = view.get_rd_dir(), view.get_nd_dir(), view.get_td_dir()
+    view.set_rd_dir(tuple(nd.split(",")))
+    view.set_nd_dir(tuple(td.split(",")))
+    view.set_td_dir(tuple(rd.split(",")))
+    click(view.updateDirs)
+
+
 # ------------------------------------------------------------------------------------------------
 # chapter 1 - sample setup
 # ------------------------------------------------------------------------------------------------
@@ -101,11 +125,12 @@ SAMPLE_SETUP = TutorialChapter(
             title="Load a sample shape",
             text=(
                 "The sample's shape comes from a file: an <b>STL mesh</b> exported from CAD, or a "
-                "<b>CSG description</b> in Mantid's XML shape format. The tutorial is loading a 2 cm "
-                "cube defined in XML."
+                "<b>CSG description</b> in Mantid's XML shape format. The tutorial is loading a "
+                "30 × 10 × 20 mm cuboid defined in XML — a deliberately lopsided block, so every "
+                "rotation of it looks different in the lab view."
             ),
             target=lambda s: s.view.finder_xml,
-            action=lambda s: _set_finder(s.view.finder_xml, s.data.cube_xml_path),
+            action=lambda s: _set_finder(s.view.finder_xml, s.data.cuboid_xml_path),
             await_=lambda s: _finder_ready(s.view.finder_xml),
             await_timeout_s=FINDER_TIMEOUT_S,
             await_text="Looking for the sample file…",
@@ -170,18 +195,27 @@ SAMPLE_SETUP = TutorialChapter(
                 "is labelled in terms you recognise rather than in instrument coordinates."
             ),
             target=lambda s: s.view.grpDirectionWidgets,
-            action=lambda s: set_check_state(s.view.grpDirectionWidgets, True),
-            settle_ms=400,
         ),
         TutorialStep(
-            title="Apply the directions",
+            title="The middle row is the pole figure axis",
             text=(
-                "Edit the vectors and press <b>Update Directions</b> to re-project everything into the "
-                "new frame. The tutorial has renamed the first direction to show where it appears."
+                "The order matters. The pole figure is always projected about the <b>second</b> of the "
+                "three directions — <b>ND</b> here — with the first and third becoming the horizontal "
+                "and vertical of the plot.<br><br>"
+                "So which direction you put in the middle row decides which pole you are looking down."
+            ),
+            target=lambda s: s.view.groupBox_textureVectors,
+        ),
+        TutorialStep(
+            title="Permute them and the projection changes",
+            text=(
+                "The tutorial is cycling the three vectors — the direction that was RD moves into the "
+                "middle row, so it becomes the pole. Press <b>Show me</b> and watch the pole figure "
+                "re-project: the same measurements, viewed down a different axis."
             ),
             target=lambda s: s.view.updateDirs,
-            action=lambda s: (set_text(s.view.lineedit_RD, "Rolling"), click(s.view.updateDirs)),
-            settle_ms=600,
+            action=_permute_directions,
+            settle_ms=800,
         ),
     ],
 )
@@ -192,17 +226,44 @@ SAMPLE_SETUP = TutorialChapter(
 # ------------------------------------------------------------------------------------------------
 
 
-# how many orientations the tour builds. Enough to make a pole figure and a table worth looking at,
-# few enough that the per-orientation absorption calculation in the next chapter stays quick.
-DEMO_ORIENTATION_COUNT = 3
-
-DEMO_GROUP = "Texture20"
+# The planner opens on ENGINX, so the tour moves to another instrument: watching the detector
+# geometry and the pole figure change is what shows the control doing something.
+DEMO_INSTRUMENT = "IMAT"
+DEMO_GROUP = "Module1"
 DEMO_GAUGE_VOLUME = "4mmCube"
+
+# The angle each added orientation is recorded at. Every one is different, so stepping through the
+# index selector afterwards visibly rotates the sample and moves its points on the pole figure -
+# with identical orientations there would be nothing to see. Kept short because the absorption
+# calculation in the next chapter runs once per orientation.
+# The first matches the angle the "dial in an orientation" step sets, so the orientation the user
+# just watched being dialled is the one that gets recorded rather than being silently reset.
+DEMO_ANGLES = (30.0, 60.0, 90.0)
 
 
 def _add_orientations(sandbox):
-    for _ in range(DEMO_ORIENTATION_COUNT):
-        click(sandbox.view.addOrientation)
+    """Record one orientation per angle in ``DEMO_ANGLES``.
+
+    Adding an orientation selects the new one and stores whatever the angle fields currently hold,
+    so the angle is set *before* each add. The first angle applies to the orientation the planner
+    already starts with, which is why there is one fewer add than there are angles.
+    """
+    view = sandbox.view
+    for index, angle in enumerate(DEMO_ANGLES):
+        if index > 0:
+            click(view.addOrientation)
+        set_spin_box(view.spnAngle0, angle)
+
+
+def _step_through_orientations(sandbox):
+    """Walk the index selector back through every orientation, ending on the first.
+
+    Ends on the first rather than the last so the lab view is left showing an orientation the user
+    has just watched it move to, rather than the one it was already displaying.
+    """
+    for index in reversed(range(len(DEMO_ANGLES))):
+        set_spin_box(sandbox.view.spnIndex, index + 1)
+        process_events(3)
 
 
 EXPERIMENTAL_SETUP = TutorialChapter(
@@ -223,17 +284,22 @@ EXPERIMENTAL_SETUP = TutorialChapter(
         TutorialStep(
             title="Pick an instrument",
             text=(
-                "Choosing an instrument loads its detector geometry. Picking <b>Custom</b> instead lets "
-                "you name any instrument definition Mantid can find, and supply your own grouping file."
+                "Choosing an instrument loads its detector geometry. The planner opens on ENGINX; the "
+                f"tutorial is switching to <b>{DEMO_INSTRUMENT}</b>, which has a different detector "
+                "layout.<br><br>"
+                "Picking <b>Custom</b> instead lets you name any instrument definition Mantid can find, "
+                "and supply your own grouping file."
             ),
             target=lambda s: s.view.cmbInstr,
+            action=lambda s: select_combo(s.view.cmbInstr, DEMO_INSTRUMENT),
+            settle_ms=400,
         ),
         TutorialStep(
             title="…and a detector grouping",
             text=(
                 "Texture measurements group detectors into banks that each look at the sample from a "
                 "different direction — every group becomes one point per orientation on the pole figure. "
-                f"The tutorial is selecting <b>{DEMO_GROUP}</b>."
+                f"The groups on offer follow the instrument; the tutorial is selecting <b>{DEMO_GROUP}</b>."
             ),
             target=lambda s: s.view.cmbGroup,
             action=lambda s: select_combo(s.view.cmbGroup, DEMO_GROUP),
@@ -258,8 +324,6 @@ EXPERIMENTAL_SETUP = TutorialChapter(
                 "with it the path lengths through the sample."
             ),
             target=lambda s: s.view.grpGaugeVol,
-            action=lambda s: set_check_state(s.view.grpGaugeVol, True),
-            settle_ms=400,
         ),
         TutorialStep(
             title="Choose a preset or your own shape",
@@ -322,7 +386,9 @@ EXPERIMENTAL_SETUP = TutorialChapter(
             title="Add it to the list",
             text=(
                 "<b>Add Orientation</b> records the current angles as one measurement position. The "
-                f"tutorial is adding {DEMO_ORIENTATION_COUNT} of them so there is something to look at."
+                f"tutorial is adding {len(DEMO_ANGLES)}, each at a different angle — "
+                f"{', '.join(f'{angle:g}°' for angle in DEMO_ANGLES)} — so the plan covers more of the "
+                "pole figure."
             ),
             target=lambda s: s.view.addOrientation,
             action=_add_orientations,
@@ -332,10 +398,11 @@ EXPERIMENTAL_SETUP = TutorialChapter(
             title="Move between them",
             text=(
                 "The index selector steps through the orientations you have added. Whichever one is "
-                "selected is the one drawn in the lab view and highlighted on the pole figure."
+                "selected is the one drawn in the lab view and highlighted on the pole figure — watch "
+                "the sample turn as the tutorial steps back through them."
             ),
             target=lambda s: s.view.spnIndex,
-            action=lambda s: set_spin_box(s.view.spnIndex, 1),
+            action=_step_through_orientations,
             settle_ms=700,
         ),
     ],
@@ -398,13 +465,20 @@ RESULTS = TutorialChapter(
         ),
         TutorialStep(
             title="Selecting rows",
-            text=(
-                "<b>Select All</b> and <b>Deselect All</b> work on the selection column, and "
-                "<b>Delete Selected</b> removes those rows from the plan — useful once the pole figure "
-                "shows an orientation is not earning its beam time."
-            ),
+            text=("<b>Select All</b> ticks every row's selection box. Watch the <b>Select</b> column on the right of the table."),
             target=lambda s: s.view.selectAll,
-            action=lambda s: (click(s.view.selectAll), click(s.view.deselectAll)),
+            action=lambda s: click(s.view.selectAll),
+            settle_ms=700,
+        ),
+        TutorialStep(
+            title="…and clearing them",
+            text=(
+                "<b>Deselect All</b> clears the column again. <b>Delete Selected</b> removes the ticked "
+                "rows from the plan altogether — useful once the pole figure shows an orientation is "
+                "not earning its beam time."
+            ),
+            target=lambda s: s.view.deselectAll,
+            action=lambda s: click(s.view.deselectAll),
             settle_ms=700,
         ),
     ],

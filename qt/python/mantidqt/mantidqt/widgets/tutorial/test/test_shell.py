@@ -93,7 +93,7 @@ class TutorialShellTest(unittest.TestCase):
     def test_it_shows_a_tab_per_chapter(self):
         tabs = self._tab_bar()
         self.assertEqual([tabs.tabText(i) for i in range(tabs.count())], ["Sample setup", "Results", "Exporting"])
-        self.assertEqual(tabs.tabToolTip(0), "Load a sample")
+        self.assertIn("Load a sample", tabs.tabToolTip(0))
 
     # ------------------------------------------------------------------ controls
 
@@ -125,6 +125,29 @@ class TutorialShellTest(unittest.TestCase):
         interaction.process_events()
 
         self.assertEqual(chosen, [2])
+
+    def test_clicking_the_current_chapter_restarts_it(self):
+        # a chapter jump is a rebuild, which makes "start this chapter again" the one form of undo
+        # the tour can offer that is always exactly right
+        chosen = []
+        self.shell.chapter_selected.connect(chosen.append)
+        self.shell.set_current_chapter(1)
+
+        self.shell._tabs.tabBarClicked.emit(1)
+        interaction.process_events()
+
+        self.assertEqual(chosen, [1])
+
+    def test_clicking_a_different_chapter_reports_it_once(self):
+        chosen = []
+        self.shell.chapter_selected.connect(chosen.append)
+
+        tabs = self._tab_bar()
+        tabs.tabBarClicked.emit(2)
+        tabs.setCurrentIndex(2)
+        interaction.process_events()
+
+        self.assertEqual(chosen, [2], "a move to another chapter must not rebuild twice")
 
     def test_the_player_moving_the_tab_does_not_report_it_back(self):
         # otherwise crossing into a new chapter would rebuild the interface underneath a tour that

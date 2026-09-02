@@ -18,13 +18,34 @@ somewhere disposable.
 import os
 import tempfile
 
-from Engineering.common.xml_shapes import get_cube_xml
+# A cuboid rather than a cube, and deliberately not close to one: a cube looks identical from every
+# face, so rotating it in the lab view shows the user almost nothing. With three different edge
+# lengths every orientation looks distinct, which is the whole point of watching it turn.
+#
+# Comfortably larger than the 4 mm gauge volume preset the tour selects, so the gauge volume reads
+# as a small region inside the sample rather than swallowing it.
+CUBOID_WIDTH_M = 0.030  # x
+CUBOID_HEIGHT_M = 0.010  # y
+CUBOID_DEPTH_M = 0.020  # z
 
-# 2 cm on a side: comfortably larger than the 4 mm gauge volume preset the tour selects, so the
-# gauge volume is visibly a small region inside the sample rather than swallowing it
-CUBE_SIDE_M = 0.02
+SAMPLE_NAME = "tutorial_sample"
 
-CUBE_NAME = "tutorial_sample"
+
+def get_cuboid_xml(name, width, height, depth, centre=(0.0, 0.0, 0.0)):
+    """A CSG cuboid in Mantid's sample-shape XML.
+
+    ``Engineering.common.xml_shapes`` only offers a cube; this is the same shape with the three
+    edges given independently.
+    """
+    return (
+        f"<cuboid id='{name}'> "
+        f"<height val='{height}' /> "
+        f"<width val='{width}' /> "
+        f"<depth val='{depth}' /> "
+        f"<centre x='{centre[0]}' y='{centre[1]}' z='{centre[2]}' /> "
+        f"</cuboid> "
+        f"<algebra val='{name}' />"
+    )
 
 
 class DemoData:
@@ -37,7 +58,10 @@ class DemoData:
         self._tmpdir = tempfile.TemporaryDirectory(prefix="texture_planner_tutorial_", ignore_cleanup_errors=True)
         self.directory = self._tmpdir.name
 
-        self.cube_xml_path = self._write("tutorial_sample.xml", get_cube_xml(CUBE_NAME, CUBE_SIDE_M))
+        self.cuboid_xml_path = self._write(
+            "tutorial_sample.xml",
+            get_cuboid_xml(SAMPLE_NAME, CUBOID_WIDTH_M, CUBOID_HEIGHT_M, CUBOID_DEPTH_M),
+        )
 
         self.save_directory = os.path.join(self.directory, "output")
         os.makedirs(self.save_directory, exist_ok=True)

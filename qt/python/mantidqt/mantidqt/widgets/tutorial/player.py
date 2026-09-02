@@ -343,6 +343,10 @@ class TutorialPlayer(QObject):
         # marked applied even when it fails, so a Back into this chapter does not try it again
         self._applied.add(position)
         if step.action is not None:
+            # revealed here as well as when playing: an action that presses a button inside a
+            # collapsed section would find it disabled, so a fast-forward has to open the interface
+            # up exactly as walking through the steps would
+            self._reveal(step)
             try:
                 step.action(self._context)
             except Exception as error:
