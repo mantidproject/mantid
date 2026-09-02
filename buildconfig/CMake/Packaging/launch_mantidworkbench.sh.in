@@ -29,6 +29,32 @@ if [ -z "${MPLCONFIGDIR+x}" ]; then
     fi
 fi
 
+# Enable QSettings staging automatically when configuration is NFS-backed and
+# the XDG cache is on a distinct local filesystem. An explicit value remains
+# authoritative; Python performs the detailed safety checks.
+# This is related to https://qt-project.atlassian.net/browse/QTBUG-148845
+if [ -z "${MANTID_QSETTINGS_STAGING+x}" ] && command -v findmnt >/dev/null 2>&1; then
+    # get values for config and cache directories
+    XDG_CONFIG_ROOT=${XDG_CONFIG_HOME:-${HOME}/.config}
+    XDG_CACHE_ROOT=${XDG_CACHE_HOME:-${HOME}/.cache}
+    # determine mount types
+    CONFIG_FS_TYPE=$(findmnt -T "${XDG_CONFIG_ROOT}" -no FSTYPE 2>/dev/null)
+    CACHE_FS_TYPE=$(findmnt -T "${XDG_CACHE_ROOT}" -no FSTYPE 2>/dev/null)
+    # enable only when config is in nfs and cache isn't
+    case "${CONFIG_FS_TYPE}" in
+        nfs|nfs4)
+            case "${CACHE_FS_TYPE}" in
+                nfs|nfs4|"") ;;
+                *)
+                    if [ "${XDG_CONFIG_ROOT}" != "${XDG_CACHE_ROOT}" ]; then
+                        export MANTID_QSETTINGS_STAGING=1
+                    fi
+                    ;;
+            esac
+            ;;
+    esac
+fi
+
 # Force the xcb (X11/XWayland) Qt platform plugin to avoid rendering and
 # stability issues seen under the native Wayland plugin.
 if [ -z "${QT_QPA_PLATFORM}" ]; then
