@@ -61,6 +61,7 @@ set(TEST_FILES
     workbench/config/test/test_user.py
     workbench/test/test_mainwindow.py
     workbench/test/test_import.py
+    workbench/test/test_workbench_process.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratoraxes.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorcolorfills.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorfigure.py
