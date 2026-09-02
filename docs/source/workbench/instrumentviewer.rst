@@ -69,6 +69,50 @@ Home tab
     :align: center
     :width: 635
 
+
+Mouse controls
+##############
+
+The Instrument View has no menus or keyboard shortcuts; everything is done with the mouse. What
+each button does depends on the projection and on which of the ``Picking/Interaction`` buttons is
+active.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 26 26 24 24
+
+    * - Mode
+      - Left button
+      - Right button
+      - Wheel
+    * - ``3D``
+      - Select a detector
+      - Drag to rotate
+      - Zoom
+    * - Flat projection
+      - Select a detector
+      - Reset the view
+      - Zoom about the cursor
+    * - ``Rectangle Zoom``
+      - Drag to zoom; :kbd:`Shift`, :kbd:`Ctrl` or :kbd:`Alt` and click to select a detector
+      - Reset the view
+      - Not used
+    * - ``Hover Pick``
+      - Not used
+      - Reset the view
+      - Zoom about the cursor
+    * - Shape overlaid
+      - Move, resize or rotate the shape
+      - Reset the view
+      - Zoom about the cursor
+    * - Line plot, adding peaks
+      - Add a peak
+      - Delete the nearest peak
+      - Not used
+
+Clicking a detector toggles it, so clicking a selected detector deselects it, and any number of
+detectors can be selected.
+
 Projection
 ##########
 
@@ -374,49 +418,6 @@ large instrument. Clearing the selection restores the whole instrument.
 .. figure:: /images/ImageNotFound.png
     :align: center
     :width: 635
-
-Mouse controls
---------------
-
-The Instrument View has no menus or keyboard shortcuts; everything is done with the mouse. What
-each button does depends on the projection and on which of the ``Picking/Interaction`` buttons is
-active.
-
-.. list-table::
-    :header-rows: 1
-    :widths: 26 26 24 24
-
-    * - Mode
-      - Left button
-      - Right button
-      - Wheel
-    * - ``3D``
-      - Select a detector
-      - Drag to rotate
-      - Zoom
-    * - Flat projection
-      - Select a detector
-      - Reset the view
-      - Zoom about the cursor
-    * - ``Rectangle Zoom``
-      - Drag to zoom; :kbd:`Shift`, :kbd:`Ctrl` or :kbd:`Alt` and click to select a detector
-      - Reset the view
-      - Not used
-    * - ``Hover Pick``
-      - Not used
-      - Reset the view
-      - Zoom about the cursor
-    * - Shape overlaid
-      - Move, resize or rotate the shape
-      - Reset the view
-      - Zoom about the cursor
-    * - Line plot, adding peaks
-      - Add a peak
-      - Delete the nearest peak
-      - Not used
-
-Clicking a detector toggles it, so clicking a selected detector deselects it, and any number of
-detectors can be selected.
 
 Python and command line access
 ------------------------------
