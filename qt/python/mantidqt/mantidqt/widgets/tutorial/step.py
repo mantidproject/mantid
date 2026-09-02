@@ -26,7 +26,7 @@ model as readily as its widgets.
 """
 
 from dataclasses import dataclass, field
-from typing import Any, Callable, Optional, Sequence, Tuple
+from typing import Any, Callable, NamedTuple, Optional, Sequence, Tuple
 
 # ``settle`` default. A step's action usually triggers a repaint, a replot or a queued signal, and
 # the spotlight is positioned from the target's geometry - so the geometry has to have caught up
@@ -148,13 +148,33 @@ class TutorialChapter:
         return self.steps[index]
 
 
-def walk(chapters: Sequence[TutorialChapter]) -> Tuple[Tuple[int, int, TutorialChapter, TutorialStep], ...]:
-    """Every step in play order as ``(chapter_index, step_index, chapter, step)``.
+class Visit(NamedTuple):
+    """One step, and where in the tour it was reached.
 
-    Used by the chapter test to visit the whole tour, and by the player to validate a position.
+    A tuple, so ``chapter_index, step_index, chapter, step = visit`` still works - but naming the
+    fields means a caller that wants two of them does not have to spell out throwaways for the
+    other two.
+    """
+
+    chapter_index: int
+    step_index: int
+    chapter: TutorialChapter
+    step: TutorialStep
+
+    @property
+    def position(self) -> Tuple[int, int]:
+        """What the player calls a position: the pair that identifies this step in the tour."""
+        return self.chapter_index, self.step_index
+
+
+def walk(chapters: Sequence[TutorialChapter]) -> Tuple[Visit, ...]:
+    """Every step in play order.
+
+    Used by the chapter test to visit the whole tour, and by the player to catch an interface up to
+    a chapter that is being jumped to.
     """
     return tuple(
-        (chapter_index, step_index, chapter, step)
+        Visit(chapter_index, step_index, chapter, step)
         for chapter_index, chapter in enumerate(chapters)
         for step_index, step in enumerate(chapter.steps)
     )

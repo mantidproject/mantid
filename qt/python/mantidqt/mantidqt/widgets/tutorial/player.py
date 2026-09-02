@@ -324,25 +324,21 @@ class TutorialPlayer(QObject):
         self._set_busy(True, message)
         self._annotator.show_waiting(message)
         self._annotator.place_beside(None)
-        preceding = [
-            ((chapter_number, step_number), step)
-            for chapter_number, step_number, _chapter, step in walk(self._chapters)
-            if chapter_number < chapter_index
-        ]
+        preceding = [visit for visit in walk(self._chapters) if visit.chapter_index < chapter_index]
         self._replay(iter(preceding))
 
-    def _replay(self, steps):
+    def _replay(self, visits):
         if not self._running:
             return
-        entry = next(steps, None)
-        if entry is None:
+        visit = next(visits, None)
+        if visit is None:
             self._set_busy(False)
             self._present_current_step()
             return
-        position, step = entry
+        step = visit.step
 
         # marked applied even when it fails, so a Back into this chapter does not try it again
-        self._applied.add(position)
+        self._applied.add(visit.position)
         if step.action is not None:
             # revealed here as well as when playing: an action that presses a button inside a
             # collapsed section would find it disabled, so a fast-forward has to open the interface
@@ -357,13 +353,13 @@ class TutorialPlayer(QObject):
         if step.await_ is not None:
             self._waiter = wait_for(
                 predicate=lambda: self._await_holds(step),
-                on_ready=lambda: self._replay(steps),
+                on_ready=lambda: self._replay(visits),
                 timeout_s=step.await_timeout_s,
-                on_timeout=lambda: self._replay(steps),
+                on_timeout=lambda: self._replay(visits),
                 parent=self,
             )
         else:
-            self._schedule(lambda: self._replay(steps), FAST_FORWARD_SETTLE_MS)
+            self._schedule(lambda: self._replay(visits), FAST_FORWARD_SETTLE_MS)
 
     # ------------------------------------------------------------------ plumbing
 
