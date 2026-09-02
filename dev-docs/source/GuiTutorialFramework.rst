@@ -147,12 +147,12 @@ dimming its window would put the scrim over the chapter tabs and the navigation 
 user needs to drive the tour. Everything else is annotated on its own window, which is what reaches
 a dialog.
 
-Two things to check before a tour opens a dialog. It must be made **non-modal**, in the sandbox
-and never in the interface itself, or it blocks the tutorial's own controls until the user closes
-something they did not ask for. And mind what applying it writes: a settings dialog that saves to
-Mantid's shared ``QSettings`` is *not* isolated by the sandbox, so such a tour must dismiss it
-rather than accept it - Ok or Apply would change the real interface's saved settings on the user's
-behalf.
+No shipped tour points into a dialog yet. Two things to check before one does. The dialog must be
+made **non-modal**, in the sandbox and never in the interface itself, or it blocks the tutorial's
+own controls until the user closes something they did not ask for. And mind what applying it
+writes: a settings dialog that saves to Mantid's shared ``QSettings`` is *not* isolated by the
+sandbox, so such a tour must dismiss it rather than accept it - Ok or Apply would change the real
+interface's saved settings on the user's behalf.
 
 Choosing a chapter tab **rebuilds the sandbox** and fast-forwards through the earlier chapters'
 actions. That is what lets a chapter be entered at all - its steps assume the state the chapters
@@ -267,10 +267,15 @@ Testing a tour
 ##############
 
 A tour is written against widget names and presenter methods, so it drifts the moment either is
-renamed — silently, because nothing else imports it. Write a test that plays every chapter against
-a real interface, pressing Next as each step becomes ready and cutting ``settle_ms`` to the
-minimum, and assert that no step failed and that every step found what it points at. See
+renamed — silently, because nothing else imports it. Write a test that plays the tour against a real
+interface, pressing Next as each step becomes ready and cutting ``settle_ms`` to the minimum, and
+assert that no step failed and that every step found what it points at. See
 ``mantidqtinterfaces/TexturePlanner/tutorial/test/test_chapters.py``.
 
 Put each step's observation in its own ``subTest`` so one broken step does not hide the rest, and
-assert that the sandbox leaves no workspaces behind once it is closed.
+assert that the sandbox leaves no workspaces behind once it is closed. Playing the tour runs the
+interface for real, so play it as few times as its distinct paths require - once through, and once
+per chapter entered by itself, since a chapter jump reaches its starting state by fast-forwarding
+rather than by walking - and assert everything else against what that recorded. Build the hurried
+copy of the tour with ``dataclasses.replace`` rather than by listing the fields, or the test will
+quietly stop matching the real steps the next time ``TutorialStep`` gains one.

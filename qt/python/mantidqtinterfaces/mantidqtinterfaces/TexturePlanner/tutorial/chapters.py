@@ -93,8 +93,12 @@ def _permute_directions(sandbox):
 
 
 def _show_pinned_directions(sandbox):
-    """
-    Update the sample shape and direction to be askew in the lab-frame
+    """Tilt the sample and pin the texture directions to it.
+
+    Both, together, because the check box on its own has nothing to show: it applies the initial
+    orientation to the sample directions as well as to the shape, so with the sample square to the
+    lab frame the pinned and unpinned directions are identical. Tilting it first is what makes the
+    difference visible on the pole figure.
     """
     set_spin_box(sandbox.view.spnInitX, 30.0)
     set_check_state(sandbox.view.chkTransformDirs, True)
