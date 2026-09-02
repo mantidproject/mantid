@@ -68,8 +68,10 @@ jobs:
           platforms = ["${{ matrix.platform }}"]
 
           [dependencies]
-          mantidworkbench = "*"
-          mslice = "*"
+          # Take the latest nightly workbench/Mantid stack
+          # Keep mslice on the stable mantid channel so Pixi does not prefer a nightly
+          mantidworkbench = { version = "*", channel = "mantid/label/nightly" }
+          mslice = { version = "*", channel = "mantid" }
           pystog = ">=0.6.3"
           EOF
 
