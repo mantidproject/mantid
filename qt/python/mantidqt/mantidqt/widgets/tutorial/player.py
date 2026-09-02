@@ -193,7 +193,7 @@ class TutorialPlayer(QObject):
         # worth reporting once the action has run
         self._overlay.set_target(self._locate(step, report=self.is_applied()))
         self._bubble.show_step(text=step.text, title=step.title)
-        self._bubble.place_beside(self._spotlight_rect())
+        self._bubble.place_beside(self._spotlight_rect(), self._keep_clear(step))
         self._set_busy(False)
         self.step_changed.emit(self._chapter_index, self._step_index)
 
@@ -258,7 +258,7 @@ class TutorialPlayer(QObject):
         if step.await_ is not None:
             self._set_busy(True, step.await_text)
             self._bubble.show_waiting(step.await_text)
-            self._bubble.place_beside(self._spotlight_rect())
+            self._bubble.place_beside(self._spotlight_rect(), self._keep_clear(step))
             self._waiter = wait_for(
                 predicate=lambda: self._await_holds(step),
                 on_ready=lambda: self._schedule(lambda: self._finish_perform(step, advance_after), step.settle_ms),
@@ -280,7 +280,7 @@ class TutorialPlayer(QObject):
         # revealed or resized what it points at
         self._overlay.set_target(self._locate(step))
         self._bubble.show_step(text=step.text, title=step.title)
-        self._bubble.place_beside(self._spotlight_rect())
+        self._bubble.place_beside(self._spotlight_rect(), self._keep_clear(step))
         self._set_busy(False)
         self.step_applied.emit()
 
@@ -372,6 +372,18 @@ class TutorialPlayer(QObject):
         self._busy = busy
         self._busy_message = message
         self.busy_changed.emit(busy, message)
+
+    def _keep_clear(self, step):
+        """Rectangles the caption must not cover: whatever the step asked to stay clear of.
+
+        Measured in the coordinates of the window being annotated, which is why it goes through the
+        overlay rather than reading widget geometry directly.
+        """
+        rect_of = getattr(self._overlay, "rect_of", None)
+        if not callable(rect_of):
+            return ()
+        rects = [rect_of(widget) for widget in step.resolve_avoid(self._context)]
+        return tuple(rect for rect in rects if rect is not None and not rect.isEmpty())
 
     def _spotlight_rect(self):
         target_rect = getattr(self._overlay, "target_rect", None)

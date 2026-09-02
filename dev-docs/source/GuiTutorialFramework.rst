@@ -147,11 +147,12 @@ dimming its window would put the scrim over the chapter tabs and the navigation 
 user needs to drive the tour. Everything else is annotated on its own window, which is what reaches
 a dialog.
 
-A dialog the tour opens must be **non-modal**, or it blocks the tutorial's own controls until the
-user closes something they did not ask for. Make it non-modal in the sandbox, never in the
-interface itself. And be careful what a dialog writes: the Texture Planner's settings dialog saves
-to Mantid's shared ``QSettings``, so the tour opens it, explains it, and *rejects* it - pressing Ok
-or Apply would change the real interface's saved settings on the user's behalf.
+Two things to check before a tour opens a dialog. It must be made **non-modal**, in the sandbox
+and never in the interface itself, or it blocks the tutorial's own controls until the user closes
+something they did not ask for. And mind what applying it writes: a settings dialog that saves to
+Mantid's shared ``QSettings`` is *not* isolated by the sandbox, so such a tour must dismiss it
+rather than accept it - Ok or Apply would change the real interface's saved settings on the user's
+behalf.
 
 Choosing a chapter tab **rebuilds the sandbox** and fast-forwards through the earlier chapters'
 actions. That is what lets a chapter be entered at all - its steps assume the state the chapters
@@ -164,6 +165,24 @@ an algorithm.
 Give a step an action only when it *does* something the user can watch. ``Show me`` is offered
 whenever a step has one, so an action whose effect is invisible - re-expanding a section the reveal
 has already opened, say - puts a button on screen that appears to do nothing when pressed.
+
+Where a step's effect shows up somewhere other than the control it points at, name that somewhere
+in ``avoid``. The caption is placed clear of it as well as of the spotlight, so a step that ticks a
+check box while the values it changes are displayed elsewhere does not end up explaining the change
+from on top of the evidence:
+
+.. code-block:: python
+
+    TutorialStep(
+        title="Seeing them in the lab frame",
+        text="The fields go read-only, because these values are derived.",
+        target=lambda sandbox: sandbox.view.chkLabDirs,
+        avoid=lambda sandbox: sandbox.view.groupBox_textureVectors,
+        action=lambda sandbox: set_check_state(sandbox.view.chkLabDirs, True),
+    )
+
+``avoid`` takes one widget or a sequence of them, and a miss is ignored - keeping out of the way is
+a courtesy, not something worth interrupting the tour over.
 
 Navigation is refused while a step is settling or working (``busy_changed``). Without that, Next
 pressed mid-calculation would run the following step's action against an interface that had not

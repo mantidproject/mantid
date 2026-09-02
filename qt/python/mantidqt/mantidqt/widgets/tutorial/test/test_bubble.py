@@ -59,8 +59,8 @@ class TutorialBubbleTest(unittest.TestCase):
 
     # ------------------------------------------------------------------ placement
 
-    def _place(self, spotlight):
-        self.bubble.place_beside(spotlight)
+    def _place(self, spotlight, keep_clear=()):
+        self.bubble.place_beside(spotlight, keep_clear)
         interaction.process_events()
         return self.bubble.geometry_in_host()
 
@@ -96,6 +96,88 @@ class TutorialBubbleTest(unittest.TestCase):
                     f"{placed} is not inside {self.window.rect()}",
                 )
                 self.assertGreaterEqual(placed.left(), GAP)
+
+    def test_it_keeps_clear_of_what_the_step_is_demonstrating(self):
+        # a step that ticks a check box while the values it changes are displayed elsewhere would
+        # otherwise put the explanation on top of the evidence
+        # the real shape of it: a check box near the top, the fields it changes below and to one
+        # side, leaving the caption room on the other side
+        spotlight = QRect(300, 40, 120, 30)
+        evidence = QRect(60, 120, 300, 200)
+
+        without = self._place(spotlight)
+        self.assertTrue(without.intersects(evidence), "this is the placement the step has to avoid")
+
+        placed = self._place(spotlight, keep_clear=[evidence])
+
+        self.assertFalse(placed.intersects(evidence))
+        self.assertFalse(placed.intersects(spotlight))
+        self.assertTrue(self.window.rect().contains(placed))
+
+    def test_an_empty_keep_clear_rect_is_ignored(self):
+        spotlight = QRect(300, 40, 120, 30)
+        self.assertEqual(self._place(spotlight, keep_clear=[QRect(), None]), self._place(spotlight))
+
+    def test_it_settles_somewhere_even_when_everything_is_blocked(self):
+        # a caption slightly in the way beats one off the edge of the window
+        spotlight = QRect(300, 300, 40, 40)
+        placed = self._place(spotlight, keep_clear=[self.window.rect()])
+        self.assertTrue(self.window.rect().contains(placed))
+
+    # ------------------------------------------------------------------ layout
+
+    def test_the_box_is_no_taller_than_the_text_it_holds(self):
+        # leftover height is what shows up as uneven padding around the caption
+        self.bubble.show_step("A caption long enough that it has to wrap over several lines. " * 3, title="A step")
+        interaction.process_events()
+
+        title = self.window.findChild(QWidget, "tutorial_bubble_title")
+        text = self.window.findChild(QWidget, "tutorial_bubble_text")
+        content_bottom = max(title.geometry().bottom(), text.geometry().bottom())
+        slack = self.bubble.height() - content_bottom
+
+        self.assertGreaterEqual(slack, 0)
+        self.assertLessEqual(slack, 20, f"{slack}px of unused height below the caption")
+
+    def test_a_short_caption_gets_a_short_box(self):
+        self.bubble.show_step("Short.", title="A step")
+        interaction.process_events()
+        short = self.bubble.height()
+
+        self.bubble.show_step("A much longer caption that will certainly need to wrap. " * 4, title="A step")
+        interaction.process_events()
+
+        self.assertGreater(self.bubble.height(), short, "the box should grow with its text, not stay a fixed size")
+
+    def test_the_heading_sits_against_the_top_margin(self):
+        self.bubble.show_step("short", title="A step")
+        interaction.process_events()
+
+        title = self.window.findChild(QWidget, "tutorial_bubble_title")
+        margin = self.bubble.layout().contentsMargins()
+        # plus the styled frame's own border
+        self.assertEqual(title.geometry().top(), margin.top() + self.bubble.frameWidth())
+
+    def test_the_padding_above_and_below_the_caption_matches(self):
+        # the complaint this fixes: uneven blank space around the text
+        self.bubble.show_step("A caption that runs on long enough to wrap. " * 3, title="A step")
+        interaction.process_events()
+
+        title = self.window.findChild(QWidget, "tutorial_bubble_title")
+        text = self.window.findChild(QWidget, "tutorial_bubble_text")
+        above = title.geometry().top()
+        below = self.bubble.height() - text.geometry().bottom()
+
+        self.assertAlmostEqual(above, below, delta=2, msg=f"{above}px above the caption, {below}px below")
+
+    def test_the_text_follows_the_heading_rather_than_floating(self):
+        self.bubble.show_step("short", title="A step")
+        interaction.process_events()
+
+        title = self.window.findChild(QWidget, "tutorial_bubble_title")
+        text = self.window.findChild(QWidget, "tutorial_bubble_text")
+        gap = text.geometry().top() - title.geometry().bottom()
+        self.assertLessEqual(gap, self.bubble.layout().spacing() + 2, "the two should stay together at the top")
 
     def test_with_no_spotlight_it_centres_itself(self):
         placed = self._place(QRect())

@@ -58,10 +58,9 @@ Settings
 Tutorial
     The mortarboard icon beside the cog runs a guided tutorial, which walks
     through the whole workflow — loading a sample, setting up the instrument and
-    goniometer, reading the pole figure, exporting the result, and what each entry
-    in the settings menu does — highlighting each control and using it as it goes.
-    It appears automatically the first time the interface is opened, and can be
-    re-run from the button at any time.
+    goniometer, reading the pole figure, and exporting the result — highlighting
+    each control and using it as it goes. It appears automatically the first time
+    the interface is opened, and can be re-run from the button at any time.
 
     The tutorial runs in a **separate window containing its own copy of the
     interface**, loaded with a small demo sample. Nothing it does affects the
