@@ -61,7 +61,7 @@ class TexturePlannerPresenter(AlgorithmObserver):
         # kept alive for as long as the tour runs: the session owns the sandbox planner it drives
         self._tutorial_session = None
         if offer_tutorial:
-            self.view.set_on_tutorial_clicked(self.open_tutorial)
+            self.view.set_on_tutorial_clicked(self._on_tutorial_clicked)
         else:
             # the tutorial's own planner: the button would start a tutorial inside the tutorial
             self.view.set_tutorial_button_visible(False)
@@ -146,6 +146,15 @@ class TexturePlannerPresenter(AlgorithmObserver):
     # TexturePlanner/tutorial/sandbox.py) so it can load a sample, add orientations and
     # export a file without any of it reaching the window the user is working in.
     # ----------------------------------------------------------------------------------
+
+    def _on_tutorial_clicked(self) -> None:
+        """Open the tutorial because the user asked for it.
+
+        Not ``open_tutorial`` connected directly: ``clicked`` carries a bool, which would land in
+        ``mark_as_seen`` - and asking for the tutorial must not change whether it appears by itself
+        on a first open.
+        """
+        self.open_tutorial()
 
     def open_tutorial(self, mark_as_seen: bool = False) -> None:
         # imported here rather than at module scope: the sandbox builds a presenter, so importing
