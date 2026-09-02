@@ -82,8 +82,9 @@ SAMPLE_SETUP = TutorialChapter(
             text=(
                 "This is a working copy of the interface, loaded with a demo sample. Everything the "
                 "tutorial does happens here — your own session is untouched.<br><br>"
-                "Press <b>Next</b> below when you have finished reading each step; nothing moves on "
-                "its own. <b>Back</b> re-reads a step, and the tabs above jump to a chapter."
+                "Each step explains a control first. Press <b>Show me</b> to watch the tutorial use "
+                "it, then <b>Next</b> to move on — nothing happens on its own. <b>Back</b> re-reads a "
+                "step, and the tabs above jump to a chapter."
             ),
         ),
         TutorialStep(

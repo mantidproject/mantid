@@ -14,9 +14,15 @@ Overview
 spotlights one widget at a time, explains what it does, and **performs the interaction itself** so
 the user watches a real workflow run rather than reading about one.
 
-The tour never advances on its own. The user presses Next when they have finished reading, because
-there is no interval that is right for everyone: a step someone already understands is a wait, and
-a step they do not is a race.
+**Explain first, act second.** A step opens whatever it points at, spotlights it and shows its
+caption, and then waits. The action runs when the user presses *Show me*, so they are reading the
+explanation of a control at the moment they watch it being used.
+
+The tour never advances on its own either: the user presses *Next* when they have finished, because
+there is no interval that is right for everyone — a step someone already understands is a wait, and
+a step they do not is a race. *Next* performs the step's action first if *Show me* was not pressed,
+since chapters are cumulative and a skipped action would leave every later step describing an
+interface that never reached the state it assumes.
 
 An interface supplies two things — a factory that builds a copy of itself, and a list of steps.
 Everything else is handled by the framework.
@@ -101,19 +107,26 @@ and both bite: the interesting widgets often do not exist when the tour is writt
 canvas injected into a placeholder, a table cell widget that appears once there are rows), and a
 chapter is replayed against a freshly built interface whenever the user jumps to it.
 
-``await_`` is polled until it holds before the step is narrated — this is how a step waits for slow
-work without blocking. Give it an explicit ``await_timeout_s``: how long is reasonable depends
-entirely on what is being waited for, and a default would only ever be wrong in the direction that
-hides a hang.
+``await_`` is polled after the action until it holds — this is how a step waits for slow work
+without blocking, and the step is not reported as done until it does. Give it an explicit
+``await_timeout_s``: how long is reasonable depends entirely on what is being waited for, and a
+default would only ever be wrong in the direction that hides a hang.
+
+A step's target is opened up *before* its action runs — the containing tab selected, a collapsed
+group box expanded, including the target itself when it is one. A value set inside a shut section
+changes nothing the user can see. A target that does not exist until the action has run is
+allowed: it is simply not highlighted while the step is being explained, and is only reported as
+missing if it is still absent afterwards.
 
 Where the controls live
 #######################
 
 Two pieces of chrome, and the split between them matters:
 
-* ``TutorialShell`` wraps the interface. Chapter tabs along the top, ``Back`` / ``Next`` / ``End
-  tutorial`` and a step counter along the bottom, with the interface reparented in between. It
-  does not move.
+* ``TutorialShell`` wraps the interface. Chapter tabs along the top, ``Back`` / ``Show me`` /
+  ``Next`` / ``End tutorial`` and a step counter along the bottom, with the interface reparented in
+  between. It does not move. ``Show me`` is hidden for a step that only explains something, and
+  disabled once the step has been performed.
 * ``TutorialBubble`` is the caption beside the highlight, and carries **no controls at all**. It
   chases whatever is being spotlighted, so a button on it would be somewhere different on every
   step - the one control the user has to press would be the one they had to hunt for.
@@ -125,10 +138,10 @@ Choosing a chapter tab **rebuilds the sandbox** and fast-forwards through the ea
 actions. That is what lets a chapter be entered at all - its steps assume the state the chapters
 before it leave behind - and it is only possible because the tour drives a throwaway interface.
 
-Navigation is refused while a step is settling or waiting on the interface (``busy_changed``).
-Without that, Next pressed mid-search would run the following step's action against an interface
-that had not finished reacting to this one - and Next pressed during the settle would skip the
-step's caption while its action had already run.
+Navigation is refused while a step is settling or working (``busy_changed``). Without that, Next
+pressed mid-calculation would run the following step's action against an interface that had not
+finished reacting to this one - and Next pressed during the settle would skip the step's caption
+while its action had already run.
 
 Never block
 ###########

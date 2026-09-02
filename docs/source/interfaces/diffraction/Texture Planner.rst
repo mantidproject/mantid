@@ -67,10 +67,15 @@ Tutorial
     session you are working in, and everything it creates is removed when its
     window is closed.
 
-    Nothing moves on its own: press *Next* at the bottom of the window when you
-    have finished reading a step, or *Back* to re-read the previous one. The tabs
-    along the top jump to a chapter — the interface is rebuilt and brought up to
-    that point, so a chapter always starts from the state it expects.
+    Nothing happens on its own. Each step explains a control first; press
+    *Show me* to watch the tutorial use it, then *Next* to move on. *Next* on a
+    step you have not shown performs it for you, so the tutorial never skips a
+    change that later steps depend on. *Back* re-reads the previous step without
+    repeating anything.
+
+    The tabs along the top jump to a chapter — the interface is rebuilt and
+    brought up to that point, so a chapter always starts from the state it
+    expects.
 
 .. _Texture_Planner_sample-setup-ref:
 
