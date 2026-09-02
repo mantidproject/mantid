@@ -337,7 +337,13 @@ void solvePoissonMatchedFilter(const std::vector<double> &g, const std::vector<d
 
   double dA, dB, dAA, dBB, dAB;
   logLikelihoodGradHess(A, b, dA, dB, dAA, dBB, dAB);
-  sigA = dAA < 0.0 ? std::sqrt(-1.0 / dAA) : std::numeric_limits<double>::infinity();
+  const auto det = dAA * dBB - dAB * dAB;
+  sigA = std::numeric_limits<double>::infinity();
+  if (det > 0.0 && std::isfinite(det)) {
+    const auto varianceA = -dBB / det;
+    if (varianceA > 0.0 && std::isfinite(varianceA))
+      sigA = std::sqrt(varianceA);
+  }
 }
 
 /// Solve the 3x3 linear system H*x = -g via Cramer's rule, used for the

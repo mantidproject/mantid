@@ -213,6 +213,37 @@ public:
     const double normG = std::pow(2.0 * M_PI, 1.5) * sigmas[0] * sigmas[1] * sigmas[2];
     const double volume = (4.0 / 3.0) * M_PI * regionRadius * regionRadius * regionRadius;
 
+    // Recover the fitted background from its score equation at A_fit, then
+    // verify sigi uses the marginal variance from the full 2x2 information
+    // matrix rather than the conditional variance from dAA alone.
+    const double A_fit = inti / normG;
+    double bLow = 0.0;
+    double bHigh = 100.0;
+    for (int iteration = 0; iteration < 100; ++iteration) {
+      const double bMid = 0.5 * (bLow + bHigh);
+      double dB = -volume;
+      for (const double gi : g)
+        dB += 1.0 / (A_fit * gi + bMid);
+      if (dB > 0.0)
+        bLow = bMid;
+      else
+        bHigh = bMid;
+    }
+    const double bFit = 0.5 * (bLow + bHigh);
+    double dAA = 0.0;
+    double dBB = 0.0;
+    double dAB = 0.0;
+    for (const double gi : g) {
+      const double mu = A_fit * gi + bFit;
+      dAA -= gi * gi / (mu * mu);
+      dBB -= 1.0 / (mu * mu);
+      dAB -= gi / (mu * mu);
+    }
+    const double det = dAA * dBB - dAB * dAB;
+    const double expectedSigi = normG * std::sqrt(-dBB / det);
+    TSM_ASSERT_DELTA("profile-fit uncertainty should include covariance with the fitted background", sigi, expectedSigi,
+                     1e-8);
+
     auto logLikelihood = [&](double A, double b) {
       double ll = -(A * normG + b * volume);
       for (const double gi : g)
@@ -232,7 +263,6 @@ public:
 
     // Profile likelihood over b at the production-fitted A: if that A is
     // correct, maximizing over b here should reach the same joint optimum.
-    const double A_fit = inti / normG;
     double bestLLAtAFit = -std::numeric_limits<double>::infinity();
     for (int ib = 0; ib <= 4000; ++ib) {
       const double b = ib * 0.0125; // 0..50, finer than the joint grid
@@ -249,6 +279,30 @@ public:
     integrator.integrateUsingShapeProfileFit(shape, peak_q, true, intiAdjusted, sigiAdjusted);
     TSM_ASSERT_DELTA("AdjustCenter should not drift when the center is already correct", intiAdjusted, inti,
                      0.05 * inti);
+  }
+
+  void test_integrateUsingShapeProfileFit_returns_infinite_uncertainty_for_singular_information() {
+    const V3D peak_q(10, 0, 0);
+    const std::vector<std::pair<std::pair<double, double>, V3D>> peak_q_list{{std::make_pair(1., 1.), peak_q}};
+
+    DblMatrix UBinv(3, 3, false);
+    UBinv.setRow(0, V3D(.1, 0, 0));
+    UBinv.setRow(1, V3D(0, .1, 0));
+    UBinv.setRow(2, V3D(0, 0, .1));
+
+    const auto event = std::make_pair(std::make_pair(1., 1.), peak_q);
+    std::vector<std::pair<std::pair<double, double>, V3D>> event_Qs(6, event);
+    Integrate3DEvents integrator(peak_q_list, UBinv, 1.0);
+    integrator.addEvents(event_Qs, false);
+
+    const PeakEllipsoidFrame directions{V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    const PeakEllipsoidExtent sigmas{0.2, 0.2, 0.2};
+    const PeakShapeEllipsoid shape(directions, sigmas, sigmas, sigmas, Mantid::Kernel::QLab);
+
+    double inti, sigi;
+    integrator.integrateUsingShapeProfileFit(shape, peak_q, false, inti, sigi);
+
+    TS_ASSERT(std::isinf(sigi));
   }
 
   // Verify that AdjustCenter recovers (close to) the intensity that would

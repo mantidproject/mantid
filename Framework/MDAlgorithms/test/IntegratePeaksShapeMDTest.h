@@ -9,6 +9,8 @@
 #include "MantidMDAlgorithms/IntegratePeaksShapeMD.h"
 
 #include "MantidAPI/Run.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidFrameworkTestHelpers/SingleCrystalDiffractionTestHelper.h"
 #include "MantidKernel/V3D.h"
@@ -56,6 +58,67 @@ public:
     alg.setPropertyValue("OutputWorkspace", "dummy");
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
     TS_ASSERT(!alg.isExecuted());
+  }
+
+  void test_exec_throws_for_shape_not_in_qlab() {
+    const auto sigmas = std::make_tuple(.002, .002, 0.1);
+    WorkspaceBuilder builder;
+    builder.setRandomSeed(1);
+    builder.setNumPixels(100);
+    builder.addBackground(false);
+    builder.addPeakByHKL(V3D(1, -5, -3), 100, sigmas);
+    builder.addPeakByHKL(V3D(1, -4, -4), 100, sigmas);
+    builder.addPeakByHKL(V3D(1, -3, -5), 100, sigmas);
+
+    auto data = builder.build();
+    auto eventWS = std::get<0>(data);
+    auto peaksWS = std::get<1>(data);
+    const PeakEllipsoidFrame directions{V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    const PeakEllipsoidExtent radii{0.35, 0.35, 0.35};
+    peaksWS->getPeak(0).setPeakShape(new PeakShapeEllipsoid(directions, radii, radii, radii, Kernel::QSample));
+
+    IntegratePeaksShapeMD alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", eventWS);
+    alg.setProperty("PeaksWorkspace", peaksWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+    TS_ASSERT(!alg.isExecuted());
+  }
+
+  void test_exec_does_not_modify_input_events() {
+    const auto sigmas = std::make_tuple(.002, .002, 0.1);
+    WorkspaceBuilder builder;
+    builder.setRandomSeed(1);
+    builder.setNumPixels(100);
+    builder.addBackground(false);
+    builder.addPeakByHKL(V3D(1, -5, -3), 100, sigmas);
+    builder.addPeakByHKL(V3D(1, -4, -4), 100, sigmas);
+    builder.addPeakByHKL(V3D(1, -3, -5), 100, sigmas);
+
+    auto data = builder.build();
+    auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(std::get<0>(data));
+    auto peaksWS = std::get<1>(data);
+    const PeakEllipsoidFrame directions{V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    const PeakEllipsoidExtent radii{0.35, 0.35, 0.35};
+    for (auto &peak : peaksWS->getPeaks())
+      peak.setPeakShape(new PeakShapeEllipsoid(directions, radii, radii, radii, Kernel::QLab));
+
+    const auto originalEventType = eventWS->getEventType();
+    const auto originalEventCount = eventWS->getNumberEvents();
+
+    IntegratePeaksShapeMD alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", eventWS);
+    alg.setProperty("PeaksWorkspace", peaksWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    TS_ASSERT_EQUALS(eventWS->getEventType(), originalEventType);
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), originalEventCount);
   }
 
   void test_exec_events_reuses_existing_shape() {

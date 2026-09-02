@@ -114,11 +114,14 @@ void IntegratePeaksShapeMD::exec() {
   std::vector<V3D> hkl_vectors;
   std::vector<std::pair<std::pair<double, double>, V3D>> qList;
   for (size_t i = 0; i < n_peaks; i++) {
-    if (!dynamic_cast<const PeakShapeEllipsoid *>(&peaks[i].getPeakShape()))
+    const auto *shape = dynamic_cast<const PeakShapeEllipsoid *>(&peaks[i].getPeakShape());
+    if (!shape)
       throw std::runtime_error("Peak " + std::to_string(i) +
                                " does not have an ellipsoidal shape. Integrate the "
                                "PeaksWorkspace first, e.g. with IntegrateEllipsoids, "
                                "so that every peak has a shape to reuse.");
+    if (shape->frame() != Kernel::QLab)
+      throw std::runtime_error("Peak " + std::to_string(i) + " has an ellipsoidal shape that is not in QLab.");
 
     V3D hkl(peaks[i].getH(), peaks[i].getK(), peaks[i].getL());
     if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) { // tolerance == 1 just checks for (0,0,0)
@@ -206,7 +209,7 @@ void IntegratePeaksShapeMD::qListFromEventWS(Integrate3DEvents &integrator, Prog
     qConverter.initialize(m_targWSDescr);
 
     std::vector<double> buffer(DIMS);
-    EventList &events = wksp->getSpectrum(i);
+    EventList events = wksp->getSpectrum(i);
 
     events.switchTo(WEIGHTED_NOTIME);
     events.compressEvents(1e-5, &events);
