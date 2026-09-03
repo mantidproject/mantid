@@ -44,15 +44,6 @@ std::optional<std::pair<double, double>> getInstrumentTofRange(QMap<QString, QSt
   return std::make_pair(instrumentDetails.value(startKey).toDouble(), instrumentDetails.value(endKey).toDouble());
 }
 
-bool hasSpectraRange(MatrixWorkspace const &workspace, Mantid::specnum_t const spectraMin,
-                     Mantid::specnum_t const spectraMax) {
-  if (workspace.getNumberHistograms() == 0)
-    return false;
-
-  return workspace.getSpectrum(0).getSpectrumNo() == spectraMin &&
-         workspace.getSpectrum(workspace.getNumberHistograms() - 1).getSpectrumNo() == spectraMax;
-}
-
 } // namespace
 
 using namespace Mantid::API;

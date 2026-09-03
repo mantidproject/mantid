@@ -13,6 +13,7 @@
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"

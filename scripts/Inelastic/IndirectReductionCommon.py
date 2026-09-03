@@ -743,8 +743,6 @@ def group_spectra_by_theta(
                          all unmasked spectra are used.
     @return Grouped workspace
     """
-    import numpy as np
-
     spectrum_info = workspace.spectrumInfo()
     num_histograms = workspace.getNumberHistograms()
 
@@ -762,14 +760,12 @@ def group_spectra_by_theta(
     if not indexed_thetas:
         raise RuntimeError("No valid detectors found for ThetaGroups grouping.")
 
-    indices, theta_values = zip(*indexed_thetas)
+    _, theta_values = zip(*indexed_thetas)
     theta_min = min(theta_values)
     theta_max = max(theta_values)
 
     # Divide the theta range into equal-width bins
     bin_edges = np.linspace(theta_min, theta_max, number_of_groups + 1)
-    # Nudge the last edge so the maximum theta falls inside the last bin
-    bin_edges[-1] += 1e-10
 
     theta_groups: List[List[int]] = [[] for _ in range(number_of_groups)]
     for idx, theta in indexed_thetas:
