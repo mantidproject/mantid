@@ -85,7 +85,7 @@ IETPlotData IETView::getPlotData() const {
 IETSaveData IETView::getSaveData() const {
   IETSaveData saveTypes(m_uiForm.ckSaveNexus->isChecked(), m_uiForm.ckSaveSPE->isChecked(),
                         m_uiForm.ckSaveASCII->isChecked(), m_uiForm.ckSaveAclimax->isChecked(),
-                        m_uiForm.ckSaveDaveGrp->isChecked());
+                        m_uiForm.ckSaveDaveGrp->isChecked(), m_uiForm.ckSaveNXSPE->isChecked());
 
   return saveTypes;
 }
@@ -198,6 +198,7 @@ void IETView::setSaveEnabled(bool enable) {
   m_uiForm.ckSaveDaveGrp->setEnabled(enable);
   m_uiForm.ckSaveNexus->setEnabled(enable);
   m_uiForm.ckSaveSPE->setEnabled(enable);
+  m_uiForm.ckSaveNXSPE->setEnabled(enable);
 }
 
 void IETView::setPlotTimeIsPlotting(bool plotting) {

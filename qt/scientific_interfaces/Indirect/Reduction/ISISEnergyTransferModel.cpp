@@ -204,12 +204,24 @@ void IETModel::saveWorkspace(std::string const &workspaceName, IETSaveData const
     save("SaveNexusProcessed", workspaceName, workspaceName + ".nxs");
   if (saveTypes.getSPE())
     save("SaveSPE", workspaceName, workspaceName + ".spe");
+  if (saveTypes.getNXSPE())
+    saveNXSPE(workspaceName, workspaceName + ".nxspe");
   if (saveTypes.getASCII())
     save("SaveAscii", workspaceName, workspaceName + ".dat", 2);
   if (saveTypes.getAclimax())
     saveAclimax(workspaceName, workspaceName + "_aclimax.dat");
   if (saveTypes.getDaveGrp())
     saveDaveGroup(workspaceName, workspaceName + ".grp");
+}
+
+void IETModel::saveNXSPE(std::string const &workspaceName, std::string const &outputName) {
+  auto saver = AlgorithmManager::Instance().create("SaveNXSPE");
+  saver->initialize();
+  saver->setProperty("InputWorkspace", workspaceName);
+  saver->setProperty("Filename", outputName);
+  saver->setProperty("Psi", 0.0);
+  saver->setProperty("KiOverKfScaling", true);
+  saver->execute();
 }
 
 void IETModel::save(std::string const &algorithmName, std::string const &workspaceName, std::string const &outputName,

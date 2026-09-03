@@ -128,6 +128,32 @@ private:
 
 DECLARE_ALGORITHM(ISISIndirectEnergyTransfer)
 
+class SaveNXSPE : public Algorithm {
+public:
+  const std::string name() const override { return "SaveNXSPE"; }
+  int version() const override { return 1; }
+  const std::string summary() const override { return "SaveNXSPE mock"; }
+
+private:
+  void init() override {
+    declareProperty(
+        std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, PropertyMode::Optional));
+    declareProperty("Filename", "");
+    declareProperty("Psi", EMPTY_DBL());
+    declareProperty("KiOverKfScaling", true);
+  }
+  void exec() override {
+    auto tbl = WorkspaceFactory::Instance().createTable();
+    tbl->addColumn("double", "Psi");
+    tbl->addColumn("bool", "KiOverKfScaling");
+    TableRow row = tbl->appendRow();
+    row << static_cast<double>(getProperty("Psi")) << static_cast<bool>(getProperty("KiOverKfScaling"));
+    AnalysisDataService::Instance().addOrReplace("nxspeProps", tbl);
+  }
+};
+
+DECLARE_ALGORITHM(SaveNXSPE)
+
 class ISISEnergyTransferModelTest : public CxxTest::TestSuite {
 public:
   static ISISEnergyTransferModelTest *createSuite() { return new ISISEnergyTransferModelTest(); }
@@ -481,6 +507,23 @@ public:
 
     auto const algorithmQueue = m_model->plotRawAlgorithmQueue(instData, plotData);
     TS_ASSERT_EQUALS(4, algorithmQueue.size());
+  }
+
+  void test_saveWorkspace_nxspe_passes_psi_and_kikf_scaling() {
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(2, 10);
+    AnalysisDataService::Instance().addOrReplace("TestWS", ws);
+
+    IETSaveData saveData(false, false, false, false, false, /*nxspe=*/true);
+    m_model->saveWorkspace("TestWS", saveData);
+
+    auto props = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("nxspeProps");
+    TS_ASSERT(props);
+    if (props) {
+      TS_ASSERT_DELTA(props->getRef<double>("Psi", 0), 0.0, 1e-10);
+      TS_ASSERT_EQUALS(props->getRef<bool>("KiOverKfScaling", 0), true);
+    }
+    AnalysisDataService::Instance().remove("TestWS");
+    AnalysisDataService::Instance().remove("nxspeProps");
   }
 
 private:

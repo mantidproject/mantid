@@ -1145,7 +1145,12 @@ def save_reduction(workspace_names, formats, x_units="DeltaE"):
             SaveNexusProcessed(InputWorkspace=workspace_name, Filename=workspace_name + ".nxs")
 
         if "nxspe" in formats:
-            SaveNXSPE(InputWorkspace=workspace_name, Filename=workspace_name + ".nxspe")
+            SaveNXSPE(
+                InputWorkspace=workspace_name,
+                Filename=workspace_name + ".nxspe",
+                Psi=0.0,
+                KiOverKfScaling=True,
+            )
 
         if "ascii" in formats:
             _save_ascii(workspace_name, workspace_name + ".dat")
