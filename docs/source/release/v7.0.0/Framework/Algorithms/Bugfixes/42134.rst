@@ -1,0 +1,1 @@
+- Removed ``MultipleScattering`` checkbox from :ref:`algm-CylinderAbsorptionCW`, and renamed ``AttenuationXSection`` to ``AbsorptionXSection``
