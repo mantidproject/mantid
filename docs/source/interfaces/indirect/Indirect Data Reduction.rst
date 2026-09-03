@@ -67,6 +67,10 @@ ISIS Energy Transfer
 This tab provides you with the functionality to convert the raw data from the experiment run into
 units of :math:`\Delta E`. See the algorithm :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>`.
 
+OSIRIS silicon analyser data can be reduced by selecting the ``silicon`` analyser with either the
+``111`` or ``333`` reflection. The tab supplies the appropriate detector range and energy settings
+for the selected reflection.
+
 .. interface:: Data Reduction
   :widget: tabISISEnergyTransfer
 
@@ -99,8 +103,8 @@ Spectra Min/Spectra Max
 
 Detector Grouping
   Used to specify a method for grouping detectors. Possible grouping options include 'Individual', 'All', 'IPF',
-  'File', 'Groups' and 'Custom'. The TOSCA instrument will default to grouping using 'IPF', and the other instruments
-  will default to 'Individual' grouping.
+  'File', 'Groups' and 'Custom'. OSIRIS silicon reductions also provide 'Detectors' and 'ThetaGroups'. The TOSCA
+  instrument will default to grouping using 'IPF', and the other instruments will default to 'Individual' grouping.
 
 Background Removal
   Allows removal of a background given a time-of-flight range.
@@ -153,7 +157,8 @@ Output in :math:`cm^{-1}`
 
 Select Save Formats
   Allows you to select multiple output save formats to save the reduced data as,
-  in all cases the file will be saved in the default save directory.
+  in all cases the file will be saved in the default save directory. ``NXSPE`` is available for exporting data for
+  visualisation in :math:`\vec{Q}` space.
 
 .. _isis-energy-transfer-example-workflow:
 
@@ -209,6 +214,14 @@ All
 File
   Gives the option of supplying a grouping file to be used with the
   :ref:`GroupDetectors <algm-GroupDetectors>` algorithm.
+
+Detectors
+  Available for the OSIRIS silicon analyser. Groups the working pixels of each detector tube using the supplied
+  OSIRIS silicon grouping file. Unreliable edge pixels are excluded.
+
+ThetaGroups
+  Available for the OSIRIS silicon analyser. Divides the selected detector :math:`2\theta` range into the requested
+  number of equal-width angular groups and averages the spectra in each group.
 
 Default
   This grouping option is only available for TOSCA. It uses the spectra grouping specified in the IPF.
