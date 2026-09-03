@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<detector-grouping description="OSIRIS Silicon Analyser Tube Grouping - one group per tube">
+  <!-- Upper bank: 56 tubes (00-55), 15 pixels each, detector IDs 1005-1844 -->
+  <group name="upper_tube_00" ID="1">
+    <detids val="1005-1019"/>
+  </group>
+  <group name="upper_tube_01" ID="2">
+    <detids val="1020-1034"/>
+  </group>
+  <group name="upper_tube_02" ID="3">
+    <detids val="1035-1049"/>
+  </group>
+  <group name="upper_tube_03" ID="4">
+    <detids val="1050-1064"/>
+  </group>
+  <group name="upper_tube_04" ID="5">
+    <detids val="1065-1079"/>
+  </group>
+  <group name="upper_tube_05" ID="6">
+    <detids val="1080-1094"/>
+  </group>
+  <group name="upper_tube_06" ID="7">
+    <detids val="1095-1109"/>
+  </group>
+  <group name="upper_tube_07" ID="8">
+    <detids val="1110-1124"/>
+  </group>
+  <group name="upper_tube_08" ID="9">
+    <detids val="1125-1139"/>
+  </group>
+  <group name="upper_tube_09" ID="10">
+    <detids val="1140-1154"/>
+  </group>
+  <group name="upper_tube_10" ID="11">
+    <detids val="1155-1169"/>
+  </group>
+  <group name="upper_tube_11" ID="12">
+    <detids val="1170-1184"/>
+  </group>
+  <group name="upper_tube_12" ID="13">
+    <detids val="1185-1199"/>
+  </group>
+  <group name="upper_tube_13" ID="14">
+    <detids val="1200-1214"/>
+  </group>
+  <group name="upper_tube_14" ID="15">
+    <detids val="1215-1229"/>
+  </group>
+  <group name="upper_tube_15" ID="16">
+    <detids val="1230-1244"/>
+  </group>
+  <group name="upper_tube_16" ID="17">
+    <detids val="1245-1259"/>
+  </group>
+  <group name="upper_tube_17" ID="18">
+    <detids val="1260-1274"/>
+  </group>
+  <group name="upper_tube_18" ID="19">
+    <detids val="1275-1289"/>
+  </group>
+  <group name="upper_tube_19" ID="20">
+    <detids val="1290-1304"/>
+  </group>
+  <group name="upper_tube_20" ID="21">
+    <detids val="1305-1319"/>
+  </group>
+  <group name="upper_tube_21" ID="22">
+    <detids val="1320-1334"/>
+  </group>
+  <group name="upper_tube_22" ID="23">
+    <detids val="1335-1349"/>
+  </group>
+  <group name="upper_tube_23" ID="24">
+    <detids val="1350-1364"/>
+  </group>
+  <group name="upper_tube_24" ID="25">
+    <detids val="1365-1379"/>
+  </group>
+  <group name="upper_tube_25" ID="26">
+    <detids val="1380-1394"/>
+  </group>
+  <group name="upper_tube_26" ID="27">
+    <detids val="1395-1409"/>
+  </group>
+  <group name="upper_tube_27" ID="28">
+    <detids val="1410-1424"/>
+  </group>
+  <group name="upper_tube_28" ID="29">
+    <detids val="1425-1439"/>
+  </group>
+  <group name="upper_tube_29" ID="30">
+    <detids val="1440-1454"/>
+  </group>
+  <group name="upper_tube_30" ID="31">
+    <detids val="1455-1469"/>
+  </group>
+  <group name="upper_tube_31" ID="32">
+    <detids val="1470-1484"/>
+  </group>
+  <group name="upper_tube_32" ID="33">
+    <detids val="1485-1499"/>
+  </group>
+  <group name="upper_tube_33" ID="34">
+    <detids val="1500-1514"/>
+  </group>
+  <group name="upper_tube_34" ID="35">
+    <detids val="1515-1529"/>
+  </group>
+  <group name="upper_tube_35" ID="36">
+    <detids val="1530-1544"/>
+  </group>
+  <group name="upper_tube_36" ID="37">
+    <detids val="1545-1559"/>
+  </group>
+  <group name="upper_tube_37" ID="38">
+    <detids val="1560-1574"/>
+  </group>
+  <group name="upper_tube_38" ID="39">
+    <detids val="1575-1589"/>
+  </group>
+  <group name="upper_tube_39" ID="40">
+    <detids val="1590-1604"/>
+  </group>
+  <group name="upper_tube_40" ID="41">
+    <detids val="1605-1619"/>
+  </group>
+  <group name="upper_tube_41" ID="42">
+    <detids val="1620-1634"/>
+  </group>
+  <group name="upper_tube_42" ID="43">
+    <detids val="1635-1649"/>
+  </group>
+  <group name="upper_tube_43" ID="44">
+    <detids val="1650-1664"/>
+  </group>
+  <group name="upper_tube_44" ID="45">
+    <detids val="1665-1679"/>
+  </group>
+  <group name="upper_tube_45" ID="46">
+    <detids val="1680-1694"/>
+  </group>
+  <group name="upper_tube_46" ID="47">
+    <detids val="1695-1709"/>
+  </group>
+  <group name="upper_tube_47" ID="48">
+    <detids val="1710-1724"/>
+  </group>
+  <group name="upper_tube_48" ID="49">
+    <detids val="1725-1739"/>
+  </group>
+  <group name="upper_tube_49" ID="50">
+    <detids val="1740-1754"/>
+  </group>
+  <group name="upper_tube_50" ID="51">
+    <detids val="1755-1769"/>
+  </group>
+  <group name="upper_tube_51" ID="52">
+    <detids val="1770-1784"/>
+  </group>
+  <group name="upper_tube_52" ID="53">
+    <detids val="1785-1799"/>
+  </group>
+  <group name="upper_tube_53" ID="54">
+    <detids val="1800-1814"/>
+  </group>
+  <group name="upper_tube_54" ID="55">
+    <detids val="1815-1829"/>
+  </group>
+  <group name="upper_tube_55" ID="56">
+    <detids val="1830-1844"/>
+  </group>
+  <!-- Lower bank: 48 tubes (00-47), 15 pixels each, detector IDs 1845-2564 -->
+  <group name="lower_tube_00" ID="57">
+    <detids val="1845-1859"/>
+  </group>
+  <group name="lower_tube_01" ID="58">
+    <detids val="1860-1874"/>
+  </group>
+  <group name="lower_tube_02" ID="59">
+    <detids val="1875-1889"/>
+  </group>
+  <group name="lower_tube_03" ID="60">
+    <detids val="1890-1904"/>
+  </group>
+  <group name="lower_tube_04" ID="61">
+    <detids val="1905-1919"/>
+  </group>
+  <group name="lower_tube_05" ID="62">
+    <detids val="1920-1934"/>
+  </group>
+  <group name="lower_tube_06" ID="63">
+    <detids val="1935-1949"/>
+  </group>
+  <group name="lower_tube_07" ID="64">
+    <detids val="1950-1964"/>
+  </group>
+  <group name="lower_tube_08" ID="65">
+    <detids val="1965-1979"/>
+  </group>
+  <group name="lower_tube_09" ID="66">
+    <detids val="1980-1994"/>
+  </group>
+  <group name="lower_tube_10" ID="67">
+    <detids val="1995-2009"/>
+  </group>
+  <group name="lower_tube_11" ID="68">
+    <detids val="2010-2024"/>
+  </group>
+  <group name="lower_tube_12" ID="69">
+    <detids val="2025-2039"/>
+  </group>
+  <group name="lower_tube_13" ID="70">
+    <detids val="2040-2054"/>
+  </group>
+  <group name="lower_tube_14" ID="71">
+    <detids val="2055-2069"/>
+  </group>
+  <group name="lower_tube_15" ID="72">
+    <detids val="2070-2084"/>
+  </group>
+  <group name="lower_tube_16" ID="73">
+    <detids val="2085-2099"/>
+  </group>
+  <group name="lower_tube_17" ID="74">
+    <detids val="2100-2114"/>
+  </group>
+  <group name="lower_tube_18" ID="75">
+    <detids val="2115-2129"/>
+  </group>
+  <group name="lower_tube_19" ID="76">
+    <detids val="2130-2144"/>
+  </group>
+  <group name="lower_tube_20" ID="77">
+    <detids val="2145-2159"/>
+  </group>
+  <group name="lower_tube_21" ID="78">
+    <detids val="2160-2174"/>
+  </group>
+  <group name="lower_tube_22" ID="79">
+    <detids val="2175-2189"/>
+  </group>
+  <group name="lower_tube_23" ID="80">
+    <detids val="2190-2204"/>
+  </group>
+  <group name="lower_tube_24" ID="81">
+    <detids val="2205-2219"/>
+  </group>
+  <group name="lower_tube_25" ID="82">
+    <detids val="2220-2234"/>
+  </group>
+  <group name="lower_tube_26" ID="83">
+    <detids val="2235-2249"/>
+  </group>
+  <group name="lower_tube_27" ID="84">
+    <detids val="2250-2264"/>
+  </group>
+  <group name="lower_tube_28" ID="85">
+    <detids val="2265-2279"/>
+  </group>
+  <group name="lower_tube_29" ID="86">
+    <detids val="2280-2294"/>
+  </group>
+  <group name="lower_tube_30" ID="87">
+    <detids val="2295-2309"/>
+  </group>
+  <group name="lower_tube_31" ID="88">
+    <detids val="2310-2324"/>
+  </group>
+  <group name="lower_tube_32" ID="89">
+    <detids val="2325-2339"/>
+  </group>
+  <group name="lower_tube_33" ID="90">
+    <detids val="2340-2354"/>
+  </group>
+  <group name="lower_tube_34" ID="91">
+    <detids val="2355-2369"/>
+  </group>
+  <group name="lower_tube_35" ID="92">
+    <detids val="2370-2384"/>
+  </group>
+  <group name="lower_tube_36" ID="93">
+    <detids val="2385-2399"/>
+  </group>
+  <group name="lower_tube_37" ID="94">
+    <detids val="2400-2414"/>
+  </group>
+  <group name="lower_tube_38" ID="95">
+    <detids val="2415-2429"/>
+  </group>
+  <group name="lower_tube_39" ID="96">
+    <detids val="2430-2444"/>
+  </group>
+  <group name="lower_tube_40" ID="97">
+    <detids val="2445-2459"/>
+  </group>
+  <group name="lower_tube_41" ID="98">
+    <detids val="2460-2474"/>
+  </group>
+  <group name="lower_tube_42" ID="99">
+    <detids val="2475-2489"/>
+  </group>
+  <group name="lower_tube_43" ID="100">
+    <detids val="2490-2504"/>
+  </group>
+  <group name="lower_tube_44" ID="101">
+    <detids val="2505-2519"/>
+  </group>
+  <group name="lower_tube_45" ID="102">
+    <detids val="2520-2534"/>
+  </group>
+  <group name="lower_tube_46" ID="103">
+    <detids val="2535-2549"/>
+  </group>
+  <group name="lower_tube_47" ID="104">
+    <detids val="2550-2564"/>
+  </group>
+</detector-grouping>
