@@ -345,10 +345,10 @@ class CylinderAbsorptionCW(PythonAlgorithm):
             "the workspace sample shape if it is a cylinder.",
         )
         self.declareProperty(
-            "AttenuationXSection",
+            "AbsorptionXSection",
             Property.EMPTY_DBL,
             float_greater_than_zero_validator,
-            doc="Attenuation cross-section in barn at 1.7982 Å. If not provided, it will be inferred from the workspace sample material.",
+            doc="Absorption cross-section in barn at 1.7982 Å. If not provided, it will be inferred from the workspace sample material.",
         )
         self.declareProperty(
             "ScatteringXSection",
@@ -368,7 +368,6 @@ class CylinderAbsorptionCW(PythonAlgorithm):
             doc="Method to calculate absorption correction.",
             validator=StringListValidator(["Sears", "Sabine"]),
         )
-        self.declareProperty("MultipleScattering", True, doc="Calculate multiple scattering in addition to absorption correction.")
         self.declareProperty(
             WorkspaceProperty("AbsorptionWorkspace", "", direction=Direction.Output), doc="Absorption correction output workspace name"
         )
@@ -396,15 +395,12 @@ class CylinderAbsorptionCW(PythonAlgorithm):
                         "Input workspace sample shape is not a cylinder. Please provide radius and height properties "
                         "or use a workspace with a cylinder sample shape."
                     )
-        elif not self.getProperty("MultipleScattering").value:
-            if self.getProperty("Radius").isDefault:
-                issues["Radius"] = "Radius is required, either provide it or use a workspace with a cylinder sample shape."
         elif self.getProperty("Radius").isDefault or self.getProperty("Height").isDefault:
             issues["Radius"] = "Radius is required, either provide it or use a workspace with a cylinder sample shape."
             issues["Height"] = "Height is required, either provide it or use a workspace with a cylinder sample shape."
 
         if (
-            self.getProperty("AttenuationXSection").isDefault
+            self.getProperty("AbsorptionXSection").isDefault
             and self.getProperty("ScatteringXSection").isDefault
             and self.getProperty("SampleNumberDensity").isDefault
         ):
@@ -419,17 +415,17 @@ class CylinderAbsorptionCW(PythonAlgorithm):
                     "the workspace sample material. Please provide these properties or ensure the sample material has valid values."
                 )
                 issues["InputWorkspace"] = msg
-                issues["AttenuationXSection"] = msg
+                issues["AbsorptionXSection"] = msg
                 issues["ScatteringXSection"] = msg
                 issues["SampleNumberDensity"] = msg
         elif (
-            self.getProperty("AttenuationXSection").isDefault
+            self.getProperty("AbsorptionXSection").isDefault
             or self.getProperty("ScatteringXSection").isDefault
             or self.getProperty("SampleNumberDensity").isDefault
         ):
-            issues["AttenuationXSection"] = "Attenuation and scattering cross-section properties must be provided together."
-            issues["ScatteringXSection"] = "Attenuation and scattering cross-section properties must be provided together."
-            issues["SampleNumberDensity"] = "Attenuation and scattering cross-section properties must be provided together."
+            issues["AbsorptionXSection"] = "Absorption and scattering cross-section properties must be provided together."
+            issues["ScatteringXSection"] = "Absorption and scattering cross-section properties must be provided together."
+            issues["SampleNumberDensity"] = "Absorption and scattering cross-section properties must be provided together."
 
         return issues
 
@@ -438,10 +434,9 @@ class CylinderAbsorptionCW(PythonAlgorithm):
 
         wavelength = self.getProperty("Wavelength").value
         method = self.getProperty("AbsorptionCorrectionMethod").value
-        multiple_scattering = self.getProperty("MultipleScattering").value
 
         if (
-            self.getProperty("AttenuationXSection").isDefault
+            self.getProperty("AbsorptionXSection").isDefault
             and self.getProperty("ScatteringXSection").isDefault
             and self.getProperty("SampleNumberDensity").isDefault
         ):
@@ -451,9 +446,9 @@ class CylinderAbsorptionCW(PythonAlgorithm):
             totalXSection = absorbXSection + totalScatterXSection
             numberDensity = material.numberDensity
         else:
-            # AttenuationXSection is given at REFERENCE_LAMBDA, so scale it linearly to the
+            # AbsorptionXSection is given at REFERENCE_LAMBDA, so scale it linearly to the
             # requested wavelength exactly as Material::absorbXSection does.
-            absorbXSection = self.getProperty("AttenuationXSection").value * wavelength / REFERENCE_LAMBDA
+            absorbXSection = self.getProperty("AbsorptionXSection").value * wavelength / REFERENCE_LAMBDA
             totalScatterXSection = self.getProperty("ScatteringXSection").value
             totalXSection = absorbXSection + totalScatterXSection
             numberDensity = self.getProperty("SampleNumberDensity").value
@@ -513,26 +508,20 @@ class CylinderAbsorptionCW(PythonAlgorithm):
 
         self.setProperty("AbsorptionWorkspace", output_abs_ws)
 
-        multiple_scattering_delta = 0
-
-        if multiple_scattering:
-            R_over_h_grid = np.array(
-                [0.10, 0.12, 0.14, 0.16, 0.18, 0.20, 0.22, 0.24, 0.26, 0.28, 0.30, 0.40, 0.50, 1.00, 2.00, 3.00, 4.00, 5.00]
-            )
-            μR_grid = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
-
-            R_over_h = radius / height
-
-            try:
-                δ = bilinear_interpolate(R_over_h, μR, R_over_h_grid, μR_grid, δ_grid)
-            except ValueError:
-                self.log().error("Multiple scattering correction out of lookup range for this sample and set to zero")
-                δ = 0
-
-            multiple_scattering_delta = δ * totalScatterXSection / totalXSection
-            self.log().information(
-                f"Calculated multiple scattering delta: {multiple_scattering_delta:.4f} using R/h {R_over_h:.4f} and μR {μR:.4f}"
-            )
+        R_over_h_grid = np.array(
+            [0.10, 0.12, 0.14, 0.16, 0.18, 0.20, 0.22, 0.24, 0.26, 0.28, 0.30, 0.40, 0.50, 1.00, 2.00, 3.00, 4.00, 5.00]
+        )
+        μR_grid = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
+        R_over_h = radius / height
+        try:
+            δ = bilinear_interpolate(R_over_h, μR, R_over_h_grid, μR_grid, δ_grid)
+        except ValueError:
+            self.log().error("Multiple scattering correction out of lookup range for this sample and set to zero")
+            δ = 0
+        multiple_scattering_delta = δ * totalScatterXSection / totalXSection
+        self.log().information(
+            f"Calculated multiple scattering delta: {multiple_scattering_delta:.4f} using R/h {R_over_h:.4f} and μR {μR:.4f}"
+        )
 
         output_ms_ws = CreateSingleValuedWorkspace(
             DataValue=multiple_scattering_delta, OutputWorkspace=self.getProperty("MultipleScatteringWorkspace").value, EnableLogging=False
