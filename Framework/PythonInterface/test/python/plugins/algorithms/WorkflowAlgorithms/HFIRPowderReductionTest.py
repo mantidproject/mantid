@@ -2027,22 +2027,6 @@ class SampleAbsorptionCorrectionTests(unittest.TestCase):
             if mtd.doesExist(name):
                 mtd.remove(name)
 
-    def test_validate_do_ms_requires_sample_height(self):
-        """DoMultipleScatteringCorrection=True requires SampleHeight > 0."""
-        algo = _create_algo(
-            Instrument="WAND^2",
-            Wavelength=1.7982,
-            VanadiumDiameter=0.5,
-            DoAttenuationCorrection=True,
-            DoMultipleScatteringCorrection=True,
-            SampleChemicalFormula="Fe2 O3",
-            SampleCrystalDensity=5.24,
-            SampleDiameter=0.8,
-            SampleHeight=0.0,
-        )
-        issues = algo.validateInputs()
-        self.assertIn("SampleHeight", issues)
-
     def test_validate_absolute_units_requires_vanadium_and_height(self):
         """AbsoluteIntensityUnits=True requires VanadiumDiameter>0, VanadiumHeight>0, SampleHeight>0."""
         algo = _create_algo(
@@ -2183,57 +2167,6 @@ class SampleAbsorptionCorrectionTests(unittest.TestCase):
         for i in range(ws.getNumberHistograms()):
             self.assertGreater(ws.y(i)[0], 90.0)
 
-    def test_no_multiple_scattering_when_disabled(self):
-        """When DoMultipleScatteringCorrection=False, ΔS=0."""
-        self._create_workspace("sample_ws", counts=100.0, monitor=200.0)
-
-        algo = _create_algo(
-            Instrument="WAND^2",
-            Wavelength=1.7982,
-            VanadiumDiameter=0.5,
-            VanadiumHeight=3.0,
-            DoAttenuationCorrection=True,
-            DoMultipleScatteringCorrection=False,
-            SampleChemicalFormula="V",
-            SampleCrystalDensity=6.1172,
-            SamplePackingFraction=1.0,
-            SampleDiameter=1.0,
-            SampleHeight=3.0,
-            NormaliseBy="None",
-        )
-        algo.vanadium_ws = None
-        algo.vanadium_background_ws = None
-        algo.sample_background_ws = None
-
-        algo._apply_sample_corrections_pre_conversion(["sample_ws"])
-        val_no_ms = mtd["sample_ws"].y(0)[0]
-
-        # Now with MS
-        self._create_workspace("sample_ws2", counts=100.0, monitor=200.0)
-        algo2 = _create_algo(
-            Instrument="WAND^2",
-            Wavelength=1.7982,
-            VanadiumDiameter=0.5,
-            VanadiumHeight=3.0,
-            DoAttenuationCorrection=True,
-            DoMultipleScatteringCorrection=True,
-            SampleChemicalFormula="V",
-            SampleCrystalDensity=6.1172,
-            SamplePackingFraction=1.0,
-            SampleDiameter=1.0,
-            SampleHeight=3.0,
-            NormaliseBy="None",
-        )
-        algo2.vanadium_ws = None
-        algo2.vanadium_background_ws = None
-        algo2.sample_background_ws = None
-
-        algo2._apply_sample_corrections_pre_conversion(["sample_ws2"])
-        val_with_ms = mtd["sample_ws2"].y(0)[0]
-
-        # With MS correction (Δ > 0), (1-Δ) < 1, so result should be smaller
-        self.assertGreater(val_no_ms, val_with_ms)
-
     def test_sample_correction_per_spectrum_varies(self):
         """Per-spectrum absorption values differ for different 2theta angles."""
         self._create_workspace("sample_ws", counts=100.0, monitor=200.0)
@@ -2271,7 +2204,6 @@ class SampleAbsorptionCorrectionTests(unittest.TestCase):
         """Test that new properties have correct defaults."""
         algo = _create_algo(Instrument="WAND^2")
         self.assertFalse(algo.getProperty("DoAttenuationCorrection").value)
-        self.assertFalse(algo.getProperty("DoMultipleScatteringCorrection").value)
         self.assertFalse(algo.getProperty("AbsoluteIntensityUnits").value)
         self.assertEqual(algo.getProperty("SamplePackingFraction").value, 0.5)
         self.assertEqual(algo.getProperty("SampleHeight").value, 0.0)
