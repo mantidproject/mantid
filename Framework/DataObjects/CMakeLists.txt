@@ -81,8 +81,6 @@ set(INC_FILES
     inc/MantidDataObjects/FractionalRebinning.h
     inc/MantidDataObjects/GroupingWorkspace.h
     inc/MantidDataObjects/Histogram1D.h
-    inc/MantidDataObjects/MDBin.h
-    inc/MantidDataObjects/MDBin.hxx
     inc/MantidDataObjects/MDBox.h
     inc/MantidDataObjects/MDBox.hxx
     inc/MantidDataObjects/MDBoxBase.h
@@ -161,7 +159,6 @@ set(TEST_FILES
     FakeMDTest.h
     GroupingWorkspaceTest.h
     Histogram1DTest.h
-    MDBinTest.h
     MDBoxBaseTest.h
     MDBoxFlatTreeTest.h
     MDBoxIteratorTest.h

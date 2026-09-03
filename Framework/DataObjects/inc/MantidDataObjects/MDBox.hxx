@@ -205,18 +205,6 @@ TMDE(void MDBox)::getBoxes(std::vector<API::IMDNode *> &boxes, size_t /*maxDepth
 }
 
 //-----------------------------------------------------------------------------------------------
-/** Return all boxes contained within.
- *
- * @param outBoxes :: vector to fill
- * @param cond :: condition to check
- *(leaves on the tree)
- */
-TMDE(void MDBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes, const std::function<bool(API::IMDNode *)> &cond) {
-  if (cond(this))
-    outBoxes.emplace_back(this);
-}
-
-//-----------------------------------------------------------------------------------------------
 /** Returns the total number of points (events) in this box either they are all
  * in memory, or on disk or partially on memory and partially on disk
  * for partially loaded object substantially relies on correct settings of
@@ -466,82 +454,6 @@ TMDE(void MDBox)::calculateDimensionStats(MDDimensionStats *stats) const {
   for (const MDE &Evnt : data) {
     for (size_t d = 0; d < nd; d++) {
       stats[d].addPoint(Evnt.getCenter(d));
-    }
-  }
-}
-
-//-----------------------------------------------------------------------------------------------
-/** Perform centerpoint binning of events.
- * @param bin :: MDBin object giving the limits of events to accept.
- * @param fullyContained :: optional bool array sized [nd] of which dimensions
- * are known to be fully contained (for MDSplitBox)
- */
-TMDE(void MDBox)::centerpointBin(MDBin<MDE, nd> &bin, bool *fullyContained) const {
-  if (fullyContained) {
-    // For MDSplitBox, check if we've already found that all dimensions are
-    // fully contained
-    size_t d;
-    for (d = 0; d < nd; ++d) {
-      if (!fullyContained[d])
-        break;
-    }
-    if (d == nd) {
-      // All dimensions are fully contained, so just return the cached total
-      // signal instead of counting.
-      bin.m_signal += static_cast<signal_t>(this->m_signal);
-      bin.m_errorSquared += static_cast<signal_t>(this->m_errorSquared);
-      return;
-    }
-  }
-
-  // If the box is cached to disk, you need to retrieve it
-  const std::vector<MDE> &events = this->getConstEvents();
-  // For each MDLeanEvent
-  for (const auto &evnt : events) {
-    size_t d;
-    // Go through each dimension
-    for (d = 0; d < nd; ++d) {
-      // Check that the value is within the bounds given. (Rotation is for
-      // later)
-      coord_t x = evnt.getCenter(d);
-      if (x < bin.m_min[d] || x >= bin.m_max[d])
-        break;
-    }
-    // If the loop reached the end, then it was all within bounds.
-    if (d == nd) {
-      // Accumulate error and signal (as doubles, to preserve precision)
-      bin.m_signal += static_cast<signal_t>(evnt.getSignal());
-      bin.m_errorSquared += static_cast<signal_t>(evnt.getErrorSquared());
-    }
-  }
-  // it is constant access, so no saving or fiddling with the buffer is needed.
-  // Events just can be dropped if necessary
-  // releaseEvents
-  if (m_Saveable)
-    m_Saveable->setBusy(false);
-}
-
-//-----------------------------------------------------------------------------------------------
-/** General (non-axis-aligned) centerpoint binning method.
- * TODO: TEST THIS!
- *
- * @param bin :: a MDBin object giving the limits, aligned with the axes of the
- *workspace,
- *        of where the non-aligned bin MIGHT be present.
- * @param function :: a ImplicitFunction that will evaluate true for any
- *coordinate that is
- *        contained within the (non-axis-aligned) bin.
- */
-TMDE(void MDBox)::generalBin(MDBin<MDE, nd> &bin, Mantid::Geometry::MDImplicitFunction &function) const {
-  UNUSED_ARG(bin);
-
-  // For each MDLeanEvent
-  for (const auto &event : data) {
-    if (function.isPointContained(event.getCenter())) // HACK
-    {
-      // Accumulate error and signal
-      bin.m_signal += static_cast<signal_t>(event.getSignal());
-      bin.m_errorSquared += static_cast<signal_t>(event.getErrorSquared());
     }
   }
 }

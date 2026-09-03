@@ -49,9 +49,6 @@ public:
   /// Clear all contained data
   void clear() override {}
 
-  // Not to be pure virtual
-  void getBoxes(std::vector<API::IMDNode *> &, const std::function<bool(API::IMDNode *)> &) override {}
-
   uint64_t getNPoints() const override {
     return 0;
     // return this->getFileSize();
@@ -100,10 +97,6 @@ public:
   void buildAndAddEventUnsafe(const Mantid::signal_t, const Mantid::signal_t, const std::vector<coord_t> &, uint16_t,
                               uint16_t, uint32_t) override {};
 
-  /** Perform centerpoint binning of events
-   * @param bin :: MDBin object giving the limits of events to accept.
-   */
-  void centerpointBin(MDBin<MDE, nd> & /*bin*/, bool *) const override {}
   void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = nullptr) override {};
   void refreshCache(Kernel::ThreadScheduler * /*ts*/ = nullptr) override {};
   // virtual void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL){};
@@ -122,7 +115,6 @@ public:
   void getBoxes(std::vector<API::IMDNode *> & /*boxes*/, size_t /*maxDepth*/, bool,
                 Mantid::Geometry::MDImplicitFunction *) override {};
 
-  void generalBin(MDBin<MDE, nd> & /*bin*/, Mantid::Geometry::MDImplicitFunction & /*function*/) const override {}
   void clearDataFromMemory() override {};
 
   bool getIsMasked() const override { throw std::runtime_error("MDBoxBaseTester does not implement getIsMasked"); }

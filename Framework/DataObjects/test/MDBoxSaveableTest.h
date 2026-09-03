@@ -9,7 +9,6 @@
 #include "MantidAPI/BoxController.h"
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidDataObjects/CoordTransformDistance.h"
-#include "MantidDataObjects/MDBin.h"
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidFrameworkTestHelpers/BoxControllerDummyIO.h"
@@ -665,8 +664,8 @@ public:
 
   //-----------------------------------------------------------------------------------------
   /** Set up the file back end and test accessing data
-   * by binning and stuff */
-  void do_test_fileBackEnd_binningOperations(bool parallel_condition) {
+   * by integrating a sphere */
+  void do_test_fileBackEnd_integrationOperations(bool parallel_condition) {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
 
@@ -679,21 +678,6 @@ public:
     DiskBuffer *dbuf = bc->getFileIO();
     // It is empty now
     TS_ASSERT_EQUALS(dbuf->getWriteBufferUsed(), 0);
-
-    PARALLEL_FOR_IF(parallel_condition)
-    for (int i = 0; i < 20; i++) {
-      // std::cout << "Bin try " << i << "\n";
-      // Try a bin, 2x2x2 so 8 events should be in there
-      MDBin<MDLeanEvent<3>, 3> bin;
-      for (size_t d = 0; d < 3; d++) {
-        bin.m_min[d] = 2.0;
-        bin.m_max[d] = 4.0;
-        bin.m_signal = 0;
-      }
-      c.centerpointBin(bin, nullptr);
-      TS_ASSERT_DELTA(bin.m_signal, 8.0, 1e-4);
-      TS_ASSERT_DELTA(bin.m_errorSquared, 8.0, 1e-4);
-    }
 
     PARALLEL_FOR_IF(parallel_condition)
     for (int i = 0; i < 20; i++) {
@@ -716,10 +700,10 @@ public:
     UNUSED_ARG(parallel_condition)
   }
 
-  void test_fileBackEnd_binningOperations() { do_test_fileBackEnd_binningOperations(false); }
+  void test_fileBackEnd_integrationOperations() { do_test_fileBackEnd_integrationOperations(false); }
 
   // TODO : does not work multithreaded and have never been workging. -- to fix
-  void xxest_fileBackEnd_binningOperations_inParallel() { do_test_fileBackEnd_binningOperations(true); }
+  void xxest_fileBackEnd_integrationOperations_inParallel() { do_test_fileBackEnd_integrationOperations(true); }
 
   //------------------------------------------------------------------------------------------------
   /** This test splits a large number of events,
