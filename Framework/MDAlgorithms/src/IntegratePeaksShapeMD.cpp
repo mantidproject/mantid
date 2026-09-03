@@ -175,7 +175,17 @@ void IntegratePeaksShapeMD::exec() {
     double inti = 0.0;
     double sigi = 0.0;
     if (profileFit) {
-      integrator.integrateUsingShapeProfileFit(*shape, peak.getQLabFrame(), adjustCenter, inti, sigi);
+      V3D center;
+      integrator.integrateUsingShapeProfileFit(*shape, peak.getQLabFrame(), adjustCenter, center, inti, sigi);
+      // Persist a center correction found by AdjustCenter as the output
+      // shape's translation -- peak.getQLabFrame() itself is left alone,
+      // since it's tied to a specific detector pixel/TOF and isn't free to
+      // move without checking that still corresponds to a valid trajectory.
+      if (adjustCenter && center != shape->translation()) {
+        peak.setPeakShape(new PeakShapeEllipsoid(
+            shape->directions(), shape->abcRadii(), shape->abcRadiiBackgroundInner(), shape->abcRadiiBackgroundOuter(),
+            shape->frame(), shape->algorithmName(), shape->algorithmVersion(), center));
+      }
     } else {
       integrator.integrateUsingShape(*shape, peak.getQLabFrame(), inti, sigi);
     }

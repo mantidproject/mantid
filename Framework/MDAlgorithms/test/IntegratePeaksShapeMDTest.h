@@ -230,6 +230,76 @@ public:
     }
   }
 
+  // AdjustCenter should persist any found correction as the output shape's
+  // translation (leaving directions/radii/frame/algorithm metadata
+  // untouched), and should not touch translation at all when disabled.
+  void test_exec_profileFit_adjustCenter_writes_translation() {
+    const int numEventsPerPeak = 10000;
+    const auto sigmas = std::make_tuple(.002, .002, 0.1);
+
+    WorkspaceBuilder builder;
+    builder.setRandomSeed(1);
+    builder.setNumPixels(100);
+    builder.addBackground(false);
+    builder.addPeakByHKL(V3D(1, -5, -3), numEventsPerPeak, sigmas);
+    builder.addPeakByHKL(V3D(1, -4, -4), numEventsPerPeak, sigmas);
+    builder.addPeakByHKL(V3D(1, -3, -5), numEventsPerPeak, sigmas);
+    builder.addPeakByHKL(V3D(1, -4, -2), numEventsPerPeak, sigmas);
+    builder.addPeakByHKL(V3D(1, -4, 0), numEventsPerPeak, sigmas);
+    builder.addPeakByHKL(V3D(2, -3, -4), numEventsPerPeak, sigmas);
+
+    auto data = builder.build();
+    auto eventWS = std::get<0>(data);
+    auto peaksWS = std::get<1>(data);
+
+    // Simple, sigma-scaled shapes (not a hard SpecifySize cutoff) so
+    // ProfileFit's Gaussian kernel is well-conditioned against the region.
+    const PeakEllipsoidFrame directions{V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    const PeakEllipsoidExtent radii{0.03, 0.03, 0.03};
+    for (auto &peak : peaksWS->getPeaks())
+      peak.setPeakShape(new PeakShapeEllipsoid(directions, radii, radii, radii, Mantid::Kernel::QLab));
+
+    auto runIntegration = [&](bool adjustCenter, const std::string &outputName) {
+      IntegratePeaksShapeMD alg;
+      alg.setChild(true);
+      alg.setRethrows(true);
+      alg.initialize();
+      alg.setProperty("InputWorkspace", eventWS);
+      alg.setProperty("PeaksWorkspace", peaksWS);
+      alg.setProperty("RegionRadius", 0.5);
+      alg.setProperty("ProfileFit", true);
+      alg.setProperty("AdjustCenter", adjustCenter);
+      alg.setPropertyValue("OutputWorkspace", outputName);
+      alg.execute();
+      PeaksWorkspace_sptr result = alg.getProperty("OutputWorkspace");
+      return result;
+    };
+
+    PeaksWorkspace_sptr withoutAdjust = runIntegration(false, "withoutAdjust");
+    PeaksWorkspace_sptr withAdjust = runIntegration(true, "withAdjust");
+
+    for (int i = 0; i < withoutAdjust->getNumberPeaks(); ++i) {
+      const auto *inputShape = dynamic_cast<const PeakShapeEllipsoid *>(&peaksWS->getPeak(i).getPeakShape());
+      const auto *noAdjustShape = dynamic_cast<const PeakShapeEllipsoid *>(&withoutAdjust->getPeak(i).getPeakShape());
+      const auto *adjustShape = dynamic_cast<const PeakShapeEllipsoid *>(&withAdjust->getPeak(i).getPeakShape());
+      TS_ASSERT(noAdjustShape);
+      TS_ASSERT(adjustShape);
+
+      TSM_ASSERT_EQUALS("AdjustCenter=false must not write a translation for peak " + std::to_string(i),
+                        noAdjustShape->translation(), V3D(0, 0, 0));
+
+      // Everything except translation must survive the reconstruction
+      // unchanged: same directions, radii, frame and algorithm metadata.
+      for (size_t k = 0; k < 3; ++k) {
+        TS_ASSERT_EQUALS(adjustShape->directions()[k], inputShape->directions()[k]);
+        TS_ASSERT_EQUALS(adjustShape->abcRadii()[k], inputShape->abcRadii()[k]);
+        TS_ASSERT_EQUALS(adjustShape->abcRadiiBackgroundInner()[k], inputShape->abcRadiiBackgroundInner()[k]);
+        TS_ASSERT_EQUALS(adjustShape->abcRadiiBackgroundOuter()[k], inputShape->abcRadiiBackgroundOuter()[k]);
+      }
+      TS_ASSERT_EQUALS(adjustShape->frame(), inputShape->frame());
+    }
+  }
+
   void test_exec_histogram_reuses_existing_shape() {
     const int numEventsPerPeak = 1000;
     const auto sigmas = std::make_tuple(.002, .002, .01);

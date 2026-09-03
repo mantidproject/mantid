@@ -383,15 +383,14 @@ void solvePoissonMatchedFilter(const std::vector<double> &g, const std::vector<d
   }
 }
 
-/// Solve the 3x3 linear system H*x = -g via Cramer's rule, used for the
-/// Gauss-Newton center-refinement step. Returns false (x left unchanged) if
 /**
- * @brief Solves a 3×3 linear system of the form Hx = -g.
+ * @brief Solves a 3x3 linear system of the form Hx = -g, via Cramer's rule.
+ * Used for the Gauss-Newton center-refinement step.
  *
  * @param H Coefficient matrix.
  * @param g Right-hand-side vector before negation.
  * @param x Output solution vector.
- * @return true if the matrix is nonsingular and the solution was computed, false otherwise.
+ * @return true if the matrix is nonsingular and the solution was computed, false (x left unchanged) otherwise.
  */
 bool solve3x3(const double H[3][3], const double g[3], double x[3]) {
   const auto det = H[0][0] * (H[1][1] * H[2][2] - H[1][2] * H[2][1]) -
@@ -461,16 +460,23 @@ void Integrate3DEvents::integrateUsingShape(const PeakShapeEllipsoid &shape, con
  * returns the integrated Gaussian intensity.
  *
  * @param shape Ellipsoidal peak shape; its principal radii define the Gaussian
- *              standard deviations.
- * @param peak_q Q-vector used as the initial peak center.
+ *              standard deviations. shape.translation() seeds the fit center
+ *              (offset from peak_q), so a previously found correction is
+ *              honored and further refined rather than discarded.
+ * @param peak_q Q-vector used as the reference peak center.
  * @param adjustCenter Whether to refine the peak center during fitting.
+ * @param center Receives the center offset from peak_q actually used for the
+ *               fit: shape.translation() unchanged if adjustCenter is false,
+ *               or the refined offset (capped at one standard deviation of
+ *               incremental shift from shape.translation()) if true.
  * @param inti Receives the fitted integrated peak intensity.
  * @param sigi Receives the standard deviation of the fitted intensity.
  */
 void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &shape, const V3D &peak_q,
-                                                      bool adjustCenter, double &inti, double &sigi) {
+                                                      bool adjustCenter, V3D &center, double &inti, double &sigi) {
   inti = 0.0;
   sigi = 0.0;
+  center = shape.translation();
 
   auto result = getEvents(peak_q);
   if (!result || result->empty())
@@ -522,7 +528,6 @@ void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &
     return ll;
   };
 
-  V3D center;
   std::vector<double> g, w;
   std::vector<V3D> invSq;
   computeKernel(center, g, w, invSq);
@@ -532,6 +537,11 @@ void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &
 
   if (adjustCenter) {
     const auto maxShift = *std::min_element(sigmas.begin(), sigmas.end());
+    // seedCenter is where this call started (shape.translation()); maxShift
+    // bounds the *incremental* correction made in this call, not the total
+    // distance from peak_q, so an already-substantial prior translation
+    // isn't clamped away before any new refinement even starts.
+    const V3D seedCenter = center;
 
     for (int outer = 0; outer < 20; ++outer) {
       // Gauss-Newton step in the center, holding A, b fixed
@@ -558,8 +568,9 @@ void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &
         step *= (0.25 * maxShift / step.norm());
 
       auto clampToMaxShift = [&](V3D c) {
-        if (c.norm() > maxShift)
-          c *= (maxShift / c.norm());
+        const V3D offsetFromSeed = c - seedCenter;
+        if (offsetFromSeed.norm() > maxShift)
+          return seedCenter + offsetFromSeed * (maxShift / offsetFromSeed.norm());
         return c;
       };
 

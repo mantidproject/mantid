@@ -123,12 +123,18 @@ public:
   /// events inside/outside ellipsoidal boundaries. The shape's peak radii
   /// are interpreted as the Gaussian's standard deviations (1-sigma) along
   /// its principal axes; the shape's background radii are not used, since
-  /// the background rate is fit directly instead. If adjustCenter is true,
+  /// the background rate is fit directly instead. shape.translation() seeds
+  /// the fit center (an offset from peak_q), so a previously found
+  /// correction is honored rather than discarded. If adjustCenter is true,
   /// also refines the center by a bounded, coordinate-ascent Gauss-Newton
-  /// step (capped at one standard deviation from peak_q) -- a slight
-  /// correction, not a free centroid search.
+  /// step (capped at one standard deviation of incremental shift from
+  /// shape.translation()) -- a slight correction, not a free centroid
+  /// search. center returns the offset from peak_q actually used for the
+  /// fit (unchanged from shape.translation() if adjustCenter is false), for
+  /// the caller to persist as the output shape's translation if it wants to.
   void integrateUsingShapeProfileFit(const Mantid::DataObjects::PeakShapeEllipsoid &shape,
-                                     const Mantid::Kernel::V3D &peak_q, bool adjustCenter, double &inti, double &sigi);
+                                     const Mantid::Kernel::V3D &peak_q, bool adjustCenter, Mantid::Kernel::V3D &center,
+                                     double &inti, double &sigi);
 
   /// Estimate the signal-to-noise ratio for a peak at the given position
   /// by fitting an ellipsoid to the events and comparing peak to background

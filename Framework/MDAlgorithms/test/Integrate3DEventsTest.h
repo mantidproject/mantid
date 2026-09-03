@@ -217,7 +217,8 @@ public:
 
     inti = 123.0;
     sigi = 456.0;
-    integrator.integrateUsingShapeProfileFit(shape, peak_q, true, inti, sigi);
+    V3D center;
+    integrator.integrateUsingShapeProfileFit(shape, peak_q, true, center, inti, sigi);
     TS_ASSERT_EQUALS(inti, 0.0);
     TS_ASSERT_EQUALS(sigi, 0.0);
   }
@@ -259,7 +260,8 @@ public:
     PeakShapeEllipsoid shape(directions, sigmas, sigmas, sigmas, Mantid::Kernel::QLab);
 
     double inti, sigi;
-    integrator.integrateUsingShapeProfileFit(shape, peak_q, false, inti, sigi);
+    V3D center;
+    integrator.integrateUsingShapeProfileFit(shape, peak_q, false, center, inti, sigi);
 
     TS_ASSERT(inti > 0.0);
     TS_ASSERT(std::isfinite(sigi));
@@ -344,7 +346,8 @@ public:
     // With the center already correct (symmetric data centered exactly at
     // peak_q), enabling AdjustCenter should not meaningfully change the fit.
     double intiAdjusted, sigiAdjusted;
-    integrator.integrateUsingShapeProfileFit(shape, peak_q, true, intiAdjusted, sigiAdjusted);
+    V3D adjustedCenter;
+    integrator.integrateUsingShapeProfileFit(shape, peak_q, true, adjustedCenter, intiAdjusted, sigiAdjusted);
     TSM_ASSERT_DELTA("AdjustCenter should not drift when the center is already correct", intiAdjusted, inti,
                      0.05 * inti);
   }
@@ -368,7 +371,8 @@ public:
     const PeakShapeEllipsoid shape(directions, sigmas, sigmas, sigmas, Mantid::Kernel::QLab);
 
     double inti, sigi;
-    integrator.integrateUsingShapeProfileFit(shape, peak_q, false, inti, sigi);
+    V3D center;
+    integrator.integrateUsingShapeProfileFit(shape, peak_q, false, center, inti, sigi);
 
     TS_ASSERT(std::isinf(sigi));
   }
@@ -411,10 +415,13 @@ public:
     integratorWrong.addEvents(event_Qs, false);
 
     double intiFixedWrong, sigiFixedWrong;
-    integratorWrong.integrateUsingShapeProfileFit(shape, peak_q, false, intiFixedWrong, sigiFixedWrong);
+    V3D centerFixedWrong;
+    integratorWrong.integrateUsingShapeProfileFit(shape, peak_q, false, centerFixedWrong, intiFixedWrong,
+                                                  sigiFixedWrong);
 
     double intiAdjusted, sigiAdjusted;
-    integratorWrong.integrateUsingShapeProfileFit(shape, peak_q, true, intiAdjusted, sigiAdjusted);
+    V3D centerAdjusted;
+    integratorWrong.integrateUsingShapeProfileFit(shape, peak_q, true, centerAdjusted, intiAdjusted, sigiAdjusted);
 
     // (b) registered (and queried) at the true center -- the best achievable
     // answer, since here the center is exactly right
@@ -423,13 +430,75 @@ public:
     integratorTrue.addEvents(event_Qs, false);
 
     double intiReference, sigiReference;
-    integratorTrue.integrateUsingShapeProfileFit(shape, trueCenter, false, intiReference, sigiReference);
+    V3D centerReference;
+    integratorTrue.integrateUsingShapeProfileFit(shape, trueCenter, false, centerReference, intiReference,
+                                                 sigiReference);
 
     TSM_ASSERT_LESS_THAN("AdjustCenter should get closer to the true-center answer than the fixed, wrong-center fit",
                          std::abs(intiAdjusted - intiReference), std::abs(intiFixedWrong - intiReference));
     TSM_ASSERT_DELTA("AdjustCenter should nearly recover the true-center answer for a small, "
                      "within-cap offset",
                      intiAdjusted, intiReference, 0.1 * intiReference);
+  }
+
+  // integrateUsingShapeProfileFit must seed its fit from shape.translation()
+  // (a previously found correction), not from zero, and the maxShift cap
+  // must bound the *incremental* refinement made in this call rather than
+  // the total distance from peak_q -- otherwise a shape whose existing
+  // translation already sits near the cap could never be refined further,
+  // even when the true center is only a small step beyond it.
+  void test_integrateUsingShapeProfileFit_adjustCenter_refines_from_existing_translation() {
+    const V3D peak_q(10, 0, 0);
+    // 0.19: just inside the 1-sigma (0.2) cap on its own, so an *absolute*
+    // (rather than incremental) clamp would leave almost no room to move.
+    const V3D presetTranslation(0.19, 0, 0);
+    // True center is 0.25 from peak_q -- beyond the 1-sigma cap in total,
+    // but only 0.06 beyond presetTranslation, well within an incremental cap.
+    const V3D trueCenter = peak_q + V3D(0.25, 0, 0);
+
+    DblMatrix UBinv(3, 3, false);
+    UBinv.setRow(0, V3D(.1, 0, 0));
+    UBinv.setRow(1, V3D(0, .1, 0));
+    UBinv.setRow(2, V3D(0, 0, .1));
+
+    std::vector<std::pair<std::pair<double, double>, V3D>> event_Qs;
+    for (int i = 0; i < 6; ++i)
+      event_Qs.emplace_back(std::make_pair(1., 1.), trueCenter);
+    for (const double offset : {0.9, -0.9}) {
+      event_Qs.emplace_back(std::make_pair(1., 1.), trueCenter + V3D(offset, 0, 0));
+      event_Qs.emplace_back(std::make_pair(1., 1.), trueCenter + V3D(0, offset, 0));
+      event_Qs.emplace_back(std::make_pair(1., 1.), trueCenter + V3D(0, 0, offset));
+    }
+
+    PeakEllipsoidFrame directions{V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    PeakEllipsoidExtent sigmas{0.2, 0.2, 0.2};
+    PeakShapeEllipsoid shapeNoTranslation(directions, sigmas, sigmas, sigmas, Mantid::Kernel::QLab);
+    PeakShapeEllipsoid shapeWithTranslation(directions, sigmas, sigmas, sigmas, Mantid::Kernel::QLab, "", -1,
+                                            presetTranslation);
+
+    std::vector<std::pair<std::pair<double, double>, V3D>> peak_q_list{{std::make_pair(1., 1.), peak_q}};
+    Integrate3DEvents integrator(peak_q_list, UBinv, 1.0);
+    integrator.addEvents(event_Qs, false);
+
+    // Without the preset translation, a single call's 1-sigma cap (measured
+    // from zero) cannot reach all the way to a true center 0.25 away.
+    double intiFromScratch, sigiFromScratch;
+    V3D centerFromScratch;
+    integrator.integrateUsingShapeProfileFit(shapeNoTranslation, peak_q, true, centerFromScratch, intiFromScratch,
+                                             sigiFromScratch);
+    TSM_ASSERT_LESS_THAN("a single call starting from zero translation should be capped short of the true offset",
+                         centerFromScratch.norm(), 0.25 - 1e-6);
+
+    // With the preset translation as the seed, only a small further step is
+    // needed, well within the incremental cap, so it should reach much
+    // closer to the true center than the from-scratch call did.
+    double intiFromPreset, sigiFromPreset;
+    V3D centerFromPreset;
+    integrator.integrateUsingShapeProfileFit(shapeWithTranslation, peak_q, true, centerFromPreset, intiFromPreset,
+                                             sigiFromPreset);
+    TSM_ASSERT_LESS_THAN("seeding from an existing translation should reach closer to the true offset than "
+                         "starting from zero did",
+                         std::abs(centerFromPreset.norm() - 0.25), std::abs(centerFromScratch.norm() - 0.25));
   }
 
   void test_satellites() {
