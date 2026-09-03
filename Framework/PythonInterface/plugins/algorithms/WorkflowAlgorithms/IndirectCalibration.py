@@ -27,7 +27,7 @@ from mantid.simpleapi import (
 )
 
 from IndirectCommon import get_run_number
-from IndirectReductionCommon import remove_edge_pixels
+from IndirectReductionCommon import remove_edge_pixels, exclude_low_calibration_spectra
 
 import os.path
 
@@ -170,6 +170,8 @@ class IndirectCalibration(DataProcessorAlgorithm):
 
         workflow_prog.report("Scaling calibration")
         Scale(InputWorkspace=calib_ws_name, OutputWorkspace=self._out_ws, Factor=self._intensity_scale, Operation="Multiply")
+
+        exclude_low_calibration_spectra(self._out_ws)
 
         # Remove old workspaces
         if len(runs) > 1:
