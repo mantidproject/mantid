@@ -336,8 +336,8 @@ private:
   /// m_indirectPositions is true.
   std::map<Geometry::IComponent *, Poco::XML::Element *> m_neutronicPos;
 
-  /// True if the IDF has <indirect-neutronic-positions-mixed/> tag set,
-  /// allowing detectors without <neutronic> tags to keep their physical
+  /// True if the IDF has \<indirect-neutronic-positions-mixed/\> tag set,
+  /// allowing detectors without \<neutronic\> tags to keep their physical
   /// positions rather than being removed from the neutronic instrument.
   bool m_mixedNeutronicPositions;
 
