@@ -4,7 +4,17 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import AppendSpectra, ApplyDiffCal, ConvertUnits, CreateGroupingWorkspace, DeleteWorkspace, Load, Rebin
+from mantid.simpleapi import (
+    AppendSpectra,
+    ApplyDiffCal,
+    ConvertUnits,
+    CreateGroupingWorkspace,
+    DeleteWorkspace,
+    Load,
+    LoadMask,
+    Rebin,
+    RemoveSpectra,
+)
 from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup, AlgorithmManager
 from mantid.dataobjects import GroupingWorkspace
 from mantid import mtd, logger, config
@@ -1337,6 +1347,36 @@ def mask_detectors(workspace, masked_indices):
     mask_detectors_alg.setProperty("Workspace", workspace)
     mask_detectors_alg.setProperty("SpectraList", masked_indices)
     mask_detectors_alg.execute()
+
+
+def remove_edge_pixels(workspace):
+    """
+    Loads the mask file referenced by 'Workflow.EdgePixelMaskFile' from the silicon
+    component of the workspace's instrument and physically removes those spectra.
+    This is a no-op for non-silicon analysers (when the parameter is absent).
+
+    :param workspace:   The name of a workspace in the ADS.
+    """
+    ws = mtd[workspace]
+    component = ws.getInstrument().getComponentByName("silicon")
+    if component is None:
+        return
+    values = component.getStringParameter("Workflow.EdgePixelMaskFile")
+    if not values:
+        return
+    mask_ws_name = "__edge_pixel_mask"
+    LoadMask(Instrument=ws.getInstrument().getName(), InputFile=values[0], OutputWorkspace=mask_ws_name)
+    mask_ws = mtd[mask_ws_name]
+    masked_det_ids = frozenset(
+        detid
+        for i in range(mask_ws.getNumberHistograms())
+        if mask_ws.readY(i)[0] > 0.5
+        for detid in mask_ws.getSpectrum(i).getDetectorIDs()
+    )
+    DeleteWorkspace(mask_ws_name)
+    indices_to_remove = [i for i in range(ws.getNumberHistograms()) if ws.getSpectrum(i).getSpectrumNo() in masked_det_ids]
+    if indices_to_remove:
+        RemoveSpectra(InputWorkspace=workspace, OutputWorkspace=workspace, WorkspaceIndices=indices_to_remove)
 
 
 def _save_ascii(workspace, file_name):

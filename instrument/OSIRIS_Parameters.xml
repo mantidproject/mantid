@@ -121,4 +121,12 @@
 
 </component-link>
 
+<component-link name = "silicon">
+
+<parameter name="Workflow.EdgePixelMaskFile" type="string">
+  <value val="OSIRIS_Si_Edge_Pixels_Mask.xml" />
+</parameter>
+
+</component-link>
+
 </parameter-file>
