@@ -352,6 +352,15 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                 )
                 AnalysisDataService.addOrReplace(ws_name, grouped)
 
+                spec_info = mtd[ws_name].spectrumInfo()
+                no_det = [i for i in range(mtd[ws_name].getNumberHistograms()) if not spec_info.hasDetectors(i)]
+                if no_det:
+                    RemoveSpectra(InputWorkspace=ws_name, OutputWorkspace=ws_name, WorkspaceIndices=no_det)
+                    logger.warning(
+                        f"{ws_name}: removed {len(no_det)} grouped spectra with no detector associations "
+                        f"(all contributing pixels were excluded by calibration filtering)"
+                    )
+
             if self._fold_multiple_frames and is_multi_frame:
                 fold_chopped(c_ws_name)
 
