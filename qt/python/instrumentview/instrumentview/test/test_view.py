@@ -401,6 +401,30 @@ class TestFullInstrumentViewView(unittest.TestCase):
         self._view._set_detector_edit_text(mock_edit, [det], lambda d: str(d.detector_id))
         mock_edit.setPlainText.assert_called_once_with("42")
 
+    def test_create_from_selection_buttons_exist_on_both_tabs(self):
+        for button in (self._view._create_selection_from_picked, self._view._create_mask_from_picked):
+            self.assertEqual(button.text(), "Create From Current Selection")
+
+    def test_set_create_from_selection_buttons_enabled(self):
+        self._view.set_create_from_selection_buttons_enabled(True)
+        self.assertTrue(self._view._create_selection_from_picked.isEnabled())
+        self.assertTrue(self._view._create_mask_from_picked.isEnabled())
+
+        self._view.set_create_from_selection_buttons_enabled(False)
+        self.assertFalse(self._view._create_selection_from_picked.isEnabled())
+        self.assertFalse(self._view._create_mask_from_picked.isEnabled())
+
+    def test_create_from_selection_buttons_notify_presenter(self):
+        self._view.setup_connections_to_presenter()
+        # Connecting leaves them disabled until the presenter reports a selection
+        self.assertFalse(self._view._create_selection_from_picked.isEnabled())
+        self._view.set_create_from_selection_buttons_enabled(True)
+
+        self._view._create_selection_from_picked.click()
+        self._view._create_mask_from_picked.click()
+
+        self.assertEqual(self._view._presenter.on_create_item_from_selection_clicked.call_count, 2)
+
     def test_on_show_monitors_toggled_sets_presenter_color_when_checked(self):
         self._view._presenter.monitor_colour = (230, 55, 55)
         with mock.patch.object(self._view._show_monitors_check_box, "set_colour") as mock_set_colour:

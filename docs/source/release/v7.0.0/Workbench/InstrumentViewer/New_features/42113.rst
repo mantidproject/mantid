@@ -1,0 +1,1 @@
+- In the new Instrument View, the ``Grouping`` and ``Masking`` tabs now have a ``Create From Current Selection`` button, which creates an ROI or mask from the detectors currently selected in the projection. For example, detectors can be picked with the ``Select Bank/Tube`` option and then masked, without having to draw a shape around them.
