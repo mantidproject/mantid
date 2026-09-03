@@ -31,6 +31,10 @@
       <value val="0.0315" />
     </parameter>
 
+    <parameter name="Workflow.DetectorsGroupingFile" type="string">
+      <value val="OSIRIS_Si_Detectors_Grouping.xml" />
+    </parameter>
+
   </component-link>
 
 </parameter-file>
