@@ -1,0 +1,1 @@
+- :ref:`ISIS Energy Transfer <ISISEnergyTransfer>` in the :ref:`Indirect Data Reduction <interface-indirect-data-reduction>` interface now supports OSIRIS silicon analyser reductions for the 111 and 333 reflections, with detector-tube and angular grouping options and NXSPE export.

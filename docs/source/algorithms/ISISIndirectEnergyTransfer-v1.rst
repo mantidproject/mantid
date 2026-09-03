@@ -12,6 +12,15 @@ Description
 Performs a reduction from raw time of flight to energy transfer for an inelastic
 indirect geometry instrument at ISIS.
 
+OSIRIS silicon analyser data are supported for the ``111`` and ``333`` reflections. The default spectrum range and
+rebinning are obtained from the selected instrument parameter file. For silicon reductions, unreliable edge pixels
+are excluded before calibration and reduction. When a calibration workspace is supplied, spectra removed from that
+workspace are also excluded from the sample reduction.
+
+The ``Detectors`` grouping method groups the remaining silicon pixels tube by tube using the supplied OSIRIS grouping
+file. ``ThetaGroups`` divides the selected detector :math:`2\theta` range into a requested number of equal-width
+angular groups.
+
 Workflow
 --------
 
