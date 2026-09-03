@@ -104,40 +104,40 @@ class EngDiffGuiRoiOptionsTest(_CroppingTestBase):
     def _check_combo_and_visibility(self):
         view = self.run_processing_view
 
-        with self.check("Cropping / the region of interest inputs are hidden until it is ticked"):
+        with self.subTest("Cropping / the region of interest inputs are hidden until it is ticked"):
             self.assertFalse(self.cropping_view.isVisible())
 
         self.set_region_of_interest("1 (North)")
 
-        with self.check("Cropping / ticking the box reveals the region of interest widget"):
+        with self.subTest("Cropping / ticking the box reveals the region of interest widget"):
             self.assertTrue(self.cropping_view.isVisible())
 
-        with self.check("Cropping / ENGIN-X offers exactly its own grouping options"):
+        with self.subTest("Cropping / ENGIN-X offers exactly its own grouping options"):
             self.assertEqual(list(EXPECTED_ROI_OPTIONS), combo_items(self.cropping_view.combo_bank))
 
-        with self.check("Cropping / a bank option needs no extra input"):
+        with self.subTest("Cropping / a bank option needs no extra input"):
             self.assertFalse(self.cropping_view.widget_custom.isVisible())
             self.assertFalse(self.cropping_view.widget_crop.isVisible())
 
         select_combo(self.cropping_view.combo_bank, "Custom Grouping File")
-        with self.check("Cropping / 'Custom Grouping File' reveals the file finder only"):
+        with self.subTest("Cropping / 'Custom Grouping File' reveals the file finder only"):
             self.assertTrue(self.cropping_view.widget_custom.isVisible())
             self.assertFalse(self.cropping_view.widget_crop.isVisible())
 
         select_combo(self.cropping_view.combo_bank, "Crop to Spectra")
-        with self.check("Cropping / 'Crop to Spectra' reveals the spectrum number field only"):
+        with self.subTest("Cropping / 'Crop to Spectra' reveals the spectrum number field only"):
             self.assertTrue(self.cropping_view.widget_crop.isVisible())
             self.assertFalse(self.cropping_view.widget_custom.isVisible())
 
         select_combo(self.cropping_view.combo_bank, "Texture20")
-        with self.check("Cropping / a texture option needs no extra input either"):
+        with self.subTest("Cropping / a texture option needs no extra input either"):
             self.assertFalse(self.cropping_view.widget_custom.isVisible())
             self.assertFalse(self.cropping_view.widget_crop.isVisible())
 
         # unticking must put the widget away again, otherwise the next calibration would silently
         # keep using whatever was last selected
         self.set_region_of_interest(None)
-        with self.check("Cropping / unticking the box hides the region of interest widget"):
+        with self.subTest("Cropping / unticking the box hides the region of interest widget"):
             self.assertFalse(self.cropping_view.isVisible())
             self.assertFalse(view.get_crop_checked())
 
@@ -155,21 +155,21 @@ class EngDiffGuiRoiOptionsTest(_CroppingTestBase):
         cropping = self.calibration_presenter.cropping_widget
         for description, group in expected.items():
             self.set_region_of_interest(description)
-            with self.check(f"Cropping / selecting '{description}' selects {group}"):
+            with self.subTest(f"Cropping / selecting '{description}' selects {group}"):
                 self.assertEqual(group, cropping.get_group())
 
     def _check_spectra_validation(self):
         cropping = self.calibration_presenter.cropping_widget
         self.set_region_of_interest("Crop to Spectra")
 
-        with self.check("Cropping / a valid spectrum range is accepted and cleaned up"):
+        with self.subTest("Cropping / a valid spectrum range is accepted and cleaned up"):
             self.cropping_view.edit_crop.setText(CUSTOM_SPECTRA)
             process_events()
             self.assertTrue(cropping.is_spectra_valid())
             self.assertEqual(CUSTOM_SPECTRA, cropping.get_custom_spectra())
             self.assertFalse(self.cropping_view.label_cropValid.isVisible())
 
-        with self.check("Cropping / an invalid spectrum range is rejected and flagged"):
+        with self.subTest("Cropping / an invalid spectrum range is rejected and flagged"):
             self.cropping_view.edit_crop.setText("not a spectrum list")
             process_events()
             self.assertFalse(cropping.is_spectra_valid())
@@ -178,13 +178,13 @@ class EngDiffGuiRoiOptionsTest(_CroppingTestBase):
             # the reason is offered as a tooltip rather than a popup, so nothing blocks
             self.assertTrue(self.cropping_view.label_cropValid.toolTip())
 
-        with self.check("Cropping / correcting the spectrum range clears the warning"):
+        with self.subTest("Cropping / correcting the spectrum range clears the warning"):
             self.cropping_view.edit_crop.setText(CUSTOM_SPECTRA)
             process_events()
             self.assertTrue(cropping.is_spectra_valid())
             self.assertFalse(self.cropping_view.label_cropValid.isVisible())
 
-        with self.check("Cropping / a custom grouping file is resolved and reported valid"):
+        with self.subTest("Cropping / a custom grouping file is resolved and reported valid"):
             self.set_region_of_interest("Custom Grouping File", custom_grouping_file=self.custom_grouping_file())
             self.assertTrue(cropping.is_groupingfile_valid())
             self.assertEqual(
@@ -209,7 +209,7 @@ class EngDiffGuiRoiOptionsTest(_CroppingTestBase):
             ENGINX_GROUP.TEXTURE30: 30,
         }
         for group, count in expected_groups.items():
-            with self.check(f"Cropping / {group} produces {count} focused group(s)"):
+            with self.subTest(f"Cropping / {group} produces {count} focused group(s)"):
                 calibration = CalibrationInfo(group=group, instrument=INSTRUMENT)
                 calibration.set_calibration_paths(INSTRUMENT, CERIA, VANADIUM)
                 calibration.update_group_ws_from_group()
@@ -230,12 +230,12 @@ class EngDiffGuiRoiOptionsTest(_CroppingTestBase):
             ENGINX_GROUP.TEXTURE30: f"{INSTRUMENT}_{CERIA}_Texture30.prm",
         }
         for group, expected in cases.items():
-            with self.check(f"Cropping / {group} names its output '{expected}'"):
+            with self.subTest(f"Cropping / {group} names its output '{expected}'"):
                 calibration = CalibrationInfo(group=group, instrument=INSTRUMENT)
                 calibration.set_calibration_paths(INSTRUMENT, CERIA, VANADIUM)
                 self.assertEqual(expected, calibration.generate_output_file_name())
 
-        with self.check("Cropping / a cropped calibration carries the spectrum range in its name"):
+        with self.subTest("Cropping / a cropped calibration carries the spectrum range in its name"):
             calibration = CalibrationInfo(group=ENGINX_GROUP.CROPPED, instrument=INSTRUMENT)
             calibration.set_calibration_paths(INSTRUMENT, CERIA, VANADIUM)
             calibration.set_spectra_list(CUSTOM_SPECTRA)
@@ -258,10 +258,10 @@ class EngDiffGuiCroppedCalibrationTest(_CroppingTestBase):
         calibration = self.calibrate(ceria=CERIA, vanadium=VANADIUM)
         self.assertTrue(calibration.is_valid(), "the North bank calibration reported itself invalid")
 
-        with self.check("Cropping / a North bank calibration records that group"):
+        with self.subTest("Cropping / a North bank calibration records that group"):
             self.assertEqual(ENGINX_GROUP.NORTH, calibration.get_group())
 
-        with self.check("Cropping / a North bank calibration writes exactly one prm and one nxs"):
+        with self.subTest("Cropping / a North bank calibration writes exactly one prm and one nxs"):
             written = self.basenames_under(self.calibration_dir())
             self.assertEqual(
                 sorted([f"{INSTRUMENT}_{CERIA}_bank_1.prm", f"{INSTRUMENT}_{CERIA}_bank_1.nxs"]),
@@ -270,12 +270,12 @@ class EngDiffGuiCroppedCalibrationTest(_CroppingTestBase):
             )
 
         self.focus(runs=CERIA)
-        with self.check("Cropping / focusing a single bank gives a single spectrum"):
+        with self.subTest("Cropping / focusing a single bank gives a single spectrum"):
             focused = self.focused_workspace_names()
             self.assertEqual(1, len(focused), f"expected one focused workspace, got {focused}")
             self.assertEqual(1, ADS.retrieve(focused[0]).getNumberHistograms())
 
-        with self.check("Cropping / the focused files are named for the bank"):
+        with self.subTest("Cropping / the focused files are named for the bank"):
             written = self.basenames_under(self.focus_dir())
             self.assertIn(self.focused_basename("bank_1", "TOF") + ".nxs", written)
             self.assertIn(self.focused_basename("bank_1", "TOF") + ".gss", written)
@@ -288,24 +288,24 @@ class EngDiffGuiCroppedCalibrationTest(_CroppingTestBase):
         calibration = self.calibrate(ceria=CERIA, vanadium=VANADIUM)
         self.assertTrue(calibration.is_valid(), "the cropped calibration reported itself invalid")
 
-        with self.check("Cropping / a cropped calibration records the group and the spectrum range"):
+        with self.subTest("Cropping / a cropped calibration records the group and the spectrum range"):
             self.assertEqual(ENGINX_GROUP.CROPPED, calibration.get_group())
             self.assertEqual(CUSTOM_SPECTRA, calibration.spectra_list_str)
 
         expected_stem = f"{INSTRUMENT}_{CERIA}_Cropped_{CUSTOM_SPECTRA}"
         written = self.basenames_under(self.calibration_dir())
 
-        with self.check("Cropping / a cropped calibration names its output for the spectrum range"):
+        with self.subTest("Cropping / a cropped calibration names its output for the spectrum range"):
             self.assertIn(expected_stem + ".prm", written)
             self.assertIn(expected_stem + ".nxs", written)
 
-        with self.check("Cropping / the grouping used is saved alongside, so the crop is reproducible"):
+        with self.subTest("Cropping / the grouping used is saved alongside, so the crop is reproducible"):
             # only custom and cropped groupings are saved - the bank and texture ones ship with the
             # instrument, so there would be nothing to record
             self.assertIn(expected_stem + ".xml", written)
 
         self.focus(runs=CERIA)
-        with self.check("Cropping / focusing a cropped calibration gives a single spectrum"):
+        with self.subTest("Cropping / focusing a cropped calibration gives a single spectrum"):
             from Engineering.EnggUtils import FOCUSED_OUTPUT_WORKSPACE_NAME
 
             # named for the region of interest, so it sits alongside the North bank output from the
@@ -314,7 +314,7 @@ class EngDiffGuiCroppedCalibrationTest(_CroppingTestBase):
             self.assertIn(expected_ws, self.focused_workspace_names())
             self.assertEqual(1, ADS.retrieve(expected_ws).getNumberHistograms())
 
-        with self.check("Cropping / the focused files carry the cropped suffix too"):
+        with self.subTest("Cropping / the focused files carry the cropped suffix too"):
             focused_written = self.basenames_under(self.focus_dir())
             self.assertIn(self.focused_basename(f"Cropped_{CUSTOM_SPECTRA}", "TOF") + ".nxs", focused_written)
 
@@ -337,16 +337,16 @@ class EngDiffGuiTextureRoiTest(_CroppingTestBase):
         calibration = self.calibrate(ceria=CERIA, vanadium=VANADIUM)
         self.assertTrue(calibration.is_valid(), "the texture calibration reported itself invalid")
 
-        with self.check("Cropping / a texture calibration records the texture group"):
+        with self.subTest("Cropping / a texture calibration records the texture group"):
             self.assertEqual(ENGINX_GROUP.TEXTURE20, calibration.get_group())
             self.assertTrue(calibration.is_texture_group())
 
-        with self.check("Cropping / a texture calibration writes one prm and nxs named for the grouping"):
+        with self.subTest("Cropping / a texture calibration writes one prm and nxs named for the grouping"):
             written = self.basenames_under(self.calibration_dir())
             self.assertIn(f"{INSTRUMENT}_{CERIA}_Texture20.prm", written)
             self.assertIn(f"{INSTRUMENT}_{CERIA}_Texture20.nxs", written)
 
-        with self.check("Cropping / the texture prm describes every group in the grouping"):
+        with self.subTest("Cropping / the texture prm describes every group in the grouping"):
             from Engineering.EnggUtils import read_diff_constants_from_prm
 
             prm = os.path.join(self.calibration_dir(), f"{INSTRUMENT}_{CERIA}_Texture20.prm")
@@ -354,19 +354,19 @@ class EngDiffGuiTextureRoiTest(_CroppingTestBase):
 
         self.focus(runs=CERIA)
 
-        with self.check("Cropping / focusing a texture calibration gives one spectrum per group"):
+        with self.subTest("Cropping / focusing a texture calibration gives one spectrum per group"):
             focused = self.focused_workspace_names()
             self.assertEqual(1, len(focused), f"expected one focused workspace, got {focused}")
             self.assertEqual(TEXTURE_GROUPS, ADS.retrieve(focused[0]).getNumberHistograms())
 
         texture_focus_dir = os.path.join(self.focus_dir(), "Texture20")
-        with self.check("Cropping / texture focused output goes into its own subdirectory"):
+        with self.subTest("Cropping / texture focused output goes into its own subdirectory"):
             written = self.basenames_under(texture_focus_dir)
             self.assertIn(self.focused_basename("Texture20", "TOF") + ".gss", written)
             for group in (1, TEXTURE_GROUPS):
                 self.assertIn(self.focused_basename(f"Texture20_{group}", "TOF") + ".nxs", written)
 
-        with self.check("Cropping / a nexus file is written for every texture group"):
+        with self.subTest("Cropping / a nexus file is written for every texture group"):
             written = self.basenames_under(texture_focus_dir, ".nxs")
             per_group = [name for name in written if "_Texture20_" in name and "_TOF" in name]
             self.assertEqual(TEXTURE_GROUPS, len(per_group))
@@ -380,10 +380,10 @@ class EngDiffGuiTextureRoiTest(_CroppingTestBase):
         self.focus(runs=CERIA)
         process_events(2)
 
-        with self.check("Cropping / with an RB number texture output goes to the RB directory"):
+        with self.subTest("Cropping / with an RB number texture output goes to the RB directory"):
             rb_dir = os.path.join(self.focus_dir(self.RB_NUMBER), "Texture20")
             self.assertIn(self.focused_basename("Texture20", "TOF") + ".gss", self.basenames_under(rb_dir))
 
-        with self.check("Cropping / and *only* there, to limit the number of files saved"):
+        with self.subTest("Cropping / and *only* there, to limit the number of files saved"):
             # unlike a non-texture grouping, which is written to both places
             self.assertEqual(before, set(self.files_under(texture_focus_dir)))

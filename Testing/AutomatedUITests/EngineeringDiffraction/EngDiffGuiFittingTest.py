@@ -140,13 +140,13 @@ class EngDiffGuiFittingDataTest(_FittingTestBase):
         self.show_tab(TAB_FITTING)
         finder = self.data_view.finder_data
 
-        with self.check("Test 5 / focusing prefills the fitting file finder"):
+        with self.subTest("Test 5 / focusing prefills the fitting file finder"):
             text = finder.getText()
             self.assertTrue(text, "the fitting finder was not prefilled after focusing")
             for run in (CERIA, SECOND_SAMPLE):
                 self.assertIn(run, text, f"{run} is missing from the prefilled file list")
 
-        with self.check("Test 5 / the finder is prefilled with the TOF files"):
+        with self.subTest("Test 5 / the finder is prefilled with the TOF files"):
             self.assertIn("_TOF", finder.getText())
 
         # the browse filter is built from the two combos, and it is what decides which of the many
@@ -155,7 +155,7 @@ class EngDiffGuiFittingDataTest(_FittingTestBase):
             _file_filter_generator,
         )
 
-        with self.check("Test 5 / the Unit and Region filters build the expected file filter"):
+        with self.subTest("Test 5 / the Unit and Region filters build the expected file filter"):
             self.assertEqual("*bank_1*_TOF*", _file_filter_generator({"Region": "1 (North)", "Unit": "TOF"}))
             self.assertEqual("*Texture*_dSpacing*", _file_filter_generator({"Region": "Texture", "Unit": "dSpacing"}))
             self.assertEqual("*bank_*", _file_filter_generator({"Region": "Both Banks", "Unit": "No Unit Filter"}))
@@ -163,42 +163,42 @@ class EngDiffGuiFittingDataTest(_FittingTestBase):
     def _check_loading(self):
         self.load_focused_data(add_to_plot=True)
 
-        with self.check("Test 5 / one table row appears per focused file"):
+        with self.subTest("Test 5 / one table row appears per focused file"):
             self.assertEqual(2, self.table().rowCount(), f"expected two rows, got {self.table_run_column()}")
 
-        with self.check("Test 5 / the table names the run and the bank it came from"):
+        with self.subTest("Test 5 / the table names the run and the bank it came from"):
             self.assertEqual(sorted([CERIA, SECOND_SAMPLE]), sorted(self.table_run_column()))
             # the bank comes from the "bankid" log the focus writes, which has its underscores
             # replaced with spaces so it reads as a label
             banks = {self.table().item(row, COL_BANK).text() for row in range(self.table().rowCount())}
             self.assertEqual({"bank 1"}, banks)
 
-        with self.check("Test 5 / the loaded workspaces are tracked by the model"):
+        with self.subTest("Test 5 / the loaded workspaces are tracked by the model"):
             loaded = self.data_presenter.get_loaded_ws_list()
             self.assertEqual(2, len(loaded), f"expected two loaded workspaces, got {loaded}")
 
-        with self.check("Test 5 / a log workspace group is created for the loaded runs"):
+        with self.subTest("Test 5 / a log workspace group is created for the loaded runs"):
             from mantid.api import AnalysisDataService as ADS
 
             group_name = self.data_presenter.get_log_ws_group_name()
             self.assertTrue(ADS.doesExist(group_name), f"{group_name} was not created")
 
     def _check_plot_checkbox(self):
-        with self.check("Test 5 / with Add To Plot ticked the rows are marked as plotted"):
+        with self.subTest("Test 5 / with Add To Plot ticked the rows are marked as plotted"):
             for row in range(self.table().rowCount()):
                 self.assertTrue(self.data_view.get_item_checked(row, COL_PLOT), f"row {row} is not marked as plotted")
 
-        with self.check("Test 5 / and the lines really are on the axes"):
+        with self.subTest("Test 5 / and the lines really are on the axes"):
             axes = self.plot_view.get_axes()[0]
             self.assertTrue(axes.get_lines(), "nothing was plotted")
 
-        with self.check("Test 5 / unticking a row's Plot box removes its line"):
+        with self.subTest("Test 5 / unticking a row's Plot box removes its line"):
             before = len(self.plot_view.get_axes()[0].get_lines())
             self.data_view.set_item_checkstate(0, COL_PLOT, False)
             process_events(3)
             self.assertLess(len(self.plot_view.get_axes()[0].get_lines()), before)
 
-        with self.check("Test 5 / and re-ticking it puts the line back"):
+        with self.subTest("Test 5 / and re-ticking it puts the line back"):
             before = len(self.plot_view.get_axes()[0].get_lines())
             self.data_view.set_item_checkstate(0, COL_PLOT, True)
             process_events(3)
@@ -207,19 +207,19 @@ class EngDiffGuiFittingDataTest(_FittingTestBase):
     def _check_background_subtraction(self):
         from mantid.api import AnalysisDataService as ADS
 
-        with self.check("Test 5 / background subtraction is on by default for a newly loaded run"):
+        with self.subTest("Test 5 / background subtraction is on by default for a newly loaded run"):
             for row in range(self.table().rowCount()):
                 self.assertTrue(self.data_view.get_item_checked(row, COL_BGSUB), f"row {row} has no background subtraction")
 
         candidates = [name for name in ADS.getObjectNames() if name.endswith("_bgsub")]
-        with self.check("Test 5 / a background subtracted workspace is created for each run"):
+        with self.subTest("Test 5 / a background subtracted workspace is created for each run"):
             self.assertEqual(2, len(candidates), f"expected two _bgsub workspaces, got {candidates}")
 
         # work with whichever one belongs to the ceria run, without assuming the exact prefix
         bgsub_name = next((name for name in candidates if CERIA in name), None)
         self.assertIsNotNone(bgsub_name, f"no _bgsub workspace for run {CERIA} in {candidates}")
 
-        with self.check("Test 5 / the subtracted data really is below the raw data"):
+        with self.subTest("Test 5 / the subtracted data really is below the raw data"):
             import numpy as np
 
             raw_name = bgsub_name[: -len("_bgsub")]
@@ -228,7 +228,7 @@ class EngDiffGuiFittingDataTest(_FittingTestBase):
             self.assertTrue(np.all(subtracted <= raw + 1e-9), "the background subtraction increased the counts")
             self.assertLess(subtracted.sum(), raw.sum(), "the background subtraction removed nothing")
 
-        with self.check("Test 5 / changing the number of iterations changes the subtracted data"):
+        with self.subTest("Test 5 / changing the number of iterations changes the subtracted data"):
             import numpy as np
 
             before = ADS.retrieve(bgsub_name).readY(0).copy()
@@ -241,7 +241,7 @@ class EngDiffGuiFittingDataTest(_FittingTestBase):
                 msg="the background estimate to be recalculated",
             )
 
-        with self.check("Test 5 / turning the Savitzky-Golay filter off also changes it"):
+        with self.subTest("Test 5 / turning the Savitzky-Golay filter off also changes it"):
             import numpy as np
 
             before = ADS.retrieve(bgsub_name).readY(0).copy()
@@ -254,7 +254,7 @@ class EngDiffGuiFittingDataTest(_FittingTestBase):
                 msg="the background estimate to be recalculated without the filter",
             )
 
-        with self.check("Test 5 / unticking background subtraction puts the raw data back on the plot"):
+        with self.subTest("Test 5 / unticking background subtraction puts the raw data back on the plot"):
             row = self.table_run_column().index(CERIA)
             self.data_view.set_item_checkstate(row, COL_BGSUB, False)
             process_events(3)
@@ -266,17 +266,17 @@ class EngDiffGuiFittingDataTest(_FittingTestBase):
             self.assertTrue(ADS.doesExist(bgsub_name))
 
     def _check_plot_background_button(self):
-        with self.check("Test 5 / the Inspect Background button needs a selected row"):
+        with self.subTest("Test 5 / the Inspect Background button needs a selected row"):
             self.table().clearSelection()
             process_events(2)
             self.assertFalse(self.data_view.button_plotBG.isEnabled())
 
-        with self.check("Test 5 / selecting a row enables it"):
+        with self.subTest("Test 5 / selecting a row enables it"):
             self.table().selectRow(0)
             process_events(2)
             self.assertTrue(self.data_view.button_plotBG.isEnabled())
 
-        with self.check("Test 5 / and pressing it opens a figure"):
+        with self.subTest("Test 5 / and pressing it opens a figure"):
             # re-enable the subtraction on the selected row, which is what there is to inspect
             row = 0
             self.data_view.set_item_checkstate(row, COL_BGSUB, True)
@@ -293,18 +293,18 @@ class EngDiffGuiFittingDataTest(_FittingTestBase):
         removed_run = self.table().item(0, COL_RUN).text()
         removed_ws = self.data_presenter.row_numbers[0]
 
-        with self.check("Test 5 / Remove Selected drops just that row"):
+        with self.subTest("Test 5 / Remove Selected drops just that row"):
             click(self.data_view.button_removeSelected)
             process_events(3)
             self.assertEqual(1, self.table().rowCount())
             self.assertNotIn(removed_run, self.table_run_column())
 
-        with self.check("Test 5 / and its workspaces leave the ADS with it"):
+        with self.subTest("Test 5 / and its workspaces leave the ADS with it"):
             # both the focused workspace and its background subtracted partner
             self.assertFalse(ADS.doesExist(removed_ws), f"{removed_ws} survived removal")
             self.assertFalse(ADS.doesExist(f"{removed_ws}_bgsub"), f"{removed_ws}_bgsub survived removal")
 
-        with self.check("Test 5 / Remove All empties the table"):
+        with self.subTest("Test 5 / Remove All empties the table"):
             click(self.data_view.button_removeAll)
             process_events(3)
             self.assertEqual(0, self.table().rowCount())
@@ -356,10 +356,10 @@ class EngDiffGuiSequentialFitTest(_FittingTestBase):
         self.plot_presenter.fit_toggle()
         process_events(3)
 
-        with self.check("Test 5 / the fit browser opens once data is plotted"):
+        with self.subTest("Test 5 / the fit browser opens once data is plotted"):
             self.assertTrue(browser.isVisible(), "the fit browser did not open")
 
-        with self.check("Test 5 / the browser's default peak comes from the instrument setting"):
+        with self.subTest("Test 5 / the browser's default peak comes from the instrument setting"):
             self.assertEqual("Gaussian", browser.defaultPeakType())
 
         browser.loadFunction(
@@ -387,17 +387,17 @@ class EngDiffGuiSequentialFitTest(_FittingTestBase):
         with self.captured_logs(level="notice") as logs:
             fitprops = self._do_fit_all(sequential=False)
 
-        with self.check("Test 5 / a serial fit fits every loaded run"):
+        with self.subTest("Test 5 / a serial fit fits every loaded run"):
             self.assertEqual(2, len(fitprops), f"expected one result per run, got {fitprops}")
 
-        with self.check("Test 5 / and reports itself as a serial fit"):
+        with self.subTest("Test 5 / and reports itself as a serial fit"):
             self.assertIn("Serial fitting finished", logs.text)
 
-        with self.check("Test 5 / each serial fit converged"):
+        with self.subTest("Test 5 / each serial fit converged"):
             for fitprop in fitprops:
                 self.assertTrue(self._converged(fitprop["status"]), f"fit status was {fitprop['status']}")
 
-        with self.check("Test 5 / the fitted peak centre is the one the fixture generated"):
+        with self.subTest("Test 5 / the fitted peak centre is the one the fixture generated"):
             centre = self._peak_tof()
             for fitprop in fitprops:
                 fitted = self._fitted_parameter(fitprop["properties"]["Function"], "PeakCentre")
@@ -407,20 +407,20 @@ class EngDiffGuiSequentialFitTest(_FittingTestBase):
         with self.captured_logs(level="notice") as logs:
             fitprops = self._do_fit_all(sequential=True)
 
-        with self.check("Test 5 / a sequential fit also fits every loaded run"):
+        with self.subTest("Test 5 / a sequential fit also fits every loaded run"):
             self.assertEqual(2, len(fitprops), f"expected one result per run, got {fitprops}")
 
-        with self.check("Test 5 / and reports itself as a sequential fit"):
+        with self.subTest("Test 5 / and reports itself as a sequential fit"):
             self.assertIn("Sequential fitting finished", logs.text)
 
-        with self.check("Test 5 / each sequential fit converged"):
+        with self.subTest("Test 5 / each sequential fit converged"):
             for fitprop in fitprops:
                 self.assertTrue(self._converged(fitprop["status"]), f"fit status was {fitprop['status']}")
 
-        with self.check("Test 5 / the browser is left holding the last fitted function"):
+        with self.subTest("Test 5 / the browser is left holding the last fitted function"):
             self.assertIn("Gaussian", self.plot_view.read_fitprop_from_browser()["properties"]["Function"])
 
-        with self.check("Test 5 / the progress bar reports a converged fit as a success"):
+        with self.subTest("Test 5 / the progress bar reports a converged fit as a success"):
             # every run after the first starts from the previous result, so it converges on a
             # tolerance-limited stop rather than an exact "success" - which must still read as done
             self.assertEqual(100, self.plot_view.fit_progress_bar.value())
@@ -431,25 +431,25 @@ class EngDiffGuiSequentialFitTest(_FittingTestBase):
 
         group_name = self.data_presenter.get_log_ws_group_name().split("_log")[0] + "_fits"
 
-        with self.check("Test 5 / the fit results are grouped together"):
+        with self.subTest("Test 5 / the fit results are grouped together"):
             self.assertTrue(ADS.doesExist(group_name), f"{group_name} was not created")
 
-        with self.check("Test 5 / a matrix workspace is produced per fitted parameter"):
+        with self.subTest("Test 5 / a matrix workspace is produced per fitted parameter"):
             # named for the function the parameter belongs to, so a model with two peaks of the same
             # type stays unambiguous
             members = list(ADS.retrieve(group_name).getNames())
             for parameter in ("Gaussian_PeakCentre", "Gaussian_Height", "Gaussian_Sigma", "LinearBackground_A0"):
                 self.assertIn(parameter, members, f"{parameter} is missing from {members}")
 
-        with self.check("Test 5 / the peak width is reported as an FWHM as well"):
+        with self.subTest("Test 5 / the peak width is reported as an FWHM as well"):
             self.assertIn("Gaussian_fwhm", list(ADS.retrieve(group_name).getNames()))
 
-        with self.check("Test 5 / the peak centre is also reported in d-spacing"):
+        with self.subTest("Test 5 / the peak centre is also reported in d-spacing"):
             members = list(ADS.retrieve(group_name).getNames())
             d_parameters = [name for name in members if name.endswith("_dSpacing")]
             self.assertTrue(d_parameters, f"no d-spacing conversion in {members}")
 
-        with self.check("Test 5 / the d-spacing conversion is of the peak that was fitted"):
+        with self.subTest("Test 5 / the d-spacing conversion is of the peak that was fitted"):
             import numpy as np
 
             members = list(ADS.retrieve(group_name).getNames())
@@ -459,14 +459,14 @@ class EngDiffGuiSequentialFitTest(_FittingTestBase):
             self.assertTrue(finite.size, f"{d_name} holds no finite values")
             self.assertTrue(np.allclose(FIT_PEAK_D, finite, rtol=0.02), f"expected d = {FIT_PEAK_D}, got {finite}")
 
-        with self.check("Test 5 / the model summary table has one row per fitted run"):
+        with self.subTest("Test 5 / the model summary table has one row per fitted run"):
             table = ADS.retrieve("model")
             self.assertEqual(["Workspace", "chisq/DOF", "status", "Model"], list(table.getColumnNames()))
             self.assertEqual(2, table.rowCount())
             for row in range(table.rowCount()):
                 self.assertTrue(self._converged(table.cell("status", row)), f"row {row} reports {table.cell('status', row)}")
 
-        with self.check("Test 5 / a fit parameter table is saved for each run"):
+        with self.subTest("Test 5 / a fit parameter table is saved for each run"):
             saved = self.basenames_under(os.path.join(self.save_dir, "User", self.RB_NUMBER, "FitParameters"))
             self.assertTrue(saved, "no fit parameter files were saved")
             for run in (CERIA, SECOND_SAMPLE):
@@ -493,16 +493,16 @@ class EngDiffGuiSequentialFitTest(_FittingTestBase):
         self.set_engineering_setting("sort_ascending", True)
         ascending = self.data_presenter.get_sorted_active_ws_list()
 
-        with self.check("Test 5 / sorting by a primary log keeps every run"):
+        with self.subTest("Test 5 / sorting by a primary log keeps every run"):
             self.assertEqual(sorted(self.data_presenter.get_active_ws_list()), sorted(ascending))
 
-        with self.check("Test 5 / unticking Ascending reverses the order the runs are fitted in"):
+        with self.subTest("Test 5 / unticking Ascending reverses the order the runs are fitted in"):
             # asserted as a reversal rather than against specific log values, because two runs can
             # legitimately share a value for a given log and then no absolute order is defined
             self.set_engineering_setting("sort_ascending", False)
             self.assertEqual(ascending[::-1], self.data_presenter.get_sorted_active_ws_list())
 
-        with self.check("Test 5 / with no primary log the loaded order is kept"):
+        with self.subTest("Test 5 / with no primary log the loaded order is kept"):
             self.set_engineering_setting("primary_log", "")
             self.set_engineering_setting("sort_ascending", True)
             self.assertEqual(self.data_presenter.get_active_ws_list(), self.data_presenter.get_sorted_active_ws_list())

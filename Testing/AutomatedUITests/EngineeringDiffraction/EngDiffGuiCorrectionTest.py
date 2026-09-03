@@ -198,24 +198,24 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
     def _check_loading(self):
         runs = self.load_runs()
 
-        with self.check("Correction / loading runs puts one row in the table per run"):
+        with self.subTest("Correction / loading runs puts one row in the table per run"):
             self.assertEqual([CERIA_WS, VANADIUM_WS], sorted(runs))
 
-        with self.check("Correction / a freshly loaded run has no shape, material or orientation"):
+        with self.subTest("Correction / a freshly loaded run has no shape, material or orientation"):
             row = self.row_of(CERIA_WS)
             self.assertIsNone(cell_button(self.table(), row, COL_SHAPE), "a run with no shape must not offer a view button")
             self.assertEqual("Not set", self.table().item(row, COL_MATERIAL).text())
             self.assertEqual("default", self.table().item(row, COL_ORIENTATION).text())
 
-        with self.check("Correction / newly loaded rows start unselected"):
+        with self.subTest("Correction / newly loaded rows start unselected"):
             # the presenter carries the previous tick state forward when it redraws, and a run that
             # was not in the table before had none, so nothing is acted on until the user chooses
             self.assertEqual([], self.correction_view.get_selected_workspaces())
 
-        with self.check("Correction / the loaded runs are offered as a sample to copy from"):
+        with self.subTest("Correction / the loaded runs are offered as a sample to copy from"):
             self.assertIn(CERIA_WS, combo_items(self.correction_view.combo_workspaceList))
 
-        with self.check("Correction / loading the same run again does not duplicate its row"):
+        with self.subTest("Correction / loading the same run again does not duplicate its row"):
             self.load_runs(runs=CERIA)
             self.assertEqual([CERIA_WS, VANADIUM_WS], sorted(self.table_runs()))
 
@@ -223,14 +223,14 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
         view = self.correction_view
 
         click(view.btn_deselectAll)
-        with self.check("Correction / Deselect All clears every row"):
+        with self.subTest("Correction / Deselect All clears every row"):
             self.assertEqual([], view.get_selected_workspaces())
 
         click(view.btn_selectAll)
-        with self.check("Correction / Select All ticks every row"):
+        with self.subTest("Correction / Select All ticks every row"):
             self.assertEqual(sorted([CERIA_WS, VANADIUM_WS]), sorted(view.get_selected_workspaces()))
 
-        with self.check("Correction / a single row can be ticked on its own"):
+        with self.subTest("Correction / a single row can be ticked on its own"):
             self.select_only([CERIA_WS])
             self.assertEqual([CERIA_WS], view.get_selected_workspaces())
 
@@ -241,12 +241,12 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
         click(view.btn_createRefWS)
         process_events(2)
 
-        with self.check("Correction / creating a reference workspace names it for the RB number"):
+        with self.subTest("Correction / creating a reference workspace names it for the RB number"):
             expected = f"{RB_NUMBER}_reference_workspace"
             self.assertTrue(ADS.doesExist(expected), f"{expected} was not created")
             self.assertEqual(expected, view.ref_frame_status.text())
 
-        with self.check("Correction / a reference workspace with no shape cannot be viewed"):
+        with self.subTest("Correction / a reference workspace with no shape cannot be viewed"):
             self.assertFalse(view.btn_viewRefShape.isEnabled())
             self.assertEqual("Not set", view.ref_material_status.text())
 
@@ -256,11 +256,11 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
         self._set_shape_from_stl([reference])
         self._set_material(["Fe"], [reference])
 
-        with self.check("Correction / the reference section updates once it has a shape and material"):
+        with self.subTest("Correction / the reference section updates once it has a shape and material"):
             self.assertTrue(view.btn_viewRefShape.isEnabled())
             self.assertEqual("Fe", view.ref_material_status.text())
 
-        with self.check("Correction / the reference shape can be viewed"):
+        with self.subTest("Correction / the reference shape can be viewed"):
             before = figure_numbers()
             click(view.btn_viewRefShape)
             process_events(3)
@@ -268,11 +268,11 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
 
         click(view.btn_saveRefWS)
         process_events(2)
-        with self.check("Correction / saving the reference writes it under ReferenceWorkspaces"):
+        with self.subTest("Correction / saving the reference writes it under ReferenceWorkspaces"):
             saved = self.basenames_under(self.output_dir("ReferenceWorkspaces", RB_NUMBER))
             self.assertIn(f"{RB_NUMBER}_reference_workspace.nxs", saved)
 
-        with self.check("Correction / a saved reference can be loaded back"):
+        with self.subTest("Correction / a saved reference can be loaded back"):
             path = os.path.join(self.output_dir("ReferenceWorkspaces", RB_NUMBER), f"{RB_NUMBER}_reference_workspace.nxs")
             set_finder_text(view.finder_reference, path)
             click(view.btn_loadRef)
@@ -287,15 +287,15 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
         self.select_only([CERIA_WS])
         self._set_shape_from_stl([CERIA_WS])
 
-        with self.check("Correction / an STL shape is loaded as a mesh"):
+        with self.subTest("Correction / an STL shape is loaded as a mesh"):
             shape = ADS.retrieve(CERIA_WS).sample().getShape()
             self.assertIsInstance(shape, MeshObject)
 
-        with self.check("Correction / the table offers a view button once a shape is set"):
+        with self.subTest("Correction / the table offers a view button once a shape is set"):
             row = self.row_of(CERIA_WS)
             self.assertIsNotNone(cell_button(self.table(), row, COL_SHAPE), "no view button appeared for a shape")
 
-        with self.check("Correction / the per-row shape button opens a figure"):
+        with self.subTest("Correction / the per-row shape button opens a figure"):
             before = figure_numbers()
             click(cell_button(self.table(), self.row_of(CERIA_WS), COL_SHAPE))
             process_events(3)
@@ -305,11 +305,11 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
         self.select_only([VANADIUM_WS])
         self._set_shape_from_csg([VANADIUM_WS])
 
-        with self.check("Correction / a CSG shape is loaded as a constructive solid"):
+        with self.subTest("Correction / a CSG shape is loaded as a constructive solid"):
             shape = ADS.retrieve(VANADIUM_WS).sample().getShape()
             self.assertIsInstance(shape, CSGObject)
 
-        with self.check("Correction / the CSG shape has the volume that was asked for"):
+        with self.subTest("Correction / the CSG shape has the volume that was asked for"):
             # the magnitude, because Mantid reports a signed volume for a centre-and-dimensions
             # cuboid - the same form Engineering's own get_cube_xml produces - and it comes back
             # negative. That is a geometry quirk, not something this tab controls.
@@ -322,13 +322,13 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
         self.select_only([CERIA_WS])
         self._set_material(["Fe"], [CERIA_WS])
 
-        with self.check("Correction / the material set through the dialog is on the workspace"):
+        with self.subTest("Correction / the material set through the dialog is on the workspace"):
             self.assertEqual("Fe", ADS.retrieve(CERIA_WS).sample().getMaterial().name())
 
-        with self.check("Correction / and is shown in the table"):
+        with self.subTest("Correction / and is shown in the table"):
             self.assertEqual("Fe", self.table().item(self.row_of(CERIA_WS), COL_MATERIAL).text())
 
-        with self.check("Correction / a run with no material still reads 'Not set'"):
+        with self.subTest("Correction / a run with no material still reads 'Not set'"):
             self.assertEqual("Not set", self.table().item(self.row_of(VANADIUM_WS), COL_MATERIAL).text())
 
     def _check_orientations(self):
@@ -339,7 +339,7 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
         view = self.correction_view
         self.select_only([CERIA_WS])
 
-        with self.check("Correction / a single orientation set through the dialog reaches the goniometer"):
+        with self.subTest("Correction / a single orientation set through the dialog reaches the goniometer"):
             self.run_alg_dialog(
                 view.btn_setOrientation,
                 lambda: SetGoniometer(Workspace=CERIA_WS, Axis0="90,1,0,0,1", Axis1="135,0,0,1,-1"),
@@ -347,7 +347,7 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
             rotation = ADS.retrieve(CERIA_WS).run().getGoniometer().getR()
             self.assertFalse(np.allclose(rotation, np.identity(3)), "the goniometer is still the identity")
 
-        with self.check("Correction / the table reports that an orientation has been set"):
+        with self.subTest("Correction / the table reports that an orientation has been set"):
             self.assertEqual("set", self.table().item(self.row_of(CERIA_WS), COL_ORIENTATION).text())
 
         # from a file of flattened rotation matrices
@@ -358,7 +358,7 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
         click(view.btn_loadOrientation)
         process_events(2)
 
-        with self.check("Correction / an orientation file of matrices is applied verbatim"):
+        with self.subTest("Correction / an orientation file of matrices is applied verbatim"):
             with open(matrix_file) as handle:
                 values = [float(value) for value in handle.readline().split(",")]
             expected = np.array(values[:9]).reshape(3, 3)
@@ -377,7 +377,7 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
         process_events(2)
         from_xyz = ADS.retrieve(CERIA_WS).run().getGoniometer().getR().copy()
 
-        with self.check("Correction / an orientation file of Euler angles gives a real rotation"):
+        with self.subTest("Correction / an orientation file of Euler angles gives a real rotation"):
             self.assertFalse(np.allclose(from_xyz, np.identity(3)), "the Euler angles produced no rotation")
             # a rotation matrix is orthonormal with determinant +1; a mis-parsed file would not be
             self.assertTrue(np.allclose(from_xyz @ from_xyz.T, np.identity(3), atol=1e-6))
@@ -391,10 +391,10 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
         # goniometer's own matrix
         from_zxz = ADS.retrieve(CERIA_WS).run().getGoniometer().getR().copy()
 
-        with self.check("Correction / changing the Euler scheme changes how the same file is read"):
+        with self.subTest("Correction / changing the Euler scheme changes how the same file is read"):
             self.assertFalse(np.allclose(from_xyz, from_zxz), "the Euler scheme setting had no effect")
 
-        with self.check("Correction / reversing the sense of rotation also changes the result"):
+        with self.subTest("Correction / reversing the sense of rotation also changes the result"):
             self.select_only([CERIA_WS])
             self.set_engineering_setting("euler_angles_sense", "-1,-1,-1")
             click(view.btn_loadOrientation)
@@ -408,7 +408,7 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
 
         view = self.correction_view
 
-        with self.check("Correction / the reference sample can be copied onto the selected runs"):
+        with self.subTest("Correction / the reference sample can be copied onto the selected runs"):
             self.select_only([VANADIUM_WS])
             click(view.btn_copyRefSample)
             process_events(2)
@@ -416,7 +416,7 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
             self.assertIsInstance(ADS.retrieve(VANADIUM_WS).sample().getShape(), MeshObject)
             self.assertEqual("Fe", ADS.retrieve(VANADIUM_WS).sample().getMaterial().name())
 
-        with self.check("Correction / any loaded workspace can be used as the sample to copy from"):
+        with self.subTest("Correction / any loaded workspace can be used as the sample to copy from"):
             self._set_shape_from_csg([VANADIUM_WS])
             select_combo(view.combo_workspaceList, VANADIUM_WS)
             self.select_only([CERIA_WS])
@@ -433,10 +433,10 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
         click(view.btn_deleteSelected)
         process_events(2)
 
-        with self.check("Correction / Delete Selected removes only the ticked rows"):
+        with self.subTest("Correction / Delete Selected removes only the ticked rows"):
             self.assertEqual([CERIA_WS], self.table_runs())
 
-        with self.check("Correction / deleting a row does not delete the workspace"):
+        with self.subTest("Correction / deleting a row does not delete the workspace"):
             from mantid.api import AnalysisDataService as ADS
 
             # the table is a working set, not the ADS - the guide expects the workspace to survive
@@ -512,25 +512,25 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
     def _check_visibility_toggles(self):
         view = self.correction_view
 
-        with self.check("Correction / the gauge volume inputs follow the absorption checkbox"):
+        with self.subTest("Correction / the gauge volume inputs follow the absorption checkbox"):
             set_checkbox(view.check_absorption, False)
             self.assertFalse(view.combo_shapeMethod.isVisible())
             set_checkbox(view.check_absorption, True)
             self.assertTrue(view.combo_shapeMethod.isVisible())
 
-        with self.check("Correction / the divergence inputs follow the divergence checkbox"):
+        with self.subTest("Correction / the divergence inputs follow the divergence checkbox"):
             set_checkbox(view.check_divergence, True)
             self.assertTrue(view.line_divHorz.isVisible())
             set_checkbox(view.check_divergence, False)
             self.assertFalse(view.line_divHorz.isVisible())
 
-        with self.check("Correction / the attenuation table inputs follow its checkbox"):
+        with self.subTest("Correction / the attenuation table inputs follow its checkbox"):
             set_checkbox(view.check_attenTab, True)
             self.assertTrue(view.widget_attenuationTableContainer.isVisible())
             set_checkbox(view.check_attenTab, False)
             self.assertFalse(view.widget_attenuationTableContainer.isVisible())
 
-        with self.check("Correction / the custom gauge volume finder appears only for a custom shape"):
+        with self.subTest("Correction / the custom gauge volume finder appears only for a custom shape"):
             select_combo(view.combo_shapeMethod, "4mmCube")
             self.assertFalse(view.finder_gauge_vol.isVisible())
             select_combo(view.combo_shapeMethod, "Custom Shape")
@@ -542,15 +542,15 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
 
         self.apply_corrections(absorption=True, divergence=False, attenuation=False)
 
-        with self.check("Correction / applying absorption produces a corrected workspace"):
+        with self.subTest("Correction / applying absorption produces a corrected workspace"):
             self.assertTrue(ADS.doesExist(f"Corrected_{CERIA_WS}"), "no corrected workspace was produced")
 
-        with self.check("Correction / the corrected workspace is in d-spacing"):
+        with self.subTest("Correction / the corrected workspace is in d-spacing"):
             corrected = ADS.retrieve(f"Corrected_{CERIA_WS}")
             self.assertEqual("dSpacing", corrected.getAxis(0).getUnit().unitID())
             self.assertEqual(ADS.retrieve(CERIA_WS).getNumberHistograms(), corrected.getNumberHistograms())
 
-        with self.check("Correction / the correction actually changed the data"):
+        with self.subTest("Correction / the correction actually changed the data"):
             import numpy as np
             from mantid.simpleapi import ConvertUnits
 
@@ -558,10 +558,10 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
             corrected = ADS.retrieve(f"Corrected_{CERIA_WS}")
             self.assertFalse(np.allclose(original.readY(0), corrected.readY(0)), "the corrected data is identical to the input")
 
-        with self.check("Correction / the corrected workspace is saved under AbsorptionCorrection"):
+        with self.subTest("Correction / the corrected workspace is saved under AbsorptionCorrection"):
             self.assertIn(f"Corrected_{CERIA_WS}.nxs", self.basenames_under(self.output_dir("AbsorptionCorrection")))
 
-        with self.check("Correction / the absorption calculation used the shape that was set"):
+        with self.subTest("Correction / the absorption calculation used the shape that was set"):
             # MonteCarloAbsorption is never stubbed - the correction workspace it produced is left
             # in the ADS so the factors themselves can be checked
             import numpy as np
@@ -584,12 +584,12 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
         select_combo(self.correction_view.combo_shapeMethod, "4mmCube")
         self.apply_corrections(absorption=True, divergence=False, attenuation=False)
 
-        with self.check("Correction / the 4mm cube preset is written to the run as a gauge volume"):
+        with self.subTest("Correction / the 4mm cube preset is written to the run as a gauge volume"):
             self.assertEqual(get_cube_xml("some-gv", 0.004).strip(), logged_gauge_volume())
 
         preset_factors = ADS.retrieve("_abs_corr").readY(0).copy()
 
-        with self.check("Correction / a custom gauge volume file is used instead when chosen"):
+        with self.subTest("Correction / a custom gauge volume file is used instead when chosen"):
             custom_file = self.texture_data_file("custom_gauge_volume.xml")
             select_combo(self.correction_view.combo_shapeMethod, "Custom Shape")
             set_finder_text(self.correction_view.finder_gauge_vol, custom_file)
@@ -599,7 +599,7 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
                 expected = handle.read()
             self.assertEqual(expected.strip(), logged_gauge_volume())
 
-        with self.check("Correction / the shipped custom file describes the same volume as the preset"):
+        with self.subTest("Correction / the shipped custom file describes the same volume as the preset"):
             # custom_gauge_volume.xml is itself a 4 mm cube, so this is a round trip: reading the
             # shape from a file must give the same correction as asking for the preset directly
             self.assertTrue(
@@ -607,7 +607,7 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
                 "the same gauge volume gave different absorption factors depending on how it was specified",
             )
 
-        with self.check("Correction / a genuinely different gauge volume gives a different correction"):
+        with self.subTest("Correction / a genuinely different gauge volume gives a different correction"):
             smaller = os.path.join(self.tmp_root, "small_gauge_volume.xml")
             with open(smaller, "w") as handle:
                 handle.write(get_cube_xml("some-gv", 0.001))
@@ -618,7 +618,7 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
                 "shrinking the gauge volume made no difference to the absorption factors",
             )
 
-        with self.check("Correction / 'No Gauge Volume' clears the gauge volume off the run"):
+        with self.subTest("Correction / 'No Gauge Volume' clears the gauge volume off the run"):
             from Engineering.texture.texture_helper import GAUGE_VOLUME_LOG
 
             select_combo(self.correction_view.combo_shapeMethod, "No Gauge Volume")
@@ -630,7 +630,7 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
                 "the previous gauge volume was left on the workspace",
             )
 
-        with self.check("Correction / and the correction really is the uncollimated one"):
+        with self.subTest("Correction / and the correction really is the uncollimated one"):
             uncollimated = ADS.retrieve("_abs_corr").readY(0).copy()
             self.assertFalse(
                 np.allclose(preset_factors, uncollimated),
@@ -651,11 +651,11 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
         self.apply_corrections(absorption=False, divergence=True, attenuation=False)
         corrected = ADS.retrieve(f"Corrected_{CERIA_WS}").readY(0).copy()
 
-        with self.check("Correction / a divergence correction changes the data"):
+        with self.subTest("Correction / a divergence correction changes the data"):
             self.assertFalse(np.allclose(uncorrected, corrected), "the divergence correction had no effect")
             self.assertTrue(np.all(np.isfinite(corrected)), "the corrected data contains non-finite values")
 
-        with self.check("Correction / the divergence parameters typed into the tab are the ones used"):
+        with self.subTest("Correction / the divergence parameters typed into the tab are the ones used"):
             # the correction is data / (scale * sin^2(theta)) with scale = vert * sqrt(horz^2 +
             # det_horz^2), so dividing the two spectra back out must recover that factor exactly
             view = self.correction_view
@@ -667,7 +667,7 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
             ratio = uncorrected[usable] / corrected[usable]
             self.assertTrue(np.allclose(expected, ratio, rtol=1e-6), f"expected a divergence factor of {expected}, got {ratio[:3]}")
 
-        with self.check("Correction / changing the divergence changes the correction"):
+        with self.subTest("Correction / changing the divergence changes the correction"):
             self.correction_view.line_divVert.setText("0.05")
             process_events()
             self.apply_corrections(absorption=False, divergence=True, attenuation=False)
@@ -692,15 +692,15 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
         # the table is named from the workspace's own instrument name, which is the full name in the
         # IDF ("ENGIN-X") rather than the short name the interface's combo box uses ("ENGINX")
         expected_name = f"ENGIN-X_{CERIA}_attenuation_coefficient_2.0_dSpacing"
-        with self.check("Correction / the attenuation table is named for the run and evaluation point"):
+        with self.subTest("Correction / the attenuation table is named for the run and evaluation point"):
             self.assertTrue(ADS.doesExist(expected_name), f"{expected_name} was not produced; found {ADS.getObjectNames()}")
 
-        with self.check("Correction / the attenuation table has one mu per spectrum"):
+        with self.subTest("Correction / the attenuation table has one mu per spectrum"):
             table = ADS.retrieve(expected_name)
             self.assertEqual(["mu"], list(table.getColumnNames()))
             self.assertEqual(ADS.retrieve(CERIA_WS).getNumberHistograms(), table.rowCount())
 
-        with self.check("Correction / the attenuation table is saved under AttenuationTables"):
+        with self.subTest("Correction / the attenuation table is saved under AttenuationTables"):
             self.assertIn(f"{expected_name}.nxs", self.basenames_under(self.output_dir("AttenuationTables")))
 
         set_checkbox(view.check_attenTab, False)
@@ -713,7 +713,7 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
         self.set_engineering_setting("monte_carlo_params", monte_carlo_params(rows=5, columns=5))
         self.apply_corrections(absorption=True, divergence=False, attenuation=False)
 
-        with self.check("Correction / the Monte Carlo settings reach MonteCarloAbsorption"):
+        with self.subTest("Correction / the Monte Carlo settings reach MonteCarloAbsorption"):
             history = ADS.retrieve("_abs_corr").getHistory().getAlgorithmHistories()
             monte_carlo = [alg for alg in history if alg.name() == "MonteCarloAbsorption"]
             self.assertTrue(monte_carlo, "MonteCarloAbsorption is not in the history of the correction workspace")
@@ -721,7 +721,7 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
             self.assertEqual("5", properties["NumberOfDetectorRows"])
             self.assertEqual("5", properties["NumberOfDetectorColumns"])
 
-        with self.check("Correction / different Monte Carlo settings give different factors"):
+        with self.subTest("Correction / different Monte Carlo settings give different factors"):
             import numpy as np
 
             coarse = ADS.retrieve("_abs_corr").readY(0).copy()
@@ -738,12 +738,12 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
         self.set_engineering_setting("clear_absorption_ws_after_processing", True)
         self.apply_corrections(absorption=True, divergence=True, attenuation=False)
 
-        with self.check("Correction / the intermediate workspaces are dropped when the setting asks"):
+        with self.subTest("Correction / the intermediate workspaces are dropped when the setting asks"):
             self.assertFalse(ADS.doesExist("_abs_corr"), "the absorption factors were left in the ADS")
             self.assertFalse(ADS.doesExist("_div_corr"), "the divergence factors were left in the ADS")
             self.assertFalse(ADS.doesExist(f"Corrected_{CERIA_WS}"), "the corrected workspace was left in the ADS")
 
-        with self.check("Correction / but the file is still written"):
+        with self.subTest("Correction / but the file is still written"):
             self.assertIn(f"Corrected_{CERIA_WS}.nxs", self.basenames_under(self.output_dir("AbsorptionCorrection")))
 
     # ------------------------------------------------------------------ helper
