@@ -56,34 +56,34 @@ class EngDiffGuiImatSettingsTest(EngDiffGuiTestBase):
         self.show_tab(TAB_RUN_PROCESSING)
         self.set_instrument(INSTRUMENT)
 
-        with self.check("Run Processing / IMAT offers its own region of interest options"):
+        with self.subTest("Run Processing / IMAT offers its own region of interest options"):
             options = combo_items(self.cropping_view.combo_bank)
             self.assertEqual(list(EXPECTED_ROI_OPTIONS), options)
 
-        with self.check("Run Processing / the ENGIN-X texture groupings are not offered for IMAT"):
+        with self.subTest("Run Processing / the ENGIN-X texture groupings are not offered for IMAT"):
             options = combo_items(self.cropping_view.combo_bank)
             self.assertNotIn("Texture20", options)
             self.assertNotIn("Texture30", options)
 
-        with self.check("Run Processing / IMAT uses its own full instrument calibration"):
+        with self.subTest("Run Processing / IMAT uses its own full instrument calibration"):
             from Engineering.common.instrument_config import get_instr_config
 
             config = get_instr_config(INSTRUMENT)
             self.assertIn("IMAT", config.full_instr_calib)
 
-        with self.check("Run Processing / IMAT uses IkedaCarpenterPV with fixed peak parameters"):
+        with self.subTest("Run Processing / IMAT uses IkedaCarpenterPV with fixed peak parameters"):
             from Engineering.common.instrument_config import get_instr_config
 
             config = get_instr_config(INSTRUMENT)
             self.assertEqual("IkedaCarpenterPV", config.peak_func)
             self.assertIn("IkedaCarpenterPV", config.funcs_to_keep_fixed)
 
-        with self.check("Run Processing / IMAT uses its own TOF binning"):
+        with self.subTest("Run Processing / IMAT uses its own TOF binning"):
             from Engineering.common.instrument_config import get_instr_config
 
             self.assertNotEqual(get_instr_config("ENGINX").calibration_tof_binning, get_instr_config(INSTRUMENT).calibration_tof_binning)
 
-        with self.check("Run Processing / switching back to ENGIN-X restores its texture groupings"):
+        with self.subTest("Run Processing / switching back to ENGIN-X restores its texture groupings"):
             self.set_instrument("ENGINX")
             options = combo_items(self.cropping_view.combo_bank)
             # The exact labels matter: the combo is repopulated from the instrument config on every
@@ -131,32 +131,32 @@ class EngDiffGuiImatCalibrateAndFocusTest(EngDiffGuiTestBase):
         self._check_focus()
 
     def _check_calibration_reported(self, logs):
-        with self.check("Run Processing / the status bar reports the IMAT calibration"):
+        with self.subTest("Run Processing / the status bar reports the IMAT calibration"):
             self.assertEqual(
                 f"CeO2: {IMAT_CERIA_RUN}, V: {IMAT_VANADIUM_RUN}, Instrument: {INSTRUMENT}",
                 self.statusbar_text(),
             )
 
-        with self.check("Run Processing / the peak function from the settings is the one used"):
+        with self.subTest("Run Processing / the peak function from the settings is the one used"):
             # the Default Peak Function setting is only observable through this log line
             self.assertIn("Gaussian", logs.text)
             # only IkedaCarpenterPV is in IMAT's funcs_to_keep_fixed, so a Gaussian fit is free
             self.assertIn("RespectFixedPeakParameters: False", logs.text)
 
-        with self.check("Run Processing / the calibration records the peak shape it fitted"):
+        with self.subTest("Run Processing / the calibration records the peak shape it fitted"):
             self.assertEqual("Gaussian", self.calibration_presenter.current_calibration.get_fit_peak_shape())
 
     def _check_calibration_files(self):
         calibration_dir = self.calibration_dir()
         written = self.basenames_under(calibration_dir)
-        with self.check("Run Processing / a prm and nxs are written for both banks and for all banks"):
+        with self.subTest("Run Processing / a prm and nxs are written for both banks and for all banks"):
             # calibration files are named INSTRUMENT_ceriaRun_suffix for every instrument; the
             # vanadium run appears in the *focused* output names, not these
             for suffix in ("all_banks", "bank_1", "bank_2"):
                 for extension in (".prm", ".nxs"):
                     self.assertIn(f"{INSTRUMENT}_{IMAT_CERIA_RUN}_{suffix}{extension}", written)
 
-        with self.check("Run Processing / the prm is built from the IMAT header template"):
+        with self.subTest("Run Processing / the prm is built from the IMAT header template"):
             from Engineering.EnggUtils import CALIB_DIR
 
             prm = os.path.join(calibration_dir, f"{INSTRUMENT}_{IMAT_CERIA_RUN}_all_banks.prm")
@@ -167,7 +167,7 @@ class EngDiffGuiImatCalibrateAndFocusTest(EngDiffGuiTestBase):
             self.assertIn(first_line, contents)
             self.assertIn("ICONS", contents)
 
-        with self.check("Run Processing / the written prm parses back into diffractometer constants"):
+        with self.subTest("Run Processing / the written prm parses back into diffractometer constants"):
             from Engineering.EnggUtils import read_diff_constants_from_prm
 
             prm = os.path.join(calibration_dir, f"{INSTRUMENT}_{IMAT_CERIA_RUN}_all_banks.prm")
@@ -181,7 +181,7 @@ class EngDiffGuiImatCalibrateAndFocusTest(EngDiffGuiTestBase):
         # when PDCalibration fails rather than raising, so a zero here means the fabricated peak
         # shape did not fit that bank. That is a data-quality signal about this fixture, not a
         # regression in the interface, which is what the rest of the class is testing.
-        with self.check("Run Processing / both IMAT banks got a fitted difc (data quality, soft)"):
+        with self.subTest("Run Processing / both IMAT banks got a fitted difc (data quality, soft)"):
             from Engineering.EnggUtils import read_diff_constants_from_prm
 
             prm = os.path.join(self.calibration_dir(), f"{INSTRUMENT}_{IMAT_CERIA_RUN}_all_banks.prm")
@@ -196,7 +196,7 @@ class EngDiffGuiImatCalibrateAndFocusTest(EngDiffGuiTestBase):
         from mantid.api import AnalysisDataService as ADS
 
         mask_name = "engggui_calibration_all_banks_mask"
-        with self.check("Run Processing / PDCalibration fitted the IMAT banks (data quality, soft)"):
+        with self.subTest("Run Processing / PDCalibration fitted the IMAT banks (data quality, soft)"):
             self.assertTrue(ADS.doesExist(mask_name), f"{mask_name} was not produced")
             mask = ADS.retrieve(mask_name)
             total = mask.getNumberHistograms()
@@ -209,13 +209,13 @@ class EngDiffGuiImatCalibrateAndFocusTest(EngDiffGuiTestBase):
     def _check_focus(self):
         self.focus(runs=str(IMAT_CERIA_RUN))
 
-        with self.check("Run Processing / focusing produces an output workspace named for the run"):
+        with self.subTest("Run Processing / focusing produces an output workspace named for the run"):
             focused = self.focused_workspace_names()
             self.assertTrue(focused, "focusing produced no output workspace")
             for name in focused:
                 self.assertTrue(name.startswith(str(IMAT_CERIA_RUN)), f"{name} is not named for the focused run")
 
-        with self.check("Run Processing / the focused output files are written"):
+        with self.subTest("Run Processing / the focused output files are written"):
             written = self.basenames_under(self.focus_dir())
             self.assertTrue(written, f"nothing under {self.focus_dir()}")
             self.assertTrue(any(name.endswith(".gss") for name in written), f"no gss in {written}")
