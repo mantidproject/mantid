@@ -266,9 +266,10 @@ from all ticked peaks workspaces.
 Grouping and Masking
 ####################
 
-Regions of the instrument are selected by overlaying a shape on a flat projection. Choose a shape
-from the combo box, ``Circle``, ``Rectangle``, ``Ellipse``, ``Annulus`` or ``Hollow Rectangle``,
-and press ``Add Shape``.
+Regions of the instrument are selected either by overlaying a shape on a flat projection, or from
+the detectors already selected in the display. To use a shape, choose one from the combo box,
+``Circle``, ``Rectangle``, ``Ellipse``, ``Annulus`` or ``Hollow Rectangle``, and press
+``Add Shape``.
 
 The shape can be moved by dragging from inside it and resized by dragging an edge. ``Rectangle``,
 ``Ellipse`` and ``Hollow Rectangle`` also have a rotation handle above the shape. ``Annulus`` and
@@ -295,6 +296,17 @@ The two tabs underneath turn the covered detectors into a permanent selection:
 
 If ``Select Bank/Tube`` is on, the selection is expanded from the covered detectors to the whole of
 each tube or bank they belong to.
+
+``Create From Current Selection``, on both tabs, adds an entry from the detectors currently
+selected in the display rather than from a shape. Detectors can be clicked one at a time, or a tube
+or a bank at a time with ``Select Bank/Tube``, and then committed without having to draw a shape
+around them. It uses everything that is highlighted, which includes the detectors of any ticked
+``Grouping`` entry as well as those clicked directly; only the ones clicked directly are deselected
+once the new entry has been added.
+
+The button is enabled only while something is selected, and never while ``Hover Pick`` or
+``Adding/Deleting Peaks Mode`` is on, because those use the selection to show what is under the
+cursor rather than to build one up.
 
 Entries are ticked when added and can be ticked and unticked to combine them; the effect of all
 ticked entries is applied together. ``Clear All`` removes the entries created in this session. Any

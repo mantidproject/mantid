@@ -163,6 +163,24 @@ run before the work is queued. ``on_shape_changed`` is the pattern to copy:
 The generation counter lets the worker discard superseded updates, which matters when a shape is
 dragged or the wheel is scrolled and events arrive faster than they can be processed.
 
+The queue also means the state a handler read can have moved on by the time the work runs, so a
+handler that acts on the current selection has to snapshot it rather than read it again later.
+``on_create_item_from_selection_clicked`` is the pattern to copy:
+
+.. code-block:: python
+
+   def on_create_item_from_selection_clicked(self):
+       selection = self._model.picked_detector_mask
+       pickable = self._model.is_pickable
+       point_picks = self._model.point_picked_detectors
+       tab = self._view.get_current_selected_tab()
+       self._callback_queue.put((self._on_create_item_from_selection_clicked, (selection, pickable, point_picks, tab)))
+
+The ``is_pickable`` mask is carried along because ``selection`` is positioned by it, so the worker
+can compare and refuse to commit if masking or a component tree selection has swapped detectors in
+or out of the pickable set meanwhile. The count would be unchanged, but every entry after the swap
+would describe a different detector.
+
 Related helpers are the ``SuppressRendering`` context manager, used to batch plotter updates, and
 the ``_skip_if_closing`` decorator, which guards view methods against calls arriving after
 ``closeEvent``.
@@ -311,6 +329,16 @@ over them. Nearly every public property is a slice of one of those arrays:
 Understanding which mask a property is sliced by is usually enough to understand the property. Note
 in particular that indices coming back from a picking callback are indices into the *pickable*
 detectors, not into all detectors.
+
+There are two masks describing the selection, and they differ in both length and content, so
+mixing them up is an easy mistake. ``picked_detector_mask`` has one entry per *pickable* detector,
+matching the meshes and the picking callbacks, and covers everything highlighted -- both the
+detectors clicked in the projection and those of any ticked ``Grouping`` entry, which
+``apply_detector_items`` unions together into ``_detector_is_picked``.
+``point_picked_detectors`` has one entry per detector, so it indexes the full-length arrays, and
+holds only the detectors clicked in the projection. It returns a copy, because the model picks into
+its own array in place and a caller holding it as a snapshot would otherwise see it change
+underneath them.
 
 Bulk detector data is read with the :ref:`CreateDetectorTable <algm-CreateDetectorTable>` algorithm
 rather than a Python loop over detectors, which is much faster for large instruments:
