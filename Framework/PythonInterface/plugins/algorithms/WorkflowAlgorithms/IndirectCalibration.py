@@ -27,6 +27,7 @@ from mantid.simpleapi import (
 )
 
 from IndirectCommon import get_run_number
+from IndirectReductionCommon import remove_edge_pixels
 
 import os.path
 
@@ -140,6 +141,8 @@ class IndirectCalibration(DataProcessorAlgorithm):
         else:
             calib_ws_name = runs[0]
             merge_prog.report()
+
+        remove_edge_pixels(calib_ws_name)
 
         workflow_prog = Progress(self, start=0.40, end=0.90, nreports=10)
         workflow_prog.report("Calculating flat background")
