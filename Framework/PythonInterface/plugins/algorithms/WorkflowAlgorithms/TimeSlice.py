@@ -190,19 +190,16 @@ class TimeSlice(PythonAlgorithm):
 
     def _divide_by_calibration(self, raw_file):
         """
-        Divide raw_file by the calibration workspace, matched per detector ID.
-        Raw spectra whose detector IDs are absent from the calibration workspace
+        Divide raw_file by the calibration workspace, matched per spectrum number.
+        Raw spectra whose spectrum numbers are absent from the calibration workspace
         are divided by 1.0, so they survive and appear as raw integrated counts
         in the diagnostic output.
         """
         calib = mtd[self._calib_ws]
 
-        calib_by_detid = {}
+        calib_by_specno = {}
         for i in range(calib.getNumberHistograms()):
-            y0 = calib.readY(i)[0]
-            e0 = calib.readE(i)[0]
-            for detid in calib.getSpectrum(i).getDetectorIDs():
-                calib_by_detid[detid] = (y0, e0)
+            calib_by_specno[calib.getSpectrum(i).getSpectrumNo()] = (calib.readY(i)[0], calib.readE(i)[0])
 
         raw = mtd[raw_file]
         raw_x = raw.readX(0)
@@ -217,14 +214,11 @@ class TimeSlice(PythonAlgorithm):
 
         unmatched = 0
         for i in range(divisor.getNumberHistograms()):
-            match_y, match_e = 1.0, 0.0
-            matched = False
-            for detid in divisor.getSpectrum(i).getDetectorIDs():
-                if detid in calib_by_detid:
-                    match_y, match_e = calib_by_detid[detid]
-                    matched = True
-                    break
-            if not matched:
+            spec_no = divisor.getSpectrum(i).getSpectrumNo()
+            if spec_no in calib_by_specno:
+                match_y, match_e = calib_by_specno[spec_no]
+            else:
+                match_y, match_e = 1.0, 0.0
                 unmatched += 1
             divisor.dataY(i)[0] = match_y
             divisor.dataE(i)[0] = match_e
