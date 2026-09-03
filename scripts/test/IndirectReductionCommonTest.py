@@ -17,6 +17,7 @@ from IndirectReductionCommon import (
     group_spectra_by_theta,
     group_spectra_of,
     remove_edge_pixels,
+    get_minimum_calibration_factor,
     _excluded_detector_ids,
     _get_x_range_when_bins_vary,
 )
@@ -156,6 +157,22 @@ class EdgePixelRemovalTest(unittest.TestCase):
         initial = mtd[ws_name].getNumberHistograms()
         remove_edge_pixels(ws_name)
         self.assertEqual(initial, mtd[ws_name].getNumberHistograms())
+        DeleteWorkspace(ws_name)
+
+
+class MinimumCalibrationFactorTest(unittest.TestCase):
+    """Tests for get_minimum_calibration_factor's instrument-parameter lookup."""
+
+    def test_falls_back_to_osiris_silicon_instrument_parameter(self):
+        ws_name = "__test_osiris_min_calib_default"
+        LoadEmptyInstrument(InstrumentName="OSIRIS", OutputWorkspace=ws_name)
+        self.assertEqual(get_minimum_calibration_factor(ws_name), 0.5)
+        DeleteWorkspace(ws_name)
+
+    def test_defaults_to_zero_for_non_silicon_instrument(self):
+        ws_name = "__test_iris_min_calib_default"
+        LoadEmptyInstrument(InstrumentName="IRIS", OutputWorkspace=ws_name)
+        self.assertEqual(get_minimum_calibration_factor(ws_name), 0.0)
         DeleteWorkspace(ws_name)
 
 

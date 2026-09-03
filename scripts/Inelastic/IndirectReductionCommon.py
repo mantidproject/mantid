@@ -1379,6 +1379,40 @@ def remove_edge_pixels(workspace):
         RemoveSpectra(InputWorkspace=workspace, OutputWorkspace=workspace, WorkspaceIndices=indices_to_remove)
 
 
+def get_minimum_calibration_factor(workspace):
+    """
+    Reads the silicon component's 'Workflow.MinimumCalibrationFactor' parameter, or 0.0 if absent.
+
+    :param workspace:   The name of a workspace in the ADS.
+    """
+    component = mtd[workspace].getInstrument().getComponentByName("silicon")
+    if component is None:
+        return 0.0
+    values = component.getNumberParameter("Workflow.MinimumCalibrationFactor")
+    return values[0] if values else 0.0
+
+
+def exclude_low_calibration_spectra(workspace):
+    """
+    Removes spectra with a calibration factor below get_minimum_calibration_factor() times the mean.
+
+    :param workspace:   The name of a calibration workspace in the ADS to remove spectra from.
+    """
+    threshold_factor = get_minimum_calibration_factor(workspace)
+    if threshold_factor <= 0.0:
+        return
+    values = mtd[workspace].extractY().flatten()
+    nonzero = values[values > 0.0]
+    if nonzero.size == 0:
+        return
+    low_indices = np.where(values < threshold_factor * nonzero.mean())[0].tolist()
+    if not low_indices:
+        return
+    spec_nos = [mtd[workspace].getSpectrum(i).getSpectrumNo() for i in low_indices]
+    logger.warning(f"Excluding {len(low_indices)} low-calibration spectra: {spec_nos}")
+    RemoveSpectra(InputWorkspace=workspace, OutputWorkspace=workspace, WorkspaceIndices=low_indices)
+
+
 def _save_ascii(workspace, file_name):
     """
     Saves the specified workspace into a file with the specified name,
