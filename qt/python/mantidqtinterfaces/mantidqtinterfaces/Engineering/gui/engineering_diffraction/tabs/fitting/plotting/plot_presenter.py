@@ -68,7 +68,9 @@ class FittingPlotPresenter(object):
     def remove_workspace_from_plot(self, ws: MatrixWorkspace) -> None:
         for ax in self.view.get_axes():
             self.model.remove_workspace_from_plot(ws, ax)
-            self.view.remove_ws_from_fitbrowser(ws)
+        # once for the workspace, not once per axes: the fit browser holds one entry per workspace,
+        # so a second removal has nothing left to remove
+        self.view.remove_ws_from_fitbrowser(ws)
         self.view.update_figure()
         self.set_progress_bar_zero()
         if len(self.model.get_plotted_workspaces()) == 0:

@@ -43,7 +43,10 @@ class FittingPlotPresenterTest(unittest.TestCase):
         self.presenter.remove_workspace_from_plot("workspace")
 
         self.assertEqual(1, self.view.update_figure.call_count)
-        self.assertEqual(2, self.view.remove_ws_from_fitbrowser.call_count)
+        # the curve is removed from each axes, but the fit browser holds one entry per workspace and
+        # so is told once - removing the same workspace from it twice erased an iterator it no longer
+        # had, which hung the interface
+        self.assertEqual(1, self.view.remove_ws_from_fitbrowser.call_count)
         self.assertEqual(2, self.model.remove_workspace_from_plot.call_count)
         self.model.remove_workspace_from_plot.assert_any_call("workspace", "axis1")
         self.model.remove_workspace_from_plot.assert_any_call("workspace", "axis2")
