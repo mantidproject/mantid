@@ -38,10 +38,9 @@ class HelpWindowPresenter:
     Uses QDesktopServices to open both local and online documentation URLs.
     """
 
-    def __init__(self, parentApp=None, onlineBaseUrl="https://docs.mantidproject.org/"):
-        log.debug(f"Initializing with onlineBaseUrl='{onlineBaseUrl}'")
+    def __init__(self, parentApp=None):
         try:
-            self.model = HelpWindowModel(online_base=onlineBaseUrl)
+            self.model = HelpWindowModel()
         except Exception as e:
             log.error(f"Failed to initialize HelpWindowModel: {e}")
             self.model = None
