@@ -380,6 +380,7 @@ class FullInstrumentViewView(QWidget):
         self._selection_tab = QWidget()
         (
             self._add_selection,
+            self._create_selection_from_picked,
             self._clear_selections,
             self._selection_list,
             self._save_roi_to_ws,
@@ -395,6 +396,7 @@ class FullInstrumentViewView(QWidget):
         self._mask_tab = QWidget()
         (
             self._add_mask,
+            self._create_mask_from_picked,
             self._clear_masks,
             self._mask_list,
             self._save_mask_to_ws,
@@ -570,6 +572,10 @@ class FullInstrumentViewView(QWidget):
         self._add_mask.setEnabled(enabled)
         self._add_selection.setEnabled(enabled)
 
+    def set_create_from_selection_buttons_enabled(self, enabled: bool):
+        self._create_mask_from_picked.setEnabled(enabled)
+        self._create_selection_from_picked.setEnabled(enabled)
+
     def set_aspect_ratio_box_enabled(self, enabled):
         self._aspect_ratio_check_box.setEnabled(enabled)
 
@@ -710,6 +716,8 @@ class FullInstrumentViewView(QWidget):
         pre_list_layout = QHBoxLayout()
         pre_list_layout.addWidget(add_item_btn)
         pre_list_layout.addWidget(clear_items_btn)
+        create_from_selection_btn = QPushButton("Create From Current Selection")
+        create_from_selection_btn.setToolTip(f"Create a new {label} from the detectors currently selected in the projection.")
         item_list = WorkspaceListWidget()
         item_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
         item_list.setSelectionMode(QAbstractItemView.NoSelection)
@@ -723,9 +731,19 @@ class FullInstrumentViewView(QWidget):
         post_list_layout.addWidget(save_to_cal_btn)
         post_list_layout.addWidget(overwrite_btn)
         tab_layout.addLayout(pre_list_layout)
+        tab_layout.addWidget(create_from_selection_btn)
         tab_layout.addWidget(item_list)
         tab_layout.addLayout(post_list_layout)
-        return (add_item_btn, clear_items_btn, item_list, save_to_ws_btn, save_to_xml_btn, save_to_cal_btn, overwrite_btn)
+        return (
+            add_item_btn,
+            create_from_selection_btn,
+            clear_items_btn,
+            item_list,
+            save_to_ws_btn,
+            save_to_xml_btn,
+            save_to_cal_btn,
+            overwrite_btn,
+        )
 
     def subscribe_presenter(self, presenter) -> None:
         self._presenter = presenter
@@ -793,6 +811,10 @@ class FullInstrumentViewView(QWidget):
         self._add_mask.setDisabled(True)
         self._add_selection.clicked.connect(self._presenter.on_add_item_clicked)
         self._add_selection.setDisabled(True)
+
+        self._create_mask_from_picked.clicked.connect(self._presenter.on_create_item_from_selection_clicked)
+        self._create_selection_from_picked.clicked.connect(self._presenter.on_create_item_from_selection_clicked)
+        self.set_create_from_selection_buttons_enabled(False)
 
     def is_select_peaks_checked(self) -> bool:
         return self._select_peaks.isChecked()
