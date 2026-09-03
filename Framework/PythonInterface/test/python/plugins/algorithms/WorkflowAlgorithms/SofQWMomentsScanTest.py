@@ -7,9 +7,22 @@
 import unittest
 from mantid.simpleapi import SofQWMomentsScan, DeleteWorkspace
 from mantid import mtd
+from mantid.api import AlgorithmManager
 
 
 class SofQWMomentsScanTest(unittest.TestCase):
+    def test_accepts_osiris_silicon_analyser(self):
+        alg = AlgorithmManager.createUnmanaged("SofQWMomentsScan")
+        alg.initialize()
+
+        alg.setProperty("Instrument", "OSIRIS")
+        alg.setProperty("Analyser", "silicon")
+        alg.setProperty("Reflection", "111")
+
+        self.assertEqual(alg.getPropertyValue("Instrument"), "OSIRIS")
+        self.assertEqual(alg.getPropertyValue("Analyser"), "silicon")
+        self.assertEqual(alg.getPropertyValue("Reflection"), "111")
+
     def test_sqw_moments_scan(self):
         SofQWMomentsScan(
             InputFiles="OSIRIS100320",
