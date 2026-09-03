@@ -19,7 +19,7 @@ detector groupings, and peaks from a
 :py:obj:`PeaksWorkspace <mantid.dataobjects.PeaksWorkspace>` can be overlaid on both the instrument
 and the plot.
 
-.. figure:: /images/ImageNotFound.png
+.. figure:: ../images/Workbench/InstrumentViewer/Overview.png
     :align: center
     :width: 635
 
@@ -65,7 +65,7 @@ toolbar. Both splitters can be dragged to change the proportions.
 Home tab
 --------
 
-.. figure:: /images/ImageNotFound.png
+.. figure:: ../images/Workbench/InstrumentViewer/HomeTab.png
     :align: center
     :width: 635
 
@@ -126,17 +126,28 @@ The ``Projection`` combo box selects how the instrument is drawn:
 - ``Side by Side``: each flat bank of detectors is unrolled into its own panel and the panels are
   laid out next to each other, so that every bank can be seen at once without foreshortening.
 
+.. figure:: ../images/Workbench/InstrumentViewer/ProjectionOptions.png
+    :align: center
+
 The default is taken from the instrument definition, so most instruments open in the projection
 their scientists normally use. ``Reset Projection`` returns the camera to its default position and
 zoom for the current projection.
+
+.. figure:: ../images/Workbench/InstrumentViewer/Projection3D.png
+    :align: center
+    :width: 635
+
+    SXD in the ``3D`` projection.
 
 Banks in the ``Side by Side`` view are arranged automatically, but their positions can be set
 explicitly with the ``side-by-side-view-location`` tag in the
 :ref:`instrument definition file <Side by side view location>`.
 
-.. figure:: /images/ImageNotFound.png
+.. figure:: ../images/Workbench/InstrumentViewer/ProjectionSideBySide.png
     :align: center
     :width: 635
+
+    The same instrument in the ``Side by Side`` projection.
 
 Several controls only apply to the flat projections and are disabled in ``3D``:
 ``Rectangle Zoom``, ``Hover Pick``, the shape controls, ``Maintain Aspect Ratio`` and
@@ -160,7 +171,7 @@ Sets the minimum and maximum of the colour map, using the same slider and ``Min`
 boxes. Narrowing the range brings out detail in weak regions of the instrument. ``Reset`` restores
 the limits to the range of the integrated counts.
 
-.. figure:: /images/ImageNotFound.png
+.. figure:: ../images/Workbench/InstrumentViewer/UnitsAndContourRange.png
     :align: center
     :width: 635
 
@@ -190,6 +201,9 @@ selecting one may switch others off where the combination would be ambiguous.
     Deselects everything selected by clicking. Selections made from the ROI and mask lists are
     left alone.
 
+.. figure:: ../images/Workbench/InstrumentViewer/PickingInteraction.png
+    :align: center
+
 Line Plot
 #########
 
@@ -203,7 +217,7 @@ that detectors at different scattering angles add up correctly.
 ``Export Spectra to ADS`` saves whatever is currently plotted into a workspace named
 ``instrument_view_selected_spectra_<workspace name>``.
 
-.. figure:: /images/ImageNotFound.png
+.. figure:: ../images/Workbench/InstrumentViewer/LinePlot.png
     :align: center
     :width: 635
 
@@ -219,13 +233,17 @@ vertical lines. Each workspace is given its own colour, shown next to its name.
 Where several peaks fall on one detector, the marker is labelled with the indices of the peak with
 the largest d-spacing followed by the number of peaks, for example ``[1, 1, 0] x 4``.
 
-.. figure:: /images/ImageNotFound.png
+.. figure:: ../images/Workbench/InstrumentViewer/PeaksOverlay.png
     :align: center
     :width: 635
 
-.. figure:: /images/ImageNotFound.png
+    Peaks overlaid on the instrument, labelled with their Miller indices.
+
+.. figure:: ../images/Workbench/InstrumentViewer/PeaksLinePlot.png
     :align: center
     :width: 635
+
+    The same peaks on the line plot for the selected detectors.
 
 ``Adding/Deleting Peaks Mode`` allows peaks to be added and removed by clicking on the line plot:
 
@@ -241,7 +259,7 @@ continue to work while the mode is active.
 ``Delete All Peaks In Selected Detectors`` removes every peak on the currently selected detectors
 from all ticked peaks workspaces.
 
-.. figure:: /images/ImageNotFound.png
+.. figure:: ../images/Workbench/InstrumentViewer/PeakAddDelete.png
     :align: center
     :width: 635
 
@@ -261,7 +279,7 @@ While a shape is on screen the line plot shows the summed spectra of the detecto
 follows the shape as it is moved, resized, rotated or as the view is zoomed. Only one shape exists
 at a time. Pressing ``Add Shape`` again replaces it, and switching the button off removes it.
 
-.. figure:: /images/ImageNotFound.png
+.. figure:: ../images/Workbench/InstrumentViewer/ShapeOverlay.png
     :align: center
     :width: 635
 
@@ -283,13 +301,17 @@ ticked entries is applied together. ``Clear All`` removes the entries created in
 ``MaskWorkspace`` or ``GroupingWorkspace`` in the Analysis Data Service for the same instrument is
 also listed, so existing masks and groupings can be applied here too.
 
-.. figure:: /images/ImageNotFound.png
+.. figure:: ../images/Workbench/InstrumentViewer/GroupingTab.png
     :align: center
     :width: 635
 
-.. figure:: /images/ImageNotFound.png
+    Two regions of interest on the ``Grouping`` tab.
+
+.. figure:: ../images/Workbench/InstrumentViewer/MaskingTab.png
     :align: center
     :width: 635
+
+    A mask on the ``Masking`` tab. The masked detectors are drawn dark grey.
 
 Saving masks, regions of interest and groupings
 ###############################################
@@ -363,14 +385,14 @@ that only the plot is updated.
       - Angle between the two selected detectors in reciprocal space. Shown only when exactly two
         detectors are selected.
 
-.. figure:: /images/ImageNotFound.png
+.. figure:: ../images/Workbench/InstrumentViewer/DetectorInfo.png
     :align: center
     :width: 635
 
 Settings tab
 ------------
 
-.. figure:: /images/ImageNotFound.png
+.. figure:: ../images/Workbench/InstrumentViewer/SettingsTab.png
     :align: center
     :width: 635
 
@@ -415,7 +437,7 @@ Selecting one or more components restricts the display to those components: ever
 drawn dark grey and cannot be picked, which makes it much easier to work with a single bank of a
 large instrument. Clearing the selection restores the whole instrument.
 
-.. figure:: /images/ImageNotFound.png
+.. figure:: ../images/Workbench/InstrumentViewer/ComponentTree.png
     :align: center
     :width: 635
 
