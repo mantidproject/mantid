@@ -166,6 +166,10 @@ class EngDiffGuiTestBase(AutomatedUITestBase):
     def tearDown(self):
         gui = getattr(self, "gui", None)
         if gui is not None:
+            # Before anything else, and again from the base tearDown: a worker abandoned by a failed
+            # assertion is still writing to the ADS and still reporting back into the interface, so
+            # it has to be stopped while both are intact rather than after they have gone.
+            self._drain_async_tasks()
             # Clear the ADS while the interface is still alive. The fitting, texture and GSAS-II
             # tabs all hold ADS observers that repopulate their tables on a clear, so clearing after
             # the window has gone drives those handlers into deleted C++ widgets.
