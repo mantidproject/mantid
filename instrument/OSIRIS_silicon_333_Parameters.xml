@@ -55,6 +55,10 @@
       <value val="0.08" />
     </parameter>
 
+    <parameter name="resolution-rebin-width">
+      <value val="0.001" />
+    </parameter>
+
   </component-link>
 
 </parameter-file>

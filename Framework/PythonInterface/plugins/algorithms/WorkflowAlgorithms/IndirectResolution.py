@@ -5,9 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-many-instance-attributes
-from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, Progress, WorkspaceProperty
+from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, Progress, PropertyMode, WorkspaceProperty
 from mantid.kernel import Direction, FloatArrayProperty, IntArrayProperty, StringArrayProperty, StringListValidator
-from mantid.simpleapi import CalculateFlatBackground, Rebin, Scale
+from mantid.simpleapi import CalculateFlatBackground, GroupDetectors, Rebin, RemoveSpectra, Scale
 
 
 class IndirectResolution(DataProcessorAlgorithm):
@@ -21,6 +21,7 @@ class IndirectResolution(DataProcessorAlgorithm):
     _rebin_string = None
     _scale_factor = None
     _load_logs = None
+    _calibration_ws = None
 
     def category(self):
         return "Workflow\\Inelastic;Inelastic\\Indirect"
@@ -60,6 +61,11 @@ class IndirectResolution(DataProcessorAlgorithm):
 
         self.declareProperty(name="LoadLogFiles", defaultValue=True, doc="Option to load log files")
 
+        self.declareProperty(
+            WorkspaceProperty("CalibrationWorkspace", "", direction=Direction.Input, optional=PropertyMode.Optional),
+            doc="Optional calibration workspace; spectra absent from it (by detector ID) are excluded from the resolution sum.",
+        )
+
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output), doc="Output resolution workspace.")
 
     def PyExec(self):
@@ -69,7 +75,7 @@ class IndirectResolution(DataProcessorAlgorithm):
         iet_alg.setProperty("Instrument", self._instrument)
         iet_alg.setProperty("Analyser", self._analyser)
         iet_alg.setProperty("Reflection", self._reflection)
-        iet_alg.setProperty("GroupingMethod", "All")
+        iet_alg.setProperty("GroupingMethod", "Individual")
         iet_alg.setProperty("SumFiles", True)
         iet_alg.setProperty("InputFiles", self._input_files)
         iet_alg.setProperty("SpectraRange", self._detector_range)
@@ -80,6 +86,8 @@ class IndirectResolution(DataProcessorAlgorithm):
         icon_ws = group_ws.getItem(0).name()
 
         workflow_prog = Progress(self, start=0.7, end=0.9, nreports=4)
+
+        self._apply_calibration_mask_and_average(icon_ws)
 
         if self._scale_factor != 1.0:
             workflow_prog.report("Scaling Workspace")
@@ -119,6 +127,34 @@ class IndirectResolution(DataProcessorAlgorithm):
         self._rebin_string = self.getProperty("RebinParam").value
         self._scale_factor = self.getProperty("ScaleFactor").value
         self._load_logs = self.getProperty("LoadLogFiles").value
+        self._calibration_ws = self.getProperty("CalibrationWorkspace").value
+
+    def _apply_calibration_mask_and_average(self, ws_name):
+        """
+        Reduce the per-pixel workspace to a single averaged spectrum, first
+        dropping any spectra whose detector IDs are absent from the optional
+        calibration workspace (i.e. pixels that IndirectCalibration already
+        excluded as edge or low-calibration).
+        """
+        from mantid.api import AnalysisDataService as ADS
+
+        ws = ADS.retrieve(ws_name)
+
+        if self._calibration_ws is not None:
+            calib_det_ids = set()
+            for i in range(self._calibration_ws.getNumberHistograms()):
+                calib_det_ids.update(self._calibration_ws.getSpectrum(i).getDetectorIDs())
+            indices_to_remove = [i for i in range(ws.getNumberHistograms()) if calib_det_ids.isdisjoint(ws.getSpectrum(i).getDetectorIDs())]
+            if indices_to_remove:
+                RemoveSpectra(InputWorkspace=ws_name, OutputWorkspace=ws_name, WorkspaceIndices=indices_to_remove)
+                ws = ADS.retrieve(ws_name)
+
+        GroupDetectors(
+            InputWorkspace=ws_name,
+            OutputWorkspace=ws_name,
+            Behaviour="Average",
+            WorkspaceIndexList=list(range(ws.getNumberHistograms())),
+        )
 
     def _post_process(self):
         """
