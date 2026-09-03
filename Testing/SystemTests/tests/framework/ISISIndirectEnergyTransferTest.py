@@ -31,15 +31,15 @@ class ISISIndirectEnergyTransferTest(MantidSystemTest):
 class ISISIndirectEnergyTransferSiliconAnalyserTest(MantidSystemTest):
     def runTest(self):
         ISISIndirectEnergyTransfer(
-            InputFiles="OSI100320_silicon_test.nxs",
+            InputFiles="OSIRIS00156815.raw",
             Instrument="OSIRIS",
             Analyser="silicon",
             Reflection="111",
-            SpectraRange="1005,1019",
-            OutputWorkspace="OSI100320_silicon_002_Reduced",
+            SpectraRange="1005,2564",
+            OutputWorkspace="OSIRIS00156815_silicon_111_Reduced",
         )
 
     def validate(self):
         self.tolerance = 1e-10
         self.nanEqual = True
-        return "osiris100320_silicon111_red", "OSI100320_silicon111_red-ref.nxs"
+        return "osiris156815_silicon111_red", "OSIRIS00156815_silicon111_red-ref.nxs"
