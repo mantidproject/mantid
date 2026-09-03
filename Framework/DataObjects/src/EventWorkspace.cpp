@@ -501,6 +501,7 @@ size_t EventWorkspace::getMemorySize() const {
 // interface: handing out a mutable MantidVec would allow the length to be changed, so
 // FixedLengthVector::mutableRawData() is protected and Histogram is its only friend.
 GNU_DIAG_OFF("deprecated-declarations")
+MSVC_DIAG_OFF(4996)
 
 /// Deprecated, use mutableX() instead. Return the data X vector at a given
 /// workspace index
@@ -514,6 +515,7 @@ MantidVec &EventWorkspace::dataX(const std::size_t index) { return getSpectrum(i
 /// @returns A reference to the vector of binned error values
 MantidVec &EventWorkspace::dataDx(const std::size_t index) { return getSpectrum(index).dataDx(); }
 
+MSVC_DIAG_ON(4996)
 GNU_DIAG_ON("deprecated-declarations")
 
 /// Deprecated, use mutableY() instead. Return the data Y vector at a given

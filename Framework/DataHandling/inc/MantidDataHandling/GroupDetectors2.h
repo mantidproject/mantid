@@ -125,8 +125,8 @@ private:
     RangeHelper() = default;
     /// give an enum from poco a better name here
     enum {
-      IGNORE_SPACES =
-          Mantid::Kernel::StringTokenizer::TOK_TRIM | Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY ///< equal to
+      IGNORE_SPACES = Mantid::Kernel::StringTokenizer::TOK_TRIM |
+      Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY ///< equal to
       /// Mantid::Kernel::StringTokenizer::TOK_TRIM but
       /// saves some typing
     };

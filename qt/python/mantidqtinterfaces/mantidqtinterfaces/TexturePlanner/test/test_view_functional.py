@@ -45,7 +45,7 @@ from mantid.simpleapi import (
 )
 from Engineering.common.instrument_config import SUPPORTED_INSTRUMENTS
 from Engineering.common.xml_shapes import get_cube_xml
-from Engineering.texture.texture_helper import convert_to_sscanss_frame
+from Engineering.texture.texture_helper import convert_to_sscanss_frame, read_texture_direction_info_from_log
 
 from mantidqtinterfaces.TexturePlanner.model import TexturePlannerModel
 from mantidqtinterfaces.TexturePlanner.settings.settings_model import DEFAULT_SETTINGS
@@ -223,6 +223,7 @@ class _FunctionalTestBase(unittest.TestCase):
         "get_att_point": "att_point",
         "get_att_unit": "att_unit",
         "get_att_use_data_range": "att_use_data_range",
+        "get_att_show_current": "att_show_current",
     }
 
     def _apply_settings_via_real_presenter(self, **overrides):
@@ -276,6 +277,29 @@ class _FunctionalTestBase(unittest.TestCase):
             if len(c.get_offsets()) == len(swapped) and np.allclose(np.asarray(c.get_offsets()), swapped, atol=1e-12)
         ]
 
+    def _transmission_scatter(self):
+        # the colour-mapped transmission points are the only pole-figure scatter carrying a value array
+        scatters = [c for c in self._pf_point_scatters() if c.get_array() is not None]
+        self.assertEqual(len(scatters), 1)
+        return scatters[0]
+
+    def _current_highlight_scatter(self):
+        """The ring drawn around the current orientation in transmission mode, or None if it is not
+        drawn. It is the only grey open-circle scatter: the transmission points carry a colour array
+        and the goniometer poles are colour-coded per axis."""
+        rings = [
+            c
+            for c in self._pf_point_scatters()
+            if c.get_array() is None and len(c.get_facecolor()) == 0 and np.allclose(c.get_edgecolor()[0][:3], to_rgba("grey")[:3])
+        ]
+        self.assertLessEqual(len(rings), 1)
+        return rings[0] if rings else None
+
+    def _add_rotated_orientation(self, angle):
+        self._click(self.view.addOrientation)
+        self.view.spnAngle0.setValue(angle)
+        QApplication.processEvents()
+
     def _drawn_sample_vertices(self):
         # the sample is drawn grey; a gauge volume (if any) adds a second, cyan Poly3DCollection
         polys = [
@@ -311,6 +335,36 @@ class _FunctionalTestBase(unittest.TestCase):
 
     def _lab_direction_labels(self):
         return {t.get_text(): np.asarray(t.get_position_3d(), dtype=float) for t in self.view.get_lab_ax().texts if isinstance(t, Text3D)}
+
+    def _lab_direction_unit_vectors(self):
+        """Unit direction of each labelled sample-direction arrow in the lab view.
+
+        Each label sits at scat_centre + direction * arrow_length, and the arrow length is read off
+        the mesh extent along that direction, so only the direction itself is a stable assertion."""
+        scat_centre = self.model.workspaces.scattering_centre
+        vectors = {}
+        for name, position in self._lab_direction_labels().items():
+            arrow = position - scat_centre
+            vectors[name] = arrow / np.linalg.norm(arrow)
+        return vectors
+
+    def _displayed_directions(self):
+        # the three direction fields as a (3, 3) array, one direction per row (RD, ND, TD)
+        fields = (self.view.get_rd_dir(), self.view.get_nd_dir(), self.view.get_td_dir())
+        return np.array([[float(x) for x in vec.split(",")] for vec in fields])
+
+    def _reveal_direction_controls(self):
+        # both groups start collapsed, hiding the two frame checkboxes and the direction fields
+        self.view.grpDirectionWidgets.setChecked(True)
+        self.view.initOrientation.setChecked(True)
+        QApplication.processEvents()
+
+    def _set_entered_directions(self, rd, nd, td):
+        self.view.set_rd_dir(rd)
+        self.view.set_nd_dir(nd)
+        self.view.set_td_dir(td)
+        self._click(self.view.updateDirs)
+        QApplication.processEvents()
 
 
 class TestInitialState(_FunctionalTestBase):
@@ -966,6 +1020,234 @@ class TestSampleDirectionsDisplay(_FunctionalTestBase):
         self.assertEqual(len(self._pf_scatters_matching(pf_points)), 1)
 
 
+class TestTextureDirectionFrames(_FunctionalTestBase):
+    """The two direction-frame controls in the sample setup tab.
+
+    "Apply Transformation to Sample Directions" (chkTransformDirs) decides whether the initial shape
+    orientation also carries the texture directions - i.e. whether the initial rotation models a
+    misoriented shape *definition* (unticked, the original behaviour) or a sample misaligned on the
+    beamline (ticked). "Show Directions in Lab Frame" (chkLabDirs) only changes what the direction
+    fields display; the directions are always entered in the sample frame.
+
+    A 90 deg initial rotation about x is used throughout because it maps the default directions onto
+    each other exactly: RD (1,0,0) -> (1,0,0), ND (0,1,0) -> (0,0,1), TD (0,0,1) -> (0,-1,0).
+    """
+
+    _ROT_X90_RD = (1.0, 0.0, 0.0)
+    _ROT_X90_ND = (0.0, 0.0, 1.0)
+    _ROT_X90_TD = (0.0, -1.0, 0.0)
+
+    def setUp(self):
+        super().setUp()
+        self._reveal_direction_controls()
+
+    def _rotate_initial_shape_x90(self):
+        self.view.spnInitX.setValue(90.0)
+        QApplication.processEvents()
+        # sanity: the rotation really is on the workspace manager, so the directions have something
+        # non-trivial to (not) follow
+        np.testing.assert_allclose(self.model.workspaces.init_R.as_euler("xyz", degrees=True), (90.0, 0.0, 0.0), atol=1e-9)
+
+    def _assert_lab_arrows(self, rd, nd, td):
+        arrows = self._lab_direction_unit_vectors()
+        self.assertEqual(set(arrows), {"RD", "ND", "TD"})
+        np.testing.assert_allclose(arrows["RD"], rd, atol=1e-9)
+        np.testing.assert_allclose(arrows["ND"], nd, atol=1e-9)
+        np.testing.assert_allclose(arrows["TD"], td, atol=1e-9)
+
+    # the transform toggle -------------------------------------------------
+    def test_initial_rotation_leaves_directions_alone_by_default(self):
+        # the pre-existing behaviour: the initial rotation misorients the shape definition only, so
+        # the directions stay pinned to the lab axes
+        self.assertFalse(self.view.chkTransformDirs.isChecked())
+        self.assertFalse(self.model.transform_dirs)
+
+        self._rotate_initial_shape_x90()
+
+        np.testing.assert_allclose(self.model.effective_ax_transform, np.eye(3), atol=1e-9)
+        self._assert_lab_arrows((1, 0, 0), (0, 1, 0), (0, 0, 1))
+
+    def test_ticking_transform_rotates_the_directions_with_the_shape(self):
+        self._rotate_initial_shape_x90()
+
+        self._click_checkbox(self.view.chkTransformDirs)
+        QApplication.processEvents()
+
+        self.assertTrue(self.model.transform_dirs)
+        # columns of the effective transform are the directions, now carried round by the rotation
+        effective = self.model.effective_ax_transform
+        np.testing.assert_allclose(effective[:, 0], self._ROT_X90_RD, atol=1e-9)
+        np.testing.assert_allclose(effective[:, 1], self._ROT_X90_ND, atol=1e-9)
+        np.testing.assert_allclose(effective[:, 2], self._ROT_X90_TD, atol=1e-9)
+        # and the lab view draws the arrows in their new places
+        self._assert_lab_arrows(self._ROT_X90_RD, self._ROT_X90_ND, self._ROT_X90_TD)
+
+    def test_transform_is_a_no_op_without_an_initial_rotation(self):
+        self._click_checkbox(self.view.chkTransformDirs)
+        QApplication.processEvents()
+
+        self.assertTrue(self.model.transform_dirs)
+        np.testing.assert_allclose(self.model.effective_ax_transform, np.eye(3), atol=1e-9)
+        self._assert_lab_arrows((1, 0, 0), (0, 1, 0), (0, 0, 1))
+
+    def test_directions_follow_a_later_change_of_initial_rotation(self):
+        self._click_checkbox(self.view.chkTransformDirs)
+        QApplication.processEvents()
+
+        # the toggle is applied first, so the rotation that arrives afterwards must still be picked up
+        self._rotate_initial_shape_x90()
+
+        self._assert_lab_arrows(self._ROT_X90_RD, self._ROT_X90_ND, self._ROT_X90_TD)
+
+    def test_untransformed_directions_are_restored_when_the_toggle_is_cleared(self):
+        self._rotate_initial_shape_x90()
+        self._click_checkbox(self.view.chkTransformDirs)
+        QApplication.processEvents()
+        self._assert_lab_arrows(self._ROT_X90_RD, self._ROT_X90_ND, self._ROT_X90_TD)
+
+        self._click_checkbox(self.view.chkTransformDirs)
+        QApplication.processEvents()
+
+        self.assertFalse(self.model.transform_dirs)
+        self._assert_lab_arrows((1, 0, 0), (0, 1, 0), (0, 0, 1))
+
+    def test_transform_toggle_leaves_the_entered_directions_untouched(self):
+        # the transform changes only the derived (lab) directions; the values the user typed - and
+        # the model's record of them - must survive a toggle unrounded and unrotated
+        self._set_entered_directions((0, 2, 0), (0, 0, 1), (1, 0, 0))
+        self._rotate_initial_shape_x90()
+        entered = self._displayed_directions()
+        ax_transform = self.model.ax_transform.copy()
+
+        self._click_checkbox(self.view.chkTransformDirs)
+        QApplication.processEvents()
+
+        np.testing.assert_array_equal(self._displayed_directions(), entered)
+        np.testing.assert_array_equal(self.model.ax_transform, ax_transform)
+
+    def test_transform_toggle_reprojects_the_pole_figure(self):
+        self._rotate_initial_shape_x90()
+        before = self.model.orientations[0].pf_points.copy()
+
+        self._click_checkbox(self.view.chkTransformDirs)
+        QApplication.processEvents()
+
+        after = self.model.orientations[0].pf_points
+        # rotating the directions reframes the projection, so the coverage points must move...
+        self.assertFalse(np.allclose(before, after))
+        # ...and the redrawn scatter must be the new points, not a stale artist
+        self.assertEqual(len(self._pf_scatters_matching(after)), 1)
+        self.assertEqual(len(self._pf_scatters_matching(before)), 0)
+
+    # the lab-frame display toggle ----------------------------------------
+    def test_lab_frame_display_shows_the_rotated_directions_read_only(self):
+        self._rotate_initial_shape_x90()
+        self._click_checkbox(self.view.chkTransformDirs)
+        QApplication.processEvents()
+        self.assertTrue(self.view.lineedit_RD0.isEnabled())
+
+        self._click_checkbox(self.view.chkLabDirs)
+        QApplication.processEvents()
+
+        np.testing.assert_allclose(self._displayed_directions(), (self._ROT_X90_RD, self._ROT_X90_ND, self._ROT_X90_TD), atol=1e-9)
+        # the lab values are derived, so they cannot be edited
+        for field in (self.view.lineedit_RD0, self.view.lineedit_ND1, self.view.lineedit_TD2):
+            self.assertFalse(field.isEnabled())
+
+    def test_clearing_lab_frame_display_restores_the_entered_directions(self):
+        self._rotate_initial_shape_x90()
+        self._click_checkbox(self.view.chkTransformDirs)
+        self._click_checkbox(self.view.chkLabDirs)
+        QApplication.processEvents()
+
+        self._click_checkbox(self.view.chkLabDirs)
+        QApplication.processEvents()
+
+        np.testing.assert_allclose(self._displayed_directions(), np.eye(3), atol=1e-9)
+        self.assertTrue(self.view.lineedit_RD0.isEnabled())
+
+    def test_lab_frame_display_matches_the_sample_frame_when_not_transforming(self):
+        # with the transform off the two frames coincide, so the display must not move
+        self._rotate_initial_shape_x90()
+
+        self._click_checkbox(self.view.chkLabDirs)
+        QApplication.processEvents()
+
+        np.testing.assert_allclose(self._displayed_directions(), np.eye(3), atol=1e-9)
+
+    def test_lab_frame_display_keeps_each_direction_on_its_own_row(self):
+        # guards the row/column convention: ax_transform stores the directions as columns, but the
+        # fields take one direction per row, so a missing transpose would silently permute them
+        self._set_entered_directions((0, 1, 0), (0, 0, 1), (1, 0, 0))
+        entered = self._displayed_directions()
+
+        self._click_checkbox(self.view.chkLabDirs)
+        QApplication.processEvents()
+        np.testing.assert_allclose(self._displayed_directions(), entered, atol=1e-9)
+
+        # and with a rotation applied, each row is exactly its own direction, rotated
+        self._rotate_initial_shape_x90()
+        self._click_checkbox(self.view.chkTransformDirs)
+        QApplication.processEvents()
+
+        rotated = Rotation.from_euler("x", 90, degrees=True).apply(entered)
+        np.testing.assert_allclose(self._displayed_directions(), rotated, atol=1e-9)
+
+    def test_lab_frame_display_follows_a_later_change_of_initial_rotation(self):
+        # the displayed values are derived from the initial rotation, so editing the rotation while
+        # the lab frame is on must refresh them rather than leave the old frame on screen
+        self._click_checkbox(self.view.chkTransformDirs)
+        self._click_checkbox(self.view.chkLabDirs)
+        QApplication.processEvents()
+        np.testing.assert_allclose(self._displayed_directions(), np.eye(3), atol=1e-9)
+
+        self._rotate_initial_shape_x90()
+
+        np.testing.assert_allclose(self._displayed_directions(), (self._ROT_X90_RD, self._ROT_X90_ND, self._ROT_X90_TD), atol=1e-9)
+
+    def test_entered_directions_keep_their_precision_through_an_update(self):
+        # the sample-frame fields are read straight back into the model, so rounding them for
+        # display would quietly rewrite the frame the user entered
+        rotated = Rotation.from_euler("z", 30, degrees=True).as_matrix()
+        self._set_entered_directions(*rotated.T)
+
+        np.testing.assert_allclose(self._displayed_directions(), rotated.T, atol=1e-9)
+        np.testing.assert_allclose(self.model.ax_transform, rotated, atol=1e-9)
+        self.assertEqual(self.model.dir_names, ["RD", "ND", "TD"])
+
+    def test_direction_boxes_grow_to_fit_the_longest_entry(self):
+        # the entered directions are kept at full precision, so the boxes have to show them
+        widths = {field.maximumWidth() for field in self.view.direction_fields}
+        self.assertEqual(len(widths), 1)  # a grid: every box the same width
+        before = widths.pop()
+
+        rotated = Rotation.from_euler("z", 30, degrees=True).as_matrix()
+        self._set_entered_directions(*rotated.T)
+
+        widths = {field.maximumWidth() for field in self.view.direction_fields}
+        self.assertEqual(len(widths), 1)
+        width = widths.pop()
+        self.assertGreater(width, before)
+        longest = max(self.view.get_rd_dir().split(","), key=len)
+        self.assertGreaterEqual(width, self.view.lineedit_RD0.fontMetrics().horizontalAdvance(longest))
+
+    def test_update_directions_in_lab_frame_renames_without_rewriting_the_vectors(self):
+        # the fields are showing derived values, so Update must not feed them back into the model
+        self._set_entered_directions((0, 1, 0), (0, 0, 1), (1, 0, 0))
+        self._rotate_initial_shape_x90()
+        self._click_checkbox(self.view.chkTransformDirs)
+        self._click_checkbox(self.view.chkLabDirs)
+        QApplication.processEvents()
+        ax_transform = self.model.ax_transform.copy()
+
+        self.view.set_rd_name("AD")
+        self._click(self.view.updateDirs)
+        QApplication.processEvents()
+
+        self.assertEqual(self.model.dir_names, ["AD", "ND", "TD"])
+        np.testing.assert_array_equal(self.model.ax_transform, ax_transform)
+
+
 class TestInstrumentGeometryCounts(_FunctionalTestBase):
     """Detector / Q / pole-figure point counts per instrument grouping."""
 
@@ -1176,11 +1458,6 @@ class TestGoniometerDisplay(_FunctionalTestBase):
 class TestOrientationCycling(_FunctionalTestBase):
     """Cycling / clamping the current orientation and its pole-figure highlighting."""
 
-    def _add_rotated_orientation(self, angle):
-        self._click(self.view.addOrientation)
-        self.view.spnAngle0.setValue(angle)
-        QApplication.processEvents()
-
     def _filled_state(self, pf_points):
         (scatter,) = self._pf_scatters_matching(pf_points)
         return len(scatter.get_facecolor()) > 0
@@ -1256,11 +1533,6 @@ class TestTransmissionValues(_FunctionalTestBase):
         # 2 detector groups keep the (real) MonteCarloAbsorption runs quick
         self._apply_instrument_group("banks")
 
-    def _transmission_scatter(self):
-        scatters = [c for c in self._pf_point_scatters() if c.get_array() is not None]
-        self.assertEqual(len(scatters), 1)
-        return scatters[0]
-
     def test_transmission_estimates_are_sensible(self):
         self._click_checkbox(self.view.chkTransmission)
 
@@ -1270,6 +1542,61 @@ class TestTransmissionValues(_FunctionalTestBase):
         # the default cube is centred on the beam, so the two (mirrored) ENGINX banks should see
         # roughly the same attenuation (loose bound: MonteCarlo with 50 events per point)
         self.assertLess(abs(transmission[0] - transmission[1]), 0.15 * transmission.mean())
+
+    def _transmission_for(self, **att_settings):
+        self._apply_settings_via_real_presenter(**att_settings)
+        self._click_checkbox(self.view.chkTransmission)
+        return np.array(self.model.orientations[0].transmission)
+
+    def test_evaluation_point_far_outside_the_default_range_still_computes(self):
+        # regression: the absorption workspace used to be binned on a fixed 0-5 dSpacing grid, so an
+        # evaluation point beyond it fell outside the interpolation range and raised a ValueError -
+        # which calc_for_index does not catch, so it escaped to the user. The grid is now built
+        # around the point itself, so any point is in range.
+        transmission = self._transmission_for(att_point=7.5, att_unit="dSpacing")
+
+        self.assertEqual(len(transmission), len(self.model.geometry.spec_inds))
+        self.assertTrue(np.all((transmission > 0) & (transmission <= 1)))
+
+    def test_evaluation_point_far_below_the_default_range_still_computes(self):
+        transmission = self._transmission_for(att_point=0.2, att_unit="dSpacing")
+
+        self.assertTrue(np.all((transmission > 0) & (transmission <= 1)))
+
+    def test_wavelength_evaluation_point_computes(self):
+        # a wavelength point needs no per-spectrum conversion, but must still bracket correctly
+        transmission = self._transmission_for(att_point=4.0, att_unit="Wavelength")
+
+        self.assertTrue(np.all((transmission > 0) & (transmission <= 1)))
+
+    def test_longer_wavelength_attenuates_more(self):
+        # absorption cross-sections rise with wavelength, so a longer wavelength must transmit less.
+        # This is what pins the evaluation point to the *right* wavelength: binning the whole bank
+        # around one shared wavelength would wash the difference out.
+        short = self._transmission_for(att_point=0.5, att_unit="Wavelength")
+        self._click_checkbox(self.view.chkTransmission)  # off, so the next toggle recomputes
+        long = self._transmission_for(att_point=4.0, att_unit="Wavelength")
+
+        self.assertTrue(np.all(long < short))
+
+    def test_dspacing_point_is_converted_per_detector(self):
+        # lambda = 2 d sin(theta), so a dSpacing point maps to a different wavelength in each detector.
+        # Asking for d and asking for that detector's equivalent wavelength must therefore agree.
+        # Binning the whole bank around a single shared wavelength would break this for every
+        # detector except the one the shared wavelength was derived from.
+        by_d = self._transmission_for(att_point=1.5, att_unit="dSpacing")
+
+        spec_info = self.model.workspaces.ws.spectrumInfo()
+        two_thetas = np.array([spec_info.twoTheta(i) for i in self.model.geometry.spec_inds])
+        equivalent_lambda = 2 * 1.5 * np.sin(two_thetas / 2)
+        # the two ENGINX banks are at mirrored 2theta, so they share one equivalent wavelength
+        np.testing.assert_allclose(equivalent_lambda, equivalent_lambda[0], rtol=1e-6)
+
+        self._click_checkbox(self.view.chkTransmission)  # off, so the next toggle recomputes
+        by_lambda = self._transmission_for(att_point=float(equivalent_lambda[0]), att_unit="Wavelength")
+
+        # loose bound: MonteCarloAbsorption with 50 events per point is noisy
+        np.testing.assert_allclose(by_lambda, by_d, rtol=0.1)
 
     def test_colourbar_limit_setting_switches_scale_to_data_range(self):
         self._click_checkbox(self.view.chkTransmission)
@@ -1284,6 +1611,77 @@ class TestTransmissionValues(_FunctionalTestBase):
         scatter = self._transmission_scatter()
         self.assertNotEqual(scatter.get_clim(), (0.0, 1.0))
         np.testing.assert_allclose(scatter.get_clim(), (transmission.min(), transmission.max()), atol=1e-12)
+
+
+class TestTransmissionCurrentOrientation(_FunctionalTestBase):
+    """In transmission mode every point is coloured by its value, so the current orientation cannot be
+    picked out by fill colour as it is in the coverage plot. It is ringed instead."""
+
+    def setUp(self):
+        super().setUp()
+        # 2 detector groups keep the (real) MonteCarloAbsorption runs quick
+        self._apply_instrument_group("banks")
+        # two orientations, so a highlight of *only* the current one is distinguishable
+        self._add_rotated_orientation(45.0)
+        self._click_checkbox(self.view.chkTransmission)
+
+    def _swapped(self, index):
+        # the plotter draws (pf_xy[:, 1], pf_xy[:, 0]), i.e. columns swapped
+        return np.asarray(self.model.orientations[index].pf_points)[:, ::-1]
+
+    def test_current_orientation_is_ringed_over_the_colour_mapped_points(self):
+        # both orientations are colour-mapped together...
+        transmission_points = np.asarray(self._transmission_scatter().get_offsets())
+        np.testing.assert_allclose(transmission_points, np.concatenate([self._swapped(0), self._swapped(1)]), atol=1e-12)
+
+        # ...and the current one (orientation 1) additionally gets an open grey ring
+        ring = self._current_highlight_scatter()
+        self.assertIsNotNone(ring)
+        np.testing.assert_allclose(np.asarray(ring.get_offsets()), self._swapped(1), atol=1e-12)
+        # oversized relative to the coloured points, so the colour stays visible inside the ring
+        np.testing.assert_allclose(ring.get_sizes(), self._transmission_scatter().get_sizes() * 2)
+
+    def test_ring_follows_the_current_index(self):
+        self.view.spnIndex.setValue(1)  # the spinbox is 1-based: select orientation 0
+        QApplication.processEvents()
+
+        np.testing.assert_allclose(np.asarray(self._current_highlight_scatter().get_offsets()), self._swapped(0), atol=1e-12)
+
+        self.view.spnIndex.setValue(2)
+        QApplication.processEvents()
+
+        np.testing.assert_allclose(np.asarray(self._current_highlight_scatter().get_offsets()), self._swapped(1), atol=1e-12)
+
+    def test_excluded_current_orientation_is_still_ringed_though_it_has_no_coloured_points(self):
+        self._click_checkbox(self._checkbox(1, 6))  # exclude the current row
+        QApplication.processEvents()
+
+        # only orientation 0 is colour-mapped now
+        np.testing.assert_allclose(np.asarray(self._transmission_scatter().get_offsets()), self._swapped(0), atol=1e-12)
+        # but the ring keeps the current orientation's coverage visible
+        np.testing.assert_allclose(np.asarray(self._current_highlight_scatter().get_offsets()), self._swapped(1), atol=1e-12)
+
+    def test_highlight_setting_switches_the_ring_off_and_back_on(self):
+        self._apply_settings_via_real_presenter(att_show_current=False)
+
+        self.assertIsNone(self._current_highlight_scatter())
+        # the colour-mapped points and their scale are untouched
+        np.testing.assert_allclose(
+            np.asarray(self._transmission_scatter().get_offsets()), np.concatenate([self._swapped(0), self._swapped(1)]), atol=1e-12
+        )
+        self.assertEqual(self._transmission_scatter().get_clim(), (0.0, 1.0))
+
+        self._apply_settings_via_real_presenter(att_show_current=True)
+
+        np.testing.assert_allclose(np.asarray(self._current_highlight_scatter().get_offsets()), self._swapped(1), atol=1e-12)
+
+    def test_no_ring_outside_transmission_mode(self):
+        # in the coverage plot the current orientation is already drawn filled, so it needs no ring
+        self._click_checkbox(self.view.chkTransmission)  # transmission off
+        QApplication.processEvents()
+
+        self.assertIsNone(self._current_highlight_scatter())
+        self.assertTrue(self._pf_scatters_matching(self.model.orientations[1].pf_points))
 
 
 class TestExportContents(_FunctionalTestBase):
@@ -1352,6 +1750,57 @@ class TestExportContents(_FunctionalTestBase):
         self.assertAlmostEqual(abs(loaded.sample().getShape().volume()), 0.01**3, places=9)
         self.assertEqual(loaded.sample().getMaterial().name(), "Fe")
         np.testing.assert_allclose(self._aabb_extent(loaded), expected_extent, atol=1e-9)
+
+    def test_reference_workspace_carries_the_texture_directions(self):
+        self.view.grpDirectionWidgets.setChecked(True)
+        QApplication.processEvents()
+        self.view.set_rd_name("AD")
+        self._set_entered_directions((0, 1, 0), (0, 0, 1), (1, 0, 0))
+
+        self.view.cmbExportFormat.setCurrentText(EXPORT_REFERENCE_WS)
+        self._click(self.view.btnExport)
+
+        loaded = LoadNexus(Filename=os.path.join(self._tmpdir, "run.nxs"), OutputWorkspace="__texplan_test_ref_dirs")
+        matrix, names = read_texture_direction_info_from_log(loaded)
+        self.assertEqual(names, ("AD", "ND", "TD"))
+        # columns are the directions, in the same order as the fields
+        np.testing.assert_allclose(matrix, [[0, 0, 1], [1, 0, 0], [0, 1, 0]], atol=1e-9)
+
+    def test_reference_workspace_carries_the_directions_the_shape_was_saved_in(self):
+        # the reference ws holds the shape with the initial rotation already baked in, so with
+        # "apply transformation to sample directions" on it must carry the *rotated* directions -
+        # anything else would describe a frame the saved shape is not actually in
+        self._reveal_direction_controls()
+        self._set_entered_directions((1, 0, 0), (0, 1, 0), (0, 0, 1))
+        self.view.spnInitX.setValue(90.0)
+        QApplication.processEvents()
+        self._click_checkbox(self.view.chkTransformDirs)
+        QApplication.processEvents()
+
+        self.view.cmbExportFormat.setCurrentText(EXPORT_REFERENCE_WS)
+        self._click(self.view.btnExport)
+
+        loaded = LoadNexus(Filename=os.path.join(self._tmpdir, "run.nxs"), OutputWorkspace="__texplan_test_ref_effective")
+        matrix, _ = read_texture_direction_info_from_log(loaded)
+        # 90 deg about x: RD (1,0,0) -> (1,0,0), ND (0,1,0) -> (0,0,1), TD (0,0,1) -> (0,-1,0)
+        np.testing.assert_allclose(matrix[:, 0], (1.0, 0.0, 0.0), atol=1e-9)
+        np.testing.assert_allclose(matrix[:, 1], (0.0, 0.0, 1.0), atol=1e-9)
+        np.testing.assert_allclose(matrix[:, 2], (0.0, -1.0, 0.0), atol=1e-9)
+
+    def test_reference_workspace_carries_the_entered_directions_when_not_transforming(self):
+        # with the transform off the initial rotation is a shape-definition fix only, so the
+        # directions saved alongside it are the ones the user entered
+        self._reveal_direction_controls()
+        self._set_entered_directions((1, 0, 0), (0, 1, 0), (0, 0, 1))
+        self.view.spnInitX.setValue(90.0)
+        QApplication.processEvents()
+
+        self.view.cmbExportFormat.setCurrentText(EXPORT_REFERENCE_WS)
+        self._click(self.view.btnExport)
+
+        loaded = LoadNexus(Filename=os.path.join(self._tmpdir, "run.nxs"), OutputWorkspace="__texplan_test_ref_untransformed")
+        matrix, _ = read_texture_direction_info_from_log(loaded)
+        np.testing.assert_allclose(matrix, np.eye(3), atol=1e-9)
 
 
 class TestPoleFigureReference(_FunctionalTestBase):

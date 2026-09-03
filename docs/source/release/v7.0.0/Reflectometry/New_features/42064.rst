@@ -1,0 +1,1 @@
+- :ref:`ReflectometryISISLoadAndProcess <algm-ReflectometryISISLoadAndProcess>` now utilises the POLREF calibration workflow as part of :ref:`ReflectometryISISCalibration <algm-ReflectometryISISCalibration>` through ``ReflectometryISISPreprocess``. A warning is emitted if a loaded file has already been calibrated before the selected calibration is applied again.

@@ -180,6 +180,22 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         np.testing.assert_equal(model._point_picked_detectors, [False, False, False])
         np.testing.assert_equal(model._detector_is_picked, [True, False, False])
 
+    def test_clear_point_picked_detectors_for_given_detectors_only(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._detector_is_picked = np.array([True, True, True])
+        model._point_picked_detectors = np.array([False, True, True])
+        model.clear_point_picked_detectors(np.array([True, True, False]))
+        # Detector 1 was never point picked, and detector 3 was not asked for, so both are left alone
+        np.testing.assert_equal(model._point_picked_detectors, [False, False, True])
+        np.testing.assert_equal(model._detector_is_picked, [True, False, True])
+
+    def test_point_picked_detectors_is_a_snapshot(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._point_picked_detectors = np.array([False, True, False])
+        snapshot = model.point_picked_detectors
+        model._point_picked_detectors[2] = True
+        np.testing.assert_equal(snapshot, [False, True, False])
+
     def test_update_point_picked_detectors_expand_to_parent_subtree(self):
         model, mock_workspace = self._setup_model([10, 11, 12, 13])
         component_info = mock_workspace.componentInfo.return_value
@@ -368,6 +384,21 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model, _ = self._setup_model([1, 2, 3])
         model._detector_is_picked = np.array([False, False, True])
         self.assertEqual(model.picked_detector_ids, [3])
+
+    def test_picked_detector_mask_only_covers_pickable_detectors(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._is_masked = np.array([True, False, False])
+        model._detector_is_picked = np.array([True, False, True])
+        # The masked detector is not pickable, so it drops out of the mask entirely
+        np.testing.assert_array_equal(model.picked_detector_mask, [False, True])
+
+    def test_picked_detector_mask_round_trips_through_add_new_detector_key(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._cached_rois_map = {}
+        model._is_masked = np.array([True, False, False])
+        model._detector_is_picked = np.array([False, False, True])
+        model.add_new_detector_key(model.picked_detector_mask.tolist(), CurrentTab.Grouping)
+        np.testing.assert_array_equal(next(iter(model._cached_rois_map.values())), np.array([False, False, True]))
 
     def test_picked_workspace_indices(self):
         model, _ = self._setup_model([1, 2, 3])
@@ -754,7 +785,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._is_valid = np.array([True, True, True])
         model._is_masked = np.array([True, False, False])
         model.add_new_detector_key([True, True], CurrentTab.Masking)
-        np.testing.assert_array_equal(list(model._cached_masks_map.values())[0], np.array([True, True, True]))
+        np.testing.assert_array_equal(next(iter(model._cached_masks_map.values())), np.array([True, True, True]))
 
     def test_roi_mask(self):
         model, _ = self._setup_model([1, 2, 3])
@@ -762,7 +793,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._is_valid = np.array([True, True, True])
         model._detector_is_picked = np.array([True, False, False])
         model.add_new_detector_key([True, True, False], CurrentTab.Grouping)
-        np.testing.assert_array_equal(list(model._cached_rois_map.values())[0], np.array([True, True, False]))
+        np.testing.assert_array_equal(next(iter(model._cached_rois_map.values())), np.array([True, True, False]))
 
     def test_get_boolean_masks_from_workspaces_in_ads_grouping(self):
         det_ids = [1, 2, 3, 4, 5]

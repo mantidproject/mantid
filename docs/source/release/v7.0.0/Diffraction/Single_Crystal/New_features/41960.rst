@@ -1,0 +1,1 @@
+- Added the :ref:`FindUBFromConventionalCell <algm-FindUBFromConventionalCell>` algorithm, which determines a UB matrix (crystal orientation) from unindexed peaks and the known conventional-cell lattice parameters and centering.

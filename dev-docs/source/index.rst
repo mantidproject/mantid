@@ -187,6 +187,7 @@ Testing
    Gatekeeping
    WritingPerformanceTests
    SystemTests
+   AutomatedUITests
    DataFilesForTesting
    TestingUtilities
    RunningSanitizers
@@ -213,6 +214,9 @@ Testing
 :doc:`SystemTests`
    Guidance on working with the system tests.
 
+:doc:`AutomatedUITests`
+   Guidance on working with the automated UI tests, which drive a real Qt interface.
+
 :doc:`DataFilesForTesting`
    How to work with test data files in the mantid repository.
 
@@ -238,6 +242,7 @@ GUI Development
    BalsamiqWireframes
    MantidUsedIconsTable
    ISISReflectometryInterface
+   ISISReflectometryPlottingTab
 
 :doc:`MVPDesign`
    Gives some guidelines to consider when developing a new graphical user interface.
@@ -256,6 +261,9 @@ GUI Development
 
 :doc:`ISISReflectometryInterface`
    An example of a complex C++ interface that uses MVP.
+
+:doc:`ISISReflectometryPlottingTab`
+   Describes the architecture and execution flow of the ISIS Reflectometry Plotting tab.
 
 =========
 Workbench

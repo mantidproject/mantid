@@ -1394,7 +1394,9 @@ MantidVec &EventList::dataX() {
   // FixedLengthVector::mutableRawData() is protected and Histogram is its only friend. The
   // deprecated legacy accessor is therefore the only way to express this.
   GNU_DIAG_OFF("deprecated-declarations")
+  MSVC_DIAG_OFF(4996)
   return m_histogram.dataX();
+  MSVC_DIAG_ON(4996)
   GNU_DIAG_ON("deprecated-declarations")
 }
 
@@ -1410,7 +1412,9 @@ Kernel::cow_ptr<HistogramData::HistogramX> EventList::ptrX() const { return m_hi
 
 /// Deprecated, use mutableDx() instead.
 GNU_DIAG_OFF("deprecated-declarations")
+MSVC_DIAG_OFF(4996)
 MantidVec &EventList::dataDx() { return m_histogram.dataDx(); }
+MSVC_DIAG_ON(4996)
 GNU_DIAG_ON("deprecated-declarations")
 /// Deprecated, use dx() instead.
 const MantidVec &EventList::dataDx() const { return m_histogram.dx().rawData(); }

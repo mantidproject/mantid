@@ -1,0 +1,7 @@
+- Added optional duration- and monitor-count normalization to
+  :ref:`algm-HFIRGoniometerIndependentBackground`. Backgrounds can now be calculated from
+  exposure-normalized rotations and either retained in normalized units or restored to the
+  per-rotation exposure scale. WAND (HB2C) and DEMAND (HB3A) sample-log naming conventions
+  are supported.
+- :ref:`algm-HFIRGoniometerIndependentBackground` no longer accepts a negative ``BackgroundLevel``.
+  The property is a percentile and must be between 0 and 100.

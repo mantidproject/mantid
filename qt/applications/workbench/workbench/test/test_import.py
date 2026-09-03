@@ -25,7 +25,8 @@ class ImportTest(unittest.TestCase):
                 "-c",
                 "import sys; import workbench.app.start; "
                 "assert 'workbench.config' not in sys.modules; "
-                "assert 'workbench.widgets.about.presenter' not in sys.modules",
+                "assert 'workbench.widgets.about.presenter' not in sys.modules; "
+                "assert 'mantidqt.utils.qt.qsettings_staging_session' not in sys.modules",
             ],
             capture_output=True,
             check=False,

@@ -1,4 +1,10 @@
 ignore:
+  # the interpreter once per executable and library that embeds it
+  # lets only track the conda version
   - package:
       name: python
+      type: binary
+  # windows is uppercase
+  - package:
+      name: Python
       type: binary

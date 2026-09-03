@@ -252,6 +252,7 @@ class FullInstrumentViewPresenter:
         with SuppressRendering(self._view.main_plotter):
             self._update_view_main_plotter(refresh_limits=refresh_limits)
             self.refresh_plotter_peaks()
+        self.refresh_create_from_selection_enabled()
 
     def count_scale_combo_options(self) -> list[str]:
         return [self._LINEAR, self._LOGARITHMIC]
@@ -399,6 +400,7 @@ class FullInstrumentViewPresenter:
         self._update_interactor_style()
 
         if checked:
+            self.refresh_create_from_selection_enabled()
             return
 
         self.update_picked_detectors_on_view()
@@ -424,6 +426,7 @@ class FullInstrumentViewPresenter:
         self._view.run_on_main_thread(
             self._renderer.update_picked_highlight, self._view.main_plotter, self._detector_mesh, picked_visibility
         )
+        self.refresh_create_from_selection_enabled()
         self._update_line_plot_ws_and_draw(self._view.current_selected_lineplot_unit())
 
     def _on_clear_point_picked_detectors_clicked(self) -> None:
@@ -529,6 +532,51 @@ class FullInstrumentViewPresenter:
         centres = self._model.transformed_detector_positions
         self._view.project_and_cache_detector_points(centres)
         self._callback_queue.put((self._on_add_item_clicked, ()))
+
+    def _on_create_item_from_selection_clicked(
+        self, selection: np.ndarray, pickable: np.ndarray, point_picks: np.ndarray, tab: CurrentTab
+    ) -> None:
+        """Commit a snapshot of the picked detectors, taken when the button was clicked, as a new ROI or mask."""
+        if not np.any(selection):
+            return
+
+        if not np.array_equal(pickable, self._model.is_pickable):
+            # set_detector_key positions the selection by which detectors are pickable, so it is only
+            # meaningful against the exact set it was taken from. Masking or a component tree
+            # selection can swap detectors in and out of that set between the click and now, leaving
+            # the count unchanged but every entry after the swap describing a different detector.
+            logger.warning("Detectors changed before the selection could be committed, so no item was created.")
+            return
+
+        new_key = self._model.add_new_detector_key(selection.tolist(), tab)
+        self._view.set_new_item_key(tab, new_key)
+        # Only the picks that went into the item are cleared, so anything picked since the click stands
+        self._model.clear_point_picked_detectors(point_picks)
+        self.update_picked_detectors_on_view()
+
+    def on_create_item_from_selection_clicked(self) -> None:
+        # Snapshot on the Qt thread so the item that gets created is the one the user saw
+        # themselves ask for, whatever they select or which tab they open before the worker runs
+        selection = self._model.picked_detector_mask
+        # The detectors the selection is positioned against, so the worker can tell whether they
+        # still describe the same detectors by the time it runs
+        pickable = self._model.is_pickable
+        point_picks = self._model.point_picked_detectors
+        tab = self._view.get_current_selected_tab()
+        self._callback_queue.put((self._on_create_item_from_selection_clicked, (selection, pickable, point_picks, tab)))
+
+    def refresh_create_from_selection_enabled(self) -> None:
+        """Only offer to create an item from the selection while there is a selection to create it from.
+
+        Hover pick and peak picking both take over the picked detectors for their own purposes, so
+        what is highlighted then is not a selection the user has deliberately built up.
+        """
+        can_create = (
+            not self._view.is_hover_pick_mode_checked()
+            and not self._model.peak_picking_enabled()
+            and bool(np.any(self._model.picked_detector_mask))
+        )
+        self._view.set_create_from_selection_buttons_enabled(can_create)
 
     def _on_list_item_selected(self, kind: CurrentTab) -> None:
         self._model.apply_detector_items(self._view.selected_items_in_list(kind), kind)
