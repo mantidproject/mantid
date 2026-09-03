@@ -125,21 +125,29 @@ const MantidVersion::VersionInfo MantidVersion::versionInfo() {
 std::string MantidVersion::versionForReleaseNotes(const VersionInfo &version) {
   // Convert here in those cases where patch number is of the form "20131022.1356".
   const unsigned long patchVersion = std::stoul(version.patch);
-  // For major/minor/patch/rc/local releases we point users to a specific release-notes.
-  // For dev and nightly versions we point to the next main release notes.
-  // We assume that the next main release version number will be one minor version higher.
 
-  std::stringstream versionLabel;
+  // A development/nightly version has either a .dev suffix or date-based patch.
+  const bool isDevelopmentVersion = version.tweak.starts_with(".dev") || patchVersion > 100;
 
-  if ((patchVersion < 100 && version.tweak.empty()) || version.tweak[0] == '+' || version.tweak.substr(0, 2) == "rc") {
-    versionLabel << version.major << "." << version.minor;
-    versionLabel << "." << patchVersion;
-  } else {
-    const unsigned long minorVersion = std::stoul(version.minor);
-    versionLabel << version.major << "." << minorVersion + 1 << "." << "0";
+  // Released versions and release candidates point to their own release notes.
+  if (!isDevelopmentVersion) {
+    std::stringstream versionLabel;
+    versionLabel << version.major << "." << version.minor << "." << patchVersion;
+    return versionLabel.str();
   }
 
-  return versionLabel.str();
+  // Development and nightly versions point to the next release's notes.
+  // Normally this is the next minor version, except when the next release is a major version.
+  if (version.major == "6" && version.minor == "16") {
+    // The next release after 6.16 is 7.0, rather than 6.17.
+    return "7.0.0";
+  }
+
+  const unsigned long minorVersion = std::stoul(version.minor);
+  std::stringstream nextMinorVersionLabel;
+  nextMinorVersionLabel << version.major << "." << minorVersion + 1 << "." << "0";
+
+  return nextMinorVersionLabel.str();
 }
 
 std::string MantidVersion::releaseNotes() {
