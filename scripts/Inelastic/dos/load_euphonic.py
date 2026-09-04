@@ -56,7 +56,7 @@ def euphonic_calculate_modes(
     # Did not return: should be ForceConstants. Now we interpolate these to obtain modes on regular grid.
     fc = phonon_data
 
-    recip_lattice_lengths = np.linalg.norm(fc.crystal.reciprocal_cell().to("1/angstrom").magnitude, axis=1)
+    recip_lattice_lengths = np.linalg.norm(fc.crystal.reciprocal_cell.to("1/angstrom").magnitude, axis=1)
     mp_sampling = [ceil(x) for x in (cutoff * recip_lattice_lengths / (2 * np.pi))]
     qpts = mp_grid(mp_sampling)
 
