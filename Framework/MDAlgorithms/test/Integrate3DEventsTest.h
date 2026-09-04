@@ -10,7 +10,10 @@
 #include "MantidKernel/V3D.h"
 #include "MantidMDAlgorithms/Integrate3DEvents.h"
 
+#include <algorithm>
+#include <cmath>
 #include <cxxtest/TestSuite.h>
+#include <limits>
 #include <random>
 
 using namespace Mantid;
@@ -112,6 +115,390 @@ public:
       TS_ASSERT_DELTA(inti, 2 * inti_some[i], 0.1);
       TS_ASSERT_DELTA(sigi, sigi_some[i], 0.01);
     }
+  }
+
+  // Verify integrateUsingShape counts events exactly inside the supplied
+  // ellipsoid, with no shape adjustment of its own.
+  void test_integrateUsingShape_counts_events_inside_fixed_shape() {
+    V3D peak_q(10, 0, 0);
+    std::vector<std::pair<std::pair<double, double>, V3D>> peak_q_list{{std::make_pair(1., 1.), peak_q}};
+
+    DblMatrix UBinv(3, 3, false);
+    UBinv.setRow(0, V3D(.1, 0, 0));
+    UBinv.setRow(1, V3D(0, .1, 0));
+    UBinv.setRow(2, V3D(0, 0, .1));
+
+    // 3 events within radius 0.3 and 2 events between 0.3 and 0.45, along
+    // each of the x, y and z axes.
+    std::vector<std::pair<std::pair<double, double>, V3D>> event_Qs;
+    for (const double offset : {0.1, 0.2, 0.29, 0.4, 0.45}) {
+      event_Qs.emplace_back(std::make_pair(1., 1.), peak_q + V3D(offset, 0, 0));
+      event_Qs.emplace_back(std::make_pair(1., 1.), peak_q + V3D(0, offset, 0));
+      event_Qs.emplace_back(std::make_pair(1., 1.), peak_q + V3D(0, 0, offset));
+    }
+
+    Integrate3DEvents integrator(peak_q_list, UBinv, 1.0);
+    integrator.addEvents(event_Qs, false);
+
+    PeakEllipsoidFrame directions{V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    // peak radii == background radii on all axes, so the background shell
+    // has zero volume and inti is exactly the raw weighted peak count.
+    PeakEllipsoidExtent radii{0.3, 0.3, 0.3};
+    PeakShapeEllipsoid shape(directions, radii, radii, radii, Mantid::Kernel::QLab);
+
+    double inti, sigi;
+
+    // Only the 3 inside-0.3 events per axis count: 9 total.
+    integrator.integrateUsingShape(shape, peak_q, inti, sigi);
+    TS_ASSERT_DELTA(inti, 9.0, 1e-10);
+    TS_ASSERT_DELTA(sigi, std::sqrt(9.0), 1e-10);
+  }
+
+  void test_integrateUsingShape_subtracts_weighted_background_and_propagates_errors() {
+    const V3D peak_q(10, 0, 0);
+    const std::vector<std::pair<std::pair<double, double>, V3D>> peak_q_list{{std::make_pair(1., 1.), peak_q}};
+
+    DblMatrix UBinv(3, 3, false);
+    UBinv.setRow(0, V3D(.1, 0, 0));
+    UBinv.setRow(1, V3D(0, .1, 0));
+    UBinv.setRow(2, V3D(0, 0, .1));
+
+    std::vector<std::pair<std::pair<double, double>, V3D>> event_Qs;
+    // Four weighted events in the peak contribute intensity 8 and variance 16.
+    for (int i = 0; i < 4; ++i)
+      event_Qs.emplace_back(std::make_pair(2., 4.), peak_q);
+    // Five events in the background shell contribute intensity 5 and variance 1.25.
+    for (int i = 0; i < 5; ++i)
+      event_Qs.emplace_back(std::make_pair(1., .25), peak_q + V3D(.35, 0, 0));
+
+    // Disable the optional high-background culling so this test isolates the
+    // fixed-shape volume scaling and error propagation.
+    Integrate3DEvents integrator(peak_q_list, UBinv, 1.0, false);
+    integrator.addEvents(event_Qs, false);
+
+    const PeakEllipsoidFrame directions{V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    const PeakEllipsoidExtent peakRadii{.2, .3, .4};
+    const PeakEllipsoidExtent backgroundInnerRadii{.3, .4, .5};
+    const PeakEllipsoidExtent backgroundOuterRadii{.4, .5, .6};
+    const PeakShapeEllipsoid shape(directions, peakRadii, backgroundInnerRadii, backgroundOuterRadii,
+                                   Mantid::Kernel::QLab);
+
+    double inti, sigi;
+    integrator.integrateUsingShape(shape, peak_q, inti, sigi);
+
+    // Peak/background-shell volume ratio = .024 / (.120 - .060) = .4.
+    TS_ASSERT_DELTA(inti, 8.0 - .4 * 5.0, 1e-10);
+    TS_ASSERT_DELTA(sigi, std::sqrt(16.0 + .4 * .4 * 1.25), 1e-10);
+  }
+
+  void test_fixed_shape_integrations_return_zero_with_fewer_than_three_events() {
+    const V3D peak_q(10, 0, 0);
+    const std::vector<std::pair<std::pair<double, double>, V3D>> peak_q_list{{std::make_pair(1., 1.), peak_q}};
+
+    DblMatrix UBinv(3, 3, false);
+    UBinv.setRow(0, V3D(.1, 0, 0));
+    UBinv.setRow(1, V3D(0, .1, 0));
+    UBinv.setRow(2, V3D(0, 0, .1));
+
+    Integrate3DEvents integrator(peak_q_list, UBinv, 1.0);
+    const std::vector<std::pair<std::pair<double, double>, V3D>> event_Qs{
+        {std::make_pair(1., 1.), peak_q}, {std::make_pair(1., 1.), peak_q + V3D(.1, 0, 0)}};
+    integrator.addEvents(event_Qs, false);
+
+    const PeakEllipsoidFrame directions{V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    const PeakEllipsoidExtent radii{.2, .2, .2};
+    const PeakShapeEllipsoid shape(directions, radii, radii, radii, Mantid::Kernel::QLab);
+
+    double inti = 123.0;
+    double sigi = 456.0;
+    integrator.integrateUsingShape(shape, peak_q, inti, sigi);
+    TS_ASSERT_EQUALS(inti, 0.0);
+    TS_ASSERT_EQUALS(sigi, 0.0);
+
+    inti = 123.0;
+    sigi = 456.0;
+    V3D center;
+    integrator.integrateUsingShapeProfileFit(shape, peak_q, true, center, inti, sigi);
+    TS_ASSERT_EQUALS(inti, 0.0);
+    TS_ASSERT_EQUALS(sigi, 0.0);
+  }
+
+  // Verify integrateUsingShapeProfileFit's fitted amplitude is (very
+  // nearly) the joint maximum of the same Poisson log-likelihood it is
+  // supposed to optimize, by independently reconstructing that likelihood
+  // in the test and comparing against a fine brute-force grid search. This
+  // decouples "did the hand-rolled Newton solver find the right answer"
+  // from trusting the production code's own bookkeeping.
+  void test_integrateUsingShapeProfileFit_matches_grid_search_optimum() {
+    V3D peak_q(10, 0, 0);
+    std::vector<std::pair<std::pair<double, double>, V3D>> peak_q_list{{std::make_pair(1., 1.), peak_q}};
+
+    DblMatrix UBinv(3, 3, false);
+    UBinv.setRow(0, V3D(.1, 0, 0));
+    UBinv.setRow(1, V3D(0, .1, 0));
+    UBinv.setRow(2, V3D(0, 0, .1));
+
+    // 6 events exactly at the peak center (strong signal), and 6 events
+    // far out along +-x, +-y, +-z (within the search radius, but many
+    // sigma away from the peak -- effectively pure background).
+    std::vector<std::pair<std::pair<double, double>, V3D>> event_Qs;
+    for (int i = 0; i < 6; ++i)
+      event_Qs.emplace_back(std::make_pair(1., 1.), peak_q);
+    for (const double offset : {0.9, -0.9}) {
+      event_Qs.emplace_back(std::make_pair(1., 1.), peak_q + V3D(offset, 0, 0));
+      event_Qs.emplace_back(std::make_pair(1., 1.), peak_q + V3D(0, offset, 0));
+      event_Qs.emplace_back(std::make_pair(1., 1.), peak_q + V3D(0, 0, offset));
+    }
+
+    const double regionRadius = 1.0;
+    Integrate3DEvents integrator(peak_q_list, UBinv, regionRadius);
+    integrator.addEvents(event_Qs, false);
+
+    PeakEllipsoidFrame directions{V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    PeakEllipsoidExtent sigmas{0.2, 0.2, 0.2};
+    // background radii are unused by the profile-fit method
+    PeakShapeEllipsoid shape(directions, sigmas, sigmas, sigmas, Mantid::Kernel::QLab);
+
+    double inti, sigi;
+    V3D center;
+    integrator.integrateUsingShapeProfileFit(shape, peak_q, false, center, inti, sigi);
+
+    TS_ASSERT(inti > 0.0);
+    TS_ASSERT(std::isfinite(sigi));
+    TS_ASSERT(sigi > 0.0);
+
+    // Independently reconstruct g_i for each event using the same
+    // quadratic-form convention as numInEllipsoid/numInEllipsoidBkg.
+    std::vector<double> g;
+    for (const auto &event : event_Qs) {
+      const V3D offset = event.second - peak_q;
+      double d2 = 0.0;
+      for (size_t k = 0; k < 3; ++k) {
+        const double comp = offset.scalar_prod(directions[k]) / sigmas[k];
+        d2 += comp * comp;
+      }
+      g.push_back(std::exp(-0.5 * d2));
+    }
+
+    const double normG = std::pow(2.0 * M_PI, 1.5) * sigmas[0] * sigmas[1] * sigmas[2];
+    const double volume = (4.0 / 3.0) * M_PI * regionRadius * regionRadius * regionRadius;
+
+    // Recover the fitted background from its score equation at A_fit, then
+    // verify sigi uses the marginal variance from the full 2x2 information
+    // matrix rather than the conditional variance from dAA alone.
+    const double A_fit = inti / normG;
+    double bLow = 0.0;
+    double bHigh = 100.0;
+    for (int iteration = 0; iteration < 100; ++iteration) {
+      const double bMid = 0.5 * (bLow + bHigh);
+      double dB = -volume;
+      for (const double gi : g)
+        dB += 1.0 / (A_fit * gi + bMid);
+      if (dB > 0.0)
+        bLow = bMid;
+      else
+        bHigh = bMid;
+    }
+    const double bFit = 0.5 * (bLow + bHigh);
+    double dAA = 0.0;
+    double dBB = 0.0;
+    double dAB = 0.0;
+    for (const double gi : g) {
+      const double mu = A_fit * gi + bFit;
+      dAA -= gi * gi / (mu * mu);
+      dBB -= 1.0 / (mu * mu);
+      dAB -= gi / (mu * mu);
+    }
+    const double det = dAA * dBB - dAB * dAB;
+    const double expectedSigi = normG * std::sqrt(-dBB / det);
+    TSM_ASSERT_DELTA("profile-fit uncertainty should include covariance with the fitted background", sigi, expectedSigi,
+                     1e-8);
+
+    auto logLikelihood = [&](double A, double b) {
+      double ll = -(A * normG + b * volume);
+      for (const double gi : g)
+        ll += std::log(A * gi + b);
+      return ll;
+    };
+
+    // Fine joint grid search over generous ranges for the true optimum.
+    double bestLL = -std::numeric_limits<double>::infinity();
+    for (int ia = 0; ia <= 400; ++ia) {
+      const double A = ia * 0.5; // 0..200
+      for (int ib = 0; ib <= 400; ++ib) {
+        const double b = ib * 0.125; // 0..50
+        bestLL = std::max(bestLL, logLikelihood(A, b));
+      }
+    }
+
+    // Profile likelihood over b at the production-fitted A: if that A is
+    // correct, maximizing over b here should reach the same joint optimum.
+    double bestLLAtAFit = -std::numeric_limits<double>::infinity();
+    for (int ib = 0; ib <= 4000; ++ib) {
+      const double b = ib * 0.0125; // 0..50, finer than the joint grid
+      bestLLAtAFit = std::max(bestLLAtAFit, logLikelihood(A_fit, b));
+    }
+
+    TSM_ASSERT_DELTA("fitted amplitude should (nearly) reach the grid-search joint optimum "
+                     "of the Poisson log-likelihood it is supposed to maximize",
+                     bestLLAtAFit, bestLL, 0.05);
+
+    // With the center already correct (symmetric data centered exactly at
+    // peak_q), enabling AdjustCenter should not meaningfully change the fit.
+    double intiAdjusted, sigiAdjusted;
+    V3D adjustedCenter;
+    integrator.integrateUsingShapeProfileFit(shape, peak_q, true, adjustedCenter, intiAdjusted, sigiAdjusted);
+    TSM_ASSERT_DELTA("AdjustCenter should not drift when the center is already correct", intiAdjusted, inti,
+                     0.05 * inti);
+  }
+
+  void test_integrateUsingShapeProfileFit_returns_infinite_uncertainty_for_singular_information() {
+    const V3D peak_q(10, 0, 0);
+    const std::vector<std::pair<std::pair<double, double>, V3D>> peak_q_list{{std::make_pair(1., 1.), peak_q}};
+
+    DblMatrix UBinv(3, 3, false);
+    UBinv.setRow(0, V3D(.1, 0, 0));
+    UBinv.setRow(1, V3D(0, .1, 0));
+    UBinv.setRow(2, V3D(0, 0, .1));
+
+    const auto event = std::make_pair(std::make_pair(1., 1.), peak_q);
+    std::vector<std::pair<std::pair<double, double>, V3D>> event_Qs(6, event);
+    Integrate3DEvents integrator(peak_q_list, UBinv, 1.0);
+    integrator.addEvents(event_Qs, false);
+
+    const PeakEllipsoidFrame directions{V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    const PeakEllipsoidExtent sigmas{0.2, 0.2, 0.2};
+    const PeakShapeEllipsoid shape(directions, sigmas, sigmas, sigmas, Mantid::Kernel::QLab);
+
+    double inti, sigi;
+    V3D center;
+    integrator.integrateUsingShapeProfileFit(shape, peak_q, false, center, inti, sigi);
+
+    TS_ASSERT(std::isinf(sigi));
+  }
+
+  // Verify that AdjustCenter recovers (close to) the intensity that would
+  // have been obtained had peak_q been exactly right, when it is instead
+  // off by a small, deliberate amount -- by comparing three calls of the
+  // same function rather than an externally-derived expected value: fit at
+  // the (deliberately wrong) nominal peak_q with and without AdjustCenter,
+  // and fit at the true center directly, using the same raw events for all
+  // three, only the registered peak position differs.
+  void test_integrateUsingShapeProfileFit_adjustCenter_recovers_true_center() {
+    V3D peak_q(10, 0, 0);
+    const V3D trueOffset(0.06, 0, 0); // 0.3 sigma; well within the 1-sigma cap
+    const V3D trueCenter = peak_q + trueOffset;
+
+    DblMatrix UBinv(3, 3, false);
+    UBinv.setRow(0, V3D(.1, 0, 0));
+    UBinv.setRow(1, V3D(0, .1, 0));
+    UBinv.setRow(2, V3D(0, 0, .1));
+
+    // Events genuinely centered on trueCenter, not peak_q: 6 strong events
+    // exactly at trueCenter, and 6 far-out (background-like) events.
+    std::vector<std::pair<std::pair<double, double>, V3D>> event_Qs;
+    for (int i = 0; i < 6; ++i)
+      event_Qs.emplace_back(std::make_pair(1., 1.), trueCenter);
+    for (const double offset : {0.9, -0.9}) {
+      event_Qs.emplace_back(std::make_pair(1., 1.), trueCenter + V3D(offset, 0, 0));
+      event_Qs.emplace_back(std::make_pair(1., 1.), trueCenter + V3D(0, offset, 0));
+      event_Qs.emplace_back(std::make_pair(1., 1.), trueCenter + V3D(0, 0, offset));
+    }
+
+    PeakEllipsoidFrame directions{V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    PeakEllipsoidExtent sigmas{0.2, 0.2, 0.2};
+    PeakShapeEllipsoid shape(directions, sigmas, sigmas, sigmas, Mantid::Kernel::QLab);
+
+    // (a) registered (and queried) at the wrong, nominal peak_q
+    std::vector<std::pair<std::pair<double, double>, V3D>> peak_q_list_wrong{{std::make_pair(1., 1.), peak_q}};
+    Integrate3DEvents integratorWrong(peak_q_list_wrong, UBinv, 1.0);
+    integratorWrong.addEvents(event_Qs, false);
+
+    double intiFixedWrong, sigiFixedWrong;
+    V3D centerFixedWrong;
+    integratorWrong.integrateUsingShapeProfileFit(shape, peak_q, false, centerFixedWrong, intiFixedWrong,
+                                                  sigiFixedWrong);
+
+    double intiAdjusted, sigiAdjusted;
+    V3D centerAdjusted;
+    integratorWrong.integrateUsingShapeProfileFit(shape, peak_q, true, centerAdjusted, intiAdjusted, sigiAdjusted);
+
+    // (b) registered (and queried) at the true center -- the best achievable
+    // answer, since here the center is exactly right
+    std::vector<std::pair<std::pair<double, double>, V3D>> peak_q_list_true{{std::make_pair(1., 1.), trueCenter}};
+    Integrate3DEvents integratorTrue(peak_q_list_true, UBinv, 1.0);
+    integratorTrue.addEvents(event_Qs, false);
+
+    double intiReference, sigiReference;
+    V3D centerReference;
+    integratorTrue.integrateUsingShapeProfileFit(shape, trueCenter, false, centerReference, intiReference,
+                                                 sigiReference);
+
+    TSM_ASSERT_LESS_THAN("AdjustCenter should get closer to the true-center answer than the fixed, wrong-center fit",
+                         std::abs(intiAdjusted - intiReference), std::abs(intiFixedWrong - intiReference));
+    TSM_ASSERT_DELTA("AdjustCenter should nearly recover the true-center answer for a small, "
+                     "within-cap offset",
+                     intiAdjusted, intiReference, 0.1 * intiReference);
+  }
+
+  // integrateUsingShapeProfileFit must seed its fit from shape.translation()
+  // (a previously found correction), not from zero, and the maxShift cap
+  // must bound the *incremental* refinement made in this call rather than
+  // the total distance from peak_q -- otherwise a shape whose existing
+  // translation already sits near the cap could never be refined further,
+  // even when the true center is only a small step beyond it.
+  void test_integrateUsingShapeProfileFit_adjustCenter_refines_from_existing_translation() {
+    const V3D peak_q(10, 0, 0);
+    // 0.19: just inside the 1-sigma (0.2) cap on its own, so an *absolute*
+    // (rather than incremental) clamp would leave almost no room to move.
+    const V3D presetTranslation(0.19, 0, 0);
+    // True center is 0.25 from peak_q -- beyond the 1-sigma cap in total,
+    // but only 0.06 beyond presetTranslation, well within an incremental cap.
+    const V3D trueCenter = peak_q + V3D(0.25, 0, 0);
+
+    DblMatrix UBinv(3, 3, false);
+    UBinv.setRow(0, V3D(.1, 0, 0));
+    UBinv.setRow(1, V3D(0, .1, 0));
+    UBinv.setRow(2, V3D(0, 0, .1));
+
+    std::vector<std::pair<std::pair<double, double>, V3D>> event_Qs;
+    for (int i = 0; i < 6; ++i)
+      event_Qs.emplace_back(std::make_pair(1., 1.), trueCenter);
+    for (const double offset : {0.9, -0.9}) {
+      event_Qs.emplace_back(std::make_pair(1., 1.), trueCenter + V3D(offset, 0, 0));
+      event_Qs.emplace_back(std::make_pair(1., 1.), trueCenter + V3D(0, offset, 0));
+      event_Qs.emplace_back(std::make_pair(1., 1.), trueCenter + V3D(0, 0, offset));
+    }
+
+    PeakEllipsoidFrame directions{V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    PeakEllipsoidExtent sigmas{0.2, 0.2, 0.2};
+    PeakShapeEllipsoid shapeNoTranslation(directions, sigmas, sigmas, sigmas, Mantid::Kernel::QLab);
+    PeakShapeEllipsoid shapeWithTranslation(directions, sigmas, sigmas, sigmas, Mantid::Kernel::QLab, "", -1,
+                                            presetTranslation);
+
+    std::vector<std::pair<std::pair<double, double>, V3D>> peak_q_list{{std::make_pair(1., 1.), peak_q}};
+    Integrate3DEvents integrator(peak_q_list, UBinv, 1.0);
+    integrator.addEvents(event_Qs, false);
+
+    // Without the preset translation, a single call's 1-sigma cap (measured
+    // from zero) cannot reach all the way to a true center 0.25 away.
+    double intiFromScratch, sigiFromScratch;
+    V3D centerFromScratch;
+    integrator.integrateUsingShapeProfileFit(shapeNoTranslation, peak_q, true, centerFromScratch, intiFromScratch,
+                                             sigiFromScratch);
+    TSM_ASSERT_LESS_THAN("a single call starting from zero translation should be capped short of the true offset",
+                         centerFromScratch.norm(), 0.25 - 1e-6);
+
+    // With the preset translation as the seed, only a small further step is
+    // needed, well within the incremental cap, so it should reach much
+    // closer to the true center than the from-scratch call did.
+    double intiFromPreset, sigiFromPreset;
+    V3D centerFromPreset;
+    integrator.integrateUsingShapeProfileFit(shapeWithTranslation, peak_q, true, centerFromPreset, intiFromPreset,
+                                             sigiFromPreset);
+    TSM_ASSERT_LESS_THAN("seeding from an existing translation should reach closer to the true offset than "
+                         "starting from zero did",
+                         std::abs(centerFromPreset.norm() - 0.25), std::abs(centerFromScratch.norm() - 0.25));
   }
 
   void test_satellites() {

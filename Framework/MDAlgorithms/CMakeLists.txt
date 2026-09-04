@@ -64,6 +64,7 @@ set(SRC_FILES
     src/IntegratePeaksMD.cpp
     src/IntegratePeaksMD2.cpp
     src/IntegratePeaksMDHKL.cpp
+    src/IntegratePeaksShapeMD.cpp
     src/IntegrateQLabEvents.cpp
     src/InvalidParameter.cpp
     src/InvalidParameterParser.cpp
@@ -184,6 +185,7 @@ set(INC_FILES
     inc/MantidMDAlgorithms/IntegratePeaksMD.h
     inc/MantidMDAlgorithms/IntegratePeaksMD2.h
     inc/MantidMDAlgorithms/IntegratePeaksMDHKL.h
+    inc/MantidMDAlgorithms/IntegratePeaksShapeMD.h
     inc/MantidMDAlgorithms/IntegrateQLabEvents.h
     inc/MantidMDAlgorithms/InvalidParameter.h
     inc/MantidMDAlgorithms/InvalidParameterParser.h
@@ -304,6 +306,7 @@ set(TEST_FILES
     IntegratePeaksMD2Test.h
     IntegratePeaksMDHKLTest.h
     IntegratePeaksMDTest.h
+    IntegratePeaksShapeMDTest.h
     IntegrateQLabEventsTest.h
     InvalidParameterParserTest.h
     InvalidParameterTest.h
