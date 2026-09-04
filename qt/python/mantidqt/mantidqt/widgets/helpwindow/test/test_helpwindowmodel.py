@@ -231,5 +231,35 @@ class TestHelpWindowModelDocPathDiscovery(unittest.TestCase):
         self.assertEqual(discovered_path, "", "Should return empty string when no docs found")
 
 
+class TestHelpWindowModelOnlineUrl(unittest.TestCase):
+    def test_nightly_url_with_nightly_version_number(self):
+        # Return empty string from _get_doc_path to force online mode.
+        with (
+            patch("mantidqt.widgets.helpwindow.helpwindowmodel.version") as mock_version,
+            patch("mantidqt.widgets.helpwindow.helpwindowmodel.HelpWindowModel._get_doc_path", return_value=""),
+        ):
+            # Set version number to a nightly version.
+            mock_version.return_value.major = "6"
+            mock_version.return_value.minor = "13"
+            mock_version.return_value.patch = "20260904.1412"
+            model = HelpWindowModel()
+            self.assertEqual(model.MODE_ONLINE, model.get_mode_string())
+            self.assertEqual(model.ONLINE_BASE_URL + "/nightly/", model.get_base_url())
+
+    def test_nightly_url_with_release_version_number(self):
+        # Return empty string from _get_doc_path to force online mode.
+        with (
+            patch("mantidqt.widgets.helpwindow.helpwindowmodel.version") as mock_version,
+            patch("mantidqt.widgets.helpwindow.helpwindowmodel.HelpWindowModel._get_doc_path", return_value=""),
+        ):
+            # Set version number to a release version.
+            mock_version.return_value.major = "6"
+            mock_version.return_value.minor = "13"
+            mock_version.return_value.patch = "1"
+            model = HelpWindowModel()
+            self.assertEqual(model.MODE_ONLINE, model.get_mode_string())
+            self.assertEqual(model.ONLINE_BASE_URL + "/v6.13.1/", model.get_base_url())
+
+
 if __name__ == "__main__":
     unittest.main()
