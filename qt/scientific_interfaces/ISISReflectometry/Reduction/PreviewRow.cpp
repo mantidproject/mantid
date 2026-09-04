@@ -18,17 +18,7 @@
 #include <vector>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
-void validatePreviewWorkspace(Mantid::API::Workspace_sptr const &workspace) {
-  auto const &members = getMembers(workspace);
-  if (members.empty()) {
-    throw std::runtime_error(
-        "Unsupported workspace type; expected MatrixWorkspace or WorkspaceGroup of MatrixWorkspaces");
-  }
-  if (std::all_of(members.cbegin(), members.cend(),
-                  [](auto const &member) { return std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(member); })) {
-    return;
-  }
-}
+void validatePreviewWorkspace(Mantid::API::Workspace_sptr const &workspace) { getMembers(workspace, true); }
 
 PreviewRow::PreviewRow(const std::vector<std::string> &runNumbers)
     : Item(), m_runNumbers(std::move(runNumbers)), m_theta{0.0} {

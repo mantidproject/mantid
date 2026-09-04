@@ -18,7 +18,7 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 MANTIDQT_ISISREFLECTOMETRY_DLL std::vector<Mantid::API::MatrixWorkspace_sptr>
-getMembers(Mantid::API::Workspace_sptr const &workspace);
+getMembers(Mantid::API::Workspace_sptr const &workspace, bool validate = false);
 
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
