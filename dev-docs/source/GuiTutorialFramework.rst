@@ -18,9 +18,7 @@ the user watches a real workflow run rather than reading about one.
 caption, and then waits. The action runs when the user presses *Show me*, so they are reading the
 explanation of a control at the moment they watch it being used.
 
-The tour never advances on its own either: the user presses *Next* when they have finished, because
-there is no interval that is right for everyone — a step someone already understands is a wait, and
-a step they do not is a race. *Next* performs the step's action first if *Show me* was not pressed,
+*Next* performs the step's action first if *Show me* was not pressed,
 since chapters are cumulative and a skipped action would leave every later step describing an
 interface that never reached the state it assumes.
 
@@ -45,8 +43,7 @@ Consequences of this:
 * Jumping to a chapter is a *rebuild*, not an undo. There is no need for a step to know how to
   reverse itself.
 * Your interface must be safe to instantiate twice. In practice that means workspace names must be
-  unique per instance, and closing the window must clean up after itself. The Texture Planner
-  already did both.
+  unique per instance, and closing the window must clean up after itself.
 
 A sandbox is any object with a ``window`` attribute and a ``teardown()`` method. It is also passed
 to every step as the *context*, so put on it whatever the steps need to reach:
@@ -73,8 +70,8 @@ Two traps of this pattern:
 
 * **Usage reporting.** If the view registers a feature usage in its constructor, the sandbox will
   double-count every real launch. Give the view a flag to skip it.
-* **Recursion.** If the presenter offers a tutorial, the sandbox's presenter will offer one too —
-  and on a first-ever open, launch it. Give the presenter a flag to suppress it.
+* **Recursion.** Any method the presenter has of starting the tutorial, the sandbox's presenter also has.
+  Give the presenter a flag to suppress it, these methods so tutorials can't be launched by tutorials.
 
 Writing steps
 #############
@@ -109,8 +106,7 @@ chapter is replayed against a freshly built interface whenever the user jumps to
 
 ``await_`` is polled after the action until it holds — this is how a step waits for slow work
 without blocking, and the step is not reported as done until it does. Give it an explicit
-``await_timeout_s``: how long is reasonable depends entirely on what is being waited for, and a
-default would only ever be wrong in the direction that hides a hang.
+``await_timeout_s``: how long is reasonable depends entirely on what is being waited for.
 
 A step's target is opened up *before* its action runs — the containing tab selected, a collapsed
 group box expanded, including the target itself when it is one. A value set inside a shut section
@@ -153,14 +149,6 @@ own controls until the user closes something they did not ask for. And mind what
 writes: a settings dialog that saves to Mantid's shared ``QSettings`` is *not* isolated by the
 sandbox, so such a tour must dismiss it rather than accept it - Ok or Apply would change the real
 interface's saved settings on the user's behalf.
-
-Choosing a chapter tab **rebuilds the sandbox** and fast-forwards through the earlier chapters'
-actions. That is what lets a chapter be entered at all - its steps assume the state the chapters
-before it leave behind - and it is only possible because the tour drives a throwaway interface.
-Clicking the tab already showing restarts that chapter, which is the framework's answer to "undo":
-rebuilding reaches a known state exactly, where a per-step inverse would have to re-implement the
-interface's own logic backwards and could not be written at all for steps that load a file or run
-an algorithm.
 
 Give a step an action only when it *does* something the user can watch. ``Show me`` is offered
 whenever a step has one, so an action whose effect is invisible - re-expanding a section the reveal
