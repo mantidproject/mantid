@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import AnalysisDataServiceObserver, WorkspaceGroup
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 from functools import wraps
 import sys
 
@@ -30,10 +31,10 @@ def _catch_exceptions(func):
 class MuonADSObserver(AnalysisDataServiceObserver):
     def __init__(self, delete_callback, clear_callback, replace_callback, delete_group_callback=None):
         super(MuonADSObserver, self).__init__()
-        self.delete_callback = delete_callback
-        self.clear_callback = clear_callback
-        self.replace_callback = replace_callback
-        self.delete_group_callback = delete_group_callback
+        self.delete_callback = QAppThreadCall(delete_callback, blocking=False)
+        self.clear_callback = QAppThreadCall(clear_callback, blocking=False)
+        self.replace_callback = QAppThreadCall(replace_callback, blocking=False)
+        self.delete_group_callback = QAppThreadCall(delete_group_callback, blocking=False) if delete_group_callback else None
 
         self.observeDelete(True)
         self.observeRename(True)

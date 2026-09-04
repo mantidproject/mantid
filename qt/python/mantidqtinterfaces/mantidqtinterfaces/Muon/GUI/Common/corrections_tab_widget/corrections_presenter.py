@@ -31,6 +31,7 @@ class CorrectionsPresenter(QObject):
         self.model = model
 
         self.thread_success = True
+        self.calculation_thread = None
 
         self.dead_time_model = DeadTimeCorrectionsModel(model, context.data_context, context.corrections_context)
         self.dead_time_presenter = DeadTimeCorrectionsPresenter(self.view.dead_time_view, self.dead_time_model, self)
@@ -124,11 +125,13 @@ class CorrectionsPresenter(QObject):
 
     def handle_asymmetry_pairs_and_diffs_calc_finished(self) -> None:
         """Handle when the calculation of Asymmetry, Pairs and Diffs has finished finished."""
+        self.calculation_thread = None
         self.enable_editing_notifier.notify_subscribers()
         self.asymmetry_pair_and_diff_calculations_finished_notifier.notify_subscribers()
 
     def handle_thread_error(self, error: str) -> None:
         """Handle when an error occurs while doing calculations on a thread."""
+        self.calculation_thread = None
         self.disable_editing_notifier.notify_subscribers()
         self.thread_success = False
         self.view.warning_popup(error)
@@ -139,6 +142,8 @@ class CorrectionsPresenter(QObject):
 
     def _perform_asymmetry_pairs_and_diffs_calculation(self, *args) -> None:
         """Calculate the Asymmetry workspaces, Pairs and Diffs on a thread after background corrections are complete."""
+        if self.calculation_thread is not None:
+            return
         try:
             self.calculation_thread = self.create_calculation_thread(self._calculate_asymmetry_pairs_and_diffs, *args)
             self.calculation_thread.threadWrapperSetUp(

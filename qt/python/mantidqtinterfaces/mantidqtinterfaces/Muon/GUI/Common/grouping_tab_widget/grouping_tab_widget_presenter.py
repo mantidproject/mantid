@@ -47,6 +47,8 @@ class GroupingTabPresenter(object):
         self._view = view
         self._model = model
 
+        self.update_thread = None
+
         self.grouping_table_widget = grouping_table_widget
         self.pairing_table_widget = pairing_table_widget
         self.diff_table = diff_table
@@ -229,15 +231,19 @@ class GroupingTabPresenter(object):
         self._model.calculate_all_data()
 
     def handle_update_all_clicked(self):
+        if self.update_thread is not None:
+            return
         self.update_thread = self.create_update_thread()
         self.update_thread.threadWrapperSetUp(self.disable_editing, self.handle_update_finished, self.error_callback)
         self.update_thread.start()
 
     def error_callback(self, error_message):
+        self.update_thread = None
         self.enable_editing()
         self._view.display_warning_box(error_message)
 
     def handle_update_finished(self):
+        self.update_thread = None
         self.enable_editing()
         self.groupingNotifier.notify_subscribers()
         self.counts_calculation_finished_notifier.notify_subscribers()
