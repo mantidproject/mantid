@@ -328,9 +328,7 @@ void solvePoissonMatchedFilter(const std::vector<double> &g, const std::vector<d
   // a flat background over the search volume, deliberately conservative so
   // the backtracking Newton solve below has a well-behaved starting point
   // regardless of the absolute scale of normG/volume/event counts
-  double sumW = 0.0;
-  for (size_t i = 0; i < n; ++i)
-    sumW += w[i];
+  const double sumW = std::accumulate(w.begin(), w.end(), 0.0);
   b = volume > 0 ? std::max(0.5 * sumW / volume, 1e-10) : 1e-10;
   A = normG > 0 ? std::max(0.5 * sumW / normG, 1e-10) : 1e-10;
 
