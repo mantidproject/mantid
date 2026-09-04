@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "PreviewModel.h"
+#include "Common/GroupHelper.h"
 #include "GUI/Common/IJobManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -100,13 +101,7 @@ MatrixWorkspace_sptr PreviewModel::getSelectedReducedWs() const {
 }
 
 std::vector<MatrixWorkspace_sptr> PreviewModel::getReducedWorkspaceMembers() const {
-  auto const group = std::dynamic_pointer_cast<WorkspaceGroup>(m_runDetails->getReducedWs());
-  std::vector<MatrixWorkspace_sptr> members;
-  members.reserve(group->size());
-  auto const &allItems = group->getAllItems();
-  std::transform(allItems.cbegin(), allItems.cend(), std::back_inserter(members),
-                 [](auto const &member) { return std::dynamic_pointer_cast<MatrixWorkspace>(member); });
-  return members;
+  return getMembers(m_runDetails->getReducedWs());
 }
 
 bool PreviewModel::isWorkspaceGroup() const {
@@ -126,13 +121,7 @@ std::vector<std::string> PreviewModel::getGroupMemberDisplayNames() const {
   return names;
 }
 
-size_t PreviewModel::getNumberOfGroupMembers() const {
-  auto const workspace = m_runDetails->getLoadedWs();
-  if (!workspace)
-    return 0;
-  auto const group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
-  return group ? group->size() : 1;
-}
+size_t PreviewModel::getNumberOfGroupMembers() const { return getMembers(m_runDetails->getLoadedWs()).size(); }
 
 size_t PreviewModel::getSelectedGroupMember() const { return m_selectedGroupMember; }
 

@@ -42,6 +42,7 @@ private:
                                          double) const;
   std::vector<LookupRow> findMatchingRegexes(std::string const &title) const;
   std::vector<LookupRow> findEmptyRegexes() const;
+  std::string getPreviewTitle(MantidQt::CustomInterfaces::ISISReflectometry::PreviewRow const &previewRow) const;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

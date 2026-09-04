@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "PreviewRow.h"
+#include "Common/GroupHelper.h"
 #include "GUI/Preview/ROIType.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
@@ -18,19 +19,15 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 void validatePreviewWorkspace(Mantid::API::Workspace_sptr const &workspace) {
-  if (std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace))
-    return;
-
-  auto const group = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(workspace);
-  if (group && group->size() > 0) {
-    auto const members = group->getAllItems();
-    if (std::all_of(members.cbegin(), members.cend(),
-                    [](auto const &member) { return std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(member); }))
-      return;
+  auto const &members = getMembers(workspace);
+  if (members.empty()) {
+    throw std::runtime_error(
+        "Unsupported workspace type; expected MatrixWorkspace or WorkspaceGroup of MatrixWorkspaces");
   }
-
-  throw std::runtime_error("Unsupported workspace type; expected MatrixWorkspace or WorkspaceGroup of "
-                           "MatrixWorkspaces");
+  if (std::all_of(members.cbegin(), members.cend(),
+                  [](auto const &member) { return std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(member); })) {
+    return;
+  }
 }
 
 PreviewRow::PreviewRow(const std::vector<std::string> &runNumbers)
