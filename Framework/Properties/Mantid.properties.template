@@ -53,6 +53,7 @@ UpdateInstrumentDefinitions.URL = https://api.github.com/repos/mantidproject/man
 CheckMantidVersion.OnStartup = @CHECK_FOR_NEW_MANTID_VERSION@
 CheckMantidVersion.GitHubReleaseURL = https://api.github.com/repos/mantidproject/mantid/releases/latest
 CheckMantidVersion.DownloadURL = https://download.mantidproject.org
+CheckMantidVersion.NotifyUpdateOnStartup = 0
 
 # Whether to report usage statistics back to central server
 usagereports.enabled = @ENABLE_USAGE_REPORTS@
