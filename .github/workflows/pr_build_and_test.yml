@@ -147,14 +147,14 @@ jobs:
 
     strategy:
       matrix:
-        # Skip Windows when the PR targets ornl-next (ORNL-specific branch, Linux only)
-        include: ${{ fromJson(github.base_ref == 'ornl-next' && '[{"os":"Linux","cmake_preset":"linux-64-ci"}]' || '[{"os":"Linux","cmake_preset":"linux-64-ci"},{"os":"Windows","cmake_preset":"win-64-ci"}]') }}
+        # Skip Windows and macOS when the PR targets ornl-next (ORNL-specific branch, Linux only)
+        include: ${{ fromJson(github.base_ref == 'ornl-next' && '[{"os":"Linux","cmake_preset":"linux-64-ci","arch":"X64"}]' || '[{"os":"Linux","cmake_preset":"linux-64-ci","arch":"X64"},{"os":"Windows","cmake_preset":"win-64-ci","arch":"X64"},{"os":"macOS","cmake_preset":"osx-arm64-ci","arch":"ARM64"}]') }}
 
     runs-on:
       - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
       - self-hosted
       - ${{ matrix.os }}
-      - X64
+      - ${{ matrix.arch }}
     #
     # If the user who clicked "Run Workflow" button left the RUNNER_LABEL field blank,
     # the default evaluated output is the string 'self-hosted'.
@@ -252,7 +252,11 @@ jobs:
         run: |
           cd ${GITHUB_WORKSPACE}
           # Not physical but logical cores, includes hyper threaded - different for darwin
-          BUILD_THREADS="$(grep -c ^processor /proc/cpuinfo)"
+          if [ "$(uname)" = "Darwin" ]; then
+            BUILD_THREADS="$(sysctl -n hw.ncpu)"
+          else
+            BUILD_THREADS="$(grep -c ^processor /proc/cpuinfo)"
+          fi
           # bool flags for this are
           # SYSTEM_TESTS UNIT_TESTS DOCS DOC_TESTS
           pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/run-tests ${GITHUB_WORKSPACE} false true $ENABLE_DOCS $ENABLE_DOC_TESTS ${BUILD_THREADS}
@@ -270,6 +274,14 @@ jobs:
         if: ${{ matrix.os == 'Windows' && !cancelled() && github.event_name == 'pull_request' && steps.testunit.conclusion != 'skipped' }}
         with:
           name: junit-unit-Windows
+          if-no-files-found: ignore
+          path: ${{ github.workspace }}/build/Testing/*unittest.xml
+
+      - name: Archive unit test output (macOS)
+        uses: actions/upload-artifact@v7
+        if: ${{ matrix.os == 'macOS' && failure() && steps.testunit.conclusion == 'failure' }}
+        with:
+          name: junit-unit-macOS
           if-no-files-found: ignore
           path: ${{ github.workspace }}/build/Testing/*unittest.xml
 
