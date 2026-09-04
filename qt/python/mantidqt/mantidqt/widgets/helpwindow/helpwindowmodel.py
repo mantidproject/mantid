@@ -7,37 +7,9 @@
 import os
 
 # --- Logger and ConfigService Setup ---
-try:
-    from mantid.kernel import Logger
-    from mantid.kernel import ConfigService
-except ImportError:
-    print("Warning: Mantid Kernel (Logger/ConfigService) not found, using basic print/dummy.")
-
-    class Logger:
-        def __init__(self, name):
-            self._name = name
-
-        def warning(self, msg):
-            print(f"WARNING [{self._name}]: {msg}")
-
-        def debug(self, msg):
-            print(f"DEBUG [{self._name}]: {msg}")
-
-        def information(self, msg):
-            print(f"INFO [{self._name}]: {msg}")
-
-        def error(self, msg):
-            print(f"ERROR [{self._name}]: {msg}")
-
-    class ConfigService:  # Dummy for environments without Mantid
-        @staticmethod
-        def Instance():
-            class DummyInstance:
-                def getString(self, key, pathAbsolute=True):
-                    return None
-
-            return DummyInstance()
-
+from mantid.kernel import Logger
+from mantid.kernel import ConfigService
+from mantid.kernel import version
 
 log = Logger("HelpWindowModel")
 # --------------------------------------
@@ -47,28 +19,20 @@ from qtpy.QtCore import QUrl  # noqa: E402
 
 
 def getMantidVersionString():
-    """Placeholder function to get Mantid version (e.g., 'v6.13.0')."""
-    try:
-        import mantid  # Keep import local as it might fail
+    # Assume it's a nightly build if patch > 100, (i.e. patch == YYYYMMDD.TIME)
+    if int(float(version().patch)) > 100:
+        return "nightly"
 
-        if hasattr(mantid, "__version__"):
-            versionParts = str(mantid.__version__).split(".")
-            if len(versionParts) >= 2:
-                return f"v{versionParts[0]}.{versionParts[1]}.0"
-    except ImportError:
-        pass  # Mantid might not be available
-    log.warning("Could not determine Mantid version for documentation URL.")
-    return None
+    return f"v{version().major}.{version().minor}.{version().patch}"
 
 
 class HelpWindowModel:
     MODE_OFFLINE = "Offline Docs"
     MODE_ONLINE = "Online Docs"
 
-    def __init__(self, online_base="https://docs.mantidproject.org/"):
-        # Store raw online base early, needed for fallback logic below
-        self._raw_online_base = online_base.rstrip("/")
+    ONLINE_BASE_URL = "https://docs.mantidproject.org"
 
+    def __init__(self):
         # --- Step 1: Attempt to get local path ---
         local_docs_path_from_config = self._get_doc_path()
 
@@ -153,8 +117,6 @@ class HelpWindowModel:
             abs_local_path = os.path.abspath(local_docs_path)  # Ensure absolute
             # Base URL for local files needs 'file:///' prefix and correct path format
             self._base_url = QUrl.fromLocalFile(abs_local_path).toString()
-            self._version_string = None  # Version string not applicable for local docs mode
-            log.debug(f"Final state: Mode='{self._mode_string}', Base URL='{self._base_url}'")
 
         else:
             # --- Configure for ONLINE Mode ---
@@ -167,25 +129,13 @@ class HelpWindowModel:
             self._is_local = False
             self._mode_string = self.MODE_ONLINE
 
-            # Attempt to get versioned URL for online mode
-            self._version_string = getMantidVersionString()  # Might return None
+            # Use version string to link to either versioned or nightly docs.
+            version_string = getMantidVersionString()
 
             # Set final base URL based on online path and version string
-            if self._version_string:
-                base_online = self._raw_online_base
-                base_online = base_online.removesuffix("/stable")
-                # Avoid double versioning if base_online already has it
-                if self._version_string not in base_online:
-                    self._base_url = f"{base_online.rstrip('/')}/{self._version_string}"
-                    log.debug(f"Using versioned online URL: {self._base_url}")
-                else:  # Use provided base as-is (likely includes 'stable' or version)
-                    self._base_url = self._raw_online_base
-                    log.debug(f"Using provided online base URL (version/stable implied): {self._base_url}")
-            else:  # No version string found, use raw online base
-                self._base_url = self._raw_online_base
-                log.debug(f"Using default online base URL (version unknown): {self._base_url}")
+            self._base_url = f"{self.ONLINE_BASE_URL}/{version_string}"
 
-            log.debug(f"Final state: Mode='{self._mode_string}', Base URL='{self._base_url}', Version='{self._version_string}'")
+        log.debug(f"Final state: Mode='{self._mode_string}', Base URL='{self._base_url}'")
 
     # --- Getter methods remain the same ---
     def is_local_docs_mode(self):

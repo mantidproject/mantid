@@ -14,7 +14,6 @@ from mantidqt.widgets.helpwindow.helpwindowmodel import HelpWindowModel
 # --- Define Constants ---
 CONFIG_SERVICE_LOOKUP_PATH = "mantidqt.widgets.helpwindow.helpwindowmodel.ConfigService"
 VERSION_FUNC_LOOKUP_PATH = "mantidqt.widgets.helpwindow.helpwindowmodel.getMantidVersionString"
-ONLINE_BASE_EXAMPLE = "https://example.org"
 # ------------------------
 
 
@@ -40,7 +39,7 @@ class TestHelpWindowModelConfigService(unittest.TestCase):
 
         mock_ConfigService.getPropertiesDir.return_value = self.props_dir
 
-        model = HelpWindowModel(online_base=ONLINE_BASE_EXAMPLE)
+        model = HelpWindowModel()
 
         self.assertTrue(model.is_local_docs_mode(), "Expected is_local_docs_mode() True")
         self.assertEqual(model.MODE_OFFLINE, model.get_mode_string(), "Expected mode string 'Offline Docs'")
@@ -87,18 +86,18 @@ class TestHelpWindowModelConfigService(unittest.TestCase):
         """Test online mode when ConfigService returns emtpy path."""
         mock_ConfigService.getPropertiesDir.return_value = ""
 
-        model = HelpWindowModel(online_base=ONLINE_BASE_EXAMPLE)
+        model = HelpWindowModel()
 
         self.assertFalse(model.is_local_docs_mode(), "Expected is_local_docs_mode() False")
         self.assertEqual(model.MODE_ONLINE, model.get_mode_string(), "Expected mode string 'Online Docs'")
         test_url = model.build_help_url("algorithms/MyAlgorithm-v1.html")
         self.assertFalse(test_url.isLocalFile(), "Expected a non-local (http/https) URL")
         self.assertEqual(test_url.scheme(), "https")
-        self.assertTrue(ONLINE_BASE_EXAMPLE in test_url.toString())
+        self.assertTrue(model.ONLINE_BASE_URL in test_url.toString())
         self.assertTrue("algorithms/MyAlgorithm-v1.html" in test_url.toString())
         home_url = model.get_home_url()
         self.assertFalse(home_url.isLocalFile(), "Expected an online docs home URL")
-        self.assertTrue(ONLINE_BASE_EXAMPLE in home_url.toString())
+        self.assertTrue(model.ONLINE_BASE_URL in home_url.toString())
 
         mock_ConfigService.getPropertiesDir.assert_called_once_with()
 
@@ -107,35 +106,12 @@ class TestHelpWindowModelConfigService(unittest.TestCase):
         """Test fallback to online mode when ConfigService returns an invalid/non-existent directory path."""
         mock_ConfigService.getPropertiesDir.return_value = self.invalid_path
 
-        model = HelpWindowModel(online_base=ONLINE_BASE_EXAMPLE)
+        model = HelpWindowModel()
 
         self.assertFalse(model.is_local_docs_mode(), "Expected is_local_docs_mode() False")
         self.assertEqual(model.MODE_ONLINE, model.get_mode_string(), "Expected mode string 'Online Docs' on fallback")
 
         mock_ConfigService.getPropertiesDir.assert_called_once_with()
-
-    @patch(CONFIG_SERVICE_LOOKUP_PATH)
-    @patch(VERSION_FUNC_LOOKUP_PATH, return_value=None)
-    def test_online_url_construction_with_trailing_slashes(self, mock_version_func, mock_ConfigService):
-        """Test online base URL construction handles trailing slashes correctly (forced online)."""
-        mock_ConfigService.getPropertiesDir.return_value = ""
-
-        model1 = HelpWindowModel(online_base="https://example.org")
-        model2 = HelpWindowModel(online_base="https://example.org/")
-
-        self.assertFalse(model1.is_local_docs_mode(), "Model1 should be in online mode")
-        self.assertFalse(model2.is_local_docs_mode(), "Model2 should be in online mode")
-        self.assertTrue(model1.get_base_url().endswith("/"), "get_base_url() should add trailing slash")
-        self.assertTrue(model2.get_base_url().endswith("/"), "get_base_url() should keep trailing slash")
-        self.assertEqual(model1.get_base_url(), model2.get_base_url(), "Base URLs should be identical")
-
-        url1 = model1.build_help_url("test.html")
-        url2 = model2.build_help_url("test.html")
-
-        self.assertEqual(url1.toString(), url2.toString(), "Generated URLs should be identical")
-        self.assertEqual(url1.toString(), "https://example.org/test.html", "Generated URL should be correct (no version)")
-        self.assertTrue(mock_version_func.called)
-        mock_ConfigService.getPropertiesDir.assert_called()
 
 
 class TestHelpWindowModelDocPathDiscovery(unittest.TestCase):
@@ -253,6 +229,36 @@ class TestHelpWindowModelDocPathDiscovery(unittest.TestCase):
         discovered_path = model._get_doc_path()
 
         self.assertEqual(discovered_path, "", "Should return empty string when no docs found")
+
+
+class TestHelpWindowModelOnlineUrl(unittest.TestCase):
+    def test_nightly_url_with_nightly_version_number(self):
+        # Return empty string from _get_doc_path to force online mode.
+        with (
+            patch("mantidqt.widgets.helpwindow.helpwindowmodel.version") as mock_version,
+            patch("mantidqt.widgets.helpwindow.helpwindowmodel.HelpWindowModel._get_doc_path", return_value=""),
+        ):
+            # Set version number to a nightly version.
+            mock_version.return_value.major = "6"
+            mock_version.return_value.minor = "13"
+            mock_version.return_value.patch = "20260904.1412"
+            model = HelpWindowModel()
+            self.assertEqual(model.MODE_ONLINE, model.get_mode_string())
+            self.assertEqual(model.ONLINE_BASE_URL + "/nightly/", model.get_base_url())
+
+    def test_nightly_url_with_release_version_number(self):
+        # Return empty string from _get_doc_path to force online mode.
+        with (
+            patch("mantidqt.widgets.helpwindow.helpwindowmodel.version") as mock_version,
+            patch("mantidqt.widgets.helpwindow.helpwindowmodel.HelpWindowModel._get_doc_path", return_value=""),
+        ):
+            # Set version number to a release version.
+            mock_version.return_value.major = "6"
+            mock_version.return_value.minor = "13"
+            mock_version.return_value.patch = "1"
+            model = HelpWindowModel()
+            self.assertEqual(model.MODE_ONLINE, model.get_mode_string())
+            self.assertEqual(model.ONLINE_BASE_URL + "/v6.13.1/", model.get_base_url())
 
 
 if __name__ == "__main__":
