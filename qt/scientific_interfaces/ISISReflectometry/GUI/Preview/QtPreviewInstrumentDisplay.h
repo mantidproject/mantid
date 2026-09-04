@@ -28,6 +28,7 @@ public:
   ~QtPreviewInstrumentDisplay() override;
 
   void updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) override;
+  void updateWorkspacePreservingSelection(Mantid::API::MatrixWorkspace_sptr &workspace) override;
   void resetInstView() override;
   void plotInstView() override;
   void setInstViewZoomMode() override;

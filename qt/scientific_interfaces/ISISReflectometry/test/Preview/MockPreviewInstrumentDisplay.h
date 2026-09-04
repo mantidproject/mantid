@@ -20,6 +20,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class MockPreviewInstrumentDisplay : public IPreviewInstrumentDisplay {
 public:
   MOCK_METHOD(void, updateWorkspace, (Mantid::API::MatrixWorkspace_sptr &), (override));
+  MOCK_METHOD(void, updateWorkspacePreservingSelection, (Mantid::API::MatrixWorkspace_sptr &), (override));
   MOCK_METHOD(void, resetInstView, (), (override));
   MOCK_METHOD(void, plotInstView, (), (override));
   MOCK_METHOD(void, setInstViewZoomMode, (), (override));

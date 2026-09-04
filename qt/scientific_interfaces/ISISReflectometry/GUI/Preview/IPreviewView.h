@@ -11,8 +11,10 @@
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
 
 #include <QLayout>
+#include <cstddef>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace MantidQt::MantidWidgets {
 class IPlotView;
@@ -28,6 +30,7 @@ public:
   virtual void acceptMainPresenter(IBatchPresenter *mainPresenter) = 0;
 
   virtual void notifyLoadWorkspaceRequested() = 0;
+  virtual void notifyGroupMemberSelectionChanged() = 0;
   virtual void notifyUpdateAngle() = 0;
   virtual void notifyApplyRequested() = 0;
 };
@@ -42,9 +45,11 @@ public:
   virtual void disableMainWidget() = 0;
 
   virtual std::string getWorkspaceName() const = 0;
+  virtual size_t getSelectedGroupMember() const = 0;
   virtual double getAngle() const = 0;
   virtual void setAngle(double angle) = 0;
   virtual void setUpdateAngleButtonEnabled(bool enabled) = 0;
   virtual void setTitle(const std::string &title) = 0;
+  virtual void setGroupMembers(std::vector<std::string> const &workspaceNames) = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
