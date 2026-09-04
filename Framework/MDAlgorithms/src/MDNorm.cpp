@@ -42,8 +42,6 @@ using namespace Mantid::DataObjects;
 
 namespace {
 using VectorDoubleProperty = Kernel::PropertyWithValue<std::vector<double>>;
-// function to  compare two intersections (h,k,l,Momentum) by Momentum
-bool compareMomentum(const std::array<double, 4> &v1, const std::array<double, 4> &v2) { return (v1[3] < v2[3]); }
 
 // k=sqrt(energyToK * E)
 constexpr double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass * PhysicalConstants::meV * 1e-20 /
@@ -60,10 +58,7 @@ DECLARE_ALGORITHM(MDNorm)
 /**
  * Constructor
  */
-MDNorm::MDNorm()
-    : m_normWS(), m_inputWS(), m_isRLU(false), m_UB(3, 3, true), m_W(3, 3, true), m_transformation(), m_hX(), m_kX(),
-      m_lX(), m_eX(), m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_eIdx(-1), m_numExptInfos(0), m_Ei(0.0), m_diffraction(true),
-      m_monochromatic(false), m_accumulate(false), m_dEIntegrated(true), m_samplePos(), m_beamDir(), convention("") {}
+MDNorm::MDNorm() : m_isRLU(false), m_monochromatic(false) {}
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string MDNorm::name() const { return "MDNorm"; }
@@ -216,6 +211,8 @@ void MDNorm::init() {
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputBackgroundNormalizationWorkspace", "",
                                                                  Direction::Output, PropertyMode::Optional),
                   "A name for the optional output background normalization MDHistoWorkspace.");
+
+  m_progress = std::make_unique<API::Progress>(this, 0, 1, 1);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -497,7 +494,8 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
 /** Execute the algorithm.
  */
 void MDNorm::exec() {
-  convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  m_convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  m_hIntegrated = m_kIntegrated = m_lIntegrated = false;
   // symmetry operations
   std::string symOps = this->getProperty("SymmetryOperations");
   std::vector<Geometry::SymmetryOperation> symmetryOps;
@@ -576,9 +574,14 @@ void MDNorm::exec() {
 
   m_numExptInfos = outputDataWS->getNumExperimentInfo();
   if (!m_monochromatic) {
+    m_signalArray = std::vector<std::atomic<signal_t>>(m_normWS->getNPoints());
+    if (m_backgroundWS)
+      m_bkgdSignalArray = std::vector<std::atomic<signal_t>>(m_bkgdNormWS->getNPoints());
     // loop over all experiment infos, computing the normalization from solid angle/flux
     // trajectories (TOF only; for monochromatic input, m_normWS was already binned above)
+    m_progress->resetNumSteps(m_numExptInfos * m_numSymmOps, 0.3, 0.9);
     for (uint16_t expInfoIndex = 0; expInfoIndex < m_numExptInfos; expInfoIndex++) {
+      const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
       // Check for other dimensions if we could measure anything in the original
       // data
       bool skipNormalization = false;
@@ -587,18 +590,31 @@ void MDNorm::exec() {
       cacheDimensionXValues();
 
       if (!skipNormalization) {
-        size_t symmOpsIndex = 0;
         for (const auto &so : symmetryOps) {
-          calculateNormalization(otherValues, so, expInfoIndex, symmOpsIndex);
-          symmOpsIndex++;
+          if (currentExptInfo.run().hasProperty("useLogTimes")) {
+            calculateNormContinuous(otherValues, expInfoIndex, &so);
+          } else {
+            calculateNormalization(otherValues, so, expInfoIndex);
+          }
+          m_progress->report();
         }
-
       } else {
         g_log.warning("Binning limits are outside the limits of the MDWorkspace. "
                       "Not applying normalization.");
       }
-      // if more than one experiment info, keep accumulating
-      m_accumulate = true;
+    }
+    if (m_accumulate) {
+      std::transform(m_signalArray.cbegin(), m_signalArray.cend(), m_normWS->getSignalArray(),
+                     m_normWS->mutableSignalArray(),
+                     [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
+      if (m_backgroundWS)
+        std::transform(m_bkgdSignalArray.cbegin(), m_bkgdSignalArray.cend(), m_bkgdNormWS->getSignalArray(),
+                       m_bkgdNormWS->mutableSignalArray(),
+                       [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
+    } else {
+      std::copy(m_signalArray.cbegin(), m_signalArray.cend(), m_normWS->mutableSignalArray());
+      if (m_backgroundWS)
+        std::copy(m_bkgdSignalArray.cbegin(), m_bkgdSignalArray.cend(), m_bkgdNormWS->mutableSignalArray());
     }
   }
 
@@ -854,23 +870,6 @@ std::map<std::string, std::string> MDNorm::getBinParameters() {
   m_transformation = Mantid::Kernel::Matrix<coord_t>(
       transformation, static_cast<size_t>((transformation.size()) / m_inputWS->getNumDims()), m_inputWS->getNumDims());
   return parameters;
-}
-
-/**
- * Create & cached the normalization workspace
- * @param dataWS The binned workspace that will be used for the data
- */
-void MDNorm::createNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS) {
-  // Copy the MDHisto workspace, and change signals and errors to 0.
-  std::shared_ptr<IMDHistoWorkspace> tmp = this->getProperty("TemporaryNormalizationWorkspace");
-  m_normWS = std::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
-  if (!m_normWS) {
-    m_normWS = dataWS.clone();
-    m_normWS->setTo(0., 0., 0.);
-  } else {
-    // Temp is given.  Accumulation mode is on
-    m_accumulate = true;
-  }
 }
 
 void MDNorm::createBackgroundNormalizationWS(const DataObjects::MDHistoWorkspace &bkgdDataWS) {
@@ -1405,532 +1404,6 @@ std::vector<coord_t> MDNorm::getValuesFromOtherDimensions(bool &skipNormalizatio
     }
   }
   return otherDimValues;
-}
-
-/**
- * Stores the X values from each H,K,L, and optionally DeltaE dimension as
- * member variables
- */
-void MDNorm::cacheDimensionXValues() {
-  auto &hDim = *m_normWS->getDimension(m_hIdx);
-  m_hX.resize(hDim.getNBoundaries());
-  for (size_t i = 0; i < m_hX.size(); ++i) {
-    m_hX[i] = hDim.getX(i);
-  }
-  auto &kDim = *m_normWS->getDimension(m_kIdx);
-  m_kX.resize(kDim.getNBoundaries());
-  for (size_t i = 0; i < m_kX.size(); ++i) {
-    m_kX[i] = kDim.getX(i);
-  }
-
-  auto &lDim = *m_normWS->getDimension(m_lIdx);
-  m_lX.resize(lDim.getNBoundaries());
-  for (size_t i = 0; i < m_lX.size(); ++i) {
-    m_lX[i] = lDim.getX(i);
-  }
-
-  if ((!m_diffraction) && (!m_dEIntegrated)) {
-    // NOTE: store k final instead
-    auto &eDim = *m_normWS->getDimension(m_eIdx);
-    m_eX.resize(eDim.getNBoundaries());
-    for (size_t i = 0; i < m_eX.size(); ++i) {
-      double temp = m_Ei - eDim.getX(i);
-      temp = std::max(temp, 0.);
-      m_eX[i] = std::sqrt(energyToK * temp);
-    }
-  }
-}
-
-/**
- * Calculate QTransform = (R * UB * SymmetryOperation * m_W)^-1
- * @param currentExpInfo
- * @param so
- * @return
- */
-inline Mantid::Kernel::DblMatrix MDNorm::calQTransform(const ExperimentInfo &currentExpInfo,
-                                                       const Geometry::SymmetryOperation &so) {
-  // Make it to a method!
-  DblMatrix R = currentExpInfo.run().getGoniometerMatrix();
-  DblMatrix soMatrix(3, 3);
-  auto v = so.transformHKL(V3D(1, 0, 0));
-  soMatrix.setColumn(0, v);
-  v = so.transformHKL(V3D(0, 1, 0));
-  soMatrix.setColumn(1, v);
-  v = so.transformHKL(V3D(0, 0, 1));
-  soMatrix.setColumn(2, v);
-  soMatrix.Invert();
-  DblMatrix Qtransform = R * m_UB * soMatrix * m_W;
-  Qtransform.Invert();
-
-  return Qtransform;
-}
-
-/**
- * Calculate the diffraction MDE's intersection integral of a certain
- * detector/spectru
- * @param intersections: vector of intersections
- * @param xValues: empty vector for X values
- * @param yValues: empty vector of Y values (output)
- * @param integrFlux: integral flux workspace
- * @param wsIdx: workspace index
- */
-inline void MDNorm::calcDiffractionIntersectionIntegral(std::vector<std::array<double, 4>> &intersections,
-                                                        std::vector<double> &xValues, std::vector<double> &yValues,
-                                                        const API::MatrixWorkspace &integrFlux, const size_t &wsIdx) {
-  // -- calculate integrals for the intersection --
-  // momentum values at intersections
-  auto intersectionsBegin = intersections.begin();
-  // copy momenta to xValues
-  xValues.resize(intersections.size());
-  yValues.resize(intersections.size());
-  auto x = xValues.begin();
-  for (auto it = intersectionsBegin; it != intersections.end(); ++it, ++x) {
-    *x = (*it)[3];
-  }
-  // calculate integrals at momenta from xValues by interpolating between
-  // points in spectrum sp
-  // of workspace integrFlux. The result is stored in yValues
-  calcIntegralsForIntersections(xValues, integrFlux, wsIdx, yValues);
-}
-
-/**
- * Calculate the normalization among intersections on a single detector
- * in 1 specific SpectrumInfo/ExperimentInfo
- * @param intersections: intersections
- * @param solid: proton charge
- * @param yValues: diffraction intersection integral and common to sample and background
- * @param vmdDims: MD dimensions
- * @param pos: position from intersecton for memory efficiency
- * @param posNew: transformed positions
- * @param signalArray: (output) normalization
- * @param solidBkgd: background proton charge
- * @param bkgdSignalArray: (output) background normalization
- */
-inline void MDNorm::calcSingleDetectorNorm(const std::vector<std::array<double, 4>> &intersections, const double &solid,
-                                           std::vector<double> &yValues, const size_t &vmdDims,
-                                           std::vector<coord_t> &pos, std::vector<coord_t> &posNew,
-                                           std::vector<std::atomic<signal_t>> &signalArray, const double &solidBkgd,
-                                           std::vector<std::atomic<signal_t>> &bkgdSignalArray) {
-
-  auto intersectionsBegin = intersections.begin();
-  for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
-
-    const auto &curIntSec = *it;
-    const auto &prevIntSec = *(it - 1);
-
-    // The full vector isn't used so compute only what is necessary
-    // If the difference between 2 adjacent intersection is trivial, no
-    // intersection normalization is to be calculated
-    double delta, eps;
-    if (m_diffraction) {
-      // diffraction
-      delta = curIntSec[3] - prevIntSec[3];
-      eps = 1e-7;
-    } else {
-      // inelastic
-      delta = (curIntSec[3] * curIntSec[3] - prevIntSec[3] * prevIntSec[3]) / energyToK;
-      eps = 1e-10;
-    }
-    if (delta < eps)
-      continue; // Assume zero contribution if difference is small
-
-    // Average between two intersections for final position
-    // [Task 89] Sample and background have same 'pos[]'
-    std::transform(curIntSec.data(), curIntSec.data() + vmdDims, prevIntSec.data(), pos.begin(),
-                   [](const double rhs, const double lhs) { return static_cast<coord_t>(0.5 * (rhs + lhs)); });
-    signal_t signal;
-    signal_t bkgdSignal(0.);
-    if (m_diffraction) {
-      // Diffraction
-      // index of the current intersection
-      auto k = static_cast<size_t>(std::distance(intersectionsBegin, it));
-      // signal = integral between two consecutive intersections
-      signal = (yValues[k] - yValues[k - 1]) * solid;
-      if (m_backgroundWS)
-        bkgdSignal = (yValues[k] - yValues[k - 1]) * solidBkgd;
-
-    } else {
-      // Inelastic
-      // transform kf to energy transfer
-      pos[3] = static_cast<coord_t>(m_Ei - pos[3] * pos[3] / energyToK);
-      // signal = energy distance between two consecutive intersections *solid
-      // angle *PC
-      signal = solid * delta;
-      if (m_backgroundWS)
-        bkgdSignal = solidBkgd * delta;
-    }
-
-    // Find the coordiate of the new position after transformation
-    m_transformation.multiplyPoint(pos, posNew);
-    // [Task 89] Is linIndex common to both sample and background?
-    size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
-    if (linIndex == size_t(-1))
-      continue; // not found
-
-    // Set to output
-    // set the calculated signal to
-    Mantid::Kernel::AtomicOp(signalArray[linIndex], signal, std::plus<signal_t>());
-    // [Task 89]
-    if (m_backgroundWS)
-      Mantid::Kernel::AtomicOp(bkgdSignalArray[linIndex], bkgdSignal, std::plus<signal_t>());
-  }
-  return;
-}
-
-/**
- * Computed the normalization for the input workspace. Results are stored in
- * m_normWS
- * @param otherValues - values for dimensions other than Q or DeltaE
- * @param so - symmetry operation
- * @param expInfoIndex - current experiment info index
- * @param soIndex - the index of symmetry operation (for progress purposes only)
- */
-void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues, const Geometry::SymmetryOperation &so,
-                                    uint16_t expInfoIndex, size_t soIndex) {
-  const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
-  std::vector<double> lowValues, highValues;
-  auto *lowValuesLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("MDNorm_low"));
-  lowValues = (*lowValuesLog)();
-  auto *highValuesLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("MDNorm_high"));
-  highValues = (*highValuesLog)();
-
-  // calculate Q transformation matrix (R * UB * SymmetryOperation * m_W)^-1
-  // in order to calculate intersections
-  DblMatrix Qtransform = calQTransform(currentExptInfo, so);
-
-  // get proton charges
-  const double protonCharge = currentExptInfo.run().getProtonCharge();
-  // [Task 89]
-  const double protonChargeBkgd =
-      (m_backgroundWS != nullptr) ? m_backgroundWS->getExperimentInfo(0)->run().getProtonCharge() : 0;
-
-  const auto &spectrumInfo = currentExptInfo.spectrumInfo();
-
-  // Mappings: solid angle and flux workspaces' detector to ws_index map
-  const auto ndets = static_cast<int64_t>(spectrumInfo.size());
-  bool haveSA = false;
-  API::MatrixWorkspace_const_sptr solidAngleWS = getProperty("SolidAngleWorkspace");
-  if (solidAngleWS != nullptr) {
-    haveSA = true;
-  }
-  API::MatrixWorkspace_const_sptr integrFlux = getProperty("FluxWorkspace");
-  const detid2index_map solidAngDetToIdx =
-      (haveSA) ? solidAngleWS->getDetectorIDToWorkspaceIndexMap() : detid2index_map();
-  const detid2index_map fluxDetToIdx =
-      (m_diffraction) ? integrFlux->getDetectorIDToWorkspaceIndexMap() : detid2index_map();
-
-  // Define dimension, signal array
-  const size_t vmdDims = (m_diffraction) ? 3 : 4;
-  std::vector<std::atomic<signal_t>> signalArray(m_normWS->getNPoints());
-
-  size_t numNPoints = (m_backgroundWS) ? m_bkgdNormWS->getNPoints() : 0;
-  if (m_backgroundWS && numNPoints != m_normWS->getNPoints()) {
-    throw std::runtime_error("N points are different");
-  }
-  std::vector<std::atomic<signal_t>> bkgdSignalArray(numNPoints);
-
-  std::vector<std::array<double, 4>> intersections;
-  std::vector<double> xValues, yValues;
-  std::vector<coord_t> pos, posNew;
-
-  // Progress report
-  double progStep = 0.7 / static_cast<double>(m_numExptInfos * m_numSymmOps);
-  auto progIndex = static_cast<double>(soIndex + expInfoIndex * m_numSymmOps);
-  auto prog =
-      std::make_unique<API::Progress>(this, 0.3 + progStep * progIndex, 0.3 + progStep * (1. + progIndex), ndets);
-  // muliple threading
-  bool safe = m_diffraction ? Kernel::threadSafe(*integrFlux) : true;
-
-PRAGMA_OMP(parallel for private(intersections, xValues, yValues, pos, posNew) if (safe))
-for (int64_t i = 0; i < ndets; i++) {
-  PARALLEL_START_INTERRUPT_REGION
-
-  // Skip: non-existing detector, monitor and masked detector
-  if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i)) {
-    continue;
-  }
-
-  const auto &detector = spectrumInfo.detector(i);
-  double theta = detector.getTwoTheta(m_samplePos, m_beamDir);
-  double phi = detector.getPhi();
-  // If the dtefctor is a group, this should be the ID of the first detector
-  const auto detID = detector.getID();
-
-  // get the flux spectrum number: this is for diffraction only!
-  size_t wsIdx = 0;
-  if (m_diffraction) {
-    auto index = fluxDetToIdx.find(detID);
-    if (index != fluxDetToIdx.end()) {
-      wsIdx = index->second;
-    } else { // masked detector in flux, but not in input workspace
-      continue;
-    }
-  }
-
-  // Intersections for sample and background if present
-  this->calculateIntersections(intersections, theta, phi, Qtransform, lowValues[i], highValues[i]);
-
-  // No need to do normalization calculation if there is no intersection
-  if (intersections.empty())
-    continue;
-
-  // Get solid angle for this contribution
-  double solid = protonCharge;
-  // [Task 89]
-  double bkgdSolid = protonChargeBkgd;
-  if (haveSA) {
-    double solid_angle_factor = solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0];
-    //  solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0]
-    solid = solid_angle_factor * protonCharge;
-    // [Task 89]
-    bkgdSolid = solid_angle_factor * protonChargeBkgd;
-  }
-
-  if (m_diffraction) {
-    // -- calculate integrals for the intersection --
-    calcDiffractionIntersectionIntegral(intersections, xValues, yValues, *integrFlux, wsIdx);
-  }
-
-  // Compute final position in HKL
-  // pre-allocate for efficiency and copy non-hkl dim values into place
-  pos.resize(vmdDims + otherValues.size());
-  std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims);
-
-  calcSingleDetectorNorm(intersections, solid, yValues, vmdDims, pos, posNew, signalArray, bkgdSolid,
-                         bkgdSignalArray); // [Task 89] ADD solidBkgd, bkgdYValues, bkgdSignalArray
-
-  prog->report();
-
-  PARALLEL_END_INTERRUPT_REGION
-}
-PARALLEL_CHECK_INTERRUPT_REGION
-if (m_accumulate) {
-  std::transform(signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray(), m_normWS->mutableSignalArray(),
-                 [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
-  // [Task 89] Process background
-  if (m_backgroundWS)
-    std::transform(bkgdSignalArray.cbegin(), bkgdSignalArray.cend(), m_bkgdNormWS->getSignalArray(),
-                   m_bkgdNormWS->mutableSignalArray(),
-                   [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
-
-} else {
-  // First time, init
-  std::copy(signalArray.cbegin(), signalArray.cend(), m_normWS->mutableSignalArray());
-  // [Task 89]
-  if (m_backgroundWS)
-    std::copy(bkgdSignalArray.cbegin(), bkgdSignalArray.cend(), m_bkgdNormWS->mutableSignalArray());
-}
-m_accumulate = true;
-}
-
-/**
- * Calculate the points of intersection for the given detector with cuboid
- * surrounding the detector position in HKL
- * @param intersections A list of intersections in HKL space
- * @param theta Polar angle withd detector
- * @param phi Azimuthal angle with detector
- * @param transform Matrix to convert frm Q_lab to HKL (2Pi*R *UB*W*SO)^{-1}
- * @param lowvalue The lowest momentum or energy transfer for the trajectory
- * @param highvalue The highest momentum or energy transfer for the trajectory
- */
-void MDNorm::calculateIntersections(std::vector<std::array<double, 4>> &intersections, const double theta,
-                                    const double phi, const Kernel::DblMatrix &transform, double lowvalue,
-                                    double highvalue) {
-  V3D qout(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)), qin(0., 0., 1);
-
-  qout = transform * qout;
-  qin = transform * qin;
-  if (convention == "Crystallography") {
-    qout *= -1;
-    qin *= -1;
-  }
-  double kfmin, kfmax, kimin, kimax;
-  if (m_diffraction) {
-    kimin = lowvalue;
-    kimax = highvalue;
-    kfmin = kimin;
-    kfmax = kimax;
-  } else {
-    kimin = std::sqrt(energyToK * m_Ei);
-    kimax = kimin;
-    kfmin = std::sqrt(energyToK * (m_Ei - highvalue));
-    kfmax = std::sqrt(energyToK * (m_Ei - lowvalue));
-  }
-
-  double hStart = qin.X() * kimin - qout.X() * kfmin, hEnd = qin.X() * kimax - qout.X() * kfmax;
-  double kStart = qin.Y() * kimin - qout.Y() * kfmin, kEnd = qin.Y() * kimax - qout.Y() * kfmax;
-  double lStart = qin.Z() * kimin - qout.Z() * kfmin, lEnd = qin.Z() * kimax - qout.Z() * kfmax;
-
-  double eps = 1e-10;
-  auto hNBins = m_hX.size();
-  auto kNBins = m_kX.size();
-  auto lNBins = m_lX.size();
-  auto eNBins = m_eX.size();
-  intersections.clear();
-  intersections.reserve(hNBins + kNBins + lNBins + eNBins + 2);
-
-  // calculate intersections with planes perpendicular to h
-  if (fabs(hStart - hEnd) > eps) {
-    double fmom = (kfmax - kfmin) / (hEnd - hStart);
-    double fk = (kEnd - kStart) / (hEnd - hStart);
-    double fl = (lEnd - lStart) / (hEnd - hStart);
-    for (size_t i = 0; i < hNBins; i++) {
-      double hi = m_hX[i];
-      if (((hStart - hi) * (hEnd - hi) < 0)) {
-        // if hi is between hStart and hEnd, then ki and li will be between
-        // kStart, kEnd and lStart, lEnd and momi will be between kfmin and
-        // kfmax
-        double ki = fk * (hi - hStart) + kStart;
-        double li = fl * (hi - hStart) + lStart;
-        if ((ki >= m_kX[0]) && (ki <= m_kX[kNBins - 1]) && (li >= m_lX[0]) && (li <= m_lX[lNBins - 1])) {
-          double momi = fmom * (hi - hStart) + kfmin;
-          intersections.push_back({{hi, ki, li, momi}});
-        }
-      }
-    }
-  }
-  // calculate intersections with planes perpendicular to k
-  if (fabs(kStart - kEnd) > eps) {
-    double fmom = (kfmax - kfmin) / (kEnd - kStart);
-    double fh = (hEnd - hStart) / (kEnd - kStart);
-    double fl = (lEnd - lStart) / (kEnd - kStart);
-    for (size_t i = 0; i < kNBins; i++) {
-      double ki = m_kX[i];
-      if (((kStart - ki) * (kEnd - ki) < 0)) {
-        // if ki is between kStart and kEnd, then hi and li will be between
-        // hStart, hEnd and lStart, lEnd and momi will be between kfmin and
-        // kfmax
-        double hi = fh * (ki - kStart) + hStart;
-        double li = fl * (ki - kStart) + lStart;
-        if ((hi >= m_hX[0]) && (hi <= m_hX[hNBins - 1]) && (li >= m_lX[0]) && (li <= m_lX[lNBins - 1])) {
-          double momi = fmom * (ki - kStart) + kfmin;
-          intersections.push_back({{hi, ki, li, momi}});
-        }
-      }
-    }
-  }
-
-  // calculate intersections with planes perpendicular to l
-  if (fabs(lStart - lEnd) > eps) {
-    double fmom = (kfmax - kfmin) / (lEnd - lStart);
-    double fh = (hEnd - hStart) / (lEnd - lStart);
-    double fk = (kEnd - kStart) / (lEnd - lStart);
-
-    for (size_t i = 0; i < lNBins; i++) {
-      double li = m_lX[i];
-      if (((lStart - li) * (lEnd - li) < 0)) {
-        double hi = fh * (li - lStart) + hStart;
-        double ki = fk * (li - lStart) + kStart;
-        if ((hi >= m_hX[0]) && (hi <= m_hX[hNBins - 1]) && (ki >= m_kX[0]) && (ki <= m_kX[kNBins - 1])) {
-          double momi = fmom * (li - lStart) + kfmin;
-          intersections.push_back({{hi, ki, li, momi}});
-        }
-      }
-    }
-  }
-  // intersections with dE
-  if (!m_dEIntegrated) {
-    for (size_t i = 0; i < eNBins; i++) {
-      double kfi = m_eX[i];
-      if ((kfi - kfmin) * (kfi - kfmax) <= 0) {
-        double h = qin.X() * kimin - qout.X() * kfi;
-        double k = qin.Y() * kimin - qout.Y() * kfi;
-        double l = qin.Z() * kimin - qout.Z() * kfi;
-        if ((h >= m_hX[0]) && (h <= m_hX[hNBins - 1]) && (k >= m_kX[0]) && (k <= m_kX[kNBins - 1]) && (l >= m_lX[0]) &&
-            (l <= m_lX[lNBins - 1])) {
-          intersections.push_back({{h, k, l, kfi}});
-        }
-      }
-    }
-  }
-
-  // endpoints
-  if ((hStart >= m_hX[0]) && (hStart <= m_hX[hNBins - 1]) && (kStart >= m_kX[0]) && (kStart <= m_kX[kNBins - 1]) &&
-      (lStart >= m_lX[0]) && (lStart <= m_lX[lNBins - 1])) {
-    intersections.push_back({{hStart, kStart, lStart, kfmin}});
-  }
-  if ((hEnd >= m_hX[0]) && (hEnd <= m_hX[hNBins - 1]) && (kEnd >= m_kX[0]) && (kEnd <= m_kX[kNBins - 1]) &&
-      (lEnd >= m_lX[0]) && (lEnd <= m_lX[lNBins - 1])) {
-    intersections.push_back({{hEnd, kEnd, lEnd, kfmax}});
-  }
-
-  // sort intersections by final momentum
-  std::stable_sort(intersections.begin(), intersections.end(), compareMomentum);
-}
-
-/**
- * Linearly interpolate between the points in integrFlux at xValues and save the
- * results in yValues.
- * @param xValues :: X-values at which to interpolate
- * @param integrFlux :: A workspace with the spectra to interpolate
- * @param sp :: A workspace index for a spectrum in integrFlux to interpolate.
- * @param yValues :: A vector to save the results.
- */
-void MDNorm::calcIntegralsForIntersections(const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux,
-                                           size_t sp, std::vector<double> &yValues) {
-  assert(xValues.size() == yValues.size());
-
-  // the x-data from the workspace
-  const auto &xData = integrFlux.x(sp);
-  const double xStart = xData.front();
-  const double xEnd = xData.back();
-
-  // the values in integrFlux are expected to be integrals of a non-negative
-  // function
-  // ie they must make a non-decreasing function
-  const auto &yData = integrFlux.y(sp);
-  size_t spSize = yData.size();
-
-  const double yMin = 0.0;
-  const double yMax = yData.back();
-
-  size_t nData = xValues.size();
-  // all integrals below xStart must be 0
-  if (xValues[nData - 1] < xStart) {
-    std::fill(yValues.begin(), yValues.end(), yMin);
-    return;
-  }
-
-  // all integrals above xEnd must be equal tp yMax
-  if (xValues[0] > xEnd) {
-    std::fill(yValues.begin(), yValues.end(), yMax);
-    return;
-  }
-
-  size_t i = 0;
-  // integrals below xStart must be 0
-  while (i < nData - 1 && xValues[i] < xStart) {
-    yValues[i] = yMin;
-    i++;
-  }
-  size_t j = 0;
-  for (; i < nData; i++) {
-    // integrals above xEnd must be equal tp yMax
-    if (j >= spSize - 1) {
-      yValues[i] = yMax;
-    } else {
-      double xi = xValues[i];
-      while (j < spSize - 1 && xi > xData[j])
-        j++;
-      // if x falls onto an interpolation point return the corresponding y
-      if (xi == xData[j]) {
-        yValues[i] = yData[j];
-      } else if (j == spSize - 1) {
-        // if we get above xEnd it's yMax
-        yValues[i] = yMax;
-      } else if (j > 0) {
-        // interpolate between the consecutive points
-        double x0 = xData[j - 1];
-        double x1 = xData[j];
-        double y0 = yData[j - 1];
-        double y1 = yData[j];
-        yValues[i] = y0 + (y1 - y0) * (xi - x0) / (x1 - x0);
-      } else // j == 0
-      {
-        yValues[i] = yMin;
-      }
-    }
-  }
 }
 
 } // namespace Mantid::MDAlgorithms
