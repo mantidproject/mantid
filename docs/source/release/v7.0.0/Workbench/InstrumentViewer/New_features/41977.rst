@@ -1,0 +1,1 @@
+- In the new Instrument View, picked detectors are now marked in magenta: shapes are given an outline and points a surrounding halo. These markers are drawn at a fixed size on screen, so a selection stays easy to spot even when zoomed out on a large instrument.
