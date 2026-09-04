@@ -54,7 +54,7 @@ std::optional<std::string> validateGroupingProperties(std::unique_ptr<Mantid::AP
     return groupingStrInRange(customString, spectraMin, spectraMax)
                ? std::nullopt
                : std::optional<std::string>("Please supply a custom grouping within the correct range.");
-  } else if (groupingType == "Groups") {
+  } else if (groupingType == "Groups" || groupingType == "ThetaGroups") {
     auto const numberOfSpectra = spectraMax - spectraMin + 1;
     auto const numberOfGroups = std::stoull(properties->getPropertyValue("NGroups"));
     if (numberOfGroups > numberOfSpectra) {

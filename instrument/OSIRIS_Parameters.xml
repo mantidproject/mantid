@@ -121,4 +121,16 @@
 
 </component-link>
 
+<component-link name = "silicon">
+
+<parameter name="Workflow.EdgePixelMaskFile" type="string">
+  <value val="OSIRIS_Si_Edge_Pixels_Mask.xml" />
+</parameter>
+
+<parameter name="Workflow.MinimumCalibrationFactor">
+  <value val="0.5" />
+</parameter>
+
+</component-link>
+
 </parameter-file>

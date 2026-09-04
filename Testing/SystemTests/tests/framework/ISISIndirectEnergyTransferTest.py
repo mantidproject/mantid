@@ -26,3 +26,20 @@ class ISISIndirectEnergyTransferTest(MantidSystemTest):
         self.tolerance = 1e-10
         self.nanEqual = True
         return "tosca5224-glucose", "tosca5224-glucose-ref.nxs"
+
+
+class ISISIndirectEnergyTransferSiliconAnalyserTest(MantidSystemTest):
+    def runTest(self):
+        ISISIndirectEnergyTransfer(
+            InputFiles="OSIRIS00156815.raw",
+            Instrument="OSIRIS",
+            Analyser="silicon",
+            Reflection="111",
+            SpectraRange="1005,2564",
+            OutputWorkspace="OSIRIS00156815_silicon_111_Reduced",
+        )
+
+    def validate(self):
+        self.tolerance = 1e-10
+        self.nanEqual = True
+        return "osiris156815_silicon111_red", "OSIRIS00156815_silicon111_red-ref.nxs"

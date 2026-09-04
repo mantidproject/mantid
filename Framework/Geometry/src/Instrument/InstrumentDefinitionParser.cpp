@@ -65,7 +65,7 @@ Kernel::Logger g_log("InstrumentDefinitionParser");
 InstrumentDefinitionParser::InstrumentDefinitionParser()
     : m_xmlFile(std::make_shared<NullIDFObject>()), m_cacheFile(std::make_shared<NullIDFObject>()), m_pDoc(nullptr),
       m_hasParameterElement_beenSet(false), m_haveDefaultFacing(false), m_deltaOffsets(false), m_angleConvertConst(1.0),
-      m_indirectPositions(false), m_cachingOption(NoneApplied) {
+      m_indirectPositions(false), m_mixedNeutronicPositions(false), m_cachingOption(NoneApplied) {
   initialise("", "", "", "");
 }
 //----------------------------------------------------------------------------------------------
@@ -79,7 +79,7 @@ InstrumentDefinitionParser::InstrumentDefinitionParser(const std::string &filena
                                                        const std::string &xmlText)
     : m_xmlFile(std::make_shared<NullIDFObject>()), m_cacheFile(std::make_shared<NullIDFObject>()), m_pDoc(nullptr),
       m_hasParameterElement_beenSet(false), m_haveDefaultFacing(false), m_deltaOffsets(false), m_angleConvertConst(1.0),
-      m_indirectPositions(false), m_cachingOption(NoneApplied) {
+      m_indirectPositions(false), m_mixedNeutronicPositions(false), m_cachingOption(NoneApplied) {
   initialise(filename, instName, xmlText, "");
 }
 
@@ -96,7 +96,7 @@ InstrumentDefinitionParser::InstrumentDefinitionParser(const IDFObject_const_spt
                                                        const std::string &instName, const std::string &xmlText)
     : m_xmlFile(std::make_shared<NullIDFObject>()), m_cacheFile(std::make_shared<NullIDFObject>()), m_pDoc(nullptr),
       m_hasParameterElement_beenSet(false), m_haveDefaultFacing(false), m_deltaOffsets(false), m_angleConvertConst(1.0),
-      m_indirectPositions(false), m_cachingOption(NoneApplied) {
+      m_indirectPositions(false), m_mixedNeutronicPositions(false), m_cachingOption(NoneApplied) {
   initialise(xmlFile->getFileFullPathStr(), instName, xmlText, expectedCacheFile->getFileFullPathStr());
 
   m_cacheFile = expectedCacheFile;
@@ -1009,6 +1009,15 @@ void InstrumentDefinitionParser::readDefaults(Poco::XML::Element *defaults) {
   // Any neutronic position tags will be ignored if this tag is missing
   if (defaults->getChildElement("indirect-neutronic-positions"))
     m_indirectPositions = true;
+
+  // Check if the IDF requests mixed-mode neutronic positions.
+  // When set, detectors without <neutronic> tags retain their physical
+  // positions instead of being removed from the instrument. This also
+  // implies indirect neutronic positions are enabled.
+  if (defaults->getChildElement("indirect-neutronic-positions-mixed")) {
+    m_indirectPositions = true;
+    m_mixedNeutronicPositions = true;
+  }
 
   /*
   Try to extract the reference frame information.
@@ -2628,10 +2637,14 @@ void InstrumentDefinitionParser::createNeutronicInstrument() {
       }
     } else // We have a null Element*, which signals a detector with no neutronic position
     {
-      // This should only happen for detectors
-      auto *det = dynamic_cast<Detector *>(component.first);
-      if (det)
-        m_instrument->removeDetector(det);
+      // In mixed mode a detector with no neutronic tag keeps its physical position, so an IDF
+      // can give neutronic positions for the analysed detectors alone while diffraction,
+      // graphite and monitor detectors stay where they are. Otherwise it is removed.
+      if (!m_mixedNeutronicPositions) {
+        auto *det = dynamic_cast<Detector *>(component.first);
+        if (det)
+          m_instrument->removeDetector(det);
+      }
     }
   }
 }

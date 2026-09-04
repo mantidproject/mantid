@@ -36,13 +36,14 @@ from mantid.simpleapi import (
     DeleteWorkspace,
     Divide,
     ExponentialCorrection,
+    ExtractSpectra,
     GroupWorkspaces,
     Scale,
     SetInstrumentParameter,
     CalculateFlatBackground,
     ConvertFromDistribution,
     ConvertToDistribution,
-    CropWorkspace,
+    RemoveSpectra,
 )
 from mantid import config
 
@@ -59,6 +60,7 @@ from IndirectReductionCommon import (
     fold_chopped,
     rename_reduction,
     mask_detectors,
+    remove_edge_pixels,
 )
 
 import os
@@ -173,7 +175,9 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self.declareProperty(
             name="GroupingMethod",
             defaultValue="IPF",
-            validator=StringListValidator(["Individual", "All", "File", "Workspace", "IPF", "Custom", "Groups"]),
+            validator=StringListValidator(
+                ["Individual", "All", "File", "Workspace", "IPF", "Custom", "Groups", "Detectors", "ThetaGroups"]
+            ),
             doc="The method used to group detectors.",
         )
         self.declareProperty(
@@ -242,6 +246,9 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             else:
                 workspaces = [c_ws_name]
 
+            for ws_name in workspaces:
+                remove_edge_pixels(ws_name)
+
             # Process rebinning for framed data
             rebin_string_2, num_bins = get_multi_frame_rebin(c_ws_name, self._rebin_string)
 
@@ -284,20 +291,27 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                     )
                     ConvertFromDistribution(Workspace=ws_name)
 
-                # Divide by the calibration workspace if one was provided
                 if self._calibration_ws is not None:
-                    index_min = self._calibration_ws.getIndexFromSpectrumNumber(int(self._spectra_range[0]))
-                    index_max = self._calibration_ws.getIndexFromSpectrumNumber(int(self._spectra_range[1]))
-
-                    CropWorkspace(
+                    calib_spec_nos = frozenset(
+                        self._calibration_ws.getSpectrum(i).getSpectrumNo() for i in range(self._calibration_ws.getNumberHistograms())
+                    )
+                    sample_ws = mtd[ws_name]
+                    missing_indices = [
+                        i for i in range(sample_ws.getNumberHistograms()) if sample_ws.getSpectrum(i).getSpectrumNo() not in calib_spec_nos
+                    ]
+                    if missing_indices:
+                        RemoveSpectra(InputWorkspace=ws_name, OutputWorkspace=ws_name, WorkspaceIndices=missing_indices)
+                    sample_ws = mtd[ws_name]
+                    calib_indices = [
+                        self._calibration_ws.getIndexFromSpectrumNumber(sample_ws.getSpectrum(i).getSpectrumNo())
+                        for i in range(sample_ws.getNumberHistograms())
+                    ]
+                    ExtractSpectra(
                         InputWorkspace=self._calibration_ws,
                         OutputWorkspace="__cropped_calib",
-                        StartWorkspaceIndex=index_min,
-                        EndWorkspaceIndex=index_max,
+                        WorkspaceIndexList=calib_indices,
                     )
-
                     Divide(LHSWorkspace=ws_name, RHSWorkspace="__cropped_calib", OutputWorkspace=ws_name)
-
                     DeleteWorkspace("__cropped_calib")
 
                 # Scale detector data by monitor intensities
@@ -337,6 +351,15 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                     spectra_range=self._spectra_range,
                 )
                 AnalysisDataService.addOrReplace(ws_name, grouped)
+
+                spec_info = mtd[ws_name].spectrumInfo()
+                no_det = [i for i in range(mtd[ws_name].getNumberHistograms()) if not spec_info.hasDetectors(i)]
+                if no_det:
+                    RemoveSpectra(InputWorkspace=ws_name, OutputWorkspace=ws_name, WorkspaceIndices=no_det)
+                    logger.warning(
+                        f"{ws_name}: removed {len(no_det)} grouped spectra with no detector associations "
+                        f"(all contributing pixels were excluded by calibration filtering)"
+                    )
 
             if self._fold_multiple_frames and is_multi_frame:
                 fold_chopped(c_ws_name)

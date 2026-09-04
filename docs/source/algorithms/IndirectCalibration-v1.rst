@@ -17,6 +17,10 @@ algorithm which are then merged into a single run using :ref:`MergeRuns
 <algm-MergeRuns>`, a flat background is then calculated and normalised to give
 the output workspace.
 
+For the OSIRIS silicon analyser, unreliable edge pixels are excluded. Spectra with a calibration factor below the
+instrument-configured minimum relative to the mean non-zero calibration factor are also excluded from the resulting
+workspace (default: 0.5). This ensures that a later energy-transfer or resolution reduction uses the same set of valid pixels.
+
 .. note::
   This algorithm only supports files containing histogram data.
 

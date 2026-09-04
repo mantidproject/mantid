@@ -30,40 +30,6 @@ from IndirectCommon import check_hist_zero
 import os
 
 
-def _count_monitors(raw_file):
-    """
-    Returns the number of monitors and if they're at the start or end of the file
-    """
-
-    raw_file = mtd[raw_file]
-    num_hist = raw_file.getNumberHistograms()
-    mon_count = 1
-
-    spectrumInfo = raw_file.spectrumInfo()
-    if spectrumInfo.isMonitor(0):
-        # Monitors are at the start
-        for i in range(1, num_hist):
-            if spectrumInfo.isMonitor(i):
-                mon_count += 1
-            else:
-                break
-
-        return mon_count, True
-    else:
-        # Monitors are at the end
-        if not spectrumInfo.isMonitor(num_hist):
-            # if it's not, we don't have any monitors!
-            return 0, True
-
-        for i in range(num_hist, 0, -1):
-            if spectrumInfo.isMonitor(i):
-                mon_count += 1
-            else:
-                break
-
-        return mon_count, False
-
-
 # pylint: disable=too-many-instance-attributes
 
 
@@ -166,10 +132,6 @@ class TimeSlice(PythonAlgorithm):
                 # we just use workspace name if we haven't loaded a raw file
                 sliced_ws_name = raw_file.lstrip("__") + self._output_ws_name_suffix
 
-            # Only need to process the calib file once
-            if index == 0 and self._calib_ws is not None:
-                self._process_calib(raw_file)
-
             workflow_prog.report("Transposing Workspace: " + str(i))
             self._process_raw_file(raw_file, sliced_ws_name)
             Transpose(InputWorkspace=sliced_ws_name, OutputWorkspace=sliced_ws_name)
@@ -226,33 +188,46 @@ class TimeSlice(PythonAlgorithm):
 
         return workspace_name
 
-    def _process_calib(self, raw_file):
+    def _divide_by_calibration(self, raw_file):
         """
-        Run the calibration file with the raw file workspace.
-
-        @param raw_file Name of calibration file
+        Divide raw_file by the calibration workspace, matched per spectrum number.
+        Raw spectra whose spectrum numbers are absent from the calibration workspace
+        are divided by 1.0, so they survive and appear as raw integrated counts
+        in the diagnostic output.
         """
+        calib = mtd[self._calib_ws]
 
-        calib_spec_min = int(self._spectra_range[0])
-        calib_spec_max = int(self._spectra_range[1])
+        calib_by_specno = {}
+        for i in range(calib.getNumberHistograms()):
+            calib_by_specno[calib.getSpectrum(i).getSpectrumNo()] = (calib.readY(i)[0], calib.readE(i)[0])
 
-        if calib_spec_max - calib_spec_min > mtd[self._calib_ws].getNumberHistograms():
-            raise IndexError("Number of spectra used is greater than the number of spectra in the calibration file.")
-
-        # Offset cropping range to account for monitors
-        (mon_count, at_start) = _count_monitors(raw_file)
-
-        if at_start:
-            calib_spec_min -= mon_count + 1
-            calib_spec_max -= mon_count + 1
-
-        # Crop the calibration workspace, excluding the monitors
-        CropWorkspace(
-            InputWorkspace=self._calib_ws,
-            OutputWorkspace=self._calib_ws,
-            StartWorkspaceIndex=calib_spec_min,
-            EndWorkspaceIndex=calib_spec_max,
+        raw = mtd[raw_file]
+        raw_x = raw.readX(0)
+        divisor_name = "__timeslice_padded_divisor"
+        Integration(
+            InputWorkspace=raw_file,
+            OutputWorkspace=divisor_name,
+            RangeLower=raw_x[0],
+            RangeUpper=raw_x[-1],
         )
+        divisor = mtd[divisor_name]
+
+        unmatched = 0
+        for i in range(divisor.getNumberHistograms()):
+            spec_no = divisor.getSpectrum(i).getSpectrumNo()
+            if spec_no in calib_by_specno:
+                match_y, match_e = calib_by_specno[spec_no]
+            else:
+                match_y, match_e = 1.0, 0.0
+                unmatched += 1
+            divisor.dataY(i)[0] = match_y
+            divisor.dataE(i)[0] = match_e
+
+        if unmatched:
+            logger.notice(f"TimeSlice: {unmatched} raw spectra had no calibration entry; using factor 1.0 for those")
+
+        Divide(LHSWorkspace=raw_file, RHSWorkspace=divisor_name, OutputWorkspace=raw_file)
+        DeleteWorkspace(divisor_name)
 
     def _process_raw_file(self, curr_name, sliced_ws_name):
         """
@@ -273,7 +248,7 @@ class TimeSlice(PythonAlgorithm):
 
         # Use calibration file if desired
         if self._calib_ws is not None:
-            Divide(LHSWorkspace=curr_name, RHSWorkspace=self._calib_ws, OutputWorkspace=curr_name)
+            self._divide_by_calibration(curr_name)
 
         if self._background_range is None:
             Integration(

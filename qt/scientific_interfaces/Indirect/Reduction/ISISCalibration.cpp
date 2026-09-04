@@ -16,6 +16,7 @@
 #include <QFileInfo>
 #include <QRegularExpression>
 #include <QRegularExpressionValidator>
+#include <optional>
 #include <stdexcept>
 
 using namespace Mantid::API;
@@ -34,6 +35,15 @@ Value getValueOr(const Map &map, const Key &key, const Value &defaultValue) {
   } catch (std::out_of_range &) {
     return defaultValue;
   }
+}
+
+std::optional<std::pair<double, double>> getInstrumentTofRange(QMap<QString, QString> const &instrumentDetails,
+                                                               QString const &startKey, QString const &endKey) {
+  auto const start = instrumentDetails.value(startKey);
+  auto const end = instrumentDetails.value(endKey);
+  if (start.isEmpty() || end.isEmpty())
+    return std::nullopt;
+  return std::make_pair(start.toDouble(), end.toDouble());
 }
 
 } // namespace
@@ -269,12 +279,12 @@ void ISISCalibration::setRangeLimits(MantidWidgets::RangeSelector *rangeSelector
 
 void ISISCalibration::setPeakRangeLimits(const double &peakMin, const double &peakMax) {
   auto calibrationPeak = m_uiForm.ppCalibration->getRangeSelector("CalPeak");
-  setRangeLimits(calibrationPeak, peakMin, peakMax, "CalELow", "CalEHigh");
+  setRangeLimits(calibrationPeak, peakMin, peakMax, "CalPeakMin", "CalPeakMax");
 }
 
 void ISISCalibration::setBackgroundRangeLimits(const double &backgroundMin, const double &backgroundMax) {
   auto background = m_uiForm.ppCalibration->getRangeSelector("CalBackground");
-  setRangeLimits(background, backgroundMin, backgroundMax, "CalStart", "CalEnd");
+  setRangeLimits(background, backgroundMin, backgroundMax, "CalBackMin", "CalBackMax");
 }
 
 void ISISCalibration::setResolutionSpectraRange(const double &minimum, const double &maximum) {
@@ -324,7 +334,9 @@ void ISISCalibration::handleRun() {
   // Configure the resolution algorithm
   if (m_uiForm.ckCreateResolution->isChecked()) {
     m_outputResolutionName = m_outputNamePrefix + "_res";
-    m_batchAlgoRunner->addAlgorithm(resolutionAlgorithm(filenames));
+    auto resAlgInputProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
+    resAlgInputProps->setPropertyValue("CalibrationWorkspace", m_outputCalibrationName.toStdString());
+    m_batchAlgoRunner->addAlgorithm(resolutionAlgorithm(filenames), std::move(resAlgInputProps));
 
     if (m_uiForm.ckSmoothResolution->isChecked())
       addRuntimeSmoothing(m_outputResolutionName);
@@ -417,25 +429,40 @@ void ISISCalibration::calPlotRaw(const std::string &inputName) {
   setBackgroundRangeLimits(dataX.front(), dataX.back());
 
   // Set peak and background ranges
-  const auto ranges = getRangesFromInstrument();
+  auto const instrumentDetails = getInstrumentDetails();
+  auto const idfPeakRange = getInstrumentTofRange(instrumentDetails, "peak-start", "peak-end");
+  auto const idfBackgroundRange = getInstrumentTofRange(instrumentDetails, "back-start", "back-end");
+  auto const fitsInData = [&](std::pair<double, double> const &range) {
+    return range.first >= dataX.front() && range.second <= dataX.back();
+  };
+
+  auto const isSiliconAnalyser = instrumentDetails.value("analyser") == "silicon";
+  auto const useIdfRanges = isSiliconAnalyser && idfPeakRange && idfBackgroundRange && fitsInData(*idfPeakRange) &&
+                            fitsInData(*idfBackgroundRange);
 
   disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ISISCalibration::calUpdateRS);
   disconnectRangeSelectors();
-  if (dataX.back() <= getValueOr(ranges, "peak-end-tof", 0.0) ||
-      dataX.front() >= getValueOr(ranges, "peak-start-tof", 0.0)) {
-    // Sets peak beginning/end within start/end 25% of the dataX range and background range within the first 12.5% of
-    // dataX range.
-    setPeakRange(dataX.front() + (dataX.back() - dataX.front()) * PEAK_QUARTILE,
-                 (dataX.back() - (dataX.back() - dataX.front()) * PEAK_QUARTILE));
-    setBackgroundRange(dataX.front(), dataX.front() + (dataX.back() - dataX.front()) * BCKGRND_PERCENTILE);
+  if (useIdfRanges) {
+    setPeakRange(idfPeakRange->first, idfPeakRange->second);
+    setBackgroundRange(idfBackgroundRange->first, idfBackgroundRange->second);
   } else {
-    setPeakRange(getValueOr(ranges, "peak-start-tof", 0.0), getValueOr(ranges, "peak-end-tof", 0.0));
-    setBackgroundRange(getValueOr(ranges, "back-start-tof", 0.0), getValueOr(ranges, "back-end-tof", 0.0));
+    const auto ranges = getRangesFromInstrument();
+    if (dataX.back() <= getValueOr(ranges, "peak-end-tof", 0.0) ||
+        dataX.front() >= getValueOr(ranges, "peak-start-tof", 0.0)) {
+      // Sets peak beginning/end within start/end 25% of the dataX range and background range within the first 12.5% of
+      // dataX range.
+      setPeakRange(dataX.front() + (dataX.back() - dataX.front()) * PEAK_QUARTILE,
+                   (dataX.back() - (dataX.back() - dataX.front()) * PEAK_QUARTILE));
+      setBackgroundRange(dataX.front(), dataX.front() + (dataX.back() - dataX.front()) * BCKGRND_PERCENTILE);
+    } else {
+      setPeakRange(getValueOr(ranges, "peak-start-tof", 0.0), getValueOr(ranges, "peak-end-tof", 0.0));
+      setBackgroundRange(getValueOr(ranges, "back-start-tof", 0.0), getValueOr(ranges, "back-end-tof", 0.0));
+    }
   }
 
   m_uiForm.ppCalibration->replot();
 
-  auto const hasResolution = hasInstrumentDetail(getInstrumentDetails(), "resolution");
+  auto const hasResolution = hasInstrumentDetail(instrumentDetails, "resolution");
   m_uiForm.ckCreateResolution->setEnabled(hasResolution);
   if (!hasResolution)
     m_uiForm.ckCreateResolution->setChecked(false);
@@ -541,6 +568,11 @@ void ISISCalibration::calSetDefaultResolution(const MatrixWorkspace_const_sptr &
       std::pair<double, double> backgroundERange(-res * minScaleFactor + offset, -res * maxScaleFactor + offset);
       auto resBackground = m_uiForm.ppResolution->getRangeSelector("ResBackground");
       setRangeSelector(resBackground, m_properties["ResStart"], m_properties["ResEnd"], backgroundERange);
+
+      auto widthParams = comp->getNumberParameter("resolution-rebin-width", true);
+      if (!widthParams.empty()) {
+        m_dblManager->setValue(m_properties["ResEWidth"], widthParams[0]);
+      }
     }
   }
 }
@@ -619,9 +651,9 @@ void ISISCalibration::calUpdateRS(QtProperty *prop, double val) {
   } else if (prop == m_properties["CalPeakMax"]) {
     setRangeSelectorMax(m_properties["CalPeakMin"], m_properties["CalPeakMax"], calPeak, val);
   } else if (prop == m_properties["CalBackMin"]) {
-    setRangeSelectorMin(m_properties["CalPeakMin"], m_properties["CalBackMax"], calBackground, val);
+    setRangeSelectorMin(m_properties["CalBackMin"], m_properties["CalBackMax"], calBackground, val);
   } else if (prop == m_properties["CalBackMax"]) {
-    setRangeSelectorMax(m_properties["CalPeakMin"], m_properties["CalBackMax"], calBackground, val);
+    setRangeSelectorMax(m_properties["CalBackMin"], m_properties["CalBackMax"], calBackground, val);
   } else if (prop == m_properties["ResStart"]) {
     setRangeSelectorMin(m_properties["ResStart"], m_properties["ResEnd"], resBackground, val);
   } else if (prop == m_properties["ResEnd"]) {
@@ -738,6 +770,8 @@ IAlgorithm_sptr ISISCalibration::energyTransferReductionAlgorithm(const QString 
   reductionAlg->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
   reductionAlg->setProperty("OutputWorkspace", CALIBRATION_OUTPUT);
   reductionAlg->setProperty("SpectraRange", resolutionDetectorRangeString().toStdString());
+  // Group all spectra into one to reduce the runtime of the energy transfer reduction used for calibration plotting.
+  reductionAlg->setProperty("GroupingMethod", "All");
   reductionAlg->setProperty("LoadLogFiles", m_uiForm.ckLoadLogFiles->isChecked());
   return reductionAlg;
 }
