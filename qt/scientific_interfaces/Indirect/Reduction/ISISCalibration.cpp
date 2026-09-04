@@ -39,9 +39,11 @@ Value getValueOr(const Map &map, const Key &key, const Value &defaultValue) {
 
 std::optional<std::pair<double, double>> getInstrumentTofRange(QMap<QString, QString> const &instrumentDetails,
                                                                QString const &startKey, QString const &endKey) {
-  if (!instrumentDetails.contains(startKey) || !instrumentDetails.contains(endKey))
+  auto const start = instrumentDetails.value(startKey);
+  auto const end = instrumentDetails.value(endKey);
+  if (start.isEmpty() || end.isEmpty())
     return std::nullopt;
-  return std::make_pair(instrumentDetails.value(startKey).toDouble(), instrumentDetails.value(endKey).toDouble());
+  return std::make_pair(start.toDouble(), end.toDouble());
 }
 
 } // namespace
@@ -427,31 +429,35 @@ void ISISCalibration::calPlotRaw(const std::string &inputName) {
   setBackgroundRangeLimits(dataX.front(), dataX.back());
 
   // Set peak and background ranges
-  const auto ranges = getRangesFromInstrument();
   auto const instrumentDetails = getInstrumentDetails();
   auto const idfPeakRange = getInstrumentTofRange(instrumentDetails, "peak-start", "peak-end");
   auto const idfBackgroundRange = getInstrumentTofRange(instrumentDetails, "back-start", "back-end");
   auto const fitsInData = [&](std::pair<double, double> const &range) {
     return range.first >= dataX.front() && range.second <= dataX.back();
   };
-  auto const useIdfRanges =
-      idfPeakRange && idfBackgroundRange && fitsInData(*idfPeakRange) && fitsInData(*idfBackgroundRange);
+
+  auto const isSiliconAnalyser = instrumentDetails.value("analyser") == "silicon";
+  auto const useIdfRanges = isSiliconAnalyser && idfPeakRange && idfBackgroundRange && fitsInData(*idfPeakRange) &&
+                            fitsInData(*idfBackgroundRange);
 
   disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ISISCalibration::calUpdateRS);
   disconnectRangeSelectors();
   if (useIdfRanges) {
     setPeakRange(idfPeakRange->first, idfPeakRange->second);
     setBackgroundRange(idfBackgroundRange->first, idfBackgroundRange->second);
-  } else if (dataX.back() <= getValueOr(ranges, "peak-end-tof", 0.0) ||
-             dataX.front() >= getValueOr(ranges, "peak-start-tof", 0.0)) {
-    // Sets peak beginning/end within start/end 25% of the dataX range and background range within the first 12.5% of
-    // dataX range.
-    setPeakRange(dataX.front() + (dataX.back() - dataX.front()) * PEAK_QUARTILE,
-                 (dataX.back() - (dataX.back() - dataX.front()) * PEAK_QUARTILE));
-    setBackgroundRange(dataX.front(), dataX.front() + (dataX.back() - dataX.front()) * BCKGRND_PERCENTILE);
   } else {
-    setPeakRange(getValueOr(ranges, "peak-start-tof", 0.0), getValueOr(ranges, "peak-end-tof", 0.0));
-    setBackgroundRange(getValueOr(ranges, "back-start-tof", 0.0), getValueOr(ranges, "back-end-tof", 0.0));
+    const auto ranges = getRangesFromInstrument();
+    if (dataX.back() <= getValueOr(ranges, "peak-end-tof", 0.0) ||
+        dataX.front() >= getValueOr(ranges, "peak-start-tof", 0.0)) {
+      // Sets peak beginning/end within start/end 25% of the dataX range and background range within the first 12.5% of
+      // dataX range.
+      setPeakRange(dataX.front() + (dataX.back() - dataX.front()) * PEAK_QUARTILE,
+                   (dataX.back() - (dataX.back() - dataX.front()) * PEAK_QUARTILE));
+      setBackgroundRange(dataX.front(), dataX.front() + (dataX.back() - dataX.front()) * BCKGRND_PERCENTILE);
+    } else {
+      setPeakRange(getValueOr(ranges, "peak-start-tof", 0.0), getValueOr(ranges, "peak-end-tof", 0.0));
+      setBackgroundRange(getValueOr(ranges, "back-start-tof", 0.0), getValueOr(ranges, "back-end-tof", 0.0));
+    }
   }
 
   m_uiForm.ppCalibration->replot();
