@@ -9,7 +9,11 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ILiveListener.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidLiveData/DllConfig.h"
+
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace LiveData {
@@ -27,6 +31,12 @@ public:
   const std::string category() const override;
 
   void copyPropertyValuesFrom(const LiveDataAlgorithm &other);
+
+  /// The facility that 'Instrument' is resolved against: 'Facility' if given, else the Mantid default.
+  const Kernel::FacilityInfo &facility() const;
+
+  /// Instrument names, in `facility()`, that have a live listener configured.
+  std::vector<std::string> liveListenerInstruments() const;
 
   Mantid::API::ILiveListener_sptr getLiveListener(bool start = true);
   Mantid::API::ILiveListener_sptr createLiveListener(bool connect = false);

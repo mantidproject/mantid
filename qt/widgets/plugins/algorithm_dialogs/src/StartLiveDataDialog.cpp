@@ -13,8 +13,10 @@
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/LiveListenerInfo.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Common/PropertyWidgetFactory.h"
@@ -30,6 +32,8 @@ using Mantid::Kernel::ConfigService;
 using Mantid::Types::Core::DateAndTime;
 
 namespace {
+Mantid::Kernel::Logger g_log("StartLiveDataDialog");
+
 class LiveDataAlgInputHistoryImpl : public AbstractAlgorithmInputHistory {
 private:
   LiveDataAlgInputHistoryImpl() : AbstractAlgorithmInputHistory("LiveDataAlgorithms") {}
@@ -105,7 +109,10 @@ void StartLiveDataDialog::initLayout() {
   ui.postAlgo->setInputHistory(history2);
 
   // ========== Set previous values from history =============
-  fillAndSetComboBox("Instrument", ui.cmbInstrument);
+  // 'Instrument' no longer carries a list validator -- which instruments are valid depends on the
+  //   facility, which is itself a property -- so `fillAndSetComboBox` has nothing to offer here.
+  //   Populate the box from the algorithm's own view of its facility instead.
+  fillInstrumentComboBox();
   tie(ui.edtUpdateEvery, "UpdateEvery", ui.layoutUpdateEvery);
   fillAndSetComboBox("AccumulationMethod", ui.cmbAccumulationMethod);
 
@@ -442,6 +449,42 @@ void StartLiveDataDialog::initListenerPropLayout(const QString &listener) {
       tie(propWidget, propName, gridLayout);
     }
     ui.listenerProps->setVisible(true);
+  }
+}
+
+/**
+ * Fill the instrument combo box with the instruments that have a live listener in the algorithm's
+ * facility, and restore the previously used value if it is still one of them.
+ */
+void StartLiveDataDialog::fillInstrumentComboBox() {
+  ui.cmbInstrument->clear();
+
+  // The dialog offers the *default* facility's instruments; it has no facility selector of its own,
+  //   so it leaves the algorithm's 'Facility' property unset.  Selecting an instrument from another
+  //   facility is possible from a script, by naming 'Facility'.
+  std::vector<std::string> instruments;
+  try {
+    const auto &facility = ConfigService::Instance().getFacility();
+    for (const auto &instrument : facility.instruments()) {
+      if (instrument.hasLiveListenerInfo()) {
+        instruments.emplace_back(instrument.name());
+      }
+    }
+  } catch (const std::runtime_error &e) {
+    // A default facility Mantid cannot resolve should not stop the dialog from opening.
+    g_log.warning() << "Cannot list live-data instruments: " << e.what() << "\n";
+    return;
+  }
+  std::sort(instruments.begin(), instruments.end());
+
+  for (const auto &instrument : instruments) {
+    ui.cmbInstrument->addItem(QString::fromStdString(instrument));
+  }
+
+  const auto previous = AlgorithmInputHistory::Instance().previousInput("StartLiveData", "Instrument");
+  const auto index = ui.cmbInstrument->findText(previous);
+  if (index >= 0) {
+    ui.cmbInstrument->setCurrentIndex(index);
   }
 }
 

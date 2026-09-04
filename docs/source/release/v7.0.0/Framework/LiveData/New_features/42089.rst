@@ -1,0 +1,4 @@
+- The live-data algorithms gain an optional ``Facility`` property, naming the facility that
+  ``Instrument`` is resolved against. The Mantid default facility is used when it is not set. An
+  instrument name is only meaningful with respect to a facility, so the two are now validated together,
+  and a mismatch is reported against the offending property rather than raising an exception.
