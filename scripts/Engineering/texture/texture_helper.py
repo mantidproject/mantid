@@ -416,7 +416,7 @@ def plot_pole_figure(
     ws = _retrieve_ws_object(ws)
     pfi = get_pole_figure_data(ws, projection, readout_col)
 
-    debug_info = get_debug_info(ws) if display_debug_info else None
+    debug_info = get_debug_info(ws, readout_col) if display_debug_info else None
 
     if plot_exp:
         suffix = "scatter"
@@ -555,7 +555,7 @@ def plot_contour_pf(
     grid_z[~mask] = np.nan
 
     # Plotting
-    fig = plt.figure() if not fig else fig
+    fig = plt.figure(layout="constrained") if not fig else fig
     gs = fig.add_gridspec(
         1,
         3,
@@ -585,13 +585,18 @@ def plot_contour_pf(
     return fig, ax
 
 
-def get_debug_info(ws: TableWorkspace) -> Sequence[str]:
+def get_debug_info(ws: TableWorkspace, readout_col: Optional[str] = None) -> Sequence[str]:
     """
     Format the rows of the Pole Figure Table as labels for points in the plot
+
+    readout_col: if given, rows whose readout value is non-finite are skipped so the labels stay
+                 aligned with the plotted points (get_pole_figure_data drops those same rows)
     """
     debug_info = []
     for i in range(ws.rowCount()):
         row_dict = ws.row(i)
+        if readout_col is not None and not np.isfinite(row_dict[readout_col]):
+            continue
         debug_info.append(", ".join([f"{k}: {v}" for k, v in row_dict.items()]))
     return debug_info
 

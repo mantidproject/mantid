@@ -391,7 +391,7 @@ class TestHelperPoleFigurePlots(BaseTextureTestClass):
 
         plot_pole_figure("ws", "stereographic", plot_exp=True, save_dirs=None, fig=None, readout_col="I")
 
-        mock_get_debug.assert_called_once_with(ws_obj)
+        mock_get_debug.assert_called_once_with(ws_obj, "I")
         mock_plot_exp.assert_called_once_with(test_pfi, ("Dir1", "Dir2"), "I", None, ["row0", "row1"])
 
     @patch(texture_utils_path + "._retrieve_ws_object")
@@ -468,6 +468,21 @@ class TestDebugInfo(unittest.TestCase):
         self.assertEqual(len(labels), 2)
         self.assertEqual("Alpha: 1.0, Beta: 2.0, I: 1.0", labels[0])
         self.assertEqual("Alpha: 1.0, Beta: 0.0, I: 2.0", labels[1])
+
+    def test_get_debug_info_skips_non_finite_readout_rows_to_stay_aligned_with_plotted_points(self):
+        # get_pole_figure_data drops rows with a non-finite readout value; the labels must drop the
+        # same rows or they shift out of alignment with the plotted points and their colours
+        ws = MockTable(
+            [
+                {"Alpha": 1.0, "Beta": 2.0, "X0": 1.5},
+                {"Alpha": 1.0, "Beta": 0.0, "X0": np.nan},
+                {"Alpha": 0.5, "Beta": 1.0, "X0": 1.7},
+            ]
+        )
+        labels = get_debug_info(ws, "X0")
+        self.assertEqual(len(labels), 2)
+        self.assertEqual("Alpha: 1.0, Beta: 2.0, X0: 1.5", labels[0])
+        self.assertEqual("Alpha: 0.5, Beta: 1.0, X0: 1.7", labels[1])
 
 
 class TestSaveTextureWsAscii(unittest.TestCase):

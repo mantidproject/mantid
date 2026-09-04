@@ -1,6 +1,6 @@
 # Texture Util tests
 
-set(TEST_PY_FILES test_io.py test_correction_utils.py test_focus_utils.py test_fitting_utils.py
+set(TEST_PY_FILES test_io.py test_correction_utils.py test_focus_utils.py test_fitting_utils.py test_fitpeaks_engine.py
                   test_polefigure_utils.py
 )
 
