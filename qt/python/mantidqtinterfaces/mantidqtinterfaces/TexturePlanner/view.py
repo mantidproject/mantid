@@ -15,6 +15,7 @@ from qtpy.QtWidgets import (
     QToolBar,
     QGroupBox,
     QLineEdit,
+    QSizePolicy,
 )
 from qtpy import QtCore
 from qtpy.QtGui import QCloseEvent
@@ -70,7 +71,10 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     # algorithm worker thread) to hop back onto the GUI thread before touching workspaces/plots
     sig_material_set = QtCore.Signal()
 
-    def __init__(self, parent=None, presenter=None):
+    def __init__(self, parent=None, presenter=None, register_usage: bool = True):
+        """:param register_usage: whether to count this window as a use of the interface. False for
+        the throwaway copy the tutorial drives, which is Mantid opening the interface rather than
+        the user, and would otherwise double every real launch in the usage figures."""
         super().__init__(parent)
         self.setupUi(self)
         self.presenter = presenter
@@ -157,21 +161,42 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.make_box_toggleable(self.grpOrientationFile)  # finder widget has some hidden features that toggling messes with
         self.make_box_toggleable(self.grpGaugeVol, self.set_gauge_vol_visible)
 
-        self._setup_settings_toolbar()
+        self._setup_bottom_toolbar()
 
         # register startup
-        UsageService.registerFeatureUsage(FeatureType.Interface, "TexturePlanner", False)
+        if register_usage:
+            UsageService.registerFeatureUsage(FeatureType.Interface, "TexturePlanner", False)
 
-    def _setup_settings_toolbar(self) -> None:
-        toolbar = QToolBar("Main Toolbar", self)
+    def _setup_bottom_toolbar(self) -> None:
+        # kept as an attribute rather than a local so the tutorial can point at the toolbar itself
+        self.toolbar = QToolBar("Main Toolbar", self)
         self.btn_settings = QPushButton()
         self.btn_settings.setIcon(get_icon("mdi.settings", "black", 1.2))
         self.btn_settings.setToolTip("Settings")
-        toolbar.addWidget(self.btn_settings)
-        self.addToolBar(QtCore.Qt.BottomToolBarArea, toolbar)
+        self.toolbar.addWidget(self.btn_settings)
+
+        # an expanding blank widget is how a QToolBar is split into a left and a right group; it
+        # has no actions of its own for aligning what comes after it
+        spacer = QWidget()
+        spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self.toolbar.addWidget(spacer)
+
+        self.btn_tutorial = QPushButton()
+        self.btn_tutorial.setIcon(get_icon("mdi.school", "black", 1.2))
+        self.btn_tutorial.setToolTip("Guided tutorial")
+        # the action, not the button, is what controls visibility here: a toolbar re-shows the
+        # widget of any visible action, so hiding the button alone does not stick
+        self._tutorial_action = self.toolbar.addWidget(self.btn_tutorial)
+        self.addToolBar(QtCore.Qt.BottomToolBarArea, self.toolbar)
 
     def set_on_settings_clicked(self, slot: Callable) -> None:
         self.btn_settings.clicked.connect(slot)
+
+    def set_on_tutorial_clicked(self, slot: Callable) -> None:
+        self.btn_tutorial.clicked.connect(slot)
+
+    def set_tutorial_button_visible(self, visible: bool) -> None:
+        self._tutorial_action.setVisible(visible)
 
     def set_on_close(self, slot: Callable) -> None:
         self._on_close = slot

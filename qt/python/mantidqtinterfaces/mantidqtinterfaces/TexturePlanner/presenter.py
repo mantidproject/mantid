@@ -6,9 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import annotations
 from typing import TYPE_CHECKING, List, Tuple
+from qtpy.QtCore import QTimer
+
 from mantid.api import AlgorithmObserver
 from mantidqt.interfacemanager import InterfaceManager
+from mantidqt.widgets.tutorial.launcher import run_tutorial, should_show_on_startup
 
+from mantidqtinterfaces.TexturePlanner.tutorial.chapters import CHAPTERS
 from mantidqtinterfaces.TexturePlanner.settings.settings_view import TexturePlannerSettingsView
 from mantidqtinterfaces.TexturePlanner.settings.settings_presenter import TexturePlannerSettingsPresenter
 from mantidqtinterfaces.TexturePlanner.helpers.instrument import CUSTOM_GROUP
@@ -27,9 +31,19 @@ if TYPE_CHECKING:
     from mantidqtinterfaces.TexturePlanner.view import TexturePlannerView
     from numpy import ndarray
 
+# Settings key the tutorial's "already shown once" flag is stored under, beside this interface's
+# other settings.
+TUTORIAL_SETTINGS_KEY = "TexturePlanner"
+
+# Title of the tutorial window, which frames a throwaway copy of this interface.
+TUTORIAL_WINDOW_TITLE = "Texture Planner — Tutorial"
+
 
 class TexturePlannerPresenter(AlgorithmObserver):
-    def __init__(self, model: TexturePlannerModel, view: TexturePlannerView):
+    def __init__(self, model: TexturePlannerModel, view: TexturePlannerView, offer_tutorial: bool = True):
+        """:param offer_tutorial: whether this planner may show the guided tutorial on a first ever
+        open, and offer it from the toolbar. False for the throwaway planner the tutorial itself
+        drives, which must not offer a tutorial inside a tutorial."""
         super().__init__()
         self.model = model
         self.view = view
@@ -43,6 +57,17 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.settings_presenter.set_on_settings_applied(self.on_settings_applied)
         self.view.set_on_settings_clicked(self.open_settings)
         self.view.set_on_close(self.on_close)
+        self._offer_tutorial = offer_tutorial
+        # kept alive for as long as the tour runs: the session owns the sandbox planner it drives
+        self._tutorial_session = None
+        # set once this planner has been closed, so the deferred first-open offer below becomes a
+        # no-op rather than building a tour for a window that has already gone
+        self._closed = False
+        if offer_tutorial:
+            self.view.set_on_tutorial_clicked(self._on_tutorial_clicked)
+        else:
+            # the tutorial's own planner: the button would start a tutorial inside the tutorial
+            self.view.set_tutorial_button_visible(False)
 
         self.set_instrument_options()
         self.set_view_with_default_texture_directions()
@@ -106,12 +131,76 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.refresh_update_instrument_enabled()
         self.update_material_display()
 
+        self._offer_tutorial_on_first_open()
+
     def on_close(self) -> None:
+        self._closed = True
+        # the tutorial drives a second planner of its own; closing this one must take that with it,
+        # or its window would be left behind with nothing to return to
+        if self._tutorial_session is not None:
+            self._tutorial_session.close()
         # remove this instance's workspaces from the ADS so they don't linger after the window closes
         self.model.workspaces.cleanup()
 
     def open_settings(self) -> None:
         self.settings_presenter.show()
+
+    # ----------------------------------------------------------------------------------
+    # Guided tutorial. The tour runs against a separate, throwaway planner (see
+    # TexturePlanner/tutorial/sandbox.py) so it can load a sample, add orientations and
+    # export a file without any of it reaching the window the user is working in.
+    # ----------------------------------------------------------------------------------
+
+    def _on_tutorial_clicked(self) -> None:
+        """Open the tutorial because the user asked for it.
+
+        Not ``open_tutorial`` connected directly: ``clicked`` carries a bool, which would land in
+        ``mark_as_seen`` - and asking for the tutorial must not change whether it appears by itself
+        on a first open.
+        """
+        self.open_tutorial()
+
+    def open_tutorial(self, mark_as_seen: bool = False) -> None:
+        # imported here rather than at module scope: the sandbox builds a presenter, so importing
+        # it from the presenter's own module would be a cycle
+        from mantidqtinterfaces.TexturePlanner.tutorial.sandbox import make_sandbox_factory
+
+        if self._closed:
+            # the first-open offer is deferred to the event loop, so it can still arrive after the
+            # planner it belongs to has been closed. There is nothing left to open a tour over.
+            return
+        if self._tutorial_session is not None:
+            # already running: bring it forward rather than starting a second one. The shell is
+            # what has to be raised - the interface it frames is a child widget of it, and raising
+            # a child does nothing to the window it is in
+            shell = self._tutorial_session.shell
+            if shell is not None:
+                shell.raise_()
+                shell.activateWindow()
+            return
+        self._tutorial_session = run_tutorial(
+            sandbox_factory=make_sandbox_factory(parent=self.view),
+            chapters=CHAPTERS,
+            parent=self.view,
+            settings_key=TUTORIAL_SETTINGS_KEY,
+            mark_as_seen=mark_as_seen,
+            title=TUTORIAL_WINDOW_TITLE,
+        )
+        self._tutorial_session.finished.connect(self._on_tutorial_finished)
+
+    def _on_tutorial_finished(self) -> None:
+        self._tutorial_session = None
+
+    def _offer_tutorial_on_first_open(self) -> None:
+        """Show the tutorial the first time this interface is ever opened.
+
+        Deferred to the event loop rather than run here: this is still the presenter's constructor,
+        so the window it would appear over has not been shown or laid out yet, and the tutorial
+        would have nothing to position itself against.
+        """
+        if not self._offer_tutorial or not should_show_on_startup(TUTORIAL_SETTINGS_KEY):
+            return
+        QTimer.singleShot(0, lambda: self.open_tutorial(mark_as_seen=True))
 
     def set_view_texture_directions(self, names: Tuple[str, str, str], vecs: FlatArrayTuple | ndarray) -> None:
         self.view.set_rd_name(names[0])
