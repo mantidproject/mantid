@@ -40,10 +40,7 @@ bool isOsirisSiliconAnalyserRun(const std::string &instrumentName, const specnum
 /// Maps each spectrum to the detector whose ID equals its spectrum number ovew
 SpectrumDetectorMapping createIdfDetectorMapping(const Geometry::Instrument_const_sptr &instrument) {
   const auto detectorIDs = instrument->getDetectorIDs(false);
-  std::vector<specnum_t> spectrumNumbers;
-  spectrumNumbers.reserve(detectorIDs.size());
-  for (const auto detID : detectorIDs)
-    spectrumNumbers.emplace_back(static_cast<specnum_t>(detID));
+  const std::vector<specnum_t> spectrumNumbers(detectorIDs.cbegin(), detectorIDs.cend());
   return SpectrumDetectorMapping(spectrumNumbers, detectorIDs);
 }
 } // namespace

@@ -1345,19 +1345,29 @@ def mask_detectors(workspace, masked_indices):
     mask_detectors_alg.execute()
 
 
+def _silicon_detector_ids(workspace):
+    """Detector IDs of the OSIRIS silicon analyser banks, read from the IDF. Empty for other instruments."""
+    component_info = workspace.componentInfo()
+    if not component_info.uniqueName("silicon"):
+        return np.empty(0, dtype=int)
+    return workspace.detectorInfo().detectorIDs()[component_info.detectorsInSubtree(component_info.indexOfAny("silicon"))]
+
+
 def remove_edge_pixels(workspace):
     """
     Loads the mask file referenced by 'Workflow.EdgePixelMaskFile' from the silicon
     component of the workspace's instrument and physically removes those spectra.
-    This is a no-op for non-silicon analysers (when the parameter is absent).
+
+    A no-op unless the workspace holds silicon analyser spectra, so graphite runs on the same
+    instrument - which still have a silicon component in their IDF - are left untouched.
 
     :param workspace:   The name of a workspace in the ADS.
     """
     ws = mtd[workspace]
-    component = ws.getInstrument().getComponentByName("silicon")
-    if component is None:
+    if not _silicon_spectrum_indices(ws):
         return
-    values = component.getStringParameter("Workflow.EdgePixelMaskFile")
+    component = ws.getInstrument().getComponentByName("silicon")
+    values = component.getStringParameter("Workflow.EdgePixelMaskFile") if component is not None else []
     if not values:
         return
     mask_ws_name = "__edge_pixel_mask"
@@ -1370,7 +1380,7 @@ def remove_edge_pixels(workspace):
         for detid in mask_ws.getSpectrum(i).getDetectorIDs()
     )
     DeleteWorkspace(mask_ws_name)
-    indices_to_remove = [i for i in range(ws.getNumberHistograms()) if ws.getSpectrum(i).getSpectrumNo() in masked_det_ids]
+    indices_to_remove = [i for i in range(ws.getNumberHistograms()) if not masked_det_ids.isdisjoint(ws.getSpectrum(i).getDetectorIDs())]
     if indices_to_remove:
         RemoveSpectra(InputWorkspace=workspace, OutputWorkspace=workspace, WorkspaceIndices=indices_to_remove)
 
@@ -1394,7 +1404,10 @@ def get_minimum_calibration_factor(workspace):
 
 def _silicon_spectrum_indices(workspace):
     """Returns workspace indices for the OSIRIS silicon spectra defined by the IDF."""
-    return [i for i in range(workspace.getNumberHistograms()) if 1005 <= workspace.getSpectrum(i).getSpectrumNo() <= 2564]
+    silicon_ids = {int(detector_id) for detector_id in _silicon_detector_ids(workspace)}
+    if not silicon_ids:
+        return []
+    return [i for i in range(workspace.getNumberHistograms()) if workspace.getSpectrum(i).getSpectrumNo() in silicon_ids]
 
 
 def exclude_low_calibration_spectra(workspace):

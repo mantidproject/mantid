@@ -8,7 +8,7 @@ import unittest
 
 from mantid import mtd
 from mantid.dataobjects import GroupingWorkspace
-from mantid.simpleapi import DeleteWorkspace, Load, LoadEmptyInstrument
+from mantid.simpleapi import CropWorkspace, DeleteWorkspace, Load, LoadEmptyInstrument, LoadParameterFile
 from IndirectReductionCommon import (
     create_detector_grouping_string,
     create_grouping_string,
@@ -83,7 +83,7 @@ class IndirectReductionCommonTest(unittest.TestCase):
 class GroupSpectraByThetaTest(unittest.TestCase):
     """Tests for group_spectra_by_theta using OSIRIS silicon analyser data.
 
-    OSI100320_silicon_test.nxs is used with spectra_range=[1005, 2564] so that
+    OSIRIS00156815.raw is used with spectra_range=[1005, 2564] so that
     spectrum numbers (starting at 1005) differ from workspace indices (0-based).
     This is an explicit regression check for the bug where workspace indices
     were passed as spectrum numbers to GroupDetectors.SpectraList, causing
@@ -95,7 +95,13 @@ class GroupSpectraByThetaTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls._workspace = Load(Filename="OSI100320_silicon_test.nxs", StoreInADS=False)
+        cls._workspace = Load(
+            Filename="OSIRIS00156815.raw",
+            OutputWorkspace="__theta_grouping_test",
+            SpectrumMin=cls._SPECTRA_MIN,
+            SpectrumMax=cls._SPECTRA_MAX,
+            StoreInADS=False,
+        )
 
     def test_returns_requested_number_of_groups(self):
         result = group_spectra_by_theta(self._workspace, number_of_groups=3, spectra_range=[self._SPECTRA_MIN, self._SPECTRA_MAX])
@@ -114,15 +120,31 @@ class GroupSpectraByThetaTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "No valid detectors found"):
             group_spectra_by_theta(self._workspace, number_of_groups=3, spectra_range=[99999, 99999])
 
+    def test_group_spectra_of_dispatches_theta_groups_to_the_theta_grouping(self):
+        result = group_spectra_of(
+            self._workspace,
+            method="ThetaGroups",
+            number_of_groups=3,
+            spectra_range=[self._SPECTRA_MIN, self._SPECTRA_MAX],
+        )
+        self.assertEqual(3, result.getNumberHistograms())
+
 
 class GroupSpectraDetectorsTest(unittest.TestCase):
     """Tests for the 'Detectors' grouping method in group_spectra_of."""
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls._si_workspace = Load(Filename="OSI100320_silicon_test.nxs", StoreInADS=False)
+        cls._si_workspace = Load(
+            Filename="OSIRIS00156815.raw",
+            OutputWorkspace="__detectors_grouping_si",
+            SpectrumMin=1005,
+            SpectrumMax=2564,
+            StoreInADS=False,
+        )
         # Graphite workspace has no Workflow.DetectorsGroupingFile in its IPF
-        cls._pg_workspace = Load(Filename="OSI10203.raw", StoreInADS=False)
+        cls._pg_workspace = Load(Filename="OSI10203.raw", OutputWorkspace="__detectors_grouping_pg", StoreInADS=False)
+        LoadParameterFile(Workspace=cls._si_workspace, Filename="OSIRIS_silicon_111_Parameters.xml")
 
     def test_groups_spectra_using_detectors_grouping_file(self):
         # The SI workspace IPF defines Workflow.DetectorsGroupingFile pointing
@@ -155,6 +177,15 @@ class EdgePixelRemovalTest(unittest.TestCase):
     def test_remove_edge_pixels_is_no_op_for_non_silicon_instrument(self):
         ws_name = "__test_iris_edge"
         LoadEmptyInstrument(InstrumentName="IRIS", OutputWorkspace=ws_name)
+        initial = mtd[ws_name].getNumberHistograms()
+        remove_edge_pixels(ws_name)
+        self.assertEqual(initial, mtd[ws_name].getNumberHistograms())
+        DeleteWorkspace(ws_name)
+
+    def test_remove_edge_pixels_is_no_op_when_the_workspace_holds_no_silicon_spectra(self):
+        ws_name = "__test_osiris_graphite_edge"
+        LoadEmptyInstrument(InstrumentName="OSIRIS", OutputWorkspace=ws_name)
+        CropWorkspace(InputWorkspace=ws_name, OutputWorkspace=ws_name, StartWorkspaceIndex=962, EndWorkspaceIndex=1003)
         initial = mtd[ws_name].getNumberHistograms()
         remove_edge_pixels(ws_name)
         self.assertEqual(initial, mtd[ws_name].getNumberHistograms())
