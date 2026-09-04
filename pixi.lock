@@ -56,7 +56,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/eigen-abi-5.0.1.80-hf414acd_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/elfutils-0.194-h849f50c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/epoxy-1.5.10-hb03c661_2.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/euphonic-1.6.2-py313h29aa505_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/euphonic-2.1.0-py313h12b3e8d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/ffmpeg-9.0.1-gpl_hc1c51de_902.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/fmt-12.1.0-h76c4fd7_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/fontconfig-2.18.3-h4db4eae_1.conda
@@ -648,7 +648,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/eigen-5.0.1-hdb59ae0_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/eigen-abi-5.0.1.100-h485a483_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/epoxy-1.5.10-hc919400_2.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/euphonic-1.6.2-py313hf5115c3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/euphonic-2.1.0-py313ha1f18a4_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/ffmpeg-9.0.1-gpl_h5f9a2c2_102.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/fmt-12.1.0-h99e4e11_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/fontconfig-2.18.3-h81aa574_1.conda
@@ -1008,7 +1008,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/doxygen-1.9.8-h849606c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/eigen-5.0.1-h5112557_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/eigen-abi-5.0.1.100-hc11354d_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/euphonic-1.6.2-py313h0591002_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/euphonic-2.1.0-py313h0591002_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/ffmpeg-8.1.2-gpl_hfba0be1_908.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/fmt-12.1.0-h1ced75a_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/fontconfig-2.18.3-hd47e2ca_1.conda
@@ -2824,15 +2824,15 @@ packages:
     - epoxy >=1.5.10,<1.6.0a0
   size: 411735
   timestamp: 1758743520805
-- conda: https://conda.anaconda.org/conda-forge/linux-64/euphonic-1.6.2-py313h29aa505_0.conda
-  sha256: 15c58ba081e8998ab363261dde1b0ccf7e494b4626d5546bd161f7eeaf9f6022
-  md5: 0a2038d407996cf2b6935630e80d2709
+- conda: https://conda.anaconda.org/conda-forge/linux-64/euphonic-2.1.0-py313h12b3e8d_0.conda
+  sha256: b51148bdea04e18636433831627ff1912b5e921c9d67feedfca5830c5ea4c33b
+  md5: 4a9c97f12a7e8c5f7ad12764df4bf3fc
   depends:
   - __glibc >=2.17,<3.0.a0
   - _openmp_mutex >=4.5
-  - libgcc >=14
-  - numpy >=1.23,<3
+  - libgcc >=15
   - numpy >=1.24
+  - numpy >=1.25,<3
   - packaging
   - pint >=0.22
   - python >=3.13,<3.14.0a0
@@ -2844,10 +2844,9 @@ packages:
   - toolz >=0.12.1
   - typing_extensions >=4.0,<5
   license: GPL-3.0-only
-  license_family: GPL
   run_exports: {}
-  size: 319218
-  timestamp: 1780933400453
+  size: 377916
+  timestamp: 1788528053496
 - conda: https://conda.anaconda.org/conda-forge/linux-64/ffmpeg-9.0.1-gpl_hc1c51de_902.conda
   sha256: d4fdc573187aad82820470e34f1d854eaa8828aa46351348b1ed516044e7664a
   md5: cc6cfab52bbbca00f91fc389870c4dbb
@@ -11353,14 +11352,14 @@ packages:
     - epoxy >=1.5.10,<1.6.0a0
   size: 296347
   timestamp: 1758743805063
-- conda: https://conda.anaconda.org/conda-forge/osx-arm64/euphonic-1.6.2-py313hf5115c3_0.conda
-  sha256: 2dd00432ef505cf5710c523d291f9bc66f2ce64a4654e50117399b824024c011
-  md5: c75e4ee0ab327d402f68a5de574d5ead
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/euphonic-2.1.0-py313ha1f18a4_0.conda
+  sha256: 1467859548b2eefaae9e0eed6657919e2d85ffe7bb2efcbab9bf323996b62f92
+  md5: b5e8b4231588d4daad79035be208fe88
   depends:
   - __osx >=11.0
   - llvm-openmp >=15.0.7
-  - numpy >=1.23,<3
   - numpy >=1.24
+  - numpy >=1.25,<3
   - packaging
   - pint >=0.22
   - python >=3.13,<3.14.0a0
@@ -11373,10 +11372,9 @@ packages:
   - toolz >=0.12.1
   - typing_extensions >=4.0,<5
   license: GPL-3.0-only
-  license_family: GPL
   run_exports: {}
-  size: 319218
-  timestamp: 1780934299288
+  size: 376184
+  timestamp: 1788528830800
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/ffmpeg-9.0.1-gpl_h5f9a2c2_102.conda
   sha256: fcf9edb555a506ecacb136d39f0ef8a3a6a7e1a86a45e218f3e6331608b0a5c1
   md5: 23f8dc0e19279a4de4dae0151da16462
@@ -15432,12 +15430,12 @@ packages:
   run_exports: {}
   size: 13467
   timestamp: 1788180304606
-- conda: https://conda.anaconda.org/conda-forge/win-64/euphonic-1.6.2-py313h0591002_0.conda
-  sha256: ff9d1250e0f731dc8f8a1961fe2c3816f79c422fd340fc6b477e80af1401b21f
-  md5: abbac7971a10b994d0e243f7e5fe7b25
+- conda: https://conda.anaconda.org/conda-forge/win-64/euphonic-2.1.0-py313h0591002_0.conda
+  sha256: f7887d283fc6d56aa7ab462052bd8bd3d0f2a22f601ed9fde356d93edaad4bf4
+  md5: 1fa40cb60e60c4bb7fa5c53a8ce36d5c
   depends:
-  - numpy >=1.23,<3
   - numpy >=1.24
+  - numpy >=1.25,<3
   - packaging
   - pint >=0.22
   - python >=3.13,<3.14.0a0
@@ -15452,10 +15450,9 @@ packages:
   - vc >=14.3,<15
   - vc14_runtime >=14.44.35208
   license: GPL-3.0-only
-  license_family: GPL
   run_exports: {}
-  size: 344966
-  timestamp: 1780933513127
+  size: 402979
+  timestamp: 1788528162565
 - conda: https://conda.anaconda.org/conda-forge/win-64/ffmpeg-8.1.2-gpl_hfba0be1_908.conda
   sha256: 8faa487bd4962a02a04d16f88fefe3a057d47e2f913ae44ef0e477dd9d001088
   md5: bfc0781d033dbafe8f005093fcc8e7aa
