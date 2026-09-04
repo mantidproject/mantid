@@ -5,7 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MomentsPresenter.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
@@ -44,8 +46,41 @@ MomentsPresenter::MomentsPresenter(QWidget *parent, std::unique_ptr<MantidQt::AP
  */
 void MomentsPresenter::handleDataReady(std::string const &dataName) {
   if (m_runPresenter->validate()) {
+    setNumericQAxis(m_view->getDataName());
     m_model->setInputWorkspace(m_view->getDataName());
     plotNewData(dataName);
+  }
+}
+
+/**
+ * Ensures the input workspace's vertical (spectrum) axis is a numeric axis
+ * labelled with the MomentumTransfer unit. SofQWMoments transposes this axis and
+ * converts it to MomentumTransfer, which requires it to already be in a
+ * recognised unit. A workspace produced by the Sqw tab already satisfies this, so
+ * this is a no-op in that case; it only takes effect for a workspace loaded from a
+ * text file, whose vertical axis otherwise has no physical unit set.
+ */
+void MomentsPresenter::setNumericQAxis(std::string const &wsName) {
+  if (!ads.doesExist(wsName)) {
+    return;
+  }
+
+  auto ws = ads.retrieveWS<MatrixWorkspace>(wsName);
+  if (!ws) {
+    return;
+  }
+
+  auto const &axis = ws->getAxis(1);
+  if (!axis->isNumeric()) {
+    auto numericAxis = std::make_unique<NumericAxis>(ws->getNumberHistograms());
+    for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
+      numericAxis->setValue(i, axis->getValue(i));
+    }
+    ws->replaceAxis(1, std::move(numericAxis));
+  }
+
+  if (ws->getAxis(1)->unit()->unitID() != "MomentumTransfer") {
+    ws->getAxis(1)->setUnit("MomentumTransfer");
   }
 }
 
