@@ -2637,16 +2637,10 @@ void InstrumentDefinitionParser::createNeutronicInstrument() {
       }
     } else // We have a null Element*, which signals a detector with no neutronic position
     {
-      if (m_mixedNeutronicPositions) {
-        // Mixed mode: detector keeps its physical position in the neutronic
-        // instrument. This allows IDFs to define neutronic positions only
-        // for analysed detectors (e.g. silicon) while diffraction, graphite
-        // and monitor detectors remain at their physical locations.
-        g_log.debug() << "Component '" << component.first->getName()
-                      << "' has no <neutronic> tag; keeping physical position"
-                      << " (mixed-mode enabled).\n";
-      } else {
-        // Original behaviour: remove detectors without neutronic positions
+      // In mixed mode a detector with no neutronic tag keeps its physical position, so an IDF
+      // can give neutronic positions for the analysed detectors alone while diffraction,
+      // graphite and monitor detectors stay where they are. Otherwise it is removed.
+      if (!m_mixedNeutronicPositions) {
         auto *det = dynamic_cast<Detector *>(component.first);
         if (det)
           m_instrument->removeDetector(det);

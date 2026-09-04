@@ -427,6 +427,7 @@
                 </xs:complexType>
               </xs:element>
               <xs:element name="indirect-neutronic-positions"/>
+              <xs:element name="indirect-neutronic-positions-mixed"/>
             </xs:choice>
           </xs:complexType>
         </xs:element>
