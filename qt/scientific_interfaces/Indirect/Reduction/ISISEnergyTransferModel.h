@@ -95,7 +95,6 @@ private:
   void saveDaveGroup(std::string const &workspaceName, std::string const &outputName);
   void saveAclimax(std::string const &workspaceName, std::string const &outputName,
                    std::string const &xUnits = "DeltaE_inWavenumber");
-  void saveNXSPE(std::string const &workspaceName, std::string const &outputName);
   void save(std::string const &algorithmName, std::string const &workspaceName, std::string const &outputName,
             int const version = -1, std::string const &separator = "");
 
