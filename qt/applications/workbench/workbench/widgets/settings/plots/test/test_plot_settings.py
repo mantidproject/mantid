@@ -25,6 +25,7 @@ class MockPlotsSettingsModel:
         self.get_x_axes_scale = MagicMock()
         self.get_y_axes_scale = MagicMock()
         self.get_axes_line_width = MagicMock()
+        self.get_axes_label_font_size = MagicMock()
         self.get_x_min = MagicMock()
         self.get_x_max = MagicMock()
         self.get_y_min = MagicMock()
@@ -43,6 +44,7 @@ class MockPlotsSettingsModel:
         self.get_minor_ticks_length = MagicMock()
         self.get_minor_ticks_width = MagicMock()
         self.get_minor_ticks_direction = MagicMock()
+        self.get_tick_label_font_size = MagicMock()
         self.get_enable_grid = MagicMock()
         self.get_show_minor_ticks = MagicMock()
         self.get_show_minor_gridlines = MagicMock()
@@ -65,6 +67,7 @@ class MockPlotsSettingsModel:
         self.set_x_axes_scale = MagicMock()
         self.set_y_axes_scale = MagicMock()
         self.set_axes_line_width = MagicMock()
+        self.set_axes_label_font_size = MagicMock()
         self.set_x_min = MagicMock()
         self.set_x_max = MagicMock()
         self.set_y_min = MagicMock()
@@ -86,6 +89,7 @@ class MockPlotsSettingsModel:
         self.set_capsize = MagicMock()
         self.set_cap_thickness = MagicMock()
         self.set_error_every = MagicMock()
+        self.set_tick_label_font_size = MagicMock()
         self.set_show_minor_ticks = MagicMock()
         self.set_show_minor_gridlines = MagicMock()
         self.set_show_legend = MagicMock()
@@ -119,6 +123,7 @@ class PlotsSettingsTest(unittest.TestCase):
         self.mock_model.get_plot_font.assert_called_once()
         self.mock_model.get_x_axes_scale.assert_called_once()
         self.mock_model.get_y_axes_scale.assert_called_once()
+        self.mock_model.get_axes_label_font_size.assert_called_once()
         self.mock_model.get_x_min.assert_called_once()
         self.mock_model.get_x_max.assert_called_once()
         self.mock_model.get_y_min.assert_called_once()
@@ -137,6 +142,7 @@ class PlotsSettingsTest(unittest.TestCase):
         self.mock_model.get_minor_ticks_length.assert_called_once()
         self.mock_model.get_minor_ticks_width.assert_called_once()
         self.mock_model.get_minor_ticks_direction.assert_called_once()
+        self.mock_model.get_tick_label_font_size.assert_called_once()
         self.mock_model.get_enable_grid.assert_called_once()
         self.mock_model.get_show_minor_ticks.assert_called_once()
         self.mock_model.get_show_minor_gridlines.assert_called_once()
@@ -226,6 +232,21 @@ class PlotsSettingsTest(unittest.TestCase):
 
         presenter.action_axes_line_width_changed(3.5)
         self.mock_model.set_axes_line_width.assert_called_once_with("3.5")
+        mock_notify_changes.assert_called_once()
+
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_axes_label_font_size_changed(self, mock_notify_changes: MagicMock):
+        presenter = PlotSettings(None, model=self.mock_model)
+
+        presenter.action_axes_label_font_size_changed(12)
+        self.mock_model.set_axes_label_font_size.assert_called_once_with("12")
+        mock_notify_changes.assert_called_once()
+
+        self.mock_model.set_axes_label_font_size.reset_mock()
+        mock_notify_changes.reset_mock()
+
+        presenter.action_axes_label_font_size_changed(8.5)
+        self.mock_model.set_axes_label_font_size.assert_called_once_with("8.5")
         mock_notify_changes.assert_called_once()
 
     @patch(NOTIFY_CHANGES_PATH)
@@ -720,6 +741,21 @@ class PlotsSettingsTest(unittest.TestCase):
 
         presenter.action_legend_size_changed(8)
         self.mock_model.set_legend_font_size.assert_called_once_with("8")
+        mock_notify_changes.assert_called_once()
+
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_tick_label_font_size_changed(self, mock_notify_changes: MagicMock):
+        presenter = PlotSettings(None, model=self.mock_model)
+
+        presenter.action_tick_label_font_size_changed(10)
+        self.mock_model.set_tick_label_font_size.assert_called_once_with("10")
+        mock_notify_changes.assert_called_once()
+
+        self.mock_model.set_tick_label_font_size.reset_mock()
+        mock_notify_changes.reset_mock()
+
+        presenter.action_tick_label_font_size_changed(8)
+        self.mock_model.set_tick_label_font_size.assert_called_once_with("8")
         mock_notify_changes.assert_called_once()
 
     @patch(NOTIFY_CHANGES_PATH)
