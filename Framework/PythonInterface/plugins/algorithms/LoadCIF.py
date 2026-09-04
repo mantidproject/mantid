@@ -6,11 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-few-public-methods
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, WorkspaceProperty
-from mantid.kernel import Direction
+from mantid.kernel import Direction, Logger
 from mantid.geometry import SpaceGroupFactory, CrystalStructure, UnitCell
 
 import re
 import numpy as np
+
+logger = Logger("LoadCIF")
 
 
 # pylint: disable=invalid-name
@@ -262,6 +264,11 @@ class AtomListBuilder(object):
             isotropicUs += [convertBtoU(getFloatOrNone(b)) for b in isotropicBsNoErrors]
         else:
             isotropicUs += [None] * len(labels)
+
+        for i, u in enumerate(isotropicUs):
+            if u is not None and u < 0:
+                isotropicUs[i] = 0
+                logger.warning("Negative isotropic U-value encountered for label {0}, setting to 0.".format(labels[i]))
 
         isotropicUMap = dict(list(zip(labels, isotropicUs)))
 
