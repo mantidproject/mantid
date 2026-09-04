@@ -9,6 +9,7 @@
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusException.h"
 #include "test_helper.h"
+#include <H5Cpp.h>
 #include <cxxtest/TestSuite.h>
 #include <filesystem>
 
@@ -133,5 +134,52 @@ public:
     auto radius = entry.openNXDouble(radiusPath);
     TS_ASSERT_EQUALS(radius.rank(), 0);
     TS_ASSERT_DELTA(entry.getDouble(radiusPath), 2400.0, 0.1);
+  }
+
+  void test_handle_empty() {
+    std::cout << "test handle empty float, double, int" << std::endl;
+    NexusTest::FileResource resource("test_nexus_null.h5");
+    std::string const filename = resource.fullPath();
+
+    // Nexus::File cannot create this fixture itself: must use HDF5 directly
+    {
+      // file permissions
+      Mantid::Nexus::ParameterID fapl = H5Pcreate(H5P_FILE_ACCESS);
+      H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
+      Mantid::Nexus::UniqueFileID fid = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+      // put an initial entry
+      Mantid::Nexus::GroupID groupid = H5Gcreate(fid, "entry", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      // add a NX_class attribute
+      Mantid::Nexus::DataTypeID attrtype = H5Tcopy(H5T_C_S1);
+      H5Tset_size(attrtype, 7);
+      Mantid::Nexus::DataSpaceID attrspce = H5Screate(H5S_SCALAR);
+      Mantid::Nexus::AttributeID attrid = H5Acreate(groupid, "NX_class", attrtype, attrspce, H5P_DEFAULT, H5P_DEFAULT);
+      H5Awrite(attrid, attrtype, "NXpants");
+
+      // setup the empty datasets
+      hsize_t const zero[] = {0};
+      Mantid::Nexus::DataSpaceID dataspace = H5Screate_simple(1, zero, nullptr);
+      // empty int32
+      Mantid::Nexus::DataSetID i32 =
+          H5Dcreate(groupid, "empty_int32", H5T_NATIVE_INT32, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      // empty float
+      Mantid::Nexus::DataSetID f32 =
+          H5Dcreate(groupid, "empty_float", H5T_NATIVE_FLOAT, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      // empty double
+      Mantid::Nexus::DataSetID d64 =
+          H5Dcreate(groupid, "empty_double", H5T_NATIVE_DOUBLE, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      // cleanup and close file
+      H5Fclose(fid.release());
+    }
+
+    // all three must read back as zero
+    Mantid::Nexus::NXRoot root(filename);
+    auto entry = root.openEntry("entry");
+    // check the int32
+    TS_ASSERT_EQUALS(entry.getInt("empty_int32"), 0);
+    // check the float
+    TS_ASSERT_EQUALS(entry.getFloat("empty_float"), 0.0f);
+    // check the double);
+    TS_ASSERT_EQUALS(entry.getDouble("empty_double"), 0.0);
   }
 };

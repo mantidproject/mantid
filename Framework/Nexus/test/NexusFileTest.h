@@ -505,6 +505,90 @@ public:
     TS_ASSERT_EQUALS(in, out);
   }
 
+  void test_data_get_null_vlen_string() {
+    // this test guards against regressions in the handling of NULL variable-length strings
+    // at some point, certain muon data files were written to assign numerical data to
+    // a null pointer to a variable-length string
+    // that is technically legal HDF5, but undefined in NeXus.
+    // this test ensures these files can be read without raising errors
+    cout << "\ntest dataset read -- NULL variable-length UTF-8 string" << std::endl;
+
+    FileResource resource("test_nexus_null_vlen_string.h5");
+    std::string const filename = resource.fullPath();
+
+    // Nexus::File cannot create this fixture itself: makeData always produces a
+    // fixed-length ASCII string, so build the file with raw HDF5.
+    {
+      H5::H5File h5file(filename, H5F_ACC_TRUNC);
+      H5::StrType vlenUtf8(H5::PredType::C_S1, H5T_VARIABLE);
+      vlenUtf8.setCset(H5T_CSET_UTF8);
+      vlenUtf8.setStrpad(H5T_STR_NULLTERM);
+      H5::DataSpace const scalar(H5S_SCALAR);
+
+      H5::Group entry = h5file.createGroup("entry");
+      entry.createAttribute("NX_class", vlenUtf8, scalar).write(vlenUtf8, std::string("NXentry"));
+
+      // created but never written -- how the ISIS skeleton leaves an unset field
+      entry.createDataSet("unwritten", vlenUtf8, scalar);
+
+      // a NULL pointer written deliberately -- same observable result
+      char const *nothing = nullptr;
+      entry.createDataSet("explicit_null", vlenUtf8, scalar).write(&nothing, vlenUtf8);
+
+      // control: a genuine zero-length string, which must behave identically
+      char const *empty = "";
+      entry.createDataSet("empty_string", vlenUtf8, scalar).write(&empty, vlenUtf8);
+    }
+
+    // all three must read back cleanly, as an empty string
+    Mantid::Nexus::File file(filename, NXaccess::READ);
+    for (std::string const name : {"unwritten", "explicit_null", "empty_string"}) {
+      std::string const address("/entry/" + name);
+
+      TS_ASSERT_THROWS_NOTHING(file.openAddress(address));
+
+      Mantid::Nexus::Info info;
+      TSM_ASSERT_THROWS_NOTHING(address, info = file.getInfo());
+      TSM_ASSERT_EQUALS(address, info.type, NXnumtype::CHAR);
+      TSM_ASSERT_EQUALS(address, info.dims.size(), 1);
+      TSM_ASSERT_EQUALS(address, info.dims.front(), 0);
+
+      std::string value("XXXXXXXXXX"); // junk data
+      TSM_ASSERT_THROWS_NOTHING(address, value = file.getStrData());
+      TSM_ASSERT_EQUALS(address, value, "");
+    }
+  }
+
+  void test_data_get_char_writes_exactly_one_byte() {
+    // this test handles the use of getData<char>() for a *single* char, instead of a string
+    // this can have its own problems, especially around trimming whitespace
+    cout << "\ntest dataset read -- single character does not overrun the caller" << std::endl;
+
+    FileResource resource("test_nexus_char_no_overrun.h5");
+    Mantid::Nexus::File file(resource.fullPath(), NXaccess::CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+
+    std::vector<char> input{'x', ' ', '\0'};
+    std::vector<char> expected{'x', '\0', '\0'};
+    std::size_t const GUARD_SIZE(8);
+    for (std::size_t c = 0; c < input.size(); c++) {
+      std::string const name("c" + std::to_string(c));
+
+      file.makeData(name, NXnumtype::CHAR, 1, true);
+      file.putData(&input[c]);
+
+      // over-allocate, but hand getData only the address of the first byte
+      std::vector<char> guarded(GUARD_SIZE, '?');
+      file.getData(guarded.data());
+      file.closeData();
+
+      TS_ASSERT_EQUALS(guarded.front(), expected[c]);
+      for (std::size_t i = 1; i < GUARD_SIZE; i++) {
+        TSM_ASSERT_EQUALS("getData<char> wrote past the one byte of a single-character dataset", guarded[i], '?');
+      }
+    }
+  }
+
   void test_check_str_length() {
     cout << "\ntest dataset read/write -- string length" << std::endl;
     FileResource resource("test_nexus_str_len.h5");
@@ -650,6 +734,98 @@ public:
     TS_ASSERT_EQUALS(info.dims.size(), 1);
     TS_ASSERT_EQUALS(info.dims.front(), ind.size());
     TS_ASSERT_EQUALS(ind, outd);
+  }
+
+  void test_data_putget_empty_array() {
+    cout << "\ntest dataset read/write -- empty array\n" << std::flush;
+
+    // open a file
+    FileResource resource("test_nexus_file_dataRW_empty.h5");
+    std::string filename = resource.fullPath();
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+
+    // put/get an empty int array
+    Mantid::Nexus::DimVector nodims{};
+    std::vector<int32_t> in{}, out;
+    // trying to make a dataset with empty dimension array should throw an error
+    TS_ASSERT_THROWS(file.makeData("data_int", NXnumtype::INT32, nodims, true), Mantid::Nexus::Exception const &);
+    // but we can make a dataset from the input's length (here, zero)
+    // a dimension of 0 is interpreted as "unlimited" data, which is saved with a length of 1
+    TS_ASSERT_THROWS_NOTHING(file.makeData("data_int", NXnumtype::INT32, in.size(), true));
+    // trying to put an empty array should throw an exception, as it is not a valid dataset
+    TS_ASSERT_THROWS(file.putData(in), Mantid::Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.putData(in.data()), Mantid::Nexus::Exception const &);
+    // we can still read the empty dataset -- will be a vector of length 1, holding value 0
+    std::vector<int32_t> expected{0};
+    file.getData(out);
+    Mantid::Nexus::Info info = file.getInfo();
+    file.closeData();
+    // confirm -- dims mutated to {1}, the data holds {0}
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), 1);
+    TS_ASSERT_EQUALS(out, expected);
+  }
+
+  void test_data_get_null_array() {
+    // this test guards against regressions in the handling of NULL numerical arrays
+    cout << "\ntest dataset read -- uninitialized or empty data" << std::endl;
+
+    FileResource resource("test_nexus_null_array.h5");
+    std::string const filename = resource.fullPath();
+    std::size_t constexpr ARRAYSIZE(8);
+
+    // Nexus::File cannot create this fixture itself: must use HDF5 directly
+    {
+      // file permissions
+      Mantid::Nexus::ParameterID fapl = H5Pcreate(H5P_FILE_ACCESS);
+      H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
+      Mantid::Nexus::UniqueFileID fid = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+      // put an initial entry
+      Mantid::Nexus::GroupID groupid = H5Gcreate(fid, "entry", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      // add a NX_class attribute
+      Mantid::Nexus::DataTypeID attrtype = H5Tcopy(H5T_C_S1);
+      H5Tset_size(attrtype, 7);
+      Mantid::Nexus::DataSpaceID attrspce = H5Screate(H5S_SCALAR);
+      Mantid::Nexus::AttributeID attrid = H5Acreate(groupid, "NX_class", attrtype, attrspce, H5P_DEFAULT, H5P_DEFAULT);
+      H5Awrite(attrid, attrtype, "NXpants");
+
+      // setup the empty datasets
+      hsize_t const array1d[] = {ARRAYSIZE};
+      Mantid::Nexus::DataSpaceID dataspace = H5Screate_simple(1, array1d, nullptr);
+      // unwritten array
+      Mantid::Nexus::DataSetID unwrit =
+          H5Dcreate(groupid, "unwritten_array", H5T_NATIVE_DOUBLE, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      // deliberately don't write
+      // nullptr as array
+      double *nullarray = nullptr;
+      Mantid::Nexus::DataSetID nullar =
+          H5Dcreate(groupid, "null_array", H5T_NATIVE_DOUBLE, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      H5Dwrite(nullar, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, nullarray);
+      // zero array
+      double empty[ARRAYSIZE] = {0.0};
+      Mantid::Nexus::DataSetID write =
+          H5Dcreate(groupid, "empty_array", H5T_NATIVE_DOUBLE, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      H5Dwrite(write, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, empty);
+      // NOTE: another check might try saving `double uninit[8];`, which could also count as an "empty" array
+      // that results in undefined behavior and will save whatever happens to be in memory into the file,
+      // making deterministic testing impossible
+      // cleanup and close file
+      H5Fclose(fid.release());
+    }
+
+    // all three must read back cleanly, as an empty string
+    Mantid::Nexus::File file(filename, NXaccess::READ);
+    for (std::string const name : {"unwritten_array", "null_array", "empty_array"}) {
+      std::string const address("/entry/" + name);
+
+      TS_ASSERT_THROWS_NOTHING(file.openAddress(address));
+
+      std::vector<double> value(ARRAYSIZE, 999.0); // junk data
+      std::vector<double> expected(ARRAYSIZE, 0.0);
+      TSM_ASSERT_THROWS_NOTHING(address, file.getData(value));
+      TSM_ASSERT_EQUALS(address, value, expected);
+    }
   }
 
   void test_data_string_array_as_char_array() {
