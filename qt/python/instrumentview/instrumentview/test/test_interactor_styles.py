@@ -295,6 +295,73 @@ class TestRubberBandZoomInteractorStyle(unittest.TestCase):
 
         self.assertFalse(style._ignore_rubberband_interaction)
 
+    def test_rubber_band_actor_added_to_renderer(self):
+        style, plotter = self._create_style()
+        plotter.renderer.AddActor2D.assert_called_once_with(style._rubber_band_actor)
+
+    def test_left_press_without_modifier_shows_rubber_band_at_click_position(self):
+        style, _, _ = self._create_style_with_super_spy()
+
+        with mock.patch.object(style, "_modifier_key_pressed", return_value=False):
+            with mock.patch.object(style, "_event_position", return_value=(10, 20)):
+                style._on_left_button_press_event("obj", "event")
+
+        self.assertTrue(style._rubber_band_actor.GetVisibility())
+        self.assertEqual(style._rubber_band_start, (10, 20))
+        assert_array_almost_equal(style._rubber_band_poly.points[0], [10, 20, 0])
+
+    def test_left_press_with_modifier_does_not_show_rubber_band(self):
+        style, _ = self._create_style()
+
+        with mock.patch.object(style, "_modifier_key_pressed", return_value=True):
+            style._on_left_button_press_event("obj", "event")
+
+        self.assertFalse(style._rubber_band_actor.GetVisibility())
+        self.assertIsNone(style._rubber_band_start)
+
+    def test_mouse_move_updates_rubber_band_points_and_renders(self):
+        style, plotter, _ = self._create_style_with_super_spy()
+        style._rubber_band_start = (10, 20)
+
+        with mock.patch.object(style, "_event_position", return_value=(30, 40)):
+            style._on_mouse_move_event("obj", "event")
+
+        assert_array_almost_equal(style._rubber_band_poly.points[0], [10, 20, 0])
+        assert_array_almost_equal(style._rubber_band_poly.points[1], [30, 20, 0])
+        assert_array_almost_equal(style._rubber_band_poly.points[2], [30, 40, 0])
+        assert_array_almost_equal(style._rubber_band_poly.points[3], [10, 40, 0])
+        plotter.render_window.Render.assert_called_once()
+
+    def test_mouse_move_without_active_rubber_band_does_not_render(self):
+        style, plotter, _ = self._create_style_with_super_spy()
+        style._rubber_band_start = None
+
+        style._on_mouse_move_event("obj", "event")
+
+        plotter.render_window.Render.assert_not_called()
+
+    def test_left_button_release_hides_rubber_band_and_renders(self):
+        style, plotter, _ = self._create_style_with_super_spy()
+        style._rubber_band_start = (10, 20)
+        style._rubber_band_actor.SetVisibility(True)
+
+        style._on_left_button_release_event("obj", "event")
+
+        self.assertFalse(style._rubber_band_actor.GetVisibility())
+        self.assertIsNone(style._rubber_band_start)
+        plotter.render_window.Render.assert_called_once()
+
+    def test_left_button_release_with_modifier_leaves_rubber_band_untouched(self):
+        style, _ = self._create_style()
+        style._ignore_rubberband_interaction = True
+        style._rubber_band_start = (10, 20)
+        style._rubber_band_actor.SetVisibility(True)
+
+        style._on_left_button_release_event(None, None)
+
+        self.assertTrue(style._rubber_band_actor.GetVisibility())
+        self.assertEqual(style._rubber_band_start, (10, 20))
+
 
 class TestSwappedButtonTrackballCamera(unittest.TestCase):
     def test_instantiates(self):
