@@ -212,20 +212,20 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params, cons
  * @param params Integration settings used to determine radius factors and detector-edge corrections.
  * @param shape Supplied peak and background ellipsoid.
  * @param libPeak Tuple containing the peak fraction, its uncertainty, and the maximum peak width.
- * @param center Peak center in Q-space.
+ * @param peak_q Peak center in Q-space.
  * @param[out] inti Integrated peak intensity.
  * @param[out] sigi Uncertainty of the integrated peak intensity.
  * @return The scaled peak shape, or a no-shape result when no events are available.
  */
 std::shared_ptr<const Geometry::PeakShape>
 Integrate3DEvents::integrateWeakPeak(const IntegrationParameters &params, PeakShapeEllipsoid_const_sptr shape,
-                                     const std::tuple<double, double, double> &libPeak, const V3D &center, double &inti,
+                                     const std::tuple<double, double, double> &libPeak, const V3D &peak_q, double &inti,
                                      double &sigi) {
 
   inti = 0.0; // default values, in case something
   sigi = 0.0; // is wrong with the peak.
 
-  auto result = getEvents(center);
+  auto result = getEvents(peak_q);
   if (!result)
     return std::make_shared<NoShape>();
 
@@ -239,7 +239,7 @@ Integrate3DEvents::integrateWeakPeak(const IntegrationParameters &params, PeakSh
   const auto max_sigma = std::get<2>(libPeak);
   auto rValues = calculateRadiusFactors(params, max_sigma);
 
-  const auto isPeakOnDetector = correctForDetectorEdges(rValues, params.E1Vectors, center, abcRadii,
+  const auto isPeakOnDetector = correctForDetectorEdges(rValues, params.E1Vectors, peak_q, abcRadii,
                                                         abcBackgroundInnerRadii, abcBackgroundOuterRadii);
 
   if (!isPeakOnDetector)
