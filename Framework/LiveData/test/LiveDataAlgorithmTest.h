@@ -11,6 +11,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidFrameworkTestHelpers/FacilityHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Timer.h"
 #include "MantidLiveData/LiveDataAlgorithm.h"
 #include <algorithm>
@@ -195,6 +196,25 @@ public:
     alg.setPropertyValue("OutputWorkspace", "out_ws");
 
     TSM_ASSERT("instrument with no live listener is reported", !alg.validateInputs()["Instrument"].empty());
+  }
+
+  /** An unset default facility must be reported, not silently accepted as a blank facility. */
+  void test_validateInputs_no_default_facility() {
+    FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilitiesMultiple.xml", "TESTDEFAULT");
+
+    auto &config = Mantid::Kernel::ConfigService::Instance();
+    const std::string savedFacility = config.getString("default.facility");
+    config.setString("default.facility", "");
+
+    LiveDataAlgorithmImpl alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    alg.setPropertyValue("Instrument", "DEFAULTLISTENER");
+    alg.setPropertyValue("OutputWorkspace", "out_ws");
+
+    const auto errors = alg.validateInputs();
+    config.setString("default.facility", savedFacility);
+
+    TSM_ASSERT("unset default facility is reported", !errors.at("Facility").empty());
   }
 
   void test_validateInputs_missing_instrument() {

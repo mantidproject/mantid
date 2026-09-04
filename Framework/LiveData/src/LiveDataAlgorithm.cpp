@@ -25,6 +25,11 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::Types::Core::DateAndTime;
 
+namespace {
+/// `ConfigService` returns a placeholder facility, whose name is blank, when no default is set.
+bool isBlankFacilityName(const std::string &name) { return name.find_first_not_of(" \t\n\r") == std::string::npos; }
+} // namespace
+
 namespace Mantid::LiveData {
 
 /// Algorithm's category for identification. @see Algorithm::category
@@ -41,9 +46,19 @@ const std::string LiveDataAlgorithm::category() const { return "DataHandling\\Li
  */
 const Kernel::FacilityInfo &LiveDataAlgorithm::facility() const {
   const std::string facilityName = getPropertyValue("Facility");
-  // `getFacility("")` already returns the default facility, but be explicit about the intent.
-  return facilityName.empty() ? Kernel::ConfigService::Instance().getFacility()
-                              : Kernel::ConfigService::Instance().getFacility(facilityName);
+  if (!facilityName.empty()) {
+    return Kernel::ConfigService::Instance().getFacility(facilityName);
+  }
+
+  // `ConfigService::getFacility()` does not fail when 'default.facility' is unset: it returns a
+  // placeholder facility whose name is blank and which owns no real instruments.  Reject that here,
+  // rather than letting it surface further down as a baffling complaint that the instrument is not
+  // part of facility ' '.
+  const auto &defaultFacility = Kernel::ConfigService::Instance().getFacility();
+  if (isBlankFacilityName(defaultFacility.name())) {
+    throw Exception::NotFoundError("Facilities", "<no default facility is set>");
+  }
+  return defaultFacility;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -364,8 +379,13 @@ std::map<std::string, std::string> LiveDataAlgorithm::validateInputs() {
     std::transform(facilities.cbegin(), facilities.cend(), knownFacilities.begin(),
                    [](const auto &knownFacility) { return knownFacility->name(); });
     std::sort(knownFacilities.begin(), knownFacilities.end());
-    out["Facility"] = "Facility '" + facilityName + "' is not known to Mantid. Known facilities are: " +
-                      Strings::join(knownFacilities.cbegin(), knownFacilities.cend(), ", ") + ".";
+    const std::string known = Strings::join(knownFacilities.cbegin(), knownFacilities.cend(), ", ");
+    out["Facility"] = facilityName.empty() ? "No facility was specified and Mantid has no default facility set. Set "
+                                             "'Facility', or set a default facility in the Mantid configuration. "
+                                             "Known facilities are: " +
+                                                 known + "."
+                                           : "Facility '" + facilityName +
+                                                 "' is not known to Mantid. Known facilities are: " + known + ".";
     return out;
   }
 
