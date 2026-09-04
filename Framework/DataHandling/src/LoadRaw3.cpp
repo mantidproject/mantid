@@ -30,6 +30,24 @@ DECLARE_FILELOADER_ALGORITHM(LoadRaw3)
 using namespace Kernel;
 using namespace API;
 
+namespace {
+constexpr specnum_t OSIRIS_SILICON_SPECTRUM_COUNT = 2565;
+
+bool isOsirisSiliconAnalyserRun(const std::string &instrumentName, const specnum_t spectraInFile) {
+  return instrumentName == "OSIRIS" && spectraInFile == OSIRIS_SILICON_SPECTRUM_COUNT;
+}
+
+/// Maps each spectrum to the detector whose ID equals its spectrum number ovew
+SpectrumDetectorMapping createIdfDetectorMapping(const Geometry::Instrument_const_sptr &instrument) {
+  const auto detectorIDs = instrument->getDetectorIDs(false);
+  std::vector<specnum_t> spectrumNumbers;
+  spectrumNumbers.reserve(detectorIDs.size());
+  for (const auto detID : detectorIDs)
+    spectrumNumbers.emplace_back(static_cast<specnum_t>(detID));
+  return SpectrumDetectorMapping(spectrumNumbers, detectorIDs);
+}
+} // namespace
+
 /// Constructor
 LoadRaw3::LoadRaw3()
     : m_filename(), m_numberOfSpectra(), m_cache_options(), m_specTimeRegimes(), m_noTimeRegimes(0), m_prog(0.0),
@@ -118,10 +136,21 @@ void LoadRaw3::exec() {
 
   // Only run the Child Algorithms once
   loadRunParameters(localWorkspace);
-  const SpectrumDetectorMapping detectorMapping(isisRaw().spec, isisRaw().udet, isisRaw().i_det);
+  SpectrumDetectorMapping detectorMapping(isisRaw().spec, isisRaw().udet, isisRaw().i_det);
   localWorkspace->updateSpectraUsing(detectorMapping);
 
   runLoadInstrument(m_filename, localWorkspace, 0.0, 0.4);
+
+  // Map detector IDs to matching spectrum numbers: silicon analyser runs record hardware IDs that do not match the IDF.
+  if (const auto instrument = localWorkspace->getInstrument()) {
+    if (isOsirisSiliconAnalyserRun(instrument->getName(), m_numberOfSpectra)) {
+      g_log.notice("Ignoring the spectrum-detector table in this RAW file: each spectrum is mapped "
+                   "to the detector of the same ID in the instrument definition.");
+      detectorMapping = createIdfDetectorMapping(instrument);
+      localWorkspace->updateSpectraUsing(detectorMapping);
+    }
+  }
+
   m_prog_start = 0.4;
   Run &run = localWorkspace->mutableRun();
   if (bLoadlogFiles) {
@@ -251,10 +280,8 @@ void LoadRaw3::exec() {
       separateMonitors(file, period, monitorSpecList, localWorkspace, monitorWorkspace);
     }
 
-    // Re-update spectra etc. OSIRIS silicon RAW files use hardware UDET mappings,
-    // so retain the IDF spectra mapping loaded by LoadInstrument.
-    if (localWorkspace &&
-        !shouldRewriteOsirisSiliconSpectraMap(localWorkspace->getInstrument()->getName(), localWorkspace))
+    // Re-update spectra etc.
+    if (localWorkspace)
       localWorkspace->updateSpectraUsing(detectorMapping);
 
     if (monitorWorkspace)
@@ -279,13 +306,11 @@ void LoadRaw3::exec() {
     }
 
   } // loop over periods
-
   // Clean up
 
   reset();
   fclose(file);
 }
-
 /** This method creates outputworkspace excluding monitors
  *@param file :: -pointer to file
  *@param period :: period number
