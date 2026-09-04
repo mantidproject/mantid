@@ -72,7 +72,7 @@ class WorkspaceWidget(PluginWidget):
         self.workspacewidget.sliceViewerClicked.connect(self._do_slice_viewer)
         self.workspacewidget.showDataClicked.connect(self._do_show_data)
         self.workspacewidget.showInstrumentClicked.connect(self._do_show_instrument)
-        self.workspacewidget.showNewInstrumentViewClicked.connect(self._do_show_new_instrument_view)
+        self.workspacewidget.showLegacyInstrumentViewClicked.connect(self._do_show_legacy_instrument_view)
         self.workspacewidget.showAlgorithmHistoryClicked.connect(self._do_show_algorithm_history)
         self.workspacewidget.showDetectorsClicked.connect(self._do_show_detectors)
         self.workspacewidget.plotAdvancedClicked.connect(partial(self._do_plot_spectrum, errors=False, overplot=False, advanced=True))
@@ -277,26 +277,9 @@ class WorkspaceWidget(PluginWidget):
                 logger.warning("Could not open slice viewer for workspace '{}'.".format(ws.name()))
                 logger.warning("{}: {}".format(type(exception).__name__, exception))
 
-    def _do_show_instrument(self, names):
+    def _do_show_instrument(self, names, off_screen=False):
         """
-        Show an instrument widget for the given workspaces
-
-        :param names: A list of workspace names
-        """
-        parent, flags = get_window_config()
-        for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
-            if ws.getInstrumentName():
-                try:
-                    presenter = InstrumentViewPresenter(ws, parent=parent, window_flags=flags)
-                    presenter.show_view()
-                except Exception as exception:
-                    logger.warning("Could not show instrument for workspace '{}':\n{}\n".format(ws.name(), exception))
-            else:
-                logger.warning("Could not show instrument for workspace '{}':\nNo instrument available.\n".format(ws.name()))
-
-    def _do_show_new_instrument_view(self, names, off_screen=False):
-        """
-        Show the updated instrument view for the given workspaces
+        Show the instrument view for the given workspaces
 
         :param names: A list of workspace names
         """
@@ -308,12 +291,23 @@ class WorkspaceWidget(PluginWidget):
                     self._instrument_view_window.show()
                     model = FullInstrumentViewModel(ws)
                     FullInstrumentViewPresenter(self._instrument_view_window.get_instrument_view_widget(), model)
-                    logger.warning(
-                        "This Instrument View interface is available for testing purposes and evaluation, but is still "
-                        "under active development. There may be bugs, and several features from the older Instrument View "
-                        "('Show Instrument') are not currently implemented. If you have any feedback about this interface "
-                        "then the Mantid team would be happy to receive it."
-                    )
+                except Exception as exception:
+                    logger.warning("Could not show instrument for workspace '{}':\n{}\n".format(ws.name(), exception))
+            else:
+                logger.warning("Could not show instrument for workspace '{}':\nNo instrument available.\n".format(ws.name()))
+
+    def _do_show_legacy_instrument_view(self, names):
+        """
+        Show the legacy instrument widget for the given workspaces
+
+        :param names: A list of workspace names
+        """
+        parent, flags = get_window_config()
+        for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
+            if ws.getInstrumentName():
+                try:
+                    presenter = InstrumentViewPresenter(ws, parent=parent, window_flags=flags)
+                    presenter.show_view()
                 except Exception as exception:
                     logger.warning("Could not show instrument for workspace '{}':\n{}\n".format(ws.name(), exception))
             else:

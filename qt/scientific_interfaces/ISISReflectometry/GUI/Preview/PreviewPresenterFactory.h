@@ -29,8 +29,8 @@ public:
     const QSettings settings(QSettings::IniFormat, QSettings::UserScope, "mantidproject", "mantidworkbench");
     const auto previewSettings = PreviewSettings::readSettings(settings);
     auto dependencies = PreviewPresenter::Dependencies{
-        view,    std::make_unique<PreviewModel>(),      std::move(jobManager), nullptr, nullptr,
-        nullptr, previewSettings.useNewInstrumentView()};
+        view,    std::make_unique<PreviewModel>(),          std::move(jobManager), nullptr, nullptr,
+        nullptr, !previewSettings.useLegacyInstrumentView()};
     return std::make_unique<PreviewPresenter>(std::move(dependencies));
   }
 };

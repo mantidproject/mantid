@@ -22,7 +22,7 @@ public:
     TS_ASSERT(directory.isValid());
     auto const filename = directory.filePath("settings.ini");
     QSettings storage(filename, QSettings::IniFormat);
-    storage.setValue("InstrumentView/use_new_instrument_view", true);
+    storage.setValue("InstrumentView/use_legacy_instrument_view", true);
     storage.setValue("unrelated", "preserved");
     storage.sync();
     auto const contentsBefore = fileContents(filename);
@@ -30,8 +30,29 @@ public:
     auto const values = PreviewSettings::readSettings(storage);
     storage.sync();
 
-    TS_ASSERT(values.useNewInstrumentView());
+    TS_ASSERT(values.useLegacyInstrumentView());
     TS_ASSERT_EQUALS(fileContents(filename), contentsBefore);
+  }
+
+  void test_read_settings_defaults_to_the_new_instrument_view() {
+    QTemporaryDir directory;
+    TS_ASSERT(directory.isValid());
+    QSettings storage(directory.filePath("settings.ini"), QSettings::IniFormat);
+
+    auto const values = PreviewSettings::readSettings(storage);
+
+    TS_ASSERT(!values.useLegacyInstrumentView());
+  }
+
+  void test_read_settings_ignores_the_superseded_use_new_instrument_view_setting() {
+    QTemporaryDir directory;
+    TS_ASSERT(directory.isValid());
+    QSettings storage(directory.filePath("settings.ini"), QSettings::IniFormat);
+    storage.setValue("InstrumentView/use_new_instrument_view", false);
+
+    auto const values = PreviewSettings::readSettings(storage);
+
+    TS_ASSERT(!values.useLegacyInstrumentView());
   }
 
 private:

@@ -66,7 +66,7 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *par
       m_superplotWithErrs(new QAction("Superplot with errors...", this)),
       m_superplotBins(new QAction("Superplot bins...", this)),
       m_superplotBinsWithErrs(new QAction("Superplot bins with errors...", this)),
-      m_showNewInstrumentView(new QAction("(Experimental) Show Instrument", this)), m_separator(new QAction()) {
+      m_showLegacyInstrumentView(new QAction("Show Instrument (Legacy)", this)), m_separator(new QAction()) {
 
   // Replace the double click action on the MantidTreeWidget
   m_tree->m_doubleClickAction = [&](const QString &wsName) { emit workspaceDoubleClicked(wsName); };
@@ -100,7 +100,7 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *par
   connect(m_superplotWithErrs, SIGNAL(triggered()), this, SLOT(onSuperplotWithErrsClicked()));
   connect(m_superplotBins, SIGNAL(triggered()), this, SLOT(onSuperplotBinsClicked()));
   connect(m_superplotBinsWithErrs, SIGNAL(triggered()), this, SLOT(onSuperplotBinsWithErrsClicked()));
-  connect(m_showNewInstrumentView, SIGNAL(triggered()), this, SLOT(onShowNewInstrumentViewClicked()));
+  connect(m_showLegacyInstrumentView, SIGNAL(triggered()), this, SLOT(onShowLegacyInstrumentViewClicked()));
   m_separator->setSeparator(true);
 }
 
@@ -221,8 +221,8 @@ void WorkspaceTreeWidgetSimple::onSuperplotBinsWithErrsClicked() {
   emit superplotBinsWithErrsClicked(getSelectedWorkspaceNamesAsQList());
 }
 
-void WorkspaceTreeWidgetSimple::onShowNewInstrumentViewClicked() {
-  emit showNewInstrumentViewClicked(getSelectedWorkspaceNamesAsQList());
+void WorkspaceTreeWidgetSimple::onShowLegacyInstrumentViewClicked() {
+  emit showLegacyInstrumentViewClicked(getSelectedWorkspaceNamesAsQList());
 }
 
 /**
@@ -286,7 +286,7 @@ QMenu *WorkspaceTreeWidgetSimple::createWorkspaceContextMenu(const QStringList &
           return false;
         });
     m_showInstrument->setEnabled(enabled);
-    m_showNewInstrumentView->setEnabled(enabled);
+    m_showLegacyInstrumentView->setEnabled(enabled);
   }
 
   if (!combinedPlotMenuActions.empty()) {
@@ -345,6 +345,7 @@ WorkspaceTreeWidgetSimple::createMatrixWorkspaceActions(const Mantid::API::Matri
   actions.push_back(m_showData);
   actions.push_back(m_showAlgorithmHistory);
   actions.push_back(m_showInstrument);
+  actions.push_back(m_showLegacyInstrumentView);
   actions.push_back(m_sampleLogs);
   actions.push_back(m_sliceViewer);
   actions.push_back(m_showDetectors);
@@ -352,7 +353,6 @@ WorkspaceTreeWidgetSimple::createMatrixWorkspaceActions(const Mantid::API::Matri
     actions.push_back(m_sampleMaterial);
     actions.push_back(m_sampleShape);
   }
-  actions.push_back(m_showNewInstrumentView);
   return std::make_tuple(actions, plotActions);
 }
 
