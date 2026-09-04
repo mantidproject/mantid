@@ -8,7 +8,6 @@
 
 #include "MantidAPI/BoxController.h"
 #include "MantidDataObjects/CoordTransformDistance.h"
-#include "MantidDataObjects/MDBin.h"
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
@@ -398,37 +397,6 @@ public:
     b3.addEvents(vec);
 
     TS_ASSERT(b3.getBoxController() == sc.get());
-  }
-
-  void test_centerpointBin() {
-    BoxController_sptr sc(new BoxController(2));
-    MDBox<MDLeanEvent<2>, 2> box(sc.get());
-    for (double x = 0.5; x < 10.0; x += 1.0)
-      for (double y = 0.5; y < 10.0; y += 1.0) {
-        MDLeanEvent<2> ev(1.0, 1.5);
-        ev.setCenter(0, static_cast<coord_t>(x));
-        ev.setCenter(1, static_cast<coord_t>(y));
-        box.addEvent(ev);
-      }
-    TS_ASSERT_EQUALS(box.getNPoints(), 100);
-    // First, a bin object that holds everything
-    MDBin<MDLeanEvent<2>, 2> bin;
-    // Perform the centerpoint binning
-    box.centerpointBin(bin, nullptr);
-    // 100 events = 100 weight.
-    TS_ASSERT_DELTA(bin.m_signal, 100.0, 1e-4);
-    TS_ASSERT_DELTA(bin.m_errorSquared, 150.0, 1e-4);
-
-    // Next, a more restrictive bin. a 2.0 x 2.0 square, with 4 events
-    bin.m_signal = 0;
-    bin.m_errorSquared = 0;
-    bin.m_min[0] = 4.0;
-    bin.m_max[0] = 6.0;
-    bin.m_min[1] = 1.0;
-    bin.m_max[1] = 3.0;
-    box.centerpointBin(bin, nullptr);
-    TS_ASSERT_DELTA(bin.m_signal, 4.0, 1e-4);
-    TS_ASSERT_DELTA(bin.m_errorSquared, 6.0, 1e-4);
   }
 
   /** For test_integrateSphere,

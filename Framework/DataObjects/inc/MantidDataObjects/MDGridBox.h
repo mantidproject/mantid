@@ -117,8 +117,6 @@ public:
   void getBoxes(std::vector<API::IMDNode *> &outBoxes, size_t maxDepth, bool leafOnly,
                 Mantid::Geometry::MDImplicitFunction *function) override;
 
-  void getBoxes(std::vector<API::IMDNode *> &outBoxes, const std::function<bool(API::IMDNode *)> &cond) final override;
-
   const API::IMDNode *getBoxAtCoord(const coord_t *coords) override;
 
   void transformDimensions(std::vector<double> &scaling, std::vector<double> &offset) override;
@@ -140,10 +138,6 @@ public:
                            const std::vector<uint16_t> &expInfoIndex, const std::vector<uint16_t> &goniometerIndex,
                            const std::vector<uint32_t> &detectorId) override;
   //----------------------------------------------------------------------------------------------------------------------
-
-  void centerpointBin(MDBin<MDE, nd> &bin, bool *fullyContained) const override;
-
-  void generalBin(MDBin<MDE, nd> & /*bin*/, Mantid::Geometry::MDImplicitFunction & /*function*/) const override {}
 
   void integrateSphere(Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared, signal_t &signal,
                        signal_t &errorSquared, const coord_t innerRadiusSquared = 0.0,

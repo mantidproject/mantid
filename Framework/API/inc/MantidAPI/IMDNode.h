@@ -135,9 +135,6 @@ public:
   virtual void getBoxes(std::vector<IMDNode *> &boxes, size_t maxDepth, bool leafOnly,
                         Mantid::Geometry::MDImplicitFunction *function) = 0;
 
-  /// Fill a vector with all the boxes who are satisfying the condition
-  virtual void getBoxes(std::vector<IMDNode *> &outBoxes, const std::function<bool(IMDNode *)> &cond) = 0;
-
   // -------------------------------- Events-Related
   // -------------------------------------------
   /// Get total number of points both in memory and on file if present;
