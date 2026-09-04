@@ -1022,6 +1022,81 @@ public:
 
     TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true), const Exception::InstrumentDefinitionError &);
   }
+
+  void test_indirect_neutronic_positions_removes_detectors_without_a_neutronic_tag() {
+    auto const instrument = parseNeutronicPositionsIDF("indirect-neutronic-positions");
+
+    // Detector 2 has no <neutronic> tag, so it is dropped from the neutronic instrument
+    TS_ASSERT_EQUALS(1, instrument->getNumberDetectors());
+    TS_ASSERT_THROWS_NOTHING(instrument->getDetector(1));
+    TS_ASSERT_THROWS_ANYTHING(instrument->getDetector(2));
+  }
+
+  void test_indirect_neutronic_positions_mixed_keeps_detectors_without_a_neutronic_tag() {
+    auto const instrument = parseNeutronicPositionsIDF("indirect-neutronic-positions-mixed");
+
+    TS_ASSERT_EQUALS(2, instrument->getNumberDetectors());
+
+    // Detector 1 has a <neutronic> tag, so it moves to the neutronic position
+    TS_ASSERT_EQUALS(V3D(0.0, 0.0, 2.0), instrument->getDetector(1)->getPos());
+    // Detector 2 has none, and in mixed mode keeps its physical position
+    TS_ASSERT_EQUALS(V3D(0.0, 0.0, 3.0), instrument->getDetector(2)->getPos());
+  }
+
+  void test_indirect_neutronic_positions_mixed_retains_the_physical_instrument() {
+    auto const instrument = parseNeutronicPositionsIDF("indirect-neutronic-positions-mixed");
+
+    auto const physical = instrument->getPhysicalInstrument();
+    TS_ASSERT(physical);
+    TS_ASSERT_EQUALS(2, physical->getNumberDetectors());
+    TS_ASSERT_EQUALS(V3D(0.0, 0.0, 1.0), physical->getDetector(1)->getPos());
+    TS_ASSERT_EQUALS(V3D(0.0, 0.0, 3.0), physical->getDetector(2)->getPos());
+  }
+
+private:
+  /// Parses a two detector IDF under the given neutronic positions default. Detector 1 carries a
+  /// <neutronic> tag moving it from z=1 to z=2; detector 2 has none and sits at z=3.
+  std::shared_ptr<const Instrument> parseNeutronicPositionsIDF(std::string const &defaultsTag) {
+    std::string const contents = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                                 "<instrument name=\"NeutronicPositionsTest\" valid-from=\"1900-01-31 23:59:59\" "
+                                 "valid-to=\"2100-01-31 23:59:59\" last-modified=\"2026-09-03 11:00:00\">"
+                                 "<defaults><" +
+                                 defaultsTag +
+                                 "/></defaults>"
+                                 // A source and sample are required: the neutronic positions code
+                                 // dereferences them, so an IDF without them crashes the parser.
+                                 "<component type=\"moderator\"><location z=\"-10.0\"/></component>"
+                                 "<type name=\"moderator\" is=\"Source\"/>"
+                                 "<component type=\"sample-position\"><location/></component>"
+                                 "<type name=\"sample-position\" is=\"SamplePos\"/>"
+                                 "<component type=\"bank\" idlist=\"dets\"><location/></component>"
+                                 "<type name=\"bank\">"
+                                 "  <component type=\"pixel\">"
+                                 "    <location x=\"0.0\" y=\"0.0\" z=\"1.0\" name=\"analysed\">"
+                                 "      <neutronic x=\"0.0\" y=\"0.0\" z=\"2.0\"/>"
+                                 "    </location>"
+                                 "    <location x=\"0.0\" y=\"0.0\" z=\"3.0\" name=\"not-analysed\"/>"
+                                 "  </component>"
+                                 "</type>"
+                                 "<type name=\"pixel\" is=\"detector\">"
+                                 "  <cylinder id=\"some-shape\">"
+                                 "    <centre-of-bottom-base r=\"0.0\" t=\"0.0\" p=\"0.0\" />"
+                                 "    <axis x=\"0.0\" y=\"0.0\" z=\"1.0\" />"
+                                 "    <radius val=\"0.01\" />"
+                                 "    <height val=\"0.03\" />"
+                                 "  </cylinder>"
+                                 "</type>"
+                                 "<idlist idname=\"dets\"><id start=\"1\" end=\"2\" /></idlist>"
+                                 "</instrument>";
+
+    std::string const filename = "NeutronicPositionsTest_Definition.xml";
+    ScopedFile idfFile = createIDFFileObject(filename, contents);
+
+    InstrumentDefinitionParser parser(filename, "NeutronicPositionsTest", contents);
+    std::shared_ptr<const Instrument> instrument;
+    TS_ASSERT_THROWS_NOTHING(instrument = parser.parseXML(nullptr));
+    return instrument;
+  }
 };
 
 class InstrumentDefinitionParserTestPerformance : public CxxTest::TestSuite {
