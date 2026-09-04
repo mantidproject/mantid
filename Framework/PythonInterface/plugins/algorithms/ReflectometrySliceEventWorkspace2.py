@@ -1,12 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, WorkspaceGroupProperty
+from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspace
 from mantid.kernel import DateAndTime, Direction
 from mantid.simpleapi import AddSampleLog
+
+import re
 
 
 class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
@@ -23,12 +25,15 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         return ["GenerateEventsFilter", "FilterEvents", "ReflectometryReductionOneAuto"]
 
     def version(self):
-        return 1
+        return 2
 
     def PyInit(self):
+        self.declareProperty(
+            "InputWorkspaceName", "", direction=Direction.Input, doc="The name of an input event workspace or group of event workspaces."
+        )
+
         # Add properties from child algorithm
         self._filter_properties = [
-            "InputWorkspace",
             "StartTime",
             "StopTime",
             "TimeInterval",
@@ -42,58 +47,122 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         self.copyProperties("GenerateEventsFilter", self._filter_properties)
 
         # Add our own properties
-        self.declareProperty(MatrixWorkspaceProperty("MonitorWorkspace", "", direction=Direction.Input), "Input monitor workspace")
         self.declareProperty(
-            WorkspaceGroupProperty("OutputWorkspace", "", direction=Direction.Output), doc="Group name for the output workspace(s)."
+            "MonitorWorkspaceName",
+            "",
+            direction=Direction.Input,
+            doc="The name of the input monitor workspace or group of monitor workspaces.",
         )
-        self.declareProperty("UseNewFilterAlgorithm", True, doc="If true, use the new FilterEvents algorithm instead of FilterByTime.")
+        self.declareProperty("OutputWorkspaceName", "", direction=Direction.Output, doc="(Base)Name for the output workspace(s).")
+        self.declareProperty(
+            "FilterByLogValue", False, doc="If true, filter events via the FilterByLogValue algorithm. Uses FilterEvents otherwise."
+        )
 
     def validateInputs(self):
         issues = {}
-        workspace = self.getProperty("InputWorkspace").value
-        # Skip check for workspace groups
-        if not workspace:
+        if not self.getPropertyValue("OutputWorkspaceName"):
+            issues["OutputWorkspaceName"] = "A base name for the output workspace must be provided."
+        if not mtd.doesExist(self.getPropertyValue("InputWorkspaceName")):
+            issues["InputWorkspaceName"] = "The input workspace must be present in the ADS."
+        if not mtd.doesExist(self.getPropertyValue("MonitorWorkspaceName")):
+            issues["MonitorWorkspaceName"] = "The monitor workspace must be present in the ADS."
+        if issues:
             return issues
+        input_ws = mtd.retrieve(self.getPropertyValue("InputWorkspaceName"))
+        monitor_ws = mtd.retrieve(self.getPropertyValue("MonitorWorkspaceName"))
+
+        if input_ws.isGroup():
+            return self._validate_group_inputs(input_ws, monitor_ws, issues)
+        if monitor_ws.isGroup():
+            issues["MonitorWorkspaceName"] = "A monitor workspace group may only be provided alongside an eqivalent input workspace group."
+        return self._validate_single_workspace(input_ws, issues)
+
+    def _validate_single_workspace(self, workspace, issues):
+        if not isinstance(workspace, MatrixWorkspace):
+            issues["InputWorkspaceName"] = "Input workspaces must be MatrixWorkspaces."
+            return issues  # Stop here so we don't error out by asking more about the workspace.
         if workspace.run().getProtonCharge() < 1e-9:
-            issues["InputWorkspace"] = "Cannot slice workspace with zero proton charge"
+            issues["InputWorkspaceName"] = "Cannot slice workspace with zero proton charge"
+        return issues
+
+    def _validate_group_inputs(self, ws_group, monitors, issues: dict):
+        if monitors.isGroup() and len(monitors) != len(ws_group):
+            issues["InputWorkspaceName"] = "Monitor and Input workspace groups must be the same size."
+        for ws in ws_group:
+            issues = self._validate_single_workspace(ws, issues) | issues
         return issues
 
     def PyExec(self):
-        self._input_ws = self.getProperty("InputWorkspace").value
-        self._output_ws_group_name = self.getPropertyValue("OutputWorkspace")
+        input_ws = mtd.retrieve(self.getPropertyValue("InputWorkspaceName"))
+        input_monitor_ws = mtd.retrieve(self.getPropertyValue("MonitorWorkspaceName"))
+        output_ws_base_name = self.getPropertyValue("OutputWorkspaceName")
 
-        output_ws_group = self._slice_input_workspace()
-        self._scale_monitors_for_each_slice(output_ws_group)
-        output_ws_group = self._rebin_to_monitors()
-        output_ws_group = self._add_monitors_to_sliced_output()
-
-        self.setProperty("OutputWorkspace", self._output_ws_group_name)
-        self._clean_up()
-
-    def _slice_input_workspace(self):
-        if self.getProperty("UseNewFilterAlgorithm").value:
-            return self._slice_input_workspace_with_filter_events()
-        elif self._slice_by_log():
-            return self._slice_input_workspace_with_filter_by_log_value()
+        if input_ws.isGroup():
+            if not input_monitor_ws.isGroup():
+                input_monitor_ws = [input_monitor_ws] * len(input_ws)
+            sliced_workspaces = []
+            for i, (input_ws, monitor_ws) in enumerate(zip(input_ws, input_monitor_ws)):
+                self._output_ws_group_name = f"{input_ws.name()}_{monitor_ws.name()}_{output_ws_base_name}"
+                output_ws_group, monitor_ws_group = self._exec_single_workspace(input_ws, monitor_ws, output_workspace_suffix=f"_{i}")
+                sliced_workspaces.append(output_ws_group)
+                self._clean_up(monitor_ws_group)
+            # Transform the workspace groups so that each slice has a workspace group with the same shape as the original input workspace.
+            if not all(len(sliced_workspaces[0]) == len(ws) for ws in sliced_workspaces[1:]):
+                raise RuntimeError(
+                    f"All input workspaces must produce the same number of workspaces when sliced."
+                    f"FilterEvents will silently produce fewer than the prescribed number of slices if those slices would be empty."
+                    f"Check your slicing parameters and try again. Slices per input: {str([len(ws) for ws in sliced_workspaces])}"
+                )
+            for slice in zip(*sliced_workspaces):
+                slice_group = self._group_workspaces(list(slice))
+                mtd.addOrReplace(self._create_name_for_slice_group(output_ws_base_name, slice_group), slice_group)
+            for ws in sliced_workspaces:
+                self._ungroup_ws(ws)
         else:
-            return self._slice_input_workspace_with_filter_by_time()
+            self._output_ws_group_name = output_ws_base_name
+            output_ws_group, monitor_ws_group = self._exec_single_workspace(input_ws, input_monitor_ws)
+            self._clean_up(monitor_ws_group)
+            mtd.addOrReplace(output_ws_group.name(), output_ws_group)
+
+    def _exec_single_workspace(self, input_ws, input_monitor_ws, output_workspace_suffix=""):
+        output_ws_group = self._slice_input_workspace(input_ws, output_workspace_suffix)
+        monitor_ws_group = self._scale_monitors_for_each_slice(input_monitor_ws, input_ws, output_ws_group)
+        # This step is done in-place.
+        self._rebin_to_monitors(output_ws_group, monitor_ws_group)
+        self._add_monitors_to_sliced_output(output_ws_group, monitor_ws_group)
+        return output_ws_group, monitor_ws_group
+
+    def _create_name_for_slice_group(self, output_base_name, slice_group):
+        if self._slice_by_log():
+            regex = re.compile(r"\.From\.(\d+)\.To\.(\d+)")
+        else:
+            regex = re.compile(r"_(\d+)_(\d+)$")
+        start, end = regex.search(slice_group[0].name()).groups()
+        return f"{output_base_name}_{start}_{end}"
+
+    def _slice_input_workspace(self, input_ws, output_suffix):
+        if self._slice_by_log():
+            return self._slice_input_workspace_with_filter_by_log_value(input_ws, output_suffix)
+        else:
+            return self._slice_input_workspace_with_filter_events(input_ws, output_suffix)
 
     def _slice_by_log(self):
         """Return true if we are slicing by log value"""
-        return self._property_set("LogName")
+        return self._property_set("LogName") and self.getProperty("FilterByLogValue").value
 
     def _property_set(self, property_name):
         """Return true if the given property is set"""
         return not self.getProperty(property_name).isDefault
 
-    def _slice_input_workspace_with_filter_events(self):
+    def _slice_input_workspace_with_filter_events(self, input_ws, output_suffix=""):
         """Perform the slicing of the input workspace"""
-        self._create_filter()
+        split_ws, info_ws = self._create_filter(input_ws)
+        output_group_name = self._output_ws_group_name + output_suffix
         alg = self.createChildAlgorithm("FilterEvents")
-        alg.setProperty("InputWorkspace", self._input_ws)
-        alg.setProperty("SplitterWorkspace", self._split_ws)
-        alg.setProperty("InformationWorkspace", self._info_ws)
-        alg.setProperty("OutputWorkspaceBaseName", self._output_ws_group_name)
+        alg.setProperty("InputWorkspace", input_ws)
+        alg.setProperty("SplitterWorkspace", split_ws)
+        alg.setProperty("InformationWorkspace", info_ws)
+        alg.setProperty("OutputWorkspaceBaseName", output_group_name)
         alg.setProperty("GroupWorkspaces", True)
         alg.setProperty("FilterByPulseTime", False)
         alg.setProperty("OutputWorkspaceIndexedFrom1", True)
@@ -107,65 +176,29 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         alg.execute()
         # Ensure the run number for the child workspaces is stored in the
         # sample logs as a string (FilterEvents converts it to a double).
-        group = mtd[self._output_ws_group_name]
+        group = alg.getProperty("OutputWorkspace").value
         for ws in group:
             self._copy_run_number_to_sample_log(ws, ws)
         return group
 
-    def _create_filter(self):
+    def _create_filter(self, input_ws):
         """Generate the splitter workspace for performing the filtering for each required slice"""
         alg = self.createChildAlgorithm("GenerateEventsFilter")
         for property_name in self._filter_properties:
             alg.setProperty(property_name, self.getPropertyValue(property_name))
         alg.setProperty("OutputWorkspace", "__split")
         alg.setProperty("InformationWorkspace", "__info")
+        alg.setProperty("InputWorkspace", input_ws)
         alg.execute()
-        self._split_ws = alg.getProperty("OutputWorkspace").value
-        self._info_ws = alg.getProperty("InformationWorkspace").value
+        _split_ws = alg.getProperty("OutputWorkspace").value
+        _info_ws = alg.getProperty("InformationWorkspace").value
+        return _split_ws, _info_ws
 
-    def _slice_input_workspace_with_filter_by_time(self):
-        # Get the start/stop times, or use the run start/stop times if they are not provided
-        run_start = DateAndTime(self._input_ws.run().startTime())
-        run_stop = DateAndTime(self._input_ws.run().endTime())
-        start_time = self._get_property_or_default_as_datetime("StartTime", default_value=run_start, relative_start=run_start)
-        stop_time = self._get_property_or_default_as_datetime("StopTime", default_value=run_stop, relative_start=run_start)
-        # Get the time interval, or use the total interval if it's not provided
-        total_interval = (stop_time - start_time).total_seconds()
-        time_interval = self._get_interval_as_float("TimeInterval", total_interval)
-        # Calculate start/stop times in seconds relative to the start of the run
-        relative_start_time = (start_time - run_start).total_seconds()
-        relative_stop_time = relative_start_time + total_interval
-        # Loop through each slice
-        slice_names = list()
-        slice_start_time = relative_start_time
-        while slice_start_time < relative_stop_time:
-            slice_stop_time = slice_start_time + time_interval
-            slice_name = self._output_ws_group_name + "_" + str(slice_start_time) + "_" + str(slice_stop_time)
-            slice_names.append(slice_name)
-            alg = self.createChildAlgorithm("FilterByTime")
-            alg.setProperty("InputWorkspace", self._input_ws)
-            alg.setProperty("OutputWorkspace", slice_name)
-            alg.setProperty("StartTime", str(slice_start_time))
-            alg.setProperty("StopTime", str(slice_stop_time))
-            alg.execute()
-            sliced_workspace = alg.getProperty("OutputWorkspace").value
-            mtd.addOrReplace(slice_name, sliced_workspace)
-            # Proceed to the next interval
-            slice_start_time = slice_stop_time
-        # Group the sliced workspaces
-        group = self._group_workspaces(slice_names, self._output_ws_group_name)
-        mtd.addOrReplace(self._output_ws_group_name, group)
-        # Ensure the run number for the child workspaces is stored in the
-        # sample logs as a string (FilterEvents converts it to a double).
-        for ws in group:
-            self._copy_run_number_to_sample_log(ws, ws)
-        return group
-
-    def _slice_input_workspace_with_filter_by_log_value(self):
+    def _slice_input_workspace_with_filter_by_log_value(self, input_ws, output_suffix=""):
         # Get the min/max log value, or use the values from the sample logs if they're not provided
         log_name = self.getProperty("LogName").value
-        run_log_start = min(self._input_ws.run().getProperty(log_name).value)
-        run_log_stop = max(self._input_ws.run().getProperty(log_name).value)
+        run_log_start = min(input_ws.run().getProperty(log_name).value)
+        run_log_stop = max(input_ws.run().getProperty(log_name).value)
         log_min = self._get_property_or_default("MinimumLogValue", run_log_start)
         log_max = self._get_property_or_default("MaximumLogValue", run_log_stop)
         log_interval = self._get_interval_as_float("LogValueInterval", log_max - log_min)
@@ -176,7 +209,7 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
             slice_name = self._output_ws_group_name + "_" + str(slice_start_value) + "_" + str(slice_stop_value)
             slice_names.append(slice_name)
             alg = self.createChildAlgorithm("FilterByLogValue")
-            alg.setProperty("InputWorkspace", self._input_ws)
+            alg.setProperty("InputWorkspace", input_ws)
             alg.setProperty("OutputWorkspace", slice_name)
             alg.setProperty("LogName", log_name)
             alg.setProperty("LogBoundary", self.getProperty("LogBoundary").value)
@@ -188,19 +221,18 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
             # Proceed to the next interval
             slice_start_value = slice_stop_value
         # Group the sliced workspaces
-        group = self._group_workspaces(slice_names, self._output_ws_group_name)
-        mtd.addOrReplace(self._output_ws_group_name, group)
+        group = self._group_workspaces(slice_names)
+        mtd.addOrReplace(self._output_ws_group_name + output_suffix, group)
         # Ensure the run number for the child workspaces is stored in the
         # sample logs as a string (FilterEvents converts it to a double).
         for ws in group:
             self._copy_run_number_to_sample_log(ws, ws)
         return group
 
-    def _scale_monitors_for_each_slice(self, sliced_ws_group):
+    def _scale_monitors_for_each_slice(self, input_monitor_ws, input_ws, sliced_ws_group):
         """Create a group workspace which contains a copy of the monitors workspace for
         each slice, scaled by the relative proton charge for that slice"""
-        input_monitor_ws = self.getProperty("MonitorWorkspace").value
-        total_proton_charge = self._total_proton_charge()
+        total_proton_charge = self._total_proton_charge(input_ws)
         monitors_ws_list = []
         i = 1
         for slice in sliced_ws_group:
@@ -214,62 +246,61 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
             self._copy_run_number_to_sample_log(slice, slice_monitor_ws)
             i += 1
 
-        self._monitor_ws_group_name = input_monitor_ws.name() + "_sliced"
-        self._monitor_ws_group = self._group_workspaces(monitors_ws_list, self._monitor_ws_group_name)
-        mtd.addOrReplace(self._monitor_ws_group_name, self._monitor_ws_group)
+        monitor_ws_group_name = input_monitor_ws.name() + "_sliced"
+        monitor_ws_group = self._group_workspaces(monitors_ws_list)
+        mtd.addOrReplace(monitor_ws_group_name, monitor_ws_group)
+        return monitor_ws_group
 
     def _clone_workspace(self, ws_to_clone, output_ws_name):
         alg = self.createChildAlgorithm("CloneWorkspace")
         alg.setProperty("InputWorkspace", ws_to_clone)
-        alg.setProperty("OutputWorkspace", output_ws_name)
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
     def _scale_workspace(self, ws_to_scale, output_ws_name, scale_factor):
         alg = self.createChildAlgorithm("Scale")
         alg.setProperty("InputWorkspace", ws_to_scale)
-        alg.setProperty("OutputWorkspace", output_ws_name)
         alg.setProperty("Factor", scale_factor)
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
-    def _group_workspaces(self, ws_list, output_ws_name):
+    def _group_workspaces(self, ws_list):
         alg = self.createChildAlgorithm("GroupWorkspaces")
         alg.setProperty("InputWorkspaces", ws_list)
-        alg.setProperty("OutputWorkspace", output_ws_name)
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
-    def _total_proton_charge(self):
+    def _total_proton_charge(self, input_ws):
         """Get the proton charge for the input workspace"""
-        return self._input_ws.run().getProtonCharge()
+        return input_ws.run().getProtonCharge()
 
-    def _rebin_to_monitors(self):
+    def _rebin_to_monitors(self, ws_to_rebin, monitor_ws_group):
         """Rebin the output workspace group to the monitors workspace group"""
         alg = self.createChildAlgorithm("RebinToWorkspace")
-        alg.setProperty("WorkspaceToRebin", self._output_ws_group_name)
-        alg.setProperty("WorkspaceToMatch", self._monitor_ws_group_name)
-        alg.setProperty("OutputWorkspace", self._output_ws_group_name)
+        alg.setProperty("WorkspaceToRebin", ws_to_rebin.name())
+        alg.setProperty("WorkspaceToMatch", monitor_ws_group.name())
         alg.setProperty("PreserveEvents", False)
+        alg.setProperty("OutputWorkspace", ws_to_rebin.name())
         alg.execute()
-        return alg.getProperty("OutputWorkspace").value
 
-    def _add_monitors_to_sliced_output(self):
+    def _add_monitors_to_sliced_output(self, input_ws_group, monitor_ws_group):
         """Add the monitors for each slice to the output workspace for each slice"""
         alg = self.createChildAlgorithm("AppendSpectra")
-        alg.setProperty("InputWorkspace1", self._monitor_ws_group_name)
-        alg.setProperty("InputWorkspace2", self._output_ws_group_name)
+        alg.setProperty("InputWorkspace1", monitor_ws_group.name())
+        alg.setProperty("InputWorkspace2", input_ws_group.name())
+        alg.setProperty("OutputWorkspace", f"{input_ws_group.name()}")
         alg.setProperty("MergeLogs", False)
-        alg.setProperty("OutputWorkspace", self._output_ws_group_name)
         alg.execute()
-        return alg.getProperty("OutputWorkspace").value
 
-    def _clean_up(self):
-        """Remove worspaces added to the ADS"""
-        monitor_ws_names = [ws.name() for ws in self._monitor_ws_group]
+    def _ungroup_ws(self, ws_group):
         alg = self.createChildAlgorithm("UnGroupWorkspace")
-        alg.setProperty("InputWorkspace", self._monitor_ws_group_name)
+        alg.setProperty("InputWorkspace", ws_group.name())
         alg.execute()
+
+    def _clean_up(self, monitor_ws_group):
+        """Remove worspaces added to the ADS"""
+        monitor_ws_names = [ws.name() for ws in monitor_ws_group]
+        self._ungroup_ws(monitor_ws_group)
         for ws_name in monitor_ws_names:
             mtd.remove(ws_name)
 
@@ -310,7 +341,7 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         value_as_string = self.getPropertyValue(property_name)
         value_as_list = value_as_string.split(",")
         if len(value_as_list) > 1:
-            raise RuntimeError("Multiple intervals are not currently supported if UseNewFilterAlgorithm is False")
+            raise RuntimeError("Multiple intervals are not supported if using FilterByLogValue.")
         if len(value_as_list) < 1:
             raise RuntimeError("Interval was not specified")
         return float(value_as_list[0])

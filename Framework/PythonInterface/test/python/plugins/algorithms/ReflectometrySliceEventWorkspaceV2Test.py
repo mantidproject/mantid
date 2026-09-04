@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -12,18 +12,13 @@ from mantid.dataobjects import Workspace2D
 from testhelpers import assertRaisesNothing, create_algorithm
 
 
-class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
+class ReflectometrySliceEventWorkspaceV2Test(unittest.TestCase):
     def setUp(self):
         self.__class__._input_ws = self._create_test_workspace()
         self.__class__._input_ws_group = self._create_test_workspace_group()
         self.__class__._monitor_ws = self._create_monitor_workspace()
         self.__class__._monitor_ws_group = self._create_monitor_workspace_group()
-        self._default_args = {
-            "InputWorkspace": "input_ws",
-            "MonitorWorkspace": "monitor_ws",
-            "OutputWorkspace": "output",
-            "UseNewFilterAlgorithm": True,
-        }
+        self._default_args = {"InputWorkspaceName": "input_ws", "MonitorWorkspaceName": "monitor_ws", "OutputWorkspaceName": "output"}
 
     def tearDown(self):
         mtd.clear()
@@ -32,21 +27,14 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         self._assert_run_algorithm_throws()
 
     def test_missing_monitors(self):
-        self._assert_run_algorithm_throws({"InputWorkspace": "input_ws"})
+        self._assert_run_algorithm_throws({"InputWorkspaceName": "input_ws"})
 
     def test_missing_output_ws(self):
-        self._assert_run_algorithm_throws({"InputWorkspace": "input_ws", "MonitorWorkspace": "monitor_ws"})
+        self._assert_run_algorithm_throws({"InputWorkspaceName": "input_ws", "MonitorWorkspaceName": "monitor_ws"})
 
     def test_default_inputs_return_single_slice(self):
         output = self._assert_run_algorithm_succeeds(self._default_args)
         self._check_slices(output, ["output_0_4200"])
-        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[14, 16, 8])
-
-    def test_default_inputs_return_single_slice_FilterByTime(self):
-        args = self._default_args
-        args["UseNewFilterAlgorithm"] = False
-        output = self._assert_run_algorithm_succeeds(args)
-        self._check_slices(output, ["output_0_3600.0"])
         self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[14, 16, 8])
 
     def test_setting_time_interval(self):
@@ -73,29 +61,6 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         self._check_y(output, child=5, spec=3, expected_bins=101, expected_values=[2, 1, 1])
         self._check_y(output, child=6, spec=3, expected_bins=101, expected_values=[0, 0, 0])
 
-    def test_setting_time_interval_FilterByTime(self):
-        args = self._default_args
-        args["TimeInterval"] = 600
-        args["UseNewFilterAlgorithm"] = False
-        output = self._assert_run_algorithm_succeeds(args)
-        self._check_slices(
-            output,
-            [
-                "output_0_600.0",
-                "output_600.0_1200.0",
-                "output_1200.0_1800.0",
-                "output_1800.0_2400.0",
-                "output_2400.0_3000.0",
-                "output_3000.0_3600.0",
-            ],
-        )
-        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
-        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 3, 2])
-        self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 3, 0])
-        self._check_y(output, child=3, spec=3, expected_bins=101, expected_values=[4, 2, 2])
-        self._check_y(output, child=4, spec=3, expected_bins=101, expected_values=[4, 1, 2])
-        self._check_y(output, child=5, spec=3, expected_bins=101, expected_values=[2, 1, 1])
-
     def test_setting_time_interval_and_limits(self):
         args = self._default_args
         args["TimeInterval"] = 600
@@ -106,20 +71,6 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[4, 2, 2])
         self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[4, 1, 2])
         self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[1, 1, 0])
-
-    def test_setting_time_interval_and_limits_FilterByTime(self):
-        args = self._default_args
-        args["TimeInterval"] = 600
-        args["StartTime"] = "1800"
-        args["StopTime"] = "3300"
-        args["UseNewFilterAlgorithm"] = False
-        output = self._assert_run_algorithm_succeeds(args)
-        # This filters up to 3600, which looks less correct than the new algorithm which cuts
-        # off at the requested 3300
-        self._check_slices(output, ["output_1800_2400.0", "output_2400.0_3000.0", "output_3000.0_3600.0"])
-        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[4, 2, 2])
-        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[4, 1, 2])
-        self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[2, 1, 1])
 
     def test_setting_multiple_time_intervals(self):
         args = self._default_args
@@ -132,13 +83,6 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[4, 2, 2])
         self._check_y(output, child=3, spec=3, expected_bins=101, expected_values=[6, 2, 3])
 
-    def test_setting_multiple_time_intervals_is_not_implemented_for_FilterByTime(self):
-        args = self._default_args
-        args["TimeInterval"] = "600, 1200"
-        args["StopTime"] = "3600"
-        args["UseNewFilterAlgorithm"] = False
-        self._assert_run_algorithm_fails(args)
-
     def test_setting_log_interval_without_log_name_produces_single_slice(self):
         args = self._default_args
         args["LogValueInterval"] = 600
@@ -149,9 +93,9 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
     def test_setting_log_interval_without_log_name_produces_single_slice_FilterByLogValue(self):
         args = self._default_args
         args["LogValueInterval"] = 600
-        args["UseNewFilterAlgorithm"] = False
+        args["FilterByLogValue"] = True
         output = self._assert_run_algorithm_succeeds(args)
-        self._check_slices(output, ["output_0_3600.0"])
+        self._check_slices(output, ["output_0_4200"])
         self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[14, 16, 8])
 
     def test_setting_log_interval(self):
@@ -197,7 +141,7 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         args["LogValueInterval"] = 20
         args["MinimumLogValue"] = 0
         args["MaximumLogValue"] = 100
-        args["UseNewFilterAlgorithm"] = False
+        args["FilterByLogValue"] = True
         output = self._assert_run_algorithm_succeeds(args)
         self._check_slices(output, ["output_0.0_20.0", "output_20.0_40.0", "output_40.0_60.0", "output_60.0_80.0", "output_80.0_100.0"])
         self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[0, 0, 0])
@@ -231,7 +175,7 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         args["LogName"] = "proton_charge"
         args["MinimumLogValue"] = 0
         args["MaximumLogValue"] = 101
-        args["UseNewFilterAlgorithm"] = False
+        args["FilterByLogValue"] = True
         output = self._assert_run_algorithm_succeeds(args)
         self._check_slices(output, ["output_0.0_101.0"])
         # These values don't seem right - I think they should contain all the counts from the
@@ -263,7 +207,7 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         args["LogValueInterval"] = 20
         args["MinimumLogValue"] = "75"
         args["MaximumLogValue"] = "110"
-        args["UseNewFilterAlgorithm"] = False
+        args["FilterByLogValue"] = True
         output = self._assert_run_algorithm_succeeds(args)
         self._check_slices(output, ["output_75.0_95.0", "output_95.0_115.0"])
         self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[0, 3, 0])
@@ -271,125 +215,35 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
 
     def test_when_input_is_a_workspace_group(self):
         args = self._default_args
-        args["TimeInterval"] = 600
-        args["InputWorkspace"] = "input_ws_group"
-        group = self._assert_run_algorithm_succeeds(args)
-        self.assertEqual(group.getNumberOfEntries(), 3)
-        output = group[0]
-        self._check_slices(
-            output,
-            [
-                "ws1_monitor_ws_output_0_600",
-                "ws1_monitor_ws_output_600_1200",
-                "ws1_monitor_ws_output_1200_1800",
-                "ws1_monitor_ws_output_1800_2400",
-                "ws1_monitor_ws_output_2400_3000",
-                "ws1_monitor_ws_output_3000_3600",
-                "ws1_monitor_ws_output_3600_4200",
-            ],
-        )
-        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
-        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 3, 2])
-        self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 3, 0])
-        self._check_y(output, child=3, spec=3, expected_bins=101, expected_values=[4, 2, 2])
-        self._check_y(output, child=4, spec=3, expected_bins=101, expected_values=[4, 1, 2])
-        self._check_y(output, child=5, spec=3, expected_bins=101, expected_values=[2, 1, 1])
-        self._check_y(output, child=6, spec=3, expected_bins=101, expected_values=[0, 0, 0])
-
-    def test_when_input_is_a_workspace_group_FilterByTime(self):
-        args = self._default_args
-        args["TimeInterval"] = 600
-        args["InputWorkspace"] = "input_ws_group"
-        args["UseNewFilterAlgorithm"] = False
-        group = self._assert_run_algorithm_succeeds(args)
-        self.assertEqual(group.getNumberOfEntries(), 3)
-        output = group[0]
-        self._check_slices(
-            output,
-            [
-                "ws1_monitor_ws_output_0_600.0",
-                "ws1_monitor_ws_output_600.0_1200.0",
-                "ws1_monitor_ws_output_1200.0_1800.0",
-                "ws1_monitor_ws_output_1800.0_2400.0",
-                "ws1_monitor_ws_output_2400.0_3000.0",
-                "ws1_monitor_ws_output_3000.0_3600.0",
-            ],
-        )
-        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
-        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 3, 2])
-        self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 3, 0])
-        self._check_y(output, child=3, spec=3, expected_bins=101, expected_values=[4, 2, 2])
-        self._check_y(output, child=4, spec=3, expected_bins=101, expected_values=[4, 1, 2])
-        self._check_y(output, child=5, spec=3, expected_bins=101, expected_values=[2, 1, 1])
+        time_interval = 600
+        args["TimeInterval"] = time_interval
+        args["InputWorkspaceName"] = "input_ws_group"
+        self._assert_run_algorithm_succeeds(args, len(mtd["input_ws_group"]))
+        self._check_group(time_interval, ["ws1", "ws2", "ws3"], ["monitor_ws"] * 3)
 
     def test_when_input_and_monitors_are_both_workspace_groups(self):
         args = self._default_args
-        args["TimeInterval"] = 600
-        args["InputWorkspace"] = "input_ws_group"
-        args["MonitorWorkspace"] = "monitor_ws_group"
-        group = self._assert_run_algorithm_succeeds(args)
-        self.assertEqual(group.getNumberOfEntries(), 3)
-        output = group[0]
-        self._check_slices(
-            output,
-            [
-                "ws1_mon1_output_0_600",
-                "ws1_mon1_output_600_1200",
-                "ws1_mon1_output_1200_1800",
-                "ws1_mon1_output_1800_2400",
-                "ws1_mon1_output_2400_3000",
-                "ws1_mon1_output_3000_3600",
-                "ws1_mon1_output_3600_4200",
-            ],
-        )
-        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
-        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 3, 2])
-        self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 3, 0])
-        self._check_y(output, child=3, spec=3, expected_bins=101, expected_values=[4, 2, 2])
-        self._check_y(output, child=4, spec=3, expected_bins=101, expected_values=[4, 1, 2])
-        self._check_y(output, child=5, spec=3, expected_bins=101, expected_values=[2, 1, 1])
-        self._check_y(output, child=6, spec=3, expected_bins=101, expected_values=[0, 0, 0])
-
-    def test_when_input_and_monitors_are_both_workspace_groups_FilterByTime(self):
-        args = self._default_args
-        args["TimeInterval"] = 600
-        args["InputWorkspace"] = "input_ws_group"
-        args["MonitorWorkspace"] = "monitor_ws_group"
-        args["UseNewFilterAlgorithm"] = False
-        group = self._assert_run_algorithm_succeeds(args)
-        self.assertEqual(group.getNumberOfEntries(), 3)
-        output = group[0]
-        self._check_slices(
-            output,
-            [
-                "ws1_mon1_output_0_600.0",
-                "ws1_mon1_output_600.0_1200.0",
-                "ws1_mon1_output_1200.0_1800.0",
-                "ws1_mon1_output_1800.0_2400.0",
-                "ws1_mon1_output_2400.0_3000.0",
-                "ws1_mon1_output_3000.0_3600.0",
-            ],
-        )
-        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
-        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 3, 2])
-        self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 3, 0])
-        self._check_y(output, child=3, spec=3, expected_bins=101, expected_values=[4, 2, 2])
-        self._check_y(output, child=4, spec=3, expected_bins=101, expected_values=[4, 1, 2])
-        self._check_y(output, child=5, spec=3, expected_bins=101, expected_values=[2, 1, 1])
+        time_interval = 600
+        args["TimeInterval"] = time_interval
+        args["InputWorkspaceName"] = "input_ws_group"
+        args["MonitorWorkspaceName"] = "monitor_ws_group"
+        self._assert_run_algorithm_succeeds(args, len(mtd["input_ws_group"]))
+        self._check_group(time_interval, ["ws1", "ws2", "ws3"], ["mon1", "mon2", "mon3"])
 
     def test_fails_when_input_groups_are_different_sizes(self):
         self._create_monitor_workspace_group_with_two_members()
         args = self._default_args
         args["TimeInterval"] = 600
-        args["InputWorkspace"] = "input_ws_group"
-        args["MonitorWorkspace"] = "test_monitor_ws_group"
-        self._assert_run_algorithm_fails(args)
+        args["InputWorkspaceName"] = "input_ws_group"
+        args["MonitorWorkspaceName"] = "test_monitor_ws_group"
+        self._assert_run_algorithm_throws(args)
         mtd.remove("test_monitor_ws_group")
 
     def test_validation_fails_when_workspace_has_zero_counts(self):
         input_ws = Workspace2D()
+        mtd.addOrReplace("test_ws", input_ws)
         args = self._default_args
-        args["InputWorkspace"] = input_ws
+        args["InputWorkspaceName"] = input_ws.name()
         self._assert_run_algorithm_throws(args)
 
     def _create_test_workspace(self):
@@ -439,28 +293,52 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         mtd.addOrReplace("test_monitor_ws_group", group)
         return group
 
-    def _assert_run_algorithm_succeeds(self, args):
+    """
+    Does not return the output workspaces when groups have been used as the input.
+    The resulting groups need to be selected manually in the main test methods.
+    """
+
+    def _assert_run_algorithm_succeeds(self, args, is_group=False):
         """Run the algorithm with the given args and check it succeeds"""
-        alg = create_algorithm("ReflectometrySliceEventWorkspace", **args, Version=1)
+        alg = create_algorithm("ReflectometrySliceEventWorkspace", **args)
         assertRaisesNothing(self, alg.execute)
+        if is_group:
+            return
         self.assertEqual(mtd.doesExist("output"), True)
         return mtd["output"]
 
     def _assert_run_algorithm_fails(self, args):
         """Run the algorithm with the given args and check it fails to produce output"""
-        alg = create_algorithm("ReflectometrySliceEventWorkspace", **args, Version=1)
+        alg = create_algorithm("ReflectometrySliceEventWorkspace", **args)
         assertRaisesNothing(self, alg.execute)
         self.assertEqual(mtd.doesExist("output"), False)
 
     def _assert_run_algorithm_throws(self, args={}):
         """Run the algorithm with the given args and check it throws"""
         throws = False
-        alg = create_algorithm("ReflectometrySliceEventWorkspace", **args, Version=1)
+        alg = create_algorithm("ReflectometrySliceEventWorkspace", **args)
         try:
             alg.execute()
         except:
             throws = True
         self.assertEqual(throws, True)
+
+    def _check_group(self, time_interval, expected_ws_names, expected_monitor_names):
+        expected_values_set = [[2, 6, 1], [2, 3, 2], [0, 3, 0], [4, 2, 2], [4, 1, 2], [2, 1, 1], [0, 0, 0]]
+        # Check for the 3 workspaces contained in each slice group.
+        for i, expected_values in zip(range(7), expected_values_set):
+            self.assertTrue(mtd.doesExist(f"output_{i * time_interval}_{(i + 1) * time_interval}"))
+            slice_group = mtd.retrieve(f"output_{i * time_interval}_{(i + 1) * time_interval}")
+            self.assertEqual(slice_group.getNumberOfEntries(), 3)
+            self._check_slices(
+                slice_group,
+                [
+                    f"{expected_ws_names[0]}_{expected_monitor_names[0]}_output_0_{i * time_interval}_{(i + 1) * time_interval}",
+                    f"{expected_ws_names[1]}_{expected_monitor_names[1]}_output_1_{i * time_interval}_{(i + 1) * time_interval}",
+                    f"{expected_ws_names[2]}_{expected_monitor_names[2]}_output_2_{i * time_interval}_{(i + 1) * time_interval}",
+                ],
+            )
+            self._check_y(slice_group, child=0, spec=3, expected_bins=101, expected_values=expected_values)
 
     def _check_slices(self, workspace_group, expected_names):
         number_of_slices = workspace_group.getNumberOfEntries()
