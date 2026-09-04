@@ -127,9 +127,6 @@ protected:
                                                                           const int64_t &lengthIn);
   /// loadinstrument Child Algorithm
   void runLoadInstrument(const std::string &fileName, const DataObjects::Workspace2D_sptr &, double, double);
-  /// Returns whether OSIRIS silicon RAW hardware IDs must be replaced by the IDF spectra map.
-  bool shouldRewriteOsirisSiliconSpectraMap(const std::string &instrumentID,
-                                            const DataObjects::Workspace2D_sptr &localWorkspace) const;
   /// loadinstrumentfromraw algorithm
   void runLoadInstrumentFromRaw(const std::string &fileName, const DataObjects::Workspace2D_sptr &);
   /// loadinstrumentfromraw Child Algorithm

@@ -1130,7 +1130,60 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_osiris_silicon_spectra_are_mapped_from_the_instrument_definition() {
+    auto const workspace = loadOsirisSilicon("osiris_full", "", "");
+
+    TS_ASSERT_EQUALS(2565, workspace->getNumberHistograms());
+
+    assertSpectrumMapsToMatchingDetector(*workspace, 1005);
+    assertSpectrumMapsToMatchingDetector(*workspace, 2564);
+
+    assertSpectrumMapsToMatchingDetector(*workspace, 1);
+    assertSpectrumMapsToMatchingDetector(*workspace, 963);
+
+    TS_ASSERT(workspace->getSpectrum(2564).getDetectorIDs().empty());
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_osiris_silicon_spectra_keep_their_mapping_when_a_spectrum_range_is_given() {
+    auto const workspace = loadOsirisSilicon("osiris_cropped", "1005", "2564");
+
+    TS_ASSERT_EQUALS(1560, workspace->getNumberHistograms());
+    TS_ASSERT_EQUALS(1005, workspace->getSpectrum(0).getSpectrumNo());
+    TS_ASSERT_EQUALS(2564, workspace->getSpectrum(1559).getSpectrumNo());
+
+    assertSpectrumMapsToMatchingDetector(*workspace, 1005);
+    assertSpectrumMapsToMatchingDetector(*workspace, 2564);
+
+    AnalysisDataService::Instance().clear();
+  }
+
 private:
+  MatrixWorkspace_sptr loadOsirisSilicon(std::string const &outputName, std::string const &spectrumMin,
+                                         std::string const &spectrumMax) {
+    LoadRaw3 loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "OSIRIS00156815.raw");
+    loader.setPropertyValue("OutputWorkspace", outputName);
+    if (!spectrumMin.empty())
+      loader.setPropertyValue("SpectrumMin", spectrumMin);
+    if (!spectrumMax.empty())
+      loader.setPropertyValue("SpectrumMax", spectrumMax);
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT(loader.isExecuted());
+
+    return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputName);
+  }
+
+  void assertSpectrumMapsToMatchingDetector(MatrixWorkspace const &workspace, specnum_t const spectrumNumber) {
+    auto const &detectorIDs =
+        workspace.getSpectrum(workspace.getIndexFromSpectrumNumber(spectrumNumber)).getDetectorIDs();
+    TS_ASSERT_EQUALS(1, detectorIDs.size());
+    if (detectorIDs.size() == 1)
+      TS_ASSERT_EQUALS(spectrumNumber, *detectorIDs.begin());
+  }
+
   /// Helper method to run common set of tests on a workspace in a multi-period
   /// group.
   void doTestMultiPeriodWorkspace(const MatrixWorkspace_sptr &workspace, const size_t &nHistograms,
