@@ -279,6 +279,76 @@ A few widgets are best not driven with ``QTest`` at all. ``FunctionBrowser`` and
 ``FitPropertyBrowser`` are Qt property browsers whose cells are nested editors; use their Python API
 (``setFunction``, ``getParameter``, ``loadFunction``) instead.
 
+Which guides are covered
+########################
+
+One directory under ``Testing/AutomatedUITests`` per interface, each replacing the manual guide
+named in its base module's docstring:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Suite
+     - Guide it replaces
+   * - ``EngineeringDiffraction``
+     - ``Testing/EngineeringDiffraction/EngineeringDiffractionTestGuide.rst``
+   * - ``ElementalAnalysis``
+     - ``Testing/ElementalAnalysis/ElementalAnalysisTests.rst``
+   * - ``FilterEvents``
+     - ``Testing/Utility/FilterEventsInterfaceTest.rst``
+   * - ``Muon``
+     - ``Testing/MuonAnalysis_test_guides/Muon_Analysis_PSI.rst`` (the other Muon guides need the
+       ISIS data archive)
+   * - ``SampleTransmissionCalculator``
+     - ``Testing/General/SampleTransmissionCalculatorTestGuide.rst``
+   * - ``SANS``
+     - ``Testing/SANSGUI/ISISSANSGUITests.rst`` (the scenarios that need no run data)
+   * - ``SliceViewer``
+     - ``Testing/SliceViewer/SliceViewer.rst``
+
+The guides stay in place as prose. The mapping from a guide section to the test that replaces it
+lives in the test modules' docstrings and in their ``subTest`` labels, which quote the guide's own
+step numbers.
+
+``Testing/AutomatedUITests/FUTURE_WORK.md`` records what each suite could not check and why -
+observations that had to be weakened, steps with no automated equivalent, and the failures the
+replay found and deliberately left failing.
+
+Guides that stay manual
+#######################
+
+Some guides cannot be replaced by a test that drives Qt offscreen, and no attempt is made to. They
+are listed here so that "there is no suite for this one" is a decision on the record rather than an
+oversight:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Guide
+     - What blocks it
+   * - ``Testing/Core/Core.rst``
+     - Deliberately exploratory - "try things that should work, then try to break Mantid" - and
+       required to be run against the installer on four operating systems.
+   * - ``Testing/Documentation/DocumentationTest.rst``
+     - Human inspection of rendered documentation: a web browser, internet access, a native print
+       dialog, and a per-page judgement that it "displays correctly".
+   * - ``Testing/Direct/MSliceTestGuide.rst``
+     - MSlice is a separate package with its own application and plot manager; the guide also turns
+       on clipboard round-trips into the script editor and an embedded Jupyter console.
+   * - ``Testing/ErrorReporter-ProjectRecovery/ErrorReporterTesting.rst``
+     - Every scenario starts by segfaulting Workbench, and the pass criterion is a person checking
+       the live error reports database.
+   * - ``Testing/ErrorReporter-ProjectRecovery/ProjectRecoveryTesting.rst``
+     - Every scenario is crash, restart, answer the recovery dialog. That needs a harness that
+       launches, kills and relaunches Workbench, which is a different thing from these tests.
+   * - ``Testing/LiveData/LiveDataTests.rst``
+     - Requires the facility switched to ``TEST_LIVE`` and ``Mantid.user.properties`` edited before
+       startup, and is time-dependent throughout.
+   * - ``Testing/LiveData/LiveDataPacketPlayback.rst``
+     - No GUI at all: a multi-process, POSIX-only command line utility.
+
 Adding a new interface
 ######################
 

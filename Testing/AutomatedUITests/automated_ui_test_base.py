@@ -276,6 +276,68 @@ class AutomatedUITestBase(unittest.TestCase):
         config["datasearch.directories"] = self._saved_data_dirs
         self._saved_data_dirs = None
 
+    # ------------------------------------------------------------------ facility configuration
+
+    @contextmanager
+    def config_settings(self, **settings):
+        """Change ``mantid.kernel.config`` keys for the duration of a block, then put them back.
+
+        Distinct from ``_isolate_qsettings``, which redirects Qt's own settings store: several guides
+        begin "set the facility to ISIS and the instrument to ALF", and that lives in Mantid's
+        properties rather than in QSettings, so it leaks into every later test in the process unless
+        it is restored. Keys are given as Python identifiers with underscores for dots
+        (``default_facility="ISIS"``), because a dotted name cannot be a keyword argument.
+        """
+        from mantid.kernel import config
+
+        keys = {name.replace("_", "."): value for name, value in settings.items()}
+        saved = {key: config[key] for key in keys}
+        for key, value in keys.items():
+            config[key] = value
+        try:
+            yield
+        finally:
+            for key, value in saved.items():
+                config[key] = value
+
+    # ------------------------------------------------------------------ C++ interfaces
+
+    def open_cpp_interface(self, name):
+        """Open one of the C++ ``UserSubWindow`` interfaces and return its window.
+
+        ALFView, ISIS Reflectometry, the Indirect and Inelastic interfaces and ALC are registered
+        with ``DECLARE_SUBWINDOW`` and have no Python entry point at all, so the factory is the only
+        way in and the returned ``QWidget`` is the only handle a test gets - its tabs and widgets are
+        reached with ``child_named``. ``name`` is the interface's ``static std::string name()``, the
+        same string the Interfaces menu shows.
+
+        The window is registered for teardown here rather than left to the caller because it needs
+        the explicit ``sip.delete`` that ``CppInterfacesStartupTest`` documents: the C++ destructor
+        does not run on ``close()`` even with ``WA_DeleteOnClose`` set, and an interface left alive
+        keeps its ADS observers, which then fire into the next test's cleared ADS.
+        """
+        from mantidqt.interfacemanager import InterfaceManager
+        from qt_interaction_helpers import process_events
+
+        window = InterfaceManager().createSubWindow(name)
+        if window is None:
+            raise RuntimeError(f"the interface factory does not know '{name}'; is this build missing that interface?")
+        window.show()
+        process_events(2)
+        self.addCleanup(self._close_cpp_interface, window)
+        return window
+
+    @staticmethod
+    def _close_cpp_interface(window):
+        from qt_interaction_helpers import process_events
+        from qtpy import sip
+
+        if sip.isdeleted(window):
+            return
+        window.close()
+        process_events(2)
+        sip.delete(window)
+
     # ------------------------------------------------------------------ waiting
 
     # how long tearDown will keep pumping the event loop for an abandoned worker before it stops

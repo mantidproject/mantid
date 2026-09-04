@@ -48,6 +48,67 @@ def process_events(rounds=1):
         QApplication.processEvents(QEventLoop.AllEvents, _EVENT_SLICE_MS)
 
 
+def children_of_type(parent, widget_type):
+    """Every descendant of ``parent`` of the given type, in Qt's own order.
+
+    The counting half of ``child_named``: "how many plot canvases does this tab hold", "which spin
+    boxes did loading a user file populate". Kept separate because a count is a legitimate assertion
+    in its own right, whereas reaching a particular widget should always go by name.
+    """
+    return parent.findChildren(widget_type)
+
+
+def child_named(parent, object_name, widget_type=None):
+    """The descendant of ``parent`` whose ``objectName`` is ``object_name``.
+
+    This is the entire access story for the C++ interfaces. ``ALFView``, ``ISIS Reflectometry``, the
+    Indirect and Inelastic interfaces and ``ALC`` are ``UserSubWindow`` subclasses: Python gets the
+    window back from ``InterfaceManager().createSubWindow(...)`` and nothing else, because their
+    tabs, presenters and widgets are not wrapped. The names are the ones in the interface's ``.ui``
+    file under ``qt/scientific_interfaces``.
+
+    That coupling is why the failure message matters more here than anywhere else in this module: a
+    renamed widget in a ``.ui`` file is the most likely way one of these tests breaks, and "no
+    widget named X" with the names that *are* present turns that from a puzzle into a one-line fix.
+    """
+    from qtpy.QtWidgets import QWidget
+
+    widget_type = QWidget if widget_type is None else widget_type
+    child = parent.findChild(widget_type, object_name)
+    if child is None:
+        available = sorted({c.objectName() for c in parent.findChildren(widget_type) if c.objectName()})
+        raise AssertionError(
+            f"no {widget_type.__name__} named '{object_name}' under '{parent.objectName() or parent}'; available: {available}"
+        )
+    return child
+
+
+def dock_widgets(window):
+    """Every ``QDockWidget`` in a window, keyed by its title.
+
+    Several interfaces (Elemental Analysis, the Reflectometry preview tab) are checked only for
+    whether their panels can be undocked and re-docked, so the title is the useful handle - it is
+    what the guide names them by.
+    """
+    from qtpy.QtWidgets import QDockWidget
+
+    return {dock.windowTitle(): dock for dock in window.findChildren(QDockWidget)}
+
+
+def set_dock_floating(dock, floating):
+    """Float or re-dock a ``QDockWidget``, checking it took.
+
+    ``setFloating`` is refused outright when the dock is not in a ``QMainWindow``, and silently does
+    nothing when ``QDockWidget.DockWidgetFloatable`` is not among its features - both of which read
+    as "undocking is broken" unless the state is checked here.
+    """
+    dock.setFloating(floating)
+    process_events(2)
+    if dock.isFloating() != floating:
+        raise AssertionError(f"dock '{dock.windowTitle()}' is floating={dock.isFloating()} after asking for {floating}")
+    return dock.isFloating()
+
+
 def click(widget):
     """Left-click a widget, using the dependable hot-spot for its kind.
 
@@ -563,6 +624,70 @@ def set_finder_text(finder, text, expect_valid=True):
     if expect_valid and not finder.isValid():
         raise AssertionError(f"file finder could not resolve '{text}'")
     return finder
+
+
+# ---------------------------------------------------------------------------------------------
+# Embedded matplotlib canvases.
+#
+# Several interfaces put their only interactive control on a plot rather than on a widget: a pair of
+# draggable range markers whose positions are mirrored into "EMin"/"EMax" fields (Indirect
+# Diagnostics, the Inelastic Symmetrise and Moments tabs, Filter Events, ALC). QTest cannot drive
+# those - the markers are matplotlib artists, not widgets, and the canvas is one opaque QWidget - so
+# the events have to be injected through matplotlib's own event machinery instead.
+#
+# The coordinates are given in *data* space, which is what a test has: the guide says "drag the
+# marker to 0.4", not "drag it to pixel 317".
+# ---------------------------------------------------------------------------------------------
+
+
+def _mpl_event(axes, name, x, y, button=1):
+    """Build and dispatch one matplotlib mouse event at data coordinates ``(x, y)``.
+
+    Dispatched through ``canvas.callbacks.process`` rather than the ``canvas.button_press_event``
+    convenience methods, which were removed in matplotlib 3.6.
+    """
+    from matplotlib.backend_bases import MouseEvent
+
+    canvas = axes.figure.canvas
+    x_pixel, y_pixel = axes.transData.transform((x, y))
+    canvas.callbacks.process(name, MouseEvent(name, canvas, x_pixel, y_pixel, button))
+    process_events()
+
+
+def mpl_click(axes, x, y, button=1):
+    """Click a point on an embedded plot, in data coordinates.
+
+    A press and a release, because a handler that only listens for one of the two is common - the
+    range selectors react to the press, the "add a peak here" tools to the release.
+    """
+    _mpl_event(axes, "button_press_event", x, y, button)
+    _mpl_event(axes, "button_release_event", x, y, button)
+
+
+def mpl_drag(axes, from_xy, to_xy, button=1, steps=3):
+    """Drag from one point to another on an embedded plot, in data coordinates.
+
+    The intermediate motion events are not padding: a range selector moves its marker on
+    ``motion_notify_event`` and only commits the value on release, so a press followed straight by a
+    release moves nothing at all.
+    """
+    x0, y0 = from_xy
+    x1, y1 = to_xy
+    _mpl_event(axes, "button_press_event", x0, y0, button)
+    for step in range(1, steps + 1):
+        fraction = step / steps
+        _mpl_event(axes, "motion_notify_event", x0 + (x1 - x0) * fraction, y0 + (y1 - y0) * fraction, button)
+    _mpl_event(axes, "button_release_event", x1, y1, button)
+
+
+def line_labels(axes):
+    """Labels of the lines drawn on an axes, in draw order.
+
+    The replacement for the guides' colour-based observations. "A red line labelled Fitted Data
+    should appear" is checked as the label arriving, not the colour: an offscreen render has no
+    colour to inspect without rasterising it, and the label is what the legend shows the user anyway.
+    """
+    return [line.get_label() for line in axes.get_lines()]
 
 
 def figure_numbers():
