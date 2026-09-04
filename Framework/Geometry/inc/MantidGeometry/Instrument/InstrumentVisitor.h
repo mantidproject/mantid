@@ -124,6 +124,9 @@ private:
   /// Component names
   std::shared_ptr<std::vector<std::string>> m_names;
 
+  /// Side-by-side (unwrapped) instrument-view positions; unset entries hold EMPTY_DBL
+  std::shared_ptr<std::vector<Eigen::Vector2d>> m_sideBySideViewPositions;
+
   void markAsSourceOrSample(Mantid::Geometry::IComponent *componentId, const size_t componentIndex);
 
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> makeWrappers() const;

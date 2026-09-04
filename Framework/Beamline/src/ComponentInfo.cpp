@@ -52,13 +52,15 @@ ComponentInfo::ComponentInfo(
     std::shared_ptr<std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>> rotations,
     std::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
     std::shared_ptr<std::vector<ComponentType>> componentType, std::shared_ptr<const std::vector<std::string>> names,
-    int64_t sourceIndex, int64_t sampleIndex)
+    std::shared_ptr<const std::vector<Eigen::Vector2d>> sideBySideViewPositions, int64_t sourceIndex,
+    int64_t sampleIndex)
     : m_assemblySortedDetectorIndices(std::move(assemblySortedDetectorIndices)),
       m_assemblySortedComponentIndices(std::move(assemblySortedComponentIndices)),
       m_detectorRanges(std::move(detectorRanges)), m_componentRanges(std::move(componentRanges)),
       m_parentIndices(std::move(parentIndices)), m_children(std::move(children)), m_positions(std::move(positions)),
       m_rotations(std::move(rotations)), m_scaleFactors(std::move(scaleFactors)),
       m_componentType(std::move(componentType)), m_names(std::move(names)),
+      m_sideBySideViewPositions(std::move(sideBySideViewPositions)),
       m_size(ComponentInfo::computeTotalSize(*m_assemblySortedDetectorIndices, *m_detectorRanges)),
       m_sourceIndex(sourceIndex), m_sampleIndex(sampleIndex), m_detectorInfo(nullptr) {
   if (m_rotations->size() != m_positions->size()) {
@@ -90,6 +92,10 @@ ComponentInfo::ComponentInfo(
   if (m_names->size() != m_size) {
     throw std::invalid_argument("ComponentInfo should be provided same number "
                                 "of names as number of components");
+  }
+  if (m_sideBySideViewPositions->size() != m_size) {
+    throw std::invalid_argument("ComponentInfo should be provided same number "
+                                "of side-by-side view positions as number of components");
   }
 
   // Calculate total size of all assemblies
@@ -597,6 +603,10 @@ Eigen::Vector3d ComponentInfo::scaleFactor(const size_t componentIndex) const {
 
 const std::string &ComponentInfo::name(const size_t componentIndex) const { return (*m_names)[componentIndex]; }
 
+const Eigen::Vector2d &ComponentInfo::sideBySideViewPosition(const size_t componentIndex) const {
+  return (*m_sideBySideViewPositions)[componentIndex];
+}
+
 bool ComponentInfo::uniqueName(const std::string &name) const { return unique_if_exists((*m_names), name); }
 
 size_t ComponentInfo::indexOfAny(const std::string &name) const {
@@ -782,6 +792,8 @@ size_t ComponentInfo::getMemorySize() const {
     mem += std::accumulate(m_names->cbegin(), m_names->cend(), size_t{0},
                            [](size_t acc, const auto &str) { return acc + str.capacity(); });
   }
+  if (m_sideBySideViewPositions)
+    mem += sizeof(*m_sideBySideViewPositions) + m_sideBySideViewPositions->size() * sizeof(Eigen::Vector2d);
 
   // m_scanIntervals: inline vector's heap buffer
   mem += m_scanIntervals.capacity() * sizeof(std::pair<int64_t, int64_t>);

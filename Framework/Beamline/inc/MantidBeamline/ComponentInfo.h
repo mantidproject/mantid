@@ -39,6 +39,9 @@ private:
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
   Mantid::Kernel::cow_ptr<std::vector<ComponentType>> m_componentType;
   std::shared_ptr<const std::vector<std::string>> m_names;
+  /// Side-by-side (unwrapped) instrument-view position, set from the IDF and never
+  /// modified afterwards; EMBTY_DBL for components with no declared position
+  std::shared_ptr<const std::vector<Eigen::Vector2d>> m_sideBySideViewPositions;
 
   const size_t m_size;
   const int64_t m_sourceIndex;
@@ -77,7 +80,8 @@ public:
       std::shared_ptr<std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>> rotations,
       std::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
       std::shared_ptr<std::vector<ComponentType>> componentType, std::shared_ptr<const std::vector<std::string>> names,
-      int64_t sourceIndex, int64_t sampleIndex);
+      std::shared_ptr<const std::vector<Eigen::Vector2d>> sideBySideViewPositions, int64_t sourceIndex,
+      int64_t sampleIndex);
   /// Copy assignment not permitted because of the way DetectorInfo stored
   ComponentInfo &operator=(const ComponentInfo &other) = delete;
   /// Clone method
@@ -144,6 +148,7 @@ public:
   Eigen::Vector3d scaleFactor(const size_t componentIndex) const;
   void setScaleFactor(const size_t componentIndex, const Eigen::Vector3d &scaleFactor);
   ComponentType componentType(const size_t componentIndex) const;
+  const Eigen::Vector2d &sideBySideViewPosition(const size_t componentIndex) const;
 
   size_t scanCount() const;
   size_t scanSize() const;

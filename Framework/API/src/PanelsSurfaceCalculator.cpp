@@ -10,6 +10,7 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
+#include "MantidKernel/EmptyValues.h"
 
 #include <cmath>
 #include <numeric>
@@ -391,15 +392,12 @@ std::vector<size_t> PanelsSurfaceCalculator::tubeDetectorParentIDs(const Compone
  * @returns :: Side-by-side position from the IDF
  */
 std::optional<Kernel::V2D> PanelsSurfaceCalculator::getSideBySideViewPos(const ComponentInfo &componentInfo,
-                                                                         const Instrument_const_sptr &instrument,
+                                                                         const Instrument_const_sptr &,
                                                                          const size_t componentIndex) const {
-  const auto *componentID = componentInfo.componentID(componentIndex);
-  const auto component = instrument->getComponentByID(componentID);
-  if (!component) {
-    return std::optional<Kernel::V2D>();
-  }
-
-  return component->getSideBySideViewPos();
+  const auto pos = componentInfo.sideBySideViewPosition(componentIndex);
+  if (pos.X() == EMPTY_DBL())
+    return std::nullopt;
+  return pos;
 }
 
 } // namespace Mantid::API

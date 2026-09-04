@@ -19,6 +19,7 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/EmptyValues.h"
 
 #include <algorithm>
 #include <memory>
@@ -56,6 +57,14 @@ bool hasValidShape(const ObjCompAssembly &obj) {
   const auto *shape = obj.shape().get();
   return shape != nullptr && shape->hasValidShape();
 }
+
+/// Converts a legacy, possibly-unset side-by-side view position to the
+/// Eigen::Vector2d representation used by Beamline::ComponentInfo.
+Eigen::Vector2d toVector2dOrSentinel(const std::optional<Kernel::V2D> &pos) {
+  if (!pos)
+    return Eigen::Vector2d(Mantid::EMPTY_DBL(), Mantid::EMPTY_DBL());
+  return Kernel::toVector2d(*pos);
+}
 } // namespace
 
 /**
@@ -87,7 +96,8 @@ InstrumentVisitor::InstrumentVisitor(std::shared_ptr<const Instrument> instrumen
       m_scaleFactors(
           std::make_shared<std::vector<Eigen::Vector3d>>(m_orderedDetectorIds->size(), Eigen::Vector3d{1, 1, 1})),
       m_componentType(std::make_shared<std::vector<Beamline::ComponentType>>()),
-      m_names(std::make_shared<std::vector<std::string>>(m_orderedDetectorIds->size())) {
+      m_names(std::make_shared<std::vector<std::string>>(m_orderedDetectorIds->size())),
+      m_sideBySideViewPositions(std::make_shared<std::vector<Eigen::Vector2d>>(m_orderedDetectorIds->size())) {
   if (m_instrument->isParametrized()) {
     m_pmap = m_instrument->getParameterMap().get();
   }
@@ -130,6 +140,7 @@ size_t InstrumentVisitor::commonRegistration(const IComponent &component) {
   m_shapes->emplace_back(m_nullShape);
   m_scaleFactors->emplace_back(Kernel::toVector3d(component.getScaleFactor()));
   m_names->emplace_back(component.getName());
+  m_sideBySideViewPositions->emplace_back(toVector2dOrSentinel(component.getSideBySideViewPos()));
   clearLegacyParameters(m_pmap, component);
   return componentIndex;
 }
@@ -322,6 +333,7 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
     m_monitorIndices->emplace_back(detectorIndex);
   }
   (*m_names)[detectorIndex] = detector.getName();
+  (*m_sideBySideViewPositions)[detectorIndex] = toVector2dOrSentinel(detector.getSideBySideViewPos());
   clearLegacyParameters(m_pmap, detector);
 
   /* Note that positions and rotations for detectors are currently
@@ -370,7 +382,7 @@ std::unique_ptr<Beamline::ComponentInfo> InstrumentVisitor::componentInfo() cons
   return std::make_unique<Mantid::Beamline::ComponentInfo>(
       m_assemblySortedDetectorIndices, m_detectorRanges, m_assemblySortedComponentIndices, m_componentRanges,
       m_parentComponentIndices, m_children, m_positions, m_rotations, m_scaleFactors, m_componentType, m_names,
-      m_sourceIndex, m_sampleIndex);
+      m_sideBySideViewPositions, m_sourceIndex, m_sampleIndex);
 }
 
 std::unique_ptr<Beamline::DetectorInfo> InstrumentVisitor::detectorInfo() const {
