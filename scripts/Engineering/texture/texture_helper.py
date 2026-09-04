@@ -38,6 +38,15 @@ from Engineering.common.xml_shapes import get_cube_xml
 ##### Utility Gauge Volume Setup Functions ################
 # ---------------------------------------------------------#
 
+# the gauge volume presets, as offered in the interface's combo box. Named here because callers have
+# to tell "the user asked for no gauge volume" apart from "the shape could not be read", which both
+# produce no xml but mean different things.
+CUBE_4MM_GAUGE_VOLUME = "4mmCube"
+NO_GAUGE_VOLUME = "No Gauge Volume"
+
+# run log DefineGaugeVolume writes the shape into
+GAUGE_VOLUME_LOG = "GaugeVolume"
+
 
 def get_gauge_vol_str(preset: str, custom_file: Optional[str] = None) -> str:
     """
@@ -47,9 +56,9 @@ def get_gauge_vol_str(preset: str, custom_file: Optional[str] = None) -> str:
     custom: if preset is not one of the defaults, the custom file will be read
 
     """
-    if preset == "4mmCube":
+    if preset == CUBE_4MM_GAUGE_VOLUME:
         gauge_str = get_cube_xml("some-gv", 0.004)
-    elif preset == "No Gauge Volume":
+    elif preset == NO_GAUGE_VOLUME:
         gauge_str = None
     else:
         try:
