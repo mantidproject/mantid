@@ -23,6 +23,8 @@ namespace Mantid::Nexus {
 /// @brief an ID that HDF5 will always consider invalid
 constexpr hid_t INVALID_HID{-1};
 
+bool MANTID_NEXUS_DLL H5_id_is_valid(hid_t id);
+
 /**
  * @class Hdf5ID
  * @brief A very simple wrapper that holds an HDF5 object through its hid_t.
@@ -50,14 +52,7 @@ public:
   operator hid_t() const { return m_id; }
   /// @brief Return whether the UniqueId corresponds to a valid HDF5 object
   /// @return true if it is valid; otherwise false; on error, false
-  bool isValid() const {
-    // fail early condition
-    if (m_id <= 0) {
-      return false;
-    } else {
-      return H5Iis_valid(m_id) > 0;
-    }
-  }
+  bool isValid() const { return H5_id_is_valid(m_id); }
 };
 
 /// @brief Close the held object ID
