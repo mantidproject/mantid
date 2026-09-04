@@ -735,6 +735,12 @@ void GridDetector::testIntersectionWithChildren(Track &testRay,
   // The parametrized form delegates to the base detector's shape.
   std::shared_ptr<IObject> const &pixelShape = isParametrized() ? m_gridBase->m_shape : m_shape;
 
+  // NOTE: getAtXYZ is still required here to obtain a valid ComponentID.
+  // ComponentID is an IComponent* pointer; the instrument's component-ID map
+  // (used by InstrumentRayTracer to resolve hits back to a detector spectrum)
+  // only contains entries for real, heap-allocated IComponent objects.
+  // Until virtual (non-stored) pixels have a proxy mechanism with a stable
+  // ComponentID, this call cannot be eliminated.  Tracked in ewm14486.
   auto comp = getAtXYZ(xIndex, yIndex, 0);
   testRay.addLink(intersec, intersec, 0.0, *pixelShape, comp->getComponentID());
 }

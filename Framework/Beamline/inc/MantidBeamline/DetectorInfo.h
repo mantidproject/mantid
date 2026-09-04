@@ -7,10 +7,13 @@
 #pragma once
 
 #include "MantidBeamline/DllConfig.h"
+#include "MantidBeamline/VirtualBankSegment.h"
 #include "MantidKernel/cow_ptr.h"
 
 #include "Eigen/Geometry"
 #include "Eigen/StdVector"
+
+#include <vector>
 
 namespace Mantid {
 namespace Beamline {
@@ -50,6 +53,14 @@ public:
   DetectorInfo(std::vector<Eigen::Vector3d> positions,
                std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>> rotations,
                const std::vector<size_t> &monitorIndices);
+  /// Constructor for instruments with virtual (PixelAssembly) banks.
+  /// @param compactPositions  positions for real (non-virtual) detectors only
+  /// @param compactRotations  rotations for real (non-virtual) detectors only
+  /// @param monitorIndices    logical indices of monitor detectors
+  /// @param virtualBanks      sorted virtual-bank segments (ascending firstIndex)
+  DetectorInfo(std::vector<Eigen::Vector3d> compactPositions,
+               std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>> compactRotations,
+               const std::vector<size_t> &monitorIndices, std::vector<VirtualBankSegment> virtualBanks);
 
   bool isEquivalent(const DetectorInfo &other) const;
 
@@ -64,9 +75,11 @@ public:
   void setMasked(const size_t index, bool masked);
   void setMasked(const std::pair<size_t, size_t> &index, bool masked);
   bool hasMaskedDetectors() const;
-  const Eigen::Vector3d &position(const size_t index) const;
+  // For virtual-bank instruments position/rotation are computed analytically and
+  // cannot return a reference into a flat array — these overloads return by value.
+  Eigen::Vector3d position(const size_t index) const;
   const Eigen::Vector3d &position(const std::pair<size_t, size_t> &index) const;
-  const Eigen::Quaterniond &rotation(const size_t index) const;
+  Eigen::Quaterniond rotation(const size_t index) const;
   const Eigen::Quaterniond &rotation(const std::pair<size_t, size_t> &index) const;
   Eigen::Vector3d scaleFactor(const size_t index) const;
   void setPosition(const size_t index, const Eigen::Vector3d &position);
@@ -83,6 +96,13 @@ public:
   const Eigen::Vector3d &sourcePosition() const;
   const Eigen::Vector3d &samplePosition() const;
 
+  /// Whether this instrument has any PixelAssembly (virtual) banks.
+  bool hasVirtualBanks() const noexcept { return !m_virtualBanks.empty(); }
+
+  /// Returns the VirtualBankSegment whose ID range contains @p detId,
+  /// or nullptr if @p detId is not a virtual pixel in any bank.
+  const VirtualBankSegment *findVirtualSegmentByDetId(int32_t detId) const noexcept;
+
   /** The `merge()` operation was made private in `DetectorInfo`, and only
    * accessible through `ComponentInfo` (via this `friend` declaration)
    * because we need to avoid merging `DetectorInfo` without merging
@@ -92,9 +112,11 @@ public:
    */
   friend class ComponentInfo;
 
+  /// Returns the segment owning @p index, or nullptr if not virtual.
+  const VirtualBankSegment *findVirtualSegment(size_t index) const noexcept;
   /// Maps a logical detector index to its compact array offset, skipping virtual pixel ranges.
-  /// Only valid for non-virtual indices. Identity for non-virtual-bank instruments.
-  size_t compactDetectorIndex(size_t index) const noexcept { return index; }
+  /// Only valid for non-virtual indices.
+  size_t compactDetectorIndex(size_t index) const noexcept;
 
 private:
   size_t linearIndex(const std::pair<size_t, size_t> &index) const;
@@ -104,8 +126,14 @@ private:
 
   Kernel::cow_ptr<std::vector<bool>> m_isMonitor{nullptr};
   Kernel::cow_ptr<std::vector<bool>> m_isMasked{nullptr};
+  /// Compact position array: one entry per real (non-virtual) detector, in
+  /// the same order as logical indices with virtual pixel gaps removed.
   Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions{nullptr};
   Kernel::cow_ptr<std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>> m_rotations{nullptr};
+
+  /// Sorted (ascending firstIndex) list of virtual-bank segments.
+  /// Empty for instruments that have no PixelAssembly banks.
+  std::vector<VirtualBankSegment> m_virtualBanks;
 
   ComponentInfo *m_componentInfo = nullptr; // Geometry::ComponentInfo owner
 };
@@ -120,48 +148,26 @@ inline size_t DetectorInfo::size() const {
   return m_isMonitor->size();
 }
 
-/// Returns true if the beamline has scanning detectors.
+/// Returns true if the beamline has scanning (time-dependent) detectors.
+/// Virtual-bank (PixelAssembly) instruments are NOT scanning: their compact
+/// position arrays are smaller than size() but hold no time-dependent data.
 inline bool DetectorInfo::isScanning() const {
   if (!m_positions)
     return false;
-  return size() != m_positions->size();
+  // Scanning instruments hold N * T positions (T scan points, T > 1).
+  // Compact virtual-bank instruments hold N_real < N_total positions.
+  // Only the scanning case has *more* positions than total detectors.
+  return m_positions->size() > size();
 }
 
-/** Returns the position of the detector with given detector index.
- *
- * Convenience method for beamlines with static (non-moving) detectors.
- * Throws if there are time-dependent detectors. */
-inline const Eigen::Vector3d &DetectorInfo::position(const size_t index) const {
-  checkNoTimeDependence();
-  return (*m_positions)[index];
-}
-
-/// Returns the position of the detector with given index.
+/// Returns the position of the detector with given index (pair overload for scanning).
 inline const Eigen::Vector3d &DetectorInfo::position(const std::pair<size_t, size_t> &index) const {
   return (*m_positions)[linearIndex(index)];
 }
 
-/** Returns the rotation of the detector with given detector index.
- *
- * Convenience method for beamlines with static (non-moving) detectors.
- * Throws if there are time-dependent detectors. */
-inline const Eigen::Quaterniond &DetectorInfo::rotation(const size_t index) const {
-  checkNoTimeDependence();
-  return (*m_rotations)[index];
-}
-
-/// Returns the rotation of the detector with given index.
+/// Returns the rotation of the detector with given index (pair overload for scanning).
 inline const Eigen::Quaterniond &DetectorInfo::rotation(const std::pair<size_t, size_t> &index) const {
   return (*m_rotations)[linearIndex(index)];
-}
-
-/** Set the position of the detector with given detector index.
- *
- * Convenience method for beamlines with static (non-moving) detectors.
- * Throws if there are time-dependent detectors. */
-inline void DetectorInfo::setPosition(const size_t index, const Eigen::Vector3d &position) {
-  checkNoTimeDependence();
-  m_positions.access()[index] = position;
 }
 
 /// Set the position of the detector with given index (scanning pair overload).
@@ -169,16 +175,7 @@ inline void DetectorInfo::setPosition(const std::pair<size_t, size_t> &index, co
   m_positions.access()[linearIndex(index)] = position;
 }
 
-/** Set the rotation of the detector with given detector index.
- *
- * Convenience method for beamlines with static (non-moving) detectors.
- * Throws if there are time-dependent detectors. */
-inline void DetectorInfo::setRotation(const size_t index, const Eigen::Quaterniond &rotation) {
-  checkNoTimeDependence();
-  m_rotations.access()[index] = rotation.normalized();
-}
-
-/// Set the rotation of the detector with given index.
+/// Set the rotation of the detector with given index (scanning pair overload).
 inline void DetectorInfo::setRotation(const std::pair<size_t, size_t> &index, const Eigen::Quaterniond &rotation) {
   m_rotations.access()[linearIndex(index)] = rotation.normalized();
 }

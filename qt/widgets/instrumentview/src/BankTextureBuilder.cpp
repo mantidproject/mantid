@@ -105,6 +105,7 @@ BankTextureBuilder::BankTextureBuilder(const Mantid::Geometry::ComponentInfo &co
     m_textSizes.resize(6);
     break;
   case ComponentType::Rectangular:
+  case ComponentType::VirtualAssembly:
   case ComponentType::OutlineComposite:
     m_colorTextureIDs.resize(1);
     m_pickTextureIDs.resize(1);
@@ -175,6 +176,9 @@ void BankTextureBuilder::buildOpenGLTextures(bool picking, const std::vector<GLC
   case ComponentType::Rectangular:
     buildRectangularBankTextures(colors, picking);
     break;
+  case ComponentType::VirtualAssembly:
+    buildVirtualBankTextures(colors, picking);
+    break;
   default:
     break;
   }
@@ -194,6 +198,7 @@ void BankTextureBuilder::uploadTextures(bool picking, GridTextureFace gridFace) 
     uploadGridBankTexture(picking, gridFace);
     break;
   case ComponentType::Rectangular:
+  case ComponentType::VirtualAssembly:
     uploadRectangularBankTextures(picking);
     break;
   default:
@@ -301,6 +306,32 @@ void BankTextureBuilder::buildRectangularBankTextures(const std::vector<GLColor>
   texture.resize(texSizeX * texSizeY * 3, 0); // fill with black
 
   createTexture(m_compInfo, m_compInfo.children(m_bankIndex), colors, texture, texSizeX);
+}
+
+void BankTextureBuilder::buildVirtualBankTextures(const std::vector<GLColor> &colors, bool picking) {
+  const auto *seg = m_compInfo.findVirtualBankByCompIdx(m_bankIndex);
+  if (!seg)
+    return;
+
+  auto &texture = picking ? m_detPickTextures[0] : m_detColorTextures[0];
+  const auto nx = static_cast<size_t>(seg->nx);
+  const auto ny = static_cast<size_t>(seg->ny);
+  auto res = BankRenderingHelpers::getCorrectedTextureSize(nx, ny);
+  m_textSizes[0] = res;
+  const auto texSizeX = res.first;
+
+  texture.resize(texSizeX * res.second * 3, 0);
+
+  for (size_t ix = 0; ix < nx; ++ix) {
+    for (size_t iy = 0; iy < ny; ++iy) {
+      const auto det = seg->indexAtXYZ(static_cast<int>(ix), static_cast<int>(iy));
+      const auto ti = (iy * texSizeX + ix) * 3;
+      const auto &col = colors[det];
+      texture[ti] = static_cast<char>(col.red());
+      texture[ti + 1] = static_cast<char>(col.green());
+      texture[ti + 2] = static_cast<char>(col.blue());
+    }
+  }
 }
 
 void BankTextureBuilder::uploadTubeBankTextures(bool picking) {

@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <exception>
+#include <numeric>
 
 namespace Mantid::Beamline {
 
@@ -31,6 +32,132 @@ DetectorInfo::DetectorInfo(std::vector<Eigen::Vector3d> positions,
     : DetectorInfo(std::move(positions), std::move(rotations)) {
   for (const auto i : monitorIndices)
     m_isMonitor.access().at(i) = true;
+}
+
+DetectorInfo::DetectorInfo(
+    std::vector<Eigen::Vector3d> compactPositions,
+    std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>> compactRotations,
+    const std::vector<size_t> &monitorIndices, std::vector<VirtualBankSegment> virtualBanks)
+    : m_virtualBanks(std::move(virtualBanks)) {
+  // Total logical size = compact real detectors + all virtual pixel slots.
+  const size_t totalVirtual =
+      std::accumulate(m_virtualBanks.cbegin(), m_virtualBanks.cend(), size_t{0},
+                      [](size_t acc, const auto &seg) { return acc + seg.lastIndex - seg.firstIndex + 1; });
+  const size_t totalSize = compactPositions.size() + totalVirtual;
+
+  m_isMonitor = Kernel::make_cow<std::vector<bool>>(totalSize);
+  m_isMasked = Kernel::make_cow<std::vector<bool>>(totalSize);
+  m_positions = Kernel::make_cow<std::vector<Eigen::Vector3d>>(std::move(compactPositions));
+  m_rotations = Kernel::make_cow<std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>(
+      std::move(compactRotations));
+
+  if (m_positions->size() != m_rotations->size())
+    throw std::runtime_error("DetectorInfo: compact position and rotation vectors must have identical size");
+
+  for (const auto i : monitorIndices)
+    m_isMonitor.access().at(i) = true;
+}
+
+// ---------------------------------------------------------------------------
+// Virtual-bank helpers
+// ---------------------------------------------------------------------------
+
+/** Returns the VirtualBankSegment whose ID range contains @p detId, or nullptr if not virtual.
+ *  Performs a linear scan; O(N_banks), which is negligible for typical instruments. */
+const VirtualBankSegment *DetectorInfo::findVirtualSegmentByDetId(const int32_t detId) const noexcept {
+  auto it = std::find_if(m_virtualBanks.cbegin(), m_virtualBanks.cend(),
+                         [detId](const auto &seg) { return detId >= seg.idstart && detId <= seg.lastDetId; });
+  return it != m_virtualBanks.cend() ? &*it : nullptr;
+}
+
+/** Returns the VirtualBankSegment owning @p index, or nullptr if not virtual.
+ *  Segments are stored sorted by firstIndex, so we can break early. */
+const VirtualBankSegment *DetectorInfo::findVirtualSegment(const size_t index) const noexcept {
+  for (const auto &seg : m_virtualBanks) {
+    if (index < seg.firstIndex)
+      return nullptr; // sorted — no segment further right can match
+    if (index <= seg.lastIndex)
+      return &seg;
+  }
+  return nullptr;
+}
+
+/** Maps a logical detector index to its compact array offset.
+ *  Only valid for non-virtual indices; behaviour for virtual indices is undefined. */
+size_t DetectorInfo::compactDetectorIndex(const size_t index) const noexcept {
+  size_t virtualsBefore = 0;
+  for (const auto &seg : m_virtualBanks) {
+    if (seg.firstIndex >= index)
+      break; // this and all later segments start at or after index
+    // Segment starts before index.
+    if (seg.lastIndex < index)
+      virtualsBefore += seg.lastIndex - seg.firstIndex + 1; // fully before
+    // If firstIndex < index <= lastIndex the caller passed a virtual index —
+    // we silently treat it as fully-before (should not happen in correct code).
+  }
+  return index - virtualsBefore;
+}
+
+// ---------------------------------------------------------------------------
+// Non-inline position / rotation / setPosition / setRotation (size_t overloads)
+// ---------------------------------------------------------------------------
+
+/** Returns the position of the detector with given detector index.
+ *
+ * For virtual (PixelAssembly) pixels the position is computed analytically
+ * from the bank's grid formula; for real pixels it reads from the compact
+ * flat array.  Returns by value because virtual positions have no permanent
+ * storage to reference.
+ *
+ * Throws if the beamline has time-dependent (scanning) detectors. */
+Eigen::Vector3d DetectorInfo::position(const size_t index) const {
+  checkNoTimeDependence();
+  if (const auto *seg = findVirtualSegment(index)) {
+    const size_t local = index - seg->firstIndex;
+    const auto ix = static_cast<double>(local / static_cast<size_t>(seg->ny));
+    const auto iy = static_cast<double>(local % static_cast<size_t>(seg->ny));
+    const Eigen::Vector3d localOffset{seg->xstart + ix * seg->xstep, seg->ystart + iy * seg->ystep, 0.0};
+    return seg->bankPos + seg->bankRot * localOffset;
+  }
+  const size_t compactIdx = compactDetectorIndex(index);
+  return (*m_positions)[compactIdx];
+}
+
+/** Returns the rotation of the detector with given detector index.
+ *
+ * All pixels in a virtual bank share the bank rotation.  Real pixels read
+ * from the compact flat array.
+ *
+ * Throws if the beamline has time-dependent (scanning) detectors. */
+Eigen::Quaterniond DetectorInfo::rotation(const size_t index) const {
+  checkNoTimeDependence();
+  if (const auto *seg = findVirtualSegment(index))
+    return seg->bankRot;
+  return (*m_rotations)[compactDetectorIndex(index)];
+}
+
+/** Set the position of the detector with given detector index.
+ *
+ * Throws for virtual (PixelAssembly) pixel indices — their positions are
+ * fully determined by the bank parameters and cannot be overridden
+ * individually.  Throws if the beamline has time-dependent detectors. */
+void DetectorInfo::setPosition(const size_t index, const Eigen::Vector3d &position) {
+  checkNoTimeDependence();
+  if (findVirtualSegment(index))
+    throw std::runtime_error("Cannot directly set the position of a virtual bank pixel; "
+                             "move the PixelAssembly component instead.");
+  m_positions.access()[compactDetectorIndex(index)] = position;
+}
+
+/** Set the rotation of the detector with given detector index.
+ *
+ * Throws for virtual (PixelAssembly) pixel indices. */
+void DetectorInfo::setRotation(const size_t index, const Eigen::Quaterniond &rotation) {
+  checkNoTimeDependence();
+  if (findVirtualSegment(index))
+    throw std::runtime_error("Cannot directly set the rotation of a virtual bank pixel; "
+                             "rotate the PixelAssembly component instead.");
+  m_rotations.access()[compactDetectorIndex(index)] = rotation.normalized();
 }
 
 /** Returns true if the content of this is equivalent to the content of other.
@@ -251,6 +378,8 @@ size_t DetectorInfo::getMemorySize() const {
     mem += sizeof(*m_positions) + m_positions->size() * sizeof(Eigen::Vector3d);
   if (m_rotations)
     mem += sizeof(*m_rotations) + m_rotations->size() * sizeof(Eigen::Quaterniond);
+  // Virtual bank segment list (one entry per PixelAssembly bank, very small)
+  mem += m_virtualBanks.capacity() * sizeof(VirtualBankSegment);
   return mem;
 }
 
