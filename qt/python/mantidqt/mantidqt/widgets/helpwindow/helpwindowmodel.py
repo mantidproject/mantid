@@ -20,10 +20,10 @@ from qtpy.QtCore import QUrl  # noqa: E402
 
 def getMantidVersionString():
     # Assume it's a nightly build if patch > 100, (i.e. patch == YYYYMMDD.TIME)
-    if version.patch > 100:
+    if int(float(version().patch)) > 100:
         return "nightly"
 
-    return f"v{version.major}.{version.minor}.{version.patch}"
+    return f"v{version().major}.{version().minor}.{version().patch}"
 
 
 class HelpWindowModel:
