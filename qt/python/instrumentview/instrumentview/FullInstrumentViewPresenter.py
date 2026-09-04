@@ -64,10 +64,8 @@ class FullInstrumentViewPresenter:
         self._model = model
         self._closing = False
         self._counts_label = "Integrated Counts"
-        self._visible_label = "Visible Picked"
         self._count_scale_mode = self._LINEAR
         self._detector_mesh: Optional[pv.PolyData] = None
-        self._pickable_mesh: Optional[pv.PolyData] = None
         self._masked_mesh: Optional[pv.PolyData] = None
         self._model.setup()
         self._point_cloud_renderer = PointCloudRenderer()
@@ -281,17 +279,17 @@ class FullInstrumentViewPresenter:
         self._view.clear_main_plotter()
         renderer = self._renderer
 
+        run_on_main_thread = self._view.run_on_main_thread
+
         self._detector_mesh = renderer.build_detector_mesh(self._model.detector_positions, self._model.flip_beam, self._model)
         display_counts = self._transform_counts(self._model.detector_counts)
         renderer.set_detector_scalars(self._detector_mesh, display_counts, self._counts_label)
-        renderer.add_detector_mesh_to_plotter(self._view.main_plotter, self._detector_mesh, scalars=self._counts_label)
+        run_on_main_thread(renderer.add_detector_mesh_to_plotter, self._view.main_plotter, self._detector_mesh, scalars=self._counts_label)
 
-        self._pickable_mesh = renderer.build_pickable_mesh(self._model.detector_positions, self._model.flip_beam)
-        renderer.set_pickable_scalars(self._pickable_mesh, self._model.picked_visibility, self._visible_label)
-        renderer.add_pickable_mesh_to_plotter(self._view.main_plotter, self._pickable_mesh, scalars=self._visible_label)
+        run_on_main_thread(renderer.create_picked_highlight_actor, self._view.main_plotter)
 
         self._masked_mesh = renderer.build_masked_mesh(self._model.masked_positions, self._model.flip_beam, self._model)
-        renderer.add_masked_mesh_to_plotter(self._view.main_plotter, self._masked_mesh)
+        run_on_main_thread(renderer.add_masked_mesh_to_plotter, self._view.main_plotter, self._masked_mesh)
 
         monitor_mesh = self._create_and_add_monitor_mesh()
         sample_position_mesh = self._create_and_add_sample_mesh()
@@ -301,9 +299,12 @@ class FullInstrumentViewPresenter:
         # Update transform needs to happen after adding to plotter
         # Uses display coordinates
         self._update_transform()
-        for mesh in [self._detector_mesh, self._pickable_mesh, self._masked_mesh, monitor_mesh, sample_position_mesh]:
+        for mesh in [self._detector_mesh, self._masked_mesh, monitor_mesh, sample_position_mesh]:
             if mesh is not None:
                 mesh.transform(self._model.transform, inplace=True)
+
+        # Must follow the transform so the highlight is built from display coordinates
+        run_on_main_thread(renderer.update_picked_highlight, self._view.main_plotter, self._detector_mesh, self._model.picked_visibility)
 
         # If refreshing the limits we reset both the contour and integration sliders.
         # If not, we need to manually update the contour limits to what they were set to before we added the
@@ -421,7 +422,10 @@ class FullInstrumentViewPresenter:
 
     def update_picked_detectors_on_view(self) -> None:
         # Update to visibility shows up in real time
-        self._renderer.set_pickable_scalars(self._pickable_mesh, self._model.picked_visibility, self._visible_label)
+        picked_visibility = self._model.picked_visibility
+        self._view.run_on_main_thread(
+            self._renderer.update_picked_highlight, self._view.main_plotter, self._detector_mesh, picked_visibility
+        )
         self.refresh_create_from_selection_enabled()
         self._update_line_plot_ws_and_draw(self._view.current_selected_lineplot_unit())
 
