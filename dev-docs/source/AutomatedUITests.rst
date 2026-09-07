@@ -202,6 +202,31 @@ to switch it off.
 box hangs until the suite times out. ``patch_error_messages``, ``patch_confirmation_box`` and
 ``algorithm_dialog_runs`` on the base class cover three common cases that come up.
 
+None of those three helps with a dialog raised from **C++**, because all of them work by replacing a
+Python-side symbol - and the C++ interfaces (see below) report every refused reduction that way.
+``dismiss_modal_dialogs`` is the answer there: it starts a ``QTimer`` that finds
+``QApplication.activeModalWidget`` and closes it, recording what it said in
+``self.message_box_messages``. It works because a modal dialog runs its own event loop while it
+blocks, so the timer keeps firing inside it. Prefer the patching helpers where there is a Python seam
+- they say which module raised the dialog and let the test *choose* the answer, whereas this closes
+whatever it finds.
+
+**A C++ interface is opened through the factory and driven by object name.** ALFView, ISIS
+Reflectometry, ALC and the Indirect and Inelastic interfaces are ``UserSubWindow`` subclasses
+registered with ``DECLARE_SUBWINDOW``. Python gets the window back from
+``self.open_cpp_interface("<name>")`` and nothing else - no view, no presenter - so every widget is
+reached with ``child_named(parent, "objectName")``, using the names in the interface's ``.ui`` file
+under ``qt/scientific_interfaces``. Three things are worth knowing:
+
+* the interfaces are registered when the framework starts, which ``open_cpp_interface`` does for you;
+  without it the factory knows no names and returns ``None`` for everything;
+* collect the object names as constants in the suite's base module, so a renamed widget is a one-line
+  fix rather than a hunt. ``child_named`` lists the names that *are* present when it misses, which is
+  usually enough to see what a widget was renamed to;
+* some widgets built in C++ come back to Python as a plain ``QWidget`` rather than their wrapped
+  class - a ``FileFinderWidget`` among them, so ``set_finder_text`` does not work on one. Reach for
+  the ``QLineEdit`` named ``fileEditor`` inside it instead, which is the box a user types into.
+
 **Go through the interface, not around it.** Where possible use ``add_data_search_dir`` and let the
 interface's own file finder resolve a run, rather than reaching past the view to inject a workspace -
 what is being tested is the path a user takes.
@@ -291,15 +316,25 @@ named in its base module's docstring:
 
    * - Suite
      - Guide it replaces
-   * - ``EngineeringDiffraction``
-     - ``Testing/EngineeringDiffraction/EngineeringDiffractionTestGuide.rst``
+   * - ``ALFView``
+     - ``Testing/Direct/ALFViewTests.rst`` (the loading scenario needs the ISIS data archive)
    * - ``ElementalAnalysis``
      - ``Testing/ElementalAnalysis/ElementalAnalysisTests.rst``
+   * - ``EngineeringDiffraction``
+     - ``Testing/EngineeringDiffraction/EngineeringDiffractionTestGuide.rst``
    * - ``FilterEvents``
      - ``Testing/Utility/FilterEventsInterfaceTest.rst``
+   * - ``Indirect``
+     - ``Testing/Indirect/DiffractionTests.rst`` and ``DataReductionTests.rst``
+   * - ``Inelastic``
+     - ``Testing/Inelastic/DataProcessorTests.rst``, ``CorrectionsTests.rst``,
+       ``QENSFittingTests.rst`` and ``BayesFittingTests.rst``
    * - ``Muon``
      - ``Testing/MuonAnalysis_test_guides/Muon_Analysis_PSI.rst`` (the other Muon guides need the
        ISIS data archive)
+   * - ``Reflectometry``
+     - ``Testing/ReflectometryGUI/ReflectometryGUITests.rst`` (the scenarios that need neither the
+       archive nor the ICAT catalogue)
    * - ``SampleTransmissionCalculator``
      - ``Testing/General/SampleTransmissionCalculatorTestGuide.rst``
    * - ``SANS``

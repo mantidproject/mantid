@@ -316,12 +316,23 @@ class AutomatedUITestBase(unittest.TestCase):
         does not run on ``close()`` even with ``WA_DeleteOnClose`` set, and an interface left alive
         keeps its ADS observers, which then fire into the next test's cleared ADS.
         """
+        from mantid.api import FrameworkManager
         from mantidqt.interfacemanager import InterfaceManager
         from qt_interaction_helpers import process_events
 
+        # The framework has to be up first. These interfaces are registered by DECLARE_SUBWINDOW in
+        # the MantidScientificInterfaces plugin libraries, and it is starting the framework that
+        # loads them - without it the factory knows no names at all and every call returns None,
+        # while constructing a Mantid C++ widget raises a message-less RuntimeError.
+        FrameworkManager.Instance()
+
         window = InterfaceManager().createSubWindow(name)
         if window is None:
-            raise RuntimeError(f"the interface factory does not know '{name}'; is this build missing that interface?")
+            raise RuntimeError(
+                f"the interface factory does not know '{name}'. Either this build has no "
+                f"MantidScientificInterfaces plugins, or the name has changed - it is the interface's "
+                f"static name() in qt/scientific_interfaces."
+            )
         window.show()
         process_events(2)
         self.addCleanup(self._close_cpp_interface, window)
@@ -440,6 +451,43 @@ class AutomatedUITestBase(unittest.TestCase):
             patcher = mock.patch(f"{module}.{helper_name}", side_effect=record)
             patcher.start()
             self.addCleanup(patcher.stop)
+
+    def dismiss_modal_dialogs(self, interval_ms=250):
+        """Close any modal dialog that appears, recording what it said, until the test ends.
+
+        The last resort, and the only thing that works on a dialog raised from **C++**.
+        ``patch_error_messages`` and ``patch_confirmation_box`` both replace a Python-side symbol, so
+        neither can touch a ``QMessageBox`` constructed inside a C++ interface - and one of those
+        blocks the calling thread inside ``exec()`` with nothing left to dismiss it, which hangs the
+        run until CTest kills it. The Indirect and Inelastic interfaces raise exactly that whenever
+        they refuse a reduction or a fit.
+
+        What makes this work is that a modal dialog runs its *own* event loop while it blocks, and a
+        ``QTimer`` keeps firing inside it. So the sweep below still runs, finds the dialog through
+        ``activeModalWidget`` and closes it, and the blocked call returns.
+
+        Prefer the two patching helpers where the dialog comes from Python: they say which module
+        raised it and let the test choose the answer, whereas this closes whatever it finds - which
+        for a question dialog means taking the default button rather than a chosen one. Use this for
+        the interfaces where there is no Python seam to patch.
+        """
+        from qtpy.QtCore import QTimer
+        from qtpy.QtWidgets import QApplication, QMessageBox
+
+        def sweep():
+            dialog = QApplication.activeModalWidget()
+            if dialog is None:
+                return
+            self.message_box_messages.append(dialog.text() if isinstance(dialog, QMessageBox) else dialog.windowTitle())
+            dialog.close()
+
+        timer = QTimer()
+        timer.timeout.connect(sweep)
+        timer.start(interval_ms)
+        # stop it before the QApplication goes, and keep a reference so it is not collected
+        self._modal_sweep_timer = timer
+        self.addCleanup(timer.stop)
+        return timer
 
     # button names that mean "the user agreed" and "the user declined". Every accepting name shares
     # one sentinel and every declining name shares the other, so the answer holds whichever
