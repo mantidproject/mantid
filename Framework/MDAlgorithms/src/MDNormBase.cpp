@@ -417,7 +417,7 @@ void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues
     for (size_t n = 0; n < protonCharge.size(); n++) {
       chargeSum += protonCharge[n];
       if (chargeSum > CHARGEBINSIZE) {
-        size_t index = static_cast<int>(floor(static_cast<double>(n - i0) / 2.) + i0);
+        size_t index = static_cast<int>(floor(static_cast<double>(n - i0) / 2.)) + i0;
         skipIter = false;
         for (size_t gAx = 0; gAx < gonio.getNumberAxes(); gAx++) {
           double logval = logs[gAx]->getSingleValue(protonTimes[index]);
