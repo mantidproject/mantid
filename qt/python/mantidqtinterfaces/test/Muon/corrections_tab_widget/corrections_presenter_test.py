@@ -131,6 +131,43 @@ class CorrectionsPresenterTest(unittest.TestCase):
         self.presenter.disable_editing_notifier.notify_subscribers.assert_called_once_with()
         self.view.warning_popup.assert_called_once_with(error)
 
+    def test_that_handle_thread_error_does_not_clear_the_calculation_thread(self):
+        self._start_asymmetry_calculation()
+
+        self.presenter.handle_thread_error("This is an error message.")
+
+        # handle_asymmetry_pairs_and_diffs_calc_finished always runs after this callback and owns the reference
+        self.assertIsNotNone(self.presenter.calculation_thread)
+
+    def test_that_a_calculation_cannot_be_restarted_between_the_error_and_finished_callbacks(self):
+        self._start_asymmetry_calculation()
+        self.presenter.handle_thread_error("This is an error message.")
+
+        self._start_asymmetry_calculation()
+
+        self.assertEqual(self.presenter.create_calculation_thread.call_count, 1)
+
+    def test_that_the_finished_callback_clears_the_calculation_thread_after_an_error(self):
+        self._start_asymmetry_calculation()
+        self.presenter.handle_thread_error("This is an error message.")
+
+        self.presenter.handle_asymmetry_pairs_and_diffs_calc_finished()
+
+        self.assertIsNone(self.presenter.calculation_thread)
+
+    def test_that_a_calculation_can_be_started_again_once_the_finished_callback_has_run_after_an_error(self):
+        self._start_asymmetry_calculation()
+        self.presenter.handle_thread_error("This is an error message.")
+        self.presenter.handle_asymmetry_pairs_and_diffs_calc_finished()
+
+        self._start_asymmetry_calculation()
+
+        self.assertEqual(self.presenter.create_calculation_thread.call_count, 2)
+
+    def _start_asymmetry_calculation(self):
+        """Calls the real method, which _setup_presenter replaces with a mock for the other tests."""
+        CorrectionsPresenter._perform_asymmetry_pairs_and_diffs_calculation(self.presenter, self.run_strings, self.groups)
+
     def _setup_mock_view(self):
         self.view = mock.Mock(spec=CorrectionsView)
 
@@ -174,6 +211,7 @@ class CorrectionsPresenterTest(unittest.TestCase):
         self.presenter._handle_selected_table_is_invalid = mock.Mock()
         self.presenter._notify_perform_dead_time_corrections = mock.Mock()
         self.presenter._perform_asymmetry_pairs_and_diffs_calculation = mock.Mock()
+        self.presenter.create_calculation_thread = mock.Mock(return_value=mock.Mock(spec=ThreadModel))
 
         # Mock the correction result property
         self.presenter.thread_model_wrapper = mock.Mock(spec=ThreadModel)

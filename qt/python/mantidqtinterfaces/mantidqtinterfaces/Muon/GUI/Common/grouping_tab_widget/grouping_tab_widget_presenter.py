@@ -238,8 +238,6 @@ class GroupingTabPresenter(object):
         self.update_thread.start()
 
     def error_callback(self, error_message):
-        self.update_thread = None
-        self.enable_editing()
         self._view.display_warning_box(error_message)
 
     def handle_update_finished(self):

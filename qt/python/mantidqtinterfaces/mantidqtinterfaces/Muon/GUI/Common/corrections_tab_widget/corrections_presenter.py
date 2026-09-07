@@ -131,7 +131,6 @@ class CorrectionsPresenter(QObject):
 
     def handle_thread_error(self, error: str) -> None:
         """Handle when an error occurs while doing calculations on a thread."""
-        self.calculation_thread = None
         self.disable_editing_notifier.notify_subscribers()
         self.thread_success = False
         self.view.warning_popup(error)
