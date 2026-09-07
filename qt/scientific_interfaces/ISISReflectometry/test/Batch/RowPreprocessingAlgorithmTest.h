@@ -12,6 +12,8 @@
 #include "../../../ISISReflectometry/Reduction/PreviewRow.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MockBatch.h"
@@ -103,5 +105,57 @@ public:
     updateRowOnAlgorithmComplete(mockAlg, row);
 
     TS_ASSERT_EQUALS(row.getLoadedWs(), mockWs);
+  }
+
+  void test_row_is_updated_with_workspace_group_on_algorithm_complete() {
+    auto mockAlg = std::make_shared<StubbedPreProcess>();
+    auto group = std::make_shared<Mantid::API::WorkspaceGroup>();
+    group->addWorkspace(WorkspaceCreationHelper::create2DWorkspace(1, 1));
+    Mantid::API::Workspace_sptr output = group;
+    mockAlg->addOutputWorkspace(output);
+    auto row = PreviewRow({});
+
+    updateRowOnAlgorithmComplete(mockAlg, row);
+
+    TS_ASSERT_EQUALS(row.getLoadedWs(), group);
+  }
+
+  void test_empty_workspace_group_output_is_rejected() {
+    auto mockAlg = std::make_shared<StubbedPreProcess>();
+    Mantid::API::Workspace_sptr output = std::make_shared<Mantid::API::WorkspaceGroup>();
+    mockAlg->addOutputWorkspace(output);
+    auto row = PreviewRow({});
+
+    TS_ASSERT_THROWS_EQUALS(updateRowOnAlgorithmComplete(mockAlg, row), std::runtime_error const &e,
+                            std::string(e.what()),
+                            "Unsupported workspace type; expected MatrixWorkspace or WorkspaceGroup of "
+                            "MatrixWorkspaces");
+  }
+
+  void test_workspace_group_with_non_matrix_member_is_rejected() {
+    auto mockAlg = std::make_shared<StubbedPreProcess>();
+    auto group = std::make_shared<Mantid::API::WorkspaceGroup>();
+    group->addWorkspace(WorkspaceCreationHelper::create2DWorkspace(1, 1));
+    group->addWorkspace(Mantid::API::WorkspaceFactory::Instance().createTable());
+    Mantid::API::Workspace_sptr output = group;
+    mockAlg->addOutputWorkspace(output);
+    auto row = PreviewRow({});
+
+    TS_ASSERT_THROWS_EQUALS(updateRowOnAlgorithmComplete(mockAlg, row), std::runtime_error const &e,
+                            std::string(e.what()),
+                            "Unsupported workspace type; expected MatrixWorkspace or WorkspaceGroup of "
+                            "MatrixWorkspaces");
+  }
+
+  void test_non_matrix_workspace_output_is_rejected() {
+    auto mockAlg = std::make_shared<StubbedPreProcess>();
+    Mantid::API::Workspace_sptr output = Mantid::API::WorkspaceFactory::Instance().createTable();
+    mockAlg->addOutputWorkspace(output);
+    auto row = PreviewRow({});
+
+    TS_ASSERT_THROWS_EQUALS(updateRowOnAlgorithmComplete(mockAlg, row), std::runtime_error const &e,
+                            std::string(e.what()),
+                            "Unsupported workspace type; expected MatrixWorkspace or WorkspaceGroup of "
+                            "MatrixWorkspaces");
   }
 };

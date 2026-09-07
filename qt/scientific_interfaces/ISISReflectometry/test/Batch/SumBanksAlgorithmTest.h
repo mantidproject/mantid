@@ -11,6 +11,7 @@
 #include "../../../ISISReflectometry/Reduction/PreviewRow.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MockBatch.h"
@@ -38,7 +39,7 @@ class SumBanksAlgorithmTest : public CxxTest::TestSuite {
           m_propName, "", Mantid::Kernel::Direction::Output));
     }
 
-    void addOutputWorkspace(Mantid::API::MatrixWorkspace_sptr &ws) {
+    void addOutputWorkspace(Mantid::API::Workspace_sptr &ws) {
       this->getPointerToProperty("OutputWorkspace")->createTemporaryValue();
       setProperty(m_propName, ws);
     }
@@ -103,7 +104,8 @@ public:
     auto mockAlg = std::make_shared<StubbedPreProcess>();
     const bool isHistogram = true;
     Mantid::API::MatrixWorkspace_sptr mockWs = WorkspaceCreationHelper::create1DWorkspaceRand(1, isHistogram);
-    mockAlg->addOutputWorkspace(mockWs);
+    Mantid::API::Workspace_sptr output = mockWs;
+    mockAlg->addOutputWorkspace(output);
 
     auto runNumbers = std::vector<std::string>{};
     auto row = PreviewRow(runNumbers);
@@ -111,5 +113,27 @@ public:
     updateRowOnAlgorithmComplete(mockAlg, row);
 
     TS_ASSERT_EQUALS(row.getSummedWs(), mockWs);
+  }
+
+  void test_workspace_group_input_and_output_are_forwarded() {
+    auto batch = MockBatch();
+    auto inputGroup = std::make_shared<Mantid::API::WorkspaceGroup>();
+    inputGroup->addWorkspace(WorkspaceCreationHelper::create2DWorkspace(1, 1));
+    auto outputGroup = std::make_shared<Mantid::API::WorkspaceGroup>();
+    outputGroup->addWorkspace(WorkspaceCreationHelper::create2DWorkspace(1, 1));
+    auto row = PreviewRow({});
+    row.setLoadedWs(inputGroup);
+    auto mockAlg = std::make_shared<StubbedPreProcess>();
+
+    auto configuredAlg = createConfiguredAlgorithm(batch, row, mockAlg);
+    Mantid::API::Workspace_sptr input = configuredAlg->getAlgorithmRuntimeProps().getProperty("InputWorkspace");
+    TS_ASSERT_EQUALS(input, inputGroup);
+    TS_ASSERT_THROWS_NOTHING(mockAlg->updatePropertyValues(configuredAlg->getAlgorithmRuntimeProps()));
+    Mantid::API::Workspace_sptr output = outputGroup;
+    mockAlg->addOutputWorkspace(output);
+
+    updateRowOnAlgorithmComplete(mockAlg, row);
+
+    TS_ASSERT_EQUALS(row.getSummedWs(), outputGroup);
   }
 };

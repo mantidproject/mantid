@@ -6,12 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "LookupTable.h"
+#include "Common/GroupHelper.h"
 #include "IGroup.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "ParseReflectometryStrings.h"
 #include "PreviewRow.h"
 #include "Row.h"
 #include "RowExceptions.h"
+
 #include <boost/regex.hpp>
 #include <cmath>
 #include <vector>
@@ -24,6 +27,7 @@ bool equalWithinTolerance(double val1, double val2, double tolerance) {
 }
 
 static const std::string EMPTY_SEARCH_TITLE = "";
+
 } // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -42,7 +46,7 @@ std::optional<LookupRow> LookupTable::findLookupRow(Row const &row, double toler
 }
 
 std::optional<LookupRow> LookupTable::findLookupRow(PreviewRow const &previewRow, double tolerance) const {
-  auto const title = !previewRow.getLoadedWs() ? EMPTY_SEARCH_TITLE : previewRow.getLoadedWs()->getTitle();
+  auto const title = getPreviewTitle(previewRow);
   auto titleAndTheta = parseTitleAndThetaFromRunTitle(title);
 
   if (titleAndTheta.has_value()) {
@@ -140,6 +144,15 @@ std::vector<LookupRow::ValueArray> LookupTable::toValueArray() const {
   std::transform(m_lookupRows.cbegin(), m_lookupRows.cend(), std::back_inserter(result),
                  [](auto const &lookupRow) { return lookupRowToArray(lookupRow); });
   return result;
+}
+
+std::string
+LookupTable::getPreviewTitle(MantidQt::CustomInterfaces::ISISReflectometry::PreviewRow const &previewRow) const {
+  auto const &members = getMembers(previewRow.getLoadedWs());
+  if (members.empty()) {
+    return EMPTY_SEARCH_TITLE;
+  }
+  return members[0]->getTitle();
 }
 
 bool operator==(LookupTable const &lhs, LookupTable const &rhs) { return lhs.m_lookupRows == rhs.m_lookupRows; }

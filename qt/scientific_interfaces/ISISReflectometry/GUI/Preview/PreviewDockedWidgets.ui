@@ -249,6 +249,16 @@
                         </layout>
                     </widget>
                 </item>
+                <item>
+                    <widget class="QCheckBox" name="plot_all_group_members_checkbox">
+                        <property name="visible">
+                            <bool>false</bool>
+                        </property>
+                        <property name="text">
+                            <string>Plot reduction preview for all group members</string>
+                        </property>
+                    </widget>
+                </item>
             </layout>
         </item>
       </layout>

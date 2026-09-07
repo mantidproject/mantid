@@ -119,6 +119,40 @@
        </property>
       </widget>
      </item>
+   </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="group_member_layout">
+     <item>
+      <widget class="QLabel" name="group_member_label">
+       <property name="visible">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Group member</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="group_member_combo_box">
+       <property name="visible">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="group_member_spacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
     </layout>
    </item>
    <item>

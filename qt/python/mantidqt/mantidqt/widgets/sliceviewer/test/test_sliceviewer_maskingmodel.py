@@ -140,6 +140,16 @@ class SliceViewerMaskingModelTest(unittest.TestCase):
         self.assertFalse(self.model._apply_inverted_mask)
         self.model.export_selectors.assert_called_once()
 
+    def test_invert_masking_clicked_exports_stored_masks_without_an_active_mask(self):
+        self.model._auto_update_mask_file = True
+        self.model._masks = ["stored_mask"]
+        self.model.export_selectors = MagicMock()
+
+        self.model.invert_masking_clicked(True)
+
+        self.assertTrue(self.model._apply_inverted_mask)
+        self.model.export_selectors.assert_called_once_with()
+
     def test_export_selectors(self):
         with (
             patch("mantidqt.widgets.sliceviewer.models.masking.AnalysisDataService") as ads_mock,

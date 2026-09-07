@@ -132,6 +132,19 @@ class SliceViewerMaskingPresenterTest(unittest.TestCase):
         mock_model.clear_active_mask.assert_called_once()
         mock_model.clear_stored_masks.assert_called_once()
 
+    def test_set_visible_updates_stored_and_active_selectors(self):
+        active_selector = Mock()
+        presenter, _ = self._setup_presenter_test(active_selector=active_selector)
+        stored_selectors = [Mock(), Mock()]
+        presenter._selectors = stored_selectors
+
+        presenter.set_visible(False)
+
+        for selector in stored_selectors:
+            selector.set_visible.assert_called_once_with(False)
+        active_selector.set_visible.assert_called_once_with(False)
+        active_selector.set_active.assert_called_once_with(False)
+
 
 class SliceViewerSelectionMaskingTest(unittest.TestCase):
     Click = namedtuple("Click", ["xdata", "ydata"])
@@ -161,6 +174,17 @@ class SliceViewerSelectionMaskingTest(unittest.TestCase):
 
             selector.add_cursor_info("test_click", "test_release")
             mocks["model"].add_elli_cursor_info.assert_called_once_with(click="test_click", release="test_release", transpose=False)
+
+    def test_set_visible_updates_all_selector_artists(self):
+        with patch("mantidqt.widgets.sliceviewer.presenters.masking.make_selector_class") as selector_fn_mock:
+            artists = [Mock(), Mock()]
+            selector_fn_mock.return_value.return_value.artists = artists
+            selector, _ = self._set_up_selector_test(ToolItemText.RECT_MASKING)
+
+            selector.set_visible(False)
+
+            for artist in artists:
+                artist.set_visible.assert_called_once_with(False)
 
     def _test_inactive_color_rect_base(self, text):
         with patch("mantidqt.widgets.sliceviewer.presenters.masking.make_selector_class") as selector_fn_mock:

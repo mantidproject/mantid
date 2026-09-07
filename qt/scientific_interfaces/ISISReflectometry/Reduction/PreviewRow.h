@@ -8,7 +8,7 @@
 #include "Common/DllConfig.h"
 #include "GUI/Preview/ROIType.h"
 #include "Item.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
 #include "Reduction/ProcessingInstructions.h"
 
@@ -17,6 +17,8 @@
 #include <vector>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
+MANTIDQT_ISISREFLECTOMETRY_DLL void validatePreviewWorkspace(Mantid::API::Workspace_sptr const &workspace);
+
 class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewRow : public Item {
 public:
   explicit PreviewRow(const std::vector<std::string> &runNumbers);
@@ -42,15 +44,15 @@ public:
   void renameOutputWorkspace(std::string const &, std::string const &) override {}
   void setOutputNames(std::vector<std::string> const &) override {}
 
-  Mantid::API::MatrixWorkspace_sptr getLoadedWs() const noexcept;
-  Mantid::API::MatrixWorkspace_sptr getSummedWs() const noexcept;
-  Mantid::API::MatrixWorkspace_sptr getReducedWs() const noexcept;
+  Mantid::API::Workspace_sptr getLoadedWs() const noexcept;
+  Mantid::API::Workspace_sptr getSummedWs() const noexcept;
+  Mantid::API::Workspace_sptr getReducedWs() const noexcept;
   std::optional<ProcessingInstructions> getSelectedBanks() const noexcept;
   std::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const;
 
-  void setLoadedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
-  void setSummedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
-  void setReducedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
+  void setLoadedWs(Mantid::API::Workspace_sptr ws) noexcept;
+  void setSummedWs(Mantid::API::Workspace_sptr ws) noexcept;
+  void setReducedWs(Mantid::API::Workspace_sptr ws) noexcept;
   void setSelectedBanks(std::optional<ProcessingInstructions> selectedBanks) noexcept;
   void setProcessingInstructions(ROIType regionType, std::optional<ProcessingInstructions> processingInstructions);
 
@@ -67,9 +69,9 @@ private:
   std::optional<ProcessingInstructions> m_processingInstructions{std::nullopt};
   std::optional<ProcessingInstructions> m_backgroundProcessingInstructions{std::nullopt};
   std::optional<ProcessingInstructions> m_transmissionProcessingInstructions{std::nullopt};
-  Mantid::API::MatrixWorkspace_sptr m_loadedWs;
-  Mantid::API::MatrixWorkspace_sptr m_summedWs;
-  Mantid::API::MatrixWorkspace_sptr m_reducedWs;
+  Mantid::API::Workspace_sptr m_loadedWs;
+  Mantid::API::Workspace_sptr m_summedWs;
+  Mantid::API::Workspace_sptr m_reducedWs;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

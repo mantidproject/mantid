@@ -37,6 +37,7 @@ set(TEST_FILES
     Common/DetectorTest.h
     Common/EncoderTest.h
     Common/PlotOptionsProviderTest.h
+    Common/GroupHelperTest.h
     Common/PlotterTest.h
     Experiment/ExperimentPresenterTest.h
     Experiment/LookupTableValidatorTest.h
@@ -60,6 +61,8 @@ set(TEST_FILES
     Preview/PreviewJobManagerTest.h
     Preview/PreviewModelTest.h
     Preview/PreviewPresenterTest.h
+    Preview/QtPreviewDockedWidgetsTest.h
+    Preview/QtPreviewViewTest.h
     Preview/PreviewSettingsTest.h
 )
 

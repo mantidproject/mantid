@@ -58,6 +58,9 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         super().__init__(ws, self.view.data_view)
         self._selectors: list[Selector] = []
         self._drawing_region = False
+        self._group_member_name = None
+        self._group_member_maskings = {}
+        self._masking_inverted = False
 
         self._toggle_masking_options(False)
 
@@ -116,13 +119,21 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         pass
 
     def clear_workspace(self):
+        if self._data_view.masking:
+            self._data_view.masking.clear_and_disconnect()
+        self._clear_group_member_maskings()
+        self._data_view.masking = None
+        self._group_member_name = None
         self._selectors = []
         self.model.ws = None
         self.view.clear_figure()
 
-    def update_workspace(self, workspace) -> None:
+    def update_workspace(self, workspace, group_member_name=None) -> None:
         if WorkspaceInfo.get_ws_type(workspace) != WS_TYPE.MATRIX:
             raise NotImplementedError("Only Matrix Workspaces are currently supported by the region selector.")
+
+        if group_member_name != self._group_member_name:
+            self._switch_group_member_masking(group_member_name)
 
         if not self.model.ws:
             self._initialise_dimensions(workspace)
@@ -267,9 +278,46 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         self._data_view.deactivate_and_disable_tool(ToolItemText.ZOOM)
         self._data_view.deactivate_and_disable_tool(ToolItemText.PAN)
         self._data_view.deactivate_and_disable_tool(ToolItemText.REGIONSELECTION)
-        self._data_view.masking = Masking(self._data_view, self.model.ws.name(), auto_update_mask_file=True)
-        self._data_view.masking.new_selector(ToolItemText.RECT_MASKING)  # default to rect masking
+        masking = self._group_member_maskings.pop(self._group_member_name, None)
+        if masking:
+            masking.set_visible(True)
+            self._data_view.canvas.draw_idle()
+        else:
+            masking = self._create_masking()
+        self._data_view.masking = masking
         self._data_view.activate_tool(ToolItemText.RECT_MASKING, True)
+
+    def _create_masking(self):
+        workspace_name = self._group_member_name or self.model.ws.name()
+        masking = Masking(self._data_view, workspace_name, auto_update_mask_file=True)
+        masking.new_selector(ToolItemText.RECT_MASKING)
+        if self._masking_inverted:
+            masking.invert_masking_clicked(True)
+        return masking
+
+    def _switch_group_member_masking(self, group_member_name):
+        masking_active = self._data_view.masking is not None
+        if masking_active:
+            self._data_view.masking.set_visible(False)
+            if self._group_member_name:
+                self._group_member_maskings[self._group_member_name] = self._data_view.masking
+
+        self._data_view.masking = None
+        self._group_member_name = group_member_name
+
+        if masking_active:
+            masking = self._group_member_maskings.pop(group_member_name, None) or self._create_masking()
+            masking.set_visible(True)
+            self._data_view.masking = masking
+
+    def _clean_up_masking(self):
+        super()._clean_up_masking()
+        self._clear_group_member_maskings()
+
+    def _clear_group_member_maskings(self):
+        for masking in self._group_member_maskings.values():
+            masking.clear_and_disconnect()
+        self._group_member_maskings = {}
 
     def masking(self, active) -> None:
         super().masking(active)
@@ -295,7 +343,10 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         pass
 
     def invert_masking_clicked(self, active) -> None:
+        self._masking_inverted = active
         self.view.data_view.masking.invert_masking_clicked(active)
+        for masking in self._group_member_maskings.values():
+            masking.invert_masking_clicked(active)
 
     @property
     def _is_masking_disabled(self):

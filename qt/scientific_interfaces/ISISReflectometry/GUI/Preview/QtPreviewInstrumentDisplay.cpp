@@ -27,6 +27,14 @@ void QtPreviewInstrumentDisplay::updateWorkspace(Mantid::API::MatrixWorkspace_sp
   m_instViewModel->updateWorkspace(workspace);
 }
 
+void QtPreviewInstrumentDisplay::updateWorkspacePreservingSelection(Mantid::API::MatrixWorkspace_sptr &workspace) {
+  m_instViewModel->updateWorkspace(workspace);
+  if (auto const surface = getSurface()) {
+    surface->resetInstrumentActor(m_instViewModel->getInstrumentViewActor());
+    surface->updateDetectors();
+  }
+}
+
 void QtPreviewInstrumentDisplay::resetInstView() {
   disconnectSurfaceSignals();
   m_instDisplay = std::make_unique<MantidWidgets::InstrumentDisplay>(m_placeholder);

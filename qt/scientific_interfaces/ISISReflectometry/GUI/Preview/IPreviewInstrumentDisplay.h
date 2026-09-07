@@ -20,6 +20,7 @@ public:
   virtual ~IPreviewInstrumentDisplay() = default;
 
   virtual void updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) = 0;
+  virtual void updateWorkspacePreservingSelection(Mantid::API::MatrixWorkspace_sptr &workspace) = 0;
   virtual void resetInstView() = 0;
   virtual void plotInstView() = 0;
   virtual void setInstViewZoomMode() = 0;
