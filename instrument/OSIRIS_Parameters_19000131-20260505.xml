@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "OSIRIS" valid-from = "2026-05-05 00:00:00" valid-to = "2100-01-31 23:59:59">
+<parameter-file instrument = "OSIRIS" valid-from = "1900-01-31 23:59:59" valid-to = "2026-05-05 00:00:00">
 
 <component-link name = "OSIRIS">
 
@@ -117,18 +117,6 @@
 <parameter name="Workflow.Diffraction.Correction" type="string">
     <value val="Vanadium" />
     <value val="Calibration" />
-</parameter>
-
-</component-link>
-
-<component-link name = "silicon">
-
-<parameter name="Workflow.EdgePixelMaskFile" type="string">
-  <value val="OSIRIS_Si_Edge_Pixels_Mask.xml" />
-</parameter>
-
-<parameter name="Workflow.MinimumCalibrationFactor">
-  <value val="0.5" />
 </parameter>
 
 </component-link>
