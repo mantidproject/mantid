@@ -15,6 +15,8 @@ public:
   MOCK_METHOD(void, subscribe, (std::shared_ptr<Mantid::API::RegionSelectorObserver> const &), (override));
   MOCK_METHOD(void, clearWorkspace, (), (override));
   MOCK_METHOD(void, updateWorkspace, (Mantid::API::Workspace_sptr const &workspace), (override));
+  MOCK_METHOD(void, updateWorkspaceForGroupMember,
+              (Mantid::API::Workspace_sptr const &workspace, std::string const &groupMemberName), (override));
   MOCK_METHOD(void, addRectangularRegion,
               (std::string const &regionType, std::string const &color, std::string const &hatch), (override));
   MOCK_METHOD(void, deselectAllSelectors, (), (override));

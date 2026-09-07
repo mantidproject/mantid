@@ -1,0 +1,3 @@
+- The ISIS Reflectometry Preview tab now supports workspace groups. Individual group members can be inspected while
+  retaining detector and time-of-flight regions, masks are retained separately for each member, and the reduced
+  reflectivity curves can be overplotted for comparison.

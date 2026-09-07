@@ -70,6 +70,20 @@ class TestReflectometryInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.InteractorStyles")
     @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.ShapeRenderer")
     @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.FullInstrumentViewModel")
+    def test_update_workspace_preserves_shape_overlay(self, mock_model_cls, mock_renderer_cls, _mock_styles_cls):
+        mock_ws = MagicMock()
+        mock_model_cls.return_value.detector_positions = np.zeros((10, 3))
+        mock_model_cls.return_value.detector_counts = np.zeros(10)
+        mock_renderer_cls.return_value.build_detector_mesh.return_value = MagicMock(bounds=(0, 1, 0, 1, 0, 1))
+
+        self._presenter.update_workspace(mock_ws)
+
+        self._mock_view.main_plotter.clear_actors.assert_called_once_with()
+        self._mock_view.main_plotter.clear.assert_not_called()
+
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.InteractorStyles")
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.ShapeRenderer")
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.FullInstrumentViewModel")
     def test_update_workspace_sets_model(self, mock_model_cls, mock_renderer_cls, _mock_styles_cls):
         mock_ws = MagicMock()
         mock_model_cls.return_value.detector_positions = np.zeros((10, 3))

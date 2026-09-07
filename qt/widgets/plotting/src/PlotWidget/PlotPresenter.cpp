@@ -23,6 +23,10 @@ void PlotPresenter::setSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws, con
   m_model->setSpectrum(ws, wsIndex);
 }
 
+void PlotPresenter::setSpectra(const std::vector<MatrixWorkspace_sptr> &workspaces, const size_t wsIndex) {
+  m_model->setSpectra(workspaces, wsIndex);
+}
+
 void PlotPresenter::setScaleLinear(const AxisID axisID) { m_view->setScaleLinear(axisID); }
 
 void PlotPresenter::setScaleLog(const AxisID axisID) { m_view->setScaleLog(axisID); }

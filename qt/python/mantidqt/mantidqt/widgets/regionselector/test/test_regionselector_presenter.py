@@ -79,6 +79,81 @@ class RegionSelectorTest(unittest.TestCase):
         mock_view.set_workspace.assert_called_once_with(mock_ws)
         region_selector.show_all_data_clicked.assert_called_once()
 
+    def test_update_workspace_preserves_selector_extents(self):
+        region_selector = RegionSelector(view=Mock())
+        region_selector.show_all_data_clicked = Mock()
+        selector = Mock()
+        selector.extents = (1000.0, 5000.0, 10.0, 20.0)
+        region_selector._selectors = [selector]
+
+        region_selector.update_workspace(Mock(spec=MatrixWorkspace))
+
+        self.assertEqual(region_selector._selectors, [selector])
+        self.assertEqual(selector.extents, (1000.0, 5000.0, 10.0, 20.0))
+
+    @patch("mantidqt.widgets.regionselector.presenter.Masking")
+    def test_update_workspace_switches_to_group_member_specific_masking(self, mock_masking_cls):
+        region_selector = RegionSelector(view=self.mock_view)
+        region_selector.show_all_data_clicked = Mock()
+        first_masking = MagicMock()
+        second_masking = MagicMock()
+        mock_masking_cls.return_value = second_masking
+        region_selector._group_member_name = "POLREF_1"
+        region_selector._data_view.masking = first_masking
+
+        region_selector.update_workspace(Mock(spec=MatrixWorkspace), "POLREF_2")
+
+        first_masking.set_visible.assert_called_once_with(False)
+        mock_masking_cls.assert_called_once_with(region_selector._data_view, "POLREF_2", auto_update_mask_file=True)
+        second_masking.new_selector.assert_called_once_with(ToolItemText.RECT_MASKING)
+        second_masking.set_visible.assert_called_once_with(True)
+        self.assertEqual(region_selector._data_view.masking, second_masking)
+
+    @patch("mantidqt.widgets.regionselector.presenter.Masking")
+    def test_update_workspace_restores_cached_group_member_masking(self, mock_masking_cls):
+        region_selector = RegionSelector(view=self.mock_view)
+        region_selector.show_all_data_clicked = Mock()
+        first_masking = MagicMock()
+        second_masking = MagicMock()
+        region_selector._group_member_name = "POLREF_2"
+        region_selector._group_member_maskings = {"POLREF_1": first_masking}
+        region_selector._data_view.masking = second_masking
+
+        region_selector.update_workspace(Mock(spec=MatrixWorkspace), "POLREF_1")
+
+        second_masking.set_visible.assert_called_once_with(False)
+        first_masking.set_visible.assert_called_once_with(True)
+        mock_masking_cls.assert_not_called()
+        self.assertEqual(region_selector._data_view.masking, first_masking)
+
+    @patch("mantidqt.widgets.regionselector.presenter.Masking")
+    def test_update_workspace_applies_inverted_masking_to_a_new_group_member(self, mock_masking_cls):
+        region_selector = RegionSelector(view=self.mock_view)
+        region_selector.show_all_data_clicked = Mock()
+        first_masking = MagicMock()
+        second_masking = MagicMock()
+        mock_masking_cls.return_value = second_masking
+        region_selector._group_member_name = "POLREF_1"
+        region_selector._data_view.masking = first_masking
+
+        region_selector.invert_masking_clicked(True)
+        region_selector.update_workspace(Mock(spec=MatrixWorkspace), "POLREF_2")
+
+        second_masking.invert_masking_clicked.assert_called_once_with(True)
+
+    def test_update_workspace_keeps_cached_group_member_masking_hidden_when_masking_is_inactive(self):
+        region_selector = RegionSelector(view=self.mock_view)
+        region_selector.show_all_data_clicked = Mock()
+        first_masking = MagicMock()
+        region_selector._group_member_name = "POLREF_2"
+        region_selector._group_member_maskings = {"POLREF_1": first_masking}
+        region_selector._data_view.masking = None
+
+        region_selector.update_workspace(Mock(spec=MatrixWorkspace), "POLREF_1")
+
+        first_masking.set_visible.assert_not_called()
+        self.assertIsNone(region_selector._data_view.masking)
+
     def test_add_rectangular_region_creates_selector(self):
         region_selector = RegionSelector(ws=Mock(spec=MatrixWorkspace), view=self.mock_view)
 
@@ -125,6 +200,22 @@ class RegionSelectorTest(unittest.TestCase):
         region_selector.clear_workspace()
 
         mock_view.clear_figure.assert_called_once_with()
+
+    def test_clear_workspace_discards_group_member_maskings(self):
+        region_selector = RegionSelector(view=self.mock_view)
+        current_masking = MagicMock()
+        cached_masking = MagicMock()
+        region_selector._data_view.masking = current_masking
+        region_selector._group_member_maskings = {"POLREF_1": cached_masking}
+        region_selector._group_member_name = "POLREF_2"
+
+        region_selector.clear_workspace()
+
+        current_masking.clear_and_disconnect.assert_called_once_with()
+        cached_masking.clear_and_disconnect.assert_called_once_with()
+        self.assertIsNone(region_selector._data_view.masking)
+        self.assertEqual(region_selector._group_member_maskings, {})
+        self.assertIsNone(region_selector._group_member_name)
 
     def test_get_region_with_two_signal_regions(self):
         region_selector, selector_one, selector_two = self._mock_selectors()
@@ -328,17 +419,28 @@ class RegionSelectorTest(unittest.TestCase):
 
     def test_invert_masking_clicked(self):
         mock_masking = MagicMock()
+        cached_maskings = [MagicMock(), MagicMock()]
         mock_data_view = MagicMock()
         mock_data_view.masking = mock_masking
         self.mock_view.data_view = mock_data_view
 
         region_selector = RegionSelector(view=self.mock_view)
+        region_selector._group_member_maskings = {"POLREF_1": cached_maskings[0], "POLREF_2": cached_maskings[1]}
 
         region_selector.invert_masking_clicked(True)
+        self.assertTrue(region_selector._masking_inverted)
         mock_masking.invert_masking_clicked.assert_called_once_with(True)
+        for masking in cached_maskings:
+            masking.invert_masking_clicked.assert_called_once_with(True)
         mock_masking.reset_mock()
+        for masking in cached_maskings:
+            masking.reset_mock()
+
         region_selector.invert_masking_clicked(False)
+        self.assertFalse(region_selector._masking_inverted)
         mock_masking.invert_masking_clicked.assert_called_once_with(False)
+        for masking in cached_maskings:
+            masking.invert_masking_clicked.assert_called_once_with(False)
 
     def test_rect_masking_clicked(self):
         mock_masking = MagicMock()
@@ -404,6 +506,21 @@ class RegionSelectorTest(unittest.TestCase):
             ]
         )
 
+    def test_toggling_masking_off_discards_current_and_cached_group_member_maskings(self):
+        region_selector = RegionSelector(view=self.mock_view)
+        current_masking = MagicMock()
+        cached_maskings = [MagicMock(), MagicMock()]
+        region_selector._data_view.masking = current_masking
+        region_selector._group_member_maskings = {"POLREF_1": cached_maskings[0], "POLREF_2": cached_maskings[1]}
+
+        region_selector.masking(False)
+
+        current_masking.clear_and_disconnect.assert_called_once_with()
+        for masking in cached_maskings:
+            masking.clear_and_disconnect.assert_called_once_with()
+        self.assertIsNone(region_selector._data_view.masking)
+        self.assertEqual(region_selector._group_member_maskings, {})
+
     @patch("mantidqt.widgets.regionselector.presenter.Masking")
     def test_activate_masking(self, mock_masking_cls):
         region_selector = RegionSelector(view=self.mock_view)
@@ -432,6 +549,21 @@ class RegionSelectorTest(unittest.TestCase):
             ToolItemText.RECT_MASKING,
             True,
         )
+
+    @patch("mantidqt.widgets.regionselector.presenter.Masking")
+    def test_activate_masking_restores_cached_group_member_masking(self, mock_masking_cls):
+        region_selector = RegionSelector(view=self.mock_view)
+        region_selector._data_view = MagicMock()
+        cached_masking = MagicMock()
+        region_selector._group_member_name = "POLREF_1"
+        region_selector._group_member_maskings = {"POLREF_1": cached_masking}
+
+        region_selector._activate_masking()
+
+        cached_masking.set_visible.assert_called_once_with(True)
+        region_selector._data_view.canvas.draw_idle.assert_called_once_with()
+        mock_masking_cls.assert_not_called()
+        self.assertEqual(region_selector._data_view.masking, cached_masking)
 
     def test_display_rectangular_region_y1_out_of_bounds_does_not_add_selector(self):
         y_limits = (200, 500)

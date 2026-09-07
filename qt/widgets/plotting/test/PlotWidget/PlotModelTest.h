@@ -43,6 +43,16 @@ public:
     TS_ASSERT_EQUALS(model.getWorkspaces(), expectedWorkspaces);
   }
 
+  void test_set_spectra() {
+    auto model = PlotModel();
+    auto const workspaces = std::vector<MatrixWorkspace_sptr>{createMatrixWorkspace(2), createMatrixWorkspace(2)};
+
+    model.setSpectra(workspaces, 1);
+
+    TS_ASSERT_EQUALS(model.getWorkspaceIndices(), std::vector<int>({1}));
+    TS_ASSERT_EQUALS(model.getWorkspaces(), workspaces);
+  }
+
   void test_clear_will_clear_the_model() {
     auto model = PlotModel();
     auto ws = createMatrixWorkspace(3);
