@@ -114,10 +114,9 @@ class RubberBandZoomInteractorStyle(vtkInteractorStyleRubberBandZoom):
     def _on_mouse_move_event(self, obj, event):
         if self._ignore_rubberband_interaction:
             return
-        super().OnMouseMove()
         if self._rubber_band_start is not None:
             self._set_rubber_band_points(self._rubber_band_start, self._event_position())
-            self.plotter.render_window.Render()
+        super().OnMouseMove()
 
     def _on_left_button_release_event(self, obj, event):
         if self._ignore_rubberband_interaction:
