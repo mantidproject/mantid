@@ -240,11 +240,15 @@ jobs:
 
       # Runs after the whole build has completed so that every warning is reported at once,
       # and before the tests so that a warning stops the job from proceeding any further.
+      # The parser understands both the gcc and the MSVC diagnostic formats, so the same
+      # check covers the Linux and the Windows build.
+      # TODO: Needs to be expanded for clang on osx.
       - uses: ./.github/actions/check-build-warnings
         name: Check for compiler warnings
-        if: ${{ matrix.os == 'Linux' && needs.check-filters.outputs.code_changes == 'true' }}
+        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
         with:
           log-file: build/test_logs/build_${{ matrix.os }}.log
+          os: ${{ matrix.os }}
 
       - name: Run unit tests
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
