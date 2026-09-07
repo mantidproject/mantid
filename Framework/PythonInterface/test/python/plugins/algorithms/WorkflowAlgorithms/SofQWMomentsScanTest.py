@@ -51,11 +51,13 @@ class SofQWMomentsScanTest(unittest.TestCase):
 
     def tearDown(self):
         """
-        Remove workspaces from ADS.
+        Remove workspaces from ADS. Tests which only check the algorithm's properties never
+        create them, so each is removed only if it is there.
         """
 
-        DeleteWorkspace(mtd["reduced"])
-        DeleteWorkspace(mtd["sqw"])
+        for name in ("reduced", "sqw"):
+            if mtd.doesExist(name):
+                DeleteWorkspace(mtd[name])
 
 
 if __name__ == "__main__":
