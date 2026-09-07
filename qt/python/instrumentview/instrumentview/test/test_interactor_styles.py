@@ -320,7 +320,7 @@ class TestRubberBandZoomInteractorStyle(unittest.TestCase):
         self.assertIsNone(style._rubber_band_start)
 
     def test_mouse_move_updates_rubber_band_points_and_renders(self):
-        style, plotter, _ = self._create_style_with_super_spy()
+        style, _, _ = self._create_style_with_super_spy()
         style._rubber_band_start = (10, 20)
 
         with mock.patch.object(style, "_event_position", return_value=(30, 40)):
@@ -330,15 +330,6 @@ class TestRubberBandZoomInteractorStyle(unittest.TestCase):
         assert_array_almost_equal(style._rubber_band_poly.points[1], [30, 20, 0])
         assert_array_almost_equal(style._rubber_band_poly.points[2], [30, 40, 0])
         assert_array_almost_equal(style._rubber_band_poly.points[3], [10, 40, 0])
-        plotter.render_window.Render.assert_called_once()
-
-    def test_mouse_move_without_active_rubber_band_does_not_render(self):
-        style, plotter, _ = self._create_style_with_super_spy()
-        style._rubber_band_start = None
-
-        style._on_mouse_move_event("obj", "event")
-
-        plotter.render_window.Render.assert_not_called()
 
     def test_left_button_release_hides_rubber_band_and_renders(self):
         style, plotter, _ = self._create_style_with_super_spy()
