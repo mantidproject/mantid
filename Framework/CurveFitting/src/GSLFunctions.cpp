@@ -15,6 +15,24 @@
 
 namespace Mantid::CurveFitting {
 
+namespace {
+double leastSquaresLoss(const std::shared_ptr<API::FunctionValues> &values, const size_t index) {
+  return (values->getCalculated(index) - values->getFitData(index)) * values->getFitWeight(index);
+}
+
+double poissonLoss(const std::shared_ptr<API::FunctionValues> &values, const size_t index) {
+  return PoissonLoss::calculatePoissonLossLM(values->getFitData(index), values->getCalculated(index));
+}
+
+double leastSquaresWeight(const std::shared_ptr<API::FunctionValues> &values, const size_t index) {
+  return values->getFitWeight(index);
+}
+
+double poissonWeight(const std::shared_ptr<API::FunctionValues> &values, const size_t index) {
+  return PoissonLoss::calculateJacobianScaleFactor(values->getFitData(index), values->getCalculated(index));
+}
+} // namespace
+
 /** Fit GSL function wrapper
  * @param x :: Input function parameters
  * @param params :: Input data
@@ -68,14 +86,10 @@ int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
   }
 
   // function() return calculated data values. Need to convert this values into
-  // calculated-observed devided by error values used by GSL
+  // calculated-observed divided by error values used by GSL
 
   for (size_t i = 0; i < p->n; i++) {
-    if (p->isPoisson) {
-      f->data[i] = PoissonLoss::calculatePoissonLossLM(values->getFitData(i), values->getCalculated(i));
-    } else {
-      f->data[i] = (values->getCalculated(i) - values->getFitData(i)) * values->getFitWeight(i);
-    }
+    f->data[i] = p->loss(values, i);
   }
   return GSL_SUCCESS;
 }
@@ -146,9 +160,7 @@ int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
   EigenMatrix m_tr = m.tr();
   std::copy(&m_tr.mutator().data()[0], &m_tr.mutator().data()[J_tr->size1 * J_tr->size2], &J->data[0]);
   for (size_t iY = 0; iY < p->n; iY++) {
-    const double weight =
-        p->isPoisson ? PoissonLoss::calculateJacobianScaleFactor(values->getFitData(iY), values->getCalculated(iY))
-                     : values->getFitWeight(iY);
+    const double weight = p->scaleFactor(values, iY);
     for (size_t iP = 0; iP < p->p; iP++) {
       J->data[iY * p->p + iP] *= weight;
     }
@@ -175,11 +187,15 @@ int gsl_fdf(const gsl_vector *x, void *params, gsl_vector *f, gsl_matrix *J) {
  * @param cf :: ICostFunction
  */
 GSL_FitData::GSL_FitData(const std::shared_ptr<CostFunctions::CostFuncFitting> &cf)
-    : function(cf->getFittingFunction()), costFunction(cf), isPoisson(false) {
+    : function(cf->getFittingFunction()), costFunction(cf) {
   gsl_set_error_handler_off();
 
   if (std::dynamic_pointer_cast<CostFunctions::CostFuncPoisson>(cf)) {
-    isPoisson = true;
+    this->loss = &poissonLoss;
+    this->scaleFactor = &poissonWeight;
+  } else {
+    this->loss = &leastSquaresLoss;
+    this->scaleFactor = &leastSquaresWeight;
   }
 
   // number of active parameters

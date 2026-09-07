@@ -38,11 +38,12 @@ struct GSL_FitData {
   /// Pointer to the function
   API::IFunction_sptr function;
   std::shared_ptr<CostFunctions::CostFuncFitting> costFunction;
-  /// Initial function parameters∫
+  /// Initial function parameters
   gsl_vector *initFuncParams;
   /// Jacobi matrix interface
   JacobianImpl1<EigenMatrix> J;
-  bool isPoisson;
+  double (*loss)(const std::shared_ptr<API::FunctionValues> &values, size_t index);
+  double (*scaleFactor)(const std::shared_ptr<API::FunctionValues> &values, size_t index);
 
   // this is presently commented out in the implementation
   // gsl_matrix *holdCalculatedJacobian; ///< cache of the calculated jacobian

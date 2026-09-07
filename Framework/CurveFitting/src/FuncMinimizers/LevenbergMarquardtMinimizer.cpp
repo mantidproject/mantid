@@ -20,6 +20,8 @@
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_version.h>
 
+#include "MantidCurveFitting/CostFunctions/CostFuncPoisson.h"
+
 namespace Mantid::CurveFitting::FuncMinimisers {
 namespace {
 // Get a reference to the logger
@@ -47,14 +49,14 @@ LevenbergMarquardtMinimizer::LevenbergMarquardtMinimizer()
 
 void LevenbergMarquardtMinimizer::initialize(API::ICostFunction_sptr costFunction, size_t /*maxIterations*/) {
   // set-up GSL container to be used with GSL simplex algorithm
-  auto leastSquares = std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(costFunction);
-  if (leastSquares) {
-    m_data = std::make_unique<GSL_FitData>(leastSquares);
+  if (const auto ps = std::dynamic_pointer_cast<CostFunctions::CostFuncPoisson>(costFunction); ps) {
+    m_data = std::make_unique<GSL_FitData>(ps);
+  } else if (const auto ls = std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(costFunction); ls) {
+    m_data = std::make_unique<GSL_FitData>(ls);
   } else {
     throw std::runtime_error("LevenbergMarquardt can only be used with Least "
-                             "squares cost function.");
+                             "squares or Deviance (Poisson) cost functions.");
   }
-
   // specify the type of GSL solver to use
   const gsl_multifit_fdfsolver_type *T = gsl_multifit_fdfsolver_lmsder;
 
@@ -74,7 +76,7 @@ void LevenbergMarquardtMinimizer::initialize(API::ICostFunction_sptr costFunctio
   }
   gsl_multifit_fdfsolver_set(m_gslSolver, &gslContainer, m_data->initFuncParams);
 
-  m_function = leastSquares->getFittingFunction();
+  m_function = m_data->costFunction->getFittingFunction();
 }
 
 LevenbergMarquardtMinimizer::~LevenbergMarquardtMinimizer() {
