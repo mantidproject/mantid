@@ -374,7 +374,7 @@ class EngDiffGuiTextureRoiTest(_CroppingTestBase):
         self._check_rb_number_rule(texture_focus_dir)
 
     def _check_rb_number_rule(self, texture_focus_dir):
-        before = set(self.files_under(texture_focus_dir))
+        before = self.file_states_under(texture_focus_dir)
 
         self.set_rb_number(self.RB_NUMBER)
         self.focus(runs=CERIA)
@@ -386,4 +386,4 @@ class EngDiffGuiTextureRoiTest(_CroppingTestBase):
 
         with self.subTest("Cropping / and *only* there, to limit the number of files saved"):
             # unlike a non-texture grouping, which is written to both places
-            self.assertEqual(before, set(self.files_under(texture_focus_dir)))
+            self.assertEqual(before, self.file_states_under(texture_focus_dir))

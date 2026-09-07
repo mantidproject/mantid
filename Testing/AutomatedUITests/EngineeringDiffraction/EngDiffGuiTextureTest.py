@@ -335,12 +335,8 @@ class EngDiffGuiTexturePoleFigureTest(_TextureTestBase):
             self.assertEqual(self.RB_NUMBER, self.texture_presenter.rb_num)
 
         self.calculate_pole_figure()
-        written = self.files_under(self.save_dir)
-        with self.subTest("Test 12 / pole figure tables are written under PoleFigureTables"):
+        rb_dir = self.pole_figure_dir(self.RB_NUMBER)
+        with self.subTest("Test 12 / pole figure tables are written under the RB number's PoleFigureTables"):
             # repeated calculations overwrite rather than accumulate, so this asserts the layout
             # rather than a delta
-            self.assertTrue(written, "nothing was written to the save directory")
-            self.assertTrue(
-                any(path.startswith("PoleFigureTables") for path in written),
-                f"no PoleFigureTables output in {sorted(written)}",
-            )
+            self.assertTrue(self.files_under(rb_dir), f"nothing was written under {rb_dir}")

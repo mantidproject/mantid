@@ -388,7 +388,7 @@ class EngDiffGuiSaveLocationAndRbNumberTest(_RunProcessingTestBase):
     def _check_save_location_change(self):
         new_save_dir = os.path.join(self.tmp_root, "relocated_output")
         os.makedirs(new_save_dir, exist_ok=True)
-        before = set(self.files_under(self.save_dir))
+        before = self.file_states_under(self.save_dir)
 
         # through the real settings dialog rather than by writing QSettings, so the presenter's
         # validation and its save-directory notification are exercised as well
@@ -408,4 +408,4 @@ class EngDiffGuiSaveLocationAndRbNumberTest(_RunProcessingTestBase):
             self.assertIn(self.focused_basename("bank_1", "TOF") + ".nxs", relocated)
 
         with self.subTest("Test 1 / steps 4-7 (nothing further is written under the old save location)"):
-            self.assertEqual(before, set(self.files_under(self.save_dir)))
+            self.assertEqual(before, self.file_states_under(self.save_dir))

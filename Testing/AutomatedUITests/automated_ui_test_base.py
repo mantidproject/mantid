@@ -486,5 +486,15 @@ class AutomatedUITestBase(unittest.TestCase):
         return sorted(str(path.relative_to(root)) for path in root.rglob(pattern) if path.is_file())
 
     @staticmethod
+    def file_states_under(directory, extension=None):
+        """Every file below ``directory`` mapped to its modification time, in nanoseconds.
+
+        Used where the assertion is that nothing further was written: a set of paths alone cannot
+        tell an untouched directory from one whose files were overwritten in place.
+        """
+        root = Path(directory)
+        return {relative: (root / relative).stat().st_mtime_ns for relative in AutomatedUITestBase.files_under(directory, extension)}
+
+    @staticmethod
     def basenames_under(directory, extension=None):
         return sorted(os.path.basename(p) for p in AutomatedUITestBase.files_under(directory, extension))
