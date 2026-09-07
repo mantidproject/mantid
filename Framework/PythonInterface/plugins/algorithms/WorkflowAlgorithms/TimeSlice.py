@@ -203,14 +203,12 @@ class TimeSlice(PythonAlgorithm):
 
         raw = mtd[raw_file]
         raw_x = raw.readX(0)
-        divisor_name = "__timeslice_padded_divisor"
-        Integration(
+        divisor = Integration(
             InputWorkspace=raw_file,
-            OutputWorkspace=divisor_name,
             RangeLower=raw_x[0],
             RangeUpper=raw_x[-1],
+            StoreInADS=False,
         )
-        divisor = mtd[divisor_name]
 
         unmatched = 0
         for i in range(divisor.getNumberHistograms()):
@@ -226,8 +224,7 @@ class TimeSlice(PythonAlgorithm):
         if unmatched:
             logger.notice(f"TimeSlice: {unmatched} raw spectra had no calibration entry; using factor 1.0 for those")
 
-        Divide(LHSWorkspace=raw_file, RHSWorkspace=divisor_name, OutputWorkspace=raw_file)
-        DeleteWorkspace(divisor_name)
+        Divide(LHSWorkspace=raw_file, RHSWorkspace=divisor, OutputWorkspace=raw_file)
 
     def _process_raw_file(self, curr_name, sliced_ws_name):
         """
