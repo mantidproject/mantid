@@ -1,0 +1,1 @@
+- The :ref:`Texture Planning User Interface <Texture_Planner-ref>` now has a guided tutorial. It appears the first time the interface is opened and can be re-run at any time from the mortarboard button on the bottom toolbar. The tutorial drives a separate, temporary copy of the interface, so it never affects the session you are working in.

@@ -239,6 +239,7 @@ GUI Development
    MVPDesign
    MVPTutorial/index
    QtDesignerForPython
+   GuiTutorialFramework
    BalsamiqWireframes
    MantidUsedIconsTable
    ISISReflectometryInterface
@@ -252,6 +253,9 @@ GUI Development
 
 :doc:`QtDesignerForPython`
    Describes how to use the Qt designer to produce GUI views.
+
+:doc:`GuiTutorialFramework`
+   How to add a guided, automated tutorial that walks a user through a Qt interface.
 
 :doc:`BalsamiqWireframes`
    An introduction to mockups with Balsamiq Wireframes.
