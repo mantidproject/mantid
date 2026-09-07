@@ -34,7 +34,7 @@ class GeneralUserConfigProperties(Enum):
     USER_LAYOUT = "MainWindow/user_layouts"
     WINDOW_BEHAVIOUR = "AdditionalWindows/behaviour"
     COMPLETION_ENABLED = "Editors/completion_enabled"
-    USE_NEW_INSTRUMENT_VIEW = "InstrumentView/use_new_instrument_view"
+    USE_LEGACY_INSTRUMENT_VIEW = "InstrumentView/use_legacy_instrument_view"
 
 
 class GeneralSettingsModel(ConfigSettingsChangesModel):
@@ -142,9 +142,9 @@ class GeneralSettingsModel(ConfigSettingsChangesModel):
         return self.get_saved_value(GeneralProperties.APPLY_DARK_THEME_ENABLED.value)
 
     @staticmethod
-    def get_use_new_instrument_view() -> bool:
-        if CONF.has(GeneralUserConfigProperties.USE_NEW_INSTRUMENT_VIEW.value):
-            return CONF.get(GeneralUserConfigProperties.USE_NEW_INSTRUMENT_VIEW.value, type=bool)
+    def get_use_legacy_instrument_view() -> bool:
+        if CONF.has(GeneralUserConfigProperties.USE_LEGACY_INSTRUMENT_VIEW.value):
+            return CONF.get(GeneralUserConfigProperties.USE_LEGACY_INSTRUMENT_VIEW.value, type=bool)
         return False
 
     def set_crystallography_convention(self, value: str) -> None:
@@ -162,8 +162,8 @@ class GeneralSettingsModel(ConfigSettingsChangesModel):
     def set_completion_enabled(self, value: bool) -> None:
         self.add_change(GeneralUserConfigProperties.COMPLETION_ENABLED.value, value)
 
-    def set_use_new_instrument_view(self, value: bool) -> None:
-        self.add_change(GeneralUserConfigProperties.USE_NEW_INSTRUMENT_VIEW.value, value)
+    def set_use_legacy_instrument_view(self, value: bool) -> None:
+        self.add_change(GeneralUserConfigProperties.USE_LEGACY_INSTRUMENT_VIEW.value, value)
 
     def set_prompt_save_on_close(self, value: bool) -> None:
         self.add_change(GeneralUserConfigProperties.PROMPT_SAVE_ON_CLOSE.value, value)

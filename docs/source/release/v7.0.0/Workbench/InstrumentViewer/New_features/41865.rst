@@ -1,0 +1,2 @@
+- The new Instrument View is now the default. Right-clicking a workspace and selecting ``Show Instrument`` opens the new Instrument View, and it is no longer labelled as experimental. The previous Instrument View is still available from the same menu as ``Show Instrument (Legacy)``.
+- The setting controlling which Instrument View the ALFView and ISIS Reflectometry interfaces use has been replaced by ``Use legacy Instrument View in interfaces?``, found under ``File`` → ``Settings`` → ``General``. These interfaces now use the new Instrument View unless this option is ticked.
