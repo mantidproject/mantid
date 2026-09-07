@@ -123,7 +123,7 @@ void MDNormDirectSC::exec() {
     // data
     bool skipNormalization = false;
     const std::vector<coord_t> otherValues = getValuesFromOtherDimensions(skipNormalization, expInfoIndex);
-    findIntergratedDimensions(otherValues, skipNormalization);
+    findIntegratedDimensions(otherValues, skipNormalization);
     cacheDimensionXValues();
 
     if (!skipNormalization) {

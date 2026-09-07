@@ -767,8 +767,6 @@ std::map<std::string, std::string> MDNorm::getBinParameters() {
       } else {
         throw std::invalid_argument("Could not find Ei value in the workspace.");
       }
-      const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass * PhysicalConstants::meV * 1e-20 /
-                               (PhysicalConstants::h * PhysicalConstants::h);
       double ki = std::sqrt(energyToK * Ei);
       double kfmin = std::sqrt(energyToK * (Ei - minDE));
       double kfmax = std::sqrt(energyToK * (Ei - maxDE));

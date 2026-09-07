@@ -39,7 +39,7 @@ protected:
   DataObjects::MDHistoWorkspace_sptr binInputWS();
   void createNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
   std::vector<coord_t> getValuesFromOtherDimensions(bool &skipNormalization, uint16_t expInfoIndex = 0) const;
-  void findIntergratedDimensions(const std::vector<coord_t> &otherDimValues, bool &skipNormalization);
+  void findIntegratedDimensions(const std::vector<coord_t> &otherDimValues, bool &skipNormalization);
   void cacheDimensionXValues();
   void calculateNormalization(const std::vector<coord_t> &otherValues, uint16_t expInfoIndex);
   void calculateNormalization(const std::vector<coord_t> &otherValues, const Geometry::SymmetryOperation &so,

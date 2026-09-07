@@ -139,7 +139,7 @@ std::vector<coord_t> MDNormBase::getValuesFromOtherDimensions(bool &skipNormaliz
  * @param skipNormalization [InOut] Sets the flag true if normalization values
  * are outside of original inputs
  */
-void MDNormBase::findIntergratedDimensions(const std::vector<coord_t> &otherDimValues, bool &skipNormalization) {
+void MDNormBase::findIntegratedDimensions(const std::vector<coord_t> &otherDimValues, bool &skipNormalization) {
   // Get indices of the original dimensions in the output workspace,
   // and if not found, the corresponding dimension is integrated
   m_transformation = m_normWS->getTransformFromOriginal(0)->makeAffineMatrix();
