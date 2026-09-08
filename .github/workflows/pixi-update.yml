@@ -1,0 +1,83 @@
+name: Update pixi
+
+permissions:
+  contents: write
+  pull-requests: write
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: 0 6 * * *
+
+env:
+  UPDATE_BRANCH: ${{ vars.BRANCH_TO_PUBLISH }}
+
+jobs:
+  pixi-update-version:
+    if: ${{ github.repository_owner == 'mantidproject' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.UPDATE_BRANCH }}  # start from this branch
+      - name: Update pixi version
+        id: update-pixi-version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          current_version=$(tr -d '[:space:]' < .pixi-version)
+          latest_version=$(gh api repos/prefix-dev/pixi/releases/latest --jq '.tag_name | sub("^v"; "")')
+
+          if dpkg --compare-versions "$latest_version" gt "$current_version"; then
+            echo "$latest_version" > .pixi-version
+            echo "updated=true" >> "$GITHUB_OUTPUT"
+            echo "version=$latest_version" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Create pull request
+        if: steps.update-pixi-version.outputs.updated == 'true'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.MANTID_BUILDER_TOKEN }}
+          author: mantid-builder <mantid-builder@users.noreply.github.com>
+          committer: mantid-builder <mantid-builder@users.noreply.github.com>
+          commit-message: Update pixi to ${{ steps.update-pixi-version.outputs.version }}
+          title: Update pixi to ${{ steps.update-pixi-version.outputs.version }}
+          body: Update pixi to version ${{ steps.update-pixi-version.outputs.version }}.
+          branch: update-pixi-version
+          base: ${{ env.UPDATE_BRANCH }}  # merge into this branch
+          labels: |
+            pixi
+            Maintenance
+            DevOps
+          delete-branch: true
+          add-paths: .pixi-version
+
+  pixi-update-lockfile:
+    if: ${{ github.repository_owner == 'mantidproject' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.UPDATE_BRANCH }}  # start from this branch
+      - uses: ./.github/actions/setup-pixi
+      - name: Update lockfiles
+        run: |
+          set -o pipefail
+          pixi update --json | pixi exec pixi-diff-to-markdown >> diff.md
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.MANTID_BUILDER_TOKEN }}
+          author: mantid-builder <mantid-builder@users.noreply.github.com>
+          committer: mantid-builder <mantid-builder@users.noreply.github.com>
+          commit-message: Update pixi lockfile
+          title: Update pixi lockfile
+          body-path: diff.md
+          branch: update-pixi
+          base:  ${{ env.UPDATE_BRANCH }}  # merge into this branch
+          labels: |
+            pixi
+            Maintenance
+            DevOps
+          delete-branch: true
+          add-paths: pixi.lock
