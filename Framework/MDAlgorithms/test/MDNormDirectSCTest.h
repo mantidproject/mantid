@@ -135,7 +135,7 @@ private:
     Mantid::Types::Core::DateAndTime t0 = Mantid::Types::Core::DateAndTime("2010-01-01T00:00:00");
     std::generate(pchargetimes.begin(), pchargetimes.end(), [t0, n = 0]() mutable { return t0 + double(n++); });
     for (int i = 0; i < m_numAngles; i++) {
-      rotvals.push_back(i * MDNormDirectSC::GONIOBINSTEP);
+      rotvals.push_back(i * Mantid::MDAlgorithms::MDNormBase::GONIOBINSTEP);
       rottimes.push_back(t0 + double(i * m_numEvents));
     }
     m_event_ws = std::dynamic_pointer_cast<MatrixWorkspace>(
@@ -168,7 +168,7 @@ private:
       // ws->mutableRun().addLogData(std::move(pchargelog));
       rotlog = new Mantid::Kernel::TimeSeriesProperty<double>("Rot");
       rotlog->addValues(std::vector<Mantid::Types::Core::DateAndTime>(1, t1),
-                        std::vector<double>(1, i * MDNormDirectSC::GONIOBINSTEP));
+                        std::vector<double>(1, i * Mantid::MDAlgorithms::MDNormBase::GONIOBINSTEP));
       ws->mutableRun().addLogData(std::move(rotlog));
       ws->mutableRun().setGoniometer(gonio, true);
       m_event_vec.push_back(ws);
