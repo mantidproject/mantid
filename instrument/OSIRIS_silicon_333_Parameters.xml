@@ -15,6 +15,15 @@
       <value val="2564" />
     </parameter>
 
+    <!-- theta range for the full instrument detectors range -->
+    <parameter name="theta-min">
+      <value val="8" />
+    </parameter>
+
+    <parameter name="theta-max">
+      <value val="163" />
+    </parameter>
+
     <parameter name="analyser" type="string">
       <value val="silicon" />
     </parameter>

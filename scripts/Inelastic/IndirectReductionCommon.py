@@ -732,22 +732,34 @@ def group_spectra_by_theta(
     spectra_range: List[int] = None,
 ) -> MatrixWorkspace:
     """
-    Groups spectra into theta-based bins. The 2-theta range of the valid analyser
-    detectors is divided into equal-width bins and spectra from all banks within the
-    same bin are averaged together.
+    Groups spectra into fixed, equal-width 2-theta bins using the IPF parameters
+    theta-min and theta-max (in degrees). Spectra from all banks within the same
+    bin are averaged together. Filtering spectra does not change the bin boundaries.
 
     @param workspace The workspace to group
     @param number_of_groups Number of theta groups to create
     @param spectra_range [min, max] spectrum numbers defining the analyser spectra to
                          consider; spectra outside this range are ignored. When None,
-                         all unmasked spectra are used.
-    @return Grouped workspace
+                         all unmasked, non-monitor spectra within the angular limits are used.
+    @return Grouped workspace, omitting empty bins
     """
+    if number_of_groups <= 0:
+        raise ValueError("Number of theta groups must be greater than zero.")
+
+    instrument = workspace.getInstrument()
+    try:
+        theta_min = np.deg2rad(instrument.getNumberParameter("theta-min")[0])
+        theta_max = np.deg2rad(instrument.getNumberParameter("theta-max")[0])
+    except IndexError:
+        raise RuntimeError("ThetaGroups requires 'theta-min' and 'theta-max' in degrees in the instrument parameter file.")
+    if not np.isfinite(theta_min) or not np.isfinite(theta_max) or theta_min >= theta_max:
+        raise RuntimeError("ThetaGroups requires finite 'theta-min' < 'theta-max' in the instrument parameter file.")
+
+    bin_edges = np.linspace(theta_min, theta_max, number_of_groups + 1)
+    theta_groups: List[List[int]] = [[] for _ in range(number_of_groups)]
     spectrum_info = workspace.spectrumInfo()
     num_histograms = workspace.getNumberHistograms()
 
-    # Collect (spectrum_number, 2-theta) for each valid, unmasked analyser spectrum
-    indexed_thetas = []
     for i in range(num_histograms):
         if not spectrum_info.hasDetectors(i) or spectrum_info.isMasked(i) or spectrum_info.isMonitor(i):
             continue
@@ -755,27 +767,16 @@ def group_spectra_by_theta(
         if spectra_range is not None:
             if spec_no < spectra_range[0] or spec_no > spectra_range[1]:
                 continue
-        indexed_thetas.append((spec_no, spectrum_info.twoTheta(i)))
-
-    if not indexed_thetas:
-        raise RuntimeError("No valid detectors found for ThetaGroups grouping.")
-
-    _, theta_values = zip(*indexed_thetas)
-    theta_min = min(theta_values)
-    theta_max = max(theta_values)
-
-    # Divide the theta range into equal-width bins
-    bin_edges = np.linspace(theta_min, theta_max, number_of_groups + 1)
-
-    theta_groups: List[List[int]] = [[] for _ in range(number_of_groups)]
-    for idx, theta in indexed_thetas:
+        theta = spectrum_info.twoTheta(i)
+        if not theta_min <= theta <= theta_max:
+            continue
+        # Internal boundaries belong to the lower bin; both outer limits are included.
         bin_idx = int(np.searchsorted(bin_edges[1:], theta))
-        bin_idx = min(bin_idx, number_of_groups - 1)
-        theta_groups[bin_idx].append(idx)
+        theta_groups[bin_idx].append(spec_no)
 
     non_empty_groups = [g for g in theta_groups if g]
     if not non_empty_groups:
-        raise RuntimeError("No spectra could be assigned to theta groups.")
+        raise RuntimeError("No valid detectors found for ThetaGroups grouping.")
 
     group_detectors = AlgorithmManager.create("GroupDetectors")
     group_detectors.setChild(True)

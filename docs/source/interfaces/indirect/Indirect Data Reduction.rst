@@ -220,8 +220,10 @@ Detectors
   OSIRIS silicon grouping file. Unreliable edge pixels are excluded.
 
 ThetaGroups
-  Available for the OSIRIS silicon analyser. Divides the selected detector :math:`2\theta` range into the requested
-  number of equal-width angular groups and averages the spectra in each group.
+  Available for the OSIRIS silicon analyser. Divides the fixed :math:`2\theta` range from 8 to 163 degrees into the
+  requested number of equal-width angular groups and averages the spectra in each group. The limits come from
+  ``theta-min`` and ``theta-max`` in the instrument parameter file. Removing or masking pixels or changing the spectrum
+  range does not change the group boundaries. Spectra outside the angular limits are excluded, and empty groups are omitted.
 
 Default
   This grouping option is only available for TOSCA. It uses the spectra grouping specified in the IPF.

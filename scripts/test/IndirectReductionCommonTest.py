@@ -6,9 +6,22 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
+import numpy as np
 from mantid import mtd
 from mantid.dataobjects import GroupingWorkspace
-from mantid.simpleapi import CropWorkspace, DeleteWorkspace, Load, LoadEmptyInstrument, LoadParameterFile
+from mantid.simpleapi import (
+    CloneWorkspace,
+    CreateWorkspace,
+    CropWorkspace,
+    DeleteWorkspace,
+    EditInstrumentGeometry,
+    Load,
+    LoadEmptyInstrument,
+    LoadParameterFile,
+    MaskDetectors,
+    RemoveSpectra,
+    SetInstrumentParameter,
+)
 from IndirectReductionCommon import (
     create_detector_grouping_string,
     create_grouping_string,
@@ -102,6 +115,7 @@ class GroupSpectraByThetaTest(unittest.TestCase):
             SpectrumMax=cls._SPECTRA_MAX,
             StoreInADS=False,
         )
+        LoadParameterFile(Workspace=cls._workspace, Filename="OSIRIS_silicon_111_Parameters.xml", StoreInADS=False)
 
     def test_returns_requested_number_of_groups(self):
         result = group_spectra_by_theta(self._workspace, number_of_groups=3, spectra_range=[self._SPECTRA_MIN, self._SPECTRA_MAX])
@@ -110,6 +124,30 @@ class GroupSpectraByThetaTest(unittest.TestCase):
     def test_single_group_combines_all_spectra_into_one(self):
         result = group_spectra_by_theta(self._workspace, number_of_groups=1, spectra_range=[self._SPECTRA_MIN, self._SPECTRA_MAX])
         self.assertEqual(1, result.getNumberHistograms())
+        self.assertEqual(self._SPECTRA_MAX - self._SPECTRA_MIN + 1, len(result.getSpectrum(0).getDetectorIDs()))
+
+    def test_both_silicon_reflections_use_the_same_fixed_limits(self):
+        for reflection in ("111", "333"):
+            with self.subTest(reflection=reflection):
+                workspace = LoadEmptyInstrument(InstrumentName="OSIRIS", StoreInADS=False)
+                LoadParameterFile(Workspace=workspace, Filename=f"OSIRIS_silicon_{reflection}_Parameters.xml", StoreInADS=False)
+                self.assertEqual(8.0, workspace.getInstrument().getNumberParameter("theta-min")[0])
+                self.assertEqual(163.0, workspace.getInstrument().getNumberParameter("theta-max")[0])
+
+    def test_removing_edge_pixels_keeps_surviving_detectors_in_the_same_groups(self):
+        workspace_name = "__theta_grouping_edges"
+        CloneWorkspace(self._workspace, OutputWorkspace=workspace_name)
+        self.addCleanup(DeleteWorkspace, workspace_name)
+        original = group_spectra_by_theta(self._workspace, number_of_groups=5)
+
+        remove_edge_pixels(workspace_name)
+        filtered = mtd[workspace_name]
+        surviving_ids = set().union(*(filtered.getSpectrum(i).getDetectorIDs() for i in range(filtered.getNumberHistograms())))
+        result = group_spectra_by_theta(filtered, number_of_groups=5)
+
+        self.assertEqual(original.getNumberHistograms(), result.getNumberHistograms())
+        for i in range(result.getNumberHistograms()):
+            self.assertEqual(set(original.getSpectrum(i).getDetectorIDs()) & surviving_ids, set(result.getSpectrum(i).getDetectorIDs()))
 
     def test_number_of_groups_does_not_exceed_requested_count(self):
         # Empty theta bins are dropped, so output histograms <= number_of_groups
@@ -128,6 +166,94 @@ class GroupSpectraByThetaTest(unittest.TestCase):
             spectra_range=[self._SPECTRA_MIN, self._SPECTRA_MAX],
         )
         self.assertEqual(3, result.getNumberHistograms())
+
+
+class GroupSpectraByThetaBinningTest(unittest.TestCase):
+    @staticmethod
+    def _create_workspace(angles=(10, 20, 45, 58, 65, 95, 110), theta_limits=(0, 120)):
+        workspace = CreateWorkspace(DataX=[0, 1], DataY=np.arange(1, len(angles) + 1), NSpec=len(angles), StoreInADS=False)
+        for i in range(len(angles)):
+            workspace.getSpectrum(i).setSpectrumNo(1005 + i)
+        EditInstrumentGeometry(
+            Workspace=workspace,
+            PrimaryFlightPath=1,
+            L2=[1] * len(angles),
+            Polar=angles,
+            DetectorIDs=list(range(1005, 1005 + len(angles))),
+            StoreInADS=False,
+        )
+        for name, value in zip(("theta-min", "theta-max"), theta_limits):
+            if value is not None:
+                SetInstrumentParameter(
+                    Workspace=workspace, ParameterName=name, ParameterType="Number", Value=str(float(value)), StoreInADS=False
+                )
+        return workspace
+
+    def setUp(self):
+        self._workspace = self._create_workspace()
+
+    def _assert_groups(self, workspace, expected, number_of_groups=2, spectra_range=None):
+        result = group_spectra_by_theta(workspace, number_of_groups, spectra_range)
+        actual = [set(result.getSpectrum(i).getDetectorIDs()) for i in range(result.getNumberHistograms())]
+        self.assertEqual(expected, actual)
+        return result
+
+    def test_groups_use_fixed_ipf_limits_in_degrees_and_average_spectra(self):
+        result = self._assert_groups(self._workspace, [{1005, 1006, 1007, 1008}, {1009, 1010, 1011}])
+        np.testing.assert_allclose(result.extractY(), [[2.5], [6.0]])
+
+    def test_masking_angular_extremes_does_not_move_remaining_spectra_between_bins(self):
+        MaskDetectors(Workspace=self._workspace, SpectraList=[1005, 1011], StoreInADS=False)
+        self._assert_groups(self._workspace, [{1006, 1007, 1008}, {1009, 1010}])
+
+    def test_removing_angular_extremes_does_not_move_remaining_spectra_between_bins(self):
+        workspace = RemoveSpectra(InputWorkspace=self._workspace, WorkspaceIndices=[0, 6], StoreInADS=False)
+        self._assert_groups(workspace, [{1006, 1007, 1008}, {1009, 1010}])
+
+    def test_narrowing_spectra_range_does_not_move_remaining_spectra_between_bins(self):
+        self._assert_groups(self._workspace, [{1006, 1007, 1008}, {1009, 1010}], spectra_range=[1006, 1010])
+
+    def test_includes_outer_limits_and_assigns_internal_boundary_to_lower_bin(self):
+        workspace = self._create_workspace(angles=(0, 45, 90, 135, 180), theta_limits=(0, 180))
+        self._assert_groups(workspace, [{1005, 1006, 1007}, {1008, 1009}])
+
+    def test_spectra_outside_angular_limits_are_excluded(self):
+        workspace = self._create_workspace(theta_limits=(30, 90))
+        self._assert_groups(workspace, [{1007, 1008}, {1009}])
+
+    def test_empty_bins_are_omitted_without_redistributing_spectra(self):
+        workspace = self._create_workspace(angles=(10, 110))
+        self._assert_groups(workspace, [{1005}, {1006}], number_of_groups=4)
+
+    def test_raises_when_no_spectra_are_within_angular_limits(self):
+        workspace = self._create_workspace(theta_limits=(120, 180))
+        with self.assertRaisesRegex(RuntimeError, "No valid detectors found"):
+            group_spectra_by_theta(workspace, 2)
+
+    def test_raises_when_all_spectra_are_masked(self):
+        MaskDetectors(Workspace=self._workspace, WorkspaceIndexList=list(range(7)), StoreInADS=False)
+        with self.assertRaisesRegex(RuntimeError, "No valid detectors found"):
+            group_spectra_by_theta(self._workspace, 2)
+
+    def test_requires_both_ipf_limits(self):
+        for limits in ((None, 120), (0, None), (None, None)):
+            with self.subTest(limits=limits):
+                workspace = self._create_workspace(theta_limits=limits)
+                with self.assertRaisesRegex(RuntimeError, "requires 'theta-min' and 'theta-max'"):
+                    group_spectra_by_theta(workspace, 2)
+
+    def test_requires_increasing_ipf_limits(self):
+        for limits in ((120, 0), (60, 60)):
+            with self.subTest(limits=limits):
+                workspace = self._create_workspace(theta_limits=limits)
+                with self.assertRaisesRegex(RuntimeError, "requires finite 'theta-min' < 'theta-max'"):
+                    group_spectra_by_theta(workspace, 2)
+
+    def test_requires_a_positive_number_of_groups(self):
+        for number_of_groups in (0, -1):
+            with self.subTest(number_of_groups=number_of_groups):
+                with self.assertRaisesRegex(ValueError, "Number of theta groups must be greater than zero"):
+                    group_spectra_by_theta(self._workspace, number_of_groups)
 
 
 class GroupSpectraDetectorsTest(unittest.TestCase):

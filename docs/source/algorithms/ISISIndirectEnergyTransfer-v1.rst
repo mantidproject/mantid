@@ -18,8 +18,11 @@ are excluded before calibration and reduction. When a calibration workspace is s
 workspace are also excluded from the sample reduction.
 
 The ``Detectors`` grouping method groups the remaining silicon pixels tube by tube using the supplied OSIRIS grouping
-file. ``ThetaGroups`` divides the selected detector :math:`2\theta` range into a requested number of equal-width
-angular groups.
+file. ``ThetaGroups`` divides the fixed :math:`2\theta` range defined by the instrument parameter file's ``theta-min``
+and ``theta-max`` parameters (in degrees) into ``NGroups`` equal-width angular bins. Both OSIRIS silicon reflections
+use limits of 8 and 163 degrees. Masking, removing edge pixels or selecting a narrower ``SpectraRange`` does not
+change these boundaries. Spectra outside the angular limits are excluded, and empty bins are omitted from the output.
+Both outer limits are included; a spectrum exactly on an internal boundary belongs to the lower-angle bin.
 
 Workflow
 --------
