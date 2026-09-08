@@ -16,6 +16,7 @@
 
 #include <QApplication>
 #include <QSpinBox>
+#include <QSurfaceFormat>
 #include <QTime>
 #include <QtOpenGL>
 
@@ -30,6 +31,14 @@ namespace MantidQt::MantidWidgets {
 constexpr Qt::CursorShape GLCursor = Qt::ArrowCursor;
 
 GLDisplay::GLDisplay(QWidget *parent) : IGLDisplay(parent), m_isKeyPressed(false) {
+  // We use deprecated OpenGL calls so anything with a profile version >= 3 causes failures to render.
+  // Third-party Qt/OpenGL libraries can reset QSurfaceFormat::defaultFormat() to a core profile,
+  // which makes every widget created afterwards fail to render.
+  QSurfaceFormat format;
+  format.setProfile(QSurfaceFormat::CompatibilityProfile);
+  format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+  setFormat(format);
+
   setFocusPolicy(Qt::StrongFocus);
   setAutoFillBackground(false);
   // Enable right-click in pick mode

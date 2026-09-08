@@ -57,6 +57,7 @@ from instrumentview.ShapeWidgets import (
     EllipseSelectionShape,
 )
 from instrumentview.ShapeOverlayManager import ShapeOverlayManager
+from instrumentview.SurfaceFormat import preserve_default_surface_format
 
 from contextlib import suppress
 from typing import Callable
@@ -250,7 +251,8 @@ class FullInstrumentViewView(QWidget):
         self._right_column_graphics = QWidget()
         self._parent_hsplitter = QSplitter(Qt.Horizontal)
         # TODO: get connections out of setup
-        self.main_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=self._off_screen)
+        with preserve_default_surface_format():
+            self.main_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=self._off_screen)
 
         self._detector_spectrum_fig = Figure()
         self._detector_spectrum_axes = self._detector_spectrum_fig.add_subplot(111, projection="mantid")

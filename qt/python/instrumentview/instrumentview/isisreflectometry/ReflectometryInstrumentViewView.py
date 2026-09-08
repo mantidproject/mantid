@@ -14,6 +14,7 @@ from qtpy.QtCore import QTimer
 from mantidqt.utils.qt.qappthreadcall import run_on_qapp_thread
 from instrumentview.ShapeOverlayManager import ShapeOverlayManager
 from instrumentview.ShapeWidgets import RectangleSelectionShape
+from instrumentview.SurfaceFormat import preserve_default_surface_format
 
 
 @run_on_qapp_thread()
@@ -55,7 +56,8 @@ class ReflectometryInstrumentViewView(QWidget):
             return
         self._initialised = True
 
-        self.main_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=False)
+        with preserve_default_surface_format():
+            self.main_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=False)
         self.layout().addWidget(self.main_plotter.app_window)
 
     def set_on_resize_callback(self, callback) -> None:

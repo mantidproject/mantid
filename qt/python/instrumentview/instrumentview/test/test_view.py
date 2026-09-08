@@ -10,6 +10,7 @@ from unittest.mock import MagicMock
 
 import numpy as np
 from qtpy.QtCore import Qt
+from qtpy.QtGui import QSurfaceFormat
 from mantidqt.utils.qt.testing import start_qapplication
 from mantid.simpleapi import CreateSampleWorkspace
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewView, _LIGHT_GREY
@@ -462,6 +463,34 @@ class TestFullInstrumentViewView(unittest.TestCase):
         with mock.patch.object(self._view._show_sample_position_check_box, "set_colour") as mock_set_colour:
             self._view._on_show_sample_position_toggled(False)
         mock_set_colour.assert_called_once_with(_LIGHT_GREY)
+
+    @mock.patch("instrumentview.FullInstrumentViewWindow.FigureCanvas")
+    @mock.patch("qtpy.QtWidgets.QHBoxLayout.addWidget")
+    @mock.patch("qtpy.QtWidgets.QVBoxLayout.addWidget")
+    @mock.patch("qtpy.QtWidgets.QSplitter.addWidget")
+    @mock.patch("instrumentview.FullInstrumentViewWindow.BackgroundPlotter")
+    def test_default_surface_format_restored_after_creating_plotter(
+        self, mock_plotter, mock_splitter, mock_v_layout, mock_h_layout, mock_canvas
+    ):
+        """pyvistaqt resets the process-wide default QSurfaceFormat to an OpenGL core profile when it
+        builds the plotter widget. Left in place it could break an QOpenGLWidget created afterwards"""
+        self.addCleanup(QSurfaceFormat.setDefaultFormat, QSurfaceFormat.defaultFormat())
+        compatibility_format = QSurfaceFormat()
+        compatibility_format.setProfile(QSurfaceFormat.CompatibilityProfile)
+        QSurfaceFormat.setDefaultFormat(compatibility_format)
+
+        def clobber_default_format(*_args, **_kwargs):
+            core_format = QSurfaceFormat()
+            core_format.setProfile(QSurfaceFormat.CoreProfile)
+            core_format.setVersion(3, 2)
+            QSurfaceFormat.setDefaultFormat(core_format)
+            return MagicMock()
+
+        mock_plotter.side_effect = clobber_default_format
+        with mock.patch("mantidqt.utils.qt.qappthreadcall.force_method_calls_to_qapp_thread"):
+            FullInstrumentViewView()
+
+        self.assertEqual(QSurfaceFormat.defaultFormat().profile(), QSurfaceFormat.CompatibilityProfile)
 
 
 if __name__ == "__main__":

@@ -9,6 +9,7 @@ from unittest import mock
 from unittest.mock import MagicMock
 
 from qtpy.QtCore import QSize
+from qtpy.QtGui import QSurfaceFormat
 
 from mantidqt.utils.qt.testing import start_qapplication
 from instrumentview.isisreflectometry.ReflectometryInstrumentViewView import ReflectometryInstrumentViewView
@@ -58,6 +59,27 @@ class TestReflectometryInstrumentViewView(unittest.TestCase):
     def test_initialise_sets_initialised_flag(self, mock_bg_plotter_cls):
         self._view.initialise()
         self.assertTrue(self._view._initialised)
+
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewView.BackgroundPlotter")
+    def test_initialise_restores_default_surface_format(self, mock_bg_plotter_cls):
+        """pyvistaqt resets the process-wide default QSurfaceFormat to an OpenGL core profile when it
+        builds the plotter widget. Left in place it could break an QOpenGLWidget created afterwards"""
+        self.addCleanup(QSurfaceFormat.setDefaultFormat, QSurfaceFormat.defaultFormat())
+        compatibility_format = QSurfaceFormat()
+        compatibility_format.setProfile(QSurfaceFormat.CompatibilityProfile)
+        QSurfaceFormat.setDefaultFormat(compatibility_format)
+
+        def clobber_default_format(*_args, **_kwargs):
+            core_format = QSurfaceFormat()
+            core_format.setProfile(QSurfaceFormat.CoreProfile)
+            core_format.setVersion(3, 2)
+            QSurfaceFormat.setDefaultFormat(core_format)
+            return MagicMock()
+
+        mock_bg_plotter_cls.side_effect = clobber_default_format
+        self._view.initialise()
+
+        self.assertEqual(QSurfaceFormat.defaultFormat().profile(), QSurfaceFormat.CompatibilityProfile)
 
     @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewView.BackgroundPlotter")
     def test_initialise_is_idempotent(self, mock_bg_plotter_cls):
