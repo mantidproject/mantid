@@ -27,8 +27,9 @@ on:
 env:
   # the secrets are only available on branches in the main repository
   RELEASES_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN || 'unset_token' }}
-  ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN || 'unset_token' }}
-  ANACONDA_TOKEN_MANTIDORNL: ${{ secrets.ANACONDA_TOKEN_MANTIDORNL || 'unset_token' }}
+  # pkg-remove does not use the token during pull request dry runs
+  ANACONDA_TOKEN: ${{ github.event_name == 'pull_request' && 'dry-run-no-token-required' || secrets.ANACONDA_TOKEN }}
+  ANACONDA_TOKEN_MANTIDORNL: ${{ github.event_name == 'pull_request' && 'dry-run-no-token-required' || secrets.ANACONDA_TOKEN_MANTIDORNL }}
 
 jobs:
   github-releases:
@@ -64,11 +65,6 @@ jobs:
           - mantidworkbench
           - mantiddocs
     steps:
-      - name: fail if ANACONDA_TOKEN is unavailable
-        if: ${{ env.ANACONDA_TOKEN == 'unset_token' }}
-        run: |
-          echo "ANACONDA_TOKEN is unset_token. The ANACONDA_TOKEN secret is not available in this workflow context."
-          exit 1
       - name: check out setup-pixi action
         uses: actions/checkout@v7
         with:
@@ -102,11 +98,6 @@ jobs:
           - mantidworkbench
           - mantiddocs
     steps:
-      - name: fail if ANACONDA_TOKEN_MANTIDORNL is unavailable
-        if: ${{ env.ANACONDA_TOKEN_MANTIDORNL == 'unset_token' }}
-        run: |
-          echo "ANACONDA_TOKEN_MANTIDORNL is unset_token. The ANACONDA_TOKEN_MANTIDORNL secret is not available in this workflow context."
-          exit 1
       - name: check out setup-pixi action
         uses: actions/checkout@v7
         with:
