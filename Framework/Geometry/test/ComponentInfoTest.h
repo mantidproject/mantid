@@ -25,6 +25,7 @@
 
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include <Eigen/Geometry>
+#include <map>
 #include <memory>
 
 using namespace Mantid;
@@ -102,8 +103,7 @@ std::unique_ptr<Beamline::ComponentInfo> makeSingleBeamlineComponentInfo(
   using Mantid::Beamline::ComponentType;
   auto componentType = std::make_shared<std::vector<ComponentType>>(1, ComponentType::Generic);
   auto children = std::make_shared<std::vector<std::vector<size_t>>>(1);
-  auto sideBySideViewPositions =
-      std::make_shared<std::vector<Eigen::Vector2d>>(1, Eigen::Vector2d(EMPTY_DBL(), EMPTY_DBL()));
+  auto sideBySideViewPositions = std::make_shared<std::map<size_t, Eigen::Vector2d>>();
   return std::make_unique<Beamline::ComponentInfo>(detectorIndices, detectorRanges, componentIndices, componentRanges,
                                                    parentIndices, children, positions, rotations, scaleFactors,
                                                    componentType, names, sideBySideViewPositions, -1, -1);
@@ -142,8 +142,7 @@ public:
     using Mantid::Beamline::ComponentType;
     auto isRectBank = std::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
     auto children = std::make_shared<std::vector<std::vector<size_t>>>(1, std::vector<size_t>(1));
-    auto sideBySideViewPositions =
-        std::make_shared<std::vector<Eigen::Vector2d>>(2, Eigen::Vector2d(EMPTY_DBL(), EMPTY_DBL()));
+    auto sideBySideViewPositions = std::make_shared<std::map<size_t, Eigen::Vector2d>>();
     auto internalInfo = std::make_unique<Beamline::ComponentInfo>(
         detectorIndices, detectorRanges, componentIndices, componentRanges, parentIndices, children, positions,
         rotations, scaleFactors, isRectBank, names, sideBySideViewPositions, -1, -1);
@@ -184,8 +183,10 @@ public:
     auto children = std::make_shared<std::vector<std::vector<size_t>>>(1, std::vector<size_t>(1));
 
     const Eigen::Vector2d panelPos{2.0, 3.5};
-    auto sideBySideViewPositions = std::make_shared<std::vector<Eigen::Vector2d>>(
-        std::vector<Eigen::Vector2d>{panelPos, Eigen::Vector2d(EMPTY_DBL(), EMPTY_DBL())});
+    // Only component 0 has a declared side-by-side view position; component 1 has no
+    // entry at all in the (sparse) map.
+    auto sideBySideViewPositions =
+        std::make_shared<std::map<size_t, Eigen::Vector2d>>(std::map<size_t, Eigen::Vector2d>{{0, panelPos}});
 
     auto internalInfo = std::make_unique<Beamline::ComponentInfo>(
         detectorIndices, detectorRanges, componentIndices, componentRanges, parentIndices, children, positions,

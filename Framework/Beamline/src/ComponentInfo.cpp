@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/make_cow.h"
 #include <algorithm>
 #include <iterator>
@@ -17,6 +18,9 @@
 namespace Mantid::Beamline {
 
 namespace {
+
+Eigen::Vector2d const EMPTY_VEC2D(Mantid::EMPTY_DBL(), Mantid::EMPTY_DBL());
+
 void failMerge(const std::string &what) {
   throw std::runtime_error(std::string("Cannot merge ComponentInfo: ") + what);
 }
@@ -52,7 +56,7 @@ ComponentInfo::ComponentInfo(
     std::shared_ptr<std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>> rotations,
     std::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
     std::shared_ptr<std::vector<ComponentType>> componentType, std::shared_ptr<const std::vector<std::string>> names,
-    std::shared_ptr<const std::vector<Eigen::Vector2d>> sideBySideViewPositions, int64_t sourceIndex,
+    std::shared_ptr<const std::map<size_t, Eigen::Vector2d>> sideBySideViewPositions, int64_t sourceIndex,
     int64_t sampleIndex)
     : m_assemblySortedDetectorIndices(std::move(assemblySortedDetectorIndices)),
       m_assemblySortedComponentIndices(std::move(assemblySortedComponentIndices)),
@@ -92,10 +96,6 @@ ComponentInfo::ComponentInfo(
   if (m_names->size() != m_size) {
     throw std::invalid_argument("ComponentInfo should be provided same number "
                                 "of names as number of components");
-  }
-  if (m_sideBySideViewPositions->size() != m_size) {
-    throw std::invalid_argument("ComponentInfo should be provided same number "
-                                "of side-by-side view positions as number of components");
   }
 
   // Calculate total size of all assemblies
@@ -603,8 +603,14 @@ Eigen::Vector3d ComponentInfo::scaleFactor(const size_t componentIndex) const {
 
 const std::string &ComponentInfo::name(const size_t componentIndex) const { return (*m_names)[componentIndex]; }
 
-const Eigen::Vector2d &ComponentInfo::sideBySideViewPosition(const size_t componentIndex) const {
-  return (*m_sideBySideViewPositions)[componentIndex];
+Eigen::Vector2d const &ComponentInfo::sideBySideViewPosition(const size_t componentIndex) const {
+  if (m_sideBySideViewPositions) {
+    const auto it = m_sideBySideViewPositions->find(componentIndex);
+    if (it != m_sideBySideViewPositions->end()) {
+      return it->second;
+    }
+  }
+  return EMPTY_VEC2D;
 }
 
 bool ComponentInfo::uniqueName(const std::string &name) const { return unique_if_exists((*m_names), name); }
@@ -792,8 +798,11 @@ size_t ComponentInfo::getMemorySize() const {
     mem += std::accumulate(m_names->cbegin(), m_names->cend(), size_t{0},
                            [](size_t acc, const auto &str) { return acc + str.capacity(); });
   }
-  if (m_sideBySideViewPositions)
-    mem += sizeof(*m_sideBySideViewPositions) + m_sideBySideViewPositions->size() * sizeof(Eigen::Vector2d);
+  // m_sideBySideViewPositions: map object + heap buffer for the map's key-value pairs
+  if (m_sideBySideViewPositions) {
+    mem += sizeof(*m_sideBySideViewPositions) +
+           m_sideBySideViewPositions->size() * sizeof(std::pair<const size_t, Eigen::Vector2d>);
+  }
 
   // m_scanIntervals: inline vector's heap buffer
   mem += m_scanIntervals.capacity() * sizeof(std::pair<int64_t, int64_t>);
