@@ -465,10 +465,10 @@ class MainWindow(QMainWindow):
 
     def prep_window_for_reset(self):
         """Function to reset all dock widgets to a state where they can be
-        ordered by setup_default_layout"""
+        ordered by setup_default_layout.
+        """
         for widget in self.widgets:
             widget.dockwidget.setFloating(False)  # Bring back any floating windows
-            self.addDockWidget(Qt.LeftDockWidgetArea, widget.dockwidget)  # Un-tabify all widgets
             widget.toggle_view(False)
 
     def setup_default_layouts(self):
@@ -495,42 +495,69 @@ class MainWindow(QMainWindow):
                 # column 2
                 [[memorywidget], [logmessages]],
             ],
+            # Relative width of each column, in the same order as "widgets" above.
+            # Only the ratio between entries matters.
+            "column_width_ratios": [1, 3, 1],
         }
 
         size = self.size()  # Preserve size on reset
         self.arrange_layout(default_layout)
+
+        # Don't restore a size larger than the current screen's
+        # available area (mirrors the same clamp already applied in restoreSettings()).
+        available = self.screen().availableGeometry()
+        size = QSize(min(size.width(), available.width()), min(size.height(), available.height()))
         self.resize(size)
 
     def arrange_layout(self, layout):
         """Arrange the layout of the child widgets according to the supplied layout"""
+        # Widgets are now introduced one at a time below,
+        # each immediately split into its own slot, eliminating
+        # the QWindowsWindow::setGeometry warnings
         self.prep_window_for_reset()
         widgets_layout = layout["widgets"]
         with widget_updates_disabled(self):
-            # flatten list
-            widgets = [item for column in widgets_layout for row in column for item in row]
-            # show everything
-            for w in widgets:
-                w.toggle_view(True)
-            # split everything on the horizontal
-            for i in range(len(widgets) - 1):
-                first, second = widgets[i], widgets[i + 1]
-                self.splitDockWidget(first.dockwidget, second.dockwidget, Qt.Horizontal)
-            # now arrange the rows
+            # Fix the column skeleton FIRST, using only each column's
+            # anchor widget (its first row's first widget), before any column
+            # is subdivided internally. Once a column has been split
+            # vertically, its top-row widget only occupies the top slice.
+            column_anchors = [column[0][0] for column in widgets_layout]
+            for anchor in column_anchors:
+                anchor.toggle_view(True)
+            self.addDockWidget(Qt.LeftDockWidgetArea, column_anchors[0].dockwidget)
+            for i in range(len(column_anchors) - 1):
+                self.splitDockWidget(column_anchors[i].dockwidget, column_anchors[i + 1].dockwidget, Qt.Horizontal)
+
+            # subdivide column's full-height
             for column in widgets_layout:
+                # Stack this column's rows vertically, below its own anchor --
+                # never touches any other column's widgets.
                 for i in range(len(column) - 1):
                     first_row, second_row = column[i], column[i + 1]
+                    second_row[0].toggle_view(True)
                     self.splitDockWidget(first_row[0].dockwidget, second_row[0].dockwidget, Qt.Vertical)
 
-            # and finally tabify those in the same position
-            for column in widgets_layout:
+                # Tabify widgets sharing the same row within this column.
                 for row in column:
                     for i in range(len(row) - 1):
                         first, second = row[i], row[i + 1]
+                        second.toggle_view(True)
                         self.tabifyDockWidget(first.dockwidget, second.dockwidget)
 
                     # Raise front widget per row
                     row[0].dockwidget.show()
                     row[0].dockwidget.raise_()
+
+            screen = self.screen() or QApplication.primaryScreen()
+            total_width = screen.availableGeometry().width()
+            ratios = layout.get("column_width_ratios") or [1] * len(column_anchors)
+            ratio_sum = sum(ratios)
+            target_widths = [max(total_width * r // ratio_sum, 1) for r in ratios]
+            self.resizeDocks(
+                [anchor.dockwidget for anchor in column_anchors],
+                target_widths,
+                Qt.Horizontal,
+            )
 
     # ----------------------- Events ---------------------------------
     def closeEvent(self, event):
