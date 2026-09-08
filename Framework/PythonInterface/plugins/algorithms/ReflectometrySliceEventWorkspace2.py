@@ -72,10 +72,12 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         monitor_ws = mtd.retrieve(self.getPropertyValue("MonitorWorkspaceName"))
 
         if input_ws.isGroup():
-            return self._validate_group_inputs(input_ws, monitor_ws, issues)
+            self._validate_group_inputs(input_ws, monitor_ws, issues)
+            return issues
         if monitor_ws.isGroup():
             issues["MonitorWorkspaceName"] = "A monitor workspace group may only be provided alongside an eqivalent input workspace group."
-        return self._validate_single_workspace(input_ws, issues)
+        self._validate_single_workspace(input_ws, issues)
+        return issues
 
     def _validate_single_workspace(self, workspace, issues):
         if not isinstance(workspace, MatrixWorkspace):
@@ -83,14 +85,12 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
             return issues  # Stop here so we don't error out by asking more about the workspace.
         if workspace.run().getProtonCharge() < 1e-9:
             issues["InputWorkspaceName"] = "Cannot slice workspace with zero proton charge"
-        return issues
 
     def _validate_group_inputs(self, ws_group, monitors, issues: dict):
         if monitors.isGroup() and len(monitors) != len(ws_group):
-            issues["InputWorkspaceName"] = "Monitor and Input workspace groups must be the same size."
+            issues["MonitorWorkspaceName"] = "Monitor and Input workspace groups must be the same size."
         for ws in ws_group:
-            issues = self._validate_single_workspace(ws, issues) | issues
-        return issues
+            self._validate_single_workspace(ws, issues)
 
     def PyExec(self):
         input_ws = mtd.retrieve(self.getPropertyValue("InputWorkspaceName"))
@@ -237,9 +237,9 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         i = 1
         for slice in sliced_ws_group:
             slice_monitor_ws_name = input_monitor_ws.name() + "_" + str(i)
-            slice_monitor_ws = self._clone_workspace(input_monitor_ws, slice_monitor_ws_name)
+            slice_monitor_ws = self._clone_workspace(input_monitor_ws)
             scale_factor = slice.run().getProtonCharge() / total_proton_charge
-            slice_monitor_ws = self._scale_workspace(slice_monitor_ws, slice_monitor_ws_name, scale_factor)
+            slice_monitor_ws = self._scale_workspace(slice_monitor_ws, scale_factor)
             # The workspace must be in the ADS for grouping and updating the sample log
             mtd.addOrReplace(slice_monitor_ws_name, slice_monitor_ws)
             monitors_ws_list.append(slice_monitor_ws_name)
@@ -251,13 +251,13 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         mtd.addOrReplace(monitor_ws_group_name, monitor_ws_group)
         return monitor_ws_group
 
-    def _clone_workspace(self, ws_to_clone, output_ws_name):
+    def _clone_workspace(self, ws_to_clone):
         alg = self.createChildAlgorithm("CloneWorkspace")
         alg.setProperty("InputWorkspace", ws_to_clone)
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
-    def _scale_workspace(self, ws_to_scale, output_ws_name, scale_factor):
+    def _scale_workspace(self, ws_to_scale, scale_factor):
         alg = self.createChildAlgorithm("Scale")
         alg.setProperty("InputWorkspace", ws_to_scale)
         alg.setProperty("Factor", scale_factor)
