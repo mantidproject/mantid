@@ -24,6 +24,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/ReducedCell.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/InstrumentMetadata.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -521,9 +522,9 @@ void SCDCalibratePanels::saveXmlFile(const string &FileName, const boost::contai
   // create the file and add the header
   ofstream oss3(FileName.c_str());
   oss3 << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
-  oss3 << " <parameter-file instrument=\"" << instrument.getName() << "\" valid-from=\""
-       << instrument.getValidFromDate().toISO8601String() << "\">\n";
   ParameterMap_sptr pmap = instrument.getParameterMap();
+  oss3 << " <parameter-file instrument=\"" << instrument.getName() << "\" valid-from=\""
+       << pmap->instrumentMetadata().validFromDate().toISO8601String() << "\">\n";
 
   // write out the detector banks
   for (auto bankName : AllBankNames) {

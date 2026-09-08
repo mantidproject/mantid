@@ -16,6 +16,7 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument/InstrumentMetadata.h"
 #include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/OptionalBool.h"
@@ -179,7 +180,7 @@ void LoadDiffCal::getInstrument(H5File &file) {
       m_instrument = tempWS->getInstrument();
 
       g_log.information() << "Loaded instrument \"" << m_instrument->getName() << "\" from \""
-                          << m_instrument->getFilename() << "\"\n";
+                          << tempWS->instrumentMetadata().filename() << "\"\n";
     } else {
       g_log.debug("LoadInstrument child algorithm did not execute successfully. No instrument will be associated with "
                   "the output workspaces.");
