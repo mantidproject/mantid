@@ -331,7 +331,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
 
         self.assertRaisesRegex(
             RuntimeError,
-            "Invalid instrument configuration",
+            "does not support reflection '006'. Valid reflections are: 002, 004",
             ISISIndirectEnergyTransfer,
             OutputWorkspace="__ISISIndirectEnergyTransferTest_ws",
             InputFiles=["IRS26176.raw"],
