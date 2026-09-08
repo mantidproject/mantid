@@ -32,6 +32,7 @@ namespace Geometry {
 class ComponentInfo;
 class DetectorInfo;
 class IDetector;
+class InstrumentMetadata;
 class ParameterMap;
 class XMLInstrumentParameter;
 } // namespace Geometry
@@ -158,6 +159,8 @@ public:
 
   const Geometry::ComponentInfo &componentInfo() const;
   Geometry::ComponentInfo &mutableComponentInfo();
+
+  Geometry::InstrumentMetadata const &instrumentMetadata() const;
 
   std::string getInstrumentName() const;
 
