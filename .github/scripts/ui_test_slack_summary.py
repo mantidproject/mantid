@@ -115,6 +115,20 @@ def _run_url() -> str:
     )
 
 
+def _escape(text: str) -> str:
+    """Escape the three characters Slack treats as markup in message text."""
+    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def _branch() -> str:
+    """The branch the run used: the default branch on a schedule, the chosen one on a dispatch.
+
+    Worth stating, because a dispatched run from a feature branch is otherwise
+    indistinguishable from the Sunday run of main.
+    """
+    return _escape(os.environ.get("GITHUB_REF_NAME", "unknown"))
+
+
 def _payload() -> dict:
     texts = []
     needs_attention = False
@@ -135,7 +149,10 @@ def _payload() -> dict:
         "blocks": [
             {"type": "header", "text": {"type": "plain_text", "text": header, "emoji": True}},
             *sections,
-            {"type": "context", "elements": [{"type": "mrkdwn", "text": f"<{_run_url()}|Full run and artifacts>"}]},
+            {
+                "type": "context",
+                "elements": [{"type": "mrkdwn", "text": f"Branch `{_branch()}` · <{_run_url()}|Full run and artifacts>"}],
+            },
         ],
     }
 
