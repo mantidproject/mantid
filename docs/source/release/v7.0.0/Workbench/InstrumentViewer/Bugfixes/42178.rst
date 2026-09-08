@@ -1,0 +1,1 @@
+- Fixed a bug where opening the new Instrument View stopped the original Instrument View from drawing for the rest of the session, reporting OpenGL errors instead. Both can now be opened in any order.
