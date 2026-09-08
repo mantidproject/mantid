@@ -274,7 +274,7 @@ class TestHelpWindowModelOnlineUrl(unittest.TestCase):
             # Set version number to a release version.
             mock_version.return_value.major = "6"
             mock_version.return_value.minor = "13"
-            mock_version.return_value.patch = "1.2"
+            mock_version.return_value.patch = "1.1.3.4"
             model = HelpWindowModel()
             self.assertEqual(model.MODE_ONLINE, model.get_mode_string())
             self.assertEqual(model.ONLINE_BASE_URL + "/v6.13.1/", model.get_base_url())
