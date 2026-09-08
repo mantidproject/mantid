@@ -183,9 +183,8 @@ jobs:
           action_fail: false
           action_fail_on_inconclusive: false
 
-      # The check runs published above are only found by someone going looking for them, so
-      # the same results are pushed to Slack. Both steps run even when the test job failed,
-      # which is when the notification matters most.
+      # The check runs above are only seen by someone going looking for them. Both steps run
+      # even when the tests failed, which is when the notification matters most.
       - name: Build Slack summary
         if: always()
         run: python3 .github/scripts/ui_test_slack_summary.py slack-payload.json
@@ -195,14 +194,12 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.AUTOMATED_UI_SLACK_BOT }}
         run: |
-          # the secret is not available to a fork, and a report-only workflow must not go
-          # red over a notification it was never able to send
+          # the secret is unavailable to a fork, and a report-only workflow must not go red
+          # over a notification it was never able to send
           if [[ -z "$SLACK_WEBHOOK_URL" ]]; then
             echo "AUTOMATED_UI_SLACK_BOT is not set - skipping the Slack notification"
             exit 0
           fi
-          # a rejected post is a bug in the payload above, so let it fail the job rather
-          # than leaving the notification quietly dead
           curl --silent --show-error --fail-with-body -X POST \
             -H 'Content-type: application/json' \
             --data @slack-payload.json "$SLACK_WEBHOOK_URL"

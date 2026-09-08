@@ -2,21 +2,14 @@
 
 """Summarise the weekly automated UI test results as a Slack message.
 
-The results are the per-platform JUnit files that .github/workflows/weekly_ui_tests.yml
-uploads as artifacts. This reads them and writes a Slack Block Kit payload to a file; it
-does not post it. The workflow does that with curl, which keeps the webhook URL out of this
-script's environment entirely.
+Reads the per-platform JUnit files that .github/workflows/weekly_ui_tests.yml uploads as
+artifacts and writes a Slack Block Kit payload. The workflow posts it with curl, so the
+webhook URL never enters this script's environment.
 
-The message is failure-list-first: every failing test is named, and no failure message or
-traceback is included. It exists to answer "what broke, and is it the same thing as last
-week" at a glance - the detail is one click away in the check runs and the test log
-artifacts, and reproducing a failure needs the test name rather than its output. A test is
-named by its JUnit `name` attribute alone, which for the ctest --output-junit file this
-reads is the ctest test name, i.e. what `ctest -R <name>` takes.
-
-A platform whose file is missing is reported rather than skipped. That is the case where
-the build itself failed, which is both the most important thing to say and the easiest to
-lose silently.
+Every failing test is named and no failure output is included: the JUnit name is the ctest
+test name, i.e. what `ctest -R` takes to reproduce one, and the output is a click away in
+the check runs and the test log artifacts. A platform whose file is missing is reported
+rather than skipped - that is the run where the build itself died.
 """
 
 import argparse
@@ -26,31 +19,23 @@ import pathlib
 import sys
 from xml.etree import ElementTree
 
-# The matrix.os values of weekly_ui_tests.yml, which name its artifacts
 PLATFORMS = ("Linux", "Windows")
 
-# Where the workflow's download-artifact step puts them
-ARTIFACT_DIR = pathlib.Path("artifacts")
-ARTIFACT_NAME = "junit-automated-ui-{platform}"
-JUNIT_FILENAME = "junit-uitest.xml"
+# Where weekly_ui_tests.yml's download-artifact step puts each platform's results
+JUNIT_PATH = "artifacts/junit-automated-ui-{platform}/junit-uitest.xml"
 
-# A section block's text field caps at 3000 characters, so a platform's failing tests are
-# split over as many blocks as they need rather than being truncated. Kept below the limit
-# so that adding the heading line to a chunk cannot push it over.
+# A section block's text caps at 3000 characters, so a long list is split over several
 SECTION_TEXT_LIMIT = 2800
 
-# A message caps at 50 blocks. Past this many the list is cut short with a count of the
-# rest, so that a pathological run degrades instead of being rejected by the API.
-MAX_BLOCKS = 40
+# The suite is ~25 tests, so this never truncates in practice. It is here to bound the
+# block count, as a message caps at 50 blocks.
+MAX_LISTED_FAILURES = 100
 
 
 def _summarise(junit_path: pathlib.Path) -> tuple[int, int, list]:
-    """Return (total, skipped, failing test names) for one JUnit file.
-
-    ctest --output-junit writes a single root <testsuite>; a <testsuites> wrapper is also
-    accepted so that a file from any other producer reads the same way.
-    """
+    """Return (total, skipped, failing test names) for one JUnit file."""
     root = ElementTree.parse(junit_path).getroot()
+    # ctest --output-junit writes a single root <testsuite>; a <testsuites> wrapper is accepted too
     suites = [root] if root.tag == "testsuite" else root.iter("testsuite")
 
     total = skipped = 0
@@ -67,34 +52,25 @@ def _summarise(junit_path: pathlib.Path) -> tuple[int, int, list]:
     return total, skipped, failing
 
 
-def _failure_lines(names: list) -> list:
-    """Return the bulleted failing test names, cut short if there are absurdly many."""
-    listed = names[: MAX_BLOCKS * 10]
-    lines = [f"    • `{name}`" for name in listed]
-    if len(names) > len(listed):
-        lines.append(f"    • …and {len(names) - len(listed)} more, see the run")
+def _failure_sections(heading: str, names: list) -> list:
+    """Return the section texts listing the failing tests, none of them over the size cap."""
+    lines = [f"    • `{name}`" for name in names[:MAX_LISTED_FAILURES]]
+    if len(names) > MAX_LISTED_FAILURES:
+        lines.append(f"    • …and {len(names) - MAX_LISTED_FAILURES} more, see the run")
 
-    return lines
-
-
-def _chunk(heading: str, lines: list) -> list:
-    """Return the section block texts for a heading and its lines, none over the size cap."""
-    texts = []
-    current = heading
+    texts = [heading]
     for line in lines:
-        if len(current) + len(line) + 1 > SECTION_TEXT_LIMIT:
-            texts.append(current)
-            current = line
+        if len(texts[-1]) + len(line) + 1 > SECTION_TEXT_LIMIT:
+            texts.append(line)
         else:
-            current = f"{current}\n{line}"
-    texts.append(current)
+            texts[-1] = f"{texts[-1]}\n{line}"
 
     return texts
 
 
 def _platform_sections(platform: str) -> tuple[list, bool]:
-    """Return the section block texts for one platform, and whether it needs attention."""
-    junit_path = ARTIFACT_DIR / ARTIFACT_NAME.format(platform=platform) / JUNIT_FILENAME
+    """Return the section texts for one platform, and whether it needs attention."""
+    junit_path = pathlib.Path(JUNIT_PATH.format(platform=platform))
     if not junit_path.exists():
         return [f":question: *{platform}* — no results (build or upload failed)"], True
 
@@ -102,73 +78,46 @@ def _platform_sections(platform: str) -> tuple[list, bool]:
     if not failing:
         return [f":large_green_circle: *{platform}* — {total} passed, {skipped} skipped"], False
 
-    heading = f":red_circle: *{platform}* — {len(failing)} of {total} failed, {skipped} skipped"
-
-    return _chunk(heading, _failure_lines(failing)), True
+    return _failure_sections(f":red_circle: *{platform}* — {len(failing)} of {total} failed, {skipped} skipped", failing), True
 
 
-def _run_url() -> str:
-    return "{}/{}/actions/runs/{}".format(
-        os.environ.get("GITHUB_SERVER_URL", "https://github.com"),
-        os.environ.get("GITHUB_REPOSITORY", "mantidproject/mantid"),
-        os.environ.get("GITHUB_RUN_ID", "0"),
-    )
+def _context() -> str:
+    """The branch and run link. The branch is named because a dispatch otherwise looks like the Sunday run."""
+    env = os.environ.get
+    branch = env("GITHUB_REF_NAME", "unknown").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    repository = f"{env('GITHUB_SERVER_URL', 'https://github.com')}/{env('GITHUB_REPOSITORY', 'mantidproject/mantid')}"
 
-
-def _escape(text: str) -> str:
-    """Escape the three characters Slack treats as markup in message text."""
-    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-
-
-def _branch() -> str:
-    """The branch the run used: the default branch on a schedule, the chosen one on a dispatch.
-
-    Worth stating, because a dispatched run from a feature branch is otherwise
-    indistinguishable from the Sunday run of main.
-    """
-    return _escape(os.environ.get("GITHUB_REF_NAME", "unknown"))
+    return f"Branch `{branch}` · <{repository}/actions/runs/{env('GITHUB_RUN_ID', '0')}|Full run and artifacts>"
 
 
 def _payload() -> dict:
     texts = []
     needs_attention = False
     for platform in PLATFORMS:
-        platform_texts, platform_needs_attention = _platform_sections(platform)
+        platform_texts, platform_failed = _platform_sections(platform)
         texts.extend(platform_texts)
-        needs_attention = needs_attention or platform_needs_attention
+        needs_attention |= platform_failed
 
     header = ":warning: Weekly UI tests: failures" if needs_attention else ":white_check_mark: Weekly UI tests: all green"
 
-    # Two of the block budget are spent on the header and the context blocks
-    sections = [{"type": "section", "text": {"type": "mrkdwn", "text": text}} for text in texts[: MAX_BLOCKS - 2]]
-
     return {
-        # The notification preview and screen reader fallback: a Block Kit message without
-        # it arrives looking empty
+        # The notification preview and screen reader fallback; without it the message arrives looking empty
         "text": header,
         "blocks": [
             {"type": "header", "text": {"type": "plain_text", "text": header, "emoji": True}},
-            *sections,
-            {
-                "type": "context",
-                "elements": [{"type": "mrkdwn", "text": f"Branch `{_branch()}` · <{_run_url()}|Full run and artifacts>"}],
-            },
+            *({"type": "section", "text": {"type": "mrkdwn", "text": text}} for text in texts),
+            {"type": "context", "elements": [{"type": "mrkdwn", "text": _context()}]},
         ],
     }
 
 
-def _parse_args(argv: list) -> argparse.Namespace:
+def main() -> int:
     parser = argparse.ArgumentParser(description="Summarise the weekly automated UI test results as a Slack message.")
     parser.add_argument("output_file", type=pathlib.Path, help="File to write the Slack Block Kit payload to")
+    args = parser.parse_args(sys.argv[1:])
 
-    return parser.parse_args(argv)
-
-
-def main() -> int:
-    args = _parse_args(sys.argv[1:])
     payload = _payload()
     args.output_file.write_text(json.dumps(payload), encoding="utf-8")
-    print(f"Wrote Slack payload to {args.output_file}:")
     print(json.dumps(payload, indent=2))
 
     return 0
