@@ -260,6 +260,25 @@ class TestHelpWindowModelOnlineUrl(unittest.TestCase):
             self.assertEqual(model.MODE_ONLINE, model.get_mode_string())
             self.assertEqual(model.ONLINE_BASE_URL + "/v6.13.1/", model.get_base_url())
 
+    def test_nightly_url_with_release_version_number_uses_only_first_patch_number(self):
+        """
+        The version number supports multiple ".patch" numbers, but we generally only
+        upload versioned major.minor.patch, so we must ensure that we strip extra patch
+        numbers in the online help URL.
+        """
+        # Return empty string from _get_doc_path to force online mode.
+        with (
+            patch("mantidqt.widgets.helpwindow.helpwindowmodel.version") as mock_version,
+            patch("mantidqt.widgets.helpwindow.helpwindowmodel.HelpWindowModel._get_doc_path", return_value=""),
+        ):
+            # Set version number to a release version.
+            mock_version.return_value.major = "6"
+            mock_version.return_value.minor = "13"
+            mock_version.return_value.patch = "1.2"
+            model = HelpWindowModel()
+            self.assertEqual(model.MODE_ONLINE, model.get_mode_string())
+            self.assertEqual(model.ONLINE_BASE_URL + "/v6.13.1/", model.get_base_url())
+
 
 if __name__ == "__main__":
     unittest.main()
