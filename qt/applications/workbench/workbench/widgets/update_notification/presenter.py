@@ -1,5 +1,5 @@
 from qtpy.QtCore import QObject, Signal, Qt
-from qtpy.QtWidgets import QMessageBox
+from qtpy.QtWidgets import QMessageBox, QCheckBox
 from mantid.api import AlgorithmObserver, AlgorithmManager
 from mantid.kernel import ConfigService, logger
 
@@ -65,9 +65,17 @@ class UpdateNotificationPresenter:
         box.setInformativeText(
             "Would you like to open the download page now? This will close the Mantid Workbench if you choose to update now."
         )
+
+        dont_show_again = QCheckBox("Don't show this again")
+        box.setCheckBox(dont_show_again)
+
         update_btn = box.addButton("Update now", QMessageBox.AcceptRole)
         box.addButton("Remind me later", QMessageBox.RejectRole)
         box.exec()
+
+        if dont_show_again.isChecked():
+            self._suppress_future_checks()
+
         if box.clickedButton() == update_btn:
             from qtpy.QtGui import QDesktopServices
             from qtpy.QtCore import QUrl
@@ -82,3 +90,12 @@ class UpdateNotificationPresenter:
                 self._parent.close()
             except Exception as exc:
                 logger.error(f"Failed to close Workbench: {exc}")
+
+    @staticmethod
+    def _suppress_future_checks():
+        # Persist to Mantid.user.properties so this survives past different installs
+        try:
+            ConfigService.setString("CheckMantidVersion.NotifyUpdateOnStartup", "0")
+            ConfigService.saveConfig(ConfigService.getUserFilename())
+        except Exception as e:
+            logger.error(f"Failed to suppress future update checks: {e}")

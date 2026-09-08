@@ -24,6 +24,7 @@ class GeneralProperties(Enum):
     PR_RECOVERY_ENABLED = "projectRecovery.enabled"
     USE_NOTIFICATIONS = "Notifications.Enabled"
     APPLY_DARK_THEME_ENABLED = "editors.apply_dark_theme"
+    PROMPT_UPDATE_ON_STARTUP = "CheckMantidVersion.NotifyUpdateOnStartup"
 
 
 class GeneralUserConfigProperties(Enum):
@@ -125,6 +126,9 @@ class GeneralSettingsModel(ConfigSettingsChangesModel):
     def get_use_notifications(self) -> str:
         return self.get_saved_value(GeneralProperties.USE_NOTIFICATIONS.value)
 
+    def get_prompt_update_on_startup(self) -> str:
+        return self.get_saved_value(GeneralProperties.PROMPT_UPDATE_ON_STARTUP.value)
+
     def get_user_layout(self, get_potential_update=False) -> dict:
         if get_potential_update and GeneralUserConfigProperties.USER_LAYOUT.value in self._user_config_changes:
             return self._user_config_changes[GeneralUserConfigProperties.USER_LAYOUT.value]
@@ -176,6 +180,9 @@ class GeneralSettingsModel(ConfigSettingsChangesModel):
 
     def set_use_notifications(self, value: str) -> None:
         self.add_change(GeneralProperties.USE_NOTIFICATIONS.value, value)
+
+    def set_prompt_update_on_startup(self, value: bool) -> None:
+        self.add_change(GeneralProperties.PROMPT_UPDATE_ON_STARTUP.value, value)
 
     def set_project_recovery_enabled(self, value: str) -> None:
         self.add_change(GeneralProperties.PR_RECOVERY_ENABLED.value, value)

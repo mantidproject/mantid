@@ -482,10 +482,6 @@ class MainWindow(QMainWindow):
         algorithm_selector = self.algorithm_selector
         plot_selector = self.plot_selector
         workspacecalculator = self.workspacecalculator
-        # If more than two rows are needed in a column,
-        # arrange_layout function needs to be revisited.
-        # In the first column, there are three widgets in two rows
-        # as the algorithm_selector and plot_selector are tabified.
         default_layout = {
             "widgets": [
                 # column 0

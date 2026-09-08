@@ -285,8 +285,12 @@ Network Properties
 +-----------------------------------------------+-------------------------------------------------------+---------------------------------+
 | ``usagereports.enabled``                      | Enable usage reporting                                | ``1``                           |
 +-----------------------------------------------+-------------------------------------------------------+---------------------------------+
-| ``CheckMantidVersion.NotifyUpdateOnStartup``  | Prompt to update MantidWorkbench on startup,          | ``0``, ``1``, ``On``, ``True``, |
-|                                               | This is disabled by default.                          | ``true``                        |
+| ``CheckMantidVersion.NotifyUpdateOnStartup``  | Prompt to update MantidWorkbench on startup.          | ``0``, ``1``, ``On``, ``True``, |
+|                                               | This is enabled by default and can be turned off by   |  ``true``                       |
+|                                               | unticking the check box "Prompt to update Mantid      |                                 |
+|                                               | Workbench on startup" in the General Settings of      |                                 |
+|                                               | the workbench or by clicking on the                   |                                 |
+|                                               | "Don't show this again" button at the startup         |                                 |
 +-----------------------------------------------+-------------------------------------------------------+---------------------------------+
 
 
