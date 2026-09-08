@@ -48,7 +48,7 @@ public:
     QTemporaryDir directory;
     TS_ASSERT(directory.isValid());
     QSettings storage(directory.filePath("settings.ini"), QSettings::IniFormat);
-    storage.setValue("InstrumentView/use_new_instrument_view", false);
+    storage.setValue("InstrumentView/use_new_instrument_view", true);
 
     auto const values = PreviewSettings::readSettings(storage);
 
