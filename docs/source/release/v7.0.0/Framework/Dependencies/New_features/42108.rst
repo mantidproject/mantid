@@ -1,0 +1,1 @@
+- Remove ArielToMantidXML tool. This is a tool that was used when transitioning instruments to mantid from other reduction software.
