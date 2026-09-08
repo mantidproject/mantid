@@ -49,7 +49,7 @@ MANTID_DATAHANDLING_DLL bool correctSpectraMapping(API::MatrixWorkspace &workspa
  * @param loader :: the loader that has just finished executing
  * @param log :: logger used to report what was corrected
  */
-MANTID_DATAHANDLING_DLL void correctLoadedWorkspaces(API::Algorithm &loader, Kernel::Logger &log);
+MANTID_DATAHANDLING_DLL void correctLoadedWorkspaces(const API::Algorithm &loader, Kernel::Logger &log);
 
 } // namespace DataHandling
 } // namespace Mantid

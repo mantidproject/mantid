@@ -96,7 +96,7 @@ bool correctSpectraMapping(MatrixWorkspace &workspace, Logger &log) {
   return true;
 }
 
-void correctLoadedWorkspaces(API::Algorithm &loader, Logger &log) {
+void correctLoadedWorkspaces(const API::Algorithm &loader, Logger &log) {
   // A group's members are reached through the group, so the per-period properties need no separate visit.
   for (const auto *name : {"OutputWorkspace", "MonitorWorkspace"}) {
     if (!loader.existsProperty(name))
