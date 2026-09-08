@@ -254,7 +254,7 @@ class FullInstrumentViewView(QWidget):
 
         self._detector_spectrum_fig = Figure()
         self._detector_spectrum_axes = self._detector_spectrum_fig.add_subplot(111, projection="mantid")
-        self._detector_spectrum_fig.set_layout_engine(layout="tight")
+        self._detector_spectrum_fig.set_layout_engine(layout="constrained")
         self._detector_figure_canvas = FigureCanvas(self._detector_spectrum_fig)
         self._detector_figure_canvas.setMinimumSize(QSize(0, 0))
         self._plot_toolbar = MantidNavigationToolbar(self._detector_figure_canvas, None)

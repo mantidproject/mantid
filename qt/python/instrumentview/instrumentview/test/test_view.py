@@ -11,7 +11,7 @@ from unittest.mock import MagicMock
 
 import numpy as np
 from matplotlib.backends.backend_agg import FigureCanvasAgg
-from matplotlib.layout_engine import TightLayoutEngine
+from matplotlib.layout_engine import ConstrainedLayoutEngine
 from qtpy.QtCore import Qt
 from mantidqt.utils.qt.testing import start_qapplication
 from mantid.simpleapi import CreateSampleWorkspace
@@ -174,9 +174,9 @@ class TestFullInstrumentViewView(unittest.TestCase):
         self._view.redraw_lineplot()
         self._view._detector_figure_canvas.draw.assert_called_once()
 
-    def test_lineplot_figure_uses_tight_layout(self):
+    def test_lineplot_figure_uses_constrained_layout(self):
         # Keeps the axis labels, which carry the units, inside the canvas as the pane is resized
-        self.assertIsInstance(self._view._detector_spectrum_fig.get_layout_engine(), TightLayoutEngine)
+        self.assertIsInstance(self._view._detector_spectrum_fig.get_layout_engine(), ConstrainedLayoutEngine)
 
     def test_axis_labels_visible_when_peak_labels_outside_plot_range(self):
         # A peak label outside the x range used to defeat the tight layout, which then warned and gave
@@ -197,7 +197,7 @@ class TestFullInstrumentViewView(unittest.TestCase):
             warnings.simplefilter("always")
             figure.canvas.draw()
 
-        self.assertEqual([], [str(w.message) for w in caught if "Tight layout" in str(w.message)])
+        self.assertEqual([], [str(w.message) for w in caught if "Constrained layout" in str(w.message)])
         renderer = figure.canvas.get_renderer()
         self.assertGreater(axes.xaxis.label.get_window_extent(renderer).y0, 0)
         self.assertGreater(axes.yaxis.label.get_window_extent(renderer).x0, 0)
