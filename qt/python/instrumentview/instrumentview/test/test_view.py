@@ -5,10 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL-3.0+
 import unittest
+import warnings
 from unittest import mock
 from unittest.mock import MagicMock
 
 import numpy as np
+from matplotlib.backends.backend_agg import FigureCanvasAgg
+from matplotlib.layout_engine import ConstrainedLayoutEngine
 from qtpy.QtCore import Qt
 from mantidqt.utils.qt.testing import start_qapplication
 from mantid.simpleapi import CreateSampleWorkspace
@@ -147,6 +150,34 @@ class TestFullInstrumentViewView(unittest.TestCase):
     def test_redraw_lineplot(self):
         self._view.redraw_lineplot()
         self._view._detector_figure_canvas.draw.assert_called_once()
+
+    def test_lineplot_figure_uses_constrained_layout(self):
+        # Keeps the axis labels, which carry the units, inside the canvas as the pane is resized
+        self.assertIsInstance(self._view._detector_spectrum_fig.get_layout_engine(), ConstrainedLayoutEngine)
+
+    def test_axis_labels_visible_when_peak_labels_outside_plot_range(self):
+        # A peak label outside the x range used to defeat the tight layout, which then warned and gave
+        # up, leaving the axis labels, and so the units, off the canvas
+        figure = self._view._detector_spectrum_fig
+        FigureCanvasAgg(figure)
+        axes = self._view._detector_spectrum_axes
+        axes.set_xlabel("Time-of-flight")
+        axes.set_ylabel("Counts")
+        axes.set_xlim(0, 1)
+        mock_item = MagicMock()
+        mock_item.foreground().color().name.return_value = "#ff7f0e"
+        self._view._peak_ws_list = MagicMock()
+        self._view._peak_ws_list.findItems.return_value = [mock_item]
+
+        self._view.plot_lineplot_peak_overlays([[85.0]], [["(1,1,1)"]], ["ws1"])
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            figure.canvas.draw()
+
+        self.assertEqual([], [str(w.message) for w in caught if "Constrained layout" in str(w.message)])
+        renderer = figure.canvas.get_renderer()
+        self.assertGreater(axes.xaxis.label.get_window_extent(renderer).y0, 0)
+        self.assertGreater(axes.yaxis.label.get_window_extent(renderer).x0, 0)
 
     def test_add_rectangular_widget(self) -> None:
         self._view.add_rectangular_widget()
