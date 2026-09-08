@@ -230,6 +230,16 @@ class ReflectometrySliceEventWorkspaceV2Test(unittest.TestCase):
         self._assert_run_algorithm_succeeds(args, len(mtd["input_ws_group"]))
         self._check_group(time_interval, ["ws1", "ws2", "ws3"], ["mon1", "mon2", "mon3"])
 
+    def test_when_input_is_a_workspace_group_log_interval(self):
+        args = self._default_args
+        args["LogName"] = "proton_charge"
+        args["LogValueInterval"] = 20
+        args["MinimumLogValue"] = "75"
+        args["MaximumLogValue"] = "110"
+        args["InputWorkspaceName"] = "input_ws_group"
+        self._assert_run_algorithm_succeeds(args, True)
+        self._check_log_interval_group(20, ["ws1", "ws2", "ws3"], ["monitor_ws"] * 3)
+
     def test_fails_when_input_groups_are_different_sizes(self):
         self._create_monitor_workspace_group_with_two_members()
         args = self._default_args
@@ -327,18 +337,31 @@ class ReflectometrySliceEventWorkspaceV2Test(unittest.TestCase):
         expected_values_set = [[2, 6, 1], [2, 3, 2], [0, 3, 0], [4, 2, 2], [4, 1, 2], [2, 1, 1], [0, 0, 0]]
         # Check for the 3 workspaces contained in each slice group.
         for i, expected_values in zip(range(7), expected_values_set):
-            self.assertTrue(mtd.doesExist(f"output_{i * time_interval}_{(i + 1) * time_interval}"))
-            slice_group = mtd.retrieve(f"output_{i * time_interval}_{(i + 1) * time_interval}")
-            self.assertEqual(slice_group.getNumberOfEntries(), 3)
-            self._check_slices(
-                slice_group,
-                [
-                    f"{expected_ws_names[0]}_{expected_monitor_names[0]}_output_0_{i * time_interval}_{(i + 1) * time_interval}",
-                    f"{expected_ws_names[1]}_{expected_monitor_names[1]}_output_1_{i * time_interval}_{(i + 1) * time_interval}",
-                    f"{expected_ws_names[2]}_{expected_monitor_names[2]}_output_2_{i * time_interval}_{(i + 1) * time_interval}",
-                ],
-            )
-            self._check_y(slice_group, child=0, spec=3, expected_bins=101, expected_values=expected_values)
+            group_name = f"output_{i * time_interval}_{(i + 1) * time_interval}"
+            range_str = f"{i * time_interval}_{(i + 1) * time_interval}"
+            self._check_group_member(group_name, expected_ws_names, expected_monitor_names, expected_values, range_str)
+
+    def _check_log_interval_group(self, log_interval, expected_ws_names, expected_monitor_names):
+        expected_values_set = [[4, 5, 2], [6, 10, 4]]
+        expected_groups = ["output_65_85", "output_85_105"]
+        # Check for the 2 workspaces contained in each slice group.
+        for i, expected_values, expected_group in zip(range(2), expected_values_set, expected_groups):
+            range_str = f"Log.proton_charge.From.{i * log_interval + 65}.To.{(i + 1) * log_interval + 65}.Value-change-direction:both"
+            self._check_group_member(expected_group, expected_ws_names, expected_monitor_names, expected_values, range_str)
+
+    def _check_group_member(self, expected_group, expected_ws_names, expected_monitor_names, expected_values, range_str):
+        self.assertTrue(mtd.doesExist(expected_group))
+        slice_group = mtd.retrieve(expected_group)
+        self.assertEqual(slice_group.getNumberOfEntries(), 3)
+        self._check_slices(
+            slice_group,
+            [
+                f"{expected_ws_names[0]}_{expected_monitor_names[0]}_output_0_{range_str}",
+                f"{expected_ws_names[1]}_{expected_monitor_names[1]}_output_1_{range_str}",
+                f"{expected_ws_names[2]}_{expected_monitor_names[2]}_output_2_{range_str}",
+            ],
+        )
+        self._check_y(slice_group, child=0, spec=3, expected_bins=101, expected_values=expected_values)
 
     def _check_slices(self, workspace_group, expected_names):
         number_of_slices = workspace_group.getNumberOfEntries()

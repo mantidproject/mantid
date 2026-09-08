@@ -133,10 +133,11 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         return output_ws_group, monitor_ws_group
 
     def _create_name_for_slice_group(self, output_base_name, slice_group):
-        if self._slice_by_log():
-            regex = re.compile(r"\.From\.(\d+)\.To\.(\d+)")
+        # If slicing by log interval, FilterEvents uses a descriptive slice name.
+        if not self._slice_by_log() and self._property_set("LogValueInterval"):
+            regex = re.compile(r"\.From\.([\d.]+)\.To\.([\d.]+)\.")
         else:
-            regex = re.compile(r"_(\d+)_(\d+)$")
+            regex = re.compile(r"_([\d.]+)_([\d.]+)$")
         start, end = regex.search(slice_group[0].name()).groups()
         return f"{output_base_name}_{start}_{end}"
 
