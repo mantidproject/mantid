@@ -22,6 +22,11 @@ contribute to different spectra (for example in DAE2 (Data Acquisition
 Electronic) when a spectra containing electronically focussed data is
 created simultaneously with individual spectra).
 
+Where the instrument definition sets ``spectra-map-source`` to ``instrument`` in its
+:ref:`parameter file <InstrumentParameterFile>`, the table read from the file is corrected against the instrument
+before it is applied. See :ref:`the LoadRaw description <raw-spectra-map-source>` for what that does and when it
+applies.
+
 Usage
 -----
 

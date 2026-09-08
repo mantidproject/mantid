@@ -11,9 +11,9 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidDataHandling/InstrumentSpectraMapping.h"
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
@@ -29,21 +29,6 @@ DECLARE_FILELOADER_ALGORITHM(LoadRaw3)
 
 using namespace Kernel;
 using namespace API;
-
-namespace {
-constexpr specnum_t OSIRIS_SILICON_SPECTRUM_COUNT = 2565;
-
-bool isOsirisSiliconAnalyserRun(const std::string &instrumentName, const specnum_t spectraInFile) {
-  return instrumentName == "OSIRIS" && spectraInFile == OSIRIS_SILICON_SPECTRUM_COUNT;
-}
-
-/// Maps each spectrum to the detector whose ID equals its spectrum number ovew
-SpectrumDetectorMapping createIdfDetectorMapping(const Geometry::Instrument_const_sptr &instrument) {
-  const auto detectorIDs = instrument->getDetectorIDs(false);
-  const std::vector<specnum_t> spectrumNumbers(detectorIDs.cbegin(), detectorIDs.cend());
-  return SpectrumDetectorMapping(spectrumNumbers, detectorIDs);
-}
-} // namespace
 
 /// Constructor
 LoadRaw3::LoadRaw3()
@@ -137,16 +122,6 @@ void LoadRaw3::exec() {
   localWorkspace->updateSpectraUsing(detectorMapping);
 
   runLoadInstrument(m_filename, localWorkspace, 0.0, 0.4);
-
-  // Map detector IDs to matching spectrum numbers: silicon analyser runs record hardware IDs that do not match the IDF.
-  if (const auto instrument = localWorkspace->getInstrument()) {
-    if (isOsirisSiliconAnalyserRun(instrument->getName(), m_numberOfSpectra)) {
-      g_log.notice("Ignoring the spectrum-detector table in this RAW file: each spectrum is mapped "
-                   "to the detector of the same ID in the instrument definition.");
-      detectorMapping = createIdfDetectorMapping(instrument);
-      localWorkspace->updateSpectraUsing(detectorMapping);
-    }
-  }
 
   m_prog_start = 0.4;
   Run &run = localWorkspace->mutableRun();
@@ -303,8 +278,12 @@ void LoadRaw3::exec() {
     }
 
   } // loop over periods
-  // Clean up
 
+  // Map spectra whose file detector IDs the instrument does not define onto the detector of the same ID; a no-op
+  // unless the instrument definition enables it. Left until here so every period and monitor workspace are populated.
+  correctLoadedWorkspaces(*this, g_log);
+
+  // Clean up
   reset();
   fclose(file);
 }
