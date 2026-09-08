@@ -254,7 +254,7 @@ class FullInstrumentViewView(QWidget):
 
         self._detector_spectrum_fig = Figure()
         self._detector_spectrum_axes = self._detector_spectrum_fig.add_subplot(111, projection="mantid")
-        self._detector_spectrum_fig.subplots_adjust(left=0.05, right=0.98, bottom=0.1, top=0.95)
+        self._detector_spectrum_fig.set_layout_engine(layout="constrained")
         self._detector_figure_canvas = FigureCanvas(self._detector_spectrum_fig)
         self._detector_figure_canvas.setMinimumSize(QSize(0, 0))
         self._plot_toolbar = MantidNavigationToolbar(self._detector_figure_canvas, None)
@@ -1239,7 +1239,7 @@ class FullInstrumentViewView(QWidget):
 
             for x, label in zip(x_values, labels):
                 self._lineplot_overlays.append(self._detector_spectrum_axes.axvline(x, color=item_color, linestyle="--"))
-                self._detector_spectrum_axes.text(
+                peak_label = self._detector_spectrum_axes.text(
                     x,
                     0.99,
                     label,
@@ -1250,6 +1250,7 @@ class FullInstrumentViewView(QWidget):
                     fontsize=8,
                     rotation=90,
                 )
+                peak_label.set_in_layout(False)
             self.redraw_lineplot()
 
     @_skip_if_closing
