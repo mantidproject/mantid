@@ -56,7 +56,7 @@ signals:
   void sampleLogsClicked(const QStringList &workspaceName);
   void sliceViewerClicked(const QStringList &workspaceName);
   void showInstrumentClicked(const QStringList &workspaceNames);
-  void showNewInstrumentViewClicked(const QStringList &workspaceNames);
+  void showLegacyInstrumentViewClicked(const QStringList &workspaceNames);
   void showDataClicked(const QStringList &workspaceNames);
   void showAlgorithmHistoryClicked(const QStringList &workspaceNames);
   void showDetectorsClicked(const QStringList &workspaceNames);
@@ -91,7 +91,7 @@ private slots:
   void onSampleLogsClicked();
   void onSliceViewerClicked();
   void onShowInstrumentClicked();
-  void onShowNewInstrumentViewClicked();
+  void onShowLegacyInstrumentViewClicked();
   void onShowDataClicked();
   void onShowAlgorithmHistoryClicked();
   void onShowDetectorsClicked();
@@ -127,7 +127,7 @@ private:
       *m_plotColorfill, *m_sampleLogs, *m_sliceViewer, *m_showInstrument, *m_showData, *m_showAlgorithmHistory,
       *m_showDetectors, *m_plotAdvanced, *m_plotSurface, *m_plotWireframe, *m_plotContour, *m_plotMDHisto1D,
       *m_overplotMDHisto1D, *m_plotMDHisto1DWithErrs, *m_overplotMDHisto1DWithErrs, *m_sampleMaterial, *m_sampleShape,
-      *m_superplot, *m_superplotWithErrs, *m_superplotBins, *m_superplotBinsWithErrs, *m_showNewInstrumentView,
+      *m_superplot, *m_superplotWithErrs, *m_superplotBins, *m_superplotBinsWithErrs, *m_showLegacyInstrumentView,
       *m_separator;
 };
 } // namespace MantidQt::MantidWidgets
