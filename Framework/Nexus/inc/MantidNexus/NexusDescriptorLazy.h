@@ -9,14 +9,11 @@
 #include "MantidNexus/DllConfig.h"
 #include "MantidNexus/UniqueID.h"
 
-#include <cmath>
 #include <concepts>
 #include <format>
 #include <map>
-#include <optional>
 #include <shared_mutex>
 #include <string>
-#include <tuple>
 #include <unordered_set>
 #include <variant>
 #include <vector>
