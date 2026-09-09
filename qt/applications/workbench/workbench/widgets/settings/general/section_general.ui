@@ -406,7 +406,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>Use legacy Instrument View in interfaces?</string>
+               <string>Use legacy Instrument View in interfaces</string>
               </property>
              </widget>
             </item>
