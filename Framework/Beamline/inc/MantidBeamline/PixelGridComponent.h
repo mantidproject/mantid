@@ -11,11 +11,7 @@
 namespace Mantid {
 namespace Beamline {
 
-/** PixelGridComponent : structural metadata for a Rectangular/Grid detector
- * bank, i.e. the legacy Geometry::RectangularDetector/GridDetector fields
- * that have no other home on ComponentInfo. Pixel counts and detector-ID
- * numbering are never parametrized (unlike position/rotation/scale), so this
- * is captured once, at instrument-build time, and never changes afterwards.
+/** PixelGridComponent : structural metadata for a Rectangular/Grid banks
  */
 struct PixelGridComponent {
   /// Number of pixels in the X (horizontal) direction
@@ -28,8 +24,7 @@ struct PixelGridComponent {
   double xStart = 0;
   double yStart = 0;
   double zStart = 0;
-  /// Step size between neighbouring pixels; captured once at instrument-build
-  /// time so any parametrized scaling (e.g. "scalex") already baked in.
+  /// Step size between neighbouring pixels
   double xStep = 0;
   double yStep = 0;
   double zStep = 0;

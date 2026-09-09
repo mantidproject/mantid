@@ -19,7 +19,6 @@
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/V3D.h"
@@ -121,6 +120,9 @@ void LoadIsawDetCal::exec() {
 
   std::string instname = inst->getName();
 
+  auto expInfoWS = std::dynamic_pointer_cast<ExperimentInfo>(ws);
+  auto &componentInfo = expInfoWS->mutableComponentInfo();
+
   const auto filenames = getFilenames();
 
   // Output summary to log file
@@ -129,44 +131,11 @@ void LoadIsawDetCal::exec() {
   std::ifstream input(filenames[0].c_str(), std::ios_base::in);
   std::string line;
   std::string detname;
-  // Build a list of Rectangular Detectors
-  std::vector<std::shared_ptr<RectangularDetector>> detList;
-  for (int i = 0; i < inst->nelements(); i++) {
-    std::shared_ptr<RectangularDetector> det;
-    std::shared_ptr<ICompAssembly> assem;
-    std::shared_ptr<ICompAssembly> assem2;
-
-    det = std::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
-    if (det) {
-      detList.emplace_back(det);
-    } else {
-      // Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
-      // We are not doing a full recursive search since that will be very long
-      // for lots of pixels.
-      assem = std::dynamic_pointer_cast<ICompAssembly>((*inst)[i]);
-      if (assem) {
-        for (int j = 0; j < assem->nelements(); j++) {
-          det = std::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
-          if (det) {
-            detList.emplace_back(det);
-
-          } else {
-            // Also, look in the second sub-level for RectangularDetectors (e.g.
-            // PG3).
-            // We are not doing a full recursive search since that will be very
-            // long for lots of pixels.
-            assem2 = std::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
-            if (assem2) {
-              for (int k = 0; k < assem2->nelements(); k++) {
-                det = std::dynamic_pointer_cast<RectangularDetector>((*assem2)[k]);
-                if (det) {
-                  detList.emplace_back(det);
-                }
-              }
-            }
-          }
-        }
-      }
+  // Build a list of Rectangular/Grid Detectors (as component indices)
+  std::vector<size_t> detList;
+  for (size_t i = 0; i < componentInfo.size(); ++i) {
+    if (componentInfo.isGridDetector(i)) {
+      detList.emplace_back(i);
     }
   }
   std::unordered_set<int> uniqueBanks; // for CORELLI and WISH
@@ -174,10 +143,6 @@ void LoadIsawDetCal::exec() {
   if (instname == "WISH")
     bankPart = "WISHpanel";
   if (detList.empty()) {
-    // Get all components using ComponentInfo
-    auto expInfoWS = std::dynamic_pointer_cast<ExperimentInfo>(ws);
-    const auto &componentInfo = expInfoWS->componentInfo();
-
     // iterate over the top level components, which contain the banks
     size_t const rootIndex = componentInfo.root();
     auto const topChildren = componentInfo.children(rootIndex);
@@ -197,8 +162,6 @@ void LoadIsawDetCal::exec() {
     }
   }
 
-  auto expInfoWS = std::dynamic_pointer_cast<ExperimentInfo>(ws);
-  auto &componentInfo = expInfoWS->mutableComponentInfo();
   std::vector<ComponentScaling> rectangularDetectorScalings;
 
   while (std::getline(input, line)) {
@@ -255,26 +218,23 @@ void LoadIsawDetCal::exec() {
           break;
       }
     }
-    std::shared_ptr<RectangularDetector> det;
     std::string bankName = getBankName(bankPart, id);
-    auto matchingDetector =
-        std::find_if(detList.begin(), detList.end(), [&bankName](const std::shared_ptr<RectangularDetector> &detector) {
-          return detector->getName() == bankName;
-        });
-    if (matchingDetector != detList.end()) {
-      det = *matchingDetector;
-    }
+    auto matchingDetector = std::find_if(detList.begin(), detList.end(), [&bankName, &componentInfo](size_t index) {
+      return componentInfo.name(index) == bankName;
+    });
 
     V3D rX(base_x, base_y, base_z);
     V3D rY(up_x, up_y, up_z);
 
-    if (det) {
-      detname = det->getName();
+    if (matchingDetector != detList.end()) {
+      const size_t bankIndex = *matchingDetector;
+      detname = componentInfo.name(bankIndex);
       center(x, y, z, detname, ws, componentInfo);
 
       ComponentScaling detScaling;
-      detScaling.scaleX = CM_TO_M * width / det->xsize();
-      detScaling.scaleY = CM_TO_M * height / det->ysize();
+      const auto grid = componentInfo.pixelGridComponent(bankIndex);
+      detScaling.scaleX = CM_TO_M * width / (grid.nX * grid.xStep);
+      detScaling.scaleY = CM_TO_M * height / (grid.nY * grid.yStep);
       detScaling.componentName = detname;
       // Scaling will need both scale factors if LoadIsawPeaks or LoadIsawDetCal
       // has already
@@ -300,7 +260,8 @@ void LoadIsawDetCal::exec() {
 
       rectangularDetectorScalings.emplace_back(detScaling);
 
-      doRotation(rX, rY, componentInfo, det);
+      IComponent_const_sptr bankComponent(componentInfo.componentID(bankIndex), NoDeleting());
+      doRotation(rX, rY, componentInfo, bankComponent);
     }
     auto bank = uniqueBanks.find(id);
     if (bank == uniqueBanks.end())

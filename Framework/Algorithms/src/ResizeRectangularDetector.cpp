@@ -12,7 +12,6 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -83,23 +82,26 @@ void ResizeRectangularDetector::exec() {
   if (ComponentName.empty())
     throw std::runtime_error("You must specify a ComponentName.");
 
-  IComponent_const_sptr comp;
-
-  comp = inst->getComponentByName(ComponentName);
-  if (!comp)
-    throw std::runtime_error("Component with name " + ComponentName + " was not found.");
-
-  RectangularDetector_const_sptr det = std::dynamic_pointer_cast<const RectangularDetector>(comp);
-  if (!det)
-    throw std::runtime_error("Component with name " + ComponentName + " is not a RectangularDetector.");
-
   auto input = std::dynamic_pointer_cast<ExperimentInfo>(ws);
+  auto &componentInfo = input->mutableComponentInfo();
+
+  size_t componentIndex;
+  try {
+    componentIndex = componentInfo.indexOfAny(ComponentName);
+  } catch (std::invalid_argument &) {
+    throw std::runtime_error("Component with name " + ComponentName + " was not found.");
+  }
+  if (!componentInfo.isGridDetector(componentIndex)) {
+    throw std::runtime_error("Component with name " + ComponentName + " is not a RectangularDetector.");
+  }
   Geometry::ParameterMap &pmap = input->instrumentParameters();
-  auto oldscalex = pmap.getDouble(det->getName(), std::string("scalex"));
-  auto oldscaley = pmap.getDouble(det->getName(), std::string("scaley"));
+  const std::string &resolvedName = componentInfo.name(componentIndex);
+  auto oldscalex = pmap.getDouble(resolvedName, std::string("scalex"));
+  auto oldscaley = pmap.getDouble(resolvedName, std::string("scaley"));
   // Add a parameter for the new scale factors
-  pmap.addDouble(det->getComponentID(), "scalex", ScaleX);
-  pmap.addDouble(det->getComponentID(), "scaley", ScaleY);
+  auto *componentID = const_cast<IComponent *>(componentInfo.componentID(componentIndex));
+  pmap.addDouble(componentID, "scalex", ScaleX);
+  pmap.addDouble(componentID, "scaley", ScaleY);
   pmap.clearPositionSensitiveCaches();
 
   // Positions of detectors are now stored in DetectorInfo, so we must update
@@ -112,8 +114,7 @@ void ResizeRectangularDetector::exec() {
     relscalex /= oldscalex[0];
   if (!oldscaley.empty())
     relscaley /= oldscaley[0];
-  applyRectangularDetectorScaleToComponentInfo(input->mutableComponentInfo(), comp->getComponentID(), relscalex,
-                                               relscaley);
+  applyRectangularDetectorScaleToComponentInfo(componentInfo, componentID, relscalex, relscaley);
 }
 
 } // namespace Mantid::Algorithms

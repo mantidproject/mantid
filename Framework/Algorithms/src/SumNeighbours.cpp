@@ -12,9 +12,8 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidGeometry/ICompAssembly.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <boost/algorithm/string.hpp>
@@ -66,15 +65,14 @@ void SumNeighbours::exec() {
 
   // Get the input workspace
   Mantid::API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+  const auto &componentInfo = inWS->componentInfo();
   const auto &spectrumInfo = inWS->spectrumInfo();
   const auto &det = spectrumInfo.detector(0);
-  // Check if grandparent is rectangular detector
-  std::shared_ptr<const Geometry::IComponent> parent = det.getParent();
-  std::shared_ptr<const RectangularDetector> rect;
-
-  if (parent) {
-    rect = std::dynamic_pointer_cast<const RectangularDetector>(parent->getParent());
-  }
+  // Check if grandparent is a Rectangular/Grid detector
+  const size_t detIndex = componentInfo.indexOf(det.getComponentID());
+  const size_t parentIndex = componentInfo.parent(detIndex);
+  const size_t grandparentIndex = componentInfo.parent(parentIndex);
+  const bool rect = componentInfo.isGridDetector(grandparentIndex);
 
   Mantid::API::MatrixWorkspace_sptr outWS;
 

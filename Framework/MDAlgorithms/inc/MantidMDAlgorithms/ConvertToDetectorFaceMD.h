@@ -39,7 +39,8 @@ private:
   void init() override;
   void exec() override;
 
-  std::map<int, Geometry::RectangularDetector_const_sptr> getBanks();
+  /// Component indices of the rectangular bank for each requested bank number
+  std::map<int, size_t> getBanks();
 
   template <class T, class MDE, size_t nd>
   void convertEventList(std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> outWS, size_t workspaceIndex,
