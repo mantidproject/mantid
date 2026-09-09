@@ -10,7 +10,6 @@
 #include "MantidNexus/UniqueID.h"
 
 #include <concepts>
-#include <format>
 #include <map>
 #include <shared_mutex>
 #include <string>
