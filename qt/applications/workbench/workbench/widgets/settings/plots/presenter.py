@@ -56,6 +56,7 @@ class PlotSettings(SettingsPresenterBase):
 
     def add_filters(self):
         filter_out_mousewheel_events_from_combo_or_spin_box(self._view.plot_font)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self._view.title_font_size)
         filter_out_mousewheel_events_from_combo_or_spin_box(self._view.x_axes_scale)
         filter_out_mousewheel_events_from_combo_or_spin_box(self._view.y_axes_scale)
         filter_out_mousewheel_events_from_combo_or_spin_box(self._view.axes_line_width)
@@ -100,10 +101,12 @@ class PlotSettings(SettingsPresenterBase):
         normalize_to_bin_width = "on" == self._model.get_normalize_to_bin_width().lower()
         show_title = "on" == self._model.get_show_title().lower()
         show_legend = "on" == self._model.get_show_legend().lower()
+        title_font_size = float(self._model.get_title_font_size())
 
         self._view.normalize_to_bin_width.setChecked(normalize_to_bin_width)
         self._view.show_title.setChecked(show_title)
         self._view.show_legend.setChecked(show_legend)
+        self._view.title_font_size.setValue(title_font_size)
         self.populate_font_combo_box()
 
     def setup_axes_group(self):
@@ -246,6 +249,7 @@ class PlotSettings(SettingsPresenterBase):
     def setup_signals(self):
         self._view.normalize_to_bin_width.stateChanged.connect(self.action_normalization_changed)
         self._view.show_title.stateChanged.connect(self.action_show_title_changed)
+        self._view.title_font_size.valueChanged.connect(self.action_title_font_size_changed)
         self._view.show_legend.stateChanged.connect(self.action_show_legend_changed)
 
         # Axes
@@ -313,6 +317,10 @@ class PlotSettings(SettingsPresenterBase):
 
     def action_show_title_changed(self, state):
         self._model.set_show_title("On" if checkbox_state_to_bool(state) else "Off")
+        self.notify_changes()
+
+    def action_title_font_size_changed(self, value):
+        self._model.set_title_font_size(str(value))
         self.notify_changes()
 
     def action_enable_grid_changed(self, state):

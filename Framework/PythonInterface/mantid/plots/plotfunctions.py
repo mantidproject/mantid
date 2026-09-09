@@ -546,6 +546,7 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
             axes_label_font_size = float(ConfigService.getString("plots.axesLabelFontSize"))
             ax.xaxis.label.set_size(axes_label_font_size)
             ax.yaxis.label.set_size(axes_label_font_size)
+            ax.title.set_size(float(ConfigService.getString("plots.titleFontSize")))
 
         if ConfigService.getString("plots.enableGrid").lower() == "on":
             try:

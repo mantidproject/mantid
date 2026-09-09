@@ -22,6 +22,7 @@ class MockPlotsSettingsModel:
         self.get_normalize_to_bin_width = MagicMock()
         self.get_show_title = MagicMock()
         self.get_show_legend = MagicMock()
+        self.get_title_font_size = MagicMock()
         self.get_x_axes_scale = MagicMock()
         self.get_y_axes_scale = MagicMock()
         self.get_axes_line_width = MagicMock()
@@ -93,6 +94,7 @@ class MockPlotsSettingsModel:
         self.set_show_minor_ticks = MagicMock()
         self.set_show_minor_gridlines = MagicMock()
         self.set_show_legend = MagicMock()
+        self.set_title_font_size = MagicMock()
         self.set_legend_location = MagicMock()
         self.set_legend_font_size = MagicMock()
         self.set_color_map = MagicMock()
@@ -120,6 +122,7 @@ class PlotsSettingsTest(unittest.TestCase):
         self.mock_model.get_normalize_to_bin_width.assert_called_once()
         self.mock_model.get_show_title.assert_called_once()
         self.mock_model.get_show_legend.assert_called_once()
+        self.mock_model.get_title_font_size.assert_called_once()
         self.mock_model.get_plot_font.assert_called_once()
         self.mock_model.get_x_axes_scale.assert_called_once()
         self.mock_model.get_y_axes_scale.assert_called_once()
@@ -187,6 +190,21 @@ class PlotsSettingsTest(unittest.TestCase):
 
         presenter.action_show_title_changed(Qt.Unchecked)
         self.mock_model.set_show_title.assert_called_once_with("Off")
+        mock_notify_changes.assert_called_once()
+
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_title_font_size_changed(self, mock_notify_changes: MagicMock):
+        presenter = PlotSettings(None, model=self.mock_model)
+
+        presenter.action_title_font_size_changed(12)
+        self.mock_model.set_title_font_size.assert_called_once_with("12")
+        mock_notify_changes.assert_called_once()
+
+        self.mock_model.set_title_font_size.reset_mock()
+        mock_notify_changes.reset_mock()
+
+        presenter.action_title_font_size_changed(10.5)
+        self.mock_model.set_title_font_size.assert_called_once_with("10.5")
         mock_notify_changes.assert_called_once()
 
     @patch(NOTIFY_CHANGES_PATH)

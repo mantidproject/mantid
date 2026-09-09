@@ -48,6 +48,7 @@ class PlotProperties(Enum):
     MARKER_SIZE = "plots.marker.Size"
     NORMALIZATION = "graph1d.autodistribution"
     SHOW_TITLE = "plots.ShowTitle"
+    TITLE_FONT_SIZE = "plots.titleFontSize"
     PLOT_FONT = "plots.font"
     SHOW_LEGEND = "plots.ShowLegend"
     LEGEND_FONT_SIZE = "plots.legend.FontSize"
@@ -87,6 +88,9 @@ class PlotsSettingsModel(ConfigSettingsChangesModel):
 
     def get_show_title(self) -> str:
         return self.get_saved_value(PlotProperties.SHOW_TITLE.value)
+
+    def get_title_font_size(self) -> str:
+        return self.get_saved_value(PlotProperties.TITLE_FONT_SIZE.value)
 
     def get_show_legend(self) -> str:
         return self.get_saved_value(PlotProperties.SHOW_LEGEND.value)
@@ -216,6 +220,9 @@ class PlotsSettingsModel(ConfigSettingsChangesModel):
 
     def set_show_title(self, value: str) -> None:
         self.add_change(PlotProperties.SHOW_TITLE.value, value)
+
+    def set_title_font_size(self, value: str) -> None:
+        self.add_change(PlotProperties.TITLE_FONT_SIZE.value, value)
 
     def set_enable_grid(self, value: str) -> None:
         self.add_change(PlotProperties.ENABLE_GRID.value, value)

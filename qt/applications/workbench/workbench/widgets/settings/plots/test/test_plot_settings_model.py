@@ -66,6 +66,12 @@ class PlotsSettingsModelTest(BaseSettingsModelTest):
         )
 
     @patch(GET_SAVED_VALUE_PATCH_PATH)
+    def test_get_title_font_size(self, get_saved_value_mock: MagicMock):
+        self._assert_getter_with_different_values(
+            get_saved_value_mock, self.model.get_title_font_size, ["10", "12"], call(PlotProperties.TITLE_FONT_SIZE.value)
+        )
+
+    @patch(GET_SAVED_VALUE_PATCH_PATH)
     def test_get_show_legend(self, get_saved_value_mock: MagicMock):
         self._assert_getter_with_different_values(
             get_saved_value_mock, self.model.get_show_legend, ["On", "Off"], call(PlotProperties.SHOW_LEGEND.value)
@@ -340,6 +346,12 @@ class PlotsSettingsModelTest(BaseSettingsModelTest):
     def test_set_plot_font(self, add_change_mock: MagicMock):
         self._assert_setter_with_different_values(
             add_change_mock, self.model.set_plot_font, ["time new roman", "computer modern"], PlotProperties.PLOT_FONT.value
+        )
+
+    @patch(ADD_CHANGE_PATCH_PATH)
+    def test_set_title_font_size(self, add_change_mock: MagicMock):
+        self._assert_setter_with_different_values(
+            add_change_mock, self.model.set_title_font_size, ["10", "12"], PlotProperties.TITLE_FONT_SIZE.value
         )
 
     @patch(ADD_CHANGE_PATCH_PATH)
