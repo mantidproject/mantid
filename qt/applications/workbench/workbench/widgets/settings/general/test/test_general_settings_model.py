@@ -353,6 +353,15 @@ class GeneralSettingsModelTest(BaseSettingsModelTest):
         )
 
     @patch(ADD_CHANGE_PATCH_PATH)
+    def test_set_prompt_update_on_startup(self, add_change_mock: MagicMock):
+        self._assert_setter_with_different_values(
+            add_change_mock,
+            self.model.set_prompt_update_on_startup,
+            [False, True],
+            GeneralProperties.PROMPT_UPDATE_ON_STARTUP.value,
+        )
+
+    @patch(ADD_CHANGE_PATCH_PATH)
     def test_set_use_notifications(self, add_change_mock: MagicMock):
         self._assert_setter_with_different_values(
             add_change_mock, self.model.set_use_notifications, ["Off", "On"], GeneralProperties.USE_NOTIFICATIONS.value
