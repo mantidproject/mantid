@@ -135,8 +135,9 @@ def get_two_theta_angles(workspace: Union[str, MatrixWorkspace]) -> List[float]:
         workspace = AnalysisDataService.retrieve(workspace)
 
     num_hist = workspace.getNumberHistograms()  # get no. of histograms/groups
-    source_pos = workspace.getInstrument().getSource().getPos()
-    sample_pos = workspace.getInstrument().getSample().getPos()
+    component_info = workspace.componentInfo()
+    source_pos = component_info.sourcePosition()
+    sample_pos = component_info.samplePosition()
     beam_pos = sample_pos - source_pos
     angles = []  # will be list of angles
     for index in range(0, num_hist):

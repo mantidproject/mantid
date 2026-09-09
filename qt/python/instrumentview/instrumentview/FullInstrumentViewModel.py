@@ -80,7 +80,7 @@ class FullInstrumentViewModel:
 
         component_info = self._workspace.componentInfo()
         self._sample_position = np.array(component_info.samplePosition()) if component_info.hasSample() else np.zeros(3)
-        has_source = self._workspace.getInstrument().getSource() is not None
+        has_source = component_info.hasSource()
         self._source_position = np.array(component_info.sourcePosition()) if has_source else np.array([0, 0, 0])
         self._root_position = np.array(component_info.position(0))
         self._beam_axis = get_beam_axis(self._workspace)
