@@ -7,12 +7,15 @@
 #pragma once
 
 #include "MantidBeamline/ComponentType.h"
+#include "MantidBeamline/PixelGridComponent.h"
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/ComponentInfoIterator.h"
 #include "MantidGeometry/Instrument/SolidAngleParams.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidTypes/Core/DateAndTime.h"
 #include <memory>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 
@@ -118,6 +121,10 @@ public:
   const std::string &name(const size_t componentIndex) const;
   void setScaleFactor(const size_t componentIndex, const Kernel::V3D &scaleFactor);
   Kernel::V2D sideBySideViewPosition(const size_t componentIndex) const;
+  Beamline::PixelGridComponent pixelGridComponent(const size_t componentIndex) const;
+  size_t detectorIndexAtXYZ(const size_t componentIndex, const int x, const int y, const int z) const;
+  std::tuple<int, int, int> xyzForDetectorID(const size_t componentIndex, const detid_t detectorID) const;
+  bool isGridDetector(size_t const componentIndex) const;
   size_t root() const;
 
   const IComponent *componentID(const size_t componentIndex) const { return (*m_componentIds)[componentIndex]; }

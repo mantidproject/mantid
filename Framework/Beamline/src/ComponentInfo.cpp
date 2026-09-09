@@ -20,6 +20,7 @@ namespace Mantid::Beamline {
 namespace {
 
 Eigen::Vector2d const EMPTY_VEC2D(Mantid::EMPTY_DBL(), Mantid::EMPTY_DBL());
+PixelGridComponent const EMPTY_PIXEL_GRID{};
 
 void failMerge(const std::string &what) {
   throw std::runtime_error(std::string("Cannot merge ComponentInfo: ") + what);
@@ -56,7 +57,8 @@ ComponentInfo::ComponentInfo(
     std::shared_ptr<std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>> rotations,
     std::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
     std::shared_ptr<std::vector<ComponentType>> componentType, std::shared_ptr<const std::vector<std::string>> names,
-    std::shared_ptr<const std::map<size_t, Eigen::Vector2d>> sideBySideViewPositions, int64_t sourceIndex,
+    std::shared_ptr<const std::map<size_t, Eigen::Vector2d>> sideBySideViewPositions,
+    std::shared_ptr<const std::map<size_t, PixelGridComponent>> pixelGridComponents, int64_t sourceIndex,
     int64_t sampleIndex)
     : m_assemblySortedDetectorIndices(std::move(assemblySortedDetectorIndices)),
       m_assemblySortedComponentIndices(std::move(assemblySortedComponentIndices)),
@@ -65,6 +67,7 @@ ComponentInfo::ComponentInfo(
       m_rotations(std::move(rotations)), m_scaleFactors(std::move(scaleFactors)),
       m_componentType(std::move(componentType)), m_names(std::move(names)),
       m_sideBySideViewPositions(std::move(sideBySideViewPositions)),
+      m_pixelGridComponents(std::move(pixelGridComponents)),
       m_size(ComponentInfo::computeTotalSize(*m_assemblySortedDetectorIndices, *m_detectorRanges)),
       m_sourceIndex(sourceIndex), m_sampleIndex(sampleIndex), m_detectorInfo(nullptr) {
   if (m_rotations->size() != m_positions->size()) {
@@ -613,6 +616,46 @@ Eigen::Vector2d const &ComponentInfo::sideBySideViewPosition(const size_t compon
   return EMPTY_VEC2D;
 }
 
+const PixelGridComponent &ComponentInfo::pixelGridComponent(const size_t componentIndex) const {
+  if (m_pixelGridComponents) {
+    const auto it = m_pixelGridComponents->find(componentIndex);
+    if (it != m_pixelGridComponents->end()) {
+      return it->second;
+    }
+  }
+  return EMPTY_PIXEL_GRID;
+}
+
+bool ComponentInfo::isGridDetector(const size_t componentIndex) const {
+  return m_pixelGridComponents && m_pixelGridComponents->contains(componentIndex);
+}
+
+/**
+ * Given the component index of a Rectangular/Grid bank, and pixel indices
+ * (x, y[, z]) into it, return the detector index of that pixel.
+ *
+ * The instrument tree for such a bank always nests x-columns then y-pixels
+ * (and, if 3D, an outer layer of z-layers) regardless of the bank's detector-ID
+ * numbering scheme, so this is a pure tree walk and does not depend on
+ * idStart/idStep/idStepByRow/idFillOrder at all.
+ */
+size_t ComponentInfo::detectorIndexAtXYZ(const size_t componentIndex, const int x, const int y, const int z) const {
+  const auto &grid = pixelGridComponent(componentIndex);
+  if (x < 0 || x >= grid.nX)
+    throw std::out_of_range("ComponentInfo::detectorIndexAtXYZ: x is out of range.");
+  if (y < 0 || y >= grid.nY)
+    throw std::out_of_range("ComponentInfo::detectorIndexAtXYZ: y is out of range.");
+  if (grid.nZ > 0 && (z < 0 || z >= grid.nZ))
+    throw std::out_of_range("ComponentInfo::detectorIndexAtXYZ: z is out of range.");
+
+  size_t index = componentIndex;
+  if (grid.nZ > 0)
+    index = children(index).at(z);
+  index = children(index).at(x);
+  index = children(index).at(y);
+  return index;
+}
+
 bool ComponentInfo::uniqueName(const std::string &name) const { return unique_if_exists((*m_names), name); }
 
 size_t ComponentInfo::indexOfAny(const std::string &name) const {
@@ -802,6 +845,11 @@ size_t ComponentInfo::getMemorySize() const {
   if (m_sideBySideViewPositions) {
     mem += sizeof(*m_sideBySideViewPositions) +
            m_sideBySideViewPositions->size() * sizeof(std::pair<const size_t, Eigen::Vector2d>);
+  }
+  // m_pixelGridComponents: map object + heap buffer for the map's key-value pairs
+  if (m_pixelGridComponents) {
+    mem += sizeof(*m_pixelGridComponents) +
+           m_pixelGridComponents->size() * sizeof(std::pair<const size_t, PixelGridComponent>);
   }
 
   // m_scanIntervals: inline vector's heap buffer

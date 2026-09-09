@@ -14,6 +14,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/GridDetector.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -57,6 +58,29 @@ bool hasValidShape(const ObjCompAssembly &obj) {
   return shape != nullptr && shape->hasValidShape();
 }
 
+/// Captures the pixel-grid metadata of a Rectangular/Grid bank once, at
+/// instrument-build time. None of these fields are ever parametrized (unlike
+/// position/rotation/scale), so this snapshot remains valid for the lifetime
+/// of the resulting Beamline::ComponentInfo.
+Beamline::PixelGridComponent makePixelGridComponent(const GridDetector &grid) {
+  Beamline::PixelGridComponent pixelGrid;
+  pixelGrid.nX = grid.xpixels();
+  pixelGrid.nY = grid.ypixels();
+  pixelGrid.nZ = grid.zpixels();
+  pixelGrid.xStart = grid.xstart();
+  pixelGrid.yStart = grid.ystart();
+  pixelGrid.zStart = grid.zstart();
+  pixelGrid.xStep = grid.xstep();
+  pixelGrid.yStep = grid.ystep();
+  pixelGrid.zStep = grid.zstep();
+  pixelGrid.idStart = grid.idstart();
+  pixelGrid.idStep = grid.idstep();
+  pixelGrid.idStepByRow = grid.idstepbyrow();
+  pixelGrid.idFillOrder = grid.idFillOrder();
+  pixelGrid.minDetectorID = grid.minDetectorID();
+  pixelGrid.maxDetectorID = grid.maxDetectorID();
+  return pixelGrid;
+}
 } // namespace
 
 /**
@@ -89,7 +113,8 @@ InstrumentVisitor::InstrumentVisitor(std::shared_ptr<const Instrument> instrumen
           std::make_shared<std::vector<Eigen::Vector3d>>(m_orderedDetectorIds->size(), Eigen::Vector3d{1, 1, 1})),
       m_componentType(std::make_shared<std::vector<Beamline::ComponentType>>()),
       m_names(std::make_shared<std::vector<std::string>>(m_orderedDetectorIds->size())),
-      m_sideBySideViewPositions(std::make_shared<std::map<size_t, Eigen::Vector2d>>()) {
+      m_sideBySideViewPositions(std::make_shared<std::map<size_t, Eigen::Vector2d>>()),
+      m_pixelGridComponents(std::make_shared<std::map<size_t, Beamline::PixelGridComponent>>()) {
   if (m_instrument->isParametrized()) {
     m_pmap = m_instrument->getParameterMap().get();
   }
@@ -243,6 +268,7 @@ size_t InstrumentVisitor::registerRectangularBank(const ICompAssembly &bank) {
   auto index = registerComponentAssembly(bank);
   size_t rangesIndex = index - m_orderedDetectorIds->size();
   (*m_componentType)[rangesIndex] = Beamline::ComponentType::Rectangular;
+  (*m_pixelGridComponents)[index] = makePixelGridComponent(dynamic_cast<const GridDetector &>(bank));
   return index;
 }
 
@@ -255,6 +281,7 @@ size_t InstrumentVisitor::registerGridBank(const ICompAssembly &bank) {
   auto index = registerComponentAssembly(bank);
   size_t rangesIndex = index - m_orderedDetectorIds->size();
   (*m_componentType)[rangesIndex] = Beamline::ComponentType::Grid;
+  (*m_pixelGridComponents)[index] = makePixelGridComponent(dynamic_cast<const GridDetector &>(bank));
   return index;
 }
 
@@ -378,7 +405,7 @@ std::unique_ptr<Beamline::ComponentInfo> InstrumentVisitor::componentInfo() cons
   return std::make_unique<Mantid::Beamline::ComponentInfo>(
       m_assemblySortedDetectorIndices, m_detectorRanges, m_assemblySortedComponentIndices, m_componentRanges,
       m_parentComponentIndices, m_children, m_positions, m_rotations, m_scaleFactors, m_componentType, m_names,
-      m_sideBySideViewPositions, m_sourceIndex, m_sampleIndex);
+      m_sideBySideViewPositions, m_pixelGridComponents, m_sourceIndex, m_sampleIndex);
 }
 
 std::unique_ptr<Beamline::DetectorInfo> InstrumentVisitor::detectorInfo() const {

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidBeamline/ComponentType.h"
+#include "MantidBeamline/PixelGridComponent.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include <Eigen/Geometry>
@@ -127,6 +128,9 @@ private:
 
   /// Side-by-side (unwrapped) instrument-view positions when declared in the IDF.
   std::shared_ptr<std::map<size_t, Eigen::Vector2d>> m_sideBySideViewPositions;
+
+  /// Rectangular/Grid bank pixel-grid metadata
+  std::shared_ptr<std::map<size_t, Beamline::PixelGridComponent>> m_pixelGridComponents;
 
   void markAsSourceOrSample(Mantid::Geometry::IComponent *componentId, const size_t componentIndex);
 
