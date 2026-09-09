@@ -20,10 +20,12 @@
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
 
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include <Eigen/Geometry>
+#include <map>
 #include <memory>
 
 using namespace Mantid;
@@ -101,9 +103,10 @@ std::unique_ptr<Beamline::ComponentInfo> makeSingleBeamlineComponentInfo(
   using Mantid::Beamline::ComponentType;
   auto componentType = std::make_shared<std::vector<ComponentType>>(1, ComponentType::Generic);
   auto children = std::make_shared<std::vector<std::vector<size_t>>>(1);
+  auto sideBySideViewPositions = std::make_shared<std::map<size_t, Eigen::Vector2d>>();
   return std::make_unique<Beamline::ComponentInfo>(detectorIndices, detectorRanges, componentIndices, componentRanges,
                                                    parentIndices, children, positions, rotations, scaleFactors,
-                                                   componentType, names, -1, -1);
+                                                   componentType, names, sideBySideViewPositions, -1, -1);
 }
 } // namespace
 
@@ -139,9 +142,10 @@ public:
     using Mantid::Beamline::ComponentType;
     auto isRectBank = std::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
     auto children = std::make_shared<std::vector<std::vector<size_t>>>(1, std::vector<size_t>(1));
-    auto internalInfo = std::make_unique<Beamline::ComponentInfo>(detectorIndices, detectorRanges, componentIndices,
-                                                                  componentRanges, parentIndices, children, positions,
-                                                                  rotations, scaleFactors, isRectBank, names, -1, -1);
+    auto sideBySideViewPositions = std::make_shared<std::map<size_t, Eigen::Vector2d>>();
+    auto internalInfo = std::make_unique<Beamline::ComponentInfo>(
+        detectorIndices, detectorRanges, componentIndices, componentRanges, parentIndices, children, positions,
+        rotations, scaleFactors, isRectBank, names, sideBySideViewPositions, -1, -1);
     Mantid::Geometry::ObjComponent comp1("component1");
     Mantid::Geometry::ObjComponent comp2("component2");
 
@@ -155,6 +159,50 @@ public:
     ComponentInfo info(std::move(internalInfo), componentIds, makeComponentIDMap(componentIds), shapes);
     TS_ASSERT_EQUALS(info.indexOf(comp1.getComponentID()), 0);
     TS_ASSERT_EQUALS(info.indexOf(comp2.getComponentID()), 1);
+  }
+
+  void test_side_by_side_view_position() {
+    auto detectorIndices = std::make_shared<std::vector<size_t>>(); // No detectors in this example
+    auto detectorRanges = std::make_shared<std::vector<std::pair<size_t, size_t>>>();
+    detectorRanges->emplace_back(std::make_pair(0, 0));
+    detectorRanges->emplace_back(std::make_pair(0, 0));
+
+    auto componentIndices = std::make_shared<std::vector<size_t>>(std::vector<size_t>{0, 1});
+    auto componentRanges = std::make_shared<std::vector<std::pair<size_t, size_t>>>();
+    componentRanges->emplace_back(std::make_pair(0, 0));
+    componentRanges->emplace_back(std::make_pair(0, 0));
+
+    auto parentIndices = std::make_shared<const std::vector<size_t>>(std::vector<size_t>{1, 1});
+
+    auto positions = std::make_shared<std::vector<Eigen::Vector3d>>(2);
+    auto rotations = std::make_shared<std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>(2);
+    auto scaleFactors = std::make_shared<std::vector<Eigen::Vector3d>>(2);
+    auto names = std::make_shared<std::vector<std::string>>(2);
+    using Mantid::Beamline::ComponentType;
+    auto isRectBank = std::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
+    auto children = std::make_shared<std::vector<std::vector<size_t>>>(1, std::vector<size_t>(1));
+
+    const Eigen::Vector2d panelPos{2.0, 3.5};
+    // Only component 0 has a declared side-by-side view position; component 1 has no
+    // entry at all in the (sparse) map.
+    auto sideBySideViewPositions =
+        std::make_shared<std::map<size_t, Eigen::Vector2d>>(std::map<size_t, Eigen::Vector2d>{{0, panelPos}});
+
+    auto internalInfo = std::make_unique<Beamline::ComponentInfo>(
+        detectorIndices, detectorRanges, componentIndices, componentRanges, parentIndices, children, positions,
+        rotations, scaleFactors, isRectBank, names, sideBySideViewPositions, -1, -1);
+
+    Mantid::Geometry::ObjComponent comp1("component1");
+    Mantid::Geometry::ObjComponent comp2("component2");
+    auto componentIds = std::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
+        std::vector<Mantid::Geometry::ComponentID>{&comp1, &comp2});
+    auto shapes = std::make_shared<std::vector<std::shared_ptr<const Geometry::IObject>>>();
+    shapes->emplace_back(std::make_shared<const Geometry::CSGObject>());
+    shapes->emplace_back(std::make_shared<const Geometry::CSGObject>());
+
+    ComponentInfo info(std::move(internalInfo), componentIds, makeComponentIDMap(componentIds), shapes);
+    TS_ASSERT_EQUALS(info.sideBySideViewPosition(0), Kernel::V2D(2.0, 3.5));
+    TSM_ASSERT_EQUALS("Not set for component 1", info.sideBySideViewPosition(1), Kernel::V2D(EMPTY_DBL(), EMPTY_DBL()));
   }
 
   void test_partial_copy() {

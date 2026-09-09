@@ -11,6 +11,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/InstrumentMetadata.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 
 #include <boost/lexical_cast.hpp>
@@ -137,7 +138,7 @@ void SaveParameterFile::exec() {
   std::ofstream file(filename.c_str(), std::ofstream::trunc);
   file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
   file << "<parameter-file instrument=\"" << instrument->getName() << "\"";
-  file << " valid-from=\"" << instrument->getValidFromDate().toISO8601String() << "\">\n";
+  file << " valid-from=\"" << ws->instrumentMetadata().validFromDate().toISO8601String() << "\">\n";
 
   prog.resetNumSteps(static_cast<int64_t>(toSave.size()), 0.6, 1.0);
   // Iterate through all the parameters we want to save and build an XML

@@ -20,6 +20,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
+#include "MantidGeometry/Instrument/InstrumentMetadata.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -843,6 +844,10 @@ SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
 const Geometry::ComponentInfo &ExperimentInfo::componentInfo() const { return m_parmap->componentInfo(); }
 
 ComponentInfo &ExperimentInfo::mutableComponentInfo() { return m_parmap->mutableComponentInfo(); }
+
+Geometry::InstrumentMetadata const &ExperimentInfo::instrumentMetadata() const {
+  return m_parmap->instrumentMetadata();
+}
 
 /// Sets the SpectrumDefinition for all spectra.
 void ExperimentInfo::setSpectrumDefinitions(Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions) {

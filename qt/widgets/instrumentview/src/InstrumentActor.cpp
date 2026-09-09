@@ -22,6 +22,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/InstrumentMetadata.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -220,7 +221,7 @@ void InstrumentActor::setupPhysicalInstrumentIfExists() {
   auto sharedWorkspace = getWorkspace();
   Mantid::Kernel::ReadLock _lock(*sharedWorkspace);
 
-  auto instr = sharedWorkspace->getInstrument()->getPhysicalInstrument();
+  auto instr = sharedWorkspace->instrumentMetadata().physicalInstrument();
   if (instr) {
     auto infos = InstrumentVisitor::makeWrappers(*instr);
     m_physicalComponentInfo = std::move(infos.first);
@@ -370,7 +371,7 @@ Instrument_const_sptr InstrumentActor::getInstrument() const {
   if (isPhysicalView()) {
     // First see if there is a 'physical' instrument available. Use it if there
     // is.
-    auto instr = sharedWorkspace->getInstrument()->getPhysicalInstrument();
+    auto instr = sharedWorkspace->instrumentMetadata().physicalInstrument();
     if (instr)
       return instr;
   }

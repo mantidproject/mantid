@@ -273,6 +273,10 @@ void ComponentInfo::setScaleFactor(const size_t componentIndex, const Kernel::V3
   m_componentInfo->setScaleFactor(componentIndex, Kernel::toVector3d(scaleFactor));
 }
 
+Kernel::V2D ComponentInfo::sideBySideViewPosition(const size_t componentIndex) const {
+  return Kernel::toV2D(m_componentInfo->sideBySideViewPosition(componentIndex));
+}
+
 double ComponentInfo::solidAngle(const size_t componentIndex, const Geometry::SolidAngleParams &params) const {
   if (!hasValidShape(componentIndex))
     throw Kernel::Exception::NullPointerException("ComponentInfo::solidAngle", "shape");

@@ -15,6 +15,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/Instrument/InstrumentMetadata.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -80,6 +81,42 @@ public:
     std::shared_ptr<const Instrument> inst3 = inst2->baseInstrument();
     TS_ASSERT_EQUALS(inst3.get(), inst1.get());
     TS_ASSERT_EQUALS(inst3->getName(), "MyTestInst");
+  }
+
+  void test_GetInstrumentMetadata() {
+    ExperimentInfo ws;
+    auto inst1 = std::make_shared<Instrument>();
+    inst1->setName("MyTestInst");
+    inst1->setFilename("/some/path/MyTestInst_Definition.xml");
+    inst1->setXmlText("<instrument/>");
+    const DateAndTime validFrom("2020-01-01T00:00:00");
+    inst1->setValidFromDate(validFrom);
+    inst1->setDefaultView("3D");
+    inst1->setDefaultViewAxis("Z-");
+    ws.setInstrument(inst1);
+
+    const auto &metadata = ws.instrumentMetadata();
+    TS_ASSERT_EQUALS(metadata.filename(), "/some/path/MyTestInst_Definition.xml");
+    TS_ASSERT_EQUALS(metadata.xmlText(), "<instrument/>");
+    TS_ASSERT_EQUALS(metadata.validFromDate(), validFrom);
+    TS_ASSERT_EQUALS(metadata.defaultView(), "3D");
+    TS_ASSERT_EQUALS(metadata.defaultAxis(), "Z-");
+    TSM_ASSERT("No physical instrument was set", !metadata.physicalInstrument());
+  }
+
+  void test_GetInstrumentMetadata_physicalInstrument() {
+    ExperimentInfo ws;
+    auto inst1 = std::make_shared<Instrument>();
+    inst1->setName("MyTestInst");
+    auto physInst = std::make_unique<Instrument>();
+    physInst->setName("MyPhysicalInst");
+    inst1->setPhysicalInstrument(std::move(physInst));
+    ws.setInstrument(inst1);
+
+    const auto physical = ws.instrumentMetadata().physicalInstrument();
+    TSM_ASSERT("Physical instrument should be present", physical);
+    TS_ASSERT_EQUALS(physical->getName(), "MyPhysicalInst");
+    TSM_ASSERT("Physical instrument should share the owning instrument's ParameterMap", physical->isParametrized());
   }
 
   void test_GetSetSample() {

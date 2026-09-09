@@ -9,6 +9,10 @@
 //-------------------------------------------------------------
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/V3D.h"
@@ -45,6 +49,8 @@ InstrumentRayTracer::InstrumentRayTracer(Instrument_const_sptr instrument) : m_i
     throw std::invalid_argument(errorMsg);
   }
 }
+
+InstrumentRayTracer::~InstrumentRayTracer() = default;
 
 /**
  * Trace a given track from the instrument source in the given direction. For
@@ -95,16 +101,15 @@ Links InstrumentRayTracer::getResults() const {
  */
 IDetector_const_sptr InstrumentRayTracer::getDetectorResult() const {
   Links results = this->getResults();
+  const auto &compInfo = componentInfo();
+  const auto &detInfo = detectorInfo();
 
   // Go through all results
   Links::const_iterator resultItr = results.begin();
   for (; resultItr != results.end(); ++resultItr) {
-    IComponent_const_sptr component = m_instrument->getComponentByID(resultItr->componentID);
-    IDetector_const_sptr det = std::dynamic_pointer_cast<const IDetector>(component);
-    if (det) {
-      if (!m_instrument->isMonitor(det->getID())) {
-        return det;
-      }
+    const size_t index = compInfo.indexOf(resultItr->componentID);
+    if (compInfo.isDetector(index) && !detInfo.isMonitor(index)) {
+      return m_instrument->getDetector(detInfo.detid(index));
     } // (is a detector)
   } // each ray tracer result
   return IDetector_const_sptr();
@@ -113,6 +118,29 @@ IDetector_const_sptr InstrumentRayTracer::getDetectorResult() const {
 //-------------------------------------------------------------
 // Private member functions
 //-------------------------------------------------------------
+
+/// Builds m_ownedComponentInfo/m_ownedDetectorInfo if not already built. Only
+/// needed when m_instrument is not parametrized, in which case it has no
+/// ComponentInfo/DetectorInfo of its own to reuse.
+void InstrumentRayTracer::ensureOwnedInfoIsBuilt() const {
+  if (!m_ownedComponentInfo)
+    std::tie(m_ownedComponentInfo, m_ownedDetectorInfo) = InstrumentVisitor::makeWrappers(*m_instrument);
+}
+
+const ComponentInfo &InstrumentRayTracer::componentInfo() const {
+  if (m_instrument->isParametrized())
+    return m_instrument->getParameterMap()->componentInfo();
+  ensureOwnedInfoIsBuilt();
+  return *m_ownedComponentInfo;
+}
+
+const DetectorInfo &InstrumentRayTracer::detectorInfo() const {
+  if (m_instrument->isParametrized())
+    return m_instrument->getParameterMap()->detectorInfo();
+  ensureOwnedInfoIsBuilt();
+  return *m_ownedDetectorInfo;
+}
+
 /**
  * Fire the test ray at the instrument and perform a bread-first search of the
  * object tree to find the objects that were intersected.

@@ -10,8 +10,10 @@
 
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidKernel/EmptyValues.h"
 #include <Eigen/Geometry>
 #include <Eigen/StdVector>
+#include <map>
 #include <memory>
 #include <numeric>
 #include <string>
@@ -24,6 +26,10 @@ namespace {
 using PosVec = std::vector<Eigen::Vector3d>;
 using RotVec = std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>;
 using StrVec = std::vector<std::string>;
+using SideBySideMap = std::map<size_t, Eigen::Vector2d>;
+
+/// Sentinel returned by ComponentInfo::sideBySideViewPosition() to mean "not set"
+Eigen::Vector2d unsetSideBySideViewPos() { return Eigen::Vector2d(Mantid::EMPTY_DBL(), Mantid::EMPTY_DBL()); }
 
 /*
  * Makes a tree which in which all detectors are arranged in a single flat
@@ -55,6 +61,8 @@ std::tuple<std::shared_ptr<ComponentInfo>, std::shared_ptr<DetectorInfo>> makeFl
     names->emplace_back("det" + std::to_string(detIndex));
   }
   names->emplace_back("root");
+  // Side-by-side view positions (unset for all components in this fixture)
+  auto sideBySideViewPositions = std::make_shared<const SideBySideMap>();
   auto detectorInfo = std::make_shared<DetectorInfo>(detPositions, detRotations);
   // Rectangular bank flag
   auto isRectangularBank = std::make_shared<std::vector<ComponentType>>(1, ComponentType::Generic);
@@ -66,7 +74,8 @@ std::tuple<std::shared_ptr<ComponentInfo>, std::shared_ptr<DetectorInfo>> makeFl
   auto componentInfo = std::make_shared<ComponentInfo>(
       bankSortedDetectorIndices, std::make_shared<const std::vector<std::pair<size_t, size_t>>>(detectorRanges),
       bankSortedComponentIndices, std::make_shared<const std::vector<std::pair<size_t, size_t>>>(componentRanges),
-      parentIndices, children, positions, rotations, scaleFactors, isRectangularBank, names, -1, -1);
+      parentIndices, children, positions, rotations, scaleFactors, isRectangularBank, names, sideBySideViewPositions,
+      -1, -1);
 
   componentInfo->setDetectorInfo(detectorInfo.get());
 
@@ -127,6 +136,8 @@ makeTreeExampleAndReturnGeometricArguments() {
   auto scaleFactors = std::make_shared<PosVec>(PosVec(5, Eigen::Vector3d{1, 1, 1}));
   // Component names
   auto names = std::make_shared<StrVec>(5);
+  // Side-by-side view positions (unset for all components in this fixture)
+  auto sideBySideViewPositions = std::make_shared<const SideBySideMap>();
   // Rectangular bank flag
   auto isRectangularBank = std::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
   auto children = std::make_shared<std::vector<std::vector<size_t>>>(2, std::vector<size_t>(2));
@@ -134,7 +145,8 @@ makeTreeExampleAndReturnGeometricArguments() {
   auto compInfo = std::make_shared<ComponentInfo>(
       bankSortedDetectorIndices, std::make_shared<const std::vector<std::pair<size_t, size_t>>>(detectorRanges),
       bankSortedComponentIndices, std::make_shared<const std::vector<std::pair<size_t, size_t>>>(componentRanges),
-      parentIndices, children, compPositions, compRotations, scaleFactors, isRectangularBank, names, -1, -1);
+      parentIndices, children, compPositions, compRotations, scaleFactors, isRectangularBank, names,
+      sideBySideViewPositions, -1, -1);
 
   compInfo->setDetectorInfo(detectorInfo.get());
 
@@ -175,6 +187,8 @@ std::tuple<std::shared_ptr<ComponentInfo>, std::shared_ptr<DetectorInfo>> makeTr
   auto scaleFactors = std::make_shared<PosVec>(PosVec(5, Eigen::Vector3d{1, 1, 1}));
   // Component names
   auto names = std::make_shared<StrVec>(5);
+  // Side-by-side view positions (unset for all components in this fixture)
+  auto sideBySideViewPositions = std::make_shared<const SideBySideMap>();
   auto detectorInfo = std::make_shared<DetectorInfo>(detPositions, detRotations);
   // Rectangular bank flag
   auto isRectangularBank = std::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
@@ -184,7 +198,8 @@ std::tuple<std::shared_ptr<ComponentInfo>, std::shared_ptr<DetectorInfo>> makeTr
   auto componentInfo = std::make_shared<ComponentInfo>(
       bankSortedDetectorIndices, std::make_shared<const std::vector<std::pair<size_t, size_t>>>(detectorRanges),
       bankSortedComponentIndices, std::make_shared<const std::vector<std::pair<size_t, size_t>>>(componentRanges),
-      parentIndices, children, positions, rotations, scaleFactors, isRectangularBank, names, -1, -1);
+      parentIndices, children, positions, rotations, scaleFactors, isRectangularBank, names, sideBySideViewPositions,
+      -1, -1);
 
   componentInfo->setDetectorInfo(detectorInfo.get());
 
@@ -246,12 +261,13 @@ public:
     auto rotations = std::make_shared<RotVec>(1);
     auto scaleFactors = std::make_shared<PosVec>(4);
     auto names = std::make_shared<StrVec>(4);
+    auto sideBySideViewPositions = std::make_shared<const SideBySideMap>();
     auto isRectangularBank = std::make_shared<std::vector<ComponentType>>(1);
     auto children = std::make_shared<std::vector<std::vector<size_t>>>(1, std::vector<size_t>(3));
 
     ComponentInfo componentInfo(bankSortedDetectorIndices, detectorRanges, bankSortedComponentIndices, componentRanges,
                                 parentIndices, children, positions, rotations, scaleFactors, isRectangularBank, names,
-                                -1, -1);
+                                sideBySideViewPositions, -1, -1);
 
     DetectorInfo detectorInfo; // Detector info size 0
     TS_ASSERT_THROWS(componentInfo.setDetectorInfo(&detectorInfo), std::invalid_argument &);
@@ -277,13 +293,14 @@ public:
 
     auto scaleFactors = std::make_shared<PosVec>();
     auto names = std::make_shared<StrVec>();
+    auto sideBySideViewPositions = std::make_shared<const SideBySideMap>();
     auto isRectangularBank = std::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
     auto children = std::make_shared<std::vector<std::vector<size_t>>>(); // invalid but not
                                                                           // being tested
 
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges, bankSortedComponentIndices, componentRanges,
                                    parentIndices, children, positions, rotations, scaleFactors, isRectangularBank,
-                                   names, -1, -1),
+                                   names, sideBySideViewPositions, -1, -1),
                      std::invalid_argument &);
   }
 
@@ -310,6 +327,7 @@ public:
 
     auto scaleFactors = std::make_shared<PosVec>();
     auto names = std::make_shared<StrVec>();
+    auto sideBySideViewPositions = std::make_shared<const SideBySideMap>();
     // Only one component. So single empty component range.
     auto componentRanges =
         std::make_shared<const std::vector<std::pair<size_t, size_t>>>(std::vector<std::pair<size_t, size_t>>{{0, 0}});
@@ -319,7 +337,7 @@ public:
 
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges, componentsInSubtree, componentRanges,
                                    parentIndices, children, positions, rotations, scaleFactors, isRectangularBank,
-                                   names, -1, -1),
+                                   names, sideBySideViewPositions, -1, -1),
                      std::invalid_argument &);
   }
 
@@ -347,6 +365,7 @@ public:
 
     auto scaleFactors = std::make_shared<PosVec>(1);
     auto names = std::make_shared<StrVec>(1);
+    auto sideBySideViewPositions = std::make_shared<const SideBySideMap>();
     // Only one component. So single empty component range.
     auto componentRanges =
         std::make_shared<const std::vector<std::pair<size_t, size_t>>>(std::vector<std::pair<size_t, size_t>>{{0, 0}});
@@ -356,7 +375,7 @@ public:
 
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges, componentsInSubtree, componentRanges,
                                    parentIndices, children, positions, rotations, scaleFactors, componentTypes, names,
-                                   -1, -1),
+                                   sideBySideViewPositions, -1, -1),
                      std::invalid_argument &);
   }
 
@@ -716,6 +735,47 @@ public:
     ComponentInfo &compInfo = *std::get<0>(infos);
     TS_ASSERT_EQUALS(compInfo.name(compInfo.root()), "root");
     TS_ASSERT_EQUALS(compInfo.name(0), "det0");
+  }
+
+  void test_side_by_side_view_position_default_unset() {
+    auto infos = makeTreeExample();
+    auto &compInfo = *std::get<0>(infos);
+
+    for (size_t i = 0; i < compInfo.size(); ++i) {
+      TSM_ASSERT_EQUALS("No side-by-side view position unless explicitly provided", compInfo.sideBySideViewPosition(i),
+                        unsetSideBySideViewPos());
+    }
+  }
+
+  void test_side_by_side_view_position_reads_constructed_value() {
+    // Imitate an instrument with 3 detectors and nothing more.
+    auto bankSortedDetectorIndices = std::make_shared<const std::vector<size_t>>(std::vector<size_t>{0, 1, 2});
+    auto bankSortedComponentIndices = std::make_shared<const std::vector<size_t>>(std::vector<size_t>(1));
+    auto parentIndices = std::make_shared<const std::vector<size_t>>(std::vector<size_t>{3, 3, 3, 3});
+    auto detectorRanges =
+        std::make_shared<const std::vector<std::pair<size_t, size_t>>>(1, std::pair<size_t, size_t>{0, 3});
+    auto componentRanges =
+        std::make_shared<const std::vector<std::pair<size_t, size_t>>>(std::vector<std::pair<size_t, size_t>>{{0, 1}});
+    auto positions = std::make_shared<PosVec>(1);
+    auto rotations = std::make_shared<RotVec>(1);
+    auto scaleFactors = std::make_shared<PosVec>(4, Eigen::Vector3d{1, 1, 1});
+    auto names = std::make_shared<StrVec>(4);
+    auto isRectangularBank = std::make_shared<std::vector<ComponentType>>(1, ComponentType::Generic);
+    auto children = std::make_shared<std::vector<std::vector<size_t>>>(1, std::vector<size_t>{0, 1, 2});
+
+    const Eigen::Vector2d detector1Pos{1.5, -2.5};
+    // Only detector 1 has a declared side-by-side view position; detectors 0/2 and the
+    // root (3) have no entry at all in the (sparse) map.
+    auto sideBySideViewPositions = std::make_shared<const SideBySideMap>(SideBySideMap{{1, detector1Pos}});
+
+    ComponentInfo componentInfo(bankSortedDetectorIndices, detectorRanges, bankSortedComponentIndices, componentRanges,
+                                parentIndices, children, positions, rotations, scaleFactors, isRectangularBank, names,
+                                sideBySideViewPositions, -1, -1);
+
+    TSM_ASSERT_EQUALS("Not set for detector 0", componentInfo.sideBySideViewPosition(0), unsetSideBySideViewPos());
+    TS_ASSERT_EQUALS(componentInfo.sideBySideViewPosition(1), detector1Pos);
+    TSM_ASSERT_EQUALS("Not set for detector 2", componentInfo.sideBySideViewPosition(2), unsetSideBySideViewPos());
+    TSM_ASSERT_EQUALS("Not set for root", componentInfo.sideBySideViewPosition(3), unsetSideBySideViewPos());
   }
 
   void test_indexOfAny_name_throws_when_name_invalid() {

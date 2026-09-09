@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/InstrumentMetadata.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumNumber.h"
 #include "MantidKernel/Logger.h"
@@ -92,7 +93,7 @@ public:
     dict state;
     state["title"] = ws.getTitle();
     state["instrument_name"] = ws.getInstrument()->getName();
-    state["instrument_xml"] = ws.getInstrument()->getXmlText();
+    state["instrument_xml"] = ws.instrumentMetadata().xmlText();
     state["unit_x"] = ws.getAxis(0)->unit()->unitID();
     state["unit_y"] = ws.getAxis(1)->unit()->unitID();
     state["spectra"] = spectraList;
