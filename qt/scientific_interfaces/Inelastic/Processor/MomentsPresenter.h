@@ -58,9 +58,6 @@ public:
 
   void runComplete(Mantid::API::IAlgorithm_sptr const algorithm, bool const error) override;
 
-protected:
-  void setNumericQAxis(std::string const &wsName);
-
 private:
   void plotNewData(std::string const &filename);
   void setFileExtensionsByName(bool filter) override;
