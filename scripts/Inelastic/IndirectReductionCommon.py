@@ -726,6 +726,54 @@ def group_on_string(group_detectors, grouping_string):
     return conjoin_workspaces(*groups)
 
 
+def group_spectra_into_groups(workspace, group_detectors, number_of_groups: int, spectra_range: List[int]):
+    """
+    Splits a fixed spectrum range into a number of contiguous, equal-width groups.
+
+    The group boundaries come from spectra_range, so masking, edge pixel removal and calibration filtering do not
+    move them; a spectrum stays in the same group however the others are filtered. Only the spectra actually
+    present are handed to GroupDetectors, and a group left with none of them is omitted rather than failing.
+
+    @param workspace The workspace whose spectra are to be grouped
+    @param group_detectors An initialised GroupDetectors algorithm
+    @param number_of_groups The number of groups to split the range into
+    @param spectra_range [min, max] spectrum numbers defining the range to divide
+    @return The grouped workspace, omitting empty groups
+    """
+    if number_of_groups <= 0:
+        raise ValueError("Number of groups must be greater than zero.")
+    if spectra_range is None:
+        raise ValueError("A spectra range is required to group spectra into a number of groups.")
+
+    spectra_min, spectra_max = spectra_range[0], spectra_range[1]
+    if spectra_min > spectra_max:
+        raise ValueError("Spectra min cannot be larger than spectra max.")
+
+    number_of_spectra = 1 + spectra_max - spectra_min
+    if number_of_groups > number_of_spectra:
+        raise ValueError(f"Cannot split {number_of_spectra} spectra into {number_of_groups} groups.")
+
+    # Fixed boundaries over the requested range. Spectra left over by a non-divisible count form one extra group.
+    group_size = number_of_spectra // number_of_groups
+    bounds = [(spectra_min + i * group_size, spectra_min + (i + 1) * group_size - 1) for i in range(number_of_groups)]
+    if bounds[-1][1] < spectra_max:
+        bounds.append((bounds[-1][1] + 1, spectra_max))
+
+    present = {workspace.getSpectrum(i).getSpectrumNo() for i in range(workspace.getNumberHistograms())}
+    groups = []
+    for lower, upper in bounds:
+        spectra = [spec_no for spec_no in range(lower, upper + 1) if spec_no in present]
+        if spectra:
+            groups.append(create_group_from_spectra_list(group_detectors, spectra))
+
+    if not groups:
+        raise RuntimeError("No spectra were found to group.")
+    if len(groups) < len(bounds):
+        logger.warning(f"{len(bounds) - len(groups)} of {len(bounds)} groups held no remaining spectra and were omitted.")
+
+    return conjoin_workspaces(*groups)
+
+
 def group_spectra_by_theta(
     workspace: MatrixWorkspace,
     number_of_groups: int,
@@ -909,8 +957,7 @@ def group_spectra_of(
     elif grouping_method == "Custom":
         return group_on_string(group_detectors, group_string)
     elif grouping_method == "Groups":
-        group_string = create_detector_grouping_string(number_of_groups, spectra_range[0], spectra_range[1])
-        return group_on_string(group_detectors, group_string)
+        return group_spectra_into_groups(workspace, group_detectors, number_of_groups, spectra_range)
     elif grouping_method == "Detectors":
         try:
             grouping_file = instrument.getStringParameter("Workflow.DetectorsGroupingFile")[0]
