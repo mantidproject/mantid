@@ -31,19 +31,53 @@ class ShowPromptTest(unittest.TestCase):
     # ------------------------------------------------------------------
     # "Update now" path
     # ------------------------------------------------------------------
+    @patch(f"{MODULE}.QCheckBox")
     @patch(f"{MODULE}.QMessageBox")
     @patch(f"{MODULE}.ConfigService")
     @patch("qtpy.QtCore.QUrl")
     @patch("qtpy.QtGui.QDesktopServices")
-    def test_update_now_opens_url_and_closes_parent(self, mock_qdesktop, mock_qurl_cls, mock_config, mock_msgbox_cls):
+    def test_update_now_opens_url_and_closes_parent_with_dont_show_again(
+        self, mock_qdesktop, mock_qurl_cls, mock_config, mock_msgbox_cls, mock_check_box
+    ):
         mock_box, buttons_by_label = self._make_mock_box(clicked_button_label="Update now")
         mock_msgbox_cls.return_value = mock_box
         mock_msgbox_cls.AcceptRole = "accept-role"
         mock_msgbox_cls.RejectRole = "reject-role"
         mantid_download_url = "this/is/a/dummy/mantid/download/url"
         mock_config.getString.return_value = mantid_download_url
+        mock_check_box.isChecked.return_value = True
 
         self.update_notif_presenter._show_prompt("7.0.0")
+
+        mock_config.setString.assert_called_once_with("CheckMantidVersion.NotifyUpdateOnStartup", "0")
+        mock_config.saveConfig.assert_called_once()
+        mock_config.getString.assert_called_once_with("CheckMantidVersion.DownloadURL")
+        self.update_notif_presenter._parent.close.assert_called_once()
+        mock_qurl_cls.assert_called_once_with(mantid_download_url)
+        mock_qdesktop.openUrl.assert_called_once_with(mock_qurl_cls.return_value)
+        mock_box.setWindowTitle.assert_called_once_with("Update available")
+        mock_box.setText.assert_called_once_with("Mantid Workbench 7.0.0 is available!")
+
+    @patch(f"{MODULE}.QCheckBox")
+    @patch(f"{MODULE}.QMessageBox")
+    @patch(f"{MODULE}.ConfigService")
+    @patch("qtpy.QtCore.QUrl")
+    @patch("qtpy.QtGui.QDesktopServices")
+    def test_update_now_opens_url_and_closes_parent_without_dont_show(
+        self, mock_qdesktop, mock_qurl_cls, mock_config, mock_msgbox_cls, mock_check_box
+    ):
+        mock_box, buttons_by_label = self._make_mock_box(clicked_button_label="Update now")
+        mock_msgbox_cls.return_value = mock_box
+        mock_msgbox_cls.AcceptRole = "accept-role"
+        mock_msgbox_cls.RejectRole = "reject-role"
+        mantid_download_url = "this/is/a/dummy/mantid/download/url"
+        mock_config.getString.return_value = mantid_download_url
+        mock_check_box.return_value.isChecked.return_value = False
+
+        self.update_notif_presenter._show_prompt("7.0.0")
+
+        mock_config.setString.assert_not_called()
+        mock_config.saveConfig.assert_not_called()
 
         mock_config.getString.assert_called_once_with("CheckMantidVersion.DownloadURL")
         self.update_notif_presenter._parent.close.assert_called_once()
@@ -53,14 +87,14 @@ class ShowPromptTest(unittest.TestCase):
         mock_box.setText.assert_called_once_with("Mantid Workbench 7.0.0 is available!")
 
     # ------------------------------------------------------------------
-    # "Remind me later" path
+    # "Dismiss" path
     # ------------------------------------------------------------------
     @patch(f"{MODULE}.QMessageBox")
     @patch(f"{MODULE}.ConfigService")
     @patch("qtpy.QtCore.QUrl")
     @patch("qtpy.QtGui.QDesktopServices")
     def test_remind_me_later_does_not_close_or_open_url(self, mock_qdesktop, mock_qurl_cls, mock_config, mock_msgbox_cls):
-        mock_box, _ = self._make_mock_box(clicked_button_label="Remind me later")
+        mock_box, _ = self._make_mock_box(clicked_button_label="Dismiss")
         mock_msgbox_cls.return_value = mock_box
 
         self.update_notif_presenter._show_prompt("7.0.0")

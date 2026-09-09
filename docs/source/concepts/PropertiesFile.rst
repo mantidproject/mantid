@@ -289,8 +289,8 @@ Network Properties
 |                                               | This is enabled by default and can be turned off by   |  ``true``                       |
 |                                               | unticking the check box "Prompt to update Mantid      |                                 |
 |                                               | Workbench on startup" in the General Settings of      |                                 |
-|                                               | the workbench or by clicking on the                   |                                 |
-|                                               | "Don't show this again" button at the startup         |                                 |
+|                                               | the workbench or by toggling the                      |                                 |
+|                                               | "Don't show this again" checkbox at the startup       |                                 |
 +-----------------------------------------------+-------------------------------------------------------+---------------------------------+
 
 

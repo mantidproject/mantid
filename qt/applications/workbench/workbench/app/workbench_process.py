@@ -15,7 +15,7 @@ from sys import setswitchinterval
 from functools import partial
 
 from mantid.api import FrameworkManagerImpl
-from mantid.kernel import ConfigService, Logger, UsageService, version_str as mantid_version_str
+from mantid.kernel import ConfigService, Logger, UsageService, version_str as mantid_version_str, amend_config
 from mantidqt.utils.qt import plugins
 import mantidqt.utils.qt as qtutils
 import mantid.kernel.environment as mtd_env
@@ -270,15 +270,14 @@ def create_and_launch_workbench(app, command_line_options, qsettings_staging_ses
         # or the log messages don't get through to the widget
         main_window.setup()
 
-        notify_update_popup = ConfigService.getString("CheckMantidVersion.NotifyUpdateOnStartup") in ("1", "On", "true", "True")
-        if notify_update_popup:
-            # Prevent FrameworkManagerImpl's constructor from also firing its own unobserved CheckMantidVersion run.
-            # Below config change is in-memory only and does not write to .properties file.
-            ConfigService.setString("CheckMantidVersion.OnStartup", "0")
+        notify_update_popup = ConfigService.getString("CheckMantidVersion.NotifyUpdateOnStartup").lower() in ("1", "on", "true")
+        update_check_popup = ConfigService.getString("CheckMantidVersion.OnStartup").lower() in ("1", "on", "true")
+        config_overrides = {"CheckMantidVersion.OnStartup": "0"} if notify_update_popup and update_check_popup else {}
 
         # start mantid
         main_window.set_splash("Initializing mantid framework")
-        FrameworkManagerImpl.Instance()
+        with amend_config(**config_overrides):
+            FrameworkManagerImpl.Instance()
         main_window.post_mantid_init()
 
         if main_window.splash:

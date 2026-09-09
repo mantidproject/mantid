@@ -70,7 +70,7 @@ class UpdateNotificationPresenter:
         box.setCheckBox(dont_show_again)
 
         update_btn = box.addButton("Update now", QMessageBox.AcceptRole)
-        box.addButton("Remind me later", QMessageBox.RejectRole)
+        box.addButton("Dismiss", QMessageBox.RejectRole)
         box.exec()
 
         if dont_show_again.isChecked():
