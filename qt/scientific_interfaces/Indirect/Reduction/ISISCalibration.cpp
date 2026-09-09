@@ -27,6 +27,8 @@ Mantid::Kernel::Logger g_log("ISISCalibration");
 const static std::string CALIBRATION_OUTPUT = "__IndirectCalibration_reduction";
 constexpr double PEAK_QUARTILE = 0.25;
 constexpr double BCKGRND_PERCENTILE = 0.125;
+/// Rebin width used when the analyser does not supply "resolution-rebin-width".
+constexpr double DEFAULT_RESOLUTION_REBIN_WIDTH = 0.002;
 
 template <typename Map, typename Key, typename Value>
 Value getValueOr(const Map &map, const Key &key, const Value &defaultValue) {
@@ -126,7 +128,7 @@ ISISCalibration::ISISCalibration(IDataReduction *idrUI, QWidget *parent) : DataR
 
   m_properties["ResEWidth"] = m_dblManager->addProperty("Width");
   m_dblManager->setDecimals(m_properties["ResEWidth"], NUM_DECIMALS);
-  m_dblManager->setValue(m_properties["ResEWidth"], 0.002);
+  m_dblManager->setValue(m_properties["ResEWidth"], DEFAULT_RESOLUTION_REBIN_WIDTH);
   m_dblManager->setMinimum(m_properties["ResEWidth"], 0.001);
   resRB->addSubProperty(m_properties["ResEWidth"]);
 
@@ -569,10 +571,10 @@ void ISISCalibration::calSetDefaultResolution(const MatrixWorkspace_const_sptr &
       auto resBackground = m_uiForm.ppResolution->getRangeSelector("ResBackground");
       setRangeSelector(resBackground, m_properties["ResStart"], m_properties["ResEnd"], backgroundERange);
 
+      // Reset to the default when the analyser does not supply a width
       auto widthParams = comp->getNumberParameter("resolution-rebin-width", true);
-      if (!widthParams.empty()) {
-        m_dblManager->setValue(m_properties["ResEWidth"], widthParams[0]);
-      }
+      m_dblManager->setValue(m_properties["ResEWidth"],
+                             widthParams.empty() ? DEFAULT_RESOLUTION_REBIN_WIDTH : widthParams[0]);
     }
   }
 }

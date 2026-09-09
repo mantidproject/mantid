@@ -87,11 +87,12 @@ bool correctSpectraMapping(MatrixWorkspace &workspace, Logger &log) {
   if (corrected == 0 && unmappable == 0)
     return false;
 
-  log.warning() << instrument->getName() << ": " << corrected
-                << " spectra referenced detectors not in the instrument definition and were mapped to the detector "
-                   "of the same ID.\n";
+  if (corrected > 0)
+    log.information() << instrument->getName() << ": " << corrected
+                      << " spectra referenced detectors not in the instrument definition and were mapped to the "
+                         "detector of the same ID.\n";
   if (unmappable > 0)
-    log.warning() << unmappable << " spectra had no detector of a matching ID and were left without detectors.\n";
+    log.information() << unmappable << " spectra had no detector of a matching ID and were left without detectors.\n";
 
   return true;
 }
