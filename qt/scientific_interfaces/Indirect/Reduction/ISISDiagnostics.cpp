@@ -250,8 +250,9 @@ void ISISDiagnostics::setDefaultInstDetails(QMap<QString, QString> const &instru
   m_uiForm.dsInputFiles->setInstrumentOverride(instrument);
 
   // Set spectra range
-  m_dblManager->setMaximum(m_properties["SpecMin"], spectraMax);
-  m_dblManager->setMinimum(m_properties["SpecMax"], spectraMin);
+  m_dblManager->setRange(m_properties["SpecMin"], spectraMin, spectraMax);
+  m_dblManager->setRange(m_properties["SpecMax"], spectraMin, spectraMax);
+  m_dblManager->setRange(m_properties["PreviewSpec"], spectraMin, spectraMax);
 
   m_dblManager->setValue(m_properties["SpecMin"], spectraMin);
   m_dblManager->setValue(m_properties["SpecMax"], spectraMax);
@@ -293,16 +294,20 @@ void ISISDiagnostics::handleNewFile() {
   m_sampleName = wsname;
   m_isSumFiles = m_uiForm.ckSumFiles->isChecked();
 
-  int specMin = static_cast<int>(m_dblManager->value(m_properties["SpecMin"]));
-
   auto const inputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname.toStdString());
 
-  auto const previewSpec = static_cast<int>(m_dblManager->value(m_properties["PreviewSpec"])) - specMin;
+  auto const previewSpectrumNumber = static_cast<Mantid::specnum_t>(m_dblManager->value(m_properties["PreviewSpec"]));
+  std::size_t previewIndex = 0;
+  try {
+    previewIndex = inputWorkspace->getIndexFromSpectrumNumber(previewSpectrumNumber);
+  } catch (std::exception const &) {
+    g_log.warning() << "Spectrum " << previewSpectrumNumber << " is not in the loaded file; previewing the first.\n";
+  }
 
   m_uiForm.ppRawPlot->clear();
-  m_uiForm.ppRawPlot->addSpectrum("Raw", inputWorkspace->clone(), previewSpec);
+  m_uiForm.ppRawPlot->addSpectrum("Raw", inputWorkspace->clone(), static_cast<int>(previewIndex));
 
-  auto const xLimits = getXRangeFromWorkspace(inputWorkspace);
+  auto const xLimits = getXRangeFromWorkspace(inputWorkspace, 0.00001, previewIndex);
   setPeakRangeLimits(xLimits.first, xLimits.second);
   setBackgroundRangeLimits(xLimits.first, xLimits.second);
 
