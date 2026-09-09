@@ -9,6 +9,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/Run.h"
+#include "MantidGeometry/Instrument/InstrumentMetadata.h"
 
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/DOMWriter.h>
@@ -153,7 +154,7 @@ void SaveDetectorsGrouping::printToXML(const std::map<int, std::vector<detid_t>>
   AutoPtr<Element> pRoot = pDoc->createElement("detector-grouping");
   pDoc->appendChild(pRoot);
   pRoot->setAttribute("instrument", instrumentName);
-  pRoot->setAttribute("idf-date", instrument->getValidFromDate().toISO8601String());
+  pRoot->setAttribute("idf-date", mGroupWS->instrumentMetadata().validFromDate().toISO8601String());
 
   // Set description if was specified by user
   if (mGroupWS->run().hasProperty("Description")) {

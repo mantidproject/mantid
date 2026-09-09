@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Quat.h"
@@ -19,8 +18,6 @@
 #include <vector>
 
 using Mantid::Geometry::ComponentInfo;
-using Mantid::Geometry::Instrument;
-using Mantid::Geometry::Instrument_const_sptr;
 using Mantid::Kernel::V3D;
 
 namespace Mantid {
@@ -47,7 +44,6 @@ public:
       const ComponentInfo &componentInfo,
       std::function<std::vector<size_t>(const ComponentInfo &, size_t, std::vector<bool> &)> operation);
   std::optional<Kernel::V2D> getSideBySideViewPos(const ComponentInfo &componentInfo,
-                                                  const Instrument_const_sptr &instrument,
                                                   const size_t componentIndex) const;
 
 private:

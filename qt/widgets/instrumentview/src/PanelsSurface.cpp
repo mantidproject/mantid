@@ -215,7 +215,7 @@ void PanelsSurface::processStructured(size_t rootIndex) {
     }
   }
 
-  info->bankCentreOverride = m_calculator.getSideBySideViewPos(componentInfo, m_instrActor->getInstrument(), rootIndex);
+  info->bankCentreOverride = m_calculator.getSideBySideViewPos(componentInfo, rootIndex);
 }
 
 void PanelsSurface::processGrid(size_t rootIndex) {
@@ -336,7 +336,7 @@ std::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
 
   // read any bank centre override from the bank - note that due to the logic higher up that sets bankIndex, the
   // override will only be read from components one or two levels up from a tube
-  info->bankCentreOverride = m_calculator.getSideBySideViewPos(componentInfo, m_instrActor->getInstrument(), bankIndex);
+  info->bankCentreOverride = m_calculator.getSideBySideViewPos(componentInfo, bankIndex);
 
   return bankIndex;
 }
@@ -421,8 +421,7 @@ void PanelsSurface::processUnstructured(size_t rootIndex, std::vector<bool> &vis
       info->polygon << QPointF(udet.u, udet.v);
     }
 
-    info->bankCentreOverride =
-        m_calculator.getSideBySideViewPos(componentInfo, m_instrActor->getInstrument(), rootIndex);
+    info->bankCentreOverride = m_calculator.getSideBySideViewPos(componentInfo, rootIndex);
   }
 }
 

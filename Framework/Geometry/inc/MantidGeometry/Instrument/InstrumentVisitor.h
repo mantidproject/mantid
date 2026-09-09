@@ -12,6 +12,7 @@
 #include <Eigen/Geometry>
 #include <Eigen/StdVector>
 #include <cstddef>
+#include <map>
 #include <memory>
 #include <unordered_map>
 #include <utility>
@@ -123,6 +124,9 @@ private:
 
   /// Component names
   std::shared_ptr<std::vector<std::string>> m_names;
+
+  /// Side-by-side (unwrapped) instrument-view positions when declared in the IDF.
+  std::shared_ptr<std::map<size_t, Eigen::Vector2d>> m_sideBySideViewPositions;
 
   void markAsSourceOrSample(Mantid::Geometry::IComponent *componentId, const size_t componentIndex);
 

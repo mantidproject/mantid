@@ -149,7 +149,7 @@ class SideBySide(Projection, projection_types={ProjectionType.SIDE_BY_SIDE: {"ax
             flat_bank.steps = np.abs([bank.xstep(), bank.ystep(), bank.zstep()])
             flat_bank.pixels = [bank.xpixels(), bank.ypixels(), bank.zpixels()]
             parent_component_index = component_info.parent(int(self._detector_id_component_index_map[flat_bank.detector_ids[0]]))
-            override_pos = self._calculator.getSideBySideViewPos(component_info, instrument, parent_component_index)
+            override_pos = self._calculator.getSideBySideViewPos(component_info, parent_component_index)
             flat_bank.has_position_in_idf = override_pos[0]
             if flat_bank.has_position_in_idf:
                 flat_bank.reference_position = np.array(override_pos[1] + [0])
@@ -190,7 +190,7 @@ class SideBySide(Projection, projection_types={ProjectionType.SIDE_BY_SIDE: {"ax
             flat_bank.dimensions = np.max(flat_bank.relative_projected_positions, axis=0) - np.min(
                 flat_bank.relative_projected_positions, axis=0
             )
-            override_pos = self._calculator.getSideBySideViewPos(component_info, self._workspace.getInstrument(), group[0])
+            override_pos = self._calculator.getSideBySideViewPos(component_info, group[0])
             flat_bank.has_position_in_idf = override_pos[0]
             if flat_bank.has_position_in_idf:
                 flat_bank.reference_position = np.array(override_pos[1] + [0])
