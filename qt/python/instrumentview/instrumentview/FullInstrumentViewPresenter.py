@@ -50,6 +50,7 @@ class FullInstrumentViewPresenter:
     _WAVELENGTH = "Wavelength"
     _MOMENTUM_TRANSFER = "MomentumTransfer"
     _UNIT_OPTIONS = [_TIME_OF_FLIGHT, _D_SPACING, _WAVELENGTH, _MOMENTUM_TRANSFER]
+    _NO_UNITS = "No units"
 
     _LINEAR = "Linear"
     _LOGARITHMIC = "Logarithmic"
@@ -105,6 +106,9 @@ class FullInstrumentViewPresenter:
 
     def setup(self):
         self._view.subscribe_presenter(self)
+        # Before setup_connections_to_presenter below, so filling the combos cannot re-enter
+        # the presenter through currentIndexChanged
+        self._populate_unit_combo_boxes()
         self._view.set_projection_combo_options(self._model.get_projection_options())
         self._view.set_default_projection(self._model.get_default_projection())
         self._view.setup_connections_to_presenter()
@@ -123,8 +127,30 @@ class FullInstrumentViewPresenter:
         )
         self.update_plotter(refresh_limits=False)
 
-        if self._model.workspace_base_unit in self._UNIT_OPTIONS:
-            self._view.set_unit_combo_box_index(self._UNIT_OPTIONS.index(self._model.workspace_base_unit))
+        self._select_workspace_unit_in_sliders_combo_box()
+
+    def _populate_unit_combo_boxes(self, sliders_unit: Optional[str] = None, lineplot_unit: Optional[str] = None) -> None:
+        """Fill both unit combo boxes for the current workspace, selecting the given units where
+        they are offered.
+
+        Disabled when the workspace's units cannot be converted, so the only thing the combos
+        could offer is the unit they are already showing.
+        """
+        self._view.set_unit_combo_options(self.available_unit_options(), sliders_unit, lineplot_unit)
+        self._view.set_unit_combo_boxes_enabled(self._model.can_convert_units)
+
+    def _select_workspace_unit_in_sliders_combo_box(self) -> None:
+        options = self.available_unit_options()
+        if self._model.workspace_base_unit in options:
+            self._view.set_unit_combo_box_index(options.index(self._model.workspace_base_unit))
+
+    def _refresh_unit_combo_boxes(self) -> None:
+        """Rebuild the unit combo boxes after the model is set up on a different workspace,
+        which may have different units, or none that can be converted.
+        """
+        self._populate_unit_combo_boxes(
+            sliders_unit=self._model.workspace_base_unit, lineplot_unit=self._view.current_selected_lineplot_unit()
+        )
 
     def _setup_component_tree(self) -> None:
         component_tree_model = ComponentTreeModel(self._model.workspace)
@@ -164,9 +190,9 @@ class FullInstrumentViewPresenter:
         self._update_line_plot_ws_and_draw(self._view.current_selected_lineplot_unit())
 
     def available_unit_options(self) -> list[str]:
-        if self._model.has_unit:
+        if self._model.can_convert_units:
             return self._UNIT_OPTIONS
-        return ["No units"]
+        return [self._NO_UNITS]
 
     @property
     def workspace_display_unit(self) -> str:
@@ -753,6 +779,7 @@ class FullInstrumentViewPresenter:
             self._model._workspace = mtd[ws_new_name]
             self._model.setup()
             self._setup_component_tree()
+            self._refresh_unit_combo_boxes()
             logger.warning(f"Workspace {ws_old_name} renamed to {ws_new_name}, updated Experimental Instrument View.")
 
         self._reload_everything()
@@ -777,6 +804,7 @@ class FullInstrumentViewPresenter:
         self._model._workspace = AnalysisDataService.retrieve(ws_name)
         self._model.setup()
         self._setup_component_tree()
+        self._refresh_unit_combo_boxes()
         self._reload_renderers()  # Clear cached renderers before rendering
         self.update_plotter()
 
@@ -806,13 +834,21 @@ class FullInstrumentViewPresenter:
         # Drop presenter->model reference on close while keeping _model non-optional for static typing.
         self._model = cast(FullInstrumentViewModel, None)
 
-    def on_sliders_unit_selected(self, value) -> None:
-        self._model.set_integration_units(self._UNIT_OPTIONS[value])
-        self._update_line_plot_ws_and_draw(self._UNIT_OPTIONS[value])
+    def on_sliders_unit_selected(self, _index) -> None:
+        # The combo holds a placeholder when the units cannot be converted, so go by what it
+        # says rather than by index, which would map that placeholder onto the first real unit
+        unit = self._view.current_selected_sliders_unit()
+        if unit not in self._UNIT_OPTIONS:
+            return
+        self._model.set_integration_units(unit)
+        self._update_line_plot_ws_and_draw(unit)
         self.on_integration_limits_reset_clicked()
 
-    def on_lineplot_unit_selected(self, value) -> None:
-        self._update_line_plot_ws_and_draw(self._UNIT_OPTIONS[value])
+    def on_lineplot_unit_selected(self, _index) -> None:
+        unit = self._view.current_selected_lineplot_unit()
+        if unit not in self._UNIT_OPTIONS:
+            return
+        self._update_line_plot_ws_and_draw(unit)
 
     def peaks_workspaces_in_ads(self) -> list[str]:
         return [ws.name() for ws in self._model.get_workspaces_in_ads_of_type(PeaksWorkspace)]

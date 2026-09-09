@@ -841,9 +841,6 @@ class FullInstrumentViewView(QWidget):
 
     def subscribe_presenter(self, presenter) -> None:
         self._presenter = presenter
-        for unit in self._presenter.available_unit_options():
-            self._units_combo_box_sliders.addItem(unit)
-            self._units_combo_box_lineplot.addItem(unit)
         self._count_scale_combo_box.addItems(self._presenter.count_scale_combo_options())
         self.refresh_peaks_ws_list()
         self.refresh_workspaces_in_list(CurrentTab.Masking)
@@ -1033,6 +1030,27 @@ class FullInstrumentViewView(QWidget):
 
     def set_delete_all_selected_peaks_button_enabled(self, is_enabled: bool) -> None:
         self._delete_all_selected_peaks_button.setEnabled(is_enabled)
+
+    def set_unit_combo_options(self, options: list[str], sliders_unit: str | None = None, lineplot_unit: str | None = None) -> None:
+        """Replace the entries of both unit combo boxes, selecting the given units where they are
+        among the options, and the first option otherwise.
+
+        Signals are blocked while they are refilled: clearing a populated combo emits
+        currentIndexChanged for rows on their way out, which the presenter would act on.
+        """
+        for combo_box, unit in ((self._units_combo_box_sliders, sliders_unit), (self._units_combo_box_lineplot, lineplot_unit)):
+            was_blocked = combo_box.blockSignals(True)
+            try:
+                combo_box.clear()
+                combo_box.addItems(options)
+                if unit in options:
+                    combo_box.setCurrentIndex(options.index(unit))
+            finally:
+                combo_box.blockSignals(was_blocked)
+
+    def set_unit_combo_boxes_enabled(self, enabled: bool) -> None:
+        self._units_combo_box_sliders.setEnabled(enabled)
+        self._units_combo_box_lineplot.setEnabled(enabled)
 
     def set_unit_combo_box_index(self, index: int) -> None:
         self._units_combo_box_sliders.setCurrentIndex(index)

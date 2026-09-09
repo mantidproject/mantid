@@ -228,12 +228,28 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.extract_spectra_for_line_plot")
     def test_unit_option_selected(self, mock_extract_spectra, mock_set_integration_units, mock_reset_integration):
         self._mock_view.sum_spectra_selected.return_value = True
+        unit = self._presenter._UNIT_OPTIONS[1]
+        self._mock_view.current_selected_sliders_unit.return_value = unit
         self._presenter.on_sliders_unit_selected(1)
-        mock_set_integration_units.assert_called_once_with(self._presenter._UNIT_OPTIONS[1])
+        mock_set_integration_units.assert_called_once_with(unit)
         self._mock_view.show_plot_for_detectors.assert_called_once()
         self._mock_view.set_selected_detector_info.assert_called_once()
-        mock_extract_spectra.assert_called_once_with(self._presenter._UNIT_OPTIONS[1], True)
+        mock_extract_spectra.assert_called_once_with(unit, True)
         mock_reset_integration.assert_called_once()
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_integration_units")
+    def test_sliders_unit_selected_ignores_the_no_units_placeholder(self, mock_set_integration_units):
+        """The combo holds a single placeholder when the units cannot be converted. Going by
+        index rather than by text would map that placeholder onto the first real unit."""
+        self._mock_view.current_selected_sliders_unit.return_value = self._presenter._NO_UNITS
+        self._presenter.on_sliders_unit_selected(0)
+        mock_set_integration_units.assert_not_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_line_plot_ws_and_draw")
+    def test_lineplot_unit_selected_ignores_the_no_units_placeholder(self, mock_update_line_plot):
+        self._mock_view.current_selected_lineplot_unit.return_value = self._presenter._NO_UNITS
+        self._presenter.on_lineplot_unit_selected(0)
+        mock_update_line_plot.assert_not_called()
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.save_line_plot_workspace_to_ads")
     def test_export_workspace_clicked(self, mock_save_line_plot_workspace_to_ads):
@@ -246,19 +262,52 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter.on_sum_spectra_checkbox_clicked()
         mock_update_line_plot_ws_and_draw.assert_called_once_with("dSpacing")
 
-    @mock.patch.object(FullInstrumentViewModel, "has_unit", new_callable=mock.PropertyMock)
-    def test_available_units_no_units(self, mock_has_unit):
-        mock_has_unit.return_value = False
+    @mock.patch.object(FullInstrumentViewModel, "can_convert_units", new_callable=mock.PropertyMock)
+    def test_available_units_no_units(self, mock_can_convert_units):
+        mock_can_convert_units.return_value = False
         units = self._presenter.available_unit_options()
-        mock_has_unit.assert_called_once()
-        self.assertEqual(["No units"], units)
+        mock_can_convert_units.assert_called_once()
+        self.assertEqual([self._presenter._NO_UNITS], units)
 
-    @mock.patch.object(FullInstrumentViewModel, "has_unit", new_callable=mock.PropertyMock)
-    def test_available_units_has_units(self, mock_has_unit):
-        mock_has_unit.return_value = True
+    @mock.patch.object(FullInstrumentViewModel, "can_convert_units", new_callable=mock.PropertyMock)
+    def test_available_units_has_units(self, mock_can_convert_units):
+        mock_can_convert_units.return_value = True
         units = self._presenter.available_unit_options()
-        mock_has_unit.assert_called_once()
+        mock_can_convert_units.assert_called_once()
         self.assertEqual(self._presenter._UNIT_OPTIONS, units)
+
+    @mock.patch.object(FullInstrumentViewModel, "can_convert_units", new_callable=mock.PropertyMock)
+    def test_unit_combo_boxes_disabled_when_units_cannot_be_converted(self, mock_can_convert_units):
+        mock_can_convert_units.return_value = False
+        self._presenter._populate_unit_combo_boxes()
+        self._mock_view.set_unit_combo_options.assert_called_once_with([self._presenter._NO_UNITS], None, None)
+        self._mock_view.set_unit_combo_boxes_enabled.assert_called_once_with(False)
+
+    @mock.patch.object(FullInstrumentViewModel, "can_convert_units", new_callable=mock.PropertyMock)
+    def test_unit_combo_boxes_enabled_when_units_can_be_converted(self, mock_can_convert_units):
+        mock_can_convert_units.return_value = True
+        self._presenter._populate_unit_combo_boxes()
+        self._mock_view.set_unit_combo_options.assert_called_once_with(self._presenter._UNIT_OPTIONS, None, None)
+        self._mock_view.set_unit_combo_boxes_enabled.assert_called_once_with(True)
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._setup_component_tree")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
+    def test_unit_combo_boxes_refreshed_on_ws_replace(self, _mock_update_plotter, mock_ads, _mock_setup_component_tree):
+        """The replacement may have different units, or none that can be converted, so the
+        combos cannot keep the entries built for the workspace that has just gone."""
+        mock_ads.retrieve.return_value = MagicMock()
+        self._model.setup = MagicMock()
+        self._mock_view.current_selected_lineplot_unit.return_value = "Wavelength"
+        self._mock_view.set_unit_combo_options.reset_mock()
+
+        self._presenter._reset_model_workspace(self._model.workspace.name())
+
+        self._mock_view.set_unit_combo_options.assert_called_once_with(
+            self._presenter.available_unit_options(), self._model.workspace_base_unit, "Wavelength"
+        )
+        self._mock_view.set_unit_combo_boxes_enabled.assert_called_once()
+        self._mock_view.set_unit_combo_box_index.assert_not_called()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._setup_component_tree")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.AnalysisDataService")

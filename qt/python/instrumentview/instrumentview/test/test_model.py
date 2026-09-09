@@ -117,7 +117,15 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model.setup()
         model._is_selected_in_tree = np.ones(len(model._detector_ids), dtype=bool)
         model._workspace_x_unit = "dSpacing"
+        model._can_convert_units = True
         return model, mock_ws
+
+    def _setup_model_needing_probe(self, base_unit: str = "dSpacing") -> FullInstrumentViewModel:
+        """A model whose convertibility has not been settled, so can_convert_units probes for it."""
+        model, _ = self._setup_model([1, 2, 3])
+        model._workspace_x_unit = base_unit
+        model._can_convert_units = None
+        return model
 
     def test_update_integration_range(self):
         model, mock_workspace = self._setup_model([1, 2, 3])
@@ -649,21 +657,239 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model.save_line_plot_workspace_to_ads()
         mock_ads.addOrReplace.assert_called_once()
 
-    def test_has_no_unit(self):
-        model, mock_workspace = self._setup_model([1, 2, 3])
-        mock_workspace.getAxis.return_value = MagicMock()
-        mock_workspace.getAxis(0).getUnit.return_value = MagicMock()
-        mock_workspace.getAxis(0).getUnit().unitID.return_value = "Empty"
-        model.setup()
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceUnitValidator")
+    def test_has_no_unit(self, mock_validator):
+        # The validator describes the problem when the workspace has no unit, and says
+        # nothing at all when it has one
+        mock_validator.return_value.isValid.return_value = "The workspace must have units"
+        model, _ = self._setup_model([1, 2, 3])
         self.assertEqual(False, model.has_unit)
 
-    def test_has_unit(self):
-        model, mock_workspace = self._setup_model([1, 2, 3])
-        mock_workspace.getAxis.return_value = MagicMock()
-        mock_workspace.getAxis(0).getUnit.return_value = MagicMock()
-        mock_workspace.getAxis(0).getUnit().unitID.return_value = "Wavelength"
-        model.setup()
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceUnitValidator")
+    def test_has_unit(self, mock_validator):
+        mock_validator.return_value.isValid.return_value = ""
+        model, _ = self._setup_model([1, 2, 3])
         self.assertEqual(True, model.has_unit)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceUnitValidator")
+    def test_can_convert_units_when_probe_converts_a_spectrum(self, mock_validator, mock_extract_spectra, mock_convert_units):
+        mock_validator.return_value.isValid.return_value = ""
+        mock_convert_units.return_value.spectrumInfo.return_value.isMasked.return_value = False
+        model = self._setup_model_needing_probe()
+
+        self.assertTrue(model.can_convert_units)
+        mock_extract_spectra.assert_called_once()
+        mock_convert_units.assert_called_once()
+        self.assertEqual("TOF", mock_convert_units.call_args.kwargs["Target"])
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceUnitValidator")
+    def test_probe_converts_a_tof_workspace_to_something_else(self, mock_validator, _mock_extract_spectra, mock_convert_units):
+        """Converting to the unit the workspace already has is a no-op, so it would prove nothing."""
+        mock_validator.return_value.isValid.return_value = ""
+        mock_convert_units.return_value.spectrumInfo.return_value.isMasked.return_value = False
+        model = self._setup_model_needing_probe(base_unit="TOF")
+
+        self.assertTrue(model.can_convert_units)
+        self.assertEqual("Wavelength", mock_convert_units.call_args.kwargs["Target"])
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceUnitValidator")
+    def test_cannot_convert_units_without_a_unit(self, mock_validator, mock_convert_units):
+        mock_validator.return_value.isValid.return_value = "The workspace must have units"
+        model = self._setup_model_needing_probe()
+
+        self.assertFalse(model.can_convert_units)
+        mock_convert_units.assert_not_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceUnitValidator")
+    def test_cannot_convert_units_when_the_probe_raises(self, mock_validator, _mock_extract_spectra, mock_convert_units):
+        mock_validator.return_value.isValid.return_value = ""
+        for error in (RuntimeError("no source"), ValueError("must have units")):
+            with self.subTest(error=error):
+                mock_convert_units.side_effect = error
+                model = self._setup_model_needing_probe()
+                self.assertFalse(model.can_convert_units)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceUnitValidator")
+    def test_cannot_convert_units_when_the_probe_comes_back_masked(self, mock_validator, _mock_extract_spectra, mock_convert_units):
+        """A Time axis converts without complaint, but ConvertUnits masks every spectrum."""
+        mock_validator.return_value.isValid.return_value = ""
+        mock_convert_units.return_value.spectrumInfo.return_value.isMasked.return_value = True
+        model = self._setup_model_needing_probe()
+
+        self.assertFalse(model.can_convert_units)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceUnitValidator")
+    def test_can_convert_units_is_only_probed_once(self, mock_validator, _mock_extract_spectra, mock_convert_units):
+        mock_validator.return_value.isValid.return_value = ""
+        mock_convert_units.return_value.spectrumInfo.return_value.isMasked.return_value = False
+        model = self._setup_model_needing_probe()
+
+        self.assertTrue(model.can_convert_units)
+        self.assertTrue(model.can_convert_units)
+        mock_convert_units.assert_called_once()
+
+    @mock.patch.object(FullInstrumentViewModel, "calculate_and_set_full_integration_range")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
+    def test_set_integration_units_converts(self, mock_convert_units, mock_calculate_range):
+        model, _ = self._setup_model([1, 2, 3])
+
+        model.set_integration_units("TOF")
+
+        mock_convert_units.assert_called_once()
+        self.assertEqual("TOF", mock_convert_units.call_args.kwargs["Target"])
+        self.assertEqual(mock_convert_units.return_value, model._integration_workspace)
+        mock_calculate_range.assert_called_once()
+
+    @mock.patch.object(FullInstrumentViewModel, "calculate_and_set_full_integration_range")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
+    def test_set_integration_units_does_not_convert_units_that_cannot_be_converted(self, mock_convert_units, mock_calculate_range):
+        model, mock_workspace = self._setup_model([1, 2, 3])
+        model._can_convert_units = False
+
+        model.set_integration_units("TOF")
+
+        mock_convert_units.assert_not_called()
+        self.assertEqual(mock_workspace.clone.return_value, model._integration_workspace)
+        mock_calculate_range.assert_called_once()
+
+    @mock.patch.object(FullInstrumentViewModel, "calculate_and_set_full_integration_range")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
+    def test_set_integration_units_falls_back_to_the_workspace_when_conversion_fails(self, mock_convert_units, mock_calculate_range):
+        model, mock_workspace = self._setup_model([1, 2, 3])
+        mock_convert_units.side_effect = RuntimeError("Unable to calculate source-sample distance")
+
+        model.set_integration_units("TOF")
+
+        self.assertEqual(mock_workspace.clone.return_value, model._integration_workspace)
+        mock_calculate_range.assert_called_once()
+
+    @mock.patch.object(FullInstrumentViewModel, "_match_workspace_unit", return_value=1.0)
+    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
+    @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
+    def test_extract_spectra_does_not_convert_units_that_cannot_be_converted(
+        self, mock_picked_detector_ids, mock_extract_spectra, mock_convert_units, _mock_match_unit
+    ):
+        model, mock_workspace = self._setup_model([1, 2, 3])
+        model._can_convert_units = False
+        mock_picked_detector_ids.return_value = np.array([1, 2])
+        mock_extract_spectra.return_value = mock_workspace
+
+        model.extract_spectra_for_line_plot("TOF", False)
+
+        mock_convert_units.assert_not_called()
+        self.assertEqual(mock_extract_spectra.return_value, model.line_plot_workspace)
+
+    @mock.patch.object(FullInstrumentViewModel, "_match_workspace_unit", return_value=1.0)
+    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
+    @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
+    def test_extract_spectra_plots_base_units_when_conversion_fails(
+        self, mock_picked_detector_ids, mock_extract_spectra, mock_convert_units, _mock_match_unit
+    ):
+        model, mock_workspace = self._setup_model([1, 2, 3])
+        mock_picked_detector_ids.return_value = np.array([1, 2])
+        mock_extract_spectra.return_value = mock_workspace
+        mock_convert_units.side_effect = ValueError("The workspace must have units")
+
+        model.extract_spectra_for_line_plot("TOF", False)
+
+        self.assertEqual(mock_extract_spectra.return_value, model.line_plot_workspace)
+
+    def _workspace_with_bin_edges(self, bin_edges_per_spectrum) -> MagicMock:
+        workspace = MagicMock()
+        workspace.getNumberHistograms.return_value = len(bin_edges_per_spectrum)
+        workspace.x.side_effect = lambda i: np.array(bin_edges_per_spectrum[i], dtype=float)
+        return workspace
+
+    def test_rebin_params_span_every_spectrum_at_the_finest_binning(self):
+        workspace = self._workspace_with_bin_edges([[0.0, 1.0, 2.0, 3.0], [2.0, 2.5, 3.0, 5.0]])
+
+        params = FullInstrumentViewModel._rebin_params_for_summing(workspace)
+
+        self.assertEqual([0.0, 0.5, 5.0], params)
+
+    def test_rebin_params_leave_out_infinite_bin_edges(self):
+        """An x axis starting at zero converts to an infinite edge in momentum transfer or
+        wavelength, which Rebin cannot be given as a range."""
+        workspace = self._workspace_with_bin_edges([[1.0, 2.0, 4.0, np.inf]])
+
+        params = FullInstrumentViewModel._rebin_params_for_summing(workspace)
+
+        self.assertEqual([1.0, 1.0, 4.0], params)
+
+    def test_no_rebin_params_when_a_spectrum_has_no_width_left(self):
+        """A detector in the path of the beam has no scattering angle, so in momentum transfer
+        every one of its bin edges is zero. Rebin cannot bin that whatever it is given."""
+        workspace = self._workspace_with_bin_edges([[0.0, 0.0, 0.0], [1.0, 2.0, 3.0]])
+
+        self.assertIsNone(FullInstrumentViewModel._rebin_params_for_summing(workspace))
+
+    def test_no_rebin_params_when_every_edge_is_infinite(self):
+        workspace = self._workspace_with_bin_edges([[np.inf, np.inf, np.inf]])
+
+        self.assertIsNone(FullInstrumentViewModel._rebin_params_for_summing(workspace))
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.SumSpectra")
+    @mock.patch("instrumentview.FullInstrumentViewModel.Rebin")
+    def test_sum_spectra_rebins_first_when_the_bins_are_not_common(self, mock_rebin, mock_sum_spectra):
+        model, _ = self._setup_model([1, 2, 3])
+        workspace = self._workspace_with_bin_edges([[0.0, 1.0, 2.0], [0.0, 0.5, 2.0]])
+        workspace.isCommonBins.return_value = False
+
+        result = model._sum_spectra_for_line_plot(workspace, "TOF")
+
+        mock_rebin.assert_called_once_with(InputWorkspace=workspace, Params=[0.0, 0.5, 2.0], EnableLogging=False, StoreInADS=False)
+        mock_sum_spectra.assert_called_once_with(InputWorkspace=mock_rebin.return_value, EnableLogging=False, StoreInADS=False)
+        self.assertEqual(mock_sum_spectra.return_value, result)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.SumSpectra")
+    @mock.patch("instrumentview.FullInstrumentViewModel.Rebin")
+    def test_sum_spectra_skips_the_rebin_when_the_bins_are_common(self, mock_rebin, mock_sum_spectra):
+        model, _ = self._setup_model([1, 2, 3])
+        workspace = self._workspace_with_bin_edges([[0.0, 1.0, 2.0]])
+        workspace.isCommonBins.return_value = True
+
+        result = model._sum_spectra_for_line_plot(workspace, "TOF")
+
+        mock_rebin.assert_not_called()
+        self.assertEqual(mock_sum_spectra.return_value, result)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.SumSpectra")
+    @mock.patch("instrumentview.FullInstrumentViewModel.Rebin")
+    def test_spectra_are_plotted_unsummed_when_there_is_no_common_binning(self, mock_rebin, mock_sum_spectra):
+        model, _ = self._setup_model([1, 2, 3])
+        workspace = self._workspace_with_bin_edges([[0.0, 0.0, 0.0], [1.0, 2.0, 3.0]])
+        workspace.isCommonBins.return_value = False
+
+        result = model._sum_spectra_for_line_plot(workspace, "MomentumTransfer")
+
+        mock_rebin.assert_not_called()
+        mock_sum_spectra.assert_not_called()
+        self.assertEqual(workspace, result)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.SumSpectra")
+    @mock.patch("instrumentview.FullInstrumentViewModel.Rebin")
+    def test_spectra_are_plotted_unsummed_when_summing_raises(self, mock_rebin, mock_sum_spectra):
+        model, _ = self._setup_model([1, 2, 3])
+        workspace = self._workspace_with_bin_edges([[0.0, 1.0, 2.0]])
+        workspace.isCommonBins.return_value = True
+        mock_sum_spectra.side_effect = RuntimeError("No spectra selected for summing")
+
+        result = model._sum_spectra_for_line_plot(workspace, "TOF")
+
+        self.assertEqual(workspace, result)
 
     @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
     def test_peaks_workspaces_in_ads(self, mock_ads):
@@ -1477,6 +1703,45 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model.get_peak_lineplot_overlay_arguments(["ws1"])
 
         np.testing.assert_array_equal(np.array([2, 3]), mock_wdp.get_x_values_and_labels.call_args.args[0])
+
+
+class TestFullInstrumentViewModelUnitConversion(unittest.TestCase):
+    """Unit conversion on real workspaces, since the ways ConvertUnits can fail are what is under test."""
+
+    def setUp(self):
+        self._ws = CreateSampleWorkspace(OutputWorkspace="TestFullInstrumentViewModelUnitConversion", XUnit="TOF", EnableLogging=False)
+
+    def tearDown(self):
+        self._ws.delete()
+
+    def _setup_model_with_unit(self, unit_id: str) -> FullInstrumentViewModel:
+        self._ws.getAxis(0).setUnit(unit_id)
+        model = FullInstrumentViewModel(self._ws)
+        model.setup()
+        return model
+
+    def test_can_convert_units_in_tof(self):
+        self.assertTrue(self._setup_model_with_unit("TOF").can_convert_units)
+
+    def test_units_that_cannot_be_converted(self):
+        # DeltaE only converts in an inelastic mode, and the instrument view converts elastically
+        for unit_id in ("Empty", "Label", "DeltaE"):
+            with self.subTest(unit=unit_id):
+                model = self._setup_model_with_unit(unit_id)
+
+                self.assertFalse(model.can_convert_units)
+
+    def test_line_plot_and_integration_stay_in_units_that_cannot_be_converted(self):
+        for unit_id in ("Empty", "Label", "DeltaE"):
+            with self.subTest(unit=unit_id):
+                model = self._setup_model_with_unit(unit_id)
+
+                model.extract_spectra_for_line_plot("dSpacing", True, np.array([0, 1]))
+                model.set_integration_units("dSpacing")
+
+                self.assertEqual(1, model.line_plot_workspace.getNumberHistograms())
+                self.assertEqual(unit_id, model.line_plot_workspace.getAxis(0).getUnit().unitID())
+                self.assertEqual(unit_id, model.get_integration_units())
 
 
 if __name__ == "__main__":

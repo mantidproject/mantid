@@ -494,6 +494,53 @@ class TestFullInstrumentViewView(unittest.TestCase):
             self._view._on_show_sample_position_toggled(False)
         mock_set_colour.assert_called_once_with(_LIGHT_GREY)
 
+    def test_set_unit_combo_options_fills_both_combo_boxes(self):
+        self._view.set_unit_combo_options(["TOF", "dSpacing"])
+        for combo_box in (self._view._units_combo_box_sliders, self._view._units_combo_box_lineplot):
+            self.assertEqual(["TOF", "dSpacing"], [combo_box.itemText(i) for i in range(combo_box.count())])
+
+    def test_set_unit_combo_options_replaces_the_previous_entries(self):
+        self._view.set_unit_combo_options(["TOF", "dSpacing"])
+        self._view.set_unit_combo_options(["No units"])
+        for combo_box in (self._view._units_combo_box_sliders, self._view._units_combo_box_lineplot):
+            self.assertEqual(1, combo_box.count())
+            self.assertEqual("No units", combo_box.currentText())
+
+    def test_set_unit_combo_options_does_not_notify_the_presenter(self):
+        """Refilling a populated combo emits currentIndexChanged for the rows on their way out,
+        which the presenter would otherwise act on as though the user had chosen a unit."""
+        self._view.setup_connections_to_presenter()
+        self._view.set_unit_combo_options(["TOF", "dSpacing"])
+        self._view.set_unit_combo_options(["No units"])
+        self._view._presenter.on_sliders_unit_selected.assert_not_called()
+        self._view._presenter.on_lineplot_unit_selected.assert_not_called()
+
+    def test_set_unit_combo_options_selects_the_given_units(self):
+        self._view.set_unit_combo_options(["TOF", "dSpacing", "Wavelength"], sliders_unit="dSpacing", lineplot_unit="Wavelength")
+        self.assertEqual("dSpacing", self._view.current_selected_sliders_unit())
+        self.assertEqual("Wavelength", self._view.current_selected_lineplot_unit())
+
+    def test_set_unit_combo_options_selects_the_first_option_for_units_not_offered(self):
+        self._view.set_unit_combo_options(["TOF", "dSpacing"], sliders_unit="dSpacing", lineplot_unit="No units")
+        self.assertEqual("dSpacing", self._view.current_selected_sliders_unit())
+        self.assertEqual("TOF", self._view.current_selected_lineplot_unit())
+
+    def test_set_unit_combo_options_does_not_notify_the_presenter_of_the_selection(self):
+        """The presenter selects the units this way when the workspace is replaced, before its
+        renderers have been reloaded, so acting on the selection would draw onto the old ones."""
+        self._view.setup_connections_to_presenter()
+        self._view.set_unit_combo_options(["TOF", "dSpacing", "Wavelength"], sliders_unit="dSpacing", lineplot_unit="Wavelength")
+        self._view._presenter.on_sliders_unit_selected.assert_not_called()
+        self._view._presenter.on_lineplot_unit_selected.assert_not_called()
+
+    def test_set_unit_combo_boxes_enabled(self):
+        self._view.set_unit_combo_boxes_enabled(False)
+        self.assertFalse(self._view._units_combo_box_sliders.isEnabled())
+        self.assertFalse(self._view._units_combo_box_lineplot.isEnabled())
+        self._view.set_unit_combo_boxes_enabled(True)
+        self.assertTrue(self._view._units_combo_box_sliders.isEnabled())
+        self.assertTrue(self._view._units_combo_box_lineplot.isEnabled())
+
 
 if __name__ == "__main__":
     unittest.main()

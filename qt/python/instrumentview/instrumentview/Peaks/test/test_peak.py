@@ -24,9 +24,13 @@ class TestPeak(unittest.TestCase):
         self.assertEqual(dspacing, peak.location_in_unit("dspacing"))
         self.assertEqual(q, peak.location_in_unit("Q"))
 
-    def test_location_in_unit_wrong_unit(self):
-        peak = Peak(0, 0, (1.233333, 4.0, 36), 0, 0, 0, 0)
-        self.assertRaisesRegex(RuntimeError, "Unknown unit Oops for peak location", peak.location_in_unit, "Oops")
+    def test_location_in_unit_unknown_unit(self):
+        """A workspace can be in a unit a peak has no position for, which is not an error:
+        the instrument view still has to draw everything else."""
+        peak = Peak(0, 0, (1.233333, 4.0, 36), 10, 20, 15, 25)
+        self.assertIsNone(peak.location_in_unit("Oops"))
+        self.assertIsNone(peak.location_in_unit("Empty"))
+        self.assertIsNone(peak.location_in_unit("Energy"))
 
 
 if __name__ == "__main__":
