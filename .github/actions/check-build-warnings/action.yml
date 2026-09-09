@@ -4,6 +4,11 @@ inputs:
   log-file:
     description: 'Path to the captured build log, relative to the workspace'
     required: true
+  os:
+    description: |
+      Operating system the build ran on, i.e. the workflow's matrix.os value. It selects which
+      compiler's diagnostics are looked for, so that the other compiler's format cannot false match.
+    required: true
   allowed-warnings-count:
     description: |
       If warnings slip through to main this can be used to set a non-zero allowed count while those
@@ -19,7 +24,8 @@ runs:
       working-directory: ${{ github.workspace }}
       env:
         BUILD_LOG: ${{ inputs.log-file }}
+        BUILD_OS: ${{ inputs.os }}
         ALLOWED_WARNINGS_COUNT: ${{ inputs.allowed-warnings-count }}
       run: |
         pixi run --frozen python ${GITHUB_WORKSPACE}/.github/actions/check-build-warnings/count_warnings.py \
-          "${GITHUB_WORKSPACE}/${BUILD_LOG}" --allowed-warnings "${ALLOWED_WARNINGS_COUNT}"
+          "${GITHUB_WORKSPACE}/${BUILD_LOG}" --os "${BUILD_OS}" --allowed-warnings "${ALLOWED_WARNINGS_COUNT}"
