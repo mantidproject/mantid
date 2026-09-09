@@ -10,11 +10,6 @@ on:
         description: 'Match Runner Label'
         required: false
         type: string
-      CLEAN:
-        description: 'Run clean-builder before building. Only available via workflow_dispatch; use Run workflow, not Re-run jobs.'
-        required: false
-        default: false
-        type: boolean
 
 
 # cancel previous job if a new commit is pushed
