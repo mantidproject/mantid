@@ -1672,36 +1672,37 @@ def delete_optimization_workspaces(reduction_packages, workspaces, monitors, sav
 
 
 def get_names_to_delete(reduction_packages, workspaces, monitors, save_can):
-    def _add_from_dict(_ws_dict):
-        for ws_list in _ws_dict.values():
-            if isinstance(ws_list, (Workspace2D, IEventWorkspace)):
-                ws_list = [ws_list]
-            if ws_list:
-                for ws in ws_list:
-                    if ws and (name := ws.name()):
-                        yield name
+    def _ws_names(_ws_values):
+        for ws_list in _ws_values:
+            if ws_list is None:
+                continue
+            ws_list = (ws_list,) if isinstance(ws_list, (Workspace2D, IEventWorkspace)) else ws_list
+            for ws in ws_list:
+                if ws and (name := ws.name()):
+                    yield name
 
-    ws_names = []
-    ws_names.extend(list(_add_from_dict(workspaces)))
-    ws_names.extend(list(_add_from_dict(monitors)))
-    optimizations_to_delete = dict()
+    ws_names = list(_ws_names(workspaces.values()))
+    ws_names.extend(_ws_names(monitors.values()))
     for reduction_package in reduction_packages:
-        optimizations_to_delete.update(
-            {
-                "lab_can_count": reduction_package.reduced_lab_can_count,
-                "lab_can_norm": reduction_package.reduced_lab_can_norm,
-                "hab_can_count": reduction_package.reduced_hab_can_count,
-                "hab_can_norm": reduction_package.reduced_hab_can_norm,
-                "fitted_trans_can": reduction_package.calculated_transmission_can,
-                "fitted_trans": reduction_package.calculated_transmission,
-            }
-        )
         # using base names to avoid bug described in get_transmission_to_save
         ws_names.extend(get_transmission_names_to_save(reduction_package, False))
         ws_names.extend(get_transmission_names_to_save(reduction_package, True))
+        optimization_workspaces = [
+            reduction_package.reduced_lab_can_count,
+            reduction_package.reduced_lab_can_norm,
+            reduction_package.reduced_hab_can_count,
+            reduction_package.reduced_hab_can_norm,
+            reduction_package.calculated_transmission_can,
+            reduction_package.calculated_transmission,
+        ]
         if not save_can:
-            optimizations_to_delete.update({"lab_can": reduction_package.reduced_lab_can, "hab_can": reduction_package.reduced_hab_can})
-        ws_names.extend(list(_add_from_dict(optimizations_to_delete)))
+            optimization_workspaces.extend(
+                [
+                    reduction_package.reduced_lab_can,
+                    reduction_package.reduced_hab_can,
+                ]
+            )
+        ws_names.extend(_ws_names(optimization_workspaces))
     return ws_names
 
 

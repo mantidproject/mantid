@@ -193,7 +193,7 @@ WavRangeReduction
 
     WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None,
                       combineDet=None, saveAlgs=None, save_as_zero_error_free=False, output_name=None,
-                      output_mode=OutputMode.PUBLISH_TO_ADS, use_reduction_mode_as_suffix=False)
+                      output_mode=OutputMode.PUBLISH_TO_ADS, use_reduction_mode_as_suffix=False, output_diagnostic_names=False)
 
 Assuming the mask file contains the correct analysis details one can proceed to calculate :math:`I(Q)` using the
 ``WavRangeReduction()`` function, which can be executed with no arguments.
