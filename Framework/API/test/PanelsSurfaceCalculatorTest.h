@@ -111,7 +111,7 @@ public:
     const auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10);
     const size_t tubeIndex = 4;
     const auto p = PanelsSurfaceCalculator();
-    const auto pos = p.getSideBySideViewPos(ws->componentInfo(), ws->getInstrument(), tubeIndex);
+    const auto pos = p.getSideBySideViewPos(ws->componentInfo(), tubeIndex);
     TSM_ASSERT("No side-by-side view position declared in this test instrument", !pos.has_value());
   }
 
