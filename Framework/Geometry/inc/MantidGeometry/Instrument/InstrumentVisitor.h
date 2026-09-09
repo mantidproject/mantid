@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidBeamline/ComponentType.h"
+#include "MantidBeamline/DetectorInfo.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include <Eigen/Geometry>
@@ -15,12 +16,13 @@
 #include <memory>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 namespace Mantid {
 using detid_t = int32_t;
 namespace Beamline {
 class ComponentInfo;
-class DetectorInfo;
+// DetectorInfo is fully included above; forward declaration not needed.
 } // namespace Beamline
 namespace Geometry {
 class ComponentInfo;
@@ -32,6 +34,7 @@ class IObjComponent;
 class Instrument;
 class IObject;
 class ParameterMap;
+class PixelAssembly;
 class RectangularDetector;
 class ObjCompAssembly;
 
@@ -124,6 +127,14 @@ private:
   /// Component names
   std::shared_ptr<std::vector<std::string>> m_names;
 
+  /// Virtual bank segments registered by registerVirtualBank().
+  /// Passed to Beamline::DetectorInfo so it can compute pixel positions on demand.
+  std::vector<Beamline::VirtualBankSegment> m_virtualBankSegments;
+
+  /// One pixel shape per virtual (PixelAssembly) bank, in registration order.
+  /// Stored separately so m_shapes can be compacted (virtual pixel slots omitted).
+  std::vector<std::shared_ptr<const Mantid::Geometry::IObject>> m_virtualPixelShapes;
+
   void markAsSourceOrSample(Mantid::Geometry::IComponent *componentId, const size_t componentIndex);
 
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> makeWrappers() const;
@@ -145,6 +156,8 @@ public:
   virtual size_t registerGenericObjComponent(const Mantid::Geometry::IObjComponent &objComponent) override;
 
   virtual size_t registerGridBank(const Mantid::Geometry::ICompAssembly &bank) override;
+
+  virtual size_t registerVirtualBank(const Mantid::Geometry::PixelAssembly &bank) override;
 
   virtual size_t registerRectangularBank(const Mantid::Geometry::ICompAssembly &bank) override;
 

@@ -66,6 +66,7 @@ public:
 protected:
   virtual void draw(const std::vector<bool> &visibleComps, bool showGuides, bool picking) = 0;
   void drawGridBank(size_t bankIndex, bool picking);
+  void drawVirtualBank(size_t bankIndex, bool picking);
   void drawRectangularBank(size_t bankIndex, bool picking);
   void drawStructuredBank(size_t bankIndex, bool picking);
   void drawTube(size_t bankIndex, bool picking);

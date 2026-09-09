@@ -214,6 +214,10 @@ private:
     TS_ASSERT(!det.inBoundsXYZ(0, -1, 0));
     TS_ASSERT(!det.inBoundsXYZ(100, 0, 0));
     TS_ASSERT(!det.inBoundsXYZ(0, 205, 0));
+    TS_ASSERT_THROWS(det.getDetectorIDAtXYZ(-1, 0, 0), const std::runtime_error &);
+    TS_ASSERT_THROWS(det.getDetectorIDAtXYZ(0, -1, 0), const std::runtime_error &);
+    TS_ASSERT_THROWS(det.getDetectorIDAtXYZ(100, 0, 0), const std::runtime_error &);
+    TS_ASSERT_THROWS(det.getDetectorIDAtXYZ(0, 205, 0), const std::runtime_error &);
   }
 
   void do_test_ids(const GridDetector &det) {

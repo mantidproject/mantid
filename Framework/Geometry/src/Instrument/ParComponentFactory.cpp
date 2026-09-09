@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument/GridDetectorPixel.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Instrument/PixelAssembly.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include <memory>
@@ -83,6 +84,10 @@ IComponent_sptr ParComponentFactory::create(const std::shared_ptr<const ICompone
   const auto *gd = dynamic_cast<const GridDetector *>(base.get());
   if (gd)
     return std::make_shared<GridDetector>(gd, map);
+
+  const auto *pa = dynamic_cast<const PixelAssembly *>(base.get());
+  if (pa)
+    return std::make_shared<PixelAssembly>(pa, map);
 
   const auto *ac = dynamic_cast<const CompAssembly *>(base.get());
   if (ac)

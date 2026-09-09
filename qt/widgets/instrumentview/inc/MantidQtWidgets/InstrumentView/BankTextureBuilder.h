@@ -40,6 +40,7 @@ private:
   void buildGridBankLayer(const std::vector<GLColor> &colors, bool picking, size_t layer);
   void buildGridBankTextures(const std::vector<GLColor> &colors, bool picking, bool isUsingLayer, size_t layer);
   void buildRectangularBankTextures(const std::vector<GLColor> &colors, bool picking);
+  void buildVirtualBankTextures(const std::vector<GLColor> &colors, bool picking);
   void uploadTubeBankTextures(bool picking);
   void uploadGridBankTexture(bool picking, GridTextureFace gridFace);
   void uploadRectangularBankTextures(bool picking);

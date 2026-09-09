@@ -10,6 +10,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/GridDetector.h"
+#include "MantidGeometry/Instrument/IVirtualBank.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument_fwd.h"
 
@@ -98,6 +99,12 @@ public:
   /// to be a monitor and also add it to _detectorCache for possible later retrieval
   void markAsMonitor(IDetector const *);
   void markAsMonitorIncomplete(IDetector const *);
+  /// Register all detector IDs from a virtual pixel bank (PixelAssembly /
+  /// IVirtualBank) into the detector cache.  No per-pixel IDetector objects
+  /// are created; the cache entries carry null IDetector_const_sptr.  This is
+  /// sufficient for InstrumentVisitor / DetectorInfo; legacy getDetector(id)
+  /// calls for virtual pixels will return nullptr.
+  void markAsVirtualBankDetectors(const IVirtualBank &bank);
 
   /// Remove a detector from the instrument
   void removeDetector(IDetector *);
@@ -381,6 +388,15 @@ private:
 
   /// Pointer to the ComponentInfo object. May be NULL.
   std::shared_ptr<const ComponentInfo> m_componentInfo{nullptr};
+
+  /// One entry per PixelAssembly bank; replaces the O(n_pixels) sorted ID
+  /// vector.  Empty for non-PA instruments.
+  struct VirtualBankInfo {
+    detid_t idstart; ///< detector ID at grid position (0, 0, 0)
+    int idstep;      ///< ID increment per pixel along the fastest fill axis
+    size_t npixels;  ///< total pixel count in this bank
+  };
+  std::vector<VirtualBankInfo> m_virtualBankInfos;
 
   /// Flag - is this the physical rather than neutronic instrument
   bool m_isPhysicalInstrument{false};

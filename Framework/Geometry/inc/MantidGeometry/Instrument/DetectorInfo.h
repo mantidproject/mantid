@@ -137,6 +137,11 @@ private:
 
   mutable std::vector<std::shared_ptr<const Geometry::IDetector>> m_lastDetector;
   mutable std::vector<size_t> m_lastIndex;
+
+  /// For PA instruments: lazily-built full ID list (real + virtual) returned
+  /// by detectorIDs().  Null until first call to detectorIDs() on a PA instrument.
+  mutable std::once_flag m_allDetectorIDsCacheOnce;
+  mutable std::shared_ptr<const std::vector<detid_t>> m_allDetectorIDsCache;
 };
 
 using DetectorInfoIt = DetectorInfoIterator<DetectorInfo>;

@@ -10,6 +10,18 @@
 
 namespace Mantid {
 namespace Beamline {
-enum class ComponentType { Generic, Infinite, Grid, Rectangular, Structured, Unstructured, Detector, OutlineComposite };
+enum class ComponentType {
+  Generic,
+  Infinite,
+  Grid,
+  Rectangular,
+  Structured,
+  Unstructured,
+  Detector,
+  OutlineComposite,
+  /// PixelAssembly (virtual) bank: geometry computed analytically from
+  /// VirtualBankSegment; no per-pixel or per-column child entries stored.
+  VirtualAssembly
+};
 } // namespace Beamline
 } // namespace Mantid
