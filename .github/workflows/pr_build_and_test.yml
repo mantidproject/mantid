@@ -74,11 +74,30 @@ jobs:
       - uses: ./.github/actions/setup-pixi
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
 
-      - name: Build conda packages
+      - name: Clean conda package output directory
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
         run: |
           rm -rf ${GITHUB_WORKSPACE}/conda-bld
-          bash -ex ${GITHUB_WORKSPACE}/source/buildconfig/Jenkins/Conda/package-conda ${GITHUB_WORKSPACE} --build-mantid --build-qt --build-docs --build-workbench
+
+      - name: Build mantid and mantidmpi conda packages
+        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
+        run: |
+          bash -ex ${GITHUB_WORKSPACE}/source/buildconfig/Jenkins/Conda/package-conda ${GITHUB_WORKSPACE} --build-mantid
+
+      - name: Build mantidqt conda package
+        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
+        run: |
+          bash -ex ${GITHUB_WORKSPACE}/source/buildconfig/Jenkins/Conda/package-conda ${GITHUB_WORKSPACE} --build-qt
+
+      - name: Build mantiddocs conda package
+        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
+        run: |
+          bash -ex ${GITHUB_WORKSPACE}/source/buildconfig/Jenkins/Conda/package-conda ${GITHUB_WORKSPACE} --build-docs
+
+      - name: Build mantidworkbench conda package
+        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
+        run: |
+          bash -ex ${GITHUB_WORKSPACE}/source/buildconfig/Jenkins/Conda/package-conda ${GITHUB_WORKSPACE} --build-workbench
 
       - name: Upload conda packages
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
