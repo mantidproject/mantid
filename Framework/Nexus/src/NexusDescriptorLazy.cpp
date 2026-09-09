@@ -11,6 +11,7 @@
 #include "MantidNexus/UniqueID.h"
 
 #include "MantidNexus/NexusFile_fwd.h"
+#include <H5Cpp.h>
 #include <hdf5.h>
 
 #include <algorithm>

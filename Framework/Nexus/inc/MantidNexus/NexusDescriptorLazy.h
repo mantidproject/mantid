@@ -17,8 +17,6 @@
 #include <variant>
 #include <vector>
 
-#include <H5Cpp.h>
-
 namespace Mantid {
 namespace Nexus {
 
