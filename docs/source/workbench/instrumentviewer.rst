@@ -26,9 +26,7 @@ and the plot.
 .. note::
 
    This view replaces the previous Instrument Viewer widget, which is still available and is
-   documented at :ref:`LegacyInstrumentViewer`. A few of that widget's features have not been
-   implemented here yet, and are listed under
-   `Differences from the legacy Instrument Viewer`_.
+   documented at :ref:`LegacyInstrumentViewer`.
 
 Opening the Instrument View
 ---------------------------
@@ -38,7 +36,7 @@ From Workbench, right-click a workspace in the Workspaces toolbox and select
 :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` that has an instrument attached.
 ``Show Instrument (Legacy)``, directly below it, opens the previous widget instead.
 
-.. figure:: /images/ImageNotFound.png
+.. figure:: ../images/Workbench/InstrumentViewer/ContextMenu.png
     :align: center
 
 The window follows the workspace it is showing: renaming or replacing the workspace updates the
@@ -126,9 +124,8 @@ The ``Projection`` combo box selects how the instrument is drawn:
 .. figure:: ../images/Workbench/InstrumentViewer/ProjectionOptions.png
     :align: center
 
-The default is taken from the instrument definition, so most instruments open in the projection
-their scientists normally use. ``Reset Projection`` returns the camera to its default position and
-zoom for the current projection.
+The default is taken from the instrument definition file. ``Reset Projection`` returns the
+camera to its default position and zoom for the current projection.
 
 .. figure:: ../images/Workbench/InstrumentViewer/Projection3D.png
     :align: center
@@ -184,7 +181,7 @@ selecting one may switch others off where the combination would be ambiguous.
 
 ``Hover Pick``
     Preview a single detector's spectrum and information by moving the mouse over it, without
-    clicking. The selection is not changed. Only available in the flat projections.
+    clicking. The selection is not changed. Only available in the 2D projections.
 
 ``Select Peaks``
     Clicking selects the nearest detector that has a peak on it, rather than the exact detector
@@ -410,7 +407,7 @@ Settings tab
     them to fill the window.
 
 ``Flip Beam``
-    Mirrors a flat projection about the plane perpendicular to the beam, which swaps the left and
+    Mirrors a 2D projection about the plane perpendicular to the beam, which swaps the left and
     right halves of the instrument. It has no effect in ``3D`` or ``Side by Side``.
 
 ``Monitors``
@@ -425,9 +422,7 @@ Render mode
 
     - ``Points (Fastest)``: each detector is a single point.
     - ``Approximated Shapes (Fast)``: detector shapes are drawn, approximated by simple quads.
-    - ``Raw Shapes (Slowest)``: the full detector geometry is drawn.
-
-    Larger instruments take noticeably longer to draw in the more detailed modes.
+    - ``Raw Shapes (Slowest)``: the full detector geometry is drawn. This can take noticeably longer for larger instruments.
 
 Count scale
     ``Linear`` or ``Logarithmic`` colouring of the integrated counts. The logarithmic scale is
@@ -492,20 +487,3 @@ masking, grouping or peak editing of the full window.
 
    view = create_notebook_window("/path/to/file.nxs")
    view.pick_detectors([100, 101], sum_spectra=True)
-
-Differences from the legacy Instrument Viewer
----------------------------------------------
-
-Some features of the :ref:`legacy Instrument Viewer <LegacyInstrumentViewer>` have no equivalent
-here yet:
-
-- Masking individual bins rather than whole detectors.
-- The peak comparison and peak alignment tools.
-- The free-hand brush shape, and drawing more than one shape at a time.
-- Loading a colour map from a file, and saving the view as an image.
-- Storing curves on the plot from a context menu.
-- Saving and restoring the view as part of a Mantid project.
-
-Features that only the current Instrument View has include the ``Side by Side`` projection, hover
-picking, the live plot preview that follows a shape as it is dragged, the logarithmic count scale,
-and the relative angle between two selected detectors.
