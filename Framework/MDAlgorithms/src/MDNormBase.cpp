@@ -272,7 +272,8 @@ Mantid::Kernel::DblMatrix MDNormBase::calQTransform(const DblMatrix &R, const Ge
 void MDNormBase::calculateNormalization(const std::vector<coord_t> &otherValues, uint16_t expInfoIndex) {
   const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
   const auto &spectrumInfo = currentExptInfo.spectrumInfo();
-  Kernel::DblMatrix Qtransform(getLogValues<VectorDoubleProperty>(currentExptInfo, "RUBW_MATRIX"); // includes the 2*pi factor but not goniometer for now :)
+  Kernel::DblMatrix Qtransform(getLogValues<VectorDoubleProperty>(
+      currentExptInfo, "RUBW_MATRIX")); // includes the 2*pi factor but not goniometer for now :)
   Qtransform = currentExptInfo.run().getGoniometerMatrix() * Qtransform;
   Qtransform.Invert();
   const double protonCharge = currentExptInfo.run().getProtonCharge();
@@ -341,11 +342,11 @@ void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues
   double progressStart = 0.3 + 0.7 * expInfoIndex / m_numExptInfos;
   double progressEnd = 0.3 + 0.7 * (expInfoIndex + 1) / m_numExptInfos;
   double normfac = 1.0;
-  if (auto *factor = dynamic_cast<Kernel::PropertyWithValue<double> *>(run.getProperty("NormalizationFactor"));
-      run.hasProperty("NormalizationFactor") && factor) {
+  if (auto *factor = run.hasProperty("NormalizationFactor")
+                         ? dynamic_cast<Kernel::PropertyWithValue<double> *>(run.getProperty("NormalizationFactor"))
+                         : nullptr) {
     normfac = (*factor)();
   }
-
   std::istringstream tosplit;
   if (auto *logTimesStr = dynamic_cast<PropertyWithValue<std::string> *>(run.getProperty("useLogTimes"));
       run.hasProperty("useLogTimes") && logTimesStr) {
