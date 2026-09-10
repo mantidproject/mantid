@@ -22,6 +22,9 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
     def seeAlso(self):
         return ["GenerateEventsFilter", "FilterEvents", "ReflectometryReductionOneAuto"]
 
+    def version(self):
+        return 1
+
     def PyInit(self):
         # Add properties from child algorithm
         self._filter_properties = [

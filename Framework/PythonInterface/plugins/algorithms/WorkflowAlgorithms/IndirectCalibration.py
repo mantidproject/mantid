@@ -148,7 +148,7 @@ class IndirectCalibration(DataProcessorAlgorithm):
         )
 
         workflow_prog.report("Masking detectors")
-        number_historgrams = mtd[calib_ws_name].getNumberHistograms()
+        number_histograms = mtd[calib_ws_name].getNumberHistograms()
         ws_mask, num_zero_spectra = FindDetectorsOutsideLimits(InputWorkspace=calib_ws_name, OutputWorkspace="__temp_ws_mask")
         DeleteWorkspace(ws_mask)
 
@@ -163,13 +163,14 @@ class IndirectCalibration(DataProcessorAlgorithm):
         DeleteWorkspace(temp_sum)
 
         if self._intensity_scale is None:
-            self._intensity_scale = 1 / (total / (number_historgrams - num_zero_spectra))
+            self._intensity_scale = 1 / (total / (number_histograms - num_zero_spectra))
 
         workflow_prog.report("Scaling calibration")
         Scale(InputWorkspace=calib_ws_name, OutputWorkspace=self._out_ws, Factor=self._intensity_scale, Operation="Multiply")
 
         # Remove old workspaces
         if len(runs) > 1:
+            DeleteWorkspace(Workspace=calib_ws_name)
             for run in runs:
                 DeleteWorkspace(Workspace=run)
                 workflow_prog.report("Deleting workspaces")

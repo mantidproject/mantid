@@ -84,14 +84,26 @@ class TestGlobalFigureManagerObserver(unittest.TestCase):
 
 class TestGlobalFigureManagerInitialisation(unittest.TestCase):
     def test_correctly_initialises_on_import(self):
-        # A figure observer should have been added with the import of the class
+        # The dictionary and active-figure observers should be added when the module is imported
         self.assertEqual(1, len(GlobalFigureManager.figs.observers))
+        self.assertIn(GlobalFigureManager.initialiseActiveFiguresObserver(), GlobalFigureManager.observers)
+
+    def test_initialising_active_figure_observer_more_than_once_does_not_register_it_again(self):
+        observer = GlobalFigureManager.initialiseActiveFiguresObserver()
+
+        self.assertIs(observer, GlobalFigureManager.initialiseActiveFiguresObserver())
+        self.assertEqual(1, GlobalFigureManager.observers.count(observer))
 
 
 class TestGlobalFigureManager(unittest.TestCase):
     def setUp(self):
         # reset the figure manager before each test
         GlobalFigureManager.destroy_all()
+        self.active_figure_changed = Mock()
+        GlobalFigureManager.initialiseActiveFiguresObserver().active_figure_changed.connect(self.active_figure_changed)
+
+    def tearDown(self):
+        GlobalFigureManager.initialiseActiveFiguresObserver().active_figure_changed.disconnect(self.active_figure_changed)
 
     def add_manager(self, num=0):
         mock_manager = MockFigureManager(num)
@@ -112,6 +124,16 @@ class TestGlobalFigureManager(unittest.TestCase):
         mock_manager = MockFigureManager(0)
         GlobalFigureManager.set_active(mock_manager)
         self.assertEqual(1, len(GlobalFigureManager._activeQue))
+
+    def test_set_active_notifies_after_the_active_figure_changes(self):
+        mock_manager = MockFigureManager(0)
+        active_figure_when_notified = []
+        self.active_figure_changed.side_effect = lambda: active_figure_when_notified.append(GlobalFigureManager.get_active())
+
+        GlobalFigureManager.set_active(mock_manager)
+
+        self.active_figure_changed.assert_called_once_with()
+        self.assertEqual([mock_manager], active_figure_when_notified)
 
     def test_get_active(self):
         mock_manager = MockFigureManager(0)
@@ -146,6 +168,18 @@ class TestGlobalFigureManager(unittest.TestCase):
             self.assertEqual(0, len(GlobalFigureManager.figs))
             mock_gc_collect.assert_called_once_with(1)
             mock_notify_observers.assert_has_calls([call(FigureAction.Closed, num), call(FigureAction.OrderChanged, -1)])
+
+    def test_destroy_notifies_after_the_previous_figure_becomes_active(self):
+        previous_manager, _ = self.add_manager(0)
+        active_manager, _ = self.add_manager(1)
+        active_figure_when_notified = []
+        self.active_figure_changed.reset_mock()
+        self.active_figure_changed.side_effect = lambda: active_figure_when_notified.append(GlobalFigureManager.get_active())
+
+        GlobalFigureManager.destroy(active_manager.num)
+
+        self.active_figure_changed.assert_called_once_with()
+        self.assertEqual([previous_manager], active_figure_when_notified)
 
     def test_destroy_fig(self):
         num = 0
@@ -274,8 +308,8 @@ class TestGlobalFigureManager(unittest.TestCase):
         bad_observer = {}
         self.assertRaises(AssertionError, GlobalFigureManager.add_observer, bad_observer)
 
+    @patch.object(GlobalFigureManager, "observers", [])
     def test_notify_observers(self):
-        GlobalFigureManager.observers = []
         num = 10
         mock_observers = []
         for i in range(num):

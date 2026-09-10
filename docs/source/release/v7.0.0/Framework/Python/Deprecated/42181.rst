@@ -1,0 +1,1 @@
+- `PanelSurfaceCalculator.getSideBySideViewPos()` will no longer take an instrument parameter.

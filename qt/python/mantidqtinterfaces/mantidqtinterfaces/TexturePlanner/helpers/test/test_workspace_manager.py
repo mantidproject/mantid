@@ -169,7 +169,7 @@ class TestWorkspaceManager_InitWss(unittest.TestCase):
 
         mock_create_sim.assert_called_once_with(
             Instrument="ENGINX",
-            BinParams="0,0.1,5",
+            BinParams=WorkspaceManager.DEFAULT_BIN_PARAMS,
             OutputWorkspace=wm.WS_DATA,
             UnitX="dSpacing",
         )
@@ -288,7 +288,9 @@ class TestWorkspaceManager_CreateNewWsWithCopiedSample(unittest.TestCase):
 
         result = wm._create_new_ws_with_copied_sample("dest_ws", MagicMock(), clone=True)
 
-        mock_create_sim.assert_called_once_with(Instrument="ENGINX", BinParams="0,0.1,5", OutputWorkspace="dest_ws", UnitX="dSpacing")
+        mock_create_sim.assert_called_once_with(
+            Instrument="ENGINX", BinParams=WorkspaceManager.DEFAULT_BIN_PARAMS, OutputWorkspace="dest_ws", UnitX="dSpacing"
+        )
         mock_copy.assert_called_once_with(InputWorkspace="shape_tmp", OutputWorkspace="dest_ws", **COPY_KWARGS)
         self.assertEqual(result, "new_ws")
 
@@ -771,6 +773,85 @@ class TestWorkspaceManager_SetGaugeVolumeStr(unittest.TestCase):
 
         mock_define_gv.assert_not_called()
         mock_delete_log.assert_not_called()
+
+
+@patch(file_path + ".CreateSimulationWorkspace")
+class TestWorkspaceManager_CreateSimulationWorkspace(unittest.TestCase):
+    def test_defaults_to_the_generic_dspacing_grid(self, mock_create_sim):
+        wm = _make_manager("ENGINX")
+
+        result = wm.create_simulation_workspace("some_ws")
+
+        mock_create_sim.assert_called_once_with(
+            Instrument="ENGINX", BinParams=WorkspaceManager.DEFAULT_BIN_PARAMS, OutputWorkspace="some_ws", UnitX="dSpacing"
+        )
+        self.assertIs(result, mock_create_sim.return_value)
+
+    def test_forwards_explicit_unit_and_bin_params(self, mock_create_sim):
+        wm = _make_manager("IMAT")
+
+        wm.create_simulation_workspace("some_ws", unit="Wavelength", bin_params="1,2,3")
+
+        mock_create_sim.assert_called_once_with(Instrument="IMAT", BinParams="1,2,3", OutputWorkspace="some_ws", UnitX="Wavelength")
+
+    def test_reads_instrument_from_the_model_at_call_time(self, mock_create_sim):
+        # the instrument is a live property, so a switch must be picked up without rebuilding the manager
+        model = MagicMock()
+        model.instrument.get_instrument.return_value = "ENGINX"
+        wm = WorkspaceManager(model)
+        model.instrument.get_instrument.return_value = "IMAT"
+
+        wm.create_simulation_workspace("some_ws")
+
+        self.assertEqual(mock_create_sim.call_args.kwargs["Instrument"], "IMAT")
+
+
+class TestWorkspaceManager_CreateBinParamsAroundPoint(unittest.TestCase):
+    @staticmethod
+    def _edges(params):
+        start, step, stop = (float(p) for p in params.split(","))
+        return np.arange(start, stop + step / 2, step)
+
+    def _centres(self, params):
+        edges = self._edges(params)
+        return np.convolve(edges, np.ones(2), "valid") / 2
+
+    def test_point_lands_on_the_middle_bin_centre(self):
+        # read_attenuation_coefficient_at_value interpolates the MC output at the point, so the point
+        # must sit on a bin centre, not merely inside the range
+        for point in (0.2, 1.5, 7.5, 100.0):
+            with self.subTest(point=point):
+                centres = self._centres(WorkspaceManager.create_bin_params_around_point(point))
+                self.assertEqual(len(centres), 3)
+                self.assertAlmostEqual(centres[1], point)
+
+    def test_builds_three_bins(self):
+        # CreateSimulationWorkspace rejects anything with fewer than three bin boundaries, and
+        # interpolation needs at least two points either side to be well defined
+        edges = self._edges(WorkspaceManager.create_bin_params_around_point(1.5))
+
+        self.assertEqual(len(edges), 4)
+
+    def test_bracket_is_narrow_and_scales_with_the_point(self):
+        # a fixed-width bracket would be far too wide for a small point and too narrow for a large one
+        for point in (0.2, 1.5, 7.5):
+            with self.subTest(point=point):
+                edges = self._edges(WorkspaceManager.create_bin_params_around_point(point))
+                self.assertAlmostEqual((edges[-1] - edges[0]) / point, 0.03)
+
+    def test_bracket_stays_strictly_positive(self):
+        # negative dSpacing/wavelength is meaningless and CreateSimulationWorkspace would reject it
+        for point in (0.2, 1.5, 7.5):
+            with self.subTest(point=point):
+                self.assertGreater(self._edges(WorkspaceManager.create_bin_params_around_point(point))[0], 0)
+
+    def test_non_positive_point_is_clamped_rather_than_raising(self):
+        # a stray non-physical point should degrade to a garbage number, not kill the whole calculation
+        for point in (0.0, -1.5):
+            with self.subTest(point=point):
+                params = WorkspaceManager.create_bin_params_around_point(point)
+                self.assertGreater(self._edges(params)[0], 0)
+                self.assertAlmostEqual(self._centres(params)[1], 1e-6)
 
 
 if __name__ == "__main__":

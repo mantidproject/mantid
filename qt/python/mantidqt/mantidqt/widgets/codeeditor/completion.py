@@ -36,6 +36,8 @@ import warnings
 
 from inspect import getfullargspec
 
+from qtpy.compat import isalive
+
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.widgets.codeeditor.editor import CodeEditor
 
@@ -270,6 +272,10 @@ class CodeCompleter(object):
     def update_completion_api(self):
         with _ignore_matplotlib_deprecation_warnings():
             self._add_to_completions(self._get_completions_from_globals())
+
+        if not isalive(self.editor):
+            return
+
         self.editor.updateCompletionAPI(self.completions)
 
     def add_simpleapi_to_completions_if_required(self):

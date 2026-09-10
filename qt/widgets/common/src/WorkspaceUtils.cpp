@@ -221,6 +221,12 @@ bool doAllWsExistInADS(std::vector<std::string> const &workspaceNames) {
   return AnalysisDataService::Instance().doAllWsExist(workspaceNames);
 }
 
+void removeADSWorkspace(std::string const &workspaceName) {
+  if (doesExistInADS(workspaceName)) {
+    AnalysisDataService::Instance().remove(workspaceName);
+  }
+}
+
 std::vector<std::string> attachPrefix(std::vector<std::string> const &strings, std::string const &prefix) {
   return transformElements(strings.begin(), strings.end(), [&prefix](std::string const &str) { return prefix + str; });
 }

@@ -10,8 +10,8 @@ from unittest.mock import MagicMock
 
 import numpy
 
-from mantid.api import MatrixWorkspace
-from mantid.simpleapi import CreateSampleWorkspace, CreateWorkspace
+from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
+from mantid.simpleapi import CreateSampleWorkspace, CreateWorkspace, GroupWorkspaces
 from plugins.algorithms.WorkflowAlgorithms.ReflectometryISISSumBanks import ReflectometryISISSumBanks
 from testhelpers import WorkspaceCreationHelper
 
@@ -69,6 +69,24 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
 
         issues = alg.validateInputs()
         self.assertEqual(len(issues), 0)
+
+    def test_workspace_group_can_be_passed_and_returned_as_an_object(self):
+        self.addCleanup(AnalysisDataService.clear)
+        first = CreateSampleWorkspace(NumBanks=1, NumMonitors=2, BankPixelWidth=2, OutputWorkspace="group_member_1")
+        second = CreateSampleWorkspace(NumBanks=1, NumMonitors=2, BankPixelWidth=2, OutputWorkspace="group_member_2")
+        input_group = GroupWorkspaces([first, second], OutputWorkspace="input_group")
+        alg = ReflectometryISISSumBanks()
+        alg.initialize()
+        alg.setProperty("InputWorkspace", input_group)
+        alg.setProperty("OutputWorkspace", "summed_group")
+
+        alg.execute()
+
+        output_group = alg.getProperty("OutputWorkspace").value
+        self.assertIsInstance(output_group, WorkspaceGroup)
+        self.assertEqual(output_group.size(), 2)
+        self.assertEqual(output_group[0].getNumberHistograms(), 4)
+        self.assertEqual(output_group[1].getNumberHistograms(), 4)
 
     def test_no_summing_done_on_single_bank(self):
         test_ws = "ws"

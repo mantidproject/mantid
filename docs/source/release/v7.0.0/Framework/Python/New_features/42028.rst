@@ -1,0 +1,3 @@
+- Output workspace properties of the generic type ``Workspace`` now return a ``WorkspaceGroup`` object after an
+  algorithm is automatically dispatched over an input workspace group. Previously, the value component of the
+  property would be set to equal the ``WorkspaceGroup`` name but the workspace component would be null.

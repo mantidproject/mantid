@@ -73,6 +73,11 @@ class ALFInstrumentViewView(FullInstrumentViewView):
             self.delete_current_overlaid_shape()
             return
         self.add_rectangular_widget()
+
+    # ALF drives its tube selection from the rectangle rather than showing the base class's
+    # line-plot-only preview, so it registers its own callback here instead.
+    @override
+    def _register_shape_changed_callback(self) -> None:
         if self._shape_overlay_manager is None:
             return
         self._shape_overlay_manager.set_on_shape_changed(self._presenter.on_roi_shape_changed)

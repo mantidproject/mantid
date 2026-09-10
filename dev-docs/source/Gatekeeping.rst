@@ -29,14 +29,16 @@ With great power comes great responsibility
 Performing a merge on Github
 ============================
 
-*The* ``Merge pull request`` *button*
+* Gatekeepers should use ``Squash and merge`` for all pull requests. This option:
 
-* Generally we perform the default merge which is to create a merge commit, so you can just click ``Merge pull request``.
-* This button should be green if all checks have passed and there is an approved review. The button will be red if this is not the case but you have the power to override it and merge anyway - it is not recommended to do this but very occasionally may be needed if e.g. it is urgent and being held up by an unreliable test you are certain is unrelated. If you do need to do this, make sure you add a clear comment describing why.
-* Occasionally you might want to use ``Squash and merge`` from the drop-down menu, but typically this is only done if the developer specifically asked for it (although feel free to ask the developer if you can squash if you think that's more appropriate).
-* When you click the button you will get the chance to edit the commit message before committing. Typically we leave the commit title as per the default text so it is clear it is a merge, and paste the PR title into the body of the commit message. (Any other useful information can also be added here.)
-* Click ``Confirm merge`` to merge the commit to the destination branch.
-* If a PR is approved but still finishing its CI checks then the button will read ``Enable auto merge``. Feel free to use this if you are happy for the PR to be automatically merged once it passes all the CI checks.
+  * Helps maintain a tidy Git history by combining all of the commits in a PR into a single commit on the destination branch.
+  * Ensures that every commit on the destination branch is a complete, CI-tested change that compile. This keeps the Git history self-consistent and makes it easier to use ``git bisect`` to track down regressions.
+  * Makes it easier to identify which PR introduced a failure in a nightly build.
+
+* The ``Squash and merge`` button will be green if all checks have passed and there is an approved review. The button will be red if this is not the case but you have the power to override it and merge anyway. It is not recommended to do this but very occasionally may be needed if, for example, it is urgent and being held up by an unreliable test you are certain is unrelated. If you do need to do this, make sure you add a clear comment describing why.
+* When you click the button you will get the chance to edit the commit message before committing. Feel free to edit the commit message if the PR title can be improved upon. If required, add any useful information to the ``Extended description`` box.
+* Click ``Confirm merge (squash)`` to merge the commit to the destination branch.
+* If a PR is approved but still finishing its CI checks then the button will read ``Enable auto-merge (squash)``. Use this if you are happy for the PR to be automatically merged once it passes all the CI checks.
 
 
 Don't panic
@@ -90,7 +92,7 @@ Code quality
 ------------
 
 * Have a brief scan of some of the changes to check that they adhere to standards.
-* Consider any design decisions that have been made and if these are appropriate and not breaking any obvious design patters, e.g. it is common to see MVP being broken where logic is added to the view and is not testable; the lack of tests can be an indicator here. Is there any pollution of e.g. Qt in a non-Qt class; again this may make testing more difficult/complicated.
+* Consider any design decisions that have been made and if these are appropriate and not breaking any obvious design patterns, e.g. it is common to see MVP being broken where logic is added to the view and is not testable; the lack of tests can be an indicator here. Is there any pollution of e.g. Qt in a non-Qt class; again this may make testing more difficult/complicated.
 * Have a brief check that any tests look to be of good quality; unit tests should be clear and test things in isolation. Check for appropriate use of mocks.
 * Keep an eye out for any other code smells - unclear tests, files/classes too long, long comments etc.
 
@@ -124,40 +126,9 @@ While not vital and often not something I'd ask for changes on, it is good to ke
 Fixing a merge conflict between ``main`` and a protected branch
 ===============================================================
 
-There may occasionally be a merge conflict when the automated "Merge protected branches" workflow attempts to merge a protected branch into ``main``. The following instructions detail how to fix the conflict, using the ``release-next`` branch as an example:
+There may occasionally be a merge conflict when the automated "Merge protected branches" workflow attempts to merge a protected branch into ``main``. Since all PRs are now squash merged, these conflicts must be resolved by performing the merge directly on ``main`` so that the merge commit is preserved. The instructions below detail how to fix the conflict, using the ``release-next`` branch as an example.
 
-From a fork
------------
-
-Assuming your fork has the following remote setup
-
-.. code-block:: bash
-
-    $ git remote -v
-    mantid  https://github.com/mantidproject/mantid.git (fetch)
-    mantid  https://github.com/mantidproject/mantid.git (push)
-    origin  https://github.com/<username>/mantid.git (fetch)
-    origin  https://github.com/<username>/mantid.git (push)
-
-
-then you can follow these instructions to fix the merge conflict:
-
-.. code-block:: bash
-
-    git fetch --all
-    git checkout release-next
-    git pull mantid release-next
-    git checkout main
-    git pull mantid main
-    git checkout -b 0-fix-conflicts
-    git merge release-next
-
-You should then fix the merge conflicts, git add and commit the changes. Then push the branch to the ``mantid`` remote repository and open a PR. The PR should be reviewed and then merged into ``main``.
-
-From a non-fork
----------------
-
-Assuming you have the following remote setup
+Assuming you have the following remote setup:
 
 .. code-block:: bash
 
@@ -166,19 +137,22 @@ Assuming you have the following remote setup
     origin  https://github.com/mantidproject/mantid.git (push)
 
 
-then you can follow these instructions to fix the merge conflict:
+you can follow these instructions to fix the merge conflict:
 
 .. code-block:: bash
 
-    git fetch --all
-    git checkout release-next
-    git pull origin release-next
+    git fetch origin
     git checkout main
     git pull origin main
-    git checkout -b 0-fix-conflicts
-    git merge release-next
+    git merge origin/release-next
 
-You should then fix the merge conflicts, git add and commit the changes. Then push the branch to the ``origin`` remote repository and open a PR. The PR should be reviewed and then merged into ``main``.
+resolve any conflicts, then:
+
+.. code-block:: bash
+
+    git add <resolved-files>
+    git commit
+    git push origin main
 
 Specific quirks of Mantid
 =========================
@@ -208,7 +182,7 @@ Workspace Groups
 IDFs and IPFs
 -------------
 
-* These changes take effect as soon as they are merged to ``main`` - ensure the developer and their user(s) are aware of this. They may want to decouple these changes from code changes, and ensure backwards compatibility. Release notes may or may not be helpful (the changes are not tied to a release so in that case could be confusing, but some people prefer to add them because at least then the changes do get higlighted to users; it depends somewhat on the change and the audience).
+* These changes take effect as soon as they are merged to ``main`` - ensure the developer and their user(s) are aware of this. They may want to decouple these changes from code changes, and ensure backwards compatibility. Release notes may or may not be helpful (the changes are not tied to a release so in that case could be confusing, but some people prefer to add them because at least then the changes do get highlighted to users; it depends somewhat on the change and the audience).
 
 
 Unit tests

@@ -36,10 +36,18 @@ set(TEST_FILES
     Common/DecoderTest.h
     Common/DetectorTest.h
     Common/EncoderTest.h
+    Common/PlotOptionsProviderTest.h
+    Common/GroupHelperTest.h
     Common/PlotterTest.h
     Experiment/ExperimentPresenterTest.h
     Experiment/LookupTableValidatorTest.h
     Experiment/ExperimentOptionDefaultsTest.h
+    Plotting/PlottingModelTest.h
+    Plotting/PlottingPresenterTest.h
+    Plotting/PlottingViewStateProviderTest.h
+    Plotting/PlottingWorkspaceTreeTest.h
+    Plotting/QtActiveFigureMonitorTest.h
+    Plotting/QtPlottingViewTest.h
     Reduction/BatchLookupIndexTest.h
     Reduction/LookupTableTest.h
     Reduction/ReductionJobsMergeTest.h
@@ -53,6 +61,8 @@ set(TEST_FILES
     Preview/PreviewJobManagerTest.h
     Preview/PreviewModelTest.h
     Preview/PreviewPresenterTest.h
+    Preview/QtPreviewDockedWidgetsTest.h
+    Preview/QtPreviewViewTest.h
     Preview/PreviewSettingsTest.h
 )
 

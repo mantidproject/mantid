@@ -15,7 +15,7 @@ GlobalParameter::GlobalParameter(std::string parameter) : m_parameter(std::move(
 GlobalTie::GlobalTie(std::string parameter, std::string tie)
     : m_parameter(std::move(parameter)), m_tie(std::move(tie)) {}
 
-std::string GlobalTie::toCompositeParameter(std ::string const &fullParameter) const {
+std::string GlobalTie::toCompositeParameter(std::string const &fullParameter) const {
   auto const dotIndex = fullParameter.find(".");
   if (dotIndex != std::string::npos) {
     return fullParameter.substr(0, dotIndex + 1) + "f0." + fullParameter.substr(dotIndex + 1);
@@ -23,7 +23,7 @@ std::string GlobalTie::toCompositeParameter(std ::string const &fullParameter) c
   return fullParameter;
 }
 
-std::string GlobalTie::toNonCompositeParameter(std ::string const &fullParameter) const {
+std::string GlobalTie::toNonCompositeParameter(std::string const &fullParameter) const {
   auto const firstDotIndex = fullParameter.find(".");
   if (firstDotIndex != std::string::npos) {
     auto const secondDotIndex = fullParameter.find(".", firstDotIndex + 1);

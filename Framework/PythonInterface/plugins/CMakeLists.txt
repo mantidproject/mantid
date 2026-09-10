@@ -176,6 +176,7 @@ set(PYTHON_PLUGINS
     algorithms/ReorientUnitCell.py
     algorithms/ReflectometryReductionOneLiveData.py
     algorithms/ReflectometrySliceEventWorkspace.py
+    algorithms/ReflectometrySliceEventWorkspace2.py
     algorithms/RetrieveRunInfo.py
     algorithms/SANSSubtract.py
     algorithms/SANSWideAngleCorrection.py

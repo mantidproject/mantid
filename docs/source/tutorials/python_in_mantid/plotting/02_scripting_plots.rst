@@ -185,6 +185,7 @@ Output:
 
     DeleteWorkspace(ws)
 
+.. _generate_plot_script:
 
 Generate a Script
 =================

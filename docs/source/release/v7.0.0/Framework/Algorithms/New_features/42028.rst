@@ -1,0 +1,2 @@
+- :ref:`RenameWorkspace <algm-RenameWorkspace>` can now assign a name to a workspace object that is not already in the
+  Analysis Data Service (ADS). In this case, the workspace will be added to the ADS.

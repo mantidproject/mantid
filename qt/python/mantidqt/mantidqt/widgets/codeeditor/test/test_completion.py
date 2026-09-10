@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt  # noqa # Needs importing so it's availiabe in t
 import numpy as np
 
 from mantid.simpleapi import FrameworkManager
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from mantidqt.widgets.codeeditor.completion import (
     CodeCompleter,
     generate_call_tips,
@@ -34,7 +34,10 @@ class CodeCompletionTest(unittest.TestCase):
     def _run_check_call_tip_generated(self, script_text, call_tip_regex):
         completer = self._get_completer(script_text)
         update_completion_api_mock = completer.editor.updateCompletionAPI
-        completer._add_simpleapi_to_completions_if_required()
+
+        with patch("mantidqt.widgets.codeeditor.completion.isalive", return_value=True):
+            completer._add_simpleapi_to_completions_if_required()
+
         call_tips = update_completion_api_mock.call_args_list[1][0][0]
         self.assertEqual(2, update_completion_api_mock.call_count)
         self.assertGreater(len(call_tips), 1)
@@ -122,6 +125,15 @@ class CodeCompletionTest(unittest.TestCase):
         }
         for import_name, alias in aliases.items():
             self.assertEqual(alias, get_module_import_alias(import_name, script))
+
+    @patch("mantidqt.widgets.codeeditor.completion.isalive", return_value=False)
+    def test_update_completion_api_does_nothing_if_editor_is_not_alive(self, mock_isalive):
+        completer = self._get_completer("")
+        # editor.updateCompletionAPI() is called in the CodeCompleter init,
+        # so reset the mock before checking it's not called when running update_completion_api().
+        completer.editor.updateCompletionAPI.reset_mock()
+        completer.update_completion_api()
+        completer.editor.updateCompletionAPI.assert_not_called()
 
 
 if __name__ == "__main__":

@@ -179,6 +179,9 @@ class TexturePlannerSettingsView(QDialog):
         self.att_use_data_range = QCheckBox()
         form.addRow("Use Data Range Scale:", self.att_use_data_range)
 
+        self.att_show_current = QCheckBox()
+        form.addRow("Highlight Current Orientation:", self.att_show_current)
+
         group.setLayout(form)
         return group
 
@@ -231,6 +234,7 @@ class TexturePlannerSettingsView(QDialog):
         self.att_use_data_range.setToolTip(
             "If checked, the estimated transmission plot colour scale spans the data range; if unchecked, it is fixed between 0 and 1"
         )
+        self.att_show_current.setToolTip("If checked, the estimated transmission plot will highlight the points of the current orientation")
 
     # ================
     # Slot Connectors
@@ -306,6 +310,9 @@ class TexturePlannerSettingsView(QDialog):
     def get_att_use_data_range(self) -> bool:
         return self.att_use_data_range.isChecked()
 
+    def get_att_show_current(self) -> bool:
+        return self.att_show_current.isChecked()
+
     # ================
     # Setters
     # ================
@@ -366,3 +373,6 @@ class TexturePlannerSettingsView(QDialog):
 
     def set_att_use_data_range(self, check: bool) -> None:
         self.att_use_data_range.setChecked(check)
+
+    def set_att_show_current(self, check: bool) -> None:
+        self.att_show_current.setChecked(check)

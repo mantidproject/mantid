@@ -5,9 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from unittest import mock
 from mantid.api import mtd, AnalysisDataService
 from mantid.kernel import config
-from mantid.simpleapi import ClearMaskFlag, DeleteWorkspace, LoadEmptyInstrument, MaskBTP
+from mantid.simpleapi import DeleteWorkspace, LoadEmptyInstrument, MaskBTP
 from testhelpers import WorkspaceCreationHelper
 from numpy import concatenate, arange, sort, array_equal, where
 
@@ -149,6 +150,18 @@ class MaskBTPTest(unittest.TestCase):
         # keep on masking the same workspace to speed up the test
         masking = MaskBTP(Workspace="TOPAZMaskBTP", Tube="edges")
         self.assertEqual(2 * 256 * 25, len(masking))
+
+    def test_wish_workspace_with_padded_instrument_name(self):
+        ws_name = "wish"
+        ws = LoadEmptyInstrument(InstrumentName="WISH", OutputWorkspace=ws_name)
+
+        expected = MaskBTP(Workspace=ws_name, Pixel="1-16,496-512")
+
+        with mock.patch.object(type(ws), "getInstrumentName", return_value="WISH    "):
+            masked = MaskBTP(Workspace=ws_name, Pixel="1-16,496-512")
+
+        self.assertTrue(array_equal(masked, expected))
+        DeleteWorkspace(ws_name)
 
     def test_eqsans_simple(self):
         ws_name = "eqsans"
@@ -317,35 +330,6 @@ class MaskBTPTest(unittest.TestCase):
         masked_pixels = MaskBTP(Workspace=ws_name, Pixel="0-9")
         # 10 pixels * 512 tubes * 3 banks
         self.assertEqual(len(masked_pixels), 10 * 512 * 3)
-        self.checkConsistentMask(wksp, masked_pixels)
-
-        DeleteWorkspace(ws_name)
-
-    def testIMAGINEMaskBTP(self):
-        ws_name = mtd.unique_hidden_name()
-        LoadEmptyInstrument(InstrumentName="IMAGINE", OutputWorkspace=ws_name)
-        wksp = mtd[ws_name]
-
-        # Test masking individual bank 11 (512*512 pixels)
-        masked_bank11 = MaskBTP(Workspace=ws_name, Bank="11")
-        self.assertEqual(len(masked_bank11), 512 * 512)
-        self.checkConsistentMask(wksp, masked_bank11)
-
-        # Clear mask to start fresh
-        ClearMaskFlag(Workspace=ws_name)
-
-        # Test masking multiple banks (banks 11-18, first series)
-        masked_banks = MaskBTP(Workspace=ws_name, Bank="11-18")
-        self.assertEqual(len(masked_banks), 8 * 512 * 512)
-        self.checkConsistentMask(wksp, masked_banks)
-
-        # Clear mask to start fresh
-        ClearMaskFlag(Workspace=ws_name)
-
-        # Test masking specific pixels (first 10 pixels in all banks, 0-indexed)
-        masked_pixels = MaskBTP(Workspace=ws_name, Pixel="0-9")
-        # 10 pixels * 512 tubes * 80 banks
-        self.assertEqual(len(masked_pixels), 10 * 512 * 80)
         self.checkConsistentMask(wksp, masked_pixels)
 
         DeleteWorkspace(ws_name)

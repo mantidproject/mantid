@@ -14,7 +14,14 @@ from mantid.api import (
     WorkspaceGroup,
     WorkspaceProperty,
 )
-from mantid.kernel import CompositeValidator, StringArrayLengthValidator, StringArrayMandatoryValidator, StringArrayProperty, Direction
+from mantid.kernel import (
+    CompositeValidator,
+    StringArrayLengthValidator,
+    StringArrayMandatoryValidator,
+    StringArrayProperty,
+    Direction,
+    StringListValidator,
+)
 
 
 class ReflectometryISISPreprocess(DataProcessorAlgorithm):
@@ -24,6 +31,12 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
     _MONITOR_WS = "MonitorWorkspace"
     _EVENT_MODE = "EventMode"
     _CALIBRATION_FILE = "CalibrationFile"
+    _THETA_IN = "ThetaIn"
+    _THETA_LOG_NAME = "ThetaLogName"
+    _CALIBRATION_FILE_LOG = "reflectometry_calibration_file"
+    _POLREF = "POLREF"
+    _POLREF_START_WS_INDEX = 4
+    _HANDLE_METHOD_ALREADY_CALIBRATED = "IfAlreadyCalibrated"
 
     def __init__(self):
         """Initialize an instance of the algorithm."""
@@ -61,17 +74,42 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
             doc="The loaded monitors workspace. This is only output in event mode.",
         )
         self.copyProperties("ReflectometryISISCalibration", [self._CALIBRATION_FILE])
+        self.copyProperties("ReflectometryReductionOneAuto", [self._THETA_IN, self._THETA_LOG_NAME])
+        self.declareProperty(
+            self._HANDLE_METHOD_ALREADY_CALIBRATED,
+            "NONE",
+            validator=StringListValidator(["NONE", "WARN", "THROW"]),
+            doc="How to handle loaded files that have already been calibrated, if calibration file specified.",
+        )
 
     def PyExec(self):
         workspace, monitor_ws = self._loadRun(self.getPropertyValue(self._RUNS))
 
         calibration_file = self.getPropertyValue(self._CALIBRATION_FILE)
         if calibration_file:
+            self.handle_if_already_calibrated(workspace)
             workspace = self._applyCalibration(workspace, calibration_file)
 
         self.setProperty(self._OUTPUT_WS, workspace)
         if monitor_ws:
             self.setProperty(self._MONITOR_WS, monitor_ws)
+
+    def handle_if_already_calibrated(self, workspace):
+        handle_method = self.getPropertyValue(self._HANDLE_METHOD_ALREADY_CALIBRATED)
+        if handle_method == "NONE":
+            return
+        if isinstance(workspace, WorkspaceGroup):
+            for ws in workspace:
+                self.handle_if_already_calibrated(ws)
+            return
+        if workspace.run().hasProperty(self._CALIBRATION_FILE_LOG):
+            if handle_method == "WARN":
+                self.log().warning(
+                    f"Workspace with run no. {workspace.getRunNumber()} already has a calibration file log. "
+                    "The calibration algorithm will be rerun, which may produce erroneous results."
+                )
+            else:  # handle_method == "THROW"
+                raise RuntimeError(f"Workspace with run no. {workspace.getRunNumber()} already has a calibration file log.")
 
     @staticmethod
     def _get_input_runs_validator():
@@ -101,17 +139,70 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
             self.log().information("Loaded workspace ")
         return ws, monitor_ws
 
-    def _applyCalibration(self, ws: MatrixWorkspace, calibration_filepath: str) -> MatrixWorkspace:
-        if isinstance(ws, WorkspaceGroup):
-            raise RuntimeError("Calibrating a Workspace Group as part of pre-processing is not currently supported")
-
+    def _apply_calibration_impl(
+        self, ws: MatrixWorkspace, calibration_filepath: str, specular_pixel_spectrum_no: float | None = None
+    ) -> MatrixWorkspace:
         alg = self.createChildAlgorithm("ReflectometryISISCalibration")
         alg.setProperty("InputWorkspace", ws)
         alg.setProperty("CalibrationFile", calibration_filepath)
+
+        if specular_pixel_spectrum_no is not None:  # Only present for POLREF workflow
+            alg.setProperty("InstrumentWorkflow", self._POLREF)
+            alg.setProperty("SpecularPixelSpectrumNo", specular_pixel_spectrum_no)
+            alg.setProperty("ExperimentAngle", self._experiment_angle(ws))
+
         alg.execute()
         calibrated_ws = alg.getProperty("OutputWorkspace").value
-        self.log().information("Calibrated workspace")
+        calibrated_ws.run().addProperty(self._CALIBRATION_FILE_LOG, calibration_filepath, True)
+        self.log().information(f"Calibrated workspace {ws.getName()}")
         return calibrated_ws
+
+    def _applyCalibration(self, ws: MatrixWorkspace, calibration_filepath: str) -> MatrixWorkspace:
+        is_group = isinstance(ws, WorkspaceGroup)
+        ws1 = ws[0] if is_group else ws
+        specular_pixel_spectrum_no = None
+        if ws1.getInstrument().getName() == self._POLREF:
+            specular_pixel_spectrum_no = self._find_specular_pixel_spectrum_no(ws1, self._POLREF_START_WS_INDEX)
+
+        if is_group:
+            calibrated_group = WorkspaceGroup()
+            for member in ws:
+                calibrated_group.addWorkspace(self._apply_calibration_impl(member, calibration_filepath, specular_pixel_spectrum_no))
+            return calibrated_group
+        return self._apply_calibration_impl(ws, calibration_filepath, specular_pixel_spectrum_no)
+
+    def _find_specular_pixel_spectrum_no(self, ws: MatrixWorkspace, start_index: int) -> float:
+        lines_alg = self.createChildAlgorithm("FindReflectometryLines")
+        lines_alg.setProperty("InputWorkspace", ws)
+        lines_alg.setProperty("StartWorkspaceIndex", start_index)
+        lines_alg.execute()
+        line_centre = lines_alg.getProperty("LineCentre").value
+        return self._spectrum_number_for_workspace_index(ws, line_centre)
+
+    def _experiment_angle(self, ws: MatrixWorkspace) -> float:
+        theta = self.getProperty(self._THETA_IN)
+        if not theta.isDefault:
+            return theta.value
+
+        theta_log_name = self.getPropertyValue(self._THETA_LOG_NAME)
+        if theta_log_name:
+            theta_log = ws.run().getProperty(theta_log_name)
+            if hasattr(theta_log, "lastValue"):
+                return theta_log.lastValue()
+            return float(theta_log.value)
+
+        raise RuntimeError("ThetaIn or ThetaLogName must be provided when calibrating POLREF data")
+
+    @staticmethod
+    def _spectrum_number_for_workspace_index(ws: MatrixWorkspace, workspace_index: float) -> float:
+        lower_index = int(workspace_index)
+        fraction = workspace_index - lower_index
+        lower_spectrum_no = ws.getSpectrum(lower_index).getSpectrumNo()
+        if fraction == 0.0:
+            return float(lower_spectrum_no)
+
+        upper_spectrum_no = ws.getSpectrum(lower_index + 1).getSpectrumNo()
+        return lower_spectrum_no + fraction * (upper_spectrum_no - lower_spectrum_no)
 
     @staticmethod
     def _validate_event_ws(workspace):

@@ -709,9 +709,11 @@ PropertyHandler *FitPropertyBrowser::getHandler() const {
   return static_cast<PropertyHandler *>(m_compositeFunction->getHandler());
 }
 
-PropertyHandler *FitPropertyBrowser::addFunction(const std::string &fnName) {
+PropertyHandler *FitPropertyBrowser::addFunction(const std::string &fnName, bool notify /*= true*/) {
   PropertyHandler *h = getHandler()->addFunction(fnName);
-  emit functionChanged();
+  if (notify) {
+    emit functionChanged();
+  }
   return h;
 }
 
@@ -2763,6 +2765,7 @@ void FitPropertyBrowser::findPeaks(const std::unique_ptr<FindPeakStrategyGeneric
   try {
     findPeakStrategy->execute();
     clear();
+    m_browser->setUpdatesEnabled(false);
     for (size_t i = 0; i < findPeakStrategy->peakNumber(); ++i) {
       if (findPeakStrategy->getPeakCentre(i) < startX() || findPeakStrategy->getPeakCentre(i) > endX()) {
         continue;
@@ -2771,7 +2774,10 @@ void FitPropertyBrowser::findPeaks(const std::unique_ptr<FindPeakStrategyGeneric
         break;
       }
     }
+    m_browser->setUpdatesEnabled(true);
+    emit functionChanged();
   } catch (...) {
+    m_browser->setUpdatesEnabled(true);
     QApplication::restoreOverrideCursor();
     throw;
   }
@@ -3313,7 +3319,7 @@ bool FitPropertyBrowser::createAndAddFunction(const Mantid::API::MatrixWorkspace
     f->setCentre(findPeakStrategy->getPeakCentre(peakIndex));
     f->setFwhm(findPeakStrategy->getPeakWidth(peakIndex));
     f->setHeight(findPeakStrategy->getPeakHeight(peakIndex));
-    addFunction(f->asString());
+    addFunction(f->asString(), false);
   }
   return validFn;
 }

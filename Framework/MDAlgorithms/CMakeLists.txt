@@ -76,6 +76,7 @@ set(SRC_FILES
     src/LogarithmMD.cpp
     src/MDEventWSWrapper.cpp
     src/MDNorm.cpp
+    src/MDNormBase.cpp
     src/MDNormDirectSC.cpp
     src/MDNormSCD.cpp
     src/MDTransfAxisNames.cpp
@@ -198,6 +199,7 @@ set(INC_FILES
     inc/MantidMDAlgorithms/MDEventTreeBuilder.h
     inc/MantidMDAlgorithms/MDEventWSWrapper.h
     inc/MantidMDAlgorithms/MDNorm.h
+    inc/MantidMDAlgorithms/MDNormBase.h
     inc/MantidMDAlgorithms/MDNormDirectSC.h
     inc/MantidMDAlgorithms/MDNormSCD.h
     inc/MantidMDAlgorithms/MDTransfAxisNames.h

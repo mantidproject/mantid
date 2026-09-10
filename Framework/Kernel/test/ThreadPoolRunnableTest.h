@@ -29,7 +29,7 @@ public:
   void test_run() {
     std::unique_ptr<ThreadPoolRunnable> tpr;
     std::unique_ptr<ThreadScheduler> sc = std::make_unique<ThreadSchedulerFIFO>();
-    tpr = std ::make_unique<ThreadPoolRunnable>(0, sc.get());
+    tpr = std::make_unique<ThreadPoolRunnable>(0, sc.get());
     sc->push(std::make_shared<SimpleTask>());
     TS_ASSERT_EQUALS(sc->size(), 1);
 

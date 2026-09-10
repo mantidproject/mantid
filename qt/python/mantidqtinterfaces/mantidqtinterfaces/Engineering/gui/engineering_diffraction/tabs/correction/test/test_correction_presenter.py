@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #
 import unittest
+import numpy as np
+from scipy.spatial.transform import Rotation
 from unittest.mock import MagicMock, patch, call
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.correction.presenter import TextureCorrectionPresenter
 
@@ -78,9 +80,21 @@ class TestTextureCorrectionPresenter(unittest.TestCase):
         self.view.get_reference_file.return_value = "ref_file.nxs"
         self.model.load_ref = MagicMock()
         self.presenter.update_reference_info = MagicMock()
+        # the setting is read from real QSettings otherwise, making the test depend on the machine
+        self.presenter._get_setting = MagicMock(return_value=False)
         self.presenter._on_load_ref_clicked()
         self.model.load_ref.assert_called_once_with("ref_file.nxs")
         self.presenter.update_reference_info.assert_called_once()
+
+    def test_load_ref_adopts_directions_when_the_setting_is_on(self):
+        self.presenter.update_reference_info = MagicMock()
+        self.presenter._adopt_reference_texture_directions = MagicMock()
+        self.presenter._get_setting = MagicMock(return_value=True)
+
+        self.presenter._on_load_ref_clicked()
+
+        self.presenter._get_setting.assert_called_once_with("read_texture_dirs_from_ref", bool)
+        self.presenter._adopt_reference_texture_directions.assert_called_once_with()
 
     def test_update_reference_info_calls_view_update(self):
         self.view.reset_mock()
@@ -154,6 +168,115 @@ class TestTextureCorrectionPresenter(unittest.TestCase):
         val = self.presenter._get_setting("key")
         self.assertEqual(val, "default")
         mock_get.assert_called_once()
+
+
+@patch(presenter_path + ".set_setting")
+class TestAdoptReferenceTextureDirections(unittest.TestCase):
+    """Loading a reference workspace re-frames the sample directions for the active experiment."""
+
+    # RD=(0,1,0), ND=(0,0,1), TD=(1,0,0) stored as COLUMNS, so a transposed write would show up
+    _AX_TRANSFORM = np.array([[0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
+    _DIR_NAMES = ("AD", "BD", "CD")
+
+    def setUp(self):
+        self.model = MagicMock()
+        self.view = MagicMock()
+        self.presenter = TextureCorrectionPresenter(self.model, self.view)
+        self.presenter.set_rb_num("RB123")
+        self.presenter.reference_frame_notifier = MagicMock()
+        self.model.get_reference_ws.return_value = "ref_ws"
+        # every direction setting currently holds the default frame
+        self._stored = {"rd_dir": "1,0,0", "nd_dir": "0,1,0", "td_dir": "0,0,1", "rd_name": "RD", "nd_name": "ND", "td_name": "TD"}
+        self.presenter._get_setting = MagicMock(side_effect=lambda name, *a: self._stored.get(name, ""))
+
+    @staticmethod
+    def _written(mock_set_setting):
+        # {setting_name: (value, rb)} from the set_setting calls
+        return {c.args[2]: (c.args[3], c.kwargs.get("rb")) for c in mock_set_setting.call_args_list}
+
+    def test_directions_are_written_under_the_active_rb(self, mock_set_setting):
+        self.model.get_reference_texture_directions.return_value = (self._AX_TRANSFORM, self._DIR_NAMES)
+
+        self.presenter._adopt_reference_texture_directions()
+
+        written = self._written(mock_set_setting)
+        # columns of the matrix map onto RD/ND/TD in order
+        self.assertEqual(written["rd_dir"], ("0.0,1.0,0.0", "RB123"))
+        self.assertEqual(written["nd_dir"], ("0.0,0.0,1.0", "RB123"))
+        self.assertEqual(written["td_dir"], ("1.0,0.0,0.0", "RB123"))
+        self.assertEqual(written["rd_name"], ("AD", "RB123"))
+        self.assertEqual(written["nd_name"], ("BD", "RB123"))
+        self.assertEqual(written["td_name"], ("CD", "RB123"))
+
+    @patch(presenter_path + ".logger")
+    def test_a_reference_without_directions_leaves_the_settings_alone(self, mock_logger, mock_set_setting):
+        # a reference built by Create Reference Workspace carries no direction logs; that says
+        # nothing about the sample frame and must not wipe a configured one
+        self.model.get_reference_texture_directions.return_value = None
+
+        self.presenter._adopt_reference_texture_directions()
+
+        mock_set_setting.assert_not_called()
+        self.presenter.reference_frame_notifier.notify_subscribers.assert_not_called()
+        mock_logger.notice.assert_called_once()
+
+    @patch(presenter_path + ".logger")
+    def test_the_change_is_logged_with_the_old_and_new_values(self, mock_logger, mock_set_setting):
+        self.model.get_reference_texture_directions.return_value = (self._AX_TRANSFORM, self._DIR_NAMES)
+
+        self.presenter._adopt_reference_texture_directions()
+
+        message = mock_logger.notice.call_args.args[0]
+        self.assertIn("RB123", message)
+        self.assertIn("ref_ws", message)
+        self.assertIn("rd_dir 1,0,0 -> 0.0,1.0,0.0", message)
+        self.assertIn("rd_name RD -> AD", message)
+
+    @patch(presenter_path + ".logger")
+    def test_a_reference_matching_the_current_settings_is_not_reported(self, mock_logger, mock_set_setting):
+        self.model.get_reference_texture_directions.return_value = (np.eye(3), ("RD", "ND", "TD"))
+        self._stored.update({"rd_dir": "1.0,0.0,0.0", "nd_dir": "0.0,1.0,0.0", "td_dir": "0.0,0.0,1.0"})
+
+        self.presenter._adopt_reference_texture_directions()
+
+        mock_logger.notice.assert_not_called()
+        self.presenter.reference_frame_notifier.notify_subscribers.assert_not_called()
+
+    @patch(presenter_path + ".logger")
+    def test_the_default_direction_strings_are_not_reported_as_a_change(self, mock_logger, mock_set_setting):
+        # the stored defaults are typed as "1,0,0" while these are always written as floats, so
+        # comparing the strings would report an identity reference as a re-framing
+        self.model.get_reference_texture_directions.return_value = (np.eye(3), ("RD", "ND", "TD"))
+
+        self.presenter._adopt_reference_texture_directions()
+
+        mock_logger.notice.assert_not_called()
+        self.presenter.reference_frame_notifier.notify_subscribers.assert_not_called()
+
+    def test_the_settings_dialog_is_told_to_drop_its_cache(self, mock_set_setting):
+        # otherwise the dialog's pre-load cache would be written back over these values on Apply
+        self.model.get_reference_texture_directions.return_value = (self._AX_TRANSFORM, self._DIR_NAMES)
+
+        self.presenter._adopt_reference_texture_directions()
+
+        self.presenter.reference_frame_notifier.notify_subscribers.assert_called_once_with()
+
+    def test_without_an_rb_the_directions_are_written_globally(self, mock_set_setting):
+        self.presenter.set_rb_num(None)
+        self.model.get_reference_texture_directions.return_value = (self._AX_TRANSFORM, self._DIR_NAMES)
+
+        self.presenter._adopt_reference_texture_directions()
+
+        self.assertEqual(self._written(mock_set_setting)["rd_dir"], ("0.0,1.0,0.0", None))
+
+    def test_rotated_directions_are_written_at_a_usable_precision(self, mock_set_setting):
+        rotated = Rotation.from_euler("z", 30, degrees=True).as_matrix()
+        self.model.get_reference_texture_directions.return_value = (rotated, self._DIR_NAMES)
+
+        self.presenter._adopt_reference_texture_directions()
+
+        rd_value, _ = self._written(mock_set_setting)["rd_dir"]
+        np.testing.assert_allclose([float(x) for x in rd_value.split(",")], rotated[:, 0], atol=1e-6)
 
 
 if __name__ == "__main__":

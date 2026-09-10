@@ -24,6 +24,7 @@ public:
   MOCK_CONST_METHOD0(experiment, IExperimentView *());
   MOCK_CONST_METHOD0(instrument, IInstrumentView *());
   MOCK_CONST_METHOD0(preview, IPreviewView *());
+  MOCK_CONST_METHOD0(plotting, IPlottingView *());
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

@@ -245,6 +245,8 @@ void PropertyHandler::initParameters() {
     m_item->property()->removeSubProperty(parameter);
   }
   m_parameters.clear();
+  m_paramToPropertyHandlerMap.clear();
+
   for (size_t i = 0; i < function()->nParams(); i++) {
     QString parName = QString::fromStdString(function()->parameterName(i));
     if (parName.contains('.'))
@@ -295,6 +297,13 @@ void PropertyHandler::initParameters() {
         prop->addSubProperty(upProp);
       }
       m_constraints.insert(parName, std::pair<QtProperty *, QtProperty *>(loProp, upProp));
+    }
+  }
+
+  PropertyHandler *pHandler = this->parentHandler();
+  if (pHandler) {
+    for (auto it = m_parameters.cbegin(); it != m_parameters.cend(); ++it) {
+      pHandler->m_paramToPropertyHandlerMap[*it] = this;
     }
   }
 }
@@ -360,9 +369,8 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
     f = Mantid::API::FunctionFactory::Instance().createInitialized(fnName);
   }
 
-  // turn of the change slots (doubleChanged() etc) to avoid infinite loop
+  // turn off the change slots (doubleChanged() etc) to avoid infinite loop
   m_browser->m_changeSlotsEnabled = false;
-
   // Check if it's a peak and set its width
   std::shared_ptr<Mantid::API::IPeakFunction> pf = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(f);
   if (pf) {
@@ -415,20 +423,21 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
 
   size_t nFunctions = m_cf->nFunctions() + 1;
   m_cf->addFunction(f);
+
   m_browser->compositeFunction()->checkFunction();
 
   if (m_cf->nFunctions() != nFunctions) { // this may happen
     m_browser->reset();
+    m_browser->m_changeSlotsEnabled = true;
     return nullptr;
   }
 
   f->setHandler(std::make_unique<PropertyHandler>(f, m_cf, m_browser));
+
   auto h = static_cast<PropertyHandler *>(f->getHandler());
   h->setAttribute("StartX", m_browser->startX());
   h->setAttribute("EndX", m_browser->endX());
 
-  // enable the change slots
-  m_browser->m_changeSlotsEnabled = true;
   m_browser->setFitEnabled(true);
   if (pf) {
     m_browser->setDefaultPeakType(f->name());
@@ -438,7 +447,8 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
   m_browser->setFocus();
   auto return_ptr = static_cast<PropertyHandler *>(f->getHandler());
   m_browser->setCurrentFunction(return_ptr);
-
+  // enable the change slots
+  m_browser->m_changeSlotsEnabled = true;
   return return_ptr;
 }
 
@@ -663,7 +673,6 @@ bool PropertyHandler::setParameter(QtProperty *prop) {
     std::string parName = prop->propertyName().toStdString();
     double parValue = m_browser->m_parameterManager->value(prop);
     m_fun->setParameter(parName, parValue);
-
     // If the parameter is fixed, re-fix to update the subproperty.
     if (m_fun->isFixed(m_fun->parameterIndex(parName))) {
       const auto subProps = prop->subProperties();
@@ -678,8 +687,9 @@ bool PropertyHandler::setParameter(QtProperty *prop) {
     return true;
   }
   if (m_cf) {
-    for (size_t i = 0; i < m_cf->nFunctions(); i++) {
-      bool res = getHandler(i)->setParameter(prop);
+    auto pit = m_paramToPropertyHandlerMap.find(prop);
+    if (pit != m_paramToPropertyHandlerMap.end()) {
+      bool res = pit.value()->setParameter(prop);
       if (res) {
         m_cf->applyTies();
         updateParameters();

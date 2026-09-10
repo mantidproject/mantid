@@ -18,6 +18,18 @@ AlgorithmProgressWidget::AlgorithmProgressWidget(QWidget *parent)
       m_detailsButton{new QPushButton("Details")},
       m_presenter{std::make_unique<AlgorithmProgressPresenter>(parent, this)} {
   m_progressBar->setAlignment(Qt::AlignHCenter);
+  m_progressBar->setStyleSheet(R"(
+    QProgressBar {
+      text-align: center;
+      border-radius: 3px;
+    }
+    QProgressBar::chunk {
+      background-color: lightgreen;
+      border-radius: 3px;
+    }
+    )");
+  m_progressBar->setValue(0);
+  m_progressBar->setFormat("Idle.");
   m_layout->addWidget(m_progressBar);
   m_layout->addWidget(m_detailsButton);
   this->setLayout(m_layout);

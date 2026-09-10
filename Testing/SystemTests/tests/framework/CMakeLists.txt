@@ -134,6 +134,7 @@ set(SYSTEST_NAMES
     # LRReductionWithReferenceTest  # Skipped due to missing import.
     LRScalingFactorsTest.py
     MagnetismReflectometryReductionTest.py
+    MaskBTPTest.py
     MaxEntTest.py
     MDNormBackgroundHYSPECTest.py
     MDNormCORELLITest.py

@@ -46,6 +46,8 @@ class Prop:
 
 
 class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
+    _CALIBRATION_FILE_LOG = "reflectometry_calibration_file"
+
     def __init__(self):
         """Initialize an instance of the algorithm."""
         DataProcessorAlgorithm.__init__(self)
@@ -186,7 +188,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         whenSliceEnabled = EnabledWhenProperty(Prop.SLICE, PropertyCriterion.IsEqualTo, "1")
 
         self._slice_properties = ["TimeInterval", "LogName", "LogValueInterval", "UseNewFilterAlgorithm"]
-        self.copyProperties("ReflectometrySliceEventWorkspace", self._slice_properties)
+        self.copyProperties("ReflectometrySliceEventWorkspace", self._slice_properties, version=1)
         for property in self._slice_properties:
             self.setPropertySettings(property, whenSliceEnabled)
             self.setPropertyGroup(property, "Slicing")
@@ -359,10 +361,18 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             return
 
         perform_sum = []
-        for workspace_name in [inputWorkspace, firstTransWorkspace, secondTransWorkspace]:
+        for workspace_name, inspect_all_group_members in [
+            (inputWorkspace, True),
+            (firstTransWorkspace, False),
+            (secondTransWorkspace, False),
+        ]:
             if workspace_name is not None:
                 workspace = AnalysisDataService.retrieve(workspace_name)
-                perform_sum.append(self._has_single_2D_rectangular_detector(workspace))
+                if isinstance(workspace, WorkspaceGroup):
+                    workspaces = workspace if inspect_all_group_members else [workspace[0]]
+                else:
+                    workspaces = [workspace]
+                perform_sum.extend(self._has_single_2D_rectangular_detector(member) for member in workspaces)
 
         should_sum = perform_sum[0]
         if not all(sum_ws == should_sum for sum_ws in perform_sum):
@@ -373,10 +383,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             self.setProperty(Prop.ROI_DETECTOR_IDS, "")
 
     def _has_single_2D_rectangular_detector(self, workspace) -> bool:
-        """Returns true if workspace has a single 2D rectangular detector, and is not a group workspace."""
-        is_group = isinstance(workspace, WorkspaceGroup)
-        if is_group:
-            workspace = workspace[0]
+        """Returns true if workspace has a single 2D rectangular detector."""
 
         rect_detectors = workspace.getInstrument().findRectDetectors()
         num_rect_detectors = len(rect_detectors)
@@ -390,9 +397,6 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # We don't sum banks for a linear detector
         if rect_detectors[0].xpixels() == 1 or rect_detectors[0].ypixels() == 1:
             return False
-
-        if is_group:
-            raise NotImplementedError("Not implemented for a WorkspaceGroup containing 2D detectors.")
 
         if not self._all_spectra_refer_to_rectangular_detector(workspace, rect_detectors[0]):
             return False
@@ -462,9 +466,23 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             return False
         self.log().information("Workspace " + workspace_name + " exists")
         if not isTrans and self._slicingEnabled():
-            return self._isValidWorkspace(workspace_name, "EventWorkspace")
+            is_valid = self._isValidWorkspace(workspace_name, "EventWorkspace")
         else:
-            return self._isValidWorkspace(workspace_name, "Workspace2D")
+            is_valid = self._isValidWorkspace(workspace_name, "Workspace2D")
+
+        if is_valid and not self._workspaceHasRequestedCalibration(AnalysisDataService.retrieve(workspace_name)):
+            self.log().information(f'Workspace "{workspace_name}" does not have the requested calibration')
+            return False
+        return is_valid
+
+    def _workspaceHasRequestedCalibration(self, workspace):
+        calibration_filepath = self.getPropertyValue("CalibrationFile")
+        if not calibration_filepath:
+            return True
+        if isinstance(workspace, WorkspaceGroup):
+            return all(self._workspaceHasRequestedCalibration(member) for member in workspace)
+        run = workspace.run()
+        return run.hasProperty(self._CALIBRATION_FILE_LOG) and run.getProperty(self._CALIBRATION_FILE_LOG).value == calibration_filepath
 
     def _getRunFromADSOrNone(self, run, isTrans):
         """Given a run name, return the name of the equivalent workspace in the ADS (
@@ -536,10 +554,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         """Load a run as an event workspace if slicing is requested, or a histogram
         workspace otherwise. Transmission runs are always loaded as histogram workspaces."""
         event_mode = not isTrans and self._slicingEnabled()
-        args = {"InputRunList": [run], "EventMode": event_mode}
-        calibration_filepath = self.getPropertyValue("CalibrationFile")
-        if calibration_filepath:
-            args["CalibrationFile"] = calibration_filepath
+        args = self._preprocess_arguments(run, event_mode)
         alg = self.createChildAlgorithm("ReflectometryISISPreprocess", **args)
         alg.setRethrows(True)
         alg.execute()
@@ -558,6 +573,17 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             self.log().information("Loaded workspace " + workspace_name)
 
         return workspace_name
+
+    def _preprocess_arguments(self, run, event_mode):
+        args = {"InputRunList": [run], "EventMode": event_mode}
+        calibration_filepath = self.getPropertyValue("CalibrationFile")
+        if calibration_filepath:
+            args["CalibrationFile"] = calibration_filepath
+            args["IfAlreadyCalibrated"] = "WARN"
+        for property_name in ["ThetaIn", "ThetaLogName"]:
+            if not self.getProperty(property_name).isDefault:
+                args[property_name] = self.getPropertyValue(property_name)
+        return args
 
     def _sumWorkspaces(self, workspaces, isTrans):
         """If there are multiple input workspaces, sum them and return the result. Otherwise
@@ -613,7 +639,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _runSliceAlgorithm(self, input_workspace, output_workspace):
         """Run the child algorithm to perform the slicing"""
         self.log().information("Running ReflectometrySliceEventWorkspace")
-        alg = self.createChildAlgorithm("ReflectometrySliceEventWorkspace")
+        alg = self.createChildAlgorithm("ReflectometrySliceEventWorkspace", version=1)
         for property in self._slice_properties:
             alg.setProperty(property, self.getPropertyValue(property))
         alg.setProperty("OutputWorkspace", output_workspace)

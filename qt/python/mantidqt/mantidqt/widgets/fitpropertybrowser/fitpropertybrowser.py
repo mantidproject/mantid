@@ -57,7 +57,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
     def _connect_signals(self):
         self.xRangeChanged.connect(self.move_x_range)
         self.algorithmFinished.connect(self.fitting_done_slot)
-        self.changedParameterOf.connect(self.peak_changed_slot)
+        self.changedParameterOf.connect(self.peak_changed_slot, Qt.QueuedConnection)
         self.removeFitCurves.connect(self.clear_fit_result_lines_slot, Qt.QueuedConnection)
         self.functionChanged.connect(self.function_changed_slot, Qt.QueuedConnection)
         # Update whether data needs to be normalised when a button on the Fit menu is clicked

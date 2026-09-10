@@ -17,10 +17,10 @@ SearchResult::SearchResult(const std::string &runNumber, std::string title) : m_
 }
 
 SearchResult::SearchResult(std::string runNumber, std::string title, std::string groupName, std::string theta,
-                           std::string error, std::string excludeReason, std::string comment)
+                           std::string error, std::string excludeReason, std::string comment, std::string model)
     : m_runNumber(std::move(runNumber)), m_title(std::move(title)), m_groupName(std::move(groupName)),
       m_theta(std::move(theta)), m_error(std::move(error)), m_excludeReason(std::move(excludeReason)),
-      m_comment(std::move(comment)) {}
+      m_comment(std::move(comment)), m_model(std::move(model)) {}
 
 void SearchResult::parseRun(std::string const &runNumber) {
   auto const maybeRunNumber = parseRunNumber(runNumber);
@@ -70,7 +70,11 @@ const std::string &SearchResult::excludeReason() const { return m_excludeReason;
 
 bool SearchResult::hasComment() const { return !m_comment.empty(); }
 
+bool SearchResult::hasModel() const { return !m_model.empty(); }
+
 const std::string &SearchResult::comment() const { return m_comment; }
+
+const std::string &SearchResult::model() const { return m_model; }
 
 void SearchResult::addError(std::string const &error) {
   if (m_error.empty())
@@ -82,6 +86,8 @@ void SearchResult::addError(std::string const &error) {
 void SearchResult::addExcludeReason(std::string const &excludeReason) { m_excludeReason = excludeReason; }
 
 void SearchResult::addComment(std::string const &comment) { m_comment = comment; }
+
+void SearchResult::addModel(std::string const &model) { m_model = model; }
 
 bool operator==(SearchResult const &lhs, SearchResult const &rhs) {
   // Ignore the error field in the comparison because this represents the

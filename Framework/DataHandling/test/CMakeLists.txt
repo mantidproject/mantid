@@ -32,7 +32,7 @@ if(CXXTEST_FOUND)
     target_include_directories(DataHandlingTest PRIVATE ${LIB3MF_INCLUDE_DIR})
   endif()
   add_framework_test_helpers(DataHandlingTest)
-  add_dependencies(DataHandlingTest Algorithms MDAlgorithms)
+  add_dependencies(DataHandlingTest Algorithms MDAlgorithms Reflectometry)
   add_dependencies(FrameworkTests DataHandlingTest)
   # Test data
   add_dependencies(DataHandlingTest UnitTestData)

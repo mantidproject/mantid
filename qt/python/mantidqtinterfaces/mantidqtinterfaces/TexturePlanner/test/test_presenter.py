@@ -24,6 +24,10 @@ def _make_view():
     view.get_rd_name.return_value = "RD"
     view.get_nd_name.return_value = "ND"
     view.get_td_name.return_value = "TD"
+    # both direction-frame checkboxes start unticked in the .ui; a bare MagicMock would report a
+    # truthy value for them and silently take the lab-frame branch
+    view.get_transform_dirs.return_value = False
+    view.get_lab_dirs.return_value = False
     view.get_group.return_value = "banks"
     view.get_vecs.return_value = ["vecs"]
     view.get_senses.return_value = ["senses"]
@@ -289,6 +293,103 @@ class TestTexturePlannerPresenter_DirectionsUpdated(unittest.TestCase):
         model.geometry.recompute.assert_called_once_with()
         model.update_all_projected_data.assert_called_once_with()
         presenter.update_plots.assert_called_once_with()
+
+    def test_renames_without_rewriting_vectors_while_showing_the_lab_frame(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+        view.get_lab_dirs.return_value = True
+        presenter = TexturePlannerPresenter(model, view)
+        presenter.update_plots = MagicMock()
+
+        model.set_ax_transform.reset_mock()
+        model.set_dir_names.reset_mock()
+
+        presenter.on_directions_updated()
+
+        # the fields hold derived lab-frame values, so they must not be fed back into the model
+        model.set_ax_transform.assert_not_called()
+        model.set_dir_names.assert_called_once_with("RD", "ND", "TD")
+
+
+@patch(file_path + ".TexturePlannerSettingsPresenter")
+@patch(file_path + ".TexturePlannerSettingsView")
+class TestTexturePlannerPresenter_DirectionFrames(unittest.TestCase):
+    def test_transform_toggle_pushes_to_model_and_reprojects(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+        view.get_transform_dirs.return_value = True
+        presenter = TexturePlannerPresenter(model, view)
+        presenter.update_plots = MagicMock()
+        model.update_all_projected_data.reset_mock()
+
+        presenter.set_transform_dirs()
+
+        model.set_transform_dirs.assert_called_once_with(True)
+        model.update_all_projected_data.assert_called_once_with()
+        presenter.update_plots.assert_called_once_with()
+
+    def test_transform_toggle_leaves_the_sample_frame_fields_alone(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+        view.get_transform_dirs.return_value = True
+        presenter = TexturePlannerPresenter(model, view)
+        presenter.update_plots = MagicMock()
+        view.set_rd_dir.reset_mock()
+
+        presenter.set_transform_dirs()
+
+        # the displayed sample-frame values do not depend on the toggle, so rewriting them would only
+        # push the model's rounded values back over what the user typed
+        view.set_rd_dir.assert_not_called()
+
+    def test_transform_toggle_refreshes_the_fields_while_showing_the_lab_frame(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+        view.get_transform_dirs.return_value = True
+        view.get_lab_dirs.return_value = True
+        model.get_texture_directions.return_value = (("RD", "ND", "TD"), ((1, 0, 0), (0, 0, 1), (0, -1, 0)))
+        presenter = TexturePlannerPresenter(model, view)
+        presenter.update_plots = MagicMock()
+        view.set_nd_dir.reset_mock()
+
+        presenter.set_transform_dirs()
+
+        model.get_texture_directions.assert_called_with(True)
+        view.set_nd_dir.assert_called_once_with((0, 0, 1))
+
+    def test_lab_frame_toggle_shows_derived_values_read_only(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+        view.get_lab_dirs.return_value = True
+        model.get_texture_directions.return_value = (("RD", "ND", "TD"), ((1, 0, 0), (0, 0, 1), (0, -1, 0)))
+        presenter = TexturePlannerPresenter(model, view)
+
+        presenter.set_lab_dirs()
+
+        model.get_texture_directions.assert_called_with(True)
+        view.set_td_dir.assert_called_with((0, -1, 0))
+        view.set_texture_directions_enabled.assert_called_with(False)
+
+    def test_clearing_lab_frame_toggle_shows_entered_values_editable(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+        view.get_lab_dirs.return_value = False
+        model.get_texture_directions.return_value = (("RD", "ND", "TD"), ((1, 0, 0), (0, 1, 0), (0, 0, 1)))
+        presenter = TexturePlannerPresenter(model, view)
+
+        presenter.set_lab_dirs()
+
+        model.get_texture_directions.assert_called_with(False)
+        view.set_texture_directions_enabled.assert_called_with(True)
+
+    def test_fields_start_editable(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+
+        TexturePlannerPresenter(model, view)
+
+        # the lab-frame box starts unticked, so construction must leave the fields editable
+        view.set_texture_directions_enabled.assert_called_once_with(True)
 
 
 @patch(file_path + ".TexturePlannerSettingsPresenter")
@@ -971,6 +1072,81 @@ class TestTexturePlannerPresenter_Settings(unittest.TestCase):
         presenter.open_settings()
 
         mock_settings_presenter.return_value.show.assert_called_with()
+
+
+@patch(file_path + ".run_tutorial")
+@patch(file_path + ".TexturePlannerSettingsPresenter")
+@patch(file_path + ".TexturePlannerSettingsView")
+class TestTexturePlannerPresenter_Tutorial(unittest.TestCase):
+    """The tutorial builds a whole second planner, so every test here stubs ``run_tutorial`` out.
+    What is under test is when the presenter asks for one, not what the tour then does."""
+
+    def test_opening_it_from_the_toolbar_does_not_mark_it_as_already_seen(
+        self, mock_settings_view, mock_settings_presenter, mock_run_tutorial
+    ):
+        # asking for the tutorial should not change whether it appears on startup. The slot the
+        # button gets takes no arguments, so ``clicked(bool)`` cannot be what decides that
+        view = _make_view()
+        with patch(file_path + ".should_show_on_startup", return_value=False):
+            TexturePlannerPresenter(_make_model(), view)
+
+        view.set_on_tutorial_clicked.call_args.args[0]()
+
+        self.assertFalse(mock_run_tutorial.call_args.kwargs["mark_as_seen"])
+
+    def test_a_second_request_raises_the_running_tutorial_rather_than_starting_another(
+        self, mock_settings_view, mock_settings_presenter, mock_run_tutorial
+    ):
+        presenter = TexturePlannerPresenter(_make_model(), _make_view(), offer_tutorial=False)
+        presenter.open_tutorial()
+
+        presenter.open_tutorial()
+
+        mock_run_tutorial.assert_called_once()
+        # the shell is the window; the sandbox interface inside it is only a child widget
+        mock_run_tutorial.return_value.shell.raise_.assert_called_once_with()
+
+    def test_closing_the_planner_closes_a_tutorial_it_started(self, mock_settings_view, mock_settings_presenter, mock_run_tutorial):
+        # the tour drives a second planner, which would otherwise be left with nothing to return to
+        presenter = TexturePlannerPresenter(_make_model(), _make_view(), offer_tutorial=False)
+        presenter.open_tutorial()
+
+        presenter.on_close()
+
+        mock_run_tutorial.return_value.close.assert_called_once_with()
+
+    @patch(file_path + ".should_show_on_startup", return_value=True)
+    def test_closing_the_planner_before_the_offer_arrives_cancels_it(
+        self, mock_should_show, mock_settings_view, mock_settings_presenter, mock_run_tutorial
+    ):
+        # the first-open offer is deferred to the event loop, so it can arrive after the planner has
+        # been closed - at which point there is no window left to run a tour over
+        presenter = TexturePlannerPresenter(_make_model(), _make_view())
+        presenter.on_close()
+
+        presenter.open_tutorial(mark_as_seen=True)  # what the deferred timer would do
+
+        mock_run_tutorial.assert_not_called()
+
+    @patch(file_path + ".should_show_on_startup", return_value=False)
+    def test_it_is_not_offered_once_it_has_been_seen(
+        self, mock_should_show, mock_settings_view, mock_settings_presenter, mock_run_tutorial
+    ):
+        TexturePlannerPresenter(_make_model(), _make_view())
+
+        mock_run_tutorial.assert_not_called()
+
+    @patch(file_path + ".should_show_on_startup", return_value=True)
+    def test_it_is_not_offered_when_the_planner_is_the_tutorials_own(
+        self, mock_should_show, mock_settings_view, mock_settings_presenter, mock_run_tutorial
+    ):
+        # a tutorial inside a tutorial, recursively, on a first ever open
+        view = _make_view()
+
+        TexturePlannerPresenter(_make_model(), view, offer_tutorial=False)
+
+        mock_run_tutorial.assert_not_called()
+        view.set_tutorial_button_visible.assert_called_once_with(False)
 
 
 @patch(file_path + ".TexturePlannerSettingsPresenter")

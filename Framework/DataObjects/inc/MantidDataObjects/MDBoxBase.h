@@ -10,7 +10,6 @@
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDNode.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidDataObjects/MDBin.h"
 #include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
@@ -111,16 +110,6 @@ public:
   virtual size_t addEvents(const std::vector<MDE> &events);
   virtual size_t addEventsUnsafe(const std::vector<MDE> &events);
   //----------------------------------------------------------------------------------------------------------------------
-  /** Perform centerpoint binning of events
-   * @param bin :: MDBin object giving the limits of events to accept.
-   * @param fullyContained :: optional bool array sized [nd] of which dimensions
-   * are known to be fully contained (for MDSplitBox)
-   */
-  virtual void centerpointBin(MDBin<MDE, nd> &bin, bool *fullyContained) const = 0;
-
-  /// General binning method for any shape.
-  virtual void generalBin(MDBin<MDE, nd> &bin, Mantid::Geometry::MDImplicitFunction &function) const = 0;
-
   /** Sphere (peak) integration */
   void integrateSphere(Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared, signal_t &signal,
                        signal_t &errorSquared, const coord_t innerRadiusSquared = 0.0,

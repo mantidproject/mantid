@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 from os import path
+
 from scipy.spatial.transform import Rotation
 from mantid.simpleapi import (
     logger,
@@ -20,6 +21,7 @@ from mantid.simpleapi import (
     Rebin,
     RebinToWorkspace,
     SaveAscii,
+    AddSampleLog,
 )
 from mantid.api import AnalysisDataService as ADS
 from typing import Optional, Sequence
@@ -106,6 +108,132 @@ def show_texture_sample_shape(
         model.set_gauge_vol_str(get_gauge_vol_str(gauge_vol_preset, custom_file))
         model.set_include_gauge_vol(gauge_vol_preset != "No Gauge Volume")
     model.show_shape_plot(ax_transform, ax_labels)
+
+
+# ------------------------------------------------------------#
+##### Utility Texture Log IO Functions ################
+# ------------------------------------------------------------#
+
+# Log names carrying the texture sample directions. Named here rather than inline so the writer
+# (the Texture Planner's reference-workspace export) and the readers cannot drift apart.
+TEXTURE_DIRECTION_MATRIX_LOG = "TextureDirectionMatrix"
+TEXTURE_DIRECTION_LABELS_LOG = "TextureDirectionLabels"
+
+
+def has_texture_direction_info(ws: str | Workspace2D) -> bool:
+    """Whether ws carries a texture direction matrix at all.
+
+    Lets callers tell "this workspace defines no sample frame" (a reference workspace made by
+    LoadEmptyInstrument, or one predating these logs) apart from "it defines the identity frame",
+    which read_texture_direction_info_from_log cannot express - it always falls back to a default.
+    The labels are not required: they default harmlessly, whereas the matrix is the meaningful part.
+    """
+    if isinstance(ws, str):
+        if not ADS.doesExist(ws):
+            return False
+        ws = ADS.retrieve(ws)
+    return ws.getRun().hasProperty(TEXTURE_DIRECTION_MATRIX_LOG)
+
+
+def write_texture_direction_info_to_log(ws: str | Workspace2D, ax_transform: np.ndarray, dir_names: tuple[str, str, str]) -> None:
+    """
+    Create SampleLogs with the Texture Sample Directions saved as:
+    -  TextureDirectionMatrix (comma separated string of row-major flattened 3x3 matrix elements where each column is a direction)
+    -  TextureDirectionLabels (comma separated string of three direction names
+    """
+    _write_ax_transform_to_log(ws, ax_transform)
+    _write_texture_dir_names_to_log(ws, dir_names)
+
+
+def read_texture_direction_info_from_log(
+    ws: str | Workspace2D, dir_matrix_default: np.ndarray | None = None, dir_names_default: tuple[str, str, str] = ("D1", "D2", "D3")
+) -> tuple[np.ndarray, tuple[str, str, str]]:
+    """
+    Read Texture Sample Direction Information off SampleLogs populating missing logs with the provided defaults
+    """
+    return _read_ax_transform_from_log(ws, dir_matrix_default), _read_texture_dir_names_from_log(ws, dir_names_default)
+
+
+# ------------- writing helpers----------------------------------
+
+
+def _write_ax_transform_to_log(ws: str | Workspace2D, ax_transform: np.ndarray) -> None:
+    direction_matrix_str = ",".join([str(x) for x in ax_transform.reshape(-1)])
+    AddSampleLog(Workspace=ws, LogName=TEXTURE_DIRECTION_MATRIX_LOG, LogText=direction_matrix_str)
+
+
+def _write_texture_dir_names_to_log(ws: str | Workspace2D, dir_names: tuple[str, str, str]) -> None:
+    # the log is a comma separated list of exactly three labels, so a label containing a comma would
+    # be read back as several labels - silently shifting the frame rather than failing here
+    offenders = [name for name in dir_names if "," in name]
+    if offenders:
+        raise ValueError(
+            f"Texture direction labels cannot contain commas: ({','.join(offenders)}). "
+            f"The {TEXTURE_DIRECTION_LABELS_LOG} log stores the three labels comma separated."
+        )
+    AddSampleLog(Workspace=ws, LogName=TEXTURE_DIRECTION_LABELS_LOG, LogText=",".join(dir_names))
+
+
+# --------------- reading helpers ----------------------------------
+
+
+def _read_texture_log(ws: str | Workspace2D, log_name: str, default: str) -> str:
+    if isinstance(ws, str):
+        if ADS.doesExist(ws):
+            ws = ADS.retrieve(ws)
+        else:
+            # warn if a ws is provided that can't be found
+            logger.warning(f"Workspace: {ws} could not be found to read the {log_name} from. Using Default: ({default})")
+            return default
+    try:
+        return ws.getRun().getLogData(log_name).value
+    except RuntimeError:
+        # only notice if the log is missing - may be the case with some legacy data
+        logger.notice(f"{log_name} could not be found or read from the logs of Workspace: {ws}. Using provided default: ({default})")
+        return default
+
+
+def _read_texture_dir_names_from_log(ws: str | Workspace2D, default: tuple[str, str, str] = ("D1", "D2", "D3")) -> tuple[str, str, str]:
+    default_str = ",".join(default)
+    dir_name_str = _read_texture_log(ws, TEXTURE_DIRECTION_LABELS_LOG, default_str)
+    return _ensure_dir_names_are_three_comma_separated_labels([x for x in dir_name_str.split(",")])
+
+
+def _read_ax_transform_from_log(ws: str | Workspace2D, default: np.ndarray | None = None) -> np.ndarray:
+    default = np.eye(3) if default is None else default
+    default_str = ",".join([str(x) for x in default.reshape(-1)])
+    dir_name_str = _read_texture_log(ws, TEXTURE_DIRECTION_MATRIX_LOG, default_str)
+    return _ensure_ax_transform_is_nine_comma_separated_values([x for x in dir_name_str.split(",")])
+
+
+# ----------------- validators----------------------------------------------------------------------
+
+
+def _ensure_dir_names_are_three_comma_separated_labels(dir_names: Sequence[str]) -> tuple[str, str, str]:
+    num_dirs = len(dir_names)
+    match num_dirs:
+        case 3:
+            return dir_names[0], dir_names[1], dir_names[2]  # explicit for type hinting
+        case _ if num_dirs > 3:
+            logger.warning(f"The obtained Texture Direction Labels: ({','.join(dir_names)}) have too many labels.Using only the first 3.")
+            return dir_names[0], dir_names[1], dir_names[2]  # explicit for type hinting
+        case _:
+            logger.warning(f"The obtained Texture Direction Labels: ({','.join(dir_names)}) have too few labels.Using generic (D1,D2,D3).")
+            return "D1", "D2", "D3"
+
+
+def _ensure_ax_transform_is_nine_comma_separated_values(matrix_elements: Sequence[str]) -> np.ndarray:
+    if len(matrix_elements) == 9:
+        try:
+            return np.asarray([float(x) for x in matrix_elements]).reshape((3, 3))
+        except ValueError:
+            pass
+    # if function reaches here, log is malformed - warn and return identity
+    logger.warning(
+        f"The obtained Texture Direction Matrix: ({','.join(matrix_elements)}) cannot be read into a 3x3 matrix."
+        f"Using generic identity matrix."
+    )
+    return np.eye(3)
 
 
 # --------------------------------------------------------#

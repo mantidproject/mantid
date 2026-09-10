@@ -60,7 +60,16 @@ AlgorithmProgressDialogWidget::addAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
   m_tree->addTopLevelItem(item);
   auto progressBar = new QProgressBar(m_tree);
   progressBar->setAlignment(Qt::AlignHCenter);
-
+  progressBar->setStyleSheet(R"(
+    QProgressBar {
+        text-align: center;
+        border-radius: 3px;
+    }
+    QProgressBar::chunk {
+        background-color: lightgreen;
+        border-radius: 3px;
+    }
+    )");
   const auto cancelButton = new AlgorithmProgressDialogWidgetCancelButton(alg, m_tree);
 
   m_tree->setItemWidget(item, 1, progressBar);

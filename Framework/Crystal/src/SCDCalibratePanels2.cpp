@@ -20,6 +20,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/InstrumentMetadata.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -1216,7 +1217,7 @@ void SCDCalibratePanels2::saveXmlFile(const std::string &FileName,
 
   // configure root node
   parafile.put("<xmlattr>.instrument", instrument->getName());
-  parafile.put("<xmlattr>.valid-from", instrument->getValidFromDate().toISO8601String());
+  parafile.put("<xmlattr>.valid-from", pmap.instrumentMetadata().validFromDate().toISO8601String());
 
   // get L1 info for source
   ptree src;

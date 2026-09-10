@@ -133,148 +133,26 @@
            </layout>
           </widget>
          </item>
-            <item>
-              <widget class="QGroupBox" name="initOrientation">
-               <property name="title">
-                <string>Update Initial Shape Orientation</string>
-               </property>
-               <layout class="QGridLayout" name="layInitAxis">
-                <item row="0" column="0">
-                 <widget class="QLabel" name="lblInitX">
-                  <property name="text">
-                   <string>Rotate Around X:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1" colspan="2">
-                 <widget class="QDoubleSpinBox" name="spnInitX">
-                  <property name="decimals">
-                   <number>3</number>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="0">
-                 <widget class="QLabel" name="lblInitY">
-                  <property name="text">
-                   <string>Rotate Around Y:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1" colspan="2">
-                 <widget class="QDoubleSpinBox" name="spnInitY">
-                  <property name="decimals">
-                   <number>3</number>
-                  </property>
-                 </widget>
-                </item>
-
-                   <item row="2" column="0">
-                 <widget class="QLabel" name="lblInitZ">
-                  <property name="text">
-                   <string>Rotate Around Z:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="1" colspan="2">
-                 <widget class="QDoubleSpinBox" name="spnInitZ">
-                  <property name="decimals">
-                   <number>3</number>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-
-            <item>
-              <widget class="QGroupBox" name="initPosition">
-               <property name="title">
-                <string>Update Initial Shape Position</string>
-               </property>
-               <layout class="QGridLayout" name="layInitPos">
-                <item row="0" column="0">
-                 <widget class="QLabel" name="lblInitPX">
-                  <property name="text">
-                   <string>X:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1" colspan="1">
-                 <widget class="QDoubleSpinBox" name="spnInitPX">
-                  <property name="decimals">
-                   <number>4</number>
-                  </property>
-                 </widget>
-                </item>
-
-                   <item row="0" column="2">
-   <spacer name="spacer_left">
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-    <property name="sizeHint" stdset="0">
-     <size>
-      <width>40</width>
-      <height>0</height>
-     </size>
-    </property>
-   </spacer>
-  </item>
-
-                <item row="0" column="3">
-                 <widget class="QLabel" name="lblInitPY">
-                  <property name="text">
-                   <string>Y:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="4" colspan="1">
-                 <widget class="QDoubleSpinBox" name="spnInitPY">
-                  <property name="decimals">
-                   <number>4</number>
-                  </property>
-                 </widget>
-                </item>
-
-                   <item row="0" column="5">
-   <spacer name="spacer_left">
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-    <property name="sizeHint" stdset="0">
-     <size>
-      <width>40</width>
-      <height>0</height>
-     </size>
-    </property>
-   </spacer>
-  </item>
-
-                   <item row="0" column="6">
-                 <widget class="QLabel" name="lblInitPZ">
-                  <property name="text">
-                   <string>Z:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="7" colspan="1">
-                 <widget class="QDoubleSpinBox" name="spnInitPZ">
-                  <property name="decimals">
-                   <number>4</number>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-
-
-        <item>
+             <item>
        <widget class="QGroupBox" name="grpDirectionWidgets">
         <property name="title">
          <string>Update Sample Directions</string>
         </property>
         <layout class="QVBoxLayout" name="vboxDirectionWidgets">
+            <item>
+          <layout class="QHBoxLayout">
+            <item>
+              <widget class="QLabel" name="lblLabDirs">
+                <property name="text">
+                  <string>Show Directions in Lab Frame:</string>
+                </property>
+              </widget>
+            </item>
+            <item>
+              <widget class="QCheckBox" name="chkLabDirs"/>
+            </item>
+          </layout>
+         </item>
          <item>
           <widget class="QGroupBox" name="groupBox_textureVectors">
      <property name="title">
@@ -560,6 +438,151 @@
         </layout>
        </widget>
       </item>
+            <item>
+              <widget class="QGroupBox" name="initOrientation">
+               <property name="title">
+                <string>Update Initial Shape Orientation</string>
+               </property>
+               <layout class="QGridLayout" name="layInitAxis">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="lblInitX">
+                  <property name="text">
+                   <string>Rotate Around X:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1" colspan="2">
+                 <widget class="QDoubleSpinBox" name="spnInitX">
+                  <property name="decimals">
+                   <number>3</number>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="lblInitY">
+                  <property name="text">
+                   <string>Rotate Around Y:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1" colspan="2">
+                 <widget class="QDoubleSpinBox" name="spnInitY">
+                  <property name="decimals">
+                   <number>3</number>
+                  </property>
+                 </widget>
+                </item>
+
+                   <item row="2" column="0">
+                 <widget class="QLabel" name="lblInitZ">
+                  <property name="text">
+                   <string>Rotate Around Z:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1" colspan="2">
+                 <widget class="QDoubleSpinBox" name="spnInitZ">
+                  <property name="decimals">
+                   <number>3</number>
+                  </property>
+                 </widget>
+                </item>
+
+                   <item row="3" column="0">
+                 <widget class="QLabel" name="lblTransformDirs">
+                  <property name="text">
+                   <string>Apply Transformation to Sample Directions:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1" colspan="2">
+                 <widget class="QCheckBox" name="chkTransformDirs"/>
+                </item>
+               </layout>
+              </widget>
+             </item>
+
+            <item>
+              <widget class="QGroupBox" name="initPosition">
+               <property name="title">
+                <string>Update Initial Shape Position</string>
+               </property>
+               <layout class="QGridLayout" name="layInitPos">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="lblInitPX">
+                  <property name="text">
+                   <string>X:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1" colspan="1">
+                 <widget class="QDoubleSpinBox" name="spnInitPX">
+                  <property name="decimals">
+                   <number>4</number>
+                  </property>
+                 </widget>
+                </item>
+
+                   <item row="0" column="2">
+   <spacer name="spacer_left">
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="sizeHint" stdset="0">
+     <size>
+      <width>40</width>
+      <height>0</height>
+     </size>
+    </property>
+   </spacer>
+  </item>
+
+                <item row="0" column="3">
+                 <widget class="QLabel" name="lblInitPY">
+                  <property name="text">
+                   <string>Y:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="4" colspan="1">
+                 <widget class="QDoubleSpinBox" name="spnInitPY">
+                  <property name="decimals">
+                   <number>4</number>
+                  </property>
+                 </widget>
+                </item>
+
+                   <item row="0" column="5">
+   <spacer name="spacer_left">
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="sizeHint" stdset="0">
+     <size>
+      <width>40</width>
+      <height>0</height>
+     </size>
+    </property>
+   </spacer>
+  </item>
+
+                   <item row="0" column="6">
+                 <widget class="QLabel" name="lblInitPZ">
+                  <property name="text">
+                   <string>Z:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="7" colspan="1">
+                 <widget class="QDoubleSpinBox" name="spnInitPZ">
+                  <property name="decimals">
+                   <number>4</number>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
       <item>
        <spacer name="spSampleStretch">
         <property name="orientation">

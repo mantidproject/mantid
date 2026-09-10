@@ -53,6 +53,8 @@ getADSWorkspace(std::string const &workspaceName);
 template EXPORT_OPT_MANTIDQT_COMMON std::shared_ptr<Mantid::API::ITableWorkspace_sptr>
 getADSWorkspace(std::string const &workspaceName);
 
+EXPORT_OPT_MANTIDQT_COMMON void removeADSWorkspace(std::string const &workspaceName);
+
 template <typename Iterator, typename Functor>
 std::vector<std::string> transformElements(Iterator const fromIter, Iterator const toIter, Functor const &functor) {
   std::vector<std::string> newVector;

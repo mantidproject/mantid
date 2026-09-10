@@ -151,8 +151,6 @@ public:
                            const std::vector<uint32_t> &detectorId) override;
 
   //---------------------------------------------------------------------------------------------------------------------------------
-  void centerpointBin(MDBin<MDE, nd> &bin, bool *fullyContained) const override;
-  void generalBin(MDBin<MDE, nd> &bin, Mantid::Geometry::MDImplicitFunction &function) const override;
   void
   splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = nullptr) override { /* Do nothing with a box default. */ }
 
@@ -181,7 +179,6 @@ public:
   void getBoxes(std::vector<API::IMDNode *> &boxes, size_t maxDepth, bool leafOnly,
                 Mantid::Geometry::MDImplicitFunction *function) override;
 
-  void getBoxes(std::vector<API::IMDNode *> &outBoxes, const std::function<bool(API::IMDNode *)> &cond) final override;
   //------------------------------------------------------------------------------------------------------------------------------------
   void transformDimensions(std::vector<double> &scaling, std::vector<double> &offset) override;
   //------------------------------------------------------------------------------------------------------------------------------------

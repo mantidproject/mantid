@@ -45,6 +45,18 @@ public:
     presenter.setSpectrum(ws, wsIndex);
   }
 
+  void test_set_spectra() {
+    auto view = MockPlotView();
+    auto model = std::make_unique<MockPlotModel>();
+    auto const workspaces = std::vector<MatrixWorkspace_sptr>{createMatrixWorkspace(1), createMatrixWorkspace(1)};
+
+    EXPECT_CALL(*model, setSpectra(workspaces, 0)).Times(1);
+
+    auto presenter = PlotPresenter(&view, std::move(model));
+
+    presenter.setSpectra(workspaces, 0);
+  }
+
   void test_plot() {
     auto view = MockPlotView();
     auto model = makeModel();

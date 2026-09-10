@@ -49,24 +49,62 @@ def _make_model(R=None, n_orientations=1, spec_inds=None):
 
 @patch(file_path + ".ConvertUnits")
 class TestAbsorptionCalculator_CreateMcWs(unittest.TestCase):
-    def test_converts_units_to_wavelength_into_mc_input(self, mock_convert):
-        wsm = _make_wsm()
-        mc_ws = MagicMock()
-        mock_convert.return_value = mc_ws
+    @staticmethod
+    def _make_calculator(point=1.5, unit="dSpacing"):
+        model, _ = _make_model()
+        model.workspaces.attenuation_kwargs = {"point": point, "unit": unit}
+        model.workspaces.create_bin_params_around_point.return_value = "1.4775,0.015,1.5225"
+        return AbsorptionCalculator(model), model.workspaces
 
-        result = AbsorptionCalculator._create_mc_ws(wsm)
+    def test_bins_the_source_ws_around_the_evaluation_point(self, mock_convert):
+        # the source grid must bracket the point so that read_attenuation_coefficient_at_value can
+        # interpolate there - a grid that does not reach the point raises instead
+        calc, wsm = self._make_calculator(point=7.5, unit="dSpacing")
 
-        mock_convert.assert_called_once_with(InputWorkspace=WS_DATA, Target="Wavelength", OutputWorkspace=WS_MC_INPUT)
-        self.assertIs(result, mc_ws)
+        calc._create_mc_ws()
+
+        wsm.create_bin_params_around_point.assert_called_once_with(7.5)
+        wsm.create_simulation_workspace.assert_called_once_with(
+            WS_MC_INPUT, unit="dSpacing", bin_params=wsm.create_bin_params_around_point.return_value
+        )
+
+    def test_builds_source_ws_in_the_requested_unit_not_in_wavelength(self, mock_convert):
+        # a single dSpacing point maps to a different wavelength in every detector (lambda = 2 d sin(theta)),
+        # so the grid is built in the requested unit and converted per spectrum; binning directly in
+        # wavelength would evaluate the whole bank at one detector's wavelength
+        calc, wsm = self._make_calculator(unit="dSpacing")
+
+        calc._create_mc_ws()
+
+        self.assertEqual(wsm.create_simulation_workspace.call_args.kwargs["unit"], "dSpacing")
+
+    def test_converts_source_ws_to_wavelength_for_the_mc_input(self, mock_convert):
+        calc, wsm = self._make_calculator()
+
+        result = calc._create_mc_ws()
+
+        mock_convert.assert_called_once_with(
+            InputWorkspace=wsm.create_simulation_workspace.return_value, Target="Wavelength", OutputWorkspace=WS_MC_INPUT
+        )
+        self.assertIs(result, mock_convert.return_value)
+
+    def test_still_converts_when_point_is_already_in_wavelength(self, mock_convert):
+        # MonteCarloAbsorption needs a wavelength axis, and ConvertUnits is a no-op when already there
+        calc, wsm = self._make_calculator(point=4.0, unit="Wavelength")
+
+        calc._create_mc_ws()
+
+        self.assertEqual(wsm.create_simulation_workspace.call_args.kwargs["unit"], "Wavelength")
+        mock_convert.assert_called_once()
 
     def test_resets_goniometer_to_identity(self, mock_convert):
-        wsm = _make_wsm()
-        mc_ws = MagicMock()
+        # _set_mc_sample_state CopySamples onto this ws, and CopySample bakes the *destination's*
+        # goniometer into the shape, so a stale rotation here would be applied twice
+        calc, _ = self._make_calculator()
         gonio = MagicMock()
-        mc_ws.run.return_value.getGoniometer.return_value = gonio
-        mock_convert.return_value = mc_ws
+        mock_convert.return_value.run.return_value.getGoniometer.return_value = gonio
 
-        AbsorptionCalculator._create_mc_ws(wsm)
+        calc._create_mc_ws()
 
         gonio.setR.assert_called_once()
         np.testing.assert_array_equal(gonio.setR.call_args.args[0], np.eye(3))
@@ -175,7 +213,7 @@ class TestAbsorptionCalculator_CalcForIndex(unittest.TestCase):
 
         calc.calc_for_index(0)
 
-        calc._create_mc_ws.assert_called_once_with(model.workspaces)
+        calc._create_mc_ws.assert_called_once_with()
         calc._set_mc_sample_state.assert_called_once_with(model.workspaces, mc_ws, orient.R)
         mock_mc.assert_called_once_with(**calc.mc_kwargs)
 

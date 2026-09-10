@@ -1,0 +1,2 @@
+- New instrument view now allows picking in rectangle zoom by pressing the `Ctrl` or `Shift` keys.
+- New instrument view now allows picking the closest detector with peaks to the mouse position.

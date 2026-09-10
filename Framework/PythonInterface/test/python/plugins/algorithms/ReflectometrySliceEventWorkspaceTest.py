@@ -441,21 +441,21 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
 
     def _assert_run_algorithm_succeeds(self, args):
         """Run the algorithm with the given args and check it succeeds"""
-        alg = create_algorithm("ReflectometrySliceEventWorkspace", **args)
+        alg = create_algorithm("ReflectometrySliceEventWorkspace", **args, Version=1)
         assertRaisesNothing(self, alg.execute)
         self.assertEqual(mtd.doesExist("output"), True)
         return mtd["output"]
 
     def _assert_run_algorithm_fails(self, args):
         """Run the algorithm with the given args and check it fails to produce output"""
-        alg = create_algorithm("ReflectometrySliceEventWorkspace", **args)
+        alg = create_algorithm("ReflectometrySliceEventWorkspace", **args, Version=1)
         assertRaisesNothing(self, alg.execute)
         self.assertEqual(mtd.doesExist("output"), False)
 
     def _assert_run_algorithm_throws(self, args={}):
         """Run the algorithm with the given args and check it throws"""
         throws = False
-        alg = create_algorithm("ReflectometrySliceEventWorkspace", **args)
+        alg = create_algorithm("ReflectometrySliceEventWorkspace", **args, Version=1)
         try:
             alg.execute()
         except:

@@ -1,0 +1,1 @@
+- In the new Instrument View, the line plot now updates to show the spectra covered by an overlaid ROI or mask shape, and follows the shape as it is dragged, resized, rotated or as the projection is zoomed.

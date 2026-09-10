@@ -60,6 +60,7 @@ set(SRC_FILES
     src/Instrument/GridDetectorPixel.cpp
     src/Instrument/IDFObject.cpp
     src/Instrument/InstrumentDefinitionParser.cpp
+    src/Instrument/InstrumentMetadata.cpp
     src/Instrument/InstrumentVisitor.cpp
     src/Instrument/ObjCompAssembly.cpp
     src/Instrument/ObjComponent.cpp
@@ -208,6 +209,7 @@ set(INC_FILES
     inc/MantidGeometry/Instrument/IDFObject.h
     inc/MantidGeometry/Instrument/InfoIteratorBase.h
     inc/MantidGeometry/Instrument/InstrumentDefinitionParser.h
+    inc/MantidGeometry/Instrument/InstrumentMetadata.h
     inc/MantidGeometry/Instrument/InstrumentVisitor.h
     inc/MantidGeometry/Instrument/ObjCompAssembly.h
     inc/MantidGeometry/Instrument/ObjComponent.h

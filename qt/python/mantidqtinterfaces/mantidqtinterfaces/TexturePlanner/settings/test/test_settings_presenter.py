@@ -33,6 +33,7 @@ SETTINGS_FIXTURE = {
     "att_point": 2.5,
     "att_unit": "Wavelength",
     "att_use_data_range": True,
+    "att_show_current": False,
 }
 
 
@@ -49,6 +50,7 @@ def _make_texture_model():
     }
     m.workspaces.attenuation_kwargs = {"point": 1.5, "unit": "dSpacing"}
     m.plotter.transmission_use_data_range = False
+    m.plotter.att_show_current = True
     return m
 
 
@@ -73,6 +75,7 @@ def _make_view_returning(settings):
     view.get_att_point.return_value = settings["att_point"]
     view.get_att_unit.return_value = settings["att_unit"]
     view.get_att_use_data_range.return_value = settings["att_use_data_range"]
+    view.get_att_show_current.return_value = settings["att_show_current"]
     return view
 
 
@@ -155,6 +158,7 @@ class TestTexturePlannerSettingsPresenter_Show(unittest.TestCase):
         view.set_att_point.assert_called_once_with(1.5)
         view.set_att_unit.assert_called_once_with("dSpacing")
         view.set_att_use_data_range.assert_called_once_with(False)
+        view.set_att_show_current.assert_called_once_with(True)
 
         view.show.assert_called_once_with()
 
@@ -192,6 +196,7 @@ class TestTexturePlannerSettingsPresenter_SaveSettings(unittest.TestCase):
         self.assertEqual(texture_model.workspaces.stl_kwargs["TranslationVector"], "1,2,3")
         self.assertEqual(texture_model.orientations.orientation_kwargs["Senses"], "1,-1,1")
         self.assertIs(texture_model.absorption.mc_kwargs["ResimulateTracksForDifferentWavelengths"], True)
+        self.assertIs(texture_model.plotter.att_show_current, False)
 
     def test_invokes_on_settings_applied_callback_if_registered(self, mock_model_cls):
         view = _make_view_returning(SETTINGS_FIXTURE)

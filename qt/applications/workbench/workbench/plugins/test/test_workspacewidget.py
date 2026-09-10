@@ -39,6 +39,8 @@ SAMPLE_MATERIAL_DIALOG_TYPE = "SampleMaterialDialogView"
 SAMPLE_MATERIAL_DIALOG = "mantidqt.widgets.samplematerialdialog.samplematerial_view." + SAMPLE_MATERIAL_DIALOG_TYPE
 INSTRUMENT_VIEW_WINDOW_TYPE = "FullInstrumentViewWindow"
 INSTRUMENT_VIEW_DIALOG = "instrumentview.FullInstrumentViewWindow." + INSTRUMENT_VIEW_WINDOW_TYPE
+INSTRUMENT_VIEW_MODEL_TYPE = "FullInstrumentViewModel"
+INSTRUMENT_VIEW_PRESENTER_TYPE = "FullInstrumentViewPresenter"
 
 
 @start_qapplication
@@ -201,29 +203,59 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
         self.ws_widget._show_sample_shape(self.ws_names)
         mock_plot_sample_container_and_components.assert_not_called()
 
+    @mock.patch("workbench.plugins.workspacewidget.logger")
+    @mock.patch("workbench.plugins.workspacewidget." + INSTRUMENT_VIEW_PRESENTER_TYPE)
+    @mock.patch("workbench.plugins.workspacewidget." + INSTRUMENT_VIEW_MODEL_TYPE)
     @mock.patch("workbench.plugins.workspacewidget." + INSTRUMENT_VIEW_WINDOW_TYPE)
-    def test_new_instrument_view_opens_with_single_workspace_name(self, mock_instrument_view):
+    def test_instrument_view_opens_with_single_workspace_name(self, mock_window, mock_model, mock_presenter, mock_logger):
         """
-        New Instrument View should work with a single workspace selected
+        Instrument View should build a window, model and presenter for a single workspace selected
         """
-        single_ws_list = [self.ws_names[0]]
-        mock_instance = mock.MagicMock()
-        mock_instrument_view.return_value = mock_instance
-        self.ws_widget._do_show_new_instrument_view(single_ws_list, off_screen=True)
-        mock_instrument_view.assert_called_once()
-        mock_instance.show.assert_called_once()
+        expected_ws = self.ws_widget._ads.retrieveWorkspaces([self.ws_names[0]], unrollGroups=True)[0]
+        window_instance = mock_window.return_value
 
+        self.ws_widget._do_show_instrument([self.ws_names[0]], off_screen=True)
+
+        mock_window.assert_called_once_with(parent=mock.ANY, off_screen=True)
+        window_instance.show.assert_called_once()
+        mock_model.assert_called_once()
+        self.assertEqual(mock_model.call_args.args[0].name(), expected_ws.name())
+        mock_presenter.assert_called_once_with(window_instance.get_instrument_view_widget.return_value, mock_model.return_value)
+        mock_logger.warning.assert_not_called()
+
+    @mock.patch("workbench.plugins.workspacewidget.logger")
+    @mock.patch("workbench.plugins.workspacewidget." + INSTRUMENT_VIEW_PRESENTER_TYPE)
+    @mock.patch("workbench.plugins.workspacewidget." + INSTRUMENT_VIEW_MODEL_TYPE)
     @mock.patch("workbench.plugins.workspacewidget." + INSTRUMENT_VIEW_WINDOW_TYPE)
-    def test_new_instrument_view_opens_with_multiple_workspace_names(self, mock_instrument_view):
+    def test_instrument_view_opens_with_multiple_workspace_names(self, mock_window, mock_model, mock_presenter, mock_logger):
         """
-        New Instrument View should work with multiple workspaces selected
+        Instrument View should build a window, model and presenter for each of multiple workspaces selected
         """
         workspaces = [self.ws_names[0], self.ws_names[0]]
-        mock_instance = mock.MagicMock()
-        mock_instrument_view.return_value = mock_instance
-        self.ws_widget._do_show_new_instrument_view(workspaces, off_screen=True)
-        self.assertEqual(mock_instrument_view.call_count, len(workspaces))
-        self.assertEqual(mock_instance.show.call_count, len(workspaces))
+        expected_ws = self.ws_widget._ads.retrieveWorkspaces([self.ws_names[0]], unrollGroups=True)[0]
+        window_instance = mock_window.return_value
+
+        self.ws_widget._do_show_instrument(workspaces, off_screen=True)
+
+        self.assertEqual(mock_window.call_args_list, [mock.call(parent=mock.ANY, off_screen=True)] * len(workspaces))
+        self.assertEqual(window_instance.show.call_count, len(workspaces))
+        self.assertEqual(mock_model.call_count, len(workspaces))
+        for call_args in mock_model.call_args_list:
+            self.assertEqual(call_args.args[0].name(), expected_ws.name())
+        expected_presenter_call = mock.call(window_instance.get_instrument_view_widget.return_value, mock_model.return_value)
+        self.assertEqual(mock_presenter.call_args_list, [expected_presenter_call] * len(workspaces))
+        mock_logger.warning.assert_not_called()
+
+    @mock.patch("workbench.plugins.workspacewidget.InstrumentViewPresenter")
+    def test_legacy_instrument_view_opens_with_single_workspace_name(self, mock_instrument_view_presenter):
+        """
+        Legacy Instrument View should work with a single workspace selected
+        """
+        mock_presenter = mock.MagicMock()
+        mock_instrument_view_presenter.return_value = mock_presenter
+        self.ws_widget._do_show_legacy_instrument_view([self.ws_names[0]])
+        mock_instrument_view_presenter.assert_called_once()
+        mock_presenter.show_view.assert_called_once()
 
     def test_empty_workspaces(self):
         def mock_getEmptyObjectNames():

@@ -26,6 +26,7 @@ namespace Geometry {
 class ComponentInfo;
 class DetectorInfo;
 class Instrument;
+class InstrumentMetadata;
 
 /** @class ParameterMap ParameterMap.h
 
@@ -302,6 +303,7 @@ public:
   Geometry::DetectorInfo &mutableDetectorInfo();
   const Geometry::ComponentInfo &componentInfo() const;
   Geometry::ComponentInfo &mutableComponentInfo();
+  Geometry::InstrumentMetadata const &instrumentMetadata() const;
   size_t detectorIndex(const detid_t detID) const;
   size_t componentIndex(const Geometry::ComponentID componentId) const;
   const std::vector<Geometry::ComponentID> &componentIds() const;
@@ -313,6 +315,8 @@ private:
 
   /// Assignment operator
   ParameterMap &operator=(ParameterMap *rhs);
+  /// Builds m_instrumentMetadata from m_instrument. Requires m_instrument to be set.
+  void buildInstrumentMetadata();
   /// internal function to get position of the parameter in the parameter map
   component_map_it positionOf(const IComponent *comp, const char *name, const char *type);
   /// const version of the internal function to get position of the parameter in
@@ -338,6 +342,10 @@ private:
   /// Pointer to the ComponentInfo wrapper. NULL unless the instrument is
   /// associated with an ExperimentInfo object.
   std::unique_ptr<Geometry::ComponentInfo> m_componentInfo;
+
+  /// Whole-of-instrument metadata built alongside m_componentInfo/m_detectorInfo. NULL
+  /// unless the instrument is associated with an ExperimentInfo object.
+  std::unique_ptr<Geometry::InstrumentMetadata> m_instrumentMetadata;
 
   /// Pointer to the owning instrument for translating detector IDs into
   /// detector indices when accessing the DetectorInfo object. If the workspace

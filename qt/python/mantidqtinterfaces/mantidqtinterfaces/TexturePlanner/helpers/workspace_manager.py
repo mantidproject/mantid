@@ -38,6 +38,8 @@ class WorkspaceManager:
     """
 
     DEFAULT_MATERIAL = "Fe"
+    # Bin params for most workspaces are irrelevant, just set some generic defaults
+    DEFAULT_BIN_PARAMS = "0,0.1,5"
 
     def __init__(self, model: TexturePlannerModel):
         self._model = model
@@ -155,7 +157,7 @@ class WorkspaceManager:
         self.updated_mesh_ws = updated_mesh_ws
 
     def _init_wss(self) -> None:
-        ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="0,0.1,5", OutputWorkspace=self.wsname, UnitX="dSpacing")
+        ws = self.create_simulation_workspace(self.wsname)
         for ispec in range(ws.getNumberHistograms()):
             ws.setSharedY(ispec, np.ones_like(ws.y(ispec)))
         mesh_ws = CloneWorkspace(InputWorkspace=ws, OutputWorkspace=self.WS_MESH_RAW)
@@ -311,7 +313,7 @@ class WorkspaceManager:
         else:
             shape_ws = sample_to_copy
         try:
-            new_ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="0,0.1,5", OutputWorkspace=new_wsname, UnitX="dSpacing")
+            new_ws = self.create_simulation_workspace(new_wsname)
             if preserve_initial_rotation:
                 self.copy_sample_preserving_initial_rotation(shape_ws, new_ws)
             else:
@@ -341,3 +343,18 @@ class WorkspaceManager:
         dest_ws.run().getGoniometer().setR(gonio_R)
         CopySample(InputWorkspace=source_ws, OutputWorkspace=dest_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
         dest_ws.run().getGoniometer().setR(np.eye(3))
+
+    def create_simulation_workspace(self, name: str, unit: str = "dSpacing", bin_params: str | None = None) -> MatrixWorkspace:
+        return CreateSimulationWorkspace(
+            Instrument=self.instr, BinParams=bin_params or self.DEFAULT_BIN_PARAMS, OutputWorkspace=name, UnitX=unit
+        )
+
+    @staticmethod
+    def create_bin_params_around_point(point: float) -> str:
+        point = point if point > 0 else 1e-6
+        bin_width = 0.01 * point
+        # create 3 bins with p in the centre of the middle bin
+        #
+        # -1.5bw      -0.5bw   p   0.5bw      1.5bw
+        #    |-----------|-----x-----|-----------|
+        return f"{point - 1.5 * bin_width},{bin_width},{point + 1.5 * bin_width}"

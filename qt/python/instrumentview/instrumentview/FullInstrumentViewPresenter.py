@@ -28,8 +28,6 @@ from instrumentview.renderers.side_by_side_shape_renderer import SideBySideShape
 
 from instrumentview.InteractorStyles import InteractorStyles
 
-from vtkmodules.vtkRenderingCore import vtkCoordinate
-
 
 class SuppressRendering:
     def __init__(self, plotter):
@@ -65,12 +63,9 @@ class FullInstrumentViewPresenter:
         self._view = view
         self._model = model
         self._closing = False
-        self._transform = np.eye(4)
         self._counts_label = "Integrated Counts"
-        self._visible_label = "Visible Picked"
         self._count_scale_mode = self._LINEAR
         self._detector_mesh: Optional[pv.PolyData] = None
-        self._pickable_mesh: Optional[pv.PolyData] = None
         self._masked_mesh: Optional[pv.PolyData] = None
         self._model.setup()
         self._point_cloud_renderer = PointCloudRenderer()
@@ -81,7 +76,10 @@ class FullInstrumentViewPresenter:
         self._renderer = self._get_renderer_for_mode(view.get_render_mode_option())
         self._interactor_styles = InteractorStyles(self._view.main_plotter, picking_callback=lambda: None, hover_callback=lambda: None)
         self._last_hovered_point_index: Optional[int] = None
-        self._select_bank_tube = False
+        self._shape_preview_active = False
+        # Incremented per requested shape update so the worker can drop superseded ones
+        self._shape_update_generation = 0
+        self._sum_spectra_before_shape: Optional[bool] = None
         self._callback_queue = Queue()
         self._callback_stop_sentinel = object()
         self._callback_thread = Thread(None, self._callback_worker, daemon=True)
@@ -123,8 +121,7 @@ class FullInstrumentViewPresenter:
             add_callback=self.add_workspace_callback,
         )
         self._view.hide_status_box()
-        self._select_bank_tube = self._view.is_select_bank_tube_checked()
-        self.update_plotter(False)
+        self.update_plotter(refresh_limits=False)
 
         if self._model.workspace_base_unit in self._UNIT_OPTIONS:
             self._view.set_unit_combo_box_index(self._UNIT_OPTIONS.index(self._model.workspace_base_unit))
@@ -255,6 +252,7 @@ class FullInstrumentViewPresenter:
         with SuppressRendering(self._view.main_plotter):
             self._update_view_main_plotter(refresh_limits=refresh_limits)
             self.refresh_plotter_peaks()
+        self.refresh_create_from_selection_enabled()
 
     def count_scale_combo_options(self) -> list[str]:
         return [self._LINEAR, self._LOGARITHMIC]
@@ -281,17 +279,17 @@ class FullInstrumentViewPresenter:
         self._view.clear_main_plotter()
         renderer = self._renderer
 
+        run_on_main_thread = self._view.run_on_main_thread
+
         self._detector_mesh = renderer.build_detector_mesh(self._model.detector_positions, self._model.flip_beam, self._model)
         display_counts = self._transform_counts(self._model.detector_counts)
         renderer.set_detector_scalars(self._detector_mesh, display_counts, self._counts_label)
-        renderer.add_detector_mesh_to_plotter(self._view.main_plotter, self._detector_mesh, scalars=self._counts_label)
+        run_on_main_thread(renderer.add_detector_mesh_to_plotter, self._view.main_plotter, self._detector_mesh, scalars=self._counts_label)
 
-        self._pickable_mesh = renderer.build_pickable_mesh(self._model.detector_positions, self._model.flip_beam)
-        renderer.set_pickable_scalars(self._pickable_mesh, self._model.picked_visibility, self._visible_label)
-        renderer.add_pickable_mesh_to_plotter(self._view.main_plotter, self._pickable_mesh, scalars=self._visible_label)
+        run_on_main_thread(renderer.create_picked_highlight_actor, self._view.main_plotter)
 
         self._masked_mesh = renderer.build_masked_mesh(self._model.masked_positions, self._model.flip_beam, self._model)
-        renderer.add_masked_mesh_to_plotter(self._view.main_plotter, self._masked_mesh)
+        run_on_main_thread(renderer.add_masked_mesh_to_plotter, self._view.main_plotter, self._masked_mesh)
 
         monitor_mesh = self._create_and_add_monitor_mesh()
         sample_position_mesh = self._create_and_add_sample_mesh()
@@ -301,9 +299,12 @@ class FullInstrumentViewPresenter:
         # Update transform needs to happen after adding to plotter
         # Uses display coordinates
         self._update_transform()
-        for mesh in [self._detector_mesh, self._pickable_mesh, self._masked_mesh, monitor_mesh, sample_position_mesh]:
+        for mesh in [self._detector_mesh, self._masked_mesh, monitor_mesh, sample_position_mesh]:
             if mesh is not None:
-                mesh.transform(self._transform, inplace=True)
+                mesh.transform(self._model.transform, inplace=True)
+
+        # Must follow the transform so the highlight is built from display coordinates
+        run_on_main_thread(renderer.update_picked_highlight, self._view.main_plotter, self._detector_mesh, self._model.picked_visibility)
 
         # If refreshing the limits we reset both the contour and integration sliders.
         # If not, we need to manually update the contour limits to what they were set to before we added the
@@ -323,9 +324,9 @@ class FullInstrumentViewPresenter:
 
     def _update_transform(self) -> None:
         if not self._model.is_2d_projection or self._view.is_maintain_aspect_ratio_checkbox_checked():
-            self._transform = np.eye(4)
+            self._model.transform = np.eye(4)
         else:
-            self._transform = self._transform_mesh_to_fill_window()
+            self._model.transform = self._transform_mesh_to_fill_window()
 
     def _transform_mesh_to_fill_window(self) -> np.ndarray:
         xmin, xmax, ymin, ymax, zmin, zmax = self._detector_mesh_bounds
@@ -333,18 +334,12 @@ class FullInstrumentViewPresenter:
         max_point = np.array([xmax, ymax, zmax])
 
         # Convert to display coordinates (pixels)
-        plotter = self._view.main_plotter
-        coordinate = vtkCoordinate()
-        coordinate.SetCoordinateSystemToWorld()
-        display_coords = []
-        for p in (min_point, max_point):
-            coordinate.SetValue(*p)
-            display_coords.append(coordinate.GetComputedDisplayValue(plotter.renderer))
+        display_coords = [self._view.world_to_display(*p) for p in (min_point, max_point)]
 
         mesh_width = display_coords[1][0] - display_coords[0][0]
         mesh_height = display_coords[1][1] - display_coords[0][1]
 
-        window_width, window_height = plotter.window_size
+        window_width, window_height = self._view.main_plotter.window_size
 
         # Safeguard against division by zero
         mesh_width = mesh_width if mesh_width > 0 else window_width
@@ -357,16 +352,6 @@ class FullInstrumentViewPresenter:
         # The matrix below is the product of those three transformations
         c_x, c_y, _ = centre
         return np.array([[scale_x, 0, 0, c_x * (1 - scale_x)], [0, scale_y, 0, c_y * (1 - scale_y)], [0, 0, 1, 0], [0, 0, 0, 1]])
-
-    def _transform_vectors_with_matrix(self, points: np.ndarray, transform: np.ndarray) -> np.ndarray:
-        if points.size == 0:
-            return points
-        # The transform is a 4x4 matrix, the points are 3D vectors, first we need an extra
-        # entry on the points
-        transformed_points = np.hstack([points, np.ones((points.shape[0], 1))])
-        transformed_points = transformed_points @ transform.T
-        # Now remove extra point
-        return transformed_points[:, :3]
 
     def on_aspect_ratio_check_box_clicked(self) -> None:
         self._view.store_maintain_aspect_ratio_option()
@@ -389,7 +374,6 @@ class FullInstrumentViewPresenter:
 
     def on_rubberband_zoom_toggled(self, checked: bool) -> None:
         if checked:
-            self._view.set_start_adding_peaks_checked(False)
             self._view.set_hover_pick_checked(False)
             self._view.delete_current_overlaid_shape()
         self._view.set_overlaid_shape_controls_enabled(not checked)
@@ -416,6 +400,7 @@ class FullInstrumentViewPresenter:
         self._update_interactor_style()
 
         if checked:
+            self.refresh_create_from_selection_enabled()
             return
 
         self.update_picked_detectors_on_view()
@@ -437,7 +422,11 @@ class FullInstrumentViewPresenter:
 
     def update_picked_detectors_on_view(self) -> None:
         # Update to visibility shows up in real time
-        self._renderer.set_pickable_scalars(self._pickable_mesh, self._model.picked_visibility, self._visible_label)
+        picked_visibility = self._model.picked_visibility
+        self._view.run_on_main_thread(
+            self._renderer.update_picked_highlight, self._view.main_plotter, self._detector_mesh, picked_visibility
+        )
+        self.refresh_create_from_selection_enabled()
         self._update_line_plot_ws_and_draw(self._view.current_selected_lineplot_unit())
 
     def _on_clear_point_picked_detectors_clicked(self) -> None:
@@ -450,30 +439,144 @@ class FullInstrumentViewPresenter:
     def on_overlaid_shape_added(self) -> None:
         self._update_interactor_style()
         self._view.set_add_selection_and_mask_buttons_enabled(True)
+        if self._sum_spectra_before_shape is None:
+            self._sum_spectra_before_shape = self._view.sum_spectra_selected()
+        self._view.set_sum_spectra_selected(True)
+        self._view.set_sum_spectra_checkbox_disabled(True)
 
     def on_overlaid_shape_removed(self) -> None:
         self._update_interactor_style()
         self._view.set_add_selection_and_mask_buttons_enabled(False)
+        if self._sum_spectra_before_shape is not None:
+            self._view.set_sum_spectra_selected(self._sum_spectra_before_shape)
+            self._sum_spectra_before_shape = None
+            self._view.set_sum_spectra_checkbox_disabled(False)
+        # Retire the generation so any queued or part-way-through preview update is discarded
+        # instead of drawing a preview for a shape that no longer exists
+        self._shape_update_generation += 1
+        if not self._shape_preview_active:
+            return
+        self._callback_queue.put((self._restore_committed_line_plot, ()))
+
+    def _restore_committed_line_plot(self) -> None:
+        self._shape_preview_active = False
+        self._update_line_plot_ws_and_draw(self._view.current_selected_lineplot_unit())
+
+    def on_shape_changed(self) -> None:
+        """Live-update the line plot with the spectra covered by the overlaid shape.
+
+        Called on the Qt thread when a shape is first drawn, and again by the shape overlay
+        manager each time it is dragged, resized or rotated, so the plot always shows what
+        would be committed by Add ROI / Add Mask.
+        """
+        centres = self._model.transformed_detector_positions
+        # Projection uses VTK, so must be done on the Qt thread before queueing the rest
+        self._view.project_and_cache_detector_points(centres)
+        self._shape_update_generation += 1
+        self._callback_queue.put((self._on_shape_changed, (centres, self._shape_update_generation)))
+
+    def on_camera_changed(self) -> None:
+        """Keep the line plot in step with the overlaid shape when the view is zoomed.
+
+        The shape is drawn in fixed screen coordinates, so zooming moves the instrument
+        underneath it and changes which detectors it covers.
+        """
+        if not self._view.is_active_current_overlaid_shape():
+            return
+        self.on_shape_changed()
+
+    def _is_current_shape_update(self, generation: int) -> bool:
+        """Whether a queued shape preview update is still the one that should be shown.
+
+        It is superseded either by a newer update (e.g. a burst of mouse-wheel zooms) or by the
+        shape being removed, both of which retire the generation it was queued with.
+        """
+        return generation == self._shape_update_generation and self._view.is_active_current_overlaid_shape()
+
+    def _on_shape_changed(self, centres: np.ndarray, generation: int) -> None:
+        if not self._is_current_shape_update(generation):
+            return
+        mask = self._view.get_shape_mask(centres)
+        if self._view.is_select_bank_tube_checked():
+            mask = self._model.expand_pickable_mask_to_parent_subtrees(mask)
+
+        self._model.extract_spectra_for_line_plot(
+            self._view.current_selected_lineplot_unit(), self._view.sum_spectra_selected(), np.flatnonzero(mask)
+        )
+        if not self._is_current_shape_update(generation):
+            # Extracting takes long enough for the shape to be removed or moved again meanwhile,
+            # and drawing now would put back a preview that has already been superseded
+            return
+
+        self._shape_preview_active = True
+        self._view.show_plot_for_detectors(self._model.line_plot_workspace, self._model.lineplot_limits)
+        # A shape typically covers far too many detectors for the per-detector info to be useful
+        self._view.set_selected_detector_info([])
+        self._view.set_relative_detector_angle(None)
+        # Peak overlays annotate the plotted spectra, so they have to follow the shape as well
+        self.refresh_lineplot_peaks()
 
     def _on_add_item_clicked(self) -> None:
-        centres = self._transform_vectors_with_matrix(np.array(self._model.detector_positions), self._transform)
+        centres = self._model.transformed_detector_positions
         mask = self._view.get_shape_mask(centres)
         if not np.any(mask):
             return
 
-        if self._select_bank_tube:
+        if self._view.is_select_bank_tube_checked():
             mask = self._model.expand_pickable_mask_to_parent_subtrees(mask)
         new_key = self._model.add_new_detector_key(mask.tolist(), self._view.get_current_selected_tab())
         self._view.set_new_item_key(self._view.get_current_selected_tab(), new_key)
         self._view.set_overlaid_shape_controls_checked(False)
 
-    def on_select_bank_tube_toggled(self, checked: bool) -> None:
-        self._select_bank_tube = checked
-
     def on_add_item_clicked(self) -> None:
-        centres = self._transform_vectors_with_matrix(np.array(self._model.detector_positions), self._transform)
+        centres = self._model.transformed_detector_positions
         self._view.project_and_cache_detector_points(centres)
         self._callback_queue.put((self._on_add_item_clicked, ()))
+
+    def _on_create_item_from_selection_clicked(
+        self, selection: np.ndarray, pickable: np.ndarray, point_picks: np.ndarray, tab: CurrentTab
+    ) -> None:
+        """Commit a snapshot of the picked detectors, taken when the button was clicked, as a new ROI or mask."""
+        if not np.any(selection):
+            return
+
+        if not np.array_equal(pickable, self._model.is_pickable):
+            # set_detector_key positions the selection by which detectors are pickable, so it is only
+            # meaningful against the exact set it was taken from. Masking or a component tree
+            # selection can swap detectors in and out of that set between the click and now, leaving
+            # the count unchanged but every entry after the swap describing a different detector.
+            logger.warning("Detectors changed before the selection could be committed, so no item was created.")
+            return
+
+        new_key = self._model.add_new_detector_key(selection.tolist(), tab)
+        self._view.set_new_item_key(tab, new_key)
+        # Only the picks that went into the item are cleared, so anything picked since the click stands
+        self._model.clear_point_picked_detectors(point_picks)
+        self.update_picked_detectors_on_view()
+
+    def on_create_item_from_selection_clicked(self) -> None:
+        # Snapshot on the Qt thread so the item that gets created is the one the user saw
+        # themselves ask for, whatever they select or which tab they open before the worker runs
+        selection = self._model.picked_detector_mask
+        # The detectors the selection is positioned against, so the worker can tell whether they
+        # still describe the same detectors by the time it runs
+        pickable = self._model.is_pickable
+        point_picks = self._model.point_picked_detectors
+        tab = self._view.get_current_selected_tab()
+        self._callback_queue.put((self._on_create_item_from_selection_clicked, (selection, pickable, point_picks, tab)))
+
+    def refresh_create_from_selection_enabled(self) -> None:
+        """Only offer to create an item from the selection while there is a selection to create it from.
+
+        Hover pick and peak picking both take over the picked detectors for their own purposes, so
+        what is highlighted then is not a selection the user has deliberately built up.
+        """
+        can_create = (
+            not self._view.is_hover_pick_mode_checked()
+            and not self._model.peak_picking_enabled()
+            and bool(np.any(self._model.picked_detector_mask))
+        )
+        self._view.set_create_from_selection_buttons_enabled(can_create)
 
     def _on_list_item_selected(self, kind: CurrentTab) -> None:
         self._model.apply_detector_items(self._view.selected_items_in_list(kind), kind)
@@ -695,9 +798,9 @@ class FullInstrumentViewPresenter:
 
     def refresh_plotter_peaks(self) -> None:
         self._view.clear_overlay_meshes()
-        pos, labels, selected_peaks_workspaces = self._model.get_peak_overlay_arguments(self._view.selected_peaks_workspaces())
-        transformed_pos = [self._transform_vectors_with_matrix(p, self._transform) for p in pos]
-        self._view.plot_overlay_meshes(transformed_pos, labels, selected_peaks_workspaces)
+        self._view.plot_overlay_meshes(*self._model.get_peak_overlay_arguments(self._view.selected_peaks_workspaces()))
+        # Everytime the pyvista plotter gets updated with peaks, the button for peak picking should be updated
+        self._view.set_select_peaks_enabled(self._view.has_any_peak_overlays_in_pyvista_plotter())
 
     def refresh_lineplot_peaks(self) -> None:
         # Plot vertical lines on the lineplot if the peak detector is selected
@@ -708,7 +811,6 @@ class FullInstrumentViewPresenter:
     def on_start_adding_peaks_toggled(self, checked) -> None:
         if checked:
             self._model.turn_on_single_point_picking()
-            self._view.set_rubberband_zoom_checked(False)
             self._view.set_hover_pick_checked(False)
             self._view.start_peak_selection_in_lineplot()
             self._view.disable_and_uncheck_selection_list()
@@ -754,7 +856,9 @@ class FullInstrumentViewPresenter:
             return
 
         def detector_picked(detector_index: int) -> None:
-            self._model.update_point_picked_detectors(detector_index, self._select_bank_tube)
+            self._model.update_point_picked_detectors(
+                detector_index, self._view.is_select_peaks_checked(), self._view.is_select_bank_tube_checked()
+            )
             self.update_picked_detectors_on_view()
             return
 
@@ -766,7 +870,10 @@ class FullInstrumentViewPresenter:
         )
 
         self._interactor_styles = InteractorStyles(
-            self._view.main_plotter, picking_callback=wrapped_picking_callback, hover_callback=wrapped_hover_callback
+            self._view.main_plotter,
+            picking_callback=wrapped_picking_callback,
+            hover_callback=wrapped_hover_callback,
+            camera_changed_callback=self.on_camera_changed,
         )
         self._update_interactor_style()
 

@@ -28,7 +28,7 @@ from qtpy.QtWidgets import (
     QFrame,
 )
 from qtpy.QtGui import QDoubleValidator, QDragEnterEvent, QDropEvent, QDragMoveEvent, QColor, QPalette, QPixmap, QIcon, QPainter
-from qtpy.QtCore import Qt, QEvent, QSize
+from qtpy.QtCore import Qt, QEvent, QSize, QMetaObject
 from qtpy.QtWidgets import QFileDialog
 from superqt import QDoubleRangeSlider
 from pyvistaqt import BackgroundPlotter
@@ -86,6 +86,7 @@ def _ensure_overlay_manager(method):
         shape = method(self, *args, **kwargs)
         self._shape_overlay_manager.set_shape(shape)
         self._presenter.on_overlaid_shape_added()
+        self._register_shape_changed_callback()
 
     return wrapper
 
@@ -229,6 +230,7 @@ class FullInstrumentViewView(QWidget):
         self._last_camera_position = None
         self._last_parallel_scale = None
         self._detector_spectrum_fig = None
+        self._line_edit_connections: dict[QLineEdit, QMetaObject.Connection] = {}
 
         self._create_main_widgets()
         self._set_layouts()
@@ -252,7 +254,7 @@ class FullInstrumentViewView(QWidget):
 
         self._detector_spectrum_fig = Figure()
         self._detector_spectrum_axes = self._detector_spectrum_fig.add_subplot(111, projection="mantid")
-        self._detector_spectrum_fig.subplots_adjust(left=0.05, right=0.98, bottom=0.1, top=0.95)
+        self._detector_spectrum_fig.set_layout_engine(layout="constrained")
         self._detector_figure_canvas = FigureCanvas(self._detector_spectrum_fig)
         self._detector_figure_canvas.setMinimumSize(QSize(0, 0))
         self._plot_toolbar = MantidNavigationToolbar(self._detector_figure_canvas, None)
@@ -337,6 +339,8 @@ class FullInstrumentViewView(QWidget):
         )
         self._select_bank_tube = QPushButton("Select Bank/Tube")
         self._select_bank_tube.setCheckable(True)
+        self._select_peaks = QPushButton("Select Peaks")
+        self._select_peaks.setCheckable(True)
         self._render_mode_combo_box = NoWheelComboBox()
         self._render_mode_combo_box.addItems(self._RENDER_MODE_OPTIONS)
         saved_mode = ConfigService.Instance()[self._RENDER_MODE_SETTING_STRING]
@@ -376,6 +380,7 @@ class FullInstrumentViewView(QWidget):
         self._selection_tab = QWidget()
         (
             self._add_selection,
+            self._create_selection_from_picked,
             self._clear_selections,
             self._selection_list,
             self._save_roi_to_ws,
@@ -391,6 +396,7 @@ class FullInstrumentViewView(QWidget):
         self._mask_tab = QWidget()
         (
             self._add_mask,
+            self._create_mask_from_picked,
             self._clear_masks,
             self._mask_list,
             self._save_mask_to_ws,
@@ -462,6 +468,7 @@ class FullInstrumentViewView(QWidget):
         picking_layout = QHBoxLayout(self._picking_group_box)
         picking_layout.addWidget(self._rubberband_zoom)
         picking_layout.addWidget(self._hover_pick)
+        picking_layout.addWidget(self._select_peaks)
         picking_layout.addWidget(self._select_bank_tube)
         picking_layout.addWidget(self._clear_point_picked_detectors)
 
@@ -523,10 +530,8 @@ class FullInstrumentViewView(QWidget):
         """Closes view, not window"""
         self._closing = True
         with suppress(TypeError):
-            self._contour_range_max_edit.disconnect()
-            self._contour_range_min_edit.disconnect()
-            self._integration_limit_max_edit.disconnect()
-            self._integration_limit_min_edit.disconnect()
+            for line_edit in self._line_edit_connections:
+                line_edit.disconnect(self._line_edit_connections[line_edit])
         # Shut down any callbacks before closing the plotter and the figure
         if hasattr(self, "_presenter") and self._presenter is not None:
             self._presenter.handle_close()
@@ -566,6 +571,10 @@ class FullInstrumentViewView(QWidget):
     def set_add_selection_and_mask_buttons_enabled(self, enabled: bool):
         self._add_mask.setEnabled(enabled)
         self._add_selection.setEnabled(enabled)
+
+    def set_create_from_selection_buttons_enabled(self, enabled: bool):
+        self._create_mask_from_picked.setEnabled(enabled)
+        self._create_selection_from_picked.setEnabled(enabled)
 
     def set_aspect_ratio_box_enabled(self, enabled):
         self._aspect_ratio_check_box.setEnabled(enabled)
@@ -681,8 +690,8 @@ class FullInstrumentViewView(QWidget):
 
         # Connections to sync sliders and edits
         slider.valueChanged.connect(lambda lims: self._set_min_max_edit_boxes(min_edit, max_edit, lims))
-        min_edit.editingFinished.connect(set_slider(callled_from_min=True))
-        max_edit.editingFinished.connect(set_slider(callled_from_min=False))
+        self._line_edit_connections[min_edit] = min_edit.editingFinished.connect(set_slider(callled_from_min=True))
+        self._line_edit_connections[max_edit] = max_edit.editingFinished.connect(set_slider(callled_from_min=False))
 
     def _add_detector_info_boxes(self, parent_box: QVBoxLayout, label: str) -> QTextEdit:
         """Adds a text box to the given parent that is designed to show read-only information about the selected detector"""
@@ -707,6 +716,8 @@ class FullInstrumentViewView(QWidget):
         pre_list_layout = QHBoxLayout()
         pre_list_layout.addWidget(add_item_btn)
         pre_list_layout.addWidget(clear_items_btn)
+        create_from_selection_btn = QPushButton("Create From Current Selection")
+        create_from_selection_btn.setToolTip(f"Create a new {label} from the detectors currently selected in the projection.")
         item_list = WorkspaceListWidget()
         item_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
         item_list.setSelectionMode(QAbstractItemView.NoSelection)
@@ -720,9 +731,19 @@ class FullInstrumentViewView(QWidget):
         post_list_layout.addWidget(save_to_cal_btn)
         post_list_layout.addWidget(overwrite_btn)
         tab_layout.addLayout(pre_list_layout)
+        tab_layout.addWidget(create_from_selection_btn)
         tab_layout.addWidget(item_list)
         tab_layout.addLayout(post_list_layout)
-        return (add_item_btn, clear_items_btn, item_list, save_to_ws_btn, save_to_xml_btn, save_to_cal_btn, overwrite_btn)
+        return (
+            add_item_btn,
+            create_from_selection_btn,
+            clear_items_btn,
+            item_list,
+            save_to_ws_btn,
+            save_to_xml_btn,
+            save_to_cal_btn,
+            overwrite_btn,
+        )
 
     def subscribe_presenter(self, presenter) -> None:
         self._presenter = presenter
@@ -770,7 +791,6 @@ class FullInstrumentViewView(QWidget):
         self._count_scale_combo_box.currentIndexChanged.connect(self._presenter.on_count_scale_selected)
         self._flip_beam_check_box.clicked.connect(self._presenter.on_flip_beam_check_box_clicked)
         self._render_mode_combo_box.currentIndexChanged.connect(self._presenter.on_render_mode_changed)
-        self._select_bank_tube.toggled.connect(self._presenter.on_select_bank_tube_toggled)
 
         self._add_connections_to_edits_and_slider(
             self._contour_range_min_edit,
@@ -791,6 +811,16 @@ class FullInstrumentViewView(QWidget):
         self._add_mask.setDisabled(True)
         self._add_selection.clicked.connect(self._presenter.on_add_item_clicked)
         self._add_selection.setDisabled(True)
+
+        self._create_mask_from_picked.clicked.connect(self._presenter.on_create_item_from_selection_clicked)
+        self._create_selection_from_picked.clicked.connect(self._presenter.on_create_item_from_selection_clicked)
+        self.set_create_from_selection_buttons_enabled(False)
+
+    def is_select_peaks_checked(self) -> bool:
+        return self._select_peaks.isChecked()
+
+    def set_select_peaks_enabled(self, enabled: bool) -> None:
+        self._select_peaks.setEnabled(enabled)
 
     def is_select_bank_tube_checked(self) -> bool:
         return self._select_bank_tube.isChecked()
@@ -836,6 +866,9 @@ class FullInstrumentViewView(QWidget):
 
     def set_sum_spectra_checkbox_disabled(self, disabled):
         self._sum_spectra_checkbox.setDisabled(disabled)
+
+    def set_sum_spectra_selected(self, selected: bool) -> None:
+        self._sum_spectra_checkbox.setChecked(selected)
 
     def set_select_bank_tube_disabled(self, disabled):
         self._select_bank_tube.setDisabled(disabled)
@@ -972,6 +1005,24 @@ class FullInstrumentViewView(QWidget):
         self.main_plotter.add_mesh(mesh, color=colour, pickable=pickable)
 
     @_skip_if_closing
+    def run_on_main_thread(self, func: Callable, *args, **kwargs):
+        """Run *func* on the Qt thread and return its result.
+
+        Every public method of this class is wrapped in a blocking
+        ``QAppThreadCall`` by the ``@run_on_qapp_thread`` decorator, so calling
+        this one from the presenter's callback worker thread hands the work to
+        the Qt thread and waits for it.  Anything that mutates ``main_plotter``
+        needs that: VTK removes an actor by releasing its graphics resources,
+        which makes the OpenGL context current and fails when the Qt thread
+        already holds it.
+
+        Methods on this class get that protection for free.  This exists for the
+        calls that reach the plotter directly instead — the renderers, which are
+        handed ``main_plotter`` and add actors to it themselves.
+        """
+        return func(*args, **kwargs)
+
+    @_skip_if_closing
     def clear_main_plotter(self) -> None:
         self.delete_current_overlaid_shape()
         self.main_plotter.clear()
@@ -980,6 +1031,18 @@ class FullInstrumentViewView(QWidget):
     def enable_parallel_projection(self) -> None:
         self.main_plotter.view_xy()
         self.main_plotter.enable_parallel_projection()
+
+    def _register_shape_changed_callback(self) -> None:
+        """Make the line plot follow the overlaid shape.
+
+        The overlay manager fires the callback whenever the shape is dragged, resized or
+        rotated. It is also called once here so the plot reflects the shape where it is
+        first drawn.
+        """
+        if self._shape_overlay_manager is None:
+            return
+        self._shape_overlay_manager.set_on_shape_changed(self._presenter.on_shape_changed)
+        self._presenter.on_shape_changed()
 
     @_ensure_overlay_manager
     def add_circle_widget(self) -> None:
@@ -1015,6 +1078,14 @@ class FullInstrumentViewView(QWidget):
         renderer.DisplayToWorld()
         world_x, world_y, world_z, world_w = renderer.GetWorldPoint()
         return world_x / world_w, world_y / world_w, world_z / world_w
+
+    def world_to_display(self, x, y, z):
+        # Convert from world coordinates to display coordinates
+        renderer = self.main_plotter.renderer
+        renderer.SetWorldPoint(x, y, z, 1.0)
+        renderer.WorldToDisplay()
+        display_x, display_y, display_z = renderer.GetDisplayPoint()
+        return display_x, display_y, display_z
 
     def get_shape_mask(self, points: np.ndarray) -> np.ndarray:
         """Return a boolean mask of which 3D points are inside the current selection shape.
@@ -1112,6 +1183,9 @@ class FullInstrumentViewView(QWidget):
             self.main_plotter.remove_actor(mesh[1])
         self._overlay_meshes.clear()
 
+    def has_any_peak_overlays_in_pyvista_plotter(self) -> bool:
+        return bool(self._overlay_meshes)
+
     @_skip_if_closing
     def clear_lineplot_overlays(self) -> None:
         for line in self._lineplot_overlays:
@@ -1165,7 +1239,7 @@ class FullInstrumentViewView(QWidget):
 
             for x, label in zip(x_values, labels):
                 self._lineplot_overlays.append(self._detector_spectrum_axes.axvline(x, color=item_color, linestyle="--"))
-                self._detector_spectrum_axes.text(
+                peak_label = self._detector_spectrum_axes.text(
                     x,
                     0.99,
                     label,
@@ -1176,6 +1250,7 @@ class FullInstrumentViewView(QWidget):
                     fontsize=8,
                     rotation=90,
                 )
+                peak_label.set_in_layout(False)
             self.redraw_lineplot()
 
     @_skip_if_closing
@@ -1213,9 +1288,6 @@ class FullInstrumentViewView(QWidget):
                 continue
             removed = list_to_clear.takeItem(i)
             del removed
-
-    def has_any_peak_overlays(self) -> bool:
-        return len(self._lineplot_overlays) > 0
 
     def _on_axes_click_during_peak_selection(self, event) -> None:
         if self._plot_toolbar.zoom_enabled() or self._plot_toolbar.pan_enabled():

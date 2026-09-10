@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "../../../ISISReflectometry/GUI/Common/PlotOptionsProvider.h"
 #include "../../../ISISReflectometry/GUI/Common/Plotter.h"
 #include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h"
 #include "../../../ISISReflectometry/Reduction/Slicing.h"
@@ -67,13 +68,13 @@ public:
   RunsTablePresenter makePresenter(IRunsTableView &view) { return makePresenter(view, ReductionJobs()); }
 
   RunsTablePresenter makePresenter(IRunsTableView &view, ReductionJobs jobs) {
-    auto presenter = RunsTablePresenter(&view, {}, 0.01, std::move(jobs), m_plotter);
+    auto presenter = RunsTablePresenter(&view, {}, 0.01, std::move(jobs), m_plotter, m_plotOptionsProvider);
     presenter.acceptMainPresenter(&m_mainPresenter);
     return presenter;
   }
 
   RunsTablePresenter makePresenterWithoutMainPresenter(IRunsTableView &view) {
-    return RunsTablePresenter(&view, {}, 0.01, ReductionJobs(), m_plotter);
+    return RunsTablePresenter(&view, {}, 0.01, ReductionJobs(), m_plotter, m_plotOptionsProvider);
   }
 
   Group &getGroup(RunsTablePresenter &presenter, int groupIndex) {
@@ -115,4 +116,5 @@ protected:
   NiceMock<MockRunsTableView> m_view;
   NiceMock<MockRunsPresenter> m_mainPresenter;
   NiceMock<MockPlotter> m_plotter;
+  PlotOptionsProvider m_plotOptionsProvider;
 };

@@ -23,6 +23,9 @@ using namespace MantidQt::MantidWidgets;
 
 namespace {
 Mantid::Kernel::Logger g_log("ISISCalibration");
+const static std::string CALIBRATION_OUTPUT = "__IndirectCalibration_reduction";
+constexpr double PEAK_QUARTILE = 0.25;
+constexpr double BCKGRND_PERCENTILE = 0.125;
 
 template <typename Map, typename Key, typename Value>
 Value getValueOr(const Map &map, const Key &key, const Value &defaultValue) {
@@ -42,8 +45,7 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ISISCalibration::ISISCalibration(IDataReduction *idrUI, QWidget *parent)
-    : DataReductionTab(idrUI, parent), m_lastCalPlotFilename("") {
+ISISCalibration::ISISCalibration(IDataReduction *idrUI, QWidget *parent) : DataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
   setOutputPlotOptionsPresenter(m_uiForm.ipoPlotOptions, PlotWidget::SpectraBin);
@@ -135,7 +137,7 @@ ISISCalibration::ISISCalibration(IDataReduction *idrUI, QWidget *parent)
   // Update range selector positions when a value in the double manager changes
   connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ISISCalibration::calUpdateRS);
   // Plot miniplots after a file has loaded
-  connect(m_uiForm.leRunNo, &FileFinderWidget::filesFound, this, &ISISCalibration::calPlotRaw);
+  connect(m_uiForm.leRunNo, &FileFinderWidget::filesFoundChanged, this, &ISISCalibration::handleLoadFiles);
   // Toggle RES file options when user toggles Create RES File checkbox
   connect(m_uiForm.ckCreateResolution, &QCheckBox::toggled, this, &ISISCalibration::resCheck);
   // Shows message on run button when Mantid is finding the file for a given run
@@ -298,14 +300,17 @@ void ISISCalibration::algorithmComplete(bool error) {
     setOutputPlotOptionsWorkspaces(outputWorkspaces);
 
     m_uiForm.pbSave->setEnabled(true);
+    WorkspaceUtils::removeADSWorkspace(CALIBRATION_OUTPUT);
   }
 }
 
 void ISISCalibration::handleRun() {
   const auto filenames = m_uiForm.leRunNo->getFilenames().join(",");
-  const auto outputWorkspaceNameStem = outputWorkspaceName().toLower();
 
-  m_outputCalibrationName = outputWorkspaceNameStem + "_calib";
+  if (m_outputNamePrefix.isEmpty()) {
+    m_outputNamePrefix = outputWorkspaceName().toLower();
+  }
+  m_outputCalibrationName = m_outputNamePrefix + "_calib";
 
   try {
     m_batchAlgoRunner->addAlgorithm(calibrationAlgorithm(filenames));
@@ -318,7 +323,7 @@ void ISISCalibration::handleRun() {
   m_pythonExportWsName = m_outputCalibrationName.toStdString();
   // Configure the resolution algorithm
   if (m_uiForm.ckCreateResolution->isChecked()) {
-    m_outputResolutionName = outputWorkspaceNameStem + "_res";
+    m_outputResolutionName = m_outputNamePrefix + "_res";
     m_batchAlgoRunner->addAlgorithm(resolutionAlgorithm(filenames));
 
     if (m_uiForm.ckSmoothResolution->isChecked())
@@ -374,72 +379,35 @@ void ISISCalibration::setDefaultInstDetails(QMap<QString, QString> const &instru
 
   // Set spectra range
   setResolutionSpectraRange(spectraMin, spectraMax);
-
-  // Set peak and background ranges
-  const auto ranges = getRangesFromInstrument();
-
-  QString filename = m_uiForm.leRunNo->getFirstFilename();
-  if (filename.isEmpty())
-    return;
-  QFileInfo fi(filename);
-  QString wsname = fi.baseName();
-  if (!Mantid::API::AnalysisDataService::Instance().doesExist(wsname.toStdString())) {
-    loadFile(filename.toStdString(), wsname.toStdString(), spectraMin, spectraMax);
-  }
-  const auto input =
-      std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsname.toStdString()));
-  const auto &dataX = input->x(0);
-
-  disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ISISCalibration::calUpdateRS);
-  disconnectRangeSelectors();
-  if (dataX.back() <= getValueOr(ranges, "peak-end-tof", 0.0) ||
-      dataX.front() >= getValueOr(ranges, "peak-start-tof", 0.0)) {
-    setPeakRange((3.0 * dataX.front() + dataX.back()) / 4.0, (dataX.front() + 3.0 * dataX.back()) / 4.0);
-    setBackgroundRange(dataX.front(), (7.0 * dataX.front() + dataX.back()) / 8.0);
-  } else {
-    setPeakRange(getValueOr(ranges, "peak-start-tof", 0.0), getValueOr(ranges, "peak-end-tof", 0.0));
-    setBackgroundRange(getValueOr(ranges, "back-start-tof", 0.0), getValueOr(ranges, "back-end-tof", 0.0));
-  }
-
-  auto const hasResolution = hasInstrumentDetail(instrumentDetails, "resolution");
-  m_uiForm.ckCreateResolution->setEnabled(hasResolution);
-  if (!hasResolution)
-    m_uiForm.ckCreateResolution->setChecked(false);
-
-  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ISISCalibration::calUpdateRS);
-  connectRangeSelectors();
-  // plot energy to correctly set the res plot
-  calPlotEnergy();
 }
 
-/**
- * Replots the raw data mini plot and the energy mini plot
- */
-void ISISCalibration::calPlotRaw() {
-  QString filename = m_uiForm.leRunNo->getFirstFilename();
-
-  // Don't do anything if the file we would plot has not changed
-  if (filename.isEmpty() || filename == m_lastCalPlotFilename)
+void ISISCalibration::handleLoadFiles() {
+  if (!m_uiForm.leRunNo->isValid()) {
     return;
-
-  m_lastCalPlotFilename = filename;
-
-  QFileInfo fi(filename);
-  QString wsname = fi.baseName();
-
+  }
   int const specMin = hasInstrumentDetail("spectra-min") ? getInstrumentDetail("spectra-min").toInt() : -1;
   int const specMax = hasInstrumentDetail("spectra-max") ? getInstrumentDetail("spectra-max").toInt() : -1;
 
-  if (!loadFile(filename.toStdString(), wsname.toStdString(), specMin, specMax)) {
+  const QString filename = m_uiForm.leRunNo->getFirstFilename();
+  const QFileInfo fi(filename);
+  const std::string wsname = fi.baseName().toStdString();
+
+  if (!loadFile(filename.toStdString(), wsname, specMin, specMax)) {
     emit showMessageBox("Unable to load file.\nCheck whether your file exists "
                         "and matches the selected instrument in the Energy "
                         "Transfer tab.");
     return;
   }
 
-  const auto input =
-      std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsname.toStdString()));
+  calPlotRaw(wsname);
+  calPlotEnergy();
+}
 
+/**
+ * Replots the raw data mini plot and the energy mini plot
+ */
+void ISISCalibration::calPlotRaw(const std::string &inputName) {
+  const auto input = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputName));
   m_uiForm.ppCalibration->clear();
   m_uiForm.ppCalibration->addSpectrum("Raw", input, 0);
   m_uiForm.ppCalibration->resizeX();
@@ -448,12 +416,32 @@ void ISISCalibration::calPlotRaw() {
   setPeakRangeLimits(dataX.front(), dataX.back());
   setBackgroundRangeLimits(dataX.front(), dataX.back());
 
-  updateInstrumentConfiguration();
+  // Set peak and background ranges
+  const auto ranges = getRangesFromInstrument();
+
+  disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ISISCalibration::calUpdateRS);
+  disconnectRangeSelectors();
+  if (dataX.back() <= getValueOr(ranges, "peak-end-tof", 0.0) ||
+      dataX.front() >= getValueOr(ranges, "peak-start-tof", 0.0)) {
+    // Sets peak beginning/end within start/end 25% of the dataX range and background range within the first 12.5% of
+    // dataX range.
+    setPeakRange(dataX.front() + (dataX.back() - dataX.front()) * PEAK_QUARTILE,
+                 (dataX.back() - (dataX.back() - dataX.front()) * PEAK_QUARTILE));
+    setBackgroundRange(dataX.front(), dataX.front() + (dataX.back() - dataX.front()) * BCKGRND_PERCENTILE);
+  } else {
+    setPeakRange(getValueOr(ranges, "peak-start-tof", 0.0), getValueOr(ranges, "peak-end-tof", 0.0));
+    setBackgroundRange(getValueOr(ranges, "back-start-tof", 0.0), getValueOr(ranges, "back-end-tof", 0.0));
+  }
 
   m_uiForm.ppCalibration->replot();
 
-  // Also replot the energy
-  calPlotEnergy();
+  auto const hasResolution = hasInstrumentDetail(getInstrumentDetails(), "resolution");
+  m_uiForm.ckCreateResolution->setEnabled(hasResolution);
+  if (!hasResolution)
+    m_uiForm.ckCreateResolution->setChecked(false);
+
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ISISCalibration::calUpdateRS);
+  connectRangeSelectors();
 }
 
 /**
@@ -471,7 +459,7 @@ void ISISCalibration::calPlotEnergy() {
   }
 
   WorkspaceGroup_sptr reductionOutputGroup =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("__IndirectCalibration_reduction");
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(CALIBRATION_OUTPUT);
   if (reductionOutputGroup->isEmpty()) {
     g_log.warning("No result workspaces, cannot plot energy preview.");
     return;
@@ -481,6 +469,12 @@ void ISISCalibration::calPlotEnergy() {
   if (!energyWs) {
     g_log.warning("No result workspaces, cannot plot energy preview.");
     return;
+  }
+
+  const auto &wsName = energyWs->getName();
+  const auto prefix_pos = wsName.find("_red");
+  if (prefix_pos != std::string::npos) {
+    m_outputNamePrefix = QString::fromStdString(wsName.substr(0, prefix_pos)).toLower();
   }
 
   const auto &dataX = energyWs->x(0);
@@ -742,7 +736,7 @@ IAlgorithm_sptr ISISCalibration::energyTransferReductionAlgorithm(const QString 
   reductionAlg->setProperty("Reflection", getReflectionName().toStdString());
   reductionAlg->setProperty("InputFiles", inputFiles.toStdString());
   reductionAlg->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
-  reductionAlg->setProperty("OutputWorkspace", "__IndirectCalibration_reduction");
+  reductionAlg->setProperty("OutputWorkspace", CALIBRATION_OUTPUT);
   reductionAlg->setProperty("SpectraRange", resolutionDetectorRangeString().toStdString());
   reductionAlg->setProperty("LoadLogFiles", m_uiForm.ckLoadLogFiles->isChecked());
   return reductionAlg;

@@ -17,6 +17,7 @@ from instrumentview.renderers.point_cloud_renderer import PointCloudRenderer
 
 import numpy as np
 from mantid.simpleapi import CreateSampleWorkspace
+from vtkmodules.vtkRenderingCore import vtkCamera
 
 import unittest
 from unittest import mock
@@ -32,9 +33,14 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view._RENDER_MODE_POINTS = "Points (Fastest)"
         self._mock_view._RENDER_MODE_SHAPES_FAST = "Approximated Shapes (Fast)"
         self._mock_view._RENDER_MODE_RAW_SHAPES = "Raw Shapes (Slowest)"
+        self._mock_view.is_select_peaks_checked.return_value = False
         self._mock_view.is_select_bank_tube_checked.return_value = False
         self._mock_view.get_contour_limits.return_value = (0.0, 1.0)
         self._mock_view.selected_peaks_workspaces.return_value = []
+        self._mock_view.run_on_main_thread.side_effect = lambda func, *args, **kwargs: func(*args, **kwargs)
+        # The shape renderers outline picked detectors with a silhouette, which
+        # needs a real camera: the outline depends on where the scene is viewed from.
+        self._mock_view.main_plotter.renderer.GetActiveCamera.return_value = vtkCamera()
         self._ws = CreateSampleWorkspace(OutputWorkspace="TestFullInstrumentViewPresenter", EnableLogging=False)
         self._model = FullInstrumentViewModel(self._ws)
         self._presenter = self._create_test_presenter()
@@ -112,14 +118,19 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.InteractorStyles")
     def test_reload_interactor_styles_single(self, mock_interactor_styles):
-        self._reload_interactor_styles(select_bank_tube=False)
+        self._reload_interactor_styles(select_peaks=False, select_bank_tube=False)
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.InteractorStyles")
     def test_reload_interactor_styles_bank_tube(self, mock_interactor_styles):
-        self._reload_interactor_styles(select_bank_tube=True)
+        self._reload_interactor_styles(select_peaks=False, select_bank_tube=True)
 
-    def _reload_interactor_styles(self, select_bank_tube: bool):
-        self._presenter._select_bank_tube = select_bank_tube
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.InteractorStyles")
+    def test_reload_interactor_styles_select_peaks(self, mock_interactor_styles):
+        self._reload_interactor_styles(select_peaks=True, select_bank_tube=False)
+
+    def _reload_interactor_styles(self, select_peaks: bool, select_bank_tube: bool):
+        self._mock_view.is_select_peaks_checked.return_value = select_peaks
+        self._mock_view.is_select_bank_tube_checked.return_value = select_bank_tube
         self._presenter._renderer.get_callback_tied_to_detector_index.side_effect = lambda _plotter, callback, hover=False: callback
         self._presenter._update_interactor_style = MagicMock()
         self._presenter._model.update_point_picked_detectors = MagicMock()
@@ -136,7 +147,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         )
         callback = self._presenter._renderer.get_callback_tied_to_detector_index.call_args_list[0].kwargs["callback"]
         callback(3)
-        self._presenter._model.update_point_picked_detectors.assert_called_once_with(3, select_bank_tube)
+        self._presenter._model.update_point_picked_detectors.assert_called_once_with(3, select_peaks, select_bank_tube)
         self._presenter.update_picked_detectors_on_view.assert_called_once()
         self._presenter._update_interactor_style.assert_called_once()
 
@@ -160,7 +171,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
         self._presenter.on_rubberband_zoom_toggled(True)
 
-        self._mock_view.set_start_adding_peaks_checked.assert_called_once_with(False)
         self._mock_view.set_hover_pick_checked.assert_called_once_with(False)
         self._mock_view.delete_current_overlaid_shape.assert_called_once()
         self._mock_view.set_overlaid_shape_controls_enabled.assert_called_once_with(False)
@@ -278,18 +288,57 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model._detector_ids = np.array([1, 2, 3])
         self._model.picked_detectors_info_text = MagicMock(return_value=["a", "a"])
         self._model.extract_spectra_for_line_plot = MagicMock()
-        self._presenter._pickable_mesh = MagicMock()
-        self._presenter._pickable_mesh.point_data = {}
-        self._presenter._renderer.set_pickable_scalars.side_effect = lambda m, visibility, label: m.point_data.update({label: visibility})
+        self._presenter._detector_mesh = MagicMock()
         self._mock_view.current_selected_lineplot_unit.return_value = "TOF"
         self._mock_view.sum_spectra_selected.return_value = True
         self._presenter.update_picked_detectors_on_view()
-        np.testing.assert_allclose(
-            self._presenter._pickable_mesh.point_data[self._presenter._visible_label], self._model._detector_is_picked
-        )
         self._mock_view.show_plot_for_detectors.assert_called_once_with(self._model.line_plot_workspace, self._model.lineplot_limits)
         self._mock_view.set_selected_detector_info.assert_called_once_with(["a", "a"])
         self._model.extract_spectra_for_line_plot.assert_called_once_with("TOF", True)
+
+    def test_actors_are_added_on_the_qt_thread(self):
+        """The renderers get the plotter directly, so their actor additions must be marshalled.
+
+        Adding or removing a VTK actor off the Qt thread fails with wglMakeCurrent
+        errors, because the Qt thread already holds the OpenGL context.
+        """
+        self._presenter.update_plotter()
+
+        marshalled = [call[0][0] for call in self._mock_view.run_on_main_thread.call_args_list]
+        renderer = self._presenter._renderer
+        for expected in (
+            renderer.add_detector_mesh_to_plotter,
+            renderer.add_masked_mesh_to_plotter,
+            renderer.create_picked_highlight_actor,
+            renderer.update_picked_highlight,
+        ):
+            self.assertIn(expected, marshalled)
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_relative_detector_angle")
+    def test_update_picked_detectors_refreshes_highlight(self, _mock_update_det_angle):
+        self._model._workspace_indices = np.array([0, 1, 2])
+        self._model._is_valid = np.array([True, True, True])
+        self._model._is_masked = np.array([False, False, False])
+        self._model._is_selected_in_tree = np.array([True, True, True])
+        self._model._detector_is_picked = np.array([True, False, False])
+        self._model._detector_ids = np.array([1, 2, 3])
+        self._model.picked_detectors_info_text = MagicMock(return_value=["a"])
+        self._model.extract_spectra_for_line_plot = MagicMock()
+        self._presenter._detector_mesh = MagicMock()
+
+        self._presenter.update_picked_detectors_on_view()
+
+        renderer = self._presenter._renderer
+        renderer.update_picked_highlight.assert_called_once()
+        args = renderer.update_picked_highlight.call_args[0]
+        self.assertIs(args[0], self._mock_view.main_plotter)
+        self.assertIs(args[1], self._presenter._detector_mesh)
+        np.testing.assert_array_equal(args[2], self._model._detector_is_picked)
+
+        # This path is reached from the callback worker thread, so the highlight update
+        # must be marshalled onto the Qt thread rather than called directly.
+        marshalled = [call[0][0] for call in self._mock_view.run_on_main_thread.call_args_list]
+        self.assertIn(renderer.update_picked_highlight, marshalled)
 
     def test_on_add_selection_clicked(self):
         n_hist = self._ws.getNumberHistograms()
@@ -313,7 +362,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model._is_valid = np.array([True, True, True])
         self._model._is_selected_in_tree = np.array([True, True, True])
         self._model._detector_positions_3d = np.array([[0, 0, 0], [1, 1, 1], [2, 2, 2]])
-        self._presenter._select_bank_tube = True
+        self._mock_view.is_select_bank_tube_checked.return_value = True
         self._model.expand_pickable_mask_to_parent_subtrees = MagicMock(return_value=mask)
         self._model.add_new_detector_key = MagicMock(return_value="mock_key")
 
@@ -322,11 +371,334 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model.expand_pickable_mask_to_parent_subtrees.assert_called_once()
         np.testing.assert_array_equal(self._model.add_new_detector_key.call_args.args[0], mask)
 
-    def test_on_select_bank_tube_toggled(self):
-        self._presenter.on_select_bank_tube_toggled(True)
-        self.assertTrue(self._presenter._select_bank_tube)
-        self._presenter.on_select_bank_tube_toggled(False)
-        self.assertFalse(self._presenter._select_bank_tube)
+    def _click_create_from_selection(self):
+        """Click the button and return the queued work, without letting the worker run it yet.
+
+        Lets a test change the selection or the tab in between, as a user can while the work waits.
+        """
+        self._mock_view.current_selected_lineplot_unit.return_value = "TOF"
+        self._model.add_new_detector_key = MagicMock(return_value="mock_key")
+        with mock.patch.object(self._presenter, "_callback_queue") as mock_queue:
+            self._presenter.on_create_item_from_selection_clicked()
+        func, args = mock_queue.put.call_args.args[0]
+        return func, args
+
+    def test_on_create_item_from_selection_clicked(self):
+        n_hist = self._ws.getNumberHistograms()
+        picked = np.array([i % 3 == 0 for i in range(n_hist)])
+        self._model._detector_is_picked = picked
+        self._mock_view.get_current_selected_tab.return_value = CurrentTab.Masking
+
+        func, args = self._click_create_from_selection()
+        func(*args)
+
+        np.testing.assert_array_equal(self._model.add_new_detector_key.call_args.args[0], picked[self._model.is_pickable].tolist())
+        self.assertEqual(self._model.add_new_detector_key.call_args.args[1], CurrentTab.Masking)
+        self._mock_view.set_new_item_key.assert_called_once_with(CurrentTab.Masking, "mock_key")
+
+    def test_on_create_item_from_selection_clicked_clears_the_selection(self):
+        n_hist = self._ws.getNumberHistograms()
+        self._model._detector_is_picked = np.full(n_hist, True)
+        self._model._point_picked_detectors = np.full(n_hist, True)
+        self._mock_view.get_current_selected_tab.return_value = CurrentTab.Masking
+
+        func, args = self._click_create_from_selection()
+        func(*args)
+
+        self.assertFalse(np.any(self._model._detector_is_picked))
+        self.assertFalse(np.any(self._model._point_picked_detectors))
+        # The committed mask was taken before the selection was cleared
+        self.assertTrue(np.all(self._model.add_new_detector_key.call_args.args[0]))
+        self._mock_view.set_create_from_selection_buttons_enabled.assert_called_with(False)
+
+    def test_on_create_item_from_selection_clicked_does_nothing_without_a_selection(self):
+        self._model._detector_is_picked = np.full(self._ws.getNumberHistograms(), False)
+        self._mock_view.get_current_selected_tab.return_value = CurrentTab.Grouping
+
+        func, args = self._click_create_from_selection()
+        func(*args)
+
+        self._model.add_new_detector_key.assert_not_called()
+        self._mock_view.set_new_item_key.assert_not_called()
+
+    def test_on_create_item_from_selection_commits_the_selection_and_tab_from_when_it_was_clicked(self):
+        n_hist = self._ws.getNumberHistograms()
+        picked_at_click = np.array([i % 3 == 0 for i in range(n_hist)])
+        self._model._detector_is_picked = picked_at_click.copy()
+        self._model._point_picked_detectors = picked_at_click.copy()
+        self._mock_view.get_current_selected_tab.return_value = CurrentTab.Grouping
+
+        func, args = self._click_create_from_selection()
+
+        # The user carries on selecting, and switches tab, before the queued work runs
+        self._model._detector_is_picked[:] = True
+        self._model._point_picked_detectors[:] = True
+        self._mock_view.get_current_selected_tab.return_value = CurrentTab.Masking
+
+        func(*args)
+
+        expected = picked_at_click[self._model.is_pickable].tolist()
+        np.testing.assert_array_equal(self._model.add_new_detector_key.call_args.args[0], expected)
+        self.assertEqual(self._model.add_new_detector_key.call_args.args[1], CurrentTab.Grouping)
+        self._mock_view.set_new_item_key.assert_called_once_with(CurrentTab.Grouping, "mock_key")
+
+    def test_on_create_item_from_selection_keeps_detectors_picked_after_it_was_clicked(self):
+        n_hist = self._ws.getNumberHistograms()
+        at_click, after_click = np.flatnonzero(self._model.is_pickable)[:2]
+        self._model._detector_is_picked = np.full(n_hist, False)
+        self._model._point_picked_detectors = np.full(n_hist, False)
+        self._model._detector_is_picked[at_click] = True
+        self._model._point_picked_detectors[at_click] = True
+        self._mock_view.get_current_selected_tab.return_value = CurrentTab.Grouping
+
+        func, args = self._click_create_from_selection()
+
+        # Another detector is picked while the work is still queued
+        self._model._detector_is_picked[after_click] = True
+        self._model._point_picked_detectors[after_click] = True
+
+        func(*args)
+
+        # Only what went into the new item is cleared, so the later pick survives
+        expected = np.full(n_hist, False)
+        expected[after_click] = True
+        np.testing.assert_array_equal(self._model._point_picked_detectors, expected)
+        np.testing.assert_array_equal(self._model._detector_is_picked, expected)
+
+    def test_on_create_item_from_selection_abandoned_if_a_pickable_detector_is_removed(self):
+        self._model._detector_is_picked = np.full(self._ws.getNumberHistograms(), True)
+        self._mock_view.get_current_selected_tab.return_value = CurrentTab.Grouping
+
+        func, args = self._click_create_from_selection()
+
+        # A mask applied in the meantime takes a detector out of the pickable set, so the snapshot
+        # no longer has one entry per pickable detector
+        self._model._is_masked = self._model._is_masked.copy()
+        self._model._is_masked[np.flatnonzero(self._model.is_pickable)[0]] = True
+
+        with mock.patch("instrumentview.FullInstrumentViewPresenter.logger") as mock_logger:
+            func(*args)
+
+        mock_logger.warning.assert_called_once()
+        self._model.add_new_detector_key.assert_not_called()
+        self._mock_view.set_new_item_key.assert_not_called()
+
+    def test_on_create_item_from_selection_abandoned_if_a_pickable_detector_is_swapped(self):
+        """A swap keeps the count the same, so only the identity of the pickable detectors gives it away."""
+        n_hist = self._ws.getNumberHistograms()
+        self._model._is_masked = np.full(n_hist, False)
+        masked_at_click, masked_after_click = np.flatnonzero(self._model.is_pickable)[:2]
+        self._model._is_masked[masked_at_click] = True
+        self._model._detector_is_picked = np.full(n_hist, True)
+        self._mock_view.get_current_selected_tab.return_value = CurrentTab.Grouping
+
+        func, args = self._click_create_from_selection()
+        pickable_at_click = np.count_nonzero(self._model.is_pickable)
+
+        # Unmasking one detector and masking another leaves as many pickable detectors as before,
+        # but every snapshot entry between the two now lines up against a different detector
+        self._model._is_masked[masked_at_click] = False
+        self._model._is_masked[masked_after_click] = True
+        self.assertEqual(np.count_nonzero(self._model.is_pickable), pickable_at_click)
+
+        with mock.patch("instrumentview.FullInstrumentViewPresenter.logger") as mock_logger:
+            func(*args)
+
+        mock_logger.warning.assert_called_once()
+        self._model.add_new_detector_key.assert_not_called()
+        self._mock_view.set_new_item_key.assert_not_called()
+
+    def test_create_from_selection_enabled_only_while_detectors_are_selected(self):
+        self._model._detector_is_picked = np.full(self._ws.getNumberHistograms(), False)
+        self._presenter.refresh_create_from_selection_enabled()
+        self._mock_view.set_create_from_selection_buttons_enabled.assert_called_once_with(False)
+
+        self._mock_view.reset_mock()
+        self._model._detector_is_picked[0] = True
+        self._presenter.refresh_create_from_selection_enabled()
+        self._mock_view.set_create_from_selection_buttons_enabled.assert_called_once_with(True)
+
+    def test_create_from_selection_disabled_in_hover_pick_mode(self):
+        self._model._detector_is_picked = np.full(self._ws.getNumberHistograms(), True)
+        self._mock_view.is_hover_pick_mode_checked.return_value = True
+
+        self._presenter.refresh_create_from_selection_enabled()
+
+        self._mock_view.set_create_from_selection_buttons_enabled.assert_called_once_with(False)
+
+    def test_create_from_selection_disabled_while_picking_peaks(self):
+        self._model._detector_is_picked = np.full(self._ws.getNumberHistograms(), True)
+        self._model.peak_picking_enabled = MagicMock(return_value=True)
+
+        self._presenter.refresh_create_from_selection_enabled()
+
+        self._mock_view.set_create_from_selection_buttons_enabled.assert_called_once_with(False)
+
+    def test_adding_a_shape_forces_summed_spectra(self):
+        """A shape covers too many detectors to plot individually, so the choice is taken away."""
+        self._mock_view.sum_spectra_selected.return_value = False
+
+        self._presenter.on_overlaid_shape_added()
+
+        self._mock_view.set_sum_spectra_selected.assert_called_once_with(True)
+        self._mock_view.set_sum_spectra_checkbox_disabled.assert_called_once_with(True)
+
+    def test_removing_a_shape_restores_the_users_sum_spectra_choice(self):
+        self._mock_view.sum_spectra_selected.return_value = False
+        self._presenter.on_overlaid_shape_added()
+        self._mock_view.reset_mock()
+
+        self._presenter.on_overlaid_shape_removed()
+        self._presenter._callback_queue.join()
+
+        self._mock_view.set_sum_spectra_selected.assert_called_once_with(False)
+        self._mock_view.set_sum_spectra_checkbox_disabled.assert_called_once_with(False)
+
+    def test_replacing_a_shape_remembers_the_original_sum_spectra_choice(self):
+        """Swapping shape type re-runs the added handler; it must not remember the forced value."""
+        self._mock_view.sum_spectra_selected.return_value = False
+        self._presenter.on_overlaid_shape_added()
+        self._mock_view.sum_spectra_selected.return_value = True
+        self._presenter.on_overlaid_shape_added()
+        self._mock_view.reset_mock()
+
+        self._presenter.on_overlaid_shape_removed()
+        self._presenter._callback_queue.join()
+
+        self._mock_view.set_sum_spectra_selected.assert_called_once_with(False)
+
+    def test_removing_a_shape_that_was_never_added_leaves_the_checkbox_alone(self):
+        """Deleting the shape is unconditional, so it must not re-enable a box hover pick disabled."""
+        self._presenter.on_overlaid_shape_removed()
+        self._presenter._callback_queue.join()
+
+        self._mock_view.set_sum_spectra_selected.assert_not_called()
+        self._mock_view.set_sum_spectra_checkbox_disabled.assert_not_called()
+
+    def test_on_shape_changed_projects_points_before_queueing(self):
+        """on_shape_changed projects detector points on the main thread before
+        dispatching work to the background queue, because projection uses VTK."""
+        self._presenter._callback_queue = MagicMock()
+        self._presenter.on_shape_changed()
+        self._mock_view.project_and_cache_detector_points.assert_called_once()
+        self._presenter._callback_queue.put.assert_called_once()
+
+    def test_on_shape_changed_plots_spectra_covered_by_the_shape(self):
+        n_hist = self._ws.getNumberHistograms()
+        mask = np.array([i < 3 for i in range(n_hist)])
+        self._mock_view.get_shape_mask.return_value = mask
+        self._mock_view.current_selected_lineplot_unit.return_value = "TOF"
+        self._mock_view.sum_spectra_selected.return_value = True
+        self._model.extract_spectra_for_line_plot = MagicMock()
+
+        self._presenter._on_shape_changed(np.array(self._model.detector_positions), self._presenter._shape_update_generation)
+
+        unit, sum_spectra = self._model.extract_spectra_for_line_plot.call_args.args[:2]
+        self.assertEqual("TOF", unit)
+        self.assertTrue(sum_spectra)
+        np.testing.assert_array_equal(np.flatnonzero(mask), self._model.extract_spectra_for_line_plot.call_args.args[2])
+        self._mock_view.show_plot_for_detectors.assert_called_once_with(self._model.line_plot_workspace, self._model.lineplot_limits)
+        self.assertTrue(self._presenter._shape_preview_active)
+
+    def test_on_shape_changed_refreshes_the_lineplot_peak_overlays(self):
+        """Peak lines from a previously picked detector must not linger over the shape's plot."""
+        n_hist = self._ws.getNumberHistograms()
+        self._mock_view.get_shape_mask.return_value = np.array([i < 3 for i in range(n_hist)])
+        self._model.extract_spectra_for_line_plot = MagicMock()
+        self._presenter.refresh_lineplot_peaks = MagicMock()
+
+        self._presenter._on_shape_changed(np.array(self._model.detector_positions), self._presenter._shape_update_generation)
+
+        self._presenter.refresh_lineplot_peaks.assert_called_once()
+
+    def test_on_shape_changed_select_bank_tube_expands_mask(self):
+        n_hist = self._ws.getNumberHistograms()
+        mask = np.array([i < 3 for i in range(n_hist)])
+        expanded = np.array([i < 5 for i in range(n_hist)])
+        self._mock_view.get_shape_mask.return_value = mask
+        self._mock_view.is_select_bank_tube_checked.return_value = True
+        self._model.expand_pickable_mask_to_parent_subtrees = MagicMock(return_value=expanded)
+        self._model.extract_spectra_for_line_plot = MagicMock()
+
+        self._presenter._on_shape_changed(np.array(self._model.detector_positions), self._presenter._shape_update_generation)
+
+        self._model.expand_pickable_mask_to_parent_subtrees.assert_called_once()
+        np.testing.assert_array_equal(np.flatnonzero(expanded), self._model.extract_spectra_for_line_plot.call_args.args[2])
+
+    def test_on_shape_changed_does_nothing_if_the_shape_has_already_been_removed(self):
+        self._mock_view.is_active_current_overlaid_shape.return_value = False
+        self._model.extract_spectra_for_line_plot = MagicMock()
+
+        self._presenter._on_shape_changed(np.array(self._model.detector_positions), self._presenter._shape_update_generation)
+
+        self._model.extract_spectra_for_line_plot.assert_not_called()
+        self.assertFalse(self._presenter._shape_preview_active)
+
+    def test_on_shape_changed_drops_updates_superseded_by_a_newer_one(self):
+        """A burst of zooms queues several updates; only the newest is worth running."""
+        self._model.extract_spectra_for_line_plot = MagicMock()
+        stale_generation = self._presenter._shape_update_generation
+        self._presenter._shape_update_generation += 1
+
+        self._presenter._on_shape_changed(np.array(self._model.detector_positions), stale_generation)
+
+        self._model.extract_spectra_for_line_plot.assert_not_called()
+
+    def test_zooming_updates_the_line_plot_while_a_shape_is_overlaid(self):
+        self._mock_view.is_active_current_overlaid_shape.return_value = True
+        self._presenter._callback_queue = MagicMock()
+
+        self._presenter.on_camera_changed()
+
+        self._mock_view.project_and_cache_detector_points.assert_called_once()
+        self._presenter._callback_queue.put.assert_called_once()
+
+    def test_zooming_does_nothing_when_no_shape_is_overlaid(self):
+        self._mock_view.is_active_current_overlaid_shape.return_value = False
+        self._presenter._callback_queue = MagicMock()
+
+        self._presenter.on_camera_changed()
+
+        self._mock_view.project_and_cache_detector_points.assert_not_called()
+        self._presenter._callback_queue.put.assert_not_called()
+
+    def test_reload_interactor_styles_wires_the_camera_changed_callback(self):
+        with mock.patch("instrumentview.FullInstrumentViewPresenter.InteractorStyles") as mock_styles:
+            self._presenter.reload_interactor_styles()
+        self.assertEqual(self._presenter.on_camera_changed, mock_styles.call_args.kwargs["camera_changed_callback"])
+
+    def test_removing_shape_restores_the_line_plot_for_the_committed_selection(self):
+        self._presenter._shape_preview_active = True
+        self._presenter._update_line_plot_ws_and_draw = MagicMock()
+
+        self._presenter.on_overlaid_shape_removed()
+        self._presenter._callback_queue.join()
+
+        self._presenter._update_line_plot_ws_and_draw.assert_called_once()
+        self.assertFalse(self._presenter._shape_preview_active)
+
+    def test_removing_shape_leaves_the_line_plot_alone_when_no_preview_was_shown(self):
+        self._presenter._update_line_plot_ws_and_draw = MagicMock()
+
+        self._presenter.on_overlaid_shape_removed()
+        self._presenter._callback_queue.join()
+
+        self._presenter._update_line_plot_ws_and_draw.assert_not_called()
+
+    def test_removing_shape_while_extracting_keeps_the_committed_line_plot(self):
+        """An extraction already in flight must not draw its preview over the restored plot."""
+        self._presenter._shape_preview_active = True
+        self._presenter._update_line_plot_ws_and_draw = MagicMock()
+        # Stand in for the shape being deleted part-way through the extraction on the worker
+        self._model.extract_spectra_for_line_plot = MagicMock(side_effect=lambda *_: self._presenter.on_overlaid_shape_removed())
+
+        self._presenter._on_shape_changed(np.array(self._model.detector_positions), self._presenter._shape_update_generation)
+        self._presenter._callback_queue.join()
+
+        self._model.extract_spectra_for_line_plot.assert_called_once()
+        self._mock_view.show_plot_for_detectors.assert_not_called()
+        self._presenter._update_line_plot_ws_and_draw.assert_called_once()
+        self.assertFalse(self._presenter._shape_preview_active)
 
     def test_on_add_item_projects_points_before_queueing(self):
         """on_add_item_clicked projects detector points on the main thread
@@ -356,22 +728,23 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_peaks_workspaces_in_ads.assert_called_once()
         self.assertEqual([self._ws.name(), self._ws.name()], workspaces)
 
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._transform_vectors_with_matrix")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_peak_overlay_arguments")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.refresh_lineplot_peaks")
     def test_on_peaks_workspace_selected(
         self,
         mock_refresh_lineplot_peaks,
         mock_get_peak_overlay_arguments,
-        mock_transform,
     ):
-        mock_get_peak_overlay_arguments.return_value = ([np.zeros((1, 3))], [["(1, 1, 1)"]], ["ws1"])
-        mock_transform.return_value = np.zeros((1, 3))
+        expected_positions = [np.zeros((1, 3))]
+        mock_get_peak_overlay_arguments.return_value = (expected_positions, [["(1, 1, 1)"]], ["ws1"])
         self._presenter.on_peaks_workspace_selected()
         mock_refresh_lineplot_peaks.assert_called_once()
         self._mock_view.clear_overlay_meshes.assert_called_once()
         self._mock_view.plot_overlay_meshes.assert_called_once()
-        mock_transform.assert_called_once()
+        args, _ = self._mock_view.plot_overlay_meshes.call_args
+        np.testing.assert_array_equal(args[0], expected_positions)
+        self.assertEqual(args[1], [["(1, 1, 1)"]])
+        self.assertEqual(args[2], ["ws1"])
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_peak_lineplot_overlay_arguments")
     def test_refresh_lineplot_peaks(self, mock_get_lineplot_args):
@@ -452,14 +825,24 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._transform_mesh_to_fill_window")
     def test_update_transform(self, mock_transform_mesh):
         self._presenter._update_transform()
-        np.testing.assert_allclose(np.eye(4), self._presenter._transform, atol=1e-10)
+        np.testing.assert_allclose(np.eye(4), self._model.transform, atol=1e-10)
+        np.testing.assert_allclose(self._model.detector_positions, self._model.transformed_detector_positions, atol=1e-10)
         mock_transform_mesh.assert_not_called()
         self._mock_view.is_maintain_aspect_ratio_checkbox_checked.return_value = True
         self._presenter._update_transform()
-        np.testing.assert_allclose(np.eye(4), self._presenter._transform, atol=1e-10)
+        np.testing.assert_allclose(np.eye(4), self._model.transform, atol=1e-10)
+        np.testing.assert_allclose(self._model.detector_positions, self._model.transformed_detector_positions, atol=1e-10)
         mock_transform_mesh.assert_not_called()
+        scale_transform = np.eye(4)
+        scale_transform[0][0] = 2
+        scale_transform[1][1] = 3
+        mock_transform_mesh.return_value = scale_transform
         self._mock_view.is_maintain_aspect_ratio_checkbox_checked.return_value = False
         self._presenter._update_transform()
+        np.testing.assert_allclose(scale_transform, self._model.transform, atol=1e-10)
+        np.testing.assert_allclose(
+            self._model.detector_positions * np.array([2, 3, 1]), self._model.transformed_detector_positions, atol=1e-10
+        )
         mock_transform_mesh.assert_called()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._scale_matrix_relative_to_centre")
@@ -468,26 +851,12 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_mask_mesh = MagicMock(bounds=[0, 1, -1, 1, -1, 1])
 
         self._mock_view.main_plotter.window_size = (10, 10)
+        self._mock_view.world_to_display.side_effect = [(-4, -4, -4), (4, 4, 4)]
 
-        class mock_vtkCoordinate(MagicMock):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, **kwargs)
-                self.GetComputedDisplayValueCount = 0
-
-            def GetComputedDisplayValue(self, _):
-                self.GetComputedDisplayValueCount += 1
-                if self.GetComputedDisplayValueCount % 2 == 1:
-                    return [-4, -4, -4]
-                return [4, 4, 4]
-
-        with mock.patch("instrumentview.FullInstrumentViewPresenter.vtkCoordinate") as mock_vtk:
-            mock_vtk_instance = mock_vtkCoordinate()
-            mock_vtk.return_value = mock_vtk_instance
-            self._presenter._detector_mesh = mock_det_mesh
-            self._presenter._masked_mesh = mock_mask_mesh
-            self._presenter._transform_mesh_to_fill_window()
-            mock_vtk.assert_called_once()
-            self.assertEqual(2, mock_vtk_instance.GetComputedDisplayValueCount)
+        self._presenter._detector_mesh = mock_det_mesh
+        self._presenter._masked_mesh = mock_mask_mesh
+        self._presenter._transform_mesh_to_fill_window()
+        self._mock_view.world_to_display.assert_has_calls([mock.call(-1, -1, -1), mock.call(1, 1, 1)])
 
         # The mesh width and height in pixels are 8 each, the window is width 10,
         # hence the scale factor should be 10 / 8 = 1.25
@@ -526,7 +895,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         scale_matrix = np.eye(4)
         scale_matrix[0][0] = 3
         scale_matrix[1][1] = 10
-        transformed_vectors = self._presenter._transform_vectors_with_matrix(vectors, scale_matrix)
+        transformed_vectors = self._model._transform_vectors_with_matrix(vectors, scale_matrix)
         expected_vectors = np.array([[3, 0, 0], [0, 10, 0]])
         np.testing.assert_allclose(expected_vectors, transformed_vectors)
 

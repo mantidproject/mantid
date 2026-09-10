@@ -111,6 +111,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         presenter.setup_texture(self)
         presenter.setup_gsas2(self)
         presenter.setup_calibration_notifier()
+        presenter.setup_reference_frame_notifier()
         presenter.statusbar_observable.add_subscriber(self.update_statusbar_text_observable)
         presenter.savedir_observable.add_subscriber(self.update_savedir_observable)
         self.set_on_settings_clicked(presenter.open_settings)

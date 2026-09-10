@@ -1,0 +1,4 @@
+- A new property `CheckMantidVersion.NotifyUpdateOnStartup` has been added to the Mantid.properties file which is enabled by default.
+- The same property can be updated via the check box in General Settings as "Prompt to update Mantid Workbench on startup" in the mantid workbench.
+- This introduces a more persuasive prompt on the startup to update mantid workbench and can be disabled by setting with `0` in your Mantid.properties file.
+- The user can also disable the prompt by unchecking the check box in General Settings or by clicking on the "Don't show this again" button in the update notification dialog.

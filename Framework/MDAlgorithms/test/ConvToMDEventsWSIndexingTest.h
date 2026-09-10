@@ -191,7 +191,7 @@ class ConvToMDEventsWSIndexingTest : public CxxTest::TestSuite {
   using MDEvent = MDEventTml<ND>;
   using MDNode = Mantid::API::IMDNode;
   using MDEventStore = std::vector<MDEvent>;
-  using MDEventIterator = MDEventStore ::iterator;
+  using MDEventIterator = MDEventStore::iterator;
   using TreeBuilder = Mantid::MDAlgorithms::MDEventTreeBuilder<ND, MDEventTml, MDEventIterator>;
 
   const std::array<double, 3> lowerLeft = {{0, 0, 0}};

@@ -62,7 +62,6 @@ class SideBySideShapeRenderer(ShapeRenderer):
         )
         self._cell_to_detector = c2d
         self._faces_per_detector = fpd
-        self._detector_mesh_ref = mesh
         return mesh
 
     def build_masked_mesh(self, positions: np.ndarray, flip_beam: bool, model=None) -> pv.PolyData:

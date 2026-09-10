@@ -18,6 +18,7 @@ from mantid.simpleapi import (
     JoinISISPolarizationEfficiencies,
     Rebin,
 )
+from plugins.algorithms.WorkflowAlgorithms.ReflectometryISISLoadAndProcess import ReflectometryISISLoadAndProcess
 from testhelpers import assertRaisesNothing, create_algorithm
 
 
@@ -119,6 +120,21 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ["ReflectometryReductionOneAuto", "GroupWorkspaces"]
         self._check_history(AnalysisDataService.retrieve("IvsQ_binned_13460"), history)
+
+    def test_input_workspace_with_requested_calibration_is_reused(self):
+        self._create_workspace(13460, "TOF_")
+        AddSampleLog(
+            Workspace="TOF_13460",
+            LogName="reflectometry_calibration_file",
+            LogText=self._CALIBRATION_TEST_DATA,
+        )
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("CalibrationFile", self._CALIBRATION_TEST_DATA)
+
+        workspace_name = alg._getRunFromADSOrNone("13460", False)
+
+        self.assertEqual(workspace_name, "TOF_13460")
 
     def test_input_run_that_is_in_ADS_without_prefix_is_not_reloaded(self):
         self._create_workspace(13460)
@@ -675,6 +691,135 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._check_sum_banks(AnalysisDataService.retrieve("IvsQ_binned_38415"), is_summed=True)
         _check_num_histograms_and_first_y_value("TOF_38415_summed_segment", 4, 0.6)
 
+    def test_sum_banks_runs_for_each_2D_detector_workspace_group_member(self):
+        self._create_workspace_group(38415, 2, "TOF_", self._create_2D_detector_workspace)
+        args = self._default_options
+        args["InputRunList"] = "38415"
+        args["ROIDetectorIDs"] = self._TEST_2D_WS_DETECTOR_ROI
+        outputs = [
+            "IvsLam_38415",
+            "IvsLam_38415_1",
+            "IvsLam_38415_2",
+            "IvsQ_38415",
+            "IvsQ_38415_1",
+            "IvsQ_38415_2",
+            "IvsQ_binned_38415",
+            "IvsQ_binned_38415_1",
+            "IvsQ_binned_38415_2",
+            "TOF",
+            "TOF_38415_1",
+            "TOF_38415_1_summed_segment",
+            "TOF_38415_2",
+            "TOF_38415_2_summed_segment",
+            "TOF_summed_segment",
+        ]
+
+        self._assert_run_algorithm_succeeds(args, outputs)
+
+        self.assertEqual(list(AnalysisDataService.retrieve("IvsQ_38415").getNames()), ["IvsQ_38415_1", "IvsQ_38415_2"])
+        for index in (1, 2):
+            summed = AnalysisDataService.retrieve(f"TOF_38415_{index}_summed_segment")
+            self.assertEqual(summed.getNumberHistograms(), 4)
+            self._check_sum_banks(AnalysisDataService.retrieve(f"IvsQ_binned_38415_{index}"), is_summed=True)
+
+    def test_reduction_algorithm_sums_each_2D_detector_workspace_group_member(self):
+        self._create_workspace_group(38415, 2, "TOF_", self._create_2D_detector_workspace)
+        alg = create_algorithm(
+            "ReflectometryReductionOneAuto",
+            InputWorkspace="TOF_38415",
+            ROIDetectorIDs=self._TEST_2D_WS_DETECTOR_ROI,
+            **self._default_options,
+        )
+
+        assertRaisesNothing(self, alg.execute)
+
+        self.assertEqual(
+            list(AnalysisDataService.retrieve("TOF_summed_segment").getNames()),
+            ["TOF_38415_1_summed_segment", "TOF_38415_2_summed_segment"],
+        )
+        self.assertEqual(list(AnalysisDataService.retrieve("IvsQ_38415").getNames()), ["IvsQ_38415_1", "IvsQ_38415_2"])
+
+    def test_reduction_algorithm_preserves_informative_group_member_names_when_summing(self):
+        self._create_2D_detector_workspace(38415, "TOF_", "_up")
+        self._create_2D_detector_workspace(38415, "TOF_", "_down")
+        GroupWorkspaces("TOF_38415_up,TOF_38415_down", OutputWorkspace="TOF_38415")
+        alg = create_algorithm(
+            "ReflectometryReductionOneAuto",
+            InputWorkspace="TOF_38415",
+            ROIDetectorIDs=self._TEST_2D_WS_DETECTOR_ROI,
+            **self._default_options,
+        )
+
+        assertRaisesNothing(self, alg.execute)
+
+        self.assertEqual(
+            list(AnalysisDataService.retrieve("TOF_summed_segment").getNames()),
+            ["TOF_38415_up_summed_segment", "TOF_38415_down_summed_segment"],
+        )
+        self.assertEqual(list(AnalysisDataService.retrieve("IvsQ_38415").getNames()), ["IvsQ_38415_up", "IvsQ_38415_down"])
+
+    def test_sum_banks_rejects_workspace_group_with_mixed_detector_types(self):
+        self._create_2D_detector_workspace(38415, "TOF_", "_1")
+        self._create_workspace(38415, "TOF_", "_2")
+        GroupWorkspaces("TOF_38415_1,TOF_38415_2", OutputWorkspace="TOF_38415")
+        args = self._default_options
+        args["InputRunList"] = "38415"
+        args["ROIDetectorIDs"] = self._TEST_2D_WS_DETECTOR_ROI
+
+        self._assert_run_algorithm_throws_with_correct_msg(
+            args, "some but not all input and transmission workspaces require summing across banks"
+        )
+
+    def test_sum_banks_runs_for_polarized_2D_detector_workspace_group(self):
+        self._create_workspace_group(38415, 4, "TOF_", self._create_2D_detector_workspace)
+        self._create_polarization_efficiencies_workspace("efficiencies")
+        args = self._default_options
+        args["InputRunList"] = "38415"
+        args["ROIDetectorIDs"] = self._TEST_2D_WS_DETECTOR_ROI
+        args["PolarizationAnalysis"] = "1"
+        args["PolarizationEfficiencies"] = "efficiencies"
+
+        self._assert_run_algorithm_succeeds(args)
+
+        self.assertEqual(
+            list(AnalysisDataService.retrieve("IvsQ_38415").getNames()),
+            ["IvsQ_38415_1", "IvsQ_38415_2", "IvsQ_38415_3", "IvsQ_38415_4"],
+        )
+        for index in range(1, 5):
+            self._check_sum_banks(AnalysisDataService.retrieve(f"IvsQ_binned_38415_{index}"), is_summed=True)
+
+    def test_sum_banks_preserves_group_output_names_when_summed_workspaces_are_hidden(self):
+        self._create_workspace_group(38415, 2, "__TOF_", self._create_2D_detector_workspace)
+        args = self._default_options
+        args["InputRunList"] = "38415"
+        args["ROIDetectorIDs"] = self._TEST_2D_WS_DETECTOR_ROI
+        args["HideInputWorkspaces"] = True
+
+        self._assert_run_algorithm_succeeds(args)
+
+        self.assertEqual(list(AnalysisDataService.retrieve("IvsQ_38415").getNames()), ["IvsQ_38415_1", "IvsQ_38415_2"])
+        self.assertEqual(
+            list(AnalysisDataService.retrieve("__TOF_summed_segment").getNames()),
+            ["__TOF_38415_1_summed_segment", "__TOF_38415_2_summed_segment"],
+        )
+        self.assertTrue(AnalysisDataService.doesExist("__TOF_38415_1_summed_segment"))
+        self.assertTrue(AnalysisDataService.doesExist("__TOF_38415_2_summed_segment"))
+
+    def test_sum_banks_uses_only_first_transmission_group_member(self):
+        self._create_2D_detector_workspace(38415, "TOF_")
+        self._create_2D_detector_workspace(38416, "TRANS_", "_1")
+        self._create_workspace(38416, "TRANS_", "_2")
+        GroupWorkspaces("TRANS_38416_1,TRANS_38416_2", OutputWorkspace="TRANS_38416")
+        args = self._default_options
+        args["InputRunList"] = "38415"
+        args["FirstTransmissionRunList"] = "38416"
+        args["ROIDetectorIDs"] = self._TEST_2D_WS_DETECTOR_ROI
+
+        self._assert_run_algorithm_succeeds(args)
+
+        self._check_sum_banks(AnalysisDataService.retrieve("IvsQ_binned_38415"), is_summed=True)
+        self.assertEqual(AnalysisDataService.retrieve("TRANS_38416_2").getNumberHistograms(), 3)
+
     def test_sum_banks_not_run_for_2D_detector_workspace_when_no_detector_ROI(self):
         self._create_2D_detector_workspace(38415, "TOF_")
         args = self._default_options
@@ -726,6 +871,21 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._assert_run_algorithm_succeeds(args, outputs)
         self._check_calibration(AnalysisDataService.retrieve("IvsQ_binned_45455"), is_calibrated=True)
 
+    def test_uncalibrated_workspace_in_ads_is_reloaded_when_calibration_file_is_provided(self):
+        self._create_workspace(45455, "TOF_")
+        args = self._default_options
+        args["InputRunList"] = "45455"
+        del args["ProcessingInstructions"]
+        args["CalibrationFile"] = self._CALIBRATION_TEST_DATA
+        args["AnalysisMode"] = "MultiDetectorAnalysis"
+        args["ROIDetectorIDs"] = self._INTER45455_DETECTOR_ROI
+
+        self._assert_run_algorithm_succeeds(args)
+
+        self._check_calibration(AnalysisDataService.retrieve("IvsQ_binned_45455"), is_calibrated=True)
+        calibration_log = AnalysisDataService.retrieve("TOF_45455").run().getProperty("reflectometry_calibration_file")
+        self.assertEqual(calibration_log.value, self._CALIBRATION_TEST_DATA)
+
     def test_calibration_is_skipped_if_file_not_provided(self):
         args = self._default_options
         args["InputRunList"] = "INTER45455"
@@ -735,6 +895,35 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         outputs = ["IvsQ_45455", "IvsQ_binned_45455", "TOF", "TOF_45455", "TOF_45455_summed_segment"]
         self._assert_run_algorithm_succeeds(args, outputs)
         self._check_calibration(AnalysisDataService.retrieve("IvsQ_binned_45455"), is_calibrated=False)
+
+    def test_calibration_file_enables_warning_for_already_calibrated_loaded_files(self):
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("CalibrationFile", self._CALIBRATION_TEST_DATA)
+
+        args = alg._preprocess_arguments("INTER45455", False)
+
+        self.assertEqual("WARN", args["IfAlreadyCalibrated"])
+
+    def test_theta_properties_are_forwarded_to_preprocessing(self):
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("ThetaIn", 0.5)
+        alg.setProperty("ThetaLogName", "theta")
+
+        args = alg._preprocess_arguments("INTER13460", False)
+
+        self.assertEqual("0.5", args["ThetaIn"])
+        self.assertEqual("theta", args["ThetaLogName"])
+
+    def test_default_theta_properties_are_not_forwarded_to_preprocessing(self):
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+
+        args = alg._preprocess_arguments("INTER13460", False)
+
+        self.assertNotIn("ThetaIn", args)
+        self.assertNotIn("ThetaLogName", args)
 
     def test_invalid_polarization_efficiency_file_name_raises_error(self):
         args = self._default_options
@@ -846,13 +1035,14 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         AddTimeSeriesLog(Workspace=name, Name="proton_charge", Time="2010-01-01T00:40:00", Value=15)
         AddTimeSeriesLog(Workspace=name, Name="proton_charge", Time="2010-01-01T00:50:00", Value=100)
 
-    def _create_workspace_group(self, run_number, number_of_items, prefix=""):
+    def _create_workspace_group(self, run_number, number_of_items, prefix="", workspace_creator=None):
         group_name = prefix + str(run_number)
         child_names = list()
+        workspace_creator = workspace_creator or self._create_workspace
         for index in range(0, number_of_items):
             child_suffix = "_" + str(index + 1)
             child_name = group_name + child_suffix
-            self._create_workspace(run_number, prefix, child_suffix)
+            workspace_creator(run_number, prefix, child_suffix)
             child_names.append(child_name)
         GroupWorkspaces(InputWorkspaces=",".join(child_names), OutputWorkspace=group_name)
 

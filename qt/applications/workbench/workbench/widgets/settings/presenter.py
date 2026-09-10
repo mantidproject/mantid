@@ -70,6 +70,7 @@ class SettingsPresenter(object):
 
         self.model.register_property_which_needs_a_restart(str(GeneralUserConfigProperties.FONT.value))
         self.model.register_property_which_needs_a_restart(str(GeneralUserConfigProperties.PROMPT_ON_DELETING_WORKSPACE.value))
+        self.model.register_property_which_needs_a_restart(str(GeneralProperties.PROMPT_UPDATE_ON_STARTUP.value))
 
         self.update_apply_button()
 

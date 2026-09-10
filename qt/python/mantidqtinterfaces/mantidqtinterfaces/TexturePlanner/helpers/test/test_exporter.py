@@ -305,14 +305,18 @@ class TestOrientationExporter_BuildReferenceWs(unittest.TestCase):
 @patch(FILE_PATH + ".logger")
 @patch(FILE_PATH + ".ADS")
 @patch(FILE_PATH + ".SaveNexus")
+@patch(FILE_PATH + ".write_texture_direction_info_to_log")
 class TestOrientationExporter_OutputAsReferenceWorkspace(unittest.TestCase):
+    # _build_reference_ws and the ADS are mocked out here, so the reference workspace never really
+    # exists; the direction-log write is therefore patched too (its own round-trip is covered in
+    # test_texture_helper and in the planner's functional export tests).
     def _make_exporter(self):
         model = _make_model()
         exp = OrientationExporter(model)
         exp._build_reference_ws = MagicMock()
         return exp
 
-    def test_orchestrates_build_then_save(self, mock_save, mock_ads, mock_logger):
+    def test_orchestrates_build_then_save(self, mock_write_dirs, mock_save, mock_ads, mock_logger):
         exp = self._make_exporter()
 
         with tempfile.TemporaryDirectory() as tmp:
@@ -325,7 +329,29 @@ class TestOrientationExporter_OutputAsReferenceWorkspace(unittest.TestCase):
             mock_save.assert_called_once_with(InputWorkspace=WS_REFERENCE, Filename=expected_path)
             mock_logger.notice.assert_called_once()
 
-    def test_removes_ref_ws_from_ads_when_it_exists(self, mock_save, mock_ads, mock_logger):
+    def test_writes_the_directions_the_saved_shape_is_in(self, mock_write_dirs, mock_save, mock_ads, mock_logger):
+        exp = self._make_exporter()
+
+        with tempfile.TemporaryDirectory() as tmp:
+            exp.output_as_reference_workspace(tmp, "out")
+
+        # the saved shape already has the initial rotation baked in, so the directions written
+        # alongside it must be the effective (post-rotation) ones, not the raw entered transform
+        mock_write_dirs.assert_called_once_with(WS_REFERENCE, exp._model.effective_ax_transform, exp._model.dir_names)
+
+    def test_directions_are_written_before_the_file_is_saved(self, mock_write_dirs, mock_save, mock_ads, mock_logger):
+        exp = self._make_exporter()
+        call_order = []
+        mock_write_dirs.side_effect = lambda *a, **k: call_order.append("write_dirs")
+        mock_save.side_effect = lambda *a, **k: call_order.append("save")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            exp.output_as_reference_workspace(tmp, "out")
+
+        # otherwise the logs would never reach the file
+        self.assertEqual(call_order, ["write_dirs", "save"])
+
+    def test_removes_ref_ws_from_ads_when_it_exists(self, mock_write_dirs, mock_save, mock_ads, mock_logger):
         exp = self._make_exporter()
         mock_ads.doesExist.return_value = True
 
@@ -335,7 +361,7 @@ class TestOrientationExporter_OutputAsReferenceWorkspace(unittest.TestCase):
         mock_ads.doesExist.assert_called_with(WS_REFERENCE)
         mock_ads.remove.assert_called_once_with(WS_REFERENCE)
 
-    def test_does_not_remove_ref_ws_if_absent(self, mock_save, mock_ads, mock_logger):
+    def test_does_not_remove_ref_ws_if_absent(self, mock_write_dirs, mock_save, mock_ads, mock_logger):
         exp = self._make_exporter()
         mock_ads.doesExist.return_value = False
 
@@ -344,7 +370,7 @@ class TestOrientationExporter_OutputAsReferenceWorkspace(unittest.TestCase):
 
         mock_ads.remove.assert_not_called()
 
-    def test_cleans_up_ref_ws_even_when_build_raises(self, mock_save, mock_ads, mock_logger):
+    def test_cleans_up_ref_ws_even_when_build_raises(self, mock_write_dirs, mock_save, mock_ads, mock_logger):
         exp = self._make_exporter()
         exp._build_reference_ws.side_effect = RuntimeError("boom")
         mock_ads.doesExist.return_value = True
@@ -355,6 +381,7 @@ class TestOrientationExporter_OutputAsReferenceWorkspace(unittest.TestCase):
 
         mock_ads.remove.assert_called_once_with(WS_REFERENCE)
         mock_save.assert_not_called()
+        mock_write_dirs.assert_not_called()
 
 
 if __name__ == "__main__":

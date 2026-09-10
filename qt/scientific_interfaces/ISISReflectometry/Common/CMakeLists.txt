@@ -1,5 +1,11 @@
-set(COMMON_SRC_FILES Detector.cpp Parse.cpp GetInstrumentParameter.cpp InstrumentParameters.cpp OptionDefaults.cpp
-                     Clipboard.cpp
+set(COMMON_SRC_FILES
+    Detector.cpp
+    Parse.cpp
+    GetInstrumentParameter.cpp
+    GroupHelper.cpp
+    InstrumentParameters.cpp
+    OptionDefaults.cpp
+    Clipboard.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio IMPORTANT: Include files are required in
@@ -10,6 +16,7 @@ set(COMMON_INC_FILES
     DllConfig.h
     First.h
     GetInstrumentParameter.h
+    GroupHelper.h
     IndexOf.h
     InstrumentParameters.h
     Map.h

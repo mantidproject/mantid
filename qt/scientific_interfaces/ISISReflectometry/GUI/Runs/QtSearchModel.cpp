@@ -61,7 +61,7 @@ int QtSearchModel::rowCount(const QModelIndex &) const { return static_cast<int>
 /**
 @return the number of columns in the model.
 */
-int QtSearchModel::columnCount(const QModelIndex &) const { return 4; }
+int QtSearchModel::columnCount(const QModelIndex &) const { return static_cast<int>(Column::NUM_COLUMNS); }
 
 /**
 Overrident data method, allows consuming view to extract data for an index and
@@ -90,6 +90,8 @@ QVariant QtSearchModel::data(const QModelIndex &index, int role) const {
         return QString::fromStdString(std::string("Excluded by user: ") + run.excludeReason());
       else if (run.hasComment())
         return QString::fromStdString(std::string("User comment: ") + run.comment());
+      else if (run.hasModel())
+        return QString::fromStdString(std::string("Model: ") + run.model());
     } else if (role == Qt::BackgroundRole) {
       // setting the background colour for any unsuccessful transfers / excluded
       // runs
@@ -109,6 +111,8 @@ QVariant QtSearchModel::data(const QModelIndex &index, int role) const {
     return QString::fromStdString(run.excludeReason());
   if (column == Column::COMMENT)
     return QString::fromStdString(run.comment());
+  if (column == Column::MODEL)
+    return QString::fromStdString(run.model());
 
   return QVariant();
 }
@@ -129,6 +133,8 @@ bool QtSearchModel::setData(const QModelIndex &index, const QVariant &value, int
     run.addExcludeReason(value.toString().toStdString());
   else if (column == Column::COMMENT)
     run.addComment(value.toString().toStdString());
+  else if (column == Column::MODEL)
+    run.addModel(value.toString().toStdString());
   else
     return false;
 
@@ -157,6 +163,8 @@ QVariant QtSearchModel::headerData(int section, Qt::Orientation orientation, int
         return QString("Exclude");
       case Column::COMMENT:
         return QString("Comment");
+      case Column::MODEL:
+        return QString("Model");
       default:
         return "";
       }
@@ -175,6 +183,8 @@ QVariant QtSearchModel::headerData(int section, Qt::Orientation orientation, int
       case Column::COMMENT:
         return QString("User-specified annotation. Double-click to edit. Does "
                        "not affect the reduction.");
+      case Column::MODEL:
+        return QString("The model description of the run.");
       default:
         return "";
       }
@@ -192,7 +202,7 @@ Qt::ItemFlags QtSearchModel::flags(const QModelIndex &index) const {
   const auto column = static_cast<Column>(index.column());
   if (!index.isValid())
     return {};
-  else if (column == Column::EXCLUDE || column == Column::COMMENT)
+  else if (column == Column::EXCLUDE || column == Column::COMMENT || column == Column::MODEL)
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
   else
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
@@ -227,7 +237,8 @@ std::string QtSearchModel::makeSearchResultsCSV(SearchResults const &results) co
   }
   std::string csv = makeSearchResultsCSVHeaders();
   for (SearchResult const &result : results) {
-    csv += result.runNumber() + "," + result.title() + "," + result.excludeReason() + "," + result.comment() + "\n";
+    csv += result.runNumber() + "," + result.title() + "," + result.excludeReason() + "," + result.comment() + "," +
+           result.model() + "\n";
   }
   return csv;
 }
@@ -246,6 +257,10 @@ std::string QtSearchModel::makeSearchResultsCSVHeaders() const {
                 .toStdString() +
             ",";
   header += headerData(static_cast<int>(Column::COMMENT), Qt::Orientation::Horizontal, Qt::DisplayRole)
+                .toString()
+                .toStdString() +
+            ",";
+  header += headerData(static_cast<int>(Column::MODEL), Qt::Orientation::Horizontal, Qt::DisplayRole)
                 .toString()
                 .toStdString() +
             "\n";

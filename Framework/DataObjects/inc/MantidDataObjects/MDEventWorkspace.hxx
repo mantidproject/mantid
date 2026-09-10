@@ -546,7 +546,7 @@ TMDE(size_t MDEventWorkspace)::addEvent(const MDE &event) { return data->addEven
 TMDE(size_t MDEventWorkspace)::addEvents(const std::vector<MDE> &events) { return data->addEvents(events); }
 
 //-----------------------------------------------------------------------------------------------
-/** Split the contained MDBox into a MDGridBox or MDSplitBox, if it is not
+/** Split the contained MDBox into a MDGridBox, if it is not
  * that already.
  */
 TMDE(void MDEventWorkspace)::splitBox() {

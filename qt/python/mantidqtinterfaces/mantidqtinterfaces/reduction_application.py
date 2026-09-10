@@ -11,6 +11,7 @@ Main window for reduction UIs
 
 import sys
 import os
+from pathlib import Path
 import traceback
 
 from mantidqt.gui_helper import get_qapplication
@@ -19,7 +20,7 @@ from mantidqt.utils.qt.qsettings_change_aware import QSettingsChangeAware
 from mantidqtinterfaces.reduction_gui.instruments.instrument_factory import instrument_factory, INSTRUMENT_DICT
 from mantidqtinterfaces.reduction_gui.settings.application_settings import GeneralSettings
 
-from qtpy.QtWidgets import QAction, QDialog, QFileDialog, QMainWindow, QMessageBox
+from qtpy.QtWidgets import QAction, QApplication, QDialog, QFileDialog, QMainWindow, QMessageBox
 from qtpy.QtCore import QCoreApplication, QFile, QFileInfo, QSettings
 
 
@@ -27,13 +28,17 @@ from qtpy.QtCore import QCoreApplication, QFile, QFileInfo, QSettings
 CAN_REDUCE = False
 try:
     CAN_REDUCE = True
-    from mantid.kernel import ConfigService
+    from mantid.kernel import ConfigService, Logger
 except ImportError:
     pass
 
 unicode = str
 
 STARTUP_WARNING = ""
+REDUCTION_ORGANIZATION = "mantidproject"
+REDUCTION_APPLICATION = "Mantid Reduction"
+REDUCTION_SETTINGS_PATH = Path(REDUCTION_ORGANIZATION, f"{REDUCTION_APPLICATION}.ini")
+_QSETTINGS_STAGING_WARNING_EMITTED = False
 
 if CAN_REDUCE:
     try:
@@ -51,8 +56,19 @@ if CAN_REDUCE:
         STARTUP_WARNING += unicode(traceback.format_exc())
 
 
+def _create_application_settings(explicit_ini=False):
+    if explicit_ini:
+        return QSettings(
+            QSettings.IniFormat,
+            QSettings.UserScope,
+            QCoreApplication.organizationName(),
+            QCoreApplication.applicationName(),
+        )
+    return QSettings(QCoreApplication.organizationName(), QCoreApplication.applicationName())
+
+
 class ReductionGUI(QMainWindow):
-    def __init__(self, parent=None, window_flags=None, instrument=None, instrument_list=None):
+    def __init__(self, parent=None, window_flags=None, instrument=None, instrument_list=None, application_settings=None):
         QMainWindow.__init__(self, parent)
         if window_flags:
             self.setWindowFlags(window_flags)
@@ -64,7 +80,9 @@ class ReductionGUI(QMainWindow):
             QMessageBox.warning(self, "WARNING", message)
 
         # Application settings
-        settings = QSettings(QCoreApplication.organizationName(), QCoreApplication.applicationName())
+        settings = _create_application_settings() if application_settings is None else application_settings
+        self._settings = settings
+        self._shutdown_accepted = False
 
         # Name handle for the instrument
         if instrument is None:
@@ -110,6 +128,14 @@ class ReductionGUI(QMainWindow):
         self.interface_chk.setChecked(self.general_settings.advanced)
 
         self.general_settings.progress.connect(self._progress_updated)
+
+    @property
+    def application_settings(self):
+        return self._settings
+
+    @property
+    def shutdown_accepted(self):
+        return self._shutdown_accepted
 
     def _set_window_title(self):
         """
@@ -343,14 +369,16 @@ class ReductionGUI(QMainWindow):
         # Save application settings
         if self._clear_and_restart:
             self._clear_and_restart = False
-            QSettings().clear()
+            self._settings.clear()
         else:
-            settings = QSettingsChangeAware()
+            settings = QSettingsChangeAware(self._settings)
             settings.setValue("instrument_name", self._instrument)
             settings.setValue("last_file", self._filename)
             settings.setValue("recent_files", self._recent_files)
             settings.setValue("last_directory", str(self._last_directory))
             settings.setValue("last_export_directory", str(self._last_export_directory))
+        self._shutdown_accepted = True
+        event.accept()
 
     def reduce_clicked(self):
         """
@@ -532,15 +560,144 @@ class ReductionGUI(QMainWindow):
 # --------------------------------------------------------------------------------------------------------
 
 
-def start():
-    app, within_mantid = get_qapplication()
+def _warn_about_qsettings_staging(message):
+    global _QSETTINGS_STAGING_WARNING_EMITTED
+    if _QSETTINGS_STAGING_WARNING_EMITTED:
+        return
 
-    app.setApplicationName("Mantid Reduction")
-    reducer = ReductionGUI()
-    reducer.setup_layout(load_last=True)
-    reducer.show()
-    if not within_mantid:
-        sys.exit(app.exec())
+    if CAN_REDUCE:
+        Logger("Mantid Reduction").warning(message)
+    else:
+        print(message, file=sys.stderr)
+    _QSETTINGS_STAGING_WARNING_EMITTED = True
+
+
+def _prepare_qsettings_staging():
+    from mantidqt.utils.qt.qsettings_staging import evaluate_qsettings_staging
+
+    eligibility = evaluate_qsettings_staging()
+    if not eligibility.active:
+        reason = eligibility.reason.value
+        if reason == "cache_is_nfs":
+            _warn_about_qsettings_staging(
+                "QSettings staging was requested, but the XDG cache directory is also on NFS. "
+                "Mantid Reduction will use the canonical configuration directory. Use a user-owned local "
+                "XDG_CACHE_HOME or unset MANTID_QSETTINGS_STAGING."
+            )
+        elif reason not in {"disabled", "unsupported_platform", "config_not_nfs"}:
+            _warn_about_qsettings_staging(
+                f"QSettings staging was requested but is unavailable ({reason}). "
+                "Mantid Reduction will use the canonical configuration directory."
+            )
+        return None
+
+    from mantidqt.utils.qt.qsettings_staging_session import (
+        QT_PROJECT_SETTINGS_PATH,
+        QSettingsStagingSessionManager,
+        StagingActivationError,
+        StagingPreparationError,
+    )
+
+    try:
+        session = QSettingsStagingSessionManager(
+            eligibility, expected_settings_paths=(REDUCTION_SETTINGS_PATH, QT_PROJECT_SETTINGS_PATH)
+        ).prepare()
+    except StagingPreparationError as error:
+        _warn_about_qsettings_staging(
+            f"QSettings staging preparation failed ({error}). Mantid Reduction will use the canonical configuration directory."
+        )
+        return None
+
+    try:
+        session.activate()
+    except StagingActivationError as error:
+        _abort_qsettings_staging(session, f"QSettings staging activation failed: {error}")
+        return None
+    return session
+
+
+def _abort_qsettings_staging(session, reason):
+    try:
+        session.abort()
+    except Exception as error:
+        reason = f"{reason}; coordinator release also failed: {error}"
+    _warn_about_qsettings_staging(
+        f"QSettings staging was not copied back ({reason}). Recoverable files remain under {session.staging_root}."
+    )
+
+
+def _sync_and_finalize_qsettings_staging(session, settings):
+    try:
+        settings.sync()
+        status = settings.status()
+        if status != QSettings.NoError:
+            _abort_qsettings_staging(session, f"QSettings sync failed with status {status}")
+            return
+    except Exception as error:
+        _abort_qsettings_staging(session, f"QSettings sync failed: {error}")
+        return
+
+    try:
+        finalization = session.finalize()
+    except Exception as error:
+        _abort_qsettings_staging(session, f"copy-back failed: {error}")
+        return
+
+    if not finalization.successful:
+        failed_paths = ", ".join(
+            f"{result.relative_path} ({result.status.value})"
+            for result in finalization.files
+            if result.status.value in {"conflict", "failed"}
+        )
+        detail = finalization.error or failed_paths or "unknown finalization error"
+        _warn_about_qsettings_staging(
+            f"QSettings staging copy-back was incomplete ({detail}). Recoverable files remain under {session.staging_root}."
+        )
+
+
+def _verify_qsettings_staging(session, settings):
+    expected = (session.staging_root / REDUCTION_SETTINGS_PATH).resolve(strict=False)
+    actual = QFileInfo(settings.fileName()).absoluteFilePath()
+    if os.path.realpath(actual) != str(expected):
+        raise RuntimeError(f"QSettings staging activation selected {actual}, expected {expected}")
+
+
+def start():
+    # A hosted interface inherits Workbench's identity and staging lifecycle.
+    # Only a process creating its own QApplication may own a second session.
+    qsettings_staging_session = _prepare_qsettings_staging() if QApplication.instance() is None else None
+
+    try:
+        app, within_mantid = get_qapplication()
+
+        if not within_mantid:
+            app.setApplicationName(REDUCTION_APPLICATION)
+
+        staged_settings = None
+        if qsettings_staging_session is not None:
+            QSettings.setDefaultFormat(QSettings.IniFormat)
+            app.setOrganizationName(REDUCTION_ORGANIZATION)
+            staged_settings = _create_application_settings(explicit_ini=True)
+
+        reducer = ReductionGUI(application_settings=staged_settings)
+        if qsettings_staging_session is not None:
+            _verify_qsettings_staging(qsettings_staging_session, reducer.application_settings)
+        reducer.setup_layout(load_last=True)
+        reducer.show()
+        if within_mantid:
+            return
+        exit_code = app.exec()
+    except BaseException:
+        if qsettings_staging_session is not None:
+            _abort_qsettings_staging(qsettings_staging_session, "Mantid Reduction startup failed")
+        raise
+
+    if qsettings_staging_session is not None:
+        if reducer.shutdown_accepted:
+            _sync_and_finalize_qsettings_staging(qsettings_staging_session, reducer.application_settings)
+        else:
+            _abort_qsettings_staging(qsettings_staging_session, "Mantid Reduction did not complete a clean shutdown")
+    sys.exit(exit_code)
 
 
 if __name__ == "__main__":

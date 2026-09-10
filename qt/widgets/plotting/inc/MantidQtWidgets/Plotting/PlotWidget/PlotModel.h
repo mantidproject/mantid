@@ -22,6 +22,7 @@ public:
   virtual void clear() noexcept;
 
   virtual void setSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex);
+  virtual void setSpectra(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces, const size_t wsIndex);
 
   virtual bool getPlotErrorBars() const { return m_plotErrorBars; }
   virtual void setPlotErrorBars(const bool plotErrorBars) { m_plotErrorBars = plotErrorBars; }

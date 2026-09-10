@@ -1,0 +1,1 @@
+- Fixed ISIS Reflectometry reductions reusing uncalibrated data from the ADS after a calibration file was selected. The requested calibration is now applied on the first reduction.

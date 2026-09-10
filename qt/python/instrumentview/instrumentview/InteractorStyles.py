@@ -1,7 +1,11 @@
 from typing import Callable
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser, vtkInteractorStyleTrackballCamera, vtkInteractorStyleRubberBandZoom
 from vtkmodules.vtkCommonCore import vtkCommand
+from vtkmodules.vtkRenderingCore import vtkActor2D, vtkPolyDataMapper2D
 import numpy as np
+import pyvista as pv
+
+from mantid.kernel import logger
 
 
 class _PlotterWrapper:
@@ -13,7 +17,7 @@ class _PlotterWrapper:
 
 
 class InteractorStyles:
-    def __init__(self, plotter, picking_callback, hover_callback):
+    def __init__(self, plotter, picking_callback, hover_callback, camera_changed_callback: Callable | None = None):
         self.SCROLL_ZOOM_WITH_PICKING = CursorZoomInteractorStyle(plotter)
         self.SCROLL_ZOOM_WITH_HOVER = CursorZoomInteractorStyle(plotter)
         self.SCROLL_ZOOM_NO_PICKING = CursorZoomInteractorStyle(plotter)
@@ -22,16 +26,106 @@ class InteractorStyles:
 
         self.TRACKBALL.set_picking_callback(picking_callback)
         self.SCROLL_ZOOM_WITH_PICKING.set_picking_callback(picking_callback)
+        self.RUBBERBAND_ZOOM.set_picking_callback(picking_callback)
         self.SCROLL_ZOOM_WITH_HOVER.set_hover_callback(hover_callback)
+
+        for style in (self.SCROLL_ZOOM_WITH_PICKING, self.SCROLL_ZOOM_WITH_HOVER, self.SCROLL_ZOOM_NO_PICKING):
+            style.set_camera_changed_callback(camera_changed_callback)
 
 
 class RubberBandZoomInteractorStyle(vtkInteractorStyleRubberBandZoom):
+    _RUBBER_BAND_COLOUR = (1.0, 1.0, 1.0)
+    _RUBBER_BAND_LINE_WIDTH = 1.0
+    _RUBBER_BAND_LINE_STIPPLE_PATTERN = 0xF0F0
+
     def __init__(self, plotter):
         super().__init__()
         self.plotter = plotter
         self._pyvista_plotter = _PlotterWrapper(plotter)  # HACK: Wrapper for PyVista compatibility
+        self._picking_callback = None
+        self._ignore_rubberband_interaction = False
+        self._rubber_band_start = None
+        self._rubber_band_poly, self._rubber_band_actor = self._create_rubber_band_actor()
+        self.plotter.renderer.AddActor2D(self._rubber_band_actor)
         self.update_default_camera_state()
         self.AddObserver(vtkCommand.RightButtonPressEvent, lambda *_: self._reset_camera())
+        self.RemoveObservers(vtkCommand.LeftButtonPressEvent)
+        self.RemoveObservers(vtkCommand.MouseMoveEvent)
+        self.RemoveObservers(vtkCommand.LeftButtonReleaseEvent)
+        self.AddObserver(vtkCommand.LeftButtonPressEvent, self._on_left_button_press_event)
+        self.AddObserver(vtkCommand.MouseMoveEvent, self._on_mouse_move_event)
+        self.AddObserver(vtkCommand.LeftButtonReleaseEvent, self._on_left_button_release_event)
+
+    def _create_rubber_band_actor(self) -> tuple[pv.PolyData, vtkActor2D]:
+        """Build the zoom-box outline as a scene overlay actor, positioned in display (pixel) coordinates.
+
+        vtkInteractorStyleRubberBandZoom normally draws its own zoom box by poking pixels directly
+        into the render window's framebuffer, bypassing the scene graph entirely. pyvistaqt >= 0.13
+        always re-renders the whole scene from the actors before every paint, which wipes out that
+        poke before it can ever be shown, so the box is drawn as a real actor instead so it survives
+        the re-render.
+
+        vtkPolyDataMapper2D/vtkActor2D have no pyvista-level equivalent (pyvista's own fixed-to-viewport
+        overlays, e.g. Renderer.add_border, drop down to the same raw VTK classes), so only the mesh is
+        built with pyvista.
+        """
+        poly_data = pv.PolyData()
+        poly_data.points = np.zeros((5, 3))  # closed loop: 4 corners plus a repeat of the first to close it
+        poly_data.lines = np.array([5, 0, 1, 2, 3, 4])
+
+        mapper = vtkPolyDataMapper2D()
+        mapper.SetInputData(poly_data)
+
+        actor = vtkActor2D()
+        actor.SetMapper(mapper)
+        actor.GetProperty().SetColor(*self._RUBBER_BAND_COLOUR)
+        actor.GetProperty().SetLineWidth(self._RUBBER_BAND_LINE_WIDTH)
+        actor.GetProperty().SetLineStipplePattern(self._RUBBER_BAND_LINE_STIPPLE_PATTERN)
+        actor.SetVisibility(False)
+        return poly_data, actor
+
+    def _set_rubber_band_points(self, start, end):
+        x0, y0 = start
+        x1, y1 = end
+        self._rubber_band_poly.points = np.array([[x0, y0, 0.0], [x1, y0, 0.0], [x1, y1, 0.0], [x0, y1, 0.0], [x0, y0, 0.0]])
+
+    def _event_position(self):
+        interactor = self.GetInteractor()
+        return interactor.GetEventPosition() if interactor is not None else (0, 0)
+
+    def _modifier_key_pressed(self):
+        interactor = self.GetInteractor()
+        return bool(interactor and (interactor.GetShiftKey() or interactor.GetControlKey() or interactor.GetAltKey()))
+
+    def _on_left_button_press_event(self, obj, event):
+        self._ignore_rubberband_interaction = self._modifier_key_pressed()
+        if self._ignore_rubberband_interaction:
+            if self._picking_callback is not None:
+                self._picking_callback(obj, event)
+            return
+        self._rubber_band_start = self._event_position()
+        self._set_rubber_band_points(self._rubber_band_start, self._rubber_band_start)
+        self._rubber_band_actor.SetVisibility(True)
+        super().OnLeftButtonDown()
+
+    def set_picking_callback(self, picking_callback: Callable):
+        self._picking_callback = picking_callback
+
+    def _on_mouse_move_event(self, obj, event):
+        if self._ignore_rubberband_interaction:
+            return
+        if self._rubber_band_start is not None:
+            self._set_rubber_band_points(self._rubber_band_start, self._event_position())
+        super().OnMouseMove()
+
+    def _on_left_button_release_event(self, obj, event):
+        if self._ignore_rubberband_interaction:
+            self._ignore_rubberband_interaction = False
+            return
+        super().OnLeftButtonUp()
+        self._rubber_band_start = None
+        self._rubber_band_actor.SetVisibility(False)
+        self.plotter.render_window.Render()
 
     def update_default_camera_state(self):
         """Re-cache the current camera state as the default (right-click reset) state.
@@ -68,6 +162,7 @@ class CursorZoomInteractorStyle(vtkInteractorStyleUser):
         # Cache the current world coordinates under the cursor
         self._cursor_world_pos = None
         self._zoom_in_progress = False
+        self._camera_changed_callback = None
 
         # Setup plotter
         self.plotter.track_mouse_position()
@@ -76,7 +171,23 @@ class CursorZoomInteractorStyle(vtkInteractorStyleUser):
         self.AddObserver(vtkCommand.MouseMoveEvent, self._on_mouse_move)
         self.AddObserver(vtkCommand.MouseWheelForwardEvent, self._on_wheel_forward)
         self.AddObserver(vtkCommand.MouseWheelBackwardEvent, self._on_wheel_backward)
-        self.AddObserver(vtkCommand.RightButtonPressEvent, lambda *_: self._reset_camera())
+        self.AddObserver(vtkCommand.RightButtonPressEvent, lambda *_: self._reset_camera_and_notify())
+
+    def set_camera_changed_callback(self, camera_changed_callback: Callable | None):
+        """Register a zero-argument callable fired after this style has moved the camera.
+
+        Anything drawn in fixed screen coordinates (e.g. an overlaid selection shape) covers a
+        different part of the instrument once the view is zoomed, so it needs to be told.
+        """
+        self._camera_changed_callback = camera_changed_callback
+
+    def _notify_camera_changed(self):
+        if self._camera_changed_callback is None:
+            return
+        try:
+            self._camera_changed_callback()
+        except Exception as ex:
+            logger.debug(f"Exception in camera_changed callback: {ex}")
 
     def set_picking_callback(self, picking_callback: Callable):
         self.RemoveObservers(vtkCommand.LeftButtonPressEvent)
@@ -160,6 +271,8 @@ class CursorZoomInteractorStyle(vtkInteractorStyleUser):
 
         renderer.reset_camera_clipping_range()
         self.plotter.render_window.Render()
+        # Covers both branches above, so a zoom-out past the default notifies only once
+        self._notify_camera_changed()
 
     def _reset_camera(self):
         renderer = self.plotter.renderer
@@ -169,6 +282,10 @@ class CursorZoomInteractorStyle(vtkInteractorStyleUser):
         camera.parallel_scale = self._default_parallel_scale
         renderer.reset_camera_clipping_range()
         self.plotter.render_window.Render()
+
+    def _reset_camera_and_notify(self):
+        self._reset_camera()
+        self._notify_camera_changed()
 
     def update_default_camera_state(self):
         """Re-cache the current camera state as the default (right-click reset) state.

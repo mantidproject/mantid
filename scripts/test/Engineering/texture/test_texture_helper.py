@@ -10,7 +10,7 @@ import tempfile
 import os
 from unittest.mock import patch, MagicMock, call, mock_open
 from mantid.api import AnalysisDataService as ADS
-from mantid.simpleapi import CreateWorkspace, ConjoinWorkspaces
+from mantid.simpleapi import AddSampleLog, CreateWorkspace, ConjoinWorkspaces
 from Engineering.texture.texture_helper import (
     load_all_orientations,
     _read_xml,
@@ -36,6 +36,11 @@ from Engineering.texture.texture_helper import (
     define_gauge_volume,
     get_scattering_centre,
     convert_to_sscanss_frame,
+    has_texture_direction_info,
+    read_texture_direction_info_from_log,
+    write_texture_direction_info_to_log,
+    TEXTURE_DIRECTION_LABELS_LOG,
+    TEXTURE_DIRECTION_MATRIX_LOG,
 )
 import numpy as np
 from os import path
@@ -947,6 +952,173 @@ class TestConvertToSscanssFrame(unittest.TestCase):
         recovered = Rotation.from_euler("xyz", -angles, degrees=True).as_matrix()
         expected = M @ rot @ M.T
         np.testing.assert_allclose(recovered, expected, atol=1e-9)
+
+
+class TestTextureDirectionLogIO(unittest.TestCase):
+    """Reading/writing the texture sample directions as sample logs.
+
+    This is the contract between the Texture Planner (which writes the logs onto an exported
+    reference workspace) and the Engineering Diffraction interface (which reads them back), so the
+    round-trip and the fallbacks when a log is absent or malformed are the things worth pinning.
+    """
+
+    # a deliberately non-symmetric frame: RD=(0,1,0), ND=(0,0,1), TD=(1,0,0) stored as COLUMNS,
+    # so a transposed write or read would be caught rather than cancelling out
+    _AX_TRANSFORM = np.array([[0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
+    _DIR_NAMES = ("RD", "ND", "TD")
+
+    def setUp(self):
+        self.ws_name = "__test_texture_direction_log_ws"
+        self.ws = CreateWorkspace(DataX=[0, 1], DataY=[1], OutputWorkspace=self.ws_name)
+        self.addCleanup(self._remove_ws)
+
+    def _remove_ws(self):
+        if ADS.doesExist(self.ws_name):
+            ADS.remove(self.ws_name)
+
+    def _log_value(self, log_name):
+        return self.ws.getRun().getLogData(log_name).value
+
+    # writing ------------------------------------------------------------
+    def test_write_stores_both_logs_as_comma_separated_strings(self):
+        write_texture_direction_info_to_log(self.ws_name, self._AX_TRANSFORM, self._DIR_NAMES)
+
+        # row-major flattening of the column-per-direction matrix
+        self.assertEqual(self._log_value(TEXTURE_DIRECTION_MATRIX_LOG), "0.0,0.0,1.0,1.0,0.0,0.0,0.0,1.0,0.0")
+        self.assertEqual(self._log_value(TEXTURE_DIRECTION_LABELS_LOG), "RD,ND,TD")
+
+    def test_write_accepts_a_workspace_object_as_well_as_a_name(self):
+        write_texture_direction_info_to_log(self.ws, self._AX_TRANSFORM, self._DIR_NAMES)
+
+        self.assertTrue(has_texture_direction_info(self.ws_name))
+
+    # round trip ---------------------------------------------------------
+    def test_round_trip_preserves_the_matrix_and_the_labels(self):
+        write_texture_direction_info_to_log(self.ws_name, self._AX_TRANSFORM, self._DIR_NAMES)
+
+        matrix, names = read_texture_direction_info_from_log(self.ws_name)
+
+        np.testing.assert_allclose(matrix, self._AX_TRANSFORM, atol=1e-12)
+        self.assertEqual(names, self._DIR_NAMES)
+
+    def test_round_trip_keeps_each_direction_in_its_own_column(self):
+        # the directions are the columns, and the flatten/reshape must not silently transpose them
+        write_texture_direction_info_to_log(self.ws_name, self._AX_TRANSFORM, self._DIR_NAMES)
+
+        matrix, _ = read_texture_direction_info_from_log(self.ws_name)
+
+        np.testing.assert_allclose(matrix[:, 0], (0.0, 1.0, 0.0), atol=1e-12)  # RD
+        np.testing.assert_allclose(matrix[:, 1], (0.0, 0.0, 1.0), atol=1e-12)  # ND
+        np.testing.assert_allclose(matrix[:, 2], (1.0, 0.0, 0.0), atol=1e-12)  # TD
+
+    def test_round_trip_survives_non_integer_components(self):
+        # a frame carried round by an initial shape rotation is not made of 0s and 1s
+        rotated = Rotation.from_euler("z", 30, degrees=True).as_matrix() @ self._AX_TRANSFORM
+        write_texture_direction_info_to_log(self.ws_name, rotated, self._DIR_NAMES)
+
+        matrix, _ = read_texture_direction_info_from_log(self.ws_name)
+
+        np.testing.assert_allclose(matrix, rotated, atol=1e-12)
+
+    def test_a_label_containing_a_comma_is_rejected(self):
+        # the labels share one comma separated log, so "RD, rolling" would be read back as four
+        # labels and silently truncated to the wrong three
+        with self.assertRaises(ValueError):
+            write_texture_direction_info_to_log(self.ws_name, self._AX_TRANSFORM, ("RD, rolling", "ND", "TD"))
+
+    def test_rewriting_replaces_rather_than_appends(self):
+        write_texture_direction_info_to_log(self.ws_name, np.eye(3), ("A", "B", "C"))
+        write_texture_direction_info_to_log(self.ws_name, self._AX_TRANSFORM, self._DIR_NAMES)
+
+        matrix, names = read_texture_direction_info_from_log(self.ws_name)
+
+        np.testing.assert_allclose(matrix, self._AX_TRANSFORM, atol=1e-12)
+        self.assertEqual(names, self._DIR_NAMES)
+
+    # presence probe -----------------------------------------------------
+    def test_has_info_is_false_before_writing_and_true_after(self):
+        self.assertFalse(has_texture_direction_info(self.ws_name))
+
+        write_texture_direction_info_to_log(self.ws_name, self._AX_TRANSFORM, self._DIR_NAMES)
+
+        self.assertTrue(has_texture_direction_info(self.ws_name))
+
+    def test_has_info_is_false_for_an_unknown_workspace(self):
+        # a reference workspace that failed to load must not look like it defines a sample frame
+        self.assertFalse(has_texture_direction_info("__not_a_workspace"))
+
+    def test_has_info_ignores_the_labels(self):
+        # the labels default harmlessly; only the matrix carries meaning
+        AddSampleLog(Workspace=self.ws_name, LogName=TEXTURE_DIRECTION_LABELS_LOG, LogText="RD,ND,TD")
+
+        self.assertFalse(has_texture_direction_info(self.ws_name))
+
+    # fallbacks ----------------------------------------------------------
+    def test_missing_logs_fall_back_to_the_supplied_defaults(self):
+        default_matrix = Rotation.from_euler("x", 90, degrees=True).as_matrix()
+
+        matrix, names = read_texture_direction_info_from_log(self.ws_name, default_matrix, ("A", "B", "C"))
+
+        # a 3x3 default must be usable here - testing it as a boolean would raise
+        np.testing.assert_allclose(matrix, default_matrix, atol=1e-12)
+        self.assertEqual(names, ("A", "B", "C"))
+
+    def test_missing_logs_without_defaults_give_identity_and_generic_labels(self):
+        matrix, names = read_texture_direction_info_from_log(self.ws_name)
+
+        np.testing.assert_allclose(matrix, np.eye(3), atol=1e-12)
+        self.assertEqual(names, ("D1", "D2", "D3"))
+
+    def test_unknown_workspace_falls_back_rather_than_raising(self):
+        matrix, names = read_texture_direction_info_from_log("__not_a_workspace")
+
+        np.testing.assert_allclose(matrix, np.eye(3), atol=1e-12)
+        self.assertEqual(names, ("D1", "D2", "D3"))
+
+    def test_only_the_missing_log_falls_back(self):
+        AddSampleLog(Workspace=self.ws_name, LogName=TEXTURE_DIRECTION_MATRIX_LOG, LogText="0,0,1,1,0,0,0,1,0")
+
+        matrix, names = read_texture_direction_info_from_log(self.ws_name)
+
+        np.testing.assert_allclose(matrix, self._AX_TRANSFORM, atol=1e-12)
+        self.assertEqual(names, ("D1", "D2", "D3"))
+
+    # malformed logs -----------------------------------------------------
+    @patch(texture_utils_path + ".logger")
+    def test_matrix_with_the_wrong_number_of_values_falls_back_to_identity(self, mock_logger):
+        AddSampleLog(Workspace=self.ws_name, LogName=TEXTURE_DIRECTION_MATRIX_LOG, LogText="1,0,0,0,1,0")
+
+        matrix, _ = read_texture_direction_info_from_log(self.ws_name)
+
+        np.testing.assert_allclose(matrix, np.eye(3), atol=1e-12)
+        mock_logger.warning.assert_called_once()
+
+    @patch(texture_utils_path + ".logger")
+    def test_matrix_with_non_numeric_values_falls_back_to_identity(self, mock_logger):
+        AddSampleLog(Workspace=self.ws_name, LogName=TEXTURE_DIRECTION_MATRIX_LOG, LogText="1,0,0,0,1,0,0,0,not_a_number")
+
+        matrix, _ = read_texture_direction_info_from_log(self.ws_name)
+
+        np.testing.assert_allclose(matrix, np.eye(3), atol=1e-12)
+        mock_logger.warning.assert_called_once()
+
+    @patch(texture_utils_path + ".logger")
+    def test_too_many_labels_are_truncated_to_the_first_three(self, mock_logger):
+        AddSampleLog(Workspace=self.ws_name, LogName=TEXTURE_DIRECTION_LABELS_LOG, LogText="RD,ND,TD,XD")
+
+        _, names = read_texture_direction_info_from_log(self.ws_name)
+
+        self.assertEqual(names, ("RD", "ND", "TD"))
+        mock_logger.warning.assert_called_once()
+
+    @patch(texture_utils_path + ".logger")
+    def test_too_few_labels_fall_back_to_generic_names(self, mock_logger):
+        AddSampleLog(Workspace=self.ws_name, LogName=TEXTURE_DIRECTION_LABELS_LOG, LogText="RD,ND")
+
+        _, names = read_texture_direction_info_from_log(self.ws_name)
+
+        self.assertEqual(names, ("D1", "D2", "D3"))
+        mock_logger.warning.assert_called_once()
 
 
 if __name__ == "__main__":

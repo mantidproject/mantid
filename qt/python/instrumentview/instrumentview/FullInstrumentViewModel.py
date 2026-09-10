@@ -52,6 +52,7 @@ class FullInstrumentViewModel:
     _source_position = np.array([0, 0, 0])
     _beam_axis = np.array([0, 0, 1])
     line_plot_workspace = None
+    line_plot_det_ids = np.array([], dtype=int)
     _lineplot_ws_in_base_units_not_summed = None
     _lineplot_ws_in_selected_units_not_summed = None
     _line_plot_workspace = None
@@ -122,6 +123,10 @@ class FullInstrumentViewModel:
         self.full_counts_limits = self._counts_limits
 
         self._sample_shape = self._get_sample_shape_from_workspace(self._workspace)
+        self._transform = np.eye(4)
+        self._transformed_detector_positions = self.detector_positions.copy()
+
+        self._peaks_indices_in_detector_positions = np.array([], dtype=int)
 
     @property
     def workspace(self) -> Workspace2D:
@@ -175,28 +180,51 @@ class FullInstrumentViewModel:
         return ~self._is_masked & self._is_valid & self._is_selected_in_tree
 
     @property
+    def picked_detector_mask(self) -> np.ndarray:
+        return self._detector_is_picked[self.is_pickable]
+
+    @property
+    def point_picked_detectors(self) -> np.ndarray:
+        """A copy of the mask over all detectors of those picked directly in the projection.
+
+        A copy because the model picks into this array in place, so callers holding on to it as a
+        snapshot would otherwise see it change underneath them.
+        """
+        return self._point_picked_detectors.copy()
+
+    @property
     def picked_visibility(self) -> np.ndarray:
-        return self._detector_is_picked.astype(int)[self.is_pickable]
+        """picked_detector_mask as the numeric scalars the renderers hand to VTK."""
+        return self.picked_detector_mask.astype(int)
+
+    @property
+    def _is_picked_and_pickable(self) -> np.ndarray:
+        """Mask over all detectors of those that are both pickable and currently selected.
+
+        Unlike picked_detector_mask this has one entry per detector, so it indexes the
+        per-detector arrays built in setup().
+        """
+        return self.is_pickable & self._detector_is_picked
 
     @property
     def picked_detector_ids(self) -> np.ndarray:
-        return self._detector_ids[self.is_pickable & self._detector_is_picked]
+        return self._detector_ids[self._is_picked_and_pickable]
 
     @property
     def picked_workspace_indices(self) -> np.ndarray:
-        return self._workspace_indices[self.is_pickable & self._detector_is_picked]
+        return self._workspace_indices[self._is_picked_and_pickable]
 
     @property
     def picked_detector_positions_3d(self) -> np.ndarray:
-        return self._detector_positions_3d[self.is_pickable & self._detector_is_picked]
+        return self._detector_positions_3d[self._is_picked_and_pickable]
 
     @property
     def picked_spherical_positions(self) -> np.ndarray:
-        return self._spherical_positions[self.is_pickable & self._detector_is_picked]
+        return self._spherical_positions[self._is_picked_and_pickable]
 
     @property
     def picked_counts(self) -> np.ndarray:
-        return self._counts[self.is_pickable & self._detector_is_picked]
+        return self._counts[self._is_picked_and_pickable]
 
     @property
     def detector_counts(self) -> np.ndarray:
@@ -321,13 +349,12 @@ class FullInstrumentViewModel:
     def get_integration_units(self):
         return self._integration_workspace.getAxis(0).getUnit().unitID()
 
-    def _detector_table_indices_for_parent_subtree(self, selected_indices: np.ndarray, pickable_only: bool) -> np.ndarray:
-        pickable_mask = self.is_pickable if pickable_only else None
+    def _detector_table_indices_for_parent_subtree(self, selected_indices: np.ndarray) -> np.ndarray:
         return detector_table_indices_for_parent_subtrees(
             selected_indices=selected_indices,
             component_idxs=self._component_idxs,
             component_info=self._workspace.componentInfo(),
-            pickable_mask=pickable_mask,
+            pickable_mask=self.is_pickable,
         )
 
     def expand_pickable_mask_to_parent_subtrees(self, pickable_mask: list[bool] | np.ndarray) -> np.ndarray:
@@ -337,7 +364,7 @@ class FullInstrumentViewModel:
             raise ValueError("pickable_mask must have one value per pickable detector")
 
         selected_pickable_indices = pickable_table_indices[pickable_mask]
-        expanded_pickable_table_indices = self._detector_table_indices_for_parent_subtree(selected_pickable_indices, pickable_only=True)
+        expanded_pickable_table_indices = self._detector_table_indices_for_parent_subtree(selected_pickable_indices)
 
         expanded_pickable_mask = np.zeros_like(pickable_mask, dtype=bool)
         if expanded_pickable_table_indices.size == 0:
@@ -362,12 +389,16 @@ class FullInstrumentViewModel:
         # Restoring groupings will handle the rest
         self._detector_is_picked = self._point_picked_detectors
 
-    def update_point_picked_detectors(self, index: int, expand_to_parent_subtree: bool) -> None:
+    def update_point_picked_detectors(self, index: int, pick_detector_with_peak, expand_to_parent_subtree: bool) -> None:
+        if pick_detector_with_peak:
+            index = self._get_index_of_closest_detector_with_peak(index)
+
         if self._peak_picking_status == PeakPickingStatus.Off:
             global_index = np.argwhere(self.is_pickable).flatten()[index]
             indices_to_update = np.array([global_index], dtype=int)
+
             if expand_to_parent_subtree:
-                indices_to_update = self._detector_table_indices_for_parent_subtree(indices_to_update, pickable_only=True)
+                indices_to_update = self._detector_table_indices_for_parent_subtree(indices_to_update)
 
             new_selection_value = ~self._detector_is_picked[global_index]
             self._detector_is_picked[indices_to_update] = new_selection_value
@@ -407,9 +438,14 @@ class FullInstrumentViewModel:
             self._counts[index],
         )
 
-    def clear_point_picked_detectors(self) -> None:
-        self._detector_is_picked[self._point_picked_detectors] = False
-        self._point_picked_detectors.fill(False)
+    def clear_point_picked_detectors(self, detectors: Optional[np.ndarray] = None) -> None:
+        """Deselect detectors picked directly in the projection.
+
+        Pass a mask over all detectors to clear only those, leaving any picked since it was taken.
+        """
+        to_clear = self._point_picked_detectors if detectors is None else self._point_picked_detectors & detectors
+        self._detector_is_picked[to_clear] = False
+        self._point_picked_detectors[to_clear] = False
 
     def picked_detectors_info_text(self) -> list[DetectorInfo]:
         """For the specified detector, extract info that can be displayed in the View, and wrap it all up in a DetectorInfo class"""
@@ -459,6 +495,31 @@ class FullInstrumentViewModel:
         if self._projection_type == ProjectionType.THREE_D:
             return self._detector_positions_3d[self.is_pickable]
         return self._calculate_projection()[self.is_pickable]
+
+    @property
+    def transform(self) -> np.ndarray:
+        return self._transform
+
+    @transform.setter
+    def transform(self, value: np.ndarray) -> None:
+        self._transform = value
+        self._transformed_detector_positions = self._transform_vectors_with_matrix(self.detector_positions)
+
+    @property
+    def transformed_detector_positions(self) -> np.ndarray:
+        return self._transformed_detector_positions
+
+    def _transform_vectors_with_matrix(self, points: np.ndarray, transform: Optional[np.ndarray] = None) -> np.ndarray:
+        if points.size == 0:
+            return points
+        if transform is None:
+            transform = self._transform
+
+        # The transform is a 4x4 matrix while the points are 3D vectors,
+        # so first append the homogeneous coordinate.
+        transformed_points = np.hstack([points, np.ones((points.shape[0], 1))])
+        transformed_points = transformed_points @ transform.T
+        return transformed_points[:, :3]
 
     @property
     def masked_positions(self) -> np.ndarray:
@@ -582,12 +643,22 @@ class FullInstrumentViewModel:
         wrapped_workspaces = [
             WorkspaceDetectorPeaks(ws_name, self.get_integration_units(), self.integration_limits) for ws_name in selected_peaks_workspaces
         ]
-        positions_and_labels_by_pws = [
-            wws.get_positions_and_labels(self.detector_positions, self.pickable_detector_ids) for wws in wrapped_workspaces
-        ]
-        positions_by_pws = [pair[0] for pair in positions_and_labels_by_pws]
-        labels_by_pws = [pair[1] for pair in positions_and_labels_by_pws]
-        return positions_by_pws, labels_by_pws, selected_peaks_workspaces
+        indices_and_labels_by_pws = [wws.get_peaks_indices_and_labels(self.pickable_detector_ids) for wws in wrapped_workspaces]
+        indices_by_pws = [pair[0] for pair in indices_and_labels_by_pws]
+        self._peaks_indices_in_detector_positions = np.concatenate(indices_by_pws or [np.array([], dtype=int)])
+        positions_by_pws = [self.detector_positions[indices] for indices in indices_by_pws]
+        labels_by_pws = [pair[1] for pair in indices_and_labels_by_pws]
+
+        transformed_pos = [self._transform_vectors_with_matrix(p) for p in positions_by_pws]
+        return transformed_pos, labels_by_pws, selected_peaks_workspaces
+
+    def _get_index_of_closest_detector_with_peak(self, index_in_detector_positions: int) -> int:
+        clicked_position = self.transformed_detector_positions[index_in_detector_positions]
+        positions_detectors_with_peaks = self.transformed_detector_positions[self._peaks_indices_in_detector_positions]
+        if len(positions_detectors_with_peaks) == 0:
+            return index_in_detector_positions
+        closest_peak_index = np.argmin(np.linalg.norm(positions_detectors_with_peaks - clicked_position, axis=1))
+        return self._peaks_indices_in_detector_positions[closest_peak_index]
 
     def get_peak_lineplot_overlay_arguments(
         self, selected_peaks_workspaces: list[str]
@@ -599,7 +670,10 @@ class FullInstrumentViewModel:
         wrapped_workspaces = [
             WorkspaceDetectorPeaks(ws_name, self.get_integration_units(), self._integration_limits) for ws_name in selected_peaks_workspaces
         ]
-        peaks_by_pws = [wws.get_x_values_and_labels(self.picked_detector_ids) for wws in wrapped_workspaces]
+        # Key off the detectors actually plotted rather than the picked selection: they differ
+        # when the plot is previewing an overlaid shape or a hovered detector, and the x-position
+        # lookup below can only resolve detectors present in the extracted line plot workspace.
+        peaks_by_pws = [wws.get_x_values_and_labels(self.line_plot_det_ids) for wws in wrapped_workspaces]
         labels_by_pws = [[p.label for p in peaks] for peaks in peaks_by_pws]
         # Convert peak units to currently plotted units
         # NOTE: Need to get x coords in workspace unit for better acuracy

@@ -14,6 +14,7 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspacePropertyUtils.h"
 
 #include "MantidJson/Json.h"
@@ -1405,6 +1406,10 @@ bool Algorithm::processGroups() {
       outGroups.emplace_back(outWSGrp);
       // Put the GROUP in the ADS
       AnalysisDataService::Instance().addOrReplace(prop->value(), outWSGrp);
+      if (auto workspaceProperty = dynamic_cast<WorkspaceProperty<Workspace> *>(pureOutputWorkspaceProp)) {
+        Workspace_sptr outputWorkspace = outWSGrp;
+        *workspaceProperty = outputWorkspace;
+      }
       outWSGrp->observeADSNotifications(false);
     }
   }

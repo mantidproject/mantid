@@ -1,0 +1,2 @@
+- Created a new version of :ref:`algm-ReflectometrySliceEventWorkspace-v2`, which produces one workspace group per slice when a workspace group is used as the ``InputWorkspace``.
+  These output groups have the same structure as the input group so they can be used in workflows that require a certain set of member workspaces in a group, such as polarization corrections.

@@ -42,6 +42,7 @@ void QtPreviewView::disableMainWidget() { this->setEnabled(false); }
 void QtPreviewView::connectSignals() const {
   // Loading section
   connect(m_ui.load_button, SIGNAL(clicked()), this, SLOT(onLoadWorkspaceRequested()));
+  connect(m_ui.group_member_combo_box, SIGNAL(currentIndexChanged(int)), this, SLOT(onGroupMemberSelectionChanged()));
   connect(m_ui.update_button, SIGNAL(clicked()), this, SLOT(onUpdateClicked()));
   connect(m_ui.angle_spin_box, SIGNAL(valueChanged(double)), this, SLOT(onAngleEdited()));
   // Apply button
@@ -49,6 +50,7 @@ void QtPreviewView::connectSignals() const {
 }
 
 void QtPreviewView::onLoadWorkspaceRequested() const { m_notifyee->notifyLoadWorkspaceRequested(); }
+void QtPreviewView::onGroupMemberSelectionChanged() const { m_notifyee->notifyGroupMemberSelectionChanged(); }
 void QtPreviewView::onUpdateClicked() const { m_notifyee->notifyUpdateAngle(); }
 
 void QtPreviewView::onAngleEdited() { m_ui.update_button->setEnabled(true); }
@@ -56,6 +58,10 @@ void QtPreviewView::onAngleEdited() { m_ui.update_button->setEnabled(true); }
 void QtPreviewView::onApplyClicked() const { m_notifyee->notifyApplyRequested(); }
 
 std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line_edit->text().toStdString(); }
+
+size_t QtPreviewView::getSelectedGroupMember() const {
+  return static_cast<size_t>(m_ui.group_member_combo_box->currentIndex());
+}
 
 double QtPreviewView::getAngle() const { return m_ui.angle_spin_box->value(); }
 
@@ -69,5 +75,16 @@ void QtPreviewView::setUpdateAngleButtonEnabled(bool enabled) { m_ui.update_butt
 
 void QtPreviewView::setTitle(const std::string &title) {
   m_ui.title_display_label->setText(QString::fromStdString(title));
+}
+
+void QtPreviewView::setGroupMembers(std::vector<std::string> const &workspaceNames) {
+  auto const isGroup = !workspaceNames.empty();
+  m_ui.group_member_label->setVisible(isGroup);
+  m_ui.group_member_combo_box->setVisible(isGroup);
+  m_ui.group_member_combo_box->blockSignals(true);
+  m_ui.group_member_combo_box->clear();
+  for (auto const &name : workspaceNames)
+    m_ui.group_member_combo_box->addItem(QString::fromStdString(name));
+  m_ui.group_member_combo_box->blockSignals(false);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

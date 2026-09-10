@@ -262,6 +262,61 @@ class AtomListBuilderTest(unittest.TestCase):
 
         self.assertEqual(self.builder._getAtoms(data), "Si 1/8 1/8 1/8 1.0 0.012665147955292222;Al 0.34 0.56 0.23 1.0")
 
+    def test_getAtoms_negative_u(self):
+        data = self._getData(
+            dict(
+                [
+                    ("_atom_site_label", ["Si", "Al"]),
+                    ("_atom_site_occupancy", ["1.0", "1.0(0)"]),
+                    ("_atom_site_u_iso_or_equiv", ["0.01", "-0.02"]),
+                ]
+            )
+        )
+
+        # A negative U_iso is unphysical, it is clamped to 0.
+        self.assertEqual(self.builder._getAtoms(data), "Si 1/8 1/8 1/8 1.0 0.01;Al 0.34 0.56 0.23 1.0 0")
+
+    def test_getAtoms_negative_b(self):
+        data = self._getData(
+            dict(
+                [
+                    ("_atom_site_label", ["Si", "Al"]),
+                    ("_atom_site_occupancy", ["1.0", "1.0(0)"]),
+                    ("_atom_site_b_iso_or_equiv", ["1.0", "-2.0"]),
+                ]
+            )
+        )
+
+        # A negative B_iso converts to a negative U_iso, which is clamped to 0.
+        self.assertEqual(self.builder._getAtoms(data), "Si 1/8 1/8 1/8 1.0 0.012665147955292222;Al 0.34 0.56 0.23 1.0 0")
+
+    def test_getAtoms_negative_u_with_error_estimate(self):
+        data = self._getData(
+            dict(
+                [
+                    ("_atom_site_label", ["Si", "Al"]),
+                    ("_atom_site_occupancy", ["1.0", "1.0(0)"]),
+                    ("_atom_site_u_iso_or_equiv", ["-0.01(2)", "0.02"]),
+                ]
+            )
+        )
+
+        self.assertEqual(self.builder._getAtoms(data), "Si 1/8 1/8 1/8 1.0 0;Al 0.34 0.56 0.23 1.0 0.02")
+
+    def test_getAtoms_negative_and_invalid_u(self):
+        data = self._getData(
+            dict(
+                [
+                    ("_atom_site_label", ["Si", "Al"]),
+                    ("_atom_site_occupancy", ["1.0", "1.0(0)"]),
+                    ("_atom_site_u_iso_or_equiv", ["-0.01", "sdfsdfs"]),
+                ]
+            )
+        )
+
+        # The unparsable value stays None (and is dropped), the negative one is clamped to 0.
+        self.assertEqual(self.builder._getAtoms(data), "Si 1/8 1/8 1/8 1.0 0;Al 0.34 0.56 0.23 1.0")
+
     def test_getAtoms_aniso_u_orthogonal(self):
         uElements = {
             "11": ["0.01", "0.02"],

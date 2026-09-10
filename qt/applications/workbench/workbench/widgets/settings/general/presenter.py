@@ -91,7 +91,7 @@ class GeneralSettings(SettingsPresenterBase):
         self._view.main_font.clicked.connect(self.action_main_font_button_clicked)
         self._view.completion_enabled.stateChanged.connect(self.action_completion_enabled_modified)
         self._view.apply_dark_theme_enabled.stateChanged.connect(self.action_apply_dark_theme_enabled_modified)
-        self._view.use_new_instrument_view.stateChanged.connect(self.action_use_new_instrument_view_modified)
+        self._view.use_legacy_instrument_view.stateChanged.connect(self.action_use_legacy_instrument_view_modified)
         filter_out_mousewheel_events_from_combo_or_spin_box(self._view.window_behaviour)
 
     def action_main_font_button_clicked(self):
@@ -129,8 +129,8 @@ class GeneralSettings(SettingsPresenterBase):
         self._model.set_apply_dark_theme_enabled(str(checkbox_state_to_bool(state)))
         self.notify_changes()
 
-    def action_use_new_instrument_view_modified(self, state):
-        self._model.set_use_new_instrument_view(checkbox_state_to_bool(state))
+    def action_use_legacy_instrument_view_modified(self, state):
+        self._model.set_use_legacy_instrument_view(checkbox_state_to_bool(state))
         self.notify_changes()
 
     def setup_checkbox_signals(self):
@@ -159,6 +159,7 @@ class GeneralSettings(SettingsPresenterBase):
         self._view.prompt_save_editor_modified.stateChanged.connect(self.action_prompt_save_editor_modified)
         self._view.prompt_deleting_workspaces.stateChanged.connect(self.action_prompt_deleting_workspace)
         self._view.use_notifications.stateChanged.connect(self.action_use_notifications_modified)
+        self._view.prompt_update_on_startup.stateChanged.connect(self.action_prompt_update_on_startup)
 
     def action_prompt_save_on_close(self, state):
         self._model.set_prompt_save_on_close(checkbox_state_to_bool(state))
@@ -174,6 +175,10 @@ class GeneralSettings(SettingsPresenterBase):
 
     def action_use_notifications_modified(self, state):
         self._model.set_use_notifications("On" if checkbox_state_to_bool(state) else "Off")
+        self.notify_changes()
+
+    def action_prompt_update_on_startup(self, state):
+        self._model.set_prompt_update_on_startup("1" if checkbox_state_to_bool(state) else "0")
         self.notify_changes()
 
     def load_current_setting_values(self):
@@ -192,7 +197,8 @@ class GeneralSettings(SettingsPresenterBase):
         invisible_workspaces = "1" == self._model.get_show_invisible_workspaces().lower()
         completion_enabled = self._model.get_completion_enabled()
         apply_dark_theme_enabled = "true" == self._model.get_apply_dark_theme_enabled().lower()
-        use_new_instrument_view = self._model.get_use_new_instrument_view()
+        use_legacy_instrument_view = self._model.get_use_legacy_instrument_view()
+        prompt_update_on_startup = self._model.get_prompt_update_on_startup().lower() in ["true", "1", "on"]
 
         self._view.project_recovery_enabled.setChecked(pr_enabled)
         self._view.time_between_recovery.setValue(pr_time_between_recovery)
@@ -203,7 +209,8 @@ class GeneralSettings(SettingsPresenterBase):
         self._view.show_invisible_workspaces.setChecked(invisible_workspaces)
         self._view.completion_enabled.setChecked(completion_enabled)
         self._view.apply_dark_theme_enabled.setChecked(apply_dark_theme_enabled)
-        self._view.use_new_instrument_view.setChecked(use_new_instrument_view)
+        self._view.use_legacy_instrument_view.setChecked(use_legacy_instrument_view)
+        self._view.prompt_update_on_startup.setChecked(prompt_update_on_startup)
 
     def action_project_recovery_enabled(self, state):
         self._model.set_project_recovery_enabled(str(checkbox_state_to_bool(state)))
