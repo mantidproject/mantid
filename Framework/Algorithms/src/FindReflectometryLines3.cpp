@@ -231,8 +231,8 @@ std::map<std::string, std::string> FindReflectometryLines3::validateInputs() {
 
 API::MatrixWorkspace_sptr FindReflectometryLines3::createProfile(const API::MatrixWorkspace_sptr &inputWorkspace) {
   auto integration = createChildAlgorithm("Integration");
+  integration->setAlwaysStoreInADS(false);
   integration->setProperty("InputWorkspace", inputWorkspace);
-  integration->setProperty("OutputWorkspace", "__unused_find_reflectometry_lines");
   int const startIndexProperty = getProperty(Prop::START_INDEX);
   integration->setProperty("StartWorkspaceIndex", startIndexProperty);
   if (!isDefault(Prop::END_INDEX)) {
@@ -250,8 +250,8 @@ API::MatrixWorkspace_sptr FindReflectometryLines3::createProfile(const API::Matr
   setCommonBinEdgesForTranspose(*integratedWorkspace);
 
   auto transpose = createChildAlgorithm("Transpose");
+  transpose->setAlwaysStoreInADS(false);
   transpose->setProperty("InputWorkspace", integratedWorkspace);
-  transpose->setProperty("OutputWorkspace", "__unused_find_reflectometry_lines");
   transpose->execute();
   API::MatrixWorkspace_sptr profileWorkspace = transpose->getProperty("OutputWorkspace");
 
