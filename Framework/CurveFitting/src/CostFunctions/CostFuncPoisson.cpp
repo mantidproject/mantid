@@ -40,7 +40,7 @@ double calculatePoissonResidualLM(double observedCounts, double predicted) {
 }
 double calculateJacobianScaleFactor(double observedCounts, double predicted) {
   if (std::abs(observedCounts - predicted) < tolDiff) {
-    return 1;
+    return 1 / sqrt(observedCounts);
   }
   return sgn(predicted - observedCounts) * (1 - observedCounts / predicted) * 1 /
          std::sqrt(2 * calculatePoissonResidualLM(observedCounts, predicted));
