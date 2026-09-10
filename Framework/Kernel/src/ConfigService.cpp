@@ -1628,14 +1628,19 @@ const std::string ConfigServiceImpl::getVTPFileDirectory() {
 void ConfigServiceImpl::cacheInstrumentPaths() {
   m_instrumentDirs.clear();
 
+  // =================================================================================================
+  // TEMPORARY - DO NOT MERGE. Revert this block before review.
+  //
+  // The user-profile instrument directory is searched first and, where a downloaded definition has the
+  // same valid-from date as the one shipped here, it wins. This build ignores that directory entirely
+  // so the definitions shipped with the installation are always the ones used, whatever a previously
+  // installed Mantid downloaded into the user profile.
+  // =================================================================================================
   std::filesystem::path path(getAppDataDir());
   path /= "instrument";
   const std::string appdatadir = path.string();
-  addDirectoryifExists(appdatadir, m_instrumentDirs);
-
-#ifndef _WIN32
-  addDirectoryifExists("/etc/mantid/instrument", m_instrumentDirs);
-#endif
+  g_log.notice() << "TEMPORARY BUILD: ignoring downloaded instrument definitions in " << appdatadir
+                 << ". Only the definitions shipped with this installation are used.\n";
 
   // Determine the search directory for XML instrument definition files (IDFs)
   std::string directoryName = getString("instrumentDefinition.directory", true);

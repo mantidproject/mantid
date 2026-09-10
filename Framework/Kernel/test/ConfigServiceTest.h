@@ -259,20 +259,16 @@ public:
   void testInstrumentDirectory() {
 
     auto directories = ConfigService::Instance().getInstrumentDirectories();
-    TS_ASSERT_LESS_THAN(1, directories.size());
-    // the first entry should be the AppDataDir + instrument
-    TSM_ASSERT_LESS_THAN("Could not find the appData directory in getInstrumentDirectories()[0]",
-                         directories[0].find(ConfigService::Instance().getAppDataDir()), directories[0].size());
+    // =================================================================================================
+    // TEMPORARY - DO NOT MERGE. Revert alongside the change in ConfigServiceImpl::cacheInstrumentPaths.
+    //
+    // That build ignores the user-profile and /etc instrument directories, so only the shipped
+    // directory remains and the assertions on the leading entries no longer apply.
+    // =================================================================================================
+    TSM_ASSERT("The shipped instrument directory should still be searched", !directories.empty());
     TSM_ASSERT_LESS_THAN("Could not find the 'instrument' directory in "
-                         "getInstrumentDirectories()[0]",
-                         directories[0].find("instrument"), directories[0].size());
-
-    if (directories.size() == 3) {
-      // The middle entry should be /etc/mantid/instrument
-      TSM_ASSERT_LESS_THAN("Could not find /etc/mantid/instrument path in "
-                           "getInstrumentDirectories()[1]",
-                           directories[1].find("etc/mantid/instrument"), directories[1].size());
-    }
+                         "getInstrumentDirectories().back()",
+                         directories.back().find("instrument"), directories.back().size());
     // Check that the last directory matches that returned by
     // getInstrumentDirectory
     TS_ASSERT_EQUALS(directories.back(), ConfigService::Instance().getInstrumentDirectory());
