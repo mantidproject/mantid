@@ -9,6 +9,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidGeometry/Instrument/InstrumentMetadata.h"
 #include "MantidNexus/H5Util.h"
 
 #include <H5Cpp.h>
@@ -315,14 +316,14 @@ void SaveDiffCal::exec() {
   std::string instrumentSource;
   if (bool(groupingWS)) {
     instrumentName = groupingWS->getInstrument()->getName();
-    instrumentSource = groupingWS->getInstrument()->getFilename();
+    instrumentSource = groupingWS->instrumentMetadata().filename();
   }
   if (bool(maskWS)) {
     if (instrumentName.empty()) {
       instrumentName = maskWS->getInstrument()->getName();
     }
     if (instrumentSource.empty()) {
-      instrumentSource = maskWS->getInstrument()->getFilename();
+      instrumentSource = maskWS->instrumentMetadata().filename();
     }
   }
   if (!instrumentSource.empty()) {

@@ -10,6 +10,7 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/Instrument/InstrumentMetadata.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidKernel/Cache.h"
@@ -72,8 +73,10 @@ ParameterMap::ParameterMap(const ParameterMap &other)
       m_cacheLocMap(std::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>(*other.m_cacheLocMap)),
       m_cacheRotMap(std::make_unique<Kernel::Cache<const ComponentID, Kernel::Quat>>(*other.m_cacheRotMap)),
       m_instrument(other.m_instrument) {
-  if (m_instrument)
+  if (m_instrument) {
     std::tie(m_componentInfo, m_detectorInfo) = m_instrument->makeBeamline(*this, &other);
+    buildInstrumentMetadata();
+  }
 }
 
 // Defined as default in source for forward declaration with std::unique_ptr.
@@ -1203,6 +1206,14 @@ Geometry::ComponentInfo &ParameterMap::mutableComponentInfo() {
   return *m_componentInfo;
 }
 
+/// Only for use by ExperimentInfo. Returns a reference to the InstrumentMetadata.
+const Geometry::InstrumentMetadata &ParameterMap::instrumentMetadata() const {
+  if (!m_instrumentMetadata) {
+    throw std::runtime_error("Cannot return reference to NULL InstrumentMetadata");
+  }
+  return *m_instrumentMetadata;
+}
+
 /// Only for use by Detector. Returns a detector index for a detector ID.
 size_t ParameterMap::detectorIndex(const detid_t detID) const { return m_instrument->detectorIndex(detID); }
 
@@ -1217,6 +1228,7 @@ void ParameterMap::setInstrument(const Instrument *instrument) {
   if (!instrument) {
     m_componentInfo = nullptr;
     m_detectorInfo = nullptr;
+    m_instrumentMetadata = nullptr;
     return;
   }
   if (m_instrument)
@@ -1231,6 +1243,22 @@ void ParameterMap::setInstrument(const Instrument *instrument) {
   } else {
     std::tie(m_componentInfo, m_detectorInfo) = m_instrument->makeBeamline(*this);
   }
+  buildInstrumentMetadata();
+}
+
+/// Builds m_instrumentMetadata from m_instrument. Requires m_instrument to be set.
+void ParameterMap::buildInstrumentMetadata() {
+  // Mirrors Instrument::getPhysicalInstrument()'s parametrized branch: a physical
+  // instrument must share the same ParameterMap as the owning (neutronic) instrument.
+  Instrument_const_sptr physicalInstrument;
+  if (const auto &basePhysicalInstrument = m_instrument->getPhysicalInstrument()) {
+    physicalInstrument =
+        std::make_shared<Instrument>(basePhysicalInstrument, std::shared_ptr<ParameterMap>(this, NoDeleting()));
+  }
+  m_instrumentMetadata = std::make_unique<InstrumentMetadata>(
+      m_instrument->getValidFromDate(), m_instrument->getValidToDate(), m_instrument->getFilename(),
+      m_instrument->getXmlText(), m_instrument->getDefaultView(), m_instrument->getDefaultAxis(),
+      std::move(physicalInstrument));
 }
 
 /** Return memory used by the parameter map, in bytes.

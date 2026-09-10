@@ -20,6 +20,7 @@ namespace Mantid {
 
 namespace Kernel {
 class Quat;
+class V2D;
 class V3D;
 } // namespace Kernel
 
@@ -116,6 +117,7 @@ public:
   Kernel::V3D scaleFactor(const size_t componentIndex) const;
   const std::string &name(const size_t componentIndex) const;
   void setScaleFactor(const size_t componentIndex, const Kernel::V3D &scaleFactor);
+  Kernel::V2D sideBySideViewPosition(const size_t componentIndex) const;
   size_t root() const;
 
   const IComponent *componentID(const size_t componentIndex) const { return (*m_componentIds)[componentIndex]; }

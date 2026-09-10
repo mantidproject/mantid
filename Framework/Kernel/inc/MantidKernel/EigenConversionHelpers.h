@@ -8,6 +8,7 @@
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Quat.h"
+#include "MantidKernel/V2D.h"
 #include "MantidKernel/V3D.h"
 
 #include <Eigen/Geometry>
@@ -25,6 +26,9 @@ namespace Kernel {
 /// Converts Eigen::Vector3d to Kernel::V3D
 inline Kernel::V3D toV3D(const Eigen::Vector3d &vec) { return Kernel::V3D(vec[0], vec[1], vec[2]); }
 
+/// Converts Eigen::Vector2d to Kernel::V2D
+inline Kernel::V2D toV2D(const Eigen::Vector2d &vec) { return Kernel::V2D(vec[0], vec[1]); }
+
 /// Converts Eigen::Quaterniond to Kernel::Quat
 inline Kernel::Quat toQuat(const Eigen::Quaterniond &quat) {
   return Kernel::Quat(quat.w(), quat.x(), quat.y(), quat.z());
@@ -32,6 +36,9 @@ inline Kernel::Quat toQuat(const Eigen::Quaterniond &quat) {
 
 /// Converts Kernel::V3D to Eigen::Vector3d
 inline Eigen::Vector3d toVector3d(const Kernel::V3D &vec) { return Eigen::Vector3d(vec[0], vec[1], vec[2]); }
+
+/// Converts Kernel::V2D to Eigen::Vector2d
+inline Eigen::Vector2d toVector2d(const Kernel::V2D &vec) { return Eigen::Vector2d(vec.X(), vec.Y()); }
 
 /// Converts Kernel::Quat to Eigen::Quaterniond
 inline Eigen::Quaterniond toQuaterniond(const Kernel::Quat &quat) {

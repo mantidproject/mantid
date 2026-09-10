@@ -163,11 +163,10 @@ list getAllTubeDetectorFlatGroupParents(PanelsSurfaceCalculator &self, const obj
   return pyAllTubeGroupParents;
 }
 
-tuple getSideBySideViewPos(const PanelsSurfaceCalculator &self, const object &componentInfo, const object &instrument,
+tuple getSideBySideViewPos(const PanelsSurfaceCalculator &self, const object &componentInfo,
                            const size_t componentIndex) {
   const std::shared_ptr<ComponentInfo> cInfoSharedPtr = extract<std::shared_ptr<ComponentInfo>>(componentInfo);
-  const std::shared_ptr<Instrument> instrumentSharedPtr = extract<std::shared_ptr<Instrument>>(instrument);
-  const auto sideBySidePos = self.getSideBySideViewPos(*(cInfoSharedPtr).get(), instrumentSharedPtr, componentIndex);
+  const auto sideBySidePos = self.getSideBySideViewPos(*(cInfoSharedPtr).get(), componentIndex);
   list position;
   list result;
   if (!sideBySidePos.has_value()) {
@@ -218,8 +217,7 @@ void export_PanelsSurfaceCalculator() {
       .def("getAllTubeDetectorFlatGroupParents", &getAllTubeDetectorFlatGroupParents,
            (arg("self"), arg("componentInfo")),
            "Returns the parent component indices of detectors of all groups of tubes arranged in flat banks")
-      .def("getSideBySideViewPos", &getSideBySideViewPos,
-           (arg("self"), arg("componentInfo"), arg("instrument"), arg("componentIndex")),
+      .def("getSideBySideViewPos", &getSideBySideViewPos, (arg("self"), arg("componentInfo"), arg("componentIndex")),
            "Returns a tuple indicating whether the bank side-by-side projection position has been specified in the "
            "IDF, and what it is.");
 }

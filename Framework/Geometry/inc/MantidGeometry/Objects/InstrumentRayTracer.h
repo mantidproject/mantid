@@ -13,6 +13,7 @@
 #include <boost/unordered_map.hpp>
 #include <deque>
 #include <list>
+#include <memory>
 #include <mutex>
 
 namespace Mantid {
@@ -38,6 +39,7 @@ class MANTID_GEOMETRY_DLL InstrumentRayTracer {
 public:
   /// Constructor taking an instrument
   InstrumentRayTracer(Instrument_const_sptr instrument);
+  ~InstrumentRayTracer();
   /// Trace a given track from the instrument source in the given direction
   /// and compile a list of results that this track intersects.
   void trace(const Kernel::V3D &dir) const;
@@ -53,6 +55,11 @@ private:
   InstrumentRayTracer();
   /// Fire the given track at the instrument
   void fireRay(Track &testRay) const;
+  /// ComponentInfo/DetectorInfo for m_instrument, built and owned here only if
+  /// m_instrument is not parametrized (and so has none cached of its own to reuse).
+  void ensureOwnedInfoIsBuilt() const;
+  const ComponentInfo &componentInfo() const;
+  const DetectorInfo &detectorInfo() const;
 
   /// Pointer to the instrument
   Instrument_const_sptr m_instrument;
@@ -63,6 +70,8 @@ private:
   mutable boost::unordered_map<IComponent *, BoundingBox> m_boxCache;
   /// Mutex to lock box cache
   mutable std::mutex m_mutex;
+  mutable std::unique_ptr<ComponentInfo> m_ownedComponentInfo;
+  mutable std::unique_ptr<DetectorInfo> m_ownedDetectorInfo;
 };
 } // namespace Geometry
 } // namespace Mantid
