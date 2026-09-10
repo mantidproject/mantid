@@ -76,15 +76,7 @@ class InstrumentHelper:
 
     @staticmethod
     def is_grouping_file_applicable(instrument: str, grouping_path: str) -> bool:
-        """Whether grouping_path can be applied to instrument.
-
-        Checked on throwaway workspaces (StoreInADS=False, so the live state and the ADS are
-        untouched) rather than with a bare try/except around the real recompute. A leading null
-        group is tolerated to match DetectorGeometry.recompute, but any other detector-less group
-        means the file references detectors this instrument does not have - i.e. it does not fit.
-
-        Calls are cached for quick evaluation of repeated calls
-        """
+        """Whether grouping_path can be applied to instrument (see _is_grouping_file_applicable)."""
         return _is_grouping_file_applicable(instrument, grouping_path)
 
     def set_group(self, group_str: str) -> None:
@@ -130,7 +122,9 @@ def _is_grouping_file_applicable(instrument: str, grouping_path: str) -> bool:
     group is tolerated to match DetectorGeometry.recompute, but any other detector-less group
     means the file references detectors this instrument does not have - i.e. it does not fit.
 
-    cached for repeated calls
+    The check builds an instrument, so results are cached for the life of the process and are
+    keyed on the path, not the file's contents: editing a grouping file in place mid-session
+    keeps the previous answer until cache_clear() is called.
     """
     if not instrument or not grouping_path:
         return False
