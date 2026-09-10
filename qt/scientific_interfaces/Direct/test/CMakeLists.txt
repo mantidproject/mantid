@@ -4,14 +4,12 @@ endif()
 
 # Testing
 set(TEST_FILES ALFAlgorithmManagerTest.h ALFAnalysisModelTest.h ALFAnalysisPresenterTest.h ALFInstrumentModelTest.h
-               ALFInstrumentPresenterTest.h ALFPythonInstrumentViewTest.h
+               ALFInstrumentPresenterTest.h
 )
 
 set(TEST_HELPERS ALFAnalysisMocks.h ALFInstrumentMocks.h MockALFAlgorithmManager.h MockALFAlgorithmManagerSubscriber.h
                  MockInstrumentActor.h
 )
-
-set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/InterfacesDirectTestInitialization.h)
 
 mtd_add_qt_tests(
   TARGET_NAME MantidQtInterfacesDirectTest
