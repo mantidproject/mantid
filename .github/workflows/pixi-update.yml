@@ -112,7 +112,7 @@ jobs:
             printf '%s\n' 'Test mode: no pull request would be created because pixi.lock did not change.'
           fi
       - name: Create pull request
-        if: github.event_name != 'pull_request' && steps.check-lockfile.outputs.updated == 'true'
+        if: github.event_name != 'pull_request'
         uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.MANTID_BUILDER_TOKEN }}
