@@ -116,11 +116,9 @@ void LoadIsawSpectrum::exec() {
           // PG3).
           // We are not doing a full recursive search since that will be very
           // long for lots of pixels.
-          for (const size_t k : componentInfo.children(j)) {
-            if (componentInfo.isGridDetector(k)) {
-              detList.emplace_back(k);
-            }
-          }
+          const auto &grandchildren = componentInfo.children(j);
+          std::copy_if(grandchildren.begin(), grandchildren.end(), std::back_inserter(detList),
+                       [&componentInfo](size_t k) { return componentInfo.isGridDetector(k); });
         }
       }
     }
