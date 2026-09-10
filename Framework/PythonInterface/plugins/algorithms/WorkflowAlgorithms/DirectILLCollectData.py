@@ -268,10 +268,9 @@ def _sumDetectorsAtDistance(ws, distance, tolerance):
     histogramCount = ws.getNumberHistograms()
     ySums = np.zeros(ws.blocksize())
     detectorInfo = ws.detectorInfo()
-    sample = ws.getInstrument().getSample()
+    spectrumInfo = ws.spectrumInfo()
     for i in range(histogramCount):
-        det = ws.getDetector(i)
-        sampleToDetector = sample.getDistance(det)
+        sampleToDetector = spectrumInfo.l2(i)
         if abs(distance - sampleToDetector) < tolerance:
             if detectorInfo.isMonitor(i) or detectorInfo.isMasked(i):
                 continue

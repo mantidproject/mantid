@@ -80,8 +80,9 @@ class SXDDetectorCalibration(systemtesting.MantidSystemTest):
         self.assertTrue(os.path.exists(self.xml_path))
         # check calibration has been applied to both MatrixWorkspace and peaks
         for ws in [self.peaks, self.ws]:
-            self.assertNotEqual(ws.getInstrument().getComponentByName("bank1").getPos()[1], 0)
-            self.assertNotEqual(ws.getInstrument().getComponentByName("bank2").getPos()[2], 0)
+            component_info = ws.componentInfo()
+            self.assertNotEqual(component_info.position(component_info.indexOfAny("bank1"))[1], 0)
+            self.assertNotEqual(component_info.position(component_info.indexOfAny("bank2"))[2], 0)
         return True
 
 
