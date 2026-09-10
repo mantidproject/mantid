@@ -16,11 +16,15 @@
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/FacilityHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Timer.h"
 #include <cmath>
 #include <cxxtest/TestSuite.h>
+#include <iomanip>
 #include <random>
 
 using namespace Mantid;
@@ -91,6 +95,110 @@ public:
     TS_ASSERT_EQUALS(dets.size(), 100 * 100 + 2);
 
     return retVal;
+  }
+
+  /** Build a small tube instrument:
+   * - one bank ("bank1")
+   * - containing nTubes tubes ("tubeNNN")
+   * - of nPixelsPerTube pixels ("pixelNNNN") each.
+   * This follows WISH's nesting convention
+   */
+  Instrument_sptr createTestInstrumentTubes(int nTubes, int nPixelsPerTube) {
+    auto testInst = std::make_shared<Instrument>("TestTubes");
+
+    auto pixelShape = ComponentCreationHelper::createCappedCylinder(0.01, 0.03, V3D(0.0, -0.015, 0.0),
+                                                                    V3D(0.0, 1.0, 0.0), "pixel-shape");
+
+    auto *bankGroup = new CompAssembly("1");
+    auto *bank = new CompAssembly("bank1");
+    int detID = 1;
+    for (int col = 1; col <= nTubes; ++col) {
+      std::ostringstream tubeName;
+      tubeName << "tube" << std::setw(3) << std::setfill('0') << col;
+      auto *tube = new CompAssembly(tubeName.str());
+      for (int row = 1; row <= nPixelsPerTube; ++row) {
+        std::ostringstream pixelName;
+        pixelName << "pixel" << std::setw(4) << std::setfill('0') << row;
+        auto *pixel = new Detector(pixelName.str(), detID, pixelShape, tube);
+        pixel->setPos(0.0, (row - 1) * 0.03, 0.0);
+        tube->add(pixel);
+        testInst->markAsDetector(pixel);
+        ++detID;
+      }
+      tube->setPos((col - 1) * 0.02, 0.0, 0.0);
+      bank->add(tube);
+    }
+    bank->setPos(0.0, 0.0, 1.0);
+    bankGroup->add(bank);
+    testInst->add(bankGroup);
+
+    ComponentCreationHelper::addSourceToInstrument(testInst, V3D(0.0, 0.0, -10.0));
+    ComponentCreationHelper::addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
+
+    return testInst;
+  }
+
+  void test_non_rectangular_detector() {
+    const int nTubes = 2;
+    const int nPixelsPerTube = 3;
+    auto instrument = createTestInstrumentTubes(nTubes, nPixelsPerTube);
+
+    const int numPixels = nTubes * nPixelsPerTube;
+    const int numBins = 10;
+    const double binDelta = 10.0;
+    EventWorkspace_sptr ws = create<EventWorkspace>(numPixels, BinEdges(numBins, LinearGenerator(0.0, binDelta)));
+    ws->setInstrument(instrument);
+    ws->rebuildSpectraMapping();
+    ws->getAxis(0)->setUnit("TOF");
+
+    // The "true" peak is at tube 2 (col=2), pixel 2 (row=2), i.e. detector ID 5.
+    const detid_t targetID = 5;
+    const int targetBin = numBins / 2;
+    for (int pix = 0; pix < numPixels; ++pix) {
+      auto &el = ws->getSpectrum(pix);
+      // Background in every bin, every pixel, so intensity is never zero.
+      for (int i = 0; i < numBins; ++i) {
+        el += TofEvent((i + 0.5) * binDelta, 0);
+      }
+      if (pix == targetID - 1) {
+        // A strong excess at the target pixel's bin, so the centroid pulls in.
+        for (int i = 0; i < 100; ++i) {
+          el += TofEvent((targetBin + 0.5) * binDelta, 0);
+        }
+      }
+    }
+
+    MatrixWorkspace_sptr inputW = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
+
+    PeaksWorkspace_sptr peaksWS(new PeaksWorkspace());
+    Peak peakObj(instrument, targetID, 2.0);
+    peakObj.setRunNumber(1);
+    peaksWS->addPeak(peakObj);
+    AnalysisDataService::Instance().addOrReplace("GenericTubes", peaksWS);
+    inputW->mutableRun().addProperty("run_number", 1);
+
+    CentroidPeaks alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    alg.setProperty("InputWorkspace", inputW);
+    alg.setProperty("InPeaksWorkspace", "GenericTubes");
+    alg.setProperty("OutPeaksWorkspace", "GenericTubes");
+    alg.setProperty("PeakRadius", 5);
+    alg.setProperty("EdgePixels", 0);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    PeaksWorkspace_sptr result;
+    TS_ASSERT_THROWS_NOTHING(result = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("GenericTubes"));
+    TS_ASSERT(result);
+    if (!result)
+      return;
+    Peak &resultPeak = result->getPeak(0);
+    TS_ASSERT_EQUALS(resultPeak.getBankName(), "bank1");
+    TS_ASSERT_EQUALS(resultPeak.getCol(), 2);
+    TS_ASSERT_EQUALS(resultPeak.getRow(), 2);
+    TS_ASSERT_EQUALS(resultPeak.getDetectorID(), targetID);
+
+    AnalysisDataService::Instance().remove("GenericTubes");
   }
 
   void test_Init() {

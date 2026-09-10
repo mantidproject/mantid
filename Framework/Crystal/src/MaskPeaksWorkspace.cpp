@@ -13,6 +13,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/VectorHelper.h"
@@ -73,8 +74,7 @@ void MaskPeaksWorkspace::exec() {
 
   // To get the workspace index from the detector ID
   const detid2index_map pixel_to_wi = m_inputW->getDetectorIDToWorkspaceIndexMap();
-  // Get some stuff from the input workspace
-  Geometry::Instrument_const_sptr inst = m_inputW->getInstrument();
+  const auto &componentInfo = m_inputW->componentInfo();
 
   // Init a table workspace
   DataObjects::TableWorkspace_sptr tablews = std::make_shared<DataObjects::TableWorkspace>();
@@ -99,8 +99,10 @@ void MaskPeaksWorkspace::exec() {
     const string &bankName = peak.getBankName();
     if (bankName == "None")
       continue;
-    Geometry::IComponent_const_sptr comp = inst->getComponentByName(bankName);
-    if (!comp) {
+    size_t bankIndex;
+    try {
+      bankIndex = componentInfo.indexOfAny(bankName);
+    } catch (std::invalid_argument &) {
       g_log.debug() << "Component " + bankName + " does not exist in instrument\n";
       continue;
     }
@@ -109,7 +111,7 @@ void MaskPeaksWorkspace::exec() {
     double x0;
     double xf;
     bool tofRangeSet(false);
-    size_t wi = this->getWkspIndex(pixel_to_wi, comp, xPeak, yPeak);
+    size_t wi = this->getWkspIndex(pixel_to_wi, bankIndex, xPeak, yPeak);
     if (wi != static_cast<size_t>(EMPTY_INT())) { // scope limit the workspace index
       this->getTofRange(x0, xf, peak.getTOF(), m_inputW->x(wi));
       tofRangeSet = true;
@@ -120,7 +122,7 @@ void MaskPeaksWorkspace::exec() {
     for (int ix = m_xMin; ix <= m_xMax; ix++) {
       for (int iy = m_yMin; iy <= m_yMax; iy++) {
         // Find the pixel ID at that XY position on the rectangular detector
-        size_t wj = this->getWkspIndex(pixel_to_wi, comp, xPeak + ix, yPeak + iy);
+        size_t wj = this->getWkspIndex(pixel_to_wi, bankIndex, xPeak + ix, yPeak + iy);
         if (wj == static_cast<size_t>(EMPTY_INT()))
           continue;
         spectra.insert(wj);
@@ -182,20 +184,21 @@ void MaskPeaksWorkspace::retrieveProperties() {
   }
 }
 
-size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi, const Geometry::IComponent_const_sptr &comp,
-                                        const int x, const int y) {
-  Geometry::RectangularDetector_const_sptr det = std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
-  Geometry::Instrument_const_sptr Iptr = m_inputW->getInstrument();
+size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi, const size_t bankIndex, const int x,
+                                        const int y) {
+  const auto &componentInfo = m_inputW->componentInfo();
 
-  if (det) {
-    if (x >= det->xpixels() || x < 0 || y >= det->ypixels() || y < 0) {
+  if (componentInfo.isGridDetector(bankIndex)) {
+    const auto &detectorInfo = m_inputW->detectorInfo();
+    const auto grid = componentInfo.pixelGridComponent(bankIndex);
+    if (x >= grid.nX || x < 0 || y >= grid.nY || y < 0) {
       // throw std::runtime_error("Failed to find workspace index for x=" + std::to_string(x) + " y=" +
-      // std::to_string(y) + "(max x=" + std::to_string(det->xpixels()) +
-      // ", max y=" + std::to_string(det->ypixels()) + ")"); // Useful for debugging
+      // std::to_string(y) + "(max x=" + std::to_string(grid.nX) +
+      // ", max y=" + std::to_string(grid.nY) + ")"); // Useful for debugging
       return EMPTY_INT();
     }
 
-    int pixelID = det->getDetectorIDAtXY(x, y);
+    int pixelID = detectorInfo.detid(componentInfo.detectorIndexAtXYZ(bankIndex, x, y, 0));
 
     // Find the corresponding workspace index, if any
     auto wiEntry = pixel_to_wi.find(pixelID);
@@ -206,9 +209,7 @@ size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi, cons
     }
     return wiEntry->second;
   } else {
-    const auto &componentInfo = m_inputW->componentInfo();
-    const size_t compIndex = componentInfo.indexOfAny(comp->getName());
-    auto children = componentInfo.children(compIndex);
+    auto children = componentInfo.children(bankIndex);
 
     auto grandchildren = componentInfo.children(children[0]);
 
@@ -216,7 +217,7 @@ size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi, cons
     auto NCOLS = static_cast<int>(children.size());
 
     std::ostringstream msg;
-    if (Iptr->getName().compare("CORELLI") == 0) {
+    if (m_inputW->getInstrumentName() == "CORELLI") {
       msg << "Instrument is CORELLI\n";
       // CORELLI has one extra layer than WISH
       auto greatgrandchildren = componentInfo.children(grandchildren[0]);
@@ -237,7 +238,7 @@ size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi, cons
       return EMPTY_INT();
     }
 
-    std::string bankName = comp->getName();
+    std::string bankName = componentInfo.name(bankIndex);
     auto it = pixel_to_wi.find(findPixelID(bankName, x, y));
     if (it == pixel_to_wi.end())
       return EMPTY_INT();
@@ -273,22 +274,22 @@ void MaskPeaksWorkspace::getTofRange(double &tofMin, double &tofMax, const doubl
  * @return int
  */
 int MaskPeaksWorkspace::findPixelID(const std::string &bankName, int col, int row) {
-  Geometry::Instrument_const_sptr Iptr = m_inputW->getInstrument();
-  std::shared_ptr<const IComponent> parent = Iptr->getComponentByName(bankName);
-
-  if (parent->type() == "RectangularDetector") {
-    std::shared_ptr<const RectangularDetector> RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
-    return RDet->getDetectorIDAtXY(col, row);
-  } else if (Iptr->getName().compare("CORELLI") == 0) {
+  auto const &componentInfo = m_inputW->componentInfo();
+  size_t const parentIndex = componentInfo.indexOfAny(bankName);
+  if (componentInfo.isGridDetector(parentIndex)) {
+    auto const &detectorInfo = m_inputW->detectorInfo();
+    return detectorInfo.detid(componentInfo.detectorIndexAtXYZ(parentIndex, col, row, 0));
+  } else if (m_inputW->getInstrumentName() == "CORELLI") {
     // Checking for CORELLI
     // pixel full name example
     //      /CORELLI/A row/bank10/sixteenpack/tube10/pixel23
     //                                ^ the extra layer that makes CORELLI different from WISH
     std::ostringstream pixelString;
-    pixelString << parent->getFullName() // /CORELLI/A row/bank10
-                << "/sixteenpack"        // /sixteenpack
-                << "/tube" << col        // /tube10
-                << "/pixel" << row;      // /pixel23
+    pixelString << componentInfo.name(parentIndex) // /CORELLI/A row/bank10
+                << "/sixteenpack"                  // /sixteenpack
+                << "/tube" << col                  // /tube10
+                << "/pixel" << row;                // /pixel23
+    Geometry::Instrument_const_sptr Iptr = m_inputW->getInstrument();
     std::shared_ptr<const Geometry::IComponent> component = Iptr->getComponentByName(pixelString.str());
     std::shared_ptr<const Detector> pixel = std::dynamic_pointer_cast<const Detector>(component);
     //
@@ -298,8 +299,9 @@ int MaskPeaksWorkspace::findPixelID(const std::string &bankName, int col, int ro
     // Only works for WISH
     bankName0.erase(0, 4);
     std::ostringstream pixelString;
-    pixelString << Iptr->getName() << "/" << bankName0 << "/" << bankName << "/tube" << std::setw(3)
+    pixelString << m_inputW->getInstrumentName() << "/" << bankName0 << "/" << bankName << "/tube" << std::setw(3)
                 << std::setfill('0') << col << "/pixel" << std::setw(4) << std::setfill('0') << row;
+    Geometry::Instrument_const_sptr Iptr = m_inputW->getInstrument();
     std::shared_ptr<const Geometry::IComponent> component = Iptr->getComponentByName(pixelString.str());
     std::shared_ptr<const Detector> pixel = std::dynamic_pointer_cast<const Detector>(component);
     return pixel->getID();
