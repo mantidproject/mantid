@@ -26,6 +26,21 @@ def _make_manager(instr="ENGINX"):
     return WorkspaceManager(model)
 
 
+class _FakeCsgWs:
+    """A CSG-shaped workspace tracking the rotation baked into its shape and the one on its run
+    goniometer, so a CopySample stand-in can model how the two interact."""
+
+    def __init__(self):
+        self.baked = np.eye(3)
+        self.gonio_R = np.eye(3)
+        gonio = MagicMock()
+        gonio.setR.side_effect = lambda R: setattr(self, "gonio_R", np.asarray(R))
+        self.run = MagicMock()
+        self.run.return_value.getGoniometer.return_value = gonio
+        self.sample = MagicMock()
+        self.sample.return_value.getShape.return_value = type("CSGObject", (), {})()
+
+
 class TestWorkspaceManager_Init(unittest.TestCase):
     def test_default_attributes(self):
         wm = _make_manager("ENGINX")
@@ -346,6 +361,23 @@ class TestWorkspaceManager_CreateNewWsWithCopiedSample(unittest.TestCase):
             [call(sample, "shape_tmp"), call("shape_tmp", "new_ws")],
         )
         mock_copy.assert_not_called()
+
+    def test_two_hops_leave_init_R_baked_in_once(self, mock_create_shape, mock_create_sim, mock_copy, mock_ads):
+        # the idempotence the two hops rely on comes from CopySample -> copyParameters ->
+        # addGoniometerTag *replacing* a CSG shape's <goniometer> tag with the destination's run
+        # goniometer, discarding whatever the tag held. Were it to compose instead, the sample would
+        # come out of an instrument switch at init_R squared - so pin the value, not just the flag.
+        wm = _make_manager("ENGINX")
+        wm.init_R = Rotation.from_euler("x", 30, degrees=True)
+        mock_create_shape.return_value = _FakeCsgWs()
+        new_ws = mock_create_sim.return_value = _FakeCsgWs()
+        mock_copy.side_effect = lambda InputWorkspace, OutputWorkspace, **kw: setattr(OutputWorkspace, "baked", OutputWorkspace.gonio_R)
+
+        wm._create_new_ws_with_copied_sample("dest_ws", _FakeCsgWs(), preserve_initial_rotation=True)
+
+        np.testing.assert_allclose(new_ws.baked, wm.init_R.as_matrix(), atol=1e-12)
+        # init_R must live in the shape, never left behind on the run goniometer
+        np.testing.assert_allclose(new_ws.gonio_R, np.eye(3), atol=1e-12)
 
 
 @patch(file_path + ".CopySample")
@@ -737,6 +769,17 @@ class TestWorkspaceManager_UpdateInitialShape(unittest.TestCase):
 
         with self.assertRaises(RuntimeError):
             wm.update_initial_shape(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+
+        mock_ads.remove.assert_called_once_with(wm.WS_TMP)
+
+    def test_tmp_workspace_removed_even_when_translate_raises(self, mock_copy, mock_ads):
+        # everything that touches the temp ws sits inside the try, so a throw on the way to the
+        # CopySamples cannot leak it into the ADS until the window is closed
+        wm, _ = self._make_wm_with_ws()
+        wm.translate_shape.side_effect = RuntimeError("boom")
+
+        with self.assertRaises(RuntimeError):
+            wm.update_initial_shape(0.0, 0.0, 0.0, 1.0, 0.0, 0.0)
 
         mock_ads.remove.assert_called_once_with(wm.WS_TMP)
 

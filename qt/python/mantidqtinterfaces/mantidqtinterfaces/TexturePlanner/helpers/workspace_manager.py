@@ -239,25 +239,21 @@ class WorkspaceManager:
     def update_initial_shape(
         self, x_rot: float | int, y_rot: float | int, z_rot: float | int, x_pos: float | int, y_pos: float | int, z_pos: float | int
     ) -> None:
-        # this runs on every tick of the six initial-shape spin boxes, and the working copy only ever
-        # holds a sample, so build it as a stub-instrument shape ws rather than on the real instrument
-        _tmp_ws = self.create_shape_workspace(self.WS_TMP)
-        self._copy_sample(self.mesh_ws, _tmp_ws, preserve_initial_rotation=False)
-        self.offset = (x_pos, y_pos, z_pos)
-        rots_zero = self._all_rots_zero(x_rot, y_rot, z_rot)
-        # The initial orientation should be applied before the initial translation:
-        # this feels like the more intuative order as
-        # sample position will be determined by the stage etc. where as the initial orientation will be
-        # determined by the mounting of the sample onto this stage.
-        #
-        # init_R must therefore be resolved
-        # before the translation, because initial_translation_vector expresses the offset in the
-        # sample's pre-orientation frame due to how the sample goniometer works
-        # (see initial_translation_vector).
-        self.init_R = Rotation.identity() if rots_zero else Rotation.from_euler("xyz", (x_rot, y_rot, z_rot), degrees=True)
-        self.translate_shape(_tmp_ws, *self.initial_translation_vector())
-
         try:
+            # this runs on every tick of the six initial-shape spin boxes, and the working copy only
+            # ever holds a sample, so build it as a stub-instrument shape ws not the real instrument
+            _tmp_ws = self.create_shape_workspace(self.WS_TMP)
+            self._copy_sample(self.mesh_ws, _tmp_ws, preserve_initial_rotation=False)
+            self.offset = (x_pos, y_pos, z_pos)
+            rots_zero = self._all_rots_zero(x_rot, y_rot, z_rot)
+            # The initial orientation is applied before the initial translation, the more intuitive
+            # order: sample position is determined by the stage, whereas the initial orientation is
+            # determined by how the sample is mounted onto that stage. init_R must therefore be
+            # resolved before the translation, because initial_translation_vector expresses the
+            # offset in the sample's pre-orientation frame (see its docstring).
+            self.init_R = Rotation.identity() if rots_zero else Rotation.from_euler("xyz", (x_rot, y_rot, z_rot), degrees=True)
+            self.translate_shape(_tmp_ws, *self.initial_translation_vector())
+
             # CopySample bakes the destination workspace's current goniometer R into the new
             # shape's XML (see CopySample::copyParameters -> addGoniometerTag), and the plotter
             # leaves a non-identity R on self.ws on every redraw.
