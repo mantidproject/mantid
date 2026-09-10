@@ -6,7 +6,7 @@ on:
   workflow_run:
     workflows: ["PR cpp check"]
     types:
-      - completed
+      - requested
 
 # cancel previous job if a new commit is pushed
 concurrency:
