@@ -73,7 +73,15 @@ def parse_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("source", nargs="?", help="File path, run number, or the name of a workspace already in the ADS.")
     parser.add_argument("-o", "--output-dir", type=Path, default=_DEFAULT_OUTPUT_DIR, help="Directory to write the PNGs into.")
-    parser.add_argument("--only", nargs="+", metavar="NAME", help="Take only these screenshots. See --list for the names.")
+    parser.add_argument(
+        "--only",
+        nargs="+",
+        metavar="NAME",
+        help="Take only these screenshots. See --list for the names. Peaks are found only for the "
+        "shots that need them, so the shots taking in the whole window show an empty Peaks "
+        "Workspaces list unless one of those is asked for too. Prefer a full run for anything "
+        "being committed.",
+    )
     parser.add_argument("--list", action="store_true", help="Print the screenshot names and exit.")
     parser.add_argument(
         "--window-size",
@@ -244,6 +252,22 @@ class Session:
                 self.settle(renders=2)
                 return
         raise RuntimeError(f"No '{label}' tab in Grouping and Masking")
+
+    def clear_grouping_and_masking(self, leave_on=None):
+        """Empty both lists, and leave the tab named by *leave_on* showing.
+
+        ``Clear All`` only empties the list on the tab it was pressed on, and the detectors of a
+        ticked entry stay highlighted whichever tab is showing, so clearing one tab is not enough
+        to stop an earlier shot's regions of interest colouring the ones that follow.
+        """
+        tabs = self.view._picking_masking_tab
+        showing = tabs.tabText(tabs.currentIndex())
+        for index in range(tabs.count()):
+            tabs.setCurrentIndex(index)
+            self.settle(renders=2)
+            self.presenter.on_clear_list_clicked()
+            self.settle()
+        self.show_grouping_masking_tab(leave_on or showing)
 
     def clear_picking(self):
         self.presenter.on_clear_point_picked_detectors_clicked()
@@ -537,9 +561,7 @@ def shot_grouping_tab(session):
     session.untick_peaks_workspaces()
     session.show_left_tab("Home")
     session.set_projection("Side by Side")
-    session.show_grouping_masking_tab("Grouping")
-    session.presenter.on_clear_list_clicked()
-    session.settle()
+    session.clear_grouping_and_masking(leave_on="Grouping")
     for centre in ((0.35, 0.5), (0.62, 0.5)):
         session.add_shape("Rectangle", centre=centre)
         session.presenter.on_add_item_clicked()
@@ -553,16 +575,17 @@ def shot_masking_tab(session):
     session.untick_peaks_workspaces()
     session.show_left_tab("Home")
     session.set_projection("Side by Side")
-    session.show_grouping_masking_tab("Masking")
-    session.presenter.on_clear_list_clicked()
-    session.settle()
+    session.clear_grouping_and_masking(leave_on="Masking")
     session.add_shape("Circle", centre=(0.5, 0.5))
     session.presenter.on_add_item_clicked()
     session.settle()
     session.remove_shape()
+    # This shot takes in the whole window, so pick something to keep the line plot from being
+    # blank. It has to come after the shape has gone, because overlaying one takes the selection
+    # over to say which detectors the shape covers.
+    session.pick_detectors(session.brightest_detector_indices(3))
     session.save_window("MaskingTab")
-    session.presenter.on_clear_list_clicked()
-    session.settle()
+    session.clear_grouping_and_masking()
 
 
 def shot_settings_tab(session):
