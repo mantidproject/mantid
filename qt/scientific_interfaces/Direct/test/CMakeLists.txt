@@ -17,7 +17,7 @@ mtd_add_qt_tests(
   SRC ${TEST_FILES}
   TEST_HELPER_SRCS ${TEST_HELPERS}
   INCLUDE_DIRS ../
-  LINK_LIBS Mantid::API Mantid::DataObjects Mantid::Geometry Mantid::Kernel Mantid::PythonInterfaceCore
+  LINK_LIBS Mantid::API Mantid::DataObjects Mantid::Geometry Mantid::Kernel Mantid::PythonInterfaceCore Python::Python
   MTD_QT_LINK_LIBS MantidScientificInterfacesDirect MantidQtWidgetsCommon MantidQtWidgetsInstrumentView
   PARENT_DEPENDENCIES GUITests
 )
