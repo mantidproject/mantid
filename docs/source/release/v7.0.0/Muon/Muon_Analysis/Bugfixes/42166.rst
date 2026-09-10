@@ -1,0 +1,1 @@
+- Fixed a bug in the :ref:`Muon Analysis <Muon_Analysis-ref>` interface where rapidly clicking the increment or decrement run arrows could cause the interface to hang. The same run could be loaded more than once at the same time, and the resulting loads could block each other indefinitely.

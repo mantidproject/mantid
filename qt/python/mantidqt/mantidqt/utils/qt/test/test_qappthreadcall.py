@@ -105,6 +105,73 @@ class QAppThreadCallTest(unittest.TestCase):
         self.assertEqual(TaskExitCode.ERROR, thread.exit_code)
         self.assertTrue(isinstance(self.exc.exc_value, CustomException), msg=f"Expected CustomException, found {self.exc.exc_value}")
 
+    def _run_on_thread_and_drain(self, target):
+        """Run target on a worker thread, pumping the event loop so queued calls are delivered."""
+        thread = AsyncTask(target, error_cb=lambda x: self.fail(msg=str(x.exc_value)))
+        thread.start()
+        while thread.is_alive():
+            QApplication.sendPostedEvents()
+        thread.join()
+        # Nothing further can be posted now the thread has finished, so a single
+        # flush delivers anything still queued
+        QApplication.sendPostedEvents()
+
+    def test_non_blocking_calls_do_not_retain_results(self):
+        call_count = 25
+        called_args = []
+
+        def record(value):
+            called_args.append(value)
+            return value
+
+        wrapped_record = QAppThreadCall(record, blocking=False)
+
+        def call_repeatedly():
+            for value in range(call_count):
+                wrapped_record(value)
+
+        self._run_on_thread_and_drain(call_repeatedly)
+
+        self.assertEqual(list(range(call_count)), called_args)
+        # A non-blocking caller never reads results back, so storing them would grow
+        # without bound for the lifetime of the wrapper
+        self.assertEqual(0, len(wrapped_record._completed_calls))
+        self.assertEqual(0, len(wrapped_record._pending_calls))
+
+    def test_non_blocking_calls_do_not_retain_results_when_the_callable_raises(self):
+        call_count = 25
+        wrapped_raises = QAppThreadCall(raises_exception, blocking=False)
+
+        def call_repeatedly():
+            for _ in range(call_count):
+                wrapped_raises()
+
+        self._run_on_thread_and_drain(call_repeatedly)
+
+        # A retained exc_info would keep the traceback, and every frame it references, alive
+        self.assertEqual(0, len(wrapped_raises._completed_calls))
+        self.assertEqual(0, len(wrapped_raises._pending_calls))
+
+    def test_blocking_calls_still_return_results_and_do_not_accumulate_them(self):
+        call_count = 25
+        results = []
+
+        def add_one(value):
+            return value + 1
+
+        wrapped_add_one = QAppThreadCall(add_one, blocking=True)
+
+        def call_repeatedly():
+            for value in range(call_count):
+                results.append(wrapped_add_one(value))
+
+        self._run_on_thread_and_drain(call_repeatedly)
+
+        self.assertEqual([value + 1 for value in range(call_count)], results)
+        # Each blocking call pops the result it stored
+        self.assertEqual(0, len(wrapped_add_one._completed_calls))
+        self.assertEqual(0, len(wrapped_add_one._pending_calls))
+
     def test_force_method_calls_to_qapp_thread(self):
         class Impl:
             def public(self):
