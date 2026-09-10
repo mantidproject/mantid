@@ -33,7 +33,7 @@ MDNormBase::MDNormBase()
     : m_hmin(0.0f), m_hmax(0.0f), m_kmin(0.0f), m_kmax(0.0f), m_lmin(0.0f), m_lmax(0.0f), m_dEmin(0.f), m_dEmax(0.f),
       m_Ei(0.), m_ki(0.), m_kfmin(0.), m_kfmax(0.), m_hIntegrated(true), m_kIntegrated(true), m_lIntegrated(true),
       m_dEIntegrated(true), m_UB(3, 3, true), m_W(3, 3, true), m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_eIdx(-1),
-      m_samplePos(), m_beamDir(), m_diffraction(true), m_accumulate(false) {}
+      m_samplePos(), m_beamDir(), m_numExptInfos(0), m_diffraction(true), m_accumulate(false) {}
 
 /**
  * Currently looks for the ConvertToMD algorithm in the history
@@ -272,12 +272,7 @@ Mantid::Kernel::DblMatrix MDNormBase::calQTransform(const DblMatrix &R, const Ge
 void MDNormBase::calculateNormalization(const std::vector<coord_t> &otherValues, uint16_t expInfoIndex) {
   const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
   const auto &spectrumInfo = currentExptInfo.spectrumInfo();
-  auto *rubwLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("RUBW_MATRIX"));
-  if (!rubwLog) {
-    throw std::runtime_error("Wokspace does not contain a log entry for the RUBW matrix."
-                             "Cannot continue.");
-  }
-  Kernel::DblMatrix Qtransform((*rubwLog)()); // includes the 2*pi factor but not goniometer for now :)
+  Kernel::DblMatrix Qtransform(getLogValues<VectorDoubleProperty>(currentExptInfo, "RUBW_MATRIX"); // includes the 2*pi factor but not goniometer for now :)
   Qtransform = currentExptInfo.run().getGoniometerMatrix() * Qtransform;
   Qtransform.Invert();
   const double protonCharge = currentExptInfo.run().getProtonCharge();
@@ -295,12 +290,8 @@ void MDNormBase::calculateNormalization(const std::vector<coord_t> &otherValues,
 void MDNormBase::calculateNormalization(const std::vector<coord_t> &otherValues, const Geometry::SymmetryOperation &so,
                                         uint16_t expInfoIndex) {
   const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
-  std::vector<double> lowValues, highValues;
-  auto *lowValuesLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("MDNorm_low"));
-  lowValues = (*lowValuesLog)();
-  auto *highValuesLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("MDNorm_high"));
-  highValues = (*highValuesLog)();
-
+  std::vector<double> lowValues = getLogValues<VectorDoubleProperty>(currentExptInfo, "MDNorm_low");
+  std::vector<double> highValues = getLogValues<VectorDoubleProperty>(currentExptInfo, "MDNormHigh");
   // calculate Q transformation matrix (R * UB * SymmetryOperation * m_W)^-1
   // in order to calculate intersections
   Kernel::DblMatrix Qtransform = calQTransform(currentExptInfo.run().getGoniometerMatrix(), so);
@@ -329,18 +320,16 @@ void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues
   std::vector<double> lowValues, highValues;
   DblMatrix UBWSymm; // Symmetrised matrix (UB * symm * W) converting from lab to crystal frame
   if (so == nullptr) {
-    auto *rubwLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("RUBW_MATRIX"));
-    UBWSymm = (*rubwLog)(); // includes the 2*pi factor but not goniometer for now :)
+    UBWSymm = getLogValues<VectorDoubleProperty>(
+        currentExptInfo, "RUBW_MATRIX"); // includes the 2*pi factor but not goniometer for now :)
   } else {
     if (m_backgroundWS != nullptr) {
       throw std::runtime_error("Continuous rotation and background workspace not yet implemented.");
     }
     isMDNorm = true;
     UBWSymm = calQTransform(DblMatrix(3, 3, true), *so, false);
-    auto *lowValuesLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("MDNorm_low"));
-    lowValues = (*lowValuesLog)();
-    auto *highValuesLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("MDNorm_high"));
-    highValues = (*highValuesLog)();
+    lowValues = getLogValues<VectorDoubleProperty>(currentExptInfo, "MDNorm_low");
+    highValues = getLogValues<VectorDoubleProperty>(currentExptInfo, "MDNorm_high");
   }
   // MDEventWS was created with the "useLogTimes" option: should be only a single expInfo, but
   // gonios vary with time - we now coarse-bin it to compute the normalisation.
@@ -351,11 +340,19 @@ void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues
 
   double progressStart = 0.3 + 0.7 * expInfoIndex / m_numExptInfos;
   double progressEnd = 0.3 + 0.7 * (expInfoIndex + 1) / m_numExptInfos;
-  double normfac = run.hasProperty("NormalizationFactor")
-                       ? (*dynamic_cast<Kernel::PropertyWithValue<double> *>(run.getProperty("NormalizationFactor")))()
-                       : 1.0;
+  double normfac = 1.0;
+  if (auto *factor = dynamic_cast<Kernel::PropertyWithValue<double> *>(run.getProperty("NormalizationFactor"));
+      run.hasProperty("NormalizationFactor") && factor) {
+    normfac = (*factor)();
+  }
+
   std::istringstream tosplit;
-  tosplit.str((*dynamic_cast<PropertyWithValue<std::string> *>(run.getProperty("useLogTimes")))());
+  if (auto *logTimesStr = dynamic_cast<PropertyWithValue<std::string> *>(run.getProperty("useLogTimes"));
+      run.hasProperty("useLogTimes") && logTimesStr) {
+    tosplit.str((*logTimesStr)());
+  } else {
+    throw std::runtime_error("useLogTimes property needs to be defined for Continuous Normalization");
+  }
   std::vector<TimeSeriesProperty<double> *> logs;
   std::vector<size_t> movingGonioIndex;
   const TimeSeriesProperty<double> *protonlog = run.getTimeSeriesProperty<double>(LOG_CHARGE_NAME);
@@ -523,7 +520,7 @@ void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const
     double solid = protonCharge;
     double bkgdSolid = protonChargeBkgd;
     if (haveSA) {
-      double solid_angle_factor = solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0];
+      double solid_angle_factor = solidAngleWS->y(solidAngDetToIdx.at(detID))[0];
       solid = solid_angle_factor * protonCharge;
       bkgdSolid = solid_angle_factor * protonChargeBkgd;
     }
