@@ -66,24 +66,23 @@ void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames, cons
   std::shared_ptr<ParameterMap> pmap = newInstrument.getParameterMap();
 
   for (const auto &bankName : bankNames) {
-    std::shared_ptr<const IComponent> bank1 = newInstrument.getComponentByName(bankName);
-    std::shared_ptr<const Geometry::RectangularDetector> bank =
-        std::dynamic_pointer_cast<const RectangularDetector>(bank1);
+    const size_t bankComponentIndex = componentInfo.indexOfAny(bankName);
+    const size_t parentIndex = componentInfo.parent(bankComponentIndex);
 
-    Quat relRot = bank->getRelativeRot();
-    Quat parentRot = bank->getParent()->getRotation();
+    Quat relRot = componentInfo.relativeRotation(bankComponentIndex);
+    Quat parentRot = componentInfo.rotation(parentIndex);
     Quat newRot = parentRot * rot * relRot;
 
-    const auto bankComponentIndex = componentInfo.indexOf(bank->getComponentID());
     componentInfo.setRotation(bankComponentIndex, newRot);
 
     V3D rotatedPos = V3D(pos);
-    bank->getParent()->getRotation().rotate(rotatedPos);
+    parentRot.rotate(rotatedPos);
 
-    componentInfo.setPosition(bankComponentIndex, rotatedPos + bank->getPos());
+    componentInfo.setPosition(bankComponentIndex, rotatedPos + componentInfo.position(bankComponentIndex));
 
-    std::vector<double> oldScalex = pmap->getDouble(bank->getName(), std::string("scalex"));
-    std::vector<double> oldScaley = pmap->getDouble(bank->getName(), std::string("scaley"));
+    const std::string &resolvedBankName = componentInfo.name(bankComponentIndex);
+    std::vector<double> oldScalex = pmap->getDouble(resolvedBankName, std::string("scalex"));
+    std::vector<double> oldScaley = pmap->getDouble(resolvedBankName, std::string("scaley"));
 
     double scalex, scaley;
     if (!oldScalex.empty())
@@ -96,11 +95,12 @@ void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames, cons
     else
       scaley = detHtScale;
 
-    pmap->addDouble(bank.get(), std::string("scalex"), scalex);
-    pmap->addDouble(bank.get(), std::string("scaley"), scaley);
+    auto *bankComponentID = const_cast<IComponent *>(componentInfo.componentID(bankComponentIndex));
+    pmap->addDouble(bankComponentID, std::string("scalex"), scalex);
+    pmap->addDouble(bankComponentID, std::string("scaley"), scaley);
 
     if (detWScale != 1.0 || detHtScale != 1.0)
-      applyRectangularDetectorScaleToComponentInfo(componentInfo, bank->getComponentID(), detWScale, detHtScale);
+      applyRectangularDetectorScaleToComponentInfo(componentInfo, bankComponentID, detWScale, detHtScale);
   }
 }
 

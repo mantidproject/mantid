@@ -9,7 +9,8 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
@@ -82,45 +83,6 @@ void LoadIsawSpectrum::exec() {
     }
   }
   infile.close();
-  // Build a list of Rectangular Detectors
-  std::vector<std::shared_ptr<RectangularDetector>> detList;
-  for (int i = 0; i < inst->nelements(); i++) {
-    std::shared_ptr<RectangularDetector> det;
-    std::shared_ptr<ICompAssembly> assem;
-    std::shared_ptr<ICompAssembly> assem2;
-
-    det = std::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
-    if (det) {
-      detList.emplace_back(det);
-    } else {
-      // Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
-      // We are not doing a full recursive search since that will be very long
-      // for lots of pixels.
-      assem = std::dynamic_pointer_cast<ICompAssembly>((*inst)[i]);
-      if (assem) {
-        for (int j = 0; j < assem->nelements(); j++) {
-          det = std::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
-          if (det) {
-            detList.emplace_back(det);
-          } else {
-            // Also, look in the second sub-level for RectangularDetectors (e.g.
-            // PG3).
-            // We are not doing a full recursive search since that will be very
-            // long for lots of pixels.
-            assem2 = std::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
-            if (assem2) {
-              for (int k = 0; k < assem2->nelements(); k++) {
-                det = std::dynamic_pointer_cast<RectangularDetector>((*assem2)[k]);
-                if (det) {
-                  detList.emplace_back(det);
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
 
   if (spectra.size() < 1)
     throw std::runtime_error("The number of spectra in the loaded file is zero.");
@@ -133,18 +95,53 @@ void LoadIsawSpectrum::exec() {
   outWS->setDistribution(true);
   outWS->rebuildSpectraMapping(false);
 
+  const auto &componentInfo = outWS->componentInfo();
+  const auto &detectorInfo = outWS->detectorInfo();
+
+  // Build a list of Rectangular/Grid Detectors (as component indices)
+  // Do this after creating the workspace, to avoid double-walking the instrument tree
+  std::vector<size_t> detList;
+  for (const size_t i : componentInfo.children(componentInfo.root())) {
+    if (componentInfo.isGridDetector(i)) {
+      detList.emplace_back(i);
+    } else {
+      // Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
+      // We are not doing a full recursive search since that will be very long
+      // for lots of pixels.
+      for (const size_t j : componentInfo.children(i)) {
+        if (componentInfo.isGridDetector(j)) {
+          detList.emplace_back(j);
+        } else {
+          // Also, look in the second sub-level for RectangularDetectors (e.g.
+          // PG3).
+          // We are not doing a full recursive search since that will be very
+          // long for lots of pixels.
+          for (const size_t k : componentInfo.children(j)) {
+            if (componentInfo.isGridDetector(k)) {
+              detList.emplace_back(k);
+            }
+          }
+        }
+      }
+    }
+  }
+
   // Go through each point at this run / bank
   for (size_t i = 0; i < spectra.size(); i++) {
     auto &outSpec = outWS->getSpectrum(i);
     outSpec.clearDetectorIDs();
-    for (int j = 0; j < detList[i]->xpixels(); j++)
-      for (int k = 0; k < detList[i]->ypixels(); k++)
-        outSpec.addDetectorID(static_cast<detid_t>(detList[i]->getDetectorIDAtXY(j, k)));
+    const size_t bankIndex = detList[i];
+    const auto grid = componentInfo.pixelGridComponent(bankIndex);
+    for (int j = 0; j < grid.nX; j++) {
+      for (int k = 0; k < grid.nY; k++) {
+        outSpec.addDetectorID(detectorInfo.detid(componentInfo.detectorIndexAtXYZ(bankIndex, j, k, 0)));
+      }
+    }
     auto &outX = outSpec.mutableX();
     auto &outY = outSpec.mutableY();
     auto &outE = outSpec.mutableE();
     // This is the scattered beam direction
-    V3D dir = detList[i]->getPos() - samplePos;
+    V3D dir = componentInfo.position(bankIndex) - samplePos;
 
     // Find spectra at wavelength of 1 for normalization
     std::vector<double> xdata(1, 1.0); // wl = 1
