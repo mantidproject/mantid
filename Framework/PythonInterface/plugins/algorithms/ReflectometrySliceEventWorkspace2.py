@@ -235,8 +235,7 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         each slice, scaled by the relative proton charge for that slice"""
         total_proton_charge = self._total_proton_charge(input_ws)
         monitors_ws_list = []
-        i = 1
-        for slice in sliced_ws_group:
+        for i, slice in enumerate(sliced_ws_group, 1):
             slice_monitor_ws_name = input_monitor_ws.name() + "_" + str(i)
             slice_monitor_ws = self._clone_workspace(input_monitor_ws)
             scale_factor = slice.run().getProtonCharge() / total_proton_charge
@@ -245,7 +244,6 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
             mtd.addOrReplace(slice_monitor_ws_name, slice_monitor_ws)
             monitors_ws_list.append(slice_monitor_ws_name)
             self._copy_run_number_to_sample_log(slice, slice_monitor_ws)
-            i += 1
 
         monitor_ws_group_name = input_monitor_ws.name() + "_sliced"
         monitor_ws_group = self._group_workspaces(monitors_ws_list)
