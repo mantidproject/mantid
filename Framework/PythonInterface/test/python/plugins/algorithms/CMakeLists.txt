@@ -127,6 +127,7 @@ set(TEST_PY_FILES
     PoldiAutoCorrelation6Test.py
     ReflectometryReductionOneLiveDataTest.py
     ReflectometrySliceEventWorkspaceTest.py
+    ReflectometrySliceEventWorkspaceV2Test.py
     RetrieveRunInfoTest.py
     SNSPowderReductionTest.py
     SANSWideAngleCorrectionTest.py
