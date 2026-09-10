@@ -1,12 +1,9 @@
 name: PR doxygen
 
 on:
+  pull_request:
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
-
-  workflow_run:
-    workflows: ["PR cpp check"]
-    types:
-      - requested
 
 # cancel previous job if a new commit is pushed
 concurrency:
