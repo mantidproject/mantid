@@ -1056,9 +1056,8 @@ class LOQ(ISISInstrument):
         Loads information about the setup used for LOQ transmission runs
         """
         ws = mtd[ws_trans]
-        instrument = ws.getInstrument()
-        has_m4 = instrument.getComponentByName(self._m4_monitor_name)
-        if has_m4 is None:
+        has_m4 = ws.componentInfo().uniqueName(self._m4_monitor_name)
+        if not has_m4:
             trans_definition_file = os.path.join(config.getString("instrumentDefinition.directory"), self._NAME + "_trans_Definition.xml")
         else:
             trans_definition_file = os.path.join(
@@ -1785,9 +1784,7 @@ class LARMOR(ISISInstrument):
 
         # Get the angle of the rotation from the rotation quaternion
         # At this point we also need to take the sign of the axis into account
-        instrument = ws.getInstrument()
-        detector_bench = instrument.getComponentByName("DetectorBench")
-        rot = detector_bench.getRotation()
+        rot = component_info.rotation(component_info.indexOfAny("DetectorBench"))
         angle, axis = su.quaternion_to_angle_and_axis(rot)
         angle = copysign(angle, axis[1])
 

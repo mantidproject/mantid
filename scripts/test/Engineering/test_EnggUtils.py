@@ -262,8 +262,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
     ):
         ws = MagicMock()
         # nominal sample position and component name
-        sample = ws.getInstrument().getSample.return_value
-        sample.getFullName.return_value = "sample-comp"
+        ws.componentInfo.return_value.name.return_value = "sample-comp"
         # scattering centre of mass offset from the origin
         mock_com.return_value = (0.001, 0.002, 0.003)
         # per-detector geometric DIFCs -> ratio of 1.1 for both detectors

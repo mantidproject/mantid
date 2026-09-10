@@ -11,6 +11,7 @@ from mantid.api import AnalysisDataService, WorkspaceGroup, IEventWorkspace
 from mantid.dataobjects import Workspace2D
 from mantid.kernel import Logger
 from sans.algorithm_detail.move_workspaces import move_component
+from plugins.algorithms.component_info_utils import resolve_component_index
 from sans.common.general_functions import (
     create_managed_non_child_algorithm,
     create_unmanaged_algorithm,
@@ -1578,15 +1579,23 @@ def _apply_polarization_component_adjustments(polarization_state, ws):
 
     def _update_component_properties(component_state):
         idf_name = component_state.idf_component_name
-        component = ws.getInstrument().getComponentByName(idf_name)
-        if component is None:
+        component_info = ws.componentInfo()
+        try:
+            # idf_name comes from the user file, so it may be a hierarchical path such as
+            # "instrument/bank/component"; indexOfAny does not parse those.
+            component_index = resolve_component_index(idf_name, component_info)
+        except ValueError:
             raise AttributeError(
                 f'The name "{idf_name}" is not present in the Instrument Definition File for {ws.getInstrumentName()}. '
                 f'Please ensure any "idf_component_name" fields in the User File match an existing entry in the IDF for the '
                 f"component you wish to override."
-            )
+            ) from None
         _move_pol_component(
-            component_state.location_x, component_state.location_y, component_state.location_z, component.getPos(), idf_name
+            component_state.location_x,
+            component_state.location_y,
+            component_state.location_z,
+            component_info.position(component_index),
+            idf_name,
         )
         parameter_map = {"device_type": component_state.device_type}
         if hasattr(component_state, "cell_length"):  # Only StateFilters (polarizers & analyzers) have these properties.
