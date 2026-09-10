@@ -24,13 +24,16 @@ class ReflectometrySliceEventWorkspaceV2Test(unittest.TestCase):
         mtd.clear()
 
     def test_missing_input_workspace(self):
-        self._assert_run_algorithm_throws()
+        self._assert_run_algorithm_throws("The input workspace must be present in the ADS")
 
     def test_missing_monitors(self):
-        self._assert_run_algorithm_throws({"InputWorkspaceName": "input_ws"})
+        self._assert_run_algorithm_throws("The monitor workspace must be present in the ADS", {"InputWorkspaceName": "input_ws"})
 
     def test_missing_output_ws(self):
-        self._assert_run_algorithm_throws({"InputWorkspaceName": "input_ws", "MonitorWorkspaceName": "monitor_ws"})
+        self._assert_run_algorithm_throws(
+            "A base name for the output workspace must be provided",
+            {"InputWorkspaceName": "input_ws", "MonitorWorkspaceName": "monitor_ws"},
+        )
 
     def test_default_inputs_return_single_slice(self):
         output = self._assert_run_algorithm_succeeds(self._default_args)
@@ -246,7 +249,7 @@ class ReflectometrySliceEventWorkspaceV2Test(unittest.TestCase):
         args["TimeInterval"] = 600
         args["InputWorkspaceName"] = "input_ws_group"
         args["MonitorWorkspaceName"] = "test_monitor_ws_group"
-        self._assert_run_algorithm_throws(args)
+        self._assert_run_algorithm_throws("Monitor and Input workspace groups must be the same size", args)
         mtd.remove("test_monitor_ws_group")
 
     def test_validation_fails_when_workspace_has_zero_counts(self):
@@ -254,7 +257,7 @@ class ReflectometrySliceEventWorkspaceV2Test(unittest.TestCase):
         mtd.addOrReplace("test_ws", input_ws)
         args = self._default_args
         args["InputWorkspaceName"] = input_ws.name()
-        self._assert_run_algorithm_throws(args)
+        self._assert_run_algorithm_throws("Cannot slice workspace with zero proton charge", args)
 
     def _create_test_workspace(self):
         input_ws = CreateSampleWorkspace("Event", BankPixelWidth=1, BinWidth=20000)
@@ -323,15 +326,10 @@ class ReflectometrySliceEventWorkspaceV2Test(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
         self.assertEqual(mtd.doesExist("output"), False)
 
-    def _assert_run_algorithm_throws(self, args={}):
+    def _assert_run_algorithm_throws(self, err_msg: str, args={}):
         """Run the algorithm with the given args and check it throws"""
-        throws = False
         alg = create_algorithm("ReflectometrySliceEventWorkspace", **args)
-        try:
-            alg.execute()
-        except:
-            throws = True
-        self.assertEqual(throws, True)
+        self.assertRaisesRegex(RuntimeError, err_msg, alg.execute)
 
     def _check_group(self, time_interval, expected_ws_names, expected_monitor_names):
         expected_values_set = [[2, 6, 1], [2, 3, 2], [0, 3, 0], [4, 2, 2], [4, 1, 2], [2, 1, 1], [0, 0, 0]]
@@ -378,7 +376,7 @@ class ReflectometrySliceEventWorkspaceV2Test(unittest.TestCase):
         self._assert_delta(ws.y(spec)[99], expected_values[2])
 
     def _assert_delta(self, value1, value2):
-        self.assertEqual(round(value1, 6), round(value2, 6))
+        self.assertAlmostEqual(value1, value2, places=6)
 
 
 if __name__ == "__main__":
