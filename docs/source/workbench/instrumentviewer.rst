@@ -25,21 +25,18 @@ and the plot.
 
 .. note::
 
-   This interface is still under active development, and opening it logs the following message:
-
-      This Instrument View interface is available for testing purposes and evaluation, but is still
-      under active development. There may be bugs, and several features from the older Instrument
-      View ('Show Instrument') are not currently implemented. If you have any feedback about this
-      interface then the Mantid team would be happy to receive it.
-
-   The previous widget is still available and is documented at :ref:`LegacyInstrumentViewer`.
+   This view replaces the previous Instrument Viewer widget, which is still available and is
+   documented at :ref:`LegacyInstrumentViewer`. A few of that widget's features have not been
+   implemented here yet, and are listed under
+   `Differences from the legacy Instrument Viewer`_.
 
 Opening the Instrument View
 ---------------------------
 
 From Workbench, right-click a workspace in the Workspaces toolbox and select
-``(Experimental) Show Instrument``. The entry is only enabled for a
+``Show Instrument``. The entry is only enabled for a
 :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` that has an instrument attached.
+``Show Instrument (Legacy)``, directly below it, opens the previous widget instead.
 
 .. figure:: /images/ImageNotFound.png
     :align: center
@@ -48,7 +45,7 @@ The window follows the workspace it is showing: renaming or replacing the worksp
 view, and deleting the workspace, or clearing the Analysis Data Service, closes the window.
 
 The Instrument View is also used inside the ALFView interface and the ISIS Reflectometry Preview
-tab. Those interfaces use it only when ``Use new Instrument View in interfaces?`` is ticked under
+tab. Those interfaces use it unless ``Use legacy Instrument View in interfaces`` is ticked under
 ``File`` -> ``Settings`` -> ``General``.
 
 It can also be started outside Workbench, and used from a Jupyter notebook. See

@@ -16,8 +16,8 @@ build masks, regions of interest and detector groupings.
 
 It is a pure-Python package built on `PyVista <https://docs.pyvista.org>`_ and VTK, and is
 completely separate from the OpenGL widget described in :ref:`LegacyInstrumentViewer`. The two ship
-side by side: ``Show Instrument`` opens the legacy widget, ``(Experimental) Show Instrument`` opens
-this one.
+side by side: since v7.0.0 ``Show Instrument`` opens this one, and ``Show Instrument (Legacy)``
+opens the legacy widget.
 
 The user documentation is at :ref:`mantid:InstrumentViewer`.
 
@@ -419,9 +419,10 @@ Reusing only the model
 Interfaces that embed the Instrument View
 #########################################
 
-Both current consumers are C++ interfaces that import the Python presenter, and both are gated on
-the QSettings flag ``InstrumentView/use_new_instrument_view``, exposed in Workbench under
-``Settings`` -> ``General``.
+Both current consumers are C++ interfaces that import the Python presenter, and both use it
+unless the QSettings flag ``InstrumentView/use_legacy_instrument_view`` is set, exposed in Workbench
+under ``Settings`` -> ``General``. Mind the sense of that flag: it names the widget it selects, so
+its default of ``false`` gets this one.
 
 ``alfview/``
     ``ALFInstrumentViewPresenter`` and ``ALFInstrumentViewView`` subclass the full presenter and
