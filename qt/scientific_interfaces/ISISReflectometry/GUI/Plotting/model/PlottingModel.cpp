@@ -9,14 +9,12 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/Logger.h"
 
 #include <algorithm>
 #include <cmath>
@@ -24,7 +22,6 @@
 #include <iterator>
 #include <memory>
 #include <optional>
-#include <sstream>
 #include <stdexcept>
 #include <unordered_map>
 #include <utility>
@@ -32,8 +29,6 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace {
-Mantid::Kernel::Logger g_log("Reflectometry PlottingModel");
-
 auto constexpr spinAsymmetryWorkspacePrefix = "__isis_refl_spin_asym_";
 auto constexpr alignmentWorkspacePrefix = "__isis_refl_align_";
 auto constexpr detectorMapWorkspacePrefix = "__isis_refl_det_map_";
@@ -42,20 +37,9 @@ using IndexRegion = std::pair<int, int>;
 using WorkspaceCreator = std::vector<std::string> (*)(std::vector<PlottingWorkspace> const &,
                                                       PlotOutputSelection const &);
 
-struct GaussianParameters {
-  double height;
-  double centre;
-  double sigma;
-};
-
 struct WorkspaceGroupInputs {
-  std::string workspaceGroupName;
+  std::string key;
   std::vector<std::string> workspaceNames;
-};
-
-// Detector and background regions are currently only calibrated for POLREF.
-const std::unordered_map<std::string, IndexRegion> instrumentBackgroundIndexRegions{
-    {"INTER", {0, 0}}, {"POLREF", {360, 450}}, {"OFFSPEC", {0, 0}}, {"SURF", {0, 0}}, {"CRISP", {0, 0}},
 };
 
 const std::unordered_map<std::string, IndexRegion> instrumentDetectorIndexRegions{
@@ -76,12 +60,8 @@ IndexRegion detectorIndexRegion(std::string const &instrumentName) {
   return configuredInstrumentRegion(instrumentDetectorIndexRegions, instrumentName, "detector");
 }
 
-IndexRegion backgroundIndexRegion(std::string const &instrumentName) {
-  return configuredInstrumentRegion(instrumentBackgroundIndexRegions, instrumentName, "background");
-}
-
-Mantid::API::IAlgorithm_sptr createAlgorithm(std::string const &name) {
-  auto algorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged(name);
+Mantid::API::IAlgorithm_sptr createAlgorithm(std::string const &name, int const version = -1) {
+  auto algorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged(name, version);
   algorithm->initialize();
   algorithm->setChild(true);
   algorithm->setLogging(false);
@@ -95,14 +75,6 @@ Mantid::API::MatrixWorkspace_sptr executeBinaryAlgorithm(std::string const &algo
   auto algorithm = createAlgorithm(algorithmName);
   algorithm->setProperty("LHSWorkspace", lhsWorkspace);
   algorithm->setProperty("RHSWorkspace", rhsWorkspace);
-  algorithm->setProperty("OutputWorkspace", "__NotUsed__");
-  algorithm->execute();
-  return algorithm->getProperty("OutputWorkspace");
-}
-
-Mantid::API::MatrixWorkspace_sptr integrateSpectra(Mantid::API::MatrixWorkspace_sptr const &workspace) {
-  auto algorithm = createAlgorithm("Integration");
-  algorithm->setProperty("InputWorkspace", workspace);
   algorithm->setProperty("OutputWorkspace", "__NotUsed__");
   algorithm->execute();
   return algorithm->getProperty("OutputWorkspace");
@@ -130,14 +102,6 @@ Mantid::API::MatrixWorkspace_sptr convertToWavelength(Mantid::API::MatrixWorkspa
   return algorithm->getProperty("OutputWorkspace");
 }
 
-Mantid::API::MatrixWorkspace_sptr transpose(Mantid::API::MatrixWorkspace_sptr const &workspace) {
-  auto algorithm = createAlgorithm("Transpose");
-  algorithm->setProperty("InputWorkspace", workspace);
-  algorithm->setProperty("OutputWorkspace", "__NotUsed__");
-  algorithm->execute();
-  return algorithm->getProperty("OutputWorkspace");
-}
-
 Mantid::API::MatrixWorkspace_sptr extractSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace,
                                                   size_t const workspaceIndex) {
   auto algorithm = createAlgorithm("ExtractSpectra");
@@ -152,9 +116,16 @@ double theta(Mantid::API::MatrixWorkspace const &workspace, size_t const workspa
   return workspace.spectrumInfo().twoTheta(workspaceIndex) * 90.0 / M_PI;
 }
 
-double xValueForWorkspaceIndex(Mantid::API::MatrixWorkspace const &workspace, size_t const workspaceIndex,
-                               AlignmentXAxis const xAxis) {
-  return xAxis == AlignmentXAxis::Theta ? theta(workspace, workspaceIndex) : static_cast<double>(workspaceIndex);
+double xValueForFractionalWorkspaceIndex(Mantid::API::MatrixWorkspace const &workspace, double const workspaceIndex,
+                                         AlignmentXAxis const xAxis) {
+  if (xAxis == AlignmentXAxis::DetectorId) {
+    return workspaceIndex;
+  }
+  auto const lowerIndex = static_cast<size_t>(std::floor(workspaceIndex));
+  auto const upperIndex = static_cast<size_t>(std::ceil(workspaceIndex));
+  auto const fraction = workspaceIndex - static_cast<double>(lowerIndex);
+  auto const lowerTheta = theta(workspace, lowerIndex);
+  return lowerTheta + fraction * (theta(workspace, upperIndex) - lowerTheta);
 }
 
 double detectorMapYAxisValue(Mantid::API::MatrixWorkspace const &workspace, size_t const workspaceIndex,
@@ -177,103 +148,57 @@ Mantid::API::MatrixWorkspace_sptr createPointWorkspace(size_t const numberOfPoin
 
 void setAlignmentXAxisValues(Mantid::API::MatrixWorkspace_sptr const &profileWorkspace,
                              Mantid::API::MatrixWorkspace const &rawWorkspace, AlignmentXAxis const xAxis) {
+  if (xAxis == AlignmentXAxis::DetectorId) {
+    return;
+  }
   auto &x = profileWorkspace->mutableX(0);
-  for (size_t idx = 0; idx < x.size(); ++idx) {
-    x[idx] = xValueForWorkspaceIndex(rawWorkspace, idx, xAxis);
-  }
+  std::transform(x.begin(), x.end(), x.begin(), [&rawWorkspace, &xAxis](const auto &x) {
+    return xValueForFractionalWorkspaceIndex(rawWorkspace, x, xAxis);
+  });
 }
 
-GaussianParameters estimateGaussianParameters(Mantid::API::MatrixWorkspace const &workspace) {
-  auto const &x = workspace.x(0);
-  auto const &y = workspace.y(0);
-  auto const maxY = std::max_element(y.cbegin(), y.cend());
-  auto const maxIndex = std::distance(y.cbegin(), maxY);
-  return {*maxY, x[maxIndex], 2.5};
-}
+struct SpecularPeakFit {
+  Mantid::API::MatrixWorkspace_sptr profileWorkspace;
+  Mantid::API::MatrixWorkspace_sptr fitWorkspace;
+  double peakCentre;
+};
 
-std::string gaussianFunctionString(GaussianParameters const &parameters) {
-  auto stream = std::ostringstream{};
-  stream << "name=Gaussian,Height=" << parameters.height << ",PeakCentre=" << parameters.centre
-         << ",Sigma=" << parameters.sigma;
-  return stream.str();
-}
-
-GaussianParameters gaussianParametersFromTable(Mantid::API::ITableWorkspace_sptr const &peaks,
-                                               GaussianParameters const &fallbackParameters) {
-  if (!peaks || peaks->rowCount() == 0) {
-    return fallbackParameters;
-  }
-  return {.height = peaks->cell<double>(0, 3),
-          .centre = peaks->cell<double>(0, 1),
-          .sigma = peaks->cell<double>(0, 2) / 2.3548};
-}
-
-GaussianParameters findPeaks(Mantid::API::MatrixWorkspace_sptr const &workspace) {
-  auto const fallbackParameters = estimateGaussianParameters(*workspace);
-
-  try {
-    auto algorithm = createAlgorithm("FindPeaks");
-    algorithm->setProperty("InputWorkspace", workspace);
-    algorithm->setProperty("WorkspaceIndex", 0);
-    algorithm->setProperty("PeaksList", "__NotUsed__");
-    algorithm->execute();
-
-    Mantid::API::ITableWorkspace_sptr peaks = algorithm->getProperty("PeaksList");
-    return gaussianParametersFromTable(peaks, fallbackParameters);
-  } catch (std::exception const &) {
-    g_log.error("Failed to find peaks in profile workspace. Using fallback parameters for Gaussian fit.");
-    return fallbackParameters;
-  }
-}
-
-Mantid::API::MatrixWorkspace_sptr subtractBackground(Mantid::API::MatrixWorkspace_sptr const &workspace,
-                                                     Mantid::API::MatrixWorkspace_sptr const &rawWorkspace,
-                                                     AlignmentXAxis const xAxis, std::string const &instrumentName) {
-  try {
-    auto algorithm = createAlgorithm("CalculateFlatBackground");
-    algorithm->setProperty("InputWorkspace", workspace);
-    algorithm->setProperty("OutputWorkspace", "__NotUsed__");
-    auto const [idxMin, idxMax] = backgroundIndexRegion(instrumentName);
-    algorithm->setProperty("StartX", xValueForWorkspaceIndex(*rawWorkspace, idxMin, xAxis));
-    algorithm->setProperty("EndX", xValueForWorkspaceIndex(*rawWorkspace, idxMax, xAxis));
-    algorithm->execute();
-    return algorithm->getProperty("OutputWorkspace");
-  } catch (std::exception const &) {
-    g_log.error("Failed to subtract background from workspace.");
-    return workspace;
-  }
-}
-
-Mantid::API::MatrixWorkspace_sptr fitGaussian(Mantid::API::MatrixWorkspace_sptr const &workspace,
-                                              GaussianParameters const &parameters) {
-  try {
-    auto algorithm = createAlgorithm("Fit");
-    algorithm->setProperty("Function", gaussianFunctionString(parameters));
-    algorithm->setProperty("InputWorkspace", workspace);
-    algorithm->setProperty("WorkspaceIndex", 0);
-    algorithm->setProperty("Output", "__NotUsed__");
-    algorithm->setProperty("IgnoreInvalidData", true);
-    algorithm->execute();
-    return algorithm->getProperty("OutputWorkspace");
-  } catch (std::exception const &) {
-    g_log.error("Failed to fit Gaussian to profile workspace.");
-    return nullptr;
-  }
+SpecularPeakFit fitSpecularPeak(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  auto algorithm = createAlgorithm("FindReflectometryLines", 3);
+  algorithm->setProperty("InputWorkspace", workspace);
+  algorithm->setProperty("BackgroundType", "Linear");
+  algorithm->setProperty("OutputProfileWorkspace", "__NotUsed__");
+  algorithm->setProperty("OutputFitWorkspace", "__NotUsed__");
+  algorithm->execute();
+  return {algorithm->getProperty("OutputProfileWorkspace"), algorithm->getProperty("OutputFitWorkspace"),
+          algorithm->getProperty("LineCentre")};
 }
 
 Mantid::API::MatrixWorkspace_sptr createPeakCentreWorkspace(Mantid::API::MatrixWorkspace_sptr const &profileWorkspace,
                                                             double const peakCentre) {
   auto peakCentreWorkspace = createPointWorkspace(2);
   auto const &profileY = profileWorkspace->y(0);
-  auto const yRange = std::minmax_element(profileY.cbegin(), profileY.cend());
+  auto const firstFinite =
+      std::find_if(profileY.cbegin(), profileY.cend(), [](double value) { return std::isfinite(value); });
+  if (firstFinite == profileY.cend()) {
+    throw std::runtime_error("Cannot create a peak centre marker for a profile without finite values.");
+  }
+  auto minY = *firstFinite;
+  auto maxY = *firstFinite;
+  for (auto value = std::next(firstFinite); value != profileY.cend(); ++value) {
+    if (std::isfinite(*value)) {
+      minY = std::min(minY, *value);
+      maxY = std::max(maxY, *value);
+    }
+  }
 
   auto &x = peakCentreWorkspace->mutableX(0);
   auto &y = peakCentreWorkspace->mutableY(0);
   auto &e = peakCentreWorkspace->mutableE(0);
   x[0] = peakCentre;
   x[1] = peakCentre;
-  y[0] = *yRange.first;
-  y[1] = *yRange.second;
+  y[0] = minY;
+  y[1] = maxY;
   e[0] = 0.0;
   e[1] = 0.0;
   return peakCentreWorkspace;
@@ -354,7 +279,7 @@ std::string createSpinAsymmetryWorkspace(WorkspaceGroupInputs const &inputs) {
     return "";
   }
 
-  auto const outputWorkspace = std::string{spinAsymmetryWorkspacePrefix} + inputs.workspaceGroupName;
+  auto const outputWorkspace = std::string{spinAsymmetryWorkspacePrefix} + inputs.key;
   if (workspaceExists(outputWorkspace)) {
     return outputWorkspace;
   }
@@ -457,29 +382,29 @@ std::string createAlignmentWorkspace(PlottingWorkspace const &workspace, Alignme
     return outputWorkspace;
   }
 
-  auto const rawProfileWorkspace = outputWorkspace + "_raw_sub_bg";
+  auto const rawProfileWorkspace = outputWorkspace + "_profile";
   auto const fittedPeakWorkspace = outputWorkspace + "_fitted_peak";
   auto const peakCentreWorkspace = outputWorkspace + "_peak_centre";
 
   auto detectorSpectraWorkspace = extractDetectorSpectra(rawWorkspace, instrumentName);
-  auto integratedWorkspace = integrateSpectra(detectorSpectraWorkspace);
-  auto profileWorkspace = transpose(integratedWorkspace);
-  setAlignmentXAxisValues(profileWorkspace, *detectorSpectraWorkspace, xAxis);
-  auto profileWorkspaceNoBG = subtractBackground(profileWorkspace, rawWorkspace, xAxis, instrumentName);
-  auto fitParameters = findPeaks(profileWorkspaceNoBG);
-  auto fitOutputWorkspace = fitGaussian(profileWorkspaceNoBG, fitParameters);
+  auto peakFit = fitSpecularPeak(detectorSpectraWorkspace);
+  auto fittedWorkspace = peakFit.fitWorkspace ? extractSpectrum(peakFit.fitWorkspace, 1) : nullptr;
+  auto const peakCentre = xValueForFractionalWorkspaceIndex(*detectorSpectraWorkspace, peakFit.peakCentre, xAxis);
+  setAlignmentXAxisValues(peakFit.profileWorkspace, *detectorSpectraWorkspace, xAxis);
+  if (fittedWorkspace) {
+    setAlignmentXAxisValues(fittedWorkspace, *detectorSpectraWorkspace, xAxis);
+  }
+  auto centreWorkspace = createPeakCentreWorkspace(peakFit.profileWorkspace, peakCentre);
 
   auto group = std::make_shared<Mantid::API::WorkspaceGroup>();
-  ads.addOrReplace(rawProfileWorkspace, profileWorkspaceNoBG);
-  group->addWorkspace(profileWorkspaceNoBG);
-  if (fitOutputWorkspace) {
-    auto fittedWorkspace = extractSpectrum(fitOutputWorkspace, 1);
-    auto centreWorkspace = createPeakCentreWorkspace(profileWorkspaceNoBG, fitParameters.centre);
+  ads.addOrReplace(rawProfileWorkspace, peakFit.profileWorkspace);
+  group->addWorkspace(peakFit.profileWorkspace);
+  if (fittedWorkspace) {
     ads.addOrReplace(fittedPeakWorkspace, fittedWorkspace);
-    ads.addOrReplace(peakCentreWorkspace, centreWorkspace);
     group->addWorkspace(fittedWorkspace);
-    group->addWorkspace(centreWorkspace);
   }
+  ads.addOrReplace(peakCentreWorkspace, centreWorkspace);
+  group->addWorkspace(centreWorkspace);
 
   ads.addOrReplace(outputWorkspace, group);
   return outputWorkspace;
