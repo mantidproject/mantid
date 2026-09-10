@@ -20,6 +20,7 @@ set(EXPORT_FILES
     src/Exports/GridDetector.cpp
     src/Exports/RectangularDetector.cpp
     src/Exports/Instrument.cpp
+    src/Exports/InstrumentMetadata.cpp
     src/Exports/UnitCell.cpp
     src/Exports/MDFrame.cpp
     src/Exports/OrientedLattice.cpp

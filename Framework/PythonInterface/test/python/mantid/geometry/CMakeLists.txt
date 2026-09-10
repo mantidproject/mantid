@@ -7,6 +7,7 @@ set(TEST_PY_FILES
     IComponentTest.py
     IPeakTest.py
     InstrumentTest.py
+    InstrumentMetadataTest.py
     OrientedLatticeTest.py
     RectangularDetectorTest.py
     UnitCellTest.py

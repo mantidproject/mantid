@@ -12,6 +12,7 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/InstrumentMetadata.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
@@ -128,6 +129,11 @@ void export_ExperimentInfo() {
            args("self"),
            "Return a const reference to the "
            ":class:`~mantid.geometry.ComponentInfo` "
+           "object.")
+      .def("instrumentMetadata", &ExperimentInfo::instrumentMetadata, return_value_policy<reference_existing_object>(),
+           args("self"),
+           "Return a const reference to the "
+           ":class:`~mantid.geometry.InstrumentMetadata` "
            "object.")
       .def("getInstrumentName", &ExperimentInfo::getInstrumentName, args("self"),
            "Return the name of the instrument for this experiment.")

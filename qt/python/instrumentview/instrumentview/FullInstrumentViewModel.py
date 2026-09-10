@@ -474,7 +474,7 @@ class FullInstrumentViewModel:
             "CYLINDRICAL_Y": ProjectionType.CYLINDRICAL_Y,
             "CYLINDRICAL_Z": ProjectionType.CYLINDRICAL_Z,
         }
-        return possible_returns_map[self._workspace.getInstrument().getDefaultView()]
+        return possible_returns_map[self._workspace.instrumentMetadata().defaultView()]
 
     @property
     def projection_type(self):
@@ -953,7 +953,7 @@ class FullInstrumentViewModel:
             individual_groups_strings.append("+".join([str(id) for id in self._detector_ids[self._current_detector_groupings == i]]))
 
         CreateGroupingWorkspace(
-            InstrumentFilename=self._workspace.getInstrument().getFilename(),
+            InstrumentFilename=self._workspace.instrumentMetadata().filename(),
             ComponentName=self._workspace.getInstrument().getFullName(),
             CustomGroupingString=",".join(individual_groups_strings),
             OutputWorkspace=grouping_name,
