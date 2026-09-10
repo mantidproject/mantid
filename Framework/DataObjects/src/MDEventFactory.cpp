@@ -9,7 +9,6 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include <memory>
 
-#include "MantidDataObjects/MDBin.h"
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDBoxIterator.h"
@@ -21,7 +20,6 @@
 // We need to include the .cpp files so that the declarations are picked up
 // correctly. Weird, I know.
 // See http://www.parashift.com/c++-faq-lite/templates.html#faq-35.13
-#include "MantidDataObjects/MDBin.hxx"
 #include "MantidDataObjects/MDBox.hxx"
 #include "MantidDataObjects/MDBoxBase.hxx"
 #include "MantidDataObjects/MDBoxIterator.hxx"
@@ -135,26 +133,6 @@ template class DLLExport MDGridBox<MDEvent<6>, 6>;
 template class DLLExport MDGridBox<MDEvent<7>, 7>;
 template class DLLExport MDGridBox<MDEvent<8>, 8>;
 template class DLLExport MDGridBox<MDEvent<9>, 9>;
-
-// Instantiations for MDBin
-template class DLLExport MDBin<MDLeanEvent<1>, 1>;
-template class DLLExport MDBin<MDLeanEvent<2>, 2>;
-template class DLLExport MDBin<MDLeanEvent<3>, 3>;
-template class DLLExport MDBin<MDLeanEvent<4>, 4>;
-template class DLLExport MDBin<MDLeanEvent<5>, 5>;
-template class DLLExport MDBin<MDLeanEvent<6>, 6>;
-template class DLLExport MDBin<MDLeanEvent<7>, 7>;
-template class DLLExport MDBin<MDLeanEvent<8>, 8>;
-template class DLLExport MDBin<MDLeanEvent<9>, 9>;
-template class DLLExport MDBin<MDEvent<1>, 1>;
-template class DLLExport MDBin<MDEvent<2>, 2>;
-template class DLLExport MDBin<MDEvent<3>, 3>;
-template class DLLExport MDBin<MDEvent<4>, 4>;
-template class DLLExport MDBin<MDEvent<5>, 5>;
-template class DLLExport MDBin<MDEvent<6>, 6>;
-template class DLLExport MDBin<MDEvent<7>, 7>;
-template class DLLExport MDBin<MDEvent<8>, 8>;
-template class DLLExport MDBin<MDEvent<9>, 9>;
 
 // Instantiations for MDBoxIterator
 template class DLLExport MDBoxIterator<MDLeanEvent<1>, 1>;

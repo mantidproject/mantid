@@ -145,7 +145,7 @@ def generate():
     print("Generating MDEventFactory")
 
     # Classes that have a .cpp file (and will get an Include line)
-    classes_cpp = ["MDBoxBase", "MDBox", "MDEventWorkspace", "MDGridBox", "MDBin", "MDBoxIterator"]
+    classes_cpp = ["MDBoxBase", "MDBox", "MDEventWorkspace", "MDGridBox", "MDBoxIterator"]
 
     padding, lines, lines_after = parse_file(
         "../inc/MantidDataObjects/MDEventFactory.h", "//### BEGIN AUTO-GENERATED CODE", "//### END AUTO-GENERATED CODE"
@@ -166,7 +166,7 @@ def generate():
     lines += macro_lines
 
     lines.append("\n")
-    classes = ["MDBox", "MDBoxBase", "MDGridBox", "MDEventWorkspace", "MDBin"]
+    classes = ["MDBox", "MDBoxBase", "MDGridBox", "MDEventWorkspace"]
     for c in classes:
         lines.append("\n%s// ------------- Typedefs for %s ------------------\n" % (padding, c))
         mdevent_type = "MDLeanEvent"
