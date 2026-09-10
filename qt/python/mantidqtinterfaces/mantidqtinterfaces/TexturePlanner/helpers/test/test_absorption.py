@@ -24,6 +24,7 @@ def _make_wsm(offset=(0.0, 0.0, 0.0), init_R=None, gauge_volume_str="<gv/>"):
     wsm.WS_MC_INPUT = WS_MC_INPUT
     wsm.WS_MC_OUTPUT = WS_MC_OUTPUT
     wsm.wsname = WS_DATA
+    wsm.instr = "ENGINX"
     wsm.mesh_ws = "mesh_ws"
     wsm.offset = offset
     wsm.init_R = init_R if init_R is not None else Rotation.identity()
@@ -47,19 +48,19 @@ def _make_model(R=None, n_orientations=1, spec_inds=None):
     return model, orient
 
 
+def _make_calculator(point=1.5, unit="dSpacing"):
+    model, _ = _make_model()
+    model.workspaces.attenuation_kwargs = {"point": point, "unit": unit}
+    model.workspaces.create_bin_params_around_point.return_value = "1.4775,0.015,1.5225"
+    return AbsorptionCalculator(model), model.workspaces
+
+
 @patch(file_path + ".ConvertUnits")
 class TestAbsorptionCalculator_CreateMcWs(unittest.TestCase):
-    @staticmethod
-    def _make_calculator(point=1.5, unit="dSpacing"):
-        model, _ = _make_model()
-        model.workspaces.attenuation_kwargs = {"point": point, "unit": unit}
-        model.workspaces.create_bin_params_around_point.return_value = "1.4775,0.015,1.5225"
-        return AbsorptionCalculator(model), model.workspaces
-
     def test_bins_the_source_ws_around_the_evaluation_point(self, mock_convert):
         # the source grid must bracket the point so that read_attenuation_coefficient_at_value can
         # interpolate there - a grid that does not reach the point raises instead
-        calc, wsm = self._make_calculator(point=7.5, unit="dSpacing")
+        calc, wsm = _make_calculator(point=7.5, unit="dSpacing")
 
         calc._create_mc_ws()
 
@@ -72,14 +73,14 @@ class TestAbsorptionCalculator_CreateMcWs(unittest.TestCase):
         # a single dSpacing point maps to a different wavelength in every detector (lambda = 2 d sin(theta)),
         # so the grid is built in the requested unit and converted per spectrum; binning directly in
         # wavelength would evaluate the whole bank at one detector's wavelength
-        calc, wsm = self._make_calculator(unit="dSpacing")
+        calc, wsm = _make_calculator(unit="dSpacing")
 
         calc._create_mc_ws()
 
         self.assertEqual(wsm.create_simulation_workspace.call_args.kwargs["unit"], "dSpacing")
 
     def test_converts_source_ws_to_wavelength_for_the_mc_input(self, mock_convert):
-        calc, wsm = self._make_calculator()
+        calc, wsm = _make_calculator()
 
         result = calc._create_mc_ws()
 
@@ -90,7 +91,7 @@ class TestAbsorptionCalculator_CreateMcWs(unittest.TestCase):
 
     def test_still_converts_when_point_is_already_in_wavelength(self, mock_convert):
         # MonteCarloAbsorption needs a wavelength axis, and ConvertUnits is a no-op when already there
-        calc, wsm = self._make_calculator(point=4.0, unit="Wavelength")
+        calc, wsm = _make_calculator(point=4.0, unit="Wavelength")
 
         calc._create_mc_ws()
 
@@ -100,7 +101,7 @@ class TestAbsorptionCalculator_CreateMcWs(unittest.TestCase):
     def test_resets_goniometer_to_identity(self, mock_convert):
         # _set_mc_sample_state CopySamples onto this ws, and CopySample bakes the *destination's*
         # goniometer into the shape, so a stale rotation here would be applied twice
-        calc, _ = self._make_calculator()
+        calc, _ = _make_calculator()
         gonio = MagicMock()
         mock_convert.return_value.run.return_value.getGoniometer.return_value = gonio
 
@@ -108,6 +109,64 @@ class TestAbsorptionCalculator_CreateMcWs(unittest.TestCase):
 
         gonio.setR.assert_called_once()
         np.testing.assert_array_equal(gonio.setR.call_args.args[0], np.eye(3))
+
+
+@patch(file_path + ".ADS")
+@patch(file_path + ".ConvertUnits")
+class TestAbsorptionCalculator_CreateMcWsCaching(unittest.TestCase):
+    # building the mc input ws is slow, so it is reused across orientations. It is only safe to reuse
+    # while the workspace still matches the args it was built from and is still in the ADS.
+    def test_reuses_the_cached_ws_when_args_are_unchanged(self, mock_convert, mock_ads):
+        calc, wsm = _make_calculator()
+        mock_ads.doesExist.return_value = True
+
+        calc._create_mc_ws()
+        result = calc._create_mc_ws()
+
+        wsm.create_simulation_workspace.assert_called_once()
+        self.assertIs(result, mock_ads.retrieve.return_value)
+
+    def test_resets_goniometer_on_the_cached_ws_too(self, mock_convert, mock_ads):
+        # the reuse branch hands the ws straight to _set_mc_sample_state, which CopySamples onto it;
+        # the previous orientation's rotation must not be left on the goniometer to be baked in again
+        calc, _ = _make_calculator()
+        mock_ads.doesExist.return_value = True
+        gonio = mock_ads.retrieve.return_value.run.return_value.getGoniometer.return_value
+
+        calc._create_mc_ws()
+        calc._create_mc_ws()
+
+        gonio.setR.assert_called_once()
+        np.testing.assert_array_equal(gonio.setR.call_args.args[0], np.eye(3))
+
+    def test_rebuilds_when_a_key_arg_changes(self, mock_convert, mock_ads):
+        # the ws is binned around the evaluation point and carries the instrument's detectors, so any
+        # of these leaves the cached ws wrong. The instrument especially: update_ws rebuilds WS_DATA
+        # on a switch but not this ws, so without it in the key absorption runs on the old geometry
+        for name, mutate in (
+            ("point", lambda wsm: wsm.attenuation_kwargs.update(point=7.5)),
+            ("unit", lambda wsm: wsm.attenuation_kwargs.update(unit="Wavelength")),
+            ("instrument", lambda wsm: setattr(wsm, "instr", "IMAT")),
+        ):
+            with self.subTest(changed=name):
+                calc, wsm = _make_calculator()
+                mock_ads.doesExist.return_value = True
+
+                calc._create_mc_ws()
+                mutate(wsm)
+                calc._create_mc_ws()
+
+                self.assertEqual(wsm.create_simulation_workspace.call_count, 2)
+
+    def test_rebuilds_when_the_ws_is_gone_from_the_ads(self, mock_convert, mock_ads):
+        # matching args are not enough on their own; something else may have removed the ws
+        calc, wsm = _make_calculator()
+        mock_ads.doesExist.return_value = False
+
+        calc._create_mc_ws()
+        calc._create_mc_ws()
+
+        self.assertEqual(wsm.create_simulation_workspace.call_count, 2)
 
 
 @patch(file_path + ".define_gauge_volume")

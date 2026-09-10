@@ -63,8 +63,10 @@ class AbsorptionCalculator:
 
     def _create_mc_ws(self) -> MatrixWorkspace:
         wsm = self._model.workspaces
-        # create a ws with params binned around the evaluation point, if the init args have changed
-        input_args = (wsm.WS_MC_INPUT, wsm.attenuation_kwargs["unit"], wsm.attenuation_kwargs["point"])
+        # create a ws with params binned around the evaluation point, if the init args have changed.
+        # instr is in the key because this ws carries its detectors and update_ws does not rebuild it
+        # on an instrument switch, so the absorption would otherwise run on the old geometry
+        input_args = (wsm.WS_MC_INPUT, wsm.instr, wsm.attenuation_kwargs["unit"], wsm.attenuation_kwargs["point"])
         # if the workspace isn't in the ADS it needs to be rebuilt
         # if the workspace is in the ADS rebuild it if the args have changes
         rebuild = input_args != self.mc_ws_init_args if ADS.doesExist(wsm.WS_MC_INPUT) else True
