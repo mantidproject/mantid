@@ -14,6 +14,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Plane.h"
@@ -104,9 +105,10 @@ std::unique_ptr<Beamline::ComponentInfo> makeSingleBeamlineComponentInfo(
   auto componentType = std::make_shared<std::vector<ComponentType>>(1, ComponentType::Generic);
   auto children = std::make_shared<std::vector<std::vector<size_t>>>(1);
   auto sideBySideViewPositions = std::make_shared<std::map<size_t, Eigen::Vector2d>>();
-  return std::make_unique<Beamline::ComponentInfo>(detectorIndices, detectorRanges, componentIndices, componentRanges,
-                                                   parentIndices, children, positions, rotations, scaleFactors,
-                                                   componentType, names, sideBySideViewPositions, -1, -1);
+  auto pixelGridComponents = std::make_shared<std::map<size_t, Beamline::PixelGridComponent>>();
+  return std::make_unique<Beamline::ComponentInfo>(
+      detectorIndices, detectorRanges, componentIndices, componentRanges, parentIndices, children, positions, rotations,
+      scaleFactors, componentType, names, sideBySideViewPositions, pixelGridComponents, -1, -1);
 }
 } // namespace
 
@@ -143,9 +145,10 @@ public:
     auto isRectBank = std::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
     auto children = std::make_shared<std::vector<std::vector<size_t>>>(1, std::vector<size_t>(1));
     auto sideBySideViewPositions = std::make_shared<std::map<size_t, Eigen::Vector2d>>();
+    auto pixelGridComponents = std::make_shared<std::map<size_t, Beamline::PixelGridComponent>>();
     auto internalInfo = std::make_unique<Beamline::ComponentInfo>(
         detectorIndices, detectorRanges, componentIndices, componentRanges, parentIndices, children, positions,
-        rotations, scaleFactors, isRectBank, names, sideBySideViewPositions, -1, -1);
+        rotations, scaleFactors, isRectBank, names, sideBySideViewPositions, pixelGridComponents, -1, -1);
     Mantid::Geometry::ObjComponent comp1("component1");
     Mantid::Geometry::ObjComponent comp2("component2");
 
@@ -188,9 +191,10 @@ public:
     auto sideBySideViewPositions =
         std::make_shared<std::map<size_t, Eigen::Vector2d>>(std::map<size_t, Eigen::Vector2d>{{0, panelPos}});
 
+    auto pixelGridComponents = std::make_shared<std::map<size_t, Beamline::PixelGridComponent>>();
     auto internalInfo = std::make_unique<Beamline::ComponentInfo>(
         detectorIndices, detectorRanges, componentIndices, componentRanges, parentIndices, children, positions,
-        rotations, scaleFactors, isRectBank, names, sideBySideViewPositions, -1, -1);
+        rotations, scaleFactors, isRectBank, names, sideBySideViewPositions, pixelGridComponents, -1, -1);
 
     Mantid::Geometry::ObjComponent comp1("component1");
     Mantid::Geometry::ObjComponent comp2("component2");
@@ -671,6 +675,103 @@ public:
     TS_ASSERT_EQUALS(panel.bottomRight, 12);
     TS_ASSERT_EQUALS(panel.topLeft, 3);
     TS_ASSERT_EQUALS(panel.topRight, 15);
+  }
+
+  void test_pixel_grid_component_for_rectangular_bank() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+    size_t bankIndex = componentInfo->root() - 3;
+
+    auto bank = std::dynamic_pointer_cast<const RectangularDetector>(instrument->getComponentByName("bank1"));
+    TS_ASSERT(bank);
+
+    auto grid = componentInfo->pixelGridComponent(bankIndex);
+    TS_ASSERT_EQUALS(grid.nX, bank->xpixels());
+    TS_ASSERT_EQUALS(grid.nY, bank->ypixels());
+    TS_ASSERT_EQUALS(grid.nZ, bank->zpixels());
+    TS_ASSERT_DELTA(grid.xStart, bank->xstart(), 1e-12);
+    TS_ASSERT_DELTA(grid.yStart, bank->ystart(), 1e-12);
+    TS_ASSERT_DELTA(grid.zStart, bank->zstart(), 1e-12);
+    TS_ASSERT_DELTA(grid.xStep, bank->xstep(), 1e-12);
+    TS_ASSERT_DELTA(grid.yStep, bank->ystep(), 1e-12);
+    TS_ASSERT_DELTA(grid.zStep, bank->zstep(), 1e-12);
+    TS_ASSERT_EQUALS(grid.idStart, bank->idstart());
+    TS_ASSERT_EQUALS(grid.idStep, bank->idstep());
+    TS_ASSERT_EQUALS(grid.idStepByRow, bank->idstepbyrow());
+    const auto &expectedFillOrder = bank->idFillOrder();
+    TS_ASSERT_EQUALS(grid.idFillOrder[0], expectedFillOrder[0]);
+    TS_ASSERT_EQUALS(grid.idFillOrder[1], expectedFillOrder[1]);
+    TS_ASSERT_EQUALS(grid.idFillOrder[2], expectedFillOrder[2]);
+    TS_ASSERT_EQUALS(grid.minDetectorID, bank->minDetectorID());
+    TS_ASSERT_EQUALS(grid.maxDetectorID, bank->maxDetectorID());
+  }
+
+  void test_pixel_grid_component_throws_for_non_bank() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+
+    TS_ASSERT_THROWS(componentInfo->pixelGridComponent(componentInfo->root()), std::runtime_error &);
+    TS_ASSERT_THROWS(componentInfo->pixelGridComponent(0), std::runtime_error &);
+  }
+
+  void test_is_grid_detector() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+    size_t bankIndex = componentInfo->root() - 3;
+
+    TSM_ASSERT("Bank is Rectangular", componentInfo->isGridDetector(bankIndex));
+    TSM_ASSERT("Root is not Rectangular/Grid", !componentInfo->isGridDetector(componentInfo->root()));
+    TSM_ASSERT("A detector is not Rectangular/Grid", !componentInfo->isGridDetector(0));
+  }
+
+  void test_detector_index_at_xyz_matches_legacy_getAtXY() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+    const auto &detectorInfo = std::get<1>(wrappers);
+    size_t bankIndex = componentInfo->root() - 3;
+
+    auto bank = std::dynamic_pointer_cast<const RectangularDetector>(instrument->getComponentByName("bank1"));
+    TS_ASSERT(bank);
+
+    for (int x = 0; x < 4; ++x) {
+      for (int y = 0; y < 4; ++y) {
+        auto detIndex = componentInfo->detectorIndexAtXYZ(bankIndex, x, y, 0);
+        TS_ASSERT_EQUALS(detectorInfo->detid(detIndex), bank->getDetectorIDAtXY(x, y));
+      }
+    }
+  }
+
+  void test_detector_index_at_xyz_throws_out_of_range() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+    size_t bankIndex = componentInfo->root() - 3;
+
+    TS_ASSERT_THROWS(componentInfo->detectorIndexAtXYZ(bankIndex, 4, 0, 0), const std::out_of_range &);
+    TS_ASSERT_THROWS(componentInfo->detectorIndexAtXYZ(bankIndex, 0, 4, 0), const std::out_of_range &);
+    TS_ASSERT_THROWS(componentInfo->detectorIndexAtXYZ(bankIndex, -1, 0, 0), const std::out_of_range &);
+  }
+
+  void test_xyz_for_detector_id_matches_legacy_getXYZForDetectorID() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+    size_t bankIndex = componentInfo->root() - 3;
+
+    auto bank = std::dynamic_pointer_cast<const RectangularDetector>(instrument->getComponentByName("bank1"));
+    TS_ASSERT(bank);
+
+    for (detid_t id = bank->minDetectorID(); id <= bank->maxDetectorID(); ++id) {
+      auto [expectedX, expectedY, expectedZ] = bank->getXYZForDetectorID(id);
+      auto [x, y, z] = componentInfo->xyzForDetectorID(bankIndex, id);
+      TS_ASSERT_EQUALS(x, expectedX);
+      TS_ASSERT_EQUALS(y, expectedY);
+      TS_ASSERT_EQUALS(z, expectedZ);
+    }
   }
 
   void test_has_detectors() {

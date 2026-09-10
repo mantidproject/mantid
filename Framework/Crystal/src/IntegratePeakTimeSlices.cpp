@@ -823,6 +823,9 @@ void IntegratePeakTimeSlices::FindPlane(V3D &center, V3D &xvec, V3D &yvec, doubl
 
   std::shared_ptr<const RectangularDetector> ddet = std::dynamic_pointer_cast<const RectangularDetector>(panel);
 
+  // NOTE: uses legacy accessors rather than ComponentInfo because peak.getInstrument()
+  // is not guaranteed to be parametrized (no ParameterMap available in that case), which
+  // GridDetector/RectangularDetector's own accessors handle natively but ComponentInfo cannot.
   if (ddet) {
     std::pair<int, int> CR = ddet->getXYForDetectorID(det->getID());
     ROW = CR.second;

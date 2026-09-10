@@ -277,6 +277,79 @@ Kernel::V2D ComponentInfo::sideBySideViewPosition(const size_t componentIndex) c
   return Kernel::toV2D(m_componentInfo->sideBySideViewPosition(componentIndex));
 }
 
+bool ComponentInfo::isGridDetector(size_t const componentIndex) const {
+  return m_componentInfo->isGridDetector(componentIndex);
+}
+
+Beamline::PixelGridComponent ComponentInfo::pixelGridComponent(const size_t componentIndex) const {
+  if (!isGridDetector(componentIndex)) {
+    throw std::runtime_error("ComponentType is not Rectangular or Grid in ComponentInfo::pixelGridComponent.");
+  }
+  return m_componentInfo->pixelGridComponent(componentIndex);
+}
+
+size_t ComponentInfo::detectorIndexAtXYZ(const size_t componentIndex, const int x, const int y, const int z) const {
+  return m_componentInfo->detectorIndexAtXYZ(componentIndex, x, y, z);
+}
+
+namespace {
+std::tuple<int, int, int> xyzFillFirstZ(const Beamline::PixelGridComponent &grid, int col, int id) {
+  if (grid.idFillOrder[1] == 'y') {
+    int row = (id / grid.idStepByRow) % grid.nY;
+    int layer = (id / grid.idStepByRow) / grid.nY;
+    return {layer, row, col};
+  }
+  int row = (id / grid.idStepByRow) % grid.nX;
+  int layer = (id / grid.idStepByRow) / grid.nX;
+  return {row, layer, col};
+}
+
+std::tuple<int, int, int> xyzFillFirstY(const Beamline::PixelGridComponent &grid, int col, int id) {
+  if (grid.idFillOrder[1] == 'z') {
+    int row = (id / grid.idStepByRow) % grid.nZ;
+    int layer = (id / grid.idStepByRow) / grid.nZ;
+    return {layer, col, row};
+  }
+  int row = (id / grid.idStepByRow) % grid.nX;
+  int layer = (id / grid.idStepByRow) / grid.nX;
+  return {row, col, layer};
+}
+
+std::tuple<int, int, int> xyzFillFirstX(const Beamline::PixelGridComponent &grid, int col, int id) {
+  if (grid.idFillOrder[1] == 'y') {
+    int row = (id / grid.idStepByRow) % grid.nY;
+    int layer = (id / grid.idStepByRow) / grid.nY;
+    return {col, row, layer};
+  }
+  int row = (id / grid.idStepByRow) % grid.nZ;
+  int layer = (id / grid.idStepByRow) / grid.nZ;
+  return {col, layer, row};
+}
+} // namespace
+
+/**
+ * Given the component index of a Rectangular/Grid bank, and a detector ID
+ * within it, return the (x, y, z) pixel indices of that detector.
+ *
+ * Ports Geometry::GridDetector::getXYZForDetectorID's arithmetic exactly
+ * (detector-ID numbering is never parametrized, so this is safe to compute
+ * from the cached PixelGridComponent alone).
+ */
+std::tuple<int, int, int> ComponentInfo::xyzForDetectorID(const size_t componentIndex, const detid_t detectorID) const {
+  const auto grid = pixelGridComponent(componentIndex);
+
+  const int id = detectorID - grid.idStart;
+  if (grid.idStepByRow == 0 || grid.idStep == 0)
+    return {-1, -1, -1};
+  const int col = (id % grid.idStepByRow) / grid.idStep;
+
+  if (grid.idFillOrder[0] == 'z')
+    return xyzFillFirstZ(grid, col, id);
+  if (grid.idFillOrder[0] == 'y')
+    return xyzFillFirstY(grid, col, id);
+  return xyzFillFirstX(grid, col, id);
+}
+
 double ComponentInfo::solidAngle(const size_t componentIndex, const Geometry::SolidAngleParams &params) const {
   if (!hasValidShape(componentIndex))
     throw Kernel::Exception::NullPointerException("ComponentInfo::solidAngle", "shape");

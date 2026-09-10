@@ -46,7 +46,6 @@ private:
   int findPixelID(const std::string &bankName, int col, int row);
   void removeEdgePeaks(Mantid::DataObjects::PeaksWorkspace &peakWS);
   void sizeBanks(const std::string &bankName, int &nCols, int &nRows);
-  Geometry::Instrument_const_sptr m_inst;
 
   /// Input 2D Workspace
   API::MatrixWorkspace_sptr m_inWS;

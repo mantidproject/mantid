@@ -13,10 +13,9 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -172,51 +171,17 @@ void SmoothNeighbours::findNeighboursRectangular() {
 
   m_progress->resetNumSteps(m_inWS->getNumberHistograms(), 0.2, 0.5);
 
-  Instrument_const_sptr inst = m_inWS->getInstrument();
+  const auto &componentInfo = m_inWS->componentInfo();
+  const auto &detectorInfo = m_inWS->detectorInfo();
 
   // To get the workspace index from the detector ID
   const detid2index_map pixel_to_wi = m_inWS->getDetectorIDToWorkspaceIndexMap(true, true);
 
-  Progress prog(this, 0.0, 1.0, inst->nelements());
-
-  // Build a list of Rectangular Detectors
-  std::vector<std::shared_ptr<RectangularDetector>> detList;
-  for (int i = 0; i < inst->nelements(); i++) {
-    std::shared_ptr<RectangularDetector> det;
-    std::shared_ptr<ICompAssembly> assem;
-    std::shared_ptr<ICompAssembly> assem2;
-
-    det = std::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
-    if (det) {
-      detList.emplace_back(det);
-    } else {
-      // Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
-      // We are not doing a full recursive search since that will be very long
-      // for lots of pixels.
-      assem = std::dynamic_pointer_cast<ICompAssembly>((*inst)[i]);
-      if (assem) {
-        for (int j = 0; j < assem->nelements(); j++) {
-          det = std::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
-          if (det) {
-            detList.emplace_back(det);
-
-          } else {
-            // Also, look in the second sub-level for RectangularDetectors (e.g.
-            // PG3).
-            // We are not doing a full recursive search since that will be very
-            // long for lots of pixels.
-            assem2 = std::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
-            if (assem2) {
-              for (int k = 0; k < assem2->nelements(); k++) {
-                det = std::dynamic_pointer_cast<RectangularDetector>((*assem2)[k]);
-                if (det) {
-                  detList.emplace_back(det);
-                }
-              }
-            }
-          }
-        }
-      }
+  // Build a list of Rectangular/Grid Detectors (as component indices)
+  std::vector<size_t> detList;
+  for (size_t i = 0; i < componentInfo.size(); ++i) {
+    if (componentInfo.isGridDetector(i)) {
+      detList.emplace_back(i);
     }
   }
 
@@ -228,6 +193,8 @@ void SmoothNeighbours::findNeighboursRectangular() {
     findNeighboursUbiquitous();
     return;
   }
+
+  Progress prog(this, 0.0, 1.0, detList.size());
 
   // Resize the vector we are setting
   m_neighbours.resize(m_inWS->getNumberHistograms());
@@ -250,7 +217,7 @@ void SmoothNeighbours::findNeighboursRectangular() {
   std::vector<std::pair<int, int>> idToIndexMap;
   idToIndexMap.reserve(detList.size());
   for (int i = 0; i < static_cast<int>(detList.size()); i++)
-    idToIndexMap.emplace_back(detList[i]->getDetectorIDAtXY(0, 0), i);
+    idToIndexMap.emplace_back(detectorInfo.detid(componentInfo.detectorIndexAtXYZ(detList[i], 0, 0, 0)), i);
 
   // To sort in descending order
   if (sum)
@@ -258,10 +225,11 @@ void SmoothNeighbours::findNeighboursRectangular() {
 
   // Loop through the RectangularDetector's we listed before.
   for (const auto &idIndex : idToIndexMap) {
-    std::shared_ptr<RectangularDetector> det = detList[idIndex.second];
-    const std::string det_name = det->getName();
-    for (int j = 0; j < det->xpixels(); j += sumX) {
-      for (int k = 0; k < det->ypixels(); k += sumY) {
+    const size_t bankIndex = detList[idIndex.second];
+    const auto grid = componentInfo.pixelGridComponent(bankIndex);
+    const std::string det_name = componentInfo.name(bankIndex);
+    for (int j = 0; j < grid.nX; j += sumX) {
+      for (int k = 0; k < grid.nY; k += sumY) {
         double totalWeight = 0;
         // Neighbours and weights
         std::vector<weightedNeighbour> neighbours;
@@ -273,11 +241,11 @@ void SmoothNeighbours::findNeighboursRectangular() {
 
             // Find the pixel ID at that XY position on the rectangular
             // detector
-            if (j + ix >= det->xpixels() - m_edge || j + ix < m_edge)
+            if (j + ix >= grid.nX - m_edge || j + ix < m_edge)
               continue;
-            if (k + iy >= det->ypixels() - m_edge || k + iy < m_edge)
+            if (k + iy >= grid.nY - m_edge || k + iy < m_edge)
               continue;
-            int pixelID = det->getDetectorIDAtXY(j + ix, k + iy);
+            int pixelID = detectorInfo.detid(componentInfo.detectorIndexAtXYZ(bankIndex, j + ix, k + iy, 0));
 
             // Find the corresponding workspace index, if any
             auto mapEntry = pixel_to_wi.find(pixelID);

@@ -10,7 +10,6 @@
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -459,17 +458,18 @@ void SaveLauenorm::exec() {
 void SaveLauenorm::sizeBanks(const std::string &bankName, int &nCols, int &nRows) {
   if (bankName == "None")
     return;
-  std::shared_ptr<const IComponent> parent = ws->getInstrument()->getComponentByName(bankName);
-  if (!parent)
+  const auto &componentInfo = ws->componentInfo();
+  size_t parentIndex;
+  try {
+    parentIndex = componentInfo.indexOfAny(bankName);
+  } catch (std::invalid_argument &) {
     return;
-  if (parent->type() == "RectangularDetector") {
-    std::shared_ptr<const RectangularDetector> RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
-
-    nCols = RDet->xpixels();
-    nRows = RDet->ypixels();
+  }
+  if (componentInfo.isGridDetector(parentIndex)) {
+    const auto grid = componentInfo.pixelGridComponent(parentIndex);
+    nCols = grid.nX;
+    nRows = grid.nY;
   } else {
-    const auto &componentInfo = ws->componentInfo();
-    const size_t parentIndex = componentInfo.indexOfAny(bankName);
     auto children = componentInfo.children(parentIndex);
     auto grandchildren = componentInfo.children(children[0]);
     nRows = static_cast<int>(grandchildren.size());

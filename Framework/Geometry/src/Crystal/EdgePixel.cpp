@@ -9,7 +9,6 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 
 namespace Mantid::Geometry {
 
@@ -26,10 +25,10 @@ bool edgePixel(ComponentInfo const &compInfo, const std::string &bankName, int c
     return false;
   }
   size_t parentIndex = compInfo.indexOfAny(bankName);
-  if (compInfo.componentType(parentIndex) == Beamline::ComponentType::Rectangular) {
-    auto RDet = dynamic_cast<Geometry::RectangularDetector const *const>(compInfo.componentID(parentIndex));
+  if (compInfo.isGridDetector(parentIndex)) {
+    auto const grid = compInfo.pixelGridComponent(parentIndex);
 
-    return col < Edge || col >= (RDet->xpixels() - Edge) || row < Edge || row >= (RDet->ypixels() - Edge);
+    return col < Edge || col >= (grid.nX - Edge) || row < Edge || row >= (grid.nY - Edge);
   } else {
 
     // get the children and grandchildren from the component info

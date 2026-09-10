@@ -13,8 +13,8 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include <vector>
@@ -308,49 +308,49 @@ void CalculateEfficiency::maskComponent(MatrixWorkspace &ws, const std::string &
 void CalculateEfficiency::maskEdges(const MatrixWorkspace_sptr &ws, int left, int right, int high, int low,
                                     const std::string &componentName) {
 
-  auto instrument = ws->getInstrument();
+  const auto &componentInfo = ws->componentInfo();
 
-  std::shared_ptr<Mantid::Geometry::RectangularDetector> component;
+  size_t componentIndex;
   try {
-    component = std::const_pointer_cast<Mantid::Geometry::RectangularDetector>(
-        std::dynamic_pointer_cast<const Mantid::Geometry::RectangularDetector>(
-            instrument->getComponentByName(componentName)));
+    componentIndex = componentInfo.indexOfAny(componentName);
   } catch (std::exception &) {
     g_log.warning("Expecting the component " + componentName + " to be a RectangularDetector. maskEdges not executed.");
     return;
   }
-  if (!component) {
+  if (!componentInfo.isGridDetector(componentIndex)) {
     g_log.warning("Component " + componentName + " is not a RectangularDetector. MaskEdges not executed.");
     return;
   }
 
+  const auto grid = componentInfo.pixelGridComponent(componentIndex);
+
   std::vector<int> IDs;
   int i = 0;
 
-  while (i < left * component->idstep()) {
-    IDs.emplace_back(component->idstart() + i);
+  while (i < left * grid.idStep) {
+    IDs.emplace_back(grid.idStart + i);
     i += 1;
   }
   // right
-  i = component->maxDetectorID() - right * component->idstep();
-  while (i < component->maxDetectorID()) {
+  i = grid.maxDetectorID - right * grid.idStep;
+  while (i < grid.maxDetectorID) {
     IDs.emplace_back(i);
     i += 1;
   }
   // low: 0,256,512,768,..,1,257,513
   for (int row = 0; row < low; row++) {
-    i = row + component->idstart();
-    while (i < component->nelements() * component->idstep() - component->idstep() + low + component->idstart()) {
+    i = row + grid.idStart;
+    while (i < grid.nX * grid.idStep - grid.idStep + low + grid.idStart) {
       IDs.emplace_back(i);
-      i += component->idstep();
+      i += grid.idStep;
     }
   }
   // high # 255, 511, 767..
   for (int row = 0; row < high; row++) {
-    i = component->idstep() + component->idstart() - row - 1;
-    while (i < component->nelements() * component->idstep() + component->idstart()) {
+    i = grid.idStep + grid.idStart - row - 1;
+    while (i < grid.nX * grid.idStep + grid.idStart) {
       IDs.emplace_back(i);
-      i += component->idstep();
+      i += grid.idStep;
     }
   }
 

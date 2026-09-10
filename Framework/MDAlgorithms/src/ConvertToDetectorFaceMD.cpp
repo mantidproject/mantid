@@ -10,7 +10,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -115,30 +115,28 @@ void ConvertToDetectorFaceMD::convertEventList(std::shared_ptr<Mantid::DataObjec
  * @return map with key = bank number; value = pointer to the rectangular
  *detector
  */
-std::map<int, RectangularDetector_const_sptr> ConvertToDetectorFaceMD::getBanks() {
-  Instrument_const_sptr inst = in_ws->getInstrument();
+std::map<int, size_t> ConvertToDetectorFaceMD::getBanks() {
+  auto const &componentInfo = in_ws->componentInfo();
 
   std::vector<int> bankNums = this->getProperty("BankNumbers");
   std::sort(bankNums.begin(), bankNums.end());
 
-  std::map<int, RectangularDetector_const_sptr> banks;
+  std::map<int, size_t> banks;
 
   if (bankNums.empty()) {
     // --- Find all rectangular detectors ----
-    auto const &componentInfo = in_ws->componentInfo();
     size_t const root = componentInfo.root();
     auto const topChildren = componentInfo.children(root);
     for (size_t const panel : topChildren) {
       size_t parentIndex = componentInfo.findBankParent(panel, "bank");
       auto const children = componentInfo.children(parentIndex);
       for (size_t const child : children) {
-        if (componentInfo.componentType(child) == Beamline::ComponentType::Rectangular) {
+        if (componentInfo.isGridDetector(child)) {
           std::string name = componentInfo.name(child);
           std::string bankNumStr = name.substr(4, name.size() - 4);
           int bankNum = -1;
           if (Mantid::Kernel::Strings::convert(bankNumStr, bankNum)) {
-            banks[bankNum] = RectangularDetector_const_sptr(
-                dynamic_cast<const RectangularDetector *>(componentInfo.componentID(child)), NoDeleting());
+            banks[bankNum] = child;
           }
         }
       }
@@ -147,20 +145,24 @@ std::map<int, RectangularDetector_const_sptr> ConvertToDetectorFaceMD::getBanks(
     // -- Find detectors using the numbers given ---
     for (auto &bankNum : bankNums) {
       std::string bankName = "bank" + Mantid::Kernel::Strings::toString(bankNum);
-      IComponent_const_sptr comp = inst->getComponentByName(bankName);
-      RectangularDetector_const_sptr det = std::dynamic_pointer_cast<const RectangularDetector>(comp);
-      if (det)
-        banks[bankNum] = det;
+      try {
+        const size_t bankIndex = componentInfo.indexOfAny(bankName);
+        if (componentInfo.isGridDetector(bankIndex)) {
+          banks[bankNum] = bankIndex;
+        }
+      } catch (std::invalid_argument &) {
+        // No such component; skip this bank number.
+      }
     }
   }
 
   for (auto &bank : banks) {
-    RectangularDetector_const_sptr det = bank.second;
+    const auto grid = componentInfo.pixelGridComponent(bank.second);
     // Track the largest detector
-    if (det->xpixels() > m_numXPixels)
-      m_numXPixels = det->xpixels();
-    if (det->ypixels() > m_numYPixels)
-      m_numYPixels = det->ypixels();
+    if (grid.nX > m_numXPixels)
+      m_numXPixels = grid.nX;
+    if (grid.nY > m_numYPixels)
+      m_numYPixels = grid.nY;
   }
 
   if (banks.empty())
@@ -185,7 +187,7 @@ void ConvertToDetectorFaceMD::exec() {
   m_detID_to_WI = in_ws->getDetectorIDToWorkspaceIndexVector(m_detID_to_WI_offset, true);
 
   // Get the map of the banks we'll display
-  std::map<int, RectangularDetector_const_sptr> banks = this->getBanks();
+  std::map<int, size_t> banks = this->getBanks();
 
   // Find the size in the TOF dimension
   double tof_min, tof_max;
@@ -238,17 +240,20 @@ void ConvertToDetectorFaceMD::exec() {
   ExperimentInfo_sptr ei(in_ws->cloneExperimentInfo());
   uint16_t expInfoIndex = outWS->addExperimentInfo(ei);
   uint16_t goniometerIndex(0);
+  const auto &componentInfo = in_ws->componentInfo();
+  const auto &detectorInfo = in_ws->detectorInfo();
   // ---------------- Convert each bank --------------------------------------
   for (auto &bank : banks) {
     int bankNum = bank.first;
-    RectangularDetector_const_sptr det = bank.second;
-    for (int x = 0; x < det->xpixels(); x++)
-      for (int y = 0; y < det->ypixels(); y++) {
+    const size_t bankIndex = bank.second;
+    const auto grid = componentInfo.pixelGridComponent(bankIndex);
+    for (int x = 0; x < grid.nX; x++)
+      for (int y = 0; y < grid.nY; y++) {
         // Find the workspace index for this pixel coordinate
-        detid_t detID = det->getDetectorIDAtXY(x, y);
+        detid_t detID = detectorInfo.detid(componentInfo.detectorIndexAtXYZ(bankIndex, x, y, 0));
         size_t wi = m_detID_to_WI[detID + m_detID_to_WI_offset];
         if (wi >= in_ws->getNumberHistograms())
-          throw std::runtime_error("Invalid workspace index found in bank " + det->getName() + "!");
+          throw std::runtime_error("Invalid workspace index found in bank " + componentInfo.name(bankIndex) + "!");
 
         auto xPos = static_cast<coord_t>(x);
         auto yPos = static_cast<coord_t>(y);
