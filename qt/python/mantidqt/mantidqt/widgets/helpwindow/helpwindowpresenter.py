@@ -64,7 +64,7 @@ class HelpWindowPresenter:
             log.error(f"Documentation file not found: {e}")
             # Fallback to online docs if local file not found
             try:
-                fallback_url = QUrl(f"{self.model._raw_online_base}/{relativeUrl}")
+                fallback_url = QUrl(f"{self.model.ONLINE_BASE_URL}/{relativeUrl}")
                 log.debug(f"Attempting fallback to online docs: {fallback_url.toString()}")
                 if not QDesktopServices.openUrl(fallback_url):
                     log.error(f"Failed to open fallback URL: {fallback_url.toString()}")
