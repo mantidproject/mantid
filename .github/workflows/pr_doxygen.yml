@@ -1,7 +1,6 @@
 name: PR doxygen
 
 on:
-  workflow_dispatch:
   workflow_run:
     workflows: [PR cpp check]
     types: [completed]
