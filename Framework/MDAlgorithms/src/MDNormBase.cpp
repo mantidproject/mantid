@@ -292,7 +292,7 @@ void MDNormBase::calculateNormalization(const std::vector<coord_t> &otherValues,
                                         uint16_t expInfoIndex) {
   const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
   std::vector<double> lowValues = getLogValues<VectorDoubleProperty>(currentExptInfo, "MDNorm_low");
-  std::vector<double> highValues = getLogValues<VectorDoubleProperty>(currentExptInfo, "MDNormHigh");
+  std::vector<double> highValues = getLogValues<VectorDoubleProperty>(currentExptInfo, "MDNorm_high");
   // calculate Q transformation matrix (R * UB * SymmetryOperation * m_W)^-1
   // in order to calculate intersections
   Kernel::DblMatrix Qtransform = calQTransform(currentExptInfo.run().getGoniometerMatrix(), so);
