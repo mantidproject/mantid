@@ -38,10 +38,9 @@ class HelpWindowPresenter:
     Uses QDesktopServices to open both local and online documentation URLs.
     """
 
-    def __init__(self, parentApp=None, onlineBaseUrl="https://docs.mantidproject.org/"):
-        log.debug(f"Initializing with onlineBaseUrl='{onlineBaseUrl}'")
+    def __init__(self, parentApp=None):
         try:
-            self.model = HelpWindowModel(online_base=onlineBaseUrl)
+            self.model = HelpWindowModel()
         except Exception as e:
             log.error(f"Failed to initialize HelpWindowModel: {e}")
             self.model = None
@@ -65,7 +64,7 @@ class HelpWindowPresenter:
             log.error(f"Documentation file not found: {e}")
             # Fallback to online docs if local file not found
             try:
-                fallback_url = QUrl(f"{self.model._raw_online_base}/{relativeUrl}")
+                fallback_url = QUrl(f"{self.model.ONLINE_BASE_URL}/{relativeUrl}")
                 log.debug(f"Attempting fallback to online docs: {fallback_url.toString()}")
                 if not QDesktopServices.openUrl(fallback_url):
                     log.error(f"Failed to open fallback URL: {fallback_url.toString()}")
@@ -73,29 +72,3 @@ class HelpWindowPresenter:
                 log.error(f"Fallback to online docs failed: {fallback_error}")
         except Exception as e:
             log.error(f"Error opening help page '{relativeUrl}': {e}")
-
-    def show_home_page(self):
-        """
-        Opens the documentation home page in the system browser.
-        """
-        if not self.model:
-            log.error("Cannot show home page, model is not available.")
-            return
-
-        log.debug("Opening home page in system browser.")
-        try:
-            homeUrl = self.model.get_home_url()
-            if not QDesktopServices.openUrl(homeUrl):
-                log.error(f"Failed to open home URL in system browser: {homeUrl.toString()}")
-        except FileNotFoundError as e:
-            log.error(f"Home page file not found: {e}")
-            # Fallback to online docs
-            try:
-                fallback_url = QUrl(f"{self.model._raw_online_base}/index.html")
-                log.debug(f"Attempting fallback to online home page: {fallback_url.toString()}")
-                if not QDesktopServices.openUrl(fallback_url):
-                    log.error(f"Failed to open fallback home URL: {fallback_url.toString()}")
-            except Exception as fallback_error:
-                log.error(f"Fallback to online home page failed: {fallback_error}")
-        except Exception as e:
-            log.error(f"Error opening home page: {e}")

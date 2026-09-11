@@ -145,7 +145,7 @@ std::string MantidVersion::versionForReleaseNotes(const VersionInfo &version) {
 
   const unsigned long minorVersion = std::stoul(version.minor);
   std::stringstream nextMinorVersionLabel;
-  nextMinorVersionLabel << version.major << "." << minorVersion + 1 << "." << "0";
+  nextMinorVersionLabel << version.major << "." << minorVersion + 1 << ".0";
 
   return nextMinorVersionLabel.str();
 }
