@@ -34,13 +34,12 @@ class ReflectometryInstrumentSignedThetaTest(systemtesting.MantidSystemTest):
         theta_spectrum_axis = ConvertSpectrumAxis(
             InputWorkspace=instrument_workspace, OutputWorkspace="SignedTheta_vs_Wavelength", Target="signed_theta"
         )
-        # Retrieve point detector from IDF (after translation)
-        detector = theta_spectrum_axis.getInstrument().getComponentByName(detector_name)
+        # Retrieve point detector from IDF (after translation). The component is itself a
+        # detector, so its ComponentInfo index is also its DetectorInfo index.
+        detector_index = theta_spectrum_axis.componentInfo().indexOfAny(detector_name)
+        detector_info = theta_spectrum_axis.detectorInfo()
         # Compare det-position * detector two theta with signed 2 theta (they should always be equal)
-        self.assertTrue(
-            detector_vertical_position * theta_spectrum_axis.detectorTwoTheta(detector)
-            == theta_spectrum_axis.detectorSignedTwoTheta(detector)
-        )
+        self.assertTrue(detector_vertical_position * detector_info.twoTheta(detector_index) == detector_info.signedTwoTheta(detector_index))
 
         return True
 

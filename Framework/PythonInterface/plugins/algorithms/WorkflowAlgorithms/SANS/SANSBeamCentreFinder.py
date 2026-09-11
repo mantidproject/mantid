@@ -140,8 +140,9 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
 
         self.state = self._get_state()
 
-        instrument = self.sample_scatter.getInstrument()
-        self.scale_1 = 1.0 if instrument.getName() == "LARMOR" else 1000
+        component_info = self.sample_scatter.componentInfo()
+        instrument_name = component_info.name(component_info.root())
+        self.scale_1 = 1.0 if instrument_name == "LARMOR" else 1000
         self.scale_2 = 1000
 
         centre_1_hold, centre_2_hold = self._find_centres()

@@ -809,8 +809,8 @@ def _correct_full_calib_for_offset_scattering_com(ws: MatrixWorkspace, full_cali
     difc0 = mantid.CalculateDIFC(InputWorkspace=ws, OutputWorkspace="__difc0", StoreInADS=False)
 
     # extract sample information
-    sample = ws.getInstrument().getSample()
-    name = sample.getFullName()
+    component_info = ws.componentInfo()
+    name = component_info.name(component_info.sample())
 
     # move the nominal sample location to the scattering COM and calculate the DIFCs from here
     # (do this on a small copy of the ws to make sure data workspace state is never corrupted)
@@ -1043,7 +1043,7 @@ def get_detector_ids_for_bank(bank):
 
     for i in range(grouping.getNumberHistograms()):
         if grouping.y(i)[0] in bank_int:
-            detector_ids.add(grouping.getDetector(i).getID())
+            detector_ids.update(grouping.getSpectrum(i).getDetectorIDs())
 
     mantid.DeleteWorkspace(grouping)
 
