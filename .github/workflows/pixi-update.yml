@@ -1,0 +1,131 @@
+name: Update pixi
+
+permissions:
+  contents: write
+  pull-requests: write
+
+on:
+  pull_request:
+    paths:
+      - .github/actions/setup-pixi/**
+      - .github/workflows/pixi-update.yml
+      - .pixi-version
+  workflow_dispatch:
+  schedule:
+    - cron: 0 6 * * *
+
+env:
+  UPDATE_BRANCH: ${{ vars.BRANCH_TO_PUBLISH }}
+
+jobs:
+  pixi-update-version:
+    if: ${{ github.repository_owner == 'mantidproject' }}
+    runs-on: ubuntu-latest
+    steps:
+      - if: github.event_name == 'pull_request'
+        uses: actions/checkout@v7
+      - if: github.event_name != 'pull_request'
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ env.UPDATE_BRANCH }}  # start from this branch
+      - name: Update pixi version
+        id: update-pixi-version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          current_version=$(tr -d '[:space:]' < .pixi-version)
+          latest_version=$(gh api repos/prefix-dev/pixi/releases/latest --jq '.tag_name | sub("^v"; "")')
+
+          if dpkg --compare-versions "$latest_version" gt "$current_version"; then
+            echo "$latest_version" > .pixi-version
+            echo "updated=true" >> "$GITHUB_OUTPUT"
+            echo "version=$latest_version" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Log test-mode pull request
+        if: github.event_name == 'pull_request'
+        run: |
+          if [[ "${{ steps.update-pixi-version.outputs.updated }}" == 'true' ]]; then
+            printf '%s\n' 'Test mode: a pull request would be created.'
+            printf 'Title: Update pixi to %s\n' "${{ steps.update-pixi-version.outputs.version }}"
+            printf 'Branch: %s\n' 'update-pixi-version'
+            printf 'Base: %s\n' "${{ env.UPDATE_BRANCH }}"
+            printf '%s\n' 'Body: Update pixi to version ${{ steps.update-pixi-version.outputs.version }}.'
+            printf '%s\n' 'Changed paths: .pixi-version'
+          else
+            printf '%s\n' 'Test mode: no pull request would be created because .pixi-version is already up to date.'
+          fi
+      - name: Create pull request
+        if: github.event_name != 'pull_request' && steps.update-pixi-version.outputs.updated == 'true'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.MANTID_BUILDER_TOKEN }}
+          author: mantid-builder <mantid-builder@users.noreply.github.com>
+          committer: mantid-builder <mantid-builder@users.noreply.github.com>
+          commit-message: Update pixi to ${{ steps.update-pixi-version.outputs.version }}
+          title: Update pixi to ${{ steps.update-pixi-version.outputs.version }}
+          body: Update pixi to version ${{ steps.update-pixi-version.outputs.version }}.
+          branch: update-pixi-version
+          base: ${{ env.UPDATE_BRANCH }}  # merge into this branch
+          labels: |
+            pixi
+            Maintenance
+            DevOps
+          delete-branch: true
+          add-paths: .pixi-version
+
+  pixi-update-lockfile:
+    if: ${{ github.repository_owner == 'mantidproject' }}
+    runs-on: ubuntu-latest
+    steps:
+      - if: github.event_name == 'pull_request'
+        uses: actions/checkout@v7
+      - if: github.event_name != 'pull_request'
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ env.UPDATE_BRANCH }}  # start from this branch
+      - uses: ./.github/actions/setup-pixi
+      - name: Update lockfiles
+        run: |
+          set -o pipefail
+          pixi update --json | pixi exec pixi-diff-to-markdown >> diff.md
+      - name: Check lockfile changes
+        id: check-lockfile
+        run: |
+          if git diff --quiet --exit-code -- pixi.lock; then
+            echo 'updated=false' >> "$GITHUB_OUTPUT"
+          else
+            echo 'updated=true' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Log test-mode pull request
+        if: github.event_name == 'pull_request'
+        run: |
+          if [[ "${{ steps.check-lockfile.outputs.updated }}" == 'true' ]]; then
+            printf '%s\n' 'Test mode: a pull request would be created.'
+            printf '%s\n' 'Title: Update pixi lockfile'
+            printf 'Branch: %s\n' 'update-pixi'
+            printf 'Base: %s\n' "${{ env.UPDATE_BRANCH }}"
+            printf '%s\n' 'Body: generated from diff.md'
+            printf '%s\n' 'Changed paths: pixi.lock'
+            printf '%s\n' 'Body preview:'
+            cat diff.md
+          else
+            printf '%s\n' 'Test mode: no pull request would be created because pixi.lock did not change.'
+          fi
+      - name: Create pull request
+        if: github.event_name != 'pull_request'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.MANTID_BUILDER_TOKEN }}
+          author: mantid-builder <mantid-builder@users.noreply.github.com>
+          committer: mantid-builder <mantid-builder@users.noreply.github.com>
+          commit-message: Update pixi lockfile
+          title: Update pixi lockfile
+          body-path: diff.md
+          branch: update-pixi
+          base:  ${{ env.UPDATE_BRANCH }}  # merge into this branch
+          labels: |
+            pixi
+            Maintenance
+            DevOps
+          delete-branch: true
+          add-paths: pixi.lock
