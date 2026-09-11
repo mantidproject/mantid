@@ -57,6 +57,8 @@ code_changes: &files_code_changes
  - 'instrument/**'
  - 'qt/**'
  - 'scripts/**'
+ - Testing/SystemTests/scripts/systemtest.bat.in
+ - Testing/SystemTests/scripts/systemtest.in
  - 'tools/**'
 user_docs:
  - *files_code_changes
