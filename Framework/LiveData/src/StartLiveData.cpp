@@ -11,6 +11,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Exception.h"
 #include "MantidLiveData/LoadLiveData.h"
 #include "MantidLiveData/MonitorLiveData.h"
 #include "MantidTypes/Core/DateAndTime.h"
@@ -80,16 +81,26 @@ void StartLiveData::init() {
  * @param propName Name of property that was just set
  */
 void StartLiveData::afterPropertySet(const std::string &propName) {
-  // If any of these properties change, the listener class might change
-  if (propName == "Instrument" || propName == "Listener" || propName == "Connection") {
+  // If any of these properties change, the listener class might change.
+  //   'Facility' belongs here too: it selects which facility 'Instrument' is resolved against, and so
+  //   which listener applies.
+  if (propName == "Instrument" || propName == "Facility" || propName == "Listener" || propName == "Connection") {
     // Properties of old listener, if any, need to be removed
     removeListenerProperties();
 
-    // Get temp instance of listener for this instrument with current properties
-    auto listener = createLiveListener();
+    // Get temp instance of listener for this instrument with current properties.
+    //   The instrument may not be resolvable yet -- properties are set one at a time, so 'Facility'
+    //   may arrive before 'Instrument', or the pair may not (yet) be consistent.  There is nothing to
+    //   surface in that case, and the pair is properly reported against its property in
+    //   `validateInputs`; so do not let a partially configured algorithm throw from a property setter.
+    try {
+      auto listener = createLiveListener();
 
-    // Copy over properties of listener to this algorithm
-    copyListenerProperties(listener);
+      // Copy over properties of listener to this algorithm
+      copyListenerProperties(listener);
+    } catch (const Exception::NotFoundError &e) {
+      g_log.debug() << "Cannot list listener properties yet: " << e.what() << "\n";
+    }
   }
 }
 

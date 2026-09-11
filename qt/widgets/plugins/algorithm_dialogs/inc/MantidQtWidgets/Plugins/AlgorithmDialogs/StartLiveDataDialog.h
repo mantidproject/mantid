@@ -49,6 +49,9 @@ private:
   /// Parse the input from the dialog when it has been accepted
   void parseInput() override;
 
+  /// Fill the instrument combo box from the default facility's live-data instruments.
+  void fillInstrumentComboBox();
+
   Mantid::API::Algorithm_sptr changeAlgorithm(MantidQt::MantidWidgets::AlgorithmSelectorWidget *selector,
                                               MantidQt::API::AlgorithmPropertiesWidget *propWidget);
 
