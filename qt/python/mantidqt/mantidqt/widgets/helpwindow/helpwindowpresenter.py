@@ -72,29 +72,3 @@ class HelpWindowPresenter:
                 log.error(f"Fallback to online docs failed: {fallback_error}")
         except Exception as e:
             log.error(f"Error opening help page '{relativeUrl}': {e}")
-
-    def show_home_page(self):
-        """
-        Opens the documentation home page in the system browser.
-        """
-        if not self.model:
-            log.error("Cannot show home page, model is not available.")
-            return
-
-        log.debug("Opening home page in system browser.")
-        try:
-            homeUrl = self.model.get_home_url()
-            if not QDesktopServices.openUrl(homeUrl):
-                log.error(f"Failed to open home URL in system browser: {homeUrl.toString()}")
-        except FileNotFoundError as e:
-            log.error(f"Home page file not found: {e}")
-            # Fallback to online docs
-            try:
-                fallback_url = QUrl(f"{self.model._raw_online_base}/index.html")
-                log.debug(f"Attempting fallback to online home page: {fallback_url.toString()}")
-                if not QDesktopServices.openUrl(fallback_url):
-                    log.error(f"Failed to open fallback home URL: {fallback_url.toString()}")
-            except Exception as fallback_error:
-                log.error(f"Fallback to online home page failed: {fallback_error}")
-        except Exception as e:
-            log.error(f"Error opening home page: {e}")
