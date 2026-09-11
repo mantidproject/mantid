@@ -1,0 +1,1 @@
+- New algorithm :ref:`algm-IntegratePeaksShapeMD` integrates single crystal Bragg peaks by reusing the ellipsoidal peak shape already stored on each peak (e.g. derived from a model of the instrument's resolution), instead of fitting a new shape from the events around each peak.

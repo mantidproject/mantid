@@ -9,9 +9,11 @@
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 
+#include <algorithm>
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
 #include <fstream>
+#include <limits>
 #include <memory>
 #include <numeric>
 #include <tuple>
@@ -201,15 +203,29 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params, cons
   return std::make_pair(shape, std::make_tuple(frac, fracError, max_sigma));
 }
 
+/**
+ * @brief Integrates a weak peak using a supplied ellipsoidal shape and peak fraction.
+ *
+ * Applies background subtraction, detector-edge correction, and fractional-intensity
+ * scaling before returning the scaled integration shape.
+ *
+ * @param params Integration settings used to determine radius factors and detector-edge corrections.
+ * @param shape Supplied peak and background ellipsoid.
+ * @param libPeak Tuple containing the peak fraction, its uncertainty, and the maximum peak width.
+ * @param peak_q Peak center in Q-space.
+ * @param[out] inti Integrated peak intensity.
+ * @param[out] sigi Uncertainty of the integrated peak intensity.
+ * @return The scaled peak shape, or a no-shape result when no events are available.
+ */
 std::shared_ptr<const Geometry::PeakShape>
 Integrate3DEvents::integrateWeakPeak(const IntegrationParameters &params, PeakShapeEllipsoid_const_sptr shape,
-                                     const std::tuple<double, double, double> &libPeak, const V3D &center, double &inti,
+                                     const std::tuple<double, double, double> &libPeak, const V3D &peak_q, double &inti,
                                      double &sigi) {
 
   inti = 0.0; // default values, in case something
   sigi = 0.0; // is wrong with the peak.
 
-  auto result = getEvents(center);
+  auto result = getEvents(peak_q);
   if (!result)
     return std::make_shared<NoShape>();
 
@@ -223,7 +239,7 @@ Integrate3DEvents::integrateWeakPeak(const IntegrationParameters &params, PeakSh
   const auto max_sigma = std::get<2>(libPeak);
   auto rValues = calculateRadiusFactors(params, max_sigma);
 
-  const auto isPeakOnDetector = correctForDetectorEdges(rValues, params.E1Vectors, center, abcRadii,
+  const auto isPeakOnDetector = correctForDetectorEdges(rValues, params.E1Vectors, peak_q, abcRadii,
                                                         abcBackgroundInnerRadii, abcBackgroundOuterRadii);
 
   if (!isPeakOnDetector)
@@ -261,6 +277,338 @@ Integrate3DEvents::integrateWeakPeak(const IntegrationParameters &params, PeakSh
                                                     "IntegrateEllipsoidsTwoStep");
 }
 
+namespace {
+/// Maximize the (weighted) Poisson log-likelihood
+/// sum(w_i * ln(A*g_i + b)) - (A*normG + b*volume) over A, b >= 0, via a
+/// bounded, backtracking Newton solve. g_i are the (unnormalized, peak
+/// height 1) Gaussian kernel values at each event; normG is the kernel's
+/// integral over all space; volume is the search region's volume (its
+/// background rate contribution). Also returns the standard error on A
+/**
+ * @brief Estimates peak amplitude and background from weighted event data.
+ *
+ * @param g Peak-model values for each event.
+ * @param w Observed event weights.
+ * @param normG Integrated peak-model normalization.
+ * @param volume Search volume used to model the uniform background.
+ * @param A Output peak amplitude estimate.
+ * @param b Output uniform background estimate.
+ * @param sigA Output standard uncertainty of the peak amplitude.
+ */
+void solvePoissonMatchedFilter(const std::vector<double> &g, const std::vector<double> &w, double normG, double volume,
+                               double &A, double &b, double &sigA) {
+  const auto n = g.size();
+
+  auto logLikelihood = [&](double a, double bb) {
+    double ll = -(a * normG + bb * volume);
+    for (size_t i = 0; i < n; ++i)
+      ll += w[i] * std::log(std::max(a * g[i] + bb, 1e-300));
+    return ll;
+  };
+
+  auto logLikelihoodGradHess = [&](double a, double bb, double &dA, double &dB, double &dAA, double &dBB, double &dAB) {
+    dA = -normG;
+    dB = -volume;
+    dAA = 0.0;
+    dBB = 0.0;
+    dAB = 0.0;
+    for (size_t i = 0; i < n; ++i) {
+      const auto mu = std::max(a * g[i] + bb, 1e-12);
+      const auto wi = w[i];
+      dA += wi * g[i] / mu;
+      dB += wi / mu;
+      dAA -= wi * g[i] * g[i] / (mu * mu);
+      dBB -= wi / (mu * mu);
+      dAB -= wi * g[i] / (mu * mu);
+    }
+  };
+
+  // seed from crude estimates: split total weight evenly between a peak
+  // (using the mean kernel value over events with above-average signal) and
+  // a flat background over the search volume, deliberately conservative so
+  // the backtracking Newton solve below has a well-behaved starting point
+  // regardless of the absolute scale of normG/volume/event counts
+  const double sumW = std::accumulate(w.begin(), w.end(), 0.0);
+  b = volume > 0 ? std::max(0.5 * sumW / volume, 1e-10) : 1e-10;
+  A = normG > 0 ? std::max(0.5 * sumW / normG, 1e-10) : 1e-10;
+
+  for (int iter = 0; iter < 100; ++iter) {
+    double dA, dB, dAA, dBB, dAB;
+    logLikelihoodGradHess(A, b, dA, dB, dAA, dBB, dAB);
+
+    const auto det = dAA * dBB - dAB * dAB;
+    if (std::abs(det) < 1e-300)
+      break;
+
+    const auto deltaA = -(dBB * dA - dAB * dB) / det;
+    const auto deltaB = -(-dAB * dA + dAA * dB) / det;
+
+    // backtrack until both parameters stay non-negative AND the
+    // log-likelihood actually improves -- plain Newton without this can
+    // overshoot and diverge for a poorly-scaled seed
+    const auto llOld = logLikelihood(A, b);
+    double step = 1.0;
+    double newA = A, newB = b;
+    double llNew = llOld;
+    for (int halving = 0; halving < 60; ++halving) {
+      newA = A + step * deltaA;
+      newB = b + step * deltaB;
+      if (newA >= 0.0 && newB >= 0.0) {
+        llNew = logLikelihood(newA, newB);
+        if (llNew >= llOld)
+          break;
+      }
+      step *= 0.5;
+    }
+    if (llNew < llOld) // no improving step found within the halving budget
+      break;
+
+    const auto converged = std::abs(newA - A) < 1e-12 * (1.0 + A) && std::abs(newB - b) < 1e-12 * (1.0 + b);
+    A = newA;
+    b = newB;
+    if (converged)
+      break;
+  }
+
+  double dA, dB, dAA, dBB, dAB;
+  logLikelihoodGradHess(A, b, dA, dB, dAA, dBB, dAB);
+  const auto det = dAA * dBB - dAB * dAB;
+  sigA = std::numeric_limits<double>::infinity();
+  if (det > 0.0 && std::isfinite(det)) {
+    const auto varianceA = -dBB / det;
+    if (varianceA > 0.0 && std::isfinite(varianceA))
+      sigA = std::sqrt(varianceA);
+  }
+}
+
+/**
+ * @brief Solves a 3x3 linear system of the form Hx = -g, via Cramer's rule.
+ * Used for the Gauss-Newton center-refinement step.
+ *
+ * @param H Coefficient matrix.
+ * @param g Right-hand-side vector before negation.
+ * @param x Output solution vector.
+ * @return true if the matrix is nonsingular and the solution was computed, false (x left unchanged) otherwise.
+ */
+bool solve3x3(const double H[3][3], const double g[3], double x[3]) {
+  const auto det = H[0][0] * (H[1][1] * H[2][2] - H[1][2] * H[2][1]) -
+                   H[0][1] * (H[1][0] * H[2][2] - H[1][2] * H[2][0]) +
+                   H[0][2] * (H[1][0] * H[2][1] - H[1][1] * H[2][0]);
+  if (std::abs(det) < 1e-300)
+    return false;
+
+  for (int col = 0; col < 3; ++col) {
+    double M[3][3];
+    for (int r = 0; r < 3; ++r)
+      for (int c = 0; c < 3; ++c)
+        M[r][c] = (c == col) ? -g[r] : H[r][c];
+    const auto colDet = M[0][0] * (M[1][1] * M[2][2] - M[1][2] * M[2][1]) -
+                        M[0][1] * (M[1][0] * M[2][2] - M[1][2] * M[2][0]) +
+                        M[0][2] * (M[1][0] * M[2][1] - M[1][1] * M[2][0]);
+    x[col] = colDet / det;
+  }
+  return true;
+}
+} // namespace
+
+/**
+ * Integrate a peak using a fixed ellipsoidal shape, rather than fitting one
+ * from the events themselves. The shape's directions and radii (peak and
+ * background) are used exactly as supplied, centered on peak_q.
+ *
+ * @param shape   The ellipsoid shape (directions, peak radii, background
+ *                inner/outer radii) to integrate with.
+ * @param peak_q  Q-vector at which to center the shape.
+ * @param inti    Returns the net (background-subtracted) integrated intensity.
+ * @param sigi    Returns the standard deviation of inti.
+ */
+void Integrate3DEvents::integrateUsingShape(const PeakShapeEllipsoid &shape, const V3D &peak_q, double &inti,
+                                            double &sigi) {
+  inti = 0.0; // default values, in case something
+  sigi = 0.0; // is wrong with the peak.
+
+  auto result = getEvents(peak_q);
+  if (!result)
+    return;
+
+  const auto &events = *result;
+
+  const auto &directions = shape.directions();
+  const auto &abcRadii = shape.abcRadii();
+  const auto &abcBackgroundInnerRadii = shape.abcRadiiBackgroundInner();
+  const auto &abcBackgroundOuterRadii = shape.abcRadiiBackgroundOuter();
+
+  const std::pair<double, double> backgrd = numInEllipsoidBkg(
+      events, directions, abcBackgroundOuterRadii, abcBackgroundInnerRadii, m_useOnePercentBackgroundCorrection);
+  const std::pair<double, double> peak = numInEllipsoid(events, directions, abcRadii);
+
+  // volume ratio between the peak ellipsoid and the background shell, used to
+  // scale the background counts to the peak's volume before subtracting
+  const auto peakVolume = abcRadii[0] * abcRadii[1] * abcRadii[2];
+  const auto backgroundVolume = abcBackgroundOuterRadii[0] * abcBackgroundOuterRadii[1] * abcBackgroundOuterRadii[2] -
+                                abcBackgroundInnerRadii[0] * abcBackgroundInnerRadii[1] * abcBackgroundInnerRadii[2];
+  const auto ratio = backgroundVolume > 0 ? peakVolume / backgroundVolume : 0.0;
+
+  inti = peak.first - ratio * backgrd.first;
+  sigi = sqrt(peak.second + ratio * ratio * backgrd.second);
+}
+
+/**
+ * Fits a Gaussian peak and constant background within the search radius and
+ * returns the integrated Gaussian intensity.
+ *
+ * @param shape Ellipsoidal peak shape; its principal radii define the Gaussian
+ *              standard deviations. shape.translation() seeds the fit center
+ *              (offset from peak_q), so a previously found correction is
+ *              honored and further refined rather than discarded.
+ * @param peak_q Q-vector used as the reference peak center.
+ * @param adjustCenter Whether to refine the peak center during fitting.
+ * @param center Receives the center offset from peak_q actually used for the
+ *               fit: shape.translation() unchanged if adjustCenter is false,
+ *               or the refined offset (capped at one standard deviation of
+ *               incremental shift from shape.translation()) if true.
+ * @param inti Receives the fitted integrated peak intensity.
+ * @param sigi Receives the standard deviation of the fitted intensity.
+ */
+void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &shape, const V3D &peak_q,
+                                                      bool adjustCenter, V3D &center, double &inti, double &sigi) {
+  inti = 0.0;
+  sigi = 0.0;
+  center = shape.translation();
+
+  auto result = getEvents(peak_q);
+  if (!result || result->empty())
+    return;
+
+  const auto &events = *result;
+
+  const auto &directions = shape.directions();
+  const auto &sigmas = shape.abcRadii();
+
+  // apply the ellipsoid's inverse-covariance to v, via its spectral (axis) form
+  auto applyInvS = [&](const V3D &v) {
+    V3D out;
+    for (size_t k = 0; k < 3; ++k)
+      out += directions[k] * (v.scalar_prod(directions[k]) / (sigmas[k] * sigmas[k]));
+    return out;
+  };
+
+  // kernel value and inv_S*(event-c) (needed for the center gradient) for
+  // every event, at center offset c from peak_q
+  auto computeKernel = [&](const V3D &c, std::vector<double> &g, std::vector<double> &w, std::vector<V3D> &invSq) {
+    g.clear();
+    w.clear();
+    invSq.clear();
+    g.reserve(events.size());
+    w.reserve(events.size());
+    invSq.reserve(events.size());
+    for (const auto &event : events) {
+      const V3D qOff = event.second - c;
+      const auto Sq = applyInvS(qOff);
+      g.push_back(exp(-0.5 * qOff.scalar_prod(Sq)));
+      w.push_back(event.first.first);
+      invSq.push_back(Sq);
+    }
+  };
+
+  // sum(g) over all space is translation-invariant, so normG does not
+  // depend on the center offset c
+  const auto normG = pow(2.0 * M_PI, 1.5) * sigmas[0] * sigmas[1] * sigmas[2];
+  const auto volume = (4.0 / 3.0) * M_PI * m_radius * m_radius * m_radius;
+
+  auto logLikelihood = [&](const V3D &c, double A, double b) {
+    double ll = -(A * normG + b * volume);
+    for (const auto &event : events) {
+      const V3D qOff = event.second - c;
+      const auto gi = exp(-0.5 * qOff.scalar_prod(applyInvS(qOff)));
+      ll += event.first.first * log(std::max(A * gi + b, 1e-12));
+    }
+    return ll;
+  };
+
+  std::vector<double> g, w;
+  std::vector<V3D> invSq;
+  computeKernel(center, g, w, invSq);
+
+  double A = 0.0, b = 0.0, sigA = 0.0;
+  solvePoissonMatchedFilter(g, w, normG, volume, A, b, sigA);
+
+  if (adjustCenter) {
+    const auto maxShift = *std::min_element(sigmas.begin(), sigmas.end());
+    // seedCenter is where this call started (shape.translation()); maxShift
+    // bounds the *incremental* correction made in this call, not the total
+    // distance from peak_q, so an already-substantial prior translation
+    // isn't clamped away before any new refinement even starts.
+    const V3D seedCenter = center;
+
+    for (int outer = 0; outer < 20; ++outer) {
+      // Gauss-Newton step in the center, holding A, b fixed
+      double grad[3] = {0.0, 0.0, 0.0};
+      double hess[3][3] = {{0.0}};
+      for (size_t i = 0; i < g.size(); ++i) {
+        const auto mu = std::max(A * g[i] + b, 1e-12);
+        const auto factor = w[i] * g[i] / mu;
+        const auto factor2 = w[i] * g[i] * g[i] / (mu * mu);
+        const double Sq[3] = {invSq[i].X(), invSq[i].Y(), invSq[i].Z()};
+        for (int r = 0; r < 3; ++r) {
+          grad[r] += A * factor * Sq[r];
+          for (int c = 0; c < 3; ++c)
+            hess[r][c] -= A * A * factor2 * Sq[r] * Sq[c];
+        }
+      }
+
+      double deltaC[3];
+      if (!solve3x3(hess, grad, deltaC))
+        break;
+
+      V3D step(deltaC[0], deltaC[1], deltaC[2]);
+      if (step.norm() > 0.25 * maxShift)
+        step *= (0.25 * maxShift / step.norm());
+
+      auto clampToMaxShift = [&](V3D c) {
+        const V3D offsetFromSeed = c - seedCenter;
+        if (offsetFromSeed.norm() > maxShift)
+          return seedCenter + offsetFromSeed * (maxShift / offsetFromSeed.norm());
+        return c;
+      };
+
+      const auto llOld = logLikelihood(center, A, b);
+      V3D newCenter = clampToMaxShift(center + step);
+      auto llNew = logLikelihood(newCenter, A, b);
+
+      double localStep = 1.0;
+      while (llNew < llOld && localStep > 1e-4) {
+        localStep *= 0.5;
+        newCenter = clampToMaxShift(center + step * localStep);
+        llNew = logLikelihood(newCenter, A, b);
+      }
+
+      const auto converged = (newCenter - center).norm() < 1e-8 * (1.0 + maxShift);
+      center = newCenter;
+
+      computeKernel(center, g, w, invSq);
+      solvePoissonMatchedFilter(g, w, normG, volume, A, b, sigA);
+
+      if (converged)
+        break;
+    }
+  }
+
+  inti = A * normG;
+  sigi = sigA * normG;
+}
+
+/**
+ * @brief Estimates the signal-to-noise ratio for a peak at the specified reciprocal-space position.
+ *
+ * @param params Integration parameters that define the analysis region and radius factors.
+ * @param center Reciprocal-space position of the peak.
+ * @param forceSpherical Whether to require and use a spherically symmetric peak shape.
+ * @param sphericityTol Maximum relative difference between the largest and smallest peak widths
+ *                      when spherical symmetry is required.
+ * @return Signal-to-noise ratio after background subtraction, or zero when the peak cannot be
+ *         analyzed or does not meet the requested shape constraints.
+ */
 double Integrate3DEvents::estimateSignalToNoiseRatio(const IntegrationParameters &params, const V3D &center,
                                                      bool forceSpherical, double sphericityTol) {
 
