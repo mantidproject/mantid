@@ -195,14 +195,29 @@ alongside a matplotlib canvas for the line plot:
 
    self.main_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=self._off_screen)
 
-``renderers/base_renderer.py`` defines the ``InstrumentRenderer`` abstract base class. It builds
-three meshes -- the visible detectors, a pickable overlay used for highlighting the selection, and
-the masked detectors -- and supplies the picking callback. The three implementations correspond to
-the render modes offered in the GUI:
+``renderers/base_renderer.py`` defines the ``InstrumentRenderer`` abstract base class. A renderer
+builds two meshes and supplies the picking callback:
+
+- the **detector mesh**, built from the pickable detectors and coloured by counts. It is added with
+  ``pickable=True`` and is the only mesh clicks are picked against;
+- the **masked mesh**, drawn in a flat dark grey with ``pickable=False``.
+
+Monitors and the sample are not the renderer's concern: the presenter adds them as separate
+point meshes through ``FullInstrumentViewView.add_rgba_mesh``.
+
+The selection is not a mesh of its own either. Each renderer draws it with a magenta marker on a
+**persistent highlight actor**, created once per plotter rebuild by ``create_picked_highlight_actor``
+and afterwards only given new data and shown or hidden by ``update_picked_highlight``. The marker is sized in screen pixels rather than
+by tinting the detectors, so it stays visible when a large instrument is zoomed out until each
+detector covers a pixel or less.
+
+The three implementations correspond to the render modes offered in the GUI:
 
 ``PointCloudRenderer``
     One point per detector in a single ``pv.PolyData``, drawn as screen-space spheres. Picking uses
-    a ``vtkPointPicker``.
+    a ``vtkPointPicker``. The selection is a larger sphere sprite centred on each picked detector,
+    with its middle discarded in a fragment shader so the counts colour still shows through the
+    ring.
 
 ``ShapeRenderer``
     Draws real detector geometry. Detectors are grouped by unique shape using
@@ -212,7 +227,16 @@ the render modes offered in the GUI:
     then scaled, rotated and translated with vectorised NumPy using ``detectorInfo.allRotations()``,
     ``allScaleFactors()`` and ``allPositions()``, and merged into a **single** ``pv.PolyData`` so
     that VTK issues one draw call for the whole instrument. A ``_cell_to_detector`` array maps VTK
-    cell IDs back to detector indices, both for picking and for writing the scalars.
+    cell IDs back to detector indices, for picking, for writing the scalars and for picking out the
+    cells of the selected detectors.
+
+    The selection is outlined with the *silhouette* of the picked cells, from a
+    ``vtkPolyDataSilhouette`` left in the pipeline because the silhouette changes as the camera
+    moves. Edges would be wrong for anything but a flat quad: a raw cuboid would draw as a
+    wireframe box and a raw cylinder as two cap rings. The outline is also lifted towards the
+    camera by the depth of the picked shapes, or it would be buried in the detectors packed around
+    it. Past ``_MAX_OUTLINE_CELLS`` picked cells, recomputing the silhouette on every camera move
+    gets too slow, so a second actor takes over with one marker point per picked detector.
 
 ``SideBySideShapeRenderer``
     Subclasses ``ShapeRenderer``. It uses nearest-neighbour distances per bank
@@ -242,9 +266,9 @@ projection needs no changes to any factory or combo box:
                subclass, _ = Projection._registry.get(type)
                return super().__new__(subclass)
 
-Subclasses are imported at the bottom of the module so that they register themselves without
-creating a circular import. ``ProjectionType`` is a ``str`` enum, and the GUI's list of projections
-is derived from it directly.
+The ``ProjectionType`` enum is used to derive the GUI's list of projections. If ``u`` and ``v`` are
+the horizontal and vertical axes of the 2D projection, respectively, then the projections are
+created as follows.
 
 - ``SphericalProjection`` uses ``u = -atan2(y, x)`` and ``v = -acos(v/r)``.
 - ``CylindricalProjection`` is equal-area: ``u = -atan2(y, x)`` and ``v = z/|r|``.
@@ -267,9 +291,8 @@ Picking and mouse interaction
 
 Each renderer supplies ``get_callback_tied_to_detector_index(plotter, callback, hover)``, which
 wraps a ``vtkPointPicker`` or ``vtkCellPicker`` and translates a hit into an index into the
-*pickable* detectors. Only the pickable mesh has ``pickable=True``, so masked detectors, monitors
-and the sample cannot be picked. This differs from the legacy widget, which rendered a hidden image
-with detector indices encoded as colours and read the colour back.
+*pickable* detectors. Only the detector mesh has ``pickable=True``, so masked detectors, monitors,
+the sample and the selection marker cannot be picked.
 
 ``InteractorStyles.py`` holds five VTK styles, and
 ``FullInstrumentViewPresenter._update_interactor_style()`` chooses between them, in this order:
@@ -330,8 +353,7 @@ Understanding which mask a property is sliced by is usually enough to understand
 in particular that indices coming back from a picking callback are indices into the *pickable*
 detectors, not into all detectors.
 
-There are two masks describing the selection, and they differ in both length and content, so
-mixing them up is an easy mistake. ``picked_detector_mask`` has one entry per *pickable* detector,
+There are two masks describing the selection, and they differ in both length and content. ``picked_detector_mask`` has one entry per *pickable* detector,
 matching the meshes and the picking callbacks, and covers everything highlighted -- both the
 detectors clicked in the projection and those of any ticked ``Grouping`` entry, which
 ``apply_detector_items`` unions together into ``_detector_is_picked``.
@@ -391,7 +413,9 @@ Extending the Instrument View
 New render mode
     Implement ``InstrumentRenderer``, add the mode string to
     ``FullInstrumentViewView._RENDER_MODE_OPTIONS`` and a branch to
-    ``FullInstrumentViewPresenter._get_renderer_for_mode``.
+    ``FullInstrumentViewPresenter._get_renderer_for_mode``. Also override
+    ``_add_picked_highlight_actor`` and ``_build_picked_highlight_mesh``: they are not abstract, but
+    the base versions draw nothing, and the marker is the only thing that shows the selection.
 
 New projection
     Add a member to ``ProjectionType`` and subclass ``Projection`` with
@@ -452,12 +476,6 @@ plain ``unittest`` test cases:
 - View tests use ``@start_qapplication`` from ``mantidqt.utils.qt.testing``, patch
   ``BackgroundPlotter`` and the matplotlib canvas, and patch ``force_method_calls_to_qapp_thread``
   so that the ``@run_on_qapp_thread`` decorator does not interfere.
-
-.. warning::
-
-   Test files are listed explicitly in ``PYTHON_TEST_FILES`` in
-   ``qt/python/instrumentview/CMakeLists.txt``. A new test file will not run in CI until it is added
-   there.
 
 Run them with:
 

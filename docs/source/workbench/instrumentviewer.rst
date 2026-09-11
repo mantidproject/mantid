@@ -437,9 +437,7 @@ Shows the components of the instrument as they are named and arranged in the
 :ref:`Instrument Definition File <InstrumentDefinitionFile>`. Branches are expanded as they are
 opened, so even large instruments appear immediately.
 
-Selecting one or more components restricts the display to those components: everything else is
-drawn dark grey and cannot be picked, which makes it much easier to work with a single bank of a
-large instrument. Clearing the selection restores the whole instrument.
+Selecting one or more components restricts the display to those components. Clearing the selection restores the whole instrument.
 
 .. figure:: ../images/Workbench/InstrumentViewer/ComponentTree.png
     :align: center
