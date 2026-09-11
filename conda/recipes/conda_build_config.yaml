@@ -119,6 +119,10 @@ pip:
 pystog:
   - '>=0.6.3'
 
+# Optional: only needed for SavePlot1D OutputType='plotly'/'plotly-full'.
+plotly:
+  - '>=5.0.0'
+
 pyqt6:
   - '>=6.11,<7'
 
