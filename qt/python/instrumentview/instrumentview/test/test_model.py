@@ -725,13 +725,13 @@ class TestFullInstrumentViewModel(unittest.TestCase):
 
     def test_get_default_projection_3D(self):
         model, mock_workspace = self._setup_model([1, 2, 3])
-        mock_workspace.getInstrument = MagicMock(return_value=MagicMock(getDefaultView=MagicMock(return_value="3D")))
+        mock_workspace.defaultView = MagicMock(return_value="3D")
         self.assertEqual(model.get_default_projection(), ProjectionType.THREE_D)
         self.assertEqual(model.get_projection_options()[0], ProjectionType.THREE_D.value)
 
     def test_get_default_projection_non_3D(self):
         model, mock_workspace = self._setup_model([1, 2, 3])
-        mock_workspace.getInstrument = MagicMock(return_value=MagicMock(getDefaultView=MagicMock(return_value="SPHERICAL_X")))
+        mock_workspace.defaultView = MagicMock(return_value="SPHERICAL_X")
         self.assertEqual(model.get_default_projection(), ProjectionType.SPHERICAL_X)
         self.assertIn(ProjectionType.SPHERICAL_X.value, model.get_projection_options())
 
