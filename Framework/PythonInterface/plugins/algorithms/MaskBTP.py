@@ -171,7 +171,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         components = self.getProperty("components").value
         if not components:
             components = self.getProperty("Bank").value
-            validFrom = str(ws.instrumentMetadata().validFromDate())
+            validFrom = str(ws.validFromDate())
             if len(components) == 0:
                 if self.instname == "EQ-SANS" and "1900-" in validFrom:  # numbering convention changed in 2019
                     components = numpy.arange(1, 2)

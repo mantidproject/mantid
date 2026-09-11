@@ -73,6 +73,19 @@ GNU_DIAG_ON("unused-local-typedef")
 namespace {
 void setSample(ExperimentInfo &expInfo, const Mantid::API::Sample &sample) { expInfo.mutableSample() = sample; }
 void setRun(ExperimentInfo &expInfo, const Mantid::API::Run &run) { expInfo.mutableRun() = run; }
+
+// Forward the InstrumentMetadata accessors so that the metadata object itself does not
+// need to be handed out to Python.
+Mantid::Types::Core::DateAndTime validFromDate(const ExperimentInfo &expInfo) {
+  return expInfo.instrumentMetadata().validFromDate();
+}
+Mantid::Types::Core::DateAndTime validToDate(const ExperimentInfo &expInfo) {
+  return expInfo.instrumentMetadata().validToDate();
+}
+const std::string &filename(const ExperimentInfo &expInfo) { return expInfo.instrumentMetadata().filename(); }
+const std::string &xmlText(const ExperimentInfo &expInfo) { return expInfo.instrumentMetadata().xmlText(); }
+const std::string &defaultView(const ExperimentInfo &expInfo) { return expInfo.instrumentMetadata().defaultView(); }
+const std::string &defaultAxis(const ExperimentInfo &expInfo) { return expInfo.instrumentMetadata().defaultAxis(); }
 } // namespace
 
 void export_ExperimentInfo() {
@@ -130,11 +143,17 @@ void export_ExperimentInfo() {
            "Return a const reference to the "
            ":class:`~mantid.geometry.ComponentInfo` "
            "object.")
-      .def("instrumentMetadata", &ExperimentInfo::instrumentMetadata, return_value_policy<reference_existing_object>(),
-           args("self"),
-           "Return a const reference to the "
-           ":class:`~mantid.geometry.InstrumentMetadata` "
-           "object.")
+      .def("validFromDate", &validFromDate, args("self"),
+           "Return the valid-from :class:`~mantid.kernel.DateAndTime` of the instrument.")
+      .def("validToDate", &validToDate, args("self"),
+           "Return the valid-to :class:`~mantid.kernel.DateAndTime` of the instrument.")
+      .def("filename", &filename, args("self"), return_value_policy<copy_const_reference>(),
+           "Return the name of the file that the original IDF was from.")
+      .def("xmlText", &xmlText, args("self"), return_value_policy<copy_const_reference>(), "Return the instrument XML.")
+      .def("defaultView", &defaultView, args("self"), return_value_policy<copy_const_reference>(),
+           "Return the name of the preferred view in instrument view.")
+      .def("defaultAxis", &defaultAxis, args("self"), return_value_policy<copy_const_reference>(),
+           "Return the axis the instrument view is wrapped around by default.")
       .def("getInstrumentName", &ExperimentInfo::getInstrumentName, args("self"),
            "Return the name of the instrument for this experiment.")
       .def("setSample", setSample, args("self", "sample"))
