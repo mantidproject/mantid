@@ -142,8 +142,16 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       checks: write
+      contents: read
 
     steps:
+      - name: Checkout the Slack summary script
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github/scripts/
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
       - name: Download JUnit results
         uses: actions/download-artifact@v8
         # nothing to publish is a normal outcome here, e.g. if every build failed
@@ -174,3 +182,24 @@ jobs:
           files: artifacts/junit-automated-ui-Windows/junit-uitest.xml
           action_fail: false
           action_fail_on_inconclusive: false
+
+      # The check runs above are only seen by someone going looking for them. Both steps run
+      # even when the tests failed, which is when the notification matters most.
+      - name: Build Slack summary
+        if: always()
+        run: python3 .github/scripts/ui_test_slack_summary.py slack-payload.json
+
+      - name: Post to Slack
+        if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.AUTOMATED_UI_SLACK_BOT }}
+        run: |
+          # the secret is unavailable to a fork, and a report-only workflow must not go red
+          # over a notification it was never able to send
+          if [[ -z "$SLACK_WEBHOOK_URL" ]]; then
+            echo "AUTOMATED_UI_SLACK_BOT is not set - skipping the Slack notification"
+            exit 0
+          fi
+          curl --silent --show-error --fail-with-body -X POST \
+            -H 'Content-type: application/json' \
+            --data @slack-payload.json "$SLACK_WEBHOOK_URL"
