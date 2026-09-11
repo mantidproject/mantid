@@ -137,8 +137,8 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
                 (traces, xlabel, ylabel) = self.toScatterAndLabels(wksp, spectraNames)
                 for spectrum in traces:
                     fig.add_trace(spectrum, row=i + 1, col=1)
-                fig["layout"]["xaxis%d" % (i + 1)].update(title={"text": xlabel})
-                fig["layout"]["yaxis%d" % (i + 1)].update(title={"text": ylabel})
+                fig.update_xaxes(title_text=xlabel, row=i + 1, col=1)
+                fig.update_yaxes(title_text=ylabel, row=i + 1, col=1)
                 if len(spectraNames) > 0:  # remove the used spectra names
                     spectraNames = spectraNames[len(traces) :]
             fig["layout"].update(margin={"r": 0, "t": 0})
