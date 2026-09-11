@@ -276,6 +276,79 @@ class AutomatedUITestBase(unittest.TestCase):
         config["datasearch.directories"] = self._saved_data_dirs
         self._saved_data_dirs = None
 
+    # ------------------------------------------------------------------ facility configuration
+
+    @contextmanager
+    def config_settings(self, **settings):
+        """Change ``mantid.kernel.config`` keys for the duration of a block, then put them back.
+
+        Distinct from ``_isolate_qsettings``, which redirects Qt's own settings store: several guides
+        begin "set the facility to ISIS and the instrument to ALF", and that lives in Mantid's
+        properties rather than in QSettings, so it leaks into every later test in the process unless
+        it is restored. Keys are given as Python identifiers with underscores for dots
+        (``default_facility="ISIS"``), because a dotted name cannot be a keyword argument.
+        """
+        from mantid.kernel import config
+
+        keys = {name.replace("_", "."): value for name, value in settings.items()}
+        saved = {key: config[key] for key in keys}
+        for key, value in keys.items():
+            config[key] = value
+        try:
+            yield
+        finally:
+            for key, value in saved.items():
+                config[key] = value
+
+    # ------------------------------------------------------------------ C++ interfaces
+
+    def open_cpp_interface(self, name):
+        """Open one of the C++ ``UserSubWindow`` interfaces and return its window.
+
+        ALFView, ISIS Reflectometry, the Indirect and Inelastic interfaces and ALC are registered
+        with ``DECLARE_SUBWINDOW`` and have no Python entry point at all, so the factory is the only
+        way in and the returned ``QWidget`` is the only handle a test gets - its tabs and widgets are
+        reached with ``child_named``. ``name`` is the interface's ``static std::string name()``, the
+        same string the Interfaces menu shows.
+
+        The window is registered for teardown here rather than left to the caller because it needs
+        the explicit ``sip.delete`` that ``CppInterfacesStartupTest`` documents: the C++ destructor
+        does not run on ``close()`` even with ``WA_DeleteOnClose`` set, and an interface left alive
+        keeps its ADS observers, which then fire into the next test's cleared ADS.
+        """
+        from mantid.api import FrameworkManager
+        from mantidqt.interfacemanager import InterfaceManager
+        from qt_interaction_helpers import process_events
+
+        # The framework has to be up first. These interfaces are registered by DECLARE_SUBWINDOW in
+        # the MantidScientificInterfaces plugin libraries, and it is starting the framework that
+        # loads them - without it the factory knows no names at all and every call returns None,
+        # while constructing a Mantid C++ widget raises a message-less RuntimeError.
+        FrameworkManager.Instance()
+
+        window = InterfaceManager().createSubWindow(name)
+        if window is None:
+            raise RuntimeError(
+                f"the interface factory does not know '{name}'. Either this build has no "
+                f"MantidScientificInterfaces plugins, or the name has changed - it is the interface's "
+                f"static name() in qt/scientific_interfaces."
+            )
+        window.show()
+        process_events(2)
+        self.addCleanup(self._close_cpp_interface, window)
+        return window
+
+    @staticmethod
+    def _close_cpp_interface(window):
+        from qt_interaction_helpers import process_events
+        from qtpy import sip
+
+        if sip.isdeleted(window):
+            return
+        window.close()
+        process_events(2)
+        sip.delete(window)
+
     # ------------------------------------------------------------------ waiting
 
     # how long tearDown will keep pumping the event loop for an abandoned worker before it stops
@@ -378,6 +451,43 @@ class AutomatedUITestBase(unittest.TestCase):
             patcher = mock.patch(f"{module}.{helper_name}", side_effect=record)
             patcher.start()
             self.addCleanup(patcher.stop)
+
+    def dismiss_modal_dialogs(self, interval_ms=250):
+        """Close any modal dialog that appears, recording what it said, until the test ends.
+
+        The last resort, and the only thing that works on a dialog raised from **C++**.
+        ``patch_error_messages`` and ``patch_confirmation_box`` both replace a Python-side symbol, so
+        neither can touch a ``QMessageBox`` constructed inside a C++ interface - and one of those
+        blocks the calling thread inside ``exec()`` with nothing left to dismiss it, which hangs the
+        run until CTest kills it. The Indirect and Inelastic interfaces raise exactly that whenever
+        they refuse a reduction or a fit.
+
+        What makes this work is that a modal dialog runs its *own* event loop while it blocks, and a
+        ``QTimer`` keeps firing inside it. So the sweep below still runs, finds the dialog through
+        ``activeModalWidget`` and closes it, and the blocked call returns.
+
+        Prefer the two patching helpers where the dialog comes from Python: they say which module
+        raised it and let the test choose the answer, whereas this closes whatever it finds - which
+        for a question dialog means taking the default button rather than a chosen one. Use this for
+        the interfaces where there is no Python seam to patch.
+        """
+        from qtpy.QtCore import QTimer
+        from qtpy.QtWidgets import QApplication, QMessageBox
+
+        def sweep():
+            dialog = QApplication.activeModalWidget()
+            if dialog is None:
+                return
+            self.message_box_messages.append(dialog.text() if isinstance(dialog, QMessageBox) else dialog.windowTitle())
+            dialog.close()
+
+        timer = QTimer()
+        timer.timeout.connect(sweep)
+        timer.start(interval_ms)
+        # stop it before the QApplication goes, and keep a reference so it is not collected
+        self._modal_sweep_timer = timer
+        self.addCleanup(timer.stop)
+        return timer
 
     # button names that mean "the user agreed" and "the user declined". Every accepting name shares
     # one sentinel and every declining name shares the other, so the answer holds whichever
