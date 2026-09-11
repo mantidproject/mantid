@@ -348,9 +348,9 @@ class FullInstrumentViewView(QWidget):
             saved_mode = self._RENDER_MODE_POINTS
         self._render_mode_combo_box.setCurrentText(saved_mode)
         self._render_mode_combo_box.setToolTip(
-            "Points: draw detectors as a point cloud.\n"
-            "Shapes (Fast): draw detector shapes with optimised quad approximation.\n"
-            "Full Shapes: draw the full triangulated detector geometry."
+            f"{self._RENDER_MODE_POINTS}: draw detectors as a point cloud.\n"
+            f"{self._RENDER_MODE_SHAPES_FAST}: draw detector shapes with optimised quad approximation.\n"
+            f"{self._RENDER_MODE_RAW_SHAPES}: draw the full triangulated detector geometry."
         )
 
         self._peaks_group_box = QGroupBox("Peaks Workspaces")
@@ -412,8 +412,6 @@ class FullInstrumentViewView(QWidget):
         self._picking_masking_tab = QTabWidget()
         self._picking_masking_tab.addTab(self._selection_tab, CurrentTab.Grouping.value)
         self._picking_masking_tab.addTab(self._mask_tab, CurrentTab.Masking.value)
-
-        self.status_group_box = QGroupBox("Status")
 
         self._lineplot_options_group_box = QGroupBox("Line Plot")
         self._units_combo_box_lineplot = NoWheelComboBox()
@@ -602,9 +600,6 @@ class FullInstrumentViewView(QWidget):
 
     def set_render_mode_combo_enabled(self, enabled: bool) -> None:
         self._render_mode_combo_box.setEnabled(enabled)
-
-    def hide_status_box(self) -> None:
-        self.status_group_box.hide()
 
     def cache_current_camera_position(self) -> None:
         self._last_camera_position = self.main_plotter.camera_position
