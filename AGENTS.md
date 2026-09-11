@@ -105,3 +105,13 @@ Agents can run both unit and system tests for Python and C++ changes.
 - `scripts` Python code.
 - `Testing` test data and system test framework.
 - `tools` small tools for maintaining code and report generation.
+
+# Commit messages
+
+Only humans can be named as co-authors, and AI can _never_ sign off on a
+commit. The Linux kernel trailer can be used to credit AI assistance, like
+this:
+
+```text
+Assisted-by: <harness>:<model>
+```
