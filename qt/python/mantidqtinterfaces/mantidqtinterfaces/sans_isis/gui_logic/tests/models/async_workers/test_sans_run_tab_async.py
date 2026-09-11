@@ -38,7 +38,7 @@ class SansRunTabAsyncTest(unittest.TestCase):
         errors = {}
         get_states_mock.return_value = states, errors
 
-        expected_shift_scale_factors = (1.1, 2.2)
+        expected_shift_scale_factors = (1.1, 2.2, [])
         self.async_worker.batch_processor.return_value = expected_shift_scale_factors
 
         self.async_worker.process_states_on_thread(
@@ -57,6 +57,42 @@ class SansRunTabAsyncTest(unittest.TestCase):
         expected_emit_calls = [call(i, [], []) for i in range(len(self._mock_rows))]
 
         self.async_worker._notify_progress_signal.signal.emit.assert_has_calls(expected_emit_calls, any_order=True)
+
+    @mock.patch("mantidqtinterfaces.sans_isis.gui_logic.models.async_workers.sans_run_tab_async.delete_workspaces")
+    def test_that_process_states_finishes_cleaning_up_ads_names_if_option_selected(self, mock_deleter):
+        get_states_mock = mock.MagicMock()
+        states = {0: mock.MagicMock()}
+        errors = {}
+        get_states_mock.return_value = states, errors
+
+        trans_ws_names = ["trans_sample", "trans_monitor", "trans_can", "trans_can_monitor"]
+        names1 = ["raw_1", "test1_norm", *trans_ws_names]
+        names2 = ["raw_2", "test2_norm", *trans_ws_names]
+        names3 = ["raw_3", "test3_norm", *trans_ws_names]
+        expected_shift_scale_factors = [1.1, 2.2]
+        self.async_worker.batch_processor.side_effect = [
+            (*expected_shift_scale_factors, out_names) for out_names in [names1, names2, names3]
+        ]
+
+        self.async_worker.process_states_on_thread(
+            row_index_pairs=self._mock_rows,
+            get_states_func=get_states_mock,
+            use_optimizations=False,
+            output_mode=OutputMode.BOTH,
+            output_graph="",
+            clean_up_ads=True,
+        )
+
+        for row, _ in self._mock_rows:
+            self.assertEqual(RowState.PROCESSED, row.state)
+            self.assertIsNone(row.tool_tip)
+
+        self.assertEqual(self.async_worker.batch_processor.call_count, 3)
+        expected_emit_calls = [call(i, [], []) for i in range(len(self._mock_rows))]
+
+        self.async_worker._notify_progress_signal.signal.emit.assert_has_calls(expected_emit_calls, any_order=True)
+        mock_deleter.assert_called_once()
+        mock_deleter.assert_called_with(set([*names1, *names2, *names3]), use_names=True)
 
     def test_that_process_states_emits_row_failed_information(self):
         self.async_worker.batch_processor.side_effect = Exception("failure")
