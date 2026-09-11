@@ -8,22 +8,20 @@
 
 #include "MantidNexus/DllConfig.h"
 
-#include <filesystem>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace Mantid::Nexus {
 
 /**
  * This simple class encapsulates some methods for working with paths inside a Nexus file.
- * The base is std::filesystem::path, but the root will always resolve to "/" regardless of OS.
- * New paths are always cast to lexically normal during creation.
+ * Paths are stored as plain std::string; the root is always "/".
+ * Trailing slashes are stripped on construction (except for the root itself).
  */
 class MANTID_NEXUS_DLL NexusAddress {
 
 public:
-  NexusAddress(std::filesystem::path const &p);
-
   NexusAddress(std::string const &p);
 
   NexusAddress(char const *const p);
@@ -68,6 +66,10 @@ public:
 
   bool hasChild(std::string const &p) const;
 
+  // In-place mutation — no heap allocation when string capacity is sufficient.
+  void appendComponent(std::string const &name);
+  void popComponent();
+
   // access
 
   bool isAbsolute() const;
@@ -90,17 +92,14 @@ public:
 
   std::string operator+(char const s[]) const;
 
-  operator std::string() const { return m_resolved_path; }
+  operator std::string() const { return m_path; }
 
-  std::string const &string() const { return m_resolved_path; }
+  std::string const &string() const { return m_path; }
 
-  char const *c_str() const { return m_resolved_path.c_str(); }
+  char const *c_str() const { return m_path.c_str(); }
 
 private:
-  /** standard filesystem path */
-  std::filesystem::path m_path;
-  // in order to return c_str from the generic_string, this must remain in memory
-  std::string m_resolved_path;
+  std::string m_path;
 };
 
 } // namespace Mantid::Nexus

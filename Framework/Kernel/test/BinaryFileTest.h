@@ -9,6 +9,7 @@
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/ConfigService.h"
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <sys/stat.h>
 
 using namespace Mantid::Kernel;

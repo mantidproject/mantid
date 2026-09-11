@@ -22,6 +22,7 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/H5Util.h"
 
+#include <filesystem>
 #include <functional>
 #include <regex>
 

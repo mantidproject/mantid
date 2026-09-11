@@ -1,5 +1,6 @@
 #include "MantidNexus/NexusFile.h"
 #include "MantidNexus/H5Util.h"
+#include "MantidNexus/NexusDescriptorLazy.h"
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/hdf5_type_helper.h"
 #include "MantidNexus/inverted_napi.h"
@@ -88,6 +89,42 @@ static herr_t getEntriesCallback(hid_t gid, const char *name, const H5L_info2_t 
   return 0;
 }
 
+/** Number of bytes an open string dataset occupies when read back as raw characters.
+ * A string dataset carries its width in the datatype rather than the dataspace, so the
+ * dataspace extents on their own undercount the storage by that width.
+ * @param data_id :: handle of the open dataset
+ * @param type_id :: handle of the dataset's datatype
+ * @param space_id :: handle of the dataset's dataspace
+ * @return the storage size, in bytes, excluding any null terminator
+ */
+static std::size_t stringStorageSize(hid_t const data_id, hid_t const type_id, hid_t const space_id) {
+  std::size_t storage_size(0);
+  if (H5Tis_variable_str(type_id) > 0) {
+    hsize_t vlen_size(0);
+    if (H5Sget_simple_extent_ndims(space_id) == 0) {
+      // H5Dvlen_get_buf_size is unreliable with H5S_SCALAR in some HDF5 versions.
+      // Read the single vlen string and measure it directly.
+      char *vbuf = nullptr;
+      if (H5Dread(data_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vbuf) < 0 || vbuf == nullptr) {
+        throw Mantid::Nexus::Exception("Failed to read scalar variable-length string length");
+      }
+      vlen_size = strlen(vbuf);
+      H5free_memory(vbuf);
+    } else if (H5Dvlen_get_buf_size(data_id, type_id, space_id, &vlen_size) < 0) {
+      throw Mantid::Nexus::Exception("Failed to read string length for variable-length string");
+    }
+    storage_size = static_cast<std::size_t>(vlen_size);
+  } else {
+    // a scalar dataspace reports a single point, so this covers rank 0 as well
+    hssize_t const npoints = H5Sget_simple_extent_npoints(space_id);
+    if (npoints < 0) {
+      throw Mantid::Nexus::Exception("Failed to get dataspace extent");
+    }
+    storage_size = H5Tget_size(type_id) * static_cast<std::size_t>(npoints);
+  }
+  return storage_size;
+}
+
 } // end of anonymous namespace
 
 namespace Mantid::Nexus {
@@ -135,7 +172,7 @@ namespace Mantid::Nexus {
 
 File::File(const char *filename, const NXaccess access)
     : m_filename(filename), m_access(access), m_address(), m_current_group_id(0), m_current_data_id(0),
-      m_current_type_id(0), m_current_space_id(0), m_gid_stack{0}, m_descriptor(m_filename, m_access) {
+      m_current_type_id(0), m_current_space_id(0), m_gid_stack{0} {
   this->initOpenFile(m_filename, m_access);
 }
 
@@ -162,7 +199,10 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
   UniqueFileID temp_fid;
   if (am != NXaccess::CREATE5) {
     if (H5Fis_accessible(filename.c_str(), fapl) <= 0) {
-      throw NXEXCEPTION("File is not HDF5");
+      // The descriptor used to perform this check while being constructed, ahead of the file open.
+      // Keep both its exception type and its message so callers see no change.
+      // NOTE must be std::invalid_argument for expected errors to be raised in python API
+      throw std::invalid_argument("ERROR: Kernel::NexusDescriptor couldn't open hdf5 file " + filename + "\n");
     }
     temp_fid = H5Fopen(filename.c_str(), (unsigned)am, fapl);
   } else {
@@ -204,6 +244,9 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
   } else {
     m_fileID = temp_fid.release();
   }
+  // pass the SharedFileID itself (not the raw hid_t) so the descriptor shares the same
+  // leash counter as m_fileID, rather than opening its own independent one on the same handle
+  m_descriptor = std::make_shared<NexusDescriptorLazy>(m_fileID, filename);
 }
 
 // copy constructors
@@ -248,8 +291,16 @@ File::~File() {
 }
 
 void File::close() {
-  // decrease reference counts to this file
+  // release the descriptor first so its handle is dropped before the file handle
+  m_descriptor.reset();
   m_fileID.reset();
+}
+
+NexusDescriptorLazy &File::descriptor() const {
+  if (!m_descriptor) {
+    throw NXEXCEPTION("No descriptor available: the file has been closed");
+  }
+  return *m_descriptor;
 }
 
 void File::flush() {
@@ -269,74 +320,88 @@ void File::openAddress(std::string const &address) {
     throw NXEXCEPTION("Supplied empty address");
   }
 
-  // if we are already there, do nothing
-  NexusAddress absaddr(formAbsoluteAddress(address));
+  NexusAddress const absaddr(formAbsoluteAddress(address));
+  // if we're already there, do nothing
   if (absaddr == m_address) {
     return;
   }
 
-  // confirm the address exists before trying to open
+  // confirm the address exists before modifying any file state
   if (!hasAddress(absaddr)) {
     throw NXEXCEPTION("Address " + address + " is not valid");
   }
 
-  // if a dataset is open, close it
+  // close any open dataset; pop m_address back to the parent group
   if (isDataSetOpen()) {
-    H5Dclose(m_current_data_id);
-    H5Tclose(m_current_type_id);
-    H5Sclose(m_current_space_id);
-    m_current_data_id = INVALID_HID;
-    m_current_space_id = INVALID_HID;
-    m_current_type_id = INVALID_HID;
+    closeData();
   }
 
-  // close all groups in the stack
-  for (hid_t const &gid : m_gid_stack) {
-    if (H5Iis_valid(gid) > 0) {
+  // find how many leading path components are shared between the current
+  // group position and the target (the "common trunk")
+  auto const cur_parts = m_address.parts();
+  auto const tgt_parts = absaddr.parts();
+
+  std::size_t common = 0;
+  while (common < cur_parts.size() && common < tgt_parts.size() && cur_parts[common] == tgt_parts[common]) {
+    ++common;
+  }
+
+  // close groups above the trunk (back-to-front, skipping root sentinel at [0])
+  while (m_gid_stack.size() > common + 1) {
+    hid_t gid = m_gid_stack.back();
+    if (H5Iis_valid(gid) > 0)
       H5Gclose(gid);
-    }
+    m_gid_stack.pop_back();
   }
-  m_gid_stack.clear();
-  m_gid_stack.push_back(0);
-  m_address = NexusAddress::root();
+  m_current_group_id = m_gid_stack.back(); // 0 sentinel → groupHID() returns m_fileID
+  for (std::size_t i = cur_parts.size(); i > common; --i)
+    m_address.popComponent();
 
-  // if we wanted to go to root, then stop here
-  if (absaddr == NexusAddress::root()) {
-    m_current_group_id = 0; // root!
+  // if we've landed exactly on the target (e.g. target was an ancestor), we're done
+  if (m_address == absaddr) {
     return;
   }
 
-  // open all groups in the address
-  NexusAddress groupstack(absaddr.parent_path());
-  NexusAddress fromroot;
-  if (groupstack.isRoot()) {
-    m_current_group_id = 0; // root!
-  } else {
-    m_current_group_id = m_fileID.get();
-    for (auto const &name : groupstack.parts()) {
-      fromroot /= name;
-      if (m_descriptor.isEntry(fromroot, m_descriptor.classTypeForName(fromroot))) {
-        hid_t gid = H5Gopen(m_fileID, fromroot.c_str(), H5P_DEFAULT);
-        m_gid_stack.push_back(gid);
-        // update stack in case of failure
-        m_current_group_id = gid;
-        m_address = fromroot;
-      } else {
-        throw NXEXCEPTION("Failed to open " + name + " while opening " + absaddr);
-      }
+  // open intermediate groups from trunk to the parent of the final element
+  for (std::size_t i = common; i + 1 < tgt_parts.size(); ++i) {
+    hid_t gid = H5Gopen(groupHID(), tgt_parts[i].c_str(), H5P_DEFAULT);
+    if (H5_id_is_valid(gid)) {
+      m_gid_stack.push_back(gid);
+      m_current_group_id = gid;
+      m_address.appendComponent(tgt_parts[i]);
+    } else {
+      throw NXEXCEPTION("Failed to open " + tgt_parts[i] + " while navigating to " + absaddr.string());
     }
   }
-  // open the last element -- either a group or a dataset
-  if (hasData(absaddr)) { // is a dataset
-    m_current_data_id = H5Dopen(m_fileID, absaddr.c_str(), H5P_DEFAULT);
-    m_current_type_id = H5Dget_type(m_current_data_id);
-    m_current_space_id = H5Dget_space(m_current_data_id);
-  } else if (hasAddress(absaddr)) { // not a dataset but exists = is a group
-    hid_t gid = H5Gopen(m_fileID, absaddr.c_str(), H5P_DEFAULT);
-    m_gid_stack.push_back(gid);
-    m_current_group_id = gid;
+
+  // open the final element — either a dataset or a group
+  std::string const &finalName = tgt_parts.back();
+  hid_t const last_parent = groupHID();
+  if (hasData(absaddr)) {
+    DataSetID newData = H5Dopen(last_parent, finalName.c_str(), H5P_DEFAULT);
+    if (!newData.isValid()) {
+      throw NXEXCEPTION("Failed to open dataset " + finalName + " while navigating to " + absaddr.string());
+    }
+    DataTypeID newType = H5Dget_type(newData);
+    if (!newType.isValid()) {
+      throw NXEXCEPTION("Failed to get datatype for " + finalName + " while navigating to " + absaddr.string());
+    }
+    DataSpaceID newSpace = H5Dget_space(newData);
+    if (!newSpace.isValid()) {
+      throw NXEXCEPTION("Failed to get dataspace for " + finalName + " while navigating to " + absaddr.string());
+    }
+    m_current_data_id = newData.release();
+    m_current_type_id = newType.release();
+    m_current_space_id = newSpace.release();
+  } else if (hasAddress(absaddr)) {
+    GroupID newGroup = H5Gopen(last_parent, finalName.c_str(), H5P_DEFAULT);
+    if (!newGroup.isValid()) {
+      throw NXEXCEPTION("Failed to open final element of address " + absaddr.string());
+    }
+    m_current_group_id = newGroup.release();
+    m_gid_stack.push_back(m_current_group_id);
   } else {
-    throw NXEXCEPTION("Failed to open final element of address " + absaddr);
+    throw NXEXCEPTION("Failed to open final element of address " + absaddr.string());
   }
   m_address = absaddr;
 }
@@ -360,25 +425,24 @@ NexusAddress File::groupAddress(NexusAddress const &addr) const {
 }
 
 bool File::hasAddress(std::string const &name) const {
-  if (name == "/") { // NexusDescriptor does not keep the root, but it does exist
+  NexusAddress const absaddr(formAbsoluteAddress(name));
+  if (absaddr.isRoot()) {
+    // the descriptor does not track the root, which always exists
     return true;
   } else {
-    return m_descriptor.isEntry(formAbsoluteAddress(name));
+    return descriptor().isEntry(absaddr);
   }
 }
 
 bool File::hasGroup(std::string const &name, std::string const &class_type) const {
-  std::string const address = formAbsoluteAddress(name);
-  return m_descriptor.isEntry(address, class_type);
+  std::string const addr = formAbsoluteAddress(name);
+  return descriptor().isEntry(addr, class_type);
 }
 
-bool File::hasData(std::string const &name) const {
-  std::string const address = formAbsoluteAddress(name);
-  return m_descriptor.isEntry(address, SCIENTIFIC_DATA_SET);
-}
+bool File::hasData(std::string const &name) const { return descriptor().isDataSet(formAbsoluteAddress(name)); }
 
 bool File::isDataSetOpen() const {
-  if (H5Iis_valid(m_current_data_id) <= 0) {
+  if (!H5_id_is_valid(m_current_data_id)) {
     return false;
   } else {
     return H5Iget_type(m_current_data_id) == H5I_DATASET;
@@ -386,30 +450,38 @@ bool File::isDataSetOpen() const {
 }
 
 bool File::isDataInt() const {
-  if (H5Iis_valid(m_current_type_id) <= 0) {
+  if (!H5_id_is_valid(m_current_type_id)) {
     throw NXEXCEPTION("No dataset is open");
+  } else {
+    return H5Tget_class(m_current_type_id) == H5T_INTEGER;
   }
-  return H5Tget_class(m_current_type_id) == H5T_INTEGER;
 }
 
 NexusAddress File::formAbsoluteAddress(NexusAddress const &name) const {
   NexusAddress new_name(name);
-  if (new_name.isAbsolute()) {
-    new_name = name;
-  } else {
-    new_name = groupAddress(getAddress()) / name;
+  if (!name.isAbsolute()) {
+    // When a dataset is open, form absolute address off of the parent group
+    // When a group is open, form absolute address off of the current group
+    new_name = (H5_id_is_valid(m_current_data_id) ? m_address.parent_path() : m_address) / name;
   }
-  // the caller is responsible for checking that it exists
   return new_name;
 }
 
 hid_t File::getCurrentId() const {
-  if (H5Iis_valid(m_current_data_id) > 0) {
+  if (H5_id_is_valid(m_current_data_id)) {
     return m_current_data_id;
-  } else if (H5Iis_valid(m_current_group_id) > 0) {
+  } else if (H5_id_is_valid(m_current_group_id)) {
     return m_current_group_id;
   } else {
-    return m_fileID;
+    return m_fileID.get();
+  }
+}
+
+hid_t File::groupHID() const {
+  if (H5_id_is_valid(m_current_group_id)) {
+    return m_current_group_id;
+  } else {
+    return m_fileID.get();
   }
 }
 
@@ -420,17 +492,6 @@ std::shared_ptr<H5::H5Object> File::getCurrentObject() const {
     return std::make_shared<H5::Group>(m_current_group_id);
   } else {
     return std::make_shared<H5::H5File>(m_fileID);
-  }
-}
-
-void File::registerEntry(std::string const &address, std::string const &name) {
-  if (m_descriptor.isEntry(address, name)) {
-    // do nothing
-  } else if (address.front() != '/') {
-    throw NXEXCEPTION("Address must be absolute: " + address);
-  } else {
-    // NOTE the caller is responsible for only registering valid address
-    m_descriptor.addEntry(address, name);
   }
 }
 
@@ -452,15 +513,21 @@ void File::makeGroup(const std::string &name, const std::string &nxclass, bool o
   H5::H5File h5file(m_fileID);
   H5::Group grp = H5Util::createGroupNXS(h5file, absaddr, nxclass);
 
+  // keep the descriptor in sync with the newly-created group
+  descriptor().registerEntry(absaddr.string(), nxclass);
+
   // cleanup
-  registerEntry(absaddr, nxclass);
   if (open_group) {
     // grp will close when it goes out of scope -- open new copy
-    m_current_group_id = H5Gopen(grp.getId(), ".", H5P_DEFAULT);
+    GroupID newGroup = H5Gopen(grp.getId(), ".", H5P_DEFAULT);
+    if (!newGroup.isValid()) {
+      throw NXEXCEPTION("Failed to open newly-created group " + absaddr.string());
+    }
+    m_current_group_id = newGroup.release();
     m_gid_stack.push_back(m_current_group_id);
     m_address = absaddr;
     // if we are opening a new group, close whatever dataset is already open
-    if (H5Iis_valid(m_current_data_id) > 0) {
+    if (H5_id_is_valid(m_current_data_id)) {
       closeData();
     }
   }
@@ -473,32 +540,21 @@ void File::openGroup(std::string const &name, std::string const &nxclass) {
   if (nxclass.empty()) {
     throw NXEXCEPTION("Supplied empty class name");
   }
-
-  NexusAddress const absaddr(formAbsoluteAddress(name));
-  if (absaddr == getAddress()) {
-    // we are already there
-    return;
+  // check for existence
+  GroupID iVID = H5Gopen(groupHID(), name.c_str(), H5P_DEFAULT);
+  if (iVID.get() < 0) {
+    throw NXEXCEPTION("Group " + (m_address / name).string() + " does not exist");
   }
-
-  hid_t iVID;
-  if (m_descriptor.isEntry(absaddr, nxclass)) {
-    iVID = H5Gopen(m_fileID, absaddr.c_str(), H5P_DEFAULT);
-  } else {
-    throw NXEXCEPTION("The supplied group " + absaddr + " does not exist");
+  // validate NX_class
+  NexusAddress const absstr = m_address / name;
+  if (!descriptor().isEntry(absstr, nxclass)) {
+    throw NXEXCEPTION("Group " + name + " at " + m_address + " does not have class " + nxclass);
   }
-
-  if (iVID < 0) {
-    std::stringstream msg;
-    msg << "Group " << absaddr.string() << " does not exist";
-    throw NXEXCEPTION(msg.str());
-  }
-
-  /* maintain stack */
-  m_current_group_id = iVID;
-  m_gid_stack.push_back(iVID);
-  m_address = absaddr;
+  m_current_group_id = iVID.release();
+  m_gid_stack.push_back(m_current_group_id);
+  m_address.appendComponent(name);
   // if we are opening a new group, close whatever dataset is already open
-  if (H5Iis_valid(m_current_data_id) > 0) {
+  if (H5_id_is_valid(m_current_data_id)) {
     closeData();
   }
 }
@@ -509,7 +565,7 @@ void File::closeGroup() {
   } else {
     // if a group is closed while a dataset is still open,
     // make sure the dataset and all its parts are closed
-    if (H5Iis_valid(m_current_data_id) > 0) {
+    if (H5_id_is_valid(m_current_data_id)) {
       closeData();
     }
     // close the current group and maintain stack
@@ -522,7 +578,7 @@ void File::closeGroup() {
     } else {
       m_current_group_id = 0; // root!
     }
-    m_address = m_address.parent_path();
+    m_address.popComponent();
   }
 }
 
@@ -555,35 +611,34 @@ void File::openData(std::string const &name) {
   }
 
   // close any open dataset
-  if (H5Iis_valid(m_current_data_id) > 0) {
+  if (H5_id_is_valid(m_current_data_id)) {
     closeData();
   }
   m_current_data_id = INVALID_HID;
   m_current_type_id = INVALID_HID;
   m_current_space_id = INVALID_HID;
 
-  NexusAddress absaddr(formAbsoluteAddress(name));
-
-  /* find the ID number and open the dataset */
-  DataSetID newData = H5Dopen(m_fileID, absaddr.c_str(), H5P_DEFAULT);
+  /* find the ID number and open relative to the current group handle */
+  DataSetID newData = H5Dopen(groupHID(), name.c_str(), H5P_DEFAULT);
   if (!newData.isValid()) {
-    throw NXEXCEPTION("Dataset (" + absaddr + ") not found at this level");
+    throw NXEXCEPTION("Dataset (" + name + ") not found at this level");
   }
   /* find the ID number of datatype */
   DataTypeID newType = H5Dget_type(newData);
   if (!newType.isValid()) {
-    throw NXEXCEPTION("Error opening dataset (" + absaddr + ")");
+    throw NXEXCEPTION("Error opening dataset (" + name + ")");
   }
   /* find the ID number of dataspace */
   DataSpaceID newSpace = H5Dget_space(newData);
   if (!newSpace.isValid()) {
-    throw NXEXCEPTION("Error opening dataset (" + absaddr + ")");
+    throw NXEXCEPTION("Error opening dataset (" + name + ")");
   }
+  // Set m_address -- must be before m_current_data_id
+  m_address.appendComponent(name);
   // now maintain stack
   m_current_data_id = newData.release();
   m_current_type_id = newType.release();
   m_current_space_id = newSpace.release();
-  m_address = absaddr;
 }
 
 void File::closeData() {
@@ -611,7 +666,7 @@ void File::closeData() {
   m_current_data_id = INVALID_HID;
   m_current_space_id = INVALID_HID;
   m_current_type_id = INVALID_HID;
-  m_address = m_address.parent_path();
+  m_address.popComponent();
 }
 
 // PUT DATA
@@ -762,25 +817,8 @@ string File::getStrData() {
     throw NXEXCEPTION(msg.str());
   }
   // determine storage size: type_size × npoints (mirrors H5Cpp's getInMemDataSize approach)
-  dimsize_t storage_size;
-  if (H5Tis_variable_str(m_current_type_id)) {
-    if (rank == 0) {
-      // H5Dvlen_get_buf_size is unreliable with H5S_SCALAR in some HDF5 versions.
-      char *vbuf = nullptr;
-      if (H5Dread(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vbuf) < 0 || !vbuf)
-        throw NXEXCEPTION("Failed to read scalar variable-length string");
-      storage_size = strlen(vbuf);
-      H5free_memory(vbuf);
-    } else if (H5Dvlen_get_buf_size(m_current_data_id, m_current_type_id, m_current_space_id, &storage_size) < 0) {
-      throw NXEXCEPTION("Failed to read string length for variable-length string");
-    }
-  } else {
-    hssize_t npoints = H5Sget_simple_extent_npoints(m_current_space_id);
-    if (npoints < 0)
-      throw NXEXCEPTION("Failed to get dataspace extent");
-    storage_size = H5Tget_size(m_current_type_id) * static_cast<dimsize_t>(npoints);
-  }
-  std::vector<char> value(static_cast<size_t>(storage_size) + 1, '\0');
+  std::size_t const storage_size = stringStorageSize(m_current_data_id, m_current_type_id, m_current_space_id);
+  std::vector<char> value(storage_size + 1, '\0');
   this->getData(value.data());
   return std::string(value.data(), strlen(value.data()));
 }
@@ -797,9 +835,10 @@ template <typename NumT> void File::getData(NumT *data) {
   }
 
   herr_t ret = -1;
-  hsize_t dims[H5S_MAX_RANK];
-  H5Sget_simple_extent_dims(m_current_space_id, dims, nullptr);
-  hsize_t ndims = H5Sget_simple_extent_ndims(m_current_space_id);
+  int const ndims = H5Sget_simple_extent_ndims(m_current_space_id);
+  if (ndims < 0) {
+    throw NXEXCEPTION("Cannot get rank for current dataset");
+  }
 
   if (ndims == 0) {
     DataTypeID datatype = H5Dget_type(m_current_data_id);
@@ -822,24 +861,54 @@ template <typename NumT> void File::getData(NumT *data) {
 }
 
 template <typename NumT> void File::getData(vector<NumT> &data) {
-  Info info = this->getInfo();
+  if (!isDataSetOpen()) {
+    throw NXEXCEPTION("No dataset open");
+  }
 
-  if (info.type != getType<NumT>()) {
+  // validate type on disk against queried type
+  H5T_class_t const tclass = H5Tget_class(m_current_type_id);
+  NXnumtype const file_type = hdf5ToNXType(tclass, m_current_type_id);
+  if (file_type != getType<NumT>()) {
     std::stringstream msg;
-    msg << "inconsistent NXnumtype file datatype=" << info.type << " supplied datatype=" << getType<NumT>();
+    msg << "inconsistent NXnumtype file datatype=" << file_type << " supplied datatype=" << getType<NumT>();
     throw NXEXCEPTION(msg.str());
   }
-  // determine the number of elements
-  size_t length =
-      std::accumulate(info.dims.cbegin(), info.dims.cend(), static_cast<size_t>(1),
-                      [](auto const subtotal, auto const &value) { return subtotal * static_cast<size_t>(value); });
 
-  // allocate memory to put the data into
-  // need to use resize() rather than reserve() so vector length gets set
-  data.resize(length);
+  if (tclass == H5T_STRING) {
+    // CHAR data does not hold one character per dataspace element.  makeData folds the string
+    // width into the datatype and leaves the trailing dataspace extent at 1, so the extents alone
+    // undercount the bytes by that width.  Ask HDF5 for the storage size instead.
+    size_t const length = stringStorageSize(m_current_data_id, m_current_type_id, m_current_space_id);
+    if (H5Sget_simple_extent_ndims(m_current_space_id) <= 1) {
+      // getData<char>() strips surrounding whitespace from rank<=1 strings and null-terminates the
+      // result, so leave room for the terminator and then shrink to the trimmed length.
+      data.resize(length + 1, NumT());
+      this->getData<NumT>(data.data());
+      auto const terminator = std::find(data.cbegin(), data.cend(), NumT());
+      data.resize(static_cast<size_t>(std::distance(data.cbegin(), terminator)));
+    } else {
+      // rank>=2 blocks are copied verbatim, with no trimming and no terminator
+      data.resize(length);
+      this->getData<NumT>(data.data());
+    }
+  } else {
+    // determine the number of elements (product of the per-dimension extents).
+    // A scalar/null dataspace has rank 0, giving an empty range whose product is the accumulate seed of 1.
+    std::array<hsize_t, H5S_MAX_RANK> dims{0};
+    int const rank = H5Sget_simple_extent_dims(m_current_space_id, dims.data(), nullptr);
+    if (rank < 0) {
+      throw NXEXCEPTION("Cannot get rank for current dataset");
+    }
+    size_t const length = std::accumulate(dims.cbegin(), dims.cbegin() + rank, size_t{1},
+                                          [](size_t acc, hsize_t dim) { return acc * static_cast<size_t>(dim); });
 
-  // fetch the data
-  this->getData<NumT>(data.data());
+    // allocate memory to put the data into
+    // need to use resize() rather than reserve() so vector length gets set
+    data.resize(length);
+
+    // fetch the data
+    this->getData<NumT>(data.data());
+  }
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -969,8 +1038,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
       throw NXEXCEPTION(msg.str());
     }
   }
-  // cleanup
-  registerEntry(absaddr, SCIENTIFIC_DATA_SET);
+  descriptor().registerDataSet(absaddr.string());
   if (open_data) {
     m_current_type_id = datatype.release();
     m_current_space_id = dataspace.release();
@@ -1402,7 +1470,10 @@ Info File::getInfo() {
         throw NXEXCEPTION("Failed to read string length for variable-length string");
       }
     } else {
-      // fixed-length: byte width is encoded in the datatype itself
+      // fixed-length: the per-element byte width is encoded in the datatype itself. Unlike
+      // stringStorageSize() (used for a single full-buffer read), this must NOT multiply by the
+      // dataspace's total point count: a multi-row block folds its width into the datatype while
+      // leaving dims.back()==1, so npoints here can exceed 1 without the string itself being longer.
       length = H5Tget_size(m_current_type_id);
     }
     info.dims.back() = length;
@@ -1430,23 +1501,33 @@ void File::getEntries(Entries &result) const {
 }
 
 std::string File::getTopLevelEntryName() const {
-  std::string top("");
-  // check all of the NXentry's for one at top-level
-  auto allEntryAddresses = m_descriptor.allAddressesOfType("NXentry");
-  auto iTopAddress = std::find_if(allEntryAddresses.cbegin(), allEntryAddresses.cend(),
-                                  [](auto x) { return x.find_first_of('/', 1) == std::string::npos; });
-  if (iTopAddress != allEntryAddresses.cend()) {
-    top = *iTopAddress;
+  // Iterate only the root-level links to find the first NXentry group.
+  H5::H5File h5file(m_fileID);
+  H5::Group root = h5file.openGroup("/");
+  hsize_t const n = root.getNumObjs();
+  for (hsize_t i = 0; i < n; ++i) {
+    if (root.getObjTypeByIdx(i) != H5G_GROUP)
+      continue;
+    std::string const childName = root.getObjnameByIdx(i);
+    try {
+      H5::Group child = root.openGroup(childName);
+      if (H5Util::keyHasValue(child, GROUP_CLASS_SPEC, "NXentry"))
+        return "/" + childName;
+    } catch (H5::Exception const &) {
+      continue;
+    }
   }
-  if (top.empty()) {
-    throw NXEXCEPTION("unable to find top-level entry, no valid groups");
-  }
-  return top;
+  throw NXEXCEPTION("unable to find top-level entry, no valid groups");
 }
 
 std::set<std::string> File::getEntriesByClass(std::string const &class_type) const {
-  return m_descriptor.allAddressesOfType(class_type);
+  // served from the descriptor's cache; the first enumeration triggers one full-file scan (memoized)
+  return descriptor().allAddressesOfType(class_type);
 }
+
+bool File::classTypeExists(std::string const &class_type) const { return descriptor().classTypeExists(class_type); }
+
+std::string File::classForEntry(std::string const &entry) const { return descriptor()[entry]; }
 
 //------------------------------------------------------------------------------------------------------------------
 // ATTRIBUTE METHODS
@@ -1606,7 +1687,7 @@ bool File::hasAttr(const std::string &name) const {
 
 NXlink File::getGroupID() {
   NXlink link;
-  if (H5Iis_valid(m_current_group_id) <= 0) {
+  if (!H5_id_is_valid(m_current_group_id)) {
     throw NXEXCEPTION("getGroupID failed, No current group open");
   }
 
@@ -1637,7 +1718,7 @@ NXlink File::getDataID() {
 }
 
 void File::makeLink(NXlink const &link) {
-  if (H5Iis_valid(m_current_group_id) <= 0) { /* root level, can not link here */
+  if (!H5_id_is_valid(m_current_group_id)) { /* root level, can not link here */
     throw NXEXCEPTION("makeLink failed : cannot form link at root level");
   }
 
@@ -1647,10 +1728,12 @@ void File::makeLink(NXlink const &link) {
 
   // build addressname to link from our current group and the name of the thing to link
   std::string linkTarget(groupAddress(m_address) / itemName);
-  H5Lcreate_hard(m_fileID, link.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT, H5P_DEFAULT);
-
-  // register the entry
-  registerEntry(linkTarget, m_descriptor.classTypeForName(link.targetAddress));
+  if (H5Lcreate_hard(m_fileID, link.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT, H5P_DEFAULT) <
+      0) {
+    throw NXEXCEPTION("makeLink failed : could not create hard link from " + link.targetAddress + " to " + linkTarget);
+  }
+  // keep the descriptor in sync with the newly-created link
+  descriptor().registerEntry(linkTarget, descriptor()[link.targetAddress]);
 
   // set the target attribute
   NexusAddress here(m_address);

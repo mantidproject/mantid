@@ -74,7 +74,7 @@ int LoadNXSPE::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
   for (const auto &it : entries) {
     if (it.second == "NXentry") {
       std::string defAddress = it.first + "/definition";
-      if (descriptor.isEntry(defAddress, Mantid::Nexus::SCIENTIFIC_DATA_SET)) {
+      if (descriptor.isDataSet(defAddress)) {
         // check the dataset to see if it matches the definition we are looking for
         confidence = identiferConfidence(descriptor.getStrData(defAddress));
       }

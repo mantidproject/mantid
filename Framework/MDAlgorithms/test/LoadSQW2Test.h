@@ -20,6 +20,7 @@
 #include <Poco/TemporaryFile.h>
 
 #include <array>
+#include <filesystem>
 #include <utility>
 
 using Mantid::API::ExperimentInfo;

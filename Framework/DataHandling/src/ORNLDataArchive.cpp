@@ -14,6 +14,7 @@
 
 #include <boost/algorithm/string/join.hpp>
 
+#include <filesystem>
 #include <map>
 #include <regex>
 #include <sstream>
