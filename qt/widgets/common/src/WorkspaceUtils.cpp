@@ -10,6 +10,7 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidGeometry/Instrument.h"
 #include <boost/algorithm/string.hpp>
@@ -224,6 +225,41 @@ bool doAllWsExistInADS(std::vector<std::string> const &workspaceNames) {
 void removeADSWorkspace(std::string const &workspaceName) {
   if (doesExistInADS(workspaceName)) {
     AnalysisDataService::Instance().remove(workspaceName);
+  }
+}
+
+/**
+ * Ensures the vertical (spectrum) axis of the named workspace is a numeric axis, and labels it with
+ * the MomentumTransfer unit if it does not already have a meaningful one. This is needed before
+ * running some Q-conversion algorithms (e.g. SofQWMoments, or multi-domain fitting across Q) on a
+ * workspace whose vertical axis has no physical unit set, such as one loaded from a text file. It
+ * is a no-op if the workspace does not exist, or if its vertical axis already has a unit other than
+ * "Empty" or "Label" (i.e. an existing, genuine unit is never overwritten).
+ *
+ * @param workspaceName :: Name of the workspace in the ADS to update.
+ */
+void setNumericQAxis(std::string const &workspaceName) {
+  if (workspaceName.empty() || !doesExistInADS(workspaceName)) {
+    return;
+  }
+
+  auto const ws = getADSWorkspace(workspaceName);
+  if (!ws) {
+    return;
+  }
+
+  auto const &axis = ws->getAxis(1);
+  if (!axis->isNumeric()) {
+    auto numericAxis = std::make_unique<NumericAxis>(ws->getNumberHistograms());
+    for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
+      numericAxis->setValue(i, axis->getValue(i));
+    }
+    ws->replaceAxis(1, std::move(numericAxis));
+  }
+
+  auto const unitID = ws->getAxis(1)->unit()->unitID();
+  if (unitID == "Empty" || unitID == "Label") {
+    ws->getAxis(1)->setUnit("MomentumTransfer");
   }
 }
 

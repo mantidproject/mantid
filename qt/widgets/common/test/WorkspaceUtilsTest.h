@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/NumericAxis.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
@@ -137,5 +138,87 @@ public:
 
     TS_ASSERT_EQUALS(getIndexString("testWs"), "0-4");
     AnalysisDataService::Instance().clear();
+  }
+
+  void test_setNumericQAxis_converts_non_numeric_axis_to_numeric_with_momentum_transfer_unit() {
+    auto const testWorkspace = createWorkspace(5);
+    AnalysisDataService::Instance().addOrReplace("workspace_test", testWorkspace);
+    TS_ASSERT(!testWorkspace->getAxis(1)->isNumeric());
+
+    setNumericQAxis("workspace_test");
+
+    auto const axis = testWorkspace->getAxis(1);
+    TS_ASSERT(axis->isNumeric());
+    TS_ASSERT_EQUALS(axis->unit()->unitID(), "MomentumTransfer");
+  }
+
+  void test_setNumericQAxis_sets_unit_when_axis_is_already_numeric_with_empty_unit() {
+    auto const testWorkspace = createWorkspace(5);
+    auto numericAxis = std::make_unique<NumericAxis>(testWorkspace->getNumberHistograms());
+    for (size_t i = 0; i < testWorkspace->getNumberHistograms(); ++i) {
+      numericAxis->setValue(i, static_cast<double>(i));
+    }
+    testWorkspace->replaceAxis(1, std::move(numericAxis));
+    TS_ASSERT_EQUALS(testWorkspace->getAxis(1)->unit()->unitID(), "Empty");
+    AnalysisDataService::Instance().addOrReplace("workspace_test", testWorkspace);
+
+    setNumericQAxis("workspace_test");
+
+    TS_ASSERT_EQUALS(testWorkspace->getAxis(1)->unit()->unitID(), "MomentumTransfer");
+  }
+
+  void test_setNumericQAxis_sets_unit_when_axis_is_already_numeric_with_label_unit() {
+    auto const testWorkspace = createWorkspace(5);
+    auto numericAxis = std::make_unique<NumericAxis>(testWorkspace->getNumberHistograms());
+    for (size_t i = 0; i < testWorkspace->getNumberHistograms(); ++i) {
+      numericAxis->setValue(i, static_cast<double>(i));
+    }
+    testWorkspace->replaceAxis(1, std::move(numericAxis));
+    testWorkspace->getAxis(1)->setUnit("Label");
+    AnalysisDataService::Instance().addOrReplace("workspace_test", testWorkspace);
+
+    setNumericQAxis("workspace_test");
+
+    TS_ASSERT_EQUALS(testWorkspace->getAxis(1)->unit()->unitID(), "MomentumTransfer");
+  }
+
+  void test_setNumericQAxis_does_not_overwrite_an_existing_meaningful_unit() {
+    // A workspace whose vertical axis already carries a genuine physical unit (not just
+    // "Empty" or "Label") should be left alone, even if that unit isn't MomentumTransfer.
+    auto const testWorkspace = createWorkspace(5);
+    auto numericAxis = std::make_unique<NumericAxis>(testWorkspace->getNumberHistograms());
+    for (size_t i = 0; i < testWorkspace->getNumberHistograms(); ++i) {
+      numericAxis->setValue(i, static_cast<double>(i));
+    }
+    testWorkspace->replaceAxis(1, std::move(numericAxis));
+    testWorkspace->getAxis(1)->setUnit("Wavelength");
+    AnalysisDataService::Instance().addOrReplace("workspace_test", testWorkspace);
+
+    setNumericQAxis("workspace_test");
+
+    TS_ASSERT_EQUALS(testWorkspace->getAxis(1)->unit()->unitID(), "Wavelength");
+  }
+
+  void test_setNumericQAxis_leaves_axis_unchanged_when_already_numeric_with_momentum_transfer_unit() {
+    auto const testWorkspace = createWorkspace(5);
+    auto numericAxis = std::make_unique<NumericAxis>(testWorkspace->getNumberHistograms());
+    for (size_t i = 0; i < testWorkspace->getNumberHistograms(); ++i) {
+      numericAxis->setValue(i, static_cast<double>(i));
+    }
+    testWorkspace->replaceAxis(1, std::move(numericAxis));
+    testWorkspace->getAxis(1)->setUnit("MomentumTransfer");
+    AnalysisDataService::Instance().addOrReplace("workspace_test", testWorkspace);
+
+    TS_ASSERT_THROWS_NOTHING(setNumericQAxis("workspace_test"));
+
+    TS_ASSERT_EQUALS(testWorkspace->getAxis(1)->unit()->unitID(), "MomentumTransfer");
+  }
+
+  void test_setNumericQAxis_does_nothing_for_a_workspace_that_does_not_exist() {
+    TS_ASSERT_THROWS_NOTHING(setNumericQAxis("not_a_real_workspace"));
+  }
+
+  void test_setNumericQAxis_does_nothing_for_an_empty_workspace_name() {
+    TS_ASSERT_THROWS_NOTHING(setNumericQAxis(""));
   }
 };

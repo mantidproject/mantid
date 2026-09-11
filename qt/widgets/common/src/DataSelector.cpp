@@ -251,6 +251,16 @@ void DataSelector::setLoadProperty(std::string const &propertyName, bool const v
 }
 
 /**
+ * Set an extra string-valued property on the load algorithm before execution.
+ *
+ * @param propertyName :: The name of the Load algorithm property to be set
+ * @param value :: The value of the Load algorithm property to be set
+ */
+void DataSelector::setLoadProperty(std::string const &propertyName, std::string const &value) {
+  Mantid::API::AlgorithmProperties::update(propertyName, value, m_loadProperties);
+}
+
+/**
  * Handles when the load algorithm completes.
  *
  * @param error :: Whether loading completed without error

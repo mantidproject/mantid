@@ -159,6 +159,10 @@ void IqtView::setup() {
 
   m_uiForm.dsInput->isOptional(true);
   m_uiForm.dsResolution->isOptional(true);
+  // Text files loaded via LoadAscii default to Unit="Energy"; these workspaces are
+  // always in energy transfer, so label them correctly regardless of the input format.
+  m_uiForm.dsInput->setLoadProperty("Unit", std::string("DeltaE"));
+  m_uiForm.dsResolution->setLoadProperty("Unit", std::string("DeltaE"));
   notifyIterationsChanged(m_uiForm.spIterations->value());
   notifyErrorsClicked(1);
   notifyEnableNormalizationClicked(1);

@@ -20,10 +20,13 @@ def get_run_number(ws_name: str) -> str:
     Gets the run number for a given workspace.
 
     Attempts to get from logs and falls back to parsing the workspace name for
-    something that looks like a run number.
+    something that looks like a run number. Workspaces with no run number
+    associated with them, e.g. those loaded from a text file, fall back to
+    "0" rather than raising so that algorithms which only use this to build
+    a default output name do not fail.
 
     @param ws_name Name of workspace
-    @return Parsed run number
+    @return Parsed run number, or "0" if one could not be determined
     """
     workspace = AnalysisDataService.retrieve(ws_name)
     run_number = str(workspace.getRunNumber())
@@ -37,11 +40,12 @@ def get_run_number(ws_name: str) -> str:
 
     # attempt reading from the logs (ILL)
     run = workspace.getRun()
-    if not run.hasProperty("run_number"):
-        raise RuntimeError("Could not find run number associated with workspace.")
+    if run.hasProperty("run_number"):
+        log = run.getLogData("run_number").value
+        return log.split(",")[0]
 
-    log = run.getLogData("run_number").value
-    return log.split(",")[0]
+    # No run number could be found, e.g. for a workspace loaded from a text file.
+    return "0"
 
 
 def get_instrument_and_run(ws_name: str) -> Tuple[str, str]:

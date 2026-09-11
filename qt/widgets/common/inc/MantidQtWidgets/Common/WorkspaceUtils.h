@@ -23,6 +23,8 @@ EXPORT_OPT_MANTIDQT_COMMON std::string getWorkspaceBasename(const std::string &w
 EXPORT_OPT_MANTIDQT_COMMON std::unordered_map<std::string, size_t>
 extractAxisLabels(const Mantid::API::MatrixWorkspace_const_sptr &workspace, const size_t &axisIndex);
 
+EXPORT_OPT_MANTIDQT_COMMON void setNumericQAxis(std::string const &workspaceName);
+
 EXPORT_OPT_MANTIDQT_COMMON std::string getEMode(const Mantid::API::MatrixWorkspace_sptr &ws);
 EXPORT_OPT_MANTIDQT_COMMON std::optional<double> getEFixed(const Mantid::API::MatrixWorkspace_sptr &ws);
 

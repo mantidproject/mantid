@@ -18,7 +18,6 @@
 #include "../QENSFitting/MockObjects.h"
 #include "MantidQtWidgets/Spectroscopy/MockObjects.h"
 
-#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidFrameworkTestHelpers/MockAlgorithm.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -26,7 +25,6 @@
 #include <MantidQtWidgets/Common/MockAlgorithmRunner.h>
 
 using namespace Mantid::API;
-using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::Inelastic;
 using namespace testing;
@@ -49,10 +47,7 @@ public:
     ON_CALL(*m_view, getPlotOptions()).WillByDefault(Return((m_outputPlotView.get())));
     ON_CALL(*m_view, getRunView()).WillByDefault(Return((m_runView.get())));
     m_presenter =
-        std::make_unique<MomentsPresenter>(nullptr, std::move(algorithmRunner), m_view.get(), std::move(model));
-
-    m_workspace = createWorkspace(5);
-    m_ads = std::make_unique<SetUpADSWithWorkspace>("workspace_test", m_workspace);
+        std::make_unique<TestableMomentsPresenter>(nullptr, std::move(algorithmRunner), m_view.get(), std::move(model));
 
     m_algorithm = std::make_shared<MockAlgorithm>();
   }
@@ -133,14 +128,19 @@ public:
   }
 
 private:
+  // setNumericQAxis moved to MantidQt::MantidWidgets::WorkspaceUtils (see WorkspaceUtilsTest.h);
+  // MomentsPresenter now calls it directly, so no protected-member exposure is needed here.
+  class TestableMomentsPresenter : public MomentsPresenter {
+  public:
+    using MomentsPresenter::MomentsPresenter;
+  };
+
   NiceMock<MockMomentsModel> *m_model;
   NiceMock<MockAlgorithmRunner> *m_algorithmRunner;
   std::unique_ptr<NiceMock<MockOutputPlotOptionsView>> m_outputPlotView;
   std::unique_ptr<NiceMock<MockRunView>> m_runView;
   std::unique_ptr<NiceMock<MockMomentsView>> m_view;
-  std::unique_ptr<MomentsPresenter> m_presenter;
+  std::unique_ptr<TestableMomentsPresenter> m_presenter;
 
-  MatrixWorkspace_sptr m_workspace;
-  std::unique_ptr<SetUpADSWithWorkspace> m_ads;
   std::shared_ptr<MockAlgorithm> m_algorithm;
 };

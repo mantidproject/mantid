@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.api import mtd
-from mantid.simpleapi import CompareWorkspaces, CreateEmptyTableWorkspace, Load, TransformToIqt
+from mantid.simpleapi import CompareWorkspaces, CreateEmptyTableWorkspace, CreateSampleWorkspace, Load, TransformToIqt
 
 
 class TransformToIqtTest(unittest.TestCase):
@@ -65,6 +65,37 @@ class TransformToIqtTest(unittest.TestCase):
 
         self._param_table.addRow([1724, 10.0, 172, -0.5, 0.5, 0.00581395, 0.0175, 6])
         self.assertTrue(CompareWorkspaces(params, self._param_table, 1e-8)[0])
+
+    def test_with_workspaces_that_have_no_instrument_run_number_or_efixed_information(self):
+        """
+        Tests that TransformToIqt does not fail when the sample and resolution workspaces have no
+        run number, IPF resolution parameter or Efixed value associated with them, e.g. workspaces
+        loaded from a text file.
+        """
+        sample = CreateSampleWorkspace(
+            NumBanks=1,
+            BankPixelWidth=1,
+            XUnit="DeltaE",
+            XMin=-1.0,
+            XMax=1.0,
+            BinWidth=0.01,
+            OutputWorkspace="__TransformToIqtTest_sample",
+        )
+        resolution = CreateSampleWorkspace(
+            NumBanks=1,
+            BankPixelWidth=1,
+            XUnit="DeltaE",
+            XMin=-1.0,
+            XMax=1.0,
+            BinWidth=0.01,
+            OutputWorkspace="__TransformToIqtTest_resolution",
+        )
+
+        params, iqt = TransformToIqt(SampleWorkspace=sample, ResolutionWorkspace=resolution, BinReductionFactor=10)
+
+        self.assertIsNotNone(iqt)
+        self.assertEqual(params.column("Resolution")[0], 0.0)
+        self.assertEqual(params.column("ResolutionBins")[0], 0)
 
 
 if __name__ == "__main__":
