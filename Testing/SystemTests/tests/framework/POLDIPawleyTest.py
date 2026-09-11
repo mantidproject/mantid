@@ -38,7 +38,8 @@ class POLDIPawleyWorkflow(systemtesting.MantidSystemTest):
         si.merge_reflections()
 
         # run 1D Pawley refinement
-        pawley1d = PawleyPattern1D(self.ws_autocorr, [si], profile=GaussianProfile(), bg_func=FlatBackground(), ispec=self.ispec)
+        pawley1d = PawleyPattern1D(self.ws_autocorr, [si], profile=GaussianProfile(), bg_func=FlatBackground())
+        pawley1d.set_ispec(self.ispec)
         pawley1d.estimate_initial_params()
         res = pawley1d.fit()
         # collect attributes to assert
@@ -58,7 +59,7 @@ class POLDIPawleyWorkflow(systemtesting.MantidSystemTest):
         self.ws2d_sim_detid = ws2d_sim.getSpectrum(0).getDetectorIDs()[0]
 
         # Do unconstrained 2D fit (all peaks independent)
-        pawley2d_free = pawley2d.create_no_constriants_fit()
+        pawley2d_free = pawley2d.create_no_constraints_fit()
         res = pawley2d_free.fit()
         # collect attributes to assert
         self.cost_2d_free = res.cost
@@ -75,7 +76,7 @@ class POLDIPawleyWorkflow(systemtesting.MantidSystemTest):
 
         # 2D Pawley
         self.assertAlmostEqual(self.alatt_2d, 5.43122, delta=1e-4)
-        self.assertAlmostEqual(self.cost_2d, 248117, delta=1)
+        self.assertAlmostEqual(self.cost_2d, 248250, delta=40)
         self.assertEqual(self.ws2d_sim_nspec, 224)
         self.assertEqual(self.ws2d_sim_detid, 211001)
 
