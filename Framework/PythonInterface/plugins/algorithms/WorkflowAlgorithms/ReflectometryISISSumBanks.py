@@ -46,7 +46,9 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
 
         masked_workspace = self.mask_workspace(input_workspace)
 
-        num_banks = self._get_rectangular_detector_component(input_workspace).xpixels()
+        bank = self._get_rectangular_detector_component(input_workspace)
+        component_info = input_workspace.componentInfo()
+        num_banks = component_info.pixelGridComponent(component_info.indexOfAny(bank.getName())).nX
         if num_banks == 1:
             self.setProperty(self._OUTPUT_WS, masked_workspace)
             return

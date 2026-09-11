@@ -133,6 +133,9 @@ void export_DetectorInfo() {
       .def("indexOf", &DetectorInfo::indexOf, (arg("self"), arg("detId")),
            "Returns the index of the detector with the given id.")
 
+      .def("detid", &DetectorInfo::detid, (arg("self"), arg("index")),
+           "Returns the detector id of the detector identified by 'index'.")
+
       .def("isMonitor", isMonitor, (arg("self"), arg("index")), "Returns True if the detector is a monitor.")
 
       .def("isMasked", isMasked, (arg("self"), arg("index")), "Returns True if the detector is masked.")

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidBeamline/ComponentType.h"
+#include "MantidBeamline/PixelGridComponent.h"
 #include "MantidGeometry/Instrument/SolidAngleParams.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/IObject.h"
@@ -23,6 +24,7 @@
 #include <boost/python/return_value_policy.hpp>
 
 using Mantid::Beamline::ComponentType;
+using Mantid::Beamline::PixelGridComponent;
 using Mantid::Geometry::ComponentInfo;
 using Mantid::Geometry::SolidAngleParams;
 using Mantid::Kernel::Quat;
@@ -41,6 +43,12 @@ ComponentInfoPythonIterator make_pyiterator(ComponentInfo &componentInfo) {
 // IDetector::solidAngle(observer), constructing SolidAngleParams internally.
 double solidAngle(const ComponentInfo &self, const size_t index, const V3D &observer) {
   return self.solidAngle(index, SolidAngleParams(observer));
+}
+
+// Axis fill order ('x'/'y'/'z' permutation) as a 3-character string, since
+// std::array<char, 3> has no automatic boost::python converter.
+std::string pixelGridIdFillOrder(const PixelGridComponent &self) {
+  return std::string(self.idFillOrder.begin(), self.idFillOrder.end());
 }
 
 dict shapeToComponentIndices(const ComponentInfo &componentInfo) {
@@ -77,6 +85,24 @@ void export_ComponentInfo() {
       .value("Unstructured", ComponentType::Unstructured)
       .value("Detector", ComponentType::Detector)
       .value("OutlineComposite", ComponentType::OutlineComposite);
+
+  class_<PixelGridComponent>("PixelGridComponent")
+
+      .def_readonly("nX", &PixelGridComponent::nX)
+      .def_readonly("nY", &PixelGridComponent::nY)
+      .def_readonly("nZ", &PixelGridComponent::nZ)
+      .def_readonly("xStart", &PixelGridComponent::xStart)
+      .def_readonly("yStart", &PixelGridComponent::yStart)
+      .def_readonly("zStart", &PixelGridComponent::zStart)
+      .def_readonly("xStep", &PixelGridComponent::xStep)
+      .def_readonly("yStep", &PixelGridComponent::yStep)
+      .def_readonly("zStep", &PixelGridComponent::zStep)
+      .def_readonly("idStart", &PixelGridComponent::idStart)
+      .def_readonly("idStep", &PixelGridComponent::idStep)
+      .def_readonly("idStepByRow", &PixelGridComponent::idStepByRow)
+      .def_readonly("minDetectorID", &PixelGridComponent::minDetectorID)
+      .def_readonly("maxDetectorID", &PixelGridComponent::maxDetectorID)
+      .add_property("idFillOrder", &pixelGridIdFillOrder);
 
   class_<ComponentInfo, boost::noncopyable>("ComponentInfo", no_init)
 
@@ -179,6 +205,16 @@ void export_ComponentInfo() {
 
       .def("componentType", &ComponentInfo::componentType, (arg("self"), arg("index")),
            "Returns the ComponentType of the component identified by 'index'.")
+
+      .def("pixelGridComponent", &ComponentInfo::pixelGridComponent, (arg("self"), arg("index")),
+           "Returns the PixelGridComponent (pixel counts, detector-ID numbering scheme) "
+           "of the Rectangular/Grid bank identified by 'index'. Raises RuntimeError if "
+           "the component is not a Rectangular or Grid bank.")
+
+      .def("detectorIndexAtXYZ", &ComponentInfo::detectorIndexAtXYZ,
+           (arg("self"), arg("index"), arg("x"), arg("y"), arg("z")),
+           "Returns the detector index of the pixel at (x, y, z) within the "
+           "Rectangular/Grid bank identified by 'index'.")
 
       .def("indexOfAny", &ComponentInfo::indexOfAny, (arg("self"), arg("name")),
            "Returns the index of any component matching name. Raises "
