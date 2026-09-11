@@ -52,7 +52,7 @@ requirements:
     - qscintilla2 ${{ qscintilla2 }}
     - qtpy ${{ qtpy }}
     - quickbayes ${{ quickbayes }}
-    - rattler-build ==0.70.0
+    - rattler-build 0.76.*
     - rattler-index
     - requests>=2.32.4
     - scipy ${{ scipy }}
