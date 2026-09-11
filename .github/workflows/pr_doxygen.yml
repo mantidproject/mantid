@@ -1,9 +1,9 @@
 name: PR doxygen
 
 on:
-  workflow_run:
-    workflows: [PR cpp check]
-    types: [completed]
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
 
 # cancel previous job if a new commit is pushed
 concurrency:
@@ -12,12 +12,9 @@ concurrency:
 
 jobs:
   doxygen:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
 
       - uses: dorny/paths-filter@v4
         id: changes
