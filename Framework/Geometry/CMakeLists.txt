@@ -66,6 +66,7 @@ set(SRC_FILES
     src/Instrument/ObjComponent.cpp
     src/Instrument/ParComponentFactory.cpp
     src/Instrument/Parameter.cpp
+    src/Instrument/ParameterInfo.cpp
     src/Instrument/ParameterMap.cpp
     src/Instrument/RectangularDetector.cpp
     src/Instrument/ReferenceFrame.cpp
@@ -216,6 +217,7 @@ set(INC_FILES
     inc/MantidGeometry/Instrument/ParComponentFactory.h
     inc/MantidGeometry/Instrument/Parameter.h
     inc/MantidGeometry/Instrument/ParameterFactory.h
+    inc/MantidGeometry/Instrument/ParameterInfo.h
     inc/MantidGeometry/Instrument/ParameterMap.h
     inc/MantidGeometry/Instrument/RectangularDetector.h
     inc/MantidGeometry/Instrument/ReferenceFrame.h
@@ -371,6 +373,7 @@ set(TEST_FILES
     ParInstrumentTest.h
     ParObjCompAssemblyTest.h
     ParObjComponentTest.h
+    ParameterInfoTest.h
     ParameterMapTest.h
     ParametrizedComponentTest.h
     PeakTransformHKLTest.h
