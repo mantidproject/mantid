@@ -9,6 +9,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidDataHandling/InstrumentSpectraMapping.h"
 
 namespace Mantid::DataHandling {
 
@@ -49,6 +50,9 @@ void LoadMappingTable::exec() {
   }
   // Fill in the mapping in the workspace's ISpectrum objects
   localWorkspace->updateSpectraUsing(SpectrumDetectorMapping(iraw->spec, iraw->udet, number_spectra));
+  // Map spectra whose file detector IDs the instrument does not define onto the detector of the same ID; a no-op
+  // unless the instrument definition enables it.
+  correctSpectraMapping(*localWorkspace, g_log);
   progress(1);
 }
 

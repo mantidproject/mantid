@@ -24,7 +24,7 @@ import os
 import numpy as np
 import re
 
-from IndirectCommon import format_runs
+from IndirectCommon import format_runs, validate_instrument_configuration
 
 
 class SofQWMomentsScan(DataProcessorAlgorithm):
@@ -74,13 +74,13 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
         self.declareProperty(
             name="Analyser",
             defaultValue="",
-            validator=StringListValidator(["graphite", "mica", "fmica"]),
+            validator=StringListValidator(["graphite", "mica", "fmica", "silicon"]),
             doc="Analyser bank used during run.",
         )
         self.declareProperty(
             name="Reflection",
             defaultValue="",
-            validator=StringListValidator(["002", "004", "006"]),
+            validator=StringListValidator(["002", "004", "006", "111", "333"]),
             doc="Reflection number for instrument setup during run.",
         )
         self.declareProperty(
@@ -339,15 +339,11 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
         analyser = self.getPropertyValue("Analyser")
         reflection = self.getPropertyValue("Reflection")
 
-        ipf_filename = os.path.join(
-            config["instrumentDefinition.directory"], instrument_name + "_" + analyser + "_" + reflection + "_Parameters.xml"
-        )
-
-        if not os.path.exists(ipf_filename):
-            error_message = "Invalid instrument configuration"
-            issues["Instrument"] = error_message
-            issues["Analyser"] = error_message
-            issues["Reflection"] = error_message
+        configuration_issue = validate_instrument_configuration(instrument_name, analyser, reflection)
+        if configuration_issue is not None:
+            issues["Instrument"] = configuration_issue
+            issues["Analyser"] = configuration_issue
+            issues["Reflection"] = configuration_issue
 
         # Validate spectra range
         spectra_range = self.getProperty("SpectraRange").value

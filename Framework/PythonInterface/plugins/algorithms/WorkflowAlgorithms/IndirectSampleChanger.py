@@ -45,13 +45,13 @@ class IndirectSampleChanger(DataProcessorAlgorithm):
         self.declareProperty(
             name="Analyser",
             defaultValue="",
-            validator=StringListValidator(["graphite", "mica", "fmica"]),
+            validator=StringListValidator(["graphite", "mica", "fmica", "silicon"]),
             doc="The analyser bank used during run.",
         )
         self.declareProperty(
             name="Reflection",
             defaultValue="",
-            validator=StringListValidator(["002", "004", "006"]),
+            validator=StringListValidator(["002", "004", "006", "111", "333"]),
             doc="Reflection number for instrument setup during run.",
         )
 

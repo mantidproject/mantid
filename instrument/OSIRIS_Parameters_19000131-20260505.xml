@@ -1,17 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "OSIRIS" valid-from = "2026-05-05 00:00:00" valid-to = "2100-01-31 23:59:59">
+<parameter-file instrument = "OSIRIS" valid-from = "1900-01-31 23:59:59" valid-to = "2026-05-05 00:00:00">
 
 <component-link name = "OSIRIS">
-
-<!-- The silicon analyser is read out as eight hardware elements per pixel, which the electronics sum into a single
-     spectrum, so a data file's spectrum-detector table gives every silicon spectrum eight detector IDs from a
-     numbering space this definition does not use. This tells the ISIS loaders to map those spectra to the detector
-     of the same ID instead. Spectra whose detectors this definition does contain are left as the file records them,
-     so runs taken with the graphite analyser are unaffected, as is any run taken once the electronics and this
-     definition agree again. -->
-<parameter name="spectra-map-source" type="string">
-  <value val="instrument"/>
-</parameter>
 
 <parameter name="deltaE-mode" type="string">
   <value val="indirect"/>
@@ -127,18 +117,6 @@
 <parameter name="Workflow.Diffraction.Correction" type="string">
     <value val="Vanadium" />
     <value val="Calibration" />
-</parameter>
-
-</component-link>
-
-<component-link name = "silicon">
-
-<parameter name="Workflow.EdgePixelMaskFile" type="string">
-  <value val="OSIRIS_Si_Edge_Pixels_Mask.xml" />
-</parameter>
-
-<parameter name="Workflow.MinimumCalibrationFactor">
-  <value val="0.5" />
 </parameter>
 
 </component-link>

@@ -1130,7 +1130,181 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  // ---------------------------------------------------------------------------------------------------------------
+  // Correcting a spectrum-detector table against the instrument definition.
+  //
+  // The OSIRIS silicon analyser is read out as eight hardware elements per pixel, which the electronics sum into one
+  // spectrum, so the file's table gives every silicon spectrum eight detector IDs the instrument definition does not
+  // contain. OSIRIS_Parameters.xml enables the corrections through the "spectra-map-source" parameter. See
+  // InstrumentSpectraMappingTest for the correction itself; these tests cover the wiring on real data.
+  // ---------------------------------------------------------------------------------------------------------------
+
+  void test_silicon_spectra_are_mapped_to_the_detector_of_the_same_id() {
+    auto const workspace = loadOsirisSilicon("osiris_full", "", "");
+
+    TS_ASSERT_EQUALS(2565, workspace->getNumberHistograms());
+
+    assertSpectrumMapsToMatchingDetector(*workspace, 1005);
+    assertSpectrumMapsToMatchingDetector(*workspace, 1784);
+    assertSpectrumMapsToMatchingDetector(*workspace, 2564);
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_every_silicon_spectrum_is_mapped_to_the_detector_of_the_same_id() {
+    auto const workspace = loadOsirisSilicon("osiris_all_silicon", "", "");
+
+    for (specnum_t spectrumNumber = 1005; spectrumNumber <= 2564; ++spectrumNumber)
+      assertSpectrumMapsToMatchingDetector(*workspace, spectrumNumber);
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_monitor_diffraction_and_graphite_spectra_keep_their_mapping() {
+    auto const workspace = loadOsirisSilicon("osiris_low_spectra", "", "");
+
+    // The file already maps these to the detector of the same ID, so the correction should not be what put them
+    // there. They are checked to make sure it did not disturb them on its way past.
+    assertSpectrumMapsToMatchingDetector(*workspace, 1);
+    assertSpectrumMapsToMatchingDetector(*workspace, 500);
+    assertSpectrumMapsToMatchingDetector(*workspace, 963);
+    assertSpectrumMapsToMatchingDetector(*workspace, 1004);
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_the_spare_hardware_channel_keeps_its_histogram_but_loses_its_detectors() {
+    auto const workspace = loadOsirisSilicon("osiris_spare", "", "");
+
+    auto const index = workspace->getIndexFromSpectrumNumber(2565);
+    TS_ASSERT(workspace->getSpectrum(index).getDetectorIDs().empty());
+    TS_ASSERT_EQUALS(workspace->blocksize(), workspace->y(index).size());
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_a_cropped_load_maps_only_the_spectra_it_read() {
+    auto const workspace = loadOsirisSilicon("osiris_cropped", "1005", "2564");
+
+    TS_ASSERT_EQUALS(1560, workspace->getNumberHistograms());
+    TS_ASSERT_EQUALS(1005, workspace->getSpectrum(0).getSpectrumNo());
+    TS_ASSERT_EQUALS(2564, workspace->getSpectrum(1559).getSpectrumNo());
+
+    assertSpectrumMapsToMatchingDetector(*workspace, 1005);
+    assertSpectrumMapsToMatchingDetector(*workspace, 2564);
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_a_non_contiguous_spectrum_list_is_mapped() {
+    LoadRaw3 loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "OSIRIS00156815.raw");
+    loader.setPropertyValue("OutputWorkspace", "osiris_list");
+    loader.setPropertyValue("SpectrumList", "1005,1500,2564");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT(loader.isExecuted());
+
+    auto const workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("osiris_list");
+    TS_ASSERT_EQUALS(3, workspace->getNumberHistograms());
+    assertSpectrumMapsToMatchingDetector(*workspace, 1005);
+    assertSpectrumMapsToMatchingDetector(*workspace, 1500);
+    assertSpectrumMapsToMatchingDetector(*workspace, 2564);
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_monitors_can_be_excluded_and_the_silicon_spectra_are_still_mapped() {
+    LoadRaw3 loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "OSIRIS00156815.raw");
+    loader.setPropertyValue("OutputWorkspace", "osiris_no_monitors");
+    loader.setPropertyValue("LoadMonitors", "Exclude");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT(loader.isExecuted());
+
+    auto const workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("osiris_no_monitors");
+    assertSpectrumMapsToMatchingDetector(*workspace, 1005);
+    assertSpectrumMapsToMatchingDetector(*workspace, 2564);
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_monitors_can_be_loaded_separately_and_both_workspaces_are_corrected() {
+    LoadRaw3 loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "OSIRIS00156815.raw");
+    loader.setPropertyValue("OutputWorkspace", "osiris_separate");
+    loader.setPropertyValue("LoadMonitors", "Separate");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT(loader.isExecuted());
+
+    auto const workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("osiris_separate");
+    assertSpectrumMapsToMatchingDetector(*workspace, 1005);
+    assertSpectrumMapsToMatchingDetector(*workspace, 2564);
+
+    auto const monitors = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("osiris_separate_monitors");
+    assertSpectrumMapsToMatchingDetector(*monitors, 1);
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_an_osiris_run_predating_the_silicon_analyser_is_untouched() {
+    // The parameter file valid for this run does not carry "spectra-map-source", and its table names no unknown
+    // detectors either, so neither gate opens and every spectrum keeps what the file gave it.
+    LoadRaw3 loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "OSI89813.raw");
+    loader.setPropertyValue("OutputWorkspace", "osiris_pre_silicon");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT(loader.isExecuted());
+
+    auto const workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("osiris_pre_silicon");
+    for (std::size_t i = 0; i < workspace->getNumberHistograms(); ++i)
+      TS_ASSERT(!workspace->getSpectrum(i).getDetectorIDs().empty());
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_a_run_from_an_instrument_that_does_not_ask_for_the_correction_is_untouched() {
+    LoadRaw3 loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "IRS38633.raw");
+    loader.setPropertyValue("OutputWorkspace", "iris_untouched");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT(loader.isExecuted());
+
+    auto const workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("iris_untouched");
+    TS_ASSERT_EQUALS(1, workspace->getSpectrum(0).getDetectorIDs().size());
+
+    AnalysisDataService::Instance().clear();
+  }
+
 private:
+  MatrixWorkspace_sptr loadOsirisSilicon(std::string const &outputName, std::string const &spectrumMin,
+                                         std::string const &spectrumMax) {
+    LoadRaw3 loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "OSIRIS00156815.raw");
+    loader.setPropertyValue("OutputWorkspace", outputName);
+    if (!spectrumMin.empty())
+      loader.setPropertyValue("SpectrumMin", spectrumMin);
+    if (!spectrumMax.empty())
+      loader.setPropertyValue("SpectrumMax", spectrumMax);
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT(loader.isExecuted());
+
+    return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputName);
+  }
+
+  void assertSpectrumMapsToMatchingDetector(MatrixWorkspace const &workspace, specnum_t const spectrumNumber) {
+    auto const &detectorIDs =
+        workspace.getSpectrum(workspace.getIndexFromSpectrumNumber(spectrumNumber)).getDetectorIDs();
+    TS_ASSERT_EQUALS(1, detectorIDs.size());
+    if (detectorIDs.size() == 1)
+      TS_ASSERT_EQUALS(spectrumNumber, *detectorIDs.begin());
+  }
+
   /// Helper method to run common set of tests on a workspace in a multi-period
   /// group.
   void doTestMultiPeriodWorkspace(const MatrixWorkspace_sptr &workspace, const size_t &nHistograms,

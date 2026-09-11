@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadISISNexus2.h"
 #include "MantidDataHandling/DataBlockGenerator.h"
+#include "MantidDataHandling/InstrumentSpectraMapping.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadISISNexusHelper.h"
 #include "MantidDataHandling/LoadRawHelper.h"
@@ -380,6 +381,10 @@ void LoadISISNexus2::exec() {
       g_log.information() << " no monitors to load for workspace: " << wsName << '\n';
     }
   }
+
+  // Map spectra whose file detector IDs the instrument does not define onto the detector of the same ID; a no-op
+  // unless the instrument definition enables it. Left until here so every period and monitor workspace are populated.
+  correctLoadedWorkspaces(*this, g_log);
 
   // Clear off the member variable containers
   m_tof_data.reset();

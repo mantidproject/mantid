@@ -483,6 +483,19 @@ public:
     TS_ASSERT_EQUALS(4, algorithmQueue.size());
   }
 
+  void test_save_data_maps_each_flag_to_the_matching_format() {
+    TS_ASSERT(IETSaveData(true, false, false, false, false, false).getNexus());
+    TS_ASSERT(IETSaveData(false, true, false, false, false, false).getSPE());
+    TS_ASSERT(IETSaveData(false, false, true, false, false, false).getASCII());
+    TS_ASSERT(IETSaveData(false, false, false, true, false, false).getAclimax());
+    TS_ASSERT(IETSaveData(false, false, false, false, true, false).getDaveGrp());
+    TS_ASSERT(IETSaveData(false, false, false, false, false, true).getNXSPE());
+
+    IETSaveData const none;
+    TS_ASSERT(!none.getNexus() && !none.getSPE() && !none.getASCII());
+    TS_ASSERT(!none.getAclimax() && !none.getDaveGrp() && !none.getNXSPE());
+  }
+
 private:
   IAlgorithm_sptr makeReductionAlgorithm() {
     auto alg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");

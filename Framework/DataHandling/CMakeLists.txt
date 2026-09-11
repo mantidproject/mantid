@@ -32,6 +32,7 @@ set(SRC_FILES
     src/ISISDataArchive.cpp
     src/ISISJournal.cpp
     src/ISISJournalGetExperimentRuns.cpp
+    src/InstrumentSpectraMapping.cpp
     src/JoinISISPolarizationEfficiencies.cpp
     src/Load.cpp
     src/LoadANSTOHelper.cpp
@@ -257,6 +258,7 @@ set(INC_FILES
     inc/MantidDataHandling/ISISDataArchive.h
     inc/MantidDataHandling/ISISJournal.h
     inc/MantidDataHandling/ISISJournalGetExperimentRuns.h
+    inc/MantidDataHandling/InstrumentSpectraMapping.h
     inc/MantidDataHandling/JoinISISPolarizationEfficiencies.h
     inc/MantidDataHandling/Load.h
     inc/MantidDataHandling/LoadANSTOEventFile.h
@@ -485,6 +487,7 @@ set(TEST_FILES
     ISISJournalGetExperimentRunsTest.h
     ISISJournalTest.h
     InstrumentRayTracerTest.h
+    InstrumentSpectraMappingTest.h
     JoinISISPolarizationEfficienciesTest.h
     LoadAscii2Test.h
     LoadAsciiStlTest.h

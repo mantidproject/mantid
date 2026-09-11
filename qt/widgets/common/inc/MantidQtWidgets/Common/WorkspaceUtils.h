@@ -31,7 +31,8 @@ EXPORT_OPT_MANTIDQT_COMMON bool getResolutionRangeFromWs(const Mantid::API::Matr
                                                          std::pair<double, double> &res);
 
 EXPORT_OPT_MANTIDQT_COMMON std::pair<double, double>
-getXRangeFromWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &workspace, double precision = 0.00001);
+getXRangeFromWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &workspace, double precision = 0.00001,
+                       std::size_t wsIndex = 0);
 EXPORT_OPT_MANTIDQT_COMMON std::pair<double, double> getXRangeFromWorkspace(std::string const &workspaceName,
                                                                             double precision = 0.000001);
 

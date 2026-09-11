@@ -15,6 +15,10 @@ give a single resolution curve.
 
 Rebinning and intensity scaling can optionally be applied to the result.
 
+An optional calibration workspace can be supplied to exclude detector pixels that were excluded while creating the
+calibration, for example unreliable OSIRIS silicon edge pixels or pixels with low calibration factors. The remaining
+spectra are averaged to create the resolution curve.
+
 Workflow
 --------
 

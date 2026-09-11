@@ -418,5 +418,41 @@ class IndirectCommonTests(unittest.TestCase):
         return ws
 
 
+class ValidateInstrumentConfigurationTest(unittest.TestCase):
+    """Tests for pairing an analyser with a reflection the instrument actually provides."""
+
+    def test_valid_analyser_and_reflection_pairs_are_accepted(self):
+        for instrument, analyser, reflection in [
+            ("OSIRIS", "silicon", "111"),
+            ("OSIRIS", "silicon", "333"),
+            ("OSIRIS", "graphite", "002"),
+            ("OSIRIS", "graphite", "004"),
+            ("IRIS", "graphite", "002"),
+            ("IRIS", "mica", "006"),
+            ("IRIS", "fmica", "002"),
+        ]:
+            with self.subTest(instrument=instrument, analyser=analyser, reflection=reflection):
+                self.assertIsNone(indirect_common.validate_instrument_configuration(instrument, analyser, reflection))
+
+    def test_a_reflection_the_analyser_does_not_provide_is_rejected(self):
+        message = indirect_common.validate_instrument_configuration("OSIRIS", "silicon", "002")
+        self.assertIn("does not support reflection '002'", message)
+        self.assertIn("111, 333", message)
+
+    def test_a_graphite_reflection_is_not_accepted_for_silicon_and_vice_versa(self):
+        self.assertIsNotNone(indirect_common.validate_instrument_configuration("OSIRIS", "silicon", "004"))
+        self.assertIsNotNone(indirect_common.validate_instrument_configuration("OSIRIS", "graphite", "111"))
+        self.assertIsNotNone(indirect_common.validate_instrument_configuration("OSIRIS", "graphite", "333"))
+
+    def test_an_analyser_the_instrument_does_not_have_is_rejected(self):
+        message = indirect_common.validate_instrument_configuration("IRIS", "silicon", "111")
+        self.assertIn("'silicon' is not an analyser on IRIS", message)
+        self.assertIn("graphite", message)
+
+    def test_an_unknown_instrument_is_rejected(self):
+        message = indirect_common.validate_instrument_configuration("NOT_AN_INSTRUMENT", "graphite", "002")
+        self.assertIn("No parameter files were found", message)
+
+
 if __name__ == "__main__":
     unittest.main()

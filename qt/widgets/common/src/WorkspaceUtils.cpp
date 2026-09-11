@@ -207,9 +207,11 @@ std::pair<double, double> getXRangeFromWorkspace(std::string const &workspaceNam
 }
 
 std::pair<double, double> getXRangeFromWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
-                                                 double precision) {
+                                                 double precision, std::size_t wsIndex) {
   assert(workspace != nullptr);
-  auto const &xValues = workspace->x(0);
+  if (wsIndex >= workspace->getNumberHistograms())
+    wsIndex = 0;
+  auto const &xValues = workspace->x(wsIndex);
   return roundRangeToPrecision(xValues.front(), xValues.back(), precision);
 }
 

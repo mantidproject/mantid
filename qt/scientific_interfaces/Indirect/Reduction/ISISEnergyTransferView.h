@@ -77,7 +77,7 @@ public:
   virtual void setInstrumentRebinning(std::vector<double> const &rebinParams, std::string const &rebinText,
                                       bool checked, int tabIndex) = 0;
   virtual void setInstrumentEFixed(std::string const &instrumentName, double eFixed) = 0;
-  virtual void setInstrumentGrouping(std::string const &instrumentName) = 0;
+  virtual void setInstrumentGrouping(std::string const &instrumentName, std::string const &analyserName) = 0;
   virtual void setInstrumentSpecDefault(std::map<std::string, bool> &specMap) = 0;
 
   virtual void showMessageBox(std::string const &message) = 0;
@@ -142,7 +142,7 @@ public:
   void setInstrumentRebinning(std::vector<double> const &rebinParams, std::string const &rebinText, bool checked,
                               int tabIndex) override;
   void setInstrumentEFixed(std::string const &instrumentName, double eFixed) override;
-  void setInstrumentGrouping(std::string const &instrumentName) override;
+  void setInstrumentGrouping(std::string const &instrumentName, std::string const &analyserName) override;
   void setInstrumentSpecDefault(std::map<std::string, bool> &specMap) override;
 
   void showMessageBox(std::string const &message) override;

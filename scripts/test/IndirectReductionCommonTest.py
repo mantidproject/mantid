@@ -6,13 +6,32 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
+import numpy as np
+from mantid import mtd
 from mantid.dataobjects import GroupingWorkspace
-from mantid.simpleapi import Load
+from mantid.simpleapi import (
+    CloneWorkspace,
+    CreateWorkspace,
+    CropWorkspace,
+    DeleteWorkspace,
+    EditInstrumentGeometry,
+    Load,
+    LoadEmptyInstrument,
+    LoadParameterFile,
+    MaskDetectors,
+    RemoveSpectra,
+    SetInstrumentParameter,
+)
 from IndirectReductionCommon import (
     create_detector_grouping_string,
     create_grouping_string,
     create_grouping_workspace,
     create_range_string,
+    group_spectra_by_theta,
+    group_spectra_of,
+    remove_edge_pixels,
+    get_minimum_calibration_factor,
+    exclude_low_calibration_spectra,
     _excluded_detector_ids,
     _get_x_range_when_bins_vary,
 )
@@ -55,14 +74,14 @@ class IndirectReductionCommonTest(unittest.TestCase):
         grouping_workspace = create_grouping_workspace(self._workspace, "osiris_041_RES10.cal")
 
         self.assertTrue(isinstance(grouping_workspace, GroupingWorkspace))
-        self.assertEqual(1008, grouping_workspace.getNumberHistograms())
+        self.assertEqual(2562, grouping_workspace.getNumberHistograms())
 
     def test_excluded_detector_ids_returns_the_expected_detector_ids(self):
         grouping_workspace = create_grouping_workspace(self._workspace, "osiris_041_RES10.cal")
 
         excluded_ids = _excluded_detector_ids(grouping_workspace)
 
-        self.assertEqual(904, len(excluded_ids))
+        self.assertEqual(2458, len(excluded_ids))
         self.assertEqual([i for i in range(16, 116)], excluded_ids[:100])
 
     def test_get_x_range_when_bins_vary_returns_the_expected_min_and_max_x(self):
@@ -72,6 +91,269 @@ class IndirectReductionCommonTest(unittest.TestCase):
 
         self.assertEqual(50100.00, x_min)
         self.assertEqual(70100.00, x_max)
+
+
+class GroupSpectraByThetaTest(unittest.TestCase):
+    """Tests for group_spectra_by_theta using OSIRIS silicon analyser data.
+
+    OSIRIS00156815.raw is used with spectra_range=[1005, 2564] so that
+    spectrum numbers (starting at 1005) differ from workspace indices (0-based).
+    This is an explicit regression check for the bug where workspace indices
+    were passed as spectrum numbers to GroupDetectors.SpectraList, causing
+    "All list properties are empty, nothing to group".
+    """
+
+    _SPECTRA_MIN = 1005  # OSIRIS silicon analyser spectra-min (from IPF)
+    _SPECTRA_MAX = 2564  # OSIRIS silicon analyser spectra-max (from IPF)
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls._workspace = Load(
+            Filename="OSIRIS00156815.raw",
+            OutputWorkspace="__theta_grouping_test",
+            SpectrumMin=cls._SPECTRA_MIN,
+            SpectrumMax=cls._SPECTRA_MAX,
+            StoreInADS=False,
+        )
+        LoadParameterFile(Workspace=cls._workspace, Filename="OSIRIS_silicon_111_Parameters.xml", StoreInADS=False)
+
+    def test_returns_requested_number_of_groups(self):
+        result = group_spectra_by_theta(self._workspace, number_of_groups=3, spectra_range=[self._SPECTRA_MIN, self._SPECTRA_MAX])
+        self.assertEqual(3, result.getNumberHistograms())
+
+    def test_single_group_combines_all_spectra_into_one(self):
+        result = group_spectra_by_theta(self._workspace, number_of_groups=1, spectra_range=[self._SPECTRA_MIN, self._SPECTRA_MAX])
+        self.assertEqual(1, result.getNumberHistograms())
+        self.assertEqual(self._SPECTRA_MAX - self._SPECTRA_MIN + 1, len(result.getSpectrum(0).getDetectorIDs()))
+
+    def test_both_silicon_reflections_use_the_same_fixed_limits(self):
+        for reflection in ("111", "333"):
+            with self.subTest(reflection=reflection):
+                workspace = LoadEmptyInstrument(InstrumentName="OSIRIS", StoreInADS=False)
+                LoadParameterFile(Workspace=workspace, Filename=f"OSIRIS_silicon_{reflection}_Parameters.xml", StoreInADS=False)
+                self.assertEqual(8.0, workspace.getInstrument().getNumberParameter("theta-min")[0])
+                self.assertEqual(163.0, workspace.getInstrument().getNumberParameter("theta-max")[0])
+
+    def test_removing_edge_pixels_keeps_surviving_detectors_in_the_same_groups(self):
+        workspace_name = "__theta_grouping_edges"
+        CloneWorkspace(self._workspace, OutputWorkspace=workspace_name)
+        self.addCleanup(DeleteWorkspace, workspace_name)
+        original = group_spectra_by_theta(self._workspace, number_of_groups=5)
+
+        remove_edge_pixels(workspace_name)
+        filtered = mtd[workspace_name]
+        surviving_ids = set().union(*(filtered.getSpectrum(i).getDetectorIDs() for i in range(filtered.getNumberHistograms())))
+        result = group_spectra_by_theta(filtered, number_of_groups=5)
+
+        self.assertEqual(original.getNumberHistograms(), result.getNumberHistograms())
+        for i in range(result.getNumberHistograms()):
+            self.assertEqual(set(original.getSpectrum(i).getDetectorIDs()) & surviving_ids, set(result.getSpectrum(i).getDetectorIDs()))
+
+    def test_number_of_groups_does_not_exceed_requested_count(self):
+        # Empty theta bins are dropped, so output histograms <= number_of_groups
+        result = group_spectra_by_theta(self._workspace, number_of_groups=5, spectra_range=[self._SPECTRA_MIN, self._SPECTRA_MAX])
+        self.assertLessEqual(result.getNumberHistograms(), 5)
+
+    def test_raises_when_spectra_range_contains_no_valid_detectors(self):
+        with self.assertRaisesRegex(RuntimeError, "No valid detectors found"):
+            group_spectra_by_theta(self._workspace, number_of_groups=3, spectra_range=[99999, 99999])
+
+    def test_group_spectra_of_dispatches_theta_groups_to_the_theta_grouping(self):
+        result = group_spectra_of(
+            self._workspace,
+            method="ThetaGroups",
+            number_of_groups=3,
+            spectra_range=[self._SPECTRA_MIN, self._SPECTRA_MAX],
+        )
+        self.assertEqual(3, result.getNumberHistograms())
+
+
+class GroupSpectraByThetaBinningTest(unittest.TestCase):
+    @staticmethod
+    def _create_workspace(angles=(10, 20, 45, 58, 65, 95, 110), theta_limits=(0, 120)):
+        workspace = CreateWorkspace(DataX=[0, 1], DataY=np.arange(1, len(angles) + 1), NSpec=len(angles), StoreInADS=False)
+        for i in range(len(angles)):
+            workspace.getSpectrum(i).setSpectrumNo(1005 + i)
+        EditInstrumentGeometry(
+            Workspace=workspace,
+            PrimaryFlightPath=1,
+            L2=[1] * len(angles),
+            Polar=angles,
+            DetectorIDs=list(range(1005, 1005 + len(angles))),
+            StoreInADS=False,
+        )
+        for name, value in zip(("theta-min", "theta-max"), theta_limits):
+            if value is not None:
+                SetInstrumentParameter(
+                    Workspace=workspace, ParameterName=name, ParameterType="Number", Value=str(float(value)), StoreInADS=False
+                )
+        return workspace
+
+    def setUp(self):
+        self._workspace = self._create_workspace()
+
+    def _assert_groups(self, workspace, expected, number_of_groups=2, spectra_range=None):
+        result = group_spectra_by_theta(workspace, number_of_groups, spectra_range)
+        actual = [set(result.getSpectrum(i).getDetectorIDs()) for i in range(result.getNumberHistograms())]
+        self.assertEqual(expected, actual)
+        return result
+
+    def test_groups_use_fixed_ipf_limits_in_degrees_and_average_spectra(self):
+        result = self._assert_groups(self._workspace, [{1005, 1006, 1007, 1008}, {1009, 1010, 1011}])
+        np.testing.assert_allclose(result.extractY(), [[2.5], [6.0]])
+
+    def test_masking_angular_extremes_does_not_move_remaining_spectra_between_bins(self):
+        MaskDetectors(Workspace=self._workspace, SpectraList=[1005, 1011], StoreInADS=False)
+        self._assert_groups(self._workspace, [{1006, 1007, 1008}, {1009, 1010}])
+
+    def test_removing_angular_extremes_does_not_move_remaining_spectra_between_bins(self):
+        workspace = RemoveSpectra(InputWorkspace=self._workspace, WorkspaceIndices=[0, 6], StoreInADS=False)
+        self._assert_groups(workspace, [{1006, 1007, 1008}, {1009, 1010}])
+
+    def test_narrowing_spectra_range_does_not_move_remaining_spectra_between_bins(self):
+        self._assert_groups(self._workspace, [{1006, 1007, 1008}, {1009, 1010}], spectra_range=[1006, 1010])
+
+    def test_includes_outer_limits_and_assigns_internal_boundary_to_lower_bin(self):
+        workspace = self._create_workspace(angles=(0, 45, 90, 135, 180), theta_limits=(0, 180))
+        self._assert_groups(workspace, [{1005, 1006, 1007}, {1008, 1009}])
+
+    def test_spectra_outside_angular_limits_are_excluded(self):
+        workspace = self._create_workspace(theta_limits=(30, 90))
+        self._assert_groups(workspace, [{1007, 1008}, {1009}])
+
+    def test_empty_bins_are_omitted_without_redistributing_spectra(self):
+        workspace = self._create_workspace(angles=(10, 110))
+        self._assert_groups(workspace, [{1005}, {1006}], number_of_groups=4)
+
+    def test_raises_when_no_spectra_are_within_angular_limits(self):
+        workspace = self._create_workspace(theta_limits=(120, 180))
+        with self.assertRaisesRegex(RuntimeError, "No valid detectors found"):
+            group_spectra_by_theta(workspace, 2)
+
+    def test_raises_when_all_spectra_are_masked(self):
+        MaskDetectors(Workspace=self._workspace, WorkspaceIndexList=list(range(7)), StoreInADS=False)
+        with self.assertRaisesRegex(RuntimeError, "No valid detectors found"):
+            group_spectra_by_theta(self._workspace, 2)
+
+    def test_requires_both_ipf_limits(self):
+        for limits in ((None, 120), (0, None), (None, None)):
+            with self.subTest(limits=limits):
+                workspace = self._create_workspace(theta_limits=limits)
+                with self.assertRaisesRegex(RuntimeError, "requires 'theta-min' and 'theta-max'"):
+                    group_spectra_by_theta(workspace, 2)
+
+    def test_requires_increasing_ipf_limits(self):
+        for limits in ((120, 0), (60, 60)):
+            with self.subTest(limits=limits):
+                workspace = self._create_workspace(theta_limits=limits)
+                with self.assertRaisesRegex(RuntimeError, "requires finite 'theta-min' < 'theta-max'"):
+                    group_spectra_by_theta(workspace, 2)
+
+    def test_requires_a_positive_number_of_groups(self):
+        for number_of_groups in (0, -1):
+            with self.subTest(number_of_groups=number_of_groups):
+                with self.assertRaisesRegex(ValueError, "Number of theta groups must be greater than zero"):
+                    group_spectra_by_theta(self._workspace, number_of_groups)
+
+
+class GroupSpectraDetectorsTest(unittest.TestCase):
+    """Tests for the 'Detectors' grouping method in group_spectra_of."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls._si_workspace = Load(
+            Filename="OSIRIS00156815.raw",
+            OutputWorkspace="__detectors_grouping_si",
+            SpectrumMin=1005,
+            SpectrumMax=2564,
+            StoreInADS=False,
+        )
+        # Graphite workspace has no Workflow.DetectorsGroupingFile in its IPF
+        cls._pg_workspace = Load(Filename="OSI10203.raw", OutputWorkspace="__detectors_grouping_pg", StoreInADS=False)
+        LoadParameterFile(Workspace=cls._si_workspace, Filename="OSIRIS_silicon_111_Parameters.xml")
+
+    def test_groups_spectra_using_detectors_grouping_file(self):
+        # The SI workspace IPF defines Workflow.DetectorsGroupingFile pointing
+        # to OSIRIS_Si_Detectors_Grouping.xml
+        result = group_spectra_of(self._si_workspace, method="Detectors")
+        self.assertGreater(result.getNumberHistograms(), 0)
+
+    def test_raises_when_detectors_grouping_file_parameter_is_missing(self):
+        with self.assertRaisesRegex(RuntimeError, "Workflow.DetectorsGroupingFile"):
+            group_spectra_of(self._pg_workspace, method="Detectors")
+
+
+class EdgePixelRemovalTest(unittest.TestCase):
+    """Tests for remove_edge_pixels using Mantid mask-file infrastructure."""
+
+    def test_remove_edge_pixels_removes_320_spectra_from_osiris(self):
+        ws_name = "__test_osiris_edge"
+        LoadEmptyInstrument(InstrumentName="OSIRIS", OutputWorkspace=ws_name)
+        initial = mtd[ws_name].getNumberHistograms()
+        remove_edge_pixels(ws_name)
+        # 56 upper tubes * 4 edge pixels + 48 lower tubes * 2 edge pixels = 320
+        self.assertEqual(initial - (56 * 4 + 48 * 2), mtd[ws_name].getNumberHistograms())
+        remaining = {mtd[ws_name].getSpectrum(i).getSpectrumNo() for i in range(mtd[ws_name].getNumberHistograms())}
+        self.assertNotIn(1005, remaining)
+        self.assertNotIn(2564, remaining)
+        self.assertIn(1009, remaining)
+        self.assertIn(2562, remaining)
+        DeleteWorkspace(ws_name)
+
+    def test_remove_edge_pixels_is_no_op_for_non_silicon_instrument(self):
+        ws_name = "__test_iris_edge"
+        LoadEmptyInstrument(InstrumentName="IRIS", OutputWorkspace=ws_name)
+        initial = mtd[ws_name].getNumberHistograms()
+        remove_edge_pixels(ws_name)
+        self.assertEqual(initial, mtd[ws_name].getNumberHistograms())
+        DeleteWorkspace(ws_name)
+
+    def test_remove_edge_pixels_is_no_op_when_the_workspace_holds_no_silicon_spectra(self):
+        ws_name = "__test_osiris_graphite_edge"
+        LoadEmptyInstrument(InstrumentName="OSIRIS", OutputWorkspace=ws_name)
+        CropWorkspace(InputWorkspace=ws_name, OutputWorkspace=ws_name, StartWorkspaceIndex=962, EndWorkspaceIndex=1003)
+        initial = mtd[ws_name].getNumberHistograms()
+        remove_edge_pixels(ws_name)
+        self.assertEqual(initial, mtd[ws_name].getNumberHistograms())
+        DeleteWorkspace(ws_name)
+
+
+class MinimumCalibrationFactorTest(unittest.TestCase):
+    """Tests for get_minimum_calibration_factor's instrument-parameter lookup."""
+
+    def test_falls_back_to_osiris_silicon_instrument_parameter(self):
+        ws_name = "__test_osiris_min_calib_default"
+        LoadEmptyInstrument(InstrumentName="OSIRIS", OutputWorkspace=ws_name)
+        self.assertEqual(get_minimum_calibration_factor(ws_name), 0.5)
+        DeleteWorkspace(ws_name)
+
+    def test_defaults_to_zero_for_non_silicon_instrument(self):
+        ws_name = "__test_iris_min_calib_default"
+        LoadEmptyInstrument(InstrumentName="IRIS", OutputWorkspace=ws_name)
+        self.assertEqual(get_minimum_calibration_factor(ws_name), 0.0)
+        DeleteWorkspace(ws_name)
+
+    def test_excludes_low_silicon_calibration_without_affecting_graphite_spectra(self):
+        ws_name = "__test_osiris_min_calib_filter"
+        LoadEmptyInstrument(InstrumentName="OSIRIS", OutputWorkspace=ws_name)
+        workspace = mtd[ws_name]
+
+        def workspace_index(spectrum_number):
+            return workspace.getIndexFromSpectrumNumber(spectrum_number)
+
+        # LoadEmptyInstrument fills every detector with DetectorValue (1.0), so 1005 must be
+        # set well below half the mean non-zero factor to be excluded.
+        workspace.dataY(workspace_index(963))[0] = 0.1
+        workspace.dataY(workspace_index(1005))[0] = 0.1
+        workspace.dataY(workspace_index(1006))[0] = 10.0
+
+        exclude_low_calibration_spectra(ws_name)
+
+        remaining = {mtd[ws_name].getSpectrum(i).getSpectrumNo() for i in range(mtd[ws_name].getNumberHistograms())}
+        self.assertIn(963, remaining)
+        self.assertNotIn(1005, remaining)
+        self.assertIn(1006, remaining)
+        DeleteWorkspace(ws_name)
 
 
 if __name__ == "__main__":
