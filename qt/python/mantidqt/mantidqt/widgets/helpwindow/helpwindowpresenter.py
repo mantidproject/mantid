@@ -2,28 +2,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-try:
-    from mantid.kernel import Logger
-except ImportError:
-    print("Warning: Mantid Logger not found, using basic print for logging.")
-
-    class Logger:
-        def __init__(self, name):
-            self._name = name
-
-        def warning(self, msg):
-            print(f"WARNING [{self._name}]: {msg}")
-
-        def debug(self, msg):
-            print(f"DEBUG [{self._name}]: {msg}")
-
-        def information(self, msg):
-            print(f"INFO [{self._name}]: {msg}")
-
-        def error(self, msg):
-            print(f"ERROR [{self._name}]: {msg}")
-
+from mantid.kernel import Logger
 
 log = Logger("HelpWindowPresenter")
 
@@ -56,19 +35,22 @@ class HelpWindowPresenter:
             return
 
         log.debug(f"Opening help page in system browser: '{relativeUrl}'")
+
         try:
             docUrl = self.model.build_help_url(relativeUrl)
+
             if not QDesktopServices.openUrl(docUrl):
                 log.error(f"Failed to open URL in system browser: {docUrl.toString()}")
+
         except FileNotFoundError as e:
             log.error(f"Documentation file not found: {e}")
+
             # Fallback to online docs if local file not found
-            try:
-                fallback_url = QUrl(f"{self.model.ONLINE_BASE_URL}/{relativeUrl}")
-                log.debug(f"Attempting fallback to online docs: {fallback_url.toString()}")
-                if not QDesktopServices.openUrl(fallback_url):
-                    log.error(f"Failed to open fallback URL: {fallback_url.toString()}")
-            except Exception as fallback_error:
-                log.error(f"Fallback to online docs failed: {fallback_error}")
+            fallback_url = QUrl(f"{self.model.ONLINE_BASE_URL}/{relativeUrl}")
+            log.debug(f"Attempting fallback to online docs: {fallback_url.toString()}")
+
+            if not QDesktopServices.openUrl(fallback_url):
+                log.error(f"Failed to open fallback URL: {fallback_url.toString()}")
+
         except Exception as e:
             log.error(f"Error opening help page '{relativeUrl}': {e}")
