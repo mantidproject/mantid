@@ -181,6 +181,23 @@ threads. Both default to a short timeout, so a wait on something genuinely slow 
 longer ``timeout`` explicitly rather than every wait in the suite inheriting one long enough to
 hide a hang.
 
+**A worker must never outlive its test.** ``AsyncTask`` is a *non-daemon* thread that reports back
+through a blocking queued connection, so one still running when the run ends is joined by the
+interpreter at exit while nothing is left to pump the event loop it is parked on. That join never
+returns: the process hangs with every test already reported, and CTest kills it at the directory
+``TIMEOUT`` having printed nothing useful. ``wait_for_async_task`` therefore aborts and drains the
+worker before it raises, and ``tearDown`` sweeps the live threads for any worker no test ever
+waited on - a scenario abandoned part way through by a failed assertion leaves one behind that
+nothing holds a handle to. A subclass that overrides ``tearDown`` must reach
+``_drain_async_tasks()`` before it tears its interface down.
+
+**A hang dumps its stacks before CTest kills it.** ``HANG_DUMP_AFTER_SECONDS`` in
+``automated_ui_test_base`` arms a repeating ``faulthandler`` dump of every thread, comfortably
+inside the CTest ``TIMEOUT``. It never fails a run by itself; it is there because a wedged GUI test
+is otherwise entirely silent in a CI log. Two identical dumps mean the process is stuck; dumps that
+move on mean it is only slow. Set ``AUTOMATED_UI_TEST_HANG_DUMP_SECONDS`` to override it, or to 0
+to switch it off.
+
 **Neutralise anything modal before the first click.** An unattended test that pops a modal message
 box hangs until the suite times out. ``patch_error_messages``, ``patch_confirmation_box`` and
 ``algorithm_dialog_runs`` on the base class cover three common cases that come up.

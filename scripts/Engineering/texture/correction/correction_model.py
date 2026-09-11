@@ -10,6 +10,7 @@ from mantid.simpleapi import (
     CopySample,
     SetSampleMaterial,
     DefineGaugeVolume,
+    DeleteLog,
     ConvertUnits,
     MonteCarloAbsorption,
     CloneWorkspace,
@@ -28,7 +29,7 @@ from Engineering.common.texture_sample_viewer import has_valid_shape
 from typing import Sequence, Tuple
 from mantid.dataobjects import Workspace2D
 from Engineering.common.calibration_info import CalibrationInfo
-from Engineering.texture.texture_helper import get_gauge_vol_str, load_all_orientations
+from Engineering.texture.texture_helper import GAUGE_VOLUME_LOG, NO_GAUGE_VOLUME, get_gauge_vol_str, load_all_orientations
 
 
 class TextureCorrectionModel:
@@ -267,7 +268,10 @@ class TextureCorrectionModel:
 
     @staticmethod
     def _get_material_name(ws_name: str) -> str:
-        return ADS.retrieve(ws_name).sample().getMaterial().name()
+        # stripped because a workspace that has been through a processed nexus round trip - which
+        # is how every run reaches this tab - comes back with a material name of " " rather than the
+        # "" it was saved with, and an unstripped comparison then reports a blank material as set
+        return ADS.retrieve(ws_name).sample().getMaterial().name().strip()
 
     def _has_no_valid_material(self, ws_name: str) -> bool:
         return self._get_material_name(ws_name) == ""
@@ -279,6 +283,14 @@ class TextureCorrectionModel:
         gauge_str = get_gauge_vol_str(preset, custom)
         if gauge_str:
             DefineGaugeVolume(ws, gauge_str)
+        elif preset == NO_GAUGE_VOLUME:
+            # DefineGaugeVolume only ever adds, so without this a workspace that was already
+            # corrected with a gauge volume would silently keep using it and the option would do
+            # nothing. Only the explicit "no gauge volume" choice clears it - failing to read a
+            # custom shape also yields no xml, and that must not discard a valid definition.
+            # Guarded because DeleteLog warns when the log is not there, which it usually is not.
+            if (ADS.retrieve(ws) if isinstance(ws, str) else ws).run().hasProperty(GAUGE_VOLUME_LOG):
+                DeleteLog(Workspace=ws, Name=GAUGE_VOLUME_LOG)
 
     # ~~~~~ `Parameter Dictionary as String` Functions ~~~~~~~~~~~~~
 

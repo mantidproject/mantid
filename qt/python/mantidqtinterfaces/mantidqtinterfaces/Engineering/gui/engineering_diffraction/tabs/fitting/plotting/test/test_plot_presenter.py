@@ -8,6 +8,7 @@ import unittest
 
 from unittest import mock
 
+from mantid.api import MinimizerStatus
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting import plot_model, plot_view, plot_presenter
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
 
@@ -42,7 +43,10 @@ class FittingPlotPresenterTest(unittest.TestCase):
         self.presenter.remove_workspace_from_plot("workspace")
 
         self.assertEqual(1, self.view.update_figure.call_count)
-        self.assertEqual(2, self.view.remove_ws_from_fitbrowser.call_count)
+        # the curve is removed from each axes, but the fit browser holds one entry per workspace and
+        # so is told once - removing the same workspace from it twice erased an iterator it no longer
+        # had, which hung the interface
+        self.assertEqual(1, self.view.remove_ws_from_fitbrowser.call_count)
         self.assertEqual(2, self.model.remove_workspace_from_plot.call_count)
         self.model.remove_workspace_from_plot.assert_any_call("workspace", "axis1")
         self.model.remove_workspace_from_plot.assert_any_call("workspace", "axis2")
@@ -95,6 +99,28 @@ class FittingPlotPresenterTest(unittest.TestCase):
             # check calls to fit use initial guess for both workspaces as first fit was unsuccessful
             _, _, kwargs = mock_fit.mock_calls[iws]
             self.assertEqual(kwargs, {"Function": fun_str_list[0], "InputWorkspace": ws, "Output": ws})
+
+    @mock.patch(dir_path + ".AsyncTask", wraps=BlockingAsyncTaskWithCallback)
+    @mock.patch(dir_path + ".Fit")
+    def test_do_sequential_fit_carries_on_tolerance_limited_stop(self, mock_fit, mock_async):
+        # a fit started from an already-optimal set of parameters stops this way rather than
+        # reporting "success", and its result must still seed the next workspace's fit
+        ws_list = ["ws1", "ws2"]
+        fun_str_list = [
+            "name=Gaussian,Height=11,PeakCentre=30000,Sigma=40",  # initial
+            "name=Gaussian,Height=10,PeakCentre=35000,Sigma=50",  # fit result of ws1
+        ]
+        self.view.read_fitprop_from_browser.return_value = {"properties": {"Function": fun_str_list[0]}}  # initial
+        mock_fit_output = mock.MagicMock()
+        mock_fit_output.OutputStatus = MinimizerStatus.CHANGES_IN_FUNCTION_TOO_SMALL
+        mock_fit_output.Function.fun = fun_str_list[1]
+        mock_fit.return_value = mock_fit_output
+
+        self.presenter.do_fit_all(self.view.read_fitprop_from_browser(), ws_list, do_sequential=True)
+
+        self.assertEqual(mock_fit.call_count, len(ws_list))
+        _, _, kwargs = mock_fit.mock_calls[1]
+        self.assertEqual(kwargs, {"Function": fun_str_list[1], "InputWorkspace": "ws2", "Output": "ws2"})
 
     def fit_all_helper(self, mock_fit, do_sequential):
         ws_list = ["ws1", "ws2"]
@@ -163,6 +189,17 @@ class FittingPlotPresenterTest(unittest.TestCase):
     def test_final_state_success_status(self):
         self.presenter.set_final_state_progress_bar(output_list=None, status="success")
         self.view.set_progress_bar.assert_has_calls([self.call_success])
+
+    def test_final_state_treats_tolerance_limited_stops_as_success(self):
+        # a minimizer started from an already-optimal set of parameters - the normal case for every
+        # run after the first in a sequential fit - stops this way rather than reporting "success"
+        for status in (MinimizerStatus.CHANGES_IN_FUNCTION_TOO_SMALL, MinimizerStatus.CHANGES_IN_PARAMETER_TOO_SMALL):
+            with self.subTest(status=status):
+                self.view.reset_mock()
+                self.presenter.set_final_state_progress_bar([{"status": status}])
+                self.view.set_progress_bar.assert_has_calls(
+                    [mock.call(status=status, minimum=0, maximum=100, value=100, style_sheet=plot_presenter.SUCCESS_STYLE_SHEET)]
+                )
 
     def test_setup_toolbar(self):
         # Get's called during setup, so let's begin with a blank slate.
