@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Two facilities, each owning a live-data instrument, plus one instrument with no live-data
+  configuration at all.  This supports tests which need to distinguish "the default facility" from
+  "some other facility": for example, when checking that a live-data instrument can be selected from
+  a facility which is not the default one.
+-->
+<facilities>
+
+<facility name="TESTDEFAULT" FileExtensions=".nxs,.dat,.xml">
+
+  <timezone>US/Eastern</timezone>
+
+  <livedata listener="FakeEventDataListener"/>
+
+  <instrument name="DEFAULTLISTENER">
+    <technique>Test Listener</technique>
+    <livedata>
+      <connection name="default" address="127.0.0.1:0" listener="FakeEventDataListener" />
+    </livedata>
+  </instrument>
+
+  <!-- Deliberately has no <livedata> block: live data cannot be collected from it. -->
+  <instrument name="NOLIVEDATA">
+    <technique>Test Neutron Diffraction</technique>
+  </instrument>
+
+</facility>
+
+<facility name="TESTOTHER" FileExtensions=".nxs,.dat,.xml">
+
+  <timezone>US/Eastern</timezone>
+
+  <livedata listener="FakeEventDataListener"/>
+
+  <instrument name="OTHERLISTENER">
+    <technique>Test Listener</technique>
+    <livedata>
+      <connection name="default" address="127.0.0.1:0" listener="FakeEventDataListener" />
+    </livedata>
+  </instrument>
+
+</facility>
+
+</facilities>

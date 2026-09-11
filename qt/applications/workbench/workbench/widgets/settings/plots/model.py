@@ -23,6 +23,7 @@ class PlotProperties(Enum):
     Y_MIN = "plots.y_min"
     Y_MAX = "plots.y_max"
     AXES_LINE_WIDTH = "plots.axesLineWidth"
+    AXES_LABEL_FONT_SIZE = "plots.axesLabelFontSize"
     SHOW_TICKS_LEFT = "plots.showTicksLeft"
     SHOW_TICKS_BOTTOM = "plots.showTicksBottom"
     SHOW_TICKS_RIGHT = "plots.showTicksRight"
@@ -37,6 +38,7 @@ class PlotProperties(Enum):
     MINOR_TICKS_LENGTH = "plots.ticks.minor.length"
     MINOR_TICKS_WIDTH = "plots.ticks.minor.width"
     MINOR_TICKS_DIRECTION = "plots.ticks.minor.direction"
+    TICK_LABEL_FONT_SIZE = "plots.ticks.labelSize"
     ERROR_EVERY = "plots.errorbar.errorEvery"
     ERROR_WIDTH = "plots.errorbar.Width"
     LINE_STYLE = "plots.line.Style"
@@ -46,6 +48,7 @@ class PlotProperties(Enum):
     MARKER_SIZE = "plots.marker.Size"
     NORMALIZATION = "graph1d.autodistribution"
     SHOW_TITLE = "plots.ShowTitle"
+    TITLE_FONT_SIZE = "plots.titleFontSize"
     PLOT_FONT = "plots.font"
     SHOW_LEGEND = "plots.ShowLegend"
     LEGEND_FONT_SIZE = "plots.legend.FontSize"
@@ -86,6 +89,9 @@ class PlotsSettingsModel(ConfigSettingsChangesModel):
     def get_show_title(self) -> str:
         return self.get_saved_value(PlotProperties.SHOW_TITLE.value)
 
+    def get_title_font_size(self) -> str:
+        return self.get_saved_value(PlotProperties.TITLE_FONT_SIZE.value)
+
     def get_show_legend(self) -> str:
         return self.get_saved_value(PlotProperties.SHOW_LEGEND.value)
 
@@ -97,6 +103,9 @@ class PlotsSettingsModel(ConfigSettingsChangesModel):
 
     def get_axes_line_width(self) -> str:
         return self.get_saved_value(PlotProperties.AXES_LINE_WIDTH.value)
+
+    def get_axes_label_font_size(self) -> str:
+        return self.get_saved_value(PlotProperties.AXES_LABEL_FONT_SIZE.value)
 
     def get_x_min(self) -> str:
         return self.get_saved_value(PlotProperties.X_MIN.value)
@@ -151,6 +160,9 @@ class PlotsSettingsModel(ConfigSettingsChangesModel):
 
     def get_minor_ticks_direction(self) -> str:
         return self.get_saved_value(PlotProperties.MINOR_TICKS_DIRECTION.value)
+
+    def get_tick_label_font_size(self) -> str:
+        return self.get_saved_value(PlotProperties.TICK_LABEL_FONT_SIZE.value)
 
     def get_enable_grid(self) -> str:
         return self.get_saved_value(PlotProperties.ENABLE_GRID.value)
@@ -209,6 +221,9 @@ class PlotsSettingsModel(ConfigSettingsChangesModel):
     def set_show_title(self, value: str) -> None:
         self.add_change(PlotProperties.SHOW_TITLE.value, value)
 
+    def set_title_font_size(self, value: str) -> None:
+        self.add_change(PlotProperties.TITLE_FONT_SIZE.value, value)
+
     def set_enable_grid(self, value: str) -> None:
         self.add_change(PlotProperties.ENABLE_GRID.value, value)
 
@@ -232,6 +247,9 @@ class PlotsSettingsModel(ConfigSettingsChangesModel):
 
     def set_axes_line_width(self, value: str) -> None:
         self.add_change(PlotProperties.AXES_LINE_WIDTH.value, value)
+
+    def set_axes_label_font_size(self, value: str) -> None:
+        self.add_change(PlotProperties.AXES_LABEL_FONT_SIZE.value, value)
 
     def set_show_ticks_left(self, value: str) -> None:
         self.add_change(PlotProperties.SHOW_TICKS_LEFT.value, value)
@@ -274,6 +292,9 @@ class PlotsSettingsModel(ConfigSettingsChangesModel):
 
     def set_minor_ticks_direction(self, value: str) -> None:
         self.add_change(PlotProperties.MINOR_TICKS_DIRECTION.value, value)
+
+    def set_tick_label_font_size(self, value: str) -> None:
+        self.add_change(PlotProperties.TICK_LABEL_FONT_SIZE.value, value)
 
     def set_line_style(self, value: str) -> None:
         self.add_change(PlotProperties.LINE_STYLE.value, value)
