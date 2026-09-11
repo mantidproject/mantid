@@ -9,7 +9,7 @@ import unittest
 
 from unittest.mock import patch, MagicMock
 
-from mantidqtinterfaces.TexturePlanner.helpers.instrument import InstrumentHelper
+from mantidqtinterfaces.TexturePlanner.helpers.instrument import InstrumentHelper, _is_grouping_file_applicable
 
 FILE_PATH = "mantidqtinterfaces.TexturePlanner.helpers.instrument"
 
@@ -148,6 +148,11 @@ class TestInstrumentHelper_GroupingPath(unittest.TestCase):
 @patch(FILE_PATH + ".GroupDetectors")
 @patch(FILE_PATH + ".CreateSimulationWorkspace")
 class TestInstrumentHelper_IsGroupingFileApplicable(unittest.TestCase):
+    def setUp(self):
+        # the lookup is cached, so without this the first result for a given
+        # (instrument, path) pair would be reused by every later test
+        _is_grouping_file_applicable.cache_clear()
+
     @staticmethod
     def _grouped_with(has_detectors):
         grouped = MagicMock()

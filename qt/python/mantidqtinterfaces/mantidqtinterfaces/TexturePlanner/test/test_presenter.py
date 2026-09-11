@@ -284,13 +284,16 @@ class TestTexturePlannerPresenter_DirectionsUpdated(unittest.TestCase):
         model.set_ax_transform.reset_mock()
         model.set_dir_names.reset_mock()
         model.geometry.recompute.reset_mock()
+        model.geometry.recompute_scattering_geometry.reset_mock()
         model.update_all_projected_data.reset_mock()
 
         presenter.on_directions_updated()
 
         model.set_ax_transform.assert_called_once_with("1,0,0", "0,1,0", "0,0,1")
         model.set_dir_names.assert_called_once_with("RD", "ND", "TD")
-        model.geometry.recompute.assert_called_once_with()
+        # new directions only move the scattering geometry; the detector grouping is unchanged
+        model.geometry.recompute_scattering_geometry.assert_called_once_with()
+        model.geometry.recompute.assert_not_called()
         model.update_all_projected_data.assert_called_once_with()
         presenter.update_plots.assert_called_once_with()
 
