@@ -39,7 +39,7 @@ Note that the Sample and Vanadium x arrays must be the same for this normalisati
 Selecting Tubes
 ---------------
 
-The normalised data should now be plotted on a custom version of the :ref:`Instrument View <InstrumentViewer>`, which only contains the 'Render' and 'Pick' tabs.
+The normalised data should now be plotted on a custom version of the :ref:`Instrument View <LegacyInstrumentViewer>`, which only contains the 'Render' and 'Pick' tabs.
 
 In the 'Pick' tab, you have several options for selecting one or more tubes.
 

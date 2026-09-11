@@ -120,7 +120,6 @@ class FullInstrumentViewPresenter:
             replace_callback=self.replace_workspace_callback,
             add_callback=self.add_workspace_callback,
         )
-        self._view.hide_status_box()
         self.update_plotter(refresh_limits=False)
 
         if self._model.workspace_base_unit in self._UNIT_OPTIONS:
