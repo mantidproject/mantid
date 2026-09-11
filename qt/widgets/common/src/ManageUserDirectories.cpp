@@ -312,7 +312,10 @@ void ManageUserDirectories::selectSaveDir() {
                                                         QFileDialog::ShowDirsOnly);
 
   if (!newDir.isEmpty()) {
-    const auto path = newDir + QDir::separator();
+    auto path = QDir::cleanPath(newDir);
+    if (!path.endsWith(QDir::separator())) {
+      path += QDir::separator();
+    }
     MantidQt::MantidWidgets::QSettingsChangeAware(settings).setValue(QSettingsKeys::LastDirectory, path);
     m_uiForm.leDefaultSave->setText(path);
   }
