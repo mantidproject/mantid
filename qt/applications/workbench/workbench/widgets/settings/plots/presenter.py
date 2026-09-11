@@ -56,9 +56,11 @@ class PlotSettings(SettingsPresenterBase):
 
     def add_filters(self):
         filter_out_mousewheel_events_from_combo_or_spin_box(self._view.plot_font)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self._view.title_font_size)
         filter_out_mousewheel_events_from_combo_or_spin_box(self._view.x_axes_scale)
         filter_out_mousewheel_events_from_combo_or_spin_box(self._view.y_axes_scale)
         filter_out_mousewheel_events_from_combo_or_spin_box(self._view.axes_line_width)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self._view.axes_label_font_size)
         filter_out_mousewheel_events_from_combo_or_spin_box(self._view.x_min)
         filter_out_mousewheel_events_from_combo_or_spin_box(self._view.x_max)
         filter_out_mousewheel_events_from_combo_or_spin_box(self._view.y_min)
@@ -69,6 +71,7 @@ class PlotSettings(SettingsPresenterBase):
         filter_out_mousewheel_events_from_combo_or_spin_box(self._view.minor_ticks_length)
         filter_out_mousewheel_events_from_combo_or_spin_box(self._view.minor_ticks_width)
         filter_out_mousewheel_events_from_combo_or_spin_box(self._view.minor_ticks_direction)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self._view.tick_label_font_size)
         filter_out_mousewheel_events_from_combo_or_spin_box(self._view.line_style)
         filter_out_mousewheel_events_from_combo_or_spin_box(self._view.draw_style)
         filter_out_mousewheel_events_from_combo_or_spin_box(self._view.line_width)
@@ -98,16 +101,19 @@ class PlotSettings(SettingsPresenterBase):
         normalize_to_bin_width = "on" == self._model.get_normalize_to_bin_width().lower()
         show_title = "on" == self._model.get_show_title().lower()
         show_legend = "on" == self._model.get_show_legend().lower()
+        title_font_size = float(self._model.get_title_font_size())
 
         self._view.normalize_to_bin_width.setChecked(normalize_to_bin_width)
         self._view.show_title.setChecked(show_title)
         self._view.show_legend.setChecked(show_legend)
+        self._view.title_font_size.setValue(title_font_size)
         self.populate_font_combo_box()
 
     def setup_axes_group(self):
         x_axes_scale = self._model.get_x_axes_scale()
         y_axes_scale = self._model.get_y_axes_scale()
         axes_line_width = float(self._model.get_axes_line_width())
+        axes_label_font_size = float(self._model.get_axes_label_font_size())
         x_min_str = self._model.get_x_min()
         x_max_str = self._model.get_x_max()
         y_min_str = self._model.get_y_min()
@@ -117,6 +123,7 @@ class PlotSettings(SettingsPresenterBase):
         self._setup_style_combo_boxes(y_axes_scale, self._view.y_axes_scale, self.AXES_SCALE)
 
         self._view.axes_line_width.setValue(axes_line_width)
+        self._view.axes_label_font_size.setValue(axes_label_font_size)
 
         float_max = sys.float_info.max
         self._view.x_min.setRange(-float_max, float_max)
@@ -158,6 +165,7 @@ class PlotSettings(SettingsPresenterBase):
         minor_ticks_length = int(self._model.get_minor_ticks_length())
         minor_ticks_width = int(self._model.get_minor_ticks_width())
         minor_ticks_direction = self._model.get_minor_ticks_direction()
+        tick_label_font_size = float(self._model.get_tick_label_font_size())
 
         enable_grid = "on" == self._model.get_enable_grid().lower()
         show_minor_ticks = "on" == self._model.get_show_minor_ticks().lower()
@@ -175,6 +183,7 @@ class PlotSettings(SettingsPresenterBase):
         self._view.show_labels_bottom.setChecked(show_labels_bottom)
         self._view.show_labels_right.setChecked(show_labels_right)
         self._view.show_labels_top.setChecked(show_labels_top)
+        self._view.tick_label_font_size.setValue(tick_label_font_size)
         self._view.major_ticks_length.setValue(major_ticks_length)
         self._view.major_ticks_width.setValue(major_ticks_width)
         self._view.minor_ticks_length.setValue(minor_ticks_length)
@@ -240,12 +249,14 @@ class PlotSettings(SettingsPresenterBase):
     def setup_signals(self):
         self._view.normalize_to_bin_width.stateChanged.connect(self.action_normalization_changed)
         self._view.show_title.stateChanged.connect(self.action_show_title_changed)
+        self._view.title_font_size.valueChanged.connect(self.action_title_font_size_changed)
         self._view.show_legend.stateChanged.connect(self.action_show_legend_changed)
 
         # Axes
         self._view.x_axes_scale.currentTextChanged.connect(self.action_default_x_axes_changed)
         self._view.y_axes_scale.currentTextChanged.connect(self.action_default_y_axes_changed)
         self._view.axes_line_width.valueChanged.connect(self.action_axes_line_width_changed)
+        self._view.axes_label_font_size.valueChanged.connect(self.action_axes_label_font_size_changed)
 
         # Lines
         self._view.line_style.currentTextChanged.connect(self.action_line_style_changed)
@@ -278,6 +289,7 @@ class PlotSettings(SettingsPresenterBase):
         self._view.minor_ticks_length.valueChanged.connect(self.action_minor_ticks_length_changed)
         self._view.minor_ticks_width.valueChanged.connect(self.action_minor_ticks_width_changed)
         self._view.minor_ticks_direction.currentTextChanged.connect(self.action_minor_ticks_direction_changed)
+        self._view.tick_label_font_size.valueChanged.connect(self.action_tick_label_font_size_changed)
 
         # Markers
         self._view.marker_style.currentTextChanged.connect(self.action_marker_style_changed)
@@ -305,6 +317,10 @@ class PlotSettings(SettingsPresenterBase):
 
     def action_show_title_changed(self, state):
         self._model.set_show_title("On" if checkbox_state_to_bool(state) else "Off")
+        self.notify_changes()
+
+    def action_title_font_size_changed(self, value):
+        self._model.set_title_font_size(str(value))
         self.notify_changes()
 
     def action_enable_grid_changed(self, state):
@@ -341,6 +357,10 @@ class PlotSettings(SettingsPresenterBase):
 
     def action_axes_line_width_changed(self, width):
         self._model.set_axes_line_width(str(width))
+        self.notify_changes()
+
+    def action_axes_label_font_size_changed(self, value):
+        self._model.set_axes_label_font_size(str(value))
         self.notify_changes()
 
     def action_show_ticks_left_changed(self, state):
@@ -397,6 +417,10 @@ class PlotSettings(SettingsPresenterBase):
 
     def action_minor_ticks_direction_changed(self, direction):
         self._model.set_minor_ticks_direction(direction)
+        self.notify_changes()
+
+    def action_tick_label_font_size_changed(self, value):
+        self._model.set_tick_label_font_size(str(value))
         self.notify_changes()
 
     def action_line_style_changed(self, style):
@@ -511,6 +535,7 @@ class PlotSettings(SettingsPresenterBase):
     def update_properties(self):
         self.load_general_setting_values()
         self.setup_axes_group()
+        self.setup_ticks_group()
         self.setup_line_group()
         self.setup_marker_group()
         self.setup_error_bar_group()
