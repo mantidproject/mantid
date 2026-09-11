@@ -51,6 +51,7 @@ class SavePlot1DTest(unittest.TestCase):
         )
         simpleapi.GroupWorkspaces("test1,test2", OutputWorkspace="group")
         self.plotfile = os.path.join(config.getString("defaultsave.directory"), "plot.png")
+        self.plotlyfile = os.path.join(config.getString("defaultsave.directory"), "plot.html")
 
     def cleanup(self):
         ads = AnalysisDataServiceImpl.Instance()
@@ -59,6 +60,8 @@ class SavePlot1DTest(unittest.TestCase):
         ads.remove("test2")
         if os.path.exists(self.plotfile):
             os.remove(self.plotfile)
+        if os.path.exists(self.plotlyfile):
+            os.remove(self.plotlyfile)
 
     @unittest.skipIf(matplotlibissue is not None, matplotlibissue)
     def testPlotSingle(self):
@@ -74,19 +77,50 @@ class SavePlot1DTest(unittest.TestCase):
         self.assertGreater(os.path.getsize(self.plotfile), 1e4)
         self.cleanup()
 
+    def assertIsPlotlyDiv(self, div):
+        """A bare plot div, with plotly.js left out so the page can supply it"""
+        self.assertGreater(len(div), 0)  # confirm result is non-empty
+        self.assertIn("plotly-graph-div", div)
+        self.assertIn("Plotly.newPlot", div)
+        self.assertNotIn("<html", div)  # a div, not a whole page
+
     @unittest.skipIf(not havePlotly, "Do not have plotly installed")
     def testPlotlySingle(self):
         self.makeWs()
         div = simpleapi.SavePlot1D(InputWorkspace="test1", OutputType="plotly")
         self.cleanup()
-        self.assertGreater(len(div), 0)  # confirm result is non-empty
+        self.assertIsPlotlyDiv(div)
 
     @unittest.skipIf(not havePlotly, "Do not have plotly installed")
     def testPlotlyGroup(self):
         self.makeWs()
         div = simpleapi.SavePlot1D(InputWorkspace="group", OutputType="plotly")
         self.cleanup()
-        self.assertGreater(len(div), 0)  # confirm result is non-empty
+        self.assertIsPlotlyDiv(div)
+
+    @unittest.skipIf(not havePlotly, "Do not have plotly installed")
+    def testPlotlyFullSingle(self):
+        self.makeWs()
+        result = simpleapi.SavePlot1D(InputWorkspace="test1", OutputFilename=self.plotlyfile, OutputType="plotly-full")
+        self.assertTrue(os.path.exists(self.plotlyfile))
+        with open(self.plotlyfile) as handle:
+            contents = handle.read()
+        self.cleanup()
+        # Result reports the file that was written, however the platform spells the path
+        self.assertEqual(os.path.normcase(os.path.abspath(result)), os.path.normcase(os.path.abspath(self.plotlyfile)))
+        self.assertIn("plotly-graph-div", contents)
+        self.assertIn("Plotly.newPlot", contents)
+        self.assertIn("</html>", contents)  # a whole page, not just the div
+        self.assertGreater(len(contents), 1e5)  # plotly.js is bundled into the page
+
+    @unittest.skipIf(not havePlotly, "Do not have plotly installed")
+    def testPlotlyFullGroup(self):
+        self.makeWs()
+        simpleapi.SavePlot1D(InputWorkspace="group", OutputFilename=self.plotlyfile, OutputType="plotly-full")
+        self.assertTrue(os.path.exists(self.plotlyfile))
+        size = os.path.getsize(self.plotlyfile)
+        self.cleanup()
+        self.assertGreater(size, 1e5)
 
 
 if __name__ == "__main__":
