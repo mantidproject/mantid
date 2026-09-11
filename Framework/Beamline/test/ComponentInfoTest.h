@@ -10,6 +10,7 @@
 
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidBeamline/PixelGridComponent.h"
 #include "MantidKernel/EmptyValues.h"
 #include <Eigen/Geometry>
 #include <Eigen/StdVector>
@@ -27,6 +28,7 @@ using PosVec = std::vector<Eigen::Vector3d>;
 using RotVec = std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>;
 using StrVec = std::vector<std::string>;
 using SideBySideMap = std::map<size_t, Eigen::Vector2d>;
+using PixelGridMap = std::map<size_t, PixelGridComponent>;
 
 /// Sentinel returned by ComponentInfo::sideBySideViewPosition() to mean "not set"
 Eigen::Vector2d unsetSideBySideViewPos() { return Eigen::Vector2d(Mantid::EMPTY_DBL(), Mantid::EMPTY_DBL()); }
@@ -66,6 +68,7 @@ std::tuple<std::shared_ptr<ComponentInfo>, std::shared_ptr<DetectorInfo>> makeFl
   auto detectorInfo = std::make_shared<DetectorInfo>(detPositions, detRotations);
   // Rectangular bank flag
   auto isRectangularBank = std::make_shared<std::vector<ComponentType>>(1, ComponentType::Generic);
+  auto pixelGridComponents = std::make_shared<const PixelGridMap>();
 
   std::vector<size_t> branch(detPositions.size());
   std::iota(branch.begin(), branch.end(), 0);
@@ -75,7 +78,7 @@ std::tuple<std::shared_ptr<ComponentInfo>, std::shared_ptr<DetectorInfo>> makeFl
       bankSortedDetectorIndices, std::make_shared<const std::vector<std::pair<size_t, size_t>>>(detectorRanges),
       bankSortedComponentIndices, std::make_shared<const std::vector<std::pair<size_t, size_t>>>(componentRanges),
       parentIndices, children, positions, rotations, scaleFactors, isRectangularBank, names, sideBySideViewPositions,
-      -1, -1);
+      pixelGridComponents, -1, -1);
 
   componentInfo->setDetectorInfo(detectorInfo.get());
 
@@ -140,13 +143,14 @@ makeTreeExampleAndReturnGeometricArguments() {
   auto sideBySideViewPositions = std::make_shared<const SideBySideMap>();
   // Rectangular bank flag
   auto isRectangularBank = std::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
+  auto pixelGridComponents = std::make_shared<const PixelGridMap>();
   auto children = std::make_shared<std::vector<std::vector<size_t>>>(2, std::vector<size_t>(2));
 
   auto compInfo = std::make_shared<ComponentInfo>(
       bankSortedDetectorIndices, std::make_shared<const std::vector<std::pair<size_t, size_t>>>(detectorRanges),
       bankSortedComponentIndices, std::make_shared<const std::vector<std::pair<size_t, size_t>>>(componentRanges),
       parentIndices, children, compPositions, compRotations, scaleFactors, isRectangularBank, names,
-      sideBySideViewPositions, -1, -1);
+      sideBySideViewPositions, pixelGridComponents, -1, -1);
 
   compInfo->setDetectorInfo(detectorInfo.get());
 
@@ -192,6 +196,7 @@ std::tuple<std::shared_ptr<ComponentInfo>, std::shared_ptr<DetectorInfo>> makeTr
   auto detectorInfo = std::make_shared<DetectorInfo>(detPositions, detRotations);
   // Rectangular bank flag
   auto isRectangularBank = std::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
+  auto pixelGridComponents = std::make_shared<const PixelGridMap>();
 
   auto children = std::make_shared<std::vector<std::vector<size_t>>>(2, std::vector<size_t>(2));
 
@@ -199,11 +204,71 @@ std::tuple<std::shared_ptr<ComponentInfo>, std::shared_ptr<DetectorInfo>> makeTr
       bankSortedDetectorIndices, std::make_shared<const std::vector<std::pair<size_t, size_t>>>(detectorRanges),
       bankSortedComponentIndices, std::make_shared<const std::vector<std::pair<size_t, size_t>>>(componentRanges),
       parentIndices, children, positions, rotations, scaleFactors, isRectangularBank, names, sideBySideViewPositions,
-      -1, -1);
+      pixelGridComponents, -1, -1);
 
   componentInfo->setDetectorInfo(detectorInfo.get());
 
   return std::make_tuple(componentInfo, detectorInfo);
+}
+
+/*
+ * Builds a minimal 2 (x) by 3 (y) Rectangular-bank-shaped tree:
+ *
+ *          bank (index 8, Rectangular)
+ *         /    \
+ *    xCol0(6)  xCol1(7)
+ *    /  |  \    /  |  \
+ *   0   1   2  3   4   5    <- detector indices
+ *
+ * matching the real tree layout GridDetector::createLayer produces (x-columns
+ * nested outside y-pixels, independent of idFillOrder). Returns the
+ * ComponentInfo/DetectorInfo pair plus the bank's own component index.
+ */
+std::tuple<std::shared_ptr<ComponentInfo>, std::shared_ptr<DetectorInfo>, size_t> makeRectangularBankTree() {
+  const size_t bankIndex = 8;
+  auto bankSortedDetectorIndices = std::make_shared<const std::vector<size_t>>(std::vector<size_t>{0, 1, 2, 3, 4, 5});
+  auto bankSortedComponentIndices = std::make_shared<const std::vector<size_t>>(std::vector<size_t>{6, 7, 8});
+  auto parentIndices = std::make_shared<const std::vector<size_t>>(std::vector<size_t>{6, 6, 6, 7, 7, 7, 8, 8, 8});
+  auto detectorRanges = std::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+      std::vector<std::pair<size_t, size_t>>{{0, 3}, {3, 6}, {0, 6}});
+  auto componentRanges = std::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+      std::vector<std::pair<size_t, size_t>>{{0, 0}, {0, 0}, {0, 2}});
+  auto positions = std::make_shared<PosVec>(3, Eigen::Vector3d{0, 0, 0});
+  auto rotations = std::make_shared<RotVec>(3, Eigen::Quaterniond::Identity());
+  auto scaleFactors = std::make_shared<PosVec>(9, Eigen::Vector3d{1, 1, 1});
+  auto names =
+      std::make_shared<StrVec>(StrVec{"det0", "det1", "det2", "det3", "det4", "det5", "xCol0", "xCol1", "bank"});
+  auto sideBySideViewPositions = std::make_shared<const SideBySideMap>();
+  auto componentType = std::make_shared<std::vector<ComponentType>>(
+      std::vector<ComponentType>{ComponentType::Unstructured, ComponentType::Unstructured, ComponentType::Rectangular});
+
+  PixelGridComponent bankGrid;
+  bankGrid.nX = 2;
+  bankGrid.nY = 3;
+  bankGrid.nZ = 0;
+  bankGrid.idStart = 100;
+  bankGrid.idStep = 1;
+  bankGrid.idStepByRow = 10;
+  bankGrid.idFillOrder = {{'x', 'y', 'z'}};
+  bankGrid.minDetectorID = 100;
+  bankGrid.maxDetectorID = 121;
+  // Only the bank itself (absolute index 8) is Rectangular/Grid; xCol0 (6) and
+  // xCol1 (7) have no entry at all in the (sparse) map.
+  auto pixelGridComponents = std::make_shared<const PixelGridMap>(PixelGridMap{{bankIndex, bankGrid}});
+
+  auto children = std::make_shared<std::vector<std::vector<size_t>>>(
+      std::vector<std::vector<size_t>>{{0, 1, 2}, {3, 4, 5}, {6, 7}});
+
+  auto componentInfo = std::make_shared<ComponentInfo>(
+      bankSortedDetectorIndices, detectorRanges, bankSortedComponentIndices, componentRanges, parentIndices, children,
+      positions, rotations, scaleFactors, componentType, names, sideBySideViewPositions, pixelGridComponents, -1, -1);
+
+  PosVec detPositions(6);
+  RotVec detRotations(6);
+  auto detectorInfo = std::make_shared<DetectorInfo>(detPositions, detRotations);
+  componentInfo->setDetectorInfo(detectorInfo.get());
+
+  return std::make_tuple(componentInfo, detectorInfo, bankIndex);
 }
 
 // Helper to clone and resync both Info objects
@@ -263,11 +328,12 @@ public:
     auto names = std::make_shared<StrVec>(4);
     auto sideBySideViewPositions = std::make_shared<const SideBySideMap>();
     auto isRectangularBank = std::make_shared<std::vector<ComponentType>>(1);
+    auto pixelGridComponents = std::make_shared<const PixelGridMap>();
     auto children = std::make_shared<std::vector<std::vector<size_t>>>(1, std::vector<size_t>(3));
 
     ComponentInfo componentInfo(bankSortedDetectorIndices, detectorRanges, bankSortedComponentIndices, componentRanges,
                                 parentIndices, children, positions, rotations, scaleFactors, isRectangularBank, names,
-                                sideBySideViewPositions, -1, -1);
+                                sideBySideViewPositions, pixelGridComponents, -1, -1);
 
     DetectorInfo detectorInfo; // Detector info size 0
     TS_ASSERT_THROWS(componentInfo.setDetectorInfo(&detectorInfo), std::invalid_argument &);
@@ -295,12 +361,13 @@ public:
     auto names = std::make_shared<StrVec>();
     auto sideBySideViewPositions = std::make_shared<const SideBySideMap>();
     auto isRectangularBank = std::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
+    auto pixelGridComponents = std::make_shared<const PixelGridMap>();
     auto children = std::make_shared<std::vector<std::vector<size_t>>>(); // invalid but not
                                                                           // being tested
 
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges, bankSortedComponentIndices, componentRanges,
                                    parentIndices, children, positions, rotations, scaleFactors, isRectangularBank,
-                                   names, sideBySideViewPositions, -1, -1),
+                                   names, sideBySideViewPositions, pixelGridComponents, -1, -1),
                      std::invalid_argument &);
   }
 
@@ -332,12 +399,13 @@ public:
     auto componentRanges =
         std::make_shared<const std::vector<std::pair<size_t, size_t>>>(std::vector<std::pair<size_t, size_t>>{{0, 0}});
     auto isRectangularBank = std::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
+    auto pixelGridComponents = std::make_shared<const PixelGridMap>();
     auto children = std::make_shared<std::vector<std::vector<size_t>>>(); // invalid but not
                                                                           // being tested
 
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges, componentsInSubtree, componentRanges,
                                    parentIndices, children, positions, rotations, scaleFactors, isRectangularBank,
-                                   names, sideBySideViewPositions, -1, -1),
+                                   names, sideBySideViewPositions, pixelGridComponents, -1, -1),
                      std::invalid_argument &);
   }
 
@@ -371,11 +439,12 @@ public:
         std::make_shared<const std::vector<std::pair<size_t, size_t>>>(std::vector<std::pair<size_t, size_t>>{{0, 0}});
     auto componentTypes =
         std::make_shared<std::vector<Mantid::Beamline::ComponentType>>(1, Mantid::Beamline::ComponentType::Generic);
+    auto pixelGridComponents = std::make_shared<const PixelGridMap>();
     auto children = std::make_shared<std::vector<std::vector<size_t>>>(1, std::vector<size_t>{1, 2}); // invalid
 
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges, componentsInSubtree, componentRanges,
                                    parentIndices, children, positions, rotations, scaleFactors, componentTypes, names,
-                                   sideBySideViewPositions, -1, -1),
+                                   sideBySideViewPositions, pixelGridComponents, -1, -1),
                      std::invalid_argument &);
   }
 
@@ -761,6 +830,7 @@ public:
     auto scaleFactors = std::make_shared<PosVec>(4, Eigen::Vector3d{1, 1, 1});
     auto names = std::make_shared<StrVec>(4);
     auto isRectangularBank = std::make_shared<std::vector<ComponentType>>(1, ComponentType::Generic);
+    auto pixelGridComponents = std::make_shared<const PixelGridMap>();
     auto children = std::make_shared<std::vector<std::vector<size_t>>>(1, std::vector<size_t>{0, 1, 2});
 
     const Eigen::Vector2d detector1Pos{1.5, -2.5};
@@ -770,7 +840,7 @@ public:
 
     ComponentInfo componentInfo(bankSortedDetectorIndices, detectorRanges, bankSortedComponentIndices, componentRanges,
                                 parentIndices, children, positions, rotations, scaleFactors, isRectangularBank, names,
-                                sideBySideViewPositions, -1, -1);
+                                sideBySideViewPositions, pixelGridComponents, -1, -1);
 
     TSM_ASSERT_EQUALS("Not set for detector 0", componentInfo.sideBySideViewPosition(0), unsetSideBySideViewPos());
     TS_ASSERT_EQUALS(componentInfo.sideBySideViewPosition(1), detector1Pos);
@@ -1302,5 +1372,51 @@ public:
     auto size3 = comp3->getMemorySize(); // 30
     // 20 - 10 == 30 - 20
     TS_ASSERT_EQUALS(size2 - size1, size3 - size2);
+  }
+
+  void test_pixel_grid_component_default_for_non_bank() {
+    auto [compInfo, detInfo, bankIndex] = makeRectangularBankTree();
+    // xCol0 (index 6) is a plain Unstructured assembly, not a Rectangular/Grid bank.
+    const auto &grid = compInfo->pixelGridComponent(6);
+    TS_ASSERT_EQUALS(grid.nX, 0);
+    TS_ASSERT_EQUALS(grid.nY, 0);
+  }
+
+  void test_pixel_grid_component_reads_constructed_value() {
+    auto [compInfo, detInfo, bankIndex] = makeRectangularBankTree();
+    const auto &grid = compInfo->pixelGridComponent(bankIndex);
+    TS_ASSERT_EQUALS(grid.nX, 2);
+    TS_ASSERT_EQUALS(grid.nY, 3);
+    TS_ASSERT_EQUALS(grid.nZ, 0);
+    TS_ASSERT_EQUALS(grid.idStart, 100);
+    TS_ASSERT_EQUALS(grid.idStep, 1);
+    TS_ASSERT_EQUALS(grid.idStepByRow, 10);
+    TS_ASSERT_EQUALS(grid.idFillOrder[0], 'x');
+    TS_ASSERT_EQUALS(grid.minDetectorID, 100);
+    TS_ASSERT_EQUALS(grid.maxDetectorID, 121);
+  }
+
+  void test_is_grid_detector() {
+    auto [compInfo, detInfo, bankIndex] = makeRectangularBankTree();
+    TSM_ASSERT("Bank is Rectangular/Grid", compInfo->isGridDetector(bankIndex));
+    TSM_ASSERT("xCol0 is a plain Unstructured assembly", !compInfo->isGridDetector(6));
+    TSM_ASSERT("xCol1 is a plain Unstructured assembly", !compInfo->isGridDetector(7));
+  }
+
+  void test_detector_index_at_xyz() {
+    auto [compInfo, detInfo, bankIndex] = makeRectangularBankTree();
+    TS_ASSERT_EQUALS(compInfo->detectorIndexAtXYZ(bankIndex, 0, 0, 0), 0);
+    TS_ASSERT_EQUALS(compInfo->detectorIndexAtXYZ(bankIndex, 0, 1, 0), 1);
+    TS_ASSERT_EQUALS(compInfo->detectorIndexAtXYZ(bankIndex, 0, 2, 0), 2);
+    TS_ASSERT_EQUALS(compInfo->detectorIndexAtXYZ(bankIndex, 1, 0, 0), 3);
+    TS_ASSERT_EQUALS(compInfo->detectorIndexAtXYZ(bankIndex, 1, 1, 0), 4);
+    TS_ASSERT_EQUALS(compInfo->detectorIndexAtXYZ(bankIndex, 1, 2, 0), 5);
+  }
+
+  void test_detector_index_at_xyz_throws_out_of_range() {
+    auto [compInfo, detInfo, bankIndex] = makeRectangularBankTree();
+    TS_ASSERT_THROWS(compInfo->detectorIndexAtXYZ(bankIndex, 2, 0, 0), const std::out_of_range &);
+    TS_ASSERT_THROWS(compInfo->detectorIndexAtXYZ(bankIndex, 0, 3, 0), const std::out_of_range &);
+    TS_ASSERT_THROWS(compInfo->detectorIndexAtXYZ(bankIndex, -1, 0, 0), const std::out_of_range &);
   }
 };

@@ -33,6 +33,8 @@ namespace DataObjects {
  */
 class MANTID_DATAOBJECTS_DLL Peak : public BasePeak {
 public:
+  // NOTE: constructors currently require a legacy instrument pointer
+  // Future work for Instrument 2.0 most change this to work with ComponentInfo and DetectorInfo instead
   Peak();
   Peak(const Geometry::Instrument_const_sptr &m_inst, const Mantid::Kernel::V3D &QLabFrame,
        std::optional<double> detectorDistance = std::nullopt);

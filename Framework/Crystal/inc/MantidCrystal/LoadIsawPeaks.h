@@ -9,6 +9,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/FileDescriptor.h"
 
@@ -73,12 +74,12 @@ private:
   /// Throws std::length_error on mismatch
   void checkNumberPeaks(const Mantid::DataObjects::PeaksWorkspace_sptr &outWS, const std::string &filename);
 
-  /// Local cache of bank IComponents used in file
-  std::map<std::string, std::shared_ptr<const Geometry::IComponent>> m_banks;
+  /// Local cache of bank component indices used in file
+  std::map<std::string, size_t> m_bankIndices;
 
-  /// Retrieve cached bank (or load and cache for next time)
-  std::shared_ptr<const Geometry::IComponent>
-  getCachedBankByName(const std::string &bankname, const std::shared_ptr<const Geometry::Instrument> &inst);
+  /// Retrieve cached bank component index (or look up and cache for next time).
+  /// Throws std::invalid_argument (via ComponentInfo::indexOfAny) if bankname does not exist.
+  size_t getCachedBankIndex(std::string const &bankname, Geometry::ComponentInfo const &componentInfo);
 };
 
 } // namespace Crystal

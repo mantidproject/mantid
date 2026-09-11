@@ -346,35 +346,35 @@ DataObjects::Peak LoadIsawPeaks::readPeak(const PeaksWorkspace_sptr &outWS, std:
 
 //----------------------------------------------------------------------------------------------
 int LoadIsawPeaks::findPixelID(const PeaksWorkspace_sptr &ws, const std::string &bankName, int col, int row) {
-  const auto inst = ws->getInstrument();
-  std::shared_ptr<const IComponent> parent = getCachedBankByName(bankName, inst);
+  const auto &componentInfo = ws->componentInfo();
 
-  if (!parent)
+  size_t bankIndex;
+  try {
+    bankIndex = getCachedBankIndex(bankName, componentInfo);
+  } catch (std::invalid_argument &) {
     return -1; // peak not in any detector.
+  }
 
-  if (parent->type() == "RectangularDetector") {
-    std::shared_ptr<const RectangularDetector> RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
-    return RDet->getDetectorIDAtXY(col, row);
+  const auto &detectorInfo = ws->detectorInfo();
+  if (componentInfo.isGridDetector(bankIndex)) {
+    return detectorInfo.detid(componentInfo.detectorIndexAtXYZ(bankIndex, col, row, 0));
   } else {
-    const auto &componentInfo = ws->componentInfo();
-    const size_t parentIndex = componentInfo.indexOfAny(bankName);
-    auto children = componentInfo.children(parentIndex);
+    auto children = componentInfo.children(bankIndex);
 
     if (!children.empty() && componentInfo.name(children[0]) == "sixteenpack") {
       children = componentInfo.children(children[0]);
     }
     int col0 = col - 1;
     // WISH detectors are in bank in this order in instrument
-    if (inst->getName() == "WISH")
+    if (ws->getInstrumentName() == "WISH")
       col0 = (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
 
     auto grandchildren = componentInfo.children(children[col0]);
-    const auto *first = componentInfo.componentID(grandchildren[row - 1]);
-    const auto *det = dynamic_cast<const Geometry::IDetector *>(first);
-    if (!det) {
+    const size_t detIndex = grandchildren[row - 1];
+    if (!componentInfo.isDetector(detIndex)) {
       return -1; // peak not in any detector.
     }
-    return det->getID();
+    return detectorInfo.detid(detIndex);
   }
 }
 
@@ -563,9 +563,9 @@ void LoadIsawPeaks::checkNumberPeaks(const PeaksWorkspace_sptr &outWS, const std
 }
 
 //----------------------------------------------------------------------------------------------
-/** Retrieves pointer to given bank from local cache.
+/** Retrieves component index of given bank from local cache.
  *
- * When the bank isn't in the local cache, it is loaded and
+ * When the bank isn't in the local cache, it is looked up and
  * added to the cache for later use. Lifetime of the cache
  * is bound to the lifetime of this instance of the algorithm
  * (typically, the instance should be destroyed once exec()
@@ -575,16 +575,17 @@ void LoadIsawPeaks::checkNumberPeaks(const PeaksWorkspace_sptr &outWS, const std
  * work for caching any component without modification.
  *
  * @param bankname :: the name of the requested bank
- * @param inst :: the instrument from which to load the bank if it is not yet
- *cached
- * @return A shared pointer to the request bank (empty shared pointer if not
- *found)
+ * @param componentInfo :: the ComponentInfo to look the bank up in if it is
+ *not yet cached
+ * @return The component index of the requested bank
+ * @throws std::invalid_argument if bankname does not exist
  */
-std::shared_ptr<const IComponent>
-LoadIsawPeaks::getCachedBankByName(const std::string &bankname,
-                                   const std::shared_ptr<const Geometry::Instrument> &inst) {
-  m_banks.try_emplace(bankname, inst->getComponentByName(bankname));
-  return m_banks[bankname];
+size_t LoadIsawPeaks::getCachedBankIndex(const std::string &bankname, const Geometry::ComponentInfo &componentInfo) {
+  auto it = m_bankIndices.find(bankname);
+  if (it == m_bankIndices.end()) {
+    it = m_bankIndices.try_emplace(bankname, componentInfo.indexOfAny(bankname)).first;
+  }
+  return it->second;
 }
 
 } // namespace Mantid::Crystal

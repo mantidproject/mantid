@@ -18,7 +18,7 @@
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CPUTimer.h"
@@ -284,57 +284,16 @@ void DiffractionEventCalibrateDetectors::exec() {
   // `inputW` but want to access original positions (etc.) via `detList` below.
   const auto &dummyW = create<EventWorkspace>(*inputW, 1, inputW->binEdges(0));
   Instrument_const_sptr inst = dummyW->getInstrument();
+  const auto &componentInfo = dummyW->componentInfo();
 
-  // Build a list of Rectangular Detectors
-  std::vector<std::shared_ptr<RectangularDetector>> detList;
+  // Build a list of Rectangular/Grid Detectors (as component indices)
+  std::vector<size_t> detList;
   // --------- Loading only one bank ----------------------------------
   std::string onebank = getProperty("BankName");
   bool doOneBank = (!onebank.empty());
-  for (int i = 0; i < inst->nelements(); i++) {
-    std::shared_ptr<RectangularDetector> det;
-    std::shared_ptr<ICompAssembly> assem;
-    std::shared_ptr<ICompAssembly> assem2;
-
-    det = std::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
-    if (det) {
-      if (det->getName() == onebank)
-        detList.emplace_back(det);
-      if (!doOneBank)
-        detList.emplace_back(det);
-    } else {
-      // Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
-      // We are not doing a full recursive search since that will be very long
-      // for lots of pixels.
-      assem = std::dynamic_pointer_cast<ICompAssembly>((*inst)[i]);
-      if (assem) {
-        for (int j = 0; j < assem->nelements(); j++) {
-          det = std::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
-          if (det) {
-            if (det->getName() == onebank)
-              detList.emplace_back(det);
-            if (!doOneBank)
-              detList.emplace_back(det);
-
-          } else {
-            // Also, look in the second sub-level for RectangularDetectors (e.g.
-            // PG3).
-            // We are not doing a full recursive search since that will be very
-            // long for lots of pixels.
-            assem2 = std::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
-            if (assem2) {
-              for (int k = 0; k < assem2->nelements(); k++) {
-                det = std::dynamic_pointer_cast<RectangularDetector>((*assem2)[k]);
-                if (det) {
-                  if (det->getName() == onebank)
-                    detList.emplace_back(det);
-                  if (!doOneBank)
-                    detList.emplace_back(det);
-                }
-              }
-            }
-          }
-        }
-      }
+  for (size_t i = 0; i < componentInfo.size(); ++i) {
+    if (componentInfo.isGridDetector(i) && (!doOneBank || componentInfo.name(i) == onebank)) {
+      detList.emplace_back(i);
     }
   }
 
@@ -377,8 +336,10 @@ void DiffractionEventCalibrateDetectors::exec() {
 
   Progress prog(this, 0.0, 1.0, detList.size());
   for (int det = 0; det < static_cast<int>(detList.size()); det++) {
+    const size_t bankIndex = detList[det];
+    const std::string bankName = componentInfo.name(bankIndex);
     std::string par[6];
-    par[0] = detList[det]->getName();
+    par[0] = bankName;
     par[1] = inname;
     par[2] = outname;
     std::ostringstream strpeakOpt;
@@ -391,8 +352,8 @@ void DiffractionEventCalibrateDetectors::exec() {
     auto alg2 = AlgorithmFactory::Instance().create("CreateGroupingWorkspace", 1);
     alg2->initialize();
     alg2->setProperty("InputWorkspace", inputW);
-    alg2->setPropertyValue("GroupNames", detList[det]->getName());
-    std::string groupWSName = "group_" + detList[det]->getName();
+    alg2->setPropertyValue("GroupNames", bankName);
+    std::string groupWSName = "group_" + bankName;
     alg2->setPropertyValue("OutputWorkspace", groupWSName);
     alg2->executeAsChildAlg();
     par[5] = groupWSName;
@@ -475,18 +436,18 @@ void DiffractionEventCalibrateDetectors::exec() {
 
     Kernel::V3D CalCenter =
         V3D(gsl_vector_get(s->x, 0) * 0.01, gsl_vector_get(s->x, 1) * 0.01, gsl_vector_get(s->x, 2) * 0.01);
-    Kernel::V3D Center = detList[det]->getPos() + CalCenter;
-    int pixmax = detList[det]->xpixels() - 1;
-    int pixmid = (detList[det]->ypixels() - 1) / 2;
-    BoundingBox box;
-    detList[det]->getBoundingBoxAtXY(pixmax, pixmid, box);
+    const auto grid = componentInfo.pixelGridComponent(bankIndex);
+    Kernel::V3D Center = componentInfo.position(bankIndex) + CalCenter;
+    int pixmax = grid.nX - 1;
+    int pixmid = (grid.nY - 1) / 2;
+    BoundingBox box = componentInfo.boundingBox(componentInfo.detectorIndexAtXYZ(bankIndex, pixmax, pixmid, 0));
     double baseX = box.xMax();
     double baseY = box.yMax();
     double baseZ = box.zMax();
     Kernel::V3D Base = V3D(baseX, baseY, baseZ) + CalCenter;
-    pixmid = (detList[det]->xpixels() - 1) / 2;
-    pixmax = detList[det]->ypixels() - 1;
-    detList[det]->getBoundingBoxAtXY(pixmid, pixmax, box);
+    pixmid = (grid.nX - 1) / 2;
+    pixmax = grid.nY - 1;
+    box = componentInfo.boundingBox(componentInfo.detectorIndexAtXYZ(bankIndex, pixmid, pixmax, 0));
     double upX = box.xMax();
     double upY = box.yMax();
     double upZ = box.zMax();
@@ -528,9 +489,8 @@ void DiffractionEventCalibrateDetectors::exec() {
     Up.normalize();
     Center *= 100.0;
     // << det+1  << "  "
-    outfile << "5  " << detList[det]->getName().substr(4) << "  " << detList[det]->xpixels() << "  "
-            << detList[det]->ypixels() << "  " << 100.0 * detList[det]->xsize() << "  " << 100.0 * detList[det]->ysize()
-            << "  "
+    outfile << "5  " << bankName.substr(4) << "  " << grid.nX << "  " << grid.nY << "  "
+            << 100.0 * (grid.nX * grid.xStep) << "  " << 100.0 * (grid.nY * grid.yStep) << "  "
             << "0.2000"
             << "  " << Center.norm() << "  ";
     Center.write(outfile);
@@ -547,7 +507,7 @@ void DiffractionEventCalibrateDetectors::exec() {
 
     // Remove the now-unneeded grouping workspace
     AnalysisDataService::Instance().remove(groupWSName);
-    prog.report(detList[det]->getName());
+    prog.report(bankName);
   }
 
   // Closing

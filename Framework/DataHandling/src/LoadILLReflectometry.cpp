@@ -19,7 +19,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/DynamicPointerCastHelper.h"
@@ -673,16 +673,16 @@ void LoadILLReflectometry::sampleAngle(const Nexus::NXEntry &entry) {
 
 /// Initialize m_pixelWidth from the IDF as the step of rectangular detector
 void LoadILLReflectometry::initPixelWidth() {
-  const auto &instrument = m_localWorkspace->getInstrument();
-  const auto &detectorPanels = instrument->getAllComponentsWithName("detector");
-  if (detectorPanels.size() != 1) {
+  const auto &componentInfo = m_localWorkspace->componentInfo();
+  if (!componentInfo.uniqueName("detector")) {
     throw std::runtime_error("IDF should have a single 'detector' component.");
   }
-  const auto &detector = std::dynamic_pointer_cast<const Geometry::RectangularDetector>(detectorPanels.front());
+  const size_t detectorIndex = componentInfo.indexOfAny("detector");
+  const auto grid = componentInfo.pixelGridComponent(detectorIndex);
   if (m_instrument == Supported::D17) {
-    m_pixelWidth = std::abs(detector->xstep());
+    m_pixelWidth = std::abs(grid.xStep);
   } else {
-    m_pixelWidth = std::abs(detector->ystep());
+    m_pixelWidth = std::abs(grid.yStep);
   }
 }
 

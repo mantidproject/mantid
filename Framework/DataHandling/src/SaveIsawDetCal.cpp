@@ -213,8 +213,8 @@ void SaveIsawDetCal::exec() {
 V3D SaveIsawDetCal::findPixelPos(const std::string &bankName, int col, int row, const ComponentInfo &componentInfo) {
   std::shared_ptr<const IComponent> parent = inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
-    std::shared_ptr<const RectangularDetector> RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
-    return RDet->getPosAtXY(col, row);
+    const size_t bankIndex = componentInfo.indexOf(parent->getComponentID());
+    return componentInfo.position(componentInfo.detectorIndexAtXYZ(bankIndex, col, row, 0));
   } else {
     const size_t parentIndex = componentInfo.indexOfAny(bankName);
     auto children = componentInfo.children(parentIndex);
@@ -236,12 +236,12 @@ void SaveIsawDetCal::sizeBanks(const std::string &bankName, int &NCOLS, int &NRO
     return;
   std::shared_ptr<const IComponent> parent = inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
-    std::shared_ptr<const RectangularDetector> RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
+    const auto grid = componentInfo.pixelGridComponent(componentInfo.indexOf(parent->getComponentID()));
 
-    NCOLS = RDet->xpixels();
-    NROWS = RDet->ypixels();
-    xsize = RDet->xsize();
-    ysize = RDet->ysize();
+    NCOLS = grid.nX;
+    NROWS = grid.nY;
+    xsize = grid.nX * grid.xStep;
+    ysize = grid.nY * grid.yStep;
   } else {
     const size_t parentIndex = componentInfo.indexOfAny(bankName);
     auto children = componentInfo.children(parentIndex);

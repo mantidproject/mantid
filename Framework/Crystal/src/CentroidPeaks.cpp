@@ -9,7 +9,7 @@
 #include "MantidGeometry/Crystal/EdgePixel.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 #include <boost/algorithm/clamp.hpp>
@@ -302,7 +302,6 @@ void CentroidPeaks::integrateEvent() {
  */
 void CentroidPeaks::exec() {
   m_inWS = getProperty("InputWorkspace");
-  m_inst = m_inWS->getInstrument();
   // For quickly looking up workspace index from det id
   m_wi_to_detid_map = m_inWS->getDetectorIDToWorkspaceIndexMap();
 
@@ -316,20 +315,16 @@ void CentroidPeaks::exec() {
 }
 
 int CentroidPeaks::findPixelID(const std::string &bankName, int col, int row) {
-  std::shared_ptr<const IComponent> parent = m_inst->getComponentByName(bankName);
-  if (parent->type() == "RectangularDetector") {
-    std::shared_ptr<const RectangularDetector> RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
-    return RDet->getDetectorIDAtXY(col, row);
+  const auto &componentInfo = m_inWS->componentInfo();
+  const size_t bankIndex = componentInfo.indexOfAny(bankName);
+  if (componentInfo.isGridDetector(bankIndex)) {
+    const auto &detectorInfo = m_inWS->detectorInfo();
+    return detectorInfo.detid(componentInfo.detectorIndexAtXYZ(bankIndex, col, row, 0));
   } else {
-    std::string bankName0 = bankName;
-    // Only works for WISH
-    bankName0.erase(0, 4);
-    std::ostringstream pixelString;
-    pixelString << m_inst->getName() << "/" << bankName0 << "/" << bankName << "/tube" << std::setw(3)
-                << std::setfill('0') << col << "/pixel" << std::setw(4) << std::setfill('0') << row;
-    std::shared_ptr<const Geometry::IComponent> component = m_inst->getComponentByName(pixelString.str());
-    std::shared_ptr<const Detector> pixel = std::dynamic_pointer_cast<const Detector>(component);
-    return pixel->getID();
+    auto children = componentInfo.children(bankIndex);
+    auto grandChildren = componentInfo.children(children[col - 1]);
+    auto const &detectorInfo = m_inWS->detectorInfo();
+    return detectorInfo.detid(grandChildren[row - 1]);
   }
 }
 
@@ -355,23 +350,18 @@ void CentroidPeaks::removeEdgePeaks(Mantid::DataObjects::PeaksWorkspace &peakWS)
 void CentroidPeaks::sizeBanks(const std::string &bankName, int &nCols, int &nRows) {
   if (bankName == "None")
     return;
-  ExperimentInfo expInfo;
-  expInfo.setInstrument(m_inst);
-  const auto &compInfo = expInfo.componentInfo();
+  const auto &compInfo = m_inWS->componentInfo();
 
   // Get a single bank
-  auto bank = m_inst->getComponentByName(bankName);
-  auto bankID = bank->getComponentID();
-  auto allBankDetectorIndexes = compInfo.detectorsInSubtree(compInfo.indexOf(bankID));
+  const size_t bankIndex = compInfo.indexOfAny(bankName);
+  auto allBankDetectorIndexes = compInfo.detectorsInSubtree(bankIndex);
 
-  nRows = static_cast<int>(compInfo.componentsInSubtree(compInfo.indexOf(bankID)).size() -
-                           allBankDetectorIndexes.size() - 1);
+  nRows = static_cast<int>(compInfo.componentsInSubtree(bankIndex).size() - allBankDetectorIndexes.size() - 1);
   nCols = static_cast<int>(allBankDetectorIndexes.size()) / nRows;
 
   if (nCols * nRows != static_cast<int>(allBankDetectorIndexes.size())) {
     // Need grandchild instead of child
-    nRows = static_cast<int>(compInfo.componentsInSubtree(compInfo.indexOf(bankID)).size() -
-                             allBankDetectorIndexes.size() - 2);
+    nRows = static_cast<int>(compInfo.componentsInSubtree(bankIndex).size() - allBankDetectorIndexes.size() - 2);
     nCols = static_cast<int>(allBankDetectorIndexes.size()) / nRows;
   }
 }

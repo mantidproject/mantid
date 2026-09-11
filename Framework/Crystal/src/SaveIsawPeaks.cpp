@@ -454,8 +454,9 @@ bool SaveIsawPeaks::bankMasked(size_t componentIndex, const Geometry::DetectorIn
 V3D SaveIsawPeaks::findPixelPos(const std::string &bankName, int col, int row) {
   auto parent = inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
-    const auto RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
-    return RDet->getPosAtXY(col, row);
+    const auto &componentInfo = this->m_ws->componentInfo();
+    const size_t bankIndex = componentInfo.indexOf(parent->getComponentID());
+    return componentInfo.position(componentInfo.detectorIndexAtXYZ(bankIndex, col, row, 0));
   } else {
     const auto &componentInfo = this->m_ws->componentInfo();
     const size_t parentIndex = componentInfo.indexOfAny(bankName);
@@ -478,17 +479,21 @@ V3D SaveIsawPeaks::findPixelPos(const std::string &bankName, int col, int row) {
 void SaveIsawPeaks::sizeBanks(const std::string &bankName, int &NCOLS, int &NROWS, double &xsize, double &ysize) {
   if (bankName == "None")
     return;
-  const auto parent = inst->getComponentByName(bankName);
-  if (parent->type() == "RectangularDetector") {
-    const auto RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
+  const auto &componentInfo = this->m_ws->componentInfo();
+  size_t parentIndex;
+  try {
+    parentIndex = componentInfo.indexOfAny(bankName);
+  } catch (std::invalid_argument &) {
+    return;
+  }
+  if (componentInfo.isGridDetector(parentIndex)) {
+    const auto grid = componentInfo.pixelGridComponent(parentIndex);
 
-    NCOLS = RDet->xpixels();
-    NROWS = RDet->ypixels();
-    xsize = RDet->xsize();
-    ysize = RDet->ysize();
+    NCOLS = grid.nX;
+    NROWS = grid.nY;
+    xsize = grid.nX * grid.xStep;
+    ysize = grid.nY * grid.yStep;
   } else {
-    const auto &componentInfo = this->m_ws->componentInfo();
-    const size_t parentIndex = componentInfo.indexOfAny(bankName);
     auto children = componentInfo.children(parentIndex);
 
     if (!children.empty() && componentInfo.name(children[0]) == "sixteenpack") {
