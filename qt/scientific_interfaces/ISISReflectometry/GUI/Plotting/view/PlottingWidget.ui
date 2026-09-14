@@ -12,6 +12,37 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
+    <layout class="QVBoxLayout" name="workspaceLayout">
+     <item>
+      <layout class="QHBoxLayout" name="workspaceFilterLayout">
+       <item>
+        <widget class="QCheckBox" name="filterIvsQBinned">
+         <property name="text"><string>IvsQBinned</string></property>
+         <property name="checked"><bool>true</bool></property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="filterIvsLambda">
+         <property name="text"><string>IvsLambda</string></property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="filterIvsQ">
+         <property name="text"><string>IvsQ</string></property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="workspaceFilter">
+         <property name="placeholderText"><string>Filter by Item (regex)</string></property>
+         <property name="toolTip">
+          <string>Case-sensitive regular expression matched against the Item column. Matching a parent includes its children of the checked output types. Invalid expressions keep the last valid filter.</string>
+         </property>
+         <property name="clearButtonEnabled"><bool>true</bool></property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
     <widget class="MantidQt::CustomInterfaces::ISISReflectometry::QtPlottingWorkspaceTreeView" name="plottingWorkspaceTree">
      <property name="selectionMode">
       <enum>QAbstractItemView::ExtendedSelection</enum>
@@ -20,6 +51,8 @@
       <bool>false</bool>
      </property>
     </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <layout class="QVBoxLayout" name="optionsLayout">
