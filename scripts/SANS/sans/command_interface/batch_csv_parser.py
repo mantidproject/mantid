@@ -29,6 +29,7 @@ class BatchFileKeywords(Enum):
     SAMPLE_SHAPE = "sample_shape"
     BACKGROUND_WORKSPACE = "background_workspace"
     SCALE_FACTOR = "scale_factor"
+    OPTIONS = "options"
 
 
 class BatchCsvParser(object):
@@ -126,6 +127,8 @@ class BatchCsvParser(object):
             pack_val(row.background_ws),
             BatchFileKeywords.SCALE_FACTOR.value,
             pack_val(row.scale_factor),
+            BatchFileKeywords.OPTIONS.value,
+            pack_val(row.options.get_displayed_text()),
         ]
 
     def _parse_csv_row(self, row, row_number):
@@ -191,6 +194,8 @@ class BatchCsvParser(object):
             row_entry.background_ws = value
         elif key_enum is BatchFileKeywords.SCALE_FACTOR:
             row_entry.scale_factor = value
+        elif key_enum is BatchFileKeywords.OPTIONS:
+            row_entry.options.set_user_options(value)
 
         elif key_enum is BatchFileKeywords.SAMPLE_HEIGHT:
             row_entry.sample_height = value

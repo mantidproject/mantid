@@ -301,6 +301,7 @@ class BatchCsvParserTest(unittest.TestCase):
         test_row.sample_shape = SampleShape.DISC
         test_row.background_ws = "TestWS"
         test_row.scale_factor = 1.3
+        test_row.options.set_user_options("WavelengthMin=1, EventSlices=1-6,5-9")
 
         expected = (
             "sample_sans,SANS2D00022025,"
@@ -316,7 +317,8 @@ class BatchCsvParserTest(unittest.TestCase):
             "sample_width,5.4,"
             "sample_shape,Disc,"
             "background_workspace,TestWS,"
-            "scale_factor,1.3"
+            "scale_factor,1.3,"
+            'options,"WavelengthMin=1, EventSlices=1-6,5-9"'
         )
 
         mocked_handle = mock.mock_open()
@@ -350,6 +352,8 @@ class BatchCsvParserTest(unittest.TestCase):
             background_ws="TestWS",
             scale_factor="1.3",
         )
+        row.options.set_user_options("WavelengthMin=1, EventSlices=1-6,5-9")
+        row.options.set_developer_option("MergeScale", 1.2)
         batch_file_path = BatchCsvParserTest._save_to_csv("")
         parser = BatchCsvParser()
         parser.save_batch_file(rows=[row], file_path=batch_file_path)
@@ -367,6 +371,11 @@ class BatchCsvParserTest(unittest.TestCase):
         self.assertEqual(SampleShape.FLAT_PLATE, loaded.sample_shape)
         self.assertEqual("TestWS", loaded.background_ws)
         self.assertEqual("1.3", loaded.scale_factor)
+        self.assertEqual("WavelengthMin=1, EventSlices=1-6,5-9, MergeScale=1.2", loaded.options.get_displayed_text())
+        self.assertEqual(
+            {"WavelengthMin": 1.0, "EventSlices": "1-6,5-9", "MergeScale": 1.2},
+            loaded.options.get_options_dict(),
+        )
 
 
 if __name__ == "__main__":
