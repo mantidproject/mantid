@@ -1098,3 +1098,39 @@ def get_bank_for_spectrum_number(spectrum_number, instrument):
         if 36873 <= spectrum_number <= 73736:
             detector = DetectorType.HAB
     return detector
+
+
+def delete_workspaces(workspaces, use_names=False) -> None:
+    if not workspaces:
+        return
+
+    delete_alg = create_unmanaged_algorithm("DeleteWorkspace")
+
+    def _delete_by_name(_names):
+        for name in _names:
+            if name and AnalysisDataService.doesExist(name):
+                delete_alg.setProperty("Workspace", name)
+                delete_alg.execute()
+
+    if isinstance(workspaces, dict):
+        ws_names = {
+            workspace.name()
+            for workspace_list in workspaces.values()
+            for workspace in workspace_list
+            if workspace and hasattr(workspace, "name")
+        }
+        _delete_by_name(ws_names)
+        return
+
+    if use_names:
+        if isinstance(workspaces, (set, list)) and all(isinstance(workspace, str) for workspace in workspaces):
+            ws_names = workspaces
+        else:
+            ws_names = {workspace.name() for workspace in workspaces if workspace and hasattr(workspace, "name")}
+        _delete_by_name(ws_names)
+        return
+
+    for workspace in workspaces:
+        if workspace:
+            delete_alg.setProperty("Workspace", workspace)
+            delete_alg.execute()
