@@ -130,6 +130,7 @@ outputs:
         - matplotlib-base ${{ matplotlib }}
         - pyparsing ${{ pyparsing }}
         - pystog ${{ pystog }}
+        - plotly ${{ plotly }}
 
     tests:
       - script:
