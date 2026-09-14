@@ -18,6 +18,13 @@ namespace Mantid::MDAlgorithms {
 
 using Mantid::Kernel::DblMatrix;
 
+template <typename PropertyType> auto getLogValues(const API::ExperimentInfo &exptInfo, const std::string &logName) {
+  if (auto *prop = dynamic_cast<PropertyType *>(exptInfo.getLog(logName))) {
+    return (*prop)();
+  }
+  throw std::runtime_error("Log property missing or wrong type: " + logName + ". Cannot continue.");
+}
+
 /** Base class for the three MDNorm, MDNormDirectSC and MDNormSCD algorithms
  * with the common normalization and detector intersections algorithms
  */
