@@ -1,0 +1,1 @@
+- :ref:`algm-SavePlot1D` no longer fails when run with plotly 7.0 or later. The ``plotly`` and ``plotly-full`` output types used plotly interfaces that were deprecated and then removed.

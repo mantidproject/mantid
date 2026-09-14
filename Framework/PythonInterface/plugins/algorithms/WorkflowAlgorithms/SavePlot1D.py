@@ -123,22 +123,22 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         return (xlabel, ylabel)
 
     def savePlotly(self, fullPage):
-        from plotly import tools as toolsly
-        from plotly.offline import plot
         import plotly.graph_objs as go
+        import plotly.io as pio
+        from plotly.subplots import make_subplots
 
         spectraNames = self.getProperty("SpectraNames").value
 
         if isinstance(self._wksp, mantid.api.WorkspaceGroup):
-            fig = toolsly.make_subplots(rows=self._wksp.getNumberOfEntries())
+            fig = make_subplots(rows=self._wksp.getNumberOfEntries(), cols=1)
 
             for i in range(self._wksp.getNumberOfEntries()):
                 wksp = self._wksp.getItem(i)
                 (traces, xlabel, ylabel) = self.toScatterAndLabels(wksp, spectraNames)
                 for spectrum in traces:
-                    fig.append_trace(spectrum, i + 1, 1)
-                fig["layout"]["xaxis%d" % (i + 1)].update(title={"text": xlabel})
-                fig["layout"]["yaxis%d" % (i + 1)].update(title={"text": ylabel})
+                    fig.add_trace(spectrum, row=i + 1, col=1)
+                fig.update_xaxes(title_text=xlabel, row=i + 1, col=1)
+                fig.update_yaxes(title_text=ylabel, row=i + 1, col=1)
                 if len(spectraNames) > 0:  # remove the used spectra names
                     spectraNames = spectraNames[len(traces) :]
             fig["layout"].update(margin={"r": 0, "t": 0})
@@ -156,21 +156,13 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
 
             fig = go.Figure(data=traces, layout=layout)
 
-        # extra arguments for div vs full page
+        # render the plot and decide what to return
         if fullPage:
             filename = self.getProperty("OutputFilename").value
-            plotly_args = {"filename": filename}
-        else:  # just the div
-            plotly_args = {"output_type": "div", "include_plotlyjs": False}
-
-        # render the plot
-        div = plot(fig, show_link=False, **plotly_args)
-
-        # decide what to return
-        if fullPage:
+            pio.write_html(fig, file=filename, include_plotlyjs=True, full_html=True, auto_open=True)
             return filename
-        else:
-            return str(div)
+        else:  # just the div
+            return str(pio.to_html(fig, full_html=False, include_plotlyjs=False))
 
     def toScatterAndLabels(self, wksp, spectraNames):
         import plotly.graph_objs as go
