@@ -1,0 +1,1998 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+ name="GEM" valid-from   ="2026-09-15 00:00:00"
+                       valid-to     ="2100-01-31 23:59:59"
+		       last-modified="2026-05-24 00:00:00">
+
+  <defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>
+    <location x="0.0" y="0.0" z="0.0" rot="0.0" axis-x="0.0" axis-y="0.0" axis-z="1.0"/>
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+           y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+    <offsets spherical="delta" />
+  </defaults>
+
+  
+  <!-- DESCRIPTION OF INSTRUMENT IN WORDS: 
+  
+		Instrument geometry rebuilt from GEM_225_DAE3_detector.dat tables, which contain largely accurate
+		geometry, and describes Bank 5X, which was missing from previous IDF, and corrects inversion of B1 modules.
+		
+		Other geometric errors in detector table are corrected by references to engineering drawings. 
+		
+		Relevant assembly drawings.
+		
+		Instrument level SI-2559-700 (pre-5X; no overall assy drawing showing 5X found)
+		
+		B1 SI-2605-100, 2605-101, 2605-134, 2605-136
+		
+		B2 SI-2559-710 *
+		
+		B3 SI-2559-957
+		
+		B4 SI-2559-571
+		
+		B5 SI-2559-370
+		
+		B5X SI-2559-880
+		
+		B6 SI-2559-900
+		
+		*Note that B2 drawings show 7 x 100 mm segments but spectra only allow for 4, so it is assumed
+		some are grouped in the DAE, and the IDF reflects an average geometry of these arcs. This should be checked to
+		ensure accurate solid-angle corrections are applied in this bank.
+		
+		Current 2026 version by Dominic Fortes, modifies earlier version by Paolo Raedelli & Laurent Chapon.
+  -->
+
+
+  <!--  source and sample-position components -->
+  <component type="CH4_moderator">
+    <location z="-17.0" />
+  </component>
+
+  <component type="vanadium_can">
+    <location x="0.0" y="0.0" z="0.0"/>
+  </component>
+
+  <!--  DEFINITION OF TYPES -->
+
+  <!--  Source types -->
+  <type name="CH4_moderator" is="Source">
+    <percent-transparency val="50" />
+    <!-- The shape is 100 mm tall along y; 100 mm wide along x and 25 mm deep in z -->
+    <cuboid id="shape">
+      <left-front-bottom-point   x="-0.05" y="-0.05" z="0.0"  />
+      <left-front-top-point      x="-0.05" y="0.05" z="0.0"  />
+      <left-back-bottom-point    x="-0.05" y="-0.05" z="-0.025"  />
+      <right-front-bottom-point  x="0.05"  y="-0.05" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>
+
+
+  <!--  Sample-position types -->
+  <type name="vanadium_can" is="SamplePos">
+  </type>
+
+  <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+
+  <!-- detector components -->
+
+  <component type="monitors" idlist="monitors">
+    <location> </location>
+  </component>
+  
+  <component type="bank1" idlist="bank1">
+    <location  r="0" t="0" p="0"> </location>     
+  </component>
+
+  <component type="bank2" idlist="bank2">
+    <location  r="0" t="0" p="0"> </location>   
+  </component>
+  
+  <component type="bank3" idlist="bank3">
+    <location  r="0" t="0" p="0"> </location> 
+  </component>
+  
+  <component type="bank4" idlist="bank4">
+    <location  r="0" t="0" p="0"> </location> 
+  </component>
+  
+  <component type="bank5" idlist="bank5">
+    <location  r="0" t="0" p="0"> </location>   
+  </component>
+
+  <component type="bank5X" idlist="bank5X">
+    <location  r="0" t="0" p="0"> </location>   
+  </component>
+
+  <component type="bank6" idlist="bank6">
+    <location  r="0.0" t="0" p="0"> </location> 
+  </component>
+  
+
+  <type name="monitors">
+    <component type="monitor">
+      <location r="10.78" t="180.0" p="0.0" name="back_monitor1_det" />
+      <location r="10.78" t="180.0" p="0.0" name="back_monitor2_det" />
+      <location r="10.78" t="180.0" p="0.0" name="scint_monitor_det" />
+      <location r="1.465" t="180.0" p="0.0" name="upstream_monitor1_det" />
+      <location r="1.465" t="180.0" p="0.0" name="upstream_monitor2_det" />
+      <location r="1.465" t="180.0" p="0.0" name="upstream_monitor3_det" />
+      <location r="1.465" t="180.0" p="0.0" name="upstream_monitor4_det" />
+      <location r="3.1450" t="0.000" p="0.0" name="downstream_monitor1_det" />
+      <location r="3.1450" t="0.000" p="0.0" name="downstream_monitor2_det" />
+      <location r="3.1450" t="0.000" p="0.0" name="downstream_monitor3_det" />
+      <location r="3.1450" t="0.000" p="0.0" name="downstream_monitor4_det" />
+    </component>
+  </type>
+
+<type name="bank1">
+<properties />
+<component type="module_B1l" name="east-mod1">
+  <location  r="0" t="0" p="0" rot="-30"> </location>
+</component>
+<component type="module_B1l" name="east-mod2">
+  <location  r="0" t="0" p="0" rot="0"> </location>
+</component>
+<component type="module_B1s" name="east-mod3">
+  <location  r="0" t="0" p="0" rot="30"> </location>
+</component>
+<component type="module_B1l" name="west-mod1">
+  <location  r="0" t="0" p="0" rot="210"> </location>
+</component>
+<component type="module_B1l" name="west-mod2">
+  <location  r="0" t="0" p="0" rot="180"> </location>
+</component>
+<component type="module_B1s" name="west-mod3">
+  <location  r="0" t="0" p="0" rot="150"> </location>
+</component>
+</type>
+
+<type name="bank2">
+  <component type="bank2-east" >
+    <location  r="0" t="0" p="0"> </location>
+  </component>  
+  <component type="bank2-west" >
+    <location  r="0" t="0" p="180"> </location>
+  </component>
+</type>
+
+<type name="bank2-east">
+  <component type="module_B2" name="east-mod1">
+    <location  r="0" t="0" p="0" rot="32.8125"> </location>
+  </component>
+  <component type="module_B2" name="east-mod2">
+    <location  r="0" t="0" p="0" rot="10.9375"> </location>
+  </component>
+  <component type="module_B2" name="east-mod3">
+    <location  r="0" t="0" p="0" rot="-10.9735"> </location>
+  </component>
+  <component type="module_B2" name="east-mod4">
+    <location  r="0" t="0" p="0" rot="-32.8125"> </location>
+  </component>
+</type>
+
+<type name="bank2-west">
+  <component type="module_B2" name="west-mod1">
+    <location  r="0" t="0" p="0" rot="-32.8125"> </location>
+  </component>
+  <component type="module_B2" name="west-mod2">
+    <location  r="0" t="0" p="0" rot="-10.9735"> </location>
+  </component>
+  <component type="module_B2" name="west-mod3">
+    <location  r="0" t="0" p="0" rot="10.9735"> </location>
+  </component>
+  <component type="module_B2" name="west-mod4">
+    <location  r="0" t="0" p="0" rot="32.8125"> </location>
+  </component>
+</type>
+
+<type name="bank3">
+  <component type="bank3-east" >
+    <location  r="0" t="0" p="0"> </location>
+  </component>  
+  <component type="bank3-west" >
+    <location  r="0" t="0" p="180"> </location>
+  </component>
+</type>
+
+<type name="bank3-east">
+<component type="module_B3">
+  <location  r="0" t="0" p="0" rot="34"  name="east-mod1"> </location>
+  <location  r="0" t="0" p="0" rot="17"  name="east-mod2"> </location>
+  <location  r="0" t="0" p="0" rot="0"   name="east-mod3"> </location>
+  <location  r="0" t="0" p="0" rot="-17" name="east-mod4"> </location>
+  <location  r="0" t="0" p="0" rot="-34" name="east-mod5"> </location>
+</component>
+</type>
+
+<type name="bank3-west">
+<component type="module_B3">
+  <location  r="0" t="0" p="0" rot="-34" name="west-mod1"> </location>
+  <location  r="0" t="0" p="0" rot="-17" name="west-mod2"> </location>
+  <location  r="0" t="0" p="0" rot="0"   name="west-mod3"> </location>
+  <location  r="0" t="0" p="0" rot="17"  name="west-mod4"> </location>
+  <location  r="0" t="0" p="0" rot="34"  name="west-mod5"> </location>
+</component>
+</type>
+
+<type name="bank4">
+  <component type="bank4-east" >
+    <location  r="0" t="0" p="0"> </location>
+  </component>  
+  <component type="bank4-west" >
+    <location  r="0" t="0" p="180"> </location>
+  </component>
+</type>
+
+<type name="bank4-east">
+<component type="module_B4">
+  <location  r="0" t="0" p="0" rot="38.1"   name="east-mod1"> </location>
+  <location  r="0" t="0" p="0" rot="25.4"   name="east-mod2"> </location>
+  <location  r="0" t="0" p="0" rot="12.7"   name="east-mod3"> </location>
+  <location  r="0" t="0" p="0" rot="0.0"    name="east-mod4"> </location>
+  <location  r="0" t="0" p="0" rot="-12.7"  name="east-mod5"> </location>
+  <location  r="0" t="0" p="0" rot="-25.5"  name="east-mod6"> </location>
+  <location  r="0" t="0" p="0" rot="-38.1"  name="east-mod7"> </location>
+</component>
+</type>
+
+<type name="bank4-west">
+<properties />
+<component type="module_B4">
+  <location  r="0" t="0" p="0" rot="-38.1"  name="west-mod1"> </location>
+  <location  r="0" t="0" p="0" rot="-25.4"  name="west-mod2"> </location>
+  <location  r="0" t="0" p="0" rot="-12.7"  name="west-mod3"> </location>
+  <location  r="0" t="0" p="0" rot="0.0"    name="west-mod4"> </location>
+  <location  r="0" t="0" p="0" rot="12.7"   name="west-mod5"> </location>
+  <location  r="0" t="0" p="0" rot="25.5"   name="west-mod6"> </location>
+  <location  r="0" t="0" p="0" rot="38.1"   name="west-mod7"> </location>
+</component>
+</type>
+
+<type name="bank5">
+  <component type="bank5-east" >
+    <location  r="0" t="0" p="0"> </location>
+  </component>  
+  <component type="bank5-west" >
+    <location  r="0" t="0" p="180"> </location>
+  </component>
+</type>
+
+<type name="bank5-east">
+<component type="module_B5">
+  <location  r="0" t="0" p="0" rot="39.6"  name="east-mod1"> </location>
+  <location  r="0" t="0" p="0" rot="29.7"  name="east-mod2"> </location>
+  <location  r="0" t="0" p="0" rot="19.8"  name="east-mod3"> </location>
+  <location  r="0" t="0" p="0" rot="9.9"   name="east-mod4"> </location>
+  <location  r="0" t="0" p="0" rot="0.0"   name="east-mod5"> </location>
+  <location  r="0" t="0" p="0" rot="-9.9"  name="east-mod6"> </location>
+  <location  r="0" t="0" p="0" rot="-19.8" name="east-mod7"> </location>
+  <location  r="0" t="0" p="0" rot="-29.7" name="east-mod8"> </location>
+  <location  r="0" t="0" p="0" rot="-39.6" name="east-mod9"> </location>
+</component>
+</type>
+
+<type name="bank5-west">
+<properties />
+<component type="module_B5">
+  <location  r="0" t="0" p="0" rot="-39.6" name="west-mod1"> </location>
+  <location  r="0" t="0" p="0" rot="-29.7" name="west-mod2"> </location>
+  <location  r="0" t="0" p="0" rot="-19.8" name="west-mod3"> </location>
+  <location  r="0" t="0" p="0" rot="-9.9"  name="west-mod4"> </location>
+  <location  r="0" t="0" p="0" rot="0.0"   name="west-mod5"> </location>
+  <location  r="0" t="0" p="0" rot="9.9"   name="west-mod6"> </location>
+  <location  r="0" t="0" p="0" rot="19.8"  name="west-mod7"> </location>
+  <location  r="0" t="0" p="0" rot="29.7"  name="west-mod8"> </location>
+  <location  r="0" t="0" p="0" rot="39.6"  name="west-mod9"> </location>
+</component>
+</type>
+
+<type name="bank5X">
+  <component type="bank5X-east" >
+    <location  r="0" t="0" p="0"> </location>
+  </component>  
+  <component type="bank5X-west" >
+    <location  r="0" t="0" p="180"> </location>
+  </component>
+</type>
+
+<type name="bank5X-east">
+<component type="module_B5X">
+  <location  r="0" t="0" p="0" rot="38.5"  name="east-mod1"> </location>
+  <location  r="0" t="0" p="0" rot="30.0"  name="east-mod2"> </location>
+  <location  r="0" t="0" p="0" rot="21.5"  name="east-mod3"> </location>
+  <location  r="0" t="0" p="0" rot="8.5"   name="east-mod4"> </location>
+  <location  r="0" t="0" p="0" rot="0.0"   name="east-mod5"> </location>
+  <location  r="0" t="0" p="0" rot="-8.5"  name="east-mod6"> </location>
+  <location  r="0" t="0" p="0" rot="-21.5" name="east-mod7"> </location>
+  <location  r="0" t="0" p="0" rot="-30.0" name="east-mod8"> </location>
+  <location  r="0" t="0" p="0" rot="-38.5" name="east-mod9"> </location>
+</component>
+</type>
+
+<type name="bank5X-west">
+<properties />
+<component type="module_B5X">
+  <location  r="0" t="0" p="0" rot="-38.5" name="west-mod1"> </location>
+  <location  r="0" t="0" p="0" rot="-30.0" name="west-mod2"> </location>
+  <location  r="0" t="0" p="0" rot="-21.5" name="west-mod3"> </location>
+  <location  r="0" t="0" p="0" rot="-8.5"  name="west-mod4"> </location>
+  <location  r="0" t="0" p="0" rot="0.0"   name="west-mod5"> </location>
+  <location  r="0" t="0" p="0" rot="8.5"   name="west-mod6"> </location>
+  <location  r="0" t="0" p="0" rot="21.5"  name="west-mod7"> </location>
+  <location  r="0" t="0" p="0" rot="30.0"  name="west-mod8"> </location>
+  <location  r="0" t="0" p="0" rot="38.5"  name="west-mod9"> </location>
+</component>
+</type>
+
+
+<type name="bank6">
+<properties />
+<component type="module_B6b">
+  <location  r="0" t="0" p="0" rot="-60" name="east-modb1" > </location>
+  <location  r="0" t="0" p="0" rot="-40" name="east-modb2" > </location>
+  <location  r="0" t="0" p="0" rot="-20" name="east-modb3" > </location>
+  <location  r="0" t="0" p="0" rot="0"   name="east-modb4" > </location>
+  <location  r="0" t="0" p="0" rot="20"  name="east-modb5" > </location>
+  <location  r="0" t="0" p="0" rot="40"  name="east-modb6" > </location>
+  <location  r="0" t="0" p="0" rot="60"  name="east-modb7" > </location>
+  <location  r="0" t="0" p="0" rot="120" name="west-modb1" > </location>
+  <location  r="0" t="0" p="0" rot="140" name="west-modb2" > </location>
+  <location  r="0" t="0" p="0" rot="160" name="west-modb3" > </location>
+  <location  r="0" t="0" p="0" rot="180" name="west-modb4" > </location>
+  <location  r="0" t="0" p="0" rot="200" name="west-modb5" > </location>
+  <location  r="0" t="0" p="0" rot="220" name="west-modb6" > </location>
+  <location  r="0" t="0" p="0" rot="240" name="west-modb7" > </location>
+</component>
+<component type="module_B6a">
+  <location  r="0" t="0" p="0" rot="-51.4286" name="east-moda1" > </location>
+  <location  r="0" t="0" p="0" rot="-25.7143" name="east-moda2" > </location>
+  <location  r="0" t="0" p="0" rot="0.0000"   name="east-moda3" > </location>
+  <location  r="0" t="0" p="0" rot="25.7143"  name="east-moda4" > </location>
+  <location  r="0" t="0" p="0" rot="51.6286"  name="east-moda5" > </location>
+  <location  r="0" t="0" p="0" rot="128.5710" name="west-moda1" > </location>
+  <location  r="0" t="0" p="0" rot="154.2860" name="west-moda2" > </location>
+  <location  r="0" t="0" p="0" rot="180.0000" name="west-moda3" > </location>
+  <location  r="0" t="0" p="0" rot="205.7140" name="west-moda4" > </location>
+  <location  r="0" t="0" p="0" rot="231.4290" name="west-moda5" > </location>
+</component>
+</type>
+
+<type name="module_B1s">
+<component type="arc_B1s_0">  <location r="2.3728" t="6.940"  p="0" name="Det1"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_1">  <location r="2.3656" t="7.284"  p="0" name="Det2"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_2">  <location r="2.3725" t="7.172"  p="0" name="Det3"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_3">  <location r="2.3654" t="7.516"  p="0" name="Det4"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_4">  <location r="2.3723" t="7.404"  p="0" name="Det5"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_5">  <location r="2.3652" t="7.749"  p="0" name="Det6"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_6">  <location r="2.3720" t="7.636"  p="0" name="Det7"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_7">  <location r="2.3650" t="7.982"  p="0" name="Det8"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_8">  <location r="2.3719" t="7.867"  p="0" name="Det9"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_9">  <location r="2.3649" t="8.215"  p="0" name="Det10" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_10"> <location r="2.3717" t="8.100"  p="0" name="Det11" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_11"> <location r="2.3649" t="8.447"  p="0" name="Det12" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_12"> <location r="2.3716" t="8.332"  p="0" name="Det13" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_13"> <location r="2.3648" t="8.680"  p="0" name="Det14" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_14"> <location r="2.3716" t="8.564"  p="0" name="Det15" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_15"> <location r="2.3649" t="8.913"  p="0" name="Det16" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_16"> <location r="2.3716" t="8.796"  p="0" name="Det17" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_17"> <location r="2.3649" t="9.145"  p="0" name="Det18" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_18"> <location r="2.3716" t="9.028"  p="0" name="Det19" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_19"> <location r="2.3650" t="9.378"  p="0" name="Det20" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_20"> <location r="2.3717" t="9.260"  p="0" name="Det21" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_21"> <location r="2.3652" t="9.611"  p="0" name="Det22" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_22"> <location r="2.3718" t="9.492"  p="0" name="Det23" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_23"> <location r="2.3654" t="9.843"  p="0" name="Det24" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_24"> <location r="2.3720" t="9.724"  p="0" name="Det25" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_25"> <location r="2.3656" t="10.076" p="0" name="Det26" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_26"> <location r="2.3722" t="9.956"  p="0" name="Det27" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_27"> <location r="2.3658" t="10.309" p="0" name="Det28" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_28"> <location r="2.3725" t="10.188" p="0" name="Det29" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_29"> <location r="2.3662" t="10.541" p="0" name="Det30" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_30"> <location r="2.3728" t="10.420" p="0" name="Det31" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_31"> <location r="2.3665" t="10.774" p="0" name="Det32" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_32"> <location r="2.3731" t="10.652" p="0" name="Det33" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_33"> <location r="2.3669" t="11.006" p="0" name="Det34" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_34"> <location r="2.3735" t="10.884" p="0" name="Det35" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_35"> <location r="2.3674" t="11.238" p="0" name="Det36" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_36"> <location r="2.3739" t="11.115" p="0" name="Det37" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_37"> <location r="2.3678" t="11.470" p="0" name="Det38" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_38"> <location r="2.3743" t="11.346" p="0" name="Det39" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_39"> <location r="2.3684" t="11.703" p="0" name="Det40" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_40"> <location r="2.3748" t="11.578" p="0" name="Det41" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_41"> <location r="2.3689" t="11.934" p="0" name="Det42" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_42"> <location r="2.3754" t="11.809" p="0" name="Det43" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_43"> <location r="2.3695" t="12.166" p="0" name="Det44" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1s_44"> <location r="2.3760" t="12.040" p="0" name="Det45" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+</type>
+
+<type name="arc_B1s_0" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.28421"/><outer-radius val="0.28921"/><depth val="0.001"/><arc val="28.00158"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_1" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.29743"/><outer-radius val="0.30243"/><depth val="0.001"/><arc val="28.08969"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_2" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.29370"/><outer-radius val="0.29870"/><depth val="0.001"/><arc val="28.06566"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_3" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.30690"/><outer-radius val="0.31190"/><depth val="0.001"/><arc val="28.14817"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_4" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.30321"/><outer-radius val="0.30821"/><depth val="0.001"/><arc val="28.12579"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_5" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.31641"/><outer-radius val="0.32141"/><depth val="0.001"/><arc val="28.20338"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_6" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.31269"/><outer-radius val="0.31769"/><depth val="0.001"/><arc val="28.18218"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_7" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.32591"/><outer-radius val="0.33091"/><depth val="0.001"/><arc val="28.25535"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_8" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.32215"/><outer-radius val="0.32715"/><depth val="0.001"/><arc val="28.23516"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_9" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.33542"/><outer-radius val="0.34042"/><depth val="0.001"/><arc val="28.30444"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_10" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.33168"/><outer-radius val="0.33668"/><depth val="0.001"/><arc val="28.28546"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_11" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.34489"/><outer-radius val="0.34989"/><depth val="0.001"/><arc val="28.35068"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_12" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.34117"/><outer-radius val="0.34617"/><depth val="0.001"/><arc val="28.33281"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_13" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.35439"/><outer-radius val="0.35939"/><depth val="0.001"/><arc val="28.39456"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_14" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.35066"/><outer-radius val="0.35566"/><depth val="0.001"/><arc val="28.37765"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_15" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.36390"/><outer-radius val="0.36890"/><depth val="0.001"/><arc val="28.43627"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_16" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.36016"/><outer-radius val="0.36516"/><depth val="0.001"/><arc val="28.42011"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_17" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.37336"/><outer-radius val="0.37836"/><depth val="0.001"/><arc val="28.47562"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_18" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.36964"/><outer-radius val="0.37464"/><depth val="0.001"/><arc val="28.46039"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_19" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.38287"/><outer-radius val="0.38787"/><depth val="0.001"/><arc val="28.51323"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_20" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.37914"/><outer-radius val="0.38414"/><depth val="0.001"/><arc val="28.49870"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_21" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.39239"/><outer-radius val="0.39739"/><depth val="0.001"/><arc val="28.54907"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_22" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.38863"/><outer-radius val="0.39363"/><depth val="0.001"/><arc val="28.53513"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_23" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.40186"/><outer-radius val="0.40686"/><depth val="0.001"/><arc val="28.58306"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_24" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.39814"/><outer-radius val="0.40314"/><depth val="0.001"/><arc val="28.56988"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_25" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.41137"/><outer-radius val="0.41637"/><depth val="0.001"/><arc val="28.61562"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_26" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.40763"/><outer-radius val="0.41263"/><depth val="0.001"/><arc val="28.60300"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_27" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.42088"/><outer-radius val="0.42588"/><depth val="0.001"/><arc val="28.64669"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_28" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.41714"/><outer-radius val="0.42214"/><depth val="0.001"/><arc val="28.63466"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_29" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.43037"/><outer-radius val="0.43537"/><depth val="0.001"/><arc val="28.67638"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_30" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.42665"/><outer-radius val="0.43165"/><depth val="0.001"/><arc val="28.66490"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_31" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.43988"/><outer-radius val="0.44488"/><depth val="0.001"/><arc val="28.70484"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_32" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.43615"/><outer-radius val="0.44115"/><depth val="0.001"/><arc val="28.69382"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_33" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.44937"/><outer-radius val="0.45437"/><depth val="0.001"/><arc val="28.73203"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_34" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.44567"/><outer-radius val="0.45067"/><depth val="0.001"/><arc val="28.72155"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_35" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.45887"/><outer-radius val="0.46387"/><depth val="0.001"/><arc val="28.75814"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_36" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.45514"/><outer-radius val="0.46014"/><depth val="0.001"/><arc val="28.74801"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_37" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.46835"/><outer-radius val="0.47335"/><depth val="0.001"/><arc val="28.78314"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_38" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.46460"/><outer-radius val="0.46960"/><depth val="0.001"/><arc val="28.77338"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_39" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.47790"/><outer-radius val="0.48290"/><depth val="0.001"/><arc val="28.80734"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_40" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.47413"/><outer-radius val="0.47913"/><depth val="0.001"/><arc val="28.79789"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_41" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.48735"/><outer-radius val="0.49235"/><depth val="0.001"/><arc val="28.83035"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_42" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.48363"/><outer-radius val="0.48863"/><depth val="0.001"/><arc val="28.82138"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_43" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.49686"/><outer-radius val="0.50186"/><depth val="0.001"/><arc val="28.85262"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1s_44" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.49312"/><outer-radius val="0.49812"/><depth val="0.001"/><arc val="28.84396"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+
+<type name="module_B1l">
+<component type="arc_B1l_0">  <location r="2.3690" t="5.425"  p="0" name="Det1"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_1">  <location r="2.3761" t="5.319"  p="0" name="Det2"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_2">  <location r="2.3684" t="5.658"  p="0" name="Det3"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_3">  <location r="2.3755" t="5.550"  p="0" name="Det4"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_4">  <location r="2.3679" t="5.889"  p="0" name="Det5"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_5">  <location r="2.3749" t="5.782"  p="0" name="Det6"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_6">  <location r="2.3674" t="6.122"  p="0" name="Det7"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_7">  <location r="2.3744" t="6.014"  p="0" name="Det8"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_8">  <location r="2.3670" t="6.354"  p="0" name="Det9"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_9">  <location r="2.3740" t="6.244"  p="0" name="Det10" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_10"> <location r="2.3666" t="6.587"  p="0" name="Det11" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_11"> <location r="2.3735" t="6.476"  p="0" name="Det12" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_12"> <location r="2.3662" t="6.818"  p="0" name="Det13" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_13"> <location r="2.3731" t="6.708"  p="0" name="Det14" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_14"> <location r="2.3659" t="7.051"  p="0" name="Det15" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_15"> <location r="2.3728" t="6.940"  p="0" name="Det16" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_16"> <location r="2.3656" t="7.284"  p="0" name="Det17" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_17"> <location r="2.3725" t="7.172"  p="0" name="Det18" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_18"> <location r="2.3654" t="7.516"  p="0" name="Det19" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_19"> <location r="2.3723" t="7.404"  p="0" name="Det20" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_20"> <location r="2.3652" t="7.749"  p="0" name="Det21" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_21"> <location r="2.3720" t="7.636"  p="0" name="Det22" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_22"> <location r="2.3650" t="7.982"  p="0" name="Det23" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_23"> <location r="2.3719" t="7.867"  p="0" name="Det24" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_24"> <location r="2.3649" t="8.215"  p="0" name="Det25" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_25"> <location r="2.3717" t="8.100"  p="0" name="Det26" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_26"> <location r="2.3649" t="8.447"  p="0" name="Det27" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_27"> <location r="2.3716" t="8.332"  p="0" name="Det28" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_28"> <location r="2.3648" t="8.680"  p="0" name="Det29" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_29"> <location r="2.3716" t="8.564"  p="0" name="Det30" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_30"> <location r="2.3649" t="8.913"  p="0" name="Det31" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_31"> <location r="2.3716" t="8.796"  p="0" name="Det32" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_32"> <location r="2.3649" t="9.145"  p="0" name="Det33" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_33"> <location r="2.3716" t="9.028"  p="0" name="Det34" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_34"> <location r="2.3650" t="9.378"  p="0" name="Det35" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_35"> <location r="2.3717" t="9.260"  p="0" name="Det36" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_36"> <location r="2.3652" t="9.611"  p="0" name="Det37" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_37"> <location r="2.3718" t="9.492"  p="0" name="Det38" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_38"> <location r="2.3654" t="9.843"  p="0" name="Det39" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_39"> <location r="2.3720" t="9.724"  p="0" name="Det40" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_40"> <location r="2.3656" t="10.076" p="0" name="Det41" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_41"> <location r="2.3722" t="9.956"  p="0" name="Det42" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_42"> <location r="2.3658" t="10.309" p="0" name="Det43" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_43"> <location r="2.3725" t="10.188" p="0" name="Det44" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_44"> <location r="2.3662" t="10.541" p="0" name="Det45" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_45"> <location r="2.3728" t="10.420" p="0" name="Det46" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_46"> <location r="2.3665" t="10.774" p="0" name="Det47" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_47"> <location r="2.3731" t="10.652" p="0" name="Det48" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_48"> <location r="2.3669" t="11.006" p="0" name="Det49" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_49"> <location r="2.3735" t="10.884" p="0" name="Det50" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_50"> <location r="2.3674" t="11.238" p="0" name="Det51" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_51"> <location r="2.3739" t="11.115" p="0" name="Det52" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_52"> <location r="2.3678" t="11.470" p="0" name="Det53" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_53"> <location r="2.3743" t="11.346" p="0" name="Det54" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_54"> <location r="2.3684" t="11.703" p="0" name="Det55" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_55"> <location r="2.3748" t="11.578" p="0" name="Det56" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_56"> <location r="2.3689" t="11.934" p="0" name="Det57" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_57"> <location r="2.3754" t="11.809" p="0" name="Det58" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_58"> <location r="2.3695" t="12.166" p="0" name="Det59" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+<component type="arc_B1l_59"> <location r="2.3760" t="12.040" p="0" name="Det60" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+</type>
+
+<type name="arc_B1l_0" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.22147"/><outer-radius val="0.22647"/><depth val="0.001"/><arc val="27.44183"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_1" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.21777"/><outer-radius val="0.22277"/><depth val="0.001"/><arc val="27.39880"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_2" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.23100"/><outer-radius val="0.23600"/><depth val="0.001"/><arc val="27.54623"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_3" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.22724"/><outer-radius val="0.23224"/><depth val="0.001"/><arc val="27.50611"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_4" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.24045"/><outer-radius val="0.24545"/><depth val="0.001"/><arc val="27.64167"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_5" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.23676"/><outer-radius val="0.24176"/><depth val="0.001"/><arc val="27.60526"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_6" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.24997"/><outer-radius val="0.25497"/><depth val="0.001"/><arc val="27.73062"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_7" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.24627"/><outer-radius val="0.25127"/><depth val="0.001"/><arc val="27.69683"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_8" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.25946"/><outer-radius val="0.26446"/><depth val="0.001"/><arc val="27.81279"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_9" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.25570"/><outer-radius val="0.26070"/><depth val="0.001"/><arc val="27.78098"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_10" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.26898"/><outer-radius val="0.27398"/><depth val="0.001"/><arc val="27.88948"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_11" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.26520"/><outer-radius val="0.27020"/><depth val="0.001"/><arc val="27.85970"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_12" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.27841"/><outer-radius val="0.28341"/><depth val="0.001"/><arc val="27.96032"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_13" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.27470"/><outer-radius val="0.27970"/><depth val="0.001"/><arc val="27.93306"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_14" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.28792"/><outer-radius val="0.29292"/><depth val="0.001"/><arc val="28.02715"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_15" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.28421"/><outer-radius val="0.28921"/><depth val="0.001"/><arc val="28.00158"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_16" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.29743"/><outer-radius val="0.30243"/><depth val="0.001"/><arc val="28.08969"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_17" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.29370"/><outer-radius val="0.29870"/><depth val="0.001"/><arc val="28.06566"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_18" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.30690"/><outer-radius val="0.31190"/><depth val="0.001"/><arc val="28.14817"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_19" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.30321"/><outer-radius val="0.30821"/><depth val="0.001"/><arc val="28.12579"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_20" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.31641"/><outer-radius val="0.32141"/><depth val="0.001"/><arc val="28.20338"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_21" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.31269"/><outer-radius val="0.31769"/><depth val="0.001"/><arc val="28.18218"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_22" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.32591"/><outer-radius val="0.33091"/><depth val="0.001"/><arc val="28.25535"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_23" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.32215"/><outer-radius val="0.32715"/><depth val="0.001"/><arc val="28.23516"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_24" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.33542"/><outer-radius val="0.34042"/><depth val="0.001"/><arc val="28.30444"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_25" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.33168"/><outer-radius val="0.33668"/><depth val="0.001"/><arc val="28.28546"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_26" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.34489"/><outer-radius val="0.34989"/><depth val="0.001"/><arc val="28.35068"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_27" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.34117"/><outer-radius val="0.34617"/><depth val="0.001"/><arc val="28.33281"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_28" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.35439"/><outer-radius val="0.35939"/><depth val="0.001"/><arc val="28.39456"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_29" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.35066"/><outer-radius val="0.35566"/><depth val="0.001"/><arc val="28.37765"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_30" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.36390"/><outer-radius val="0.36890"/><depth val="0.001"/><arc val="28.43627"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_31" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.36016"/><outer-radius val="0.36516"/><depth val="0.001"/><arc val="28.42011"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_32" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.37336"/><outer-radius val="0.37836"/><depth val="0.001"/><arc val="28.47562"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_33" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.36964"/><outer-radius val="0.37464"/><depth val="0.001"/><arc val="28.46039"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_34" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.38287"/><outer-radius val="0.38787"/><depth val="0.001"/><arc val="28.51323"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_35" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.37914"/><outer-radius val="0.38414"/><depth val="0.001"/><arc val="28.49870"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_36" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.39239"/><outer-radius val="0.39739"/><depth val="0.001"/><arc val="28.54907"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_37" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.38863"/><outer-radius val="0.39363"/><depth val="0.001"/><arc val="28.53513"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_38" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.40186"/><outer-radius val="0.40686"/><depth val="0.001"/><arc val="28.58306"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_39" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.39814"/><outer-radius val="0.40314"/><depth val="0.001"/><arc val="28.56988"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_40" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.41137"/><outer-radius val="0.41637"/><depth val="0.001"/><arc val="28.61562"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_41" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.40763"/><outer-radius val="0.41263"/><depth val="0.001"/><arc val="28.60300"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_42" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.42088"/><outer-radius val="0.42588"/><depth val="0.001"/><arc val="28.64669"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_43" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.41714"/><outer-radius val="0.42214"/><depth val="0.001"/><arc val="28.63466"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_44" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.43037"/><outer-radius val="0.43537"/><depth val="0.001"/><arc val="28.67638"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_45" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.42665"/><outer-radius val="0.43165"/><depth val="0.001"/><arc val="28.66490"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_46" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.43988"/><outer-radius val="0.44488"/><depth val="0.001"/><arc val="28.70484"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_47" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.43615"/><outer-radius val="0.44115"/><depth val="0.001"/><arc val="28.69382"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_48" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.44937"/><outer-radius val="0.45437"/><depth val="0.001"/><arc val="28.73203"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_49" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.44567"/><outer-radius val="0.45067"/><depth val="0.001"/><arc val="28.72155"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_50" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.45887"/><outer-radius val="0.46387"/><depth val="0.001"/><arc val="28.75814"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_51" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.45514"/><outer-radius val="0.46014"/><depth val="0.001"/><arc val="28.74801"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_52" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.46835"/><outer-radius val="0.47335"/><depth val="0.001"/><arc val="28.78314"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_53" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.46460"/><outer-radius val="0.46960"/><depth val="0.001"/><arc val="28.77338"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_54" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.47790"/><outer-radius val="0.48290"/><depth val="0.001"/><arc val="28.80734"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_55" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.47413"/><outer-radius val="0.47913"/><depth val="0.001"/><arc val="28.79789"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_56" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.48735"/><outer-radius val="0.49235"/><depth val="0.001"/><arc val="28.83035"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_57" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.48363"/><outer-radius val="0.48863"/><depth val="0.001"/><arc val="28.82138"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_58" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.49686"/><outer-radius val="0.50186"/><depth val="0.001"/><arc val="28.85262"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B1l_59" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.49312"/><outer-radius val="0.49812"/><depth val="0.001"/><arc val="28.84396"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+
+
+<type name="module_B2">
+<properties />
+<component type="scintillator_2">
+  <location r="1.4854" t="20.590" p="0" name="Det1" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4775" t="20.400" p="0" name="Det2" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4851" t="20.204" p="0" name="Det3" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4772" t="20.013" p="0" name="Det4" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4848" t="19.810" p="0" name="Det5" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4771" t="19.616" p="0" name="Det6" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4847" t="19.433" p="0" name="Det7" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4769" t="19.236" p="0" name="Det8" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4846" t="19.040" p="0" name="Det9" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4769" t="18.839" p="0" name="Det10"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+</component>
+<component type="scintillator_2">  
+  <location r="1.6652" t="18.489" p="0" name="Det11"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.6574" t="18.330" p="0" name="Det12"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.6650" t="18.149" p="0" name="Det13"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.6571" t="17.974" p="0" name="Det14"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.6648" t="17.807" p="0" name="Det15"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.6570" t="17.630" p="0" name="Det16"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.6646" t="17.465" p="0" name="Det17"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.6569" t="17.303" p="0" name="Det18"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.6645" t="17.131" p="0" name="Det19"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.6568" t="16.947" p="0" name="Det20"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+</component>
+<component type="scintillator_2">
+  <location r="1.8689" t="16.577" p="0" name="Det21"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.8611" t="16.447" p="0" name="Det22"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.8687" t="16.297" p="0" name="Det23"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.8609" t="16.125" p="0" name="Det24"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.8685" t="15.984" p="0" name="Det25"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.8607" t="15.817" p="0" name="Det26"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.8684" t="15.668" p="0" name="Det27"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.8606" t="15.518" p="0" name="Det28"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.8683" t="15.365" p="0" name="Det29"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.8606" t="15.219" p="0" name="Det30"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+</component>
+<component type="scintillator_2">
+  <location r="2.0995" t="14.873" p="0" name="Det31"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="2.0917" t="14.761" p="0" name="Det32"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="2.0993" t="14.625" p="0" name="Det33"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="2.0915" t="14.484" p="0" name="Det34"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="2.0992" t="14.345" p="0" name="Det35"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="2.0914" t="14.213" p="0" name="Det36"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="2.0991" t="14.078" p="0" name="Det37"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="2.0913" t="13.953" p="0" name="Det38"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="2.0990" t="13.860" p="0" name="Det39"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="2.0913" t="13.827" p="0" name="Det40"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+</component>
+</type>
+
+<type name="module_B3">
+<properties />
+<component type="scintillator">
+  <location r="1.0844" t="44.263" p="0" name="Det1" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0772" t="44.010" p="0" name="Det2" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0843" t="43.741" p="0" name="Det3" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0771" t="43.485" p="0" name="Det4" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0842" t="43.220" p="0" name="Det5" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0772" t="42.961" p="0" name="Det6" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0842" t="42.699" p="0" name="Det7" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0773" t="42.435" p="0" name="Det8" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0843" t="42.177" p="0" name="Det9" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0774" t="41.910" p="0" name="Det10"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1524" t="41.488" p="0" name="Det11"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1453" t="41.246" p="0" name="Det12"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1522" t="40.997" p="0" name="Det13"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1452" t="40.752" p="0" name="Det14"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1522" t="40.505" p="0" name="Det15"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1451" t="40.259" p="0" name="Det16"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1522" t="40.014" p="0" name="Det17"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1452" t="39.766" p="0" name="Det18"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1523" t="39.523" p="0" name="Det19"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1453" t="39.272" p="0" name="Det20"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.2304" t="38.795" p="0" name="Det21"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.2233" t="38.569" p="0" name="Det22"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.2302" t="38.337" p="0" name="Det23"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.2232" t="38.106" p="0" name="Det24"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.2301" t="37.876" p="0" name="Det25"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.2231" t="37.645" p="0" name="Det26"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.2302" t="37.418" p="0" name="Det27"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.2232" t="37.183" p="0" name="Det28"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.2303" t="36.958" p="0" name="Det29"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.2233" t="36.722" p="0" name="Det30"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3174" t="36.259" p="0" name="Det31"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3103" t="36.044" p="0" name="Det32"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3172" t="35.830" p="0" name="Det33"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3102" t="35.613" p="0" name="Det34"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3172" t="35.399" p="0" name="Det35"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3102" t="35.181" p="0" name="Det36"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3172" t="34.970" p="0" name="Det37"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3102" t="34.750" p="0" name="Det38"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3173" t="34.539" p="0" name="Det39"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3103" t="34.319" p="0" name="Det40"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4124" t="33.901" p="0" name="Det41"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4053" t="33.706" p="0" name="Det42"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4123" t="33.501" p="0" name="Det43"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4052" t="33.303" p="0" name="Det44"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4122" t="33.101" p="0" name="Det45"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4052" t="32.899" p="0" name="Det46"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4122" t="32.699" p="0" name="Det47"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4052" t="32.497" p="0" name="Det48"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4123" t="32.300" p="0" name="Det49"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4053" t="32.092" p="0" name="Det50"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.5174" t="31.715" p="0" name="Det51"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.5104" t="31.531" p="0" name="Det52"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.5172" t="31.342" p="0" name="Det53"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.5103" t="31.156" p="0" name="Det54"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.5172" t="30.969" p="0" name="Det55"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.5102" t="30.781" p="0" name="Det56"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.5172" t="30.596" p="0" name="Det57"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.5103" t="30.407" p="0" name="Det58"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.5173" t="30.224" p="0" name="Det59"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.5104" t="30.033" p="0" name="Det60"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.6314" t="29.672" p="0" name="Det61"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.6243" t="29.503" p="0" name="Det62"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.6313" t="29.325" p="0" name="Det63"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.6243" t="29.155" p="0" name="Det64"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.6312" t="28.978" p="0" name="Det65"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.6243" t="28.806" p="0" name="Det66"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.6312" t="28.631" p="0" name="Det67"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.6243" t="28.458" p="0" name="Det68"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.6313" t="28.284" p="0" name="Det69"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.6244" t="28.109" p="0" name="Det70"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.7574" t="27.778" p="0" name="Det71"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.7503" t="27.622" p="0" name="Det72"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.7573" t="27.457" p="0" name="Det73"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.7502" t="27.299" p="0" name="Det74"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.7572" t="27.135" p="0" name="Det75"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.7502" t="26.975" p="0" name="Det76"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.7572" t="26.814" p="0" name="Det77"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.7503" t="26.651" p="0" name="Det78"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.7573" t="26.492" p="0" name="Det79"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.7503" t="26.327" p="0" name="Det80"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.8934" t="26.022" p="0" name="Det81"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.8863" t="25.872" p="0" name="Det82"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.8933" t="25.721" p="0" name="Det83"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.8863" t="25.572" p="0" name="Det84"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.8933" t="25.422" p="0" name="Det85"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.8863" t="25.271" p="0" name="Det86"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.8933" t="25.123" p="0" name="Det87"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.8863" t="24.971" p="0" name="Det88"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.8934" t="24.824" p="0" name="Det89"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.8864" t="24.671" p="0" name="Det90"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+</component>
+</type>
+
+<type name="module_B4">
+<properties />
+<component type="scintillator_4A">  
+  <location r="1.0362" t="74.409" p="0" name="Det1"  > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0294" t="74.707" p="0" name="Det2"  > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0359" t="73.857" p="0" name="Det3"  > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0289" t="74.150" p="0" name="Det4"  > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0356" t="73.304" p="0" name="Det5"  > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0286" t="73.593" p="0" name="Det6"  > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0354" t="72.751" p="0" name="Det7"  > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0284" t="73.036" p="0" name="Det8"  > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0354" t="72.198" p="0" name="Det9"  > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0283" t="72.478" p="0" name="Det10" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0354" t="71.645" p="0" name="Det11" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0283" t="71.921" p="0" name="Det12" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0355" t="71.091" p="0" name="Det13" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0284" t="71.363" p="0" name="Det14" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0357" t="70.539" p="0" name="Det15" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0285" t="70.806" p="0" name="Det16" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0360" t="69.986" p="0" name="Det17" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0288" t="70.248" p="0" name="Det18" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0365" t="69.434" p="0" name="Det19" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.0292" t="69.692" p="0" name="Det20" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+</component>
+<component type="scintillator_4B">
+  <location r="1.1101" t="68.619" p="0" name="Det21" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1033" t="68.894" p="0" name="Det22" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1098" t="68.104" p="0" name="Det23" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1029" t="68.375" p="0" name="Det24" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1095" t="67.588" p="0" name="Det25" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1026" t="67.855" p="0" name="Det26" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1094" t="67.071" p="0" name="Det27" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1024" t="67.336" p="0" name="Det28" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1093" t="66.555" p="0" name="Det29" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1023" t="66.816" p="0" name="Det30" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1094" t="66.039" p="0" name="Det31" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1023" t="66.296" p="0" name="Det32" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1095" t="65.522" p="0" name="Det33" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1024" t="65.776" p="0" name="Det34" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1097" t="65.006" p="0" name="Det35" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1025" t="65.257" p="0" name="Det36" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1100" t="64.490" p="0" name="Det37" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1028" t="64.737" p="0" name="Det38" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1104" t="63.975" p="0" name="Det39" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1031" t="64.218" p="0" name="Det40" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+</component>
+<component type="scintillator_4C">
+  <location r="1.2011" t="63.217" p="0" name="Det41" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1942" t="63.471" p="0" name="Det42" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.2007" t="62.741" p="0" name="Det43" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1939" t="62.992" p="0" name="Det44" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.2005" t="62.264" p="0" name="Det45" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1936" t="62.512" p="0" name="Det46" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.2004" t="61.787" p="0" name="Det47" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1934" t="62.031" p="0" name="Det48" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.2003" t="61.311" p="0" name="Det49" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1933" t="61.551" p="0" name="Det50" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.2003" t="60.834" p="0" name="Det51" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1933" t="61.071" p="0" name="Det52" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.2004" t="60.357" p="0" name="Det53" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1933" t="60.590" p="0" name="Det54" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.2006" t="59.880" p="0" name="Det55" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1935" t="60.110" p="0" name="Det56" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.2009" t="59.404" p="0" name="Det57" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.1937" t="59.630" p="0" name="Det58" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.2013" t="58.927" p="0" name="Det59" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+</component>
+<component type="scintillator_4D">
+  <location r="1.1940" t="59.150" p="0" name="Det60" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3090" t="58.234" p="0" name="Det61" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3021" t="58.462" p="0" name="Det62" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3087" t="57.797" p="0" name="Det63" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3018" t="58.022" p="0" name="Det64" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3085" t="57.359" p="0" name="Det65" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3016" t="57.583" p="0" name="Det66" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3084" t="56.921" p="0" name="Det67" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3014" t="57.143" p="0" name="Det68" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3083" t="56.483" p="0" name="Det69" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3013" t="56.703" p="0" name="Det70" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3083" t="56.045" p="0" name="Det71" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3013" t="56.263" p="0" name="Det72" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3084" t="55.607" p="0" name="Det73" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3013" t="55.823" p="0" name="Det74" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3086" t="55.169" p="0" name="Det75" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3015" t="55.383" p="0" name="Det76" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3089" t="54.731" p="0" name="Det77" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3017" t="54.943" p="0" name="Det78" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3092" t="54.293" p="0" name="Det79" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+</component>
+<component type="scintillator_4E">
+  <location r="1.3020" t="54.503" p="0" name="Det80" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4359" t="53.664" p="0" name="Det81" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4291" t="53.875" p="0" name="Det82" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4356" t="53.265" p="0" name="Det83" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4288" t="53.474" p="0" name="Det84" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4355" t="52.866" p="0" name="Det85" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4286" t="53.074" p="0" name="Det86" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4353" t="52.467" p="0" name="Det87" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4284" t="52.673" p="0" name="Det88" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4353" t="52.068" p="0" name="Det89" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4283" t="52.272" p="0" name="Det90" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4353" t="51.669" p="0" name="Det91" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4283" t="51.870" p="0" name="Det92" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4354" t="51.270" p="0" name="Det93" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4283" t="51.469" p="0" name="Det94" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4356" t="50.871" p="0" name="Det95" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4285" t="51.068" p="0" name="Det96" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4358" t="50.472" p="0" name="Det97" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4287" t="50.668" p="0" name="Det98" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4361" t="50.073" p="0" name="Det99" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.4289" t="50.267" p="0" name="Det100"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+</component>
+</type>
+
+<type name="module_B5">
+<properties />
+<component type="scintillator_5">  
+  <location r="1.3832" t="103.914" p="0" name="Det1" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="103.682" p="0" name="Det2" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="103.462" p="0" name="Det3" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="103.273" p="0" name="Det4" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="103.050" p="0" name="Det5" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="102.846" p="0" name="Det6" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="102.614" p="0" name="Det7" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="102.429" p="0" name="Det8" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="102.219" p="0" name="Det9" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="102.012" p="0" name="Det10"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="101.786" p="0" name="Det11"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="101.580" p="0" name="Det12"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="101.368" p="0" name="Det13"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="101.184" p="0" name="Det14"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="100.948" p="0" name="Det15"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="100.755" p="0" name="Det16"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="100.537" p="0" name="Det17"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="100.341" p="0" name="Det18"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="100.113" p="0" name="Det19"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="99.922" p="0" name="Det20" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="99.704" p="0" name="Det21" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="99.505" p="0" name="Det22" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="99.299" p="0" name="Det23" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="99.084" p="0" name="Det24" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="98.867" p="0" name="Det25" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="98.671" p="0" name="Det26" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="98.451" p="0" name="Det27" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="98.249" p="0" name="Det28" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="98.035" p="0" name="Det29" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="97.846" p="0" name="Det30" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="97.625" p="0" name="Det31" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="97.429" p="0" name="Det32" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="97.196" p="0" name="Det33" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="97.020" p="0" name="Det34" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="96.798" p="0" name="Det35" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="96.613" p="0" name="Det36" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="96.377" p="0" name="Det37" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="96.176" p="0" name="Det38" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="95.942" p="0" name="Det39" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="95.745" p="0" name="Det40" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="95.527" p="0" name="Det41" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="95.332" p="0" name="Det42" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="95.101" p="0" name="Det43" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="94.904" p="0" name="Det44" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="94.680" p="0" name="Det45" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="94.487" p="0" name="Det46" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="94.269" p="0" name="Det47" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="94.088" p="0" name="Det48" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="93.860" p="0" name="Det49" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="93.668" p="0" name="Det50" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="93.450" p="0" name="Det51" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="93.247" p="0" name="Det52" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="93.028" p="0" name="Det53" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="92.835" p="0" name="Det54" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="92.608" p="0" name="Det55" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="92.412" p="0" name="Det56" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="92.192" p="0" name="Det57" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="91.999" p="0" name="Det58" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="91.792" p="0" name="Det59" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="91.583" p="0" name="Det60" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="91.364" p="0" name="Det61" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="91.167" p="0" name="Det62" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="90.940" p="0" name="Det63" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="90.737" p="0" name="Det64" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="90.535" p="0" name="Det65" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="90.325" p="0" name="Det66" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="90.107" p="0" name="Det67" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="89.919" p="0" name="Det68" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="89.702" p="0" name="Det69" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="89.488" p="0" name="Det70" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="89.266" p="0" name="Det71" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="89.068" p="0" name="Det72" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="88.854" p="0" name="Det73" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="88.662" p="0" name="Det74" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="88.435" p="0" name="Det75" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="88.238" p="0" name="Det76" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="88.011" p="0" name="Det77" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="87.844" p="0" name="Det78" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="87.612" p="0" name="Det79" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="87.428" p="0" name="Det80" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="87.202" p="0" name="Det81" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="86.998" p="0" name="Det82" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="86.771" p="0" name="Det83" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="86.572" p="0" name="Det84" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="86.353" p="0" name="Det85" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="86.166" p="0" name="Det86" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="85.934" p="0" name="Det87" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="85.739" p="0" name="Det88" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="85.519" p="0" name="Det89" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="85.322" p="0" name="Det90" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="85.116" p="0" name="Det91" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="84.929" p="0" name="Det92" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="84.720" p="0" name="Det93" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="84.505" p="0" name="Det94" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="84.274" p="0" name="Det95" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="84.073" p="0" name="Det96" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="83.853" p="0" name="Det97" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="83.653" p="0" name="Det98" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="83.431" p="0" name="Det99" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="83.268" p="0" name="Det100"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="83.046" p="0" name="Det101"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="82.850" p="0" name="Det102"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="82.628" p="0" name="Det103"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="82.428" p="0" name="Det104"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="82.216" p="0" name="Det105"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="82.019" p="0" name="Det106"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="81.797" p="0" name="Det107"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="81.596" p="0" name="Det108"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="81.377" p="0" name="Det109"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="81.180" p="0" name="Det110"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="80.955" p="0" name="Det111"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="80.758" p="0" name="Det112"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="80.545" p="0" name="Det113"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="80.351" p="0" name="Det114"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="80.124" p="0" name="Det115"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="79.915" p="0" name="Det116"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="79.709" p="0" name="Det117"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="79.506" p="0" name="Det118"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3832" t="79.290" p="0" name="Det119"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3755" t="79.099" p="0" name="Det120"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+</component>
+</type>
+
+<type name="module_B5X">
+<properties />
+<component type="scintillator_5X">
+  <location r="1.3871" t="113.532" p="0" name="Det1" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3796" t="113.345" p="0" name="Det2" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3864" t="113.120" p="0" name="Det3" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3790" t="112.930" p="0" name="Det4" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3858" t="112.707" p="0" name="Det5" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3785" t="112.516" p="0" name="Det6" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3853" t="112.294" p="0" name="Det7" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3780" t="112.101" p="0" name="Det8" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3848" t="111.881" p="0" name="Det9" > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3775" t="111.685" p="0" name="Det10"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3844" t="111.468" p="0" name="Det11"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3772" t="111.270" p="0" name="Det12"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3841" t="111.054" p="0" name="Det13"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3769" t="110.854" p="0" name="Det14"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3839" t="110.640" p="0" name="Det15"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3767" t="110.438" p="0" name="Det16"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3837" t="110.226" p="0" name="Det17"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3766" t="110.022" p="0" name="Det18"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3836" t="109.812" p="0" name="Det19"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3765" t="109.606" p="0" name="Det20"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3836" t="109.398" p="0" name="Det21"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3766" t="109.190" p="0" name="Det22"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3837" t="108.984" p="0" name="Det23"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3766" t="108.775" p="0" name="Det24"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3838" t="108.570" p="0" name="Det25"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3768" t="108.359" p="0" name="Det26"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3840" t="108.156" p="0" name="Det27"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3771" t="107.943" p="0" name="Det28"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3843" t="107.742" p="0" name="Det29"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3774" t="107.527" p="0" name="Det30"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3846" t="107.329" p="0" name="Det31"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3777" t="107.112" p="0" name="Det32"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3850" t="106.915" p="0" name="Det33"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3782" t="106.697" p="0" name="Det34"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3855" t="106.502" p="0" name="Det35"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3787" t="106.282" p="0" name="Det36"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3860" t="106.089" p="0" name="Det37"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3793" t="105.867" p="0" name="Det38"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3867" t="105.677" p="0" name="Det39"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location r="1.3800" t="105.453" p="0" name="Det40"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+</component>
+</type>
+
+<type name="module_B6a">  
+  <component type="arc_B6a1_0">  <location r="1.0439" t="170.725" p="0" rot="180" name="Det1"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a1_1">  <location r="1.0360" t="170.030" p="0" rot="180" name="Det2"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a1_2">  <location r="1.0435" t="169.718" p="0" rot="180" name="Det3"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a1_3">  <location r="1.0357" t="169.571" p="0" rot="180" name="Det4"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a1_4">  <location r="1.0432" t="169.165" p="0" rot="180" name="Det5"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a1_5">  <location r="1.0354" t="169.029" p="0" rot="180" name="Det6"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a1_6">  <location r="1.0430" t="168.631" p="0" rot="180" name="Det7"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a1_7">  <location r="1.0352" t="168.456" p="0" rot="180" name="Det8"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a1_8">  <location r="1.0429" t="168.146" p="0" rot="180" name="Det9"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a1_9">  <location r="1.0351" t="167.905" p="0" rot="180" name="Det10" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a1_10"> <location r="1.0429" t="167.478" p="0" rot="180" name="Det11" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a1_11"> <location r="1.0352" t="167.316" p="0" rot="180" name="Det12" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a1_12"> <location r="1.0429" t="166.917" p="0" rot="180" name="Det13" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a1_13"> <location r="1.0353" t="166.761" p="0" rot="180" name="Det14" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a1_14"> <location r="1.0431" t="166.393" p="0" rot="180" name="Det15" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a1_15"> <location r="1.0355" t="166.186" p="0" rot="180" name="Det16" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a1_16"> <location r="1.0434" t="165.848" p="0" rot="180" name="Det17" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a1_17"> <location r="1.0358" t="165.592" p="0" rot="180" name="Det18" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a1_18"> <location r="1.0437" t="165.215" p="0" rot="180" name="Det19" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a1_19"> <location r="1.0362" t="165.025" p="0" rot="180" name="Det20" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a2_0">  <location r="1.1374" t="164.439" p="0" rot="180" name="Det1"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a2_1">  <location r="1.1295" t="164.222" p="0" rot="180" name="Det2"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a2_2">  <location r="1.1371" t="163.857" p="0" rot="180" name="Det3"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a2_3">  <location r="1.1292" t="163.697" p="0" rot="180" name="Det4"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a2_4">  <location r="1.1368" t="163.376" p="0" rot="180" name="Det5"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a2_5">  <location r="1.1290" t="163.196" p="0" rot="180" name="Det6"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a2_6">  <location r="1.1366" t="162.859" p="0" rot="180" name="Det7"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a2_7">  <location r="1.1288" t="162.682" p="0" rot="180" name="Det8"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a2_8">  <location r="1.1365" t="162.353" p="0" rot="180" name="Det9"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a2_9">  <location r="1.1287" t="162.144" p="0" rot="180" name="Det10" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a2_10"> <location r="1.1365" t="161.790" p="0" rot="180" name="Det11" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a2_11"> <location r="1.1288" t="161.648" p="0" rot="180" name="Det12" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a2_12"> <location r="1.1365" t="161.296" p="0" rot="180" name="Det13" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a2_13"> <location r="1.1289" t="161.098" p="0" rot="180" name="Det14" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a2_14"> <location r="1.1367" t="160.760" p="0" rot="180" name="Det15" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a2_15"> <location r="1.1291" t="160.577" p="0" rot="180" name="Det16" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a2_16"> <location r="1.1369" t="160.256" p="0" rot="180" name="Det17" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a2_17"> <location r="1.1294" t="160.044" p="0" rot="180" name="Det18" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a2_18"> <location r="1.1373" t="159.715" p="0" rot="180" name="Det19" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a2_19"> <location r="1.1297" t="159.505" p="0" rot="180" name="Det20" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a3_0">  <location r="1.2536" t="158.917" p="0" rot="180" name="Det1"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a3_1">  <location r="1.2457" t="158.711" p="0" rot="180" name="Det2"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a3_2">  <location r="1.2532" t="158.427" p="0" rot="180" name="Det3"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a3_3">  <location r="1.2454" t="158.239" p="0" rot="180" name="Det4"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a3_4">  <location r="1.2530" t="157.938" p="0" rot="180" name="Det5"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a3_5">  <location r="1.2451" t="157.764" p="0" rot="180" name="Det6"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a3_6">  <location r="1.2528" t="157.470" p="0" rot="180" name="Det7"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a3_7">  <location r="1.2450" t="157.288" p="0" rot="180" name="Det8"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a3_8">  <location r="1.2527" t="157.015" p="0" rot="180" name="Det9"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a3_9">  <location r="1.2449" t="156.831" p="0" rot="180" name="Det10" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a3_10"> <location r="1.2527" t="156.587" p="0" rot="180" name="Det11" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a3_11"> <location r="1.2450" t="156.379" p="0" rot="180" name="Det12" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a3_12"> <location r="1.2527" t="156.096" p="0" rot="180" name="Det13" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a3_13"> <location r="1.2451" t="155.909" p="0" rot="180" name="Det14" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a3_14"> <location r="1.2529" t="155.598" p="0" rot="180" name="Det15" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a3_15"> <location r="1.2452" t="155.442" p="0" rot="180" name="Det16" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a3_16"> <location r="1.2531" t="155.171" p="0" rot="180" name="Det17" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a3_17"> <location r="1.2455" t="154.971" p="0" rot="180" name="Det18" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a3_18"> <location r="1.2534" t="154.714" p="0" rot="180" name="Det19" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a3_19"> <location r="1.2459" t="154.520" p="0" rot="180" name="Det20" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a4_0">  <location r="1.3890" t="153.946" p="0" rot="180" name="Det1"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a4_1">  <location r="1.3811" t="153.740" p="0" rot="180" name="Det2"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a4_2">  <location r="1.3887" t="153.486" p="0" rot="180" name="Det3"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a4_3">  <location r="1.3808" t="153.308" p="0" rot="180" name="Det4"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a4_4">  <location r="1.3884" t="153.073" p="0" rot="180" name="Det5"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a4_5">  <location r="1.3806" t="152.918" p="0" rot="180" name="Det6"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a4_6">  <location r="1.3883" t="152.676" p="0" rot="180" name="Det7"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a4_7">  <location r="1.3805" t="152.501" p="0" rot="180" name="Det8"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a4_8">  <location r="1.3882" t="152.260" p="0" rot="180" name="Det9"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a4_9">  <location r="1.3804" t="152.092" p="0" rot="180" name="Det10" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a4_10"> <location r="1.3882" t="151.817" p="0" rot="180" name="Det11" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a4_11"> <location r="1.3805" t="151.672" p="0" rot="180" name="Det12" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a4_12"> <location r="1.3882" t="151.405" p="0" rot="180" name="Det13" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a4_13"> <location r="1.3806" t="151.239" p="0" rot="180" name="Det14" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a4_14"> <location r="1.3883" t="150.982" p="0" rot="180" name="Det15" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a4_15"> <location r="1.3807" t="150.818" p="0" rot="180" name="Det16" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a4_16"> <location r="1.3885" t="150.580" p="0" rot="180" name="Det17" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a4_17"> <location r="1.3810" t="150.404" p="0" rot="180" name="Det18" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a4_18"> <location r="1.3888" t="150.151" p="0" rot="180" name="Det19" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6a4_19"> <location r="1.3813" t="149.982" p="0" rot="180" name="Det20" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+</type>
+
+<type name="arc_B6a1_0" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.16575"/><outer-radius val="0.17075"/><depth val="0.001"/><arc val="22.30886"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a1_1" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.17687"/><outer-radius val="0.18187"/><depth val="0.001"/><arc val="22.51992"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a1_2" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.18376"/><outer-radius val="0.18876"/><depth val="0.001"/><arc val="22.63813"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a1_3" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.18498"/><outer-radius val="0.18998"/><depth val="0.001"/><arc val="22.65817"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a1_4" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.19360"/><outer-radius val="0.19860"/><depth val="0.001"/><arc val="22.79255"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a1_5" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.19455"/><outer-radius val="0.19955"/><depth val="0.001"/><arc val="22.80660"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a1_6" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.20310"/><outer-radius val="0.20810"/><depth val="0.001"/><arc val="22.92757"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a1_7" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.20466"/><outer-radius val="0.20966"/><depth val="0.001"/><arc val="22.94857"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a1_8" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.21173"/><outer-radius val="0.21673"/><depth val="0.001"/><arc val="23.03980"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a1_9" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.21439"/><outer-radius val="0.21939"/><depth val="0.001"/><arc val="23.07256"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a1_10" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.22362"/><outer-radius val="0.22862"/><depth val="0.001"/><arc val="23.18037"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a1_11" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.22480"/><outer-radius val="0.22980"/><depth val="0.001"/><arc val="23.19360"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a1_12" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.23357"/><outer-radius val="0.23857"/><depth val="0.001"/><arc val="23.28725"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a1_13" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.23460"/><outer-radius val="0.23960"/><depth val="0.001"/><arc val="23.29774"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a1_14" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.24290"/><outer-radius val="0.24790"/><depth val="0.001"/><arc val="23.37950"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a1_15" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.24475"/><outer-radius val="0.24975"/><depth val="0.001"/><arc val="23.39694"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a1_16" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.25261"/><outer-radius val="0.25761"/><depth val="0.001"/><arc val="23.46833"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a1_17" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.25523"/><outer-radius val="0.26023"/><depth val="0.001"/><arc val="23.49122"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a1_18" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.26384"/><outer-radius val="0.26884"/><depth val="0.001"/><arc val="23.56310"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a1_19" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.26525"/><outer-radius val="0.27025"/><depth val="0.001"/><arc val="23.57440"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a2_0" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.30262"/><outer-radius val="0.30762"/><depth val="0.001"/><arc val="23.83650"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a2_1" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.30462"/><outer-radius val="0.30962"/><depth val="0.001"/><arc val="23.84872"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a2_2" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.31365"/><outer-radius val="0.31865"/><depth val="0.001"/><arc val="23.90201"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a2_3" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.31449"/><outer-radius val="0.31949"/><depth val="0.001"/><arc val="23.90677"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a2_4" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.32273"/><outer-radius val="0.32773"/><depth val="0.001"/><arc val="23.95257"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a2_5" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.32389"/><outer-radius val="0.32889"/><depth val="0.001"/><arc val="23.95886"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a2_6" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.33248"/><outer-radius val="0.33748"/><depth val="0.001"/><arc val="24.00388"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a2_7" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.33352"/><outer-radius val="0.33852"/><depth val="0.001"/><arc val="24.00913"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a2_8" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.34203"/><outer-radius val="0.34703"/><depth val="0.001"/><arc val="24.05128"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a2_9" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.34359"/><outer-radius val="0.34859"/><depth val="0.001"/><arc val="24.05876"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a2_10" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.35266"/><outer-radius val="0.35766"/><depth val="0.001"/><arc val="24.10103"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a2_11" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.35291"/><outer-radius val="0.35791"/><depth val="0.001"/><arc val="24.10217"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a2_12" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.36195"/><outer-radius val="0.36695"/><depth val="0.001"/><arc val="24.14218"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a2_13" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.36321"/><outer-radius val="0.36821"/><depth val="0.001"/><arc val="24.14758"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a2_14" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.37207"/><outer-radius val="0.37707"/><depth val="0.001"/><arc val="24.18465"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a2_15" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.37297"/><outer-radius val="0.37797"/><depth val="0.001"/><arc val="24.18831"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a2_16" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.38157"/><outer-radius val="0.38657"/><depth val="0.001"/><arc val="24.22246"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a2_17" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.38296"/><outer-radius val="0.38796"/><depth val="0.001"/><arc val="24.22787"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a2_18" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.39179"/><outer-radius val="0.39679"/><depth val="0.001"/><arc val="24.26115"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a2_19" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.39304"/><outer-radius val="0.39804"/><depth val="0.001"/><arc val="24.26573"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a3_0" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.44844"/><outer-radius val="0.45344"/><depth val="0.001"/><arc val="24.44371"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a3_1" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.44978"/><outer-radius val="0.45478"/><depth val="0.001"/><arc val="24.44746"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a3_2" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.45828"/><outer-radius val="0.46328"/><depth val="0.001"/><arc val="24.47085"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a3_3" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.45921"/><outer-radius val="0.46421"/><depth val="0.001"/><arc val="24.47335"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a3_4" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.46814"/><outer-radius val="0.47314"/><depth val="0.001"/><arc val="24.49688"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a3_5" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.46867"/><outer-radius val="0.47367"/><depth val="0.001"/><arc val="24.49826"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a3_6" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.47753"/><outer-radius val="0.48253"/><depth val="0.001"/><arc val="24.52070"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a3_7" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.47819"/><outer-radius val="0.48319"/><depth val="0.001"/><arc val="24.52235"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a3_8" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.48667"/><outer-radius val="0.49167"/><depth val="0.001"/><arc val="24.54299"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a3_9" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.48730"/><outer-radius val="0.49230"/><depth val="0.001"/><arc val="24.54450"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a3_10" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.49527"/><outer-radius val="0.50027"/><depth val="0.001"/><arc val="24.56323"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a3_11" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.49635"/><outer-radius val="0.50135"/><depth val="0.001"/><arc val="24.56573"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a3_12" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.50510"/><outer-radius val="0.51010"/><depth val="0.001"/><arc val="24.58553"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a3_13" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.50573"/><outer-radius val="0.51073"/><depth val="0.001"/><arc val="24.58693"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a3_14" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.51512"/><outer-radius val="0.52012"/><depth val="0.001"/><arc val="24.60737"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a3_15" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.51502"/><outer-radius val="0.52002"/><depth val="0.001"/><arc val="24.60717"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a3_16" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.52369"/><outer-radius val="0.52869"/><depth val="0.001"/><arc val="24.62541"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a3_17" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.52444"/><outer-radius val="0.52944"/><depth val="0.001"/><arc val="24.62696"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a3_18" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.53287"/><outer-radius val="0.53787"/><depth val="0.001"/><arc val="24.64408"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a3_19" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.53348"/><outer-radius val="0.53848"/><depth val="0.001"/><arc val="24.64530"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a4_0" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.60757"/><outer-radius val="0.61257"/><depth val="0.001"/><arc val="24.77512"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a4_1" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.60856"/><outer-radius val="0.61356"/><depth val="0.001"/><arc val="24.77664"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a4_2" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.61744"/><outer-radius val="0.62244"/><depth val="0.001"/><arc val="24.79007"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a4_3" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.61775"/><outer-radius val="0.62275"/><depth val="0.001"/><arc val="24.79053"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a4_4" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.62624"/><outer-radius val="0.63124"/><depth val="0.001"/><arc val="24.80301"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a4_5" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.62604"/><outer-radius val="0.63104"/><depth val="0.001"/><arc val="24.80272"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a4_6" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.63476"/><outer-radius val="0.63976"/><depth val="0.001"/><arc val="24.81519"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a4_7" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.63492"/><outer-radius val="0.63992"/><depth val="0.001"/><arc val="24.81542"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a4_8" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.64365"/><outer-radius val="0.64865"/><depth val="0.001"/><arc val="24.82756"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a4_9" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.64360"/><outer-radius val="0.64860"/><depth val="0.001"/><arc val="24.82749"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a4_10" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.65313"/><outer-radius val="0.65813"/><depth val="0.001"/><arc val="24.84038"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a4_11" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.65257"/><outer-radius val="0.65757"/><depth val="0.001"/><arc val="24.83964"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a4_12" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.66191"/><outer-radius val="0.66691"/><depth val="0.001"/><arc val="24.85193"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a4_13" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.66179"/><outer-radius val="0.66679"/><depth val="0.001"/><arc val="24.85177"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a4_14" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.67094"/><outer-radius val="0.67594"/><depth val="0.001"/><arc val="24.86350"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a4_15" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.67071"/><outer-radius val="0.67571"/><depth val="0.001"/><arc val="24.86320"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a4_16" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.67954"/><outer-radius val="0.68454"/><depth val="0.001"/><arc val="24.87422"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a4_17" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.67955"/><outer-radius val="0.68455"/><depth val="0.001"/><arc val="24.87423"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a4_18" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.68873"/><outer-radius val="0.69373"/><depth val="0.001"/><arc val="24.88539"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6a4_19" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.68853"/><outer-radius val="0.69353"/><depth val="0.001"/><arc val="24.88514"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+
+
+<type name="module_B6b">           
+  <component type="arc_B6b1_0">  <location r="1.5524" t="149.603" p="0" rot="180" name="Det1"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b1_1">  <location r="1.5445" t="149.424" p="0" rot="180" name="Det2"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b1_2">  <location r="1.5521" t="149.222" p="0" rot="180" name="Det3"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b1_3">  <location r="1.5443" t="149.070" p="0" rot="180" name="Det4"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b1_4">  <location r="1.5519" t="148.843" p="0" rot="180" name="Det5"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b1_5">  <location r="1.5441" t="148.686" p="0" rot="180" name="Det6"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b1_6">  <location r="1.5518" t="148.446" p="0" rot="180" name="Det7"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b1_7">  <location r="1.5440" t="148.308" p="0" rot="180" name="Det8"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b1_8">  <location r="1.5517" t="148.089" p="0" rot="180" name="Det9"  > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b1_9">  <location r="1.5439" t="147.924" p="0" rot="180" name="Det10" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b1_10"> <location r="1.5517" t="147.721" p="0" rot="180" name="Det11" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b1_11"> <location r="1.5440" t="147.574" p="0" rot="180" name="Det12" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b1_12"> <location r="1.5517" t="147.339" p="0" rot="180" name="Det13" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b1_13"> <location r="1.5440" t="147.202" p="0" rot="180" name="Det14" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b1_14"> <location r="1.5518" t="146.998" p="0" rot="180" name="Det15" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b1_15"> <location r="1.5442" t="146.818" p="0" rot="180" name="Det16" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b1_16"> <location r="1.5520" t="146.581" p="0" rot="180" name="Det17" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b1_17"> <location r="1.5444" t="146.440" p="0" rot="180" name="Det18" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b1_18"> <location r="1.5522" t="146.223" p="0" rot="180" name="Det19" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b1_19"> <location r="1.5447" t="146.068" p="0" rot="180" name="Det20" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b2_0">  <location r="1.7380" t="145.679" p="0" rot="180" name="Det1 " > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b2_1">  <location r="1.7302" t="145.557" p="0" rot="180" name="Det2 " > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b2_2">  <location r="1.7378" t="145.339" p="0" rot="180" name="Det3 " > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b2_3">  <location r="1.7300" t="145.199" p="0" rot="180" name="Det4 " > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b2_4">  <location r="1.7376" t="144.994" p="0" rot="180" name="Det5 " > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b2_5">  <location r="1.7298" t="144.865" p="0" rot="180" name="Det6 " > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b2_6">  <location r="1.7374" t="144.685" p="0" rot="180" name="Det7 " > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b2_7">  <location r="1.7297" t="144.547" p="0" rot="180" name="Det8 " > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b2_8">  <location r="1.7374" t="144.319" p="0" rot="180" name="Det9 " > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b2_9">  <location r="1.7296" t="144.200" p="0" rot="180" name="Det10" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b2_10"> <location r="1.7374" t="144.001" p="0" rot="180" name="Det11" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b2_11"> <location r="1.7297" t="143.853" p="0" rot="180" name="Det12" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b2_12"> <location r="1.7374" t="143.654" p="0" rot="180" name="Det13" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b2_13"> <location r="1.7297" t="143.529" p="0" rot="180" name="Det14" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b2_14"> <location r="1.7375" t="143.333" p="0" rot="180" name="Det15" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b2_15"> <location r="1.7299" t="143.206" p="0" rot="180" name="Det16" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b2_16"> <location r="1.7377" t="143.005" p="0" rot="180" name="Det17" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b2_17"> <location r="1.7301" t="142.845" p="0" rot="180" name="Det18" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b2_18"> <location r="1.7379" t="142.622" p="0" rot="180" name="Det19" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+  <component type="arc_B6b2_19"> <location r="1.7303" t="142.496" p="0" rot="180" name="Det20" > <facing x="0.0" y="0.0" z="0.0"/> </location> </component>
+</type>
+  
+<type name="arc_B6b1_0" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.78300"/><outer-radius val="0.78800"/><depth val="0.001"/><arc val="19.27058"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b1_1" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.78316"/><outer-radius val="0.78816"/><depth val="0.001"/><arc val="19.27073"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b1_2" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.79173"/><outer-radius val="0.79673"/><depth val="0.001"/><arc val="19.27860"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b1_3" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.79126"/><outer-radius val="0.79626"/><depth val="0.001"/><arc val="19.27817"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b1_4" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.80043"/><outer-radius val="0.80543"/><depth val="0.001"/><arc val="19.28642"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b1_5" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.80001"/><outer-radius val="0.80501"/><depth val="0.001"/><arc val="19.28604"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b1_6" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.80956"/><outer-radius val="0.81456"/><depth val="0.001"/><arc val="19.29444"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b1_7" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.80864"/><outer-radius val="0.81364"/><depth val="0.001"/><arc val="19.29364"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b1_8" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.81773"/><outer-radius val="0.82273"/><depth val="0.001"/><arc val="19.30147"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b1_9" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.81738"/><outer-radius val="0.82238"/><depth val="0.001"/><arc val="19.30117"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b1_10" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.82617"/><outer-radius val="0.83117"/><depth val="0.001"/><arc val="19.30858"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b1_11" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.82541"/><outer-radius val="0.83041"/><depth val="0.001"/><arc val="19.30795"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b1_12" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.83490"/><outer-radius val="0.83990"/><depth val="0.001"/><arc val="19.31579"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b1_13" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.83385"/><outer-radius val="0.83885"/><depth val="0.001"/><arc val="19.31493"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b1_14" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.84272"/><outer-radius val="0.84772"/><depth val="0.001"/><arc val="19.32212"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b1_15" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.84264"/><outer-radius val="0.84764"/><depth val="0.001"/><arc val="19.32206"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b1_16" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.85228"/><outer-radius val="0.85728"/><depth val="0.001"/><arc val="19.32970"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b1_17" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.85126"/><outer-radius val="0.85626"/><depth val="0.001"/><arc val="19.32890"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b1_18" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.86046"/><outer-radius val="0.86546"/><depth val="0.001"/><arc val="19.33606"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b1_19" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.85976"/><outer-radius val="0.86476"/><depth val="0.001"/><arc val="19.33552"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b2_0" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.97743"/><outer-radius val="0.98243"/><depth val="0.001"/><arc val="19.41531"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b2_1" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.97608"/><outer-radius val="0.98108"/><depth val="0.001"/><arc val="19.41450"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b2_2" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.98582"/><outer-radius val="0.99082"/><depth val="0.001"/><arc val="19.42027"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b2_3" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.98486"/><outer-radius val="0.98986"/><depth val="0.001"/><arc val="19.41971"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b2_4" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.99430"/><outer-radius val="0.99930"/><depth val="0.001"/><arc val="19.42520"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b2_5" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="0.99301"/><outer-radius val="0.99801"/><depth val="0.001"/><arc val="19.42446"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b2_6" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="1.00184"/><outer-radius val="1.00684"/><depth val="0.001"/><arc val="19.42952"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b2_7" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="1.00079"/><outer-radius val="1.00579"/><depth val="0.001"/><arc val="19.42892"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b2_8" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="1.01088"/><outer-radius val="1.01588"/><depth val="0.001"/><arc val="19.43461"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b2_9" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="1.00924"/><outer-radius val="1.01424"/><depth val="0.001"/><arc val="19.43369"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b2_10" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="1.01869"/><outer-radius val="1.02369"/><depth val="0.001"/><arc val="19.43893"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b2_11" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="1.01778"/><outer-radius val="1.02278"/><depth val="0.001"/><arc val="19.43843"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b2_12" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="1.02719"/><outer-radius val="1.03219"/><depth val="0.001"/><arc val="19.44356"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b2_13" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="1.02566"/><outer-radius val="1.03066"/><depth val="0.001"/><arc val="19.44274"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b2_14" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="1.03507"/><outer-radius val="1.04007"/><depth val="0.001"/><arc val="19.44779"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b2_15" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="1.03361"/><outer-radius val="1.03861"/><depth val="0.001"/><arc val="19.44701"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b2_16" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="1.04315"/><outer-radius val="1.04815"/><depth val="0.001"/><arc val="19.45206"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b2_17" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="1.04243"/><outer-radius val="1.04743"/><depth val="0.001"/><arc val="19.45168"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b2_18" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="1.05253"/><outer-radius val="1.05753"/><depth val="0.001"/><arc val="19.45693"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+<type name="arc_B6b2_19" is="detector">
+<slice-of-cylinder-ring id="A"> <inner-radius val="1.05094"/><outer-radius val="1.05594"/><depth val="0.001"/><arc val="19.45611"/> </slice-of-cylinder-ring> <algebra val="A"/>
+</type>
+
+  <type name="scintillator" is="detector">
+    <properties />
+
+    <cuboid id="approximate-shape">
+      <left-front-bottom-point x="0.0025" y="-0.1" z="0.0"  />
+      <left-front-top-point  x="0.0025" y="-0.1" z="0.001"  />
+      <left-back-bottom-point  x="-0.0025" y="-0.1" z="0.0"  />
+      <right-front-bottom-point  x="0.0025" y="0.1" z="0.0"  />
+    </cuboid>
+    <algebra val="approximate-shape" />    
+  </type>
+
+  <type name="scintillator_2" is="detector">
+    <properties />
+
+    <cuboid id="approximate-shape">
+      <left-front-bottom-point x="0.0025" y="-0.095" z="0.0"  />
+      <left-front-top-point  x="0.0025" y="-0.095" z="0.001"  />
+      <left-back-bottom-point  x="-0.0025" y="-0.095" z="0.0"  />
+      <right-front-bottom-point  x="0.0025" y="0.095" z="0.0"  />
+    </cuboid>
+    <algebra val="approximate-shape" />    
+  </type>
+
+  <type name="scintillator_4A" is="detector">
+    <properties />
+
+    <cuboid id="approximate-shape">
+      <left-front-bottom-point x="0.0025" y="-0.1" z="0.0"  />
+      <left-front-top-point  x="0.0025" y="-0.1" z="0.001"  />
+      <left-back-bottom-point  x="-0.0025" y="-0.1" z="0.0"  />
+      <right-front-bottom-point  x="0.0025" y="0.1" z="0.0"  />
+    </cuboid>
+    <algebra val="approximate-shape" />    
+  </type>
+  
+  <type name="scintillator_4B" is="detector">
+    <properties />
+
+    <cuboid id="approximate-shape">
+      <left-front-bottom-point x="0.0025" y="-0.1025" z="0.0"  />
+      <left-front-top-point  x="0.0025" y="-0.1025" z="0.001"  />
+      <left-back-bottom-point  x="-0.0025" y="-0.1025" z="0.0"  />
+      <right-front-bottom-point  x="0.0025" y="0.1025" z="0.0"  />
+    </cuboid>
+    <algebra val="approximate-shape" />    
+  </type>
+  
+  <type name="scintillator_4C" is="detector">
+    <properties />
+
+    <cuboid id="approximate-shape">
+      <left-front-bottom-point x="0.0025" y="-0.105" z="0.0"  />
+      <left-front-top-point  x="0.0025" y="-0.105" z="0.001"  />
+      <left-back-bottom-point  x="-0.0025" y="-0.105" z="0.0"  />
+      <right-front-bottom-point  x="0.0025" y="0.105" z="0.0"  />
+    </cuboid>
+    <algebra val="approximate-shape" />    
+  </type>
+
+  <type name="scintillator_4D" is="detector">
+    <properties />
+
+    <cuboid id="approximate-shape">
+      <left-front-bottom-point x="0.0025" y="-0.1075" z="0.0"  />
+      <left-front-top-point  x="0.0025" y="-0.1075" z="0.001"  />
+      <left-back-bottom-point  x="-0.0025" y="-0.1075" z="0.0"  />
+      <right-front-bottom-point  x="0.0025" y="0.1075" z="0.0"  />
+    </cuboid>
+    <algebra val="approximate-shape" />    
+  </type>
+
+  <type name="scintillator_4E" is="detector">
+    <properties />
+
+    <cuboid id="approximate-shape">
+      <left-front-bottom-point x="0.0025" y="-0.11" z="0.0"  />
+      <left-front-top-point  x="0.0025" y="-0.11" z="0.001"  />
+      <left-back-bottom-point  x="-0.0025" y="-0.11" z="0.0"  />
+      <right-front-bottom-point  x="0.0025" y="0.11" z="0.0"  />
+    </cuboid>
+    <algebra val="approximate-shape" />    
+  </type>
+
+  <type name="scintillator_5" is="detector">
+    <properties />
+
+    <cuboid id="approximate-shape">
+      <left-front-bottom-point x="0.0025" y="-0.1" z="0.0"  />
+      <left-front-top-point  x="0.0025" y="-0.1" z="0.001"  />
+      <left-back-bottom-point  x="-0.0025" y="-0.1" z="0.0"  />
+      <right-front-bottom-point  x="0.0025" y="0.1" z="0.0"  />
+    </cuboid>
+    <algebra val="approximate-shape" />    
+  </type>
+ 
+  <type name="scintillator_5X" is="detector">
+    <properties />
+
+    <cuboid id="approximate-shape">
+      <left-front-bottom-point x="0.0025" y="-0.0935" z="0.0"  />
+      <left-front-top-point  x="0.0025" y="-0.0935" z="0.001"  />
+      <left-back-bottom-point  x="-0.0025" y="-0.0935" z="0.0"  />
+      <right-front-bottom-point  x="0.0025" y="0.0935" z="0.0"  />
+    </cuboid>
+    <algebra val="approximate-shape" />    
+  </type> 
+  
+  <type name="monitor" is="monitor">
+    <properties />
+    
+    <cylinder id="some-shape">
+      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+      <axis x="0.0" y="0.0" z="1.0" /> 
+      <radius val="0.01" />
+      <height val="0.03" />
+    </cylinder> 
+    <algebra val="some-shape" />    
+  </type>
+
+  
+  <!-- DETECTOR ID LISTS -->
+
+  <idlist idname="monitors">
+    <id start="611" end="612" />
+    <id val="621" />
+    <id start="631" end="634" />
+    <id start="641" end="644" />
+  </idlist>
+  
+  <idlist idname="bank1">
+    <id start="101001" end="101060" />
+    <id start="102001" end="102060" />
+    <id start="103001" end="103045" />
+    <id start="111001" end="111060" />
+    <id start="112001" end="112060" />
+    <id start="113001" end="113045" />
+  </idlist>
+  
+  <idlist idname="bank2">
+    <id start="201001" end="201010" />
+    <id start="201021" end="201030" />	
+    <id start="201041" end="201050" />	
+    <id start="201061" end="201070" />	
+    <id start="201011" end="201020" />	
+    <id start="201031" end="201040" />	
+    <id start="201051" end="201060" />	
+    <id start="201071" end="201080" />
+    <id start="202001" end="202010" />
+    <id start="202021" end="202030" />	
+    <id start="202041" end="202050" />	
+    <id start="202061" end="202070" />	
+    <id start="202011" end="202020" />	
+    <id start="202031" end="202040" />	
+    <id start="202051" end="202060" />	
+    <id start="202071" end="202080" />
+    <id start="211001" end="211010" />
+    <id start="211021" end="211030" />	
+    <id start="211041" end="211050" />	
+    <id start="211061" end="211070" />	
+    <id start="211011" end="211020" />	
+    <id start="211031" end="211040" />	
+    <id start="211051" end="211060" />	
+    <id start="211071" end="211080" />
+    <id start="212001" end="212010" />
+    <id start="212021" end="212030" />	
+    <id start="212041" end="212050" />	
+    <id start="212061" end="212070" />	
+    <id start="212011" end="212020" />	
+    <id start="212031" end="212040" />	
+    <id start="212051" end="212060" />	
+    <id start="212071" end="212080" />
+  </idlist>
+
+  <idlist idname="bank3">
+    <id start="301001" end="301090" />
+    <id start="302001" end="302090" />
+    <id start="303001" end="303090" />
+    <id start="304001" end="304090" />
+    <id start="305001" end="305090" />
+    <id start="311001" end="311090" />
+    <id start="312001" end="312090" />
+    <id start="313001" end="313090" />
+    <id start="314001" end="314090" />
+    <id start="315001" end="315090" />    
+  </idlist>
+
+  <idlist idname="bank4">
+    <id start="401001" end="401100" />
+    <id start="402001" end="402100" />
+    <id start="403001" end="403100" />
+    <id start="404001" end="404100" />
+    <id start="405001" end="405100" />
+    <id start="406001" end="406100" />
+    <id start="407001" end="407100" />    
+    <id start="411001" end="411100" />
+    <id start="412001" end="412100" />
+    <id start="413001" end="413100" />
+    <id start="414001" end="414100" />
+    <id start="415001" end="415100" />
+    <id start="416001" end="416100" />
+    <id start="417001" end="417100" />    
+  </idlist>  
+  
+  <idlist idname="bank5">
+    <id start="501001" end="501120" />
+    <id start="502001" end="502120" />
+    <id start="503001" end="503120" />
+    <id start="504001" end="504120" />
+    <id start="505001" end="505120" />
+    <id start="506001" end="506120" />
+    <id start="507001" end="507120" />
+    <id start="508001" end="508120" />
+    <id start="509001" end="509120" />
+    <id start="511001" end="511120" />
+    <id start="512001" end="512120" />
+    <id start="513001" end="513120" />
+    <id start="514001" end="514120" />
+    <id start="515001" end="515120" />
+    <id start="516001" end="516120" />
+    <id start="517001" end="517120" />
+    <id start="518001" end="518120" />
+    <id start="519001" end="519120" />
+  </idlist>   
+
+  <idlist idname="bank5X">
+    <id start="521001" end="521040" />
+    <id start="522001" end="522040" />
+    <id start="523001" end="523040" />
+    <id start="524001" end="524040" />
+    <id start="525001" end="525040" />
+    <id start="526001" end="526040" />
+    <id start="527001" end="527040" />
+    <id start="528001" end="528040" />
+    <id start="529001" end="529040" />
+    <id start="531001" end="531040" />
+    <id start="532001" end="532040" />
+    <id start="533001" end="533040" />
+    <id start="534001" end="534040" />
+    <id start="535001" end="535040" />
+    <id start="536001" end="536040" />
+    <id start="537001" end="537040" />
+    <id start="538001" end="538040" />
+    <id start="539001" end="539040" />
+  </idlist>   
+ 
+  <idlist idname="bank6">
+    <id start="601001" end="601040" />
+    <id start="602001" end="602040" />
+    <id start="603001" end="603040" />
+    <id start="604001" end="604040" />
+    <id start="605001" end="605040" />
+    <id start="606001" end="606040" />
+    <id start="607001" end="607040" />
+    <id start="611001" end="611040" />
+    <id start="612001" end="612040" />
+    <id start="613001" end="613040" />
+    <id start="614001" end="614040" />
+    <id start="615001" end="615040" />
+    <id start="616001" end="616040" />
+    <id start="617001" end="617040" />
+    <id start="701001" end="701080" />
+    <id start="702001" end="702080" />
+    <id start="703001" end="703080" />
+    <id start="704001" end="704080" />
+    <id start="705001" end="705080" />
+    <id start="711001" end="711080" />
+    <id start="712001" end="712080" />
+    <id start="713001" end="713080" />
+    <id start="714001" end="714080" />
+    <id start="715001" end="715080" />
+  </idlist>  
+</instrument>
