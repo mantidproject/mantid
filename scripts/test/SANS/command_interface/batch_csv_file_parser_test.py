@@ -11,6 +11,7 @@ import mantid
 from unittest import mock
 from sans.command_interface.batch_csv_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
+from sans.common.enums import SampleShape
 from sans.data_objects.row_entries import RowEntries
 
 
@@ -297,6 +298,7 @@ class BatchCsvParserTest(unittest.TestCase):
         test_row.sample_thickness = "1.0"
         test_row.sample_height = 5.0
         test_row.sample_width = 5.4
+        test_row.sample_shape = SampleShape.DISC
         test_row.background_ws = "TestWS"
         test_row.scale_factor = 1.3
 
@@ -312,6 +314,7 @@ class BatchCsvParserTest(unittest.TestCase):
             "sample_thickness,1.0,"
             "sample_height,5.0,"
             "sample_width,5.4,"
+            "sample_shape,Disc,"
             "background_workspace,TestWS,"
             "scale_factor,1.3"
         )
@@ -330,6 +333,40 @@ class BatchCsvParserTest(unittest.TestCase):
         self.assertTrue(isinstance(args[0], str))
         written = args[0].replace("\n", "").replace("\r", "")
         self.assertEqual(expected, written)
+
+    def test_saved_optional_columns_are_loaded_back(self):
+        row = RowEntries(
+            sample_scatter="SANS2D00022025",
+            sample_scatter_period=2,
+            sample_transmission="SANS2D00022052",
+            sample_transmission_period=3,
+            sample_direct="SANS2D00022022",
+            sample_direct_period=4,
+            output_name="out",
+            sample_thickness="1.0",
+            sample_height="5.0",
+            sample_width="5.4",
+            sample_shape=SampleShape.FLAT_PLATE,
+            background_ws="TestWS",
+            scale_factor="1.3",
+        )
+        batch_file_path = BatchCsvParserTest._save_to_csv("")
+        parser = BatchCsvParser()
+        parser.save_batch_file(rows=[row], file_path=batch_file_path)
+
+        output = parser.parse_batch_file(batch_file_path)
+        BatchCsvParserTest._remove_csv(batch_file_path)
+
+        self.assertEqual(1, len(output))
+        loaded = output[0]
+        self.assertEqual(2, loaded.sample_scatter_period)
+        self.assertEqual(3, loaded.sample_transmission_period)
+        self.assertEqual(4, loaded.sample_direct_period)
+        self.assertEqual("5.0", loaded.sample_height)
+        self.assertEqual("5.4", loaded.sample_width)
+        self.assertEqual(SampleShape.FLAT_PLATE, loaded.sample_shape)
+        self.assertEqual("TestWS", loaded.background_ws)
+        self.assertEqual("1.3", loaded.scale_factor)
 
 
 if __name__ == "__main__":

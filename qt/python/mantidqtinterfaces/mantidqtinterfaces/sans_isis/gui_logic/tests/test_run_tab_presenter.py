@@ -380,6 +380,45 @@ class RunTabPresenterTest(unittest.TestCase):
 
         self.presenter._view.hide_background_subtraction.assert_called_once_with()
 
+    def _update_view_with_rows(self, rows, multi_period=False, geometry=False, background=False):
+        view = mock.Mock()
+        view.is_multi_period_view.return_value = multi_period
+        view.is_sample_geometry.return_value = geometry
+        view.is_background_subtraction.return_value = background
+        self.presenter._view = view
+        self._mock_table.get_number_of_rows.return_value = len(rows)
+        self._mock_table.get_row.side_effect = lambda i: rows[i]
+        RunTabPresenter.update_view_from_table_model(self.presenter)
+        return view
+
+    def test_update_view_hides_optional_columns_when_unused(self):
+        view = self._update_view_with_rows([RowEntries(sample_scatter="1")])
+
+        view.hide_period_columns.assert_called_once_with()
+        view.show_period_columns.assert_not_called()
+        view.set_sample_geometry_mode.assert_called_once_with(False)
+        view.set_background_subtraction_mode.assert_called_once_with(False)
+
+    def test_update_view_keeps_optional_columns_enabled_by_user(self):
+        view = self._update_view_with_rows([RowEntries(sample_scatter="1")], multi_period=True, geometry=True, background=True)
+
+        view.show_period_columns.assert_called_once_with()
+        view.hide_period_columns.assert_not_called()
+        view.set_sample_geometry_mode.assert_called_once_with(True)
+        view.set_background_subtraction_mode.assert_called_once_with(True)
+
+    def test_update_view_shows_optional_columns_when_rows_use_them(self):
+        rows = [
+            RowEntries(sample_scatter="1", sample_scatter_period="2"),
+            RowEntries(sample_scatter="1", sample_shape="Disc"),
+            RowEntries(sample_scatter="1", background_ws="bg", scale_factor="1.5"),
+        ]
+        view = self._update_view_with_rows(rows)
+
+        view.show_period_columns.assert_called_once_with()
+        view.set_sample_geometry_mode.assert_called_once_with(True)
+        view.set_background_subtraction_mode.assert_called_once_with(True)
+
     def test_on_data_changed_updates_table_model(self):
         self.presenter._beam_centre_presenter = mock.Mock()
         self.presenter._masking_table_presenter = mock.Mock()
