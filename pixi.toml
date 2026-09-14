@@ -12,9 +12,13 @@ channels = [
 platforms = ["linux-64", "win-64", "osx-arm64"]
 
 [environments]
-rattler-builder = { features = ["rattler-builder"], no-default-feature = true }
+rattler-builder = { features = [
+  "jq",
+  "rattler-builder",
+], no-default-feature = true }
 delete-old-packages = { features = [
   "delete-old-packages",
+  "jq",
 ], no-default-feature = true }
 devsite = { features = ["devsite"], no-default-feature = true }
 publish-gh = { features = ["publish-gh"], no-default-feature = true }
@@ -32,18 +36,17 @@ rattler-build = "0.76.*"
 versioningit = ">=2.1"
 rattler-index = ">=0.31.5,<1.0"
 
-[feature.rattler-builder.target.linux-64.dependencies]
+[feature.jq.target.linux-64.dependencies]
 jq = ">=1.8.1,<2"
 
-[feature.rattler-builder.target.osx-arm64.dependencies]
+[feature.jq.target.osx-arm64.dependencies]
 jq = ">=1.8.1,<2"
 
-[feature.rattler-builder.target.win-64.dependencies]
+[feature.jq.target.win-64.dependencies]
 m2w64-jq = ">=1.6,<2"
 
 [feature.delete-old-packages.target.linux-64.dependencies]
 curl = "*"
-jq = "*"
 
 [feature.devsite.target.linux-64.dependencies]
 sphinx = "*"
