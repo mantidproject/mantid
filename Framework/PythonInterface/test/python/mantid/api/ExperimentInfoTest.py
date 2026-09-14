@@ -80,21 +80,21 @@ class ExperimentInfoTest(unittest.TestCase):
 
     def test_instrument_metadata_access(self):
         ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(1, 1)
-        self.assertIsInstance(ws.validFromDate(), DateAndTime)
-        self.assertIsInstance(ws.validToDate(), DateAndTime)
-        self.assertIsInstance(ws.filename(), str)
-        self.assertEqual(ws.xmlText(), "Fake XML")
-        self.assertIsInstance(ws.defaultView(), str)
-        self.assertIsInstance(ws.defaultAxis(), str)
+        self.assertIsInstance(ws.instrumentValidFromDate(), DateAndTime)
+        self.assertIsInstance(ws.instrumentValidToDate(), DateAndTime)
+        self.assertIsInstance(ws.instrumentFilename(), str)
+        self.assertEqual(ws.instrumentXmlText(), "Fake XML")
+        self.assertIsInstance(ws.instrumentDefaultView(), str)
+        self.assertIsInstance(ws.instrumentDefaultAxis(), str)
 
     def test_instrument_metadata_matches_a_loaded_IDF(self):
         # A real IDF exercises values the fake instrument leaves empty.
         ws = LoadEmptyInstrument(InstrumentName="ARCS")
-        self.assertIn("ARCS", ws.filename())
-        self.assertTrue(ws.filename().endswith(".xml"))
-        self.assertEqual(ws.defaultView(), "CYLINDRICAL_Y")
-        self.assertGreater(len(ws.xmlText()), 0)
-        self.assertLess(ws.validFromDate(), ws.validToDate())
+        self.assertIn("ARCS", ws.instrumentFilename())
+        self.assertTrue(ws.instrumentFilename().endswith(".xml"))
+        self.assertEqual(ws.instrumentDefaultView(), "CYLINDRICAL_Y")
+        self.assertGreater(len(ws.instrumentXmlText()), 0)
+        self.assertLess(ws.instrumentValidFromDate(), ws.instrumentValidToDate())
 
 
 if __name__ == "__main__":

@@ -1,0 +1,1 @@
+- InstrumentMetadata is now exposed on workspaces and `ExperimentInfo` objects through `instrumentValidFromDate()`, `instrumentValidToDate()`, `instrumentFilename()`, `instrumentXmlText()`, `instrumentDefaultView()` and `instrumentDefaultAxis()`
