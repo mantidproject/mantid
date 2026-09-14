@@ -21,7 +21,7 @@ double leastSquaresLoss(const std::shared_ptr<API::FunctionValues> &values, cons
 }
 
 double poissonLoss(const std::shared_ptr<API::FunctionValues> &values, const size_t index) {
-  return PoissonLoss::calculatePoissonLossLM(values->getFitData(index), values->getCalculated(index));
+  return CostFunctions::PoissonLossLM::calculatePoissonLossLM(values->getFitData(index), values->getCalculated(index));
 }
 
 double leastSquaresWeight(const std::shared_ptr<API::FunctionValues> &values, const size_t index) {
@@ -29,7 +29,8 @@ double leastSquaresWeight(const std::shared_ptr<API::FunctionValues> &values, co
 }
 
 double poissonWeight(const std::shared_ptr<API::FunctionValues> &values, const size_t index) {
-  return PoissonLoss::calculateJacobianScaleFactor(values->getFitData(index), values->getCalculated(index));
+  return CostFunctions::PoissonLossLM::calculateJacobianScaleFactor(values->getFitData(index),
+                                                                    values->getCalculated(index));
 }
 } // namespace
 
