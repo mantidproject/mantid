@@ -29,7 +29,8 @@ using testing::Return;
 inline std::vector<PlottingWorkspaceTreeItemState>
 plottingWorkspaceTreeItemStatesForOutputType(std::vector<PlottingWorkspaceTreeItem> const &items,
                                              PlotOutputType outputType) {
-  return PlottingViewStateProvider().plottingWorkspaceTreeItemStates(items, outputType);
+  return PlottingViewStateProvider().plottingWorkspaceTreeItemStates(items, outputType, boost::regex(""),
+                                                                     {ReducedWorkspaceOutputType::IvsQBinned});
 }
 
 inline std::vector<PlottingWorkspaceTreeItemState>
@@ -54,6 +55,9 @@ public:
   MOCK_METHOD(void, setPlotActionState, (PlotActionState const &), (override));
   MOCK_METHOD(void, setPlottingWorkspaceTreeItemStates, (std::vector<PlottingWorkspaceTreeItemState> const &),
               (override));
+  MOCK_METHOD(void, updatePlottingWorkspaceTreeItemStates, (std::vector<PlottingWorkspaceTreeItemState> const &),
+              (override));
+  MOCK_METHOD(PlottingWorkspaceFilter, workspaceFilter, (), (const, override));
   MOCK_METHOD(std::vector<std::string>, selectedPlottingWorkspaceNames, (), (const, override));
   MOCK_METHOD(size_t, selectedPlottingWorkspaceGroupCount, (), (const, override));
   MOCK_METHOD(std::optional<PlotOutputType>, selectedPlotOutputType, (), (const, override));
@@ -144,7 +148,7 @@ public:
     auto runsTable = RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", {successfulRow("12345")})}));
     addWorkspaces({"IvsQ_12345"});
 
-    EXPECT_CALL(view, selectedPlotOutputType()).WillOnce(Return(std::nullopt));
+    EXPECT_CALL(view, selectedPlotOutputType()).Times(2).WillRepeatedly(Return(std::nullopt));
     EXPECT_CALL(view, setPlottingWorkspaceTreeItemStates(
                           PlottingWorkspaceTreeItemStatesEqual(std::vector<PlottingWorkspaceTreeItemState>{})))
         .Times(1);
@@ -808,6 +812,55 @@ public:
     EXPECT_CALL(plotter, plot(testing::_)).Times(0);
 
     presenter.notifyPlotOverplotClicked();
+  }
+
+  void testFilterChangesUpdateExistingRowsAndRetainLastValidRegex() {
+    NiceMock<MockPlottingView> view;
+    PlottingPresenter presenter(&view);
+    addWorkspaces({"IvsQ_12345", "IvsQ_binned_12345"});
+    presenter.notifyRunsTableChanged(
+        RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", {successfulRow("12345")})})));
+    PlottingWorkspaceFilter filter;
+    ON_CALL(view, workspaceFilter()).WillByDefault(testing::Invoke([&]() { return filter; }));
+    std::vector<PlottingWorkspaceTreeItemState> states;
+    EXPECT_CALL(view, setPlottingWorkspaceTreeItemStates(testing::_)).Times(0);
+    EXPECT_CALL(view, updatePlottingWorkspaceTreeItemStates(testing::_))
+        .Times(3)
+        .WillRepeatedly(testing::SaveArg<0>(&states));
+    EXPECT_CALL(view, setPlotActionState(testing::_)).Times(3);
+
+    filter.text = "^IvsQ_12345$";
+    presenter.notifyWorkspaceFilterChanged();
+    TS_ASSERT(!states[0].visible);
+
+    filter.text = "[";
+    filter.outputTypes.push_back(ReducedWorkspaceOutputType::IvsQ);
+    presenter.notifyWorkspaceFilterChanged();
+    TS_ASSERT(states[0].visible);
+    TS_ASSERT(states[0].children[0].children[0].visible);
+    TS_ASSERT(!states[0].children[0].children[1].visible);
+
+    filter.text.clear();
+    presenter.notifyWorkspaceFilterChanged();
+    TS_ASSERT(states[0].children[0].children[1].visible);
+  }
+
+  void testWorkspaceFilterPersistsWhenNewReductionResultsArrive() {
+    NiceMock<MockPlottingView> view;
+    PlottingPresenter presenter(&view);
+    ON_CALL(view, workspaceFilter())
+        .WillByDefault(Return(PlottingWorkspaceFilter{"^IvsQ_12345$", {ReducedWorkspaceOutputType::IvsQ}}));
+    presenter.notifyWorkspaceFilterChanged();
+    addWorkspaces({"IvsQ_12345", "IvsQ_binned_12345"});
+    std::vector<PlottingWorkspaceTreeItemState> states;
+    EXPECT_CALL(view, setPlottingWorkspaceTreeItemStates(testing::_)).WillOnce(testing::SaveArg<0>(&states));
+
+    presenter.notifyRunsTableChanged(
+        RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", {successfulRow("12345")})})));
+
+    TS_ASSERT(states[0].visible);
+    TS_ASSERT(states[0].children[0].children[0].visible);
+    TS_ASSERT(!states[0].children[0].children[1].visible);
   }
 
 private:

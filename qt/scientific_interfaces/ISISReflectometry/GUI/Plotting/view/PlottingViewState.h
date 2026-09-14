@@ -41,6 +41,12 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL PlotActionState {
 /// Selection behaviour requested by the presenter for one displayed workspace tree row.
 enum class PlottingWorkspaceTreeSelectionMode { None, Direct, ParentOnly, DirectAndParent };
 
+/// Values read from the workspace filter controls.
+struct PlottingWorkspaceFilter {
+  std::string text;
+  std::vector<ReducedWorkspaceOutputType> outputTypes{ReducedWorkspaceOutputType::IvsQBinned};
+};
+
 /// View-facing state for one node in the plotting workspace tree.
 struct MANTIDQT_ISISREFLECTOMETRY_DLL PlottingWorkspaceTreeItemState {
   std::string label;
@@ -50,6 +56,7 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL PlottingWorkspaceTreeItemState {
   std::vector<PlottingWorkspaceTreeItemState> children;
   bool muted{false};
   PlottingWorkspaceTreeSelectionMode selectionMode{PlottingWorkspaceTreeSelectionMode::DirectAndParent};
+  bool visible{true};
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

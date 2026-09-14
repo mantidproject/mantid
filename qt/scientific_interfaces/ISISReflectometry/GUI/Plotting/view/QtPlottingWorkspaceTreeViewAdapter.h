@@ -34,6 +34,8 @@ public:
 
   /// Replace all displayed plotting workspace tree item states.
   void setPlottingWorkspaceTreeItemStates(std::vector<PlottingWorkspaceTreeItemState> const &itemStates);
+  /// Apply visual state to existing rows and deselect rows that become unavailable.
+  void updatePlottingWorkspaceTreeItemStates(std::vector<PlottingWorkspaceTreeItemState> const &itemStates);
   /// Clear all selected tree rows without recursively updating children.
   void clearSelection();
   /// Return selected leaf workspace names.
@@ -49,6 +51,11 @@ protected:
 
 private:
   enum PlottingWorkspaceTreeColumn { ItemTypeColumn, OutputTypeColumn, ItemColumn };
+
+  /// Apply the supplied visibility, selection mode and muted appearance recursively.
+  void updateItemStates(QStandardItem *parent, std::vector<PlottingWorkspaceTreeItemState> const &itemStates);
+  /// Filtering does not treat collapsed descendants as hidden.
+  bool isAvailableForSelection(QModelIndex const &index) const;
 
   /// Apply muted visual state to every column in a row.
   void setItemMuted(QStandardItem *parent, int row, bool muted);
