@@ -103,7 +103,7 @@ class SavePlot1DTest(unittest.TestCase):
         self.makeWs()
         result = simpleapi.SavePlot1D(InputWorkspace="test1", OutputFilename=self.plotlyfile, OutputType="plotly-full")
         self.assertTrue(os.path.exists(self.plotlyfile))
-        with open(self.plotlyfile) as handle:
+        with open(self.plotlyfile, encoding="utf-8") as handle:
             contents = handle.read()
         self.cleanup()
         # Result reports the file that was written, however the platform spells the path
