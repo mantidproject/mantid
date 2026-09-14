@@ -49,6 +49,7 @@ public:
   void notifyPlotOutputTypeChanged() override;
   /// Refresh action state after the workspace tree selection changes.
   void notifyPlottingWorkspaceTreeSelectionChanged() override;
+  void notifyWorkspaceFilterChanged() override;
   /// Refresh action state for controls that depend on the active figure.
   void notifyActiveFigureChanged();
 
@@ -67,6 +68,7 @@ private:
   void updateAvailablePlotOutputTypes(std::string const &instrumentName);
   /// Reapply output-type specific plotting workspace tree state in the view.
   void updatePlottingWorkspaceTreeItemStates();
+  std::vector<PlottingWorkspaceTreeItemState> plottingWorkspaceTreeItemStates() const;
   /// Update controls that depend on reduction and autoreduction state.
   void updateWidgetEnabledState();
   bool isProcessing() const;
@@ -84,6 +86,7 @@ private:
   IActiveFigureMonitor *m_activeFigureMonitor;
   PlottingWorkspaceTree m_plottingWorkspaceTree;
   PlottingViewStateProvider m_viewStateProvider;
+  boost::regex m_filterExpression{""};
   std::string m_instrumentName;
   bool m_outputSelectionEnabled;
   bool m_hasActiveReflectometryFigure;
