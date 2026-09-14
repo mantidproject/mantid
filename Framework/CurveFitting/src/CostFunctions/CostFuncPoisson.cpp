@@ -37,6 +37,8 @@ double calculatePoissonLoss(double observedCounts, double predicted) {
 namespace Mantid::CurveFitting::CostFunctions {
 
 namespace PoissonLossLM {
+template MANTID_CURVEFITTING_DLL int sgn<double>(double val);
+
 double calculatePoissonResidualLM(double observedCounts, double predicted) {
   double retVal = (predicted - observedCounts);
   if (predicted <= absoluteCutOff) {

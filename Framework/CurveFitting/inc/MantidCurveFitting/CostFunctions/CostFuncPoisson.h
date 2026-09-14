@@ -17,7 +17,7 @@ namespace CostFunctions {
 namespace PoissonLossLM {
 double MANTID_CURVEFITTING_DLL calculatePoissonLossLM(double observedCounts, double predicted);
 double MANTID_CURVEFITTING_DLL calculateJacobianScaleFactor(double observedCounts, double predicted);
-template <typename T> int MANTID_CURVEFITTING_DLL sgn(T val) { return (T(0) < val) - (val < T(0)); }
+template <typename T> int sgn(T val) { return (T(0) < val) - (val < T(0)); }
 } // namespace PoissonLossLM
 
 /** CostFuncPoisson : Implements a cost function for fitting applications using
