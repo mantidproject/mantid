@@ -126,8 +126,6 @@ QPointF FigureCanvasQt::toDataCoords(QPoint pos) const {
   // matplotlib's coordinate system, (0,0) is bottom left,
   // and then to the data coordinates
   GlobalInterpreterLock lock;
-  // Must be a double: Qt6 passes through fractional scale factors (e.g. 1.25 at 125% display
-  // scaling) whereas Qt5 rounded them to an integer. Truncating here offsets every click.
   const double dpiRatio(
       PyFloat_AsDouble(Python::Object(m_figure.pyobj().attr("canvas").attr("device_pixel_ratio")).ptr()));
   const double xPosPhysical = pos.x() * dpiRatio;
