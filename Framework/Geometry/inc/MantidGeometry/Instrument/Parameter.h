@@ -124,6 +124,7 @@ public:
 
 private:
   friend class ParameterMap;
+  friend class ComponentInfo;
   friend class Parameter;
   /// Set the value of the parameter
   void setValue(const Type &value);

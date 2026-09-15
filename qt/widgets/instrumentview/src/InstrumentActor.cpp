@@ -33,6 +33,9 @@
 
 #include <boost/algorithm/string.hpp>
 #include <cmath>
+#include <set>
+#include <string>
+#include <vector>
 
 #include <QMessageBox>
 #include <QMetaObject>
@@ -1136,48 +1139,43 @@ void InstrumentActor::addMaskBinsData(const std::vector<size_t> &indices) {
 bool InstrumentActor::hasBinMask() const { return !m_maskBinsData.isEmpty(); }
 
 QString InstrumentActor::getParameterInfo(size_t index) const {
-  auto instr = getInstrument();
   const auto &compInfo = componentInfo();
 
-  auto compID = compInfo.componentID(index);
-  auto comp = instr->getComponentByID(compID);
+  // A parameter name is reported once, against the nearest component in the ancestry that
+  // defines it -- a bank's "Efixed" hides the instrument's. The legacy implementation got this
+  // from getParameterNamesByComponent() returning a name-keyed map; here the walk is explicit.
+  std::set<std::string> alreadyReported;
 
-  QString text = "";
-  std::map<Mantid::Geometry::ComponentID, std::vector<std::string>> mapCmptToNameVector;
-
-  auto paramNames = comp->getParameterNamesByComponent();
-  for (auto &itParamName : paramNames) {
-    // build the data structure I need Map comp id -> vector of names
-    std::string paramName = itParamName.first;
-    Mantid::Geometry::ComponentID paramCompId = itParamName.second;
-    mapCmptToNameVector.emplace(paramCompId, std::vector<std::string>());
-    // get the vector out and add the name
-    mapCmptToNameVector[paramCompId].emplace_back(std::move(paramName));
-  }
-
-  // walk out from the selected component
-  const Mantid::Geometry::IComponent *paramComp = comp.get();
-  std::shared_ptr<const Mantid::Geometry::IComponent> parentComp;
-  while (paramComp) {
-    auto id = paramComp->getComponentID();
-    auto &compParamNames = mapCmptToNameVector[id];
-    if (compParamNames.size() > 0) {
-      text += QString::fromStdString("\nParameters from: " + paramComp->getName() + "\n");
-      std::sort(compParamNames.begin(), compParamNames.end(), Mantid::Kernel::CaseInsensitiveStringComparator());
-      for (const auto &paramName : compParamNames) {
-        // no need to search recursively as we are asking from the matching
-        // component
-        std::string paramValue = "";
-        if (paramComp->getParameterVisible(paramName)) {
-          paramValue = paramComp->getParameterAsString(paramName, false);
-        }
-        if (paramValue != "") {
-          text += QString::fromStdString(paramName + ": " + paramValue + "\n");
+  QString text;
+  for (size_t componentIndex = index;; componentIndex = compInfo.parent(componentIndex)) {
+    // Parameters arrive ordered by name, case-insensitively, which is the order this used to
+    // produce by sorting afterwards.
+    std::vector<std::pair<std::string, std::string>> rows;
+    bool definesAnything = false;
+    for (const auto &[name, parameter] : compInfo.parameters(componentIndex)) {
+      if (!alreadyReported.insert(name).second) {
+        continue; // a nearer component already reported this name
+      }
+      definesAnything = true;
+      // Invisible parameters are skipped, and so is a parameter whose value is the empty
+      // string -- the two are indistinguishable here. That is long-standing behaviour, kept
+      // deliberately rather than changed as a side effect of this migration.
+      if (parameter->visible()) {
+        const auto value = parameter->asString();
+        if (!value.empty()) {
+          rows.emplace_back(name, value);
         }
       }
     }
-    parentComp = paramComp->getParent();
-    paramComp = parentComp.get();
+    if (definesAnything) {
+      text += QString::fromStdString("\nParameters from: " + compInfo.name(componentIndex) + "\n");
+      for (const auto &[name, value] : rows) {
+        text += QString::fromStdString(name + ": " + value + "\n");
+      }
+    }
+    if (!compInfo.hasParent(componentIndex)) {
+      break;
+    }
   }
 
   return text;

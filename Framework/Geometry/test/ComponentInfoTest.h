@@ -914,6 +914,83 @@ public:
     TS_ASSERT_EQUALS(pmap.get(bank.get(), "from_the_map")->value<double>(), 1.0);
   }
 
+  void test_parameters_written_through_ComponentInfo_read_back_typed() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    ParameterMap pmap;
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
+    auto &componentInfo = *std::get<0>(wrappers);
+    const size_t bankIndex = componentInfo.root() - 3;
+
+    componentInfo.addDouble(bankIndex, "a_double", 2.5);
+    componentInfo.addInt(bankIndex, "an_int", 7);
+    componentInfo.addBool(bankIndex, "a_bool", true);
+    componentInfo.addString(bankIndex, "a_string", "hello");
+
+    TS_ASSERT_EQUALS(componentInfo.getNumberParameter(bankIndex, "a_double").at(0), 2.5);
+    TS_ASSERT_EQUALS(componentInfo.getIntParameter(bankIndex, "an_int").at(0), 7);
+    TS_ASSERT_EQUALS(componentInfo.getBoolParameter(bankIndex, "a_bool").at(0), true);
+    TS_ASSERT_EQUALS(componentInfo.getStringParameter(bankIndex, "a_string").at(0), "hello");
+  }
+
+  /// The whole point of writing through ComponentInfo: it lands in the same store the owning
+  /// ParameterMap reads, so the legacy pointer-keyed API sees it immediately.
+  void test_parameters_written_through_ComponentInfo_are_visible_in_the_ParameterMap() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    auto bank = instrument->getComponentByName("bank1");
+    ParameterMap pmap;
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
+    auto &componentInfo = *std::get<0>(wrappers);
+    const size_t bankIndex = componentInfo.indexOf(bank->getComponentID());
+
+    componentInfo.addDouble(bankIndex, "written_via_2_0", 42.0);
+
+    TS_ASSERT(pmap.contains(bank.get(), "written_via_2_0"));
+    TS_ASSERT_EQUALS(pmap.get(bank.get(), "written_via_2_0")->value<double>(), 42.0);
+
+    // ...and the reverse direction still works.
+    pmap.addDouble(bank.get(), "written_via_1_0", 1.0);
+    TS_ASSERT_EQUALS(componentInfo.getNumberParameter(bankIndex, "written_via_1_0").at(0), 1.0);
+  }
+
+  void test_addParameter_replaces_case_insensitively_like_the_legacy_map() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    ParameterMap pmap;
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
+    auto &componentInfo = *std::get<0>(wrappers);
+    const size_t bankIndex = componentInfo.root() - 3;
+
+    componentInfo.addDouble(bankIndex, "Efixed", 25.0);
+    componentInfo.addDouble(bankIndex, "efixed", 50.0);
+
+    TS_ASSERT_EQUALS(componentInfo.getParameterNames(bankIndex, false).size(), 1);
+    TS_ASSERT_EQUALS(componentInfo.getNumberParameter(bankIndex, "Efixed").at(0), 50.0);
+  }
+
+  void test_clearParameter_removes_it() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    ParameterMap pmap;
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
+    auto &componentInfo = *std::get<0>(wrappers);
+    const size_t bankIndex = componentInfo.root() - 3;
+
+    componentInfo.addDouble(bankIndex, "transient", 1.0);
+    TS_ASSERT(componentInfo.hasParameter(bankIndex, "transient", false));
+    componentInfo.clearParameter(bankIndex, "transient");
+    TS_ASSERT(!componentInfo.hasParameter(bankIndex, "transient", false));
+  }
+
+  /// Writing works even on a ComponentInfo built without a store, which is how a bare
+  /// non-parametrized instrument arrives.
+  void test_parameters_can_be_added_to_a_ComponentInfo_built_without_a_store() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    auto &componentInfo = *std::get<0>(wrappers);
+    const size_t bankIndex = componentInfo.root() - 3;
+
+    TS_ASSERT_THROWS_NOTHING(componentInfo.addDouble(bankIndex, "created_on_demand", 3.0));
+    TS_ASSERT_EQUALS(componentInfo.getNumberParameter(bankIndex, "created_on_demand").at(0), 3.0);
+  }
+
   void test_indexOfFullName_is_the_exact_inverse_of_fullName() {
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(2, 3);
     auto wrappers = InstrumentVisitor::makeWrappers(*instrument);

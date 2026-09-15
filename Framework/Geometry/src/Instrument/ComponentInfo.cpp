@@ -10,7 +10,9 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/Parameter.h"
+#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterInfo.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
@@ -675,6 +677,90 @@ std::set<std::string> ComponentInfo::getParameterNames(const size_t componentInd
     }
   }
   return result;
+}
+
+ParameterInfo &ComponentInfo::mutableParameterInfo() {
+  if (!m_parameterInfo) {
+    m_parameterInfo = std::make_shared<ParameterInfo>();
+  }
+  return *m_parameterInfo;
+}
+
+template <class T>
+void ComponentInfo::addTypedParameter(const size_t componentIndex, const std::string &type, const std::string &name,
+                                      const T &value, const std::string *const pDescription,
+                                      const std::string &pVisible) {
+  auto parameter = ParameterFactory::create(type, name, pVisible);
+  auto typedParameter = std::dynamic_pointer_cast<ParameterType<T>>(parameter);
+  if (!typedParameter) {
+    throw std::invalid_argument("ComponentInfo: parameter type '" + type + "' does not match the value supplied for '" +
+                                name + "'");
+  }
+  typedParameter->setValue(value);
+  if (pDescription) {
+    parameter->setDescription(*pDescription);
+  }
+  mutableParameterInfo().add(componentIndex, parameter);
+}
+
+void ComponentInfo::addParameter(const size_t componentIndex, const std::string &type, const std::string &name,
+                                 const std::string &value, const std::string *const pDescription,
+                                 const std::string &pVisible) {
+  auto parameter = ParameterFactory::create(type, name, pVisible);
+  // fromString rather than setValue: the value arrives already serialised, and the concrete
+  // parameter type knows how to parse its own form.
+  parameter->fromString(value);
+  if (pDescription) {
+    parameter->setDescription(*pDescription);
+  }
+  mutableParameterInfo().add(componentIndex, parameter);
+}
+
+void ComponentInfo::addDouble(const size_t componentIndex, const std::string &name, double value,
+                              const std::string *const pDescription, const std::string &pVisible) {
+  addTypedParameter(componentIndex, ParameterMap::pDouble(), name, value, pDescription, pVisible);
+}
+
+void ComponentInfo::addInt(const size_t componentIndex, const std::string &name, int value,
+                           const std::string *const pDescription, const std::string &pVisible) {
+  addTypedParameter(componentIndex, ParameterMap::pInt(), name, value, pDescription, pVisible);
+}
+
+void ComponentInfo::addBool(const size_t componentIndex, const std::string &name, bool value,
+                            const std::string *const pDescription, const std::string &pVisible) {
+  addTypedParameter(componentIndex, ParameterMap::pBool(), name, value, pDescription, pVisible);
+}
+
+void ComponentInfo::addString(const size_t componentIndex, const std::string &name, const std::string &value,
+                              const std::string *const pDescription, const std::string &pVisible) {
+  addTypedParameter(componentIndex, ParameterMap::pString(), name, value, pDescription, pVisible);
+}
+
+void ComponentInfo::addV3D(const size_t componentIndex, const std::string &name, const Kernel::V3D &value,
+                           const std::string *const pDescription) {
+  addTypedParameter(componentIndex, ParameterMap::pV3D(), name, value, pDescription, "true");
+}
+
+void ComponentInfo::addQuat(const size_t componentIndex, const std::string &name, const Kernel::Quat &value,
+                            const std::string *const pDescription) {
+  addTypedParameter(componentIndex, ParameterMap::pQuat(), name, value, pDescription, "true");
+}
+
+void ComponentInfo::addFittingParameter(const size_t componentIndex, const std::string &name,
+                                        const std::string &fittingFunction, const std::string &value,
+                                        const std::string *const pDescription, const std::string &pVisible) {
+  auto parameter = ParameterFactory::create("fitting", name, pVisible);
+  parameter->fromString(value);
+  if (pDescription) {
+    parameter->setDescription(*pDescription);
+  }
+  mutableParameterInfo().addFittingParameter(componentIndex, parameter, fittingFunction);
+}
+
+void ComponentInfo::clearParameter(const size_t componentIndex, const std::string &name) {
+  if (m_parameterInfo) {
+    m_parameterInfo->clearParametersByName(componentIndex, name);
+  }
 }
 
 const ParameterInfo::ComponentParameters &ComponentInfo::parameters(const size_t componentIndex) const {

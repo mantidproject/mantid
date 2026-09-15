@@ -66,6 +66,15 @@ private:
 
   template <class T> std::vector<T> getParameter(size_t componentIndex, const std::string &name, bool recursive) const;
 
+  /// Shared implementation of the typed add*() methods.
+  template <class T>
+  void addTypedParameter(const size_t componentIndex, const std::string &type, const std::string &name, const T &value,
+                         const std::string *const pDescription, const std::string &pVisible);
+
+  /// The store, created on first write if this ComponentInfo was built without one (a bare,
+  /// non-parametrized instrument). Reads leave it null, so they stay cheap and const.
+  ParameterInfo &mutableParameterInfo();
+
   BoundingBox componentBoundingBox(const size_t index, const BoundingBox *reference,
                                    const bool excludeMonitors = false) const;
 
@@ -181,6 +190,36 @@ public:
   std::vector<std::string> getStringParameter(const size_t componentIndex, const std::string &name,
                                               bool recursive = true) const;
   double getFittingParameter(const size_t componentIndex, const std::string &name, double xvalue) const;
+
+  /// Add or replace a named parameter at a specific component index
+  void addParameter(const size_t componentIndex, const std::string &type, const std::string &name,
+                    const std::string &value, const std::string *const pDescription = nullptr,
+                    const std::string &pVisible = "true");
+  /// Add or replace a named double parameter at a specific component index
+  void addDouble(const size_t componentIndex, const std::string &name, double value,
+                 const std::string *const pDescription = nullptr, const std::string &pVisible = "true");
+  /// Add or replace a named integer parameter at a specific component index
+  void addInt(const size_t componentIndex, const std::string &name, int value,
+              const std::string *const pDescription = nullptr, const std::string &pVisible = "true");
+  /// Add or replace a named boolean parameter at a specific component index
+  void addBool(const size_t componentIndex, const std::string &name, bool value,
+               const std::string *const pDescription = nullptr, const std::string &pVisible = "true");
+  /// Add or replace a named string parameter at a specific component index
+  void addString(const size_t componentIndex, const std::string &name, const std::string &value,
+                 const std::string *const pDescription = nullptr, const std::string &pVisible = "true");
+  /// Add or replace a named vector parameter at a specific component index
+  void addV3D(const size_t componentIndex, const std::string &name, const Kernel::V3D &value,
+              const std::string *const pDescription = nullptr);
+  /// Add or replace a named quaternion parameter at a specific component index
+  void addQuat(const size_t componentIndex, const std::string &name, const Kernel::Quat &value,
+               const std::string *const pDescription = nullptr);
+  /// Add a fitting parameter.
+  void addFittingParameter(const size_t componentIndex, const std::string &name, const std::string &fittingFunction,
+                           const std::string &value, const std::string *const pDescription = nullptr,
+                           const std::string &pVisible = "true");
+  /// Remove every parameter of this name from this component. Matches the name case-sensitively,
+  /// as ParameterMap::clearParametersByName() does.
+  void clearParameter(const size_t componentIndex, const std::string &name);
 
   /// This allows ParameterMap to delegate to ParameterInfo,
   /// rather than keeping a parallel copy that would silently diverge.
