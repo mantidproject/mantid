@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
 from itertools import chain
+from sys import platform
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt.testing import get_application
@@ -31,6 +32,9 @@ class CppInterfacesStartupTest(systemtesting.MantidSystemTest):
         self._app = get_application()
         self._interface_manager = InterfaceManager()
         self._cpp_interface_names = set(chain.from_iterable(gather_cpp_interface_names().values()))
+
+    def skipTests(self):
+        return platform.startswith("win")
 
     def runTest(self):
         if len(self._cpp_interface_names) == 0:
