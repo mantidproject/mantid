@@ -68,6 +68,7 @@ set(SRC_FILES
     src/Instrument/Parameter.cpp
     src/Instrument/ParameterInfo.cpp
     src/Instrument/ParameterMap.cpp
+    src/Instrument/PositionAndRotationAccumulator.cpp
     src/Instrument/RectangularDetector.cpp
     src/Instrument/ReferenceFrame.cpp
     src/Instrument/SampleEnvironment.cpp
@@ -219,6 +220,7 @@ set(INC_FILES
     inc/MantidGeometry/Instrument/ParameterFactory.h
     inc/MantidGeometry/Instrument/ParameterInfo.h
     inc/MantidGeometry/Instrument/ParameterMap.h
+    inc/MantidGeometry/Instrument/PositionAndRotationAccumulator.h
     inc/MantidGeometry/Instrument/RectangularDetector.h
     inc/MantidGeometry/Instrument/ReferenceFrame.h
     inc/MantidGeometry/Instrument/SampleEnvironment.h
