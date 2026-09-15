@@ -85,9 +85,11 @@ directory:
 
 Most suites need data from the ExternalData store, which is what the ``AutomatedUITestData`` target
 above downloads (it is nothing more than ``StandardTestData`` and ``SystemTestData`` together);
-without it the tests that need a file report a skip rather than a failure. Tests run offscreen (the
-harness *defaults* ``QT_QPA_PLATFORM`` to ``offscreen`` and ``MPLBACKEND`` to ``Agg`` on import, leaving
-either alone if it is already set), so nothing appears on screen and no display is needed. Set
+without it the tests that need a file report a skip rather than a failure, unless
+``AUTOMATED_UI_TEST_REQUIRE_PREREQUISITES`` is set - see `Skipping and failing`_ below. Tests run
+offscreen (the harness *defaults* ``QT_QPA_PLATFORM`` to ``offscreen`` and ``MPLBACKEND`` to ``Agg``
+on import, leaving either alone if it is already set), so nothing appears on screen and no display is
+needed. Set
 ``QT_QPA_PLATFORM`` yourself if you want to watch a test run.
 
 The data directories are named by ``PYUNITTEST_DATA_DIRS`` in
@@ -130,7 +132,7 @@ The shape is:
    class MyInterfaceTest(AutomatedUITestBase):
        def setUp(self):
            super(MyInterfaceTest, self).setUp()
-           self.require_files("SOMEDATA00001.nxs")   # skip cleanly if the data is not there
+           self.require_files("SOMEDATA00001.nxs")   # skip if the data is not there; fail in CI
            self.patch_error_messages(("some.module.that.pops.a.dialog",))
            self.gui = MyInterface()
            self.gui.show()
@@ -201,6 +203,16 @@ to switch it off.
 **Neutralise anything modal before the first click.** An unattended test that pops a modal message
 box hangs until the suite times out. ``patch_error_messages``, ``patch_confirmation_box`` and
 ``algorithm_dialog_runs`` on the base class cover three common cases that come up.
+
+.. _Skipping and failing:
+
+**A missing prerequisite skips locally and fails in CI.** ``require_files`` and the no-Qt check in
+``setUp`` both go through ``_skip_or_fail``, which reads
+``AUTOMATED_UI_TEST_REQUIRE_PREREQUISITES``. Unset, they skip: on a developer's machine not having
+built ``AutomatedUITestData`` is an ordinary state. ``.github/workflows/weekly_ui_tests.yml`` sets it
+on its test step, where a skip would instead mean the run reported green having tested nothing. Set
+it yourself to reproduce a CI result, but not in CMake, which would reach developer runs too. Any new
+reason to skip should go through ``_skip_or_fail`` rather than calling ``skipTest`` directly.
 
 **Go through the interface, not around it.** Where possible use ``add_data_search_dir`` and let the
 interface's own file finder resolve a run, rather than reaching past the view to inject a workspace -

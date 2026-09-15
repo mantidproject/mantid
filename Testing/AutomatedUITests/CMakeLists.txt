@@ -26,7 +26,9 @@ set(PYUNITTEST_RUN_SERIAL ON)
 # A UI test replaces a manual test guide, so it uses whatever data that guide told a tester to load - which for most
 # interfaces means the SystemTest set. The built properties file only puts UnitTest and DocTest on the search path, so
 # name the rest here and let the harness add them per test. Their contents are downloaded by the AutomatedUITestData
-# target below; a test whose files are absent reports a skip through require_files.
+# target below; a test whose files are absent reports a skip through require_files, or a failure under
+# AUTOMATED_UI_TEST_REQUIRE_PREREQUISITES. That variable belongs to the weekly workflow and must not be set here, where
+# it would reach developer runs too.
 set(PYUNITTEST_DATA_DIRS
     ${ExternalData_BINARY_ROOT}/Testing/Data/SystemTest ${ExternalData_BINARY_ROOT}/Testing/Data/DocTest
     ${ExternalData_BINARY_ROOT}/Testing/Data/UnitTest

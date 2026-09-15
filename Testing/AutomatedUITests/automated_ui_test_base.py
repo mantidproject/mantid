@@ -76,6 +76,13 @@ if HANG_DUMP_AFTER_SECONDS > 0:
     faulthandler.enable()
     faulthandler.dump_traceback_later(HANG_DUMP_AFTER_SECONDS, repeat=True, exit=False)
 
+# Whether a missing prerequisite - a data file, or a build with no Qt - fails the test or skips it.
+#
+# Skipping suits a developer, for whom not having built AutomatedUITestData is an ordinary state. In
+# CI it would mean the run reported green having tested nothing, which is the outcome this suite
+# exists to prevent, so the weekly workflow sets this. Nothing else should.
+REQUIRE_PREREQUISITES = os.environ.get("AUTOMATED_UI_TEST_REQUIRE_PREREQUISITES", "").lower() not in ("", "0", "false", "no")
+
 
 def qt_is_available():
     """Whether this build can construct widgets at all. Used to report a clean skip on a
@@ -129,18 +136,24 @@ class AutomatedUITestBase(unittest.TestCase):
         with self.subTest(label):
             self.fail(message)
 
+    def _skip_or_fail(self, reason):
+        """Report a missing prerequisite - a failure under ``REQUIRE_PREREQUISITES``, a skip without."""
+        if REQUIRE_PREREQUISITES:
+            self.fail(reason)
+        self.skipTest(reason)
+
     def require_files(self, *filenames):
-        """Skip this test unless every named data file can be found.
+        """Skip this test unless every named data file can be found, or fail under CI.
 
         The data lives in the ExternalData store and is downloaded by the ``AutomatedUITestData``
-        target, so a developer who has not built that target gets a clean skip rather than a
-        failure inside the interface.
+        target, so a developer who has not built it gets a clean report rather than a failure from
+        inside the interface.
         """
         from mantid.api import FileFinder
 
         missing = [name for name in filenames if not FileFinder.getFullPath(name)]
         if missing:
-            self.skipTest(f"missing data file(s): {', '.join(missing)}. Build the AutomatedUITestData target.")
+            self._skip_or_fail(f"missing data file(s): {', '.join(missing)}. Build the AutomatedUITestData target.")
 
     # ------------------------------------------------------------------ lifecycle
 
@@ -148,7 +161,7 @@ class AutomatedUITestBase(unittest.TestCase):
         # recorded text of any message box a patch intercepts; see patch_error_messages
         self.message_box_messages = []
         if not qt_is_available():
-            self.skipTest("this build has no Qt interfaces")
+            self._skip_or_fail("this build has no Qt interfaces")
         self._saved_qsettings_state = None
         self._settings_tmpdir = None
         self._saved_data_dirs = None
