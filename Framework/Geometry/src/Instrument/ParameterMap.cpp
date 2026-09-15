@@ -82,6 +82,19 @@ ParameterMap::ParameterMap(const ParameterMap &other)
 // Defined as default in source for forward declaration with std::unique_ptr.
 ParameterMap::~ParameterMap() = default;
 
+std::vector<ParameterMap::Entry> ParameterMap::entries() const {
+  std::vector<Entry> result;
+  result.reserve(m_parameterInfo->size());
+  for (auto const &[componentIndex, parameters] : *m_parameterInfo) {
+    const ComponentID id = componentIdAt(componentIndex);
+    for (auto const &[parameterName, parameter] : parameters) {
+      static_cast<void>(parameterName);
+      result.emplace_back(id, parameter);
+    }
+  }
+  return result;
+}
+
 /**
  * Return string to be inserted into the parameter map
  */
@@ -143,11 +156,10 @@ bool ParameterMap::operator==(const ParameterMap &rhs) const { return diff(rhs, 
  *  or empty string if no description found.
  */
 const std::string ParameterMap::getDescription(const std::string &compName, const std::string &name) const {
-  pmap_cit it;
   std::string result;
-  for (it = m_map.begin(); it != m_map.end(); ++it) {
-    if (compName == it->first->getName()) {
-      std::shared_ptr<Parameter> param = get(it->first, name);
+  for (auto const &entry : entries()) {
+    if (compName == entry.first->getName()) {
+      std::shared_ptr<Parameter> const param = get(entry.first, name);
       if (param) {
         result = param->getDescription();
         if (!result.empty())
@@ -165,11 +177,10 @@ const std::string ParameterMap::getDescription(const std::string &compName, cons
  *  or empty string if no description found.
  */
 const std::string ParameterMap::getShortDescription(const std::string &compName, const std::string &name) const {
-  pmap_cit it;
   std::string result;
-  for (it = m_map.begin(); it != m_map.end(); ++it) {
-    if (compName == it->first->getName()) {
-      std::shared_ptr<Parameter> param = get(it->first, name);
+  for (auto const &entry : entries()) {
+    if (compName == entry.first->getName()) {
+      std::shared_ptr<Parameter> const param = get(entry.first, name);
       if (param) {
         result = param->getShortDescription();
         if (!result.empty())
@@ -234,11 +245,11 @@ const std::string ParameterMap::diff(const ParameterMap &rhs, const bool &firstD
   // so we will use the same approach to compare them
 
   std::unordered_multimap<std::string, Parameter_sptr> thisMap, rhsMap;
-  for (auto &mappair : this->m_map) {
-    thisMap.emplace(mappair.first->getFullName(), mappair.second);
+  for (auto const &entry : entries()) {
+    thisMap.emplace(entry.first->getFullName(), entry.second);
   }
-  for (auto &mappair : rhs.m_map) {
-    rhsMap.emplace(mappair.first->getFullName(), mappair.second);
+  for (auto const &entry : rhs.entries()) {
+    rhsMap.emplace(entry.first->getFullName(), entry.second);
   }
 
   std::stringstream strOutput;
@@ -1039,10 +1050,10 @@ std::set<std::string> ParameterMap::names(const IComponent *comp) const {
  */
 std::string ParameterMap::asString() const {
   std::stringstream out;
-  for (const auto &mappair : m_map) {
-    const std::shared_ptr<Parameter> &p = mappair.second;
-    if (p && mappair.first) {
-      const auto *comp = dynamic_cast<const IComponent *>(mappair.first);
+  for (auto const &entry : entries()) {
+    const std::shared_ptr<Parameter> &p = entry.second;
+    if (p && entry.first) {
+      const auto *comp = dynamic_cast<const IComponent *>(entry.first);
       const auto *det = dynamic_cast<const IDetector *>(comp);
       if (det) {
         out << "detID:" << det->getID();

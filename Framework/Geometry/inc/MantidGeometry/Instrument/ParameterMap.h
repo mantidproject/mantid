@@ -38,17 +38,12 @@ class InstrumentMetadata;
   @date 2/12/2008
 */
 /// Parameter map iterator typedef
-using component_map_it = tbb::concurrent_unordered_multimap<ComponentID, std::shared_ptr<Parameter>>::iterator;
-using component_map_cit = tbb::concurrent_unordered_multimap<ComponentID, std::shared_ptr<Parameter>>::const_iterator;
 
 class MANTID_GEOMETRY_DLL ParameterMap {
 public:
-  /// Parameter map typedef
-  using pmap = tbb::concurrent_unordered_multimap<ComponentID, std::shared_ptr<Parameter>>;
-  /// Parameter map iterator typedef
-  using pmap_it = tbb::concurrent_unordered_multimap<ComponentID, std::shared_ptr<Parameter>>::iterator;
-  /// Parameter map iterator typedef
-  using pmap_cit = tbb::concurrent_unordered_multimap<ComponentID, std::shared_ptr<Parameter>>::const_iterator;
+  /// A stored parameter together with the component it belongs to.
+  using Entry = std::pair<ComponentID, std::shared_ptr<Parameter>>;
+
   /// Default constructor
   ParameterMap();
   /// Const constructor
@@ -290,12 +285,8 @@ public:
   /// adds a parameter filename that has been loaded
   void addParameterFilename(const std::string &filename);
 
-  /// access iterators. begin;
-  pmap_it begin() { return m_map.begin(); }
-  pmap_cit begin() const { return m_map.begin(); }
-  /// access iterators. end;
-  pmap_it end() { return m_map.end(); }
-  pmap_cit end() const { return m_map.end(); }
+  /** Every stored parameter with its owning component, in component-index order.*/
+  std::vector<Entry> entries() const;
 
   bool hasDetectorInfo(const Instrument *instrument) const;
   bool hasComponentInfo(const Instrument *instrument) const;
