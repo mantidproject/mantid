@@ -10,8 +10,9 @@ import unittest
 # This has to be tested through a workspace as it cannot be created in
 # Python
 ###############################################################################
-from testhelpers import run_algorithm
+from testhelpers import run_algorithm, WorkspaceCreationHelper
 from mantid.geometry import Instrument
+from mantid.kernel import DateAndTime
 from mantid.api import Sample, Run
 from mantid.simpleapi import LoadEmptyInstrument
 
@@ -76,6 +77,24 @@ class ExperimentInfoTest(unittest.TestCase):
         ws = LoadEmptyInstrument(InstrumentName="SNAP")
         inst_name = ws.getInstrumentName()
         self.assertEqual(inst_name, "SNAP")
+
+    def test_instrument_metadata_access(self):
+        ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(1, 1)
+        self.assertIsInstance(ws.instrumentValidFromDate(), DateAndTime)
+        self.assertIsInstance(ws.instrumentValidToDate(), DateAndTime)
+        self.assertIsInstance(ws.instrumentFilename(), str)
+        self.assertEqual(ws.instrumentXmlText(), "Fake XML")
+        self.assertIsInstance(ws.instrumentDefaultView(), str)
+        self.assertIsInstance(ws.instrumentDefaultAxis(), str)
+
+    def test_instrument_metadata_matches_a_loaded_IDF(self):
+        # A real IDF exercises values the fake instrument leaves empty.
+        ws = LoadEmptyInstrument(InstrumentName="ARCS")
+        self.assertIn("ARCS", ws.instrumentFilename())
+        self.assertTrue(ws.instrumentFilename().endswith(".xml"))
+        self.assertEqual(ws.instrumentDefaultView(), "CYLINDRICAL_Y")
+        self.assertGreater(len(ws.instrumentXmlText()), 0)
+        self.assertLess(ws.instrumentValidFromDate(), ws.instrumentValidToDate())
 
 
 if __name__ == "__main__":
