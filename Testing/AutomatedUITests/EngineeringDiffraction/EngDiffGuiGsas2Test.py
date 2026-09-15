@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-"""Automated UI tests for the GSAS II tab, replacing the manual guide's Tests 13 and 14.
+"""Automated UI tests for the GSAS II tab.
 
 GSAS-II itself is an external program, so the one thing mocked is the subprocess call that runs it;
 the canned outputs it would have produced are shipped in ``Testing/Data/UnitTest/EngDiff_gsas2_tab``
@@ -51,7 +51,7 @@ N_BANKS = 2
 # diffractometer constants of roughly the right magnitude for ENGIN-X, used for the fabricated .prm
 BANK_DIFC = (18400.0, 18500.0)
 
-# the cell length the guide types into Override Unit Cell Length
+# the cell length typed into Override Unit Cell Length
 OVERRIDE_CELL_LENGTH = "3.65"
 
 
@@ -142,7 +142,7 @@ class _Gsas2TestBase(EngDiffGuiTestBase):
 
 
 class EngDiffGuiGsas2SingleTest(_Gsas2TestBase):
-    """One focused file with two banks - the manual guide's Test 13."""
+    """A single refinement: one focused file with two banks."""
 
     def test_single_refinement(self):
         self._check_initial_tab_state()
@@ -156,10 +156,10 @@ class EngDiffGuiGsas2SingleTest(_Gsas2TestBase):
         self._check_override_unit_cell()
 
     def _check_override_unit_cell(self):
-        """Guide Test 13 step 11: Override Unit Cell Length replaces the phase's lattice parameters.
+        """Override Unit Cell Length replaces the phase's lattice parameters.
 
-        The guide judges this by the fit looking better, which needs a real GSAS-II; what is
-        checkable here is that the value typed in reaches GSAS-II instead of the cif's own.
+        Whether the fit is thereby better needs a real GSAS-II; what is checkable here is that the
+        value typed in reaches GSAS-II instead of the cif's own.
         """
         self.subprocess_calls = []
         self.fill_in_refinement()
@@ -169,7 +169,7 @@ class EngDiffGuiGsas2SingleTest(_Gsas2TestBase):
 
         self.assertEqual(1, len(self.subprocess_calls), "GSAS-II was not called with the overridden cell")
 
-        with self.subTest("Test 13 / step 11 (the overridden cell length is what GSAS-II is given)"):
+        with self.subTest("GSAS II / the overridden cell length is what GSAS-II is given"):
             lengths = self.serialized_inputs()["override_cell_lengths"]
             self.assertTrue(lengths, "no cell lengths were passed to GSAS-II")
             # a single value is read as a cubic cell, so all three axes take it
@@ -181,49 +181,49 @@ class EngDiffGuiGsas2SingleTest(_Gsas2TestBase):
 
     def _check_initial_tab_state(self):
         view = self.gsas2_view
-        with self.subTest("Test 13 / an empty project name is flagged as invalid"):
+        with self.subTest("GSAS II / an empty project name is flagged as invalid"):
             self.assertTrue(view.project_name_invalid.isVisible())
             self.assertIn("No Project Name", view.project_name_invalid.toolTip())
 
         view.project_name_line_edit.setText(PROJECT_NAME)
         process_events()
-        with self.subTest("Test 13 / the invalid marker clears once a project name is given"):
+        with self.subTest("GSAS II / the invalid marker clears once a project name is given"):
             self.assertFalse(view.project_name_invalid.isVisible())
 
-        with self.subTest("Test 13 / Rietveld is offered but disabled"):
+        with self.subTest("GSAS II / Rietveld is offered but disabled"):
             self.assertIn("Rietveld", combo_items(view.refinement_method_combobox))
             index = view.refinement_method_combobox.findText("Rietveld")
             self.assertFalse(view.refinement_method_combobox.model().item(index).isEnabled())
             self.assertEqual("Pawley", view.refinement_method_combobox.currentText())
 
-        # the guide calls out that refining microstrain together with both peak-shape parameters is
-        # inadvisable, and the interface warns rather than forbids
-        with self.subTest("Test 13 / no advisory marker until all three refinement boxes are ticked"):
+        # refining microstrain together with both peak-shape parameters is inadvisable, and the
+        # interface warns rather than forbids
+        with self.subTest("GSAS II / no advisory marker until all three refinement boxes are ticked"):
             self.assertFalse(view.checkboxes_invalid.isVisible())
         for checkbox in (view.refine_microstrain_checkbox, view.refine_sigma_one_checkbox, view.refine_gamma_y_checkbox):
             set_checkbox(checkbox, True)
-        with self.subTest("Test 13 / advisory marker appears when microstrain, Sigma-1 and Gamma(Y) are all refined"):
+        with self.subTest("GSAS II / advisory marker appears when microstrain, Sigma-1 and Gamma(Y) are all refined"):
             self.assertTrue(view.checkboxes_invalid.isVisible())
             self.assertIn("may not be advisable", view.checkboxes_invalid.toolTip())
         set_checkbox(view.refine_microstrain_checkbox, False)
-        with self.subTest("Test 13 / advisory marker clears when microstrain is unticked"):
+        with self.subTest("GSAS II / advisory marker clears when microstrain is unticked"):
             self.assertFalse(view.checkboxes_invalid.isVisible())
 
     def _check_phase_selection(self):
         view = self.gsas2_view
         options = combo_items(view.cifComboBox)
-        with self.subTest("Test 13 / the phase combo offers the shipped cif files plus a custom entry"):
+        with self.subTest("GSAS II / the phase combo offers the shipped cif files plus a custom entry"):
             self.assertGreater(len(options), 1)
             self.assertIn("Custom", options)
-        with self.subTest("Test 13 / the custom phase file finder is hidden for a shipped phase"):
+        with self.subTest("GSAS II / the custom phase file finder is hidden for a shipped phase"):
             self.assertNotEqual("Custom", view.cifComboBox.currentText())
             self.assertFalse(view.phase_file_finder.isVisible())
         select_combo(view.cifComboBox, "Custom")
-        with self.subTest("Test 13 / choosing Custom reveals the phase file finder"):
+        with self.subTest("GSAS II / choosing Custom reveals the phase file finder"):
             self.assertTrue(view.phase_file_finder.isVisible())
         # go back to a shipped phase so the refinement below has one without needing a cif on disk
         select_combo(view.cifComboBox, options[0])
-        with self.subTest("Test 13 / the custom phase file finder is hidden again"):
+        with self.subTest("GSAS II / the custom phase file finder is hidden again"):
             self.assertFalse(view.phase_file_finder.isVisible())
 
     # -------------------------------------------------------------- error handling
@@ -233,18 +233,18 @@ class EngDiffGuiGsas2SingleTest(_Gsas2TestBase):
         self.fill_in_refinement(project_name="")
         with self.captured_logs(level="error") as logs:
             self.refine()
-        with self.subTest("Test 13 / refining without a project name is rejected"):
+        with self.subTest("GSAS II / refining without a project name is rejected"):
             self.assertIn("valid Project Name", logs.text)
             self.assertEqual([], self.subprocess_calls)
 
-        # more than one instrument file is the guide's documented error case
+        # the second error case: more than one instrument file
         self.subprocess_calls = []
         second_prm = os.path.join(self.inputs_dir, "second.prm")
         shutil.copy(self.prm_path, second_prm)
         self.fill_in_refinement(prm_paths=[self.prm_path, second_prm])
         with self.captured_logs(level="error") as logs:
             self.refine()
-        with self.subTest("Test 13 / more than one instrument file is rejected"):
+        with self.subTest("GSAS II / more than one instrument file is rejected"):
             self.assertIn("exactly one instrument file", logs.text)
             self.assertEqual([], self.subprocess_calls)
 
@@ -254,20 +254,19 @@ class EngDiffGuiGsas2SingleTest(_Gsas2TestBase):
         self.fill_in_refinement(gss_paths=[single_bank])
         with self.captured_logs(level="error") as logs:
             self.refine()
-        with self.subTest("Test 13 / a bank count that disagrees with the instrument file is rejected"):
+        with self.subTest("GSAS II / a bank count that disagrees with the instrument file is rejected"):
             self.assertIn("same number of banks", logs.text)
             self.assertEqual([], self.subprocess_calls)
 
-        # the guide's third error case: several data files that disagree with *each other*
+        # the third error case: several data files that disagree with *each other*
         self.subprocess_calls = []
         self.fill_in_refinement(gss_paths=[self.gss_path, single_bank])
         with self.captured_logs(level="error") as logs:
             self.refine()
-        with self.subTest("Test 14 / step 9 (a data file whose bank count differs is reported and skipped)"):
+        with self.subTest("GSAS II / a data file whose bank count differs is reported and skipped"):
             self.assertIn("same number of banks", logs.text)
-            # Note the difference from the two cases above, which reject the whole request: here the
-            # offending file is dropped and the remaining one is still refined. The guide describes
-            # this case as simply showing an error, which is only half of what happens.
+            # note the difference from the two cases above, which reject the whole request: here the
+            # offending file is dropped and the remaining one is still refined
             self.assertEqual(1, len(self.subprocess_calls), "the file with a matching bank count should still be refined")
 
     # -------------------------------------------------------------- a successful refinement
@@ -283,11 +282,11 @@ class EngDiffGuiGsas2SingleTest(_Gsas2TestBase):
         # a precondition, not an observation: nothing below means anything if GSAS-II was not called
         self.assertEqual(1, len(self.subprocess_calls), "GSAS-II was not called exactly once")
 
-        with self.subTest("Test 13 / the histogram selector lists one entry per bank"):
+        with self.subTest("GSAS II / the histogram selector lists one entry per bank"):
             self.assertEqual([str(i) for i in range(1, N_BANKS + 1)], combo_items(self.gsas2_view.number_output_histograms_combobox))
             self.assertEqual("1", self.gsas2_view.number_output_histograms_combobox.currentText())
 
-        with self.subTest("Test 13 / the lattice parameter table is created from the cell parameters file"):
+        with self.subTest("GSAS II / the lattice parameter table is created from the cell parameters file"):
             table = ADS.retrieve(f"{FULL_PROJECT}_GSASII_lattice_parameters")
             self.assertEqual(1, table.rowCount())
             self.assertEqual(PHASE_NAME, table.column("Phase name")[0])
@@ -298,12 +297,12 @@ class EngDiffGuiGsas2SingleTest(_Gsas2TestBase):
                 self.assertAlmostEqual(90.0, table.column(angle)[0], places=4)
             self.assertAlmostEqual(lengths[0] ** 3, table.column("volume")[0], places=3)
 
-        with self.subTest("Test 13 / the microstrain column is marked as refined only when it was refined"):
+        with self.subTest("GSAS II / the microstrain column is marked as refined only when it was refined"):
             table = ADS.retrieve(f"{FULL_PROJECT}_GSASII_lattice_parameters")
             self.assertIn("Microstrain", table.getColumnNames())
             self.assertNotIn("Microstrain (Refined)", table.getColumnNames())
 
-        with self.subTest("Test 13 / the instrument parameter table has a row per bank with the fit range"):
+        with self.subTest("GSAS II / the instrument parameter table has a row per bank with the fit range"):
             table = ADS.retrieve(f"{FULL_PROJECT}_GSASII_instrument_parameters")
             self.assertEqual(N_BANKS, table.rowCount())
             names = table.column("Histogram name")
@@ -314,20 +313,20 @@ class EngDiffGuiGsas2SingleTest(_Gsas2TestBase):
             self.assertIn("Sigma-1 (Refined)", table.getColumnNames())
             self.assertIn("Gamma (Y) (Refined)", table.getColumnNames())
 
-        with self.subTest("Test 13 / the reflections table has a row per bank and phase"):
+        with self.subTest("GSAS II / the reflections table has a row per bank and phase"):
             table = ADS.retrieve(f"{FULL_PROJECT}_GSASII_reflections")
             self.assertEqual(N_BANKS, table.rowCount())
             self.assertEqual([PHASE_NAME] * N_BANKS, table.column("Phase name"))
             for reflections in table.column("Reflections"):
                 self.assertTrue(reflections.strip(), "a reflections row is empty")
 
-        with self.subTest("Test 13 / an 'all banks' file is expanded into its per-bank focused workspaces"):
+        with self.subTest("GSAS II / an 'all banks' file is expanded into its per-bank focused workspaces"):
             # the tab loads the .nxs beside the .gss to get at the sample logs, one per bank
             loaded = self.gsas2_presenter.model._data_workspaces.get_loaded_workpace_names()
             expected = [FOCUSED_BASENAME.replace("all_banks", f"bank_{bank}") + "_GSASII" for bank in range(1, N_BANKS + 1)]
             self.assertEqual(sorted(expected), sorted(loaded))
 
-        with self.subTest("Test 13 / the GSAS-II sample log group is built"):
+        with self.subTest("GSAS II / the GSAS-II sample log group is built"):
             self.assertTrue(ADS.doesExist("logs_GSASII"))
             group_names = ADS.retrieve("logs_GSASII").getNames()
             # a run summary table plus one table per log the interface tracks for this instrument
@@ -338,7 +337,7 @@ class EngDiffGuiGsas2SingleTest(_Gsas2TestBase):
     def _check_saved_files(self):
         output_dir = self.gsas2_output_dir()
         saved = self.basenames_under(output_dir)
-        with self.subTest("Test 13 / the GSAS-II outputs are moved to the save directory"):
+        with self.subTest("GSAS II / the GSAS-II outputs are moved to the save directory"):
             self.assertTrue(os.path.isdir(output_dir), f"{output_dir} was not created")
             for expected in (
                 f"{FULL_PROJECT}.lst",
@@ -349,7 +348,7 @@ class EngDiffGuiGsas2SingleTest(_Gsas2TestBase):
             ):
                 self.assertIn(expected, saved)
 
-        with self.subTest("Test 13 / no temporary working directory is left behind"):
+        with self.subTest("GSAS II / no temporary working directory is left behind"):
             # covers the rejected refinements above as well as the successful one: each creates a
             # working directory before validating, and all of them must clean it up again
             leftover = [name for name in os.listdir(os.path.join(self.save_dir, "GSAS2")) if name.startswith("tmp_EngDiff_GSASII")]
@@ -357,7 +356,7 @@ class EngDiffGuiGsas2SingleTest(_Gsas2TestBase):
 
     def _check_serialized_inputs(self):
         inputs = self.serialized_inputs()
-        with self.subTest("Test 13 / the inputs handed to GSAS-II describe the requested refinement"):
+        with self.subTest("GSAS II / the inputs handed to GSAS-II describe the requested refinement"):
             self.assertEqual(FULL_PROJECT, inputs["project_name"])
             self.assertEqual("Pawley", inputs["refinement_settings"]["method"])
             self.assertFalse(inputs["refinement_settings"]["microstrain"])
@@ -365,12 +364,12 @@ class EngDiffGuiGsas2SingleTest(_Gsas2TestBase):
             self.assertTrue(inputs["refinement_settings"]["gamma"])
             self.assertEqual(N_BANKS, inputs["number_of_regions"])
 
-        with self.subTest("Test 13 / the file paths handed to GSAS-II are the ones chosen in the tab"):
+        with self.subTest("GSAS II / the file paths handed to GSAS-II are the ones chosen in the tab"):
             self.assertEqual([self.prm_path], [os.path.normpath(p) for p in inputs["file_paths"]["instrument_files"]])
             self.assertEqual([self.gss_path], [os.path.normpath(p) for p in inputs["file_paths"]["data_files"]])
             self.assertTrue(inputs["file_paths"]["phase_filepaths"], "no phase file was passed to GSAS-II")
 
-        with self.subTest("Test 13 / Pawley reflections were generated for the phase"):
+        with self.subTest("GSAS II / Pawley reflections were generated for the phase"):
             reflections = inputs["mantid_pawley_reflections"]
             self.assertEqual(1, len(reflections), "expected one phase")
             self.assertTrue(reflections[0], "no reflections generated")
@@ -379,36 +378,36 @@ class EngDiffGuiGsas2SingleTest(_Gsas2TestBase):
             self.assertEqual(sorted(d_values, reverse=True), d_values)
             self.assertTrue(all(d >= inputs["d_spacing_min"] for d in d_values))
 
-        with self.subTest("Test 13 / the command line points at the configured GSAS-II interpreter"):
+        with self.subTest("GSAS II / the command line points at the configured GSAS-II interpreter"):
             command = self.subprocess_calls[-1]
             self.assertTrue(command[0].startswith(self.gsas2_install), f"unexpected interpreter {command[0]}")
             self.assertTrue(command[1].endswith("call_G2sc.py"))
 
     def _check_plot(self):
         axes = self.gsas2_view.get_axes()[0]
-        with self.subTest("Test 13 / the refinement result is plotted"):
+        with self.subTest("GSAS II / the refinement result is plotted"):
             labels = [line.get_label() for line in axes.get_lines()]
             # observed, calculated, difference and background, plus the two draggable limit markers
             self.assertGreaterEqual(len(labels), 4, f"only got {labels}")
-        with self.subTest("Test 13 / the four refinement curves are plotted"):
+        with self.subTest("GSAS II / the four refinement curves are plotted"):
             labels = [line.get_label() for line in axes.get_lines()]
             for expected in ("observed", "calculated", "difference", "background"):
                 self.assertIn(expected, labels)
-        with self.subTest("Test 13 / reflection markers are plotted for the phase"):
+        with self.subTest("GSAS II / reflection markers are plotted for the phase"):
             labels = [line.get_label() for line in axes.get_lines()]
             self.assertIn(f"reflections_{PHASE_NAME}", labels)
-        with self.subTest("Test 13 / the plot is titled for the refined data file"):
+        with self.subTest("GSAS II / the plot is titled for the refined data file"):
             # set_x_limits runs immediately after the title is set and reaches update_figure through
             # the range markers, so this also covers the title surviving that
             self.assertEqual(f"GSAS-II Refinement {os.path.basename(self.gss_path)}", self.gsas2_view.plot_dock.windowTitle())
-        with self.subTest("Test 13 / the plot is labelled in time of flight"):
+        with self.subTest("GSAS II / the plot is labelled in time of flight"):
             self.assertIn("Time-of-flight", axes.get_xlabel())
 
     def _check_x_limits_round_trip(self):
         view = self.gsas2_view
         original_min = float(view.x_min_line_edit.text())
         original_max = float(view.x_max_line_edit.text())
-        with self.subTest("Test 13 / the x limits are seeded from the data"):
+        with self.subTest("GSAS II / the x limits are seeded from the data"):
             self.assertLess(original_min, original_max)
             self.assertAlmostEqual(original_min, view.initial_x_limits[0], places=2)
             self.assertAlmostEqual(original_max, view.initial_x_limits[1], places=2)
@@ -420,7 +419,7 @@ class EngDiffGuiGsas2SingleTest(_Gsas2TestBase):
         view.set_x_limits_line_edits(narrowed_min, narrowed_max)
         process_events()
         self.refine()
-        with self.subTest("Test 13 / user x limits are passed through to GSAS-II"):
+        with self.subTest("GSAS II / user x limits are passed through to GSAS-II"):
             self.assertEqual(2, len(self.subprocess_calls), "the second refinement did not run")
             limits = self.serialized_inputs()["limits"]
             self.assertEqual(N_BANKS, len(limits[0]))
@@ -433,15 +432,14 @@ class EngDiffGuiGsas2SingleTest(_Gsas2TestBase):
         other_gss = _write_focused_gss(self.inputs_dir, basename="ENGINX_305763_307521_all_banks_TOF", n_banks=N_BANKS)
         self.fill_in_refinement(gss_paths=[other_gss])
         self.refine()
-        with self.subTest("Test 13 / x limits are reset when different input files are chosen"):
+        with self.subTest("GSAS II / x limits are reset when different input files are chosen"):
             self.assertEqual(3, len(self.subprocess_calls), "the third refinement did not run")
             limits = self.serialized_inputs()["limits"]
             self.assertNotAlmostEqual(narrowed_min, limits[0][0], places=2)
 
 
 class EngDiffGuiGsas2PrefillTest(EngDiffGuiTestBase):
-    """Guide Test 13 steps 2-5: the GSAS II tab's paths are filled in by the preceding calibration
-    and focus.
+    """The GSAS II tab's paths are filled in by the preceding calibration and focus.
 
     The only class here that calibrates and focuses for real. The refinement tests stage a
     fabricated ``.gss`` and ``.prm`` instead, which is far quicker but leaves the notifiers that
@@ -471,25 +469,25 @@ class EngDiffGuiGsas2PrefillTest(EngDiffGuiTestBase):
         self.show_tab(TAB_GSAS2)
         view = self.gsas2_view
 
-        with self.subTest("Test 13 / step 5 (the Instrument Group path is prefilled from the calibration)"):
+        with self.subTest("GSAS II / the Instrument Group path is prefilled from the calibration"):
             prm = view.instrument_group_file_finder.getText()
             self.assertTrue(prm, "the instrument group finder was not prefilled")
             self.assertTrue(prm.endswith(".prm"), f"expected a prm file, got {prm}")
             self.assertIn(ceria, prm)
 
-        with self.subTest("Test 13 / step 5 (the Focused Data path is prefilled from the focus)"):
+        with self.subTest("GSAS II / the Focused Data path is prefilled from the focus"):
             gss = view.focused_data_file_finder.getText()
             self.assertTrue(gss, "the focused data finder was not prefilled")
             self.assertTrue(gss.endswith(".gss"), f"expected a gss file, got {gss}")
             self.assertIn(ceria, gss)
 
-        with self.subTest("Test 13 / step 5 (both prefilled paths exist on disk)"):
+        with self.subTest("GSAS II / both prefilled paths exist on disk"):
             for path in (view.instrument_group_file_finder.getText(), view.focused_data_file_finder.getText()):
                 self.assertTrue(os.path.exists(path), f"the tab was prefilled with a path that does not exist: {path}")
 
 
 class EngDiffGuiGsas2MultipleTest(_Gsas2TestBase):
-    """Several focused files, and the RB-number save location - the manual guide's Test 14."""
+    """Several focused files refined in one go, and the RB-number save location."""
 
     RB_NUMBER = "9876"
 
@@ -504,21 +502,21 @@ class EngDiffGuiGsas2MultipleTest(_Gsas2TestBase):
         self.fill_in_refinement(gss_paths=[self.gss_path, second_gss])
         self.refine()
 
-        with self.subTest("Test 14 / each focused file is refined in its own GSAS-II call"):
+        with self.subTest("GSAS II / each focused file is refined in its own GSAS-II call"):
             self.assertEqual(2, len(self.subprocess_calls))
             projects = [self.serialized_inputs(i)["project_name"] for i in range(2)]
             self.assertEqual([FULL_PROJECT, f"{PROJECT_NAME}_ENGINX_305762_307521_all_banks_TOF"], projects)
 
-        with self.subTest("Test 14 / each refinement produces its own set of tables"):
+        with self.subTest("GSAS II / each refinement produces its own set of tables"):
             for project in (FULL_PROJECT, f"{PROJECT_NAME}_ENGINX_305762_307521_all_banks_TOF"):
                 for suffix in ("reflections", "instrument_parameters", "lattice_parameters"):
                     self.assertTrue(ADS.doesExist(f"{project}_GSASII_{suffix}"), f"{project}_GSASII_{suffix} missing")
 
-        with self.subTest("Test 14 / each refinement writes its own save directory"):
+        with self.subTest("GSAS II / each refinement writes its own save directory"):
             for project in (FULL_PROJECT, f"{PROJECT_NAME}_ENGINX_305762_307521_all_banks_TOF"):
                 self.assertTrue(os.path.isdir(self.gsas2_output_dir(project)), f"no output directory for {project}")
 
-        with self.subTest("Test 14 / the sample logs cover every bank of both focused files"):
+        with self.subTest("GSAS II / the sample logs cover every bank of both focused files"):
             self.assertTrue(ADS.doesExist("logs_GSASII"))
             loaded = self.gsas2_presenter.model._data_workspaces.get_loaded_workpace_names()
             self.assertEqual(2 * N_BANKS, len(loaded), f"expected both files' banks, got {loaded}")
@@ -529,10 +527,10 @@ class EngDiffGuiGsas2MultipleTest(_Gsas2TestBase):
         self.refine()
 
         rb_dir = self.gsas2_output_dir(rb_number=self.RB_NUMBER)
-        with self.subTest("Test 14 / an RB number adds a copy under User/<RB>/GSAS2"):
+        with self.subTest("GSAS II / an RB number adds a copy under User/<RB>/GSAS2"):
             self.assertTrue(os.path.isdir(rb_dir), f"{rb_dir} was not created")
             self.assertIn(f"{FULL_PROJECT}.lst", self.basenames_under(rb_dir))
-        with self.subTest("Test 14 / the non-RB copy is still written"):
+        with self.subTest("GSAS II / the non-RB copy is still written"):
             self.assertIn(f"{FULL_PROJECT}.lst", self.basenames_under(self.gsas2_output_dir()))
 
 

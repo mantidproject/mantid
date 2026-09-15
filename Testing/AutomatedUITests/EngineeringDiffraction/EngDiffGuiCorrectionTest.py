@@ -61,7 +61,7 @@ RB_NUMBER = "5551234"
 # the orientation and gauge volume fixtures live under Testing/Data/SystemTest/Texture
 TEXTURE_DATA = "Texture"
 
-# the CSG cuboid the manual guide asks for, as typed into the SetSampleShape dialog
+# a CSG cuboid, as typed into the SetSampleShape dialog
 CUBOID_XML = (
     "<cuboid id='sample'>"
     "<height val='0.01'/>"
@@ -176,8 +176,7 @@ class _CorrectionTestBase(EngDiffGuiTestBase):
         return os.path.join(self.save_dir, name)
 
     def _assert_shape_is_drawn(self, figure, shape):
-        """The guide compares these figures against a screenshot; this asserts what one would show -
-        a solid drawn in three dimensions, sized like the shape it came from.
+        """A shape figure shows a solid drawn in three dimensions, sized like the shape it came from.
 
         Measured against the shape's own bounding box rather than the numbers typed into the dialog,
         so it holds for both the STL mesh and the CSG cuboid.
@@ -281,7 +280,7 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
             self.assertTrue(view.btn_viewRefShape.isEnabled())
             self.assertEqual("Fe", view.ref_material_status.text())
 
-        with self.subTest("Test 4 / steps 9-10 (the reference shape is drawn, not just opened)"):
+        with self.subTest("Correction / the reference shape is drawn, not just opened"):
             from mantid.api import AnalysisDataService as ADS
 
             before = figure_numbers()
@@ -320,7 +319,7 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
             row = self.row_of(CERIA_WS)
             self.assertIsNotNone(cell_button(self.table(), row, COL_SHAPE), "no view button appeared for a shape")
 
-        with self.subTest("Test 4 / steps 8-10 (the row's shape button draws the mesh it was given)"):
+        with self.subTest("Correction / the row's shape button draws the mesh it was given"):
             before = figure_numbers()
             click(cell_button(self.table(), self.row_of(CERIA_WS), COL_SHAPE))
             process_events(3)
@@ -466,7 +465,7 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
         with self.subTest("Correction / deleting a row does not delete the workspace"):
             from mantid.api import AnalysisDataService as ADS
 
-            # the table is a working set, not the ADS - the guide expects the workspace to survive
+            # the table is a working set, not the ADS, so the workspace outlives its row
             self.assertTrue(ADS.doesExist(VANADIUM_WS))
 
     # ------------------------------------------------------------------ dialog helpers

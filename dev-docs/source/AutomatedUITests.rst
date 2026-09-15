@@ -143,20 +143,26 @@ The shape is:
            process_events(2)
            super(MyInterfaceTest, self).tearDown()
 
-       def test_the_guide_section_this_replaces(self):
+       def test_running_on_enginx(self):
            select_combo(self.gui.combo_instrument, "ENGINX")
            click(self.gui.button_run)
 
-           with self.subTest("Guide step 4 / the output workspace is created"):
+           with self.subTest("My Interface / the output workspace is created"):
                self.assertTrue(ADS.doesExist("output"))
-           with self.subTest("Guide step 5 / it is in d-spacing"):
+           with self.subTest("My Interface / the output is in d-spacing"):
                self.assertEqual(ADS.retrieve("output").getAxis(0).getUnit().unitID(), "dSpacing")
 
 Points worth knowing before you write one:
 
 **One ``test_`` method per scenario, not per observation.** Building an interface is expensive, and
-a scenario in a manual test guide is a sequence - calibrate, then focus, then look at what was
-written. Split by guide section, not by assertion.
+a scenario is a sequence a user would work through - calibrate, then focus, then look at what was
+written. Split by scenario, not by assertion.
+
+**Name the method and its ``subTest`` labels for the functionality, not for the guide.** A label
+reads back on its own from a failure, so ``"Fitting / the peak centre is also reported in
+d-spacing"`` says what broke where ``"Test 10 / step 6"`` sends the reader off to another document.
+Record which guide sections a suite covers once, in the guide itself - see
+:ref:`Engineering_Diffraction_TestGuide-ref` for one written that way.
 
 **Use** :py:meth:`unittest.TestCase.subTest` **for observations.** A failed observation inside
 ``with self.subTest(label)`` is reported against its label and the ones after it still run. A test

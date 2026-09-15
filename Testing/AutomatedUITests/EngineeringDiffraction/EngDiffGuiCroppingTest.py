@@ -82,9 +82,9 @@ class _CroppingTestBase(EngDiffGuiTestBase):
         return f"{INSTRUMENT}_{CERIA}_{VANADIUM}_{suffix}_{xunit}"
 
     def _check_calibration_plot_tiling(self, figures, n_spectra, label):
-        """The guide states the calibration plot's shape per region of interest, as a count of
-        windows and subplots. What is *on* them does not vary with the region of interest and is
-        checked once, in ``EngDiffGuiPlotOutputTest``."""
+        """The calibration plot's shape - a count of windows and subplots - follows the region of
+        interest. What is *on* them does not vary with it and is checked once, in
+        ``EngDiffGuiPlotOutputTest``."""
         expected = self.calibration_plot_layout(n_spectra)
 
         with self.subTest(f"{label} plots {len(expected)} window(s) of calibration output"):
@@ -274,7 +274,7 @@ class EngDiffGuiCroppedCalibrationTest(_CroppingTestBase):
         with self.subTest("Cropping / a North bank calibration records that group"):
             self.assertEqual(ENGINX_GROUP.NORTH, calibration.get_group())
 
-        # guide step 4: one bank, so one window of TOF vs d-spacing over its residuals
+        # one bank, so one window of TOF vs d-spacing over its residuals
         self._check_calibration_plot_tiling(new_figures(before), 1, "Cropping / a single bank")
 
         with self.subTest("Cropping / a North bank calibration writes exactly one prm and one nxs"):
@@ -309,7 +309,7 @@ class EngDiffGuiCroppedCalibrationTest(_CroppingTestBase):
             self.assertEqual(ENGINX_GROUP.CROPPED, calibration.get_group())
             self.assertEqual(CUSTOM_SPECTRA, calibration.spectra_list_str)
 
-        # guide step 8: the cropped range is one group, so "a similar plot but with only 2 subplots"
+        # the cropped range is one group, so one window of two subplots, as for a single bank
         self._check_calibration_plot_tiling(new_figures(before), 1, "Cropping / a cropped spectrum range")
 
         expected_stem = f"{INSTRUMENT}_{CERIA}_Cropped_{CUSTOM_SPECTRA}"
@@ -362,7 +362,7 @@ class EngDiffGuiTextureRoiTest(_CroppingTestBase):
             self.assertEqual(ENGINX_GROUP.TEXTURE20, calibration.get_group())
             self.assertTrue(calibration.is_texture_group())
 
-        # guide step 9: twenty groups, so "5 tiled plot windows, 4 spectra per window"
+        # twenty groups, so five tiled windows of four spectra each
         self._check_calibration_plot_tiling(new_figures(before), TEXTURE_GROUPS, "Cropping / a texture grouping")
 
         with self.subTest("Cropping / a texture calibration writes one prm and nxs named for the grouping"):

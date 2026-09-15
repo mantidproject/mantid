@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """Automated UI tests for the Run Processing tab on ENGIN-X.
 
-Covers the manual guide's Test 1 (calibrate and focus), its settings steps, the plot-output
-checkboxes, the RB number's effect on the save layout, and the "restart the interface" step that
-checks the last calibration is restored.
+Covers creating a calibration and focusing against it, the settings that feed both, the plot-output
+checkboxes, the RB number's effect on the save layout, and restarting the interface to check the
+last calibration is restored.
 
 The ceria and vanadium runs are **fabricated** rather than the real 305738/307521 pair, in the same
 way as the IMAT tests - see ``create_synthetic_ceria_and_vanadium``. The real runs are large and
@@ -79,7 +79,7 @@ class _RunProcessingTestBase(EngDiffGuiTestBase):
 
 
 class EngDiffGuiCalibrateAndFocusTest(_RunProcessingTestBase):
-    """Guide Test 1: a new calibration with no region of interest, then focusing the ceria run.
+    """A new calibration with no region of interest, then focusing the ceria run.
 
     The bulk of the coverage - the calibration state, the files written by both the calibration and
     the focus, and the focused workspaces themselves.
@@ -104,27 +104,27 @@ class EngDiffGuiCalibrateAndFocusTest(_RunProcessingTestBase):
 
     def _check_initial_state(self):
         view = self.run_processing_view
-        with self.subTest("Test 1 / step 3 (Create New Calibration is preselected on a clean setup)"):
+        with self.subTest("Run Processing / Create New Calibration is preselected on a clean setup"):
             # nothing has been calibrated in this isolated settings store, so there is no last
             # calibration to restore and the interface must offer to make one
             self.assertTrue(view.get_new_checked())
             self.assertFalse(view.get_load_checked())
 
-        with self.subTest("Test 1 / step 3 (the existing calibration path field is disabled)"):
+        with self.subTest("Run Processing / the existing calibration path field is disabled"):
             self.assertFalse(view.finder_path.isEnabled())
 
-        with self.subTest("Test 1 / step 3 (no calibration is reported in the status bar)"):
+        with self.subTest("Run Processing / no calibration is reported in the status bar"):
             self.assertEqual("No Calibration Loaded.", self.statusbar_text())
 
-        with self.subTest("Test 1 / step 4 (the save location reported is the one in settings)"):
+        with self.subTest("Run Processing / the save location reported is the one in settings"):
             self.assertIn(self.save_dir, self.savedir_text())
 
-        with self.subTest("Test 1 / step 6 (Full Calibration defaults to a nexus file that exists)"):
+        with self.subTest("Run Processing / Full Calibration defaults to a nexus file that exists"):
             from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_presenter import DEFAULT_SETTINGS
             from qt_interaction_helpers import wait_for_file_finder
 
             # nothing has been stored for it in this isolated settings file, so what the dialog shows
-            # is the shipped default - which is the guide's point
+            # is the shipped default
             expected = DEFAULT_SETTINGS[f"full_calibration_{INSTRUMENT}"]
             self.assertTrue(expected.endswith(".nxs"), f"the default full calibration is not a nexus file: {expected}")
             self.assertTrue(os.path.exists(expected), f"the default full calibration does not exist: {expected}")
@@ -138,24 +138,24 @@ class EngDiffGuiCalibrateAndFocusTest(_RunProcessingTestBase):
     def _check_calibration_state(self, calibration, logs):
         from Engineering.common.instrument_config import ENGINX_GROUP
 
-        with self.subTest("Test 1 / step 11 (the status bar reports the new calibration)"):
+        with self.subTest("Run Processing / the status bar reports the new calibration"):
             self.assertEqual(
                 f"CeO2: {CERIA}, V: {VANADIUM}, Instrument: {INSTRUMENT}",
                 self.statusbar_text(),
             )
 
-        with self.subTest("Test 1 / step 11 (the calibration records both banks and both runs)"):
+        with self.subTest("Run Processing / the calibration records both banks and both runs"):
             self.assertEqual(ENGINX_GROUP.BOTH, calibration.get_group())
             self.assertEqual(CERIA, calibration.get_ceria_runno())
             self.assertEqual(VANADIUM, calibration.get_vanadium_runno())
             self.assertEqual(INSTRUMENT, calibration.get_instrument())
 
-        with self.subTest("Test 1 / steps 4-7 (the Default Peak Function setting is the one used)"):
+        with self.subTest("Run Processing / the Default Peak Function setting is the one used"):
             # the setting is only observable through this log line and the calibration's own record
             self.assertIn("Gaussian", logs.text)
             self.assertEqual("Gaussian", calibration.get_fit_peak_shape())
 
-        with self.subTest("Test 1 / step 11 (the diffractometer constants table is produced)"):
+        with self.subTest("Run Processing / the diffractometer constants table is produced"):
             from mantid.api import AnalysisDataService as ADS
             from Engineering.EnggUtils import DIFF_CONSTS_TABLE_NAME
 
@@ -166,15 +166,15 @@ class EngDiffGuiCalibrateAndFocusTest(_RunProcessingTestBase):
         calibration_dir = self.calibration_dir()
         written = self.basenames_under(calibration_dir)
 
-        with self.subTest("Test 1 / step 12 (a prm and nxs are written for each bank and for both)"):
+        with self.subTest("Run Processing / a prm and nxs are written for each bank and for both"):
             for suffix in ("all_banks", "bank_1", "bank_2"):
                 for extension in (".prm", ".nxs"):
                     self.assertIn(f"{INSTRUMENT}_{CERIA}_{suffix}{extension}", written)
 
-        with self.subTest("Test 1 / step 12 (nothing is written under User/ without an RB number)"):
+        with self.subTest("Run Processing / nothing is written under User/ without an RB number"):
             self.assertEqual([], self.files_under(os.path.join(self.save_dir, "User")))
 
-        with self.subTest("Test 1 / step 12 (the prm is built from the ENGIN-X header template)"):
+        with self.subTest("Run Processing / the prm is built from the ENGIN-X header template"):
             from Engineering.EnggUtils import CALIB_DIR
 
             with open(self._all_banks_prm()) as written_prm:
@@ -186,7 +186,7 @@ class EngDiffGuiCalibrateAndFocusTest(_RunProcessingTestBase):
             # the header carries the run number of the ceria run it was made from
             self.assertIn(CERIA, contents)
 
-        with self.subTest("Test 1 / step 12 (the written prm parses back into diffractometer constants)"):
+        with self.subTest("Run Processing / the written prm parses back into diffractometer constants"):
             from Engineering.EnggUtils import read_diff_constants_from_prm
 
             constants = read_diff_constants_from_prm(self._all_banks_prm())
@@ -195,7 +195,7 @@ class EngDiffGuiCalibrateAndFocusTest(_RunProcessingTestBase):
                 for value in row:
                     self.assertFalse(math.isnan(value), "a diffractometer constant is NaN")
 
-        with self.subTest("Test 1 / step 12 (the per-bank prm files hold one bank each)"):
+        with self.subTest("Run Processing / the per-bank prm files hold one bank each"):
             from Engineering.EnggUtils import read_diff_constants_from_prm
 
             for bank in (1, 2):
@@ -206,7 +206,7 @@ class EngDiffGuiCalibrateAndFocusTest(_RunProcessingTestBase):
         # PDCalibration fails, so a zero here means the fabricated peaks did not fit that bank.
         # That is a signal about this fixture rather than a regression in the interface, which is
         # what the rest of the class tests.
-        with self.subTest("Test 1 / both banks got a fitted difc (data quality, soft)"):
+        with self.subTest("Run Processing / both banks got a fitted difc (data quality, soft)"):
             from Engineering.EnggUtils import read_diff_constants_from_prm
 
             unfitted = [index for index, row in enumerate(read_diff_constants_from_prm(self._all_banks_prm())) if row[0] <= 0.0]
@@ -217,7 +217,7 @@ class EngDiffGuiCalibrateAndFocusTest(_RunProcessingTestBase):
         from mantid.api import AnalysisDataService as ADS
 
         mask_name = "engggui_calibration_all_banks_mask"
-        with self.subTest("Test 1 / PDCalibration fitted the ENGIN-X banks (data quality, soft)"):
+        with self.subTest("Run Processing / PDCalibration fitted the ENGIN-X banks (data quality, soft)"):
             self.assertTrue(ADS.doesExist(mask_name), f"{mask_name} was not produced")
             mask = ADS.retrieve(mask_name)
             total = mask.getNumberHistograms()
@@ -230,7 +230,7 @@ class EngDiffGuiCalibrateAndFocusTest(_RunProcessingTestBase):
     def _check_focus(self):
         self.focus(runs=CERIA)
 
-        with self.subTest("Test 1 / step 15 (focusing produces one workspace with one spectrum per bank)"):
+        with self.subTest("Run Processing / focusing produces one workspace with one spectrum per bank"):
             from mantid.api import AnalysisDataService as ADS
 
             focused = self.focused_workspace_names()
@@ -238,7 +238,7 @@ class EngDiffGuiCalibrateAndFocusTest(_RunProcessingTestBase):
             self.assertTrue(focused[0].startswith(CERIA), f"{focused[0]} is not named for the focused run")
             self.assertEqual(N_BANKS, ADS.retrieve(focused[0]).getNumberHistograms())
 
-        with self.subTest("Test 1 / step 15 (the focused output is left in TOF)"):
+        with self.subTest("Run Processing / the focused output is left in TOF"):
             from mantid.api import AnalysisDataService as ADS
 
             focused = ADS.retrieve(self.focused_workspace_names()[0])
@@ -247,24 +247,24 @@ class EngDiffGuiCalibrateAndFocusTest(_RunProcessingTestBase):
         focus_dir = self.focus_dir()
         written = self.basenames_under(focus_dir)
 
-        with self.subTest("Test 1 / step 15 (ASCII output is written for the whole run in TOF)"):
+        with self.subTest("Run Processing / ASCII output is written for the whole run in TOF"):
             self.assertIn(self.focused_basename("all_banks", "TOF") + ".gss", written)
             self.assertIn(self.focused_basename("all_banks", "TOF") + ".abc", written)
 
-        with self.subTest("Test 1 / step 15 (ASCII output is also written in d-spacing)"):
+        with self.subTest("Run Processing / ASCII output is also written in d-spacing"):
             self.assertIn(self.focused_basename("all_banks", "dSpacing") + ".gss", written)
             self.assertIn(self.focused_basename("all_banks", "dSpacing") + ".abc", written)
 
-        with self.subTest("Test 1 / step 15 (a nexus file is written per bank, in both units)"):
+        with self.subTest("Run Processing / a nexus file is written per bank, in both units"):
             for bank in (1, 2):
                 for xunit in ("TOF", "dSpacing"):
                     self.assertIn(self.focused_basename(f"bank_{bank}", xunit) + ".nxs", written)
 
-        with self.subTest("Test 1 / step 15 (the d-spacing spectra are also saved combined)"):
+        with self.subTest("Run Processing / the d-spacing spectra are also saved combined"):
             combined = self.basenames_under(os.path.join(focus_dir, "CombinedFiles"))
             self.assertEqual([self.focused_basename("bank", "dSpacing") + ".nxs"], combined)
 
-        with self.subTest("Test 1 / step 15 (the focused workspace records the vanadium it was normalised by)"):
+        with self.subTest("Run Processing / the focused workspace records the vanadium it was normalised by"):
             from mantid.api import AnalysisDataService as ADS
 
             run = ADS.retrieve(self.focused_workspace_names()[0]).run()
@@ -276,7 +276,7 @@ class EngDiffGuiCalibrateAndFocusTest(_RunProcessingTestBase):
 
 
 class EngDiffGuiPlotOutputTest(_RunProcessingTestBase):
-    """Guide Test 1: the 'Plot Calibrated Workspace' and 'Plot Focused Workspace' checkboxes.
+    """The 'Plot Calibrated Workspace' and 'Plot Focused Workspace' checkboxes.
 
     Uses the North bank only - one group instead of two makes both the calibration and the focus
     noticeably cheaper, and the checkbox behaviour does not depend on the region of interest.
@@ -287,11 +287,11 @@ class EngDiffGuiPlotOutputTest(_RunProcessingTestBase):
 
         before = figure_numbers()
         self.calibrate(ceria=CERIA, vanadium=VANADIUM, plot_output=False)
-        with self.subTest("Test 1 / step 9 (no plot appears when Plot Calibrated Workspace is off)"):
+        with self.subTest("Run Processing / no plot appears when Plot Calibrated Workspace is off"):
             self.assertEqual(before, figure_numbers())
 
         self.focus(runs=CERIA, plot_output=False)
-        with self.subTest("Test 1 / step 14 (no plot appears when Plot Focused Workspace is off)"):
+        with self.subTest("Run Processing / no plot appears when Plot Focused Workspace is off"):
             self.assertEqual(before, figure_numbers())
 
         # calibrate again with the box ticked; the calibration itself is unchanged, so any new
@@ -299,7 +299,7 @@ class EngDiffGuiPlotOutputTest(_RunProcessingTestBase):
         before = figure_numbers()
         self.calibrate(ceria=CERIA, vanadium=VANADIUM, plot_output=True)
         calibration_figures = new_figures(before)
-        with self.subTest("Test 1 / step 9 (a plot appears when Plot Calibrated Workspace is on)"):
+        with self.subTest("Run Processing / a plot appears when Plot Calibrated Workspace is on"):
             self.assertTrue(calibration_figures, "no new figure was created by the calibration")
         # a precondition: every content check below indexes into this
         self.assertEqual(1, len(calibration_figures), f"expected one figure for one bank, got {len(calibration_figures)}")
@@ -308,26 +308,26 @@ class EngDiffGuiPlotOutputTest(_RunProcessingTestBase):
         before = figure_numbers()
         self.focus(runs=CERIA, plot_output=True)
         focus_figures = new_figures(before)
-        with self.subTest("Test 1 / step 14 (a plot appears when Plot Focused Workspace is on)"):
+        with self.subTest("Run Processing / a plot appears when Plot Focused Workspace is on"):
             self.assertTrue(focus_figures, "no new figure was created by the focus")
         self.assertEqual(1, len(focus_figures), f"expected one figure for one focused run, got {len(focus_figures)}")
         self._check_focus_plot(focus_figures[0])
 
-        with self.subTest("Test 1 / step 9 (the checkbox state is what the view reports)"):
+        with self.subTest("Run Processing / the checkbox state is what the view reports"):
             view = self.run_processing_view
             self.assertTrue(view.get_plot_output())
             set_checkbox(view.check_plotOutput, False)
             self.assertFalse(view.get_plot_output())
 
     def _check_calibration_plot(self, figure):
-        """The figure the guide shows at Test 1 step 11 and describes at Test 3 step 4: one column
-        per focused spectrum, fitted TOF against d-spacing above the quadratic fit's residuals."""
-        with self.subTest("Test 1 / step 11 (the calibration plot has a TOF row and a residuals row)"):
+        """The calibration figure: one column per focused spectrum, fitted TOF against d-spacing
+        above the quadratic fit's residuals."""
+        with self.subTest("Run Processing / the calibration plot has a TOF row and a residuals row"):
             self.assertEqual(2, len(figure.axes), "expected two subplots for a single bank")
 
         tof_axes, residual_axes = figure.axes
 
-        with self.subTest("Test 1 / step 11 (the top row plots the peak centres and the quadratic fit)"):
+        with self.subTest("Run Processing / the top row plots the peak centres and the quadratic fit"):
             # plot_labels rather than curve_labels: the peak centres are an errorbar series, which
             # carries its name on the container rather than on the line
             labels = plot_labels(tof_axes)
@@ -335,26 +335,26 @@ class EngDiffGuiPlotOutputTest(_RunProcessingTestBase):
             self.assertIn("quadratic fit", labels)
             assert_axes_not_blank(tof_axes, "TOF vs d-spacing")
 
-        with self.subTest("Test 1 / step 11 (the axes are labelled as TOF against d-spacing)"):
+        with self.subTest("Run Processing / the axes are labelled as TOF against d-spacing"):
             self.assertEqual("Fitted TOF (μs)", tof_axes.get_ylabel())
             self.assertEqual("Residuals (μs)", residual_axes.get_ylabel())
             self.assertEqual("d-spacing (Ang)", residual_axes.get_xlabel())
 
-        with self.subTest("Test 1 / step 11 (the residuals row is drawn about zero)"):
+        with self.subTest("Run Processing / the residuals row is drawn about zero"):
             assert_axes_not_blank(residual_axes, "residuals")
             self.assertTrue(
                 any((y == 0.0).all() for _label, _x, y in curves(residual_axes) if len(y)),
                 "the residuals row has no zero line to read the residuals against",
             )
 
-        with self.subTest("Test 1 / step 11 (the subplot is titled for the calibrated region)"):
+        with self.subTest("Run Processing / the subplot is titled for the calibrated region"):
             expected = self.calibration_presenter.current_calibration.get_subplot_title(0)
             self.assertEqual(expected, tof_axes.get_title())
 
         # SOFT: the fixture places its peaks at difc * d exactly, so a large residual says the
         # fabricated peaks did not fit well - a signal about the fixture rather than the interface,
         # as with the difc check in EngDiffGuiCalibrateAndFocusTest.
-        with self.subTest("Test 1 / the quadratic fit passes through the peak centres (data quality, soft)"):
+        with self.subTest("Run Processing / the quadratic fit passes through the peak centres (data quality, soft)"):
             _x, centres = curve_by_label(tof_axes, "Peak centres")
             _x, fitted = curve_by_label(tof_axes, "quadratic fit")
             self.assertTrue(len(centres), "no peak centres were plotted")
@@ -362,32 +362,32 @@ class EngDiffGuiPlotOutputTest(_RunProcessingTestBase):
             self.assertLess(worst, 0.01, f"the quadratic fit is {worst:.1%} off the fitted peak centres")
 
     def _check_focus_plot(self, figure):
-        """The figure the guide shows at Test 1 Focus step 5: one figure per focused workspace with
-        one curve per spectrum, so the North bank alone gives the guide's "single spectrum"."""
+        """The focus figure: one figure per focused workspace with one curve per spectrum, so the
+        North bank alone gives a single spectrum."""
         from mantid.api import AnalysisDataService as ADS
 
-        with self.subTest("Test 1 / Focus step 3 (one set of axes with one curve per focused spectrum)"):
+        with self.subTest("Run Processing / one set of axes with one curve per focused spectrum"):
             self.assertEqual(1, len(figure.axes))
             self.assertEqual(1, len(curve_labels(figure.axes[0])), "expected a single spectrum for one bank")
 
         axes = figure.axes[0]
         focused = ADS.retrieve(self.focused_workspace_names()[0])
-        with self.subTest("Test 1 / Focus step 3 (the curve is the focused workspace's own data)"):
+        with self.subTest("Run Processing / the curve is the focused workspace's own data"):
             assert_curve_matches_workspace(axes, focused)
 
-        with self.subTest("Test 1 / Focus step 3 (the curve is labelled for the instrument, run and spectrum)"):
+        with self.subTest("Run Processing / the curve is labelled for the instrument, run and spectrum"):
             label = curve_labels(axes)[0]
             # the label carries the instrument's full name ("ENGIN-X"), not the file prefix
             self.assertIn(focused.getInstrumentName(), label)
             self.assertIn(CERIA, label)
             self.assertIn("spec 1", label)
 
-        with self.subTest("Test 1 / Focus step 3 (the plot carries a legend naming the curve)"):
+        with self.subTest("Run Processing / the plot carries a legend naming the curve"):
             self.assertIsNotNone(axes.get_legend(), "the focused plot has no legend")
 
 
 class EngDiffGuiLoadExistingCalibrationTest(_RunProcessingTestBase):
-    """Guide Test 1: closing and reopening the interface, then loading a calibration by path."""
+    """Closing and reopening the interface, then loading a calibration by path."""
 
     def test_load_existing_calibration(self):
         self.set_region_of_interest(None)
@@ -399,11 +399,11 @@ class EngDiffGuiLoadExistingCalibrationTest(_RunProcessingTestBase):
 
         self.rebuild_gui()
 
-        with self.subTest("Test 1 / step 16 (reopening preselects Load Existing Calibration)"):
+        with self.subTest("Run Processing / reopening preselects Load Existing Calibration"):
             self.assertTrue(self.run_processing_view.get_load_checked())
             self.assertFalse(self.run_processing_view.get_new_checked())
 
-        with self.subTest("Test 1 / step 16 (the path field is prefilled with the last calibration)"):
+        with self.subTest("Run Processing / the path field is prefilled with the last calibration"):
             from qt_interaction_helpers import wait_for_file_finder
 
             wait_for_file_finder(self.run_processing_view.finder_path, msg="restored calibration path")
@@ -412,20 +412,20 @@ class EngDiffGuiLoadExistingCalibrationTest(_RunProcessingTestBase):
                 os.path.normcase(self.run_processing_view.get_path_filename()),
             )
 
-        with self.subTest("Test 1 / step 16 (the last vanadium run is restored too)"):
+        with self.subTest("Run Processing / the last vanadium run is restored too"):
             from qt_interaction_helpers import wait_for_file_finder
 
             wait_for_file_finder(self.run_processing_view.finder_vanadium, msg="restored vanadium run")
             self.assertIn(VANADIUM, self.run_processing_view.finder_vanadium.getText())
 
-        with self.subTest("Test 1 / step 16 (the calibrate button is relabelled for the load path)"):
+        with self.subTest("Run Processing / the calibrate button is relabelled for the load path"):
             self.assertEqual("Load", self.run_processing_view.button_calibrate.text())
 
-        # now browse to a single bank instead, which is the guide's "load a different calibration"
+        # now browse to a single bank instead, loading a different calibration over the first
         bank_2_prm = os.path.join(self.calibration_dir(), f"{INSTRUMENT}_{CERIA}_bank_2.prm")
         loaded = self.load_calibration(bank_2_prm)
 
-        with self.subTest("Test 1 / step 17 (loading a bank prm reports that calibration)"):
+        with self.subTest("Run Processing / loading a bank prm reports that calibration"):
             from Engineering.common.instrument_config import ENGINX_GROUP
 
             self.assertIsNotNone(loaded, "no calibration was loaded")
@@ -434,11 +434,11 @@ class EngDiffGuiLoadExistingCalibrationTest(_RunProcessingTestBase):
             self.assertEqual(CERIA, loaded.get_ceria_runno())
             self.assertEqual(INSTRUMENT, loaded.get_instrument())
 
-        with self.subTest("Test 1 / step 17 (the status bar reports the loaded calibration)"):
+        with self.subTest("Run Processing / the status bar reports the loaded calibration"):
             self.assertIn(f"CeO2: {CERIA}", self.statusbar_text())
             self.assertIn(f"Instrument: {INSTRUMENT}", self.statusbar_text())
 
-        with self.subTest("Test 1 / step 17 (focusing against the loaded calibration gives one spectrum)"):
+        with self.subTest("Run Processing / focusing against the loaded calibration gives one spectrum"):
             from mantid.api import AnalysisDataService as ADS
 
             self.focus(runs=CERIA)
@@ -448,7 +448,7 @@ class EngDiffGuiLoadExistingCalibrationTest(_RunProcessingTestBase):
 
 
 class EngDiffGuiSaveLocationAndRbNumberTest(_RunProcessingTestBase):
-    """Guide Test 1: the RB number and changing the save location mid-session.
+    """The RB number and changing the save location mid-session.
 
     North bank only, for the same reason as the plot test - what is being checked is where the
     output lands, not what is in it.
@@ -469,17 +469,17 @@ class EngDiffGuiSaveLocationAndRbNumberTest(_RunProcessingTestBase):
     def _check_rb_layout(self):
         expected_prm = f"{INSTRUMENT}_{CERIA}_bank_1.prm"
 
-        with self.subTest("Test 1 / step 8 (with an RB number the calibration is saved in both places)"):
+        with self.subTest("Run Processing / with an RB number the calibration is saved in both places"):
             # a non-texture group is written to the plain directory *and* the RB one
             self.assertIn(expected_prm, self.basenames_under(self.calibration_dir()))
             self.assertIn(expected_prm, self.basenames_under(self.calibration_dir(self.RB_NUMBER)))
 
-        with self.subTest("Test 1 / step 8 (the focused output is saved in both places too)"):
+        with self.subTest("Run Processing / the focused output is saved in both places too"):
             expected_nxs = self.focused_basename("bank_1", "TOF") + ".nxs"
             self.assertIn(expected_nxs, self.basenames_under(self.focus_dir()))
             self.assertIn(expected_nxs, self.basenames_under(self.focus_dir(self.RB_NUMBER)))
 
-        with self.subTest("Test 1 / step 8 (the RB directory is named for the number that was entered)"):
+        with self.subTest("Run Processing / the RB directory is named for the number that was entered"):
             self.assertTrue(
                 os.path.isdir(os.path.join(self.save_dir, "User", self.RB_NUMBER)),
                 f"no User/{self.RB_NUMBER} directory under {self.save_dir}",
@@ -494,18 +494,18 @@ class EngDiffGuiSaveLocationAndRbNumberTest(_RunProcessingTestBase):
         # validation and its save-directory notification are exercised as well
         self.apply_settings(save_location=new_save_dir)
 
-        with self.subTest("Test 1 / steps 4-7 (the interface reports the new save location)"):
+        with self.subTest("Run Processing / the interface reports the new save location"):
             self.assertIn(new_save_dir, self.savedir_text())
 
-        with self.subTest("Test 1 / steps 4-7 (the setting was persisted)"):
+        with self.subTest("Run Processing / the setting was persisted"):
             self.assertEqual(new_save_dir, self.get_engineering_setting("save_location"))
 
         self.focus(runs=CERIA)
         process_events(2)
 
-        with self.subTest("Test 1 / steps 4-7 (subsequent output lands under the new save location)"):
+        with self.subTest("Run Processing / subsequent output lands under the new save location"):
             relocated = self.basenames_under(os.path.join(new_save_dir, "User", self.RB_NUMBER, "Focus"))
             self.assertIn(self.focused_basename("bank_1", "TOF") + ".nxs", relocated)
 
-        with self.subTest("Test 1 / steps 4-7 (nothing further is written under the old save location)"):
+        with self.subTest("Run Processing / nothing further is written under the old save location"):
             self.assertEqual(before, self.file_states_under(self.save_dir))

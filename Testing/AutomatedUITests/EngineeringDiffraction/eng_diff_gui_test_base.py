@@ -6,7 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """Shared setup for the Engineering Diffraction automated UI tests.
 
-These tests replace ``dev-docs/source/Testing/EngineeringDiffraction/EngineeringDiffractionTestGuide.rst``.
+These tests replace most of the manual testing described in
+``dev-docs/source/Testing/EngineeringDiffraction/EngineeringDiffractionTestGuide.rst``, which carries
+a table of what they cover and what still has to be checked by hand.
+
 They build the real ``EngineeringDiffractionGui`` and click it with ``QTest``; the model, the
 presenters, the algorithms and the files written to disk are all real. The only things mocked are
 the ones that would block waiting for a user: the generated algorithm dialogs, the error popups,
@@ -55,7 +58,7 @@ TAB_FITTING = "Fitting"
 TAB_TEXTURE = "Texture"
 TAB_GSAS2 = "GSAS II"
 
-# ENGINX runs used by the guide, all present in Testing/Data/DocTest
+# real ENGINX runs, all present in Testing/Data/DocTest
 ENGINX_CERIA = "305738"
 ENGINX_VANADIUM = "307521"
 ENGINX_FOCUS_RUN = "305761"
@@ -72,9 +75,9 @@ ENGINX_SYNTHETIC_VANADIUM_RUN = 99102
 class EngDiffGuiTestBase(AutomatedUITestBase):
     """Builds the Engineering Diffraction interface and exposes its tabs.
 
-    Subclasses write one ``test_*`` method per guide section. Anything they need before the
-    interface exists (extra data directories, pre-seeded settings) goes in the ``pre_gui_setup``
-    hook rather than in an override of ``setUp``.
+    Subclasses write one ``test_*`` method per scenario a user would work through. Anything they
+    need before the interface exists (extra data directories, pre-seeded settings) goes in the
+    ``pre_gui_setup`` hook rather than in an override of ``setUp``.
     """
 
     # ------------------------------------------------------------------ hooks
@@ -100,8 +103,8 @@ class EngDiffGuiTestBase(AutomatedUITestBase):
         """Settings to write before the interface is built, as a plain dict.
 
         Defaults to pointing the save location at this test's temporary directory. A test that
-        wants to drive the settings dialog itself (guide Test 1, steps 4-7) can return ``{}`` and
-        set it through the real dialog instead.
+        wants to drive the settings dialog itself can return ``{}`` and set it through the real
+        dialog instead.
         """
         return {"save_location": self.save_dir}
 
@@ -129,9 +132,9 @@ class EngDiffGuiTestBase(AutomatedUITestBase):
     def rebuild_gui(self):
         """Close the interface and open a fresh one, leaving the settings store and the ADS alone.
 
-        This is how the guide's "restart the interface" steps are reproduced: what they are really
-        checking is that state which should survive a restart (the last calibration, the last
-        vanadium run, the RB number) was written to settings and is read back on construction.
+        This is how restarting the interface is reproduced. What that really checks is that state
+        which should survive a restart (the last calibration, the last vanadium run, the RB number)
+        was written to settings and is read back on construction.
         """
         self.gui.close()
         process_events(2)
@@ -211,8 +214,8 @@ class EngDiffGuiTestBase(AutomatedUITestBase):
 
         ``fields`` names map onto the dialog's own setters, e.g.
         ``apply_settings(save_location=..., peak_function="Gaussian")``. Going through the dialog
-        rather than writing QSettings directly is the point: it is the path the guide describes,
-        and it exercises the presenter's validation and its save-directory notification.
+        rather than writing QSettings directly is the point: it is the path a user takes, and it
+        exercises the presenter's validation and its save-directory notification.
         """
         view = self.open_settings()
         for name, value in fields.items():
@@ -257,8 +260,8 @@ class EngDiffGuiTestBase(AutomatedUITestBase):
         """Tick 'Set Calibration Region of Interest' and choose an option by its combo text.
 
         ``description`` is the label the user sees, e.g. "1 (North)", "Crop to Spectra",
-        "Texture (20 spec)". Passing ``None`` unticks the checkbox, which is the guide's
-        "no region of interest" case and makes the calibration fall back to both banks.
+        "Texture (20 spec)". Passing ``None`` unticks the checkbox, leaving no region of interest,
+        which makes the calibration fall back to both banks.
         """
         self.show_tab(TAB_RUN_PROCESSING)
         if description is None:
@@ -288,8 +291,8 @@ class EngDiffGuiTestBase(AutomatedUITestBase):
         return self.calibration_presenter.current_calibration
 
     def load_calibration(self, prm_path):
-        """Load an existing calibration from a .prm file, as the guide's 'Load Existing
-        Calibration' radio button does. This path is synchronous - no worker is started."""
+        """Load an existing calibration from a .prm file, through the 'Load Existing Calibration'
+        radio button. This path is synchronous - no worker is started."""
         self.show_tab(TAB_RUN_PROCESSING)
         view = self.run_processing_view
         view.radio_loadCalib.setChecked(True)
@@ -318,8 +321,9 @@ class EngDiffGuiTestBase(AutomatedUITestBase):
         """The number of subplots in each calibration figure, for ``n_spectra`` focused spectra.
 
         One column per spectrum over two rows - fitted TOF above, residuals below - filling a figure
-        at a time. The guide states this per region of interest ("only 2 subplots", "5 tiled plot
-        windows, 4 spectra per window"); expressing it once keeps those from drifting apart.
+        at a time. Every region of interest produces a different shape - two subplots for a single
+        bank, five windows of eight for a twenty-group texture calibration - so the rule is expressed
+        here once rather than restated per test.
         """
         per_figure = self.CALIBRATION_PLOT_SPECTRA_PER_FIGURE
         columns = [per_figure] * (n_spectra // per_figure)

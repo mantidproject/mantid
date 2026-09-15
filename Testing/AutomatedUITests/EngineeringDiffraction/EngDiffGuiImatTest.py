@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """Automated UI tests for Run Processing on IMAT.
 
-The manual guide asks for calibration and focusing "for all instrument options", but the repository
+Calibration and focusing have to work for every instrument the interface offers, but the repository
 has no IMAT ceria/vanadium pair, so this module fabricates one (see ``create_imat_ceria_and_vanadium``
 in the shared base) and puts it where the interface's own file finder will resolve it from a run
 number. The interface is therefore driven exactly as it is for ENGIN-X - nothing reaches past the
@@ -100,8 +100,8 @@ class EngDiffGuiImatCalibrateAndFocusTest(EngDiffGuiTestBase):
         settings = super(EngDiffGuiImatCalibrateAndFocusTest, self).seeded_settings()
         # Fit Gaussians, matching the shape the fixture generates. IMAT's real default is
         # IkedaCarpenterPV with its parameters pinned by the instrument definition, which is both
-        # far slower to fit and impossible to satisfy with fabricated data - so this doubles as the
-        # manual guide's "changing Default Peak Function" step, asserted from the log below.
+        # far slower to fit and impossible to satisfy with fabricated data - so this doubles as
+        # coverage of changing the Default Peak Function, asserted from the log below.
         settings["default_peak_IMAT"] = "Gaussian"
         return settings
 
