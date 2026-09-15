@@ -11,11 +11,13 @@
 #include "MantidGeometry/IDTypes.h" //For specnum_t
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Parameter.h"
+#include "MantidGeometry/Instrument/ParameterInfo.h"
 
-#include "tbb/concurrent_unordered_map.h"
-
+#include <cstddef>
 #include <memory>
 #include <typeinfo>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace Mantid {
@@ -50,9 +52,9 @@ public:
   ParameterMap(const ParameterMap &other);
   ~ParameterMap();
   /// Returns true if the map is empty, false otherwise
-  inline bool empty() const { return m_map.empty(); }
+  inline bool empty() const { return m_parameterInfo->empty(); }
   /// Return the size of the map
-  inline int size() const { return static_cast<int>(m_map.size()); }
+  inline int size() const { return static_cast<int>(m_parameterInfo->size()); }
   /// Get the footprint in memory in bytes.
   size_t getMemorySize() const;
   /// Return string to be used in the map
@@ -82,13 +84,18 @@ public:
 
   /// Clears the map
   inline void clear() {
-    m_map.clear();
+    m_parameterInfo->clear();
+    m_idToIndex.clear();
+    m_indexToId.clear();
     clearPositionSensitiveCaches();
   }
   /// method swaps two parameter maps contents  each other. All caches contents
   /// is nullified (TO DO: it can be efficiently swapped too)
   void swap(ParameterMap &other) {
-    m_map.swap(other.m_map);
+    // The translation tables must travel with the store: an index is meaningless without them.
+    m_parameterInfo.swap(other.m_parameterInfo);
+    m_idToIndex.swap(other.m_idToIndex);
+    m_indexToId.swap(other.m_indexToId);
     clearPositionSensitiveCaches();
   }
   /// Clear any parameters with the given name
@@ -215,13 +222,13 @@ public:
    */
   template <class T> std::vector<T> getType(const std::string &compName, const std::string &name) const {
     std::vector<T> retval;
-
-    pmap_cit it;
-    for (it = m_map.begin(); it != m_map.end(); ++it) {
-      if (compName == it->first->getName()) {
-        std::shared_ptr<Parameter> param = get(it->first, name);
-        if (param)
+    // Iterate every stored parameter because the match is on component name rather than key
+    for (auto const &entry : entries()) {
+      if (compName == entry.first->getName()) {
+        std::shared_ptr<Parameter> const param = get(entry.first, name);
+        if (param) {
           retval.emplace_back(param->value<T>());
+        }
       }
     }
     return retval;
@@ -300,6 +307,10 @@ public:
   const std::vector<Geometry::ComponentID> &componentIds() const;
   void setInstrument(const Instrument *instrument);
 
+  /** Rekey this map's parameters from the synthetic staging indices onto an instrument's real
+   * component indices, returning the resulting store. */
+  std::shared_ptr<ParameterInfo> rekey(const std::unordered_map<Geometry::IComponent const *, size_t> &idToIndex);
+
 private:
   std::shared_ptr<Parameter> create(const std::string &className, const std::string &name,
                                     const std::string &visible = "true") const;
@@ -308,19 +319,27 @@ private:
   ParameterMap &operator=(ParameterMap *rhs);
   /// Builds m_instrumentMetadata from m_instrument. Requires m_instrument to be set.
   void buildInstrumentMetadata();
-  /// internal function to get position of the parameter in the parameter map
-  component_map_it positionOf(const IComponent *comp, const char *name, const char *type);
-  /// const version of the internal function to get position of the parameter in
-  /// the parameter map
-  component_map_cit positionOf(const IComponent *comp, const char *name, const char *type) const;
   /// calculate relative error for use in diff
   bool relErr(double x1, double x2, double errorVal) const;
+
+  /// Index for a component, or ComponentInfo::invalidIndex if this map holds nothing for it.
+  size_t indexOf(const IComponent *comp) const;
+  /// As indexOf(), but allocating a new index for a component seen for the first time.
+  size_t indexForWrite(const IComponent *comp);
+  /// The component an index refers to. Only valid for an index this map issued.
+  ComponentID componentIdAt(const size_t index) const;
 
   /// internal list of parameter files loaded
   std::vector<std::string> m_parameterFileNames;
 
-  /// internal parameter map instance
-  pmap m_map;
+  /** The parameter store, owner of the parameter info*/
+  std::shared_ptr<ParameterInfo> m_parameterInfo;
+
+  /// Component pointer to index translation.
+  std::unordered_map<Geometry::IComponent const *, size_t> m_idToIndex;
+  /// Reverse of m_idToIndex. Needed because several accessors (asString, diff, getType) must
+  /// recover the component from a stored parameter to report its name.
+  std::vector<ComponentID> m_indexToId;
   /// internal cache map instance for cached position values
   std::unique_ptr<Kernel::Cache<const ComponentID, Kernel::V3D>> m_cacheLocMap;
   /// internal cache map instance for cached rotation values

@@ -33,6 +33,7 @@ class IDetector;
 class IObjComponent;
 class Instrument;
 class IObject;
+class ParameterInfo;
 class ParameterMap;
 class RectangularDetector;
 class ObjCompAssembly;
@@ -135,6 +136,9 @@ private:
   void markAsSourceOrSample(Mantid::Geometry::IComponent *componentId, const size_t componentIndex);
 
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> makeWrappers() const;
+
+  /// Rekey the ParameterMap's parameters from legacy component pointers to component indices.
+  std::shared_ptr<ParameterInfo> makeParameterInfo() const;
 
   /// Extract the common aspects relevant to all component types
   size_t commonRegistration(const Mantid::Geometry::IComponent &component);

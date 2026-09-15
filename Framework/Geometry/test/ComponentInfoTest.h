@@ -818,4 +818,127 @@ public:
     auto detMemSize3 = std::get<1>(wrappers3)->getMemorySize();
     TS_ASSERT_EQUALS(detMemSize2 - detMemSize1, detMemSize3 - detMemSize2);
   }
+
+  void test_named_parameter_read_through_to_parameter_map() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
+    auto bank = instrument->getComponentByName("bank1");
+    ParameterMap pmap;
+    pmap.addDouble(bank.get(), "my_double", 42.0);
+    pmap.addString(bank.get(), "my_string", "hello");
+    pmap.addBool(bank.get(), "my_bool", true);
+    pmap.addInt(bank.get(), "my_int", 7);
+
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
+    const auto &componentInfo = std::get<0>(wrappers);
+    const size_t bankIndex = componentInfo->root() - 3;
+
+    TS_ASSERT(componentInfo->hasParameter(bankIndex, "my_double"));
+    TS_ASSERT(!componentInfo->hasParameter(bankIndex, "no_such_parameter"));
+
+    auto doubleValues = componentInfo->getNumberParameter(bankIndex, "my_double");
+    TS_ASSERT_EQUALS(doubleValues.size(), 1);
+    TS_ASSERT_EQUALS(doubleValues[0], 42.0);
+
+    auto stringValues = componentInfo->getStringParameter(bankIndex, "my_string");
+    TS_ASSERT_EQUALS(stringValues.size(), 1);
+    TS_ASSERT_EQUALS(stringValues[0], "hello");
+
+    auto boolValues = componentInfo->getBoolParameter(bankIndex, "my_bool");
+    TS_ASSERT_EQUALS(boolValues.size(), 1);
+    TS_ASSERT_EQUALS(boolValues[0], true);
+
+    auto intValues = componentInfo->getIntParameter(bankIndex, "my_int");
+    TS_ASSERT_EQUALS(intValues.size(), 1);
+    TS_ASSERT_EQUALS(intValues[0], 7);
+
+    // Missing parameter yields an empty vector, not an exception.
+    TS_ASSERT(componentInfo->getNumberParameter(bankIndex, "no_such_parameter").empty());
+
+    auto names = componentInfo->getParameterNames(bankIndex, false);
+    TS_ASSERT_EQUALS(names.count("my_double"), 1);
+    TS_ASSERT_EQUALS(names.count("my_string"), 1);
+  }
+
+  void test_named_parameter_recursive_lookup_and_no_recursion() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
+    auto bank = instrument->getComponentByName("bank1");
+    ParameterMap pmap;
+    pmap.addDouble(bank.get(), "bank_level_param", 1.5);
+
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
+    const auto &componentInfo = std::get<0>(wrappers);
+    const size_t bankIndex = componentInfo->root() - 3;
+    // A detector one level below the bank inherits the parameter recursively...
+    const size_t detectorIndex = componentInfo->children(componentInfo->children(bankIndex)[0])[0];
+
+    TS_ASSERT(componentInfo->hasParameter(detectorIndex, "bank_level_param", true));
+    TS_ASSERT_EQUALS(componentInfo->getNumberParameter(detectorIndex, "bank_level_param", true).size(), 1);
+
+    // ...but not when recursion is switched off.
+    TS_ASSERT(!componentInfo->hasParameter(detectorIndex, "bank_level_param", false));
+    TS_ASSERT(componentInfo->getNumberParameter(detectorIndex, "bank_level_param", false).empty());
+  }
+
+  void test_named_parameters_are_live_not_a_snapshot() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
+    auto bank = instrument->getComponentByName("bank1");
+    ParameterMap pmap;
+
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
+    const auto &componentInfo = std::get<0>(wrappers);
+    const size_t bankIndex = componentInfo->root() - 3;
+
+    TS_ASSERT(!componentInfo->hasParameter(bankIndex, "added_later"));
+
+    // ensure that adding a parameter to the map after ocnstruction can be found
+    pmap.addDouble(bank.get(), "added_later", 3.0);
+    TS_ASSERT(componentInfo->hasParameter(bankIndex, "added_later"));
+    TS_ASSERT_EQUALS(componentInfo->getNumberParameter(bankIndex, "added_later").at(0), 3.0);
+  }
+
+  void test_parameter_written_through_ComponentInfo_is_visible_in_the_ParameterMap() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
+    auto bank = instrument->getComponentByName("bank1");
+    ParameterMap pmap;
+    pmap.addDouble(bank.get(), "from_the_map", 1.0);
+
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
+    const auto &componentInfo = std::get<0>(wrappers);
+    const size_t bankIndex = componentInfo->indexOf(bank->getComponentID());
+
+    // The rekey carried the existing parameter across...
+    TS_ASSERT_EQUALS(componentInfo->getNumberParameter(bankIndex, "from_the_map").at(0), 1.0);
+    // ...and the map still sees it afterwards, i.e. the rekey moved the store rather than
+    // leaving the map pointing at an orphaned copy.
+    TS_ASSERT(pmap.contains(bank.get(), "from_the_map"));
+    TS_ASSERT_EQUALS(pmap.get(bank.get(), "from_the_map")->value<double>(), 1.0);
+  }
+
+  void test_fullName_matches_the_legacy_getFullName() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+
+    // The root has no parent, so its full name is just its own name -- no leading separator.
+    TS_ASSERT_EQUALS(componentInfo->fullName(componentInfo->root()), componentInfo->name(componentInfo->root()));
+
+    // Every component must agree with IComponent::getFullName(), which is the identifier
+    // ParameterMap serialization writes for non-detector components.
+    for (size_t i = 0; i < componentInfo->size(); ++i) {
+      const auto *component = componentInfo->componentID(i);
+      TS_ASSERT_EQUALS(componentInfo->fullName(i), component->getFullName());
+    }
+  }
+
+  void test_named_parameter_no_owning_parameter_map() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
+    // No ParameterMap supplied: the resulting ComponentInfo has none of its own.
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+    const size_t bankIndex = componentInfo->root() - 3;
+
+    TS_ASSERT(!componentInfo->hasParameter(bankIndex, "anything"));
+    TS_ASSERT(componentInfo->getNumberParameter(bankIndex, "anything").empty());
+    TS_ASSERT(componentInfo->getParameterNames(bankIndex).empty());
+  }
 };

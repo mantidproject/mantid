@@ -415,14 +415,20 @@ std::unique_ptr<Beamline::DetectorInfo> InstrumentVisitor::detectorInfo() const 
 
 std::shared_ptr<std::vector<detid_t>> InstrumentVisitor::detectorIds() const { return m_orderedDetectorIds; }
 
+/// Rekey the ParameterMap's parameters from legacy component pointers to component indices.
+std::shared_ptr<ParameterInfo> InstrumentVisitor::makeParameterInfo() const {
+  // The ParameterMap does the rekeying itself
+  return m_pmap ? m_pmap->rekey(*m_componentIdToIndexMap) : std::make_shared<ParameterInfo>();
+}
+
 std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> InstrumentVisitor::makeWrappers() const {
   auto compInfo = componentInfo();
   auto detInfo = detectorInfo();
   // Cross link Component and Detector info objects
   compInfo->setDetectorInfo(detInfo.get());
 
-  auto compInfoWrapper =
-      std::make_unique<ComponentInfo>(std::move(compInfo), componentIds(), componentIdToIndexMap(), m_shapes);
+  auto compInfoWrapper = std::make_unique<ComponentInfo>(std::move(compInfo), componentIds(), componentIdToIndexMap(),
+                                                         m_shapes, makeParameterInfo());
   auto detInfoWrapper =
       std::make_unique<DetectorInfo>(std::move(detInfo), m_instrument, detectorIds(), detectorIdToIndexMap());
 
