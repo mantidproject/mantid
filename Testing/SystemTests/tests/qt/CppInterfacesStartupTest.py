@@ -9,6 +9,7 @@ from itertools import chain
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt.testing import get_application
+from mantid.kernel import ConfigService
 from workbench.config import CONF, WINDOW_ONTOP_FLAGS, WINDOW_STANDARD_FLAGS
 from workbench.utils.gather_interfaces import gather_cpp_interface_names
 
@@ -31,6 +32,11 @@ class CppInterfacesStartupTest(systemtesting.MantidSystemTest):
         self._app = get_application()
         self._interface_manager = InterfaceManager()
         self._cpp_interface_names = set(chain.from_iterable(gather_cpp_interface_names().values()))
+        # Use legacy instrument view on windows as CI VMs do not currently have a modern version of openG required by new version/VTK.
+        ConfigService.Instance().setString("InstrumentView.use_legacy_instrument_view", True)
+
+    def tearDown(self):
+        ConfigService.Instance().setString("InstrumentView.use_legacy_instrument_view", False)
 
     def runTest(self):
         if len(self._cpp_interface_names) == 0:
