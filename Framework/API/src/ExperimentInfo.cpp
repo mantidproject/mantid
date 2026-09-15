@@ -67,6 +67,7 @@ Kernel::Logger g_log("ExperimentInfo");
  */
 ExperimentInfo::ExperimentInfo() : m_parmap(new ParameterMap()), sptr_instrument(new Instrument()) {
   m_parmap->setInstrument(sptr_instrument.get());
+  adoptBeamline();
 }
 
 /**
@@ -193,12 +194,25 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
     // We take a *copy* of the ParameterMap since we are modifying it by setting
     // a pointer to our DetectorInfo, and in case it contains legacy parameters
     // such as positions or rotations.
-    m_parmap = std::make_shared<ParameterMap>(*instr->getParameterMap());
+    const auto &source = *instr->getParameterMap();
+    m_parmap = std::make_shared<ParameterMap>(source);
+    // The copy carries the source's instrument pointer, so the setInstrument() below sees no
+    // change and returns early. The beamline therefore has to be rebuilt explicitly -- this is
+    // the copy-on-write of the instrument geometry, and it used to happen implicitly inside
+    // ParameterMap's copy constructor.
+    m_parmap->rebuildBeamlineFrom(source);
   } else {
     sptr_instrument = instr;
     m_parmap = std::make_shared<ParameterMap>();
   }
   m_parmap->setInstrument(sptr_instrument.get());
+  adoptBeamline();
+}
+
+void ExperimentInfo::adoptBeamline() {
+  m_componentInfo = m_parmap->sharedComponentInfo();
+  m_detectorInfo = m_parmap->sharedDetectorInfo();
+  m_instrumentMetadata = m_parmap->sharedInstrumentMetadata();
 }
 
 /** Get a shared pointer to the parametrized instrument associated with this
@@ -297,8 +311,7 @@ template <class T> T getParam(const std::string &paramType, const std::string &p
   return param->value<T>();
 }
 
-void updatePosition(ComponentInfo &componentInfo, const IComponent *component, const V3D &newRelPos) {
-  const auto compIndex = componentInfo.indexOf(component->getComponentID());
+void updatePosition(ComponentInfo &componentInfo, const size_t compIndex, const V3D &newRelPos) {
   V3D position = newRelPos;
   if (componentInfo.hasParent(compIndex)) {
     const auto parentIndex = componentInfo.parent(compIndex);
@@ -308,9 +321,7 @@ void updatePosition(ComponentInfo &componentInfo, const IComponent *component, c
   componentInfo.setPosition(compIndex, position);
 }
 
-void updateRotation(ComponentInfo &componentInfo, const IComponent *component, const Quat &newRelRot) {
-  const auto compIndex = componentInfo.indexOf(component->getComponentID());
-
+void updateRotation(ComponentInfo &componentInfo, const size_t compIndex, const Quat &newRelRot) {
   auto rotation = newRelRot;
   if (componentInfo.hasParent(compIndex)) {
     const auto parentIndex = componentInfo.parent(compIndex);
@@ -319,15 +330,15 @@ void updateRotation(ComponentInfo &componentInfo, const IComponent *component, c
   componentInfo.setRotation(compIndex, rotation);
 }
 
-void adjustPositionsFromScaleFactor(ComponentInfo &componentInfo, const IComponent *component,
-                                    const std::string &paramName, double factor) {
+void adjustPositionsFromScaleFactor(ComponentInfo &componentInfo, const size_t compIndex, const std::string &paramName,
+                                    double factor) {
   double ScaleX = 1.0;
   double ScaleY = 1.0;
   if (paramName == "scalex")
     ScaleX = factor;
   else
     ScaleY = factor;
-  applyRectangularDetectorScaleToComponentInfo(componentInfo, component->getComponentID(), ScaleX, ScaleY);
+  applyRectangularDetectorScaleToComponentInfo(componentInfo, compIndex, ScaleX, ScaleY);
 }
 } // namespace
 
@@ -402,12 +413,18 @@ void ExperimentInfo::populateInstrumentParameters() {
     }
   }
   for (const auto &item : paramMapForPosAndRot.entries()) {
+    // This staging map was populated against this same instrument, so every component in it is
+    // known to compInfo; indexOfOrInvalid guards the case anyway rather than throwing.
+    const auto compIndex = compInfo.indexOfOrInvalid(item.first);
+    if (compIndex == Geometry::ComponentInfo::invalidIndex) {
+      continue;
+    }
     if (isPositionParameter(item.second->name())) {
       const auto newRelPos = item.second->value<V3D>();
-      updatePosition(compInfo, item.first, newRelPos);
+      updatePosition(compInfo, compIndex, newRelPos);
     } else if (isRotationParameter(item.second->name())) {
       const auto newRelRot = item.second->value<Quat>();
-      updateRotation(compInfo, item.first, newRelRot);
+      updateRotation(compInfo, compIndex, newRelRot);
     }
     // Parameters for individual components (x,y,z) are ignored. ParameterMap
     // did compute the correct compound positions and rotations internally.
@@ -415,8 +432,12 @@ void ExperimentInfo::populateInstrumentParameters() {
   // Special case RectangularDetector: Parameters scalex and scaley affect pixel
   // positions.
   for (const auto &item : paramMap.entries()) {
-    if (isScaleParameter(item.second->name()))
-      adjustPositionsFromScaleFactor(compInfo, item.first, item.second->name(), item.second->value<double>());
+    if (isScaleParameter(item.second->name())) {
+      const auto compIndex = compInfo.indexOfOrInvalid(item.first);
+      if (compIndex != Geometry::ComponentInfo::invalidIndex) {
+        adjustPositionsFromScaleFactor(compInfo, compIndex, item.second->name(), item.second->value<double>());
+      }
+    }
   }
   // paramMapForPosAndRot goes out of scope, dropping all position and rotation
   // parameters of detectors (parameters for non-detector components have been
@@ -778,13 +799,19 @@ std::string ExperimentInfo::getAvailableWorkspaceEndDate() const {
  */
 const Geometry::DetectorInfo &ExperimentInfo::detectorInfo() const {
   populateIfNotLoaded();
-  return m_parmap->detectorInfo();
+  if (!m_detectorInfo) {
+    throw std::runtime_error("Cannot return reference to NULL DetectorInfo");
+  }
+  return *m_detectorInfo;
 }
 
 /** Return a non-const reference to the DetectorInfo object. */
 Geometry::DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
   populateIfNotLoaded();
-  return m_parmap->mutableDetectorInfo();
+  if (!m_detectorInfo) {
+    throw std::runtime_error("Cannot return reference to NULL DetectorInfo");
+  }
+  return *m_detectorInfo;
 }
 
 /** Return a reference to the SpectrumInfo object.
@@ -841,12 +868,25 @@ SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
   return const_cast<SpectrumInfo &>(static_cast<const ExperimentInfo &>(*this).spectrumInfo());
 }
 
-const Geometry::ComponentInfo &ExperimentInfo::componentInfo() const { return m_parmap->componentInfo(); }
+const Geometry::ComponentInfo &ExperimentInfo::componentInfo() const {
+  if (!m_componentInfo) {
+    throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
+  }
+  return *m_componentInfo;
+}
 
-ComponentInfo &ExperimentInfo::mutableComponentInfo() { return m_parmap->mutableComponentInfo(); }
+ComponentInfo &ExperimentInfo::mutableComponentInfo() {
+  if (!m_componentInfo) {
+    throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
+  }
+  return *m_componentInfo;
+}
 
 Geometry::InstrumentMetadata const &ExperimentInfo::instrumentMetadata() const {
-  return m_parmap->instrumentMetadata();
+  if (!m_instrumentMetadata) {
+    throw std::runtime_error("Cannot return reference to NULL InstrumentMetadata");
+  }
+  return *m_instrumentMetadata;
 }
 
 /// Sets the SpectrumDefinition for all spectra.
@@ -1206,19 +1246,35 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     // if( comp_name == prev_name ) continue; this blocks reading in different
     // parameters of the same component. RNT
     // prev_name = comp_name;
-    const Geometry::IComponent *comp = nullptr;
+    // Resolve the component once, to an index. Both forms written by ParameterMap::asString()
+    // are resolvable without consulting the legacy instrument tree: "detID:<id>" through
+    // DetectorInfo, and a full path through ComponentInfo::indexOfFullName().
+    size_t compIndex = Geometry::ComponentInfo::invalidIndex;
     if (comp_name.find("detID:") != std::string::npos) {
-      int detID = std::stoi(comp_name.substr(6));
-      comp = instr->getDetector(detID).get();
-      if (!comp) {
+      const auto detID = static_cast<detid_t>(std::stoi(comp_name.substr(6)));
+      try {
+        // Detectors occupy the leading component indices, so a detector index is also its
+        // component index.
+        compIndex = detInfo.indexOf(detID);
+      } catch (std::out_of_range &) {
         g_log.warning() << "Cannot find detector " << detID << '\n';
         continue;
       }
     } else {
-      comp = instr->getComponentByName(comp_name).get();
-      if (!comp) {
-        g_log.warning() << "Cannot find component " << comp_name << '\n';
-        continue;
+      compIndex = compInfo.indexOfFullName(comp_name);
+      if (compIndex == Geometry::ComponentInfo::invalidIndex) {
+        // indexOfFullName() resolves only exact, fully-rooted paths. getComponentByName() is
+        // more lenient -- it accepts a bare name anywhere in the tree and lets path segments be
+        // skipped -- so fall back to it rather than rejecting strings the old code accepted.
+        // Reproducing that leniency on ComponentInfo is its own piece of work.
+        const auto *comp = instr->getComponentByName(comp_name).get();
+        if (comp) {
+          compIndex = compInfo.indexOfOrInvalid(comp->getComponentID());
+        }
+        if (compIndex == Geometry::ComponentInfo::invalidIndex) {
+          g_log.warning() << "Cannot find component " << comp_name << '\n';
+          continue;
+        }
       }
     }
 
@@ -1243,7 +1299,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
       auto value = getParam<bool>(paramType, paramValue);
       if (value) {
         // Do not add masking to ParameterMap, it is stored in DetectorInfo
-        const auto componentIndex = compInfo.indexOf(comp->getComponentID());
+        const auto componentIndex = compIndex;
         if (!compInfo.isDetector(componentIndex)) {
           throw std::runtime_error("Found masking for a non-detector "
                                    "component. This is not possible");
@@ -1258,19 +1314,19 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
       // component wise positions are set, 'pos' is updated accordingly. We are
       // thus ignoring position components below.
       const auto newRelPos = getParam<V3D>(paramType, paramValue);
-      updatePosition(compInfo, comp, newRelPos);
+      updatePosition(compInfo, compIndex, newRelPos);
     } else if (isRotationParameter(paramName)) {
       // We are parsing a string obtained from a ParameterMap. The map may
       // contain rotx, roty, and rotz (in addition to rot). However, when these
       // component wise rotations are set, 'rot' is updated accordingly. We are
       // thus ignoring rotation components below.
       const auto newRelRot = getParam<Quat>(paramType, paramValue);
-      updateRotation(compInfo, comp, newRelRot);
+      updateRotation(compInfo, compIndex, newRelRot);
     } else if (!isRedundantPosOrRot(paramName)) {
       // Special case RectangularDetector: Parameters scalex and scaley affect
       // pixel positions, but we must also add the parameter below.
       if (isScaleParameter(paramName))
-        adjustPositionsFromScaleFactor(compInfo, comp, paramName, getParam<double>(paramType, paramValue));
+        adjustPositionsFromScaleFactor(compInfo, compIndex, paramName, getParam<double>(paramType, paramValue));
       // For fitting parameters, route through addFittingParameter so that two functions on the same
       // component sharing a parameter short name (e.g. IkedaCarpenterPV:Gamma and
       // Bk2BkExpConvPV:Gamma) both survive a NeXus save/load round-trip. ParameterMap::add only
@@ -1303,12 +1359,12 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
           }
         }
         if (!fittingFunction.empty()) {
-          pmap.addFittingParameter(comp, paramName, fittingFunction, paramValue, &paramDescr, paramVisibility);
+          pmap.addFittingParameter(compIndex, paramName, fittingFunction, paramValue, &paramDescr, paramVisibility);
         } else {
-          pmap.add(paramType, comp, paramName, paramValue, &paramDescr, paramVisibility);
+          pmap.add(paramType, compIndex, paramName, paramValue, &paramDescr, paramVisibility);
         }
       } else {
-        pmap.add(paramType, comp, paramName, paramValue, &paramDescr, paramVisibility);
+        pmap.add(paramType, compIndex, paramName, paramValue, &paramDescr, paramVisibility);
       }
     }
   }

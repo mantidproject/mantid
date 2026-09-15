@@ -143,6 +143,22 @@ public:
                            const std::string &value, const std::string *const pDescription = nullptr,
                            const std::string &pVisible = "true");
 
+  /** @name Index-addressed mutators
+   *
+   * The same operations addressed by component index instead of by a legacy component pointer,
+   * for callers that already hold an index. These are the primary implementations; the
+   * pointer-based overloads above translate and delegate to them. A componentIndex of
+   * ComponentInfo::invalidIndex is ignored, so a caller whose lookup failed need not branch. */
+  //@{
+  void add(const std::string &type, const size_t componentIndex, const std::string &name, const std::string &value,
+           const std::string *const pDescription = nullptr, const std::string &pVisible = "true");
+  void add(const size_t componentIndex, const std::shared_ptr<Parameter> &par,
+           const std::string *const pDescription = nullptr);
+  void addFittingParameter(const size_t componentIndex, const std::string &name, const std::string &fittingFunction,
+                           const std::string &value, const std::string *const pDescription = nullptr,
+                           const std::string &pVisible = "true");
+  //@}
+
   /** @name Helper methods for adding and updating parameter types  */
   /// Create or adjust "pos" parameter for a component
   void addPositionCoordinate(const IComponent *comp, const std::string &name, const double value,
@@ -307,6 +323,28 @@ public:
   const std::vector<Geometry::ComponentID> &componentIds() const;
   void setInstrument(const Instrument *instrument);
 
+  /** Rebuild the 2.0 layers for a map that was copy-constructed from `source`.
+   *
+   * The copy constructor deliberately leaves them null; ExperimentInfo calls this after
+   * copying, because it is the owner and the only caller that needs them. A map whose
+   * instrument is not set is left alone. */
+  void rebuildBeamlineFrom(const ParameterMap &source);
+
+  /** @name Shared ownership of the 2.0 layers, for ExperimentInfo only.
+   *
+   * ExperimentInfo takes co-ownership of whatever setInstrument() built, so that it can serve
+   * componentInfo()/detectorInfo()/instrumentMetadata() directly instead of reaching through
+   * this map. Null before setInstrument() has run. */
+  //@{
+  /// The parameter store this map owns. Instrument::makeWrappers() installs it into a freshly
+  /// cloned ComponentInfo, so that the clone reads this map's parameters rather than the ones
+  /// belonging to whichever ComponentInfo it was cloned from.
+  const std::shared_ptr<ParameterInfo> &sharedParameterInfo() const { return m_parameterInfo; }
+  const std::shared_ptr<Geometry::ComponentInfo> &sharedComponentInfo() const { return m_componentInfo; }
+  const std::shared_ptr<Geometry::DetectorInfo> &sharedDetectorInfo() const { return m_detectorInfo; }
+  const std::shared_ptr<Geometry::InstrumentMetadata> &sharedInstrumentMetadata() const { return m_instrumentMetadata; }
+  //@}
+
   /** Rekey this map's parameters from the synthetic staging indices onto an instrument's real
    * component indices, returning the resulting store. */
   std::shared_ptr<ParameterInfo> rekey(const std::unordered_map<Geometry::IComponent const *, size_t> &idToIndex);
@@ -345,17 +383,19 @@ private:
   /// internal cache map instance for cached rotation values
   std::unique_ptr<Kernel::Cache<const ComponentID, Kernel::Quat>> m_cacheRotMap;
 
-  /// Pointer to the DetectorInfo wrapper. NULL unless the instrument is
-  /// associated with an ExperimentInfo object.
-  std::unique_ptr<Geometry::DetectorInfo> m_detectorInfo;
-
-  /// Pointer to the ComponentInfo wrapper. NULL unless the instrument is
-  /// associated with an ExperimentInfo object.
-  std::unique_ptr<Geometry::ComponentInfo> m_componentInfo;
-
-  /// Whole-of-instrument metadata built alongside m_componentInfo/m_detectorInfo. NULL
-  /// unless the instrument is associated with an ExperimentInfo object.
-  std::unique_ptr<Geometry::InstrumentMetadata> m_instrumentMetadata;
+  /** The 2.0 instrument layers, co-owned with the ExperimentInfo that built them.
+   *
+   * ExperimentInfo is the primary owner and serves its own accessors from its copies of these
+   * pointers rather than reaching through this map. They are co-owned here, rather than merely
+   * pointed at, because a parametrized legacy Component reaches ComponentInfo ONLY through its
+   * ParameterMap (Component::getPos() -> m_map->componentInfo().position(index())), and
+   * ExperimentInfo::getInstrument() hands out parametrized instruments that share this map and
+   * may outlive the ExperimentInfo. Shared ownership is what keeps those from dangling.
+   *
+   * All NULL unless the instrument is associated with an ExperimentInfo object. */
+  std::shared_ptr<Geometry::DetectorInfo> m_detectorInfo;
+  std::shared_ptr<Geometry::ComponentInfo> m_componentInfo;
+  std::shared_ptr<Geometry::InstrumentMetadata> m_instrumentMetadata;
 
   /// Pointer to the owning instrument for translating detector IDs into
   /// detector indices when accessing the DetectorInfo object. If the workspace

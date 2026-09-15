@@ -1483,6 +1483,8 @@ Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
   auto compInfo = componentInfo.cloneWithoutDetectorInfo();
   auto detInfo = std::make_unique<DetectorInfo>(detectorInfo);
   compInfo->m_componentInfo->setDetectorInfo(detInfo->m_detectorInfo.get());
+  // Point the clone at THIS map's parameter store.
+  compInfo->m_parameterInfo = pmap.sharedParameterInfo();
   const auto parInstrument = ParComponentFactory::createInstrument(
       std::shared_ptr<const Instrument>(this, NoDeleting()), std::shared_ptr<ParameterMap>(&pmap, NoDeleting()));
   detInfo->m_instrument = parInstrument;

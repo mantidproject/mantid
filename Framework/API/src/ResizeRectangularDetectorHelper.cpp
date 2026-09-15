@@ -14,8 +14,11 @@ namespace Mantid::API {
 void applyRectangularDetectorScaleToComponentInfo(Geometry::ComponentInfo &componentInfo,
                                                   const Geometry::ComponentID componentId, const double scaleX,
                                                   const double scaleY) {
+  applyRectangularDetectorScaleToComponentInfo(componentInfo, componentInfo.indexOf(componentId), scaleX, scaleY);
+}
 
-  const size_t componentIndex = componentInfo.indexOf(componentId);
+void applyRectangularDetectorScaleToComponentInfo(Geometry::ComponentInfo &componentInfo, const size_t componentIndex,
+                                                  const double scaleX, const double scaleY) {
   // Precompute transformation: Undo translation, undo rotation, scale, rotate
   // back, translate back:
   Eigen::Affine3d transformation(Eigen::Scaling(Eigen::Vector3d(scaleX, scaleY, 1)));
