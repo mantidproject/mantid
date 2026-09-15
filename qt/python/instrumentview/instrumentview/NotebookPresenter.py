@@ -36,15 +36,18 @@ class NotebookPresenter:
         self._view.reset_camera()
 
     def pick_detectors(self, detector_ids: list[int] | np.ndarray, sum_spectra: bool) -> Optional[Axes]:
-        indices = np.where(np.isin(self._model.detector_ids, detector_ids))[0]
+        """Toggle the picked state of the given detectors, then plot their spectra.
+
+        Indices are into the pickable detectors, to match the meshes created in setup().
+        """
+        indices = np.where(np.isin(self._model.pickable_detector_ids, detector_ids))[0]
         if len(indices) == 0:
             warnings.warn(f"Detectors not found for IDs: {detector_ids}")
-            return
-        mask = np.full(self._model.detector_ids.shape, False)
-        mask[indices] = True
-        self._model.negate_picked_visibility(mask)
+            return None
+        for index in indices:
+            self._model.update_point_picked_detectors(int(index), False, False)
         self._pickable_mesh[self._visible_label] = self._model.picked_visibility
-        self._model.extract_spectra_for_line_plot(self._model._workspace_x_unit, sum_spectra)
+        self._model.extract_spectra_for_line_plot(self._model.workspace_base_unit, sum_spectra)
         if self._model.line_plot_workspace is None or self._model.line_plot_workspace.getNumberHistograms() == 0:
             return None
         return self._view.plot_spectra(self._model.line_plot_workspace, sum_spectra)

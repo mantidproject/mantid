@@ -1,0 +1,1 @@
+- The new Instrument View is now documented. See :ref:`InstrumentViewer` for the user documentation. The documentation for the previous instrument view has moved to :ref:`LegacyInstrumentViewer`.
