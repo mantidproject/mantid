@@ -9,7 +9,7 @@ from itertools import chain
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt.testing import get_application
-from mantid.kernel import ConfigService
+from mantid.kernel import amend_config
 from workbench.config import CONF, WINDOW_ONTOP_FLAGS, WINDOW_STANDARD_FLAGS
 from workbench.utils.gather_interfaces import gather_cpp_interface_names
 from sys import platform
@@ -34,20 +34,16 @@ class CppInterfacesStartupTest(systemtesting.MantidSystemTest):
         self._interface_manager = InterfaceManager()
         self._cpp_interface_names = set(chain.from_iterable(gather_cpp_interface_names().values()))
         # Use legacy instrument view on windows as CI VMs do not currently have a modern version of openG required by new version/VTK.
+        self.config_overrides = {}
         if platform.startswith("win"):
-            self._orig_use_legacy_instrument_view = ConfigService.Instance().getString("InstrumentView.use_legacy_instrument_view")
-            ConfigService.Instance().setString("InstrumentView.use_legacy_instrument_view", "True")
-
-    def tearDown(self):
-        if platform.startswith("win"):
-            ConfigService.Instance().setString("InstrumentView.use_legacy_instrument_view", self._orig_use_legacy_instrument_view)
+            self.config_overrides = {"InstrumentView.use_legacy_instrument_view": "True"}
 
     def runTest(self):
         if len(self._cpp_interface_names) == 0:
             self.fail("Failed to find the names of the c++ interfaces.")
-
-        self._open_interfaces("On Top")
-        self._open_interfaces("Floating")
+        with amend_config(**self.config_overrides):
+            self._open_interfaces("On Top")
+            self._open_interfaces("Floating")
 
     def _open_interfaces(self, window_behaviour):
         CONF.set("AdditionalWindows/behaviour", window_behaviour)

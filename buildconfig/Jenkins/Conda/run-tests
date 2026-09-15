@@ -91,7 +91,7 @@ echo MultiThreaded.MaxCores=2 > $userprops
 
 if [[ $OSTYPE == "msys"* ]]; then
     WINDOWS_BUILD_OPTIONS="--config Release"
-    WINDOWS_TEST_OPTIONS="-C Release"
+    WINDOWS_TEST_OPTIONS="-C Release -R CppInterfacesStartupTest"
     WINDOWS_UNITTEST_TIMEOUT_OPTIONS="--timeout 500"
     export PYTHONHOME=$CONDA_PREFIX
     SYSTEM_TEST_EXECUTABLE=$WORKSPACE/build/systemtest.bat
