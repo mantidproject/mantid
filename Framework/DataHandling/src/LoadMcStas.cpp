@@ -517,7 +517,7 @@ LoadMcStas::readHistogramData(const std::map<std::string, std::vector<std::strin
  * be used
  */
 int LoadMcStas::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
-  if (!descriptor.isEntry("/entry1/simulation/name", Nexus::SCIENTIFIC_DATA_SET)) {
+  if (!descriptor.isDataSet("/entry1/simulation/name")) {
     return 0;
   }
   std::string value = descriptor.getStrData("/entry1/simulation/name");

@@ -16,6 +16,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidNexus/NexusDescriptor.h"
 
 #include <algorithm>
 #include <cctype>

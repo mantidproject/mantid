@@ -1,4 +1,6 @@
-# Defines functions to help deal with python packages
+# Defines functions to help deal with python packages Capture the directory of this file at include time, so functions
+# can reference sibling cmake scripts regardless of which directory calls them.
+set(_PYTHON_PKG_FUNCTIONS_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 # Directory of this module, captured at file scope where CMAKE_CURRENT_LIST_DIR is this file's location (inside a
 # function it would instead resolve to the caller's listfile). Used to locate helper scripts shipped alongside this
@@ -81,9 +83,10 @@ function(add_python_package pkg_name)
     set(_write_sitecustomize ${_python_package_functions_dir}/WriteSiteCustomize.cmake)
     add_custom_command(
       OUTPUT ${_egg_link_dir}/sitecustomize.py
-      COMMAND ${CMAKE_COMMAND} -DSITECUSTOMIZE_DIR=${_egg_link_dir} -P ${_write_sitecustomize}
+      COMMAND ${CMAKE_COMMAND} -DSITECUSTOMIZE_DIR=${_egg_link_dir} -P
+              ${_PYTHON_PKG_FUNCTIONS_DIR}/WriteSiteCustomize.cmake
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      DEPENDS ${_setup_py} ${_write_sitecustomize}
+      DEPENDS ${_setup_py} ${_PYTHON_PKG_FUNCTIONS_DIR}/WriteSiteCustomize.cmake
     )
     set(_pkg_depends ${_pkg_depends} ${_egg_link_dir}/sitecustomize.py)
   endif()

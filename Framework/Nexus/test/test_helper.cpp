@@ -1,6 +1,7 @@
 #include "test_helper.h"
 #include "MantidKernel/ConfigService.h"
 #include <cstdarg>
+#include <filesystem>
 #include <hdf5.h>
 #include <iostream>
 

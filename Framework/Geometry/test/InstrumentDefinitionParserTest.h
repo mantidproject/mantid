@@ -19,6 +19,8 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include <cxxtest/TestSuite.h>
 
+#include <filesystem>
+
 #include <boost/algorithm/string/replace.hpp>
 #include <gmock/gmock.h>
 

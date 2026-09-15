@@ -10,6 +10,7 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Logger.h"
 #include <algorithm>
+#include <filesystem>
 #include <fstream>
 #include <json/reader.h>
 

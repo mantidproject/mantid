@@ -23,6 +23,7 @@
 #include "MantidNexus/H5Util.h"
 
 #include <algorithm>
+#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling::NXcanSAS;
