@@ -9,6 +9,7 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QItemSelection>
+#include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSignalBlocker>
@@ -36,6 +37,10 @@ void QtPlottingView::initLayout() {
   m_ui.alignmentXAxis->addItem("Detector angle, theta", enumIndex(AlignmentXAxis::Theta));
   m_plottingWorkspaceTreeViewAdapter =
       std::make_unique<QtPlottingWorkspaceTreeViewAdapter>(m_ui.plottingWorkspaceTree, this);
+  for (auto *checkbox : {m_ui.filterIvsQBinned, m_ui.filterIvsLambda, m_ui.filterIvsQ}) {
+    connect(checkbox, &QCheckBox::toggled, this, &QtPlottingView::notifyWorkspaceFilterChanged);
+  }
+  connect(m_ui.workspaceFilter, &QLineEdit::textChanged, this, &QtPlottingView::notifyWorkspaceFilterChanged);
   connect(m_ui.plottingWorkspaceTree->selectionModel(), &QItemSelectionModel::selectionChanged, this,
           [this](QItemSelection const &selected, QItemSelection const &deselected) {
             m_plottingWorkspaceTreeViewAdapter->updateChildSelection(deselected, QItemSelectionModel::Deselect);
@@ -128,6 +133,31 @@ void QtPlottingView::clearPlottingWorkspaceTreeSelection() { m_plottingWorkspace
 
 void QtPlottingView::setPlottingWorkspaceTreeItemStates(std::vector<PlottingWorkspaceTreeItemState> const &itemStates) {
   m_plottingWorkspaceTreeViewAdapter->setPlottingWorkspaceTreeItemStates(itemStates);
+}
+
+void QtPlottingView::updatePlottingWorkspaceTreeItemStates(
+    std::vector<PlottingWorkspaceTreeItemState> const &itemStates) {
+  m_plottingWorkspaceTreeViewAdapter->updatePlottingWorkspaceTreeItemStates(itemStates);
+}
+
+void QtPlottingView::notifyWorkspaceFilterChanged() {
+  if (m_notifyee) {
+    m_notifyee->notifyWorkspaceFilterChanged();
+  }
+}
+
+PlottingWorkspaceFilter QtPlottingView::workspaceFilter() const {
+  std::vector<ReducedWorkspaceOutputType> outputTypes;
+  if (m_ui.filterIvsQBinned->isChecked()) {
+    outputTypes.emplace_back(ReducedWorkspaceOutputType::IvsQBinned);
+  }
+  if (m_ui.filterIvsLambda->isChecked()) {
+    outputTypes.emplace_back(ReducedWorkspaceOutputType::IvsLambda);
+  }
+  if (m_ui.filterIvsQ->isChecked()) {
+    outputTypes.emplace_back(ReducedWorkspaceOutputType::IvsQ);
+  }
+  return {m_ui.workspaceFilter->text().toStdString(), std::move(outputTypes)};
 }
 
 std::vector<std::string> QtPlottingView::selectedPlottingWorkspaceNames() const {

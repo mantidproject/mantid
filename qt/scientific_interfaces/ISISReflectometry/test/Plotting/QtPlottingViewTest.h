@@ -15,6 +15,7 @@
 #include <QColor>
 #include <QComboBox>
 #include <QItemSelectionModel>
+#include <QLineEdit>
 #include <QMouseEvent>
 #include <QPalette>
 #include <QPushButton>
@@ -672,6 +673,87 @@ public:
     TS_ASSERT_EQUALS(subscriber.addToExistingPlotChanged, 1);
   }
 
+  void testWorkspaceFilterControlsHaveExpectedDefaultsAndNotifyImmediately() {
+    QtPlottingView view;
+    TestPlottingViewSubscriber subscriber;
+    view.subscribe(&subscriber);
+    TS_ASSERT(view.workspaceFilter().text.empty());
+    TS_ASSERT_EQUALS(view.workspaceFilter().outputTypes,
+                     std::vector<ReducedWorkspaceOutputType>{ReducedWorkspaceOutputType::IvsQBinned});
+
+    view.findChild<QLineEdit *>("workspaceFilter")->setText("123");
+    TS_ASSERT_EQUALS(subscriber.filterChanged, 1);
+    TS_ASSERT_EQUALS(view.workspaceFilter().text, "123");
+    view.findChild<QCheckBox *>("filterIvsQ")->setChecked(true);
+    view.findChild<QCheckBox *>("filterIvsLambda")->setChecked(true);
+    TS_ASSERT_EQUALS(subscriber.filterChanged, 3);
+    TS_ASSERT_EQUALS(view.workspaceFilter().outputTypes.size(), 3);
+  }
+
+  void testApplyingVisibilityPreservesOnlyAvailableSelections() {
+    QtPlottingView view;
+    auto states = plottingWorkspaceTreeItemStates();
+    view.setPlottingWorkspaceTreeItemStates(states);
+    auto *tree = plottingWorkspaceTree(view);
+    auto const run = runIndex(tree);
+    click(tree, run);
+    TS_ASSERT_EQUALS(view.selectedPlottingWorkspaceNames().size(), 2);
+
+    states[0].children[0].children[0].visible = false;
+    view.updatePlottingWorkspaceTreeItemStates(states);
+
+    TS_ASSERT(tree->isRowHidden(0, run));
+    TS_ASSERT(tree->selectionModel()->isSelected(run));
+    TS_ASSERT_EQUALS(view.selectedPlottingWorkspaceNames(), std::vector<std::string>{"IvsQ_binned_12345"});
+    view.updatePlottingWorkspaceTreeItemStates(plottingWorkspaceTreeItemStates());
+    TS_ASSERT(!tree->isRowHidden(0, run));
+    TS_ASSERT_EQUALS(view.selectedPlottingWorkspaceNames().size(), 1);
+  }
+
+  void testApplyingUnavailableGroupStateClearsGroupAndChildSelections() {
+    QtPlottingView view;
+    auto states = plottingWorkspaceTreeItemStatesWithWorkspaceGroupsForSpinAsymmetry();
+    view.setPlottingWorkspaceTreeItemStates(states);
+    auto *tree = plottingWorkspaceTree(view);
+    auto const group = workspaceIndex(tree, 0, 0, 1);
+    click(tree, group);
+    TS_ASSERT_EQUALS(view.selectedPlottingWorkspaceNames().size(), 1);
+
+    auto &groupState = states[0].children[0].children[1];
+    groupState = mutedItem(std::move(groupState), false);
+    groupState.children[0].selectionMode = PlottingWorkspaceTreeSelectionMode::None;
+    view.updatePlottingWorkspaceTreeItemStates(states);
+
+    TS_ASSERT(view.selectedPlottingWorkspaceNames().empty());
+    TS_ASSERT_EQUALS(view.selectedPlottingWorkspaceGroupCount(), 0);
+    TS_ASSERT(!tree->selectionModel()->isSelected(group));
+    TS_ASSERT(rowIsMuted(tree, group));
+    view.updatePlottingWorkspaceTreeItemStates(plottingWorkspaceTreeItemStatesWithWorkspaceGroupsForSpinAsymmetry());
+    TS_ASSERT(view.selectedPlottingWorkspaceNames().empty());
+    click(tree, group);
+    TS_ASSERT_EQUALS(view.selectedPlottingWorkspaceNames().size(), 1);
+  }
+
+  void testParentSelectionChecksSelectableChildrenOfUnavailableContainers() {
+    QtPlottingView view;
+    view.setPlottingWorkspaceTreeItemStates({groupItem(
+        "sample",
+        {mutedItem(workspaceGroupItem("mixed_group", {workspaceItem("first", ReducedWorkspaceOutputType::IvsQBinned),
+                                                      workspaceItem("second", ReducedWorkspaceOutputType::IvsQBinned)}),
+                   false)})});
+    auto *tree = plottingWorkspaceTree(view);
+    auto const parent = groupIndex(tree);
+    auto const child = groupChildIndex(tree, 0, 0);
+    click(tree, parent);
+    tree->selectionModel()->select(child, QItemSelectionModel::Deselect | QItemSelectionModel::Rows);
+    TS_ASSERT_EQUALS(view.selectedPlottingWorkspaceNames().size(), 1);
+
+    click(tree, parent);
+
+    TS_ASSERT(tree->selectionModel()->isSelected(parent));
+    TS_ASSERT_EQUALS(view.selectedPlottingWorkspaceNames().size(), 2);
+  }
+
 private:
   class TestPlottingViewSubscriber : public PlottingViewSubscriber {
   public:
@@ -681,7 +763,9 @@ private:
     void notifyAddToExistingPlotChanged() override { ++addToExistingPlotChanged; }
     void notifyPlotOutputTypeChanged() override {}
     void notifyPlottingWorkspaceTreeSelectionChanged() override {}
+    void notifyWorkspaceFilterChanged() override { ++filterChanged; }
 
+    int filterChanged{0};
     int tiledClicked{0};
     int overplotClicked{0};
     int individualClicked{0};

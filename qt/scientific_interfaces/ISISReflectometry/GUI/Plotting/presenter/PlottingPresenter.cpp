@@ -90,10 +90,19 @@ void PlottingPresenter::notifyAddToExistingPlotChanged() { updatePlotActionState
 void PlottingPresenter::notifyPlotOutputTypeChanged() {
   updatePlottingWorkspaceTreeItemStates();
   updatePlotOutputControlsState();
-  updatePlotActionState();
 }
 
 void PlottingPresenter::notifyPlottingWorkspaceTreeSelectionChanged() { updatePlotActionState(); }
+
+void PlottingPresenter::notifyWorkspaceFilterChanged() {
+  try {
+    m_filterExpression = boost::regex(m_view->workspaceFilter().text);
+  } catch (boost::regex_error const &) {
+    // Keep the last valid expression while the user edits incomplete syntax.
+  }
+  m_view->updatePlottingWorkspaceTreeItemStates(plottingWorkspaceTreeItemStates());
+  updatePlotActionState();
+}
 
 void PlottingPresenter::notifyActiveFigureChanged() { updateActivePlotCompatibility(); }
 
@@ -149,18 +158,20 @@ void PlottingPresenter::updateAvailablePlotOutputTypes(std::string const &instru
       m_viewStateProvider.outputTypeViewItems(m_plotOptionsProvider->availableTypes(instrumentName)));
   updatePlotOutputControlsState();
   updatePlottingWorkspaceTreeItemStates();
-  updatePlotActionState();
 }
 
 void PlottingPresenter::updatePlottingWorkspaceTreeItemStates() {
+  m_view->setPlottingWorkspaceTreeItemStates(plottingWorkspaceTreeItemStates());
+  updatePlotActionState();
+}
+
+std::vector<PlottingWorkspaceTreeItemState> PlottingPresenter::plottingWorkspaceTreeItemStates() const {
   auto const selectedOutputType = m_view->selectedPlotOutputType();
   if (!selectedOutputType) {
-    m_view->setPlottingWorkspaceTreeItemStates({});
-    return;
+    return {};
   }
-
-  m_view->setPlottingWorkspaceTreeItemStates(
-      m_viewStateProvider.plottingWorkspaceTreeItemStates(m_plottingWorkspaceTree.items(), *selectedOutputType));
+  return m_viewStateProvider.plottingWorkspaceTreeItemStates(m_plottingWorkspaceTree.items(), *selectedOutputType,
+                                                             m_filterExpression, m_view->workspaceFilter().outputTypes);
 }
 
 void PlottingPresenter::updatePlotActionState() const {
