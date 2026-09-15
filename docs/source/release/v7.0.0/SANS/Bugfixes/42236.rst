@@ -1,0 +1,1 @@
+- In the :ref:`ISIS SANS GUI <ISIS_Sans_interface_contents>`, reloading a batch file saved from the GUI now restores sample shape and any options that were entered.

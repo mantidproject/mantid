@@ -493,16 +493,28 @@ class RunTabPresenter(PresenterCommon):
             self.on_user_file_load()
 
     def update_view_from_table_model(self):
+        # Optional columns stay visible if the user enabled them, and are shown if any row has data in them
+        show_periods = self._view.is_multi_period_view()
+        show_geometry = self._view.is_sample_geometry()
+        show_background = self._view.is_background_subtraction()
+
         self._view.clear_table()
-        self._view.hide_period_columns()
         num_rows = self._table_model.get_number_of_rows()
         for row_index in range(num_rows):
             row = self._table_model.get_row(row_index)
             self._view.add_row(row)
             self._view.change_row_color(row_state_to_colour_mapping[row.state], row_index + 1)
             self._view.set_row_tooltip(row.tool_tip, row_index + 1)
-            if row.is_multi_period():
-                self._view.show_period_columns()
+            show_periods = show_periods or row.is_multi_period()
+            show_geometry = show_geometry or any((row.sample_height, row.sample_width, row.sample_shape))
+            show_background = show_background or any((row.background_ws, row.scale_factor))
+
+        if show_periods:
+            self._view.show_period_columns()
+        else:
+            self._view.hide_period_columns()
+        self._view.set_sample_geometry_mode(bool(show_geometry))
+        self._view.set_background_subtraction_mode(bool(show_background))
         self._view.remove_rows([0])
         self._view.clear_selection()
 
