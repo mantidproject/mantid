@@ -126,8 +126,8 @@ QPointF FigureCanvasQt::toDataCoords(QPoint pos) const {
   // matplotlib's coordinate system, (0,0) is bottom left,
   // and then to the data coordinates
   GlobalInterpreterLock lock;
-  const int dpiRatio(static_cast<int>(
-      PyFloat_AsDouble(Python::Object(m_figure.pyobj().attr("canvas").attr("device_pixel_ratio")).ptr())));
+  const double dpiRatio(
+      PyFloat_AsDouble(Python::Object(m_figure.pyobj().attr("canvas").attr("device_pixel_ratio")).ptr()));
   const double xPosPhysical = pos.x() * dpiRatio;
   // Y=0 is at the bottom
   double height = PyFloat_AsDouble(Python::Object(m_figure.pyobj().attr("bbox").attr("height")).ptr());
