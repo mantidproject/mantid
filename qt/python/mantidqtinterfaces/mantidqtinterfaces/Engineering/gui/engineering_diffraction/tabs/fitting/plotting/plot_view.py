@@ -17,7 +17,7 @@ from workbench.plotting.toolbar import ToolbarStateManager
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_toolbar import FittingPlotToolbar
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObserver
 from matplotlib.backend_bases import MouseEvent, ResizeEvent
-from mantid.api import MatrixWorkspace
+from mantid.api import MatrixWorkspace, MinimizerStatus
 from matplotlib.axes import Axes
 
 
@@ -258,8 +258,9 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         if status:
             self.fit_browser.fitResultsChanged.emit(status)
             self.fit_browser.changeWindowTitle.emit(status)
-            # update browser with output function and save setup if successful
-            if "success" in status.lower():
+            # update browser with output function and save setup if the fit converged - which
+            # includes the tolerance-limited stopping conditions, not just an exact "success"
+            if MinimizerStatus.isConverged(status):
                 self.fit_browser.loadFunction(func_str)
                 self.fit_browser.save_current_setup(setup_name)
 

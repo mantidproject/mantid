@@ -61,7 +61,11 @@ class CalibrationPresenter(RbScopeConsumer, InstrumentScopeConsumer):
         if self.view.get_load_checked():
             # loading calibration from path to .prm
             self.current_calibration.set_calibration_from_prm_fname(self.view.get_path_filename(), self.instrument)
-            self.current_calibration.van_file = van_file
+            # the .prm file name only carries the instrument and the ceria run, so the vanadium has
+            # to come from the view. It must be set on vanadium_path, which is what is_valid and the
+            # focus path read - assigning to a van_file attribute silently created a new one, so a
+            # loaded calibration reported itself invalid until the focus tab filled the gap in.
+            self.current_calibration.vanadium_path = van_file or None
         else:
             # update current calibration with new data
             sample_file = self.view.get_sample_filename()

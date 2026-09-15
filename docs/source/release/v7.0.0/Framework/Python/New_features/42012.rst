@@ -1,0 +1,1 @@
+- Added ``mantid.api.MinimizerStatus``, exposing the status strings a function minimizer reports through a fit's ``OutputStatus`` and an ``isConverged`` test for them, so Python callers no longer have to hard code the wording. By default the tolerance-limited stopping conditions count as converged alongside ``success``; pass ``strict=True`` for an exact match.

@@ -315,7 +315,9 @@ class TextureCorrectionPresenter(RbScopeConsumer, InstrumentScopeConsumer, Algor
         self.current_calibration = CalibrationInfo(instrument=self.instrument)
 
     def update_custom_shape_finder_vis(self) -> None:
-        self.view.set_finder_gauge_vol_visible(self.view.get_shape_method() == "Custom Shape")
+        # the finder belongs to the absorption section, so a shape change must not reveal it while
+        # that section is hidden - this mirrors the check in view.set_absorption_section_visibility
+        self.view.set_finder_gauge_vol_visible(self.view.include_absorption() and self.view.get_shape_method() == "Custom Shape")
 
     def on_create_ref_sample_clicked(self) -> None:
         self.model.create_reference_ws(self.rb_num, self.instrument)
