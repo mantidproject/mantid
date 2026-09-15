@@ -139,6 +139,23 @@ class SofQWMoments(DataProcessorAlgorithm):
 
         # create output workspace
         moments.insert(0, moments_0)
+
+        # Some combinations of the Multiply/Divide operations above (e.g. a single-spectrum
+        # input workspace) do not necessarily preserve a non-default vertical axis on the
+        # moment workspaces. Restore it explicitly from the input workspace so that the
+        # Transpose step below (which turns this axis into the output's X axis) always has
+        # a recognised unit to work with.
+        q_axis = input_workspace.getAxis(1)
+        if q_axis.isNumeric():
+            for moment_ws in moments:
+                current_axis = moment_ws.getAxis(1)
+                if not current_axis.isNumeric() or current_axis.getUnit().unitID() != q_axis.getUnit().unitID():
+                    new_axis = NumericAxis.create(moment_ws.getNumberHistograms())
+                    for i in range(moment_ws.getNumberHistograms()):
+                        new_axis.setValue(i, q_axis.getValue(i))
+                    new_axis.setUnit(q_axis.getUnit().unitID())
+                    moment_ws.replaceAxis(1, new_axis)
+
         transpose_alg = self.createChildAlgorithm("Transpose", enableLogging=False)
         convert_hist_alg = self.createChildAlgorithm("ConvertToHistogram", enableLogging=False)
         convert_units_alg = self.createChildAlgorithm("ConvertUnits", enableLogging=False)

@@ -113,6 +113,8 @@ public:
   void setAlwaysLoadAsGroup(bool const loadAsGroup);
   /// Set an extra property on the load algorithm before execution
   void setLoadProperty(std::string const &propertyName, bool const value);
+  /// Set an extra string-valued property on the load algorithm before execution
+  void setLoadProperty(std::string const &propertyName, std::string const &value);
 
   // These are accessors/modifiers of the child FileFinderWidget
   /**

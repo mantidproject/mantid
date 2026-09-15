@@ -46,7 +46,19 @@ class IndirectCommonTests(unittest.TestCase):
 
     def test_get_instrument_and_run_failure(self):
         ws = self.make_dummy_QENS_workspace(add_logs=False)
-        self.assertRaises(RuntimeError, indirect_common.get_instrument_and_run, ws)
+        _instrument, run_number = indirect_common.get_instrument_and_run(ws)
+
+        self.assertEqual(run_number, "0")
+
+    def test_get_run_number_returns_zero_for_workspace_with_no_run_number(self):
+        # Simulates a workspace loaded from a text file, which has no run number,
+        # instrument or "run_number" log associated with it.
+        ws_name = "simulated_data"
+        CreateWorkspace(DataX=[0, 1, 2], DataY=[1, 2], OutputWorkspace=ws_name)
+
+        run_number = indirect_common.get_run_number(ws_name)
+
+        self.assertEqual(run_number, "0")
 
     def test_get_workspace_name_prefix_ISIS(self):
         config["default.facility"] = "ISIS"
