@@ -134,7 +134,8 @@ class SideBySide(Projection, projection_types={ProjectionType.SIDE_BY_SIDE: {"ax
             return flat_banks
 
         for bank in rectangular_banks:
-            bank_detector_ids = np.array(range(bank.minDetectorID(), bank.maxDetectorID() + 1))
+            grid = component_info.pixelGridComponent(component_info.indexOfAny(bank.getName()))
+            bank_detector_ids = np.array(range(grid.minDetectorID, grid.maxDetectorID + 1))
             valid_detector_ids = self._detector_ids[np.isin(self._detector_ids, bank_detector_ids)]
             if len(valid_detector_ids) == 0:
                 continue
@@ -145,9 +146,9 @@ class SideBySide(Projection, projection_types={ProjectionType.SIDE_BY_SIDE: {"ax
             rotation = bank.getRotation()
             flat_bank.rotation = Rotation.from_quat([rotation.imagI(), rotation.imagJ(), rotation.imagK(), rotation.real()])
             flat_bank.detector_ids = list(valid_detector_ids)
-            flat_bank.dimensions = np.abs([bank.xsize(), bank.ysize(), bank.zsize()])
-            flat_bank.steps = np.abs([bank.xstep(), bank.ystep(), bank.zstep()])
-            flat_bank.pixels = [bank.xpixels(), bank.ypixels(), bank.zpixels()]
+            flat_bank.dimensions = np.abs([grid.nX * grid.xStep, grid.nY * grid.yStep, grid.nZ * grid.zStep])
+            flat_bank.steps = np.abs([grid.xStep, grid.yStep, grid.zStep])
+            flat_bank.pixels = [grid.nX, grid.nY, grid.nZ]
             parent_component_index = component_info.parent(int(self._detector_id_component_index_map[flat_bank.detector_ids[0]]))
             override_pos = self._calculator.getSideBySideViewPos(component_info, parent_component_index)
             flat_bank.has_position_in_idf = override_pos[0]

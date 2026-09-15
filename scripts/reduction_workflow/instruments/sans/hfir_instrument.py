@@ -78,28 +78,30 @@ def get_masked_ids(nx_low, nx_high, ny_low, ny_high, workspace, component_name=N
 
     IDs = []
     if component.type() == "RectangularDetector":
+        component_info = workspace.componentInfo()
+        grid = component_info.pixelGridComponent(component_info.indexOfAny(component_name))
         # left
         i = 0
-        while i < nx_low * component.idstep():
-            IDs.append(component.idstart() + i)
+        while i < nx_low * grid.idStep:
+            IDs.append(grid.idStart + i)
             i += 1
         # right
-        i = component.maxDetectorID() - nx_high * component.idstep()
-        while i < component.maxDetectorID():
+        i = grid.maxDetectorID - nx_high * grid.idStep
+        while i < grid.maxDetectorID:
             IDs.append(i)
             i += 1
         # low: 0,256,512,768,..,1,257,513
         for row in range(ny_low):
-            i = row + component.idstart()
-            while i < component.nelements() * component.idstep() - component.idstep() + ny_low + component.idstart():
+            i = row + grid.idStart
+            while i < grid.nX * grid.idStep - grid.idStep + ny_low + grid.idStart:
                 IDs.append(i)
-                i += component.idstep()
+                i += grid.idStep
         # high # 255, 511, 767..
         for row in range(ny_high):
-            i = component.idstep() + component.idstart() - row - 1
-            while i < component.nelements() * component.idstep() + component.idstart():
+            i = grid.idStep + grid.idStart - row - 1
+            while i < grid.nX * grid.idStep + grid.idStart:
                 IDs.append(i)
-                i += component.idstep()
+                i += grid.idStep
     elif component.type() == "CompAssembly" or component.type() == "ObjCompAssembly" or component.type() == "DetectorComponent":
         # Wing detector
         # x

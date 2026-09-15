@@ -155,12 +155,13 @@ class InstrumentArrayConverter:
         return detids, detector_edges, irow_peak, icol_peak
 
     def _get_detid_array_rect_detector(self, bank, detid, row, col, drows, dcols, nrows_edge, ncols_edge):
-        col_step, row_step = bank.idstep(), bank.idstepbyrow()  # step in detID along col and row
+        grid = self.ws.componentInfo().pixelGridComponent(self.ws.componentInfo().indexOfAny(bank.getName()))
+        col_step, row_step = grid.idStep, grid.idStepByRow  # step in detID along col and row
         # need to adjust range depending on whether above min/max row/col
-        drow_vec = np.arange(max(0, row - drows), min(row + drows + 1, bank.xpixels())) - row
-        dcol_vec = np.arange(max(0, col - dcols), min(col + dcols + 1, bank.ypixels())) - col
+        drow_vec = np.arange(max(0, row - drows), min(row + drows + 1, grid.nX)) - row
+        dcol_vec = np.arange(max(0, col - dcols), min(col + dcols + 1, grid.nY)) - col
         dcol, drow = np.meshgrid(dcol_vec, drow_vec)
-        if bank.idfillbyfirst_y():
+        if grid.idFillOrder[0] == "y":
             col_step, row_step = row_step, col_step
         detids = detid + dcol * col_step + drow * row_step
         # create bool mask for detector edges
@@ -168,8 +169,8 @@ class InstrumentArrayConverter:
             (
                 drow <= -row + nrows_edge - 1,
                 dcol <= -col + ncols_edge - 1,
-                drow >= bank.xpixels() - nrows_edge - row,
-                dcol >= bank.ypixels() - ncols_edge - col,
+                drow >= grid.nX - nrows_edge - row,
+                dcol >= grid.nY - ncols_edge - col,
             )
         )
         # get indices of peak centre

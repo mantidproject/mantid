@@ -150,12 +150,16 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
 
         array_converter = InstrumentArrayConverter(ws)
         banks = ws.getInstrument().findRectDetectors()
+        component_info = ws.componentInfo()
+        detector_info = ws.detectorInfo()
         prog_reporter = Progress(self, start=0.0, end=1.0, nreports=len(banks))
         for bank in banks:
             prog_reporter.report(f"Searching in {bank.getName()}")
             # add a dummy peak at center of detector (used in PeakData to get data arrays) - will be deleted after
             irow_to_del = peaks.getNumberPeaks()
-            detid = bank[bank.xpixels() // 2][bank.ypixels() // 2].getID()
+            bank_index = component_info.indexOfAny(bank.getName())
+            grid = component_info.pixelGridComponent(bank_index)
+            detid = detector_info.detid(component_info.detectorIndexAtXYZ(bank_index, grid.nX // 2, grid.nY // 2, 0))
             ispec = ws.getIndicesFromDetectorIDs([detid])[0]
             xspec = ws.x(ispec)
             icen = len(xspec) // 2
@@ -171,7 +175,7 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
                 nbins = self.getProperty("NBins").value
 
             # get data in detector coords
-            peak_data = array_converter.get_peak_data(dummy_pk, detid, bank.getName(), bank.xpixels(), bank.ypixels(), 1, 1)
+            peak_data = array_converter.get_peak_data(dummy_pk, detid, bank.getName(), grid.nX, grid.nY, 1, 1)
             _, y, esq, _ = peak_data.get_data_arrays()  # 3d arrays [rows x cols x tof]
             if peak_finding_strategy == "IOverSigma":
                 threshold = self.getProperty("ThresholdIoverSigma").value
