@@ -1,1 +1,1 @@
-- Add new IDF for ISIS GEM instrument, including Bank 5X and correcting other issues
+- Add new IDF for ISIS GEM instrument, including Bank 5X, updating geometry from GEM_225_DAE3_detector.dat tables and fix inversions of B1 modules.
