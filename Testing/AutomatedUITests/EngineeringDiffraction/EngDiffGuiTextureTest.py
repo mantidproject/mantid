@@ -95,6 +95,11 @@ class _TextureTestBase(EngDiffGuiTestBase):
         figure, _canvas = self.texture_view.get_plot_axis()
         return figure.axes
 
+    def _collection_types(self):
+        """Class names of what is drawn on the pole figure, which is how the scatter and contour
+        modes are told apart - both draw the same number of collections."""
+        return [type(collection).__name__ for collection in self.plot_axes()[0].collections]
+
 
 class EngDiffGuiTextureLoadingTest(_TextureTestBase):
     """Loading runs and parameter files, and the table buttons."""
@@ -228,11 +233,57 @@ class EngDiffGuiTexturePoleFigureTest(_TextureTestBase):
     RB_NUMBER = "5432"
 
     def test_pole_figure(self):
+        self._check_texture_directions()
         self._check_pole_figure_without_parameters()
         self._check_projection_methods()
         self._check_pole_figure_with_parameters()
+        self._check_contour_pole_figure()
         self._check_scattering_correction()
         self._check_rb_number_save_location()
+
+    def _check_texture_directions(self):
+        """Guide Test 12 step 6: the sample directions the pole figure is computed against.
+
+        The guide calls them ``D1``/``D2``/``D3``; the interface and its settings call them
+        ``RD``/``ND``/``TD``, and there is no ``D1`` anywhere in the code.
+        """
+        from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
+
+        self.apply_settings(rd_dir="1,0,0", nd_dir="0,1,0", td_dir="0,0,1")
+
+        with self.subTest("Test 12 / step 6 (the texture directions set in the dialog are the ones stored)"):
+            import numpy as np
+
+            # the columns are the RD, ND and TD directions in order, so the three axes above are the
+            # identity; the names come back alongside them
+            transform, names = output_settings.get_texture_axes_transform(None)
+            np.testing.assert_allclose(np.identity(3), transform)
+            self.assertEqual(("RD", "ND", "TD"), names)
+
+    def _check_contour_pole_figure(self):
+        """Guide Test 12 steps 12-14: unticking the scatter option contours the pole figure instead,
+        which is told apart by what ends up on the axes rather than by the setting alone."""
+        with self.subTest("Test 12 / step 12 (the scatter option really does scatter the points)"):
+            self.assertIn("PathCollection", self._collection_types(), "the scattered pole figure has no scatter points")
+
+        # the kernel size is only editable once the scatter option is off, which is the order the
+        # guide gives the two steps in
+        self.apply_settings(plot_exp_pf=False, contour_kernel="6.0")
+        self.calculate_pole_figure()
+
+        with self.subTest("Test 12 / step 13 (the contour kernel size is stored)"):
+            self.assertEqual("6.0", self.get_engineering_setting("contour_kernel"))
+
+        with self.subTest("Test 12 / step 14 (the pole figure is contoured instead of scattered)"):
+            # the count of collections is unchanged - the axis arrows account for the rest - so it is
+            # the kind of artist that distinguishes the two modes
+            drawn = self._collection_types()
+            self.assertIn("QuadContourSet", drawn, f"the pole figure was not contoured; drew {drawn}")
+            self.assertNotIn("PathCollection", drawn, f"the scatter points are still drawn; drew {drawn}")
+
+        # back to the scatter plot, which the checks after this one expect
+        self.apply_settings(plot_exp_pf=True)
+        self.calculate_pole_figure()
 
     def _check_pole_figure_without_parameters(self):
         self.load_workspaces()

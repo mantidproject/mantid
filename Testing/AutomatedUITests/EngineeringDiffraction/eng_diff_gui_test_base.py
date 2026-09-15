@@ -309,6 +309,24 @@ class EngDiffGuiTestBase(AutomatedUITestBase):
         click(view.button_focus)
         self.wait_for_async_task(self.focus_presenter.worker, what="focus")
 
+    # ------------------------------------------------------------------ the calibration plot
+
+    # how many spectra plot_tof_vs_d_from_calibration puts in one figure window
+    CALIBRATION_PLOT_SPECTRA_PER_FIGURE = 4
+
+    def calibration_plot_layout(self, n_spectra):
+        """The number of subplots in each calibration figure, for ``n_spectra`` focused spectra.
+
+        One column per spectrum over two rows - fitted TOF above, residuals below - filling a figure
+        at a time. The guide states this per region of interest ("only 2 subplots", "5 tiled plot
+        windows, 4 spectra per window"); expressing it once keeps those from drifting apart.
+        """
+        per_figure = self.CALIBRATION_PLOT_SPECTRA_PER_FIGURE
+        columns = [per_figure] * (n_spectra // per_figure)
+        if n_spectra % per_figure:
+            columns.append(n_spectra % per_figure)
+        return [2 * ncols for ncols in columns]
+
     # ------------------------------------------------------------------ output locations
 
     def calibration_dir(self, rb_number=None):

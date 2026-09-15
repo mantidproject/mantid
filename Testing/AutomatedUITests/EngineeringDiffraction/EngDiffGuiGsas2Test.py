@@ -26,7 +26,13 @@ from unittest import mock
 
 import numpy as np
 
-from eng_diff_gui_test_base import EngDiffGuiTestBase, TAB_GSAS2
+from eng_diff_gui_test_base import (
+    ENGINX_SYNTHETIC_CERIA_RUN,
+    ENGINX_SYNTHETIC_VANADIUM_RUN,
+    EngDiffGuiTestBase,
+    TAB_GSAS2,
+    create_enginx_ceria_and_vanadium,
+)
 from qt_interaction_helpers import click, combo_items, process_events, select_combo, set_checkbox, set_finder_text
 
 GSAS2_MODEL = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model"
@@ -44,6 +50,9 @@ FULL_PROJECT = f"{PROJECT_NAME}_{FOCUSED_BASENAME}"
 N_BANKS = 2
 # diffractometer constants of roughly the right magnitude for ENGIN-X, used for the fabricated .prm
 BANK_DIFC = (18400.0, 18500.0)
+
+# the cell length the guide types into Override Unit Cell Length
+OVERRIDE_CELL_LENGTH = "3.65"
 
 
 class _Gsas2TestBase(EngDiffGuiTestBase):
@@ -144,6 +153,29 @@ class EngDiffGuiGsas2SingleTest(_Gsas2TestBase):
         self._check_serialized_inputs()
         self._check_plot()
         self._check_x_limits_round_trip()
+        self._check_override_unit_cell()
+
+    def _check_override_unit_cell(self):
+        """Guide Test 13 step 11: Override Unit Cell Length replaces the phase's lattice parameters.
+
+        The guide judges this by the fit looking better, which needs a real GSAS-II; what is
+        checkable here is that the value typed in reaches GSAS-II instead of the cif's own.
+        """
+        self.subprocess_calls = []
+        self.fill_in_refinement()
+        self.gsas2_view.override_unitcell_length.setText(OVERRIDE_CELL_LENGTH)
+        process_events()
+        self.refine()
+
+        self.assertEqual(1, len(self.subprocess_calls), "GSAS-II was not called with the overridden cell")
+
+        with self.subTest("Test 13 / step 11 (the overridden cell length is what GSAS-II is given)"):
+            lengths = self.serialized_inputs()["override_cell_lengths"]
+            self.assertTrue(lengths, "no cell lengths were passed to GSAS-II")
+            # a single value is read as a cubic cell, so all three axes take it
+            expected = float(OVERRIDE_CELL_LENGTH)
+            for axis in lengths[0][:3]:
+                self.assertAlmostEqual(expected, axis, places=6)
 
     # -------------------------------------------------------------- initial state
 
@@ -225,6 +257,18 @@ class EngDiffGuiGsas2SingleTest(_Gsas2TestBase):
         with self.subTest("Test 13 / a bank count that disagrees with the instrument file is rejected"):
             self.assertIn("same number of banks", logs.text)
             self.assertEqual([], self.subprocess_calls)
+
+        # the guide's third error case: several data files that disagree with *each other*
+        self.subprocess_calls = []
+        self.fill_in_refinement(gss_paths=[self.gss_path, single_bank])
+        with self.captured_logs(level="error") as logs:
+            self.refine()
+        with self.subTest("Test 14 / step 9 (a data file whose bank count differs is reported and skipped)"):
+            self.assertIn("same number of banks", logs.text)
+            # Note the difference from the two cases above, which reject the whole request: here the
+            # offending file is dropped and the remaining one is still refined. The guide describes
+            # this case as simply showing an error, which is only half of what happens.
+            self.assertEqual(1, len(self.subprocess_calls), "the file with a matching bank count should still be refined")
 
     # -------------------------------------------------------------- a successful refinement
 
@@ -393,6 +437,55 @@ class EngDiffGuiGsas2SingleTest(_Gsas2TestBase):
             self.assertEqual(3, len(self.subprocess_calls), "the third refinement did not run")
             limits = self.serialized_inputs()["limits"]
             self.assertNotAlmostEqual(narrowed_min, limits[0][0], places=2)
+
+
+class EngDiffGuiGsas2PrefillTest(EngDiffGuiTestBase):
+    """Guide Test 13 steps 2-5: the GSAS II tab's paths are filled in by the preceding calibration
+    and focus.
+
+    The only class here that calibrates and focuses for real. The refinement tests stage a
+    fabricated ``.gss`` and ``.prm`` instead, which is far quicker but leaves the notifiers that
+    carry those paths across from the Run Processing tab untested; keeping this separate confines
+    that cost to one class.
+    """
+
+    def seeded_settings(self):
+        settings = super(EngDiffGuiGsas2PrefillTest, self).seeded_settings()
+        # the fixture generates Gaussian peaks, so the calibration must fit the same shape
+        settings["default_peak_ENGINX"] = "Gaussian"
+        return settings
+
+    def pre_gui_setup(self):
+        self.data_dir = os.path.join(self.tmp_root, "enginx_data")
+        os.makedirs(self.data_dir, exist_ok=True)
+        create_enginx_ceria_and_vanadium(self.data_dir)
+        self.add_data_search_dir(self.data_dir)
+
+    def test_paths_are_prefilled_from_calibration_and_focus(self):
+        ceria = str(ENGINX_SYNTHETIC_CERIA_RUN)
+        self.set_region_of_interest(None)
+        calibration = self.calibrate(ceria=ceria, vanadium=str(ENGINX_SYNTHETIC_VANADIUM_RUN))
+        self.assertTrue(calibration.is_valid(), "the calibration reported itself invalid")
+        self.focus(runs=ceria)
+
+        self.show_tab(TAB_GSAS2)
+        view = self.gsas2_view
+
+        with self.subTest("Test 13 / step 5 (the Instrument Group path is prefilled from the calibration)"):
+            prm = view.instrument_group_file_finder.getText()
+            self.assertTrue(prm, "the instrument group finder was not prefilled")
+            self.assertTrue(prm.endswith(".prm"), f"expected a prm file, got {prm}")
+            self.assertIn(ceria, prm)
+
+        with self.subTest("Test 13 / step 5 (the Focused Data path is prefilled from the focus)"):
+            gss = view.focused_data_file_finder.getText()
+            self.assertTrue(gss, "the focused data finder was not prefilled")
+            self.assertTrue(gss.endswith(".gss"), f"expected a gss file, got {gss}")
+            self.assertIn(ceria, gss)
+
+        with self.subTest("Test 13 / step 5 (both prefilled paths exist on disk)"):
+            for path in (view.instrument_group_file_finder.getText(), view.focused_data_file_finder.getText()):
+                self.assertTrue(os.path.exists(path), f"the tab was prefilled with a path that does not exist: {path}")
 
 
 class EngDiffGuiGsas2MultipleTest(_Gsas2TestBase):

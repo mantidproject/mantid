@@ -32,7 +32,18 @@ from eng_diff_gui_test_base import (
     TAB_RUN_PROCESSING,
     create_enginx_ceria_and_vanadium,
 )
-from qt_interaction_helpers import figure_numbers, process_events, set_checkbox
+from qt_interaction_helpers import (
+    assert_axes_not_blank,
+    assert_curve_matches_workspace,
+    curve_by_label,
+    curve_labels,
+    curves,
+    figure_numbers,
+    new_figures,
+    plot_labels,
+    process_events,
+    set_checkbox,
+)
 
 INSTRUMENT = "ENGINX"
 CERIA = str(ENGINX_SYNTHETIC_CERIA_RUN)
@@ -107,6 +118,22 @@ class EngDiffGuiCalibrateAndFocusTest(_RunProcessingTestBase):
 
         with self.subTest("Test 1 / step 4 (the save location reported is the one in settings)"):
             self.assertIn(self.save_dir, self.savedir_text())
+
+        with self.subTest("Test 1 / step 6 (Full Calibration defaults to a nexus file that exists)"):
+            from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_presenter import DEFAULT_SETTINGS
+            from qt_interaction_helpers import wait_for_file_finder
+
+            # nothing has been stored for it in this isolated settings file, so what the dialog shows
+            # is the shipped default - which is the guide's point
+            expected = DEFAULT_SETTINGS[f"full_calibration_{INSTRUMENT}"]
+            self.assertTrue(expected.endswith(".nxs"), f"the default full calibration is not a nexus file: {expected}")
+            self.assertTrue(os.path.exists(expected), f"the default full calibration does not exist: {expected}")
+
+            settings_view = self.open_settings()
+            wait_for_file_finder(settings_view.finder_fullCalib, msg="full calibration finder")
+            self.assertEqual(os.path.normcase(expected), os.path.normcase(settings_view.get_full_calibration()))
+            settings_view.close()
+            process_events(2)
 
     def _check_calibration_state(self, calibration, logs):
         from Engineering.common.instrument_config import ENGINX_GROUP
@@ -271,19 +298,92 @@ class EngDiffGuiPlotOutputTest(_RunProcessingTestBase):
         # figure can only have come from the checkbox
         before = figure_numbers()
         self.calibrate(ceria=CERIA, vanadium=VANADIUM, plot_output=True)
+        calibration_figures = new_figures(before)
         with self.subTest("Test 1 / step 9 (a plot appears when Plot Calibrated Workspace is on)"):
-            self.assertTrue(figure_numbers() - before, "no new figure was created by the calibration")
+            self.assertTrue(calibration_figures, "no new figure was created by the calibration")
+        # a precondition: every content check below indexes into this
+        self.assertEqual(1, len(calibration_figures), f"expected one figure for one bank, got {len(calibration_figures)}")
+        self._check_calibration_plot(calibration_figures[0])
 
         before = figure_numbers()
         self.focus(runs=CERIA, plot_output=True)
+        focus_figures = new_figures(before)
         with self.subTest("Test 1 / step 14 (a plot appears when Plot Focused Workspace is on)"):
-            self.assertTrue(figure_numbers() - before, "no new figure was created by the focus")
+            self.assertTrue(focus_figures, "no new figure was created by the focus")
+        self.assertEqual(1, len(focus_figures), f"expected one figure for one focused run, got {len(focus_figures)}")
+        self._check_focus_plot(focus_figures[0])
 
         with self.subTest("Test 1 / step 9 (the checkbox state is what the view reports)"):
             view = self.run_processing_view
             self.assertTrue(view.get_plot_output())
             set_checkbox(view.check_plotOutput, False)
             self.assertFalse(view.get_plot_output())
+
+    def _check_calibration_plot(self, figure):
+        """The figure the guide shows at Test 1 step 11 and describes at Test 3 step 4: one column
+        per focused spectrum, fitted TOF against d-spacing above the quadratic fit's residuals."""
+        with self.subTest("Test 1 / step 11 (the calibration plot has a TOF row and a residuals row)"):
+            self.assertEqual(2, len(figure.axes), "expected two subplots for a single bank")
+
+        tof_axes, residual_axes = figure.axes
+
+        with self.subTest("Test 1 / step 11 (the top row plots the peak centres and the quadratic fit)"):
+            # plot_labels rather than curve_labels: the peak centres are an errorbar series, which
+            # carries its name on the container rather than on the line
+            labels = plot_labels(tof_axes)
+            self.assertIn("Peak centres", labels)
+            self.assertIn("quadratic fit", labels)
+            assert_axes_not_blank(tof_axes, "TOF vs d-spacing")
+
+        with self.subTest("Test 1 / step 11 (the axes are labelled as TOF against d-spacing)"):
+            self.assertEqual("Fitted TOF (μs)", tof_axes.get_ylabel())
+            self.assertEqual("Residuals (μs)", residual_axes.get_ylabel())
+            self.assertEqual("d-spacing (Ang)", residual_axes.get_xlabel())
+
+        with self.subTest("Test 1 / step 11 (the residuals row is drawn about zero)"):
+            assert_axes_not_blank(residual_axes, "residuals")
+            self.assertTrue(
+                any((y == 0.0).all() for _label, _x, y in curves(residual_axes) if len(y)),
+                "the residuals row has no zero line to read the residuals against",
+            )
+
+        with self.subTest("Test 1 / step 11 (the subplot is titled for the calibrated region)"):
+            expected = self.calibration_presenter.current_calibration.get_subplot_title(0)
+            self.assertEqual(expected, tof_axes.get_title())
+
+        # SOFT: the fixture places its peaks at difc * d exactly, so a large residual says the
+        # fabricated peaks did not fit well - a signal about the fixture rather than the interface,
+        # as with the difc check in EngDiffGuiCalibrateAndFocusTest.
+        with self.subTest("Test 1 / the quadratic fit passes through the peak centres (data quality, soft)"):
+            _x, centres = curve_by_label(tof_axes, "Peak centres")
+            _x, fitted = curve_by_label(tof_axes, "quadratic fit")
+            self.assertTrue(len(centres), "no peak centres were plotted")
+            worst = max(abs(centres - fitted) / centres)
+            self.assertLess(worst, 0.01, f"the quadratic fit is {worst:.1%} off the fitted peak centres")
+
+    def _check_focus_plot(self, figure):
+        """The figure the guide shows at Test 1 Focus step 5: one figure per focused workspace with
+        one curve per spectrum, so the North bank alone gives the guide's "single spectrum"."""
+        from mantid.api import AnalysisDataService as ADS
+
+        with self.subTest("Test 1 / Focus step 3 (one set of axes with one curve per focused spectrum)"):
+            self.assertEqual(1, len(figure.axes))
+            self.assertEqual(1, len(curve_labels(figure.axes[0])), "expected a single spectrum for one bank")
+
+        axes = figure.axes[0]
+        focused = ADS.retrieve(self.focused_workspace_names()[0])
+        with self.subTest("Test 1 / Focus step 3 (the curve is the focused workspace's own data)"):
+            assert_curve_matches_workspace(axes, focused)
+
+        with self.subTest("Test 1 / Focus step 3 (the curve is labelled for the instrument, run and spectrum)"):
+            label = curve_labels(axes)[0]
+            # the label carries the instrument's full name ("ENGIN-X"), not the file prefix
+            self.assertIn(focused.getInstrumentName(), label)
+            self.assertIn(CERIA, label)
+            self.assertIn("spec 1", label)
+
+        with self.subTest("Test 1 / Focus step 3 (the plot carries a legend naming the curve)"):
+            self.assertIsNotNone(axes.get_legend(), "the focused plot has no legend")
 
 
 class EngDiffGuiLoadExistingCalibrationTest(_RunProcessingTestBase):

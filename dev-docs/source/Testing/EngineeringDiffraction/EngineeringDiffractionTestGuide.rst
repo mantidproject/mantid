@@ -55,9 +55,14 @@ Test 1 - Calibration and focussing
    ``EngDiffGuiSaveLocationAndRbNumberTest`` (Calibration 5, including changing the save location
    mid-session).
 
-   Still manual: Calibration 1-2 (archive access; opening the interface from the menu) and
-   Calibration 6 - nothing asserts the ``Full Calibration`` setting's default path. The plots at
-   Calibration 11 and Focus 3/5 are only checked for having appeared, not for their contents.
+   The plots are checked for their contents, not merely for having appeared: the calibration figure
+   for its two rows, its "Peak centres" and "quadratic fit" curves, its axis labels and its subplot
+   title, and the focus figure for carrying the focused workspace's own data under a legend naming
+   the instrument, run and spectrum.
+
+   Still manual: Calibration 1-2 (archive access, and opening the interface from the menu), and
+   comparing the two figures against the screenshots - the curves are asserted, but whether the
+   result *looks* right is still a human judgement.
 
 This test follows the simple steps for calibrating and focusing in the Engineering Diffraction Gui.
 
@@ -160,8 +165,12 @@ Test 3 - Cropping
    (steps 2-3, 5-6 and 8) and ``EngDiffGuiTextureRoiTest`` (steps 1, 7 and 9, including the output
    file layout for a texture grouping).
 
-   Still manual: every judgement about plot contents - step 4's TOF vs d-spacing and quadratic-fit
-   residuals, step 8's "2 subplots" and step 9's "5 tiled plot windows, 4 spectra per window".
+   The plot shapes these steps describe are asserted from the region of interest: step 4's two
+   subplots for one bank, step 8's "only 2 subplots" for a cropped range, and step 9's "5 tiled plot
+   windows, 4 spectra per window" for twenty texture groups all come from one rule, expressed once
+   in ``EngDiffGuiTestBase.calibration_plot_layout``.
+
+   Still manual: comparing the figures against the screenshots.
 
 This test covers the Cropping functionality in the ``Run Processing`` tab.
 
@@ -197,8 +206,12 @@ Test 4 - Absorption Correction
    for. Part of step 24 is covered too: loading a run collection, and loading orientation files of
    both matrices and Euler angles.
 
-   Still manual: the screenshot comparisons at steps 10 and 21 (the shape figures are only checked
-   for having opened), steps 17-18's texture directions, and the rest of step 24.
+   The shape figures at steps 9-10 are checked for drawing a solid on 3D axes whose extent matches
+   the sample's own bounding box, rather than only for having opened.
+
+   Still manual: step 21, where the shape is viewed again after a custom gauge volume is chosen;
+   steps 17-18's texture directions, whose settings are covered by `Test 12` but not their effect on
+   a correction; the screenshot comparisons; and the rest of step 24.
 
 This test covers the sample setting functionality in the ``Absorption Correction`` tab.
 
@@ -274,16 +287,16 @@ Test 5 - Focused data
 ^^^^^^^^^^^^^^^^^^^^^
 
 .. note::
-   Automated by ``EngDiffGuiFittingDataTest`` (``EngDiffGuiFittingTest.py``), which reaches the tab
-   by really calibrating and focusing first, as steps 1-2 do. It covers step 3 (the finder is
-   prefilled with the focused files), step 4 (a row per file, named for the run and bank, and the log
-   workspace group) and step 6 (``Add To Plot``, and that unticking a row's ``Plot`` box removes its
-   line).
+   Automated in full by ``EngDiffGuiFittingDataTest`` (``EngDiffGuiFittingTest.py``), which reaches
+   the tab by really calibrating and focusing first, as steps 1-2 do. It covers step 3 (the finder
+   is prefilled with the focused files), step 4 (a row per file, and each row of ``run_info_Fitting``
+   and of every sample log table lining up with the UI table row), step 6 (``Add To Plot``, and that
+   unticking a row's ``Plot`` box removes its line), step 7 (loading the d-spacing files instead of
+   the TOF ones) and steps 8-9 (un-docking and re-docking the plot).
 
-   Still manual: step 4's check that each row of the log tables and ``run_info_Fitting`` matches the
-   UI table row - only the existence of the group is asserted; step 5 entirely, including that the
-   sample log selection survives a restart; step 7, since only the TOF files are ever loaded; and
-   steps 8-9, the plot un-docking and docking.
+   Step 5 is covered separately, by ``EngDiffGuiFittingSettingsTest``, which unticks a sample log in
+   the settings dialog, reopens the interface and checks the selection was remembered. That class
+   needs no data, so it also stands as a quick check of the settings store on its own.
 
 This test covers the loading and plotting focused data in the fitting tab.
 
@@ -335,8 +348,13 @@ Test 7 - Run removal
    steps 2 and 3: ``Remove Selected`` drops only that row and takes both its focused and its
    ``_bgsub`` workspace out of the ADS, and ``Remove All`` empties the table.
 
-   Still manual: step 2's check on the log table rows, step 4's absence of an ``AverageLogData``
-   call, and steps 5-6, where a workspace is deleted from the ADS rather than through the interface.
+   Steps 4 to 6 are covered too: reloading a run is asserted to make no further ``AverageLogData``
+   call - read off the notice log, as this step tells you to - and deleting a workspace from the ADS
+   is asserted to take its row with it, while deleting only its ``_bgsub`` partner unticks
+   ``Subtract BG`` and leaves the row in place.
+
+   Still manual: step 2's check on the log table rows after a removal. The row-for-row
+   correspondence is asserted when the runs are loaded (`Test 5` step 4) but not again afterwards.
 
 This tests the removal of focused runs from the ``Fitting`` tab.
 
@@ -363,9 +381,9 @@ Test 8 - Background subtraction
    subtracted data really is below the raw data; step 2's enablement rule; and step 3's requirement
    that changing ``Niter`` and ``SG`` changes the subtracted data.
 
-   Still manual: the ``Inspect Background`` figure itself, which is only checked for having opened.
-   Nothing asserts that it shows the raw data, the background and the subtracted data, or that the
-   parameter changes are visible on it.
+   The ``Inspect Background`` figure is checked for its contents: the raw data and the subtracted
+   data are matched against the workspaces they came from, both curves are named, and the background
+   curve is asserted to be the raw data minus the subtracted data.
 
 This tests that the background subtraction works.
 
@@ -379,16 +397,20 @@ Test 9 - Fit browser
 ^^^^^^^^^^^^^^^^^^^^
 
 .. note::
-   Partly automated by ``EngDiffGuiSequentialFitTest`` (``EngDiffGuiFittingTest.py``): step 3, the
-   browser opening from the toolbar once data is plotted, and step 6 - the ``_fits`` group appears,
+   Automated by ``EngDiffGuiSequentialFitTest`` (``EngDiffGuiFittingTest.py``): step 1 (with nothing
+   plotted the ``Fit`` button does not open the browser), step 3, step 4 (the ``Settings > Workspace``
+   combo follows the ``Plot`` checkboxes), part of step 5, and step 6 - the ``_fits`` group appears,
    with a matrix workspace per fitted parameter, the peak width also as an FWHM, the peak centre
    converted to d-spacing, and a ``model`` table with a row per fitted run.
 
-   This is the least automated of the fitting tests. Still manual: step 1, step 2, step 4 (the
-   ``Settings > Workspace`` combo following the ``Plot`` checkboxes), and steps 5 and 7 entirely. The
-   automated test sets its function through the browser's Python API rather than the right-click
-   menu, so no context menu is exercised, and it fits a Gaussian to fabricated data - nothing here
-   covers ``BackToBackExponential``'s ``A`` and ``B`` being fixed automatically for ENGIN-X data.
+   Step 5 is covered in two halves. The right-click menu's entries are asserted by building the menu
+   the way the canvas handler does, and a ``BackToBackExponential`` added to the browser is asserted
+   to come back with ``A`` and ``B`` already fixed - which is what ENGIN-X's instrument parameter
+   file asks for, and which nothing else in the repository tests. Note that the fixing happens on the
+   *add peak* path only: the same function loaded from a function string arrives unfixed.
+
+   Still manual: step 2, actually clicking through the right-click menu, and step 7 entirely. The
+   fit browser's ``Custom Setup``, ``Clear Model`` and ``Evaluate Function`` have no Python API.
 
 This tests the operation of the fit browser.
 
@@ -424,9 +446,13 @@ Test 10 - Sequential fitting
    6-8 is covered too - sorting by a primary log keeps every run, unticking ``Ascending`` reverses
    the order, and a blank primary log falls back to the table order.
 
-   Still manual: steps 0-2 and 9. The ordering checks write the ``Primary Log`` and ``Ascending``
-   settings directly and read the order back off the presenter, so neither the settings dialog nor
-   the notice-level log is exercised, and nothing checks the setting survives a restart.
+   The order is read back off the notice log, exactly as step 6 asks: the tab logs "Starting to fit
+   workspace ..." once per run, in the order it visits them, and that sequence is compared against
+   the primary log's ordering and then against its reversal for step 8. Steps 2 and 9 - choosing the
+   primary log and its direction in the settings dialog, and finding them remembered after a restart
+   - are covered by ``EngDiffGuiFittingSettingsTest``.
+
+   Still manual: step 0, setting the workbench log level, which the automated tests do not need.
 
 This tests the sequential fitting capability of the UI (where the result of a fit to one workspace is used as the initial guess for the next).
 This test uses data generated in `Test 4`.
@@ -467,7 +493,8 @@ Test 11 - Serial fitting
    serial rather than a sequential fit, each fit converged, and the fitted peak centre is the one
    the fixture generated.
 
-   Still manual: step 3, the run order read out of the notice-level log.
+   Step 3 is covered too: the order the runs are fitted in is read off the notice log and compared
+   against the table's own order, a serial fit doing no sorting of its own.
 
 This tests the serial fitting capability of the UI (where all loaded workspaces are fitted from the same starting parameters).
 This test uses data generated in `Test 4`.
@@ -494,8 +521,15 @@ Test 12 - Pole Figures
    colour data. Part of step 15 is covered too - changing the projection, and including scattering
    power for a ``1,1,0`` reflection with the crystal set from lattice parameters.
 
-   Still manual: step 6's texture directions, the three screenshot comparisons, and steps 12-14
-   entirely - only the scatter plot is exercised, never the contour mode or ``Contour Kernel Size``.
+   Steps 6 and 12-14 are covered as well: the texture directions are set through the dialog and read
+   back from the stored transform, and unticking ``Scatter Plot Experimental Pole Figure`` with a
+   ``Contour Kernel Size`` of 6.0 is asserted to replace the scattered points with a contour. The two
+   modes draw the same *number* of collections, so they are told apart by the kind of artist drawn.
+
+   Note the naming: this guide calls the sample directions ``D1``/``D2``/``D3``, while the interface
+   and its settings call them ``RD``/``ND``/``TD``. There is no ``D1`` anywhere in the code.
+
+   Still manual: step 15, and the three screenshot comparisons.
 
 This test will check the Pole Figure plotting in the Texture Tab
 
@@ -561,9 +595,15 @@ Test 13 - GSASII
    title and TOF axis), step 8 (x limits are seeded from the data, passed through to GSAS-II and
    reset when different input files are chosen) and step 12's advisory marker.
 
-   Still manual: steps 1-4, since this test stages a fabricated ``.gss`` and ``.prm`` rather than
-   calibrating and focusing first; step 5's prefilling of the two paths, which the automated test
-   sets itself; step 9's browse; and step 11's ``Override Unit Cell Length``.
+   Step 11 is covered as far as it can be without a real GSAS-II: the ``Override Unit Cell Length``
+   typed into the tab is asserted to reach GSAS-II as the phase's cell lengths, read as a cubic cell.
+   Whether the fit is thereby *better* needs the real program.
+
+   Steps 2-5 are covered by ``EngDiffGuiGsas2PrefillTest``, which calibrates and focuses for real and
+   then checks the tab's ``Instrument Group`` and ``Focused Data`` paths were filled in from them.
+   It is the only class here that runs a genuine calibration, which is why it is kept separate.
+
+   Still manual: step 1, and step 9's browse.
 
 Note this test will only work if ``GSASII`` is also installed.
 Please test this on IDAaaS: an ENGINX instance should have MantidWorkbenchNightly and ``GSASII`` installed in the expected location.
@@ -606,11 +646,16 @@ Test 14 - GSASII multiple files
    `Test 13`: GSAS-II itself is mocked. It covers step 8 - each focused file is refined in its own
    GSAS-II call, each produces its own tables and its own save directory, and the sample logs cover
    every bank of both files - and adds the RB number save location, which this test does not ask for.
-   Two of step 9's error cases are covered by ``EngDiffGuiGsas2SingleTest``: more than one instrument
-   file, and a bank count that disagrees with the instrument file.
+   All three of step 9's error cases are covered by ``EngDiffGuiGsas2SingleTest``: more than one
+   instrument file, a single-bank ``.gss`` against a two-bank instrument file, and data files whose
+   bank counts differ from each other.
 
-   Still manual: steps 1-4 for the same reason as `Test 13`, steps 5-7's browsing, and step 9's
-   single-bank ``.gss`` error case.
+   That last case does not behave quite as this step describes, and the test records what actually
+   happens: the error *is* reported, but only the offending file is dropped - the file whose bank
+   count does match is still refined, rather than the whole request being rejected as it is for the
+   other two cases.
+
+   Still manual: steps 1-4 for the same reason as `Test 13`, and steps 5-7's browsing.
 
 This test covers the multiple data files functionality with multiple banks per file in the ``GSAS II`` tab.
 

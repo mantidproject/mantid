@@ -36,6 +36,7 @@ from qt_interaction_helpers import (
     click,
     combo_items,
     figure_numbers,
+    new_figures,
     process_events,
     select_combo,
     set_checkbox,
@@ -174,6 +175,26 @@ class _CorrectionTestBase(EngDiffGuiTestBase):
             return os.path.join(self.save_dir, "User", rb_number, name)
         return os.path.join(self.save_dir, name)
 
+    def _assert_shape_is_drawn(self, figure, shape):
+        """The guide compares these figures against a screenshot; this asserts what one would show -
+        a solid drawn in three dimensions, sized like the shape it came from.
+
+        Measured against the shape's own bounding box rather than the numbers typed into the dialog,
+        so it holds for both the STL mesh and the CSG cuboid.
+        """
+        axes = figure.axes
+        self.assertTrue(axes, "the shape figure has no axes")
+        drawn = [collection for axis in axes for collection in axis.collections]
+        self.assertTrue(drawn, "the shape figure has no solid drawn on it")
+
+        axis = axes[0]
+        self.assertTrue(hasattr(axis, "get_zlim3d"), "the sample shape was not drawn on 3D axes")
+        # the axis limits rather than the collections' own vertices: the limits are public API and
+        # are auto-scaled to what was drawn, whereas the vertex arrays on a Poly3DCollection are not
+        spans = [limits[1] - limits[0] for limits in (axis.get_xlim3d(), axis.get_ylim3d(), axis.get_zlim3d())]
+        expected = max(shape.getBoundingBox().width()[i] for i in range(3))
+        self.assertAlmostEqual(expected, max(spans), delta=0.5 * expected, msg=f"the drawn solid spans {max(spans)}, the sample {expected}")
+
 
 class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
     """Loading runs, the table, the reference workspace and every sample-definition dialog.
@@ -260,11 +281,15 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
             self.assertTrue(view.btn_viewRefShape.isEnabled())
             self.assertEqual("Fe", view.ref_material_status.text())
 
-        with self.subTest("Correction / the reference shape can be viewed"):
+        with self.subTest("Test 4 / steps 9-10 (the reference shape is drawn, not just opened)"):
+            from mantid.api import AnalysisDataService as ADS
+
             before = figure_numbers()
             click(view.btn_viewRefShape)
             process_events(3)
-            self.assertTrue(figure_numbers() - before, "viewing the reference shape opened no figure")
+            figures = new_figures(before)
+            self.assertTrue(figures, "viewing the reference shape opened no figure")
+            self._assert_shape_is_drawn(figures[-1], ADS.retrieve(reference).sample().getShape())
 
         click(view.btn_saveRefWS)
         process_events(2)
@@ -295,11 +320,13 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
             row = self.row_of(CERIA_WS)
             self.assertIsNotNone(cell_button(self.table(), row, COL_SHAPE), "no view button appeared for a shape")
 
-        with self.subTest("Correction / the per-row shape button opens a figure"):
+        with self.subTest("Test 4 / steps 8-10 (the row's shape button draws the mesh it was given)"):
             before = figure_numbers()
             click(cell_button(self.table(), self.row_of(CERIA_WS), COL_SHAPE))
             process_events(3)
-            self.assertTrue(figure_numbers() - before, "the row's shape button opened no figure")
+            figures = new_figures(before)
+            self.assertTrue(figures, "the row's shape button opened no figure")
+            self._assert_shape_is_drawn(figures[-1], ADS.retrieve(CERIA_WS).sample().getShape())
 
         # now the CSG route, on the other run, so both shape dialogs are covered
         self.select_only([VANADIUM_WS])

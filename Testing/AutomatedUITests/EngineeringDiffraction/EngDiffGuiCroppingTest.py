@@ -32,7 +32,7 @@ from eng_diff_gui_test_base import (
     TAB_RUN_PROCESSING,
     create_enginx_ceria_and_vanadium,
 )
-from qt_interaction_helpers import combo_items, process_events, select_combo
+from qt_interaction_helpers import combo_items, figure_numbers, new_figures, process_events, select_combo
 
 INSTRUMENT = "ENGINX"
 CERIA = str(ENGINX_SYNTHETIC_CERIA_RUN)
@@ -80,6 +80,18 @@ class _CroppingTestBase(EngDiffGuiTestBase):
 
     def focused_basename(self, suffix, xunit):
         return f"{INSTRUMENT}_{CERIA}_{VANADIUM}_{suffix}_{xunit}"
+
+    def _check_calibration_plot_tiling(self, figures, n_spectra, label):
+        """The guide states the calibration plot's shape per region of interest, as a count of
+        windows and subplots. What is *on* them does not vary with the region of interest and is
+        checked once, in ``EngDiffGuiPlotOutputTest``."""
+        expected = self.calibration_plot_layout(n_spectra)
+
+        with self.subTest(f"{label} plots {len(expected)} window(s) of calibration output"):
+            self.assertEqual(len(expected), len(figures), f"expected {len(expected)} figure(s), got {len(figures)}")
+
+        with self.subTest(f"{label} tiles its spectra two subplots deep"):
+            self.assertEqual(expected, [len(figure.axes) for figure in figures])
 
 
 class EngDiffGuiRoiOptionsTest(_CroppingTestBase):
@@ -255,11 +267,15 @@ class EngDiffGuiCroppedCalibrationTest(_CroppingTestBase):
         from mantid.api import AnalysisDataService as ADS
 
         self.set_region_of_interest("1 (North)")
-        calibration = self.calibrate(ceria=CERIA, vanadium=VANADIUM)
+        before = figure_numbers()
+        calibration = self.calibrate(ceria=CERIA, vanadium=VANADIUM, plot_output=True)
         self.assertTrue(calibration.is_valid(), "the North bank calibration reported itself invalid")
 
         with self.subTest("Cropping / a North bank calibration records that group"):
             self.assertEqual(ENGINX_GROUP.NORTH, calibration.get_group())
+
+        # guide step 4: one bank, so one window of TOF vs d-spacing over its residuals
+        self._check_calibration_plot_tiling(new_figures(before), 1, "Cropping / a single bank")
 
         with self.subTest("Cropping / a North bank calibration writes exactly one prm and one nxs"):
             written = self.basenames_under(self.calibration_dir())
@@ -285,12 +301,16 @@ class EngDiffGuiCroppedCalibrationTest(_CroppingTestBase):
         from mantid.api import AnalysisDataService as ADS
 
         self.set_region_of_interest("Crop to Spectra", custom_spectra=CUSTOM_SPECTRA)
-        calibration = self.calibrate(ceria=CERIA, vanadium=VANADIUM)
+        before = figure_numbers()
+        calibration = self.calibrate(ceria=CERIA, vanadium=VANADIUM, plot_output=True)
         self.assertTrue(calibration.is_valid(), "the cropped calibration reported itself invalid")
 
         with self.subTest("Cropping / a cropped calibration records the group and the spectrum range"):
             self.assertEqual(ENGINX_GROUP.CROPPED, calibration.get_group())
             self.assertEqual(CUSTOM_SPECTRA, calibration.spectra_list_str)
+
+        # guide step 8: the cropped range is one group, so "a similar plot but with only 2 subplots"
+        self._check_calibration_plot_tiling(new_figures(before), 1, "Cropping / a cropped spectrum range")
 
         expected_stem = f"{INSTRUMENT}_{CERIA}_Cropped_{CUSTOM_SPECTRA}"
         written = self.basenames_under(self.calibration_dir())
@@ -334,12 +354,16 @@ class EngDiffGuiTextureRoiTest(_CroppingTestBase):
         from mantid.api import AnalysisDataService as ADS
 
         self.set_region_of_interest("Texture20")
-        calibration = self.calibrate(ceria=CERIA, vanadium=VANADIUM)
+        before = figure_numbers()
+        calibration = self.calibrate(ceria=CERIA, vanadium=VANADIUM, plot_output=True)
         self.assertTrue(calibration.is_valid(), "the texture calibration reported itself invalid")
 
         with self.subTest("Cropping / a texture calibration records the texture group"):
             self.assertEqual(ENGINX_GROUP.TEXTURE20, calibration.get_group())
             self.assertTrue(calibration.is_texture_group())
+
+        # guide step 9: twenty groups, so "5 tiled plot windows, 4 spectra per window"
+        self._check_calibration_plot_tiling(new_figures(before), TEXTURE_GROUPS, "Cropping / a texture grouping")
 
         with self.subTest("Cropping / a texture calibration writes one prm and nxs named for the grouping"):
             written = self.basenames_under(self.calibration_dir())
