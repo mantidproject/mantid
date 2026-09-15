@@ -202,6 +202,31 @@ to switch it off.
 box hangs until the suite times out. ``patch_error_messages``, ``patch_confirmation_box`` and
 ``algorithm_dialog_runs`` on the base class cover three common cases that come up.
 
+None of those three helps with a dialog raised from **C++**, because all of them work by replacing a
+Python-side symbol - and the C++ interfaces (see below) report every refused reduction that way.
+``dismiss_modal_dialogs`` is the answer there: it starts a ``QTimer`` that finds
+``QApplication.activeModalWidget`` and closes it, recording what it said in
+``self.message_box_messages``. It works because a modal dialog runs its own event loop while it
+blocks, so the timer keeps firing inside it. Prefer the patching helpers where there is a Python seam
+- they say which module raised the dialog and let the test *choose* the answer, whereas this closes
+whatever it finds.
+
+**A C++ interface is opened through the factory and driven by object name.** ALFView, ISIS
+Reflectometry, ALC and the Indirect and Inelastic interfaces are ``UserSubWindow`` subclasses
+registered with ``DECLARE_SUBWINDOW``. Python gets the window back from
+``self.open_cpp_interface("<name>")`` and nothing else - no view, no presenter - so every widget is
+reached with ``child_named(parent, "objectName")``, using the names in the interface's ``.ui`` file
+under ``qt/scientific_interfaces``. Three things are worth knowing:
+
+* the interfaces are registered when the framework starts, which ``open_cpp_interface`` does for you;
+  without it the factory knows no names and returns ``None`` for everything;
+* collect the object names as constants in the suite's base module, so a renamed widget is a one-line
+  fix rather than a hunt. ``child_named`` lists the names that *are* present when it misses, which is
+  usually enough to see what a widget was renamed to;
+* some widgets built in C++ come back to Python as a plain ``QWidget`` rather than their wrapped
+  class - a ``FileFinderWidget`` among them, so ``set_finder_text`` does not work on one. Reach for
+  the ``QLineEdit`` named ``fileEditor`` inside it instead, which is the box a user types into.
+
 **Go through the interface, not around it.** Where possible use ``add_data_search_dir`` and let the
 interface's own file finder resolve a run, rather than reaching past the view to inject a workspace -
 what is being tested is the path a user takes.
@@ -278,6 +303,86 @@ the wrong thing.
 A few widgets are best not driven with ``QTest`` at all. ``FunctionBrowser`` and
 ``FitPropertyBrowser`` are Qt property browsers whose cells are nested editors; use their Python API
 (``setFunction``, ``getParameter``, ``loadFunction``) instead.
+
+Which guides are covered
+########################
+
+One directory under ``Testing/AutomatedUITests`` per interface, each replacing the manual guide
+named in its base module's docstring:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Suite
+     - Guide it replaces
+   * - ``ALFView``
+     - ``Testing/Direct/ALFViewTests.rst`` (the loading scenario needs the ISIS data archive)
+   * - ``ElementalAnalysis``
+     - ``Testing/ElementalAnalysis/ElementalAnalysisTests.rst``
+   * - ``EngineeringDiffraction``
+     - ``Testing/EngineeringDiffraction/EngineeringDiffractionTestGuide.rst``
+   * - ``FilterEvents``
+     - ``Testing/Utility/FilterEventsInterfaceTest.rst``
+   * - ``Indirect``
+     - ``Testing/Indirect/DiffractionTests.rst`` and ``DataReductionTests.rst``
+   * - ``Inelastic``
+     - ``Testing/Inelastic/DataProcessorTests.rst``, ``CorrectionsTests.rst``,
+       ``QENSFittingTests.rst`` and ``BayesFittingTests.rst``
+   * - ``Muon``
+     - ``Testing/MuonAnalysis_test_guides/Muon_Analysis_PSI.rst`` (the other Muon guides need the
+       ISIS data archive)
+   * - ``Reflectometry``
+     - ``Testing/ReflectometryGUI/ReflectometryGUITests.rst`` (the scenarios that need neither the
+       archive nor the ICAT catalogue)
+   * - ``SampleTransmissionCalculator``
+     - ``Testing/General/SampleTransmissionCalculatorTestGuide.rst``
+   * - ``SANS``
+     - ``Testing/SANSGUI/ISISSANSGUITests.rst`` (the scenarios that need no run data)
+   * - ``SliceViewer``
+     - ``Testing/SliceViewer/SliceViewer.rst``
+
+The guides stay in place as prose. The mapping from a guide section to the test that replaces it
+lives in the test modules' docstrings and in their ``subTest`` labels, which quote the guide's own
+step numbers.
+
+``Testing/AutomatedUITests/FUTURE_WORK.md`` records what each suite could not check and why -
+observations that had to be weakened, steps with no automated equivalent, and the failures the
+replay found and deliberately left failing.
+
+Guides that stay manual
+#######################
+
+Some guides cannot be replaced by a test that drives Qt offscreen, and no attempt is made to. They
+are listed here so that "there is no suite for this one" is a decision on the record rather than an
+oversight:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Guide
+     - What blocks it
+   * - ``Testing/Core/Core.rst``
+     - Deliberately exploratory - "try things that should work, then try to break Mantid" - and
+       required to be run against the installer on four operating systems.
+   * - ``Testing/Documentation/DocumentationTest.rst``
+     - Human inspection of rendered documentation: a web browser, internet access, a native print
+       dialog, and a per-page judgement that it "displays correctly".
+   * - ``Testing/Direct/MSliceTestGuide.rst``
+     - MSlice is a separate package with its own application and plot manager; the guide also turns
+       on clipboard round-trips into the script editor and an embedded Jupyter console.
+   * - ``Testing/ErrorReporter-ProjectRecovery/ErrorReporterTesting.rst``
+     - Every scenario starts by segfaulting Workbench, and the pass criterion is a person checking
+       the live error reports database.
+   * - ``Testing/ErrorReporter-ProjectRecovery/ProjectRecoveryTesting.rst``
+     - Every scenario is crash, restart, answer the recovery dialog. That needs a harness that
+       launches, kills and relaunches Workbench, which is a different thing from these tests.
+   * - ``Testing/LiveData/LiveDataTests.rst``
+     - Requires the facility switched to ``TEST_LIVE`` and ``Mantid.user.properties`` edited before
+       startup, and is time-dependent throughout.
+   * - ``Testing/LiveData/LiveDataPacketPlayback.rst``
+     - No GUI at all: a multi-process, POSIX-only command line utility.
 
 Adding a new interface
 ######################
