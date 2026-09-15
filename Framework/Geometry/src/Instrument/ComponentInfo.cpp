@@ -8,12 +8,18 @@
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/ComponentType.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/Instrument/Parameter.h"
+#include "MantidGeometry/Instrument/ParameterFactory.h"
+#include "MantidGeometry/Instrument/ParameterInfo.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 
 #include <Eigen/Geometry>
+#include <algorithm>
 #include <exception>
 #include <iterator>
 #include <string>
@@ -55,9 +61,11 @@ ComponentInfo::ComponentInfo(
     std::unique_ptr<Beamline::ComponentInfo> componentInfo,
     std::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>> componentIds,
     std::shared_ptr<const std::unordered_map<Geometry::IComponent const *, size_t>> componentIdToIndexMap,
-    std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> shapes)
+    std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> shapes,
+    std::shared_ptr<ParameterInfo> parameterInfo)
     : m_componentInfo(std::move(componentInfo)), m_componentIds(std::move(componentIds)),
-      m_compIDToIndex(std::move(componentIdToIndexMap)), m_shapes(std::move(shapes)) {
+      m_compIDToIndex(std::move(componentIdToIndexMap)), m_shapes(std::move(shapes)),
+      m_parameterInfo(std::move(parameterInfo)) {
 
   if (m_componentIds->size() != m_compIDToIndex->size()) {
     throw std::invalid_argument("Inconsistent ID and Mapping input containers "
@@ -85,7 +93,7 @@ std::unique_ptr<Geometry::ComponentInfo> ComponentInfo::cloneWithoutDetectorInfo
  * ComponentInfo must be set up. */
 ComponentInfo::ComponentInfo(const ComponentInfo &other)
     : m_componentInfo(other.m_componentInfo->cloneWithoutDetectorInfo()), m_componentIds(other.m_componentIds),
-      m_compIDToIndex(other.m_compIDToIndex), m_shapes(other.m_shapes) {}
+      m_compIDToIndex(other.m_compIDToIndex), m_shapes(other.m_shapes), m_parameterInfo(other.m_parameterInfo) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 ComponentInfo::~ComponentInfo() = default;
@@ -127,6 +135,11 @@ ComponentInfo::QuadrilateralComponent ComponentInfo::quadrilateralComponent(cons
 }
 
 size_t ComponentInfo::indexOf(Geometry::IComponent const *id) const { return m_compIDToIndex->at(id); }
+
+size_t ComponentInfo::indexOfOrInvalid(Geometry::IComponent const *id) const {
+  auto const found = m_compIDToIndex->find(id);
+  return found == m_compIDToIndex->end() ? invalidIndex : found->second;
+}
 
 size_t ComponentInfo::indexOfAny(const std::string &name) const { return m_componentInfo->indexOfAny(name); }
 
@@ -566,6 +579,229 @@ size_t ComponentInfo::findBankParent(size_t index, const std::string &bankPart) 
     }
   }
   return invalidIndex;
+}
+
+/** The fully-qualified name of a component, e.g. "instrument/bank1/pixel3".
+ * Matches IComponent::getFullName() */
+std::string ComponentInfo::fullName(const size_t componentIndex) const {
+  std::vector<size_t> ancestry{componentIndex};
+  for (size_t index = componentIndex; hasParent(index);) {
+    index = parent(index);
+    ancestry.emplace_back(index);
+  }
+  std::string result;
+  for (auto it = ancestry.crbegin(); it != ancestry.crend(); ++it) {
+    if (it != ancestry.crbegin()) {
+      result += "/";
+    }
+    result += name(*it);
+  }
+  return result;
+}
+
+/** The component with this fully-qualified name, or invalidIndex.
+ *
+ * Descends the tree one path segment at a time rather than comparing fullName() against every
+ * component, which would be O(components x depth) on every lookup -- prohibitive for the large
+ * instruments this is called for once per stored parameter during a load.
+ *
+ * Where two children of the same parent share a name the first is returned, matching what
+ * Instrument::getComponentByName() does within a level. Such a full name is ambiguous anyway.
+ */
+size_t ComponentInfo::indexOfFullName(const std::string &fullName) const {
+  if (fullName.empty() || size() == 0) {
+    return invalidIndex;
+  }
+
+  size_t current = root();
+  size_t segmentStart = 0;
+  bool first = true;
+  while (segmentStart <= fullName.size()) {
+    const auto separator = fullName.find('/', segmentStart);
+    const auto segment =
+        fullName.substr(segmentStart, separator == std::string::npos ? std::string::npos : separator - segmentStart);
+    if (first) {
+      // The leading segment names the root itself, as fullName() writes it.
+      if (name(current) != segment) {
+        return invalidIndex;
+      }
+      first = false;
+    } else {
+      auto const &candidates = children(current);
+      auto const found =
+          std::find_if(candidates.cbegin(), candidates.cend(), [&](size_t child) { return name(child) == segment; });
+      if (found == candidates.cend()) {
+        return invalidIndex;
+      }
+      current = *found;
+    }
+    if (separator == std::string::npos) {
+      break;
+    }
+    segmentStart = separator + 1;
+  }
+  return current;
+}
+
+template <class T>
+std::vector<T> ComponentInfo::getParameter(size_t componentIndex, const std::string &name, bool recursive) const {
+  std::vector<T> result;
+  if (m_parameterInfo) {
+    Parameter_sptr const param = recursive ? m_parameterInfo->getRecursive(*this, componentIndex, name)
+                                           : m_parameterInfo->get(componentIndex, name);
+    if (param) {
+      result.emplace_back(param->value<T>());
+    }
+  }
+  return result;
+}
+
+bool ComponentInfo::hasParameter(const size_t componentIndex, const std::string &name, bool recursive) const {
+  bool result = false;
+  if (m_parameterInfo) {
+    // Recursively walk the ParameterInfo to search for name
+    result = recursive ? static_cast<bool>(m_parameterInfo->getRecursive(*this, componentIndex, name))
+                       : m_parameterInfo->contains(componentIndex, name);
+  }
+  return result;
+}
+
+std::set<std::string> ComponentInfo::getParameterNames(const size_t componentIndex, bool recursive) const {
+  std::set<std::string> result;
+  if (m_parameterInfo) {
+    // Unlike the single-parameter lookups, this searches for all instances in component tree
+    result = m_parameterInfo->names(componentIndex);
+    if (recursive && hasParent(componentIndex)) {
+      auto const parentNames = getParameterNames(parent(componentIndex), true);
+      result.insert(parentNames.cbegin(), parentNames.cend());
+    }
+  }
+  return result;
+}
+
+ParameterInfo &ComponentInfo::mutableParameterInfo() {
+  if (!m_parameterInfo) {
+    m_parameterInfo = std::make_shared<ParameterInfo>();
+  }
+  return *m_parameterInfo;
+}
+
+template <class T>
+void ComponentInfo::addTypedParameter(const size_t componentIndex, const std::string &type, const std::string &name,
+                                      const T &value, const std::string *const pDescription,
+                                      const std::string &pVisible) {
+  auto parameter = ParameterFactory::create(type, name, pVisible);
+  auto typedParameter = std::dynamic_pointer_cast<ParameterType<T>>(parameter);
+  if (!typedParameter) {
+    throw std::invalid_argument("ComponentInfo: parameter type '" + type + "' does not match the value supplied for '" +
+                                name + "'");
+  }
+  typedParameter->setValue(value);
+  if (pDescription) {
+    parameter->setDescription(*pDescription);
+  }
+  mutableParameterInfo().add(componentIndex, parameter);
+}
+
+void ComponentInfo::addParameter(const size_t componentIndex, const std::string &type, const std::string &name,
+                                 const std::string &value, const std::string *const pDescription,
+                                 const std::string &pVisible) {
+  auto parameter = ParameterFactory::create(type, name, pVisible);
+  // fromString rather than setValue: the value arrives already serialised, and the concrete
+  // parameter type knows how to parse its own form.
+  parameter->fromString(value);
+  if (pDescription) {
+    parameter->setDescription(*pDescription);
+  }
+  mutableParameterInfo().add(componentIndex, parameter);
+}
+
+void ComponentInfo::addDouble(const size_t componentIndex, const std::string &name, double value,
+                              const std::string *const pDescription, const std::string &pVisible) {
+  addTypedParameter(componentIndex, ParameterMap::pDouble(), name, value, pDescription, pVisible);
+}
+
+void ComponentInfo::addInt(const size_t componentIndex, const std::string &name, int value,
+                           const std::string *const pDescription, const std::string &pVisible) {
+  addTypedParameter(componentIndex, ParameterMap::pInt(), name, value, pDescription, pVisible);
+}
+
+void ComponentInfo::addBool(const size_t componentIndex, const std::string &name, bool value,
+                            const std::string *const pDescription, const std::string &pVisible) {
+  addTypedParameter(componentIndex, ParameterMap::pBool(), name, value, pDescription, pVisible);
+}
+
+void ComponentInfo::addString(const size_t componentIndex, const std::string &name, const std::string &value,
+                              const std::string *const pDescription, const std::string &pVisible) {
+  addTypedParameter(componentIndex, ParameterMap::pString(), name, value, pDescription, pVisible);
+}
+
+void ComponentInfo::addV3D(const size_t componentIndex, const std::string &name, const Kernel::V3D &value,
+                           const std::string *const pDescription) {
+  addTypedParameter(componentIndex, ParameterMap::pV3D(), name, value, pDescription, "true");
+}
+
+void ComponentInfo::addQuat(const size_t componentIndex, const std::string &name, const Kernel::Quat &value,
+                            const std::string *const pDescription) {
+  addTypedParameter(componentIndex, ParameterMap::pQuat(), name, value, pDescription, "true");
+}
+
+void ComponentInfo::addFittingParameter(const size_t componentIndex, const std::string &name,
+                                        const std::string &fittingFunction, const std::string &value,
+                                        const std::string *const pDescription, const std::string &pVisible) {
+  auto parameter = ParameterFactory::create("fitting", name, pVisible);
+  parameter->fromString(value);
+  if (pDescription) {
+    parameter->setDescription(*pDescription);
+  }
+  mutableParameterInfo().addFittingParameter(componentIndex, parameter, fittingFunction);
+}
+
+void ComponentInfo::clearParameter(const size_t componentIndex, const std::string &name) {
+  if (m_parameterInfo) {
+    m_parameterInfo->clearParametersByName(componentIndex, name);
+  }
+}
+
+const ParameterInfo::ComponentParameters &ComponentInfo::parameters(const size_t componentIndex) const {
+  static ParameterInfo::ComponentParameters const empty;
+  return m_parameterInfo ? m_parameterInfo->parameters(componentIndex) : empty;
+}
+
+std::vector<double> ComponentInfo::getNumberParameter(const size_t componentIndex, const std::string &name,
+                                                      bool recursive) const {
+  return getParameter<double>(componentIndex, name, recursive);
+}
+
+std::vector<int> ComponentInfo::getIntParameter(const size_t componentIndex, const std::string &name,
+                                                bool recursive) const {
+  return getParameter<int>(componentIndex, name, recursive);
+}
+
+std::vector<bool> ComponentInfo::getBoolParameter(const size_t componentIndex, const std::string &name,
+                                                  bool recursive) const {
+  return getParameter<bool>(componentIndex, name, recursive);
+}
+
+std::vector<std::string> ComponentInfo::getStringParameter(const size_t componentIndex, const std::string &name,
+                                                           bool recursive) const {
+  return getParameter<std::string>(componentIndex, name, recursive);
+}
+
+double ComponentInfo::getFittingParameter(const size_t componentIndex, const std::string &name, double xvalue) const {
+  if (!m_parameterInfo)
+    throw std::runtime_error("Parameters are not available in component=" + this->name(componentIndex));
+  Parameter_sptr parameter = m_parameterInfo->getRecursive(*this, componentIndex, name, "fitting");
+  if (!parameter)
+    throw std::runtime_error("Fitting parameter=" + name +
+                             " could not be extracted from component=" + this->name(componentIndex));
+  try {
+    const auto &fitParam = parameter->value<FitParameter>();
+    return fitParam.getValue(xvalue);
+  } catch (...) {
+    throw std::runtime_error("Unable to get lookup table for parameter=" + name +
+                             " from component=" + this->name(componentIndex));
+  }
 }
 
 /** Return memory used by the component info, in bytes.
