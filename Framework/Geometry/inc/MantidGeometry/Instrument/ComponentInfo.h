@@ -11,10 +11,13 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/ComponentInfoIterator.h"
+#include "MantidGeometry/Instrument/ParameterInfo.h"
 #include "MantidGeometry/Instrument/SolidAngleParams.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidTypes/Core/DateAndTime.h"
+#include <limits>
 #include <memory>
+#include <set>
 #include <tuple>
 #include <unordered_map>
 #include <vector>
@@ -43,6 +46,10 @@ class Instrument;
   Indexes are per component.
 */
 class MANTID_GEOMETRY_DLL ComponentInfo {
+public:
+  /// Returned by indexOfOrInvalid() for a component ID that is not part of this instrument.
+  static constexpr size_t invalidIndex = std::numeric_limits<size_t>::max();
+
 private:
   /// Pointer to the actual ComponentInfo object (non-wrapping part).
   std::unique_ptr<Beamline::ComponentInfo> m_componentInfo;
@@ -53,6 +60,11 @@ private:
 
   /// Shapes for each component
   std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> m_shapes;
+
+  /// The instrument's named parameters, keyed by component index
+  std::shared_ptr<ParameterInfo> m_parameterInfo;
+
+  template <class T> std::vector<T> getParameter(size_t componentIndex, const std::string &name, bool recursive) const;
 
   BoundingBox componentBoundingBox(const size_t index, const BoundingBox *reference,
                                    const bool excludeMonitors = false) const;
@@ -77,7 +89,8 @@ public:
   ComponentInfo(std::unique_ptr<Beamline::ComponentInfo> componentInfo,
                 std::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>> componentIds,
                 std::shared_ptr<const std::unordered_map<Geometry::IComponent const *, size_t>> componentIdToIndexMap,
-                std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> shapes);
+                std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> shapes,
+                std::shared_ptr<ParameterInfo> parameterInfo = nullptr);
   ~ComponentInfo();
   /// Copy assignment is not possible for ComponentInfo
   ComponentInfo &operator=(const ComponentInfo &) = delete;
@@ -89,6 +102,8 @@ public:
   size_t getMemorySize() const;
   QuadrilateralComponent quadrilateralComponent(const size_t componentIndex) const;
   size_t indexOf(Geometry::IComponent const *id) const;
+  /// The index for a component ID, or invalidIndex if it is not part of this instrument.
+  size_t indexOfOrInvalid(Geometry::IComponent const *id) const;
   size_t indexOfAny(const std::string &name) const;
   bool uniqueName(const std::string &name) const;
   bool isDetector(const size_t componentIndex) const;
@@ -147,6 +162,26 @@ public:
   const ComponentInfoIterator<const ComponentInfo> cend();
 
   size_t findBankParent(size_t index, const std::string &bankPart) const;
+
+  /// The fully-qualified name of a component ("instrument/bank1/pixel3")
+  std::string fullName(const size_t componentIndex) const;
+
+  /// Returns empty (or false) if the ComponentInfo was built without parameters or the parameter is unset.
+  bool hasParameter(const size_t componentIndex, const std::string &name, bool recursive = true) const;
+  std::set<std::string> getParameterNames(const size_t componentIndex, bool recursive = true) const;
+  /// All parameters on one component, non-recursive, ordered by name.
+  const ParameterInfo::ComponentParameters &parameters(const size_t componentIndex) const;
+  std::vector<double> getNumberParameter(const size_t componentIndex, const std::string &name,
+                                         bool recursive = true) const;
+  std::vector<int> getIntParameter(const size_t componentIndex, const std::string &name, bool recursive = true) const;
+  std::vector<bool> getBoolParameter(const size_t componentIndex, const std::string &name, bool recursive = true) const;
+  std::vector<std::string> getStringParameter(const size_t componentIndex, const std::string &name,
+                                              bool recursive = true) const;
+  double getFittingParameter(const size_t componentIndex, const std::string &name, double xvalue) const;
+
+  /// This allows ParameterMap to delegate to ParameterInfo,
+  /// rather than keeping a parallel copy that would silently diverge.
+  const std::shared_ptr<ParameterInfo> &sharedParameterInfo() const { return m_parameterInfo; }
 
   friend class Instrument;
 };

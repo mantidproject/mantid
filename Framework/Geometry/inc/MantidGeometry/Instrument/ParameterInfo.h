@@ -50,7 +50,8 @@ public:
 
   /// Add a fitting parameter, deduplicating by (name, function) rather than by name alone so
   /// that two functions on one component may each declare a parameter of the same short name.
-  void addFittingParameter(size_t const componentIndex, std::shared_ptr<Parameter> const &parameter,
+  /// Returns true if an existing parameter was replaced, false if new entry.
+  bool addFittingParameter(size_t const componentIndex, std::shared_ptr<Parameter> const &parameter,
                            std::string const &fittingFunction);
 
   /// Insert a parameter without add()'s add-or-replace deduplication.

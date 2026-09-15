@@ -65,11 +65,16 @@ void checkIsNotMaskingParameter(const std::string &name) {
  * Default constructor
  */
 ParameterMap::ParameterMap()
-    : m_cacheLocMap(std::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>()),
+    : m_parameterInfo(std::make_shared<ParameterInfo>()),
+      m_cacheLocMap(std::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>()),
       m_cacheRotMap(std::make_unique<Kernel::Cache<const ComponentID, Kernel::Quat>>()) {}
 
 ParameterMap::ParameterMap(const ParameterMap &other)
-    : m_parameterFileNames(other.m_parameterFileNames), m_map(other.m_map),
+    // The store is deep-copied, not shared: a copied ParameterMap is an independent map, and
+    // sharing would make a write through either one visible to the other.
+    : m_parameterFileNames(other.m_parameterFileNames),
+      m_parameterInfo(std::make_shared<ParameterInfo>(*other.m_parameterInfo)), m_idToIndex(other.m_idToIndex),
+      m_indexToId(other.m_indexToId),
       m_cacheLocMap(std::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>(*other.m_cacheLocMap)),
       m_cacheRotMap(std::make_unique<Kernel::Cache<const ComponentID, Kernel::Quat>>(*other.m_cacheRotMap)),
       m_instrument(other.m_instrument) {
@@ -82,6 +87,42 @@ ParameterMap::ParameterMap(const ParameterMap &other)
 // Defined as default in source for forward declaration with std::unique_ptr.
 ParameterMap::~ParameterMap() = default;
 
+//--------------------------------------------------------------------------------------------
+// Component pointer <-> component index translation
+//--------------------------------------------------------------------------------------------
+
+size_t ParameterMap::indexOf(const IComponent *comp) const {
+  size_t result = ComponentInfo::invalidIndex;
+  if (comp) {
+    auto const found = m_idToIndex.find(comp->getComponentID());
+    if (found != m_idToIndex.end()) {
+      result = found->second;
+    }
+  }
+  return result;
+}
+
+size_t ParameterMap::indexForWrite(const IComponent *comp) {
+  size_t result = ComponentInfo::invalidIndex;
+  if (comp) {
+    const ComponentID id = comp->getComponentID();
+    auto const found = m_idToIndex.find(id);
+    if (found != m_idToIndex.end()) {
+      result = found->second;
+    } else {
+      // First time this component has been written to
+      result = m_indexToId.size();
+      m_indexToId.emplace_back(id);
+      m_idToIndex.emplace(id, result);
+    }
+  }
+  return result;
+}
+
+ComponentID ParameterMap::componentIdAt(const size_t index) const {
+  return index < m_indexToId.size() ? m_indexToId[index] : nullptr;
+}
+
 std::vector<ParameterMap::Entry> ParameterMap::entries() const {
   std::vector<Entry> result;
   result.reserve(m_parameterInfo->size());
@@ -93,6 +134,35 @@ std::vector<ParameterMap::Entry> ParameterMap::entries() const {
     }
   }
   return result;
+}
+
+//--------------------------------------------------------------------------------------------
+
+std::shared_ptr<ParameterInfo> ParameterMap::rekey(const std::unordered_map<IComponent const *, size_t> &idToIndex) {
+  auto rekeyed = std::make_shared<ParameterInfo>();
+  for (auto const &[stagingIndex, parameters] : *m_parameterInfo) {
+    const ComponentID id = componentIdAt(stagingIndex);
+    auto const found = idToIndex.find(id);
+    if (found == idToIndex.end()) {
+      continue;
+    }
+    for (auto const &[parameterName, parameter] : parameters) {
+      static_cast<void>(parameterName);
+      // insert() rather than add(): this map's contents have already had the legacy
+      // deduplication applied
+      rekeyed->insert(found->second, parameter);
+    }
+  }
+
+  // Adopt the rekeyed store and the instrument's index domain, so that this map and the
+  // ComponentInfo built alongside it share one set of parameters from here on.
+  m_parameterInfo = rekeyed;
+  m_idToIndex = idToIndex;
+  m_indexToId.assign(idToIndex.size(), nullptr);
+  for (auto const &[id, index] : idToIndex) {
+    m_indexToId[index] = const_cast<ComponentID>(id);
+  }
+  return m_parameterInfo;
 }
 
 /**
@@ -312,14 +382,8 @@ const std::string ParameterMap::diff(const ParameterMap &rhs, const bool &firstD
  */
 void ParameterMap::clearParametersByName(const std::string &name) {
   checkIsNotMaskingParameter(name);
-  // Key is component ID so have to search through whole lot
-  for (auto itr = m_map.begin(); itr != m_map.end();) {
-    if (itr->second->name() == name) {
-      PARALLEL_CRITICAL(unsafe_erase) { itr = m_map.unsafe_erase(itr); }
-    } else {
-      ++itr;
-    }
-  }
+  // The erase is guarded at whole operation granularity rather than per element.
+  PARALLEL_CRITICAL(unsafe_erase) { m_parameterInfo->clearParametersByName(name); }
   // Check if the caches need invalidating
   if (name == pos() || name == rot())
     clearPositionSensitiveCaches();
@@ -332,16 +396,9 @@ void ParameterMap::clearParametersByName(const std::string &name) {
  */
 void ParameterMap::clearParametersByName(const std::string &name, const IComponent *comp) {
   checkIsNotMaskingParameter(name);
-  if (!m_map.empty()) {
-    const ComponentID id = comp->getComponentID();
-    auto itrs = m_map.equal_range(id);
-    for (auto it = itrs.first; it != itrs.second;) {
-      if (it->second->name() == name) {
-        PARALLEL_CRITICAL(unsafe_erase) { it = m_map.unsafe_erase(it); }
-      } else {
-        ++it;
-      }
-    }
+  const size_t index = indexOf(comp);
+  if (index != ComponentInfo::invalidIndex) {
+    PARALLEL_CRITICAL(unsafe_erase) { m_parameterInfo->clearParametersByName(index, name); }
 
     // Check if the caches need invalidating
     if (name == pos() || name == rot())
@@ -381,28 +438,10 @@ void ParameterMap::add(const IComponent *comp, const std::shared_ptr<Parameter> 
   if (pDescription)
     par->setDescription(*pDescription);
 
-  auto existing_par = positionOf(comp, par->name().c_str(), "");
-  // As this is only an add method it should really throw if it already
-  // exists.
-  // However, this is old behavior and many things rely on this actually be
-  // an
-  // add/replace-style function
-  if (existing_par != m_map.end()) {
-    std::atomic_store(&(existing_par->second), par);
-  } else {
-// When using Clang & Linux, TBB 4.4 doesn't detect C++11 features.
-// https://software.intel.com/en-us/forums/intel-threading-building-blocks/topic/641658
-#if defined(__clang__) && !defined(__APPLE__)
-#define CLANG_ON_LINUX true
-#else
-#define CLANG_ON_LINUX false
-#endif
-#if TBB_VERSION_MAJOR >= 4 && TBB_VERSION_MINOR >= 4 && !CLANG_ON_LINUX
-    m_map.emplace(comp->getComponentID(), par);
-#else
-    m_map.insert(std::make_pair(comp->getComponentID(), par));
-#endif
-  }
+  // As this is only an add method it should really throw if it already exists. However, this
+  // is old behavior and many things rely on this actually being an add/replace-style function
+  // -- ParameterInfo::add() implements exactly that, including the case-insensitive name match.
+  m_parameterInfo->add(indexForWrite(comp), par);
 }
 
 /** Add a fitting parameter, deduplicating by (name, fittingFunction) instead of name alone.
@@ -430,35 +469,10 @@ void ParameterMap::addFittingParameter(const IComponent *comp, const std::string
 
   // Look for an existing fitting parameter on this component with the same name AND the same
   // embedded function; only that one should be replaced.
-  if (!m_map.empty()) {
-    const ComponentID id = comp->getComponentID();
-    auto it_found = m_map.find(id);
-    if (it_found != m_map.end()) {
-      auto itrs = m_map.equal_range(id);
-      for (auto itr = itrs.first; itr != itrs.second; ++itr) {
-        const auto &existing = itr->second;
-        if (existing->type() == "fitting" && strcasecmp(existing->nameAsCString(), name.c_str()) == 0) {
-          try {
-            if (existing->value<FitParameter>().getFunction() == fittingFunction) {
-              g_log.debug() << "addFittingParameter: [replace] matched existing (name='" << name << "', function='"
-                            << fittingFunction << "') on component '" << comp->getName() << "'; overwriting in place\n";
-              std::atomic_store(&(itr->second), param);
-              return;
-            }
-          } catch (...) {
-            // Not a FitParameter value despite the type tag
-            g_log.debug() << "addFittingParameter: [skip-match] existing 'fitting' entry (name='" << name
-                          << "') on component '" << comp->getName()
-                          << "' did not hold a FitParameter value; ignoring it and continuing search\n";
-          }
-        }
-      }
-    }
-  }
-
-  g_log.debug() << "addFittingParameter: [insert] no existing match for (name='" << name << "', function='"
-                << fittingFunction << "') on component '" << comp->getName() << "'; adding new entry\n";
-  m_map.insert({comp->getComponentID(), param});
+  // ParameterInfo applies that rule and reports which of the two happened.
+  const bool replaced = m_parameterInfo->addFittingParameter(indexForWrite(comp), param, fittingFunction);
+  g_log.debug() << "addFittingParameter: [" << (replaced ? "replace" : "insert") << "] (name='" << name
+                << "', function='" << fittingFunction << "') on component '" << comp->getName() << "'\n";
 }
 
 /** Create or adjust "pos" parameter for a component
@@ -657,18 +671,9 @@ void ParameterMap::forceUnsafeSetMasked(const IComponent *comp, bool value) {
   auto typedParam = std::dynamic_pointer_cast<ParameterType<bool>>(param);
   typedParam->setValue(value);
 
-// When using Clang & Linux, TBB 4.4 doesn't detect C++11 features.
-// https://software.intel.com/en-us/forums/intel-threading-building-blocks/topic/641658
-#if defined(__clang__) && !defined(__APPLE__)
-#define CLANG_ON_LINUX true
-#else
-#define CLANG_ON_LINUX false
-#endif
-#if TBB_VERSION_MAJOR >= 4 && TBB_VERSION_MINOR >= 4 && !CLANG_ON_LINUX
-  m_map.emplace(comp->getComponentID(), param);
-#else
-  m_map.insert(std::make_pair(comp->getComponentID(), param));
-#endif
+  // insert() rather than add(): "masked" is rejected by checkIsNotMaskingParameter() on every
+  // normal path, so this bypasses the add/replace lookup exactly as the raw insert did before.
+  m_parameterInfo->insert(indexForWrite(comp), param);
 }
 
 /**
@@ -748,18 +753,8 @@ bool ParameterMap::contains(const IComponent *comp, const std::string &name, con
  */
 bool ParameterMap::contains(const IComponent *comp, const char *name, const char *type) const {
   checkIsNotMaskingParameter(name);
-  if (m_map.empty())
-    return false;
-  const ComponentID id = comp->getComponentID();
-  std::pair<pmap_cit, pmap_cit> components = m_map.equal_range(id);
-  bool anytype = (strlen(type) == 0);
-  for (auto itr = components.first; itr != components.second; ++itr) {
-    const auto &param = itr->second;
-    if (strcasecmp(param->nameAsCString(), name) == 0 && (anytype || param->type() == type)) {
-      return true;
-    }
-  }
-  return false;
+  const size_t index = indexOf(comp);
+  return index != ComponentInfo::invalidIndex && m_parameterInfo->contains(index, name, type);
 }
 
 /**
@@ -769,21 +764,18 @@ bool ParameterMap::contains(const IComponent *comp, const char *name, const char
  */
 bool ParameterMap::contains(const IComponent *comp, const Parameter &parameter) const {
   checkIsNotMaskingParameter(parameter.name());
-  if (m_map.empty() || !comp)
+  const size_t index = indexOf(comp);
+  if (index == ComponentInfo::invalidIndex)
     return false;
 
-  const ComponentID id = comp->getComponentID();
-  auto it_found = m_map.find(id);
-  if (it_found != m_map.end()) {
-    auto itrs = m_map.equal_range(id);
-    for (auto itr = itrs.first; itr != itrs.second; ++itr) {
-      const Parameter_sptr &param = itr->second;
-      if (*param == parameter)
-        return true;
-    }
-    return false;
-  } else
-    return false;
+  // Compares whole Parameter objects (name, type and value), not just the name, so every
+  // parameter on the component has to be examined rather than looked up by name.
+  for (auto const &[storedName, param] : m_parameterInfo->parameters(index)) {
+    static_cast<void>(storedName);
+    if (param && *param == parameter)
+      return true;
+  }
+  return false;
 }
 
 /** Return a named parameter of a given type
@@ -805,72 +797,8 @@ Parameter_sptr ParameterMap::get(const IComponent *comp, const std::string &name
  */
 std::shared_ptr<Parameter> ParameterMap::get(const IComponent *comp, const char *name, const char *type) const {
   checkIsNotMaskingParameter(name);
-  Parameter_sptr result;
-  if (!comp)
-    return result;
-
-  auto itr = positionOf(comp, name, type);
-  if (itr != m_map.end())
-    result = std::atomic_load(&itr->second);
-  return result;
-}
-
-/** Return an iterator pointing to a named parameter of a given type.
- * @param comp :: Component to which parameter is related
- * @param name :: Parameter name
- * @param type :: An optional type string. If empty, any type is returned
- * @returns The iterator parameter of the given type if it exists or a NULL
- * shared pointer if not
- */
-component_map_it ParameterMap::positionOf(const IComponent *comp, const char *name, const char *type) {
-  auto result = m_map.end();
-  if (!comp)
-    return result;
-  const bool anytype = (strlen(type) == 0);
-  if (!m_map.empty()) {
-    const ComponentID id = comp->getComponentID();
-    auto it_found = m_map.find(id);
-    if (it_found != m_map.end()) {
-      auto itrs = m_map.equal_range(id);
-      for (auto itr = itrs.first; itr != itrs.second; ++itr) {
-        const auto &param = itr->second;
-        if (strcasecmp(param->nameAsCString(), name) == 0 && (anytype || param->type() == type)) {
-          result = itr;
-          break;
-        }
-      }
-    }
-  }
-  return result;
-}
-
-/** Return a const iterator pointing to a named parameter of a given type.
- * @param comp :: Component to which parameter is related
- * @param name :: Parameter name
- * @param type :: An optional type string. If empty, any type is returned
- * @returns The iterator parameter of the given type if it exists or a NULL
- * shared pointer if not
- */
-component_map_cit ParameterMap::positionOf(const IComponent *comp, const char *name, const char *type) const {
-  auto result = m_map.end();
-  if (!comp)
-    return result;
-  const bool anytype = (strlen(type) == 0);
-  if (!m_map.empty()) {
-    const ComponentID id = comp->getComponentID();
-    auto it_found = m_map.find(id);
-    if (it_found != m_map.end()) {
-      auto itrs = m_map.equal_range(id);
-      for (auto itr = itrs.first; itr != itrs.second; ++itr) {
-        const auto &param = itr->second;
-        if (strcasecmp(param->nameAsCString(), name) == 0 && (anytype || param->type() == type)) {
-          result = itr;
-          break;
-        }
-      }
-    }
-  }
-  return result;
+  const size_t index = indexOf(comp);
+  return index == ComponentInfo::invalidIndex ? Parameter_sptr() : m_parameterInfo->get(index, name, type);
 }
 
 /** Look for a parameter in the given component by the type of the parameter.
@@ -879,22 +807,8 @@ component_map_cit ParameterMap::positionOf(const IComponent *comp, const char *n
  * @returns The typed parameter if it exists or a NULL shared pointer if not
  */
 Parameter_sptr ParameterMap::getByType(const IComponent *comp, const std::string &type) const {
-  Parameter_sptr result;
-  if (!m_map.empty()) {
-    const ComponentID id = comp->getComponentID();
-    auto it_found = m_map.find(id);
-    if (it_found != m_map.end() && it_found->first) {
-      auto itrs = m_map.equal_range(id);
-      for (auto itr = itrs.first; itr != itrs.second; ++itr) {
-        const auto &param = itr->second;
-        if (strcasecmp(param->type().c_str(), type.c_str()) == 0) {
-          result = std::atomic_load(&param);
-          break;
-        }
-      } // found->firdst
-    } // it_found != m_map.end()
-  } //! m_map.empty()
-  return result;
+  const size_t index = indexOf(comp);
+  return index == ComponentInfo::invalidIndex ? Parameter_sptr() : m_parameterInfo->getByType(index, type);
 }
 
 /** Looks recursively upwards in the component tree for the first instance of a
@@ -969,7 +883,7 @@ Parameter_sptr ParameterMap::getRecursive(const IComponent *comp, const char *na
 Parameter_sptr ParameterMap::getRecursiveFittingParameter(const IComponent *comp, const std::string &name,
                                                           const std::string &fittingFunction) const {
   checkIsNotMaskingParameter(name);
-  if (!comp || m_map.empty())
+  if (!comp || m_parameterInfo->empty())
     return Parameter_sptr();
 
   // Walk up the component tree using a raw pointer. Wrapping the externally-owned
@@ -978,16 +892,14 @@ Parameter_sptr ParameterMap::getRecursiveFittingParameter(const IComponent *comp
   const IComponent *current = comp;
   std::shared_ptr<const IComponent> parent;
   while (current != nullptr) {
-    const ComponentID id = current->getComponentID();
-    auto it_found = m_map.find(id);
-    if (it_found != m_map.end()) {
-      auto itrs = m_map.equal_range(id);
-      for (auto itr = itrs.first; itr != itrs.second; ++itr) {
-        const auto &param = itr->second;
+    const size_t index = indexOf(current);
+    if (index != ComponentInfo::invalidIndex) {
+      for (auto const &[storedName, param] : m_parameterInfo->parameters(index)) {
+        static_cast<void>(storedName);
         if (param->type() == "fitting" && strcasecmp(param->nameAsCString(), name.c_str()) == 0) {
           try {
             if (param->value<FitParameter>().getFunction() == fittingFunction) {
-              return std::atomic_load(&itr->second);
+              return param;
             }
           } catch (...) {
             // Not a FitParameter value despite the type tag, keep looking.
@@ -1027,19 +939,8 @@ std::string ParameterMap::getString(const IComponent *comp, const std::string &n
  * @returns A set of names of parameters for the given component
  */
 std::set<std::string> ParameterMap::names(const IComponent *comp) const {
-  std::set<std::string> paramNames;
-  const ComponentID id = comp->getComponentID();
-  auto it_found = m_map.find(id);
-  if (it_found == m_map.end()) {
-    return paramNames;
-  }
-
-  auto itrs = m_map.equal_range(id);
-  for (auto it = itrs.first; it != itrs.second; ++it) {
-    paramNames.insert(it->second->name());
-  }
-
-  return paramNames;
+  const size_t index = indexOf(comp);
+  return index == ComponentInfo::invalidIndex ? std::set<std::string>() : m_parameterInfo->names(index);
 }
 
 /**
@@ -1116,15 +1017,12 @@ bool ParameterMap::getCachedRotation(const IComponent *comp, Quat &rotation) con
 void ParameterMap::copyFromParameterMap(const IComponent *oldComp, const IComponent *newComp,
                                         const ParameterMap *oldPMap) {
 
-  auto oldParameterNames = oldPMap->names(oldComp);
+  auto const oldParameterNames = oldPMap->names(oldComp);
+  const size_t newIndex = indexForWrite(newComp);
   for (const auto &oldParameterName : oldParameterNames) {
-    Parameter_sptr thisParameter = oldPMap->get(oldComp, oldParameterName);
-// Insert the fetched parameter in the m_map
-#if TBB_VERSION_MAJOR >= 4 && TBB_VERSION_MINOR >= 4 && !CLANG_ON_LINUX
-    m_map.emplace(newComp->getComponentID(), std::move(thisParameter));
-#else
-    m_map.insert(std::make_pair(newComp->getComponentID(), std::move(thisParameter)));
-#endif
+    // insert() rather than add(), matching the raw insert this replaced: names() has already
+    // deduplicated, so no add/replace lookup is wanted here.
+    m_parameterInfo->insert(newIndex, oldPMap->get(oldComp, oldParameterName));
   }
 }
 
@@ -1249,10 +1147,16 @@ void ParameterMap::setInstrument(const Instrument *instrument) {
     throw std::logic_error("ParameterMap::setInstrument must be called with "
                            "base instrument, not a parametrized instrument");
   m_instrument = instrument;
-  if (m_map.empty()) {
+  if (m_parameterInfo->empty()) {
     std::tie(m_componentInfo, m_detectorInfo) = m_instrument->makeBeamlineNew(*this);
   } else {
     std::tie(m_componentInfo, m_detectorInfo) = m_instrument->makeBeamline(*this);
+  }
+  // The visitor called rekey() while building the beamline, so this map and the new
+  // ComponentInfo now share one store. Re-point at it to be certain of that even on the
+  // makeBeamlineNew() path, where there were no parameters to rekey.
+  if (m_componentInfo) {
+    m_parameterInfo = m_componentInfo->sharedParameterInfo();
   }
   buildInstrumentMetadata();
 }
@@ -1276,23 +1180,13 @@ void ParameterMap::buildInstrumentMetadata() {
  * @return bytes used.
  */
 size_t ParameterMap::getMemorySize() const {
-  // m_map: tbb::concurrent_unordered_multimap<ComponentID, shared_ptr<Parameter>>
-  // Each node: key + value + ~2 pointers for chaining and bucket slot
-  const size_t n = m_map.size();
-  const size_t mapMem = n * (sizeof(pmap::value_type) + 2 * sizeof(void *));
-  // Count the heap-allocated Parameter objects the shared_ptrs point to.
-  // ParameterMap is a friend of Parameter so private string members are accessible.
-  size_t parameterObjectsMem = 0;
-  for (const auto &entry : m_map) {
-    const auto &param = entry.second;
-    if (param) {
-      parameterObjectsMem += sizeof(Parameter);
-      parameterObjectsMem += param->m_name.capacity();
-      parameterObjectsMem += param->m_type.capacity();
-      parameterObjectsMem += param->m_str_value.capacity();
-      parameterObjectsMem += param->m_description.capacity();
-    }
-  }
+  // The parameters themselves, including the Parameter objects on the heap. Note that the
+  // store may be shared with the owning ComponentInfo, which reports it too, so summing this
+  // with ComponentInfo::getMemorySize() double-counts it.
+  const size_t mapMem = m_parameterInfo->getMemorySize();
+  // The pointer/index translation tables, which exist only here.
+  const size_t translationMem = m_idToIndex.size() * (sizeof(std::pair<const ComponentID, size_t>) + sizeof(void *)) +
+                                m_indexToId.capacity() * sizeof(ComponentID);
   // m_parameterFileNames: vector of strings; sizeof(*this) covers the vector object, count the heap buffer
   const size_t fileNamesMem = m_parameterFileNames.size() * sizeof(std::string) +
                               std::accumulate(m_parameterFileNames.cbegin(), m_parameterFileNames.cend(), size_t{0},
@@ -1306,7 +1200,7 @@ size_t ParameterMap::getMemorySize() const {
   const size_t componentInfoMem = m_componentInfo ? m_componentInfo->getMemorySize() : 0;
   // m_instrument is a non-owning raw pointer to the base Instrument; its memory is counted in
   // Instrument::getMemorySize() and excluded here to avoid double-counting.
-  return sizeof(*this) + mapMem + parameterObjectsMem + fileNamesMem + cacheLocMem + cacheRotMem + detectorInfoMem +
+  return sizeof(*this) + mapMem + translationMem + fileNamesMem + cacheLocMem + cacheRotMem + detectorInfoMem +
          componentInfoMem;
 }
 

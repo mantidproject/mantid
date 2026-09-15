@@ -55,10 +55,10 @@ void ParameterInfo::add(size_t const componentIndex, std::shared_ptr<Parameter> 
   }
 }
 
-void ParameterInfo::addFittingParameter(size_t const componentIndex, std::shared_ptr<Parameter> const &parameter,
+bool ParameterInfo::addFittingParameter(size_t const componentIndex, std::shared_ptr<Parameter> const &parameter,
                                         std::string const &fittingFunction) {
   if (!parameter) {
-    return;
+    return false;
   }
   auto &componentParameters = m_store[componentIndex];
   // Deduplicate by (name, function) rather than by name alone, so that two functions on the
@@ -71,13 +71,14 @@ void ParameterInfo::addFittingParameter(size_t const componentIndex, std::shared
     try {
       if (it->second->value<FitParameter>().getFunction() == fittingFunction) {
         it->second = parameter;
-        return;
+        return true;
       }
     } catch (...) {
       // Tagged "fitting" but the value is not a FitParameter; not a match, keep looking.
     }
   }
   componentParameters.emplace(parameter->name(), parameter);
+  return false;
 }
 
 void ParameterInfo::insert(size_t const componentIndex, std::shared_ptr<Parameter> const &parameter) {
@@ -197,9 +198,33 @@ ParameterInfo::ComponentParameters const &ParameterInfo::parameters(size_t const
   return component == m_store.end() ? emptyParameters() : component->second;
 }
 
+namespace {
+/** Erase a component's parameters of exactly this name, returning whether anything was removed.
+ *
+ * The match is case-SENSITIVE, which is necessary to preserve legacy inconsistency in string comparison.
+ * ParameterMap::clearParametersByName compared with case-sensitive operator== on the parameter name.
+ * ParameterMap lookups used strcasecmp, which is case-insensitive.
+ *
+ * The inconsistency is preserved rather than fixed here.
+ */
+bool eraseExactName(ParameterInfo::ComponentParameters &parameters, std::string const &name) {
+  bool erased = false;
+  auto const range = parameters.equal_range(name);
+  for (auto it = range.first; it != range.second;) {
+    if (it->second && it->second->name() == name) {
+      it = parameters.erase(it);
+      erased = true;
+    } else {
+      ++it;
+    }
+  }
+  return erased;
+}
+} // namespace
+
 void ParameterInfo::clearParametersByName(std::string const &name) {
   for (auto component = m_store.begin(); component != m_store.end();) {
-    component->second.erase(name);
+    eraseExactName(component->second, name);
     // Drop components that no longer carry anything, so the store stays sparse.
     if (component->second.empty()) {
       component = m_store.erase(component);
@@ -212,7 +237,7 @@ void ParameterInfo::clearParametersByName(std::string const &name) {
 void ParameterInfo::clearParametersByName(size_t const componentIndex, std::string const &name) {
   auto const component = m_store.find(componentIndex);
   if (component != m_store.end()) {
-    component->second.erase(name);
+    eraseExactName(component->second, name);
     if (component->second.empty()) {
       m_store.erase(component);
     }
