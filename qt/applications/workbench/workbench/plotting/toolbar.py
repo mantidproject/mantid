@@ -309,6 +309,9 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
                 break
 
     def set_buttons_visibility(self, fig):
+        if not fig.get_axes():
+            return
+
         #  check if fitting and superplot should be enabled
         if figure_type(fig) not in [FigureType.Line, FigureType.Errorbar] or len(fig.get_axes()) > 1:
             self.set_fit_enabled(False)

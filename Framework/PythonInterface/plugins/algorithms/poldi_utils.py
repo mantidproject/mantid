@@ -186,6 +186,19 @@ def get_dspac_limits(tth_min: float, tth_max: float, lambda_min: float, lambda_m
     return dspac_min, dspac_max
 
 
+def get_dspac_limits_from_ws(ws: Workspace2D, lambda_min: float = 1.1, lambda_max: float = 5.0) -> Tuple[float, float]:
+    """
+    Function to calculate min and max d-spacing accessible in a workspace given its two-theta coverage
+    :param ws: MatrixWorkspace containing POLDI data (raw instrument)
+    :param lambda_min: minimum wavelength (Ang) to consider
+    :param lambda_max: maximum wavelength (Ang) to consider
+    :return (dspac_min, dspac_max): min and max d-spacing
+    """
+    si = ws.spectrumInfo()
+    tths = np.array([si.twoTheta(ispec) for ispec in range(ws.getNumberHistograms())])
+    return get_dspac_limits(tths.min(), tths.max(), lambda_min, lambda_max)
+
+
 def get_final_dspac_array(bin_width: float, dspac_min: float, dspac_max: float, time_max: float) -> np.ndarray[float]:
     """
     Function to calculate d-spacing bins given time bin width and maximum arrival time
@@ -243,7 +256,12 @@ def get_max_tof_from_chopper(l1: float, l1_chop: float, l2s: Sequence[float], tt
 
 
 def simulate_2d_data(
-    ws_2d: Workspace2D, ws_1d: Workspace2D, output_workspace: Optional[str] = None, lambda_max: float = 5.0, ispec=0
+    ws_2d: Workspace2D,
+    ws_1d: Workspace2D,
+    output_workspace: Optional[str] = None,
+    lambda_max: float = 5.0,
+    ispec=0,
+    flux_sample_points=1000,
 ) -> Workspace2D:
     """
     Function to simulate 2D pulse overlap data given 1D spectrum in d-spacing (i.e. powder pattern).
@@ -252,6 +270,9 @@ def simulate_2d_data(
                   x-range (d-spacing or |Q|) as produced by PoldiAutoCorrelation.
     :param output_workspace: String with name for output workspace
     :param lambda_max: maximum wavelength (Ang) to consider
+    :param ispec: Spectrum Index
+    :param flux_sample_points: number of points to interpolate the instrument flux dependence with
+                               (if None, flux dependence is not accounted for)
     :return: MatrixWorkspace containing simulated POLDI data (raw instrument)
     """
     is_dspac = ws_1d.getXDimension().name.replace("-", "") == "dSpacing"
@@ -281,14 +302,40 @@ def simulate_2d_data(
     tofs = ws_sim.x(0)[:, None] + offsets  # same for all spectra
     path_length_ratio = (l2s + l1 - l1_chop) / (l2s + l1)
     tof_d1Ang = np.asarray([si.diffractometerConstants(ispec)[UnitParams.difc] * path_length_ratio[ispec] for ispec in range(nspec)])
-    out = Parallel(n_jobs=min(4, cpu_count()), prefer="threads", return_as="generator")(
-        delayed(_do_interp)(tofs / tof_d1Ang[ispec], ws_1d.x(0), ws_1d.y(0)) for ispec in range(nspec)
-    )
+    if flux_sample_points:
+        lam_grid, flux_vals = _get_flux_arrays(ws_sim, n_points=flux_sample_points)
+        sin_thetas = np.sin(tths / 2.0)
+        out = Parallel(n_jobs=min(4, cpu_count()), prefer="threads", return_as="generator")(
+            delayed(_do_interp_with_flux_correction)(
+                tofs / tof_d1Ang[ispec], ws_1d.x(0), ws_1d.y(0), sin_thetas[ispec], lam_grid, flux_vals
+            )
+            for ispec in range(nspec)
+        )
+    else:
+        out = Parallel(n_jobs=min(4, cpu_count()), prefer="threads", return_as="generator")(
+            delayed(_do_interp)(tofs / tof_d1Ang[ispec], ws_1d.x(0), ws_1d.y(0)) for ispec in range(nspec)
+        )
     # set y values
-    [ws_sim.setSharedY(ispec, yvec) for ispec, yvec in enumerate(out)]
+    for ispec, yvec in enumerate(out):
+        ws_sim.setSharedY(ispec, yvec)
     ADS.addOrReplace(output_workspace, ws_sim)
     return ws_sim
 
 
 def _do_interp(dtarget, d, intensity):
     return np.interp(dtarget, d, intensity).sum(axis=1)
+
+
+def _do_interp_with_flux_correction(dtarget, d, intensity, sin_theta, lam_grid, flux_vals):
+    flux_weights = np.interp(d * (2.0 * sin_theta), lam_grid, flux_vals)
+    return np.interp(dtarget, d, intensity * flux_weights).sum(axis=1)
+
+
+def _get_flux_arrays(ws, lam_min: float = 1.1, lam_max: float = 5.0, n_points: int = 100):
+    """Sample the flux distribution into in memory numpy arrays for fast lookups."""
+    source_comp = ws.getInstrument().getComponentByName("source")
+    lam_grid = np.linspace(lam_min, lam_max, n_points)
+    flux_vals = np.fromiter(
+        (source_comp.getFittingParameter("WavelengthDistribution", lam) for lam in lam_grid), dtype=float, count=n_points
+    )
+    return lam_grid, flux_vals

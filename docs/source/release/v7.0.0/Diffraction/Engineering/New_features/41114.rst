@@ -1,0 +1,6 @@
+- Pawley refinement classes in ``Engineering.pawley_utils`` can now output the fitted peak parameters (intensity, centre and FWHM, with errors where available) as a table workspace per phase.
+- Pawley refinement classes in ``Engineering.pawley_utils`` can now have bounds set on their fit parameters, as a fraction of the current value, as a multiplicative factor, or as explicit limits (e.g. to force non-negative peak intensities).
+- The 2D Pawley refinement in ``Engineering.pawley_utils`` now offers an alternating fit strategy (selected with ``PawleyFitStrategy``), which re-estimates the per-spectrum scale factors and backgrounds between successive refinements rather than applying a single overall scale.
+- The 2D Pawley refinement in ``Engineering.pawley_utils`` can now optionally apply a Lorentz correction to the simulated pattern.
+- The ``Phase`` class in ``Engineering.pawley_utils`` can now crop its hkl list to the reflections accessible in a given workspace (from the two-theta coverage of that workspace and the wavelength limits), for use when several virtual detectors each cover a subset of the pixels.
+- POLDI 2D data simulated with ``poldi_utils.simulate_2d_data`` now accounts for the wavelength dependence of the incident flux.

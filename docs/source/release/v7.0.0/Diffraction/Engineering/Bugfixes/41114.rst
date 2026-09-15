@@ -1,0 +1,1 @@
+- The POLDI instrument definition has been corrected so that all detector pixels face the sample position — previously half of each detector block was rotated about the wrong axis and the other half was not rotated at all. The IDF schema now also allows a rotation axis to be given on a ``<locations>`` element.
