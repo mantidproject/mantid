@@ -3281,9 +3281,14 @@ void FitPropertyBrowser::addAllowedSpectra(const QString &wsName, const QList<in
 
 void FitPropertyBrowser::removeWorkspaceAndSpectra(const std::string &wsName) {
   removeWorkspace(wsName);
-  // remove spectra
+  // remove spectra. The find must be checked before it is erased: erasing end() is undefined
+  // behaviour, and a caller removing a workspace this browser was never told about - or removing the
+  // same one twice - reaches here with no entry to erase.
   QString qWsName = QString::fromStdString(wsName);
-  m_allowedSpectra.erase(m_allowedSpectra.find(qWsName));
+  auto const spectra = m_allowedSpectra.find(qWsName);
+  if (spectra != m_allowedSpectra.end()) {
+    m_allowedSpectra.erase(spectra);
+  }
 }
 
 void FitPropertyBrowser::addAllowedTableWorkspace(const QString &wsName) {

@@ -12,15 +12,23 @@
 # into add_subdirectory.
 list(APPEND PYUNITTEST_PYTHONPATH_EXTRA ${CMAKE_CURRENT_SOURCE_DIR})
 set(PYUNITTEST_QT_API pyqt${MANTID_QT_VERSION}) # force to use the configured Qt version
-# these drive a real interface and run real algorithms, so they are both slow and greedy: give them a longer limit than
-# the global one and keep them off each other's toes
-set(PYUNITTEST_TIMEOUT 3600)
+# These drive a real interface and run real algorithms, so they are both slow and greedy: give them a longer limit than
+# the global one and keep them off each other's toes.
+#
+# 600 rather than an hour. The limit is only ever reached by a suite that has hung - a hung GUI test does not finish
+# late, it does not finish at all - so its real job is to decide how long a wedged run wastes before the build gets its
+# report. The slowest module here takes well under two minutes, and every wait inside them is separately bounded, so
+# this leaves a large multiple of the true cost while still failing the same day. AUTOMATED_UI_TEST_HANG_DUMP_SECONDS in
+# automated_ui_test_base dumps every thread's stack before this fires, so a timeout arrives with something to debug.
+set(PYUNITTEST_TIMEOUT 600)
 set(PYUNITTEST_RUN_SERIAL ON)
 
 # A UI test replaces a manual test guide, so it uses whatever data that guide told a tester to load - which for most
 # interfaces means the SystemTest set. The built properties file only puts UnitTest and DocTest on the search path, so
 # name the rest here and let the harness add them per test. Their contents are downloaded by the AutomatedUITestData
-# target below; a test whose files are absent reports a skip through require_files.
+# target below; a test whose files are absent reports a skip through require_files, or a failure under
+# AUTOMATED_UI_TEST_REQUIRE_PREREQUISITES. That variable belongs to the weekly workflow and must not be set here, where
+# it would reach developer runs too.
 set(PYUNITTEST_DATA_DIRS
     ${ExternalData_BINARY_ROOT}/Testing/Data/SystemTest ${ExternalData_BINARY_ROOT}/Testing/Data/DocTest
     ${ExternalData_BINARY_ROOT}/Testing/Data/UnitTest
@@ -41,3 +49,4 @@ if(TARGET StandardTestData AND TARGET SystemTestData)
 endif()
 
 add_subdirectory(Example)
+add_subdirectory(EngineeringDiffraction)

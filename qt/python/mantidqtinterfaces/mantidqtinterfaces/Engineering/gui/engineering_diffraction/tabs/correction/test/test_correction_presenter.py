@@ -119,10 +119,17 @@ class TestTextureCorrectionPresenter(unittest.TestCase):
         self.presenter.redraw_table.assert_called_once()
 
     def test_update_custom_shape_finder_vis(self):
+        self.view.include_absorption.return_value = True
         self.view.get_shape_method.return_value = "Custom Shape"
         self.presenter.update_custom_shape_finder_vis()
         self.view.set_finder_gauge_vol_visible.assert_called_with(True)
         self.view.get_shape_method.return_value = "4mmCube"
+        self.presenter.update_custom_shape_finder_vis()
+        self.view.set_finder_gauge_vol_visible.assert_called_with(False)
+
+    def test_update_custom_shape_finder_vis_stays_hidden_without_absorption(self):
+        self.view.include_absorption.return_value = False
+        self.view.get_shape_method.return_value = "Custom Shape"
         self.presenter.update_custom_shape_finder_vis()
         self.view.set_finder_gauge_vol_visible.assert_called_with(False)
 

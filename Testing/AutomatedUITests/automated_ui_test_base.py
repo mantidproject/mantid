@@ -38,6 +38,7 @@ Four details shape everything here, and each of them contradicts the obvious app
    its own right.
 """
 
+import faulthandler
 import os
 import sys
 import tempfile
@@ -58,6 +59,29 @@ if _THIS_DIR not in sys.path:
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 # matplotlib must not try to open a window either; several interfaces plot as a side effect
 os.environ.setdefault("MPLBACKEND", "Agg")
+
+# Seconds of no progress after which every thread's stack is dumped to stderr. Comfortably longer
+# than any suite here takes (the slowest is well under two minutes) and comfortably shorter than the
+# CTest TIMEOUT the directory sets, so the dump lands in the test's captured output *before* CTest
+# kills the process.
+#
+# It exists because a GUI test that hangs is otherwise completely silent: CTest reports only
+# "***Timeout" with no indication of which test, which widget or which thread was stuck, so there is
+# nothing to debug from a CI log. The dump repeats, so a second one that looks identical says the
+# process is wedged while one that has moved on says it is merely slow. It never fails a run by
+# itself - exit=False - so a legitimately slow suite is only ever made noisier, never broken.
+HANG_DUMP_AFTER_SECONDS = float(os.environ.get("AUTOMATED_UI_TEST_HANG_DUMP_SECONDS", 240))
+
+if HANG_DUMP_AFTER_SECONDS > 0:
+    faulthandler.enable()
+    faulthandler.dump_traceback_later(HANG_DUMP_AFTER_SECONDS, repeat=True, exit=False)
+
+# Whether a missing prerequisite - a data file, or a build with no Qt - fails the test or skips it.
+#
+# Skipping suits a developer, for whom not having built AutomatedUITestData is an ordinary state. In
+# CI it would mean the run reported green having tested nothing, which is the outcome this suite
+# exists to prevent, so the weekly workflow sets this. Nothing else should.
+REQUIRE_PREREQUISITES = os.environ.get("AUTOMATED_UI_TEST_REQUIRE_PREREQUISITES", "").lower() not in ("", "0", "false", "no")
 
 
 def qt_is_available():
@@ -112,18 +136,24 @@ class AutomatedUITestBase(unittest.TestCase):
         with self.subTest(label):
             self.fail(message)
 
+    def _skip_or_fail(self, reason):
+        """Report a missing prerequisite - a failure under ``REQUIRE_PREREQUISITES``, a skip without."""
+        if REQUIRE_PREREQUISITES:
+            self.fail(reason)
+        self.skipTest(reason)
+
     def require_files(self, *filenames):
-        """Skip this test unless every named data file can be found.
+        """Skip this test unless every named data file can be found, or fail under CI.
 
         The data lives in the ExternalData store and is downloaded by the ``AutomatedUITestData``
-        target, so a developer who has not built that target gets a clean skip rather than a
-        failure inside the interface.
+        target, so a developer who has not built it gets a clean report rather than a failure from
+        inside the interface.
         """
         from mantid.api import FileFinder
 
         missing = [name for name in filenames if not FileFinder.getFullPath(name)]
         if missing:
-            self.skipTest(f"missing data file(s): {', '.join(missing)}. Build the AutomatedUITestData target.")
+            self._skip_or_fail(f"missing data file(s): {', '.join(missing)}. Build the AutomatedUITestData target.")
 
     # ------------------------------------------------------------------ lifecycle
 
@@ -131,7 +161,7 @@ class AutomatedUITestBase(unittest.TestCase):
         # recorded text of any message box a patch intercepts; see patch_error_messages
         self.message_box_messages = []
         if not qt_is_available():
-            self.skipTest("this build has no Qt interfaces")
+            self._skip_or_fail("this build has no Qt interfaces")
         self._saved_qsettings_state = None
         self._settings_tmpdir = None
         self._saved_data_dirs = None
@@ -149,6 +179,10 @@ class AutomatedUITestBase(unittest.TestCase):
         from qt_interaction_helpers import close_all_figures, process_events
 
         try:
+            # first, and before anything is torn down: a worker still running here is a non-daemon
+            # thread that would deadlock the process at interpreter exit (see wait_for_async_task),
+            # and it is also still writing to the ADS this is about to clear
+            self._drain_async_tasks()
             close_all_figures()
             process_events(2)
         finally:
@@ -257,6 +291,10 @@ class AutomatedUITestBase(unittest.TestCase):
 
     # ------------------------------------------------------------------ waiting
 
+    # how long tearDown will keep pumping the event loop for an abandoned worker before it stops
+    # waiting and leaves the thread to the interpreter. See _drain_async_tasks.
+    ABANDONED_WORKER_GRACE = 30.0
+
     def wait_for_async_task(self, worker, timeout=10.0, what="worker"):
         """Block until an ``AsyncTask`` finishes, pumping the event loop throughout.
 
@@ -269,6 +307,13 @@ class AutomatedUITestBase(unittest.TestCase):
         The worker is therefore parked until the GUI thread runs its event loop - so a plain
         ``worker.join()`` here would deadlock both threads. Short joins interleaved with
         ``processEvents`` are what make it terminate.
+
+        Giving up therefore cannot simply raise. ``AsyncTask`` is a *non-daemon* thread, so an
+        abandoned one is joined by ``threading._shutdown`` at interpreter exit - and by then nobody
+        is pumping the event loop it is parked on, so that join never returns. The process hangs
+        with every test already reported and CTest kills it at the suite TIMEOUT. The worker is
+        aborted and drained here before the failure is raised, which turns that into an ordinary
+        test failure. ``tearDown`` repeats the sweep for workers no test ever waited on.
         """
         from qt_interaction_helpers import process_events
 
@@ -279,9 +324,51 @@ class AutomatedUITestBase(unittest.TestCase):
             process_events()
             worker.join(0.1)
             if time.time() > deadline:
+                self._abort_and_drain(worker)
                 raise RuntimeError(f"{what} did not finish within {timeout}s")
         # drain the callbacks the worker queued on its way out (e.g. re-enabling controls)
         process_events(3)
+
+    def _drain_async_tasks(self):
+        """Stop every ``AsyncTask`` still running, so none outlives this test.
+
+        Found by walking the live threads rather than by remembering what was started: a worker
+        abandoned by an assertion part way through a scenario is one no test ever held a handle to,
+        and it deadlocks the process just as thoroughly as one a wait gave up on.
+        """
+        import threading
+
+        from mantidqt.utils.asynchronous import AsyncTask
+
+        for thread in threading.enumerate():
+            if isinstance(thread, AsyncTask) and thread.is_alive():
+                self._abort_and_drain(thread)
+
+    def _abort_and_drain(self, worker):
+        """Cancel a worker and keep pumping the event loop until it actually finishes.
+
+        Both halves are needed. ``abort`` cancels the algorithm running in the thread, but the
+        thread still has to run its callbacks on the way out, and those block on the GUI thread -
+        so the event loop has to keep turning until it is really gone.
+        """
+        from qt_interaction_helpers import process_events
+
+        try:
+            # best effort only - a worker that has already moved past its algorithm has nothing to
+            # cancel, and it is the drain below that actually has to see it out
+            worker.abort(interrupt=True)
+        except Exception:
+            pass
+        deadline = time.time() + self.ABANDONED_WORKER_GRACE
+        while worker.is_alive() and time.time() < deadline:
+            process_events()
+            worker.join(0.1)
+        if worker.is_alive():
+            # nothing further can be done from here, but say so: this is the state that used to
+            # hang the run silently, and the message is the only warning the log will carry
+            sys.stderr.write(f"AutomatedUITest: worker {worker.name} would not stop; the process may not exit\n")
+        else:
+            process_events(3)
 
     # ------------------------------------------------------------------ modal dialogs
 
@@ -410,6 +497,16 @@ class AutomatedUITestBase(unittest.TestCase):
             return []
         pattern = "*" if extension is None else f"*{extension}"
         return sorted(str(path.relative_to(root)) for path in root.rglob(pattern) if path.is_file())
+
+    @staticmethod
+    def file_states_under(directory, extension=None):
+        """Every file below ``directory`` mapped to its modification time, in nanoseconds.
+
+        Used where the assertion is that nothing further was written: a set of paths alone cannot
+        tell an untouched directory from one whose files were overwritten in place.
+        """
+        root = Path(directory)
+        return {relative: (root / relative).stat().st_mtime_ns for relative in AutomatedUITestBase.files_under(directory, extension)}
 
     @staticmethod
     def basenames_under(directory, extension=None):
