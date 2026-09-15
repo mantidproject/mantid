@@ -401,7 +401,7 @@ void ExperimentInfo::populateInstrumentParameters() {
       continue;
     }
   }
-  for (const auto &item : paramMapForPosAndRot) {
+  for (const auto &item : paramMapForPosAndRot.entries()) {
     if (isPositionParameter(item.second->name())) {
       const auto newRelPos = item.second->value<V3D>();
       updatePosition(compInfo, item.first, newRelPos);
@@ -414,7 +414,7 @@ void ExperimentInfo::populateInstrumentParameters() {
   }
   // Special case RectangularDetector: Parameters scalex and scaley affect pixel
   // positions.
-  for (const auto &item : paramMap) {
+  for (const auto &item : paramMap.entries()) {
     if (isScaleParameter(item.second->name()))
       adjustPositionsFromScaleFactor(compInfo, item.first, item.second->name(), item.second->value<double>());
   }
