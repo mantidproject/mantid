@@ -36,7 +36,7 @@ class CppInterfacesStartupTest(systemtesting.MantidSystemTest):
         # Use legacy instrument view on windows as CI VMs do not currently have a modern version of openG required by new version/VTK.
         self.config_overrides = {}
         if platform.startswith("win"):
-            self.config_overrides = {"InstrumentView.use_legacy_instrument_view": "True"}
+            self.config_overrides = {"MantidOptions.InstrumentView.use_legacy_instrument_view": "True"}
 
     def runTest(self):
         if len(self._cpp_interface_names) == 0:
