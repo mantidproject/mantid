@@ -161,7 +161,8 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
         is_group = isinstance(ws, WorkspaceGroup)
         ws1 = ws[0] if is_group else ws
         specular_pixel_spectrum_no = None
-        if ws1.getInstrument().getName() == self._POLREF:
+        component_info = ws1.componentInfo()
+        if component_info.name(component_info.root()) == self._POLREF:
             specular_pixel_spectrum_no = self._find_specular_pixel_spectrum_no(ws1, self._POLREF_START_WS_INDEX)
 
         if is_group:
