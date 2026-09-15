@@ -34,6 +34,7 @@ class DetectorInfo;
 class IDetector;
 class InstrumentMetadata;
 class ParameterMap;
+class PositionAndRotationAccumulator;
 class XMLInstrumentParameter;
 } // namespace Geometry
 
@@ -196,7 +197,7 @@ protected:
 
 private:
   /// Fill with given instrument parameter
-  void populateWithParameter(Geometry::ParameterMap &paramMap, Geometry::ParameterMap &paramMapForPosAndRot,
+  void populateWithParameter(Geometry::ParameterMap &paramMap, Geometry::PositionAndRotationAccumulator &posAndRot,
                              const std::string &name, const Geometry::XMLInstrumentParameter &paramInfo,
                              const Run &runData);
 

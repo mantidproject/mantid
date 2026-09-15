@@ -24,6 +24,7 @@
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/PositionAndRotationAccumulator.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 
 #include "MantidBeamline/ComponentInfo.h"
@@ -49,6 +50,7 @@
 #include <Poco/Path.h>
 
 #include <algorithm>
+#include <map>
 #include <memory>
 #include <tuple>
 
@@ -358,7 +360,7 @@ void ExperimentInfo::populateInstrumentParameters() {
   // about
   // the parameters that my be specified in the instrument definition file (IDF)
   Geometry::ParameterMap &paramMap = instrumentParameters();
-  Geometry::ParameterMap paramMapForPosAndRot;
+  Geometry::PositionAndRotationAccumulator posAndRot;
 
   // Get instrument and sample
   auto &compInfo = mutableComponentInfo();
@@ -402,32 +404,27 @@ void ExperimentInfo::populateInstrumentParameters() {
         if (rtpValues.haveRadius) {
           V3D pos;
           pos.spherical(rtpValues.radius, rtpValues.theta, rtpValues.phi);
-          paramMapForPosAndRot.addV3D(paramInfo->m_component, ParameterMap::pos(), pos);
+          const auto compIndex = compInfo.indexOfOrInvalid(paramInfo->m_component->getComponentID());
+          if (compIndex != Geometry::ComponentInfo::invalidIndex) {
+            posAndRot.setPosition(compIndex, pos);
+          }
         }
       } else {
-        populateWithParameter(paramMap, paramMapForPosAndRot, paramN, *paramInfo, runData);
+        populateWithParameter(paramMap, posAndRot, paramN, *paramInfo, runData);
       }
     } catch (std::exception &exc) {
       g_log.information() << "Unable to add component parameter '" << paramN << "'. Error: " << exc.what();
       continue;
     }
   }
-  for (const auto &item : paramMapForPosAndRot.entries()) {
-    // This staging map was populated against this same instrument, so every component in it is
-    // known to compInfo; indexOfOrInvalid guards the case anyway rather than throwing.
-    const auto compIndex = compInfo.indexOfOrInvalid(item.first);
-    if (compIndex == Geometry::ComponentInfo::invalidIndex) {
-      continue;
-    }
-    if (isPositionParameter(item.second->name())) {
-      const auto newRelPos = item.second->value<V3D>();
-      updatePosition(compInfo, compIndex, newRelPos);
-    } else if (isRotationParameter(item.second->name())) {
-      const auto newRelRot = item.second->value<Quat>();
-      updateRotation(compInfo, compIndex, newRelRot);
-    }
-    // Parameters for individual components (x,y,z) are ignored. ParameterMap
-    // did compute the correct compound positions and rotations internally.
+  // Each component's position and rotation is applied once, complete. The accumulator has
+  // already folded the individual x/y/z coordinates and rotx/roty/rotz angles together, so
+  // there are no partial values left to ignore here.
+  for (const auto &[compIndex, newRelPos] : posAndRot.positions()) {
+    updatePosition(compInfo, compIndex, newRelPos);
+  }
+  for (const auto &[compIndex, newRelRot] : posAndRot.rotations()) {
+    updateRotation(compInfo, compIndex, newRelRot);
   }
   // Special case RectangularDetector: Parameters scalex and scaley affect pixel
   // positions.
@@ -1375,13 +1372,13 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
  * Where this is appropriate a parameter value is dependent on values in a log
  * entry
  * @param paramMap Map to populate (except for position and rotation parameters)
- * @param paramMapForPosAndRot Map to populate with positions and rotations
+ * @param posAndRot Accumulator collecting positions and rotations
  * @param name The name of the parameter
  * @param paramInfo A reference to the object describing this parameter
  * @param runData A reference to the run object, which stores log value entries
  */
 void ExperimentInfo::populateWithParameter(Geometry::ParameterMap &paramMap,
-                                           Geometry::ParameterMap &paramMapForPosAndRot, const std::string &name,
+                                           Geometry::PositionAndRotationAccumulator &posAndRot, const std::string &name,
                                            const Geometry::XMLInstrumentParameter &paramInfo, const Run &runData) {
   const std::string &category = paramInfo.m_type;
   ParameterValue paramValue(paramInfo,
@@ -1409,10 +1406,19 @@ void ExperimentInfo::populateWithParameter(Geometry::ParameterMap &paramMap,
                                                    // (guarantee)
     }
   } else if (name == "x" || name == "y" || name == "z") {
-    paramMapForPosAndRot.addPositionCoordinate(paramInfo.m_component, name, paramValue);
+    const auto compIndex = componentInfo().indexOfOrInvalid(paramInfo.m_component->getComponentID());
+    if (compIndex != Geometry::ComponentInfo::invalidIndex) {
+      // Seeded from the component's current position, so specifying one coordinate leaves the
+      // other two alone.
+      posAndRot.setCoordinate(compIndex, name, paramValue, componentInfo().position(compIndex));
+    }
   } else if (name == "rot" || name == "rotx" || name == "roty" || name == "rotz") {
-    // Effectively this is dropping any parameters named 'rot'.
-    paramMapForPosAndRot.addRotationParam(paramInfo.m_component, name, paramValue, pDescription);
+    const auto compIndex = componentInfo().indexOfOrInvalid(paramInfo.m_component->getComponentID());
+    if (compIndex != Geometry::ComponentInfo::invalidIndex &&
+        !posAndRot.setRotationAngle(compIndex, name, paramValue)) {
+      // "rot" itself names no axis and is deliberately dropped, as it always has been.
+      g_log.warning() << "Ignoring instrument parameter '" << name << "': it does not name a rotation axis.\n";
+    }
   } else if (category == "fitting") {
     std::ostringstream str;
     // read parameter map relies on extracting m_fittingFunction from this string - edit with care
