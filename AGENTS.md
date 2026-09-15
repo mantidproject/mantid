@@ -115,3 +115,7 @@ this:
 ```text
 Assisted-by: <harness>:<model>
 ```
+
+# AI policy
+
+@AI_POLICY.md

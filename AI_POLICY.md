@@ -12,9 +12,12 @@ AI-assisted contributions are accepted only if:
 - It was not opened by a fully autonomous agent.
 - You respond to review comments yourself.
 
-This applies to issues and comments as well as pull requests. Using AI for
-translation or grammar help is fine. AI output may infringe copyright; it is
-your responsibility to make sure it does not.
+This applies to issues, comments, pull requests, and suggested changes from
+AI code review. Using AI for translation or grammar help is fine. AI output
+may infringe copyright; it is your responsibility to make sure it does not.
+
+The use of non-AI tools such as those for formatting, linting, and static
+analysis are not covered by this policy.
 
 Unsolicited, undisclosed, or low-effort AI PRs will be closed.
 
