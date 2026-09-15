@@ -21,6 +21,7 @@
 #include <exception>
 #include <iterator>
 #include <memory>
+#include <numeric>
 #include <optional>
 #include <stdexcept>
 #include <unordered_map>
@@ -204,14 +205,6 @@ Mantid::API::MatrixWorkspace_sptr createPeakCentreWorkspace(Mantid::API::MatrixW
   return peakCentreWorkspace;
 }
 
-Mantid::API::WorkspaceGroup_sptr workspaceGroupFromADS(std::string const &workspaceName) {
-  auto &ads = Mantid::API::AnalysisDataService::Instance();
-  if (!ads.doesExist(workspaceName)) {
-    return nullptr;
-  }
-  return std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ads.retrieveWS<Mantid::API::Workspace>(workspaceName));
-}
-
 bool workspaceHasRunNumber(Mantid::API::MatrixWorkspace const &workspace, std::string const &runNumber) {
   auto const &run = workspace.run();
   return run.hasProperty("run_number") && run.getProperty("run_number")->value() == runNumber;
@@ -234,22 +227,44 @@ bool workspaceMatchesRunAndPeriod(Mantid::API::MatrixWorkspace const &workspace,
   return !plottingWorkspace.periodNumber || workspaceHasCurrentPeriod(workspace, *plottingWorkspace.periodNumber);
 }
 
+Mantid::API::MatrixWorkspace_sptr matchingTOFWorkspace(Mantid::API::Workspace_sptr const &workspace,
+                                                       PlottingWorkspace const &plottingWorkspace,
+                                                       std::string const &expectedRunNumber) {
+  if (auto matrixWorkspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace)) {
+    return workspaceMatchesRunAndPeriod(*matrixWorkspace, plottingWorkspace, expectedRunNumber) ? matrixWorkspace
+                                                                                                : nullptr;
+  }
+  if (auto group = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(workspace)) {
+    for (size_t index = 0; index < group->size(); ++index) {
+      if (auto match = matchingTOFWorkspace(group->getItem(index), plottingWorkspace, expectedRunNumber)) {
+        return match;
+      }
+    }
+  }
+  return nullptr;
+}
+
 Mantid::API::MatrixWorkspace_sptr rawTOFWorkspaceFor(PlottingWorkspace const &plottingWorkspace) {
-  if (plottingWorkspace.runNumbers.size() != 1) {
+  if (plottingWorkspace.runNumbers.empty()) {
     return nullptr;
   }
 
-  auto const &expectedRunNumber = plottingWorkspace.runNumbers.front();
-  for (auto const &groupName : std::vector<std::string>{"TOF", "__TOF"}) {
-    auto const workspaceGroup = workspaceGroupFromADS(groupName);
-    if (!workspaceGroup) {
+  auto const expectedRunNumber =
+      std::accumulate(std::next(plottingWorkspace.runNumbers.begin()), plottingWorkspace.runNumbers.end(),
+                      plottingWorkspace.runNumbers.front(), [](std::string joined, std::string const &run) {
+                        joined += '+';
+                        joined += run;
+                        return joined;
+                      });
+  auto &ads = Mantid::API::AnalysisDataService::Instance();
+  // Summed inputs remain outside the TOF groups after reduction.
+  for (auto const &name :
+       std::vector<std::string>{"TOF", "__TOF", "TOF_" + expectedRunNumber, "__TOF_" + expectedRunNumber}) {
+    if (!ads.doesExist(name)) {
       continue;
     }
-    for (auto index = 0u; index < workspaceGroup->size(); ++index) {
-      auto const groupMember = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspaceGroup->getItem(index));
-      if (groupMember && workspaceMatchesRunAndPeriod(*groupMember, plottingWorkspace, expectedRunNumber)) {
-        return groupMember;
-      }
+    if (auto match = matchingTOFWorkspace(ads.retrieve(name), plottingWorkspace, expectedRunNumber)) {
+      return match;
     }
   }
   return nullptr;
