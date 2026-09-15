@@ -7,6 +7,7 @@
 #pragma once
 
 #include <cmath>
+#include <limits>
 #include <numeric>
 
 #include <cxxtest/TestSuite.h>
@@ -16,16 +17,20 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncPoisson.h"
+
 #include "MantidCurveFitting/Functions/UserFunction.h"
 #include "MantidCurveFitting/Jacobian.h"
 
 using namespace Mantid::API;
 using Mantid::CurveFitting::CostFunctions::CostFuncPoisson;
 using Mantid::CurveFitting::Functions::UserFunction;
+using namespace Mantid::CurveFitting::CostFunctions::PoissonLossLM;
 
 namespace {
 // Taken from CostFuncPoisson
 const double cutOffPoint = 0.0001;
+const double tolDiff = 1e-9;
+const double delta = 1e-12;
 
 std::vector<double> calculateDeterminant(const FunctionValues &vals, size_t numParams) {
   Mantid::CurveFitting::Jacobian jacob(vals.size(), numParams);
@@ -300,5 +305,73 @@ public:
     for (size_t i = 0; i < firstRow.size(); i++) {
       TS_ASSERT(std::isinf(firstRow[i]));
     }
+  }
+};
+
+class PoissonHelpersTest : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static PoissonHelpersTest *createSuite() { return new PoissonHelpersTest(); }
+  static void destroySuite(PoissonHelpersTest *suite) { delete suite; }
+
+  void testSgn() {
+    TS_ASSERT_EQUALS(sgn(-10.0), -1.0);
+    TS_ASSERT_EQUALS(sgn(10.0), 1.0);
+    TS_ASSERT_EQUALS(sgn(-1.0), -1.0);
+    TS_ASSERT_EQUALS(sgn(1.0), 1.0);
+    TS_ASSERT_EQUALS(sgn(0.0), 0.0);
+  }
+
+  void testCalculatePoissonLossLMZeroCounts() {
+    TS_ASSERT_DELTA(calculatePoissonLossLM(0.0, 2.0), 2.0, delta);
+
+    TS_ASSERT_DELTA(calculatePoissonLossLM(0.0, 8.0), 4.0, delta);
+  }
+
+  void testCalculatePoissonLossLM() {
+    // Equal
+    TS_ASSERT_DELTA(calculatePoissonLossLM(4.0, 4.0), 0.0, delta);
+
+    // Pos
+    double expected = std::sqrt(2.0 * (2.0 + 2.0 * std::log(0.5)));
+    TS_ASSERT_DELTA(calculatePoissonLossLM(2.0, 4.0), expected, delta);
+
+    // Neg
+    expected = -std::sqrt(2.0 * (-2.0 + 4.0 * std::log(2.0)));
+    TS_ASSERT_DELTA(calculatePoissonLossLM(4.0, 2.0), expected, delta);
+  }
+
+  void testCalculatePoissonLossLossLM_BelowRelativeCutOff() {
+    const double observed = 4.0;
+    const double predicted = 4.0 + 0.5 * cutOffPoint;
+    double expected = 0.25 * cutOffPoint;
+    TS_ASSERT_DELTA(calculatePoissonLossLM(observed, predicted), expected, cutOffPoint);
+  }
+
+  void testCalculateJacobianScaleFactor_Equal() {
+    // Equal -> 1 / sqrt(observed)
+    TS_ASSERT_DELTA(calculateJacobianScaleFactor(4.0, 4.0), 0.5, delta);
+
+    // Pos
+    double residual = 2.0 + 2.0 * std::log(0.5);
+    double expected = (1.0 - 2.0 / 4.0) / std::sqrt(2.0 * residual);
+    TS_ASSERT_DELTA(calculateJacobianScaleFactor(2.0, 4.0), expected, delta);
+
+    // Neg
+    residual = -2.0 + 4.0 * std::log(2.0);
+    expected = -(1.0 - 4.0 / 2.0) / std::sqrt(2.0 * residual);
+    TS_ASSERT_DELTA(calculateJacobianScaleFactor(4.0, 2.0), expected, delta);
+  }
+
+  void testCalculateJacobianScaleFactor_NearlyEqual() {
+    const double observed = 4.0;
+    const double predicted = 4.0 + 0.5 * tolDiff;
+
+    TS_ASSERT_DELTA(calculateJacobianScaleFactor(observed, predicted), 0.5, cutOffPoint);
+  }
+
+  void testCalculateJacobianScaleFactor_PredictedZero() {
+    TS_ASSERT_EQUALS(calculateJacobianScaleFactor(1.0, 0.0), std::numeric_limits<double>::max());
   }
 };

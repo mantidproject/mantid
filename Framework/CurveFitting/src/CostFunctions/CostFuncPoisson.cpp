@@ -23,8 +23,8 @@ using namespace Mantid::API;
 
 namespace {
 // predicted < 0 is forbidden as it causes inf cost
-const double absoluteCutOff = 0.0;
-const double effectiveCutOff = 0.0001;
+constexpr double absoluteCutOff = 0.0;
+constexpr double effectiveCutOff = 0.0001;
 
 double calculatePoissonLoss(double observedCounts, double predicted) {
   double retVal = (predicted - observedCounts);
@@ -35,6 +35,51 @@ double calculatePoissonLoss(double observedCounts, double predicted) {
 } // namespace
 
 namespace Mantid::CurveFitting::CostFunctions {
+
+namespace PoissonLossLM {
+template MANTID_CURVEFITTING_DLL int sgn<double>(double val);
+
+double calculatePoissonResidualLM(double observedCounts, double predicted) {
+  double retVal = (predicted - observedCounts);
+  if (predicted <= absoluteCutOff) {
+    return std::numeric_limits<double>::max();
+  }
+  // at observed = 0 the Poisson function reduces to predicted - observed
+  if (observedCounts != 0) {
+    if (const auto x = retVal / observedCounts; std::abs(x) < effectiveCutOff) {
+      // taylor around small
+      return observedCounts * (x * x) * (0.5 - (x / 3.0) + (x * x) / 4.0);
+    }
+
+    retVal += observedCounts * (log(observedCounts) - log(predicted));
+  }
+  return retVal;
+}
+double calculateJacobianScaleFactor(double observedCounts, double predicted) {
+  if (predicted <= absoluteCutOff) {
+    return std::numeric_limits<double>::max();
+  }
+  const double delta = predicted - observedCounts;
+  const double signDelta = sgn(delta);
+  // If observed is zero
+  if (observedCounts == 0.0) {
+    return signDelta / std::sqrt(2.0 * predicted);
+  }
+  // taylor
+  if (const auto x = delta / observedCounts; std::abs(x) < effectiveCutOff) {
+    return (1.0 / std::sqrt(observedCounts)) * (1.0 - (2.0 / 3.0) * x + (7.0 / 12.0) * (x * x));
+  }
+
+  return signDelta * (1 - observedCounts / predicted) * 1 /
+         std::sqrt(2 * calculatePoissonResidualLM(observedCounts, predicted));
+}
+
+// calculate loss for the LM minimizer as needed for gsl minimizer, taking the root of the residual.
+double calculatePoissonLossLM(double observedCounts, double predicted) {
+  return sgn(predicted - observedCounts) * std::sqrt(2 * calculatePoissonResidualLM(observedCounts, predicted));
+}
+
+} // namespace PoissonLossLM
 
 DECLARE_COSTFUNCTION(CostFuncPoisson, Poisson)
 //----------------------------------------------------------------------------------------------
