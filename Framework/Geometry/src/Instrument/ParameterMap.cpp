@@ -78,10 +78,19 @@ ParameterMap::ParameterMap(const ParameterMap &other)
       m_cacheLocMap(std::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>(*other.m_cacheLocMap)),
       m_cacheRotMap(std::make_unique<Kernel::Cache<const ComponentID, Kernel::Quat>>(*other.m_cacheRotMap)),
       m_instrument(other.m_instrument) {
-  if (m_instrument) {
-    std::tie(m_componentInfo, m_detectorInfo) = m_instrument->makeBeamline(*this, &other);
-    buildInstrumentMetadata();
+  // Deliberately does NOT rebuild the beamline. That is now ExperimentInfo's job, via rebuildBeamlineFrom()
+}
+
+void ParameterMap::rebuildBeamlineFrom(const ParameterMap &source) {
+  if (!m_instrument) {
+    return;
   }
+  auto [componentInfo, detectorInfo] = m_instrument->makeBeamline(*this, &source);
+  m_componentInfo = std::move(componentInfo);
+  m_detectorInfo = std::move(detectorInfo);
+  // Deliberately does NOT adopt m_componentInfo's store here, unlike setInstrument().
+  // This map was copy-constructed and therefore already holds its own deep copy of the parameters
+  buildInstrumentMetadata();
 }
 
 // Defined as default in source for forward declaration with std::unique_ptr.
@@ -432,7 +441,14 @@ void ParameterMap::add(const std::string &type, const IComponent *comp, const st
  */
 void ParameterMap::add(const IComponent *comp, const std::shared_ptr<Parameter> &par,
                        const std::string *const pDescription) {
-  if (!par)
+  // indexForWrite() allocates an index for a component this map has not seen before; everything
+  // else is the index-addressed overload's job.
+  add(indexForWrite(comp), par, pDescription);
+}
+
+void ParameterMap::add(const size_t componentIndex, const std::shared_ptr<Parameter> &par,
+                       const std::string *const pDescription) {
+  if (!par || componentIndex == ComponentInfo::invalidIndex)
     return;
   checkIsNotMaskingParameter(par->name());
   if (pDescription)
@@ -441,7 +457,14 @@ void ParameterMap::add(const IComponent *comp, const std::shared_ptr<Parameter> 
   // As this is only an add method it should really throw if it already exists. However, this
   // is old behavior and many things rely on this actually being an add/replace-style function
   // -- ParameterInfo::add() implements exactly that, including the case-insensitive name match.
-  m_parameterInfo->add(indexForWrite(comp), par);
+  m_parameterInfo->add(componentIndex, par);
+}
+
+void ParameterMap::add(const std::string &type, const size_t componentIndex, const std::string &name,
+                       const std::string &value, const std::string *const pDescription, const std::string &pVisible) {
+  auto param = ParameterFactory::create(type, name, pVisible);
+  param->fromString(value);
+  add(componentIndex, param, pDescription);
 }
 
 /** Add a fitting parameter, deduplicating by (name, fittingFunction) instead of name alone.
@@ -461,7 +484,15 @@ void ParameterMap::add(const IComponent *comp, const std::shared_ptr<Parameter> 
 void ParameterMap::addFittingParameter(const IComponent *comp, const std::string &name,
                                        const std::string &fittingFunction, const std::string &value,
                                        const std::string *const pDescription, const std::string &pVisible) {
+  addFittingParameter(indexForWrite(comp), name, fittingFunction, value, pDescription, pVisible);
+}
+
+void ParameterMap::addFittingParameter(const size_t componentIndex, const std::string &name,
+                                       const std::string &fittingFunction, const std::string &value,
+                                       const std::string *const pDescription, const std::string &pVisible) {
   checkIsNotMaskingParameter(name);
+  if (componentIndex == ComponentInfo::invalidIndex)
+    return;
   auto param = ParameterFactory::create("fitting", name, pVisible);
   param->fromString(value);
   if (pDescription)
@@ -470,9 +501,9 @@ void ParameterMap::addFittingParameter(const IComponent *comp, const std::string
   // Look for an existing fitting parameter on this component with the same name AND the same
   // embedded function; only that one should be replaced.
   // ParameterInfo applies that rule and reports which of the two happened.
-  const bool replaced = m_parameterInfo->addFittingParameter(indexForWrite(comp), param, fittingFunction);
+  const bool replaced = m_parameterInfo->addFittingParameter(componentIndex, param, fittingFunction);
   g_log.debug() << "addFittingParameter: [" << (replaced ? "replace" : "insert") << "] (name='" << name
-                << "', function='" << fittingFunction << "') on component '" << comp->getName() << "'\n";
+                << "', function='" << fittingFunction << "') on component index " << componentIndex << '\n';
 }
 
 /** Create or adjust "pos" parameter for a component
@@ -1147,11 +1178,12 @@ void ParameterMap::setInstrument(const Instrument *instrument) {
     throw std::logic_error("ParameterMap::setInstrument must be called with "
                            "base instrument, not a parametrized instrument");
   m_instrument = instrument;
-  if (m_parameterInfo->empty()) {
-    std::tie(m_componentInfo, m_detectorInfo) = m_instrument->makeBeamlineNew(*this);
-  } else {
-    std::tie(m_componentInfo, m_detectorInfo) = m_instrument->makeBeamline(*this);
-  }
+  // Assigned one at a time rather than through std::tie: the members are shared_ptr while
+  // makeBeamline returns unique_ptr, and the conversion is clearer spelled out.
+  auto [componentInfo, detectorInfo] =
+      m_parameterInfo->empty() ? m_instrument->makeBeamlineNew(*this) : m_instrument->makeBeamline(*this);
+  m_componentInfo = std::move(componentInfo);
+  m_detectorInfo = std::move(detectorInfo);
   // The visitor called rekey() while building the beamline, so this map and the new
   // ComponentInfo now share one store. Re-point at it to be certain of that even on the
   // makeBeamlineNew() path, where there were no parameters to rekey.
@@ -1170,7 +1202,7 @@ void ParameterMap::buildInstrumentMetadata() {
     physicalInstrument =
         std::make_shared<Instrument>(basePhysicalInstrument, std::shared_ptr<ParameterMap>(this, NoDeleting()));
   }
-  m_instrumentMetadata = std::make_unique<InstrumentMetadata>(
+  m_instrumentMetadata = std::make_shared<InstrumentMetadata>(
       m_instrument->getValidFromDate(), m_instrument->getValidToDate(), m_instrument->getFilename(),
       m_instrument->getXmlText(), m_instrument->getDefaultView(), m_instrument->getDefaultAxis(),
       std::move(physicalInstrument));

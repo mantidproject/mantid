@@ -914,6 +914,36 @@ public:
     TS_ASSERT_EQUALS(pmap.get(bank.get(), "from_the_map")->value<double>(), 1.0);
   }
 
+  void test_indexOfFullName_is_the_exact_inverse_of_fullName() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(2, 3);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = *std::get<0>(wrappers);
+
+    // The property that matters: every component's full name resolves back to that component.
+    for (size_t i = 0; i < componentInfo.size(); ++i) {
+      TSM_ASSERT_EQUALS(componentInfo.fullName(i), componentInfo.indexOfFullName(componentInfo.fullName(i)), i);
+    }
+  }
+
+  void test_indexOfFullName_rejects_names_it_should_not_resolve() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = *std::get<0>(wrappers);
+    const size_t root = componentInfo.root();
+
+    TS_ASSERT_EQUALS(componentInfo.indexOfFullName(""), ComponentInfo::invalidIndex);
+    TS_ASSERT_EQUALS(componentInfo.indexOfFullName("no_such_component"), ComponentInfo::invalidIndex);
+    TS_ASSERT_EQUALS(componentInfo.indexOfFullName(componentInfo.name(root) + "/no_such_child"),
+                     ComponentInfo::invalidIndex);
+
+    // Deliberately stricter than Instrument::getComponentByName(): a bare child name that is not
+    // rooted does not resolve, and path segments may not be skipped. Callers that need the
+    // lenient behaviour must keep the legacy lookup as a fallback.
+    const size_t bankIndex = componentInfo.root() - 3;
+    TS_ASSERT_DIFFERS(bankIndex, root);
+    TS_ASSERT_EQUALS(componentInfo.indexOfFullName(componentInfo.name(bankIndex)), ComponentInfo::invalidIndex);
+  }
+
   void test_fullName_matches_the_legacy_getFullName() {
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
     auto wrappers = InstrumentVisitor::makeWrappers(*instrument);

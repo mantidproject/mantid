@@ -264,6 +264,60 @@ public:
     delete ws2;
   }
 
+  /** Copy-on-write of the instrument geometry.
+   *
+   * A clone must be able to move its detectors without disturbing the original.
+   *
+   * The existing clone tests above use a bare Instrument with no detectors, so none of them
+   * exercise this. */
+  void test_clone_does_not_share_detector_positions_with_original() {
+    ExperimentInfo original;
+    original.setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(1));
+
+    constexpr size_t detectorIndex = 0;
+    const auto positionBefore = original.detectorInfo().position(detectorIndex);
+
+    const std::unique_ptr<ExperimentInfo> clone(original.cloneExperimentInfo());
+    TS_ASSERT_EQUALS(clone->detectorInfo().position(detectorIndex), positionBefore);
+
+    const V3D movedTo = positionBefore + V3D(1.0, 2.0, 3.0);
+    clone->mutableDetectorInfo().setPosition(detectorIndex, movedTo);
+
+    TS_ASSERT_EQUALS(clone->detectorInfo().position(detectorIndex), movedTo);
+    TS_ASSERT_EQUALS(original.detectorInfo().position(detectorIndex), positionBefore);
+  }
+
+  /// As above, but through ComponentInfo and for a non-detector component.
+  void test_clone_does_not_share_component_positions_with_original() {
+    ExperimentInfo original;
+    original.setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(1));
+
+    const size_t sampleIndex = original.componentInfo().sample();
+    const auto positionBefore = original.componentInfo().position(sampleIndex);
+
+    const std::unique_ptr<ExperimentInfo> clone(original.cloneExperimentInfo());
+    const V3D movedTo = positionBefore + V3D(0.0, 0.0, 0.5);
+    clone->mutableComponentInfo().setPosition(sampleIndex, movedTo);
+
+    TS_ASSERT_EQUALS(clone->componentInfo().position(sampleIndex), movedTo);
+    TS_ASSERT_EQUALS(original.componentInfo().position(sampleIndex), positionBefore);
+  }
+
+  /// The parameter store must be copied too, not shared, or a parameter added to the clone
+  /// would appear on the original.
+  void test_clone_does_not_share_parameters_with_original() {
+    ExperimentInfo original;
+    original.setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(1));
+    const auto component = original.getInstrument()->getComponentByName("bank1");
+    TS_ASSERT(component);
+
+    const std::unique_ptr<ExperimentInfo> clone(original.cloneExperimentInfo());
+    clone->instrumentParameters().addDouble(component.get(), "only_on_the_clone", 1.0);
+
+    TS_ASSERT(clone->instrumentParameters().contains(component.get(), "only_on_the_clone"));
+    TS_ASSERT(!original.instrumentParameters().contains(component.get(), "only_on_the_clone"));
+  }
+
   void test_clone_then_copy() {
     ExperimentInfo ws;
     ws.mutableRun().setProtonCharge(1.234);

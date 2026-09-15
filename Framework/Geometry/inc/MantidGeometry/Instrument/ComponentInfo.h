@@ -166,6 +166,9 @@ public:
   /// The fully-qualified name of a component ("instrument/bank1/pixel3")
   std::string fullName(const size_t componentIndex) const;
 
+  /// The component with this fully-qualified name, or invalidIndex if there is none.
+  size_t indexOfFullName(const std::string &fullName) const;
+
   /// Returns empty (or false) if the ComponentInfo was built without parameters or the parameter is unset.
   bool hasParameter(const size_t componentIndex, const std::string &name, bool recursive = true) const;
   std::set<std::string> getParameterNames(const size_t componentIndex, bool recursive = true) const;

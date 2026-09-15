@@ -17,6 +17,7 @@
 #include "MantidKernel/Exception.h"
 
 #include <Eigen/Geometry>
+#include <algorithm>
 #include <exception>
 #include <iterator>
 #include <string>
@@ -594,6 +595,50 @@ std::string ComponentInfo::fullName(const size_t componentIndex) const {
     result += name(*it);
   }
   return result;
+}
+
+/** The component with this fully-qualified name, or invalidIndex.
+ *
+ * Descends the tree one path segment at a time rather than comparing fullName() against every
+ * component, which would be O(components x depth) on every lookup -- prohibitive for the large
+ * instruments this is called for once per stored parameter during a load.
+ *
+ * Where two children of the same parent share a name the first is returned, matching what
+ * Instrument::getComponentByName() does within a level. Such a full name is ambiguous anyway.
+ */
+size_t ComponentInfo::indexOfFullName(const std::string &fullName) const {
+  if (fullName.empty() || size() == 0) {
+    return invalidIndex;
+  }
+
+  size_t current = root();
+  size_t segmentStart = 0;
+  bool first = true;
+  while (segmentStart <= fullName.size()) {
+    const auto separator = fullName.find('/', segmentStart);
+    const auto segment =
+        fullName.substr(segmentStart, separator == std::string::npos ? std::string::npos : separator - segmentStart);
+    if (first) {
+      // The leading segment names the root itself, as fullName() writes it.
+      if (name(current) != segment) {
+        return invalidIndex;
+      }
+      first = false;
+    } else {
+      auto const &candidates = children(current);
+      auto const found =
+          std::find_if(candidates.cbegin(), candidates.cend(), [&](size_t child) { return name(child) == segment; });
+      if (found == candidates.cend()) {
+        return invalidIndex;
+      }
+      current = *found;
+    }
+    if (separator == std::string::npos) {
+      break;
+    }
+    segmentStart = separator + 1;
+  }
+  return current;
 }
 
 template <class T>
