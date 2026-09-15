@@ -12,6 +12,7 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/InstrumentMetadata.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
@@ -72,6 +73,23 @@ GNU_DIAG_ON("unused-local-typedef")
 namespace {
 void setSample(ExperimentInfo &expInfo, const Mantid::API::Sample &sample) { expInfo.mutableSample() = sample; }
 void setRun(ExperimentInfo &expInfo, const Mantid::API::Run &run) { expInfo.mutableRun() = run; }
+
+// Forward the InstrumentMetadata accessors so that the metadata object itself does not
+// need to be handed out to Python.
+Mantid::Types::Core::DateAndTime instrumentValidFromDate(const ExperimentInfo &expInfo) {
+  return expInfo.instrumentMetadata().validFromDate();
+}
+Mantid::Types::Core::DateAndTime instrumentValidToDate(const ExperimentInfo &expInfo) {
+  return expInfo.instrumentMetadata().validToDate();
+}
+const std::string &instrumentFilename(const ExperimentInfo &expInfo) { return expInfo.instrumentMetadata().filename(); }
+const std::string &instrumentXmlText(const ExperimentInfo &expInfo) { return expInfo.instrumentMetadata().xmlText(); }
+const std::string &instrumentDefaultView(const ExperimentInfo &expInfo) {
+  return expInfo.instrumentMetadata().defaultView();
+}
+const std::string &instrumentDefaultAxis(const ExperimentInfo &expInfo) {
+  return expInfo.instrumentMetadata().defaultAxis();
+}
 } // namespace
 
 void export_ExperimentInfo() {
@@ -129,6 +147,18 @@ void export_ExperimentInfo() {
            "Return a const reference to the "
            ":class:`~mantid.geometry.ComponentInfo` "
            "object.")
+      .def("instrumentValidFromDate", &instrumentValidFromDate, args("self"),
+           "Return the valid-from :class:`~mantid.kernel.DateAndTime` of the instrument.")
+      .def("instrumentValidToDate", &instrumentValidToDate, args("self"),
+           "Return the valid-to :class:`~mantid.kernel.DateAndTime` of the instrument.")
+      .def("instrumentFilename", &instrumentFilename, args("self"), return_value_policy<copy_const_reference>(),
+           "Return the name of the file that the original IDF was from.")
+      .def("instrumentXmlText", &instrumentXmlText, args("self"), return_value_policy<copy_const_reference>(),
+           "Return the instrument XML.")
+      .def("instrumentDefaultView", &instrumentDefaultView, args("self"), return_value_policy<copy_const_reference>(),
+           "Return the name of the preferred view in instrument view.")
+      .def("instrumentDefaultAxis", &instrumentDefaultAxis, args("self"), return_value_policy<copy_const_reference>(),
+           "Return the axis the instrument view is wrapped around by default.")
       .def("getInstrumentName", &ExperimentInfo::getInstrumentName, args("self"),
            "Return the name of the instrument for this experiment.")
       .def("setSample", setSample, args("self", "sample"))
