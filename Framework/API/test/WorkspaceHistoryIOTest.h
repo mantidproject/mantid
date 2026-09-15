@@ -322,6 +322,63 @@ public:
     loadhandle->close();
   }
 
+  void test_LoadNexus_Handles_Trailing_Newline_In_History_Data() {
+    NexusTestHelper testfile(true);
+    testfile.createFile("LoadNexusTest.nxs");
+
+    testfile.file->makeGroup("process", "NXprocess", true);
+    testfile.file->makeGroup("MantidAlgorithm_1", "NXnote", true);
+    testfile.file->writeData("author", std::string("mantid"));
+    testfile.file->writeData("description", std::string("Mantid Algorithm data"));
+    testfile.file->writeData("data", "Algorithm: CropWorkspace v1\n"
+                                     "Execution Date: 2025-05-22 13:09:22.324053000\n"
+                                     "Execution Duration: 0.0093664 seconds\n"
+                                     "UUID: fd20fcf1-b8b4-415e-a21d-eb182bb736ab\n"
+                                     "Parameters:\n"
+                                     "  Name: InputWorkspace, Value: SofQW, Default?: No, Direction: Input\n"
+                                     "  Name: OutputWorkspace, Value: cropped, Default?: No, Direction: Output\n");
+    testfile.file->closeGroup();
+    testfile.file->closeGroup();
+
+    WorkspaceHistory history;
+    TS_ASSERT_THROWS_NOTHING(history.loadNexus(testfile.file.get()));
+    TS_ASSERT_EQUALS(1, history.size());
+    const auto loadedHistory = history.getAlgorithmHistory(0);
+    TS_ASSERT_EQUALS("CropWorkspace", loadedHistory->name());
+    TS_ASSERT_EQUALS(2, loadedHistory->getProperties().size());
+  }
+
+  void test_LoadNexus_Handles_Multiline_Property_Values_In_History_Data() {
+    NexusTestHelper testfile(true);
+    testfile.createFile("LoadNexusTest.nxs");
+
+    testfile.file->makeGroup("process", "NXprocess", true);
+    testfile.file->makeGroup("MantidAlgorithm_1", "NXnote", true);
+    testfile.file->writeData("author", std::string("mantid"));
+    testfile.file->writeData("description", std::string("Mantid Algorithm data"));
+    testfile.file->writeData("data", "Algorithm: DirectILLDiagnostics v1\n"
+                                     "Execution Date: 2025-05-22 13:09:22.324053000\n"
+                                     "Execution Duration: 0.0093664 seconds\n"
+                                     "UUID: fd20fcf1-b8b4-415e-a21d-eb182bb736ab\n"
+                                     "Parameters:\n"
+                                     "  Name: OutputReport, Value: Spectra masked by default mask file:\n"
+                                     "1-8, 249-264\n"
+                                     "Spectra masked by beam stop diagnostics:\n"
+                                     "None, Default?: No, Direction: Output\n");
+    testfile.file->closeGroup();
+    testfile.file->closeGroup();
+
+    WorkspaceHistory history;
+    TS_ASSERT_THROWS_NOTHING(history.loadNexus(testfile.file.get()));
+    TS_ASSERT_EQUALS(1, history.size());
+    const auto loadedProperties = history.getAlgorithmHistory(0)->getProperties();
+    TS_ASSERT_EQUALS(1, loadedProperties.size());
+    TS_ASSERT_EQUALS("OutputReport", loadedProperties.front()->name());
+    TS_ASSERT_EQUALS(
+        "Spectra masked by default mask file:\n1-8, 249-264\nSpectra masked by beam stop diagnostics:\nNone",
+        loadedProperties.front()->value());
+  }
+
   void test_LoadNexus_Blank_File() {
     std::string rootstring = "/process/";
     // first file - clean - contains nothing
