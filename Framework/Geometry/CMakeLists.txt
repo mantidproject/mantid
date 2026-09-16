@@ -111,6 +111,7 @@ set(SRC_FILES
     src/Objects/RuleItems.cpp
     src/Objects/Rules.cpp
     src/Objects/ShapeFactory.cpp
+    src/Objects/ShapeRotation.cpp
     src/Objects/Track.cpp
     src/RandomPoint.cpp
     src/Rasterize.cpp
@@ -268,6 +269,7 @@ set(INC_FILES
     inc/MantidGeometry/Objects/MeshObjectCommon.h
     inc/MantidGeometry/Objects/Rules.h
     inc/MantidGeometry/Objects/ShapeFactory.h
+    inc/MantidGeometry/Objects/ShapeRotation.h
     inc/MantidGeometry/Objects/Track.h
     inc/MantidGeometry/RandomPoint.h
     inc/MantidGeometry/Rasterize.h
@@ -405,6 +407,7 @@ set(TEST_FILES
     ScalarUtilsTest.h
     ShapeFactoryTest.h
     ShapeInfoTest.h
+    ShapeRotationTest.h
     SpaceGroupFactoryTest.h
     SpaceGroupTest.h
     SphereTest.h
