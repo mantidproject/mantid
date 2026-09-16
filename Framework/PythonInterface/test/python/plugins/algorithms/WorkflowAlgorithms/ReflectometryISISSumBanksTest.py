@@ -71,14 +71,14 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
         self.assertEqual(len(issues), 0)
 
     def test_no_summing_done_on_single_bank(self):
-        test_ws = "ws"
+        test_ws = MagicMock()
+        test_ws.componentInfo().pixelGridNX.return_value = 1
         masked_ws = "masked"
         alg = ReflectometryISISSumBanks()
         alg.getProperty = MagicMock()
         alg.getProperty.return_value.value = test_ws
         alg.mask_workspace = MagicMock(return_value=masked_ws)
         alg._get_rectangular_detector_component = MagicMock(return_value=MagicMock())
-        alg._get_rectangular_detector_component.return_value.xpixels.return_value = 1
         alg.setProperty = MagicMock()
 
         alg.PyExec()

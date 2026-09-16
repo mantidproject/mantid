@@ -78,28 +78,34 @@ def get_masked_ids(nx_low, nx_high, ny_low, ny_high, workspace, component_name=N
 
     IDs = []
     if component.type() == "RectangularDetector":
+        component_info = workspace.componentInfo()
+        bank_index = component_info.indexOfAny(component_name)
+        id_start = component_info.pixelGridIdStart(bank_index)
+        id_step = component_info.pixelGridIdStep(bank_index)
+        max_detector_id = component_info.pixelGridMaxDetectorID(bank_index)
+        npixels_x = component_info.pixelGridNX(bank_index)
         # left
         i = 0
-        while i < nx_low * component.idstep():
-            IDs.append(component.idstart() + i)
+        while i < nx_low * id_step:
+            IDs.append(id_start + i)
             i += 1
         # right
-        i = component.maxDetectorID() - nx_high * component.idstep()
-        while i < component.maxDetectorID():
+        i = max_detector_id - nx_high * id_step
+        while i < max_detector_id:
             IDs.append(i)
             i += 1
         # low: 0,256,512,768,..,1,257,513
         for row in range(ny_low):
-            i = row + component.idstart()
-            while i < component.nelements() * component.idstep() - component.idstep() + ny_low + component.idstart():
+            i = row + id_start
+            while i < npixels_x * id_step - id_step + ny_low + id_start:
                 IDs.append(i)
-                i += component.idstep()
+                i += id_step
         # high # 255, 511, 767..
         for row in range(ny_high):
-            i = component.idstep() + component.idstart() - row - 1
-            while i < component.nelements() * component.idstep() + component.idstart():
+            i = id_step + id_start - row - 1
+            while i < npixels_x * id_step + id_start:
                 IDs.append(i)
-                i += component.idstep()
+                i += id_step
     elif component.type() == "CompAssembly" or component.type() == "ObjCompAssembly" or component.type() == "DetectorComponent":
         # Wing detector
         # x

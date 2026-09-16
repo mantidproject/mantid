@@ -148,8 +148,15 @@ class TestSideBySideProjection(unittest.TestCase):
         mock_bank = MagicMock()
         mock_bank.getPos.return_value = [2, 2, 2]
         mock_bank.getRotation.return_value = Quat(1, 1, 0, 0)
-        mock_bank.minDetectorID.return_value = 5
-        mock_bank.maxDetectorID.return_value = 5
+        component_info = ws.componentInfo()
+        component_info.pixelGridMinDetectorID.return_value = 5
+        component_info.pixelGridMaxDetectorID.return_value = 5
+        component_info.pixelGridNX.return_value = 1
+        component_info.pixelGridNY.return_value = 1
+        component_info.pixelGridNZ.return_value = 0
+        component_info.pixelGridXStep.return_value = 1.0
+        component_info.pixelGridYStep.return_value = 1.0
+        component_info.pixelGridZStep.return_value = 0.0
         ws.getInstrument().findGridDetectors.return_value = [mock_bank]
         flat_banks = side_by_side._construct_rectangles_and_grids(side_by_side._workspace)
         self.assertEqual(1, len(flat_banks))
