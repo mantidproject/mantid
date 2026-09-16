@@ -48,9 +48,6 @@ class CppInterfacesStartupTest(systemtesting.MantidSystemTest):
             else:
                 CONF.remove(self._legacy_instrument_view_setting)
 
-    def skipTests(self):
-        return platform.startswith("win")
-
     def runTest(self):
         if len(self._cpp_interface_names) == 0:
             self.fail("Failed to find the names of the c++ interfaces.")
