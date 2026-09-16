@@ -43,6 +43,7 @@ set(SRC_FILES
     src/RebinnedOutput.cpp
     src/ReflectometryTransform.cpp
     src/ScanningWorkspaceBuilder.cpp
+    src/SemanticVersion.cpp
     src/SpecialWorkspace2D.cpp
     src/SplittersWorkspace.cpp
     src/TableColumn.cpp
@@ -127,6 +128,7 @@ set(INC_FILES
     inc/MantidDataObjects/RebinnedOutput.h
     inc/MantidDataObjects/ReflectometryTransform.h
     inc/MantidDataObjects/ScanningWorkspaceBuilder.h
+    inc/MantidDataObjects/SemanticVersion.h
     inc/MantidDataObjects/SkippingPolicy.h
     inc/MantidDataObjects/SpecialWorkspace2D.h
     inc/MantidDataObjects/SplittersWorkspace.h
@@ -195,6 +197,7 @@ set(TEST_FILES
     RefAxisTest.h
     ReflectometryTransformTest.h
     ScanningWorkspaceBuilderTest.h
+    SemanticVersionTest.h
     SkippingPolicyTest.h
     SpecialWorkspace2DTest.h
     SplittersWorkspaceTest.h

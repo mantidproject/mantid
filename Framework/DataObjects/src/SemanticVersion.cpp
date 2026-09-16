@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataHandling/SemanticVersion.h"
+#include "MantidDataObjects/SemanticVersion.h"
 
 #include <algorithm>
 #include <cctype>
@@ -15,9 +15,7 @@
 
 namespace Mantid {
 
-namespace DataHandling {
-
-namespace ILLNexus {
+namespace DataObjects {
 
 namespace {
 
@@ -166,8 +164,6 @@ void SemanticVersion::parse_version(const std::string &version) {
     m_build = m[5].str();
 }
 
-} // end namespace ILLNexus
-
-} // end namespace DataHandling
+} // end namespace DataObjects
 
 } // end namespace Mantid

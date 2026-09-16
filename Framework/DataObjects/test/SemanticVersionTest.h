@@ -10,9 +10,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/SemanticVersion.h"
+#include "MantidDataObjects/SemanticVersion.h"
 
-using Mantid::DataHandling::ILLNexus::SemanticVersion;
+using Mantid::DataObjects::SemanticVersion;
 
 class SemanticVersionTest : public CxxTest::TestSuite {
 public:

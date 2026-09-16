@@ -23,8 +23,6 @@ namespace Nexus {
 template <typename T>
 concept entryTypes = std::integral<T> || std::floating_point<T> || std::same_as<T, std::string>;
 
-template <typename T> hid_t getH5NativeType();
-
 class MANTID_NEXUS_DLL NexusDescriptorLazy {
 
 public:

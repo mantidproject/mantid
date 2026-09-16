@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidDataHandling/DllConfig.h"
+#include "MantidDataObjects/DllConfig.h"
 
 #include <compare>
 #include <cstdint>
@@ -15,9 +15,7 @@
 
 namespace Mantid {
 
-namespace DataHandling {
-
-namespace ILLNexus {
+namespace DataObjects {
 
 /**
  * @class SemanticVersion
@@ -40,7 +38,7 @@ namespace ILLNexus {
  * - 3.12.3 --> major = 3, minor = 12, patch = 3, identifier = ""
  * - 3.12.3-myid --> major = 3, minor = 12, patch = 3, identifier = "myid"
  */
-class MANTID_DATAHANDLING_DLL SemanticVersion {
+class MANTID_DATAOBJECTS_DLL SemanticVersion {
 
 public:
   // The SemVer regex
@@ -113,8 +111,6 @@ private:
   std::string m_build = "";
 };
 
-} // end namespace ILLNexus
-
-} // end namespace DataHandling
+} // end namespace DataObjects
 
 } // end namespace Mantid
