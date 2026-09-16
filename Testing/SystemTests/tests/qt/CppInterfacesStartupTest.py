@@ -10,10 +10,8 @@ from sys import platform
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt.testing import get_application
-from mantid.kernel import ConfigService
 from workbench.config import CONF, WINDOW_ONTOP_FLAGS, WINDOW_STANDARD_FLAGS
 from workbench.utils.gather_interfaces import gather_cpp_interface_names
-from sys import platform
 
 from qtpy.QtCore import Qt
 
@@ -36,12 +34,19 @@ class CppInterfacesStartupTest(systemtesting.MantidSystemTest):
         self._cpp_interface_names = set(chain.from_iterable(gather_cpp_interface_names().values()))
         # Use legacy instrument view on windows as CI VMs do not currently have a modern version of openG required by new version/VTK.
         if platform.startswith("win"):
-            self._orig_use_legacy_instrument_view = ConfigService.Instance().getString("InstrumentView.use_legacy_instrument_view")
-            ConfigService.Instance().setString("InstrumentView.use_legacy_instrument_view", "True")
+            self._legacy_instrument_view_setting = "InstrumentView/use_legacy_instrument_view"
+            self._legacy_instrument_view_setting_exists = CONF.has(self._legacy_instrument_view_setting)
+            self._original_use_legacy_instrument_view = (
+                CONF.get(self._legacy_instrument_view_setting) if self._legacy_instrument_view_setting_exists else None
+            )
+            CONF.set(self._legacy_instrument_view_setting, True)
 
     def tearDown(self):
         if platform.startswith("win"):
-            ConfigService.Instance().setString("InstrumentView.use_legacy_instrument_view", self._orig_use_legacy_instrument_view)
+            if self._legacy_instrument_view_setting_exists:
+                CONF.set(self._legacy_instrument_view_setting, self._original_use_legacy_instrument_view)
+            else:
+                CONF.remove(self._legacy_instrument_view_setting)
 
     def skipTests(self):
         return platform.startswith("win")
