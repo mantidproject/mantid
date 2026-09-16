@@ -473,8 +473,8 @@ std::shared_ptr<GeometryHandler> MeshObject::getGeometryHandler() const {
 /**
  * Rotate the mesh according to the supplied rotation matrix.
  *
- * Definition-frame only, so getAppliedRotation() is deliberately left alone - MeshFileIO::rotate
- * and RotateSampleShape both belong here. Use bakeGoniometerRotation to move into the lab frame.
+ * Definition-frame only, so getAppliedRotation() is deliberately left alone. Use
+ * bakeGoniometerRotation to move into the lab frame.
  *
  * @param rotationMatrix Rotation matrix to be applied
  */
@@ -483,15 +483,12 @@ void MeshObject::rotate(const Kernel::Matrix<double> &rotationMatrix) {
                 [&rotationMatrix](auto &vertex) { vertex.rotate(rotationMatrix); });
 }
 
-/// Rotate the mesh and record the rotation as a goniometer bake, composed onto any already there.
-/// See IObject::getAppliedRotation for what that total does and does not account for.
+/// The later bake goes on the outside - see IObject::getAppliedRotation.
 void MeshObject::bakeGoniometerRotation(const Kernel::Matrix<double> &rotationMatrix) {
   rotate(rotationMatrix);
   m_appliedRotation = rotationMatrix * m_appliedRotation;
 }
 
-/// Record a bake whose rotation the vertices already carry - the Nexus load. Rotating them again
-/// here would double it.
 void MeshObject::setAppliedGoniometerRotation(const Kernel::Matrix<double> &bakedRotation) {
   m_appliedRotation = bakedRotation;
 }
@@ -609,9 +606,7 @@ void MeshObject::saveNexus(Nexus::File *file, const std::string &group) const {
   }
   file->writeData("faces", faceIndices);
 
-  // Without this a mesh that had been moved into the lab frame would come back claiming its own
-  // frame and be rotated again. Written only when non-identity, so most NXoff_geometry groups and
-  // every file of a shape in its own frame are unchanged.
+  // Written only when non-identity, so files of a shape in its own frame are byte-for-byte as before
   if (m_appliedRotation != Kernel::Matrix<double>(3, 3, true)) {
     file->writeData("applied_goniometer_rotation", m_appliedRotation.getVector());
   }
@@ -631,7 +626,7 @@ std::shared_ptr<MeshObject> MeshObject::loadNexus(Nexus::File *file, const std::
   std::vector<uint32_t> faceIndices;
   file->readData("faces", faceIndices);
 
-  // Absent for a shape in its own frame, and for any file written before this was saved, both of
+  // Absent for a shape in its own frame and for any file written before this was saved, both of
   // which mean identity. Has to be read before the group is closed.
   std::vector<double> appliedRotation;
   const bool hasAppliedRotation = file->hasData("applied_goniometer_rotation");

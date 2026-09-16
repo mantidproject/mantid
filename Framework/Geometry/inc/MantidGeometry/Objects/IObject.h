@@ -51,24 +51,22 @@ public:
 
   /** The goniometer rotation baked into this shape.
    *
-   * A shape may be stored either in its own frame or already rotated into the lab frame -
-   * CopySample bakes the destination workspace's goniometer in, while SetGoniometer alone leaves
-   * the shape untouched. Both produce a workspace whose run carries a goniometer, so the matrix is
-   * the only way to tell which frame the shape is in and avoid rotating it a second time.
+   * A shape may be stored in its own frame or already rotated into the lab frame - CopySample bakes
+   * the destination workspace's goniometer in, SetGoniometer alone leaves the shape untouched - and
+   * both leave a goniometer on the run, so this matrix is the only way to tell which, and so to
+   * avoid rotating the shape a second time.
    *
-   * This reports which frame the shape is in, NOT every rotation it has ever had. Definition-frame
+   * It reports which frame the shape is in, NOT every rotation it has ever had. Definition-frame
    * rotations - the file-load orientation of LoadSampleShape and the sample environment spec,
    * "rotate-all" and per-primitive "rotate" tags, and RotateSampleShape - re-express the shape
    * within its own frame and are deliberately excluded. Identity therefore means the shape is
    * expressed in its own frame, however much its definition has been rotated within that frame.
    *
-   * More precisely, this is the ordered product of the goniometer bakes the shape has been given.
-   * That is outermost among the bakes, but not necessarily the outermost rotation overall: a
-   * definition-frame rotation applied after a bake - RotateSampleShape on a shape CopySample has
-   * already baked - ends up outside it. A mesh cannot record anything else, its vertices being the
-   * only account of how far it has been turned, and the CSG side composes to match so that the two
-   * agree. Re-baking such a shape is still correct: stripping the old bake and applying the new one
-   * conjugates that later rotation into the new frame, which is where it belongs.
+   * Precisely, it is the ordered product of the bakes the shape has been given: outermost among
+   * those, but not necessarily outermost overall, since a definition-frame rotation applied after a
+   * bake ends up outside it. A mesh cannot record anything finer - its vertices are the only account
+   * of how far it has turned - and the CSG side composes to match. Re-baking stays correct: stripping
+   * the old bake and applying the new one conjugates that later rotation into the new frame.
    */
   virtual const Kernel::Matrix<double> &getAppliedRotation() const {
     static const Kernel::Matrix<double> identity(3, 3, true);
