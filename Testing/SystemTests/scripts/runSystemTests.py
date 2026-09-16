@@ -9,7 +9,7 @@ import argparse
 import os
 import sys
 import time
-from multiprocessing import Process, Array, Manager, Value, Lock
+from multiprocessing import Process, Array, Manager, Value, Condition
 
 # Prevents errors in systemtests that use matplotlib directly
 os.environ["MPLBACKEND"] = "Agg"
@@ -286,8 +286,10 @@ def main():
                         print(" - {}".format(t._fqtestname))
                     print()
 
-            # Define a lock
-            lock = Lock()
+            # Define the condition used to hand modules out. Its lock guards the shared
+            # scheduling state; the condition itself lets threads with no work park until
+            # another thread releases the data files they are waiting for.
+            condition = Condition()
 
             # Prepare ncores processes
             for ip in range(options.ncores):
@@ -306,7 +308,7 @@ def main():
                             maximum_name_length,
                             tests_done,
                             ip,
-                            lock,
+                            condition,
                             required_files_dict,
                             locked_files_dict,
                         ),

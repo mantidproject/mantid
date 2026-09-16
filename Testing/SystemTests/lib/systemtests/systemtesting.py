@@ -70,6 +70,11 @@ REFERENCE_FILE_DIR = santize_backslash(
 # Indicates the child process trying to run the tests had an error
 TESTING_PROC_FAILURE_CODE = 255
 
+# How long a thread with no runnable module waits to be told that data files have been
+# released before it re-checks the module list itself. Only a safety net against a lost
+# notification; in normal operation the waiting thread is notified directly.
+IDLE_WAIT_TIMEOUT_SECONDS = 5.0
+
 if not os.path.exists(FRAMEWORK_PYTHONINTERFACE_TEST_DIR):
     raise ImportError("Expected 'Framework/PythonInterface/test' to be found at '{}' but it wasn'target. Has the directory moved?")
 
@@ -1427,7 +1432,7 @@ def testThreadsLoop(
     maximum_name_length,
     tests_done,
     process_number,
-    lock,
+    condition,
     required_files_dict,
     locked_files_dict,
 ):
@@ -1444,7 +1449,7 @@ def testThreadsLoop(
             maximum_name_length,
             tests_done,
             process_number,
-            lock,
+            condition,
             required_files_dict,
             locked_files_dict,
         )
@@ -1471,7 +1476,7 @@ def testThreadsLoopImpl(
     maximum_name_length,
     tests_done,
     process_number,
-    lock,
+    condition,
     required_files_dict,
     locked_files_dict,
 ):
@@ -1487,7 +1492,8 @@ def testThreadsLoopImpl(
     log_scheduling = options.ci_log or not options.quiet
     # Counters describing how much effort went into finding the next module to run. They are
     # reset every time a module is claimed so each claim reports the cost of acquiring it.
-    idle_scans = 0
+    idle_waits = 0
+    idle_wait = 0.0
     lock_wait = 0.0
 
     # Begin loop: as long as there are still some test modules that
@@ -1501,35 +1507,56 @@ def testThreadsLoopImpl(
         locked_files = ()
         # Get the lock to inspect the global list of tests
         lock_requested_at = time.time()
-        with lock:
+        with condition:
             lock_wait += time.time() - lock_requested_at
-            # Run through the list of test modules, starting from the ith
-            # element where i is the process number.
-            for i in range(process_number, len(tests_lock)):
-                # If the lock for this particular module is 0, it means
-                # this module has not yet been run and it will be chosen
-                # for this particular loop
-                if tests_lock[i] == 0:
-                    # Check for the lock status of the required files for this test module
-                    modname = tests_dict[str(i)][1][0]._modname
-                    required_files = tuple(required_files_dict[modname])
-                    no_files_are_locked = True
-                    for f in required_files:
-                        if locked_files_dict[f]:
-                            no_files_are_locked = False
-                            break
-                    # If all files are available, we can proceed with this module
-                    if no_files_are_locked:
-                        # Lock the data files for this test module
+            # Keep looking for a module whose data files are all free. If there is nothing to
+            # take yet, wait to be notified by whichever thread releases its data files next.
+            # Waiting on the condition releases the lock, so a thread that has finished a
+            # module is never held up handing its data files back by threads looking for work.
+            while True:
+                # Run through the list of test modules, starting from the ith
+                # element where i is the process number.
+                for i in range(process_number, len(tests_lock)):
+                    # If the lock for this particular module is 0, it means
+                    # this module has not yet been run and it will be chosen
+                    # for this particular loop
+                    if tests_lock[i] == 0:
+                        # Check for the lock status of the required files for this test module
+                        modname = tests_dict[str(i)][1][0]._modname
+                        required_files = tuple(required_files_dict[modname])
+                        no_files_are_locked = True
                         for f in required_files:
-                            locked_files_dict[f] = True
-                        locked_files = required_files
-                        # Set the current test list to the chosen module
-                        test_sub_directory, local_test_list = tests_dict[str(i)]
-                        tests_lock[i] = 1
-                        imodule = i
-                        tests_left.value -= 1
-                        break
+                            if locked_files_dict[f]:
+                                no_files_are_locked = False
+                                break
+                        # If all files are available, we can proceed with this module
+                        if no_files_are_locked:
+                            # Lock the data files for this test module
+                            for f in required_files:
+                                locked_files_dict[f] = True
+                            locked_files = required_files
+                            # Set the current test list to the chosen module
+                            test_sub_directory, local_test_list = tests_dict[str(i)]
+                            tests_lock[i] = 1
+                            imodule = i
+                            tests_left.value -= 1
+                            if tests_left.value <= 0:
+                                # Nothing left to hand out, so wake the threads that are
+                                # waiting for work and let them leave the loop.
+                                condition.notify_all()
+                            break
+
+                # Either a module was claimed above, or every module has now been handed to
+                # some thread and there is nothing left for this one to wait for.
+                if local_test_list is not None or tests_left.value <= 0:
+                    break
+
+                idle_waits += 1
+                wait_started_at = time.time()
+                # The timeout is only a safety net: a thread that exits without releasing its
+                # data files cannot then leave the others waiting indefinitely.
+                condition.wait(IDLE_WAIT_TIMEOUT_SECONDS)
+                idle_wait += time.time() - wait_started_at
 
         # Check if local_test_list exists: if all data was locked,
         # then there is no test list
@@ -1538,11 +1565,12 @@ def testThreadsLoopImpl(
                 if log_scheduling:
                     print(
                         "##### Thread %2i will execute module: [%3i] %s (%i tests)"
-                        " [idle_scans=%i lock_wait=%.2fs]"
-                        % (process_number, imodule, modname, len(local_test_list), idle_scans, lock_wait)
+                        " [idle_waits=%i idle_wait=%.2fs lock_wait=%.2fs]"
+                        % (process_number, imodule, modname, len(local_test_list), idle_waits, idle_wait, lock_wait)
                     )
                     sys.stdout.flush()
-                idle_scans = 0
+                idle_waits = 0
+                idle_wait = 0.0
                 lock_wait = 0.0
 
                 test_directory = os.path.abspath(os.path.join(mtdconf.testDir, test_sub_directory))
@@ -1581,22 +1609,20 @@ def testThreadsLoopImpl(
                     int(reporter.reportStatus()), res_array[process_number + 2 * options.ncores]
                 )
             finally:
-                # Unlock the data files even if the test module raises
+                # Unlock the data files even if the test module raises, and wake the threads
+                # that are waiting for them
                 unlock_requested_at = time.time()
-                with lock:
+                with condition:
                     unlock_wait = time.time() - unlock_requested_at
                     for f in locked_files:
                         locked_files_dict[f] = False
+                    condition.notify_all()
                 if log_scheduling:
                     print(
                         "##### Thread %2i has finished module: [%3i] %s [unlock_wait=%.2fs]"
                         % (process_number, imodule, modname, unlock_wait)
                     )
                     sys.stdout.flush()
-        else:
-            # No module could be claimed: every remaining one still has data files locked by
-            # another thread. The loop spins with no backoff, so count how often that happens.
-            idle_scans += 1
 
     # Report the errors
     local_dict = dict()
