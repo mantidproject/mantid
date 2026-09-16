@@ -15,11 +15,16 @@ from mantid.simpleapi import CloneWorkspace, CreateWorkspace
 
 class ComponentInfoTest(unittest.TestCase):
     _ws = None
+    _ws_rect = None
+    _RECT_NUM_PIXELS = 3
+    _RECT_ID_START = _RECT_NUM_PIXELS * _RECT_NUM_PIXELS  # bank1 of 1: idstart = banknum * pixels * pixels
 
     def setUp(self):
         if self.__class__._ws is None:
             self.__class__._ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(2, 1, False)  # no monitors
             self.__class__._ws.getSpectrum(0).clearDetectorIDs()
+        if self.__class__._ws_rect is None:
+            self.__class__._ws_rect = WorkspaceCreationHelper.create2DWorkspaceWithRectangularInstrument(1, self._RECT_NUM_PIXELS, 1)
 
     """
     ----------------------------------------------------------------------------
@@ -208,6 +213,61 @@ class ComponentInfoTest(unittest.TestCase):
         # Non-detector components report a non-Detector type
         self.assertIsInstance(info.componentType(info.root()), ComponentType)
         self.assertNotEqual(info.componentType(info.root()), ComponentType.Detector)
+
+    def test_componentType_rectangular_bank(self):
+        """A RectangularDetector bank reports ComponentType.Rectangular"""
+        info = self._ws_rect.componentInfo()
+        bank_index = info.indexOfAny("bank1")
+        self.assertEqual(info.componentType(bank_index), ComponentType.Rectangular)
+
+    def test_pixelGridComponent(self):
+        """Check the pixel counts and ID-numbering scheme reported for a real bank"""
+        info = self._ws_rect.componentInfo()
+        bank_index = info.indexOfAny("bank1")
+        grid = info.pixelGridComponent(bank_index)
+        self.assertEqual(grid.nX, self._RECT_NUM_PIXELS)
+        self.assertEqual(grid.nY, self._RECT_NUM_PIXELS)
+        self.assertEqual(grid.idStart, self._RECT_ID_START)
+        self.assertEqual(grid.minDetectorID, self._RECT_ID_START)
+        self.assertEqual(grid.maxDetectorID, self._RECT_ID_START + self._RECT_NUM_PIXELS * self._RECT_NUM_PIXELS - 1)
+        self.assertIsInstance(grid.xStep, float)
+        self.assertIsInstance(grid.yStep, float)
+        self.assertIsInstance(grid.idFillOrder, str)
+        self.assertEqual(len(grid.idFillOrder), 3)
+
+    def test_pixelGridComponent_non_bank_raises(self):
+        """A component that is not a Rectangular/Grid bank has no pixel grid"""
+        info = self._ws_rect.componentInfo()
+        with self.assertRaises(RuntimeError):
+            info.pixelGridComponent(info.root())
+
+    def test_detectorIndexAtXYZ(self):
+        """Every (x, y) in the bank resolves to a distinct detector, matching the bank's own detector set"""
+        ws = self._ws_rect
+        info = ws.componentInfo()
+        det_info = ws.detectorInfo()
+        bank_index = info.indexOfAny("bank1")
+        grid = info.pixelGridComponent(bank_index)
+
+        # (0, 0) always maps to the bank's first ID, regardless of fill order
+        index00 = info.detectorIndexAtXYZ(bank_index, 0, 0, 0)
+        self.assertEqual(det_info.detid(index00), grid.idStart)
+
+        found_indices = set()
+        for x in range(grid.nX):
+            for y in range(grid.nY):
+                index = info.detectorIndexAtXYZ(bank_index, x, y, 0)
+                self.assertTrue(info.isDetector(index))
+                found_indices.add(index)
+        self.assertEqual(found_indices, set(info.detectorsInSubtree(bank_index).tolist()))
+
+    def test_detectorIndexAtXYZ_extreme(self):
+        info = self._ws_rect.componentInfo()
+        bank_index = info.indexOfAny("bank1")
+        with self.assertRaises(IndexError):
+            info.detectorIndexAtXYZ(bank_index, self._RECT_NUM_PIXELS, 0, 0)
+        with self.assertRaises(IndexError):
+            info.detectorIndexAtXYZ(bank_index, 0, self._RECT_NUM_PIXELS, 0)
 
     def test_getMemorySize(self):
         info = self._ws.componentInfo()

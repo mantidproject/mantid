@@ -49,6 +49,13 @@ class DetectorInfoTest(unittest.TestCase):
         with self.assertRaises(IndexError):
             info.indexOf(3)
 
+    def test_detid_indexOf_roundtrip(self):
+        """detid(indexOf(id)) should return the same detector id for every real detector"""
+        info = self._ws.detectorInfo()
+        for detector_id in info.detectorIDs():
+            detector_id = int(detector_id)
+            self.assertEqual(info.detid(info.indexOf(detector_id)), detector_id)
+
     def test_isMonitor(self):
         """Check if detector is a monitor"""
         info = self._ws.detectorInfo()
