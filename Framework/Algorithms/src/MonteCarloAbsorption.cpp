@@ -18,9 +18,11 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Objects/ShapeRotation.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/DeltaEMode.h"
@@ -293,7 +295,15 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
   const auto nhists = static_cast<int64_t>(instrumentWS.getNumberHistograms());
 
   EFixedProvider efixed(instrumentWS);
-  auto beamProfile = BeamProfileFactory::createBeamProfile(instrumentWS.componentInfo(), inputWS.sample());
+
+  // The gauge volume, the beam and the detectors are all in the lab frame, so the sample has to be
+  // too - see Geometry::getLabFrameShape. Everything below works from this copy rather than the
+  // workspace's own sample.
+  API::Sample labFrameSample(inputWS.sample());
+  labFrameSample.setShape(
+      Geometry::getLabFrameShape(inputWS.sample().getShape(), inputWS.run().getGoniometer().getR()));
+
+  auto beamProfile = BeamProfileFactory::createBeamProfile(instrumentWS.componentInfo(), labFrameSample);
 
   // Configure progress
   Progress prog(this, 0.0, 1.0, nhists);
@@ -322,7 +332,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
   }
 
   std::shared_ptr<IMCInteractionVolume> interactionVolume =
-      MCInteractionVolume::create(inputWS.sample(), maxScatterPtAttempts, pointsIn, gaugeVolume);
+      MCInteractionVolume::create(labFrameSample, maxScatterPtAttempts, pointsIn, gaugeVolume);
 
   Geometry::IObject_sptr gv = interactionVolume->getGaugeVolume();
 
@@ -367,7 +377,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
         j = nbins - lambdaStepSize - 1;
       }
     }
-    MCInteractionStatistics detStatistics(detID, inputWS.sample());
+    MCInteractionStatistics detStatistics(detID, labFrameSample);
 
     strategy->calculate(rng, detPos, packedLambdas, lambdaFixed, packedAttFactors, packedAttFactorErrors,
                         detStatistics);

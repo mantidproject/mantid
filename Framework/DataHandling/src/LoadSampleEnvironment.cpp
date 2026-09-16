@@ -297,7 +297,9 @@ void LoadSampleEnvironment::loadEnvironmentFrom3MF([[maybe_unused]] const Matrix
   MeshLoader.readMeshObjects(environmentMeshes, sampleMesh);
 
   if (sampleMesh) {
-    sampleMesh->rotate(inputWS->run().getGoniometer().getR());
+    // Baking the goniometer in moves the sample into the lab frame, so it is recorded - unlike the
+    // definition-frame rotation applied to the environment meshes below.
+    sampleMesh->bakeGoniometerRotation(inputWS->run().getGoniometer().getR());
     sample.setShape(sampleMesh);
   }
 

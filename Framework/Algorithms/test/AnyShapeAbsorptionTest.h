@@ -17,6 +17,9 @@
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/UnitFactory.h"
+#include "SampleFrameEquivalence.h"
+
+#include <cmath>
 
 using Mantid::API::AlgorithmManager;
 using Mantid::API::AnalysisDataService;
@@ -371,6 +374,40 @@ public:
     TS_ASSERT(asaAlgo.isExecuted());
   }
 
+  void test_both_ways_of_orienting_the_sample_agree() {
+    const auto rotation = SampleFrameEquivalence::rotationY(30.0);
+    const double ownFrame = runPlateCorrection("anyshape_own", rotation, false);
+    const double labFrame = runPlateCorrection("anyshape_lab", rotation, true);
+
+    TS_ASSERT_DELTA(ownFrame, labFrame, 1e-9);
+    // and the rotation actually mattered - otherwise the assertion above proves nothing
+    const double unrotated = runPlateCorrection("anyshape_flat", SampleFrameEquivalence::unrotated(), false);
+    TS_ASSERT(std::abs(ownFrame - unrotated) > 1e-6);
+  }
+
 private:
+  /// Absorption-correct a plate sample held in the given frame and return the first attenuation
+  /// factor. No cross sections are set, so the material comes from the shape the fixture attached.
+  double runPlateCorrection(const std::string &name, const Mantid::Kernel::Matrix<double> &rotation, const bool baked) {
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10);
+    ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+    SampleFrameEquivalence::setSample(*ws, rotation, baked);
+
+    Mantid::Algorithms::AnyShapeAbsorption alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+    alg.setPropertyValue("OutputWorkspace", name);
+    // mm. Comfortably smaller than the 4 mm plate thickness, or the unrotated case dices to nothing.
+    alg.setProperty("ElementSize", 2.0);
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    auto result = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(name);
+    const double value = result->y(0).front();
+    AnalysisDataService::Instance().remove(name);
+    return value;
+  }
+
   Mantid::Algorithms::AnyShapeAbsorption atten;
 };

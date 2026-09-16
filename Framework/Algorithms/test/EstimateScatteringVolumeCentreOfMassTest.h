@@ -12,7 +12,9 @@
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidKernel/UnitFactory.h"
@@ -198,6 +200,50 @@ public:
     TS_ASSERT_DELTA(result.Y(), 0.01 / 3.0, 0.0002);
     TS_ASSERT_DELTA(result.Z(), 0.01 / 3.0, 0.0002);
   }
+  void testPreRotatedShapeIsNotRotatedTwice() {
+    // Same experiment as testGoniometerRotatedGaugeClipsSampleCorrectly, but with the shape already
+    // baked into the lab frame the way CopySample leaves it. The run reports the same goniometer
+    // either way, so a shape not asked what it carries is turned twice: (0, 0, 0.005) rather than
+    // (0, 0.01/3, 0.01/3), several millimetres out on a 20 mm gauge.
+    Mantid::Geometry::Goniometer gonio;
+    gonio.pushAxis("phi", 1.0, 0.0, 0.0, 45.0, 1);
+    const auto rotation = gonio.getR();
+
+    // The sequence CopySample uses: stamp the goniometer onto the shape's XML and rebuild.
+    const auto plainShape = ComponentCreationHelper::createCuboid(0.02, 0.02, 0.02, V3D(0.0, 0.02, 0.0), "asymmSample");
+    const auto rotatedXML = Mantid::Geometry::ShapeFactory().addGoniometerTag(rotation, plainShape->getShapeXML());
+    const auto preRotatedShape = Mantid::Geometry::ShapeFactory().createShape(rotatedXML, false);
+    TS_ASSERT(preRotatedShape->hasValidShape());
+    // the shape must report the rotation it carries, which is what makes this resolvable at all
+    TS_ASSERT(preRotatedShape->getAppliedRotation() != Mantid::Kernel::Matrix<double>(3, 3, true));
+
+    MatrixWorkspace_sptr testWS = createTestWorkspace();
+    testWS->mutableSample().setShape(preRotatedShape);
+    const std::string gaugeXML = " \
+        <cuboid id='gv'> \
+        <height val='0.02' /> \
+        <width val='0.02' /> \
+        <depth val='0.02' /> \
+        <centre x='0.0' y='0.0' z='0.0' /> \
+        </cuboid> \
+        <algebra val='gv' /> \
+        ";
+    testWS->mutableRun().addProperty("GaugeVolume", gaugeXML);
+    testWS->mutableRun().setGoniometer(gonio, false);
+
+    Mantid::Algorithms::EstimateScatteringVolumeCentreOfMass centerOfMass;
+    centerOfMass.initialize();
+    centerOfMass.setProperty("InputWorkspace", testWS);
+    centerOfMass.setProperty("ElementSize", 0.5);
+    TS_ASSERT_THROWS_NOTHING(centerOfMass.execute());
+    TS_ASSERT(centerOfMass.isExecuted());
+    std::vector<double> resultVec = centerOfMass.getProperty("CentreOfMass");
+    V3D result(resultVec[0], resultVec[1], resultVec[2]);
+    TS_ASSERT_DELTA(result.X(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(result.Y(), 0.01 / 3.0, 0.0002);
+    TS_ASSERT_DELTA(result.Z(), 0.01 / 3.0, 0.0002);
+  }
+
   void testBadElementUnitsThrowsError() {
     // Create a test workspace with cylinder sample
     MatrixWorkspace_sptr testWS = createWorkspaceWithCylinderSample();

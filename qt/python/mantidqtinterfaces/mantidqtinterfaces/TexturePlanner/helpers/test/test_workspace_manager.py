@@ -27,10 +27,12 @@ def _make_manager(instr="ENGINX"):
 
 
 class _FakeCsgWs:
-    """A CSG-shaped workspace tracking the rotation baked into its shape and the one on its run
-    goniometer, so a CopySample stand-in can model how the two interact."""
+    """A CSG-shaped workspace tracking the rotation held in its shape's own frame, the one baked on
+    top of it, and the one on its run goniometer, so a CopySample stand-in can model how the three
+    interact."""
 
-    def __init__(self):
+    def __init__(self, own=None):
+        self.own = np.eye(3) if own is None else np.asarray(own)
         self.baked = np.eye(3)
         self.gonio_R = np.eye(3)
         gonio = MagicMock()
@@ -347,7 +349,8 @@ class TestWorkspaceManager_CreateNewWsWithCopiedSample(unittest.TestCase):
 
     def test_preserve_initial_rotation_used_for_both_hops(self, mock_create_shape, mock_create_sim, mock_copy, mock_ads):
         # both hops must use the same copy semantics: the preserving helper is idempotent, but
-        # mixing it with a bare CopySample would re-bake init_R on one hop and strip it on the other
+        # mixing it with a bare CopySample would bake the destination's goniometer into the shape on
+        # one hop and not the other
         wm = _make_manager("ENGINX")
         sample = MagicMock(name="sample")
         mock_create_shape.return_value = "shape_tmp"
@@ -362,56 +365,40 @@ class TestWorkspaceManager_CreateNewWsWithCopiedSample(unittest.TestCase):
         )
         mock_copy.assert_not_called()
 
-    def test_two_hops_leave_init_R_baked_in_once(self, mock_create_shape, mock_create_sim, mock_copy, mock_ads):
-        # the idempotence the two hops rely on comes from CopySample -> copyParameters ->
-        # addGoniometerTag *replacing* a CSG shape's <goniometer> tag with the destination's run
-        # goniometer, discarding whatever the tag held. Were it to compose instead, the sample would
-        # come out of an instrument switch at init_R squared - so pin the value, not just the flag.
+    def test_two_hops_carry_init_R_across_once(self, mock_create_shape, mock_create_sim, mock_copy, mock_ads):
+        # the idempotence the two hops rely on comes from CopySample re-baking only the
+        # *destination's* run goniometer onto the shape, leaving the rotation the shape holds in its
+        # own frame alone. Were it to compose instead, the sample would come out of an instrument
+        # switch at init_R squared - so pin the value, not just the flag.
         wm = _make_manager("ENGINX")
         wm.init_R = Rotation.from_euler("x", 30, degrees=True)
         mock_create_shape.return_value = _FakeCsgWs()
         new_ws = mock_create_sim.return_value = _FakeCsgWs()
-        mock_copy.side_effect = lambda InputWorkspace, OutputWorkspace, **kw: setattr(OutputWorkspace, "baked", OutputWorkspace.gonio_R)
+        source = _FakeCsgWs(own=wm.init_R.as_matrix())
 
-        wm._create_new_ws_with_copied_sample("dest_ws", _FakeCsgWs(), preserve_initial_rotation=True)
+        def copy(InputWorkspace, OutputWorkspace, **kw):
+            OutputWorkspace.own = InputWorkspace.own
+            OutputWorkspace.baked = OutputWorkspace.gonio_R
 
-        np.testing.assert_allclose(new_ws.baked, wm.init_R.as_matrix(), atol=1e-12)
-        # init_R must live in the shape, never left behind on the run goniometer
+        mock_copy.side_effect = copy
+
+        wm._create_new_ws_with_copied_sample("dest_ws", source, preserve_initial_rotation=True)
+
+        np.testing.assert_allclose(new_ws.own, wm.init_R.as_matrix(), atol=1e-12)
+        # nothing is baked on top of it, and it is never left behind on the run goniometer
+        np.testing.assert_allclose(new_ws.baked, np.eye(3), atol=1e-12)
         np.testing.assert_allclose(new_ws.gonio_R, np.eye(3), atol=1e-12)
 
 
 @patch(file_path + ".CopySample")
 class TestWorkspaceManager_CopySamplePreservingInitialRotation(unittest.TestCase):
-    @staticmethod
-    def _ws_with_shape(shape_type_name):
-        ws = MagicMock()
-        ws.sample.return_value.getShape.return_value = type(shape_type_name, (), {})()
-        return ws
-
-    def test_csg_source_bakes_init_R_onto_destination_then_restores_identity(self, mock_copy):
+    def test_destination_is_set_to_identity_before_the_copy(self, mock_copy):
+        # CopySample leaves the copy baked to the destination's goniometer, so an identity
+        # destination leaves the shape in its own frame with init_R still inside it. The same call
+        # now works for both shape types - it used to have to know which it was dealing with.
         wm = _make_manager()
         wm.init_R = Rotation.from_euler("x", 30, degrees=True)
-        source = self._ws_with_shape("CSGObject")
-        dest = MagicMock()
-        gonio = dest.run.return_value.getGoniometer.return_value
-
-        wm.copy_sample_preserving_initial_rotation(source, dest)
-
-        # CopySample overwrites a CSG shape's <goniometer> tag with the destination's run goniometer,
-        # so the destination must carry init_R while the sample is copied...
-        set_matrices = [c.args[0] for c in gonio.setR.call_args_list]
-        self.assertEqual(len(set_matrices), 2)
-        np.testing.assert_allclose(set_matrices[0], wm.init_R.as_matrix())
-        # ...then be restored to identity so init_R lives in the shape, not the run goniometer
-        np.testing.assert_array_equal(set_matrices[1], np.eye(3))
-        mock_copy.assert_called_once_with(InputWorkspace=source, OutputWorkspace=dest, **COPY_KWARGS)
-
-    def test_mesh_source_keeps_destination_at_identity(self, mock_copy):
-        # a MeshObject already holds init_R in its vertices, which CopySample re-rotates by the
-        # destination goniometer; leaving it at identity avoids applying init_R a second time
-        wm = _make_manager()
-        wm.init_R = Rotation.from_euler("x", 30, degrees=True)
-        source = self._ws_with_shape("MeshObject")
+        source = MagicMock()
         dest = MagicMock()
         gonio = dest.run.return_value.getGoniometer.return_value
 
@@ -419,6 +406,22 @@ class TestWorkspaceManager_CopySamplePreservingInitialRotation(unittest.TestCase
 
         for c in gonio.setR.call_args_list:
             np.testing.assert_array_equal(c.args[0], np.eye(3))
+        mock_copy.assert_called_once_with(InputWorkspace=source, OutputWorkspace=dest, **COPY_KWARGS)
+
+    def test_does_not_depend_on_the_shape_type(self, mock_copy):
+        wm = _make_manager()
+        wm.init_R = Rotation.from_euler("x", 30, degrees=True)
+        calls = []
+        for shape_type_name in ("CSGObject", "MeshObject"):
+            source = MagicMock()
+            source.sample.return_value.getShape.return_value = type(shape_type_name, (), {})()
+            dest = MagicMock()
+
+            wm.copy_sample_preserving_initial_rotation(source, dest)
+
+            calls.append([c.args[0] for c in dest.run.return_value.getGoniometer.return_value.setR.call_args_list])
+
+        np.testing.assert_array_equal(calls[0], calls[1])
 
 
 @patch(file_path + ".CopySample")
