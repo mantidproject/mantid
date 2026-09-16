@@ -85,6 +85,14 @@ def main():
     )
     parser.add_argument("-q", "--quiet", dest="quiet", action="store_true", help="Prints detailed log to terminal.")
     parser.add_argument(
+        "--ci-log",
+        dest="ci_log",
+        action="store_true",
+        help="Sits between --quiet and the default verbose output. Per-test output stays compact, as with "
+        "--quiet, but the scheduler instrumentation is kept: the module dispatch order, the data files "
+        "each module locks, and a line every time a worker claims or finishes a module. Implies --quiet.",
+    )
+    parser.add_argument(
         "-c",
         "--clean",
         dest="clean",
@@ -118,10 +126,16 @@ def main():
         loglevel="information",
         ncores=1,
         quiet=False,
+        ci_log=False,
         output_on_failure=False,
         clean=False,
     )
     options = parser.parse_args()
+
+    # ci_log reuses quiet mode for the per-test output and re-enables the scheduling messages
+    # individually, so everything downstream only has to know about the two flags.
+    if options.ci_log:
+        options.quiet = True
 
     # Set the Qt version to use during the system tests
     os.environ["QT_API"] = options.qt_api
@@ -170,6 +184,7 @@ def main():
         mantid_config=mtdconf,
         runner=runner,
         quiet=options.quiet,
+        ci_log=options.ci_log,
         testsInclude=options.testsInclude,
         testsExclude=options.testsExclude,
         exclude_in_pr_builds=options.exclude_in_pr_builds,
@@ -201,8 +216,10 @@ def main():
         tmgr.replaceRunner(no_exec_runner)
         for modname, suite_list in test_list.items():
             mod_test_counts = test_counts[modname]
-            if not options.quiet:
-                test_suffix = "" if mod_test_counts == 1 else "s"
+            test_suffix = "" if mod_test_counts == 1 else "s"
+            if options.ci_log:
+                print(f"Test module {modname} has {mod_test_counts} test{test_suffix}")
+            elif not options.quiet:
                 print(f"Test module {modname} has {mod_test_counts} test{test_suffix}:")
                 for suite in suite_list:
                     print(f"    - {suite._fqtestname}")
@@ -257,8 +274,13 @@ def main():
             counter = 0
             for key, value in reverse_sorted_dict:
                 tests_dict[str(counter)] = tuple([test_sub_directories[key], test_list[key]])
+                module_index = counter
                 counter += 1
-                if not options.quiet:
+                if options.ci_log:
+                    # The index is the dispatch order: each worker scans this list from its own
+                    # process number upwards, so it is needed to interpret the claim messages.
+                    print("Test module [{:3d}] {} has {} tests".format(module_index, key, value))
+                elif not options.quiet:
                     print("Test module {} has {} tests:".format(key, value))
                     for t in test_list[key]:
                         print(" - {}".format(t._fqtestname))

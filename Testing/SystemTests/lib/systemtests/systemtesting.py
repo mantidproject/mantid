@@ -885,6 +885,7 @@ class TestManager(object):
         runner=None,
         output=None,
         quiet=False,
+        ci_log=False,
         testsInclude=None,
         testsExclude=None,
         ignore_failed_imports=False,
@@ -907,6 +908,9 @@ class TestManager(object):
 
         self._config = mantid_config
         self._quiet = quiet
+        # ci_log keeps the compact per-test output of quiet mode but still emits the
+        # scheduler instrumentation (module dispatch order, data file locks, claim/release)
+        self._ci_log = ci_log
         self._testsInclude = re.compile(testsInclude) if testsInclude is not None else None
         self._testsExclude = re.compile(testsExclude) if testsExclude is not None else None
         self._exclude_in_pr_builds = exclude_in_pr_builds
@@ -1088,7 +1092,7 @@ class TestManager(object):
                                         data_file_lock_status[key] = False
                                     break
 
-        if not self._quiet:
+        if self._ci_log or not self._quiet:
             for key in files_required_by_test_module.keys():
                 print("=" * 45)
                 print(key)
@@ -1480,6 +1484,12 @@ def testThreadsLoopImpl(
     # Make sure the status is 1 to begin with as it will be replaced
     res_array[process_number + 2 * options.ncores] = 1
 
+    log_scheduling = options.ci_log or not options.quiet
+    # Counters describing how much effort went into finding the next module to run. They are
+    # reset every time a module is claimed so each claim reports the cost of acquiring it.
+    idle_scans = 0
+    lock_wait = 0.0
+
     # Begin loop: as long as there are still some test modules that
     # have not been run, keep looping
     while tests_left.value > 0:
@@ -1490,7 +1500,9 @@ def testThreadsLoopImpl(
         # Data files locked for the selected test module
         locked_files = ()
         # Get the lock to inspect the global list of tests
+        lock_requested_at = time.time()
         with lock:
+            lock_wait += time.time() - lock_requested_at
             # Run through the list of test modules, starting from the ith
             # element where i is the process number.
             for i in range(process_number, len(tests_lock)):
@@ -1523,12 +1535,15 @@ def testThreadsLoopImpl(
         # then there is no test list
         if local_test_list and test_sub_directory:
             try:
-                if not options.quiet:
+                if log_scheduling:
                     print(
                         "##### Thread %2i will execute module: [%3i] %s (%i tests)"
-                        % (process_number, imodule, modname, len(local_test_list))
+                        " [idle_scans=%i lock_wait=%.2fs]"
+                        % (process_number, imodule, modname, len(local_test_list), idle_scans, lock_wait)
                     )
                     sys.stdout.flush()
+                idle_scans = 0
+                lock_wait = 0.0
 
                 test_directory = os.path.abspath(os.path.join(mtdconf.testDir, test_sub_directory))
                 if os.path.isdir(test_directory):
@@ -1544,6 +1559,7 @@ def testThreadsLoopImpl(
                     runner=runner,
                     output=[reporter],
                     quiet=options.quiet,
+                    ci_log=options.ci_log,
                     testsInclude=options.testsInclude,
                     testsExclude=options.testsExclude,
                     exclude_in_pr_builds=options.exclude_in_pr_builds,
@@ -1566,9 +1582,21 @@ def testThreadsLoopImpl(
                 )
             finally:
                 # Unlock the data files even if the test module raises
+                unlock_requested_at = time.time()
                 with lock:
+                    unlock_wait = time.time() - unlock_requested_at
                     for f in locked_files:
                         locked_files_dict[f] = False
+                if log_scheduling:
+                    print(
+                        "##### Thread %2i has finished module: [%3i] %s [unlock_wait=%.2fs]"
+                        % (process_number, imodule, modname, unlock_wait)
+                    )
+                    sys.stdout.flush()
+        else:
+            # No module could be claimed: every remaining one still has data files locked by
+            # another thread. The loop spins with no backoff, so count how often that happens.
+            idle_scans += 1
 
     # Report the errors
     local_dict = dict()
