@@ -45,15 +45,12 @@ std::shared_ptr<IObject> getLabFrameShape(const IObject &shape, const Kernel::Ma
   }
 
   if (const auto *csgShape = dynamic_cast<const CSGObject *>(&shape)) {
-    // Rotating a CSG shape means rewriting its definition and rebuilding from that, so a shape
-    // assembled surface by surface rather than parsed - ShapeFactory::createSphere and
-    // createHexahedralShape both do this - has nothing to rewrite. Rebasing an empty string yields
-    // a bare pair of tags that will not parse, and createShape answers that with an empty shape:
-    // silently no sample at all, where the caller asked for a rotated one. Say so instead.
-    //
-    // Unlike the untouched MeshObject2D below, this is not a shape that has no frame to move into.
-    // It is a shape that can be rotated and whose rotation we have no way to express, which is a
-    // defect rather than a definition, so it is worth an exception rather than a warning.
+    // Rotating a CSG shape means rewriting its definition, so one assembled surface by surface
+    // rather than parsed - ShapeFactory::createSphere and createHexahedralShape both do this - has
+    // nothing to rewrite. Rebasing an empty string yields a bare pair of tags that will not parse,
+    // and createShape answers that with an empty shape: silently no sample at all, where the caller
+    // asked for a rotated one. Unlike the MeshObject2D below this shape could be rotated, so the
+    // missing definition is a defect to report rather than a frame to accept.
     if (csgShape->getShapeXML().empty()) {
       throw std::invalid_argument("The sample shape ('" + shape.id() +
                                   "') carries no XML definition, so it cannot be rotated into the lab frame. It was "
@@ -77,10 +74,8 @@ std::shared_ptr<IObject> getLabFrameShape(const IObject &shape, const Kernel::Ma
     return labShape;
   }
 
-  // A shape with no rotation mechanism at all - MeshObject2D, the flat plate, is the one in the
-  // tree. Such a shape offers no way to express a rotation, so by definition it is taken to be
-  // defined in the frame it is meant to be used in, and is returned as it stands. Say so, because
-  // the caller asked for a rotation and is not getting one.
+  // MeshObject2D, the flat plate, is the only shape in the tree with no rotation mechanism at all.
+  // Warn, because the caller asked for a rotation and is not getting one.
   g_log.warning("The sample shape is of a type that cannot be rotated ('" + shape.id() +
                 "'), so it is taken to be defined in the lab frame already and is used unchanged. "
                 "The goniometer rotation on the run has not been applied to it.");

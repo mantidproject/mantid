@@ -81,8 +81,6 @@ public:
   }
 
   void test_both_ways_of_orienting_the_sample_agree() {
-    // A sample in its own frame with the goniometer on the run, and the same sample already rotated
-    // into the lab frame, describe the same experiment and must correct identically.
     const auto rotation = SampleFrameEquivalence::rotationY(30.0);
     const auto ownFrame = runPlateCorrection("ms_own", rotation, false);
     const auto labFrame = runPlateCorrection("ms_lab", rotation, true);
@@ -90,14 +88,14 @@ public:
     TS_ASSERT_DELTA(ownFrame[0], labFrame[0], 1e-9);
     TS_ASSERT_DELTA(ownFrame[1], labFrame[1], 1e-9);
     // and the rotation actually mattered - otherwise the assertions above prove nothing
-    const auto unrotated = runPlateCorrection("ms_flat", Mantid::Kernel::Matrix<double>(3, 3, true), false);
+    const auto unrotated = runPlateCorrection("ms_flat", SampleFrameEquivalence::unrotated(), false);
     TS_ASSERT(std::abs(ownFrame[0] - unrotated[0]) > 1e-6);
   }
 
   void test_both_ways_of_orienting_the_sample_agree_with_a_container() {
-    // Same invariant as above, for the other Method. The container is not goniometer-rotated by
-    // anything in Mantid, so only the sample moves - but it must move, and by the same amount
-    // whichever frame it arrived in.
+    // Same invariant, for the other Method. The container is not goniometer-rotated by anything in
+    // Mantid, so only the sample moves - but it must move, and by the same amount whichever frame
+    // it arrived in.
     const auto rotation = SampleFrameEquivalence::rotationX(60.0);
     const auto ownFrame = runSampleAndContainerCorrection("msc_own", rotation, false);
     const auto labFrame = runSampleAndContainerCorrection("msc_lab", rotation, true);
@@ -105,8 +103,7 @@ public:
     TS_ASSERT_DELTA(ownFrame[0], labFrame[0], 1e-9);
     TS_ASSERT_DELTA(ownFrame[1], labFrame[1], 1e-9);
     // and the rotation actually mattered - otherwise the assertions above prove nothing
-    const auto unrotated =
-        runSampleAndContainerCorrection("msc_flat", Mantid::Kernel::Matrix<double>(3, 3, true), false);
+    const auto unrotated = runSampleAndContainerCorrection("msc_flat", SampleFrameEquivalence::unrotated(), false);
     TS_ASSERT(std::abs(ownFrame[0] - unrotated[0]) > 1e-6);
   }
 
@@ -172,11 +169,7 @@ private:
     unitsAlg->execute();
 
     auto ws = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(name + "_wl");
-    if (baked) {
-      SampleFrameEquivalence::setSampleInLabFrame(*ws, rotation);
-    } else {
-      SampleFrameEquivalence::setSampleInOwnFrame(*ws, rotation);
-    }
+    SampleFrameEquivalence::setSample(*ws, rotation, baked);
 
     MultipleScatteringCorrection msAlg;
     msAlg.initialize();
@@ -232,11 +225,7 @@ private:
                                "</cylinder>";
     auto ws = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(name + "_wl");
     const auto material = ws->sample().getShape().material();
-    if (baked) {
-      SampleFrameEquivalence::setSampleInLabFrame(*ws, rotation, material, rodXML);
-    } else {
-      SampleFrameEquivalence::setSampleInOwnFrame(*ws, rotation, material, rodXML);
-    }
+    SampleFrameEquivalence::setSample(*ws, rotation, baked, material, rodXML);
 
     MultipleScatteringCorrection msAlg;
     msAlg.initialize();

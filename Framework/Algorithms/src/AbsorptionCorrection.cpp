@@ -381,12 +381,8 @@ void AbsorptionCorrection::constructSample(API::Sample &sample) {
     }
 
     if (scatterFrom == CALC_SAMPLE) {
-      // The beam and the detector positions are described in the lab frame, but the sample shape is
-      // only there if something has already rotated it - CopySample bakes the destination
-      // goniometer in, while SetGoniometer alone leaves the shape in its own frame. Move it the rest
-      // of the way, so the tracks below are traced through a shape that is where the experiment puts
-      // it. getLabFrameShape returns a plain clone when nothing is outstanding, so an unrotated
-      // workspace is unchanged. Held in a member because m_sampleObject only borrows it.
+      // Trace through the sample where the experiment puts it - see Geometry::getLabFrameShape.
+      // Held in a member because m_sampleObject only borrows it.
       //
       // The container and environment are deliberately left as they stand: neither is ever
       // goniometer-rotated anywhere in Mantid, which is the same reason SetSample declines to bake

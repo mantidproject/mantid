@@ -375,15 +375,13 @@ public:
   }
 
   void test_both_ways_of_orienting_the_sample_agree() {
-    // A sample in its own frame with the rotation on the run, and the same sample already rotated
-    // into the lab frame, describe the same experiment and must correct identically.
     const auto rotation = SampleFrameEquivalence::rotationY(30.0);
     const double ownFrame = runPlateCorrection("anyshape_own", rotation, false);
     const double labFrame = runPlateCorrection("anyshape_lab", rotation, true);
 
     TS_ASSERT_DELTA(ownFrame, labFrame, 1e-9);
     // and the rotation actually mattered - otherwise the assertion above proves nothing
-    const double unrotated = runPlateCorrection("anyshape_flat", Mantid::Kernel::Matrix<double>(3, 3, true), false);
+    const double unrotated = runPlateCorrection("anyshape_flat", SampleFrameEquivalence::unrotated(), false);
     TS_ASSERT(std::abs(ownFrame - unrotated) > 1e-6);
   }
 
@@ -397,11 +395,7 @@ private:
   double runPlateCorrection(const std::string &name, const Mantid::Kernel::Matrix<double> &rotation, const bool baked) {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10);
     ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
-    if (baked) {
-      SampleFrameEquivalence::setSampleInLabFrame(*ws, rotation);
-    } else {
-      SampleFrameEquivalence::setSampleInOwnFrame(*ws, rotation);
-    }
+    SampleFrameEquivalence::setSample(*ws, rotation, baked);
 
     Mantid::Algorithms::AnyShapeAbsorption alg;
     alg.setRethrows(true);

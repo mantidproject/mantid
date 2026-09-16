@@ -182,11 +182,9 @@ void XrayAbsorptionCorrection::exec() {
   Kernel::V3D detectorPos = calculateDetectorPos(detectorAngle, detectorDistance);
   std::vector<Kernel::V3D> muonPos = calculateMuonPos(muonProfile, inputWS, detectorDistance);
 
-  // The muon implantation positions and the detector are described in the lab frame, but the sample
-  // shape is only there if something has already rotated it - CopySample bakes the destination
-  // goniometer in, while SetGoniometer alone leaves the shape in its own frame. Move it the rest of
-  // the way, once, rather than re-fetching it for every muon of every bin of every spectrum. This is
-  // a no-op for an unrotated workspace, which is every workspace that reaches here today.
+  // The muon implantation positions and the detector are in the lab frame, so the sample has to be
+  // too - see Geometry::getLabFrameShape. Done once here rather than for every muon of every bin of
+  // every spectrum, which is what the loop below used to do.
   const auto sampleShape =
       Geometry::getLabFrameShape(inputWS->sample().getShape(), inputWS->run().getGoniometer().getR());
 

@@ -180,16 +180,14 @@ public:
   }
 
   void test_single_path_both_ways_of_orienting_the_sample_agree() {
-    // Here the rotation comes from the peak, not the run, and it varies peak to peak. A sample in
-    // its own frame and the same sample already rotated into the lab frame describe the same
-    // experiment, so the path length through them must match.
+    // Here the rotation comes from the peak, not the run, and it varies peak to peak.
     const auto rotation = SampleFrameEquivalence::rotationY(30.0);
     const double ownFrame = singlePathThroughPlate(rotation, false);
     const double labFrame = singlePathThroughPlate(rotation, true);
 
     TS_ASSERT_DELTA(ownFrame, labFrame, 1e-9);
     // and the rotation actually mattered - otherwise the assertion above proves nothing
-    const double unrotated = singlePathThroughPlate(Matrix<double>(3, 3, true), false);
+    const double unrotated = singlePathThroughPlate(SampleFrameEquivalence::unrotated(), false);
     TS_ASSERT(std::abs(ownFrame - unrotated) > 1e-6);
   }
 
@@ -198,11 +196,7 @@ private:
   /// the peak carrying the same rotation either way.
   double singlePathThroughPlate(const Matrix<double> &rotation, const bool baked) {
     auto peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(1);
-    if (baked) {
-      SampleFrameEquivalence::setSampleInLabFrame(*peaksWS, rotation);
-    } else {
-      SampleFrameEquivalence::setSampleInOwnFrame(*peaksWS, rotation);
-    }
+    SampleFrameEquivalence::setSample(*peaksWS, rotation, baked);
     peaksWS->getPeak(0).setGoniometerMatrix(rotation);
 
     Mantid::Algorithms::AddAbsorptionWeightedPathLengths alg;

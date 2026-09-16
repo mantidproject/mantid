@@ -307,8 +307,6 @@ public:
   }
 
   void test_Both_Ways_Of_Orienting_The_Sample_Agree() {
-    // A sample in its own frame with the goniometer on the run, and the same sample already rotated
-    // into the lab frame, describe the same experiment and must attenuate identically.
     const auto rotation = SampleFrameEquivalence::rotationY(30.0);
     const auto ownFrameY = runOverPlate(rotation, false);
     const auto labFrameY = runOverPlate(rotation, true);
@@ -318,7 +316,7 @@ public:
       TS_ASSERT_DELTA(ownFrameY[i], labFrameY[i], 1.0e-10);
     }
     // and the rotation actually mattered - otherwise the assertion above proves nothing
-    const auto unrotatedY = runOverPlate(Mantid::Kernel::Matrix<double>(3, 3, true), false);
+    const auto unrotatedY = runOverPlate(SampleFrameEquivalence::unrotated(), false);
     TS_ASSERT(std::abs(ownFrameY[0] - unrotatedY[0]) > 1.0e-6);
   }
 
@@ -876,11 +874,7 @@ private:
     using Mantid::Kernel::DeltaEMode;
     TestWorkspaceDescriptor wsProps = {1, 2, false, Environment::CubeSampleOnly, DeltaEMode::Elastic, -1};
     auto testWS = setUpWS(wsProps);
-    if (baked) {
-      SampleFrameEquivalence::setSampleInLabFrame(*testWS, rotation);
-    } else {
-      SampleFrameEquivalence::setSampleInOwnFrame(*testWS, rotation);
-    }
+    SampleFrameEquivalence::setSample(*testWS, rotation, baked);
     auto mcAbsorb = createAlgorithm();
     mcAbsorb->setProperty("EventsPerPoint", 2000);
     mcAbsorb->setProperty("SeedValue", 123456789);

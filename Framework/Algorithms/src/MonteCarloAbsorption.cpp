@@ -296,12 +296,9 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
 
   EFixedProvider efixed(instrumentWS);
 
-  // The gauge volume, the beam and the detector positions are all described in the lab frame, but
-  // the sample shape is only there if something has already rotated it - CopySample bakes the
-  // destination goniometer in, while SetGoniometer alone leaves the shape in its own frame. Work
-  // from a copy of the sample carrying its shape in the lab frame, so the tracks are traced through
-  // a shape that is actually where the experiment puts it. This is a no-op for an unrotated
-  // workspace, which is every workspace that reaches here today.
+  // The gauge volume, the beam and the detectors are all in the lab frame, so the sample has to be
+  // too - see Geometry::getLabFrameShape. Everything below works from this copy rather than the
+  // workspace's own sample.
   API::Sample labFrameSample(inputWS.sample());
   labFrameSample.setShape(
       Geometry::getLabFrameShape(inputWS.sample().getShape(), inputWS.run().getGoniometer().getR()));

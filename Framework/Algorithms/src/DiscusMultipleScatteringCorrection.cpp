@@ -2182,16 +2182,11 @@ DiscusMultipleScatteringCorrection::findMatchingComponent(const ComponentWorkspa
 }
 
 void DiscusMultipleScatteringCorrection::prepareSampleBeamGeometry(const API::MatrixWorkspace_sptr &inputWS) {
-  // The beam and the detector positions are described in the lab frame, but the sample shape is
-  // only there if something has already rotated it - CopySample bakes the destination goniometer
-  // in, while SetGoniometer alone leaves the shape in its own frame. Move it the rest of the way so
-  // the simulated tracks pass through a shape that is where the experiment puts it. This is a no-op
-  // for an unrotated workspace, which is every workspace that reaches here today.
-  //
-  // The beam profile is built from the same lab-frame sample below, not from the workspace's own.
-  // An unspecified beam is sized from the sample's bounding box, so taking it from the unrotated
-  // shape while tracing through the rotated one would illuminate a region the sample no longer
-  // occupies.
+  // Simulate tracks through the sample where the experiment puts it - see
+  // Geometry::getLabFrameShape. The beam profile below is built from this same lab-frame sample,
+  // not the workspace's own: an unspecified beam is sized from the sample's bounding box, so taking
+  // it from the unrotated shape while tracing through the rotated one would illuminate a region the
+  // sample no longer occupies.
   API::Sample labFrameSample(inputWS->sample());
   labFrameSample.setShape(
       Geometry::getLabFrameShape(inputWS->sample().getShape(), inputWS->run().getGoniometer().getR()));

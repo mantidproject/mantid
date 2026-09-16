@@ -184,8 +184,6 @@ public:
   }
 
   void test_both_ways_of_orienting_the_sample_agree() {
-    // A sample in its own frame with the goniometer on the run, and the same sample already rotated
-    // into the lab frame by CopySample, describe the same experiment and must attenuate identically.
     const auto rotation = SampleFrameEquivalence::rotationY(30.0);
     const auto ownFrame = runPlateCorrection("pp_own", rotation, false);
     const auto labFrame = runPlateCorrection("pp_lab", rotation, true);
@@ -194,7 +192,7 @@ public:
       TS_ASSERT_DELTA(ownFrame[i], labFrame[i], 1e-9);
     }
     // and the rotation actually mattered - otherwise the assertions above prove nothing
-    const auto unrotated = runPlateCorrection("pp_flat", Mantid::Kernel::Matrix<double>(3, 3, true), false);
+    const auto unrotated = runPlateCorrection("pp_flat", SampleFrameEquivalence::unrotated(), false);
     TS_ASSERT(std::abs(ownFrame[0] - unrotated[0]) > 1e-6);
   }
 

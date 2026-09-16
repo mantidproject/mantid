@@ -18,12 +18,9 @@ class IObject;
 
 /** Reconcile a sample shape with the goniometer rotation of the workspace holding it.
  *
- * A workspace can arrive with its sample shape in either frame. CopySample bakes the destination's
- * goniometer into the shape, so the shape is already in the lab frame, while SetGoniometer on its
- * own leaves the shape untouched in its own frame. Both leave the same goniometer on the run, so
- * the run alone cannot distinguish them - applying R unconditionally rotates an already-rotated
- * shape a second time. Asking the shape what it already carries, through getAppliedRotation,
- * resolves it.
+ * A workspace can arrive with its sample shape in either frame and the run cannot tell you which,
+ * so applying its goniometer unconditionally rotates an already-rotated shape a second time. These
+ * ask the shape what it already carries instead - see IObject::getAppliedRotation.
  */
 
 /// The shape as it sits in the lab frame: a clone rotated by whatever part of goniometerR it does

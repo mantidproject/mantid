@@ -125,18 +125,16 @@ public:
   }
 
   void test_both_ways_of_orienting_the_sample_agree() {
-    // A sample in its own frame with the rotation on the run, and the same sample already rotated
-    // into the lab frame, describe the same experiment and must correct identically. This algorithm
-    // dices the gauge volume, which is always in the lab frame, and requires every element to lie
-    // inside the sample - so it is the case where the sample being in the wrong frame shows up
-    // most directly.
+    // This algorithm dices the gauge volume, which is always in the lab frame, and requires every
+    // element to lie inside the sample - so it is where a sample in the wrong frame shows up most
+    // directly.
     const auto rotation = SampleFrameEquivalence::rotationY(30.0);
     const double ownFrame = runGaugeCorrection("cuboidgauge_own", rotation, false);
     const double labFrame = runGaugeCorrection("cuboidgauge_lab", rotation, true);
 
     TS_ASSERT_DELTA(ownFrame, labFrame, 1e-9);
     // and the rotation actually mattered - otherwise the assertion above proves nothing
-    const double unrotated = runGaugeCorrection("cuboidgauge_flat", Mantid::Kernel::Matrix<double>(3, 3, true), false);
+    const double unrotated = runGaugeCorrection("cuboidgauge_flat", SampleFrameEquivalence::unrotated(), false);
     TS_ASSERT(std::abs(ownFrame - unrotated) > 1e-6);
   }
 
@@ -148,11 +146,7 @@ private:
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
     ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     const auto boxXML = ComponentCreationHelper::cuboidXML(0.025, 0.03, 0.02);
-    if (baked) {
-      SampleFrameEquivalence::setSampleInLabFrame(*ws, rotation, SampleFrameEquivalence::vanadium(), boxXML);
-    } else {
-      SampleFrameEquivalence::setSampleInOwnFrame(*ws, rotation, SampleFrameEquivalence::vanadium(), boxXML);
-    }
+    SampleFrameEquivalence::setSample(*ws, rotation, baked, SampleFrameEquivalence::vanadium(), boxXML);
 
     Mantid::Algorithms::CuboidGaugeVolumeAbsorption alg;
     alg.setRethrows(true);

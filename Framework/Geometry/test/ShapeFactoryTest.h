@@ -24,6 +24,17 @@ using Poco::XML::Element;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
+namespace {
+/// A sphere on +x with no rotation tag of its own, for the goniometer-tag tests to write tags onto.
+/// Offset from the origin so that a rotation visibly moves it.
+const std::string UNROTATED_SPHERE =
+    "<sphere id=\"s\"><centre x=\"1.0\" y=\"0\" z=\"0\"/><radius val=\"0.5\"/></sphere>"
+    "<algebra val=\"s\"/> ";
+
+/// 90 degrees anticlockwise about z, which carries a point on +x round to +y.
+const Matrix<double> NINETY_ABOUT_Z(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+} // namespace
+
 class ShapeFactoryTest : public CxxTest::TestSuite {
 public:
   void testCuboid() {
@@ -920,10 +931,8 @@ public:
   /// is taken to be a bake into the lab frame - how shapes written before the second tag existed
   /// have to keep reading.
   void testGoniometerTagAloneIsTakenToBeAllBake() {
-    const Matrix<double> rotation(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
-    const std::string plain = "<sphere id=\"s\"><centre x=\"1.0\" y=\"0\" z=\"0\"/><radius val=\"0.5\"/></sphere>"
-                              "<algebra val=\"s\"/> ";
-    auto shape = ShapeFactory().createShape(ShapeFactory().addGoniometerTag(rotation, plain));
+    const Matrix<double> &rotation = NINETY_ABOUT_Z;
+    auto shape = ShapeFactory().createShape(ShapeFactory().addGoniometerTag(rotation, UNROTATED_SPHERE));
 
     TS_ASSERT_EQUALS(shape->getAppliedRotation(), rotation);
     // and the surfaces moved: the sphere sat at +x, so a 90 degree turn about z puts it at +y
@@ -934,11 +943,9 @@ public:
   /// <applied-goniometer> is metadata only: it says how much of <goniometer> was a bake, and must
   /// not rotate anything itself.
   void testAppliedGoniometerTagRecordsWithoutRotating() {
-    const Matrix<double> total(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+    const Matrix<double> &total = NINETY_ABOUT_Z;
     const Matrix<double> bake(3, 3, true);
-    const std::string plain = "<sphere id=\"s\"><centre x=\"1.0\" y=\"0\" z=\"0\"/><radius val=\"0.5\"/></sphere>"
-                              "<algebra val=\"s\"/> ";
-    auto xml = ShapeFactory().addGoniometerTag(total, plain);
+    auto xml = ShapeFactory().addGoniometerTag(total, UNROTATED_SPHERE);
     xml = ShapeFactory().addAppliedGoniometerTag(bake, xml);
     auto shape = ShapeFactory().createShape(xml);
 
@@ -951,13 +958,11 @@ public:
   /// The two tags are independent: rewriting one must leave the other alone. "<goniometer" cannot
   /// match inside "<applied-goniometer", and neither rewrite may leave a stray '>' behind.
   void testRewritingOneTagLeavesTheOtherIntact() {
-    const Matrix<double> first(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+    const Matrix<double> &first = NINETY_ABOUT_Z;
     const Matrix<double> bake(std::vector<double>{1, 0, 0, 0, 0, -1, 0, 1, 0});
     const Matrix<double> second(std::vector<double>{-1, 0, 0, 0, -1, 0, 0, 0, 1});
-    const std::string plain = "<sphere id=\"s\"><centre x=\"1.0\" y=\"0\" z=\"0\"/><radius val=\"0.5\"/></sphere>"
-                              "<algebra val=\"s\"/> ";
 
-    auto xml = ShapeFactory().addGoniometerTag(first, plain);
+    auto xml = ShapeFactory().addGoniometerTag(first, UNROTATED_SPHERE);
     xml = ShapeFactory().addAppliedGoniometerTag(bake, xml);
     xml = ShapeFactory().addGoniometerTag(second, xml);
 
@@ -971,13 +976,11 @@ public:
 
   /// Rebasing swaps which bake is recorded while leaving the definition-frame rotation in place.
   void testRebakeGoniometerPreservesTheDefinitionFrameRotation() {
-    const Matrix<double> definition(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+    const Matrix<double> &definition = NINETY_ABOUT_Z;
     const Matrix<double> oldBake(std::vector<double>{1, 0, 0, 0, 0, -1, 0, 1, 0});
     const Matrix<double> newBake(std::vector<double>{-1, 0, 0, 0, -1, 0, 0, 0, 1});
-    const std::string plain = "<sphere id=\"s\"><centre x=\"1.0\" y=\"0\" z=\"0\"/><radius val=\"0.5\"/></sphere>"
-                              "<algebra val=\"s\"/> ";
 
-    auto xml = ShapeFactory().addGoniometerTag(oldBake * definition, plain);
+    auto xml = ShapeFactory().addGoniometerTag(oldBake * definition, UNROTATED_SPHERE);
     xml = ShapeFactory().addAppliedGoniometerTag(oldBake, xml);
 
     const auto rebaked = ShapeFactory().rebakeGoniometer(newBake, xml, oldBake);
@@ -989,10 +992,8 @@ public:
 
   /// An applied tag with no goniometer tag describes nothing, so it is warned about and ignored.
   void testAppliedGoniometerWithoutGoniometerIsIgnored() {
-    const Matrix<double> bake(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
-    const std::string plain = "<sphere id=\"s\"><centre x=\"1.0\" y=\"0\" z=\"0\"/><radius val=\"0.5\"/></sphere>"
-                              "<algebra val=\"s\"/> ";
-    auto shape = ShapeFactory().createShape(ShapeFactory().addAppliedGoniometerTag(bake, plain));
+    const Matrix<double> &bake = NINETY_ABOUT_Z;
+    auto shape = ShapeFactory().createShape(ShapeFactory().addAppliedGoniometerTag(bake, UNROTATED_SPHERE));
 
     TS_ASSERT_EQUALS(shape->getAppliedRotation(), Matrix<double>(3, 3, true));
   }
@@ -1004,11 +1005,9 @@ public:
   /// choose. Anything composing onto an existing rotation reads the tag off a rebuilt shape, so
   /// this is the path that matters rather than the raw string.
   void testTagsSurviveAShapeXMLRoundTrip() {
-    const Matrix<double> total(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+    const Matrix<double> &total = NINETY_ABOUT_Z;
     const Matrix<double> bake(std::vector<double>{1, 0, 0, 0, 0, -1, 0, 1, 0});
-    const std::string plain = "<sphere id=\"s\"><centre x=\"1.0\" y=\"0\" z=\"0\"/><radius val=\"0.5\"/></sphere>"
-                              "<algebra val=\"s\"/> ";
-    auto xml = ShapeFactory().addGoniometerTag(total, plain);
+    auto xml = ShapeFactory().addGoniometerTag(total, UNROTATED_SPHERE);
     xml = ShapeFactory().addAppliedGoniometerTag(bake, xml);
 
     const auto rebuilt = ShapeFactory().createShape(xml)->getShapeXML();

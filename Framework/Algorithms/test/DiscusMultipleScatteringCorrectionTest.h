@@ -275,15 +275,13 @@ public:
   }
 
   void test_both_ways_of_orienting_the_sample_agree() {
-    // A sample in its own frame with the goniometer on the run, and the same sample already rotated
-    // into the lab frame by CopySample, describe the same experiment and must scatter identically.
     const auto rotation = SampleFrameEquivalence::rotationY(30.0);
     const double ownFrame = singleScatterOverTiltedPlate(rotation, false);
     const double labFrame = singleScatterOverTiltedPlate(rotation, true);
 
     TS_ASSERT_DELTA(ownFrame, labFrame, 1e-9);
     // and the rotation actually mattered - otherwise the assertion above proves nothing
-    const double unrotated = singleScatterOverTiltedPlate(Mantid::Kernel::Matrix<double>(3, 3, true), false);
+    const double unrotated = singleScatterOverTiltedPlate(SampleFrameEquivalence::unrotated(), false);
     TS_ASSERT(std::abs(ownFrame - unrotated) > 1e-6);
   }
 

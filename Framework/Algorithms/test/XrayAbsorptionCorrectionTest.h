@@ -103,8 +103,6 @@ public:
   }
 
   void test_both_ways_of_orienting_the_sample_agree() {
-    // A sample in its own frame with the goniometer on the run, and the same sample already rotated
-    // into the lab frame, describe the same experiment and must attenuate identically.
     const auto rotation = SampleFrameEquivalence::rotationY(30.0);
     const auto ownFrame = createWorkspaceWithPlate(rotation, false);
     const auto labFrame = createWorkspaceWithPlate(rotation, true);
@@ -117,7 +115,8 @@ public:
       TS_ASSERT_DELTA(ownY[i], labY[i], 1.0e-10);
     }
     // and the rotation actually mattered - otherwise the assertion above proves nothing
-    const auto unrotatedY = runXrayCorrection(createWorkspaceWithPlate(rotationIdentity(), false))->y(0);
+    const auto unrotatedY =
+        runXrayCorrection(createWorkspaceWithPlate(SampleFrameEquivalence::unrotated(), false))->y(0);
     TS_ASSERT(std::abs(ownY[0] - unrotatedY[0]) > 1.0e-6);
   }
 
@@ -135,8 +134,6 @@ public:
   }
 
 private:
-  static Kernel::Matrix<double> rotationIdentity() { return Kernel::Matrix<double>(3, 3, true); }
-
   /// A plate sample, either in its own frame with the rotation on the run, or already baked into
   /// the lab frame. Both carry the same goniometer, so only the shape distinguishes them.
   API::MatrixWorkspace_sptr createWorkspaceWithPlate(const Kernel::Matrix<double> &rotation, const bool baked) {
@@ -150,11 +147,7 @@ private:
     sampleProfile.setAttenuationCoefficient(1000.0, 1.0);
     sampleMaterial.setXRayAttenuationProfile(sampleProfile);
 
-    if (baked) {
-      SampleFrameEquivalence::setSampleInLabFrame(*ws, rotation, sampleMaterial);
-    } else {
-      SampleFrameEquivalence::setSampleInOwnFrame(*ws, rotation, sampleMaterial);
-    }
+    SampleFrameEquivalence::setSample(*ws, rotation, baked, sampleMaterial);
     return ws;
   }
 

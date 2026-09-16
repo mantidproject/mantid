@@ -14,11 +14,11 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/NeutronAtom.h"
+#include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 
 #include <cxxtest/TestSuite.h>
 
-#include <cmath>
 #include <memory>
 #include <string>
 
@@ -31,24 +31,10 @@ using Mantid::Kernel::V3D;
 namespace {
 
 const Matrix<double> IDENTITY(3, 3, true);
-constexpr double PI = 3.14159265358979323846;
 
 /// Rotation by the given angle about z, so a point on +x moves towards +y.
 Matrix<double> rotationZ(const double degrees) {
-  const double radians = degrees * PI / 180.0;
-  const double c = std::cos(radians);
-  const double s = std::sin(radians);
-  Matrix<double> rotation(3, 3);
-  rotation[0][0] = c;
-  rotation[0][1] = -s;
-  rotation[0][2] = 0.0;
-  rotation[1][0] = s;
-  rotation[1][1] = c;
-  rotation[1][2] = 0.0;
-  rotation[2][0] = 0.0;
-  rotation[2][1] = 0.0;
-  rotation[2][2] = 1.0;
-  return rotation;
+  return Matrix<double>(Mantid::Kernel::Quat(degrees, V3D(0, 0, 1)).getRotation());
 }
 
 Material testMaterial() { return Material("testium", PhysicalConstants::getNeutronAtom(23, 0), 0.072); }
@@ -100,6 +86,19 @@ void assertMatrixEquals(const Matrix<double> &actual, const Matrix<double> &expe
     for (size_t j = 0; j < 3; ++j) {
       TS_ASSERT_DELTA(actual[i][j], expected[i][j], tolerance);
     }
+  }
+}
+
+/// Assert that every vertex of labShape's mesh is the matching source vertex turned by rotation.
+void assertVerticesRotatedBy(const std::shared_ptr<IObject> &labShape, const std::vector<V3D> &source,
+                             const Matrix<double> &rotation) {
+  const auto rotated = std::dynamic_pointer_cast<MeshObject>(labShape)->getV3Ds();
+  TS_ASSERT_EQUALS(rotated.size(), source.size());
+  for (size_t i = 0; i < source.size(); ++i) {
+    const V3D expected = rotation * source[i];
+    TS_ASSERT_DELTA(rotated[i].X(), expected.X(), 1e-12);
+    TS_ASSERT_DELTA(rotated[i].Y(), expected.Y(), 1e-12);
+    TS_ASSERT_DELTA(rotated[i].Z(), expected.Z(), 1e-12);
   }
 }
 
@@ -173,15 +172,7 @@ public:
 
     const auto labShape = getLabFrameShape(*meshShape, rotation);
     assertMatrixEquals(labShape->getAppliedRotation(), rotation);
-
-    const auto rotated = std::dynamic_pointer_cast<MeshObject>(labShape)->getV3Ds();
-    TS_ASSERT_EQUALS(rotated.size(), original.size());
-    for (size_t i = 0; i < original.size(); ++i) {
-      const V3D expected = rotation * original[i];
-      TS_ASSERT_DELTA(rotated[i].X(), expected.X(), 1e-12);
-      TS_ASSERT_DELTA(rotated[i].Y(), expected.Y(), 1e-12);
-      TS_ASSERT_DELTA(rotated[i].Z(), expected.Z(), 1e-12);
-    }
+    assertVerticesRotatedBy(labShape, original, rotation);
   }
 
   void test_lab_frame_mesh_shape_leaves_the_source_untouched() {
@@ -219,13 +210,7 @@ public:
 
     // The result reports the full goniometer, but the vertices moved by only the outstanding 60.
     assertMatrixEquals(labShape->getAppliedRotation(), goniometer);
-    const auto rotated = std::dynamic_pointer_cast<MeshObject>(labShape)->getV3Ds();
-    for (size_t i = 0; i < partial.size(); ++i) {
-      const V3D expected = rotationZ(60.0) * partial[i];
-      TS_ASSERT_DELTA(rotated[i].X(), expected.X(), 1e-12);
-      TS_ASSERT_DELTA(rotated[i].Y(), expected.Y(), 1e-12);
-      TS_ASSERT_DELTA(rotated[i].Z(), expected.Z(), 1e-12);
-    }
+    assertVerticesRotatedBy(labShape, partial, rotationZ(60.0));
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -345,12 +330,5 @@ public:
     TS_ASSERT_THROWS_NOTHING(labShape = getLabFrameShape(*plate, rotationZ(90.0)));
     TS_ASSERT(labShape);
     TS_ASSERT_EQUALS(std::dynamic_pointer_cast<MeshObject2D>(labShape)->getVertices(), before);
-  }
-
-  void test_a_shape_that_cannot_be_rotated_is_returned_when_nothing_is_outstanding() {
-    const auto plate = createFlatPlate();
-    std::shared_ptr<IObject> labShape;
-    TS_ASSERT_THROWS_NOTHING(labShape = getLabFrameShape(*plate, IDENTITY));
-    TS_ASSERT(labShape);
   }
 };

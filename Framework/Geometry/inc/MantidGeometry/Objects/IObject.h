@@ -59,11 +59,8 @@ public:
    * This reports which frame the shape is in, NOT every rotation it has ever had. Definition-frame
    * rotations - the file-load orientation of LoadSampleShape and the sample environment spec,
    * "rotate-all" and per-primitive "rotate" tags, and RotateSampleShape - re-express the shape
-   * within its own frame and are deliberately excluded. Only a genuine move into the lab frame
-   * counts.
-   *
-   * Identity therefore means the shape is expressed in its own frame, however much its definition
-   * has been rotated within that frame.
+   * within its own frame and are deliberately excluded. Identity therefore means the shape is
+   * expressed in its own frame, however much its definition has been rotated within that frame.
    *
    * More precisely, this is the ordered product of the goniometer bakes the shape has been given.
    * That is outermost among the bakes, but not necessarily the outermost rotation overall: a

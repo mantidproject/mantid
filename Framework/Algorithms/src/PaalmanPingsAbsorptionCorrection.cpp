@@ -394,12 +394,8 @@ void PaalmanPingsAbsorptionCorrection::constructSample(const API::Sample &sample
     throw std::invalid_argument(mess);
   }
 
-  // The gauge volume, the beam and the detector positions are all described in the lab frame, but
-  // the sample shape is only there if something has already rotated it - CopySample bakes the
-  // destination goniometer in, while SetGoniometer alone leaves the shape in its own frame. Ask the
-  // shape which frame it is in and move it the rest of the way, so the quadrature intersects a
-  // lab-frame region with a shape that is actually there. This is a no-op for an unrotated
-  // workspace, which is every workspace that reaches here today.
+  // The quadrature intersects a lab-frame region, so the sample has to be in the lab frame too -
+  // see Geometry::getLabFrameShape.
   //
   // The container is deliberately left alone: it is never goniometer-rotated anywhere in Mantid, so
   // rotating the sample inside a fixed can is what the assembly is meant to describe.

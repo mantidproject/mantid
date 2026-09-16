@@ -272,17 +272,16 @@ public:
   }
 
   void test_both_ways_of_orienting_the_sample_agree() {
-    // A sample in its own frame with the rotation on the run, and the same sample already rotated
-    // into the lab frame, describe the same experiment and must correct identically. This exercises
-    // the branch that takes its shape from the sample rather than building its own cylinder, and
-    // the rasterisation follows the cylinder's own axis, so the tilted shape dices correctly.
+    // This exercises the branch that takes its shape from the sample rather than building its own
+    // cylinder, and the rasterisation follows the cylinder's own axis, so the tilted shape dices
+    // correctly.
     const auto rotation = SampleFrameEquivalence::rotationX(30.0);
     const double ownFrame = runSampleShapeCorrection("cylabs_own", rotation, false);
     const double labFrame = runSampleShapeCorrection("cylabs_lab", rotation, true);
 
     TS_ASSERT_DELTA(ownFrame, labFrame, 1e-9);
     // and the rotation actually mattered - otherwise the assertion above proves nothing
-    const double unrotated = runSampleShapeCorrection("cylabs_flat", Mantid::Kernel::Matrix<double>(3, 3, true), false);
+    const double unrotated = runSampleShapeCorrection("cylabs_flat", SampleFrameEquivalence::unrotated(), false);
     TS_ASSERT(std::abs(ownFrame - unrotated) > 1e-6);
   }
 
@@ -296,11 +295,7 @@ private:
     MatrixWorkspace_sptr ws = createTestWorkspace();
     const auto cylinderXML = ComponentCreationHelper::cappedCylinderXML(
         0.004, 0.04, Mantid::Kernel::V3D(0.0, -0.02, 0.0), Mantid::Kernel::V3D(0.0, 1.0, 0.0), "sample");
-    if (baked) {
-      SampleFrameEquivalence::setSampleInLabFrame(*ws, rotation, SampleFrameEquivalence::vanadium(), cylinderXML);
-    } else {
-      SampleFrameEquivalence::setSampleInOwnFrame(*ws, rotation, SampleFrameEquivalence::vanadium(), cylinderXML);
-    }
+    SampleFrameEquivalence::setSample(*ws, rotation, baked, SampleFrameEquivalence::vanadium(), cylinderXML);
 
     Mantid::Algorithms::CylinderAbsorption alg;
     alg.setRethrows(true);
