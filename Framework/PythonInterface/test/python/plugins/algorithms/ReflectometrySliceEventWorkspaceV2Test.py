@@ -221,7 +221,17 @@ class ReflectometrySliceEventWorkspaceV2Test(unittest.TestCase):
         time_interval = 600
         args["TimeInterval"] = time_interval
         args["InputWorkspaceName"] = "input_ws_group"
-        self._assert_run_algorithm_succeeds(args, len(mtd["input_ws_group"]))
+        output_workspaces = self._assert_run_algorithm_succeeds(args, len(mtd["input_ws_group"]))
+        expected_groups = [
+            "output_0_600",
+            "output_600_1200",
+            "output_1200_1800",
+            "output_1800_2400",
+            "output_2400_3000",
+            "output_3000_3600",
+            "output_3600_4200",
+        ]
+        self.assertEqual(output_workspaces, expected_groups)
         self._check_group(time_interval, ["ws1", "ws2", "ws3"], ["monitor_ws"] * 3)
 
     def test_when_input_and_monitors_are_both_workspace_groups(self):
@@ -230,7 +240,17 @@ class ReflectometrySliceEventWorkspaceV2Test(unittest.TestCase):
         args["TimeInterval"] = time_interval
         args["InputWorkspaceName"] = "input_ws_group"
         args["MonitorWorkspaceName"] = "monitor_ws_group"
-        self._assert_run_algorithm_succeeds(args, len(mtd["input_ws_group"]))
+        output_workspaces = self._assert_run_algorithm_succeeds(args, len(mtd["input_ws_group"]))
+        expected_groups = [
+            "output_0_600",
+            "output_600_1200",
+            "output_1200_1800",
+            "output_1800_2400",
+            "output_2400_3000",
+            "output_3000_3600",
+            "output_3600_4200",
+        ]
+        self.assertEqual(output_workspaces, expected_groups)
         self._check_group(time_interval, ["ws1", "ws2", "ws3"], ["mon1", "mon2", "mon3"])
 
     def test_when_input_is_a_workspace_group_log_interval(self):
@@ -240,7 +260,8 @@ class ReflectometrySliceEventWorkspaceV2Test(unittest.TestCase):
         args["MinimumLogValue"] = "75"
         args["MaximumLogValue"] = "110"
         args["InputWorkspaceName"] = "input_ws_group"
-        self._assert_run_algorithm_succeeds(args, True)
+        output_workspaces = self._assert_run_algorithm_succeeds(args, True)
+        self.assertEqual(output_workspaces, ["output_65_85", "output_85_105"])
         self._check_log_interval_group(20, ["ws1", "ws2", "ws3"], ["monitor_ws"] * 3)
 
     def test_fails_when_input_groups_are_different_sizes(self):
@@ -306,17 +327,12 @@ class ReflectometrySliceEventWorkspaceV2Test(unittest.TestCase):
         mtd.addOrReplace("test_monitor_ws_group", group)
         return group
 
-    """
-    Does not return the output workspaces when groups have been used as the input.
-    The resulting groups need to be selected manually in the main test methods.
-    """
-
     def _assert_run_algorithm_succeeds(self, args, is_group=False):
         """Run the algorithm with the given args and check it succeeds"""
         alg = create_algorithm("ReflectometrySliceEventWorkspace", **args)
         assertRaisesNothing(self, alg.execute)
         if is_group:
-            return
+            return alg.getProperty("OutputWorkspaceNames").value
         self.assertEqual(mtd.doesExist("output"), True)
         return mtd["output"]
 
