@@ -14,6 +14,9 @@
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/UnitFactory.h"
+#include "SampleFrameEquivalence.h"
+
+#include <cmath>
 
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::DataObjects::Workspace2D_sptr;
@@ -121,6 +124,47 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
 
+  void test_both_ways_of_orienting_the_sample_agree() {
+    // This algorithm dices the gauge volume, which is always in the lab frame, and requires every
+    // element to lie inside the sample - so it is where a sample in the wrong frame shows up most
+    // directly.
+    const auto rotation = SampleFrameEquivalence::rotationY(30.0);
+    const double ownFrame = runGaugeCorrection("cuboidgauge_own", rotation, false);
+    const double labFrame = runGaugeCorrection("cuboidgauge_lab", rotation, true);
+
+    TS_ASSERT_DELTA(ownFrame, labFrame, 1e-9);
+    // and the rotation actually mattered - otherwise the assertion above proves nothing
+    const double unrotated = runGaugeCorrection("cuboidgauge_flat", SampleFrameEquivalence::unrotated(), false);
+    TS_ASSERT(std::abs(ownFrame - unrotated) > 1e-6);
+  }
+
 private:
+  /// Correct a box sample held in the given frame and return the first attenuation factor. The box
+  /// must enclose the gauge volume even once rotated, or the algorithm fails instead of answering.
+  double runGaugeCorrection(const std::string &name, const Mantid::Kernel::Matrix<double> &rotation, const bool baked) {
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+    const auto boxXML = ComponentCreationHelper::cuboidXML(0.025, 0.03, 0.02);
+    SampleFrameEquivalence::setSample(*ws, rotation, baked, SampleFrameEquivalence::vanadium(), boxXML);
+
+    Mantid::Algorithms::CuboidGaugeVolumeAbsorption alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+    alg.setPropertyValue("OutputWorkspace", name);
+    // the gauge volume, in cm
+    alg.setPropertyValue("SampleHeight", "2.3");
+    alg.setPropertyValue("SampleWidth", "1.8");
+    alg.setPropertyValue("SampleThickness", "1.5");
+    alg.setPropertyValue("NumberOfWavelengthPoints", "3");
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    auto result = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(name);
+    const double value = result->y(0).front();
+    Mantid::API::AnalysisDataService::Instance().remove(name);
+    return value;
+  }
+
   Mantid::Algorithms::CuboidGaugeVolumeAbsorption atten;
 };
