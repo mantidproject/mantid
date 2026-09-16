@@ -79,29 +79,33 @@ def get_masked_ids(nx_low, nx_high, ny_low, ny_high, workspace, component_name=N
     IDs = []
     if component.type() == "RectangularDetector":
         component_info = workspace.componentInfo()
-        grid = component_info.pixelGridComponent(component_info.indexOfAny(component_name))
+        bank_index = component_info.indexOfAny(component_name)
+        id_start = component_info.pixelGridIdStart(bank_index)
+        id_step = component_info.pixelGridIdStep(bank_index)
+        max_detector_id = component_info.pixelGridMaxDetectorID(bank_index)
+        npixels_x = component_info.pixelGridNX(bank_index)
         # left
         i = 0
-        while i < nx_low * grid.idStep:
-            IDs.append(grid.idStart + i)
+        while i < nx_low * id_step:
+            IDs.append(id_start + i)
             i += 1
         # right
-        i = grid.maxDetectorID - nx_high * grid.idStep
-        while i < grid.maxDetectorID:
+        i = max_detector_id - nx_high * id_step
+        while i < max_detector_id:
             IDs.append(i)
             i += 1
         # low: 0,256,512,768,..,1,257,513
         for row in range(ny_low):
-            i = row + grid.idStart
-            while i < grid.nX * grid.idStep - grid.idStep + ny_low + grid.idStart:
+            i = row + id_start
+            while i < npixels_x * id_step - id_step + ny_low + id_start:
                 IDs.append(i)
-                i += grid.idStep
+                i += id_step
         # high # 255, 511, 767..
         for row in range(ny_high):
-            i = grid.idStep + grid.idStart - row - 1
-            while i < grid.nX * grid.idStep + grid.idStart:
+            i = id_step + id_start - row - 1
+            while i < npixels_x * id_step + id_start:
                 IDs.append(i)
-                i += grid.idStep
+                i += id_step
     elif component.type() == "CompAssembly" or component.type() == "ObjCompAssembly" or component.type() == "DetectorComponent":
         # Wing detector
         # x

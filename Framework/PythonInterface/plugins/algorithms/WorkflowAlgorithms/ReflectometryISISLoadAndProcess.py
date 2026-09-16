@@ -396,8 +396,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
         # We don't sum banks for a linear detector
         component_info = workspace.componentInfo()
-        grid = component_info.pixelGridComponent(component_info.indexOfAny(rect_detectors[0].getName()))
-        if grid.nX == 1 or grid.nY == 1:
+        bank_index = component_info.indexOfAny(rect_detectors[0].getName())
+        if component_info.pixelGridNX(bank_index) == 1 or component_info.pixelGridNY(bank_index) == 1:
             return False
 
         if not self._all_spectra_refer_to_rectangular_detector(workspace, rect_detectors[0]):
@@ -409,9 +409,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _all_spectra_refer_to_rectangular_detector(workspace, rectangular_detector) -> bool:
         """Checks if all data in a workspace is from the rectangular detector."""
         component_info = workspace.componentInfo()
-        grid = component_info.pixelGridComponent(component_info.indexOfAny(rectangular_detector.getName()))
-        rect_det_id_start = grid.minDetectorID
-        rect_det_id_end = grid.maxDetectorID
+        bank_index = component_info.indexOfAny(rectangular_detector.getName())
+        rect_det_id_start = component_info.pixelGridMinDetectorID(bank_index)
+        rect_det_id_end = component_info.pixelGridMaxDetectorID(bank_index)
         ws_has_detectors = False
 
         for ws_index in range(workspace.getNumberHistograms()):

@@ -153,16 +153,18 @@ class SANSMask(PythonAlgorithm):
             component = instrument.getComponentByName(component_name)
             if component.type() == "RectangularDetector":
                 component_info = workspace.componentInfo()
-                grid = component_info.pixelGridComponent(component_info.indexOfAny(component_name))
+                bank_index = component_info.indexOfAny(component_name)
+                id_start = component_info.pixelGridIdStart(bank_index)
+                id_step = component_info.pixelGridIdStep(bank_index)
                 # id's at the bottom on every pixel
                 ids_at_the_bottom = list(
                     range(
-                        side_to_mask * grid.idStep + grid.idStart,
-                        grid.idStart + grid.idStep * grid.nX,
-                        grid.idStep * 2,
+                        side_to_mask * id_step + id_start,
+                        id_start + id_step * component_info.pixelGridNX(bank_index),
+                        id_step * 2,
                     )
                 )
-                ids = [list(range(i, i + grid.idStep)) for i in ids_at_the_bottom]
+                ids = [list(range(i, i + id_step)) for i in ids_at_the_bottom]
                 ids = [item for sublist in ids for item in sublist]  # flat list
             elif component.type() == "CompAssembly" or component.type() == "ObjCompAssembly" or component.type() == "DetectorComponent":
                 number_of_tubes = component.nelements()
@@ -202,8 +204,10 @@ class SANSMask(PythonAlgorithm):
         masked_detectors = []
         if component.type() == "RectangularDetector":
             component_info = workspace.componentInfo()
-            grid = component_info.pixelGridComponent(component_info.indexOfAny(component_name))
-            masked_detectors = list(range(grid.minDetectorID, grid.maxDetectorID + 1))
+            bank_index = component_info.indexOfAny(component_name)
+            masked_detectors = list(
+                range(component_info.pixelGridMinDetectorID(bank_index), component_info.pixelGridMaxDetectorID(bank_index) + 1)
+            )
         elif component.type() == "CompAssembly" or component.type() == "ObjCompAssembly" or component.type() == "DetectorComponent":
             ids_gen = self.__get_ids_for_assembly(component)
             masked_detectors = list(ids_gen)

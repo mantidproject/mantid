@@ -1,1 +1,1 @@
-- Grid spacing and step for rectangular/grid arrays can now be accessed from ComponentInfo, using the `pixelGridComponent` method.
+- Grid spacing, pixel counts and detector-ID numbering for rectangular/grid arrays can now be accessed from :class:`~mantid.geometry.ComponentInfo`, using the ``pixelGrid*`` methods such as ``pixelGridNX`` and ``pixelGridXStep``. Whether a component has such a grid can be tested with ``isGridDetector``.

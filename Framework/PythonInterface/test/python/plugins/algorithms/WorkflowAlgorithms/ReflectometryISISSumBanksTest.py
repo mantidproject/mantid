@@ -90,7 +90,7 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
 
     def test_no_summing_done_on_single_bank(self):
         test_ws = MagicMock()
-        test_ws.componentInfo().pixelGridComponent().nX = 1
+        test_ws.componentInfo().pixelGridNX.return_value = 1
         masked_ws = "masked"
         alg = ReflectometryISISSumBanks()
         alg.getProperty = MagicMock()

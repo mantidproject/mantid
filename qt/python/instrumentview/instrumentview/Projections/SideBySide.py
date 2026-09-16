@@ -134,8 +134,10 @@ class SideBySide(Projection, projection_types={ProjectionType.SIDE_BY_SIDE: {"ax
             return flat_banks
 
         for bank in rectangular_banks:
-            grid = component_info.pixelGridComponent(component_info.indexOfAny(bank.getName()))
-            bank_detector_ids = np.array(range(grid.minDetectorID, grid.maxDetectorID + 1))
+            bank_index = component_info.indexOfAny(bank.getName())
+            bank_detector_ids = np.array(
+                range(component_info.pixelGridMinDetectorID(bank_index), component_info.pixelGridMaxDetectorID(bank_index) + 1)
+            )
             valid_detector_ids = self._detector_ids[np.isin(self._detector_ids, bank_detector_ids)]
             if len(valid_detector_ids) == 0:
                 continue
@@ -146,9 +148,19 @@ class SideBySide(Projection, projection_types={ProjectionType.SIDE_BY_SIDE: {"ax
             rotation = bank.getRotation()
             flat_bank.rotation = Rotation.from_quat([rotation.imagI(), rotation.imagJ(), rotation.imagK(), rotation.real()])
             flat_bank.detector_ids = list(valid_detector_ids)
-            flat_bank.dimensions = np.abs([grid.nX * grid.xStep, grid.nY * grid.yStep, grid.nZ * grid.zStep])
-            flat_bank.steps = np.abs([grid.xStep, grid.yStep, grid.zStep])
-            flat_bank.pixels = [grid.nX, grid.nY, grid.nZ]
+            pixels = [
+                component_info.pixelGridNX(bank_index),
+                component_info.pixelGridNY(bank_index),
+                component_info.pixelGridNZ(bank_index),
+            ]
+            steps = [
+                component_info.pixelGridXStep(bank_index),
+                component_info.pixelGridYStep(bank_index),
+                component_info.pixelGridZStep(bank_index),
+            ]
+            flat_bank.dimensions = np.abs(np.multiply(pixels, steps))
+            flat_bank.steps = np.abs(steps)
+            flat_bank.pixels = pixels
             parent_component_index = component_info.parent(int(self._detector_id_component_index_map[flat_bank.detector_ids[0]]))
             override_pos = self._calculator.getSideBySideViewPos(component_info, parent_component_index)
             flat_bank.has_position_in_idf = override_pos[0]

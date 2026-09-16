@@ -45,10 +45,19 @@ double solidAngle(const ComponentInfo &self, const size_t index, const V3D &obse
   return self.solidAngle(index, SolidAngleParams(observer));
 }
 
+// Flat accessors for the grid metadata of a Rectangular/Grid bank. The
+// Beamline::PixelGridComponent aggregate is an implementation detail of the
+// Geometry layer and is deliberately not exported to Python; one member is
+// fetched per call.
+template <auto Field> auto pixelGridField(ComponentInfo const &self, size_t const componentIndex) {
+  return self.pixelGridComponent(componentIndex).*Field;
+}
+
 // Axis fill order ('x'/'y'/'z' permutation) as a 3-character string, since
 // std::array<char, 3> has no automatic boost::python converter.
-std::string pixelGridIdFillOrder(const PixelGridComponent &self) {
-  return std::string(self.idFillOrder.begin(), self.idFillOrder.end());
+std::string pixelGridIdFillOrder(ComponentInfo const &self, size_t const componentIndex) {
+  auto const order = self.pixelGridComponent(componentIndex).idFillOrder;
+  return std::string(order.begin(), order.end());
 }
 
 dict shapeToComponentIndices(const ComponentInfo &componentInfo) {
@@ -85,24 +94,6 @@ void export_ComponentInfo() {
       .value("Unstructured", ComponentType::Unstructured)
       .value("Detector", ComponentType::Detector)
       .value("OutlineComposite", ComponentType::OutlineComposite);
-
-  class_<PixelGridComponent>("PixelGridComponent")
-
-      .def_readonly("nX", &PixelGridComponent::nX)
-      .def_readonly("nY", &PixelGridComponent::nY)
-      .def_readonly("nZ", &PixelGridComponent::nZ)
-      .def_readonly("xStart", &PixelGridComponent::xStart)
-      .def_readonly("yStart", &PixelGridComponent::yStart)
-      .def_readonly("zStart", &PixelGridComponent::zStart)
-      .def_readonly("xStep", &PixelGridComponent::xStep)
-      .def_readonly("yStep", &PixelGridComponent::yStep)
-      .def_readonly("zStep", &PixelGridComponent::zStep)
-      .def_readonly("idStart", &PixelGridComponent::idStart)
-      .def_readonly("idStep", &PixelGridComponent::idStep)
-      .def_readonly("idStepByRow", &PixelGridComponent::idStepByRow)
-      .def_readonly("minDetectorID", &PixelGridComponent::minDetectorID)
-      .def_readonly("maxDetectorID", &PixelGridComponent::maxDetectorID)
-      .add_property("idFillOrder", &pixelGridIdFillOrder);
 
   class_<ComponentInfo, boost::noncopyable>("ComponentInfo", no_init)
 
@@ -206,10 +197,83 @@ void export_ComponentInfo() {
       .def("componentType", &ComponentInfo::componentType, (arg("self"), arg("index")),
            "Returns the ComponentType of the component identified by 'index'.")
 
-      .def("pixelGridComponent", &ComponentInfo::pixelGridComponent, (arg("self"), arg("index")),
-           "Returns the PixelGridComponent (pixel counts, detector-ID numbering scheme) "
-           "of the Rectangular/Grid bank identified by 'index'. Raises RuntimeError if "
-           "the component is not a Rectangular or Grid bank.")
+      .def("isGridDetector", &ComponentInfo::isGridDetector, (arg("self"), arg("index")),
+           "Returns True if the component identified by 'index' is a Rectangular or Grid "
+           "bank. Every pixelGrid* accessor requires this to be True.")
+
+      .def("pixelGridNX", &pixelGridField<&PixelGridComponent::nX>, (arg("self"), arg("index")),
+           "Returns the number of pixels in the X (horizontal) direction of the "
+           "Rectangular/Grid bank identified by 'index'. Raises RuntimeError if the "
+           "component is not a Rectangular or Grid bank.")
+
+      .def("pixelGridNY", &pixelGridField<&PixelGridComponent::nY>, (arg("self"), arg("index")),
+           "Returns the number of pixels in the Y (vertical) direction of the "
+           "Rectangular/Grid bank identified by 'index'. Raises RuntimeError if the "
+           "component is not a Rectangular or Grid bank.")
+
+      .def("pixelGridNZ", &pixelGridField<&PixelGridComponent::nZ>, (arg("self"), arg("index")),
+           "Returns the number of pixels in the Z (usually beam) direction of the "
+           "Rectangular/Grid bank identified by 'index', or 0 for a 2D (rectangular) "
+           "bank. Raises RuntimeError if the component is not a Rectangular or Grid bank.")
+
+      .def("pixelGridXStart", &pixelGridField<&PixelGridComponent::xStart>, (arg("self"), arg("index")),
+           "Returns the X position of pixel (0, 0, 0), in the local (unrotated, unscaled) "
+           "frame of the Rectangular/Grid bank identified by 'index'. Raises RuntimeError "
+           "if the component is not a Rectangular or Grid bank.")
+
+      .def("pixelGridYStart", &pixelGridField<&PixelGridComponent::yStart>, (arg("self"), arg("index")),
+           "Returns the Y position of pixel (0, 0, 0), in the local (unrotated, unscaled) "
+           "frame of the Rectangular/Grid bank identified by 'index'. Raises RuntimeError "
+           "if the component is not a Rectangular or Grid bank.")
+
+      .def("pixelGridZStart", &pixelGridField<&PixelGridComponent::zStart>, (arg("self"), arg("index")),
+           "Returns the Z position of pixel (0, 0, 0), in the local (unrotated, unscaled) "
+           "frame of the Rectangular/Grid bank identified by 'index'. Raises RuntimeError "
+           "if the component is not a Rectangular or Grid bank.")
+
+      .def("pixelGridXStep", &pixelGridField<&PixelGridComponent::xStep>, (arg("self"), arg("index")),
+           "Returns the step size between neighbouring pixels along X for the "
+           "Rectangular/Grid bank identified by 'index'. Raises RuntimeError if the "
+           "component is not a Rectangular or Grid bank.")
+
+      .def("pixelGridYStep", &pixelGridField<&PixelGridComponent::yStep>, (arg("self"), arg("index")),
+           "Returns the step size between neighbouring pixels along Y for the "
+           "Rectangular/Grid bank identified by 'index'. Raises RuntimeError if the "
+           "component is not a Rectangular or Grid bank.")
+
+      .def("pixelGridZStep", &pixelGridField<&PixelGridComponent::zStep>, (arg("self"), arg("index")),
+           "Returns the step size between neighbouring pixels along Z for the "
+           "Rectangular/Grid bank identified by 'index'. Raises RuntimeError if the "
+           "component is not a Rectangular or Grid bank.")
+
+      .def("pixelGridIdStart", &pixelGridField<&PixelGridComponent::idStart>, (arg("self"), arg("index")),
+           "Returns the detector ID of the first pixel of the Rectangular/Grid bank "
+           "identified by 'index'. Raises RuntimeError if the component is not a "
+           "Rectangular or Grid bank.")
+
+      .def("pixelGridIdStep", &pixelGridField<&PixelGridComponent::idStep>, (arg("self"), arg("index")),
+           "Returns the detector ID step between pixels along the first-filled axis of "
+           "the Rectangular/Grid bank identified by 'index'. Raises RuntimeError if the "
+           "component is not a Rectangular or Grid bank.")
+
+      .def("pixelGridIdStepByRow", &pixelGridField<&PixelGridComponent::idStepByRow>, (arg("self"), arg("index")),
+           "Returns the detector ID step between rows along the second-filled axis of "
+           "the Rectangular/Grid bank identified by 'index'. Raises RuntimeError if the "
+           "component is not a Rectangular or Grid bank.")
+
+      .def("pixelGridMinDetectorID", &pixelGridField<&PixelGridComponent::minDetectorID>, (arg("self"), arg("index")),
+           "Returns the minimum detector ID in the Rectangular/Grid bank identified by "
+           "'index'. Raises RuntimeError if the component is not a Rectangular or Grid bank.")
+
+      .def("pixelGridMaxDetectorID", &pixelGridField<&PixelGridComponent::maxDetectorID>, (arg("self"), arg("index")),
+           "Returns the maximum detector ID in the Rectangular/Grid bank identified by "
+           "'index'. Raises RuntimeError if the component is not a Rectangular or Grid bank.")
+
+      .def("pixelGridIdFillOrder", &pixelGridIdFillOrder, (arg("self"), arg("index")),
+           "Returns the axis order in which detector IDs are filled for the "
+           "Rectangular/Grid bank identified by 'index', as a 3-character string "
+           "permutation of 'x', 'y' and 'z'. Raises RuntimeError if the component is not "
+           "a Rectangular or Grid bank.")
 
       .def("detectorIndexAtXYZ", &ComponentInfo::detectorIndexAtXYZ,
            (arg("self"), arg("index"), arg("x"), arg("y"), arg("z")),
