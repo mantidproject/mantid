@@ -60,24 +60,24 @@ Agents can run both unit and system tests for Python and C++ changes.
   - GUI changes usually need the relevant model, presenter, widget, or workflow tests.
 - If the build environment is unavailable, state which tests should be run and why they were not run.
 - If a test is changed to make it pass, explicitly explain why the changed expectation is valid.
-- Unit test standards are documented in [Unit Test Standards](dev-docs/source/Standards/UnitTestStandards.rst).
-- Coding standards are documented in [Mantid Standards](dev-docs/source/Standards/index.rst).
+- Unit test standards are documented in @dev-docs/source/Standards/UnitTestStandards.rst.
+- Coding standards are documented in @dev-docs/source/Standards/index.rst.
 - Prefer targeted formatting or static checks for touched files first; run broader checks such as `pre-commit run --all-files` when practical.
 
 # Documentation
 
-- User documentation lives in [docs](docs/).
-- Developer documentation lives in [dev-docs](dev-docs/).
-- New Mantid algorithms must include user-facing algorithm documentation under [docs/source/algorithms](docs/source/algorithms/).
-- Algorithm documentation requirements are described in [Algorithm Documentation](dev-docs/source/Standards/AlgorithmDocumentation.rst).
-- General documentation guidance is in [Documentation Guide For Devs](dev-docs/source/Standards/DocumentationGuideForDevs.rst).
+- User documentation lives in @docs/ (site: https://docs.mantidproject.org).
+- Developer documentation lives in @dev-docs/ (site: https://developer.mantidproject.org).
+- New Mantid algorithms must include user-facing algorithm documentation under @docs/source/algorithms/.
+- Algorithm documentation requirements are described in @dev-docs/source/Standards/AlgorithmDocumentation.rst.
+- General documentation guidance is in @dev-docs/source/Standards/DocumentationGuideForDevs.rst.
 - For algorithm behavior or property changes, update both code-level summaries/property descriptions and the relevant `.rst` documentation.
 - For GUI or workflow changes, update user documentation when users need to understand new or changed behavior.
 
 # Release notes
 
-- Release notes live under [docs/source/release](docs/source/release/).
-- Follow the [Release Notes Guide](dev-docs/source/Standards/ReleaseNotesGuide.rst).
+- Release notes live under @docs/source/release/.
+- Follow the @dev-docs/source/Standards/ReleaseNotesGuide.rst.
 - Every user-facing change must include a release note unless the guide clearly says one is not required.
 - Add release notes to the next release directory, using the relevant `New_features` or `Bugfixes` subdirectory.
 - Write release notes for scientific users, not developers.
@@ -87,7 +87,7 @@ Agents can run both unit and system tests for Python and C++ changes.
 
 - Run `clang-tidy` using the configuration in `.clang-tidy` where relevant.
 - Format using `pre-commit run --all-files`.
-- Follow the PR template in [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md).
+- Follow the PR template in @.github/PULL_REQUEST_TEMPLATE.md.
 - Ensure relevant tests, docs, and release notes are included before review.
 - Do not include generated build or documentation outputs unless the project explicitly requires them.
 
