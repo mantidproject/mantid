@@ -167,6 +167,11 @@ public:
       auto v = descriptor.getEntryValue<int>("/entry/duration");
       TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::NXWRONG_TYPE)
     }
+    {
+      auto v = descriptor.getEntryValue<int>("/entry/total_counts");
+      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::NXFOUND)
+      TS_ASSERT_EQUALS(v.first, 14553)
+    }
   }
 
   void test_threadSafety() {
