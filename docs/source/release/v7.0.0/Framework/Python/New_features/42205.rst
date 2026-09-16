@@ -1,0 +1,1 @@
+- Grid spacing and step for rectangular/grid arrays can now be accessed from ComponentInfo, using the `pixelGridComponent` method.
