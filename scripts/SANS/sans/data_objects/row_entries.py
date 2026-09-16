@@ -112,12 +112,11 @@ class RowOptionsModel(object):
         self._developer_options[key] = value
 
     def get_displayed_text(self):
-        output = self._user_options + "," if self._user_options else ""
-        for k, v in self._developer_options.items():
-            output += k + "=" + str(v) + ", "
-
-        output = output.removesuffix(", ")
-        return output
+        # Strip trailing commas so re-reading the displayed text does not add a comma every time
+        user_options = self._user_options.strip().rstrip(",") if self._user_options else ""
+        parts = [user_options] if user_options else []
+        parts.extend(k + "=" + str(v) for k, v in self._developer_options.items())
+        return ", ".join(parts)
 
     def get_options_dict(self):
         """
