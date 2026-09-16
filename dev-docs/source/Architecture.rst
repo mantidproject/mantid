@@ -138,7 +138,7 @@ multiple interfaces/applications when displaying ``mantid`` features to users.
 The package contains basic widgets, such as the aforementioned ``filefinder``,
 but also more advanced widgets such as
 :ref:`slice viewer <sliceviewer>` and
-the OpenGL-based :ref:`instrument viewer <InstrumentViewer>`,
+the OpenGL-based :ref:`legacy instrument viewer <LegacyInstrumentViewer>`,
 which combine many features of the framework together to provide advanced
 visualization to users.
 

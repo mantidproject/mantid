@@ -1,0 +1,1 @@
+- In the new Instrument View, fixed a bug where the rubber band zoom box was not visible while dragging, following an update to a third-party rendering dependency. The zoom itself was unaffected.

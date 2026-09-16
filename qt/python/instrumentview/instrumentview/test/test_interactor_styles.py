@@ -1,4 +1,9 @@
-from instrumentview.InteractorStyles import CursorZoomInteractorStyle, SwappedButtonTrackballCamera, _display_to_world
+from instrumentview.InteractorStyles import (
+    CursorZoomInteractorStyle,
+    RubberBandZoomInteractorStyle,
+    SwappedButtonTrackballCamera,
+    _display_to_world,
+)
 import unittest
 from unittest import mock
 
@@ -130,6 +135,45 @@ class TestCursorZoomInteractorStyle(unittest.TestCase):
         self.assertEqual(plotter.renderer.camera.position, [7, 8, 9])
         self.assertAlmostEqual(plotter.renderer.camera.parallel_scale, 5.0)
 
+    def test_zoom_notifies_camera_changed(self):
+        style, plotter = self._create_style(parallel_scale=1.0)
+        callback = mock.MagicMock()
+        style.set_camera_changed_callback(callback)
+        style._cursor_world_pos = np.array([0.0, 0.0, 0.0])
+        with mock.patch("instrumentview.InteractorStyles._display_to_world", return_value=np.array([0.0, 0.0, 0.0])):
+            style._zoom(style.zoom_factor)
+        callback.assert_called_once()
+
+    def test_zoom_out_past_default_notifies_camera_changed_only_once(self):
+        style, plotter = self._create_style(position=(0, 0, 1), focal_point=(0, 0, 0), parallel_scale=1.0)
+        plotter.renderer.camera.parallel_scale = 0.9
+        callback = mock.MagicMock()
+        style.set_camera_changed_callback(callback)
+        style._cursor_world_pos = np.array([0.0, 0.0, 0.0])
+        with mock.patch("instrumentview.InteractorStyles._display_to_world", return_value=np.array([0.0, 0.0, 0.0])):
+            style._zoom(1.0 / style.zoom_factor)
+        callback.assert_called_once()
+
+    def test_zoom_does_not_notify_camera_changed_when_no_cursor_pos(self):
+        style, plotter = self._create_style()
+        callback = mock.MagicMock()
+        style.set_camera_changed_callback(callback)
+        style._cursor_world_pos = None
+        style._zoom(1.1)
+        callback.assert_not_called()
+
+    def test_reset_camera_and_notify_notifies_camera_changed(self):
+        style, plotter = self._create_style()
+        callback = mock.MagicMock()
+        style.set_camera_changed_callback(callback)
+        style._reset_camera_and_notify()
+        callback.assert_called_once()
+
+    def test_camera_changed_callback_exceptions_do_not_escape_into_vtk(self):
+        style, plotter = self._create_style()
+        style.set_camera_changed_callback(mock.MagicMock(side_effect=RuntimeError("boom")))
+        style._notify_camera_changed()
+
     def test_wheel_forward_calls_zoom_in(self):
         style, plotter = self._create_style()
         with mock.patch.object(style, "_zoom") as zoom_mock:
@@ -164,6 +208,150 @@ class TestDisplayToWorld(unittest.TestCase):
         result = _display_to_world(renderer, 50, 50)
         # z component should always be 0
         self.assertAlmostEqual(result[2], 0.0)
+
+
+class TestRubberBandZoomInteractorStyle(unittest.TestCase):
+    def _create_style(self, **plotter_kwargs):
+        plotter = _make_mock_plotter(**plotter_kwargs)
+        style = RubberBandZoomInteractorStyle(plotter)
+        return style, plotter
+
+    def _create_style_with_super_spy(self, **plotter_kwargs):
+        parent_calls = []
+
+        class _RubberBandZoomSuperSpy(RubberBandZoomInteractorStyle.__bases__[0]):
+            def OnLeftButtonDown(self):
+                parent_calls.append("left-down")
+
+            def OnMouseMove(self):
+                parent_calls.append("mouse-move")
+
+            def OnLeftButtonUp(self):
+                parent_calls.append("left-up")
+
+        class _RubberBandZoomStyleSpy(RubberBandZoomInteractorStyle, _RubberBandZoomSuperSpy):
+            pass
+
+        plotter = _make_mock_plotter(**plotter_kwargs)
+        style = _RubberBandZoomStyleSpy(plotter)
+        return style, plotter, parent_calls
+
+    def test_set_picking_callback_stores_callback(self):
+        style, _ = self._create_style()
+        callback = mock.MagicMock()
+
+        style.set_picking_callback(callback)
+
+        self.assertIs(style._picking_callback, callback)
+
+    def test_left_press_calls_picking_callback_when_modifier_pressed(self):
+        style, _ = self._create_style()
+        callback = mock.MagicMock()
+        style.set_picking_callback(callback)
+
+        with mock.patch.object(style, "_modifier_key_pressed", return_value=True):
+            style._on_left_button_press_event("obj", "event")
+
+        callback.assert_called_once_with("obj", "event")
+        self.assertTrue(style._ignore_rubberband_interaction)
+
+    def test_left_press_with_modifier_and_no_callback_does_not_raise(self):
+        style, _ = self._create_style()
+
+        with mock.patch.object(style, "_modifier_key_pressed", return_value=True):
+            style._on_left_button_press_event("obj", "event")
+
+        self.assertTrue(style._ignore_rubberband_interaction)
+
+    def test_left_press_without_modifier_delegates_to_rubberband_zoom(self):
+        style, _, parent_calls = self._create_style_with_super_spy()
+
+        with mock.patch.object(style, "_modifier_key_pressed", return_value=False):
+            style._on_left_button_press_event("obj", "event")
+
+        self.assertEqual(parent_calls, ["left-down"])
+        self.assertFalse(style._ignore_rubberband_interaction)
+
+    def test_mouse_move_without_ignore_delegates_to_rubberband_zoom(self):
+        style, _, parent_calls = self._create_style_with_super_spy()
+
+        style._on_mouse_move_event("obj", "event")
+
+        self.assertEqual(parent_calls, ["mouse-move"])
+
+    def test_left_button_release_without_ignore_delegates_to_rubberband_zoom(self):
+        style, _, parent_calls = self._create_style_with_super_spy()
+
+        style._on_left_button_release_event("obj", "event")
+
+        self.assertEqual(parent_calls, ["left-up"])
+        self.assertFalse(style._ignore_rubberband_interaction)
+
+    def test_left_button_release_clears_ignore_state(self):
+        style, _ = self._create_style()
+        style._ignore_rubberband_interaction = True
+
+        style._on_left_button_release_event(None, None)
+
+        self.assertFalse(style._ignore_rubberband_interaction)
+
+    def test_rubber_band_actor_added_to_renderer(self):
+        style, plotter = self._create_style()
+        plotter.renderer.AddActor2D.assert_called_once_with(style._rubber_band_actor)
+
+    def test_left_press_without_modifier_shows_rubber_band_at_click_position(self):
+        style, _, _ = self._create_style_with_super_spy()
+
+        with mock.patch.object(style, "_modifier_key_pressed", return_value=False):
+            with mock.patch.object(style, "_event_position", return_value=(10, 20)):
+                style._on_left_button_press_event("obj", "event")
+
+        self.assertTrue(style._rubber_band_actor.GetVisibility())
+        self.assertEqual(style._rubber_band_start, (10, 20))
+        assert_array_almost_equal(style._rubber_band_poly.points[0], [10, 20, 0])
+
+    def test_left_press_with_modifier_does_not_show_rubber_band(self):
+        style, _ = self._create_style()
+
+        with mock.patch.object(style, "_modifier_key_pressed", return_value=True):
+            style._on_left_button_press_event("obj", "event")
+
+        self.assertFalse(style._rubber_band_actor.GetVisibility())
+        self.assertIsNone(style._rubber_band_start)
+
+    def test_mouse_move_updates_rubber_band_points_and_renders(self):
+        style, _, _ = self._create_style_with_super_spy()
+        style._rubber_band_start = (10, 20)
+
+        with mock.patch.object(style, "_event_position", return_value=(30, 40)):
+            style._on_mouse_move_event("obj", "event")
+
+        assert_array_almost_equal(style._rubber_band_poly.points[0], [10, 20, 0])
+        assert_array_almost_equal(style._rubber_band_poly.points[1], [30, 20, 0])
+        assert_array_almost_equal(style._rubber_band_poly.points[2], [30, 40, 0])
+        assert_array_almost_equal(style._rubber_band_poly.points[3], [10, 40, 0])
+
+    def test_left_button_release_hides_rubber_band_and_renders(self):
+        style, plotter, _ = self._create_style_with_super_spy()
+        style._rubber_band_start = (10, 20)
+        style._rubber_band_actor.SetVisibility(True)
+
+        style._on_left_button_release_event("obj", "event")
+
+        self.assertFalse(style._rubber_band_actor.GetVisibility())
+        self.assertIsNone(style._rubber_band_start)
+        plotter.render_window.Render.assert_called_once()
+
+    def test_left_button_release_with_modifier_leaves_rubber_band_untouched(self):
+        style, _ = self._create_style()
+        style._ignore_rubberband_interaction = True
+        style._rubber_band_start = (10, 20)
+        style._rubber_band_actor.SetVisibility(True)
+
+        style._on_left_button_release_event(None, None)
+
+        self.assertTrue(style._rubber_band_actor.GetVisibility())
+        self.assertEqual(style._rubber_band_start, (10, 20))
 
 
 class TestSwappedButtonTrackballCamera(unittest.TestCase):

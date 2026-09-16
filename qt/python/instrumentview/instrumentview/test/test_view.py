@@ -53,10 +53,19 @@ class TestFullInstrumentViewView(unittest.TestCase):
         self.assertEqual(self._view._select_bank_tube.text(), "Select Bank/Tube")
         self.assertTrue(self._view._select_bank_tube.isCheckable())
 
+    def test_select_peaks_button_is_checkable(self):
+        self.assertEqual(self._view._select_peaks.text(), "Select Peaks")
+        self.assertTrue(self._view._select_peaks.isCheckable())
+
     def test_is_select_bank_tube_checked(self):
         self.assertFalse(self._view.is_select_bank_tube_checked())
         self._view._select_bank_tube.setChecked(True)
         self.assertTrue(self._view.is_select_bank_tube_checked())
+
+    def test_is_select_peaks_checked(self):
+        self.assertFalse(self._view.is_select_peaks_checked())
+        self._view._select_peaks.setChecked(True)
+        self.assertTrue(self._view.is_select_peaks_checked())
 
     def test_figure_canvas_created(self):
         self._mock_figure_canvas.assert_called_once()
@@ -75,6 +84,20 @@ class TestFullInstrumentViewView(unittest.TestCase):
     def test_update_scalar_range(self):
         self._view.set_plotter_scalar_bar_range((0, 100), "label")
         self._view.main_plotter.update_scalar_bar_range.assert_has_calls([mock.call((0, 100), "label")])
+
+    def test_run_on_main_thread_calls_through(self):
+        func = MagicMock(return_value="result")
+        self.assertEqual(self._view.run_on_main_thread(func, 1, kw=2), "result")
+        func.assert_called_once_with(1, kw=2)
+
+    def test_run_on_main_thread_skipped_while_closing(self):
+        func = MagicMock()
+        self._view._closing = True
+        try:
+            self.assertIsNone(self._view.run_on_main_thread(func))
+            func.assert_not_called()
+        finally:
+            self._view._closing = False
 
     def test_add_simple_shape(self):
         self._view.main_plotter.reset_mock()
@@ -203,6 +226,14 @@ class TestFullInstrumentViewView(unittest.TestCase):
         self._view.add_hollow_rectangle_widget()
         self.assertIsNotNone(self._view._shape_overlay_manager)
         self.assertIsInstance(self._view._shape_overlay_manager.current_shape, HollowRectangleSelectionShape)
+
+    def test_adding_a_shape_registers_the_live_line_plot_callback(self) -> None:
+        self._view.add_circle_widget()
+        self.assertEqual(self._view._shape_overlay_manager._on_shape_changed, self._view._presenter.on_shape_changed)
+
+    def test_adding_a_shape_plots_the_spectra_it_covers_straight_away(self) -> None:
+        self._view.add_circle_widget()
+        self._view._presenter.on_shape_changed.assert_called_once()
 
     def test_add_selected_shape_uses_dropdown_choice(self) -> None:
         self._view._shape_selector_combo_box.setCurrentText("Ellipse")
@@ -414,6 +445,30 @@ class TestFullInstrumentViewView(unittest.TestCase):
         det.detector_id = 42
         self._view._set_detector_edit_text(mock_edit, [det], lambda d: str(d.detector_id))
         mock_edit.setPlainText.assert_called_once_with("42")
+
+    def test_create_from_selection_buttons_exist_on_both_tabs(self):
+        for button in (self._view._create_selection_from_picked, self._view._create_mask_from_picked):
+            self.assertEqual(button.text(), "Create From Current Selection")
+
+    def test_set_create_from_selection_buttons_enabled(self):
+        self._view.set_create_from_selection_buttons_enabled(True)
+        self.assertTrue(self._view._create_selection_from_picked.isEnabled())
+        self.assertTrue(self._view._create_mask_from_picked.isEnabled())
+
+        self._view.set_create_from_selection_buttons_enabled(False)
+        self.assertFalse(self._view._create_selection_from_picked.isEnabled())
+        self.assertFalse(self._view._create_mask_from_picked.isEnabled())
+
+    def test_create_from_selection_buttons_notify_presenter(self):
+        self._view.setup_connections_to_presenter()
+        # Connecting leaves them disabled until the presenter reports a selection
+        self.assertFalse(self._view._create_selection_from_picked.isEnabled())
+        self._view.set_create_from_selection_buttons_enabled(True)
+
+        self._view._create_selection_from_picked.click()
+        self._view._create_mask_from_picked.click()
+
+        self.assertEqual(self._view._presenter.on_create_item_from_selection_clicked.call_count, 2)
 
     def test_on_show_monitors_toggled_sets_presenter_color_when_checked(self):
         self._view._presenter.monitor_colour = (230, 55, 55)
