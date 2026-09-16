@@ -79,7 +79,7 @@ shapes
 described in the XML instrument definition file.
 
 This class is now also use elsewhere, and in addition to create geometric shapes
-from an DOM-element-node pointing to a \<type> element with shape information,
+from an DOM-element-node pointing to a \<type\> element with shape information,
 shapes
 can also be created directly from a XML shape string.
 
@@ -94,7 +94,21 @@ public:
   static std::shared_ptr<CSGObject> createSphere(const Kernel::V3D &centre, double radius);
   static std::shared_ptr<CSGObject> createHexahedralShape(double xlb, double xlf, double xrf, double xrb, double ylb,
                                                           double ylf, double yrf, double yrb);
+  /// Replace or insert the \<goniometer\> tag, the TOTAL rotation applied to the shape's surfaces.
+  /// Leaves any \<applied-goniometer\> tag untouched.
   std::string addGoniometerTag(const Kernel::Matrix<double> &rotateMatrix, std::string xml);
+  /// Replace or insert the \<applied-goniometer\> tag, recording how much of \<goniometer\> is a
+  /// bake into the lab frame rather than a rotation of the shape within its own frame.
+  std::string addAppliedGoniometerTag(const Kernel::Matrix<double> &bakedRotation, std::string xml);
+  /// Rebase the shape so the baked part becomes exactly newBake, preserving the definition-frame
+  /// rotation. currentBake is what the shape reports through getAppliedRotation today.
+  std::string rebakeGoniometer(const Kernel::Matrix<double> &newBake, std::string xml,
+                               const Kernel::Matrix<double> &currentBake);
+  /// The total rotation held in a shape XML string's \<goniometer\> tag, identity if there is none.
+  static Kernel::Matrix<double> goniometerFromXML(const std::string &xml);
+  /// The baked part of a shape XML string's rotation - what a shape built from this XML reports
+  /// through getAppliedRotation. Suitable as rebakeGoniometer's currentBake.
+  static Kernel::Matrix<double> appliedGoniometerFromXML(const std::string &xml);
   static Kernel::Matrix<double> generateMatrix(double xRotation, double yRotation, double zRotation);
   static Kernel::Matrix<double> generateXRotation(double xRotation);
   static Kernel::Matrix<double> generateYRotation(double yRotation);
@@ -128,6 +142,8 @@ private:
   double getDoubleAttribute(Poco::XML::Element *pElem, const std::string &name);
   Kernel::V3D parsePosition(Poco::XML::Element *pElem);
   void createGeometryHandler(Poco::XML::Element *, const std::shared_ptr<CSGObject> &);
+  static std::string insertMatrixTag(const std::string &tagName, const Kernel::Matrix<double> &matrix, std::string xml);
+  Kernel::Matrix<double> parseMatrixElement(Poco::XML::Element *pElem);
 
   Kernel::Matrix<double> m_gonioRotateMatrix = Kernel::Matrix<double>(3, 3, 1);
   Kernel::Matrix<double> m_rotateAllMatrix = Kernel::Matrix<double>(3, 3, 1);

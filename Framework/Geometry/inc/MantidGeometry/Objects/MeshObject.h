@@ -64,9 +64,12 @@ public:
   /// Destructor
   ~MeshObject() override = default;
   /// Clone
-  IObject *clone() const override { return new MeshObject(m_triangles, m_vertices, m_material); }
+  IObject *clone() const override { return cloneWithMaterial(m_material); }
   IObject *cloneWithMaterial(const Kernel::Material &material) const override {
-    return new MeshObject(m_triangles, m_vertices, material);
+    auto *copy = new MeshObject(m_triangles, m_vertices, material);
+    // the copied vertices are already turned, so the copy is baked just as far as this mesh is
+    copy->m_appliedRotation = m_appliedRotation;
+    return copy;
   }
 
   void setID(const std::string &id) override { m_id = id; }
@@ -135,7 +138,13 @@ public:
   size_t numberOfTriangles() const;
   const std::vector<uint32_t> &getTriangles() const;
 
+  /// Rotate the vertices within the shape's own frame, leaving getAppliedRotation() unchanged.
   void rotate(const Kernel::Matrix<double> &);
+  /// Rotate the vertices and record it as a goniometer bake - only for a move into the lab frame.
+  void bakeGoniometerRotation(const Kernel::Matrix<double> &);
+  /// Record a bake without touching the vertices, for when they are already rotated - Nexus load.
+  void setAppliedGoniometerRotation(const Kernel::Matrix<double> &);
+  const Kernel::Matrix<double> &getAppliedRotation() const override { return m_appliedRotation; }
   void translate(const Kernel::V3D &);
   void multiply(const Kernel::Matrix<double> &);
   void scale(const double scaleFactor);
@@ -185,6 +194,8 @@ private:
   std::vector<Kernel::V3D> m_vertices;
   /// material composition
   Kernel::Material m_material;
+  /// How far the mesh has been baked out of the frame its vertices were defined in
+  Kernel::Matrix<double> m_appliedRotation{3, 3, true};
 };
 
 } // NAMESPACE Geometry
