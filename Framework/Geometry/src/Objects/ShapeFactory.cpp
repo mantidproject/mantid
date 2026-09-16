@@ -137,8 +137,8 @@ std::shared_ptr<CSGObject> ShapeFactory::createShape(Poco::XML::Element *pElem) 
     m_gonioRotateMatrix = parseMatrixElement(pElemGonio);
   }
 
-  // <applied-goniometer> says how much of that total is a bake into the lab frame. Pure metadata:
-  // it rotates nothing, and is the only account of which frame the parsed surfaces ended up in.
+  // <applied-goniometer> says how much of that total is a bake into the lab frame. Pure metadata -
+  // it rotates nothing - and the only account of which frame the parsed surfaces ended up in.
   Poco::AutoPtr<NodeList> pNL_applied = pElem->getElementsByTagName("applied-goniometer");
   auto *pElemApplied = static_cast<Element *>(pNL_applied->item(0));
   Kernel::Matrix<double> bakedRotation(3, 3, true);
@@ -1668,6 +1668,7 @@ Kernel::Matrix<double> ShapeFactory::parseMatrixElement(Poco::XML::Element *pEle
 /// angle brackets.
 std::string ShapeFactory::insertMatrixTag(const std::string &tagName, const Kernel::Matrix<double> &matrix,
                                           std::string xml) {
+  // Keeping the '<' attached is what stops "goniometer" matching inside "<applied-goniometer".
   const std::string openTag = "<" + tagName;
 
   // Delete any previous tag of this name. The closing bracket is part of the tag, so erase it too -
@@ -1675,24 +1676,18 @@ std::string ShapeFactory::insertMatrixTag(const std::string &tagName, const Kern
   // XML and so goes unnoticed until the tags are rewritten repeatedly.
   const std::size_t foundTag = xml.find(openTag);
   if (foundTag != std::string::npos) {
-    const std::size_t tagLength = xml.find(">", foundTag + 1) - foundTag + 1;
-    xml.erase(foundTag, tagLength);
+    xml.erase(foundTag, xml.find(">", foundTag + 1) - foundTag + 1);
   }
 
   // Insert before the innermost enclosing end tag, or at the end if there is none
-  std::size_t tagPlace;
-  const std::size_t foundType = xml.find("</type>");
-  const std::size_t foundSampleGeometry = xml.find("</samplegeometry");
-
-  if (foundType != std::string::npos) {
-    tagPlace = foundType;
-  } else if (foundSampleGeometry != std::string::npos) {
-    tagPlace = foundSampleGeometry;
-  } else {
+  std::size_t tagPlace = xml.find("</type>");
+  if (tagPlace == std::string::npos) {
+    tagPlace = xml.find("</samplegeometry");
+  }
+  if (tagPlace == std::string::npos) {
     tagPlace = xml.size();
   }
 
-  const std::vector<std::string> matrixElementNames = {"a11", "a12", "a13", "a21", "a22", "a23", "a31", "a32", "a33"};
   // Full precision: these matrices are now composed rather than overwritten, so rounding here
   // accumulates over repeated CopySample and RotateSampleShape calls.
   std::ostringstream tag;
@@ -1700,7 +1695,7 @@ std::string ShapeFactory::insertMatrixTag(const std::string &tagName, const Kern
   tag << " " << openTag << " ";
   for (size_t i = 0; i < matrix.numRows(); ++i) {
     for (size_t j = 0; j < matrix.numCols(); ++j) {
-      tag << matrixElementNames[3 * i + j] << " = '" << matrix[i][j] << "' ";
+      tag << "a" << i + 1 << j + 1 << " = '" << matrix[i][j] << "' ";
     }
   }
   tag << "/>";
@@ -1710,7 +1705,6 @@ std::string ShapeFactory::insertMatrixTag(const std::string &tagName, const Kern
 }
 
 std::string ShapeFactory::addGoniometerTag(const Kernel::Matrix<double> &rotateMatrix, std::string xml) {
-  // The leading '<' is what keeps this from matching inside "<applied-goniometer".
   return insertMatrixTag("goniometer", rotateMatrix, std::move(xml));
 }
 
@@ -1719,41 +1713,32 @@ std::string ShapeFactory::addAppliedGoniometerTag(const Kernel::Matrix<double> &
 }
 
 namespace {
-/// The matrix held in the named tag of a shape XML string, or nullopt when the tag is absent. The
-/// name is matched with its opening '<' attached, so "goniometer" cannot match "applied-goniometer".
+/// The matrix held in the named tag of a shape XML string, or nullopt when the tag is absent.
+/// Attributes missing or malformed are left at their identity value.
 std::optional<Kernel::Matrix<double>> matrixFromXMLTag(const std::string &xml, const std::string &tagName) {
-  Kernel::Matrix<double> total(3, 3, true);
+  constexpr auto npos = std::string::npos;
   const std::size_t foundTag = xml.find("<" + tagName);
-  if (foundTag == std::string::npos) {
+  if (foundTag == npos) {
     return std::nullopt;
   }
-  const std::size_t tagEnd = xml.find(">", foundTag + 1);
-  const std::string tag = xml.substr(foundTag, tagEnd - foundTag);
+  const std::string tag = xml.substr(foundTag, xml.find(">", foundTag + 1) - foundTag);
+
+  Kernel::Matrix<double> matrix(3, 3, true);
   for (size_t i = 0; i < 3; ++i) {
     for (size_t j = 0; j < 3; ++j) {
       const std::string name = "a" + std::to_string(i + 1) + std::to_string(j + 1);
       const std::size_t attr = tag.find(name);
-      if (attr == std::string::npos) {
-        continue;
-      }
+      const std::size_t equals = attr == npos ? npos : tag.find("=", attr + name.size());
       // Either quote character: written here with single quotes, but createShape sends the XML back
       // through Poco's writer, whose quoting style is not ours to assume.
-      const std::size_t equals = tag.find("=", attr + name.size());
-      if (equals == std::string::npos) {
-        continue;
+      const std::size_t open = equals == npos ? npos : tag.find_first_of("'\"", equals);
+      const std::size_t close = open == npos ? npos : tag.find(tag[open], open + 1);
+      if (close != npos) {
+        matrix[i][j] = std::stod(tag.substr(open + 1, close - open - 1));
       }
-      const std::size_t open = tag.find_first_of("'\"", equals);
-      if (open == std::string::npos) {
-        continue;
-      }
-      const std::size_t close = tag.find(tag[open], open + 1);
-      if (close == std::string::npos) {
-        continue;
-      }
-      total[i][j] = std::stod(tag.substr(open + 1, close - open - 1));
     }
   }
-  return total;
+  return matrix;
 }
 } // namespace
 
@@ -1776,17 +1761,14 @@ std::string ShapeFactory::rebakeGoniometer(const Kernel::Matrix<double> &newBake
                                            const Kernel::Matrix<double> &currentBake) {
   // Strip the old bake off the total, leaving the definition-frame rotation, then put the new bake
   // on the outside of it. These are orthonormal so the transpose is the exact inverse.
+  //
+  // With nothing to preserve the answer is just the new bake. Taking that shortcut is not merely
+  // cheaper but exact: the long way round multiplies by the old bake and its transpose, identity
+  // only to within rounding, and those last bits reorder the rendered mesh's triangles and
+  // accumulate over copies.
   const Kernel::Matrix<double> total = goniometerFromXML(xml);
+  const Kernel::Matrix<double> newTotal = total == currentBake ? newBake : newBake * currentBake.Tprime() * total;
 
-  // With nothing to preserve the answer is just the new bake. Not merely cheaper but exact: the
-  // long way round multiplies by the old bake and its transpose, which is identity only to within
-  // rounding, and those last bits reorder the rendered mesh's triangles and accumulate over copies.
-  if (total == currentBake) {
-    xml = addGoniometerTag(newBake, std::move(xml));
-    return addAppliedGoniometerTag(newBake, std::move(xml));
-  }
-
-  const Kernel::Matrix<double> newTotal = newBake * currentBake.Tprime() * total;
   xml = addGoniometerTag(newTotal, std::move(xml));
   return addAppliedGoniometerTag(newBake, std::move(xml));
 }

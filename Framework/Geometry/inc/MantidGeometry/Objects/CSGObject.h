@@ -77,8 +77,7 @@ public:
   void setID(const std::string &id) override { m_id = id; }
 
   const Kernel::Matrix<double> &getAppliedRotation() const override { return m_appliedRotation; }
-  /// Record the bake in this shape's definition. Record-only - the surfaces are already rotated by
-  /// the time ShapeFactory calls this, which is also how it survives a Nexus round trip.
+  /// Record-only: the surfaces are already rotated by the time ShapeFactory calls this.
   void setAppliedGoniometerRotation(const Kernel::Matrix<double> &rotation) { m_appliedRotation = rotation; }
   const std::string &id() const override { return m_id; }
 

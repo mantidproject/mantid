@@ -48,7 +48,7 @@ std::shared_ptr<IObject> getLabFrameShape(const IObject &shape, const Kernel::Ma
     // Rotating a CSG shape means rewriting its definition, so one assembled surface by surface
     // rather than parsed - ShapeFactory::createSphere and createHexahedralShape both do this - has
     // nothing to rewrite. Rebasing an empty string yields a bare pair of tags that will not parse,
-    // and createShape answers that with an empty shape: silently no sample at all, where the caller
+    // which createShape answers with an empty shape: silently no sample at all, where the caller
     // asked for a rotated one. Unlike the MeshObject2D below this shape could be rotated, so the
     // missing definition is a defect to report rather than a frame to accept.
     if (csgShape->getShapeXML().empty()) {
@@ -58,11 +58,11 @@ std::shared_ptr<IObject> getLabFrameShape(const IObject &shape, const Kernel::Ma
                                   "the sample with SetSample or CreateSampleShape to make it rotatable.");
     }
 
-    // Rebase the XML so the baked part becomes exactly goniometerR, preserving any rotation of the
-    // shape within its own frame, then rebuild. createShape carries over neither the material nor
-    // the id.
-    const auto xml = ShapeFactory().rebakeGoniometer(goniometerR, csgShape->getShapeXML(), shape.getAppliedRotation());
-    auto labShape = ShapeFactory().createShape(xml, false);
+    // Rebase so the baked part becomes exactly goniometerR, preserving any rotation of the shape
+    // within its own frame, then rebuild. createShape carries over neither the material nor the id.
+    ShapeFactory factory;
+    auto labShape = factory.createShape(
+        factory.rebakeGoniometer(goniometerR, csgShape->getShapeXML(), shape.getAppliedRotation()), false);
     labShape->setMaterial(shape.material());
     labShape->setID(shape.id());
     return labShape;
@@ -75,7 +75,6 @@ std::shared_ptr<IObject> getLabFrameShape(const IObject &shape, const Kernel::Ma
   }
 
   // MeshObject2D, the flat plate, is the only shape in the tree with no rotation mechanism at all.
-  // Warn, because the caller asked for a rotation and is not getting one.
   g_log.warning("The sample shape is of a type that cannot be rotated ('" + shape.id() +
                 "'), so it is taken to be defined in the lab frame already and is used unchanged. "
                 "The goniometer rotation on the run has not been applied to it.");

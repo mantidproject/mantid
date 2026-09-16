@@ -167,19 +167,12 @@ public:
     const auto original = meshShape->getV3Ds();
 
     const auto labShape = getLabFrameShape(*meshShape, rotation);
+
     assertMatrixEquals(labShape->getAppliedRotation(), rotation);
     assertVerticesRotatedBy(labShape, original, rotation);
-  }
-
-  void test_lab_frame_mesh_shape_leaves_the_source_untouched() {
-    const auto rotation = rotationZ(90.0);
-    const auto meshShape = createCube(2.0);
-    const auto before = meshShape->getV3Ds();
-
-    const auto labShape = getLabFrameShape(*meshShape, rotation);
-
+    // and the source is untouched
     TS_ASSERT_EQUALS(meshShape->getAppliedRotation(), IDENTITY);
-    TS_ASSERT_EQUALS(meshShape->getV3Ds(), before);
+    TS_ASSERT_EQUALS(meshShape->getV3Ds(), original);
   }
 
   void test_lab_frame_mesh_shape_is_unrotated_when_already_baked() {
@@ -225,14 +218,7 @@ public:
     TS_ASSERT(!labShape->isValid(V3D(2.0, 0.0, 0.0)));
     TS_ASSERT(labShape->isValid(V3D(0.0, 2.0, 0.0)));
     assertMatrixEquals(labShape->getAppliedRotation(), rotation, 1e-6);
-  }
-
-  void test_lab_frame_csg_shape_leaves_the_source_untouched() {
-    const auto rotation = rotationZ(90.0);
-    const auto csgShape = createOffsetSphere();
-
-    const auto labShape = getLabFrameShape(*csgShape, rotation);
-
+    // and the source is untouched
     TS_ASSERT(csgShape->isValid(V3D(2.0, 0.0, 0.0)));
     TS_ASSERT_EQUALS(csgShape->getAppliedRotation(), IDENTITY);
   }

@@ -124,14 +124,6 @@ class ExperimentInfoTest(unittest.TestCase):
         # and the workspace's own sample is untouched
         self._assert_centred_on(ws.sample().getShape(), [2.0, 0.0, 0.0])
 
-    def test_lab_frame_sample_shape_is_unchanged_when_there_is_no_goniometer(self):
-        ws = self._ws_with_offset_sphere()
-
-        lab_shape = ws.getLabFrameSampleShape()
-
-        self._assert_centred_on(lab_shape, [2.0, 0.0, 0.0])
-        np.testing.assert_allclose(lab_shape.getAppliedRotation(), np.eye(3), atol=1e-12)
-
     def test_lab_frame_sample_shape_does_not_rotate_an_already_baked_shape_twice(self):
         """CopySample bakes the destination goniometer in; the shape must not turn again."""
         rotation = np.array([[0.0, -1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]])

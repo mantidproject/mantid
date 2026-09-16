@@ -137,9 +137,9 @@ void export_ExperimentInfo() {
            "workspace's goniometer rotation the shape does not already carry.\n\n"
            "A shape may be stored in its own frame or already rotated into the lab frame - "
            ":ref:`algm-CopySample` bakes the goniometer in, while :ref:`algm-SetGoniometer` alone "
-           "leaves the shape untouched - so rotating by the goniometer unconditionally would rotate "
-           "an already-rotated shape a second time. This applies only what is outstanding.\n\n"
-           "The result is a new shape; the workspace's own sample is unchanged.")
+           "leaves the shape untouched - so rotating by the goniometer unconditionally would turn an "
+           "already-rotated shape a second time. This applies only what is outstanding, and returns "
+           "a new shape; the workspace's own sample is unchanged.")
       .def("run", &ExperimentInfo::run, return_value_policy<reference_existing_object>(), args("self"),
            "Return the :class:`~mantid.api.Run` object. This cannot be "
            "modified, use mutableRun to modify.")

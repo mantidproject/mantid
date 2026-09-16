@@ -16,20 +16,13 @@ namespace Geometry {
 
 class IObject;
 
-/** Reconcile a sample shape with the goniometer rotation of the workspace holding it.
- *
- * A workspace can arrive with its sample shape in either frame and the run cannot tell you which,
- * so applying its goniometer unconditionally rotates an already-rotated shape a second time. These
- * ask the shape what it already carries instead - see IObject::getAppliedRotation.
+/* Reconcile a sample shape with the goniometer rotation of the workspace holding it: both ask the
+ * shape which frame it is already in rather than rotating blindly. See IObject::getAppliedRotation.
  */
 
 /// The shape as it sits in the lab frame: a clone rotated by whatever part of goniometerR it does
-/// not already carry, reporting goniometerR as its bake and keeping its material and any
-/// definition-frame rotation. A plain clone when the shape is already there, so the common baked
-/// case costs nothing extra.
-///
-/// Prefer this to rotating a shape by hand. The one caller that legitimately wants the matrix
-/// instead rasterises in the shape's own frame - where the voxel grid is tight - and rotates after.
+/// not already carry, reporting goniometerR as its bake and keeping its material, id and any
+/// definition-frame rotation. Prefer this to rotating a shape by hand.
 ///
 /// A shape with no rotation mechanism at all - MeshObject2D - is by definition already in the frame
 /// it is meant to be used in, so it comes back unchanged with a warning.
@@ -41,7 +34,9 @@ MANTID_GEOMETRY_DLL std::shared_ptr<IObject> getLabFrameShape(const IObject &sha
                                                               const Kernel::Matrix<double> &goniometerR);
 
 /// The part of goniometerR that the shape does not already carry. Identity when the shape is
-/// already in the lab frame, goniometerR when it is in its own frame.
+/// already in the lab frame, goniometerR when it is in its own frame. For the caller that wants the
+/// matrix rather than the shape - rasterising in the shape's own frame, where the grid is tight,
+/// and rotating after.
 MANTID_GEOMETRY_DLL Kernel::Matrix<double> outstandingGoniometerRotation(const IObject &shape,
                                                                          const Kernel::Matrix<double> &goniometerR);
 
