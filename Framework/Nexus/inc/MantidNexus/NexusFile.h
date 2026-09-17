@@ -2,7 +2,6 @@
 
 #include "MantidNexus/DllConfig.h"
 #include "MantidNexus/NexusAddress.h"
-#include "MantidNexus/NexusDescriptor.h"
 #include "MantidNexus/NexusFile_fwd.h"
 #include "MantidNexus/UniqueID.h"
 #include <map>
@@ -49,6 +48,8 @@ MYH5DLL herr_t H5Pclose(hid_t);
 namespace Mantid {
 namespace Nexus {
 
+class NexusDescriptorLazy; // forward declaration for NX_class cache
+
 using UniqueFileID = UniqueID<&H5Fclose>;
 using SharedFileID = SharedID<&H5Fclose>;
 using GroupID = UniqueID<&H5Gclose>;
@@ -86,12 +87,8 @@ private:
   hid_t m_current_type_id;
   hid_t m_current_space_id;
   std::vector<hid_t> m_gid_stack;
-  /** nexus descriptor to track the file tree
-   * NOTE: in file write, the following cannot be relied upon:
-   * - hasRootAttr
-   * - firstEntryNameType
-   */
-  NexusDescriptor m_descriptor;
+  /** Lazily-populated NX_class descriptor; shared across copies of the same file handle. */
+  std::shared_ptr<NexusDescriptorLazy> m_descriptor;
 
   //------------------------------------------------------------------------------------------------------------------
   // CONSTRUCTORS / ASSIGNMENT / DECONSTRUCTOR
@@ -223,10 +220,17 @@ private:
    */
   std::shared_ptr<H5::H5Object> getCurrentObject() const;
 
+  hid_t groupHID() const;
+
   // these are used for updating the NexusDescriptor
   NexusAddress groupAddress(NexusAddress const &) const;
   NexusAddress formAbsoluteAddress(NexusAddress const &) const;
-  void registerEntry(std::string const &, std::string const &);
+
+  /** Access the lazy descriptor, throwing a clear error instead of a null dereference
+   * if this File has already been closed.
+   * \returns a reference to the held NexusDescriptorLazy
+   */
+  NexusDescriptorLazy &descriptor() const;
 
   //------------------------------------------------------------------------------------------------------------------
   // GROUP MAKE / OPEN / CLOSE
@@ -575,7 +579,7 @@ public:
    * \param class_type The class type to check for
    * \return true if the class type exists
    */
-  bool classTypeExists(std::string const &class_type) const { return m_descriptor.classTypeExists(class_type); }
+  bool classTypeExists(std::string const &class_type) const;
   /**
    * Return all entries of a given class type in the current location
    * \param class_type The class type to search for (e.g. "NXentry")
@@ -583,9 +587,7 @@ public:
    */
   std::set<std::string> getEntriesByClass(std::string const &class_type) const;
 
-  std::string classForEntry(std::string const &entry) const { return m_descriptor.classTypeForName(entry); }
-
-  NexusDescriptor const &getFileDescriptor() const { return m_descriptor; }
+  std::string classForEntry(std::string const &entry) const;
 
   //------------------------------------------------------------------------------------------------------------------
   // ATTRIBUTE METHODS

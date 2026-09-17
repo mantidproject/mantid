@@ -4,6 +4,15 @@
 
 namespace Mantid::Nexus {
 
+bool H5_id_is_valid(hid_t id) {
+  // fail early condition
+  if (id <= 0) {
+    return false;
+  } else {
+    return H5Iis_valid(id) > 0;
+  }
+}
+
 // ******************************************************************
 // EXPORTS
 // ******************************************************************

@@ -28,6 +28,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <filesystem>
+
 using namespace Mantid;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;

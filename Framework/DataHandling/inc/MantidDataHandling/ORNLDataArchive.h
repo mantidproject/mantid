@@ -13,6 +13,7 @@
 #include "MantidCatalog/ONCat.h"
 #include "MantidDataHandling/DllConfig.h"
 
+#include <filesystem>
 #include <string>
 
 using Mantid::Catalog::ONCat::ONCat_uptr;
