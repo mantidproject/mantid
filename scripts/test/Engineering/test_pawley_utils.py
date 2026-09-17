@@ -23,7 +23,14 @@ from mantid.simpleapi import (
 from mantid.geometry import CrystalStructure
 from mantid.kernel import V3D
 from Engineering.pawley_utils import Phase, GaussianProfile, PVProfile, PawleyPattern1D, PawleyPattern2D, BackToBackGauss
-from plugins.algorithms.poldi_utils import load_poldi, _do_interp_with_flux_correction, _get_flux_arrays, simulate_2d_data
+from plugins.algorithms.poldi_utils import (
+    load_poldi,
+    _do_interp_with_flux_correction,
+    _get_flux_arrays,
+    simulate_2d_data,
+    get_dspac_array_from_ws,
+    get_dspac_limits_from_ws,
+)
 
 
 class PhaseTest(unittest.TestCase):
@@ -1317,16 +1324,16 @@ class PoldiUtilsFluxTest(unittest.TestCase):
 
 
 class PoldiUtilsMaskingTest(unittest.TestCase):
-    """Tests that simulate_2d_data excludes masked spectra."""
+    """Tests that the poldi_utils simulation and d-spacing helpers exclude masked spectra."""
 
     IMASK = 2  # interior spectrum, so masking it does not alter the two-theta/L2 range
 
     @classmethod
     def setUpClass(cls):
         fpath_data = FileFinder.getFullPath("poldi_448x500_chopper5k_silicon.txt")
-        ws = load_poldi(fpath_data, "POLDI_Definition_448_calibrated.xml", chopper_speed=5000, t0=5.855e-02, t0_const=-9.00)
+        cls.ws_full = load_poldi(fpath_data, "POLDI_Definition_448_calibrated.xml", chopper_speed=5000, t0=5.855e-02, t0_const=-9.00)
         # crop to a handful of spectra to keep the simulation quick
-        cls.ws_2d = ExtractSpectra(InputWorkspace=ws, StartWorkspaceIndex=0, EndWorkspaceIndex=4, OutputWorkspace="ws_2d_crop")
+        cls.ws_2d = ExtractSpectra(InputWorkspace=cls.ws_full, StartWorkspaceIndex=0, EndWorkspaceIndex=4, OutputWorkspace="ws_2d_crop")
         # single sharp peak so the simulated spectra are non-trivial
         dspacs = linspace(0.69, 4.15, 2460)
         cls.ws_1d = CreateWorkspace(
@@ -1349,11 +1356,7 @@ class PoldiUtilsMaskingTest(unittest.TestCase):
         # the masked spectrum is zeroed, not simulated (it is non-zero when unmasked)
         self.assertTrue(np.any(ws_sim_ref.readY(self.IMASK) > 0))
         assert_array_equal(ws_sim.readY(self.IMASK), zeros_like(ws_sim.readY(self.IMASK)))
-
-    def test_simulate_2d_data_leaves_unmasked_spectra_unchanged(self):
-        ws_sim_ref = simulate_2d_data(self.ws_2d, self.ws_1d, output_workspace="ws_sim_ref")
-        ws_sim = simulate_2d_data(self._make_masked_ws(), self.ws_1d, output_workspace="ws_sim_masked")
-
+        # the remaining spectra are unaffected
         for ispec in (0, 1, 3, 4):
             assert_array_almost_equal(ws_sim.readY(ispec), ws_sim_ref.readY(ispec))
 
@@ -1366,6 +1369,25 @@ class PoldiUtilsMaskingTest(unittest.TestCase):
         ws_sim = simulate_2d_data(ws_masked, self.ws_1d, output_workspace="ws_sim_masked")
 
         assert_array_equal(ws_sim.readY(self.IMASK), zeros_like(ws_sim.readY(self.IMASK)))
+
+    def _make_low_tth_masked_ws(self):
+        # the first spectra have the lowest two-theta, so masking them lowers the maximum d-spacing
+        ws_masked = CloneWorkspace(InputWorkspace=self.ws_full, OutputWorkspace="ws_full_masked")
+        MaskDetectors(Workspace=ws_masked, WorkspaceIndexList=list(range(20)))
+        return ws_masked
+
+    def test_get_dspac_limits_from_ws_excludes_masked_spectra(self):
+        _, dmax_ref = get_dspac_limits_from_ws(self.ws_full)
+        _, dmax = get_dspac_limits_from_ws(self._make_low_tth_masked_ws())
+
+        self.assertLess(dmax, dmax_ref)
+
+    def test_get_dspac_array_from_ws_excludes_masked_spectra(self):
+        dspacs_ref = get_dspac_array_from_ws(self.ws_full)
+        dspacs = get_dspac_array_from_ws(self._make_low_tth_masked_ws())
+
+        self.assertLess(dspacs[-1], dspacs_ref[-1])
+        self.assertAlmostEqual(dspacs[0], dspacs_ref[0])  # min d-spacing set by the highest two-theta
 
 
 class Poldi2DEvalMixinMaskingTest(unittest.TestCase):
@@ -1394,15 +1416,15 @@ class Poldi2DEvalMixinMaskingTest(unittest.TestCase):
         MaskDetectors(Workspace=ws_masked, WorkspaceIndexList=[self.IMASK])
         return PawleyPattern2D(ws_masked, [self.phase], global_scale=global_scale, profile=GaussianProfile())
 
+    def _ilive(self):
+        return [ispec for ispec in range(self.ws.getNumberHistograms()) if ispec != self.IMASK]
+
     def test_eval_resids_excludes_masked_spectra(self):
         pawley = self._make_masked_pawley()
-        pawley_ref = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile())
 
         nresids = np.asarray(pawley.eval_resids(pawley.get_free_params())).size
-        nresids_ref = np.asarray(pawley_ref.eval_resids(pawley_ref.get_free_params())).size
 
-        self.assertEqual(nresids_ref, self.ws.getNumberHistograms() * self.ws.blocksize())
-        self.assertEqual(nresids, nresids_ref - self.ws.blocksize())
+        self.assertEqual(nresids, (self.ws.getNumberHistograms() - 1) * self.ws.blocksize())
 
     def test_eval_resids_ignores_counts_in_masked_spectra(self):
         pawley = self._make_masked_pawley()
@@ -1422,8 +1444,20 @@ class Poldi2DEvalMixinMaskingTest(unittest.TestCase):
         self.assertEqual(scales[self.IMASK], 1.0)
         self.assertEqual(bgs[self.IMASK], 0.0)
         # the unmasked spectra are estimated rather than left at the neutral defaults
-        ilive = [ispec for ispec in range(self.ws.getNumberHistograms()) if ispec != self.IMASK]
-        self.assertFalse(np.any(scales[ilive] == 1.0))
+        self.assertFalse(np.any(scales[self._ilive()] == 1.0))
+
+    def test_estimate_intensities_excludes_masked_spectra_from_median_scale(self):
+        pawley = self._make_masked_pawley(global_scale=False)
+        intens_before = pawley.intens[0].copy()
+        # _estimate_intensities re-estimates the scales itself, so this gives the same values
+        scales, _ = pawley._reestimate_scales(pawley.get_free_params())
+        expected_scale = np.median(scales[self._ilive()])
+
+        pawley._estimate_intensities()
+
+        # the neutral scale of 1.0 on the masked spectrum must not pull the median
+        self.assertNotAlmostEqual(expected_scale, np.median(scales))
+        assert_array_almost_equal(pawley.intens[0], intens_before * expected_scale)
 
 
 if __name__ == "__main__":
