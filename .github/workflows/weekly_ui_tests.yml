@@ -187,10 +187,13 @@ jobs:
       # even when the tests failed, which is when the notification matters most.
       - name: Build Slack summary
         if: always()
+        # a notification that could not be built or sent must not fail a report-only job
+        continue-on-error: true
         run: python3 .github/scripts/ui_test_slack_summary.py slack-payload.json
 
       - name: Post to Slack
         if: always()
+        continue-on-error: true
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.AUTOMATED_UI_SLACK_BOT }}
         run: |
@@ -198,6 +201,10 @@ jobs:
           # over a notification it was never able to send
           if [[ -z "$SLACK_WEBHOOK_URL" ]]; then
             echo "AUTOMATED_UI_SLACK_BOT is not set - skipping the Slack notification"
+            exit 0
+          fi
+          if [[ ! -f slack-payload.json ]]; then
+            echo "No Slack payload was built - skipping the Slack notification"
             exit 0
           fi
           curl --silent --show-error --fail-with-body -X POST \

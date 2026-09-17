@@ -74,7 +74,12 @@ def _platform_sections(platform: str) -> tuple[list, bool]:
     if not junit_path.exists():
         return [f":question: *{platform}* — no results (build or upload failed)"], True
 
-    total, skipped, failing = _summarise(junit_path)
+    try:
+        total, skipped, failing = _summarise(junit_path)
+    except ElementTree.ParseError:
+        # a half-written file is the run that died mid-write, which is when this matters most
+        return [f":question: *{platform}* — results file is unreadable (run died mid-write?)"], True
+
     if not failing:
         return [f":large_green_circle: *{platform}* — {total} passed, {skipped} skipped"], False
 
