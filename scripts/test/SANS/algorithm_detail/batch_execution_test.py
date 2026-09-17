@@ -439,9 +439,9 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         mock_polarization_state.polarizer.location_z = None
         mock_polarization_state.polarizer.gas_pressure = None
         mock_polarization_state.polarizer.cell_length = None
-        mock_ws.getInstrument.return_value.getComponentByName.return_value.getPos.return_value.getX = mock.Mock(return_value=9.8)
-        mock_ws.getInstrument.return_value.getComponentByName.return_value.getPos.return_value.getY = mock.Mock(return_value=7.6)
-        mock_ws.getInstrument.return_value.getComponentByName.return_value.getPos.return_value.getZ = mock.Mock(return_value=5.4)
+        mock_ws.componentInfo.return_value.position.return_value.getX = mock.Mock(return_value=9.8)
+        mock_ws.componentInfo.return_value.position.return_value.getY = mock.Mock(return_value=7.6)
+        mock_ws.componentInfo.return_value.position.return_value.getZ = mock.Mock(return_value=5.4)
 
         _apply_polarization_component_adjustments(mock_polarization_state, mock_ws)
         mock_move.assert_any_call(mock_ws, mock.ANY, "mocked_polarizer", False)

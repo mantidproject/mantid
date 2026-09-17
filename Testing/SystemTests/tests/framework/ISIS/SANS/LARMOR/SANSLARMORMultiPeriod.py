@@ -28,10 +28,10 @@ class LARMORMultiPeriodEventModeLoadingTest(systemtesting.MantidSystemTest):
         self.success = True
 
     def _get_position_and_rotation(self, workspace):
-        instrument = workspace.getInstrument()
-        component = instrument.getComponentByName("DetectorBench")
-        position = component.getPos()
-        rotation = component.getRotation()
+        component_info = workspace.componentInfo()
+        index = component_info.indexOfAny("DetectorBench")
+        position = component_info.position(index)
+        rotation = component_info.rotation(index)
         return position, rotation
 
     def _clean_up(self, base_name, number_of_workspaces):
