@@ -95,6 +95,11 @@ jobs:
         id: testui
         # reporting only - a failing UI test must never fail this job
         continue-on-error: true
+        env:
+          # Missing data or a Qt-less build fails the tests here instead of skipping them, so this job
+          # cannot report green having tested nothing. Set on the step rather than in CMake, which
+          # would reach developer runs too. See REQUIRE_PREREQUISITES in automated_ui_test_base.py.
+          AUTOMATED_UI_TEST_REQUIRE_PREREQUISITES: "1"
         run: |
           cd ${GITHUB_WORKSPACE}
           if [[ "${{ matrix.os }}" == "Linux" ]]; then

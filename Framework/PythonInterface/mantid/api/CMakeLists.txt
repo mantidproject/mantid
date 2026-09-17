@@ -87,6 +87,7 @@ set(EXPORT_FILES
     src/Exports/SpectrumInfoPythonIterator.cpp
     src/Exports/AnalysisDataServiceObserver.cpp
     src/Exports/Citation.cpp
+    src/Exports/MinimizerStatus.cpp
     src/Exports/IPreview.cpp
     src/Exports/PreviewManager.cpp
     src/Exports/RegionSelectorObserver.cpp
