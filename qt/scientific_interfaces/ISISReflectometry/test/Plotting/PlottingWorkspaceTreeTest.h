@@ -43,6 +43,20 @@ public:
     TS_ASSERT_EQUALS(plottingWorkspaces[0].runNumbers, std::vector<std::string>{"12345"});
   }
 
+  void testPlottingWorkspaceRetainsSummedRunLog() {
+    addWorkspaceWithRunNumber("IvsQ_12345+12346", "12345+12346");
+    auto row = Row({"12345", "12346"}, 0.5, TransmissionRunPair(), RangeInQ(), std::nullopt, ReductionOptionsMap(),
+                   ReductionWorkspaces({}, TransmissionRunPair()));
+    row.setOutputNames({"", "IvsQ_12345+12346", ""});
+    row.setSuccess();
+    auto tree = PlottingWorkspaceTree{};
+    tree.rebuild(runsTableWith(std::move(row)));
+
+    auto const workspaces = tree.plottingWorkspacesForNames({"IvsQ_12345+12346"});
+    TS_ASSERT_EQUALS(workspaces.size(), 1);
+    TS_ASSERT_EQUALS(workspaces[0].runNumbers, std::vector<std::string>{"12345+12346"});
+  }
+
   void testPlottingWorkspaceRecordsContainingWorkspaceGroupAndPeriodNumber() {
     addWorkspaceWithRunNumberAndPeriod("IvsQ_binned_12345_2", "12345", 2, 2);
     auto workspaceGroup = std::make_shared<Mantid::API::WorkspaceGroup>();
