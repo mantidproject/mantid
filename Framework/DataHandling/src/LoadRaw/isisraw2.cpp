@@ -8,6 +8,8 @@
 #include "byte_rel_comp.h"
 #include <cstdio>
 #include <exception>
+#include <stdexcept>
+#include <string>
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
@@ -19,7 +21,7 @@ Mantid::Kernel::Logger g_log("ISISRAW2");
 } // namespace
 
 /// No arg Constructor
-ISISRAW2::ISISRAW2() : ISISRAW(nullptr, false), ndes(0), outbuff(nullptr), m_bufferSize(0) {
+ISISRAW2::ISISRAW2() : ISISRAW(nullptr, false), ndes(0), outbuff(nullptr), m_bufferSize(0), m_uncompressed(false) {
   // Determine the size of the output buffer to create from the config service.
   g_log.debug("Determining ioRaw buffer size\n");
   auto bufferSizeConfigVal = Mantid::Kernel::ConfigService::Instance().getValue<int>("loadraw.readbuffer.size");
@@ -113,12 +115,36 @@ int ISISRAW2::ioRAW(FILE *file, bool from_file, bool read_data) {
   ISISRAW::ioRAW(file, &u_dat, u_len, from_file);
   ISISRAW::ioRAW(file, &ver8, 1, from_file);
   fgetpos(file, &dhdr_pos);
-  ISISRAW::ioRAW(file, &dhdr, 1, from_file);
+  // A version 1 data section has no data header and no spectrum descriptor
+  // array; the spectra follow immediately as plain 32 bit integers. A version 2
+  // section always has a data header, but may still be uncompressed
+  // (d_comp == 0), in which case it likewise has no descriptor array.
+  m_uncompressed = from_file && (ver8 == 1);
+  if (m_uncompressed) {
+    // there is no header in the file to read, so record the layout we found
+    dhdr = DHDR_STRUCT();
+    dhdr.d_comp = 0;
+    dhdr.d_offset = 1;
+  } else {
+    ISISRAW::ioRAW(file, &dhdr, 1, from_file);
+    m_uncompressed = (dhdr.d_comp == 0);
+  }
 
   if (!outbuff)
     outbuff = new char[m_bufferSize];
   ndes = t_nper * (t_nsp1 + 1);
-  ISISRAW::ioRAW(file, &ddes, ndes, true);
+  if (m_uncompressed) {
+    // Synthesise a descriptor per spectrum so that skipData() and the ndes
+    // bounds checks work unchanged for both layouts.
+    delete[] ddes;
+    ddes = new DDES_STRUCT[ndes];
+    for (int j = 0; j < ndes; ++j) {
+      ddes[j].nwords = t_ntc1 + 1;
+      ddes[j].offset = j * (t_ntc1 + 1);
+    }
+  } else {
+    ISISRAW::ioRAW(file, &ddes, ndes, true);
+  }
   if (!dat1)
     dat1 = new uint32_t[t_ntc1 + 1]; //  space for just one spectrum
   // so when we round up words we get a zero written
@@ -146,6 +172,13 @@ void ISISRAW2::skipData(FILE *file, int i) {
 bool ISISRAW2::readData(FILE *file, int i) {
   if (i >= ndes)
     return false;
+  if (m_uncompressed) {
+    // one plain 32 bit integer per time channel, no expansion needed
+    return ISISRAW::ioRAW(file, reinterpret_cast<int *>(dat1), t_ntc1 + 1, true) == 0;
+  }
+  if (ddes[i].nwords <= 0) {
+    throw std::runtime_error("Invalid spectrum descriptor in RAW file for spectrum " + std::to_string(i));
+  }
   int nwords = 4 * ddes[i].nwords;
   if (nwords > m_bufferSize) {
     g_log.debug() << "Overflow error, nwords > buffer size. nwords = " << nwords << ", buffer=" << m_bufferSize << "\n";

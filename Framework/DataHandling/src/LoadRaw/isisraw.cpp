@@ -470,19 +470,38 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
   ioRAW(file, &u_dat, u_len, from_file);
   ioRAW(file, &ver8, 1, from_file);
   fgetpos(file, &dhdr_pos);
-  ioRAW(file, &dhdr, 1, from_file);
+  if (from_file && ver8 == 1) {
+    // A version 1 data section has no data header and no spectrum descriptor
+    // array; the spectra follow immediately as plain 32 bit integers. Record
+    // the layout found rather than consuming data as a header.
+    dhdr = DHDR_STRUCT();
+    dhdr.d_comp = 0;
+    dhdr.d_offset = 1;
+  } else {
+    ioRAW(file, &dhdr, 1, from_file);
+  }
   int ndes;
   if (!read_data) {
     ndes = ndata = 0;
     dat1 = nullptr;
     // seek to position right after the data if we want to read the log
     if (from_file) {
-      ndes = t_nper * (t_nsp1 + 1);
-      ioRAW(file, &ddes, ndes, from_file);
-      for (i = 0; i < ndes; i++) {
-        int zero = fseek(file, 4 * ddes[i].nwords, SEEK_CUR);
-        if (0 != zero)
-          logger.error() << "Failed to seek position in file for index: " << i << "\n";
+      if (dhdr.d_comp == 0) {
+        // uncompressed: there is no descriptor array and every spectrum
+        // occupies the same number of words
+        for (i = 0; i < t_nper * (t_nsp1 + 1); i++) {
+          int zero = fseek(file, 4 * (t_ntc1 + 1), SEEK_CUR);
+          if (0 != zero)
+            logger.error() << "Failed to seek position in file for index: " << i << "\n";
+        }
+      } else {
+        ndes = t_nper * (t_nsp1 + 1);
+        ioRAW(file, &ddes, ndes, from_file);
+        for (i = 0; i < ndes; i++) {
+          int zero = fseek(file, 4 * ddes[i].nwords, SEEK_CUR);
+          if (0 != zero)
+            logger.error() << "Failed to seek position in file for index: " << i << "\n";
+        }
       }
     }
   } else if (dhdr.d_comp == 0) {
@@ -954,6 +973,7 @@ int ISISRAW::printInfo(std::ostream &os) {
   os << "Log section at " << add.ad_log << " 0x" << std::hex << 4 * add.ad_log << std::dec << '\n';
   os << "End section at " << add.ad_end << " 0x" << std::hex << 4 * add.ad_end << std::dec << '\n';
   os << "User data len " << u_len << '\n';
+  os << "Data section version is " << ver8 << '\n';
   os << "Compression is " << (dhdr.d_comp == 0 ? "NONE" : "BYTE-RELATIVE") << '\n';
   os << "Compression ratio of data = " << dhdr.d_crdata << '\n';
   os << "Offsets of spectrum data\n";
