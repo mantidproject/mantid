@@ -18,6 +18,16 @@ the counts and will be unit-less (i.e. no division by bin width or
 normalisation of any kind). The errors, currently assumed Gaussian, will
 be set to be the square root of the number of counts in the bin.
 
+Data section format
+###################
+
+The counts in a RAW file are held either byte-relative compressed or as plain
+32 bit integers, and LoadRaw reads both. Runs recorded by the oldest ISIS data
+acquisition software, such as the archived TFXA data, use a version 1 data
+section, which is always uncompressed and carries neither a data header nor a
+spectrum descriptor array. No property controls this; the format is taken from
+the file.
+
 Optional properties
 ###################
 
