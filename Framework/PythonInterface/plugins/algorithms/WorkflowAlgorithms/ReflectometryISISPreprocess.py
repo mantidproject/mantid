@@ -104,9 +104,9 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
     @staticmethod
     def _validate_event_ws(workspace):
         if isinstance(workspace, WorkspaceGroup):
-            # Our reduction algorithm doesn't currently support this due to slicing
-            # (which would result in a group of groups)
-            raise RuntimeError("Loading Workspace Groups in event mode is not supported currently.")
+            for member in workspace:
+                ReflectometryISISPreprocess._validate_event_ws(member)
+            return
         if not workspace.run().hasProperty("proton_charge"):
             # Reduction algorithm requires proton_charge
             raise RuntimeError("Event workspaces must contain proton_charge")

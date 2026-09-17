@@ -40,6 +40,9 @@ class Prop:
     OUTPUT_WS = "OutputWorkspace"
     OUTPUT_WS_BINNED = "OutputWorkspaceBinned"
     OUTPUT_WS_LAM = "OutputWorkspaceWavelength"
+    MULT_OUTPUT_WS = "OutputWorkspaces"
+    MULT_OUTPUT_WS_BINNED = "OutputWorkspacesBinned"
+    MULT_OUTPUT_WS_LAM = "OuputWorkspacesWavelength"
     OUTPUT_WS_FIRST_TRANS = "OutputWorkspaceFirstTransmission"
     OUTPUT_WS_SECOND_TRANS = "OutputWorkspaceSecondTransmission"
     OUTPUT_WS_TRANS = "OutputWorkspaceTransmission"
@@ -120,11 +123,17 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self._should_sum_banks(inputWorkspace, firstTransWorkspace, secondTransWorkspace)
         # Slice the input workspace, if required
         if self._slicingEnabled():
-            inputWorkspace = self._sliceWorkspace(inputWorkspace)
+            to_reduce = self._sliceWorkspace(inputWorkspace)
+        else:
+            to_reduce = [inputWorkspace]
         # Perform the reduction
-        alg = self._reduce(inputWorkspace, firstTransWorkspace, secondTransWorkspace, adjusted_theta)
+        is_multi_reduction = len(to_reduce) > 1
+        finished_algs = []
+        for ws in to_reduce:
+            alg = self._reduce(ws, firstTransWorkspace, secondTransWorkspace, adjusted_theta, is_multi_reduction)
+            finished_algs.append(alg)
         # Set outputs and tidy TOF workspaces into a group
-        self._finalize(alg)
+        self._finalize(finished_algs)
         self._groupTOFWorkspaces(inputWorkspaces)
 
     def _groupTOFWorkspaces(self, inputWorkspaces):
@@ -198,8 +207,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # Convenience variables for conditional properties
         whenSliceEnabled = EnabledWhenProperty(Prop.SLICE, PropertyCriterion.IsEqualTo, "1")
 
-        self._slice_properties = ["TimeInterval", "LogName", "LogValueInterval", "UseNewFilterAlgorithm"]
-        self.copyProperties("ReflectometrySliceEventWorkspace", self._slice_properties, version=1)
+        self._slice_properties = ["TimeInterval", "LogName", "LogValueInterval", "FilterByLogValue"]
+        self.copyProperties("ReflectometrySliceEventWorkspace", self._slice_properties)
         for property in self._slice_properties:
             self.setPropertySettings(property, whenSliceEnabled)
             self.setPropertyGroup(property, "Slicing")
@@ -275,6 +284,18 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             Prop.OUTPUT_WS_SECOND_TRANS,
         ]
         self._copy_properties_from_reduction_algorithm(properties)
+        self.declareProperty(
+            StringArrayProperty(Prop.MULT_OUTPUT_WS, values=[], direction=Direction.Output),
+            doc="A list of output workspaces. Only used when slicing a group workspace.",
+        )
+        self.declareProperty(
+            StringArrayProperty(Prop.MULT_OUTPUT_WS_BINNED, values=[], direction=Direction.Output),
+            doc="A list of binned output workspaces. Only used when slicing a group workspace.",
+        )
+        self.declareProperty(
+            StringArrayProperty(Prop.MULT_OUTPUT_WS_LAM, values=[], direction=Direction.Output),
+            doc="A list of wavelength output workspaces. Only used when slicing a group workspace.",
+        )
 
     def _declareFloodCorrectionProperties(self):
         self._copy_properties_from_reduction_algorithm(["FloodCorrection"])
@@ -787,35 +808,45 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         we can end up with more slices than we expect"""
         if alg.getProperty("TimeInterval").isDefault:
             return
-        run = AnalysisDataService.retrieve(workspace_name).run()
+        workspace = AnalysisDataService.retrieve(workspace_name)
+        if isinstance(workspace, WorkspaceGroup):
+            run = workspace[0].run()
+        else:
+            run = workspace.run()
         alg.setProperty("StartTime", str(run.startTime()))
         alg.setProperty("StopTime", str(run.endTime()))
 
     def _runSliceAlgorithm(self, input_workspace, output_workspace):
         """Run the child algorithm to perform the slicing"""
         self.log().information("Running ReflectometrySliceEventWorkspace")
-        alg = self.createChildAlgorithm("ReflectometrySliceEventWorkspace", version=1)
+        alg = self.createChildAlgorithm("ReflectometrySliceEventWorkspace")
         for property in self._slice_properties:
             alg.setProperty(property, self.getPropertyValue(property))
-        alg.setProperty("OutputWorkspace", output_workspace)
-        alg.setProperty("InputWorkspace", input_workspace)
-        alg.setProperty("MonitorWorkspace", _monitorWorkspace(input_workspace))
+        alg.setProperty("OutputWorkspaceName", output_workspace)
+        alg.setProperty("InputWorkspaceName", input_workspace)
+        alg.setProperty("MonitorWorkspaceName", _monitorWorkspace(input_workspace))
         self._setUniformNumberOfSlices(alg, input_workspace)
         self._setSliceStartStopTimes(alg, input_workspace)
         alg.execute()
-        return alg.getProperty("OutputWorkspace").value
+
+        return alg.getProperty("OutputWorkspaceNames").value
 
     def _sliceWorkspace(self, workspace):
         # Perform the slicing
         sliced_workspace_name = self._getSlicedWorkspaceGroupName(workspace)
         self.log().information("Slicing workspace " + workspace + " into " + sliced_workspace_name)
-        workspace = self._runSliceAlgorithm(workspace, sliced_workspace_name)
-        return sliced_workspace_name
+        slice_output = self._runSliceAlgorithm(workspace, sliced_workspace_name)
+        if isinstance(slice_output, list):
+            # We've sliced a group into one group for each slice. This is a list of their names.
+            return slice_output
+        # We've sliced a matrix into a group.
+        workspace = slice_output
+        return [sliced_workspace_name]
 
     def _getSlicedWorkspaceGroupName(self, workspace):
         return workspace + "_sliced"
 
-    def _reduce(self, input_workspace, first_trans_workspace, second_trans_workspace, adjusted_theta=None):
+    def _reduce(self, input_workspace, first_trans_workspace, second_trans_workspace, adjusted_theta=None, multi_reduction: bool= False):
         """Run the child algorithm to do the reduction. Return the child algorithm."""
         self.log().information("Running ReflectometryReductionOneAuto on " + input_workspace)
         alg = self.createChildAlgorithm("ReflectometryReductionOneAuto")
@@ -835,6 +866,11 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         efficiencies_ws = self._loadPolarizationCorrectionWorkspace()
         if efficiencies_ws:
             alg.setProperty("PolarizationEfficiencies", efficiencies_ws)
+        if multi_reduction:
+            name_base = AnalysisDataService.retrieve(input_workspace).name()
+            alg.setProperty(Prop.OUTPUT_WS, f"IvsQ_{name_base}")
+            alg.setProperty(Prop.OUTPUT_WS_BINNED, f"IvsQ_binned_{name_base}")
+            alg.setProperty(Prop.OUTPUT_WS_LAM, f"IvsLam_{name_base}")
         alg.setProperty("PolarizationCorrectionInputSpinStateOrder", self._polarizationCorrectionInputSpinStateOrder())
         alg.execute()
         return alg
@@ -867,12 +903,28 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _isDiagnostics(self):
         return not self.getProperty(Prop.DIAGNOSTICS).isDefault
 
-    def _finalize(self, child_alg):
+    def _finalize(self, finished_algs: list):
         """Set our output properties from the results in the given child algorithm"""
         # Set the main workspace outputs
-        self._setOutputProperty(Prop.OUTPUT_WS, child_alg)
-        self._setOutputProperty(Prop.OUTPUT_WS_BINNED, child_alg)
-        self._setOutputProperty(Prop.OUTPUT_WS_LAM, child_alg)
+        if not finished_algs:
+            return
+        if len(finished_algs) == 1:
+            child_alg = finished_algs[0]
+            self._setOutputProperty(Prop.OUTPUT_WS, child_alg)
+            self._setOutputProperty(Prop.OUTPUT_WS_BINNED, child_alg)
+            self._setOutputProperty(Prop.OUTPUT_WS_LAM, child_alg)
+        else:
+            outputs = []
+            binned_outputs = []
+            lambda_outputs = []
+            for child_alg in finished_algs:
+                outputs.append(child_alg.getPropertyValue(Prop.OUTPUT_WS))
+                binned_outputs.append(child_alg.getPropertyValue(Prop.OUTPUT_WS_BINNED))
+                lambda_outputs.append(child_alg.getPropertyValue(Prop.OUTPUT_WS_LAM))
+            self.setProperty(Prop.MULT_OUTPUT_WS, outputs)
+            self.setProperty(Prop.MULT_OUTPUT_WS_BINNED, binned_outputs)
+            self.setProperty(Prop.MULT_OUTPUT_WS_LAM, lambda_outputs)
+
         # Set the Q params as outputs if they were not specified as inputs
         self._setOutputPropertyIfInputNotSet(Prop.QMIN, child_alg)
         self._setOutputPropertyIfInputNotSet(Prop.QSTEP, child_alg)
@@ -901,11 +953,16 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
 
 def _throwIfNotValidReflectometryEventWorkspace(workspace_name):
+    def check_workspace(workspace):
+        if isinstance(workspace, WorkspaceGroup):
+            for member_ws in workspace:
+                check_workspace(member_ws)
+            return
+        if not workspace.run().hasProperty("proton_charge"):
+            raise RuntimeError("Cannot slice workspace: run must contain proton_charge")
+
     workspace = AnalysisDataService.retrieve(workspace_name)
-    if isinstance(workspace, WorkspaceGroup):
-        raise RuntimeError("Slicing workspace groups is not supported")
-    if not workspace.run().hasProperty("proton_charge"):
-        raise RuntimeError("Cannot slice workspace: run must contain proton_charge")
+    check_workspace(workspace)
 
 
 def _monitorWorkspace(workspace):
