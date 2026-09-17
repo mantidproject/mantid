@@ -79,9 +79,12 @@ public:
     auto ws1 = std::make_shared<Mantid::DataObjects::MaskWorkspace>(instrument);
     auto ws2 = std::make_shared<Mantid::DataObjects::MaskWorkspace>(instrument);
 
-    constexpr detid_t remappedDetectorID = 999;
-    ws1->getSpectrum(0).setDetectorID(remappedDetectorID);
-    ws2->getSpectrum(0).setDetectorID(remappedDetectorID);
+    const auto firstDetectorIDs = ws1->getSpectrum(0).getDetectorIDs();
+    const auto secondDetectorIDs = ws1->getSpectrum(1).getDetectorIDs();
+    ws1->getSpectrum(0).setDetectorIDs(secondDetectorIDs);
+    ws1->getSpectrum(1).setDetectorIDs(firstDetectorIDs);
+    ws2->getSpectrum(0).setDetectorIDs(secondDetectorIDs);
+    ws2->getSpectrum(1).setDetectorIDs(firstDetectorIDs);
 
     ws1->setMaskedIndex(0);
     ws2->setMaskedIndex(0);

@@ -1,0 +1,1 @@
+- :ref:`algm-BinaryOperateMasks` no longer throws a spurious validation error when acting upon input workspaces with non-default detector mapping.
