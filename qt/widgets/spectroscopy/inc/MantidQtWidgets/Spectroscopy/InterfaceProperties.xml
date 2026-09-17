@@ -16,8 +16,8 @@ xsi:schemaLocation="http://www.w3schools.com IndirectInterfacePropertiesSchema.x
 	</INTERFACE>
 
 	<INTERFACE id="Symmetrise">
-		<EXTENSIONS all=".nxs"/>
-		<FILE-SUFFIXES sample="_red.nxs"/>
+		<EXTENSIONS all=".nxs,.txt"/>
+		<FILE-SUFFIXES sample="_red.nxs,.txt"/>
 		<WORKSPACE-SUFFIXES sample="_red"/>
 	</INTERFACE>
 
@@ -28,8 +28,8 @@ xsi:schemaLocation="http://www.w3schools.com IndirectInterfacePropertiesSchema.x
 	</INTERFACE>
 
 	<INTERFACE id="Moments">
-		<EXTENSIONS all=".nxs"/>
-		<FILE-SUFFIXES sample="_sqw.nxs"/>
+		<EXTENSIONS all=".nxs,.txt"/>
+		<FILE-SUFFIXES sample="_sqw.nxs,.txt"/>
 		<WORKSPACE-SUFFIXES sample="_sqw"/>
 	</INTERFACE>
 
@@ -64,8 +64,8 @@ xsi:schemaLocation="http://www.w3schools.com IndirectInterfacePropertiesSchema.x
 	</INTERFACE>
 
 	<INTERFACE id="Iqt">
-		<EXTENSIONS all=".nxs"/>
-		<FILE-SUFFIXES sample="_red.nxs,_sqw.nxs" resolution="_res.nxs,_red.nxs,_sqw.nxs"/>
+		<EXTENSIONS all=".nxs,.txt"/>
+		<FILE-SUFFIXES sample="_red.nxs,_sqw.nxs,.txt" resolution="_res.nxs,_red.nxs,_sqw.nxs,.txt"/>
 		<WORKSPACE-SUFFIXES sample="_red,_sqw" resolution="_res,_red,_sqw"/>
 	</INTERFACE>
 

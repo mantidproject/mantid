@@ -161,6 +161,9 @@ void SymmetriseView::setDefaults() {
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsInput->isOptional(true);
+  // Text files loaded via LoadAscii default to Unit="Energy"; this workspace is
+  // always in energy transfer, so label it correctly regardless of the input format.
+  m_uiForm.dsInput->setLoadProperty("Unit", std::string("DeltaE"));
 
   // Disables searching for run files in the data archive
   m_uiForm.dsInput->isForRunFiles(false);
