@@ -85,9 +85,11 @@ directory:
 
 Most suites need data from the ExternalData store, which is what the ``AutomatedUITestData`` target
 above downloads (it is nothing more than ``StandardTestData`` and ``SystemTestData`` together);
-without it the tests that need a file report a skip rather than a failure. Tests run offscreen (the
-harness *defaults* ``QT_QPA_PLATFORM`` to ``offscreen`` and ``MPLBACKEND`` to ``Agg`` on import, leaving
-either alone if it is already set), so nothing appears on screen and no display is needed. Set
+without it the tests that need a file report a skip rather than a failure, unless
+``AUTOMATED_UI_TEST_REQUIRE_PREREQUISITES`` is set - see `Skipping and failing`_ below. Tests run
+offscreen (the harness *defaults* ``QT_QPA_PLATFORM`` to ``offscreen`` and ``MPLBACKEND`` to ``Agg``
+on import, leaving either alone if it is already set), so nothing appears on screen and no display is
+needed. Set
 ``QT_QPA_PLATFORM`` yourself if you want to watch a test run.
 
 The data directories are named by ``PYUNITTEST_DATA_DIRS`` in
@@ -130,7 +132,7 @@ The shape is:
    class MyInterfaceTest(AutomatedUITestBase):
        def setUp(self):
            super(MyInterfaceTest, self).setUp()
-           self.require_files("SOMEDATA00001.nxs")   # skip cleanly if the data is not there
+           self.require_files("SOMEDATA00001.nxs")   # skip if the data is not there; fail in CI
            self.patch_error_messages(("some.module.that.pops.a.dialog",))
            self.gui = MyInterface()
            self.gui.show()
@@ -141,20 +143,26 @@ The shape is:
            process_events(2)
            super(MyInterfaceTest, self).tearDown()
 
-       def test_the_guide_section_this_replaces(self):
+       def test_running_on_enginx(self):
            select_combo(self.gui.combo_instrument, "ENGINX")
            click(self.gui.button_run)
 
-           with self.subTest("Guide step 4 / the output workspace is created"):
+           with self.subTest("My Interface / the output workspace is created"):
                self.assertTrue(ADS.doesExist("output"))
-           with self.subTest("Guide step 5 / it is in d-spacing"):
+           with self.subTest("My Interface / the output is in d-spacing"):
                self.assertEqual(ADS.retrieve("output").getAxis(0).getUnit().unitID(), "dSpacing")
 
 Points worth knowing before you write one:
 
 **One ``test_`` method per scenario, not per observation.** Building an interface is expensive, and
-a scenario in a manual test guide is a sequence - calibrate, then focus, then look at what was
-written. Split by guide section, not by assertion.
+a scenario is a sequence a user would work through - calibrate, then focus, then look at what was
+written. Split by scenario, not by assertion.
+
+**Name the method and its ``subTest`` labels for the functionality, not for the guide.** A label
+reads back on its own from a failure, so ``"Fitting / the peak centre is also reported in
+d-spacing"`` says what broke where ``"Test 10 / step 6"`` sends the reader off to another document.
+Record which guide sections a suite covers once, in the guide itself - see
+:ref:`Engineering_Diffraction_TestGuide-ref` for one written that way.
 
 **Use** :py:meth:`unittest.TestCase.subTest` **for observations.** A failed observation inside
 ``with self.subTest(label)`` is reported against its label and the ones after it still run. A test
@@ -181,9 +189,36 @@ threads. Both default to a short timeout, so a wait on something genuinely slow 
 longer ``timeout`` explicitly rather than every wait in the suite inheriting one long enough to
 hide a hang.
 
+**A worker must never outlive its test.** ``AsyncTask`` is a *non-daemon* thread that reports back
+through a blocking queued connection, so one still running when the run ends is joined by the
+interpreter at exit while nothing is left to pump the event loop it is parked on. That join never
+returns: the process hangs with every test already reported, and CTest kills it at the directory
+``TIMEOUT`` having printed nothing useful. ``wait_for_async_task`` therefore aborts and drains the
+worker before it raises, and ``tearDown`` sweeps the live threads for any worker no test ever
+waited on - a scenario abandoned part way through by a failed assertion leaves one behind that
+nothing holds a handle to. A subclass that overrides ``tearDown`` must reach
+``_drain_async_tasks()`` before it tears its interface down.
+
+**A hang dumps its stacks before CTest kills it.** ``HANG_DUMP_AFTER_SECONDS`` in
+``automated_ui_test_base`` arms a repeating ``faulthandler`` dump of every thread, comfortably
+inside the CTest ``TIMEOUT``. It never fails a run by itself; it is there because a wedged GUI test
+is otherwise entirely silent in a CI log. Two identical dumps mean the process is stuck; dumps that
+move on mean it is only slow. Set ``AUTOMATED_UI_TEST_HANG_DUMP_SECONDS`` to override it, or to 0
+to switch it off.
+
 **Neutralise anything modal before the first click.** An unattended test that pops a modal message
 box hangs until the suite times out. ``patch_error_messages``, ``patch_confirmation_box`` and
 ``algorithm_dialog_runs`` on the base class cover three common cases that come up.
+
+.. _Skipping and failing:
+
+**A missing prerequisite skips locally and fails in CI.** ``require_files`` and the no-Qt check in
+``setUp`` both go through ``_skip_or_fail``, which reads
+``AUTOMATED_UI_TEST_REQUIRE_PREREQUISITES``. Unset, they skip: on a developer's machine not having
+built ``AutomatedUITestData`` is an ordinary state. ``.github/workflows/weekly_ui_tests.yml`` sets it
+on its test step, where a skip would instead mean the run reported green having tested nothing. Set
+it yourself to reproduce a CI result, but not in CMake, which would reach developer runs too. Any new
+reason to skip should go through ``_skip_or_fail`` rather than calling ``skipTest`` directly.
 
 **Go through the interface, not around it.** Where possible use ``add_data_search_dir`` and let the
 interface's own file finder resolve a run, rather than reaching past the view to inject a workspace -

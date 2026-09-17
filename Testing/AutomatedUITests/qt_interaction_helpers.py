@@ -579,6 +579,100 @@ def close_all_figures():
     plt.close("all")
 
 
+def new_figures(before):
+    """The figures created since ``before`` (a set from ``figure_numbers``), in creation order.
+
+    Only figures made through ``pyplot`` appear here; a plot drawn onto a widget's own canvas, as
+    the fitting and GSAS-II tabs do, is reached through that widget instead.
+    """
+    import matplotlib.pyplot as plt
+
+    return [plt.figure(number) for number in sorted(set(plt.get_fignums()) - set(before))]
+
+
+def curves(axes):
+    """Every line on ``axes``, as ``(label, x, y)`` with the data copied out as arrays.
+
+    Copied because callers compare the axes before an interaction against after it, and the arrays
+    are updated in place. Arrays because some artists - ``axhline`` among them - return plain lists,
+    which compare elementwise to something quite different.
+    """
+    import numpy as np
+
+    return [(line.get_label(), np.array(line.get_xdata()), np.array(line.get_ydata())) for line in axes.get_lines()]
+
+
+def curve_labels(axes):
+    return [label for label, _x, _y in curves(axes)]
+
+
+def plot_labels(axes):
+    """Labels of everything on ``axes`` that would appear in a legend.
+
+    Deliberately not the labels from ``curves``: ``errorbar`` labels the container rather than the
+    ``Line2D`` inside it, so such a series reads as ``_nolegend_`` at the line level and its caps are
+    further unnamed lines - counting lines does not count series either.
+    """
+    _handles, labels = axes.get_legend_handles_labels()
+    return labels
+
+
+def curve_by_label(axes, label):
+    """The ``(x, y)`` of the legend entry called ``label``, error bar series included."""
+    import numpy as np
+
+    handles, labels = axes.get_legend_handles_labels()
+    for handle, name in zip(handles, labels):
+        if name == label:
+            # an ErrorbarContainer holds (data line, caps, bars); the data line is what was plotted
+            line = handle.lines[0] if hasattr(handle, "lines") else handle
+            return np.array(line.get_xdata()), np.array(line.get_ydata())
+    raise AssertionError(f"no curve labelled '{label}' on the axes; found {labels}")
+
+
+def assert_axes_not_blank(axes, msg=""):
+    """Fail unless the axes hold a curve with at least one finite point.
+
+    Neither half is covered by counting lines: empty axes pass any "a figure appeared" check, and an
+    all-NaN curve passes any "there are lines on it" check, though both plot nothing visible.
+    """
+    import numpy as np
+
+    where = f" ({msg})" if msg else ""
+    drawn = curves(axes)
+    if not drawn and not axes.collections:
+        raise AssertionError(f"nothing was drawn on the axes{where}")
+    if drawn and not any(np.isfinite(y).any() for _label, _x, y in drawn):
+        raise AssertionError(f"every curve on the axes is entirely non-finite{where}")
+
+
+def assert_curve_matches_workspace(axes, workspace, spectrum=0):
+    """Fail unless one of the curves on ``axes`` really is that spectrum of that workspace.
+
+    Matched on the y values, not the label, which is presentation and is reworded far more often
+    than the data changes. It follows that this identifies the *data*: two spectra holding identical
+    counts are indistinguishable here.
+
+    Both comparisons allow for what Mantid's plot wrapper does to a histogram on the way to the
+    axes - x becomes bin centres, and y is divided by the bin width unless the workspace is already
+    a distribution (``graph1d.autodistribution``, on by default). Either form of y is accepted, so
+    this asserts which data was plotted rather than that setting.
+    """
+    import numpy as np
+
+    raw = workspace.readY(spectrum)
+    edges = workspace.readX(spectrum)
+    histogram = len(edges) == len(raw) + 1
+    centres = 0.5 * (edges[1:] + edges[:-1]) if histogram else edges
+    candidates = [raw, raw / np.diff(edges)] if histogram else [raw]
+    for label, x, y in curves(axes):
+        if any(len(y) == len(option) and np.allclose(y, option, equal_nan=True) for option in candidates):
+            if not np.allclose(x, centres, equal_nan=True):
+                raise AssertionError(f"curve '{label}' has {workspace.name()}'s y values but not its x values")
+            return label
+    raise AssertionError(f"no curve on the axes matches spectrum {spectrum} of {workspace.name()}; found {curve_labels(axes)}")
+
+
 def top_level_widget_names():
     """Object names of the currently open top-level widgets, for asserting that a button opened a
     new window."""

@@ -293,10 +293,13 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         self.y_bounds = None
 
     def update_figure(self, plot_window_title: str | None = None) -> None:
-        window_title = "GSAS-II Plot"
+        # Keep the existing title when called without one. update_figure is also reached from the
+        # range markers and the toolbar's home button, both of which run straight after the title
+        # has been set for the refined file, and which would otherwise discard it.
         if plot_window_title:
-            window_title = plot_window_title
-        self.plot_dock.setWindowTitle(window_title)
+            self.plot_dock.setWindowTitle(plot_window_title)
+        elif not self.plot_dock.windowTitle():
+            self.plot_dock.setWindowTitle("GSAS-II Plot")
         self.toolbar.update()
         self.update_legend(self.get_axes()[0])
         self.update_axes_position()

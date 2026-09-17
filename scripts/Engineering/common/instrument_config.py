@@ -154,6 +154,9 @@ CONFIGS: Dict[str, InstrumentConfig] = {
             (ENGINX_GROUP.NORTH, "1 (North)", False, False),
             (ENGINX_GROUP.SOUTH, "2 (South)", False, False),
             (ENGINX_GROUP.CROPPED, "Crop to Spectra", False, True),
+            # these labels are what the user sees in the region of interest combo, and the .ui
+            # file's own default items must match them: the combo is repopulated from here whenever
+            # the instrument changes, so a mismatch renames the option mid-session
             (ENGINX_GROUP.TEXTURE20, "Texture20", False, False),
             (ENGINX_GROUP.TEXTURE30, "Texture30", False, False),
         ),

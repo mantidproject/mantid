@@ -11,6 +11,102 @@ Preamble
 - The nexus files for all the runs used below are available from ``<mantidBuildDir>/ExternalData/Testing/Data/DocTest`` path
 - Data loading time from the archive can be reduced by adding the above path at ``File`` -> ``Manage User Directories`` -> ``Data Search Directories`` before starting the tests.
 
+Automated coverage
+------------------
+
+Most of this guide is now covered by automated UI tests. They live in
+``Testing/AutomatedUITests/EngineeringDiffraction/`` and are described in :ref:`AutomatedUITests`;
+run them with ``ctest -R AutomatedUITest.EngineeringDiffraction``.
+
+The table below is the whole picture: for each test, which classes cover it and which of its steps
+still have to be performed by hand. Steps not listed in the last column are automated.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 45 35
+
+   * - Test
+     - Automated by
+     - Still to be checked by hand
+   * - `Test 1 - Calibration and focussing`_
+     - ``EngDiffGuiRunProcessingTest.py``: ``EngDiffGuiCalibrateAndFocusTest`` (Calibration 3, 8-9,
+       11-12 and Focus 2, 5-7), ``EngDiffGuiPlotOutputTest`` (Calibration 10-11 and Focus 3, both
+       checkboxes on and off), ``EngDiffGuiLoadExistingCalibrationTest`` (Calibration 13-14 and
+       Focus 4-5), ``EngDiffGuiSaveLocationAndRbNumberTest`` (Calibration 5, including changing the
+       save location mid-session)
+     - Calibration 1-2: archive access, and opening the interface from the menu. Comparing both
+       figures against the screenshots.
+   * - `Test 2 - RB Number`_
+     - ``EngDiffGuiSaveLocationAndRbNumberTest`` for the calibration and focus output;
+       ``EngDiffGuiTextureRoiTest`` for the rule that texture output goes *only* to the RB
+       directory; ``EngDiffGuiTexturePoleFigureTest`` and ``EngDiffGuiGsas2MultipleTest`` for the
+       same layout on the other tabs
+     - Nothing.
+   * - `Test 3 - Cropping`_
+     - ``EngDiffGuiCroppingTest.py``: ``EngDiffGuiRoiOptionsTest`` (step 2's region of interest
+       widget - the options each instrument offers, the extra input each one reveals, and the
+       rejection of an invalid spectrum range), ``EngDiffGuiCroppedCalibrationTest`` (2-3, 5-6, 8),
+       ``EngDiffGuiTextureRoiTest`` (1, 7, 9, including the output file layout for a texture
+       grouping). The plot shapes at 4, 8 and 9 are asserted from the region of interest.
+     - Comparing the figures against the screenshots.
+   * - `Test 4 - Absorption Correction`_
+     - ``EngDiffGuiCorrectionTest.py``: ``EngDiffGuiCorrectionTableTest`` (1-9, 11-16 - the table,
+       the reference workspace, and the STL shape, CSG shape, material and orientation dialogs, each
+       of which really runs its algorithm), ``EngDiffGuiCorrectionApplyTest`` (19-20, 22-23, and
+       part of 24, plus the divergence correction, the attenuation table and the Monte Carlo
+       parameters, which this guide does not ask for)
+     - Step 21, viewing the shape again after a custom gauge volume is chosen. Steps 17-18's texture
+       directions, whose settings are covered by `Test 12 - Pole Figures`_ but not their effect on a
+       correction. The rest of step 24. The screenshot comparisons.
+   * - `Test 5 - Focused data`_
+     - ``EngDiffGuiFittingDataTest`` (3-4, 6-9), reaching the tab by really calibrating and focusing
+       first as steps 1-2 do; ``EngDiffGuiFittingSettingsTest`` (5)
+     - Nothing.
+   * - `Test 6 - Browse Filters`_
+     - ``EngDiffGuiFittingDataTest._check_prefill_and_filters``
+     - Nothing.
+   * - `Test 7 - Run removal`_
+     - ``EngDiffGuiFittingDataTest``: ``_check_removal`` (2-3), ``_check_reload_reuses_log_values``
+       (4), ``_check_ads_deletion`` (5-6)
+     - Step 2's check on the log table rows after a removal. The row-for-row correspondence is
+       asserted when the runs are loaded (`Test 5 - Focused data`_ step 4) but not again afterwards.
+   * - `Test 8 - Background subtraction`_
+     - ``EngDiffGuiFittingDataTest._check_background_subtraction`` and ``_check_plot_background_button``
+     - Nothing.
+   * - `Test 9 - Fit browser`_
+     - ``EngDiffGuiSequentialFitTest`` (1, 3-4, 6, and part of 5)
+     - Step 2. The half of step 5 that needs the right-click menu actually clicked through. Step 7
+       entirely: the fit browser's ``Custom Setup``, ``Clear Model`` and ``Evaluate Function`` have
+       no Python API.
+   * - `Test 10 - Sequential fitting`_
+     - ``EngDiffGuiSequentialFitTest`` (5-8); ``EngDiffGuiFittingSettingsTest`` (2, 9)
+     - Step 0, setting the workbench log level, which the automated tests do not need.
+   * - `Test 11 - Serial fitting`_
+     - ``EngDiffGuiSequentialFitTest._check_serial_fit`` (2-3)
+     - Nothing.
+   * - `Test 12 - Pole Figures`_
+     - ``EngDiffGuiTextureTest.py``, using the same shipped validation files this test does:
+       ``EngDiffGuiTextureLoadingTest`` (1-5, 8-10), ``EngDiffGuiTexturePoleFigureTest`` (6, 7,
+       11-14, and part of 15)
+     - The rest of step 15. The three screenshot comparisons.
+   * - `Test 13 - GSASII`_
+     - ``EngDiffGuiGsas2SingleTest`` (6-8, 11-12); ``EngDiffGuiGsas2PrefillTest`` (2-5), which
+       calibrates and focuses for real to check the tab's paths are filled in from them. **GSAS-II
+       itself is never run**: the subprocess is mocked and canned outputs copied in, so the command
+       line and JSON sent to it are covered, and so is everything built from its output, but a
+       change in GSAS-II would not be caught. Step 11 therefore only checks that the overridden cell
+       length reaches GSAS-II, not that the fit is better for it.
+     - Step 1. Step 9's browse.
+   * - `Test 14 - GSASII multiple files`_
+     - ``EngDiffGuiGsas2MultipleTest`` (8, plus the RB number save location, which the steps below do
+       not ask for); ``EngDiffGuiGsas2SingleTest`` for all three of step 9's error cases. GSAS-II is
+       mocked here too.
+     - Steps 1-4, for the same reason as `Test 13 - GSASII`_. Steps 5-7's browsing.
+
+``EngDiffGuiImatTest.py`` corresponds to no numbered test above: it repeats `Test 1 - Calibration and
+focussing`_ on IMAT against fabricated run data, and checks the IMAT-specific region of interest
+options, peak function and TOF binning.
+
 
 Overview
 ^^^^^^^^
@@ -33,6 +129,7 @@ and delete the settings with names starting with EngineeringDiffraction2 from th
 
 Test 1 - Calibration and focussing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 This test follows the simple steps for calibrating and focusing in the Engineering Diffraction Gui.
 
 Calibration
@@ -373,7 +470,7 @@ This test will check the Pole Figure plotting in the Texture Tab
 
 5. Click ``Select All Files``
 
-6. In settings, ensure the texture directions are set to  ``D1  1  0  0``, ``D2  0  1  0``, and ``D3  0  0  1``, and the ``Scatter Plot Experimental Pole Figure`` is checked, then click ``OK``
+6. In settings, ensure the texture directions are set to  ``D1  1  0  0``, ``D2  0  1  0``, and ``D3  0  0  1``, and the ``Scatter Plot Experimental Pole Figure`` is checked, then click ``OK``. Note that the interface labels these three directions ``RD``, ``ND`` and ``TD`` rather than ``D1``, ``D2`` and ``D3``.
 
 7. Click ``Calculate Pole Figure``, you should get a plot like the one below (the colours may be different, they should correspond to the order of the files in the table, for this example the files are in ascending run number order)
 
@@ -447,6 +544,7 @@ Please test this on IDAaaS: an ENGINX instance should have MantidWorkbenchNightl
 
 Test 14 - GSASII multiple files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 This test covers the multiple data files functionality with multiple banks per file in the ``GSAS II`` tab.
 
 Note this test will only work if ``GSASII`` is also installed.
@@ -469,4 +567,4 @@ Change to the ``GSAS II`` tab. Clear any pre-filled paths.
 
 8. Click Refine in ``GSAS II``. After a few seconds, the output fit should be plotted. In the top right of the plot widget, verify that the refined spectrum combobox shows entries for the banks of the last refined data file.
 
-9. Test Error Cases: Try selecting multiple instrument `.prm` files (should show error message about requiring exactly one instrument file). Try selecting `.gss` files with different numbers of banks (should show error about inconsistent bank counts). Try selecting single-bank `.gss` files (should show error about requiring multiple banks per file).
+9. Test Error Cases: Try selecting multiple instrument `.prm` files (should show error message about requiring exactly one instrument file). Try selecting `.gss` files with different numbers of banks (should show error about inconsistent bank counts; note that only the offending file is dropped here - the files whose bank counts do match are still refined, rather than the whole request being rejected as it is for the other two cases). Try selecting single-bank `.gss` files (should show error about requiring multiple banks per file).

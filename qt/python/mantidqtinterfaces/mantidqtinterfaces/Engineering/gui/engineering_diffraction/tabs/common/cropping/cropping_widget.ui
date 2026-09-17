@@ -50,12 +50,12 @@
        </item>
        <item>
         <property name="text">
-         <string>Texture (20 spec)</string>
+         <string>Texture20</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Texture (30 spec)</string>
+         <string>Texture30</string>
         </property>
        </item>
       </widget>

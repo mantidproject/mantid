@@ -32,6 +32,19 @@ inline const std::string CHANGES_IN_FUNCTION_TOO_SMALL = "Changes in function va
 /// Reported by Levenberg-Marquardt when the change in the parameter values between
 /// iterations has fallen below tolerance (an essentially-converged stop).
 inline const std::string CHANGES_IN_PARAMETER_TOO_SMALL = "Changes in parameter value are too small";
+
+/// Whether a Fit "OutputStatus" string should be treated as a converged fit.
+/// In strict mode only "success" is accepted. Otherwise the tolerance-limited stopping
+/// conditions count too: a minimiser started from an already-optimal set of parameters
+/// stops that way routinely, and treating it as a failure is wrong.
+/// Kept here beside the strings so callers do not each re-implement the comparison.
+inline bool isConverged(const std::string &status, const bool strict = false) {
+  if (status == SUCCESS)
+    return true;
+  if (strict)
+    return false;
+  return status == CHANGES_IN_FUNCTION_TOO_SMALL || status == CHANGES_IN_PARAMETER_TOO_SMALL;
+}
 } // namespace MinimizerStatus
 
 /** An interface for function minimizers. Minimizers minimize cost functions.
