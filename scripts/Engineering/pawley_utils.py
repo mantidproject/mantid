@@ -1014,6 +1014,14 @@ class Poldi2DEvalMixin:
         ):
             self._reset_scales_and_bgs()
 
+    def _live_spectra(self) -> np.ndarray:
+        """Boolean mask of "live" spectra (spectra contributing to the fit i.e. have detectors and are not masked)."""
+        n_hist = self.ws.getNumberHistograms()
+        if getattr(self, "_islive", None) is None or len(self._islive) != n_hist:
+            si = self.ws.spectrumInfo()
+            self._islive = np.array([si.hasDetectors(ispec) and not si.isMasked(ispec) for ispec in range(n_hist)])
+        return self._islive
+
     def _simulate_2d(self, params: np.ndarray[float]) -> Workspace2D:
         self.ws_1d.setSharedY(0, self.eval_profile(params))
         ws_sim = simulate_2d_data(self.ws, self.ws_1d, output_workspace=f"{self.ws.name()}_sim", lambda_max=self.lambda_max)
@@ -1041,7 +1049,10 @@ class Poldi2DEvalMixin:
             return self.scales, self.bgs
 
         ws_sim = self._simulate_2d(params)
-        self.scales, self.bgs = calculate_scales_and_bg(self.ws.extractY(), ws_sim.extractY())
+        live = self._live_spectra()
+        # better to only calculate scales for live spectra as lstsq reg is degenerate for all zeros masked spec
+        self._reset_scales_and_bgs()  # reset all then update the live ones
+        self.scales[live], self.bgs[live] = calculate_scales_and_bg(self.ws.extractY()[live], ws_sim.extractY()[live])
         return self.scales, self.bgs
 
     def eval_2d(self, params: np.ndarray[float]) -> Workspace2D:
@@ -1052,7 +1063,8 @@ class Poldi2DEvalMixin:
 
     def eval_resids(self, params: np.ndarray[float]) -> np.ndarray[float]:
         ws_sim = self.eval_2d(params)
-        return (self.ws.extractY() - ws_sim.extractY()).flat
+        live = self._live_spectra()
+        return (self.ws.extractY()[live] - ws_sim.extractY()[live]).flat
 
     def eval_profile(self, params: np.ndarray[float]) -> np.ndarray[float]:
         self.set_free_params(params)
