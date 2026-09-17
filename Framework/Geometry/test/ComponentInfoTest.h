@@ -845,7 +845,10 @@ public:
 
     auto boolValues = componentInfo->getBoolParameter(bankIndex, "my_bool");
     TS_ASSERT_EQUALS(boolValues.size(), 1);
-    TS_ASSERT_EQUALS(boolValues[0], true);
+    // std::vector<bool> subscripting yields a proxy reference, not a bool. cxxtest stringifies a
+    // failed comparison by reinterpreting the operand as bytes, which libc++ rejects for the
+    // proxy type, so collapse it to a real bool first.
+    TS_ASSERT_EQUALS(static_cast<bool>(boolValues[0]), true);
 
     auto intValues = componentInfo->getIntParameter(bankIndex, "my_int");
     TS_ASSERT_EQUALS(intValues.size(), 1);
@@ -928,7 +931,9 @@ public:
 
     TS_ASSERT_EQUALS(componentInfo.getNumberParameter(bankIndex, "a_double").at(0), 2.5);
     TS_ASSERT_EQUALS(componentInfo.getIntParameter(bankIndex, "an_int").at(0), 7);
-    TS_ASSERT_EQUALS(componentInfo.getBoolParameter(bankIndex, "a_bool").at(0), true);
+    // static_cast for the same reason as in test_named_parameter_read_through_to_parameter_map:
+    // vector<bool>::at() returns a proxy reference that cxxtest cannot stringify under libc++.
+    TS_ASSERT_EQUALS(static_cast<bool>(componentInfo.getBoolParameter(bankIndex, "a_bool").at(0)), true);
     TS_ASSERT_EQUALS(componentInfo.getStringParameter(bankIndex, "a_string").at(0), "hello");
   }
 
