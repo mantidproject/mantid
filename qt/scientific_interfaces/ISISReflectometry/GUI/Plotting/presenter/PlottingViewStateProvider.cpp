@@ -9,7 +9,6 @@
 #include "GUI/Plotting/presenter/PlotOutputTypeProperties.h"
 
 #include <algorithm>
-#include <stdexcept>
 #include <utility>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -18,53 +17,6 @@ namespace {
 auto constexpr minimumSelectedItemsForMultiPlot = size_t{2};
 
 bool hasSelectedItems(size_t selectedItemCount) { return selectedItemCount > 0; }
-
-bool matchesFilter(std::string const &label, boost::regex const &expression) {
-  try {
-    return boost::regex_search(label, expression);
-  } catch (std::runtime_error const &) {
-    // Treat labels that exceed Boost's matching limits as nonmatching.
-    return false;
-  }
-}
-
-bool filterItem(PlottingWorkspaceTreeItemState &item, boost::regex const &expression,
-                std::vector<ReducedWorkspaceOutputType> const &outputTypes, bool ancestorMatches = false) {
-  auto const matches = ancestorMatches || matchesFilter(item.label, expression);
-  if (item.itemType == PlottingWorkspaceTreeItemType::Workspace) {
-    item.visible =
-        matches && std::find(outputTypes.cbegin(), outputTypes.cend(), item.reducedOutputType) != outputTypes.cend();
-  } else {
-    item.visible = false;
-    for (auto &child : item.children) {
-      // Always visit every child; matching parents bypass only the regex filter.
-      item.visible = filterItem(child, expression, outputTypes, matches) || item.visible;
-    }
-  }
-  return item.visible;
-}
-
-bool allItemsVisible(PlottingWorkspaceTreeItemState const &item) {
-  return item.visible && std::all_of(item.children.cbegin(), item.children.cend(), allItemsVisible);
-}
-
-void disableSelection(PlottingWorkspaceTreeItemState &item) {
-  item.selectionMode = PlottingWorkspaceTreeSelectionMode::None;
-  item.muted = true;
-  for (auto &child : item.children) {
-    disableSelection(child);
-  }
-}
-
-void disableIncompleteSpinGroups(PlottingWorkspaceTreeItemState &item) {
-  if (item.itemType == PlottingWorkspaceTreeItemType::WorkspaceGroup && !allItemsVisible(item)) {
-    disableSelection(item);
-  } else {
-    for (auto &child : item.children) {
-      disableIncompleteSpinGroups(child);
-    }
-  }
-}
 
 bool hasEnoughSelectedItemsForMultiPlot(size_t selectedItemCount, size_t selectedPlottingWorkspaceGroupCount,
                                         PlotOutputTypeProperties const &plotProperties) {
@@ -236,19 +188,6 @@ PlottingViewStateProvider::plottingWorkspaceTreeItemStates(std::vector<PlottingW
   std::transform(items.cbegin(), items.cend(), std::back_inserter(itemStates),
                  [&](const auto &item) { return plottingWorkspaceTreeItemState(item, properties); });
   return itemStates;
-}
-
-std::vector<PlottingWorkspaceTreeItemState> PlottingViewStateProvider::plottingWorkspaceTreeItemStates(
-    std::vector<PlottingWorkspaceTreeItem> const &items, PlotOutputType outputType, boost::regex const &expression,
-    std::vector<ReducedWorkspaceOutputType> const &outputTypes) const {
-  auto states = plottingWorkspaceTreeItemStates(items, outputType);
-  for (auto &item : states) {
-    filterItem(item, expression, outputTypes);
-    if (outputType == PlotOutputType::SpinAsymmetry) {
-      disableIncompleteSpinGroups(item);
-    }
-  }
-  return states;
 }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

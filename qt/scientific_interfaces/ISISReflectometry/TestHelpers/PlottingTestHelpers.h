@@ -117,7 +117,7 @@ inline void PrintTo(PlottingWorkspaceTreeItemState const &state, std::ostream *o
       *os << ", ";
     PrintTo(state.children[index], os);
   }
-  *os << "], visible: " << state.visible << ", muted: " << state.muted << ", selectionMode: ";
+  *os << "], muted: " << state.muted << ", selectionMode: ";
   PrintTo(state.selectionMode, os);
   *os << "}";
 }
@@ -186,9 +186,9 @@ inline bool operator!=(PlottingWorkspaceTreeItem const &lhs, PlottingWorkspaceTr
 }
 
 inline bool operator==(PlottingWorkspaceTreeItemState const &lhs, PlottingWorkspaceTreeItemState const &rhs) {
-  return lhs.visible == rhs.visible && lhs.label == rhs.label && lhs.itemType == rhs.itemType &&
-         lhs.reducedOutputType == rhs.reducedOutputType && lhs.workspaceName == rhs.workspaceName &&
-         lhs.children == rhs.children && lhs.muted == rhs.muted && lhs.selectionMode == rhs.selectionMode;
+  return lhs.label == rhs.label && lhs.itemType == rhs.itemType && lhs.reducedOutputType == rhs.reducedOutputType &&
+         lhs.workspaceName == rhs.workspaceName && lhs.children == rhs.children && lhs.muted == rhs.muted &&
+         lhs.selectionMode == rhs.selectionMode;
 }
 
 inline bool operator!=(PlottingWorkspaceTreeItemState const &lhs, PlottingWorkspaceTreeItemState const &rhs) {

@@ -9,7 +9,6 @@
 #include "../../../ISISReflectometry/GUI/Plotting/presenter/PlottingViewStateProvider.h"
 
 #include <cxxtest/TestSuite.h>
-#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -73,128 +72,7 @@ public:
                      PlottingWorkspaceTreeSelectionMode::DirectAndParent);
   }
 
-  void testWorkspaceTypesAreFilteredEvenWhenParentMatches() {
-    PlottingViewStateProvider provider;
-    auto const items = filterItems();
-    for (auto type : {ReducedWorkspaceOutputType::IvsQBinned, ReducedWorkspaceOutputType::IvsLambda,
-                      ReducedWorkspaceOutputType::IvsQ}) {
-      auto const states = provider.plottingWorkspaceTreeItemStates(items, PlotOutputType::DetectorMap,
-                                                                   boost::regex("^sample$"), {type});
-      TS_ASSERT(states[0].visible);
-      TS_ASSERT(states[0].children[0].visible);
-      for (auto const &child : states[0].children[0].children) {
-        TS_ASSERT_EQUALS(child.visible, child.reducedOutputType == type);
-      }
-    }
-  }
-
-  void testMatchingLeafShowsAncestorsAndHidesOtherBranches() {
-    PlottingViewStateProvider provider;
-    auto const states = provider.plottingWorkspaceTreeItemStates(
-        filterItems(), PlotOutputType::ReflectivityCurve, boost::regex("^binned$"),
-        {ReducedWorkspaceOutputType::IvsQBinned, ReducedWorkspaceOutputType::IvsQ});
-
-    TS_ASSERT(states[0].visible);
-    TS_ASSERT(states[0].children[0].visible);
-    TS_ASSERT(states[0].children[0].children[0].visible);
-    TS_ASSERT(!states[0].children[0].children[1].visible);
-    TS_ASSERT(!states[0].children[1].visible);
-    TS_ASSERT(!states[1].visible);
-  }
-
-  void testMatchingRunAdmitsOnlyItsDescendants() {
-    PlottingViewStateProvider provider;
-    auto const states = provider.plottingWorkspaceTreeItemStates(
-        filterItems(), PlotOutputType::ReflectivityCurve, boost::regex("^12345$"),
-        {ReducedWorkspaceOutputType::IvsQBinned, ReducedWorkspaceOutputType::IvsQ});
-
-    TS_ASSERT(states[0].children[0].children[0].visible);
-    TS_ASSERT(states[0].children[0].children[1].visible);
-    TS_ASSERT(!states[0].children[0].children[2].visible);
-    TS_ASSERT(!states[0].children[1].visible);
-  }
-
-  void testEmptyParentsRemainHiddenEvenWhenMatching() {
-    PlottingViewStateProvider provider;
-    auto const items = std::vector<PlottingWorkspaceTreeItem>{groupItem("sample", {runItem("12345", {})})};
-    auto const states = provider.plottingWorkspaceTreeItemStates(
-        items, PlotOutputType::ReflectivityCurve, boost::regex("sample"), {ReducedWorkspaceOutputType::IvsQBinned});
-    TS_ASSERT(!states[0].visible);
-    TS_ASSERT(!states[0].children[0].visible);
-  }
-
-  void testNoCheckedTypesHidesAllParents() {
-    PlottingViewStateProvider provider;
-    auto const states = provider.plottingWorkspaceTreeItemStates(filterItems(), PlotOutputType::ReflectivityCurve,
-                                                                 boost::regex("sample"), {});
-    TS_ASSERT(!states[0].visible);
-    TS_ASSERT(!states[1].visible);
-  }
-
-  void testRegexIsCaseSensitiveAndAnEmptyExpressionRestoresMatches() {
-    PlottingViewStateProvider provider;
-    auto const items = filterItems();
-    auto const hidden = provider.plottingWorkspaceTreeItemStates(
-        items, PlotOutputType::ReflectivityCurve, boost::regex("BINNED"), {ReducedWorkspaceOutputType::IvsQBinned});
-    TS_ASSERT(!hidden[0].visible);
-    auto const shown = provider.plottingWorkspaceTreeItemStates(
-        items, PlotOutputType::ReflectivityCurve, boost::regex(""), {ReducedWorkspaceOutputType::IvsQBinned});
-    TS_ASSERT(shown[0].visible);
-    TS_ASSERT(shown[0].children[0].children[0].visible);
-    TS_ASSERT(shown[0].children[1].visible);
-  }
-
-  void testIncompleteSpinGroupIsVisibleButCannotContributeToSelection() {
-    PlottingViewStateProvider provider;
-    auto const items = std::vector<PlottingWorkspaceTreeItem>{
-        groupItem("sample", {runItem("12345", {{"spin_group",
-                                                PlottingWorkspaceTreeItemType::WorkspaceGroup,
-                                                ReducedWorkspaceOutputType::None,
-                                                "spin_group",
-                                                {workspaceItem("spin_1", ReducedWorkspaceOutputType::IvsQBinned),
-                                                 workspaceItem("spin_2", ReducedWorkspaceOutputType::IvsQBinned),
-                                                 workspaceItem("spin_3", ReducedWorkspaceOutputType::IvsQBinned),
-                                                 workspaceItem("spin_4", ReducedWorkspaceOutputType::IvsQBinned)}}})})};
-    auto const states = provider.plottingWorkspaceTreeItemStates(
-        items, PlotOutputType::SpinAsymmetry, boost::regex("^spin_[12]$"), {ReducedWorkspaceOutputType::IvsQBinned});
-    auto const &group = states[0].children[0].children[0];
-    TS_ASSERT(group.visible);
-    TS_ASSERT(group.children[0].visible);
-    TS_ASSERT(!group.children[2].visible);
-    TS_ASSERT_EQUALS(group.selectionMode, PlottingWorkspaceTreeSelectionMode::None);
-    for (auto const &child : group.children) {
-      TS_ASSERT_EQUALS(child.selectionMode, PlottingWorkspaceTreeSelectionMode::None);
-    }
-    auto const restored = provider.plottingWorkspaceTreeItemStates(
-        items, PlotOutputType::SpinAsymmetry, boost::regex(""), {ReducedWorkspaceOutputType::IvsQBinned});
-    TS_ASSERT_EQUALS(restored[0].children[0].children[0].selectionMode,
-                     PlottingWorkspaceTreeSelectionMode::DirectAndParent);
-    TS_ASSERT_EQUALS(restored[0].children[0].children[0].children[0].selectionMode,
-                     PlottingWorkspaceTreeSelectionMode::ParentOnly);
-  }
-
-  void testRegexMatchingFailureExcludesOnlyAffectedLabels() {
-    PlottingViewStateProvider provider;
-    auto const difficultLabel = std::string(200, 'a') + 'b';
-    auto const expression = boost::regex("(a+)+$");
-    TS_ASSERT_THROWS(boost::regex_search(difficultLabel, expression), std::runtime_error const &);
-    auto const states = provider.plottingWorkspaceTreeItemStates(
-        {workspaceItem(difficultLabel, ReducedWorkspaceOutputType::IvsQBinned),
-         workspaceItem("aaa", ReducedWorkspaceOutputType::IvsQBinned)},
-        PlotOutputType::ReflectivityCurve, expression, {ReducedWorkspaceOutputType::IvsQBinned});
-    TS_ASSERT(!states[0].visible);
-    TS_ASSERT(states[1].visible);
-  }
-
 private:
-  std::vector<PlottingWorkspaceTreeItem> filterItems() const {
-    return {groupItem("sample",
-                      {runItem("12345", {workspaceItem("binned", ReducedWorkspaceOutputType::IvsQBinned),
-                                         workspaceItem("q", ReducedWorkspaceOutputType::IvsQ),
-                                         workspaceItem("lambda", ReducedWorkspaceOutputType::IvsLambda)}),
-                       runItem("67890", {workspaceItem("other_binned", ReducedWorkspaceOutputType::IvsQBinned)})}),
-            groupItem("empty", {})};
-  }
   PlottingWorkspaceTreeItem groupItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) const {
     return {std::move(label), PlottingWorkspaceTreeItemType::ReductionGroup, ReducedWorkspaceOutputType::None, "",
             std::move(children)};
