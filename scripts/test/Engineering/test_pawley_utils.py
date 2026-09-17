@@ -10,7 +10,16 @@ import numpy as np
 from numpy import allclose, log, zeros_like, ones, trapezoid, array, linspace, sqrt
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 from mantid.api import AnalysisDataService, FileFinder
-from mantid.simpleapi import CreateWorkspace, FlatBackground, EditInstrumentGeometry, ConvertUnits, LinearBackground
+from mantid.simpleapi import (
+    CreateWorkspace,
+    FlatBackground,
+    EditInstrumentGeometry,
+    ConvertUnits,
+    LinearBackground,
+    CloneWorkspace,
+    MaskDetectors,
+    ExtractSpectra,
+)
 from mantid.geometry import CrystalStructure
 from mantid.kernel import V3D
 from Engineering.pawley_utils import Phase, GaussianProfile, PVProfile, PawleyPattern1D, PawleyPattern2D, BackToBackGauss
@@ -1305,6 +1314,58 @@ class PoldiUtilsFluxTest(unittest.TestCase):
         mock_flux_interp.assert_not_called()
         self.assertGreater(mock_interp.call_count, 0)
         AnalysisDataService.clear()
+
+
+class PoldiUtilsMaskingTest(unittest.TestCase):
+    """Tests that simulate_2d_data excludes masked spectra."""
+
+    IMASK = 2  # interior spectrum, so masking it does not alter the two-theta/L2 range
+
+    @classmethod
+    def setUpClass(cls):
+        fpath_data = FileFinder.getFullPath("poldi_448x500_chopper5k_silicon.txt")
+        ws = load_poldi(fpath_data, "POLDI_Definition_448_calibrated.xml", chopper_speed=5000, t0=5.855e-02, t0_const=-9.00)
+        # crop to a handful of spectra to keep the simulation quick
+        cls.ws_2d = ExtractSpectra(InputWorkspace=ws, StartWorkspaceIndex=0, EndWorkspaceIndex=4, OutputWorkspace="ws_2d_crop")
+        # single sharp peak so the simulated spectra are non-trivial
+        dspacs = linspace(0.69, 4.15, 2460)
+        cls.ws_1d = CreateWorkspace(
+            DataX=dspacs, DataY=np.exp(-0.5 * ((dspacs - 3.135) / 0.01) ** 2), UnitX="dSpacing", OutputWorkspace="ws_1d_mask_test"
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        AnalysisDataService.clear()
+
+    def _make_masked_ws(self):
+        ws_masked = CloneWorkspace(InputWorkspace=self.ws_2d, OutputWorkspace="ws_2d_masked")
+        MaskDetectors(Workspace=ws_masked, WorkspaceIndexList=[self.IMASK])
+        return ws_masked
+
+    def test_simulate_2d_data_zeroes_masked_spectra(self):
+        ws_sim_ref = simulate_2d_data(self.ws_2d, self.ws_1d, output_workspace="ws_sim_ref")
+        ws_sim = simulate_2d_data(self._make_masked_ws(), self.ws_1d, output_workspace="ws_sim_masked")
+
+        # the masked spectrum is zeroed, not simulated (it is non-zero when unmasked)
+        self.assertTrue(np.any(ws_sim_ref.readY(self.IMASK) > 0))
+        assert_array_equal(ws_sim.readY(self.IMASK), zeros_like(ws_sim.readY(self.IMASK)))
+
+    def test_simulate_2d_data_leaves_unmasked_spectra_unchanged(self):
+        ws_sim_ref = simulate_2d_data(self.ws_2d, self.ws_1d, output_workspace="ws_sim_ref")
+        ws_sim = simulate_2d_data(self._make_masked_ws(), self.ws_1d, output_workspace="ws_sim_masked")
+
+        for ispec in (0, 1, 3, 4):
+            assert_array_almost_equal(ws_sim.readY(ispec), ws_sim_ref.readY(ispec))
+
+    def test_simulate_2d_data_zeroes_masked_spectra_holding_counts(self):
+        # masking does not always zero the counts, so the simulation must zero them itself
+        # rather than leaving the values carried over from the input workspace
+        ws_masked = self._make_masked_ws()
+        ws_masked.setY(self.IMASK, ones(ws_masked.blocksize()))
+
+        ws_sim = simulate_2d_data(ws_masked, self.ws_1d, output_workspace="ws_sim_masked")
+
+        assert_array_equal(ws_sim.readY(self.IMASK), zeros_like(ws_sim.readY(self.IMASK)))
 
 
 if __name__ == "__main__":
