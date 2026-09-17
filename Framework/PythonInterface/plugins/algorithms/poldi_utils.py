@@ -290,18 +290,23 @@ def simulate_2d_data(
     cycle_time, slit_offsets, t0_const, l1_chop = get_instrument_settings_from_log(ws_sim)
     si = ws_sim.spectrumInfo()
     nspec = ws_sim.getNumberHistograms()
-    tths = np.asarray([si.twoTheta(ispec) for ispec in range(nspec)])
-    l2s = np.asarray([si.l2(ispec) for ispec in range(nspec)])
+    is_live = np.array([si.hasDetectors(ispec) and not si.isMasked(ispec) for ispec in range(nspec)])
+    tths = np.array([si.twoTheta(ispec) if is_live[ispec] else 0.0 for ispec in range(nspec)])
+    l2s = np.array([si.l2(ispec) if is_live[ispec] else 0.0 for ispec in range(nspec)])
     l1 = si.l1()
     # get npulses to include
-    time_max = get_max_tof_from_chopper(l1, l1_chop, l2s, tths, lambda_max) + slit_offsets[-1]
+    time_max = get_max_tof_from_chopper(l1, l1_chop, l2s[is_live], tths[is_live], lambda_max) + slit_offsets[-1]
     npulses = int(time_max // cycle_time)
     # simulate detected spectra
     ipulses = np.arange(npulses)[:, None]
     offsets = (ipulses * cycle_time - slit_offsets - t0_const).flatten()  # note different sign to auto-corr!
     tofs = ws_sim.x(0)[:, None] + offsets  # same for all spectra
     path_length_ratio = (l2s + l1 - l1_chop) / (l2s + l1)
-    tof_d1Ang = np.asarray([si.diffractometerConstants(ispec)[UnitParams.difc] * path_length_ratio[ispec] for ispec in range(nspec)])
+    tof_d1Ang = np.asarray(
+        [si.diffractometerConstants(ispec)[UnitParams.difc] * path_length_ratio[ispec] if is_live[ispec] else 0.0 for ispec in range(nspec)]
+    )
+
+    ilive = np.flatnonzero(is_live)
     if flux_sample_points:
         lam_grid, flux_vals = _get_flux_arrays(ws_sim, n_points=flux_sample_points)
         sin_thetas = np.sin(tths / 2.0)
@@ -309,15 +314,17 @@ def simulate_2d_data(
             delayed(_do_interp_with_flux_correction)(
                 tofs / tof_d1Ang[ispec], ws_1d.x(0), ws_1d.y(0), sin_thetas[ispec], lam_grid, flux_vals
             )
-            for ispec in range(nspec)
+            for ispec in ilive
         )
     else:
         out = Parallel(n_jobs=min(4, cpu_count()), prefer="threads", return_as="generator")(
-            delayed(_do_interp)(tofs / tof_d1Ang[ispec], ws_1d.x(0), ws_1d.y(0)) for ispec in range(nspec)
+            delayed(_do_interp)(tofs / tof_d1Ang[ispec], ws_1d.x(0), ws_1d.y(0)) for ispec in ilive
         )
-    # set y values
-    for ispec, yvec in enumerate(out):
-        ws_sim.setSharedY(ispec, yvec)
+    # set y values - masked spectra are zeroed rather than simulated
+    for ispec in np.flatnonzero(~is_live):
+        ws_sim.setY(int(ispec), np.zeros(ws_sim.blocksize()))
+    for ispec, yvec in zip(ilive, out):
+        ws_sim.setSharedY(int(ispec), yvec)
     ADS.addOrReplace(output_workspace, ws_sim)
     return ws_sim
 
