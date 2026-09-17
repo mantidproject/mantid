@@ -29,6 +29,7 @@ public:
   enum class CacheReturnStatus_t {
     NXFOUND,
     NXCACHED,
+    NXNOT_DATASET,
     NXDATASET_NOT_FOUND,
     NXWRONG_TYPE,
     NXERROR,
@@ -117,7 +118,7 @@ public:
    * @return pair<value, status> where value is valid only if the return status is FOUND or CACHED
    */
   template <typename T>
-  std::pair<T, NexusDescriptorLazy::CacheReturnStatus_t> getEntryValue(const std::string &entryName) const;
+  std::pair<T, NexusDescriptorLazy::CacheReturnStatus_t> getDataValue(const std::string &datasetAddress) const;
 
   /// Query if a given type exists somewhere in the file
   bool classTypeExists(std::string const &classType) const;
@@ -140,7 +141,7 @@ private:
   void loadGroups(std::map<std::string, std::string> &allEntries, std::string const &address, unsigned int depth,
                   const unsigned int maxDepth);
 
-  const CacheValue_t _getEntryValue(const std::string &entryName) const;
+  const CacheValue_t _getDataValue(const std::string &datasetAddress) const;
 
   /** Nexus HDF5 file name */
   std::string const m_filename;
