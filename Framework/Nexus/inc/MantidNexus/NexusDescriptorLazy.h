@@ -114,7 +114,7 @@ public:
   /**
    * @brief Gets the value of an entry in the Nexus file.
    * Only single values are returned, either numeric or strings.
-   * @param entryName full address for an entry name
+   * @param datasetAddress full address for an entry name
    * @return pair<value, status> where value is valid only if the return status is FOUND or CACHED
    */
   template <typename T>
