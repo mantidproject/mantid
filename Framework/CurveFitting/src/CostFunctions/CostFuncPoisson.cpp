@@ -25,6 +25,7 @@ namespace {
 // predicted < 0 is forbidden as it causes inf cost
 constexpr double absoluteCutOff = 0.0;
 constexpr double effectiveCutOff = 0.0001;
+constexpr double epsilon = 1e-10;
 
 double calculatePoissonLoss(double observedCounts, double predicted) {
   double retVal = (predicted - observedCounts);
@@ -40,6 +41,7 @@ namespace PoissonLossLM {
 template MANTID_CURVEFITTING_DLL int sgn<double>(double val);
 
 double calculatePoissonResidualLM(double observedCounts, double predicted) {
+  observedCounts = std::max(absoluteCutOff, observedCounts);
   double retVal = (predicted - observedCounts);
   if (predicted <= absoluteCutOff) {
     return std::numeric_limits<double>::max();
@@ -62,8 +64,8 @@ double calculateJacobianScaleFactor(double observedCounts, double predicted) {
   const double delta = predicted - observedCounts;
   const double signDelta = sgn(delta);
   // If observed is zero
-  if (observedCounts == 0.0) {
-    return signDelta / std::sqrt(2.0 * predicted);
+  if (observedCounts == absoluteCutOff) {
+    return predicted > epsilon ? signDelta / std::sqrt(2.0 * predicted) : signDelta / epsilon;
   }
   // taylor
   if (const auto x = delta / observedCounts; std::abs(x) < effectiveCutOff) {

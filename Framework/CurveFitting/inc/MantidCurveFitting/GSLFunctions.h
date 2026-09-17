@@ -42,8 +42,8 @@ struct GSL_FitData {
   gsl_vector *initFuncParams;
   /// Jacobi matrix interface
   JacobianImpl1<EigenMatrix> J;
-  double (*loss)(const std::shared_ptr<API::FunctionValues> &values, size_t index);
-  double (*scaleFactor)(const std::shared_ptr<API::FunctionValues> &values, size_t index);
+  double (*m_loss)(const std::shared_ptr<API::FunctionValues> &values, size_t index);
+  double (*m_scaleFactor)(const std::shared_ptr<API::FunctionValues> &values, size_t index);
 
   // this is presently commented out in the implementation
   // gsl_matrix *holdCalculatedJacobian; ///< cache of the calculated jacobian

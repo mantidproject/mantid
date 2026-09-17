@@ -90,7 +90,7 @@ int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
   // calculated-observed divided by error values used by GSL
 
   for (size_t i = 0; i < p->n; i++) {
-    f->data[i] = p->loss(values, i);
+    f->data[i] = p->m_loss(values, i);
   }
   return GSL_SUCCESS;
 }
@@ -161,7 +161,7 @@ int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
   EigenMatrix m_tr = m.tr();
   std::copy(&m_tr.mutator().data()[0], &m_tr.mutator().data()[J_tr->size1 * J_tr->size2], &J->data[0]);
   for (size_t iY = 0; iY < p->n; iY++) {
-    const double weight = p->scaleFactor(values, iY);
+    const double weight = p->m_scaleFactor(values, iY);
     for (size_t iP = 0; iP < p->p; iP++) {
       J->data[iY * p->p + iP] *= weight;
     }
@@ -192,11 +192,11 @@ GSL_FitData::GSL_FitData(const std::shared_ptr<CostFunctions::CostFuncFitting> &
   gsl_set_error_handler_off();
 
   if (std::dynamic_pointer_cast<CostFunctions::CostFuncPoisson>(cf)) {
-    this->loss = &poissonLoss;
-    this->scaleFactor = &poissonWeight;
+    this->m_loss = &poissonLoss;
+    this->m_scaleFactor = &poissonWeight;
   } else {
-    this->loss = &leastSquaresLoss;
-    this->scaleFactor = &leastSquaresWeight;
+    this->m_loss = &leastSquaresLoss;
+    this->m_scaleFactor = &leastSquaresWeight;
   }
 
   // number of active parameters
