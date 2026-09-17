@@ -155,7 +155,7 @@ static const NeutronAtom Be(4, 7.79, 0.12, 7.63, 0.0018, 7.63, 0.0076);
 static const NeutronAtom B(5, 0, 5.30, -0.213, 0., 0., 3.54, 1.7, 5.24, 767.);
 static const NeutronAtom B10(5, 10, -0.1, -1.066, -4.7, 1.231, 0.144, 3, 3.1, 3835.);
 static const NeutronAtom B11(5, 11, 6.65, -1.3, 5.56, 0.21, 5.77, 0.0055);
-static const NeutronAtom C(6, 6.6460, 0., 5.551, 0.001, 5.550, 0.0035);
+static const NeutronAtom C(6, 6.6460, 0., 5.550, 0.001, 5.551, 0.0035);
 static const NeutronAtom C12(6, 12, 6.6511, 0., 5.559, 0., 5.559, 0.00353);
 static const NeutronAtom C13(6, 13, 6.19, -0.52, 4.81, 0.034, 4.84, 0.00137);
 static const NeutronAtom N(7, 9.36, 0., 11.01, 0.5, 11.51, 1.9);
