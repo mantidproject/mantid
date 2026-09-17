@@ -1,0 +1,1 @@
+- Poisson deviance is now a cost function for the Levenberg-Marquardt minimizer in fitting.
