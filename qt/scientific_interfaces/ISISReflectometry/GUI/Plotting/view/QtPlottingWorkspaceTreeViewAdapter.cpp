@@ -176,10 +176,11 @@ std::vector<std::string> QtPlottingWorkspaceTreeViewAdapter::selectedPlottingWor
   auto workspaces = std::vector<std::string>{};
   for (auto const &index : m_plottingWorkspaceTreeView->selectionModel()->selectedRows()) {
     auto const selectedIndex = itemIndex(index);
-    if (isAtomicWorkspaceGroup(selectedIndex)) {
+    if (requiresCompleteWorkspaceGroupSelection(selectedIndex)) {
       appendWorkspaceNames(selectedIndex, workspaces);
     } else if (itemType(selectedIndex) == PlottingWorkspaceTreeItemType::Workspace &&
-               canContributeSelection(selectedIndex) && !isAtomicWorkspaceGroup(selectedIndex.parent())) {
+               canContributeSelection(selectedIndex) &&
+               !requiresCompleteWorkspaceGroupSelection(selectedIndex.parent())) {
       auto name = workspaceName(selectedIndex);
       if (std::find(workspaces.cbegin(), workspaces.cend(), name) == workspaces.cend()) {
         workspaces.emplace_back(std::move(name));
@@ -286,7 +287,7 @@ bool QtPlottingWorkspaceTreeViewAdapter::isVisible(QModelIndex const &index) con
   return !m_plottingWorkspaceTreeView->isRowHidden(index.row(), index.parent());
 }
 
-bool QtPlottingWorkspaceTreeViewAdapter::isAtomicWorkspaceGroup(QModelIndex const &index) const {
+bool QtPlottingWorkspaceTreeViewAdapter::requiresCompleteWorkspaceGroupSelection(QModelIndex const &index) const {
   if (itemType(index) != PlottingWorkspaceTreeItemType::WorkspaceGroup || !canSelectDirectly(index) ||
       m_model.rowCount(index) == 0) {
     return false;
