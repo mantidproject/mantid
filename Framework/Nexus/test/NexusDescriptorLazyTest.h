@@ -136,6 +136,54 @@ public:
     TS_ASSERT(descriptor.isEntry("/MDHistoWorkspace", "NXentry"));
   }
 
+  void test_getDataValue() {
+    std::cout << "\nTesting getDataValue in NexusDescriptorLazy" << std::endl;
+    const std::string filename = NexusTest::getFullPath("EQSANS_89157.nxs.h5");
+    Mantid::Nexus::NexusDescriptorLazy descriptor(filename);
+
+    {
+      auto v = descriptor.getDataValue<std::string>("/entry/bank10_events");
+      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::NXNOT_DATASET)
+    }
+
+    {
+      auto v = descriptor.getDataValue<std::string>("/entry");
+      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::NXNOT_DATASET)
+    }
+
+    {
+      auto v = descriptor.getDataValue<std::string>("/entry/instrument/not_a_data");
+      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::NXDATASET_NOT_FOUND)
+    }
+    {
+      auto v = descriptor.getDataValue<std::string>("/entry/entry_identifier");
+      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::NXFOUND)
+      TS_ASSERT_EQUALS(v.first, "89157")
+    }
+    {
+      auto v = descriptor.getDataValue<int>("/entry/entry_identifier");
+      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::NXWRONG_TYPE)
+    }
+    {
+      auto v = descriptor.getDataValue<float>("/entry/duration");
+      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::NXFOUND)
+      TS_ASSERT_DELTA(v.first, 7200.01, 1e-2)
+
+      auto v2 = descriptor.getDataValue<float>("/entry/duration");
+      TS_ASSERT_EQUALS(v2.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::NXCACHED)
+      TS_ASSERT_DELTA(v2.first, 7200.01, 1e-2)
+    }
+    {
+      auto v = descriptor.getDataValue<int>("/entry/duration");
+      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::NXWRONG_TYPE)
+    }
+    {
+      auto v = descriptor.getDataValue<int>("/entry/total_counts");
+      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::NXFOUND)
+      TS_ASSERT_EQUALS(v.first, 14553)
+    }
+  }
+
   void test_threadSafety() {
     constexpr int NUM_THREAD{5}; // number of threads to spawn
 
