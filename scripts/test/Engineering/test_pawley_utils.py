@@ -1298,7 +1298,7 @@ class PoldiUtilsFluxTest(unittest.TestCase):
         phase.set_hkls([[1, 1, 1]])
         dspacs = linspace(0.69, 4.15, 2460)
         ws_1d = CreateWorkspace(DataX=dspacs, DataY=zeros_like(dspacs), UnitX="dSpacing", OutputWorkspace="ws_1d_flux_test")
-        mock_interp.return_value = zeros_like(ws_2d.readX(0))
+        mock_interp.return_value = zeros_like(ws_2d.x(0))
 
         simulate_2d_data(ws_2d, ws_1d, flux_sample_points=None)
 

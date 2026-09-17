@@ -199,10 +199,10 @@ class TimeSlice(PythonAlgorithm):
 
         calib_by_specno = {}
         for i in range(calib.getNumberHistograms()):
-            calib_by_specno[calib.getSpectrum(i).getSpectrumNo()] = (calib.readY(i)[0], calib.readE(i)[0])
+            calib_by_specno[calib.getSpectrum(i).getSpectrumNo()] = (calib.y(i)[0], calib.e(i)[0])
 
         raw = mtd[raw_file]
-        raw_x = raw.readX(0)
+        raw_x = raw.x(0)
         divisor = Integration(
             InputWorkspace=raw_file,
             RangeLower=raw_x[0],
@@ -218,8 +218,8 @@ class TimeSlice(PythonAlgorithm):
             else:
                 match_y, match_e = 1.0, 0.0
                 unmatched += 1
-            divisor.dataY(i)[0] = match_y
-            divisor.dataE(i)[0] = match_e
+            divisor.mutableY(i)[0] = match_y
+            divisor.mutableE(i)[0] = match_e
 
         if unmatched:
             logger.notice(f"TimeSlice: {unmatched} raw spectra had no calibration entry; using factor 1.0 for those")
