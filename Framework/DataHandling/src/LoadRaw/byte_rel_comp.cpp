@@ -40,10 +40,10 @@ int byte_rel_comp(const int *data_in, int n_in, char *data_out, int max_out, int
     char c[4];
   } byte_pack;
   if (n_in <= 0) {
-    throw std::runtime_error("byte rel comp error: nin <= 0");
+    throw std::runtime_error("byte rel comp error: number of input values <= 0");
   }
   if (max_out <= n_in) {
-    throw std::runtime_error("byte rel comp error: nin <= 0");
+    throw std::runtime_error("byte rel comp error: output buffer smaller than the input");
   }
   n_out = 0;
   icurrent = 0;
@@ -61,14 +61,14 @@ int byte_rel_comp(const int *data_in, int n_in, char *data_out, int max_out, int
     // If small put it in a byte
     if ((irel <= 127) && (irel >= -127)) {
       if (n_out > max_out) {
-        throw std::runtime_error("byte rel comp error: nin <= 0");
+        throw std::runtime_error("byte rel comp error: output buffer overrun packing a relative byte");
       }
       data_out[n_out] = irel; // Pack relative byte
       n_out++;
     } else {
       // Otherwise put marker in byte followed by packed 32bit integer
       if (n_out + 4 >= max_out) {
-        throw std::runtime_error("byte rel comp error: nin <= 0");
+        throw std::runtime_error("byte rel comp error: output buffer overrun packing an absolute value");
       }
       data_out[n_out] = -128; // pack marker
       byte_pack.i = data_in[i];
@@ -124,10 +124,10 @@ int byte_rel_expn(const char *data_in, int n_in, int n_from, int *data_out, int 
   } byte_pack;
   // First check no slip-ups in the input parameters
   if (n_in <= 0) {
-    throw std::runtime_error("byte rel comp error: nin <= 0");
+    throw std::runtime_error("byte rel expn error: number of compressed bytes <= 0");
   }
   if (n_out + n_from > n_in) {
-    throw std::runtime_error("byte rel comp error: nin <= 0");
+    throw std::runtime_error("byte rel expn error: fewer compressed bytes than requested time channels");
   }
   // Set initial absolute value to zero and channel counter to zero
   byte_pack.i = 0;
@@ -135,7 +135,7 @@ int byte_rel_expn(const char *data_in, int n_in, int n_from, int *data_out, int 
   // Loop over all expected 32bit integers
   for (i = 0; i < n_from + n_out; i++) {
     if (j >= n_in) {
-      throw std::runtime_error("byte rel comp error: nin <= 0");
+      throw std::runtime_error("byte rel expn error: ran off the end of the compressed data");
     }
     // if number is contained in a byte
     if (data_in[j] != -128) {
@@ -146,7 +146,7 @@ int byte_rel_expn(const char *data_in, int n_in, int n_from, int *data_out, int 
       // Else skip marker and pick up new absolute value
       // check there are enough bytes
       if (j + 4 >= n_in) {
-        throw std::runtime_error("byte rel comp error: nin <= 0");
+        throw std::runtime_error("byte rel expn error: truncated absolute value in the compressed data");
       }
       // unpack 4 bytes
       byte_pack.c[0] = data_in[j + 1];

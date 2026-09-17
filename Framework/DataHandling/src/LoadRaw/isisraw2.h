@@ -25,4 +25,6 @@ public:
 private:
   char *outbuff; ///< output buffer
   int m_bufferSize;
+  /// data section holds plain 32 bit integers rather than byte-relative compressed data
+  bool m_uncompressed;
 };

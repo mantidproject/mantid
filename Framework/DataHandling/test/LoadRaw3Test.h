@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "../src/LoadRaw/isisraw.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileFinder.h"
@@ -22,6 +23,8 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/lexical_cast.hpp>
+#include <cstdio>
+#include <cstring>
 #include <cxxtest/TestSuite.h>
 #include <filesystem>
 
@@ -1280,7 +1283,269 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  /// A version 1 data section holds the spectra as plain 32 bit integers, with
+  /// no data header and no spectrum descriptor array. Older ISIS runs, such as
+  /// the archived TFXA data, are stored this way.
+  void test_an_uncompressed_version_1_data_section_is_read() {
+    const auto counts = uncompressedTestCounts();
+    ScopedRawFile file("uncompressed_v1.raw", 1, counts);
+
+    LoadRaw3 alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename", file.path());
+    alg.setPropertyValue("OutputWorkspace", "uncompressed_v1");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    checkUncompressedWorkspace("uncompressed_v1", counts);
+    AnalysisDataService::Instance().remove("uncompressed_v1");
+  }
+
+  /// A version 2 data section always carries a data header, but d_comp of 0
+  /// still means the spectra are uncompressed and there is no descriptor array.
+  void test_an_uncompressed_version_2_data_section_is_read() {
+    const auto counts = uncompressedTestCounts();
+    ScopedRawFile file("uncompressed_v2.raw", 2, counts);
+
+    LoadRaw3 alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename", file.path());
+    alg.setPropertyValue("OutputWorkspace", "uncompressed_v2");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    checkUncompressedWorkspace("uncompressed_v2", counts);
+    AnalysisDataService::Instance().remove("uncompressed_v2");
+  }
+
+  /// Cropping still has to line the spectra up, which exercises skipData as well
+  /// as readData on the uncompressed path.
+  void test_an_uncompressed_file_can_be_cropped() {
+    const auto counts = uncompressedTestCounts();
+    ScopedRawFile file("uncompressed_v1_cropped.raw", 1, counts);
+
+    LoadRaw3 alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename", file.path());
+    alg.setPropertyValue("OutputWorkspace", "uncompressed_cropped");
+    alg.setPropertyValue("SpectrumMin", "3");
+    alg.setPropertyValue("SpectrumMax", "4");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("uncompressed_cropped");
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(ws->y(0).rawData(), expectedY(counts[3]));
+    TS_ASSERT_EQUALS(ws->y(1).rawData(), expectedY(counts[4]));
+    AnalysisDataService::Instance().remove("uncompressed_cropped");
+  }
+
 private:
+  //----------------------------------------------------------------------------
+  // Helpers for the uncompressed (not byte-relative compressed) RAW file tests
+  //----------------------------------------------------------------------------
+
+  /// counts[i] holds the (t_ntc1 + 1) time channels of spectrum i. Index 0 is
+  /// the "spectrum zero" entry every RAW file carries, and channel 0 of each
+  /// spectrum is the bin-zero entry; LoadRaw discards both.
+  using RawCounts = std::vector<std::vector<int>>;
+
+  static RawCounts uncompressedTestCounts() {
+    return RawCounts{{0, 0, 0, 0}, {0, 1, 2, 3}, {0, 10, 20, 30}, {0, 5, 0, 5}, {0, 7, 7, 7}};
+  }
+
+  static std::vector<double> expectedY(const std::vector<int> &spectrum) {
+    return std::vector<double>(spectrum.begin() + 1, spectrum.end());
+  }
+
+  static void checkUncompressedWorkspace(const std::string &name, const RawCounts &counts) {
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), counts.size() - 1);
+    TS_ASSERT_EQUALS(ws->blocksize(), counts[0].size() - 1);
+    for (size_t i = 1; i < counts.size(); ++i) {
+      TSM_ASSERT_EQUALS("spectrum " + std::to_string(i), ws->y(i - 1).rawData(), expectedY(counts[i]));
+      TS_ASSERT_EQUALS(ws->getSpectrum(i - 1).getSpectrumNo(), static_cast<specnum_t>(i));
+    }
+  }
+
+  /// Writes a minimal ISIS RAW file whose data section is uncompressed, and
+  /// deletes it again on destruction. dataSectionVersion 1 omits the data header
+  /// and the spectrum descriptor array entirely, as the oldest ISIS runs do;
+  /// version 2 writes a data header whose d_comp is 0, which also means there is
+  /// no descriptor array.
+  class ScopedRawFile {
+  public:
+    ScopedRawFile(const std::string &name, int dataSectionVersion, const RawCounts &counts)
+        : m_path(std::filesystem::temp_directory_path() / name) {
+      write(m_path.string(), dataSectionVersion, counts);
+    }
+    ~ScopedRawFile() {
+      std::error_code ignored;
+      std::filesystem::remove(m_path, ignored);
+    }
+    ScopedRawFile(const ScopedRawFile &) = delete;
+    ScopedRawFile &operator=(const ScopedRawFile &) = delete;
+    std::string path() const { return m_path.string(); }
+
+  private:
+    std::filesystem::path m_path;
+
+    /// Fields are written in exactly the order ISISRAW2::ioRAW reads them.
+    static void write(const std::string &path, int dataSectionVersion, const RawCounts &counts) {
+      const auto nspec = static_cast<int>(counts.size()) - 1; // t_nsp1
+      const auto nchan = static_cast<int>(counts[0].size());  // t_ntc1 + 1
+      const int ntc1 = nchan - 1;
+      const int ndet = nspec;
+      const int nmon = 0;
+      const int nuse = 1;
+      const int nper = 1;
+
+      std::vector<int> w;
+      auto push = [&w](int v) { w.emplace_back(v); };
+      auto pushN = [&w](size_t n, int v) { w.insert(w.end(), n, v); };
+      auto pushFloat = [&w](float v) {
+        int bits;
+        std::memcpy(&bits, &v, sizeof(bits));
+        w.emplace_back(bits);
+      };
+      // text is space padded to len, which must be a whole number of words
+      auto pushChars = [&w](const std::string &text, size_t len) {
+        std::string padded(text);
+        padded.resize(len, ' ');
+        for (size_t i = 0; i < len; i += sizeof(int)) {
+          int word;
+          std::memcpy(&word, padded.data() + i, sizeof(int));
+          w.emplace_back(word);
+        }
+      };
+      // one based word address of the word about to be written, as the section
+      // address table records them
+      auto address = [&w] { return static_cast<int>(w.size()) + 1; };
+      auto field = [](const std::string &text, size_t len) {
+        std::string padded(text);
+        padded.resize(len, ' ');
+        return padded;
+      };
+
+      // run header, 80 bytes of text
+      std::string hdr;
+      hdr += field("TST", 3);               // inst_abrv
+      hdr += field("00001", 5);             // hd_run
+      hdr += field("tester", 20);           // hd_user
+      hdr += field("uncompressed raw", 24); // hd_title
+      hdr += field("31-JUL-1989", 12);      // hd_date
+      hdr += field("13:39:33", 8);          // hd_time
+      hdr += field("187.1", 8);             // hd_dur
+      pushChars(hdr, 80);
+
+      push(2); // frmt_ver_no
+      const size_t addressTable = w.size();
+      pushN(9, 0); // ADD_STRUCT, patched once every section address is known
+
+      push(0); // data_format
+      const int adRun = address();
+      push(1);                                     // ver2
+      push(1);                                     // r_number
+      pushChars("uncompressed test run", 80);      // r_title
+      pushN(sizeof(USER_STRUCT) / sizeof(int), 0); // user
+
+      // run parameter block, with the end date and proton charge filled in
+      std::vector<char> rpb(sizeof(RPB_STRUCT), 0);
+      const float charge = 10.0f;
+      std::memcpy(rpb.data() + 7 * sizeof(int), &charge, sizeof(charge)); // r_gd_prtn_chrg
+      std::memcpy(rpb.data() + 8 * sizeof(int), &charge, sizeof(charge)); // r_tot_prtn_chrg
+      std::memcpy(rpb.data() + 16 * sizeof(int), "31-JUL-1989 ", 12);     // r_enddate
+      std::memcpy(rpb.data() + 19 * sizeof(int), "13:42:40", 8);          // r_endtime
+      std::vector<int> rpbWords(sizeof(RPB_STRUCT) / sizeof(int));
+      std::memcpy(rpbWords.data(), rpb.data(), sizeof(RPB_STRUCT));
+      w.insert(w.end(), rpbWords.begin(), rpbWords.end());
+
+      const int adInst = address();
+      push(2);                                     // ver3
+      pushChars("TESTINST", 8);                    // i_inst
+      pushN(sizeof(IVPB_STRUCT) / sizeof(int), 0); // ivpb
+      push(ndet);
+      push(nmon);
+      push(nuse);
+      // mdet and monp are both nmon long, so nothing is written for them here
+      for (int i = 1; i <= ndet; ++i)
+        push(i); // spec
+      for (int i = 0; i < ndet; ++i)
+        pushFloat(0.0f); // delt
+      for (int i = 0; i < ndet; ++i)
+        pushFloat(1.0f); // len2
+      for (int i = 0; i < ndet; ++i)
+        push(1); // code
+      for (int i = 0; i < ndet; ++i)
+        pushFloat(90.0f); // tthe
+      for (int i = 0; i < nuse * ndet; ++i)
+        pushFloat(0.0f); // ut
+
+      const int adSe = address();
+      push(2);                                    // ver4
+      pushN(sizeof(SPB_STRUCT) / sizeof(int), 0); // spb
+      push(0);                                    // e_nse, so no SE blocks follow
+
+      const int adDae = address();
+      push(2);                                     // ver5
+      pushN(sizeof(DAEP_STRUCT) / sizeof(int), 0); // daep
+      for (int i = 0; i < ndet; ++i)
+        push(1); // crat
+      for (int i = 0; i < ndet; ++i)
+        push(1); // modn
+      for (int i = 0; i < ndet; ++i)
+        push(i + 1); // mpos
+      for (int i = 0; i < ndet; ++i)
+        push(1); // timr
+      for (int i = 1; i <= ndet; ++i)
+        push(i); // udet
+
+      const int adTcb = address();
+      push(1);       // ver6
+      push(1);       // t_ntrg
+      push(1);       // t_nfpp
+      push(nper);    // t_nper
+      pushN(256, 1); // t_pmap
+      push(nspec);   // t_nsp1
+      push(ntc1);    // t_ntc1
+      pushN(5, 1);   // t_tcm1
+      for (int i = 0; i < 20; ++i)
+        pushFloat(0.0f); // t_tcp1
+      push(1);           // t_pre1
+      for (int i = 0; i < nchan; ++i)
+        push(32 * i); // t_tcb1, giving bin boundaries of 0, 1, 2 ... microseconds
+
+      const int adUser = address();
+      push(1); // ver7
+      push(0); // the reader derives u_len from ad_data - ad_user - 2, so 0 here
+
+      const int adData = address();
+      push(dataSectionVersion); // ver8
+      if (dataSectionVersion >= 2) {
+        std::vector<int> dhdr(sizeof(DHDR_STRUCT) / sizeof(int), 0);
+        dhdr[0] = 0; // d_comp, 0 meaning uncompressed
+        dhdr[2] = 1; // d_offset
+        w.insert(w.end(), dhdr.begin(), dhdr.end());
+      }
+      for (const auto &spectrum : counts)
+        w.insert(w.end(), spectrum.begin(), spectrum.end());
+
+      const int adLog = address();
+      push(2); // log section version
+      push(0); // no log lines
+      const int adEnd = address();
+
+      const int sections[] = {adRun, adInst, adSe, adDae, adTcb, adUser, adData, adLog, adEnd};
+      std::copy(std::begin(sections), std::end(sections), w.begin() + addressTable);
+
+      FILE *file = fopen(path.c_str(), "wb");
+      if (!file)
+        throw std::runtime_error("Could not create test RAW file " + path);
+      fwrite(w.data(), sizeof(int), w.size(), file);
+      fclose(file);
+    }
+  };
+
   MatrixWorkspace_sptr loadOsirisSilicon(std::string const &outputName, std::string const &spectrumMin,
                                          std::string const &spectrumMax) {
     LoadRaw3 loader;
