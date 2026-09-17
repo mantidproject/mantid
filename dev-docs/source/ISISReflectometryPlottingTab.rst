@@ -373,9 +373,8 @@ workspace to it. Filter updates expand the visible tree, including when a
 filter is cleared.
 
 Selecting or deselecting a parent propagates only to descendants that are
-currently visible. Previously selected rows remain selected if a later filter
-hides them. For spin asymmetry, a directly selected ADS workspace group whose
-children are parent-selectable only is treated as one atomic selection. The Qt
+currently visible. For spin asymmetry, a directly selected ADS workspace group whose
+children are parent-selectable only requires complete group selection. The Qt
 selection contains only its visible rows, while the selected-workspace query
 returns every eligible member required to calculate the spin asymmetry.
 
@@ -588,8 +587,8 @@ User interaction
 #. Clicking a selectable tree row is handled by
    :code:`QtPlottingWorkspaceTreeViewAdapter`. Parent selection is propagated
    only to visible descendants whose presenter-supplied selection mode permits
-   it. Atomic spin workspace groups still resolve all required members when the
-   plotting selection is read.
+   it. Spin workspace groups requiring complete selection still resolve all
+   required members when the plotting selection is read.
 #. Changing a workspace output-type checkbox or the Item-column regular
    expression immediately reapplies row visibility and expands the visible
    tree. Hidden rows remain in the model and retain their selection state.

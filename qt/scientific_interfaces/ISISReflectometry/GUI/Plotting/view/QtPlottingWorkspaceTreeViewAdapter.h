@@ -81,8 +81,8 @@ private:
   bool canContributeSelection(QModelIndex const &index) const;
   /// Return true if a row is currently visible through the workspace filters.
   bool isVisible(QModelIndex const &index) const;
-  /// Return true if a workspace group represents one indivisible selection.
-  bool isAtomicWorkspaceGroup(QModelIndex const &index) const;
+  /// Return true if selecting a workspace group requires all of its members.
+  bool requiresCompleteWorkspaceGroupSelection(QModelIndex const &index) const;
   /// Append eligible descendant workspace names that have not already been added.
   void appendWorkspaceNames(QModelIndex const &index, std::vector<std::string> &workspaceNames) const;
   /// Handle row clicks by selecting or deselecting whole subtrees.

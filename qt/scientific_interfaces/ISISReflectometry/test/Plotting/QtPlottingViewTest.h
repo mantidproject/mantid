@@ -797,7 +797,7 @@ public:
     TS_ASSERT(!tree->selectionModel()->isSelected(visibleBinned));
   }
 
-  void testPartiallyFilteredAtomicWorkspaceGroupSelectsVisibleRowsAndReturnsAllWorkspaceNames() {
+  void testPartiallyFilteredCompleteWorkspaceGroupSelectionReturnsAllWorkspaceNames() {
     QtPlottingView view;
     auto spinGroup =
         workspaceGroupItem("spin_group", {workspaceItem("spin_up", ReducedWorkspaceOutputType::IvsQBinned),
@@ -820,7 +820,7 @@ public:
     TS_ASSERT_EQUALS(view.selectedPlottingWorkspaceNames(), std::vector<std::string>({"spin_up", "spin_down"}));
   }
 
-  void testDeselectingAndReselectingFilteredAtomicGroupCannotReturnPartialOrReorderedSpinStates() {
+  void testDeselectingAndReselectingCompleteWorkspaceGroupCannotReturnPartialOrReorderedSpinStates() {
     QtPlottingView view;
     auto spinGroup =
         workspaceGroupItem("spin_group", {workspaceItem("spin_1", ReducedWorkspaceOutputType::IvsQBinned),
