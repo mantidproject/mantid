@@ -85,9 +85,9 @@ void ParameterMap::rebuildBeamlineFrom(const ParameterMap &source) {
   if (!m_instrument) {
     return;
   }
-  auto [componentInfo, detectorInfo] = m_instrument->makeBeamline(*this, &source);
-  m_componentInfo = std::move(componentInfo);
-  m_detectorInfo = std::move(detectorInfo);
+  auto [newComponentInfo, newDetectorInfo] = m_instrument->makeBeamline(*this, &source);
+  m_componentInfo = std::move(newComponentInfo);
+  m_detectorInfo = std::move(newDetectorInfo);
   // Deliberately does NOT adopt m_componentInfo's store here, unlike setInstrument().
   // This map was copy-constructed and therefore already holds its own deep copy of the parameters
   buildInstrumentMetadata();
@@ -135,8 +135,8 @@ ComponentID ParameterMap::componentIdAt(const size_t index) const {
 std::vector<ParameterMap::Entry> ParameterMap::entries() const {
   std::vector<Entry> result;
   result.reserve(m_parameterInfo->size());
-  for (auto const &[componentIndex, parameters] : *m_parameterInfo) {
-    const ComponentID id = componentIdAt(componentIndex);
+  for (auto const &[index, parameters] : *m_parameterInfo) {
+    const ComponentID id = componentIdAt(index);
     for (auto const &[parameterName, parameter] : parameters) {
       static_cast<void>(parameterName);
       result.emplace_back(id, parameter);
@@ -1180,10 +1180,10 @@ void ParameterMap::setInstrument(const Instrument *instrument) {
   m_instrument = instrument;
   // Assigned one at a time rather than through std::tie: the members are shared_ptr while
   // makeBeamline returns unique_ptr, and the conversion is clearer spelled out.
-  auto [componentInfo, detectorInfo] =
+  auto [newComponentInfo, newDetectorInfo] =
       m_parameterInfo->empty() ? m_instrument->makeBeamlineNew(*this) : m_instrument->makeBeamline(*this);
-  m_componentInfo = std::move(componentInfo);
-  m_detectorInfo = std::move(detectorInfo);
+  m_componentInfo = std::move(newComponentInfo);
+  m_detectorInfo = std::move(newDetectorInfo);
   // The visitor called rekey() while building the beamline, so this map and the new
   // ComponentInfo now share one store. Re-point at it to be certain of that even on the
   // makeBeamlineNew() path, where there were no parameters to rekey.
