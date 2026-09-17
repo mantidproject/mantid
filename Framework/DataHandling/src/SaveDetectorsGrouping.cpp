@@ -230,7 +230,6 @@ void SaveDetectorsGrouping::printToXML(const std::map<int, std::vector<detid_t>>
 
   ofs << "<?xml version=\"1.0\"?>\n";
 
-  writer.writeNode(std::cout, pDoc);
   writer.writeNode(ofs, pDoc);
   ofs.close();
 }
