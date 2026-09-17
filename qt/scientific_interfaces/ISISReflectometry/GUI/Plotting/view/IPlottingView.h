@@ -33,8 +33,6 @@ public:
   virtual void notifyPlotOutputTypeChanged() = 0;
   /// Notify that the workspace tree selection changed.
   virtual void notifyPlottingWorkspaceTreeSelectionChanged() = 0;
-  /// Notify that the workspace filter controls changed.
-  virtual void notifyWorkspaceFilterChanged() = 0;
 };
 
 /// Interface for the ISIS Reflectometry plotting tab view.
@@ -53,10 +51,6 @@ public:
   virtual void setPlotActionState(PlotActionState const &state) = 0;
   /// Replace the displayed plotting workspace tree state.
   virtual void setPlottingWorkspaceTreeItemStates(std::vector<PlottingWorkspaceTreeItemState> const &itemStates) = 0;
-  /// Apply presentation changes to existing rows, retaining selections that remain available.
-  virtual void updatePlottingWorkspaceTreeItemStates(std::vector<PlottingWorkspaceTreeItemState> const &itemStates) = 0;
-  /// Return the current workspace filter controls.
-  virtual PlottingWorkspaceFilter workspaceFilter() const = 0;
   /// Return selected workspace leaf names.
   virtual std::vector<std::string> selectedPlottingWorkspaceNames() const = 0;
   /// Return the number of selected workspace-group rows.
