@@ -1368,5 +1368,63 @@ class PoldiUtilsMaskingTest(unittest.TestCase):
         assert_array_equal(ws_sim.readY(self.IMASK), zeros_like(ws_sim.readY(self.IMASK)))
 
 
+class Poldi2DEvalMixinMaskingTest(unittest.TestCase):
+    """Tests that masked spectra are excluded from the 2D Pawley residuals and scale estimation."""
+
+    IMASK = 2  # interior spectrum, so masking it does not alter the two-theta/L2 range
+
+    @classmethod
+    def setUpClass(cls):
+        fpath_data = FileFinder.getFullPath("poldi_448x500_chopper5k_silicon.txt")
+        ws = load_poldi(fpath_data, "POLDI_Definition_448_calibrated.xml", chopper_speed=5000, t0=5.855e-02, t0_const=-9.00)
+        # crop to a handful of spectra to keep the simulation quick
+        cls.ws = ExtractSpectra(InputWorkspace=ws, StartWorkspaceIndex=0, EndWorkspaceIndex=4, OutputWorkspace="ws_2d_eval_crop")
+
+    @classmethod
+    def tearDownClass(cls):
+        AnalysisDataService.clear()
+
+    def setUp(self):
+        self.phase = Phase.from_alatt(3 * [5.43094], "F d -3 m")
+        # need all HKL in range otherwise polyfit doesn't work when global_scale=False
+        self.phase.set_hkls_from_dspac_limits(0.7, 3.5)
+
+    def _make_masked_pawley(self, global_scale=True):
+        ws_masked = CloneWorkspace(InputWorkspace=self.ws, OutputWorkspace="ws_2d_eval_masked")
+        MaskDetectors(Workspace=ws_masked, WorkspaceIndexList=[self.IMASK])
+        return PawleyPattern2D(ws_masked, [self.phase], global_scale=global_scale, profile=GaussianProfile())
+
+    def test_eval_resids_excludes_masked_spectra(self):
+        pawley = self._make_masked_pawley()
+        pawley_ref = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile())
+
+        nresids = np.asarray(pawley.eval_resids(pawley.get_free_params())).size
+        nresids_ref = np.asarray(pawley_ref.eval_resids(pawley_ref.get_free_params())).size
+
+        self.assertEqual(nresids_ref, self.ws.getNumberHistograms() * self.ws.blocksize())
+        self.assertEqual(nresids, nresids_ref - self.ws.blocksize())
+
+    def test_eval_resids_ignores_counts_in_masked_spectra(self):
+        pawley = self._make_masked_pawley()
+        resids = np.asarray(pawley.eval_resids(pawley.get_free_params()))
+
+        # masking does not always zero the counts, so put some back and check they are ignored
+        pawley.ws.setY(self.IMASK, 1e4 * ones(pawley.ws.blocksize()))
+        resids_with_counts = np.asarray(pawley.eval_resids(pawley.get_free_params()))
+
+        assert_array_almost_equal(resids, resids_with_counts)
+
+    def test_reestimate_scales_leaves_masked_spectra_neutral(self):
+        pawley = self._make_masked_pawley(global_scale=False)
+
+        scales, bgs = pawley._reestimate_scales(pawley.get_free_params())
+
+        self.assertEqual(scales[self.IMASK], 1.0)
+        self.assertEqual(bgs[self.IMASK], 0.0)
+        # the unmasked spectra are estimated rather than left at the neutral defaults
+        ilive = [ispec for ispec in range(self.ws.getNumberHistograms()) if ispec != self.IMASK]
+        self.assertFalse(np.any(scales[ilive] == 1.0))
+
+
 if __name__ == "__main__":
     unittest.main()
