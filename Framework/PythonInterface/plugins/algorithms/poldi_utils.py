@@ -186,6 +186,27 @@ def get_dspac_limits(tth_min: float, tth_max: float, lambda_min: float, lambda_m
     return dspac_min, dspac_max
 
 
+def get_live_spectra(ws: Workspace2D) -> np.ndarray[bool]:
+    """
+    Function to identify the spectra contributing to a calculation, i.e. those with detectors that aren't masked
+    :param ws: MatrixWorkspace containing POLDI data (raw instrument)
+    :return np.ndarray: boolean array, True for spectra with detectors that are not masked
+    """
+    si = ws.spectrumInfo()
+    return np.array([si.hasDetectors(ispec) and not si.isMasked(ispec) for ispec in range(ws.getNumberHistograms())])
+
+
+def get_live_tths_and_l2s(ws: Workspace2D) -> Tuple[np.ndarray[float], np.ndarray[float]]:
+    """
+    Function to get the two-theta and L2 of the unmasked spectra in a workspace
+    :param ws: MatrixWorkspace containing POLDI data (raw instrument)
+    :return (tths, l2s): two-theta (rad) and sample to detector distance (m) of each unmasked spectrum
+    """
+    si = ws.spectrumInfo()
+    ilive = np.flatnonzero(get_live_spectra(ws))
+    return np.array([si.twoTheta(int(ispec)) for ispec in ilive]), np.array([si.l2(int(ispec)) for ispec in ilive])
+
+
 def get_dspac_limits_from_ws(ws: Workspace2D, lambda_min: float = 1.1, lambda_max: float = 5.0) -> Tuple[float, float]:
     """
     Function to calculate min and max d-spacing accessible in a workspace given its two-theta coverage
@@ -194,8 +215,7 @@ def get_dspac_limits_from_ws(ws: Workspace2D, lambda_min: float = 1.1, lambda_ma
     :param lambda_max: maximum wavelength (Ang) to consider
     :return (dspac_min, dspac_max): min and max d-spacing
     """
-    si = ws.spectrumInfo()
-    tths = np.array([si.twoTheta(ispec) for ispec in range(ws.getNumberHistograms())])
+    tths, _ = get_live_tths_and_l2s(ws)
     return get_dspac_limits(tths.min(), tths.max(), lambda_min, lambda_max)
 
 
@@ -222,12 +242,9 @@ def get_dspac_array_from_ws(ws: Workspace2D, lambda_min: float = 1.1, lambda_max
     :return np.ndarray: array of d-spacing bins
     """
     _, slit_offsets, _, l1_chop = get_instrument_settings_from_log(ws)
-    # get detector positions from IDF
-    si = ws.spectrumInfo()
-    nspec = ws.getNumberHistograms()
-    tths = np.array([si.twoTheta(ispec) for ispec in range(nspec)])
-    l2s = np.asarray([si.l2(ispec) for ispec in range(nspec)])
-    l1 = si.l1()
+    # get detector positions from IDF (masked spectra excluded as they don't contribute)
+    tths, l2s = get_live_tths_and_l2s(ws)
+    l1 = ws.spectrumInfo().l1()
     # determine npulses to include in calc
     time_max = get_max_tof_from_chopper(l1, l1_chop, l2s, tths, lambda_max) + slit_offsets[0]
     dspac_min, dspac_max = get_dspac_limits(tths.min(), tths.max(), lambda_min, lambda_max)
@@ -290,7 +307,7 @@ def simulate_2d_data(
     cycle_time, slit_offsets, t0_const, l1_chop = get_instrument_settings_from_log(ws_sim)
     si = ws_sim.spectrumInfo()
     nspec = ws_sim.getNumberHistograms()
-    is_live = np.array([si.hasDetectors(ispec) and not si.isMasked(ispec) for ispec in range(nspec)])
+    is_live = get_live_spectra(ws_sim)
     tths = np.array([si.twoTheta(ispec) if is_live[ispec] else 0.0 for ispec in range(nspec)])
     l2s = np.array([si.l2(ispec) if is_live[ispec] else 0.0 for ispec in range(nspec)])
     l1 = si.l1()

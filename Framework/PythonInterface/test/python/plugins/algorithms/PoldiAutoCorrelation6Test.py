@@ -25,9 +25,7 @@ class PoldiAutoCorrelation6Test(unittest.TestCase):
         # mask the first 20 spectra (lowest two-theta) to test masking support
         cls.nmasked = 20
         cls.ws_masked = cls._make_masked_ws("ws_masked", range(cls.nmasked))
-        cls.masked_detids = set()
-        for ispec in range(cls.nmasked):
-            cls.masked_detids.update(cls.ws.getSpectrum(ispec).getDetectorIDs())
+        cls.masked_detids = {detid for ispec in range(cls.nmasked) for detid in cls.ws.getSpectrum(ispec).getDetectorIDs()}
 
     @classmethod
     def _make_masked_ws(cls, output_workspace, ispecs_to_mask):
@@ -69,49 +67,38 @@ class PoldiAutoCorrelation6Test(unittest.TestCase):
         ndets = [len(ws_corr.getSpectrum(ispec).getDetectorIDs()) for ispec in range(ws_corr.getNumberHistograms())]
         assert_array_equal(ndets, np.array([150, 149, 149]))
 
-    def test_exec_masked_spectra_excluded_from_dspacing_range(self):
+    def test_exec_masked_spectra_excluded(self):
         ws_corr = PoldiAutoCorrelation(InputWorkspace=self.ws_masked, OutputWorkspace="ws_corr_masked", Version=6)
 
         # the masked spectra have the lowest two-theta, so excluding them reduces the d-spacing
         # range considered (2833 bins when nothing is masked)
         self.assertEqual(ws_corr.blocksize(), 2823)
         self.assertTrue(np.all(np.isfinite(ws_corr.y(0))))
-
-    def test_exec_masked_detectors_not_in_output_spectrum(self):
-        ws_corr = PoldiAutoCorrelation(InputWorkspace=self.ws_masked, OutputWorkspace="ws_corr_masked", Version=6)
-
+        # masked detectors are left out of the output spectrum
         detids = set(ws_corr.getSpectrum(0).getDetectorIDs())
         self.assertEqual(len(detids), self.ws.getNumberHistograms() - self.nmasked)
         self.assertFalse(detids & self.masked_detids)
 
-    def test_exec_ngroups_grouping_mode_all(self):
+    def test_exec_ngroups_grouping_mode(self):
         ngroups = 3
-        ws_corr = PoldiAutoCorrelation(
-            InputWorkspace=self.ws_masked, OutputWorkspace="ws_corr_masked", NGroups=ngroups, GroupingMode="All", Version=6
-        )
+        # 'All' fixes the group boundaries over the whole detector, so only the group holding the masked
+        # spectra shrinks; 'Unmasked' splits what is left, sharing the live detectors evenly. Unmasked
+        # detector counts are [150, 149, 149] with two-theta [79.19, 89.73, 100.26].
+        for mode, expected_ndets, expected_tths in (
+            ("All", [150 - self.nmasked, 149, 149], [79.87, 89.73, 100.26]),
+            ("Unmasked", [143, 143, 142], [80.33, 90.45, 100.51]),
+        ):
+            with self.subTest(mode=mode):
+                ws_corr = PoldiAutoCorrelation(
+                    InputWorkspace=self.ws_masked, OutputWorkspace="ws_corr_masked", NGroups=ngroups, GroupingMode=mode, Version=6
+                )
 
-        # group boundaries are fixed over the whole detector, so only the group containing the
-        # masked spectra loses detectors (cf. [150, 149, 149] when nothing is masked)
-        ndets = [len(ws_corr.getSpectrum(ispec).getDetectorIDs()) for ispec in range(ngroups)]
-        assert_array_equal(ndets, np.array([150 - self.nmasked, 149, 149]))
-        # two-theta of the first group increases as it has lost its lowest two-theta detectors
-        si = ws_corr.spectrumInfo()
-        tths = np.degrees([si.twoTheta(ispec) for ispec in range(ngroups)])
-        assert_array_almost_equal(tths, np.array([79.87, 89.73, 100.26]), decimal=2)
-
-    def test_exec_ngroups_grouping_mode_unmasked(self):
-        ngroups = 3
-        ws_corr = PoldiAutoCorrelation(
-            InputWorkspace=self.ws_masked, OutputWorkspace="ws_corr_masked", NGroups=ngroups, GroupingMode="Unmasked", Version=6
-        )
-
-        # masked spectra are removed before splitting, so the unmasked detectors are shared evenly
-        ndets = [len(ws_corr.getSpectrum(ispec).getDetectorIDs()) for ispec in range(ngroups)]
-        assert_array_equal(ndets, np.array([143, 143, 142]))
-        self.assertEqual(sum(ndets), self.ws.getNumberHistograms() - self.nmasked)
-        si = ws_corr.spectrumInfo()
-        tths = np.degrees([si.twoTheta(ispec) for ispec in range(ngroups)])
-        assert_array_almost_equal(tths, np.array([80.33, 90.45, 100.51]), decimal=2)
+                ndets = [len(ws_corr.getSpectrum(ispec).getDetectorIDs()) for ispec in range(ngroups)]
+                assert_array_equal(ndets, np.array(expected_ndets))
+                self.assertEqual(sum(ndets), self.ws.getNumberHistograms() - self.nmasked)
+                si = ws_corr.spectrumInfo()
+                tths = np.degrees([si.twoTheta(ispec) for ispec in range(ngroups)])
+                assert_array_almost_equal(tths, np.array(expected_tths), decimal=2)
 
     def test_exec_group_with_all_spectra_masked_is_zero(self):
         ngroups = 3
@@ -128,17 +115,14 @@ class PoldiAutoCorrelation6Test(unittest.TestCase):
         assert_array_equal(ws_corr.y(0), np.zeros(ws_corr.blocksize()))
         self.assertTrue(np.any(ws_corr.y(1) > 0))
 
-    def test_exec_raises_if_all_spectra_masked(self):
+    def test_exec_raises_if_too_few_unmasked_spectra_for_ngroups(self):
+        nunmasked = self.ws.getNumberHistograms() - self.nmasked
         ws_all_masked = self._make_masked_ws("ws_all_masked", range(self.ws.getNumberHistograms()))
 
-        with self.assertRaisesRegex(RuntimeError, "fewer unmasked spectra"):
-            PoldiAutoCorrelation(InputWorkspace=ws_all_masked, OutputWorkspace="ws_corr_all_masked", Version=6)
-
-    def test_exec_raises_if_ngroups_exceeds_unmasked_spectra(self):
-        nunmasked = self.ws.getNumberHistograms() - self.nmasked
-
-        with self.assertRaisesRegex(RuntimeError, "fewer unmasked spectra"):
-            PoldiAutoCorrelation(InputWorkspace=self.ws_masked, OutputWorkspace="ws_corr_masked", NGroups=nunmasked + 1, Version=6)
+        for ws, ngroups in ((ws_all_masked, 1), (self.ws_masked, nunmasked + 1)):
+            with self.subTest(nspectra=ws.getNumberHistograms(), ngroups=ngroups):
+                with self.assertRaisesRegex(RuntimeError, "fewer unmasked spectra"):
+                    PoldiAutoCorrelation(InputWorkspace=ws, OutputWorkspace="ws_corr_invalid", NGroups=ngroups, Version=6)
 
     def _assert_auto_corr_workspace(self, ws_corr):
         # assert min/max Q

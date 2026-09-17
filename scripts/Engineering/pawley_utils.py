@@ -13,7 +13,7 @@ from mantid.geometry import CrystalStructure, ReflectionGenerator, PointGroupFac
 from mantid.kernel import V3D, logger, UnitConversion, DeltaEModeType
 from typing import TYPE_CHECKING, Sequence, Any, Optional, Tuple
 from scipy.optimize import least_squares
-from plugins.algorithms.poldi_utils import simulate_2d_data, get_dspac_array_from_ws, get_dspac_limits_from_ws
+from plugins.algorithms.poldi_utils import simulate_2d_data, get_dspac_array_from_ws, get_dspac_limits_from_ws, get_live_spectra
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from enum import Enum
@@ -1015,11 +1015,9 @@ class Poldi2DEvalMixin:
             self._reset_scales_and_bgs()
 
     def _live_spectra(self) -> np.ndarray:
-        """Boolean mask of "live" spectra (spectra contributing to the fit i.e. have detectors and are not masked)."""
-        n_hist = self.ws.getNumberHistograms()
-        if getattr(self, "_islive", None) is None or len(self._islive) != n_hist:
-            si = self.ws.spectrumInfo()
-            self._islive = np.array([si.hasDetectors(ispec) and not si.isMasked(ispec) for ispec in range(n_hist)])
+        """Cached boolean mask of the spectra contributing to the fit (evaluated once per fit)."""
+        if getattr(self, "_islive", None) is None or len(self._islive) != self.ws.getNumberHistograms():
+            self._islive = get_live_spectra(self.ws)
         return self._islive
 
     def _simulate_2d(self, params: np.ndarray[float]) -> Workspace2D:
@@ -1050,8 +1048,8 @@ class Poldi2DEvalMixin:
 
         ws_sim = self._simulate_2d(params)
         live = self._live_spectra()
-        # better to only calculate scales for live spectra as lstsq reg is degenerate for all zeros masked spec
-        self._reset_scales_and_bgs()  # reset all then update the live ones
+        # masked spectra are left at the neutral defaults - the lstsq is degenerate for an all-zero spectrum
+        self._reset_scales_and_bgs()
         self.scales[live], self.bgs[live] = calculate_scales_and_bg(self.ws.extractY()[live], ws_sim.extractY()[live])
         return self.scales, self.bgs
 
@@ -1164,7 +1162,8 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
         # correction factor.
         self._reestimate_scales(self.get_free_params())
         if len(self.scales) > 0:
-            valid_scales = self.scales[self.scales > 0]
+            # masked spectra sit at the neutral scale of 1 so must be excluded from the median
+            valid_scales = self.scales[self._live_spectra() & (self.scales > 0)]
             global_scale = float(np.median(valid_scales)) if len(valid_scales) > 0 else 1.0
             for iphase in range(len(self.phases)):
                 self.intens[iphase] *= global_scale

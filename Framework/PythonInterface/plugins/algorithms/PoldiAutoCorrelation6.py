@@ -12,15 +12,13 @@ from plugins.algorithms.poldi_utils import (
     get_max_tof_from_chopper,
     get_dspac_limits,
     get_final_dspac_array,
+    get_live_spectra,
 )
 from joblib import Parallel, delayed
 from functools import reduce
 from operator import iadd
 from itertools import islice
 from multiprocessing import cpu_count
-
-
-GROUPING_MODES = ["All", "Unmasked"]
 
 
 class PoldiAutoCorrelation(PythonAlgorithm):
@@ -78,7 +76,7 @@ class PoldiAutoCorrelation(PythonAlgorithm):
             "GroupingMode",
             defaultValue="All",
             direction=Direction.Input,
-            validator=StringListValidator(GROUPING_MODES),
+            validator=StringListValidator(["All", "Unmasked"]),
             doc="How detectors are split into NGroups when spectra are masked. 'All' splits the detectors into groups "
             "first and then removes any which have been masked (giving consistent but potentially uneven groups). "
             "'Unmasked' removes the masked detectors first and then splits what is left.",
@@ -101,9 +99,8 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         has_chopper = ws.componentInfo().uniqueName("chopper")
         if not has_log or not has_chopper:
             issues["InputWorkspace"] = "InputWorkspace must have chopper component and chopperspeed log."
-        si = ws.spectrumInfo()
         n_groups = self.getProperty("NGroups").value
-        if sum(si.hasDetectors(ispec) and not si.isMasked(ispec) for ispec in range(ws.getNumberHistograms())) < n_groups:
+        if get_live_spectra(ws).sum() < n_groups:
             issues["NGroups"] = f"InputWorkspace has fewer unmasked spectra with detectors than required for {n_groups} groups."
         return issues
 
@@ -117,22 +114,18 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         # get detector positions from IDF
         si = ws.spectrumInfo()
         nspec = ws.getNumberHistograms()
-        # array of which spectra are unmasked
-        is_live = np.array([si.hasDetectors(ispec) and not si.isMasked(ispec) for ispec in range(nspec)])
-        # zero out masked spectra - keep full length array for when spec based indexing is required
+        is_live = get_live_spectra(ws)
+        # masked spectra are zeroed rather than dropped so the arrays stay indexable by spectrum index
         tths = np.array([si.twoTheta(ispec) if is_live[ispec] else 0.0 for ispec in range(nspec)])
         l2s = np.asarray([si.l2(ispec) if is_live[ispec] else 0.0 for ispec in range(nspec)])
-        # reduced arrays
-        live_tths = tths[is_live]
-        live_l2s = l2s[is_live]
         l1 = si.l1()
         # determine npulses to include in calc
-        time_max = get_max_tof_from_chopper(l1, l1_chop, live_l2s, live_tths, lambda_max) + slit_offsets[-1]
+        time_max = get_max_tof_from_chopper(l1, l1_chop, l2s[is_live], tths[is_live], lambda_max) + slit_offsets[-1]
         npulses = int(time_max // cycle_time)
         # get final d-spacing array based on detector limits and wavelength range
         # in actuality not all d-spacings will be measured within the wavelength range in every pixel
         # but this is a small effect as detector doesn't cover much two-theta range
-        dspac_min, dspac_max = get_dspac_limits(live_tths.min(), live_tths.max(), lambda_min, lambda_max)
+        dspac_min, dspac_max = get_dspac_limits(tths[is_live].min(), tths[is_live].max(), lambda_min, lambda_max)
         bin_width = ws.x(0)[1] - ws.x(0)[0]
         dspacs = get_final_dspac_array(bin_width, dspac_min, dspac_max, time_max)[:, None]
         # perform auto-correlation (Eq. 7 in POLDI concept paper)
@@ -147,10 +140,8 @@ class PoldiAutoCorrelation(PythonAlgorithm):
             ]
         )
 
-        # create grouping
-        groups = self._get_grouping(is_live, nspec, ngroups)
+        groups = self._get_grouping(is_live, ngroups)
         order = np.concatenate(groups)
-
         # loop over spectra and add to intermediate correlation
         progress = Progress(self, start=0.0, end=1.0, nreports=len(order))
         if self.getProperty("InterpolationMethod").value == "Linear":
@@ -188,13 +179,12 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         out_props = tuple(alg.getProperty(prop).value for prop in alg.outputProperties())
         return out_props[0] if len(out_props) == 1 else out_props
 
-    def _get_grouping(self, is_live: np.ndarray, nspec: int, ngroups: int) -> list[np.ndarray]:
-        # build the spectrum groups: a list of live workspace indices per output spectrum
+    def _get_grouping(self, is_live: np.ndarray, ngroups: int) -> list[np.ndarray]:
+        """Split the live spectra into a list of workspace indices per output spectrum."""
         if self.getProperty("GroupingMode").value == "All":
             # fixed boundaries over the whole detector, masked spectra dropped from their group
-            return [grp[is_live[grp]] for grp in np.array_split(np.arange(nspec), ngroups)]
+            return [grp[is_live[grp]] for grp in np.array_split(np.arange(len(is_live)), ngroups)]
         else:
-            # boundaries chosen so each group holds a similar number of live detectors
             return np.array_split(np.flatnonzero(is_live), ngroups)
 
 
