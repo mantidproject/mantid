@@ -61,10 +61,8 @@ void BinaryOperateMasks::exec() {
   DataObjects::MaskWorkspace_sptr outputws = getProperty("OutputWorkspace");
 
   if (outputws != inputws1) {
-    // if the input and output are not the same, then create a new workspace for
-    // the output.
-    outputws = std::make_shared<DataObjects::MaskWorkspace>(inputws1->getInstrument());
-    outputws->copyFrom(inputws1);
+    // Preserve the spectrum-to-detector mapping when creating a separate output.
+    outputws = inputws1->clone();
   }
 
   // 3. Call Child Algorithm
