@@ -36,8 +36,6 @@ public:
   void setPlotActionState(PlotActionState const &state) override;
   /// Replace the plotting workspace tree contents.
   void setPlottingWorkspaceTreeItemStates(std::vector<PlottingWorkspaceTreeItemState> const &itemStates) override;
-  void updatePlottingWorkspaceTreeItemStates(std::vector<PlottingWorkspaceTreeItemState> const &itemStates) override;
-  PlottingWorkspaceFilter workspaceFilter() const override;
   /// Return names of selected workspace leaf nodes.
   std::vector<std::string> selectedPlottingWorkspaceNames() const override;
   /// Return the number of selected workspace-group rows.
@@ -62,8 +60,8 @@ private:
   void setOutputSelectionControlsEnabled(bool enabled);
   /// Clear selected tree rows.
   void clearPlottingWorkspaceTreeSelection();
-  /// Forward filter control changes to the presenter.
-  void notifyWorkspaceFilterChanged();
+  /// Apply the current filter controls to the workspace tree.
+  void filterPlottingWorkspaces();
 
   Ui::PlottingWidget m_ui;
   std::unique_ptr<QtPlottingWorkspaceTreeViewAdapter> m_plottingWorkspaceTreeViewAdapter;

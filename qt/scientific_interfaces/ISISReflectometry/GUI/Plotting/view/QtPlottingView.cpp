@@ -38,9 +38,10 @@ void QtPlottingView::initLayout() {
   m_plottingWorkspaceTreeViewAdapter =
       std::make_unique<QtPlottingWorkspaceTreeViewAdapter>(m_ui.plottingWorkspaceTree, this);
   for (auto *checkbox : {m_ui.filterIvsQBinned, m_ui.filterIvsLambda, m_ui.filterIvsQ}) {
-    connect(checkbox, &QCheckBox::toggled, this, &QtPlottingView::notifyWorkspaceFilterChanged);
+    connect(checkbox, &QCheckBox::toggled, this, &QtPlottingView::filterPlottingWorkspaces);
   }
-  connect(m_ui.workspaceFilter, &QLineEdit::textChanged, this, &QtPlottingView::notifyWorkspaceFilterChanged);
+  connect(m_ui.workspaceFilter, &QLineEdit::textChanged, this, &QtPlottingView::filterPlottingWorkspaces);
+  filterPlottingWorkspaces();
   connect(m_ui.plottingWorkspaceTree->selectionModel(), &QItemSelectionModel::selectionChanged, this,
           [this](QItemSelection const &selected, QItemSelection const &deselected) {
             m_plottingWorkspaceTreeViewAdapter->updateChildSelection(deselected, QItemSelectionModel::Deselect);
@@ -135,18 +136,7 @@ void QtPlottingView::setPlottingWorkspaceTreeItemStates(std::vector<PlottingWork
   m_plottingWorkspaceTreeViewAdapter->setPlottingWorkspaceTreeItemStates(itemStates);
 }
 
-void QtPlottingView::updatePlottingWorkspaceTreeItemStates(
-    std::vector<PlottingWorkspaceTreeItemState> const &itemStates) {
-  m_plottingWorkspaceTreeViewAdapter->updatePlottingWorkspaceTreeItemStates(itemStates);
-}
-
-void QtPlottingView::notifyWorkspaceFilterChanged() {
-  if (m_notifyee) {
-    m_notifyee->notifyWorkspaceFilterChanged();
-  }
-}
-
-PlottingWorkspaceFilter QtPlottingView::workspaceFilter() const {
+void QtPlottingView::filterPlottingWorkspaces() {
   std::vector<ReducedWorkspaceOutputType> outputTypes;
   if (m_ui.filterIvsQBinned->isChecked()) {
     outputTypes.emplace_back(ReducedWorkspaceOutputType::IvsQBinned);
@@ -157,7 +147,7 @@ PlottingWorkspaceFilter QtPlottingView::workspaceFilter() const {
   if (m_ui.filterIvsQ->isChecked()) {
     outputTypes.emplace_back(ReducedWorkspaceOutputType::IvsQ);
   }
-  return {m_ui.workspaceFilter->text().toStdString(), std::move(outputTypes)};
+  m_plottingWorkspaceTreeViewAdapter->filterWorkspaces(m_ui.workspaceFilter->text().toStdString(), outputTypes);
 }
 
 std::vector<std::string> QtPlottingView::selectedPlottingWorkspaceNames() const {

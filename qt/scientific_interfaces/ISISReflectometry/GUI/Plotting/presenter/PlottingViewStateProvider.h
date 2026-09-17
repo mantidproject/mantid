@@ -11,7 +11,6 @@
 #include "GUI/Plotting/model/PlottingWorkspace.h"
 #include "GUI/Plotting/view/PlottingViewState.h"
 
-#include <boost/regex.hpp>
 #include <vector>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -31,11 +30,6 @@ public:
   /// Return view-facing state for each item in the plotting workspace tree.
   std::vector<PlottingWorkspaceTreeItemState>
   plottingWorkspaceTreeItemStates(std::vector<PlottingWorkspaceTreeItem> const &items, PlotOutputType outputType) const;
-  /// Derive visibility and selection state from the complete tree and current workspace filter.
-  std::vector<PlottingWorkspaceTreeItemState>
-  plottingWorkspaceTreeItemStates(std::vector<PlottingWorkspaceTreeItem> const &items, PlotOutputType outputType,
-                                  boost::regex const &expression,
-                                  std::vector<ReducedWorkspaceOutputType> const &outputTypes) const;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
