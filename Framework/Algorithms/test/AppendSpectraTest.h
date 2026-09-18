@@ -26,37 +26,41 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using Mantid::Types::Core::DateAndTime;
 
+namespace {
+constexpr std::string TOP_WS_NAME = "TOP_WS_NAME";
+constexpr std::string BOTTOM_WS_NAME = "BOTTOM_WS_NAME";
+} // namespace
+
 class AppendSpectraTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static AppendSpectraTest *createSuite() { return new AppendSpectraTest(); }
   static void destroySuite(AppendSpectraTest *suite) { delete suite; }
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   AppendSpectraTest() {}
 
   void test_algorithm_execution() {
-    std::string top = "top";
-    std::string bottom = "bottom";
-    createNonOverlappingWorkspaces(top, bottom);
+    loadTestWorkspaces(TOP_WS_NAME, BOTTOM_WS_NAME);
 
     // Get the two input workspaces for later
-    MatrixWorkspace_sptr in1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(top);
-    MatrixWorkspace_sptr in2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(bottom);
+    MatrixWorkspace_sptr in1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(TOP_WS_NAME);
+    MatrixWorkspace_sptr in2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(BOTTOM_WS_NAME);
 
     // Mask a spectrum and check it is carried over
-    const size_t maskTop(5), maskBottom(10);
-    in1->getSpectrum(maskTop).clearData();
-    in2->getSpectrum(maskBottom).clearData();
-    in1->mutableSpectrumInfo().setMasked(maskTop, true);
-    in2->mutableSpectrumInfo().setMasked(maskBottom, true);
+    const size_t maskTOP_WS_NAME(5), maskBOTTOM_WS_NAME(10);
+    in1->getSpectrum(maskTOP_WS_NAME).clearData();
+    in2->getSpectrum(maskBOTTOM_WS_NAME).clearData();
+    in1->mutableSpectrumInfo().setMasked(maskTOP_WS_NAME, true);
+    in2->mutableSpectrumInfo().setMasked(maskBOTTOM_WS_NAME, true);
 
     // Now it should succeed
     auto appendSpectra = Mantid::API::AlgorithmManager::Instance().create("AppendSpectra");
-    doAppendSpectraWithWorkspacesTest(appendSpectra, top, bottom, top);
+    doAppendSpectraWithWorkspacesTest(appendSpectra, TOP_WS_NAME, BOTTOM_WS_NAME, TOP_WS_NAME);
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(top));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(TOP_WS_NAME));
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 25);
     // Check a few values
     TS_ASSERT_EQUALS(output->x(0)[0], in1->x(0)[0]);
@@ -69,25 +73,23 @@ public:
     TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(12), in2->getAxis(1)->spectraNo(2));
 
     // Check masking
-    TS_ASSERT_EQUALS(output->spectrumInfo().isMasked(maskTop), true);
-    TS_ASSERT_EQUALS(output->spectrumInfo().isMasked(10 + maskBottom), true);
+    TS_ASSERT_EQUALS(output->spectrumInfo().isMasked(maskTOP_WS_NAME), true);
+    TS_ASSERT_EQUALS(output->spectrumInfo().isMasked(10 + maskBOTTOM_WS_NAME), true);
   }
 
   void test_algorithm_execution_with_multiple_appends() {
-    std::string top = "top";
-    std::string bottom = "bottom";
-    createNonOverlappingWorkspaces(top, bottom);
+    loadTestWorkspaces(TOP_WS_NAME, BOTTOM_WS_NAME);
 
     // Get the two input workspaces for later
-    MatrixWorkspace_sptr in1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(top);
-    MatrixWorkspace_sptr in2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(bottom);
+    MatrixWorkspace_sptr in1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(TOP_WS_NAME);
+    MatrixWorkspace_sptr in2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(BOTTOM_WS_NAME);
 
     // Now it should succeed
     auto appendSpectra = Mantid::API::AlgorithmManager::Instance().create("AppendSpectra");
-    doAppendSpectraWithWorkspacesTest(appendSpectra, top, bottom, top, false, false, false, 2);
+    doAppendSpectraWithWorkspacesTest(appendSpectra, TOP_WS_NAME, BOTTOM_WS_NAME, TOP_WS_NAME, false, false, false, 2);
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(top));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(TOP_WS_NAME));
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 40);
     // Check a few values
     TS_ASSERT_EQUALS(output->x(0)[0], in1->x(0)[0]);
@@ -115,7 +117,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace1", ews));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace2", WorkspaceCreationHelper::create2DWorkspace(10, 10)));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "outevent"));
-    alg.execute();
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
   }
 
@@ -297,6 +299,95 @@ public:
     doAppendWorkspacesWithNumericAxisTest(false, false, false, true);
   }
 
+  void test_append_spectra_with_rewrite_on_non_overlapping_detectors() {
+    const std::string outName = "outWs";
+    loadTestWorkspaces(TOP_WS_NAME, BOTTOM_WS_NAME);
+
+    const auto appendSpectra = Mantid::API::AlgorithmManager::Instance().create("AppendSpectra");
+    doAppendSpectraWithWorkspacesTest(appendSpectra, TOP_WS_NAME, BOTTOM_WS_NAME, outName, false, false, false, 1,
+                                      true);
+
+    const auto wsBottom = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(BOTTOM_WS_NAME);
+    const auto wsTop = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(TOP_WS_NAME);
+    const auto output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outName);
+    const auto &siBottom = wsBottom->spectrumInfo();
+    const auto &siTop = wsTop->spectrumInfo();
+    const auto &siOutput = output->spectrumInfo();
+
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), wsBottom->getNumberHistograms() + wsTop->getNumberHistograms());
+    TS_ASSERT_DELTA(siBottom.position(0).norm(), siOutput.position(wsTop->getNumberHistograms()).norm(), 1e-5);
+    TS_ASSERT_DELTA(siTop.position(0).norm(), siOutput.position(0).norm(), 1e-5);
+  }
+
+  void test_append_spectra_with_rewrite_on_overlapping_detectors() {
+    const std::string outName = "outWs";
+    createOverlappingGroupedWorkspaces();
+
+    const auto appendSpectra = Mantid::API::AlgorithmManager::Instance().create("AppendSpectra");
+    doAppendSpectraWithWorkspacesTest(appendSpectra, TOP_WS_NAME, BOTTOM_WS_NAME, outName, false, false, false, 1,
+                                      true);
+
+    const auto wsBottom = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(BOTTOM_WS_NAME);
+    const auto wsTop = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(TOP_WS_NAME);
+    const auto output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outName);
+    const auto &siBottom = wsBottom->spectrumInfo();
+    const auto &siTop = wsTop->spectrumInfo();
+    const auto &siOutput = output->spectrumInfo();
+    // output should be 6 spectrum, 3 from each input ws with non repeating detector position for spectra 0 and 3 (which
+    // corresponds to same bank as per grouped)
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), wsBottom->getNumberHistograms() + wsTop->getNumberHistograms());
+    TS_ASSERT_DELTA(siBottom.position(0).norm(), siOutput.position(3).norm(), 1e-5);
+    TS_ASSERT_DELTA(siTop.position(0).norm(), siOutput.position(0).norm(), 1e-5);
+  }
+
+  void test_append_spectra_with_rewrite_does_not_validate_with_not_enough_detectors() {
+    // Creating a sample workspace using basic_rect instrument fulfills this condition
+    const auto createSampleWs = AlgorithmManager::Instance().create("CreateSampleWorkspace");
+    createSampleWs->setProperty("OutputWorkspace", TOP_WS_NAME);
+    createSampleWs->execute();
+    createSampleWs->setProperty("OutputWorkspace", BOTTOM_WS_NAME);
+    createSampleWs->execute();
+
+    const auto appendSpectra = Mantid::API::AlgorithmManager::Instance().create("AppendSpectra");
+    appendSpectra->setProperty("OutputWorkspace", "out");
+    appendSpectra->setProperty("InputWorkspace1", TOP_WS_NAME);
+    appendSpectra->setProperty("InputWorkspace2", BOTTOM_WS_NAME);
+    appendSpectra->setProperty("RewriteSpectraMap", true);
+    TSM_ASSERT_THROWS(
+        "Basic Rect instrument has 200 detectors, appended spectra has 400 spectrum, not enough to rewrite to "
+        "spectrum per detector",
+        appendSpectra->execute(), const std::runtime_error &);
+  }
+
+  void test_append_spectra_with_rewrite_validates_non_monitor_spectra_only() {
+    const auto ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(6, 20, true, false, true, "testInst");
+    const auto ws2 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 20, true, false, true, "testInst");
+    AnalysisDataService::Instance().addOrReplace(TOP_WS_NAME, ws1);
+    AnalysisDataService::Instance().addOrReplace(BOTTOM_WS_NAME, ws2);
+
+    auto appendSpectra = Mantid::API::AlgorithmManager::Instance().create("AppendSpectra");
+    doAppendSpectraWithWorkspacesTest(appendSpectra, TOP_WS_NAME, BOTTOM_WS_NAME, "out", false, false, false, 1, true);
+
+    const auto output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), 8);
+  }
+
+  void test_append_spectra_with_rewrite_does_not_validate_with_non_instrument_ws() {
+    const auto ws1 = WorkspaceCreationHelper::create2DWorkspace(5, 20);
+    const auto ws2 = WorkspaceCreationHelper::create2DWorkspace(5, 20);
+    AnalysisDataService::Instance().addOrReplace(TOP_WS_NAME, ws1);
+    AnalysisDataService::Instance().addOrReplace(BOTTOM_WS_NAME, ws2);
+
+    const auto appendSpectra = Mantid::API::AlgorithmManager::Instance().create("AppendSpectra");
+    appendSpectra->setRethrows(true);
+    appendSpectra->setProperty("OutputWorkspace", "out");
+    appendSpectra->setProperty("InputWorkspace1", TOP_WS_NAME);
+    appendSpectra->setProperty("InputWorkspace2", BOTTOM_WS_NAME);
+    appendSpectra->setProperty("RewriteSpectraMap", true);
+    TSM_ASSERT_THROWS("Workspaces with no associated instrument can't rewrite spectra map to detector number",
+                      appendSpectra->execute(), const std::runtime_error &);
+  }
+
 private:
   void doTypeAndParamsTest(bool event, bool combineLogs = false, int number = 1) {
     const std::string ws1Name = "AppendSpectraTest_grp1";
@@ -354,10 +445,11 @@ private:
     }
   }
 
-  void doAppendSpectraWithWorkspacesTest(IAlgorithm_sptr appendSpectra, const std::string &inputWorkspace1,
+  void doAppendSpectraWithWorkspacesTest(const IAlgorithm_sptr &appendSpectra, const std::string &inputWorkspace1,
                                          const std::string &inputWorkspace2, const std::string &outputWorkspace,
                                          const bool shoudThrow = false, const bool appendYAxis = false,
-                                         const bool combineLogs = false, const int number = 1) {
+                                         const bool combineLogs = false, const int number = 1,
+                                         const bool rewriteSpMap = false) {
     if (!appendSpectra->isInitialized())
       appendSpectra->initialize();
     TS_ASSERT_THROWS_NOTHING(appendSpectra->setRethrows(true));
@@ -367,6 +459,7 @@ private:
     TS_ASSERT_THROWS_NOTHING(appendSpectra->setProperty("Number", number));
     TS_ASSERT_THROWS_NOTHING(appendSpectra->setProperty("MergeLogs", combineLogs));
     TS_ASSERT_THROWS_NOTHING(appendSpectra->setProperty("OutputWorkspace", outputWorkspace));
+    TS_ASSERT_THROWS_NOTHING(appendSpectra->setProperty("RewriteSpectraMap", rewriteSpMap));
 
     if (shoudThrow) {
       TS_ASSERT_THROWS_ANYTHING(appendSpectra->execute());
@@ -378,26 +471,23 @@ private:
 
   void doAppendWorkspacesWithNumericAxisTest(bool appendYAxis, bool isBinEdgeAxis, bool overlappedWS,
                                              bool differentTypes = false) {
-    const std::string inputWorkspace1 = "top";
-    const std::string inputWorkspace2 = "bottom";
-    std::string outputWorkspace = "appended";
-
+    const std::string outputWorkspace = "appended";
     if (overlappedWS || differentTypes) {
-      createWorkspaceWithAxisAndLabel(inputWorkspace1, "Time", "1.0");
-      createWorkspaceWithAxisAndLabel(inputWorkspace2, differentTypes ? "Text" : "Time", "1.0");
+      createWorkspaceWithAxisAndLabel(TOP_WS_NAME, "Time", "1.0");
+      createWorkspaceWithAxisAndLabel(BOTTOM_WS_NAME, differentTypes ? "Text" : "Time", "1.0");
     } else {
-      createNonOverlappingWorkspaces(inputWorkspace1, inputWorkspace2);
+      loadTestWorkspaces(TOP_WS_NAME, BOTTOM_WS_NAME);
     }
 
-    MatrixWorkspace_sptr inputWS1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWorkspace1);
-    MatrixWorkspace_sptr inputWS2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWorkspace2);
+    MatrixWorkspace_sptr inputWS1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(TOP_WS_NAME);
+    MatrixWorkspace_sptr inputWS2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(BOTTOM_WS_NAME);
 
     if (!differentTypes) {
       appendNumericAxis(inputWS1, inputWS2, isBinEdgeAxis);
     }
 
     auto appendSpectra = Mantid::API::AlgorithmManager::Instance().create("AppendSpectra");
-    doAppendSpectraWithWorkspacesTest(appendSpectra, inputWorkspace1, inputWorkspace2, outputWorkspace, differentTypes,
+    doAppendSpectraWithWorkspacesTest(appendSpectra, TOP_WS_NAME, BOTTOM_WS_NAME, outputWorkspace, differentTypes,
                                       appendYAxis);
 
     if (!differentTypes) {
@@ -457,8 +547,8 @@ private:
     }
 
     for (int i = 0; i < 100; ++i) {
-      dataX.emplace_back(double(i));
-      dataY.emplace_back(double(i));
+      dataX.emplace_back(static_cast<double>(i));
+      dataY.emplace_back(static_cast<double>(i));
     }
 
     auto createWS = Mantid::API::AlgorithmManager::Instance().create("CreateWorkspace");
@@ -481,26 +571,57 @@ private:
     TS_ASSERT(rebin->isExecuted());
   }
 
-  void createNonOverlappingWorkspaces(std::string ws1, std::string ws2) {
-    IAlgorithm *loader;
-    loader = new Mantid::DataHandling::LoadRaw3;
+  void loadTestWorkspaces(const std::string &ws1, const std::string &ws2, const bool nonOverlapping = true) {
+    const auto loader = AlgorithmManager::Instance().create("LoadRaw", 3);
     loader->initialize();
     loader->setPropertyValue("Filename", "OSI11886.raw");
     loader->setPropertyValue("OutputWorkspace", ws1);
-    loader->setPropertyValue("SpectrumMin", "1");
-    loader->setPropertyValue("SpectrumMax", "10");
+    if (nonOverlapping) {
+      loader->setPropertyValue("SpectrumMin", "1");
+      loader->setPropertyValue("SpectrumMax", "10");
+    }
     TS_ASSERT_THROWS_NOTHING(loader->execute());
     TS_ASSERT(loader->isExecuted());
-    delete loader;
 
-    loader = new Mantid::DataHandling::LoadRaw3;
-    loader->initialize();
     loader->setPropertyValue("Filename", "OSI11886.raw");
     loader->setPropertyValue("OutputWorkspace", ws2);
-    loader->setPropertyValue("SpectrumMin", "11");
-    loader->setPropertyValue("SpectrumMax", "25");
+    if (nonOverlapping) {
+      loader->setPropertyValue("SpectrumMin", "11");
+      loader->setPropertyValue("SpectrumMax", "25");
+    }
     TS_ASSERT_THROWS_NOTHING(loader->execute());
     TS_ASSERT(loader->isExecuted());
-    delete loader;
+  }
+
+  void groupDetectorsInWs(const std::string &wsName, const std::string &groupingPattern) {
+    const auto grouper = AlgorithmManager::Instance().create("GroupDetectors");
+    grouper->initialize();
+    grouper->setPropertyValue("InputWorkspace", wsName);
+    grouper->setPropertyValue("OutputWorkspace", wsName);
+    grouper->setPropertyValue("GroupingPattern", groupingPattern);
+
+    TS_ASSERT_THROWS_NOTHING(grouper->execute());
+    TS_ASSERT(grouper->isExecuted());
+  }
+
+  void createOverlappingGroupedWorkspaces() {
+    // taking 3 first osiris banks as groups to get 3 spectrum.
+    const std::string groupingPattern = "2-121,122-241,242-361";
+    loadTestWorkspaces(TOP_WS_NAME, BOTTOM_WS_NAME, false);
+    const auto loader = AlgorithmManager::Instance().create("LoadRaw", 3);
+
+    auto ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(TOP_WS_NAME);
+    auto BOTTOM_WS_NAMEWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(BOTTOM_WS_NAME);
+    // we move bank 0 on osiris instrument on Z
+    const std::string osirisBankName = "mod0";
+    const auto moveAlg = AlgorithmManager::Instance().create("MoveInstrumentComponent");
+    moveAlg->initialize();
+    moveAlg->setPropertyValue("Workspace", BOTTOM_WS_NAME);
+    moveAlg->setPropertyValue("ComponentName", osirisBankName);
+    moveAlg->setProperty("Z", 0.1);
+    moveAlg->execute();
+
+    groupDetectorsInWs(TOP_WS_NAME, groupingPattern);
+    groupDetectorsInWs(BOTTOM_WS_NAME, groupingPattern);
   }
 };
