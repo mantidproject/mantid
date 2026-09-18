@@ -239,6 +239,7 @@ class FullInstrumentViewPresenter:
         self._view.set_hover_pick_enabled(enabled)
         self._view.set_aspect_ratio_box_enabled(enabled)
         self._view.set_flip_beam_box_enabled(enabled)
+        self._update_rotation_controls_enabled()
 
     def on_projection_option_changed(self) -> None:
         self._callback_queue.put((self._on_projection_option_changed, ()))
@@ -248,6 +249,7 @@ class FullInstrumentViewPresenter:
             return
         self._model.projection_type = self._view.current_selected_projection()
         self._model.flip_beam = self._view.is_flip_beam_checkbox_checked()
+        self._model.u_offset = np.pi if self._view.is_rotate_180_checkbox_checked() else np.radians(self._view.u_offset_degrees())
         with SuppressRendering(self._view.main_plotter):
             self._update_view_main_plotter(refresh_limits=refresh_limits)
             self.refresh_plotter_peaks()
@@ -361,6 +363,30 @@ class FullInstrumentViewPresenter:
         self._view.store_flip_beam_option()
         self.update_plotter(refresh_limits=False)
         self._view.reset_camera()
+
+    def on_u_offset_changed(self, _value=None) -> None:
+        self._view.store_u_offset_option()
+        self.update_plotter(refresh_limits=False)
+        self._view.reset_camera()
+
+    def on_rotate_180_check_box_clicked(self) -> None:
+        self._view.store_rotate_180_option()
+        self._update_rotation_controls_enabled()
+        self.update_plotter(refresh_limits=False)
+        self._view.reset_camera()
+
+    def on_reset_projection_clicked(self) -> None:
+        self._view.reset_rotation_controls()
+        self._view.store_u_offset_option()
+        self._view.store_rotate_180_option()
+        self._update_rotation_controls_enabled()
+        self.update_plotter(refresh_limits=False)
+
+    def _update_rotation_controls_enabled(self) -> None:
+        """The slider is only usable when the projection can be rotated and the half turn is not already applied."""
+        projection_can_rotate = self._view.current_selected_projection() not in (ProjectionType.THREE_D, ProjectionType.SIDE_BY_SIDE)
+        self._view.set_rotate_180_box_enabled(projection_can_rotate)
+        self._view.set_u_offset_slider_enabled(projection_can_rotate and not self._view.is_rotate_180_checkbox_checked())
 
     @property
     def _detector_mesh_bounds(self) -> list[float]:

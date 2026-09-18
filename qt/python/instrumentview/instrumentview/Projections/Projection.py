@@ -51,19 +51,56 @@ class Projection:
         self._y_axis = np.zeros_like(self._projection_axis, dtype=np.float64)
         self._detector_x_coordinates = np.zeros(len(self._detector_positions))
         self._detector_y_coordinates = np.zeros(len(self._detector_positions))
+        self._raw_x_coordinates = np.zeros(len(self._detector_positions))
         self._x_range = (0, 0)
         self._y_range = (0, 0)
 
         self._u_period = 2 * np.pi
+        self._u_offset = 0.0
 
         self._calculate_axes(self._root_position)
         self._calculate_detector_coordinates()
         self._find_and_correct_x_gap()
+        # The range chosen automatically, which a u offset is measured from
+        self._auto_x_range = self._x_range
 
     @property
     def u_period(self) -> float:
         """The period of the projection in the x direction, used to wrap points around when they are outside the x range."""
         return self._u_period
+
+    @property
+    def u_offset(self) -> float:
+        """The angle the projection is rotated by about its axis, measured from the automatically chosen seam."""
+        return self._u_offset
+
+    def set_u_offset(self, offset: float) -> None:
+        """Rotate the projection about its axis, moving the seam at which the instrument is cut open.
+
+        The automatically chosen seam is used when the offset is zero.
+        """
+        if offset == self._u_offset:
+            return
+
+        self._u_offset = offset
+        self._apply_u_offset()
+
+    def _apply_u_offset(self) -> None:
+        """Re-wrap the detector x coordinates into the range selected by the current u offset."""
+        if self._u_period == 0 or self._auto_x_range[1] == self._auto_x_range[0]:
+            return
+
+        if self._u_offset == 0:
+            self._detector_x_coordinates = self._raw_x_coordinates.copy()
+            self._x_range = self._auto_x_range
+            self._apply_x_correction()
+            return
+
+        # A range exactly one period wide, so that every point wraps into it. The modulo keeps
+        # the range half open, so a point sitting exactly on the seam stays at the near edge.
+        seam = self._auto_x_range[0] + self._u_offset
+        self._x_range = (seam, seam + self._u_period)
+        self._detector_x_coordinates = seam + np.mod(self._raw_x_coordinates - seam, self._u_period)
 
     def _calculate_axes(self, root_position: np.ndarray) -> None:
         """The projection axis is specified, we calculate a 3D coordinate system based on that"""
@@ -95,6 +132,7 @@ class Projection:
         """Calculate 2D projection coordinates and store data"""
 
         self._detector_x_coordinates, self._detector_y_coordinates = self._calculate_2d_coordinates()
+        self._raw_x_coordinates = self._detector_x_coordinates.copy()
 
         self._x_range = (self._detector_x_coordinates.min(), self._detector_x_coordinates.max())
         self._y_range = (self._detector_y_coordinates.min(), self._detector_y_coordinates.max())

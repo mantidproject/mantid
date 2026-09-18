@@ -146,3 +146,62 @@ class TestProjection(unittest.TestCase):
             detector_positions=self.detector_positions,
         )
         np.testing.assert_allclose(proj.project_points(self.detector_positions), proj.positions())
+
+    def _projection_with_raw_x(self, raw_x):
+        """Build a cylindrical projection whose raw x coordinates are exactly the given values."""
+        patcher = unittest.mock.patch(
+            "instrumentview.Projections.CylindricalProjection.CylindricalProjection._calculate_2d_coordinates",
+            return_value=(np.asarray(raw_x, dtype=float), np.zeros(len(raw_x))),
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        return Projection(
+            type=ProjectionType.CYLINDRICAL_Z,
+            sample_position=self.sample_position,
+            root_position=self.root_position,
+            detector_positions=self.detector_positions,
+        )
+
+    def test_u_offset_defaults_to_zero_and_keeps_automatic_range(self):
+        proj = self._projection_with_raw_x([0, np.pi / 8, -np.pi / 4])
+        self.assertEqual(proj.u_offset, 0.0)
+        np.testing.assert_allclose(proj._x_range, [-np.pi / 4, np.pi / 8], rtol=1e-3)
+        np.testing.assert_allclose(proj._detector_x_coordinates, [0, np.pi / 8, -np.pi / 4], rtol=1e-3)
+
+    def test_set_u_offset_moves_seam(self):
+        proj = self._projection_with_raw_x([0, np.pi / 8, -np.pi / 4])
+        # Move the seam onto x = 0, so the detector below it wraps around to the far side
+        proj.set_u_offset(np.pi / 4)
+        self.assertEqual(proj.u_offset, np.pi / 4)
+        np.testing.assert_allclose(proj._x_range, [0, 2 * np.pi], rtol=1e-3)
+        np.testing.assert_allclose(proj._detector_x_coordinates, [0, np.pi / 8, 2 * np.pi - np.pi / 4], rtol=1e-3)
+
+    def test_set_u_offset_only_shifts_by_whole_periods(self):
+        raw_x = [0, np.pi / 8, -np.pi / 4]
+        proj = self._projection_with_raw_x(raw_x)
+        proj.set_u_offset(np.pi / 4)
+        shifts = (proj._detector_x_coordinates - np.array(raw_x)) / proj.u_period
+        np.testing.assert_allclose(shifts, np.round(shifts), atol=1e-9)
+
+    def test_set_u_offset_back_to_zero_restores_automatic_range(self):
+        proj = self._projection_with_raw_x([0, np.pi / 8, -np.pi / 4])
+        proj.set_u_offset(np.pi / 4)
+        proj.set_u_offset(0)
+        np.testing.assert_allclose(proj._x_range, [-np.pi / 4, np.pi / 8], rtol=1e-3)
+        np.testing.assert_allclose(proj._detector_x_coordinates, [0, np.pi / 8, -np.pi / 4], rtol=1e-3)
+
+    def test_set_u_offset_of_one_period_preserves_layout(self):
+        raw_x = [0, np.pi / 8, -np.pi / 4]
+        proj = self._projection_with_raw_x(raw_x)
+        proj.set_u_offset(proj.u_period)
+        np.testing.assert_allclose(proj._detector_x_coordinates, np.array(raw_x) + proj.u_period, rtol=1e-3)
+
+    def test_project_points_follows_u_offset(self):
+        proj = Projection(
+            type=ProjectionType.CYLINDRICAL_Z,
+            sample_position=self.sample_position,
+            root_position=self.root_position,
+            detector_positions=self.detector_positions,
+        )
+        proj.set_u_offset(np.pi / 4)
+        np.testing.assert_allclose(proj.project_points(self.detector_positions), proj.positions())
