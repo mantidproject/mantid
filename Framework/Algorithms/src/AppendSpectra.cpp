@@ -9,9 +9,13 @@
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -42,7 +46,6 @@ void AppendSpectra::init() {
                   "The name of the second input workspace");
 
   declareProperty("ValidateInputs", true, "Perform a set of checks that the two input workspaces are compatible.");
-
   declareProperty("Number", 1, std::make_shared<BoundedValidator<int>>(1, EMPTY_INT()),
                   "Append the spectra from InputWorkspace2 multiple times.");
 
@@ -52,6 +55,52 @@ void AppendSpectra::init() {
   declareProperty("MergeLogs", false, "Whether to combine the logs of the two input workspaces");
   declareProperty("AppendYAxisLabels", false,
                   "Whether to append y axis labels; this is done automatically if there is spectra overlap");
+  declareProperty("RewriteSpectraMap", false,
+                  "Rewrites the detectorID associated with each spectrum, moving each detector to the position on the "
+                  "original workspace");
+}
+
+std::map<std::string, std::string> AppendSpectra::validateInputs() {
+  std::map<std::string, std::string> inputs;
+  const MatrixWorkspace_const_sptr ws1 = getProperty("InputWorkspace1");
+  const MatrixWorkspace_const_sptr ws2 = getProperty("InputWorkspace2");
+  const EventWorkspace_const_sptr eventWs1 = std::dynamic_pointer_cast<const EventWorkspace>(ws1);
+  const EventWorkspace_const_sptr eventWs2 = std::dynamic_pointer_cast<const EventWorkspace>(ws2);
+
+  // Make sure that we are not mis-matching EventWorkspaces and other types of workspaces
+  if (((eventWs1) && (!eventWs2)) || ((!eventWs1) && (eventWs2))) {
+    const std::string msg = "Only one of the input workspaces are of type "
+                            "EventWorkspace; please use matching workspace "
+                            "types (both EventWorkspace or both "
+                            "Workspace2D). ";
+    inputs["InputWorkspace1"] = msg;
+    inputs["InputWorkspace2"] = msg;
+  }
+  if (!isDefault("RewriteSpectraMap")) {
+    if (!isDefault("Number")) {
+      inputs["RewriteSpectraMap"] += "Rewrite spectra only implemented when  number is  1. ";
+    }
+    if (const auto &inst1Name = ws1->getInstrumentName(), inst2Name = ws2->getInstrumentName();
+        inst1Name.empty() || inst2Name.empty() || (inst1Name != inst2Name)) {
+      inputs["RewriteSpectraMap"] += "Both input workspace must have valid instruments to rewrite the spectra maps.";
+    } else {
+      const auto countNonMonitorSpectra = [](const MatrixWorkspace_const_sptr &workspace) {
+        const auto &spectrumInfo = workspace->spectrumInfo();
+        size_t count = 0;
+        for (size_t index = 0; index < workspace->getNumberHistograms(); ++index) {
+          if (!spectrumInfo.isMonitor(index))
+            ++count;
+        }
+        return count;
+      };
+      if (ws1->getInstrument()->getNumberDetectors(true) < countNonMonitorSpectra(ws1) + countNonMonitorSpectra(ws2)) {
+        inputs["RewriteSpectraMap"] +=
+            "There are less available detectors than total number of spectrum in the appended workspace. "
+            "Not possible to rewrite their positions.";
+      }
+    }
+  }
+  return inputs;
 }
 
 /** Execute the algorithm.
@@ -62,17 +111,6 @@ void AppendSpectra::exec() {
   MatrixWorkspace_const_sptr ws2 = getProperty("InputWorkspace2");
   DataObjects::EventWorkspace_const_sptr eventWs1 = std::dynamic_pointer_cast<const EventWorkspace>(ws1);
   DataObjects::EventWorkspace_const_sptr eventWs2 = std::dynamic_pointer_cast<const EventWorkspace>(ws2);
-
-  // Make sure that we are not mis-matching EventWorkspaces and other types of
-  // workspaces
-  if (((eventWs1) && (!eventWs2)) || ((!eventWs1) && (eventWs2))) {
-    const std::string message("Only one of the input workspaces are of type "
-                              "EventWorkspace; please use matching workspace "
-                              "types (both EventWorkspace or both "
-                              "Workspace2D).");
-    g_log.error(message);
-    throw std::invalid_argument(message);
-  }
 
   bool ValidateInputs = this->getProperty("ValidateInputs");
   if (ValidateInputs) {
@@ -100,6 +138,9 @@ void AppendSpectra::exec() {
     for (int i = 1; i < number; i++) {
       output = execWS2D(*output, *ws2);
     }
+  }
+  if (!isDefault("RewriteSpectraMap")) {
+    rewriteSpectraMap(ws1, ws2, output);
   }
 
   if (mergeLogs)
@@ -186,4 +227,29 @@ void AppendSpectra::combineLogs(const API::Run &lhs, const API::Run &rhs, API::R
   }
 }
 
+void AppendSpectra::rewriteSpectraMap(const MatrixWorkspace_const_sptr &ws1, const MatrixWorkspace_const_sptr &ws2,
+                                      const MatrixWorkspace_sptr &output) {
+  const size_t lenWs1 = ws1->getNumberHistograms();
+  const size_t totLength = lenWs1 + ws2->getNumberHistograms();
+  const auto &instrument = output->getInstrument();
+  const auto &pixelIDs = instrument->getDetectorIDs(true); // ids skipping monitors
+
+  auto &componentInfo = output->mutableComponentInfo();
+  const auto &spInfo1 = ws1->spectrumInfo();
+  const auto &spInfo2 = ws2->spectrumInfo();
+  size_t detIndex = 0;
+  for (size_t i = 0; i < totLength; i++) {
+    if (i < lenWs1 ? spInfo1.isMonitor(i) : spInfo2.isMonitor(i - lenWs1)) {
+      continue;
+    }
+    const auto pos = i < lenWs1 ? spInfo1.position(i) : spInfo2.position(i - lenWs1);
+    const auto detID = pixelIDs.at(detIndex);
+    const auto comp = instrument->getDetector(detID);
+    auto &sp = output->getSpectrum(i);
+    // Do the move
+    componentInfo.setPosition(componentInfo.indexOf(comp->getComponentID()), pos);
+    sp.setDetectorID(detID);
+    detIndex++;
+  }
+}
 } // namespace Mantid::Algorithms
