@@ -15,7 +15,7 @@ from mantid.api import (
     WorkspaceGroup,
     WorkspaceGroupProperty,
 )
-from mantid.kernel import DeltaEModeType, Direction, FloatBoundedValidator, StringListValidator, UnitConversion
+from mantid.kernel import DeltaEModeType, Direction, FloatBoundedValidator, StringListValidator, UnitConversion, UnitParametersMap
 from mantid.simpleapi import (
     ConvertAxisByFormula,
     CloneWorkspace,
@@ -257,7 +257,7 @@ class D4ILLReduction(PythonAlgorithm):
         """
         Ei = mtd[ws].getRun().getLogData("Ei").value
         if self.getProperty("Wavelength").isDefault and Ei != 0:
-            wavelength = UnitConversion.run("Energy", "Wavelength", Ei, 0, 0, 0, DeltaEModeType.Elastic, 0.0)
+            wavelength = UnitConversion.run("Energy", "Wavelength", Ei, 0, DeltaEModeType.Elastic, UnitParametersMap())
         else:
             wavelength = self.getProperty("Wavelength").value
         ConvertAxisByFormula(

@@ -129,7 +129,7 @@ class SANSILLIntegrationTest(unittest.TestCase):
         self.assertTrue(ws.isDistribution())
         self.assertEqual(ws.getAxis(0).getUnit().unitID(), "MomentumTransfer")
         self.assertEqual(ws.getNumberHistograms(), spectra)
-        self.assertTrue(ws.getInstrument())
+        self.assertGreater(ws.detectorInfo().size(), 0)
         self.assertTrue(ws.getRun())
         self.assertTrue(ws.getHistory())
 

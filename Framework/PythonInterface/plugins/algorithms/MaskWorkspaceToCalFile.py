@@ -83,22 +83,16 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
         # save the grouping
         specInfo = inputWorkspace.spectrumInfo()
         for i in range(inputWorkspace.getNumberHistograms()):
-            try:
-                det = inputWorkspace.getDetector(i)
-                y_value = inputWorkspace.y(i)[0]
-                if mask_query.isMasked(specInfo, i, y_value):  # check if masked
-                    group = masking_flag
-                else:
-                    group = not_masking_flag
-                detIDs = []
-                try:
-                    detIDs = det.getDetectorIDs()
-                except AttributeError:
-                    detIDs = [det.getID()]
-                calFile.writelines(self.FormatLine(i, did, 0.0, group, group) for did in detIDs)
-            except RuntimeError:
+            detIDs = inputWorkspace.getSpectrum(i).getDetectorIDs()
+            if len(detIDs) == 0:
                 # no detector for this spectra
-                pass
+                continue
+            y_value = inputWorkspace.y(i)[0]
+            if mask_query.isMasked(specInfo, i, y_value):  # check if masked
+                group = masking_flag
+            else:
+                group = not_masking_flag
+            calFile.writelines(self.FormatLine(i, did, 0.0, group, group) for did in detIDs)
         calFile.close()
 
     # pylint: disable=too-many-arguments

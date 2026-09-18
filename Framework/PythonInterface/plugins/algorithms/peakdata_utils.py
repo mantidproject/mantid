@@ -11,7 +11,8 @@ from mantid.api import (
 )
 import numpy as np
 from scipy.stats import moment
-from mantid.geometry import RectangularDetector, GridDetector
+from mantid.geometry import ComponentType
+from collections import deque
 import re
 from scipy.signal import convolve2d
 
@@ -30,12 +31,9 @@ class InstrumentArrayConverter:
 
     def __init__(self, ws):
         self.ws = ws
-        self.inst = ws.getInstrument()
-        if any(
-            self.inst[icomp]
-            for icomp in range(self.inst.nelements())
-            if isinstance(self.inst[icomp], RectangularDetector) or isinstance(self.inst[icomp], GridDetector)
-        ):
+        self.component_info = ws.componentInfo()
+        root = self.component_info.root()
+        if any(self.component_info.isGridDetector(int(icomp)) for icomp in self.component_info.children(root)):
             # might not be true for all components due to presence of monitors etc.
             self.get_detid_array = self._get_detid_array_rect_detector
         else:
@@ -46,24 +44,61 @@ class InstrumentArrayConverter:
         *_, match = re.finditer(r"\d+", name)  # last match
         return name[: match.start()], name[match.start() :]  # prefix, num_str
 
-    @staticmethod
-    def find_nearest_child_to_component(parent, comp, excl=None, ndepth=1):
+    def _children(self, index):
+        return [int(child) for child in self.component_info.children(index)]
+
+    def _full_name(self, index):
+        """Return the path of a component from the instrument root, e.g. 'WISH/panel09/WISHpanel09'"""
+        names = [self.component_info.name(index)]
+        while self.component_info.hasParent(index):
+            index = self.component_info.parent(index)
+            names.append(self.component_info.name(index))
+        return "/".join(reversed(names))
+
+    def _find_in_subtree(self, index, name):
+        """Breadth-first search for a component called name, starting with the component at index"""
+        queue = deque([index])
+        while queue:
+            node = queue.popleft()
+            if self.component_info.name(node) == name:
+                return node
+            queue.extend(self._children(node))
+        return None
+
+    def _index_from_path(self, path):
+        """
+        Return the index of the component with the given name, or None if there is not one. As with
+        Instrument.getComponentByName, levels may be skipped at a '/' in the path.
+        """
+        index = self.component_info.root()
+        for name in path.split("/"):
+            index = self._find_in_subtree(index, name)
+            if index is None:
+                return None
+        return index
+
+    def _distance(self, index, other):
+        return (self.component_info.position(index) - self.component_info.position(other)).norm()
+
+    def find_nearest_child_to_component(self, parent, comp, excl=None, ndepth=1):
         dist = np.inf
         nearest_child = None
-        for ichild in range(parent.nelements()):
-            child = parent[ichild]
-            if hasattr(child, "nelements"):
-                while child.nelements() == 1:
-                    child = child[0]
-            is_correct_type = "CompAssembly" in child.type() or child.type() == "DetectorComponent"
-            is_not_excluded = excl is None or child.getFullName() != excl
+        for child in self._children(parent):
+            while len(self.component_info.children(child)) == 1:
+                child = self._children(child)[0]
+            is_correct_type = self.component_info.componentType(child) in (
+                ComponentType.Unstructured,
+                ComponentType.OutlineComposite,
+                ComponentType.Detector,
+            )
+            is_not_excluded = excl is None or self._full_name(child) != excl
             if is_correct_type and is_not_excluded:
-                this_dist = child.getDistance(comp)
+                this_dist = self._distance(child, comp)
                 if this_dist < dist:
                     dist = this_dist
                     nearest_child = child
-        if ndepth > 1:
-            nearest_child = InstrumentArrayConverter.find_nearest_child_to_component(nearest_child, comp, ndepth=ndepth - 1)
+        if ndepth > 1 and nearest_child is not None:
+            nearest_child = self.find_nearest_child_to_component(nearest_child, comp, ndepth=ndepth - 1)
         return nearest_child
 
     def _find_nearest_adjacent_col_component(self, dcol, col, ncols, bank_name, col_prefix, col_str, delim, ncols_edge):
@@ -72,22 +107,23 @@ class InstrumentArrayConverter:
         isRHS = np.any(dcol + col >= ncols - ncols_edge + 1)
         if isLHS or isRHS:
             # get tube/col at each end of detector to get tube separation
-            detLHS = self.inst.getComponentByName(delim.join([bank_name, f"{col_prefix}{1:0{len(col_str)}d}"]))
-            detRHS = self.inst.getComponentByName(delim.join([bank_name, f"{col_prefix}{ncols:0{len(col_str)}d}"]))
-            det_sep = detLHS.getDistance(detRHS) / (ncols - 1)  # loose half pix at each end (cen-cen dist.)
+            detLHS = self._index_from_path(delim.join([bank_name, f"{col_prefix}{1:0{len(col_str)}d}"]))
+            detRHS = self._index_from_path(delim.join([bank_name, f"{col_prefix}{ncols:0{len(col_str)}d}"]))
+            det_sep = self._distance(detLHS, detRHS) / (ncols - 1)  # loose half pix at each end (cen-cen dist.)
             # look for adjacent tube in adjacent banks
             det_ref = detLHS if isLHS else detRHS
-            next_det = self.find_nearest_child_to_component(self.inst, det_ref, excl=bank_name, ndepth=2)
-            if next_det is not None and next_det.getDistance(det_ref) < 1.1 * det_sep:
+            next_det = self.find_nearest_child_to_component(self.component_info.root(), det_ref, excl=bank_name, ndepth=2)
+            if next_det is not None and self._distance(next_det, det_ref) < 1.1 * det_sep:
                 # is considered adjacent
-                next_col_prefix, next_col_str = self.split_string_trailing_int(next_det.getFullName())
+                next_col_prefix, next_col_str = self.split_string_trailing_int(self._full_name(next_det))
         return next_col_prefix, next_col_str, isLHS, isRHS
 
     def _get_detid_array_comp_assembly(self, bank, detid, row, col, drows, dcols, nrows_edge, ncols_edge=1):
         ispec = self.ws.getIndicesFromDetectorIDs([detid])
         ndet_per_spec = len(self.ws.getSpectrum(ispec[0]).getDetectorIDs())
-        nrows = bank[0].nelements()
-        ncols = bank.nelements()
+        cols = self._children(bank)
+        nrows = len(self.component_info.children(cols[0]))
+        ncols = len(cols)
 
         # get range of row/col
         drow_vec = np.arange(-drows, drows + 1) * ndet_per_spec  # to account for n-1 detector mapping in a tube
@@ -96,13 +132,14 @@ class InstrumentArrayConverter:
         dcol, drow = np.meshgrid(dcol_vec, drow_vec)
 
         # get row and col component names from string representation of instrument tree
-        ci = self.ws.componentInfo()
-        det_idx = self.ws.detectorInfo().indexOf(detid)
+        ci = self.component_info
+        det_info = self.ws.detectorInfo()
+        det_idx = det_info.indexOf(detid)
         row_name = ci.name(det_idx)  # e.g. 'pixel0066'
         row_prefix, row_str = self.split_string_trailing_int(row_name)  # e.g. 'pixel', '0066'
         col_name = ci.name(ci.parent(det_idx))
         col_prefix, col_str = self.split_string_trailing_int(col_name)
-        bank_name = bank.getFullName()
+        bank_name = self._full_name(bank)
         bank_prefix, bank_str = self.split_string_trailing_int(bank_name)  # 'e.g. WISH/panel09/WISHPanel', '09'
         delim = bank_prefix[len(ci.name(ci.root()))]
 
@@ -129,9 +166,9 @@ class InstrumentArrayConverter:
                 if col_comp_name is not None:
                     new_row = row + drow[irow, 0]
                     row_comp_name = f"{row_prefix}{new_row:0{len(row_str)}d}"
-                    det = self.inst.getComponentByName(delim.join([col_comp_name, row_comp_name]))
+                    det = self._index_from_path(delim.join([col_comp_name, row_comp_name]))
                     if det is not None:
-                        detids[irow, icol] = det.getID()
+                        detids[irow, icol] = det_info.detid(det)
 
         # remove starting or trailing zeros from detids etc. where no adjacent tubes found in other banks
         icols_keep = detids[0, :] != 0
@@ -155,8 +192,8 @@ class InstrumentArrayConverter:
         return detids, detector_edges, irow_peak, icol_peak
 
     def _get_detid_array_rect_detector(self, bank, detid, row, col, drows, dcols, nrows_edge, ncols_edge):
-        component_info = self.ws.componentInfo()
-        bank_index = component_info.indexOfAny(bank.getName())
+        component_info = self.component_info
+        bank_index = bank
         npixels_x = component_info.pixelGridNX(bank_index)
         npixels_y = component_info.pixelGridNY(bank_index)
         # step in detID along col and row
@@ -190,7 +227,7 @@ class InstrumentArrayConverter:
         :param dpixel: width of detector window in pixels (along row and columns)
         :return peak_data: PeakData object storing detids in peak region
         """
-        bank = self.inst.getComponentByName(bank_name)
+        bank = self._index_from_path(bank_name)
         row, col = peak.getRow(), peak.getCol()
         drows, dcols = int(nrows) // 2, int(ncols) // 2
         detids, det_edges, irow_peak, icol_peak = self.get_detid_array(bank, detid, row, col, drows, dcols, nrows_edge, ncols_edge)

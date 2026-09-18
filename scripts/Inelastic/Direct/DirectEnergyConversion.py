@@ -864,8 +864,7 @@ class DirectEnergyConversion(object):
         for spec_id in spectra_list:
             specID = workspace.getIndexFromSpectrumNumber(spec_id)
             if detPos is None:
-                first_detector = workspace.getDetector(specID)
-                detPos = first_detector.getPos()
+                detPos = workspace.spectrumInfo().position(specID)
             else:
                 psp = workspace.getSpectrum(specID)
                 detIDs = psp.getDetectorIDs()
@@ -957,9 +956,9 @@ class DirectEnergyConversion(object):
 
         # shift to monitor used to calculate energy transfer
         spec_num = monitor_ws.getIndexFromSpectrumNumber(ei_mon_spectra[0])
-        mon1_det = monitor_ws.getDetector(spec_num)
-        mon1_pos = mon1_det.getPos()
-        src_name = data_ws.getInstrument().getSource().getName()
+        mon1_pos = monitor_ws.spectrumInfo().position(spec_num)
+        component_info = data_ws.componentInfo()
+        src_name = component_info.name(component_info.source())
         MoveInstrumentComponent(
             Workspace=resultws_name,
             ComponentName=src_name,
@@ -1270,9 +1269,9 @@ class DirectEnergyConversion(object):
                         EnergyEstimate=ei_guess,
                         FixEi=fix_ei,
                     )
-                    mon1_det = monitor_ws.getDetector(mon1_index)
-                    mon1_pos = mon1_det.getPos()
-                    src_name = monitor_ws.getInstrument().getSource().name()
+                    mon1_pos = monitor_ws.spectrumInfo().position(mon1_index)
+                    component_info = monitor_ws.componentInfo()
+                    src_name = component_info.name(component_info.source())
                 # pylint: disable=bare-except
                 except:
                     src_name = None
@@ -1684,7 +1683,7 @@ class DirectEnergyConversion(object):
         # define list of all existing properties, which have descriptors
         object.__setattr__(self, "_descriptors", extract_non_system_names(all_methods))
 
-        if instr_name:
+        if instr_name is not None and not (isinstance(instr_name, str) and instr_name == ""):
             self.initialise(instr_name, reload_instrument)
         # end
 

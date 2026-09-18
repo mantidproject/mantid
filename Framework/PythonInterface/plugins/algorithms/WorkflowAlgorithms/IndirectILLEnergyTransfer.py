@@ -287,7 +287,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         @throws RuntimeError :: if neither the user defined nor the default file is found
         """
 
-        self._instrument_name = self._instrument.getName()
+        self._instrument_name = mtd[self._red_ws].getInstrumentName()
         self._analyser = self.getPropertyValue("Analyser")
         self._reflection = self.getPropertyValue("Reflection")
         idf_directory = config["instrumentDefinition.directory"]
@@ -822,7 +822,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         pattern = ""
 
         # if the first spectrum does not correspond to a monitor, start from there
-        offset = 0 if mtd[ws].getDetector(0).isMonitor() else -1
+        offset = 0 if mtd[ws].spectrumInfo().isMonitor(0) else -1
 
         for tube in range(1, N_TUBES + 1):
             pattern += str((tube - 1) * N_PIXELS_PER_TUBE + self._psd_int_range[0] + offset)
@@ -855,7 +855,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         @param ws :: the workspace name, a string
         @return the total number of single detectors
         """
-        monitor_count = N_MONITOR if mtd[ws].getDetector(0).isMonitor() else 0
+        monitor_count = N_MONITOR if mtd[ws].spectrumInfo().isMonitor(0) else 0
         return mtd[ws].getNumberHistograms() - N_TUBES * N_PIXELS_PER_TUBE - monitor_count
 
     def _normalise_to_monitor(self, ws, mon):

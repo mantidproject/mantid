@@ -7,6 +7,7 @@
 # pylint: disable=too-few-public-methods, invalid-name
 
 import math
+import warnings
 from mantid.api import MatrixWorkspace
 from abc import ABCMeta, abstractmethod
 
@@ -178,6 +179,41 @@ def is_zero_axis(axis):
     return total_value < 1e-4
 
 
+def get_base_position_and_rotation(workspace, component_name):
+    """
+    Get the position and rotation of a component in the base instrument, i.e. before any moves were applied.
+
+    The access layers only describe the current (moved) instrument, so the deprecated Instrument accessors
+    are still needed for the base instrument.
+
+    :param workspace: the workspace with the instrument.
+    :param component_name: the name of the component.
+    :return: the position and rotation, or None if the base instrument does not have the component.
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        base_component = workspace.getInstrument().getBaseInstrument().getComponentByName(component_name)
+        if base_component is None:
+            return None
+        return base_component.getPos(), base_component.getRotation()
+
+
+def get_position_and_rotation(workspace, component_name):
+    """
+    Get the current position and rotation of a component.
+
+    :param workspace: the workspace with the instrument.
+    :param component_name: the name of the component.
+    :return: the position and rotation, or None if the instrument does not have the component.
+    """
+    component_info = workspace.componentInfo()
+    try:
+        index = component_info.indexOfAny(component_name)
+    except ValueError:
+        return None
+    return component_info.position(index), component_info.rotation(index)
+
+
 def set_selected_components_to_original_position(workspace, component_names):
     """
     Sets a component to its original (non-moved) position, i.e. the position one obtains when using standard loading.
@@ -188,15 +224,11 @@ def set_selected_components_to_original_position(workspace, component_names):
     :param workspace: the workspace which will have the move applied to it.
     :param component_names: the name of the component which is to be moved.
     """
-    # First get the original rotation and position of the unaltered instrument components. This information
+    # Get the original rotation and position of the unaltered instrument components. This information
     # is stored in the base instrument
-    instrument = workspace.getInstrument()
-    base_instrument = instrument.getBaseInstrument()
-
-    # Get the original position and rotation
     for component_name in component_names:
-        base_component = base_instrument.getComponentByName(component_name)
-        moved_component = instrument.getComponentByName(component_name)
+        base_component = get_base_position_and_rotation(workspace, component_name)
+        moved_component = get_position_and_rotation(workspace, component_name)
 
         # It can be that monitors are already defined in the IDF but they cannot be found on the workspace. They
         # are buffer monitor names which the experiments might use in the future. Hence we need to check if a component
@@ -204,11 +236,8 @@ def set_selected_components_to_original_position(workspace, component_names):
         if base_component is None or moved_component is None:
             continue
 
-        base_position = base_component.getPos()
-        base_rotation = base_component.getRotation()
-
-        moved_position = moved_component.getPos()
-        moved_rotation = moved_component.getRotation()
+        base_position, base_rotation = base_component
+        moved_position, moved_rotation = moved_component
 
         move_alg = None
         if base_position != moved_position:
@@ -786,9 +815,7 @@ class SANSMoveZOOM(SANSMove):
 def create_mover(workspace, state):
     # Get selection
     run_number = workspace.getRunNumber()
-    instrument = workspace.getInstrument()
-    instrument_name = instrument.getName()
-    instrument_name = sanitise_instrument_name(instrument_name)
+    instrument_name = sanitise_instrument_name(workspace.getInstrumentName())
     instrument_type = SANSInstrument[instrument_name]
     if SANSMoveLOQ.is_correct(instrument_type, run_number):
         mover = SANSMoveLOQ(state)

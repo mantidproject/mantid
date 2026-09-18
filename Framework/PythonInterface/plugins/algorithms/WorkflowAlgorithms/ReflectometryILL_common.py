@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.geometry import Instrument
 from mantid.api import Run, MatrixWorkspace
 from typing import Union
 import h5py
@@ -17,22 +16,22 @@ SUM_IN_LAMBDA = "SumInLambda"
 SUM_IN_Q = "SumInQ"
 
 
-def chopper_opening_angle(sample_logs: Run, instrument: Instrument) -> float:
+def chopper_opening_angle(ws: MatrixWorkspace) -> float:
     """Return the chopper opening angle in degrees.
 
     Keyword arguments:
-    sample_logs -- run object holding workspace metadata
-    instrument -- instrument object holding instrument parameters
+    ws -- workspace holding the sample logs and the instrument parameters
     """
-    instr_name = instrument.getName()
+    sample_logs = ws.run()
+    instr_name = ws.getInstrumentName()
     if instr_name == "D17":
         duration = sample_logs.getProperty("duration").value
         if duration > 30.0:
-            chopper1_phase_name = instrument.getStringParameter("chopper1_phase")[0]
-            chopper2_phase_name = instrument.getStringParameter("chopper2_phase")[0]
+            chopper1_phase_name = ws.getInstrument().getStringParameter("chopper1_phase")[0]
+            chopper2_phase_name = ws.getInstrument().getStringParameter("chopper2_phase")[0]
         else:
-            chopper1_phase_name = instrument.getStringParameter("chopper1_phase_alt")[0]
-            chopper2_phase_name = instrument.getStringParameter("chopper2_phase_alt")[0]
+            chopper1_phase_name = ws.getInstrument().getStringParameter("chopper1_phase_alt")[0]
+            chopper2_phase_name = ws.getInstrument().getStringParameter("chopper2_phase_alt")[0]
         chopper1_phase = sample_logs.getProperty(chopper1_phase_name).value
         chopper_window = sample_logs.getProperty("ChopperWindow").value
         if chopper1_phase > 360.0:
@@ -66,14 +65,14 @@ def chopper_opening_angle(sample_logs: Run, instrument: Instrument) -> float:
         return 45.0 - (chopper2_phase - chopper1_phase) - open_offset
 
 
-def chopper_pair_distance(sample_logs: Run, instrument: Instrument) -> float:
+def chopper_pair_distance(ws: MatrixWorkspace) -> float:
     """Return the gap distance in metres between the two choppers.
 
     Keyword arguments:
-    sample_logs -- run object holding workspace metadata
-    instrument -- instrument object holding instrument parameters
+    ws -- workspace holding the sample logs and the instrument parameters
     """
-    instr_name = instrument.getName()
+    sample_logs = ws.run()
+    instr_name = ws.getInstrumentName()
     if instr_name == "D17":
         # in [m], enforced by the loader
         return sample_logs.getProperty("Distance.ChopperGap").value
@@ -81,20 +80,20 @@ def chopper_pair_distance(sample_logs: Run, instrument: Instrument) -> float:
         return sample_logs.getProperty("ChopperSetting.distSeparationChopperPair").value * 1e-3
 
 
-def chopper_speed(sample_logs: Run, instrument: Instrument) -> float:
+def chopper_speed(ws: MatrixWorkspace) -> float:
     """Return the chopper speed.
 
     Keyword arguments:
-    sample_logs -- run object holding workspace metadata
-    instrument -- instrument object holding instrument parameters
+    ws -- workspace holding the sample logs and the instrument parameters
     """
-    instr_name = instrument.getName()
+    sample_logs = ws.run()
+    instr_name = ws.getInstrumentName()
     if instr_name == "D17":
         duration = sample_logs.getProperty("duration").value
         if duration > 30.0:  # for long durations, chopper speed average is reliable, otherwise rotation speed is used
-            chopper1_speed_name = instrument.getStringParameter("chopper1_speed")[0]
+            chopper1_speed_name = ws.getInstrument().getStringParameter("chopper1_speed")[0]
         else:
-            chopper1_speed_name = instrument.getStringParameter("chopper1_speed_alt")[0]
+            chopper1_speed_name = ws.getInstrument().getStringParameter("chopper1_speed_alt")[0]
         return sample_logs.getProperty(chopper1_speed_name).value
     else:
         first_chopper = int(sample_logs.getProperty("ChopperSetting.firstChopper").value)

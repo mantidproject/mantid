@@ -899,11 +899,8 @@ def get_ws_indices_for_bank(workspace, bank):
     detector_ids = get_detector_ids_for_bank(bank)
 
     def index_in_bank(index):
-        try:
-            det = workspace.getDetector(index)
-            return det.getID() in detector_ids
-        except RuntimeError:
-            return False
+        ids = workspace.getSpectrum(index).getDetectorIDs()
+        return len(ids) > 0 and ids[0] in detector_ids
 
     return [i for i in range(workspace.getNumberHistograms()) if index_in_bank(i)]
 
@@ -952,7 +949,7 @@ def get_detector_ids_for_bank(bank):
 
     for i in range(grouping.getNumberHistograms()):
         if grouping.y(i)[0] in bank_int:
-            detector_ids.add(grouping.getDetector(i).getID())
+            detector_ids.update(grouping.getSpectrum(i).getDetectorIDs())
 
     mantid.DeleteWorkspace(grouping)
 

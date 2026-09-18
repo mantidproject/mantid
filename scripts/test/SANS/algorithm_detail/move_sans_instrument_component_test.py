@@ -12,7 +12,15 @@ from unittest import mock
 from mantid.kernel import Quat, V3D
 from mantid.simpleapi import AddSampleLog, LoadEmptyInstrument
 from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
-from sans.algorithm_detail.move_workspaces import create_mover, SANSMoveLOQ, SANSMoveSANS2D, SANSMoveLARMORNewStyle, SANSMoveZOOM
+from sans.algorithm_detail.move_workspaces import (
+    create_mover,
+    get_base_position_and_rotation,
+    get_position_and_rotation,
+    SANSMoveLOQ,
+    SANSMoveSANS2D,
+    SANSMoveLARMORNewStyle,
+    SANSMoveZOOM,
+)
 from sans.common.enums import SANSFacility, DetectorType, SANSInstrument
 from sans.state.AllStates import AllStates
 from sans.state.StateObjects.StateData import get_data_builder
@@ -129,23 +137,19 @@ def check_that_sets_to_zero(instance, workspace, state: AllStates, comp_name=Non
         component_names = [comp_name]
 
     # Ensure that the positions on the base instrument and the instrument are the same
-    instrument = workspace.getInstrument()
-    base_instrument = instrument.getBaseInstrument()
     for component_name in component_names:
         # Confirm that the positions are the same
-        component = instrument.getComponentByName(component_name)
-        base_component = base_instrument.getComponentByName(component_name)
+        component = get_position_and_rotation(workspace, component_name)
+        base_component = get_base_position_and_rotation(workspace, component_name)
 
         # If we are dealing with a monitor which has not been implemented we need to continue
         if component is None or base_component is None:
             continue
 
-        position = component.getPos()
-        position_base = base_component.getPos()
+        position, rotation = component
+        position_base, rotation_base = base_component
         for index in range(0, 3):
             instance.assertAlmostEqual(position[index], position_base[index], delta=1e-4)
-        rotation = component.getRotation()
-        rotation_base = base_component.getRotation()
         for index in range(0, 4):
             instance.assertAlmostEqual(rotation[index], rotation_base[index], delta=1e-4)
 
@@ -172,12 +176,8 @@ def _get_state_obj(instrument, x_translation=None, z_translation=None):
 
 
 def _get_position_and_rotation(workspace, inst_info, component):
-    instrument = workspace.getInstrument()
     component_name = inst_info.detector_names[component].detector_name
-    detector = instrument.getComponentByName(component_name)
-    position = detector.getPos()
-    rotation = detector.getRotation()
-    return position, rotation
+    return get_position_and_rotation(workspace, component_name)
 
 
 class LOQMoveTest(unittest.TestCase):

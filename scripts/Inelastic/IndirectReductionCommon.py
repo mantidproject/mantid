@@ -583,9 +583,10 @@ def unwrap_monitor(workspace_name):
     logger.debug("Need to unwrap monitor for %s: %s" % (workspace_name, str(should_unwrap)))
 
     if should_unwrap:
-        sample = instrument.getSample()
-        sample_to_source = sample.getPos() - instrument.getSource().getPos()
-        radius = mtd[workspace_name].getDetector(0).getDistance(sample)
+        component_info = mtd[monitor_workspace_name].componentInfo()
+        sample_pos = component_info.samplePosition()
+        sample_to_source = sample_pos - component_info.sourcePosition()
+        radius = (mtd[workspace_name].spectrumInfo().position(0) - sample_pos).norm()
         z_dist = sample_to_source.getZ()
         l_ref = z_dist + radius
 
@@ -1087,10 +1088,12 @@ def rename_reduction(workspace_name, multiple_files, suffix=None):
     # Get the instrument, run number and title
     if is_multi_frame:
         instrument = mtd[workspace_name].getItem(0).getInstrument()
+        inst_name = mtd[workspace_name].getItem(0).getInstrumentName()
         run_number = mtd[workspace_name].getItem(0).getRun()["run_number"].value
         run_title = mtd[workspace_name].getItem(0).getRun()["run_title"].value.strip()
     else:
         instrument = mtd[workspace_name].getInstrument()
+        inst_name = mtd[workspace_name].getInstrumentName()
         run_number = mtd[workspace_name].getRun()["run_number"].value
         run_title = mtd[workspace_name].getRun()["run_title"].value.strip()
 
@@ -1104,7 +1107,6 @@ def rename_reduction(workspace_name, multiple_files, suffix=None):
     logger.information("Run number for workspace %s is %s" % (workspace_name, run_number))
     logger.information("Run title for workspace %s is %s" % (workspace_name, run_title))
 
-    inst_name = instrument.getName()
     inst_name = inst_name.lower()
 
     if multiple_files:
@@ -1419,13 +1421,10 @@ def remove_edge_pixels(workspace):
     if not values:
         return
     mask_ws_name = "__edge_pixel_mask"
-    LoadMask(Instrument=ws.getInstrument().getName(), InputFile=values[0], OutputWorkspace=mask_ws_name)
+    LoadMask(Instrument=ws.getInstrumentName(), InputFile=values[0], OutputWorkspace=mask_ws_name)
     mask_ws = mtd[mask_ws_name]
     masked_det_ids = frozenset(
-        detid
-        for i in range(mask_ws.getNumberHistograms())
-        if mask_ws.readY(i)[0] > 0.5
-        for detid in mask_ws.getSpectrum(i).getDetectorIDs()
+        detid for i in range(mask_ws.getNumberHistograms()) if mask_ws.y(i)[0] > 0.5 for detid in mask_ws.getSpectrum(i).getDetectorIDs()
     )
     DeleteWorkspace(mask_ws_name)
     indices_to_remove = [i for i in range(ws.getNumberHistograms()) if not masked_det_ids.isdisjoint(ws.getSpectrum(i).getDetectorIDs())]
@@ -1471,7 +1470,7 @@ def exclude_low_calibration_spectra(workspace):
     threshold_factor = get_minimum_calibration_factor(workspace)
     if threshold_factor <= 0.0:
         return
-    values = np.array([ws.readY(i)[0] for i in silicon_indices])
+    values = np.array([ws.y(i)[0] for i in silicon_indices])
     nonzero = values[values > 0.0]
     if nonzero.size == 0:
         return

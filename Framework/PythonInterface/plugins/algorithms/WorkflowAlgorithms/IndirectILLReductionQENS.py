@@ -372,7 +372,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                 if ws.getRun().getLogData("NormalisedTo").value == "Monitor":
                     ws.setDistribution(True)
             # unhide the final workspaces, i.e. remove __ prefix
-            RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws.getName()[2:])
+            RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws.name()[2:])
 
         self.setProperty("OutputWorkspace", self._red_ws)
 
@@ -465,7 +465,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                 raise RuntimeError("Inconsistent mirror sense in alignment run. Unable to perform unmirror.")
 
         if wings == 1:  # one wing
-            name = mtd[ws].getItem(0).getName()
+            name = mtd[ws].getItem(0).name()
 
             if self._unmirror_option < 6:  # do unmirror 0, i.e. nothing
                 CloneWorkspace(InputWorkspace=name, OutputWorkspace=outname)
@@ -482,8 +482,8 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                 )
 
         elif wings == 2:  # two wing
-            left = mtd[ws].getItem(0).getName()
-            right = mtd[ws].getItem(1).getName()
+            left = mtd[ws].getItem(0).name()
+            right = mtd[ws].getItem(1).name()
 
             mask_min = 0
             mask_max = mtd[left].blocksize()

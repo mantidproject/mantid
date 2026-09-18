@@ -92,7 +92,7 @@ class SANSILLParameterScanTest(unittest.TestCase):
         self.assertEqual(ws.getAxis(1).getUnit().symbol().ascii(), "degrees")
         self.assertEqual(ws.getAxis(1).getUnit().caption(), "Omega.value")
         self.assertEqual(ws.getNumberHistograms(), spectra)
-        self.assertTrue(ws.getInstrument())
+        self.assertGreater(ws.detectorInfo().size(), 0)
         self.assertTrue(ws.getRun())
         self.assertTrue(ws.getHistory())
         self.assertTrue(ws.blocksize(), blocksize)

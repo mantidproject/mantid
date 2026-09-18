@@ -55,6 +55,7 @@ class BaseTextureTestClass(unittest.TestCase):
         # Mock workspace
         self.mock_ws = MagicMock()
         self.mock_ws.name.return_value = self.ws_name
+        self.mock_ws.rowCount.return_value = 0
 
     def tearDown(self):
         if ADS.doesExist(self.ws_name):

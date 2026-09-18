@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspace, PropertyMode, WorkspaceProperty
+from mantid.geometry import ComponentType
 from mantid.kernel import Direction
 
 
@@ -46,9 +47,8 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
 
         masked_workspace = self.mask_workspace(input_workspace)
 
-        bank = self._get_rectangular_detector_component(input_workspace)
-        component_info = input_workspace.componentInfo()
-        num_banks = component_info.pixelGridNX(component_info.indexOfAny(bank.getName()))
+        bank_index = self._get_rectangular_detector_component(input_workspace)
+        num_banks = input_workspace.componentInfo().pixelGridNX(bank_index)
         if num_banks == 1:
             self.setProperty(self._OUTPUT_WS, masked_workspace)
             return
@@ -91,12 +91,18 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
     def sum_banks(self, workspace: MatrixWorkspace, num_banks: int):
         return self._run_child_with_out_props("SmoothNeighbours", InputWorkspace=workspace, SumPixelsX=num_banks, SumPixelsY=1)
 
-    def _get_rectangular_detector_component(self, workspace: MatrixWorkspace):
-        instrument = workspace.getInstrument()
-        if not instrument:
+    def _get_rectangular_detector_component(self, workspace: MatrixWorkspace) -> int:
+        """Return the component index of the single rectangular detector in the workspace's instrument"""
+        if workspace.detectorInfo().size() == 0:
             raise RuntimeError("The input workspace must have an instrument")
 
-        rect_detectors = instrument.findRectDetectors()
+        component_info = workspace.componentInfo()
+        # detectors come first in ComponentInfo so only the remaining components need checking for banks
+        rect_detectors = [
+            index
+            for index in range(workspace.detectorInfo().size(), component_info.size())
+            if component_info.componentType(index) == ComponentType.Rectangular
+        ]
         if len(rect_detectors) == 0:
             raise RuntimeError("The input workspace must contain a rectangular detector")
         if len(rect_detectors) > 1:

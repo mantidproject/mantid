@@ -110,7 +110,7 @@ class DirectILLReductionTest(unittest.TestCase):
         originalNDetectors = ws.getNumberHistograms()
         detectorIds = list()
         for i in range(originalNDetectors):
-            detectorIds.append(ws.getDetector(i).getID())
+            detectorIds.append(ws.getSpectrum(i).getDetectorIDs()[0])
         _add_natural_angle_step_parameter(ws)
         mtd.addOrReplace("inWS", ws)
         outWSName = "outWS"

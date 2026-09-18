@@ -22,6 +22,7 @@ import math
 import numpy
 import os
 import re
+import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 # Mantid
@@ -73,8 +74,8 @@ def create_tube_calibration_ws_by_ws_index_list(integrated_workspace, output_wor
 # Return the udet number and [x,y,z] position of the detector (or virtual detector) corresponding to spectra spectra_number
 # Thanks to Pascal Manuel for this function
 def get_detector_pos(work_handle, spectra_number):
-    udet = work_handle.getDetector(spectra_number)
-    return udet.getID(), udet.getPos()
+    detector_id = work_handle.getSpectrum(spectra_number).getDetectorIDs()[0]
+    return detector_id, work_handle.spectrumInfo().position(spectra_number)
 
 
 # Given the center of a slit in pixels return the interpolated y
@@ -429,15 +430,17 @@ def getCalibratedPixelPositions(
     if len(pixels) != n_dets:
         print("Tube correction failed.")
         return det_IDs, det_positions
-    base_instrument = ws.getInstrument().getBaseInstrument()
     # Get tube unit vector
     # get the detector from the baseInstrument, in order to get the positions
-    # before any calibration being loaded.
-    det0 = base_instrument.getDetector(ws.getDetector(which_tube[0]).getID())
-    detN = base_instrument.getDetector(ws.getDetector(which_tube[-1]).getID())
-    d0pos, dNpos = det0.getPos(), detN.getPos()
+    # before any calibration being loaded. The DetectorInfo access layer only knows the calibrated positions, so the
+    # deprecated Instrument accessors are still needed here.
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        base_instrument = ws.getInstrument().getBaseInstrument()
+        d0pos = base_instrument.getDetector(ws.getSpectrum(which_tube[0]).getDetectorIDs()[0]).getPos()
+        dNpos = base_instrument.getDetector(ws.getSpectrum(which_tube[-1]).getDetectorIDs()[0]).getPos()
     # identical to norm of vector: |dNpos - d0pos|
-    tubeLength = det0.getDistance(detN)
+    tubeLength = d0pos.distance(dNpos)
     if tubeLength <= 0.0:
         print("Zero length tube cannot be calibrated, calibration failed.")
         return det_IDs, det_positions
@@ -451,13 +454,13 @@ def getCalibratedPixelPositions(
 
     # Move the pixel detectors (might not work for sloping tubes)
     for i in range(n_dets):
-        deti = ws.getDetector(which_tube[i])
+        detector_id = ws.getSpectrum(which_tube[i]).getDetectorIDs()[0]
         p_new = pixels[i]
         # again, the operation float * v3d is not defined, but v3d * float is,
         # so, I wrote the new pos as center + unit_vector * (float)
         new_pos = center + unit_vector * p_new
 
-        det_IDs.append(deti.getID())
+        det_IDs.append(detector_id)
         det_positions.append(new_pos)
 
     return det_IDs, det_positions
