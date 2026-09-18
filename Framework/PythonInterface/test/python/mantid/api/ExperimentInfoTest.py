@@ -28,7 +28,8 @@ class ExperimentInfoTest(unittest.TestCase):
             self.__class__._expt_ws = ws
 
     def test_information_access(self):
-        inst = self._expt_ws.getInstrument()
+        with self.assertWarns(DeprecationWarning):
+            inst = self._expt_ws.getInstrument()
         self.assertTrue(isinstance(inst, Instrument))
         self.assertEqual(self._expt_ws.getRunNumber(), 48127)
 

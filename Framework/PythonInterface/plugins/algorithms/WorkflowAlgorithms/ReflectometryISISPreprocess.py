@@ -154,14 +154,14 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
         alg.execute()
         calibrated_ws = alg.getProperty("OutputWorkspace").value
         calibrated_ws.run().addProperty(self._CALIBRATION_FILE_LOG, calibration_filepath, True)
-        self.log().information(f"Calibrated workspace {ws.getName()}")
+        self.log().information(f"Calibrated workspace {ws.name()}")
         return calibrated_ws
 
     def _applyCalibration(self, ws: MatrixWorkspace, calibration_filepath: str) -> MatrixWorkspace:
         is_group = isinstance(ws, WorkspaceGroup)
         ws1 = ws[0] if is_group else ws
         specular_pixel_spectrum_no = None
-        if ws1.getInstrument().getName() == self._POLREF:
+        if ws1.getInstrumentName() == self._POLREF:
             specular_pixel_spectrum_no = self._find_specular_pixel_spectrum_no(ws1, self._POLREF_START_WS_INDEX)
 
         if is_group:

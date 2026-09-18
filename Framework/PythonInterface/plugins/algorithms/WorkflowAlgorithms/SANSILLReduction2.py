@@ -829,7 +829,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
         nspec = reference.getNumberHistograms()
         xaxis = reference.getAxis(0).extractValues()
         runs = self.getPropertyValue("Runs").split(",")
-        result = [w.getName() for w in mtd[ws]]
+        result = [w.name() for w in mtd[ws]]
         blank_indices = [i for i, r in enumerate(runs) if r == EMPTY_TOKEN]
         for index in blank_indices:
             blank = f"__blank_{index}"

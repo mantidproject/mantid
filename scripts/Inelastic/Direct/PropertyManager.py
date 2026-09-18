@@ -8,7 +8,7 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 
 # pylint: disable=invalid-name
-from Direct.NonIDF_Properties import NonIDF_Properties
+from Direct.NonIDF_Properties import NonIDF_Properties, instrument_name
 from Direct.PropertiesDescriptors import (
     mon2NormalizationEnergyRange,
     prop_helpers,
@@ -551,11 +551,11 @@ class PropertyManager(NonIDF_Properties):
     # --------------------------------------------------------------------------------------------
 
     def reduction_instrument_warning(self, pInstrument):
-        if self.instr_name != pInstrument.getName():
+        if self.instr_name != instrument_name(pInstrument):
             self.log(
                 "*** WARNING: Setting reduction properties of the instrument {0} from the instrument {1}.\n"
                 "*** This only works if both instruments have the same reduction properties!".format(
-                    self.instr_name, pInstrument.getName()
+                    self.instr_name, instrument_name(pInstrument)
                 ),
                 "warning",
             )

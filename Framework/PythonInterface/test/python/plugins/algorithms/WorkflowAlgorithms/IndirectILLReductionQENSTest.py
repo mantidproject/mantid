@@ -71,13 +71,13 @@ class IndirectILLReductionQENSTest(unittest.TestCase):
         self._check_workspace_group(mtd["out_red"], 1, 128 * 16 + 2 + 1, 1024)
 
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
-        self.assertTrue(isinstance(wsgroup, WorkspaceGroup), "{0} should be a group workspace".format(wsgroup.getName()))
+        self.assertTrue(isinstance(wsgroup, WorkspaceGroup), "{0} should be a group workspace".format(wsgroup.name()))
 
-        self.assertEqual(wsgroup.getNumberOfEntries(), nentries, "{0} should contain {1} workspaces".format(wsgroup.getName(), nentries))
+        self.assertEqual(wsgroup.getNumberOfEntries(), nentries, "{0} should contain {1} workspaces".format(wsgroup.name(), nentries))
 
         item = wsgroup.getItem(0)
 
-        name = item.getName()
+        name = item.name()
 
         self.assertTrue(isinstance(item, MatrixWorkspace), "{0} should be a matrix workspace".format(name))
 

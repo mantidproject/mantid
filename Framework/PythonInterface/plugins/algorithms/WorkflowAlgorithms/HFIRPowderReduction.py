@@ -18,6 +18,7 @@ from mantid.api import (
 )
 
 from mantid.kernel import (
+    UnitParametersMap,
     StringListValidator,
     Direction,
     Property,
@@ -1642,7 +1643,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
     def _to_spectrum_axis(self, workspace_in, workspace_out, mask, instrument_donor=None):
         target = self.getProperty("XUnits").value
         wavelength = self.getProperty("Wavelength").value
-        e_fixed = UnitConversion.run("Wavelength", "Energy", wavelength, 0, 0, 0, Elastic, 0)
+        e_fixed = UnitConversion.run("Wavelength", "Energy", wavelength, 0, Elastic, UnitParametersMap())
         _targetMap = {"d-spacing": "ElasticDSpacing", "2Theta": "Theta", "Q": "ElasticQ"}
         target = _targetMap[target]
 

@@ -117,19 +117,27 @@ function(PY_ADD_TEST _test_type _test_runner_module _additional_flags _test_src_
     set(_test_timeout ${TESTING_TIMEOUT})
   endif()
 
+  # Unit tests error on any DeprecationWarning, and on any warning attributed to the top-level mantid or mantidqt
+  # modules, so that mantid keeps using its own modern functions. Later -W options take precedence. The Instrument 1.0
+  # accessors are still needed for instrument parameters, which have no ComponentInfo/DetectorInfo equivalent yet, so
+  # those two warnings are ignored until one exists. System tests are left alone as they are not run on pull requests.
+  if(NOT _test_type STREQUAL "SystemTest")
+    set(_warning_flags
+        -Werror::DeprecationWarning -Werror:::mantid -Werror:::mantidqt
+        "-Wignore:'ExperimentInfo.getInstrument()' is deprecated:DeprecationWarning"
+        "-Wignore:'Instrument.getComponentByName' is deprecated:DeprecationWarning"
+    )
+  endif()
+
   # Add all of the individual tests so that they can be run in parallel
   foreach(part ${ARGN})
     set(_filename ${part})
     get_filename_component(_suitename ${part} NAME_WE)
     # We duplicate the suitename so that it matches the junit output name
     set(_pyunit_separate_name "${_testname_prefix}.${_suitename}.${_suitename}")
-    # this errors if warnings come from mantid, mantidqt, or any DeprecationWarnings mantid should avoid using its own
-    # code that produces warnings
-    add_test(
-      NAME ${_pyunit_separate_name}
-      COMMAND
-        ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" ${Python_EXECUTABLE} -Werror::DeprecationWarning
-        -Werror:::mantid -Werror:::mantidqt ${_test_runner_module} ${_test_src_dir}/${_filename} ${_additional_flags}
+    add_test(NAME ${_pyunit_separate_name}
+             COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" ${Python_EXECUTABLE} ${_warning_flags}
+                     ${_test_runner_module} ${_test_src_dir}/${_filename} ${_additional_flags}
     )
     # Set the PYTHONPATH so that the built modules can be found
     set_tests_properties(

@@ -21,23 +21,28 @@ class InstrumentTest(unittest.TestCase):
         self.assertFalse(can_be_instantiated(Instrument))
 
     def test_getSample(self):
-        sample_pos = self.__testws.getInstrument().getSample()
+        with self.assertWarns(DeprecationWarning):
+            sample_pos = self.__testws.getInstrument().getSample()
         self.assertTrue(isinstance(sample_pos, Component))
 
     def test_getSource(self):
-        source_pos = self.__testws.getInstrument().getSource()
+        with self.assertWarns(DeprecationWarning):
+            source_pos = self.__testws.getInstrument().getSource()
         self.assertTrue(isinstance(source_pos, ObjComponent))
 
     def test_getComponentByName(self):
-        comp = self.__testws.getInstrument().getComponentByName("pixel-0)")
+        with self.assertWarns(DeprecationWarning):
+            comp = self.__testws.getInstrument().getComponentByName("pixel-0)")
         self.assertTrue(isinstance(comp, Detector))
 
     def test_getDetector(self):
-        comp = self.__testws.getInstrument().getDetector(1)
+        with self.assertWarns(DeprecationWarning):
+            comp = self.__testws.getInstrument().getDetector(1)
         self.assertTrue(isinstance(comp, Detector))
 
     def test_getNumberDetectors(self):
-        num_detectors = self.__testws.getInstrument().getNumberDetectors()
+        with self.assertWarns(DeprecationWarning):
+            num_detectors = self.__testws.getInstrument().getNumberDetectors()
         self.assertEqual(num_detectors, 1)
 
     def test_getReferenceFrame(self):
@@ -75,7 +80,9 @@ class InstrumentTest(unittest.TestCase):
     def test_baseInstrument_Can_Be_Retrieved(self):
         inst = self.__testws.getInstrument()
         base_inst = inst.getBaseInstrument()
-        self.assertEqual("testInst", base_inst.getName())
+        self.assertIsInstance(base_inst, Instrument)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual("testInst", base_inst.getName())
 
     def test_getMemorySize(self):
         mem = self.__testws.getInstrument().getMemorySize()

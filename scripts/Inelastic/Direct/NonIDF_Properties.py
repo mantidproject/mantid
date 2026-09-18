@@ -22,6 +22,15 @@ from mantid import geometry
 
 import os
 from sys import platform
+import warnings
+
+
+def instrument_name(instrument: geometry.Instrument) -> str:
+    """Return the name of an Instrument object. An Instrument, unlike a workspace, has no access layers
+    to ask for its name, so the deprecated IComponent accessor is still needed here."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        return instrument.getName()
 
 
 class NonIDF_Properties(object):
@@ -299,13 +308,13 @@ class NonIDF_Properties(object):
 
         if run_workspace:
             instrument = run_workspace.getInstrument()
-            instr_name = instrument.getFullName()
+            instr_name = run_workspace.getInstrumentName()
             new_name, full_name, facility_ = prop_helpers.check_instrument_name(None, instr_name)
         else:
             # pylint: disable=protected-access
             if isinstance(Instrument, geometry.Instrument):
                 instrument = Instrument
-                instr_name = instrument.getFullName()
+                instr_name = instrument_name(instrument)
                 try:
                     new_name, full_name, facility_ = prop_helpers.check_instrument_name(None, instr_name)
                 except KeyError:  # the instrument pointer is not found in any facility but we have it after all

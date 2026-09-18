@@ -63,8 +63,7 @@ class AssertSpinStateOrder(PythonAlgorithm):
 
         if not matching:
             logger.warning(
-                f"Expected {group_ws.getName()} to have the spin state order '{expected_spin_states}'"
-                f" but actually found '{found_spin_states}'"
+                f"Expected {group_ws.name()} to have the spin state order '{expected_spin_states}' but actually found '{found_spin_states}'"
             )
 
             if self.getProperty("Reorder").value:
@@ -73,7 +72,7 @@ class AssertSpinStateOrder(PythonAlgorithm):
 
                 desired_order = [expected_spin_state_list.index(spin_state) for spin_state in found_spin_state_list]
                 group_ws.reorder(desired_order)
-                logger.warning(f"Reordered {group_ws.getName()} to the correct spin state order '{expected_spin_states}'")
+                logger.warning(f"Reordered {group_ws.name()} to the correct spin state order '{expected_spin_states}'")
 
 
 AlgorithmFactory.subscribe(AssertSpinStateOrder)

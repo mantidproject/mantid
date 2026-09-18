@@ -862,7 +862,7 @@ class ISISInstrument(BaseInstrument):
         @param calibration_workspace: the receiver of the parameter
         """
         ws_instrument = workspace.getInstrument()
-        component_name = ws_instrument.getName()
+        component_name = workspace.getInstrumentName()
         ipf_type = ws_instrument.getParameterType(param_name)
         # For now we only expect string, int and double
         type_ids = ["string", "int", "double"]

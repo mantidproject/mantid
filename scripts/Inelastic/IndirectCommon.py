@@ -173,14 +173,17 @@ def get_two_theta_angles(workspace: Union[str, MatrixWorkspace]) -> List[float]:
         workspace = AnalysisDataService.retrieve(workspace)
 
     num_hist = workspace.getNumberHistograms()  # get no. of histograms/groups
-    source_pos = workspace.getInstrument().getSource().getPos()
-    sample_pos = workspace.getInstrument().getSample().getPos()
-    beam_pos = sample_pos - source_pos
+    spectrum_info = workspace.spectrumInfo()
+    sample_pos = spectrum_info.samplePosition()
+    beam_pos = sample_pos - spectrum_info.sourcePosition()
     angles = []  # will be list of angles
     for index in range(0, num_hist):
-        detector = workspace.getDetector(index)  # get index
-        two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi  # calc angle
-        angles.append(two_theta)  # add angle
+        if spectrum_info.isMonitor(index):
+            # two theta is not defined for monitors by SpectrumInfo
+            two_theta = beam_pos.angle(spectrum_info.position(index) - sample_pos)
+        else:
+            two_theta = spectrum_info.twoTheta(index)
+        angles.append(two_theta * 180.0 / math.pi)  # add angle
     return angles
 
 

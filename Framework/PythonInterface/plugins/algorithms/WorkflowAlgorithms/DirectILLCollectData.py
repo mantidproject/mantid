@@ -21,6 +21,7 @@ from mantid.api import (
     WorkspaceUnitValidator,
 )
 from mantid.kernel import (
+    UnitParametersMap,
     CompositeValidator,
     Direct,
     Direction,
@@ -68,7 +69,7 @@ def _applyIncidentEnergyCalibration(ws, eiWS, wsNames, report, algorithmLogging)
     originalEnergy = ws.getRun().getLogData("Ei").value
     originalWavelength = ws.getRun().getLogData("wavelength").value
     energy = eiWS.y(0)[0]
-    wavelength = UnitConversion.run("Energy", "Wavelength", energy, 0, 0, 0, Direct, 5)
+    wavelength = UnitConversion.run("Energy", "Wavelength", energy, 0, Direct, UnitParametersMap())
     AddSampleLog(
         Workspace=ws,
         LogName="Ei",
@@ -102,7 +103,7 @@ def _calculateEPP(ws, sigma, wsNames, algorithmLogging):
 def _calibratedIncidentEnergy(detWorkspace, monWorkspace, monEPPWorkspace, eiCalibrationMon, wsNames, log, algorithmLogging):
     """Return the calibrated incident energy."""
     instrument = detWorkspace.getInstrument()
-    instrument_name = instrument.getName()
+    instrument_name = detWorkspace.getInstrumentName()
     eiWorkspace = None
     if instrument_name in ["IN4", "IN6", "PANTHER", "SHARP"]:
         run = detWorkspace.run()
@@ -192,8 +193,7 @@ def _fitEPP(ws, wsType, wsNames, algorithmLogging):
 def _monitorCounts(ws):
     """Return the total monitor counts from the sample logs"""
     logs = ws.run()
-    instrument = ws.getInstrument()
-    if instrument.getName() == "IN6":
+    if ws.getInstrumentName() == "IN6":
         return logs.getProperty("monitor1.monsum").value
     else:
         return logs.getProperty("monitor.monsum").value
@@ -268,10 +268,9 @@ def _sumDetectorsAtDistance(ws, distance, tolerance):
     histogramCount = ws.getNumberHistograms()
     ySums = np.zeros(ws.blocksize())
     detectorInfo = ws.detectorInfo()
-    sample = ws.getInstrument().getSample()
+    spectrumInfo = ws.spectrumInfo()
     for i in range(histogramCount):
-        det = ws.getDetector(i)
-        sampleToDetector = sample.getDistance(det)
+        sampleToDetector = spectrumInfo.l2(i)
         if abs(distance - sampleToDetector) < tolerance:
             if detectorInfo.isMonitor(i) or detectorInfo.isMasked(i):
                 continue

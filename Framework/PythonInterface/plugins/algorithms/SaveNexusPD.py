@@ -165,17 +165,15 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
         if self._sourcePos is None:
             return nxdetector
 
-        try:
-            # kept only for getPhi(), which has no *Info equivalent: it is the ambiguous,
-            # lab-frame atan2(y, x), not the sample-centred, reference-frame-relative
-            # DetectorInfo/SpectrumInfo.azimuthal()
-            detector = wksp.getDetector(index)
-        except RuntimeError:
+        if len(wksp.getSpectrum(index).getDetectorIDs()) == 0:
             return nxdetector
 
         L2 = spectrum_info.l2(index)
         polar = spectrum_info.twoTheta(index)  # radians
-        azi = detector.getPhi()  # radians
+        # the legacy Detector.getPhi(): the lab-frame atan2(y, x) of the (possibly grouped) detector position,
+        # not the sample-centred, reference-frame-relative SpectrumInfo.azimuthal()
+        position = spectrum_info.position(index)
+        azi = np.arctan2(position.Y(), position.X())  # radians
 
         temp = nxdetector.create_dataset("distance", data=[abs(L2)], dtype=self._dtype)
         temp.attrs["units"] = "metre"

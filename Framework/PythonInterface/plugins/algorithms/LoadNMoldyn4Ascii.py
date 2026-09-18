@@ -286,7 +286,7 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
             logger.information("Axis {0} will be converted to energy in meV".format(name))
             unit = "Energy"
             data *= sc.tera  # THz to Hz
-            data *= sc.value("Planck constant in eV s")  # Hz to eV
+            data *= sc.value("Planck constant in eV/Hz")  # Hz to eV
             data /= sc.milli  # eV to meV
 
         # Time (ps) to TOF (s)

@@ -38,6 +38,7 @@ from mantid.simpleapi import (
     GroupDetectors,
 )
 from mantid.kernel import (
+    UnitParametersMap,
     StringListValidator,
     Direction,
     Elastic,
@@ -333,7 +334,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
     def _to_spectrum_axis(self, workspace_in, workspace_out, mask, instrument_donor=None):
         target = self.getProperty("Target").value
         wavelength = self.getProperty("Wavelength").value
-        e_fixed = UnitConversion.run("Wavelength", "Energy", wavelength, 0, 0, 0, Elastic, 0)
+        e_fixed = UnitConversion.run("Wavelength", "Energy", wavelength, 0, Elastic, UnitParametersMap())
         filtered_eve = self.getProperty("FilteredInput").value
 
         if instrument_donor or not filtered_eve:

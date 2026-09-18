@@ -11,16 +11,23 @@ from qtpy.QtCore import Qt, QMetaObject
 
 from mantid import FrameworkManager
 from mantidqt.utils.qt.testing import start_qapplication
+from mantidqt.utils.qt.testing.gui_window_test import GuiWindowTest
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowserBase
 
 
 @start_qapplication
-class TestFitPropertyBrowser(unittest.TestCase):
+class TestFitPropertyBrowser(GuiWindowTest):
     def create_widget(self):
         return FitPropertyBrowserBase()
 
     def start_setup_menu(self):
         self.click_button("button_Setup")
+        return self.wait_for_popup()
+
+    def start_peak_finding_algs(self):
+        a, pm = self.get_action("action_PeakFindingAlgs", get_menu=True)
+        pm.setActiveAction(a)
+        a.menu().show()
         return self.wait_for_popup()
 
     def start_find_peaks(self):
@@ -54,6 +61,7 @@ class TestFitPropertyBrowser(unittest.TestCase):
         yield self.start_setup_menu()
         m = self.get_menu("menu_Setup")
         self.assertTrue(m.isVisible())
+        yield self.start_peak_finding_algs()
         self.start_find_peaks()
         yield self.wait_for_modal()
         box = self.get_active_modal_widget()

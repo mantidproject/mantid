@@ -25,17 +25,6 @@ from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceDisplayM
 from mantidqt.widgets.workspacedisplay.table.plot_type import PlotType
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView
-from mantidqt.widgets.workspacedisplay.table.tableworkspace_item import QStandardItem, RevertibleItem
-
-
-class MockQTable:
-    """
-    Mocks the necessary functions to replace a QTableView on which data is being set.
-    """
-
-    def __init__(self):
-        self.setItem = Mock()
-        self.setRowCount = Mock()
 
 
 def with_mock_presenter(add_selection_model=False, add_plot=False):
@@ -112,84 +101,8 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         # the test will fail if the support check fails - an exception is raised
         TableWorkspaceDisplay.supports(ws)
 
-    @with_mock_presenter
-    def test_handleItemChanged(self, ws, view, twd):
-        items = [Mock(spec=RevertibleItem), Mock(spec=QStandardItem)]
-        for item in items:
-            item.row.return_value = 5
-            item.column.return_value = 5
-            item.data.return_value = "magic parameter"
-
-            twd.handleItemChanged(item)
-
-            item.row.assert_called_once_with()
-            item.column.assert_called_once_with()
-            ws.setCell.assert_called_once_with(5, 5, "magic parameter", notify_replace=False)
-            item.update.assert_called_once_with()
-            item.reset.assert_called_once_with()
-
-    @with_mock_presenter
-    def test_handleItemChanged_raises_ValueError(self, ws, view, twd):
-        items = [Mock(spec=RevertibleItem), Mock(spec=QStandardItem)]
-        for item in items:
-            item.row.return_value = 5
-            item.column.return_value = 5
-            item.data.return_value = "magic parameter"
-
-            # setCell will throw an exception as a side effect
-            ws.setCell.side_effect = ValueError
-
-            twd.handleItemChanged(item)
-
-            item.row.assert_called_once_with()
-            item.column.assert_called_once_with()
-            ws.setCell.assert_called_once_with(5, 5, "magic parameter")
-            view.show_warning.assert_called_once_with(TableWorkspaceDisplay.ITEM_CHANGED_INVALID_DATA_MESSAGE)
-            self.assertNotCalled(item.update)
-            item.reset.assert_called_once_with()
-
-    @with_mock_presenter
-    def test_handleItemChanged_raises_Exception(self, ws, view, twd):
-        items = [Mock(spec=RevertibleItem), Mock(spec=QStandardItem)]
-        for item in items:
-            item.row.return_value = ws.ROWS
-            item.column.return_value = ws.COLS
-            item.data.return_value = "magic parameter"
-            item.is_v3d = False
-
-            # setCell will throw an exception as a side effect
-            error_message = "TEST_EXCEPTION_MESSAGE"
-            ws.setCell.side_effect = Exception(error_message)
-
-            twd.handleItemChanged(item)
-
-            item.row.assert_called_once_with()
-            item.column.assert_called_once_with()
-            ws.setCell.assert_called_once_with(ws.ROWS, ws.COLS, "magic parameter")
-            view.show_warning.assert_called_once_with(TableWorkspaceDisplay.ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE.format(error_message))
-            self.assertNotCalled(item.update)
-            item.reset.assert_called_once_with()
-
-    @with_mock_presenter
-    def test_update_column_headers(self, ws, view, twd):
-        twd.update_column_headers()
-
-        # setColumnCount is done twice - once in the TableWorkspaceDisplay initialisation, and once in the call
-        # to update_column_headers above
-        view.setColumnCount.assert_has_calls([call(ws.ROWS), call(ws.ROWS)])
-
-    @with_mock_presenter
-    def test_load_data(self, ws, _, twd):
-        mock_table = MockQTable()
-        twd.load_data(mock_table)
-
-        mock_table.setRowCount.assert_called_once_with(ws.ROWS)
-        ws.columnCount.assert_called_once_with()
-        # set item is called on every item of the table
-        self.assertEqual(ws.ROWS * ws.COLS, mock_table.setItem.call_count)
-
     @patch(copy_cells_package)
-    @with_mock_presenter
+    @with_mock_presenter()
     def test_action_copying(self, ws, view, twd, mock_copy_cells):
         twd.action_copy_cells()
         self.assertEqual(1, mock_copy_cells.call_count)

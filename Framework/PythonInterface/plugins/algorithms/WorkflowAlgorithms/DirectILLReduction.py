@@ -471,7 +471,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
     def _groupDetectors(self, mainWS):
         """Group detectors with similar thetas."""
         instrument = mainWS.getInstrument()
-        fileHandle, path = tempfile.mkstemp(suffix=".xml", prefix="grouping-{}-".format(instrument.getName()))
+        fileHandle, path = tempfile.mkstemp(suffix=".xml", prefix="grouping-{}-".format(mainWS.getInstrumentName()))
         # We don't need the handle, just the path.
         os.close(fileHandle)
         angleStepProperty = self.getProperty(common.PROP_GROUPING_ANGLE_STEP)

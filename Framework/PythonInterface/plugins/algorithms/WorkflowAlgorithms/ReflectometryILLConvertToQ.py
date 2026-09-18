@@ -241,10 +241,10 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         sum_type = logs.getProperty(common.SampleLogs.SUM_TYPE).value
         pixel_size = common.pixel_size(instrument_name)
         det_resolution = common.detector_resolution()
-        chopper_speed = common.chopper_speed(logs, instrument)
-        chopper_opening = common.chopper_opening_angle(logs, instrument)
+        chopper_speed = common.chopper_speed(ws)
+        chopper_opening = common.chopper_opening_angle(ws)
         chopper_radius = instrument.getNumberParameter("chopper_radius")[0]
-        chopper_pair_dist = common.chopper_pair_distance(logs, instrument)
+        chopper_pair_dist = common.chopper_pair_distance(ws)
         tof_bin_width = self._tof_channel_width(logs)
         q_ws_name = self._names.withSuffix("in_momentum_transfer")
         q_ws = ReflectometryMomentumTransfer(
@@ -276,17 +276,16 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         direct_ws -- direct beam workspace
         """
 
-        def opening(instr, logs, x_s):
-            chopperGap = common.chopper_pair_distance(logs, instr)
-            chopperPeriod = 60.0 / common.chopper_speed(logs, instr)
-            openingAngle = common.chopper_opening_angle(logs, instr)
+        def opening(workspace, x_s):
+            chopperGap = common.chopper_pair_distance(workspace)
+            chopperPeriod = 60.0 / common.chopper_speed(workspace)
+            openingAngle = common.chopper_opening_angle(workspace)
             return chopperGap * constants.m_n / constants.h / chopperPeriod * x_s * 1e-10 + openingAngle / 360.0
 
-        instrument = ws.getInstrument()
         x_bins = ws.x(0)
         xs = (x_bins[:-1] + x_bins[1:]) / 2.0
-        reflected_opening = opening(instrument, ws.run(), xs)
-        direct_opening = opening(instrument, direct_ws.run(), xs)
+        reflected_opening = opening(ws, xs)
+        direct_opening = opening(direct_ws, xs)
         cor_factor_ws_name = self._names.withSuffix("chopper_opening_correction_factors")
         cor_factor_ws = CreateWorkspace(
             OutputWorkspace=cor_factor_ws_name,

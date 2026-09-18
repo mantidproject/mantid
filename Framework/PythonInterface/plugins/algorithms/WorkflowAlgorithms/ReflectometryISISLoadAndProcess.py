@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.api import AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, WorkspaceGroup
+from mantid.geometry import ComponentType
 
 from mantid.simpleapi import MergeRuns
 
@@ -385,7 +386,13 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _has_single_2D_rectangular_detector(self, workspace) -> bool:
         """Returns true if workspace has a single 2D rectangular detector."""
 
-        rect_detectors = workspace.getInstrument().findRectDetectors()
+        component_info = workspace.componentInfo()
+        # detectors come first in ComponentInfo so only the remaining components need checking for banks
+        rect_detectors = [
+            index
+            for index in range(workspace.detectorInfo().size(), component_info.size())
+            if component_info.componentType(index) == ComponentType.Rectangular
+        ]
         num_rect_detectors = len(rect_detectors)
 
         if num_rect_detectors == 0:
@@ -395,8 +402,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             raise NotImplementedError(f"Not implemented for more than one rectangular detector, {num_rect_detectors} were found.")
 
         # We don't sum banks for a linear detector
-        component_info = workspace.componentInfo()
-        bank_index = component_info.indexOfAny(rect_detectors[0].getName())
+        bank_index = rect_detectors[0]
         if component_info.pixelGridNX(bank_index) == 1 or component_info.pixelGridNY(bank_index) == 1:
             return False
 
@@ -406,26 +412,23 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         return True
 
     @staticmethod
-    def _all_spectra_refer_to_rectangular_detector(workspace, rectangular_detector) -> bool:
-        """Checks if all data in a workspace is from the rectangular detector."""
+    def _all_spectra_refer_to_rectangular_detector(workspace, bank_index) -> bool:
+        """Checks if all data in a workspace is from the rectangular detector with the given component index."""
         component_info = workspace.componentInfo()
-        bank_index = component_info.indexOfAny(rectangular_detector.getName())
         rect_det_id_start = component_info.pixelGridMinDetectorID(bank_index)
         rect_det_id_end = component_info.pixelGridMaxDetectorID(bank_index)
         ws_has_detectors = False
 
+        spectrum_info = workspace.spectrumInfo()
         for ws_index in range(workspace.getNumberHistograms()):
-            try:
-                det = workspace.getDetector(ws_index)
-                if not det.isMonitor():
-                    det_id = det.getID()
-                    if not rect_det_id_start <= det_id <= rect_det_id_end:
-                        # Workspace contains data that is not from the rectangular detector
-                        return False
-                    ws_has_detectors = True
-            except RuntimeError:
-                # Ignore detectors that don't have IDs
+            det_ids = workspace.getSpectrum(ws_index).getDetectorIDs()
+            # Ignore spectra without detectors, and monitors
+            if len(det_ids) == 0 or spectrum_info.isMonitor(ws_index):
                 continue
+            if not all(rect_det_id_start <= det_id <= rect_det_id_end for det_id in det_ids):
+                # Workspace contains data that is not from the rectangular detector
+                return False
+            ws_has_detectors = True
 
         return ws_has_detectors
 
