@@ -794,7 +794,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         if self.getProperty(Prop.NUMBER_OF_SLICES).isDefault:
             return
         number_of_slices = self.getProperty(Prop.NUMBER_OF_SLICES).value
-        run = AnalysisDataService.retrieve(workspace_name).run()
+        workspace = AnalysisDataService.retrieve(workspace_name)
+        run = workspace[0].run() if workspace.isGroup() else workspace.run()
+
         total_duration = (run.endTime() - run.startTime()).total_seconds()
         slice_duration = total_duration / number_of_slices
         alg.setProperty("TimeInterval", slice_duration)
