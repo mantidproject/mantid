@@ -10,6 +10,7 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -20,9 +21,11 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Objects/ShapeRotation.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -2179,7 +2182,15 @@ DiscusMultipleScatteringCorrection::findMatchingComponent(const ComponentWorkspa
 }
 
 void DiscusMultipleScatteringCorrection::prepareSampleBeamGeometry(const API::MatrixWorkspace_sptr &inputWS) {
-  m_sampleShape = inputWS->sample().getShapePtr();
+  // Simulate tracks through the sample where the experiment puts it - see
+  // Geometry::getLabFrameShape. The beam profile below is built from this same lab-frame sample,
+  // not the workspace's own: an unspecified beam is sized from the sample's bounding box, so taking
+  // it from the unrotated shape while tracing through the rotated one would illuminate a region the
+  // sample no longer occupies.
+  API::Sample labFrameSample(inputWS->sample());
+  labFrameSample.setShape(
+      Geometry::getLabFrameShape(inputWS->sample().getShape(), inputWS->run().getGoniometer().getR()));
+  m_sampleShape = labFrameSample.getShapePtr();
   try {
     m_env = &inputWS->sample().getEnvironment();
   } catch (std::runtime_error &) {
@@ -2192,7 +2203,7 @@ void DiscusMultipleScatteringCorrection::prepareSampleBeamGeometry(const API::Ma
     m_activeRegion.grow(envBox);
   }
   m_instrument = inputWS->getInstrument();
-  m_beamProfile = BeamProfileFactory::createBeamProfile(*m_instrument, inputWS->sample());
+  m_beamProfile = BeamProfileFactory::createBeamProfile(*m_instrument, labFrameSample);
   m_refframe = m_instrument->getReferenceFrame();
   m_sourcePos = m_instrument->getSource()->getPos();
 }
