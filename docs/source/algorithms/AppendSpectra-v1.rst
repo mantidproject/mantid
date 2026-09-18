@@ -59,7 +59,7 @@ such that gaps between the detector tubes are covered. AppendSpectra does combin
 Thus spectra from the second run although having the correct detector IDs have the incorrect position.
 Setting `RewriteSpectraMap` to `True` will rewrite the detector ID per spectrum map by resetting the detectorID associated
 with each spectrum on the output workspace to single available detectors on the instrument, and moving the repeated detector positions
-in the appended workspace to available single detectors. This is only compatible with 2D Workspaces with common instruments and sufficient
+in the appended workspace to available single detectors. This is only compatible with workspaces with common instruments and sufficient
 available detectors. Also, monitor spectrum are skipped.
 
 
