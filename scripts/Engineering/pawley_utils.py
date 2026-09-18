@@ -1020,13 +1020,13 @@ class Poldi2DEvalMixin:
         if self.apply_lorentz_correction:
             si = ws_sim.spectrumInfo()
             for ispec in range(ws_sim.getNumberHistograms()):
-                ws_sim.setSharedY(ispec, ws_sim.readY(ispec) * np.sin(si.twoTheta(ispec) / 2))
+                ws_sim.setSharedY(ispec, ws_sim.y(ispec) * np.sin(si.twoTheta(ispec) / 2))
         return ws_sim
 
     def _apply_scales_and_bg(self, ws_sim: Workspace2D):
         self._ensure_scales_and_bgs()
         for ispec in range(self.ws.getNumberHistograms()):
-            ws_sim.setY(ispec, self.scales[ispec] * ws_sim.readY(ispec) + self.bgs[ispec])
+            ws_sim.setY(ispec, self.scales[ispec] * ws_sim.y(ispec) + self.bgs[ispec])
 
     def _reestimate_scales(self, params: np.ndarray[float] | None = None) -> tuple[np.ndarray, np.ndarray]:
         """Re-estimate and lock per-spectrum scale/background values.

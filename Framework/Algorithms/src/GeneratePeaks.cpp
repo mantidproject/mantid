@@ -435,8 +435,7 @@ void GeneratePeaks::generatePeaks(
       auto right = std::lower_bound(left + 1, X.cend(), rightbound);
 
       // Build domain & function
-      API::FunctionDomain1DVector domain(left,
-                                         right); // dataWS->dataX(wsindex));
+      API::FunctionDomain1DVector domain(left, right);
 
       // Evaluate the function
       API::FunctionValues values(domain);
