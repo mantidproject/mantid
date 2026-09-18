@@ -28,7 +28,9 @@ the input workspaces if ValidateInputs=false.
 For :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>`, the number of bins must be the same
 in both inputs.
 
-If ValidateInputs is selected, then the input workspaces must also:
+Mixing workspace types is not allowed.
+
+Additionally, if ValidateInputs is selected, then the input workspaces are also required to:
 
 -  Come from the same instrument
 -  Have common units
@@ -48,6 +50,19 @@ To address this, use the 'AppendYAxisLabels' option.
 This will combine y-axis values from two input workspaces into the new output workspace,
 arranging them in the order of the first workspace followed by the second. In addition, the axes
 should have the same type.
+
+Rewrite Spectra Map
+###################
+
+Some instruments have moveable detector banks and a frequently used workflow is to make two measurements with the detector banks at slightly offset positions
+such that gaps between the detector tubes are covered. AppendSpectra does combine the two runs only using the detector map from the first run.
+Thus spectra from the second run although having the correct detector IDs have the incorrect position.
+Setting `RewriteSpectraMap` to `True` will rewrite the detector ID per spectrum map by resetting the detectorID associated
+with each spectrum on the output workspace to single available detectors on the instrument, and moving the repeated detector positions
+in the appended workspace to available single detectors. This is only compatible with 2D Workspaces with common instruments and sufficient
+available detectors. Also, monitor spectrum are skipped.
+
+
 
 .. seealso:: :ref:`algm-ConjoinWorkspaces` for joining parts of the same workspace.
 
