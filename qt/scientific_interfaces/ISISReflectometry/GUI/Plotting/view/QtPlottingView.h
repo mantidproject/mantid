@@ -60,6 +60,8 @@ private:
   void setOutputSelectionControlsEnabled(bool enabled);
   /// Clear selected tree rows.
   void clearPlottingWorkspaceTreeSelection();
+  /// Apply the current filter controls to the workspace tree.
+  void filterPlottingWorkspaces();
 
   Ui::PlottingWidget m_ui;
   std::unique_ptr<QtPlottingWorkspaceTreeViewAdapter> m_plottingWorkspaceTreeViewAdapter;

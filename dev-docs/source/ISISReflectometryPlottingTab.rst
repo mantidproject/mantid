@@ -335,6 +335,8 @@ Defines :code:`QtPlottingView`, the :code:`QWidget` implementation of
 * initialises controls defined in :code:`PlottingWidget.ui`;
 * connects Qt signals to :code:`PlottingViewSubscriber` notifications;
 * applies presenter-provided control state;
+* applies workspace output-type and regular-expression filters directly to the
+  populated Qt tree;
 * reads the current plot output, axes, layout options, and plotting workspace
   tree selection;
 * owns :code:`QtPlottingWorkspaceTreeViewAdapter`; and
@@ -354,13 +356,31 @@ owns the Qt-specific details of:
 * columns and custom data roles;
 * output and item type display names;
 * palette-aware muted rendering;
+* recursively hiding filtered rows after the complete tree has been built;
 * row and subtree selection propagation;
 * direct-selection and parent-selection modes; and
 * extracting selected leaf workspace names and selected ADS workspace-group
   counts.
 
 The adapter applies selection behavior already specified by the presenter. It
-does not determine whether a particular output type permits a workspace.
+does not determine whether a particular plot output type permits a workspace.
+The workspace filter is a presentation-only pass: it matches the Item column,
+propagates a matching parent to its descendants, applies the checked reduced
+workspace output types to workspace leaves, and hides parents with no visible
+children. Filtering does not remove model rows or selections. This allows a
+user to retain a selection while changing filters and add another visible
+workspace to it. Filter updates expand the visible tree, including when a
+filter is cleared.
+
+Selecting or deselecting a parent propagates only to descendants that are
+currently visible. For spin asymmetry, a directly selected ADS workspace group whose
+children are parent-selectable only requires complete group selection. The Qt
+selection contains only its visible rows, while the selected-workspace query
+returns every eligible member required to calculate the spin asymmetry.
+
+The regular expression is compiled when the text changes. If the expression is
+temporarily invalid while being edited, the adapter keeps the last valid
+expression. Checkbox changes still take effect in this state.
 
 :code:`view/QtPlottingWorkspaceTreeView.h/.cpp`
 ################################################
@@ -374,9 +394,11 @@ palette, allowing the tree to work in light and dark themes.
 ##############################
 
 Qt Designer definition for the Plotting tab. It declares the plotting workspace
-tree, plot output selector, detector-map and alignment axis controls, plotting
-buttons, vertical-tiling checkbox, and add-to-existing checkbox. Control policy
-is not encoded in the UI file; the presenter supplies it through
+tree; the :code:`IvsQBinned`, :code:`IvsLambda`, and :code:`IvsQ` filters; the
+Item-column regular-expression filter; the plot output selector; detector-map
+and alignment axis controls; plotting buttons; vertical-tiling checkbox; and
+add-to-existing checkbox. :code:`IvsQBinned` is enabled by default. Control
+policy is not encoded in the UI file; the presenter supplies it through
 :code:`PlotActionState` and :code:`PlotOutputControlsState`.
 
 Shared Plotting Files
@@ -549,7 +571,8 @@ Updating the plotting workspace tree
    :code:`IPlottingView::setPlottingWorkspaceTreeItemStates`.
 #. :code:`QtPlottingWorkspaceTreeViewAdapter` rebuilds its
    :code:`QStandardItemModel`, applies muted state and selection modes, and
-   expands the tree.
+   applies the current workspace filters as a final visibility pass before
+   expanding the tree.
 
 User interaction
 ################
@@ -563,7 +586,12 @@ User interaction
    item states, output-control visibility, and plotting action state.
 #. Clicking a selectable tree row is handled by
    :code:`QtPlottingWorkspaceTreeViewAdapter`. Parent selection is propagated
-   only to descendants whose presenter-supplied selection mode permits it.
+   only to visible descendants whose presenter-supplied selection mode permits
+   it. Spin workspace groups requiring complete selection still resolve all
+   required members when the plotting selection is read.
+#. Changing a workspace output-type checkbox or the Item-column regular
+   expression immediately reapplies row visibility and expands the visible
+   tree. Hidden rows remain in the model and retain their selection state.
 #. A selection change notifies :code:`PlottingPresenter`. The presenter obtains
    selected leaf names and ADS workspace-group counts from the view and asks
    :code:`PlottingViewStateProvider::plotActionState` for a new
