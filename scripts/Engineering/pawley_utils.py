@@ -24,6 +24,13 @@ if TYPE_CHECKING:
 
 _MIN_SCALE = 1e-6  # floor for per-spectrum scale factors (must be positive)
 
+# POLDI correlation sidelobe, calibrated on POLDI_Definition_896.xml: the width is
+# POLDI_SIDELOBE_WIDTH_COEFF / chopper_speed (Ang rpm), used only for instruments whose IDF
+# predates the sidelobe_width_coeff parameter.  The depth was measured at NGroups=6 and moves with
+# NGroups and the background, so it seeds a refinable parameter rather than being fixed.
+POLDI_SIDELOBE_WIDTH_COEFF = 196.0
+POLDI_SIDELOBE_FRACTION = 0.054
+
 
 class PawleyFitStrategy(Enum):
     """Available higher-level 2D Pawley fit strategies."""
@@ -86,6 +93,18 @@ class PeakProfile(ABC):
     @abstractmethod
     def get_mantid_peak_params(self, dpk: float):
         pass
+
+    def set_peak_intensity(self, pk_func, intensity: float) -> None:
+        """Set the intensity of a mantid peak function.
+
+        The framework gets the intensity by integrating the function, so a profile whose function
+        has a negative integral (which setIntensity would satisfy by flipping the peak) must
+        override this pair and set the relevant parameter directly.
+        """
+        pk_func.setIntensity(intensity)
+
+    def get_peak_intensity(self, pk_func) -> float:
+        return pk_func.intensity()
 
 
 class PVProfile(PeakProfile):
@@ -152,6 +171,37 @@ class GaussianProfile(PeakProfile):
         }  # Panel 6 in [1] with zeta=0
 
 
+class PoldiSidelobeProfile(GaussianProfile):
+    """Gaussian core width parameterisation plus the POLDI correlation sidelobe.
+
+    The impulse response of the POLDI correlation method is a Gaussian core sitting in a shallow
+    negative sidelobe, so fitting the correlation spectrum with a plain Gaussian biases the refined
+    core width (and the intensity with it) low.  The sidelobe costs a single refinable parameter,
+    ``sidelobe_frac``; its width is fixed by the chopper speed.
+    """
+
+    def __init__(self, ws: Workspace2D, sidelobe_frac: float = POLDI_SIDELOBE_FRACTION):
+        super().__init__()
+        self.func_name = "PoldiSidelobeGaussian"
+        self.labels["sidelobe_frac"] = len(self.labels)
+        self.p = np.append(self.p, sidelobe_frac)
+        self.default_isfree = np.append(self.default_isfree, True)
+        self.sidelobe_sigma = get_poldi_sidelobe_sigma(ws)
+
+    def set_peak_intensity(self, pk_func, intensity: float) -> None:
+        pk_func.setParameter("Intensity", intensity)
+
+    def get_peak_intensity(self, pk_func) -> float:
+        return pk_func.getParameterValue("Intensity")
+
+    def get_mantid_peak_params(self, dpk: float) -> dict:
+        return {
+            **super().get_mantid_peak_params(dpk),
+            "SidelobeFraction": self.p[self.labels["sidelobe_frac"]],
+            "SidelobeSigma": self.sidelobe_sigma,
+        }
+
+
 class BackToBackGauss(PeakProfile):
     def __init__(self):
         self.func_name = "BackToBackExponential"
@@ -172,6 +222,20 @@ class BackToBackGauss(PeakProfile):
 
     def _calc_beta(self, dpk: float) -> float:
         return self.p[self.labels["beta_0"]] + self.p[self.labels["beta_1"]] / (dpk**4)
+
+
+def get_poldi_sidelobe_sigma(ws: Workspace2D) -> float:
+    """Return the POLDI correlation sidelobe width for *ws*, from the chopper speed.
+
+    The coefficient comes from the ``sidelobe_width_coeff`` parameter on the chopper if the
+    instrument defines one, so that a recalibration lands in the IDF rather than here.
+    """
+    # component access (rather than ComponentInfo) is needed to read instrument parameters
+    chopper = ws.getInstrument().getComponentByName("chopper")  # None for instruments without one
+    coeff = POLDI_SIDELOBE_WIDTH_COEFF
+    if chopper is not None and chopper.hasParameter("sidelobe_width_coeff"):
+        coeff = chopper.getNumberParameter("sidelobe_width_coeff")[0]
+    return coeff / ws.run().getPropertyAsSingleValue("chopperspeed")
 
 
 class Phase:
@@ -351,6 +415,8 @@ class MtdFuncMixin:
     PawleyPattern2DNoConstraints (although the getters may also be helpful for debugging PawleyPattern2D fits
     """
 
+    profile: Optional[PeakProfile] = None  # set by classes that fit through a profile
+
     def __init__(self):
         self.comp_func: CompositeFunctionWrapper = None
 
@@ -368,7 +434,11 @@ class MtdFuncMixin:
 
     def get_peak_intensities(self) -> np.ndarray[float]:
         bg_func_names = FunctionFactory.Instance().getBackgroundFunctionNames()
-        return np.array([f.function.intensity() for f in self.comp_func if f.name not in bg_func_names])
+        return np.array([self._peak_intensity(f.function) for f in self.comp_func if f.name not in bg_func_names])
+
+    def _peak_intensity(self, pk_func) -> float:
+        # defer to the profile as its function's integral may not be the intensity
+        return self.profile.get_peak_intensity(pk_func) if self.profile is not None else pk_func.intensity()
 
     def get_peak_param_errors(self, param_name: str) -> np.ndarray[float]:
         bg_func_names = FunctionFactory.Instance().getBackgroundFunctionNames()
@@ -682,7 +752,7 @@ class PawleyPatternBase(BoundsMixin, MtdFuncMixin, OutputTableMixin, ABC):
                 self.comp_func[istart + ipk].function.setCentre(pk_cens[ipk])
                 for par_name, val in self.profile.get_mantid_peak_params(dpk).items():
                     self.comp_func[istart + ipk][par_name] = val
-                self.comp_func[istart + ipk].function.setIntensity(self.intens[iphase][ipk])
+                self.profile.set_peak_intensity(self.comp_func[istart + ipk].function, self.intens[iphase][ipk])
             istart += phase.nhkls()
         if len(self.bg_params) > 0:
             for ipar, par in enumerate(self.bg_params):
@@ -1108,6 +1178,10 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
             return
         if pawley1d.profile.func_name == self.profile.func_name:
             self.profile_params = [p.copy() for p in pawley1d.profile_params]
+        else:
+            # different profiles may still share a width parameterisation (e.g. sig0/sig1/sig2),
+            # which is the case that matters when the 1D fit models an artefact the 2D fit doesn't
+            self._copy_shared_profile_params(pawley1d)
         intens_changed = False
         for iphase, phase in enumerate(self.phases):
             phase1d = pawley1d.phases[iphase]
@@ -1138,6 +1212,19 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
                 intens_changed = True
         if intens_changed:
             self._estimate_intensities()
+
+    def _copy_shared_profile_params(self, pawley1d: PawleyPattern1D) -> None:
+        """Copy the profile parameters whose labels both profiles define."""
+        shared = [name for name in self.profile.labels if name in pawley1d.profile.labels]
+        if not shared:
+            logger.warning(
+                f"Profiles {pawley1d.profile.func_name} and {self.profile.func_name} share no parameters "
+                "- no profile parameters copied from the 1D fit."
+            )
+            return
+        for iphase in range(len(self.phases)):
+            for name in shared:
+                self.profile_params[iphase][self.profile.labels[name]] = pawley1d.profile_params[iphase][pawley1d.profile.labels[name]]
 
     def estimate_initial_params(self) -> None:
         self._estimate_intensities()
@@ -1344,7 +1431,7 @@ class PawleyPattern2DNoConstraints(BoundsMixin, MtdFuncMixin, Poldi2DEvalMixin, 
                 {
                     "Workspace": self.ws.name(),
                     "HKL": hkl_str,
-                    "I": float(pk_func.intensity()),
+                    "I": float(self._peak_intensity(pk_func)),
                     "I_err": self._get_param_error_by_name(f"f{abs_ipk}.{self.intens_par_name}"),
                     "X0": float(pk_func.getParameterValue(cen_par)),
                     "X0_err": self._get_param_error_by_name(f"f{abs_ipk}.{cen_par}"),
