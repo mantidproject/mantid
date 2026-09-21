@@ -78,7 +78,7 @@ void SaveParameterFile::exec() {
   Progress prog(this, 0.0, 0.3, params->size());
 
   // Build a list of parameters to save;
-  for (auto &paramsIt : *params) {
+  for (auto const &paramsIt : params->entries()) {
     if (prog.hasCancellationBeenRequested())
       break;
     prog.report("Generating parameters");

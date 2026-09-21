@@ -127,8 +127,6 @@ public:
   //@{
   /// Return the names of the parameters for this component
   virtual std::set<std::string> getParameterNames(bool recursive = true) const = 0;
-  /// return the parameter names and the component they are from
-  virtual std::map<std::string, ComponentID> getParameterNamesByComponent() const = 0;
   /// Returns a boolean indicating if the component has the named parameter
   virtual bool hasParameter(const std::string &name, bool recursive = true) const = 0;
   // Hack until proper python export functions are defined
