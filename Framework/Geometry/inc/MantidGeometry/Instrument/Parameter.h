@@ -26,6 +26,7 @@ namespace Geometry {
 // Forward declarations
 //--------------------------------------------------------------------------
 class ParameterMap;
+class ParameterInfo;
 
 /** @class Parameter Parameter.h Geometry/Parameter.h
 
@@ -78,6 +79,8 @@ public:
 
 protected:
   friend class ParameterMap;
+  /// Instrument 2.0 replacement for ParameterMap's storage
+  friend class ParameterInfo;
 
   /** Sets the value of type T to the parameter if it has type ParameterType<T>
       Throws an exception if the types don't match.
@@ -121,6 +124,7 @@ public:
 
 private:
   friend class ParameterMap;
+  friend class ComponentInfo;
   friend class Parameter;
   /// Set the value of the parameter
   void setValue(const Type &value);
