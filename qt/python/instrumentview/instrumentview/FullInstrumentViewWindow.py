@@ -10,6 +10,7 @@ from qtpy.QtWidgets import (
     QMainWindow,
     QVBoxLayout,
     QHBoxLayout,
+    QGridLayout,
     QWidget,
     QLabel,
     QLineEdit,
@@ -75,6 +76,29 @@ def _skip_if_closing(method):
         return method(self, *args, **kwargs)
 
     return wrapper
+
+
+def _add_widgets_in_columns(layout, widgets: list[QWidget], columns: int = 2) -> None:
+    """Add the given widgets to a grid nested in the given layout, wrapping every `columns` widgets.
+
+    A row of buttons in a QHBoxLayout has a minimum width of the sum of its buttons, which is what forces the left
+    column to scroll horizontally. Wrapping them into equal width columns reduces that minimum to the widest button
+    in each column. A trailing widget with no partner spans the full width.
+    """
+    grid = QGridLayout()
+    grid.setContentsMargins(0, 0, 0, 0)
+    for column in range(columns):
+        grid.setColumnStretch(column, 1)
+    for row, index in enumerate(range(0, len(widgets), columns)):
+        widgets_in_row = widgets[index : index + columns]
+        if len(widgets_in_row) == 1 and columns > 1:
+            # QWidget *widget, int fromRow, int fromColumn, int rowSpan, int columnSpan
+            grid.addWidget(widgets_in_row[0], row, 0, 1, columns)
+            continue
+        for column, widget in enumerate(widgets_in_row):
+            # QWidget *widget, int row, int column
+            grid.addWidget(widget, row, column)
+    layout.addLayout(grid)
 
 
 def _ensure_overlay_manager(method):
@@ -490,12 +514,17 @@ class FullInstrumentViewView(QWidget):
         projection_first_row.addWidget(self._reset_projection)
         projection_layout.addLayout(projection_first_row)
 
-        picking_layout = QHBoxLayout(self._picking_group_box)
-        picking_layout.addWidget(self._rubberband_zoom)
-        picking_layout.addWidget(self._hover_pick)
-        picking_layout.addWidget(self._select_peaks)
-        picking_layout.addWidget(self._select_bank_tube)
-        picking_layout.addWidget(self._clear_point_picked_detectors)
+        picking_layout = QVBoxLayout(self._picking_group_box)
+        _add_widgets_in_columns(
+            picking_layout,
+            [
+                self._rubberband_zoom,
+                self._hover_pick,
+                self._select_peaks,
+                self._select_bank_tube,
+                self._clear_point_picked_detectors,
+            ],
+        )
 
         settings_layout = QVBoxLayout(self._left_column_settings)
         u_offset_layout = QHBoxLayout(self._u_offset_widget)
@@ -514,10 +543,11 @@ class FullInstrumentViewView(QWidget):
         settings_layout.addWidget(self._count_scale_combo_box)
         settings_layout.addStretch(1)
 
-        lineplot_options_layout = QHBoxLayout(self._lineplot_options_group_box)
-        lineplot_options_layout.addWidget((self._units_combo_box_lineplot))
-        lineplot_options_layout.addWidget(self._export_workspace_button)
-        lineplot_options_layout.addWidget(self._sum_spectra_checkbox)
+        lineplot_options_layout = QVBoxLayout(self._lineplot_options_group_box)
+        _add_widgets_in_columns(
+            lineplot_options_layout,
+            [self._units_combo_box_lineplot, self._export_workspace_button, self._sum_spectra_checkbox],
+        )
 
         self._lists_vsplitter.addWidget(self._peaks_group_box)
         self._lists_vsplitter.addWidget(self._grouping_masking_group_box)
@@ -533,10 +563,8 @@ class FullInstrumentViewView(QWidget):
         self._lists_vsplitter.setChildrenCollapsible(False)
 
         peaks_layout = QVBoxLayout(self._peaks_group_box)
-        peak_buttons_h_layout = QHBoxLayout()
-        peak_buttons_h_layout.addWidget(self._start_adding_peaks_button)
-        peak_buttons_h_layout.addWidget(self._delete_all_selected_peaks_button)
-        peaks_layout.addLayout(peak_buttons_h_layout)
+        # Both labels are long enough that a second column would only widen the panel
+        _add_widgets_in_columns(peaks_layout, [self._start_adding_peaks_button, self._delete_all_selected_peaks_button], columns=1)
         peaks_layout.addWidget(self._peak_ws_list)
 
         grouping_masking_group_layout = QVBoxLayout(self._grouping_masking_group_box)
@@ -558,6 +586,11 @@ class FullInstrumentViewView(QWidget):
         self._lineplot_layout = QVBoxLayout(self._lineplot_widget)
         self._lineplot_layout.addWidget(self._detector_figure_canvas)
         self._lineplot_layout.addWidget(self._plot_toolbar)
+
+        self._left_column_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self._left_column_scroll.setMinimumWidth(
+            self._left_column_tabs.minimumSizeHint().width() + self._left_column_scroll.verticalScrollBar().sizeHint().width()
+        )
 
     def closeEvent(self, event) -> None:
         """Closes view, not window"""
@@ -787,19 +820,14 @@ class FullInstrumentViewView(QWidget):
         item_list = WorkspaceListWidget()
         item_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
         item_list.setSelectionMode(QAbstractItemView.NoSelection)
-        post_list_layout = QHBoxLayout()
         save_to_ws_btn = QPushButton()
         save_to_xml_btn = QPushButton()
         save_to_cal_btn = QPushButton()
         overwrite_btn = QPushButton()
-        post_list_layout.addWidget(save_to_ws_btn)
-        post_list_layout.addWidget(save_to_xml_btn)
-        post_list_layout.addWidget(save_to_cal_btn)
-        post_list_layout.addWidget(overwrite_btn)
         tab_layout.addLayout(pre_list_layout)
         tab_layout.addWidget(create_from_selection_btn)
         tab_layout.addWidget(item_list)
-        tab_layout.addLayout(post_list_layout)
+        _add_widgets_in_columns(tab_layout, [save_to_ws_btn, save_to_xml_btn, save_to_cal_btn, overwrite_btn])
         return (
             add_item_btn,
             create_from_selection_btn,

@@ -190,11 +190,21 @@ class TestProjection(unittest.TestCase):
         np.testing.assert_allclose(proj._x_range, [-np.pi / 4, np.pi / 8], rtol=1e-3)
         np.testing.assert_allclose(proj._detector_x_coordinates, [0, np.pi / 8, -np.pi / 4], rtol=1e-3)
 
-    def test_set_u_offset_of_one_period_preserves_layout(self):
+    def test_set_u_offset_of_one_period_is_the_same_as_no_rotation(self):
         raw_x = [0, np.pi / 8, -np.pi / 4]
         proj = self._projection_with_raw_x(raw_x)
         proj.set_u_offset(proj.u_period)
-        np.testing.assert_allclose(proj._detector_x_coordinates, np.array(raw_x) + proj.u_period, rtol=1e-3)
+        self.assertEqual(proj.u_offset, 0.0)
+        np.testing.assert_allclose(proj._x_range, [-np.pi / 4, np.pi / 8], rtol=1e-3)
+        np.testing.assert_allclose(proj._detector_x_coordinates, raw_x, rtol=1e-3)
+
+    def test_set_u_offset_wraps_past_one_period(self):
+        proj = self._projection_with_raw_x([0, np.pi / 8, -np.pi / 4])
+        proj.set_u_offset(proj.u_period + np.pi / 4)
+        quarter_turn = self._projection_with_raw_x([0, np.pi / 8, -np.pi / 4])
+        quarter_turn.set_u_offset(np.pi / 4)
+        self.assertEqual(proj.u_offset, quarter_turn.u_offset)
+        np.testing.assert_allclose(proj._detector_x_coordinates, quarter_turn._detector_x_coordinates, rtol=1e-3)
 
     def test_project_points_follows_u_offset(self):
         proj = Projection(

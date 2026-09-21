@@ -79,6 +79,9 @@ class Projection:
 
         The automatically chosen seam is used when the offset is zero.
         """
+        if self._u_period != 0:
+            offset = float(np.mod(offset, self._u_period))
+
         if offset == self._u_offset:
             return
 
