@@ -112,6 +112,7 @@ class FullInstrumentViewPresenter:
         self._view.set_integration_range_limits(self._model.integration_limits)
         self._view.show_axes()
         self._setup_component_tree()
+        self._update_rotation_controls_enabled()
 
         self._ads_observer = InstrumentViewADSObserver(
             delete_callback=self.delete_workspace_callback,

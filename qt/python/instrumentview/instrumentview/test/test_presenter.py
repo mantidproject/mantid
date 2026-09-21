@@ -856,6 +856,27 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.set_u_offset_slider_enabled.assert_called_with(False)
         self._presenter._renderer.add_detector_mesh_to_plotter.assert_called_once()
 
+    def test_rotation_controls_set_on_opening_with_rotate_180_ticked(self):
+        self._mock_view.current_selected_projection.return_value = ProjectionType.CYLINDRICAL_Y
+        self._mock_view.is_rotate_180_checkbox_checked.return_value = True
+        self._mock_view.reset_mock()
+        presenter = self._create_test_presenter()
+        try:
+            self._mock_view.set_rotate_180_box_enabled.assert_called_with(True)
+            self._mock_view.set_u_offset_slider_enabled.assert_called_with(False)
+        finally:
+            presenter.handle_close()
+
+    def test_rotation_controls_disabled_on_opening_in_3d(self):
+        self._mock_view.current_selected_projection.return_value = ProjectionType.THREE_D
+        self._mock_view.reset_mock()
+        presenter = self._create_test_presenter()
+        try:
+            self._mock_view.set_rotate_180_box_enabled.assert_called_with(False)
+            self._mock_view.set_u_offset_slider_enabled.assert_called_with(False)
+        finally:
+            presenter.handle_close()
+
     def test_on_reset_projection_clears_the_rotation(self):
         self._mock_view.get_contour_limits.return_value = (0, 100)
         self._presenter.on_reset_projection_clicked()
