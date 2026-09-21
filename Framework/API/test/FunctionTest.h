@@ -25,9 +25,7 @@ class MocSpectrum : public SpectrumTester {
 public:
   MocSpectrum(size_t nx, size_t ny)
       : SpectrumTester(HistogramData::getHistogramXMode(nx, ny), HistogramData::Histogram::YMode::Counts) {
-    mutableX().resize(nx);
-    mutableY().resize(ny);
-    mutableE().resize(ny);
+    resize(ny);
   }
 };
 
