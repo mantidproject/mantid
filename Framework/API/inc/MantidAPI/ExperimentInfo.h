@@ -34,6 +34,7 @@ class DetectorInfo;
 class IDetector;
 class InstrumentMetadata;
 class ParameterMap;
+class PositionAndRotationAccumulator;
 class XMLInstrumentParameter;
 } // namespace Geometry
 
@@ -180,9 +181,23 @@ protected:
   /// The base (unparametrized) instrument
   Geometry::Instrument_const_sptr sptr_instrument;
 
+  /** The 2.0 instrument layers, of which this object is the primary owner.
+   *
+   * Co-owned with m_parmap rather than held exclusively: a parametrized legacy Component
+   * reaches ComponentInfo only through its ParameterMap, and getInstrument() hands out
+   * parametrized instruments that share m_parmap and may outlive this ExperimentInfo.
+   * Kept in step with m_parmap by adoptBeamline(), which is the only place they are set. */
+  std::shared_ptr<Geometry::ComponentInfo> m_componentInfo;
+  std::shared_ptr<Geometry::DetectorInfo> m_detectorInfo;
+  std::shared_ptr<Geometry::InstrumentMetadata> m_instrumentMetadata;
+
+  /// Take co-ownership of whatever m_parmap currently holds. Call after anything that
+  /// (re)builds the beamline, so the two never disagree about which objects are current.
+  void adoptBeamline();
+
 private:
   /// Fill with given instrument parameter
-  void populateWithParameter(Geometry::ParameterMap &paramMap, Geometry::ParameterMap &paramMapForPosAndRot,
+  void populateWithParameter(Geometry::ParameterMap &paramMap, Geometry::PositionAndRotationAccumulator &posAndRot,
                              const std::string &name, const Geometry::XMLInstrumentParameter &paramInfo,
                              const Run &runData);
 

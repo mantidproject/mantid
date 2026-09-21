@@ -48,6 +48,36 @@ The python interface to ``ComponentInfo`` has matured, and now provides equal, i
 
 See :py:obj:`ComponentInfo <mantid.geometry.ComponentInfo>` for more information.
 
+ParameterInfo
+_____________
+
+``ParameterInfo`` is the Instrument 2.0 home for an instrument's **named parameters**, supplied by an IDF.
+These are used by calibration algorithms, such as ``"x-pixel-size"``, ``"TubePressure"``,
+and include fitting parameters like ``IkedaCarpenterPV:Alpha0``.
+It is the replacement for the storage inside the legacy ``ParameterMap``.
+
+While  ``ParameterMap`` is keyed by ``ComponentID`` (a pointer into the legacy instrument tree),
+the ``ParameterInfo`` is keyed by the same **component index** that ``ComponentInfo`` uses,
+and its recursive lookups walk ``ComponentInfo::parent()`` instead.
+The legacy tree is no longer needed to find a parameter.
+
+``ParameterInfo`` is owned by ``ComponentInfo``, and in normal use you do not handle it directly.
+Parameter accessors on ``ComponentInfo`` are the public face of it.
+``ParameterMap`` now delegates to ``ParameterInfo`` rather than keeping its own store..
+
+Two behaviours are worth knowing because they are inherited from the legacy semantics:
+
+* Parameter names are matched **case-insensitively**
+* A component may hold more than one parameter of the same short name, provided they belong to different fitting functions
+
+Fitting parameters are deduplicated by (name, function),
+so ``IkedaCarpenterPV:Alpha0`` and ``IkedaCarpenterMD:Alpha0`` coexist on one component.
+Ordinary parameters are deduplicated by name alone,
+and adding one replaces any existing parameter of that name.
+
+Named parameters are not currently exposed to Python through ``ComponentInfo``;
+Python code still reaches them through the legacy component API.
+
 Changes for Rollout
 -------------------
 
@@ -174,6 +204,62 @@ The method ``ExperimentInfo::mutableComponentInfo()`` returns a non-const ``Comp
 * ``setPosition(const size_t index, const Kernel::V3D &position);``
 * ``setRotation(const size_t index, const Kernel::Quat &rotation);``
 * ``setScaleFactor(const size_t index, const Kernel::V3D &scaleFactor);``
+
+Named parameters
+________________
+
+Named parameters are reached through ``ComponentInfo``, by component index,
+rather than through a component pointer and a ``ParameterMap``.
+The read accessors match the legacy ``IComponent`` ones exactly,
+including the "empty vector if absent" convention and the ``recursive`` flag that defaults to ``true``,
+so migrating a call site is close to a rename once the index is in hand.
+
+* ``hasParameter(componentIndex, name, recursive)``
+* ``getParameterNames(componentIndex, recursive)``
+* ``getNumberParameter(componentIndex, name, recursive)``
+* ``getIntParameter(componentIndex, name, recursive)``
+* ``getBoolParameter(componentIndex, name, recursive)``
+* ``getStringParameter(componentIndex, name, recursive)``
+* ``getFittingParameter(componentIndex, name, xvalue)``
+* ``parameters(componentIndex)`` - every parameter on one component, non-recursive, ordered by name
+
+**Before refactoring**
+
+.. code-block:: c++
+
+  auto instrument = ws->getInstrument();
+  auto bank = instrument->getComponentByName("bank1");
+  auto pixelSizes = bank->getNumberParameter("x-pixel-size");
+
+**After**
+
+.. code-block:: c++
+
+  #include "MantidGeometry/Instrument/ComponentInfo.h"
+
+  ...
+
+  const auto &componentInfo = ws->componentInfo();
+  const auto bankIndex = componentInfo.indexOfAny("bank1");
+  auto pixelSizes = componentInfo.getNumberParameter(bankIndex, "x-pixel-size");
+
+Writing a parameter needs a non-const ``ComponentInfo`` from ``ExperimentInfo::mutableComponentInfo()``,
+and replaces the corresponding ``ParameterMap::addDouble()`` and friends.
+
+* ``addDouble(componentIndex, name, value)``
+* ``addInt(componentIndex, name, value)``
+* ``addBool(componentIndex, name, value)``
+* ``addString(componentIndex, name, value)``
+* ``addV3D(componentIndex, name, value)``
+* ``addQuat(componentIndex, name, value)``
+* ``addParameter(componentIndex, type, name, value)`` - when the type is only known as a string
+* ``addFittingParameter(componentIndex, name, fittingFunction, value)``
+* ``clearParameter(componentIndex, name)``
+
+.. code-block:: c++
+
+  auto &componentInfo = ws->mutableComponentInfo();
+  componentInfo.addDouble(bankIndex, "x-pixel-size", 0.005);
 
 Useful Tips
 ___________

@@ -11,10 +11,13 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/ComponentInfoIterator.h"
+#include "MantidGeometry/Instrument/ParameterInfo.h"
 #include "MantidGeometry/Instrument/SolidAngleParams.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidTypes/Core/DateAndTime.h"
+#include <limits>
 #include <memory>
+#include <set>
 #include <tuple>
 #include <unordered_map>
 #include <vector>
@@ -43,6 +46,10 @@ class Instrument;
   Indexes are per component.
 */
 class MANTID_GEOMETRY_DLL ComponentInfo {
+public:
+  /// Returned by indexOfOrInvalid() for a component ID that is not part of this instrument.
+  static constexpr size_t invalidIndex = std::numeric_limits<size_t>::max();
+
 private:
   /// Pointer to the actual ComponentInfo object (non-wrapping part).
   std::unique_ptr<Beamline::ComponentInfo> m_componentInfo;
@@ -53,6 +60,20 @@ private:
 
   /// Shapes for each component
   std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> m_shapes;
+
+  /// The instrument's named parameters, keyed by component index
+  std::shared_ptr<ParameterInfo> m_parameterInfo;
+
+  template <class T> std::vector<T> getParameter(size_t componentIndex, const std::string &name, bool recursive) const;
+
+  /// Shared implementation of the typed add*() methods.
+  template <class T>
+  void addTypedParameter(const size_t componentIndex, const std::string &type, const std::string &name, const T &value,
+                         const std::string *const pDescription, const std::string &pVisible);
+
+  /// The store, created on first write if this ComponentInfo was built without one (a bare,
+  /// non-parametrized instrument). Reads leave it null, so they stay cheap and const.
+  ParameterInfo &mutableParameterInfo();
 
   BoundingBox componentBoundingBox(const size_t index, const BoundingBox *reference,
                                    const bool excludeMonitors = false) const;
@@ -77,7 +98,8 @@ public:
   ComponentInfo(std::unique_ptr<Beamline::ComponentInfo> componentInfo,
                 std::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>> componentIds,
                 std::shared_ptr<const std::unordered_map<Geometry::IComponent const *, size_t>> componentIdToIndexMap,
-                std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> shapes);
+                std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> shapes,
+                std::shared_ptr<ParameterInfo> parameterInfo = nullptr);
   ~ComponentInfo();
   /// Copy assignment is not possible for ComponentInfo
   ComponentInfo &operator=(const ComponentInfo &) = delete;
@@ -89,6 +111,8 @@ public:
   size_t getMemorySize() const;
   QuadrilateralComponent quadrilateralComponent(const size_t componentIndex) const;
   size_t indexOf(Geometry::IComponent const *id) const;
+  /// The index for a component ID, or invalidIndex if it is not part of this instrument.
+  size_t indexOfOrInvalid(Geometry::IComponent const *id) const;
   size_t indexOfAny(const std::string &name) const;
   bool uniqueName(const std::string &name) const;
   bool isDetector(const size_t componentIndex) const;
@@ -147,6 +171,59 @@ public:
   const ComponentInfoIterator<const ComponentInfo> cend();
 
   size_t findBankParent(size_t index, const std::string &bankPart) const;
+
+  /// The fully-qualified name of a component ("instrument/bank1/pixel3")
+  std::string fullName(const size_t componentIndex) const;
+
+  /// The component with this fully-qualified name, or invalidIndex if there is none.
+  size_t indexOfFullName(const std::string &fullName) const;
+
+  /// Returns empty (or false) if the ComponentInfo was built without parameters or the parameter is unset.
+  bool hasParameter(const size_t componentIndex, const std::string &name, bool recursive = true) const;
+  std::set<std::string> getParameterNames(const size_t componentIndex, bool recursive = true) const;
+  /// All parameters on one component, non-recursive, ordered by name.
+  const ParameterInfo::ComponentParameters &parameters(const size_t componentIndex) const;
+  std::vector<double> getNumberParameter(const size_t componentIndex, const std::string &name,
+                                         bool recursive = true) const;
+  std::vector<int> getIntParameter(const size_t componentIndex, const std::string &name, bool recursive = true) const;
+  std::vector<bool> getBoolParameter(const size_t componentIndex, const std::string &name, bool recursive = true) const;
+  std::vector<std::string> getStringParameter(const size_t componentIndex, const std::string &name,
+                                              bool recursive = true) const;
+  double getFittingParameter(const size_t componentIndex, const std::string &name, double xvalue) const;
+
+  /// Add or replace a named parameter at a specific component index
+  void addParameter(const size_t componentIndex, const std::string &type, const std::string &name,
+                    const std::string &value, const std::string *const pDescription = nullptr,
+                    const std::string &pVisible = "true");
+  /// Add or replace a named double parameter at a specific component index
+  void addDouble(const size_t componentIndex, const std::string &name, double value,
+                 const std::string *const pDescription = nullptr, const std::string &pVisible = "true");
+  /// Add or replace a named integer parameter at a specific component index
+  void addInt(const size_t componentIndex, const std::string &name, int value,
+              const std::string *const pDescription = nullptr, const std::string &pVisible = "true");
+  /// Add or replace a named boolean parameter at a specific component index
+  void addBool(const size_t componentIndex, const std::string &name, bool value,
+               const std::string *const pDescription = nullptr, const std::string &pVisible = "true");
+  /// Add or replace a named string parameter at a specific component index
+  void addString(const size_t componentIndex, const std::string &name, const std::string &value,
+                 const std::string *const pDescription = nullptr, const std::string &pVisible = "true");
+  /// Add or replace a named vector parameter at a specific component index
+  void addV3D(const size_t componentIndex, const std::string &name, const Kernel::V3D &value,
+              const std::string *const pDescription = nullptr);
+  /// Add or replace a named quaternion parameter at a specific component index
+  void addQuat(const size_t componentIndex, const std::string &name, const Kernel::Quat &value,
+               const std::string *const pDescription = nullptr);
+  /// Add a fitting parameter.
+  void addFittingParameter(const size_t componentIndex, const std::string &name, const std::string &fittingFunction,
+                           const std::string &value, const std::string *const pDescription = nullptr,
+                           const std::string &pVisible = "true");
+  /// Remove every parameter of this name from this component. Matches the name case-sensitively,
+  /// as ParameterMap::clearParametersByName() does.
+  void clearParameter(const size_t componentIndex, const std::string &name);
+
+  /// This allows ParameterMap to delegate to ParameterInfo,
+  /// rather than keeping a parallel copy that would silently diverge.
+  const std::shared_ptr<ParameterInfo> &sharedParameterInfo() const { return m_parameterInfo; }
 
   friend class Instrument;
 };
