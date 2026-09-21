@@ -1408,9 +1408,11 @@ void ExperimentInfo::populateWithParameter(Geometry::ParameterMap &paramMap,
   } else if (name == "x" || name == "y" || name == "z") {
     const auto compIndex = componentInfo().indexOfOrInvalid(paramInfo.m_component->getComponentID());
     if (compIndex != Geometry::ComponentInfo::invalidIndex) {
-      // Seeded from the component's current position, so specifying one coordinate leaves the
-      // other two alone.
-      posAndRot.setCoordinate(compIndex, name, paramValue, componentInfo().position(compIndex));
+      // Seeded from the component's current position relative to its parent, so specifying one
+      // coordinate leaves the other two alone. It must be the relative position: the accumulated
+      // value is applied as a parent-relative one, so seeding with the absolute position would
+      // re-apply the parent's rotation and translation on every call.
+      posAndRot.setCoordinate(compIndex, name, paramValue, componentInfo().relativePosition(compIndex));
     }
   } else if (name == "rot" || name == "rotx" || name == "roty" || name == "rotz") {
     const auto compIndex = componentInfo().indexOfOrInvalid(paramInfo.m_component->getComponentID());
