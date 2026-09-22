@@ -336,8 +336,8 @@ void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues
       const auto &binBoundaries = currentExptInfo.run().getBinBoundaries();
       const double runEmin = binBoundaries.front();
       const double runEmax = binBoundaries.back();
-      lowValues.assign(spectrumInfo.size(), run_emin);
-      highValues.assign(spectrumInfo.size(), run_emax);
+      lowValues.assign(spectrumInfo.size(), runEmin);
+      highValues.assign(spectrumInfo.size(), runEmax);
     }
   }
   // MDEventWS was created with the "useLogTimes" option: should be only a single expInfo, but
