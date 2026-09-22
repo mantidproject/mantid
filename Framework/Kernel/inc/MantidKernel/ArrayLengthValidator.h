@@ -68,5 +68,18 @@ private:
   bool m_hasArraySizeMax;
 };
 
+// 'extern template' declarations matching the explicit instantiations in
+// ArrayLengthValidator.cpp. Without these, every translation unit that uses one of these
+// validators implicitly re-instantiates it locally.
+#ifndef ARRAYLENGTHVALIDATOR_PROVIDES_EXPLICIT_INSTANTIATIONS
+extern template class MANTID_KERNEL_DLL ArrayLengthValidator<double>;
+extern template class MANTID_KERNEL_DLL ArrayLengthValidator<int32_t>;
+extern template class MANTID_KERNEL_DLL ArrayLengthValidator<int64_t>;
+extern template class MANTID_KERNEL_DLL ArrayLengthValidator<std::string>;
+#if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)
+extern template class MANTID_KERNEL_DLL ArrayLengthValidator<long>;
+#endif
+#endif // ARRAYLENGTHVALIDATOR_PROVIDES_EXPLICIT_INSTANTIATIONS
+
 } // namespace Kernel
 } // namespace Mantid

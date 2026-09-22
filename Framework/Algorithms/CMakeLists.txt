@@ -1064,6 +1064,64 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_source_files_properties(src/Segfault.cpp PROPERTIES SKIP_PRECOMPILE_HEADERS ON COMPILE_FLAGS -O0)
 endif()
 
+# Files that declare a file-local anonymous-namespace g_log, or include a guard-less .hxx template-implementation header
+# meant for single inclusion per TU, collide when unity-merged with another such file. Keep these compiling
+# individually; everything else may batch.
+set_source_files_properties(
+  src/AddLogInterpolated.cpp
+  src/AddLogSmoothed.cpp
+  src/ApplyFloodWorkspace.cpp
+  src/ApplyTransmissionCorrection.cpp
+  src/CalculateDIFC.cpp
+  src/CalculateEfficiency2.cpp
+  src/CalculatePolynomialBackground.cpp
+  src/ChangePulsetime2.cpp
+  src/CombineDiffCal.cpp
+  src/ConvertDiffCal.cpp
+  src/CorrectTOFAxis.cpp
+  src/CreateEPP.cpp
+  src/CreateFloodWorkspace.cpp
+  src/CreateGroupingWorkspace.cpp
+  src/CreateMonteCarloWorkspace.cpp
+  src/DetermineSpinStateOrder.cpp
+  src/DirectILLTubeBackground.cpp
+  src/EstimateResolutionDiffraction.cpp
+  src/ExtractSpectra2.cpp
+  src/ExtractSpectra.cpp
+  src/FilterByTime.cpp
+  src/FindPeaksConvolve.cpp
+  src/FindReflectometryLines3.cpp
+  src/FitPeaks.cpp
+  src/GenerateFlatCellWorkspaceLOQ.cpp
+  src/GenerateIPythonNotebook.cpp
+  src/GeneratePythonScript.cpp
+  src/GetEiMonDet3.cpp
+  src/GetQsInQENSData.cpp
+  src/GroupToXResolution.cpp
+  src/IntegrateEPP.cpp
+  src/LineProfile.cpp
+  src/LorentzCorrection.cpp
+  src/MaskBins.cpp
+  src/MaskBinsFromWorkspace.cpp
+  src/MaskNonOverlappingBins.cpp
+  src/PolarizationCorrectionFredrikze.cpp
+  src/PolarizationCorrections/HeliumAnalyserEfficiency.cpp
+  src/PolarizationCorrections/HeliumAnalyserEfficiencyTime.cpp
+  src/PolarizationCorrections/PolarizerEfficiency.cpp
+  src/PolarizationCorrectionWildes.cpp
+  src/PolarizationEfficiencyCor.cpp
+  src/PDFFourierTransform2.cpp
+  src/FFTSmooth2.cpp
+  src/CalculatePlaczekSelfScattering.cpp
+  src/Rebin.cpp
+  src/SampleCorrections/SparseWorkspace.cpp
+  src/SANSCollimationLengthEstimator.cpp
+  src/Scale.cpp
+  src/VesuvioL1ThetaResolution.cpp
+  src/WorkflowAlgorithmRunner.cpp
+  PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON
+)
+
 # Add the target for this directory
 add_library(Algorithms ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
 add_library(Mantid::Algorithms ALIAS Algorithms)
@@ -1074,6 +1132,10 @@ target_precompile_headers(
   PRIVATE
   <MantidAPI/Algorithm.h>
   <MantidAPI/MatrixWorkspace.h>
+  <MantidDataObjects/WorkspaceCreation.h>
+  <MantidKernel/ArrayProperty.h>
+  <MantidKernel/BoundedValidator.h>
+  <MantidKernel/ListValidator.h>
   <boost/algorithm/string.hpp>
   <boost/format.hpp>
   <boost/function.hpp>
@@ -1085,7 +1147,12 @@ target_include_directories(
   Algorithms PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 # Set the name of the generated library
-set_target_properties(Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms COMPILE_DEFINITIONS "IN_MANTID_ALGORITHMS")
+set_target_properties(
+  Algorithms
+  PROPERTIES OUTPUT_NAME MantidAlgorithms
+             COMPILE_DEFINITIONS "IN_MANTID_ALGORITHMS"
+             UNITY_BUILD ON
+)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Algorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")

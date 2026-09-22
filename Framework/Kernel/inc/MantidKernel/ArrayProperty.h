@@ -59,5 +59,36 @@ private:
 
 template <> MANTID_KERNEL_DLL void ArrayProperty<int>::visualStudioC4661Workaround();
 
+// 'extern template' declarations matching the explicit instantiations in ArrayProperty.cpp.
+// Without these, every translation unit that declares a vector-valued property (e.g. via
+// declareProperty<std::vector<T>>) implicitly re-instantiates ArrayProperty<T> locally -- and
+// this header has a very wide fan-out across the codebase.
+#ifndef ARRAYPROPERTY_PROVIDES_EXPLICIT_INSTANTIATIONS
+// int32_t already gets an attributed member specialization (visualStudioC4661Workaround) just
+// above, so the DLL macro is left off here too, to avoid the same "attributes ignored after
+// type is already defined" warning ArrayProperty.cpp works around for its own instantiation.
+extern template class ArrayProperty<int32_t>;
+extern template class MANTID_KERNEL_DLL ArrayProperty<uint32_t>;
+extern template class MANTID_KERNEL_DLL ArrayProperty<int64_t>;
+extern template class MANTID_KERNEL_DLL ArrayProperty<uint64_t>;
+extern template class MANTID_KERNEL_DLL ArrayProperty<bool>;
+extern template class MANTID_KERNEL_DLL ArrayProperty<float>;
+extern template class MANTID_KERNEL_DLL ArrayProperty<double>;
+extern template class MANTID_KERNEL_DLL ArrayProperty<std::string>;
+extern template class MANTID_KERNEL_DLL ArrayProperty<std::vector<int32_t>>;
+extern template class MANTID_KERNEL_DLL ArrayProperty<std::vector<uint32_t>>;
+extern template class MANTID_KERNEL_DLL ArrayProperty<std::vector<int64_t>>;
+extern template class MANTID_KERNEL_DLL ArrayProperty<std::vector<uint64_t>>;
+extern template class MANTID_KERNEL_DLL ArrayProperty<std::vector<float>>;
+extern template class MANTID_KERNEL_DLL ArrayProperty<std::vector<double>>;
+extern template class MANTID_KERNEL_DLL ArrayProperty<std::vector<std::string>>;
+#if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)
+extern template class MANTID_KERNEL_DLL ArrayProperty<long>;
+extern template class MANTID_KERNEL_DLL ArrayProperty<unsigned long>;
+extern template class MANTID_KERNEL_DLL ArrayProperty<std::vector<long>>;
+extern template class MANTID_KERNEL_DLL ArrayProperty<std::vector<unsigned long>>;
+#endif
+#endif // ARRAYPROPERTY_PROVIDES_EXPLICIT_INSTANTIATIONS
+
 } // namespace Kernel
 } // namespace Mantid

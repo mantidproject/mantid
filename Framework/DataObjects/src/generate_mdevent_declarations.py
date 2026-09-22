@@ -148,7 +148,7 @@ def generate():
     classes_cpp = ["MDBoxBase", "MDBox", "MDEventWorkspace", "MDGridBox", "MDBoxIterator"]
 
     padding, lines, lines_after = parse_file(
-        "../inc/MantidDataObjects/MDEventFactory.h", "//### BEGIN AUTO-GENERATED CODE", "//### END AUTO-GENERATED CODE"
+        "../inc/MantidDataObjects/MDEventFactory.h", "// ### BEGIN AUTO-GENERATED CODE", "// ### END AUTO-GENERATED CODE"
     )
 
     nDim = int(find_num_dim(lines))
@@ -156,10 +156,27 @@ def generate():
     # List of the dimensions to instantiate
     dimensions = range(1, nDim + 1)
 
-    header_lines = map(lambda x: padding + x, header.split("\n"))
-    footer_lines = map(lambda x: padding + x, footer.split("\n"))
+    header_lines = list(map(lambda x: padding + x, header.split("\n")))
+    footer_lines = list(map(lambda x: padding + x, footer.split("\n")))
 
     lines += header_lines
+
+    # 'extern template' declarations matching the explicit instantiations in MDEventFactory.cpp.
+    # These stop every other translation unit that uses these classes (e.g. via CALL_MDEVENT_FUNCTION)
+    # from implicitly re-instantiating them, which is a major compile-time cost across MDAlgorithms.
+    extern_lines = ["%s// 'extern template' declarations for the explicit instantiations in MDEventFactory.cpp" % padding]
+    for c in mdevent_types:
+        extern_lines.append("%s// Extern instantiations for %s" % (padding, c))
+        for nd in dimensions:
+            extern_lines.append("%sextern template class MANTID_DATAOBJECTS_DLL %s<%d>;" % (padding, c, nd))
+    for c in classes_cpp:
+        extern_lines.append("%s// Extern instantiations for %s" % (padding, c))
+        for mdevent_type in mdevent_types:
+            for nd in dimensions:
+                extern_lines.append("%sextern template class MANTID_DATAOBJECTS_DLL %s<%s<%d>, %d>;" % (padding, c, mdevent_type, nd, nd))
+    extern_lines.append("\n")
+
+    lines += extern_lines
 
     macro_lines = build_macro(padding, 1, nDim) + build_macro(padding, 3, nDim) + build_macro(padding, 1, nDim, "const ")
 
@@ -186,10 +203,10 @@ def generate():
     f.writelines(line + "\n" for line in lines)
     f.close()
 
-    padding, lines, lines_after = parse_file("./MDEventFactory.cpp", "//### BEGIN AUTO-GENERATED CODE", "//### END AUTO-GENERATED CODE")
+    padding, lines, lines_after = parse_file("./MDEventFactory.cpp", "// ### BEGIN AUTO-GENERATED CODE", "// ### END AUTO-GENERATED CODE")
 
-    header_lines = map(lambda x: padding + x, header.split("\n"))
-    footer_lines = map(lambda x: padding + x, footer.split("\n"))
+    header_lines = list(map(lambda x: padding + x, header.split("\n")))
+    footer_lines = list(map(lambda x: padding + x, footer.split("\n")))
 
     lines += header_lines
 

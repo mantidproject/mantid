@@ -8,6 +8,7 @@
 
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 
+#include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDLeanEvent.h"
@@ -124,6 +125,129 @@ private:
  *
  * DO NOT EDIT!
  */
+
+// 'extern template' declarations matching the explicit instantiations in MDEventFactory.cpp.
+// Without these, every translation unit that uses CALL_MDEVENT_FUNCTION (or these classes directly)
+// implicitly re-instantiates all of them, which is a significant compile-time cost across MDAlgorithms.
+// Skipped in MDEventFactory.cpp itself, which provides the matching (non-extern) explicit
+// instantiations further down; seeing both in one TU triggers -Wattributes on the DLL export macro.
+#ifndef MDEVENTFACTORY_PROVIDES_EXPLICIT_INSTANTIATIONS
+// Extern instantiations for MDLeanEvent
+extern template class MANTID_DATAOBJECTS_DLL MDLeanEvent<1>;
+extern template class MANTID_DATAOBJECTS_DLL MDLeanEvent<2>;
+extern template class MANTID_DATAOBJECTS_DLL MDLeanEvent<3>;
+extern template class MANTID_DATAOBJECTS_DLL MDLeanEvent<4>;
+extern template class MANTID_DATAOBJECTS_DLL MDLeanEvent<5>;
+extern template class MANTID_DATAOBJECTS_DLL MDLeanEvent<6>;
+extern template class MANTID_DATAOBJECTS_DLL MDLeanEvent<7>;
+extern template class MANTID_DATAOBJECTS_DLL MDLeanEvent<8>;
+extern template class MANTID_DATAOBJECTS_DLL MDLeanEvent<9>;
+// Extern instantiations for MDEvent
+extern template class MANTID_DATAOBJECTS_DLL MDEvent<1>;
+extern template class MANTID_DATAOBJECTS_DLL MDEvent<2>;
+extern template class MANTID_DATAOBJECTS_DLL MDEvent<3>;
+extern template class MANTID_DATAOBJECTS_DLL MDEvent<4>;
+extern template class MANTID_DATAOBJECTS_DLL MDEvent<5>;
+extern template class MANTID_DATAOBJECTS_DLL MDEvent<6>;
+extern template class MANTID_DATAOBJECTS_DLL MDEvent<7>;
+extern template class MANTID_DATAOBJECTS_DLL MDEvent<8>;
+extern template class MANTID_DATAOBJECTS_DLL MDEvent<9>;
+// Extern instantiations for MDBoxBase
+extern template class MANTID_DATAOBJECTS_DLL MDBoxBase<MDLeanEvent<1>, 1>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxBase<MDLeanEvent<2>, 2>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxBase<MDLeanEvent<3>, 3>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxBase<MDLeanEvent<4>, 4>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxBase<MDLeanEvent<5>, 5>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxBase<MDLeanEvent<6>, 6>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxBase<MDLeanEvent<7>, 7>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxBase<MDLeanEvent<8>, 8>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxBase<MDLeanEvent<9>, 9>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxBase<MDEvent<1>, 1>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxBase<MDEvent<2>, 2>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxBase<MDEvent<3>, 3>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxBase<MDEvent<4>, 4>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxBase<MDEvent<5>, 5>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxBase<MDEvent<6>, 6>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxBase<MDEvent<7>, 7>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxBase<MDEvent<8>, 8>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxBase<MDEvent<9>, 9>;
+// Extern instantiations for MDBox
+extern template class MANTID_DATAOBJECTS_DLL MDBox<MDLeanEvent<1>, 1>;
+extern template class MANTID_DATAOBJECTS_DLL MDBox<MDLeanEvent<2>, 2>;
+extern template class MANTID_DATAOBJECTS_DLL MDBox<MDLeanEvent<3>, 3>;
+extern template class MANTID_DATAOBJECTS_DLL MDBox<MDLeanEvent<4>, 4>;
+extern template class MANTID_DATAOBJECTS_DLL MDBox<MDLeanEvent<5>, 5>;
+extern template class MANTID_DATAOBJECTS_DLL MDBox<MDLeanEvent<6>, 6>;
+extern template class MANTID_DATAOBJECTS_DLL MDBox<MDLeanEvent<7>, 7>;
+extern template class MANTID_DATAOBJECTS_DLL MDBox<MDLeanEvent<8>, 8>;
+extern template class MANTID_DATAOBJECTS_DLL MDBox<MDLeanEvent<9>, 9>;
+extern template class MANTID_DATAOBJECTS_DLL MDBox<MDEvent<1>, 1>;
+extern template class MANTID_DATAOBJECTS_DLL MDBox<MDEvent<2>, 2>;
+extern template class MANTID_DATAOBJECTS_DLL MDBox<MDEvent<3>, 3>;
+extern template class MANTID_DATAOBJECTS_DLL MDBox<MDEvent<4>, 4>;
+extern template class MANTID_DATAOBJECTS_DLL MDBox<MDEvent<5>, 5>;
+extern template class MANTID_DATAOBJECTS_DLL MDBox<MDEvent<6>, 6>;
+extern template class MANTID_DATAOBJECTS_DLL MDBox<MDEvent<7>, 7>;
+extern template class MANTID_DATAOBJECTS_DLL MDBox<MDEvent<8>, 8>;
+extern template class MANTID_DATAOBJECTS_DLL MDBox<MDEvent<9>, 9>;
+// Extern instantiations for MDEventWorkspace
+extern template class MANTID_DATAOBJECTS_DLL MDEventWorkspace<MDLeanEvent<1>, 1>;
+extern template class MANTID_DATAOBJECTS_DLL MDEventWorkspace<MDLeanEvent<2>, 2>;
+extern template class MANTID_DATAOBJECTS_DLL MDEventWorkspace<MDLeanEvent<3>, 3>;
+extern template class MANTID_DATAOBJECTS_DLL MDEventWorkspace<MDLeanEvent<4>, 4>;
+extern template class MANTID_DATAOBJECTS_DLL MDEventWorkspace<MDLeanEvent<5>, 5>;
+extern template class MANTID_DATAOBJECTS_DLL MDEventWorkspace<MDLeanEvent<6>, 6>;
+extern template class MANTID_DATAOBJECTS_DLL MDEventWorkspace<MDLeanEvent<7>, 7>;
+extern template class MANTID_DATAOBJECTS_DLL MDEventWorkspace<MDLeanEvent<8>, 8>;
+extern template class MANTID_DATAOBJECTS_DLL MDEventWorkspace<MDLeanEvent<9>, 9>;
+extern template class MANTID_DATAOBJECTS_DLL MDEventWorkspace<MDEvent<1>, 1>;
+extern template class MANTID_DATAOBJECTS_DLL MDEventWorkspace<MDEvent<2>, 2>;
+extern template class MANTID_DATAOBJECTS_DLL MDEventWorkspace<MDEvent<3>, 3>;
+extern template class MANTID_DATAOBJECTS_DLL MDEventWorkspace<MDEvent<4>, 4>;
+extern template class MANTID_DATAOBJECTS_DLL MDEventWorkspace<MDEvent<5>, 5>;
+extern template class MANTID_DATAOBJECTS_DLL MDEventWorkspace<MDEvent<6>, 6>;
+extern template class MANTID_DATAOBJECTS_DLL MDEventWorkspace<MDEvent<7>, 7>;
+extern template class MANTID_DATAOBJECTS_DLL MDEventWorkspace<MDEvent<8>, 8>;
+extern template class MANTID_DATAOBJECTS_DLL MDEventWorkspace<MDEvent<9>, 9>;
+// Extern instantiations for MDGridBox
+extern template class MANTID_DATAOBJECTS_DLL MDGridBox<MDLeanEvent<1>, 1>;
+extern template class MANTID_DATAOBJECTS_DLL MDGridBox<MDLeanEvent<2>, 2>;
+extern template class MANTID_DATAOBJECTS_DLL MDGridBox<MDLeanEvent<3>, 3>;
+extern template class MANTID_DATAOBJECTS_DLL MDGridBox<MDLeanEvent<4>, 4>;
+extern template class MANTID_DATAOBJECTS_DLL MDGridBox<MDLeanEvent<5>, 5>;
+extern template class MANTID_DATAOBJECTS_DLL MDGridBox<MDLeanEvent<6>, 6>;
+extern template class MANTID_DATAOBJECTS_DLL MDGridBox<MDLeanEvent<7>, 7>;
+extern template class MANTID_DATAOBJECTS_DLL MDGridBox<MDLeanEvent<8>, 8>;
+extern template class MANTID_DATAOBJECTS_DLL MDGridBox<MDLeanEvent<9>, 9>;
+extern template class MANTID_DATAOBJECTS_DLL MDGridBox<MDEvent<1>, 1>;
+extern template class MANTID_DATAOBJECTS_DLL MDGridBox<MDEvent<2>, 2>;
+extern template class MANTID_DATAOBJECTS_DLL MDGridBox<MDEvent<3>, 3>;
+extern template class MANTID_DATAOBJECTS_DLL MDGridBox<MDEvent<4>, 4>;
+extern template class MANTID_DATAOBJECTS_DLL MDGridBox<MDEvent<5>, 5>;
+extern template class MANTID_DATAOBJECTS_DLL MDGridBox<MDEvent<6>, 6>;
+extern template class MANTID_DATAOBJECTS_DLL MDGridBox<MDEvent<7>, 7>;
+extern template class MANTID_DATAOBJECTS_DLL MDGridBox<MDEvent<8>, 8>;
+extern template class MANTID_DATAOBJECTS_DLL MDGridBox<MDEvent<9>, 9>;
+// Extern instantiations for MDBoxIterator
+extern template class MANTID_DATAOBJECTS_DLL MDBoxIterator<MDLeanEvent<1>, 1>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxIterator<MDLeanEvent<2>, 2>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxIterator<MDLeanEvent<3>, 3>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxIterator<MDLeanEvent<4>, 4>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxIterator<MDLeanEvent<5>, 5>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxIterator<MDLeanEvent<6>, 6>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxIterator<MDLeanEvent<7>, 7>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxIterator<MDLeanEvent<8>, 8>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxIterator<MDLeanEvent<9>, 9>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxIterator<MDEvent<1>, 1>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxIterator<MDEvent<2>, 2>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxIterator<MDEvent<3>, 3>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxIterator<MDEvent<4>, 4>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxIterator<MDEvent<5>, 5>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxIterator<MDEvent<6>, 6>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxIterator<MDEvent<7>, 7>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxIterator<MDEvent<8>, 8>;
+extern template class MANTID_DATAOBJECTS_DLL MDBoxIterator<MDEvent<9>, 9>;
+#endif // MDEVENTFACTORY_PROVIDES_EXPLICIT_INSTANTIATIONS
 
 /** Macro that makes it possible to call a templated method for
  * a MDEventWorkspace using a IMDEventWorkspace_sptr as the input.

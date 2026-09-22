@@ -164,6 +164,7 @@ mpich = ">=4.3.2,<5"
 mpi = "==1.0.1"
 libboost-mpi = "1.88.*"
 mpi4py = ">=4.1.1,<5"
+mold = ">=2.40.4,<3"
 
 [target.win-64.dependencies]
 conda-wrappers = ">=1.1.3,<2"

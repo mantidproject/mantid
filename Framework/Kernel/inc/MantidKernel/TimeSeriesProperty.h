@@ -388,5 +388,20 @@ protected:
   mutable TimeSeriesSortStatus m_propSortedFlag;
 };
 
+// 'extern template' declarations matching the explicit instantiations in TimeSeriesProperty.cpp.
+// Without these, every translation unit that uses a TimeSeriesProperty<TYPE> (e.g. via
+// Run::getTimeSeriesProperty) implicitly re-instantiates it locally -- and this header has a
+// wide fan-out across the codebase.
+#ifndef TIMESERIESPROPERTY_PROVIDES_EXPLICIT_INSTANTIATIONS
+extern template class MANTID_KERNEL_DLL TimeSeriesProperty<int32_t>;
+extern template class MANTID_KERNEL_DLL TimeSeriesProperty<int64_t>;
+extern template class MANTID_KERNEL_DLL TimeSeriesProperty<uint32_t>;
+extern template class MANTID_KERNEL_DLL TimeSeriesProperty<uint64_t>;
+extern template class MANTID_KERNEL_DLL TimeSeriesProperty<float>;
+extern template class MANTID_KERNEL_DLL TimeSeriesProperty<double>;
+extern template class MANTID_KERNEL_DLL TimeSeriesProperty<std::string>;
+extern template class MANTID_KERNEL_DLL TimeSeriesProperty<bool>;
+#endif // TIMESERIESPROPERTY_PROVIDES_EXPLICIT_INSTANTIATIONS
+
 } // namespace Kernel
 } // namespace Mantid

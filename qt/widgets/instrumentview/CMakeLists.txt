@@ -129,6 +129,16 @@ set(INC_FILES
 
 set(UI_FILES inc/MantidQtWidgets/InstrumentView/UCorrectionDialog.ui)
 
+set(PRECOMP_HEADERS
+    <MantidAPI/MatrixWorkspace.h>
+    <QComboBox>
+    <QLabel>
+    <QPushButton>
+    <QString>
+    <QVBoxLayout>
+    <QWidget>
+)
+
 # Target
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsInstrumentView
@@ -138,7 +148,7 @@ mtd_add_qt_library(
   NOMOC ${INC_FILES}
   UI ${UI_FILES}
   RES ../../../images/instrumentview.qrc
-  DEFS IN_MANTIDQT_INSTRUMENTVIEW
+  DEFS IN_MANTIDQT_INSTRUMENTVIEW PRECOMPILED ${PRECOMP_HEADERS}
   INCLUDE_DIRS inc
   LINK_LIBS Mantid::DataObjects
             ${CORE_MANTIDLIBS}

@@ -109,5 +109,19 @@ private:
   mutable bool m_filterApplied;
 };
 
+// 'extern template' declarations matching the explicit instantiations in
+// FilteredTimeSeriesProperty.cpp. Without these, every translation unit that uses a
+// FilteredTimeSeriesProperty<TYPE> implicitly re-instantiates it locally.
+#ifndef FILTEREDTIMESERIESPROPERTY_PROVIDES_EXPLICIT_INSTANTIATIONS
+extern template class MANTID_KERNEL_DLL FilteredTimeSeriesProperty<int32_t>;
+extern template class MANTID_KERNEL_DLL FilteredTimeSeriesProperty<int64_t>;
+extern template class MANTID_KERNEL_DLL FilteredTimeSeriesProperty<uint32_t>;
+extern template class MANTID_KERNEL_DLL FilteredTimeSeriesProperty<uint64_t>;
+extern template class MANTID_KERNEL_DLL FilteredTimeSeriesProperty<float>;
+extern template class MANTID_KERNEL_DLL FilteredTimeSeriesProperty<double>;
+extern template class MANTID_KERNEL_DLL FilteredTimeSeriesProperty<std::string>;
+extern template class MANTID_KERNEL_DLL FilteredTimeSeriesProperty<bool>;
+#endif // FILTEREDTIMESERIESPROPERTY_PROVIDES_EXPLICIT_INSTANTIATIONS
+
 } // namespace Kernel
 } // namespace Mantid
