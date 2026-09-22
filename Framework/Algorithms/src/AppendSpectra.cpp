@@ -4,7 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidAlgorithms/AppendSpectra.h"
+#include <utility>
+
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/NumericAxis.h"
@@ -12,6 +13,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAlgorithms/AppendSpectra.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -24,6 +26,21 @@ using namespace Mantid::Indexing;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+
+namespace {
+std::vector<Mantid::detid_t> getDetectorsSkippingMonitors(const Mantid::Geometry::DetectorInfo &detectorInfo) {
+  const auto &pixelIDs = detectorInfo.detectorIDs();
+  std::vector<Mantid::detid_t> nonMonitorDetectors;
+  nonMonitorDetectors.reserve(pixelIDs.size());
+  // getting only non monitors in
+  for (Mantid::detid_t detIdx = 0; std::cmp_less(detIdx, pixelIDs.size()); detIdx++) {
+    if (!detectorInfo.isMonitor(detIdx)) {
+      nonMonitorDetectors.push_back(pixelIDs.at(detIdx));
+    }
+  }
+  return nonMonitorDetectors;
+}
+} // namespace
 
 namespace Mantid::Algorithms {
 // Register the algorithm into the AlgorithmFactory
@@ -231,8 +248,8 @@ void AppendSpectra::rewriteSpectraMap(const MatrixWorkspace_const_sptr &ws1, con
                                       const MatrixWorkspace_sptr &output) {
   const size_t lenWs1 = ws1->getNumberHistograms();
   const size_t totLength = lenWs1 + ws2->getNumberHistograms();
-  const auto &instrument = output->getInstrument();
-  const auto &pixelIDs = instrument->getDetectorIDs(true); // ids skipping monitors
+  const auto &detectorInfo = output->detectorInfo();
+  const auto &pixelIDs = getDetectorsSkippingMonitors(detectorInfo);
 
   auto &componentInfo = output->mutableComponentInfo();
   const auto &spInfo1 = ws1->spectrumInfo();
@@ -244,10 +261,11 @@ void AppendSpectra::rewriteSpectraMap(const MatrixWorkspace_const_sptr &ws1, con
     }
     const auto pos = i < lenWs1 ? spInfo1.position(i) : spInfo2.position(i - lenWs1);
     const auto detID = pixelIDs.at(detIndex);
-    const auto comp = instrument->getDetector(detID);
+    // should be the same as the component
+    const auto &detIDidx = detectorInfo.indexOf(detID);
     auto &sp = output->getSpectrum(i);
     // Do the move
-    componentInfo.setPosition(componentInfo.indexOf(comp->getComponentID()), pos);
+    componentInfo.setPosition(detIDidx, pos);
     sp.setDetectorID(detID);
     detIndex++;
   }
