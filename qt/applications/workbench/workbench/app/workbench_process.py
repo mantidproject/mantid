@@ -187,6 +187,11 @@ def qapplication():
         # Don't try to use the system GTK palette instead apply the standard theme palette
         if mtd_env.is_linux():
             app.setPalette(app.style().standardPalette())
+        elif mtd_env.is_windows():
+            from qtpy.QtCore import Qt as QtCore_Qt  # Qt.ColorScheme lives here
+
+            if app.styleHints().colorScheme() == QtCore_Qt.ColorScheme.Dark:
+                app.setStyle("Fusion")
         app.setOrganizationName(ORGANIZATION)
         app.setOrganizationDomain(ORG_DOMAIN)
         app.setApplicationName(APPNAME)

@@ -10,7 +10,7 @@ import sys
 import traceback
 
 from qtpy.QtCore import QObject, Qt, Signal
-from qtpy.QtGui import QFont, QFontMetrics, QColor
+from qtpy.QtGui import QFont, QFontMetrics
 from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QWidget
 
 from mantidqt.io import open_a_file_dialog
@@ -284,15 +284,7 @@ class PythonFileInterpreter(QWidget):
         editor.setIndentationsUseTabs(False)
         editor.setTabWidth(TAB_WIDTH)
 
-        # show current editing line but in a softer color
-        if (ConfigService["editors.apply_dark_theme"].lower()) == "true":
-            editor.setCaretForegroundColor(QColor("white"))
-            editor.setCaretLineBackgroundColor(QColor(0, 52, 110))
-        else:
-            editor.setCaretForegroundColor(QColor("black"))
-            editor.setCaretLineBackgroundColor(QColor(247, 236, 248))
-        editor.setCaretLineVisible(True)
-        editor.setCaretWidth(5)
+        self.apply_theme()
 
         # set a margin large enough for sensible file sizes < 1000 lines
         # and the progress marker
@@ -306,6 +298,9 @@ class PythonFileInterpreter(QWidget):
             editor.setFileName(filename)
         # Default content does not count as a modification
         editor.setModified(False)
+
+    def apply_theme(self):
+        self.editor.applyTheme((ConfigService["editors.apply_dark_theme"].lower()) == "true")
 
     def clear_key_binding(self, key_str):
         """Clear a keyboard shortcut bound to a Scintilla command"""

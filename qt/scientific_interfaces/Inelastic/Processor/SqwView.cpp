@@ -11,6 +11,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QDoubleValidator>
@@ -35,8 +36,8 @@ namespace MantidQt::CustomInterfaces {
  */
 SqwView::SqwView(QWidget *parent) : QWidget(parent), m_presenter() {
   m_uiForm.setupUi(parent);
-
-  m_uiForm.rqwPlot2D->setCanvasColour(QColor(240, 240, 240));
+  m_uiForm.rqwPlot2D->setCanvasColour(MantidQt::MantidWidgets::isDarkMode() ? QColor("#1d1d1d")
+                                                                            : QColor(240, 240, 240));
 
   connect(m_uiForm.dsInput, &DataSelector::dataReady, this, &SqwView::notifyDataReady);
   connect(m_uiForm.spQLow, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &SqwView::notifyQLowChanged);

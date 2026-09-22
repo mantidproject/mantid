@@ -111,7 +111,7 @@
       <bool>false</bool>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: rgb(255, 255, 224);</string>
+      <string notr="true">background-color: rgb(255, 255, 224); color: black;</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::Panel</enum>

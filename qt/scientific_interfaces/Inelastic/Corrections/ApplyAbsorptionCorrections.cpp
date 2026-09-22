@@ -11,6 +11,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidQtWidgets/Spectroscopy/DataValidationHelper.h"
@@ -35,6 +36,8 @@ Mantid::Kernel::Logger g_log("ApplyAbsorptionCorrections");
 namespace MantidQt::CustomInterfaces {
 ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent) : CorrectionsTab(parent), m_spectra(0u) {
   m_uiForm.setupUi(parent);
+  m_uiForm.ppPreview->setCanvasColour(MantidQt::MantidWidgets::isDarkMode() ? QColor("#1d1d1d")
+                                                                            : QColor(255, 255, 255));
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
   setOutputPlotOptionsPresenter(m_uiForm.ipoPlotOptions, PlotWidget::SpectraSliceSurface);
 

@@ -7,6 +7,7 @@
 #include "ALCBaselineModellingView.h"
 
 #include "ALCBaselineModellingPresenter.h"
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
 #include <QMenu>
@@ -26,8 +27,13 @@ void ALCBaselineModellingView::initialize() {
   m_ui.setupUi(m_widget);
   connect(m_ui.fit, SIGNAL(clicked()), SLOT(handleFitRequested()));
 
-  m_ui.dataPlot->setCanvasColour(Qt::white);
-  m_ui.correctedPlot->setCanvasColour(Qt::white);
+  if (MantidQt::MantidWidgets::isDarkMode()) {
+    m_ui.dataPlot->setCanvasColour(QColor("#1d1d1d"));
+    m_ui.correctedPlot->setCanvasColour(QColor("#1d1d1d"));
+  } else {
+    m_ui.dataPlot->setCanvasColour(QColor(240, 240, 240));
+    m_ui.correctedPlot->setCanvasColour(QColor(240, 240, 240));
+  }
 
   // Error bars on the plot
   const QStringList dataPlotErrors{"Data"};

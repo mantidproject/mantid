@@ -209,6 +209,7 @@ public:
   void replaceAll(const QString &search, const QString &replace,
                               bool regex, bool caseSensitive, bool matchWords,
                               bool wrap, bool backward);
+  void applyTheme(bool isDarkTheme);
 public slots:
   void updateProgressMarker(int lineno, bool error);
   void zoomTo(int level);
