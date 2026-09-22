@@ -26,7 +26,7 @@ class PoldiInstrumentFilesTest(unittest.TestCase):
         ("2014-09-07 00:00:00", "POLDI_Definition_2014e.xml", "POLDI_Parameters_2014e.xml"),
         ("2014-09-12 00:00:00", "POLDI_Definition_2014d.xml", "POLDI_Parameters_2014d.xml"),
         ("2016-01-01 00:00:00", "POLDI_Definition_2015.xml", "POLDI_Parameters_2015.xml"),
-        ("2026-01-01 00:00:00", "POLDI_Definition_896.xml", "POLDI_Parameters_2015.xml"),
+        ("2026-01-01 00:00:00", "POLDI_Definition_896.xml", "POLDI_Parameters.xml"),
     )
 
     @classmethod
@@ -48,8 +48,8 @@ class PoldiInstrumentFilesTest(unittest.TestCase):
             Filename=InstrumentFileFinder.getInstrumentFilename("POLDI", "2026-01-01 00:00:00"), OutputWorkspace="poldi"
         )
         chopper = ws.getInstrument().getComponentByName("chopper")
-        self.assertAlmostEqual(chopper.getNumberParameter("t0")[0], -0.037752, places=6)
-        self.assertAlmostEqual(chopper.getNumberParameter("t0_const")[0], -10.779, places=3)
+        self.assertAlmostEqual(chopper.getNumberParameter("t0")[0], 5.824e-02, places=6)
+        self.assertAlmostEqual(chopper.getNumberParameter("t0_const")[0], -12.68, places=3)
 
 
 if __name__ == "__main__":
