@@ -227,6 +227,12 @@ Mantid Graphical User Interface Properties
 | ``InstrumentView.FlipBeam``                        |Value of the "Flip Beam" option in the Instrument   | ``Yes``, ``No`` |
 |                                                    |View                                                |                 |
 +----------------------------------------------------+----------------------------------------------------+-----------------+
+| ``InstrumentView.Rotate180``                       |Value of the "Rotate 180" option in the Instrument  | ``Yes``, ``No`` |
+|                                                    |View                                                |                 |
++----------------------------------------------------+----------------------------------------------------+-----------------+
+| ``InstrumentView.UOffset``                         |Value of the "Rotate" option in the Instrument View,| ``0`` - ``360`` |
+|                                                    |in degrees                                          |                 |
++----------------------------------------------------+----------------------------------------------------+-----------------+
 | ``MantidOptions.InvisibleWorkspaces``              |Do not show 'invisible' workspaces                  | ``0``, ``1``    |
 +----------------------------------------------------+----------------------------------------------------+-----------------+
 | ``PeakColumn.hklPrec``                             |Precision of hkl values shown in tables             | ``2``           |

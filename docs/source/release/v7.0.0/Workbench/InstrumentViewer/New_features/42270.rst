@@ -1,0 +1,2 @@
+- In the new Instrument View, add an option to rotate a projection across the screen, similar to the ``U Correction`` option in the old Instrument View.
+- In the new Instrument View, improve the layout of the left-hand pane by arranging the buttons in two columns.

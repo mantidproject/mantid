@@ -90,8 +90,12 @@ class SideBySide(Projection, projection_types={ProjectionType.SIDE_BY_SIDE: {"ax
         self._all_detector_positions = workspace.detectorInfo().allPositions()
         super().__init__(type, **kwargs)
 
-    def _find_and_correct_x_gap(self) -> None:
-        # We don't want any gaps corrected
+    def _find_auto_seam(self) -> None:
+        # The panels are laid out flat, so they are never wrapped
+        return None
+
+    def set_u_offset(self, offset: float) -> None:
+        # The panels are laid out flat, so there is no seam to rotate
         return
 
     def _calculate_axes(self, root_position: np.ndarray) -> None:

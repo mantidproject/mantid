@@ -695,14 +695,14 @@ class TestShapeRenderer(unittest.TestCase):
         projection.project_points.side_effect = lambda points, apply_x_correction=True: np.column_stack(
             [points[:, 0] + 5.0, points[:, 1] - 3.0]
         )
-        projection.u_period = 0
+        projection.u_period = 2 * np.pi
 
         model = self._create_mock_model(workspace, n_pickable=1)
         model.is_2d_projection = True
         model.projection_type = ProjectionType.CYLINDRICAL_Z
         model.active_projection = projection
 
-        projected_centres = np.array([[100.0, 200.0, 0.0]], dtype=np.float64)
+        projected_centres = np.array([[5.0, -3.0, 0.0]], dtype=np.float64)
         mesh = self.renderer.build_detector_mesh(projected_centres, False, model)
 
         self.assertTrue(projection.project_points.called)
@@ -751,7 +751,7 @@ class TestShapeRenderer(unittest.TestCase):
 
         def make_capturing_projection():
             proj = MagicMock()
-            proj.u_period = 0
+            proj.u_period = 2 * np.pi
             calls = []
 
             def record(pts, apply_x_correction=True, _buf=calls):
@@ -793,7 +793,7 @@ class TestShapeRenderer(unittest.TestCase):
 
         def make_capturing_projection():
             proj = MagicMock()
-            proj.u_period = 0
+            proj.u_period = 2 * np.pi
             calls = []
 
             def record(pts, apply_x_correction=True, _buf=calls):

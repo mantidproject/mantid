@@ -24,6 +24,8 @@ class TestALFInstrumentViewPresenter(unittest.TestCase):
         self._mock_view._RENDER_MODE_SHAPES_FAST = "Approximated Shapes (Fast)"
         self._mock_view._RENDER_MODE_RAW_SHAPES = "Raw Shapes (Slowest)"
         self._mock_view.is_hover_pick_mode_checked.return_value = False
+        self._mock_view.u_offset_degrees.return_value = 0
+        self._mock_view.is_rotate_180_checkbox_checked.return_value = False
         self._mock_view.is_select_bank_tube_checked.return_value = True
         self._mock_view.get_contour_limits.return_value = (0.0, 1.0)
         self._mock_view.selected_peaks_workspaces.return_value = []
