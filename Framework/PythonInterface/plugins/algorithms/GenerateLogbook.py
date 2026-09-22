@@ -132,9 +132,9 @@ class GenerateLogbook(PythonAlgorithm):
             raise RuntimeError("There are no files in {} with specified numors.".format(self._data_directory))
         return file_list
 
-    def _get_optional_entries(self, parameters):
+    def _get_optional_entries(self, component_info):
         try:
-            logbook_optional_parameters = parameters.getStringParameter("logbook_optional_parameters")[0]
+            logbook_optional_parameters = component_info.getStringParameter(component_info.root(), "logbook_optional_parameters")[0]
         except IndexError:
             self.log().warning("Optional headers are requested but are not defined for {}.".format(self._instrument))
             return
@@ -210,9 +210,11 @@ class GenerateLogbook(PythonAlgorithm):
         tmp_instr = self._instrument + "_tmp"
         # Load empty instrument to access parameters defining metadata entries to be searched
         LoadEmptyInstrument(Filename=self._instrument + "_Definition.xml", OutputWorkspace=tmp_instr)
-        parameters = mtd[tmp_instr].getInstrument()
+        component_info = mtd[tmp_instr].componentInfo()
         try:
-            logbook_default_parameters = (parameters.getStringParameter("logbook_default_parameters")[0]).split(",")
+            logbook_default_parameters = (component_info.getStringParameter(component_info.root(), "logbook_default_parameters")[0]).split(
+                ","
+            )
             for parameter in logbook_default_parameters:
                 parameter = parameter.split(":")
                 if len(parameter) < 3:
@@ -225,7 +227,7 @@ class GenerateLogbook(PythonAlgorithm):
         default_entries = list(self._metadata_entries)
 
         if not self.getProperty("OptionalHeaders").isDefault:
-            self._get_optional_entries(parameters)
+            self._get_optional_entries(component_info)
 
         if not self.getProperty("CustomEntries").isDefault:
             logbook_custom_headers = self._get_custom_entries()

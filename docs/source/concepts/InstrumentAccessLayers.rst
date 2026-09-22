@@ -75,8 +75,8 @@ so ``IkedaCarpenterPV:Alpha0`` and ``IkedaCarpenterMD:Alpha0`` coexist on one co
 Ordinary parameters are deduplicated by name alone,
 and adding one replaces any existing parameter of that name.
 
-Named parameters are not currently exposed to Python through ``ComponentInfo``;
-Python code still reaches them through the legacy component API.
+The parameter accessors on ``ComponentInfo`` are available from Python as well as C++,
+so Python code reaches named parameters through the access layer rather than the legacy component API.
 
 Changes for Rollout
 -------------------
@@ -220,8 +220,9 @@ so migrating a call site is close to a rename once the index is in hand.
 * ``getIntParameter(componentIndex, name, recursive)``
 * ``getBoolParameter(componentIndex, name, recursive)``
 * ``getStringParameter(componentIndex, name, recursive)``
+* ``getParameterType(componentIndex, name, recursive)`` - the stored type, or an empty string if unset
 * ``getFittingParameter(componentIndex, name, xvalue)``
-* ``parameters(componentIndex)`` - every parameter on one component, non-recursive, ordered by name
+* ``parameters(componentIndex)`` - every parameter on one component, non-recursive, ordered by name (C++ only)
 
 **Before refactoring**
 
@@ -260,6 +261,29 @@ and replaces the corresponding ``ParameterMap::addDouble()`` and friends.
 
   auto &componentInfo = ws->mutableComponentInfo();
   componentInfo.addDouble(bankIndex, "x-pixel-size", 0.005);
+
+The same accessors are available from Python, with the same names, argument order and defaults.
+``ComponentInfo.root()`` gives the index of the instrument itself, which is where the parameters that
+the legacy code read straight off ``ws.getInstrument()`` live.
+``ComponentInfo.invalidIndex`` is the sentinel returned by ``indexOfFullName()`` for an unknown name,
+and ``indexOfAny()`` raises a ``ValueError`` rather than returning ``None`` as
+``Instrument.getComponentByName()`` did.
+
+**Before refactoring**
+
+.. code-block:: python
+
+  instrument = ws.getInstrument()
+  pixel_sizes = instrument.getComponentByName("bank1").getNumberParameter("x-pixel-size")
+  monitor_spectrum = instrument.getNumberParameter("default-incident-monitor-spectrum")[0]
+
+**After**
+
+.. code-block:: python
+
+  component_info = ws.componentInfo()
+  pixel_sizes = component_info.getNumberParameter(component_info.indexOfAny("bank1"), "x-pixel-size")
+  monitor_spectrum = component_info.getNumberParameter(component_info.root(), "default-incident-monitor-spectrum")[0]
 
 Useful Tips
 ___________

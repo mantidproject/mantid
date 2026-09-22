@@ -230,8 +230,10 @@ class VesuvioTests(unittest.TestCase):
 
         # Check some data
         evs_raw = mtd[self.ws_name]
-        det0 = evs_raw.getDetector(0)
-        param = det0.getNumberParameter("t0")
+        component_info = evs_raw.componentInfo()
+        # A detector's component index is equal to its detector index
+        detector_index = evs_raw.detectorInfo().indexOf(evs_raw.getSpectrum(0).getDetectorIDs()[0])
+        param = component_info.getNumberParameter(detector_index, "t0")
         self.assertEqual(1, len(param))
         self.assertAlmostEqual(-0.4157, param[0], places=4)
 
@@ -307,21 +309,25 @@ class VesuvioTests(unittest.TestCase):
             self.assertEqual(expected_id, det_id)
 
     def _verify_correct_parameters_loaded(self, workspace, forward_scatter, diff_mode):
+        component_info = workspace.componentInfo()
+        detector_info = workspace.detectorInfo()
         nhist = workspace.getNumberHistograms()
         for i in range(nhist):
-            self._verify_correct_detector_parameters(workspace.getDetector(i), forward_scatter, diff_mode)
+            # A detector's component index is equal to its detector index
+            detector_index = detector_info.indexOf(workspace.getSpectrum(i).getDetectorIDs()[0])
+            self._verify_correct_detector_parameters(component_info, detector_index, forward_scatter, diff_mode)
 
-    def _verify_correct_detector_parameters(self, detector, forward_scatter, diff_mode):
+    def _verify_correct_detector_parameters(self, component_info, detector_index, forward_scatter, diff_mode):
         # resolution
         tol = 1e-04
         # using decimal 'places' keyword, as delta= is not supported on Python < 2.7
         tol_places = round(-math.log10(tol), ndigits=0)
-        sigma_l1 = detector.getNumberParameter("sigma_l1")[0]
-        sigma_l2 = detector.getNumberParameter("sigma_l2")[0]
-        sigma_tof = detector.getNumberParameter("sigma_tof")[0]
-        sigma_theta = detector.getNumberParameter("sigma_theta")[0]
-        sigma_gauss = detector.getNumberParameter("sigma_gauss")[0]
-        hwhm_lorentz = detector.getNumberParameter("hwhm_lorentz")[0]
+        sigma_l1 = component_info.getNumberParameter(detector_index, "sigma_l1")[0]
+        sigma_l2 = component_info.getNumberParameter(detector_index, "sigma_l2")[0]
+        sigma_tof = component_info.getNumberParameter(detector_index, "sigma_tof")[0]
+        sigma_theta = component_info.getNumberParameter(detector_index, "sigma_theta")[0]
+        sigma_gauss = component_info.getNumberParameter(detector_index, "sigma_gauss")[0]
+        hwhm_lorentz = component_info.getNumberParameter(detector_index, "hwhm_lorentz")[0]
         self.assertAlmostEqual(sigma_l1, 0.021, places=tol_places)
         self.assertAlmostEqual(sigma_l2, 0.023, places=tol_places)
         self.assertAlmostEqual(sigma_tof, 0.370, places=tol_places)

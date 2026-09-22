@@ -433,15 +433,16 @@ class SANSILLReduction(DataProcessorAlgorithm):
 
     def apply_dead_time(self, ws):
         """Performs the dead time correction"""
-        instrument = mtd[ws].getInstrument()
-        if instrument.hasParameter("tau"):
-            tau = instrument.getNumberParameter("tau")[0]
+        component_info = mtd[ws].componentInfo()
+        root = component_info.root()
+        if component_info.hasParameter(root, "tau"):
+            tau = component_info.getNumberParameter(root, "tau")[0]
             if self.instrument == "D33" or self.instrument == "D11B":
                 grouping_filename = self.instrument + "_Grouping.xml"
                 grouping_file = os.path.join(config["groupingFiles.directory"], grouping_filename)
                 DeadTimeCorrection(InputWorkspace=ws, Tau=tau, MapFile=grouping_file, OutputWorkspace=ws)
-            elif instrument.hasParameter("grouping"):
-                pattern = instrument.getStringParameter("grouping")[0]
+            elif component_info.hasParameter(root, "grouping"):
+                pattern = component_info.getStringParameter(root, "grouping")[0]
                 DeadTimeCorrection(InputWorkspace=ws, Tau=tau, GroupingPattern=pattern, OutputWorkspace=ws)
             else:
                 self.log().warning("No grouping available in IPF, dead time correction will be performed detector-wise.")
@@ -481,11 +482,11 @@ class SANSILLReduction(DataProcessorAlgorithm):
 
     def apply_multipanel_beam_center_corr(self, ws, beam_x, beam_y):
         """Applies the beam center correction on multipanel detectors"""
-        instrument = mtd[ws].getInstrument()
+        component_info = mtd[ws].componentInfo()
+        root = component_info.root()
         l2_main = mtd[ws].getRun()["L2"].value
-        if instrument.hasParameter("detector_panels"):
-            panel_names = instrument.getStringParameter("detector_panels")[0].split(",")
-            component_info = mtd[ws].componentInfo()
+        if component_info.hasParameter(root, "detector_panels"):
+            panel_names = component_info.getStringParameter(root, "detector_panels")[0].split(",")
             for panel in panel_names:
                 l2_panel = component_info.position(component_info.indexOfAny(panel))[2]
                 MoveInstrumentComponent(Workspace=ws, X=-beam_x * l2_panel / l2_main, Y=-beam_y * l2_panel / l2_main, ComponentName=panel)
@@ -681,8 +682,10 @@ class SANSILLReduction(DataProcessorAlgorithm):
             # The tilt angle must be subtracted from 2thetas before putting them into the parallax correction formula
             # TODO: note that in cycle 211, the front detector was Detector 1, so we should rather get it from IPF
             offsets.append(mtd[ws].getRun()["Detector 2.dan2_actual"].value)
-        if mtd[ws].getInstrument().hasParameter("detector_panels"):
-            components = mtd[ws].getInstrument().getStringParameter("detector_panels")[0].split(",")
+        component_info = mtd[ws].componentInfo()
+        root = component_info.root()
+        if component_info.hasParameter(root, "detector_panels"):
+            components = component_info.getStringParameter(root, "detector_panels")[0].split(",")
         if self.instrument in ["D11B", "D22", "D22lr", "D22B", "D33"]:
             ParallaxCorrection(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames=components, AngleOffsets=offsets)
 
@@ -914,10 +917,11 @@ class SANSILLReduction(DataProcessorAlgorithm):
             if float(att_value) < 10.0 and self.instrument == "D33":
                 # for D33, it's not always the attenuation value, it could be the index of the attenuator
                 # if it is <10, we consider it's the index and take the corresponding value from the IPF
-                instrument = mtd[ws].getInstrument()
+                component_info = mtd[ws].componentInfo()
+                root = component_info.root()
                 param = "att" + str(int(att_value))
-                if instrument.hasParameter(param):
-                    att_coeff = instrument.getNumberParameter(param)[0]
+                if component_info.hasParameter(root, param):
+                    att_coeff = component_info.getNumberParameter(root, param)[0]
                 else:
                     raise RuntimeError(f"Unable to find the attenuation coefficient for D33 attenuator #{att_value}")
             else:

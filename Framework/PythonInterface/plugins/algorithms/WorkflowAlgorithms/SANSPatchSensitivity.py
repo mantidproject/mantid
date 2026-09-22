@@ -70,10 +70,11 @@ class SANSPatchSensitivity(PythonAlgorithm):
         Either from the field or from the IDF parameters
         """
         instrument = workspace.getInstrument()
+        component_info = workspace.componentInfo()
 
         # Get the default from the parameters file
         if component_name is None or component_name == "":
-            component_name = instrument.getStringParameter("detector-name")[0]
+            component_name = component_info.getStringParameter(component_info.root(), "detector-name")[0]
         try:
             component = instrument.getComponentByName(component_name)
         except:

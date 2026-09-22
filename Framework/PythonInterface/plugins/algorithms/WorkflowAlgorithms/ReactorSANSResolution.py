@@ -69,7 +69,8 @@ class ReactorSANSResolution(PythonAlgorithm):
         if input_ws.getRun().hasProperty("sample_detector_distance"):
             sample_detector_distance = input_ws.getRun().getProperty("sample_detector_distance").value
 
-        pixel_size_x = input_ws.getInstrument().getNumberParameter("x-pixel-size")[0]
+        component_info = input_ws.componentInfo()
+        pixel_size_x = component_info.getNumberParameter(component_info.root(), "x-pixel-size")[0]
 
         if (
             wvl is not None

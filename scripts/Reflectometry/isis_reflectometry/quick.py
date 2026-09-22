@@ -520,19 +520,20 @@ def get_defaults(run_ws, polcorr=False):
     """
     defaults = dict()
     if isinstance(run_ws, WorkspaceGroup):
-        instrument = run_ws[0].getInstrument()
+        component_info = run_ws[0].componentInfo()
     else:
-        instrument = run_ws.getInstrument()
-    defaults["LambdaMin"] = float(instrument.getNumberParameter("LambdaMin")[0])
-    defaults["LambdaMax"] = float(instrument.getNumberParameter("LambdaMax")[0])
-    defaults["MonitorBackgroundMin"] = float(instrument.getNumberParameter("MonitorBackgroundMin")[0])
-    defaults["MonitorBackgroundMax"] = float(instrument.getNumberParameter("MonitorBackgroundMax")[0])
-    defaults["MonitorIntegralMin"] = float(instrument.getNumberParameter("MonitorIntegralMin")[0])
-    defaults["MonitorIntegralMax"] = float(instrument.getNumberParameter("MonitorIntegralMax")[0])
-    defaults["PointDetectorStart"] = int(instrument.getNumberParameter("PointDetectorStart")[0])
-    defaults["PointDetectorStop"] = int(instrument.getNumberParameter("PointDetectorStop")[0])
-    defaults["MultiDetectorStart"] = int(instrument.getNumberParameter("MultiDetectorStart")[0])
-    defaults["I0MonitorIndex"] = int(instrument.getNumberParameter("I0MonitorIndex")[0])
+        component_info = run_ws.componentInfo()
+    root = component_info.root()
+    defaults["LambdaMin"] = float(component_info.getNumberParameter(root, "LambdaMin")[0])
+    defaults["LambdaMax"] = float(component_info.getNumberParameter(root, "LambdaMax")[0])
+    defaults["MonitorBackgroundMin"] = float(component_info.getNumberParameter(root, "MonitorBackgroundMin")[0])
+    defaults["MonitorBackgroundMax"] = float(component_info.getNumberParameter(root, "MonitorBackgroundMax")[0])
+    defaults["MonitorIntegralMin"] = float(component_info.getNumberParameter(root, "MonitorIntegralMin")[0])
+    defaults["MonitorIntegralMax"] = float(component_info.getNumberParameter(root, "MonitorIntegralMax")[0])
+    defaults["PointDetectorStart"] = int(component_info.getNumberParameter(root, "PointDetectorStart")[0])
+    defaults["PointDetectorStop"] = int(component_info.getNumberParameter(root, "PointDetectorStop")[0])
+    defaults["MultiDetectorStart"] = int(component_info.getNumberParameter(root, "MultiDetectorStart")[0])
+    defaults["I0MonitorIndex"] = int(component_info.getNumberParameter(root, "I0MonitorIndex")[0])
     if polcorr and (polcorr != PolarisationCorrection.NONE):
 
         def str_to_float_list(_str):
@@ -540,19 +541,19 @@ def get_defaults(run_ws, polcorr=False):
             float_list = list(map(float, str_list))
             return float_list
 
-        defaults["crho"] = str_to_float_list(instrument.getStringParameter("crho")[0])
-        defaults["calpha"] = str_to_float_list(instrument.getStringParameter("calpha")[0])
-        defaults["cAp"] = str_to_float_list(instrument.getStringParameter("cAp")[0])
-        defaults["cPp"] = str_to_float_list(instrument.getStringParameter("cPp")[0])
+        defaults["crho"] = str_to_float_list(component_info.getStringParameter(root, "crho")[0])
+        defaults["calpha"] = str_to_float_list(component_info.getStringParameter(root, "calpha")[0])
+        defaults["cAp"] = str_to_float_list(component_info.getStringParameter(root, "cAp")[0])
+        defaults["cPp"] = str_to_float_list(component_info.getStringParameter(root, "cPp")[0])
 
     correction = NullCorrectionStrategy()
-    corrType = instrument.getStringParameter("correction")[0]
+    corrType = component_info.getStringParameter(root, "correction")[0]
     if corrType == "polynomial":
-        poly_string = instrument.getStringParameter("polystring")[0]
+        poly_string = component_info.getStringParameter(root, "polystring")[0]
         correction = PolynomialCorrectionStrategy(poly_string)
     elif corrType == "exponential":
-        c0 = instrument.getNumberParameter("C0")[0]
-        c1 = instrument.getNumberParameter("C1")[0]
+        c0 = component_info.getNumberParameter(root, "C0")[0]
+        c1 = component_info.getNumberParameter(root, "C1")[0]
         correction = ExponentialCorrectionStrategy(c0, c1)
 
     defaults["AlgoritmicCorrection"] = correction

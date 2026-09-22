@@ -207,9 +207,10 @@ def AutoReduce(transRun=[], runRange=[], oldList=[]):
                     wq = mtd[runno + "_IvsQ"]
                     th = angle
                 wq_list.append(runno + "_IvsQ")
-                inst = wq.getInstrument()
-                lmin = inst.getNumberParameter("LambdaMin")[0] + 1
-                lmax = inst.getNumberParameter("LambdaMax")[0] - 2
+                component_info = wq.componentInfo()
+                root = component_info.root()
+                lmin = component_info.getNumberParameter(root, "LambdaMin")[0] + 1
+                lmax = component_info.getNumberParameter(root, "LambdaMax")[0] - 2
                 qmin = 4 * math.pi / lmax * math.sin(th * math.pi / 180)
                 qmax = 4 * math.pi / lmin * math.sin(th * math.pi / 180)
                 overlapLow.append(qmin)

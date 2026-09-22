@@ -72,16 +72,18 @@ class TestParameterMapModifications(unittest.TestCase):
 
         # Assert
         ws2 = mtd[ws_name2]
-        self.assertTrue(ws2.getInstrument().hasParameter("val1"))
-        self.assertTrue(ws2.getInstrument().hasParameter("val2"))
-        self.assertTrue(ws2.getInstrument().hasParameter("val3"))
-        self.assertTrue(ws2.getInstrument().hasParameter("val4"))
+        component_info = ws2.componentInfo()
+        root = component_info.root()
+        self.assertTrue(component_info.hasParameter(root, "val1"))
+        self.assertTrue(component_info.hasParameter(root, "val2"))
+        self.assertTrue(component_info.hasParameter(root, "val3"))
+        self.assertTrue(component_info.hasParameter(root, "val4"))
 
-        self.assertEqual(len(ws2.getInstrument().getNumberParameter("val1")), 1)
-        self.assertEqual(ws2.getInstrument().getNumberParameter("val1")[0], 2.4)
+        self.assertEqual(len(component_info.getNumberParameter(root, "val1")), 1)
+        self.assertEqual(component_info.getNumberParameter(root, "val1")[0], 2.4)
 
-        self.assertEqual(len(ws2.getInstrument().getIntParameter("val3")), 1)
-        self.assertEqual(ws2.getInstrument().getIntParameter("val3")[0], 200)
+        self.assertEqual(len(component_info.getIntParameter(root, "val3")), 1)
+        self.assertEqual(component_info.getIntParameter(root, "val3")[0], 200)
 
         # Clean up
         DeleteWorkspace(ws_name1)

@@ -689,16 +689,20 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         """
         Returns the efixed value relating to the specified workspace
         """
-        inst = self._input_ws.getInstrument()
+        component_info = self._input_ws.componentInfo()
+        root = component_info.root()
 
-        if inst.hasParameter("Efixed"):
-            return inst.getNumberParameter("Efixed")[0]
+        if component_info.hasParameter(root, "Efixed"):
+            return component_info.getNumberParameter(root, "Efixed")[0]
 
-        if inst.hasParameter("analyser"):
-            analyser_comp = inst.getComponentByName(inst.getStringParameter("analyser")[0])
+        if component_info.hasParameter(root, "analyser"):
+            try:
+                analyser = component_info.indexOfAny(component_info.getStringParameter(root, "analyser")[0])
+            except ValueError:
+                analyser = None
 
-            if analyser_comp is not None and analyser_comp.hasParameter("Efixed"):
-                return analyser_comp.getNumberParameter("EFixed")[0]
+            if analyser is not None and component_info.hasParameter(analyser, "Efixed"):
+                return component_info.getNumberParameter(analyser, "EFixed")[0]
 
         # Direct instruments don't use the Efixed instrument parameter
         # The GetEi algorithm calculates and saves the Ei value to this sample log

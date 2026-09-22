@@ -872,7 +872,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         run = mtd[ws][0].run() if is_group else mtd[ws].run()
         try:
             wksp = mtd[ws][0] if is_group else mtd[ws]
-            log_list = wksp.getInstrument().getStringParameter("reduction_logs_to_save")[0]
+            component_info = wksp.componentInfo()
+            log_list = component_info.getStringParameter(component_info.root(), "reduction_logs_to_save")[0]
         except IndexError:
             self.log().warning("A list of reduction logs to save not specified, cannot save them.")
             return

@@ -28,9 +28,11 @@ def parseConstraints(peaks_ws):
     """
     possibleKeys = ["iccA", "iccB", "iccR", "iccT0", "iccScale0", "iccHatWidth", "iccKConv"]
     d = {}
+    component_info = peaks_ws.componentInfo()
+    root = component_info.root()
     for paramName in possibleKeys:
-        if peaks_ws.getInstrument().hasParameter(paramName):
-            vals = np.array(peaks_ws.getInstrument().getStringParameter(paramName)[0].split(), dtype=float)
+        if component_info.hasParameter(root, paramName):
+            vals = np.array(component_info.getStringParameter(root, paramName)[0].split(), dtype=float)
             d[paramName] = vals
     return d
 

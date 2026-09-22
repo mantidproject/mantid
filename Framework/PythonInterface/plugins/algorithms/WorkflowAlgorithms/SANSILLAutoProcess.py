@@ -791,11 +791,10 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         distance = None
         try:
-            instrument = mtd[ws].getInstrument()
-            components = instrument.getStringParameter("detector_panels")
+            component_info = mtd[ws].componentInfo()
+            components = component_info.getStringParameter(component_info.root(), "detector_panels")
             if components:
                 components = components[0].split(",")
-                component_info = mtd[ws].componentInfo()
                 for c in components:
                     if c in ws:
                         distance = component_info.position(component_info.indexOfAny(c))[2]

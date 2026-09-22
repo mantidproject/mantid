@@ -67,8 +67,10 @@ class MRGetTheta(PythonAlgorithm):
                 ref_pix = direct_beam_pix
 
             # Get pixel size from instrument properties
-            if _w.getInstrument().hasParameter("pixel-width"):
-                pixel_width = float(_w.getInstrument().getNumberParameter("pixel-width")[0]) / 1000.0
+            component_info = _w.componentInfo()
+            root = component_info.root()
+            if component_info.hasParameter(root, "pixel-width"):
+                pixel_width = float(component_info.getNumberParameter(root, "pixel-width")[0]) / 1000.0
             else:
                 mantid.simpleapi.logger.warning("Not pixel width found in instrument, assuming 0.7 mm.")
                 pixel_width = 0.0007

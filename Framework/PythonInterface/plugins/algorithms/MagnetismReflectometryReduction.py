@@ -271,8 +271,10 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
 
         # Sanity check, and retrieve some info while we're at it.
         if ws_list:
-            self.number_of_pixels_x = int(ws_list[0].getInstrument().getNumberParameter("number-of-x-pixels")[0])
-            self.number_of_pixels_y = int(ws_list[0].getInstrument().getNumberParameter("number-of-y-pixels")[0])
+            component_info = ws_list[0].componentInfo()
+            root = component_info.root()
+            self.number_of_pixels_x = int(component_info.getNumberParameter(root, "number-of-x-pixels")[0])
+            self.number_of_pixels_y = int(component_info.getNumberParameter(root, "number-of-y-pixels")[0])
         else:
             raise RuntimeError("No input data was specified")
         return ws_list
@@ -358,7 +360,8 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         x_pixel_map = np.mgrid[peak[0] : peak[1] + 1, 0 : len(wl_values)]
         x_pixel_map = x_pixel_map[0, :, :]
 
-        pixel_width = float(workspace.getInstrument().getNumberParameter("pixel-width")[0]) / 1000.0
+        component_info = workspace.componentInfo()
+        pixel_width = float(component_info.getNumberParameter(component_info.root(), "pixel-width")[0]) / 1000.0
         det_distance = workspace.getRun()["SampleDetDis"].getStatistics().mean
         # Check units
         if workspace.getRun()["SampleDetDis"].units not in ["m", "meter"]:

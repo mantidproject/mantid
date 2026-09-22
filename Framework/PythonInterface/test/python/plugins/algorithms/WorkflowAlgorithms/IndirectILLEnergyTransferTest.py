@@ -50,8 +50,8 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         ipf = os.path.join(config["instrumentDefinition.directory"], "IN16B_Parameters.xml")
         ws = LoadEmptyInstrument(Filename=idf)
         LoadParameterFile(ws, Filename=ipf)
-        instrument = ws.getInstrument()
-        grouping_filename = instrument.getStringParameter("Workflow.GroupingFile")[0]
+        component_info = ws.componentInfo()
+        grouping_filename = component_info.getStringParameter(component_info.root(), "Workflow.GroupingFile")[0]
         DeleteWorkspace(ws)
 
         args = {

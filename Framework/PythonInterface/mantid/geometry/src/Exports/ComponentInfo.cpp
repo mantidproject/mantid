@@ -12,6 +12,7 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
 #include "MantidPythonInterface/geometry/ComponentInfoPythonIterator.h"
@@ -20,8 +21,10 @@
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/dict.hpp>
 #include <boost/python/enum.hpp>
+#include <boost/python/overloads.hpp>
 #include <boost/python/reference_existing_object.hpp>
 #include <boost/python/return_value_policy.hpp>
+#include <boost/python/scope.hpp>
 
 using Mantid::Beamline::ComponentType;
 using Mantid::Beamline::PixelGridComponent;
@@ -59,6 +62,79 @@ std::string pixelGridIdFillOrder(ComponentInfo const &self, size_t const compone
   auto const order = self.pixelGridComponent(componentIndex).idFillOrder;
   return std::string(order.begin(), order.end());
 }
+
+// The C++ add*() methods take the description as an optional pointer. Python passes a
+// string, with the empty default standing in for "no description", since a parameter
+// description is only ever set to something non-empty.
+const std::string *descriptionOrNull(const std::string &description) {
+  return description.empty() ? nullptr : &description;
+}
+
+void addParameter(ComponentInfo &self, const size_t componentIndex, const std::string &type, const std::string &name,
+                  const std::string &value, const std::string &description = "", const std::string &visible = "true") {
+  self.addParameter(componentIndex, type, name, value, descriptionOrNull(description), visible);
+}
+
+void addDouble(ComponentInfo &self, const size_t componentIndex, const std::string &name, double value,
+               const std::string &description = "", const std::string &visible = "true") {
+  self.addDouble(componentIndex, name, value, descriptionOrNull(description), visible);
+}
+
+void addInt(ComponentInfo &self, const size_t componentIndex, const std::string &name, int value,
+            const std::string &description = "", const std::string &visible = "true") {
+  self.addInt(componentIndex, name, value, descriptionOrNull(description), visible);
+}
+
+void addBool(ComponentInfo &self, const size_t componentIndex, const std::string &name, bool value,
+             const std::string &description = "", const std::string &visible = "true") {
+  self.addBool(componentIndex, name, value, descriptionOrNull(description), visible);
+}
+
+void addString(ComponentInfo &self, const size_t componentIndex, const std::string &name, const std::string &value,
+               const std::string &description = "", const std::string &visible = "true") {
+  self.addString(componentIndex, name, value, descriptionOrNull(description), visible);
+}
+
+void addV3D(ComponentInfo &self, const size_t componentIndex, const std::string &name, const V3D &value,
+            const std::string &description = "") {
+  self.addV3D(componentIndex, name, value, descriptionOrNull(description));
+}
+
+void addQuat(ComponentInfo &self, const size_t componentIndex, const std::string &name, const Quat &value,
+             const std::string &description = "") {
+  self.addQuat(componentIndex, name, value, descriptionOrNull(description));
+}
+
+void addFittingParameter(ComponentInfo &self, const size_t componentIndex, const std::string &name,
+                         const std::string &fittingFunction, const std::string &value,
+                         const std::string &description = "", const std::string &visible = "true") {
+  self.addFittingParameter(componentIndex, name, fittingFunction, value, descriptionOrNull(description), visible);
+}
+
+GNU_DIAG_OFF("unused-local-typedef")
+// Ignore -Wconversion warnings coming from boost::python
+GNU_DIAG_OFF("conversion")
+
+// Default arguments for the parameter accessors
+// cppcheck-suppress unknownMacro
+BOOST_PYTHON_FUNCTION_OVERLOADS(addParameterOverloads, addParameter, 5, 7)
+BOOST_PYTHON_FUNCTION_OVERLOADS(addDoubleOverloads, addDouble, 4, 6)
+BOOST_PYTHON_FUNCTION_OVERLOADS(addIntOverloads, addInt, 4, 6)
+BOOST_PYTHON_FUNCTION_OVERLOADS(addBoolOverloads, addBool, 4, 6)
+BOOST_PYTHON_FUNCTION_OVERLOADS(addStringOverloads, addString, 4, 6)
+BOOST_PYTHON_FUNCTION_OVERLOADS(addV3DOverloads, addV3D, 4, 5)
+BOOST_PYTHON_FUNCTION_OVERLOADS(addQuatOverloads, addQuat, 4, 5)
+BOOST_PYTHON_FUNCTION_OVERLOADS(addFittingParameterOverloads, addFittingParameter, 5, 7)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(hasParameterOverloads, ComponentInfo::hasParameter, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getParameterNamesOverloads, ComponentInfo::getParameterNames, 1, 2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getNumberParameterOverloads, ComponentInfo::getNumberParameter, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getIntParameterOverloads, ComponentInfo::getIntParameter, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getBoolParameterOverloads, ComponentInfo::getBoolParameter, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getStringParameterOverloads, ComponentInfo::getStringParameter, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getParameterTypeOverloads, ComponentInfo::getParameterType, 2, 3)
+
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 
 dict shapeToComponentIndices(const ComponentInfo &componentInfo) {
   dict result;
@@ -291,5 +367,107 @@ void export_ComponentInfo() {
       .def("getMemorySize", &ComponentInfo::getMemorySize, arg("self"),
            "Return the memory footprint of the component info in bytes.")
       .def("shapeToComponentIndices", &shapeToComponentIndices, arg("self"),
-           "Returns a mapping of shapes to the indices of components with that shape.");
+           "Returns a mapping of shapes to the indices of components with that shape.")
+
+      .def("fullName", &ComponentInfo::fullName, (arg("self"), arg("index")),
+           "Returns the fully-qualified name of the component identified by 'index', "
+           "e.g. 'instrument/bank1/pixel3'.")
+
+      .def("indexOfFullName", &ComponentInfo::indexOfFullName, (arg("self"), arg("fullName")),
+           "Returns the index of the component with this fully-qualified name, or "
+           "ComponentInfo.invalidIndex if there is none.")
+
+      // Named parameters. The read accessors mirror the legacy component API, including the
+      // 'empty sequence if absent' convention and the 'recursive' flag, so that migrating a
+      // call site is a rename once the component index is in hand.
+      .def("hasParameter", &ComponentInfo::hasParameter,
+           hasParameterOverloads((arg("self"), arg("index"), arg("name"), arg("recursive") = true),
+                                 "Returns True if the component identified by 'index' has a parameter "
+                                 "of this name."))
+
+      .def("getParameterNames", &ComponentInfo::getParameterNames,
+           getParameterNamesOverloads((arg("self"), arg("index"), arg("recursive") = true),
+                                      "Returns the names of the parameters on the component identified by "
+                                      "'index'."))
+
+      .def("getNumberParameter", &ComponentInfo::getNumberParameter,
+           getNumberParameterOverloads((arg("self"), arg("index"), arg("name"), arg("recursive") = true),
+                                       "Returns the named double parameter of the component identified by "
+                                       "'index', or an empty sequence if it is unset."))
+
+      .def("getIntParameter", &ComponentInfo::getIntParameter,
+           getIntParameterOverloads((arg("self"), arg("index"), arg("name"), arg("recursive") = true),
+                                    "Returns the named integer parameter of the component identified by "
+                                    "'index', or an empty sequence if it is unset."))
+
+      .def("getBoolParameter", &ComponentInfo::getBoolParameter,
+           getBoolParameterOverloads((arg("self"), arg("index"), arg("name"), arg("recursive") = true),
+                                     "Returns the named boolean parameter of the component identified by "
+                                     "'index', or an empty sequence if it is unset."))
+
+      .def("getStringParameter", &ComponentInfo::getStringParameter,
+           getStringParameterOverloads((arg("self"), arg("index"), arg("name"), arg("recursive") = true),
+                                       "Returns the named string parameter of the component identified by "
+                                       "'index', or an empty sequence if it is unset."))
+
+      .def("getParameterType", &ComponentInfo::getParameterType,
+           getParameterTypeOverloads((arg("self"), arg("index"), arg("name"), arg("recursive") = true),
+                                     "Returns the type of the named parameter of the component identified "
+                                     "by 'index', or an empty string if it is unset."))
+
+      .def("getFittingParameter", &ComponentInfo::getFittingParameter,
+           (arg("self"), arg("index"), arg("name"), arg("xvalue")),
+           "Returns the named fitting parameter of the component identified by 'index', "
+           "evaluated at 'xvalue' from its look-up table or formula.")
+
+      .def("addParameter", &addParameter,
+           addParameterOverloads((arg("self"), arg("index"), arg("type"), arg("name"), arg("value"),
+                                  arg("description") = "", arg("visible") = "true"),
+                                 "Adds or replaces the named parameter of this type, given its value as a "
+                                 "string, on the component identified by 'index'."))
+
+      .def("addDouble", &addDouble,
+           addDoubleOverloads(
+               (arg("self"), arg("index"), arg("name"), arg("value"), arg("description") = "", arg("visible") = "true"),
+               "Adds or replaces a named double parameter on the component identified by "
+               "'index'."))
+
+      .def("addInt", &addInt,
+           addIntOverloads(
+               (arg("self"), arg("index"), arg("name"), arg("value"), arg("description") = "", arg("visible") = "true"),
+               "Adds or replaces a named integer parameter on the component identified by "
+               "'index'."))
+
+      .def("addBool", &addBool,
+           addBoolOverloads(
+               (arg("self"), arg("index"), arg("name"), arg("value"), arg("description") = "", arg("visible") = "true"),
+               "Adds or replaces a named boolean parameter on the component identified by "
+               "'index'."))
+
+      .def("addString", &addString,
+           addStringOverloads(
+               (arg("self"), arg("index"), arg("name"), arg("value"), arg("description") = "", arg("visible") = "true"),
+               "Adds or replaces a named string parameter on the component identified by "
+               "'index'."))
+
+      .def("addV3D", &addV3D,
+           addV3DOverloads((arg("self"), arg("index"), arg("name"), arg("value"), arg("description") = ""),
+                           "Adds or replaces a named V3D parameter on the component identified by 'index'."))
+
+      .def("addQuat", &addQuat,
+           addQuatOverloads((arg("self"), arg("index"), arg("name"), arg("value"), arg("description") = ""),
+                            "Adds or replaces a named Quat parameter on the component identified by "
+                            "'index'."))
+
+      .def("addFittingParameter", &addFittingParameter,
+           addFittingParameterOverloads((arg("self"), arg("index"), arg("name"), arg("fittingFunction"), arg("value"),
+                                         arg("description") = "", arg("visible") = "true"),
+                                        "Adds a named fitting parameter, given its value as a string, on the "
+                                        "component identified by 'index'."))
+
+      .def("clearParameter", &ComponentInfo::clearParameter, (arg("self"), arg("index"), arg("name")),
+           "Removes every parameter of this name from the component identified by 'index'.");
+
+  // The sentinel returned by indexOfFullName() for a name that matches no component.
+  scope().attr("ComponentInfo").attr("invalidIndex") = ComponentInfo::invalidIndex;
 }

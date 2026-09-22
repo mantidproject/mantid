@@ -336,7 +336,8 @@ def mask_beam_stop(mask_info, workspace):
 
     lab_ipf_key = "low-angle-detector-name"
 
-    lab_component_name = workspace.getInstrument().getStringParameter(lab_ipf_key)
+    component_info = workspace.componentInfo()
+    lab_component_name = component_info.getStringParameter(component_info.root(), lab_ipf_key)
     if not lab_component_name:
         raise KeyError("{0} was not found in the IPF file for this instrument")
     lab_component_name = lab_component_name[0]

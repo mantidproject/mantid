@@ -35,7 +35,7 @@ class ReflectometryILL_commonTest(unittest.TestCase):
         config["datasearch.directories"] = self._data_dirs
 
     def testChopperOpeningAngleLongDurationD17(self):
-        instrument = self._ws.getInstrument()
+        component_info = self._ws.componentInfo()
         run = self._ws.getRun()
         run.addProperty("duration", self._long_duration, "s", True)  # patch for missing sample log
         chopper_window = 2
@@ -48,11 +48,11 @@ class ReflectometryILL_commonTest(unittest.TestCase):
         run.addProperty("Chopper2.phase_average", chopper2_phase, "degrees", True)  # patch for missing sample log
         run.addProperty("VirtualChopper.open_offset", open_offset, "degrees", True)  # patch for missing sample log
 
-        chopper_opening_angle = common.chopper_opening_angle(run, instrument)
+        chopper_opening_angle = common.chopper_opening_angle(run, component_info)
         self.assertEqual(chopper_opening_angle, test_value)
 
     def testChopperOpeningAngleShortDurationD17(self):
-        instrument = self._ws.getInstrument()
+        component_info = self._ws.componentInfo()
         run = self._ws.getRun()
         run.addProperty("duration", self._short_duration, "s", True)  # patch for missing sample log
         chopper_window = 2
@@ -65,12 +65,12 @@ class ReflectometryILL_commonTest(unittest.TestCase):
         run.addProperty("Chopper2.phase", chopper2_phase, "degrees", True)  # patch for missing sample log
         run.addProperty("VirtualChopper.open_offset", open_offset, "degrees", True)  # patch for missing sample log
 
-        chopper_opening_angle = common.chopper_opening_angle(run, instrument)
+        chopper_opening_angle = common.chopper_opening_angle(run, component_info)
         self.assertEqual(chopper_opening_angle, test_value)
 
     def testChopperOpeningAngleFIGARO(self):
         self._ws = illhelpers.create_empty_figaro_workspace()
-        instrument = self._ws.getInstrument()
+        component_info = self._ws.componentInfo()
         run = self._ws.getRun()
         run.addProperty("duration", self._short_duration, "s", True)  # patch for missing sample log
         chopper1_phase = 1
@@ -83,52 +83,52 @@ class ReflectometryILL_commonTest(unittest.TestCase):
         run.addProperty("chopper2.phase", chopper2_phase, "degrees", True)  # patch for missing sample log
         run.addProperty("CollAngle.openOffset", open_offset, "degrees", True)  # patch for missing sample log
 
-        chopper_opening_angle = common.chopper_opening_angle(run, instrument)
+        chopper_opening_angle = common.chopper_opening_angle(run, component_info)
         self.assertEqual(chopper_opening_angle, test_value)
 
     def testChopperPairDistanceD17(self):
-        instrument = self._ws.getInstrument()
+        component_info = self._ws.componentInfo()
         run = self._ws.getRun()
         test_value = 5e-3
         run.addProperty("Distance.ChopperGap", float(test_value), "m", True)
-        chopper_gap = common.chopper_pair_distance(run, instrument)
+        chopper_gap = common.chopper_pair_distance(run, component_info)
         self.assertEqual(chopper_gap, test_value)
 
     def testChopperPairDistanceFIGARO(self):
         self._ws = illhelpers.create_empty_figaro_workspace()
-        instrument = self._ws.getInstrument()
+        component_info = self._ws.componentInfo()
         run = self._ws.getRun()
         test_value = 5
         run.addProperty("ChopperSetting.distSeparationChopperPair", float(test_value), "mm", True)
-        chopper_gap = common.chopper_pair_distance(run, instrument)
+        chopper_gap = common.chopper_pair_distance(run, component_info)
         self.assertEqual(chopper_gap, test_value * 1e-3)  # method internally converts mm to m
 
     def testChopperSpeedShortDurationD17(self):
-        instrument = self._ws.getInstrument()
+        component_info = self._ws.componentInfo()
         run = self._ws.getRun()
         run.addProperty("duration", self._short_duration, "s", True)  # patch for missing sample log
         test_value = 11000
         run.addProperty("Chopper1.rotation_speed", float(test_value), "Hz", True)  # patch for missing sample log
-        chopper_speed = common.chopper_speed(run, instrument)
+        chopper_speed = common.chopper_speed(run, component_info)
         self.assertEqual(chopper_speed, test_value)
 
     def testChopperSpeedLongDurationD17(self):
-        instrument = self._ws.getInstrument()
+        component_info = self._ws.componentInfo()
         run = self._ws.getRun()
         run.addProperty("duration", self._long_duration, "s", True)  # patch for missing sample log
         test_value = 12000
         run.addProperty("Chopper1.speed_average", float(test_value), "Hz", True)
-        chopper_speed = common.chopper_speed(run, instrument)
+        chopper_speed = common.chopper_speed(run, component_info)
         self.assertEqual(chopper_speed, test_value)
 
     def testChopperSpeedLongDurationFIGARO(self):
         self._ws = illhelpers.create_empty_figaro_workspace()
-        instrument = self._ws.getInstrument()
+        component_info = self._ws.componentInfo()
         run = self._ws.getRun()
         run.addProperty("ChopperSetting.firstChopper", 1, "", True)  # patch for missing sample log
         test_value = 12000
         run.addProperty("chopper1.rotation_speed", float(test_value), "Hz", True)
-        chopper_speed = common.chopper_speed(run, instrument)
+        chopper_speed = common.chopper_speed(run, component_info)
         self.assertEqual(chopper_speed, test_value)
 
     def testDeflectionAngle(self):

@@ -203,8 +203,10 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
 
         # Number of pixels in each direction
         # TODO: revisit this when we update the IDF
-        self.number_of_pixels_x = int(ws_event_data.getInstrument().getNumberParameter("number-of-x-pixels")[0])
-        self.number_of_pixels_y = int(ws_event_data.getInstrument().getNumberParameter("number-of-y-pixels")[0])
+        component_info = ws_event_data.componentInfo()
+        root = component_info.root()
+        self.number_of_pixels_x = int(component_info.getNumberParameter(root, "number-of-x-pixels")[0])
+        self.number_of_pixels_y = int(component_info.getNumberParameter(root, "number-of-y-pixels")[0])
 
         # Get scattering angle theta
         theta = self.calculate_scattering_angle(ws_event_data)

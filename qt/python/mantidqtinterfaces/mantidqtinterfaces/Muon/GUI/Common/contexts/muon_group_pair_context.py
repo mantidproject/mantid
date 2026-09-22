@@ -52,9 +52,10 @@ def get_default_grouping(workspace, instrument, main_field_direction):
     if instrument != "PSI":
         try:
             if isinstance(workspace, WorkspaceGroup):
-                grouping_file = workspace[0].getInstrument().getStringParameter(parameter_name)[0]
+                component_info = workspace[0].componentInfo()
             else:
-                grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
+                component_info = workspace.componentInfo()
+            grouping_file = component_info.getStringParameter(component_info.root(), parameter_name)[0]
 
         except IndexError:
             return [], [], [], ""

@@ -20,7 +20,8 @@ def MAX_DBL():
 
 
 def getNamedParameter(ws, name):
-    return ws.getInstrument().getNumberParameter(name)[0]
+    component_info = ws.componentInfo()
+    return component_info.getNumberParameter(component_info.root(), name)[0]
 
 
 class DirectInelasticDiagnostic2(MantidSystemTest):

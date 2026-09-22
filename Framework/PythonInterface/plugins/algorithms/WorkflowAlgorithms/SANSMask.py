@@ -144,15 +144,16 @@ class SANSMask(PythonAlgorithm):
             return
 
         instrument = workspace.getInstrument()
+        component_info = workspace.componentInfo()
+        root = component_info.root()
 
         if facility.upper() == "HFIR":
             ids = []
             # Get the default from the parameters file
             if component_name is None or component_name == "":
-                component_name = instrument.getStringParameter("detector-name")[0]
+                component_name = component_info.getStringParameter(root, "detector-name")[0]
             component = instrument.getComponentByName(component_name)
             if component.type() == "RectangularDetector":
-                component_info = workspace.componentInfo()
                 bank_index = component_info.indexOfAny(component_name)
                 id_start = component_info.pixelGridIdStart(bank_index)
                 id_step = component_info.pixelGridIdStep(bank_index)
@@ -176,12 +177,12 @@ class SANSMask(PythonAlgorithm):
                 return
             self._mask_ids(list(ids), workspace)
         else:  # I'm at SNS
-            if not instrument.hasParameter("number-of-x-pixels") and not workspace.getInstrument().hasParameter("number-of-y-pixels"):
+            if not component_info.hasParameter(root, "number-of-x-pixels") and not component_info.hasParameter(root, "number-of-y-pixels"):
                 Logger("SANSMask").error("Could not find number of pixels: skipping side masking")
                 return
 
-            nx = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
-            ny = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])
+            nx = int(component_info.getNumberParameter(root, "number-of-x-pixels")[0])
+            ny = int(component_info.getNumberParameter(root, "number-of-y-pixels")[0])
             id_side = []
 
             for iy in range(ny):

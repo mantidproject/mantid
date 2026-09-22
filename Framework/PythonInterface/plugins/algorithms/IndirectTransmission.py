@@ -19,16 +19,16 @@ from mantid import config
 import math
 
 
-def _get_instrument_property_list(instrument, property_name):
+def _get_instrument_property_list(component_info, property_name):
     """
     Gets a list of properties from an instrument string property.
 
-    @param instrument Instrument object
+    @param component_info ComponentInfo object
     @param property_name Name of property
     @return A list of string values
     """
 
-    raw_property_list = instrument.getStringParameter(property_name)
+    raw_property_list = component_info.getStringParameter(component_info.root(), property_name)
     if raw_property_list is None or len(raw_property_list) == 0:
         raise RuntimeError("Got empty list for parameter %s" % property_name)
 
@@ -95,8 +95,8 @@ class IndirectTransmission(PythonAlgorithm):
         CreateSimulationWorkspace(OutputWorkspace=workspace, Instrument=instrument_name, BinParams="0,0.5,1")
 
         # Do some validation on the analyser and reflection
-        instrument = mtd[workspace].getInstrument()
-        valid_analysers = _get_instrument_property_list(instrument, "analysers")
+        component_info = mtd[workspace].componentInfo()
+        valid_analysers = _get_instrument_property_list(component_info, "analysers")
         logger.debug("Valid analysers for instrument %s: %s" % (instrument_name, str(valid_analysers)))
 
         # Check the analyser is valid for the instrument
@@ -108,7 +108,7 @@ class IndirectTransmission(PythonAlgorithm):
         else:
             # If the analyser was valid then we can check the reflection
             reflections_param_name = "refl-%s" % analyser
-            valid_reflections = _get_instrument_property_list(instrument, reflections_param_name)
+            valid_reflections = _get_instrument_property_list(component_info, reflections_param_name)
             logger.debug("Valid reflections for analyser %s: %s" % (analyser, str(valid_reflections)))
 
             if reflection not in valid_reflections:

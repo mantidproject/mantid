@@ -164,7 +164,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             sigY0 = np.median(strongPeakParams_ws.column("SigPhi"))
             # Finally, the interaction term.  This we just get from the instrument file.
             try:
-                sigP0Params = peaks_ws.getInstrument().getStringParameter("sigP0Params")
+                component_info = peaks_ws.componentInfo()
+                sigP0Params = component_info.getStringParameter(component_info.root(), "sigP0Params")
                 sigP0Params = np.array(str(sigP0Params).strip("[]'").split(), dtype=float)
             except:
                 logger.warning("Cannot find sigP0Params.  Will use defaults.")
@@ -218,17 +219,19 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         # The default values are good for MaNDi - new instruments can be added by adding a different elif
         # statement.
         # If you change these values or add an instrument, documentation should also be changed.
+        component_info = peaks_ws.componentInfo()
+        root = component_info.root()
         try:
-            numDetRows = peaks_ws.getInstrument().getIntParameter("numDetRows")[0]
-            numDetCols = peaks_ws.getInstrument().getIntParameter("numDetCols")[0]
-            nPhi = peaks_ws.getInstrument().getIntParameter("numBinsPhi")[0]
-            nTheta = peaks_ws.getInstrument().getIntParameter("numBinsTheta")[0]
-            nPhi = peaks_ws.getInstrument().getIntParameter("numBinsPhi")[0]
-            mindtBinWidth = peaks_ws.getInstrument().getNumberParameter("mindtBinWidth")[0]
-            maxdtBinWidth = peaks_ws.getInstrument().getNumberParameter("maxdtBinWidth")[0]
-            fracHKL = peaks_ws.getInstrument().getNumberParameter("fracHKL")[0]
-            dQPixel = peaks_ws.getInstrument().getNumberParameter("dQPixel")[0]
-            peakMaskSize = peaks_ws.getInstrument().getIntParameter("peakMaskSize")[0]
+            numDetRows = component_info.getIntParameter(root, "numDetRows")[0]
+            numDetCols = component_info.getIntParameter(root, "numDetCols")[0]
+            nPhi = component_info.getIntParameter(root, "numBinsPhi")[0]
+            nTheta = component_info.getIntParameter(root, "numBinsTheta")[0]
+            nPhi = component_info.getIntParameter(root, "numBinsPhi")[0]
+            mindtBinWidth = component_info.getNumberParameter(root, "mindtBinWidth")[0]
+            maxdtBinWidth = component_info.getNumberParameter(root, "maxdtBinWidth")[0]
+            fracHKL = component_info.getNumberParameter(root, "fracHKL")[0]
+            dQPixel = component_info.getNumberParameter(root, "dQPixel")[0]
+            peakMaskSize = component_info.getIntParameter(root, "peakMaskSize")[0]
         except:
             logger.error("Cannot find all parameters in instrument parameters file.")
             raise
@@ -374,7 +377,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                         p = mtd["__fitSigX0_Parameters"].column(1)[:-1]
                         tol = 0.2  # We should have a good idea now - only allow 20% variation
                     except:
-                        p = peaks_ws.getInstrument().getStringParameter("sigSC0Params")
+                        component_info = peaks_ws.componentInfo()
+                        p = component_info.getStringParameter(component_info.root(), "sigSC0Params")
                         p = np.array(str(p).strip("[]'").split(), dtype=float)
                         tol = 5.0  # High tolerance since we don't know what the answer will be
                     predSigX = BVGFT.coshPeakWidthModel(theta, p[0], p[1], p[2], p[3])

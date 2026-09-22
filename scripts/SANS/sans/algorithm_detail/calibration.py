@@ -206,11 +206,12 @@ def get_missing_parameters(calibration_workspace, workspace):
     :param workspace: the data workspace (which is to be calibrated later on).
     :return: a list of parameters which exist on the data workspace but not on the calibration workspace.
     """
-    original_parameter_names = workspace.getInstrument().getParameterNames()
-    calibration_workspace_instrument = calibration_workspace.getInstrument()
+    workspace_component_info = workspace.componentInfo()
+    original_parameter_names = workspace_component_info.getParameterNames(workspace_component_info.root())
+    calibration_component_info = calibration_workspace.componentInfo()
     missing_parameter_names = []
     for parameter in original_parameter_names:
-        if not calibration_workspace_instrument.hasParameter(parameter):
+        if not calibration_component_info.hasParameter(calibration_component_info.root(), parameter):
             missing_parameter_names.append(parameter)
     return missing_parameter_names
 
@@ -225,7 +226,8 @@ def apply_missing_parameters(calibration_workspace, workspace, missing_parameter
                                workspace.
     :param parent_alg: a handle to the parent algorithm
     """
-    instrument = workspace.getInstrument()
+    component_info = workspace.componentInfo()
+    root = component_info.root()
     component_name = workspace.getInstrumentName()
     component_name = sanitise_instrument_name(component_name)
     set_instrument_name = "SetInstrumentParameter"
@@ -234,12 +236,16 @@ def apply_missing_parameters(calibration_workspace, workspace, missing_parameter
 
     # For now only string, int and double are handled
     type_options = {"string": "String", "int": "Number", "double": "Number"}
-    value_options = {"string": instrument.getStringParameter, "int": instrument.getIntParameter, "double": instrument.getNumberParameter}
+    value_options = {
+        "string": component_info.getStringParameter,
+        "int": component_info.getIntParameter,
+        "double": component_info.getNumberParameter,
+    }
     try:
         for missing_parameter in missing_parameters:
-            parameter_type = instrument.getParameterType(missing_parameter)
+            parameter_type = component_info.getParameterType(root, missing_parameter)
             type_to_save = type_options[parameter_type]
-            value = value_options[parameter_type](missing_parameter)
+            value = value_options[parameter_type](root, missing_parameter)
 
             alg.setProperty("ParameterName", missing_parameter)
             alg.setProperty("ParameterType", type_to_save)

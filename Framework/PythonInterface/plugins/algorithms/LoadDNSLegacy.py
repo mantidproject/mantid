@@ -27,7 +27,11 @@ class LoadDNSLegacy(PythonAlgorithm):
         """
         PythonAlgorithm.__init__(self)
         self.tolerance = 1e-2
-        self.instrument = None
+        # Instrument parameters, read up front from the empty DNS instrument
+        self.coil_currents = None
+        self.l2 = None
+        self.channel_width_factor = None
+        self.tof_comissioning = None
 
     def category(self):
         """
@@ -81,7 +85,7 @@ class LoadDNSLegacy(PythonAlgorithm):
         if not poltable_name:
             # read the table from IDF
             for p in ["x", "y", "z"]:
-                currents = self.instrument.getStringParameter("{}_currents".format(p))[0].split(";")
+                currents = self.coil_currents[p].split(";")
                 for cur in currents:
                     row = {"polarisation": p, "comment": "7"}
                     row["C_a"], row["C_b"], row["C_c"], row["C_z"] = [float(c) for c in cur.split(",")]
@@ -153,9 +157,15 @@ class LoadDNSLegacy(PythonAlgorithm):
         incident_energy = 0.5e03 * m_n * velocity * velocity / physical_constants["electron volt"][0]  # meV
 
         tmp = api.LoadEmptyInstrument(InstrumentName="DNS")
-        self.instrument = tmp.getInstrument()
         component_info = tmp.componentInfo()
+        root = component_info.root()
         l1 = (component_info.samplePosition() - component_info.sourcePosition()).norm()
+        # Read the instrument parameters while the workspace is still alive; the ComponentInfo
+        # is owned by it and does not outlive it, unlike the legacy instrument.
+        self.coil_currents = {p: component_info.getStringParameter(root, "{}_currents".format(p))[0] for p in ["x", "y", "z"]}
+        self.l2 = float(component_info.getStringParameter(root, "l2")[0])
+        self.channel_width_factor = float(component_info.getStringParameter(root, "channel_width_factor")[0])
+        self.tof_comissioning = component_info.getStringParameter(root, "tof_comissioning")[0]
         api.DeleteWorkspace(tmp)
 
         # load polarisation table and determine polarisation
@@ -175,10 +185,10 @@ class LoadDNSLegacy(PythonAlgorithm):
             unitX = "TOF"
 
             # get instrument parameters
-            l2 = float(self.instrument.getStringParameter("l2")[0])
+            l2 = self.l2
             self.log().notice("L1 = {} m".format(l1))
             self.log().notice("L2 = {} m".format(l2))
-            dt_factor = float(self.instrument.getStringParameter("channel_width_factor")[0])
+            dt_factor = self.channel_width_factor
 
             # channel width
             dt = metadata.tof_channel_width * dt_factor
@@ -193,7 +203,7 @@ class LoadDNSLegacy(PythonAlgorithm):
             epp_user = self.getProperty("ElasticChannel").value
 
             # for comissioning period EPP in the data file is not relevant
-            in_comissioning = self.instrument.getStringParameter("tof_comissioning")[0]
+            in_comissioning = self.tof_comissioning
             if (epp_user < 1) and (in_comissioning == "no") and metadata.tof_elastic_channel:
                 epp_user = metadata.tof_elastic_channel
 

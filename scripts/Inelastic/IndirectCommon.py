@@ -128,9 +128,11 @@ def get_workspace_name_prefix(ws_name: str) -> str:
     else:
         run_name = instrument + run_number
 
+    component_info = workspace.componentInfo()
+    root = component_info.root()
     try:
-        analyser = workspace.getInstrument().getStringParameter("analyser")[0]
-        reflection = workspace.getInstrument().getStringParameter("reflection")[0]
+        analyser = component_info.getStringParameter(root, "analyser")[0]
+        reflection = component_info.getStringParameter(root, "reflection")[0]
     except IndexError:
         analyser = ""
         reflection = ""
@@ -145,19 +147,23 @@ def get_workspace_name_prefix(ws_name: str) -> str:
 
 def get_efixed(workspace: Union[str, MatrixWorkspace]) -> float:
     if isinstance(workspace, str):
-        inst = AnalysisDataService.retrieve(workspace).getInstrument()
+        component_info = AnalysisDataService.retrieve(workspace).componentInfo()
     else:
-        inst = workspace.getInstrument()
+        component_info = workspace.componentInfo()
+    root = component_info.root()
 
-    if inst.hasParameter("Efixed"):
-        return inst.getNumberParameter("EFixed")[0]
+    if component_info.hasParameter(root, "Efixed"):
+        return component_info.getNumberParameter(root, "EFixed")[0]
 
-    if inst.hasParameter("analyser"):
-        analyser_name = inst.getStringParameter("analyser")[0]
-        analyser_comp = inst.getComponentByName(analyser_name)
+    if component_info.hasParameter(root, "analyser"):
+        analyser_name = component_info.getStringParameter(root, "analyser")[0]
+        try:
+            analyser_index = component_info.indexOfAny(analyser_name)
+        except ValueError:
+            analyser_index = None
 
-        if analyser_comp is not None and analyser_comp.hasParameter("Efixed"):
-            return analyser_comp.getNumberParameter("EFixed")[0]
+        if analyser_index is not None and component_info.hasParameter(analyser_index, "Efixed"):
+            return component_info.getNumberParameter(analyser_index, "EFixed")[0]
 
     if efixed_log := _try_get_sample_log(workspace, "EFixed"):
         return float(efixed_log)
@@ -263,16 +269,18 @@ def _check_analysers_are_equal(workspace_name1: str, workspace_name2: str) -> No
       @exception ValueError - workspaces have different reflections
     """
     ws1 = AnalysisDataService.retrieve(workspace_name1)
+    component_info_1 = ws1.componentInfo()
     try:
-        analyser_1 = ws1.getInstrument().getStringParameter("analyser")[0]
-        reflection_1 = ws1.getInstrument().getStringParameter("reflection")[0]
+        analyser_1 = component_info_1.getStringParameter(component_info_1.root(), "analyser")[0]
+        reflection_1 = component_info_1.getStringParameter(component_info_1.root(), "reflection")[0]
     except IndexError:
         # Ignore this check if an analyser or reflection cannot be found
         return
     ws2 = AnalysisDataService.retrieve(workspace_name2)
+    component_info_2 = ws2.componentInfo()
     try:
-        analyser_2 = ws2.getInstrument().getStringParameter("analyser")[0]
-        reflection_2 = ws2.getInstrument().getStringParameter("reflection")[0]
+        analyser_2 = component_info_2.getStringParameter(component_info_2.root(), "analyser")[0]
+        reflection_2 = component_info_2.getStringParameter(component_info_2.root(), "reflection")[0]
     except:
         # Ignore this check if an analyser or reflection cannot be found
         return

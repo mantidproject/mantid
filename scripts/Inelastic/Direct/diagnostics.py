@@ -429,10 +429,12 @@ def do_bleed_test(sample_run, max_framerate, ignored_pixels):
         data_ws = sample_run.get_workspace()  # this will load data if necessary
         ws_name = data_ws.name() + "_bleed"
 
+    component_info = data_ws.componentInfo()
+    root = component_info.root()
     if max_framerate is None:  # get defaults
-        max_framerate = float(data_ws.getInstrument().getNumberParameter("max-tube-framerate")[0])
+        max_framerate = float(component_info.getNumberParameter(root, "max-tube-framerate")[0])
     if ignored_pixels is None:  # get defaults
-        ignored_pixels = int(data_ws.getInstrument().getNumberParameter("num-ignored-pixels")[0])
+        ignored_pixels = int(component_info.getNumberParameter(root, "num-ignored-pixels")[0])
     else:
         # Make sure it is an int
         ignored_pixels = int(ignored_pixels)

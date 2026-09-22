@@ -69,8 +69,10 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         workspace = self.getProperty("InputWorkspace").value
         output_ws_name = self.getPropertyValue("OutputWorkspace")
         property_manager_name = self.getProperty("ReductionProperties").value
-        pixel_size_x = workspace.getInstrument().getNumberParameter("x-pixel-size")[0]
-        pixel_size_y = workspace.getInstrument().getNumberParameter("y-pixel-size")[0]
+        component_info = workspace.componentInfo()
+        root = component_info.root()
+        pixel_size_x = component_info.getNumberParameter(root, "x-pixel-size")[0]
+        pixel_size_y = component_info.getNumberParameter(root, "y-pixel-size")[0]
         (output_msg, output_ws, output_binning) = self._call_sans_averaging(
             workspace, None, nbins, log_binning, property_manager_name, output_ws_name
         )
@@ -202,8 +204,10 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         log_binning = self.getProperty("LogBinning").value
         nbins = self.getProperty("NumberOfBins").value
         property_manager_name = self.getProperty("ReductionProperties").value
-        pixel_size_x = workspace.getInstrument().getNumberParameter("x-pixel-size")[0]
-        pixel_size_y = workspace.getInstrument().getNumberParameter("y-pixel-size")[0]
+        component_info = workspace.componentInfo()
+        root = component_info.root()
+        pixel_size_x = component_info.getNumberParameter(root, "x-pixel-size")[0]
+        pixel_size_y = component_info.getNumberParameter(root, "y-pixel-size")[0]
         output_ws_name = self.getPropertyValue("OutputWorkspace")
         compute_resolution = self.getProperty("ComputeResolution").value
 
@@ -342,10 +346,12 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         # This code has been checked that it is using the correct property from the workspace
         # it just so happens that this is not pointing to what it used to - see EQSANSLoad.cpp
         sample_detector_distance = workspace.getRun().getProperty("sample_detector_distance").value
-        nx_pixels = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
-        ny_pixels = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])
-        pixel_size_x = workspace.getInstrument().getNumberParameter("x-pixel-size")[0]
-        pixel_size_y = workspace.getInstrument().getNumberParameter("y-pixel-size")[0]
+        component_info = workspace.componentInfo()
+        root = component_info.root()
+        nx_pixels = int(component_info.getNumberParameter(root, "number-of-x-pixels")[0])
+        ny_pixels = int(component_info.getNumberParameter(root, "number-of-y-pixels")[0])
+        pixel_size_x = component_info.getNumberParameter(root, "x-pixel-size")[0]
+        pixel_size_y = component_info.getNumberParameter(root, "y-pixel-size")[0]
 
         if workspace.getRun().hasProperty("beam_center_x") and workspace.getRun().hasProperty("beam_center_y"):
             beam_ctr_x = workspace.getRun().getProperty("beam_center_x").value
