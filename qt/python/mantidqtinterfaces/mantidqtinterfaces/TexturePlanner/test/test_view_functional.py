@@ -414,6 +414,29 @@ class TestInitialState(_FunctionalTestBase):
         # the planner seeds the sample with the default material on construction
         self.assertEqual(self.view.lblCurrentMaterialValue.text(), "Fe")
 
+    def test_the_window_can_be_made_short_enough_for_a_small_screen(self):
+        # the tutorial frames this interface with its navigation along the bottom, so an interface
+        # that refuses to shrink takes those buttons off the screen with it. The offenders are easy
+        # to reintroduce: a setMinimumHeight on either plot canvas, or a minimumSize on scrollAxes
+        self.view.resize(600, 200)
+        QApplication.processEvents()
+
+        self.assertLessEqual(self.view.height(), 650)
+
+    def test_the_goniometer_axes_only_scroll_when_there_is_no_room_for_them(self):
+        # the axis list is the one thing on the tab that grows, so it has to be given the slack
+        # rather than left at its size hint with a scrollbar under a column of empty space
+        self.view.tabSetup.setCurrentWidget(self.view.tabExperiment)
+        self.view.resize(1250, 1000)
+        QApplication.processEvents()
+
+        self.assertFalse(self.view.scrollAxes.verticalScrollBar().isVisible(), "the axes should fill the space, not scroll within it")
+
+        self.view.resize(1250, 700)
+        QApplication.processEvents()
+
+        self.assertTrue(self.view.scrollAxes.verticalScrollBar().isVisible(), "but must still scroll when the window is short")
+
 
 class TestGoniometerControls(_FunctionalTestBase):
     def test_changing_num_gonios_updates_axis_enablement_and_model(self):

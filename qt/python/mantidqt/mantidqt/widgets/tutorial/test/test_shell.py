@@ -7,7 +7,7 @@
 #  This file is part of the mantidqt package
 import unittest
 
-from qtpy.QtWidgets import QLabel, QMainWindow, QTabBar, QWidget
+from qtpy.QtWidgets import QApplication, QLabel, QMainWindow, QTabBar, QWidget
 
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.tutorial import interaction
@@ -46,6 +46,18 @@ class TutorialShellTest(unittest.TestCase):
     def _tab_bar(self):
         return self.shell.findChild(QTabBar, "tutorial_chapter_tabs")
 
+    def _available(self):
+        return QApplication.primaryScreen().availableGeometry()
+
+    def _shell_around(self, width, height):
+        """A shell framing an interface of the given size, cleaned up with the test."""
+        interface = QMainWindow()
+        interface.setCentralWidget(QLabel("the interface"))
+        interface.resize(width, height)
+        shell = TutorialShell(self.chapters, interface, title="Tutorial")
+        self.addCleanup(shell.deleteLater)
+        return shell
+
     # ------------------------------------------------------------------ framing
 
     def test_it_is_a_window_of_its_own_despite_having_a_parent(self):
@@ -58,18 +70,31 @@ class TutorialShellTest(unittest.TestCase):
     def test_it_opens_big_enough_to_show_the_interface_it_frames(self):
         # the interface arrives sized by its .ui file; the shell has to be at least that big plus
         # room for its own chrome, or framing a real interface achieves nothing
-        self.assertGreaterEqual(self.shell.width(), self.interface.width())
-        self.assertGreater(self.shell.height(), self.interface.height())
+        available = self._available()
+        shell = self._shell_around(available.width() // 2, available.height() // 2)
 
-    def test_a_tiny_interface_still_gets_a_usable_window(self):
-        small = QMainWindow()
-        small.setCentralWidget(QLabel("small"))
-        small.resize(120, 80)
-        shell = TutorialShell(self.chapters, small, title="Tutorial")
-        self.addCleanup(shell.deleteLater)
+        self.assertGreaterEqual(shell.width(), available.width() // 2)
+        self.assertGreater(shell.height(), available.height() // 2)
 
-        self.assertGreaterEqual(shell.width(), 900)
-        self.assertGreaterEqual(shell.height(), 600)
+    def test_it_never_opens_bigger_than_the_screen(self):
+        # the navigation row is along the bottom, and a window cannot be dragged shorter than the
+        # interface's own minimum, so one that opens overhanging cannot be driven at all
+        available = self._available()
+        shell = self._shell_around(available.width() * 3, available.height() * 3)
+
+        self.assertLessEqual(shell.width(), available.width())
+        self.assertLessEqual(shell.height(), available.height())
+
+    def test_a_tiny_interface_still_gets_a_usable_window_but_never_one_off_the_screen(self):
+        # the floors are for an interface with a tiny size hint, not a demand on the display, so a
+        # screen smaller than them wins
+        available = self._available()
+        shell = self._shell_around(120, 80)
+
+        self.assertGreaterEqual(shell.width(), min(900, available.width()))
+        self.assertGreaterEqual(shell.height(), min(600, available.height()))
+        self.assertLessEqual(shell.width(), available.width())
+        self.assertLessEqual(shell.height(), available.height())
 
     def test_it_adopts_the_interface_as_a_child(self):
         self.assertIs(self.interface.parentWidget(), self.shell)

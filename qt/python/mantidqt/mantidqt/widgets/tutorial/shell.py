@@ -25,6 +25,10 @@ from qtpy.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QSizePolicy
 MIN_WIDTH = 900
 MIN_HEIGHT = 600
 
+# ``availableGeometry`` excludes the taskbar but not the window frame, so a window sized to the
+# full available height has its title bar pushed off the top.
+FRAME_ALLOWANCE = 40
+
 
 class TutorialShell(QWidget):
     """Wraps ``interface`` in tutorial chrome.
@@ -55,8 +59,9 @@ class TutorialShell(QWidget):
         self.setWindowTitle(title or "Tutorial")
         self.setObjectName("tutorial_shell")
 
-        # the interface arrives sized by its own .ui file; the shell has to be at least that big or
-        # the whole point of framing a real interface is lost to scrollbars and clipping
+        # the interface arrives sized by its own .ui file, and the shell wants to be at least that
+        # big or the whole point of framing a real interface is lost to clipping - but the screen
+        # has the final say. See ``_initial_size``.
         interface_size = interface.size()
 
         self._tabs = self._build_tabs()
@@ -70,9 +75,23 @@ class TutorialShell(QWidget):
         layout.addWidget(interface, 1)
         layout.addWidget(controls)
 
-        self.resize(
-            max(interface_size.width(), MIN_WIDTH),
-            max(interface_size.height() + self._tabs.sizeHint().height() + controls.sizeHint().height(), MIN_HEIGHT),
+        chrome_height = self._tabs.sizeHint().height() + controls.sizeHint().height()
+        self.resize(*self._initial_size(interface_size, chrome_height))
+
+    def _initial_size(self, interface_size, chrome_height):
+        """How big to open: what the interface wants, floored, then capped by the display.
+
+        The cap comes last, because the floors are for an interface with a tiny size hint and are
+        not a demand on the screen. Only the opening size is decided here - the user stays free to
+        resize, though not past the interface's own layout minimum, which is why a window that
+        opened overhanging the screen would have its navigation row stuck off the bottom.
+        """
+        # the shell has no window handle yet, so its own ``screen()`` would answer with the primary
+        # one. The window the tutorial belongs to is on the screen the user is looking at.
+        available = (self.parentWidget() or self).screen().availableGeometry()
+        return (
+            min(max(interface_size.width(), MIN_WIDTH), available.width()),
+            min(max(interface_size.height() + chrome_height, MIN_HEIGHT), available.height() - FRAME_ALLOWANCE),
         )
 
     def _build_tabs(self):
