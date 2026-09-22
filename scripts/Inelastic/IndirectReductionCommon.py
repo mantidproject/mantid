@@ -1422,10 +1422,7 @@ def remove_edge_pixels(workspace):
     LoadMask(Instrument=ws.getInstrument().getName(), InputFile=values[0], OutputWorkspace=mask_ws_name)
     mask_ws = mtd[mask_ws_name]
     masked_det_ids = frozenset(
-        detid
-        for i in range(mask_ws.getNumberHistograms())
-        if mask_ws.readY(i)[0] > 0.5
-        for detid in mask_ws.getSpectrum(i).getDetectorIDs()
+        detid for i in range(mask_ws.getNumberHistograms()) if mask_ws.y(i)[0] > 0.5 for detid in mask_ws.getSpectrum(i).getDetectorIDs()
     )
     DeleteWorkspace(mask_ws_name)
     indices_to_remove = [i for i in range(ws.getNumberHistograms()) if not masked_det_ids.isdisjoint(ws.getSpectrum(i).getDetectorIDs())]
@@ -1471,7 +1468,7 @@ def exclude_low_calibration_spectra(workspace):
     threshold_factor = get_minimum_calibration_factor(workspace)
     if threshold_factor <= 0.0:
         return
-    values = np.array([ws.readY(i)[0] for i in silicon_indices])
+    values = np.array([ws.y(i)[0] for i in silicon_indices])
     nonzero = values[values > 0.0]
     if nonzero.size == 0:
         return
