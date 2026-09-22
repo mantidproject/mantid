@@ -125,3 +125,17 @@ def set_rcparams(rcp):
     # We must keep our backend
     assert "backend" not in rcp
     mpl.rcParams.update(rcp)
+
+
+def watch_for_theme_changes():
+    """
+    Watch for any dynamic changes to the system color theme and set appropriate rcParams
+    for matplotlib.
+    """
+    app = QApplication.instance()
+    if app is not None:
+        app.styleHints().colorSchemeChanged.connect(_on_colour_scheme_changed)
+
+
+def _on_colour_scheme_changed(_scheme):
+    reset_rcparams_to_default()
