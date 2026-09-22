@@ -91,13 +91,13 @@ void MyAlg::exec() {
   if (axisToApply == "X") {
     for (std::size_t i = 0; i < NUM_HIST; ++i) {
       // this gets read/write axis to the x-values
-      auto &axis = outputWS->getSpectrum(i).dataX();
+      auto &axis = outputWS->getSpectrum(i).mutableX();
       std::transform(axis.cbegin(), axis.cend(), axis.begin(), transformer);
     }
   } else if (axisToApply == "Y") {
     for (std::size_t i = 0; i < NUM_HIST; ++i) {
       // this gets read/write axis to the y-values
-      auto &axis = outputWS->getSpectrum(i).dataY();
+      auto &axis = outputWS->getSpectrum(i).mutableY();
       std::transform(axis.cbegin(), axis.cend(), axis.begin(), transformer);
     }
   } else {

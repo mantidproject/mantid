@@ -343,9 +343,9 @@ class MinimumCalibrationFactorTest(unittest.TestCase):
 
         # LoadEmptyInstrument fills every detector with DetectorValue (1.0), so 1005 must be
         # set well below half the mean non-zero factor to be excluded.
-        workspace.dataY(workspace_index(963))[0] = 0.1
-        workspace.dataY(workspace_index(1005))[0] = 0.1
-        workspace.dataY(workspace_index(1006))[0] = 10.0
+        workspace.mutableY(workspace_index(963))[0] = 0.1
+        workspace.mutableY(workspace_index(1005))[0] = 0.1
+        workspace.mutableY(workspace_index(1006))[0] = 10.0
 
         exclude_low_calibration_spectra(ws_name)
 
