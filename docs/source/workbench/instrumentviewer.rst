@@ -144,8 +144,8 @@ explicitly with the ``side-by-side-view-location`` tag in the
     The same instrument in the ``Side by Side`` projection.
 
 Several controls only apply to the flat projections and are disabled in ``3D``:
-``Rectangle Zoom``, ``Hover Pick``, the shape controls, ``Maintain Aspect Ratio``,
-``Flip Beam``, ``Rotate 180°`` and ``Rotate``.
+``Rectangle Zoom``, ``Hover Pick``, the shape controls and ``Maintain Aspect Ratio``.
+``Flip Beam``, ``Rotate 180°`` and ``Rotate`` are disabled in both ``3D`` and ``Side by Side``.
 
 Units
 #####
@@ -408,7 +408,7 @@ Settings tab
 
 ``Flip Beam``
     Mirrors a 2D projection about the plane perpendicular to the beam, which swaps the left and
-    right halves of the instrument. It has no effect in ``3D`` or ``Side by Side``.
+    right halves of the instrument. It is disabled in ``3D`` and ``Side by Side``.
 
 ``Rotate 180°``
     Rotates a 2D projection half a turn about its axis, swapping the two halves of the

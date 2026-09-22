@@ -872,10 +872,21 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.reset_mock()
         presenter = self._create_test_presenter()
         try:
+            self._mock_view.set_flip_beam_box_enabled.assert_called_with(False)
             self._mock_view.set_rotate_180_box_enabled.assert_called_with(False)
             self._mock_view.set_u_offset_slider_enabled.assert_called_with(False)
         finally:
             presenter.handle_close()
+
+    def test_flip_beam_disabled_in_side_by_side(self):
+        self._mock_view.current_selected_projection.return_value = ProjectionType.SIDE_BY_SIDE
+        self._presenter._on_projection_option_changed()
+        self._mock_view.set_flip_beam_box_enabled.assert_called_with(False)
+
+    def test_flip_beam_enabled_in_flat_projection(self):
+        self._mock_view.current_selected_projection.return_value = ProjectionType.CYLINDRICAL_Y
+        self._presenter._on_projection_option_changed()
+        self._mock_view.set_flip_beam_box_enabled.assert_called_with(True)
 
     def test_on_reset_projection_clears_the_rotation(self):
         self._mock_view.get_contour_limits.return_value = (0, 100)

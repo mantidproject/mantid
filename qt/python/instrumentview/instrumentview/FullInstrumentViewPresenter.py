@@ -239,7 +239,6 @@ class FullInstrumentViewPresenter:
         self._view.set_overlaid_shape_controls_enabled(enabled)
         self._view.set_hover_pick_enabled(enabled)
         self._view.set_aspect_ratio_box_enabled(enabled)
-        self._view.set_flip_beam_box_enabled(enabled)
         self._update_rotation_controls_enabled()
 
     def on_projection_option_changed(self) -> None:
@@ -384,8 +383,8 @@ class FullInstrumentViewPresenter:
         self.update_plotter(refresh_limits=False)
 
     def _update_rotation_controls_enabled(self) -> None:
-        """The slider is only usable when the projection can be rotated and the half turn is not already applied."""
         projection_can_rotate = self._view.current_selected_projection() not in (ProjectionType.THREE_D, ProjectionType.SIDE_BY_SIDE)
+        self._view.set_flip_beam_box_enabled(projection_can_rotate)
         self._view.set_rotate_180_box_enabled(projection_can_rotate)
         self._view.set_u_offset_slider_enabled(projection_can_rotate and not self._view.is_rotate_180_checkbox_checked())
 
