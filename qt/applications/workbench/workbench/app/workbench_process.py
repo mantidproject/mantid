@@ -271,6 +271,10 @@ def create_and_launch_workbench(app, command_line_options, qsettings_staging_ses
 
         initialize_matplotlib()
 
+        from workbench.plotting.config import watch_for_theme_changes
+
+        watch_for_theme_changes()
+
         # Setup widget layouts etc. mantid.simple cannot be used before this
         # or the log messages don't get through to the widget
         main_window.setup()
