@@ -8,36 +8,29 @@
 # Print usage and exit
 function usage() {
   local exitcode=$1
-  echo "Usage: $0 [options] package_name"
+  echo "Usage: $0 [options]"
   echo
-  echo "Create a standalone installable package out of a mantidworkbench conda package."
+  echo "Create a standalone installable package out of a lockfile."
   echo "Requires mamba to be installed in the running environment, and on the path."
-  echo "Options:"
-  echo "  -c Optional conda channel overriding the default mantid"
+  echo "Mandatory arguments:"
+  echo "  --lockfile conda lock file containing the mantidworkbench environment"
+  echo "Optional arguments:"
   echo "  -s Optional Add a suffix to the output mantid file, has to be Unstable, or Nightly or not used"
-  echo
-  echo "Positional Arguments"
-  echo "  package_name: The name of the package exe, i.e. the final name will be '${package_name}.exe'"
   exit $exitcode
 }
 
-# Optional arguments
-CONDA_CHANNEL=mantid
+# Arguments
 SUFFIX=""
-MANTID_VERSION=""
+LOCKFILE=""
 while [ ! $# -eq 0 ]
 do
     case "$1" in
-        -c)
-            CONDA_CHANNEL="$2"
-            shift
-            ;;
         -s)
             SUFFIX="$2"
             shift
             ;;
-        -v)
-            MANTID_VERSION="$2"
+        --lockfile)
+            LOCKFILE="$2"
             shift
             ;;
         -h)
@@ -60,6 +53,11 @@ if [ ! -z "$SUFFIX" ]; then
     exit 1
   fi
 fi
+# Lock file is required for the script to work.
+if [ -z "$LOCKFILE" ]; then
+  echo "Lockfile must be specified."
+  exit 1
+fi
 
 # Define variables
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -77,25 +75,8 @@ rm -rf $CONDA_ENV_PATH
 
 mkdir $COPY_DIR
 
-# The mantid channel is required as the source for installing mslice
-MANTID_CHANNEL=mantid
-# If it's a Nightly or Unstable package, use the mantid/label/nightly label so it picks up
-# the nightly version of mslice
-if [[ "$SUFFIX" == "Unstable" ]] || [[ "$SUFFIX" == "Nightly" ]]; then
-  MANTID_CHANNEL=mantid/label/nightly
-fi
-
-if [ -z "$MANTID_VERSION" ]; then
-  echo "Error: Mantid version must be specified with -v flag"
-  exit 1
-fi
-
-echo "Creating conda env from mantidworkbench==${MANTID_VERSION} and mslice"
-"$CONDA_EXE" create --prefix $CONDA_ENV_PATH \
-  --copy --channel $CONDA_CHANNEL --channel conda-forge --channel $MANTID_CHANNEL -y \
-  "mantidworkbench==${MANTID_VERSION}" \
-  "mantiddocs==${MANTID_VERSION}" \
-  mslice
+echo "Creating conda env from ${LOCKFILE}"
+"$CONDA_EXE" create --prefix $CONDA_ENV_PATH --copy -f $LOCKFILE --yes
 echo "Conda env created"
 
 echo "Copying root packages of env files (Python, DLLs, Lib, Scripts, ucrt, and msvc files) to package/bin"
@@ -216,6 +197,8 @@ LICENSE_PATH="$SCRIPT_DRIVE_LETTER:${LICENSE_PATH:2}"
 echo Generating uninstaller helper files
 python $THIS_SCRIPT_DIR/create_uninstall_lists.py --package_dir=$COPY_DIR --output_dir=$THIS_SCRIPT_DIR
 
+# Pull mantid version out of the lock file.
+MANTID_VERSION=$(grep -A 10 'name: mantidworkbench$' $LOCKFILE | grep 'version:' | head -1 | sed 's/.*version: *//')
 # Add version info to the package name
 VERSION_NAME="$PACKAGE_NAME"-"$MANTID_VERSION".exe
 # Give NSIS full path to the output package name so that it drops it in the current working directory.

@@ -134,18 +134,17 @@ function usage() {
   echo "This directory will be created if it does not exist or purged if it already exists."
   echo "The final .dmg will be created in the current working directory."
   echo "Options:"
-  echo "  -c Optional conda channel overriding the default mantid"
   echo "  -s Optional Add a suffix to the output mantid file, has to be Unstable, or Nightly or not used"
   echo "  -p Target platform, e.g. osx-arm64"
+  echo "  --lockfile conda lock file that defines the mantidworkbench environment"
   exit $exitcode
 }
 
 ## Script begin
-# Optional arguments
-conda_channel=mantid
+# Arguments
 platform=""
 suffix=
-mantid_version=
+lockfile=
 while [ ! $# -eq 0 ]
 do
   case "$1" in
@@ -153,16 +152,12 @@ do
         platform="$2"
         shift
         ;;
-    -c)
-        conda_channel="$2"
-        shift
-        ;;
     -s)
         suffix="$2"
         shift
         ;;
-    -v)
-        mantid_version="$2"
+    --lockfile)
+        lockfile="$2"
         shift
         ;;
     -h)
@@ -186,11 +181,17 @@ if [ ! -z "$suffix" ]; then
   fi
 fi
 
+# Lock file is required for the script to work.
+if [ -z "$lockfile" ]; then
+  echo "Lockfile must be specified."
+  exit 1
+fi
+
 bundle_name="$BUNDLE_PREFIX$suffix"
 bundle_icon="${ICON_DIR}/mantid_workbench$(echo $suffix | tr '[:upper:]' '[:lower:]').icns"
 bundle_dirname="$bundle_name".app
 bundle_contents="$BUILD_DIR"/"$bundle_dirname"/Contents
-echo "Building '$bundle_dirname' in '$BUILD_DIR' from '$conda_channel' conda channel"
+echo "Building '$bundle_dirname' in '$BUILD_DIR' from '$lockfile'"
 echo "Using bundle icon ${bundle_icon}"
 
 # Build directory needs to be empty before we start
@@ -211,26 +212,13 @@ mkdir -p "$bundle_contents"/{Resources,MacOS}
 # --platform osx-64 is required to allow ARM-based systems to install the osx-64 mantid packages.
 bundle_conda_prefix="$bundle_contents"/Resources
 
-# The mantid channel is required as the source for installing mslice
-mantid_channel=mantid
-# If it's a Nightly or Unstable package, use the mantid/label/nightly label so it picks up
-# the nightly version of mslice
-if [[ "$suffix" == "Unstable" ]] || [[ "$suffix" == "Nightly" ]]; then
-  mantid_channel=mantid/label/nightly
-fi
-
-if [ -z "$mantid_version" ]; then
-  echo "Error: Mantid version must be specified with -v flag"
-  exit 1
-fi
-
 echo "Creating conda environment in '$bundle_conda_prefix'"
 CONDA_SUBDIR="$platform" "$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy \
-  --channel "$conda_channel" --channel conda-forge --channel $mantid_channel --yes \
-  "mantidworkbench==${mantid_version}" \
-  "mantiddocs==${mantid_version}" \
-  mslice
+  -f $lockfile --yes
 echo
+
+# Pull mantid version out of the lock file.
+mantid_version=$(grep -A 10 'name: mantidworkbench$' $LOCKFILE | grep 'version:' | head -1 | sed 's/.*version: *//')
 
 # Trim and fixup bundle
 trim_conda "$bundle_conda_prefix"

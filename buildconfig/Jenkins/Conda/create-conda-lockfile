@@ -1,0 +1,148 @@
+#!/bin/bash -ex
+
+# Creates a conda-lock file containing mantidworkbench, (optionally) mantiddocs, mslice and all dependencies.
+# Use only on Linux, otherwise we have to mess around with the workspace path.
+# Positional arguments:
+# 1. WORKSPACE: path to workspace
+#
+# Mandatory arguments:
+# --lockfile-name: Defines the name of the lockfile that is created by this script.
+# --git-tag: Version of mantidworkbench to use in the lockfile.
+# --platform: repeatable option, at least one of linux-64, win-64, osx-arm64. Tells conda-lock which platforms to use.
+#
+# Optional arguments:
+# --suffix: Package suffix, either Nightly or Unstable. For releases (which have no suffix) omit this option.
+#           This will be used to determine which channel the mslice package comes from.
+# --skip-docs: Do not install mantiddocs, e.g. in ornl builds where the docs are not built.
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source $SCRIPT_DIR/pixi-utils
+REPO_ROOT_DIR=$SCRIPT_DIR/../../..
+
+# Setup expected variables
+WORKSPACE=$1
+if [[ -z "$WORKSPACE" ]]; then
+    echo "A workspace argument is required"
+    exit 1
+fi
+shift
+
+# Parse options
+LOCKFILE_NAME=""
+GIT_TAG=""
+SKIP_DOCS=false
+SUFFIX=""
+PLATFORMS=()
+
+while [ ! $# -eq 0 ]
+do
+    case "$1" in
+        --lockfile-name)
+            LOCKFILE_NAME="$2"
+            shift ;;
+        --git-tag)
+            GIT_TAG="$2"
+            shift ;;
+        --suffix)
+            SUFFIX="$2"
+            shift ;;
+        --skip-docs)
+            SKIP_DOCS=true ;;
+        --platform)
+            if [[ -z "${2:-}" || "$2" == --* ]]; then
+                echo "Error: --platform requires a value."
+                exit 1
+            fi
+            PLATFORMS+=("$2")
+            shift ;;
+        *)
+            echo "Argument not accepted: $1"
+            exit 1
+            ;;
+  esac
+  shift
+done
+
+if [ -z "${LOCKFILE_NAME}" ]; then
+    echo "Error: --lockfile-name is required."
+    exit 1
+fi
+
+if [ -z "${GIT_TAG}" ]; then
+    echo "Error: --git-tag is required."
+    exit 1
+fi
+
+if [[ ${#PLATFORMS[@]} -eq 0 ]]; then
+    echo "Error: at least one --platform is required."
+    exit 1
+fi
+
+# Check platform names are valid.
+for platform in "${PLATFORMS[@]}"; do
+    case "$platform" in
+        linux-64|win-64|osx-arm64) ;;
+        *)
+            echo "Error: Unsupported platform: $platform"
+            exit 1
+            ;;
+    esac
+done
+
+# If suffix is not empty and does not contain Unstable or Nightly then fail.
+if [ ! -z "$SUFFIX" ]; then
+  if [ "$SUFFIX" != "Unstable" ] && [ "$SUFFIX" != "Nightly" ]; then
+    echo "Suffix must either not be passed, or be Unstable or Nightly, for release do not pass this argument."
+    exit 1
+  fi
+fi
+
+install_pixi "$REPO_ROOT_DIR"
+
+# Index the local channel and prepend the local channel syntax.
+LOCAL_CHANNEL=$WORKSPACE/conda-bld
+pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e conda-lockfile --frozen rattler-index fs $LOCAL_CHANNEL
+LOCAL_CHANNEL=file://$LOCAL_CHANNEL
+
+MANTID_VERSION="${GIT_TAG#v}"
+echo "Pinning mantidworkbench to version: ${MANTID_VERSION}"
+
+# The mantid channel is required as the source for installing mslice for release versions of mantidworkbench.
+MSLICE_CHANNEL=mantid
+# If it's a Nightly or Unstable package, use the mantid/label/nightly label so it picks up
+# the nightly version of mslice
+if [[ "$SUFFIX" == "Unstable" ]] || [[ "$SUFFIX" == "Nightly" ]]; then
+  MSLICE_CHANNEL=mantid/label/nightly
+fi
+
+if [[ "${SKIP_DOCS}" == "true" ]]; then
+    DOCS_DEPENDENCY=""
+else
+    DOCS_DEPENDENCY="  - mantiddocs=${MANTID_VERSION}"
+fi
+
+# Make a temporary conda environment file to pass to conda-lock.
+ENV_FILE=$(mktemp)
+
+cat > "${ENV_FILE}" <<EOF
+channels:
+  - ${LOCAL_CHANNEL}
+  - ${MSLICE_CHANNEL}
+  - conda-forge
+dependencies:
+  - mantidworkbench=${MANTID_VERSION}
+${DOCS_DEPENDENCY}
+  - mslice
+EOF
+
+PLATFORM_ARGS=()
+for platform in "${PLATFORMS[@]}"; do
+    PLATFORM_ARGS+=(--platform "$platform")
+done
+
+pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e conda-lockfile --frozen conda-lock lock \
+    --file "${ENV_FILE}" \
+    "${PLATFORM_ARGS[@]}" \
+    --lockfile $LOCKFILE_NAME
+
+rm "${ENV_FILE}"

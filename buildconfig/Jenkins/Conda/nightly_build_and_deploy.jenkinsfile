@@ -143,6 +143,7 @@ pipeline {
         checkoutSource("${GIT_SHA}")
         script {
           env.GIT_TAG = generate_git_tag()
+          env.LOCKFILE_NAME = "mantidworkbench-${env.GIT_TAG}.conda-lock.yml"
         }
         echo "${env.GIT_TAG}"
       }
@@ -359,13 +360,87 @@ pipeline {
 
               package_conda("${PLATFORM}", "workbench")
               archive_conda_packages("${PLATFORM}")
-              package_standalone("${PLATFORM}")
-              archive_standalone_package("${PLATFORM}")
             }
             post {
               always {
                 archive_env_logs("${PLATFORM}")
               }
+            }
+          }
+        }
+      }
+    }
+
+    stage('Create conda lock file') {
+      agent { label 'linux-64' } // Use linux for simplicity with shell scripts
+      steps {
+        checkoutSource("${GIT_SHA}")
+
+        script {
+          // Determine which platforms to include in the lockfile.
+          def platforms = params.BUILD_PACKAGE == 'all' ?
+              ['linux-64', 'win-64', 'osx-arm64'] :
+              [params.BUILD_PACKAGE]
+          def platformOptions = platforms.collect {
+              "--platform ${it}"
+          }.join(' ')
+          sh "${CISCRIPT_DIR}/create-conda-lockfile ${WORKSPACE} ${lockfile_options()} ${platformOptions}"
+        }
+
+        archiveArtifacts artifacts: "**/${LOCKFILE_NAME}",
+          allowEmptyArchive: false,
+          fingerprint: true,
+          onlyIfSuccessful: true
+      }
+    }
+
+    stage('Package standalone') {
+      matrix {
+        axes {
+          axis {
+            name 'PLATFORM'
+            values 'linux-64', 'win-64', 'osx-arm64'
+          }
+        }
+        stages {
+          stage('package standalone') {
+            when {
+              beforeAgent true
+              beforeOptions true
+              anyOf {
+                  expression { params.BUILD_PACKAGE == "${PLATFORM}" }
+                  expression { params.BUILD_PACKAGE == 'all' }
+              }
+            }
+            agent { label "${PLATFORM}" }
+            options {
+                timestamps()
+                retry(3)
+            }
+            steps {
+              // Clean up conda-bld before we start to avoid any
+              // confusion with old packages
+              dir('conda-bld') {
+                deleteDir()
+              }
+              checkoutSource("${GIT_SHA}")
+              // Copy conda packages to enable conda-lock to resolve
+              copyArtifacts filter: "**/conda-bld/noarch/*.conda, **/conda-bld/${PLATFORM}/*.conda",
+                fingerprintArtifacts: true,
+                projectName: '${JOB_NAME}',
+                selector: specific('${BUILD_NUMBER}'),
+                target: './',
+                flatten: false
+
+              copyArtifacts filter: "**/${LOCKFILE_NAME}",
+                fingerprintArtifacts: true,
+                projectName: '${JOB_NAME}',
+                selector: specific('${BUILD_NUMBER}'),
+                target: './',
+                flatten: true
+
+              package_standalone("${PLATFORM}")
+              archive_standalone_package("${PLATFORM}")
             }
           }
         }
@@ -655,12 +730,17 @@ def package_standalone_options(platform) {
   if(PACKAGE_SUFFIX.trim() != '') {
     package_options += " --package-suffix ${PACKAGE_SUFFIX}"
   }
-  package_options += " --git-tag ${GIT_TAG}"
-  // For branches that don't build mantiddocs (e.g., ornl-next), skip docs installation
-  if(!buildMantiddocs) {
-    package_options += " --skip-docs"
+  return package_options.trim() + " --platform ${platform}" + " --lockfile ${LOCKFILE_NAME}"
+}
+
+def lockfile_options() {
+  def options = "--git-tag ${GIT_TAG} --lockfile-name ${LOCKFILE_NAME}";
+  if(PACKAGE_SUFFIX.trim() != '') {
+    options += " --suffix ${PACKAGE_SUFFIX}"
   }
-  return package_options.trim() + " --platform ${platform}"
+  if(!buildMantiddocs) {
+    options += " --skip-docs"
+  }
 }
 
 // Determine whether this build should be marked as a prerelease on GitHub.

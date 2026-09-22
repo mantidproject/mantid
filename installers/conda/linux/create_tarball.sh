@@ -66,36 +66,26 @@ function usage() {
   echo "This directory will be created if it does not exist or purged if it already exists."
   echo "The final .dmg will be created in the current working directory."
   echo "Options:"
-  echo "  -c Optional conda channel overriding the default mantid"
+  echo "  --lockfile (mandatory) conda lock file that defines the mantidworkbench environment"
   echo "  -s Optional Add a suffix to the output mantid file, has to be Unstable, or Nightly or not used"
-  echo "  --skip-docs Optional Skip mantiddocs installation (uses online documentation only)"
   echo
   exit $exitcode
 }
 
 ## Script begin
-# Optional arguments
-conda_channel=mantid
+# Arguments
 suffix=
-mantid_version=
-skip_docs=false
+lockfile=
 while [ ! $# -eq 0 ]
 do
   case "$1" in
-    -c)
-        conda_channel="$2"
+    --lockfile)
+        lockfile="$2"
         shift
         ;;
     -s)
         suffix="$2"
         shift
-        ;;
-    -v)
-        mantid_version="$2"
-        shift
-        ;;
-    --skip-docs)
-        skip_docs=true
         ;;
     -h)
         usage 0
@@ -118,12 +108,18 @@ if [ ! -z "$suffix" ]; then
   fi
 fi
 
+# Lock file is required for the script to work.
+if [ -z "$lockfile" ]; then
+  echo "Lockfile must be specified."
+  exit 1
+fi
+
 suffix_lower=$(echo $suffix | tr '[:upper:]' '[:lower:]')
 bundle_name="$BUNDLE_PREFIX$suffix_lower"
 bundle_icon="${ICON_DIR}/mantid_workbench${suffix_lower}.png"
 bundle_dirname="$bundle_name"
 bundle_contents="$BUILD_DIR"/"$bundle_dirname"
-echo "Building '$bundle_dirname' in '$BUILD_DIR' from '$conda_channel' conda channel"
+echo "Building '$bundle_dirname' in '$BUILD_DIR' from '$lockfile'"
 echo "Using bundle icon ${bundle_icon}"
 
 # Build directory needs to be empty before we start
@@ -142,39 +138,17 @@ mkdir -p "$bundle_contents"
 # Create conda environment internally. --copy ensures no symlinks are used
 bundle_conda_prefix="$bundle_contents"
 
-# The mantid channel is required as the source for installing mslice
-mantid_channel=mantid
-# If it's a Nightly or Unstable package, use the mantid/label/nightly label so it picks up
-# the nightly version of mslice
-if [[ "$suffix" == "Unstable" ]] || [[ "$suffix" == "Nightly" ]]; then
-  mantid_channel=mantid/label/nightly
-fi
-
-if [ -z "$mantid_version" ]; then
-  echo "Error: Mantid version must be specified with -v flag"
-  exit 1
-fi
-
-# Build conda packages list
-conda_packages=("mantidworkbench==${mantid_version}")
-if [ "$skip_docs" = false ]; then
-  conda_packages+=("mantiddocs==${mantid_version}")
-  echo "Installing mantiddocs ${mantid_version}"
-else
-  echo "Skipping mantiddocs installation (will use online documentation)"
-fi
-conda_packages+=(mslice)
-
 echo "Creating conda environment in '$bundle_conda_prefix'"
-"$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy \
-  --channel "$conda_channel" --channel conda-forge --channel $mantid_channel --yes \
-  "${conda_packages[@]}"
+"$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy -f $lockfile --yes
 echo
 
 # Trim and fixup bundle
 trim_conda "$bundle_conda_prefix"
 fixup_bundle "$bundle_conda_prefix" "$bundle_icon"
 add_resources "$bundle_conda_prefix" "$bundle_icon"
+
+# Pull mantid version out of the lock file.
+mantid_version=$(grep -A 10 'name: mantidworkbench$' $LOCKFILE | grep 'version:' | head -1 | sed 's/.*version: *//')
 
 # Create tarball and compress
 version_name="$bundle_name"-"$mantid_version"

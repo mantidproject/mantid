@@ -18,12 +18,8 @@
 #
 # Possible parameters:
 #   --package-suffix: An optional suffix to pass to the standalone package step.
+#   --lockfile (mandatory): location of the conda lock file that defines the environment.
 #   --platform: Target platform, e.g. linux-64
-#   --git-tag: The version tag to pin the locally-built mantid packages in the installer
-#              environment. Required to prevent the solver silently picking a remote version
-#              instead of the locally-built one.
-#   --skip-docs: Skip mantiddocs installation. Required for branches (like ornl-next) that
-#                don't build mantiddocs. Uses online documentation only.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $SCRIPT_DIR/pixi-utils
@@ -52,8 +48,7 @@ fi
 # Parse options
 STANDALONE_PACKAGE_SUFFIX=
 PLATFORM=""
-GIT_TAG=""
-SKIP_DOCS=false
+LOCKFILE=
 while [ ! $# -eq 0 ]
 do
     case "$1" in
@@ -63,11 +58,9 @@ do
         --platform)
             PLATFORM="$2"
             shift ;;
-        --git-tag)
-            GIT_TAG="$2"
+        --lockfile)
+            LOCKFILE="$2"
             shift ;;
-        --skip-docs)
-            SKIP_DOCS=true ;;
         *)
             echo "Argument not accepted: $1"
             exit 1
@@ -84,29 +77,16 @@ pixi list --manifest-path $REPO_ROOT_DIR/pixi.toml -e package-standalone --froze
 
 # Build packages
 # Setup a local conda channel to find our locally built packages package. It is
-# assumed the raw .bz2 artefacts have been copied into the directory below
+# assumed the raw .conda artefacts have been copied into the directory below
 LOCAL_CHANNEL_PATH=$WORKSPACE/conda-bld
 pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e package-standalone --frozen rattler-index fs $LOCAL_CHANNEL_PATH
 
 # Jenkins Pipeline expects packages in the root workspace directory
 PACKAGING_SCRIPTS_DIR=$SCRIPT_DIR/../../../installers/conda
-LOCAL_CHANNEL=file://$LOCAL_CHANNEL_PATH
 
-if [ -z "${GIT_TAG}" ]; then
-    echo "Error: --git-tag is required to pin the locally-built mantid version in the installer environment."
-    echo "       Without it the solver may silently pick a remote version instead of the locally-built one."
-    exit 1
-fi
-# Strip leading 'v' to match the version format used by versioningit in package-conda
-MANTID_VERSION="${GIT_TAG#v}"
-echo "Pinning mantidworkbench to version: ${MANTID_VERSION}"
-
-PACKAGING_ARGS="-c ${LOCAL_CHANNEL} -v ${MANTID_VERSION}"
+PACKAGING_ARGS="--lockfile ${LOCKFILE}"
 if [ -n "${STANDALONE_PACKAGE_SUFFIX}" ]; then
     PACKAGING_ARGS="${PACKAGING_ARGS} -s ${STANDALONE_PACKAGE_SUFFIX}"
-fi
-if [ "${SKIP_DOCS}" = true ]; then
-    PACKAGING_ARGS="${PACKAGING_ARGS} --skip-docs"
 fi
 
 if [[ $OSTYPE == 'msys'* ]]; then
