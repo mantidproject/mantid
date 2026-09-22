@@ -408,6 +408,17 @@ pipeline {
       }
     }
 
+    stage('Create conda lock file') {
+      agent { label 'linux-64' } // Use linux for simplicity with shell scripts
+      steps {
+        checkoutSource("${GIT_SHA}")
+        sh "{CISCRIPT_DIR}/create-conda-lockfile --git-tag ${GIT_TAG} --"
+      }
+    }
+
+    stage ('Package standalone') {
+    }
+
     stage ('Publishing to Github') {
       when {
         beforeAgent true

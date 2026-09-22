@@ -30,6 +30,7 @@ package-standalone = { features = [
 ], no-default-feature = true }
 docs-build = { features = ["docs-build"], no-default-feature = true }
 docs-migration = { features = ["docs-migration"], no-default-feature = true }
+conda-lockfile = { features = ["conda-lockfile"], no-default-feature = true }
 
 [feature.rattler-builder.dependencies]
 rattler-build = "0.76.*"
@@ -74,6 +75,10 @@ mamba = ">=2.9,<3"
 # rst-to-myst doesn't play nice with dependencies in the default environment
 rst-to-myst = "*"
 sphinx = "*"
+
+[feature.conda-lockfile.dependencies]
+rattler-index = ">=0.31.5,<1.0"
+conda-lock = ">=4.0.2,<5"
 
 [feature.docs-migration.tasks.rst2md]
 args = [{ "arg" = "filename" }]

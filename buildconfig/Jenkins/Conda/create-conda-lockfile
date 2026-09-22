@@ -1,0 +1,114 @@
+#!/bin/bash -ex
+
+# Creates a conda-lock file containing mantidworkbench, (optionally) mantiddocs, mslice and all dependencies.
+# Mandatory agruments:
+# --local-channel: Directory containing the locally built conda packages.
+# --git-tag: Specifies which version of mantid to install. Ensures that the correct channel is used
+#            by pinning to an exact version.
+# Optional arguments:
+# --suffix: Package suffix, either Nightly or Unstable. For releases (which have no suffix) omit this option.
+#           This will be used to determine which channel the mslice package comes from.
+# --skip-docs: Do not install mantiddocs, e.g. in ornl builds where the docs are not built.
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source $SCRIPT_DIR/pixi-utils
+REPO_ROOT_DIR=$SCRIPT_DIR/../../..
+
+# Parse options
+LOCAL_CHANNEL=""
+MSLICE_CHANNEL=""
+GIT_TAG=""
+SKIP_DOCS=false
+SUFFIX=""
+
+while [ ! $# -eq 0 ]
+do
+    case "$1" in
+        --local-channel)
+            MANTID_CHANNEL="$2"
+            shift ;;
+        --git-tag)
+            GIT_TAG="$2"
+            shift ;;
+        --suffix)
+            SUFFIX="$2"
+            shift ;;
+        --skip-docs)
+            SKIP_DOCS=true ;;
+        *)
+            echo "Argument not accepted: $1"
+            exit 1
+            ;;
+  esac
+  shift
+done
+
+if [ -z "${GIT_TAG}" ]; then
+    echo "Error: --git-tag is required to pin mantid version."
+    exit 1
+fi
+
+if [ -z "${MANTID_CHANNEL}" ]; then
+    echo "Error: --mantid-channel is required for installing mantid packages."
+    echo "       Can be a conda channel or local channel prefixed with file://"
+    exit 1
+fi
+
+if [ ! -d "${LOCAL_CHANNEL}" ]; then
+    echo "Directory ${LOCAL_CHANNEL} does not exist."
+    exit 1
+fi
+
+# If suffix is not empty and does not contain Unstable or Nightly then fail.
+if [ ! -z "$SUFFIX" ]; then
+  if [ "$SUFFIX" != "Unstable" ] && [ "$SUFFIX" != "Nightly" ]; then
+    echo "Suffix must either not be passed, or be Unstable or Nightly, for release do not pass this argument."
+    exit 1
+  fi
+fi
+
+install_pixi "$REPO_ROOT_DIR"
+
+# Index the local channel and prepend the local channel syntax.
+pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e conda-lockfile --frozen rattler-index fs $LOCAL_CHANNEL
+LOCAL_CHANNEL=file://$LOCAL_CHANNEL
+
+MANTID_VERSION="${GIT_TAG#v}"
+echo "Pinning mantidworkbench to version: ${MANTID_VERSION}"
+
+# The mantid channel is required as the source for installing mslice for release versions of mantidworkbench.
+MSLICE_CHANNEL=mantid
+# If it's a Nightly or Unstable package, use the mantid/label/nightly label so it picks up
+# the nightly version of mslice
+if [[ "$SUFFIX" == "Unstable" ]] || [[ "$SUFFIX" == "Nightly" ]]; then
+  MSLICE_CHANNEL=mantid/label/nightly
+fi
+
+if [[ "${SKIP_DOCS}" == "true" ]]; then
+    DOCS_DEPENDENCY=""
+else
+    DOCS_DEPENDENCY="  - mantiddocs=${MANTID_VERSION}"
+fi
+
+# Make a temporary conda environment file to pass to conda-lock.
+ENV_FILE=$(mktemp)
+
+cat > "${ENV_FILE}" <<EOF
+channels:
+  - ${LOCAL_CHANNEL}
+  - ${MSLICE_CHANNEL}
+  - conda-forge
+dependencies:
+  - mantidworkbench=${MANTID_VERSION}
+${DOCS_DEPENDENCY}
+  - mslice
+EOF
+
+pixi run conda-lock lock \
+    --file "${ENV_FILE}" \
+    --platform win-64 --platform win-64 --platform win-64 \
+    --lockfile mantidworkbench-${GIT_TAG}.conda-lock.yml
+
+rm "${ENV_FILE}"
+
+#TODO - replace the channel and URLs in the conda lock file and modify the jenkinsfile

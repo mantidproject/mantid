@@ -84,7 +84,7 @@ pixi list --manifest-path $REPO_ROOT_DIR/pixi.toml -e package-standalone --froze
 
 # Build packages
 # Setup a local conda channel to find our locally built packages package. It is
-# assumed the raw .bz2 artefacts have been copied into the directory below
+# assumed the raw .conda artefacts have been copied into the directory below
 LOCAL_CHANNEL_PATH=$WORKSPACE/conda-bld
 pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e package-standalone --frozen rattler-index fs $LOCAL_CHANNEL_PATH
 
