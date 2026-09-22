@@ -331,10 +331,11 @@ void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues
     UBWSymm = calQTransform(DblMatrix(3, 3, true), *so, false);
     lowValues = getLogValues<VectorDoubleProperty>(currentExptInfo, "MDNorm_low");
     highValues = getLogValues<VectorDoubleProperty>(currentExptInfo, "MDNorm_high");
-    if (lowValues.size() != spectrumInfo.size()) {
+    if ((lowValues.size() != spectrumInfo.size()) || (highValues.size() != spectrumInfo.size())) {
       g_log.warning() << "Incompatible detector and spectrum size. Using original data limits.\n";
-      double run_emin = currentExptInfo.run().getBinBoundaries().front();
-      double run_emax = currentExptInfo.run().getBinBoundaries().back();
+      const auto &binBoundaries = currentExptInfo.run().getBinBoundaries();
+      const double runEmin = binBoundaries.front();
+      const double runEmax = binBoundaries.back();
       lowValues.assign(spectrumInfo.size(), run_emin);
       highValues.assign(spectrumInfo.size(), run_emax);
     }
