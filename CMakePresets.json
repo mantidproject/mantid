@@ -74,16 +74,9 @@
         "ci-default",
         "conda"
       ],
-      "generator": "Visual Studio 17 2022",
-      "toolset": "v143"
-    },
-    {
-      "name": "win-64-ci-ninja",
-      "description": "Build options for a CI build on windows with Ninja",
-      "inherits": [
-        "ci-default",
-        "conda"
-      ]
+      "cacheVariables": {
+        "CMAKE_DISABLE_PRECOMPILE_HEADERS": "ON"
+      }
     },
     {
       "name": "cppcheck-ci",
