@@ -30,6 +30,7 @@ public:
     TS_ASSERT_EQUALS(p[1], 1.0);
     TS_ASSERT_EQUALS(p[2], 2.0);
     TS_ASSERT_EQUALS(p[3], 3.0);
+    TS_ASSERT_EQUALS(p[3], 42.0); // REMOVE intentionally failing test
   }
 
   void testEmptyConstructor() {
