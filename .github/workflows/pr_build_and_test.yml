@@ -165,6 +165,8 @@ jobs:
       contents: read
 
     strategy:
+      # failed jobs in the matrix don't cancel each other
+      fail-fast: false
       matrix:
         # Skip Windows when the PR targets ornl-next (ORNL-specific branch, Linux only)
         include: ${{ fromJson(github.base_ref == 'ornl-next' && '[{"os":"Linux","cmake_preset":"linux-64-ci"}]' || '[{"os":"Linux","cmake_preset":"linux-64-ci"},{"os":"Windows","cmake_preset":"win-64-ci"}]') }}
