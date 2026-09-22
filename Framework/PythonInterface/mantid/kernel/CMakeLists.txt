@@ -73,6 +73,18 @@ set(EXPORT_FILES
 
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp)
 create_module(${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES})
+# The generated module-init file is the sole caller of NumPy's import_array() for this module; every other Exports/*.cpp
+# defines NO_IMPORT_ARRAY before including the NumPy headers. That #define leaks across an entire merged unity
+# translation unit, so this file must never be unity-batched with anything else, or NO_IMPORT_ARRAY silently suppresses
+# its own import.
+set_source_files_properties(${MODULE_DEFINITION} PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+# Guard-less header meant for single inclusion per TU (same class of issue as a .hxx impl file). Files below also
+# declare a file-local (anonymous-namespace) helper whose generic name (dtype, etc.) collides with a
+# same-named-different-implementation helper in another Exports/*.cpp file once unity-merged.
+set_source_files_properties(
+  src/Exports/SetDefaultWhenProperty.cpp src/Exports/SetValueWhenProperty.cpp src/Exports/ArrayProperty.cpp
+  src/Exports/TimeSeriesProperty.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON
+)
 
 # Helper code
 
@@ -132,5 +144,5 @@ target_link_libraries(
 )
 
 # Installation settings
-set_target_properties(PythonKernelModule PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH}")
+set_target_properties(PythonKernelModule PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH}" UNITY_BUILD ON)
 mtd_install_shared_library(TARGETS PythonKernelModule DESTINATION ${Python_SITELIB_RELPATH}/mantid/kernel)

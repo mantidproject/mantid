@@ -34,8 +34,7 @@
       "cacheVariables": {
         "CMAKE_C_FLAGS_DEBUG": "-g -Og",
         "CMAKE_CXX_FLAGS_DEBUG": "-g -Og",
-        "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_DISABLE_PRECOMPILE_HEADERS": "ON"
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
@@ -62,10 +61,7 @@
       "inherits": [
         "ci-default",
         "conda"
-      ],
-      "cacheVariables": {
-        "CMAKE_DISABLE_PRECOMPILE_HEADERS": "ON"
-      }
+      ]
     },
     {
       "name": "win-64-ci",
