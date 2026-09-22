@@ -663,12 +663,11 @@ class ShapeRenderer(InstrumentRenderer):
 
                 projected_vertices = projection.project_points(tiled.reshape(-1, 3), apply_x_correction=False).reshape(n_group, n_verts, 2)
 
+                # Keep each detector polygon contiguous at the periodic seam
+                # by wrapping vertices near the projected detector center.
                 u_period = projection.u_period
-                if np.isfinite(u_period) and abs(u_period) > 0.0:
-                    # Keep each detector polygon contiguous at the periodic seam
-                    # by wrapping vertices near the projected detector center.
-                    centre_x = detector_positions[group_indices, 0][:, np.newaxis]
-                    projected_vertices[:, :, 0] += np.round((centre_x - projected_vertices[:, :, 0]) / u_period) * u_period
+                centre_x = detector_positions[group_indices, 0][:, np.newaxis]
+                projected_vertices[:, :, 0] += np.round((centre_x - projected_vertices[:, :, 0]) / u_period) * u_period
 
                 tiled[:, :, :2] = projected_vertices
 

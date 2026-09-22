@@ -10,6 +10,7 @@ from qtpy.QtWidgets import (
     QMainWindow,
     QVBoxLayout,
     QHBoxLayout,
+    QGridLayout,
     QWidget,
     QLabel,
     QLineEdit,
@@ -24,6 +25,7 @@ from qtpy.QtWidgets import (
     QListWidgetItem,
     QAbstractItemView,
     QScrollArea,
+    QSlider,
     QTabWidget,
     QFrame,
 )
@@ -74,6 +76,29 @@ def _skip_if_closing(method):
         return method(self, *args, **kwargs)
 
     return wrapper
+
+
+def _add_widgets_in_columns(layout, widgets: list[QWidget], columns: int = 2) -> None:
+    """Add the given widgets to a grid nested in the given layout, wrapping every `columns` widgets.
+
+    A row of buttons in a QHBoxLayout has a minimum width of the sum of its buttons, which is what forces the left
+    column to scroll horizontally. Wrapping them into equal width columns reduces that minimum to the widest button
+    in each column. A trailing widget with no partner spans the full width.
+    """
+    grid = QGridLayout()
+    grid.setContentsMargins(0, 0, 0, 0)
+    for column in range(columns):
+        grid.setColumnStretch(column, 1)
+    for row, index in enumerate(range(0, len(widgets), columns)):
+        widgets_in_row = widgets[index : index + columns]
+        if len(widgets_in_row) == 1 and columns > 1:
+            # QWidget *widget, int fromRow, int fromColumn, int rowSpan, int columnSpan
+            grid.addWidget(widgets_in_row[0], row, 0, 1, columns)
+            continue
+        for column, widget in enumerate(widgets_in_row):
+            # QWidget *widget, int row, int column
+            grid.addWidget(widget, row, column)
+    layout.addLayout(grid)
 
 
 def _ensure_overlay_manager(method):
@@ -208,6 +233,9 @@ class FullInstrumentViewView(QWidget):
     _ASPECT_RATIO_SETTING_STRING = "InstrumentView.MaintainAspectRatio"
     _RENDER_MODE_SETTING_STRING = "InstrumentView.RenderMode"
     _FLIP_BEAM_SETTING_STRING = "InstrumentView.FlipBeam"
+    _U_OFFSET_SETTING_STRING = "InstrumentView.UOffset"
+    _ROTATE_180_SETTING_STRING = "InstrumentView.Rotate180"
+    _U_OFFSET_STEP_DEGREES = 10
     _RENDER_MODE_POINTS = "Points (Fastest)"
     _RENDER_MODE_SHAPES_FAST = "Approximated Shapes (Fast)"
     _RENDER_MODE_RAW_SHAPES = "Raw Shapes (Slowest)"
@@ -337,6 +365,29 @@ class FullInstrumentViewView(QWidget):
         self._flip_beam_check_box.setToolTip(
             "If checked, 2D projections are mirrored across the plane perpendicular to the beam direction."
         )
+        self._rotate_180_check_box = QCheckBox()
+        self._rotate_180_check_box.setText("Rotate 180\N{DEGREE SIGN}")
+        self._rotate_180_check_box.setChecked(is_config_setting_true(self._ROTATE_180_SETTING_STRING))
+        self._rotate_180_check_box.setToolTip(
+            "If checked, 2D projections are rotated half a turn about their axis, which swaps the two halves "
+            "of the instrument. Overrides the Rotate slider."
+        )
+        self._u_offset_slider = QSlider(Qt.Horizontal)
+        # The slider counts steps rather than degrees, so that it can only stop on a whole step
+        self._u_offset_slider.setRange(0, 360 // self._U_OFFSET_STEP_DEGREES)
+        self._u_offset_slider.setSingleStep(1)
+        self._u_offset_slider.setPageStep(90 // self._U_OFFSET_STEP_DEGREES)
+        self._u_offset_slider.setTickInterval(1)
+        self._u_offset_slider.setTickPosition(QSlider.TickPosition.TicksBelow)
+        # Redrawing is expensive, so only act once the slider is released
+        self._u_offset_slider.setTracking(False)
+        self._u_offset_slider.setValue(self._config_setting_int(self._U_OFFSET_SETTING_STRING) // self._U_OFFSET_STEP_DEGREES)
+        self._u_offset_slider.setToolTip("Rotates a 2D projection about its axis, moving the seam at which the instrument is cut open.")
+        self._u_offset_value_label = QLabel()
+        # Reserve room for the widest value, so the slider does not resize as it is dragged
+        self._u_offset_value_label.setMinimumWidth(self._u_offset_value_label.fontMetrics().horizontalAdvance("360\N{DEGREE SIGN}"))
+        self._on_u_offset_slider_moved(self._u_offset_slider.value())
+        self._u_offset_widget = QWidget()
         self._select_bank_tube = QPushButton("Select Bank/Tube")
         self._select_bank_tube.setCheckable(True)
         self._select_peaks = QPushButton("Select Peaks")
@@ -463,26 +514,40 @@ class FullInstrumentViewView(QWidget):
         projection_first_row.addWidget(self._reset_projection)
         projection_layout.addLayout(projection_first_row)
 
-        picking_layout = QHBoxLayout(self._picking_group_box)
-        picking_layout.addWidget(self._rubberband_zoom)
-        picking_layout.addWidget(self._hover_pick)
-        picking_layout.addWidget(self._select_peaks)
-        picking_layout.addWidget(self._select_bank_tube)
-        picking_layout.addWidget(self._clear_point_picked_detectors)
+        picking_layout = QVBoxLayout(self._picking_group_box)
+        _add_widgets_in_columns(
+            picking_layout,
+            [
+                self._rubberband_zoom,
+                self._hover_pick,
+                self._select_peaks,
+                self._select_bank_tube,
+                self._clear_point_picked_detectors,
+            ],
+        )
 
         settings_layout = QVBoxLayout(self._left_column_settings)
+        u_offset_layout = QHBoxLayout(self._u_offset_widget)
+        u_offset_layout.setContentsMargins(0, 0, 0, 0)
+        u_offset_layout.addWidget(QLabel("Rotate"))
+        u_offset_layout.addWidget(self._u_offset_slider)
+        u_offset_layout.addWidget(self._u_offset_value_label)
+
         settings_layout.addWidget(self._aspect_ratio_check_box)
         settings_layout.addWidget(self._flip_beam_check_box)
+        settings_layout.addWidget(self._rotate_180_check_box)
+        settings_layout.addWidget(self._u_offset_widget)
         settings_layout.addWidget(self._show_monitors_check_box)
         settings_layout.addWidget(self._show_sample_position_check_box)
         settings_layout.addWidget(self._render_mode_combo_box)
         settings_layout.addWidget(self._count_scale_combo_box)
         settings_layout.addStretch(1)
 
-        lineplot_options_layout = QHBoxLayout(self._lineplot_options_group_box)
-        lineplot_options_layout.addWidget((self._units_combo_box_lineplot))
-        lineplot_options_layout.addWidget(self._export_workspace_button)
-        lineplot_options_layout.addWidget(self._sum_spectra_checkbox)
+        lineplot_options_layout = QVBoxLayout(self._lineplot_options_group_box)
+        _add_widgets_in_columns(
+            lineplot_options_layout,
+            [self._units_combo_box_lineplot, self._export_workspace_button, self._sum_spectra_checkbox],
+        )
 
         self._lists_vsplitter.addWidget(self._peaks_group_box)
         self._lists_vsplitter.addWidget(self._grouping_masking_group_box)
@@ -498,10 +563,8 @@ class FullInstrumentViewView(QWidget):
         self._lists_vsplitter.setChildrenCollapsible(False)
 
         peaks_layout = QVBoxLayout(self._peaks_group_box)
-        peak_buttons_h_layout = QHBoxLayout()
-        peak_buttons_h_layout.addWidget(self._start_adding_peaks_button)
-        peak_buttons_h_layout.addWidget(self._delete_all_selected_peaks_button)
-        peaks_layout.addLayout(peak_buttons_h_layout)
+        # Both labels are long enough that a second column would only widen the panel
+        _add_widgets_in_columns(peaks_layout, [self._start_adding_peaks_button, self._delete_all_selected_peaks_button], columns=1)
         peaks_layout.addWidget(self._peak_ws_list)
 
         grouping_masking_group_layout = QVBoxLayout(self._grouping_masking_group_box)
@@ -523,6 +586,11 @@ class FullInstrumentViewView(QWidget):
         self._lineplot_layout = QVBoxLayout(self._lineplot_widget)
         self._lineplot_layout.addWidget(self._detector_figure_canvas)
         self._lineplot_layout.addWidget(self._plot_toolbar)
+
+        self._left_column_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self._left_column_scroll.setMinimumWidth(
+            self._left_column_tabs.minimumSizeHint().width() + self._left_column_scroll.verticalScrollBar().sizeHint().width()
+        )
 
     def closeEvent(self, event) -> None:
         """Closes view, not window"""
@@ -562,9 +630,22 @@ class FullInstrumentViewView(QWidget):
     def store_flip_beam_option(self) -> None:
         self._store_checkbox_option(self._flip_beam_check_box, self._FLIP_BEAM_SETTING_STRING)
 
+    def store_u_offset_option(self) -> None:
+        ConfigService.Instance()[self._U_OFFSET_SETTING_STRING] = str(self.u_offset_degrees())
+
+    def store_rotate_180_option(self) -> None:
+        self._store_checkbox_option(self._rotate_180_check_box, self._ROTATE_180_SETTING_STRING)
+
     def _store_checkbox_option(self, checkbox: QCheckBox, config_key: str) -> None:
         option = "Yes" if checkbox.isChecked() else "No"
         ConfigService.Instance()[config_key] = option
+
+    @staticmethod
+    def _config_setting_int(config_key: str) -> int:
+        try:
+            return int(ConfigService.Instance()[config_key])
+        except ValueError:
+            return 0
 
     def set_add_selection_and_mask_buttons_enabled(self, enabled: bool):
         self._add_mask.setEnabled(enabled)
@@ -582,6 +663,29 @@ class FullInstrumentViewView(QWidget):
 
     def is_flip_beam_checkbox_checked(self) -> bool:
         return self._flip_beam_check_box.isChecked()
+
+    def set_u_offset_slider_enabled(self, enabled):
+        self._u_offset_widget.setEnabled(enabled)
+
+    def set_rotate_180_box_enabled(self, enabled):
+        self._rotate_180_check_box.setEnabled(enabled)
+
+    def is_rotate_180_checkbox_checked(self) -> bool:
+        return self._rotate_180_check_box.isChecked()
+
+    def u_offset_degrees(self) -> int:
+        return self._u_offset_slider.value() * self._U_OFFSET_STEP_DEGREES
+
+    def reset_rotation_controls(self) -> None:
+        """Return both rotation controls to their defaults without triggering a redraw for each one."""
+        self._u_offset_slider.blockSignals(True)
+        self._u_offset_slider.setValue(0)
+        self._u_offset_slider.blockSignals(False)
+        self._on_u_offset_slider_moved(self._u_offset_slider.value())
+        self._rotate_180_check_box.setChecked(False)
+
+    def _on_u_offset_slider_moved(self, value: int) -> None:
+        self._u_offset_value_label.setText(f"{value * self._U_OFFSET_STEP_DEGREES}\N{DEGREE SIGN}")
 
     def is_show_monitors_checkbox_checked(self) -> bool:
         return self._show_monitors_check_box.isChecked()
@@ -716,19 +820,14 @@ class FullInstrumentViewView(QWidget):
         item_list = WorkspaceListWidget()
         item_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
         item_list.setSelectionMode(QAbstractItemView.NoSelection)
-        post_list_layout = QHBoxLayout()
         save_to_ws_btn = QPushButton()
         save_to_xml_btn = QPushButton()
         save_to_cal_btn = QPushButton()
         overwrite_btn = QPushButton()
-        post_list_layout.addWidget(save_to_ws_btn)
-        post_list_layout.addWidget(save_to_xml_btn)
-        post_list_layout.addWidget(save_to_cal_btn)
-        post_list_layout.addWidget(overwrite_btn)
         tab_layout.addLayout(pre_list_layout)
         tab_layout.addWidget(create_from_selection_btn)
         tab_layout.addWidget(item_list)
-        tab_layout.addLayout(post_list_layout)
+        _add_widgets_in_columns(tab_layout, [save_to_ws_btn, save_to_xml_btn, save_to_cal_btn, overwrite_btn])
         return (
             add_item_btn,
             create_from_selection_btn,
@@ -785,6 +884,11 @@ class FullInstrumentViewView(QWidget):
         self._show_sample_position_check_box.toggled.connect(self._on_show_sample_position_toggled)
         self._count_scale_combo_box.currentIndexChanged.connect(self._presenter.on_count_scale_selected)
         self._flip_beam_check_box.clicked.connect(self._presenter.on_flip_beam_check_box_clicked)
+        self._reset_projection.clicked.connect(self._presenter.on_reset_projection_clicked)
+        self._rotate_180_check_box.clicked.connect(self._presenter.on_rotate_180_check_box_clicked)
+        self._u_offset_slider.sliderMoved.connect(self._on_u_offset_slider_moved)
+        self._u_offset_slider.valueChanged.connect(self._on_u_offset_slider_moved)
+        self._u_offset_slider.valueChanged.connect(self._presenter.on_u_offset_changed)
         self._render_mode_combo_box.currentIndexChanged.connect(self._presenter.on_render_mode_changed)
 
         self._add_connections_to_edits_and_slider(

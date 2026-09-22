@@ -62,6 +62,7 @@ class FullInstrumentViewModel:
     _peak_picking_status: PeakPickingStatus = PeakPickingStatus.Off
     _projection_type: ProjectionType = ProjectionType.THREE_D
     _flip_beam: bool = False
+    _u_offset: float = 0.0
 
     def __init__(self, workspace: Workspace2D):
         """For the given workspace, calculate detector positions, the map from detector indices to workspace indices, and integrated
@@ -537,6 +538,17 @@ class FullInstrumentViewModel:
     def flip_beam(self, value: bool) -> None:
         self._flip_beam = value
 
+    @property
+    def u_offset(self) -> float:
+        """The angle, in radians, that a 2D projection is rotated by about its axis."""
+        if self._projection_type in (ProjectionType.THREE_D, ProjectionType.SIDE_BY_SIDE):
+            return 0.0
+        return self._u_offset
+
+    @u_offset.setter
+    def u_offset(self, value: float) -> None:
+        self._u_offset = value
+
     def _cache_key_for_projection(self, projection_type: ProjectionType) -> str:
         return f"{projection_type.name}_flip_{self.flip_beam}"
 
@@ -559,6 +571,7 @@ class FullInstrumentViewModel:
             self._cached_projection_objects[cache_key] = projection
 
         projection = self._cached_projection_objects[cache_key]
+        projection.set_u_offset(self.u_offset)
         projected_positions = np.zeros_like(self._detector_positions_3d)
         projected_positions[:, :2] = projection.positions()  # Assign only x and y coordinate
         return projected_positions
@@ -574,6 +587,8 @@ class FullInstrumentViewModel:
         if projection is None:
             self._calculate_projection()
             projection = self._cached_projection_objects.get(cache_key)
+        if projection is not None:
+            projection.set_u_offset(self.u_offset)
         return projection
 
     def extract_spectra_for_line_plot(self, unit: str, sum_spectra: bool, picked_indices: Optional[np.ndarray] = None) -> None:

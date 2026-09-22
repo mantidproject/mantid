@@ -33,6 +33,8 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view._RENDER_MODE_POINTS = "Points (Fastest)"
         self._mock_view._RENDER_MODE_SHAPES_FAST = "Approximated Shapes (Fast)"
         self._mock_view._RENDER_MODE_RAW_SHAPES = "Raw Shapes (Slowest)"
+        self._mock_view.u_offset_degrees.return_value = 0
+        self._mock_view.is_rotate_180_checkbox_checked.return_value = False
         self._mock_view.is_select_peaks_checked.return_value = False
         self._mock_view.is_select_bank_tube_checked.return_value = False
         self._mock_view.get_contour_limits.return_value = (0.0, 1.0)
@@ -814,6 +816,93 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.is_flip_beam_checkbox_checked.return_value = True
         self._presenter.update_plotter()
         self.assertTrue(self._model.flip_beam)
+
+    def test_u_offset_slider_enabled_disabled(self):
+        for projection_type in (ProjectionType.THREE_D, ProjectionType.SIDE_BY_SIDE):
+            self._mock_view.current_selected_projection.return_value = projection_type
+            self._presenter._on_projection_option_changed()
+            self._mock_view.set_u_offset_slider_enabled.assert_called_with(False)
+        self._mock_view.current_selected_projection.return_value = ProjectionType.CYLINDRICAL_Y
+        self._presenter._on_projection_option_changed()
+        self._mock_view.set_u_offset_slider_enabled.assert_called_with(True)
+
+    def test_on_u_offset_changed_stores_option_and_redraws(self):
+        self._mock_view.get_contour_limits.return_value = (0, 100)
+        self._presenter.on_u_offset_changed(90)
+        self._mock_view.store_u_offset_option.assert_called_once()
+        self._presenter._renderer.add_detector_mesh_to_plotter.assert_called_once()
+
+    def test_rotate_180_box_disables_the_slider(self):
+        self._mock_view.current_selected_projection.return_value = ProjectionType.CYLINDRICAL_Y
+        self._mock_view.is_rotate_180_checkbox_checked.return_value = True
+        self._presenter._on_projection_option_changed()
+        self._mock_view.set_rotate_180_box_enabled.assert_called_with(True)
+        self._mock_view.set_u_offset_slider_enabled.assert_called_with(False)
+        self._mock_view.is_rotate_180_checkbox_checked.return_value = False
+        self._presenter._on_projection_option_changed()
+        self._mock_view.set_u_offset_slider_enabled.assert_called_with(True)
+
+    def test_rotate_180_overrides_the_slider(self):
+        self._mock_view.u_offset_degrees.return_value = 90
+        self._mock_view.is_rotate_180_checkbox_checked.return_value = True
+        self._presenter.update_plotter()
+        self.assertAlmostEqual(self._model.u_offset, np.pi)
+
+    def test_on_rotate_180_stores_option_and_redraws(self):
+        self._mock_view.get_contour_limits.return_value = (0, 100)
+        self._mock_view.is_rotate_180_checkbox_checked.return_value = True
+        self._presenter.on_rotate_180_check_box_clicked()
+        self._mock_view.store_rotate_180_option.assert_called_once()
+        self._mock_view.set_u_offset_slider_enabled.assert_called_with(False)
+        self._presenter._renderer.add_detector_mesh_to_plotter.assert_called_once()
+
+    def test_rotation_controls_set_on_opening_with_rotate_180_ticked(self):
+        self._mock_view.current_selected_projection.return_value = ProjectionType.CYLINDRICAL_Y
+        self._mock_view.is_rotate_180_checkbox_checked.return_value = True
+        self._mock_view.reset_mock()
+        presenter = self._create_test_presenter()
+        try:
+            self._mock_view.set_rotate_180_box_enabled.assert_called_with(True)
+            self._mock_view.set_u_offset_slider_enabled.assert_called_with(False)
+        finally:
+            presenter.handle_close()
+
+    def test_rotation_controls_disabled_on_opening_in_3d(self):
+        self._mock_view.current_selected_projection.return_value = ProjectionType.THREE_D
+        self._mock_view.reset_mock()
+        presenter = self._create_test_presenter()
+        try:
+            self._mock_view.set_flip_beam_box_enabled.assert_called_with(False)
+            self._mock_view.set_rotate_180_box_enabled.assert_called_with(False)
+            self._mock_view.set_u_offset_slider_enabled.assert_called_with(False)
+        finally:
+            presenter.handle_close()
+
+    def test_flip_beam_disabled_in_side_by_side(self):
+        self._mock_view.current_selected_projection.return_value = ProjectionType.SIDE_BY_SIDE
+        self._presenter._on_projection_option_changed()
+        self._mock_view.set_flip_beam_box_enabled.assert_called_with(False)
+
+    def test_flip_beam_enabled_in_flat_projection(self):
+        self._mock_view.current_selected_projection.return_value = ProjectionType.CYLINDRICAL_Y
+        self._presenter._on_projection_option_changed()
+        self._mock_view.set_flip_beam_box_enabled.assert_called_with(True)
+
+    def test_on_reset_projection_clears_the_rotation(self):
+        self._mock_view.get_contour_limits.return_value = (0, 100)
+        self._presenter.on_reset_projection_clicked()
+        self._mock_view.reset_rotation_controls.assert_called_once()
+        self._mock_view.store_u_offset_option.assert_called_once()
+        self._mock_view.store_rotate_180_option.assert_called_once()
+        self.assertEqual(self._model.u_offset, 0.0)
+
+    def test_u_offset_state_propagated_to_model_in_radians(self):
+        self._mock_view.u_offset_degrees.return_value = 180
+        self._presenter.update_plotter()
+        self.assertAlmostEqual(self._model.u_offset, np.pi)
+        self._mock_view.u_offset_degrees.return_value = 0
+        self._presenter.update_plotter()
+        self.assertEqual(self._model.u_offset, 0.0)
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_transform")
     def test_transform_updated_on_redraw(self, mock_update_transform):

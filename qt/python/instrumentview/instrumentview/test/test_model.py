@@ -366,6 +366,40 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._calculate_projection()
         self.assertEqual(mock_projection_cls.call_count, 2)
 
+    @mock.patch("instrumentview.FullInstrumentViewModel.Projection")
+    def test_u_offset_passed_to_projection(self, mock_projection_cls):
+        """The u offset should be pushed onto the projection each time it is used"""
+        model, _ = self._setup_model([1, 2, 3])
+        mock_projection = MagicMock()
+        mock_projection.positions.return_value = [[1, 2], [1, 2], [1, 2]]
+        mock_projection_cls.return_value = mock_projection
+        model._projection_type = ProjectionType.CYLINDRICAL_Y
+        model.u_offset = np.pi / 2
+        model._calculate_projection()
+        mock_projection.set_u_offset.assert_called_with(np.pi / 2)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.Projection")
+    def test_u_offset_does_not_split_the_projection_cache(self, mock_projection_cls):
+        """The offset does not change the raw projection, so it must not create a new cache entry"""
+        model, _ = self._setup_model([1, 2, 3])
+        mock_projection = MagicMock()
+        mock_projection.positions.return_value = [[1, 2], [1, 2], [1, 2]]
+        mock_projection_cls.return_value = mock_projection
+        model._projection_type = ProjectionType.CYLINDRICAL_Y
+        model._calculate_projection()
+        model.u_offset = np.pi
+        model._calculate_projection()
+        self.assertEqual(mock_projection_cls.call_count, 1)
+
+    def test_u_offset_ignored_for_three_d_and_side_by_side(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model.u_offset = np.pi
+        for projection_type in (ProjectionType.THREE_D, ProjectionType.SIDE_BY_SIDE):
+            model._projection_type = projection_type
+            self.assertEqual(model.u_offset, 0.0)
+        model._projection_type = ProjectionType.CYLINDRICAL_Y
+        self.assertEqual(model.u_offset, np.pi)
+
     def test_sample_position(self):
         expected_position = np.array([1.0, 2.0, 1.0])
         model, mock_workspace = self._setup_model([1, 2, 3])
