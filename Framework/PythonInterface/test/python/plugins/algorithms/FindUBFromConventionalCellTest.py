@@ -228,7 +228,7 @@ class FindUBFromConventionalCellTest(unittest.TestCase):
         histograms = alg.getProperty("ProjectionHistograms").value
         self.assertTrue(histograms.isHistogramData())
         for spectrum in range(histograms.getNumberHistograms()):
-            self.assertEqual(histograms.readX(spectrum).size, histograms.readY(spectrum).size + 1)
+            self.assertEqual(histograms.x(spectrum).size, histograms.y(spectrum).size + 1)
 
     def test_accepts_primitive_rhombohedral_as_P(self):
         a = b = c = 5.5
