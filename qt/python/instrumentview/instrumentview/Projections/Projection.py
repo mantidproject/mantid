@@ -13,6 +13,7 @@ class Projection:
     """Base class for calculating a 2D projection with a specified axis"""
 
     _registry = {}
+    _U_PERIOD = 2 * np.pi
 
     def __init_subclass__(cls, projection_types=None, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -52,22 +53,20 @@ class Projection:
         self._detector_x_coordinates = np.zeros(len(self._detector_positions))
         self._detector_y_coordinates = np.zeros(len(self._detector_positions))
         self._raw_x_coordinates = np.zeros(len(self._detector_positions))
-        self._x_range = (0, 0)
         self._y_range = (0, 0)
 
-        self._u_period = 2 * np.pi
         self._u_offset = 0.0
 
         self._calculate_axes(self._root_position)
         self._calculate_detector_coordinates()
-        self._find_and_correct_x_gap()
-        # The range chosen automatically, which a u offset is measured from
-        self._auto_x_range = self._x_range
+        # Where the projection is cut open when it is not rotated, or None if it is left as calculated
+        self._auto_seam = self._find_auto_seam()
+        self._apply_u_offset()
 
     @property
     def u_period(self) -> float:
-        """The period of the projection in the x direction, used to wrap points around when they are outside the x range."""
-        return self._u_period
+        """The width in x of one full turn about the projection axis."""
+        return self._U_PERIOD
 
     @property
     def u_offset(self) -> float:
@@ -79,8 +78,7 @@ class Projection:
 
         The automatically chosen seam is used when the offset is zero.
         """
-        if self._u_period != 0:
-            offset = float(np.mod(offset, self._u_period))
+        offset = float(np.mod(offset, self._U_PERIOD))
 
         if offset == self._u_offset:
             return
@@ -88,22 +86,24 @@ class Projection:
         self._u_offset = offset
         self._apply_u_offset()
 
+    @property
+    def _seam(self) -> float | None:
+        """The x coordinate at which the projection is cut open, or None if it is not wrapped."""
+        if self._auto_seam is None:
+            return None
+        return self._auto_seam + self._u_offset
+
     def _apply_u_offset(self) -> None:
-        """Re-wrap the detector x coordinates into the range selected by the current u offset."""
-        if self._u_period == 0 or self._auto_x_range[1] == self._auto_x_range[0]:
+        """Wrap the detector x coordinates into the period starting at the current seam."""
+        if self._auto_seam is None:
             return
+        self._detector_x_coordinates = self._wrap_x(self._raw_x_coordinates)
 
-        if self._u_offset == 0:
-            self._detector_x_coordinates = self._raw_x_coordinates.copy()
-            self._x_range = self._auto_x_range
-            self._apply_x_correction()
-            return
-
-        # A range exactly one period wide, so that every point wraps into it. The modulo keeps
-        # the range half open, so a point sitting exactly on the seam stays at the near edge.
-        seam = self._auto_x_range[0] + self._u_offset
-        self._x_range = (seam, seam + self._u_period)
-        self._detector_x_coordinates = seam + np.mod(self._raw_x_coordinates - seam, self._u_period)
+    def _wrap_x(self, x_values: np.ndarray) -> np.ndarray:
+        """Shift x values by whole periods into [seam, seam + period). The range is half open, so a
+        point sitting exactly on the seam stays at the near edge."""
+        seam = self._seam
+        return seam + np.mod(x_values - seam, self._U_PERIOD)
 
     def _calculate_axes(self, root_position: np.ndarray) -> None:
         """The projection axis is specified, we calculate a 3D coordinate system based on that"""
@@ -137,51 +137,24 @@ class Projection:
         self._detector_x_coordinates, self._detector_y_coordinates = self._calculate_2d_coordinates()
         self._raw_x_coordinates = self._detector_x_coordinates.copy()
 
-        self._x_range = (self._detector_x_coordinates.min(), self._detector_x_coordinates.max())
         self._y_range = (self._detector_y_coordinates.min(), self._detector_y_coordinates.max())
 
-    def _find_and_correct_x_gap(self) -> None:
-        """Shift points based on the specified period so that they appear within the correct x range when plotted"""
-        if self._u_period == 0:
-            return
+    def _find_auto_seam(self) -> float | None:
+        """Choose where to cut the projection open so that the widest gap between detectors falls at the edges.
 
-        if self._x_range[1] == self._x_range[0]:
-            return
-
-        # Find biggest gap in x coordinates
-        sorted_x_coordinates = np.sort(self._detector_x_coordinates)
-        x_gap_idx = np.argmax(np.diff(sorted_x_coordinates))
-        x_from = sorted_x_coordinates[x_gap_idx]
-        x_to = sorted_x_coordinates[x_gap_idx + 1]
-
-        if x_to - x_from <= self._u_period - (self._x_range[1] - self._x_range[0]):
-            return
-
-        # Update range that avoids gap entirely, wraps around gap
-        self._x_range = (x_to, x_from + self._u_period)
-
-        self._apply_x_correction()
-
-    def _apply_x_correction(self) -> None:
+        Returns the far side of the widest gap if it is wider than the gap already left across the ends of the
+        calculated range, otherwise the lowest x coordinate. Returns None if all the detectors share one x coordinate.
         """
-        Updates x coordinates outside of current x range to be corrected to fit inside range.
-        Correction is applied by adding or subtracting a multiple of the period.
-        For example:
-            current range is (-2.1, np.pi)
-            current point at -np.pi is updated to -np.pi + 2*np.pi = np.pi
-        """
-        if self._u_period == 0:
-            return
+        sorted_x_coordinates = np.sort(self._raw_x_coordinates)
+        x_span = sorted_x_coordinates[-1] - sorted_x_coordinates[0]
+        if x_span == 0:
+            return None
 
-        self._apply_x_correction_to_values(self._detector_x_coordinates)
-
-    def _apply_x_correction_to_values(self, x_values: np.ndarray) -> np.ndarray:
-        """Shift x values into the current periodic x range and return corrected values."""
-        x_min, x_max = self._x_range
-
-        x_values[x_values < x_min] += np.floor((x_max - x_values[x_values < x_min]) / self._u_period) * self._u_period
-        x_values[x_values > x_max] -= np.floor((x_values[x_values > x_max] - x_min) / self._u_period) * self._u_period
-        return x_values
+        x_gaps = np.diff(sorted_x_coordinates)
+        x_gap_idx = np.argmax(x_gaps)
+        if x_gaps[x_gap_idx] <= self._U_PERIOD - x_span:
+            return sorted_x_coordinates[0]
+        return sorted_x_coordinates[x_gap_idx + 1]
 
     def project_points(self, points_3d: np.ndarray, apply_x_correction: bool = True) -> np.ndarray:
         """Project world-space points to this projection's 2D coordinates."""
@@ -192,8 +165,8 @@ class Projection:
         relative_positions = points - self._sample_position
         x_coordinates, y_coordinates = self._calculate_2d_coordinates_from_relative_positions(relative_positions)
 
-        if apply_x_correction and self._u_period != 0 and self._x_range[1] != self._x_range[0]:
-            x_coordinates = self._apply_x_correction_to_values(x_coordinates.copy())
+        if apply_x_correction and self._auto_seam is not None:
+            x_coordinates = self._wrap_x(x_coordinates)
 
         return np.column_stack([x_coordinates, y_coordinates])
 
