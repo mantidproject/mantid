@@ -164,6 +164,7 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
 
         component_info = mtd[input_workspace_names[0]].componentInfo()
         root = component_info.root()
+        self._resolution = 0.01
         if component_info.hasParameter(root, "analyser"):
             analyser_name = component_info.getStringParameter(root, "analyser")[0]
             try:
@@ -172,8 +173,6 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
                 analyser = None
             if analyser is not None and component_info.hasParameter(analyser, "resolution"):
                 self._resolution = float(component_info.getNumberParameter(analyser, "resolution")[0])
-            else:
-                self._resolution = 0.01
         logger.information("Resolution = %d" % self._resolution)
 
         output_workspaces = list()

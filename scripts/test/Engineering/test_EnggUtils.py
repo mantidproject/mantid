@@ -1,3 +1,4 @@
+import tempfile
 import unittest
 from unittest import mock
 from unittest.mock import call, patch, create_autospec, MagicMock
@@ -14,10 +15,18 @@ from Engineering.EnggUtils import (
     focus_run,
     convert_TOFerror_to_derror,
     plot_tof_vs_d_from_calibration,
+    write_prm_file,
 )
 from Engineering.common.instrument_config import ENGINX_GROUP
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams, UnitParametersMap
-from mantid.simpleapi import CreateSampleWorkspace
+from mantid.simpleapi import (
+    AddSampleLog,
+    ApplyDiffCal,
+    CreateEmptyTableWorkspace,
+    CreateSampleWorkspace,
+    GroupDetectors,
+    SetInstrumentParameter,
+)
 
 enggutils_path = "Engineering.EnggUtils"
 
@@ -115,6 +124,71 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
             diff_consts = read_diff_constants_from_prm(dummy_file_path)
         deltas = abs(diff_consts - array([[2.99, 18306.98, 14.44], [-29.68, 18497.75, -26.5]]))
         self.assertTrue((deltas < 1e-10).all())
+
+    BACK_TO_BACK_PARAM_NAMES = ("alpha_0", "beta_0", "beta_1", "sigma_0_sq", "sigma_1_sq", "sigma_2_sq")
+
+    def _make_focused_ws_with_distinct_bank_profile_params(self):
+        """
+        Make a focused workspace with one spectrum per bank and a distinct set of BackToBackExponential
+        parameters on each bank, so the profile parameters in a prm block identify the bank they came from.
+        The detector IDs (4-11) are distinct from both the spectrum indices and the detector indices, so
+        writing the correct parameters relies on the detector ID lookup in write_prm_file.
+        :return: (focused workspace, list of the profile parameters set on each bank)
+        """
+        ws = CreateSampleWorkspace(NumBanks=2, BankPixelWidth=2, XUnit="TOF", OutputWorkspace="ws_prm_profile")
+        bank_params = []
+        for ibank in range(2):
+            params = [float(ibank + iparam + 1) for iparam in range(len(self.BACK_TO_BACK_PARAM_NAMES))]
+            bank_params.append(params)
+            for param_name, value in zip(self.BACK_TO_BACK_PARAM_NAMES, params):
+                SetInstrumentParameter(
+                    ws, ComponentName=f"bank{ibank + 1}", ParameterName=param_name, ParameterType="Number", Value=str(value)
+                )
+        # write_prm_file reads DIFA and TZERO from the diffractometer constants, which requires a calibration
+        cal_table = CreateEmptyTableWorkspace(OutputWorkspace="ws_prm_profile_cal")
+        for col_name, col_type in [("detid", "int"), ("difc", "double"), ("difa", "double"), ("tzero", "double")]:
+            cal_table.addColumn(col_type, col_name)
+        for detid in ws.detectorInfo().detectorIDs():
+            cal_table.addRow([int(detid), 1000.0, 0.0, 0.0])
+        ApplyDiffCal(ws, CalibrationWorkspace=cal_table)
+        ws_foc = GroupDetectors(ws, GroupingPattern="0-3,4-7", OutputWorkspace="ws_prm_profile_foc")
+        AddSampleLog(ws_foc, LogName="run_number", LogText="123456")
+        return ws_foc, bank_params
+
+    @staticmethod
+    def _read_profile_params_from_prm(prm_filepath, iblock):
+        """Read the six BackToBackExponential parameters from the PRCF11/PRCF12 lines of a prm block"""
+        with open(prm_filepath) as fprm:
+            lines = fprm.readlines()
+        params = []
+        for line_type in ("PRCF11", "PRCF12"):
+            line = next(line for line in lines if line.startswith(f"INS  {iblock}{line_type}"))
+            params.extend(float(value) for value in line.split()[2:])
+        return params[: len(EnggUtilsTest.BACK_TO_BACK_PARAM_NAMES)]
+
+    def test_write_prm_file_writes_profile_params_of_the_bank_each_spectrum_was_focused_from(self):
+        ws_foc, bank_params = self._make_focused_ws_with_distinct_bank_profile_params()
+        self.calibration.config.prm_header_template = "template_ENGINX_prm_header.prm"
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            prm_filepath = path.join(tmpdir, "all_banks.prm")
+            write_prm_file(ws_foc, prm_filepath, self.calibration)
+
+            for iblock, expected_params in enumerate(bank_params, start=1):
+                self.assertEqual(expected_params, self._read_profile_params_from_prm(prm_filepath, iblock))
+
+    def test_write_prm_file_writes_profile_params_of_the_selected_bank_when_spec_nums_given(self):
+        ws_foc, bank_params = self._make_focused_ws_with_distinct_bank_profile_params()
+        self.calibration.config.prm_header_template = "template_ENGINX_prm_header.prm"
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            prm_filepath = path.join(tmpdir, "bank_2.prm")
+            write_prm_file(ws_foc, prm_filepath, self.calibration, spec_nums=[1])
+
+            # the only block in the file is the second bank, not the first
+            self.assertEqual(bank_params[1], self._read_profile_params_from_prm(prm_filepath, 1))
+            with self.assertRaises(StopIteration):
+                self._read_profile_params_from_prm(prm_filepath, 2)
 
     # tests for code used in focus tab of UI
 
