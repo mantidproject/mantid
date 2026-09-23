@@ -46,23 +46,23 @@ Usage
   #set a different value on bank 2
   SetInstrumentParameter(ws,ParameterName="NumberParam",Value="3.5", ComponentName="bank2",ParameterType="Number")
 
-  instrument=ws.getInstrument()
-  bank1=instrument.getComponentByName("bank1")
-  bank2=instrument.getComponentByName("bank2")
+  compInfo=ws.componentInfo()
+  bank1=compInfo.indexOfAny("bank1")
+  bank2=compInfo.indexOfAny("bank2")
 
   print("The whole instrument parameter can be read from anywhere.")
-  print("  The instrument: " + instrument.getStringParameter("TestParam")[0])
-  print("  bank 1: " + bank1.getStringParameter("TestParam")[0])
-  print("  bank 2: " + bank2.getStringParameter("TestParam")[0])
+  print("  The instrument: " + compInfo.getStringParameter(compInfo.root(), "TestParam")[0])
+  print("  bank 1: " + compInfo.getStringParameter(bank1, "TestParam")[0])
+  print("  bank 2: " + compInfo.getStringParameter(bank2, "TestParam")[0])
 
   print("The parameters  on the Bank 1 can be read from the bank or below.")
   #For this one call getIntParameter as the number was an int
-  print("  bank 1: " + str(bank1.getIntParameter("NumberParam")[0]))
+  print("  bank 1: " + str(compInfo.getIntParameter(bank1, "NumberParam")[0]))
   #For this one call getNumberParameter as the number was a float
-  print("  bank 2: " + str(bank2.getNumberParameter("NumberParam")[0]))
+  print("  bank 2: " + str(compInfo.getNumberParameter(bank2, "NumberParam")[0]))
   #if you are not sure of the type of a parameter you can call getParameterType
-  print("  The type of NumberParam in bank 1: " + bank1.getParameterType("NumberParam"))
-  print("  The type of NumberParam in bank 2: " + bank2.getParameterType("NumberParam"))
+  print("  The type of NumberParam in bank 1: " + compInfo.getParameterType(bank1, "NumberParam"))
+  print("  The type of NumberParam in bank 2: " + compInfo.getParameterType(bank2, "NumberParam"))
 
 
 Output:
@@ -89,14 +89,14 @@ Output:
   SetInstrumentParameter(ws,ParameterName="TestParam",Value="Goodbye")
   SetInstrumentParameter(ws,ParameterName="TestParam",Value="Hello from bank 1",ComponentName="bank1")
 
-  instrument=ws.getInstrument()
-  bank1=instrument.getComponentByName("bank1")
+  compInfo=ws.componentInfo()
+  bank1=compInfo.indexOfAny("bank1")
 
   print("The SetInstrumentParameter overwrites previous values where the ParameterName and Component match.")
-  print("  The test param for the instrument is: " + instrument.getStringParameter("TestParam")[0])
+  print("  The test param for the instrument is: " + compInfo.getStringParameter(compInfo.root(), "TestParam")[0])
   print("Different Components can have the same Parameter Name with different values.")
   print("You will receive the closest value to the component you ask from.")
-  print("  The test param for bank 1 is: " + bank1.getStringParameter("TestParam")[0])
+  print("  The test param for bank 1 is: " + compInfo.getStringParameter(bank1, "TestParam")[0])
 
 Output:
 

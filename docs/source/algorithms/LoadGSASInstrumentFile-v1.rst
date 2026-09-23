@@ -55,20 +55,20 @@ Output:
    ClearInstrumentParameters(groupWs)
 
    # ...and check they do not exist
-   instrument = groupWs.getItem(0).getInstrument()
-   print("Alpha0 parameter exists:  {}".format(instrument.hasParameter("Alpha0")))
-   print("Beta0 parameter exists:  {}".format(instrument.hasParameter("Beta0")))
-   print("SigmaSquared parameter exists:  {}".format(instrument.hasParameter("SigmaSquared")))
+   compInfo = groupWs.getItem(0).componentInfo()
+   print("Alpha0 parameter exists:  {}".format(compInfo.hasParameter(compInfo.root(), "Alpha0")))
+   print("Beta0 parameter exists:  {}".format(compInfo.hasParameter(compInfo.root(), "Beta0")))
+   print("SigmaSquared parameter exists:  {}".format(compInfo.hasParameter(compInfo.root(), "SigmaSquared")))
 
    # Now we load a GSAS Instrument file with 2 Banks into the workspace...
    print("\nLoading parameters from GSAS\n")
    tws = LoadGSASInstrumentFile(Filename="GSAS_2bank.prm",UseBankIDsInFile=True,Workspace=groupWs,Banks=[1,2])
 
    # ...and check parameters are there again
-   instrument = groupWs.getItem(0).getInstrument()
-   print("Alpha0 parameter exists:  {}".format(instrument.hasParameter("Alpha0")))
-   print("Beta0 parameter exists:  {}".format(instrument.hasParameter("Beta0")))
-   print("SigmaSquared parameter exists:  {}".format(instrument.hasParameter("SigmaSquared")))
+   compInfo = groupWs.getItem(0).componentInfo()
+   print("Alpha0 parameter exists:  {}".format(compInfo.hasParameter(compInfo.root(), "Alpha0")))
+   print("Beta0 parameter exists:  {}".format(compInfo.hasParameter(compInfo.root(), "Beta0")))
+   print("SigmaSquared parameter exists:  {}".format(compInfo.hasParameter(compInfo.root(), "SigmaSquared")))
 
 Output:
 

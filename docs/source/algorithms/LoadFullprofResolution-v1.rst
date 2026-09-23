@@ -48,19 +48,18 @@ Usage
       row = tws.row(i)
       print("{{'Name': '{}', 'Value_3': {:.2f}, 'Value_5': {:.2f}}}".format(row["Name"], row["Value_3"], row["Value_5"]))
 
-   # Get the instrument with the parameters
-   inst = ws[0][0].getInstrument()
+   # Get the component info with the parameters
+   compInfo = ws[0][0].componentInfo()
 
    # demonstrate that the type of parameters saved are fitting parameters
    print("Type of 3 parameters got from instrument in workspace")
-   print("Alpha0 type = {}".format(inst.getParameterType('Alpha0')))
-   print("Beta0 type = {}".format(inst.getParameterType('Beta0')))
-   print("SigmaSquared type = {}".format(inst.getParameterType('SigmaSquared')))
+   print("Alpha0 type = {}".format(compInfo.getParameterType(compInfo.root(), 'Alpha0')))
+   print("Beta0 type = {}".format(compInfo.getParameterType(compInfo.root(), 'Beta0')))
+   print("SigmaSquared type = {}".format(compInfo.getParameterType(compInfo.root(), 'SigmaSquared')))
 
-   # As of the time of writing,
-   # fitting instrument parameters cannot be
-   # accessed through the python API.
-   # They can be accessed via the file in the lext line, if uncommented:
+   # Fitting parameters are evaluated from python with getFittingParameter, e.g.
+   #   compInfo.getFittingParameter(compInfo.root(), 'Alpha0', 0.0)
+   # They can also be written out to a file, if the next line is uncommented:
    #SaveParameterFile(ws[0][0], "instParam.xml")
 
    #This file should contain the lines shown next and similar for other parameters:

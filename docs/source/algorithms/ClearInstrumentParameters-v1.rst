@@ -30,29 +30,27 @@ Usage
   #Set a different value on bank 2
   SetInstrumentParameter(ws,ParameterName="NumberParam",Value="3.5", ComponentName="bank2",ParameterType="Number")
 
-  instrument = ws.getInstrument()
-  bank1 = instrument.getComponentByName("bank1")
-  bank2 = instrument.getComponentByName("bank2")
+  compInfo = ws.componentInfo()
+  bank1 = compInfo.indexOfAny("bank1")
+  bank2 = compInfo.indexOfAny("bank2")
 
   #Check the parameters are set correctly
-  print("Instrument: " + instrument.getStringParameter("TestParam")[0])
-  print("Bank1: " + bank1.getStringParameter("TestParam")[0])
-  print("Bank2: " + bank2.getStringParameter("TestParam")[0])
+  print("Instrument: " + compInfo.getStringParameter(compInfo.root(), "TestParam")[0])
+  print("Bank1: " + compInfo.getStringParameter(bank1, "TestParam")[0])
+  print("Bank2: " + compInfo.getStringParameter(bank2, "TestParam")[0])
 
   #Clear all the instrument's parameters
   print("Clearing all parameters")
   ClearInstrumentParameters(ws)
 
   #Check the parameters have been cleared correctly
-  #Obtain instrument and banks again, to make sure they contain the updated parameters
-  instrument = ws.getInstrument()
-  bank1 = instrument.getComponentByName("bank1")
-  bank2 = instrument.getComponentByName("bank2")
-  if len(instrument.getStringParameter("TestParam")) == 0:
+  #Obtain the component info again, to make sure it contains the updated parameters
+  compInfo = ws.componentInfo()
+  if len(compInfo.getStringParameter(compInfo.root(), "TestParam")) == 0:
     print("Instrument was cleared successfully.")
-  if len(bank1.getStringParameter("TestParam")) == 0:
+  if len(compInfo.getStringParameter(bank1, "TestParam")) == 0:
     print("Bank1 was cleared successfully.")
-  if len(bank2.getStringParameter("TestParam")) == 0:
+  if len(compInfo.getStringParameter(bank2, "TestParam")) == 0:
     print("Bank2 was cleared successfully.")
 
 .. testoutput::

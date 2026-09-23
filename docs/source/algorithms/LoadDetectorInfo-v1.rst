@@ -280,10 +280,12 @@ that the first three detectors (monitors) were not touched and the next three we
    import os
 
    # printing procedure
-   def write_detectors(instr_type,instr,ndet):
-       ''' print first ndet detectors from given instrument '''
+   def write_detectors(instr_type,ws,ndet):
+       ''' print first ndet detectors from the instrument attached to the given workspace '''
 
-       print("{0} {1} instrument".format(instr_type, instr.getName()))
+       compInfo = ws.componentInfo()
+       detInfo = ws.detectorInfo()
+       print("{0} {1} instrument".format(instr_type, compInfo.name(compInfo.root())))
        print('det ID | monitor? | polar angle| position X | position Y | position Z |  Pressure  | Wall thick |')
 
        # get first nder detectors using detector ID
@@ -293,12 +295,13 @@ that the first three detectors (monitors) were not touched and the next three we
          else:
              detBase = 1101-3
          detID = detBase+i
-         det1 = instr.getDetector(detID);
-         pos = det1.getPos();
-         pressure = det1.getNumberParameter('TubePressure');
-         thickness = det1.getNumberParameter('TubeThickness');
+         index = detInfo.indexOf(detID);
+         pos = detInfo.position(index);
+         phi = math.atan2(pos.Y(),pos.X());
+         pressure = compInfo.getNumberParameter(index,'TubePressure');
+         thickness = compInfo.getNumberParameter(index,'TubeThickness');
          print(' {0:5} | {1:8} | {2:10.3f} | {3:>10.3f} | {4:>10.3f} | {5:>10.3f} | {6:10} | {7:10} |'.format(\
-                detID,det1.isMonitor(),(det1.getPhi()*(180/math.pi)),pos.X(),pos.Y(),pos.Z(),pressure[0],thickness[0]))
+                detID,detInfo.isMonitor(index),(phi*(180/math.pi)),pos.X(),pos.Y(),pos.Z(),pressure[0],thickness[0]))
        print('*********************************************************************************')
    #
    def prepare_test_detector(ind):
@@ -335,10 +338,9 @@ that the first three detectors (monitors) were not touched and the next three we
         return (detBase,offset,l2,code,theta,phi,w_xyz,f_xyz,a_xyz,det1,det2,det2,det4)
 
 
-   def write_test_cal_file(filename,instrument,ndet):
+   def write_test_cal_file(filename,ndet):
       """ writes partial detector.dat file  modified for testing purposes
             filename   -- the string, describing the name of the file to write:
-            instrument -- the pointer to instrument to modify
             ndet       -- number of detectors to modify using this calibration file for testing purposes
       """
 
@@ -363,20 +365,18 @@ that the first three detectors (monitors) were not touched and the next three we
    #--------------------------------------------------------------------------------------
    # load MARI
    det=LoadInstrument(ws,InstrumentName='MARI', RewriteSpectraMap=True)
-   inst1=ws.getInstrument();
    #
-   write_detectors('unCalibrated',inst1,10);
+   write_detectors('unCalibrated',ws,10);
    #--------------------------------------------------------------------------------------
    # Prepare calibration file changing first 6 detectors & monitors
    file_name = 'mari_det.dat'
-   write_test_cal_file(file_name ,inst1,6);
+   write_test_cal_file(file_name ,6);
    #--------------------------------------------------------------------------------------
    # CALIBRATE mari using full det.dat calibration file
    LoadDetectorInfo(ws,DataFilename=file_name,RelocateDets=True);
-   inst1=ws.getInstrument();
    #--------------------------------------------------------------------------------------
    # look at the result:
-   write_detectors('Calibrated',inst1,10);
+   write_detectors('Calibrated',ws,10);
 
 
 .. testcleanup:: exLoadDetectorInfo

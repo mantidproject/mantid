@@ -52,27 +52,25 @@ Usage
 
    # create sample workspace
    ws1 = CreateSampleWorkspace();
-   inst1 = ws1.getInstrument();
-   print("Default workspace has instrument: {0} with {1} parameters".format(inst1.getName(),len(inst1.getParameterNames())))
+   ci1 = ws1.componentInfo();
+   print("Default workspace has instrument: {0} with {1} parameters".format(ci1.name(ci1.root()),len(ci1.getParameterNames(ci1.root()))))
 
    # load MARI from instrument name
    print("===========================")
    mon1 = LoadInstrument(ws1, InstrumentName="MARI", RewriteSpectraMap=True)
-   inst1 = ws1.getInstrument()
    di1 = ws1.detectorInfo()
    ci1 = ws1.componentInfo()
-   print("Modified workspace {0} has instrument: {1}".format(ws1.getName(), inst1.getName()))
-   print("Instrument {0} has {1} components, including {2} monitors and {3} detectors".format(inst1.getName(), ci1.size(), len(mon1), di1.size()))
+   print("Modified workspace {0} has instrument: {1}".format(ws1.name(), ci1.name(ci1.root())))
+   print("Instrument {0} has {1} components, including {2} monitors and {3} detectors".format(ci1.name(ci1.root()), ci1.size(), len(mon1), di1.size()))
 
    # load LOKI from file name
    print("===========================")
    ws2 = CreateSampleWorkspace();
    mon2 = LoadInstrument(ws2, FileName="LOKI_Definition.hdf5", RewriteSpectraMap=True)
-   inst2 = ws2.getInstrument()
    di2 = ws2.detectorInfo()
    ci2 = ws2.componentInfo()
-   print("Workspace {0} has instrument: {1}".format(ws2.getName(), inst2.getName()))
-   print("Instrument {0} has {1} components, including {2} monitors and {3} detectors".format(inst2.getName(), ci2.size(), len(mon2), di2.size()))
+   print("Workspace {0} has instrument: {1}".format(ws2.name(), ci2.name(ci2.root())))
+   print("Instrument {0} has {1} components, including {2} monitors and {3} detectors".format(ci2.name(ci2.root()), ci2.size(), len(mon2), di2.size()))
 
 **Output:**
 
