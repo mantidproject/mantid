@@ -11,7 +11,7 @@ from qtpy.QtWidgets import QApplication, QLabel, QMainWindow, QTabBar, QWidget
 
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.tutorial import interaction
-from mantidqt.widgets.tutorial.shell import TutorialShell
+from mantidqt.widgets.tutorial.shell import FRAME_ALLOWANCE, TutorialShell
 from mantidqt.widgets.tutorial.step import TutorialChapter, TutorialStep
 
 
@@ -87,12 +87,13 @@ class TutorialShellTest(unittest.TestCase):
 
     def test_a_tiny_interface_still_gets_a_usable_window_but_never_one_off_the_screen(self):
         # the floors are for an interface with a tiny size hint, not a demand on the display, so a
-        # screen smaller than them wins
+        # screen smaller than them wins. On a screen under 640 tall - which is what CI has - the
+        # frame allowance comes off as well, so the expected height is not simply the floor.
         available = self._available()
         shell = self._shell_around(120, 80)
 
         self.assertGreaterEqual(shell.width(), min(900, available.width()))
-        self.assertGreaterEqual(shell.height(), min(600, available.height()))
+        self.assertGreaterEqual(shell.height(), min(600, available.height() - FRAME_ALLOWANCE))
         self.assertLessEqual(shell.width(), available.width())
         self.assertLessEqual(shell.height(), available.height())
 
