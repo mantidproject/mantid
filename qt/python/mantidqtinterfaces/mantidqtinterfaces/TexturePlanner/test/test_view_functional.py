@@ -417,11 +417,14 @@ class TestInitialState(_FunctionalTestBase):
     def test_the_window_can_be_made_short_enough_for_a_small_screen(self):
         # the tutorial frames this interface with its navigation along the bottom, so an interface
         # that refuses to shrink takes those buttons off the screen with it. The offenders are easy
-        # to reintroduce: a setMinimumHeight on either plot canvas, or a minimumSize on scrollAxes
+        # to reintroduce: a setMinimumHeight on either plot canvas, or a minimumSize on scrollAxes.
+        # The bound is loose because widget metrics differ by platform - the smallest achievable
+        # height is 640 on Windows and 688 on macOS - but it still catches a reintroduced floor,
+        # which takes this to 843 for the canvases alone and 944 for the scroll area.
         self.view.resize(600, 200)
         QApplication.processEvents()
 
-        self.assertLessEqual(self.view.height(), 650)
+        self.assertLessEqual(self.view.height(), 800)
 
     def test_the_goniometer_axes_only_scroll_when_there_is_no_room_for_them(self):
         # the axis list is the one thing on the tab that grows, so it has to be given the slack
