@@ -80,10 +80,15 @@ both of which can produce a matching normalization workspace).
 
 `MonoSCDNormalizationWorkspace` is binned with the exact same basis vectors, extents, and symmetry operations as
 `InputWorkspace`, so the two end up on identical grids before dividing. It cannot be used together with
-`SolidAngleWorkspace`/`FluxWorkspace` (the two normalization methods are mutually exclusive), or with
-`BackgroundWorkspace` (background subtraction is not yet supported for this mode). `InputWorkspace` must not have a
-`DeltaE` dimension (monochromatic single crystal diffraction is elastic only), and must carry a `wavelength` sample
-log -- set automatically by `ConvertHFIRSCDtoMDE` -- confirming it originates from a monochromatic instrument.
+`SolidAngleWorkspace`/`FluxWorkspace` (the two normalization methods are mutually exclusive). `InputWorkspace` must
+not have a `DeltaE` dimension (monochromatic single crystal diffraction is elastic only), and must carry a
+`wavelength` sample log -- set automatically by `ConvertHFIRSCDtoMDE` -- confirming it originates from a
+monochromatic instrument.
+
+Background subtraction is not yet implemented for this mode. When support is enabled, `BackgroundWorkspace` is
+expected to be an :py:obj:`MDEventWorkspace <mantid.api.IMDEventWorkspace>` in the `Q_sample` frame, matching
+`InputWorkspace` and `MonoSCDNormalizationWorkspace`. This differs from the time-of-flight background path, where
+`BackgroundWorkspace` is expected to be in `Q_lab`.
 
 Unlike the time-of-flight case, there is no `MDNorm_low`/`MDNorm_high` log requirement (those are set by
 :ref:`CropWorkspaceForMDNorm <algm-CropWorkspaceForMDNorm>`, a time-of-flight-only step), since each event already

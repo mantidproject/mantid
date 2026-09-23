@@ -90,7 +90,20 @@ class MDNormTest(unittest.TestCase):
         issues = alg.validateInputs()
         self.assertIn("MonoSCDNormalizationWorkspace", issues)
 
-    def test_mutually_exclusive_with_background_workspace(self):
+    def test_monochromatic_background_workspace_accepts_q_sample_but_remains_unimplemented(self):
+        data = self._make_mde(wavelength=1.5)
+        norm = self._make_mde(wavelength=1.5)
+        background = self._make_mde(wavelength=1.5)
+        alg = self._setup_alg()
+        alg.setProperty("InputWorkspace", data)
+        alg.setProperty("MonoSCDNormalizationWorkspace", norm)
+        alg.setProperty("BackgroundWorkspace", background)
+        issues = alg.validateInputs()
+        self.assertIn("MonoSCDNormalizationWorkspace", issues)
+        self.assertNotIn("BackgroundWorkspace", issues)
+        self.assertIn("not implemented yet", issues["MonoSCDNormalizationWorkspace"])
+
+    def test_monochromatic_background_workspace_must_be_q_sample(self):
         data = self._make_mde(wavelength=1.5)
         norm = self._make_mde(wavelength=1.5)
         background = self._make_mde(frame="QLab", wavelength=1.5)
@@ -99,7 +112,19 @@ class MDNormTest(unittest.TestCase):
         alg.setProperty("MonoSCDNormalizationWorkspace", norm)
         alg.setProperty("BackgroundWorkspace", background)
         issues = alg.validateInputs()
+        self.assertIn("BackgroundWorkspace", issues)
+        self.assertIn("Q_sample", issues["BackgroundWorkspace"])
         self.assertIn("MonoSCDNormalizationWorkspace", issues)
+
+    def test_non_monochromatic_background_workspace_must_be_q_lab(self):
+        data = self._make_mde(wavelength=1.5)
+        background = self._make_mde(wavelength=1.5)
+        alg = self._setup_alg()
+        alg.setProperty("InputWorkspace", data)
+        alg.setProperty("BackgroundWorkspace", background)
+        issues = alg.validateInputs()
+        self.assertIn("BackgroundWorkspace", issues)
+        self.assertIn("Q_lab", issues["BackgroundWorkspace"])
 
     def test_rejects_inelastic_input(self):
         data = self._make_mde(ndims=4, wavelength=1.5)

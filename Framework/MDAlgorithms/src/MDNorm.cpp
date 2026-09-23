@@ -232,6 +232,11 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
     }
   }
 
+  // Optional pre-computed normalization workspace for monochromatic single crystal diffraction
+  // (e.g. WAND, DEMAND). This is an alternative to SolidAngleWorkspace/FluxWorkspace.
+  Mantid::API::IMDEventWorkspace_sptr monoNormWS = this->getProperty("MonoSCDNormalizationWorkspace");
+  bool monochromatic = bool(monoNormWS);
+
   // Optional background input IMDE
   Mantid::API::IMDEventWorkspace_sptr bkgdWS = this->getProperty("BackgroundWorkspace");
   if (bkgdWS) {
@@ -239,10 +244,17 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
       // must have at least 3 dimensions
       errorMessage.emplace("BackgroundWorkspace", "The input background workspace must be at least 3D");
     } else {
-      // Check first 3 dimension for Q lab,
+      // Check first 3 dimensions for the expected Q frame. The existing background path uses
+      // Q_lab. The monochromatic-SCD path will use Q_sample once execution support is enabled.
+      const auto &expectedFrame =
+          monochromatic ? Mantid::Geometry::QSample::QSampleName : Mantid::Geometry::QLab::QLabName;
+      const auto expectedFrameMessage =
+          monochromatic
+              ? "The input background workspace must be in Q_sample when MonoSCDNormalizationWorkspace is used"
+              : "The input background workspace must be in Q_lab";
       for (size_t i = 0; i < 3; i++) {
-        if (bkgdWS->getDimension(i)->getMDFrame().name() != Mantid::Geometry::QLab::QLabName) {
-          errorMessage.emplace("BackgroundWorkspace", "The input backgound workspace must be in Q_lab");
+        if (bkgdWS->getDimension(i)->getMDFrame().name() != expectedFrame) {
+          errorMessage.emplace("BackgroundWorkspace", expectedFrameMessage);
         }
       }
 
@@ -265,10 +277,6 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
     diffraction = false;
   }
 
-  // Optional pre-computed normalization workspace for monochromatic single crystal diffraction
-  // (e.g. WAND, DEMAND). This is an alternative to SolidAngleWorkspace/FluxWorkspace.
-  Mantid::API::IMDEventWorkspace_sptr monoNormWS = this->getProperty("MonoSCDNormalizationWorkspace");
-  bool monochromatic = bool(monoNormWS);
   API::MatrixWorkspace_const_sptr solidAngleWS = getProperty("SolidAngleWorkspace");
   API::MatrixWorkspace_const_sptr fluxWS = getProperty("FluxWorkspace");
 
@@ -283,8 +291,9 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
                                                             "with SolidAngleWorkspace/FluxWorkspace");
     }
     if (bkgdWS) {
-      errorMessage.emplace("MonoSCDNormalizationWorkspace", "MonoSCDNormalizationWorkspace cannot currently be used "
-                                                            "together with BackgroundWorkspace");
+      errorMessage.emplace("MonoSCDNormalizationWorkspace",
+                           "BackgroundWorkspace validation for monochromatic SCD expects Q_sample, but background "
+                           "subtraction for this mode is not implemented yet");
     }
     if (monoNormWS->getNumDims() < 3) {
       errorMessage.emplace("MonoSCDNormalizationWorkspace", "MonoSCDNormalizationWorkspace must be at least 3D");
