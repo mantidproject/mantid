@@ -331,6 +331,14 @@ void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues
     UBWSymm = calQTransform(DblMatrix(3, 3, true), *so, false);
     lowValues = getLogValues<VectorDoubleProperty>(currentExptInfo, "MDNorm_low");
     highValues = getLogValues<VectorDoubleProperty>(currentExptInfo, "MDNorm_high");
+    if ((lowValues.size() != spectrumInfo.size()) || (highValues.size() != spectrumInfo.size())) {
+      g_log.warning() << "Incompatible detector and spectrum size. Using original data limits.\n";
+      const auto &binBoundaries = currentExptInfo.run().getBinBoundaries();
+      const double runEmin = binBoundaries.front();
+      const double runEmax = binBoundaries.back();
+      lowValues.assign(spectrumInfo.size(), runEmin);
+      highValues.assign(spectrumInfo.size(), runEmax);
+    }
   }
   // MDEventWS was created with the "useLogTimes" option: should be only a single expInfo, but
   // gonios vary with time - we now coarse-bin it to compute the normalisation.
