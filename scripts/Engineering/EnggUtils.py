@@ -441,11 +441,16 @@ def getParametersFromDetector(component_info: ComponentInfo, detector_index: int
     :param detector_index:
     :return: list of parameters
     """
-    inst_tree = component_info.fullName(detector_index).split("/")[0].split("/")
+    # The ancestry of the detector, from the instrument root down to the detector itself
+    inst_tree = [detector_index]
+    index = detector_index
+    while component_info.hasParent(index):
+        index = component_info.parent(index)
+        inst_tree.append(index)
+    inst_tree.reverse()
     param_names = ["alpha_0", "beta_0", "beta_1", "sigma_0_sq", "sigma_1_sq", "sigma_2_sq"]
     params = None
-    for comp_name in inst_tree:
-        comp = component_info.indexOfAny(comp_name)
+    for comp in inst_tree:
         if component_info.hasParameter(comp, param_names[0]):
             params = [component_info.getNumberParameter(comp, param)[0] for param in param_names]
             break
