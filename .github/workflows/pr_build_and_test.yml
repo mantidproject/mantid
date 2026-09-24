@@ -232,6 +232,10 @@ jobs:
           for f in /c/ProgramData/rattler/config.toml /c/ProgramData/pixi/config.toml "${APPDATA}/rattler/config.toml" "${APPDATA}/pixi/config.toml" "${USERPROFILE}/.pixi/config.toml"; do
             [ -f "$f" ] && { echo "--- $f"; cat "$f"; }
           done
+          echo "=== Does the runner _work directory persist between jobs? ==="
+          probe="${RUNNER_WORKSPACE}/../_persist_probe.txt"
+          if [ -f "$probe" ]; then echo "probe from a previous job found:"; cat "$probe"; else echo "no probe found"; fi
+          echo "job ${GITHUB_RUN_ID}/${GITHUB_RUN_ATTEMPT} on ${RUNNER_NAME} at $(date -u)" >> "$probe"
           echo "=== .pixi environment layout ==="
           ls -la .pixi .pixi/envs 2>/dev/null || true
           ls .pixi/envs/default/conda-meta 2>/dev/null | wc -l || true
@@ -245,7 +249,13 @@ jobs:
         env:
           # -vvv only affects pixi's own crates; the installer work happens in rattler.
           RUST_LOG: "info,pixi=debug,pixi_core=debug,rattler=debug,rattler_cache=debug,rattler_package_streaming=debug"
-        run: pixi install --frozen -vvv
+        # Retry: a cold install downloads several GB and a single dropped connection otherwise fails the job.
+        run: |
+          for attempt in 1 2 3; do
+            pixi install --frozen -vvv && exit 0
+            echo "pixi install attempt ${attempt} failed, retrying..."
+          done
+          exit 1
 
       - name: Clean build tree
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
