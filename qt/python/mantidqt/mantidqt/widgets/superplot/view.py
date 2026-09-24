@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-from qtpy.QtWidgets import QDockWidget, QHeaderView, QTreeWidgetItem, QToolButton
+from qtpy.QtWidgets import QDockWidget, QHeaderView, QTreeWidgetItem, QToolButton, QWidget
 from qtpy.QtGui import QColor
 from qtpy.QtCore import Signal, QObject, QSize, Qt
 from qtpy import uic
@@ -155,6 +155,7 @@ class SuperplotViewSide(QDockWidget):
         ws_list.setMinimumSize(QSize(size0 + size1, 0))
         self.workspaceSelector.setWorkspaceTypes(["Workspace2D", "WorkspaceGroup", "EventWorkspace", "RebinnedOutput"])
         self.setAcceptDrops(True)
+        self.setTitleBarWidget(QWidget())
 
     def dragEnterEvent(self, event):
         """
@@ -189,6 +190,7 @@ class SuperplotViewBottom(QDockWidget):
         self.here = os.path.dirname(os.path.realpath(__file__))
         uic.loadUi(os.path.join(self.here, SuperplotViewBottom.UI), self)
         self.setFocusPolicy(Qt.ClickFocus)
+        self.setTitleBarWidget(QWidget())
 
     def keyPressEvent(self, event):
         """
