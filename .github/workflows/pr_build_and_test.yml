@@ -216,6 +216,12 @@ jobs:
         uses: ./.github/actions/setup-pixi
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
 
+      # Install/update the environment in its own step so that it is visible in the log. Otherwise the
+      # first 'pixi run' in the build step silently installs it after a pixi.lock change.
+      - name: Install pixi environment
+        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
+        run: pixi install --frozen -v
+
       - name: Clean build tree
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
         run: |
