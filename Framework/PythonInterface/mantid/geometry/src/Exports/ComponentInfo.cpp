@@ -101,34 +101,11 @@ void addParameter(ComponentInfo &self, const std::string &type, const std::strin
   self.addParameter(indexOrRoot(self, componentIndex), type, name, value, descriptionOrNull(description), visible);
 }
 
-void addDouble(ComponentInfo &self, const std::string &name, double value, const object &componentIndex,
-               const std::string &description, const std::string &visible) {
-  self.addDouble(indexOrRoot(self, componentIndex), name, value, descriptionOrNull(description), visible);
-}
-
-void addInt(ComponentInfo &self, const std::string &name, int value, const object &componentIndex,
-            const std::string &description, const std::string &visible) {
-  self.addInt(indexOrRoot(self, componentIndex), name, value, descriptionOrNull(description), visible);
-}
-
-void addBool(ComponentInfo &self, const std::string &name, bool value, const object &componentIndex,
-             const std::string &description, const std::string &visible) {
-  self.addBool(indexOrRoot(self, componentIndex), name, value, descriptionOrNull(description), visible);
-}
-
-void addString(ComponentInfo &self, const std::string &name, const std::string &value, const object &componentIndex,
-               const std::string &description, const std::string &visible) {
-  self.addString(indexOrRoot(self, componentIndex), name, value, descriptionOrNull(description), visible);
-}
-
-void addV3D(ComponentInfo &self, const std::string &name, const V3D &value, const object &componentIndex,
-            const std::string &description) {
-  self.addV3D(indexOrRoot(self, componentIndex), name, value, descriptionOrNull(description));
-}
-
-void addQuat(ComponentInfo &self, const std::string &name, const Quat &value, const object &componentIndex,
-             const std::string &description) {
-  self.addQuat(indexOrRoot(self, componentIndex), name, value, descriptionOrNull(description));
+// Typed add*() setter; 'visible' is optional as addV3D/addQuat lack it.
+template <auto Method, typename T, typename... Visible>
+void insertParameter(ComponentInfo &self, const std::string &name, const T &value, const object &componentIndex,
+                     const std::string &description, const Visible &...visible) {
+  (self.*Method)(indexOrRoot(self, componentIndex), name, value, descriptionOrNull(description), visible...);
 }
 
 void addFittingParameter(ComponentInfo &self, const std::string &name, const std::string &fittingFunction,
@@ -433,36 +410,36 @@ void export_ComponentInfo() {
            "Adds or replaces the named parameter of this type, given its value as a string, "
            "on the component identified by 'index' (the root component by default).")
 
-      .def("addDouble", &addDouble,
+      .def("addDouble", &insertParameter<&ComponentInfo::addDouble, double, std::string>,
            (arg("self"), arg("name"), arg("value"), arg("index") = object(), arg("description") = "",
             arg("visible") = "true"),
            "Adds or replaces a named double parameter on the component identified by 'index' "
            "(the root component by default).")
 
-      .def("addInt", &addInt,
+      .def("addInt", &insertParameter<&ComponentInfo::addInt, int, std::string>,
            (arg("self"), arg("name"), arg("value"), arg("index") = object(), arg("description") = "",
             arg("visible") = "true"),
            "Adds or replaces a named integer parameter on the component identified by 'index' "
            "(the root component by default).")
 
-      .def("addBool", &addBool,
+      .def("addBool", &insertParameter<&ComponentInfo::addBool, bool, std::string>,
            (arg("self"), arg("name"), arg("value"), arg("index") = object(), arg("description") = "",
             arg("visible") = "true"),
            "Adds or replaces a named boolean parameter on the component identified by 'index' "
            "(the root component by default).")
 
-      .def("addString", &addString,
+      .def("addString", &insertParameter<&ComponentInfo::addString, std::string, std::string>,
            (arg("self"), arg("name"), arg("value"), arg("index") = object(), arg("description") = "",
             arg("visible") = "true"),
            "Adds or replaces a named string parameter on the component identified by 'index' "
            "(the root component by default).")
 
-      .def("addV3D", &addV3D,
+      .def("addV3D", &insertParameter<&ComponentInfo::addV3D, V3D>,
            (arg("self"), arg("name"), arg("value"), arg("index") = object(), arg("description") = ""),
            "Adds or replaces a named V3D parameter on the component identified by 'index' "
            "(the root component by default).")
 
-      .def("addQuat", &addQuat,
+      .def("addQuat", &insertParameter<&ComponentInfo::addQuat, Quat>,
            (arg("self"), arg("name"), arg("value"), arg("index") = object(), arg("description") = ""),
            "Adds or replaces a named Quat parameter on the component identified by 'index' "
            "(the root component by default).")
