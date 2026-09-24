@@ -169,6 +169,7 @@ mold = ">=2.40.4,<3"
 [target.win-64.dependencies]
 conda-wrappers = ">=1.1.3,<2"
 lib3mf = ">=2.4.1,<3"
+lld = ">=23.1.2,<24"
 
 [target.osx-arm64.dependencies]
 clang_osx-arm64 = "18.*"

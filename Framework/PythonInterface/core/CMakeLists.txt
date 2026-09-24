@@ -75,6 +75,9 @@ set(_target_name PythonInterfaceCore)
 # Files that include a guard-less .hxx template-implementation header meant for single inclusion per TU collide when
 # unity-merged with another such file. Keep these compiling individually; everything else may batch.
 set_source_files_properties(src/PythonObjectProperty.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+# NDArrayTypeIndex.cpp explicitly specializes NDArrayTypeIndex<T>::typenum/typecode, which other Converters files
+# declare 'extern template'. Merged into one TU, clang rejects the specialization as coming after instantiation.
+set_source_files_properties(src/Converters/NDArrayTypeIndex.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
 
 add_library(${_target_name} ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::${_target_name} ALIAS ${_target_name})

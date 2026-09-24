@@ -96,6 +96,7 @@ requirements:
       then:
         - conda-wrappers
         - lib3mf
+        - lld>=23.1.2,<24
     - if: osx
       then:
         - python.app
