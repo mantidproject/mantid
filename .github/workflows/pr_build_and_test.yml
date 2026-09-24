@@ -212,6 +212,14 @@ jobs:
           fetch-depth: 100
           fetch-tags: true
 
+      # The rattler package cache in the user profile is deleted by setup-pixi's post-cleanup, and actions/checkout
+      # deletes .pixi, so every Windows job otherwise re-downloads the whole environment (several GB). Keep the
+      # package cache in the persistent runner _work directory instead: it is outside the checkout, untouched by
+      # post-cleanup, and on the same volume as .pixi so packages are hard-linked rather than copied.
+      - name: Use a persistent pixi package cache (Windows)
+        if: ${{ matrix.os == 'Windows' && needs.check-filters.outputs.code_changes == 'true' }}
+        run: echo "PIXI_CACHE_DIR=$(cygpath -w "${RUNNER_WORKSPACE}/../_pixi_cache")" >> "$GITHUB_ENV"
+
       - name: Install pixi
         uses: ./.github/actions/setup-pixi
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
@@ -226,8 +234,8 @@ jobs:
           echo "=== Download timing for the new lld package ==="
           curl -sS -o /dev/null -w "http=%{http_code} size=%{size_download} time=%{time_total}s speed=%{speed_download}B/s\n" \
             --max-time 300 https://conda.anaconda.org/conda-forge/win-64/lld-23.1.2-he13e66b_0.conda || true
-          echo "=== rattler cache lock files ==="
-          ls -la "${LOCALAPPDATA}/rattler/cache" 2>/dev/null | head -20 || true
+          echo "=== pixi package cache (PIXI_CACHE_DIR=${PIXI_CACHE_DIR}) ==="
+          ls "${PIXI_CACHE_DIR}/pkgs" 2>/dev/null | wc -l || true
           echo "=== pixi/rattler config files ==="
           for f in /c/ProgramData/rattler/config.toml /c/ProgramData/pixi/config.toml "${APPDATA}/rattler/config.toml" "${APPDATA}/pixi/config.toml" "${USERPROFILE}/.pixi/config.toml"; do
             [ -f "$f" ] && { echo "--- $f"; cat "$f"; }
