@@ -131,7 +131,10 @@ private:
 // implicitly re-instantiates all of them, which is a significant compile-time cost across MDAlgorithms.
 // Skipped in MDEventFactory.cpp itself, which provides the matching (non-extern) explicit
 // instantiations further down; seeing both in one TU triggers -Wattributes on the DLL export macro.
-#ifndef MDEVENTFACTORY_PROVIDES_EXPLICIT_INSTANTIATIONS
+// MSVC cannot combine 'extern' with the class-level __declspec(dllexport) these templates carry
+// (C4910): it ignores 'extern' and instantiates in every TU, clashing with specializations
+// defined in the .cpp (LNK2005). Only use the extern declarations on other compilers.
+#if !defined(MDEVENTFACTORY_PROVIDES_EXPLICIT_INSTANTIATIONS) && !defined(_MSC_VER)
 // Extern instantiations for MDLeanEvent
 extern template class MANTID_DATAOBJECTS_DLL MDLeanEvent<1>;
 extern template class MANTID_DATAOBJECTS_DLL MDLeanEvent<2>;
@@ -247,7 +250,7 @@ extern template class MANTID_DATAOBJECTS_DLL MDBoxIterator<MDEvent<6>, 6>;
 extern template class MANTID_DATAOBJECTS_DLL MDBoxIterator<MDEvent<7>, 7>;
 extern template class MANTID_DATAOBJECTS_DLL MDBoxIterator<MDEvent<8>, 8>;
 extern template class MANTID_DATAOBJECTS_DLL MDBoxIterator<MDEvent<9>, 9>;
-#endif // MDEVENTFACTORY_PROVIDES_EXPLICIT_INSTANTIATIONS
+#endif // !MDEVENTFACTORY_PROVIDES_EXPLICIT_INSTANTIATIONS && !_MSC_VER
 
 /** Macro that makes it possible to call a templated method for
  * a MDEventWorkspace using a IMDEventWorkspace_sptr as the input.

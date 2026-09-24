@@ -112,7 +112,10 @@ private:
 // 'extern template' declarations matching the explicit instantiations in
 // FilteredTimeSeriesProperty.cpp. Without these, every translation unit that uses a
 // FilteredTimeSeriesProperty<TYPE> implicitly re-instantiates it locally.
-#ifndef FILTEREDTIMESERIESPROPERTY_PROVIDES_EXPLICIT_INSTANTIATIONS
+// MSVC cannot combine 'extern' with the class-level __declspec(dllexport) these templates carry
+// (C4910): it ignores 'extern' and instantiates in every TU, clashing with specializations
+// defined in the .cpp (LNK2005). Only use the extern declarations on other compilers.
+#if !defined(FILTEREDTIMESERIESPROPERTY_PROVIDES_EXPLICIT_INSTANTIATIONS) && !defined(_MSC_VER)
 extern template class MANTID_KERNEL_DLL FilteredTimeSeriesProperty<int32_t>;
 extern template class MANTID_KERNEL_DLL FilteredTimeSeriesProperty<int64_t>;
 extern template class MANTID_KERNEL_DLL FilteredTimeSeriesProperty<uint32_t>;
@@ -121,7 +124,7 @@ extern template class MANTID_KERNEL_DLL FilteredTimeSeriesProperty<float>;
 extern template class MANTID_KERNEL_DLL FilteredTimeSeriesProperty<double>;
 extern template class MANTID_KERNEL_DLL FilteredTimeSeriesProperty<std::string>;
 extern template class MANTID_KERNEL_DLL FilteredTimeSeriesProperty<bool>;
-#endif // FILTEREDTIMESERIESPROPERTY_PROVIDES_EXPLICIT_INSTANTIATIONS
+#endif // !FILTEREDTIMESERIESPROPERTY_PROVIDES_EXPLICIT_INSTANTIATIONS && !_MSC_VER
 
 } // namespace Kernel
 } // namespace Mantid

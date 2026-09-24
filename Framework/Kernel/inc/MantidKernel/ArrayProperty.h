@@ -63,7 +63,10 @@ template <> MANTID_KERNEL_DLL void ArrayProperty<int>::visualStudioC4661Workarou
 // Without these, every translation unit that declares a vector-valued property (e.g. via
 // declareProperty<std::vector<T>>) implicitly re-instantiates ArrayProperty<T> locally -- and
 // this header has a very wide fan-out across the codebase.
-#ifndef ARRAYPROPERTY_PROVIDES_EXPLICIT_INSTANTIATIONS
+// MSVC cannot combine 'extern' with the class-level __declspec(dllexport) these templates carry
+// (C4910): it ignores 'extern' and instantiates in every TU, clashing with specializations
+// defined in the .cpp (LNK2005). Only use the extern declarations on other compilers.
+#if !defined(ARRAYPROPERTY_PROVIDES_EXPLICIT_INSTANTIATIONS) && !defined(_MSC_VER)
 // int32_t already gets an attributed member specialization (visualStudioC4661Workaround) just
 // above, so the DLL macro is left off here too, to avoid the same "attributes ignored after
 // type is already defined" warning ArrayProperty.cpp works around for its own instantiation.
@@ -88,7 +91,7 @@ extern template class MANTID_KERNEL_DLL ArrayProperty<unsigned long>;
 extern template class MANTID_KERNEL_DLL ArrayProperty<std::vector<long>>;
 extern template class MANTID_KERNEL_DLL ArrayProperty<std::vector<unsigned long>>;
 #endif
-#endif // ARRAYPROPERTY_PROVIDES_EXPLICIT_INSTANTIATIONS
+#endif // !ARRAYPROPERTY_PROVIDES_EXPLICIT_INSTANTIATIONS && !_MSC_VER
 
 } // namespace Kernel
 } // namespace Mantid

@@ -71,7 +71,10 @@ private:
 // 'extern template' declarations matching the explicit instantiations in
 // ArrayLengthValidator.cpp. Without these, every translation unit that uses one of these
 // validators implicitly re-instantiates it locally.
-#ifndef ARRAYLENGTHVALIDATOR_PROVIDES_EXPLICIT_INSTANTIATIONS
+// MSVC cannot combine 'extern' with the class-level __declspec(dllexport) these templates carry
+// (C4910): it ignores 'extern' and instantiates in every TU, clashing with specializations
+// defined in the .cpp (LNK2005). Only use the extern declarations on other compilers.
+#if !defined(ARRAYLENGTHVALIDATOR_PROVIDES_EXPLICIT_INSTANTIATIONS) && !defined(_MSC_VER)
 extern template class MANTID_KERNEL_DLL ArrayLengthValidator<double>;
 extern template class MANTID_KERNEL_DLL ArrayLengthValidator<int32_t>;
 extern template class MANTID_KERNEL_DLL ArrayLengthValidator<int64_t>;
@@ -79,7 +82,7 @@ extern template class MANTID_KERNEL_DLL ArrayLengthValidator<std::string>;
 #if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)
 extern template class MANTID_KERNEL_DLL ArrayLengthValidator<long>;
 #endif
-#endif // ARRAYLENGTHVALIDATOR_PROVIDES_EXPLICIT_INSTANTIATIONS
+#endif // !ARRAYLENGTHVALIDATOR_PROVIDES_EXPLICIT_INSTANTIATIONS && !_MSC_VER
 
 } // namespace Kernel
 } // namespace Mantid
