@@ -211,7 +211,7 @@ Usage
    print("It has {} dimensions.".format(data.getNumDims()))
    s =  data.getSignalArray()
    print("Signal at some points: {0:.4f}, {1:.4f}, {2:.4f}".format(
-         float(s[7,1][0]), float(s[7,2][0]), float(s[7,3][0])))
+         float(s[7,1,0,0]), float(s[7,2,0,0]), float(s[7,3,0,0])))
 
 **Output:**
 

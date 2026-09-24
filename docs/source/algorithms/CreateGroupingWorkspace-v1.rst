@@ -79,9 +79,8 @@ Usage
 
    # Confirm instrument in grouping workspace.
    grouping = result[0]
-   inst1 = grouping.getInstrument()
-   comp1 = inst1.getComponentByName("MUSR")
-   print("Instrument name = {}".format(comp1.getName()))
+   compInfo1 = grouping.componentInfo()
+   print("Instrument name = {}".format(compInfo1.name(compInfo1.root())))
 
 Output:
 
@@ -103,9 +102,8 @@ Output:
 
    # Confirm instrument in grouping workspace.
    grouping = result[0]
-   inst1 = grouping.getInstrument()
-   comp1 = inst1.getComponentByName("MUSR")
-   print("Instrument name = {}".format(comp1.getName()))
+   compInfo1 = grouping.componentInfo()
+   print("Instrument name = {}".format(compInfo1.name(compInfo1.root())))
 
 Output:
 
@@ -122,9 +120,8 @@ Output:
 
    # Confirm instrument in grouping workspace.
    grouping = result[0]
-   inst1 = grouping.getInstrument()
-   comp1 = inst1.getComponentByName("GEM")
-   print("Instrument name = {}".format(comp1.getName()))
+   compInfo1 = grouping.componentInfo()
+   print("Instrument name = {}".format(compInfo1.name(compInfo1.root())))
 
 Output:
 

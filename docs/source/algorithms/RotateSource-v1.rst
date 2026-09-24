@@ -27,8 +27,9 @@ Usage
    ws = CreateSampleWorkspace()
 
    # Original positions
-   samplePos = ws.getInstrument().getSample().getPos()
-   sourcePos = ws.getInstrument().getSource().getPos()
+   compInfo = ws.componentInfo()
+   samplePos = compInfo.samplePosition()
+   sourcePos = compInfo.sourcePosition()
 
    def pos3D_as_str(pos, digits=1, tolerance=1e-7):
      """
@@ -52,8 +53,9 @@ Usage
    RotateSource(ws, -90)
 
    # New positions
-   samplePos = ws.getInstrument().getSample().getPos()
-   sourcePos = ws.getInstrument().getSource().getPos()
+   compInfo = ws.componentInfo()
+   samplePos = compInfo.samplePosition()
+   sourcePos = compInfo.sourcePosition()
    print("New position of the sample: {0}".format(pos3D_as_str(samplePos)))
    print("New position of the source: {0}".format(pos3D_as_str(sourcePos)))
 

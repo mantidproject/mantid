@@ -39,15 +39,19 @@ Usage
 
 .. testcode:: ExElasticBinWithL2
 
-    from mantid.kernel import DeltaEModeType, UnitConversion
+    from mantid.kernel import DeltaEModeType, UnitConversion, UnitParams, UnitParametersMap
 
     L1 = 2.0 # in metres.
     L2 = 2.0
     Ei = 55.0 # in meV
+    params = UnitParametersMap()
+    params[UnitParams.l2] = L2
+    params[UnitParams.twoTheta] = 0.
+    params[UnitParams.efixed] = Ei
     elasticTOF = UnitConversion.run(src='Energy', dest='TOF',
                                     srcValue=Ei,
-                                    l1=L1, l2=L2,
-                                    theta=0, emode=DeltaEModeType.Direct, efixed=Ei)
+                                    l1=L1, emode=DeltaEModeType.Direct,
+                                    params=params)
 
     # Make a workspace with wrong TOF axis.
     TOFMin = 0.0
@@ -100,15 +104,19 @@ Output:
 
 .. testcode:: ExElasticBinWithRef
 
-    from mantid.kernel import DeltaEModeType, UnitConversion
+    from mantid.kernel import DeltaEModeType, UnitConversion, UnitParams, UnitParametersMap
 
     L1 = 2.0 # in metres.
     L2 = 2.0
     Ei = 55.0 # in meV
+    params = UnitParametersMap()
+    params[UnitParams.l2] = L2
+    params[UnitParams.twoTheta] = 0.
+    params[UnitParams.efixed] = Ei
     elasticTOF = UnitConversion.run(src='Energy', dest='TOF',
                                     srcValue=Ei,
-                                    l1=L1, l2=L2,
-                                    theta=0, emode=DeltaEModeType.Direct, efixed=Ei)
+                                    l1=L1, emode=DeltaEModeType.Direct,
+                                    params=params)
 
     # Make a workspace with wrong TOF axis.
     TOFMin = 0.0
@@ -161,16 +169,20 @@ Output:
 
 .. testcode:: ExEPPTable
 
-    from mantid.kernel import DeltaEModeType, UnitConversion
+    from mantid.kernel import DeltaEModeType, UnitConversion, UnitParams, UnitParametersMap
     import numpy
 
     L1 = 2.0 # in metres
     L2 = 2.0
     Ei = 55.0 # in meV
+    params = UnitParametersMap()
+    params[UnitParams.l2] = L2
+    params[UnitParams.twoTheta] = 0.
+    params[UnitParams.efixed] = Ei
     elasticTOF = UnitConversion.run(src='Energy', dest='TOF',
                                     srcValue=Ei,
-                                    l1=L1, l2=L2,
-                                    theta=0, emode=DeltaEModeType.Direct, efixed=Ei)
+                                    l1=L1, emode=DeltaEModeType.Direct,
+                                    params=params)
 
     # Make a workspace with wrong TOF axis.
     TOFMin = 0.0
@@ -219,16 +231,20 @@ Output:
 
 .. testcode:: ExReferenceWS
 
-    from mantid.kernel import DeltaEModeType, UnitConversion
+    from mantid.kernel import DeltaEModeType, UnitConversion, UnitParams, UnitParametersMap
     import numpy
 
     L1 = 2.0
     L2 = 2.0
     Ei = 55.0 # in meV
+    params = UnitParametersMap()
+    params[UnitParams.l2] = L2
+    params[UnitParams.twoTheta] = 0.
+    params[UnitParams.efixed] = Ei
     elasticTOF = UnitConversion.run(src='Energy', dest='TOF',
                                     srcValue=Ei,
-                                    l1=L1, l2=L2,
-                                    theta=0, emode=DeltaEModeType.Direct, efixed=Ei)
+                                    l1=L1, emode=DeltaEModeType.Direct,
+                                    params=params)
 
     # Make two workspaces with wrong TOF axis.
     TOFMin = 0.0

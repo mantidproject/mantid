@@ -140,7 +140,8 @@ Usage
   print('Workspace has {} spectra'.format(ws.getNumberHistograms()))
   # Get a detector in histogram 1024 of the workspace
   detid = ws.getSpectrum(1024).getDetectorIDs()[0]
-  print('Is detector {} a monitor? {}'.format(detid, ws.getInstrument().getDetector(detid).isMonitor()))
+  detInfo = ws.detectorInfo()
+  print('Is detector {} a monitor? {}'.format(detid, detInfo.isMonitor(detInfo.indexOf(detid))))
 
   # Get the Run object
   run = ws.run()
@@ -166,7 +167,8 @@ Output:
   print('Workspace has {} spectra'.format(ws.getNumberHistograms()))
   # Get a detector in histogram 1024 of the workspace
   detid = ws.getSpectrum(1024).getDetectorIDs()[0]
-  print('Is detector {} a monitor? {}'.format(detid, ws.getInstrument().getDetector(detid).isMonitor()))
+  detInfo = ws.detectorInfo()
+  print('Is detector {} a monitor? {}'.format(detid, detInfo.isMonitor(detInfo.indexOf(detid))))
 
   # Get the Run object
   run = ws.run()
@@ -191,7 +193,8 @@ Output:
   print('Workspace has {} spectra'.format(ws.getNumberHistograms()))
   # Get a detector in histogram 1024 of the workspace
   detid = ws.getSpectrum(1024).getDetectorIDs()[0]
-  print('Is detector {} a monitor? {}'.format(detid, ws.getInstrument().getDetector(detid).isMonitor()))
+  detInfo = ws.detectorInfo()
+  print('Is detector {} a monitor? {}'.format(detid, detInfo.isMonitor(detInfo.indexOf(detid))))
 
   # Get the Run object
   run = ws.run()
@@ -217,12 +220,13 @@ Output:
 
   print('Monitor workspace has {} spectra'.format(monitorws.getNumberHistograms()))
   # Check that the detector in the first histogram of the monitor workspace is a monitor
+  monDetInfo = monitorws.detectorInfo()
   detid = monitorws.getSpectrum(0).getDetectorIDs()[0]
-  print('Is detector {} a monitor? {}'.format(detid, monitorws.getInstrument().getDetector(detid).isMonitor()))
+  print('Is detector {} a monitor? {}'.format(detid, monDetInfo.isMonitor(monDetInfo.indexOf(detid))))
 
   # Check that the detector in the second histogram of the monitor workspace is a monitor
   detid = monitorws.getSpectrum(1).getDetectorIDs()[0]
-  print('Is detector {} a monitor? {}'.format(detid, monitorws.getInstrument().getDetector(detid).isMonitor()))
+  print('Is detector {} a monitor? {}'.format(detid, monDetInfo.isMonitor(monDetInfo.indexOf(detid))))
 
 Output:
 

@@ -40,16 +40,20 @@ Usage
    spectra = [0, 1, 3] # Sprectra of detectors moved
 
    # Show positions in 1st workspace
+   specInfo1 = ws1.spectrumInfo()
    for i in spectra:
-        det = ws1.getDetector(i)
+        detID = ws1.getSpectrum(i).getDetectorIDs()[0]
+        pos = specInfo1.position(i)
         print("Position of Detector ID={} in 1st workspace: {:.0f},{:.0f},{:.0f}".
-               format(det.getID(), det.getPos().X(), det.getPos().Y(), det.getPos().Z()))
+               format(detID, pos.X(), pos.Y(), pos.Z()))
 
    # Show positions in 2nd workspace before CopyInstrumrentParameters
+   specInfo2 = ws2.spectrumInfo()
    for i in spectra:
-        det = ws2.getDetector(i)
-        print("Position of Detector ID=%i in 2nd workspace before CopyInstrumentParameters: %.0f,%.0f,%.0f" % (det.getID(),
-                det.getPos().X(), det.getPos().Y(), det.getPos().Z()))
+        detID = ws2.getSpectrum(i).getDetectorIDs()[0]
+        pos = specInfo2.position(i)
+        print("Position of Detector ID=%i in 2nd workspace before CopyInstrumentParameters: %.0f,%.0f,%.0f" % (detID,
+                pos.X(), pos.Y(), pos.Z()))
 
 
    # Copy parameters from 1st workspace to 2nd workspace
@@ -57,10 +61,12 @@ Usage
 
 
    # Show positions in 2nd workspace after CopyInstrumrentParameters
+   specInfo2 = ws2.spectrumInfo()
    for i in spectra:
-        det = ws2.getDetector(i)
+        detID = ws2.getSpectrum(i).getDetectorIDs()[0]
+        pos = specInfo2.position(i)
         print("Position of Detector ID={} in 2nd workspace after CopyInstrumentParameters: {:.0f},{:.0f},{:.0f}".
-              format(det.getID(), det.getPos().X(), det.getPos().Y(), det.getPos().Z()))
+              format(detID, pos.X(), pos.Y(), pos.Z()))
 
 Output:
 

@@ -56,16 +56,16 @@ Usage
    polref = Load(Filename=r'POLREF00004699.raw', PeriodList=1)
    polref = polref[0]
 
-   instr = polref.getInstrument()
-   print('Original position: ' + str(instr.getComponentByName('point-detector').getPos()))
+   compInfo = polref.componentInfo()
+   print('Original position: ' + str(compInfo.position(compInfo.indexOfAny('point-detector'))))
 
    polref_vert = SpecularReflectionPositionCorrect(polref, TwoTheta = 2*0.49, DetectorComponentName='point-detector', DetectorCorrectionType='VerticalShift')
-   instr = polref_vert.getInstrument()
-   print('Vertical shift:    ' + str(instr.getComponentByName('point-detector').getPos()))
+   compInfo = polref_vert.componentInfo()
+   print('Vertical shift:    ' + str(compInfo.position(compInfo.indexOfAny('point-detector'))))
 
    polref_rot = SpecularReflectionPositionCorrect(polref, TwoTheta = 2*0.49, DetectorComponentName='point-detector', DetectorCorrectionType='RotateAroundSample')
-   instr = polref_rot.getInstrument()
-   print('Rotated:           ' + str(instr.getComponentByName('point-detector').getPos()))
+   compInfo = polref_rot.componentInfo()
+   print('Rotated:           ' + str(compInfo.position(compInfo.indexOfAny('point-detector'))))
 
 Output:
 
@@ -86,16 +86,16 @@ Note that in this case the difference between shifting the detectors vertically 
    polref = Load(Filename=r'POLREF00004699.raw', PeriodList=1)
    polref = polref[0]
 
-   instr = polref.getInstrument()
-   print('Original position: ' + str(instr.getComponentByName('lineardetector').getPos()))
+   compInfo = polref.componentInfo()
+   print('Original position: ' + str(compInfo.position(compInfo.indexOfAny('lineardetector'))))
 
    polref_vert = SpecularReflectionPositionCorrect(polref, TwoTheta = 2*0.49, DetectorComponentName='lineardetector')
-   instr = polref_vert.getInstrument()
-   print('Vertical shift:    ' + str(instr.getComponentByName('lineardetector').getPos()))
+   compInfo = polref_vert.componentInfo()
+   print('Vertical shift:    ' + str(compInfo.position(compInfo.indexOfAny('lineardetector'))))
 
    polref_rot = SpecularReflectionPositionCorrect(polref, TwoTheta = 2*0.49, DetectorComponentName='lineardetector', DetectorCorrectionType='RotateAroundSample')
-   instr = polref_rot.getInstrument()
-   print('Rotated:           ' + str(instr.getComponentByName('lineardetector').getPos()))
+   compInfo = polref_rot.componentInfo()
+   print('Rotated:           ' + str(compInfo.position(compInfo.indexOfAny('lineardetector'))))
 
 Output:
 
@@ -114,16 +114,16 @@ Output:
    polref = Load(Filename=r'POLREF00004699.raw', PeriodList=1)
    polref = polref[0]
 
-   instr = polref.getInstrument()
-   print('Original position: ' + str(instr.getComponentByName('OSMOND').getPos()))
+   compInfo = polref.componentInfo()
+   print('Original position: ' + str(compInfo.position(compInfo.indexOfAny('OSMOND'))))
 
    polref_vert = SpecularReflectionPositionCorrect(polref, TwoTheta = 2*0.49, DetectorComponentName='OSMOND')
-   instr = polref_vert.getInstrument()
-   print('Vertical shift:    ' + str(instr.getComponentByName('OSMOND').getPos()))
+   compInfo = polref_vert.componentInfo()
+   print('Vertical shift:    ' + str(compInfo.position(compInfo.indexOfAny('OSMOND'))))
 
    polref_rot = SpecularReflectionPositionCorrect(polref, TwoTheta = 2*0.49, DetectorComponentName='OSMOND', DetectorCorrectionType='RotateAroundSample')
-   instr = polref_rot.getInstrument()
-   print('Rotated:           ' + str(instr.getComponentByName('OSMOND').getPos()))
+   compInfo = polref_rot.componentInfo()
+   print('Rotated:           ' + str(compInfo.position(compInfo.indexOfAny('OSMOND'))))
 
 Output:
 

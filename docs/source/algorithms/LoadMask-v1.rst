@@ -88,11 +88,12 @@ Usage
     # ws.maskDetectors(MaskedWorkspace=mask)
 
     # Check some pixels
-    print("Is detector 0 masked: {}".format(ws.getDetector(0).isMasked()))
-    print("Is detector 6245 masked: {}".format(ws.getDetector(6245).isMasked()))
-    print("Is detector 11464 masked: {}".format(ws.getDetector(11464).isMasked()))
-    print("Is detector 17578 masked: {}".format(ws.getDetector(17578).isMasked()))
-    print("Is detector 20475 masked: {}".format(ws.getDetector(20475).isMasked()))
+    specInfo = ws.spectrumInfo()
+    print("Is detector 0 masked: {}".format(specInfo.isMasked(0)))
+    print("Is detector 6245 masked: {}".format(specInfo.isMasked(6245)))
+    print("Is detector 11464 masked: {}".format(specInfo.isMasked(11464)))
+    print("Is detector 17578 masked: {}".format(specInfo.isMasked(17578)))
+    print("Is detector 20475 masked: {}".format(specInfo.isMasked(20475)))
 
 Output:
 
@@ -141,22 +142,20 @@ Output:
     MaskedDet1to1= []
     MaskedSp_R  = []
     MaskedDet_R= []
+    rwsSpecInfo = rws.spectrumInfo()
     for ind in range(0,nhist):
         try:
-            det = rws.getDetector(ind)
-            if det.isMasked():
+            if rwsSpecInfo.isMasked(ind):
                 Sig0Masked.append(ind)
-                Det0Masked.append(det.getID())
+                Det0Masked.append(rws.getSpectrum(ind).getDetectorIDs()[0])
             #  1:1 map generated from instrument definitions
             if mask1to1ws.y(ind)[0]>0.5:
-                det = mask1to1ws.getDetector(ind)
                 MaskedSp1to1.append(ind)
-                MaskedDet1to1.append(det.getID())
+                MaskedDet1to1.append(mask1to1ws.getSpectrum(ind).getDetectorIDs()[0])
             # Real spectra-detector map:
             if maskRealSDM.y(ind)[0]>0.5:
-                det = maskRealSDM.getDetector(ind)
                 MaskedSp_R.append(ind)
-                MaskedDet_R.append(det.getID())
+                MaskedDet_R.append(maskRealSDM.getSpectrum(ind).getDetectorIDs()[0])
         except:
             pass
     print("*** ************************************ **********************************************")

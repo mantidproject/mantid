@@ -32,13 +32,14 @@ Usage
 
    det_id_list = LoadInstrumentFromRaw(ws, "LOQ48127.raw")
 
-   inst = ws.getInstrument()
+   compInfo = ws.componentInfo()
+   detInfo = ws.detectorInfo()
 
-   print("The name of the instrument is '{}'.".format(inst.getName().strip()))
-   print("The position of the source is {}.".format(inst.getSource().getPos()))
-   print("The position of detector 5 is {}.".format(inst.getDetector(5).getPos()))
-   print("Is detector 1 a monitor? {}".format(inst.getDetector(1).isMonitor()))
-   print("Is detector 8 a monitor? {}".format(inst.getDetector(8).isMonitor()))
+   print("The name of the instrument is '{}'.".format(compInfo.name(compInfo.root()).strip()))
+   print("The position of the source is {}.".format(compInfo.sourcePosition()))
+   print("The position of detector 5 is {}.".format(detInfo.position(detInfo.indexOf(5))))
+   print("Is detector 1 a monitor? {}".format(detInfo.isMonitor(detInfo.indexOf(1))))
+   print("Is detector 8 a monitor? {}".format(detInfo.isMonitor(detInfo.indexOf(8))))
 
 Output:
 

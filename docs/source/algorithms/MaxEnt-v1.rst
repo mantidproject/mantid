@@ -230,7 +230,7 @@ and :ref:`algm-FFT` (right).
           if originalX[j]>xMin and originalX[j]<xMax:
               yData.append(originalY[j]**2)
               xData.append(originalX[j])
-      return np.trapz(x=xData,y=np.sqrt(yData))
+      return np.trapezoid(x=xData,y=np.sqrt(yData))
    # Do not change these numbers - they test if noise has been added to the alg
    print("Negative background {:.6f}".format(getInt(image.x(0), image.y(0),-30,-2 )))
    print("Positive background {:.6f}".format(getInt(image.x(0), image.y(0),2,30 )))

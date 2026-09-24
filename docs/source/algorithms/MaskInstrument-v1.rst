@@ -24,8 +24,9 @@ Usage
   ws = CreateSampleWorkspace()
   ws = MaskInstrument(InputWorkspace=ws, DetectorIDs='100,102-104')
   # Detectors are masked but data and mask data is zeroed
+  specInfo = ws.spectrumInfo()
   for i in range(6):
-    print("Detector {} masked: {:5} data {}".format(i, str(ws.getDetector(i).isMasked()), ws.y(i)[0]))
+    print("Detector {} masked: {:5} data {}".format(i, str(specInfo.isMasked(i)), ws.y(i)[0]))
 
 Output:
 

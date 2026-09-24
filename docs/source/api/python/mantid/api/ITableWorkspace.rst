@@ -35,7 +35,7 @@ If you want to check if a variable points to something that is an Table Workspac
     tableWS = CreateEmptyTableWorkspace()
 
     if tableWS is ITableWorkspace:
-        print(tableWS.getName() + " is a " + tableWS.id())
+        print(tableWS.name() + " is a " + tableWS.id())
 
 Output:
 

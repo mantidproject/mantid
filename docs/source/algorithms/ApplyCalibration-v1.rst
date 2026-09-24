@@ -41,14 +41,14 @@ Usage
 
    # Show positions before calibration
    for i in spectra:
-       det = ws.getDetector(i)
-       xyz = det.getPos()
-       print("Position of Detector ID=%i before ApplyCalibration: %.1f,%.1f,%.1f" % (det.getID(), xyz.X(), xyz.Y(), xyz.Z()))
-       index = detInfo.indexOf(det.getID())  # detectorInfo and componentInfo index
+       detID = ws.getSpectrum(i).getDetectorIDs()[0]
+       index = detInfo.indexOf(detID)  # detectorInfo and componentInfo index
+       xyz = compInfo.position(index)
+       print("Position of Detector ID=%i before ApplyCalibration: %.1f,%.1f,%.1f" % (detID, xyz.X(), xyz.Y(), xyz.Z()))
        box = compInfo.shape(index).getBoundingBox().width()
        scalings = compInfo.scaleFactor(index)
        width, height = box[0] * scalings[0], box[1] * scalings[1]
-       print('Width and Height of Detector ID=%i before ApplyCalibration: %.3f %.3f' % (det.getID(), width, height))
+       print('Width and Height of Detector ID=%i before ApplyCalibration: %.3f %.3f' % (detID, width, height))
 
    # Create CalibrationTable - This would be done by the calibration functions
    calibTable = CreateEmptyTableWorkspace(OutputWorkspace="CalibTable")
@@ -59,7 +59,7 @@ Usage
    calibTable.addColumn(type="double",name="Detector Height")
    calibTable.addColumn(type="double",name="Detector Width")
    # Populate the columns for three detectors
-   detIDList = [ws.getDetector(spectra[0]).getID(), ws.getDetector(spectra[1]).getID() ]
+   detIDList = [ws.getSpectrum(spectra[0]).getDetectorIDs()[0], ws.getSpectrum(spectra[1]).getDetectorIDs()[0]]
    detPosList = [V3D(9.0,0.0,0.0), V3D(10.0,3.0,0.0)]
    detYCoord = [0.1, 2.9]
    detWidthList = [0.011, 0.009]
@@ -74,14 +74,14 @@ Usage
 
    # Show positions after calibration
    for i in spectra:
-       det = ws.getDetector(i)
-       xyz = det.getPos()
-       print("Position of Detector ID=%i after ApplyCalibration: %.1f,%.1f,%.1f" % (det.getID(), xyz.X(), xyz.Y(), xyz.Z()))
-       index = detInfo.indexOf(det.getID())  # detectorInfo and componentInfo index
+       detID = ws.getSpectrum(i).getDetectorIDs()[0]
+       index = detInfo.indexOf(detID)  # detectorInfo and componentInfo index
+       xyz = compInfo.position(index)
+       print("Position of Detector ID=%i after ApplyCalibration: %.1f,%.1f,%.1f" % (detID, xyz.X(), xyz.Y(), xyz.Z()))
        box = compInfo.shape(index).getBoundingBox().width()
        scalings = compInfo.scaleFactor(index)
        width, height = box[0] * scalings[0], box[1] * scalings[1]
-       print('Width and Height of Detector ID=%i after ApplyCalibration: %.3f %.3f' % (det.getID(), width, height))
+       print('Width and Height of Detector ID=%i after ApplyCalibration: %.3f %.3f' % (detID, width, height))
 
 Output:
 

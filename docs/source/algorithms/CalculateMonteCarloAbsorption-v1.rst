@@ -80,9 +80,9 @@ Usage
     ass_ws = corrections[0]
     acc_ws = corrections[1]
 
-    print("Workspaces: " + str(ass_ws.getName()) + ", " + str(acc_ws.getName()))
-    print("Y-Unit Label of " + str(ass_ws.getName()) + ": " + str(ass_ws.YUnitLabel()))
-    print("Y-Unit Label of " + str(acc_ws.getName()) + ": " + str(acc_ws.YUnitLabel()))
+    print("Workspaces: " + str(ass_ws.name()) + ", " + str(acc_ws.name()))
+    print("Y-Unit Label of " + str(ass_ws.name()) + ": " + str(ass_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(acc_ws.name()) + ": " + str(acc_ws.YUnitLabel()))
 
 .. testcleanup:: QENSCalculateShapeMonteCarloAbsorption
 

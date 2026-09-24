@@ -106,11 +106,11 @@ Usage
 
    eventData = mtd['EventData_ws']
    print("Number of histograms in event data: {}".format(eventData.getNumberHistograms()))
-   print("Name of event data: {}".format(eventData.getName()))
+   print("Name of event data: {}".format(eventData.name()))
 
    someHistogramData = mtd['Edet.dat_ws']
    print("Number of histograms in hist data: {}".format(someHistogramData.getNumberHistograms()))
-   print("Name of hist data: {}".format(someHistogramData.getName()))
+   print("Name of hist data: {}".format(someHistogramData.name()))
 
 
 Output:

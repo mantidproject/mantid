@@ -100,10 +100,10 @@ Usage
     acsc_ws = corrections[2]
     acc_ws = corrections[3]
 
-    print("Y-Unit Label of " + str(ass_ws.getName()) + ": " + str(ass_ws.YUnitLabel()))
-    print("Y-Unit Label of " + str(assc_ws.getName()) + ": " + str(assc_ws.YUnitLabel()))
-    print("Y-Unit Label of " + str(acsc_ws.getName()) + ": " + str(acsc_ws.YUnitLabel()))
-    print("Y-Unit Label of " + str(acc_ws.getName()) + ": " + str(acc_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(ass_ws.name()) + ": " + str(ass_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(assc_ws.name()) + ": " + str(assc_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(acsc_ws.name()) + ": " + str(acsc_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(acc_ws.name()) + ": " + str(acc_ws.YUnitLabel()))
 
 .. testcleanup:: FlatPlate
 
@@ -151,10 +151,10 @@ Usage
     acsc_ws = corrections[2]
     acc_ws = corrections[3]
 
-    print("Y-Unit Label of " + str(ass_ws.getName()) + ": " + str(ass_ws.YUnitLabel()))
-    print("Y-Unit Label of " + str(assc_ws.getName()) + ": " + str(assc_ws.YUnitLabel()))
-    print("Y-Unit Label of " + str(acsc_ws.getName()) + ": " + str(acsc_ws.YUnitLabel()))
-    print("Y-Unit Label of " + str(acc_ws.getName()) + ": " + str(acc_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(ass_ws.name()) + ": " + str(ass_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(assc_ws.name()) + ": " + str(assc_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(acsc_ws.name()) + ": " + str(acsc_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(acc_ws.name()) + ": " + str(acc_ws.YUnitLabel()))
 
 .. testcleanup:: Cylinder
 
@@ -204,10 +204,10 @@ Usage
     acsc_ws = corrections[2]
     acc_ws = corrections[3]
 
-    print("Y-Unit Label of " + str(ass_ws.getName()) + ": " + str(ass_ws.YUnitLabel()))
-    print("Y-Unit Label of " + str(assc_ws.getName()) + ": " + str(assc_ws.YUnitLabel()))
-    print("Y-Unit Label of " + str(acsc_ws.getName()) + ": " + str(acsc_ws.YUnitLabel()))
-    print("Y-Unit Label of " + str(acc_ws.getName()) + ": " + str(acc_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(ass_ws.name()) + ": " + str(ass_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(assc_ws.name()) + ": " + str(assc_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(acsc_ws.name()) + ": " + str(acsc_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(acc_ws.name()) + ": " + str(acc_ws.YUnitLabel()))
 
 .. testcleanup:: Annulus
 
@@ -266,10 +266,10 @@ Usage
     acsc_ws = corrections[2]
     acc_ws = corrections[3]
 
-    print("Y-Unit Label of " + str(ass_ws.getName()) + ": " + str(ass_ws.YUnitLabel()))
-    print("Y-Unit Label of " + str(assc_ws.getName()) + ": " + str(assc_ws.YUnitLabel()))
-    print("Y-Unit Label of " + str(acsc_ws.getName()) + ": " + str(acsc_ws.YUnitLabel()))
-    print("Y-Unit Label of " + str(acc_ws.getName()) + ": " + str(acc_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(ass_ws.name()) + ": " + str(ass_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(assc_ws.name()) + ": " + str(assc_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(acsc_ws.name()) + ": " + str(acsc_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(acc_ws.name()) + ": " + str(acc_ws.YUnitLabel()))
 
 .. testcleanup:: Preset
 

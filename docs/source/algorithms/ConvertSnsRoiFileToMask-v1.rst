@@ -41,9 +41,10 @@ Usage
     MaskDetectors(ws, MaskedWorkspace=mask)
 
     # Check to see that only first 2 pixels are not masked
-    print("Is detector 0 masked: {}".format(ws.getDetector(0).isMasked()))
-    print("Is detector 1 masked: {}".format(ws.getDetector(1).isMasked()))
-    print("Is detector 2 masked: {}".format(ws.getDetector(2).isMasked()))
+    specInfo = ws.spectrumInfo()
+    print("Is detector 0 masked: {}".format(specInfo.isMasked(0)))
+    print("Is detector 1 masked: {}".format(specInfo.isMasked(1)))
+    print("Is detector 2 masked: {}".format(specInfo.isMasked(2)))
 
 Output:
 

@@ -47,13 +47,13 @@ Usage
     print("Step 3: 1 * 8 * 128 = {0.size}".format(c))
 
     print("Here are some of the masked detectors:")
-    instrument=mtd['CNCSMaskBTP'].getInstrument()
-    print("A pixel Bank 42, detector 42700:  {}".format(instrument.getDetector(42700).isMasked()))
-    print("Pixel 1 in Tube 4 in Bank 45, detector 45440:  {}".format(instrument.getDetector(45440).isMasked()))
-    print("Pixel 100 in Tube 2 in Bank 45, detector 45283:  {}".format(instrument.getDetector(45283).isMasked()))
+    detInfo=mtd['CNCSMaskBTP'].detectorInfo()
+    print("A pixel Bank 42, detector 42700:  {}".format(detInfo.isMasked(detInfo.indexOf(42700))))
+    print("Pixel 1 in Tube 4 in Bank 45, detector 45440:  {}".format(detInfo.isMasked(detInfo.indexOf(45440))))
+    print("Pixel 100 in Tube 2 in Bank 45, detector 45283:  {}".format(detInfo.isMasked(detInfo.indexOf(45283))))
     print("")
     print("And one that should not be masked")
-    print("Pixel 128 in Tube 8 in Bank 50, detector 51199:  {}".format(instrument.getDetector(51199).isMasked()))
+    print("Pixel 128 in Tube 8 in Bank 50, detector 51199:  {}".format(detInfo.isMasked(detInfo.indexOf(51199))))
 
 .. testcleanup:: MaskBTP
 

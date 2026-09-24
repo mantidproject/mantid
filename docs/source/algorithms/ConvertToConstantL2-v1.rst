@@ -29,18 +29,20 @@ This algorithm is intended for visualisation only. It is not recommended as part
    ws = Load('ILL/IN5/104007.nxs')
 
    monitorIndex = ws.getNumberHistograms() - 1  # Monitor is last in the workspace.
+   specInfo = ws.spectrumInfo()
    print("Before conversion:")
-   print("Monitor {0} distance from origin: {1:.3f}".format(monitorIndex, ws.getDetector(monitorIndex).getPos().norm()))
+   print("Monitor {0} distance from origin: {1:.3f}".format(monitorIndex, specInfo.position(monitorIndex).norm()))
    for i in range(0, 5):
-     print("Detector {0} distance from origin: {1:.3f}".format(i, ws.getDetector(i).getPos().norm()))
+     print("Detector {0} distance from origin: {1:.3f}".format(i, specInfo.position(i).norm()))
 
    # Convert to a detector with constant L2
    converted_ws = ConvertToConstantL2(ws)
 
+   converted_specInfo = converted_ws.spectrumInfo()
    print("After conversion:")
-   print("Monitor {0} distance from origin: {1:.3f}".format(monitorIndex, converted_ws.getDetector(monitorIndex).getPos().norm()))
+   print("Monitor {0} distance from origin: {1:.3f}".format(monitorIndex, converted_specInfo.position(monitorIndex).norm()))
    for i in range(0, 5):
-     print("Detector {0} distance from origin: {1:.3f}".format(i, converted_ws.getDetector(i).getPos().norm()))
+     print("Detector {0} distance from origin: {1:.3f}".format(i, converted_specInfo.position(i).norm()))
 
 Output:
 

@@ -49,7 +49,7 @@ Usage
                                   OutputWorkspace=output_ws_name+"_Members")
 
   for member_ws in members_ws:
-      print(member_ws.getName())
+      print(member_ws.name())
 
 .. testcleanup:: ExExtractQENSMembers
 
@@ -99,7 +99,7 @@ Output:
   members_ws = mtd[output_ws_name + "_Members"]
 
   for member_ws in members_ws:
-      print(member_ws.getName())
+      print(member_ws.name())
 
 .. testcleanup:: ExExtractQENSMembersProperty
 

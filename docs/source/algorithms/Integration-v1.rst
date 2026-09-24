@@ -129,7 +129,7 @@ Output:
 
 .. testcode:: ExRangeLists
 
-    from mantid.kernel import DeltaEModeType, UnitConversion
+    from mantid.kernel import DeltaEModeType, UnitConversion, UnitParams, UnitParametersMap
     import numpy
     ws = CreateSampleWorkspace(
         Function='Flat background',
@@ -149,11 +149,14 @@ Output:
     # Now, generate the elastic peaks.
     Ei = 23.0  # Incident energy, meV
     L1 = 10.0 # Source-sample distance, m
-    sample = ws.getInstrument().getSample()
+    specInfo = ws.spectrumInfo()
     for i in range(nHisto):
-        detector = ws.getDetector(i)
-        L2 = sample.getDistance(detector)
-        tof = UnitConversion.run('Energy', 'TOF', Ei, L1, L2, 0.0, DeltaEModeType.Direct, Ei)
+        L2 = specInfo.l2(i)
+        params = UnitParametersMap()
+        params[UnitParams.l2] = L2
+        params[UnitParams.twoTheta] = 0.0
+        params[UnitParams.efixed] = Ei
+        tof = UnitConversion.run('Energy', 'TOF', Ei, L1, DeltaEModeType.Direct, params)
         ys = ws.mutableY(i)
         ys += peak(tof, ws.x(i))
 

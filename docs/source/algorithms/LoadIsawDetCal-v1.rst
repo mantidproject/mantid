@@ -26,8 +26,8 @@ Usage
 
     iw = LoadEmptyInstrument(Filename="unit_testing/MINITOPAZ_Definition.xml",)
     LoadIsawDetCal(InputWorkspace=iw,FileName=filename)
-    bank = iw.getInstrument().getComponentByName("bank1")
-    print("Position after LoadDetCal : {}".format(bank.getPos()))
+    compInfo = iw.componentInfo()
+    print("Position after LoadDetCal : {}".format(compInfo.position(compInfo.indexOfAny("bank1"))))
 
 .. testcleanup:: LoadIsawDetCal
 

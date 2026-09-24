@@ -42,25 +42,25 @@ Example 1: Move a component by name
   ws = CreateSampleWorkspace()
 
   # Original position of instrument component 'bank1'
-  print(ws.getInstrument().getComponentByName('bank1').getPos())
+  print(ws.componentInfo().position(ws.componentInfo().indexOfAny('bank1')))
 
   # Move 'bank1' by vector (1,0,0) relative to its original position
   MoveInstrumentComponent( ws, 'bank1', X=1,Y=0,Z=0 )
 
   # Check the new position of 'bank1'
-  print(ws.getInstrument().getComponentByName('bank1').getPos())
+  print(ws.componentInfo().position(ws.componentInfo().indexOfAny('bank1')))
 
   # Move the same bank again by vector (2,0,0)
   MoveInstrumentComponent( ws, 'bank1', X=2,Y=0,Z=0 )
 
   # Check the new position of 'bank1'
-  print(ws.getInstrument().getComponentByName('bank1').getPos())
+  print(ws.componentInfo().position(ws.componentInfo().indexOfAny('bank1')))
 
   # Move 'bank1' to a new absolute position (1,2,3)
   MoveInstrumentComponent( ws, 'bank1', X=1,Y=2,Z=3, RelativePosition=False )
 
   # Check the new position of 'bank1'
-  print(ws.getInstrument().getComponentByName('bank1').getPos())
+  print(ws.componentInfo().position(ws.componentInfo().indexOfAny('bank1')))
 
 Output
 ^^^^^^
@@ -93,13 +93,13 @@ Example 2: Move a detector by ID
   ws = mtd['musr_1']
 
   # Original position of detector 33
-  print(ws.getInstrument().getDetector(33).getPos())
+  print(ws.detectorInfo().position(ws.detectorInfo().indexOf(33)))
 
   # Move detector 33 by vector (1,0,0) relative to its original position
   MoveInstrumentComponent( ws, DetectorID=33, X=1,Y=0,Z=0 )
 
   # Check the new position of detector 33
-  print(ws.getInstrument().getDetector(33).getPos())
+  print(ws.detectorInfo().position(ws.detectorInfo().indexOf(33)))
 
 Output
 ^^^^^^

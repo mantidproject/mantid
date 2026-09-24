@@ -34,7 +34,7 @@ Usage
 
   background = LinearBackground(A0=0, A1=0)
   peak_function = Lorentzian(Amplitude=1, PeakCentre=0, FWHM=0.0175)
-  resolution_function = Resolution(Workspace=resolution.getName(), WorkspaceIndex=0)
+  resolution_function = Resolution(Workspace=resolution.name(), WorkspaceIndex=0)
   model = CompositeFunction(background, Convolution(peak_function, resolution_function))
   multi_function = MultiDomainFunction(model, model)
 

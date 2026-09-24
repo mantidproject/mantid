@@ -51,8 +51,8 @@ Example 1: Rotating a bank around the Y Axis
      return result
 
   print('Original positions of detectors 1 and 2')
-  opos1 = ws.getInstrument().getDetector(1).getPos()
-  opos2 = ws.getInstrument().getDetector(2).getPos()
+  opos1 = ws.detectorInfo().position(ws.detectorInfo().indexOf(1))
+  opos2 = ws.detectorInfo().position(ws.detectorInfo().indexOf(2))
   print('Det 1: {0}'.format(pos3D_as_str(opos1)))
   print('Det 2: {0}'.format(pos3D_as_str(opos2)))
 
@@ -60,8 +60,8 @@ Example 1: Rotating a bank around the Y Axis
   RotateInstrumentComponent( ws, ComponentName='back', X=0,Y=1,Z=0, Angle=90.0 )
 
   print('Positions of detectors 1 and 2 after rotation')
-  pos1 = ws.getInstrument().getDetector(1).getPos()
-  pos2 = ws.getInstrument().getDetector(2).getPos()
+  pos1 = ws.detectorInfo().position(ws.detectorInfo().indexOf(1))
+  pos2 = ws.detectorInfo().position(ws.detectorInfo().indexOf(2))
   print('Det 1: {0}'.format(pos3D_as_str(pos1)))
   print('Det 2: {0}'.format(pos3D_as_str(pos2)))
 
@@ -109,8 +109,8 @@ Example 2: Rotating a bank around the Z Axis
      return result
 
   print('Original positions of detectors 1 and 4')
-  opos1 = ws.getInstrument().getDetector(1).getPos()
-  opos4 = ws.getInstrument().getDetector(4).getPos()
+  opos1 = ws.detectorInfo().position(ws.detectorInfo().indexOf(1))
+  opos4 = ws.detectorInfo().position(ws.detectorInfo().indexOf(4))
   print('Det 1: {0}'.format(pos3D_as_str(opos1)))
   print('Det 4: {0}'.format(pos3D_as_str(opos4)))
 
@@ -118,7 +118,7 @@ Example 2: Rotating a bank around the Z Axis
   RotateInstrumentComponent( ws, ComponentName='back', X=0,Y=0,Z=1, Angle=3*360.0 / 32 )
 
   print('Positions of detector 1 after rotation')
-  pos1 = ws.getInstrument().getDetector(1).getPos()
+  pos1 = ws.detectorInfo().position(ws.detectorInfo().indexOf(1))
   print('Det 1: {0}'.format(pos3D_as_str(pos1)))
   print('Detector 1 took place of detector 4')
 
@@ -156,7 +156,7 @@ Example 3: Rotating a single detector
   # Rotating a detector doesn't change its position, just its orientation
 
   # Original position of detector 33
-  print(ws.getInstrument().getDetector(33).getPos())
+  print(ws.detectorInfo().position(ws.detectorInfo().indexOf(33)))
 
   # Calculate the solid angles for all detectors in the instrument
   # The result is a single-bin workspace with solid angles for all spectra in ws
@@ -169,7 +169,7 @@ Example 3: Rotating a single detector
   RotateInstrumentComponent( ws, DetectorID=33, X=0,Y=0,Z=1, Angle=90 )
 
   # Check the position of detector 33 stays unchanged
-  print(ws.getInstrument().getDetector(33).getPos())
+  print(ws.detectorInfo().position(ws.detectorInfo().indexOf(33)))
 
   # Calculate the solid angles after rotation
   saws = SolidAngle( ws )
@@ -186,7 +186,7 @@ Example 3: Rotating a single detector
           diff_as_str += '{: .5f} '.format(diff[row][col])
       diff_as_str += '\n'
   print(diff_as_str)
-  print('The non-zero difference {:.13f} is due to detector {}'.format(diff[4][0], ws.getDetector(32).getID()))
+  print('The non-zero difference {:.13f} is due to detector {}'.format(diff[4][0], ws.getSpectrum(32).getDetectorIDs()[0]))
 
 Output
 ^^^^^^

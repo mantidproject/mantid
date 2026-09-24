@@ -183,6 +183,7 @@ Usage
   ws = CreateSampleWorkspace()
   # Mask two detectors by specifying numbers 1 and 3
   MaskDetectors(ws,SpectraList=[1,3])
+  detInfo = ws.detectorInfo()
 
   # Check that spectra with spectrum numbers 1 and 3 are masked
 
@@ -190,7 +191,7 @@ Usage
   spec = ws.getSpectrum(0)
   detid = spec.getDetectorIDs()[0]
   print('Spectrum number is {}'.format(spec.getSpectrumNo()))
-  print('Detector of this spectrum is masked: {}'.format(ws.getInstrument().getDetector(detid).isMasked()))
+  print('Detector of this spectrum is masked: {}'.format(detInfo.isMasked(detInfo.indexOf(detid))))
   y = ws.y(0)
   print('All counts in the spectrum are 0:    {}'.format(np.all( y == 0.0 )))
 
@@ -198,7 +199,7 @@ Usage
   spec = ws.getSpectrum(1)
   detid = spec.getDetectorIDs()[0]
   print('Spectrum number is {}'.format(spec.getSpectrumNo()))
-  print('Detector of this spectrum is masked: {}'.format(ws.getInstrument().getDetector(detid).isMasked()))
+  print('Detector of this spectrum is masked: {}'.format(detInfo.isMasked(detInfo.indexOf(detid))))
   y = ws.y(1)
   print('All counts in the spectrum are 0:    {}'.format(np.all( y == 0.0 )))
 
@@ -206,7 +207,7 @@ Usage
   spec = ws.getSpectrum(2)
   detid = spec.getDetectorIDs()[0]
   print('Spectrum number is {}'.format(spec.getSpectrumNo()))
-  print('Detector of this spectrum is masked: {}'.format(ws.getInstrument().getDetector(detid).isMasked()))
+  print('Detector of this spectrum is masked: {}'.format(detInfo.isMasked(detInfo.indexOf(detid))))
   y = ws.y(2)
   print('All counts in the spectrum are 0:    {}'.format(np.all( y == 0.0 )))
 
@@ -214,7 +215,7 @@ Usage
   spec = ws.getSpectrum(3)
   detid = spec.getDetectorIDs()[0]
   print('Spectrum number is {}'.format(spec.getSpectrumNo()))
-  print('Detector of this spectrum is masked: {}'.format(ws.getInstrument().getDetector(detid).isMasked()))
+  print('Detector of this spectrum is masked: {}'.format(detInfo.isMasked(detInfo.indexOf(detid))))
   y = ws.y(3)
   print('All counts in the spectrum are 0:    {}'.format(np.all( y == 0.0 )))
 
@@ -244,24 +245,25 @@ Output:
   ws = CreateSampleWorkspace()
   # Mask two detectors by specifying detector IDs 101 and 103
   MaskDetectors(ws,DetectorList=[101,103])
+  detInfo = ws.detectorInfo()
 
   # Check that spectra with spectrum numbers 1 and 3 are masked
 
   # Check the 1st detector
-  det = ws.getInstrument().getDetector(101)
-  print('Detector  {}  is masked: {}'.format(det.getID(), det.isMasked()))
+  detID = 101
+  print('Detector  {}  is masked: {}'.format(detID, detInfo.isMasked(detInfo.indexOf(detID))))
 
   # Check the 2nd detector
-  det = ws.getInstrument().getDetector(103)
-  print('Detector  {}  is masked: {}'.format(det.getID(), det.isMasked()))
+  detID = 103
+  print('Detector  {}  is masked: {}'.format(detID, detInfo.isMasked(detInfo.indexOf(detID))))
 
   # Check some other detectors
-  det = ws.getInstrument().getDetector(100)
-  print('Detector  {}  is masked: {}'.format(det.getID(), det.isMasked()))
-  det = ws.getInstrument().getDetector(102)
-  print('Detector  {}  is masked: {}'.format(det.getID(), det.isMasked()))
-  det = ws.getInstrument().getDetector(105)
-  print('Detector  {}  is masked: {}'.format(det.getID(), det.isMasked()))
+  detID = 100
+  print('Detector  {}  is masked: {}'.format(detID, detInfo.isMasked(detInfo.indexOf(detID))))
+  detID = 102
+  print('Detector  {}  is masked: {}'.format(detID, detInfo.isMasked(detInfo.indexOf(detID))))
+  detID = 105
+  print('Detector  {}  is masked: {}'.format(detID, detInfo.isMasked(detInfo.indexOf(detID))))
 
 Output:
 
@@ -282,29 +284,25 @@ Output:
   ws = CreateSampleWorkspace()
   # Mask two detectors by specifying workspace indices 0 and 2
   MaskDetectors(ws,WorkspaceIndexList=[0,2])
+  specInfo = ws.spectrumInfo()
 
   # Check that spectra with workspace indices 0 and 2 are masked
 
   # Check the 1st spectrum
   workspaceIndex = 0
-  det = ws.getDetector( workspaceIndex )
-  print('Detector in spectrum with workspace index  {}  is masked: {}'.format(workspaceIndex, det.isMasked()))
+  print('Detector in spectrum with workspace index  {}  is masked: {}'.format(workspaceIndex, specInfo.isMasked(workspaceIndex)))
 
   # Check the 2nd spectrum
   workspaceIndex = 2
-  det = ws.getDetector( workspaceIndex )
-  print('Detector in spectrum with workspace index  {}  is masked: {}'.format(workspaceIndex, det.isMasked()))
+  print('Detector in spectrum with workspace index  {}  is masked: {}'.format(workspaceIndex, specInfo.isMasked(workspaceIndex)))
 
   # Check some other spectra
   workspaceIndex = 1
-  det = ws.getDetector( workspaceIndex )
-  print('Detector in spectrum with workspace index  {}  is masked: {}'.format(workspaceIndex, det.isMasked()))
+  print('Detector in spectrum with workspace index  {}  is masked: {}'.format(workspaceIndex, specInfo.isMasked(workspaceIndex)))
   workspaceIndex = 3
-  det = ws.getDetector( workspaceIndex )
-  print('Detector in spectrum with workspace index  {}  is masked: {}'.format(workspaceIndex, det.isMasked()))
+  print('Detector in spectrum with workspace index  {}  is masked: {}'.format(workspaceIndex, specInfo.isMasked(workspaceIndex)))
   workspaceIndex = 4
-  det = ws.getDetector( workspaceIndex )
-  print('Detector in spectrum with workspace index  {}  is masked: {}'.format(workspaceIndex, det.isMasked()))
+  print('Detector in spectrum with workspace index  {}  is masked: {}'.format(workspaceIndex, specInfo.isMasked(workspaceIndex)))
 
 Output:
 
@@ -332,10 +330,10 @@ Output:
 
   # Define a helper function.
   def checkMasked(detsBegin, detsEnd):
+      detInfo = ws.detectorInfo()
       allMasked = True
       for i in range(detsBegin, detsEnd):
-          det = ws.getInstrument().getDetector(i)
-          if not det.isMasked():
+          if not detInfo.isMasked(detInfo.indexOf(i)):
               allMasked = False
               break
       if allMasked:
@@ -383,16 +381,10 @@ Output:
   MaskDetectors(ws, MaskedWorkspace=masking_ws)
 
   # Check masking of first 5 detectors
-  det = ws.getDetector(0)
-  print('Detector {} is masked: {}'.format(det.getID(), det.isMasked()))
-  det = ws.getDetector(1)
-  print('Detector {} is masked: {}'.format(det.getID(), det.isMasked()))
-  det = ws.getDetector(2)
-  print('Detector {} is masked: {}'.format(det.getID(), det.isMasked()))
-  det = ws.getDetector(3)
-  print('Detector {} is masked: {}'.format(det.getID(), det.isMasked()))
-  det = ws.getDetector(4)
-  print('Detector {} is masked: {}'.format(det.getID(), det.isMasked()))
+  specInfo = ws.spectrumInfo()
+  for ind in range(0,5):
+    detID = ws.getSpectrum(ind).getDetectorIDs()[0]
+    print('Detector {} is masked: {}'.format(detID, specInfo.isMasked(ind)))
 
 
 Output:
@@ -422,9 +414,10 @@ Output:
   MaskDetectors(ws, StartWorkspaceIndex=2, EndWorkspaceIndex=4)
 
   # Check masking of first 6 detectors
+  specInfo = ws.spectrumInfo()
   for ind in range(0,6):
-    det = ws.getDetector(ind)
-    print('Detector {} is masked: {}'.format(det.getID(), det.isMasked()))
+    detID = ws.getSpectrum(ind).getDetectorIDs()[0]
+    print('Detector {} is masked: {}'.format(detID, specInfo.isMasked(ind)))
 
 
 Output:
@@ -465,9 +458,10 @@ Output:
   MaskDetectors(ws, MaskedWorkspace=masking_ws,StartWorkspaceIndex=4, EndWorkspaceIndex=5)
 
   # Check masking of first 7 detectors
+  specInfo = ws.spectrumInfo()
   for ind in range(0,7):
-    det = ws.getDetector(ind)
-    print('Detector {} is masked: {}'.format(det.getID(), det.isMasked()))
+    detID = ws.getSpectrum(ind).getDetectorIDs()[0]
+    print('Detector {} is masked: {}'.format(detID, specInfo.isMasked(ind)))
 
 Output:
 

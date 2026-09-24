@@ -39,7 +39,7 @@ Usage
 
 .. testcode:: CreateEPPExample
 
-    from mantid.kernel import DeltaEModeType, UnitConversion
+    from mantid.kernel import DeltaEModeType, UnitConversion, UnitParams, UnitParametersMap
     import numpy
 
     CreateSampleWorkspace(
@@ -59,14 +59,15 @@ Usage
         xs = (xs[:-1] + xs[1:]) * 0.5  # Convert bin edges to bin centres.
         ys = 10.0 * numpy.exp(-numpy.square((xs - centre) / 100))
         return ys
-    instrument = ws.getInstrument()
-    source = instrument.getSource()
-    sample = instrument.getSample()
-    L1 = sample.getDistance(source)
+    specInfo = ws.spectrumInfo()
+    L1 = ws.componentInfo().l1()
     for i in range(ws.getNumberHistograms()):
-        detector = ws.getDetector(i)
-        L2 = sample.getDistance(detector)
-        tof = UnitConversion.run('Energy', 'TOF', Ei, L1, L2, 0.0, DeltaEModeType.Direct, Ei)
+        L2 = specInfo.l2(i)
+        params = UnitParametersMap()
+        params[UnitParams.l2] = L2
+        params[UnitParams.twoTheta] = 0.0
+        params[UnitParams.efixed] = Ei
+        tof = UnitConversion.run('Energy', 'TOF', Ei, L1, DeltaEModeType.Direct, params)
         ys =ws.mutableY(i)
         ys += peak(ws.x(i), tof)
     # The 'Ei' sample log shall hold the incident energy.

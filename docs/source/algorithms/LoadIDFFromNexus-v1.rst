@@ -50,14 +50,12 @@ Usage
    LoadIDFFromNexus(ws_1, "musr_with_namechange.nxs","/mantid_workspace_1")
 
    # This workspace had the IDF loaded into it, so getting component renamed to "the rings".
-   inst1 = ws_1.getInstrument()
-   comp1 = inst1.getComponentByName("the rings")
-   print("Modified component name = {}".format(comp1.getName()))
+   compInfo1 = ws_1.componentInfo()
+   print("Modified component name = {}".format(compInfo1.name(compInfo1.indexOfAny("the rings"))))
 
    # This workspace had no IDF loaded into it, so still has component named to "both rings".
-   inst2 = ws_2.getInstrument()
-   comp2 = inst2.getComponentByName("both rings")
-   print("Unmodified component name = {}".format(comp2.getName()))
+   compInfo2 = ws_2.componentInfo()
+   print("Unmodified component name = {}".format(compInfo2.name(compInfo2.indexOfAny("both rings"))))
 
 Output:
 
