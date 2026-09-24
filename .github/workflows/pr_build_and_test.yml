@@ -220,7 +220,8 @@ jobs:
       # first 'pixi run' in the build step silently installs it after a pixi.lock change.
       - name: Install pixi environment
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
-        run: pixi install --frozen -v
+        timeout-minutes: 30
+        run: pixi install --frozen -vvv
 
       - name: Clean build tree
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
