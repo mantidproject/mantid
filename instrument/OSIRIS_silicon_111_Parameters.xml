@@ -57,7 +57,7 @@
   <component-link name="silicon">
 
     <parameter name="Efixed">
-      <value val="2.082" />
+      <value val="2.120" />
     </parameter>
 
     <parameter name="resolution">
