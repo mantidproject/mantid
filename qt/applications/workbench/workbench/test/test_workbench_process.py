@@ -242,7 +242,7 @@ class WorkbenchProcessQSettingsStagingTest(unittest.TestCase):
             "workbench.app.mainwindow": SimpleNamespace(MainWindow=Mock(return_value=main_window)),
             "workbench.widgets.about.presenter": SimpleNamespace(AboutPresenter=about),
             "workbench.plugins.exception_handler": SimpleNamespace(exception_logger=Mock()),
-            "workbench.plotting.config": SimpleNamespace(initialize_matplotlib=Mock()),
+            "workbench.plotting.config": SimpleNamespace(initialize_matplotlib=Mock(), watch_for_theme_changes=Mock()),
         }
 
         with (
@@ -267,7 +267,7 @@ class WorkbenchProcessQSettingsStagingTest(unittest.TestCase):
             "workbench.app.mainwindow": SimpleNamespace(MainWindow=Mock(return_value=main_window)),
             "workbench.widgets.about.presenter": SimpleNamespace(AboutPresenter=Mock()),
             "workbench.plugins.exception_handler": SimpleNamespace(exception_logger=Mock()),
-            "workbench.plotting.config": SimpleNamespace(initialize_matplotlib=Mock()),
+            "workbench.plotting.config": SimpleNamespace(initialize_matplotlib=Mock(), watch_for_theme_changes=Mock()),
         }
 
         with (
@@ -282,6 +282,34 @@ class WorkbenchProcessQSettingsStagingTest(unittest.TestCase):
         main_window.close.assert_called_once_with()
         app.exec.assert_not_called()
 
+    def test_launch_watches_for_theme_changes_after_matplotlib_is_initialised(self):
+        events = []
+        app = Mock()
+        app.exec.return_value = 0
+        main_window = Mock(shutdown_accepted=True, splash=None)
+        main_window.project_recovery.check_for_recover_checkpoint.return_value = False
+        options = SimpleNamespace(script=None, execute=False, quit=False)
+        about = Mock()
+        about.should_show_on_startup.return_value = False
+
+        with (
+            patch.dict(
+                sys.modules,
+                {
+                    "workbench.app.mainwindow": SimpleNamespace(MainWindow=Mock(return_value=main_window)),
+                    "workbench.widgets.about.presenter": SimpleNamespace(AboutPresenter=about),
+                    "workbench.plugins.exception_handler": SimpleNamespace(exception_logger=Mock()),
+                },
+            ),
+            patch("workbench.plotting.config.initialize_matplotlib", side_effect=lambda: events.append("matplotlib")),
+            patch("workbench.plotting.config.watch_for_theme_changes", side_effect=lambda: events.append("watch_theme")),
+            patch("workbench.config.set_additional_windows_parent"),
+            patch.object(workbench_process, "FrameworkManagerImpl"),
+        ):
+            workbench_process.create_and_launch_workbench(app, options)
+
+        self.assertEqual(["matplotlib", "watch_theme"], events)
+
     def test_staged_filename_must_match_expected_workbench_settings_file(self):
         session = SimpleNamespace(staging_root=Path("/local/cache/session"))
         expected = session.staging_root / "mantidproject" / "mantidworkbench.ini"
@@ -294,6 +322,46 @@ class WorkbenchProcessQSettingsStagingTest(unittest.TestCase):
     @staticmethod
     def _eligibility(active, reason):
         return SimpleNamespace(active=active, reason=SimpleNamespace(value=reason))
+
+    def _mock_app(self, colour_scheme):
+        mock_app = Mock()
+        mock_app.styleHints.return_value.colorScheme.return_value = colour_scheme
+        return mock_app
+
+    def test_windows_dark_mode_switches_to_fusion_style(self):
+        from qtpy.QtCore import Qt as QtCoreQt
+
+        mock_app = self._mock_app(QtCoreQt.ColorScheme.Dark)
+
+        with (
+            patch.object(workbench_process, "QApplication") as mock_qapp_cls,
+            patch.object(workbench_process.mtd_env, "is_linux", return_value=False),
+            patch.object(workbench_process.mtd_env, "is_windows", return_value=True),
+        ):
+            mock_qapp_cls.instance.return_value = None
+            mock_qapp_cls.return_value = mock_app
+
+            result = workbench_process.qapplication()
+
+        mock_app.setStyle.assert_called_once_with("Fusion")
+        self.assertIs(result, mock_app)
+
+    def test_windows_light_mode_no_fusion_styles(self):
+        from qtpy.QtCore import Qt as QtCoreQt
+
+        mock_app = self._mock_app(QtCoreQt.ColorScheme.Light)
+
+        with (
+            patch.object(workbench_process, "QApplication") as mock_qapp_cls,
+            patch.object(workbench_process.mtd_env, "is_linux", return_value=False),
+            patch.object(workbench_process.mtd_env, "is_windows", return_value=True),
+        ):
+            mock_qapp_cls.instance.return_value = None
+            mock_qapp_cls.return_value = mock_app
+
+            workbench_process.qapplication()
+
+        mock_app.setStyle.assert_not_called()
 
 
 if __name__ == "__main__":
