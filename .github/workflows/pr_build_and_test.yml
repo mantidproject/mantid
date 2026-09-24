@@ -218,6 +218,20 @@ jobs:
 
       # Install/update the environment in its own step so that it is visible in the log. Otherwise the
       # first 'pixi run' in the build step silently installs it after a pixi.lock change.
+      # TEMPORARY: diagnose the silent stall in 'pixi install' on the Windows runner.
+      - name: Diagnose pixi install stall (debug)
+        if: ${{ matrix.os == 'Windows' && needs.check-filters.outputs.code_changes == 'true' }}
+        timeout-minutes: 10
+        run: |
+          echo "=== Processes that may hold pixi/rattler locks ==="
+          tasklist | grep -i -E "pixi|python|ninja|cl.exe|link.exe|lld|mspdbsrv|cmake|ctest" || true
+          echo "=== Download timing for the new lld package ==="
+          curl -sS -o /dev/null -w "http=%{http_code} size=%{size_download} time=%{time_total}s speed=%{speed_download}B/s\n" \
+            --max-time 300 https://conda.anaconda.org/conda-forge/win-64/lld-23.1.2-he13e66b_0.conda || true
+          echo "=== rattler cache lock files ==="
+          ls -la "${LOCALAPPDATA}/rattler/cache" 2>/dev/null | head -20 || true
+          find "${LOCALAPPDATA}/rattler/cache" -maxdepth 2 -name "*.lock" 2>/dev/null | head -20 || true
+
       - name: Install pixi environment
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
         timeout-minutes: 30
