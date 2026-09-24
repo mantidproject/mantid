@@ -131,6 +131,18 @@ class MDNormTest(unittest.TestCase):
         self.assertIn("BackgroundWorkspace", issues)
         self.assertIn("Q_sample", issues["BackgroundWorkspace"])
 
+    def test_monochromatic_background_workspace_dimension_mismatch(self):
+        data = self._make_mde(ndims=3, wavelength=1.5)
+        norm = self._make_mde(ndims=3, wavelength=1.5)
+        background = self._make_mde(ndims=4, wavelength=1.5)
+        alg = self._setup_alg()
+        alg.setProperty("InputWorkspace", data)
+        alg.setProperty("MonoSCDNormalizationWorkspace", norm)
+        alg.setProperty("BackgroundWorkspace", background)
+        issues = alg.validateInputs()
+        self.assertIn("BackgroundWorkspace", issues)
+        self.assertIn("same number of dimensions", issues["BackgroundWorkspace"])
+
     def test_monochromatic_background_is_subtracted_after_using_the_sample_normalization(self):
         data = self._make_mde(wavelength=1.5)
         norm = self._make_mde(wavelength=1.5)

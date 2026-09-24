@@ -252,6 +252,11 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
           monochromatic
               ? "The input background workspace must be in Q_sample when MonoSCDNormalizationWorkspace is used"
               : "The input background workspace must be in Q_lab";
+      if (monochromatic && bkgdWS->getNumDims() != inputWS->getNumDims()) {
+        errorMessage.emplace("BackgroundWorkspace", "The input background workspace must have the same number of "
+                                                    "dimensions as InputWorkspace when "
+                                                    "MonoSCDNormalizationWorkspace is used");
+      }
       for (size_t i = 0; i < 3; i++) {
         if (bkgdWS->getDimension(i)->getMDFrame().name() != expectedFrame) {
           errorMessage.emplace("BackgroundWorkspace", expectedFrameMessage);
