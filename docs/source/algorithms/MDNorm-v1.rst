@@ -85,10 +85,13 @@ not have a `DeltaE` dimension (monochromatic single crystal diffraction is elast
 `wavelength` sample log -- set automatically by `ConvertHFIRSCDtoMDE` -- confirming it originates from a
 monochromatic instrument.
 
-Background subtraction is not yet implemented for this mode. When support is enabled, `BackgroundWorkspace` is
-expected to be an :py:obj:`MDEventWorkspace <mantid.api.IMDEventWorkspace>` in the `Q_sample` frame, matching
-`InputWorkspace` and `MonoSCDNormalizationWorkspace`. This differs from the time-of-flight background path, where
-`BackgroundWorkspace` is expected to be in `Q_lab`.
+When `BackgroundWorkspace` is supplied in this mode, it must be an
+:py:obj:`MDEventWorkspace <mantid.api.IMDEventWorkspace>` in the `Q_sample` frame, matching `InputWorkspace` and
+`MonoSCDNormalizationWorkspace`. A typical workflow is to estimate the background with algorithm
+HFIRGoniometerIndependentBackground,  convert it to
+MDEvents with the same conversion used for the sample data, and pass that converted workspace as
+`BackgroundWorkspace`. This differs from the time-of-flight background path, where `BackgroundWorkspace` is expected
+to be in `Q_lab`.
 
 Unlike the time-of-flight case, there is no `MDNorm_low`/`MDNorm_high` log requirement (those are set by
 :ref:`CropWorkspaceForMDNorm <algm-CropWorkspaceForMDNorm>`, a time-of-flight-only step), since each event already
@@ -171,6 +174,11 @@ The output is given by:
 .. math::
 
     OutputWorkspace=\frac{OutputDataWorkspace}{OutputNormalizationWorkspace}-\frac{OutputBackgroundDataWorkspace}{OutputBackgroundNormalizationWorkspace}
+
+For monochromatic single crystal diffraction with `MonoSCDNormalizationWorkspace`, the same binned normalization is
+used for both the sample and the background. In this case `OutputBackgroundNormalizationWorkspace` is a clone of
+`OutputNormalizationWorkspace`, so the equation above still applies with the two normalization workspaces containing
+the same values.
 
 For citing this algorithm please use
 

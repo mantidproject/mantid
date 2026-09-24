@@ -6,14 +6,23 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
+import numpy as np
 from mantid.api import AlgorithmManager
-from mantid.simpleapi import CreateMDWorkspace, CreateSampleWorkspace, DeleteWorkspace, LoadEmptyInstrument, SetUB, mtd
+from mantid.simpleapi import (
+    CreateMDWorkspace,
+    CreateSampleWorkspace,
+    DeleteWorkspace,
+    FakeMDEventData,
+    LoadEmptyInstrument,
+    MDNorm,
+    SetUB,
+    mtd,
+)
 
 
 class MDNormTest(unittest.TestCase):
     """Fast, data-free coverage of MDNorm::validateInputs() for the monochromatic-SCD
-    (MonoSCDNormalizationWorkspace) input group. These tests never call execute(), so they
-    do not need real instrument geometry or trajectories."""
+    (MonoSCDNormalizationWorkspace) input group and focused synthetic execution coverage."""
 
     def setUp(self):
         self._workspace_names = []
@@ -26,6 +35,10 @@ class MDNormTest(unittest.TestCase):
     def _track(self, ws):
         self._workspace_names.append(ws.name())
         return ws
+
+    def _track_name(self, name):
+        self._workspace_names.append(name)
+        return name
 
     def _make_mde(self, ndims=3, frame="QSample", wavelength=None, mdnorm_logs=False, oriented_lattice=False):
         if ndims == 3:
@@ -69,6 +82,10 @@ class MDNormTest(unittest.TestCase):
         alg.setProperty("RLU", False)
         return alg
 
+    @staticmethod
+    def _add_peak_events(ws, n_events):
+        FakeMDEventData(InputWorkspace=ws, PeakParams=f"{n_events},0,0,0,0.01", RandomSeed="1234")
+
     def test_valid_monochromatic_input_has_no_errors(self):
         data = self._make_mde(wavelength=1.5)
         norm = self._make_mde(wavelength=1.5)
@@ -90,7 +107,7 @@ class MDNormTest(unittest.TestCase):
         issues = alg.validateInputs()
         self.assertIn("MonoSCDNormalizationWorkspace", issues)
 
-    def test_monochromatic_background_workspace_accepts_q_sample_but_remains_unimplemented(self):
+    def test_monochromatic_background_workspace_accepts_q_sample(self):
         data = self._make_mde(wavelength=1.5)
         norm = self._make_mde(wavelength=1.5)
         background = self._make_mde(wavelength=1.5)
@@ -99,9 +116,8 @@ class MDNormTest(unittest.TestCase):
         alg.setProperty("MonoSCDNormalizationWorkspace", norm)
         alg.setProperty("BackgroundWorkspace", background)
         issues = alg.validateInputs()
-        self.assertIn("MonoSCDNormalizationWorkspace", issues)
         self.assertNotIn("BackgroundWorkspace", issues)
-        self.assertIn("not implemented yet", issues["MonoSCDNormalizationWorkspace"])
+        self.assertNotIn("MonoSCDNormalizationWorkspace", issues)
 
     def test_monochromatic_background_workspace_must_be_q_sample(self):
         data = self._make_mde(wavelength=1.5)
@@ -114,7 +130,41 @@ class MDNormTest(unittest.TestCase):
         issues = alg.validateInputs()
         self.assertIn("BackgroundWorkspace", issues)
         self.assertIn("Q_sample", issues["BackgroundWorkspace"])
-        self.assertIn("MonoSCDNormalizationWorkspace", issues)
+
+    def test_monochromatic_background_is_subtracted_after_using_the_sample_normalization(self):
+        data = self._make_mde(wavelength=1.5)
+        norm = self._make_mde(wavelength=1.5)
+        background = self._make_mde(wavelength=1.5)
+        self._add_peak_events(data, 10)
+        self._add_peak_events(norm, 2)
+        self._add_peak_events(background, 4)
+
+        out_name = self._track_name(mtd.unique_hidden_name())
+        data_name = self._track_name(mtd.unique_hidden_name())
+        norm_name = self._track_name(mtd.unique_hidden_name())
+        bkg_data_name = self._track_name(mtd.unique_hidden_name())
+        bkg_norm_name = self._track_name(mtd.unique_hidden_name())
+        output, output_data, output_norm, output_bkg_data, output_bkg_norm = MDNorm(
+            InputWorkspace=data,
+            MonoSCDNormalizationWorkspace=norm,
+            BackgroundWorkspace=background,
+            RLU=False,
+            Dimension0Binning="-1,2,1",
+            Dimension1Binning="-1,2,1",
+            Dimension2Binning="-1,2,1",
+            OutputWorkspace=out_name,
+            OutputDataWorkspace=data_name,
+            OutputNormalizationWorkspace=norm_name,
+            OutputBackgroundDataWorkspace=bkg_data_name,
+            OutputBackgroundNormalizationWorkspace=bkg_norm_name,
+        )
+
+        np.testing.assert_allclose(output_data.getSignalArray(), 10.0)
+        np.testing.assert_allclose(output_norm.getSignalArray(), 2.0)
+        np.testing.assert_allclose(output_bkg_data.getSignalArray(), 4.0)
+        np.testing.assert_allclose(output_bkg_norm.getSignalArray(), output_norm.getSignalArray())
+        self.assertNotEqual(output_norm.name(), output_bkg_norm.name())
+        np.testing.assert_allclose(output.getSignalArray(), 3.0)
 
     def test_non_monochromatic_background_workspace_must_be_q_lab(self):
         data = self._make_mde(wavelength=1.5)
