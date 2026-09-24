@@ -85,10 +85,15 @@ size_t indexOrRoot(const ComponentInfo &self, const object &componentIndex) {
   return index();
 }
 
+template <auto Method> auto readParameter(const ComponentInfo &self, const object &componentIndex, bool recursive) {
+  return (self.*Method)(indexOrRoot(self, componentIndex), recursive);
+}
+
 // Reorders Python's (name, index, recursive) to the C++ (index, name, recursive).
-template <auto Method, typename... Leading>
-auto readParameter(const ComponentInfo &self, Leading... leading, const object &componentIndex, bool recursive) {
-  return (self.*Method)(indexOrRoot(self, componentIndex), leading..., recursive);
+template <auto Method>
+auto readNamedParameter(const ComponentInfo &self, const std::string &name, const object &componentIndex,
+                        bool recursive) {
+  return (self.*Method)(indexOrRoot(self, componentIndex), name, recursive);
 }
 
 double getFittingParameter(const ComponentInfo &self, const std::string &name, double xvalue,
@@ -364,7 +369,7 @@ void export_ComponentInfo() {
       // 'empty sequence if absent' convention and the 'recursive' flag, so that migrating a
       // call site is a rename. 'index' defaults to the root component, which holds the
       // instrument-level parameters the legacy Instrument methods looked up.
-      .def("hasParameter", &readParameter<&ComponentInfo::hasParameter, const std::string &>,
+      .def("hasParameter", &readNamedParameter<&ComponentInfo::hasParameter>,
            (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
            "Returns True if the component identified by 'index' (the root component by "
            "default) has a parameter of this name.")
@@ -374,27 +379,27 @@ void export_ComponentInfo() {
            "Returns the names of the parameters on the component identified by 'index' "
            "(the root component by default).")
 
-      .def("getNumberParameter", &readParameter<&ComponentInfo::getNumberParameter, const std::string &>,
+      .def("getNumberParameter", &readNamedParameter<&ComponentInfo::getNumberParameter>,
            (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
            "Returns the named double parameter of the component identified by 'index' "
            "(the root component by default), or an empty sequence if it is unset.")
 
-      .def("getIntParameter", &readParameter<&ComponentInfo::getIntParameter, const std::string &>,
+      .def("getIntParameter", &readNamedParameter<&ComponentInfo::getIntParameter>,
            (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
            "Returns the named integer parameter of the component identified by 'index' "
            "(the root component by default), or an empty sequence if it is unset.")
 
-      .def("getBoolParameter", &readParameter<&ComponentInfo::getBoolParameter, const std::string &>,
+      .def("getBoolParameter", &readNamedParameter<&ComponentInfo::getBoolParameter>,
            (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
            "Returns the named boolean parameter of the component identified by 'index' "
            "(the root component by default), or an empty sequence if it is unset.")
 
-      .def("getStringParameter", &readParameter<&ComponentInfo::getStringParameter, const std::string &>,
+      .def("getStringParameter", &readNamedParameter<&ComponentInfo::getStringParameter>,
            (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
            "Returns the named string parameter of the component identified by 'index' "
            "(the root component by default), or an empty sequence if it is unset.")
 
-      .def("getParameterType", &readParameter<&ComponentInfo::getParameterType, const std::string &>,
+      .def("getParameterType", &readNamedParameter<&ComponentInfo::getParameterType>,
            (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
            "Returns the type of the named parameter of the component identified by 'index' "
            "(the root component by default), or an empty string if it is unset.")
