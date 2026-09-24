@@ -8,6 +8,7 @@
 
 #include "MantidKernel/Matrix.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
+#include "MantidPythonInterface/core/DllConfig.h"
 #include <boost/python/detail/prefix.hpp>
 
 namespace Mantid {
@@ -24,20 +25,20 @@ namespace Converters {
  * contains a static member create.
  */
 template <typename ElementType, typename ConversionPolicy>
-struct DLLExport MatrixToNDArray{//clang-format off
-                                 /**
-                                  * Operator to convert a matrix to a numpy array
-                                  * @param cmatrix :: A reference to matrix
-                                  * @returns A new PyObject* that points to a numpy array
-                                  */
-                                 inline PyObject * operator()(const Kernel::Matrix<ElementType> &cmatrix) const {
-                                                       const std::pair<size_t, size_t> matrixDims = cmatrix.size();
-Py_intptr_t dims[2] = {static_cast<Py_intptr_t>(matrixDims.first), static_cast<Py_intptr_t>(matrixDims.second)};
-using policy = typename ConversionPolicy::template apply<ElementType>;
-return policy::createFromArray(&(cmatrix[0][0]), 2, dims);
-} // namespace Converters
+struct MANTID_PYTHONINTERFACE_CORE_DLL MatrixToNDArray { //clang-format off
+  /**
+   * Operator to convert a matrix to a numpy array
+   * @param cmatrix :: A reference to matrix
+   * @returns A new PyObject* that points to a numpy array
+   */
+  inline PyObject *operator()(const Kernel::Matrix<ElementType> &cmatrix) const {
+    const std::pair<size_t, size_t> matrixDims = cmatrix.size();
+    Py_intptr_t dims[2] = {static_cast<Py_intptr_t>(matrixDims.first), static_cast<Py_intptr_t>(matrixDims.second)};
+    using policy = typename ConversionPolicy::template apply<ElementType>;
+    return policy::createFromArray(&(cmatrix[0][0]), 2, dims);
+  } // namespace Converters
 }; // namespace PythonInterface
 //clang-format on
-} // namespace Mantid
+} // namespace Converters
 } // namespace PythonInterface
 } // namespace Mantid

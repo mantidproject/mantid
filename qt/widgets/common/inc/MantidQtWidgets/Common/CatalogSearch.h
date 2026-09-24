@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllOption.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtWidgets/Common/CatalogHelper.h"
 #include "MantidQtWidgets/Common/CatalogSelector.h"
 #include "MantidQtWidgets/Common/CheckboxHeader.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "ui_CatalogSearch.h"
 
 #include <QCalendarWidget>

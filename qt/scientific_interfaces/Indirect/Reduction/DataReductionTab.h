@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "../DllConfig.h"
 #include "Common/InstrumentConfig.h"
+#include "DllConfig.h"
 #include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h"
 

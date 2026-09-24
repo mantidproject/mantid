@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "../DllConfig.h"
+#include "MantidQtWidgets/Spectroscopy/DllConfig.h"
 #include "SettingsHelper.h"
 #include "SettingsModel.h"
 #include "SettingsView.h"

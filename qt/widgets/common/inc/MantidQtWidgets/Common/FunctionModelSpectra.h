@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllOption.h"
 #include "IndexTypes.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 
 #include <set>
 #include <stdexcept>

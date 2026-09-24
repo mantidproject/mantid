@@ -8,6 +8,7 @@
 
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
+#include "MantidPythonInterface/core/DllConfig.h"
 #include <boost/python/object.hpp>
 
 namespace Mantid {
@@ -19,7 +20,7 @@ namespace Converters {
  * convert it to a Kernel::Matrix object. Note, this
  * currently only suuports Matrix<double>
  */
-struct DLLExport PyObjectToMatrix {
+struct MANTID_PYTHONINTERFACE_CORE_DLL PyObjectToMatrix {
   PyObjectToMatrix(const boost::python::object &p);
   /// Produces a V3D object from the given PyObject
   Kernel::Matrix<double> operator()();

@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllOption.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidQtWidgets/InstrumentView/DllOption.h"
 
 #include "RectF.h"
 #include "Shape2D.h"

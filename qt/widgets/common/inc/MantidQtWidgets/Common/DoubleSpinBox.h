@@ -17,7 +17,7 @@
  ***************************************************************************/
 #pragma once
 
-#include "DllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <map>
 
 #include <QAbstractSpinBox>

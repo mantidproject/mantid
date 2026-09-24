@@ -9,7 +9,7 @@ mtd_add_qt_library(
   NOMOC ${INC_FILES}
   RES ${CMAKE_CURRENT_LIST_DIR}/resources/icons.qrc
   DEFS IN_MANTIDQT_ICONS
-  INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/inc
+  INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/inc ${CMAKE_CURRENT_BINARY_DIR}
   LINK_LIBS ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${JSONCPP_LIBRARIES}
   INSTALL_DIR ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH @loader_path/../MacOS @loader_path/../Frameworks
@@ -18,6 +18,18 @@ mtd_add_qt_library(
 # We require just the headers for system.h
 target_include_directories(
   MantidQtIconsQt${MANTID_QT_VERSION} PUBLIC $<TARGET_PROPERTY:Mantid::Kernel,INTERFACE_INCLUDE_DIRECTORIES>
+)
+
+# Auto-generate exports header
+generate_mantid_export_header(
+  MantidQtIconsQt${MANTID_QT_VERSION}
+  TRUE
+  BASE_NAME
+  MANTIDQT_ICONS
+  EXPORT_MACRO_NAME
+  EXPORT_OPT_MANTIDQT_ICONS
+  EXPORT_FILE_NAME
+  MantidQtIcons/DllOption.h
 )
 
 set(QT${MANTID_QT_VERSION}_TEST_FILES test/IconTest.h)

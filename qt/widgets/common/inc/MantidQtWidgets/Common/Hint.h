@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "DllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <string>
 
 namespace MantidQt {

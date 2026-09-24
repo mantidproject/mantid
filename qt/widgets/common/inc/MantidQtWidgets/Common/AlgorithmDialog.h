@@ -22,7 +22,7 @@
 // Includes
 //----------------------------------
 #include "AlgorithmDialogFactory.h"
-#include "DllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 
 // Could have forward declared this but it makes it easier to use from
 // inheriting classes if it is included here
