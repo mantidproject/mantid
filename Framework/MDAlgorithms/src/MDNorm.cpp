@@ -245,7 +245,7 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
       errorMessage.emplace("BackgroundWorkspace", "The input background workspace must be at least 3D");
     } else {
       // Check first 3 dimensions for the expected Q frame. The existing background path uses
-      // Q_lab. The monochromatic-SCD path will use Q_sample once execution support is enabled.
+      // Q_lab. The monochromatic-SCD path uses Q_sample.
       const auto &expectedFrame =
           monochromatic ? Mantid::Geometry::QSample::QSampleName : Mantid::Geometry::QLab::QLabName;
       const auto expectedFrameMessage =
