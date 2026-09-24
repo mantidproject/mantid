@@ -14,6 +14,8 @@
 #include "MantidKernel/Exception.h"
 
 #include <QFileInfo>
+#include <filesystem>
+#include <format>
 
 #include <QDebug>
 #include <QDropEvent>
@@ -103,6 +105,16 @@ void DataSelector::handleFileInput() {
 
   if (filename.isEmpty()) {
     return;
+  }
+
+  for (const auto &file : m_uiForm.rfFileInput->getFilenames()) {
+    std::error_code ec;
+    if (!std::filesystem::exists(file.toStdWString(), ec)) {
+      m_uiForm.rfFileInput->setFileProblem(
+          ec ? QString::fromStdString(ec.message())
+             : QString::fromStdString(std::format("The specified file ({}) does not exist", file.toStdString())));
+      return;
+    }
   }
 
   emit filesAutoLoaded();
