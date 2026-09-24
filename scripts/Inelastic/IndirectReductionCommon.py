@@ -447,7 +447,6 @@ def get_instrument_parameter(workspace_name: str, param_name: str):
       @param param_name The name of the parameter to look up.
     """
     component_info = AnalysisDataService.retrieve(workspace_name).componentInfo()
-    root = component_info.root()
 
     # Create a map of type parameters to functions. This is so we avoid writing lots of
     # if statements because there's no way to dynamically get the type.
@@ -465,7 +464,7 @@ def get_instrument_parameter(workspace_name: str, param_name: str):
     if param_type == "":
         raise ValueError(f"Unable to retrieve {param_name} from Instrument Parameter file.")
 
-    return func_map[param_type](root, param_name)[0]
+    return func_map[param_type](param_name)[0]
 
 
 def get_ipf_parameters_from_run(run_number, instrument, analyser, reflection, parameters):

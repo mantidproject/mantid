@@ -227,7 +227,6 @@ def apply_missing_parameters(calibration_workspace, workspace, missing_parameter
     :param parent_alg: a handle to the parent algorithm
     """
     component_info = workspace.componentInfo()
-    root = component_info.root()
     component_name = workspace.getInstrumentName()
     component_name = sanitise_instrument_name(component_name)
     set_instrument_name = "SetInstrumentParameter"
@@ -245,7 +244,7 @@ def apply_missing_parameters(calibration_workspace, workspace, missing_parameter
         for missing_parameter in missing_parameters:
             parameter_type = component_info.getParameterType(missing_parameter)
             type_to_save = type_options[parameter_type]
-            value = value_options[parameter_type](root, missing_parameter)
+            value = value_options[parameter_type](missing_parameter)
 
             alg.setProperty("ParameterName", missing_parameter)
             alg.setProperty("ParameterType", type_to_save)

@@ -85,37 +85,10 @@ size_t indexOrRoot(const ComponentInfo &self, const object &componentIndex) {
   return index();
 }
 
-bool hasParameter(const ComponentInfo &self, const std::string &name, const object &componentIndex, bool recursive) {
-  return self.hasParameter(indexOrRoot(self, componentIndex), name, recursive);
-}
-
-std::set<std::string> getParameterNames(const ComponentInfo &self, const object &componentIndex, bool recursive) {
-  return self.getParameterNames(indexOrRoot(self, componentIndex), recursive);
-}
-
-std::vector<double> getNumberParameter(const ComponentInfo &self, const std::string &name, const object &componentIndex,
-                                       bool recursive) {
-  return self.getNumberParameter(indexOrRoot(self, componentIndex), name, recursive);
-}
-
-std::vector<int> getIntParameter(const ComponentInfo &self, const std::string &name, const object &componentIndex,
-                                 bool recursive) {
-  return self.getIntParameter(indexOrRoot(self, componentIndex), name, recursive);
-}
-
-std::vector<bool> getBoolParameter(const ComponentInfo &self, const std::string &name, const object &componentIndex,
-                                   bool recursive) {
-  return self.getBoolParameter(indexOrRoot(self, componentIndex), name, recursive);
-}
-
-std::vector<std::string> getStringParameter(const ComponentInfo &self, const std::string &name,
-                                            const object &componentIndex, bool recursive) {
-  return self.getStringParameter(indexOrRoot(self, componentIndex), name, recursive);
-}
-
-std::string getParameterType(const ComponentInfo &self, const std::string &name, const object &componentIndex,
-                             bool recursive) {
-  return self.getParameterType(indexOrRoot(self, componentIndex), name, recursive);
+// Reorders Python's (name, index, recursive) to the C++ (index, name, recursive).
+template <auto Method, typename... Leading>
+auto readParameter(const ComponentInfo &self, Leading... leading, const object &componentIndex, bool recursive) {
+  return (self.*Method)(indexOrRoot(self, componentIndex), leading..., recursive);
 }
 
 double getFittingParameter(const ComponentInfo &self, const std::string &name, double xvalue,
@@ -414,35 +387,37 @@ void export_ComponentInfo() {
       // 'empty sequence if absent' convention and the 'recursive' flag, so that migrating a
       // call site is a rename. 'index' defaults to the root component, which holds the
       // instrument-level parameters the legacy Instrument methods looked up.
-      .def("hasParameter", &hasParameter, (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
+      .def("hasParameter", &readParameter<&ComponentInfo::hasParameter, const std::string &>,
+           (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
            "Returns True if the component identified by 'index' (the root component by "
            "default) has a parameter of this name.")
 
-      .def("getParameterNames", &getParameterNames, (arg("self"), arg("index") = object(), arg("recursive") = true),
+      .def("getParameterNames", &readParameter<&ComponentInfo::getParameterNames>,
+           (arg("self"), arg("index") = object(), arg("recursive") = true),
            "Returns the names of the parameters on the component identified by 'index' "
            "(the root component by default).")
 
-      .def("getNumberParameter", &getNumberParameter,
+      .def("getNumberParameter", &readParameter<&ComponentInfo::getNumberParameter, const std::string &>,
            (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
            "Returns the named double parameter of the component identified by 'index' "
            "(the root component by default), or an empty sequence if it is unset.")
 
-      .def("getIntParameter", &getIntParameter,
+      .def("getIntParameter", &readParameter<&ComponentInfo::getIntParameter, const std::string &>,
            (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
            "Returns the named integer parameter of the component identified by 'index' "
            "(the root component by default), or an empty sequence if it is unset.")
 
-      .def("getBoolParameter", &getBoolParameter,
+      .def("getBoolParameter", &readParameter<&ComponentInfo::getBoolParameter, const std::string &>,
            (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
            "Returns the named boolean parameter of the component identified by 'index' "
            "(the root component by default), or an empty sequence if it is unset.")
 
-      .def("getStringParameter", &getStringParameter,
+      .def("getStringParameter", &readParameter<&ComponentInfo::getStringParameter, const std::string &>,
            (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
            "Returns the named string parameter of the component identified by 'index' "
            "(the root component by default), or an empty sequence if it is unset.")
 
-      .def("getParameterType", &getParameterType,
+      .def("getParameterType", &readParameter<&ComponentInfo::getParameterType, const std::string &>,
            (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
            "Returns the type of the named parameter of the component identified by 'index' "
            "(the root component by default), or an empty string if it is unset.")
