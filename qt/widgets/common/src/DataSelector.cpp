@@ -108,11 +108,12 @@ void DataSelector::handleFileInput() {
   }
 
   for (const auto &file : m_uiForm.rfFileInput->getFilenames()) {
+    const auto filepath = std::filesystem::absolute(file.toUtf8().constData());
     std::error_code ec;
-    if (!std::filesystem::exists(file.toStdWString(), ec)) {
+    if (!std::filesystem::exists(filepath, ec)) {
       m_uiForm.rfFileInput->setFileProblem(
           ec ? QString::fromStdString(ec.message())
-             : QString::fromStdString(std::format("The specified file ({}) does not exist", file.toStdString())));
+             : QString::fromStdString(std::format("The specified file ({}) does not exist", filepath.string())));
       return;
     }
   }
