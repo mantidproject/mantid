@@ -216,8 +216,6 @@ jobs:
         uses: ./.github/actions/setup-pixi
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
 
-      # Install/update the environment in its own step so that it is visible in the log. Otherwise the
-      # first 'pixi run' in the build step silently installs it after a pixi.lock change.
       # TEMPORARY: diagnose the silent stall in 'pixi install' on the Windows runner.
       - name: Diagnose pixi install stall (debug)
         if: ${{ matrix.os == 'Windows' && needs.check-filters.outputs.code_changes == 'true' }}
@@ -230,11 +228,23 @@ jobs:
             --max-time 300 https://conda.anaconda.org/conda-forge/win-64/lld-23.1.2-he13e66b_0.conda || true
           echo "=== rattler cache lock files ==="
           ls -la "${LOCALAPPDATA}/rattler/cache" 2>/dev/null | head -20 || true
-          find "${LOCALAPPDATA}/rattler/cache" -maxdepth 2 -name "*.lock" 2>/dev/null | head -20 || true
+          echo "=== pixi/rattler config files ==="
+          for f in /c/ProgramData/rattler/config.toml /c/ProgramData/pixi/config.toml "${APPDATA}/rattler/config.toml" "${APPDATA}/pixi/config.toml" "${USERPROFILE}/.pixi/config.toml"; do
+            [ -f "$f" ] && { echo "--- $f"; cat "$f"; }
+          done
+          echo "=== .pixi environment layout ==="
+          ls -la .pixi .pixi/envs 2>/dev/null || true
+          ls .pixi/envs/default/conda-meta 2>/dev/null | wc -l || true
+          ls .pixi/envs/default/conda-meta 2>/dev/null | grep -i -E "^lld|pixi" || true
 
+      # Install/update the environment in its own step so that it is visible in the log. Otherwise the
+      # first 'pixi run' in the build step silently installs it after a pixi.lock change.
       - name: Install pixi environment
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
         timeout-minutes: 30
+        env:
+          # -vvv only affects pixi's own crates; the installer work happens in rattler.
+          RUST_LOG: "info,pixi=debug,pixi_core=debug,rattler=debug,rattler_cache=debug,rattler_package_streaming=debug"
         run: pixi install --frozen -vvv
 
       - name: Clean build tree
