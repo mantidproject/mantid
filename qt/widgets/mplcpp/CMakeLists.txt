@@ -58,12 +58,24 @@ mtd_add_qt_library(
   NOMOC ${NOMOC_HEADERS}
   UI ${UI_FILES}
   DEFS IN_MANTIDQT_MPLCPP
-  INCLUDE_DIRS inc ${Boost_INCLUDE_DIRS}
+  INCLUDE_DIRS inc ${CMAKE_CURRENT_BINARY_DIR} ${Boost_INCLUDE_DIRS}
   LINK_LIBS Mantid::PythonInterfaceCore Mantid::API
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon
   INSTALL_DIR ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH @loader_path/../MacOS @loader_path/../Frameworks
   LINUX_INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}"
+)
+
+# Auto-generate exports header
+generate_mantid_export_header(
+  MantidQtWidgetsMplCppQt${MANTID_QT_VERSION}
+  FALSE
+  BASE_NAME
+  MANTID_MPLCPP
+  EXPORT_MACRO_NAME
+  MANTID_MPLCPP_DLL
+  EXPORT_FILE_NAME
+  MantidQtWidgets/MplCpp/DllConfig.h
 )
 
 # Testing
