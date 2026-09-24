@@ -24,7 +24,8 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "ENABLE_PRECOMMIT": "OFF",
-        "COLORED_COMPILER_OUTPUT": "OFF"
+        "COLORED_COMPILER_OUTPUT": "OFF",
+        "USE_CCACHE": "OFF"
       }
     },
     {

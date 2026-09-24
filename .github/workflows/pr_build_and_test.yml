@@ -187,6 +187,7 @@ jobs:
     env:
       CMAKE_PRESET: ${{ matrix.cmake_preset }}
       EXTRA_CMAKE_FLAGS: "-DENABLE_PRECOMMIT=OFF"
+      CCACHE_DISABLE: "1"
       ENABLE_BUILD_CODE: true
       ENABLE_UNIT_TESTS: true
       ENABLE_SYSTEM_TESTS: ${{ matrix.os == 'Linux' }}
@@ -357,6 +358,7 @@ jobs:
     env:
       CMAKE_PRESET: linux-64-ci
       EXTRA_CMAKE_FLAGS: "-DENABLE_PRECOMMIT=OFF"
+      CCACHE_DISABLE: "1"
       ENABLE_BUILD_CODE: true
       ENABLE_UNIT_TESTS: false
       ENABLE_SYSTEM_TESTS: false
