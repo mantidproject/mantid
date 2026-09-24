@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidKernel/System.h"
+#include "MantidPythonInterface/core/DllConfig.h"
 #include <boost/python/extract.hpp>
 #include <boost/python/object.hpp>
 #include <vector>
@@ -46,7 +47,7 @@ namespace Converters {
  * Converts a Python sequence type to a C++ std::vector, where the element
  * type is defined by the template type
  */
-template <typename DestElementType> struct DLLExport PySequenceToVector {
+template <typename DestElementType> struct MANTID_PYTHONINTERFACE_CORE_DLL PySequenceToVector {
   // Alias definitions
   using TypedVector = std::vector<DestElementType>;
 

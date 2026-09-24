@@ -10,6 +10,7 @@
  */
 
 #include "MantidKernel/System.h"
+#include "MantidPythonInterface/core/DllConfig.h"
 #include <boost/python/dict.hpp>
 #include <boost/python/object.hpp>
 #include <map>
@@ -18,7 +19,7 @@ namespace Mantid {
 namespace PythonInterface {
 namespace Converters {
 
-template <typename KeyType, typename ValueType> struct DLLExport MapToPyDictionary {
+template <typename KeyType, typename ValueType> struct MANTID_PYTHONINTERFACE_CORE_DLL MapToPyDictionary {
 
 public:
   using MapType = std::map<KeyType, ValueType>;
