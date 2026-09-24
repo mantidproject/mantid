@@ -8,7 +8,6 @@
 
 #include "MantidKernel/Matrix.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
-#include "MantidPythonInterface/core/DllConfig.h"
 #include <boost/python/detail/prefix.hpp>
 
 namespace Mantid {
@@ -24,8 +23,7 @@ namespace Converters {
  * The type of conversion is specified by another struct/class that
  * contains a static member create.
  */
-template <typename ElementType, typename ConversionPolicy>
-struct MANTID_PYTHONINTERFACE_CORE_DLL MatrixToNDArray { //clang-format off
+template <typename ElementType, typename ConversionPolicy> struct MatrixToNDArray { //clang-format off
   /**
    * Operator to convert a matrix to a numpy array
    * @param cmatrix :: A reference to matrix
