@@ -623,19 +623,18 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         Returns the efixed value relating to the specified workspace
         """
         component_info = self._sample_ws.componentInfo()
-        root = component_info.root()
 
-        if component_info.hasParameter(root, "Efixed"):
-            return component_info.getNumberParameter(root, "Efixed")[0]
+        if component_info.hasParameter("Efixed"):
+            return component_info.getNumberParameter("Efixed")[0]
 
-        if component_info.hasParameter(root, "analyser"):
+        if component_info.hasParameter("analyser"):
             try:
-                analyser = component_info.indexOfAny(component_info.getStringParameter(root, "analyser")[0])
+                analyser = component_info.indexOfAny(component_info.getStringParameter("analyser")[0])
             except ValueError:
                 analyser = None
 
-            if analyser is not None and component_info.hasParameter(analyser, "Efixed"):
-                return component_info.getNumberParameter(analyser, "EFixed")[0]
+            if analyser is not None and component_info.hasParameter("Efixed", analyser):
+                return component_info.getNumberParameter("EFixed", analyser)[0]
 
         raise ValueError("No Efixed parameter found")
 

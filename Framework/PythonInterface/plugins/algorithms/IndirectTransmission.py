@@ -28,7 +28,7 @@ def _get_instrument_property_list(component_info, property_name):
     @return A list of string values
     """
 
-    raw_property_list = component_info.getStringParameter(component_info.root(), property_name)
+    raw_property_list = component_info.getStringParameter(property_name)
     if raw_property_list is None or len(raw_property_list) == 0:
         raise RuntimeError("Got empty list for parameter %s" % property_name)
 

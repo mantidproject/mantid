@@ -247,14 +247,14 @@ class SANSILLIntegration(PythonAlgorithm):
             # re-calculate the Q-range after lambda cut
             # TOF is only D33 which has panels
             component_info = mtd[self._input_ws].componentInfo()
-            panel_names = component_info.getStringParameter(component_info.root(), "detector_panels")[0].split(",")
+            panel_names = component_info.getStringParameter("detector_panels")[0].split(",")
             CalculateDynamicRange(Workspace=self._input_ws, ComponentNames=panel_names)
         self._integrate(self._input_ws, self._output_ws)
         self.setProperty("OutputWorkspace", self._output_ws)
         panels_out_ws = self.getPropertyValue("PanelOutputWorkspaces")
         if mtd[self._output_ws].getInstrumentName() in ["D33", "D11B", "D22B"] and panels_out_ws:
             component_info = mtd[self._output_ws].componentInfo()
-            panel_names = component_info.getStringParameter(component_info.root(), "detector_panels")[0].split(",")
+            panel_names = component_info.getStringParameter("detector_panels")[0].split(",")
             panel_outputs = []
             for panel in panel_names:
                 in_ws = self._input_ws + "_" + panel
@@ -295,8 +295,8 @@ class SANSILLIntegration(PythonAlgorithm):
                     component_info = mtd[self._input_ws].componentInfo()
                     root = component_info.root()
                     if component_info.name(root) == "D16" and run.hasProperty("Gamma.value"):
-                        if component_info.hasParameter(root, "detector-width"):
-                            pixel_nb = component_info.getNumberParameter(root, "detector-width")[0]
+                        if component_info.hasParameter("detector-width"):
+                            pixel_nb = component_info.getNumberParameter("detector-width")[0]
                         else:
                             self.log().warning("Width of the instrument not found. Assuming 320 pixels.")
                             pixel_nb = 320
@@ -385,10 +385,9 @@ class SANSILLIntegration(PythonAlgorithm):
         l1 = run.getLogData("collimation.actual_position").value
         l2 = run.getLogData("L2").value
         component_info = mtd[self._input_ws].componentInfo()
-        root = component_info.root()
-        if component_info.hasParameter(root, "x-pixel-size") and component_info.hasParameter(root, "y-pixel-size"):
-            x3 = component_info.getNumberParameter(root, "x-pixel-size")[0] / 1000
-            y3 = component_info.getNumberParameter(root, "y-pixel-size")[0] / 1000
+        if component_info.hasParameter("x-pixel-size") and component_info.hasParameter("y-pixel-size"):
+            x3 = component_info.getNumberParameter("x-pixel-size")[0] / 1000
+            y3 = component_info.getNumberParameter("y-pixel-size")[0] / 1000
         else:
             raise RuntimeError("Unable to calculate resolution, missing pixel size.")
         if "selector.wavelength_res" in run:
@@ -496,9 +495,8 @@ class SANSILLIntegration(PythonAlgorithm):
         q_max = run.getLogData(q_max_name).value
         self.log().information("From sample logs qmin={0:.5f}, qmax={1:.5f}".format(q_min, q_max))
         component_info = mtd[self._input_ws].componentInfo()
-        root = component_info.root()
-        pixel_width = component_info.getNumberParameter(root, "x-pixel-size")[0] / 1000
-        pixel_height = component_info.getNumberParameter(root, "y-pixel-size")[0] / 1000
+        pixel_width = component_info.getNumberParameter("x-pixel-size")[0] / 1000
+        pixel_height = component_info.getNumberParameter("y-pixel-size")[0] / 1000
 
         pixel_size = max(pixel_height, pixel_width)
         binning_factor = self.getProperty("BinningFactor").value

@@ -67,14 +67,13 @@ class LRReflectivityOutput(PythonAlgorithm):
         # at the sample. The distance from the sample to si is then xi_reference - xi.
         xi_reference = 445
         component_info = ws.componentInfo()
-        root = component_info.root()
-        if component_info.hasParameter(root, "xi-reference"):
-            component_info.getNumberParameter(root, "xi-reference")[0]
+        if component_info.hasParameter("xi-reference"):
+            component_info.getNumberParameter("xi-reference")[0]
 
         # Distance between the s1 and the sample
         s1_sample_distance = 1485
-        if component_info.hasParameter(root, "s1-sample-distance"):
-            component_info.getNumberParameter(root, "s1-sample-distance")[0]
+        if component_info.hasParameter("s1-sample-distance"):
+            component_info.getNumberParameter("s1-sample-distance")[0]
 
         front_slit = self.getProperty("FrontSlitName").value
         s1h = abs(ws.getRun().getProperty("%sVHeight" % front_slit).value[0])
@@ -258,8 +257,8 @@ class LRReflectivityOutput(PythonAlgorithm):
         if compute_dq:
             # Calibrated constant term for the resolution
             component_info = mtd[scaled_ws_list[0]].componentInfo()
-            if component_info.hasParameter(component_info.root(), "dq-constant"):
-                dq0 = component_info.getNumberParameter(component_info.root(), "dq-constant")[0]
+            if component_info.hasParameter("dq-constant"):
+                dq0 = component_info.getNumberParameter("dq-constant")[0]
 
             _dq_over_q = self.compute_resolution(mtd[scaled_ws_list[0]])
             if _dq_over_q:

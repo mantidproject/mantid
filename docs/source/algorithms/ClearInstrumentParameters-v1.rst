@@ -35,9 +35,9 @@ Usage
   bank2 = compInfo.indexOfAny("bank2")
 
   #Check the parameters are set correctly
-  print("Instrument: " + compInfo.getStringParameter(compInfo.root(), "TestParam")[0])
-  print("Bank1: " + compInfo.getStringParameter(bank1, "TestParam")[0])
-  print("Bank2: " + compInfo.getStringParameter(bank2, "TestParam")[0])
+  print("Instrument: " + compInfo.getStringParameter("TestParam")[0])
+  print("Bank1: " + compInfo.getStringParameter("TestParam", bank1)[0])
+  print("Bank2: " + compInfo.getStringParameter("TestParam", bank2)[0])
 
   #Clear all the instrument's parameters
   print("Clearing all parameters")
@@ -46,11 +46,11 @@ Usage
   #Check the parameters have been cleared correctly
   #Obtain the component info again, to make sure it contains the updated parameters
   compInfo = ws.componentInfo()
-  if len(compInfo.getStringParameter(compInfo.root(), "TestParam")) == 0:
+  if len(compInfo.getStringParameter("TestParam")) == 0:
     print("Instrument was cleared successfully.")
-  if len(compInfo.getStringParameter(bank1, "TestParam")) == 0:
+  if len(compInfo.getStringParameter("TestParam", bank1)) == 0:
     print("Bank1 was cleared successfully.")
-  if len(compInfo.getStringParameter(bank2, "TestParam")) == 0:
+  if len(compInfo.getStringParameter("TestParam", bank2)) == 0:
     print("Bank2 was cleared successfully.")
 
 .. testoutput::

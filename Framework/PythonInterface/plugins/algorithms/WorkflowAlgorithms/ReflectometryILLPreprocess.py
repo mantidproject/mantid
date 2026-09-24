@@ -113,10 +113,9 @@ def normalisation_monitor_workspace_index(ws: MatrixWorkspace) -> int:
     """
     param_name = "default-incident-monitor-spectrum"
     component_info = ws.componentInfo()
-    root = component_info.root()
-    if not component_info.hasParameter(root, param_name):
+    if not component_info.hasParameter(param_name):
         raise RuntimeError("Parameter " + param_name + " is missing from the IPF.")
-    n = component_info.getIntParameter(root, param_name)[0]
+    n = component_info.getIntParameter(param_name)[0]
     return ws.getIndexFromSpectrumNumber(n)
 
 
@@ -630,7 +629,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         x_slits2 = run.getLogData("Distance.S2_sample").value * mm2m + offset
         x_slits3 = run.getLogData("Distance.S3_sample").value * mm2m + offset
         component_info = ws.componentInfo()
-        cr = component_info.getNumberParameter(component_info.root(), "chopper_radius")[0]  # m, Nexus is improperly filled
+        cr = component_info.getNumberParameter("chopper_radius")[0]  # m, Nexus is improperly filled
 
         if self._theta_zero is not None:
             theta0 = self._theta_zero * deg2rad / 2.0

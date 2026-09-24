@@ -167,7 +167,7 @@ class TransformToIqt(PythonAlgorithm):
             root = component_info.root()
             instrument_name = component_info.name(root)
 
-            analyserName = component_info.getStringParameter(root, "analyser")[0]
+            analyserName = component_info.getStringParameter("analyser")[0]
             try:
                 analyser = component_info.indexOfAny(analyserName)
             except ValueError:
@@ -175,13 +175,13 @@ class TransformToIqt(PythonAlgorithm):
 
             if analyser is not None:
                 logger.debug("Found %s component in instrument %s, will look for resolution there" % (analyserName, instrument_name))
-                resolution = component_info.getNumberParameter(analyser, "resolution")[0]
+                resolution = component_info.getNumberParameter("resolution", analyser)[0]
             else:
                 logger.debug(
                     "No %s component found on instrument %s, will look for resolution in top level instrument"
                     % (analyserName, instrument_name)
                 )
-                resolution = component_info.getNumberParameter(root, "resolution")[0]
+                resolution = component_info.getNumberParameter("resolution")[0]
 
             logger.information("Got resolution from IPF: %f" % resolution)
             workflow_prog.report("IPF resolution obtained")

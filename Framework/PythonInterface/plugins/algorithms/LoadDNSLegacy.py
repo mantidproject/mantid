@@ -158,14 +158,13 @@ class LoadDNSLegacy(PythonAlgorithm):
 
         tmp = api.LoadEmptyInstrument(InstrumentName="DNS")
         component_info = tmp.componentInfo()
-        root = component_info.root()
         l1 = (component_info.samplePosition() - component_info.sourcePosition()).norm()
         # Read the instrument parameters while the workspace is still alive; the ComponentInfo
         # is owned by it and does not outlive it, unlike the legacy instrument.
-        self.coil_currents = {p: component_info.getStringParameter(root, "{}_currents".format(p))[0] for p in ["x", "y", "z"]}
-        self.l2 = float(component_info.getStringParameter(root, "l2")[0])
-        self.channel_width_factor = float(component_info.getStringParameter(root, "channel_width_factor")[0])
-        self.tof_comissioning = component_info.getStringParameter(root, "tof_comissioning")[0]
+        self.coil_currents = {p: component_info.getStringParameter("{}_currents".format(p))[0] for p in ["x", "y", "z"]}
+        self.l2 = float(component_info.getStringParameter("l2")[0])
+        self.channel_width_factor = float(component_info.getStringParameter("channel_width_factor")[0])
+        self.tof_comissioning = component_info.getStringParameter("tof_comissioning")[0]
         api.DeleteWorkspace(tmp)
 
         # load polarisation table and determine polarisation

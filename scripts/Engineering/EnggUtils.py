@@ -451,8 +451,8 @@ def getParametersFromDetector(component_info: ComponentInfo, detector_index: int
     param_names = ["alpha_0", "beta_0", "beta_1", "sigma_0_sq", "sigma_1_sq", "sigma_2_sq"]
     params = None
     for comp in inst_tree:
-        if component_info.hasParameter(comp, param_names[0]):
-            params = [component_info.getNumberParameter(comp, param)[0] for param in param_names]
+        if component_info.hasParameter(param_names[0], comp):
+            params = [component_info.getNumberParameter(param, comp)[0] for param in param_names]
             break
     return params
 

@@ -243,7 +243,7 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         det_resolution = common.detector_resolution()
         chopper_speed = common.chopper_speed(logs, component_info)
         chopper_opening = common.chopper_opening_angle(logs, component_info)
-        chopper_radius = component_info.getNumberParameter(component_info.root(), "chopper_radius")[0]
+        chopper_radius = component_info.getNumberParameter("chopper_radius")[0]
         chopper_pair_dist = common.chopper_pair_distance(logs, component_info)
         tof_bin_width = self._tof_channel_width(logs)
         q_ws_name = self._names.withSuffix("in_momentum_transfer")

@@ -792,7 +792,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         distance = None
         try:
             component_info = mtd[ws].componentInfo()
-            components = component_info.getStringParameter(component_info.root(), "detector_panels")
+            components = component_info.getStringParameter("detector_panels")
             if components:
                 components = components[0].split(",")
                 for c in components:

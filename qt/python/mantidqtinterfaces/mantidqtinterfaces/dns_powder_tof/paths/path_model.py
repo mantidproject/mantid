@@ -57,14 +57,13 @@ class DNSPathModel(DNSObsModel):
         polarisation_table = []
         tmp = api.LoadEmptyInstrument(InstrumentName="DNS")
         component_info = tmp.componentInfo()
-        root = component_info.root()
 
         # polarisation names are taken from the IDF "DNS_parameters.xml"
         dns_polarisations_list = ["x", "y", "z", "off", "zero_field", "z_high", "minus_x", "minus_y", "minus_z"]
 
         # Read the parameters while the workspace is still alive; the ComponentInfo is owned by it
         polarisation_currents = {
-            polarisation: component_info.getStringParameter(root, f"{polarisation}_currents")[0] for polarisation in dns_polarisations_list
+            polarisation: component_info.getStringParameter(f"{polarisation}_currents")[0] for polarisation in dns_polarisations_list
         }
         api.DeleteWorkspace(tmp)
 

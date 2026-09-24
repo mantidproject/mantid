@@ -467,10 +467,9 @@ class SANSILLReduction(DataProcessorAlgorithm):
             att_value = run.getLogData("attenuator.attenuation_value").value
             if float(att_value) < 10.0 and self._instrument == "D33":
                 component_info = mtd[ws].componentInfo()
-                root = component_info.root()
                 param = "att" + str(int(att_value))
-                if component_info.hasParameter(root, param):
-                    att_coeff = component_info.getNumberParameter(root, param)[0]
+                if component_info.hasParameter(param):
+                    att_coeff = component_info.getNumberParameter(param)[0]
                 else:
                     raise RuntimeError("Unable to find the attenuation coefficient for D33 attenuator #" + str(int(att_value)))
             else:
@@ -739,7 +738,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
         self.log().information("Performing parallax correction")
         if self._instrument in ["D33", "D11B", "D22B"]:
             component_info = mtd[ws].componentInfo()
-            components = component_info.getStringParameter(component_info.root(), "detector_panels")[0].split(",")
+            components = component_info.getStringParameter("detector_panels")[0].split(",")
         else:
             components = ["detector"]
         ParallaxCorrection(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames=components)
@@ -751,15 +750,14 @@ class SANSILLReduction(DataProcessorAlgorithm):
         """
 
         component_info = mtd[ws].componentInfo()
-        root = component_info.root()
-        if component_info.hasParameter(root, "tau"):
-            tau = component_info.getNumberParameter(root, "tau")[0]
+        if component_info.hasParameter("tau"):
+            tau = component_info.getNumberParameter("tau")[0]
             if self._instrument == "D33" or self._instrument == "D11B":
                 grouping_filename = self._instrument + "_Grouping.xml"
                 grouping_file = os.path.join(config["groupingFiles.directory"], grouping_filename)
                 DeadTimeCorrection(InputWorkspace=ws, Tau=tau, MapFile=grouping_file, OutputWorkspace=ws)
-            elif component_info.hasParameter(root, "grouping"):
-                pattern = component_info.getStringParameter(root, "grouping")[0]
+            elif component_info.hasParameter("grouping"):
+                pattern = component_info.getStringParameter("grouping")[0]
                 DeadTimeCorrection(InputWorkspace=ws, Tau=tau, GroupingPattern=pattern, OutputWorkspace=ws)
             else:
                 self.log().warning("No grouping available in IPF, dead time correction will be performed detector-wise.")
@@ -789,7 +787,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
         if process != "Transmission":
             if self._instrument in ["D33", "D11B", "D22B"]:
                 component_info = mtd[ws].componentInfo()
-                components = component_info.getStringParameter(component_info.root(), "detector_panels")[0]
+                components = component_info.getStringParameter("detector_panels")[0]
                 CalculateDynamicRange(Workspace=ws, ComponentNames=components.split(","))
             elif self._instrument == "D16" and mtd[ws].getAxis(0).getUnit().caption() != "Wavelength":
                 # D16 omega scan case : we have an histogram indexed by omega, not wavelength
@@ -1043,7 +1041,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
             self._set_sample_title(ws)
 
             component_info = mtd[ws].componentInfo()
-            components = component_info.getStringParameter(component_info.root(), "detector_panels")[0]
+            components = component_info.getStringParameter("detector_panels")[0]
             CalculateDynamicRange(Workspace=ws, ComponentNames=components.split(","))
             MaskDetectorsIf(InputWorkspace=ws, OutputWorkspace=ws, Operator="NotFinite")
 

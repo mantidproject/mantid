@@ -786,11 +786,10 @@ class PowderILLEfficiency(PythonAlgorithm):
         self._pixels_to_trim = 28
         chi2_ndof_threshold = 1.0
         component_info = mtd[numors[0]].componentInfo()
-        root = component_info.root()
-        if component_info.hasParameter(root, "pixels_to_trim"):
-            self._pixels_to_trim = component_info.getIntParameter(root, "pixels_to_trim")[0]
-        if component_info.hasParameter(root, "chi2_ndof"):
-            chi2_ndof_threshold = component_info.getNumberParameter(root, "chi2_ndof")[0]
+        if component_info.hasParameter("pixels_to_trim"):
+            self._pixels_to_trim = component_info.getIntParameter("pixels_to_trim")[0]
+        if component_info.hasParameter("chi2_ndof"):
+            chi2_ndof_threshold = component_info.getNumberParameter("chi2_ndof")[0]
 
         while iteration < self._n_iterations or (self._n_iterations == 0 and chi2_ndof > chi2_ndof_threshold):
             self._progress = Progress(self, start=0.0, end=1.0, nreports=5)

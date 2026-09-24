@@ -53,7 +53,7 @@ Usage
    # create sample workspace
    ws1 = CreateSampleWorkspace();
    ci1 = ws1.componentInfo();
-   print("Default workspace has instrument: {0} with {1} parameters".format(ci1.name(ci1.root()),len(ci1.getParameterNames(ci1.root()))))
+   print("Default workspace has instrument: {0} with {1} parameters".format(ci1.name(ci1.root()),len(ci1.getParameterNames())))
 
    # load MARI from instrument name
    print("===========================")

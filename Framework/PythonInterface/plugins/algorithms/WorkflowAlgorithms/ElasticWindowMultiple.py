@@ -335,7 +335,7 @@ def _extract_sensor_name(sample_log_name, run, component_info):
     position = _extract_position_from_run(sample_log_name, run, component_info)
     if position is not None:
         default_names = ["Bot_Can_Top", "Middle_Can_Top", "Top_Can_Top"]
-        sensor_names = component_info.getStringParameter(component_info.root(), "Workflow.TemperatureSensorNames")[0].split(",")
+        sensor_names = component_info.getStringParameter("Workflow.TemperatureSensorNames")[0].split(",")
 
         if position < len(sensor_names) and sensor_names[position] in run:
             return sensor_names[position]
@@ -367,8 +367,8 @@ def _index_of_position(position_log_value):
 
 
 def _index_of_samp_posn(samp_posn_log_value, component_info):
-    if component_info.hasParameter(component_info.root(), "Workflow.SamplePositions"):
-        sample_positions = component_info.getStringParameter(component_info.root(), "Workflow.SamplePositions")[0].split(",")
+    if component_info.hasParameter("Workflow.SamplePositions"):
+        sample_positions = component_info.getStringParameter("Workflow.SamplePositions")[0].split(",")
         if samp_posn_log_value in sample_positions:
             return sample_positions.index(samp_posn_log_value)
     return 0

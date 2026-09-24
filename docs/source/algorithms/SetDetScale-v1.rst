@@ -30,15 +30,15 @@ Usage
 
     compInfo = w.componentInfo()
     print("Before SetDetScale:")
-    print('{0:.5f}'.format(compInfo.getNumberParameter(compInfo.root(), "detScale17")[0]))
-    print('{0:.5f}'.format(compInfo.getNumberParameter(compInfo.root(), "detScale49")[0]))
+    print('{0:.5f}'.format(compInfo.getNumberParameter("detScale17")[0]))
+    print('{0:.5f}'.format(compInfo.getNumberParameter("detScale49")[0]))
 
     #This SetDetScale will change the parameters set in parameter file
     SetDetScale(Workspace=w, DetScaleList='17:1.0,49:2.0')
     compInfo = w.componentInfo()
     print("After SetDetScale:")
-    print('{0:.5f}'.format(compInfo.getNumberParameter(compInfo.root(), "detScale17")[0]))
-    print('{0:.5f}'.format(compInfo.getNumberParameter(compInfo.root(), "detScale49")[0]))
+    print('{0:.5f}'.format(compInfo.getNumberParameter("detScale17")[0]))
+    print('{0:.5f}'.format(compInfo.getNumberParameter("detScale49")[0]))
 
 
 Output:

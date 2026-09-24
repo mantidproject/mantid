@@ -74,7 +74,7 @@ class SANSPatchSensitivity(PythonAlgorithm):
 
         # Get the default from the parameters file
         if component_name is None or component_name == "":
-            component_name = component_info.getStringParameter(component_info.root(), "detector-name")[0]
+            component_name = component_info.getStringParameter("detector-name")[0]
         try:
             component = instrument.getComponentByName(component_name)
         except:

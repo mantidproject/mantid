@@ -1244,12 +1244,12 @@ class PolDiffILLReduction(PythonAlgorithm):
         )
         component_info = mtd[sample_ws][0].componentInfo()
         detector = component_info.indexOfAny("detector")
-        sample_distance_odd = component_info.getNumberParameter(detector, "sample_distance_odd")[0]  # distance from odd detectors to sample
-        sample_distance_even = component_info.getNumberParameter(detector, "sample_distance_even")[0]  # same, but for even detectors
+        sample_distance_odd = component_info.getNumberParameter("sample_distance_odd", detector)[0]  # distance from odd detectors to sample
+        sample_distance_even = component_info.getNumberParameter("sample_distance_even", detector)[0]  # same, but for even detectors
         average_distance = 0.5 * (sample_distance_odd + sample_distance_even)
         EditInstrumentGeometry(
             Workspace=mock_geometry_ws,
-            PrimaryFlightPath=component_info.getNumberParameter(detector, "sample_distance_chopper")[0],
+            PrimaryFlightPath=component_info.getNumberParameter("sample_distance_chopper", detector)[0],
             SpectrumIDs=np.arange(1, 361, 1),
             L2=[average_distance] * n_spec,
             Polar=np.arange(min_range, max_range, step_size),
@@ -1395,10 +1395,9 @@ class PolDiffILLReduction(PythonAlgorithm):
         mev_to_ev = 1e-3  # conversion factor
         Ei = self._sampleAndEnvironmentProperties["InitialEnergy"].value * mev_to_ev  # in eV
         component_info = mtd[ws][0].componentInfo()
-        root = component_info.root()
-        L1 = component_info.getNumberParameter(root, "sample_distance_chopper")[0]  # in m
-        L2_odd = component_info.getNumberParameter(root, "sample_distance_odd")[0]  # in m
-        L2_even = component_info.getNumberParameter(root, "sample_distance_even")[0]  # in m
+        L1 = component_info.getNumberParameter("sample_distance_chopper")[0]  # in m
+        L2_odd = component_info.getNumberParameter("sample_distance_odd")[0]  # in m
+        L2_even = component_info.getNumberParameter("sample_distance_even")[0]  # in m
         neutron_speed = np.sqrt(2.0 * Ei / neutron_mass) * light_speed  # in m / s, light_speed to go back to SI
         self._sampleAndEnvironmentProperties["NeutronSpeed"] = float(neutron_speed)
         tof_deltaE_0_odd = 1e6 * (L1 + L2_odd) / neutron_speed  # in us, for consistency with time_axis unit
@@ -1442,11 +1441,10 @@ class PolDiffILLReduction(PythonAlgorithm):
             ep_sigmas_tof[ep_sigmas_tof == 0] = np.mean(ep_sigmas_tof[ep_sigmas_tof != 0])
         # pad narrow peak fits with average peak width:
         component_info = mtd[ws][0].componentInfo()
-        root = component_info.root()
         m_n = physical_constants["neutron mass energy equivalent in MeV"][0] * 1e9  # in meV / c^2
         light_speed = physical_constants["speed of light in vacuum"][0]  # in m/s
-        L2_odd = component_info.getNumberParameter(root, "sample_distance_odd")[0]  # in m
-        L2_even = component_info.getNumberParameter(root, "sample_distance_even")[0]  # in m
+        L2_odd = component_info.getNumberParameter("sample_distance_odd")[0]  # in m
+        L2_even = component_info.getNumberParameter("sample_distance_even")[0]  # in m
         L2 = max(L2_odd, L2_even)  # in this case we care only about the range and want to maximise it
         neutron_speed = self._sampleAndEnvironmentProperties["NeutronSpeed"].value  # in m / s
         Ei = self._sampleAndEnvironmentProperties["InitialEnergy"].value  # in meV

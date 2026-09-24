@@ -51,9 +51,8 @@ class LRPrimaryFraction(PythonAlgorithm):
         # Number of pixels in each direction
         # TODO: revisit this when we update the IDF
         component_info = workspace.componentInfo()
-        root = component_info.root()
-        number_of_pixels_x = int(component_info.getNumberParameter(root, "number-of-x-pixels")[0])
-        number_of_pixels_y = int(component_info.getNumberParameter(root, "number-of-y-pixels")[0])
+        number_of_pixels_x = int(component_info.getNumberParameter("number-of-x-pixels")[0])
+        number_of_pixels_y = int(component_info.getNumberParameter("number-of-y-pixels")[0])
 
         # Sum up the low-resolution axis and sum up all the wavelengths
         workspace = Integration(InputWorkspace=workspace)

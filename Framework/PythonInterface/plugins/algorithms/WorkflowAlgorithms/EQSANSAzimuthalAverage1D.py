@@ -70,9 +70,8 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         output_ws_name = self.getPropertyValue("OutputWorkspace")
         property_manager_name = self.getProperty("ReductionProperties").value
         component_info = workspace.componentInfo()
-        root = component_info.root()
-        pixel_size_x = component_info.getNumberParameter(root, "x-pixel-size")[0]
-        pixel_size_y = component_info.getNumberParameter(root, "y-pixel-size")[0]
+        pixel_size_x = component_info.getNumberParameter("x-pixel-size")[0]
+        pixel_size_y = component_info.getNumberParameter("y-pixel-size")[0]
         (output_msg, output_ws, output_binning) = self._call_sans_averaging(
             workspace, None, nbins, log_binning, property_manager_name, output_ws_name
         )
@@ -205,9 +204,8 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         nbins = self.getProperty("NumberOfBins").value
         property_manager_name = self.getProperty("ReductionProperties").value
         component_info = workspace.componentInfo()
-        root = component_info.root()
-        pixel_size_x = component_info.getNumberParameter(root, "x-pixel-size")[0]
-        pixel_size_y = component_info.getNumberParameter(root, "y-pixel-size")[0]
+        pixel_size_x = component_info.getNumberParameter("x-pixel-size")[0]
+        pixel_size_y = component_info.getNumberParameter("y-pixel-size")[0]
         output_ws_name = self.getPropertyValue("OutputWorkspace")
         compute_resolution = self.getProperty("ComputeResolution").value
 
@@ -347,11 +345,10 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         # it just so happens that this is not pointing to what it used to - see EQSANSLoad.cpp
         sample_detector_distance = workspace.getRun().getProperty("sample_detector_distance").value
         component_info = workspace.componentInfo()
-        root = component_info.root()
-        nx_pixels = int(component_info.getNumberParameter(root, "number-of-x-pixels")[0])
-        ny_pixels = int(component_info.getNumberParameter(root, "number-of-y-pixels")[0])
-        pixel_size_x = component_info.getNumberParameter(root, "x-pixel-size")[0]
-        pixel_size_y = component_info.getNumberParameter(root, "y-pixel-size")[0]
+        nx_pixels = int(component_info.getNumberParameter("number-of-x-pixels")[0])
+        ny_pixels = int(component_info.getNumberParameter("number-of-y-pixels")[0])
+        pixel_size_x = component_info.getNumberParameter("x-pixel-size")[0]
+        pixel_size_y = component_info.getNumberParameter("y-pixel-size")[0]
 
         if workspace.getRun().hasProperty("beam_center_x") and workspace.getRun().hasProperty("beam_center_y"):
             beam_ctr_x = workspace.getRun().getProperty("beam_center_x").value

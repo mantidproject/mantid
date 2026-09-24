@@ -75,13 +75,12 @@ class LRSubtractAverageBackground(PythonAlgorithm):
         else:
             # TODO: revisit this when we update the IDF
             component_info = workspace.componentInfo()
-            root = component_info.root()
-            if component_info.hasParameter(root, "number-of-x-pixels"):
-                number_of_pixels_x = int(component_info.getNumberParameter(root, "number-of-x-pixels")[0])
+            if component_info.hasParameter("number-of-x-pixels"):
+                number_of_pixels_x = int(component_info.getNumberParameter("number-of-x-pixels")[0])
             else:
                 raise RuntimeError("Instrument does not have parameter number-of-x-pixels")
-            if component_info.hasParameter(root, "number-of-y-pixels"):
-                number_of_pixels_y = int(component_info.getNumberParameter(root, "number-of-y-pixels")[0])
+            if component_info.hasParameter("number-of-y-pixels"):
+                number_of_pixels_y = int(component_info.getNumberParameter("number-of-y-pixels")[0])
             else:
                 raise RuntimeError("Instrument does not have parameter number-of-y-pixels")
 

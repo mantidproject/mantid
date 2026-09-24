@@ -107,7 +107,7 @@ def _calibratedIncidentEnergy(detWorkspace, monWorkspace, monEPPWorkspace, eiCal
     eiWorkspace = None
     if instrument_name in ["IN4", "IN6", "PANTHER", "SHARP"]:
         run = detWorkspace.run()
-        eiCalibrationDets = component_info.getStringParameter(root, "Ei_calibration_detectors")[0]
+        eiCalibrationDets = component_info.getStringParameter("Ei_calibration_detectors")[0]
         maximumEnergy = 10.0
         timeFrame = None
         if instrument_name in ["IN4", "PANTHER"]:
@@ -241,10 +241,9 @@ def _scaleAfterMonitorNormalization(ws, wsNames, wsCleanup, algorithmLogging):
     SCALING_PARAM = "scaling_after_monitor_normalisation"
     NON_RECURSIVE = False  # Prevent recursive calls.
     component_info = ws.componentInfo()
-    root = component_info.root()
-    if not component_info.hasParameter(root, SCALING_PARAM, NON_RECURSIVE):
+    if not component_info.hasParameter(SCALING_PARAM, recursive=NON_RECURSIVE):
         return ws
-    factor = component_info.getNumberParameter(root, SCALING_PARAM, NON_RECURSIVE)[0]
+    factor = component_info.getNumberParameter(SCALING_PARAM, recursive=NON_RECURSIVE)[0]
     scaledWSName = wsNames.withSuffix("scaled_by_monitor_factor")
     scaledWS = Scale(InputWorkspace=ws, OutputWorkspace=scaledWSName, Factor=factor, EnableLogging=algorithmLogging)
     wsCleanup.cleanup(ws)
@@ -609,9 +608,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         mode = self.getProperty(common.PROP_ELASTIC_CHANNEL_MODE).value
         if mode == common.ELASTIC_CHANNEL_AUTO:
             component_info = mainWS.componentInfo()
-            root = component_info.root()
-            if component_info.hasParameter(root, "enable_elastic_channel_fitting"):
-                if component_info.getBoolParameter(root, "enable_elastic_channel_fitting")[0]:
+            if component_info.hasParameter("enable_elastic_channel_fitting"):
+                if component_info.getBoolParameter("enable_elastic_channel_fitting")[0]:
                     self._report.notice(common.PROP_ELASTIC_CHANNEL_MODE + " set to " + common.ELASTIC_CHANNEL_FIT + " by the IPF.")
                     return common.ELASTIC_CHANNEL_FIT
                 else:
@@ -627,9 +625,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         eppMethod = self.getProperty(common.PROP_EPP_METHOD).value
         if eppMethod == common.EPP_METHOD_AUTO:
             component_info = mainWS.componentInfo()
-            root = component_info.root()
-            if component_info.hasParameter(root, "enable_elastic_peak_fitting"):
-                if component_info.getBoolParameter(root, "enable_elastic_peak_fitting")[0]:
+            if component_info.hasParameter("enable_elastic_peak_fitting"):
+                if component_info.getBoolParameter("enable_elastic_peak_fitting")[0]:
                     self._report.notice(common.PROP_EPP_METHOD + " set to " + common.EPP_METHOD_FIT + " by the IPF.")
                     return common.EPP_METHOD_FIT
                 else:
@@ -643,9 +640,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
     def _correctTOFAxis(self, mainWS):
         """Adjust the TOF axis to get the elastic channel correct."""
         component_info = mainWS.componentInfo()
-        root = component_info.root()
         try:
-            l2 = float(component_info.getStringParameter(root, "l2")[0])
+            l2 = float(component_info.getStringParameter("l2")[0])
         except IndexError:
             self.log().warning("No 'l2' instrument parameter defined. TOF axis will not be adjusted")
             return mainWS
@@ -662,7 +658,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             else:
                 ys = _sumDetectorsAtDistance(mainWS, l2, 1e-5)
                 index = _fitElasticChannel(ys, self._names, self._cleanup, self._subalgLogging)
-                precision = int(component_info.getIntParameter(root, "elastic_channel_precision")[0])
+                precision = int(component_info.getIntParameter("elastic_channel_precision")[0])
                 index = np.trunc(index * 10**precision) / 10**precision
         correctedWSName = self._names.withSuffix("tof_axis_corrected")
         correctedWS = CorrectTOFAxis(
@@ -718,9 +714,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             return False
         elif calibration == common.INCIDENT_ENERGY_CALIBRATION_AUTO:
             component_info = mainWS.componentInfo()
-            root = component_info.root()
-            if component_info.hasParameter(root, "enable_incident_energy_calibration"):
-                enabled = component_info.getBoolParameter(root, "enable_incident_energy_calibration")[0]
+            if component_info.hasParameter("enable_incident_energy_calibration"):
+                enabled = component_info.getBoolParameter("enable_incident_energy_calibration")[0]
                 if not enabled:
                     self._report.notice("Incident energy calibration disabled by the IPF.")
                     return False
@@ -769,9 +764,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         flatBkgOption = self.getProperty(common.PROP_FLAT_BKG).value
         if flatBkgOption == common.BKG_AUTO:
             component_info = mainWS.componentInfo()
-            root = component_info.root()
-            if component_info.hasParameter(root, "enable_flat_background_subtraction"):
-                enabled = component_info.getBoolParameter(root, "enable_flat_background_subtraction")[0]
+            if component_info.hasParameter("enable_flat_background_subtraction"):
+                enabled = component_info.getBoolParameter("enable_flat_background_subtraction")[0]
                 if not enabled:
                     self._report.notice("Flat background subtraction disabled by the IPF.")
                     return False
@@ -840,12 +834,11 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         if self.getProperty(common.PROP_MON_INDEX).isDefault:
             NON_RECURSIVE = False  # Prevent recursive calls in the following.
             component_info = monWS.componentInfo()
-            root = component_info.root()
-            if not component_info.hasParameter(root, "default-incident-monitor-spectrum", NON_RECURSIVE):
+            if not component_info.hasParameter("default-incident-monitor-spectrum", recursive=NON_RECURSIVE):
                 raise RuntimeError(
                     "default-incident-monitor-spectrum missing in instrument parameters; " + common.PROP_MON_INDEX + " must be specified."
                 )
-            monIndex = component_info.getIntParameter(root, "default-incident-monitor-spectrum", NON_RECURSIVE)[0]
+            monIndex = component_info.getIntParameter("default-incident-monitor-spectrum", recursive=NON_RECURSIVE)[0]
             monIndex = common.convertToWorkspaceIndex(monIndex, monWS, common.INDEX_TYPE_SPECTRUM_NUMBER)
         else:
             monIndex = self.getProperty(common.PROP_MON_INDEX).value

@@ -13,10 +13,9 @@ class SetDetScaleTest(unittest.TestCase):
     @staticmethod
     def _detScales(workspace):
         component_info = workspace.componentInfo()
-        root = component_info.root()
         return (
-            component_info.getNumberParameter(root, "detScale17")[0],
-            component_info.getNumberParameter(root, "detScale49")[0],
+            component_info.getNumberParameter("detScale17")[0],
+            component_info.getNumberParameter("detScale49")[0],
         )
 
     def testScaleDetectors(self):

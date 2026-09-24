@@ -51,7 +51,7 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         ws = LoadEmptyInstrument(Filename=idf)
         LoadParameterFile(ws, Filename=ipf)
         component_info = ws.componentInfo()
-        grouping_filename = component_info.getStringParameter(component_info.root(), "Workflow.GroupingFile")[0]
+        grouping_filename = component_info.getStringParameter("Workflow.GroupingFile")[0]
         DeleteWorkspace(ws)
 
         args = {

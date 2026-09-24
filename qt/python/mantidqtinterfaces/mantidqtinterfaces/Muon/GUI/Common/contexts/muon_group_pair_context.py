@@ -55,7 +55,7 @@ def get_default_grouping(workspace, instrument, main_field_direction):
                 component_info = workspace[0].componentInfo()
             else:
                 component_info = workspace.componentInfo()
-            grouping_file = component_info.getStringParameter(component_info.root(), parameter_name)[0]
+            grouping_file = component_info.getStringParameter(parameter_name)[0]
 
         except IndexError:
             return [], [], [], ""

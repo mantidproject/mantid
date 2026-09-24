@@ -62,7 +62,7 @@ def _fillTemplateTOFWorkspace(templateWS, bkgLevel):
     spectrumInfo = templateWS.spectrumInfo()
     component_info = templateWS.componentInfo()
     l1 = spectrumInfo.l1()
-    l2 = float(component_info.getStringParameter(component_info.root(), "l2")[0])
+    l2 = float(component_info.getStringParameter("l2")[0])
     tofElastic = UnitConversion.run("Energy", "TOF", E_i, l1, l2, 0.0, DeltaEModeType.Direct, 0.0)
     tofBegin = tofElastic - elasticIndex * binWidth
     monitorSampleDistance = 0.5

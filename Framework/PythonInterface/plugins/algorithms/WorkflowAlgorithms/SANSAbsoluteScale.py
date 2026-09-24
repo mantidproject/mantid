@@ -206,7 +206,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
 
         # Pixel size, in mm
         component_info = ref_ws.componentInfo()
-        pixel_size_param = component_info.getNumberParameter(component_info.root(), "x-pixel-size")
+        pixel_size_param = component_info.getNumberParameter("x-pixel-size")
         if pixel_size_param is not None:
             pixel_size = pixel_size_param[0]
         else:

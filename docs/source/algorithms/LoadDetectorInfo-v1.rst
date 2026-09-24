@@ -298,8 +298,8 @@ that the first three detectors (monitors) were not touched and the next three we
          index = detInfo.indexOf(detID);
          pos = detInfo.position(index);
          phi = math.atan2(pos.Y(),pos.X());
-         pressure = compInfo.getNumberParameter(index,'TubePressure');
-         thickness = compInfo.getNumberParameter(index,'TubeThickness');
+         pressure = compInfo.getNumberParameter('TubePressure', index);
+         thickness = compInfo.getNumberParameter('TubeThickness', index);
          print(' {0:5} | {1:8} | {2:10.3f} | {3:>10.3f} | {4:>10.3f} | {5:>10.3f} | {6:10} | {7:10} |'.format(\
                 detID,detInfo.isMonitor(index),(phi*(180/math.pi)),pos.X(),pos.Y(),pos.Z(),pressure[0],thickness[0]))
        print('*********************************************************************************')

@@ -90,7 +90,7 @@ class USANSReduction(PythonAlgorithm):
 
         # Get the wavelength peak positions
         component_info = mtd["__empty"].componentInfo()
-        wl_cfg_str = component_info.getStringParameter(component_info.root(), "wavelength_config")[0]
+        wl_cfg_str = component_info.getStringParameter("wavelength_config")[0]
         self.wl_list = json.loads(wl_cfg_str)
 
         # Get the runs to reduce

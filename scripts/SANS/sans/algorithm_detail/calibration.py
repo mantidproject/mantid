@@ -207,11 +207,11 @@ def get_missing_parameters(calibration_workspace, workspace):
     :return: a list of parameters which exist on the data workspace but not on the calibration workspace.
     """
     workspace_component_info = workspace.componentInfo()
-    original_parameter_names = workspace_component_info.getParameterNames(workspace_component_info.root())
+    original_parameter_names = workspace_component_info.getParameterNames()
     calibration_component_info = calibration_workspace.componentInfo()
     missing_parameter_names = []
     for parameter in original_parameter_names:
-        if not calibration_component_info.hasParameter(calibration_component_info.root(), parameter):
+        if not calibration_component_info.hasParameter(parameter):
             missing_parameter_names.append(parameter)
     return missing_parameter_names
 
@@ -243,7 +243,7 @@ def apply_missing_parameters(calibration_workspace, workspace, missing_parameter
     }
     try:
         for missing_parameter in missing_parameters:
-            parameter_type = component_info.getParameterType(root, missing_parameter)
+            parameter_type = component_info.getParameterType(missing_parameter)
             type_to_save = type_options[parameter_type]
             value = value_options[parameter_type](root, missing_parameter)
 

@@ -56,9 +56,9 @@ Output:
 
    # ...and check they do not exist
    compInfo = groupWs.getItem(0).componentInfo()
-   print("Alpha0 parameter exists:  {}".format(compInfo.hasParameter(compInfo.root(), "Alpha0")))
-   print("Beta0 parameter exists:  {}".format(compInfo.hasParameter(compInfo.root(), "Beta0")))
-   print("SigmaSquared parameter exists:  {}".format(compInfo.hasParameter(compInfo.root(), "SigmaSquared")))
+   print("Alpha0 parameter exists:  {}".format(compInfo.hasParameter("Alpha0")))
+   print("Beta0 parameter exists:  {}".format(compInfo.hasParameter("Beta0")))
+   print("SigmaSquared parameter exists:  {}".format(compInfo.hasParameter("SigmaSquared")))
 
    # Now we load a GSAS Instrument file with 2 Banks into the workspace...
    print("\nLoading parameters from GSAS\n")
@@ -66,9 +66,9 @@ Output:
 
    # ...and check parameters are there again
    compInfo = groupWs.getItem(0).componentInfo()
-   print("Alpha0 parameter exists:  {}".format(compInfo.hasParameter(compInfo.root(), "Alpha0")))
-   print("Beta0 parameter exists:  {}".format(compInfo.hasParameter(compInfo.root(), "Beta0")))
-   print("SigmaSquared parameter exists:  {}".format(compInfo.hasParameter(compInfo.root(), "SigmaSquared")))
+   print("Alpha0 parameter exists:  {}".format(compInfo.hasParameter("Alpha0")))
+   print("Beta0 parameter exists:  {}".format(compInfo.hasParameter("Beta0")))
+   print("SigmaSquared parameter exists:  {}".format(compInfo.hasParameter("SigmaSquared")))
 
 Output:
 

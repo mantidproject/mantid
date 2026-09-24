@@ -137,10 +137,9 @@ def get3DPeak(
     # This section defines detector size to determine if a peak is too
     # close to the edge.  Order is [NROWS, NCOLS].
     component_info = peaks_ws.componentInfo()
-    root = component_info.root()
     try:
-        numDetRows = component_info.getIntParameter(root, "numDetRows")[0]
-        numDetCols = component_info.getIntParameter(root, "numDetCols")[0]
+        numDetRows = component_info.getIntParameter("numDetRows")[0]
+        numDetCols = component_info.getIntParameter("numDetCols")[0]
         nPixels = [numDetRows, numDetCols]
     except:
         UserWarning("Detector size not found in instrument parameters file. Assuming a 255*255 detector!")
@@ -262,26 +261,25 @@ def getBVGGuesses(peaks_ws, sigX0Params, sigY0, sigP0Params):
     """
 
     component_info = peaks_ws.componentInfo()
-    root = component_info.root()
     if sigX0Params is None:
-        if component_info.hasParameter(root, "sigSC0Params"):
-            sigX0Params = np.array(component_info.getStringParameter(root, "sigSC0Params")[0].split(), dtype=float)
+        if component_info.hasParameter("sigSC0Params"):
+            sigX0Params = np.array(component_info.getStringParameter("sigSC0Params")[0].split(), dtype=float)
         else:
             sigX0Params = [5.68860816e-06, 7.63702849e-01, 8.31642225e-02, 3.06656383e-03]
     if sigY0 is None:
-        if component_info.hasParameter(root, "sigAZ0"):
-            sigY0 = component_info.getNumberParameter(root, "sigAZ0")[0]
+        if component_info.hasParameter("sigAZ0"):
+            sigY0 = component_info.getNumberParameter("sigAZ0")[0]
         else:
             sigY0 = 0.0025
 
     if sigP0Params is None:
-        if component_info.hasParameter(root, "sigP0Params"):
-            sigP0Params = np.array(component_info.getStringParameter(root, "sigP0Params")[0].split(), dtype=float)
+        if component_info.hasParameter("sigP0Params"):
+            sigP0Params = np.array(component_info.getStringParameter("sigP0Params")[0].split(), dtype=float)
         else:
             sigP0Params = [0.1460775, 1.85816592, 0.26850086, -0.00725352]
 
-    if component_info.hasParameter(root, "fitConvolvedPeak"):
-        doPeakConvolution = component_info.getBoolParameter(root, "fitConvolvedPeak")[0]
+    if component_info.hasParameter("fitConvolvedPeak"):
+        doPeakConvolution = component_info.getBoolParameter("fitConvolvedPeak")[0]
     else:
         doPeakConvolution = False
 

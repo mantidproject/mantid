@@ -524,7 +524,7 @@ def beam_center_gravitational_drop(beam_center_file, sdd=1.13):
 
     i = ws.getInstrument()
     component_info = ws.componentInfo()
-    y_pixel_size_mm = component_info.getNumberParameter(component_info.root(), "y-pixel-size")[0]
+    y_pixel_size_mm = component_info.getNumberParameter("y-pixel-size")[0]
     Logger("CommandInterface").debug("Y Pixel size = %.2f mm" % y_pixel_size_mm)
     y_pixel_size = y_pixel_size_mm * 1e-3  # In meters
     distance_detector1 = i.getComponentByName("detector1").getPos()[2]

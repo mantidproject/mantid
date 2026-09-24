@@ -53,12 +53,12 @@ Usage
 
    # demonstrate that the type of parameters saved are fitting parameters
    print("Type of 3 parameters got from instrument in workspace")
-   print("Alpha0 type = {}".format(compInfo.getParameterType(compInfo.root(), 'Alpha0')))
-   print("Beta0 type = {}".format(compInfo.getParameterType(compInfo.root(), 'Beta0')))
-   print("SigmaSquared type = {}".format(compInfo.getParameterType(compInfo.root(), 'SigmaSquared')))
+   print("Alpha0 type = {}".format(compInfo.getParameterType('Alpha0')))
+   print("Beta0 type = {}".format(compInfo.getParameterType('Beta0')))
+   print("SigmaSquared type = {}".format(compInfo.getParameterType('SigmaSquared')))
 
    # Fitting parameters are evaluated from python with getFittingParameter, e.g.
-   #   compInfo.getFittingParameter(compInfo.root(), 'Alpha0', 0.0)
+   #   compInfo.getFittingParameter('Alpha0', 0.0)
    # They can also be written out to a file, if the next line is uncommented:
    #SaveParameterFile(ws[0][0], "instParam.xml")
 

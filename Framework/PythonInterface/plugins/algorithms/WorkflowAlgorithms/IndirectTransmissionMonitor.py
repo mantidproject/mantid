@@ -96,14 +96,13 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         workspace = mtd[input_ws]
         instrument = workspace.getInstrument()
         component_info = workspace.componentInfo()
-        root = component_info.root()
 
         # Get workspace index of first detector
         detector_1_idx = 2
 
         try:
             # First try to get first detector for current analyser bank
-            analyser = component_info.getStringParameter(root, "analyser")[0]
+            analyser = component_info.getStringParameter("analyser")[0]
             detector_1_idx = instrument.getComponentByName(analyser)[0].getID() - 1
             logger.information("Got index of first detector for analyser %s: %d" % (analyser, detector_1_idx))
 
@@ -120,12 +119,12 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         monitor_1_idx = 0
         monitor_2_idx = None
 
-        if component_info.hasParameter(root, "Workflow.Monitor1-SpectrumNumber"):
+        if component_info.hasParameter("Workflow.Monitor1-SpectrumNumber"):
             # First try to get monitors based on workflow parameters in IPF
-            monitor_1_idx = int(component_info.getNumberParameter(root, "Workflow.Monitor1-SpectrumNumber")[0])
+            monitor_1_idx = int(component_info.getNumberParameter("Workflow.Monitor1-SpectrumNumber")[0])
 
-            if component_info.hasParameter(root, "Workflow.Monitor2-SpectrumNumber"):
-                monitor_2_idx = int(component_info.getNumberParameter(root, "Workflow.Monitor2-SpectrumNumber")[0])
+            if component_info.hasParameter("Workflow.Monitor2-SpectrumNumber"):
+                monitor_2_idx = int(component_info.getNumberParameter("Workflow.Monitor2-SpectrumNumber")[0])
 
             logger.information("Got index of monitors: %d, %s" % (monitor_1_idx, str(monitor_2_idx)))
 

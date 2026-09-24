@@ -262,9 +262,11 @@ and replaces the corresponding ``ParameterMap::addDouble()`` and friends.
   auto &componentInfo = ws->mutableComponentInfo();
   componentInfo.addDouble(bankIndex, "x-pixel-size", 0.005);
 
-The same accessors are available from Python, with the same names, argument order and defaults.
-``ComponentInfo.root()`` gives the index of the instrument itself, which is where the parameters that
-the legacy code read straight off ``ws.getInstrument()`` live.
+The same accessors are available from Python, with the same names and defaults, but with the
+component index moved after the required arguments, where it defaults to ``root()``:
+``getNumberParameter(name, index=None, recursive=True)``, ``addDouble(name, value, index=None)``,
+and so on. The root component is where the parameters that the legacy code read straight off
+``ws.getInstrument()`` live, so those call sites drop the index entirely.
 ``ComponentInfo.invalidIndex`` is the sentinel returned by ``indexOfFullName()`` for an unknown name,
 and ``indexOfAny()`` raises a ``ValueError`` rather than returning ``None`` as
 ``Instrument.getComponentByName()`` did.
@@ -282,8 +284,8 @@ and ``indexOfAny()`` raises a ``ValueError`` rather than returning ``None`` as
 .. code-block:: python
 
   component_info = ws.componentInfo()
-  pixel_sizes = component_info.getNumberParameter(component_info.indexOfAny("bank1"), "x-pixel-size")
-  monitor_spectrum = component_info.getNumberParameter(component_info.root(), "default-incident-monitor-spectrum")[0]
+  pixel_sizes = component_info.getNumberParameter("x-pixel-size", component_info.indexOfAny("bank1"))
+  monitor_spectrum = component_info.getNumberParameter("default-incident-monitor-spectrum")[0]
 
 Useful Tips
 ___________

@@ -523,17 +523,16 @@ def get_defaults(run_ws, polcorr=False):
         component_info = run_ws[0].componentInfo()
     else:
         component_info = run_ws.componentInfo()
-    root = component_info.root()
-    defaults["LambdaMin"] = float(component_info.getNumberParameter(root, "LambdaMin")[0])
-    defaults["LambdaMax"] = float(component_info.getNumberParameter(root, "LambdaMax")[0])
-    defaults["MonitorBackgroundMin"] = float(component_info.getNumberParameter(root, "MonitorBackgroundMin")[0])
-    defaults["MonitorBackgroundMax"] = float(component_info.getNumberParameter(root, "MonitorBackgroundMax")[0])
-    defaults["MonitorIntegralMin"] = float(component_info.getNumberParameter(root, "MonitorIntegralMin")[0])
-    defaults["MonitorIntegralMax"] = float(component_info.getNumberParameter(root, "MonitorIntegralMax")[0])
-    defaults["PointDetectorStart"] = int(component_info.getNumberParameter(root, "PointDetectorStart")[0])
-    defaults["PointDetectorStop"] = int(component_info.getNumberParameter(root, "PointDetectorStop")[0])
-    defaults["MultiDetectorStart"] = int(component_info.getNumberParameter(root, "MultiDetectorStart")[0])
-    defaults["I0MonitorIndex"] = int(component_info.getNumberParameter(root, "I0MonitorIndex")[0])
+    defaults["LambdaMin"] = float(component_info.getNumberParameter("LambdaMin")[0])
+    defaults["LambdaMax"] = float(component_info.getNumberParameter("LambdaMax")[0])
+    defaults["MonitorBackgroundMin"] = float(component_info.getNumberParameter("MonitorBackgroundMin")[0])
+    defaults["MonitorBackgroundMax"] = float(component_info.getNumberParameter("MonitorBackgroundMax")[0])
+    defaults["MonitorIntegralMin"] = float(component_info.getNumberParameter("MonitorIntegralMin")[0])
+    defaults["MonitorIntegralMax"] = float(component_info.getNumberParameter("MonitorIntegralMax")[0])
+    defaults["PointDetectorStart"] = int(component_info.getNumberParameter("PointDetectorStart")[0])
+    defaults["PointDetectorStop"] = int(component_info.getNumberParameter("PointDetectorStop")[0])
+    defaults["MultiDetectorStart"] = int(component_info.getNumberParameter("MultiDetectorStart")[0])
+    defaults["I0MonitorIndex"] = int(component_info.getNumberParameter("I0MonitorIndex")[0])
     if polcorr and (polcorr != PolarisationCorrection.NONE):
 
         def str_to_float_list(_str):
@@ -541,19 +540,19 @@ def get_defaults(run_ws, polcorr=False):
             float_list = list(map(float, str_list))
             return float_list
 
-        defaults["crho"] = str_to_float_list(component_info.getStringParameter(root, "crho")[0])
-        defaults["calpha"] = str_to_float_list(component_info.getStringParameter(root, "calpha")[0])
-        defaults["cAp"] = str_to_float_list(component_info.getStringParameter(root, "cAp")[0])
-        defaults["cPp"] = str_to_float_list(component_info.getStringParameter(root, "cPp")[0])
+        defaults["crho"] = str_to_float_list(component_info.getStringParameter("crho")[0])
+        defaults["calpha"] = str_to_float_list(component_info.getStringParameter("calpha")[0])
+        defaults["cAp"] = str_to_float_list(component_info.getStringParameter("cAp")[0])
+        defaults["cPp"] = str_to_float_list(component_info.getStringParameter("cPp")[0])
 
     correction = NullCorrectionStrategy()
-    corrType = component_info.getStringParameter(root, "correction")[0]
+    corrType = component_info.getStringParameter("correction")[0]
     if corrType == "polynomial":
-        poly_string = component_info.getStringParameter(root, "polystring")[0]
+        poly_string = component_info.getStringParameter("polystring")[0]
         correction = PolynomialCorrectionStrategy(poly_string)
     elif corrType == "exponential":
-        c0 = component_info.getNumberParameter(root, "C0")[0]
-        c1 = component_info.getNumberParameter(root, "C1")[0]
+        c0 = component_info.getNumberParameter("C0")[0]
+        c1 = component_info.getNumberParameter("C1")[0]
         correction = ExponentialCorrectionStrategy(c0, c1)
 
     defaults["AlgoritmicCorrection"] = correction

@@ -233,7 +233,7 @@ class VesuvioTests(unittest.TestCase):
         component_info = evs_raw.componentInfo()
         # A detector's component index is equal to its detector index
         detector_index = evs_raw.detectorInfo().indexOf(evs_raw.getSpectrum(0).getDetectorIDs()[0])
-        param = component_info.getNumberParameter(detector_index, "t0")
+        param = component_info.getNumberParameter("t0", detector_index)
         self.assertEqual(1, len(param))
         self.assertAlmostEqual(-0.4157, param[0], places=4)
 
@@ -322,12 +322,12 @@ class VesuvioTests(unittest.TestCase):
         tol = 1e-04
         # using decimal 'places' keyword, as delta= is not supported on Python < 2.7
         tol_places = round(-math.log10(tol), ndigits=0)
-        sigma_l1 = component_info.getNumberParameter(detector_index, "sigma_l1")[0]
-        sigma_l2 = component_info.getNumberParameter(detector_index, "sigma_l2")[0]
-        sigma_tof = component_info.getNumberParameter(detector_index, "sigma_tof")[0]
-        sigma_theta = component_info.getNumberParameter(detector_index, "sigma_theta")[0]
-        sigma_gauss = component_info.getNumberParameter(detector_index, "sigma_gauss")[0]
-        hwhm_lorentz = component_info.getNumberParameter(detector_index, "hwhm_lorentz")[0]
+        sigma_l1 = component_info.getNumberParameter("sigma_l1", detector_index)[0]
+        sigma_l2 = component_info.getNumberParameter("sigma_l2", detector_index)[0]
+        sigma_tof = component_info.getNumberParameter("sigma_tof", detector_index)[0]
+        sigma_theta = component_info.getNumberParameter("sigma_theta", detector_index)[0]
+        sigma_gauss = component_info.getNumberParameter("sigma_gauss", detector_index)[0]
+        hwhm_lorentz = component_info.getNumberParameter("hwhm_lorentz", detector_index)[0]
         self.assertAlmostEqual(sigma_l1, 0.021, places=tol_places)
         self.assertAlmostEqual(sigma_l2, 0.023, places=tol_places)
         self.assertAlmostEqual(sigma_tof, 0.370, places=tol_places)

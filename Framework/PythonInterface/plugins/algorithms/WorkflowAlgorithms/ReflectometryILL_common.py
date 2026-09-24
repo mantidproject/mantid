@@ -29,11 +29,11 @@ def chopper_opening_angle(sample_logs: Run, component_info: ComponentInfo) -> fl
     if instr_name == "D17":
         duration = sample_logs.getProperty("duration").value
         if duration > 30.0:
-            chopper1_phase_name = component_info.getStringParameter(root, "chopper1_phase")[0]
-            chopper2_phase_name = component_info.getStringParameter(root, "chopper2_phase")[0]
+            chopper1_phase_name = component_info.getStringParameter("chopper1_phase")[0]
+            chopper2_phase_name = component_info.getStringParameter("chopper2_phase")[0]
         else:
-            chopper1_phase_name = component_info.getStringParameter(root, "chopper1_phase_alt")[0]
-            chopper2_phase_name = component_info.getStringParameter(root, "chopper2_phase_alt")[0]
+            chopper1_phase_name = component_info.getStringParameter("chopper1_phase_alt")[0]
+            chopper2_phase_name = component_info.getStringParameter("chopper2_phase_alt")[0]
         chopper1_phase = sample_logs.getProperty(chopper1_phase_name).value
         chopper_window = sample_logs.getProperty("ChopperWindow").value
         if chopper1_phase > 360.0:
@@ -94,9 +94,9 @@ def chopper_speed(sample_logs: Run, component_info: ComponentInfo) -> float:
     if instr_name == "D17":
         duration = sample_logs.getProperty("duration").value
         if duration > 30.0:  # for long durations, chopper speed average is reliable, otherwise rotation speed is used
-            chopper1_speed_name = component_info.getStringParameter(root, "chopper1_speed")[0]
+            chopper1_speed_name = component_info.getStringParameter("chopper1_speed")[0]
         else:
-            chopper1_speed_name = component_info.getStringParameter(root, "chopper1_speed_alt")[0]
+            chopper1_speed_name = component_info.getStringParameter("chopper1_speed_alt")[0]
         return sample_logs.getProperty(chopper1_speed_name).value
     else:
         first_chopper = int(sample_logs.getProperty("ChopperSetting.firstChopper").value)

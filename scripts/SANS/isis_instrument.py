@@ -186,11 +186,10 @@ class DetectorBank(object):
     def __init__(self, component_info, det_type):
         # detectors are known by many names, the 'uni' name is an instrument independent alias the 'long'
         # name is the instrument view name and 'short' name often used for convenience
-        root = component_info.root()
         self._names = {
             "uni": det_type,
-            "long": component_info.getStringParameter(root, det_type + "-detector-name")[0],
-            "short": component_info.getStringParameter(root, det_type + "-detector-short-name")[0],
+            "long": component_info.getStringParameter(det_type + "-detector-name")[0],
+            "short": component_info.getStringParameter(det_type + "-detector-short-name")[0],
         }
         # the bank is often also referred to by its location, as seen by the sample
         if det_type.startswith("low"):
@@ -199,29 +198,29 @@ class DetectorBank(object):
             position = "front"
         self._names["position"] = position
 
-        cols_data = component_info.getNumberParameter(root, det_type + "-detector-num-columns")
+        cols_data = component_info.getNumberParameter(det_type + "-detector-num-columns")
         if len(cols_data) > 0:
             rectanglar_shape = True
             width = int(cols_data[0])
         else:
             rectanglar_shape = False
-            width = component_info.getNumberParameter(root, det_type + "-detector-non-rectangle-width")[0]
+            width = component_info.getNumberParameter(det_type + "-detector-non-rectangle-width")[0]
 
-        rows_data = component_info.getNumberParameter(root, det_type + "-detector-num-rows")
+        rows_data = component_info.getNumberParameter(det_type + "-detector-num-rows")
         if len(rows_data) > 0:
             height = int(rows_data[0])
         else:
             rectanglar_shape = False
-            height = component_info.getNumberParameter(root, det_type + "-detector-non-rectangle-height")[0]
+            height = component_info.getNumberParameter(det_type + "-detector-non-rectangle-height")[0]
 
         n_pixels = None
-        n_pixels_override = component_info.getNumberParameter(root, det_type + "-detector-num-pixels")
+        n_pixels_override = component_info.getNumberParameter(det_type + "-detector-num-pixels")
         if len(n_pixels_override) > 0:
             n_pixels = int(n_pixels_override[0])
         # n_pixels is normally None and calculated by DectShape but LOQ (at least) has a detector with a hole
         self._shape = self._DectShape(width, height, rectanglar_shape, n_pixels)
 
-        spec_entry = component_info.getNumberParameter(root, "first-low-angle-spec-number")
+        spec_entry = component_info.getNumberParameter("first-low-angle-spec-number")
         if len(spec_entry) > 0:
             self.set_first_spec_num(int(spec_entry[0]))
         else:
@@ -448,25 +447,24 @@ class ISISInstrument(BaseInstrument):
         self.idf_path = self._definition_file
 
         # the spectrum with this number is used to normalize the workspace data
-        root = self.definition.root()
-        self._incid_monitor = int(self.definition.getNumberParameter(root, "default-incident-monitor-spectrum")[0])
-        self.cen_find_step = float(self.definition.getNumberParameter(root, "centre-finder-step-size")[0])
+        self._incid_monitor = int(self.definition.getNumberParameter("default-incident-monitor-spectrum")[0])
+        self.cen_find_step = float(self.definition.getNumberParameter("centre-finder-step-size")[0])
         # see if a second step size is defined. If not set the second value to the first for compatibility
         # logger.warning("Trying to find centre-finder-step-size2")
         try:
-            self.cen_find_step2 = float(self.definition.getNumberParameter(root, "centre-finder-step-size2")[0])
+            self.cen_find_step2 = float(self.definition.getNumberParameter("centre-finder-step-size2")[0])
         except:
             # logger.warning("Failed to find centre-finder-step-size2")
             self.cen_find_step2 = self.cen_find_step
 
         try:
-            self.beam_centre_scale_factor1 = float(self.definition.getNumberParameter(root, "beam-centre-scale-factor1")[0])
+            self.beam_centre_scale_factor1 = float(self.definition.getNumberParameter("beam-centre-scale-factor1")[0])
         except:
             logger.information("Setting beam-centre-scale-factor1 to default (1000).")
             self.beam_centre_scale_factor1 = 1000.0
 
         try:
-            self.beam_centre_scale_factor2 = float(self.definition.getNumberParameter(root, "beam-centre-scale-factor2")[0])
+            self.beam_centre_scale_factor2 = float(self.definition.getNumberParameter("beam-centre-scale-factor2")[0])
         except:
             logger.information("Setting beam-centre-scale-factor1 to default (1000).")
             self.beam_centre_scale_factor2 = 1000.0
@@ -510,7 +508,7 @@ class ISISInstrument(BaseInstrument):
         self.BENCH_ROT = 0.0
 
         # spectrum number of the monitor used to as the incidient in the transmission calculations
-        self.default_trans_spec = int(self.definition.getNumberParameter(root, "default-transmission-monitor-spectrum")[0])
+        self.default_trans_spec = int(self.definition.getNumberParameter("default-transmission-monitor-spectrum")[0])
         self.incid_mon_4_trans_calc = self._incid_monitor
 
         isis = config.getFacility("ISIS")
@@ -849,9 +847,9 @@ class ISISInstrument(BaseInstrument):
         # 3. If it does not exist, then add it
         workspace_component_info = workspace.componentInfo()
         calibration_component_info = calibration_workspace.componentInfo()
-        original_parmeters = workspace_component_info.getParameterNames(workspace_component_info.root())
+        original_parmeters = workspace_component_info.getParameterNames()
         for param in original_parmeters:
-            if not calibration_component_info.hasParameter(calibration_component_info.root(), param):
+            if not calibration_component_info.hasParameter(param):
                 self._add_new_parameter_to_calibration(param, workspace, calibration_workspace)
 
     def _add_new_parameter_to_calibration(self, param_name, workspace, calibration_workspace):
@@ -869,18 +867,18 @@ class ISISInstrument(BaseInstrument):
         component_info = workspace.componentInfo()
         root = component_info.root()
         component_name = component_info.name(root)
-        ipf_type = component_info.getParameterType(root, param_name)
+        ipf_type = component_info.getParameterType(param_name)
         # For now we only expect string, int and double
         type_ids = ["string", "int", "double"]
         value = None
         type_to_save = "Number"
         if ipf_type == type_ids[0]:
-            value = component_info.getStringParameter(root, param_name)
+            value = component_info.getStringParameter(param_name)
             type_to_save = "String"
         elif ipf_type == type_ids[1]:
-            value = component_info.getIntParameter(root, param_name)
+            value = component_info.getIntParameter(param_name)
         elif ipf_type == type_ids[2]:
-            value = component_info.getNumberParameter(root, param_name)
+            value = component_info.getNumberParameter(param_name)
         else:
             raise RuntimeError(
                 "ISISInstrument: An Instrument Parameter File value of unknown type is trying to be copied. Cannot handle this currently."

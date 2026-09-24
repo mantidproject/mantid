@@ -129,10 +129,9 @@ def get_workspace_name_prefix(ws_name: str) -> str:
         run_name = instrument + run_number
 
     component_info = workspace.componentInfo()
-    root = component_info.root()
     try:
-        analyser = component_info.getStringParameter(root, "analyser")[0]
-        reflection = component_info.getStringParameter(root, "reflection")[0]
+        analyser = component_info.getStringParameter("analyser")[0]
+        reflection = component_info.getStringParameter("reflection")[0]
     except IndexError:
         analyser = ""
         reflection = ""
@@ -150,20 +149,19 @@ def get_efixed(workspace: Union[str, MatrixWorkspace]) -> float:
         component_info = AnalysisDataService.retrieve(workspace).componentInfo()
     else:
         component_info = workspace.componentInfo()
-    root = component_info.root()
 
-    if component_info.hasParameter(root, "Efixed"):
-        return component_info.getNumberParameter(root, "EFixed")[0]
+    if component_info.hasParameter("Efixed"):
+        return component_info.getNumberParameter("EFixed")[0]
 
-    if component_info.hasParameter(root, "analyser"):
-        analyser_name = component_info.getStringParameter(root, "analyser")[0]
+    if component_info.hasParameter("analyser"):
+        analyser_name = component_info.getStringParameter("analyser")[0]
         try:
             analyser_index = component_info.indexOfAny(analyser_name)
         except ValueError:
             analyser_index = None
 
-        if analyser_index is not None and component_info.hasParameter(analyser_index, "Efixed"):
-            return component_info.getNumberParameter(analyser_index, "EFixed")[0]
+        if analyser_index is not None and component_info.hasParameter("Efixed", analyser_index):
+            return component_info.getNumberParameter("EFixed", analyser_index)[0]
 
     if efixed_log := _try_get_sample_log(workspace, "EFixed"):
         return float(efixed_log)
@@ -271,16 +269,16 @@ def _check_analysers_are_equal(workspace_name1: str, workspace_name2: str) -> No
     ws1 = AnalysisDataService.retrieve(workspace_name1)
     component_info_1 = ws1.componentInfo()
     try:
-        analyser_1 = component_info_1.getStringParameter(component_info_1.root(), "analyser")[0]
-        reflection_1 = component_info_1.getStringParameter(component_info_1.root(), "reflection")[0]
+        analyser_1 = component_info_1.getStringParameter("analyser")[0]
+        reflection_1 = component_info_1.getStringParameter("reflection")[0]
     except IndexError:
         # Ignore this check if an analyser or reflection cannot be found
         return
     ws2 = AnalysisDataService.retrieve(workspace_name2)
     component_info_2 = ws2.componentInfo()
     try:
-        analyser_2 = component_info_2.getStringParameter(component_info_2.root(), "analyser")[0]
-        reflection_2 = component_info_2.getStringParameter(component_info_2.root(), "reflection")[0]
+        analyser_2 = component_info_2.getStringParameter("analyser")[0]
+        reflection_2 = component_info_2.getStringParameter("reflection")[0]
     except:
         # Ignore this check if an analyser or reflection cannot be found
         return

@@ -472,7 +472,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
         empty_vesuvio_ws = self._load_empty_evs()
         component_info = empty_vesuvio_ws.componentInfo()
-        root = component_info.root()
 
         def to_int_list(str_param):
             """Return the list of numbers described by the string range"""
@@ -480,14 +479,14 @@ class LoadVesuvio(LoadEmptyVesuvio):
             return list(range(int(elements[0]), int(elements[1]) + 1))  # range goes x_l,x_h-1
 
         # Attach parameters as attributes
-        parnames = component_info.getParameterNames(root, False)
+        parnames = component_info.getParameterNames(recursive=False)
         for name in parnames:
             # Irritating parameter access doesn't let you query the type
             # so resort to trying
             try:
-                parvalue = component_info.getNumberParameter(root, name)
+                parvalue = component_info.getNumberParameter(name)
             except RuntimeError:
-                parvalue = component_info.getStringParameter(root, name)
+                parvalue = component_info.getStringParameter(name)
             setattr(self, name, parvalue[0])  # Adds attributes to self from Parameter file
 
         int_mon_spectra = self.monitor_spectra.split(",")

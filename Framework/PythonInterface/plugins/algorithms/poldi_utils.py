@@ -145,8 +145,8 @@ def _calc_cycle_time_from_chopper_speed(chopper_speed):
 
 def get_t0_parameters(component_info, chopper_index):
     return (
-        component_info.getNumberParameter(chopper_index, "t0")[0],
-        component_info.getNumberParameter(chopper_index, "t0_const")[0],
+        component_info.getNumberParameter("t0", chopper_index)[0],
+        component_info.getNumberParameter("t0_const", chopper_index)[0],
     )
 
 
@@ -338,6 +338,6 @@ def _get_flux_arrays(ws, lam_min: float = 1.1, lam_max: float = 5.0, n_points: i
     source = component_info.indexOfAny("source")
     lam_grid = np.linspace(lam_min, lam_max, n_points)
     flux_vals = np.fromiter(
-        (component_info.getFittingParameter(source, "WavelengthDistribution", lam) for lam in lam_grid), dtype=float, count=n_points
+        (component_info.getFittingParameter("WavelengthDistribution", lam, source) for lam in lam_grid), dtype=float, count=n_points
     )
     return lam_grid, flux_vals

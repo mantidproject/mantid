@@ -449,9 +449,8 @@ def fit_2d_peak(workspace):
     :param workspace: workspace to work with
     """
     component_info = workspace.componentInfo()
-    root = component_info.root()
-    n_x = int(component_info.getNumberParameter(root, "number-of-x-pixels")[0])
-    n_y = int(component_info.getNumberParameter(root, "number-of-y-pixels")[0])
+    n_x = int(component_info.getNumberParameter("number-of-x-pixels")[0])
+    n_y = int(component_info.getNumberParameter("number-of-y-pixels")[0])
 
     # Prepare data to fit
     _integrated = mantid.simpleapi.Integration(InputWorkspace=workspace)

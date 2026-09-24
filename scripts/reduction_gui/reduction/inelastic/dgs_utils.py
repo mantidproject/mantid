@@ -57,18 +57,17 @@ class InstrumentParameters(object):
             return default
 
         component_info = AnalysisDataService.retrieve(self._workspace_name).componentInfo()
-        root = component_info.root()
-        type_name = component_info.getParameterType(root, name)
+        type_name = component_info.getParameterType(name)
         if type_name == "double":
-            val = component_info.getNumberParameter(root, name)
+            val = component_info.getNumberParameter(name)
         elif type_name == "bool":
-            val = component_info.getBoolParameter(root, name)
+            val = component_info.getBoolParameter(name)
         elif type_name == "string":
-            val = component_info.getStringParameter(root, name)
+            val = component_info.getStringParameter(name)
             if val[0] == "None":
                 return None
         elif type_name == "int":
-            val = component_info.getIntParameter(root, name)
+            val = component_info.getIntParameter(name)
         else:
             return default
         try:

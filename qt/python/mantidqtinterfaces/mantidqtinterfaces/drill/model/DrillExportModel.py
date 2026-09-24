@@ -235,7 +235,7 @@ class DrillExportModel:
                 kwargs = {}
                 if "Ascii" in algo:
                     component_info = mtd[wsName].componentInfo()
-                    log_list = component_info.getStringParameter(component_info.root(), "log_list_to_save")
+                    log_list = component_info.getStringParameter("log_list_to_save")
                     if log_list:
                         log_list = log_list[0].split(",")
                         kwargs["LogList"] = [log.strip() for log in log_list]  # removes white spaces

@@ -271,9 +271,8 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         self._mirror = False
         self._crop_negative = self.getProperty("CropNegativeScatteringAngles").value
         component_info = input_group[0].componentInfo()
-        root = component_info.root()
-        if component_info.hasParameter(root, "mirror_scattering_angles"):
-            self._mirror = component_info.getBoolParameter(root, "mirror_scattering_angles")[0]
+        if component_info.hasParameter("mirror_scattering_angles"):
+            self._mirror = component_info.getBoolParameter("mirror_scattering_angles")[0]
 
         components = self.getPropertyValue("ComponentsToReduce")
         if components:

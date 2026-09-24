@@ -58,9 +58,8 @@ class LoadSANSMLZTest(unittest.TestCase):
         self.assertAlmostEqual(25.9118, -ws.detectorSignedTwoTheta(det) * 180 / np.pi, 4)
 
         component_info = ws.componentInfo()
-        root = component_info.root()
-        self.assertEqual(8.0, component_info.getNumberParameter(root, "x-pixel-size")[0])
-        self.assertEqual(8.0, component_info.getNumberParameter(root, "y-pixel-size")[0])
+        self.assertEqual(8.0, component_info.getNumberParameter("x-pixel-size")[0])
+        self.assertEqual(8.0, component_info.getNumberParameter("y-pixel-size")[0])
         run_algorithm("DeleteWorkspace", Workspace=output_ws_name)
 
     def test_LoadInvalidData001(self):

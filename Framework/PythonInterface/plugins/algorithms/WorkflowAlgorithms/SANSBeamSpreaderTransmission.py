@@ -126,11 +126,10 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
             if property_manager.existsProperty("TransmissionNormalisation"):
                 sample_ws = AnalysisDataService.retrieve(sample_scatt_ws)
                 component_info = sample_ws.componentInfo()
-                root = component_info.root()
                 if property_manager.getProperty("TransmissionNormalisation").value == "Monitor":
-                    monitor_det_ID = int(component_info.getNumberParameter(root, "default-incident-monitor-spectrum")[0])
+                    monitor_det_ID = int(component_info.getNumberParameter("default-incident-monitor-spectrum")[0])
                 else:
-                    monitor_det_ID = int(component_info.getNumberParameter(root, "default-incident-timer-spectrum")[0])
+                    monitor_det_ID = int(component_info.getNumberParameter("default-incident-timer-spectrum")[0])
             elif property_manager.existsProperty("NormaliseAlgorithm"):
 
                 def _normalise(workspace):

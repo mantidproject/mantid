@@ -124,7 +124,7 @@ class PoldiMerge(PythonAlgorithm):
         return True
 
     def getParameterValue(self, component_info, parameterTuple):
-        return component_info.getNumberParameter(component_info.indexOfAny(parameterTuple[0]), parameterTuple[1])[0]
+        return component_info.getNumberParameter(parameterTuple[1], component_info.indexOfAny(parameterTuple[0]))[0]
 
     def propertiesMatch(self, leftRun, rightRun):
         for propertyName in self.comparedPropertyNames:

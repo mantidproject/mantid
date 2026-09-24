@@ -477,8 +477,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
         os.close(fileHandle)
         angleStepProperty = self.getProperty(common.PROP_GROUPING_ANGLE_STEP)
         if angleStepProperty.isDefault:
-            if component_info.hasParameter(root, "natural-angle-step"):
-                angleStep = component_info.getNumberParameter(root, "natural-angle-step", recursive=False)[0]
+            if component_info.hasParameter("natural-angle-step"):
+                angleStep = component_info.getNumberParameter("natural-angle-step", recursive=False)[0]
                 self._report.notice("Using grouping angle step of {} degrees from the IPF.".format(angleStep))
             else:
                 angleStep = 0.01

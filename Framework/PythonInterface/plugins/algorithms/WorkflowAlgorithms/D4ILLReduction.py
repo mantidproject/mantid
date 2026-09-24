@@ -129,7 +129,7 @@ class D4ILLReduction(PythonAlgorithm):
         zero_angle_corr = self.getProperty("ZeroPositionAngle").value
         calibration_file = self.getPropertyValue("BankPositionOffsetsFile")
         component_info = mtd[ws][0].componentInfo() if isinstance(mtd[ws], WorkspaceGroup) else mtd[ws].componentInfo()
-        n_banks = component_info.getIntParameter(component_info.root(), "number_banks")[0]
+        n_banks = component_info.getIntParameter("number_banks")[0]
         bank_shifts = self._get_shifts(calibration_file, zero_angle_corr, n_banks)
         if self.getProperty("DebugMode").value:
             ws_old = ws
