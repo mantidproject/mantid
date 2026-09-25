@@ -184,3 +184,7 @@ librdkafka:
 
 versioningit:
   - '>=2.1'
+
+# Comes from pycifrw -> prettytable. Need to pin until the wheel tags are sorted upstream.
+wcwidth:
+  - '<0.9'

@@ -108,6 +108,7 @@ outputs:
         - numpy ${{ numpy }}
         - libboost ${{ libboost }}
         - libboost-python ${{ libboost }}
+        - wcwidth ${{ wcwidth }}
         - if: linux
           then:
             - libglu ${{ libglu }}
