@@ -184,3 +184,6 @@ librdkafka:
 
 versioningit:
   - '>=2.1'
+
+wcwidth:
+  - '<0.9'
