@@ -9,7 +9,7 @@ The main difference for our workflow is that professional offers support for rem
 
 If you haven't installed PyCharm yet do that now, PyCharm can be installed from [here](https://jetbrains.com/pycharm/download/).
 
-## Setup Python development environment with conda
+## Setup Python development environment
 
 The assumption has been made that you have setup and built Mantid already.
 If you have not, please do so before hand by following [this guide](GettingStarted/GettingStarted.md).
@@ -31,16 +31,21 @@ On Linux and macOS, use `Debug`.
 
 - Click `Add Interpreter` on the top right, then `Add Local Interpreter...`.
 
-- From the left side of the window select `Conda Environment`.
+- Choose `Select existing`, set the type to `Python`, and set the path to the `python` executable in your pixi environment:
 
-- Add the path to your conda executable, e.g. `C:\Users\<username>\AppData\Local\miniforge\Scripts\conda.exe` and click `Load Environments`.
+  - On Linux or MacOS: `{SOURCE}/.pixi/envs/default/bin/python`
+  - On Windows: `{SOURCE}\.pixi\envs\default\python.exe`
 
-- Click the `Use Existing environment` radio button and select the `mantid-developer` environment in the drop down list.
+- If you are using conda instead of pixi:
+
+  - From the left side of the window select `Conda Environment`.
+  - Add the path to your conda executable, e.g. `C:\Users\<username>\AppData\Local\miniforge\Scripts\conda.exe` and click `Load Environments`.
+  - Click the `Use Existing environment` radio button and select the `mantid-developer` environment in the drop down list.
 
 - Click OK to close the window.
 
-- Ensure that next to `Python Interpreter:` it says `mantid-developer`.
-  You will also see a list of the python packages installed in your mantid-developer environment.
+- Ensure that `Python Interpreter:` shows the interpreter you just selected.
+  You will also see a list of the python packages installed in your development environment.
 
 - Then click Apply.
 
@@ -80,7 +85,7 @@ Now that your Python development environment has been setup we can setup the deb
 - Click the down arrow next to `Script path:` and change the selection to `Module name`. Set the `Module name` to `workbench`.
 - In the `Parameters` box add `--single-process` so that the multiprocess startup is disabled and breakpoints can be attached to the primary process. See the [Running Workbench](RunningWorkbench) documentation for more information.
 - In the `Working directory:` box, on Linux/MacOS enter the `{BUILD}/bin` directory, on Windows enter `{BUILD}/bin/DebugWithRelRuntime` directory.
-- Ensure the `Python Interpreter:` box is set to use your `(mantid-developer)` conda environment.
+- Ensure the `Python Interpreter:` box is set to use the interpreter from your pixi (or conda) environment.
 - Click OK to save and exit the window.
 - You can now click the green play button in the top right of the window to create a Workbench instance from pycharm.
 - Alternatively you can click the green bug next to the green play button to start a debug session.
@@ -96,7 +101,7 @@ C:\Program Files\JetBrains\PyCharm Community Edition 2023.1.2\plugins\python-ce\
 ...
 ````
 
-To resolve the error, remove **only** the debugpy package from your conda environment with
+If you are using conda, you can resolve the error by removing **only** the debugpy package from your conda environment with
 
 ```bash
 conda remove debugpy --force

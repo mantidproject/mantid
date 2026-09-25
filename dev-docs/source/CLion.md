@@ -18,11 +18,11 @@ the relevant tools.
 
 - On Linux,
   1. Open any terminal
-  1. Run `conda activate mantid-developer`
+  1. Navigate to your mantid source directory and run `pixi shell` (or `conda activate mantid-developer` if you are using conda)
   1. Then launch CLion from this terminal with `<CLION_INSTALL>/bin/clion.sh`
 - On Windows,
   1. Using your search bar, open the `x64 Native Tools Command Prompt for VS 2019` command prompt
-  1. Run `conda activate mantid-developer`
+  1. Navigate to your mantid source directory and run `pixi shell` (or `conda activate mantid-developer` if you are using conda)
   1. Then launch CLion with `<CLION_INSTALL>/bin/clion.bat`
 
 If you get errors about being unable to compile a 'simple test program', then doing the above should fix your issue.
@@ -37,22 +37,24 @@ To set up your toolchain:
 
 1. Create a new `System` toolchain using the `+` icon and call it `Default`
 
-1. Edit the CMake field to point to your conda installed `cmake`
+1. Edit the CMake field to point to the `cmake` installed in your pixi environment
 
    ::: {.hlist columns="1"}
 
-   - On Linux: `/path/to/miniforge/envs/mantid-developer/bin/cmake`
+   - On Linux: `/path/to/source/mantid/.pixi/envs/default/bin/cmake`
    - On Windows:
-     `/path/to/miniforge/envs/mantid-developer/Library/bin/cmake.exe`
+     `/path/to/source/mantid/.pixi/envs/default/Library/bin/cmake.exe`
      :::
 
-1. Edit the Build Tool field to point to your conda installed `ninja`
+1. Edit the Build Tool field to point to the `ninja` installed in your pixi environment
 
    ::: {.hlist columns="1"}
 
-   - On Linux: `/path/to/miniforge/envs/mantid-developer/bin/ninja`
-   - On Windows: `/path/to/miniforge/envs/mantid-developer/Library/bin/ninja.exe`
+   - On Linux: `/path/to/source/mantid/.pixi/envs/default/bin/ninja`
+   - On Windows: `/path/to/source/mantid/.pixi/envs/default/Library/bin/ninja.exe`
      :::
+
+   If you are using conda, replace `/path/to/source/mantid/.pixi/envs/default` in the paths above with the location of your conda environment, e.g. `/path/to/miniforge/envs/mantid-developer`.
 
 1. For the C Compiler and C++ Compiler fields,
 
@@ -95,19 +97,20 @@ To set up CMake:
 ### Additional Build Configuration
 
 This (optional) additional configuration allows one to start Clion from the JetBrains Toolbox or
-from a terminal without having to activate the conda environment in the terminal.
+from a terminal without having to activate the development environment in the terminal.
 This is useful when you're working on both Mantid and other projects in CLion simultaneously.
 
 1. Navigate to `File > Settings > Build, Execution, Deployment > CMake`
-1. Under `environment`, add new environment variable `CONDA_PREFIX` with value `/path/to/miniforge/envs/mantid-developer`.
-1. Navigate to `File > Settings > Build, Execution, Deployment > Python Interpreter > Add Interpreter > Add Local Interpreter > Conda Environment > Use existing environment`, then select `mantid-developer`.
+1. Under `environment`, add new environment variable `CONDA_PREFIX` with value `/path/to/source/mantid/.pixi/envs/default` (or `/path/to/miniforge/envs/mantid-developer` if you are using conda).
+1. Navigate to `File > Settings > Build, Execution, Deployment > Python Interpreter > Add Interpreter > Add Local Interpreter > Select existing`, then select the `python` executable in your pixi environment (`/path/to/source/mantid/.pixi/envs/default/bin/python` on Linux, `/path/to/source/mantid/.pixi/envs/default/python.exe` on Windows).
+   If you are using conda, choose `Conda Environment > Use existing environment` instead, then select `mantid-developer`.
 
 ## Building with CLion
 
-- To build all targets, navigate to `Build > Build All in 'Debug'`. Check that the build command displayed in the Messages window is running the correct cmake executable from your conda installation.
+- To build all targets, navigate to `Build > Build All in 'Debug'`. Check that the build command displayed in the Messages window is running the correct cmake executable from your pixi (or conda) environment.
 - To build a specific target, select it in the configurations drop-down menu and click the hammer icon next to it.
 
-If this fails, you may need to open CLion from a terminal with your conda environment activated.
+If this fails, you may need to open CLion from a terminal with your development environment activated.
 
 It is also useful to have your terminals in CLion to run with this environment:
 
@@ -115,8 +118,10 @@ It is also useful to have your terminals in CLion to run with this environment:
 
    ```sh
    source ~/.bashrc
-   source ~/miniforge/bin/activate mantid-developer
+   eval "$(pixi shell-hook --manifest-path /path/to/source/mantid --frozen)"
    ```
+
+   If you are using conda, replace the last line with `source ~/miniforge/bin/activate mantid-developer`.
 
 1. Start CLion using the above steps
 
@@ -128,14 +133,16 @@ It is also useful to have your terminals in CLion to run with this environment:
 
 To debug workbench, you'll need to edit the `workbench` CMake Application configuration.
 
-1. Set the executable to be the `python` executable in your conda installation:
+1. Set the executable to be the `python` executable in your pixi environment:
 
    ::: {.hlist columns="1"}
 
    - On Linux & macOS:
-     `/path/to/miniforge/envs/mantid-developer/bin/python`
-   - On Windows: `/path/to/miniforge/envs/mantid-developer/python.exe`
+     `/path/to/source/mantid/.pixi/envs/default/bin/python`
+   - On Windows: `/path/to/source/mantid/.pixi/envs/default/python.exe`
      :::
+
+   If you are using conda, use the `python` executable in your conda environment instead, e.g. `/path/to/miniforge/envs/mantid-developer/bin/python`.
 
 1. Set the program arguments:
 
@@ -148,7 +155,7 @@ To debug workbench, you'll need to edit the `workbench` CMake Application config
 
    ::: {.hlist columns="1"}
 
-   - All OS: `path/to/miniforge/envs/md/bin/`
+   - All OS: the `bin` directory of your pixi environment, e.g. `/path/to/source/mantid/.pixi/envs/default/bin/`
      :::
 
 1. Set any relevant environment variables:

@@ -1,4 +1,4 @@
-# Develop with conda on Windows
+# Develop on Windows
 
 ## Install [Visual Studio 2022 Community Edition](https://visualstudio.microsoft.com/downloads/)
 
@@ -29,19 +29,21 @@ heading-offset: 1
 ---
 ```
 
-## Install [Miniforge](https://github.com/conda-forge/miniforge/releases)
+## Setup the mantid pixi environment (recommended)
+
+```{include} MantidDeveloperPixiSetup.md
+```
+
+## Alternative: setup a mantid conda environment
+
+### Install [Miniforge](https://github.com/conda-forge/miniforge/releases)
 
 - Choose the latest version of `Miniforge3-Windows-x86_64.exe`
 - Run your downloaded `Miniforge3-Windows-x86_64.exe` and work through the installer until it finishes. In order to make it easier later on, check the box that adds conda to your path.
 
-## Setup the mantid conda environment
+### Create the conda environment
 
 ```{include} MantidDeveloperCondaSetup.md
-```
-
-## Setup the mantid pixi environment
-
-```{include} MantidDeveloperPixiSetup.md
 ```
 
 ## Configure CMake and generate build files
@@ -53,7 +55,10 @@ heading-offset: 1
 
 - Navigate to your mantid source directory.
 
-- If not already activated in the previous step, run `conda activate mantid-developer` to activate your conda environment.
+- If not already activated in the previous step, activate your environment:
+
+  - For pixi, run `pixi shell` from your mantid source directory, or prefix the commands below with `pixi run`.
+  - For conda, run `conda activate mantid-developer`.
 
 - If you want your build directory inside your source directory, run either:
 
