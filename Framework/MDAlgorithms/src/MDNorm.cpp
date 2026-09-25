@@ -85,7 +85,8 @@ void MDNorm::init() {
 
   declareProperty(std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
                       "BackgroundWorkspace", "", Kernel::Direction::Input, PropertyMode::Optional),
-                  "An (optional) input MDEventWorkspace for background.  Must be in Q_lab frame.");
+                  "An optional input MDEventWorkspace for background. Must be in Q_lab frame for TOF data, "
+                  "or in Q_sample frame when used with MonoSCDNormalizationWorkspace.");
 
   // RLU and settings
   declareProperty("RLU", true, "Use reciprocal lattice units. If false, use Q_sample");
@@ -135,8 +136,7 @@ void MDNorm::init() {
                   "An (optional) input MDEventWorkspace containing a pre-computed normalization "
                   "for monochromatic single crystal diffraction (e.g. produced by "
                   "ConvertHFIRSCDtoMDE). Must be in Q_sample frame with the same number of "
-                  "dimensions as InputWorkspace. Cannot be used together with "
-                  "SolidAngleWorkspace/FluxWorkspace or BackgroundWorkspace.");
+                  "dimensions as InputWorkspace. Cannot be used together with SolidAngleWorkspace/FluxWorkspace.");
   setPropertyGroup("MonoSCDNormalizationWorkspace", "monochromatic-SCD");
 
   // Define slicing
@@ -232,6 +232,11 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
     }
   }
 
+  // Optional pre-computed normalization workspace for monochromatic single crystal diffraction
+  // (e.g. WAND, DEMAND). This is an alternative to SolidAngleWorkspace/FluxWorkspace.
+  Mantid::API::IMDEventWorkspace_sptr monoNormWS = this->getProperty("MonoSCDNormalizationWorkspace");
+  bool monochromatic = bool(monoNormWS);
+
   // Optional background input IMDE
   Mantid::API::IMDEventWorkspace_sptr bkgdWS = this->getProperty("BackgroundWorkspace");
   if (bkgdWS) {
@@ -239,10 +244,22 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
       // must have at least 3 dimensions
       errorMessage.emplace("BackgroundWorkspace", "The input background workspace must be at least 3D");
     } else {
-      // Check first 3 dimension for Q lab,
+      // Check first 3 dimensions for the expected Q frame. The existing background path uses
+      // Q_lab. The monochromatic-SCD path uses Q_sample.
+      const auto &expectedFrame =
+          monochromatic ? Mantid::Geometry::QSample::QSampleName : Mantid::Geometry::QLab::QLabName;
+      const auto expectedFrameMessage =
+          monochromatic
+              ? "The input background workspace must be in Q_sample when MonoSCDNormalizationWorkspace is used"
+              : "The input background workspace must be in Q_lab";
+      if (monochromatic && bkgdWS->getNumDims() != inputWS->getNumDims()) {
+        errorMessage.emplace("BackgroundWorkspace", "The input background workspace must have the same number of "
+                                                    "dimensions as InputWorkspace when "
+                                                    "MonoSCDNormalizationWorkspace is used");
+      }
       for (size_t i = 0; i < 3; i++) {
-        if (bkgdWS->getDimension(i)->getMDFrame().name() != Mantid::Geometry::QLab::QLabName) {
-          errorMessage.emplace("BackgroundWorkspace", "The input backgound workspace must be in Q_lab");
+        if (bkgdWS->getDimension(i)->getMDFrame().name() != expectedFrame) {
+          errorMessage.emplace("BackgroundWorkspace", expectedFrameMessage);
         }
       }
 
@@ -265,10 +282,6 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
     diffraction = false;
   }
 
-  // Optional pre-computed normalization workspace for monochromatic single crystal diffraction
-  // (e.g. WAND, DEMAND). This is an alternative to SolidAngleWorkspace/FluxWorkspace.
-  Mantid::API::IMDEventWorkspace_sptr monoNormWS = this->getProperty("MonoSCDNormalizationWorkspace");
-  bool monochromatic = bool(monoNormWS);
   API::MatrixWorkspace_const_sptr solidAngleWS = getProperty("SolidAngleWorkspace");
   API::MatrixWorkspace_const_sptr fluxWS = getProperty("FluxWorkspace");
 
@@ -281,10 +294,6 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
     if (solidAngleWS || fluxWS) {
       errorMessage.emplace("MonoSCDNormalizationWorkspace", "MonoSCDNormalizationWorkspace cannot be used together "
                                                             "with SolidAngleWorkspace/FluxWorkspace");
-    }
-    if (bkgdWS) {
-      errorMessage.emplace("MonoSCDNormalizationWorkspace", "MonoSCDNormalizationWorkspace cannot currently be used "
-                                                            "together with BackgroundWorkspace");
     }
     if (monoNormWS->getNumDims() < 3) {
       errorMessage.emplace("MonoSCDNormalizationWorkspace", "MonoSCDNormalizationWorkspace must be at least 3D");
@@ -566,8 +575,16 @@ void MDNorm::exec() {
   DataObjects::MDHistoWorkspace_sptr outputBackgroundDataWS(nullptr);
   // Outputs for background related
   if (m_backgroundWS) {
-    outputBackgroundDataWS = binBackgroundWS(symmetryOps);
-    createBackgroundNormalizationWS(*outputBackgroundDataWS);
+    if (m_monochromatic) {
+      // Mono-SCD data, normalization, and background are all Q_sample MDEventWorkspaces.
+      // Bin the background on the same grid as the data, then use a cloned copy of the
+      // binned mono-SCD normalization as the background denominator.
+      outputBackgroundDataWS = binMonoSCDBackgroundWS(symmetryOps);
+      createMonoSCDBackgroundNormalizationWS();
+    } else {
+      outputBackgroundDataWS = binBackgroundWS(symmetryOps);
+      createBackgroundNormalizationWS(*outputBackgroundDataWS);
+    }
     this->setProperty("OutputBackgroundNormalizationWorkspace", m_bkgdNormWS);
     this->setProperty("OutputBackgroundDataWorkspace", outputBackgroundDataWS);
   }
@@ -884,6 +901,13 @@ void MDNorm::createBackgroundNormalizationWS(const DataObjects::MDHistoWorkspace
     m_bkgdNormWS = bkgdDataWS.clone();
     m_bkgdNormWS->setTo(0., 0., 0.);
   }
+}
+
+void MDNorm::createMonoSCDBackgroundNormalizationWS() {
+  // The mono-SCD background uses the same binned normalization as the sample. Clone it
+  // so OutputBackgroundNormalizationWorkspace behaves like the separate normalization
+  // output used by the standard background path.
+  m_bkgdNormWS = m_normWS->clone();
 }
 
 /**
@@ -1265,6 +1289,17 @@ MDNorm::binMonoSCDNormalizationWS(const std::vector<Geometry::SymmetryOperation>
   std::map<std::string, std::string> parameters = getBinParameters();
   Mantid::API::IMDEventWorkspace_sptr monoNormInputWS = this->getProperty("MonoSCDNormalizationWorkspace");
   return binMDEventWorkspace(monoNormInputWS, "TemporaryNormalizationWorkspace", "OutputNormalizationWorkspace",
+                             symmetryOps, parameters);
+}
+
+/**
+ * Bin(MD) mono-SCD BackgroundWorkspace with the exact same bin parameters used for
+ * InputWorkspace and MonoSCDNormalizationWorkspace.
+ */
+DataObjects::MDHistoWorkspace_sptr
+MDNorm::binMonoSCDBackgroundWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps) {
+  std::map<std::string, std::string> parameters = getBinParameters();
+  return binMDEventWorkspace(m_backgroundWS, "TemporaryBackgroundDataWorkspace", "OutputBackgroundDataWorkspace",
                              symmetryOps, parameters);
 }
 

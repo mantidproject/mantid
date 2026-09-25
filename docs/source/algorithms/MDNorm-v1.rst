@@ -80,10 +80,18 @@ both of which can produce a matching normalization workspace).
 
 `MonoSCDNormalizationWorkspace` is binned with the exact same basis vectors, extents, and symmetry operations as
 `InputWorkspace`, so the two end up on identical grids before dividing. It cannot be used together with
-`SolidAngleWorkspace`/`FluxWorkspace` (the two normalization methods are mutually exclusive), or with
-`BackgroundWorkspace` (background subtraction is not yet supported for this mode). `InputWorkspace` must not have a
-`DeltaE` dimension (monochromatic single crystal diffraction is elastic only), and must carry a `wavelength` sample
-log -- set automatically by `ConvertHFIRSCDtoMDE` -- confirming it originates from a monochromatic instrument.
+`SolidAngleWorkspace`/`FluxWorkspace` (the two normalization methods are mutually exclusive). `InputWorkspace` must
+not have a `DeltaE` dimension (monochromatic single crystal diffraction is elastic only), and must carry a
+`wavelength` sample log -- set automatically by `ConvertHFIRSCDtoMDE` -- confirming it originates from a
+monochromatic instrument.
+
+When `BackgroundWorkspace` is supplied in this mode, it must be an
+:py:obj:`MDEventWorkspace <mantid.api.IMDEventWorkspace>` in the `Q_sample` frame, matching `InputWorkspace` and
+`MonoSCDNormalizationWorkspace`. A typical workflow is to estimate the background with algorithm
+HFIRGoniometerIndependentBackground,  convert it to
+MDEvents with the same conversion used for the sample data, and pass that converted workspace as
+`BackgroundWorkspace`. This differs from the time-of-flight background path, where `BackgroundWorkspace` is expected
+to be in `Q_lab`.
 
 Unlike the time-of-flight case, there is no `MDNorm_low`/`MDNorm_high` log requirement (those are set by
 :ref:`CropWorkspaceForMDNorm <algm-CropWorkspaceForMDNorm>`, a time-of-flight-only step), since each event already
@@ -166,6 +174,11 @@ The output is given by:
 .. math::
 
     OutputWorkspace=\frac{OutputDataWorkspace}{OutputNormalizationWorkspace}-\frac{OutputBackgroundDataWorkspace}{OutputBackgroundNormalizationWorkspace}
+
+For monochromatic single crystal diffraction with `MonoSCDNormalizationWorkspace`, the same binned normalization is
+used for both the sample and the background. In this case `OutputBackgroundNormalizationWorkspace` is a clone of
+`OutputNormalizationWorkspace`, so the equation above still applies with the two normalization workspaces containing
+the same values.
 
 For citing this algorithm please use
 

@@ -8,12 +8,27 @@ import platform
 
 import numpy as np
 import systemtesting
-from mantid.simpleapi import ConvertHFIRSCDtoMDE, DeleteWorkspaces, LoadMD, MDNorm, SetGoniometer, SetUB, mtd
+from mantid.simpleapi import (
+    ConvertHFIRSCDtoMDE,
+    DeleteWorkspaces,
+    HFIRGoniometerIndependentBackground,
+    LoadMD,
+    MDNorm,
+    SetGoniometer,
+    SetUB,
+    mtd,
+)
 
 
 def _skip_test():
     """Helper function to determine if we run the test"""
     return "Linux" not in platform.platform()
+
+
+def _delete_existing(workspaces):
+    existing = [workspace for workspace in workspaces if mtd.doesExist(workspace)]
+    if existing:
+        DeleteWorkspaces(existing)
 
 
 class MDNormWANDTest(systemtesting.MantidSystemTest):
@@ -134,3 +149,73 @@ class MDNormWANDRLUTest(systemtesting.MantidSystemTest):
                 ws_name + "_outnorm",
             ]
         )
+
+
+class MDNormWANDBackgroundTest(systemtesting.MantidSystemTest):
+    """End-to-end mono-SCD background subtraction for WAND. The detector-space background is
+    estimated by HFIRGoniometerIndependentBackground, converted to Q_sample events, then passed
+    to MDNorm with the same mono-SCD normalization as the sample."""
+
+    def requiredFiles(self):
+        return ["HB2C_WANDSCD_data.nxs"]
+
+    def skipTests(self):
+        return _skip_test()
+
+    def requiredMemoryMB(self):
+        return 4000
+
+    def runTest(self):
+        ws_name = "MDNormWANDBackgroundTest"
+        workspaces = [
+            ws_name + "_raw",
+            ws_name + "_detector_background",
+            ws_name + "_data",
+            ws_name + "_norm",
+            ws_name + "_background",
+            ws_name + "_out",
+            ws_name + "_outdata",
+            ws_name + "_outnorm",
+            ws_name + "_outbkgdata",
+            ws_name + "_outbkgnorm",
+        ]
+        try:
+            LoadMD("HB2C_WANDSCD_data.nxs", OutputWorkspace=ws_name + "_raw")
+            SetGoniometer(ws_name + "_raw", Axis0="s1,0,1,0,1", Average=False)
+
+            HFIRGoniometerIndependentBackground(
+                InputWorkspace=ws_name + "_raw", BackgroundLevel=100, OutputWorkspace=ws_name + "_detector_background"
+            )
+            ConvertHFIRSCDtoMDE(InputWorkspace=ws_name + "_raw", Wavelength=1.488, OutputWorkspace=ws_name + "_data")
+            ConvertHFIRSCDtoMDE(InputWorkspace=ws_name + "_raw", Wavelength=1.488, OutputWorkspace=ws_name + "_norm")
+            ConvertHFIRSCDtoMDE(InputWorkspace=ws_name + "_detector_background", Wavelength=1.488, OutputWorkspace=ws_name + "_background")
+
+            MDNorm(
+                InputWorkspace=ws_name + "_data",
+                MonoSCDNormalizationWorkspace=ws_name + "_norm",
+                BackgroundWorkspace=ws_name + "_background",
+                RLU=False,
+                Dimension0Binning="-10,1,10",
+                Dimension1Binning="-10,1,10",
+                Dimension2Binning="-10,1,10",
+                SymmetryOperations="x,y,z;-x,-y,-z",
+                OutputWorkspace=ws_name + "_out",
+                OutputDataWorkspace=ws_name + "_outdata",
+                OutputNormalizationWorkspace=ws_name + "_outnorm",
+                OutputBackgroundDataWorkspace=ws_name + "_outbkgdata",
+                OutputBackgroundNormalizationWorkspace=ws_name + "_outbkgnorm",
+            )
+
+            out = mtd[ws_name + "_out"].getSignalArray()
+            data = mtd[ws_name + "_outdata"].getSignalArray()
+            norm = mtd[ws_name + "_outnorm"].getSignalArray()
+            background = mtd[ws_name + "_outbkgdata"].getSignalArray()
+            background_norm = mtd[ws_name + "_outbkgnorm"].getSignalArray()
+
+            np.testing.assert_allclose(background_norm, norm)
+            valid = (norm != 0) & (background_norm != 0)
+            self.assertTrue(valid.any())
+            self.assertTrue(np.any(background[valid] != 0))
+            np.testing.assert_allclose(out[valid], data[valid] / norm[valid] - background[valid] / background_norm[valid], rtol=1e-6)
+        finally:
+            _delete_existing(workspaces)
