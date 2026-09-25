@@ -132,6 +132,7 @@ outputs:
         - pyparsing ${{ pyparsing }}
         - pystog ${{ pystog }}
         - plotly ${{ plotly }}
+        - wcwidth ${{ wcwidth }}
 
     tests:
       - script:
