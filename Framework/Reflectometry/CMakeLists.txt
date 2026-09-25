@@ -74,9 +74,7 @@ target_include_directories(
 )
 
 # Set the name of the generated library
-set_target_properties(
-  Reflectometry PROPERTIES OUTPUT_NAME MantidReflectometry COMPILE_DEFINITIONS "IN_MANTID_REFLECTOMETRY"
-)
+set_target_properties(Reflectometry PROPERTIES OUTPUT_NAME MantidReflectometry)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Reflectometry PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")

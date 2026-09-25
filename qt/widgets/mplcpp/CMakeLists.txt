@@ -57,7 +57,6 @@ mtd_add_qt_library(
   MOC ${MOC_HEADERS}
   NOMOC ${NOMOC_HEADERS}
   UI ${UI_FILES}
-  DEFS IN_MANTIDQT_MPLCPP
   INCLUDE_DIRS inc ${CMAKE_CURRENT_BINARY_DIR} ${Boost_INCLUDE_DIRS}
   LINK_LIBS Mantid::PythonInterfaceCore Mantid::API
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon

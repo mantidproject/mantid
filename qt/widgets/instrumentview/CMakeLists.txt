@@ -137,7 +137,6 @@ mtd_add_qt_library(
   NOMOC ${INC_FILES}
   UI ${UI_FILES}
   RES ../../../images/instrumentview.qrc
-  DEFS IN_MANTIDQT_INSTRUMENTVIEW
   INCLUDE_DIRS inc ${CMAKE_CURRENT_BINARY_DIR}
   LINK_LIBS Mantid::DataObjects
             ${CORE_MANTIDLIBS}
