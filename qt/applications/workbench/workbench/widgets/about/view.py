@@ -254,31 +254,34 @@ font-size: {self.rescale_w(28)}px"""
         grp_personal_setup = QGroupBox()
         grp_personal_setup.setStyleSheet(
             f"""QGroupBox {{
-     border: {self.rescale_w(3)}px solid  rgb(38, 128, 20);;
-     border-radius: {self.rescale_w(10)}px;
-     background-color: rgb(240, 240, 240);
-}}
-QGroupBox QLabel{{
-    font: {self.rescale_w(12)}px;
-    color: rgb(121, 121, 121);
-}}
-QGroupBox QComboBox{{
-    font: {self.rescale_w(12)}px;
-    color: black;
-}}
-QGroupBox QComboBox QAbstractItemView{{
-     background-color: rgb(240, 240, 240);
-}}
-QGroupBox QPushButton{{
-    font: {self.rescale_w(12)}px;
-    color: black;
-}}
-QGroupBox QComboBox::down-arrow{{
-     image: url(images/DropDownArrow.png)
-     color: black;
-}}
-font: {self.rescale_w(12)}px;
-"""
+            border: {self.rescale_w(3)}px solid  rgb(38, 128, 20);;
+            border-radius: {self.rescale_w(10)}px;
+            background-color: rgb(240, 240, 240);
+            }}
+            QGroupBox QLabel{{
+                font: {self.rescale_w(12)}px;
+                color: rgb(121, 121, 121);
+            }}
+            QGroupBox QComboBox{{
+                font: {self.rescale_w(12)}px;
+                color: black;
+                background-color: rgb(240, 240, 240);
+            }}
+            QGroupBox QComboBox QAbstractItemView{{
+                background-color: rgb(240, 240, 240);
+                color: black;
+            }}
+            QGroupBox QPushButton{{
+                font: {self.rescale_w(12)}px;
+                color: black;
+                background-color: rgb(240, 240, 240);
+            }}
+            QGroupBox QComboBox::down-arrow{{
+                image: url(images/DropDownArrow.png)
+                color: black;
+            }}
+            font: {self.rescale_w(12)}px;
+            """
         )
         grp_personal_setup_layout = QVBoxLayout()
         grp_personal_setup_layout.setContentsMargins(self.rescale_w(9), self.rescale_h(1), self.rescale_w(9), self.rescale_h(9))
@@ -395,7 +398,7 @@ font: {self.rescale_w(12)}px;
         # Close button
         close_button_layout = QVBoxLayout()
         close_button_layout.addSpacerItem(QSpacerItem(20, self.rescale_h(15), vPolicy=QSizePolicy.Expanding))
-        self.pb_close.setStyleSheet("color: black;")
+        self.pb_close.setStyleSheet("QPushButton { color: black; background-color: rgb(240, 240, 240); }")
         self.pb_close.setText("Close")
         self.pb_close.setDefault(True)
         close_button_layout.addWidget(self.pb_close)

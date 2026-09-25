@@ -8,6 +8,7 @@
 #include "ALCLatestFileFinder.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/LogValueSelector.h"
@@ -48,7 +49,7 @@ void ALCDataLoadingView::initialize() {
   enableAlpha(false);
   showAlphaMessage(false);
 
-  m_ui.dataPlot->setCanvasColour(QColor(240, 240, 240));
+  m_ui.dataPlot->setCanvasColour(MantidQt::MantidWidgets::isDarkMode() ? QColor("#1d1d1d") : QColor(240, 240, 240));
 
   // Error bars on the plot
   QStringList plotsWithErrors{"Data"};
@@ -197,7 +198,8 @@ void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr workspace, std::size_
   else
     m_ui.dataPlot->tickLabelFormat("x", "sci", true);
 
-  m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black, kwargs);
+  m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex,
+                             MantidQt::MantidWidgets::isDarkMode() ? Qt::white : Qt::black, kwargs);
 }
 
 void ALCDataLoadingView::displayError(const std::string &error) {

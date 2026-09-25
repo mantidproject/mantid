@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "StretchView.h"
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 #include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
@@ -39,6 +40,7 @@ StretchView::StretchView(QWidget *parent)
     : m_dblManager(new QtDoublePropertyManager()), m_properties(), m_propTree(new QtTreePropertyBrowser()),
       m_dblEdFac(new DoubleEditorFactory()) {
   m_uiForm.setupUi(parent);
+  m_uiForm.ppPlot->setCanvasColour(MantidQt::MantidWidgets::isDarkMode() ? QColor("#1d1d1d") : QColor(255, 255, 255));
 
   m_propTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 

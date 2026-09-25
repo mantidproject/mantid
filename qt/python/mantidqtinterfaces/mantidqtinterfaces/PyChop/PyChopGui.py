@@ -46,6 +46,7 @@ from qtpy.QtWidgets import (
 )
 from matplotlib.figure import Figure
 from matplotlib.widgets import Slider
+from mantidqt.utils.theme import is_dark_mode
 
 try:
     from mantid.plots.utility import legend_set_draggable
@@ -895,7 +896,7 @@ class PyChopGui(QMainWindow):
 
         # Right panel, matplotlib figures
         self.resfig = Figure()
-        self.resfig.patch.set_facecolor("white")
+        self.resfig.patch.set_facecolor("#1d1d1d" if is_dark_mode() else "white")
         self.rescanvas = FigureCanvas(self.resfig)
         self.resaxes = self.resfig.add_subplot(111)
         self.resaxes.axhline(color="k")
@@ -909,7 +910,7 @@ class PyChopGui(QMainWindow):
         self.restab.setLayout(self.restabbox)
 
         self.flxfig = Figure()
-        self.flxfig.patch.set_facecolor("white")
+        self.flxfig.patch.set_facecolor("#1d1d1d" if is_dark_mode() else "white")
         self.flxcanvas = FigureCanvas(self.flxfig)
         self.flxaxes1 = self.flxfig.add_subplot(121)
         self.flxaxes1.set_xlabel("Incident Energy (meV)")
@@ -919,7 +920,7 @@ class PyChopGui(QMainWindow):
         self.flxaxes2.set_ylabel("Elastic Resolution FWHM (meV)")
         self.flxfig_controls = NavigationToolbar(self.flxcanvas, self)
         self.flxsldfg = Figure()
-        self.flxsldfg.patch.set_facecolor("white")
+        self.flxsldfg.patch.set_facecolor("#1d1d1d" if is_dark_mode() else "white")
         self.flxsldcv = FigureCanvas(self.flxsldfg)
         self.flxsldax = self.flxsldfg.add_subplot(111)
         self.flxslder = Slider(self.flxsldax, "Ei (meV)", 0, 100, valinit=100)
@@ -944,7 +945,7 @@ class PyChopGui(QMainWindow):
         self.flxtab.setLayout(self.flxtabbox)
 
         self.frqfig = Figure()
-        self.frqfig.patch.set_facecolor("white")
+        self.frqfig.patch.set_facecolor("#1d1d1d" if is_dark_mode() else "white")
         self.frqcanvas = FigureCanvas(self.frqfig)
         self.frqaxes1 = self.frqfig.add_subplot(121)
         self.frqaxes1.set_xlabel("Chopper Frequency (Hz)")
@@ -960,7 +961,7 @@ class PyChopGui(QMainWindow):
         self.frqtab.setLayout(self.frqtabbox)
 
         self.repfig = Figure()
-        self.repfig.patch.set_facecolor("white")
+        self.repfig.patch.set_facecolor("#1d1d1d" if is_dark_mode() else "white")
         self.repcanvas = FigureCanvas(self.repfig)
         self.repaxes = self.repfig.add_subplot(111)
         self.repaxes.axhline(color="k")
@@ -988,7 +989,7 @@ class PyChopGui(QMainWindow):
         self.reptab.setLayout(self.reptabbox)
 
         self.qefig = Figure()
-        self.qefig.patch.set_facecolor("white")
+        self.qefig.patch.set_facecolor("#1d1d1d" if is_dark_mode() else "white")
         self.qecanvas = FigureCanvas(self.qefig)
         self.qeaxes = self.qefig.add_subplot(111)
         self.qeaxes.axhline(color="k")

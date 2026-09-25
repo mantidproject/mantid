@@ -110,12 +110,13 @@ void PreviewPlot::addSpectrum(const QString &lineName, const Mantid::API::Matrix
   auto axes = m_canvas->gca<MantidAxes>();
   axes.setXScale(m_xAxisScale.c_str());
   axes.setYScale(m_yAxisScale.c_str());
+  const QString colourStr = lineColour.isValid() ? lineColour.name(QColor::HexRgb) : QString();
   if (m_linesErrorsCache.value(lineName)) {
     m_lines[lineName] = true;
-    axes.errorbar(ws, wsIndex, lineColour.name(QColor::HexRgb), lineName, plotKwargs);
+    axes.errorbar(ws, wsIndex, colourStr, lineName, plotKwargs);
   } else {
     m_lines[lineName] = false;
-    axes.plot(ws, wsIndex, lineColour.name(QColor::HexRgb), lineName, plotKwargs);
+    axes.plot(ws, wsIndex, colourStr, lineName, plotKwargs);
   }
 
   // Add line to stored line data
