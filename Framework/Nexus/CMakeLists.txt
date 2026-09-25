@@ -67,7 +67,7 @@ target_include_directories(
 )
 
 # Set the name of the generated library
-set_target_properties(Nexus PROPERTIES OUTPUT_NAME MantidNexus COMPILE_DEFINITIONS IN_MANTID_NEXUS)
+set_target_properties(Nexus PROPERTIES OUTPUT_NAME MantidNexus)
 
 # H5_BUILT_AS_DYNAMIC_LIB required https://github.com/conda-forge/hdf5-feedstock/issues/58
 target_compile_definitions(Nexus PUBLIC -DH5_BUILT_AS_DYNAMIC_LIB)

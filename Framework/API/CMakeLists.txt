@@ -541,7 +541,7 @@ target_include_directories(
   API PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 # Set the name of the generated library
-set_target_properties(API PROPERTIES OUTPUT_NAME MantidAPI COMPILE_DEFINITIONS IN_MANTID_API)
+set_target_properties(API PROPERTIES OUTPUT_NAME MantidAPI)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(API PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")

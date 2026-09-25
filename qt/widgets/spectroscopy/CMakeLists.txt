@@ -74,7 +74,6 @@ mtd_add_qt_library(
   NOMOC ${INC_FILES}
   UI ${UI_FILES}
   RES ${RES_FILES}
-  DEFS IN_MANTIDQT_SPECTROSCOPY
   INCLUDE_DIRS inc ${CMAKE_CURRENT_BINARY_DIR}
   LINK_LIBS ${CORE_MANTIDLIBS}
             Mantid::PythonInterfaceCore

@@ -72,7 +72,7 @@ target_include_directories(
   ICat PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 # Set the name of the generated library
-set_target_properties(ICat PROPERTIES OUTPUT_NAME MantidICat COMPILE_DEFINITIONS IN_MANTID_ICAT)
+set_target_properties(ICat PROPERTIES OUTPUT_NAME MantidICat)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(ICat PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")

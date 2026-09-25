@@ -105,9 +105,7 @@ generate_mantid_export_header(
 target_include_directories(${_target_name} SYSTEM PUBLIC $<BUILD_INTERFACE:${Python_INCLUDE_DIRS}>)
 
 # Set the name of the generated library
-set_target_properties(
-  ${_target_name} PROPERTIES OUTPUT_NAME MantidPythonInterfaceCore COMPILE_DEFINITIONS IN_MANTID_PYTHONINTERFACE_CORE
-)
+set_target_properties(${_target_name} PROPERTIES OUTPUT_NAME MantidPythonInterfaceCore)
 # We need an if check here as older versions of boost won't define this target we can remove it once we adopt conda
 # fully.
 if(TARGET Boost::python${Python_VERSION_MAJOR}${Python_VERSION_MINOR})
