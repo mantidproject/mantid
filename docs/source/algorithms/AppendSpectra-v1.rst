@@ -55,12 +55,12 @@ Rewrite Spectra Map
 ###################
 
 Some instruments have moveable detector banks and a frequently used workflow is to make two measurements with the detector banks at slightly offset positions
-such that gaps between the detector tubes are covered. AppendSpectra does combine the two runs only using the detector map from the first run.
-Thus spectra from the second run although having the correct detector IDs have the incorrect position.
-Setting `RewriteSpectraMap` to `True` will rewrite the detector ID per spectrum map by resetting the detectorID associated
+such that gaps between the detector tubes are covered. AppendSpectra combines the two runs only using the detector map from the first run.
+Thus spectra from the second run, although having the correct detector IDs, have the incorrect position.
+Setting ``RewriteSpectraMap`` to ``True`` will rewrite the detector ID per spectrum map by resetting the detector ID associated
 with each spectrum on the output workspace to single available detectors on the instrument, and moving the repeated detector positions
 in the appended workspace to available single detectors. This is only compatible with workspaces with common instruments and sufficient
-available detectors. Also, monitor spectrum are skipped.
+available detectors. Also, monitor spectra are skipped.
 
 
 
