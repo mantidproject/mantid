@@ -14,8 +14,6 @@
 #include "MantidKernel/Exception.h"
 
 #include <QFileInfo>
-#include <filesystem>
-#include <format>
 
 #include <QDebug>
 #include <QDropEvent>
@@ -107,19 +105,9 @@ void DataSelector::handleFileInput() {
     return;
   }
 
-  for (const auto &file : m_uiForm.rfFileInput->getFilenames()) {
-    const auto filepath = std::filesystem::absolute(file.toUtf8().constData());
-    std::error_code ec;
-    if (!std::filesystem::exists(filepath, ec)) {
-      m_uiForm.rfFileInput->setFileProblem(
-          ec ? QString::fromStdString(ec.message())
-             : QString::fromStdString(std::format("The specified file ({}) does not exist", filepath.string())));
-      return;
-    }
+  if (autoLoadFile(filename)) {
+    emit filesAutoLoaded();
   }
-
-  emit filesAutoLoaded();
-  autoLoadFile(filename);
 }
 
 /**
@@ -232,9 +220,9 @@ QString DataSelector::getProblem() const {
  *
  * @param filepath :: The file path to load
  */
-void DataSelector::autoLoadFile(const QString &filepath) {
+bool DataSelector::autoLoadFile(const QString &filepath) {
   const auto baseName = getWsNameFromFiles().toStdString();
-  executeLoadAlgorithm(filepath.toStdString(), baseName);
+  return executeLoadAlgorithm(filepath.toStdString(), baseName);
 }
 
 /**
@@ -243,14 +231,20 @@ void DataSelector::autoLoadFile(const QString &filepath) {
  * @param filename :: The filename of the file to be loaded.
  * @param outputWorkspace :: The name to give the output workspace.
  */
-void DataSelector::executeLoadAlgorithm(std::string const &filename, std::string const &outputWorkspace) {
+bool DataSelector::executeLoadAlgorithm(std::string const &filename, std::string const &outputWorkspace) {
   const auto loadAlg = AlgorithmManager::Instance().createUnmanaged(loadAlgName(filename));
   loadAlg->initialize();
-  loadAlg->setProperty("Filename", filename);
-  loadAlg->setProperty("OutputWorkspace", outputWorkspace);
+  try {
+    loadAlg->setProperty("Filename", filename);
+    loadAlg->setProperty("OutputWorkspace", outputWorkspace);
+  } catch (std::exception const &ex) {
+    m_uiForm.rfFileInput->setFileProblem(ex.what());
+    return false;
+  }
   loadAlg->updatePropertyValues(m_loadProperties);
 
   m_algRunner.startAlgorithm(loadAlg);
+  return true;
 }
 
 /**
