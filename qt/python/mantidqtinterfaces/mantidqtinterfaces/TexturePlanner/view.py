@@ -63,6 +63,10 @@ _SSCANSS_TOOLTIP = "Write the included orientations to a .angles file that can b
 _EULER_TOOLTIP = "Write the included orientations to an Euler angle .txt file (using the axes defined in the settings)."
 _MATRIX_TOOLTIP = "Write the included orientations to a flattened rotation matrix .txt file."
 
+# The plots are the tallest things in their columns, so this floor is what decides how short the
+# whole window can be made. Not zero: a canvas squeezed to nothing renders no axes at all.
+MIN_CANVAS_HEIGHT = 200
+
 
 class TexturePlannerView(QMainWindow, Ui_texplan):
     sig_select_state_changed = QtCore.Signal()
@@ -668,7 +672,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def _setup_pf_plot(self) -> None:
         self.pf_figure = Figure(layout="constrained")
         self.pf_canvas = FigureCanvas(self.pf_figure)
-        self.pf_canvas.setMinimumHeight(400)
+        self.pf_canvas.setMinimumHeight(MIN_CANVAS_HEIGHT)
         self.pf_ax = self.pf_figure.add_subplot()
 
         self.pf_toolbar = NavigationToolbar(self.pf_canvas, self)
@@ -681,7 +685,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def _setup_lab_plot(self) -> None:
         self.lab_figure = Figure(layout="constrained")
         self.lab_canvas = FigureCanvas(self.lab_figure)
-        self.lab_canvas.setMinimumHeight(400)
+        self.lab_canvas.setMinimumHeight(MIN_CANVAS_HEIGHT)
         self.lab_ax = self.lab_figure.add_subplot(projection="3d")
         self.lab_ax.view_init(vertical_axis="y")
 
