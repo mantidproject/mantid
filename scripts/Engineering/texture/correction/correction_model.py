@@ -236,10 +236,11 @@ class TextureCorrectionModel:
         if not is_ref:
             # need to create a ws with an unorientated sample to copy over
             ref_ws = ADS.retrieve(ref_ws_name)
-            trans_mat = ref_ws.getRun().getGoniometer().getR()
 
+            # CopySample leaves the copy baked to the destination's goniometer, so copying into an
+            # identity goniometer takes the sample back to its own frame - what "unoriented" means.
             _tmp_ws = CloneWorkspace(ref_ws, OutputWorkspace="_tmp_ws")
-            _tmp_ws.getRun().getGoniometer().setR(np.linalg.inv(trans_mat))
+            _tmp_ws.getRun().getGoniometer().setR(np.eye(3))
 
             CopySample(InputWorkspace=ref_ws, OutputWorkspace=_tmp_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
 
