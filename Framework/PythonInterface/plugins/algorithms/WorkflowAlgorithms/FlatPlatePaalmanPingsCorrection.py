@@ -574,16 +574,19 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
     def _getEfixed(self):
         return_eFixed = 0.0
-        inst = mtd[self._sample_ws_name].getInstrument()
+        component_info = mtd[self._sample_ws_name].componentInfo()
 
-        if inst.hasParameter("Efixed"):
-            return_eFixed = inst.getNumberParameter("EFixed")[0]
-        elif inst.hasParameter("analyser"):
-            analyser_name = inst.getStringParameter("analyser")[0]
-            analyser_comp = inst.getComponentByName(analyser_name)
+        if component_info.hasParameter("Efixed"):
+            return_eFixed = component_info.getNumberParameter("EFixed")[0]
+        elif component_info.hasParameter("analyser"):
+            analyser_name = component_info.getStringParameter("analyser")[0]
+            try:
+                analyser = component_info.indexOfAny(analyser_name)
+            except ValueError:
+                analyser = None
 
-            if analyser_comp is not None and analyser_comp.hasParameter("Efixed"):
-                return_eFixed = analyser_comp.getNumberParameter("EFixed")[0]
+            if analyser is not None and component_info.hasParameter("Efixed", analyser):
+                return_eFixed = component_info.getNumberParameter("EFixed", analyser)[0]
 
         if return_eFixed > 0:
             return return_eFixed

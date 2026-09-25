@@ -20,8 +20,11 @@
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/dict.hpp>
 #include <boost/python/enum.hpp>
+#include <boost/python/errors.hpp>
+#include <boost/python/extract.hpp>
 #include <boost/python/reference_existing_object.hpp>
 #include <boost/python/return_value_policy.hpp>
+#include <boost/python/scope.hpp>
 
 using Mantid::Beamline::ComponentType;
 using Mantid::Beamline::PixelGridComponent;
@@ -58,6 +61,67 @@ template <auto Field> auto pixelGridField(ComponentInfo const &self, size_t cons
 std::string pixelGridIdFillOrder(ComponentInfo const &self, size_t const componentIndex) {
   auto const order = self.pixelGridComponent(componentIndex).idFillOrder;
   return std::string(order.begin(), order.end());
+}
+
+// The C++ add*() methods take the description as an optional pointer. Python passes a
+// string, with the empty default standing in for "no description", since a parameter
+// description is only ever set to something non-empty.
+const std::string *descriptionOrNull(const std::string &description) {
+  return description.empty() ? nullptr : &description;
+}
+
+// Named parameters are usually the instrument-level ones held by the root component, so
+// 'index' is optional and None stands in for root(). A boost::python default cannot be
+// computed from 'self', so it is resolved here rather than in the keyword list.
+size_t indexOrRoot(const ComponentInfo &self, const object &componentIndex) {
+  if (componentIndex.is_none()) {
+    return self.root();
+  }
+  const extract<size_t> index(componentIndex);
+  if (!index.check()) {
+    PyErr_SetString(PyExc_TypeError, "'index' must be a component index, or None for the root component.");
+    throw_error_already_set();
+  }
+  return index();
+}
+
+template <auto Method> auto readParameter(const ComponentInfo &self, const object &componentIndex, bool recursive) {
+  return (self.*Method)(indexOrRoot(self, componentIndex), recursive);
+}
+
+// Reorders Python's (name, index, recursive) to the C++ (index, name, recursive).
+template <auto Method>
+auto readNamedParameter(const ComponentInfo &self, const std::string &name, const object &componentIndex,
+                        bool recursive) {
+  return (self.*Method)(indexOrRoot(self, componentIndex), name, recursive);
+}
+
+double getFittingParameter(const ComponentInfo &self, const std::string &name, double xvalue,
+                           const object &componentIndex) {
+  return self.getFittingParameter(indexOrRoot(self, componentIndex), name, xvalue);
+}
+
+void addParameter(ComponentInfo &self, const std::string &type, const std::string &name, const std::string &value,
+                  const object &componentIndex, const std::string &description, const std::string &visible) {
+  self.addParameter(indexOrRoot(self, componentIndex), type, name, value, descriptionOrNull(description), visible);
+}
+
+// Typed add*() setter; 'visible' is optional as addV3D/addQuat lack it.
+template <auto Method, typename T, typename... Visible>
+void insertParameter(ComponentInfo &self, const std::string &name, const T &value, const object &componentIndex,
+                     const std::string &description, const Visible &...visible) {
+  (self.*Method)(indexOrRoot(self, componentIndex), name, value, descriptionOrNull(description), visible...);
+}
+
+void addFittingParameter(ComponentInfo &self, const std::string &name, const std::string &fittingFunction,
+                         const std::string &value, const object &componentIndex, const std::string &description,
+                         const std::string &visible) {
+  self.addFittingParameter(indexOrRoot(self, componentIndex), name, fittingFunction, value,
+                           descriptionOrNull(description), visible);
+}
+
+void clearParameter(ComponentInfo &self, const std::string &name, const object &componentIndex) {
+  self.clearParameter(indexOrRoot(self, componentIndex), name);
 }
 
 dict shapeToComponentIndices(const ComponentInfo &componentInfo) {
@@ -291,5 +355,110 @@ void export_ComponentInfo() {
       .def("getMemorySize", &ComponentInfo::getMemorySize, arg("self"),
            "Return the memory footprint of the component info in bytes.")
       .def("shapeToComponentIndices", &shapeToComponentIndices, arg("self"),
-           "Returns a mapping of shapes to the indices of components with that shape.");
+           "Returns a mapping of shapes to the indices of components with that shape.")
+
+      .def("fullName", &ComponentInfo::fullName, (arg("self"), arg("index")),
+           "Returns the fully-qualified name of the component identified by 'index', "
+           "e.g. 'instrument/bank1/pixel3'.")
+
+      .def("indexOfFullName", &ComponentInfo::indexOfFullName, (arg("self"), arg("fullName")),
+           "Returns the index of the component with this fully-qualified name, or "
+           "ComponentInfo.invalidIndex if there is none.")
+
+      // Named parameters. The read accessors mirror the legacy component API, including the
+      // 'empty sequence if absent' convention and the 'recursive' flag, so that migrating a
+      // call site is a rename. 'index' defaults to the root component, which holds the
+      // instrument-level parameters the legacy Instrument methods looked up.
+      .def("hasParameter", &readNamedParameter<&ComponentInfo::hasParameter>,
+           (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
+           "Returns True if the component identified by 'index' (the root component by "
+           "default) has a parameter of this name.")
+
+      .def("getParameterNames", &readParameter<&ComponentInfo::getParameterNames>,
+           (arg("self"), arg("index") = object(), arg("recursive") = true),
+           "Returns the names of the parameters on the component identified by 'index' "
+           "(the root component by default).")
+
+      .def("getNumberParameter", &readNamedParameter<&ComponentInfo::getNumberParameter>,
+           (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
+           "Returns the named double parameter of the component identified by 'index' "
+           "(the root component by default), or an empty sequence if it is unset.")
+
+      .def("getIntParameter", &readNamedParameter<&ComponentInfo::getIntParameter>,
+           (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
+           "Returns the named integer parameter of the component identified by 'index' "
+           "(the root component by default), or an empty sequence if it is unset.")
+
+      .def("getBoolParameter", &readNamedParameter<&ComponentInfo::getBoolParameter>,
+           (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
+           "Returns the named boolean parameter of the component identified by 'index' "
+           "(the root component by default), or an empty sequence if it is unset.")
+
+      .def("getStringParameter", &readNamedParameter<&ComponentInfo::getStringParameter>,
+           (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
+           "Returns the named string parameter of the component identified by 'index' "
+           "(the root component by default), or an empty sequence if it is unset.")
+
+      .def("getParameterType", &readNamedParameter<&ComponentInfo::getParameterType>,
+           (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
+           "Returns the type of the named parameter of the component identified by 'index' "
+           "(the root component by default), or an empty string if it is unset.")
+
+      .def("getFittingParameter", &getFittingParameter,
+           (arg("self"), arg("name"), arg("xvalue"), arg("index") = object()),
+           "Returns the named fitting parameter of the component identified by 'index' (the "
+           "root component by default), evaluated at 'xvalue' from its look-up table or formula.")
+
+      .def("addParameter", &addParameter,
+           (arg("self"), arg("type"), arg("name"), arg("value"), arg("index") = object(), arg("description") = "",
+            arg("visible") = "true"),
+           "Adds or replaces the named parameter of this type, given its value as a string, "
+           "on the component identified by 'index' (the root component by default).")
+
+      .def("addDouble", &insertParameter<&ComponentInfo::addDouble, double, std::string>,
+           (arg("self"), arg("name"), arg("value"), arg("index") = object(), arg("description") = "",
+            arg("visible") = "true"),
+           "Adds or replaces a named double parameter on the component identified by 'index' "
+           "(the root component by default).")
+
+      .def("addInt", &insertParameter<&ComponentInfo::addInt, int, std::string>,
+           (arg("self"), arg("name"), arg("value"), arg("index") = object(), arg("description") = "",
+            arg("visible") = "true"),
+           "Adds or replaces a named integer parameter on the component identified by 'index' "
+           "(the root component by default).")
+
+      .def("addBool", &insertParameter<&ComponentInfo::addBool, bool, std::string>,
+           (arg("self"), arg("name"), arg("value"), arg("index") = object(), arg("description") = "",
+            arg("visible") = "true"),
+           "Adds or replaces a named boolean parameter on the component identified by 'index' "
+           "(the root component by default).")
+
+      .def("addString", &insertParameter<&ComponentInfo::addString, std::string, std::string>,
+           (arg("self"), arg("name"), arg("value"), arg("index") = object(), arg("description") = "",
+            arg("visible") = "true"),
+           "Adds or replaces a named string parameter on the component identified by 'index' "
+           "(the root component by default).")
+
+      .def("addV3D", &insertParameter<&ComponentInfo::addV3D, V3D>,
+           (arg("self"), arg("name"), arg("value"), arg("index") = object(), arg("description") = ""),
+           "Adds or replaces a named V3D parameter on the component identified by 'index' "
+           "(the root component by default).")
+
+      .def("addQuat", &insertParameter<&ComponentInfo::addQuat, Quat>,
+           (arg("self"), arg("name"), arg("value"), arg("index") = object(), arg("description") = ""),
+           "Adds or replaces a named Quat parameter on the component identified by 'index' "
+           "(the root component by default).")
+
+      .def("addFittingParameter", &addFittingParameter,
+           (arg("self"), arg("name"), arg("fittingFunction"), arg("value"), arg("index") = object(),
+            arg("description") = "", arg("visible") = "true"),
+           "Adds a named fitting parameter, given its value as a string, on the component "
+           "identified by 'index' (the root component by default).")
+
+      .def("clearParameter", &clearParameter, (arg("self"), arg("name"), arg("index") = object()),
+           "Removes every parameter of this name from the component identified by 'index' "
+           "(the root component by default).");
+
+  // The sentinel returned by indexOfFullName() for a name that matches no component.
+  scope().attr("ComponentInfo").attr("invalidIndex") = ComponentInfo::invalidIndex;
 }

@@ -259,11 +259,12 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         Keyword arguments:
         ws: the name of the ws to group
         """
-        instrument = mtd[ws].getInstrument()
-        detector = instrument.getComponentByName("detector")
-        if "detector-width" in detector.getParameterNames() and "detector-height" in detector.getParameterNames():
-            width = int(detector.getNumberParameter("detector-width")[0])
-            height = int(detector.getNumberParameter("detector-height")[0])
+        component_info = mtd[ws].componentInfo()
+        detector = component_info.indexOfAny("detector")
+        detector_parameters = component_info.getParameterNames(detector)
+        if "detector-width" in detector_parameters and "detector-height" in detector_parameters:
+            width = int(component_info.getNumberParameter("detector-width", detector)[0])
+            height = int(component_info.getNumberParameter("detector-height", detector)[0])
         else:
             raise RuntimeError("No width or height found for this instrument. Unable to group detectors.")
 

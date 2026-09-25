@@ -236,7 +236,6 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         # We might already have a group, but group just in case
         input_group = GroupWorkspaces(InputWorkspaces=input_workspace)
 
-        instrument = input_group[0].getInstrument()
         instrument_name = input_group[0].getInstrumentName()
         self._validate_instrument(instrument_name)
 
@@ -271,8 +270,9 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         self._out_ws_name = self.getPropertyValue("OutputWorkspace")
         self._mirror = False
         self._crop_negative = self.getProperty("CropNegativeScatteringAngles").value
-        if instrument.hasParameter("mirror_scattering_angles"):
-            self._mirror = instrument.getBoolParameter("mirror_scattering_angles")[0]
+        component_info = input_group[0].componentInfo()
+        if component_info.hasParameter("mirror_scattering_angles"):
+            self._mirror = component_info.getBoolParameter("mirror_scattering_angles")[0]
 
         components = self.getPropertyValue("ComponentsToReduce")
         if components:

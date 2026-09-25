@@ -448,8 +448,9 @@ def fit_2d_peak(workspace):
     Fit a 2D Gaussian peak
     :param workspace: workspace to work with
     """
-    n_x = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
-    n_y = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])
+    component_info = workspace.componentInfo()
+    n_x = int(component_info.getNumberParameter("number-of-x-pixels")[0])
+    n_y = int(component_info.getNumberParameter("number-of-y-pixels")[0])
 
     # Prepare data to fit
     _integrated = mantid.simpleapi.Integration(InputWorkspace=workspace)

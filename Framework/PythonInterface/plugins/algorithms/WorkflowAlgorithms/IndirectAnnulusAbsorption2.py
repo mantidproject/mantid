@@ -416,17 +416,20 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         return issues
 
     def _getEfixed(self):
-        inst = mtd[self._sample_ws_name].getInstrument()
+        component_info = mtd[self._sample_ws_name].componentInfo()
 
-        if inst.hasParameter("Efixed"):
-            return inst.getNumberParameter("EFixed")[0]
+        if component_info.hasParameter("Efixed"):
+            return component_info.getNumberParameter("EFixed")[0]
 
-        if inst.hasParameter("analyser"):
-            analyser_name = inst.getStringParameter("analyser")[0]
-            analyser_comp = inst.getComponentByName(analyser_name)
+        if component_info.hasParameter("analyser"):
+            analyser_name = component_info.getStringParameter("analyser")[0]
+            try:
+                analyser = component_info.indexOfAny(analyser_name)
+            except ValueError:
+                analyser = None
 
-            if analyser_comp is not None and analyser_comp.hasParameter("Efixed"):
-                return analyser_comp.getNumberParameter("EFixed")[0]
+            if analyser is not None and component_info.hasParameter("Efixed", analyser):
+                return component_info.getNumberParameter("EFixed", analyser)[0]
 
         raise ValueError("No Efixed parameter found")
 

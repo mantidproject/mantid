@@ -21,10 +21,11 @@ def create_grouping(workspace=None):
 
     ## Integrated over X
     if workspace is not None:
-        if mantid.mtd[workspace].getInstrument().hasParameter("number-of-x-pixels"):
-            npix_x = int(mantid.mtd[workspace].getInstrument().getNumberParameter("number-of-x-pixels")[0])
-        if mantid.mtd[workspace].getInstrument().hasParameter("number-of-y-pixels"):
-            npix_y = int(mantid.mtd[workspace].getInstrument().getNumberParameter("number-of-y-pixels")[0])
+        component_info = mantid.mtd[workspace].componentInfo()
+        if component_info.hasParameter("number-of-x-pixels"):
+            npix_x = int(component_info.getNumberParameter("number-of-x-pixels")[0])
+        if component_info.hasParameter("number-of-y-pixels"):
+            npix_y = int(component_info.getNumberParameter("number-of-y-pixels")[0])
 
     f = open("REFL_Detector_Grouping_Sum_X_rot.xml", "w")
     f.write('<detector-grouping description="Integrated over X">\n')

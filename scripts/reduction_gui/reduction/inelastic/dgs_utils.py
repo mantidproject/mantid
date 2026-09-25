@@ -20,7 +20,9 @@ except:
 
 class InstrumentParameters(object):
     instrument_name = None
-    _instrument = None
+    # ComponentInfo is owned by its workspace, so the empty-instrument workspace is kept
+    # (hidden) in the ADS rather than removed as the legacy instrument object allowed.
+    _workspace_name = None
 
     def __init__(self, inst_name):
         if self.instrument_name is None:
@@ -37,12 +39,14 @@ class InstrumentParameters(object):
             import glob
 
             idf_files = glob.glob(idf_pattern)
-            emptyInst = LoadEmptyInstrument(Filename=str(idf_files[0]))
-            InstrumentParameters._instrument = emptyInst.getInstrument()
-            AnalysisDataService.remove(str(emptyInst))  # Don't need to keep workspace
+            if InstrumentParameters._workspace_name is not None:
+                AnalysisDataService.remove(InstrumentParameters._workspace_name)
+            workspace_name = "__%s_instrument_parameters" % inst_name
+            LoadEmptyInstrument(Filename=str(idf_files[0]), OutputWorkspace=workspace_name)
+            InstrumentParameters._workspace_name = workspace_name
 
     def _self_check(self):
-        if self._instrument is None:
+        if self._workspace_name is None:
             raise ValueError("Instrument was not loaded, cannot retrieve parameters.")
 
     def get_parameter(self, name):
@@ -52,17 +56,18 @@ class InstrumentParameters(object):
         except ValueError:
             return default
 
-        type_name = self._instrument.getParameterType(name)
+        component_info = AnalysisDataService.retrieve(self._workspace_name).componentInfo()
+        type_name = component_info.getParameterType(name)
         if type_name == "double":
-            val = self._instrument.getNumberParameter(name)
+            val = component_info.getNumberParameter(name)
         elif type_name == "bool":
-            val = self._instrument.getBoolParameter(name)
+            val = component_info.getBoolParameter(name)
         elif type_name == "string":
-            val = self._instrument.getStringParameter(name)
+            val = component_info.getStringParameter(name)
             if val[0] == "None":
                 return None
         elif type_name == "int":
-            val = self._instrument.getIntParameter(name)
+            val = component_info.getIntParameter(name)
         else:
             return default
         try:

@@ -316,10 +316,11 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         parameterFilename = self.getProperty("YIGPeaksFile")
         LoadParameterFile(Workspace=ws, Filename=parameterFilename.value)
         yig_d_set = set()
-        instrument = mtd[ws].getInstrument().getComponentByName("detector")
-        for param_name in instrument.getParameterNames(True):
+        component_info = mtd[ws].componentInfo()
+        detector = component_info.indexOfAny("detector")
+        for param_name in component_info.getParameterNames(detector, True):
             if "peak_" in param_name:
-                yig_d_set.add(instrument.getNumberParameter(param_name)[0])
+                yig_d_set.add(component_info.getNumberParameter(param_name, detector)[0])
         return sorted(list(yig_d_set))
 
     def _remove_unwanted_yig_peaks(self, yig_list):

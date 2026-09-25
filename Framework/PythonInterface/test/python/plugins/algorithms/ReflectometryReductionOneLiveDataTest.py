@@ -274,8 +274,9 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
 
     def test_slits_gaps_are_set_up_on_output_workspace(self):
         workspace = self._run_algorithm_with_defaults()
-        slit1vg = workspace.getInstrument().getComponentByName("slit1").getNumberParameter("vertical gap")
-        slit2vg = workspace.getInstrument().getComponentByName("slit2").getNumberParameter("vertical gap")
+        component_info = workspace.componentInfo()
+        slit1vg = component_info.getNumberParameter("vertical gap", component_info.indexOfAny("slit1"))
+        slit2vg = component_info.getNumberParameter("vertical gap", component_info.indexOfAny("slit2"))
         self.assertEqual(slit1vg[0], 1.001)
         self.assertEqual(slit2vg[0], 0.5)
 

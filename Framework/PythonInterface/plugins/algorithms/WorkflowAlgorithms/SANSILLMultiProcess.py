@@ -934,9 +934,9 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         """Performs azimuthal averaging, optionally with sectors"""
         results = []
         panel_names = ""
-        instrument = mtd[sample_ws[0]].getInstrument()
-        if instrument.hasParameter("detector_panels"):
-            panel_names = instrument.getStringParameter("detector_panels")[0].split(",")
+        component_info = mtd[sample_ws[0]].componentInfo()
+        if component_info.hasParameter("detector_panels"):
+            panel_names = component_info.getStringParameter("detector_panels")[0].split(",")
         CalculateDynamicRange(Workspace=sample_ws[0], ComponentNames=panel_names)
         # This will mask the pixel if it counts NaN in any of the frames
         MaskDetectorsIf(InputWorkspace=sample_ws[0], OutputWorkspace=sample_ws[0], Operator="NotFinite")

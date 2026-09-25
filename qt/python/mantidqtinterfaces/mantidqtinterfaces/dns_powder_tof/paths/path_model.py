@@ -56,14 +56,19 @@ class DNSPathModel(DNSObsModel):
         """
         polarisation_table = []
         tmp = api.LoadEmptyInstrument(InstrumentName="DNS")
-        instrument = tmp.getInstrument()
-        api.DeleteWorkspace(tmp)
+        component_info = tmp.componentInfo()
 
         # polarisation names are taken from the IDF "DNS_parameters.xml"
         dns_polarisations_list = ["x", "y", "z", "off", "zero_field", "z_high", "minus_x", "minus_y", "minus_z"]
 
+        # Read the parameters while the workspace is still alive; the ComponentInfo is owned by it
+        polarisation_currents = {
+            polarisation: component_info.getStringParameter(f"{polarisation}_currents")[0] for polarisation in dns_polarisations_list
+        }
+        api.DeleteWorkspace(tmp)
+
         for polarisation in dns_polarisations_list:
-            currents = instrument.getStringParameter(f"{polarisation}_currents")[0].split(";")
+            currents = polarisation_currents[polarisation].split(";")
             for current in currents:
                 row = {"polarisation": f"{polarisation}"}
                 row["C_a"], row["C_b"], row["C_c"], row["C_z"] = [float(c) for c in current.split(",")]

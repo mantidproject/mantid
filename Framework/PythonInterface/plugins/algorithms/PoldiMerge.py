@@ -111,23 +111,20 @@ class PoldiMerge(PythonAlgorithm):
         if not leftDetectorInfo.position(leftDetectorInfo.indexOf(0)) == rightDetectorInfo.position(rightDetectorInfo.indexOf(0)):
             raise RuntimeError("Detector positions are not equal")
 
-        leftInstrument = leftWorkspace.getInstrument()
-        rightInstrument = rightWorkspace.getInstrument()
+        return self.instrumentParametersMatch(leftWorkspace.componentInfo(), rightWorkspace.componentInfo())
 
-        return self.instrumentParametersMatch(leftInstrument, rightInstrument)
-
-    def instrumentParametersMatch(self, leftInstrument, rightInstrument):
+    def instrumentParametersMatch(self, leftComponentInfo, rightComponentInfo):
         for parameterTuple in self.comparedInstrumentParameters:
-            leftValue = self.getParameterValue(leftInstrument, parameterTuple)
-            rightValue = self.getParameterValue(rightInstrument, parameterTuple)
+            leftValue = self.getParameterValue(leftComponentInfo, parameterTuple)
+            rightValue = self.getParameterValue(rightComponentInfo, parameterTuple)
 
             if abs(leftValue - rightValue) > 1e-12:
                 raise RuntimeError("Instrument parameter '%s'/'%s' does not match" % parameterTuple)
 
         return True
 
-    def getParameterValue(self, instrument, parameterTuple):
-        return instrument.getComponentByName(parameterTuple[0]).getNumberParameter(parameterTuple[1])[0]
+    def getParameterValue(self, component_info, parameterTuple):
+        return component_info.getNumberParameter(parameterTuple[1], component_info.indexOfAny(parameterTuple[0]))[0]
 
     def propertiesMatch(self, leftRun, rightRun):
         for propertyName in self.comparedPropertyNames:

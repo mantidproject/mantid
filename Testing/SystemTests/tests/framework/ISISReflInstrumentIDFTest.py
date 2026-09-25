@@ -25,17 +25,17 @@ class ISISReflInstrumentIDFTest(systemtesting.MantidSystemTest, metaclass=ABCMet
     def runTest(self):
         IDF_path = os.path.join(config["instrumentDefinition.directory"], self.get_IDF_name())
         ws = LoadEmptyInstrument(IDF_path)
-        inst = ws.getInstrument()
-        self.assertTrue(isinstance(inst.getNumberParameter("MonitorIntegralMin")[0], float))
-        self.assertTrue(isinstance(inst.getNumberParameter("MonitorIntegralMax")[0], float))
-        self.assertTrue(isinstance(inst.getNumberParameter("MonitorBackgroundMin")[0], float))
-        self.assertTrue(isinstance(inst.getNumberParameter("MonitorBackgroundMax")[0], float))
-        self.assertTrue(isinstance(inst.getNumberParameter("PointDetectorStart")[0], float))
-        self.assertTrue(isinstance(inst.getNumberParameter("PointDetectorStop")[0], float))
-        self.assertTrue(isinstance(inst.getNumberParameter("MultiDetectorStart")[0], float))
-        self.assertTrue(isinstance(inst.getNumberParameter("I0MonitorIndex")[0], float))
-        self.assertTrue(isinstance(inst.getNumberParameter("LambdaMin")[0], float))
-        self.assertTrue(isinstance(inst.getNumberParameter("LambdaMax")[0], float))
+        component_info = ws.componentInfo()
+        self.assertTrue(isinstance(component_info.getNumberParameter("MonitorIntegralMin")[0], float))
+        self.assertTrue(isinstance(component_info.getNumberParameter("MonitorIntegralMax")[0], float))
+        self.assertTrue(isinstance(component_info.getNumberParameter("MonitorBackgroundMin")[0], float))
+        self.assertTrue(isinstance(component_info.getNumberParameter("MonitorBackgroundMax")[0], float))
+        self.assertTrue(isinstance(component_info.getNumberParameter("PointDetectorStart")[0], float))
+        self.assertTrue(isinstance(component_info.getNumberParameter("PointDetectorStop")[0], float))
+        self.assertTrue(isinstance(component_info.getNumberParameter("MultiDetectorStart")[0], float))
+        self.assertTrue(isinstance(component_info.getNumberParameter("I0MonitorIndex")[0], float))
+        self.assertTrue(isinstance(component_info.getNumberParameter("LambdaMin")[0], float))
+        self.assertTrue(isinstance(component_info.getNumberParameter("LambdaMax")[0], float))
 
         return True
 

@@ -470,7 +470,8 @@ class LRScalingFactors(PythonAlgorithm):
         if low_res_range[0] == Property.EMPTY_INT:
             low_res_range[0] = 0
         if low_res_range[1] == Property.EMPTY_INT:
-            low_res_range[1] = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0]) - 1
+            component_info = workspace.componentInfo()
+            low_res_range[1] = int(component_info.getNumberParameter("number-of-x-pixels")[0]) - 1
 
         # Rebin TOF axis
         tof_range = self.getProperty("TOFRange").value

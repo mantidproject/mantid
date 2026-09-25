@@ -113,7 +113,8 @@ def load_monitors(self, property_manager):
     # so that the beam is at (0,0), so all we need is to sum the area around that point.
     # TODO: in IGOR, the error-weighted average is computed instead of simply summing up the pixels
     beam_radius = self.getProperty("BeamRadius").value
-    pixel_size_x = sample_ws.getInstrument().getNumberParameter("x-pixel-size")[0]
+    component_info = sample_ws.componentInfo()
+    pixel_size_x = component_info.getNumberParameter("x-pixel-size")[0]
     cylXML = (
         '<infinite-cylinder id="transmission_monitor">'
         + '<centre x="0.0" y="0.0" z="0.0" />'
@@ -134,9 +135,9 @@ def load_monitors(self, property_manager):
     monitor_det_ID = None
     if property_manager.existsProperty("TransmissionNormalisation"):
         if property_manager.getProperty("TransmissionNormalisation").value == "Monitor":
-            monitor_det_ID = int(sample_ws.getInstrument().getNumberParameter("default-incident-monitor-spectrum")[0])
+            monitor_det_ID = int(component_info.getNumberParameter("default-incident-monitor-spectrum")[0])
         else:
-            monitor_det_ID = int(sample_ws.getInstrument().getNumberParameter("default-incident-timer-spectrum")[0])
+            monitor_det_ID = int(component_info.getNumberParameter("default-incident-timer-spectrum")[0])
     elif property_manager.existsProperty("NormaliseAlgorithm"):
 
         def _normalise(workspace):

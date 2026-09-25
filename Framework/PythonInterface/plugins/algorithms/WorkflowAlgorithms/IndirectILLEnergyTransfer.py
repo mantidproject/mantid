@@ -93,7 +93,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
     _doppler_speed = None
     _velocity_profile = None
     _instrument_name = None
-    _instrument = None
+    _component_info = None
     _analyser = None
     _reflection = None
     _dead_channels = None
@@ -287,7 +287,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         @throws RuntimeError :: if neither the user defined nor the default file is found
         """
 
-        self._instrument_name = self._instrument.getName()
+        self._instrument_name = self._component_info.name(self._component_info.root())
         self._analyser = self.getPropertyValue("Analyser")
         self._reflection = self.getPropertyValue("Reflection")
         idf_directory = config["instrumentDefinition.directory"]
@@ -326,7 +326,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         if self._doppler_energy != 0:
             # the doppler channels are linear in velocity (not time, neither deltaE)
             # so we perform 2-step conversion, first linear to v, then quadratic to deltaE
-            efixed = mtd[ws].getInstrument().getNumberParameter("Efixed")[0]
+            component_info = mtd[ws].componentInfo()
+            efixed = component_info.getNumberParameter("Efixed")[0]
             vfixed = math.sqrt(2 * efixed * c**2 / (nm * 1e9))
             vformula = "-2/({0}-1)*{1}*(x-{0}/2)+{2}".format(bsize, self._doppler_speed, vfixed)
             ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis="X", Formula=vformula)
@@ -418,7 +419,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         LoadAndMerge(Filename=self._run_file, OutputWorkspace=self._red_ws, LoaderName="LoadILLIndirect")
 
-        self._instrument = mtd[self._red_ws].getInstrument()
+        self._component_info = mtd[self._red_ws].componentInfo()
 
         self._load_map_file()
 
@@ -433,7 +434,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         LoadParameterFile(Workspace=self._ws, Filename=self._parameter_file)
 
-        self._efixed = self._instrument.getNumberParameter("Efixed")[0]
+        self._efixed = self._component_info.getNumberParameter("Efixed")[0]
 
         self._setup_run_properties()
 
@@ -550,7 +551,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         l1 = detector_info.l1()
         middle = N_PIXELS_PER_TUBE // 2
         l2_equator = (detector_info.l2(middle) + detector_info.l2(middle + 1)) / 2.0
-        v_fixed = self._instrument.getNumberParameter("Vfixed")[0]
+        v_fixed = self._component_info.getNumberParameter("Vfixed")[0]
         elastic_tof_equator = ((l1 + l2_equator) / v_fixed + t0_offset) * 1e6
         run = ws.getRun()
         channel_width = run.getLogData("PSD.time_of_flight_0").value
@@ -677,7 +678,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             equator_ws = _make_name(ws, "eq")
             grouped_ws = _make_name(ws, "gr")
             epp_ws = _make_name(ws, "epp")
-            equator_grouping_filename = self._instrument.getStringParameter("EquatorialGroupingFile")[0]
+            equator_grouping_filename = self._component_info.getStringParameter("EquatorialGroupingFile")[0]
             grouping_file = os.path.join(config["groupingFiles.directory"], equator_grouping_filename)
             GroupDetectors(InputWorkspace=ws, OutputWorkspace=equator_ws, MapFile=grouping_file)
             to_crop = mtd[ws].blocksize() / 4
