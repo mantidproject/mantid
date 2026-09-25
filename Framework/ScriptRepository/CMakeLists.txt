@@ -34,9 +34,7 @@ generate_mantid_export_header(
 # Add the unit tests directory
 add_subdirectory(test)
 # Set the name of the generated library
-set_target_properties(
-  ScriptRepository PROPERTIES OUTPUT_NAME MantidScriptRepository COMPILE_DEFINITIONS IN_MANTID_SCRIPTREPO
-)
+set_target_properties(ScriptRepository PROPERTIES OUTPUT_NAME MantidScriptRepository)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(ScriptRepository PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")

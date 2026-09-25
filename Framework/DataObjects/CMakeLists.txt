@@ -232,7 +232,7 @@ target_include_directories(
 )
 
 # Set the name of the generated library
-set_target_properties(DataObjects PROPERTIES OUTPUT_NAME MantidDataObjects COMPILE_DEFINITIONS IN_MANTID_DATAOBJECTS)
+set_target_properties(DataObjects PROPERTIES OUTPUT_NAME MantidDataObjects)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(DataObjects PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")

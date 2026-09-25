@@ -559,7 +559,7 @@ target_include_directories(
 )
 
 # Set the name of the generated library
-set_target_properties(CurveFitting PROPERTIES OUTPUT_NAME MantidCurveFitting COMPILE_DEFINITIONS IN_MANTID_CURVEFITTING)
+set_target_properties(CurveFitting PROPERTIES OUTPUT_NAME MantidCurveFitting)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(CurveFitting PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")

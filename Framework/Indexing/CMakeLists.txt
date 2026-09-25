@@ -59,7 +59,7 @@ target_include_directories(
 )
 
 # Set the name of the generated library
-set_target_properties(Indexing PROPERTIES OUTPUT_NAME MantidIndexing COMPILE_DEFINITIONS IN_MANTID_INDEXING)
+set_target_properties(Indexing PROPERTIES OUTPUT_NAME MantidIndexing)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Indexing PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")

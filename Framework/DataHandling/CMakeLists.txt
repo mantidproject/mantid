@@ -696,9 +696,7 @@ target_include_directories(
   DataHandling PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 # Set the name of the generated library
-set_target_properties(
-  DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling COMPILE_DEFINITIONS "IN_MANTID_DATAHANDLING"
-)
+set_target_properties(DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(DataHandling PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
