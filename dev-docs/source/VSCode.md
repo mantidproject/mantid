@@ -10,6 +10,7 @@ for C++ development on any platform that VSCode supports
 - An installed copy of VSCode - [download](https://code.visualstudio.com/).
 - A clone of the main Mantid repo
 - Follow the [Getting Started](GettingStarted/GettingStarted) guide to get a:
+- Pixi development environment (or a conda environment)
 - Built copy of Mantid (In "Debug" mode for any debugging option not "Release")
 - GDB for Linux/OSX debugging (GDB can be switched out for LLDB at any stage on OSX) or MSVC (Visual Studio) for Windows
 
@@ -19,6 +20,9 @@ for C++ development on any platform that VSCode supports
 - Click File->Open Folder
 - Navigate to your Mantid source directory and select it
 - Install the required extensions (see below)
+- Open the command palette (Ctrl+Shift+P or ⌘+Shift+P), run "Python: Select Interpreter" and choose the
+  interpreter in your pixi environment, `.pixi/envs/default` inside your source directory
+  (or your `mantid-developer` environment if you are using conda)
 - For code editing you are good to go!
 
 ## Extensions
@@ -167,7 +171,7 @@ To debug C++ and start directly into the Workbench, add this to the configuratio
     "name": "(gdb) Workbench C++ Only",
     "type": "cppdbg",
     "request": "launch",
-    "program": "/Path/To/Mamba/Install/envs/mantid-developer/bin/python",   // Full path (do not use '~') to the python executable inside your build directory
+    "program": "/Path/To/Source/mantid/.pixi/envs/default/bin/python",   // Full path (do not use '~') to the python executable inside your pixi (or conda) environment
     "preLaunchTask": "Build Mantid",
     "args": ["-m", "workbench", "--single-process"],
     "MIMode": "gdb",
