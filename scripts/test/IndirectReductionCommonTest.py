@@ -286,18 +286,21 @@ class GroupSpectraDetectorsTest(unittest.TestCase):
 class EdgePixelRemovalTest(unittest.TestCase):
     """Tests for remove_edge_pixels using Mantid mask-file infrastructure."""
 
-    def test_remove_edge_pixels_removes_320_spectra_from_osiris(self):
+    def test_remove_edge_pixels_removes_346_spectra_from_osiris(self):
         ws_name = "__test_osiris_edge"
         LoadEmptyInstrument(InstrumentName="OSIRIS", OutputWorkspace=ws_name)
         initial = mtd[ws_name].getNumberHistograms()
         remove_edge_pixels(ws_name)
-        # 56 upper tubes * 4 edge pixels + 48 lower tubes * 2 edge pixels = 320
-        self.assertEqual(initial - (56 * 4 + 48 * 2), mtd[ws_name].getNumberHistograms())
+        # 56 upper tubes * 4 edge pixels + 46 lower tubes * 2 edge pixels + the last 2 lower tubes * 15 pixels = 346
+        self.assertEqual(initial - (56 * 4 + 46 * 2 + 2 * 15), mtd[ws_name].getNumberHistograms())
         remaining = {mtd[ws_name].getSpectrum(i).getSpectrumNo() for i in range(mtd[ws_name].getNumberHistograms())}
         self.assertNotIn(1005, remaining)
         self.assertNotIn(2564, remaining)
         self.assertIn(1009, remaining)
-        self.assertIn(2562, remaining)
+        self.assertIn(2532, remaining)
+        # The last two lower tubes are excluded completely.
+        for spectrum in (2535, 2542, 2549, 2550, 2557, 2562):
+            self.assertNotIn(spectrum, remaining)
         DeleteWorkspace(ws_name)
 
     def test_remove_edge_pixels_is_no_op_for_non_silicon_instrument(self):
