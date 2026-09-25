@@ -39,6 +39,21 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
         self._reset_model_workspace(ws_name)
         self._update_view_main_plotter(refresh_limits=True)
 
+    def _replace_workspace_callback(self, ws_name, ws):
+        detector_is_picked = self._model._detector_is_picked.copy()
+        point_picked_detectors = self._model._point_picked_detectors.copy()
+
+        super()._replace_workspace_callback(ws_name, ws)
+
+        if (
+            detector_is_picked.shape == self._model._detector_is_picked.shape
+            and point_picked_detectors.shape == self._model._point_picked_detectors.shape
+        ):
+            self._model._detector_is_picked = detector_is_picked
+            self._model._point_picked_detectors = point_picked_detectors
+
+        self._publish_selection_change(force_actor_refresh=True)
+
     def selected_detector_ids(self):
         return []
 
@@ -53,8 +68,16 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
         )
 
     def update_picked_detectors_on_view(self) -> None:
+        self._publish_selection_change(force_actor_refresh=False)
+
+    def _publish_selection_change(self, force_actor_refresh: bool) -> None:
         super().update_picked_detectors_on_view()
         self.notify_cpp_callback("notify_whole_tube_selected")
+        if force_actor_refresh:
+            # Replacing the workspace can keep the same selected tubes, which
+            # the ALF presenter de-duplicates. Explicitly request an actor-reset
+            # refresh so analysis still updates against the new workspace/actor.
+            self.notify_cpp_callback("notify_instrument_actor_reset")
 
     def on_roi_shape_changed(self) -> None:
         """Re-derive the selection from the rectangle overlaid on the projection.
@@ -69,13 +92,20 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
         self._callback_queue.put((self._on_roi_shape_changed, (centres,)))
 
     def _on_roi_shape_changed(self, centres: np.ndarray) -> None:
+        mask = self._roi_mask_from_centres(centres)
+        self._apply_roi_selection(mask)
+        self._publish_selection_change(force_actor_refresh=False)
+
+    def _roi_mask_from_centres(self, centres: np.ndarray) -> np.ndarray:
         mask = self._view.get_shape_mask(centres)
         if self._view.is_select_bank_tube_checked():
             mask = self._model.expand_pickable_mask_to_parent_subtrees(mask)
+        return mask
+
+    def _apply_roi_selection(self, mask: np.ndarray) -> None:
         # A single stored key so that moving the rectangle replaces the selection rather than adding to it
         self._model.set_detector_key(self._ROI_SELECTION_KEY, mask.tolist(), CurrentTab.Grouping)
         self._model.apply_detector_items([self._ROI_SELECTION_KEY], CurrentTab.Grouping)
-        self.update_picked_detectors_on_view()
 
     def rebin_button_clicked(self, params: str) -> None:
         # Rewrites the active workspace in the model
