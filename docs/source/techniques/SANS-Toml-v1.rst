@@ -49,6 +49,67 @@ V1 (Mantid 6.4+) to V2 (Mantid 6.13+)
 
   - *sample_direction_log*
 
+These settings will be stored in a `StatePolarization` object in the `SANSState`
+that can be accessed by some SANS reduction libraries and algorithms. Note that `toml_file_version` has to be set to `2`
+for these keys to parse correctly.
+An example of settings these fields on a toml v2 file:
+
+..    code-block:: yaml
+
+
+
+    [polarization]
+
+    flipper_configuration =  "11,10,01,00"
+    spin_configuration="-1-1,-1+1,+1-1,+1+1"
+
+    [polarization.polarizer]
+        idf_component_name = "name_of_the_polarizer_component_in_IDF"
+        device_name = "sm-polarizer"
+        device_type = "coil"
+        location = {x=1.17327, y=0.04511, z=0.04511}
+        transmission = "name_of_transmission_ws_or_file"
+        efficiency = "name_of_efficiency_ws_or_file"
+
+    [polarization.flipper.polarizing]
+        idf_component_name = "name_of_a_flipper_component_in_IDF"
+        device_name = "flipper1"
+        device_type = "coil"
+        location = {x=1.17327, y=0.04511, z=0.04511}
+        transmission = "name_of_transmission_ws_or_file"
+        efficiency = "name_of_efficiency_ws_or_file"
+
+    [polarization.flipper.flipping]
+        idf_component_name = "name_of_the_flipper_component_in_IDF"
+        device_name = "flipper2"
+        device_type = "coil"
+        location = {x=1.17327, y=0.04511, z=0.04511}
+        transmission = "name_of_transmission_ws_or_file"
+        efficiency = "name_of_efficiency_ws_or_file"
+
+    [polarization.analyzer]
+        idf_component_name = "name_of_the_analyzer_component_in_IDF"
+        device_name = "3He-analyzer"
+        device_type = "3He"
+        location = {x=1.17327, y=0.04511, z=0.04511}
+        transmission = "name_of_transmission_ws_or_file"
+        efficiency = "name_of_efficiency_ws_or_file"
+        # for 3He analysers these may be added
+        cell_length = 0.005
+        gas_pressure = 5
+        empty_cell = "name_of_the_empty_cell_ws_or_file"
+        initial_polarization = "name_of_3HE_initial_polarization_table_or_file"
+
+    [polarization.magnetic_field]
+        sample_strength_log = "name_of_log_for_sample_strength"
+        sample_direction_log = "name_of_log_for_sample_direction"
+        sample_direction = {a=0, p=2.3, d=0.002} #spherical coords
+
+    [polarization.electric_field]
+        sample_strength_log = ""name_of_log_for_sample_strength"
+        sample_direction_log = "name_of_log_for_sample_direction"
+        sample_direction = {a=0, p=2.3, d=0.002}
+
 V0 (Mantid 6.3+) to V1 (Mantid 6.4+)
 --------------------------------------
 
