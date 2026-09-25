@@ -478,11 +478,55 @@ else()
   list(APPEND SRC_FILES src/NetworkProxyLinux.cpp)
 endif()
 
+# Files that declare a file-local anonymous-namespace g_log, or include a guard-less .hxx template-implementation header
+# meant for single inclusion per TU, collide when unity-merged with another such file. Keep these compiling
+# individually; everything else may batch.
+set_source_files_properties(
+  src/Memory.cpp
+  src/SetValueWhenProperty.cpp
+  src/PropertyManagerOwner.cpp
+  src/ConfigService.cpp
+  src/FileValidator.cpp
+  src/TopicInfo.cpp
+  src/TimeROI.cpp
+  src/UsageService.cpp
+  src/Interpolation.cpp
+  src/InstrumentInfo.cpp
+  src/GitHubApiHelper.cpp
+  src/ErrorReporter.cpp
+  src/DateAndTimeHelpers.cpp
+  src/Quat.cpp
+  src/Unit.cpp
+  src/LiveListenerInfo.cpp
+  src/MultiFileValidator.cpp
+  src/EqualBinsChecker.cpp
+  src/LogParser.cpp
+  src/PropertyManager.cpp
+  src/TimeSeriesProperty.cpp
+  src/DllOpen.cpp
+  src/SetDefaultWhenProperty.cpp
+  src/FacilityInfo.cpp
+  src/LibraryManager.cpp
+  src/FilteredTimeSeriesProperty.cpp
+  src/InternetHelper.cpp
+  src/ArrayProperty.cpp
+  src/MaskedProperty.cpp
+  src/PropertyNexus.cpp
+  src/PropertyWithValue.cpp
+  src/MatrixProperty.cpp
+  PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON
+)
+
 # Add the target for this directory
 add_library(Kernel ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::Kernel ALIAS Kernel)
 # Set the name of the generated library
-set_target_properties(Kernel PROPERTIES OUTPUT_NAME MantidKernel COMPILE_DEFINITIONS "IN_MANTID_KERNEL;PSAPI_VERSION=1")
+set_target_properties(
+  Kernel
+  PROPERTIES OUTPUT_NAME MantidKernel
+             COMPILE_DEFINITIONS "IN_MANTID_KERNEL;PSAPI_VERSION=1"
+             UNITY_BUILD ON
+)
 
 # Enable precompiled headers
 target_precompile_headers(

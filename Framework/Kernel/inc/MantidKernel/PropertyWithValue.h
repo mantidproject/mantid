@@ -9,6 +9,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/PropertyManager_fwd.h"
 
 #include <vector>
 
@@ -95,8 +96,67 @@ template <> MANTID_KERNEL_DLL void PropertyWithValue<uint64_t>::saveProperty(Nex
 template <> MANTID_KERNEL_DLL void PropertyWithValue<std::string>::saveProperty(Nexus::File *file);
 template <> MANTID_KERNEL_DLL void PropertyWithValue<std::vector<double>>::saveProperty(Nexus::File *file);
 template <> MANTID_KERNEL_DLL void PropertyWithValue<std::vector<int32_t>>::saveProperty(Nexus::File *file);
+#if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)
+// Defined in PropertyWithValue.cpp: nexus does not support writeData for long on mac, so it is saved as int64.
+// Must be declared before any (extern) instantiation of PropertyWithValue<long>.
+template <> MANTID_KERNEL_DLL void PropertyWithValue<long>::saveProperty(Nexus::File *file);
+#endif
 
 template <typename TYPE> Logger PropertyWithValue<TYPE>::g_logger("PropertyWithValue");
+
+// 'extern template' declarations matching (most of) the explicit instantiations in
+// Kernel/src/PropertyWithValue.cpp. Without these, every translation unit that declares a
+// property of one of these types (e.g. via IPropertyManager::declareProperty) implicitly
+// re-instantiates PropertyWithValue<TYPE> locally -- and this header is included, directly or
+// via Algorithm.h, by most of the codebase. Matrix<T>, OptionalBool and their vectors are left
+// out to avoid pulling Matrix.h/OptionalBool.h into this very high fan-out header.
+// MSVC cannot combine 'extern' with the class-level __declspec(dllexport) these templates carry
+// (C4910): it ignores 'extern' and instantiates in every TU, clashing with specializations
+// defined in the .cpp (LNK2005). Only use the extern declarations on other compilers.
+#if !defined(PROPERTYWITHVALUE_PROVIDES_EXPLICIT_INSTANTIATIONS) && !defined(_MSC_VER)
+extern template class MANTID_KERNEL_DLL PropertyWithValue<uint16_t>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<bool>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<float>>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<uint16_t>>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<uint32_t>>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<int64_t>>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<uint64_t>>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<bool>>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<std::string>>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<std::vector<int32_t>>>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<std::vector<std::string>>>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<std::shared_ptr<PropertyManager>>;
+#if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)
+extern template class MANTID_KERNEL_DLL PropertyWithValue<unsigned long>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<long>>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<unsigned long>>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<std::vector<long>>>;
+#endif
+#ifdef __linux__
+extern template class MANTID_KERNEL_DLL PropertyWithValue<long long>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<unsigned long long>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<long long>>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<unsigned long long>>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<std::vector<long long>>>;
+#endif
+// These types already get an explicitly-specialized (and DLL-attributed) saveProperty()
+// declared just above, in this same header. GCC treats that as already fixing the whole
+// specialization's visibility, so repeating the DLL macro here triggers the same
+// "attributes ignored after type is already defined" warning that Kernel/PropertyWithValue.cpp
+// works around for its own (non-extern) explicit instantiations of these types.
+extern template class PropertyWithValue<float>;
+extern template class PropertyWithValue<double>;
+extern template class PropertyWithValue<int32_t>;
+extern template class PropertyWithValue<uint32_t>;
+extern template class PropertyWithValue<int64_t>;
+extern template class PropertyWithValue<uint64_t>;
+extern template class PropertyWithValue<std::vector<double>>;
+extern template class PropertyWithValue<std::vector<int32_t>>;
+extern template class PropertyWithValue<std::string>;
+#if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)
+extern template class PropertyWithValue<long>;
+#endif
+#endif // !PROPERTYWITHVALUE_PROVIDES_EXPLICIT_INSTANTIATIONS && !_MSC_VER
 
 } // namespace Kernel
 } // namespace Mantid

@@ -684,8 +684,10 @@ target_precompile_headers(
   <MantidDataObjects/EventWorkspace.h>
   <MantidDataObjects/Workspace2D.h>
   <MantidGeometry/Instrument.h>
+  <MantidNexus/NexusClasses.h>
   <MantidNexus/NexusException.h>
   <MantidNexus/NexusFile.h>
+  <boost/regex.hpp>
   <Poco/DOM/DOMParser.h>
   <Poco/DOM/Document.h>
   <Poco/DOM/Element.h>

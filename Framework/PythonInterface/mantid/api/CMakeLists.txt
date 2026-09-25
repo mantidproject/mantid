@@ -97,6 +97,11 @@ set(EXPORT_FILES
 
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/api.cpp)
 create_module(${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES})
+# The generated module-init file is the sole caller of NumPy's import_array() for this module; every other Exports/*.cpp
+# defines NO_IMPORT_ARRAY before including the NumPy headers. That #define leaks across an entire merged unity
+# translation unit, so this file must never be unity-batched with anything else, or NO_IMPORT_ARRAY silently suppresses
+# its own import.
+set_source_files_properties(${MODULE_DEFINITION} PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
 
 # Helper code
 set(SRC_FILES
@@ -134,6 +139,10 @@ list(APPEND ALL_FILES ${EXPORT_FILES} ${SRC_FILES})
 # Create the target for this directory
 set(FRAMEWORK_DIR ../../..)
 include_directories(${FRAMEWORK_DIR}/CurveFitting/inc)
+
+# Declares a file-local (anonymous-namespace) make_pyiterator helper that collides with a
+# same-named-different-implementation helper in another Exports/*.cpp file once unity-merged.
+set_source_files_properties(src/Exports/SpectrumInfo.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
 
 add_library(PythonAPIModule ${ALL_FILES} ${MODULE_DEFINITION} ${INC_FILES} ${PYTHON_INSTALL_FILES})
 add_library(Mantid::PythonAPIModule ALIAS PythonAPIModule)

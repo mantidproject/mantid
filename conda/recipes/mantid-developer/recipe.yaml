@@ -86,6 +86,7 @@ requirements:
         # Development tooling:
         - gcovr>=4.2
         - mantidprofiler>=1.4,<2
+        - mold>=2.40.4,<3
         # MPI Support
         - mpi
         - mpi4py
@@ -95,6 +96,7 @@ requirements:
       then:
         - conda-wrappers
         - lib3mf
+        - lld>=23.1.2,<24
     - if: osx
       then:
         - python.app
