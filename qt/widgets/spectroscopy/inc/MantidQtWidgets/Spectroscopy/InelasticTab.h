@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllConfig.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -18,6 +17,7 @@
 #include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
+#include "MantidQtWidgets/Spectroscopy/DllConfig.h"
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputNamePresenter.h"
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"

@@ -11,7 +11,7 @@
 
 #include "MantidAPI/AnalysisDataServiceObserver.h"
 
-#include "../DllConfig.h"
+#include "MantidQtWidgets/Spectroscopy/DllConfig.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

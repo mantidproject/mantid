@@ -10,6 +10,7 @@
 #include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/core/Converters/NDArrayTypeIndex.h"
 #include "MantidPythonInterface/core/Converters/NumpyFunctions.h"
+#include "MantidPythonInterface/core/DllConfig.h"
 
 #include <boost/python/extract.hpp>
 #include <boost/python/stl_iterator.hpp>
@@ -162,7 +163,7 @@ void NDArrayToVector<DestElementType>::throwIfSizeMismatched(const TypedVector &
 //------------------------------------------------------------------------
 // Explicit instantiations
 //------------------------------------------------------------------------
-#define INSTANTIATE_TOVECTOR(ElementType) template struct DLLExport NDArrayToVector<ElementType>;
+#define INSTANTIATE_TOVECTOR(ElementType) template struct MANTID_PYTHONINTERFACE_CORE_DLL NDArrayToVector<ElementType>;
 
 ///@cond Doxygen doesn't seem to like this...
 INSTANTIATE_TOVECTOR(int)

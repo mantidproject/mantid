@@ -7,8 +7,8 @@
 #pragma once
 
 #include "ColorMap.h"
-#include "DllOption.h"
 #include "GLColor.h"
+#include "MantidQtWidgets/InstrumentView/DllOption.h"
 
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"

@@ -9,11 +9,11 @@
 //----------------------
 // Includes
 //----------------------
-#include "DllOption.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "ui_SlicingAlgorithmDialog.h"
 
 namespace MantidQt {

@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "../DllConfig.h"
 #include "DataReductionTab.h"
+#include "DllConfig.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_Transmission.h"

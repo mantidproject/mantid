@@ -9,7 +9,7 @@
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 
-#include "DllConfig.h"
+#include "MantidQtWidgets/Spectroscopy/DllConfig.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

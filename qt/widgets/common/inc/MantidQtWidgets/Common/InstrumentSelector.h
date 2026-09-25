@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllOption.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 
 #include <Poco/NObserver.h>
 #include <QComboBox>

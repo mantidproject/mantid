@@ -8,12 +8,12 @@
 #include <string>
 #include <utility>
 
-#include "DllConfig.h"
 #include "FitData.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
+#include "MantidQtWidgets/Spectroscopy/DllConfig.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

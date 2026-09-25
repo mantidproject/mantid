@@ -7,7 +7,7 @@
 #pragma once
 #include "ui_Simulation.h"
 
-#include "../DllConfig.h"
+#include "DllConfig.h"
 #include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
 #include "SimulationTab.h"
 

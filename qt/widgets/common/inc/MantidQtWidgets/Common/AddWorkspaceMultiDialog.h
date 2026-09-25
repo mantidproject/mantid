@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 #include "QtJobRunner.h"
 #include "ui_AddWorkspaceMultiDialog.h"

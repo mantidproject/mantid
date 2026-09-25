@@ -16,7 +16,7 @@
 #include <QString>
 #include <QWidget>
 
-#include "DllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 
 class QLineEdit;
 

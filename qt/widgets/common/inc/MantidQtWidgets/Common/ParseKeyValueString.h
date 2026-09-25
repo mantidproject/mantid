@@ -12,9 +12,9 @@ Parses a string in the format `a = 1,b=2, c = "1,2,3,4", d = 5.0, e='a,b,c'`
 into a map of key/value pairs.
 */
 
-#include "DllOption.h"
 #include "MantidAPI/IAlgorithmRuntimeProps.h"
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 
 #include <QString>
 #include <QStringList>
