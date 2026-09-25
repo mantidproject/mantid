@@ -108,7 +108,7 @@ target_include_directories(
   Muon PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 # Set the name of the generated library
-set_target_properties(Muon PROPERTIES OUTPUT_NAME MantidMuon COMPILE_DEFINITIONS "IN_MANTID_MUON")
+set_target_properties(Muon PROPERTIES OUTPUT_NAME MantidMuon)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Muon PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
