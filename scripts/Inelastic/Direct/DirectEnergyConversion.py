@@ -959,7 +959,8 @@ class DirectEnergyConversion(object):
         spec_num = monitor_ws.getIndexFromSpectrumNumber(ei_mon_spectra[0])
         mon1_det = monitor_ws.getDetector(spec_num)
         mon1_pos = mon1_det.getPos()
-        src_name = data_ws.getInstrument().getSource().getName()
+        component_info = data_ws.componentInfo()
+        src_name = component_info.name(component_info.source())
         MoveInstrumentComponent(
             Workspace=resultws_name,
             ComponentName=src_name,
@@ -1760,8 +1761,8 @@ class DirectEnergyConversion(object):
 
     def setup_instrument_properties(self, workspace=None, reload_instrument=False):
         if workspace is not None:
-            instrument = workspace.getInstrument()
-            name = instrument.name()
+            component_info = workspace.componentInfo()
+            name = component_info.name(component_info.root())
             if name != self.prop_man.instr_name:
                 self.prop_man = PropertyManager(name, workspace)
 

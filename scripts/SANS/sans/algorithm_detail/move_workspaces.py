@@ -786,8 +786,7 @@ class SANSMoveZOOM(SANSMove):
 def create_mover(workspace, state):
     # Get selection
     run_number = workspace.getRunNumber()
-    instrument = workspace.getInstrument()
-    instrument_name = instrument.getName()
+    instrument_name = workspace.getInstrumentName()
     instrument_name = sanitise_instrument_name(instrument_name)
     instrument_type = SANSInstrument[instrument_name]
     if SANSMoveLOQ.is_correct(instrument_type, run_number):

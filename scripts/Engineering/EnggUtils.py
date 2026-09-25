@@ -754,6 +754,97 @@ def _generate_output_file_name(inst, sample_run_no, van_run_no, suffix, xunit, e
     return "_".join([inst, sample_run_no, van_run_no, suffix, xunit]) + ext
 
 
+def _correct_full_calib_for_offset_scattering_com(ws: MatrixWorkspace, full_calib: TableWorkspace) -> TableWorkspace:
+    """
+    Adjusts the DIFC in the full calibration to account for an offset scattering volume centre of mass.
+
+    The reason for this is as follows:
+
+    Assuming the true DIFC for the experiment is DIFC_t = k.(L1+L2).sin(theta)
+
+    where k is a physical constant and L1 and L2 are the primary and secondary flight paths
+    and theta is the scattering angle - all of these L1, L2 and theta quantities are the averaged values across the
+    neutrons collected in each detector.
+
+    By default these values are taken assuming the average scattering position of the neutron is the same as
+    the sample position, i.e. the scattering volume (volume of the sample from which scattering occurs) has a
+    centre of mass which is the same as the sample position.
+
+    If this assumption is not true L1, L2 and most importantly (read: biggest error) sin(theta) will be wrong.
+
+    Additionally this formulation assumes that L2 can be calculated using this C.O.M and the as-defined detector positions
+    in the IDF. The calibration is however done to correct for these deviations, so we need to find a way to correct
+    the calibration DIFCs solely for the COM offset.
+
+
+    Broadly this means: DIFC_t = k.G(r, e) where G is a function of the scattering C.O.M, r, and the detector position
+    errors e.
+
+    To correct this we can say, to a first order approximation, G(r,e) = H(r)F(e)
+
+    This gives DIFC_t = k.H(r).F(e)
+
+    We can observe that we have calibrated DIFC for calibration sample (ceria) centred at the origin
+
+    So DIFC_cal = k.H(r0).F(e), where r0 is position of the sample origin
+
+    We can see that DIFC_t = DIFC_cal*H(r)/H(r0)
+    (assuming F(e) is constant - i.e the detector position errors haven't changed since ceria sample collection)
+
+    As we can calculate DIFC for the generic IDF geometry (i.e. calculate without F(e)) we can get
+
+    DIFC_1 = k.H(r) and DIFC_0 = k.H(r0)
+
+    DIFC_1/DIFC_0 = H(r)/H(r0)
+
+    This means DIFC_t = DIFC_cal * DIFC_1/DIFC_0
+    """
+
+    # gauge volume is expected to be present (see _can_calculate_scattering_com)
+    # engineering instrument gauge volumes are on the order of a few mm so this should be an
+    # appropriate level of detail
+    com = mantid.EstimateScatteringVolumeCentreOfMass(ws, ElementUnits="mm", ElementSize=0.1)
+
+    # per-detector ratio of DIFC1(at com) / DIFC(at (0,0,0))
+    difc0 = mantid.CalculateDIFC(InputWorkspace=ws, OutputWorkspace="__difc0", StoreInADS=False)
+
+    # extract sample information
+    component_info = ws.componentInfo()
+    name = component_info.name(component_info.sample())
+
+    # move the nominal sample location to the scattering COM and calculate the DIFCs from here
+    # (do this on a small copy of the ws to make sure data workspace state is never corrupted)
+    tmp_ws = mantid.ExtractSpectra(
+        InputWorkspace=ws, StartWorkspaceIndex=0, EndWorkspaceIndex=0, OutputWorkspace="__tmp_copy", StoreInADS=False
+    )
+    mantid.MoveInstrumentComponent(Workspace=tmp_ws, ComponentName=name, X=com[0], Y=com[1], Z=com[2], RelativePosition=False)
+    difc1 = mantid.CalculateDIFC(InputWorkspace=tmp_ws, OutputWorkspace="__difc1", StoreInADS=False)
+
+    # scale DIFC column only, per detector; leave DIFA/TZERO untouched
+    cal = mantid.CloneWorkspace(InputWorkspace=full_calib, OutputWorkspace="__full_calib_com")
+    difc_col, detid_col = cal.column("difc"), cal.column("detid")
+    for irow, detid in enumerate(detid_col):
+        cal.setCell("difc", irow, difc_col[irow] * difc1.getValue(detid) / difc0.getValue(detid))
+
+    return cal
+
+
+def _can_calculate_scattering_com(ws: MatrixWorkspace) -> bool:
+    do_com_calc = ws.getRun().hasProperty("GaugeVolume") and ws.sample().getShape().hasValidShape()
+    if do_com_calc:
+        logger.information(
+            f"Workspace {ws.name()} has a Gauge Volume and Sample Shape defined - Calibration DIFCs will "
+            f"be adjusted to account for any offset in the scattering volume centre of mass"
+        )
+    else:
+        logger.notice(
+            f"Workspace {ws.name()} does not have a Gauge Volume and Sample Shape defined - use of calibration DIFCs "
+            f"assume the gauge volume is fully within the sample. "
+            f"If this is not correct, please define sample shape and gauge volume."
+        )
+    return do_com_calc
+
+
 # DEPRECATED FUNCTIONS BELOW
 
 
@@ -952,7 +1043,7 @@ def get_detector_ids_for_bank(bank):
 
     for i in range(grouping.getNumberHistograms()):
         if grouping.y(i)[0] in bank_int:
-            detector_ids.add(grouping.getDetector(i).getID())
+            detector_ids.update(grouping.getSpectrum(i).getDetectorIDs())
 
     mantid.DeleteWorkspace(grouping)
 
