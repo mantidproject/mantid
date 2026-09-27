@@ -18,6 +18,7 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
+#include "MantidNexusGeometry/DllConfig.h"
 
 #include <iterator>
 #include <memory>
@@ -84,8 +85,8 @@ std::vector<uint32_t> createTriangularFaces(const std::vector<uint32_t> &faceInd
 }
 } // namespace
 
-DLLExport std::unique_ptr<const Geometry::IObject> createCylinder(const std::vector<uint32_t> &cylinderPoints,
-                                                                  const std::vector<Eigen::Vector3d> &vertices) {
+MANTID_NEXUSGEOMETRY_DLL std::unique_ptr<const Geometry::IObject>
+createCylinder(const std::vector<uint32_t> &cylinderPoints, const std::vector<Eigen::Vector3d> &vertices) {
   // Read points into matrix, sorted by cPoints ordering
   Eigen::Matrix<double, 3, 3> vSorted;
   for (int i = 0; i < 3; ++i) {

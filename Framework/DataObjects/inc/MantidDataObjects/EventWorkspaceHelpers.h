@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -17,7 +18,7 @@ namespace DataObjects {
  *  Created on: Dec 15, 2010
  *      Author: Janik Zikovsky
  */
-struct DLLExport EventWorkspaceHelpers {
+struct MANTID_DATAOBJECTS_DLL EventWorkspaceHelpers {
   /// Converts an EventWorkspace to an equivalent Workspace2D.
   static API::MatrixWorkspace_sptr convertEventTo2D(const API::MatrixWorkspace_sptr &inputMatrixW);
 };

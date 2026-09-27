@@ -12,13 +12,14 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
 /** Beam Finder for SANS instruments
  */
 
-class DLLExport SANSBeamFinder final : public API::Algorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL SANSBeamFinder final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SANSBeamFinder"; }

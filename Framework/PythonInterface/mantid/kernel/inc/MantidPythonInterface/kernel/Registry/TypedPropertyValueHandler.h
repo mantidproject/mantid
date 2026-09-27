@@ -8,6 +8,7 @@
 
 #include "MantidPythonInterface/core/ExtractSharedPtr.h"
 #include "MantidPythonInterface/core/IsNone.h" // includes object.hpp
+#include "MantidPythonInterface/kernel/DllConfig.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 
 #include "MantidKernel/IPropertyManager.h"
@@ -28,7 +29,7 @@ GNU_DIAG_OFF("maybe-uninitialized")
  * python object and perform operations with a given C type.
  */
 template <typename ValueType, typename Enable = void>
-struct DLLExport TypedPropertyValueHandler : public PropertyValueHandler {
+struct PYTHON_KERNEL_DLL TypedPropertyValueHandler : public PropertyValueHandler {
   /// Type required by TypeRegistry framework
   using HeldType = ValueType;
 

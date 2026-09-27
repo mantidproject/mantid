@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/IEventList.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/TimeROI.h"
@@ -469,12 +470,12 @@ private:
 };
 
 // Methods overloaded to get event vectors.
-DLLExport void getEventsFrom(EventList &el, std::vector<Types::Event::TofEvent> *&events);
-DLLExport void getEventsFrom(const EventList &el, std::vector<Types::Event::TofEvent> const *&events);
-DLLExport void getEventsFrom(EventList &el, std::vector<WeightedEvent> *&events);
-DLLExport void getEventsFrom(const EventList &el, std::vector<WeightedEvent> const *&events);
-DLLExport void getEventsFrom(EventList &el, std::vector<WeightedEventNoTime> *&events);
-DLLExport void getEventsFrom(const EventList &el, std::vector<WeightedEventNoTime> const *&events);
+MANTID_DATAOBJECTS_DLL void getEventsFrom(EventList &el, std::vector<Types::Event::TofEvent> *&events);
+MANTID_DATAOBJECTS_DLL void getEventsFrom(const EventList &el, std::vector<Types::Event::TofEvent> const *&events);
+MANTID_DATAOBJECTS_DLL void getEventsFrom(EventList &el, std::vector<WeightedEvent> *&events);
+MANTID_DATAOBJECTS_DLL void getEventsFrom(const EventList &el, std::vector<WeightedEvent> const *&events);
+MANTID_DATAOBJECTS_DLL void getEventsFrom(EventList &el, std::vector<WeightedEventNoTime> *&events);
+MANTID_DATAOBJECTS_DLL void getEventsFrom(const EventList &el, std::vector<WeightedEventNoTime> const *&events);
 
 } // namespace DataObjects
 } // namespace Mantid

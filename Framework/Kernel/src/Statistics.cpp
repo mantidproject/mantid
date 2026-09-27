@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 // Includes
 #include "MantidKernel/Statistics.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Logger.h"
 
 #include <boost/accumulators/accumulators.hpp>
@@ -222,14 +223,14 @@ Statistics getStatistics(std::span<double const> data, const unsigned int flags)
 }
 
 /// Getting statistics of a string array should just give a bunch of NaNs
-template <> DLLExport Statistics getStatistics<string>(const vector<string> &data, const unsigned int flags) {
+template <> MANTID_KERNEL_DLL Statistics getStatistics<string>(const vector<string> &data, const unsigned int flags) {
   UNUSED_ARG(flags);
   UNUSED_ARG(data);
   return Statistics(); // default is all nan
 }
 
 /// Getting statistics of a boolean array should just give a bunch of NaNs
-template <> DLLExport Statistics getStatistics<bool>(const vector<bool> &data, const unsigned int flags) {
+template <> MANTID_KERNEL_DLL Statistics getStatistics<bool>(const vector<bool> &data, const unsigned int flags) {
   UNUSED_ARG(flags);
   UNUSED_ARG(data);
   return Statistics(); // default is all nan

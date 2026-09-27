@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidPythonInterface/kernel/DllConfig.h"
 #include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 
 namespace Mantid {
@@ -15,7 +16,7 @@ namespace Registry {
  * A specialisation of PropertyValueHandler to handle passing a python object directly
  * to a PythonObjectProperty
  */
-struct DLLExport PythonObjectTypeHandler : public TypedPropertyValueHandler<boost::python::object> {
+struct PYTHON_KERNEL_DLL PythonObjectTypeHandler : public TypedPropertyValueHandler<boost::python::object> {
 
   /// Call to set a named property where the value is some container type
   /**
