@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -16,7 +17,7 @@ namespace WorkflowAlgorithms {
  * for performing detector diagnostics and then runs the diagnostic
  * algorithm.
  */
-class DLLExport DgsDiagnose final : public API::Algorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL DgsDiagnose final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

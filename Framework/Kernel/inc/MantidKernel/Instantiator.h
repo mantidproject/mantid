@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
+#include "MantidKernel/DllConfig.h"
 
 #include <memory>
 
@@ -20,7 +21,7 @@ namespace Kernel {
     @date 10/10/2007
 */
 template <class Base, typename... Args>
-class DLLExport AbstractInstantiator
+class MANTID_KERNEL_DLL AbstractInstantiator
 /// The base class for instantiators
 {
 public:
@@ -51,7 +52,7 @@ private:
 // instances are to be instantiated must have a no-argument
 // constructor.
 template <class C, class Base, typename... Args>
-class DLLExport Instantiator : public AbstractInstantiator<Base, Args...> {
+class MANTID_KERNEL_DLL Instantiator : public AbstractInstantiator<Base, Args...> {
 public:
   /// Creates the Instantiator.
   Instantiator() = default;

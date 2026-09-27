@@ -28,7 +28,7 @@ Otherwise you could do this
 along the chain top to bottom.
 **/
 
-template <typename ChainableType> class DLLExport Chainable {
+template <typename ChainableType> class Chainable {
 protected:
   /// Successor factory
   /// std::optional<std::unique_ptr<ChainableType>> m_successor;

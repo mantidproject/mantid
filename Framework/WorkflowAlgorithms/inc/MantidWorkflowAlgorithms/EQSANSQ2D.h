@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -23,7 +24,7 @@ namespace WorkflowAlgorithms {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport EQSANSQ2D final : public API::Algorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL EQSANSQ2D final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "EQSANSQ2D"; }

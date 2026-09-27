@@ -7,6 +7,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/ColumnFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidKernel/Logger.h"
 
 #include <queue>
@@ -300,7 +301,7 @@ TableWorkspace *TableWorkspace::doCloneColumns(const std::vector<std::string> &c
 ///\cond TEMPLATE
 namespace Mantid::Kernel {
 template <>
-DLLExport DataObjects::TableWorkspace_sptr
+MANTID_DATAOBJECTS_DLL DataObjects::TableWorkspace_sptr
 IPropertyManager::getValue<DataObjects::TableWorkspace_sptr>(const std::string &name) const {
   auto *prop = dynamic_cast<PropertyWithValue<DataObjects::TableWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
@@ -313,7 +314,7 @@ IPropertyManager::getValue<DataObjects::TableWorkspace_sptr>(const std::string &
 }
 
 template <>
-DLLExport DataObjects::TableWorkspace_const_sptr
+MANTID_DATAOBJECTS_DLL DataObjects::TableWorkspace_const_sptr
 IPropertyManager::getValue<DataObjects::TableWorkspace_const_sptr>(const std::string &name) const {
   auto const *prop = dynamic_cast<PropertyWithValue<DataObjects::TableWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {

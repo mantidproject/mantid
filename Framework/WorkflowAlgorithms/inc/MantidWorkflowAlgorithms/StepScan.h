@@ -9,6 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -18,7 +19,7 @@ namespace WorkflowAlgorithms {
     An important thing to note about this algorithm is that it may modify the
    input workspace.
 */
-class DLLExport StepScan final : public API::Algorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL StepScan final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
