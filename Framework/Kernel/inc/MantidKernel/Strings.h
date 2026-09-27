@@ -51,7 +51,7 @@ namespace Strings {
  * @return
  */
 template <typename ITERATOR_TYPE>
-std::string simpleJoin(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator) {
+MANTID_KERNEL_DLL std::string simpleJoin(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator) {
   std::ostringstream output;
   ITERATOR_TYPE it;
   for (it = begin; it != end;) {
@@ -81,9 +81,10 @@ std::string simpleJoin(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string
  * @return
  */
 template <typename ITERATOR_TYPE>
-std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
-                 typename std::enable_if<!(std::is_same<typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
-                                                        std::random_access_iterator_tag>::value)>::type * = nullptr) {
+MANTID_KERNEL_DLL std::string
+join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
+     typename std::enable_if<!(std::is_same<typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
+                                            std::random_access_iterator_tag>::value)>::type * = nullptr) {
   return simpleJoin(begin, end, separator);
 }
 
@@ -107,9 +108,10 @@ std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &sepa
  * @return
  */
 template <typename ITERATOR_TYPE>
-std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
-                 typename std::enable_if<(std::is_same<typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
-                                                       std::random_access_iterator_tag>::value)>::type * = nullptr) {
+MANTID_KERNEL_DLL std::string
+join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
+     typename std::enable_if<(std::is_same<typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
+                                           std::random_access_iterator_tag>::value)>::type * = nullptr) {
 
   // Get max number of threads
   int nmaxThreads = static_cast<int>(PARALLEL_GET_MAX_THREADS);
@@ -193,8 +195,8 @@ std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &sepa
  * @return A string with contiguous values compressed using the list syntax
  */
 template <typename ITERATOR_TYPE>
-std::string joinCompress(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator = ",",
-                         const std::string &listSeparator = "-") {
+MANTID_KERNEL_DLL std::string joinCompress(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator = ",",
+                                           const std::string &listSeparator = "-") {
 
   if (begin == end) {
     return "";
