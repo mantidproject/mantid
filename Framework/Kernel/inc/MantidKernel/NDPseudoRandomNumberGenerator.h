@@ -26,7 +26,7 @@ namespace Kernel {
  *
  */
 template <typename SingleValueGenerator>
-class DLLExport NDPseudoRandomNumberGenerator : public NDRandomNumberGenerator {
+class MANTID_KERNEL_DLL NDPseudoRandomNumberGenerator : public NDRandomNumberGenerator {
 public:
   /// Constructor
   NDPseudoRandomNumberGenerator(const unsigned int ndims, const size_t seedValue);

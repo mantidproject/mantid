@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -17,7 +18,7 @@ namespace WorkflowAlgorithms {
     Calculate the detector sensitivity and patch the pixels that are masked in a
    second workspace.
 */
-class DLLExport EQSANSPatchSensitivity final : public API::Algorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL EQSANSPatchSensitivity final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "EQSANSPatchSensitivity"; }

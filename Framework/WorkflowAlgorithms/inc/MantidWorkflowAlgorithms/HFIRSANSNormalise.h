@@ -10,11 +10,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
 
-class DLLExport HFIRSANSNormalise final : public API::Algorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL HFIRSANSNormalise final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "HFIRSANSNormalise"; }

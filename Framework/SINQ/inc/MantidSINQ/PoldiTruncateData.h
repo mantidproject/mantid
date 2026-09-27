@@ -30,7 +30,7 @@ namespace Poldi {
     @date 11/06/2014
   */
 
-class DLLExport PoldiTruncateData : public API::Algorithm {
+class MANTID_SINQ_DLL PoldiTruncateData : public API::Algorithm {
 public:
   PoldiTruncateData();
   ~PoldiTruncateData() override = default;

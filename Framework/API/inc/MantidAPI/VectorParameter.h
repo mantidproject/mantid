@@ -20,7 +20,7 @@ pattern to implement common code associated with vector storage.
 @date 21/07/2011
 */
 
-template <typename Derived, typename ElemType> class DLLExport VectorParameter : public ImplicitFunctionParameter {
+template <typename Derived, typename ElemType> class VectorParameter : public ImplicitFunctionParameter {
 public:
   using ValueType = ElemType;
   VectorParameter();

@@ -12,6 +12,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -48,7 +49,7 @@ namespace WorkflowAlgorithms {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport HFIRLoad final : public API::Algorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL HFIRLoad final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "HFIRLoad"; }

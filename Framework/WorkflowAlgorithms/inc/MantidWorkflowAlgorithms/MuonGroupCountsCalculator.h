@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 #include "MantidWorkflowAlgorithms/MuonGroupCalculator.h"
 
 namespace Mantid {
@@ -14,7 +15,7 @@ namespace WorkflowAlgorithms {
 /** MuonGroupCountsCalculator : Calculates pure counts of the group specified
   via group index
 */
-class DLLExport MuonGroupCountsCalculator : public MuonGroupCalculator {
+class MANTID_WORKFLOWALGORITHMS_DLL MuonGroupCountsCalculator : public MuonGroupCalculator {
 public:
   MuonGroupCountsCalculator(const Mantid::API::WorkspaceGroup_sptr &inputWS, const std::vector<int> &summedPeriods,
                             const std::vector<int> &subtractedPeriods, const int groupIndex);

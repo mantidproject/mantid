@@ -13,6 +13,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -20,7 +21,7 @@ namespace WorkflowAlgorithms {
     Set up the reduction options for EQSANS reduction.
 */
 
-class DLLExport SetupEQSANSReduction final : public API::Algorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL SetupEQSANSReduction final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SetupEQSANSReduction"; }

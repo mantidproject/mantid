@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -17,7 +18,7 @@ namespace WorkflowAlgorithms {
 
 @date 2012-11-10
  */
-class DLLExport DgsAbsoluteUnitsReduction final : public API::Algorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL DgsAbsoluteUnitsReduction final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

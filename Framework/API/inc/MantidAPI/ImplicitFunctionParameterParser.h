@@ -51,7 +51,7 @@ namespace API {
  * Deletion policy for unique pointers.
  */
 // clang-format off
-template <typename T> class DLLExport DeleterPolicy{
+template <typename T> class DeleterPolicy{
 public:
   void operator()(T *pParser){ delete pParser; }
 };

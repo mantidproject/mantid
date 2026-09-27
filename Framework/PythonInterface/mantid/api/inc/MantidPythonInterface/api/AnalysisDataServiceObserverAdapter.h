@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataServiceObserver.h"
+#include "MantidPythonInterface/api/DllConfig.h"
 #include <boost/python/wrapper.hpp>
 
 namespace Mantid {
@@ -19,7 +20,7 @@ on subclasses of AnalysisDataServiceObserver.
 This allows the virtual methods to be overriden by python subclasses.
  */
 
-class DLLExport AnalysisDataServiceObserverAdapter : public API::AnalysisDataServiceObserver {
+class PYTHON_API_DLL AnalysisDataServiceObserverAdapter : public API::AnalysisDataServiceObserver {
 public:
   explicit AnalysisDataServiceObserverAdapter(PyObject *self);
   AnalysisDataServiceObserverAdapter(const AnalysisDataServiceObserverAdapter &) = delete;
