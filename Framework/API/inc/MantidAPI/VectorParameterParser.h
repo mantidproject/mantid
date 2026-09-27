@@ -36,7 +36,7 @@ namespace API {
  @date 21/07/2011
  */
 template <class VectorValueParameterType>
-class VectorParameterParser : public Mantid::API::ImplicitFunctionParameterParser {
+class MANTID_API_DLL VectorParameterParser : public Mantid::API::ImplicitFunctionParameterParser {
 public:
   VectorValueParameterType *parseVectorParameter(std::string sValue);
 
