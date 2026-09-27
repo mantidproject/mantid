@@ -39,7 +39,7 @@ namespace API {
  */
 
 template <class SingleValueParameterType>
-class SingleValueParameterParser : public Mantid::API::ImplicitFunctionParameterParser {
+class MANTID_API_DLL SingleValueParameterParser : public Mantid::API::ImplicitFunctionParameterParser {
 public:
   Mantid::API::ImplicitFunctionParameter *createParameter(Poco::XML::Element *parameterElement) override;
 
