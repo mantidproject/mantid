@@ -200,7 +200,7 @@ public:
    * implement the virtual AttributeVisitor::apply methods. See
    * implementation of Attribute::value() method for an example.
    */
-  template <typename T = void> class DLLExport AttributeVisitor : public boost::static_visitor<T> {
+  template <typename T = void> class AttributeVisitor : public boost::static_visitor<T> {
   public:
     /// Virtual destructor
     virtual ~AttributeVisitor() = default;
@@ -241,7 +241,7 @@ public:
   /**
    * Const version of AttributeVisitor.
    */
-  template <typename T = void> class DLLExport ConstAttributeVisitor : public boost::static_visitor<T> {
+  template <typename T = void> class ConstAttributeVisitor : public boost::static_visitor<T> {
   public:
     /// Virtual destructor
     virtual ~ConstAttributeVisitor() = default;
@@ -377,7 +377,7 @@ public:
    * evaluate the current value of the attribute against
    * the associated validator, for all allowed types.
    */
-  template <typename T = void> class DLLExport AttributeValidatorVisitor : public boost::static_visitor<T> {
+  template <typename T = void> class AttributeValidatorVisitor : public boost::static_visitor<T> {
   public:
     AttributeValidatorVisitor(const IFunction::Attribute *attrToValidate) : m_attrToValidate{attrToValidate} {}
 

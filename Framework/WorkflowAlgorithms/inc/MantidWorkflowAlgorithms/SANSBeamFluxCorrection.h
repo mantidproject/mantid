@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -19,7 +20,7 @@ namespace WorkflowAlgorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SANSBeamFluxCorrection : public API::DataProcessorAlgorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL SANSBeamFluxCorrection : public API::DataProcessorAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SANSBeamFluxCorrection"; }

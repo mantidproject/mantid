@@ -9,6 +9,7 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
+#include "MantidPythonInterface/kernel/DllConfig.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 #include <boost/python/list.hpp>
 #include <memory>
@@ -27,7 +28,7 @@ namespace Registry {
  * Defines a static factory class that creates PropertyWithValue
  * instances from python objects.
  */
-class DLLExport PropertyWithValueFactory {
+class PYTHON_KERNEL_DLL PropertyWithValueFactory {
 public:
   static std::unique_ptr<Kernel::Property> create(const std::string &name, const boost::python::object &defaultValue,
                                                   const boost::python::object &validator, const unsigned int direction);

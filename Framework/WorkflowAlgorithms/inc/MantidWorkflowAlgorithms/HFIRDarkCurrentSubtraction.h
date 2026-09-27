@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -37,7 +38,7 @@ namespace WorkflowAlgorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport HFIRDarkCurrentSubtraction final : public API::Algorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL HFIRDarkCurrentSubtraction final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "HFIRDarkCurrentSubtraction"; }

@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -17,7 +18,7 @@ namespace WorkflowAlgorithms {
 
     Sensitivity correction for SANS
 */
-class DLLExport SANSSensitivityCorrection final : public API::Algorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL SANSSensitivityCorrection final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SANSSensitivityCorrection"; }

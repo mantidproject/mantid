@@ -10,12 +10,13 @@
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/System.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
 /** MuonProcess : Processes and analyses Muon workspace.
  */
-class DLLExport MuonProcess : public API::DataProcessorAlgorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL MuonProcess : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

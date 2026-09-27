@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -14,7 +15,7 @@ namespace WorkflowAlgorithms {
 /** SofTwoThetaTOF : Convert a S(spectrum number, TOF) workspace to
  * S(twoTheta, TOF) workspace.
  */
-class DLLExport SofTwoThetaTOF : public API::DataProcessorAlgorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL SofTwoThetaTOF : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;

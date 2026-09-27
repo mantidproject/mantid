@@ -9,13 +9,14 @@
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidKernel/System.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
 
 /** LoadEventAndCompress : TODO: DESCRIPTION
  */
-class DLLExport LoadEventAndCompress : public API::DataProcessorAlgorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL LoadEventAndCompress : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
