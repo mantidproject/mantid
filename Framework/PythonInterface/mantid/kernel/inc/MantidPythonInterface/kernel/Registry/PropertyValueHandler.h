@@ -27,7 +27,7 @@ namespace Registry {
  * The set function should call the setProperty method once it has the
  * correct C++ type from the Python object
  */
-struct PropertyValueHandler {
+struct PYTHON_KERNEL_DLL PropertyValueHandler {
   /// Virtual Destructor
   virtual ~PropertyValueHandler() = default;
   /// Overload to set the named property's value on the property manager

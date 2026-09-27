@@ -21,7 +21,7 @@ namespace Kernel {
     @date 10/10/2007
 */
 template <class Base, typename... Args>
-class AbstractInstantiator
+class MANTID_KERNEL_DLL AbstractInstantiator
 /// The base class for instantiators
 {
 public:
@@ -51,7 +51,8 @@ private:
 // For the Instantiator to work, the class of which
 // instances are to be instantiated must have a no-argument
 // constructor.
-template <class C, class Base, typename... Args> class Instantiator : public AbstractInstantiator<Base, Args...> {
+template <class C, class Base, typename... Args>
+class MANTID_KERNEL_DLL Instantiator : public AbstractInstantiator<Base, Args...> {
 public:
   /// Creates the Instantiator.
   Instantiator() = default;
