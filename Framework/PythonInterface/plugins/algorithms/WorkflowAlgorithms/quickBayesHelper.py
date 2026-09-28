@@ -158,10 +158,7 @@ class QuickBayesTemplate(PythonAlgorithm):
         :param N: the number of histograms we need
         :return a list of repeated spectra
         """
-        res_list = []
-        for j in range(N):
-            res_list.append({"x": res_ws.x(0), "y": res_ws.y(0)})
-        return res_list
+        return [{"x": res_ws.x(0), "y": res_ws.y(0)} for _ in range(N)]
 
     def unique_res(self, res_ws, N):
         """
@@ -170,10 +167,7 @@ class QuickBayesTemplate(PythonAlgorithm):
         :param N: the number of histograms we need
         :return a list of spectra
         """
-        res_list = []
-        for j in range(N):
-            res_list.append({"x": res_ws.x(j), "y": res_ws.y(j)})
-        return res_list
+        return [{"x": res_ws.x(j), "y": res_ws.y(j)} for j in range(N)]
 
     def PyExec(self):
         raise NotImplementedError("This class is for shared functionality when using quickBayes. It does not have an execute")

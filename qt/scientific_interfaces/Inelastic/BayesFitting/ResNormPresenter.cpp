@@ -41,8 +41,12 @@ void ResNormPresenter::handleValidation(IUserInputValidator *validator) const {
     auto const vanName = m_view->getCurrentDataName("Vanadium");
 
     auto const cutIndex = vanName.find_last_of("_");
-    auto const vanSuffix = vanName.substr(cutIndex + 1);
-    if (vanSuffix.compare("red") != 0 && vanSuffix.compare("sqw") != 0)
+    auto vanSuffix = vanName.substr(cutIndex + 1);
+    // Transform vanSuffix to lower case
+    std::transform(vanSuffix.begin(), vanSuffix.end(), vanSuffix.begin(),
+                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+
+    if (vanSuffix != "red" && vanSuffix != "sqw")
       validator->addErrorMessage("The Vanadium run is not _red or _sqw workspace");
 
     // Check Res and Vanadium are the same Run
