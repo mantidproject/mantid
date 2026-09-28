@@ -90,6 +90,12 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
         del wksp
         return True
 
+    @classmethod
+    def schedulingScore(cls):
+        # The longest single system test there is, and the only test in its module, so it
+        # has to be dispatched ahead of the multi-test modules that also declare a slow test
+        return 45
+
     def runTest(self):
         """Main entry point for the test suite"""
         files = self.__getDataFileList__()

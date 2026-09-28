@@ -27,6 +27,10 @@ class ILLPowderEfficiencyClosureTest(systemtesting.MantidSystemTest):
     def requiredFiles(self):
         return ["967076.nxs"]
 
+    @classmethod
+    def schedulingScore(cls):
+        return systemtesting.SLOW_TEST_SCHEDULING_SCORE
+
     def cleanup(self):
         mtd.clear()
         remove(self._m_tmp_file)

@@ -194,6 +194,7 @@ def main():
     (
         test_counts,
         test_list,
+        test_scores,
         test_sub_directories,
         test_stats,
         files_required_by_test_module,
@@ -269,8 +270,11 @@ def main():
             for key in data_file_lock_status.keys():
                 locked_files_dict[key] = data_file_lock_status[key]
 
-            # Store in reverse number of number of tests in each module into the shared dictionary
-            reverse_sorted_dict = [(k, test_counts[k]) for k in sorted(test_counts, key=test_counts.get, reverse=True)]
+            # Hand the modules out highest scheduling score first, so the modules holding the
+            # most work are started while there is still other work to overlap them with. Every
+            # test scores 1 unless it declares itself slow, which makes this a sort by descending
+            # test count for any module that contains no self-declared slow test.
+            reverse_sorted_dict = [(k, test_counts[k]) for k in sorted(test_scores, key=test_scores.get, reverse=True)]
             counter = 0
             for key, value in reverse_sorted_dict:
                 tests_dict[str(counter)] = tuple([test_sub_directories[key], test_list[key]])
@@ -279,7 +283,7 @@ def main():
                 if options.ci_log:
                     # The index is the dispatch order: each worker scans this list from its own
                     # process number upwards, so it is needed to interpret the claim messages.
-                    print("Test module [{:3d}] {} has {} tests".format(module_index, key, value))
+                    print("Test module [{:3d}] {} has {} tests, score {}".format(module_index, key, value, test_scores[key]))
                 elif not options.quiet:
                     print("Test module {} has {} tests:".format(key, value))
                     for t in test_list[key]:

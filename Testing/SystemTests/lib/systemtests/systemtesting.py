@@ -75,6 +75,17 @@ TESTING_PROC_FAILURE_CODE = 255
 # notification; in normal operation the waiting thread is notified directly.
 IDLE_WAIT_TIMEOUT_SECONDS = 5.0
 
+# Scheduling scores. Test modules are handed out highest total score first, so that the
+# modules holding the most work are started while there is still other work to overlap
+# with them. Every test scores DEFAULT_SCHEDULING_SCORE unless it says otherwise, which
+# makes a module's score its number of tests and reproduces the previous ordering by
+# descending test count.
+DEFAULT_SCHEDULING_SCORE = 1
+# What a genuinely slow test should return from MantidSystemTest.schedulingScore. One such
+# test then outweighs any module of this many ordinary tests, which is roughly the point at
+# which starting the slow test first stops paying for itself.
+SLOW_TEST_SCHEDULING_SCORE = 30
+
 if not os.path.exists(FRAMEWORK_PYTHONINTERFACE_TEST_DIR):
     raise ImportError("Expected 'Framework/PythonInterface/test' to be found at '{}' but it wasn'target. Has the directory moved?")
 
@@ -132,6 +143,28 @@ class MantidSystemTest(unittest.TestCase):
         be run with every pull request. These tests will be run nightly instead.
         """
         return False
+
+    @classmethod
+    def schedulingScore(cls):
+        """
+        Relative cost of this test, used only to order test modules for execution. A
+        module's score is the sum of the scores of its tests, and modules are handed out
+        highest score first, so that the modules holding the most work are started while
+        there is still other work to overlap them with.
+
+        Every test scores the same by default, which makes a module's score its number of
+        tests. A test that takes substantially longer than a typical system test should
+        declare itself slow by overriding this to return SLOW_TEST_SCHEDULING_SCORE:
+
+            @classmethod
+            def schedulingScore(cls):
+                return systemtesting.SLOW_TEST_SCHEDULING_SCORE
+
+        This only affects the order modules are dispatched in, never whether or how a
+        test runs. Scoring a test high when it is not actually slow just wastes the head
+        start on it, so only do it where the test really is one of the long ones.
+        """
+        return DEFAULT_SCHEDULING_SCORE
 
     def validate(self):
         """
@@ -805,10 +838,12 @@ class TestSuite(object):
     Tie together a test and its results.
     """
 
-    def __init__(self, test_dir, modname, testname, filename=None):
+    def __init__(self, test_dir, modname, testname, filename=None, score=DEFAULT_SCHEDULING_SCORE):
         self._test_dir = test_dir
         self._modname = modname
         self._test_cls_name = testname
+        # Relative cost of this test, used only to order the modules for execution
+        self._score = score
         self._fqtestname = modname
 
         # A None testname indicates the source did not load properly
@@ -938,7 +973,7 @@ class TestManager(object):
         return found
 
     def generateMasterTestList(self, test_parent_dirs):
-        mod_counts, mod_tests, mod_sub_directories, mod_required_files = dict(), dict(), dict(), dict()
+        mod_counts, mod_tests, mod_scores, mod_sub_directories, mod_required_files = dict(), dict(), dict(), dict(), dict()
         data_file_lock_status = dict()
         test_stats = [0, 0, 0]
 
@@ -947,9 +982,10 @@ class TestManager(object):
             test_folders.extend(self._get_sub_dirs(parent_dir))
 
         for sub_directory in test_folders:
-            counts, tests, sub_directories, stats, files_required, lock_status = self.__generateTestList(sub_directory)
+            counts, tests, scores, sub_directories, stats, files_required, lock_status = self.__generateTestList(sub_directory)
             mod_counts.update(counts)
             mod_tests.update(tests)
+            mod_scores.update(scores)
             mod_sub_directories.update(sub_directories)
             test_stats[0] += stats[0]
             test_stats[1] = max(test_stats[1], stats[1])
@@ -967,7 +1003,7 @@ class TestManager(object):
         for reporter in self._reporters:
             reporter.total_number_of_tests = test_stats[0]
 
-        return mod_counts, mod_tests, mod_sub_directories, test_stats, mod_required_files, data_file_lock_status
+        return mod_counts, mod_tests, mod_scores, mod_sub_directories, test_stats, mod_required_files, data_file_lock_status
 
     def __generateTestList(self, test_path: pathlib.Path):
         if not test_path.exists():
@@ -1012,15 +1048,18 @@ class TestManager(object):
         # for each module.
         modcounts = dict()
         modtests = dict()
+        modscores = dict()
         mod_sub_directories = dict()
         for t in reduced_test_list:
             key = t._modname
             if key in modcounts.keys():
                 modcounts[key] += 1
                 modtests[key].append(t)
+                modscores[key] += t._score
             else:
                 modcounts[key] = 1
                 modtests[key] = [t]
+                modscores[key] = t._score
                 mod_sub_directories[key] = test_path
 
         # Now we scan each test module (= python file) and list all the data files
@@ -1104,7 +1143,7 @@ class TestManager(object):
                 for s in files_required_by_test_module[key]:
                     print(s)
 
-        return modcounts, modtests, mod_sub_directories, test_stats, files_required_by_test_module, data_file_lock_status
+        return modcounts, modtests, modscores, mod_sub_directories, test_stats, files_required_by_test_module, data_file_lock_status
 
     def __shouldTest(self, suite):
         if self._testsInclude is not None:
@@ -1189,9 +1228,17 @@ class TestManager(object):
             spec.loader.exec_module(mod)
 
             module_classes = dict(inspect.getmembers(mod, inspect.isclass))
-            module_classes = [x for x in module_classes if isValidTestClass(module_classes[x]) and x != "MantidSystemTest"]
-            for test_name in module_classes:
-                tests.append(TestSuite(self._runner.getTestDir(), modname, test_name, filename))
+            test_names = [x for x in module_classes if isValidTestClass(module_classes[x]) and x != "MantidSystemTest"]
+            for test_name in test_names:
+                tests.append(
+                    TestSuite(
+                        self._runner.getTestDir(),
+                        modname,
+                        test_name,
+                        filename,
+                        score=schedulingScoreForClass(module_classes[test_name]),
+                    )
+                )
             module_loaded = True
         except Exception:
             print("Error importing module '{}':".format(modname))
@@ -1356,6 +1403,19 @@ def exit_code_to_str(exit_code):
 # Function to check if a given class object is a Mantid System Test
 # that can be run by the TestRunner class.
 #########################################################################
+def schedulingScoreForClass(class_obj):
+    """Return the scheduling score for a test class.
+
+    The score only affects the order modules are dispatched in, so a test class with a
+    broken override is worth reporting and carrying on from rather than failing the run.
+    """
+    try:
+        return int(class_obj.schedulingScore())
+    except Exception as exc:
+        print(f"Could not get a scheduling score for {class_obj.__name__}, using the default: {exc}")
+        return DEFAULT_SCHEDULING_SCORE
+
+
 def isValidTestClass(class_obj):
     """Returns true if the test is a valid test class. It is valid
     if: the class subclassses MantidSystemTest and has no abstract methods

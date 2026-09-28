@@ -304,6 +304,12 @@ class LoadLotsOfFiles(systemtesting.MantidSystemTest):
     def requiredMemoryMB(self):
         return 18000
 
+    @classmethod
+    def schedulingScore(cls):
+        # One of the longest system tests there is, and the only test in its module, so it
+        # has to be dispatched ahead of the multi-test modules that also declare a slow test
+        return 45
+
     def runTest(self):
         """Main entry point for the test suite"""
         files = self.__getDataFileList__()
