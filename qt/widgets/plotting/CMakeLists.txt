@@ -31,13 +31,15 @@ set(MPL_INC_FILES
     inc/MantidQtWidgets/Plotting/PlotWidget/QtPlotView.h
 )
 
+set(PRECOMP_HEADERS <MantidAPI/MatrixWorkspace.h> <QString> <QVBoxLayout> <QWidget>)
+
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsPlotting
   QT_VERSION ${MANTID_QT_VERSION}
   SRC ${MPL_SRC_FILES}
   MOC ${MPL_MOC_FILES}
   NOMOC ${MPL_INC_FILES}
-  DEFS IN_MANTIDQT_PLOTTING
+  DEFS IN_MANTIDQT_PLOTTING PRECOMPILED ${PRECOMP_HEADERS}
   INCLUDE_DIRS inc
   LINK_LIBS ${CORE_MANTIDLIBS} Mantid::PythonInterfaceCore ${POCO_LIBRARIES}
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsMplCpp

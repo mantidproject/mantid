@@ -72,6 +72,13 @@ set(INC_FILES
 # Add the target for this directory
 set(_target_name PythonInterfaceCore)
 
+# Files that include a guard-less .hxx template-implementation header meant for single inclusion per TU collide when
+# unity-merged with another such file. Keep these compiling individually; everything else may batch.
+set_source_files_properties(src/PythonObjectProperty.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+# NDArrayTypeIndex.cpp explicitly specializes NDArrayTypeIndex<T>::typenum/typecode, which other Converters files
+# declare 'extern template'. Merged into one TU, clang rejects the specialization as coming after instantiation.
+set_source_files_properties(src/Converters/NDArrayTypeIndex.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+
 add_library(${_target_name} ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::${_target_name} ALIAS ${_target_name})
 
@@ -94,7 +101,10 @@ target_include_directories(${_target_name} SYSTEM PUBLIC $<BUILD_INTERFACE:${Pyt
 
 # Set the name of the generated library
 set_target_properties(
-  ${_target_name} PROPERTIES OUTPUT_NAME MantidPythonInterfaceCore COMPILE_DEFINITIONS IN_MANTID_PYTHONINTERFACE_CORE
+  ${_target_name}
+  PROPERTIES OUTPUT_NAME MantidPythonInterfaceCore
+             COMPILE_DEFINITIONS IN_MANTID_PYTHONINTERFACE_CORE
+             UNITY_BUILD ON
 )
 # We need an if check here as older versions of boost won't define this target we can remove it once we adopt conda
 # fully.

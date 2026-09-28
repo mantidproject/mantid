@@ -169,7 +169,7 @@ jobs:
       fail-fast: false
       matrix:
         # Skip Windows when the PR targets ornl-next (ORNL-specific branch, Linux only)
-        include: ${{ fromJson(github.base_ref == 'ornl-next' && '[{"os":"Linux","cmake_preset":"linux-64-ci"}]' || '[{"os":"Linux","cmake_preset":"linux-64-ci"},{"os":"Windows","cmake_preset":"win-64-ci"}]') }}
+        include: ${{ fromJson(github.base_ref == 'ornl-next' && '[{"os":"Linux","cmake_preset":"linux-64-ci"}]' || '[{"os":"Linux","cmake_preset":"linux-64-ci"},{"os":"Windows","cmake_preset":"win-64-ci-ninja"}]') }}
 
     runs-on:
       - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
@@ -189,6 +189,7 @@ jobs:
     env:
       CMAKE_PRESET: ${{ matrix.cmake_preset }}
       EXTRA_CMAKE_FLAGS: "-DENABLE_PRECOMMIT=OFF"
+      CCACHE_DISABLE: "1"
       ENABLE_BUILD_CODE: true
       ENABLE_UNIT_TESTS: true
       ENABLE_SYSTEM_TESTS: ${{ matrix.os == 'Linux' }}
@@ -213,9 +214,58 @@ jobs:
           fetch-depth: 100
           fetch-tags: true
 
+      # The rattler package cache in the user profile is deleted by setup-pixi's post-cleanup, and actions/checkout
+      # deletes .pixi, so every Windows job otherwise re-downloads the whole environment (several GB). Keep the
+      # package cache in the persistent runner _work directory instead: it is outside the checkout, untouched by
+      # post-cleanup, and on the same volume as .pixi so packages are hard-linked rather than copied.
+      - name: Use a persistent pixi package cache (Windows)
+        if: ${{ matrix.os == 'Windows' && needs.check-filters.outputs.code_changes == 'true' }}
+        run: echo "PIXI_CACHE_DIR=$(cygpath -w "${RUNNER_WORKSPACE}/../_pixi_cache")" >> "$GITHUB_ENV"
+
       - name: Install pixi
         uses: ./.github/actions/setup-pixi
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
+
+      # TEMPORARY: diagnose the silent stall in 'pixi install' on the Windows runner.
+      - name: Diagnose pixi install stall (debug)
+        if: ${{ matrix.os == 'Windows' && needs.check-filters.outputs.code_changes == 'true' }}
+        timeout-minutes: 10
+        run: |
+          echo "=== Processes that may hold pixi/rattler locks ==="
+          tasklist | grep -i -E "pixi|python|ninja|cl.exe|link.exe|lld|mspdbsrv|cmake|ctest" || true
+          echo "=== Download timing for the new lld package ==="
+          curl -sS -o /dev/null -w "http=%{http_code} size=%{size_download} time=%{time_total}s speed=%{speed_download}B/s\n" \
+            --max-time 300 https://conda.anaconda.org/conda-forge/win-64/lld-23.1.2-he13e66b_0.conda || true
+          echo "=== pixi package cache (PIXI_CACHE_DIR=${PIXI_CACHE_DIR}) ==="
+          ls "${PIXI_CACHE_DIR}/pkgs" 2>/dev/null | wc -l || true
+          echo "=== pixi/rattler config files ==="
+          for f in /c/ProgramData/rattler/config.toml /c/ProgramData/pixi/config.toml "${APPDATA}/rattler/config.toml" "${APPDATA}/pixi/config.toml" "${USERPROFILE}/.pixi/config.toml"; do
+            [ -f "$f" ] && { echo "--- $f"; cat "$f"; }
+          done
+          echo "=== Does the runner _work directory persist between jobs? ==="
+          probe="${RUNNER_WORKSPACE}/../_persist_probe.txt"
+          if [ -f "$probe" ]; then echo "probe from a previous job found:"; cat "$probe"; else echo "no probe found"; fi
+          echo "job ${GITHUB_RUN_ID}/${GITHUB_RUN_ATTEMPT} on ${RUNNER_NAME} at $(date -u)" >> "$probe"
+          echo "=== .pixi environment layout ==="
+          ls -la .pixi .pixi/envs 2>/dev/null || true
+          ls .pixi/envs/default/conda-meta 2>/dev/null | wc -l || true
+          ls .pixi/envs/default/conda-meta 2>/dev/null | grep -i -E "^lld|pixi" || true
+
+      # Install/update the environment in its own step so that it is visible in the log. Otherwise the
+      # first 'pixi run' in the build step silently installs it after a pixi.lock change.
+      - name: Install pixi environment
+        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
+        timeout-minutes: 30
+        env:
+          # -vvv only affects pixi's own crates; the installer work happens in rattler.
+          RUST_LOG: "info,pixi=debug,pixi_core=debug,rattler=debug,rattler_cache=debug,rattler_package_streaming=debug"
+        # Retry: a cold install downloads several GB and a single dropped connection otherwise fails the job.
+        run: |
+          for attempt in 1 2 3; do
+            pixi install --frozen -vvv && exit 0
+            echo "pixi install attempt ${attempt} failed, retrying..."
+          done
+          exit 1
 
       - name: Clean build tree
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
@@ -359,6 +409,7 @@ jobs:
     env:
       CMAKE_PRESET: linux-64-ci
       EXTRA_CMAKE_FLAGS: "-DENABLE_PRECOMMIT=OFF"
+      CCACHE_DISABLE: "1"
       ENABLE_BUILD_CODE: true
       ENABLE_UNIT_TESTS: false
       ENABLE_SYSTEM_TESTS: false

@@ -49,6 +49,8 @@ set(NOMOC_HEADERS
 
 set(UI_FILES inc/MantidQtWidgets/MplCpp/Colorbar.ui)
 
+set(PRECOMP_HEADERS <QComboBox> <QLabel> <QString> <QVBoxLayout> <QWidget>)
+
 # Target
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsMplCpp
@@ -57,7 +59,7 @@ mtd_add_qt_library(
   MOC ${MOC_HEADERS}
   NOMOC ${NOMOC_HEADERS}
   UI ${UI_FILES}
-  DEFS IN_MANTIDQT_MPLCPP
+  DEFS IN_MANTIDQT_MPLCPP PRECOMPILED ${PRECOMP_HEADERS}
   INCLUDE_DIRS inc ${Boost_INCLUDE_DIRS}
   LINK_LIBS Mantid::PythonInterfaceCore Mantid::API
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon

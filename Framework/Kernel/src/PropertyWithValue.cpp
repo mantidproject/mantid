@@ -4,6 +4,9 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+// This file provides the explicit (non-extern) template instantiations declared 'extern' in
+// PropertyWithValue.h; skip that extern block here to avoid a self-conflicting DLL export attribute.
+#define PROPERTYWITHVALUE_PROVIDES_EXPLICIT_INSTANTIATIONS
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Matrix.h"
 

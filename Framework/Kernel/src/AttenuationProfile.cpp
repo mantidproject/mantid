@@ -8,6 +8,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
+#include <cctype>
 #include <filesystem>
 #include <fstream>
 
@@ -32,7 +33,8 @@ AttenuationProfile::AttenuationProfile(const std::string &inputFileName, const s
   if (!fileExt.empty() && fileExt[0] == '.') {
     fileExt = fileExt.substr(1);
   }
-  std::transform(fileExt.begin(), fileExt.end(), fileExt.begin(), toupper);
+  std::transform(fileExt.begin(), fileExt.end(), fileExt.begin(),
+                 [](unsigned char c) { return static_cast<char>(std::toupper(c)); });
 
   if (fileExt == "DAT") {
     if (suppliedFileName.is_relative()) {

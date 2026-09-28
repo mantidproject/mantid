@@ -36,6 +36,8 @@ set(INC_FILES
     IALFInstrumentView.h
 )
 
+set(PRECOMP_HEADERS <MantidAPI/MatrixWorkspace.h> <QLabel> <QPushButton> <QString> <QVBoxLayout> <QWidget>)
+
 # Target
 mtd_add_qt_library(
   TARGET_NAME MantidScientificInterfacesDirect
@@ -43,7 +45,7 @@ mtd_add_qt_library(
   SRC ${SRC_FILES}
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
-  DEFS IN_MANTIDQT_DIRECT
+  DEFS IN_MANTIDQT_DIRECT PRECOMPILED ${PRECOMP_HEADERS}
   LINK_LIBS Mantid::API Mantid::DataObjects Mantid::Geometry Mantid::Kernel Mantid::PythonInterfaceCore
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsInstrumentView MantidQtWidgetsPlotting MantidQtWidgetsMplCpp
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}

@@ -65,6 +65,8 @@ find_package(
   REQUIRED
 )
 
+set(PRECOMP_HEADERS <MantidAPI/MatrixWorkspace.h> <QComboBox> <QLabel> <QPushButton> <QString> <QWidget>)
+
 # Target
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsSpectroscopy
@@ -74,7 +76,7 @@ mtd_add_qt_library(
   NOMOC ${INC_FILES}
   UI ${UI_FILES}
   RES ${RES_FILES}
-  DEFS IN_MANTIDQT_SPECTROSCOPY
+  DEFS IN_MANTIDQT_SPECTROSCOPY PRECOMPILED ${PRECOMP_HEADERS}
   INCLUDE_DIRS inc
   LINK_LIBS ${CORE_MANTIDLIBS}
             Mantid::PythonInterfaceCore

@@ -253,6 +253,12 @@ SEARCH_INCLUDES        = YES
 INCLUDE_PATH           =
 INCLUDE_FILE_PATTERNS  =
 PREDEFINED             = "TMDE(decl)=decl" \
+                         ARRAYLENGTHVALIDATOR_PROVIDES_EXPLICIT_INSTANTIATIONS \
+                         ARRAYPROPERTY_PROVIDES_EXPLICIT_INSTANTIATIONS \
+                         FILTEREDTIMESERIESPROPERTY_PROVIDES_EXPLICIT_INSTANTIATIONS \
+                         MDEVENTFACTORY_PROVIDES_EXPLICIT_INSTANTIATIONS \
+                         PROPERTYWITHVALUE_PROVIDES_EXPLICIT_INSTANTIATIONS \
+                         TIMESERIESPROPERTY_PROVIDES_EXPLICIT_INSTANTIATIONS \
                          "INSTANTIATE(TYPE)=template MANTID_KERNEL_DLL Statistics getStatistics<TYPE> (const vector<TYPE> &, const bool);\template MANTID_KERNEL_DLL std::vector<double> getZscore<TYPE> (const vector<TYPE> &, const bool);\template MANTID_KERNEL_DLL std::vector<double> getModifiedZscore<TYPE> (const vector<TYPE> &, const bool);"
 EXPAND_AS_DEFINED      =
 SKIP_FUNCTION_MACROS   = YES

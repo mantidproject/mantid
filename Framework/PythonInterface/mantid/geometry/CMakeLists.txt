@@ -53,6 +53,11 @@ set(EXPORT_FILES
 
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/geometry.cpp)
 create_module(${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES})
+# The generated module-init file is the sole caller of NumPy's import_array() for this module; every other Exports/*.cpp
+# defines NO_IMPORT_ARRAY before including the NumPy headers. That #define leaks across an entire merged unity
+# translation unit, so this file must never be unity-batched with anything else, or NO_IMPORT_ARRAY silently suppresses
+# its own import.
+set_source_files_properties(${MODULE_DEFINITION} PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
 
 # Helper code
 
@@ -64,7 +69,25 @@ set(INC_FILES inc/MantidPythonInterface/geometry/ComponentInfoPythonIterator.h
 
 list(APPEND ALL_FILES ${EXPORT_FILES} ${SRC_FILES})
 
-# Create the target for this directory
+# Create the target for this directory Files below declare a file-local (anonymous-namespace) helper whose generic name
+# (make_pyiterator, __repr__implementation, isMaskedDeprecated) collides with a same-named- different-implementation
+# helper in another Exports/*.cpp file once unity-merged, plus CSGObject.cpp's file-local g_log logger (same underlying
+# issue, different idiom).
+set_source_files_properties(
+  src/Exports/CSGObject.cpp
+  src/Exports/DetectorInfo.cpp
+  src/Exports/ComponentInfo.cpp
+  src/Exports/SpaceGroup.cpp
+  src/Exports/UnitCell.cpp
+  src/Exports/PointGroup.cpp
+  src/Exports/CrystalStructure.cpp
+  src/Exports/Detector.cpp
+  src/Exports/DetectorGroup.cpp
+  src/Exports/Goniometer.cpp
+  src/Exports/SymmetryElement.cpp
+  PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON
+)
+
 add_library(PythonGeometryModule ${ALL_FILES} ${MODULE_DEFINITION} ${INC_FILES} ${PYTHON_INSTALL_FILES})
 add_library(Mantid::PythonGeometryModule ALIAS PythonGeometryModule)
 set_python_properties(PythonGeometryModule _geometry)
@@ -97,5 +120,7 @@ target_link_libraries(
 )
 
 # Installation settings
-set_target_properties(PythonGeometryModule PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/")
+set_target_properties(
+  PythonGeometryModule PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/" UNITY_BUILD ON
+)
 mtd_install_shared_library(TARGETS PythonGeometryModule DESTINATION ${Python_SITELIB_RELPATH}/mantid/geometry)

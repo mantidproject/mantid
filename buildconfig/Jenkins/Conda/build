@@ -44,6 +44,20 @@ if [[ $OSTYPE == "linux"* ]]; then
     EXTRA_CMAKE_FLAGS+=" -DMPI_BUILD=ON"
 fi
 
+# Build trees on the Windows runners persist between jobs, which may use different generators (Visual Studio or Ninja
+# presets). CMake refuses to reconfigure a tree with a different generator, so drop the cache when it changes.
+if [[ $OSTYPE == "msys"* && -f $WORKSPACE/build/CMakeCache.txt ]]; then
+    if [[ ${CMAKE_PRESET} == *ninja* ]]; then
+        expected_generator="Ninja"
+    else
+        expected_generator="Visual Studio"
+    fi
+    if ! grep -q "^CMAKE_GENERATOR:INTERNAL=${expected_generator}" $WORKSPACE/build/CMakeCache.txt; then
+        echo "CMake generator changed, removing CMake cache from $WORKSPACE/build"
+        rm -rf $WORKSPACE/build/CMakeCache.txt $WORKSPACE/build/CMakeFiles
+    fi
+fi
+
 # Run CMake using preset and variables
 cmake --preset=${CMAKE_PRESET} \
       ${MANTID_DATA_STORE_CMAKE} -DDATA_STORE_MIRROR=${DATA_MIRROR} \
