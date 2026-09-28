@@ -271,7 +271,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         position_logs = ["position", "samp_posn"]
         if self._sample_log_name.lower() in position_logs:
-            self._sample_log_name = _extract_sensor_name(self._sample_log_name, run, workspace.getInstrument())
+            self._sample_log_name = _extract_sensor_name(self._sample_log_name, run, workspace.componentInfo())
 
         if self._sample_log_name in run:
             # Look for sample unit in logs in workspace
@@ -331,11 +331,11 @@ def _extract_temperature_from_log(workspace, sample_log_name, log_filename, run_
     return None, None
 
 
-def _extract_sensor_name(sample_log_name, run, instrument):
-    position = _extract_position_from_run(sample_log_name, run, instrument)
+def _extract_sensor_name(sample_log_name, run, component_info):
+    position = _extract_position_from_run(sample_log_name, run, component_info)
     if position is not None:
         default_names = ["Bot_Can_Top", "Middle_Can_Top", "Top_Can_Top"]
-        sensor_names = instrument.getStringParameter("Workflow.TemperatureSensorNames")[0].split(",")
+        sensor_names = component_info.getStringParameter("Workflow.TemperatureSensorNames")[0].split(",")
 
         if position < len(sensor_names) and sensor_names[position] in run:
             return sensor_names[position]
@@ -351,12 +351,12 @@ def _extract_sensor_name(sample_log_name, run, instrument):
     return ""
 
 
-def _extract_position_from_run(sample_log_name, run, instrument):
+def _extract_position_from_run(sample_log_name, run, component_info):
     if sample_log_name in run:
         if sample_log_name.lower() == "position":
             return _index_of_position(run[sample_log_name].value[-1])
         elif sample_log_name.lower() == "samp_posn":
-            return _index_of_samp_posn(run[sample_log_name].value[-1], instrument)
+            return _index_of_samp_posn(run[sample_log_name].value[-1], component_info)
     return None
 
 
@@ -366,9 +366,9 @@ def _index_of_position(position_log_value):
     return int(position_log_value)
 
 
-def _index_of_samp_posn(samp_posn_log_value, instrument):
-    if instrument.hasParameter("Workflow.SamplePositions"):
-        sample_positions = instrument.getStringParameter("Workflow.SamplePositions")[0].split(",")
+def _index_of_samp_posn(samp_posn_log_value, component_info):
+    if component_info.hasParameter("Workflow.SamplePositions"):
+        sample_positions = component_info.getStringParameter("Workflow.SamplePositions")[0].split(",")
         if samp_posn_log_value in sample_positions:
             return sample_positions.index(samp_posn_log_value)
     return 0

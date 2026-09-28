@@ -42,7 +42,8 @@ class BaseInstrument(object):
         self._definition_file = os.path.join(config["instrumentDefinition.directory"], instr_filen)
 
         inst_ws_name = self.load_empty()
-        self.definition = AnalysisDataService.retrieve(inst_ws_name).getInstrument()
+        # The workspace stays in the ADS, which keeps the ComponentInfo reference valid
+        self.definition = AnalysisDataService.retrieve(inst_ws_name).componentInfo()
 
     def get_idf_file_path(self):
         return self._definition_file
@@ -182,13 +183,13 @@ class DetectorBank(object):
     _first_spec_num = None
     last_spec_num = None
 
-    def __init__(self, instr, det_type):
+    def __init__(self, component_info, det_type):
         # detectors are known by many names, the 'uni' name is an instrument independent alias the 'long'
         # name is the instrument view name and 'short' name often used for convenience
         self._names = {
             "uni": det_type,
-            "long": instr.getStringParameter(det_type + "-detector-name")[0],
-            "short": instr.getStringParameter(det_type + "-detector-short-name")[0],
+            "long": component_info.getStringParameter(det_type + "-detector-name")[0],
+            "short": component_info.getStringParameter(det_type + "-detector-short-name")[0],
         }
         # the bank is often also referred to by its location, as seen by the sample
         if det_type.startswith("low"):
@@ -197,29 +198,29 @@ class DetectorBank(object):
             position = "front"
         self._names["position"] = position
 
-        cols_data = instr.getNumberParameter(det_type + "-detector-num-columns")
+        cols_data = component_info.getNumberParameter(det_type + "-detector-num-columns")
         if len(cols_data) > 0:
             rectanglar_shape = True
             width = int(cols_data[0])
         else:
             rectanglar_shape = False
-            width = instr.getNumberParameter(det_type + "-detector-non-rectangle-width")[0]
+            width = component_info.getNumberParameter(det_type + "-detector-non-rectangle-width")[0]
 
-        rows_data = instr.getNumberParameter(det_type + "-detector-num-rows")
+        rows_data = component_info.getNumberParameter(det_type + "-detector-num-rows")
         if len(rows_data) > 0:
             height = int(rows_data[0])
         else:
             rectanglar_shape = False
-            height = instr.getNumberParameter(det_type + "-detector-non-rectangle-height")[0]
+            height = component_info.getNumberParameter(det_type + "-detector-non-rectangle-height")[0]
 
         n_pixels = None
-        n_pixels_override = instr.getNumberParameter(det_type + "-detector-num-pixels")
+        n_pixels_override = component_info.getNumberParameter(det_type + "-detector-num-pixels")
         if len(n_pixels_override) > 0:
             n_pixels = int(n_pixels_override[0])
         # n_pixels is normally None and calculated by DectShape but LOQ (at least) has a detector with a hole
         self._shape = self._DectShape(width, height, rectanglar_shape, n_pixels)
 
-        spec_entry = instr.getNumberParameter("first-low-angle-spec-number")
+        spec_entry = component_info.getNumberParameter("first-low-angle-spec-number")
         if len(spec_entry) > 0:
             self.set_first_spec_num(int(spec_entry[0]))
         else:
@@ -844,9 +845,11 @@ class ISISInstrument(BaseInstrument):
         # 1.Iterate over all parameters in the original workspace
         # 2. Compare with the calibration workspace
         # 3. If it does not exist, then add it
-        original_parmeters = workspace.getInstrument().getParameterNames()
+        workspace_component_info = workspace.componentInfo()
+        calibration_component_info = calibration_workspace.componentInfo()
+        original_parmeters = workspace_component_info.getParameterNames()
         for param in original_parmeters:
-            if not calibration_workspace.getInstrument().hasParameter(param):
+            if not calibration_component_info.hasParameter(param):
                 self._add_new_parameter_to_calibration(param, workspace, calibration_workspace)
 
     def _add_new_parameter_to_calibration(self, param_name, workspace, calibration_workspace):
@@ -861,20 +864,21 @@ class ISISInstrument(BaseInstrument):
         @param workspace: the donor of the parameter
         @param calibration_workspace: the receiver of the parameter
         """
-        ws_instrument = workspace.getInstrument()
-        component_name = ws_instrument.getName()
-        ipf_type = ws_instrument.getParameterType(param_name)
+        component_info = workspace.componentInfo()
+        root = component_info.root()
+        component_name = component_info.name(root)
+        ipf_type = component_info.getParameterType(param_name)
         # For now we only expect string, int and double
         type_ids = ["string", "int", "double"]
         value = None
         type_to_save = "Number"
         if ipf_type == type_ids[0]:
-            value = ws_instrument.getStringParameter(param_name)
+            value = component_info.getStringParameter(param_name)
             type_to_save = "String"
         elif ipf_type == type_ids[1]:
-            value = ws_instrument.getIntParameter(param_name)
+            value = component_info.getIntParameter(param_name)
         elif ipf_type == type_ids[2]:
-            value = ws_instrument.getNumberParameter(param_name)
+            value = component_info.getNumberParameter(param_name)
         else:
             raise RuntimeError(
                 "ISISInstrument: An Instrument Parameter File value of unknown type is trying to be copied. Cannot handle this currently."
@@ -900,7 +904,11 @@ class ISISInstrument(BaseInstrument):
         @param m4_name: the name of the M4 component
         @returns true if it has an M4 component, else false
         """
-        return False if self.definition.getComponentByName(m4_name) is None else True
+        try:
+            self.definition.indexOfAny(m4_name)
+        except ValueError:
+            return False
+        return True
 
 
 class LOQ(ISISInstrument):

@@ -163,19 +163,25 @@ class TransformToIqt(PythonAlgorithm):
         workflow_prog.report("Attempting to Access IPF")
         try:
             workflow_prog.report("Access IPF")
-            instrument = mtd[self._sample].getInstrument()
+            component_info = mtd[self._sample].componentInfo()
+            root = component_info.root()
+            instrument_name = component_info.name(root)
 
-            analyserName = instrument.getStringParameter("analyser")[0]
-            analyser = instrument.getComponentByName(analyserName)
+            analyserName = component_info.getStringParameter("analyser")[0]
+            try:
+                analyser = component_info.indexOfAny(analyserName)
+            except ValueError:
+                analyser = None
 
             if analyser is not None:
-                logger.debug("Found %s component in instrument %s, will look for resolution there" % (analyserName, instrument))
-                resolution = analyser.getNumberParameter("resolution")[0]
+                logger.debug("Found %s component in instrument %s, will look for resolution there" % (analyserName, instrument_name))
+                resolution = component_info.getNumberParameter("resolution", analyser)[0]
             else:
                 logger.debug(
-                    "No %s component found on instrument %s, will look for resolution in top level instrument" % (analyserName, instrument)
+                    "No %s component found on instrument %s, will look for resolution in top level instrument"
+                    % (analyserName, instrument_name)
                 )
-                resolution = instrument.getNumberParameter("resolution")[0]
+                resolution = component_info.getNumberParameter("resolution")[0]
 
             logger.information("Got resolution from IPF: %f" % resolution)
             workflow_prog.report("IPF resolution obtained")
