@@ -68,8 +68,15 @@ There are a few special cases and limitations:
 - Output uncertainties are correlated with one another. Without a sliding window, the same
   background estimate is reused along the full rotation axis for each pixel. With a sliding window,
   neighbouring rotations share most of the same input values. A ``MDHistoWorkspace`` cannot store
-  these correlations, so later operations that combine values along the rotation axis may report
-  uncertainties that are too small.
+  these correlations, so operations on the output workspace that combine values along the rotation
+  axis while propagating errors, such as :ref:`IntegrateMDHistoWorkspace <algm-IntegrateMDHistoWorkspace>`,
+  may report uncertainties that are too small.
+
+These uncertainties are not carried into Q space by the usual single-crystal workflows.
+:ref:`ConvertHFIRSCDtoMDE <algm-ConvertHFIRSCDtoMDE>` assigns each event an error derived from its
+signal, and the ``BackgroundWorkspace`` path of :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ>`
+uses only the background signal. In both cases the background uncertainty in the result is a Poisson
+estimate based on the background signal, and the limitations above do not apply to it.
 
 Usage
 -----

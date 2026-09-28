@@ -93,6 +93,10 @@ MDEvents with the same conversion used for the sample data, and pass that conver
 `BackgroundWorkspace`. This differs from the time-of-flight background path, where `BackgroundWorkspace` is expected
 to be in `Q_lab`.
 
+Because `ConvertHFIRSCDtoMDE` assigns each event an error derived from its signal, the background uncertainties
+estimated by HFIRGoniometerIndependentBackground are not propagated; the background contribution to the output
+uncertainty is a Poisson estimate based on the background signal.
+
 Unlike the time-of-flight case, there is no `MDNorm_low`/`MDNorm_high` log requirement (those are set by
 :ref:`CropWorkspaceForMDNorm <algm-CropWorkspaceForMDNorm>`, a time-of-flight-only step), since each event already
 corresponds to a single measured `Q_sample` point rather than a trajectory to integrate. If `RLU` is `True` and a Q
