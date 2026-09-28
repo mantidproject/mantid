@@ -303,10 +303,12 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         """Convert the given run numbers into real workspace names. Uses workspaces from
         the ADS if they exist, or loads them otherwise."""
         workspaces = list()
+        adjust_theta = False
         for run in runs:
             ws = self._getRunFromADSOrNone(run, isTrans)
             if not ws:
-                ws = self._loadRun(run, isTrans)
+                adjust_theta = not adjust_theta and not isTrans
+                ws = self._loadRun(run, isTrans, adjust_theta)
             if not ws:
                 raise RuntimeError("Error loading run " + run)
             workspaces.append(ws)
@@ -554,14 +556,23 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             # the ADS
             AnalysisDataService.addOrReplace(output_ws_name, ws_group)
 
-    def _loadRun(self, run, isTrans):
+    def _loadRun(self, run, isTrans, adjust_theta):
         """Load a run as an event workspace if slicing is requested, or a histogram
-        workspace otherwise. Transmission runs are always loaded as histogram workspaces."""
+        workspace otherwise. Transmission runs are always loaded as histogram workspaces.
+        Adjusts theta on parent algorithm if specified."""
         event_mode = not isTrans and self._slicingEnabled()
         args = self._preprocess_arguments(run, event_mode)
         alg = self.createChildAlgorithm("ReflectometryISISPreprocess", **args)
         alg.setRethrows(True)
         alg.execute()
+
+        # Currently this only uses the adjusted theta value from the first workspace.
+        # TODO: We should be doing this post-summing, acting upon the complete input dataset
+        # TODO: Currently we output the adjusted theta, then the next workspace we calibrate on we use this theta as the input,
+        # correcting again.
+        if adjust_theta:
+            adjusted_theta = alg.getProperty("AdjustedTheta").value
+            self.setProperty("ThetaIn", adjusted_theta)
 
         ws = alg.getProperty("OutputWorkspace").value
         monitor_ws = alg.getProperty("MonitorWorkspace").value

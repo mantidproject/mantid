@@ -21,7 +21,10 @@ from mantid.kernel import (
     StringArrayProperty,
     Direction,
     StringListValidator,
+    Property,
 )
+
+import math
 
 
 class ReflectometryISISPreprocess(DataProcessorAlgorithm):
@@ -41,6 +44,8 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
     def __init__(self):
         """Initialize an instance of the algorithm."""
         DataProcessorAlgorithm.__init__(self)
+
+        self._experiment_angle = None
 
     def category(self):
         """Return the categories of the algorithm."""
@@ -80,6 +85,12 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
             "NONE",
             validator=StringListValidator(["NONE", "WARN", "THROW"]),
             doc="How to handle loaded files that have already been calibrated, if calibration file specified.",
+        )
+        self.declareProperty(
+            name="AdjustedTheta",
+            defaultValue=Property.EMPTY_DBL,
+            direction=Direction.Output,
+            doc="The value of theta following angle correction",
         )
 
     def PyExec(self):
@@ -149,7 +160,7 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
         if specular_pixel_spectrum_no is not None:  # Only present for POLREF workflow
             alg.setProperty("InstrumentWorkflow", self._POLREF)
             alg.setProperty("SpecularPixelSpectrumNo", specular_pixel_spectrum_no)
-            alg.setProperty("ExperimentAngle", self._experiment_angle(ws))
+            alg.setProperty("ExperimentAngle", self._get_experiment_angle(ws))
 
         alg.execute()
         calibrated_ws = alg.getProperty("OutputWorkspace").value
@@ -161,8 +172,12 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
         is_group = isinstance(ws, WorkspaceGroup)
         ws1 = ws[0] if is_group else ws
         specular_pixel_spectrum_no = None
+        input_theta = self._get_experiment_angle(ws1)
+        adjusted_theta = None
         if ws1.getInstrument().getName() == self._POLREF:
             specular_pixel_spectrum_no = self._find_specular_pixel_spectrum_no(ws1, self._POLREF_START_WS_INDEX)
+            adjusted_theta = self._adjust_input_theta(input_theta, specular_pixel_spectrum_no, calibration_filepath)
+        self.setProperty("AdjustedTheta", adjusted_theta or input_theta)
 
         if is_group:
             calibrated_group = WorkspaceGroup()
@@ -179,7 +194,34 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
         line_centre = lines_alg.getProperty("LineCentre").value
         return self._spectrum_number_for_workspace_index(ws, line_centre)
 
-    def _experiment_angle(self, ws: MatrixWorkspace) -> float:
+    def _adjust_input_theta(self, input_theta: float, specular_pixel_spectrum_no: float, calibration_filepath: str) -> float:
+        TEMP_POLREF_SPEC_PIXEL = 280
+        frac_spec_pixel_diff = specular_pixel_spectrum_no - TEMP_POLREF_SPEC_PIXEL
+        # TODO: check if we're handling spectrum number or index here
+        round_fn = math.ceil if frac_spec_pixel_diff > 0 else math.floor
+        theta_values = self._get_pixel_positions_from_calibration_map(
+            calibration_filepath, [TEMP_POLREF_SPEC_PIXEL, round_fn(specular_pixel_spectrum_no)]
+        )
+        adjusted_theta = input_theta + (frac_spec_pixel_diff * (theta_values[-1] - theta_values[0]))
+        self._experiment_angle = adjusted_theta
+        return adjusted_theta
+
+    def _get_pixel_positions_from_calibration_map(self, calibration_filepath: str, pixel_index_list: list):
+        with open(calibration_filepath, "r") as file:
+            file_entries = self._file_entries(file)
+            # TODO: Would be nice to have the validation from `parse_offset_calibration_file` here from `ReflectometryISISCalibraiton`
+            next(file_entries)
+            idx_angle_map = {int(entries[0]): float(entries[1]) for entries in file_entries}
+            try:
+                positions = [idx_angle_map[pixel] for pixel in pixel_index_list]
+            except KeyError:
+                raise RuntimeError("Specular pixel value provided is not present in pixel map")
+        return positions
+
+    def _get_experiment_angle(self, ws: MatrixWorkspace) -> float:
+        if self._experiment_angle:
+            return self._experiment_angle
+
         theta = self.getProperty(self._THETA_IN)
         if not theta.isDefault:
             return theta.value
@@ -192,6 +234,29 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
             return float(theta_log.value)
 
         raise RuntimeError("ThetaIn or ThetaLogName must be provided when calibrating POLREF data")
+
+    # TODO: This is pretty much copied from ReflectometryISISCalibration
+    # Can we extract to a helper?
+    def _file_entries(self, file):
+        import csv
+
+        file_reader = csv.reader(file)
+        for row in file_reader:
+            if len(row) == 0:
+                # Ignore any blank lines
+                continue
+
+            entries = row[0].split()
+            if not entries:
+                # Ignore whitespace-only lines
+                continue
+
+            if entries[0][0] == "#":
+                # Ignore any lines that begin with a #
+                # This allows the user to add any metadata they would like
+                continue
+
+            yield entries
 
     @staticmethod
     def _spectrum_number_for_workspace_index(ws: MatrixWorkspace, workspace_index: float) -> float:
