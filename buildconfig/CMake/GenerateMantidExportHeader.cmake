@@ -3,7 +3,7 @@ include(GenerateExportHeader)
 # Generate the DllConfig.h for a target.
 #
 # generate_mantid_export_header(<target> <generate_extern> [BASE_NAME <name>] [EXPORT_MACRO_NAME <name>]
-# [EXPORT_FILE_NAME <path>] [EXTERN_MACRO_NAME <name>] [DEPRECATED_MACRO_NAME <name>])
+# [EXPORT_FILE_NAME <path>] [EXTERN_MACRO_NAME <name>] [DEPRECATED_WRAPPER_NAME <name>])
 #
 # By default the generated header follows the Framework convention: it is written to Mantid<target>/DllConfig.h and
 # exports with MANTID_<TARGET>_DLL. Sub-packages that predate this function use different macro names and header
@@ -12,7 +12,7 @@ include(GenerateExportHeader)
 # Whether the macro expands to dllexport or dllimport is decided by the target's DEFINE_SYMBOL property, which CMake
 # defaults to <target>_EXPORTS.
 function(GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
-  set(oneValueArgs BASE_NAME EXPORT_MACRO_NAME EXPORT_FILE_NAME EXTERN_MACRO_NAME DEPRECATED_MACRO_NAME)
+  set(oneValueArgs BASE_NAME EXPORT_MACRO_NAME EXPORT_FILE_NAME EXTERN_MACRO_NAME DEPRECATED_WRAPPER_NAME)
   cmake_parse_arguments(PARSED "" "${oneValueArgs}" "" ${ARGN})
 
   string(TOUPPER "${TARGET_LIBRARY}" TARGET_NAME)
@@ -29,8 +29,10 @@ function(GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
   if(NOT PARSED_EXTERN_MACRO_NAME)
     set(PARSED_EXTERN_MACRO_NAME "EXTERN_${PARSED_BASE_NAME}")
   endif()
-  if(NOT PARSED_DEPRECATED_MACRO_NAME)
-    set(PARSED_DEPRECATED_MACRO_NAME "${TARGET_NAME}_DEPRECATED")
+  # A function-like convenience wrapper, e.g. KERNEL_DEPRECATED(func). It is distinct from, and expands to,
+  # generate_export_header's own attribute macro <BASE_NAME>_DEPRECATED.
+  if(NOT PARSED_DEPRECATED_WRAPPER_NAME)
+    set(PARSED_DEPRECATED_WRAPPER_NAME "${TARGET_NAME}_DEPRECATED")
   endif()
 
   # generate_export_header picks dllexport vs dllimport from this same property
@@ -41,8 +43,8 @@ function(GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
 
   set(CUSTOM
       "\n\
-#ifndef ${PARSED_DEPRECATED_MACRO_NAME}\n\
-    #define ${PARSED_DEPRECATED_MACRO_NAME}(func) ${PARSED_BASE_NAME}_DEPRECATED func\n\
+#ifndef ${PARSED_DEPRECATED_WRAPPER_NAME}\n\
+    #define ${PARSED_DEPRECATED_WRAPPER_NAME}(func) ${PARSED_BASE_NAME}_DEPRECATED func\n\
 #endif\n\n"
   )
 
@@ -83,7 +85,7 @@ function(GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
     EXPORT_MACRO_NAME
     "${PARSED_EXPORT_MACRO_NAME}"
     DEPRECATED_MACRO_NAME
-    "${PARSED_DEPRECATED_MACRO_NAME}"
+    "${PARSED_BASE_NAME}_DEPRECATED"
     CUSTOM_CONTENT_FROM_VARIABLE
     CUSTOM
   )
