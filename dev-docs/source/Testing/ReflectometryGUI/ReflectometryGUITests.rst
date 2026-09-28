@@ -98,7 +98,7 @@ with ``CRISP``, ``POLREF`` or ``OFFSPEC``.
    ``Polarization Efficiencies`` combo box should be disabled.
 #. Select ``Parameter File`` from the ``Polarisation Corrections`` combo box. The ``Polarization Efficiencies`` combo
    box should still be disabled.
-#. Switch to ``Workspace`` from the ``Polarisation Corrections`` combo box. The ``Fredrikze Input Spin State Order`` and
+#. Switch to ``Workspace`` from the ``Polarisation Corrections`` combo box. The ``Input Flipper/SpinState Order`` and
    ``Polarization Efficiencies`` combo boxes should become enabled. The latter should show a list of all loaded
    workspaces.
 #. Switch to ``FilePath`` from the ``Polarisation Corrections`` combo box. ``Polarization Efficiencies`` should now
