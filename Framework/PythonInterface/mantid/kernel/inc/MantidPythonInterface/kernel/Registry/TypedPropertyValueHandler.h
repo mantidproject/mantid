@@ -28,8 +28,7 @@ GNU_DIAG_OFF("maybe-uninitialized")
  * This class provides a templated class object that is able to take a
  * python object and perform operations with a given C type.
  */
-template <typename ValueType, typename Enable = void>
-struct PYTHON_KERNEL_DLL TypedPropertyValueHandler : public PropertyValueHandler {
+template <typename ValueType, typename Enable = void> struct TypedPropertyValueHandler : public PropertyValueHandler {
   /// Type required by TypeRegistry framework
   using HeldType = ValueType;
 

@@ -25,8 +25,7 @@ namespace Kernel {
  * supports settings a seed value plus a range for each generated value.
  *
  */
-template <typename SingleValueGenerator>
-class MANTID_KERNEL_DLL NDPseudoRandomNumberGenerator : public NDRandomNumberGenerator {
+template <typename SingleValueGenerator> class NDPseudoRandomNumberGenerator : public NDRandomNumberGenerator {
 public:
   /// Constructor
   NDPseudoRandomNumberGenerator(const unsigned int ndims, const size_t seedValue);

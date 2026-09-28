@@ -17,8 +17,7 @@ namespace Kernel {
 
 /** ChainableFactory : Chain of Responsiblity generic factory
  */
-template <typename Factory, typename Product, typename Argument>
-class MANTID_KERNEL_DLL ChainableFactory : public Chainable<Factory> {
+template <typename Factory, typename Product, typename Argument> class ChainableFactory : public Chainable<Factory> {
 public:
   /**
    * Factory method wrapper. Wraps results in smart pointer.
