@@ -219,6 +219,7 @@ QString DataSelector::getProblem() const {
  * algorithm runner to attempt loading.
  *
  * @param filepath :: The file path to load
+ * @return :: true if load algorithm started successfully, otherwise false
  */
 bool DataSelector::autoLoadFile(const QString &filepath) {
   const auto baseName = getWsNameFromFiles().toStdString();
@@ -230,6 +231,7 @@ bool DataSelector::autoLoadFile(const QString &filepath) {
  *
  * @param filename :: The filename of the file to be loaded.
  * @param outputWorkspace :: The name to give the output workspace.
+ * @return :: true if load algorithm started successfully, otherwise false
  */
 bool DataSelector::executeLoadAlgorithm(std::string const &filename, std::string const &outputWorkspace) {
   const auto loadAlg = AlgorithmManager::Instance().createUnmanaged(loadAlgName(filename));
