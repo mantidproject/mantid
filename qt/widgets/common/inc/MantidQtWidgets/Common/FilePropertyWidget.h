@@ -9,6 +9,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/TextPropertyWidget.h"
 #include <QPushButton>
 #include <QString>
@@ -21,7 +22,7 @@ namespace API {
 
   @date 2012-02-17
 */
-class DLLExport FilePropertyWidget : public TextPropertyWidget {
+class EXPORT_OPT_MANTIDQT_COMMON FilePropertyWidget : public TextPropertyWidget {
   Q_OBJECT
 
 public:
