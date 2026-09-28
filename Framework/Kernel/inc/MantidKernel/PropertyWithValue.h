@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/Property.h"
@@ -30,7 +29,7 @@ namespace Kernel {
    http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 14/11/2007
 */
-template <typename TYPE> class MANTID_KERNEL_DLL PropertyWithValue : public Property {
+template <typename TYPE> class DLLExport PropertyWithValue : public Property {
 public:
   PropertyWithValue(std::string name, TYPE defaultValue, IValidator_sptr validator = IValidator_sptr(new NullValidator),
                     const unsigned int direction = Direction::Input);

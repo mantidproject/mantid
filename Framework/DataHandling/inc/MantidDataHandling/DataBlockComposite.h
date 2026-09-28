@@ -61,10 +61,9 @@ private:
  * @param monitorSpectra: a collection of monitor spectrum numbers
  */
 template <typename T>
-void MANTID_DATAHANDLING_DLL populateDataBlockCompositeWithContainer(DataBlockComposite &dataBlockComposite,
-                                                                     T &indexContainer, int64_t nArray,
-                                                                     size_t numberOfPeriods, size_t numberOfChannels,
-                                                                     std::vector<specnum_t> monitorSpectra) {
+void populateDataBlockCompositeWithContainer(DataBlockComposite &dataBlockComposite, T &indexContainer, int64_t nArray,
+                                             size_t numberOfPeriods, size_t numberOfChannels,
+                                             std::vector<specnum_t> monitorSpectra) {
   auto isMonitor = [&monitorSpectra](specnum_t index) {
     return std::find(std::begin(monitorSpectra), std::end(monitorSpectra), index) != std::end(monitorSpectra);
   };
