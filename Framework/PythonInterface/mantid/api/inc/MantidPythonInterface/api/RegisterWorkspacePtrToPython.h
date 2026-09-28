@@ -19,9 +19,8 @@ namespace Mantid::PythonInterface::Registry {
 
 // Specialization for shared_ptr<Workspace> and derived types.
 template <typename T>
-struct PYTHON_API_DLL
-    TypedPropertyValueHandler<std::shared_ptr<T>,
-                              typename std::enable_if<std::is_base_of<API::Workspace, T>::value>::type>
+struct TypedPropertyValueHandler<std::shared_ptr<T>,
+                                 typename std::enable_if<std::is_base_of<API::Workspace, T>::value>::type>
     : public PropertyValueHandler {
   /// Type required by TypeRegistry framework
   using HeldType = std::shared_ptr<T>;
