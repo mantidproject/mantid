@@ -105,8 +105,9 @@ void DataSelector::handleFileInput() {
     return;
   }
 
-  emit filesAutoLoaded();
-  autoLoadFile(filename);
+  if (autoLoadFile(filename)) {
+    emit filesAutoLoaded();
+  }
 }
 
 /**
@@ -218,10 +219,11 @@ QString DataSelector::getProblem() const {
  * algorithm runner to attempt loading.
  *
  * @param filepath :: The file path to load
+ * @return :: true if load algorithm started successfully, otherwise false
  */
-void DataSelector::autoLoadFile(const QString &filepath) {
+bool DataSelector::autoLoadFile(const QString &filepath) {
   const auto baseName = getWsNameFromFiles().toStdString();
-  executeLoadAlgorithm(filepath.toStdString(), baseName);
+  return executeLoadAlgorithm(filepath.toStdString(), baseName);
 }
 
 /**
@@ -229,15 +231,22 @@ void DataSelector::autoLoadFile(const QString &filepath) {
  *
  * @param filename :: The filename of the file to be loaded.
  * @param outputWorkspace :: The name to give the output workspace.
+ * @return :: true if load algorithm started successfully, otherwise false
  */
-void DataSelector::executeLoadAlgorithm(std::string const &filename, std::string const &outputWorkspace) {
+bool DataSelector::executeLoadAlgorithm(std::string const &filename, std::string const &outputWorkspace) {
   const auto loadAlg = AlgorithmManager::Instance().createUnmanaged(loadAlgName(filename));
   loadAlg->initialize();
-  loadAlg->setProperty("Filename", filename);
-  loadAlg->setProperty("OutputWorkspace", outputWorkspace);
+  try {
+    loadAlg->setProperty("Filename", filename);
+    loadAlg->setProperty("OutputWorkspace", outputWorkspace);
+  } catch (std::exception const &ex) {
+    m_uiForm.rfFileInput->setFileProblem(ex.what());
+    return false;
+  }
   loadAlg->updatePropertyValues(m_loadProperties);
 
   m_algRunner.startAlgorithm(loadAlg);
+  return true;
 }
 
 /**

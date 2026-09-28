@@ -370,9 +370,9 @@ private slots:
 
 private:
   /// Attempt to automatically load a file
-  void autoLoadFile(const QString &filenames);
+  bool autoLoadFile(const QString &filenames);
   /// Execute load algorithm
-  void executeLoadAlgorithm(std::string const &filename, std::string const &outputWorkspace);
+  bool executeLoadAlgorithm(std::string const &filename, std::string const &outputWorkspace);
   /// Member containing the widgets child widgets.
   Ui::DataSelector m_uiForm;
   /// Extra load properties to set on the load algorithm before execution
