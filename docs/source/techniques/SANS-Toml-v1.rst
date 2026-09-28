@@ -106,7 +106,7 @@ An example of settings these fields on a toml v2 file:
         sample_direction = {a=0, p=2.3, d=0.002} #spherical coords
 
     [polarization.electric_field]
-        sample_strength_log = ""name_of_log_for_sample_strength"
+        sample_strength_log = "name_of_log_for_sample_strength"
         sample_direction_log = "name_of_log_for_sample_direction"
         sample_direction = {a=0, p=2.3, d=0.002}
 
