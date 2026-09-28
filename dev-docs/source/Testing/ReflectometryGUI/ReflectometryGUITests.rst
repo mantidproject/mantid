@@ -107,6 +107,41 @@ with ``CRISP``, ``POLREF`` or ``OFFSPEC``.
 #. Note that this will leave an empty row. In that row enter run number ``44956`` and angle ``0.4``.
 #. Check you can process the row and it turns green.
 
+Plotting Tab
+------------
+
+#. Using the output from the previous test, navigate to the ``Plotting`` tab.
+#. Select the ``IvsQ_binned_44956_1`` item and check that only ``Plot`` and ``Plot tiled vertically`` are enabled.
+#. Select the ``IvsQ_binned_44956`` item and check that only ``Add to existing plot`` is disabled.
+#. Click ``Plot``. It should produce four plots, one for each of the workspaces in the ``WorkspaceGroup``.
+
+   #. Click ``Plot over``: One plot with four lines.
+   #. Click ``Plot tiled``: One window with four plots on it.
+   #. Check ``Plot tiled vertically`` and click ``Plot tiled`` again: Single window with four plots, but in a vertical order.
+
+#. With some of the plots left open, make sure that the ``Add to existing plot`` checkbox is enabled while they exist and is
+   disabled once they are all closed.
+#. Change the ``Plot output type`` to ``Detector Map``:
+
+   - ``Plot over`` is disabled.
+   - All group and workspace items are enabled.
+   - X and Y axis controls are made visible.
+
+#. Change the ``Plot output type`` to ``Spin Asymmetry``:
+
+   - Only the binned group is enabled.
+   - Only the ``Plot`` button is enabled.
+
+#. Change the ``Plot output type`` to ``Alignment``:
+
+   - All buttons are enabled (when an item is selected).
+   - All group and workspace items are enabled.
+   - An X axis combobox is visible.
+
+.. HINT::
+   This is a tab with a lot of permutations of its various settings and so would benefit from a small amount of time
+   spent trying to break it beyond the instructions given here.
+
 Search by experiment
 --------------------
 
