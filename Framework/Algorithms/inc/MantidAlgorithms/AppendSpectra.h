@@ -31,6 +31,7 @@ public:
   const std::string name() const override;
   int version() const override;
   const std::vector<std::string> seeAlso() const override { return {"ConjoinSpectra"}; }
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   // Overridden Algorithm methods
@@ -42,6 +43,8 @@ private:
   void combineLogs(const API::Run &lhs, const API::Run &rhs, API::Run &ans);
   void appendYAxisLabels(const API::MatrixWorkspace &ws1, const API::MatrixWorkspace &ws2,
                          const API::MatrixWorkspace &output);
+  void rewriteSpectraMap(const API::MatrixWorkspace_const_sptr &ws1, const API::MatrixWorkspace_const_sptr &ws2,
+                         const API::MatrixWorkspace_sptr &output);
 };
 
 } // namespace Algorithms
