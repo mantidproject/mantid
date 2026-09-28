@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 
 #include <QScrollArea>
 #include <QVBoxLayout>
@@ -74,7 +75,7 @@ namespace API {
  *
  *
  */
-class DLLExport WidgetScrollbarDecorator {
+class EXPORT_OPT_MANTIDQT_COMMON WidgetScrollbarDecorator {
 public:
   explicit WidgetScrollbarDecorator(QWidget *target);
   virtual ~WidgetScrollbarDecorator();

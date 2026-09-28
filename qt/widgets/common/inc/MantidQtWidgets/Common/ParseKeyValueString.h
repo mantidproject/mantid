@@ -26,9 +26,10 @@ into a map of key/value pairs.
 namespace MantidQt {
 namespace MantidWidgets {
 
-std::map<std::string, std::string> DLLExport parseKeyValueString(const std::string &str,
-                                                                 const std::string &separator = ",");
-std::map<QString, QString> DLLExport parseKeyValueQString(const QString &str, const std::string &separator = ",");
+std::map<std::string, std::string> EXPORT_OPT_MANTIDQT_COMMON parseKeyValueString(const std::string &str,
+                                                                                  const std::string &separator = ",");
+std::map<QString, QString> EXPORT_OPT_MANTIDQT_COMMON parseKeyValueQString(const QString &str,
+                                                                           const std::string &separator = ",");
 // Trim leading/trailing whitespace and quotes from a string
 void trimWhitespaceAndQuotes(const QString &valueIn);
 // Trim whitespace, quotes and empty values from a string list
