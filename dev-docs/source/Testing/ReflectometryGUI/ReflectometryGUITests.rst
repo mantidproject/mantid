@@ -176,7 +176,7 @@ Save tab
 #. Select a workspace in the list that starts with ``IvsQ``.
 #. Type a valid path into the Save path textbox.
 #. Type something in the prefix field you'd like to use to identify the file. *The files are saved in the form [prefix][workspace][ext]*.
-#. In the File Format section, select ``Custom format (*.dat)``. Check that option ``Additional columns (includes Q resolution)`` is ticked but disabled, as it is not applicable.
+#. In the File Format section, select ``Custom format (*.dat)``. Check that option ``Additional columns`` is ticked but disabled, as it is not applicable.
 #. Untick ``Header`` and ``Q resolution`` and set the separator to ``Comma``.
 #. Click ``Save`` and open the file that should have been saved to the save directory you specified. It should contain 3 columns of numbers, separated by commas.
 #. Tick ``Q resolution`` and re-save. It should now contain 4 columns of numbers.
@@ -187,9 +187,9 @@ Save tab
    - Amongst other things this text should contain the logs you selected, e.g. ``nperiods : 1`` and ``run_end : 2011-10-21T13:32:03``.
 
 #. Try changing the separator to spaces or tabs and check that the 3 or 4 columns of numbers are separated using that separator.
-#. Change the dropdown to ``ORSO Ascii (*.ort)``. The ``Header`` checkbox, separators and parameter settings are not applicable so they should be greyed out. The ``Additional columns (includes Q resolution)`` checkbox should be enabled.
+#. Change the dropdown to ``ORSO Ascii (*.ort)``. The ``Header`` checkbox, separators and parameter settings are not applicable so they should be greyed out. The ``Additional columns`` checkbox should be enabled.
 #. Select a single ``IvsQ_binned`` workspace from the left list, e.g. ``IvsQ_binned_11934``, and click Save. Open the ``.ort`` file that should have been created in your specified save directory. You should get a header at the top starting with ``ORSO reflectivity data file``. There should be 8 columns of numbers with headings ``Qz``, ``R``, ``sR``, ``sQz``, ``lambda``, ``slambda``, ``incident theta`` and ``sincident theta``.
-#. Untick ``Additional columns (includes Q resolution)`` and re-save (the ``Q resolution`` checkbox should still be selected from the earlier steps). The file should now contain 4 columns of numbers with headings ``Qz``, ``R``, ``sR`` and ``sQz``.
+#. Untick ``Additional columns`` and re-save (the ``Q resolution`` checkbox should still be selected from the earlier steps). The file should now contain 4 columns of numbers with headings ``Qz``, ``R``, ``sR`` and ``sQz``.
 #. Untick ``Q resolution`` and re-save. The file should now contain 3 columns of numbers with headings ``Qz``, ``R``, ``sR``.
 #. Change the dropdown to ``ORSO Nexus (*.orb)``. The availability of the settings should be the same as they were for the ``ORSO Ascii (*.ort)`` format. Click Save and check that a file with extension ``.orb`` is saved out. This should be a Nexus file type, so will not be possible to view in a text editor. Use an HDF5 viewer to check that the contents of the file appear sensible.
 #. Change the dropdown to ``3 column (*.dat)``. All the settings should be greyed out as they are not applicable. Click Save to create the ``.dat`` file. You should get 3 columns of numbers separated by tabs (including a leading tab). At the top there is an integer indicating the number of lines in the data.
