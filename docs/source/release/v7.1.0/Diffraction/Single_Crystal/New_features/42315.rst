@@ -1,0 +1,1 @@
+- :ref:`MDNorm <algm-MDNorm>` now supports ``BackgroundWorkspace`` together with ``MonoSCDNormalizationWorkspace`` for monochromatic single crystal diffraction reductions.
