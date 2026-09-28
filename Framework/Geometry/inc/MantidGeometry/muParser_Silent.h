@@ -7,18 +7,16 @@
 /**
 
   This file includes the muParser.h header file and avoids a conflict with the
-  MANTID_GEOMETRY_DLL macro
+  DLLExport macro
   that we both have defined.
 */
 #ifdef _WIN32
-#ifdef MANTID_GEOMETRY_DLL
-#undef MANTID_GEOMETRY_DLL // Avoid warning about redefinition
+#ifdef DLLExport
+#undef DLLExport // Avoid warning about redefinition
 #endif
-#include "MantidGeometry/DllConfig.h"
-
 #include <muParser.h>
-#undef MANTID_GEOMETRY_DLL
-#define MANTID_GEOMETRY_DLL __declspec(dllexport) // Our version.
+#undef DLLExport
+#define DLLExport __declspec(dllexport) // Our version.
 #else
 #include <muParser.h>
 #endif

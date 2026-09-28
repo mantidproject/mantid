@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "MantidKernel/DllConfig.h"
 
 /*******************************************************************************
  *                      READ THIS!! (AND THEN READ IT AGAIN)
@@ -27,11 +26,11 @@
  */
 #ifdef _WIN32
 // Export/Import declarations
-#define MANTID_KERNEL_DLL __declspec(dllexport)
+#define DLLExport __declspec(dllexport)
 #define DLLImport __declspec(dllimport)
 #define EXTERN_IMPORT extern
 #else
-#define MANTID_KERNEL_DLL __attribute__((visibility("default")))
+#define DLLExport __attribute__((visibility("default")))
 #define DLLImport
 #define EXTERN_IMPORT extern
 #endif
