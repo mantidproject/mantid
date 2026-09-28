@@ -14,7 +14,7 @@ import mantid.simpleapi as mantid  # required to call EnggUtils funcs from algor
 from mantid.dataobjects import EventWorkspace, Workspace2D, TableWorkspace
 from Engineering.common import path_handling
 from typing import Tuple, Sequence, List, TYPE_CHECKING
-from mantid.geometry import Detector, Instrument
+from mantid.geometry import ComponentInfo
 
 if TYPE_CHECKING:
     from Engineering.common.calibration_info import CalibrationInfo
@@ -245,7 +245,8 @@ def write_prm_file(ws_foc: Workspace2D, prm_savepath: str, calibration: "Calibra
     lines[13] = lines[13].replace("241391", f"{ws_foc.run().get('run_number').value}")  # replace run num
     # add blocks
     si = ws_foc.spectrumInfo()
-    inst = ws_foc.getInstrument()
+    component_info = ws_foc.componentInfo()
+    detector_info = ws_foc.detectorInfo()
     endl = lines[0][-1]  # new line char
     for iblock, ispec in enumerate(spec_nums):
         # detector parameters
@@ -257,7 +258,9 @@ def write_prm_file(ws_foc: Workspace2D, prm_savepath: str, calibration: "Calibra
         block.extend(f"INS  {iblock + 1}BNKPAR\t{l2:.3f}\t{abs(tth):.3f}\t{phi:.3f}\t0.000\t0.000\t0\t0{endl}")
         block.extend(f"INS  {iblock + 1} ICONS\t{difc:.2f}\t{difa:.2f}\t{tzero:.2f}{endl}")
         # TOF peak profile parameters
-        alpha0, beta0, beta1, sig0_sq, sig1_sq, sig2_sq = getParametersFromDetector(inst, ws_foc.getDetector(ispec))
+        # A detector's component index is equal to its detector index
+        detector_index = detector_info.indexOf(ws_foc.getSpectrum(ispec).getDetectorIDs()[0])
+        alpha0, beta0, beta1, sig0_sq, sig1_sq, sig2_sq = getParametersFromDetector(component_info, detector_index)
         block.extend(f"INS  {iblock + 1}PRCF1 \t3\t21\t0.00050{endl}")
         block.extend(f"INS  {iblock + 1}PRCF11\t{alpha0:.6E}\t{beta0:.6E}\t{beta1:.6E}\t{sig0_sq:.6E}{endl}")
         block.extend(f"INS  {iblock + 1}PRCF12\t{sig1_sq:.6E}\t{sig2_sq:.6E}\t{0.0:.6E}\t{0.0:.6E}{endl}")
@@ -431,20 +434,25 @@ def create_output_files(calibration_dir: str, calibration: "CalibrationInfo", ws
     return prm_filepath  # if both banks, do not pass individual banks (prm_filepath_bank) to GSAS II tab
 
 
-def getParametersFromDetector(instrument: Instrument, detector: Detector) -> Sequence[str] | None:
+def getParametersFromDetector(component_info: ComponentInfo, detector_index: int) -> Sequence[str] | None:
     """
     Get BackToBackExponential parameters from highest level component in tree
-    :param instrument:
-    :param detector:
+    :param component_info:
+    :param detector_index:
     :return: list of parameters
     """
-    inst_tree = detector.getFullName().split(detector.getNameSeparator())[0].split("/")
+    # The ancestry of the detector, from the instrument root down to the detector itself
+    inst_tree = [detector_index]
+    index = detector_index
+    while component_info.hasParent(index):
+        index = component_info.parent(index)
+        inst_tree.append(index)
+    inst_tree.reverse()
     param_names = ["alpha_0", "beta_0", "beta_1", "sigma_0_sq", "sigma_1_sq", "sigma_2_sq"]
     params = None
-    for comp_name in inst_tree:
-        comp = instrument.getComponentByName(comp_name)
-        if comp.hasParameter(param_names[0]):
-            params = [comp.getNumberParameter(param)[0] for param in param_names]
+    for comp in inst_tree:
+        if component_info.hasParameter(param_names[0], comp):
+            params = [component_info.getNumberParameter(param, comp)[0] for param in param_names]
             break
     return params
 

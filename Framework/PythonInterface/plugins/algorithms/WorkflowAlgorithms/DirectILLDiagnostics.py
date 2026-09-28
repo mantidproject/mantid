@@ -62,8 +62,8 @@ class _DiagnosticsSettings:
 
 def _beamStopRanges(ws):
     """Parse beam stop ranges from the instrument parameters of ws."""
-    instrument = ws.getInstrument()
-    definition = instrument.getStringParameter("beam_stop_diagnostics_spectra")[0]
+    component_info = ws.componentInfo()
+    definition = component_info.getStringParameter("beam_stop_diagnostics_spectra")[0]
     ranges = definition.split(",")
     begins = list()
     ends = list()
@@ -666,9 +666,9 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         """Return true if background diagnostics are enabled, false otherwise."""
         bkgDiagnostics = self.getProperty(common.PROP_BKG_DIAGNOSTICS).value
         if bkgDiagnostics == common.BKG_DIAGNOSTICS_AUTO:
-            instrument = mainWS.getInstrument()
-            if instrument.hasParameter("enable_background_diagnostics"):
-                enabled = instrument.getBoolParameter("enable_background_diagnostics")[0]
+            component_info = mainWS.componentInfo()
+            if component_info.hasParameter("enable_background_diagnostics"):
+                enabled = component_info.getBoolParameter("enable_background_diagnostics")[0]
                 if not enabled:
                     self._report.notice("Background diagnostics disable by the IPF.")
                     return False
@@ -693,12 +693,13 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         option = self.getProperty(common.PROP_DEFAULT_MASK).value
         if option == common.DEFAULT_MASK_OFF:
             return None
-        instrument = mainWS.getInstrument()
-        instrumentName = instrument.getName()
-        if not instrument.hasParameter("Workflow.MaskFile"):
+        component_info = mainWS.componentInfo()
+        root = component_info.root()
+        instrumentName = component_info.name(root)
+        if not component_info.hasParameter("Workflow.MaskFile"):
             self._report.notice("No default mask available for " + instrumentName + ".")
             return None
-        maskFilename = instrument.getStringParameter("Workflow.MaskFile")[0]
+        maskFilename = component_info.getStringParameter("Workflow.MaskFile")[0]
         maskFile = os.path.join(mantid.config.getInstrumentDirectory(), "masks", maskFilename)
         defaultMaskWSName = self._names.withSuffix("default_mask")
         defaultMaskWS = LoadMask(
@@ -758,9 +759,9 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         """Return true if elastic peak diagnostics are enabled, false otherwise."""
         peakDiagnostics = self.getProperty(common.PROP_ELASTIC_PEAK_DIAGNOSTICS).value
         if peakDiagnostics == common.ELASTIC_PEAK_DIAGNOSTICS_AUTO:
-            instrument = mainWS.getInstrument()
-            if instrument.hasParameter("enable_elastic_peak_diagnostics"):
-                enabled = instrument.getBoolParameter("enable_elastic_peak_diagnostics")[0]
+            component_info = mainWS.componentInfo()
+            if component_info.hasParameter("enable_elastic_peak_diagnostics"):
+                enabled = component_info.getBoolParameter("enable_elastic_peak_diagnostics")[0]
                 if not enabled:
                     self._report.notice("Elastic peak diagnostics disabled by the IPF.")
                     return False
@@ -794,9 +795,9 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         """Return a suitable value either from a property, the IPF or the supplied defaultValue."""
         prop = self.getProperty(propertyName)
         if prop.isDefault:
-            instrument = ws.getInstrument()
-            if instrument.hasParameter(instrumentParameterName):
-                return instrument.getNumberParameter(instrumentParameterName)[0]
+            component_info = ws.componentInfo()
+            if component_info.hasParameter(instrumentParameterName):
+                return component_info.getNumberParameter(instrumentParameterName)[0]
             return defaultValue
         return prop.value
 

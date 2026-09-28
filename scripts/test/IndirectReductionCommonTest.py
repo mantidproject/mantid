@@ -131,8 +131,9 @@ class GroupSpectraByThetaTest(unittest.TestCase):
             with self.subTest(reflection=reflection):
                 workspace = LoadEmptyInstrument(InstrumentName="OSIRIS", StoreInADS=False)
                 LoadParameterFile(Workspace=workspace, Filename=f"OSIRIS_silicon_{reflection}_Parameters.xml", StoreInADS=False)
-                self.assertEqual(8.0, workspace.getInstrument().getNumberParameter("theta-min")[0])
-                self.assertEqual(163.0, workspace.getInstrument().getNumberParameter("theta-max")[0])
+                component_info = workspace.componentInfo()
+                self.assertEqual(8.0, component_info.getNumberParameter("theta-min")[0])
+                self.assertEqual(163.0, component_info.getNumberParameter("theta-max")[0])
 
     def test_removing_edge_pixels_keeps_surviving_detectors_in_the_same_groups(self):
         workspace_name = "__theta_grouping_edges"

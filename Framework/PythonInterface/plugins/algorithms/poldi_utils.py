@@ -143,8 +143,11 @@ def _calc_cycle_time_from_chopper_speed(chopper_speed):
     return 60.0 / (4.0 * chopper_speed) * 1.0e6  # mus
 
 
-def get_t0_parameters(chopper):
-    return chopper.getNumberParameter("t0")[0], chopper.getNumberParameter("t0_const")[0]
+def get_t0_parameters(component_info, chopper_index):
+    return (
+        component_info.getNumberParameter("t0", chopper_index)[0],
+        component_info.getNumberParameter("t0_const", chopper_index)[0],
+    )
 
 
 def get_instrument_settings_from_log(ws: Workspace2D) -> Tuple[float, np.ndarray[float], float, float]:
@@ -156,12 +159,10 @@ def get_instrument_settings_from_log(ws: Workspace2D) -> Tuple[float, np.ndarray
     :return t0_const: TZERO diffractometer constant for instrument
     :return l1_chop: path length from source to chopper (m)
     """
-    # kept only for parameter access (t0/t0_const), which has no *Info equivalent
-    chopper = ws.getInstrument().getComponentByName("chopper")
-    t0, t0_const = get_t0_parameters(chopper)
-
     component_info = ws.componentInfo()
     chopper_index = component_info.indexOfAny("chopper")
+    t0, t0_const = get_t0_parameters(component_info, chopper_index)
+
     l1_chop = (component_info.position(chopper_index) - component_info.sourcePosition()).norm()
     chopper_speed = ws.run().getPropertyAsSingleValue("chopperspeed")  # rpm
     cycle_time = _calc_cycle_time_from_chopper_speed(chopper_speed)  # mus
@@ -333,9 +334,10 @@ def _do_interp_with_flux_correction(dtarget, d, intensity, sin_theta, lam_grid, 
 
 def _get_flux_arrays(ws, lam_min: float = 1.1, lam_max: float = 5.0, n_points: int = 100):
     """Sample the flux distribution into in memory numpy arrays for fast lookups."""
-    source_comp = ws.getInstrument().getComponentByName("source")
+    component_info = ws.componentInfo()
+    source = component_info.indexOfAny("source")
     lam_grid = np.linspace(lam_min, lam_max, n_points)
     flux_vals = np.fromiter(
-        (source_comp.getFittingParameter("WavelengthDistribution", lam) for lam in lam_grid), dtype=float, count=n_points
+        (component_info.getFittingParameter("WavelengthDistribution", lam, source) for lam in lam_grid), dtype=float, count=n_points
     )
     return lam_grid, flux_vals

@@ -66,8 +66,9 @@ def get_masked_ids(nx_low, nx_high, ny_low, ny_high, workspace, component_name=N
     """
 
     instrument = workspace.getInstrument()
+    component_info = workspace.componentInfo()
     if component_name is None or component_name == "":
-        component_name = instrument.getStringParameter("detector-name")[0]
+        component_name = component_info.getStringParameter("detector-name")[0]
 
     component = instrument.getComponentByName(component_name)
 
@@ -78,7 +79,6 @@ def get_masked_ids(nx_low, nx_high, ny_low, ny_high, workspace, component_name=N
 
     IDs = []
     if component.type() == "RectangularDetector":
-        component_info = workspace.componentInfo()
         bank_index = component_info.indexOfAny(component_name)
         id_start = component_info.pixelGridIdStart(bank_index)
         id_step = component_info.pixelGridIdStep(bank_index)
@@ -139,8 +139,9 @@ def get_masked_pixels(nx_low, nx_high, ny_low, ny_high, workspace, component_nam
     """
     id_list = get_masked_ids(nx_low, nx_high, ny_low, ny_high, workspace, component_name)
 
-    nx_pixels = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
-    ny_pixels = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])
+    component_info = workspace.componentInfo()
+    nx_pixels = int(component_info.getNumberParameter("number-of-x-pixels")[0])
+    ny_pixels = int(component_info.getNumberParameter("number-of-y-pixels")[0])
 
     pixel_list = []
     current_det_id = 3  # First ID (Need to get this from somewhere!!)
@@ -172,13 +173,14 @@ def _get_pixel_info(workspace):
     Get the pixel size and number of pixels from the workspace
     @param workspace: workspace to extract the pixel information from
     """
+    component_info = workspace.componentInfo()
     # # Number of detector pixels in X
-    nx_pixels = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
+    nx_pixels = int(component_info.getNumberParameter("number-of-x-pixels")[0])
     # # Number of detector pixels in Y
-    ny_pixels = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])
+    ny_pixels = int(component_info.getNumberParameter("number-of-y-pixels")[0])
     # # Pixel size in mm
-    pixel_size_x = workspace.getInstrument().getNumberParameter("x-pixel-size")[0]
-    pixel_size_y = workspace.getInstrument().getNumberParameter("y-pixel-size")[0]
+    pixel_size_x = component_info.getNumberParameter("x-pixel-size")[0]
+    pixel_size_y = component_info.getNumberParameter("y-pixel-size")[0]
 
     return nx_pixels, ny_pixels, pixel_size_x, pixel_size_y
 
@@ -198,7 +200,8 @@ def get_aperture_distance(workspace):
     """
     try:
         nguides = workspace.getRun().getProperty("number-of-guides").value
-        apertures_lst = workspace.getInstrument().getStringParameter("aperture-distances")[0]
+        component_info = workspace.componentInfo()
+        apertures_lst = component_info.getStringParameter("aperture-distances")[0]
         apertures = apertures_lst.split(",")
         # Note that they are in reverse order, the first item is for 8 guides
         # and the last item is for 0 guide.

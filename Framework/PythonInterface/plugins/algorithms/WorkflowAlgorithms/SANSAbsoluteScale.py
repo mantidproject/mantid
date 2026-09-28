@@ -205,7 +205,8 @@ class SANSAbsoluteScale(PythonAlgorithm):
             Logger("SANSAbsoluteScale").error("Bad reference detector count: check your beam parameters")
 
         # Pixel size, in mm
-        pixel_size_param = ref_ws.getInstrument().getNumberParameter("x-pixel-size")
+        component_info = ref_ws.componentInfo()
+        pixel_size_param = component_info.getNumberParameter("x-pixel-size")
         if pixel_size_param is not None:
             pixel_size = pixel_size_param[0]
         else:
