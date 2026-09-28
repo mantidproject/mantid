@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidKernel/DllConfig.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <QFileDialog>
 #ifdef Q_OS_DARWIN
 #include <errno.h>
@@ -34,24 +35,25 @@ namespace FileDialogHandler {
  * @param options :: The options argument holds various options about how
  * to run the dialog
  */
-DLLExport QString getSaveFileName(QWidget *parent = nullptr, const Mantid::Kernel::Property *baseProp = nullptr,
-                                  const QFileDialog::Options &options = QFileDialog::Options());
+EXPORT_OPT_MANTIDQT_COMMON QString getSaveFileName(QWidget *parent = nullptr,
+                                                   const Mantid::Kernel::Property *baseProp = nullptr,
+                                                   const QFileDialog::Options &options = QFileDialog::Options());
 
 /**
  * For file dialogs. This will add the selected extension if an extension
  * doesn't already exist.
  */
-DLLExport QString addExtension(const QString &filename, const QString &selectedFilter);
+EXPORT_OPT_MANTIDQT_COMMON QString addExtension(const QString &filename, const QString &selectedFilter);
 
-DLLExport QString getFilter(const Mantid::Kernel::Property *baseProp);
+EXPORT_OPT_MANTIDQT_COMMON QString getFilter(const Mantid::Kernel::Property *baseProp);
 
 /// For file dialogs
-DLLExport QString getFilter(const std::vector<std::string> &exts);
+EXPORT_OPT_MANTIDQT_COMMON QString getFilter(const std::vector<std::string> &exts);
 
 /// Format extension into expected form (*.ext)
-DLLExport QString formatExtension(const std::string &extension);
+EXPORT_OPT_MANTIDQT_COMMON QString formatExtension(const std::string &extension);
 
-DLLExport QString getCaption(const std::string &dialogName, const Mantid::Kernel::Property *prop);
+EXPORT_OPT_MANTIDQT_COMMON QString getCaption(const std::string &dialogName, const Mantid::Kernel::Property *prop);
 } // namespace FileDialogHandler
 } // namespace API
 } // namespace MantidQt
