@@ -97,10 +97,9 @@ with ``CRISP``, ``POLREF`` or ``OFFSPEC``.
 #. Back on the ``Experiment Settings`` tab, the ``Polarisation Corrections`` combo box should now be enabled and the
    ``Polarization Efficiencies`` combo box should be disabled.
 #. Select ``Parameter File`` from the ``Polarisation Corrections`` combo box. The ``Polarization Efficiencies`` combo
-   box should still be disabled.
-#. Switch to ``Workspace`` from the ``Polarisation Corrections`` combo box. The ``Input Flipper/SpinState Order`` and
-   ``Polarization Efficiencies`` combo boxes should become enabled. The latter should show a list of all loaded
-   workspaces.
+   box should still be disabled. The ``Input Flipper/SpinState Order`` combo box should be enabled.
+#. Switch to ``Workspace`` from the ``Polarisation Corrections`` combo box. The ``Polarization Efficiencies`` combo box
+   should become enabled and show a list of all loaded workspaces.
 #. Switch to ``FilePath`` from the ``Polarisation Corrections`` combo box. ``Polarization Efficiencies`` should now
    appear as a line edit. It should appear red for invalid paths and white for valid paths on your system.
 #. Switch back to the ``ParameterFile`` setting from the ``Polarisation Corrections`` combo box.
