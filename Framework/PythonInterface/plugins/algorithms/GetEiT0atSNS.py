@@ -38,7 +38,7 @@ class GetEiT0atSNS(mantid.api.PythonAlgorithm):
     def PyExec(self):
         """Main execution body"""
         wm = self.getProperty("MonitorWorkspace").value
-        i = wm.getInstrument()
+        component_info = wm.componentInfo()
 
         if numpy.mean(wm.getRun()["vChTrans"].value) == 2:
             Ei = numpy.nan
@@ -58,9 +58,9 @@ class GetEiT0atSNS(mantid.api.PythonAlgorithm):
                 if nsp < 2:
                     raise ValueError("There are less than 2 monitors")
                 for sp in range(nsp):
-                    if wm.getSpectrum(sp).getDetectorIDs()[0] == -int(i.getNumberParameter("ei-mon1-spec")[0]):
+                    if wm.getSpectrum(sp).getDetectorIDs()[0] == -int(component_info.getNumberParameter("ei-mon1-spec")[0]):
                         sp1 = sp
-                    if wm.getSpectrum(sp).getDetectorIDs()[0] == -int(i.getNumberParameter("ei-mon2-spec")[0]):
+                    if wm.getSpectrum(sp).getDetectorIDs()[0] == -int(component_info.getNumberParameter("ei-mon2-spec")[0]):
                         sp2 = sp
                 if sp1 == -1:
                     raise RuntimeError("Could not find spectrum for the first monitor")

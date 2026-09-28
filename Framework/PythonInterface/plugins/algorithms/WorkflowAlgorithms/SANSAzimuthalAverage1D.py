@@ -86,8 +86,9 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         output_ws_name = self.getPropertyValue("OutputWorkspace")
 
         # Q range
-        pixel_size_x = workspace.getInstrument().getNumberParameter("x-pixel-size")[0]
-        pixel_size_y = workspace.getInstrument().getNumberParameter("y-pixel-size")[0]
+        component_info = workspace.componentInfo()
+        pixel_size_x = component_info.getNumberParameter("x-pixel-size")[0]
+        pixel_size_y = component_info.getNumberParameter("y-pixel-size")[0]
 
         if len(binning) == 0 or (binning[0] == 0 and binning[1] == 0 and binning[2] == 0):
             # Wavelength. Read in the wavelength bins. Skip the first one which is not set up properly for EQ-SANS
@@ -212,10 +213,11 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         else:
             #  Checked 8/10/2017 -  this is using the right distance for calculating q
             sample_detector_distance = workspace.getRun().getProperty("sample_detector_distance").value
-            nx_pixels = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
-            ny_pixels = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])
-            pixel_size_x = workspace.getInstrument().getNumberParameter("x-pixel-size")[0]
-            pixel_size_y = workspace.getInstrument().getNumberParameter("y-pixel-size")[0]
+            component_info = workspace.componentInfo()
+            nx_pixels = int(component_info.getNumberParameter("number-of-x-pixels")[0])
+            ny_pixels = int(component_info.getNumberParameter("number-of-y-pixels")[0])
+            pixel_size_x = component_info.getNumberParameter("x-pixel-size")[0]
+            pixel_size_y = component_info.getNumberParameter("y-pixel-size")[0]
 
             if workspace.getRun().hasProperty("beam_center_x") and workspace.getRun().hasProperty("beam_center_y"):
                 beam_ctr_x = workspace.getRun().getProperty("beam_center_x").value

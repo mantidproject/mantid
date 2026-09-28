@@ -89,7 +89,8 @@ class USANSReduction(PythonAlgorithm):
             Load(Filename=self._find_monitors(empty_run), OutputWorkspace="__empty_monitors")
 
         # Get the wavelength peak positions
-        wl_cfg_str = mtd["__empty"].getInstrument().getStringParameter("wavelength_config")[0]
+        component_info = mtd["__empty"].componentInfo()
+        wl_cfg_str = component_info.getStringParameter("wavelength_config")[0]
         self.wl_list = json.loads(wl_cfg_str)
 
         # Get the runs to reduce

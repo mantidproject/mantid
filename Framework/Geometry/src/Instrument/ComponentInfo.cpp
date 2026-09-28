@@ -789,6 +789,18 @@ std::vector<std::string> ComponentInfo::getStringParameter(const size_t componen
   return getParameter<std::string>(componentIndex, name, recursive);
 }
 
+std::string ComponentInfo::getParameterType(const size_t componentIndex, const std::string &name,
+                                            bool recursive) const {
+  if (m_parameterInfo) {
+    Parameter_sptr const parameter = recursive ? m_parameterInfo->getRecursive(*this, componentIndex, name)
+                                               : m_parameterInfo->get(componentIndex, name);
+    if (parameter) {
+      return std::string(parameter->type());
+    }
+  }
+  return std::string();
+}
+
 double ComponentInfo::getFittingParameter(const size_t componentIndex, const std::string &name, double xvalue) const {
   if (!m_parameterInfo)
     throw std::runtime_error("Parameters are not available in component=" + this->name(componentIndex));

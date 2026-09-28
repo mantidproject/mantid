@@ -191,7 +191,8 @@ class DirectILLCollectDataTest(unittest.TestCase):
         inWS = mtd[self._TEST_WS_NAME]
         E_i = inWS.run().getProperty("Ei").value
         self.assertEqual(eiWS.y(0)[0], E_i)
-        E_fixed = mtd[outWSName].getInstrument().getNumberParameter("Efixed")[0]
+        component_info = mtd[outWSName].componentInfo()
+        E_fixed = component_info.getNumberParameter("Efixed")[0]
         self.assertEqual(eiWS.y(0)[0], E_fixed)
 
     def testIncidentEnergyPanther(self):
@@ -211,7 +212,8 @@ class DirectILLCollectDataTest(unittest.TestCase):
         E_i = outWS.run().getProperty("Ei").value
         assert_almost_equal(eiWS.y(0)[0], E_i, 2)
         assert_almost_equal(E_i, 77.17, 2)
-        E_fixed = outWS.getInstrument().getNumberParameter("Efixed")[0]
+        component_info = outWS.componentInfo()
+        E_fixed = component_info.getNumberParameter("Efixed")[0]
         assert_almost_equal(E_fixed, 77.17, 2)
 
 
