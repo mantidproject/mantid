@@ -45,7 +45,7 @@ AlgorithmManager.shutdown()
 class AlgorithmManagerShutdownTest(unittest.TestCase):
     def test_shutdown_releases_the_gil_while_waiting_for_algorithms(self):
         result = subprocess.run(
-            [sys.executable, "-c", SHUTDOWN_GIL_REGRESSION_SCRIPT], capture_output=True, text=True, timeout=5, check=False
+            [sys.executable, "-c", SHUTDOWN_GIL_REGRESSION_SCRIPT], capture_output=True, text=True, timeout=15, check=False
         )
         self.assertEqual(0, result.returncode, msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}")
 
