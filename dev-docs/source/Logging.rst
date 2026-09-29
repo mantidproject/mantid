@@ -143,6 +143,11 @@ The simplest way to configure the logger is:
 Note that :code:`log_to_python` overwrites the existing setup.
 If you need more control, you can use :code:`'PythonLoggingChannel'` as a channel class in the config as described above.
 
+Messages sent through :code:`PythonLoggingChannel` are queued so that C++ threads do not block waiting for the Python
+interpreter. Delivery to Python therefore happens shortly after the C++ logging call returns. The queue holds up to
+10,000 messages; if it fills, further messages are dropped and a warning with the number dropped is emitted when
+delivery resumes.
+
 Tips
 ----
 

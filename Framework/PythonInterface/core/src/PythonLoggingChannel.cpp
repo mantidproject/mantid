@@ -10,8 +10,14 @@
 
 // 3rd-party includes
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
+#include "MantidPythonInterface/core/WrapPython.h"
 #include <Poco/Message.h>
+#include <boost/python/errors.hpp>
 #include <boost/python/import.hpp>
+#include <boost/python/object.hpp>
+#include <deque>
+#include <mutex>
+#include <sstream>
 
 namespace Poco {
 
@@ -23,6 +29,7 @@ constexpr int PY_WARNING = 30;
 constexpr int PY_INFO = 20;
 constexpr int PY_DEBUG = 10;
 constexpr int PY_NOTSET = 0;
+constexpr size_t MAX_QUEUE_SIZE = 10000;
 
 auto pythonLevel(const Message::Priority prio) {
   switch (prio) {
@@ -46,33 +53,131 @@ auto pythonLevel(const Message::Priority prio) {
 
 } // namespace
 
-PythonLoggingChannel::PythonLoggingChannel() {
+struct PythonLoggingChannel::State {
+  ~State() {
+    if (!pyLogger)
+      return;
+
+    if (Py_IsInitialized()) {
+      Mantid::PythonInterface::GlobalInterpreterLock gil;
+      pyLogger = nullptr;
+    } else {
+      operator delete(pyLogger.release());
+    }
+  }
+
+  std::mutex mutex;
+  std::deque<Message> queue;
+  std::unique_ptr<boost::python::object> pyLogger;
+  size_t droppedMessages{0};
+  bool callbackScheduled{false};
+  bool closed{false};
+};
+
+PythonLoggingChannel::PythonLoggingChannel() : m_state(std::make_shared<State>()) {
   Mantid::PythonInterface::GlobalInterpreterLock gil;
   auto logger = (boost::python::import("logging").attr("getLogger")("Mantid"));
-  m_pyLogger = std::make_unique<boost::python::object>(std::move(logger));
+  m_state->pyLogger = std::make_unique<boost::python::object>(std::move(logger));
 }
 
-// The special behavior here is needed because Poco's LoggingFactory can be destroyed
-// after the Python interpreter was shut down.
-PythonLoggingChannel::~PythonLoggingChannel() {
-  if (Py_IsInitialized()) {
-    Mantid::PythonInterface::GlobalInterpreterLock gil;
-    // Destroy the object while the GIL is held.
-    m_pyLogger = nullptr;
-  } else {
-    // The Python interpreter has been shut down and our logger object destroyed.
-    // We can no longer safely call the destructor of *m_pLogger,
-    // so just deallocate the memory.
-    operator delete(m_pyLogger.release());
+PythonLoggingChannel::~PythonLoggingChannel() { close(); }
+
+void PythonLoggingChannel::log(const Poco::Message &msg) { enqueue(msg); }
+
+void PythonLoggingChannel::log(Poco::Message &&msg) { enqueue(std::move(msg)); }
+
+void PythonLoggingChannel::enqueue(Poco::Message msg) {
+  const auto state = m_state;
+  if (!state || !Py_IsInitialized())
+    return;
+
+  bool scheduleCallback{false};
+  {
+    std::lock_guard lock(state->mutex);
+    if (state->closed)
+      return;
+
+    if (state->queue.size() < MAX_QUEUE_SIZE)
+      state->queue.emplace_back(std::move(msg));
+    else
+      ++state->droppedMessages;
+
+    if (!state->callbackScheduled && !state->queue.empty()) {
+      state->callbackScheduled = true;
+      scheduleCallback = true;
+    }
+  }
+
+  if (!scheduleCallback)
+    return;
+
+  auto *stateHolder = new std::shared_ptr<State>(state);
+  if (Py_AddPendingCall(&PythonLoggingChannel::drainQueue, stateHolder) != 0) {
+    delete stateHolder;
+    std::lock_guard lock(state->mutex);
+    state->callbackScheduled = false;
   }
 }
 
-void PythonLoggingChannel::log(const Poco::Message &msg) {
-  if (m_pyLogger && Py_IsInitialized()) {
-    Mantid::PythonInterface::GlobalInterpreterLock gil;
-    const auto logFn = m_pyLogger->attr("log");
-    const auto numericLevel = pythonLevel(msg.getPriority());
-    logFn(numericLevel, msg.getText());
+int PythonLoggingChannel::drainQueue(void *statePtr) {
+  std::unique_ptr<std::shared_ptr<State>> stateHolder(static_cast<std::shared_ptr<State> *>(statePtr));
+  drainQueue(*stateHolder);
+  return 0;
+}
+
+void PythonLoggingChannel::drainQueue(const std::shared_ptr<State> &state) {
+  if (!Py_IsInitialized())
+    return;
+
+  while (true) {
+    Message message;
+    size_t droppedMessages{0};
+    {
+      std::lock_guard lock(state->mutex);
+      if (state->queue.empty()) {
+        state->callbackScheduled = false;
+        return;
+      }
+
+      message = std::move(state->queue.front());
+      state->queue.pop_front();
+      droppedMessages = state->droppedMessages;
+      state->droppedMessages = 0;
+    }
+
+    try {
+      const auto logFn = state->pyLogger->attr("log");
+      if (droppedMessages > 0) {
+        std::ostringstream warning;
+        warning << "PythonLoggingChannel dropped " << droppedMessages << " messages because its queue was full";
+        logFn(PY_WARNING, warning.str());
+      }
+      logFn(pythonLevel(message.getPriority()), message.getText());
+    } catch (boost::python::error_already_set &) {
+      PyErr_Print();
+    }
   }
+}
+
+void PythonLoggingChannel::flush() {
+  const auto state = m_state;
+  if (!state || !Py_IsInitialized())
+    return;
+
+  Mantid::PythonInterface::GlobalInterpreterLock gil;
+  drainQueue(state);
+}
+
+void PythonLoggingChannel::close() {
+  const auto state = m_state;
+  if (!state)
+    return;
+
+  {
+    std::lock_guard lock(state->mutex);
+    state->closed = true;
+  }
+  flush();
+  m_state.reset();
 }
 } // namespace Poco
