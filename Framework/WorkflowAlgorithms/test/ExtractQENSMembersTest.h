@@ -14,13 +14,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
-
-#include "MantidDataObjects/Workspace2D.h"
-
 #include "MantidDataHandling/Load.h"
-
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-
+#include "MantidKernel/Unit.h"
 #include "MantidWorkflowAlgorithms/ExtractQENSMembers.h"
 
 #include <algorithm>

@@ -9,6 +9,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
+#include "MantidKernel/Unit.h"
 
 #include <cxxtest/TestSuite.h>
 #include <utility>

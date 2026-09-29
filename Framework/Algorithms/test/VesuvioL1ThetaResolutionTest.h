@@ -15,6 +15,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidKernel/Unit.h"
 
 using Mantid::Algorithms::VesuvioL1ThetaResolution;
 using namespace Mantid::API;

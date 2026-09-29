@@ -19,6 +19,7 @@
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/Unit.h"
 
 #include <memory>
 

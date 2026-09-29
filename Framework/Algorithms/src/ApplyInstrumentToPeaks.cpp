@@ -7,6 +7,7 @@
 
 #include "MantidAlgorithms/ApplyInstrumentToPeaks.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid::Algorithms {
 

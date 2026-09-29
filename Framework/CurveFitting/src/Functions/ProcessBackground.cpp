@@ -16,6 +16,7 @@
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <algorithm>

@@ -19,6 +19,7 @@
 #include "MantidKernel/LambdaValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/SpinStateValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/H5Util.h"
 
