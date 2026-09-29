@@ -42,6 +42,7 @@ public:
 private:
   struct State;
 
+  void closeImpl();
   void enqueue(Poco::Message msg);
   static int drainQueue(void *statePtr);
   static void drainQueue(const std::shared_ptr<State> &state);
