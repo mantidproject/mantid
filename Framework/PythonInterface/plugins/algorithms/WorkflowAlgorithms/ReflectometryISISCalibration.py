@@ -25,7 +25,9 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
     _INSTRUMENT_WORKFLOW = "InstrumentWorkflow"
     _SPECULAR_PIXEL_SPECTRUM_NO = "SpecularPixelSpectrumNo"
     _EXPERIMENT_ANGLE = "ExperimentAngle"
+    _ADJUST_EXPERIMENT_ANGLE = "AdjustExperimentAngle"
     _OUTPUT_WORKSPACE = "OutputWorkspace"
+    _ADJUSTED_THETA_LOG = "reflectometry_adjusted_theta"
 
     _POSITION_CORRECTION_TYPE = "DetectorCorrectionType"
     _COMMENT_PREFIX = "#"
@@ -40,6 +42,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
     _POLREF_WORKFLOW = "POLREF"
     _VERTICAL_SHIFT = "VerticalShift"
     _ROTATE_AROUND_SAMPLE = "RotateAroundSample"
+    _POLREF_NOMINAL_SPECULAR_SPECTRUM_NO = 280.0  # This is temporary, will be dynamic in upcoming PR.
     _RAD_TO_DEG = 180.0 / math.pi
 
     class CalibrationData:
@@ -70,10 +73,12 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             self,
             calibration_angle_type,
             detector_correction_type,
+            angle_correction_enabled=False,
             enabled_properties=None,
         ):
             self.calibration_angle_type = calibration_angle_type
             self.detector_correction_type = detector_correction_type
+            self.angle_correction_enabled = angle_correction_enabled
             self.enabled_properties = set(enabled_properties or [])
 
         def enable_property(self, property_name):
@@ -130,8 +135,15 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             Property.EMPTY_DBL,
             "The experiment theta angle in degrees. Required for the POLREF workflow.",
         )
+        self.declareProperty(
+            self._ADJUST_EXPERIMENT_ANGLE,
+            False,
+            "For the POLREF workflow, adjust ExperimentAngle using the difference between the measured and nominal "
+            "specular-pixel angles in the calibration map.",
+        )
         self._enable_property_when_workflow_option_enables(self._SPECULAR_PIXEL_SPECTRUM_NO)
         self._enable_property_when_workflow_option_enables(self._EXPERIMENT_ANGLE)
+        self._enable_property_when_workflow_option_enables(self._ADJUST_EXPERIMENT_ANGLE)
         self.declareProperty(
             WorkspaceProperty(self._OUTPUT_WORKSPACE, "", direction=Direction.Output),
             doc="The calibrated output workspace.",
@@ -146,8 +158,12 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             raise FileNotFoundError("Calibration file path cannot be found")
 
         ws = self.getProperty(self._WORKSPACE).value
-        calibrated_ws = self._correct_detector_positions(ws, calibration_data)
-
+        correct_angle = self._workflow_options.angle_correction_enabled and self.getProperty(self._ADJUST_EXPERIMENT_ANGLE).value
+        calibrated_ws = self._clone_workspace(ws)
+        if correct_angle:
+            self._adjusted_theta = self._calculate_adjusted_theta(calibration_data)
+            calibrated_ws.run().addProperty(self._ADJUSTED_THETA_LOG, self._adjusted_theta, True)
+        self._correct_detector_positions(calibrated_ws, calibration_data)
         self.setProperty(self._OUTPUT_WORKSPACE, calibrated_ws)
 
     def validateInputs(self):
@@ -285,20 +301,19 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         return clone_alg.getProperty("OutputWorkspace").value
 
     def _correct_detector_positions(self, ws, calibration_data):
-        calibration_ws = self._clone_workspace(ws)
-        det_info = calibration_ws.detectorInfo()
+        det_info = ws.detectorInfo()
 
         if self._workflow_options.calibration_angle_type == self._ABSOLUTE:
-            calibration_data = self._convert_absolute_angles_to_offsets(calibration_ws, calibration_data)
+            calibration_data = self._convert_absolute_angles_to_offsets(ws, calibration_data)
 
         correction_alg = self.createChildAlgorithm("SpecularReflectionPositionCorrect")
         # Turn off history recording to prevent the history becoming very large, as this causes reloading of a
         # calibrated workspace to be very slow
         correction_alg.enableHistoryRecordingForChild(False)
         # Passing the same workspace as both input and output means all the detector moves are applied to it
-        correction_alg.setProperty("InputWorkspace", calibration_ws)
+        correction_alg.setProperty("InputWorkspace", ws)
         correction_alg.setProperty("MoveFixedDetectors", True)
-        correction_alg.setProperty("OutputWorkspace", calibration_ws)
+        correction_alg.setProperty("OutputWorkspace", ws)
         correction_alg.setProperty(self._POSITION_CORRECTION_TYPE, self._workflow_options.detector_correction_type)
 
         for det_id, theta_offset in calibration_data.items():
@@ -310,8 +325,6 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             correction_alg.setProperty("TwoTheta", new_two_theta)
             correction_alg.setProperty("DetectorID", det_id)
             correction_alg.execute()
-
-        return calibration_ws
 
     def _calculate_calibrated_two_theta(self, det_info, det_id, theta_offset):
         """Calculates the new twoTheta value for a detector from a given offset, in degrees"""
@@ -408,6 +421,25 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             values_by_spectrum_number[upper_spectrum_number],
         )
 
+    def _calculate_adjusted_theta(self, calibration_angles):
+        experiment_angle = self.getProperty(self._EXPERIMENT_ANGLE).value
+        nominal_spectrum_number = self._POLREF_NOMINAL_SPECULAR_SPECTRUM_NO
+        self._validate_interpolation_index(
+            self._specular_pixel_spectrum_number(),
+            calibration_angles.first_key(),
+            calibration_angles.last_key(),
+            self._SPECULAR_PIXEL_SPECTRUM_NO,
+        )
+        self._validate_interpolation_index(
+            nominal_spectrum_number,
+            calibration_angles.first_key(),
+            calibration_angles.last_key(),
+            "Nominal POLREF specular spectrum number",
+        )
+        measured_angle = self._interpolate_calibration_angle(calibration_angles.data, self._specular_pixel_spectrum_number())
+        nominal_angle = self._interpolate_calibration_angle(calibration_angles.data, nominal_spectrum_number)
+        return experiment_angle + measured_angle - nominal_angle
+
     @staticmethod
     def _interpolate_between(index, lower_index, lower_value, upper_index, upper_value):
         if lower_index == upper_index:
@@ -427,7 +459,8 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             self._POLREF_WORKFLOW: self.WorkflowOptions(
                 calibration_angle_type=self._ABSOLUTE,
                 detector_correction_type=self._ROTATE_AROUND_SAMPLE,
-                enabled_properties={self._SPECULAR_PIXEL_SPECTRUM_NO, self._EXPERIMENT_ANGLE},
+                angle_correction_enabled=True,
+                enabled_properties={self._SPECULAR_PIXEL_SPECTRUM_NO, self._EXPERIMENT_ANGLE, self._ADJUST_EXPERIMENT_ANGLE},
             ),
         }
 
@@ -448,7 +481,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         return self.getProperty(self._SPECULAR_PIXEL_SPECTRUM_NO).value
 
     def _experiment_angle(self):
-        return self.getProperty(self._EXPERIMENT_ANGLE).value
+        return getattr(self, "_adjusted_theta", self.getProperty(self._EXPERIMENT_ANGLE).value)
 
 
 AlgorithmFactory.subscribe(ReflectometryISISCalibration)

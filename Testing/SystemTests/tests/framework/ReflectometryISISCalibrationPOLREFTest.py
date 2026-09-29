@@ -27,12 +27,14 @@ class ReflectometryISISCalibrationPOLREFTest(systemtesting.MantidSystemTest):
             InstrumentWorkflow="POLREF",
             SpecularPixelSpectrumNo=self._SPECULAR_PIXEL,
             ExperimentAngle=0.95,
+            AdjustExperimentAngle=True,
             OutputWorkspace=self._OUTPUT_FILE,
         )
 
         for i in range(len(group_ws)):
             spec_index = self._workspace_index_for_spectrum_number(group_ws[i], int(round(self._SPECULAR_PIXEL)))
             self._check_geometry_changed_in_polref_scattering_plane(spec_index, group_ws[i], output_ws[i])
+            self.assertDelta(0.95, output_ws[i].run().getProperty("reflectometry_adjusted_theta").value, 1e-12)
 
     def validate(self):
         return self._OUTPUT_FILE, self._REFERENCE_FILE
@@ -47,6 +49,7 @@ class ReflectometryISISCalibrationPOLREFTest(systemtesting.MantidSystemTest):
         algorithm.setProperty("InstrumentWorkflow", "POLREF")
         algorithm.setProperty("SpecularPixelSpectrumNo", self._SPECULAR_PIXEL)
         algorithm.setProperty("ExperimentAngle", 0.95)
+        algorithm.setProperty("AdjustExperimentAngle", True)
         self.assertEqual({}, algorithm.validateInputs())
 
     def _check_geometry_changed_in_polref_scattering_plane(self, spec_index, input, output):

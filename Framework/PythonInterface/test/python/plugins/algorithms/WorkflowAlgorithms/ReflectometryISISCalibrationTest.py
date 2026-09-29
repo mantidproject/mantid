@@ -244,6 +244,7 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         self._assert_run_algorithm_succeeds(args, [input_ws_name, output_ws_name])
 
         output_ws = AnalysisDataService.retrieve(output_ws_name)
+        self.assertFalse(output_ws.run().hasProperty("reflectometry_adjusted_theta"))
         self._check_polref_final_theta_values(
             output_ws,
             {
@@ -258,6 +259,48 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
                 9: 0.55,
             },
         )
+
+    def test_polref_angle_correction_interpolates_positive_fractional_displacement(self):
+        alg = self._initialized_calibration_algorithm(ExperimentAngle=0.5, SpecularPixelSpectrumNo=280.5, AdjustExperimentAngle=True)
+        calibration_angles = ReflectometryISISCalibration.CalibrationData({279: 0.2, 280: 0.1, 281: 0.0})
+
+        self.assertAlmostEqual(0.45, alg._calculate_adjusted_theta(calibration_angles))
+
+    def test_polref_angle_correction_interpolates_negative_fractional_displacement(self):
+        alg = self._initialized_calibration_algorithm(ExperimentAngle=0.5, SpecularPixelSpectrumNo=279.5, AdjustExperimentAngle=True)
+        calibration_angles = ReflectometryISISCalibration.CalibrationData({279: 0.2, 280: 0.1, 281: 0.0})
+
+        self.assertAlmostEqual(0.55, alg._calculate_adjusted_theta(calibration_angles))
+
+    def test_polref_angle_correction_records_adjusted_theta_on_output_workspace(self):
+        ws = self._create_sample_workspace("test_1234")
+        for index, spectrum_number in enumerate(range(277, 286)):
+            ws.getSpectrum(index).setSpectrumNo(spectrum_number)
+        calibration_angles = {spectrum_number: 0.1 * (281 - spectrum_number) for spectrum_number in range(277, 286)}
+        self.temp_calibration_file = TemporaryFileHelper(
+            fileContent=self._absolute_calibration_file_content(calibration_angles), extension=".dat"
+        )
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "InstrumentWorkflow": "POLREF",
+            "SpecularPixelSpectrumNo": 280.5,
+            "ExperimentAngle": 0.5,
+            "AdjustExperimentAngle": True,
+            "OutputWorkspace": "test_calibrated",
+        }
+
+        self._assert_run_algorithm_succeeds(args, ["test_1234", "test_calibrated"])
+
+        adjusted_theta = AnalysisDataService.retrieve("test_calibrated").run().getProperty("reflectometry_adjusted_theta").value
+        self.assertAlmostEqual(0.45, adjusted_theta)
+
+    def test_polref_angle_correction_validates_measured_spectrum_before_interpolation(self):
+        alg = self._initialized_calibration_algorithm(ExperimentAngle=0.5, SpecularPixelSpectrumNo=278.5, AdjustExperimentAngle=True)
+        calibration_angles = ReflectometryISISCalibration.CalibrationData({279: 0.2, 280: 0.1, 281: 0.0})
+
+        with self.assertRaisesRegex(RuntimeError, "SpecularPixelSpectrumNo must be in the range 279 to 281"):
+            alg._calculate_adjusted_theta(calibration_angles)
 
     def test_polref_workflow_inverts_descending_calibration_map_angles(self):
         input_ws_name = "test_1234"
@@ -369,6 +412,13 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
 
         self.assertTrue(workflow_options.enable_property("SpecularPixelSpectrumNo"))
         self.assertFalse(workflow_options.enable_property("ExperimentAngle"))
+
+    def test_angle_correction_is_enabled_only_for_polref_workflow(self):
+        alg = self._initialized_calibration_algorithm()
+        workflow_options = alg._workflow_options_by_name()
+
+        self.assertFalse(workflow_options["Default"].angle_correction_enabled)
+        self.assertTrue(workflow_options["POLREF"].angle_correction_enabled)
 
     def test_polref_workflow_raises_if_spectrum_number_is_fractional(self):
         input_ws_name = "test_1234"
@@ -511,6 +561,14 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
     def _setup_algorithm(self, args):
         alg = create_algorithm("ReflectometryISISCalibration", **args)
         alg.setRethrows(True)
+        return alg
+
+    @staticmethod
+    def _initialized_calibration_algorithm(**kwargs):
+        alg = ReflectometryISISCalibration()
+        alg.initialize()
+        for property_name, value in kwargs.items():
+            alg.setProperty(property_name, value)
         return alg
 
 
