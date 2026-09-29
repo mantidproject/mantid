@@ -44,17 +44,24 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
         if ws_name != self._model.workspace.name():
             return
 
+        detector_ids = self._model._detector_ids.copy()
         detector_is_picked = self._model._detector_is_picked.copy()
         point_picked_detectors = self._model._point_picked_detectors.copy()
+        # Alfview should have any groupings selected, but included for consistency
+        current_detector_groupings = self._model._current_detector_groupings.copy()
 
         self._reset_model_workspace(ws_name)
 
         if (
             detector_is_picked.shape == self._model._detector_is_picked.shape
             and point_picked_detectors.shape == self._model._point_picked_detectors.shape
+            # Detector IDs should always match since alfview uses the same workspace for storing data
+            and np.array_equal(detector_ids, self._model._detector_ids)
+            and current_detector_groupings.shape == self._model._current_detector_groupings.shape
         ):
             self._model._detector_is_picked = detector_is_picked
             self._model._point_picked_detectors = point_picked_detectors
+            self._model._current_detector_groupings = current_detector_groupings
 
         self._publish_selection_change(force_actor_refresh=True)
 

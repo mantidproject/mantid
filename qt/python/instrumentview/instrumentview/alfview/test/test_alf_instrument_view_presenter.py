@@ -171,6 +171,28 @@ class TestALFInstrumentViewPresenter(unittest.TestCase):
         np.testing.assert_array_equal(self._model._detector_is_picked, np.zeros(1, dtype=bool))
         np.testing.assert_array_equal(self._model._point_picked_detectors, np.zeros(1, dtype=bool))
 
+    def test_replace_workspace_callback_does_not_restore_cached_detectors_when_detector_ids_change(self):
+        ws_name = self._model.workspace.name()
+        detector_ids = self._model._detector_ids.copy()
+        cached_detector_is_picked = np.array([True, False, True], dtype=bool)
+        cached_point_picked_detectors = np.array([False, True, False], dtype=bool)
+        self._model._detector_is_picked = cached_detector_is_picked.copy()
+        self._model._point_picked_detectors = cached_point_picked_detectors.copy()
+
+        def fake_reset(_ws_name: str):
+            self._model._detector_ids = detector_ids + 1000
+            self._model._detector_is_picked = np.zeros_like(self._model._detector_ids, dtype=bool)
+            self._model._point_picked_detectors = np.zeros_like(self._model._detector_ids, dtype=bool)
+
+        with (
+            mock.patch.object(self._presenter, "_reset_model_workspace", side_effect=fake_reset),
+            mock.patch.object(self._presenter, "_publish_selection_change"),
+        ):
+            self._presenter._replace_workspace_callback(ws_name, None)
+
+        np.testing.assert_array_equal(self._model._detector_is_picked, np.zeros_like(self._model._detector_ids, dtype=bool))
+        np.testing.assert_array_equal(self._model._point_picked_detectors, np.zeros_like(self._model._detector_ids, dtype=bool))
+
     def test_replace_workspace_callback_notifies_instrument_actor_reset(self):
         ws_name = self._model.workspace.name()
         with (
