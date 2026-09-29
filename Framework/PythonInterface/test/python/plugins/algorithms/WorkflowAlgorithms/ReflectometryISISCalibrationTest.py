@@ -264,13 +264,13 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         alg = self._initialized_calibration_algorithm(ExperimentAngle=0.5, SpecularPixelSpectrumNo=280.5, AdjustExperimentAngle=True)
         calibration_angles = ReflectometryISISCalibration.CalibrationData({279: 0.2, 280: 0.1, 281: 0.0})
 
-        self.assertAlmostEqual(0.45, alg._calculate_adjusted_theta(calibration_angles))
+        self.assertAlmostEqual(0.55, alg._calculate_adjusted_theta(calibration_angles))
 
     def test_polref_angle_correction_interpolates_negative_fractional_displacement(self):
         alg = self._initialized_calibration_algorithm(ExperimentAngle=0.5, SpecularPixelSpectrumNo=279.5, AdjustExperimentAngle=True)
         calibration_angles = ReflectometryISISCalibration.CalibrationData({279: 0.2, 280: 0.1, 281: 0.0})
 
-        self.assertAlmostEqual(0.55, alg._calculate_adjusted_theta(calibration_angles))
+        self.assertAlmostEqual(0.45, alg._calculate_adjusted_theta(calibration_angles))
 
     def test_polref_angle_correction_records_adjusted_theta_on_output_workspace(self):
         ws = self._create_sample_workspace("test_1234")
@@ -293,7 +293,7 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         self._assert_run_algorithm_succeeds(args, ["test_1234", "test_calibrated"])
 
         adjusted_theta = AnalysisDataService.retrieve("test_calibrated").run().getProperty("reflectometry_adjusted_theta").value
-        self.assertAlmostEqual(0.45, adjusted_theta)
+        self.assertAlmostEqual(0.55, adjusted_theta)
 
     def test_polref_angle_correction_validates_measured_spectrum_before_interpolation(self):
         alg = self._initialized_calibration_algorithm(ExperimentAngle=0.5, SpecularPixelSpectrumNo=278.5, AdjustExperimentAngle=True)

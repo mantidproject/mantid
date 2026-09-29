@@ -138,8 +138,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         self.declareProperty(
             self._ADJUST_EXPERIMENT_ANGLE,
             False,
-            "For the POLREF workflow, adjust ExperimentAngle using the difference between the measured and nominal "
-            "specular-pixel angles in the calibration map.",
+            "For the POLREF workflow, adjust ExperimentAngle using the nominal minus measured specular-pixel angle in the calibration map.",
         )
         self._enable_property_when_workflow_option_enables(self._SPECULAR_PIXEL_SPECTRUM_NO)
         self._enable_property_when_workflow_option_enables(self._EXPERIMENT_ANGLE)
@@ -438,7 +437,9 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         )
         measured_angle = self._interpolate_calibration_angle(calibration_angles.data, self._specular_pixel_spectrum_number())
         nominal_angle = self._interpolate_calibration_angle(calibration_angles.data, nominal_spectrum_number)
-        return experiment_angle + measured_angle - nominal_angle
+        # POLREF calibration-map angle decreases as workspace signed two theta increases,
+        # so invert the map displacement as in _convert_absolute_angles_to_offsets.
+        return experiment_angle + nominal_angle - measured_angle
 
     @staticmethod
     def _interpolate_between(index, lower_index, lower_value, upper_index, upper_value):
