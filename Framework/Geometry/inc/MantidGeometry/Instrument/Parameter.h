@@ -105,7 +105,7 @@ private:
 };
 
 /// Templated class for parameters of type \c Type
-template <class Type> class ParameterType : public Parameter {
+template <class Type> class DLLExport ParameterType : public Parameter {
 public:
   /// Constructor
   ParameterType() : Parameter(), m_value() {}
