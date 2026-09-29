@@ -64,7 +64,7 @@ public:
   // types
   using result_type = _RealType;
 
-  class MANTID_KERNEL_DLL param_type {
+  class param_type {
     result_type __mean_;
     result_type __stddev_;
 
