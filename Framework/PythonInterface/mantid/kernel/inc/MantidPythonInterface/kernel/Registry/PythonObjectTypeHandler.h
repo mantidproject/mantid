@@ -16,7 +16,7 @@ namespace Registry {
  * A specialisation of PropertyValueHandler to handle passing a python object directly
  * to a PythonObjectProperty
  */
-struct PYTHON_KERNEL_DLL PythonObjectTypeHandler : public TypedPropertyValueHandler<boost::python::object> {
+struct DLLExport PythonObjectTypeHandler : public TypedPropertyValueHandler<boost::python::object> {
 
   /// Call to set a named property where the value is some container type
   /**
