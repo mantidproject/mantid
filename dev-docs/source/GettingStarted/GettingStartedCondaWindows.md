@@ -57,7 +57,7 @@ heading-offset: 1
 
 - If not already activated in the previous step, activate your environment:
 
-  - For pixi, run `pixi shell` from your mantid source directory, or prefix the commands below with `pixi run`.
+  - For pixi, run `pixi shell` from your mantid source directory, or prefix the commands below with `pixi run` if your build folder is a subdirectory of the source directory.
   - For conda, run `conda activate mantid-developer`.
 
 - If you want your build directory inside your source directory, run either:

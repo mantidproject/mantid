@@ -33,7 +33,7 @@ heading-offset: 1
 
 - Still using the terminal.
 - If not already activated in the previous step, activate your environment:
-  - For pixi, run `pixi shell` from your mantid source directory, or prefix the commands below with `pixi run`.
+  - For pixi, run `pixi shell` from your mantid source directory, or prefix the commands below with `pixi run` if your build folder is a subdirectory of the source directory.
   - For conda, run `conda activate mantid-developer`.
 - Navigate back to your mantid source directory using `cd mantid` if you used the default name during cloning from git.
 - Inside of your mantid source directory run `cmake --preset=osx`
