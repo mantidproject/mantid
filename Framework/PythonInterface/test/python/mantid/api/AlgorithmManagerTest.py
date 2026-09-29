@@ -13,20 +13,23 @@ from mantid.api import AlgorithmManager, Algorithm, FrameworkManagerImpl, IAlgor
 
 SHUTDOWN_GIL_REGRESSION_SCRIPT = r"""
 import threading
-import time
 
 from mantid.api import AlgorithmFactory, AlgorithmManager, PythonAlgorithm
 
 
 class ShutdownNeedsGILAlgorithm(PythonAlgorithm):
     started = threading.Event()
+    cancelled = threading.Event()
 
     def PyInit(self):
         pass
 
     def PyExec(self):
         self.started.set()
-        time.sleep(0.1)
+        self.cancelled.wait()
+
+    def cancel(self):
+        self.cancelled.set()
 
 
 AlgorithmFactory.subscribe(ShutdownNeedsGILAlgorithm)
