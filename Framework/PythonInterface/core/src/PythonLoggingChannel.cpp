@@ -80,7 +80,7 @@ PythonLoggingChannel::PythonLoggingChannel() : m_state(std::make_shared<State>()
   m_state->pyLogger = std::make_unique<boost::python::object>(std::move(logger));
 }
 
-PythonLoggingChannel::~PythonLoggingChannel() { close(); }
+PythonLoggingChannel::~PythonLoggingChannel() { closeImpl(); }
 
 void PythonLoggingChannel::log(const Poco::Message &msg) { enqueue(msg); }
 
@@ -168,7 +168,9 @@ void PythonLoggingChannel::flush() {
   drainQueue(state);
 }
 
-void PythonLoggingChannel::close() {
+void PythonLoggingChannel::close() { closeImpl(); }
+
+void PythonLoggingChannel::closeImpl() {
   const auto state = m_state;
   if (!state)
     return;
