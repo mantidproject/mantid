@@ -4,9 +4,47 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import subprocess
+import sys
 import unittest
 import testhelpers
 from mantid.api import AlgorithmManager, Algorithm, FrameworkManagerImpl, IAlgorithm
+
+
+SHUTDOWN_GIL_REGRESSION_SCRIPT = r"""
+import threading
+import time
+
+from mantid.api import AlgorithmFactory, AlgorithmManager, PythonAlgorithm
+
+
+class ShutdownNeedsGILAlgorithm(PythonAlgorithm):
+    started = threading.Event()
+
+    def PyInit(self):
+        pass
+
+    def PyExec(self):
+        self.started.set()
+        time.sleep(0.1)
+
+
+AlgorithmFactory.subscribe(ShutdownNeedsGILAlgorithm)
+algorithm = AlgorithmManager.create("ShutdownNeedsGILAlgorithm")
+algorithm.initialize()
+algorithm.executeAsync()
+if not ShutdownNeedsGILAlgorithm.started.wait(timeout=5.0):
+    raise RuntimeError("The asynchronous Python algorithm did not start")
+AlgorithmManager.shutdown()
+"""
+
+
+class AlgorithmManagerShutdownTest(unittest.TestCase):
+    def test_shutdown_releases_the_gil_while_waiting_for_algorithms(self):
+        result = subprocess.run(
+            [sys.executable, "-c", SHUTDOWN_GIL_REGRESSION_SCRIPT], capture_output=True, text=True, timeout=5, check=False
+        )
+        self.assertEqual(0, result.returncode, msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}")
 
 
 class AlgorithmManagerTest(unittest.TestCase):
