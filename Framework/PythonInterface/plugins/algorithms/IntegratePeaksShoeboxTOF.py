@@ -36,6 +36,7 @@ from plugins.algorithms.peakdata_utils import (
     make_kernel,
     get_kernel_shape,
 )
+from plugins.algorithms.component_info_utils import resolve_component_index
 from enum import Enum
 from mantid.dataobjects import PeakShapeDetectorBin
 
@@ -300,7 +301,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 issues[prop] = f"{prop} must be an odd number."
         # check valid peak workspace
         ws = self.getProperty("InputWorkspace").value
-        inst = ws.getInstrument()
+        component_info = ws.componentInfo()
         pk_ws = self.getProperty("PeaksWorkspace").value
         if ws.getInstrumentName() != pk_ws.getInstrumentName():
             issues["PeaksWorkspace"] = "PeaksWorkspace must have same instrument as the InputWorkspace."
@@ -309,7 +310,8 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
         # check that is getting dTOF from back-to-back params then they are present in instrument
         if self.getProperty("GetNBinsFromBackToBackParams").value:
             # check at least first peak in workspace has back to back params
-            if not inst.getComponentByName(pk_ws.column("BankName")[0]).hasParameter("B"):
+            bank_index = resolve_component_index(pk_ws.column("BankName")[0], component_info)
+            if not component_info.hasParameter("B", bank_index):
                 issues["GetNBinsFromBackToBackParams"] = (
                     "Workspace doesn't have back to back exponential coefficients defined in the parameters.xml file."
                 )

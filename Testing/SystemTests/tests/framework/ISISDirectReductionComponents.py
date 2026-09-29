@@ -292,7 +292,7 @@ class ISISLoadFilesLET(systemtesting.MantidSystemTest):
         #
         ws = PropertyManager.sample_run.get_workspace()
         # apply IDF property, correspondent to this particular time interval
-        propman.update_defaults_from_instrument(ws.getInstrument())
+        propman.update_defaults_from_instrument(ws.componentInfo())
         self.assertEqual(int(propman.mon1_norm_spec), 40961)
         self.assertEqual(propman.ei_mon1_spec, 40966)
 
