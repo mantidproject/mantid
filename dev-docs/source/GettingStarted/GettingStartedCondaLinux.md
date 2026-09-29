@@ -11,6 +11,24 @@ heading-offset: 1
 ---
 ```
 
+## (ILL) Setup proxy
+
+For pixi, add the following to `~/.pixi/config.toml` (create the file if it does not exist):
+
+```toml
+[proxy-config]
+http = "http://proxy.ill.fr:8888"
+https = "http://proxy.ill.fr:8888"
+```
+
+For conda, open `~/.condarc` and add the following lines:
+
+```text
+proxy_servers:
+  http: http://proxy.ill.fr:8888
+  https: http://proxy.ill.fr:8888
+```
+
 ## Setup the mantid pixi environment (recommended)
 
 ```{include} MantidDeveloperPixiSetup.md
@@ -24,17 +42,6 @@ heading-offset: 1
 - Run your downloaded script from the terminal using `bash Miniforge3-Linux-x86_64.sh`.
   If it asks whether or not you want to initialise conda with conda init, choose to do so.
 - Restart your terminal.
-
-### (ILL) Setup proxy
-
-- Open ~/.condarc.
-- Add the following lines :
-
-```text
-proxy_servers:
-  http: http://proxy.ill.fr:8888
-  https: http://proxy.ill.fr:8888
-```
 
 ### Create the conda environment
 
