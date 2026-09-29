@@ -8,7 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidKernel/Unit.h"
+#include "MantidKernel/Unit_fwd.h"
 
 namespace Mantid {
 namespace HistogramData {

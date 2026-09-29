@@ -297,6 +297,7 @@ set(INC_FILES
     inc/MantidKernel/TopicInfo.h
     inc/MantidKernel/TypedValidator.h
     inc/MantidKernel/Unit.h
+    inc/MantidKernel/Unit_fwd.h
     inc/MantidKernel/UnitConversion.h
     inc/MantidKernel/UnitFactory.h
     inc/MantidKernel/UnitLabel.h

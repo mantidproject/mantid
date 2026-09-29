@@ -9,7 +9,7 @@
 #include "MantidSINQ/DllConfig.h"
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/Unit.h"
+#include "MantidKernel/Unit_fwd.h"
 #include "MantidKernel/V2D.h"
 
 #include "MantidDataObjects/Workspace2D.h"

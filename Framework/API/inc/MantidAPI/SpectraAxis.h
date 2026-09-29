@@ -12,7 +12,6 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
-#include "MantidKernel/Unit.h"
 #include <string>
 #include <vector>
 
