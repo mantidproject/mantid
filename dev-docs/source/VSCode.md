@@ -20,10 +20,22 @@ for C++ development on any platform that VSCode supports
 - Click File->Open Folder
 - Navigate to your Mantid source directory and select it
 - Install the required extensions (see below)
-- Open the command palette (Ctrl+Shift+P or ⌘+Shift+P), run "Python: Select Interpreter" and choose the
-  interpreter in your pixi environment, `.pixi/envs/default` inside your source directory
-  (or your `mantid-developer` environment if you are using conda)
+- Select the Python interpreter from your development environment (see below)
 - For code editing you are good to go!
+
+### Selecting the Python interpreter
+
+Open the command palette (Ctrl+Shift+P or ⌘+Shift+P), run "Python: Select Interpreter", and then follow the section below for your environment.
+
+#### Pixi
+
+Choose the interpreter in the `.pixi/envs/default` directory inside your Mantid source directory.
+Its full path is `/Path/To/Source/mantid/.pixi/envs/default/bin/python`.
+
+#### Conda
+
+Choose your `mantid-developer` conda environment.
+Its full path is `/Path/To/Miniforge/envs/mantid-developer/bin/python`.
 
 ## Extensions
 
@@ -171,7 +183,7 @@ To debug C++ and start directly into the Workbench, add this to the configuratio
     "name": "(gdb) Workbench C++ Only",
     "type": "cppdbg",
     "request": "launch",
-    "program": "/Path/To/Source/mantid/.pixi/envs/default/bin/python",   // Full path (do not use '~') to the python executable inside your pixi (or conda) environment
+    "program": "/Path/To/Python/Environment/bin/python",   // Full path (do not use '~') to the python executable in your development environment, see "Selecting the Python interpreter"
     "preLaunchTask": "Build Mantid",
     "args": ["-m", "workbench", "--single-process"],
     "MIMode": "gdb",

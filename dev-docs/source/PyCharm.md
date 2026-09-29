@@ -31,16 +31,22 @@ On Linux and macOS, use `Debug`.
 
 - Click `Add Interpreter` on the top right, then `Add Local Interpreter...`.
 
+- Select the interpreter from your development environment by following the section below for your environment.
+
+### Pixi interpreter
+
 - Choose `Select existing`, set the type to `Python`, and set the path to the `python` executable in your pixi environment:
 
   - On Linux or MacOS: `{SOURCE}/.pixi/envs/default/bin/python`
   - On Windows: `{SOURCE}\.pixi\envs\default\python.exe`
 
-- If you are using conda instead of pixi:
+### Conda interpreter
 
-  - From the left side of the window select `Conda Environment`.
-  - Add the path to your conda executable, e.g. `C:\Users\<username>\AppData\Local\miniforge\Scripts\conda.exe` and click `Load Environments`.
-  - Click the `Use Existing environment` radio button and select the `mantid-developer` environment in the drop down list.
+- From the left side of the window select `Conda Environment`.
+- Add the path to your conda executable, e.g. `C:\Users\<username>\AppData\Local\miniforge\Scripts\conda.exe` and click `Load Environments`.
+- Click the `Use Existing environment` radio button and select the `mantid-developer` environment in the drop down list.
+
+### Project structure
 
 - Click OK to close the window.
 
@@ -85,7 +91,7 @@ Now that your Python development environment has been setup we can setup the deb
 - Click the down arrow next to `Script path:` and change the selection to `Module name`. Set the `Module name` to `workbench`.
 - In the `Parameters` box add `--single-process` so that the multiprocess startup is disabled and breakpoints can be attached to the primary process. See the [Running Workbench](RunningWorkbench) documentation for more information.
 - In the `Working directory:` box, on Linux/MacOS enter the `{BUILD}/bin` directory, on Windows enter `{BUILD}/bin/DebugWithRelRuntime` directory.
-- Ensure the `Python Interpreter:` box is set to use the interpreter from your pixi (or conda) environment.
+- Ensure the `Python Interpreter:` box is set to use the interpreter you selected when setting up your Python development environment.
 - Click OK to save and exit the window.
 - You can now click the green play button in the top right of the window to create a Workbench instance from pycharm.
 - Alternatively you can click the green bug next to the green play button to start a debug session.
