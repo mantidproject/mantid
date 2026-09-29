@@ -12,7 +12,7 @@ The ALFView interface is a graphical front end used by the ISIS Excitations grou
 Set up
 ------
 
-- These instructions assume use of MantidWorkbench 6.6 or higher.
+- These instructions assume use of MantidWorkbench 7.0 or higher.
 - Ensure you have the ISIS facility and ALF instrument selected in your settings.
 - Ensure you have the ISIS archive enabled.
 - Open the ``Direct->ALFView`` interface.
@@ -30,25 +30,22 @@ Loading Runs
 Rebinning the Data
 ------------------
 
-- Click on the Pick tab.
-- Expand the Rebin section.
-- Type 5.5,0.01,6 into the box. Then click Run.
+- Type 5.5,0.01,6 into the Rebin parametersbox. Then click Rebin.
 - The instrument view data should change to a darker color.
 
 Selecting tubes
 ---------------
 
-- Click on the Pick tab.
-- Press the Select whole tube tool button.
 - Left click on the central tube (the one with the yellow square) in the instrument view.
-- The entire tube should be surrounded by a rectangle, indicating it is selected.
+- The entire tube should be highlighted, indicating it is selected.
 - The plot on the right-hand side should update to show the selected data.
 - The Two theta value on the right-hand side should also update.
-- Press the Draw a rectangle tool button.
-- Left click and drag your mouse on the instrument view to select some more tubes.
-- This tool should select all tubes that it overlaps with, even if its the smallest of overlaps.
-- After using this tool once, the Edit a shape tool should be selected automatically.
-- Select one of your tubes and press the Delete key to delete it.
+- Press the Add ROI button.
+- Left click to drag and resize rectangular shape to select some more tubes.
+- This tool should select all tubes that it overlaps with.
+- Both plots should be updated on every mouse release.
+- Click on Add ROI again to deactivate rectangular shape.
+- Left mouse click on selected tubes to unselect them.
 - The plot on the right-hand side should change each time the selected tubes change.
 
 Calculating the Rotation angle
