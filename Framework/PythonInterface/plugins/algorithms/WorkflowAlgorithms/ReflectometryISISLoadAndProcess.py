@@ -655,16 +655,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
         workspace = AnalysisDataService.retrieve(workspace_name)
         representative_workspace = self._representative_workspace(workspace)
-        is_polref = representative_workspace.getInstrument().getName() == self._POLREF
 
         if self._workspaceHasRequestedCalibration(workspace):
             return workspace_name, experiment_angle, specular_spectrum_no
-
-        if is_polref:
-            if specular_spectrum_no is None:
-                specular_spectrum_no = self._find_specular_pixel_spectrum_no(representative_workspace)
-            if experiment_angle is None:
-                experiment_angle = self._experiment_angle(representative_workspace)
 
         members = list(workspace) if isinstance(workspace, WorkspaceGroup) else [workspace]
         calibrated_members = []
@@ -674,18 +667,16 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             alg.setRethrows(True)
             alg.setProperty("InputWorkspace", member)
             alg.setProperty("CalibrationFile", calibration_filepath)
-            if is_polref:
-                alg.setProperty("InstrumentWorkflow", self._POLREF)
-                alg.setProperty("SpecularPixelSpectrumNo", specular_spectrum_no)
-                alg.setProperty("ExperimentAngle", experiment_angle)
-                alg.setProperty("AdjustExperimentAngle", adjust_theta)
+            experiment_angle, specular_spectrum_no, has_angle_dependent_geometry = self._setInstrumentSpecificProperties(
+                alg, representative_workspace, adjust_theta, experiment_angle, specular_spectrum_no
+            )
             alg.execute()
             calibrated_member = alg.getProperty("OutputWorkspace").value
             calibrated_member.run().addProperty(self._CALIBRATION_FILE_LOG, calibration_filepath, True)
-            if is_polref and not adjust_theta:
+            if has_angle_dependent_geometry and not adjust_theta:
                 calibrated_member.run().addProperty(self._ADJUSTED_THETA_LOG, experiment_angle, True)
             calibrated_members.append(calibrated_member)
-            if is_polref and member_index == 0 and adjust_theta:
+            if has_angle_dependent_geometry and member_index == 0 and adjust_theta:
                 adjusted_theta = calibrated_member.run().getProperty(self._ADJUSTED_THETA_LOG).value
 
         calibrated_workspace = calibrated_members[0]
@@ -695,6 +686,21 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                 calibrated_workspace.addWorkspace(member)
         AnalysisDataService.addOrReplace(workspace_name, calibrated_workspace)
         return workspace_name, adjusted_theta, specular_spectrum_no
+
+    def _setInstrumentSpecificProperties(self, calibration_alg, workspace, adjust_theta, experiment_angle=None, specular_spectrum_no=None):
+        if workspace.getInstrument().getName() != self._POLREF:
+            return experiment_angle, specular_spectrum_no, False
+
+        if specular_spectrum_no is None:
+            specular_spectrum_no = self._find_specular_pixel_spectrum_no(workspace)
+        if experiment_angle is None:
+            experiment_angle = self._experiment_angle(workspace)
+
+        calibration_alg.setProperty("InstrumentWorkflow", self._POLREF)
+        calibration_alg.setProperty("SpecularPixelSpectrumNo", specular_spectrum_no)
+        calibration_alg.setProperty("ExperimentAngle", experiment_angle)
+        calibration_alg.setProperty("AdjustExperimentAngle", adjust_theta)
+        return experiment_angle, specular_spectrum_no, True
 
     def _find_specular_pixel_spectrum_no(self, workspace):
         lines_alg = self.createChildAlgorithm("FindReflectometryLines")

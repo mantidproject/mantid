@@ -1041,6 +1041,10 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             analysis_data_service.retrieve.return_value = workspace
             alg._calibrate_workspace("TRANS_1", experiment_angle=0.45, specular_spectrum_no=280.0)
 
+        calibration_alg.setProperty.assert_any_call("InstrumentWorkflow", "POLREF")
+        calibration_alg.setProperty.assert_any_call("SpecularPixelSpectrumNo", 280.0)
+        calibration_alg.setProperty.assert_any_call("ExperimentAngle", 0.45)
+        calibration_alg.setProperty.assert_any_call("AdjustExperimentAngle", False)
         calibrated_workspace.run.return_value.addProperty.assert_any_call("reflectometry_adjusted_theta", 0.45, True)
 
     def test_uncalibrated_workspace_in_ads_is_reused_when_calibration_file_is_provided(self):
