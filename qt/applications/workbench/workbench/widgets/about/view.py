@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#  This file is part of the mantid workbench
+
 from qtpy.QtWidgets import QCommandLinkButton
 from qtpy.QtCore import Qt, QSize
 from qtpy.QtGui import QFont, QFontInfo, QPixmap, QIcon, QGuiApplication, QPainter
@@ -315,8 +315,10 @@ font: {self.rescale_pixels_to_points(12)}pt;
         # Usage data
         lbl_allow_usage_data = QLabel()
         lbl_allow_usage_data.setText(
-            f"<span style='text-align: right; font-size:{self.rescale_pixels_to_points(12)}pt;'>Report Usage Data</span><br/>"
-            f"<span style='text-align: right; font-size:{self.rescale_pixels_to_points(8)}pt;'>Required to use the Error Reporter</span>"
+            f"<span style='text-align: right; font-size:{self.rescale_h(12) * self.points_per_pixel}pt;'>"
+            "Report Usage Data</span><br/>"
+            f"<span style='text-align: right; font-size:{self.rescale_h(8) * self.points_per_pixel}pt;'>"
+            "Required to use the Error Reporter</span>"
         )
         usagelayout = QHBoxLayout()
         usagelayout.setContentsMargins(0, 0, 0, 0)
