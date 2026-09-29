@@ -21,6 +21,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/InstrumentMetadata.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -183,6 +184,11 @@ void checkDetectorInfoSize(const Instrument &instr, const Geometry::DetectorInfo
  */
 void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_spectrumInfoWrapper = nullptr;
+  {
+    std::lock_guard<std::mutex> lock{m_baseComponentInfoMutex};
+    m_baseComponentInfo = nullptr;
+    m_baseDetectorInfo = nullptr;
+  }
 
   // Detector IDs that were previously dropped because they were not part of the
   // instrument may now suddenly be valid, so we have to reinitialize the
@@ -877,6 +883,24 @@ ComponentInfo &ExperimentInfo::mutableComponentInfo() {
     throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
   }
   return *m_componentInfo;
+}
+
+/** Return a reference to a ComponentInfo describing the base (unparametrized) instrument.
+ *
+ * This is the geometry as it was loaded from the instrument definition, before any parameters
+ * (e.g. moves or rotations by MoveInstrumentComponent/RotateInstrumentComponent, or calibration)
+ * were applied. It is built by walking the base instrument tree on first use, and is invalidated
+ * by setInstrument(), as is any reference obtained from componentInfo().
+ */
+Geometry::ComponentInfo const &ExperimentInfo::baseComponentInfo() const {
+  populateIfNotLoaded();
+  std::lock_guard<std::mutex> lock{m_baseComponentInfoMutex};
+  if (!m_baseComponentInfo) {
+    // The wrappers refer to sptr_instrument without owning it. That is safe because setInstrument() resets them
+    // before replacing sptr_instrument, and they are declared after it, so are destroyed before it.
+    std::tie(m_baseComponentInfo, m_baseDetectorInfo) = InstrumentVisitor::makeWrappers(*sptr_instrument);
+  }
+  return *m_baseComponentInfo;
 }
 
 Geometry::InstrumentMetadata const &ExperimentInfo::instrumentMetadata() const {

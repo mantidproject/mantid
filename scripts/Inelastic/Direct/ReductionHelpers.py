@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from mantid import config
+from mantid.geometry import ComponentInfo
 import os
 import re
 
@@ -88,10 +89,22 @@ def findFile(fileName):
     return ""
 
 
+def get_instrument_name(instrument):
+    """Return the name of the instrument described by either a workspace's
+    ComponentInfo (the root component's name) or a legacy Instrument object.
+    """
+    if isinstance(instrument, ComponentInfo):
+        name = instrument.name(instrument.root())
+    else:
+        name = instrument.getName()
+    return name
+
+
 def get_default_parameter(instrument, name):
     """Function gets the value of a default instrument parameter and
     assign proper(the one defined in IPF ) type to this parameter
-    @param instrument --
+    @param instrument -- the workspace's ComponentInfo (parameters are read
+                         from its root component) or a legacy Instrument object
     """
 
     if instrument is None:
@@ -109,13 +122,14 @@ def get_default_parameter(instrument, name):
     elif type_name == "int":
         val = instrument.getIntParameter(name)
     else:
-        raise KeyError(" Instrument: {0} does not have parameter with name: {1}".format(instrument.getName(), name))
+        raise KeyError(" Instrument: {0} does not have parameter with name: {1}".format(get_instrument_name(instrument), name))
 
     return val[0]
 
 
 def get_default_idf_param_list(pInstrument, synonims_list=None):
-    """Obtain default reduction parameters list from the instrument"""
+    """Obtain default reduction parameters list from the instrument
+    (the workspace's ComponentInfo or a legacy Instrument object)"""
 
     params = pInstrument.getParameterNames()
     par_list = {}
