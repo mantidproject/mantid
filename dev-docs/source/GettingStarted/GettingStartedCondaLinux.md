@@ -80,7 +80,7 @@ This option can be passed to CMake on the command line using -DCONDA_BUILD=True.
 
 ## Debugging with `gdb`
 
-If you wish to use `gdb` to debug Mantid, then you can use:
+If you wish to use `gdb` to debug Mantid, first make sure `gdb` is available in your environment (`conda` or `pixi`), and your development environment is active, then you can use:
 
 `./build/bin/launch_mantidworkbench.sh --debug`
 
