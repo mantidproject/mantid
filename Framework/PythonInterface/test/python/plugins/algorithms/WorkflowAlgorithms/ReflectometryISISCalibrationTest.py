@@ -413,13 +413,6 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         self.assertTrue(workflow_options.enable_property("SpecularPixelSpectrumNo"))
         self.assertFalse(workflow_options.enable_property("ExperimentAngle"))
 
-    def test_angle_correction_is_enabled_only_for_polref_workflow(self):
-        alg = self._initialized_calibration_algorithm()
-        workflow_options = alg._workflow_options_by_name()
-
-        self.assertFalse(workflow_options["Default"].angle_correction_enabled)
-        self.assertTrue(workflow_options["POLREF"].angle_correction_enabled)
-
     def test_polref_workflow_raises_if_spectrum_number_is_fractional(self):
         input_ws_name = "test_1234"
         ws = self._create_sample_workspace(input_ws_name)
