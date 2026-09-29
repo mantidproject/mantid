@@ -11,7 +11,6 @@ from unittest.mock import MagicMock
 import numpy as np
 
 from instrumentview.alfview.ALFInstrumentViewPresenter import ALFInstrumentViewPresenter
-from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
 from instrumentview.Globals import CurrentTab
 from instrumentview.Projections.ProjectionType import ProjectionType
 
@@ -131,6 +130,7 @@ class TestALFInstrumentViewPresenter(unittest.TestCase):
         mock_notify.assert_called_once_with("notify_whole_tube_selected")
 
     def test_replace_workspace_callback_preserves_picked_detectors_after_reset(self):
+        ws_name = self._model.workspace.name()
         expected_detector_is_picked = np.zeros(self._n_pickable, dtype=bool)
         expected_point_picked_detectors = np.zeros(self._n_pickable, dtype=bool)
         expected_detector_is_picked[0:3] = True
@@ -138,51 +138,61 @@ class TestALFInstrumentViewPresenter(unittest.TestCase):
         self._model._detector_is_picked = expected_detector_is_picked.copy()
         self._model._point_picked_detectors = expected_point_picked_detectors.copy()
 
-        def fake_reset(_ws_name: str, _ws):
+        def fake_reset(_ws_name: str):
             self._model._detector_is_picked[:] = False
             self._model._point_picked_detectors[:] = False
 
         with (
-            mock.patch.object(FullInstrumentViewPresenter, "_replace_workspace_callback", side_effect=fake_reset),
-            mock.patch.object(self._presenter, "_update_view_main_plotter"),
+            mock.patch.object(self._presenter, "_reset_model_workspace", side_effect=fake_reset),
             mock.patch.object(self._presenter, "_publish_selection_change"),
         ):
-            self._presenter._replace_workspace_callback("workspace", None)
+            self._presenter._replace_workspace_callback(ws_name, None)
 
         np.testing.assert_array_equal(self._model._detector_is_picked, expected_detector_is_picked)
         np.testing.assert_array_equal(self._model._point_picked_detectors, expected_point_picked_detectors)
 
     def test_replace_workspace_callback_does_not_restore_cached_detectors_when_shape_changes(self):
+        ws_name = self._model.workspace.name()
         cached_detector_is_picked = np.array([True, False, True], dtype=bool)
         cached_point_picked_detectors = np.array([False, True, False], dtype=bool)
         self._model._detector_is_picked = cached_detector_is_picked.copy()
         self._model._point_picked_detectors = cached_point_picked_detectors.copy()
 
-        def fake_reset(_ws_name: str, _ws):
+        def fake_reset(_ws_name: str):
             self._model._detector_is_picked = np.zeros(1, dtype=bool)
             self._model._point_picked_detectors = np.zeros(1, dtype=bool)
 
         with (
-            mock.patch.object(FullInstrumentViewPresenter, "_replace_workspace_callback", side_effect=fake_reset),
-            mock.patch.object(self._presenter, "_update_view_main_plotter"),
+            mock.patch.object(self._presenter, "_reset_model_workspace", side_effect=fake_reset),
             mock.patch.object(self._presenter, "_publish_selection_change"),
         ):
-            self._presenter._replace_workspace_callback("workspace", None)
+            self._presenter._replace_workspace_callback(ws_name, None)
 
         np.testing.assert_array_equal(self._model._detector_is_picked, np.zeros(1, dtype=bool))
         np.testing.assert_array_equal(self._model._point_picked_detectors, np.zeros(1, dtype=bool))
 
     def test_replace_workspace_callback_notifies_instrument_actor_reset(self):
+        ws_name = self._model.workspace.name()
         with (
-            mock.patch.object(FullInstrumentViewPresenter, "_replace_workspace_callback"),
+            mock.patch.object(self._presenter, "_reset_model_workspace"),
             mock.patch.object(self._presenter, "notify_cpp_callback") as mock_notify,
         ):
-            self._presenter._replace_workspace_callback("workspace", None)
+            self._presenter._replace_workspace_callback(ws_name, None)
 
         self.assertEqual(
             mock_notify.call_args_list,
             [mock.call("notify_whole_tube_selected"), mock.call("notify_instrument_actor_reset")],
         )
+
+    def test_replace_workspace_callback_does_not_reset_when_workspace_name_does_not_match(self):
+        with (
+            mock.patch.object(self._presenter, "_reset_model_workspace") as mock_reset,
+            mock.patch.object(self._presenter, "_publish_selection_change") as mock_publish,
+        ):
+            self._presenter._replace_workspace_callback("some-other-workspace", None)
+
+        mock_reset.assert_not_called()
+        mock_publish.assert_not_called()
 
 
 if __name__ == "__main__":

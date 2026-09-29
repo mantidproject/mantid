@@ -40,10 +40,14 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
         self._update_view_main_plotter(refresh_limits=True)
 
     def _replace_workspace_callback(self, ws_name, ws):
+
+        if ws_name != self._model.workspace.name():
+            return
+
         detector_is_picked = self._model._detector_is_picked.copy()
         point_picked_detectors = self._model._point_picked_detectors.copy()
 
-        super()._replace_workspace_callback(ws_name, ws)
+        self._reset_model_workspace(ws_name)
 
         if (
             detector_is_picked.shape == self._model._detector_is_picked.shape
