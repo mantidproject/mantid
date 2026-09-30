@@ -25,7 +25,7 @@
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataHandling/RotateInstrumentComponent.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidKernel/Unit.h"
 #include "MantidWorkflowAlgorithms/AlignAndFocusPowder.h"
 
 #include <boost/algorithm/string/join.hpp>

@@ -30,6 +30,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
 #include "MantidMuon/PlotAsymmetryByLogValue.h"
 
 #include <filesystem>

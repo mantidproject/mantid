@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidKernel/Unit.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include <cxxtest/TestSuite.h>

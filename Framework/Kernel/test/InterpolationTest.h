@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidKernel/Interpolation.h"
+#include "MantidKernel/Unit.h"
 #include <ctime>
 #include <cxxtest/TestSuite.h>
 
