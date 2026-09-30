@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "DllConfig.h"
+#include "Common/DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Workspace.h"
 

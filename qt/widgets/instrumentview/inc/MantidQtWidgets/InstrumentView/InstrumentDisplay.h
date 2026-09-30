@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllOption.h"
 #include "IGLDisplay.h"
 #include "IInstrumentDisplay.h"
 #include "IQtDisplay.h"
 #include "IStackedLayout.h"
+#include "MantidQtWidgets/InstrumentView/DllOption.h"
 
 #include <memory>
 // Qt forward declarations
