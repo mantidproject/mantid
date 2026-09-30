@@ -121,6 +121,7 @@ Plotting Tab
 
 #. With some of the plots left open, make sure that the ``Add to existing plot`` checkbox is enabled while they exist and is
    disabled once they are all closed.
+#. For the next three tests, ensure that a group item is selected.
 #. Change the ``Plot output type`` to ``Detector Map``:
 
    - ``Plot over`` is disabled.
@@ -134,7 +135,7 @@ Plotting Tab
 
 #. Change the ``Plot output type`` to ``Alignment``:
 
-   - All buttons are enabled (when an item is selected).
+   - All three plot buttons are enabled.
    - All group and workspace items are enabled.
    - An X axis combobox is visible.
 
