@@ -37,7 +37,6 @@ mtd_add_qt_library(
   SRC ${MPL_SRC_FILES}
   MOC ${MPL_MOC_FILES}
   NOMOC ${MPL_INC_FILES}
-  DEFS IN_MANTIDQT_PLOTTING
   INCLUDE_DIRS inc ${CMAKE_CURRENT_BINARY_DIR}
   LINK_LIBS ${CORE_MANTIDLIBS} Mantid::PythonInterfaceCore ${POCO_LIBRARIES}
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsMplCpp
