@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/V3D_fwd.h"
 #include <cfloat>
 #include <iosfwd>
 #include <memory>
@@ -33,8 +34,6 @@ namespace Kernel {
 //-------------------------------------------------------------------------
 // Forward declarations
 //-------------------------------------------------------------------------
-class V3D;
-
 /**  Numerical Matrix class.     Holds a matrix of variable type and size.
 Should work for real and complex objects. Carries out eigenvalue
 and inversion if the matrix is square

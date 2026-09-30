@@ -11,9 +11,11 @@
 //------------------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/Objects/CSGObject.h"
-#include "MantidKernel/V3D.h"
 
 namespace Mantid {
+namespace Nexus {
+class File;
+}
 //-----------------------------------------------------------------------------
 // Geometry forward declarations
 //------------------------------------------------------------------------------

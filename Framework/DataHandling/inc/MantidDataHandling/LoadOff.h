@@ -8,7 +8,6 @@
 #include "MantidDataHandling/LoadSingleMesh.h"
 #include "MantidDataHandling/ReadMaterial.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/V3D.h"
 
 #include <functional>
 #include <unordered_set>

@@ -11,7 +11,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/NearestNeighbours.h"
-#include "MantidKernel/V3D.h"
+#include "MantidKernel/V3D_fwd.h"
 
 #include <Eigen/Core>
 
