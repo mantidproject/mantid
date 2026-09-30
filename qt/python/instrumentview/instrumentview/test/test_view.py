@@ -541,6 +541,59 @@ class TestFullInstrumentViewView(unittest.TestCase):
         self.assertTrue(self._view._units_combo_box_sliders.isEnabled())
         self.assertTrue(self._view._units_combo_box_lineplot.isEnabled())
 
+    def test_set_peaks_workspaces_disabled(self):
+        self._view.set_peaks_workspaces_enabled(False)
+
+        self.assertFalse(self._view._peaks_group_box.isEnabled())
+        self.assertNotEqual("", self._view._peaks_group_box.toolTip())
+
+    def test_set_peaks_workspaces_enabled_clears_the_tooltip(self):
+        self._view.set_peaks_workspaces_enabled(False)
+        self._view.set_peaks_workspaces_enabled(True)
+
+        self.assertTrue(self._view._peaks_group_box.isEnabled())
+        self.assertEqual("", self._view._peaks_group_box.toolTip())
+
+    def test_set_start_adding_peaks_disabled_leaves_the_mode_first(self):
+        self._view.setup_connections_to_presenter()
+        self._view._start_adding_peaks_button.setChecked(True)
+        self._view._presenter.on_start_adding_peaks_toggled.reset_mock()
+
+        self._view.set_start_adding_peaks_enabled(False)
+
+        self.assertFalse(self._view._start_adding_peaks_button.isChecked())
+        self.assertFalse(self._view._start_adding_peaks_button.isEnabled())
+        self.assertNotEqual("", self._view._start_adding_peaks_button.toolTip())
+        self._view._presenter.on_start_adding_peaks_toggled.assert_called_once_with(False)
+
+    def test_set_start_adding_peaks_enabled_clears_the_tooltip(self):
+        self._view.set_start_adding_peaks_enabled(False)
+        self._view.set_start_adding_peaks_enabled(True)
+
+        self.assertTrue(self._view._start_adding_peaks_button.isEnabled())
+        self.assertEqual("", self._view._start_adding_peaks_button.toolTip())
+
+    def _show_plot_with_sum_selected(self, number_of_histograms: int) -> MagicMock:
+        self._view._detector_spectrum_axes = MagicMock()
+        workspace = MagicMock()
+        workspace.getNumberHistograms.return_value = number_of_histograms
+        workspace.getSpectrumNumbers.return_value = list(range(1, number_of_histograms + 1))
+        with mock.patch.object(self._view, "sum_spectra_selected", return_value=True), mock.patch.object(self._view, "redraw_lineplot"):
+            self._view.show_plot_for_detectors(workspace, (0, 1))
+        return self._view._detector_spectrum_axes
+
+    def test_show_plot_for_detectors_summed_has_no_legend(self):
+        axes = self._show_plot_with_sum_selected(1)
+        axes.legend.assert_not_called()
+        self.assertIsNone(axes.plot.call_args.kwargs["label"])
+
+    def test_show_plot_for_detectors_labels_spectra_that_could_not_be_summed(self):
+        """Summing falls back to the unsummed spectra when they cannot share a binning, and they
+        need telling apart even though Sum is ticked."""
+        axes = self._show_plot_with_sum_selected(2)
+        axes.legend.assert_called_once()
+        self.assertEqual(["Spectrum 1", "Spectrum 2"], [c.kwargs["label"] for c in axes.plot.call_args_list])
+
 
 if __name__ == "__main__":
     unittest.main()

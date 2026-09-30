@@ -26,6 +26,11 @@ class Peak:
     def label(self) -> str:
         return f"({_format_hkl(self.hkl[0])}, {_format_hkl(self.hkl[1])}, {_format_hkl(self.hkl[2])})"
 
+    @staticmethod
+    def can_be_located_in(unit: str) -> bool:
+        """Whether peaks have a location in the given unit, see location_in_unit."""
+        return unit.casefold() in ("tof", "dspacing", "wavelength", "q", "momentumtransfer")
+
     def location_in_unit(self, unit: str) -> Optional[float]:
         """Where this peak sits in the given unit, or None if it cannot be placed in it.
 

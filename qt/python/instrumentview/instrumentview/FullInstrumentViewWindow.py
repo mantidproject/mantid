@@ -972,6 +972,31 @@ class FullInstrumentViewView(QWidget):
     def set_start_adding_peaks_checked(self, checked):
         self._start_adding_peaks_button.setChecked(checked)
 
+    def set_peaks_workspaces_enabled(self, enabled: bool) -> None:
+        """Enable or disable the whole peaks workspaces group, including its buttons.
+
+        The ticks in the list are kept, so the overlays come back if the group is enabled again.
+        """
+        self._peaks_group_box.setEnabled(enabled)
+        self._peaks_group_box.setToolTip(
+            "" if enabled else "Peaks can only be shown on a workspace in TOF, dSpacing, Wavelength or MomentumTransfer."
+        )
+
+    def set_start_adding_peaks_enabled(self, enabled: bool) -> None:
+        """Enable or disable the peak adding mode button, leaving the mode first if disabling it.
+
+        Unchecking with signals left on lets the presenter tear the mode down as usual.
+        """
+        if not enabled and self._start_adding_peaks_button.isChecked():
+            self._start_adding_peaks_button.setChecked(False)
+        self._start_adding_peaks_button.setEnabled(enabled)
+        self._start_adding_peaks_button.setToolTip(
+            ""
+            if enabled
+            else "Peaks can only be added to a workspace in TOF, dSpacing, Wavelength or MomentumTransfer, "
+            "and whose units can be converted."
+        )
+
     def set_export_workspace_button_disabled(self, disabled):
         self._export_workspace_button.setDisabled(disabled)
 
@@ -1051,9 +1076,6 @@ class FullInstrumentViewView(QWidget):
     def set_unit_combo_boxes_enabled(self, enabled: bool) -> None:
         self._units_combo_box_sliders.setEnabled(enabled)
         self._units_combo_box_lineplot.setEnabled(enabled)
-
-    def set_unit_combo_box_index(self, index: int) -> None:
-        self._units_combo_box_sliders.setCurrentIndex(index)
 
     def current_selected_sliders_unit(self) -> str:
         """Get the currently selected unit from the combo box"""
@@ -1244,8 +1266,9 @@ class FullInstrumentViewView(QWidget):
     def show_plot_for_detectors(self, workspace: Workspace2D, integration_limits) -> None:
         """Plot all the given spectra, where they are defined by their workspace indices, not the spectra numbers"""
         self._detector_spectrum_axes.clear()
-        sum_spectra = self.sum_spectra_selected()
         if workspace is not None and workspace.getNumberHistograms() > 0:
+            # Spectra that could not be summed are plotted unsummed, and need telling apart
+            sum_spectra = self.sum_spectra_selected() and workspace.getNumberHistograms() == 1
             spectra = workspace.getSpectrumNumbers()
             for spec in spectra:
                 self._detector_spectrum_axes.plot(workspace, specNum=spec, label=f"Spectrum {spec}" if not sum_spectra else None)

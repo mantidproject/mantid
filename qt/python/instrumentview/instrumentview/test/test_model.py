@@ -248,6 +248,19 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model.turn_off_single_point_picking()
         self.assertFalse(model.peak_picking_enabled())
 
+    def test_leaving_peak_picking_after_setup_on_another_workspace_keeps_its_detector_count(self):
+        """Peak adding is left when the replacement workspace cannot take peaks, which restores
+        the picked detectors cached for the workspace before it."""
+        model, _ = self._setup_model([1, 2, 3])
+        model.turn_on_single_point_picking()
+        self._setup_mocks([1, 2, 3, 4])
+        model._workspace = self._create_mock_workspace([1, 2, 3, 4])
+        model.setup()
+
+        model.turn_off_single_point_picking()
+
+        self.assertEqual(4, len(model._point_picked_detectors))
+
     def test_turn_on_single_point_picking_caches_and_clears(self):
         model, _ = self._setup_model([1, 2, 3])
         model._point_picked_detectors = np.array([True, False, True])
@@ -511,6 +524,37 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._integration_workspace = mock_workspace
         self.assertEqual(model.integration_limits, (1, 50))
 
+    def _workspace_with_x(self, data_x: np.ndarray, ragged: bool, common_bins: bool) -> MagicMock:
+        workspace = MagicMock()
+        workspace.getNumberHistograms.return_value = len(data_x)
+        workspace.isRaggedWorkspace.return_value = ragged
+        workspace.isCommonBins.return_value = common_bins
+        workspace.extractX.return_value = data_x
+        workspace.x.side_effect = lambda i: data_x[i]
+        return workspace
+
+    def test_limits_leave_out_infinite_x_values(self):
+        """An x axis starting at zero converts to an infinite value in momentum transfer, which
+        neither the sliders nor the plot axes can take as a limit."""
+        model, _ = self._setup_model([1, 2, 3])
+        ragged_x = np.array([[0.5, 2.0, np.inf], [1.0, 2.0, 3.0]])
+        common_x = np.array([[0.5, 2.0, np.inf], [0.5, 2.0, np.inf]])
+        for ragged, common_bins, data_x, expected in (
+            (True, False, ragged_x, (0.5, 3.0)),
+            (False, True, common_x, (0.5, 2.0)),
+            (False, False, ragged_x, (0.5, 3.0)),
+        ):
+            with self.subTest(ragged=ragged, common_bins=common_bins):
+                workspace = self._workspace_with_x(data_x, ragged, common_bins)
+
+                self.assertEqual(expected, model._extract_limits_from_workspace(workspace))
+
+    def test_limits_are_zero_when_no_x_value_is_finite(self):
+        model, _ = self._setup_model([1, 2, 3])
+        workspace = self._workspace_with_x(np.array([[np.inf, np.inf]]), ragged=False, common_bins=True)
+
+        self.assertEqual((0, 0), model._extract_limits_from_workspace(workspace))
+
     def test_monitor_positions(self):
         self._setup_mocks([1, 2, 3], monitors=np.array(["yes", "no", "yes"]))
         mock_workspace = self._create_mock_workspace([1, 2, 3])
@@ -739,6 +783,34 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self.assertTrue(model.can_convert_units)
         mock_convert_units.assert_called_once()
 
+    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceUnitValidator")
+    def test_probe_skips_detectors_masked_in_the_workspace(self, mock_validator, mock_extract_spectra, mock_convert_units):
+        """A masked detector stays masked through ConvertUnits, which would read as a failed conversion."""
+        mock_validator.return_value.isValid.return_value = ""
+        mock_convert_units.return_value.spectrumInfo.return_value.isMasked.return_value = False
+        model = self._setup_model_needing_probe()
+        model._is_masked_in_ws = np.array([True, False, False])
+
+        self.assertTrue(model.can_convert_units)
+        self.assertEqual([int(model._workspace_indices[1])], mock_extract_spectra.call_args.kwargs["WorkspaceIndexList"])
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceUnitValidator")
+    def test_cannot_convert_units_when_every_detector_is_masked_in_the_workspace(
+        self, mock_validator, mock_extract_spectra, mock_convert_units
+    ):
+        """No spectrum is left whose conversion can be checked, and there is nothing to show anyway."""
+        mock_validator.return_value.isValid.return_value = ""
+        model = self._setup_model_needing_probe()
+        model._is_masked_in_ws = np.array([True, True, True])
+
+        self.assertFalse(model.can_convert_units)
+        mock_extract_spectra.assert_not_called()
+        mock_convert_units.assert_not_called()
+
     @mock.patch.object(FullInstrumentViewModel, "calculate_and_set_full_integration_range")
     @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
     def test_set_integration_units_converts(self, mock_convert_units, mock_calculate_range):
@@ -749,7 +821,8 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_convert_units.assert_called_once()
         self.assertEqual("TOF", mock_convert_units.call_args.kwargs["Target"])
         self.assertEqual(mock_convert_units.return_value, model._integration_workspace)
-        mock_calculate_range.assert_called_once()
+        # Left to the presenter's reset, which would otherwise integrate the whole workspace twice
+        mock_calculate_range.assert_not_called()
 
     @mock.patch.object(FullInstrumentViewModel, "calculate_and_set_full_integration_range")
     @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
@@ -761,7 +834,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
 
         mock_convert_units.assert_not_called()
         self.assertEqual(mock_workspace.clone.return_value, model._integration_workspace)
-        mock_calculate_range.assert_called_once()
+        mock_calculate_range.assert_not_called()
 
     @mock.patch.object(FullInstrumentViewModel, "calculate_and_set_full_integration_range")
     @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
@@ -772,7 +845,8 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model.set_integration_units("TOF")
 
         self.assertEqual(mock_workspace.clone.return_value, model._integration_workspace)
-        mock_calculate_range.assert_called_once()
+        self.assertEqual({"TOF"}, model.units_failed_to_convert)
+        mock_calculate_range.assert_not_called()
 
     @mock.patch.object(FullInstrumentViewModel, "_match_workspace_unit", return_value=1.0)
     @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
@@ -806,6 +880,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model.extract_spectra_for_line_plot("TOF", False)
 
         self.assertEqual(mock_extract_spectra.return_value, model.line_plot_workspace)
+        self.assertEqual({"TOF"}, model.units_failed_to_convert)
 
     def _workspace_with_bin_edges(self, bin_edges_per_spectrum) -> MagicMock:
         workspace = MagicMock()
@@ -828,6 +903,16 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         params = FullInstrumentViewModel._rebin_params_for_summing(workspace)
 
         self.assertEqual([1.0, 1.0, 4.0], params)
+
+    def test_rebin_params_widen_the_bin_width_to_limit_the_number_of_bins(self):
+        """The finite edges next to an infinite one can be huge, so the finest width across that
+        range could need more bins than there is memory for."""
+        workspace = self._workspace_with_bin_edges([[1.0, 1.001, 2.0, 1e6, np.inf]])
+
+        start, width, end = FullInstrumentViewModel._rebin_params_for_summing(workspace)
+
+        self.assertEqual((1.0, 1e6), (start, end))
+        self.assertLessEqual((end - start) / width, FullInstrumentViewModel._MAX_SUMMED_BINS_FACTOR * 3)
 
     def test_no_rebin_params_when_a_spectrum_has_no_width_left(self):
         """A detector in the path of the beam has no scattering angle, so in momentum transfer
@@ -1722,6 +1807,24 @@ class TestFullInstrumentViewModelUnitConversion(unittest.TestCase):
 
     def test_can_convert_units_in_tof(self):
         self.assertTrue(self._setup_model_with_unit("TOF").can_convert_units)
+
+    def test_can_show_peaks(self):
+        for unit_id, can_show_peaks in (("TOF", True), ("Energy", False), ("Label", False)):
+            with self.subTest(unit=unit_id):
+                self.assertEqual(can_show_peaks, self._setup_model_with_unit(unit_id).can_show_peaks)
+
+    def test_can_add_peaks_in_tof(self):
+        self.assertTrue(self._setup_model_with_unit("TOF").can_add_peaks)
+
+    def test_cannot_add_peaks_in_a_unit_peaks_have_no_location_in(self):
+        """AddPeak would succeed in Energy, but the peak could then not be drawn or deleted."""
+        model = self._setup_model_with_unit("Energy")
+
+        self.assertTrue(model.can_convert_units)
+        self.assertFalse(model.can_add_peaks)
+
+    def test_cannot_add_peaks_in_units_that_cannot_be_converted(self):
+        self.assertFalse(self._setup_model_with_unit("Label").can_add_peaks)
 
     def test_units_that_cannot_be_converted(self):
         # DeltaE only converts in an inelastic mode, and the instrument view converts elastically
