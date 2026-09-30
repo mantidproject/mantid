@@ -44,8 +44,6 @@ class TestGSAS2Model(unittest.TestCase):
         self.model.save_directories.project_name = "gsas2_output"
         self.model.config.path_to_gsas2 = "/opt/gsas2"
         # setup a mock workspace
-        self.mock_inst = MagicMock()
-        self.mock_inst.getFullName.return_value = "instrument"
         mock_prop = MagicMock()
         mock_prop.value = "bank 1"  # bank-id
         mock_log_data = [MagicMock(), MagicMock()]
@@ -58,7 +56,7 @@ class TestGSAS2Model(unittest.TestCase):
         self.mock_ws = MagicMock()
         self.mock_ws.getNumberHistograms.return_value = 1
         self.mock_ws.getRun.return_value = self.mock_run
-        self.mock_ws.getInstrument.return_value = self.mock_inst
+        self.mock_ws.getInstrumentName.return_value = "instrument"
         self.mock_ws.getRunNumber.return_value = 1
         self.mock_ws.getTitle.return_value = "title"
         mock_axis = MagicMock()

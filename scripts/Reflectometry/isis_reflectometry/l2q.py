@@ -34,18 +34,19 @@ def l2q(ws, whichDet, theta, sample_component_name):
     """
     # pick up the sample to detector distance
     if isinstance(ws, WorkspaceGroup):
-        inst = ws[0].getInstrument()
+        first_ws = ws[0]
     else:
-        inst = ws.getInstrument()
+        first_ws = ws
 
-    sampleLocation = inst.getComponentByName(sample_component_name).getPos()
-    detLocation = inst.getComponentByName(whichDet).getPos()
+    component_info = first_ws.componentInfo()
+    sampleLocation = component_info.position(component_info.indexOfAny(sample_component_name))
+    detLocation = component_info.position(component_info.indexOfAny(whichDet))
     sample2detector = detLocation - sampleLocation  # meters
 
     theta = theta * math.pi / 180.0  # convert to radians
 
     # Fetch the reference frame to determine the instrument orientation.
-    reference_frame = inst.getReferenceFrame()
+    reference_frame = first_ws.getInstrument().getReferenceFrame()
 
     sample_to_detector_along_beam = sample2detector.scalar_prod(reference_frame.vecPointingAlongBeam())
 
