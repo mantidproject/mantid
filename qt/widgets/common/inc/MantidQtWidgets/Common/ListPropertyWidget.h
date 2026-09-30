@@ -8,6 +8,7 @@
 
 #include "MantidKernel/Property.h"
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/PropertyWidget.h"
 #include <QLabel>
 #include <QListWidget>
@@ -18,7 +19,7 @@ namespace API {
 /** Widget for displaying a Property that has a set of allowed values.
  * The display is then a multi selection list box instead of a Text box.
  */
-class DLLExport ListPropertyWidget : public PropertyWidget {
+class EXPORT_OPT_MANTIDQT_COMMON ListPropertyWidget : public PropertyWidget {
   Q_OBJECT
 
 public:
