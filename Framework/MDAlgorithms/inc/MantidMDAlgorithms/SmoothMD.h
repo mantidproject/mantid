@@ -17,9 +17,10 @@ class IMDHistoWorkspace;
 }
 namespace MDAlgorithms {
 
-DLLExport std::vector<double> gaussianKernel(const double fwhm);
-DLLExport std::vector<double> normaliseKernel(std::vector<double> kernel);
-DLLExport std::vector<double> renormaliseKernel(std::vector<double> kernel, const std::vector<bool> &validity);
+MANTID_MDALGORITHMS_DLL std::vector<double> gaussianKernel(const double fwhm);
+MANTID_MDALGORITHMS_DLL std::vector<double> normaliseKernel(std::vector<double> kernel);
+MANTID_MDALGORITHMS_DLL std::vector<double> renormaliseKernel(std::vector<double> kernel,
+                                                              const std::vector<bool> &validity);
 
 /** SmoothMD : Algorithm for smoothing MDHistoWorkspaces
  */

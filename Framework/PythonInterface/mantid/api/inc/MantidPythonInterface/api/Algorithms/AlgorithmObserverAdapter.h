@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AlgorithmObserver.h"
+#include "MantidPythonInterface/api/DllConfig.h"
 #include <boost/python/wrapper.hpp>
 
 namespace Mantid {
@@ -19,7 +20,7 @@ It provides access from the C++ side to methods defined in python
 on subclasses of AlgorithmObserver.
 This allows the virtual methods to be overriden by python subclasses.
  */
-class DLLExport AlgorithmObserverAdapter final : public API::AlgorithmObserver {
+class PYTHON_API_DLL AlgorithmObserverAdapter final : public API::AlgorithmObserver {
 public:
   explicit AlgorithmObserverAdapter(PyObject *self);
   AlgorithmObserverAdapter(const AlgorithmObserverAdapter &) = delete;

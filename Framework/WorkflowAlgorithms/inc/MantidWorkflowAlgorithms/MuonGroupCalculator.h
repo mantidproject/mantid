@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 #include "MantidWorkflowAlgorithms/IMuonAsymmetryCalculator.h"
 
 namespace Mantid {
@@ -13,7 +14,7 @@ namespace WorkflowAlgorithms {
 
 /** MuonGroupCalculator : Base class for Muon group counts/asymmetry calculators
  */
-class DLLExport MuonGroupCalculator : public IMuonAsymmetryCalculator {
+class MANTID_WORKFLOWALGORITHMS_DLL MuonGroupCalculator : public IMuonAsymmetryCalculator {
 public:
   MuonGroupCalculator(const Mantid::API::WorkspaceGroup_sptr &inputWS, const std::vector<int> &summedPeriods,
                       const std::vector<int> &subtractedPeriods, const int groupIndex);

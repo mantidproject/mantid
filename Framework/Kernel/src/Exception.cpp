@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/DllConfig.h"
 #include <sstream>
 #include <utility>
 
@@ -237,8 +238,8 @@ const char *MisMatch<T>::what() const noexcept
 }
 
 /// \cond TEMPLATE
-template class DLLExport MisMatch<int>;
-template class DLLExport MisMatch<size_t>;
+template class MANTID_KERNEL_DLL MisMatch<int>;
+template class MANTID_KERNEL_DLL MisMatch<size_t>;
 /// \endcond TEMPLATE
 
 //-------------------------

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidKernel/System.h"
+#include "MantidPythonInterface/kernel/DllConfig.h"
 #include <typeinfo>
 
 namespace Mantid {
@@ -28,7 +29,7 @@ struct PropertyValueHandler;
  * PropertyValueHandler object that is able to extract (or attempt to extract)
  * the correct C++ type for that property from a given Python object.
  */
-class DLLExport TypeRegistry {
+class PYTHON_KERNEL_DLL TypeRegistry {
 public:
   /// Register handlers for basic C++ types into the registry
   static void registerBuiltins();

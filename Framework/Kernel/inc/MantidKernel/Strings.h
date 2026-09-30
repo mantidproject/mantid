@@ -51,7 +51,7 @@ namespace Strings {
  * @return
  */
 template <typename ITERATOR_TYPE>
-DLLExport std::string simpleJoin(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator) {
+std::string simpleJoin(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator) {
   std::ostringstream output;
   ITERATOR_TYPE it;
   for (it = begin; it != end;) {
@@ -81,10 +81,9 @@ DLLExport std::string simpleJoin(ITERATOR_TYPE begin, ITERATOR_TYPE end, const s
  * @return
  */
 template <typename ITERATOR_TYPE>
-DLLExport std::string
-join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
-     typename std::enable_if<!(std::is_same<typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
-                                            std::random_access_iterator_tag>::value)>::type * = nullptr) {
+std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
+                 typename std::enable_if<!(std::is_same<typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
+                                                        std::random_access_iterator_tag>::value)>::type * = nullptr) {
   return simpleJoin(begin, end, separator);
 }
 
@@ -108,10 +107,9 @@ join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
  * @return
  */
 template <typename ITERATOR_TYPE>
-DLLExport std::string
-join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
-     typename std::enable_if<(std::is_same<typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
-                                           std::random_access_iterator_tag>::value)>::type * = nullptr) {
+std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
+                 typename std::enable_if<(std::is_same<typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
+                                                       std::random_access_iterator_tag>::value)>::type * = nullptr) {
 
   // Get max number of threads
   int nmaxThreads = static_cast<int>(PARALLEL_GET_MAX_THREADS);
@@ -195,8 +193,8 @@ join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
  * @return A string with contiguous values compressed using the list syntax
  */
 template <typename ITERATOR_TYPE>
-DLLExport std::string joinCompress(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator = ",",
-                                   const std::string &listSeparator = "-") {
+std::string joinCompress(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator = ",",
+                         const std::string &listSeparator = "-") {
 
   if (begin == end) {
     return "";

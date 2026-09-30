@@ -22,7 +22,7 @@ namespace API {
   @author Janik Zikovsky
   @date 2011-11-02
 */
-class DLLExport BoxControllerSettingsAlgorithm : public API::Algorithm {
+class MANTID_API_DLL BoxControllerSettingsAlgorithm : public API::Algorithm {
 public:
 protected:
   /// Initialise the properties

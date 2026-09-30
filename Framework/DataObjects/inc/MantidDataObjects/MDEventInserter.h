@@ -25,7 +25,7 @@ namespace DataObjects {
 
   @date 2012-07-16
 */
-template <typename MDEW_SPTR> class DLLExport MDEventInserter {
+template <typename MDEW_SPTR> class MDEventInserter {
 private:
   /// Loki IntToType, used for template overload deduction.
   template <int I> struct IntToType {

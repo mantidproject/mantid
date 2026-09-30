@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidPythonInterface/kernel/DllConfig.h"
 #include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 
 namespace Mantid {
