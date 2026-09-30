@@ -977,14 +977,12 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             raise RuntimeError("Number of corrected pixels for tube did not match the number of detectors.")
 
         # Get the detector from the base instrument, in order to get the positions before calibration
-        base_component_info = ws.baseComponentInfo()
-        detector_info = ws.detectorInfo()
-        spectrum_info = ws.spectrumInfo()
-        # the (first) detector index of each spectrum in the tube; a detector index is also its component index
-        detector_indices = [spectrum_info.getSpectrumDefinition(ws_index)[0][0] for ws_index in ws_ids]
-        first_det_pos = base_component_info.position(detector_indices[0])
-        last_det_pos = base_component_info.position(detector_indices[-1])
-        tube_length = first_det_pos.distance(last_det_pos)
+        base_instrument = ws.getInstrument().getBaseInstrument()
+        first_det = base_instrument.getDetector(ws.getDetector(ws_ids[0]).getID())
+        last_det = base_instrument.getDetector(ws.getDetector(ws_ids[-1]).getID())
+        first_det_pos = first_det.getPos()
+        last_det_pos = last_det.getPos()
+        tube_length = first_det.getDistance(last_det)
         if tube_length <= 0.0:
             raise RuntimeError("Zero length tube cannot be calibrated.")
 
@@ -998,7 +996,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
 
         # Move the pixel detectors (might not work for sloping tubes)
         for i in range(num_detectors):
-            det_id = detector_info.detid(detector_indices[i])
+            det_id = ws.getDetector(ws_ids[i]).getID()
             new_pos = center + unit_vector * corrected_pixels[i]
             calibrated_detectors[det_id] = new_pos
 
