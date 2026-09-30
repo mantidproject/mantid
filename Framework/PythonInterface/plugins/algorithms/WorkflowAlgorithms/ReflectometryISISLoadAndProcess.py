@@ -658,7 +658,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         if self._workspaceHasRequestedCalibration(workspace):
             return workspace_name, experiment_angle, specular_spectrum_no
 
-        members = list(workspace) if isinstance(workspace, WorkspaceGroup) else [workspace]
+        is_group = isinstance(workspace, WorkspaceGroup)
+        members = list(workspace) if is_group else [workspace]
         calibrated_members = []
         adjusted_theta = experiment_angle
         for member_index, member in enumerate(members):
@@ -674,17 +675,20 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             calibrated_member.run().addProperty(self._CALIBRATION_FILE_LOG, calibration_filepath, True)
             if has_angle_dependent_geometry and not adjust_theta:
                 calibrated_member.run().addProperty(self._ADJUSTED_THETA_LOG, experiment_angle, True)
-            calibrated_members.append(calibrated_member)
-            if has_angle_dependent_geometry and member_index == 0 and adjust_theta:
+            #  Only return the adjusted theta from the first member of a group, since it should be the same for all members
+            elif has_angle_dependent_geometry and member_index == 0 and adjust_theta:
                 adjusted_theta = calibrated_member.run().getProperty(self._ADJUSTED_THETA_LOG).value
+            calibrated_members.append(calibrated_member)
 
-        calibrated_workspace = calibrated_members[0]
-        if isinstance(workspace, WorkspaceGroup):
-            calibrated_workspace = WorkspaceGroup()
-            for member in calibrated_members:
-                calibrated_workspace.addWorkspace(member)
+        calibrated_workspace = self._create_workspace_group_from_members(calibrated_members) if is_group else calibrated_members[0]
         AnalysisDataService.addOrReplace(workspace_name, calibrated_workspace)
         return workspace_name, adjusted_theta, specular_spectrum_no
+
+    def _create_workspace_group_from_members(self, members):
+        group = WorkspaceGroup()
+        for member in members:
+            group.addWorkspace(member)
+        return group
 
     def _setInstrumentSpecificProperties(self, calibration_alg, workspace, adjust_theta, experiment_angle=None, specular_spectrum_no=None):
         if workspace.getInstrument().getName() != self._POLREF:
