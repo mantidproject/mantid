@@ -1,0 +1,1 @@
+- :ref:`ReflectometryISISCalibration <algm-ReflectometryISISCalibration>` now performs workspace calibration on the result of workspace summation, as opposed to on each input. This prevents redundant calibration runs.

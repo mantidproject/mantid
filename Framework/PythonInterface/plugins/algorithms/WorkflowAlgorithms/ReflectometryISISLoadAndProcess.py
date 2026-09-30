@@ -81,7 +81,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         """Initialize the input and output properties of the algorithm."""
         self._reduction_properties = []  # cached list of properties copied from child alg
         self._declareRunProperties()
-        self._declarePreprocessProperties()
+        self._declareCalibrationProperties()
         self._declareSumBanksProperties()
         self._declareSlicingProperties()
         self._declareReductionProperties()
@@ -180,10 +180,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
         self.declareProperty(Prop.HIDE_INPUT, False, doc="If true, make the input workspaces invisible in the ADS.")
 
-    def _declarePreprocessProperties(self):
-        """Copy properties from the child preprocess algorithm"""
-        properties = ["CalibrationFile"]
-        self.copyProperties("ReflectometryISISPreprocess", properties)
+    def _declareCalibrationProperties(self):
+        """Copy properties from the calibration algorithm."""
+        self.copyProperties("ReflectometryISISCalibration", ["CalibrationFile"])
 
     def _declareSumBanksProperties(self):
         """Copy properties from the child sum banks algorithm"""

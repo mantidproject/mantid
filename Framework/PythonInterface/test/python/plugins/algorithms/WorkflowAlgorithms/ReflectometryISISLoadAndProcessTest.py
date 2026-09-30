@@ -968,35 +968,49 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._assert_run_algorithm_succeeds(args, outputs)
         self._check_calibration(AnalysisDataService.retrieve("IvsQ_binned_45455"), is_calibrated=False)
 
-    def test_calibration_is_deferred_until_after_loading(self):
+    def test_experiment_angle_uses_theta_in_when_provided(self):
+        ws = CreateSampleWorkspace()
         alg = ReflectometryISISLoadAndProcess()
         alg.initialize()
-        alg.setProperty("CalibrationFile", self._CALIBRATION_TEST_DATA)
+        alg.setProperty("ThetaIn", 1.2)
 
-        args = alg._preprocess_arguments("INTER45455", False)
+        self.assertEqual(1.2, alg._experiment_angle(ws))
 
-        self.assertNotIn("CalibrationFile", args)
-        self.assertNotIn("IfAlreadyCalibrated", args)
-
-    def test_theta_properties_are_not_forwarded_to_preprocessing(self):
+    def test_experiment_angle_uses_last_time_series_log_value(self):
+        ws = CreateSampleWorkspace()
+        AddTimeSeriesLog(Workspace=ws, Name="theta", Time="2010-01-01T00:00:00", Value=0.5)
+        AddTimeSeriesLog(Workspace=ws, Name="theta", Time="2010-01-01T00:10:00", Value=0.7)
         alg = ReflectometryISISLoadAndProcess()
         alg.initialize()
-        alg.setProperty("ThetaIn", 0.5)
         alg.setProperty("ThetaLogName", "theta")
 
-        args = alg._preprocess_arguments("INTER13460", False)
+        self.assertEqual(0.7, alg._experiment_angle(ws))
 
-        self.assertNotIn("ThetaIn", args)
-        self.assertNotIn("ThetaLogName", args)
+    def test_experiment_angle_uses_scalar_log_value(self):
+        ws = CreateSampleWorkspace()
+        AddSampleLog(Workspace=ws, LogName="theta", LogText="0.7", LogType="Number", NumberType="Double")
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("ThetaLogName", "theta")
 
-    def test_default_theta_properties_are_not_forwarded_to_preprocessing(self):
+        self.assertEqual(0.7, alg._experiment_angle(ws))
+
+    def test_experiment_angle_throws_when_theta_is_not_available(self):
+        ws = CreateSampleWorkspace()
         alg = ReflectometryISISLoadAndProcess()
         alg.initialize()
 
-        args = alg._preprocess_arguments("INTER13460", False)
+        with self.assertRaisesRegex(RuntimeError, "ThetaIn or ThetaLogName"):
+            alg._experiment_angle(ws)
 
-        self.assertNotIn("ThetaIn", args)
-        self.assertNotIn("ThetaLogName", args)
+    def test_fractional_workspace_index_is_converted_to_fractional_spectrum_number(self):
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=2)
+        ws.getSpectrum(0).setSpectrumNo(100)
+        ws.getSpectrum(1).setSpectrumNo(104)
+
+        spectrum_number = ReflectometryISISLoadAndProcess._spectrum_number_for_workspace_index(ws, 0.25)
+
+        self.assertEqual(101.0, spectrum_number)
 
     def test_invalid_polarization_efficiency_file_name_raises_error(self):
         args = self._default_options
