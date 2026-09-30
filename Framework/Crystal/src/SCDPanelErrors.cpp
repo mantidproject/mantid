@@ -19,6 +19,7 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/DynamicPointerCastHelper.h"
 #include "MantidKernel/FileValidator.h"
+#include "MantidKernel/Unit.h"
 #include <algorithm>
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>

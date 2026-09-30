@@ -11,7 +11,6 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/Unit.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
