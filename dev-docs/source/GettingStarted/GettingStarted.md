@@ -12,13 +12,15 @@ GettingStartedNoneConda
 
 # Environment Setup
 
-With the addition of conda to our workflow we at present have two different methods of Getting Started with mantid development.
-Therefore you can choose which method to setup with (We recommend conda as it will be the only supported
-method eventually).
+We recommend using [pixi](https://pixi.sh) to set up your Mantid development environment.
+Pixi installs the dependency versions pinned in the `pixi.lock` file in the Mantid repository, so all developers get the same environment.
 
-- [Develop with conda on Windows](GettingStartedCondaWindows)
-- [Develop with conda on Linux](GettingStartedCondaLinux)
-- [Develop with conda on MacOSX](GettingStartedCondaOSX)
+Setting up a conda environment with the `mantid-developer` metapackage is still possible, but the `mantid-developer` metapackage will be removed in a future release.
+New developers should use pixi.
+
+- [Develop on Windows](GettingStartedCondaWindows)
+- [Develop on Linux](GettingStartedCondaLinux)
+- [Develop on MacOSX](GettingStartedCondaOSX)
 - [Develop without conda](GettingStartedNoneConda)
 
 ## Custom git setup for inside the ORNL firewall:

@@ -1,3 +1,8 @@
+```{warning}
+The `mantid-developer` conda metapackage is deprecated and will be removed in a future release.
+We recommend setting up your development environment with pixi instead.
+```
+
 Create `mantid-developer` conda environment by following the steps below:
 
 - First create a new conda environment and install the `mantid-developer` conda metapackage.
