@@ -48,6 +48,7 @@ class WorkspaceWidget(PluginWidget):
         super(WorkspaceWidget, self).__init__(parent)
 
         self._ads = AnalysisDataService.Instance()
+        self._instrument_view_windows = []
 
         # layout
         self.workspacewidget = WorkspaceTreeWidget()
@@ -287,14 +288,20 @@ class WorkspaceWidget(PluginWidget):
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             if ws.getInstrumentName():
                 try:
-                    self._instrument_view_window = FullInstrumentViewWindow(parent=parent, off_screen=off_screen)
-                    self._instrument_view_window.show()
+                    window = FullInstrumentViewWindow(parent=parent, off_screen=off_screen)
+                    self._instrument_view_windows.append(window)
+                    window.destroyed.connect(partial(self._on_instrument_view_window_destroyed, window))
+                    window.show()
                     model = FullInstrumentViewModel(ws)
-                    FullInstrumentViewPresenter(self._instrument_view_window.get_instrument_view_widget(), model)
+                    FullInstrumentViewPresenter(window.get_instrument_view_widget(), model)
                 except Exception as exception:
                     logger.warning("Could not show instrument for workspace '{}':\n{}\n".format(ws.name(), exception))
             else:
                 logger.warning("Could not show instrument for workspace '{}':\nNo instrument available.\n".format(ws.name()))
+
+    def _on_instrument_view_window_destroyed(self, window, _=None):
+        if window in self._instrument_view_windows:
+            self._instrument_view_windows.remove(window)
 
     def _do_show_legacy_instrument_view(self, names):
         """

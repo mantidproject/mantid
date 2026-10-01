@@ -15,7 +15,7 @@ from matplotlib.layout_engine import ConstrainedLayoutEngine
 from qtpy.QtCore import Qt
 from mantidqt.utils.qt.testing import start_qapplication
 from mantid.simpleapi import CreateSampleWorkspace
-from instrumentview.FullInstrumentViewWindow import FullInstrumentViewView, _LIGHT_GREY
+from instrumentview.FullInstrumentViewWindow import FullInstrumentViewView, FullInstrumentViewWindow, _LIGHT_GREY
 from instrumentview.ShapeWidgets import (
     AnnulusSelectionShape,
     CircleSelectionShape,
@@ -631,6 +631,15 @@ class TestFullInstrumentViewView(unittest.TestCase):
         axes = self._show_plot_with_sum_selected(2)
         axes.legend.assert_called_once()
         self.assertEqual(["Spectrum 1", "Spectrum 2"], [c.kwargs["label"] for c in axes.plot.call_args_list])
+
+
+@start_qapplication
+class TestFullInstrumentViewWindow(unittest.TestCase):
+    @mock.patch("qtpy.QtWidgets.QMainWindow.setCentralWidget")
+    @mock.patch("instrumentview.FullInstrumentViewWindow.FullInstrumentViewView")
+    def test_window_is_deleted_when_closed(self, _mock_view, _mock_set_central_widget):
+        window = FullInstrumentViewWindow()
+        self.assertTrue(window.testAttribute(Qt.WA_DeleteOnClose))
 
 
 if __name__ == "__main__":
