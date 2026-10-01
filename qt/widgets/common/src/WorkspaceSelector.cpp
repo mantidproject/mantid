@@ -316,6 +316,7 @@ bool WorkspaceSelector::hasValidNumberOfBins(const Mantid::API::Workspace_sptr &
 
 void WorkspaceSelector::refresh() {
   const std::lock_guard<std::mutex> lock(m_adsMutex);
+  const QString currentWorkspace = currentText();
   clear();
   if (m_optional)
     addItem("");
@@ -337,6 +338,10 @@ void WorkspaceSelector::refresh() {
   this->addItems(namesToAdd);
   if (isSorted()) {
     model()->sort(0);
+  }
+  const int index = findText(currentWorkspace);
+  if (index != -1) {
+    setCurrentIndex(index);
   }
 }
 
