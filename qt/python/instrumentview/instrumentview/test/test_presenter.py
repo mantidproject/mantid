@@ -819,6 +819,23 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
             self._presenter.reload_interactor_styles()
         self.assertEqual(self._presenter.on_camera_changed, mock_styles.call_args.kwargs["camera_changed_callback"])
 
+    def test_reload_interactor_styles_cleans_up_the_previous_styles(self):
+        previous_styles = MagicMock()
+        self._presenter._interactor_styles = previous_styles
+        with mock.patch("instrumentview.FullInstrumentViewPresenter.InteractorStyles"):
+            self._presenter.reload_interactor_styles()
+        previous_styles.cleanup.assert_called_once()
+        self.assertIsNot(self._presenter._interactor_styles, previous_styles)
+
+    def test_handle_close_cleans_up_interactor_styles(self):
+        interactor_styles = MagicMock()
+        self._presenter._interactor_styles = interactor_styles
+
+        self._presenter.handle_close()
+
+        interactor_styles.cleanup.assert_called_once()
+        self.assertIsNone(self._presenter._interactor_styles)
+
     def test_removing_shape_restores_the_line_plot_for_the_committed_selection(self):
         self._presenter._shape_preview_active = True
         self._presenter._update_line_plot_ws_and_draw = MagicMock()

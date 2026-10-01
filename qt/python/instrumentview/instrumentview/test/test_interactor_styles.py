@@ -1,11 +1,13 @@
 from instrumentview.InteractorStyles import (
     CursorZoomInteractorStyle,
+    InteractorStyles,
     RubberBandZoomInteractorStyle,
     SwappedButtonTrackballCamera,
     _display_to_world,
 )
 import unittest
 from unittest import mock
+from vtkmodules.vtkCommonCore import vtkCommand
 
 import numpy as np
 from numpy.testing import assert_array_almost_equal
@@ -358,3 +360,41 @@ class TestSwappedButtonTrackballCamera(unittest.TestCase):
     def test_instantiates(self):
         style = SwappedButtonTrackballCamera()
         self.assertIsNotNone(style)
+
+    def test_remove_observers_removes_all_observers(self):
+        style = SwappedButtonTrackballCamera()
+        style.set_picking_callback(mock.MagicMock())
+
+        style.remove_observers()
+
+        self.assertFalse(style.HasObserver(vtkCommand.LeftButtonPressEvent))
+        self.assertFalse(style.HasObserver(vtkCommand.RightButtonPressEvent))
+
+
+class TestInteractorStylesCleanup(unittest.TestCase):
+    def test_cleanup_releases_callbacks_and_plotter_from_every_style(self):
+        styles = InteractorStyles(
+            _make_mock_plotter(),
+            picking_callback=mock.MagicMock(),
+            hover_callback=mock.MagicMock(),
+            camera_changed_callback=mock.MagicMock(),
+        )
+
+        styles.cleanup()
+
+        all_styles = (
+            styles.SCROLL_ZOOM_WITH_PICKING,
+            styles.SCROLL_ZOOM_WITH_HOVER,
+            styles.SCROLL_ZOOM_NO_PICKING,
+            styles.TRACKBALL,
+            styles.RUBBERBAND_ZOOM,
+        )
+        for style in all_styles:
+            self.assertFalse(style.HasObserver(vtkCommand.LeftButtonPressEvent))
+            self.assertFalse(style.HasObserver(vtkCommand.MouseMoveEvent))
+            self.assertFalse(style.HasObserver(vtkCommand.RightButtonPressEvent))
+        for style in (styles.SCROLL_ZOOM_WITH_PICKING, styles.SCROLL_ZOOM_WITH_HOVER, styles.SCROLL_ZOOM_NO_PICKING):
+            self.assertIsNone(style.plotter)
+            self.assertIsNone(style._camera_changed_callback)
+        self.assertIsNone(styles.RUBBERBAND_ZOOM.plotter)
+        self.assertIsNone(styles.RUBBERBAND_ZOOM._picking_callback)

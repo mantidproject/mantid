@@ -855,6 +855,10 @@ class FullInstrumentViewPresenter:
             del self._ads_observer
         if hasattr(self, "_callback_queue"):
             self._callback_queue.put(self._callback_stop_sentinel)
+        # The styles hold callbacks from VTK that keep the plotter alive, see InteractorStyles.cleanup
+        if getattr(self, "_interactor_styles", None) is not None:
+            self._interactor_styles.cleanup()
+            self._interactor_styles = None
         # Drop presenter->model reference on close while keeping _model non-optional for static typing.
         self._model = cast(FullInstrumentViewModel, None)
 
@@ -963,6 +967,7 @@ class FullInstrumentViewPresenter:
             self._view.main_plotter, callback=point_hovered, hover=True
         )
 
+        previous_interactor_styles = self._interactor_styles
         self._interactor_styles = InteractorStyles(
             self._view.main_plotter,
             picking_callback=wrapped_picking_callback,
@@ -970,6 +975,9 @@ class FullInstrumentViewPresenter:
             camera_changed_callback=self.on_camera_changed,
         )
         self._update_interactor_style()
+        # Only release the old styles once they are no longer the active one
+        if previous_interactor_styles is not None:
+            previous_interactor_styles.cleanup()
 
     def _update_interactor_style(self):
         if not self._model.is_2d_projection:
