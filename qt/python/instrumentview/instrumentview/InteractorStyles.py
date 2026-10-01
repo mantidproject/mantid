@@ -32,6 +32,22 @@ class InteractorStyles:
         for style in (self.SCROLL_ZOOM_WITH_PICKING, self.SCROLL_ZOOM_WITH_HOVER, self.SCROLL_ZOOM_NO_PICKING):
             style.set_camera_changed_callback(camera_changed_callback)
 
+    def cleanup(self) -> None:
+        """Release the callbacks and plotter held by every style.
+
+        Each style registers Python callbacks with VTK, which holds them from C++ where the garbage
+        collector cannot see them. Those callbacks refer back to the style, the presenter and the plotter,
+        so unless they are removed the whole plotter is kept alive after the Instrument View is closed.
+        """
+        for style in (
+            self.SCROLL_ZOOM_WITH_PICKING,
+            self.SCROLL_ZOOM_WITH_HOVER,
+            self.SCROLL_ZOOM_NO_PICKING,
+            self.TRACKBALL,
+            self.RUBBERBAND_ZOOM,
+        ):
+            style.remove_observers()
+
 
 class RubberBandZoomInteractorStyle(vtkInteractorStyleRubberBandZoom):
     _RUBBER_BAND_COLOUR = (1.0, 1.0, 1.0)
@@ -111,6 +127,13 @@ class RubberBandZoomInteractorStyle(vtkInteractorStyleRubberBandZoom):
     def set_picking_callback(self, picking_callback: Callable):
         self._picking_callback = picking_callback
 
+    def remove_observers(self):
+        """Remove the callbacks VTK holds for this style. Also called by PyVista when its interactor closes."""
+        self.RemoveAllObservers()
+        self._picking_callback = None
+        self.plotter = None
+        self._pyvista_plotter = None
+
     def _on_mouse_move_event(self, obj, event):
         if self._ignore_rubberband_interaction:
             return
@@ -180,6 +203,13 @@ class CursorZoomInteractorStyle(vtkInteractorStyleUser):
         different part of the instrument once the view is zoomed, so it needs to be told.
         """
         self._camera_changed_callback = camera_changed_callback
+
+    def remove_observers(self):
+        """Remove the callbacks VTK holds for this style. Also called by PyVista when its interactor closes."""
+        self.RemoveAllObservers()
+        self._camera_changed_callback = None
+        self.plotter = None
+        self._pyvista_plotter = None
 
     def _notify_camera_changed(self):
         if self._camera_changed_callback is None:
@@ -322,3 +352,7 @@ class SwappedButtonTrackballCamera(vtkInteractorStyleTrackballCamera):
     def set_picking_callback(self, picking_callback: Callable):
         self.RemoveObservers(vtkCommand.LeftButtonPressEvent)
         self.AddObserver(vtkCommand.LeftButtonPressEvent, picking_callback)
+
+    def remove_observers(self):
+        """Remove the callbacks VTK holds for this style. Also called by PyVista when its interactor closes."""
+        self.RemoveAllObservers()
