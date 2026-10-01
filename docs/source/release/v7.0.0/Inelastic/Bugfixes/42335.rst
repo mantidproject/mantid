@@ -1,0 +1,1 @@
+- The :ref:`Iqt<iqt>` tab of the :ref:`Data Processor<interface-inelastic-data-processor>` interface no longer pops up a warning message box when binning is less than 5, instead it shows the warning message on the console log.
