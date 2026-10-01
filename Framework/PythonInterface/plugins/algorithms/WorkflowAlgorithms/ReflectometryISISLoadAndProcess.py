@@ -674,10 +674,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             alg.execute()
             calibrated_member = alg.getProperty("OutputWorkspace").value
             calibrated_member.run().addProperty(self._CALIBRATION_FILE_LOG, calibration_filepath, True)
-            if has_angle_dependent_geometry and not adjust_theta:
-                calibrated_member.run().addProperty(self._ADJUSTED_THETA_LOG, experiment_angle, True)
             #  Only return the adjusted theta from the first member of a group, since it should be the same for all members
-            elif has_angle_dependent_geometry and member_index == 0 and adjust_theta:
+            if has_angle_dependent_geometry and member_index == 0 and adjust_theta:
                 adjusted_theta = calibrated_member.run().getProperty(self._ADJUSTED_THETA_LOG).value
             calibrated_members.append(calibrated_member)
 

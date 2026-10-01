@@ -149,7 +149,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         self._enable_property_when_workflow_option_enables(self._SPECULAR_PIXEL_SPECTRUM_NO)
         self._enable_property_when_workflow_option_enables(self._EXPERIMENT_ANGLE)
         self._enable_property_when_workflow_option_enables(self._ADJUST_EXPERIMENT_ANGLE)
-        self._enable_property_when_workflow_option_enables(self._NOMINAL_SPECULAR_SPECTRUM_NO)
+        self._enable_property_when_workflow_option_enables(self._NOMINAL_SPECULAR_PIXEL_SPECTRUM_NO)
         self.declareProperty(
             WorkspaceProperty(self._OUTPUT_WORKSPACE, "", direction=Direction.Output),
             doc="The calibrated output workspace.",
@@ -468,7 +468,12 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
                 calibration_angle_type=self._ABSOLUTE,
                 detector_correction_type=self._ROTATE_AROUND_SAMPLE,
                 angle_correction_enabled=True,
-                enabled_properties={self._SPECULAR_PIXEL_SPECTRUM_NO, self._EXPERIMENT_ANGLE, self._ADJUST_EXPERIMENT_ANGLE},
+                enabled_properties={
+                    self._SPECULAR_PIXEL_SPECTRUM_NO,
+                    self._EXPERIMENT_ANGLE,
+                    self._ADJUST_EXPERIMENT_ANGLE,
+                    self._NOMINAL_SPECULAR_PIXEL_SPECTRUM_NO,
+                },
             ),
         }
 

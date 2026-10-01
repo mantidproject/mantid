@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from unittest.mock import call, patch
+from unittest.mock import MagicMock, call, patch
 
 from mantid import config, FileFinder
 from mantid.api import AnalysisDataService
@@ -887,6 +887,25 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         child_names = [alg.name() for alg in workflow_history.getChildHistories()]
         self.assertEqual(1, child_names.count("ReflectometryISISCalibration"))
         self.assertLess(child_names.index("MergeRuns"), child_names.index("ReflectometryISISCalibration"))
+
+    def test_transmission_calibration_does_not_apply_angle_correction(self):
+        self._create_workspace(1, "TOF_")
+        workspace = AnalysisDataService.retrieve("TOF_1")
+        calibration_alg = MagicMock()
+        calibration_alg.getProperty.return_value.value = workspace
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("CalibrationFile", self._CALIBRATION_TEST_DATA)
+
+        with (
+            patch.object(alg, "createChildAlgorithm", return_value=calibration_alg),
+            patch.object(alg, "_setInstrumentSpecificProperties", return_value=(0.0, True)),
+        ):
+            alg._calibrate_workspace("TOF_1", adjust_theta=False, experiment_angle=0.0, specular_spectrum_no=280.0)
+
+        self.assertTrue(workspace.run().hasProperty("reflectometry_calibration_file"))
+        self.assertFalse(workspace.run().hasProperty("reflectometry_adjusted_theta"))
+        self.assertFalse(alg._inputs_require_raw_reload(["TOF_1"]))
 
     def test_mixed_calibration_states_require_raw_inputs_before_summing(self):
         self._create_workspace(1, "TOF_")

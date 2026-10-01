@@ -261,13 +261,23 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         )
 
     def test_polref_angle_correction_interpolates_positive_fractional_displacement(self):
-        alg = self._initialized_calibration_algorithm(ExperimentAngle=0.5, SpecularPixelSpectrumNo=280.5, AdjustExperimentAngle=True)
+        alg = self._initialized_calibration_algorithm(
+            ExperimentAngle=0.5,
+            SpecularPixelSpectrumNo=280.5,
+            NominalSpecularPixelSpectrumNo=280.0,
+            AdjustExperimentAngle=True,
+        )
         calibration_angles = ReflectometryISISCalibration.CalibrationData({279: 0.2, 280: 0.1, 281: 0.0})
 
         self.assertAlmostEqual(0.55, alg._calculate_adjusted_theta(calibration_angles))
 
     def test_polref_angle_correction_interpolates_negative_fractional_displacement(self):
-        alg = self._initialized_calibration_algorithm(ExperimentAngle=0.5, SpecularPixelSpectrumNo=279.5, AdjustExperimentAngle=True)
+        alg = self._initialized_calibration_algorithm(
+            ExperimentAngle=0.5,
+            SpecularPixelSpectrumNo=279.5,
+            NominalSpecularPixelSpectrumNo=280.0,
+            AdjustExperimentAngle=True,
+        )
         calibration_angles = ReflectometryISISCalibration.CalibrationData({279: 0.2, 280: 0.1, 281: 0.0})
 
         self.assertAlmostEqual(0.45, alg._calculate_adjusted_theta(calibration_angles))
@@ -285,6 +295,7 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
             "CalibrationFile": self.temp_calibration_file.getName(),
             "InstrumentWorkflow": "POLREF",
             "SpecularPixelSpectrumNo": 280.5,
+            "NominalSpecularPixelSpectrumNo": 280.0,
             "ExperimentAngle": 0.5,
             "AdjustExperimentAngle": True,
             "OutputWorkspace": "test_calibrated",
@@ -296,7 +307,12 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         self.assertAlmostEqual(0.55, adjusted_theta)
 
     def test_polref_angle_correction_validates_measured_spectrum_before_interpolation(self):
-        alg = self._initialized_calibration_algorithm(ExperimentAngle=0.5, SpecularPixelSpectrumNo=278.5, AdjustExperimentAngle=True)
+        alg = self._initialized_calibration_algorithm(
+            ExperimentAngle=0.5,
+            SpecularPixelSpectrumNo=278.5,
+            NominalSpecularPixelSpectrumNo=280.0,
+            AdjustExperimentAngle=True,
+        )
         calibration_angles = ReflectometryISISCalibration.CalibrationData({279: 0.2, 280: 0.1, 281: 0.0})
 
         with self.assertRaisesRegex(RuntimeError, "SpecularPixelSpectrumNo must be in the range 279 to 281"):

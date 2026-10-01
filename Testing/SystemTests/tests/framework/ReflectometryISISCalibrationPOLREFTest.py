@@ -26,6 +26,7 @@ class ReflectometryISISCalibrationPOLREFTest(systemtesting.MantidSystemTest):
             CalibrationFile=self._POLREF_CALIBRATION_MAP,
             InstrumentWorkflow="POLREF",
             SpecularPixelSpectrumNo=self._SPECULAR_PIXEL,
+            NominalSpecularPixelSpectrumNo=self._SPECULAR_PIXEL,
             ExperimentAngle=0.95,
             AdjustExperimentAngle=True,
             OutputWorkspace=self._OUTPUT_FILE,
@@ -48,6 +49,7 @@ class ReflectometryISISCalibrationPOLREFTest(systemtesting.MantidSystemTest):
         algorithm.setProperty("CalibrationFile", self._POLREF_CALIBRATION_MAP)
         algorithm.setProperty("InstrumentWorkflow", "POLREF")
         algorithm.setProperty("SpecularPixelSpectrumNo", self._SPECULAR_PIXEL)
+        algorithm.setProperty("NominalSpecularPixelSpectrumNo", self._SPECULAR_PIXEL)
         algorithm.setProperty("ExperimentAngle", 0.95)
         algorithm.setProperty("AdjustExperimentAngle", True)
         self.assertEqual({}, algorithm.validateInputs())
