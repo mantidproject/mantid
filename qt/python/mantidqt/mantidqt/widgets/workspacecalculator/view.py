@@ -29,25 +29,20 @@ class WorkspaceCalculatorView(QWidget):
         self.lhs_scaling.setValidator(scale_validator)
         self.rhs_scaling.setValidator(scale_validator)
 
-        # setting these selectors to be optional allows to have an empty entry
-        self.lhs_ws.setOptional(True)
-        self.rhs_ws.setOptional(True)
-        self.output_ws.setOptional(True)
-
-        # connecting ADS observers
-        self.lhs_ws.focussed.connect(lambda: self.connectADS("lhs"))
-        self.rhs_ws.focussed.connect(lambda: self.connectADS("rhs"))
-        self.output_ws.focussed.connect(lambda: self.connectADS("output"))
-
-        # cases for disconnecting ADS observers
-        self.lhs_ws.activated.connect(lambda: self.disconnectADS("lhs"))
-        self.rhs_ws.activated.connect(lambda: self.disconnectADS("rhs"))
-        self.output_ws.activated.connect(lambda: self.disconnectADS("output"))
-
-        # by default the observers to the ADS should be disconnected, and connected only when user focuses on the widget
-        self.lhs_ws.disconnectObservers()
-        self.rhs_ws.disconnectObservers()
-        self.output_ws.disconnectObservers()
+        self.selectors = {
+            "lhs": self.lhs_ws,
+            "rhs": self.rhs_ws,
+            "output": self.output_ws,
+        }
+        for selector_name, selector in self.selectors.items():
+            # setting the selector to be optional allows to have an empty entry
+            selector.setOptional(True)
+            # connecting ADS observers
+            selector.focussed.connect(lambda selector_name=selector_name: self.connectADS(selector_name))
+            # case for disconnecting ADS observers
+            selector.activated.connect(lambda selector_name=selector_name: self.disconnectADS(selector_name))
+            # by default the observers to the ADS should be disconnected, and connected only when user focuses on the widget
+            selector.disconnectObservers()
 
     def setValidationLabel(self, ws, validationValue, tooltip=""):
         """Sets the visibility of the validity indicator (asterisk) next to the workspace selector."""
@@ -64,25 +59,20 @@ class WorkspaceCalculatorView(QWidget):
 
     def connectADS(self, selector_name):
         """Explicitly connects the workspace selector observers to the ADS."""
-        if selector_name == "lhs" and not self.lhs_ws.isConnected():
-            self.lhs_ws.connectObservers()
-        elif selector_name == "rhs" and not self.rhs_ws.isConnected():
-            self.rhs_ws.connectObservers()
-        elif selector_name == "output" and not self.output_ws.isConnected():
-            self.output_ws.connectObservers()
+        selector = self.selectors.get(selector_name)
+        if selector is not None and not selector.isConnected():
+            selector.connectObservers()
 
     def disconnectADS(self, selector_name=""):
         """Disconnects connected workspace selectors from signals coming from the ADS."""
-        if selector_name == "lhs":
-            self.lhs_ws.disconnectObservers()
-        elif selector_name == "rhs":
-            self.rhs_ws.disconnectObservers()
-        elif selector_name == "output":
-            self.output_ws.disconnectObservers()
+        selector = self.selectors.get(selector_name)
+        if selector is not None:
+            # Disconnect a specific selector
+            selector.disconnectObservers()
         else:
-            self.lhs_ws.disconnectObservers()
-            self.rhs_ws.disconnectObservers()
-            self.output_ws.disconnectObservers()
+            # Disconnect all selectors
+            for selector in self.selectors.values():
+                selector.disconnectObservers()
 
     def hideEvent(self, event):
         """Handles hide event of the calculator widget."""
