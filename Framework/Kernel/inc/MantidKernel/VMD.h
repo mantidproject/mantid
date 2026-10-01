@@ -7,13 +7,12 @@
 #pragma once
 
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/V3D_fwd.h"
 #include <string>
 #include <vector>
 
 namespace Mantid {
 namespace Kernel {
-class V3D;
-
 /** Simple vector class for multiple dimensions (i.e. > 3).
 
   @author Janik Zikovsky

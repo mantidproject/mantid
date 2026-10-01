@@ -14,6 +14,7 @@
 #include "MantidAlgorithms/WeightingStrategy.h"
 #include "MantidDataObjects/EventWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 namespace Algorithms {

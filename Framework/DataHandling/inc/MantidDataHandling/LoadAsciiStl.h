@@ -6,14 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "MantidDataHandling/LoadStl.h"
+#include "MantidKernel/V3D_fwd.h"
 #include <iosfwd>
 #include <utility>
 
 namespace Mantid {
-
-namespace Kernel {
-class V3D;
-}
 
 namespace Geometry {
 class MeshObject;

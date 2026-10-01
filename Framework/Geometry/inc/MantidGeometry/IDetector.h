@@ -13,15 +13,9 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/IObjComponent.h"
+#include "MantidKernel/V3D_fwd.h"
 
 namespace Mantid {
-namespace Kernel {
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
-class V3D;
-} // namespace Kernel
-
 namespace Geometry {
 /** Describes the topology of a detectors group used to calculate angular
  * position and angular
