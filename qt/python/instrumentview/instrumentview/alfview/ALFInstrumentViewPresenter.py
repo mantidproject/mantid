@@ -5,16 +5,15 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.alfview.ALFInstrumentViewView import ALFInstrumentViewView
-from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
+from instrumentview.alfview.ALFInstrumentViewModel import ALFInstrumentViewModel
 from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
 from instrumentview.ComponentSelectionUtils import detector_component_indices_in_subtrees
 from instrumentview.Globals import CurrentTab
 
 import numpy as np
-from mantid.simpleapi import CreateSampleWorkspace, Rebin
+from mantid.simpleapi import AnalysisDataService, CreateSampleWorkspace, Rebin
 from qtpy.QtCore import QObject, QMetaObject, Q_ARG
 
 
@@ -29,7 +28,7 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
 
     def __init__(self, view=None):
         _placeholder_ws = CreateSampleWorkspace(InstrumentName="ALF", StoreInADS=False, OutputWorkspace="test_alfview")
-        super().__init__(ALFInstrumentViewView(), FullInstrumentViewModel(_placeholder_ws))
+        super().__init__(ALFInstrumentViewView(), ALFInstrumentViewModel(_placeholder_ws))
         self._view._select_bank_tube.toggle()
         self._view._render_mode_combo_box.setCurrentText(self._view._RENDER_MODE_SHAPES_FAST)
         self._view._projection_combo_box.setCurrentText(ProjectionType.CYLINDRICAL_Y.value)
@@ -40,29 +39,17 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
         self._update_view_main_plotter(refresh_limits=True)
 
     def _replace_workspace_callback(self, ws_name, ws):
-
+        # This overwrite is needed to avoid alf view updating when other workspaces are renamed.
         if ws_name != self._model.workspace.name():
             return
-
-        detector_ids = self._model._detector_ids.copy()
-        detector_is_picked = self._model._detector_is_picked.copy()
-        point_picked_detectors = self._model._point_picked_detectors.copy()
-        # Alfview should have any groupings selected, but included for consistency
-        current_detector_groupings = self._model._current_detector_groupings.copy()
-
         self._reset_model_workspace(ws_name)
 
-        if (
-            detector_is_picked.shape == self._model._detector_is_picked.shape
-            and point_picked_detectors.shape == self._model._point_picked_detectors.shape
-            # Detector IDs should always match since alfview uses the same workspace for storing data
-            and np.array_equal(detector_ids, self._model._detector_ids)
-            and current_detector_groupings.shape == self._model._current_detector_groupings.shape
-        ):
-            self._model._detector_is_picked = detector_is_picked
-            self._model._point_picked_detectors = point_picked_detectors
-            self._model._current_detector_groupings = current_detector_groupings
-
+    def _reset_model_workspace(self, ws_name: str) -> None:
+        self._model._workspace = AnalysisDataService.retrieve(ws_name)
+        self._model.setup()
+        self._reload_renderers()  # Clear cached renderers before rendering
+        self.update_plotter()
+        # Trigger reset in alf view
         self._publish_selection_change(force_actor_refresh=True)
 
     def selected_detector_ids(self):
