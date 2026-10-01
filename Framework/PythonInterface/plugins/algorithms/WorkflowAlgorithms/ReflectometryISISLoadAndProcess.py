@@ -47,6 +47,10 @@ class Prop:
 
 class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     _CALIBRATION_FILE_LOG = "reflectometry_calibration_file"
+    _ADJUSTED_THETA_LOG = "reflectometry_adjusted_theta"
+    _POLREF = "POLREF"
+    _POLREF_START_WS_INDEX = 4
+    _POLREF_NOMINAL_SPECULAR_PIXEL_SPECTRUM_NO = 280.0  # This is temporary, will be dynamic in upcoming PR.
 
     def __init__(self):
         """Initialize an instance of the algorithm."""
@@ -78,7 +82,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         """Initialize the input and output properties of the algorithm."""
         self._reduction_properties = []  # cached list of properties copied from child alg
         self._declareRunProperties()
-        self._declarePreprocessProperties()
+        self._declareCalibrationProperties()
         self._declareSumBanksProperties()
         self._declareSlicingProperties()
         self._declareReductionProperties()
@@ -104,13 +108,20 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         inputWorkspace = self._sumWorkspaces(inputWorkspaces, False)
         firstTransWorkspace = self._sumWorkspaces(firstTransWorkspaces, True)
         secondTransWorkspace = self._sumWorkspaces(secondTransWorkspaces, True)
+        inputWorkspace, adjusted_theta = self._calibrate_workspace(inputWorkspace, adjust_theta=True)
+        firstTransWorkspace, _ = self._calibrate_workspace(
+            firstTransWorkspace, experiment_angle=0, specular_spectrum_no=self._POLREF_NOMINAL_SPECULAR_PIXEL_SPECTRUM_NO
+        )
+        secondTransWorkspace, _ = self._calibrate_workspace(
+            secondTransWorkspace, experiment_angle=0, specular_spectrum_no=self._POLREF_NOMINAL_SPECULAR_PIXEL_SPECTRUM_NO
+        )
         # Check if we will need to sum banks as part of the reduction
         self._should_sum_banks(inputWorkspace, firstTransWorkspace, secondTransWorkspace)
         # Slice the input workspace, if required
         if self._slicingEnabled():
             inputWorkspace = self._sliceWorkspace(inputWorkspace)
         # Perform the reduction
-        alg = self._reduce(inputWorkspace, firstTransWorkspace, secondTransWorkspace)
+        alg = self._reduce(inputWorkspace, firstTransWorkspace, secondTransWorkspace, adjusted_theta)
         # Set outputs and tidy TOF workspaces into a group
         self._finalize(alg)
         self._groupTOFWorkspaces(inputWorkspaces)
@@ -170,10 +181,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
         self.declareProperty(Prop.HIDE_INPUT, False, doc="If true, make the input workspaces invisible in the ADS.")
 
-    def _declarePreprocessProperties(self):
-        """Copy properties from the child preprocess algorithm"""
-        properties = ["CalibrationFile"]
-        self.copyProperties("ReflectometryISISPreprocess", properties)
+    def _declareCalibrationProperties(self):
+        """Copy properties from the calibration algorithm."""
+        self.copyProperties("ReflectometryISISCalibration", ["CalibrationFile"])
 
     def _declareSumBanksProperties(self):
         """Copy properties from the child sum banks algorithm"""
@@ -302,15 +312,37 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _getInputWorkspaces(self, runs, isTrans):
         """Convert the given run numbers into real workspace names. Uses workspaces from
         the ADS if they exist, or loads them otherwise."""
-        workspaces = list()
+        resolved_inputs = []
         for run in runs:
             ws = self._getRunFromADSOrNone(run, isTrans)
-            if not ws:
+            load_from_source = ws is None
+            if load_from_source:
                 ws = self._loadRun(run, isTrans)
             if not ws:
                 raise RuntimeError("Error loading run " + run)
-            workspaces.append(ws)
+            resolved_inputs.append((run, ws, load_from_source))
+
+        workspaces = [ws for _, ws, _ in resolved_inputs]
+        if self._inputs_require_raw_reload(workspaces):
+            workspaces = [
+                self._raw_input_workspace(run, ws, isTrans, loaded_from_source) for run, ws, loaded_from_source in resolved_inputs
+            ]
         return workspaces
+
+    def _raw_input_workspace(self, run, workspace_name, is_transmission, loaded_from_source):
+        workspace = AnalysisDataService.retrieve(workspace_name)
+        if self._workspaceIsRaw(workspace):
+            return workspace_name
+        if loaded_from_source:
+            raise RuntimeError(
+                "Cannot obtain uncalibrated input workspaces for post-summation calibration; "
+                "workspace loaded from file is already calibrated."
+            )
+
+        workspace_name = self._loadRun(run, is_transmission)
+        if not workspace_name or not self._workspaceIsRaw(AnalysisDataService.retrieve(workspace_name)):
+            raise RuntimeError("Cannot obtain uncalibrated input workspaces for post-summation calibration.")
+        return workspace_name
 
     def _loadFloodCorrectionWorkspace(self):
         flood_workspace = self.getPropertyValue("FloodWorkspace")
@@ -474,19 +506,53 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         else:
             is_valid = self._isValidWorkspace(workspace_name, "Workspace2D")
 
-        if is_valid and not self._workspaceHasRequestedCalibration(AnalysisDataService.retrieve(workspace_name)):
+        if not is_valid:
+            return False
+
+        workspace = AnalysisDataService.retrieve(workspace_name)
+        if (
+            self.getPropertyValue("CalibrationFile")
+            and self._workspaceHasCalibration(workspace)
+            and not self._workspaceHasRequestedCalibration(workspace)
+        ):
             self.log().information(f'Workspace "{workspace_name}" does not have the requested calibration')
             return False
-        return is_valid
+        return True
+
+    def _workspaceHasCalibration(self, workspace):
+        return self._representative_workspace(workspace).run().hasProperty(self._CALIBRATION_FILE_LOG)
 
     def _workspaceHasRequestedCalibration(self, workspace):
         calibration_filepath = self.getPropertyValue("CalibrationFile")
         if not calibration_filepath:
             return True
-        if isinstance(workspace, WorkspaceGroup):
-            return all(self._workspaceHasRequestedCalibration(member) for member in workspace)
-        run = workspace.run()
+        run = self._representative_workspace(workspace).run()
         return run.hasProperty(self._CALIBRATION_FILE_LOG) and run.getProperty(self._CALIBRATION_FILE_LOG).value == calibration_filepath
+
+    def _inputs_require_raw_reload(self, workspace_names):
+        """Return whether cached geometry is unsafe to reuse for the current input set.
+
+        An adjusted angle may have been calculated from a different set of summed inputs,
+        so angle-dependent geometry must always be recreated from raw workspaces.
+        """
+        if not self.getPropertyValue("CalibrationFile"):
+            return False
+        workspaces = [AnalysisDataService.retrieve(name) for name in workspace_names]
+        if any(self._workspaceHasAngleCorrection(workspace) for workspace in workspaces):
+            return True
+        if not any(self._workspaceHasCalibration(workspace) for workspace in workspaces):
+            return False
+        return not all([self._workspaceHasRequestedCalibration(workspace) for workspace in workspaces])
+
+    def _workspaceIsRaw(self, workspace):
+        return not self._workspaceHasCalibration(workspace) and not self._workspaceHasAngleCorrection(workspace)
+
+    def _workspaceHasAngleCorrection(self, workspace):
+        return self._representative_workspace(workspace).run().hasProperty(self._ADJUSTED_THETA_LOG)
+
+    @staticmethod
+    def _representative_workspace(workspace):
+        return workspace[0] if isinstance(workspace, WorkspaceGroup) else workspace
 
     def _getRunFromADSOrNone(self, run, isTrans):
         """Given a run name, return the name of the equivalent workspace in the ADS (
@@ -580,14 +646,95 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def _preprocess_arguments(self, run, event_mode):
         args = {"InputRunList": [run], "EventMode": event_mode}
-        calibration_filepath = self.getPropertyValue("CalibrationFile")
-        if calibration_filepath:
-            args["CalibrationFile"] = calibration_filepath
-            args["IfAlreadyCalibrated"] = "WARN"
-        for property_name in ["ThetaIn", "ThetaLogName"]:
-            if not self.getProperty(property_name).isDefault:
-                args[property_name] = self.getPropertyValue(property_name)
         return args
+
+    def _calibrate_workspace(self, workspace_name, adjust_theta=False, experiment_angle=None, specular_spectrum_no=None):
+        calibration_filepath = self.getPropertyValue("CalibrationFile")
+        if workspace_name is None or not calibration_filepath:
+            return workspace_name, experiment_angle
+
+        workspace = AnalysisDataService.retrieve(workspace_name)
+        representative_workspace = self._representative_workspace(workspace)
+
+        if self._workspaceHasRequestedCalibration(workspace):
+            return workspace_name, experiment_angle
+
+        is_group = isinstance(workspace, WorkspaceGroup)
+        members = list(workspace) if is_group else [workspace]
+        calibrated_members = []
+        adjusted_theta = experiment_angle
+        for member_index, member in enumerate(members):
+            alg = self.createChildAlgorithm("ReflectometryISISCalibration")
+            alg.setRethrows(True)
+            alg.setProperty("InputWorkspace", member)
+            alg.setProperty("CalibrationFile", calibration_filepath)
+            experiment_angle, has_angle_dependent_geometry = self._setInstrumentSpecificProperties(
+                alg, representative_workspace, adjust_theta, experiment_angle, specular_spectrum_no
+            )
+            alg.execute()
+            calibrated_member = alg.getProperty("OutputWorkspace").value
+            calibrated_member.run().addProperty(self._CALIBRATION_FILE_LOG, calibration_filepath, True)
+            #  Only return the adjusted theta from the first member of a group, since it should be the same for all members
+            if has_angle_dependent_geometry and member_index == 0 and adjust_theta:
+                adjusted_theta = calibrated_member.run().getProperty(self._ADJUSTED_THETA_LOG).value
+            calibrated_members.append(calibrated_member)
+
+        calibrated_workspace = self._create_workspace_group_from_members(calibrated_members) if is_group else calibrated_members[0]
+        AnalysisDataService.addOrReplace(workspace_name, calibrated_workspace)
+        return workspace_name, adjusted_theta
+
+    def _create_workspace_group_from_members(self, members):
+        group = WorkspaceGroup()
+        for member in members:
+            group.addWorkspace(member)
+        return group
+
+    def _setInstrumentSpecificProperties(self, calibration_alg, workspace, adjust_theta, experiment_angle=None, specular_spectrum_no=None):
+        if workspace.getInstrument().getName() != self._POLREF:
+            return experiment_angle, False
+
+        if specular_spectrum_no is None:
+            specular_spectrum_no = self._find_specular_pixel_spectrum_no(workspace)
+        if experiment_angle is None:
+            experiment_angle = self._experiment_angle(workspace)
+
+        calibration_alg.setProperty("InstrumentWorkflow", self._POLREF)
+        calibration_alg.setProperty("SpecularPixelSpectrumNo", specular_spectrum_no)
+        calibration_alg.setProperty("ExperimentAngle", experiment_angle)
+        calibration_alg.setProperty("AdjustExperimentAngle", adjust_theta)
+        calibration_alg.setProperty("NominalSpecularPixelSpectrumNo", self._POLREF_NOMINAL_SPECULAR_PIXEL_SPECTRUM_NO)
+        return experiment_angle, True
+
+    def _find_specular_pixel_spectrum_no(self, workspace):
+        lines_alg = self.createChildAlgorithm("FindReflectometryLines")
+        lines_alg.setProperty("InputWorkspace", workspace)
+        lines_alg.setProperty("StartWorkspaceIndex", self._POLREF_START_WS_INDEX)
+        lines_alg.execute()
+        return self._spectrum_number_for_workspace_index(workspace, lines_alg.getProperty("LineCentre").value)
+
+    def _experiment_angle(self, workspace):
+        theta = self.getProperty("ThetaIn")
+        if not theta.isDefault:
+            return theta.value
+
+        theta_log_name = self.getPropertyValue("ThetaLogName")
+        if theta_log_name:
+            theta_log = workspace.run().getProperty(theta_log_name)
+            if hasattr(theta_log, "lastValue"):
+                return theta_log.lastValue()
+            return float(theta_log.value)
+
+        raise RuntimeError("ThetaIn or ThetaLogName must be provided when calibrating POLREF data")
+
+    @staticmethod
+    def _spectrum_number_for_workspace_index(workspace, workspace_index):
+        lower_index = int(workspace_index)
+        fraction = workspace_index - lower_index
+        lower_spectrum_no = workspace.getSpectrum(lower_index).getSpectrumNo()
+        if fraction == 0:
+            return float(lower_spectrum_no)
+        upper_spectrum_no = workspace.getSpectrum(lower_index + 1).getSpectrumNo()
+        return lower_spectrum_no + fraction * (upper_spectrum_no - lower_spectrum_no)
 
     def _sumWorkspaces(self, workspaces, isTrans):
         """If there are multiple input workspaces, sum them and return the result. Otherwise
@@ -664,13 +811,15 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _getSlicedWorkspaceGroupName(self, workspace):
         return workspace + "_sliced"
 
-    def _reduce(self, input_workspace, first_trans_workspace, second_trans_workspace):
+    def _reduce(self, input_workspace, first_trans_workspace, second_trans_workspace, adjusted_theta=None):
         """Run the child algorithm to do the reduction. Return the child algorithm."""
         self.log().information("Running ReflectometryReductionOneAuto on " + input_workspace)
         alg = self.createChildAlgorithm("ReflectometryReductionOneAuto")
         # Set properties that we copied directly from the child
         for property in self._reduction_properties:
             alg.setProperty(property, self.getPropertyValue(property))
+        if adjusted_theta is not None:
+            alg.setProperty("ThetaIn", adjusted_theta)
         # Set properties that we could not take directly from the child
         alg.setProperty("InputWorkspace", input_workspace)
         alg.setProperty("FirstTransmissionRun", first_trans_workspace)

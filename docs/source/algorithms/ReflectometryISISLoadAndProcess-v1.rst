@@ -17,6 +17,7 @@ The steps this algorithm performs are:
 - Ensure workspaces are loaded and are of the correct type.
 - Sum multiple input runs into a single workspace, if there is more than one.
 - Sum multiple transmission runs into a single workspace, if there is more than one.
+- Apply detector calibration to each summed workspace, if requested.
 - Perform background subtraction, if requested.
 - Perform time-slicing of the input run, if requested.
 - Perform the reduction.
@@ -24,13 +25,12 @@ The steps this algorithm performs are:
 
 Input runs and transmission runs are loaded if required, or existing workspaces are used if they are already loaded. When runs are loaded, they are named based on the run number with a ``TOF_`` or ``TRANS_`` prefix. To determine whether workspaces are already loaded, workspace names are matched based on the run number with or without this prefix. Other naming formats are not considered to match.
 
-If a value is provided for the ``CalibrationFile`` property then calibration will be applied for input runs that are loaded (but not where existing workspaces are being used). The calibration will be performed using :ref:`algm-ReflectometryISISCalibration`. See the documentation for the required calibration file format. When using the POLREF calibration workflow, the experiment angle is taken from ``ThetaIn`` or, when ``ThetaIn`` is not supplied, from the run log selected by ``ThetaLogName``.
+If a value is provided for the ``CalibrationFile`` property, input runs are summed before the resulting workspace is calibrated using :ref:`algm-ReflectometryISISCalibration`. Existing workspaces carrying a matching ``reflectometry_calibration_file`` run log can be reused when their geometry has not already received angle correction. Workspaces carrying the ``reflectometry_adjusted_theta`` run log are reloaded before post-summation calibration because their geometry depends on an earlier experiment angle and fitted specular position.
 
-If a loaded file already contains a ``reflectometry_calibration_file`` run log, the algorithm warns that the data have previously been calibrated. The calibration selected in ``CalibrationFile`` is still applied, but applying a calibration more than once may produce erroneous results.
-
+For the POLREF calibration workflow, the experiment angle is taken from ``ThetaIn`` or, when ``ThetaIn`` is not supplied, from the run log selected by ``ThetaLogName``. The fractional specular pixel index is obtained through fitting the specular peak on the summed sample workspace. The experiment angle is then corrected by the difference between the angular positions of the nominal specular pixel and this fitted fractional specular pixel index. This adjusted angle is used both for detector calibration and reduction.
 If time slicing is enabled, the input run must be an event workspace and have monitors loaded; otherwise, it must be a histogram workspace. If the workspace already exists but is the incorrect type or is missing monitors, it will be reloaded.
 
-Input runs can be combined before reduction by supplying a comma-separated list of run numbers. They will be summed using the :ref:`algm-Plus` algorithm. Similarly, multiple input workspaces for the first and/or second transmission inputs can be summed prior to reduction.
+Input runs can be combined before reduction by supplying a comma-separated list of run numbers. They will be summed using the :ref:`algm-MergeRuns` algorithm. Similarly, multiple input workspaces for the first and/or second transmission inputs can be summed prior to reduction.
 
 If ``SubtractBackground`` is true, then background subtraction will be performed using the :ref:`algm-ReflectometryBackgroundSubtraction` algorithm. There are various options for specifying how the subtraction should be done.
 

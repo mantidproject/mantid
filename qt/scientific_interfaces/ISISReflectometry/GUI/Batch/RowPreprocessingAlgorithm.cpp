@@ -5,9 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RowPreprocessingAlgorithm.h"
-#include "../../Reduction/Experiment.h"
 #include "../../Reduction/IBatch.h"
-#include "../../Reduction/Instrument.h"
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProperties.h"
@@ -31,22 +29,15 @@ void updateInputWorkspacesProperties(Mantid::API::IAlgorithmRuntimeProps &proper
   Mantid::API::AlgorithmProperties::update("InputRunList", inputRunNumbers, properties);
 }
 
-void updateInstrumentSettingsProperties(Mantid::API::IAlgorithmRuntimeProps &properties, Instrument const &instrument) {
-  Mantid::API::AlgorithmProperties::update("CalibrationFile", instrument.calibrationFilePath(), properties);
-}
-
 } // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry::PreprocessRow {
 
 /** Create a configured algorithm for preprocessing a row. The algorithm
- * properties are set from the reduction configuration model and the
- * given row.
- * @param model : the reduction configuration model
+ * properties are set from the given row.
  * @param row : the row from the preview tab
  */
-IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, PreviewRow &row,
-                                                    Mantid::API::IAlgorithm_sptr alg) {
+IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &, PreviewRow &row, Mantid::API::IAlgorithm_sptr alg) {
   // Create the algorithm
   if (!alg) {
     alg = Mantid::API::AlgorithmManager::Instance().create("ReflectometryISISPreprocess");
@@ -55,10 +46,9 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Preview
   alg->setAlwaysStoreInADS(false);
   alg->getPointerToProperty("OutputWorkspace")->createTemporaryValue();
 
-  // Set the algorithm properties from the model
+  // Set the algorithm properties from the row
   auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   updateInputWorkspacesProperties(*properties, row.runNumbers());
-  updateInstrumentSettingsProperties(*properties, model.instrument());
 
   // Return the configured algorithm
   auto jobAlgorithm =

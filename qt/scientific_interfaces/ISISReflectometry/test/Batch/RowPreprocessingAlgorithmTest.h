@@ -8,9 +8,7 @@
 
 #include "../../../ISISReflectometry/GUI/Batch/RowPreprocessingAlgorithm.h"
 #include "../../../ISISReflectometry/Reduction/IBatch.h"
-#include "../../../ISISReflectometry/Reduction/Instrument.h"
 #include "../../../ISISReflectometry/Reduction/PreviewRow.h"
-#include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -25,7 +23,6 @@ using namespace ::testing;
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::PreprocessRow;
-using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 using MantidQt::API::IConfiguredAlgorithm;
 
 class RowPreprocessingAlgorithmTest : public CxxTest::TestSuite {
@@ -57,9 +54,6 @@ public:
     auto row = PreviewRow(inputRuns);
     auto mockAlg = std::make_shared<StubbedPreProcess>();
 
-    auto instrument = makeEmptyInstrument();
-    EXPECT_CALL(batch, instrument()).WillOnce(ReturnRef(instrument));
-
     auto configuredAlg = createConfiguredAlgorithm(batch, row, mockAlg);
     TS_ASSERT_EQUALS(configuredAlg->algorithm(), mockAlg);
     Mantid::API::AlgorithmRuntimeProps expectedProps;
@@ -71,24 +65,6 @@ public:
       return setProps.existsProperty(name) &&
              expectedProps.getPropertyValue(name) == expectedProps.getPropertyValue(name);
     }))
-
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&batch));
-  }
-
-  void test_calibration_properties_forwarded() {
-    auto batch = MockBatch();
-    auto row = PreviewRow(std::vector<std::string>{"12345"});
-    auto mockAlg = std::make_shared<StubbedPreProcess>();
-
-    auto instrument = makeInstrument();
-    EXPECT_CALL(batch, instrument()).WillOnce(ReturnRef(instrument));
-
-    auto configuredAlg = createConfiguredAlgorithm(batch, row, mockAlg);
-    TS_ASSERT_EQUALS(configuredAlg->algorithm(), mockAlg);
-
-    const auto &setProps = configuredAlg->getAlgorithmRuntimeProps();
-    TS_ASSERT(setProps.existsProperty("CalibrationFile"));
-    TS_ASSERT_EQUALS(setProps.getPropertyValue("CalibrationFile"), instrument.calibrationFilePath());
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&batch));
   }
