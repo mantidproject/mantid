@@ -1322,7 +1322,8 @@ public:
     auto const inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(TEST_GROUP_NAME + "_1");
     auto flood = createFloodWorkspace(inputWS->getInstrument(), 257);
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0, true, false);
-    setup_optional_properties(alg, {{"MomentumTransferStep", 0.04}, {"FloodCorrection", "ParameterFile"}});
+    setup_optional_properties(
+        alg, {{"MomentumTransferStep", 0.04}, {"FloodCorrection", "ParameterFile"}, {"CorrectionAlgorithm", "None"}});
 
     alg->execute();
 
