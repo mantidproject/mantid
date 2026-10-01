@@ -12,12 +12,14 @@
 #include "MantidGeometry/Instrument_fwd.h"
 
 #include "MantidKernel/DeltaEMode.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
 
 #include <mutex>
 
 namespace Mantid {
+namespace Nexus {
+class File;
+}
 class SpectrumDefinition;
 namespace Kernel {
 class Property;

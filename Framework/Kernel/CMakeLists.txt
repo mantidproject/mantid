@@ -308,6 +308,7 @@ set(INC_FILES
     inc/MantidKernel/Utils.h
     inc/MantidKernel/V2D.h
     inc/MantidKernel/V3D.h
+    inc/MantidKernel/V3D_fwd.h
     inc/MantidKernel/VMD.h
     inc/MantidKernel/VectorHelper.h
     inc/MantidKernel/VisibleWhenProperty.h

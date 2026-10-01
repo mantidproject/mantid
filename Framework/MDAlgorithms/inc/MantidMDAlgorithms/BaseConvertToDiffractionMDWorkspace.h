@@ -12,7 +12,6 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidKernel/V3D.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {

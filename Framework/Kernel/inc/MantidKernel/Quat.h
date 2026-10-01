@@ -7,13 +7,12 @@
 #pragma once
 
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/V3D_fwd.h"
 #include <string>
 #include <vector>
 
 namespace Mantid {
 namespace Kernel {
-// Forward declarations
-class V3D;
 template <class T> class Matrix;
 
 /** @class Quat Quat.h Geometry/Quat.h

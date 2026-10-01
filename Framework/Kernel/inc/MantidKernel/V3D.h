@@ -9,6 +9,7 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Tolerance.h"
+#include "MantidKernel/V3D_fwd.h"
 #include <algorithm>
 #include <array>
 #include <cassert>

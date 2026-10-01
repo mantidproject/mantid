@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/WeightingStrategy.h"

@@ -11,7 +11,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/V3D.h"
+#include "MantidKernel/V3D_fwd.h"
 #include "MantidNexus/NexusClasses_fwd.h"
 #include "MantidNexus/NexusDescriptorLazy.h"
 
