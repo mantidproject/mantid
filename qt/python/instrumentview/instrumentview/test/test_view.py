@@ -13,6 +13,7 @@ import numpy as np
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.layout_engine import ConstrainedLayoutEngine
 from qtpy.QtCore import Qt
+from qtpy.QtGui import QCloseEvent
 from mantidqt.utils.qt.testing import start_qapplication
 from mantid.simpleapi import CreateSampleWorkspace
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewView, FullInstrumentViewWindow, _LIGHT_GREY
@@ -493,6 +494,28 @@ class TestFullInstrumentViewView(unittest.TestCase):
         with mock.patch.object(self._view._show_sample_position_check_box, "set_colour") as mock_set_colour:
             self._view._on_show_sample_position_toggled(False)
         mock_set_colour.assert_called_once_with(_LIGHT_GREY)
+
+    def test_close_closes_presenter_then_plotter(self):
+        self._view.closeEvent(QCloseEvent())
+        self._view._presenter.handle_close.assert_called_once()
+        self._view.main_plotter.close.assert_called_once()
+
+    def test_close_removes_overlaid_shape_without_calling_presenter(self):
+        overlay_manager = MagicMock()
+        self._view._shape_overlay_manager = overlay_manager
+
+        self._view.closeEvent(QCloseEvent())
+
+        overlay_manager.remove_shape.assert_called_once()
+        self.assertIsNone(self._view._shape_overlay_manager)
+        self._view._presenter.on_overlaid_shape_removed.assert_not_called()
+
+    def test_close_clears_line_plot(self):
+        self._view._detector_spectrum_axes.plot([0, 1], [0, 1])
+
+        self._view.closeEvent(QCloseEvent())
+
+        self.assertEqual(self._view._detector_spectrum_fig.axes, [])
 
     def test_set_unit_combo_options_fills_both_combo_boxes(self):
         self._view.set_unit_combo_options(["TOF", "dSpacing"])
