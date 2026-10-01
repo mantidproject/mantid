@@ -28,6 +28,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
     _ADJUST_EXPERIMENT_ANGLE = "AdjustExperimentAngle"
     _OUTPUT_WORKSPACE = "OutputWorkspace"
     _ADJUSTED_THETA_LOG = "reflectometry_adjusted_theta"
+    _NOMINAL_SPECULAR_PIXEL_SPECTRUM_NO = "NominalSpecularPixelSpectrumNo"
 
     _POSITION_CORRECTION_TYPE = "DetectorCorrectionType"
     _COMMENT_PREFIX = "#"
@@ -42,7 +43,6 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
     _POLREF_WORKFLOW = "POLREF"
     _VERTICAL_SHIFT = "VerticalShift"
     _ROTATE_AROUND_SAMPLE = "RotateAroundSample"
-    _POLREF_NOMINAL_SPECULAR_SPECTRUM_NO = 280.0  # This is temporary, will be dynamic in upcoming PR.
     _RAD_TO_DEG = 180.0 / math.pi
 
     class CalibrationData:
@@ -128,21 +128,28 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             self._SPECULAR_PIXEL_SPECTRUM_NO,
             Property.EMPTY_DBL,
             non_negative_double,
-            "The spectrum number of the specular pixel in the subject run. Required for the POLREF workflow.",
+            "For the POLREF workflow, the actual (corrected) spectrum number of the specular pixel in the subject run.",
         )
         self.declareProperty(
             self._EXPERIMENT_ANGLE,
             Property.EMPTY_DBL,
-            "The experiment theta angle in degrees. Required for the POLREF workflow.",
+            "For the POLREF workflow, the experiment theta angle in degrees.",
         )
         self.declareProperty(
             self._ADJUST_EXPERIMENT_ANGLE,
             False,
             "For the POLREF workflow, adjust ExperimentAngle using the nominal minus measured specular-pixel angle in the calibration map.",
         )
+        self.declareProperty(
+            self._NOMINAL_SPECULAR_PIXEL_SPECTRUM_NO,
+            Property.EMPTY_DBL,
+            non_negative_double,
+            "For the POLREF workflow, the nominal spectrum number of the specular pixel (prior to correction).",
+        )
         self._enable_property_when_workflow_option_enables(self._SPECULAR_PIXEL_SPECTRUM_NO)
         self._enable_property_when_workflow_option_enables(self._EXPERIMENT_ANGLE)
         self._enable_property_when_workflow_option_enables(self._ADJUST_EXPERIMENT_ANGLE)
+        self._enable_property_when_workflow_option_enables(self._NOMINAL_SPECULAR_SPECTRUM_NO)
         self.declareProperty(
             WorkspaceProperty(self._OUTPUT_WORKSPACE, "", direction=Direction.Output),
             doc="The calibrated output workspace.",
@@ -422,18 +429,18 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
     def _calculate_adjusted_theta(self, calibration_angles):
         experiment_angle = self.getProperty(self._EXPERIMENT_ANGLE).value
-        nominal_spectrum_number = self._POLREF_NOMINAL_SPECULAR_SPECTRUM_NO
         self._validate_interpolation_index(
             self._specular_pixel_spectrum_number(),
             calibration_angles.first_key(),
             calibration_angles.last_key(),
             self._SPECULAR_PIXEL_SPECTRUM_NO,
         )
+        nominal_spectrum_number = self.getProperty(self._NOMINAL_SPECULAR_PIXEL_SPECTRUM_NO).value
         self._validate_interpolation_index(
             nominal_spectrum_number,
             calibration_angles.first_key(),
             calibration_angles.last_key(),
-            "Nominal POLREF specular spectrum number",
+            self._NOMINAL_SPECULAR_PIXEL_SPECTRUM_NO,
         )
         measured_angle = self._interpolate_calibration_angle(calibration_angles.data, self._specular_pixel_spectrum_number())
         nominal_angle = self._interpolate_calibration_angle(calibration_angles.data, nominal_spectrum_number)
