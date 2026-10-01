@@ -807,6 +807,17 @@ class FullInstrumentViewPresenter:
         if getattr(self, "_interactor_styles", None) is not None:
             self._interactor_styles.cleanup()
             self._interactor_styles = None
+        # Drop the renderers (and their cached geometry) and meshes now, rather than waiting for the
+        # view <-> presenter reference cycle to be garbage collected.
+        self._renderer = None
+        self._point_cloud_renderer = None
+        self._shape_renderer = None
+        self._shape_renderer_full = None
+        self._sbs_shape_renderer = None
+        self._sbs_shape_renderer_full = None
+        self._detector_mesh = None
+        self._masked_mesh = None
+        self._component_tree_presenter = None
         # Drop presenter->model reference on close while keeping _model non-optional for static typing.
         self._model = cast(FullInstrumentViewModel, None)
 

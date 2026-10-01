@@ -686,6 +686,26 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         interactor_styles.cleanup.assert_called_once()
         self.assertIsNone(self._presenter._interactor_styles)
 
+    def test_handle_close_releases_renderers_and_meshes(self):
+        self._presenter._detector_mesh = MagicMock()
+        self._presenter._masked_mesh = MagicMock()
+
+        self._presenter.handle_close()
+
+        for attribute in (
+            "_renderer",
+            "_point_cloud_renderer",
+            "_shape_renderer",
+            "_shape_renderer_full",
+            "_sbs_shape_renderer",
+            "_sbs_shape_renderer_full",
+            "_detector_mesh",
+            "_masked_mesh",
+            "_component_tree_presenter",
+            "_model",
+        ):
+            self.assertIsNone(getattr(self._presenter, attribute), attribute)
+
     def test_removing_shape_restores_the_line_plot_for_the_committed_selection(self):
         self._presenter._shape_preview_active = True
         self._presenter._update_line_plot_ws_and_draw = MagicMock()
