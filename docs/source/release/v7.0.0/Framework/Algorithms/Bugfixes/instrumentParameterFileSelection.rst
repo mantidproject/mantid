@@ -1,0 +1,1 @@
+- Loading an instrument through ``InstrumentFileFinder`` now consistently selects parameter files matching the search string when multiple candidates have the same validity date. This prevents parameters from being loaded from less suitable files.
