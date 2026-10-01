@@ -582,7 +582,7 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
 
             original = ConvertUnits(InputWorkspace=CERIA_WS, Target="dSpacing", StoreInADS=False)
             corrected = ADS.retrieve(f"Corrected_{CERIA_WS}")
-            self.assertFalse(np.allclose(original.readY(0), corrected.readY(0)), "the corrected data is identical to the input")
+            self.assertFalse(np.allclose(original.y(0), corrected.y(0)), "the corrected data is identical to the input")
 
         with self.subTest("Correction / the corrected workspace is saved under AbsorptionCorrection"):
             self.assertIn(f"Corrected_{CERIA_WS}.nxs", self.basenames_under(self.output_dir("AbsorptionCorrection")))
@@ -593,8 +593,8 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
             import numpy as np
 
             factors = ADS.retrieve("_abs_corr")
-            self.assertTrue(np.all(factors.readY(0) > 0.0), "absorption factors must be positive")
-            self.assertTrue(np.all(factors.readY(0) <= 1.0), "absorption factors must not exceed 1")
+            self.assertTrue(np.all(factors.y(0) > 0.0), "absorption factors must be positive")
+            self.assertTrue(np.all(factors.y(0) <= 1.0), "absorption factors must not exceed 1")
 
     def _check_gauge_volume_choices(self):
         import numpy as np
@@ -613,7 +613,7 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
         with self.subTest("Correction / the 4mm cube preset is written to the run as a gauge volume"):
             self.assertEqual(get_cube_xml("some-gv", 0.004).strip(), logged_gauge_volume())
 
-        preset_factors = ADS.retrieve("_abs_corr").readY(0).copy()
+        preset_factors = ADS.retrieve("_abs_corr").y(0).copy()
 
         with self.subTest("Correction / a custom gauge volume file is used instead when chosen"):
             custom_file = self.texture_data_file("custom_gauge_volume.xml")
@@ -629,7 +629,7 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
             # custom_gauge_volume.xml is itself a 4 mm cube, so this is a round trip: reading the
             # shape from a file must give the same correction as asking for the preset directly
             self.assertTrue(
-                np.allclose(preset_factors, ADS.retrieve("_abs_corr").readY(0)),
+                np.allclose(preset_factors, ADS.retrieve("_abs_corr").y(0)),
                 "the same gauge volume gave different absorption factors depending on how it was specified",
             )
 
@@ -640,7 +640,7 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
             set_finder_text(self.correction_view.finder_gauge_vol, smaller)
             self.apply_corrections(absorption=True, divergence=False, attenuation=False)
             self.assertFalse(
-                np.allclose(preset_factors, ADS.retrieve("_abs_corr").readY(0)),
+                np.allclose(preset_factors, ADS.retrieve("_abs_corr").y(0)),
                 "shrinking the gauge volume made no difference to the absorption factors",
             )
 
@@ -657,7 +657,7 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
             )
 
         with self.subTest("Correction / and the correction really is the uncollimated one"):
-            uncollimated = ADS.retrieve("_abs_corr").readY(0).copy()
+            uncollimated = ADS.retrieve("_abs_corr").y(0).copy()
             self.assertFalse(
                 np.allclose(preset_factors, uncollimated),
                 "correcting with no gauge volume gave the same factors as the 4mm cube",
@@ -672,10 +672,10 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
         from mantid.api import AnalysisDataService as ADS
         from mantid.simpleapi import ConvertUnits
 
-        uncorrected = ConvertUnits(InputWorkspace=CERIA_WS, Target="dSpacing", StoreInADS=False).readY(0).copy()
+        uncorrected = ConvertUnits(InputWorkspace=CERIA_WS, Target="dSpacing", StoreInADS=False).y(0).copy()
 
         self.apply_corrections(absorption=False, divergence=True, attenuation=False)
-        corrected = ADS.retrieve(f"Corrected_{CERIA_WS}").readY(0).copy()
+        corrected = ADS.retrieve(f"Corrected_{CERIA_WS}").y(0).copy()
 
         with self.subTest("Correction / a divergence correction changes the data"):
             self.assertFalse(np.allclose(uncorrected, corrected), "the divergence correction had no effect")
@@ -698,7 +698,7 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
             process_events()
             self.apply_corrections(absorption=False, divergence=True, attenuation=False)
             self.assertFalse(
-                np.allclose(corrected, ADS.retrieve(f"Corrected_{CERIA_WS}").readY(0)),
+                np.allclose(corrected, ADS.retrieve(f"Corrected_{CERIA_WS}").y(0)),
                 "the divergence parameters made no difference to the correction",
             )
             self.correction_view.line_divVert.setText("0.02")
@@ -750,11 +750,11 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
         with self.subTest("Correction / different Monte Carlo settings give different factors"):
             import numpy as np
 
-            coarse = ADS.retrieve("_abs_corr").readY(0).copy()
+            coarse = ADS.retrieve("_abs_corr").y(0).copy()
             self.set_engineering_setting("monte_carlo_params", monte_carlo_params(rows=9, columns=9))
             self.apply_corrections(absorption=True, divergence=False, attenuation=False)
             self.assertFalse(
-                np.allclose(coarse, ADS.retrieve("_abs_corr").readY(0)),
+                np.allclose(coarse, ADS.retrieve("_abs_corr").y(0)),
                 "the Monte Carlo parameters made no difference to the absorption factors",
             )
 

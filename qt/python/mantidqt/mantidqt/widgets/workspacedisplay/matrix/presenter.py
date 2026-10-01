@@ -255,13 +255,13 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
 
     def _get_ws_read_from_type(self, type):
         if type == MatrixWorkspaceTableViewModelType.y:
-            return self.model._ws.readY
+            return self.model._ws.y
         elif type == MatrixWorkspaceTableViewModelType.x:
-            return self.model._ws.readX
+            return self.model._ws.x
         elif type == MatrixWorkspaceTableViewModelType.e:
-            return self.model._ws.readE
+            return self.model._ws.e
         elif type == MatrixWorkspaceTableViewModelType.dx:
-            return self.model._ws.readDx
+            return self.model._ws.dx
         else:
             raise ValueError("Unknown TableViewModel type {}".format(type))
 

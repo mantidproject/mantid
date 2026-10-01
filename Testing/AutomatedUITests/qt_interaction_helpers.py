@@ -660,8 +660,8 @@ def assert_curve_matches_workspace(axes, workspace, spectrum=0):
     """
     import numpy as np
 
-    raw = workspace.readY(spectrum)
-    edges = workspace.readX(spectrum)
+    raw = workspace.y(spectrum)
+    edges = workspace.x(spectrum)
     histogram = len(edges) == len(raw) + 1
     centres = 0.5 * (edges[1:] + edges[:-1]) if histogram else edges
     candidates = [raw, raw / np.diff(edges)] if histogram else [raw]

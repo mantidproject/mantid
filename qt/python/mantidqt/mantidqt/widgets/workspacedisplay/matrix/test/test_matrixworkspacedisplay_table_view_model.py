@@ -74,11 +74,11 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         ws = MockWorkspace()
         model = MatrixWorkspaceTableViewModel(ws, MatrixWorkspaceTableViewModelType.x)
         msg = "The function is not set correctly! The wrong data will be read."
-        self.assertEqual(ws.readX, model.relevant_data, msg=msg)
+        self.assertEqual(ws.x, model.relevant_data, msg=msg)
         model = MatrixWorkspaceTableViewModel(ws, MatrixWorkspaceTableViewModelType.y)
-        self.assertEqual(ws.readY, model.relevant_data, msg=msg)
+        self.assertEqual(ws.y, model.relevant_data, msg=msg)
         model = MatrixWorkspaceTableViewModel(ws, MatrixWorkspaceTableViewModelType.e)
-        self.assertEqual(ws.readE, model.relevant_data, msg=msg)
+        self.assertEqual(ws.e, model.relevant_data, msg=msg)
 
     def test_invalid_model_type(self):
         ws = MockWorkspace()
