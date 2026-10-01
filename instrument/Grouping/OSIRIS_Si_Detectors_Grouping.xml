@@ -169,7 +169,8 @@
   <group name="upper_tube_55" ID="56">
     <detids val="1834-1844"/>
   </group>
-  <!-- Lower bank: 48 tubes (00-47), pixels 1-13 kept (edge pixels 14-15 removed), detector IDs 1845-2564 -->
+  <!-- Lower bank: 48 tubes (00-47), pixels 1-13 kept (edge pixels 14-15 removed), detector IDs 1845-2564.
+       Tubes 46 and 47 are excluded completely by the edge pixel mask, so have no group. -->
   <group name="lower_tube_00" ID="57">
     <detids val="1845-1857"/>
   </group>
@@ -307,11 +308,5 @@
   </group>
   <group name="lower_tube_45" ID="102">
     <detids val="2520-2532"/>
-  </group>
-  <group name="lower_tube_46" ID="103">
-    <detids val="2535-2547"/>
-  </group>
-  <group name="lower_tube_47" ID="104">
-    <detids val="2550-2562"/>
   </group>
 </detector-grouping>
