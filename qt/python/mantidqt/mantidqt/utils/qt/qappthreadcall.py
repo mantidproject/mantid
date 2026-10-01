@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from dataclasses import dataclass
-import functools
 import inspect
 import sys
 from typing import Any, Callable, Optional, Sequence
@@ -51,7 +50,7 @@ class QAppThreadCall(QObject):
         :param blocking: If True, the asynchronous call will block until completed
         """
         super().__init__()
-        functools.update_wrapper(self.__call__.__func__, callable)
+        self.__doc__ = callable.__doc__
 
         self._callable = callable
         self._blocking = blocking
