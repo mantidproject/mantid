@@ -208,6 +208,8 @@ class FullInstrumentViewWindow(QMainWindow):
         """The instrument in the given workspace will be displayed. The off_screen option is for testing or rendering an image
         e.g. in a script."""
         super(FullInstrumentViewWindow, self).__init__(parent)
+        # Without this, closing only hides the window, so it and everything it shows stay in memory
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setWindowTitle("Instrument View")
         self._instrument_view_widget = FullInstrumentViewView(self, off_screen)
         self.setCentralWidget(self._instrument_view_widget)
