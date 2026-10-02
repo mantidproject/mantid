@@ -4,9 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#  This file is part of the mantid workbench.
-#
+
+import gc
+import inspect
 import unittest
+import weakref
 
 from qtpy.QtWidgets import QApplication
 
@@ -171,6 +173,33 @@ class QAppThreadCallTest(unittest.TestCase):
         # Each blocking call pops the result it stored
         self.assertEqual(0, len(wrapped_add_one._completed_calls))
         self.assertEqual(0, len(wrapped_add_one._pending_calls))
+
+    def test_wrapped_callable_is_not_kept_alive_after_the_wrapper_is_released(self):
+        class Owner:
+            def method(self):
+                pass
+
+        owner = Owner()
+        wrapper = QAppThreadCall(owner.method)
+        owner_ref = weakref.ref(owner)
+
+        del wrapper, owner
+        gc.collect()
+
+        self.assertIsNone(owner_ref())
+
+    def test_each_wrapper_has_the_docstring_of_its_own_callable(self):
+        def first():
+            """First docstring."""
+
+        def second():
+            """Second docstring."""
+
+        wrapped_first = QAppThreadCall(first)
+        wrapped_second = QAppThreadCall(second)
+
+        self.assertEqual("First docstring.", inspect.getdoc(wrapped_first))
+        self.assertEqual("Second docstring.", inspect.getdoc(wrapped_second))
 
     def test_force_method_calls_to_qapp_thread(self):
         class Impl:

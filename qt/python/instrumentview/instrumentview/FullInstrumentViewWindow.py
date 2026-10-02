@@ -208,6 +208,8 @@ class FullInstrumentViewWindow(QMainWindow):
         """The instrument in the given workspace will be displayed. The off_screen option is for testing or rendering an image
         e.g. in a script."""
         super(FullInstrumentViewWindow, self).__init__(parent)
+        # Without this, closing only hides the window, so it and everything it shows stay in memory
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setWindowTitle("Instrument View")
         self._instrument_view_widget = FullInstrumentViewView(self, off_screen)
         self.setCentralWidget(self._instrument_view_widget)
@@ -601,6 +603,13 @@ class FullInstrumentViewView(QWidget):
         # Shut down any callbacks before closing the plotter and the figure
         if hasattr(self, "_presenter") and self._presenter is not None:
             self._presenter.handle_close()
+
+        # Not via delete_current_overlaid_shape, which would call back into the closed presenter
+        if self._shape_overlay_manager is not None:
+            self._shape_overlay_manager.remove_shape()
+            self._shape_overlay_manager = None
+        # Drop the plotted lines, which hold the line plot workspace data
+        self._detector_spectrum_fig.clear()
 
         # NOTE: Closing main plotter should be after presenter handle closing
         self.main_plotter.close()
