@@ -17,6 +17,7 @@ if is_linux():
     import lz4.frame
 import re
 import subprocess
+import sys
 import zlib
 
 
@@ -87,7 +88,7 @@ def _get_most_recent_core_dump_file(core_dumps_dir: Path, workbench_pid: str) ->
 
 
 def _check_core_file_is_the_workbench_process(core_dump_file: Path, workbench_pid: str) -> bool:
-    args = ["pystack", "core", core_dump_file.as_posix()]
+    args = ["pystack", "core", core_dump_file.as_posix(), "--lib-search-root", f"{(Path(sys.prefix) / 'lib').as_posix()}"]
     process = subprocess.run(args, capture_output=True, text=True)
     if process.stderr:
         log.error(f"Pystack executable check failed: {process.stderr}")
@@ -102,7 +103,7 @@ def _check_core_file_is_the_workbench_process(core_dump_file: Path, workbench_pi
 
 
 def _get_output_from_pystack(core_dump_file: Path) -> str:
-    args = ["pystack", "core", core_dump_file.as_posix(), "--native-all"]
+    args = ["pystack", "core", core_dump_file.as_posix(), "--native-all", "--lib-search-root", f"{(Path(sys.prefix) / 'lib').as_posix()}"]
     process = subprocess.run(args, capture_output=True, text=True)
     if process.stderr:
         log.error(f"Error when running Pystack: {process.stderr}")
