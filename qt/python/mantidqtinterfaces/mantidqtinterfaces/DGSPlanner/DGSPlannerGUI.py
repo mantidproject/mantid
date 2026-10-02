@@ -17,6 +17,7 @@ from matplotlib.figure import Figure
 from mpl_toolkits.axisartist import Subplot
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
 from qtpy import QtCore, QtWidgets
+from mantidqt.utils.theme import is_dark_mode
 
 import mantid
 from mantid.kernel import UnitConversion, Elastic, UnitParametersMap
@@ -99,7 +100,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
 
         # figure
         self.figure = Figure()
-        self.figure.patch.set_facecolor("white")
+        self.figure.patch.set_facecolor("#1d1d1d" if is_dark_mode() else "white")
         self.canvas = FigureCanvas(self.figure)
         self.grid_helper = GridHelperCurveLinear((self.tr, self.inv_tr))
         self.trajfig = Subplot(self.figure, 1, 1, 1, grid_helper=self.grid_helper)

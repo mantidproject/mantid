@@ -42,7 +42,8 @@ Line2D MantidAxes::plot(const Mantid::API::MatrixWorkspace_sptr &workspace, cons
   if (otherKwargs)
     kwargs = Python::qHashToDict(otherKwargs.value());
   kwargs["wkspIndex"] = wkspIndex;
-  kwargs["color"] = lineColour.toLatin1().constData();
+  if (!lineColour.isEmpty())
+    kwargs["color"] = lineColour.toLatin1().constData();
   kwargs["label"] = label.toLatin1().constData();
 
   return Line2D{pyobj().attr("plot")(*args, **kwargs)[0]};

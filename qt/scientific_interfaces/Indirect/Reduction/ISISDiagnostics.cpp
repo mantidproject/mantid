@@ -9,6 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
@@ -37,8 +38,14 @@ ISISDiagnostics::ISISDiagnostics(IDataReduction *idrUI, QWidget *parent) : DataR
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
   setOutputPlotOptionsPresenter(m_uiForm.ipoPlotOptions, PlotWidget::Spectra);
 
-  m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
-  m_uiForm.ppSlicePreview->setCanvasColour(QColor(240, 240, 240));
+  if (MantidQt::MantidWidgets::isDarkMode()) {
+    m_uiForm.ppRawPlot->setCanvasColour(QColor("#1d1d1d"));
+    m_uiForm.ppSlicePreview->setCanvasColour(QColor("#1d1d1d"));
+  } else {
+    m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
+    m_uiForm.ppSlicePreview->setCanvasColour(QColor(240, 240, 240));
+  }
+
   m_uiForm.ppRawPlot->watchADS(false);
 
   // Property Tree

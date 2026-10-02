@@ -15,6 +15,7 @@ from qtpy.QtCore import QRegularExpression
 from mantidqt.MPLwidgets import FigureCanvas, NavigationToolbar2QT
 from matplotlib.figure import Figure
 from scipy import constants
+from mantidqt.utils.theme import is_dark_mode
 
 
 def calcQE(efix, tthlims, **kwargs):
@@ -209,7 +210,7 @@ class QECoverageGUI(QtWidgets.QWidget):
         self.figure_grid = QtWidgets.QVBoxLayout()
         self.figure_frame.setLayout(self.figure_grid)
         self.figure = Figure()
-        self.figure.patch.set_facecolor("white")
+        self.figure.patch.set_facecolor("#1d1d1d" if is_dark_mode() else "white")
         self.canvas = FigureCanvas(self.figure)
         self.axes = self.figure.add_subplot(111)
         self.axes.axhline(color="k")

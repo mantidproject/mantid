@@ -10,6 +10,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include <QDebug>
@@ -62,8 +63,14 @@ ISISCalibration::ISISCalibration(IDataReduction *idrUI, QWidget *parent) : DataR
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
   setOutputPlotOptionsPresenter(m_uiForm.ipoPlotOptions, PlotWidget::SpectraBin);
 
-  m_uiForm.ppCalibration->setCanvasColour(QColor(240, 240, 240));
-  m_uiForm.ppResolution->setCanvasColour(QColor(240, 240, 240));
+  if (MantidQt::MantidWidgets::isDarkMode()) {
+    m_uiForm.ppCalibration->setCanvasColour(QColor("#1d1d1d"));
+    m_uiForm.ppResolution->setCanvasColour(QColor("#1d1d1d"));
+  } else {
+    m_uiForm.ppCalibration->setCanvasColour(QColor(240, 240, 240));
+    m_uiForm.ppResolution->setCanvasColour(QColor(240, 240, 240));
+  }
+
   m_uiForm.ppCalibration->watchADS(false);
   m_uiForm.ppResolution->watchADS(false);
   m_uiForm.leScale->setValidator(new QRegularExpressionValidator(QRegularExpression("\\d+(\\.\\d*)?")));
