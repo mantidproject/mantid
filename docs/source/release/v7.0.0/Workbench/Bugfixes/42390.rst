@@ -1,0 +1,2 @@
+- The data table opened with ``Show Data`` for a matrix workspace is now readable when using a dark theme. Text in normal, monitor and masked rows was previously drawn in white on a light background.
+- Opening ``Show Data`` for a matrix workspace no longer logs a deprecation warning about ``MatrixWorkspace.readY()``.
