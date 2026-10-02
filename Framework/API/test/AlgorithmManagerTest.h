@@ -14,7 +14,11 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MultiThreaded.h"
 #include <Poco/ActiveResult.h>
+#include <Poco/ActiveThreadPool.h>
+#include <Poco/Runnable.h>
 #include <Poco/Thread.h>
+#include <latch>
+#include <memory>
 #include <stdexcept>
 #include <vector>
 
@@ -89,6 +93,20 @@ public:
   ResultState resultState() const override { return isRunningFlag ? ResultState::NotFinished : ResultState::Failed; }
   void setIsRunningTo(bool runningFlag) { isRunningFlag = runningFlag; }
   void cancel() override { isRunningFlag = false; }
+};
+
+class BlockingRunnable final : public Poco::Runnable {
+public:
+  BlockingRunnable(std::latch &started, std::latch &release) : m_started(started), m_release(release) {}
+
+  void run() override {
+    m_started.count_down();
+    m_release.wait();
+  }
+
+private:
+  std::latch &m_started;
+  std::latch &m_release;
 };
 
 DECLARE_ALGORITHM(AlgTest)
@@ -172,6 +190,37 @@ public:
     TSM_ASSERT_EQUALS("Notification was received.", m_notificationValue, 12345);
 
     AlgorithmManager::Instance().notificationCenter.removeObserver(my_observer);
+  }
+
+  void testExecuteAsyncIsRunningBeforeWorkerStarts() {
+    auto &manager = AlgorithmManager::Instance();
+    manager.clear();
+
+    auto &threadPool = Poco::ActiveThreadPool::defaultPool();
+    threadPool.joinAll();
+    const auto capacity = threadPool.capacity();
+    std::latch blockersStarted(capacity);
+    std::latch releaseBlockers(1);
+    std::vector<std::unique_ptr<BlockingRunnable>> blockers;
+    blockers.reserve(capacity);
+    // create a bunch of threads to make the worst possible state
+    for (int i = 0; i < capacity; ++i) {
+      blockers.emplace_back(std::make_unique<BlockingRunnable>(blockersStarted, releaseBlockers));
+      threadPool.start(*blockers.back());
+    }
+    blockersStarted.wait();
+
+    auto algorithm = manager.create("AlgTest");
+    auto result = algorithm->executeAsync();
+
+    TS_ASSERT(algorithm->isRunning());
+    TS_ASSERT_EQUALS(manager.runningInstances().size(), 1);
+
+    releaseBlockers.count_down();
+    result.wait();
+    threadPool.joinAll();
+    TS_ASSERT(!algorithm->isRunning());
+    manager.clear();
   }
 
   void testThreadSafety() {
