@@ -36,10 +36,8 @@ class WorkspaceCalculatorTest(unittest.TestCase):
         self.model.validateInputs = mock.Mock(return_value=(False, False, ["Input1: not valid", "Input2 not valid"]))
         self.model.performOperation = mock.Mock(return_value=(False, False, ["Input1: execution failed", "Input2: execution failed"]))
 
-        self.lhs_ws = "lhs_ws"
-        CreateSingleValuedWorkspace(DataValue=1.0, OutputWorkspace=self.lhs_ws)
-        self.rhs_ws = "rhs_ws"
-        CreateSingleValuedWorkspace(DataValue=2.0, OutputWorkspace=self.rhs_ws)
+        CreateSingleValuedWorkspace(DataValue=1.0, OutputWorkspace="lhs_ws")
+        CreateSingleValuedWorkspace(DataValue=2.0, OutputWorkspace="rhs_ws")
 
     def test_workspaceCalculator_onPressedGo_update_fail(self):
         """This tests signals when both inputs don't go through validation."""
@@ -113,8 +111,8 @@ class WorkspaceCalculatorTest(unittest.TestCase):
 
     def test_workspaceCalculator_lhs_validation(self):
         presenter = WorkspaceCalculator(None, model=self.model)
-        presenter.view.lhs_ws.setCurrentIndex(0)
         presenter.view.lhs_ws.setCurrentIndex(1)
+        presenter.view.lhs_ws.setCurrentIndex(0)
         # check calls
         self.assertEqual(presenter.model.updateParameters.call_count, 0)
         self.assertEqual(presenter.model.validateInputs.call_count, 1)
@@ -122,8 +120,8 @@ class WorkspaceCalculatorTest(unittest.TestCase):
 
     def test_workspaceCalculator_rhs_validation(self):
         presenter = WorkspaceCalculator(None, model=self.model)
-        presenter.view.rhs_ws.setCurrentIndex(0)
         presenter.view.rhs_ws.setCurrentIndex(1)
+        presenter.view.rhs_ws.setCurrentIndex(0)
         # check calls
         self.assertEqual(presenter.model.updateParameters.call_count, 0)
         self.assertEqual(presenter.model.validateInputs.call_count, 1)
