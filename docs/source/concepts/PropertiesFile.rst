@@ -177,7 +177,8 @@ Information on how to customize the logging system can be found in the
 |                                                 | python and is visible in jupyter notebooks.       |                                     |
 |                                                 | ``PythonLoggingChannel`` sends messages to a      |                                     |
 |                                                 | logger called ``'Mantid'`` from the ``logging``   |                                     |
-|                                                 | framework of Python's standard library.           |                                     |
+|                                                 | framework of Python's standard library using a    |                                     |
+|                                                 | bounded asynchronous queue.                       |                                     |
 +-------------------------------------------------+---------------------------------------------------+-------------------------------------+
 | ``logging.formatters.f1.pattern``               | The format of the log messages.                   | ``[%H:%M:%S][%q] %s %U:%u - %t``    |
 |                                                 | The default is ``%s-[%p] %t``.                    |                                     |

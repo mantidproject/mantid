@@ -16,11 +16,9 @@
 
 // local includes
 #include "MantidPythonInterface/core/DllConfig.h"
-#include "MantidPythonInterface/core/WrapPython.h"
 
 // 3rd-party includes
-#include <Poco/ConsoleChannel.h>
-#include <boost/python/object.hpp>
+#include <Poco/Channel.h>
 #include <memory>
 
 namespace Poco {
@@ -37,9 +35,19 @@ public:
   PythonLoggingChannel &operator=(PythonLoggingChannel &&) = delete;
 
   void log(const Poco::Message &msg) override;
+  void log(Poco::Message &&msg) override;
+  void close() override;
+  void flush();
 
 private:
-  std::unique_ptr<boost::python::object> m_pyLogger;
+  struct State;
+
+  void closeImpl();
+  void enqueue(Poco::Message msg);
+  static int drainQueue(void *statePtr);
+  static void drainQueue(const std::shared_ptr<State> &state);
+
+  std::shared_ptr<State> m_state;
 };
 
 } // namespace Poco
