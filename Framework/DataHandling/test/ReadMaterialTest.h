@@ -416,7 +416,7 @@ public:
     Kernel::MaterialBuilder builder;
     builder.setFormula(FORMULA);
     builder.setNumberDensity(1);
-    builder.setCoherentXSection(0.0184000000);
+    builder.setCoherentXSection(0.0183800000);
     builder.setIncoherentXSection(5.0800000022);
     builder.setAbsorptionXSection(5.0800000022);
     builder.setTotalScatterXSection(5.1000000044);
