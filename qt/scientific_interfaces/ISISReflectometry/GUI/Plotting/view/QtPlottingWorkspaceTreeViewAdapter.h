@@ -15,6 +15,7 @@
 #include <QObject>
 #include <QStandardItemModel>
 
+#include <boost/regex.hpp>
 #include <string>
 #include <vector>
 
@@ -34,6 +35,8 @@ public:
 
   /// Replace all displayed plotting workspace tree item states.
   void setPlottingWorkspaceTreeItemStates(std::vector<PlottingWorkspaceTreeItemState> const &itemStates);
+  /// Hide rows that do not match the text and reduced-output filters.
+  void filterWorkspaces(std::string const &text, std::vector<ReducedWorkspaceOutputType> const &outputTypes);
   /// Clear all selected tree rows without recursively updating children.
   void clearSelection();
   /// Return selected leaf workspace names.
@@ -58,14 +61,30 @@ private:
   QModelIndex itemIndex(QModelIndex const &index) const;
   /// Return the plotting tree item type stored on a model row.
   PlottingWorkspaceTreeItemType itemType(QModelIndex const &index) const;
+  /// Return the reduced output type stored on a model row.
+  ReducedWorkspaceOutputType reducedOutputType(QModelIndex const &index) const;
   /// Return the ADS workspace name stored on a model row.
   std::string workspaceName(QModelIndex const &index) const;
+  /// Apply the current filters to all rows in the tree.
+  void applyFilter();
+  /// Apply the current filters recursively and return whether a row should be visible.
+  bool filterItem(QModelIndex const &index, bool ancestorMatches);
+  /// Return whether a row label matches the current regular expression.
+  bool matchesFilter(QModelIndex const &index) const;
+  /// Return whether a workspace row has an enabled reduced output type.
+  bool outputTypeEnabled(QModelIndex const &index) const;
   /// Return true if the evaluated row can be selected directly.
   bool canSelectDirectly(QModelIndex const &index) const;
   /// Return true if the evaluated row can be selected through a selected parent.
   bool canSelectViaParent(QModelIndex const &index) const;
   /// Return true if a selected row may contribute to the selected workspaces.
   bool canContributeSelection(QModelIndex const &index) const;
+  /// Return true if a row is currently visible through the workspace filters.
+  bool isVisible(QModelIndex const &index) const;
+  /// Return true if selecting a workspace group requires all of its members.
+  bool requiresCompleteWorkspaceGroupSelection(QModelIndex const &index) const;
+  /// Append eligible descendant workspace names that have not already been added.
+  void appendWorkspaceNames(QModelIndex const &index, std::vector<std::string> &workspaceNames) const;
   /// Handle row clicks by selecting or deselecting whole subtrees.
   bool handlePlottingWorkspaceTreeClick(QMouseEvent const &event);
   /// Return true for keyboard modifiers that should preserve existing selections.
@@ -82,6 +101,9 @@ private:
   QtPlottingWorkspaceTreeView *m_plottingWorkspaceTreeView;
   QStandardItemModel m_model;
   bool m_updatingSelection;
+  std::string m_filterText;
+  boost::regex m_filterExpression{""};
+  std::vector<ReducedWorkspaceOutputType> m_filterOutputTypes{ReducedWorkspaceOutputType::IvsQBinned};
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
