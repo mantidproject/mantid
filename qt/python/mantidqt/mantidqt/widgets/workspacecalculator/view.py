@@ -51,11 +51,12 @@ class WorkspaceCalculatorView(QWidget):
     def setValidationLabel(self, ws, validationValue, tooltip=""):
         """Sets the visibility of the validity indicator (asterisk) next to the workspace selector."""
         validator = self.label_validators.get(ws)
-        if isinstance(tooltip, list):
-            ix = 0 if ws == "LHS" else 1
-            tooltip = tooltip[ix]
-        validator.setVisible(not validationValue)
-        validator.setToolTip(tooltip)
+        if validator is not None:
+            if isinstance(tooltip, list):
+                ix = 0 if ws == "LHS" else 1
+                tooltip = tooltip[ix]
+            validator.setVisible(not validationValue)
+            validator.setToolTip(tooltip)
 
     def connectADS(self, selector_name):
         """Explicitly connects the workspace selector observers to the ADS."""
