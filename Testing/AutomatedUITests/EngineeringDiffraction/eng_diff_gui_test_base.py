@@ -458,7 +458,7 @@ def _write_synthetic_run(instrument, template, full_calib, run_number, out_dir, 
     tof_min, tof_step, tof_max = get_instr_config(instrument).calibration_tof_binning
     ws = Rebin(InputWorkspace=template, Params=f"{tof_min},{tof_step},{tof_max}", OutputWorkspace=name)
 
-    edges = ws.readX(0)
+    edges = ws.x(0)
     tof = 0.5 * (edges[1:] + edges[:-1])
     tof_centre = 0.5 * (tof_min + tof_max)
 
