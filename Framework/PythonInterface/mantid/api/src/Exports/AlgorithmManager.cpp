@@ -14,6 +14,9 @@
 #include <boost/python/list.hpp>
 #include <boost/python/overloads.hpp>
 
+#include <chrono>
+#include <thread>
+
 using namespace Mantid::API;
 using Mantid::PythonInterface::AlgorithmIDProxy;
 using Mantid::PythonInterface::ReleaseGlobalInterpreterLock;
@@ -61,10 +64,20 @@ void clear(AlgorithmManagerImpl *self) {
   return self->clear();
 }
 
+constexpr auto SLEEP_100_MS = std::chrono::milliseconds(100);
+
 void shutdown(AlgorithmManagerImpl *self) {
-  // See comment above for clear()
-  // ReleaseGlobalInterpreterLock releaseGIL;
-  return self->shutdown();
+  {
+    ReleaseGlobalInterpreterLock releaseGIL;
+    self->cancelAll();
+  }
+  while (!self->runningInstances().empty()) {
+    // A Python algorithm needs the GIL to finish after its execution method returns.
+    ReleaseGlobalInterpreterLock releaseGIL;
+    std::this_thread::sleep_for(SLEEP_100_MS);
+  }
+  // Keep the GIL while clearing because managed algorithms can own Python objects. See #33924.
+  self->clear();
 }
 
 void cancelAll(AlgorithmManagerImpl *self) {
