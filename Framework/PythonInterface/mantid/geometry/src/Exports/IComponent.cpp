@@ -40,42 +40,52 @@ double getDistance(const IComponent &self, const IComponent &other) { return sel
 // of the index-based ComponentInfo access layer. See the 'Instrument Access via
 // SpectrumInfo, DetectorInfo, ComponentInfo' concept page.
 Mantid::Kernel::V3D getPosDeprecated(const IComponent &self) {
+  /** TODO Uncomment this block for Mantid 7.1
   PyErr_Warn(PyExc_DeprecationWarning, "'IComponent.getPos' is deprecated in Mantid 7.0, "
                                        "use 'ComponentInfo.position' instead. "
                                        "For more information, see the instrument access layers concept page: "
                                        "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html");
+  */
   return self.getPos();
 }
 
 std::string getNameDeprecated(const IComponent &self) {
+  /** TODO Uncomment this block for Mantid 7.1
   PyErr_Warn(PyExc_DeprecationWarning, "'IComponent.getName' is deprecated in Mantid 7.0, "
                                        "use 'ComponentInfo.name' instead. "
                                        "For more information, see the instrument access layers concept page: "
                                        "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html");
+  */
   return self.getName();
 }
 
 std::string getFullNameDeprecated(const IComponent &self) {
+  /** TODO Uncomment this block for Mantid 7.1
   PyErr_Warn(PyExc_DeprecationWarning, "'IComponent.getFullName' is deprecated in Mantid 7.0, "
                                        "use 'ComponentInfo.name' instead. "
                                        "For more information, see the instrument access layers concept page: "
                                        "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html");
+  */
   return self.getFullName();
 }
 
 std::string typeDeprecated(const IComponent &self) {
+  /** TODO Uncomment this block for Mantid 7.1
   PyErr_Warn(PyExc_DeprecationWarning, "'IComponent.type' is deprecated in Mantid 7.0, "
                                        "use 'ComponentInfo.componentType' instead. "
                                        "For more information, see the instrument access layers concept page: "
                                        "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html");
+  */
   return self.type();
 }
 
 Mantid::Kernel::Quat getRelativeRotDeprecated(const IComponent &self) {
+  /** TODO Uncomment this block for Mantid 7.1
   PyErr_Warn(PyExc_DeprecationWarning, "'IComponent.getRelativeRot' is deprecated in Mantid 7.0, "
                                        "use 'ComponentInfo.relativeRotation' instead. "
                                        "For more information, see the instrument access layers concept page: "
                                        "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html");
+  */
   return self.getRelativeRot();
 }
 } // namespace
