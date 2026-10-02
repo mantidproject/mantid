@@ -741,8 +741,8 @@ class ISISInstrument(BaseInstrument):
             # get the current location
             component = self.monitor_names[i]
             ws = mtd[str(ws)]
-            mon = ws.getInstrument().getComponentByName(component)
-            z_loc = mon.getPos().getZ()
+            component_info = ws.componentInfo()
+            z_loc = component_info.position(component_info.indexOfAny(component)).getZ()
             # now the relative move
             offset = (self.monitor_zs[i] / 1000.0) - z_loc
             MoveInstrumentComponent(Workspace=ws, ComponentName=component, Z=offset, RelativePosition=True)
@@ -1064,9 +1064,8 @@ class LOQ(ISISInstrument):
         Loads information about the setup used for LOQ transmission runs
         """
         ws = mtd[ws_trans]
-        instrument = ws.getInstrument()
-        has_m4 = instrument.getComponentByName(self._m4_monitor_name)
-        if has_m4 is None:
+        has_m4 = ws.componentInfo().uniqueName(self._m4_monitor_name)
+        if not has_m4:
             trans_definition_file = os.path.join(config.getString("instrumentDefinition.directory"), self._NAME + "_trans_Definition.xml")
         else:
             trans_definition_file = os.path.join(
@@ -1078,7 +1077,8 @@ class LOQ(ISISInstrument):
     def cur_detector_position(self, ws_name):
         """Return the position of the center of the detector bank"""
         ws = mtd[ws_name]
-        pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
+        component_info = ws.componentInfo()
+        pos = component_info.position(component_info.indexOfAny(self.cur_detector().name()))
         cent_pos = 317.5 / 1000.0
         return [cent_pos - pos.getX(), cent_pos - pos.getY()]
 
@@ -1274,12 +1274,11 @@ class SANS2D(ISISInstrument):
             # get the current location of the monitor
             component = "monitor4"
             ws = mtd[str(ws)]
-            mon = ws.getInstrument().getComponentByName(component)
-            z_orig = mon.getPos().getZ()
+            component_info = ws.componentInfo()
+            z_orig = component_info.position(component_info.indexOfAny(component)).getZ()
 
             # the location is relative to the rear-detector, get its location
-            det = ws.getInstrument().getComponentByName(self.cur_detector().name())
-            det_z = det.getPos().getZ()
+            det_z = component_info.position(component_info.indexOfAny(self.cur_detector().name())).getZ()
 
             monitor_4_offset = self.monitor_4_offset / 1000.0
             z_new = det_z + monitor_4_offset
@@ -1465,7 +1464,8 @@ class SANS2D(ISISInstrument):
     def cur_detector_position(self, ws_name):
         """Return the position of the center of the detector bank"""
         ws = mtd[ws_name]
-        pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
+        component_info = ws.componentInfo()
+        pos = component_info.position(component_info.indexOfAny(self.cur_detector().name()))
 
         return [-pos.getX(), -pos.getY()]
 
@@ -1780,9 +1780,10 @@ class LARMOR(ISISInstrument):
         # define the vector along the beam axis
         a1 = V3D(0, 0, 1)
         # position of the detector itself
-        pos = ws.getInstrument().getComponentByName("LARMORSANSDetector").getPos()
+        component_info = ws.componentInfo()
+        pos = component_info.position(component_info.indexOfAny("LARMORSANSDetector"))
         # position of the bench
-        pos2 = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
+        pos2 = component_info.position(component_info.indexOfAny(self.cur_detector().name()))
         # take the difference
         posdiff = pos - pos2
         deg2rad = 4.0 * math.atan(1.0) / 180.0
@@ -1791,9 +1792,7 @@ class LARMOR(ISISInstrument):
 
         # Get the angle of the rotation from the rotation quaternion
         # At this point we also need to take the sign of the axis into account
-        instrument = ws.getInstrument()
-        detector_bench = instrument.getComponentByName("DetectorBench")
-        rot = detector_bench.getRotation()
+        rot = component_info.rotation(component_info.indexOfAny("DetectorBench"))
         angle, axis = su.quaternion_to_angle_and_axis(rot)
         angle = copysign(angle, axis[1])
 

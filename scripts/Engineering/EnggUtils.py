@@ -762,9 +762,6 @@ def _generate_output_file_name(inst, sample_run_no, van_run_no, suffix, xunit, e
     return "_".join([inst, sample_run_no, van_run_no, suffix, xunit]) + ext
 
 
-# DEPRECATED FUNCTIONS BELOW
-
-
 def read_in_expected_peaks(filename, expected_peaks):
     """
     DEPRECATED: not used in UI, only in deprecated functions (EnggCalibrateFull, EnggCalibrate and EnggFitPeaks)
@@ -960,7 +957,7 @@ def get_detector_ids_for_bank(bank):
 
     for i in range(grouping.getNumberHistograms()):
         if grouping.y(i)[0] in bank_int:
-            detector_ids.add(grouping.getDetector(i).getID())
+            detector_ids.update(grouping.getSpectrum(i).getDetectorIDs())
 
     mantid.DeleteWorkspace(grouping)
 

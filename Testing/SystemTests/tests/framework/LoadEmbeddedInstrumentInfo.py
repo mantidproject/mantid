@@ -8,6 +8,7 @@
 import systemtesting
 from mantid.api import mtd
 from mantid.simpleapi import Load
+from plugins.algorithms.component_info_utils import resolve_component_index
 
 #
 # Here testing against embedded instrument info in different raw file formats
@@ -28,10 +29,12 @@ class ISISRawHistNexus(systemtesting.MantidSystemTest):
 
     def validate(self):
         MAPS00018314_raw_ISIS_hist = mtd["MAPS00018314_raw_ISIS_hist"]
-        inst = MAPS00018314_raw_ISIS_hist.getInstrument()
-        A1window = inst.getComponentByName("MAPS/A1_window")
+        component_info = MAPS00018314_raw_ISIS_hist.componentInfo()
+        # "MAPS/A1_window" is a hierarchical path, so it needs the shared resolver:
+        # indexOfAny does not parse paths.
+        A1window_index = resolve_component_index("MAPS/A1_window", component_info)
 
-        if str(A1window.getPos()) != "[0,3,0]":
+        if str(component_info.position(A1window_index)) != "[0,3,0]":
             return False
 
         return True
