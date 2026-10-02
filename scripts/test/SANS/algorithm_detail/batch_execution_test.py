@@ -439,9 +439,9 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         mock_polarization_state.polarizer.location_z = None
         mock_polarization_state.polarizer.gas_pressure = None
         mock_polarization_state.polarizer.cell_length = None
-        mock_ws.getInstrument.return_value.getComponentByName.return_value.getPos.return_value.getX = mock.Mock(return_value=9.8)
-        mock_ws.getInstrument.return_value.getComponentByName.return_value.getPos.return_value.getY = mock.Mock(return_value=7.6)
-        mock_ws.getInstrument.return_value.getComponentByName.return_value.getPos.return_value.getZ = mock.Mock(return_value=5.4)
+        mock_ws.componentInfo.return_value.position.return_value.getX = mock.Mock(return_value=9.8)
+        mock_ws.componentInfo.return_value.position.return_value.getY = mock.Mock(return_value=7.6)
+        mock_ws.componentInfo.return_value.position.return_value.getZ = mock.Mock(return_value=5.4)
 
         _apply_polarization_component_adjustments(mock_polarization_state, mock_ws)
         mock_move.assert_any_call(mock_ws, mock.ANY, "mocked_polarizer", False)
@@ -457,6 +457,17 @@ class GetAllNamesToSaveTest(unittest.TestCase):
             ParameterType="String",
             Value="He3",
         )
+
+    @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
+    @mock.patch("sans.algorithm_detail.batch_execution.move_component")
+    def test_apply_polarization_component_adjustments_raises_if_component_not_in_idf(self, mock_move, mock_alg_manager):
+        mock_polarization_state, mock_ws = self._create_move_objects()
+        mock_ws.componentInfo.return_value.indexOfAny.side_effect = ValueError("mocked_polarizer does not exist")
+
+        with self.assertRaisesRegex(AttributeError, 'The name "mocked_polarizer" is not present'):
+            _apply_polarization_component_adjustments(mock_polarization_state, mock_ws)
+        mock_move.assert_not_called()
+        mock_alg_manager.assert_not_called()
 
     @mock.patch("sans.algorithm_detail.batch_execution._apply_polarization_component_adjustments")
     def test_polarization_metadata_added(self, _):

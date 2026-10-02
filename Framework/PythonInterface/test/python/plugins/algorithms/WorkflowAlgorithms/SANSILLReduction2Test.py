@@ -7,7 +7,6 @@
 import unittest
 from mantid.api import MatrixWorkspace, Run
 from mantid.simpleapi import SANSILLReduction, config, mtd
-from mantid.geometry import Instrument
 
 import numpy as np
 
@@ -131,7 +130,8 @@ class SANSILLReduction2Test(unittest.TestCase):
         self.assertEqual(ws.getAxis(0).getUnit().unitID(), "Empty")
         self.assertEqual(ws.blocksize(), blocksize)
         self.assertEqual(ws.getNumberHistograms(), spectra)
-        self.assertTrue(isinstance(ws.getInstrument(), Instrument))
+        # An attached instrument has components other than the root
+        self.assertGreater(ws.componentInfo().size(), 1)
         self.assertTrue(isinstance(ws.getRun(), Run))
         self.assertTrue(ws.getHistory())
 
@@ -143,7 +143,8 @@ class SANSILLReduction2Test(unittest.TestCase):
         self.assertEqual(ws.getAxis(0).getUnit().unitID(), "Wavelength")
         self.assertEqual(ws.blocksize(), blocksize)
         self.assertEqual(ws.getNumberHistograms(), spectra)
-        self.assertTrue(isinstance(ws.getInstrument(), Instrument))
+        # An attached instrument has components other than the root
+        self.assertGreater(ws.componentInfo().size(), 1)
         self.assertTrue(isinstance(ws.getRun(), Run))
         self.assertTrue(ws.getHistory())
 

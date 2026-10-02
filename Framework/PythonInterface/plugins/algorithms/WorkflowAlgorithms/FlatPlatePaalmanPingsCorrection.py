@@ -539,8 +539,9 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
     def _get_angles(self):
         num_hist = mtd[self._sample_ws_name].getNumberHistograms()
-        source_pos = mtd[self._sample_ws_name].getInstrument().getSource().getPos()
-        sample_pos = mtd[self._sample_ws_name].getInstrument().getSample().getPos()
+        component_info = mtd[self._sample_ws_name].componentInfo()
+        source_pos = component_info.sourcePosition()
+        sample_pos = component_info.samplePosition()
         beam_pos = sample_pos - source_pos
         self._angles = list()
         for index in range(0, num_hist):

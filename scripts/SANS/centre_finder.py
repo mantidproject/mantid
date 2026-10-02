@@ -260,9 +260,9 @@ class CentreFinder(object):
         @returns the required direction of the cylinder axis
         """
         ws = mtd[workspace]
-        instrument = ws.getInstrument()
-        quat = instrument.getComponentByName(self.detector).getRotation()
-        cylinder_direction = instrument.getReferenceFrame().vecPointingAlongBeam()
+        component_info = ws.componentInfo()
+        quat = component_info.rotation(component_info.indexOfAny(self.detector))
+        cylinder_direction = ws.getInstrument().getReferenceFrame().vecPointingAlongBeam()
         quat.rotate(cylinder_direction)
         return cylinder_direction.X(), cylinder_direction.Y(), cylinder_direction.Z()
 
@@ -547,15 +547,15 @@ class PositionProviderFactory(object):
         workspace_name = reducer.get_sample().wksp_name
         workspace = mtd[workspace_name]
 
-        instrument = workspace.getInstrument()
+        component_info = workspace.componentInfo()
         detector_name = reducer.instrument.cur_detector().name()
 
-        sample = instrument.getSample()
-        component = instrument.getComponentByName(detector_name)
+        sample_position = component_info.samplePosition()
+        component_index = component_info.indexOfAny(detector_name)
 
         # We use here the first detector entry. Do we need to have this smarter in the future?
-        detector_bench = component[0]
-        distance = detector_bench.getDistance(sample)
+        detector_bench_index = int(component_info.children(component_index)[0])
+        distance = component_info.position(detector_bench_index).distance(sample_position)
 
         return tolerance / distance
 

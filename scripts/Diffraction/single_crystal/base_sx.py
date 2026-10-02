@@ -330,9 +330,7 @@ class BaseSX(ABC):
         peaks = BaseSX.retrieve(peaks)
         use_empty_inst = ws is None
         if use_empty_inst:
-            ws = mantid.LoadEmptyInstrument(
-                InstrumentName=peaks.getInstrument().getFullName(), OutputWorkspace="empty", EnableLogging=False
-            )
+            ws = mantid.LoadEmptyInstrument(InstrumentName=peaks.getInstrumentName(), OutputWorkspace="empty", EnableLogging=False)
             axis = ws.getAxis(0)
             axis.setUnit("TOF")
         else:
