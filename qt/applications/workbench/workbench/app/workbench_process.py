@@ -187,6 +187,11 @@ def qapplication():
         # Don't try to use the system GTK palette instead apply the standard theme palette
         if mtd_env.is_linux():
             app.setPalette(app.style().standardPalette())
+        elif mtd_env.is_windows():
+            from qtpy.QtCore import Qt as QtCore_Qt  # Qt.ColorScheme lives here
+
+            if app.styleHints().colorScheme() == QtCore_Qt.ColorScheme.Dark:
+                app.setStyle("Fusion")
         app.setOrganizationName(ORGANIZATION)
         app.setOrganizationDomain(ORG_DOMAIN)
         app.setApplicationName(APPNAME)
@@ -265,6 +270,10 @@ def create_and_launch_workbench(app, command_line_options, qsettings_staging_ses
         from workbench.plotting.config import initialize_matplotlib
 
         initialize_matplotlib()
+
+        from workbench.plotting.config import watch_for_theme_changes
+
+        watch_for_theme_changes()
 
         # Setup widget layouts etc. mantid.simple cannot be used before this
         # or the log messages don't get through to the widget

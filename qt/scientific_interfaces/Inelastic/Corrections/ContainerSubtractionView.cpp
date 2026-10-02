@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ContainerSubtractionView.h"
-
 #include "ContainerSubtractionPresenter.h"
+#include "MantidQtWidgets/Common/ColorTheme.h"
 
 using namespace Mantid::API;
 
@@ -18,6 +18,8 @@ static const std::map<CSCurves, std::pair<QString, QColor>> CSPlotCurves = {
 
 ContainerSubtractionView::ContainerSubtractionView(QWidget *parent) : QWidget(parent), m_presenter() {
   m_uiForm.setupUi(parent);
+  m_uiForm.ppPreview->setCanvasColour(MantidQt::MantidWidgets::isDarkMode() ? QColor("#1d1d1d")
+                                                                            : QColor(255, 255, 255));
 
   connect(m_uiForm.dsSample, &DataSelector::dataReady, this, &ContainerSubtractionView::notifySampleDataReady);
   connect(m_uiForm.dsContainer, &DataSelector::dataReady, this, &ContainerSubtractionView::notifyCanDataReady);
