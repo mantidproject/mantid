@@ -9,8 +9,8 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "DllOption.h"
 #include "MantidKernel/Logger.h" // So we can match the Logger priority
+#include "MantidQtWidgets/Common/DllOption.h"
 
 #include <QMetaType>
 #include <QObject>

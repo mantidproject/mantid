@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllConfig.h"
 #include "FitData.h"
 #include "IDataModel.h"
+#include "MantidQtWidgets/Spectroscopy/DllConfig.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
