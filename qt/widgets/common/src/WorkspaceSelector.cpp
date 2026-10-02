@@ -22,6 +22,7 @@
 #include <QDropEvent>
 #include <QLineEdit>
 #include <QMimeData>
+#include <QSignalBlocker>
 #include <QUrl>
 using namespace MantidQt::MantidWidgets;
 
@@ -80,6 +81,7 @@ void WorkspaceSelector::connectObservers() {
   ads.notificationCenter.addObserver(m_clearObserver);
   ads.notificationCenter.addObserver(m_replaceObserver);
   refresh();
+  qDebug() << "Inside connectObservers";
   m_init = true;
   m_connected = true;
 }
@@ -126,6 +128,7 @@ void WorkspaceSelector::setOptional(bool optional) {
     m_optional = optional;
     if (m_init)
       refresh();
+    qDebug() << "Inside setOptional";
   }
 }
 
@@ -317,6 +320,7 @@ bool WorkspaceSelector::hasValidNumberOfBins(const Mantid::API::Workspace_sptr &
 void WorkspaceSelector::refresh() {
   const std::lock_guard<std::mutex> lock(m_adsMutex);
   const QString currentWorkspace = currentText();
+  const QSignalBlocker blocker(this);
   clear();
   if (m_optional)
     addItem("");
