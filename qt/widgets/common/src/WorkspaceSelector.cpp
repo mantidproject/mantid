@@ -80,7 +80,6 @@ void WorkspaceSelector::connectObservers() {
   ads.notificationCenter.addObserver(m_clearObserver);
   ads.notificationCenter.addObserver(m_replaceObserver);
   refresh();
-  qDebug() << "Inside connectObservers";
   m_init = true;
   m_connected = true;
 }
@@ -127,7 +126,6 @@ void WorkspaceSelector::setOptional(bool optional) {
     m_optional = optional;
     if (m_init)
       refresh();
-    qDebug() << "Inside setOptional";
   }
 }
 
