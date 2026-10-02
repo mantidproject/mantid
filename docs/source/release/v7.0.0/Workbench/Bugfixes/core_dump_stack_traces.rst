@@ -1,0 +1,1 @@
+- On Linux, crash reports sent from the error reporter once again include the C++ stack traces recovered from the core dump file (when ``errorreports.core_dumps`` is set).

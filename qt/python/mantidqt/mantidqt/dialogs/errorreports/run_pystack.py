@@ -33,13 +33,9 @@ def retrieve_thread_traces_from_coredump_file(workbench_pid: str) -> bytes:
         log.warning(str(e))
         return b""
 
-    # Get most recent dump file.
-    core_file = _get_most_recent_core_dump_file(core_dumps_path, workbench_pid)
-    if core_file is None:
+    pystack_output = _get_pystack_output_for_most_recent_core_dump(core_dumps_path, workbench_pid)
+    if not pystack_output:
         return b""
-
-    # Run file through pystack and capture output
-    pystack_output = _get_output_from_pystack(core_file)
 
     # Compress output and return
     compressed_bytes = zlib.compress(pystack_output.encode("utf-8"))
@@ -58,55 +54,61 @@ def _get_core_dumps_dir() -> Path:
     return core_dumps_path
 
 
-def _get_most_recent_core_dump_file(core_dumps_dir: Path, workbench_pid: str) -> Path | None:
-    files = core_dumps_dir.iterdir()
-    files_sorted_by_latest = sorted([file for file in files], key=lambda file: file.stat().st_ctime, reverse=True)
-    if files_sorted_by_latest:
-        for latest_core_dump_file in files_sorted_by_latest:
-            # test it's recent enough
-            age = datetime.now() - datetime.fromtimestamp(latest_core_dump_file.stat().st_ctime)
-            if age.seconds < CORE_DUMP_RECENCY_LIMIT:
-                log.notice(f"Found recent file {latest_core_dump_file.as_posix()}")
-                if _is_lz4_file(latest_core_dump_file):
-                    latest_core_dump_file = _decompress_lz4_file(latest_core_dump_file)
-                    log.notice(f"Decompressed lz4 core file to {latest_core_dump_file.as_posix()}")
-                # test it's the correct process.
-                if _check_core_file_is_the_workbench_process(latest_core_dump_file, workbench_pid):
-                    log.notice(f"{latest_core_dump_file.as_posix()} identified as a mantid workbench core dump")
-                    return latest_core_dump_file
-                else:
-                    log.notice(f"{latest_core_dump_file.as_posix()} not itdentified as a mantid workbench core dump")
-            else:
-                log.notice(
-                    f"Could not find recent enough ( < {CORE_DUMP_RECENCY_LIMIT} "
-                    "seconds old) valid core dump file in {core_dumps_dir.as_posix()}"
-                )
-                return None
-    log.notice(f"No valid files found in {core_dumps_dir.as_posix()}")
-    return None
+def _get_pystack_output_for_most_recent_core_dump(core_dumps_dir: Path, workbench_pid: str) -> str:
+    files_sorted_by_latest = sorted(core_dumps_dir.iterdir(), key=lambda file: file.stat().st_ctime, reverse=True)
+    for core_dump_file in files_sorted_by_latest:
+        # test it's recent enough
+        age = datetime.now() - datetime.fromtimestamp(core_dump_file.stat().st_ctime)
+        if age.total_seconds() >= CORE_DUMP_RECENCY_LIMIT:
+            break
+        log.notice(f"Found recent file {core_dump_file.as_posix()}")
+        pystack_output = _get_pystack_output_if_workbench_process(core_dump_file, workbench_pid)
+        if pystack_output:
+            return pystack_output
+    log.notice(
+        f"Could not find recent enough ( < {CORE_DUMP_RECENCY_LIMIT} seconds old) "
+        f"mantid workbench core dump file in {core_dumps_dir.as_posix()}"
+    )
+    return ""
 
 
-def _check_core_file_is_the_workbench_process(core_dump_file: Path, workbench_pid: str) -> bool:
-    args = ["pystack", "core", core_dump_file.as_posix()]
-    process = subprocess.run(args, capture_output=True, text=True)
-    if process.stderr:
-        log.error(f"Pystack executable check failed: {process.stderr}")
-        return False
-    stdout = process.stdout
-    search_result = re.search(r"pid: (\d+) ppid: (\d+) ", stdout)
-    if search_result is not None:
-        # Since the process id comes from Popen with shell=True, it might be the pid of the parent shell
-        # Seems to be inconsistent between distributions.
-        return workbench_pid in (search_result.group(1), search_result.group(2))
-    return False
+def _get_pystack_output_if_workbench_process(core_dump_file: Path, workbench_pid: str) -> str:
+    decompressed_core_dump_file = None
+    if _is_lz4_file(core_dump_file):
+        decompressed_core_dump_file = _decompress_lz4_file(core_dump_file)
+        log.notice(f"Decompressed lz4 core file to {decompressed_core_dump_file.as_posix()}")
+    try:
+        pystack_output = _run_pystack(decompressed_core_dump_file or core_dump_file)
+    finally:
+        # The decompressed core file can be hundreds of MB, so don't leave it behind
+        if decompressed_core_dump_file is not None:
+            decompressed_core_dump_file.unlink(missing_ok=True)
+
+    # test it's the correct process.
+    if _is_workbench_process(pystack_output, workbench_pid):
+        log.notice(f"{core_dump_file.as_posix()} identified as a mantid workbench core dump")
+        return pystack_output
+    log.notice(f"{core_dump_file.as_posix()} not identified as a mantid workbench core dump")
+    return ""
 
 
-def _get_output_from_pystack(core_dump_file: Path) -> str:
+def _run_pystack(core_dump_file: Path) -> str:
+    # pystack can fail to locate the Python interpreter state, e.g. when a second copy of libpython is loaded
+    # alongside the statically linked conda python. It still reports the core file information and, with
+    # --native-all, the native stack of every thread, so warnings on stderr are not treated as a failure.
     args = ["pystack", "core", core_dump_file.as_posix(), "--native-all"]
     process = subprocess.run(args, capture_output=True, text=True)
     if process.stderr:
-        log.error(f"Error when running Pystack: {process.stderr}")
+        log.warning(f"Pystack reported problems when analysing {core_dump_file.as_posix()}: {process.stderr}")
     return process.stdout
+
+
+def _is_workbench_process(pystack_output: str, workbench_pid: str) -> bool:
+    search_result = re.search(r"pid: (\d+) ppid: (\d+) ", pystack_output)
+    if search_result is None:
+        return False
+    # The parent pid is also accepted in case workbench was launched through an intermediate shell
+    return workbench_pid in (search_result.group(1), search_result.group(2))
 
 
 def _decompress_lz4_file(lz4_core_dump_file: Path) -> Path:
