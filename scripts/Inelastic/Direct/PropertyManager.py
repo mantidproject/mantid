@@ -436,6 +436,8 @@ class PropertyManager(NonIDF_Properties):
     def update_defaults_from_instrument(self, pInstrument, ignore_changes=False):
         """Method used to update default parameters from the same instrument (with different parameters).
 
+        pInstrument -- the workspace's ComponentInfo (e.g. ws.componentInfo()) or a legacy Instrument object
+
         Used if initial parameters correspond to instrument with one validity dates and
         current instrument has different validity dates and different default values for
         these dates.
@@ -551,12 +553,11 @@ class PropertyManager(NonIDF_Properties):
     # --------------------------------------------------------------------------------------------
 
     def reduction_instrument_warning(self, pInstrument):
-        if self.instr_name != pInstrument.getName():
+        other_instr_name = prop_helpers.get_instrument_name(pInstrument)
+        if self.instr_name != other_instr_name:
             self.log(
                 "*** WARNING: Setting reduction properties of the instrument {0} from the instrument {1}.\n"
-                "*** This only works if both instruments have the same reduction properties!".format(
-                    self.instr_name, pInstrument.getName()
-                ),
+                "*** This only works if both instruments have the same reduction properties!".format(self.instr_name, other_instr_name),
                 "warning",
             )
 

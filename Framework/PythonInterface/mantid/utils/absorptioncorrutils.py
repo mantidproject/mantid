@@ -654,8 +654,8 @@ def create_absorption_input(
             log.information("TOF range is {} to {} microseconds".format(tof_min, tof_max))
 
             # determine L1
-            instr = mtd[absName].getInstrument()
-            L1 = instr.getSource().getDistance(instr.getSample())
+            component_info = mtd[absName].componentInfo()
+            L1 = component_info.sourcePosition().distance(component_info.samplePosition())
             # determine L2 range
             PreprocessDetectorsToMD(InputWorkspace=absName, OutputWorkspace=absName + "_dets", GetMaskState=False)
             L2 = mtd[absName + "_dets"].column("L2")

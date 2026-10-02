@@ -345,6 +345,8 @@ Almost every legacy accessor already has a modern Python home:
      - ``componentInfo().position(index)`` / ``rotation(index)`` / ``relativePosition``/``relativeRotation``
    * - ``IDetector.getID()``
      - ``detectorInfo().detectorIDs()``
+   * - ``Instrument.getBaseInstrument()`` (geometry before any moves or calibration)
+     - ``baseComponentInfo()`` on the workspace; it has the same component indices as ``componentInfo()``
    * - ``IDetector.getTwoTheta()`` / ``getPhi()``
      - ``detectorInfo().twoTheta(index)`` / ``azimuthal(index)``
    * - ``Detector.isMasked()`` / ``isMonitor()``

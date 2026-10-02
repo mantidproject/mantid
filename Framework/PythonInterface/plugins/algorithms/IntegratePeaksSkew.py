@@ -36,6 +36,7 @@ from plugins.algorithms.peakdata_utils import (
     get_fwhm_from_back_to_back_params,
     exec_simpleapi_alg,
 )
+from plugins.algorithms.component_info_utils import resolve_component_index
 
 
 class PEAK_MASK_STATUS(Enum):
@@ -681,7 +682,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             issues["NPixMin"] = "NPixMin exceeds number of pixels in the window."
         # check valid peak workspace
         ws = self.getProperty("InputWorkspace").value
-        inst = ws.getInstrument()
+        component_info = ws.componentInfo()
         pk_ws = self.getProperty("PeaksWorkspace").value
         if ws.getInstrumentName() != pk_ws.getInstrumentName():
             issues["PeaksWorkspace"] = "PeaksWorkspace must have same instrument as the InputWorkspace."
@@ -690,7 +691,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         # check that is getting dTOF from back-to-back params then they are present in instrument
         if self.getProperty("GetTOFWindowFromBackToBackParams").value:
             # check at least first peak in workspace has back to back params
-            if not inst.getComponentByName(pk_ws.column("BankName")[0]).hasParameter("B"):
+            bank_index = resolve_component_index(pk_ws.column("BankName")[0], component_info)
+            if not component_info.hasParameter("B", bank_index):
                 issues["GetTOFWindowFromBackToBackParams"] = (
                     "Workspace doesn't have back to back exponential coefficients defined in the parameters.xml file."
                 )

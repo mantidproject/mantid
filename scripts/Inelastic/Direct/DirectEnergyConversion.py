@@ -415,7 +415,7 @@ class DirectEnergyConversion(object):
         # not been modified from input parameters.
         # E.g.  detector number have changed
         old_changes = self.prop_man.getChangedProperties()
-        all_changes = self.prop_man.update_defaults_from_instrument(sample_ws.getInstrument())
+        all_changes = self.prop_man.update_defaults_from_instrument(sample_ws.componentInfo())
         workspace_defined_prop = all_changes.difference(old_changes)
         if len(workspace_defined_prop) > 0:
             prop_man.log("****************************************************************")
@@ -959,7 +959,8 @@ class DirectEnergyConversion(object):
         spec_num = monitor_ws.getIndexFromSpectrumNumber(ei_mon_spectra[0])
         mon1_det = monitor_ws.getDetector(spec_num)
         mon1_pos = mon1_det.getPos()
-        src_name = data_ws.getInstrument().getSource().getName()
+        data_component_info = data_ws.componentInfo()
+        src_name = data_component_info.name(data_component_info.source())
         MoveInstrumentComponent(
             Workspace=resultws_name,
             ComponentName=src_name,
