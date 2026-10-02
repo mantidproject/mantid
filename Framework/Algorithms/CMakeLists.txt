@@ -1085,7 +1085,7 @@ target_include_directories(
   Algorithms PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 # Set the name of the generated library
-set_target_properties(Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms COMPILE_DEFINITIONS "IN_MANTID_ALGORITHMS")
+set_target_properties(Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Algorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
