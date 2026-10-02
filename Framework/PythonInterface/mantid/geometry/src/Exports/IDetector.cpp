@@ -26,18 +26,22 @@ namespace {
 // index-based DetectorInfo/ComponentInfo access layers. See the 'Instrument
 // Access via SpectrumInfo, DetectorInfo, ComponentInfo' concept page.
 Mantid::detid_t getIDDeprecated(const IDetector &self) {
+  /** TODO Uncomment this block for Mantid 7.1
   PyErr_Warn(PyExc_DeprecationWarning, "'IDetector.getID' is deprecated in Mantid 7.0, "
                                        "use 'DetectorInfo.detectorIDs' instead. "
                                        "For more information, see the instrument access layers concept page: "
                                        "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html");
+  */
   return self.getID();
 }
 
 double solidAngleDeprecated(const IDetector &self, const V3D &observer) {
+  /** TODO Uncomment this block for Mantid 7.1
   PyErr_Warn(PyExc_DeprecationWarning, "'IDetector.solidAngle' is deprecated in Mantid 7.0, "
                                        "use 'ComponentInfo.solidAngle' instead. "
                                        "For more information, see the instrument access layers concept page: "
                                        "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html");
+  */
   // Redirect through the preferred ComponentInfo access layer. A detector's
   // component index equals its detector index.
   const auto &parameterMap = self.parameterMap();
@@ -46,18 +50,22 @@ double solidAngleDeprecated(const IDetector &self, const V3D &observer) {
 }
 
 double getTwoThetaDeprecated(const IDetector &self, const V3D &observer, const V3D &axis) {
+  /** TODO Uncomment this block for Mantid 7.1
   PyErr_Warn(PyExc_DeprecationWarning, "'IDetector.getTwoTheta' is deprecated in Mantid 7.0, "
                                        "use 'DetectorInfo.twoTheta' instead. "
                                        "For more information, see the instrument access layers concept page: "
                                        "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html");
+  */
   return self.getTwoTheta(observer, axis);
 }
 
 double getPhiDeprecated(const IDetector &self) {
+  /** TODO Uncomment this block for Mantid 7.1
   PyErr_Warn(PyExc_DeprecationWarning, "'IDetector.getPhi' is deprecated in Mantid 7.0, "
                                        "use 'DetectorInfo.azimuthal' instead. "
                                        "For more information, see the instrument access layers concept page: "
                                        "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html");
+  */
   return self.getPhi();
 }
 } // namespace
