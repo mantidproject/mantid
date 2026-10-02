@@ -438,6 +438,7 @@ CSGObject &CSGObject::operator=(const CSGObject &A) {
     m_shapeXML = A.m_shapeXML;
     m_id = A.m_id;
     m_material = std::make_unique<Material>(A.material());
+    m_appliedRotation = A.m_appliedRotation;
 
     if (m_topRule)
       createSurfaceList();

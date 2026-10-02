@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
+import numpy as np
+
 ###############################################################################
 # This has to be tested through a workspace as it cannot be created in
 # Python
@@ -14,7 +16,7 @@ from testhelpers import run_algorithm, WorkspaceCreationHelper
 from mantid.geometry import Instrument
 from mantid.kernel import DateAndTime
 from mantid.api import Sample, Run
-from mantid.simpleapi import LoadEmptyInstrument
+from mantid.simpleapi import CopySample, CreateSampleShape, CreateSampleWorkspace, LoadEmptyInstrument
 
 
 class ExperimentInfoTest(unittest.TestCase):
@@ -95,6 +97,49 @@ class ExperimentInfoTest(unittest.TestCase):
         self.assertEqual(ws.instrumentDefaultView(), "CYLINDRICAL_Y")
         self.assertGreater(len(ws.instrumentXmlText()), 0)
         self.assertLess(ws.instrumentValidFromDate(), ws.instrumentValidToDate())
+
+    @staticmethod
+    def _ws_with_offset_sphere():
+        """A sphere sitting on +x, so any rotation visibly moves it."""
+        ws = CreateSampleWorkspace()
+        CreateSampleShape(ws, '<sphere id="offset"><centre x="2.0" y="0.0" z="0.0"/><radius val="0.5"/></sphere>')
+        return ws
+
+    def test_shape_reports_an_identity_applied_rotation_by_default(self):
+        ws = self._ws_with_offset_sphere()
+        np.testing.assert_allclose(ws.sample().getShape().getAppliedRotation(), np.eye(3), atol=1e-12)
+
+    def _assert_centred_on(self, shape, expected):
+        centre = shape.getBoundingBox().centrePoint()
+        np.testing.assert_allclose([centre.X(), centre.Y(), centre.Z()], expected, atol=1e-6)
+
+    def test_lab_frame_sample_shape_applies_the_goniometer_to_an_unbaked_shape(self):
+        ws = self._ws_with_offset_sphere()
+        # 90 degrees about z takes the sphere from +x to +y.
+        ws.run().getGoniometer().setR(np.array([[0.0, -1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]]))
+
+        lab_shape = ws.getLabFrameSampleShape()
+
+        self._assert_centred_on(lab_shape, [0.0, 2.0, 0.0])
+        # and the workspace's own sample is untouched
+        self._assert_centred_on(ws.sample().getShape(), [2.0, 0.0, 0.0])
+
+    def test_lab_frame_sample_shape_does_not_rotate_an_already_baked_shape_twice(self):
+        """CopySample bakes the destination goniometer in; the shape must not turn again."""
+        rotation = np.array([[0.0, -1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]])
+        source = self._ws_with_offset_sphere()
+        dest = CreateSampleWorkspace()
+        dest.run().getGoniometer().setR(rotation)
+        CopySample(InputWorkspace=source, OutputWorkspace=dest, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+
+        # The bake has already moved it to +y and the shape says so.
+        np.testing.assert_allclose(dest.sample().getShape().getAppliedRotation(), rotation, atol=1e-6)
+        self._assert_centred_on(dest.sample().getShape(), [0.0, 2.0, 0.0])
+
+        lab_shape = dest.getLabFrameSampleShape()
+
+        # Nothing outstanding, so it stays on +y rather than turning on to -x.
+        self._assert_centred_on(lab_shape, [0.0, 2.0, 0.0])
 
 
 if __name__ == "__main__":
