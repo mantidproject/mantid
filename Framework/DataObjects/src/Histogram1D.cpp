@@ -49,7 +49,10 @@ void Histogram1D::clearData() {
 
 /// Deprecated, use setSharedX() instead. Sets the x data.
 /// @param X :: vector of X data
-void Histogram1D::setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) { m_histogram.setSharedX(X); }
+[[deprecated("The setX method is deprecated in Mantid 7.0.  Use setSharedX instead.")]]
+void Histogram1D::setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
+  m_histogram.setSharedX(X);
+}
 
 // The mutable legacy accessors below can only be expressed in terms of Histogram's own legacy
 // interface: handing out a mutable MantidVec would allow the length to be changed, so
@@ -58,30 +61,51 @@ GNU_DIAG_OFF("deprecated-declarations")
 MSVC_DIAG_OFF(4996)
 
 /// Deprecated, use mutableX() instead. Returns the x data
-MantidVec &Histogram1D::dataX() { return m_histogram.dataX(); }
+[[deprecated("The dataX method is deprecated in Mantid 7.0.  Use mutableX() instead.")]]
+MantidVec &Histogram1D::dataX() {
+  return m_histogram.dataX();
+}
 
 MSVC_DIAG_ON(4996)
 GNU_DIAG_ON("deprecated-declarations")
 
 /// Deprecated, use x() instead. Returns the x data const
-const MantidVec &Histogram1D::dataX() const { return m_histogram.x().rawData(); }
+[[deprecated("The dataX method is deprecated in Mantid 7.0.  Use x() instead.")]]
+const MantidVec &Histogram1D::dataX() const {
+  return m_histogram.x().rawData();
+}
 
 /// Deprecated, use x() instead. Returns the x data const
-const MantidVec &Histogram1D::readX() const { return m_histogram.x().rawData(); }
+[[deprecated("The readX method is deprecated in Mantid 7.0.  Use x() instead.")]]
+const MantidVec &Histogram1D::readX() const {
+  return m_histogram.x().rawData();
+}
 
 /// Deprecated, use sharedX() instead. Returns a pointer to the x data
-Kernel::cow_ptr<HistogramData::HistogramX> Histogram1D::ptrX() const { return m_histogram.sharedX(); }
+[[deprecated("The ptrX method is deprecated in Mantid 7.0.  Use sharedX() instead.")]]
+Kernel::cow_ptr<HistogramData::HistogramX> Histogram1D::ptrX() const {
+  return m_histogram.sharedX();
+}
 
 GNU_DIAG_OFF("deprecated-declarations")
 MSVC_DIAG_OFF(4996)
 /// Deprecated, use mutableDx() instead.
-MantidVec &Histogram1D::dataDx() { return m_histogram.dataDx(); }
+[[deprecated("The dataDx method is deprecated in Mantid 7.0.  Use mutableDx() instead.")]]
+MantidVec &Histogram1D::dataDx() {
+  return m_histogram.dataDx();
+}
 MSVC_DIAG_ON(4996)
 GNU_DIAG_ON("deprecated-declarations")
 /// Deprecated, use dx() instead.
-const MantidVec &Histogram1D::dataDx() const { return m_histogram.dx().rawData(); }
+[[deprecated("The dataDx method is deprecated in Mantid 7.0.  Use dx() instead.")]]
+const MantidVec &Histogram1D::dataDx() const {
+  return m_histogram.dx().rawData();
+}
 /// Deprecated, use dx() instead.
-const MantidVec &Histogram1D::readDx() const { return m_histogram.dx().rawData(); }
+[[deprecated("The readDx method is deprecated in Mantid 7.0.  Use dx() instead.")]]
+const MantidVec &Histogram1D::readDx() const {
+  return m_histogram.dx().rawData();
+}
 
 /**
  * Makes sure a histogram has valid Y and E data.
