@@ -77,7 +77,7 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
 
         self.type = model_type
         if self.type == MatrixWorkspaceTableViewModelType.x:
-            self.relevant_data = self.ws.readX
+            self.relevant_data = self.ws.x
 
             # add another column if the workspace is histogram data
             # this will contain the right boundary for the last bin
@@ -85,11 +85,11 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
                 self.column_count += 1
 
         elif self.type == MatrixWorkspaceTableViewModelType.y:
-            self.relevant_data = self.ws.readY
+            self.relevant_data = self.ws.y
         elif self.type == MatrixWorkspaceTableViewModelType.e:
-            self.relevant_data = self.ws.readE
+            self.relevant_data = self.ws.e
         elif self.type == MatrixWorkspaceTableViewModelType.dx:
-            self.relevant_data = self.ws.readDx
+            self.relevant_data = self.ws.dx
         else:
             raise ValueError("Unknown model type {0}".format(self.type))
 
