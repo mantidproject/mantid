@@ -22,7 +22,6 @@
 #include <QDropEvent>
 #include <QLineEdit>
 #include <QMimeData>
-#include <QSignalBlocker>
 #include <QUrl>
 using namespace MantidQt::MantidWidgets;
 
@@ -320,7 +319,6 @@ bool WorkspaceSelector::hasValidNumberOfBins(const Mantid::API::Workspace_sptr &
 void WorkspaceSelector::refresh() {
   const std::lock_guard<std::mutex> lock(m_adsMutex);
   const QString currentWorkspace = currentText();
-  const QSignalBlocker blocker(this);
   clear();
   if (m_optional)
     addItem("");
