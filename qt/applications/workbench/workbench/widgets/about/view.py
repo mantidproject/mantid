@@ -167,8 +167,9 @@ class AboutViewWidget(QWidget):
     def rescale_h(self, value):
         return int(value * (self.height() / REFERENCE_HEIGHT))
 
-    def rescale_pixels_to_points(self, px_value):
-        return self.rescale_w(px_value) * self.points_per_pixel
+    def rescale_pixels_to_points(self, px_value, is_width: bool = True):
+        rescaled = self.rescale_w(px_value) if is_width else self.rescale_h(px_value)
+        return rescaled * self.points_per_pixel
 
     def setupUI(self):
         width, height = self.determine_dialog_dimensions()
@@ -315,9 +316,9 @@ font: {self.rescale_pixels_to_points(12)}pt;
         # Usage data
         lbl_allow_usage_data = QLabel()
         lbl_allow_usage_data.setText(
-            f"<span style='text-align: right; font-size:{self.rescale_h(12) * self.points_per_pixel}pt;'>"
+            f"<span style='text-align: right; font-size:{self.rescale_pixels_to_points(12, is_width=False)}pt;'>"
             "Report Usage Data</span><br/>"
-            f"<span style='text-align: right; font-size:{self.rescale_h(8) * self.points_per_pixel}pt;'>"
+            f"<span style='text-align: right; font-size:{self.rescale_pixels_to_points(8, is_width=False)}pt;'>"
             "Required to use the Error Reporter</span>"
         )
         usagelayout = QHBoxLayout()
