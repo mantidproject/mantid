@@ -841,9 +841,6 @@ class FullInstrumentViewView(QWidget):
 
     def subscribe_presenter(self, presenter) -> None:
         self._presenter = presenter
-        for unit in self._presenter.available_unit_options():
-            self._units_combo_box_sliders.addItem(unit)
-            self._units_combo_box_lineplot.addItem(unit)
         self._count_scale_combo_box.addItems(self._presenter.count_scale_combo_options())
         self.refresh_peaks_ws_list()
         self.refresh_workspaces_in_list(CurrentTab.Masking)
@@ -975,6 +972,31 @@ class FullInstrumentViewView(QWidget):
     def set_start_adding_peaks_checked(self, checked):
         self._start_adding_peaks_button.setChecked(checked)
 
+    def set_peaks_workspaces_enabled(self, enabled: bool) -> None:
+        """Enable or disable the whole peaks workspaces group, including its buttons.
+
+        The ticks in the list are kept, so the overlays come back if the group is enabled again.
+        """
+        self._peaks_group_box.setEnabled(enabled)
+        self._peaks_group_box.setToolTip(
+            "" if enabled else "Peaks can only be shown on a workspace in TOF, dSpacing, Wavelength or MomentumTransfer."
+        )
+
+    def set_start_adding_peaks_enabled(self, enabled: bool) -> None:
+        """Enable or disable the peak adding mode button, leaving the mode first if disabling it.
+
+        Unchecking with signals left on lets the presenter tear the mode down as usual.
+        """
+        if not enabled and self._start_adding_peaks_button.isChecked():
+            self._start_adding_peaks_button.setChecked(False)
+        self._start_adding_peaks_button.setEnabled(enabled)
+        self._start_adding_peaks_button.setToolTip(
+            ""
+            if enabled
+            else "Peaks can only be added to a workspace in TOF, dSpacing, Wavelength or MomentumTransfer, "
+            "and whose units can be converted."
+        )
+
     def set_export_workspace_button_disabled(self, disabled):
         self._export_workspace_button.setDisabled(disabled)
 
@@ -1034,8 +1056,26 @@ class FullInstrumentViewView(QWidget):
     def set_delete_all_selected_peaks_button_enabled(self, is_enabled: bool) -> None:
         self._delete_all_selected_peaks_button.setEnabled(is_enabled)
 
-    def set_unit_combo_box_index(self, index: int) -> None:
-        self._units_combo_box_sliders.setCurrentIndex(index)
+    def set_unit_combo_options(self, options: list[str], sliders_unit: str | None = None, lineplot_unit: str | None = None) -> None:
+        """Replace the entries of both unit combo boxes, selecting the given units where they are
+        among the options, and the first option otherwise.
+
+        Signals are blocked while they are refilled: clearing a populated combo emits
+        currentIndexChanged for rows on their way out, which the presenter would act on.
+        """
+        for combo_box, unit in ((self._units_combo_box_sliders, sliders_unit), (self._units_combo_box_lineplot, lineplot_unit)):
+            was_blocked = combo_box.blockSignals(True)
+            try:
+                combo_box.clear()
+                combo_box.addItems(options)
+                if unit in options:
+                    combo_box.setCurrentIndex(options.index(unit))
+            finally:
+                combo_box.blockSignals(was_blocked)
+
+    def set_unit_combo_boxes_enabled(self, enabled: bool) -> None:
+        self._units_combo_box_sliders.setEnabled(enabled)
+        self._units_combo_box_lineplot.setEnabled(enabled)
 
     def current_selected_sliders_unit(self) -> str:
         """Get the currently selected unit from the combo box"""
@@ -1056,27 +1096,38 @@ class FullInstrumentViewView(QWidget):
         return self._integration_limit_slider.value()
 
     def set_integration_range_limits(self, integration_limits: tuple[float, float]) -> None:
-        """Update the integration limit edit boxes with formatted text"""
-        lower, upper = integration_limits
-        if upper <= lower:
-            self._integration_limit_group_box.hide()
-            return
-        self._integration_limit_slider.setRange(*integration_limits)
-        self._integration_limit_slider.setValue(integration_limits)
-        return
+        self._set_range_controls(
+            self._integration_limit_min_edit,
+            self._integration_limit_max_edit,
+            self._integration_limit_slider,
+            self._integration_limit_reset,
+            integration_limits,
+        )
 
     def get_contour_limits(self) -> tuple[float, float]:
         return self._contour_range_slider.value()
 
     def set_contour_range_limits(self, contour_limits: tuple[int, int]) -> None:
-        """Update the contour range edit boxes with formatted text"""
-        lower, upper = contour_limits
-        if upper <= lower:
-            self._contour_range_group_box.hide()
+        self._set_range_controls(
+            self._contour_range_min_edit,
+            self._contour_range_max_edit,
+            self._contour_range_slider,
+            self._contour_range_reset,
+            contour_limits,
+        )
+
+    def _set_range_controls(
+        self, min_edit: QLineEdit, max_edit: QLineEdit, slider: QDoubleRangeSlider, reset_button: QPushButton, limits: tuple[float, float]
+    ) -> None:
+        lower, upper = limits
+        enabled = upper > lower
+        for widget in (min_edit, max_edit, slider, reset_button):
+            widget.setEnabled(enabled)
+        if not enabled:
+            self._set_min_max_edit_boxes(min_edit, max_edit, limits)
             return
-        self._contour_range_slider.setRange(*contour_limits)
-        self._contour_range_slider.setValue(contour_limits)
-        return
+        slider.setRange(*limits)
+        slider.setValue(limits)
 
     @_skip_if_closing
     def set_plotter_scalar_bar_range(self, clim: tuple[int, int], label: str, display_title: str | None = None) -> None:
@@ -1226,8 +1277,9 @@ class FullInstrumentViewView(QWidget):
     def show_plot_for_detectors(self, workspace: Workspace2D, integration_limits) -> None:
         """Plot all the given spectra, where they are defined by their workspace indices, not the spectra numbers"""
         self._detector_spectrum_axes.clear()
-        sum_spectra = self.sum_spectra_selected()
         if workspace is not None and workspace.getNumberHistograms() > 0:
+            # Spectra that could not be summed are plotted unsummed, and need telling apart
+            sum_spectra = self.sum_spectra_selected() and workspace.getNumberHistograms() == 1
             spectra = workspace.getSpectrumNumbers()
             for spec in spectra:
                 self._detector_spectrum_axes.plot(workspace, specNum=spec, label=f"Spectrum {spec}" if not sum_spectra else None)
