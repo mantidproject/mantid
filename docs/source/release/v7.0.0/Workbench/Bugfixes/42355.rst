@@ -1,0 +1,1 @@
+- Opening the About dialog on Windows no longer prints a warning about font size in the messages window.
