@@ -14,6 +14,7 @@
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
@@ -84,6 +85,7 @@ namespace MantidQt::CustomInterfaces {
 
 IqtView::IqtView(QWidget *parent) : QWidget(parent), m_presenter(), m_iqtTree(nullptr) {
   m_uiForm.setupUi(parent);
+  m_uiForm.ppPlot->setCanvasColour(MantidQt::MantidWidgets::isDarkMode() ? QColor("#1d1d1d") : QColor(255, 255, 255));
   m_dblEdFac = new DoubleEditorFactory(this);
   m_dblManager = new QtDoublePropertyManager();
 }

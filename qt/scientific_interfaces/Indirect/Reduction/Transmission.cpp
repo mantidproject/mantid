@@ -7,6 +7,7 @@
 #include "Transmission.h"
 
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "ReductionAlgorithmUtils.h"
 
 #include <MantidQtWidgets/Common/ParseKeyValueString.h>
@@ -47,7 +48,7 @@ Transmission::Transmission(IDataReduction *idrUI, QWidget *parent) : DataReducti
   connect(m_uiForm.ckSumFiles, &QCheckBox::checkStateChanged, this,
           [this]() { Transmission::handleNewInputData(SenderType::sumCheckbox); });
 
-  m_uiForm.ppPlot->setCanvasColour(QColor(240, 240, 240));
+  m_uiForm.ppPlot->setCanvasColour(MantidQt::MantidWidgets::isDarkMode() ? QColor("#1d1d1d") : QColor(240, 240, 240));
 }
 
 Transmission::~Transmission() = default;
@@ -142,7 +143,8 @@ void Transmission::transAlgDone(bool error) {
 
   // Do plotting
   m_uiForm.ppPlot->clear();
-  m_uiForm.ppPlot->addSpectrum("Can", sampleWsName + "_Can", 0, Qt::black);
+  m_uiForm.ppPlot->addSpectrum("Can", sampleWsName + "_Can", 0,
+                               MantidQt::MantidWidgets::isDarkMode() ? Qt::white : Qt::black);
   m_uiForm.ppPlot->addSpectrum("Sample", sampleWsName + "_Sam", 0, Qt::red);
   m_uiForm.ppPlot->addSpectrum("Transmission", sampleWsName + "_Trans", 0, Qt::blue);
   m_uiForm.ppPlot->resizeX();

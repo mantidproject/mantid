@@ -9,6 +9,7 @@
 #include "QuasiPresenter.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
@@ -53,6 +54,7 @@ QuasiView::QuasiView(QWidget *parent)
     : QWidget(parent), m_dblManager(new QtDoublePropertyManager()), m_propTree(new QtTreePropertyBrowser()),
       m_properties(), m_dblEditorFactory(new DoubleEditorFactory()), m_presenter() {
   m_uiForm.setupUi(parent);
+  m_uiForm.ppPlot->setCanvasColour(MantidQt::MantidWidgets::isDarkMode() ? QColor("#1d1d1d") : QColor(255, 255, 255));
 
   m_propTree->setFactoryForManager(m_dblManager, m_dblEditorFactory);
   setupFitOptions();

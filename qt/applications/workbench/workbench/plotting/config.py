@@ -16,6 +16,7 @@ import warnings
 import matplotlib as mpl
 import matplotlib._pylab_helpers as _pylab_helpers
 from qtpy.QtWidgets import QApplication
+from qtpy.QtCore import Qt
 
 # local imports
 from .globalfiguremanager import GlobalFigureManager
@@ -25,6 +26,38 @@ MPL_BACKEND = "module://workbench.plotting.backend_workbench"
 
 # Our style defaults
 DEFAULT_RCPARAMS = {"figure.facecolor": "w", "figure.max_open_warning": 200}
+
+_DARK_BG_OUTER = "#1d1d1d"  # figure background (window margin)
+_DARK_BG_PANEL = "#2b2b2b"  # axes background (the actual plot area)
+_DARK_FG_PRIMARY = "#DAD8D8"  # labels, text, legend text - near-white, highest contrast
+_DARK_FG_SECONDARY = "#c8c8c8"  # ticks, spines, patch/hatch edges - legible but a step down
+_DARK_FG_MUTED = "#555555"  # gridlines - present without competing with the data
+_DARK_ACCENT = "#ffa500"  # boxplot median, etc.
+
+DARK_RCPARAMS = {
+    "figure.facecolor": _DARK_BG_OUTER,
+    "axes.facecolor": _DARK_BG_PANEL,
+    "savefig.facecolor": _DARK_BG_PANEL,
+    "axes.edgecolor": _DARK_FG_SECONDARY,
+    "axes.labelcolor": _DARK_FG_PRIMARY,
+    "text.color": _DARK_FG_PRIMARY,
+    "xtick.color": _DARK_FG_SECONDARY,
+    "xtick.labelcolor": _DARK_FG_PRIMARY,
+    "ytick.color": _DARK_FG_SECONDARY,
+    "ytick.labelcolor": _DARK_FG_PRIMARY,
+    "grid.color": _DARK_FG_MUTED,
+    "legend.facecolor": _DARK_BG_PANEL,
+    "legend.edgecolor": _DARK_FG_SECONDARY,
+    "legend.labelcolor": _DARK_FG_PRIMARY,
+    "patch.edgecolor": _DARK_FG_SECONDARY,
+    "hatch.color": _DARK_FG_SECONDARY,
+    "boxplot.boxprops.color": _DARK_FG_PRIMARY,
+    "boxplot.whiskerprops.color": _DARK_FG_PRIMARY,
+    "boxplot.capprops.color": _DARK_FG_PRIMARY,
+    "boxplot.medianprops.color": _DARK_ACCENT,
+    "boxplot.flierprops.markeredgecolor": _DARK_FG_PRIMARY,
+    "figure.max_open_warning": 200,
+}
 
 
 def initialize_matplotlib():
@@ -67,13 +100,19 @@ def init_mpl_gcf():
     setattr(_pylab_helpers, "Gcf", GlobalFigureManager)
 
 
+def _is_dark_mode() -> bool:
+    app = QApplication.instance()
+    return app is not None and app.styleHints().colorScheme() == Qt.ColorScheme.Dark
+
+
 def reset_rcparams_to_default():
     """
     Reset the rcParams to the default settings.
     """
     mpl.rcParams.clear()
     mpl.rc_file_defaults()
-    set_rcparams(DEFAULT_RCPARAMS)
+    set_rcparams(DARK_RCPARAMS if _is_dark_mode() else DEFAULT_RCPARAMS)
+
     # We must keep our backend
     mpl.use(MPL_BACKEND)
 

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCPeakFittingView.h"
 
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
 #include <QMessageBox>
@@ -35,7 +36,7 @@ void ALCPeakFittingView::initialize() {
 
   connect(m_ui.fit, &QPushButton::clicked, this, &ALCPeakFittingView::fitRequested);
 
-  m_ui.plot->setCanvasColour(Qt::white);
+  m_ui.plot->setCanvasColour(MantidQt::MantidWidgets::isDarkMode() ? QColor("#1d1d1d") : Qt::white);
 
   // Error bars on the plot
   QStringList plotsWithErrors{"Corrected"};
