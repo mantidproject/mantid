@@ -1096,27 +1096,38 @@ class FullInstrumentViewView(QWidget):
         return self._integration_limit_slider.value()
 
     def set_integration_range_limits(self, integration_limits: tuple[float, float]) -> None:
-        """Update the integration limit edit boxes with formatted text"""
-        lower, upper = integration_limits
-        if upper <= lower:
-            self._integration_limit_group_box.hide()
-            return
-        self._integration_limit_slider.setRange(*integration_limits)
-        self._integration_limit_slider.setValue(integration_limits)
-        return
+        self._set_range_controls(
+            self._integration_limit_min_edit,
+            self._integration_limit_max_edit,
+            self._integration_limit_slider,
+            self._integration_limit_reset,
+            integration_limits,
+        )
 
     def get_contour_limits(self) -> tuple[float, float]:
         return self._contour_range_slider.value()
 
     def set_contour_range_limits(self, contour_limits: tuple[int, int]) -> None:
-        """Update the contour range edit boxes with formatted text"""
-        lower, upper = contour_limits
-        if upper <= lower:
-            self._contour_range_group_box.hide()
+        self._set_range_controls(
+            self._contour_range_min_edit,
+            self._contour_range_max_edit,
+            self._contour_range_slider,
+            self._contour_range_reset,
+            contour_limits,
+        )
+
+    def _set_range_controls(
+        self, min_edit: QLineEdit, max_edit: QLineEdit, slider: QDoubleRangeSlider, reset_button: QPushButton, limits: tuple[float, float]
+    ) -> None:
+        lower, upper = limits
+        enabled = upper > lower
+        for widget in (min_edit, max_edit, slider, reset_button):
+            widget.setEnabled(enabled)
+        if not enabled:
+            self._set_min_max_edit_boxes(min_edit, max_edit, limits)
             return
-        self._contour_range_slider.setRange(*contour_limits)
-        self._contour_range_slider.setValue(contour_limits)
-        return
+        slider.setRange(*limits)
+        slider.setValue(limits)
 
     @_skip_if_closing
     def set_plotter_scalar_bar_range(self, clim: tuple[int, int], label: str, display_title: str | None = None) -> None:

@@ -3,3 +3,4 @@
 - In the new Instrument View, the unit selectors now show the workspace's own unit when it is not one of the listed units, such as energy, rather than time-of-flight.
 - The new Instrument View no longer hangs Workbench when an algorithm, such as ConvertUnits, overwrites the workspace it is showing.
 - In the new Instrument View, summing the selected spectra no longer fails for units in which the spectra cannot share a common binning, such as momentum transfer for a detector in the path of the beam. The spectra are plotted unsummed in this case.
+- In the new Instrument View, the contour and integration range controls no longer disappear when every detector has the same counts or the range is empty. They are greyed out until there is a range to adjust.

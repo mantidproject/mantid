@@ -541,6 +541,44 @@ class TestFullInstrumentViewView(unittest.TestCase):
         self.assertTrue(self._view._units_combo_box_sliders.isEnabled())
         self.assertTrue(self._view._units_combo_box_lineplot.isEnabled())
 
+    def _contour_range_controls(self) -> tuple:
+        view = self._view
+        return (view._contour_range_min_edit, view._contour_range_max_edit, view._contour_range_slider, view._contour_range_reset)
+
+    def test_contour_range_with_nothing_to_span_is_shown_disabled(self):
+        """Every detector of a CreateSampleWorkspace has the same counts, which used to hide the
+        group for good."""
+        with mock.patch.object(self._view._contour_range_group_box, "hide") as mock_hide:
+            self._view.set_contour_range_limits((39, 39))
+
+        mock_hide.assert_not_called()
+        for widget in self._contour_range_controls():
+            self.assertFalse(widget.isEnabled())
+        self.assertEqual("39", self._view._contour_range_min_edit.text())
+        self.assertEqual("39", self._view._contour_range_max_edit.text())
+
+    def test_contour_range_enabled_again_once_there_is_a_range(self):
+        self._view.set_contour_range_limits((39, 39))
+        self._view.set_contour_range_limits((0, 100))
+
+        for widget in self._contour_range_controls():
+            self.assertTrue(widget.isEnabled())
+        self.assertEqual((0, 100), self._view._contour_range_slider.value())
+
+    def test_integration_range_with_nothing_to_span_leaves_the_unit_selector_enabled(self):
+        with mock.patch.object(self._view._integration_limit_group_box, "hide") as mock_hide:
+            self._view.set_integration_range_limits((5, 5))
+
+        mock_hide.assert_not_called()
+        for widget in (
+            self._view._integration_limit_min_edit,
+            self._view._integration_limit_max_edit,
+            self._view._integration_limit_slider,
+            self._view._integration_limit_reset,
+        ):
+            self.assertFalse(widget.isEnabled())
+        self.assertTrue(self._view._units_combo_box_sliders.isEnabled())
+
     def test_set_peaks_workspaces_disabled(self):
         self._view.set_peaks_workspaces_enabled(False)
 
