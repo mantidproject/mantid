@@ -10,7 +10,7 @@ import unittest
 from unittest import mock
 
 from qtpy.QtCore import QModelIndex, Qt, QRect
-from qtpy.QtGui import QColor, QStandardItemModel, QPainter
+from qtpy.QtGui import QColor, QStandardItemModel, QPainter, QPalette
 from qtpy.QtWidgets import QStyleOptionViewItem, QStyle
 from mantidqt.widgets.workspacedisplay.matrix.delegate import CustomTextElidingDelegate
 from mantidqt.utils.qt.testing import start_qapplication
@@ -43,7 +43,7 @@ class CustomTextElidingDelegateTest(unittest.TestCase):
         delegate.paint(painter, style, model.index(0, 0))
 
         painter.save.assert_called_once()
-        painter.setPen.assert_not_called()
+        painter.setPen.assert_called_once_with(style.palette.color(QPalette.Text))
         painter.fillRect.assert_not_called()
         painter.drawText.assert_called_once()
         painter.restore.assert_called_once()
@@ -87,10 +87,26 @@ class CustomTextElidingDelegateTest(unittest.TestCase):
 
         delegate.paint(painter, style, model.index(0, 0))
 
-        painter.setPen.assert_not_called()
+        painter.setPen.assert_called_once_with(style.palette.color(QPalette.Text))
         painter.fillRect.assert_called_once()
         # the background color object seems different but we only care about value equality
         self.assertEqual(background, painter.fillRect.call_args[0][1])
+
+    def test_custom_eliding_delegate_uses_palette_text_color_without_foreground_color(self):
+        padding = 3
+        delegate = CustomTextElidingDelegate(padding)
+        painter = mock.MagicMock(spec=QPainter)
+        # we cannot mock the style & index as they are passed to a C++ type that expects real types
+        style, model = QStyleOptionViewItem(), QStandardItemModel(1, 1)
+        style.rect = QRect(0, 0, 99, 29)  # give a non-zero sized rectangle to paint in
+        text_color = QColor(1, 2, 3)
+        style.palette.setColor(QPalette.Text, text_color)
+        model.setData(model.index(0, 0), str(math.pi), Qt.DisplayRole)
+
+        delegate.paint(painter, style, model.index(0, 0))
+
+        painter.setPen.assert_called_once_with(text_color)
+        painter.fillRect.assert_not_called()
 
     def test_custom_eliding_delegate_changes_back_and_foreground_color_if_selected(self):
         padding = 3
