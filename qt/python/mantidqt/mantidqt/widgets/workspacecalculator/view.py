@@ -22,8 +22,12 @@ class WorkspaceCalculatorView(QWidget):
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
-        self.label_validation_lhs.setVisible(False)
-        self.label_validation_rhs.setVisible(False)
+        self.label_validators = {
+            "LHS": self.label_validation_lhs,
+            "RHS": self.label_validation_rhs,
+        }
+        for validator in self.label_validators.values():
+            validator.setVisible(False)
 
         scale_validator = ScaleValidator()
         self.lhs_scaling.setValidator(scale_validator)
@@ -46,16 +50,12 @@ class WorkspaceCalculatorView(QWidget):
 
     def setValidationLabel(self, ws, validationValue, tooltip=""):
         """Sets the visibility of the validity indicator (asterisk) next to the workspace selector."""
-        if ws == "LHS":
-            if isinstance(tooltip, list):
-                tooltip = tooltip[0]
-            self.label_validation_lhs.setVisible(not validationValue)
-            self.label_validation_lhs.setToolTip(tooltip)
-        else:
-            if isinstance(tooltip, list):
-                tooltip = tooltip[1]
-            self.label_validation_rhs.setVisible(not validationValue)
-            self.label_validation_rhs.setToolTip(tooltip)
+        validator = self.label_validators.get(ws)
+        if isinstance(tooltip, list):
+            ix = 0 if ws == "LHS" else 1
+            tooltip = tooltip[ix]
+        validator.setVisible(not validationValue)
+        validator.setToolTip(tooltip)
 
     def connectADS(self, selector_name):
         """Explicitly connects the workspace selector observers to the ADS."""
