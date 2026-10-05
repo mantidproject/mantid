@@ -28,7 +28,7 @@ class InstrumentView:
         ws = Load(str(file_path))
 
         if (
-            not ws.getInstrument()
+            ws.componentInfo().size() <= 1
             or not ws.getInstrumentName()
             or not ws.getAxis(1).isSpectra()
             or (ws.detectorInfo().detectorIDs().size == 0)

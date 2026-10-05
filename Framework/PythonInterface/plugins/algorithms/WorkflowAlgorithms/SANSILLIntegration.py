@@ -82,8 +82,9 @@ class SANSILLIntegration(PythonAlgorithm):
                         issues["InputWorkspace"] = "The input workspace is not processed as sample, water or solvent."
                 else:
                     issues["InputWorkspace"] = "The input workspace is not processed by SANSILLReduction"
-            instrument = self.getProperty("InputWorkspace").value.getInstrument()
-            if not instrument:
+            component_info = self.getProperty("InputWorkspace").value.componentInfo()
+            # An instrument with no components other than the root means none is attached
+            if len(component_info.children(component_info.root())) == 0:
                 issues["InputWorkspace"] += "The input workspace does not have an instrument attached."
         output_type = self.getPropertyValue("OutputType")
         if output_type == "I(Q)":
@@ -235,9 +236,8 @@ class SANSILLIntegration(PythonAlgorithm):
         self._resolution = self.getPropertyValue("CalculateResolution")
         self._output_ws = self.getPropertyValue("OutputWorkspace")
         self._lambda_range = self.getProperty("WavelengthRange").value
-        instrument = mtd[self._input_ws].getInstrument()
         run = mtd[self._input_ws].getRun()
-        self._is_tof = instrument.getName() == "D33" and "tof_mode" in run and run["tof_mode"].value == "TOF"
+        self._is_tof = mtd[self._input_ws].getInstrumentName() == "D33" and "tof_mode" in run and run["tof_mode"].value == "TOF"
         if self._is_tof:
             cut_input_ws = self._input_ws + "_cut"
             CropWorkspaceRagged(
