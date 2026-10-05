@@ -17,6 +17,7 @@ if is_linux():
     import lz4.frame
 import re
 import subprocess
+import sys
 import zlib
 
 
@@ -65,7 +66,7 @@ def _get_most_recent_core_dump_file(core_dumps_dir: Path, workbench_pid: str) ->
         for latest_core_dump_file in files_sorted_by_latest:
             # test it's recent enough
             age = datetime.now() - datetime.fromtimestamp(latest_core_dump_file.stat().st_ctime)
-            if age.seconds < CORE_DUMP_RECENCY_LIMIT:
+            if age.total_seconds() < CORE_DUMP_RECENCY_LIMIT:
                 log.notice(f"Found recent file {latest_core_dump_file.as_posix()}")
                 if _is_lz4_file(latest_core_dump_file):
                     latest_core_dump_file = _decompress_lz4_file(latest_core_dump_file)
@@ -75,11 +76,11 @@ def _get_most_recent_core_dump_file(core_dumps_dir: Path, workbench_pid: str) ->
                     log.notice(f"{latest_core_dump_file.as_posix()} identified as a mantid workbench core dump")
                     return latest_core_dump_file
                 else:
-                    log.notice(f"{latest_core_dump_file.as_posix()} not itdentified as a mantid workbench core dump")
+                    log.notice(f"{latest_core_dump_file.as_posix()} not identified as a mantid workbench core dump")
             else:
                 log.notice(
                     f"Could not find recent enough ( < {CORE_DUMP_RECENCY_LIMIT} "
-                    "seconds old) valid core dump file in {core_dumps_dir.as_posix()}"
+                    f"seconds old) valid core dump file in {core_dumps_dir.as_posix()}"
                 )
                 return None
     log.notice(f"No valid files found in {core_dumps_dir.as_posix()}")
@@ -87,7 +88,7 @@ def _get_most_recent_core_dump_file(core_dumps_dir: Path, workbench_pid: str) ->
 
 
 def _check_core_file_is_the_workbench_process(core_dump_file: Path, workbench_pid: str) -> bool:
-    args = ["pystack", "core", core_dump_file.as_posix()]
+    args = ["pystack", "core", core_dump_file.as_posix(), "--lib-search-root", f"{(Path(sys.prefix) / 'lib').as_posix()}"]
     process = subprocess.run(args, capture_output=True, text=True)
     if process.stderr:
         log.error(f"Pystack executable check failed: {process.stderr}")
@@ -102,7 +103,7 @@ def _check_core_file_is_the_workbench_process(core_dump_file: Path, workbench_pi
 
 
 def _get_output_from_pystack(core_dump_file: Path) -> str:
-    args = ["pystack", "core", core_dump_file.as_posix(), "--native-all"]
+    args = ["pystack", "core", core_dump_file.as_posix(), "--native-all", "--lib-search-root", f"{(Path(sys.prefix) / 'lib').as_posix()}"]
     process = subprocess.run(args, capture_output=True, text=True)
     if process.stderr:
         log.error(f"Error when running Pystack: {process.stderr}")
