@@ -348,6 +348,67 @@ class SwappedButtonTrackballCamera(vtkInteractorStyleTrackballCamera):
         self.AddObserver(vtkCommand.RightButtonPressEvent, lambda *_: self.OnLeftButtonDown())
         self.AddObserver(vtkCommand.LeftButtonReleaseEvent, lambda *_: self.OnRightButtonUp())
         self.AddObserver(vtkCommand.RightButtonReleaseEvent, lambda *_: self.OnLeftButtonUp())
+        self.AddObserver(vtkCommand.MouseWheelForwardEvent, lambda *_: self._on_wheel(forward=True))
+        self.AddObserver(vtkCommand.MouseWheelBackwardEvent, lambda *_: self._on_wheel(forward=False))
+
+    def _on_wheel(self, forward: bool):
+        """Zoom keeping the point under the cursor fixed, as the 2D projections do.
+
+        The default trackball zoom always zooms into the centre of the view.
+        """
+        interactor = self.GetInteractor()
+        if interactor is None:
+            return
+        x, y = interactor.GetEventPosition()
+        self.FindPokedRenderer(x, y)
+        renderer = self.GetCurrentRenderer()
+        if renderer is None:
+            return
+        camera = renderer.GetActiveCamera()
+        if not camera.GetParallelProjection():
+            if forward:
+                self.OnMouseWheelForward()
+            else:
+                self.OnMouseWheelBackward()
+            return
+
+        # Same step per wheel notch as vtkInteractorStyleTrackballCamera
+        factor = 1.1 ** (0.2 * self.GetMotionFactor() * self.GetMouseWheelMotionFactor())
+        if not forward:
+            factor = 1.0 / factor
+        self._zoom_at_display_point(renderer, x, y, factor)
+
+        if self.GetAutoAdjustCameraClippingRange():
+            renderer.ResetCameraClippingRange()
+        interactor.Render()
+
+    def _zoom_at_display_point(self, renderer, dx, dy, factor):
+        """Zoom a parallel projection camera by factor, keeping the world point under display (pixel) coords fixed.
+
+        The camera can look along any direction, so the point is taken on the plane through
+        the focal point facing the camera rather than on z=0.
+        """
+        camera = renderer.GetActiveCamera()
+        focal = np.array(camera.GetFocalPoint())
+        position = np.array(camera.GetPosition())
+
+        # Display depth of the focal point, so the cursor point lies in the same plane
+        renderer.SetWorldPoint(*focal, 1.0)
+        renderer.WorldToDisplay()
+        focal_depth = renderer.GetDisplayPoint()[2]
+        renderer.SetDisplayPoint(dx, dy, focal_depth)
+        renderer.DisplayToWorld()
+        wx, wy, wz, ww = renderer.GetWorldPoint()
+        if abs(ww) < 1e-10:
+            return
+        cursor = np.array([wx, wy, wz]) / ww
+
+        # Moving the focal point towards the cursor by (1 - 1/factor) of the way keeps the
+        # cursor point's offset from the view centre, measured in units of parallel scale, unchanged
+        shift = (cursor - focal) * (1.0 - 1.0 / factor)
+        camera.SetFocalPoint(*(focal + shift))
+        camera.SetPosition(*(position + shift))
+        camera.SetParallelScale(camera.GetParallelScale() / factor)
 
     def set_picking_callback(self, picking_callback: Callable):
         self.RemoveObservers(vtkCommand.LeftButtonPressEvent)

@@ -11,6 +11,7 @@ from vtkmodules.vtkCommonCore import vtkCommand
 
 import numpy as np
 from numpy.testing import assert_array_almost_equal
+from vtkmodules.vtkRenderingCore import vtkRenderer, vtkRenderWindow, vtkRenderWindowInteractor
 
 
 def _make_mock_plotter(position=(0, 0, 1), focal_point=(0, 0, 0), parallel_scale=1.0):
@@ -369,6 +370,89 @@ class TestSwappedButtonTrackballCamera(unittest.TestCase):
 
         self.assertFalse(style.HasObserver(vtkCommand.LeftButtonPressEvent))
         self.assertFalse(style.HasObserver(vtkCommand.RightButtonPressEvent))
+
+    def _create_style(self, parallel_projection=True):
+        """Attach the style to a real renderer and camera. The interactor is never initialised, so nothing is drawn."""
+        render_window = vtkRenderWindow()
+        render_window.SetSize(200, 100)
+        renderer = vtkRenderer()
+        render_window.AddRenderer(renderer)
+        interactor = vtkRenderWindowInteractor()
+        interactor.SetRenderWindow(render_window)
+        style = SwappedButtonTrackballCamera()
+        interactor.SetInteractorStyle(style)
+
+        camera = renderer.GetActiveCamera()
+        camera.SetParallelProjection(parallel_projection)
+        # Looking at the origin at an angle, as after rotating the 3D view
+        camera.SetPosition(3, 4, 10)
+        camera.SetFocalPoint(0, 0, 0)
+        camera.SetParallelScale(5)
+        # Keep references so the VTK objects outlive this method
+        self._render_window, self._interactor = render_window, interactor
+        return style, renderer, interactor
+
+    @staticmethod
+    def _display_point(renderer, world_point):
+        renderer.SetWorldPoint(*world_point, 1.0)
+        renderer.WorldToDisplay()
+        return np.array(renderer.GetDisplayPoint()[:2])
+
+    def _world_point_under_cursor(self, renderer, x, y):
+        camera = renderer.GetActiveCamera()
+        renderer.SetWorldPoint(*camera.GetFocalPoint(), 1.0)
+        renderer.WorldToDisplay()
+        renderer.SetDisplayPoint(x, y, renderer.GetDisplayPoint()[2])
+        renderer.DisplayToWorld()
+        wx, wy, wz, ww = renderer.GetWorldPoint()
+        return np.array([wx, wy, wz]) / ww
+
+    def test_wheel_zoom_keeps_point_under_cursor_fixed(self):
+        for forward in (True, False):
+            with self.subTest(forward=forward):
+                style, renderer, interactor = self._create_style()
+                point = self._world_point_under_cursor(renderer, 150, 75)
+                interactor.SetEventPosition(150, 75)
+                style._on_wheel(forward=forward)
+                assert_array_almost_equal(self._display_point(renderer, point), [150, 75])
+
+    def test_wheel_events_call_cursor_zoom(self):
+        style = SwappedButtonTrackballCamera()
+        with mock.patch.object(style, "_on_wheel") as on_wheel_mock:
+            style.InvokeEvent(vtkCommand.MouseWheelForwardEvent)
+            on_wheel_mock.assert_called_once_with(forward=True)
+            on_wheel_mock.reset_mock()
+            style.InvokeEvent(vtkCommand.MouseWheelBackwardEvent)
+            on_wheel_mock.assert_called_once_with(forward=False)
+
+    def test_wheel_forward_zooms_in(self):
+        style, renderer, interactor = self._create_style()
+        interactor.SetEventPosition(150, 75)
+        style._on_wheel(forward=True)
+        self.assertLess(renderer.GetActiveCamera().GetParallelScale(), 5)
+
+    def test_wheel_backward_zooms_out(self):
+        style, renderer, interactor = self._create_style()
+        interactor.SetEventPosition(150, 75)
+        style._on_wheel(forward=False)
+        self.assertGreater(renderer.GetActiveCamera().GetParallelScale(), 5)
+
+    def test_wheel_zoom_keeps_view_direction(self):
+        style, renderer, interactor = self._create_style()
+        camera = renderer.GetActiveCamera()
+        direction_before = np.array(camera.GetDirectionOfProjection())
+        interactor.SetEventPosition(150, 75)
+        style._on_wheel(forward=True)
+        assert_array_almost_equal(camera.GetDirectionOfProjection(), direction_before)
+
+    def test_wheel_zoom_with_perspective_projection_uses_default_zoom(self):
+        style, renderer, interactor = self._create_style(parallel_projection=False)
+        camera = renderer.GetActiveCamera()
+        interactor.SetEventPosition(150, 75)
+        style._on_wheel(forward=True)
+        # The default zoom moves the camera towards the focal point, which stays where it was
+        assert_array_almost_equal(camera.GetFocalPoint(), [0, 0, 0])
+        self.assertLess(camera.GetDistance(), np.linalg.norm([3, 4, 10]))
 
 
 class TestInteractorStylesCleanup(unittest.TestCase):
