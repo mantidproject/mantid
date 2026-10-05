@@ -246,6 +246,26 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
         self.assertEqual(mock_presenter.call_args_list, [expected_presenter_call] * len(workspaces))
         mock_logger.warning.assert_not_called()
 
+    @mock.patch("workbench.plugins.workspacewidget." + INSTRUMENT_VIEW_PRESENTER_TYPE)
+    @mock.patch("workbench.plugins.workspacewidget." + INSTRUMENT_VIEW_MODEL_TYPE)
+    @mock.patch("workbench.plugins.workspacewidget." + INSTRUMENT_VIEW_WINDOW_TYPE)
+    def test_instrument_view_windows_are_kept_until_destroyed(self, mock_window, mock_model, mock_presenter):
+        """
+        Every open Instrument View window should be kept alive, and released only once Qt has deleted it
+        """
+        first_window, second_window = mock.MagicMock(), mock.MagicMock()
+        mock_window.side_effect = [first_window, second_window]
+        self.ws_widget._instrument_view_windows.clear()
+
+        self.ws_widget._do_show_instrument([self.ws_names[0], self.ws_names[0]], off_screen=True)
+
+        self.assertEqual(self.ws_widget._instrument_view_windows, [first_window, second_window])
+
+        on_first_destroyed = first_window.destroyed.connect.call_args.args[0]
+        on_first_destroyed()
+
+        self.assertEqual(self.ws_widget._instrument_view_windows, [second_window])
+
     @mock.patch("workbench.plugins.workspacewidget.InstrumentViewPresenter")
     def test_legacy_instrument_view_opens_with_single_workspace_name(self, mock_instrument_view_presenter):
         """

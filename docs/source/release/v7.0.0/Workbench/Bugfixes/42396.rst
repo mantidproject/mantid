@@ -1,0 +1,1 @@
+- Fixed a bug in Workbench where the most recently opened window, such as a plot or the new Instrument View, could stay in memory after it was closed.
