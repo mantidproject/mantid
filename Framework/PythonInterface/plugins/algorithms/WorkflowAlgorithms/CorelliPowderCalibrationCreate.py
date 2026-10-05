@@ -428,11 +428,12 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         # collect info on the source
         input_workspace = self.getPropertyValue("InputWorkspace")  # name of the input workspace
         component_info = mtd[input_workspace].componentInfo()
-        source_name = component_info.name(component_info.source())
+        source_index = component_info.source()
+        source_name, source_full_name = component_info.name(source_index), component_info.fullName(source_index)
 
         # Update the position of the source
         z_position = -abs(self.getProperty("SourceToSampleDistance").value)
-        MoveInstrumentComponent(input_workspace, source_name, X=0.0, Y=0.0, Z=z_position, RelativePosition=False)
+        MoveInstrumentComponent(input_workspace, source_full_name, X=0.0, Y=0.0, Z=z_position, RelativePosition=False)
 
         # Initialize the table of adjustments for the source
         table = CreateEmptyTableWorkspace(OutputWorkspace=table_name)

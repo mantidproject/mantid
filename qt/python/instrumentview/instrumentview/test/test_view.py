@@ -494,6 +494,144 @@ class TestFullInstrumentViewView(unittest.TestCase):
             self._view._on_show_sample_position_toggled(False)
         mock_set_colour.assert_called_once_with(_LIGHT_GREY)
 
+    def test_set_unit_combo_options_fills_both_combo_boxes(self):
+        self._view.set_unit_combo_options(["TOF", "dSpacing"])
+        for combo_box in (self._view._units_combo_box_sliders, self._view._units_combo_box_lineplot):
+            self.assertEqual(["TOF", "dSpacing"], [combo_box.itemText(i) for i in range(combo_box.count())])
+
+    def test_set_unit_combo_options_replaces_the_previous_entries(self):
+        self._view.set_unit_combo_options(["TOF", "dSpacing"])
+        self._view.set_unit_combo_options(["No units"])
+        for combo_box in (self._view._units_combo_box_sliders, self._view._units_combo_box_lineplot):
+            self.assertEqual(1, combo_box.count())
+            self.assertEqual("No units", combo_box.currentText())
+
+    def test_set_unit_combo_options_does_not_notify_the_presenter(self):
+        """Refilling a populated combo emits currentIndexChanged for the rows on their way out,
+        which the presenter would otherwise act on as though the user had chosen a unit."""
+        self._view.setup_connections_to_presenter()
+        self._view.set_unit_combo_options(["TOF", "dSpacing"])
+        self._view.set_unit_combo_options(["No units"])
+        self._view._presenter.on_sliders_unit_selected.assert_not_called()
+        self._view._presenter.on_lineplot_unit_selected.assert_not_called()
+
+    def test_set_unit_combo_options_selects_the_given_units(self):
+        self._view.set_unit_combo_options(["TOF", "dSpacing", "Wavelength"], sliders_unit="dSpacing", lineplot_unit="Wavelength")
+        self.assertEqual("dSpacing", self._view.current_selected_sliders_unit())
+        self.assertEqual("Wavelength", self._view.current_selected_lineplot_unit())
+
+    def test_set_unit_combo_options_selects_the_first_option_for_units_not_offered(self):
+        self._view.set_unit_combo_options(["TOF", "dSpacing"], sliders_unit="dSpacing", lineplot_unit="No units")
+        self.assertEqual("dSpacing", self._view.current_selected_sliders_unit())
+        self.assertEqual("TOF", self._view.current_selected_lineplot_unit())
+
+    def test_set_unit_combo_options_does_not_notify_the_presenter_of_the_selection(self):
+        """The presenter selects the units this way when the workspace is replaced, before its
+        renderers have been reloaded, so acting on the selection would draw onto the old ones."""
+        self._view.setup_connections_to_presenter()
+        self._view.set_unit_combo_options(["TOF", "dSpacing", "Wavelength"], sliders_unit="dSpacing", lineplot_unit="Wavelength")
+        self._view._presenter.on_sliders_unit_selected.assert_not_called()
+        self._view._presenter.on_lineplot_unit_selected.assert_not_called()
+
+    def test_set_unit_combo_boxes_enabled(self):
+        self._view.set_unit_combo_boxes_enabled(False)
+        self.assertFalse(self._view._units_combo_box_sliders.isEnabled())
+        self.assertFalse(self._view._units_combo_box_lineplot.isEnabled())
+        self._view.set_unit_combo_boxes_enabled(True)
+        self.assertTrue(self._view._units_combo_box_sliders.isEnabled())
+        self.assertTrue(self._view._units_combo_box_lineplot.isEnabled())
+
+    def _contour_range_controls(self) -> tuple:
+        view = self._view
+        return (view._contour_range_min_edit, view._contour_range_max_edit, view._contour_range_slider, view._contour_range_reset)
+
+    def test_contour_range_with_nothing_to_span_is_shown_disabled(self):
+        """Every detector of a CreateSampleWorkspace has the same counts, which used to hide the
+        group for good."""
+        with mock.patch.object(self._view._contour_range_group_box, "hide") as mock_hide:
+            self._view.set_contour_range_limits((39, 39))
+
+        mock_hide.assert_not_called()
+        for widget in self._contour_range_controls():
+            self.assertFalse(widget.isEnabled())
+        self.assertEqual("39", self._view._contour_range_min_edit.text())
+        self.assertEqual("39", self._view._contour_range_max_edit.text())
+
+    def test_contour_range_enabled_again_once_there_is_a_range(self):
+        self._view.set_contour_range_limits((39, 39))
+        self._view.set_contour_range_limits((0, 100))
+
+        for widget in self._contour_range_controls():
+            self.assertTrue(widget.isEnabled())
+        self.assertEqual((0, 100), self._view._contour_range_slider.value())
+
+    def test_integration_range_with_nothing_to_span_leaves_the_unit_selector_enabled(self):
+        with mock.patch.object(self._view._integration_limit_group_box, "hide") as mock_hide:
+            self._view.set_integration_range_limits((5, 5))
+
+        mock_hide.assert_not_called()
+        for widget in (
+            self._view._integration_limit_min_edit,
+            self._view._integration_limit_max_edit,
+            self._view._integration_limit_slider,
+            self._view._integration_limit_reset,
+        ):
+            self.assertFalse(widget.isEnabled())
+        self.assertTrue(self._view._units_combo_box_sliders.isEnabled())
+
+    def test_set_peaks_workspaces_disabled(self):
+        self._view.set_peaks_workspaces_enabled(False)
+
+        self.assertFalse(self._view._peaks_group_box.isEnabled())
+        self.assertNotEqual("", self._view._peaks_group_box.toolTip())
+
+    def test_set_peaks_workspaces_enabled_clears_the_tooltip(self):
+        self._view.set_peaks_workspaces_enabled(False)
+        self._view.set_peaks_workspaces_enabled(True)
+
+        self.assertTrue(self._view._peaks_group_box.isEnabled())
+        self.assertEqual("", self._view._peaks_group_box.toolTip())
+
+    def test_set_start_adding_peaks_disabled_leaves_the_mode_first(self):
+        self._view.setup_connections_to_presenter()
+        self._view._start_adding_peaks_button.setChecked(True)
+        self._view._presenter.on_start_adding_peaks_toggled.reset_mock()
+
+        self._view.set_start_adding_peaks_enabled(False)
+
+        self.assertFalse(self._view._start_adding_peaks_button.isChecked())
+        self.assertFalse(self._view._start_adding_peaks_button.isEnabled())
+        self.assertNotEqual("", self._view._start_adding_peaks_button.toolTip())
+        self._view._presenter.on_start_adding_peaks_toggled.assert_called_once_with(False)
+
+    def test_set_start_adding_peaks_enabled_clears_the_tooltip(self):
+        self._view.set_start_adding_peaks_enabled(False)
+        self._view.set_start_adding_peaks_enabled(True)
+
+        self.assertTrue(self._view._start_adding_peaks_button.isEnabled())
+        self.assertEqual("", self._view._start_adding_peaks_button.toolTip())
+
+    def _show_plot_with_sum_selected(self, number_of_histograms: int) -> MagicMock:
+        self._view._detector_spectrum_axes = MagicMock()
+        workspace = MagicMock()
+        workspace.getNumberHistograms.return_value = number_of_histograms
+        workspace.getSpectrumNumbers.return_value = list(range(1, number_of_histograms + 1))
+        with mock.patch.object(self._view, "sum_spectra_selected", return_value=True), mock.patch.object(self._view, "redraw_lineplot"):
+            self._view.show_plot_for_detectors(workspace, (0, 1))
+        return self._view._detector_spectrum_axes
+
+    def test_show_plot_for_detectors_summed_has_no_legend(self):
+        axes = self._show_plot_with_sum_selected(1)
+        axes.legend.assert_not_called()
+        self.assertIsNone(axes.plot.call_args.kwargs["label"])
+
+    def test_show_plot_for_detectors_labels_spectra_that_could_not_be_summed(self):
+        """Summing falls back to the unsummed spectra when they cannot share a binning, and they
+        need telling apart even though Sum is ticked."""
+        axes = self._show_plot_with_sum_selected(2)
+        axes.legend.assert_called_once()
+        self.assertEqual(["Spectrum 1", "Spectrum 2"], [c.kwargs["label"] for c in axes.plot.call_args_list])
+
 
 if __name__ == "__main__":
     unittest.main()

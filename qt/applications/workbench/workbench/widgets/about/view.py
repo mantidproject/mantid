@@ -4,10 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#  This file is part of the mantid workbench
+
 from qtpy.QtWidgets import QCommandLinkButton
 from qtpy.QtCore import Qt, QSize
-from qtpy.QtGui import QPixmap, QIcon, QGuiApplication, QPainter
+from qtpy.QtGui import QFont, QFontInfo, QPixmap, QIcon, QGuiApplication, QPainter
 from qtpy.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
@@ -29,6 +29,7 @@ REFERENCE_HEIGHT = 642
 REFERENCE_WIDTH = 745
 REFERENCE_ASPECT_RATIO = REFERENCE_WIDTH / REFERENCE_HEIGHT
 WIDESCREEN_ASPECT_RATIO = 16 / 9
+REFERENCE_FONT_PIXEL_SIZE = 100
 
 
 class AboutView(QDialog):
@@ -166,24 +167,31 @@ class AboutViewWidget(QWidget):
     def rescale_h(self, value):
         return int(value * (self.height() / REFERENCE_HEIGHT))
 
+    def rescale_pixels_to_points(self, px_value, is_width: bool = True):
+        rescaled = self.rescale_w(px_value) if is_width else self.rescale_h(px_value)
+        return rescaled * self.points_per_pixel
+
     def setupUI(self):
         width, height = self.determine_dialog_dimensions()
 
         self.setFixedSize(width, height)
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        reference_font = QFont(self.font())
+        reference_font.setPixelSize(REFERENCE_FONT_PIXEL_SIZE)
+        self.points_per_pixel = QFontInfo(reference_font).pointSizeF() / REFERENCE_FONT_PIXEL_SIZE
         self.setWindowTitle("About Mantid Workbench")
         self.setStyleSheet(
             f"""QDialog {{
     background-color: rgb(190, 230, 190);
 }}
 QLabel{{
-    font: {self.rescale_w(14)}px;
+    font: {self.rescale_pixels_to_points(14)}pt;
 }}
 QPushButton{{
-    font: {self.rescale_w(14)}px;
+    font: {self.rescale_pixels_to_points(14)}pt;
 }}
 QCommandLinkButton{{
-    font: {self.rescale_w(22)}px;
+    font: {self.rescale_pixels_to_points(22)}pt;
     background-color: rgba(255, 255, 255, 0);
     border-radius: {self.rescale_w(15)}px;
 }}
@@ -199,9 +207,8 @@ QCommandLinkButton:hover {{
         self.lbl_version.setIndent(self.rescale_w(115))
         self.lbl_version.setStyleSheet(
             f"""color: rgb(215, 215, 215);
-font: {self.rescale_w(28)}pt;
 font-weight: bold;
-font-size: {self.rescale_w(28)}px"""
+font-size: {self.rescale_pixels_to_points(28)}pt"""
         )
         parent_layout.addWidget(self.lbl_version)
         parent_layout.addSpacerItem(QSpacerItem(self.rescale_w(20), self.rescale_h(40), vPolicy=QSizePolicy.MinimumExpanding))
@@ -214,7 +221,7 @@ font-size: {self.rescale_w(28)}px"""
         left_layout.setSpacing(0)
         # welcome label
         lbl_welcome = QLabel()
-        lbl_welcome.setStyleSheet(f"color: rgb(45, 105, 45); font-size: {self.rescale_w(28)}px;")
+        lbl_welcome.setStyleSheet(f"color: rgb(45, 105, 45); font-size: {self.rescale_pixels_to_points(28)}pt;")
         lbl_welcome.setText("Welcome")
         left_layout.addWidget(lbl_welcome)
         # release notes
@@ -227,7 +234,7 @@ font-size: {self.rescale_w(28)}px"""
         left_layout.addWidget(self.clb_sample_datasets)
         # Tutorials Label
         lbl_tutorials = QLabel()
-        lbl_tutorials.setStyleSheet(f"color: rgb(45, 105, 45) ; font-size: {self.rescale_w(28)}px;")
+        lbl_tutorials.setStyleSheet(f"color: rgb(45, 105, 45) ; font-size: {self.rescale_pixels_to_points(28)}pt;")
         lbl_tutorials.setText("Tutorials")
         left_layout.addWidget(lbl_tutorials)
         # Mantid Introduction
@@ -259,25 +266,25 @@ font-size: {self.rescale_w(28)}px"""
      background-color: rgb(240, 240, 240);
 }}
 QGroupBox QLabel{{
-    font: {self.rescale_w(12)}px;
+    font: {self.rescale_pixels_to_points(12)}pt;
     color: rgb(121, 121, 121);
 }}
 QGroupBox QComboBox{{
-    font: {self.rescale_w(12)}px;
+    font: {self.rescale_pixels_to_points(12)}pt;
     color: black;
 }}
 QGroupBox QComboBox QAbstractItemView{{
      background-color: rgb(240, 240, 240);
 }}
 QGroupBox QPushButton{{
-    font: {self.rescale_w(12)}px;
+    font: {self.rescale_pixels_to_points(12)}pt;
     color: black;
 }}
 QGroupBox QComboBox::down-arrow{{
      image: url(images/DropDownArrow.png)
      color: black;
 }}
-font: {self.rescale_w(12)}px;
+font: {self.rescale_pixels_to_points(12)}pt;
 """
         )
         grp_personal_setup_layout = QVBoxLayout()
@@ -285,7 +292,7 @@ font: {self.rescale_w(12)}px;
         grp_personal_setup_layout.setSpacing(0)
         grp_personal_setup.setLayout(grp_personal_setup_layout)
         lbl_personal_setup = QLabel()
-        lbl_personal_setup.setStyleSheet(f"color: rgb(38, 128, 20);\nfont-size: {self.rescale_w(18)}px;")
+        lbl_personal_setup.setStyleSheet(f"color: rgb(38, 128, 20);\nfont-size: {self.rescale_pixels_to_points(18)}pt;")
         lbl_personal_setup.setText("Personal Setup")
         lbl_personal_setup.setAlignment(Qt.AlignHCenter)
         grp_personal_setup_layout.addWidget(lbl_personal_setup)
@@ -309,8 +316,10 @@ font: {self.rescale_w(12)}px;
         # Usage data
         lbl_allow_usage_data = QLabel()
         lbl_allow_usage_data.setText(
-            f"<span style='text-align: right; font-size:{self.rescale_h(12)}px;'>Report Usage Data</span><br/>"
-            f"<span style='text-align: right; font-size:{self.rescale_h(8)}px;'>Required to use the Error Reporter</span>"
+            f"<span style='text-align: right; font-size:{self.rescale_pixels_to_points(12, is_width=False)}pt;'>"
+            "Report Usage Data</span><br/>"
+            f"<span style='text-align: right; font-size:{self.rescale_pixels_to_points(8, is_width=False)}pt;'>"
+            "Required to use the Error Reporter</span>"
         )
         usagelayout = QHBoxLayout()
         usagelayout.setContentsMargins(0, 0, 0, 0)

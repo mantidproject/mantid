@@ -10,8 +10,8 @@ from copy import deepcopy
 from mantid.api import AnalysisDataService, WorkspaceGroup, IEventWorkspace
 from mantid.dataobjects import Workspace2D
 from mantid.kernel import Logger
-from sans.algorithm_detail.move_workspaces import move_component
 from plugins.algorithms.component_info_utils import resolve_component_index
+from sans.algorithm_detail.move_workspaces import move_component
 from sans.common.general_functions import (
     create_managed_non_child_algorithm,
     create_unmanaged_algorithm,
@@ -1590,8 +1590,6 @@ def _apply_polarization_component_adjustments(polarization_state, ws):
         idf_name = component_state.idf_component_name
         component_info = ws.componentInfo()
         try:
-            # idf_name comes from the user file, so it may be a hierarchical path such as
-            # "instrument/bank/component"; indexOfAny does not parse those.
             component_index = resolve_component_index(idf_name, component_info)
         except ValueError:
             raise AttributeError(

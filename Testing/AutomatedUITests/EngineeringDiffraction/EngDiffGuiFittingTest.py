@@ -271,20 +271,20 @@ class EngDiffGuiFittingDataTest(_FittingTestBase):
             import numpy as np
 
             raw_name = bgsub_name[: -len("_bgsub")]
-            raw = ADS.retrieve(raw_name).readY(0)
-            subtracted = ADS.retrieve(bgsub_name).readY(0)
+            raw = ADS.retrieve(raw_name).y(0)
+            subtracted = ADS.retrieve(bgsub_name).y(0)
             self.assertTrue(np.all(subtracted <= raw + 1e-9), "the background subtraction increased the counts")
             self.assertLess(subtracted.sum(), raw.sum(), "the background subtraction removed nothing")
 
         with self.subTest("Fitting / changing the number of iterations changes the subtracted data"):
             import numpy as np
 
-            before = ADS.retrieve(bgsub_name).readY(0).copy()
+            before = ADS.retrieve(bgsub_name).y(0).copy()
             row = self.table_run_column().index(CERIA)
             self.data_view.set_table_column(row, COL_NITER, 200)
             process_events(3)
             wait_until(
-                lambda: not np.allclose(before, ADS.retrieve(bgsub_name).readY(0)),
+                lambda: not np.allclose(before, ADS.retrieve(bgsub_name).y(0)),
                 timeout=60.0,
                 msg="the background estimate to be recalculated",
             )
@@ -292,12 +292,12 @@ class EngDiffGuiFittingDataTest(_FittingTestBase):
         with self.subTest("Fitting / turning the Savitzky-Golay filter off also changes it"):
             import numpy as np
 
-            before = ADS.retrieve(bgsub_name).readY(0).copy()
+            before = ADS.retrieve(bgsub_name).y(0).copy()
             row = self.table_run_column().index(CERIA)
             self.data_view.set_item_checkstate(row, COL_SG, False)
             process_events(3)
             wait_until(
-                lambda: not np.allclose(before, ADS.retrieve(bgsub_name).readY(0)),
+                lambda: not np.allclose(before, ADS.retrieve(bgsub_name).y(0)),
                 timeout=60.0,
                 msg="the background estimate to be recalculated without the filter",
             )

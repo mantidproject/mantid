@@ -221,7 +221,7 @@ class EngDiffGuiCalibrateAndFocusTest(_RunProcessingTestBase):
             self.assertTrue(ADS.doesExist(mask_name), f"{mask_name} was not produced")
             mask = ADS.retrieve(mask_name)
             total = mask.getNumberHistograms()
-            masked = sum(1 for index in range(total) if mask.readY(index)[0] != 0)
+            masked = sum(1 for index in range(total) if mask.y(index)[0] != 0)
             # the mask spans the whole instrument while the fabricated run populates a subset of the
             # detectors, so most entries are legitimately masked; what matters is that the focused
             # banks were fitted at all

@@ -9,6 +9,7 @@ from instrumentview.Globals import CurrentTab
 from instrumentview.Projections.Projection import Projection
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.ComponentSelectionUtils import detector_table_indices_for_parent_subtrees, get_beam_axis, reflect_points_in_axis
+from instrumentview.Peaks.Peak import Peak
 from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
 
 from mantid.dataobjects import Workspace2D, PeaksWorkspace, MaskWorkspace, GroupingWorkspace
@@ -31,7 +32,8 @@ from mantid.simpleapi import (
     SaveDetectorsGrouping,
     DeleteWorkspace,
 )
-from mantid.api import MatrixWorkspace
+from mantid.api import MatrixWorkspace, WorkspaceUnitValidator
+from mantid.kernel import logger
 from pathlib import Path
 import numpy as np
 from enum import Enum
@@ -47,6 +49,14 @@ class FullInstrumentViewModel:
     """Model for the Instrument View Window. Will calculate detector positions, indices, and integrated counts that give the colours"""
 
     MAX_DET_INFO_SHOWN = 3
+    # Every conversion ConvertUnits does goes via TOF, so probing against TOF tells us
+    # whether any of the units we offer will work. A workspace already in TOF needs a
+    # different target, because converting to the unit it already has is a no-op.
+    _PROBE_TARGET = "TOF"
+    _PROBE_FALLBACK = "Wavelength"
+    # How many times more bins than the spectrum with the most a summed line plot can have,
+    # see _rebin_params_for_summing
+    _MAX_SUMMED_BINS_FACTOR = 10
 
     _sample_position = np.array([0, 0, 0])
     _source_position = np.array([0, 0, 0])
@@ -116,6 +126,13 @@ class FullInstrumentViewModel:
         self._detector_is_picked = np.full(len(self._detector_ids), False)
         self._current_detector_groupings = np.zeros_like(self._detector_ids)
         self._point_picked_detectors = np.full(len(self._detector_ids), False)
+        # Sized for this workspace, as leaving peak picking restores it, and that can happen after
+        # the workspace is replaced
+        self._point_picked_detectors_cached = self._point_picked_detectors.copy()
+
+        # Worked out on demand, see can_convert_units
+        self._can_convert_units: Optional[bool] = None
+        self._units_failed_to_convert: set[str] = set()
 
         self._integration_workspace = self._workspace.clone(StoreInADS=False)
         self._calculate_and_set_full_integration_range(self._is_valid)
@@ -135,7 +152,41 @@ class FullInstrumentViewModel:
 
     @property
     def has_unit(self) -> bool:
-        return self._workspace_x_unit != "Empty"
+        """Whether the x axis has a unit that ConvertUnits would accept.
+
+        Not the same as ``unitID() != "Empty"``: Label, Degrees, Temperature and AtomicDistance
+        all derive from the Empty unit and are rejected too, despite their own unit IDs.
+        """
+        return not WorkspaceUnitValidator("").isValid(self._workspace)
+
+    @property
+    def can_convert_units(self) -> bool:
+        """Whether this workspace's units can usefully be converted, see _probe_unit_conversion.
+
+        Worked out on first use and cached until the next setup(), because probing costs a
+        conversion and the views that never offer a unit choice should not pay for it.
+        """
+        if self._can_convert_units is None:
+            self._can_convert_units = self._probe_unit_conversion()
+        return self._can_convert_units
+
+    @property
+    def can_show_peaks(self) -> bool:
+        """Whether peaks can be shown on this workspace.
+
+        A peak is only drawn, or found again to delete, where it has a location in the workspace
+        unit, so peaks overlaid on a workspace in any other unit, e.g. Energy, would not be seen.
+        """
+        return Peak.can_be_located_in(self.workspace_base_unit)
+
+    @property
+    def can_add_peaks(self) -> bool:
+        """Whether peaks can be added to this workspace and then seen, see can_show_peaks.
+
+        AddPeak converts the clicked position to time of flight, which needs units that can be
+        converted.
+        """
+        return self.can_convert_units and self.can_show_peaks
 
     @property
     def workspace_base_unit(self) -> str:
@@ -311,6 +362,12 @@ class FullInstrumentViewModel:
     def lineplot_limits(self) -> tuple | None:
         return self._lineplot_limits
 
+    @property
+    def units_failed_to_convert(self) -> set[str]:
+        """The units a conversion to has failed since setup(), and which are shown in the
+        workspace unit instead."""
+        return self._units_failed_to_convert
+
     def calculate_and_set_full_integration_range(self) -> None:
         self._calculate_and_set_full_integration_range(self.is_pickable)
         self.integration_limits = self.full_integration_limits
@@ -329,23 +386,83 @@ class FullInstrumentViewModel:
 
         if workspace.isRaggedWorkspace():
             first_last = np.array([workspace.x(int(i))[[0, -1]] for i in workspace_indices])
-            return (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
-
+            limits = (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
         elif workspace.isCommonBins():
-            return tuple(workspace.x(int(workspace_indices[0]))[[0, -1]])
-
+            limits = tuple(workspace.x(int(workspace_indices[0]))[[0, -1]])
         else:
             data_x = workspace.extractX()[workspace_indices]
-            return (np.min(data_x[:, 0]), np.max(data_x[:, -1]))
+            limits = (np.min(data_x[:, 0]), np.max(data_x[:, -1]))
+
+        if np.isfinite(limits).all():
+            return limits
+        return self._finite_limits_from_workspace(workspace, workspace_indices)
+
+    @staticmethod
+    def _finite_limits_from_workspace(workspace, workspace_indices) -> tuple:
+        """The x range of the given spectra, leaving out any edges that are not finite.
+
+        Converting units can turn an x value of zero into an infinite one, e.g. TOF into momentum
+        transfer, and neither the sliders nor the plot axes can take infinite limits.
+        """
+        min_x = np.inf
+        max_x = -np.inf
+        for ws_index in workspace_indices:
+            data_x = np.asarray(workspace.x(int(ws_index)))
+            data_x = data_x[np.isfinite(data_x)]
+            if data_x.size > 0:
+                min_x = min(min_x, data_x.min())
+                max_x = max(max_x, data_x.max())
+        if min_x > max_x:
+            return (0, 0)
+        return (min_x, max_x)
+
+    def _probe_unit_conversion(self) -> bool:
+        """Whether ConvertUnits can usefully convert this workspace."""
+        if not self.has_unit:
+            return False
+
+        valid_indices = self._workspace_indices[self._is_valid & ~self._is_masked_in_ws]
+        if len(valid_indices) == 0:
+            # Every detector is masked, so there is no spectrum whose conversion can be checked
+            return False
+
+        target = self._PROBE_TARGET if self._workspace_x_unit != self._PROBE_TARGET else self._PROBE_FALLBACK
+        try:
+            probe = ExtractSpectra(
+                InputWorkspace=self._workspace,
+                WorkspaceIndexList=[int(valid_indices[0])],
+                EnableLogging=False,
+                StoreInADS=False,
+            )
+            converted = ConvertUnits(InputWorkspace=probe, Target=target, EMode="Elastic", EnableLogging=False, StoreInADS=False)
+        except (RuntimeError, ValueError) as e:
+            logger.warning(f"Cannot convert the units of {self._workspace.name()}, unit selection disabled: {e}")
+            return False
+
+        # ConvertUnits masks the spectra it could not convert rather than failing, so a spectrum
+        # it masked means the conversion succeeded but produced nothing worth showing.
+        return not converted.spectrumInfo().isMasked(0)
+
+    def _convert_units(self, workspace, unit) -> Optional[MatrixWorkspace]:
+        """Convert workspace to unit, or None if that turns out not to be possible.
+
+        _probe_unit_conversion should have ruled that out already. This is here so a failure
+        can never escape into a Qt slot, where it would take the window down with it.
+        """
+        try:
+            return ConvertUnits(InputWorkspace=workspace, Target=unit, EMode="Elastic", EnableLogging=False, StoreInADS=False)
+        except (RuntimeError, ValueError) as e:
+            logger.warning(f"Could not convert {self._workspace.name()} to {unit}, showing {self.workspace_base_unit} instead: {e}")
+            self._units_failed_to_convert.add(unit)
+            return None
 
     def set_integration_units(self, unit):
-        if self.has_unit and unit != self.workspace_base_unit:
-            self._integration_workspace = ConvertUnits(
-                InputWorkspace=self._workspace, target=unit, EMode="Elastic", EnableLogging=False, StoreInADS=False
-            )
-            self.calculate_and_set_full_integration_range()
-        else:
-            self._integration_workspace = self._workspace.clone(EnableLogging=False, StoreInADS=False)
+        converted = None
+        if self.can_convert_units and unit != self.workspace_base_unit:
+            converted = self._convert_units(self._workspace, unit)
+        if converted is None:
+            converted = self._workspace.clone(EnableLogging=False, StoreInADS=False)
+        self._integration_workspace = converted
 
     def get_integration_units(self):
         return self._integration_workspace.getAxis(0).getUnit().unitID()
@@ -591,6 +708,70 @@ class FullInstrumentViewModel:
             projection.set_u_offset(self.u_offset)
         return projection
 
+    @staticmethod
+    def _rebin_params_for_summing(workspace) -> Optional[list[float]]:
+        """Rebin parameters covering every spectrum at its finest binning, or None if there are none.
+
+        We have to loop over the spectra because otherwise ragged workspaces will have their bin
+        edge vector truncated.
+
+        Converting units can leave bin edges Rebin will not accept. An x axis that starts at zero
+        maps to an infinite edge in momentum transfer or wavelength, and a detector in the path of
+        the beam has no scattering angle, so in momentum transfer its every edge is zero. Infinite
+        edges can simply be left out of the range, but a spectrum with no width left at all is one
+        Rebin cannot bin whatever parameters it is given, so give up on the whole set instead.
+
+        The finite edges either side of an infinite one can still be huge, so the finest width
+        across that range could make for more bins than there is memory to hold. The width is
+        widened to keep the count within _MAX_SUMMED_BINS_FACTOR times the most any spectrum had.
+        """
+        min_bin_edge = np.inf
+        max_bin_edge = -np.inf
+        min_bin_width = np.inf
+        max_bin_count = 0
+        for ws_index in range(workspace.getNumberHistograms()):
+            bin_edges = np.asarray(workspace.x(ws_index))
+            bin_edges = bin_edges[np.isfinite(bin_edges)]
+            bin_widths = np.diff(bin_edges)
+            bin_widths = bin_widths[bin_widths > 0]
+            if bin_widths.size == 0:
+                return None
+            min_bin_edge = min(min_bin_edge, bin_edges.min())
+            max_bin_edge = max(max_bin_edge, bin_edges.max())
+            min_bin_width = min(min_bin_width, bin_widths.min())
+            max_bin_count = max(max_bin_count, bin_widths.size)
+
+        if not np.isfinite([min_bin_edge, max_bin_edge, min_bin_width]).all() or min_bin_edge >= max_bin_edge:
+            return None
+
+        max_summed_bins = FullInstrumentViewModel._MAX_SUMMED_BINS_FACTOR * max_bin_count
+        min_bin_width = max(min_bin_width, (max_bin_edge - min_bin_edge) / max_summed_bins)
+
+        return [float(min_bin_edge), float(min_bin_width), float(max_bin_edge)]
+
+    def _sum_spectra_for_line_plot(self, workspace, unit: str):
+        """Sum the extracted spectra onto one curve, or return them unsummed if that is not possible.
+
+        Showing the spectra unsummed keeps a line plot on screen. There is nothing to be gained
+        from failing outright when they cannot be put on a common binning.
+        """
+        try:
+            if not workspace.isCommonBins():
+                # Rebin the selected spectra onto the widest range at the finest binning, so that
+                # they can be summed
+                rebin_params = self._rebin_params_for_summing(workspace)
+                if rebin_params is None:
+                    logger.warning(
+                        f"Cannot put the selected spectra of {self._workspace.name()} on a common binning "
+                        f"in {unit}, so they are plotted unsummed."
+                    )
+                    return workspace
+                workspace = Rebin(InputWorkspace=workspace, Params=rebin_params, EnableLogging=False, StoreInADS=False)
+            return SumSpectra(InputWorkspace=workspace, EnableLogging=False, StoreInADS=False)
+        except (RuntimeError, ValueError) as e:
+            logger.warning(f"Could not sum the selected spectra in {unit}, so they are plotted unsummed: {e}")
+            return workspace
+
     def extract_spectra_for_line_plot(self, unit: str, sum_spectra: bool, picked_indices: Optional[np.ndarray] = None) -> None:
         self._current_linplot_unit = unit
 
@@ -612,37 +793,14 @@ class FullInstrumentViewModel:
         self._lineplot_ws_in_base_units_not_summed = ExtractSpectra(
             InputWorkspace=self._workspace, DetectorList=det_ids, EnableLogging=False, StoreInADS=False
         )
-        if self.has_unit and unit != self.workspace_base_unit:
-            self._lineplot_ws_in_selected_units_not_summed = ConvertUnits(
-                InputWorkspace=self._lineplot_ws_in_base_units_not_summed,
-                target=unit,
-                EMode="Elastic",
-                EnableLogging=False,
-                StoreInADS=False,
-            )
-        else:
-            self._lineplot_ws_in_selected_units_not_summed = self._lineplot_ws_in_base_units_not_summed
+        converted = None
+        if self.can_convert_units and unit != self.workspace_base_unit:
+            converted = self._convert_units(self._lineplot_ws_in_base_units_not_summed, unit)
+        self._lineplot_ws_in_selected_units_not_summed = converted if converted is not None else self._lineplot_ws_in_base_units_not_summed
 
         tmp_ws = self._lineplot_ws_in_selected_units_not_summed
         if sum_spectra and len(det_ids) > 1:
-            # Find the spectrum with the widest range, and the one with the smallest bin width and use that
-            # combo to rebin the selected spectra. We have to loop over the spectra because otherwise ragged
-            # workspaces will have their bin edge vector truncated
-            if not tmp_ws.isCommonBins():
-                min_bin_edge = np.inf
-                max_bin_edge = 0
-                min_bin_width = np.inf
-                for ws_index_i in range(tmp_ws.getNumberHistograms()):
-                    bin_edges = tmp_ws.x(ws_index_i)
-                    min_bin_edge = min(min_bin_edge, bin_edges[0])
-                    max_bin_edge = max(max_bin_edge, bin_edges[-1])
-                    min_bin_width = min(min_bin_width, np.min(np.diff(bin_edges)))
-
-                tmp_ws = Rebin(
-                    InputWorkspace=tmp_ws, Params=[min_bin_edge, min_bin_width, max_bin_edge], EnableLogging=False, StoreInADS=False
-                )
-
-            tmp_ws = SumSpectra(InputWorkspace=tmp_ws, EnableLogging=False, StoreInADS=False)
+            tmp_ws = self._sum_spectra_for_line_plot(tmp_ws, unit)
 
         self.line_plot_workspace = tmp_ws
         self._lineplot_limits = self._extract_limits_from_workspace(self.line_plot_workspace)
@@ -675,6 +833,16 @@ class FullInstrumentViewModel:
         closest_peak_index = np.argmin(np.linalg.norm(positions_detectors_with_peaks - clicked_position, axis=1))
         return self._peaks_indices_in_detector_positions[closest_peak_index]
 
+    @staticmethod
+    def _located_peaks(peaks: list[Peak], unit: str) -> list[tuple[Peak, float]]:
+        """Pair each peak with its location in unit, leaving out the peaks that have none."""
+        located_peaks = []
+        for peak in peaks:
+            location = peak.location_in_unit(unit)
+            if location is not None:
+                located_peaks.append((peak, location))
+        return located_peaks
+
     def get_peak_lineplot_overlay_arguments(
         self, selected_peaks_workspaces: list[str]
     ) -> tuple[list[list[float]], list[list[str]], list[str]]:
@@ -689,7 +857,10 @@ class FullInstrumentViewModel:
         # when the plot is previewing an overlaid shape or a hovered detector, and the x-position
         # lookup below can only resolve detectors present in the extracted line plot workspace.
         peaks_by_pws = [wws.get_x_values_and_labels(self.line_plot_det_ids) for wws in wrapped_workspaces]
-        labels_by_pws = [[p.label for p in peaks] for peaks in peaks_by_pws]
+        # A peak can only be drawn where its position in the workspace unit is known, so drop
+        # the ones where it isn't, taking their labels with them to keep the two lists aligned.
+        located_peaks_by_pws = [self._located_peaks(peaks, self._workspace_x_unit) for peaks in peaks_by_pws]
+        labels_by_pws = [[p.label for p, _ in peaks] for peaks in located_peaks_by_pws]
         # Convert peak units to currently plotted units
         # NOTE: Need to get x coords in workspace unit for better acuracy
         # Cannot trust units in peak workspaces
@@ -698,12 +869,12 @@ class FullInstrumentViewModel:
                 self._match_workspace_unit(
                     self._lineplot_ws_in_base_units_not_summed,
                     self._lineplot_ws_in_base_units_not_summed.getIndicesFromDetectorIDs([p.detector_id])[0],
-                    p.location_in_unit(self._workspace_x_unit),
+                    location,
                     self._lineplot_ws_in_selected_units_not_summed,
                 )
-                for p in peaks
+                for p, location in peaks
             ]
-            for peaks in peaks_by_pws
+            for peaks in located_peaks_by_pws
         ]
         return converted_x, labels_by_pws, selected_peaks_workspaces
 
@@ -763,11 +934,15 @@ class FullInstrumentViewModel:
             if len(picked_detector_peaks) == 0:
                 continue
             peaks = sum([p.peaks for p in picked_detector_peaks], [])
-            # Now we have all the peaks on the selected detector, so we need to find the
-            # closest peak to where the mouse was clicked
-            distance_to_click = np.abs([p.location_in_unit(self.workspace_base_unit) - x_in_workspace_unit for p in peaks])
+            # Now we have all the peaks on the selected detector, so we need to find the closest
+            # peak to where the mouse was clicked. A peak with no position in the workspace unit
+            # has no distance to compare, so it cannot be the one that was clicked on.
+            located_peaks = self._located_peaks(peaks, self.workspace_base_unit)
+            if len(located_peaks) == 0:
+                continue
+            distance_to_click = np.abs([location - x_in_workspace_unit for _, location in located_peaks])
             index_of_closest = np.argmin(distance_to_click)
-            closest_peak = peaks[index_of_closest]
+            closest_peak = located_peaks[index_of_closest][0]
             closest_peak_by_ws.append((ws_name, closest_peak.peak_index, distance_to_click[index_of_closest]))
 
         if len(closest_peak_by_ws) == 0:
@@ -924,7 +1099,7 @@ class FullInstrumentViewModel:
         return [
             pws
             for pws in workspaces_in_ads
-            if str_types[ws_type] in str(type(pws)) and pws.getInstrument().getFullName() == self._workspace.getInstrument().getFullName()
+            if str_types[ws_type] in str(type(pws)) and pws.getInstrumentName() == self._workspace.getInstrumentName()
         ]
 
     def get_grouping_keys_from_workspaces_in_ads(self):
@@ -969,7 +1144,7 @@ class FullInstrumentViewModel:
 
         CreateGroupingWorkspace(
             InstrumentFilename=self._workspace.instrumentFilename(),
-            ComponentName=self._workspace.getInstrument().getFullName(),
+            ComponentName=self._workspace.getInstrumentName(),
             CustomGroupingString=",".join(individual_groups_strings),
             OutputWorkspace=grouping_name,
         )

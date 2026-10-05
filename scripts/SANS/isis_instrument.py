@@ -1064,7 +1064,11 @@ class LOQ(ISISInstrument):
         Loads information about the setup used for LOQ transmission runs
         """
         ws = mtd[ws_trans]
-        has_m4 = ws.componentInfo().uniqueName(self._m4_monitor_name)
+        try:
+            ws.componentInfo().indexOfAny(self._m4_monitor_name)
+            has_m4 = True
+        except ValueError:
+            has_m4 = False
         if not has_m4:
             trans_definition_file = os.path.join(config.getString("instrumentDefinition.directory"), self._NAME + "_trans_Definition.xml")
         else:
@@ -1779,8 +1783,8 @@ class LARMOR(ISISInstrument):
         ws = mtd[ws_name]
         # define the vector along the beam axis
         a1 = V3D(0, 0, 1)
-        # position of the detector itself
         component_info = ws.componentInfo()
+        # position of the detector itself
         pos = component_info.position(component_info.indexOfAny("LARMORSANSDetector"))
         # position of the bench
         pos2 = component_info.position(component_info.indexOfAny(self.cur_detector().name()))

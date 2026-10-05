@@ -193,8 +193,7 @@ def _fitEPP(ws, wsType, wsNames, algorithmLogging):
 def _monitorCounts(ws):
     """Return the total monitor counts from the sample logs"""
     logs = ws.run()
-    instrument = ws.getInstrument()
-    if instrument.getName() == "IN6":
+    if ws.getInstrumentName() == "IN6":
         return logs.getProperty("monitor1.monsum").value
     else:
         return logs.getProperty("monitor.monsum").value
@@ -269,9 +268,10 @@ def _sumDetectorsAtDistance(ws, distance, tolerance):
     histogramCount = ws.getNumberHistograms()
     ySums = np.zeros(ws.blocksize())
     detectorInfo = ws.detectorInfo()
-    spectrumInfo = ws.spectrumInfo()
+    samplePos = ws.componentInfo().samplePosition()
     for i in range(histogramCount):
-        sampleToDetector = spectrumInfo.l2(i)
+        det = ws.getDetector(i)
+        sampleToDetector = det.getPos().distance(samplePos)
         if abs(distance - sampleToDetector) < tolerance:
             if detectorInfo.isMonitor(i) or detectorInfo.isMasked(i):
                 continue

@@ -824,7 +824,11 @@ class LOQTransmissionCorrection(TransmissionCorrection):
         for workspace in workspace_which_require_transmission_correction:
             assert len(workspace) == 1
             workspace = workspace[0]
-            has_m4 = workspace.componentInfo().uniqueName("monitor4")
+            try:
+                workspace.componentInfo().indexOfAny("monitor4")
+                has_m4 = True
+            except ValueError:
+                has_m4 = False
             if not has_m4:
                 trans_definition_file = os.path.join(config.getString("instrumentDefinition.directory"), "LOQ_trans_Definition.xml")
             else:

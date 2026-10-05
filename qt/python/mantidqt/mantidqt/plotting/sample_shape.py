@@ -418,8 +418,8 @@ def greater_limits(new_limits, old_limits):
     return [min_x, min_y, min_z, max_x, max_y, max_z]
 
 
-def calculate_beam_direction(component_info):
-    beam_vector = component_info.samplePosition() - component_info.sourcePosition()
+def calculate_beam_direction(source_position, sample_position):
+    beam_vector = sample_position - source_position
     return beam_vector
 
 
@@ -428,7 +428,7 @@ def add_beam_arrow(plot_axes, workspace):
     component_info = workspace.componentInfo()
     if component_info.hasSource() and component_info.hasSample():
         beam_origin = plot_axes.get_xlim3d()[0], plot_axes.get_ylim3d()[0], plot_axes.get_zlim3d()[0]
-        beam_direction = calculate_beam_direction(component_info)
+        beam_direction = calculate_beam_direction(component_info.sourcePosition(), component_info.samplePosition())
         add_arrow(plot_axes, beam_direction, origin=beam_origin)
 
 

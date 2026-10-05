@@ -93,10 +93,9 @@ class WishCalibration(systemtesting.MantidSystemTest):
         fitPar = TubeCalibFitParams([59, 161, 258, 353, 448])
         fitPar.setAutomatic(True)
 
-        instrument = ws.getInstrument()
         spec = TubeSpec(ws)
 
-        spec.setTubeSpecByString(instrument.getFullName())
+        spec.setTubeSpecByString(ws.getInstrumentName())
 
         idealTube = IdealTube()
         idealTube.setArray(peak_positions)
