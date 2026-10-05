@@ -13,9 +13,10 @@ import numpy as np
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.layout_engine import ConstrainedLayoutEngine
 from qtpy.QtCore import Qt
+from qtpy.QtGui import QCloseEvent
 from mantidqt.utils.qt.testing import start_qapplication
 from mantid.simpleapi import CreateSampleWorkspace
-from instrumentview.FullInstrumentViewWindow import FullInstrumentViewView, _LIGHT_GREY
+from instrumentview.FullInstrumentViewWindow import FullInstrumentViewView, FullInstrumentViewWindow, _LIGHT_GREY
 from instrumentview.ShapeWidgets import (
     AnnulusSelectionShape,
     CircleSelectionShape,
@@ -494,6 +495,28 @@ class TestFullInstrumentViewView(unittest.TestCase):
             self._view._on_show_sample_position_toggled(False)
         mock_set_colour.assert_called_once_with(_LIGHT_GREY)
 
+    def test_close_closes_presenter_then_plotter(self):
+        self._view.closeEvent(QCloseEvent())
+        self._view._presenter.handle_close.assert_called_once()
+        self._view.main_plotter.close.assert_called_once()
+
+    def test_close_removes_overlaid_shape_without_calling_presenter(self):
+        overlay_manager = MagicMock()
+        self._view._shape_overlay_manager = overlay_manager
+
+        self._view.closeEvent(QCloseEvent())
+
+        overlay_manager.remove_shape.assert_called_once()
+        self.assertIsNone(self._view._shape_overlay_manager)
+        self._view._presenter.on_overlaid_shape_removed.assert_not_called()
+
+    def test_close_clears_line_plot(self):
+        self._view._detector_spectrum_axes.plot([0, 1], [0, 1])
+
+        self._view.closeEvent(QCloseEvent())
+
+        self.assertEqual(self._view._detector_spectrum_fig.axes, [])
+
     def test_set_unit_combo_options_fills_both_combo_boxes(self):
         self._view.set_unit_combo_options(["TOF", "dSpacing"])
         for combo_box in (self._view._units_combo_box_sliders, self._view._units_combo_box_lineplot):
@@ -631,6 +654,15 @@ class TestFullInstrumentViewView(unittest.TestCase):
         axes = self._show_plot_with_sum_selected(2)
         axes.legend.assert_called_once()
         self.assertEqual(["Spectrum 1", "Spectrum 2"], [c.kwargs["label"] for c in axes.plot.call_args_list])
+
+
+@start_qapplication
+class TestFullInstrumentViewWindow(unittest.TestCase):
+    @mock.patch("qtpy.QtWidgets.QMainWindow.setCentralWidget")
+    @mock.patch("instrumentview.FullInstrumentViewWindow.FullInstrumentViewView")
+    def test_window_is_deleted_when_closed(self, _mock_view, _mock_set_central_widget):
+        window = FullInstrumentViewWindow()
+        self.assertTrue(window.testAttribute(Qt.WA_DeleteOnClose))
 
 
 if __name__ == "__main__":
