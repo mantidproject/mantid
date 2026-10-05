@@ -140,13 +140,13 @@ class ErrorReporterPresenter(object):
 
     @staticmethod
     def _get_exit_code_description(exit_code):
-        try:
-            parsed_exit_code = int(exit_code)
-            if parsed_exit_code < 0:
-                signal_name = signal.Signals(-parsed_exit_code).name
-                return f"{exit_code} ({signal_name})"
-        except (TypeError, ValueError):
-            pass
+        parsed_exit_code = int(exit_code)
+        if parsed_exit_code < 0:
+            try:
+                interpreted_signal = signal.Signals(abs(parsed_exit_code))
+            except ValueError:
+                return exit_code
+            return f"{exit_code} ({interpreted_signal.name})"
         return exit_code
 
     def _cut_down_stacktrace(self):
