@@ -173,6 +173,25 @@ class ErrorReportPresenterTest(unittest.TestCase):
             "Error contacting server", ErrorReporterPresenter.SENDING_ERROR_MESSAGE, "http request returned with status 500"
         )
 
+    def test_signal_is_included_in_exit_code_when_sending_report(self):
+        presenter = ErrorReporterPresenter(self.view, "-15", application=self.app_name, workbench_pid=None, traceback="placeholder")
+        self.errorreport_mock.reset_mock()
+        self.errorreport_mock_instance.sendErrorReport.return_value = 201
+
+        presenter._send_report_to_server()
+
+        self.errorreport_mock.assert_called_once_with(
+            self.app_name,
+            "",
+            "-15 (SIGTERM)",
+            False,
+            "",
+            "",
+            "",
+            "placeholder",
+            b"",
+        )
+
     def test_error_handler_share_all_sunny_day_case(self):
         name = "John Smith"
         email = "john.smith@example.com"
