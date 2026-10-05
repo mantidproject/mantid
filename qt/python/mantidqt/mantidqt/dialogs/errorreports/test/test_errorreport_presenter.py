@@ -168,6 +168,9 @@ class ErrorReportPresenterTest(unittest.TestCase):
     def test_unknown_signal_leaves_exit_code_unchanged(self):
         self.assertEqual("-999", ErrorReporterPresenter._get_exit_code_description("-999"))
 
+    def test_empty_exit_code_is_unchanged(self):
+        self.assertEqual("", ErrorReporterPresenter._get_exit_code_description(""))
+
     def test_error_handler_share_all_sunny_day_case(self):
         name = "John Smith"
         email = "john.smith@example.com"

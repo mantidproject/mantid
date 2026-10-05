@@ -140,6 +140,9 @@ class ErrorReporterPresenter(object):
 
     @staticmethod
     def _get_exit_code_description(exit_code):
+        if not exit_code:
+            return exit_code
+
         parsed_exit_code = int(exit_code)
         if parsed_exit_code < 0:
             try:
