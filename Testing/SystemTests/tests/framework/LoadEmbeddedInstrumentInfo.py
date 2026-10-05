@@ -28,10 +28,10 @@ class ISISRawHistNexus(systemtesting.MantidSystemTest):
 
     def validate(self):
         MAPS00018314_raw_ISIS_hist = mtd["MAPS00018314_raw_ISIS_hist"]
-        inst = MAPS00018314_raw_ISIS_hist.getInstrument()
-        A1window = inst.getComponentByName("MAPS/A1_window")
+        component_info = MAPS00018314_raw_ISIS_hist.componentInfo()
+        A1window = component_info.indexOfAny("A1_window")
 
-        if str(A1window.getPos()) != "[0,3,0]":
+        if str(component_info.position(A1window)) != "[0,3,0]":
             return False
 
         return True

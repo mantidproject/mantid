@@ -427,8 +427,9 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         r"""Create a table with appropriate column names for saving the location of the source"""
         # collect info on the source
         input_workspace = self.getPropertyValue("InputWorkspace")  # name of the input workspace
-        source = mtd[self.getPropertyValue("InputWorkspace")].getInstrument().getSource()
-        source_name, source_full_name = source.getName(), source.getFullName()
+        component_info = mtd[input_workspace].componentInfo()
+        source_index = component_info.source()
+        source_name, source_full_name = component_info.name(source_index), component_info.fullName(source_index)
 
         # Update the position of the source
         z_position = -abs(self.getProperty("SourceToSampleDistance").value)

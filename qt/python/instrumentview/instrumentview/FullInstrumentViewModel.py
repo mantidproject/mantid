@@ -81,7 +81,7 @@ class FullInstrumentViewModel:
 
         component_info = self._workspace.componentInfo()
         self._sample_position = np.array(component_info.samplePosition()) if component_info.hasSample() else np.zeros(3)
-        has_source = self._workspace.getInstrument().getSource() is not None
+        has_source = component_info.hasSource()
         self._source_position = np.array(component_info.sourcePosition()) if has_source else np.array([0, 0, 0])
         self._root_position = np.array(component_info.position(0))
         self._beam_axis = get_beam_axis(self._workspace)
@@ -909,7 +909,7 @@ class FullInstrumentViewModel:
         return [
             pws
             for pws in workspaces_in_ads
-            if str_types[ws_type] in str(type(pws)) and pws.getInstrument().getFullName() == self._workspace.getInstrument().getFullName()
+            if str_types[ws_type] in str(type(pws)) and pws.getInstrumentName() == self._workspace.getInstrumentName()
         ]
 
     def get_grouping_keys_from_workspaces_in_ads(self):
@@ -954,7 +954,7 @@ class FullInstrumentViewModel:
 
         CreateGroupingWorkspace(
             InstrumentFilename=self._workspace.instrumentFilename(),
-            ComponentName=self._workspace.getInstrument().getFullName(),
+            ComponentName=self._workspace.getInstrumentName(),
             CustomGroupingString=",".join(individual_groups_strings),
             OutputWorkspace=grouping_name,
         )
