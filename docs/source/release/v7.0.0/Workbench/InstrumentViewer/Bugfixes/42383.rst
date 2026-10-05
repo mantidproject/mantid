@@ -1,1 +1,1 @@
-- In the new Instrument View, zooming with the mouse wheel in the 3D projection now keeps the point under the mouse cursor in place, as it does in the other projections, rather than always zooming into the centre of the view.
+- In the new Instrument View, zooming with the mouse wheel in the 3D projection now keeps the point under the mouse cursor in place, as it does in the other projections, rather than always zooming into the centre of the view. Zooming out also now stops at the full view of the instrument, keeping the direction the view has been rotated to.

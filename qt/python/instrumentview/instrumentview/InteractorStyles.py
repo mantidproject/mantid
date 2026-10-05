@@ -21,7 +21,7 @@ class InteractorStyles:
         self.SCROLL_ZOOM_WITH_PICKING = CursorZoomInteractorStyle(plotter)
         self.SCROLL_ZOOM_WITH_HOVER = CursorZoomInteractorStyle(plotter)
         self.SCROLL_ZOOM_NO_PICKING = CursorZoomInteractorStyle(plotter)
-        self.TRACKBALL = SwappedButtonTrackballCamera()
+        self.TRACKBALL = SwappedButtonTrackballCamera(plotter)
         self.RUBBERBAND_ZOOM = RubberBandZoomInteractorStyle(plotter)
 
         self.TRACKBALL.set_picking_callback(picking_callback)
@@ -342,8 +342,16 @@ def _display_to_world(renderer, dx, dy):
 
 
 class SwappedButtonTrackballCamera(vtkInteractorStyleTrackballCamera):
-    def __init__(self):
+    def __init__(self, plotter=None):
         super().__init__()
+        # The full view to stop at when zooming out. Only the camera state is kept, not the plotter,
+        # so this style does not keep the plotter alive.
+        self._default_focal_point = None
+        self._default_parallel_scale = None
+        if plotter is not None:
+            camera = plotter.renderer.camera
+            self._default_focal_point = np.array(camera.focal_point).copy()
+            self._default_parallel_scale = camera.parallel_scale
         self.AddObserver(vtkCommand.LeftButtonPressEvent, lambda *_: self.OnRightButtonDown())
         self.AddObserver(vtkCommand.RightButtonPressEvent, lambda *_: self.OnLeftButtonDown())
         self.AddObserver(vtkCommand.LeftButtonReleaseEvent, lambda *_: self.OnRightButtonUp())
@@ -376,7 +384,12 @@ class SwappedButtonTrackballCamera(vtkInteractorStyleTrackballCamera):
         factor = 1.1 ** (0.2 * self.GetMotionFactor() * self.GetMouseWheelMotionFactor())
         if not forward:
             factor = 1.0 / factor
-        self._zoom_at_display_point(renderer, x, y, factor)
+
+        # As in the 2D projections, zooming out stops at the full view
+        if self._default_parallel_scale is not None and camera.GetParallelScale() / factor > self._default_parallel_scale:
+            self._show_full_view(camera)
+        else:
+            self._zoom_at_display_point(renderer, x, y, factor)
 
         if self.GetAutoAdjustCameraClippingRange():
             renderer.ResetCameraClippingRange()
@@ -409,6 +422,14 @@ class SwappedButtonTrackballCamera(vtkInteractorStyleTrackballCamera):
         camera.SetFocalPoint(*(focal + shift))
         camera.SetPosition(*(position + shift))
         camera.SetParallelScale(camera.GetParallelScale() / factor)
+
+    def _show_full_view(self, camera):
+        """Return to the full view's zoom and centre, keeping the direction the view has been rotated to."""
+        direction = np.array(camera.GetDirectionOfProjection())
+        distance = camera.GetDistance()
+        camera.SetFocalPoint(*self._default_focal_point)
+        camera.SetPosition(*(self._default_focal_point - direction * distance))
+        camera.SetParallelScale(self._default_parallel_scale)
 
     def set_picking_callback(self, picking_callback: Callable):
         self.RemoveObservers(vtkCommand.LeftButtonPressEvent)

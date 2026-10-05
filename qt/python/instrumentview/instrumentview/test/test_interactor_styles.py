@@ -371,15 +371,18 @@ class TestSwappedButtonTrackballCamera(unittest.TestCase):
         self.assertFalse(style.HasObserver(vtkCommand.LeftButtonPressEvent))
         self.assertFalse(style.HasObserver(vtkCommand.RightButtonPressEvent))
 
-    def _create_style(self, parallel_projection=True):
-        """Attach the style to a real renderer and camera. The interactor is never initialised, so nothing is drawn."""
+    def _create_style(self, parallel_projection=True, full_view=False):
+        """Attach the style to a real renderer and camera. The interactor is never initialised, so nothing is drawn.
+
+        With full_view, the style is given the starting camera state below as the full view to stop at when zooming out.
+        """
         render_window = vtkRenderWindow()
         render_window.SetSize(200, 100)
         renderer = vtkRenderer()
         render_window.AddRenderer(renderer)
         interactor = vtkRenderWindowInteractor()
         interactor.SetRenderWindow(render_window)
-        style = SwappedButtonTrackballCamera()
+        style = SwappedButtonTrackballCamera(_make_mock_plotter(position=(3, 4, 10), parallel_scale=5) if full_view else None)
         interactor.SetInteractorStyle(style)
 
         camera = renderer.GetActiveCamera()
@@ -444,6 +447,34 @@ class TestSwappedButtonTrackballCamera(unittest.TestCase):
         interactor.SetEventPosition(150, 75)
         style._on_wheel(forward=True)
         assert_array_almost_equal(camera.GetDirectionOfProjection(), direction_before)
+
+    def test_wheel_zoom_out_stops_at_full_view(self):
+        style, renderer, interactor = self._create_style(full_view=True)
+        camera = renderer.GetActiveCamera()
+        # Zoomed in a little, off centre, and rotated to look along a different direction
+        camera.SetFocalPoint(1, 1, 0)
+        camera.SetPosition(1, 11, 0)
+        camera.SetParallelScale(4.5)
+        direction_before = np.array(camera.GetDirectionOfProjection())
+
+        interactor.SetEventPosition(150, 75)
+        style._on_wheel(forward=False)
+
+        self.assertAlmostEqual(camera.GetParallelScale(), 5)
+        assert_array_almost_equal(camera.GetFocalPoint(), [0, 0, 0])
+        # The rotation is kept
+        assert_array_almost_equal(camera.GetDirectionOfProjection(), direction_before)
+
+    def test_wheel_zoom_out_within_full_view_zooms_at_cursor(self):
+        style, renderer, interactor = self._create_style(full_view=True)
+        camera = renderer.GetActiveCamera()
+        camera.SetParallelScale(2)
+        point = self._world_point_under_cursor(renderer, 150, 75)
+        interactor.SetEventPosition(150, 75)
+        style._on_wheel(forward=False)
+        self.assertGreater(camera.GetParallelScale(), 2)
+        self.assertLess(camera.GetParallelScale(), 5)
+        assert_array_almost_equal(self._display_point(renderer, point), [150, 75])
 
     def test_wheel_zoom_with_perspective_projection_uses_default_zoom(self):
         style, renderer, interactor = self._create_style(parallel_projection=False)
