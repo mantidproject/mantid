@@ -29,6 +29,7 @@ class TestALFInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.is_select_bank_tube_checked.return_value = True
         self._mock_view.get_contour_limits.return_value = (0.0, 1.0)
         self._mock_view.selected_peaks_workspaces.return_value = []
+        self._mock_view.findChild.return_value = None
 
         with (
             mock.patch("instrumentview.alfview.ALFInstrumentViewPresenter.ALFInstrumentViewView", return_value=self._mock_view),
@@ -62,7 +63,7 @@ class TestALFInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.get_shape_mask.return_value = mask
         self._mock_view.is_select_bank_tube_checked.return_value = False
 
-        with mock.patch.object(self._presenter, "update_picked_detectors_on_view"):
+        with mock.patch.object(self._presenter, "_publish_selection_change"):
             self._presenter._on_roi_shape_changed(np.zeros((self._n_pickable, 3)))
 
         np.testing.assert_array_equal(self._model._detector_is_picked[self._model.is_pickable], mask)
@@ -73,7 +74,7 @@ class TestALFInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.is_select_bank_tube_checked.return_value = True
         self._model.expand_pickable_mask_to_parent_subtrees = MagicMock(return_value=expanded_mask)
 
-        with mock.patch.object(self._presenter, "update_picked_detectors_on_view"):
+        with mock.patch.object(self._presenter, "_publish_selection_change"):
             self._presenter._on_roi_shape_changed(np.zeros((self._n_pickable, 3)))
 
         self._model.expand_pickable_mask_to_parent_subtrees.assert_called_once()
@@ -85,7 +86,7 @@ class TestALFInstrumentViewPresenter(unittest.TestCase):
         second_mask[20:30] = True
         self._mock_view.is_select_bank_tube_checked.return_value = False
 
-        with mock.patch.object(self._presenter, "update_picked_detectors_on_view"):
+        with mock.patch.object(self._presenter, "_publish_selection_change"):
             self._mock_view.get_shape_mask.return_value = first_mask
             self._presenter._on_roi_shape_changed(np.zeros((self._n_pickable, 3)))
             self._mock_view.get_shape_mask.return_value = second_mask
@@ -97,7 +98,7 @@ class TestALFInstrumentViewPresenter(unittest.TestCase):
     def test_empty_shape_clears_the_selection(self):
         self._mock_view.is_select_bank_tube_checked.return_value = False
 
-        with mock.patch.object(self._presenter, "update_picked_detectors_on_view"):
+        with mock.patch.object(self._presenter, "_publish_selection_change"):
             self._mock_view.get_shape_mask.return_value = self._mask_for_first_n_pickable_detectors(10)
             self._presenter._on_roi_shape_changed(np.zeros((self._n_pickable, 3)))
             self._mock_view.get_shape_mask.return_value = np.zeros(self._n_pickable, dtype=bool)
@@ -111,7 +112,7 @@ class TestALFInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.is_select_bank_tube_checked.return_value = False
         self._model.set_detector_key = MagicMock(return_value=ALFInstrumentViewPresenter._ROI_SELECTION_KEY)
 
-        with mock.patch.object(self._presenter, "update_picked_detectors_on_view"):
+        with mock.patch.object(self._presenter, "_publish_selection_change"):
             self._presenter._on_roi_shape_changed(np.zeros((self._n_pickable, 3)))
 
         self._model.set_detector_key.assert_called_once_with(
@@ -127,6 +128,39 @@ class TestALFInstrumentViewPresenter(unittest.TestCase):
                 self._presenter._on_roi_shape_changed(np.zeros((self._n_pickable, 3)))
 
         mock_notify.assert_called_once_with("notify_whole_tube_selected")
+
+    def test_replace_workspace_callback_resets_model_workspace(self):
+        ws_name = self._model.workspace.name()
+        with (
+            mock.patch.object(self._presenter, "_reset_model_workspace") as mock_reset,
+        ):
+            self._presenter._replace_workspace_callback(ws_name, None)
+
+        mock_reset.assert_called_once_with(ws_name)
+
+    def test_reset_model_workspace_calls_model_setup(self):
+        ws_name = self._model.workspace.name()
+        self._model.setup = MagicMock()
+
+        with (
+            mock.patch("instrumentview.alfview.ALFInstrumentViewPresenter.AnalysisDataService") as mock_ads,
+            mock.patch.object(self._presenter, "_reload_renderers"),
+            mock.patch.object(self._presenter, "update_plotter"),
+            mock.patch.object(self._presenter, "_publish_selection_change") as mock_publish,
+        ):
+            mock_ads.retrieve.return_value = self._model.workspace
+            self._presenter._reset_model_workspace(ws_name)
+
+        self._model.setup.assert_called_once_with()
+        mock_publish.assert_called_once()
+
+    def test_replace_workspace_callback_does_not_reset_when_workspace_name_does_not_match(self):
+        with (
+            mock.patch.object(self._presenter, "_reset_model_workspace") as mock_reset,
+        ):
+            self._presenter._replace_workspace_callback("some-other-workspace", None)
+
+        mock_reset.assert_not_called()
 
 
 if __name__ == "__main__":
