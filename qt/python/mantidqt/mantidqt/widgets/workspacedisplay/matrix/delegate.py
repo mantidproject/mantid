@@ -7,7 +7,7 @@
 from typing import Optional
 
 from qtpy.QtCore import Qt, QObject, QModelIndex
-from qtpy.QtGui import QPainter, QColor
+from qtpy.QtGui import QPainter, QColor, QPalette
 from qtpy.QtWidgets import QStyledItemDelegate, QStyleOptionViewItem, QStyle
 
 
@@ -49,8 +49,7 @@ class CustomTextElidingDelegate(QStyledItemDelegate):
                 painter.setPen(QColor("white"))
                 painter.fillRect(option.rect, option.palette.highlight())
             else:
-                if foreground_colour is not None:
-                    painter.setPen(foreground_colour)
+                painter.setPen(foreground_colour if foreground_colour is not None else opt.palette.color(QPalette.Text))
                 if background_colour is not None:
                     painter.fillRect(option.rect, background_colour)
 
