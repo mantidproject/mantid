@@ -8,6 +8,7 @@
 
 #include "Common/DllConfig.h"
 #include "Common/InstrumentParameters.h"
+#include "InstrumentSettingsViewState.h"
 #include "MantidAPI/Algorithm.h"
 
 namespace MantidQt {
@@ -76,6 +77,7 @@ public:
   virtual void enableAll() = 0;
   virtual void enableDetectorCorrectionType() = 0;
   virtual void disableDetectorCorrectionType() = 0;
+  virtual void setInstrumentSettingsViewState(InstrumentSettingsViewState const &state) = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
