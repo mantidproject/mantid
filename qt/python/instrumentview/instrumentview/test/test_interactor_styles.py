@@ -1,9 +1,9 @@
 from instrumentview.InteractorStyles import (
     CursorZoomInteractorStyle,
+    FlatProjectionInteractorStyle,
     InteractorStyles,
     RubberBandZoomInteractorStyle,
-    SwappedButtonTrackballCamera,
-    _display_to_world,
+    ThreeDInteractorStyle,
 )
 import unittest
 from unittest import mock
@@ -31,186 +31,281 @@ def _make_mock_plotter(position=(0, 0, 1), focal_point=(0, 0, 0), parallel_scale
     return plotter
 
 
-class TestCursorZoomInteractorStyle(unittest.TestCase):
-    def _create_style(self, **plotter_kwargs):
-        plotter = _make_mock_plotter(**plotter_kwargs)
-        style = CursorZoomInteractorStyle(plotter)
-        return style, plotter
+class _PlotterWithRealRenderer:
+    """The parts of a PyVista plotter the cursor zoom styles use, around a real VTK renderer so the camera maths is real."""
 
+    def __init__(self, renderer):
+        self.renderer = renderer
+        self.track_mouse_position = mock.MagicMock()
+
+
+class _CursorZoomStyleTestBase(unittest.TestCase):
+    # The full view: looking at the origin at an angle, as after rotating the 3D view
+    FULL_VIEW_POSITION = (3, 4, 10)
+    FULL_VIEW_SCALE = 5
+
+    def _create_style(self, style_class=CursorZoomInteractorStyle, parallel_projection=True, position=None, full_view_scale=None):
+        """Attach a style to a real renderer and camera. The interactor is never initialised, so nothing is drawn.
+
+        The camera state when the style is created is the full view it stops at when zooming out.
+        """
+        render_window = vtkRenderWindow()
+        render_window.SetSize(200, 100)
+        renderer = vtkRenderer()
+        render_window.AddRenderer(renderer)
+        interactor = vtkRenderWindowInteractor()
+        interactor.SetRenderWindow(render_window)
+
+        camera = renderer.GetActiveCamera()
+        camera.SetParallelProjection(parallel_projection)
+        camera.SetPosition(*(position or self.FULL_VIEW_POSITION))
+        camera.SetFocalPoint(0, 0, 0)
+        camera.SetParallelScale(full_view_scale or self.FULL_VIEW_SCALE)
+
+        plotter = _PlotterWithRealRenderer(renderer)
+        style = style_class(plotter)
+        interactor.SetInteractorStyle(style)
+        # Keep references so the VTK objects outlive this method
+        self._render_window, self._interactor = render_window, interactor
+        return style, renderer, interactor
+
+    @staticmethod
+    def _display_point(renderer, world_point):
+        renderer.SetWorldPoint(*world_point, 1.0)
+        renderer.WorldToDisplay()
+        return np.array(renderer.GetDisplayPoint()[:2])
+
+    @staticmethod
+    def _world_point_under_cursor(renderer, x, y):
+        camera = renderer.GetActiveCamera()
+        renderer.SetWorldPoint(*camera.GetFocalPoint(), 1.0)
+        renderer.WorldToDisplay()
+        renderer.SetDisplayPoint(x, y, renderer.GetDisplayPoint()[2])
+        renderer.DisplayToWorld()
+        wx, wy, wz, ww = renderer.GetWorldPoint()
+        return np.array([wx, wy, wz]) / ww
+
+    def _zoom_at(self, style, interactor, forward, x=150, y=75):
+        interactor.SetEventPosition(x, y)
+        style._zoom(forward=forward)
+
+
+class TestCursorZoomInteractorStyle(_CursorZoomStyleTestBase):
     def test_caches_default_camera_state(self):
-        style, plotter = self._create_style(position=(1, 2, 3), focal_point=(4, 5, 6), parallel_scale=2.5)
-        assert_array_almost_equal(style._default_position, [1, 2, 3])
-        assert_array_almost_equal(style._default_focal_point, [4, 5, 6])
+        style, _, _ = self._create_style()
+        assert_array_almost_equal(style._default_position, self.FULL_VIEW_POSITION)
+        assert_array_almost_equal(style._default_focal_point, [0, 0, 0])
+        self.assertAlmostEqual(style._default_parallel_scale, self.FULL_VIEW_SCALE)
+
+    def test_update_default_camera_state_recaches_current_state(self):
+        style, renderer, _ = self._create_style()
+        # Simulate the camera changing after construction (e.g. fill transform)
+        camera = renderer.GetActiveCamera()
+        camera.SetPosition(7, 8, 9)
+        camera.SetFocalPoint(1, 2, 3)
+        camera.SetParallelScale(2.5)
+        style.update_default_camera_state()
+        assert_array_almost_equal(style._default_position, [7, 8, 9])
+        assert_array_almost_equal(style._default_focal_point, [1, 2, 3])
         self.assertAlmostEqual(style._default_parallel_scale, 2.5)
 
     def test_track_mouse_position_called(self):
-        style, plotter = self._create_style()
-        plotter.track_mouse_position.assert_called_once()
+        style, _, _ = self._create_style()
+        style.plotter.track_mouse_position.assert_called_once()
 
-    def test_on_mouse_move_updates_cursor_world_pos(self):
-        style, plotter = self._create_style()
-        plotter.mouse_position = (50, 60)
-        # Mock _display_to_world to return a known value
-        with mock.patch("instrumentview.InteractorStyles._display_to_world", return_value=np.array([1.0, 2.0, 0.0])):
-            style._on_mouse_move(None, None)
-        assert_array_almost_equal(style._cursor_world_pos, [1.0, 2.0, 0.0])
+    def test_trackball_button_actions_are_switched_off(self):
+        style, _, _ = self._create_style()
+        for event in (
+            vtkCommand.LeftButtonPressEvent,
+            vtkCommand.LeftButtonReleaseEvent,
+            vtkCommand.MiddleButtonPressEvent,
+            vtkCommand.MiddleButtonReleaseEvent,
+            vtkCommand.RightButtonPressEvent,
+            vtkCommand.RightButtonReleaseEvent,
+        ):
+            # An observer stops the trackball rotating, panning or zooming with that button
+            self.assertTrue(style.HasObserver(event))
 
-    def test_on_mouse_move_skipped_during_zoom(self):
-        style, plotter = self._create_style()
-        style._zoom_in_progress = True
-        style._cursor_world_pos = None
-        style._on_mouse_move(None, None)
-        self.assertIsNone(style._cursor_world_pos)
+    def test_wheel_events_call_zoom(self):
+        style, _, _ = self._create_style()
+        with mock.patch.object(style, "_zoom") as zoom_mock:
+            style.InvokeEvent(vtkCommand.MouseWheelForwardEvent)
+            zoom_mock.assert_called_once_with(forward=True)
+            zoom_mock.reset_mock()
+            style.InvokeEvent(vtkCommand.MouseWheelBackwardEvent)
+            zoom_mock.assert_called_once_with(forward=False)
 
-    def test_zoom_does_nothing_when_no_cursor_pos(self):
-        style, plotter = self._create_style()
-        style._cursor_world_pos = None
-        camera = plotter.renderer.camera
-        original_scale = camera.parallel_scale
-        style._zoom(1.1)
-        # Camera should not have been modified
-        self.assertEqual(camera.parallel_scale, original_scale)
+    def test_zoom_keeps_point_under_cursor_fixed(self):
+        for forward in (True, False):
+            with self.subTest(forward=forward):
+                style, renderer, interactor = self._create_style()
+                # Zoomed in from the full view, so zooming out does not reach it
+                renderer.GetActiveCamera().SetParallelScale(1)
+                point = self._world_point_under_cursor(renderer, 150, 75)
+                self._zoom_at(style, interactor, forward)
+                assert_array_almost_equal(self._display_point(renderer, point), [150, 75])
 
-    def test_zoom_in_decreases_parallel_scale(self):
-        style, plotter = self._create_style(parallel_scale=1.0)
-        style._cursor_world_pos = np.array([0.0, 0.0, 0.0])
-        with mock.patch("instrumentview.InteractorStyles._display_to_world", return_value=np.array([0.0, 0.0, 0.0])):
-            style._zoom(style.zoom_factor)
-        camera = plotter.renderer.camera
-        self.assertLess(camera.parallel_scale, 1.0)
+    def test_zoom_keeps_view_direction(self):
+        style, renderer, interactor = self._create_style()
+        camera = renderer.GetActiveCamera()
+        direction_before = np.array(camera.GetDirectionOfProjection())
+        self._zoom_at(style, interactor, forward=True)
+        assert_array_almost_equal(camera.GetDirectionOfProjection(), direction_before)
 
-    def test_zoom_out_past_default_resets_camera(self):
-        style, plotter = self._create_style(position=(0, 0, 1), focal_point=(0, 0, 0), parallel_scale=1.0)
-        # Set camera to a state close to default so one zoom-out step exceeds it
-        plotter.renderer.camera.parallel_scale = 0.9
-        plotter.renderer.camera.focal_point = [0.1, 0.1, 0.0]
-        plotter.renderer.camera.position = [0.1, 0.1, 1.0]
-        style._cursor_world_pos = np.array([0.0, 0.0, 0.0])
-        # Zoom out — the dynamic factor will push parallel_scale past the default
-        with mock.patch("instrumentview.InteractorStyles._display_to_world", return_value=np.array([0.0, 0.0, 0.0])):
-            style._zoom(1.0 / style.zoom_factor)
-        camera = plotter.renderer.camera
-        # Should have reset to defaults
-        self.assertEqual(camera.position, [0, 0, 1])
-        self.assertEqual(camera.focal_point, [0, 0, 0])
-        self.assertAlmostEqual(camera.parallel_scale, 1.0)
+    def test_first_zoom_step_from_full_view_does_not_depend_on_world_units(self):
+        # e.g. side by side projections are in metres, spherical projections in radians
+        for full_view_scale in (0.2, 3.0):
+            with self.subTest(full_view_scale=full_view_scale):
+                style, renderer, interactor = self._create_style(full_view_scale=full_view_scale)
+                self._zoom_at(style, interactor, forward=True)
+                self.assertAlmostEqual(renderer.GetActiveCamera().GetParallelScale(), full_view_scale / style._FULL_VIEW_ZOOM_STEP)
 
-    def test_reset_camera_restores_defaults(self):
-        style, plotter = self._create_style(position=(1, 2, 3), focal_point=(4, 5, 6), parallel_scale=2.5)
-        # Modify camera state
-        plotter.renderer.camera.position = [9, 9, 9]
-        plotter.renderer.camera.focal_point = [8, 8, 8]
-        plotter.renderer.camera.parallel_scale = 99.0
-        style._reset_camera()
-        camera = plotter.renderer.camera
-        self.assertEqual(camera.position, [1, 2, 3])
-        self.assertEqual(camera.focal_point, [4, 5, 6])
-        self.assertAlmostEqual(camera.parallel_scale, 2.5)
+    def test_zoom_step_gets_smaller_when_zoomed_in(self):
+        style, renderer, interactor = self._create_style()
+        # Zoomed in 4x from the full view
+        renderer.GetActiveCamera().SetParallelScale(self.FULL_VIEW_SCALE / 4)
+        self._zoom_at(style, interactor, forward=True)
+        expected_step = 1.0 + (style._FULL_VIEW_ZOOM_STEP - 1.0) / 4
+        self.assertAlmostEqual(renderer.GetActiveCamera().GetParallelScale(), self.FULL_VIEW_SCALE / 4 / expected_step)
 
-    def test_reset_camera_calls_render(self):
-        style, plotter = self._create_style()
-        style._reset_camera()
-        plotter.renderer.reset_camera_clipping_range.assert_called_once()
-        plotter.render_window.Render.assert_called_once()
+    def test_zoom_out_past_full_view_returns_to_full_view_keeping_rotation(self):
+        style, renderer, interactor = self._create_style()
+        camera = renderer.GetActiveCamera()
+        # Zoomed in a little, off centre, and rotated to look along a different direction
+        camera.SetFocalPoint(1, 1, 0)
+        camera.SetPosition(1, 11, 0)
+        camera.SetParallelScale(4.5)
+        direction_before = np.array(camera.GetDirectionOfProjection())
 
-    def test_update_default_camera_state_recaches_current_state(self):
-        style, plotter = self._create_style(position=(1, 2, 3), focal_point=(4, 5, 6), parallel_scale=2.5)
-        # Simulate camera changing after construction (e.g. fill transform)
-        plotter.renderer.camera.position = [7, 8, 9]
-        plotter.renderer.camera.focal_point = [10, 11, 12]
-        plotter.renderer.camera.parallel_scale = 5.0
-        style.update_default_camera_state()
-        assert_array_almost_equal(style._default_position, [7, 8, 9])
-        assert_array_almost_equal(style._default_focal_point, [10, 11, 12])
-        self.assertAlmostEqual(style._default_parallel_scale, 5.0)
+        self._zoom_at(style, interactor, forward=False)
 
-    def test_update_default_camera_state_affects_subsequent_reset(self):
-        style, plotter = self._create_style(position=(1, 2, 3), focal_point=(4, 5, 6), parallel_scale=2.5)
-        # Move camera and update defaults to new position
-        plotter.renderer.camera.position = [7, 8, 9]
-        plotter.renderer.camera.focal_point = [10, 11, 12]
-        plotter.renderer.camera.parallel_scale = 5.0
-        style.update_default_camera_state()
-        # Now change camera again and reset — should go to the updated defaults
-        plotter.renderer.camera.position = [99, 99, 99]
-        plotter.renderer.camera.parallel_scale = 99.0
-        style._reset_camera()
-        self.assertEqual(plotter.renderer.camera.position, [7, 8, 9])
-        self.assertAlmostEqual(plotter.renderer.camera.parallel_scale, 5.0)
+        self.assertAlmostEqual(camera.GetParallelScale(), self.FULL_VIEW_SCALE)
+        assert_array_almost_equal(camera.GetFocalPoint(), [0, 0, 0])
+        assert_array_almost_equal(camera.GetDirectionOfProjection(), direction_before)
+
+    def test_zoom_out_past_full_view_without_rotation_returns_to_the_full_view_camera(self):
+        """In the flat projections the camera never rotates, so this is a full reset of the view."""
+        style, renderer, interactor = self._create_style(position=(0, 0, 10))
+        camera = renderer.GetActiveCamera()
+        camera.SetFocalPoint(1, 1, 0)
+        camera.SetPosition(1, 1, 10)
+        camera.SetParallelScale(4.5)
+
+        self._zoom_at(style, interactor, forward=False)
+
+        assert_array_almost_equal(camera.GetPosition(), [0, 0, 10])
+        assert_array_almost_equal(camera.GetFocalPoint(), [0, 0, 0])
+        self.assertAlmostEqual(camera.GetParallelScale(), self.FULL_VIEW_SCALE)
+
+    def test_zoom_out_within_full_view_zooms_at_cursor(self):
+        style, renderer, interactor = self._create_style()
+        camera = renderer.GetActiveCamera()
+        camera.SetParallelScale(2)
+        point = self._world_point_under_cursor(renderer, 150, 75)
+        self._zoom_at(style, interactor, forward=False)
+        self.assertGreater(camera.GetParallelScale(), 2)
+        self.assertLess(camera.GetParallelScale(), self.FULL_VIEW_SCALE)
+        assert_array_almost_equal(self._display_point(renderer, point), [150, 75])
+
+    def test_zoom_with_perspective_projection_uses_trackball_zoom(self):
+        style, renderer, interactor = self._create_style(parallel_projection=False)
+        camera = renderer.GetActiveCamera()
+        self._zoom_at(style, interactor, forward=True)
+        # The trackball zoom moves the camera towards the focal point, which stays where it was
+        assert_array_almost_equal(camera.GetFocalPoint(), [0, 0, 0])
+        self.assertLess(camera.GetDistance(), np.linalg.norm(self.FULL_VIEW_POSITION))
+
+    def test_zoom_without_interactor_does_nothing(self):
+        render_window = vtkRenderWindow()
+        renderer = vtkRenderer()
+        render_window.AddRenderer(renderer)
+        renderer.GetActiveCamera().SetParallelScale(5)
+        style = CursorZoomInteractorStyle(_PlotterWithRealRenderer(renderer))
+        style._zoom(forward=True)
+        self.assertAlmostEqual(renderer.GetActiveCamera().GetParallelScale(), 5)
 
     def test_zoom_notifies_camera_changed(self):
-        style, plotter = self._create_style(parallel_scale=1.0)
+        style, _, interactor = self._create_style()
         callback = mock.MagicMock()
         style.set_camera_changed_callback(callback)
-        style._cursor_world_pos = np.array([0.0, 0.0, 0.0])
-        with mock.patch("instrumentview.InteractorStyles._display_to_world", return_value=np.array([0.0, 0.0, 0.0])):
-            style._zoom(style.zoom_factor)
+        self._zoom_at(style, interactor, forward=True)
         callback.assert_called_once()
 
-    def test_zoom_out_past_default_notifies_camera_changed_only_once(self):
-        style, plotter = self._create_style(position=(0, 0, 1), focal_point=(0, 0, 0), parallel_scale=1.0)
-        plotter.renderer.camera.parallel_scale = 0.9
+    def test_zoom_out_past_full_view_notifies_camera_changed_only_once(self):
+        style, renderer, interactor = self._create_style()
+        renderer.GetActiveCamera().SetParallelScale(4.5)
         callback = mock.MagicMock()
         style.set_camera_changed_callback(callback)
-        style._cursor_world_pos = np.array([0.0, 0.0, 0.0])
-        with mock.patch("instrumentview.InteractorStyles._display_to_world", return_value=np.array([0.0, 0.0, 0.0])):
-            style._zoom(1.0 / style.zoom_factor)
+        self._zoom_at(style, interactor, forward=False)
         callback.assert_called_once()
 
-    def test_zoom_does_not_notify_camera_changed_when_no_cursor_pos(self):
-        style, plotter = self._create_style()
-        callback = mock.MagicMock()
-        style.set_camera_changed_callback(callback)
-        style._cursor_world_pos = None
-        style._zoom(1.1)
-        callback.assert_not_called()
+    def test_reset_camera_restores_defaults(self):
+        style, renderer, _ = self._create_style()
+        camera = renderer.GetActiveCamera()
+        camera.SetPosition(9, 9, 9)
+        camera.SetFocalPoint(8, 8, 8)
+        camera.SetParallelScale(99)
+        style._reset_camera()
+        assert_array_almost_equal(camera.GetPosition(), self.FULL_VIEW_POSITION)
+        assert_array_almost_equal(camera.GetFocalPoint(), [0, 0, 0])
+        self.assertAlmostEqual(camera.GetParallelScale(), self.FULL_VIEW_SCALE)
+
+    def test_update_default_camera_state_affects_subsequent_reset(self):
+        style, renderer, _ = self._create_style()
+        camera = renderer.GetActiveCamera()
+        camera.SetPosition(7, 8, 9)
+        camera.SetParallelScale(2.5)
+        style.update_default_camera_state()
+        camera.SetPosition(99, 99, 99)
+        camera.SetParallelScale(99)
+        style._reset_camera()
+        assert_array_almost_equal(camera.GetPosition(), [7, 8, 9])
+        self.assertAlmostEqual(camera.GetParallelScale(), 2.5)
 
     def test_reset_camera_and_notify_notifies_camera_changed(self):
-        style, plotter = self._create_style()
+        style, _, _ = self._create_style()
         callback = mock.MagicMock()
         style.set_camera_changed_callback(callback)
         style._reset_camera_and_notify()
         callback.assert_called_once()
 
     def test_camera_changed_callback_exceptions_do_not_escape_into_vtk(self):
-        style, plotter = self._create_style()
+        style, _, _ = self._create_style()
         style.set_camera_changed_callback(mock.MagicMock(side_effect=RuntimeError("boom")))
         style._notify_camera_changed()
 
-    def test_wheel_forward_calls_zoom_in(self):
-        style, plotter = self._create_style()
-        with mock.patch.object(style, "_zoom") as zoom_mock:
-            style._on_wheel_forward(None, None)
-            zoom_mock.assert_called_once_with(style.zoom_factor)
+    def test_set_picking_callback_replaces_left_button_action(self):
+        style, _, _ = self._create_style()
+        callback = mock.MagicMock()
+        style.set_picking_callback(callback)
+        style.InvokeEvent(vtkCommand.LeftButtonPressEvent)
+        callback.assert_called_once()
 
-    def test_wheel_backward_calls_zoom_out(self):
-        style, plotter = self._create_style()
-        with mock.patch.object(style, "_zoom") as zoom_mock:
-            style._on_wheel_backward(None, None)
-            zoom_mock.assert_called_once_with(1.0 / style.zoom_factor)
+    def test_remove_observers_releases_callbacks_and_plotter(self):
+        style, _, _ = self._create_style()
+        style.set_camera_changed_callback(mock.MagicMock())
+        style.remove_observers()
+        self.assertFalse(style.HasObserver(vtkCommand.MouseWheelForwardEvent))
+        self.assertIsNone(style.plotter)
+        self.assertIsNone(style._camera_changed_callback)
 
 
-class TestDisplayToWorld(unittest.TestCase):
-    def test_returns_none_for_zero_w(self):
-        renderer = mock.MagicMock()
-        renderer.GetWorldPoint.return_value = (1.0, 2.0, 0.0, 0.0)
-        result = _display_to_world(renderer, 100, 200)
-        self.assertIsNone(result)
+class TestFlatProjectionInteractorStyle(_CursorZoomStyleTestBase):
+    def test_right_click_resets_the_view_and_notifies(self):
+        style, renderer, _ = self._create_style(FlatProjectionInteractorStyle)
+        callback = mock.MagicMock()
+        style.set_camera_changed_callback(callback)
+        renderer.GetActiveCamera().SetParallelScale(1)
+        style.InvokeEvent(vtkCommand.RightButtonPressEvent)
+        self.assertAlmostEqual(renderer.GetActiveCamera().GetParallelScale(), self.FULL_VIEW_SCALE)
+        callback.assert_called_once()
 
-    def test_converts_display_to_world(self):
-        renderer = mock.MagicMock()
-        renderer.GetWorldPoint.return_value = (2.0, 4.0, 0.0, 2.0)
-        result = _display_to_world(renderer, 100, 200)
-        renderer.SetDisplayPoint.assert_called_with(100, 200, 0.0)
-        renderer.DisplayToWorld.assert_called_once()
-        assert_array_almost_equal(result, [1.0, 2.0, 0.0])
-
-    def test_projects_onto_z_zero_plane(self):
-        renderer = mock.MagicMock()
-        renderer.GetWorldPoint.return_value = (3.0, 6.0, 9.0, 3.0)
-        result = _display_to_world(renderer, 50, 50)
-        # z component should always be 0
-        self.assertAlmostEqual(result[2], 0.0)
+    def test_set_hover_callback_is_called_on_mouse_move(self):
+        style, _, _ = self._create_style(FlatProjectionInteractorStyle)
+        hover_callback = mock.MagicMock()
+        style.set_hover_callback(hover_callback)
+        style.InvokeEvent(vtkCommand.MouseMoveEvent)
+        hover_callback.assert_called_once()
 
 
 class TestRubberBandZoomInteractorStyle(unittest.TestCase):
@@ -357,133 +452,32 @@ class TestRubberBandZoomInteractorStyle(unittest.TestCase):
         self.assertEqual(style._rubber_band_start, (10, 20))
 
 
-class TestSwappedButtonTrackballCamera(unittest.TestCase):
-    def test_instantiates(self):
-        style = SwappedButtonTrackballCamera()
-        self.assertIsNotNone(style)
+class TestThreeDInteractorStyle(_CursorZoomStyleTestBase):
+    def test_buttons_are_swapped_for_the_trackball(self):
+        style, _, _ = self._create_style(ThreeDInteractorStyle)
+        cases = (
+            # Right-drag rotates, which is the trackball's left button
+            (vtkCommand.RightButtonPressEvent, "OnLeftButtonDown"),
+            (vtkCommand.RightButtonReleaseEvent, "OnLeftButtonUp"),
+            (vtkCommand.LeftButtonPressEvent, "OnRightButtonDown"),
+            (vtkCommand.LeftButtonReleaseEvent, "OnRightButtonUp"),
+            (vtkCommand.MiddleButtonPressEvent, "OnMiddleButtonDown"),
+            (vtkCommand.MiddleButtonReleaseEvent, "OnMiddleButtonUp"),
+        )
+        for event, trackball_action in cases:
+            with self.subTest(trackball_action=trackball_action):
+                with mock.patch.object(style, trackball_action) as action_mock:
+                    style.InvokeEvent(event)
+                    action_mock.assert_called_once()
 
-    def test_remove_observers_removes_all_observers(self):
-        style = SwappedButtonTrackballCamera()
-        style.set_picking_callback(mock.MagicMock())
-
-        style.remove_observers()
-
-        self.assertFalse(style.HasObserver(vtkCommand.LeftButtonPressEvent))
-        self.assertFalse(style.HasObserver(vtkCommand.RightButtonPressEvent))
-
-    def _create_style(self, parallel_projection=True, full_view=False):
-        """Attach the style to a real renderer and camera. The interactor is never initialised, so nothing is drawn.
-
-        With full_view, the style is given the starting camera state below as the full view to stop at when zooming out.
-        """
-        render_window = vtkRenderWindow()
-        render_window.SetSize(200, 100)
-        renderer = vtkRenderer()
-        render_window.AddRenderer(renderer)
-        interactor = vtkRenderWindowInteractor()
-        interactor.SetRenderWindow(render_window)
-        style = SwappedButtonTrackballCamera(_make_mock_plotter(position=(3, 4, 10), parallel_scale=5) if full_view else None)
-        interactor.SetInteractorStyle(style)
-
-        camera = renderer.GetActiveCamera()
-        camera.SetParallelProjection(parallel_projection)
-        # Looking at the origin at an angle, as after rotating the 3D view
-        camera.SetPosition(3, 4, 10)
-        camera.SetFocalPoint(0, 0, 0)
-        camera.SetParallelScale(5)
-        # Keep references so the VTK objects outlive this method
-        self._render_window, self._interactor = render_window, interactor
-        return style, renderer, interactor
-
-    @staticmethod
-    def _display_point(renderer, world_point):
-        renderer.SetWorldPoint(*world_point, 1.0)
-        renderer.WorldToDisplay()
-        return np.array(renderer.GetDisplayPoint()[:2])
-
-    def _world_point_under_cursor(self, renderer, x, y):
-        camera = renderer.GetActiveCamera()
-        renderer.SetWorldPoint(*camera.GetFocalPoint(), 1.0)
-        renderer.WorldToDisplay()
-        renderer.SetDisplayPoint(x, y, renderer.GetDisplayPoint()[2])
-        renderer.DisplayToWorld()
-        wx, wy, wz, ww = renderer.GetWorldPoint()
-        return np.array([wx, wy, wz]) / ww
-
-    def test_wheel_zoom_keeps_point_under_cursor_fixed(self):
-        for forward in (True, False):
-            with self.subTest(forward=forward):
-                style, renderer, interactor = self._create_style()
-                point = self._world_point_under_cursor(renderer, 150, 75)
-                interactor.SetEventPosition(150, 75)
-                style._on_wheel(forward=forward)
-                assert_array_almost_equal(self._display_point(renderer, point), [150, 75])
-
-    def test_wheel_events_call_cursor_zoom(self):
-        style = SwappedButtonTrackballCamera()
-        with mock.patch.object(style, "_on_wheel") as on_wheel_mock:
-            style.InvokeEvent(vtkCommand.MouseWheelForwardEvent)
-            on_wheel_mock.assert_called_once_with(forward=True)
-            on_wheel_mock.reset_mock()
-            style.InvokeEvent(vtkCommand.MouseWheelBackwardEvent)
-            on_wheel_mock.assert_called_once_with(forward=False)
-
-    def test_wheel_forward_zooms_in(self):
-        style, renderer, interactor = self._create_style()
-        interactor.SetEventPosition(150, 75)
-        style._on_wheel(forward=True)
-        self.assertLess(renderer.GetActiveCamera().GetParallelScale(), 5)
-
-    def test_wheel_backward_zooms_out(self):
-        style, renderer, interactor = self._create_style()
-        interactor.SetEventPosition(150, 75)
-        style._on_wheel(forward=False)
-        self.assertGreater(renderer.GetActiveCamera().GetParallelScale(), 5)
-
-    def test_wheel_zoom_keeps_view_direction(self):
-        style, renderer, interactor = self._create_style()
-        camera = renderer.GetActiveCamera()
-        direction_before = np.array(camera.GetDirectionOfProjection())
-        interactor.SetEventPosition(150, 75)
-        style._on_wheel(forward=True)
-        assert_array_almost_equal(camera.GetDirectionOfProjection(), direction_before)
-
-    def test_wheel_zoom_out_stops_at_full_view(self):
-        style, renderer, interactor = self._create_style(full_view=True)
-        camera = renderer.GetActiveCamera()
-        # Zoomed in a little, off centre, and rotated to look along a different direction
-        camera.SetFocalPoint(1, 1, 0)
-        camera.SetPosition(1, 11, 0)
-        camera.SetParallelScale(4.5)
-        direction_before = np.array(camera.GetDirectionOfProjection())
-
-        interactor.SetEventPosition(150, 75)
-        style._on_wheel(forward=False)
-
-        self.assertAlmostEqual(camera.GetParallelScale(), 5)
-        assert_array_almost_equal(camera.GetFocalPoint(), [0, 0, 0])
-        # The rotation is kept
-        assert_array_almost_equal(camera.GetDirectionOfProjection(), direction_before)
-
-    def test_wheel_zoom_out_within_full_view_zooms_at_cursor(self):
-        style, renderer, interactor = self._create_style(full_view=True)
-        camera = renderer.GetActiveCamera()
-        camera.SetParallelScale(2)
-        point = self._world_point_under_cursor(renderer, 150, 75)
-        interactor.SetEventPosition(150, 75)
-        style._on_wheel(forward=False)
-        self.assertGreater(camera.GetParallelScale(), 2)
-        self.assertLess(camera.GetParallelScale(), 5)
-        assert_array_almost_equal(self._display_point(renderer, point), [150, 75])
-
-    def test_wheel_zoom_with_perspective_projection_uses_default_zoom(self):
-        style, renderer, interactor = self._create_style(parallel_projection=False)
-        camera = renderer.GetActiveCamera()
-        interactor.SetEventPosition(150, 75)
-        style._on_wheel(forward=True)
-        # The default zoom moves the camera towards the focal point, which stays where it was
-        assert_array_almost_equal(camera.GetFocalPoint(), [0, 0, 0])
-        self.assertLess(camera.GetDistance(), np.linalg.norm([3, 4, 10]))
+    def test_set_picking_callback_replaces_left_button_action(self):
+        style, _, _ = self._create_style(ThreeDInteractorStyle)
+        callback = mock.MagicMock()
+        style.set_picking_callback(callback)
+        with mock.patch.object(style, "OnRightButtonDown") as zoom_drag_mock:
+            style.InvokeEvent(vtkCommand.LeftButtonPressEvent)
+        callback.assert_called_once()
+        zoom_drag_mock.assert_not_called()
 
 
 class TestInteractorStylesCleanup(unittest.TestCase):
