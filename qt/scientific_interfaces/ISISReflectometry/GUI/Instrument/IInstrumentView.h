@@ -72,6 +72,10 @@ public:
 
   virtual std::string getCalibrationFilePath() const = 0;
   virtual void setCalibrationFilePath(std::string const &value) = 0;
+  virtual std::string getSpecularPixel() const = 0;
+  virtual void setSpecularPixel(std::optional<double> value) = 0;
+  virtual void showSpecularPixelInvalid() = 0;
+  virtual void showSpecularPixelValid() = 0;
 
   virtual void disableAll() = 0;
   virtual void enableAll() = 0;

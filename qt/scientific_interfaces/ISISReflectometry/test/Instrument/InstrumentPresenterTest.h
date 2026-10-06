@@ -209,6 +209,26 @@ public:
     TS_ASSERT_EQUALS(presenter.instrument().calibrationFilePath(), calibrationFilePath);
   }
 
+  void testSetValidSpecularPixelUpdatesModel() {
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(m_view, getSpecularPixel()).WillOnce(Return("280.5"));
+    EXPECT_CALL(m_view, showSpecularPixelValid()).Times(1);
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT_EQUALS(presenter.instrument().specularPixel(), std::optional<double>{280.5});
+  }
+
+  void testSetInvalidSpecularPixelDoesNotUpdateModel() {
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(m_view, getSpecularPixel()).WillOnce(Return("invalid"));
+    EXPECT_CALL(m_view, showSpecularPixelInvalid()).Times(1);
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT_EQUALS(presenter.instrument().specularPixel(), std::nullopt);
+  }
+
   void testAllWidgetsAreEnabledWhenReductionPaused() {
     auto presenter = makePresenter();
 
@@ -323,6 +343,18 @@ public:
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setCalibrationFilePath(defaultFilepath)).Times(1);
+    presenter.notifyInstrumentChanged("POLREF");
+  }
+
+  void testInstrumentChangedUpdatesSpecularPixelInView() {
+    auto model = Instrument(RangeInLambda(0.0, 0.0),
+                            MonitorCorrections(0, false, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0)),
+                            DetectorCorrections(false, DetectorCorrectionType::VerticalShift), "", 280.5);
+    auto defaultOptions = expectDefaults(model);
+    auto presenter = makePresenter(std::move(defaultOptions));
+
+    EXPECT_CALL(m_view, setSpecularPixel(std::optional<double>{280.5})).Times(1);
+
     presenter.notifyInstrumentChanged("POLREF");
   }
 

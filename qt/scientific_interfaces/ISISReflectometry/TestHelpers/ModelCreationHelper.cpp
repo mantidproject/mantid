@@ -468,7 +468,8 @@ DetectorCorrections makeDetectorCorrections() {
 }
 
 Instrument makeInstrument() {
-  return Instrument(makeWavelengthRange(), makeMonitorCorrections(), makeDetectorCorrections(), "test/calib_file.dat");
+  return Instrument(makeWavelengthRange(), makeMonitorCorrections(), makeDetectorCorrections(), "test/calib_file.dat",
+                    280.0);
 }
 
 Instrument makeEmptyInstrument() {

@@ -191,6 +191,7 @@ void updatePreviewInstrumentProperties(AlgorithmRuntimeProps &properties, Instru
 void updateInstrumentProperties(AlgorithmRuntimeProps &properties, Instrument const &instrument) {
   updatePreviewInstrumentProperties(properties, instrument);
   AlgorithmProperties::update("CalibrationFile", instrument.calibrationFilePath(), properties);
+  AlgorithmProperties::update("NominalSpecularPixelSpectrumNo", instrument.specularPixel(), properties);
 }
 
 class UpdateEventPropertiesVisitor : public boost::static_visitor<> {
