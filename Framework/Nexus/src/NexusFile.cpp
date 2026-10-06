@@ -1126,7 +1126,7 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
     memtype = H5Tcopy(m_current_type_id);
   } else {
     // h5MemType returns a predefined type, which cannot be closed, so take a copy for memtype to own
-    memtype = H5Tcopy(h5MemType(m_current_type_id));
+    memtype = h5MemType(m_current_type_id);
   }
 
   herr_t iRet = -1;
