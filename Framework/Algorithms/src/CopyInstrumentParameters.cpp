@@ -56,7 +56,7 @@ void CopyInstrumentParameters::exec() {
     // Get legacy ParameterMap, i.e., including masking, positions, rotations
     // stored in map (instead of DetectorInfo).
     const auto &givParams = inst1->makeLegacyParameterMap();
-    for (const auto &item : *givParams) {
+    for (const auto &item : givParams->entries()) {
       IComponent *oldComponent = item.first;
 
       const Geometry::IComponent *targComp = nullptr;

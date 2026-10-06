@@ -1,0 +1,1 @@
+- Instrument parameters can now be read and written from :class:`~mantid.geometry.ComponentInfo` in Python, with ``hasParameter``, ``getNumberParameter``, ``addDouble`` and friends, replacing the equivalent methods on ``Instrument`` and its components. The optional ``index`` argument defaults to the instrument itself, as in ``component_info.getNumberParameter("x-pixel-size")``.

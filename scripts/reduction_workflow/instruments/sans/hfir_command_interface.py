@@ -522,11 +522,11 @@ def beam_center_gravitational_drop(beam_center_file, sdd=1.13):
             Logger("CommandInterface").error("Cannot read input file %s." % beam_center_file)
             return
 
-    i = ws.getInstrument()
-    y_pixel_size_mm = i.getNumberParameter("y-pixel-size")[0]
+    component_info = ws.componentInfo()
+    y_pixel_size_mm = component_info.getNumberParameter("y-pixel-size")[0]
     Logger("CommandInterface").debug("Y Pixel size = %.2f mm" % y_pixel_size_mm)
     y_pixel_size = y_pixel_size_mm * 1e-3  # In meters
-    distance_detector1 = i.getComponentByName("detector1").getPos()[2]
+    distance_detector1 = component_info.position(component_info.indexOfAny("detector1"))[2]
     path_length = distance_detector1 - sdd
     Logger("CommandInterface").debug("SDD detector1 = %.3f meters. SDD for wing = %.3f meters." % (distance_detector1, sdd))
     Logger("CommandInterface").debug("Path length for gravitational drop = %.3f meters." % (path_length))

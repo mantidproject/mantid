@@ -507,13 +507,19 @@ MSVC_DIAG_OFF(4996)
 /// workspace index
 /// @param index :: the workspace index to return
 /// @returns A reference to the vector of binned X values
-MantidVec &EventWorkspace::dataX(const std::size_t index) { return getSpectrum(index).dataX(); }
+[[deprecated("The dataX() method is deprecated in Mantid 7.0.  Use mutableX() instead.")]]
+MantidVec &EventWorkspace::dataX(const std::size_t index) {
+  return getSpectrum(index).dataX();
+}
 
 /// Deprecated, use mutableDx() instead. Return the data X error vector at a
 /// given workspace index
 /// @param index :: the workspace index to return
 /// @returns A reference to the vector of binned error values
-MantidVec &EventWorkspace::dataDx(const std::size_t index) { return getSpectrum(index).dataDx(); }
+[[deprecated("The dataDx() method is deprecated in Mantid 7.0.  Use mutableDx() instead.")]]
+MantidVec &EventWorkspace::dataDx(const std::size_t index) {
+  return getSpectrum(index).dataDx();
+}
 
 MSVC_DIAG_ON(4996)
 GNU_DIAG_ON("deprecated-declarations")
@@ -521,6 +527,7 @@ GNU_DIAG_ON("deprecated-declarations")
 /// Deprecated, use mutableY() instead. Return the data Y vector at a given
 /// workspace index
 /// Note: these non-const access methods will throw NotImplementedError
+[[deprecated("The dataY() method is deprecated in Mantid 7.0.  Use mutableY() instead.")]]
 MantidVec &EventWorkspace::dataY(const std::size_t /*index*/) {
   throw NotImplementedError("EventWorkspace::dataY cannot return a non-const "
                             "array: you can't modify the histogrammed data in "
@@ -530,6 +537,7 @@ MantidVec &EventWorkspace::dataY(const std::size_t /*index*/) {
 /// Deprecated, use mutableE() instead. Return the data E vector at a given
 /// workspace index
 /// Note: these non-const access methods will throw NotImplementedError
+[[deprecated("The dataE() method is deprecated in Mantid 7.0.  Use mutableE() instead.")]]
 MantidVec &EventWorkspace::dataE(const std::size_t /*index*/) {
   throw NotImplementedError("EventWorkspace::dataE cannot return a non-const "
                             "array: you can't modify the histogrammed data in "
@@ -539,26 +547,39 @@ MantidVec &EventWorkspace::dataE(const std::size_t /*index*/) {
 /** Deprecated, use x() instead.
  * @return the const data X vector at a given workspace index
  * @param index :: workspace index   */
-const MantidVec &EventWorkspace::dataX(const std::size_t index) const { return getSpectrum(index).x().rawData(); }
+[[deprecated("The dataX() method is deprecated in Mantid 7.0.  Use x() instead.")]]
+const MantidVec &EventWorkspace::dataX(const std::size_t index) const {
+  return getSpectrum(index).x().rawData();
+}
 
 /** Deprecated, use dx() instead.
  * @return the const data X error vector at a given workspace index
  * @param index :: workspace index   */
-const MantidVec &EventWorkspace::dataDx(const std::size_t index) const { return getSpectrum(index).dx().rawData(); }
+[[deprecated("The dataDx() method is deprecated in Mantid 7.0.  Use dx() instead.")]]
+const MantidVec &EventWorkspace::dataDx(const std::size_t index) const {
+  return getSpectrum(index).dx().rawData();
+}
 
 /** Deprecated, use y() instead.
  * @return the const data Y vector at a given workspace index
  * @param index :: workspace index   */
-const MantidVec &EventWorkspace::dataY(const std::size_t index) const { return getSpectrum(index).y().rawData(); }
+[[deprecated("The dataY() method is deprecated in Mantid 7.0.  Use y() instead.")]]
+const MantidVec &EventWorkspace::dataY(const std::size_t index) const {
+  return getSpectrum(index).y().rawData();
+}
 
 /** Deprecated, use e() instead.
  * @return the const data E (error) vector at a given workspace index
  * @param index :: workspace index   */
-const MantidVec &EventWorkspace::dataE(const std::size_t index) const { return getSpectrum(index).e().rawData(); }
+[[deprecated("The dataE() method is deprecated in Mantid 7.0.  Use e() instead.")]]
+const MantidVec &EventWorkspace::dataE(const std::size_t index) const {
+  return getSpectrum(index).e().rawData();
+}
 
 /** Deprecated, use sharedX() instead.
  * @return a pointer to the X data vector at a given workspace index
  * @param index :: workspace index   */
+[[deprecated("The refX() method is deprecated in Mantid 7.0.  Use sharedX() instead.")]]
 Kernel::cow_ptr<HistogramData::HistogramX> EventWorkspace::refX(const std::size_t index) const {
   return getSpectrum(index).sharedX();
 }

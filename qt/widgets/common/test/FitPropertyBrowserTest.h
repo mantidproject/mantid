@@ -6,9 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/PropertyHandler.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowser.h"
@@ -200,6 +202,27 @@ public:
     heightProperty = f0Handler->getParameterProperty(QString("Height"));
     height = heightProperty->valueText().toDouble();
     TS_ASSERT_EQUALS(height, 12);
+  }
+
+  void test_removeWorkspaceAndSpectra_is_safe_for_an_unknown_workspace() {
+    m_fitPropertyBrowser->init();
+    // the browser was never told about this workspace, so there is no allowed-spectra entry to erase
+    TS_ASSERT_THROWS_NOTHING(m_fitPropertyBrowser->removeWorkspaceAndSpectra("never_added"));
+    TS_ASSERT_EQUALS(m_fitPropertyBrowser->getWorkspaceNames().indexOf("never_added"), -1);
+  }
+
+  void test_removeWorkspaceAndSpectra_is_safe_when_repeated() {
+    m_fitPropertyBrowser->init();
+    AnalysisDataService::Instance().addOrReplace("ws", WorkspaceCreationHelper::create2DWorkspace(2, 10));
+    m_fitPropertyBrowser->addAllowedSpectra("ws", QList<int>{1, 2});
+
+    TS_ASSERT_THROWS_NOTHING(m_fitPropertyBrowser->removeWorkspaceAndSpectra("ws"));
+    TS_ASSERT_EQUALS(m_fitPropertyBrowser->getWorkspaceNames().indexOf("ws"), -1);
+    // the second removal finds no allowed-spectra entry left to erase
+    TS_ASSERT_THROWS_NOTHING(m_fitPropertyBrowser->removeWorkspaceAndSpectra("ws"));
+    TS_ASSERT_EQUALS(m_fitPropertyBrowser->getWorkspaceNames().indexOf("ws"), -1);
+
+    AnalysisDataService::Instance().clear();
   }
 
 private:

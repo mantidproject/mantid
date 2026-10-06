@@ -1,3 +1,4 @@
+import tempfile
 import unittest
 from unittest import mock
 from unittest.mock import call, patch, create_autospec, MagicMock
@@ -10,14 +11,22 @@ from Engineering.EnggUtils import (
     create_output_files,
     _save_output_files,
     _load_run_and_convert_to_dSpacing,
-    _correct_full_calib_for_offset_scattering_com,
-    _can_calculate_scattering_com,
     process_vanadium,
     focus_run,
     convert_TOFerror_to_derror,
+    plot_tof_vs_d_from_calibration,
+    write_prm_file,
 )
 from Engineering.common.instrument_config import ENGINX_GROUP
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams, UnitParametersMap
+from mantid.simpleapi import (
+    AddSampleLog,
+    ApplyDiffCal,
+    CreateEmptyTableWorkspace,
+    CreateSampleWorkspace,
+    GroupDetectors,
+    SetInstrumentParameter,
+)
 
 enggutils_path = "Engineering.EnggUtils"
 
@@ -115,6 +124,71 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
             diff_consts = read_diff_constants_from_prm(dummy_file_path)
         deltas = abs(diff_consts - array([[2.99, 18306.98, 14.44], [-29.68, 18497.75, -26.5]]))
         self.assertTrue((deltas < 1e-10).all())
+
+    BACK_TO_BACK_PARAM_NAMES = ("alpha_0", "beta_0", "beta_1", "sigma_0_sq", "sigma_1_sq", "sigma_2_sq")
+
+    def _make_focused_ws_with_distinct_bank_profile_params(self):
+        """
+        Make a focused workspace with one spectrum per bank and a distinct set of BackToBackExponential
+        parameters on each bank, so the profile parameters in a prm block identify the bank they came from.
+        The detector IDs (4-11) are distinct from both the spectrum indices and the detector indices, so
+        writing the correct parameters relies on the detector ID lookup in write_prm_file.
+        :return: (focused workspace, list of the profile parameters set on each bank)
+        """
+        ws = CreateSampleWorkspace(NumBanks=2, BankPixelWidth=2, XUnit="TOF", OutputWorkspace="ws_prm_profile")
+        bank_params = []
+        for ibank in range(2):
+            params = [float(ibank + iparam + 1) for iparam in range(len(self.BACK_TO_BACK_PARAM_NAMES))]
+            bank_params.append(params)
+            for param_name, value in zip(self.BACK_TO_BACK_PARAM_NAMES, params):
+                SetInstrumentParameter(
+                    ws, ComponentName=f"bank{ibank + 1}", ParameterName=param_name, ParameterType="Number", Value=str(value)
+                )
+        # write_prm_file reads DIFA and TZERO from the diffractometer constants, which requires a calibration
+        cal_table = CreateEmptyTableWorkspace(OutputWorkspace="ws_prm_profile_cal")
+        for col_name, col_type in [("detid", "int"), ("difc", "double"), ("difa", "double"), ("tzero", "double")]:
+            cal_table.addColumn(col_type, col_name)
+        for detid in ws.detectorInfo().detectorIDs():
+            cal_table.addRow([int(detid), 1000.0, 0.0, 0.0])
+        ApplyDiffCal(ws, CalibrationWorkspace=cal_table)
+        ws_foc = GroupDetectors(ws, GroupingPattern="0-3,4-7", OutputWorkspace="ws_prm_profile_foc")
+        AddSampleLog(ws_foc, LogName="run_number", LogText="123456")
+        return ws_foc, bank_params
+
+    @staticmethod
+    def _read_profile_params_from_prm(prm_filepath, iblock):
+        """Read the six BackToBackExponential parameters from the PRCF11/PRCF12 lines of a prm block"""
+        with open(prm_filepath) as fprm:
+            lines = fprm.readlines()
+        params = []
+        for line_type in ("PRCF11", "PRCF12"):
+            line = next(line for line in lines if line.startswith(f"INS  {iblock}{line_type}"))
+            params.extend(float(value) for value in line.split()[2:])
+        return params[: len(EnggUtilsTest.BACK_TO_BACK_PARAM_NAMES)]
+
+    def test_write_prm_file_writes_profile_params_of_the_bank_each_spectrum_was_focused_from(self):
+        ws_foc, bank_params = self._make_focused_ws_with_distinct_bank_profile_params()
+        self.calibration.config.prm_header_template = "template_ENGINX_prm_header.prm"
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            prm_filepath = path.join(tmpdir, "all_banks.prm")
+            write_prm_file(ws_foc, prm_filepath, self.calibration)
+
+            for iblock, expected_params in enumerate(bank_params, start=1):
+                self.assertEqual(expected_params, self._read_profile_params_from_prm(prm_filepath, iblock))
+
+    def test_write_prm_file_writes_profile_params_of_the_selected_bank_when_spec_nums_given(self):
+        ws_foc, bank_params = self._make_focused_ws_with_distinct_bank_profile_params()
+        self.calibration.config.prm_header_template = "template_ENGINX_prm_header.prm"
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            prm_filepath = path.join(tmpdir, "bank_2.prm")
+            write_prm_file(ws_foc, prm_filepath, self.calibration, spec_nums=[1])
+
+            # the only block in the file is the second bank, not the first
+            self.assertEqual(bank_params[1], self._read_profile_params_from_prm(prm_filepath, 1))
+            with self.assertRaises(StopIteration):
+                self._read_profile_params_from_prm(prm_filepath, 2)
 
     # tests for code used in focus tab of UI
 
@@ -251,137 +325,6 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         mock_log.warning.assert_called_once()
         mock_norm.assert_not_called()  # throws error if zero charge
         mock_del.assert_called_once()
-
-    @patch(enggutils_path + ".mantid.CloneWorkspace")
-    @patch(enggutils_path + ".mantid.MoveInstrumentComponent")
-    @patch(enggutils_path + ".mantid.CalculateDIFC")
-    @patch(enggutils_path + ".mantid.ExtractSpectra")
-    @patch(enggutils_path + ".mantid.EstimateScatteringVolumeCentreOfMass")
-    def test_correct_full_calib_for_offset_scattering_com_scales_difc_per_detector(
-        self, mock_com, mock_extract, mock_calc_difc, mock_move, mock_clone
-    ):
-        ws = MagicMock()
-        # nominal sample position and component name
-        sample = ws.getInstrument().getSample.return_value
-        sample.getFullName.return_value = "sample-comp"
-        # scattering centre of mass offset from the origin
-        mock_com.return_value = (0.001, 0.002, 0.003)
-        # per-detector geometric DIFCs -> ratio of 1.1 for both detectors
-        difc0, difc1 = MagicMock(), MagicMock()
-        difc0.getValue.side_effect = lambda detid: {1: 10.0, 2: 20.0}[detid]
-        difc1.getValue.side_effect = lambda detid: {1: 11.0, 2: 22.0}[detid]
-        mock_calc_difc.side_effect = [difc0, difc1]
-        # cloned calibration table to be corrected in place
-        cal = MagicMock()
-        cal.column.side_effect = lambda name: {"difc": [100.0, 200.0], "detid": [1, 2]}[name]
-        copy_ws = MagicMock()
-        mock_extract.return_value = copy_ws
-        mock_clone.return_value = cal
-
-        result = _correct_full_calib_for_offset_scattering_com(ws, "full_calib")
-
-        mock_extract.assert_called_once_with(
-            InputWorkspace=ws, StartWorkspaceIndex=0, EndWorkspaceIndex=0, OutputWorkspace="__tmp_copy", StoreInADS=False
-        )
-
-        # returns the cloned (corrected) table, cloned from the supplied full calibration
-        self.assertIs(result, cal)
-        mock_clone.assert_called_once_with(InputWorkspace="full_calib", OutputWorkspace="__full_calib_com")
-        # DIFC computed once at the nominal position and once at the com
-        mock_com.assert_called_once()
-        self.assertEqual(mock_calc_difc.call_count, 2)
-        # sample is moved to the com and then restored to its original position
-        mock_move.assert_has_calls(
-            [
-                call(Workspace=copy_ws, ComponentName="sample-comp", X=0.001, Y=0.002, Z=0.003, RelativePosition=False),
-            ]
-        )
-        self.assertEqual(mock_move.call_count, 1)
-        # only the DIFC column is scaled (by difc1/difc0 = 1.1), DIFA/TZERO are untouched
-        cal.setCell.assert_has_calls(
-            [
-                call("difc", 0, 100.0 * 11.0 / 10.0),
-                call("difc", 1, 200.0 * 22.0 / 20.0),
-            ]
-        )
-        self.assertEqual(cal.setCell.call_count, 2)
-
-    @patch(enggutils_path + ".logger")
-    def test_can_calculate_scattering_com_true_when_gauge_volume_and_valid_shape(self, mock_logger):
-        ws = MagicMock()
-        ws.getRun().hasProperty.return_value = True
-        ws.sample().getShape().hasValidShape.return_value = True
-
-        self.assertTrue(_can_calculate_scattering_com(ws))
-        ws.getRun().hasProperty.assert_called_with("GaugeVolume")
-        mock_logger.information.assert_called_once()
-
-    @patch(enggutils_path + ".logger")
-    def test_can_calculate_scattering_com_false_when_no_gauge_volume(self, mock_logger):
-        ws = MagicMock()
-        ws.getRun().hasProperty.return_value = False
-        ws.sample().getShape().hasValidShape.return_value = True
-
-        self.assertFalse(_can_calculate_scattering_com(ws))
-
-    @patch(enggutils_path + ".logger")
-    def test_can_calculate_scattering_com_false_when_invalid_shape(self, mock_logger):
-        ws = MagicMock()
-        ws.getRun().hasProperty.return_value = True
-        ws.sample().getShape().hasValidShape.return_value = False
-
-        self.assertFalse(_can_calculate_scattering_com(ws))
-
-    @patch(enggutils_path + ".mantid.DeleteWorkspace")
-    @patch(enggutils_path + ".mantid.ConvertUnits")
-    @patch(enggutils_path + ".mantid.ApplyDiffCal")
-    @patch(enggutils_path + "._correct_full_calib_for_offset_scattering_com")
-    @patch(enggutils_path + "._can_calculate_scattering_com")
-    @patch(enggutils_path + ".mantid.NormaliseByCurrent")
-    @patch(enggutils_path + ".path_handling.get_run_number_from_path")
-    @patch(enggutils_path + ".mantid.Load")
-    def test_load_run_applies_com_corrected_calib_when_possible(
-        self, mock_load, mock_runno, mock_norm, mock_can, mock_correct, mock_apply, mock_conv, mock_del
-    ):
-        ws = MagicMock()
-        ws.getRun().getProtonCharge.return_value = 1.0
-        mock_load.return_value = ws
-        mock_norm.return_value = ws
-        mock_conv.return_value = "ws_dSpacing"
-        mock_can.return_value = True
-        mock_correct.return_value = "corrected_cal"
-
-        result = _load_run_and_convert_to_dSpacing("fpath", "ENGINX", "full_calib")
-
-        mock_correct.assert_called_once_with(ws, "full_calib")
-        mock_apply.assert_called_once_with(InstrumentWorkspace=ws, CalibrationWorkspace="corrected_cal")
-        mock_del.assert_called_once_with("corrected_cal")  # temporary corrected table is cleaned up
-        self.assertEqual(result, "ws_dSpacing")
-
-    @patch(enggutils_path + ".mantid.DeleteWorkspace")
-    @patch(enggutils_path + ".mantid.ConvertUnits")
-    @patch(enggutils_path + ".mantid.ApplyDiffCal")
-    @patch(enggutils_path + "._correct_full_calib_for_offset_scattering_com")
-    @patch(enggutils_path + "._can_calculate_scattering_com")
-    @patch(enggutils_path + ".mantid.NormaliseByCurrent")
-    @patch(enggutils_path + ".path_handling.get_run_number_from_path")
-    @patch(enggutils_path + ".mantid.Load")
-    def test_load_run_uses_uncorrected_calib_when_com_not_possible(
-        self, mock_load, mock_runno, mock_norm, mock_can, mock_correct, mock_apply, mock_conv, mock_del
-    ):
-        ws = MagicMock()
-        ws.getRun().getProtonCharge.return_value = 1.0
-        mock_load.return_value = ws
-        mock_norm.return_value = ws
-        mock_conv.return_value = "ws_dSpacing"
-        mock_can.return_value = False
-
-        result = _load_run_and_convert_to_dSpacing("fpath", "ENGINX", "full_calib")
-
-        mock_correct.assert_not_called()
-        mock_apply.assert_called_once_with(InstrumentWorkspace=ws, CalibrationWorkspace="full_calib")
-        mock_del.assert_not_called()  # full_calib is reused, nothing temporary to delete
-        self.assertEqual(result, "ws_dSpacing")
 
     @patch(enggutils_path + ".path.exists")
     @patch(enggutils_path + ".mantid.SaveFocusedXYE")
@@ -549,6 +492,34 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
 
         expected_dirs = [path.join("/mock", "User", "RB123", "Focus", "Texture20")]
         mock_save.assert_called_with(expected_dirs, ws, calib, "123456", "RB123")
+
+    @patch("matplotlib.pyplot.subplots")
+    @patch(f"{enggutils_path}.ADS")
+    def test_plot_tof_vs_d_reads_centres_using_peak_function_centre_parameter(self, mock_ads, mock_subplots):
+        # Gaussian calls its centre parameter "PeakCentre" rather than BackToBackExponential's "X0"
+        self.calibration.get_fit_peak_shape.return_value = "Gaussian"
+        centre_param = "PeakCentre"
+        ws_foc = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=1, OutputWorkspace="ws_foc_centre_param")
+        detid = ws_foc.getSpectrum(0).getDetectorIDs()[0]
+        centres, errors, dspacing = [1.0e4, 2.0e4], [10.0, 20.0], [1.0, 2.0]
+        tables = {
+            "diag_fitparam": {"wsindex": [0, 0], centre_param: centres},
+            "diag_fiterror": {centre_param: errors},
+            "diag_dspacing": {"detid": [detid], "@1.0": [1.0], "@2.0": [2.0]},
+        }
+        mock_ads.retrieve.side_effect = lambda name: MagicMock(toDict=MagicMock(return_value=tables[name]))
+        diag_ws = MagicMock()
+        diag_ws.name.return_value = "diag"
+        mock_ax = MagicMock()
+        mock_ax.ndim = 2
+        mock_subplots.return_value = (MagicMock(), mock_ax)
+
+        plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing, self.calibration)  # would raise KeyError if hard coded to X0
+
+        # first errorbar call plots the fitted centres and their errors against d-spacing
+        args, kwargs = mock_ax.__getitem__.return_value.errorbar.call_args_list[0]
+        self.assertTrue((args[1] == array(centres)).all())
+        self.assertTrue((kwargs["yerr"] == array(errors)).all())
 
     def test_convert_centres_and_error_from_TOF_to_d(self):
         params = UnitParametersMap()

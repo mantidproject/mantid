@@ -10,7 +10,7 @@ from testhelpers import WorkspaceCreationHelper
 from mantid.kernel import V3D
 from mantid.kernel import Quat
 import mantid.geometry
-from mantid.geometry import ComponentType, CSGObject
+from mantid.geometry import ComponentInfo, ComponentType, CSGObject
 from mantid.simpleapi import CloneWorkspace, CreateWorkspace
 
 
@@ -282,6 +282,127 @@ class ComponentInfoTest(unittest.TestCase):
             info.detectorIndexAtXYZ(bank_index, self._RECT_NUM_PIXELS, 0, 0)
         with self.assertRaises(IndexError):
             info.detectorIndexAtXYZ(bank_index, 0, self._RECT_NUM_PIXELS, 0)
+
+    """
+    ----------------------------------------------------------------------------
+    Named parameters
+    ----------------------------------------------------------------------------
+    """
+
+    def test_fullName(self):
+        info = self._ws.componentInfo()
+        root = info.root()
+        self.assertEqual(info.fullName(root), info.name(root))
+        child = int(info.children(root)[0])
+        self.assertEqual(info.fullName(child), info.name(root) + "/" + info.name(child))
+
+    def test_indexOfFullName(self):
+        info = self._ws.componentInfo()
+        for index in (info.root(), int(info.children(info.root())[0])):
+            self.assertEqual(info.indexOfFullName(info.fullName(index)), index)
+
+    def test_indexOfFullName_unknown_name_returns_invalidIndex(self):
+        info = self._ws.componentInfo()
+        self.assertEqual(info.indexOfFullName("not/a/component"), ComponentInfo.invalidIndex)
+
+    def test_parameters_are_unset_by_default(self):
+        info = self._ws.componentInfo()
+        self.assertFalse(info.hasParameter("a-double"))
+        self.assertEqual(len(info.getNumberParameter("a-double")), 0)
+        self.assertEqual(info.getParameterType("a-double"), "")
+
+    def test_addDouble_and_read_back(self):
+        ws = CloneWorkspace(self._ws, StoreInADS=False)
+        ws.componentInfo().addDouble("a-double", 1.25)
+        info = ws.componentInfo()
+        self.assertTrue(info.hasParameter("a-double"))
+        self.assertEqual(info.getNumberParameter("a-double")[0], 1.25)
+        self.assertEqual(info.getParameterType("a-double"), "double")
+
+    def test_addInt_addBool_addString(self):
+        ws = CloneWorkspace(self._ws, StoreInADS=False)
+        mutable = ws.componentInfo()
+        mutable.addInt("an-int", 7)
+        mutable.addBool("a-bool", True)
+        mutable.addString("a-string", "hello")
+        info = ws.componentInfo()
+        self.assertEqual(info.getIntParameter("an-int")[0], 7)
+        self.assertEqual(info.getBoolParameter("a-bool")[0], True)
+        self.assertEqual(info.getStringParameter("a-string")[0], "hello")
+        self.assertEqual(info.getParameterType("an-int"), "int")
+        self.assertEqual(info.getParameterType("a-bool"), "bool")
+        self.assertEqual(info.getParameterType("a-string"), "string")
+
+    def test_addV3D_and_addQuat(self):
+        ws = CloneWorkspace(self._ws, StoreInADS=False)
+        mutable = ws.componentInfo()
+        mutable.addV3D("a-v3d", V3D(1, 2, 3))
+        mutable.addQuat("a-quat", Quat(1, 0, 0, 0))
+        info = ws.componentInfo()
+        self.assertEqual(info.getParameterType("a-v3d"), "V3D")
+        self.assertEqual(info.getParameterType("a-quat"), "Quat")
+
+    def test_addParameter_takes_the_value_as_a_string(self):
+        ws = CloneWorkspace(self._ws, StoreInADS=False)
+        ws.componentInfo().addParameter("string", "a-string", "hello")
+        self.assertEqual(ws.componentInfo().getStringParameter("a-string")[0], "hello")
+
+    def test_index_defaults_to_the_root_component(self):
+        ws = CloneWorkspace(self._ws, StoreInADS=False)
+        root = ws.componentInfo().root()
+        # Written without an index, read back with an explicit one, and the other way round.
+        ws.componentInfo().addDouble("a-double", 1.25)
+        ws.componentInfo().addDouble("another-double", 2.5, root)
+        info = ws.componentInfo()
+        self.assertEqual(info.getNumberParameter("a-double", root)[0], 1.25)
+        self.assertEqual(info.getNumberParameter("another-double")[0], 2.5)
+        self.assertEqual(set(info.getParameterNames()), set(info.getParameterNames(root)))
+
+    def test_index_must_be_a_component_index_or_None(self):
+        info = self._ws.componentInfo()
+        self.assertRaises(TypeError, info.getNumberParameter, "a-double", "not-an-index")
+
+    def test_lookups_are_recursive_by_default(self):
+        ws = CloneWorkspace(self._ws, StoreInADS=False)
+        root = ws.componentInfo().root()
+        ws.componentInfo().addDouble("a-double", 1.25)
+        info = ws.componentInfo()
+        child = int(info.children(root)[0])
+        self.assertTrue(info.hasParameter("a-double", child))
+        self.assertEqual(info.getNumberParameter("a-double", child)[0], 1.25)
+        self.assertFalse(info.hasParameter("a-double", child, False))
+        self.assertEqual(len(info.getNumberParameter("a-double", child, False)), 0)
+
+    def test_getParameterNames(self):
+        ws = CloneWorkspace(self._ws, StoreInADS=False)
+        mutable = ws.componentInfo()
+        root = ws.componentInfo().root()
+        child = int(ws.componentInfo().children(root)[0])
+        mutable.addDouble("on-root", 1.0)
+        mutable.addDouble("on-child", 2.0, child)
+        info = ws.componentInfo()
+        self.assertEqual(set(info.getParameterNames(child, False)), {"on-child"})
+        self.assertEqual(set(info.getParameterNames(child)), {"on-child", "on-root"})
+
+    def test_clearParameter(self):
+        ws = CloneWorkspace(self._ws, StoreInADS=False)
+        ws.componentInfo().addDouble("a-double", 1.25)
+        self.assertTrue(ws.componentInfo().hasParameter("a-double"))
+        ws.componentInfo().clearParameter("a-double")
+        self.assertFalse(ws.componentInfo().hasParameter("a-double"))
+
+    def test_addFittingParameter_and_getFittingParameter(self):
+        ws = CloneWorkspace(self._ws, StoreInADS=False)
+        ws.componentInfo().addFittingParameter("TestFitParam", "TestFunction", "3.5 , TestFunction , TestFitParam")
+        info = ws.componentInfo()
+        self.assertEqual(info.getParameterType("TestFitParam"), "fitting")
+        self.assertEqual(info.getFittingParameter("TestFitParam", 1.0), 3.5)
+
+    def test_getFittingParameter_raises_for_a_non_fitting_parameter(self):
+        ws = CloneWorkspace(self._ws, StoreInADS=False)
+        ws.componentInfo().addDouble("a-double", 1.25)
+        with self.assertRaises(RuntimeError):
+            ws.componentInfo().getFittingParameter("a-double", 1.0)
 
     def test_getMemorySize(self):
         info = self._ws.componentInfo()

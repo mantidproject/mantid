@@ -184,8 +184,8 @@ def _load_files(file_specifiers, ipf_filename, spec_min, spec_max, load_logs=Tru
         workspace_names.append(ws_name)
 
         # Get the spectrum number for the monitor
-        instrument = workspace.getInstrument()
-        monitor_param = instrument.getNumberParameter("Workflow.Monitor1-SpectrumNumber")
+        component_info = workspace.componentInfo()
+        monitor_param = component_info.getNumberParameter("Workflow.Monitor1-SpectrumNumber")
 
         if monitor_param:
             monitor_index = int(monitor_param[0])
@@ -247,7 +247,8 @@ def chop_workspace(workspace, monitor_index):
 
     # Chop data if required
     try:
-        chop_threshold = workspace.getInstrument().getNumberParameter("Workflow.ChopDataIfGreaterThan")[0]
+        component_info = workspace.componentInfo()
+        chop_threshold = component_info.getNumberParameter("Workflow.ChopDataIfGreaterThan")[0]
         x_max = workspace.x(0)[-1]
         chopped_data = x_max > chop_threshold
     except IndexError:
@@ -435,21 +436,21 @@ def get_instrument_parameter(workspace_name: str, param_name: str):
       @param ws The workspace to get the instrument from.
       @param param_name The name of the parameter to look up.
     """
-    instrument = AnalysisDataService.retrieve(workspace_name).getInstrument()
+    component_info = AnalysisDataService.retrieve(workspace_name).componentInfo()
 
     # Create a map of type parameters to functions. This is so we avoid writing lots of
     # if statements because there's no way to dynamically get the type.
     func_map = {
-        "double": instrument.getNumberParameter,
-        "string": instrument.getStringParameter,
-        "int": instrument.getIntParameter,
-        "bool": instrument.getBoolParameter,
+        "double": component_info.getNumberParameter,
+        "string": component_info.getStringParameter,
+        "int": component_info.getIntParameter,
+        "bool": component_info.getBoolParameter,
     }
 
-    if not instrument.hasParameter(param_name):
+    if not component_info.hasParameter(param_name):
         raise ValueError(f"Unable to retrieve {param_name} from Instrument Parameter file.")
 
-    param_type = instrument.getParameterType(param_name)
+    param_type = component_info.getParameterType(param_name)
     if param_type == "":
         raise ValueError(f"Unable to retrieve {param_name} from Instrument Parameter file.")
 
@@ -516,10 +517,10 @@ def identify_bad_detectors(workspace_name):
     """
     from mantid.simpleapi import IdentifyNoisyDetectors
 
-    instrument = mtd[workspace_name].getInstrument()
+    component_info = mtd[workspace_name].componentInfo()
 
     try:
-        masking_type = instrument.getStringParameter("Workflow.Masking")[0]
+        masking_type = component_info.getStringParameter("Workflow.Masking")[0]
     except IndexError:
         masking_type = "None"
 
@@ -552,11 +553,11 @@ def unwrap_monitor(workspace_name):
     from mantid.simpleapi import UnwrapMonitor, RemoveBins, FFTSmooth
 
     monitor_workspace_name = workspace_name + "_mon"
-    instrument = mtd[monitor_workspace_name].getInstrument()
+    component_info = mtd[monitor_workspace_name].componentInfo()
 
     # Determine if the monitor should be unwrapped
     try:
-        unwrap = instrument.getStringParameter("Workflow.UnwrapMonitor")[0]
+        unwrap = component_info.getStringParameter("Workflow.UnwrapMonitor")[0]
 
         if unwrap == "Always":
             should_unwrap = True
@@ -573,9 +574,9 @@ def unwrap_monitor(workspace_name):
     logger.debug("Need to unwrap monitor for %s: %s" % (workspace_name, str(should_unwrap)))
 
     if should_unwrap:
-        sample = instrument.getSample()
-        sample_to_source = sample.getPos() - instrument.getSource().getPos()
-        radius = mtd[workspace_name].getDetector(0).getDistance(sample)
+        sample_position = component_info.samplePosition()
+        sample_to_source = sample_position - component_info.sourcePosition()
+        radius = mtd[workspace_name].spectrumInfo().position(0).distance(sample_position)
         z_dist = sample_to_source.getZ()
         l_ref = z_dist + radius
 
@@ -611,12 +612,12 @@ def process_monitor_efficiency(workspace_name):
     from mantid.simpleapi import OneMinusExponentialCor
 
     monitor_workspace_name = workspace_name + "_mon"
-    instrument = mtd[workspace_name].getInstrument()
+    component_info = mtd[workspace_name].componentInfo()
 
     try:
-        area = instrument.getNumberParameter("Workflow.Monitor1-Area")[0]
-        thickness = instrument.getNumberParameter("Workflow.Monitor1-Thickness")[0]
-        attenuation = instrument.getNumberParameter("Workflow.Monitor1-Attenuation")[0]
+        area = component_info.getNumberParameter("Workflow.Monitor1-Area")[0]
+        thickness = component_info.getNumberParameter("Workflow.Monitor1-Thickness")[0]
+        attenuation = component_info.getNumberParameter("Workflow.Monitor1-Attenuation")[0]
     except IndexError:
         raise ValueError("Cannot get monitor details form parameter file")
 
@@ -641,10 +642,10 @@ def scale_monitor(workspace_name):
     from mantid.simpleapi import Scale
 
     monitor_workspace_name = workspace_name + "_mon"
-    instrument = mtd[workspace_name].getInstrument()
+    component_info = mtd[workspace_name].componentInfo()
 
     try:
-        scale_factor = instrument.getNumberParameter("Workflow.Monitor1-ScalingFactor")[0]
+        scale_factor = component_info.getNumberParameter("Workflow.Monitor1-ScalingFactor")[0]
     except IndexError:
         logger.information("No monitor scaling factor found for workspace %s" % workspace_name)
         return
@@ -768,7 +769,7 @@ def group_spectra_of(
     @param spectra_range The min and max spectra numbers
     """
 
-    instrument = workspace.getInstrument()
+    component_info = workspace.componentInfo()
     group_detectors = AlgorithmManager.create("GroupDetectors")
     group_detectors.setChild(True)
     group_detectors.setProperty("InputWorkspace", workspace)
@@ -778,7 +779,7 @@ def group_spectra_of(
     if method == "IPF":
         # Get the grouping method from the parameter file
         try:
-            grouping_method = instrument.getStringParameter("Workflow.GroupingMethod")[0]
+            grouping_method = component_info.getStringParameter("Workflow.GroupingMethod")[0]
         except IndexError:
             grouping_method = "Individual"
 
@@ -816,7 +817,7 @@ def group_spectra_of(
             group_detectors.setProperty("ExcludeGroupNumbers", [0])
         else:
             try:
-                grouping_file = instrument.getStringParameter("Workflow.GroupingFile")[0]
+                grouping_file = component_info.getStringParameter("Workflow.GroupingFile")[0]
             except IndexError:
                 raise RuntimeError("Cannot get grouping file from properties or IPF.")
 
@@ -953,17 +954,18 @@ def rename_reduction(workspace_name, multiple_files, suffix=None):
 
     # Get the instrument, run number and title
     if is_multi_frame:
-        instrument = mtd[workspace_name].getItem(0).getInstrument()
+        component_info = mtd[workspace_name].getItem(0).componentInfo()
         run_number = mtd[workspace_name].getItem(0).getRun()["run_number"].value
         run_title = mtd[workspace_name].getItem(0).getRun()["run_title"].value.strip()
     else:
-        instrument = mtd[workspace_name].getInstrument()
+        component_info = mtd[workspace_name].componentInfo()
         run_number = mtd[workspace_name].getRun()["run_number"].value
         run_title = mtd[workspace_name].getRun()["run_title"].value.strip()
+    root = component_info.root()
 
     # Get the naming convention parameter form the parameter file
     try:
-        convention = instrument.getStringParameter("Workflow.NamingConvention")[0]
+        convention = component_info.getStringParameter("Workflow.NamingConvention")[0]
     except IndexError:
         # Default to run title if naming convention parameter not set
         convention = "RunTitle"
@@ -971,7 +973,7 @@ def rename_reduction(workspace_name, multiple_files, suffix=None):
     logger.information("Run number for workspace %s is %s" % (workspace_name, run_number))
     logger.information("Run title for workspace %s is %s" % (workspace_name, run_title))
 
-    inst_name = instrument.getName()
+    inst_name = component_info.name(root)
     inst_name = inst_name.lower()
 
     if multiple_files:
@@ -990,8 +992,8 @@ def rename_reduction(workspace_name, multiple_files, suffix=None):
         new_name = "%s%s%s-%s" % (inst_name.lower(), run_number, multi_run_marker, formatted_title)
 
     elif convention == "AnalyserReflection":
-        analyser = instrument.getStringParameter("analyser")[0]
-        reflection = instrument.getStringParameter("reflection")[0]
+        analyser = component_info.getStringParameter("analyser")[0]
+        reflection = component_info.getStringParameter("reflection")[0]
         if not suffix:
             new_name = "%s%s%s_%s%s_red" % (inst_name.lower(), run_number, multi_run_marker, analyser, reflection)
         else:

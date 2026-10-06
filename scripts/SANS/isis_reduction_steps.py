@@ -1170,8 +1170,8 @@ class Mask_ISIS(ReductionStep):
             if instrument_name == "SANS2D" or instrument_name == "LOQ":
                 component_name = "rear-detector" if instrument_name == "SANS2D" else "main-detector-bank"
                 ws = mtd[str(workspace)]
-                det = ws.getInstrument().getComponentByName(component_name)
-                det_Z = det.getPos().getZ()
+                component_info = ws.componentInfo()
+                det_Z = component_info.position(component_info.indexOfAny(component_name)).getZ()
                 start_point = [self.arm_x, self.arm_y, det_Z]
                 MaskDetectorsInShape(Workspace=workspace, ShapeXML=self._mask_line(start_point, 100.0, self.arm_width, self.arm_angle))
 

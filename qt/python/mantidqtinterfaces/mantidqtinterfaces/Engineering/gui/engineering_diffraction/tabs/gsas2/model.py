@@ -10,6 +10,7 @@ import os
 import platform
 import shutil
 import subprocess
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Tuple, TypeAlias
@@ -214,6 +215,12 @@ class GSAS2Model:
         data_files = load_parameters[2]  # Extract data files list
         num_hist = None
 
+        # Checked here rather than only in initial_validation because the per-file project name
+        # below is never empty, so that check could never fire for a missing project name.
+        if not project_name or not project_name.strip(" \t"):
+            logger.error("* There must be a valid Project Name for GSASII refinement")
+            return None
+
         for data_file in data_files:
             # Create unique project name for each file
             file_basename = os.path.splitext(os.path.basename(data_file))[0]
@@ -246,39 +253,54 @@ class GSAS2Model:
         self.clear_input_components()
         if not self.initial_validation(project_name, load_parameters):
             return None
+        # From here on a temporary working directory exists, so every exit has to tidy it up. On the
+        # success path load_basic_outputs empties and removes it, and the cleanup below is a no-op.
         self.set_components_from_inputs(load_parameters, refinement_parameters, project_name, rb_num)
-        self.read_phase_files()
-        self.generate_reflections_from_space_group()
+        try:
+            self.read_phase_files()
+            self.generate_reflections_from_space_group()
 
-        formatted_limits: List[List[float]] | None = None
-        # Ensure both elements are lists of floats and pass formatted limits to validate_x_limits
-        if isinstance(user_x_limits, list) and len(user_x_limits) == 2:
-            formatted_limits = [
-                user_x_limits[0] if isinstance(user_x_limits[0], list) else [user_x_limits[0]],
-                user_x_limits[1] if isinstance(user_x_limits[1], list) else [user_x_limits[1]],
-            ]
+            formatted_limits: List[List[float]] | None = None
+            # Ensure both elements are lists of floats and pass formatted limits to validate_x_limits
+            if isinstance(user_x_limits, list) and len(user_x_limits) == 2:
+                formatted_limits = [
+                    user_x_limits[0] if isinstance(user_x_limits[0], list) else [user_x_limits[0]],
+                    user_x_limits[1] if isinstance(user_x_limits[1], list) else [user_x_limits[1]],
+                ]
 
-        if not self.validate_x_limits(formatted_limits):
-            return None
-        if not self.further_validation():
-            return None
+            if not self.validate_x_limits(formatted_limits):
+                return None
+            if not self.further_validation():
+                return None
 
-        runtime = self.call_gsas2()
-        if not runtime:
-            return None
-        runtime_str = runtime[1]  # Extract the string part of the runtime tuple
-        report_result = self.report_on_outputs(runtime_str)
-        if report_result is not None:
-            gsas_result_filepath, _ = report_result  # Unpack the tuple
-        else:
-            logger.error("Failed to unpack the result from report_on_outputs.")
-            return None
-        gsas_result = gsas_result_filepath
-        if not gsas_result:
-            return None
-        self.load_basic_outputs(gsas_result)
+            runtime = self.call_gsas2()
+            if not runtime:
+                return None
+            runtime_str = runtime[1]  # Extract the string part of the runtime tuple
+            report_result = self.report_on_outputs(runtime_str)
+            if report_result is not None:
+                gsas_result_filepath, _ = report_result  # Unpack the tuple
+            else:
+                logger.error("Failed to unpack the result from report_on_outputs.")
+                return None
+            gsas_result = gsas_result_filepath
+            if not gsas_result:
+                return None
+            self.load_basic_outputs(gsas_result)
 
-        return self.state.number_of_regions
+            return self.state.number_of_regions
+        finally:
+            self._remove_temporary_save_directory()
+
+    def _remove_temporary_save_directory(self) -> None:
+        """Remove the working directory, if it is still there.
+
+        A refinement that is rejected by validation, or that GSAS-II fails, would otherwise leave an
+        empty tmp_EngDiff_GSASII_* directory in the user's save location on every attempt.
+        """
+        temporary_directory = self.save_directories.temporary_save_directory
+        if temporary_directory and os.path.isdir(temporary_directory):
+            shutil.rmtree(temporary_directory, ignore_errors=True)
 
     # ===============
     # Prepare Inputs
@@ -761,10 +783,12 @@ class GSAS2Model:
             # if calibration.group == GROUP.TEXTURE20 or calibration.group == GROUP.TEXTURE30:
             #     calib_dirs.pop(0)  # only save to RB directory to limit number files saved
         self.user_save_directory = os.path.join(save_directory, self.save_directories.project_name)
-        self.save_directories.temporary_save_directory = os.path.join(
-            save_directory, datetime.datetime.now().strftime("tmp_EngDiff_GSASII_%Y-%m-%d_%H-%M-%S")
+        # mkdtemp rather than a bare timestamp: the name is only resolved to the second, so two
+        # refinements started within the same second would otherwise collide and raise FileExistsError
+        os.makedirs(save_directory, exist_ok=True)
+        self.save_directories.temporary_save_directory = tempfile.mkdtemp(
+            prefix=datetime.datetime.now().strftime("tmp_EngDiff_GSASII_%Y-%m-%d_%H-%M-%S_"), dir=save_directory
         )
-        os.makedirs(self.save_directories.temporary_save_directory)
 
     def move_output_files_to_user_save_location(self) -> str:
         for new_directory in self.file_paths.gsas2_save_dirs:

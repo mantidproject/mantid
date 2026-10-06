@@ -470,14 +470,15 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def _groupDetectors(self, mainWS):
         """Group detectors with similar thetas."""
-        instrument = mainWS.getInstrument()
-        fileHandle, path = tempfile.mkstemp(suffix=".xml", prefix="grouping-{}-".format(instrument.getName()))
+        component_info = mainWS.componentInfo()
+        root = component_info.root()
+        fileHandle, path = tempfile.mkstemp(suffix=".xml", prefix="grouping-{}-".format(component_info.name(root)))
         # We don't need the handle, just the path.
         os.close(fileHandle)
         angleStepProperty = self.getProperty(common.PROP_GROUPING_ANGLE_STEP)
         if angleStepProperty.isDefault:
-            if instrument.hasParameter("natural-angle-step"):
-                angleStep = instrument.getNumberParameter("natural-angle-step", recursive=False)[0]
+            if component_info.hasParameter("natural-angle-step"):
+                angleStep = component_info.getNumberParameter("natural-angle-step", recursive=False)[0]
                 self._report.notice("Using grouping angle step of {} degrees from the IPF.".format(angleStep))
             else:
                 angleStep = 0.01

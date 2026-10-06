@@ -44,8 +44,6 @@ class TestGSAS2Model(unittest.TestCase):
         self.model.save_directories.project_name = "gsas2_output"
         self.model.config.path_to_gsas2 = "/opt/gsas2"
         # setup a mock workspace
-        self.mock_inst = MagicMock()
-        self.mock_inst.getFullName.return_value = "instrument"
         mock_prop = MagicMock()
         mock_prop.value = "bank 1"  # bank-id
         mock_log_data = [MagicMock(), MagicMock()]
@@ -58,7 +56,7 @@ class TestGSAS2Model(unittest.TestCase):
         self.mock_ws = MagicMock()
         self.mock_ws.getNumberHistograms.return_value = 1
         self.mock_ws.getRun.return_value = self.mock_run
-        self.mock_ws.getInstrument.return_value = self.mock_inst
+        self.mock_ws.getInstrumentName.return_value = "instrument"
         self.mock_ws.getRunNumber.return_value = 1
         self.mock_ws.getTitle.return_value = "title"
         mock_axis = MagicMock()
@@ -392,7 +390,12 @@ class TestGSAS2Model(unittest.TestCase):
             rb_num = "valid_rb_number"
             self.model.organize_save_directories(rb_num)
             self.assertEqual(self.model.user_save_directory, mock_user_directory)
-            self.assertEqual(self.model.save_directories.temporary_save_directory[:-20], expected_temp_directory)
+            # the name carries a timestamp and a unique suffix, so only the stem is fixed
+            self.assertTrue(
+                self.model.save_directories.temporary_save_directory.startswith(expected_temp_directory),
+                f"{self.model.save_directories.temporary_save_directory} does not start with {expected_temp_directory}",
+            )
+            self.assertTrue(os.path.isdir(self.model.save_directories.temporary_save_directory))
             self.assertEqual(self.model.file_paths.gsas2_save_dirs[0], os.path.join(current_directory, "GSAS2", ""))
             self.assertEqual(len(self.model.file_paths.gsas2_save_dirs), 2)
             self.assertEqual(
@@ -400,6 +403,48 @@ class TestGSAS2Model(unittest.TestCase):
             )
         finally:
             _try_delete(stem_save_dir)
+
+    @patch(model_path + ".datetime")
+    @patch(model_path + ".output_settings.get_output_path")
+    def test_organize_save_directories_is_unique_within_a_single_second(self, mock_output_path, mock_datetime):
+        # the timestamp in the name only resolves to the second, so two refinements started in the
+        # same second must still get directories of their own
+        mock_datetime.datetime.now.return_value.strftime.return_value = "tmp_EngDiff_GSASII_2026-01-01_00-00-00_"
+        current_directory = os.getcwd()
+        stem_save_dir = os.path.join(current_directory, "GSAS2")
+        try:
+            self.model.save_directories.project_name = "project_name"
+            mock_output_path.return_value = current_directory
+
+            self.model.organize_save_directories(None)
+            first = self.model.save_directories.temporary_save_directory
+            self.model.organize_save_directories(None)
+            second = self.model.save_directories.temporary_save_directory
+
+            self.assertNotEqual(first, second)
+            self.assertTrue(os.path.isdir(first))
+            self.assertTrue(os.path.isdir(second))
+        finally:
+            _try_delete(stem_save_dir)
+
+    def test_run_single_refinement_removes_temporary_directory_when_validation_fails(self):
+        temporary_directory = tempfile.mkdtemp()
+
+        def create_temporary_directory(*_args, **_kwargs):
+            self.model.save_directories.temporary_save_directory = temporary_directory
+
+        self.model.initial_validation = MagicMock(return_value=True)
+        self.model.set_components_from_inputs = MagicMock(side_effect=create_temporary_directory)
+        self.model.read_phase_files = MagicMock()
+        self.model.generate_reflections_from_space_group = MagicMock()
+        self.model.validate_x_limits = MagicMock(return_value=False)
+        self.model.call_gsas2 = MagicMock()
+
+        result = self.model._run_single_refinement([[], [], []], [], "project_name")
+
+        self.assertIsNone(result)
+        self.model.call_gsas2.assert_not_called()
+        self.assertFalse(os.path.exists(temporary_directory))
 
     def test_move_output_files_to_user_save_location(self):
         project_name = "project_name"

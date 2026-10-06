@@ -64,8 +64,6 @@ public:
   // one for each type, luckily there won't be too many
   /// Return the parameter names
   std::set<std::string> getParameterNames(bool recursive = true) const override;
-  /// return the parameter names and the component they are from
-  std::map<std::string, ComponentID> getParameterNamesByComponent() const override;
   /// Returns a boolean indicating whether the parameter exists or not
   bool hasParameter(const std::string &name, bool recursive = true) const override;
   // Hack used untill Geomertry can not exprot different types parematers

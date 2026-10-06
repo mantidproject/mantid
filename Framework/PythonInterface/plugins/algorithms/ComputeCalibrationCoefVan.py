@@ -96,10 +96,10 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         if not temperatureProperty.isDefault:
             return temperatureProperty.value
         temperatureLogName = "temperature"
-        instrument = self.vanaws.getInstrument()
+        component_info = self.vanaws.componentInfo()
         LOG_ENTRY = "temperature_log_entry"
-        if instrument.hasParameter(LOG_ENTRY, False):
-            temperatureLogName = instrument.getStringParameter(LOG_ENTRY)[0]
+        if component_info.hasParameter(LOG_ENTRY, recursive=False):
+            temperatureLogName = component_info.getStringParameter(LOG_ENTRY)[0]
         run = self.vanaws.getRun()
         if not run.hasProperty(temperatureLogName):
             self.log().warning(

@@ -291,9 +291,9 @@ class InelasticEMUauReduction(PythonAlgorithm):
         # instrument parameters
         self._inst_ws = LoadEmptyInstrument(Filename="EMUau_Definition.xml")
         LoadParameterFile(self._inst_ws, "EMUau_Parameters.xml")
-        self._instrument = self._inst_ws.getInstrument()
-        self._efixed = self._instrument.getNumberParameter("EFixed")[0]
-        self._analysed_v2 = self._instrument.getNumberParameter("AnalysedV2")[0]
+        component_info = self._inst_ws.componentInfo()
+        self._efixed = component_info.getNumberParameter("EFixed")[0]
+        self._analysed_v2 = component_info.getNumberParameter("AnalysedV2")[0]
         self._pixels_per_tube = 64  # load from instrument
         self._file_prefix = "EMU"
 

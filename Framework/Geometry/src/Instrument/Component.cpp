@@ -472,32 +472,6 @@ std::set<std::string> Component::getParameterNames(bool recursive) const {
 }
 
 /**
- * Get the names of the parameters for this component and it's parents.
- * @returns A map of strings giving the parameter names and the component they
- * are from, warning this contains shared pointers keeping transient objects
- * alive, do not keep longer than needed
- */
-std::map<std::string, ComponentID> Component::getParameterNamesByComponent() const {
-  auto retVal = std::map<std::string, ComponentID>();
-  if (!m_map)
-    return retVal;
-
-  auto names = m_map->names(this);
-  for (const auto &name : names) {
-    retVal.insert(std::pair<std::string, ComponentID>(name, this->getComponentID()));
-  }
-
-  // Walk up the tree and find the parameters attached to the parent components
-  std::shared_ptr<const IComponent> parent = getParent();
-  if (parent) {
-    auto parentNames = parent->getParameterNamesByComponent();
-    // this should discard duplicates
-    retVal.insert(parentNames.begin(), parentNames.end());
-  }
-  return retVal;
-}
-
-/**
  * Returns a boolean indicating if the component has the named parameter
  * @param name :: The name of the parameter
  * @param recursive :: If true the parent components will also be searched

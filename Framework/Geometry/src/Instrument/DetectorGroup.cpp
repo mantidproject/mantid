@@ -252,16 +252,6 @@ std::set<std::string> DetectorGroup::getParameterNames(bool recursive) const {
 }
 
 /**
- * Get the names of the parameters for this component and it's parents.
- * @returns A map of strings giving the parameter names and the component they
- * are from, warning this contains shared pointers keeping transient objects
- * alive, do not keep longer than needed
- */
-std::map<std::string, ComponentID> DetectorGroup::getParameterNamesByComponent() const {
-  return std::map<std::string, ComponentID>();
-}
-
-/**
  * Get a string representation of a parameter
  * @param pname :: The name of the parameter
  * @param recursive :: If true the search will walk up through the parent

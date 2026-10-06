@@ -1,0 +1,1 @@
+- Instrument parameters are now held in a new Instrument 2.0 ``ParameterInfo`` store and reached in C++ through ``ComponentInfo``, with no change to parameter values or to the Python instrument API. ``IComponent::getParameterNamesByComponent()`` and direct ``ParameterMap`` iteration have been removed; see :ref:`InstrumentAccessLayers` for the replacements.
