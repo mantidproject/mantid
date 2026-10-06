@@ -26,8 +26,13 @@ public:
   std::unique_ptr<IPreviewPresenter> make(IPreviewView *view, std::unique_ptr<IReflAlgorithmFactory> algFactory) {
     auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>();
     auto jobManager = std::make_unique<PreviewJobManager>(std::move(jobRunner), std::move(algFactory));
-    const QSettings settings(QSettings::IniFormat, QSettings::UserScope, "mantidproject", "mantidworkbench");
-    const auto previewSettings = PreviewSettings::readSettings(settings);
+
+    // The original lines will be uncommented once the issues noted in #42354 are fixed. Otherwise ensure the legacy IV
+    // is used.
+    const auto previewSettings = PreviewSettings(true);
+    // const QSettings settings(QSettings::IniFormat, QSettings::UserScope, "mantidproject", "mantidworkbench");
+    // const auto previewSettings = PreviewSettings::readSettings(settings);
+
     auto dependencies = PreviewPresenter::Dependencies{
         view,    std::make_unique<PreviewModel>(),          std::move(jobManager), nullptr, nullptr,
         nullptr, !previewSettings.useLegacyInstrumentView()};
