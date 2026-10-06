@@ -1026,7 +1026,7 @@ class Poldi2DEvalMixin:
     def _apply_scales_and_bg(self, ws_sim: Workspace2D):
         self._ensure_scales_and_bgs()
         for ispec in range(self.ws.getNumberHistograms()):
-            ws_sim.setY(ispec, self.scales[ispec] * ws_sim.y(ispec) + self.bgs[ispec])
+            ws_sim.setSharedY(ispec, self.scales[ispec] * ws_sim.y(ispec) + self.bgs[ispec])
 
     def _reestimate_scales(self, params: np.ndarray[float] | None = None) -> tuple[np.ndarray, np.ndarray]:
         """Re-estimate and lock per-spectrum scale/background values.

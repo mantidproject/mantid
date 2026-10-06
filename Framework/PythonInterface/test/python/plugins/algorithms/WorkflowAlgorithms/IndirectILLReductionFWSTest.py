@@ -115,9 +115,9 @@ class IndirectILLReductionFWS(unittest.TestCase):
         self.assertEqual(run.getLogData("ManualInelasticRightPeak").value, 507)
 
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
-        self.assertTrue(isinstance(wsgroup, WorkspaceGroup), "{0} should be a group workspace".format(wsgroup.getName()))
+        self.assertTrue(isinstance(wsgroup, WorkspaceGroup), "{0} should be a group workspace".format(wsgroup.name()))
 
-        self.assertEqual(wsgroup.getNumberOfEntries(), nentries, "{0} should contain {1} workspaces".format(wsgroup.getName(), nentries))
+        self.assertEqual(wsgroup.getNumberOfEntries(), nentries, "{0} should contain {1} workspaces".format(wsgroup.name(), nentries))
 
         item = wsgroup.getItem(0)
 
