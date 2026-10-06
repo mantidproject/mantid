@@ -119,7 +119,8 @@ void QtInstrumentView::setInstrumentSettingsViewState(InstrumentSettingsViewStat
   m_ui.correctDetectorsCheckBox->setVisible(state.detectorCorrectionControlsVisible);
   m_ui.detectorCorrectionTypeLabel->setVisible(state.detectorCorrectionControlsVisible);
   m_ui.detectorCorrectionTypeComboBox->setVisible(state.detectorCorrectionControlsVisible);
-  m_ui.specularPixelCheckBox->setVisible(state.specularPixelVisible);
+  m_ui.specularPixelLabel->setVisible(state.specularPixelVisible);
+  m_ui.specularPixelEdit->setVisible(state.specularPixelVisible);
 }
 
 void QtInstrumentView::registerSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg) {
