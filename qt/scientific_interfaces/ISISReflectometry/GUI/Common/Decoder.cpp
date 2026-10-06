@@ -193,6 +193,7 @@ void Decoder::decodeInstrument(const QtInstrumentView *gui, const QMap<QString, 
   gui->m_ui.correctDetectorsCheckBox->setChecked(map[QString("correctDetectorsCheckBox")].toBool());
   gui->m_ui.detectorCorrectionTypeComboBox->setCurrentIndex(map[QString("detectorCorrectionTypeComboBox")].toInt());
   gui->m_ui.calibrationPathEdit->setText(map[QString("calibrationPathEdit")].toString());
+  gui->m_ui.specularPixelEdit->setText(map[QString("specularPixelEdit")].toString());
 }
 
 void Decoder::decodeRuns(QtRunsView *gui, ReductionJobs *redJobs, RunsTablePresenter *presenter,

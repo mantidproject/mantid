@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InstrumentPresenter.h"
+#include "Common/Parse.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "InstrumentOptionDefaults.h"
 #include "InstrumentSettingsViewState.h"
@@ -208,12 +209,27 @@ std::string InstrumentPresenter::calibrationFilePathFromView() {
   return calibrationFilePath;
 }
 
+std::optional<double> InstrumentPresenter::specularPixelFromView() {
+  auto const text = m_view->getSpecularPixel();
+  if (isEntirelyWhitespace(text)) {
+    m_view->showSpecularPixelValid();
+    return std::nullopt;
+  }
+  auto const specularPixel = parseNonNegativeDouble(text);
+  if (specularPixel)
+    m_view->showSpecularPixelValid();
+  else
+    m_view->showSpecularPixelInvalid();
+  return specularPixel;
+}
+
 void InstrumentPresenter::updateModelFromView() {
   auto const wavelengthRange = wavelengthRangeFromView();
   auto const monitorCorrections = monitorCorrectionsFromView();
   auto const detectorCorrections = detectorCorrectionsFromView();
   auto const calibrationFilePath = calibrationFilePathFromView();
-  m_model = Instrument(wavelengthRange, monitorCorrections, detectorCorrections, calibrationFilePath);
+  auto const specularPixel = specularPixelFromView();
+  m_model = Instrument(wavelengthRange, monitorCorrections, detectorCorrections, calibrationFilePath, specularPixel);
 }
 
 void InstrumentPresenter::updateViewFromModel() {
@@ -238,6 +254,7 @@ void InstrumentPresenter::updateViewFromModel() {
   m_view->setCorrectDetectors(m_model.correctDetectors());
   m_view->setDetectorCorrectionType(detectorCorrectionTypeToString(m_model.detectorCorrectionType()));
   m_view->setCalibrationFilePath(m_model.calibrationFilePath());
+  m_view->setSpecularPixel(m_model.specularPixel());
 
   updateWidgetEnabledState();
   updateWidgetValidState();

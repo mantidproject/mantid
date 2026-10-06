@@ -139,6 +139,7 @@ void QtInstrumentView::registerInstrumentSettingsWidgets(const Mantid::API::IAlg
   registerSettingWidget(*m_ui.detectorCorrectionTypeComboBox, "DetectorCorrectionType", alg);
   registerSettingWidget(*m_ui.correctDetectorsCheckBox, "CorrectDetectors", alg);
   registerSettingWidget(*m_ui.calibrationPathEdit, "CalibrationFile", alg);
+  registerSettingWidget(*m_ui.specularPixelEdit, "NominalSpecularPixelSpectrumNo", alg);
 }
 
 void QtInstrumentView::connectInstrumentSettingsWidgets() {
@@ -153,6 +154,7 @@ void QtInstrumentView::connectInstrumentSettingsWidgets() {
   connectSettingsChange(*m_ui.detectorCorrectionTypeComboBox);
   connectSettingsChange(*m_ui.correctDetectorsCheckBox);
   connectSettingsChange(*m_ui.calibrationPathEdit);
+  connectSettingsChange(*m_ui.specularPixelEdit);
 }
 
 void QtInstrumentView::disconnectInstrumentSettingsWidgets() {
@@ -167,6 +169,7 @@ void QtInstrumentView::disconnectInstrumentSettingsWidgets() {
   disconnectSettingsChange(*m_ui.detectorCorrectionTypeComboBox);
   disconnectSettingsChange(*m_ui.correctDetectorsCheckBox);
   disconnectSettingsChange(*m_ui.calibrationPathEdit);
+  disconnectSettingsChange(*m_ui.specularPixelEdit);
 }
 
 template <typename Widget>
@@ -309,4 +312,17 @@ void QtInstrumentView::setCalibrationFilePath(std::string const &value) {
 void QtInstrumentView::showCalibrationFilePathInvalid() { showAsInvalid(*m_ui.calibrationPathEdit); }
 
 void QtInstrumentView::showCalibrationFilePathValid() { showAsValid(*m_ui.calibrationPathEdit); }
+
+std::string QtInstrumentView::getSpecularPixel() const { return getText(*m_ui.specularPixelEdit); }
+
+void QtInstrumentView::setSpecularPixel(std::optional<double> value) {
+  if (value)
+    setText(*m_ui.specularPixelEdit, *value);
+  else
+    m_ui.specularPixelEdit->clear();
+}
+
+void QtInstrumentView::showSpecularPixelInvalid() { showAsInvalid(*m_ui.specularPixelEdit); }
+
+void QtInstrumentView::showSpecularPixelValid() { showAsValid(*m_ui.specularPixelEdit); }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
