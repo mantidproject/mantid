@@ -19,6 +19,7 @@ import numpy as np
 
 from mantid.kernel import Direction, V3D, StringArrayProperty, StringArrayMandatoryValidator, IntArrayProperty, IntArrayMandatoryValidator
 from mantid.api import DataProcessorAlgorithm, AnalysisDataService, AlgorithmFactory, FileProperty, FileAction, Progress, mtd
+from plugins.algorithms.component_info_utils import get_spectrum_detector_index
 from tube_spec import TubeSpec
 from ideal_tube import IdealTube
 from tube_calib_fit_params import TubeCalibFitParams
@@ -519,14 +520,13 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
     @staticmethod
     def _set_counts_to_one_outside_strip_boundaries(ws, boundaries: tuple[float]) -> None:
         """Set counts equal to 1 for x values outside the strip position boundaries."""
+        spectrum_info = ws.spectrumInfo()
         for ws_idx in range(ws.getNumberHistograms()):
-            try:
-                det_x = ws.getDetector(ws_idx).getPos().getX()
+            # Ignore detectors that can't be found in the IDF
+            if spectrum_info.hasDetectors(ws_idx):
+                det_x = spectrum_info.position(ws_idx).getX()
                 if det_x < boundaries[0] or det_x > boundaries[1]:
                     ws.mutableY(ws_idx)[0] = 1
-            except RuntimeError:
-                # Ignore detectors that can't be found in the IDF
-                continue
 
     def _get_integrated_workspace(self, data_file: str, progress: Progress):
         """Load a tube calibration run. Search multiple places to ensure fastest possible loading."""
@@ -981,7 +981,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         detector_info = ws.detectorInfo()
         spectrum_info = ws.spectrumInfo()
         # the (first) detector index of each spectrum in the tube; a detector index is also its component index
-        detector_indices = [spectrum_info.getSpectrumDefinition(ws_index)[0][0] for ws_index in ws_ids]
+        detector_indices = [get_spectrum_detector_index(spectrum_info, ws_index) for ws_index in ws_ids]
         first_det_pos = base_component_info.position(detector_indices[0])
         last_det_pos = base_component_info.position(detector_indices[-1])
         tube_length = first_det_pos.distance(last_det_pos)

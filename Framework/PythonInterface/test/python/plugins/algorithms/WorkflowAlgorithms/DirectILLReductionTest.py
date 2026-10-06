@@ -9,6 +9,7 @@ from mantid.api import mtd
 from mantid.simpleapi import SetSample, DirectILLReduction
 import numpy
 from numpy.testing import assert_almost_equal
+from plugins.algorithms.component_info_utils import get_spectrum_detector_index
 from testhelpers import illhelpers, run_algorithm
 import unittest
 
@@ -109,8 +110,10 @@ class DirectILLReductionTest(unittest.TestCase):
         ws = illhelpers.create_poor_mans_in5_workspace(0.0, _groupingTestDetectors)
         originalNDetectors = ws.getNumberHistograms()
         detectorIds = list()
+        detectorInfo = ws.detectorInfo()
+        spectrumInfo = ws.spectrumInfo()
         for i in range(originalNDetectors):
-            detectorIds.append(ws.getDetector(i).getID())
+            detectorIds.append(detectorInfo.detid(get_spectrum_detector_index(spectrumInfo, i)))
         _add_natural_angle_step_parameter(ws)
         mtd.addOrReplace("inWS", ws)
         outWSName = "outWS"

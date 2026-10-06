@@ -7,13 +7,14 @@
 import numpy as np
 import unittest
 import warnings
-from mantid.simpleapi import CreateSampleWorkspace, LoadEmptyInstrument
+from mantid.simpleapi import CreateSampleWorkspace, CreateWorkspace, GroupDetectors, LoadEmptyInstrument
 
 from plugins.algorithms.component_info_utils import (
     find_grid_detector_indices,
     find_rectangular_detector_indices,
     get_assembly_children,
     get_detector_id,
+    get_spectrum_detector_index,
     resolve_component_index,
 )
 
@@ -101,6 +102,24 @@ class ComponentInfoUtilsTest(unittest.TestCase):
         # a pixel is not an assembly, and a bank is not a detector
         self.assertRaises(RuntimeError, get_assembly_children, component_info, pixel_index)
         self.assertRaises(RuntimeError, get_detector_id, component_info, detector_info, bank_index)
+
+    def test_get_spectrum_detector_index_matches_legacy_detector_id(self):
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=3, OutputWorkspace="sample_banks")
+        # spectrum 0 groups three detectors, listed out of order to check the first is the lowest ID
+        grouped = GroupDetectors(InputWorkspace=ws, GroupingPattern="5+3+4,0,1-2", OutputWorkspace="grouped_banks")
+        for workspace in (ws, grouped):
+            detector_info = workspace.detectorInfo()
+            spectrum_info = workspace.spectrumInfo()
+            for ws_index in range(workspace.getNumberHistograms()):
+                # the deprecated getDetector(ws_index).getID() is the reference this must reproduce
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", DeprecationWarning)
+                    legacy_id = workspace.getDetector(ws_index).getID()
+                self.assertEqual(detector_info.detid(get_spectrum_detector_index(spectrum_info, ws_index)), legacy_id)
+
+    def test_get_spectrum_detector_index_raises_for_spectrum_without_detectors(self):
+        ws = CreateWorkspace(DataX=[1, 2], DataY=[1], NSpec=1, OutputWorkspace="no_detectors")
+        self.assertRaises(RuntimeError, get_spectrum_detector_index, ws.spectrumInfo(), 0)
 
 
 if __name__ == "__main__":

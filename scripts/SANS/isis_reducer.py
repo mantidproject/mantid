@@ -17,7 +17,7 @@ from reducer_singleton import Reducer
 import isis_reduction_steps
 import isis_instrument
 from reduction_settings import get_settings_object
-from mantid.api import mtd, ExperimentInfo, IEventWorkspace, Workspace, WorkspaceGroup
+from mantid.api import mtd, IEventWorkspace, InstrumentFileFinder, Workspace, WorkspaceGroup
 from mantid.kernel import Logger
 from mantid.simpleapi import AddSampleLog, CloneWorkspace, DeleteWorkspace, ExtractSingleSpectrum
 import SANSUtility as su
@@ -860,7 +860,7 @@ class ISISReducer(Reducer):
             measurement_time = su.get_measurement_time_from_file(run)
 
         # Get the path to the instrument definition file
-        idf_path_workspace = ExperimentInfo.getInstrumentFilename(instrument_name, measurement_time)
+        idf_path_workspace = InstrumentFileFinder.getInstrumentFilename(instrument_name, measurement_time)
         idf_path_workspace = os.path.normpath(idf_path_workspace)
 
         # Get the idf from the reducer

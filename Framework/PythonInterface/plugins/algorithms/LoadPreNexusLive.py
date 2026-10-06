@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid import mtd
-from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, WorkspaceProperty
+from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, InstrumentFileFinder, WorkspaceProperty
 from mantid.kernel import Direction, EnabledWhenProperty, IntBoundedValidator, Property, PropertyCriterion, StringListValidator
 from mantid.simpleapi import FilterByXValue, GetIPTS, LoadEventPreNexus, LoadInstrument, LoadNexusLogs, NormaliseByCurrent
 from mantid.utils.deprecator import deprecated_algorithm
@@ -112,7 +112,7 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
                 self.log().information("Loading logs from %s" % logFilename)
                 LoadNexusLogs(Workspace=wkspName, Filename=logFilename)
                 wksp = mtd[wkspName]
-                instrFilename = wksp.getInstrumentFilename(instrument, startTime)
+                instrFilename = InstrumentFileFinder.getInstrumentFilename(instrument, startTime)
                 LoadInstrument(Workspace=wkspName, Filename=instrFilename, RewriteSpectraMap=True)
 
         # gets rid of many simple DAS errors

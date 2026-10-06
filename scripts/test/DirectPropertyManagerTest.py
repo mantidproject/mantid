@@ -46,7 +46,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
     @staticmethod
     def getInstrument(InstrumentName="MAR"):
         """test method used to obtain default instrument for testing"""
-        idf_file = api.ExperimentInfo.getInstrumentFilename(InstrumentName)
+        idf_file = api.InstrumentFileFinder.getInstrumentFilename(InstrumentName)
         tmp_ws_name = "__empty_" + InstrumentName
         if not mtd.doesExist(tmp_ws_name):
             LoadEmptyInstrument(Filename=idf_file, OutputWorkspace=tmp_ws_name)
@@ -517,7 +517,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
     def test_set_all_defaults_from_instrument(self):
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
         # idf_dir = config.getString('instrumentDefinition.directory')
-        idf_file = api.ExperimentInfo.getInstrumentFilename("LET", "2014-05-02 23:59:59")
+        idf_file = api.InstrumentFileFinder.getInstrumentFilename("LET", "2014-05-02 23:59:59")
         print(idf_file)
         LoadEmptyInstrument(Filename=idf_file, OutputWorkspace=ws)
 

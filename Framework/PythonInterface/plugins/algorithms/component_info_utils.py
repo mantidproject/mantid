@@ -72,12 +72,12 @@ def _find_bank_indices(component_info, is_bank) -> list[int]:
 
 def is_rectangular_grid(component_info, index) -> bool:
     """Predicate for whether the component at index is a RectangularDetector grid."""
-    return component_info.isGrid(index) and component_info.componentType(index) == ComponentType.Rectangular
+    return component_info.isGridDetector(index) and component_info.componentType(index) == ComponentType.Rectangular
 
 
 def find_rectangular_detector_indices(component_info) -> list[int]:
     """Component indices of the RectangularDetector banks, in the order of the deprecated Instrument.findRectDetectors()."""
-    return _find_bank_indices(component_info, is_rectangular_grid)
+    return _find_bank_indices(component_info, lambda index: is_rectangular_grid(component_info, index))
 
 
 def find_grid_detector_indices(component_info) -> list[int]:
@@ -102,3 +102,14 @@ def get_detector_id(component_info, detector_info, index):
     if not component_info.isDetector(index):
         raise RuntimeError(f"Component {component_info.fullName(index)} is not a detector")
     return detector_info.detid(index)
+
+
+def get_spectrum_detector_index(spectrum_info, workspace_index):
+    """Detector index of the first detector of a spectrum, which is the detector whose ID the deprecated
+    MatrixWorkspace.getDetector(workspace_index).getID() returned, also for a grouped spectrum (the spectrum definition
+    is sorted, and detector indices are in detector ID order). A detector index is also its component index.
+    Raises RuntimeError for a spectrum without detectors, as getDetector did.
+    """
+    if not spectrum_info.hasDetectors(workspace_index):
+        raise RuntimeError(f"No detectors found for workspace index {workspace_index}")
+    return spectrum_info.getSpectrumDefinition(workspace_index)[0][0]

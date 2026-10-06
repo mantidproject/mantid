@@ -41,7 +41,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
     @staticmethod
     def getEmptyInstrumentWorkspace(InstrumentName="MAR"):
         """test method used to obtain a workspace with the default instrument for testing"""
-        idf_file = api.ExperimentInfo.getInstrumentFilename(InstrumentName)
+        idf_file = api.InstrumentFileFinder.getInstrumentFilename(InstrumentName)
         tmp_ws_name = "__empty_" + InstrumentName
         if not mtd.doesExist(tmp_ws_name):
             LoadEmptyInstrument(Filename=idf_file, OutputWorkspace=tmp_ws_name)

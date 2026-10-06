@@ -73,6 +73,8 @@ public:
   /// Instrument accessors
   void setInstrument(const Geometry::Instrument_const_sptr &instr);
   /// Returns the parameterized instrument
+  [[deprecated(
+      "This method is deprecated in Mantid 7.0. To access instrument properties, use the ComponentInfo instead.")]]
   Geometry::Instrument_const_sptr getInstrument() const;
 
   /// Returns the set of parameters modifying the base instrument (const-version)

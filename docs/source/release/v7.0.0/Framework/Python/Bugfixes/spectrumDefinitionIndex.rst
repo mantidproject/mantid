@@ -1,0 +1,1 @@
+- Indexing a ``SpectrumDefinition`` (from ``SpectrumInfo.getSpectrumDefinition()``) past its end, for example the first entry of a spectrum with no detectors, now raises an ``IndexError`` instead of crashing Mantid.

@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import ExperimentInfo
+from mantid.api import InstrumentFileFinder
 from sans.common.general_functions import create_unmanaged_algorithm, sanitise_instrument_name
 from sans.common.constants import EMPTY_NAME
 
@@ -125,7 +125,7 @@ def get_idf_path_from_workspace(workspace):
     """
     Gets the full IDF path from a workspace.
 
-    It queries the workspace for the start time and instrument name. It gets the IDF path from the ExperimentInfo.
+    It queries the workspace for the start time and instrument name. It gets the IDF path from the InstrumentFileFinder.
     :param workspace: the workspace for which we want the full IDF path.
     :return: the full IDF path for the instrument of the workspace.
     """
@@ -134,10 +134,10 @@ def get_idf_path_from_workspace(workspace):
     instrument_name = sanitise_instrument_name(instrument_name)
     if run.hasProperty("start_time"):
         time = run.getProperty("start_time").value
-        idf_path = ExperimentInfo.getInstrumentFilename(instrument_name, time)
+        idf_path = InstrumentFileFinder.getInstrumentFilename(instrument_name, time)
     elif run.hasProperty("run_start"):
         time = run.getProperty("run_start").value
-        idf_path = ExperimentInfo.getInstrumentFilename(instrument_name, time)
+        idf_path = InstrumentFileFinder.getInstrumentFilename(instrument_name, time)
     else:
         idf_path = None
     return idf_path

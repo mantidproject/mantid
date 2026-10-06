@@ -15,6 +15,7 @@ from mantid.api import (
     PythonAlgorithm,
 )
 from mantid.kernel import Direction, IntArrayBoundedValidator, IntArrayProperty, Logger
+from plugins.algorithms.component_info_utils import get_spectrum_detector_index
 import numpy as np
 
 
@@ -295,10 +296,10 @@ class DarkRunMonitorAndDetectorRemover(object):
         try:
             num_histograms = dark_run.getNumberHistograms()
             spectrumInfo = dark_run.spectrumInfo()
+            detectorInfo = dark_run.detectorInfo()
             for index in range(0, num_histograms):
                 if spectrumInfo.isMonitor(index):
-                    det = dark_run.getDetector(index)
-                    det_id_list.append(det.getID())
+                    det_id_list.append(detectorInfo.detid(get_spectrum_detector_index(spectrumInfo, index)))
                     monitor_list.append(index)
         except:
             Logger("DarkRunMonitorAndDetectorRemover").information(

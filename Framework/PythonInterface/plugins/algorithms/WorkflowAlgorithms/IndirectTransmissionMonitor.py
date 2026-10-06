@@ -8,7 +8,7 @@
 from mantid.api import mtd, AlgorithmFactory, Progress, PythonAlgorithm, WorkspaceProperty
 from mantid.geometry import ComponentType
 from mantid.kernel import logger, Direction
-from plugins.algorithms.component_info_utils import resolve_component_index
+from plugins.algorithms.component_info_utils import get_spectrum_detector_index, resolve_component_index
 from mantid.simpleapi import (
     AddSampleLog,
     ConvertUnits,
@@ -156,8 +156,10 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         @param detector_id Detector ID to search for
         """
 
+        detector_info = mtd[workspace].detectorInfo()
+        spectrum_info = mtd[workspace].spectrumInfo()
         for spec_idx in range(0, mtd[workspace].getNumberHistograms()):
-            if mtd[workspace].getDetector(spec_idx).getID() == detector_id:
+            if detector_info.detid(get_spectrum_detector_index(spectrum_info, spec_idx)) == detector_id:
                 return spec_idx
 
         return None

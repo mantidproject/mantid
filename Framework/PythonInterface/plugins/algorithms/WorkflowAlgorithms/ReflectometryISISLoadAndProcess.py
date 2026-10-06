@@ -443,6 +443,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _all_spectra_refer_to_rectangular_detector(workspace, bank_index) -> bool:
         """Checks if all data in a workspace is from the rectangular detector with component index bank_index."""
         component_info = workspace.componentInfo()
+        detector_info = workspace.detectorInfo()
+        spectrum_info = workspace.spectrumInfo()
         rect_det_id_start = component_info.pixelGridMinDetectorID(bank_index)
         rect_det_id_end = component_info.pixelGridMaxDetectorID(bank_index)
         ws_has_detectors = False
@@ -689,7 +691,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         return group
 
     def _setInstrumentSpecificProperties(self, calibration_alg, workspace, adjust_theta, experiment_angle=None, specular_spectrum_no=None):
-        if workspace.getInstrument().getName() != self._POLREF:
+        if workspace.getInstrumentName() != self._POLREF:
             return experiment_angle, False
 
         if specular_spectrum_no is None:
