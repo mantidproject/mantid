@@ -11,6 +11,8 @@
 #include <Poco/SAX/SAXParser.h>
 #include <boost/algorithm/string/find.hpp>
 #include <boost/regex.hpp>
+
+#include <algorithm>
 #include <filesystem>
 
 #include <string>
@@ -306,12 +308,16 @@ std::vector<std::string> InstrumentFileFinder::getResourceFilenames(const std::s
   // recently starting file, if none match
   DateAndTime refDateGoodFile("1899-01-01 23:59:00"); // used to help determine the most recently
 
-  // Two files could have the same `from` date so multimap is required.
-  // Sort with newer dates placed at the beginning
-  std::multimap<DateAndTime, std::string, std::greater<DateAndTime>> matchingFiles;
+  struct MatchingFile {
+    DateAndTime validFrom;
+    size_t directoryIndex;
+    std::string path;
+  };
+  std::vector<MatchingFile> matchingFiles;
   bool foundFile = false;
   std::string mostRecentFile; // path to the file with most recent "valid-from"
-  for (const auto &directoryName : directoryNames) {
+  for (size_t directoryIndex = 0; directoryIndex < directoryNames.size(); ++directoryIndex) {
+    const auto &directoryName = directoryNames[directoryIndex];
     // Iterate over the directories from user ->etc ->install, and find the
     // first beat file
     for (const auto &dir_entry : std::filesystem::directory_iterator(directoryName)) {
@@ -360,7 +366,7 @@ std::vector<std::string> InstrumentFileFinder::getResourceFilenames(const std::s
 
         if (from <= d && d <= to) {
           foundFile = true;
-          matchingFiles.insert(std::pair<DateAndTime, std::string>(from, pathName));
+          matchingFiles.emplace_back(from, directoryIndex, pathName);
         }
         // Consider the most recent file in the absence of matching files
         if (!foundFile && (from >= refDate)) {
@@ -374,10 +380,17 @@ std::vector<std::string> InstrumentFileFinder::getResourceFilenames(const std::s
   // Retrieve the file names only
   std::vector<std::string> pathNames;
   if (!matchingFiles.empty()) {
+    std::sort(matchingFiles.begin(), matchingFiles.end(), [](const auto &lhs, const auto &rhs) {
+      if (lhs.validFrom != rhs.validFrom)
+        return lhs.validFrom > rhs.validFrom;
+      if (lhs.directoryIndex != rhs.directoryIndex)
+        return lhs.directoryIndex < rhs.directoryIndex;
+      return lhs.path < rhs.path;
+    });
     pathNames.reserve(matchingFiles.size());
 
     std::transform(matchingFiles.begin(), matchingFiles.end(), std::back_inserter(pathNames),
-                   [](const auto &elem) { return elem.second; });
+                   [](const auto &elem) { return elem.path; });
   } else {
     pathNames.emplace_back(std::move(mostRecentFile));
   }

@@ -113,6 +113,15 @@ public:
     TS_ASSERT(boost::icontains(result, expected));
   }
 
+  void testFindIPFPrefersCanonicalFileWhenValidFromDatesMatch() {
+    const auto instrumentDir = std::filesystem::path(ConfigService::Instance().getInstrumentDirectory());
+    const auto unitTestDir = instrumentDir / "unit_testing";
+
+    const auto result = InstrumentFileFinder::getParameterFilename("REFL", "1900-01-31 23:59:59", unitTestDir.string());
+
+    TS_ASSERT_EQUALS(std::filesystem::path(result).filename(), "REFL_Parameters.xml");
+  }
+
   void testFindIPFNonExistant() {
     const auto result = InstrumentFileFinder::getParameterPath("NotThere");
     TS_ASSERT_EQUALS("", result);
