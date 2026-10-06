@@ -131,5 +131,5 @@ hid_t h5MemType(hid_t atype) {
       memtype_id = H5T_NATIVE_DOUBLE;
     }
   }
-  return memtype_id;
+  return H5Tcopy(memtype_id);
 }

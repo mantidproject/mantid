@@ -925,7 +925,7 @@ static hid_t h5MemType(hid_t atype) {
   if (memtype_id == -1) {
     NXReportError("ERROR: h5MemType: invalid type");
   }
-  return memtype_id;
+  return H5Tcopy(memtype_id);
 }
 
 /*-------------------------------------------------------------------------*/
