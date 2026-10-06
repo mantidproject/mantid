@@ -16,6 +16,11 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
+inline bool operator==(InstrumentSettingsViewState const &lhs, InstrumentSettingsViewState const &rhs) {
+  return lhs.detectorCorrectionControlsVisible == rhs.detectorCorrectionControlsVisible &&
+         lhs.specularPixelVisible == rhs.specularPixelVisible;
+}
+
 class MockInstrumentView : public IInstrumentView {
 public:
   MOCK_METHOD1(subscribe, void(InstrumentViewSubscriber *));
@@ -55,6 +60,7 @@ public:
   MOCK_METHOD0(enableAll, void());
   MOCK_METHOD0(enableDetectorCorrectionType, void());
   MOCK_METHOD0(disableDetectorCorrectionType, void());
+  MOCK_METHOD1(setInstrumentSettingsViewState, void(InstrumentSettingsViewState const &));
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

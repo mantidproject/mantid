@@ -68,6 +68,7 @@ public:
   void enableAll() override;
   void enableDetectorCorrectionType() override;
   void disableDetectorCorrectionType() override;
+  void setInstrumentSettingsViewState(InstrumentSettingsViewState const &state) override;
 
 public slots:
   void onSettingsChanged();

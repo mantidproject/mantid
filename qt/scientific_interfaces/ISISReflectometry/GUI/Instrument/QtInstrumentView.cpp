@@ -114,6 +114,14 @@ void QtInstrumentView::enableDetectorCorrectionType() { m_ui.detectorCorrectionT
 
 void QtInstrumentView::disableDetectorCorrectionType() { m_ui.detectorCorrectionTypeComboBox->setEnabled(false); }
 
+void QtInstrumentView::setInstrumentSettingsViewState(InstrumentSettingsViewState const &state) {
+  m_ui.correctDetectorsLabel->setVisible(state.detectorCorrectionControlsVisible);
+  m_ui.correctDetectorsCheckBox->setVisible(state.detectorCorrectionControlsVisible);
+  m_ui.detectorCorrectionTypeLabel->setVisible(state.detectorCorrectionControlsVisible);
+  m_ui.detectorCorrectionTypeComboBox->setVisible(state.detectorCorrectionControlsVisible);
+  m_ui.specularPixelCheckBox->setVisible(state.specularPixelVisible);
+}
+
 void QtInstrumentView::registerSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg) {
   registerInstrumentSettingsWidgets(alg);
 }

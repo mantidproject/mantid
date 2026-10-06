@@ -326,6 +326,26 @@ public:
     presenter.notifyInstrumentChanged("POLREF");
   }
 
+  void testInstrumentChangedShowsSpecularPixelAndHidesDetectorCorrectionsForPOLREF() {
+    auto defaultOptions = expectDefaults(ModelCreationHelper::makeEmptyInstrument());
+    auto presenter = makePresenter(std::move(defaultOptions));
+    auto const expectedState = InstrumentSettingsViewState{false, true};
+
+    EXPECT_CALL(m_view, setInstrumentSettingsViewState(expectedState)).Times(1);
+
+    presenter.notifyInstrumentChanged("POLREF");
+  }
+
+  void testInstrumentChangedShowsDetectorCorrectionsAndHidesSpecularPixelForOtherInstruments() {
+    auto defaultOptions = expectDefaults(ModelCreationHelper::makeEmptyInstrument());
+    auto presenter = makePresenter(std::move(defaultOptions));
+    auto const expectedState = InstrumentSettingsViewState{true, false};
+
+    EXPECT_CALL(m_view, setInstrumentSettingsViewState(expectedState)).Times(1);
+
+    presenter.notifyInstrumentChanged("INTER");
+  }
+
   void testEnteringInvalidCalibrationFilePathTriggersError() {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getCalibrationFilePath()).WillOnce(Return("test"));

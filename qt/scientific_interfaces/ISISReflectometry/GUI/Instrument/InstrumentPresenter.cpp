@@ -7,6 +7,7 @@
 #include "InstrumentPresenter.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "InstrumentOptionDefaults.h"
+#include "InstrumentSettingsViewState.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include <ostream>
 #include <stdexcept>
@@ -122,7 +123,7 @@ void InstrumentPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState
 void InstrumentPresenter::notifyAutoreductionResumed() { updateWidgetEnabledState(); }
 
 void InstrumentPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
-  UNUSED_ARG(instrumentName);
+  m_view->setInstrumentSettingsViewState(instrumentSettingsViewState(instrumentName));
   restoreDefaults();
 }
 
