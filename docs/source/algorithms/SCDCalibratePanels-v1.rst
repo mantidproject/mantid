@@ -86,9 +86,11 @@ Usage
     CloneWorkspace(InputWorkspace='MANDI_801_event_DetCal', OutputWorkspace='MANDI_801_event_xml')
     LoadParameterFile(Workspace='MANDI_801_event_xml', Filename='mandi_801.xml')
     LoadIsawDetCal(InputWorkspace='MANDI_801_event_DetCal', Filename='mandi_801.DetCal')
-    det1 = mtd['MANDI_801_event_DetCal'].getInstrument().getDetector(327680)
-    det2 = mtd['MANDI_801_event_xml'].getInstrument().getDetector(327680)
-    if det1.getPos() == det2.getPos():
+    detector_info1 = mtd['MANDI_801_event_DetCal'].detectorInfo()
+    detector_info2 = mtd['MANDI_801_event_xml'].detectorInfo()
+    pos1 = detector_info1.position(detector_info1.indexOf(327680))
+    pos2 = detector_info2.position(detector_info2.indexOf(327680))
+    if pos1 == pos2:
         print("matches")
 
 .. code-block:: python
