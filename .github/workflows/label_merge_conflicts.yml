@@ -20,6 +20,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: prince-chrismc/label-merge-conflicts-action@v3
+        # This action can fail to set the label, but that does not indicate a problem with the PR
+        continue-on-error: true
+        id: label-merge-conflicts-action
         with:
           conflict_label_name: "Has Conflicts"
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -28,3 +31,6 @@ jobs:
           wait_ms: 15000
           detect_merge_changes: false
           conflict_comment: ":wave: Hi, @${author},\n\nConflicts have been detected against the base branch. Please rebase your branch against the base branch."
+      - name: Allowing label-merge-conflicts-action failure
+        run: echo "Allowing label-merge-conflicts-action failure"
+        if: steps.label-merge-conflicts-action.outcome == 'failure'
