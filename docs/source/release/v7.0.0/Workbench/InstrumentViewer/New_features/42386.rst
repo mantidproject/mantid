@@ -1,0 +1,1 @@
+- In the new Instrument View, ``Hover Pick`` now respects ``Select Bank/Tube``, showing the summed spectrum of the tube or bank under the cursor.
