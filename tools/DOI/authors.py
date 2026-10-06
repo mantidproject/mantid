@@ -243,7 +243,7 @@ _translations = {
     "Ciara Nightingale": "Nightingale, Ciara",
     "ciaranightingale": "Nightingale, Ciara",
     "Danny Hindson": "Hindson, Danny",
-    "DannyHindson": "Hindson, Dannny",
+    "DannyHindson": "Hindson, Danny",
     "Fahima-Islam": "Islam, Fahima",
     "giovannidisiena": "Di Siena, Giovanni",
     "Giovanni Di Siena": "Di Siena, Giovanni",
