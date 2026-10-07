@@ -54,6 +54,7 @@ def add_release_notes_to_main_pages(release_notes_root: pathlib.Path, git_token:
     # iterates through files in a directory
     for file in release_notes_root.glob("*.rst"):
         with open(file) as f:
+            print(f"Writing release notes to {file}")
             # iterate through each line in the upper level release note file e.g. diffraction.rst
             for line in f:
                 # finds the amalgamate directive to replace
