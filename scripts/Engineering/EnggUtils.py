@@ -762,6 +762,9 @@ def _generate_output_file_name(inst, sample_run_no, van_run_no, suffix, xunit, e
     return "_".join([inst, sample_run_no, van_run_no, suffix, xunit]) + ext
 
 
+# DEPRECATED FUNCTIONS BELOW
+
+
 def read_in_expected_peaks(filename, expected_peaks):
     """
     DEPRECATED: not used in UI, only in deprecated functions (EnggCalibrateFull, EnggCalibrate and EnggFitPeaks)
