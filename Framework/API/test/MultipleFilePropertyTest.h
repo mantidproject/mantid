@@ -9,7 +9,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger_fwd.h"
 #include "MantidKernel/Timer.h"
 
 #include <algorithm>

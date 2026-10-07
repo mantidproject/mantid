@@ -25,6 +25,7 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <sstream>

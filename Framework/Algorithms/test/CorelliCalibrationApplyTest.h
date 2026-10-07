@@ -20,7 +20,7 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/IObject.h"
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger_fwd.h"
 
 #include <stdexcept>
 

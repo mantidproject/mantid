@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "MantidGeometry/Math/MapSupport.h"
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger_fwd.h"
 #include "MantidKernel/V3D.h"
 #include <cmath>
 #include <cxxtest/TestSuite.h>
