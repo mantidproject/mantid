@@ -59,14 +59,17 @@ getSpectrum for info on the structure of a workspace eg. the spectrum number rel
 
     ws.getAxis(0).getUnit().setLabel("Time-of-flight", "Milliseconds")
 
-:py:obj:`getInstrument <mantid.geometry.Instrument>` for :py:obj:`Sample <mantid.api.Sample>` and Source :ref:`Geometry`.
+getInstrumentName for the name of the instrument, and :py:obj:`componentInfo <mantid.geometry.ComponentInfo>` for :py:obj:`Sample <mantid.api.Sample>` and Source :ref:`Geometry`.
+The ComponentInfo describes every part of the instrument (source, sample, detectors and the banks that hold them) by an index:
 
 .. code-block:: python
 
-    instrument = ws.getInstrument()
-    print(instrument.getName())
+    print(ws.getInstrumentName())
+    component_info = ws.componentInfo()
+    print(component_info.sourcePosition())
+    print(component_info.samplePosition())
 
-:ref:`SpectrumInfo`, :py:obj:`~mantid.geometry.DetectorInfo` and :py:obj:`~mantid.geometry.ComponentInfo` have many other features:
+:ref:`SpectrumInfo` (detector geometry by workspace index), :py:obj:`~mantid.geometry.DetectorInfo` (by detector) and :py:obj:`~mantid.geometry.ComponentInfo` have many other features:
 
 .. code-block:: python
 

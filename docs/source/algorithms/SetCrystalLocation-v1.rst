@@ -19,10 +19,11 @@ Usage
 .. testcode:: ExSetCrystalLocation
 
   events = Load('BSS_11841_event.nxs')
-  sample = mtd['events'].getInstrument().getSample()
-  print('Sample position before SetCrystalLocation: {}'.format(sample.getPos()))
+  component_info = mtd['events'].componentInfo()
+  print('Sample position before SetCrystalLocation: {}'.format(component_info.samplePosition()))
   SetCrystalLocation(InputWorkspace=events, OutputWorkspace=events, NewX=0.1, NewY=0.1, NewZ=0.1)
-  print('Sample position after SetCrystalLocation: {}'.format(sample.getPos()))
+  component_info = mtd['events'].componentInfo()
+  print('Sample position after SetCrystalLocation: {}'.format(component_info.samplePosition()))
 
 Output:
 
