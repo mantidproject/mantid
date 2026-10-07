@@ -1,1 +1,2 @@
-- In :ref:`SliceViewer <sliceviewer>`, fixed an error raised when reopening the interface after using the non-axis-aligned cutting tool.
+- Fixed an error raised when reopening :ref:`SliceViewer <sliceviewer>` after using the non-axis-aligned cutting tool.
+- Fixed an error raised when moving the mouse over a plot after a :ref:`SliceViewer <sliceviewer>` window has been closed.
