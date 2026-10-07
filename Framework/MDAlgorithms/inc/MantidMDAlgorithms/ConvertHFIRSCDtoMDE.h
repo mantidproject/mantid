@@ -7,6 +7,8 @@
 #pragma once
 
 #include "MantidAPI/BoxControllerSettingsAlgorithm.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
@@ -26,6 +28,8 @@ public:
 private:
   void init() override;
   void exec() override;
+  std::string validateInputWorkspace(const API::IMDHistoWorkspace_sptr &inputWS) const;
+  API::IMDEventWorkspace_sptr convertWorkspace(const API::IMDHistoWorkspace_sptr &inputWS, double wavelength);
 };
 
 } // namespace MDAlgorithms

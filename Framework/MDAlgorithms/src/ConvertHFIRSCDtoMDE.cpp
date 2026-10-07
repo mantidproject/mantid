@@ -54,10 +54,11 @@ const std::string ConvertHFIRSCDtoMDE::summary() const {
          "MDEventWorkspace with units in Q_sample.";
 }
 
-std::map<std::string, std::string> ConvertHFIRSCDtoMDE::validateInputs() {
-  std::map<std::string, std::string> result;
-
-  API::IMDHistoWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
+/** Check that a workspace can be converted.
+ * @param inputWS :: detector-space workspace to check
+ * @return description of the problems found, or an empty string if there are none
+ */
+std::string ConvertHFIRSCDtoMDE::validateInputWorkspace(const API::IMDHistoWorkspace_sptr &inputWS) const {
   std::stringstream inputWSmsg;
   if (inputWS->getNumDims() != 3) {
     inputWSmsg << "Incorrect number of dimensions";
@@ -90,8 +91,16 @@ std::map<std::string, std::string> ConvertHFIRSCDtoMDE::validateInputs() {
       }
     }
   }
-  if (!inputWSmsg.str().empty())
-    result["InputWorkspace"] = inputWSmsg.str();
+  return inputWSmsg.str();
+}
+
+std::map<std::string, std::string> ConvertHFIRSCDtoMDE::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  API::IMDHistoWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
+  const std::string inputWSmsg = validateInputWorkspace(inputWS);
+  if (!inputWSmsg.empty())
+    result["InputWorkspace"] = inputWSmsg;
 
   std::vector<double> minVals = this->getProperty("MinValues");
   std::vector<double> maxVals = this->getProperty("MaxValues");
@@ -160,10 +169,20 @@ void ConvertHFIRSCDtoMDE::init() {
 /** Execute the algorithm.
  */
 void ConvertHFIRSCDtoMDE::exec() {
+  API::IMDHistoWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
   double wavelength = this->getProperty("Wavelength");
+  setProperty("OutputWorkspace", convertWorkspace(inputWS, wavelength));
+}
+
+/** Convert one detector-space workspace into a Q-sample MDEventWorkspace.
+ * @param inputWS :: detector-space workspace to convert
+ * @param wavelength :: incident wavelength, in Angstrom
+ * @return the converted workspace
+ */
+API::IMDEventWorkspace_sptr ConvertHFIRSCDtoMDE::convertWorkspace(const API::IMDHistoWorkspace_sptr &inputWS,
+                                                                  const double wavelength) {
   bool lorentz = getProperty("LorentzCorrection");
 
-  API::IMDHistoWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
   auto &expInfo = *(inputWS->getExperimentInfo(static_cast<uint16_t>(0)));
   std::string instrument = expInfo.getInstrument()->getName();
 
@@ -280,7 +299,7 @@ void ConvertHFIRSCDtoMDE::exec() {
     convention_alg->setProperty("InputWorkspace", outputWS);
     convention_alg->executeAsChildAlg();
   }
-  setProperty("OutputWorkspace", outputWS);
+  return outputWS;
 }
 
 } // namespace Mantid::MDAlgorithms
