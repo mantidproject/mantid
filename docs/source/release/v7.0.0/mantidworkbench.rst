@@ -29,8 +29,8 @@ Bugfixes
 - (`#41948 <https://github.com/mantidproject/mantid/pull/41948>`_) In the ALF View interface, fixed an error on opening the interface.
 - (`#41949 <https://github.com/mantidproject/mantid/pull/41949>`_) Opening interfaces or changing default directories no longer unnecessarily rewrites and locks the Mantid Workbench settings file.
 - (`#42037 <https://github.com/mantidproject/mantid/pull/42037>`_) On Linux systems with an NFS-backed configuration directory, Workbench now stages its QSettings files in the local cache. This avoids lock-file failures when running multiple Workbench instances and preserves conflicting settings for recovery. Existing settings for the Mantid Reduction interface must be migrated once to the staged INI file.
--  Opening the About dialog on Windows no longer prints a warning about font size in the messages window.
--  Fixed a bug in Workbench where the most recently opened window, such as a plot or the new Instrument View, could stay in memory after it was closed.
+- (`#42355 <https://github.com/mantidproject/mantid/pull/42355>`_) Opening the About dialog on Windows no longer prints a warning about font size in the messages window.
+- (`#42396 <https://github.com/mantidproject/mantid/pull/42396>`_) Fixed a bug in Workbench where the most recently opened window, such as a plot or the new Instrument View, could stay in memory after it was closed.
 
 
 InstrumentViewer
@@ -51,8 +51,8 @@ New features
 - (`#42010 <https://github.com/mantidproject/mantid/pull/42010>`_) New instrument view now allows picking in rectangle zoom by pressing the `Ctrl` or `Shift` keys.
 - (`#42010 <https://github.com/mantidproject/mantid/pull/42010>`_) New instrument view now allows picking the closest detector with peaks to the mouse position.
 - (`#42113 <https://github.com/mantidproject/mantid/pull/42113>`_) In the new Instrument View, the ``Grouping`` and ``Masking`` tabs now have a ``Create From Current Selection`` button, which creates an ROI or mask from the detectors currently selected in the projection. For example, detectors can be picked with the ``Select Bank/Tube`` option and then masked, without having to draw a shape around them.
--  In the new Instrument View, add an option to rotate a projection across the screen, similar to the ``U Correction`` option in the old Instrument View.
--  In the new Instrument View, improve the layout of the left-hand pane by arranging the buttons in two columns.
+- (`#42270 <https://github.com/mantidproject/mantid/pull/42270>`_) In the new Instrument View, add an option to rotate a projection across the screen, similar to the ``U Correction`` option in the old Instrument View.
+- (`#42270 <https://github.com/mantidproject/mantid/pull/42270>`_) In the new Instrument View, improve the layout of the left-hand pane by arranging the buttons in two columns.
 
 Bugfixes
 ############
@@ -64,13 +64,13 @@ Bugfixes
 - (`#42202 <https://github.com/mantidproject/mantid/pull/42202>`_) In the new Instrument View, the tooltip for the render mode now matches the options shown in the drop-down list.
 - (`#42202 <https://github.com/mantidproject/mantid/pull/42202>`_) Fixed an error when picking detectors in the new Instrument View from a Jupyter notebook.
 - (`#42158 <https://github.com/mantidproject/mantid/pull/42158>`_) In the new Instrument View, fixed a bug where the rubber band zoom box was not visible while dragging, following an update to a third-party rendering dependency. The zoom itself was unaffected.
--  In the new Instrument View, workspaces whose x axis units cannot be converted no longer cause errors. This covers workspaces with no units at all, workspaces with a unit such as a label or degrees, and workspaces whose instrument has no sample or source position. Unit selection is disabled for these workspaces, which are shown in their own x values and labelled with their own unit, and everything else continues to work as normal.
--  In the new Instrument View, peaks workspaces cannot be overlaid on a workspace in a unit peaks cannot be shown in, such as energy, and Adding/Deleting Peaks Mode is also disabled for workspaces whose units cannot be converted, since peaks there could not be seen or added.
--  In the new Instrument View, the unit selectors now show the workspace's own unit when it is not one of the listed units, such as energy, rather than time-of-flight.
--  The new Instrument View no longer hangs Workbench when an algorithm, such as ConvertUnits, overwrites the workspace it is showing.
--  In the new Instrument View, summing the selected spectra no longer fails for units in which the spectra cannot share a common binning, such as momentum transfer for a detector in the path of the beam. The spectra are plotted unsummed in this case.
--  In the new Instrument View, the contour and integration range controls no longer disappear when every detector has the same counts or the range is empty. They are greyed out until there is a range to adjust.
--  In the new Instrument View, memory is now freed more effectively when the interface is closed.
+- (`#42380 <https://github.com/mantidproject/mantid/pull/42380>`_) In the new Instrument View, workspaces whose x axis units cannot be converted no longer cause errors. This covers workspaces with no units at all, workspaces with a unit such as a label or degrees, and workspaces whose instrument has no sample or source position. Unit selection is disabled for these workspaces, which are shown in their own x values and labelled with their own unit, and everything else continues to work as normal.
+- (`#42380 <https://github.com/mantidproject/mantid/pull/42380>`_) In the new Instrument View, peaks workspaces cannot be overlaid on a workspace in a unit peaks cannot be shown in, such as energy, and Adding/Deleting Peaks Mode is also disabled for workspaces whose units cannot be converted, since peaks there could not be seen or added.
+- (`#42380 <https://github.com/mantidproject/mantid/pull/42380>`_) In the new Instrument View, the unit selectors now show the workspace's own unit when it is not one of the listed units, such as energy, rather than time-of-flight.
+- (`#42380 <https://github.com/mantidproject/mantid/pull/42380>`_) The new Instrument View no longer hangs Workbench when an algorithm, such as ConvertUnits, overwrites the workspace it is showing.
+- (`#42380 <https://github.com/mantidproject/mantid/pull/42380>`_) In the new Instrument View, summing the selected spectra no longer fails for units in which the spectra cannot share a common binning, such as momentum transfer for a detector in the path of the beam. The spectra are plotted unsummed in this case.
+- (`#42380 <https://github.com/mantidproject/mantid/pull/42380>`_) In the new Instrument View, the contour and integration range controls no longer disappear when every detector has the same counts or the range is empty. They are greyed out until there is a range to adjust.
+- (`#42396 <https://github.com/mantidproject/mantid/pull/42396>`_) In the new Instrument View, memory is now freed more effectively when the interface is closed.
 
 
 SliceViewer

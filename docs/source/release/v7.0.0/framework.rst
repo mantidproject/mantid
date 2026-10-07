@@ -53,7 +53,7 @@ Bugfixes
 - (`#42134 <https://github.com/mantidproject/mantid/pull/42134>`_) Removed ``MultipleScattering`` checkbox from :ref:`algm-CylinderAbsorptionCW`, and renamed ``AttenuationXSection`` to ``AbsorptionXSection``
 - (`#42207 <https://github.com/mantidproject/mantid/pull/42207>`_) :ref:`algm-SavePlot1D` no longer fails when run with plotly 7.0 or later. The ``plotly`` and ``plotly-full`` output types used plotly interfaces that were deprecated and then removed.
 - (`#42256 <https://github.com/mantidproject/mantid/pull/42256>`_) :ref:`algm-BinaryOperateMasks` no longer throws a spurious validation error when acting upon input workspaces with non-default detector mapping.
--  Loading an instrument through ``InstrumentFileFinder`` now consistently selects parameter files matching the search string when multiple candidates have the same validity date. This prevents parameters from being loaded from less suitable files.
+- (`#42397 <https://github.com/mantidproject/mantid/pull/42397>`_) Loading an instrument through ``InstrumentFileFinder`` now consistently selects parameter files matching the search string when multiple candidates have the same validity date. This prevents parameters from being loaded from less suitable files.
 
 Deprecated
 ############
@@ -90,7 +90,7 @@ New features
 - (`#41719 <https://github.com/mantidproject/mantid/pull/41719>`_) :ref:`SampleEnvironment` is now saved in the Nexus File
 - (`#41901 <https://github.com/mantidproject/mantid/pull/41901>`_) `getInstrumentName()` can be used on workspaces or `ExperimentInfo` objects to get the name of the underlying instrument.  Use this instead of `getInstrument().getName()`.
 - (`#42206 <https://github.com/mantidproject/mantid/pull/42206>`_) InstrumentMetadata is now exposed on workspaces and `ExperimentInfo` objects through `instrumentValidFromDate()`, `instrumentValidToDate()`, `instrumentFilename()`, `instrumentXmlText()`, `instrumentDefaultView()` and `instrumentDefaultAxis()`
--  Instrument parameters are now held in a new Instrument 2.0 ``ParameterInfo`` store and reached in C++ through ``ComponentInfo``, with no change to parameter values or to the Python instrument API. ``IComponent::getParameterNamesByComponent()`` and direct ``ParameterMap`` iteration have been removed; see :ref:`InstrumentAccessLayers` for the replacements.
+- (`#42245 <https://github.com/mantidproject/mantid/pull/42245>`_) Instrument parameters are now held in a new Instrument 2.0 ``ParameterInfo`` store and reached in C++ through ``ComponentInfo``, with no change to parameter values or to the Python instrument API. ``IComponent::getParameterNamesByComponent()`` and direct ``ParameterMap`` iteration have been removed; see :ref:`InstrumentAccessLayers` for the replacements.
 
 Bugfixes
 ############
@@ -142,7 +142,7 @@ New features
   algorithm is automatically dispatched over an input workspace group. Previously, the value component of the
   property would be set to equal the ``WorkspaceGroup`` name but the workspace component would be null.
 - (`#42205 <https://github.com/mantidproject/mantid/pull/42205>`_) Grid spacing, pixel counts and detector-ID numbering for rectangular/grid arrays can now be accessed from :class:`~mantid.geometry.ComponentInfo`, using the ``pixelGrid*`` methods such as ``pixelGridNX`` and ``pixelGridXStep``. Whether a component has such a grid can be tested with ``isGridDetector``.
--  Instrument parameters can now be read and written from :class:`~mantid.geometry.ComponentInfo` in Python, with ``hasParameter``, ``getNumberParameter``, ``addDouble`` and friends, replacing the equivalent methods on ``Instrument`` and its components. The optional ``index`` argument defaults to the instrument itself, as in ``component_info.getNumberParameter("x-pixel-size")``.
+- (`#42306 <https://github.com/mantidproject/mantid/pull/42306>`_) Instrument parameters can now be read and written from :class:`~mantid.geometry.ComponentInfo` in Python, with ``hasParameter``, ``getNumberParameter``, ``addDouble`` and friends, replacing the equivalent methods on ``Instrument`` and its components. The optional ``index`` argument defaults to the instrument itself, as in ``component_info.getNumberParameter("x-pixel-size")``.
 - (`#41739 <https://github.com/mantidproject/mantid/pull/41739>`_) ``Instrument`` now has ``getXmlText`` exposed to python.
 
 Bugfixes

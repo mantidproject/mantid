@@ -18,7 +18,7 @@ New Features
 - (`#42064 <https://github.com/mantidproject/mantid/pull/42064>`_) :ref:`ReflectometryISISLoadAndProcess <algm-ReflectometryISISLoadAndProcess>` now utilises the POLREF calibration workflow as part of :ref:`ReflectometryISISCalibration <algm-ReflectometryISISCalibration>` through ``ReflectometryISISPreprocess``.
 - (`#42131 <https://github.com/mantidproject/mantid/pull/42131>`_) Created a new version of :ref:`algm-ReflectometrySliceEventWorkspace-v2`, which produces one workspace group per slice when a workspace group is used as the ``InputWorkspace``.
   These output groups have the same structure as the input group so they can be used in workflows that require a certain set of member workspaces in a group, such as polarization corrections.
-- The ``ReflectometryISISPreprocess`` algorithm no longer applies detector calibration. The
+- (`#42388 <https://github.com/mantidproject/mantid/pull/42388>`_) The ``ReflectometryISISPreprocess`` algorithm no longer applies detector calibration. The
   :ref:`ISIS Reflectometry Interface <interface-isis-refl>` instead applies calibration through
   :ref:`ReflectometryISISLoadAndProcess <algm-ReflectometryISISLoadAndProcess>` after workspace summation. The detector
   image and TOF plot in the reduction preview now display the raw workspace instead of the calibrated workspace, but no

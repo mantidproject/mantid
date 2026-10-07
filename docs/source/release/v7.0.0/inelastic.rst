@@ -12,7 +12,7 @@ New Features
 Bugfixes
 --------
 - (`#41733 <https://github.com/mantidproject/mantid/pull/41733>`_) The :ref:`Moments<inelastic-moments>` tab now correctly sets the ``EMin`` and ``EMax`` value for the *MomentsModel* when plotting new data so that it is correctly propagated through to the :ref:`SofQWMoments <algm-SofQWMoments>` algorithm initialization.
--  The :ref:`Iqt<iqt>` tab of the :ref:`Data Processor<interface-inelastic-data-processor>` interface no longer pops up a warning message box when binning is less than 5, instead it shows the warning message on the console log.
+- (`#42351 <https://github.com/mantidproject/mantid/pull/42351>`_) The :ref:`Iqt<iqt>` tab of the :ref:`Data Processor<interface-inelastic-data-processor>` interface no longer pops up a warning message box when binning is less than 5, instead it shows the warning message on the console log.
 
 
 Algorithms

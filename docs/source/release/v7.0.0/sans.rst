@@ -6,7 +6,7 @@ New Features
 ------------
 - (`#42054 <https://github.com/mantidproject/mantid/pull/42054>`_) :ref:`Runs Tab <ISIS_SANS_Runs_Tab-ref>` of the :ref:`ISIS SANS Interface<ISIS_Sans_interface_contents>` now has a `Clean Up ADS` checkbox to automatically delete all non-reduced workspaces (optimization, raw, transmission and their monitors) from the ADS at the end of a Batch Reduction.
 - (`#42054 <https://github.com/mantidproject/mantid/pull/42054>`_) :ref:`BatchReduce <SANSScriptingBatchReduce>` function on the :ref:`SANS ISIS Command Interface<ScriptingSANSReductions>` now has a `clean_up_ads` parameter to automatically delete all non-reduced workspaces (optimization, raw, transmission and their monitors) from the ADS at the end of a Batch Reduction.
--  :ref:`ISIS SANS TOML <sans_toml_v1-ref>` documentation has been updated with a toml code block example for polarization fields.
+- (`#42334 <https://github.com/mantidproject/mantid/pull/42334>`_) :ref:`ISIS SANS TOML <sans_toml_v1-ref>` documentation has been updated with a toml code block example for polarization fields.
 
 Bugfixes
 --------
