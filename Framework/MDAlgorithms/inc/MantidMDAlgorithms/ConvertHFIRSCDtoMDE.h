@@ -11,6 +11,8 @@
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 
+#include <optional>
+
 namespace Mantid {
 namespace MDAlgorithms {
 
@@ -30,6 +32,8 @@ private:
   void exec() override;
   std::string validateInputWorkspace(const API::IMDHistoWorkspace_sptr &inputWS) const;
   API::IMDEventWorkspace_sptr convertWorkspace(const API::IMDHistoWorkspace_sptr &inputWS, double wavelength);
+  static std::optional<double> fallbackWavelength(const std::vector<double> &wavelengths);
+  double resolveWavelength(const API::IMDHistoWorkspace &inputWS, const std::optional<double> &fallback) const;
 };
 
 } // namespace MDAlgorithms

@@ -14,8 +14,8 @@
 #include "MantidDataObjects/MDEventInserter.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -36,6 +36,10 @@ using namespace Mantid::DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertHFIRSCDtoMDE)
+
+namespace {
+const std::string WAVELENGTH_LOG("wavelength");
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 
@@ -102,6 +106,17 @@ std::map<std::string, std::string> ConvertHFIRSCDtoMDE::validateInputs() {
   if (!inputWSmsg.empty())
     result["InputWorkspace"] = inputWSmsg;
 
+  const std::vector<double> wavelengths = this->getProperty("Wavelength");
+  if (wavelengths.size() > 1) {
+    result["Wavelength"] = "Only one value can be given when InputWorkspace is a single workspace";
+  } else if (inputWSmsg.empty()) {
+    try {
+      resolveWavelength(*inputWS, fallbackWavelength(wavelengths));
+    } catch (const std::runtime_error &err) {
+      result["Wavelength"] = err.what();
+    }
+  }
+
   std::vector<double> minVals = this->getProperty("MinValues");
   std::vector<double> maxVals = this->getProperty("MaxValues");
 
@@ -140,10 +155,10 @@ void ConvertHFIRSCDtoMDE::init() {
 
   declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input workspace.");
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "Wavelength", DBL_MAX, std::make_shared<BoundedValidator<double>>(0.0, 100.0, true), Direction::Input),
-      "Wavelength");
+  declareProperty(std::make_unique<ArrayProperty<double>>(
+                      "Wavelength", std::make_shared<ArrayBoundedValidator<double>>(0.0, 100.0, true)),
+                  "Fallback incident wavelength, in Angstrom. As in HB3AAdjustSampleNorm, the 'wavelength' sample log "
+                  "of the input workspace is used when present, and this value only when the log is missing.");
   declareProperty(std::make_unique<PropertyWithValue<bool>>("LorentzCorrection", false, Direction::Input),
                   "Correct the weights of events or signals and errors transformed into "
                   "reciprocal space by multiplying them "
@@ -170,8 +185,53 @@ void ConvertHFIRSCDtoMDE::init() {
  */
 void ConvertHFIRSCDtoMDE::exec() {
   API::IMDHistoWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
-  double wavelength = this->getProperty("Wavelength");
+  const std::vector<double> wavelengths = this->getProperty("Wavelength");
+  const double wavelength = resolveWavelength(*inputWS, fallbackWavelength(wavelengths));
   setProperty("OutputWorkspace", convertWorkspace(inputWS, wavelength));
+}
+
+/** The fallback wavelength given in the Wavelength property, if any.
+ * @param wavelengths :: values of the Wavelength property
+ * @return the first value, or no value if the property is empty
+ */
+std::optional<double> ConvertHFIRSCDtoMDE::fallbackWavelength(const std::vector<double> &wavelengths) {
+  if (wavelengths.empty())
+    return std::nullopt;
+  return wavelengths.front();
+}
+
+/** Find the wavelength for a workspace, following HB3AAdjustSampleNorm: the
+ * 'wavelength' sample log when present, otherwise the fallback value.
+ * @param inputWS :: detector-space workspace to convert
+ * @param fallback :: value to use when the sample log is missing
+ * @return the wavelength, in Angstrom
+ * @throws std::runtime_error if the sample log is not a positive number, or if
+ * neither the sample log nor the fallback is available
+ */
+double ConvertHFIRSCDtoMDE::resolveWavelength(const API::IMDHistoWorkspace &inputWS,
+                                              const std::optional<double> &fallback) const {
+  const auto &run = inputWS.getExperimentInfo(static_cast<uint16_t>(0))->run();
+  if (run.hasProperty(WAVELENGTH_LOG)) {
+    double wavelength;
+    try {
+      // HB3A files store the log as a string, which is converted here
+      wavelength = run.getLogAsSingleValue(WAVELENGTH_LOG);
+    } catch (const std::invalid_argument &) {
+      throw std::runtime_error("The '" + WAVELENGTH_LOG + "' sample log of the input workspace cannot be converted " +
+                               "to a number: '" + run.getProperty(WAVELENGTH_LOG)->value() + "'");
+    }
+    if (!(wavelength > 0.0) || !std::isfinite(wavelength))
+      throw std::runtime_error("The '" + WAVELENGTH_LOG + "' sample log of the input workspace must be a positive " +
+                               "number, found " + std::to_string(wavelength));
+    g_log.information() << "Using wavelength " << wavelength << " Angstrom from the '" << WAVELENGTH_LOG
+                        << "' sample log\n";
+    return wavelength;
+  }
+  if (!fallback)
+    throw std::runtime_error("No wavelength available: the input workspace has no '" + WAVELENGTH_LOG +
+                             "' sample log and the Wavelength property is not set");
+  g_log.information() << "Using wavelength " << *fallback << " Angstrom from the Wavelength property\n";
+  return *fallback;
 }
 
 /** Convert one detector-space workspace into a Q-sample MDEventWorkspace.
@@ -286,11 +346,11 @@ API::IMDEventWorkspace_sptr ConvertHFIRSCDtoMDE::convertWorkspace(const API::IMD
   outputWS->refreshCache();
   outputWS->copyExperimentInfos(*inputWS);
   auto &outRun = outputWS->getExperimentInfo(0)->mutableRun();
-  if (outRun.hasProperty("wavelength")) {
-    outRun.removeLogData("wavelength");
+  if (outRun.hasProperty(WAVELENGTH_LOG)) {
+    outRun.removeLogData(WAVELENGTH_LOG);
   }
-  outRun.addLogData(new PropertyWithValue<double>("wavelength", wavelength));
-  outRun.getProperty("wavelength")->setUnits("Angstrom");
+  outRun.addLogData(new PropertyWithValue<double>(WAVELENGTH_LOG, wavelength));
+  outRun.getProperty(WAVELENGTH_LOG)->setUnits("Angstrom");
 
   auto user_convention = Kernel::ConfigService::Instance().getString("Q.convention");
   auto ws_convention = outputWS->getConvention();
