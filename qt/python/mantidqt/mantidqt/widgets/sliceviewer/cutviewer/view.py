@@ -12,6 +12,7 @@ from qtpy.QtGui import QColor
 from mantid.plots.plotfunctions import create_subplots
 from mantidqt.MPLwidgets import FigureCanvas
 from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
+import matplotlib.pyplot as plt
 import matplotlib.text as text
 from mantid.simpleapi import AnalysisDataService as ADS
 from mantid.kernel import SpecialCoordinateSystem
@@ -180,6 +181,7 @@ class CutViewerView(QWidget):
         self.layout.addLayout(self.figure_layout)
         self.figure.canvas.mpl_connect("draw_event", self._on_figure_canvas_draw)
         self._is_drawing = False
+        self.destroyed.connect(lambda _=None, fig=fig: plt.close(fig))
 
     # When the figure redraws after e.g. the user changing an axis to log, then
     # for this view to see the update it requires an extra draw(). This method
