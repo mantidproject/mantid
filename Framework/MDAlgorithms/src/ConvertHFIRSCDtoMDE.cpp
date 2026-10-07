@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvertHFIRSCDtoMDE.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
@@ -25,6 +26,8 @@
 
 #include "Eigen/Dense"
 #include "boost/math/constants/constants.hpp"
+
+#include <sstream>
 
 namespace Mantid::MDAlgorithms {
 
@@ -233,7 +236,11 @@ void ConvertHFIRSCDtoMDE::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "", Direction::Output),
       "An MDEventWorkspace in Q-sample. For a WorkspaceGroup input, a WorkspaceGroup whose members are named "
-      "<OutputWorkspace>_<input member name>, as in HB3AAdjustSampleNorm.");
+      "<OutputWorkspace>_<input member name>, as in HB3AAdjustSampleNorm, or a single MDEventWorkspace if "
+      "MergeInputs is set.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("MergeInputs", false, Direction::Input),
+                  "For a WorkspaceGroup input, merge the converted members into one MDEventWorkspace with MergeMD, "
+                  "using the box controller settings given here. Ignored for a single input workspace.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -251,25 +258,67 @@ void ConvertHFIRSCDtoMDE::exec() {
     return;
   }
 
+  const bool mergeInputs = this->getProperty("MergeInputs");
+  std::vector<API::IMDEventWorkspace_sptr> outputWorkspaces;
+  Progress progress(this, 0.0, mergeInputs ? 0.9 : 1.0, inputWorkspaces.size());
+  for (size_t i = 0; i < inputWorkspaces.size(); ++i) {
+    const double wavelength = resolveWavelength(*inputWorkspaces[i], fallbackWavelength(wavelengths, i));
+    outputWorkspaces.emplace_back(convertWorkspace(inputWorkspaces[i], wavelength));
+    progress.report("Converted " + memberName(*group, i));
+  }
+
+  if (mergeInputs) {
+    setProperty("OutputWorkspace", std::static_pointer_cast<API::Workspace>(mergeWorkspaces(outputWorkspaces)));
+    return;
+  }
+
   // One output per member, named as in HB3AAdjustSampleNorm. Each member is declared as an output property so that
   // it is stored in the AnalysisDataService under its name, before the group.
   const std::string outputName = getPropertyValue("OutputWorkspace");
   auto outputGroup = std::make_shared<WorkspaceGroup>();
-  Progress progress(this, 0.0, 1.0, inputWorkspaces.size());
-  for (size_t i = 0; i < inputWorkspaces.size(); ++i) {
-    const double wavelength = resolveWavelength(*inputWorkspaces[i], fallbackWavelength(wavelengths, i));
-    auto outputWS = convertWorkspace(inputWorkspaces[i], wavelength);
+  for (size_t i = 0; i < outputWorkspaces.size(); ++i) {
     const std::string propertyName = "OutputWorkspace_" + std::to_string(i + 1);
     if (existsProperty(propertyName))
       removeProperty(propertyName);
     declareProperty(std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
                         propertyName, outputName + "_" + memberName(*group, i), Direction::Output),
                     "Output for member " + std::to_string(i + 1) + " of the input group.");
-    setProperty(propertyName, outputWS);
-    outputGroup->addWorkspace(outputWS);
-    progress.report("Converted " + memberName(*group, i));
+    setProperty(propertyName, outputWorkspaces[i]);
+    outputGroup->addWorkspace(outputWorkspaces[i]);
   }
   setProperty("OutputWorkspace", std::static_pointer_cast<API::Workspace>(outputGroup));
+}
+
+/** Merge converted workspaces with MergeMD, with the box controller settings of this algorithm.
+ * MergeMD reads its inputs from the AnalysisDataService, so the workspaces are stored there under hidden temporary
+ * names, which are removed afterwards, also if the merge fails.
+ * @param workspaces :: converted workspaces, in group order
+ * @return the merged workspace
+ */
+API::IMDEventWorkspace_sptr
+ConvertHFIRSCDtoMDE::mergeWorkspaces(const std::vector<API::IMDEventWorkspace_sptr> &workspaces) {
+  // Names are unique to this algorithm instance, so that concurrent executions do not collide
+  std::ostringstream prefix;
+  prefix << "__ConvertHFIRSCDtoMDE_" << static_cast<const void *>(this) << "_";
+
+  struct TemporaryWorkspaces {
+    std::vector<std::string> names;
+    ~TemporaryWorkspaces() {
+      for (const auto &name : names)
+        AnalysisDataService::Instance().remove(name);
+    }
+  } temporary;
+  for (size_t i = 0; i < workspaces.size(); ++i) {
+    temporary.names.emplace_back(prefix.str() + std::to_string(i + 1));
+    AnalysisDataService::Instance().addOrReplace(temporary.names.back(), workspaces[i]);
+  }
+
+  auto merge = createChildAlgorithm("MergeMD", 0.9, 1.0);
+  merge->setProperty("InputWorkspaces", temporary.names);
+  for (const std::string name : {"SplitInto", "SplitThreshold", "MaxRecursionDepth"})
+    merge->setPropertyValue(name, getPropertyValue(name));
+  merge->executeAsChildAlg();
+  return merge->getProperty("OutputWorkspace");
 }
 
 /** The input workspaces to convert: the members of a group in order, or the single input workspace.

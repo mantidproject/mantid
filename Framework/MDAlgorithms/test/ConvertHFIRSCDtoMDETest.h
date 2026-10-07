@@ -10,6 +10,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/BoxController.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -39,6 +40,7 @@ public:
     ConvertHFIRSCDtoMDE alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_EQUALS(alg.getPropertyValue("MergeInputs"), "0");
   }
 
   void test_exec() {
@@ -285,8 +287,119 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_merge_inputs() {
+    addGroup("ConvertHFIRSCDtoMDETest_group", {"ConvertHFIRSCDtoMDETest_a", "ConvertHFIRSCDtoMDETest_b"},
+             {loadData(), loadData()});
+    auto alg = createAlgorithm("ConvertHFIRSCDtoMDETest_group", "", "ConvertHFIRSCDtoMDETest_Q");
+    alg->setProperty("MergeInputs", true);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    auto &ads = AnalysisDataService::Instance();
+    auto outWS = ads.retrieveWS<IMDEventWorkspace>("ConvertHFIRSCDtoMDETest_Q");
+    TS_ASSERT(outWS);
+    if (!outWS)
+      return;
+    TS_ASSERT_EQUALS(outWS->getNEvents(), 2 * 9038);
+    TS_ASSERT_EQUALS(outWS->getNumExperimentInfo(), 2);
+    // The box controller defaults of this algorithm, not those of MergeMD
+    const auto boxController = outWS->getBoxController();
+    TS_ASSERT_EQUALS(boxController->getSplitInto(0), 5);
+    TS_ASSERT_EQUALS(boxController->getSplitThreshold(), 1000);
+    TS_ASSERT_EQUALS(boxController->getMaxDepth(), 20);
+    // Neither per-member outputs nor the temporary workspaces given to MergeMD remain
+    TS_ASSERT(!ads.doesExist("ConvertHFIRSCDtoMDETest_Q_ConvertHFIRSCDtoMDETest_a"));
+    TS_ASSERT(!ads.doesExist("ConvertHFIRSCDtoMDETest_Q_ConvertHFIRSCDtoMDETest_b"));
+    TS_ASSERT(temporaryWorkspaceNames().empty());
+    ads.clear();
+  }
+
+  void test_merge_inputs_as_child_algorithm() {
+    auto group = std::make_shared<WorkspaceGroup>();
+    group->addWorkspace(loadData());
+    group->addWorkspace(loadData());
+    ConvertHFIRSCDtoMDE alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", std::static_pointer_cast<Workspace>(group));
+    alg.setProperty("MergeInputs", true);
+    alg.setPropertyValue("SplitInto", "3");
+    alg.setProperty("SplitThreshold", 200);
+    alg.setProperty("MaxRecursionDepth", 10);
+    alg.setPropertyValue("OutputWorkspace", "_unused_for_child");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    Workspace_sptr output = alg.getProperty("OutputWorkspace");
+    auto outWS = std::dynamic_pointer_cast<IMDEventWorkspace>(output);
+    TS_ASSERT(outWS);
+    if (outWS) {
+      TS_ASSERT_EQUALS(outWS->getNEvents(), 2 * 9038);
+      const auto boxController = outWS->getBoxController();
+      TS_ASSERT_EQUALS(boxController->getSplitInto(0), 3);
+      TS_ASSERT_EQUALS(boxController->getSplitThreshold(), 200);
+      TS_ASSERT_EQUALS(boxController->getMaxDepth(), 10);
+    }
+    TS_ASSERT(temporaryWorkspaceNames().empty());
+  }
+
+  void test_merge_inputs_equals_convert_then_MergeMD() {
+    // Different wavelengths for the two members, so that the merge combines different Q coordinates
+    auto withoutLog = loadData();
+    withoutLog->getExperimentInfo(0)->mutableRun().removeProperty("wavelength");
+    addGroup("ConvertHFIRSCDtoMDETest_group", {"ConvertHFIRSCDtoMDETest_a", "ConvertHFIRSCDtoMDETest_b"},
+             {loadData(), withoutLog});
+    auto alg = createAlgorithm("ConvertHFIRSCDtoMDETest_group", "1.5,2.0", "ConvertHFIRSCDtoMDETest_Q");
+    alg->setProperty("MergeInputs", true);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    auto &ads = AnalysisDataService::Instance();
+    ads.addOrReplace("ConvertHFIRSCDtoMDETest_Q_a",
+                     convert(ads.retrieveWS<IMDHistoWorkspace>("ConvertHFIRSCDtoMDETest_a"), ""));
+    ads.addOrReplace("ConvertHFIRSCDtoMDETest_Q_b",
+                     convert(ads.retrieveWS<IMDHistoWorkspace>("ConvertHFIRSCDtoMDETest_b"), "2.0"));
+    auto merge = AlgorithmManager::Instance().createUnmanaged("MergeMD");
+    merge->initialize();
+    merge->setRethrows(true);
+    merge->setPropertyValue("InputWorkspaces", "ConvertHFIRSCDtoMDETest_Q_a,ConvertHFIRSCDtoMDETest_Q_b");
+    merge->setPropertyValue("OutputWorkspace", "ConvertHFIRSCDtoMDETest_reference");
+    // The box controller defaults of ConvertHFIRSCDtoMDE, which it passes to MergeMD
+    merge->setPropertyValue("SplitInto", "5");
+    merge->setProperty("SplitThreshold", 1000);
+    merge->setProperty("MaxRecursionDepth", 20);
+    merge->execute();
+
+    auto compare = AlgorithmManager::Instance().createUnmanaged("CompareMDWorkspaces");
+    compare->initialize();
+    compare->setRethrows(true);
+    compare->setPropertyValue("Workspace1", "ConvertHFIRSCDtoMDETest_Q");
+    compare->setPropertyValue("Workspace2", "ConvertHFIRSCDtoMDETest_reference");
+    compare->setProperty("CheckEvents", true);
+    compare->execute();
+    const bool equals = compare->getProperty("Equals");
+    TSM_ASSERT(compare->getPropertyValue("Result"), equals);
+    ads.clear();
+  }
+
+  void test_merge_inputs_ignored_for_single_input() {
+    AnalysisDataService::Instance().addOrReplace("ConvertHFIRSCDtoMDETest_a", loadData());
+    auto alg = createAlgorithm("ConvertHFIRSCDtoMDETest_a", "", "ConvertHFIRSCDtoMDETest_Q");
+    alg->setProperty("MergeInputs", true);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    assertConvertedWithWavelength(
+        AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("ConvertHFIRSCDtoMDETest_Q"), 1.008);
+    AnalysisDataService::Instance().clear();
+  }
+
 private:
   IMDHistoWorkspace_sptr m_data;
+
+  /// Names of the hidden workspaces that the algorithm stores for MergeMD
+  std::vector<std::string> temporaryWorkspaceNames() {
+    std::vector<std::string> names;
+    for (const auto &name : AnalysisDataService::Instance().getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
+                                                                           Mantid::Kernel::DataServiceHidden::Include))
+      if (name.starts_with("__ConvertHFIRSCDtoMDE"))
+        names.emplace_back(name);
+    return names;
+  }
 
   /// Add workspaces to the AnalysisDataService under the given names, and group them
   void addGroup(const std::string &groupName, const std::vector<std::string> &names,
