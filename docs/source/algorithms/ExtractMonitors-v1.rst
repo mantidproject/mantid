@@ -39,9 +39,9 @@ Usage
   # Monitor histograms
   print("Number of spectra in monitor workspace: {0}".format(monitor_ws.getNumberHistograms()))
   # Check if the first spectrum in the detector workspace is a monitor
-  print("Detector workspace isMonitor for spectrum 0: {0}".format(detector_ws.getDetector(0).isMonitor()))
+  print("Detector workspace isMonitor for spectrum 0: {0}".format(detector_ws.spectrumInfo().isMonitor(0)))
   # Check if the first spectrum in the monitor workspace is a monitor
-  print("Monitor workspace isMonitor for spectrum 0: {0}".format(monitor_ws.getDetector(0).isMonitor()))
+  print("Monitor workspace isMonitor for spectrum 0: {0}".format(monitor_ws.spectrumInfo().isMonitor(0)))
   # See the monitor workspace is set
   print("Name of monitor workspace: {0}".format(detector_ws.getMonitorWorkspace().name()))
 

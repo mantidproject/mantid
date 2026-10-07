@@ -46,8 +46,8 @@ Usage
    corrected_ws = SpecularReflectionPositionCorrect(InputWorkspace=ws, DetectorComponentName='point-detector', AnalysisMode='PointDetectorAnalysis', TwoThetaIn=45.0, Version=1)
 
    # Get the detector position post correction. We expect that the vertical offset of the point detector == 1.0
-   inst = corrected_ws.getInstrument()
-   det_pos = inst.getComponentByName('point-detector').getPos()
+   component_info = corrected_ws.componentInfo()
+   det_pos = component_info.position(component_info.indexOfAny('point-detector'))
    print(det_pos)
 
 Output:

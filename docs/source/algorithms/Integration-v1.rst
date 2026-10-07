@@ -149,10 +149,9 @@ Output:
     # Now, generate the elastic peaks.
     Ei = 23.0  # Incident energy, meV
     L1 = 10.0 # Source-sample distance, m
-    sample = ws.getInstrument().getSample()
+    spectrum_info = ws.spectrumInfo()
     for i in range(nHisto):
-        detector = ws.getDetector(i)
-        L2 = sample.getDistance(detector)
+        L2 = spectrum_info.l2(i)
         tof = UnitConversion.run('Energy', 'TOF', Ei, L1, L2, 0.0, DeltaEModeType.Direct, Ei)
         ys = ws.mutableY(i)
         ys += peak(tof, ws.x(i))

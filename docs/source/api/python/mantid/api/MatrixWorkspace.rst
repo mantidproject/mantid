@@ -122,7 +122,11 @@ Output:
 Instrument
 ^^^^^^^^^^
 
-You can get access to the :py:obj:`Instrument <mantid.geometry.Instrument>` for a workspace with
+You can get access to the instrument geometry for a workspace through its
+:ref:`instrument access layers <InstrumentAccessLayers>`:
+:py:obj:`SpectrumInfo <mantid.api.SpectrumInfo>` (by workspace index),
+:py:obj:`DetectorInfo <mantid.geometry.DetectorInfo>` (by detector) and
+:py:obj:`ComponentInfo <mantid.geometry.ComponentInfo>` (every component, including the source, sample and banks)
 
 .. testsetup:: MatrixWorkspaceInstrument
 
@@ -131,9 +135,14 @@ You can get access to the :py:obj:`Instrument <mantid.geometry.Instrument>` for 
 
 .. testcode:: MatrixWorkspaceInstrument
 
-  instrument = ws.getInstrument()
+  instrument_name = ws.getInstrumentName()
+  spectrum_info = ws.spectrumInfo()
+  detector_info = ws.detectorInfo()
+  component_info = ws.componentInfo()
 
-For the properties and operations of the instrument look at the :py:obj:`Instrument help <mantid.geometry.Instrument>`.
+For the properties and operations of each layer look at the
+:py:obj:`SpectrumInfo <mantid.api.SpectrumInfo>`, :py:obj:`DetectorInfo <mantid.geometry.DetectorInfo>`
+and :py:obj:`ComponentInfo <mantid.geometry.ComponentInfo>` help.
 
 Run - to access logs, and other run information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
