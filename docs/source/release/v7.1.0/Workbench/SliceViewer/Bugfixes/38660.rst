@@ -1,0 +1,1 @@
+- In :ref:`SliceViewer <sliceviewer>`, fixed an error raised when reopening the interface after using the non-axis-aligned cutting tool.
