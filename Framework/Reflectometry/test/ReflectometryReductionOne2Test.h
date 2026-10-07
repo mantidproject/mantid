@@ -505,6 +505,28 @@ public:
     TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 31.418985, 1e-6);
   }
 
+  void test_sum_in_q_preserves_signed_residuals() {
+    // A background-subtracted detector value may be negative. SumInQ must
+    // project it, rather than treating it as an empty bin.
+    auto signedWorkspace = create2DWorkspaceWithReflectometryInstrumentMultiDetector(
+        0, m_detSize, V3D(0, 0, 0), V3D(0, 0, 1), 0.5, 1.0, V3D(0, 0, 0), V3D(14, 0, 0), V3D(15, 0, 0), V3D(20, 5, 0),
+        6);
+    for (size_t index = 1; index < signedWorkspace->getNumberHistograms(); ++index) {
+      std::fill(signedWorkspace->mutableY(index).begin(), signedWorkspace->mutableY(index).end(), -2.0);
+      std::fill(signedWorkspace->mutableE(index).begin(), signedWorkspace->mutableE(index).end(), 1.0);
+    }
+
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "3");
+    alg.setProperty("InputWorkspace", signedWorkspace);
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "NonFlatSample");
+
+    auto outLam = runAlgorithmLam(alg, 10);
+    TS_ASSERT_LESS_THAN(sumCounts(outLam->counts(0)), 0.0);
+    TS_ASSERT_DIFFERS(std::accumulate(outLam->e(0).cbegin(), outLam->e(0).cend(), 0.0), 0.0);
+  }
+
   void test_sum_in_q_monitor_normalization() {
     // Monitor normalization
     // No direct beam normalization
