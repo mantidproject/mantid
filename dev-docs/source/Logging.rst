@@ -145,8 +145,8 @@ If you need more control, you can use :code:`'PythonLoggingChannel'` as a channe
 
 Messages sent through :code:`PythonLoggingChannel` are queued so that C++ threads do not block waiting for the Python
 interpreter. Delivery to Python therefore happens shortly after the C++ logging call returns. The queue holds up to
-10,000 messages; if it fills, further messages are dropped and a warning with the number dropped is emitted when
-delivery resumes.
+:code:`logging.python.queueSize` messages (default 10,000, :code:`0` for unlimited); if it fills, further messages are
+dropped and a warning with the number dropped is emitted when delivery resumes.
 
 Tips
 ----

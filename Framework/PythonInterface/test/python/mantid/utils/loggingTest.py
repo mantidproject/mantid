@@ -27,11 +27,20 @@ class CaptureHandler(logging.Handler):
         self.records.append(record)
 
 
+# Generous bounds: on a heavily loaded CI runner, process startup alone can take well over 10 seconds.
+# The subprocess timeout only exists to stop a deadlock hanging the test suite; the watchdog in the
+# script fires first so that a hang reports the Python stack of every thread.
+LIVE_DATA_SUBPROCESS_TIMEOUT = 120
+LIVE_DATA_WATCHDOG_TIMEOUT = 100
+
 LIVE_DATA_GIL_REGRESSION_SCRIPT = r"""
+import faulthandler
 import logging
 import os
 import sys
 import time
+
+faulthandler.dump_traceback_later(int(sys.argv[1]), exit=True)
 
 from mantid.api import AlgorithmManager
 from mantid.kernel import ConfigService
@@ -59,32 +68,34 @@ mtd_log_to_python(level="notice", pattern="%t")
 
 StartLiveData(Instrument="FakeEventDataListener", OutputWorkspace="live", UpdateEvery=0.05)
 
-startup_deadline = time.monotonic() + 5.0
+startup_deadline = time.monotonic() + 30.0 # seconds
 while not any(message.startswith("MonitorLiveData started") for message in handler.records):
     if time.monotonic() > startup_deadline:
         raise RuntimeError("MonitorLiveData did not start")
     time.sleep(0.01)
 
+
+def last_chunk():
+    chunk_messages = [message for message in handler.records if message.startswith("Loading live data chunk")]
+    return int(chunk_messages[-1].split()[4]) if chunk_messages else 0
+
+
 old_switch_interval = sys.getswitchinterval()
-hold_started = time.monotonic()
 try:
     # Prevent the main Python thread from periodically yielding the GIL.
     sys.setswitchinterval(10.0)
-    hold_deadline = hold_started + 1.0
-    while time.monotonic() < hold_deadline:
+    # Hold until MonitorLiveData has made progress; the deadline must stay below the switch interval.
+    hold_deadline = time.monotonic() + 5.0 # seconds
+    while last_chunk() < 2 and time.monotonic() < hold_deadline:
         pass
 finally:
     sys.setswitchinterval(old_switch_interval)
 
-chunk_messages = [message for message in handler.records if message.startswith("Loading live data chunk")]
-if not chunk_messages:
-    raise RuntimeError("MonitorLiveData did not progress while Python held the GIL")
-last_chunk = int(chunk_messages[-1].split()[4])
-if last_chunk < 2:
-    raise RuntimeError(f"MonitorLiveData only reached chunk {last_chunk} while Python held the GIL")
+if last_chunk() < 2:
+    raise RuntimeError(f"MonitorLiveData only reached chunk {last_chunk()} while Python held the GIL")
 
 AlgorithmManager.cancelAll()
-cleanup_deadline = time.monotonic() + 5.0
+cleanup_deadline = time.monotonic() + 30.0 # seconds
 while AlgorithmManager.runningInstancesOf("MonitorLiveData"):
     if time.monotonic() > cleanup_deadline:
         raise RuntimeError("MonitorLiveData did not stop")
@@ -138,10 +149,24 @@ class loggingTest(unittest.TestCase):
 
     def test_monitor_live_data_progresses_while_python_holds_the_gil(self):
         # Isolate the long-lived MonitorLiveData thread and bound any deadlock during cleanup.
-        result = subprocess.run(
-            [sys.executable, "-c", LIVE_DATA_GIL_REGRESSION_SCRIPT], capture_output=True, text=True, timeout=15, check=False
-        )
-        self.assertEqual(0, result.returncode, msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}")
+        timed_out = False
+        with subprocess.Popen(
+            [sys.executable, "-c", LIVE_DATA_GIL_REGRESSION_SCRIPT, str(LIVE_DATA_WATCHDOG_TIMEOUT)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        ) as process:
+            try:
+                stdout, stderr = process.communicate(timeout=LIVE_DATA_SUBPROCESS_TIMEOUT)
+            except subprocess.TimeoutExpired:
+                # collect whatever the script wrote before it was killed
+                process.kill()
+                stdout, stderr = process.communicate()
+                timed_out = True
+
+        output = f"stdout:\n{stdout}\nstderr:\n{stderr}"
+        self.assertFalse(timed_out, msg=f"timed out after {LIVE_DATA_SUBPROCESS_TIMEOUT} seconds\n{output}")
+        self.assertEqual(0, process.returncode, msg=output)
 
 
 if __name__ == "__main__":

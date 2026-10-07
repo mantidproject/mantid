@@ -44,10 +44,14 @@ private:
 
   void closeImpl();
   void enqueue(Poco::Message msg);
-  static int drainQueue(void *statePtr);
-  static void drainQueue(const std::shared_ptr<State> &state);
+  /// Callback with the signature required by Py_AddPendingCall. It takes ownership of a heap-allocated
+  /// std::shared_ptr<State> so that the state outlives the channel if the call runs after it was destroyed.
+  static int pendingCallDrainQueue(void *stateHolder);
+  /// Deliver all queued messages to Python. The GIL must be held.
+  static void drainQueue(State &state);
 
-  std::shared_ptr<State> m_state;
+  /// Shared with any outstanding pending calls. It is set in the constructor and never reset.
+  const std::shared_ptr<State> m_state;
 };
 
 } // namespace Poco

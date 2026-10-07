@@ -183,6 +183,11 @@ Information on how to customize the logging system can be found in the
 | ``logging.formatters.f1.pattern``               | The format of the log messages.                   | ``[%H:%M:%S][%q] %s %U:%u - %t``    |
 |                                                 | The default is ``%s-[%p] %t``.                    |                                     |
 +-------------------------------------------------+---------------------------------------------------+-------------------------------------+
+| ``logging.python.queueSize``                    | The maximum number of messages                    | ``10000``                           |
+|                                                 | ``PythonLoggingChannel`` holds while waiting for  |                                     |
+|                                                 | Python. Further messages are dropped and counted. |                                     |
+|                                                 | ``0`` means unlimited. The default is ``10000``.  |                                     |
++-------------------------------------------------+---------------------------------------------------+-------------------------------------+
 
 The logging priority levels for the file logging and console logging can also be adjusted in python using the command:
 
