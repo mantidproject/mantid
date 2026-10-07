@@ -833,13 +833,13 @@ class ComponentInfoTest(unittest.TestCase):
         self.assertEqual(info.pixelGridYSize(bank_index), sizeY)
 
     def test_pixel_grid_xy_size_parametrized(self):
-        info = CloneWorkspace(self._ws, StoreInADS=False).componentInfo()
+        info = CloneWorkspace(self._ws_rect, StoreInADS=False).componentInfo()
         bank_index = info.indexOfAny("bank1")
 
         # add this parameter to the bank to rescale it
         SCALE = 0.5
-        info.addParameter("double", "xscale", SCALE, bank_index, "scale for x", True)
-        info.addParameter("double", "yscale", SCALE, bank_index, "scale for y", True)
+        info.addDouble("scalex", SCALE, bank_index)
+        info.addDouble("scaley", SCALE, bank_index)
 
         # now check it scaled
         scaledSizeX = self._RECT_NUM_PIXELS * 0.008 * SCALE  # Each pixel is 8 mm in size, in WorkspaceCreationHelper

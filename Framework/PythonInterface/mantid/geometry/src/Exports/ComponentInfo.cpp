@@ -367,12 +367,12 @@ void export_ComponentInfo() {
            "permutation of 'x', 'y' and 'z'. Raises RuntimeError if the component is not "
            "a Rectangular or Grid bank.")
 
-      .def("pixelGridSize", &pixelGridXSize, (arg("self"), arg("index")),
+      .def("pixelGridXSize", &pixelGridXSize, (arg("self"), arg("index")),
            "Returns the x-size (width) in the Rectangular/Grid bank identified "
            "by 'index'. Raises RuntimeError if the component is not a Rectangular or Grid "
            "bank.")
 
-      .def("pixelGridSizeY", &pixelGridYSize, (arg("self"), arg("index")),
+      .def("pixelGridYSize", &pixelGridYSize, (arg("self"), arg("index")),
            "Returns the y-size (height) in the Rectangular/Grid bank identified "
            "by 'index'. Raises RuntimeError if the component is not a Rectangular or Grid "
            "bank.")
