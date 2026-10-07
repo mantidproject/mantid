@@ -46,24 +46,12 @@ Usage
 
 	ResizeRectangularDetector(ws,"bank1",2.0,0.5)
 
-	component_info = ws.componentInfo()
+	i=ws.getInstrument()
+	bank1=i.getComponentByName('bank1')
+	bank2=i.getComponentByName('bank2')
 
-	def bank_size(bank_name):
-		''' width and height of a rectangular bank, including any "scalex"/"scaley" resize parameters '''
-		index = component_info.indexOfAny(bank_name)
-		width = component_info.pixelGridNX(index) * component_info.pixelGridXStep(index)
-		height = component_info.pixelGridNY(index) * component_info.pixelGridYStep(index)
-		if component_info.hasParameter("scalex", index):
-			width *= component_info.getNumberParameter("scalex", index)[0]
-		if component_info.hasParameter("scaley", index):
-			height *= component_info.getNumberParameter("scaley", index)[0]
-		return width, height
-
-	bank1_width, bank1_height = bank_size('bank1')
-	bank2_width, bank2_height = bank_size('bank2')
-
-	print ("bank 1 was scaled and is now {:.2f} by {:.2f}".format(bank1_width, bank1_height))
-	print ("bank 2 was not scaled and remains {:.2f} by {:.2f}".format(bank2_width, bank2_height))
+	print ("bank 1 was scaled and is now {:.2f} by {:.2f}".format(bank1.xsize(), bank1.ysize()))
+	print ("bank 2 was not scaled and remains {:.2f} by {:.2f}".format(bank2.xsize(), bank2.ysize()))
 
 Output:
 
