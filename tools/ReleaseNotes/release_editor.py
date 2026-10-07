@@ -100,7 +100,7 @@ def get_pr_number_and_link(release_note_path: pathlib.Path, git_token: str) -> T
             continue
 
         pr = response.json()[0]
-        if pr["base"]["ref"] == "main":
+        if pr["base"]["ref"] in ("main", "release-next"):
             return pr["number"], pr["html_url"]
 
     return "", ""
