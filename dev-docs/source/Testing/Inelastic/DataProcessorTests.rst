@@ -106,16 +106,6 @@ Moments tab
 #. On the Output edit, the name of the output workspace should be greyed out. The spectra numbers box should also be disabled, and should read `0,2,4`. Click on the ``Plot Spectra`` button.
    A plot window should be generated with three of the calculated moments.
 
-2. Invalid data
-###############
-
-#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Processor``
-#. Go to the ``Moments`` tab
-#. On the File Input, click on ``Browse``, a dialog window should prompt.
-#. Find the file ``MAR27698_red.nxs`` from the ISIS Sample Data and Load it.
-#. Click the ``Run`` button.
-#. There should be a red error message in the logger. No data should be plotted in the bottom embedded plot.
-
 
 .. _moments_inelastic_test:
 
