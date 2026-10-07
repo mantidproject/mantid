@@ -107,8 +107,9 @@ Note Component index 0 is usually the Container.
             linestyle = linestyle
       )
    # Add arrow along beam direction
-   source = ws.getInstrument().getSource().getPos()
-   sample = ws.getInstrument().getSample().getPos() - source
+   component_info = ws.componentInfo()
+   source = component_info.sourcePosition()
+   sample = component_info.samplePosition() - source
    arrow(axes, sample, origin=(0,0,-0.04))
    axes.view_init(vertical_axis='y', elev=30, azim=-135)
    fig.show()

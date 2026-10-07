@@ -57,13 +57,14 @@ Usage
   # Collect separately all masked detector IDs and IDs of detectors
   # that are inside the cylinder defined by shapeXML
   R2 = 0.04**2 # cylinder radius sqared
+  spectrum_info = ws.spectrumInfo()
   for i in range(ws.getNumberHistograms()):
-    det = ws.getDetector(i)
-    if det.isMasked():
-      masked_dets.append( det.getID() )
-    r = det.getPos()
+    detid = ws.getSpectrum(i).getDetectorIDs()[0]
+    if spectrum_info.isMasked(i):
+      masked_dets.append( detid )
+    r = spectrum_info.position(i)
     if r.X()**2 + r.Y()**2 <= R2:
-      inside_dets.append( det.getID() )
+      inside_dets.append( detid )
 
   # Print out the IDs
   print(masked_dets)

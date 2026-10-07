@@ -56,8 +56,8 @@ Usage
    # Load ILL d17 data file (TOF mode) into a workspace 2D using a user-defined angle of 5.5 degrees:
    ws2 = LoadILLReflectometry('ILL/D17/317370.nxs', Measurement='ReflectedBeam', BraggAngle=5.5)
    detId = 202 # the foreground centre is around 202
-   det = ws2.getInstrument().getDetector(detId)
-   angleDet = ws2.detectorTwoTheta(det) / numpy.pi * 180
+   detector_info = ws2.detectorInfo()
+   angleDet = detector_info.twoTheta(detector_info.indexOf(detId)) / numpy.pi * 180
 
    print("Pixel at detector ID {} was rotated to {:.1f} degrees.".format(detId, angleDet))
 
@@ -78,8 +78,8 @@ Output:
    import numpy
    directBeamWS = LoadILLReflectometry('ILL/D17/317369.nxs')
    detId = 202 # the foreground centre is around 202
-   det = directBeamWS.getInstrument().getDetector(detId)
-   angleDet = directBeamWS.detectorTwoTheta(det) / numpy.pi * 180
+   detector_info = directBeamWS.detectorInfo()
+   angleDet = detector_info.twoTheta(detector_info.indexOf(detId)) / numpy.pi * 180
 
    print("Pixel at detector ID {} was rotated to {:.1f} degrees.".format(detId, angleDet))
 

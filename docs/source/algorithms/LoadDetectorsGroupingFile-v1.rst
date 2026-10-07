@@ -167,16 +167,14 @@ Usage
 
     #check some values
     format_string = "Detector {}, with ID {}, in spectrum {} belongs to group {:.0f}"
+    component_info = ws.componentInfo()
+    detector_info = ws.detectorInfo()
 
-    sid=0
-    print(format_string.format(ws.getDetector(sid).getName(), ws.getDetector(sid).getID(),
-	  sid, ws.y(sid)[0]))
-    sid=2500
-    print(format_string.format(ws.getDetector(sid).getName(), ws.getDetector(sid).getID(),
-	  sid, ws.y(sid)[0]))
-    sid=5000
-    print(format_string.format(ws.getDetector(sid).getName(), ws.getDetector(sid).getID(),
-	  sid, ws.y(sid)[0]))
+    for sid in [0, 2500, 5000]:
+        det_id = ws.getSpectrum(sid).getDetectorIDs()[0]
+        # detector indices are also component indices
+        det_name = component_info.name(detector_info.indexOf(det_id))
+        print(format_string.format(det_name, det_id, sid, ws.y(sid)[0]))
 
 .. testcleanup:: LoadDetectorsGroupingFile
 

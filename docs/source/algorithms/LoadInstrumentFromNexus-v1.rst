@@ -28,11 +28,10 @@ Usage
    # Create a dummy ws containing arbitrary data, into which we will load the instrument.
    ws = CreateSampleWorkspace("Histogram","Flat background")
    LoadInstrumentFromNexus(ws, "MUSR00015189.nxs")
-   inst = ws.getInstrument()
-   source = inst.getSource()
+   component_info = ws.componentInfo()
 
-   print("The name of the instrument is '{}'.".format(inst.getName().strip()))
-   print("The source position is at:  {}.".format(source.getPos()))
+   print("The name of the instrument is '{}'.".format(ws.getInstrumentName().strip()))
+   print("The source position is at:  {}.".format(component_info.sourcePosition()))
 
 
 Output:
