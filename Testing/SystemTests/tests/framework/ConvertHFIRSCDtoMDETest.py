@@ -8,12 +8,33 @@ import platform
 import systemtesting
 import numpy as np
 from mantid.api import AlgorithmManager
-from mantid.simpleapi import ConvertHFIRSCDtoMDE, FindPeaksMD, HFIRCalculateGoniometer, IndexPeaks, Load, LoadMD, SaveMD, SetGoniometer
+from mantid.simpleapi import (
+    CompareMDWorkspaces,
+    ConvertHFIRSCDtoMDE,
+    FindPeaksMD,
+    GroupWorkspaces,
+    HB3AAdjustSampleNorm,
+    HFIRCalculateGoniometer,
+    IndexPeaks,
+    Load,
+    LoadMD,
+    MergeMD,
+    SaveMD,
+    SetGoniometer,
+    mtd,
+)
 
 
 def _skip_test():
     """Helper function to determine if we run the test"""
     return "Linux" not in platform.platform()
+
+
+def _assert_equal_md(test, workspace1, workspace2):
+    """Assert that two MDEventWorkspaces have the same boxes and events. Box IDs are not compared, because boxes are split
+    in parallel, so that converting the same input twice can number the boxes differently."""
+    equals, result = CompareMDWorkspaces(Workspace1=workspace1, Workspace2=workspace2, CheckEvents=True, IgnoreBoxID=True)
+    test.assertTrue(equals, f"{workspace1} differs from {workspace2}: {result}")
 
 
 class ConvertHFIRSCDtoMDETest(systemtesting.MantidSystemTest):
@@ -171,3 +192,74 @@ class ConvertHFIRSCDtoMDE_HB3A_Test(systemtesting.MantidSystemTest):
             return False
 
         return True
+
+
+class ConvertHFIRSCDtoMDE_GroupInput_Test(systemtesting.MantidSystemTest):
+    """Convert a group of HB3A scans in detector space, and compare against HB3AAdjustSampleNorm, which converts each
+    scan with ConvertHFIRSCDtoMDE and then groups or merges the results. NormalizeData=False keeps the detector-space
+    data and the data converted by HB3AAdjustSampleNorm unscaled, so that both start from the same input."""
+
+    def skipTests(self):
+        return _skip_test()
+
+    def requiredMemoryMB(self):
+        return 4000
+
+    def requiredFiles(self):
+        return ["HB3A_exp0724_scan0182.nxs", "HB3A_exp0724_scan0183.nxs"]
+
+    def runTest(self):
+        common = dict(Filename="HB3A_exp0724_scan0182.nxs, HB3A_exp0724_scan0183.nxs", NormaliseBy="None", NormalizeData=False)
+        HB3AAdjustSampleNorm(OutputType="Detector", OutputWorkspace="GroupInput_detector", **common)
+        HB3AAdjustSampleNorm(OutputType="Q-sample events", MergeInputs=False, OutputWorkspace="GroupInput_reference", **common)
+
+        # Unmerged: one output per scan, in group order, named after the input member
+        ConvertHFIRSCDtoMDE(InputWorkspace="GroupInput_detector", OutputWorkspace="GroupInput_Q")
+        names = list(mtd["GroupInput_Q"].getNames())
+        self.assertEqual(names, ["GroupInput_Q_" + name for name in mtd["GroupInput_detector"].getNames()])
+        for name, reference in zip(names, mtd["GroupInput_reference"].getNames()):
+            _assert_equal_md(self, name, reference)
+
+        # Merged: equal to merging the reference members with the box controller settings of ConvertHFIRSCDtoMDE
+        ConvertHFIRSCDtoMDE(InputWorkspace="GroupInput_detector", MergeInputs=True, OutputWorkspace="GroupInput_Q_merged")
+        MergeMD(
+            InputWorkspaces=mtd["GroupInput_reference"].getNames(),
+            SplitInto=5,
+            SplitThreshold=1000,
+            MaxRecursionDepth=20,
+            OutputWorkspace="GroupInput_reference_merged",
+        )
+        _assert_equal_md(self, "GroupInput_Q_merged", "GroupInput_reference_merged")
+
+
+class ConvertHFIRSCDtoMDE_GroupDifferentScanCounts_Test(systemtesting.MantidSystemTest):
+    """Convert a group whose members have different numbers of scan points (13 and 123), and compare each member against
+    the conversion of that member on its own."""
+
+    def skipTests(self):
+        return _skip_test()
+
+    def requiredMemoryMB(self):
+        return 4000
+
+    def requiredFiles(self):
+        return ["HB3A_data.nxs", "HB3A_exp0724_scan0182.nxs"]
+
+    def runTest(self):
+        LoadMD("HB3A_data.nxs", OutputWorkspace="ScanCounts_short")
+        SetGoniometer("ScanCounts_short", Axis0="omega,0,1,0,-1", Axis1="chi,0,0,1,-1", Axis2="phi,0,1,0,-1", Average=False)
+        HB3AAdjustSampleNorm(
+            Filename="HB3A_exp0724_scan0182.nxs",
+            OutputType="Detector",
+            NormaliseBy="None",
+            NormalizeData=False,
+            OutputWorkspace="ScanCounts_long",
+        )
+        self.assertEqual(mtd["ScanCounts_short"].getDimension(2).getNBins(), 13)
+        self.assertEqual(mtd["ScanCounts_long"].getDimension(2).getNBins(), 123)
+        GroupWorkspaces(InputWorkspaces="ScanCounts_short, ScanCounts_long", OutputWorkspace="ScanCounts_group")
+
+        ConvertHFIRSCDtoMDE(InputWorkspace="ScanCounts_group", OutputWorkspace="ScanCounts_Q")
+        for member in ["ScanCounts_short", "ScanCounts_long"]:
+            ConvertHFIRSCDtoMDE(InputWorkspace=member, OutputWorkspace=member + "_reference")
+            _assert_equal_md(self, "ScanCounts_Q_" + member, member + "_reference")
