@@ -4,10 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from enum import Enum
+from enum import StrEnum
 
 
-class ProjectionType(str, Enum):
+class ProjectionType(StrEnum):
     THREE_D = "3D"
     SPHERICAL_X = "Spherical X"
     SPHERICAL_Y = "Spherical Y"

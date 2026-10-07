@@ -238,11 +238,11 @@ def get_pixel_size(run_start):  # reads current IDF and get pixelsize from there
     """To get pixel size for Bilby detectors from the Bilby_Definition.xml file"""
 
     from mantid.api import ExperimentInfo
-    import xml.etree.cElementTree as ET
+    import xml.etree.ElementTree as ET
 
     currentIDF = ExperimentInfo.getInstrumentFilename("Bilby", run_start)
     # print currentIDF
-    tree = ET.parse(currentIDF)  # noqa: S313
+    tree = ET.parse(currentIDF)
     for node in tree.iter():
         if node.tag == "{http://www.mantidproject.org/IDF/1.0}height":
             name = node.attrib.get("val")
