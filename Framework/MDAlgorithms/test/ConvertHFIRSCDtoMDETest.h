@@ -15,12 +15,15 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidMDAlgorithms/ConvertHFIRSCDtoMDE.h"
 #include "MantidMDAlgorithms/LoadMD.h"
 
 #include <string>
+#include <vector>
 
 using namespace Mantid::API;
 using namespace Mantid::MDAlgorithms;
@@ -72,7 +75,8 @@ public:
     // Retrieve the workspace from the algorithm. The type here will probably
     // need to change. It should be the type using in declareProperty for the
     // "OutputWorkspace" type. We can't use auto as it's an implicit conversion.
-    IMDEventWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    Workspace_sptr output = alg.getProperty("OutputWorkspace");
+    auto outWS = std::dynamic_pointer_cast<IMDEventWorkspace>(output);
     TS_ASSERT(outWS);
 
     // check dimensions
@@ -107,7 +111,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    outWS = alg.getProperty("OutputWorkspace");
+    output = alg.getProperty("OutputWorkspace");
+    outWS = std::dynamic_pointer_cast<IMDEventWorkspace>(output);
     TS_ASSERT(outWS);
 
     TS_ASSERT_EQUALS(1, outWS->getNumExperimentInfo());
@@ -161,8 +166,165 @@ public:
     TS_ASSERT_THROWS(alg.setProperty("Wavelength", "-1.0"), const std::invalid_argument &);
   }
 
+  void test_group_output_names_and_order() {
+    // Member order differs from alphabetical order, to check that the output follows the group
+    addGroup("ConvertHFIRSCDtoMDETest_group", {"ConvertHFIRSCDtoMDETest_b", "ConvertHFIRSCDtoMDETest_a"},
+             {loadData(), loadData()});
+    auto alg = createAlgorithm("ConvertHFIRSCDtoMDETest_group", "", "ConvertHFIRSCDtoMDETest_Q");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    auto &ads = AnalysisDataService::Instance();
+    auto outGroup = ads.retrieveWS<WorkspaceGroup>("ConvertHFIRSCDtoMDETest_Q");
+    TS_ASSERT_EQUALS(outGroup->size(), 2);
+    const std::vector<std::string> expected = {"ConvertHFIRSCDtoMDETest_Q_ConvertHFIRSCDtoMDETest_b",
+                                               "ConvertHFIRSCDtoMDETest_Q_ConvertHFIRSCDtoMDETest_a"};
+    TS_ASSERT_EQUALS(outGroup->getNames(), expected);
+    for (const auto &name : expected)
+      assertConvertedWithWavelength(ads.retrieveWS<IMDEventWorkspace>(name), 1.008);
+    ads.clear();
+  }
+
+  void test_group_as_child_algorithm() {
+    auto group = std::make_shared<WorkspaceGroup>();
+    group->addWorkspace(loadData());
+    group->addWorkspace(loadData());
+    ConvertHFIRSCDtoMDE alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", std::static_pointer_cast<Workspace>(group));
+    alg.setPropertyValue("OutputWorkspace", "_unused_for_child");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    Workspace_sptr output = alg.getProperty("OutputWorkspace");
+    auto outGroup = std::dynamic_pointer_cast<WorkspaceGroup>(output);
+    TS_ASSERT(outGroup);
+    if (!outGroup)
+      return;
+    TS_ASSERT_EQUALS(outGroup->size(), 2);
+    for (size_t i = 0; i < outGroup->size(); ++i)
+      assertConvertedWithWavelength(std::dynamic_pointer_cast<IMDEventWorkspace>(outGroup->getItem(i)), 1.008);
+    // A child algorithm does not store the members of its output group
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("_unused_for_child_1"));
+  }
+
+  void test_group_per_member_wavelength() {
+    // The first member keeps its sample log, which takes precedence over its fallback value
+    auto withoutLog = loadData();
+    withoutLog->getExperimentInfo(0)->mutableRun().removeProperty("wavelength");
+    addGroup("ConvertHFIRSCDtoMDETest_group", {"ConvertHFIRSCDtoMDETest_a", "ConvertHFIRSCDtoMDETest_b"},
+             {loadData(), withoutLog});
+    auto alg = createAlgorithm("ConvertHFIRSCDtoMDETest_group", "1.5,2.0", "ConvertHFIRSCDtoMDETest_Q");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT_DELTA(outputWavelength("ConvertHFIRSCDtoMDETest_Q_ConvertHFIRSCDtoMDETest_a"), 1.008, 1e-9);
+    TS_ASSERT_DELTA(outputWavelength("ConvertHFIRSCDtoMDETest_Q_ConvertHFIRSCDtoMDETest_b"), 2.0, 1e-9);
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_group_single_wavelength_for_all_members() {
+    std::vector<IMDHistoWorkspace_sptr> members = {loadData(), loadData()};
+    for (const auto &member : members)
+      member->getExperimentInfo(0)->mutableRun().removeProperty("wavelength");
+    addGroup("ConvertHFIRSCDtoMDETest_group", {"ConvertHFIRSCDtoMDETest_a", "ConvertHFIRSCDtoMDETest_b"}, members);
+    auto alg = createAlgorithm("ConvertHFIRSCDtoMDETest_group", "1.008", "ConvertHFIRSCDtoMDETest_Q");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    for (const std::string name :
+         {"ConvertHFIRSCDtoMDETest_Q_ConvertHFIRSCDtoMDETest_a", "ConvertHFIRSCDtoMDETest_Q_ConvertHFIRSCDtoMDETest_b"})
+      assertConvertedWithWavelength(AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(name), 1.008);
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_group_wavelength_count_mismatch() {
+    addGroup("ConvertHFIRSCDtoMDETest_group", {"ConvertHFIRSCDtoMDETest_a", "ConvertHFIRSCDtoMDETest_b"},
+             {loadData(), loadData()});
+    auto alg = createAlgorithm("ConvertHFIRSCDtoMDETest_group", "1.0,1.5,2.0", "ConvertHFIRSCDtoMDETest_Q");
+    assertValidationError(*alg, "Wavelength", "found 3 values for 2 members");
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_group_member_missing_wavelength() {
+    auto withoutLog = loadData();
+    withoutLog->getExperimentInfo(0)->mutableRun().removeProperty("wavelength");
+    addGroup("ConvertHFIRSCDtoMDETest_group", {"ConvertHFIRSCDtoMDETest_a", "ConvertHFIRSCDtoMDETest_b"},
+             {loadData(), withoutLog});
+    auto alg = createAlgorithm("ConvertHFIRSCDtoMDETest_group", "", "ConvertHFIRSCDtoMDETest_Q");
+    assertValidationError(*alg, "Wavelength", "Member 'ConvertHFIRSCDtoMDETest_b': No wavelength available");
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_group_member_not_an_MDHistoWorkspace() {
+    auto &ads = AnalysisDataService::Instance();
+    ads.addOrReplace("ConvertHFIRSCDtoMDETest_a", loadData());
+    ads.addOrReplace("ConvertHFIRSCDtoMDETest_b", convert(loadData(), ""));
+    auto group = std::make_shared<WorkspaceGroup>();
+    group->addWorkspace(ads.retrieve("ConvertHFIRSCDtoMDETest_a"));
+    group->addWorkspace(ads.retrieve("ConvertHFIRSCDtoMDETest_b"));
+    ads.addOrReplace("ConvertHFIRSCDtoMDETest_group", group);
+    auto alg = createAlgorithm("ConvertHFIRSCDtoMDETest_group", "", "ConvertHFIRSCDtoMDETest_Q");
+    assertValidationError(*alg, "InputWorkspace", "Member 'ConvertHFIRSCDtoMDETest_b': must be an MDHistoWorkspace");
+    ads.clear();
+  }
+
+  void test_group_members_from_different_instruments() {
+    // Give the second member a WAND instrument with the logs that WAND requires
+    auto wand = loadData();
+    const auto nScans = wand->getDimension(2)->getNBins();
+    auto expInfo = wand->getExperimentInfo(0);
+    expInfo->setInstrument(std::make_shared<Mantid::Geometry::Instrument>("WAND"));
+    expInfo->mutableRun().addProperty("duration", std::vector<double>(nScans, 1.0), true);
+    expInfo->mutableRun().addProperty("monitor_count", std::vector<double>(nScans, 1.0), true);
+    addGroup("ConvertHFIRSCDtoMDETest_group", {"ConvertHFIRSCDtoMDETest_a", "ConvertHFIRSCDtoMDETest_b"},
+             {loadData(), wand});
+    auto alg = createAlgorithm("ConvertHFIRSCDtoMDETest_group", "", "ConvertHFIRSCDtoMDETest_Q");
+    assertValidationError(*alg, "InputWorkspace", "instrument WAND differs from instrument HB3A");
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_empty_group() {
+    AnalysisDataService::Instance().addOrReplace("ConvertHFIRSCDtoMDETest_group", std::make_shared<WorkspaceGroup>());
+    auto alg = createAlgorithm("ConvertHFIRSCDtoMDETest_group", "", "ConvertHFIRSCDtoMDETest_Q");
+    assertValidationError(*alg, "InputWorkspace", "The input group is empty");
+    AnalysisDataService::Instance().clear();
+  }
+
 private:
   IMDHistoWorkspace_sptr m_data;
+
+  /// Add workspaces to the AnalysisDataService under the given names, and group them
+  void addGroup(const std::string &groupName, const std::vector<std::string> &names,
+                const std::vector<IMDHistoWorkspace_sptr> &members) {
+    auto &ads = AnalysisDataService::Instance();
+    auto group = std::make_shared<WorkspaceGroup>();
+    for (size_t i = 0; i < names.size(); ++i) {
+      ads.addOrReplace(names[i], members[i]);
+      group->addWorkspace(members[i]);
+    }
+    ads.addOrReplace(groupName, group);
+  }
+
+  /// Create a non-child algorithm working with names in the AnalysisDataService; an empty wavelength is left unset
+  IAlgorithm_sptr createAlgorithm(const std::string &input, const std::string &wavelength, const std::string &output) {
+    auto alg = AlgorithmManager::Instance().createUnmanaged("ConvertHFIRSCDtoMDE");
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setPropertyValue("InputWorkspace", input);
+    if (!wavelength.empty())
+      alg->setPropertyValue("Wavelength", wavelength);
+    alg->setPropertyValue("OutputWorkspace", output);
+    return alg;
+  }
+
+  double outputWavelength(const std::string &name) {
+    auto ws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(name);
+    return ws->getExperimentInfo(0)->run().getPropertyValueAsType<double>("wavelength");
+  }
+
+  /// Check that validation reports an error for the property, containing the given text
+  void assertValidationError(IAlgorithm &alg, const std::string &property, const std::string &expected) {
+    const auto errors = alg.validateInputs();
+    TS_ASSERT_EQUALS(errors.count(property), 1);
+    if (errors.count(property) == 1)
+      TS_ASSERT(errors.at(property).find(expected) != std::string::npos);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+  }
 
   /// Load HB3A_data.nxs once, and return a copy that a test may modify
   IMDHistoWorkspace_sptr loadData() {
@@ -200,7 +362,8 @@ private:
       alg.setProperty("Wavelength", wavelength);
     alg.setPropertyValue("OutputWorkspace", "_unused_for_child");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
-    return alg.getProperty("OutputWorkspace");
+    Workspace_sptr output = alg.getProperty("OutputWorkspace");
+    return std::dynamic_pointer_cast<IMDEventWorkspace>(output);
   }
 
   /// Check the output against the reference values of test_exec, obtained with the given wavelength

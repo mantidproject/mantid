@@ -9,6 +9,7 @@
 #include "MantidAPI/BoxControllerSettingsAlgorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 
 #include <optional>
@@ -26,13 +27,15 @@ public:
   const std::string category() const override;
   const std::string summary() const override;
   std::map<std::string, std::string> validateInputs() override;
+  bool checkGroups() override { return false; }
 
 private:
   void init() override;
   void exec() override;
   std::string validateInputWorkspace(const API::IMDHistoWorkspace_sptr &inputWS) const;
   API::IMDEventWorkspace_sptr convertWorkspace(const API::IMDHistoWorkspace_sptr &inputWS, double wavelength);
-  static std::optional<double> fallbackWavelength(const std::vector<double> &wavelengths);
+  static std::vector<API::IMDHistoWorkspace_sptr> inputWorkspaceList(const API::Workspace_sptr &input);
+  static std::optional<double> fallbackWavelength(const std::vector<double> &wavelengths, size_t index);
   double resolveWavelength(const API::IMDHistoWorkspace &inputWS, const std::optional<double> &fallback) const;
 };
 

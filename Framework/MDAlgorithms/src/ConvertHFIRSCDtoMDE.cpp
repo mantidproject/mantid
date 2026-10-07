@@ -8,7 +8,9 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventInserter.h"
@@ -39,6 +41,19 @@ DECLARE_ALGORITHM(ConvertHFIRSCDtoMDE)
 
 namespace {
 const std::string WAVELENGTH_LOG("wavelength");
+
+/// Identify a group member in messages and output names: its name, or its 1-based position if it has none
+std::string memberName(const WorkspaceGroup &group, const size_t index) {
+  const std::string name = group.getItem(index)->getName();
+  return name.empty() ? std::to_string(index + 1) : name;
+}
+
+std::string join(const std::vector<std::string> &messages) {
+  std::string joined;
+  for (const auto &message : messages)
+    joined += (joined.empty() ? "" : "; ") + message;
+  return joined;
+}
 } // namespace
 
 //----------------------------------------------------------------------------------------------
@@ -101,21 +116,59 @@ std::string ConvertHFIRSCDtoMDE::validateInputWorkspace(const API::IMDHistoWorks
 std::map<std::string, std::string> ConvertHFIRSCDtoMDE::validateInputs() {
   std::map<std::string, std::string> result;
 
-  API::IMDHistoWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
-  const std::string inputWSmsg = validateInputWorkspace(inputWS);
-  if (!inputWSmsg.empty())
-    result["InputWorkspace"] = inputWSmsg;
-
+  const API::Workspace_sptr input = this->getProperty("InputWorkspace");
+  const auto group = std::dynamic_pointer_cast<WorkspaceGroup>(input);
+  const auto inputWorkspaces = inputWorkspaceList(input);
   const std::vector<double> wavelengths = this->getProperty("Wavelength");
-  if (wavelengths.size() > 1) {
-    result["Wavelength"] = "Only one value can be given when InputWorkspace is a single workspace";
-  } else if (inputWSmsg.empty()) {
-    try {
-      resolveWavelength(*inputWS, fallbackWavelength(wavelengths));
-    } catch (const std::runtime_error &err) {
-      result["Wavelength"] = err.what();
+
+  std::vector<std::string> inputMessages;
+  std::vector<std::string> wavelengthMessages;
+  if (group && inputWorkspaces.empty())
+    inputMessages.emplace_back("The input group is empty");
+  if (!group && wavelengths.size() > 1)
+    wavelengthMessages.emplace_back("Only one value can be given when InputWorkspace is a single workspace");
+  if (group && wavelengths.size() > 1 && wavelengths.size() != inputWorkspaces.size())
+    wavelengthMessages.emplace_back("Give one value, or one value per group member: found " +
+                                    std::to_string(wavelengths.size()) + " values for " +
+                                    std::to_string(inputWorkspaces.size()) + " members");
+  // Resolve the wavelength of each workspace only when the number of fallback values is valid
+  const bool checkWavelengths = wavelengthMessages.empty();
+
+  std::string instrument;      // instrument of the first valid member
+  std::string instrumentOwner; // name of that member
+  for (size_t i = 0; i < inputWorkspaces.size(); ++i) {
+    const auto &inputWS = inputWorkspaces[i];
+    const std::string prefix = group ? "Member '" + memberName(*group, i) + "': " : "";
+    if (!inputWS) {
+      inputMessages.emplace_back(
+          prefix + (group ? "must be an MDHistoWorkspace" : "must be an MDHistoWorkspace or a WorkspaceGroup of them"));
+      continue;
+    }
+    const std::string inputWSmsg = validateInputWorkspace(inputWS);
+    if (!inputWSmsg.empty()) {
+      inputMessages.emplace_back(prefix + inputWSmsg);
+      continue;
+    }
+    const std::string memberInstrument = inputWS->getExperimentInfo(0)->getInstrument()->getName();
+    if (instrument.empty()) {
+      instrument = memberInstrument;
+      instrumentOwner = group ? memberName(*group, i) : "";
+    } else if (memberInstrument != instrument) {
+      inputMessages.emplace_back(prefix + "instrument " + memberInstrument + " differs from instrument " + instrument +
+                                 " of member '" + instrumentOwner + "'");
+    }
+    if (checkWavelengths) {
+      try {
+        resolveWavelength(*inputWS, fallbackWavelength(wavelengths, i));
+      } catch (const std::runtime_error &err) {
+        wavelengthMessages.emplace_back(prefix + err.what());
+      }
     }
   }
+  if (!inputMessages.empty())
+    result["InputWorkspace"] = join(inputMessages);
+  if (!wavelengthMessages.empty())
+    result["Wavelength"] = join(wavelengthMessages);
 
   std::vector<double> minVals = this->getProperty("MinValues");
   std::vector<double> maxVals = this->getProperty("MaxValues");
@@ -153,12 +206,13 @@ std::map<std::string, std::string> ConvertHFIRSCDtoMDE::validateInputs() {
  */
 void ConvertHFIRSCDtoMDE::init() {
 
-  declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>("InputWorkspace", "", Direction::Input),
-                  "An input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>("InputWorkspace", "", Direction::Input),
+                  "A detector-space MDHistoWorkspace, or a WorkspaceGroup of them from the same instrument.");
   declareProperty(std::make_unique<ArrayProperty<double>>(
                       "Wavelength", std::make_shared<ArrayBoundedValidator<double>>(0.0, 100.0, true)),
                   "Fallback incident wavelength, in Angstrom. As in HB3AAdjustSampleNorm, the 'wavelength' sample log "
-                  "of the input workspace is used when present, and this value only when the log is missing.");
+                  "of each input workspace is used when present, and this value only when the log is missing. Give "
+                  "one value for all inputs, or, for a WorkspaceGroup, one value per member in group order.");
   declareProperty(std::make_unique<PropertyWithValue<bool>>("LorentzCorrection", false, Direction::Input),
                   "Correct the weights of events or signals and errors transformed into "
                   "reciprocal space by multiplying them "
@@ -176,28 +230,75 @@ void ConvertHFIRSCDtoMDE::init() {
   this->initBoxControllerProps("5" /*SplitInto*/, 1000 /*SplitThreshold*/, 20 /*MaxRecursionDepth*/);
   declareProperty(std::make_unique<PropertyWithValue<double>>("ObliquityParallaxCoefficient", 1.0, Direction::Input),
                   "Geometrical correction for shift in vertical beam position due to wide beam.");
-  declareProperty(std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>("OutputWorkspace", "", Direction::Output),
-                  "An output workspace.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "", Direction::Output),
+      "An MDEventWorkspace in Q-sample. For a WorkspaceGroup input, a WorkspaceGroup whose members are named "
+      "<OutputWorkspace>_<input member name>, as in HB3AAdjustSampleNorm.");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void ConvertHFIRSCDtoMDE::exec() {
-  API::IMDHistoWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
+  const API::Workspace_sptr input = this->getProperty("InputWorkspace");
+  const auto group = std::dynamic_pointer_cast<WorkspaceGroup>(input);
+  const auto inputWorkspaces = inputWorkspaceList(input);
   const std::vector<double> wavelengths = this->getProperty("Wavelength");
-  const double wavelength = resolveWavelength(*inputWS, fallbackWavelength(wavelengths));
-  setProperty("OutputWorkspace", convertWorkspace(inputWS, wavelength));
+
+  if (!group) {
+    const double wavelength = resolveWavelength(*inputWorkspaces.front(), fallbackWavelength(wavelengths, 0));
+    setProperty("OutputWorkspace", convertWorkspace(inputWorkspaces.front(), wavelength));
+    return;
+  }
+
+  // One output per member, named as in HB3AAdjustSampleNorm. Each member is declared as an output property so that
+  // it is stored in the AnalysisDataService under its name, before the group.
+  const std::string outputName = getPropertyValue("OutputWorkspace");
+  auto outputGroup = std::make_shared<WorkspaceGroup>();
+  Progress progress(this, 0.0, 1.0, inputWorkspaces.size());
+  for (size_t i = 0; i < inputWorkspaces.size(); ++i) {
+    const double wavelength = resolveWavelength(*inputWorkspaces[i], fallbackWavelength(wavelengths, i));
+    auto outputWS = convertWorkspace(inputWorkspaces[i], wavelength);
+    const std::string propertyName = "OutputWorkspace_" + std::to_string(i + 1);
+    if (existsProperty(propertyName))
+      removeProperty(propertyName);
+    declareProperty(std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
+                        propertyName, outputName + "_" + memberName(*group, i), Direction::Output),
+                    "Output for member " + std::to_string(i + 1) + " of the input group.");
+    setProperty(propertyName, outputWS);
+    outputGroup->addWorkspace(outputWS);
+    progress.report("Converted " + memberName(*group, i));
+  }
+  setProperty("OutputWorkspace", std::static_pointer_cast<API::Workspace>(outputGroup));
 }
 
-/** The fallback wavelength given in the Wavelength property, if any.
- * @param wavelengths :: values of the Wavelength property
- * @return the first value, or no value if the property is empty
+/** The input workspaces to convert: the members of a group in order, or the single input workspace.
+ * @param input :: value of the InputWorkspace property
+ * @return one entry per workspace, null for an entry that is not an MDHistoWorkspace
  */
-std::optional<double> ConvertHFIRSCDtoMDE::fallbackWavelength(const std::vector<double> &wavelengths) {
+std::vector<API::IMDHistoWorkspace_sptr> ConvertHFIRSCDtoMDE::inputWorkspaceList(const API::Workspace_sptr &input) {
+  std::vector<API::IMDHistoWorkspace_sptr> inputWorkspaces;
+  if (const auto group = std::dynamic_pointer_cast<WorkspaceGroup>(input)) {
+    for (size_t i = 0; i < group->size(); ++i)
+      inputWorkspaces.emplace_back(std::dynamic_pointer_cast<API::IMDHistoWorkspace>(group->getItem(i)));
+  } else if (input) {
+    inputWorkspaces.emplace_back(std::dynamic_pointer_cast<API::IMDHistoWorkspace>(input));
+  }
+  return inputWorkspaces;
+}
+
+/** The fallback wavelength given in the Wavelength property for an input workspace, if any.
+ * @param wavelengths :: values of the Wavelength property
+ * @param index :: position of the input workspace in the group, 0 for a single input
+ * @return the value for this workspace, or no value if the property is empty
+ */
+std::optional<double> ConvertHFIRSCDtoMDE::fallbackWavelength(const std::vector<double> &wavelengths,
+                                                              const size_t index) {
   if (wavelengths.empty())
     return std::nullopt;
-  return wavelengths.front();
+  if (wavelengths.size() == 1)
+    return wavelengths.front();
+  return wavelengths.at(index);
 }
 
 /** Find the wavelength for a workspace, following HB3AAdjustSampleNorm: the
