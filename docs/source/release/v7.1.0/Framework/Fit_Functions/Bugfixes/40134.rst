@@ -1,0 +1,1 @@
+- Fixed a crash in :ref:`UserFunction1D <algm-UserFunction1D>` when the function has no fitting parameters or all parameters are fixed. An error is now raised suggesting :ref:`EvaluateFunction <algm-EvaluateFunction>` instead.
