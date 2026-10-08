@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../../ISISReflectometry/GUI/Instrument/InstrumentOptionDefaults.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidFrameworkTestHelpers/ReflectometryHelper.h"
@@ -77,6 +78,14 @@ public:
     TS_ASSERT_EQUALS(result.detectorCorrections(), expected);
   }
 
+  void testCorrectDetectorsDisabledForCurrentPOLREFParamsFile() {
+    auto workspace = loadPOLREF();
+    InstrumentOptionDefaults instrumentDefaults;
+    auto result = instrumentDefaults.get(workspace->getInstrument());
+    auto expected = DetectorCorrections(false, DetectorCorrectionType::VerticalShift);
+    TS_ASSERT_EQUALS(result.detectorCorrections(), expected);
+  }
+
   void testInvalidDetectorCorrectionFromParamsFile() { getDefaultsFromParamsFileThrows("DetectorCorrection_Invalid"); }
 
 private:
@@ -126,5 +135,16 @@ private:
     auto instrument = workspace->getInstrument();
     InstrumentOptionDefaults instrumentDefaults;
     TS_ASSERT_THROWS(instrumentDefaults.get(instrument), const std::invalid_argument &);
+  }
+
+  Mantid::API::MatrixWorkspace_sptr loadPOLREF() {
+    auto instrumentLoader = Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadEmptyInstrument");
+    instrumentLoader->initialize();
+    instrumentLoader->setChild(true);
+    instrumentLoader->setPropertyValue("InstrumentName", "POLREF");
+    instrumentLoader->setPropertyValue("OutputWorkspace", "POLREF_InstrumentOptionDefaultsTest");
+    instrumentLoader->execute();
+    Mantid::API::MatrixWorkspace_sptr workspace = instrumentLoader->getProperty("OutputWorkspace");
+    return workspace;
   }
 };

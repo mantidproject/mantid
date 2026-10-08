@@ -48,6 +48,10 @@
     <value val="15.0"/>
   </parameter>
 
+  <parameter name="CorrectDetectors">
+    <value val="0"/>
+  </parameter>
+
   <parameter name="TransRunStartOverlap"> <!-- in wavelength -->
     <value val="10"/>
   </parameter>
