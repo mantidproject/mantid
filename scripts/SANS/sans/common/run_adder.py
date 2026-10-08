@@ -27,7 +27,7 @@ from mantid.simpleapi import (
     UnGroupWorkspace,
 )
 from sans.common.file_information import get_geometry_information_isis_nexus, convert_to_flag
-from SANSUtility import (
+from sans.common.utils import (
     AddOperation,
     transfer_special_sample_logs,
     bundle_added_event_data_as_group,
@@ -436,7 +436,3 @@ def _delete_workspaces():
     for ws_name in names:
         if ws_name in mtd:
             DeleteWorkspace(ws_name)
-
-
-if __name__ == "__main__":
-    add_runs(("16183", "16197"), "SANS2D", ".nxs")
