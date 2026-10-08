@@ -13,6 +13,7 @@ source:
 
 build:
   number: 0
+  noarch: python
   python:
     entry_points:
       - workbench = workbench.app.mantidworkbench_launch_wrapper:launch
