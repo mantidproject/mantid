@@ -8,14 +8,6 @@ import pyvista as pv
 from mantid.kernel import logger
 
 
-class _PlotterWrapper:
-    """Wrapper to provide PyVista-compatible interface for picking."""
-
-    def __init__(self, plotter):
-        self._plotter = plotter
-        super().__init__()
-
-
 class InteractorStyles:
     def __init__(self, plotter, picking_callback, hover_callback, camera_changed_callback: Callable | None = None):
         self.SCROLL_ZOOM_WITH_PICKING = FlatProjectionInteractorStyle(plotter)
@@ -57,7 +49,6 @@ class RubberBandZoomInteractorStyle(vtkInteractorStyleRubberBandZoom):
     def __init__(self, plotter):
         super().__init__()
         self.plotter = plotter
-        self._pyvista_plotter = _PlotterWrapper(plotter)  # HACK: Wrapper for PyVista compatibility
         self._picking_callback = None
         self._ignore_rubberband_interaction = False
         self._rubber_band_start = None
@@ -132,7 +123,6 @@ class RubberBandZoomInteractorStyle(vtkInteractorStyleRubberBandZoom):
         self.RemoveAllObservers()
         self._picking_callback = None
         self.plotter = None
-        self._pyvista_plotter = None
 
     def _on_mouse_move_event(self, obj, event):
         if self._ignore_rubberband_interaction:
@@ -185,7 +175,8 @@ class CursorZoomInteractorStyle(vtkInteractorStyleTrackballCamera):
         super().__init__()
 
         self.plotter = plotter
-        self._pyvista_plotter = _PlotterWrapper(plotter)  # HACK: Wrapper for PyVista compatibility
+        self._renderer = plotter.renderer
+        self._camera = self._renderer.GetActiveCamera()
         self._camera_changed_callback = None
 
         self.update_default_camera_state()
@@ -224,7 +215,8 @@ class CursorZoomInteractorStyle(vtkInteractorStyleTrackballCamera):
         self.RemoveAllObservers()
         self._camera_changed_callback = None
         self.plotter = None
-        self._pyvista_plotter = None
+        self._renderer = None
+        self._camera = None
 
     def _notify_camera_changed(self):
         if self._camera_changed_callback is None:
@@ -234,19 +226,13 @@ class CursorZoomInteractorStyle(vtkInteractorStyleTrackballCamera):
         except Exception as ex:
             logger.debug(f"Exception in camera_changed callback: {ex}")
 
-    def _parent(self):
-        """Return a reference to the plotter for PyVista compatibility."""
-        return self._pyvista_plotter
-
     def _zoom(self, forward: bool):
         """Zoom keeping the point under the cursor fixed, stopping at the full view when zooming out."""
         interactor = self.GetInteractor()
         if interactor is None:
             return
-        renderer = self.plotter.renderer
-        camera = renderer.GetActiveCamera()
         x, y = interactor.GetEventPosition()
-        if not camera.GetParallelProjection():
+        if not self._camera.GetParallelProjection():
             # The cursor zoom relies on a parallel projection, so fall back to the trackball's own zoom
             self.FindPokedRenderer(x, y)
             if forward:
@@ -257,38 +243,34 @@ class CursorZoomInteractorStyle(vtkInteractorStyleTrackballCamera):
 
         # Take big steps when zoomed out and small steps when zoomed in. The step is measured against the
         # full view rather than in world units, so every projection zooms at the same rate whatever its units.
-        zoom_level = camera.GetParallelScale() / self._default_parallel_scale if self._default_parallel_scale > 0 else 1.0
+        parallel_scale = self._camera.GetParallelScale()
+        zoom_level = parallel_scale / self._default_parallel_scale if self._default_parallel_scale > 0 else 1.0
         factor = max(1.001, 1.0 + (self._FULL_VIEW_ZOOM_STEP - 1.0) * zoom_level)
         if not forward:
             factor = 1.0 / factor
 
-        if camera.GetParallelScale() / factor > self._default_parallel_scale:
-            self._show_full_view(camera)
+        if parallel_scale / factor > self._default_parallel_scale:
+            self._reset_camera()
         else:
-            self._zoom_at_display_point(renderer, x, y, factor)
+            self._zoom_at_display_point(x, y, factor)
+        self._camera_moved()
 
-        renderer.ResetCameraClippingRange()
-        interactor.Render()
-        # Covers both branches above, so a zoom-out past the full view notifies only once
-        self._notify_camera_changed()
-
-    def _zoom_at_display_point(self, renderer, dx, dy, factor):
-        """Zoom a parallel projection camera by factor, keeping the world point under display (pixel) coords fixed.
+    def _zoom_at_display_point(self, dx, dy, factor):
+        """Zoom by factor, keeping the world point under display (pixel) coords fixed.
 
         The camera can look along any direction, so the point is taken on the plane through
         the focal point facing the camera.
         """
-        camera = renderer.GetActiveCamera()
-        focal = np.array(camera.GetFocalPoint())
-        position = np.array(camera.GetPosition())
+        focal = np.array(self._camera.GetFocalPoint())
+        position = np.array(self._camera.GetPosition())
 
         # Display depth of the focal point, so the cursor point lies in the same plane
-        renderer.SetWorldPoint(*focal, 1.0)
-        renderer.WorldToDisplay()
-        focal_depth = renderer.GetDisplayPoint()[2]
-        renderer.SetDisplayPoint(dx, dy, focal_depth)
-        renderer.DisplayToWorld()
-        wx, wy, wz, ww = renderer.GetWorldPoint()
+        self._renderer.SetWorldPoint(*focal, 1.0)
+        self._renderer.WorldToDisplay()
+        focal_depth = self._renderer.GetDisplayPoint()[2]
+        self._renderer.SetDisplayPoint(dx, dy, focal_depth)
+        self._renderer.DisplayToWorld()
+        wx, wy, wz, ww = self._renderer.GetWorldPoint()
         if abs(ww) < 1e-10:
             return
         cursor = np.array([wx, wy, wz]) / ww
@@ -296,43 +278,42 @@ class CursorZoomInteractorStyle(vtkInteractorStyleTrackballCamera):
         # Moving the focal point towards the cursor by (1 - 1/factor) of the way keeps the
         # cursor point's offset from the view centre, measured in units of parallel scale, unchanged
         shift = (cursor - focal) * (1.0 - 1.0 / factor)
-        camera.SetFocalPoint(*(focal + shift))
-        camera.SetPosition(*(position + shift))
-        camera.SetParallelScale(camera.GetParallelScale() / factor)
-
-    def _show_full_view(self, camera):
-        """Return to the full view's zoom and centre, keeping the direction the view has been rotated to."""
-        direction = np.array(camera.GetDirectionOfProjection())
-        distance = camera.GetDistance()
-        camera.SetFocalPoint(*self._default_focal_point)
-        camera.SetPosition(*(self._default_focal_point - direction * distance))
-        camera.SetParallelScale(self._default_parallel_scale)
+        self._set_camera(focal + shift, position + shift, self._camera.GetParallelScale() / factor)
 
     def _reset_camera(self):
-        renderer = self.plotter.renderer
-        camera = renderer.GetActiveCamera()
-        camera.SetPosition(*self._default_position)
-        camera.SetFocalPoint(*self._default_focal_point)
-        camera.SetParallelScale(self._default_parallel_scale)
-        renderer.ResetCameraClippingRange()
-        interactor = self.GetInteractor()
-        if interactor is not None:
-            interactor.Render()
+        """Return to the full view's zoom and centre, keeping the direction the view has been rotated to.
+
+        The flat projections never rotate, so for them this restores the full view exactly.
+        """
+        direction = np.array(self._camera.GetDirectionOfProjection())
+        distance = self._camera.GetDistance()
+        self._set_camera(self._default_focal_point, self._default_focal_point - direction * distance, self._default_parallel_scale)
 
     def _reset_camera_and_notify(self):
         self._reset_camera()
+        self._camera_moved()
+
+    def _set_camera(self, focal_point, position, parallel_scale):
+        self._camera.SetFocalPoint(*focal_point)
+        self._camera.SetPosition(*position)
+        self._camera.SetParallelScale(parallel_scale)
+
+    def _camera_moved(self):
+        """Redraw after the camera has moved, and tell anything drawn in screen coordinates."""
+        self._renderer.ResetCameraClippingRange()
+        interactor = self.GetInteractor()
+        if interactor is not None:
+            interactor.Render()
         self._notify_camera_changed()
 
     def update_default_camera_state(self):
-        """Re-cache the current camera state as the default (full view) state.
+        """Re-cache the current camera state as the full view.
 
         Must be called after any operation that changes the intended full-view
         camera state (e.g. after a fill transform is applied on resize).
         """
-        camera = self.plotter.renderer.GetActiveCamera()
-        self._default_position = np.array(camera.GetPosition())
-        self._default_focal_point = np.array(camera.GetFocalPoint())
-        self._default_parallel_scale = camera.GetParallelScale()
+        self._default_focal_point = np.array(self._camera.GetFocalPoint())
+        self._default_parallel_scale = self._camera.GetParallelScale()
 
 
 class FlatProjectionInteractorStyle(CursorZoomInteractorStyle):

@@ -93,7 +93,6 @@ class _CursorZoomStyleTestBase(unittest.TestCase):
 class TestCursorZoomInteractorStyle(_CursorZoomStyleTestBase):
     def test_caches_default_camera_state(self):
         style, _, _ = self._create_style()
-        assert_array_almost_equal(style._default_position, self.FULL_VIEW_POSITION)
         assert_array_almost_equal(style._default_focal_point, [0, 0, 0])
         self.assertAlmostEqual(style._default_parallel_scale, self.FULL_VIEW_SCALE)
 
@@ -105,7 +104,6 @@ class TestCursorZoomInteractorStyle(_CursorZoomStyleTestBase):
         camera.SetFocalPoint(1, 2, 3)
         camera.SetParallelScale(2.5)
         style.update_default_camera_state()
-        assert_array_almost_equal(style._default_position, [7, 8, 9])
         assert_array_almost_equal(style._default_focal_point, [1, 2, 3])
         self.assertAlmostEqual(style._default_parallel_scale, 2.5)
 
@@ -239,27 +237,29 @@ class TestCursorZoomInteractorStyle(_CursorZoomStyleTestBase):
         self._zoom_at(style, interactor, forward=False)
         callback.assert_called_once()
 
-    def test_reset_camera_restores_defaults(self):
+    def test_reset_camera_returns_to_full_view_keeping_rotation(self):
         style, renderer, _ = self._create_style()
         camera = renderer.GetActiveCamera()
-        camera.SetPosition(9, 9, 9)
+        # Zoomed in, off centre, and rotated to look along a different direction
         camera.SetFocalPoint(8, 8, 8)
-        camera.SetParallelScale(99)
+        camera.SetPosition(8, 18, 8)
+        camera.SetParallelScale(1)
+        direction_before = np.array(camera.GetDirectionOfProjection())
         style._reset_camera()
-        assert_array_almost_equal(camera.GetPosition(), self.FULL_VIEW_POSITION)
         assert_array_almost_equal(camera.GetFocalPoint(), [0, 0, 0])
         self.assertAlmostEqual(camera.GetParallelScale(), self.FULL_VIEW_SCALE)
+        assert_array_almost_equal(camera.GetDirectionOfProjection(), direction_before)
 
     def test_update_default_camera_state_affects_subsequent_reset(self):
         style, renderer, _ = self._create_style()
         camera = renderer.GetActiveCamera()
-        camera.SetPosition(7, 8, 9)
+        camera.SetFocalPoint(1, 2, 3)
         camera.SetParallelScale(2.5)
         style.update_default_camera_state()
-        camera.SetPosition(99, 99, 99)
+        camera.SetFocalPoint(9, 9, 9)
         camera.SetParallelScale(99)
         style._reset_camera()
-        assert_array_almost_equal(camera.GetPosition(), [7, 8, 9])
+        assert_array_almost_equal(camera.GetFocalPoint(), [1, 2, 3])
         self.assertAlmostEqual(camera.GetParallelScale(), 2.5)
 
     def test_reset_camera_and_notify_notifies_camera_changed(self):
