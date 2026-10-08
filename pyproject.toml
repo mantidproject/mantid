@@ -15,34 +15,43 @@ lint.select = [
   "F",
   "FURB",
   "RUF100",
-  "UP001",
-  "UP010",
-  "UP012",
-  "UP019",
-  "UP020",
-  "UP021",
-  "UP025",
-  "UP026",
-  "UP029",
-  "UP036",
+  "UP",
   "W",
   "NPY201",
   "S",
   "INP",
 ]
 lint.ignore = [
-  "E722", # bare except https://docs.astral.sh/ruff/rules/bare-except/
-  "S101", # using assert https://docs.astral.sh/ruff/rules/assert/
-  "S110", # try-except-pass https://docs.astral.sh/ruff/rules/try-except-pass/
-  "S112", # try-except-continue https://docs.astral.sh/ruff/rules/try-except-continue/
-  "S314", # use of xml module https://docs.astral.sh/ruff/rules/suspicious-xml-element-tree-usage/
-  "S311", # use of insecure random numbers https://docs.astral.sh/ruff/rules/suspicious-non-cryptographic-random-usage/
-  "S324", # probable use of insecure hash functions https://docs.astral.sh/ruff/rules/hashlib-insecure-hash-function/
-  "S301", # suspicious pickle use https://docs.astral.sh/ruff/rules/suspicious-pickle-usage/
-  "S607", # starting process with partial path https://docs.astral.sh/ruff/rules/start-process-with-partial-path/
-  "S603", # check subprocess for untrusted input https://docs.astral.sh/ruff/rules/subprocess-without-shell-equals-true/
-  "S605", # starting process with a shell https://docs.astral.sh/ruff/rules/start-process-with-a-shell/
-  "S318", # use of xml module https://docs.astral.sh/ruff/rules/suspicious-xml-mini-dom-usage/
+  "E722",  # bare except https://docs.astral.sh/ruff/rules/bare-except/
+  "S101",  # using assert https://docs.astral.sh/ruff/rules/assert/
+  "S110",  # try-except-pass https://docs.astral.sh/ruff/rules/try-except-pass/
+  "S112",  # try-except-continue https://docs.astral.sh/ruff/rules/try-except-continue/
+  "S314",  # use of xml module https://docs.astral.sh/ruff/rules/suspicious-xml-element-tree-usage/
+  "S311",  # use of insecure random numbers https://docs.astral.sh/ruff/rules/suspicious-non-cryptographic-random-usage/
+  "S324",  # probable use of insecure hash functions https://docs.astral.sh/ruff/rules/hashlib-insecure-hash-function/
+  "S301",  # suspicious pickle use https://docs.astral.sh/ruff/rules/suspicious-pickle-usage/
+  "S607",  # starting process with partial path https://docs.astral.sh/ruff/rules/start-process-with-partial-path/
+  "S603",  # check subprocess for untrusted input https://docs.astral.sh/ruff/rules/subprocess-without-shell-equals-true/
+  "S605",  # starting process with a shell https://docs.astral.sh/ruff/rules/start-process-with-a-shell/
+  "S318",  # use of xml module https://docs.astral.sh/ruff/rules/suspicious-xml-mini-dom-usage/
+  "UP004", # useless-object-inheritance https://docs.astral.sh/ruff/rules/useless-object-inheritance
+  "UP006", # non-pep585-annotation https://docs.astral.sh/ruff/rules/non-pep585-annotation
+  "UP007", # non-pep604-annotation-union https://docs.astral.sh/ruff/rules/non-pep604-annotation-union
+  "UP008", # super-call-with-parameters https://docs.astral.sh/ruff/rules/super-call-with-parameters
+  "UP009", # utf8-encoding-declaration https://docs.astral.sh/ruff/rules/utf8-encoding-declaration
+  "UP015", # redundant-open-modes https://docs.astral.sh/ruff/rules/redundant-open-modes
+  "UP018", # native-literals https://docs.astral.sh/ruff/rules/native-literals
+  "UP024", # os-error-alias https://docs.astral.sh/ruff/rules/os-error-alias
+  "UP028", # yield-in-for-loop https://docs.astral.sh/ruff/rules/yield-in-for-loop
+  "UP030", # format-literals https://docs.astral.sh/ruff/rules/format-literals
+  "UP031", # printf-string-formatting https://docs.astral.sh/ruff/rules/printf-string-formatting
+  "UP032", # f-string https://docs.astral.sh/ruff/rules/format-literals
+  "UP034", # extraneous-parentheses https://docs.astral.sh/ruff/rules/extraneous-parentheses
+  "UP035", # deprecated-import https://docs.astral.sh/ruff/rules/deprecated-import
+  "UP037", # quoted-annotation https://docs.astral.sh/ruff/rules/quoted-annotation
+  "UP040", # non-pep695-type-alias https://docs.astral.sh/ruff/rules/non-pep695-type-alias
+  "UP041", # timeout-error-alias https://docs.astral.sh/ruff/rules/timeout-error-alias
+  "UP045", # non-pep604-annotation-optional https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional
 ]
 exclude = [
   "qt/python/mantidqt/mantidqt/dialogs/errorreports/resources.py",
