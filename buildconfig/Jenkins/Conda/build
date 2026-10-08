@@ -1,4 +1,5 @@
 #!/bin/bash -ex
+# Temporary: forces a full CI build to test the macOS OS update (do not merge)
 
 # This script expects a setup environment with all dependencies available in
 # the environment
