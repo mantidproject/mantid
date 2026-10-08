@@ -1,0 +1,1 @@
+- Added ``SetSampleThickness`` to the ISIS SANS command interface, which allows the sample thickness (in mm) stored in a data file to be overridden from a Python reduction script.
