@@ -1761,8 +1761,7 @@ class DirectEnergyConversion(object):
 
     def setup_instrument_properties(self, workspace=None, reload_instrument=False):
         if workspace is not None:
-            component_info = workspace.componentInfo()
-            name = component_info.name(component_info.root())
+            name = workspace.getInstrumentName()
             if name != self.prop_man.instr_name:
                 self.prop_man = PropertyManager(name, workspace)
 
