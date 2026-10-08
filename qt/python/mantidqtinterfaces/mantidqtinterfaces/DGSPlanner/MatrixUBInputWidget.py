@@ -14,7 +14,7 @@ from mantidqtinterfaces.DGSPlanner.LoadNexusUB import LoadNexusUB
 try:
     from qtpy.QtCore import QString
 except ImportError:
-    QString = type("")
+    QString = str
 
 
 class UBTableModel(QtCore.QAbstractTableModel):
