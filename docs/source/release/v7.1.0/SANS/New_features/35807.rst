@@ -1,0 +1,2 @@
+- Deprecated :ref:`ISIS SANS Command Interface<ScriptingSANSReductions>` and related functions are now removed from Mantid.
+- `SANSAdd2` and `SANSUtility` libraries have been renamed to ... change its relative path to `sans/common/` to homogenize with current SANS libraries.

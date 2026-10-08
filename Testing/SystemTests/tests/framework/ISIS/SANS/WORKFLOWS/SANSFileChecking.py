@@ -15,7 +15,7 @@ import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.api import ExperimentInfo
 from mantid.kernel import config
-import SANSUtility as su
+import sans.common.utils as su
 import os
 from sans.command_interface.ISISCommandInterface import AssignSample, Clean, LARMOR, LOQ, MaskFile, SANS2DTUBES, Set1D, director
 from sans.common.enums import SANSInstrument

@@ -9,7 +9,7 @@ import systemtesting
 from mantid.api import mtd
 from mantid.kernel import config
 from mantid.simpleapi import CreateSampleWorkspace, DeleteWorkspace, SaveNexusProcessed
-from SANSUtility import can_load_as_event_workspace
+from sans.common.utils import can_load_as_event_workspace
 import os
 
 
