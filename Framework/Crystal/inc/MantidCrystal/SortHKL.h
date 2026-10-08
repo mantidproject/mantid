@@ -19,8 +19,6 @@
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 
-#include "MantidKernel/V3D.h"
-
 namespace Mantid {
 namespace Crystal {
 

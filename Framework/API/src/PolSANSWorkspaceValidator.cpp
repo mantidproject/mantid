@@ -9,6 +9,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace API {

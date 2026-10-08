@@ -9,6 +9,7 @@
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -18,7 +19,6 @@ class Track;
 
 namespace Kernel {
 class PseudoRandomNumberGenerator;
-class V3D;
 } // namespace Kernel
 namespace Algorithms {
 

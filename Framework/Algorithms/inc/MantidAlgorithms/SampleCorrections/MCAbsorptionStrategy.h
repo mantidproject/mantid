@@ -13,6 +13,7 @@
 #include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/V3D_fwd.h"
 #include <tuple>
 
 namespace Mantid {
@@ -21,7 +22,6 @@ class Sample;
 }
 namespace Kernel {
 class PseudoRandomNumberGenerator;
-class V3D;
 class Logger;
 } // namespace Kernel
 namespace Algorithms {

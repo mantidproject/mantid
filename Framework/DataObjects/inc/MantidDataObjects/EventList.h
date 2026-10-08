@@ -10,6 +10,7 @@
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/TimeROI.h"
+#include "MantidKernel/Unit_fwd.h"
 #include "MantidKernel/cow_ptr.h"
 
 #include <iosfwd>
@@ -23,9 +24,6 @@ namespace Core {
 class DateAndTime;
 }
 } // namespace Types
-namespace Kernel {
-class Unit;
-} // namespace Kernel
 namespace DataObjects {
 class EventWorkspaceMRU;
 

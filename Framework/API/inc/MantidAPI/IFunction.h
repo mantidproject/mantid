@@ -17,7 +17,7 @@
 #include "MantidAPI/ParameterTie.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/Unit.h"
+#include "MantidKernel/Unit_fwd.h"
 #include "MantidKernel/WarningSuppressions.h"
 
 #ifndef Q_MOC_RUN

@@ -17,6 +17,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RegexStrings.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/Unit.h"
 #include "MantidReflectometry/ReflectometryPolarizationCorrectionISIS.h"
 
 #include <boost/algorithm/string/classification.hpp>

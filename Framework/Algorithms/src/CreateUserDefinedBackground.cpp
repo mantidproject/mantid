@@ -11,6 +11,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Interpolation.h"
+#include "MantidKernel/Unit.h"
 
 #include <algorithm>
 

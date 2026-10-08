@@ -10,14 +10,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/UnitLabel.h"
+#include "MantidKernel/Unit_fwd.h"
 #include <utility>
 
 #include <algorithm>
 #include <unordered_map>
 #include <vector>
-#ifndef Q_MOC_RUN
-#include <memory>
-#endif
 
 #include "tbb/concurrent_unordered_map.h"
 
@@ -234,11 +232,6 @@ private:
   /// The table of possible 'quick conversions'
   static ConversionsMap s_conversionFactors;
 };
-
-/// Shared pointer to the Unit base class
-using Unit_sptr = std::shared_ptr<Unit>;
-/// Shared pointer to the Unit base class (const version)
-using Unit_const_sptr = std::shared_ptr<const Unit>;
 
 //----------------------------------------------------------------------
 // Now the concrete units classes

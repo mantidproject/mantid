@@ -11,7 +11,7 @@ import tempfile
 import numpy as np
 from unittest.mock import Mock, patch
 from pathlib import Path
-from datetime import datetime, timezone, date, time
+from datetime import datetime, date, time, UTC
 from collections import namedtuple
 
 from mantid import config
@@ -106,7 +106,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     def test_file_populates_software_version_and_reduction_timestamp(self, mock_alg_histories):
         input_ws = self._create_sample_workspace()
         history = self._create_mock_alg_history(self._REDUCTION_ALG, {"InputWorkspace": "input_ws"}, [Mock()])
-        expected_value = datetime.combine(date(2024, 2, 13), time(12, 14, 36)).replace(tzinfo=timezone.utc).astimezone(tz=None)
+        expected_value = datetime.combine(date(2024, 2, 13), time(12, 14, 36)).replace(tzinfo=UTC).astimezone(tz=None)
         history.executionDate = Mock(return_value=DateAndTime("2024-02-13T12:14:36.073814000"))
         mock_alg_histories.return_value = [history]
 
@@ -897,7 +897,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
     def test_manual_source_allows_manual_setting_of_metadata(self):
         ws = self._create_sample_workspace()
-        timestamp = datetime.combine(date(2024, 2, 13), time(12, 14, 36)).replace(tzinfo=timezone.utc).astimezone(tz=None)
+        timestamp = datetime.combine(date(2024, 2, 13), time(12, 14, 36)).replace(tzinfo=UTC).astimezone(tz=None)
         alg_kwargs = {
             "MetadataSource": "Manual",
             "ReductionTimestamp": str(timestamp.isoformat()),

@@ -16,6 +16,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/Unit.h"
 
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>

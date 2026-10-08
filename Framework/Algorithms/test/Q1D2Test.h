@@ -14,6 +14,7 @@
 #include "MantidDataHandling/LoadRKH.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/MaskDetectors.h"
+#include "MantidKernel/Unit.h"
 #include <cxxtest/TestSuite.h>
 
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"

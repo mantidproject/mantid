@@ -8,6 +8,7 @@
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/V3D.h"
 
 #include <deque>
 #include <unordered_map>

@@ -8,14 +8,12 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/Unit_fwd.h"
 
 #include <memory>
 #include <string>
 
 namespace Mantid {
-namespace Kernel {
-class Unit;
-}
 namespace API {
 //----------------------------------------------------------------------
 // Forward declaration
@@ -40,11 +38,11 @@ public:
   const std::string &title() const;
   std::string &title();
 
-  const std::shared_ptr<Kernel::Unit> &unit() const;
-  std::shared_ptr<Kernel::Unit> &unit();
+  const Kernel::Unit_sptr &unit() const;
+  Kernel::Unit_sptr &unit();
 
   /// Set the unit on the Axis
-  virtual const std::shared_ptr<Kernel::Unit> &setUnit(const std::string &unitName);
+  virtual const Kernel::Unit_sptr &setUnit(const std::string &unitName);
 
   /// Returns true is the axis is a Spectra axis
   virtual bool isSpectra() const { return false; }
@@ -94,7 +92,7 @@ private:
   /// The user-defined title for this axis
   std::string m_title;
   /// The unit for this axis
-  std::shared_ptr<Kernel::Unit> m_unit;
+  Kernel::Unit_sptr m_unit;
 };
 
 } // namespace API

@@ -297,6 +297,7 @@ set(INC_FILES
     inc/MantidKernel/TopicInfo.h
     inc/MantidKernel/TypedValidator.h
     inc/MantidKernel/Unit.h
+    inc/MantidKernel/Unit_fwd.h
     inc/MantidKernel/UnitConversion.h
     inc/MantidKernel/UnitFactory.h
     inc/MantidKernel/UnitLabel.h
@@ -307,6 +308,7 @@ set(INC_FILES
     inc/MantidKernel/Utils.h
     inc/MantidKernel/V2D.h
     inc/MantidKernel/V3D.h
+    inc/MantidKernel/V3D_fwd.h
     inc/MantidKernel/VMD.h
     inc/MantidKernel/VectorHelper.h
     inc/MantidKernel/VisibleWhenProperty.h

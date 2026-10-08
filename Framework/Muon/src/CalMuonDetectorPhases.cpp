@@ -20,6 +20,7 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Unit.h"
 
 namespace {
 int PHASE_ROW = 2;

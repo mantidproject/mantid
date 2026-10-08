@@ -15,6 +15,7 @@
 #include "MantidDataHandling/LoadEventAsWorkspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/Unit.h"
 
 using Mantid::API::AlgorithmManager;
 using Mantid::DataHandling::LoadEventAsWorkspace2D;
