@@ -46,12 +46,17 @@ Usage
 
 	ResizeRectangularDetector(ws,"bank1",2.0,0.5)
 
-	i=ws.getInstrument()
-	bank1=i.getComponentByName('bank1')
-	bank2=i.getComponentByName('bank2')
+	component_info = ws.componentInfo()
+	bank1_index = component_info.indexOfAny("bank1")
+	bank2_index = component_info.indexOfAny("bank2")
 
-	print ("bank 1 was scaled and is now {:.2f} by {:.2f}".format(bank1.xsize(), bank1.ysize()))
-	print ("bank 2 was not scaled and remains {:.2f} by {:.2f}".format(bank2.xsize(), bank2.ysize()))
+	bank1_width = component_info.pixelGridXSize(bank1_index)
+	bank1_height = component_info.pixelGridYSize(bank1_index)
+	bank2_width = component_info.pixelGridXSize(bank2_index)
+	bank2_height = component_info.pixelGridYSize(bank2_index)
+
+	print ("bank 1 was scaled and is now {:.2f} by {:.2f}".format(bank1_width, bank1_height))
+	print ("bank 2 was not scaled and remains {:.2f} by {:.2f}".format(bank2_width, bank2_height))
 
 Output:
 

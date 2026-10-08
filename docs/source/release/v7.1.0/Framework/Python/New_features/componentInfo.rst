@@ -1,0 +1,1 @@
+- :class:`~mantid.geometry.ComponentInfo` in Python has new methods ``pixelGridXSize`` and ``pixelGridYSize`` for finding the physical size (in m) if a grid or rectangular detector.
