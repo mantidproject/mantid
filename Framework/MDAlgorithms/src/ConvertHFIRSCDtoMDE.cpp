@@ -44,6 +44,8 @@ DECLARE_ALGORITHM(ConvertHFIRSCDtoMDE)
 
 namespace {
 const std::string WAVELENGTH_LOG("wavelength");
+/// With MergeInputs, the fraction of the progress given to the conversion of the members; MergeMD reports the rest
+constexpr double CONVERSION_PROGRESS_FRACTION = 0.9;
 
 /// Identify a group member in messages and output names: its name, or its 1-based position if it has none
 std::string memberName(const WorkspaceGroup &group, const size_t index) {
@@ -260,7 +262,7 @@ void ConvertHFIRSCDtoMDE::exec() {
 
   const bool mergeInputs = this->getProperty("MergeInputs");
   std::vector<API::IMDEventWorkspace_sptr> outputWorkspaces;
-  Progress progress(this, 0.0, mergeInputs ? 0.9 : 1.0, inputWorkspaces.size());
+  Progress progress(this, 0.0, mergeInputs ? CONVERSION_PROGRESS_FRACTION : 1.0, inputWorkspaces.size());
   for (size_t i = 0; i < inputWorkspaces.size(); ++i) {
     const double wavelength = resolveWavelength(*inputWorkspaces[i], fallbackWavelength(wavelengths, i));
     outputWorkspaces.emplace_back(convertWorkspace(inputWorkspaces[i], wavelength));
@@ -303,6 +305,11 @@ ConvertHFIRSCDtoMDE::mergeWorkspaces(const std::vector<API::IMDEventWorkspace_sp
 
   struct TemporaryWorkspaces {
     std::vector<std::string> names;
+    TemporaryWorkspaces() = default;
+    TemporaryWorkspaces(const TemporaryWorkspaces &) = delete;
+    TemporaryWorkspaces &operator=(const TemporaryWorkspaces &) = delete;
+    TemporaryWorkspaces(TemporaryWorkspaces &&) = delete;
+    TemporaryWorkspaces &operator=(TemporaryWorkspaces &&) = delete;
     ~TemporaryWorkspaces() {
       for (const auto &name : names)
         AnalysisDataService::Instance().remove(name);
@@ -313,7 +320,7 @@ ConvertHFIRSCDtoMDE::mergeWorkspaces(const std::vector<API::IMDEventWorkspace_sp
     AnalysisDataService::Instance().addOrReplace(temporary.names.back(), workspaces[i]);
   }
 
-  auto merge = createChildAlgorithm("MergeMD", 0.9, 1.0);
+  auto merge = createChildAlgorithm("MergeMD", CONVERSION_PROGRESS_FRACTION, 1.0);
   merge->setProperty("InputWorkspaces", temporary.names);
   for (const std::string name : {"SplitInto", "SplitThreshold", "MaxRecursionDepth"})
     merge->setPropertyValue(name, getPropertyValue(name));
@@ -362,7 +369,7 @@ double ConvertHFIRSCDtoMDE::resolveWavelength(const API::IMDHistoWorkspace &inpu
                                               const std::optional<double> &fallback) const {
   const auto &run = inputWS.getExperimentInfo(static_cast<uint16_t>(0))->run();
   if (run.hasProperty(WAVELENGTH_LOG)) {
-    double wavelength;
+    double wavelength{0.0};
     try {
       // HB3A files store the log as a string, which is converted here
       wavelength = run.getLogAsSingleValue(WAVELENGTH_LOG);
