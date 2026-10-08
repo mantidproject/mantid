@@ -3,6 +3,11 @@
 
 # This must be set for long paths to work properly.
 # Unicode only defaults to true in NSIS 3.07 onwards.
+
+SetCompressor /SOLID lzma   # Much faster than LZMA for packing
+SetDatablockOptimize on    # CRITICAL: Stops the exponential search for duplicate files
+SetCompress auto
+
 Unicode True
 
 !include MUI2.nsh
