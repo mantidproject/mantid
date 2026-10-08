@@ -23,6 +23,8 @@ New Features
   :ref:`ReflectometryISISLoadAndProcess <algm-ReflectometryISISLoadAndProcess>` after workspace summation. The detector
   image and TOF plot in the reduction preview now display the raw workspace instead of the calibrated workspace, but no
   visual impact is expected because calibration changes detector geometry rather than the plotted signal.
+- (`#42423 <https://github.com/mantidproject/mantid/pull/42423>`_) ``POLREF_Parameters.xml`` now specifies ``CorrectDetectors=0``. This ensures that detector correction is turned off when reducing POLREF data through the ISIS Reflectometry GUI, as for POLREF the correction of detector positions is currently handled by :ref:`algm-ReflectometryISISCalibration`
+
 
 Bugfixes
 --------

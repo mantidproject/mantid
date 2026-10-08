@@ -1,1 +1,0 @@
-- ``POLREF_Parameters.xml`` now specifies ``CorrectDetectors=0``. This ensures that detector correction is turned off when reducing POLREF data through the ISIS Reflectometry GUI, as for POLREF the correction of detector positions is currently handled by :ref:`algm-ReflectometryISISCalibration`
