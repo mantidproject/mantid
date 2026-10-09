@@ -7,6 +7,7 @@
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/Logger.h"
 
+#include <algorithm>
 #include <cstdio>
 #include <sstream>
 
@@ -26,6 +27,9 @@
 #ifdef _WIN32
 #include <Psapi.h>
 #include <windows.h>
+
+// windows.h has to be included before pdh.h
+#include <pdh.h>
 #endif
 
 using std::size_t;
@@ -564,13 +568,95 @@ size_t MemoryStats::getCurrentRSS() const {
 #endif
 }
 
+namespace {
+/// DIAGNOSTIC ONLY (#41818): what the system could still commit, and the figures it was worked out from
+struct Headroom {
+  size_t committable; ///< in KiB
+  string detail;      ///< the platform figures behind it, for the log
+};
+
+Headroom headroom(size_t const availableMemory, size_t const totalMemory) {
+  std::stringstream detail;
+#ifdef _WIN32
+  size_t committable = availableMemory;
+  MEMORYSTATUSEX status;
+  status.dwLength = sizeof(status);
+  if (GlobalMemoryStatusEx(&status)) {
+    const auto commitHeadroom = static_cast<size_t>(status.ullAvailPageFile / 1024);
+    detail << " commitHeadroom=" << commitHeadroom << "KiB";
+    committable = std::max(committable, commitHeadroom);
+  } else {
+    detail << " commitHeadroom=unknown";
+  }
+
+  // the maximum a Hyper-V Dynamic Memory host can assign to this machine, 0 if it is not such a guest
+  size_t dynamicMaximum = 0;
+  PDH_HQUERY query{nullptr};
+  if (PdhOpenQueryW(nullptr, 0, &query) == ERROR_SUCCESS) {
+    PDH_HCOUNTER counter{nullptr};
+    PDH_FMT_COUNTERVALUE value{};
+    if (PdhAddEnglishCounterW(query, L"\\Hyper-V Dynamic Memory Integration Service\\Maximum Memory, Mbytes", 0,
+                              &counter) == ERROR_SUCCESS &&
+        PdhCollectQueryData(query) == ERROR_SUCCESS &&
+        PdhGetFormattedCounterValue(counter, PDH_FMT_LARGE, nullptr, &value) == ERROR_SUCCESS && value.largeValue > 0) {
+      dynamicMaximum = static_cast<size_t>(value.largeValue) * 1024; // the counter is in MiB
+    }
+    PdhCloseQuery(query);
+  }
+  detail << " dynamicMax=" << dynamicMaximum << "KiB";
+  if (dynamicMaximum > totalMemory)
+    committable = std::max(committable, availableMemory + (dynamicMaximum - totalMemory));
+  return {committable, detail.str()};
+#else
+  (void)totalMemory;
+  size_t freeSwap = 0;
+#ifdef __linux__
+  std::ifstream file("/proc/meminfo");
+  string line;
+  while (getline(file, line)) {
+    std::istringstream is(line);
+    string tag;
+    long value(0);
+    is >> tag >> value;
+    if (is && tag == "SwapFree:") {
+      freeSwap = static_cast<size_t>(value); // already in KiB
+      break;
+    }
+  }
+#elif __APPLE__
+  xsw_usage swap{};
+  size_t length = sizeof(swap);
+  if (sysctlbyname("vm.swapusage", &swap, &length, nullptr, 0) == 0) {
+    freeSwap = static_cast<size_t>(swap.xsu_avail / 1024);
+    detail << " swapTotal=" << swap.xsu_total / 1024 << "KiB swapUsed=" << swap.xsu_used / 1024 << "KiB";
+  } else {
+    detail << " swapusage=unavailable";
+  }
+#endif
+  detail << " freeSwap=" << freeSwap << "KiB";
+  return {availableMemory + freeSwap, detail.str()};
+#endif
+}
+} // namespace
+
 /** @brief Check if there is enough space in memory to hold the requested amount of memory.
  * @param requestedMemoryBytes :: The amount of memory that is being requested, in bytes.
  * @return error string if the requested memory would exceed the available memory; else empty string
  */
 std::string MemoryStats::checkAvailableMemory(std::size_t const requestedMemoryBytes) const {
   std::string errorString;
-  const auto availableMemory = this->availMem() * 1024; // Convert from KiB to bytes
+
+  // DIAGNOSTIC ONLY (#41818): compare the memory this check uses with what the system could still commit, and report
+  // what each of them would decide. Do not merge.
+  const auto measured = headroom(this->availMem(), this->totalMem());
+  const auto committableMemory = measured.committable * 1024; // KiB to bytes
+  g_log.notice() << "MEMCHECK requested=" << requestedMemoryBytes / 1024 << "KiB avail=" << this->availMem()
+                 << "KiB total=" << this->totalMem() << "KiB" << measured.detail
+                 << " committable=" << measured.committable
+                 << "KiB was=" << (requestedMemoryBytes > this->availMem() * 1024 ? "REFUSED" : "allowed")
+                 << " now=" << (requestedMemoryBytes > committableMemory ? "REFUSED" : "allowed") << "\n";
+
+  const auto availableMemory = committableMemory;
   if (requestedMemoryBytes > availableMemory) {
     double constexpr bytesToGB = 1e9;
     double requestedGB = static_cast<double>(requestedMemoryBytes) / bytesToGB;
