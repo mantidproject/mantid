@@ -1,0 +1,1 @@
+- Mantid now keeps asynchronously started algorithms, including live-data monitoring algorithms, active during startup so they can be cancelled safely if Mantid shuts down immediately.
