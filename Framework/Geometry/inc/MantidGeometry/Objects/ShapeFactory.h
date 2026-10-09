@@ -14,6 +14,7 @@
 #include "MantidKernel/V3D.h"
 #ifndef Q_MOC_RUN
 #include <memory>
+#include <utility>
 #endif
 #include <map>
 
@@ -141,6 +142,10 @@ private:
   Poco::XML::Element *getOptionalShapeElement(Poco::XML::Element *pElem, const std::string &name);
   double getDoubleAttribute(Poco::XML::Element *pElem, const std::string &name);
   Kernel::V3D parsePosition(Poco::XML::Element *pElem);
+  std::pair<Kernel::V3D, Kernel::V3D> applyShapeRotations(Poco::XML::Element *pElem, Kernel::V3D centre,
+                                                          Kernel::V3D axis);
+  std::pair<Kernel::V3D, Kernel::V3D> rotatedCylinderBase(Poco::XML::Element *pElem, const Kernel::V3D &base,
+                                                          const Kernel::V3D &axis, const double height);
   void createGeometryHandler(Poco::XML::Element *, const std::shared_ptr<CSGObject> &);
   static std::string insertMatrixTag(const std::string &tagName, const Kernel::Matrix<double> &matrix, std::string xml);
   Kernel::Matrix<double> parseMatrixElement(Poco::XML::Element *pElem);
