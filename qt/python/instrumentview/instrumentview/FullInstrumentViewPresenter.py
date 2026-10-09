@@ -486,11 +486,13 @@ class FullInstrumentViewPresenter:
         if point_index < 0 or point_index >= n_pickable:
             self._last_hovered_point_index = None
             return
-        indices = np.array([point_index])
+        indices = None
         if self._view.is_select_bank_tube_checked():
             mask = np.zeros(n_pickable, dtype=bool)
             mask[point_index] = True
             indices = np.flatnonzero(self._model.expand_pickable_mask_to_parent_subtrees(mask))
+        else:
+            indices = np.array([point_index])
         self._model.extract_spectra_for_line_plot(self._view.current_selected_lineplot_unit(), True, indices)
         detector_info = self._model.detector_info_text_for_workspace_index(point_index)
         if len(detector_info) == 0:
