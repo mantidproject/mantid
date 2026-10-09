@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "../../Common/DllConfig.h"
 #include "../../Reduction/ReductionOptionsMap.h"
+#include "Common/DllConfig.h"
 #include "IEncoder.h"
 #include "MantidQtWidgets/Common/BaseEncoder.h"
 

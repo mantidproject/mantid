@@ -45,7 +45,7 @@ mtd_add_qt_library(
   NOMOC ${INC_FILES}
   UI ${UI_FILES}
   DEFS IN_MANTIDQT_ISISREFLECTOMETRY PRECOMPILED ${PRECOMP_HEADERS}
-  INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
+  INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
   LINK_LIBS ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${JSONCPP_LIBRARIES} ${PYTHON_LIBRARIES}
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsInstrumentView MantidQtIcons MantidQtWidgetsMplCpp
                    MantidQtWidgetsRegionSelector
@@ -57,3 +57,15 @@ mtd_add_qt_library(
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   add_subdirectory(test)
 endif()
+
+# Auto-generate exports header
+generate_mantid_export_header(
+  MantidScientificInterfacesISISReflectometryQt${MANTID_QT_VERSION}
+  TRUE
+  BASE_NAME
+  MANTIDQT_ISISREFLECTOMETRY
+  EXPORT_MACRO_NAME
+  MANTIDQT_ISISREFLECTOMETRY_DLL
+  EXPORT_FILE_NAME
+  Common/DllConfig.h
+)

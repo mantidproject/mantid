@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "DllConfig.h"
+#include "Common/DllConfig.h"
 #include <boost/algorithm/string.hpp>
 #include <optional>
 #include <vector>

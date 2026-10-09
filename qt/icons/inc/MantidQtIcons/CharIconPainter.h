@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllOption.h"
+#include "MantidQtIcons/DllOption.h"
 
 #include <QIcon>
 #include <QPainter>
