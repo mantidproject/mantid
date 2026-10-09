@@ -238,7 +238,7 @@ def get_pixel_size(run_start):  # reads current IDF and get pixelsize from there
     """To get pixel size for Bilby detectors from the Bilby_Definition.xml file"""
 
     from mantid.api import InstrumentFileFinder
-    import xml.etree.cElementTree as ET
+    import xml.etree.ElementTree as ET
 
     currentIDF = InstrumentFileFinder.getInstrumentFilename("Bilby", run_start)
     # print currentIDF
