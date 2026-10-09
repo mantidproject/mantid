@@ -5,11 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IFunctionGeneral.h"
-#include "MantidKernel/Logger.h"
 
 namespace Mantid::API {
-
-Kernel::Logger IFunctionGeneral::g_log("IFunctionGeneral");
 
 void IFunctionGeneral::function(const FunctionDomain &domain, FunctionValues &values) const {
   auto actualValuesSize = values.size();

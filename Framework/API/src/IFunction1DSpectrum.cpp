@@ -5,11 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IFunction1DSpectrum.h"
-#include "MantidKernel/Logger.h"
 
 namespace Mantid::API {
-
-Kernel::Logger IFunction1DSpectrum::g_log("IFunction1DSpectrum");
 
 void IFunction1DSpectrum::function(const FunctionDomain &domain, FunctionValues &values) const {
   try {

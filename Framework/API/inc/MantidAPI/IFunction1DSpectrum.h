@@ -10,7 +10,6 @@
 
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidKernel/Logger_fwd.h"
 
 namespace Mantid {
 namespace API {
@@ -35,9 +34,6 @@ public:
   /// Derivatives of the function. The base implementation calculates numerical
   /// derivatives.
   virtual void functionDeriv1DSpectrum(const FunctionDomain1DSpectrum &domain, Jacobian &jacobian);
-
-protected:
-  static Kernel::Logger g_log;
 };
 
 } // namespace API
