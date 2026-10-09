@@ -20,6 +20,7 @@ public:
   QFont defaultFont(int style) const override;
   QColor defaultPaper(int style) const override;
   const char *keywords(int set) const override;
+  void setDarkMode(bool dark);
 
 private:
   QColor defaultColorLight(int style) const;
