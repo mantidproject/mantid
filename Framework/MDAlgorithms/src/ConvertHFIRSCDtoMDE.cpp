@@ -274,18 +274,13 @@ void ConvertHFIRSCDtoMDE::exec() {
     return;
   }
 
-  // One output per member, named as in HB3AAdjustSampleNorm. Each member is declared as an output property so that
-  // it is stored in the AnalysisDataService under its name, before the group.
+  // One output per member, named as in HB3AAdjustSampleNorm. Store the members directly in the
+  // AnalysisDataService so that OutputWorkspace remains the sole output property.
   const std::string outputName = getPropertyValue("OutputWorkspace");
   auto outputGroup = std::make_shared<WorkspaceGroup>();
   for (size_t i = 0; i < outputWorkspaces.size(); ++i) {
-    const std::string propertyName = "OutputWorkspace_" + std::to_string(i + 1);
-    if (existsProperty(propertyName))
-      removeProperty(propertyName);
-    declareProperty(std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
-                        propertyName, outputName + "_" + memberName(*group, i), Direction::Output),
-                    "Output for member " + std::to_string(i + 1) + " of the input group.");
-    setProperty(propertyName, outputWorkspaces[i]);
+    if (getAlwaysStoreInADS())
+      AnalysisDataService::Instance().addOrReplace(outputName + "_" + memberName(*group, i), outputWorkspaces[i]);
     outputGroup->addWorkspace(outputWorkspaces[i]);
   }
   setProperty("OutputWorkspace", std::static_pointer_cast<API::Workspace>(outputGroup));
@@ -299,10 +294,6 @@ void ConvertHFIRSCDtoMDE::exec() {
  */
 API::IMDEventWorkspace_sptr
 ConvertHFIRSCDtoMDE::mergeWorkspaces(const std::vector<API::IMDEventWorkspace_sptr> &workspaces) {
-  // Names are unique to this algorithm instance, so that concurrent executions do not collide
-  std::ostringstream prefix;
-  prefix << "__ConvertHFIRSCDtoMDE_" << static_cast<const void *>(this) << "_";
-
   struct TemporaryWorkspaces {
     std::vector<std::string> names;
     TemporaryWorkspaces() = default;
@@ -316,7 +307,9 @@ ConvertHFIRSCDtoMDE::mergeWorkspaces(const std::vector<API::IMDEventWorkspace_sp
     }
   } temporary;
   for (size_t i = 0; i < workspaces.size(); ++i) {
-    temporary.names.emplace_back(prefix.str() + std::to_string(i + 1));
+    // Generate each name through the ADS so that an existing hidden workspace cannot be overwritten and
+    // subsequently removed by TemporaryWorkspaces.
+    temporary.names.emplace_back(AnalysisDataService::Instance().uniqueHiddenName());
     AnalysisDataService::Instance().addOrReplace(temporary.names.back(), workspaces[i]);
   }
 
@@ -387,6 +380,8 @@ double ConvertHFIRSCDtoMDE::resolveWavelength(const API::IMDHistoWorkspace &inpu
   if (!fallback)
     throw std::runtime_error("No wavelength available: the input workspace has no '" + WAVELENGTH_LOG +
                              "' sample log and the Wavelength property is not set");
+  if (!(*fallback > 0.0) || !std::isfinite(*fallback))
+    throw std::runtime_error("The Wavelength property must be a positive number, found " + std::to_string(*fallback));
   g_log.information() << "Using wavelength " << *fallback << " Angstrom from the Wavelength property\n";
   return *fallback;
 }

@@ -7,7 +7,7 @@
 import platform
 import systemtesting
 import numpy as np
-from mantid.api import AlgorithmManager
+from mantid.api import AlgorithmManager, WorkspaceGroup
 from mantid.simpleapi import (
     CompareMDWorkspaces,
     ConvertHFIRSCDtoMDE,
@@ -214,7 +214,8 @@ class ConvertHFIRSCDtoMDE_GroupInput_Test(systemtesting.MantidSystemTest):
         HB3AAdjustSampleNorm(OutputType="Q-sample events", MergeInputs=False, OutputWorkspace="GroupInput_reference", **common)
 
         # Unmerged: one output per scan, in group order, named after the input member
-        ConvertHFIRSCDtoMDE(InputWorkspace="GroupInput_detector", OutputWorkspace="GroupInput_Q")
+        result = ConvertHFIRSCDtoMDE(InputWorkspace="GroupInput_detector", OutputWorkspace="GroupInput_Q")
+        self.assertIsInstance(result, WorkspaceGroup)
         names = list(mtd["GroupInput_Q"].getNames())
         self.assertEqual(names, ["GroupInput_Q_" + name for name in mtd["GroupInput_detector"].getNames()])
         for name, reference in zip(names, mtd["GroupInput_reference"].getNames()):

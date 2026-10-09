@@ -168,6 +168,12 @@ public:
     TS_ASSERT_THROWS(alg.setProperty("Wavelength", "-1.0"), const std::invalid_argument &);
   }
 
+  void test_non_finite_wavelength_property() {
+    auto inputWS = loadData();
+    inputWS->getExperimentInfo(0)->mutableRun().removeProperty("wavelength");
+    assertWavelengthError(inputWS, "nan", "Wavelength property must be a positive number");
+  }
+
   void test_group_output_names_and_order() {
     // Member order differs from alphabetical order, to check that the output follows the group
     addGroup("ConvertHFIRSCDtoMDETest_group", {"ConvertHFIRSCDtoMDETest_b", "ConvertHFIRSCDtoMDETest_a"},
@@ -176,6 +182,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
 
     auto &ads = AnalysisDataService::Instance();
+    TS_ASSERT(!alg->existsProperty("OutputWorkspace_1"));
+    TS_ASSERT(!alg->existsProperty("OutputWorkspace_2"));
     auto outGroup = ads.retrieveWS<WorkspaceGroup>("ConvertHFIRSCDtoMDETest_Q");
     TS_ASSERT_EQUALS(outGroup->size(), 2);
     const std::vector<std::string> expected = {"ConvertHFIRSCDtoMDETest_Q_ConvertHFIRSCDtoMDETest_b",
@@ -290,6 +298,7 @@ public:
   void test_merge_inputs() {
     addGroup("ConvertHFIRSCDtoMDETest_group", {"ConvertHFIRSCDtoMDETest_a", "ConvertHFIRSCDtoMDETest_b"},
              {loadData(), loadData()});
+    const auto hiddenWorkspacesBefore = hiddenWorkspaceNames();
     auto alg = createAlgorithm("ConvertHFIRSCDtoMDETest_group", "", "ConvertHFIRSCDtoMDETest_Q");
     alg->setProperty("MergeInputs", true);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -309,7 +318,7 @@ public:
     // Neither per-member outputs nor the temporary workspaces given to MergeMD remain
     TS_ASSERT(!ads.doesExist("ConvertHFIRSCDtoMDETest_Q_ConvertHFIRSCDtoMDETest_a"));
     TS_ASSERT(!ads.doesExist("ConvertHFIRSCDtoMDETest_Q_ConvertHFIRSCDtoMDETest_b"));
-    TS_ASSERT(temporaryWorkspaceNames().empty());
+    TS_ASSERT_EQUALS(hiddenWorkspaceNames(), hiddenWorkspacesBefore);
     ads.clear();
   }
 
@@ -337,7 +346,7 @@ public:
       TS_ASSERT_EQUALS(boxController->getSplitThreshold(), 200);
       TS_ASSERT_EQUALS(boxController->getMaxDepth(), 10);
     }
-    TS_ASSERT(temporaryWorkspaceNames().empty());
+    TS_ASSERT(hiddenWorkspaceNames().empty());
   }
 
   void test_merge_inputs_equals_convert_then_MergeMD() {
@@ -391,12 +400,12 @@ public:
 private:
   IMDHistoWorkspace_sptr m_data;
 
-  /// Names of the hidden workspaces that the algorithm stores for MergeMD
-  std::vector<std::string> temporaryWorkspaceNames() {
+  /// Names of hidden workspaces currently in the ADS
+  std::vector<std::string> hiddenWorkspaceNames() {
     std::vector<std::string> names;
     for (const auto &name : AnalysisDataService::Instance().getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
                                                                            Mantid::Kernel::DataServiceHidden::Include))
-      if (name.starts_with("__ConvertHFIRSCDtoMDE"))
+      if (name.starts_with("__"))
         names.emplace_back(name);
     return names;
   }
