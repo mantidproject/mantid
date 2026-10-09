@@ -919,9 +919,8 @@ void ReflectometryReductionOne3::sumInQProcessValue(const int inputIdx, const do
                                                     const size_t outSpecIdx, const MatrixWorkspace_sptr &IvsLam,
                                                     std::vector<double> &outputE) {
 
-  // Check whether there are any counts (if not, nothing to share)
   const double inputCounts = inputY[inputIdx];
-  if (inputCounts <= 0.0 || std::isnan(inputCounts) || std::isinf(inputCounts)) {
+  if (std::isnan(inputCounts) || std::isinf(inputCounts)) {
     return;
   }
   // Get the bin width and the bin centre
@@ -994,7 +993,7 @@ void ReflectometryReductionOne3::sumInQShareCounts(const double inputCounts, con
       // Projection to a single value. Put all counts in the overlapping output
       // bin.
       outputY[outIdx] += inputCounts;
-      outputE[outIdx] += inputCounts;
+      outputE[outIdx] += inputErr;
     }
   }
 }
