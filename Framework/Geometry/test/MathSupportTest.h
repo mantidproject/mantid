@@ -14,7 +14,7 @@
 #include <vector>
 
 #include "MantidGeometry/Math/mathSupport.h"
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger_fwd.h"
 
 using namespace Mantid;
 using namespace mathSupport;

@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidCurveFitting/DllConfig.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid {
 namespace CurveFitting {

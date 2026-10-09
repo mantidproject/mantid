@@ -11,6 +11,7 @@
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Quat.h"
 #include "MantidQtWidgets/InstrumentView/BankTextureBuilder.h"
 

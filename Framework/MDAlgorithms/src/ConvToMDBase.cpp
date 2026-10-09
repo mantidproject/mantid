@@ -8,6 +8,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidKernel/Logger.h"
 #include "MantidMDAlgorithms/ConvToMDBase.h"
 
 namespace Mantid::MDAlgorithms {

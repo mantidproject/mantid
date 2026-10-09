@@ -13,6 +13,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidTypes/SpectrumDefinition.h"
 

@@ -10,9 +10,10 @@
 #include "MantidDataObjects/TableWorkspace_fwd.h"
 #include "MantidDataObjects/Workspace2D_fwd.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger_fwd.h"
 
 #include <optional>
+#include <vector>
 
 namespace Mantid {
 namespace DataHandling {

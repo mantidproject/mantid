@@ -8,8 +8,6 @@
 
 namespace Mantid::API {
 
-Kernel::Logger IFunctionGeneral::g_log("IFunctionGeneral");
-
 void IFunctionGeneral::function(const FunctionDomain &domain, FunctionValues &values) const {
   auto actualValuesSize = values.size();
   auto requiredValuesSize = getValuesSize(domain);
