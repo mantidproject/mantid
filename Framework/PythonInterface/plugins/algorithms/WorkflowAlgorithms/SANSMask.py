@@ -7,7 +7,9 @@
 # pylint: disable=no-init,invalid-name,bare-except
 import mantid.simpleapi as api
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, PythonAlgorithm
+from mantid.geometry import ComponentType
 from mantid.kernel import Direction, IntArrayProperty, Logger, StringListValidator
+from plugins.algorithms.component_info_utils import get_assembly_children, get_detector_id, resolve_component_index
 from reduction_workflow.instruments.sans import hfir_instrument
 from reduction_workflow.instruments.sans import sns_instrument
 import sys
@@ -143,7 +145,6 @@ class SANSMask(PythonAlgorithm):
         else:
             return
 
-        instrument = workspace.getInstrument()
         component_info = workspace.componentInfo()
 
         if facility.upper() == "HFIR":
@@ -151,9 +152,8 @@ class SANSMask(PythonAlgorithm):
             # Get the default from the parameters file
             if component_name is None or component_name == "":
                 component_name = component_info.getStringParameter("detector-name")[0]
-            component = instrument.getComponentByName(component_name)
-            if component.type() == "RectangularDetector":
-                bank_index = component_info.indexOfAny(component_name)
+            bank_index = resolve_component_index(component_name, component_info)
+            if component_info.componentType(bank_index) == ComponentType.Rectangular:
                 id_start = component_info.pixelGridIdStart(bank_index)
                 id_step = component_info.pixelGridIdStep(bank_index)
                 # id's at the bottom on every pixel
@@ -166,11 +166,17 @@ class SANSMask(PythonAlgorithm):
                 )
                 ids = [list(range(i, i + id_step)) for i in ids_at_the_bottom]
                 ids = [item for sublist in ids for item in sublist]  # flat list
-            elif component.type() == "CompAssembly" or component.type() == "ObjCompAssembly" or component.type() == "DetectorComponent":
-                number_of_tubes = component.nelements()
-                number_of_pixels_per_tube = component[0].nelements()
+            elif self.__is_assembly_or_detector(component_info, bank_index):
+                detector_info = workspace.detectorInfo()
+                tubes = get_assembly_children(component_info, bank_index)
+                number_of_tubes = len(tubes)
+                number_of_pixels_per_tube = len(get_assembly_children(component_info, tubes[0]))
                 idx_at_the_bottom = list(range(side_to_mask, number_of_tubes, 2))
-                ids = [component[i][j].getID() for i in idx_at_the_bottom for j in range(number_of_pixels_per_tube)]
+                ids = [
+                    get_detector_id(component_info, detector_info, get_assembly_children(component_info, tubes[i])[j])
+                    for i in idx_at_the_bottom
+                    for j in range(number_of_pixels_per_tube)
+                ]
             else:
                 Logger("SANSMask").warning("No Front/Back tubes masked for HFIR!")
                 return
@@ -194,42 +200,50 @@ class SANSMask(PythonAlgorithm):
         """
         Masks component by name (e.g. "detector1" or "wing_detector".
         """
-        instrument = workspace.getInstrument()
+        component_info = workspace.componentInfo()
         try:
-            component = instrument.getComponentByName(component_name)
-        except:
+            bank_index = resolve_component_index(component_name, component_info)
+        except ValueError:
             Logger("SANSMask").error("Component not valid! %s" % component_name)
             return
 
         masked_detectors = []
-        if component.type() == "RectangularDetector":
-            component_info = workspace.componentInfo()
-            bank_index = component_info.indexOfAny(component_name)
+        if component_info.componentType(bank_index) == ComponentType.Rectangular:
             masked_detectors = list(
                 range(component_info.pixelGridMinDetectorID(bank_index), component_info.pixelGridMaxDetectorID(bank_index) + 1)
             )
-        elif component.type() == "CompAssembly" or component.type() == "ObjCompAssembly" or component.type() == "DetectorComponent":
-            ids_gen = self.__get_ids_for_assembly(component)
-            masked_detectors = list(ids_gen)
+        elif self.__is_assembly_or_detector(component_info, bank_index):
+            detector_info = workspace.detectorInfo()
+            # Detector index == component index for detectors
+            masked_detectors = [detector_info.detid(int(i)) for i in component_info.detectorsInSubtree(bank_index)]
         else:
-            Logger("SANSMask").error("Mask not applied. Component not valid: %s of type %s." % (component.getName(), component.type()))
+            Logger("SANSMask").error(
+                "Mask not applied. Component not valid: %s of type %s."
+                % (component_info.name(bank_index), component_info.componentType(bank_index))
+            )
 
         api.MaskDetectors(Workspace=workspace, DetectorList=masked_detectors)
 
-    def __get_ids_for_assembly(self, component):
+    @staticmethod
+    def __is_assembly_or_detector(component_info, index):
         """
-        Recursive function that get a generator for all IDs for a component.
-        Component must be one of these:
-        'CompAssembly'
-        'ObjCompAssembly'
-        'DetectorComponent'
+        Returns True if the component is one of the legacy component types
+        'CompAssembly', 'ObjCompAssembly' or 'DetectorComponent'.
         """
-        if component.type() == "DetectorComponent":
-            yield component.getID()
+        component_type = component_info.componentType(index)
+        if component_type == ComponentType.Detector:
+            # Pixels of grid banks are 'GridDetectorPixel', not 'DetectorComponent'
+            is_valid = True
+            ancestor = index
+            while is_valid and component_info.hasParent(ancestor):
+                ancestor = component_info.parent(ancestor)
+                is_valid = component_info.componentType(ancestor) not in (ComponentType.Grid, ComponentType.Rectangular)
+        elif component_type in (ComponentType.Unstructured, ComponentType.OutlineComposite):
+            # The root is the 'Instrument', not a 'CompAssembly'
+            is_valid = index != component_info.root()
         else:
-            for i in range(component.nelements()):
-                for j in self.__get_ids_for_assembly(component[i]):
-                    yield j
+            is_valid = False
+        return is_valid
 
 
 AlgorithmFactory.subscribe(SANSMask())

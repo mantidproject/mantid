@@ -6,7 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,too-many-arguments,too-many-branches
 import sys
+from mantid.geometry import ComponentType
 from mantid.kernel import Logger
+from plugins.algorithms.component_info_utils import resolve_component_index
 
 
 def get_default_beam_center(workspace=None):
@@ -65,21 +67,21 @@ def get_masked_ids(nx_low, nx_high, ny_low, ny_high, workspace, component_name=N
     @param workspace: the pixel number and size info will be taken from the workspace
     """
 
-    instrument = workspace.getInstrument()
     component_info = workspace.componentInfo()
     if component_name is None or component_name == "":
         component_name = component_info.getStringParameter("detector-name")[0]
 
-    component = instrument.getComponentByName(component_name)
+    component_index = resolve_component_index(component_name, component_info)
+    component_type = component_info.componentType(component_index)
 
     Logger("hfir_instrument").debug(
         "Masking pixels: nx_low=%s, nx_high=%s, ny_low=%s, ny_high=%s for component %s of type=%s."
-        % (nx_low, nx_high, ny_low, ny_high, component_name, component.type())
+        % (nx_low, nx_high, ny_low, ny_high, component_name, component_type)
     )
 
     IDs = []
-    if component.type() == "RectangularDetector":
-        bank_index = component_info.indexOfAny(component_name)
+    if component_type == ComponentType.Rectangular:
+        bank_index = component_index
         id_start = component_info.pixelGridIdStart(bank_index)
         id_step = component_info.pixelGridIdStep(bank_index)
         max_detector_id = component_info.pixelGridMaxDetectorID(bank_index)
@@ -106,24 +108,27 @@ def get_masked_ids(nx_low, nx_high, ny_low, ny_high, workspace, component_name=N
             while i < npixels_x * id_step + id_start:
                 IDs.append(i)
                 i += id_step
-    elif component.type() == "CompAssembly" or component.type() == "ObjCompAssembly" or component.type() == "DetectorComponent":
+    elif _is_assembly_or_detector(component_info, component_index):
         # Wing detector
         # x
-        total_n_tubes = component.nelements()
+        detector_info = workspace.detectorInfo()
+        total_n_tubes = len(component_info.children(component_index))
         for tube in range(nx_low):
-            IDs.extend(list(_get_ids_for_assembly(component[tube])))
+            IDs.extend(list(_get_ids_for_assembly(component_info, detector_info, _child_index(component_info, component_index, tube))))
         for tube in range(total_n_tubes - nx_high, total_n_tubes):
-            IDs.extend(list(_get_ids_for_assembly(component[tube])))
+            IDs.extend(list(_get_ids_for_assembly(component_info, detector_info, _child_index(component_info, component_index, tube))))
         # y
         for tube in range(total_n_tubes):
-            for pixel in range(component[tube].nelements()):
+            tube_index = _child_index(component_info, component_index, tube)
+            n_pixels = len(component_info.children(tube_index))
+            for pixel in range(n_pixels):
                 if pixel in range(ny_low):
-                    IDs.append(component[tube][pixel].getID())
-                if pixel in range(component[tube].nelements() - ny_high, component[tube].nelements()):
-                    IDs.append(component[tube][pixel].getID())
+                    IDs.append(_detector_id(component_info, detector_info, _child_index(component_info, tube_index, pixel)))
+                if pixel in range(n_pixels - ny_high, n_pixels):
+                    IDs.append(_detector_id(component_info, detector_info, _child_index(component_info, tube_index, pixel)))
     else:
         Logger("hfir_instrument").error(
-            "get_masked_pixels not applied. Component not valid: %s of type %s." % (component.getName(), component.type())
+            "get_masked_pixels not applied. Component not valid: %s of type %s." % (component_info.name(component_index), component_type)
         )
     return IDs
 
@@ -152,7 +157,42 @@ def get_masked_pixels(nx_low, nx_high, ny_low, ny_high, workspace, component_nam
     return pixel_list
 
 
-def _get_ids_for_assembly(component):
+def _is_assembly_or_detector(component_info, component_index):
+    """
+    True if the component is a generic (unstructured) assembly or a detector, i.e.
+    what the legacy Instrument API reported as one of these types:
+    'CompAssembly'
+    'ObjCompAssembly'
+    'DetectorComponent'
+    The instrument root is itself an unstructured assembly, but it was never one of these types.
+    """
+    assembly_types = (ComponentType.Unstructured, ComponentType.OutlineComposite, ComponentType.Detector)
+    return component_index != component_info.root() and component_info.componentType(component_index) in assembly_types
+
+
+def _child_index(component_info, parent_index, position):
+    """
+    Component index of the child at the given position within its parent.
+    Raises RuntimeError for a position out of range, including negative positions,
+    as the legacy ICompAssembly item access did.
+    """
+    children = component_info.children(parent_index)
+    if position < 0 or position >= len(children):
+        raise RuntimeError(f"Child {position} of component {component_info.name(parent_index)} is out of range")
+    return int(children[position])
+
+
+def _detector_id(component_info, detector_info, component_index):
+    """
+    Detector ID of a component that must be a detector.
+    Raises AttributeError otherwise, as the legacy call of getID() on a non-detector component did.
+    """
+    if not component_info.isDetector(component_index):
+        raise AttributeError(f"Component {component_info.name(component_index)} is not a detector and has no detector ID")
+    return detector_info.detid(component_index)
+
+
+def _get_ids_for_assembly(component_info, detector_info, component_index):
     """
     Recursive function that get a generator for all IDs for a component.
     Component must be one of these:
@@ -160,11 +200,14 @@ def _get_ids_for_assembly(component):
     'ObjCompAssembly'
     'DetectorComponent'
     """
-    if component.type() == "DetectorComponent":
-        yield component.getID()
+    if component_info.isDetector(component_index):
+        yield detector_info.detid(component_index)
+    elif component_info.componentType(component_index) in (ComponentType.Generic, ComponentType.Infinite):
+        # A leaf that is not a detector, which the legacy recursion could not descend into
+        raise AttributeError(f"Component {component_info.name(component_index)} is neither a detector nor an assembly")
     else:
-        for i in range(component.nelements()):
-            for j in _get_ids_for_assembly(component[i]):
+        for child_index in component_info.children(component_index):
+            for j in _get_ids_for_assembly(component_info, detector_info, int(child_index)):
                 yield j
 
 

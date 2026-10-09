@@ -6,7 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
 from mantid.api import mtd, AlgorithmFactory, Progress, PythonAlgorithm, WorkspaceProperty
+from mantid.geometry import ComponentType
 from mantid.kernel import logger, Direction
+from plugins.algorithms.component_info_utils import get_spectrum_detector_index, resolve_component_index
 from mantid.simpleapi import (
     AddSampleLog,
     ConvertUnits,
@@ -94,7 +96,6 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         """
 
         workspace = mtd[input_ws]
-        instrument = workspace.getInstrument()
         component_info = workspace.componentInfo()
 
         # Get workspace index of first detector
@@ -103,7 +104,19 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         try:
             # First try to get first detector for current analyser bank
             analyser = component_info.getStringParameter("analyser")[0]
-            detector_1_idx = instrument.getComponentByName(analyser)[0].getID() - 1
+            analyser_index = resolve_component_index(analyser, component_info)
+            analyser_children = component_info.children(analyser_index)
+            # Raise a RuntimeError, as the legacy API did, rather than let an IndexError trigger the fallback below
+            if (
+                component_info.componentType(analyser_index) in (ComponentType.Generic, ComponentType.Infinite, ComponentType.Detector)
+                or len(analyser_children) == 0
+            ):
+                raise RuntimeError("Analyser %s is not an assembly with children" % analyser)
+            first_child = int(analyser_children[0])
+            if not component_info.isDetector(first_child):
+                raise RuntimeError("Component %s is not a detector" % component_info.fullName(first_child))
+            # Detector index == component index for detectors
+            detector_1_idx = workspace.detectorInfo().detid(first_child) - 1
             logger.information("Got index of first detector for analyser %s: %d" % (analyser, detector_1_idx))
 
         except IndexError:
@@ -143,8 +156,10 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         @param detector_id Detector ID to search for
         """
 
+        detector_info = mtd[workspace].detectorInfo()
+        spectrum_info = mtd[workspace].spectrumInfo()
         for spec_idx in range(0, mtd[workspace].getNumberHistograms()):
-            if mtd[workspace].getDetector(spec_idx).getID() == detector_id:
+            if detector_info.detid(get_spectrum_detector_index(spectrum_info, spec_idx)) == detector_id:
                 return spec_idx
 
         return None

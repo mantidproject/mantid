@@ -46,7 +46,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
     @staticmethod
     def getInstrument(InstrumentName="MAR"):
         """test method used to obtain default instrument for testing"""
-        idf_file = api.ExperimentInfo.getInstrumentFilename(InstrumentName)
+        idf_file = api.InstrumentFileFinder.getInstrumentFilename(InstrumentName)
         tmp_ws_name = "__empty_" + InstrumentName
         if not mtd.doesExist(tmp_ws_name):
             LoadEmptyInstrument(Filename=idf_file, OutputWorkspace=tmp_ws_name)
@@ -462,7 +462,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue("TestParam2" in changes)
         self.assertTrue("TestParam3" not in changes)
 
-        changes = propman.update_defaults_from_instrument(ws.getInstrument())
+        changes = propman.update_defaults_from_instrument(ws.componentInfo())
 
         self.assertAlmostEqual(propman.TestParam1, 3.5)
         self.assertEqual(propman.TestParam2, "gui_changed1")
@@ -499,7 +499,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         SetInstrumentParameter(ws, ParameterName="addParam2", Value="Ignore2", ParameterType="String")
         SetInstrumentParameter(ws, ParameterName="mask_run", Value="None", ParameterType="String")
 
-        changed_prop = propman.update_defaults_from_instrument(ws.getInstrument())
+        changed_prop = propman.update_defaults_from_instrument(ws.componentInfo())
 
         self.assertEqual(len(changed_prop), 4)
         # property have been changed from GUI and changes from instrument are
@@ -517,7 +517,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
     def test_set_all_defaults_from_instrument(self):
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
         # idf_dir = config.getString('instrumentDefinition.directory')
-        idf_file = api.ExperimentInfo.getInstrumentFilename("LET", "2014-05-02 23:59:59")
+        idf_file = api.InstrumentFileFinder.getInstrumentFilename("LET", "2014-05-02 23:59:59")
         print(idf_file)
         LoadEmptyInstrument(Filename=idf_file, OutputWorkspace=ws)
 
@@ -528,7 +528,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         ws = mtd["ws"]
 
-        changed_prop = propman.update_defaults_from_instrument(ws.getInstrument(), False)
+        changed_prop = propman.update_defaults_from_instrument(ws.componentInfo(), False)
         self.assertTrue("ei-mon1-spec" in changed_prop)
         self.assertEqual(propman.ei_mon1_spec, 65542)
 
@@ -779,7 +779,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertAlmostEqual(bkgd_range[0], 20)
         self.assertAlmostEqual(bkgd_range[1], 40)
 
-        changed_prop = propman.update_defaults_from_instrument(ws.getInstrument())
+        changed_prop = propman.update_defaults_from_instrument(ws.componentInfo())
 
         self.assertEqual(len(changed_prop), 3)
         bkgd_range = propman.bkgd_range
@@ -801,7 +801,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertAlmostEqual(bkgd_range[0], mari_bkgd_range[0])
         self.assertAlmostEqual(bkgd_range[1], 40)
 
-        changed_prop = propman.update_defaults_from_instrument(ws.getInstrument())
+        changed_prop = propman.update_defaults_from_instrument(ws.componentInfo())
 
         self.assertEqual(len(changed_prop), 2)
         bkgd_range = propman.bkgd_range
@@ -912,7 +912,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         SetInstrumentParameter(ws, ParameterName="use_hard_mask_only", Value="True", ParameterType="String")
 
         # verify if changed properties list does not change anything
-        changed_prop = propman1.update_defaults_from_instrument(ws.getInstrument())
+        changed_prop = propman1.update_defaults_from_instrument(ws.componentInfo())
         self.assertEqual(len(changed_prop), 2)
         self.assertFalse(propman1.use_hard_mask_only)
         self.assertEqual(propman1.hard_mask_file, "a_hard_mask_file.msk")
@@ -922,7 +922,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman1.hardmaskOnly = "more_hard_mask_file"
 
         # verify if changed properties list does not change anything
-        changed_prop = propman1.update_defaults_from_instrument(ws.getInstrument())
+        changed_prop = propman1.update_defaults_from_instrument(ws.componentInfo())
         self.assertTrue(propman1.use_hard_mask_only)
         self.assertEqual(propman1.hard_mask_file, "more_hard_mask_file.msk")
         self.assertTrue(propman1.run_diagnostics)

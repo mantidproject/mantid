@@ -21,6 +21,8 @@ from mantid.kernel import (
     StringArrayProperty,
 )
 
+from plugins.algorithms.component_info_utils import find_rectangular_detector_indices
+
 
 class Prop:
     RUNS = "InputRunList"
@@ -417,7 +419,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _has_single_2D_rectangular_detector(self, workspace) -> bool:
         """Returns true if workspace has a single 2D rectangular detector."""
 
-        rect_detectors = workspace.getInstrument().findRectDetectors()
+        component_info = workspace.componentInfo()
+        rect_detectors = find_rectangular_detector_indices(component_info)
         num_rect_detectors = len(rect_detectors)
 
         if num_rect_detectors == 0:
@@ -427,21 +430,20 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             raise NotImplementedError(f"Not implemented for more than one rectangular detector, {num_rect_detectors} were found.")
 
         # We don't sum banks for a linear detector
-        component_info = workspace.componentInfo()
-        bank_index = component_info.indexOfAny(rect_detectors[0].getName())
+        bank_index = rect_detectors[0]
         if component_info.pixelGridNX(bank_index) == 1 or component_info.pixelGridNY(bank_index) == 1:
             return False
 
-        if not self._all_spectra_refer_to_rectangular_detector(workspace, rect_detectors[0]):
+        if not self._all_spectra_refer_to_rectangular_detector(workspace, bank_index):
             return False
 
         return True
 
     @staticmethod
-    def _all_spectra_refer_to_rectangular_detector(workspace, rectangular_detector) -> bool:
-        """Checks if all data in a workspace is from the rectangular detector."""
+    def _all_spectra_refer_to_rectangular_detector(workspace, bank_index) -> bool:
+        """Checks if all data in a workspace is from the rectangular detector with component index bank_index."""
         component_info = workspace.componentInfo()
-        bank_index = component_info.indexOfAny(rectangular_detector.getName())
+        spectrum_info = workspace.spectrumInfo()
         rect_det_id_start = component_info.pixelGridMinDetectorID(bank_index)
         rect_det_id_end = component_info.pixelGridMaxDetectorID(bank_index)
         ws_has_detectors = False
@@ -688,7 +690,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         return group
 
     def _setInstrumentSpecificProperties(self, calibration_alg, workspace, adjust_theta, experiment_angle=None, specular_spectrum_no=None):
-        if workspace.getInstrument().getName() != self._POLREF:
+        if workspace.getInstrumentName() != self._POLREF:
             return experiment_angle, False
 
         if specular_spectrum_no is None:

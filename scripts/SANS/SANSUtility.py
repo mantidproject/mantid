@@ -48,6 +48,7 @@ import re
 import types
 import numpy as np
 import h5py as h5
+from plugins.algorithms.component_info_utils import get_spectrum_detector_index
 
 sanslog = Logger("SANS")
 ADDED_TAG = "-add"
@@ -604,9 +605,11 @@ def _yield_masked_det_ids(masking_ws):
     For some reason Detector.isMasked() does not work for MaskingWorkspaces.
     We use masking_ws.y(ws_index)[0] == 1 instead.
     """
+    detector_info = masking_ws.detectorInfo()
+    spectrum_info = masking_ws.spectrumInfo()
     for ws_index in range(masking_ws.getNumberHistograms()):
         if masking_ws.y(ws_index)[0] == 1:
-            yield masking_ws.getDetector(ws_index).getID()
+            yield detector_info.detid(get_spectrum_detector_index(spectrum_info, ws_index))
 
 
 def get_masked_det_ids_from_mask_file(mask_file_path, idf_path):

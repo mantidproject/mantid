@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
-from mantid.api import AlgorithmFactory, ExperimentInfo, FileAction, FileProperty, PythonAlgorithm, WorkspaceProperty
+from mantid.api import AlgorithmFactory, FileAction, FileProperty, InstrumentFileFinder, PythonAlgorithm, WorkspaceProperty
 from mantid.kernel import config, Direction
 import mantid.simpleapi
 import os
@@ -68,7 +68,7 @@ class LoadVisionElasticEQ(PythonAlgorithm):
                     Filename=filename, Dictionary=os.path.join(dictionary_path, "vision-" + bank + ".dic"), OutputWorkspace=bank
                 )
                 mantid.simpleapi.LoadInstrument(
-                    Workspace=bank, Filename=ExperimentInfo.getInstrumentFilename("VISION"), RewriteSpectraMap=False
+                    Workspace=bank, Filename=InstrumentFileFinder.getInstrumentFilename("VISION"), RewriteSpectraMap=False
                 )
                 workspaces.append(bank)
                 if first_bank:

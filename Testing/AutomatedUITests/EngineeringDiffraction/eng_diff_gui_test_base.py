@@ -26,6 +26,7 @@ import re
 import sys
 
 import numpy as np
+from plugins.algorithms.component_info_utils import get_spectrum_detector_index
 
 _PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _PARENT_DIR not in sys.path:
@@ -510,8 +511,10 @@ def _fill_ceria_peaks(ws, tof, full_calib, expected_d_values):
     background = 100.0 + 20.0 * np.exp(-(((tof - 40000.0) / 25000.0) ** 2))
     d_values = [d for d in expected_d_values if _D_MIN <= d <= _D_MAX]
 
+    detector_info = ws.detectorInfo()
+    spectrum_info = ws.spectrumInfo()
     for index in range(ws.getNumberHistograms()):
-        difc = difc_by_detid.get(ws.getDetector(index).getID())
+        difc = difc_by_detid.get(detector_info.detid(get_spectrum_detector_index(spectrum_info, index)))
         if difc is None:
             # no calibration entry for this detector, so leave it as background only
             ws.setY(index, background)

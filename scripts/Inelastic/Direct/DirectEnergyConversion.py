@@ -221,7 +221,7 @@ class DirectEnergyConversion(object):
                     ref_ws = white.get_workspace()
                 else:
                     ref_ws = self.prop_man.mapmask_ref_ws
-                idf_file = api.ExperimentInfo.getInstrumentFilename(self.instr_name)
+                idf_file = api.InstrumentFileFinder.getInstrumentFilename(self.instr_name)
                 diag_mask = LoadMask(
                     Instrument=idf_file, InputFile=self.hard_mask_file, OutputWorkspace="hard_mask_ws", RefWorkspace=ref_ws
                 )
@@ -415,7 +415,7 @@ class DirectEnergyConversion(object):
         # not been modified from input parameters.
         # E.g.  detector number have changed
         old_changes = self.prop_man.getChangedProperties()
-        all_changes = self.prop_man.update_defaults_from_instrument(sample_ws.getInstrument())
+        all_changes = self.prop_man.update_defaults_from_instrument(sample_ws.componentInfo())
         workspace_defined_prop = all_changes.difference(old_changes)
         if len(workspace_defined_prop) > 0:
             prop_man.log("****************************************************************")
@@ -864,8 +864,7 @@ class DirectEnergyConversion(object):
         for spec_id in spectra_list:
             specID = workspace.getIndexFromSpectrumNumber(spec_id)
             if detPos is None:
-                first_detector = workspace.getDetector(specID)
-                detPos = first_detector.getPos()
+                detPos = workspace.spectrumInfo().position(specID)
             else:
                 psp = workspace.getSpectrum(specID)
                 detIDs = psp.getDetectorIDs()
@@ -957,10 +956,9 @@ class DirectEnergyConversion(object):
 
         # shift to monitor used to calculate energy transfer
         spec_num = monitor_ws.getIndexFromSpectrumNumber(ei_mon_spectra[0])
-        mon1_det = monitor_ws.getDetector(spec_num)
-        mon1_pos = mon1_det.getPos()
-        component_info = data_ws.componentInfo()
-        src_name = component_info.name(component_info.source())
+        mon1_pos = monitor_ws.spectrumInfo().position(spec_num)
+        data_component_info = data_ws.componentInfo()
+        src_name = data_component_info.name(data_component_info.source())
         MoveInstrumentComponent(
             Workspace=resultws_name,
             ComponentName=src_name,
@@ -1271,8 +1269,7 @@ class DirectEnergyConversion(object):
                         EnergyEstimate=ei_guess,
                         FixEi=fix_ei,
                     )
-                    mon1_det = monitor_ws.getDetector(mon1_index)
-                    mon1_pos = mon1_det.getPos()
+                    mon1_pos = monitor_ws.spectrumInfo().position(mon1_index)
                     src_name = monitor_ws.getInstrument().getSource().name()
                 # pylint: disable=bare-except
                 except:
