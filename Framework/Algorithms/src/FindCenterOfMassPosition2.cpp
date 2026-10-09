@@ -19,6 +19,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/FloatingPointComparison.h"
+#include "MantidKernel/NullValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 namespace Mantid::Algorithms {
 

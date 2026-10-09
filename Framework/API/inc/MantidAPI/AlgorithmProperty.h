@@ -8,7 +8,6 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/NullValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 #include <memory>
@@ -42,8 +41,7 @@ public:
   using HeldType = std::shared_ptr<IAlgorithm>;
 
   /// Constructor
-  AlgorithmProperty(const std::string &propName,
-                    Kernel::IValidator_sptr validator = Kernel::IValidator_sptr(new Kernel::NullValidator),
+  AlgorithmProperty(const std::string &propName, Kernel::IValidator_sptr validator = nullptr,
                     unsigned int direction = Kernel::Direction::Input);
 
   AlgorithmProperty(const AlgorithmProperty &) = default;

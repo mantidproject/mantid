@@ -57,19 +57,15 @@ and the overwriting the old one at the end.)
 template <typename TYPE = MatrixWorkspace>
 class WorkspaceProperty : public Kernel::PropertyWithValue<std::shared_ptr<TYPE>>, public IWorkspaceProperty {
 public:
-  explicit WorkspaceProperty(
-      const std::string &name, const std::string &wsName, const unsigned int direction,
-      const Kernel::IValidator_sptr &validator = Kernel::IValidator_sptr(new Kernel::NullValidator));
+  explicit WorkspaceProperty(const std::string &name, const std::string &wsName, const unsigned int direction,
+                             const Kernel::IValidator_sptr &validator = nullptr);
 
-  explicit WorkspaceProperty(
-      const std::string &name, const std::string &wsName, const unsigned int direction,
-      const PropertyMode::Type optional,
-      const Kernel::IValidator_sptr &validator = Kernel::IValidator_sptr(new Kernel::NullValidator));
+  explicit WorkspaceProperty(const std::string &name, const std::string &wsName, const unsigned int direction,
+                             const PropertyMode::Type optional, const Kernel::IValidator_sptr &validator = nullptr);
 
-  explicit WorkspaceProperty(
-      const std::string &name, const std::string &wsName, const unsigned int direction,
-      const PropertyMode::Type optional, const LockMode::Type locking,
-      const Kernel::IValidator_sptr &validator = Kernel::IValidator_sptr(new Kernel::NullValidator));
+  explicit WorkspaceProperty(const std::string &name, const std::string &wsName, const unsigned int direction,
+                             const PropertyMode::Type optional, const LockMode::Type locking,
+                             const Kernel::IValidator_sptr &validator = nullptr);
 
   WorkspaceProperty(const WorkspaceProperty &right);
 

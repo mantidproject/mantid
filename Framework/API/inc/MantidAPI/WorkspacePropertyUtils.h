@@ -9,7 +9,7 @@
 #include "MantidAPI/DllConfig.h"
 
 #include "MantidAPI/IWorkspaceProperty.h"
-#include "MantidKernel/Property.h"
+#include "MantidKernel/Property_fwd.h"
 
 namespace Mantid {
 namespace API {

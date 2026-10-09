@@ -8,6 +8,7 @@
 
 #include "MantidKernel/DataItem.h"
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/IValidator_fwd.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/any.hpp>
@@ -18,13 +19,6 @@
 
 namespace Mantid {
 namespace Kernel {
-// Forward declaration so that the typedef std::shared_ptr<Validator>
-// understand it
-class IValidator;
-
-/// A shared_ptr to an IValidator
-using IValidator_sptr = std::shared_ptr<IValidator>;
-
 namespace {
 /// Helper object to determine if a type is either a pointer/shared_ptr
 /// Generic implementation says it is not

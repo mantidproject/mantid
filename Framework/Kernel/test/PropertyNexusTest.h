@@ -15,7 +15,6 @@
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
-using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Mantid::Types::Core::DateAndTime;
 

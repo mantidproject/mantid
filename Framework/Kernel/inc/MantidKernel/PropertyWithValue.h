@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/IValidator_fwd.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/NullValidator.h"
 #include "MantidKernel/Property.h"
 
 #include <vector>
@@ -31,7 +31,7 @@ namespace Kernel {
 */
 template <typename TYPE> class DLLExport PropertyWithValue : public Property {
 public:
-  PropertyWithValue(std::string name, TYPE defaultValue, IValidator_sptr validator = IValidator_sptr(new NullValidator),
+  PropertyWithValue(std::string name, TYPE defaultValue, IValidator_sptr validator = nullptr,
                     const unsigned int direction = Direction::Input);
   PropertyWithValue(std::string name, TYPE defaultValue, const unsigned int direction);
   PropertyWithValue(const std::string &name, const TYPE &defaultValue, const std::string &defaultValueStr,

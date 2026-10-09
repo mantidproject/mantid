@@ -14,6 +14,7 @@
 #include "MantidKernel/CatalogInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ICatalogInfo.h"
+#include "MantidKernel/NullValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UserCatalogInfo.h"
 
