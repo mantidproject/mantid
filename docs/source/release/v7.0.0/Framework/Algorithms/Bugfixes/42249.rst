@@ -1,0 +1,1 @@
+- A mesh sample's baked goniometer rotation is now saved to and loaded from NeXus, so a saved and reloaded sample is no longer rotated a second time. Files saved before this change, and samples in their own frame, load as unrotated exactly as before.
