@@ -62,7 +62,7 @@ private:
   void exec() override;
 
   void retrieveBaseProperties();
-  void constructSample(API::Sample &sample);
+  void constructSample(const API::Sample &sample);
   void calculateDistances(const Geometry::IDetector &detector, std::vector<double> &sample_L2s,
                           std::vector<double> &sample_container_L2s, std::vector<double> &container_L2s,
                           std::vector<double> &container_sample_L2s) const;
@@ -76,7 +76,9 @@ private:
   void initialiseCachedDistances();
   Geometry::Raster rasterize(const Geometry::IObject *object);
 
-  API::MatrixWorkspace_sptr m_inputWS;                  ///< A pointer to the input workspace
+  API::MatrixWorkspace_sptr m_inputWS; ///< A pointer to the input workspace
+  /// Holds the lab frame sample shape that m_sampleObject points at.
+  Geometry::IObject_sptr m_labFrameSampleShape;
   const Geometry::IObject *m_sampleObject;              ///< Local cache of sample object.
   const Geometry::IObject *m_containerObject;           ///< Local cache of container object.
   Kernel::V3D m_beamDirection;                          ///< The direction of the beam.

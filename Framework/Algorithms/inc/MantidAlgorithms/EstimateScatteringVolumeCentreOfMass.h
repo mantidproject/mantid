@@ -44,13 +44,12 @@ public:
                                                                         const Geometry::IObject_sptr integrationVolume,
                                                                         const Geometry::IObject_sptr sampleObject);
   const Geometry::IObject_sptr extractValidSampleObject(const API::Sample &sample);
-  /// Rasterise the workspace's lab-frame GaugeVolume directly, transforming each candidate voxel
-  /// into the sample shape's frame via gonioR.inv() before testing it against the sample. Keeping
-  /// the gauge in its own frame avoids inflating its axis-aligned bounding box for non-axis-aligned
-  /// goniometer rotations, which would otherwise admit voxels lying outside the actual gauge
-  /// volume. Returns the mean accepted position directly in the lab frame.
-  const Kernel::V3D rasterizeLabGaugeAndCalculateMeanElementPosition(const Geometry::IObject &sampleObject,
-                                                                     const Kernel::Matrix<double> &gonioR);
+  /// Rasterise the workspace's lab-frame GaugeVolume directly, testing each candidate voxel against
+  /// a sample shape that is already in the lab frame. Keeping the gauge in its own frame avoids
+  /// inflating its axis-aligned bounding box for non-axis-aligned goniometer rotations, which would
+  /// otherwise admit voxels lying outside the actual gauge volume. Returns the mean accepted
+  /// position directly in the lab frame.
+  const Kernel::V3D rasterizeLabGaugeAndCalculateMeanElementPosition(const Geometry::IObject &labSampleShape);
 
 private:
   /// Initialisation code
