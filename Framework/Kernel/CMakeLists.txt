@@ -544,7 +544,7 @@ target_link_libraries(
   PRIVATE ${NETWORK_LIBRARIES}
 )
 if(WIN32)
-  target_link_libraries(Kernel PRIVATE Psapi.lib) # For memory usage queries
+  target_link_libraries(Kernel PRIVATE Psapi.lib Pdh.lib) # For memory usage queries
 endif()
 
 # H5_BUILT_AS_DYNAMIC_LIB required https://github.com/conda-forge/hdf5-feedstock/issues/58
