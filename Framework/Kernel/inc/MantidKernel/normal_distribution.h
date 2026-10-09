@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include <ios>
@@ -58,12 +59,12 @@ public:
   }
 };
 
-template <class _RealType = double> class DLLExport normal_distribution {
+template <class _RealType = double> class normal_distribution {
 public:
   // types
   using result_type = _RealType;
 
-  class DLLExport param_type {
+  class param_type {
     result_type __mean_;
     result_type __stddev_;
 

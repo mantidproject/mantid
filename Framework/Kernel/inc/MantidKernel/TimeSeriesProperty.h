@@ -99,7 +99,7 @@ struct MANTID_KERNEL_DLL TimeSeriesPropertyStatistics {
 /**
  * Class to hold unit value (DateAndTime, T)
  */
-template <class TYPE> class MANTID_KERNEL_DLL TimeValueUnit {
+template <class TYPE> class TimeValueUnit {
 private:
   Types::Core::DateAndTime m_time;
   TYPE m_value;
@@ -134,7 +134,7 @@ public:
 /**
    A specialised Property class for holding a series of time-value pairs.
  */
-template <typename TYPE> class DLLExport TimeSeriesProperty : public Property, public ITimeSeriesProperty {
+template <typename TYPE> class MANTID_KERNEL_DLL TimeSeriesProperty : public Property, public ITimeSeriesProperty {
 public:
   /// Constructor
   explicit TimeSeriesProperty(const std::string &name);

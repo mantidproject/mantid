@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -30,7 +31,7 @@ const double CHOPPER_ANGLE[4] = {129.605, 179.989, 230.010, 230.007};
 // Chopper location (mm)
 const double CHOPPER_LOCATION[4] = {5700., 7800., 9497., 9507.};
 
-class DLLExport EQSANSMonitorTOF final : public API::Algorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL EQSANSMonitorTOF final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "EQSANSMonitorTOF"; }

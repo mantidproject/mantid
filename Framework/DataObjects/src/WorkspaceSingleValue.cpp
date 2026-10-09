@@ -8,6 +8,7 @@
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidKernel/IPropertyManager.h"
 
 namespace Mantid::DataObjects {
@@ -74,7 +75,7 @@ size_t WorkspaceSingleValue::getNumDims() const { return 0; }
 
 namespace Mantid::Kernel {
 template <>
-DLLExport Mantid::DataObjects::WorkspaceSingleValue_sptr
+MANTID_DATAOBJECTS_DLL Mantid::DataObjects::WorkspaceSingleValue_sptr
 IPropertyManager::getValue<Mantid::DataObjects::WorkspaceSingleValue_sptr>(const std::string &name) const {
   auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::DataObjects::WorkspaceSingleValue_sptr> *>(getPointerToProperty(name));
@@ -88,7 +89,7 @@ IPropertyManager::getValue<Mantid::DataObjects::WorkspaceSingleValue_sptr>(const
 }
 
 template <>
-DLLExport Mantid::DataObjects::WorkspaceSingleValue_const_sptr
+MANTID_DATAOBJECTS_DLL Mantid::DataObjects::WorkspaceSingleValue_const_sptr
 IPropertyManager::getValue<Mantid::DataObjects::WorkspaceSingleValue_const_sptr>(const std::string &name) const {
   const auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::DataObjects::WorkspaceSingleValue_sptr> *>(getPointerToProperty(name));

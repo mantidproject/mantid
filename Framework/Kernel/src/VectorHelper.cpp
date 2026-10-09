@@ -7,6 +7,7 @@
 #include <cmath>
 #include <stdexcept>
 
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/VectorHelper.h"
 #include <algorithm>
@@ -908,17 +909,17 @@ void smoothInRange(std::span<double const> input, std::vector<double> &output, c
 }
 
 /// Declare all version of this
-template DLLExport std::vector<int32_t> splitStringIntoVector<int32_t>(std::string listString,
-                                                                       const std::string &separator);
-template DLLExport std::vector<int64_t> splitStringIntoVector<int64_t>(std::string listString,
-                                                                       const std::string &separator);
-template DLLExport std::vector<size_t> splitStringIntoVector<size_t>(std::string listString,
-                                                                     const std::string &separator);
-template DLLExport std::vector<float> splitStringIntoVector<float>(std::string listString,
-                                                                   const std::string &separator);
-template DLLExport std::vector<double> splitStringIntoVector<double>(std::string listString,
-                                                                     const std::string &separator);
-template DLLExport std::vector<std::string> splitStringIntoVector<std::string>(std::string listString,
+template MANTID_KERNEL_DLL std::vector<int32_t> splitStringIntoVector<int32_t>(std::string listString,
                                                                                const std::string &separator);
+template MANTID_KERNEL_DLL std::vector<int64_t> splitStringIntoVector<int64_t>(std::string listString,
+                                                                               const std::string &separator);
+template MANTID_KERNEL_DLL std::vector<size_t> splitStringIntoVector<size_t>(std::string listString,
+                                                                             const std::string &separator);
+template MANTID_KERNEL_DLL std::vector<float> splitStringIntoVector<float>(std::string listString,
+                                                                           const std::string &separator);
+template MANTID_KERNEL_DLL std::vector<double> splitStringIntoVector<double>(std::string listString,
+                                                                             const std::string &separator);
+template MANTID_KERNEL_DLL std::vector<std::string> splitStringIntoVector<std::string>(std::string listString,
+                                                                                       const std::string &separator);
 
 } // namespace Mantid::Kernel::VectorHelper

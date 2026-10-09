@@ -10,6 +10,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertyManager.h"
@@ -356,7 +357,7 @@ Workspace2D *Workspace2D::doCloneEmpty() const { return new Workspace2D(); }
 
 namespace Mantid::Kernel {
 template <>
-DLLExport Mantid::DataObjects::Workspace2D_sptr
+MANTID_DATAOBJECTS_DLL Mantid::DataObjects::Workspace2D_sptr
 IPropertyManager::getValue<Mantid::DataObjects::Workspace2D_sptr>(const std::string &name) const {
   auto *prop = dynamic_cast<PropertyWithValue<Mantid::DataObjects::Workspace2D_sptr> *>(getPointerToProperty(name));
   if (prop) {
@@ -369,7 +370,7 @@ IPropertyManager::getValue<Mantid::DataObjects::Workspace2D_sptr>(const std::str
 }
 
 template <>
-DLLExport Mantid::DataObjects::Workspace2D_const_sptr
+MANTID_DATAOBJECTS_DLL Mantid::DataObjects::Workspace2D_const_sptr
 IPropertyManager::getValue<Mantid::DataObjects::Workspace2D_const_sptr>(const std::string &name) const {
   const auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::DataObjects::Workspace2D_sptr> *>(getPointerToProperty(name));

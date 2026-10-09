@@ -9,6 +9,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 #include <vector>
 
@@ -18,7 +19,7 @@ namespace WorkflowAlgorithms {
 /** IMuonAsymmetryCalculator : Abstract base class for muon asymmetry
   calculations
 */
-class DLLExport IMuonAsymmetryCalculator {
+class MANTID_WORKFLOWALGORITHMS_DLL IMuonAsymmetryCalculator {
 public:
   IMuonAsymmetryCalculator(API::WorkspaceGroup_sptr inputWS, std::vector<int> summedPeriods,
                            std::vector<int> subtractedPeriods);

@@ -16,9 +16,9 @@ namespace API {
 namespace OperatorOverloads {
 // Helper function for operator overloads
 template <typename LHSType, typename RHSType, typename ResultType>
-DLLExport ResultType executeBinaryOperation(const std::string &algorithmName, const LHSType lhs, const RHSType rhs,
-                                            bool lhsAsOutput = false, bool child = true, const std::string &name = "",
-                                            bool rethrow = false);
+MANTID_API_DLL ResultType executeBinaryOperation(const std::string &algorithmName, const LHSType lhs, const RHSType rhs,
+                                                 bool lhsAsOutput = false, bool child = true,
+                                                 const std::string &name = "", bool rethrow = false);
 } // namespace OperatorOverloads
 
 bool MANTID_API_DLL equals(const MatrixWorkspace_sptr &lhs, const MatrixWorkspace_sptr &rhs, double tolerance = 0.0);

@@ -163,7 +163,20 @@ target_precompile_headers(
 )
 
 target_include_directories(
-  PythonAPIModule PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
+  PythonAPIModule PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+                         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include/Mantid>
+)
+
+# Auto-generate exports header
+generate_mantid_export_header(
+  PythonAPIModule
+  FALSE
+  BASE_NAME
+  MANTID_PYTHON_API
+  EXPORT_MACRO_NAME
+  PYTHON_API_DLL
+  EXPORT_FILE_NAME
+  MantidPythonInterface/api/DllConfig.h
 )
 
 set_python_properties(PythonAPIModule _api)
