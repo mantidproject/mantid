@@ -1,0 +1,1 @@
+- In the new Instrument View, zooming with the mouse wheel now starts at the same rate in every projection. Previously the first zoom in the spherical and cylindrical projections was much larger than in the other projections.

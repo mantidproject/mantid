@@ -71,6 +71,8 @@ Bugfixes
 - (`#42380 <https://github.com/mantidproject/mantid/pull/42380>`_) In the new Instrument View, summing the selected spectra no longer fails for units in which the spectra cannot share a common binning, such as momentum transfer for a detector in the path of the beam. The spectra are plotted unsummed in this case.
 - (`#42380 <https://github.com/mantidproject/mantid/pull/42380>`_) In the new Instrument View, the contour and integration range controls no longer disappear when every detector has the same counts or the range is empty. They are greyed out until there is a range to adjust.
 - (`#42396 <https://github.com/mantidproject/mantid/pull/42396>`_) In the new Instrument View, memory is now freed more effectively when the interface is closed.
+- (`#42407 <https://github.com/mantidproject/mantid/pull/42407>`_) In the new Instrument View, zooming with the mouse wheel in the 3D projection now keeps the point under the mouse cursor in place, as it does in the other projections, rather than always zooming into the centre of the view. Zooming out also now stops at the full view of the instrument, keeping the direction the view has been rotated to.
+- (`#42407 <https://github.com/mantidproject/mantid/pull/42407>`_) In the new Instrument View, zooming with the mouse wheel now starts at the same rate in every projection. Previously the first zoom in the spherical and cylindrical projections was much larger than in the other projections.
 
 
 SliceViewer
