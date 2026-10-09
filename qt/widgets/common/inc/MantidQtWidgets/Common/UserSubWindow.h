@@ -27,7 +27,7 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "DllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "PythonRunner.h"
 #include "UserSubWindowFactory.h"
 

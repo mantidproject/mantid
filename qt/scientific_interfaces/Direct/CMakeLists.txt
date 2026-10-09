@@ -30,7 +30,6 @@ set(INC_FILES
     ALFInstrumentModel.h
     ALFInstrumentPresenter.h
     DetectorTube.h
-    DllConfig.h
     ALFPythonCallbackRelay.h
     IALFAlgorithmManagerSubscriber.h
     IALFInstrumentView.h
@@ -44,6 +43,7 @@ mtd_add_qt_library(
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
   DEFS IN_MANTIDQT_DIRECT
+  INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
   LINK_LIBS Mantid::API Mantid::DataObjects Mantid::Geometry Mantid::Kernel Mantid::PythonInterfaceCore
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsInstrumentView MantidQtWidgetsPlotting MantidQtWidgetsMplCpp
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
@@ -55,3 +55,15 @@ mtd_add_qt_library(
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   add_subdirectory(test)
 endif()
+
+# Auto-generate exports header
+generate_mantid_export_header(
+  MantidScientificInterfacesDirectQt${MANTID_QT_VERSION}
+  TRUE
+  BASE_NAME
+  MANTIDQT_DIRECT
+  EXPORT_MACRO_NAME
+  MANTIDQT_DIRECT_DLL
+  EXPORT_FILE_NAME
+  DllConfig.h
+)

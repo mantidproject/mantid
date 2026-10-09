@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidPythonInterface/core/DllConfig.h"
 #include "MantidPythonInterface/core/NDArray.h"
 #include <vector>
 
@@ -16,7 +17,7 @@ namespace Converters {
  * Converter taking an input numpy array and converting it to a std::vector.
  * Multi-dimensional arrays are flattened and copied.
  */
-template <typename DestElementType> struct DLLExport NDArrayToVector {
+template <typename DestElementType> struct MANTID_PYTHONINTERFACE_CORE_DLL NDArrayToVector {
   // Alias definitions
   using TypedVector = std::vector<DestElementType>;
   using TypedVectorIterator = typename std::vector<DestElementType>::iterator;

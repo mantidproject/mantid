@@ -10,8 +10,8 @@
 //   Includes
 //----------------------------
 
-#include "DllOption.h"
 #include "MantidAPI/AlgorithmObserver.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/MantidDialog.h"
 #include "ui_SequentialFitDialog.h"
 
