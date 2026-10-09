@@ -147,7 +147,7 @@ target_include_directories(
   SINQ PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 # Set the name of the generated library
-set_target_properties(SINQ PROPERTIES OUTPUT_NAME MantidSINQ COMPILE_DEFINITIONS "IN_MANTID_SINQ")
+set_target_properties(SINQ PROPERTIES OUTPUT_NAME MantidSINQ)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(SINQ PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")

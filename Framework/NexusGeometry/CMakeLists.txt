@@ -51,9 +51,7 @@ target_include_directories(
   NexusGeometry PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 # Set the name of the generated library
-set_target_properties(
-  NexusGeometry PROPERTIES OUTPUT_NAME MantidNexusGeometry COMPILE_DEFINITIONS IN_MANTID_NEXUS_GEOMETRY
-)
+set_target_properties(NexusGeometry PROPERTIES OUTPUT_NAME MantidNexusGeometry)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(NexusGeometry PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
