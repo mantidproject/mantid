@@ -30,6 +30,8 @@ from mantid.kernel import (
     Property,
     StringListValidator,
     UnitConversion,
+    UnitParametersMap,
+    UnitParams,
 )
 from mantid.simpleapi import (
     AddSampleLog,
@@ -68,7 +70,11 @@ def _applyIncidentEnergyCalibration(ws, eiWS, wsNames, report, algorithmLogging)
     originalEnergy = ws.getRun().getLogData("Ei").value
     originalWavelength = ws.getRun().getLogData("wavelength").value
     energy = eiWS.y(0)[0]
-    wavelength = UnitConversion.run("Energy", "Wavelength", energy, 0, 0, 0, Direct, 5)
+    params = UnitParametersMap()
+    params[UnitParams.l2] = 0
+    params[UnitParams.twoTheta] = 0
+    params[UnitParams.efixed] = 5
+    wavelength = UnitConversion.run("Energy", "Wavelength", energy, 0, Direct, params)
     AddSampleLog(
         Workspace=ws,
         LogName="Ei",

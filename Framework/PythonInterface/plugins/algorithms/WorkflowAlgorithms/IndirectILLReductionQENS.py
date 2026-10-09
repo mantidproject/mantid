@@ -335,7 +335,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
 
             # MatchPeaks does not play nicely with the ws groups
             for ws in mtd[calibration]:
-                MatchPeaks(InputWorkspace=ws.getName(), OutputWorkspace=ws.getName(), MaskBins=True, BinRangeTable="")
+                MatchPeaks(InputWorkspace=ws.name(), OutputWorkspace=ws.name(), MaskBins=True, BinRangeTable="")
 
             Integration(
                 InputWorkspace=calibration, RangeLower=self._peak_range[0], RangeUpper=self._peak_range[1], OutputWorkspace=calibration
@@ -372,7 +372,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                 if ws.getRun().getLogData("NormalisedTo").value == "Monitor":
                     ws.setDistribution(True)
             # unhide the final workspaces, i.e. remove __ prefix
-            RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws.getName()[2:])
+            RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws.name()[2:])
 
         self.setProperty("OutputWorkspace", self._red_ws)
 
@@ -434,8 +434,8 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         # number of wings are checked to be the same in ws and calib_ws here already
 
         for wing in range(mtd[ws].getNumberOfEntries()):
-            sample = mtd[ws].getItem(wing).getName()
-            integral = mtd[calib_ws].getItem(wing).getName()
+            sample = mtd[ws].getItem(wing).name()
+            integral = mtd[calib_ws].getItem(wing).name()
             scale = numpy.max(mtd[integral].extractY()[:, 0])
             self.log().information("Wing {0} will be scaled up with {1} after calibration".format(wing, scale))
             Scale(InputWorkspace=sample, Factor=scale, OutputWorkspace=sample, Operation="Multiply")
@@ -465,7 +465,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                 raise RuntimeError("Inconsistent mirror sense in alignment run. Unable to perform unmirror.")
 
         if wings == 1:  # one wing
-            name = mtd[ws].getItem(0).getName()
+            name = mtd[ws].getItem(0).name()
 
             if self._unmirror_option < 6:  # do unmirror 0, i.e. nothing
                 CloneWorkspace(InputWorkspace=name, OutputWorkspace=outname)
@@ -474,7 +474,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
             elif self._unmirror_option == 7:
                 MatchPeaks(
                     InputWorkspace=name,
-                    InputWorkspace2=mtd[alignment].getItem(0).getName(),
+                    InputWorkspace2=mtd[alignment].getItem(0).name(),
                     MatchInput2ToCenter=True,
                     OutputWorkspace=outname,
                     MaskBins=True,
@@ -482,8 +482,8 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                 )
 
         elif wings == 2:  # two wing
-            left = mtd[ws].getItem(0).getName()
-            right = mtd[ws].getItem(1).getName()
+            left = mtd[ws].getItem(0).name()
+            right = mtd[ws].getItem(1).name()
 
             mask_min = 0
             mask_max = mtd[left].blocksize()
@@ -523,8 +523,8 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                 bin_range_table = "__um5_" + right
                 MatchPeaks(
                     InputWorkspace=right,
-                    InputWorkspace2=mtd[alignment].getItem(0).getName(),
-                    InputWorkspace3=mtd[alignment].getItem(1).getName(),
+                    InputWorkspace2=mtd[alignment].getItem(0).name(),
+                    InputWorkspace3=mtd[alignment].getItem(1).name(),
                     OutputWorkspace=right,
                     MaskBins=True,
                     BinRangeTable=bin_range_table,
@@ -546,7 +546,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                 bin_range_table_right = "__um7_" + right
                 MatchPeaks(
                     InputWorkspace=left,
-                    InputWorkspace2=mtd[alignment].getItem(0).getName(),
+                    InputWorkspace2=mtd[alignment].getItem(0).name(),
                     OutputWorkspace=left,
                     MatchInput2ToCenter=True,
                     MaskBins=True,
@@ -554,7 +554,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                 )
                 MatchPeaks(
                     InputWorkspace=right,
-                    InputWorkspace2=mtd[alignment].getItem(1).getName(),
+                    InputWorkspace2=mtd[alignment].getItem(1).name(),
                     OutputWorkspace=right,
                     MatchInput2ToCenter=True,
                     MaskBins=True,
