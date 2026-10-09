@@ -16,11 +16,9 @@
 
 // local includes
 #include "MantidPythonInterface/core/DllConfig.h"
-#include "MantidPythonInterface/core/WrapPython.h"
 
 // 3rd-party includes
-#include <Poco/ConsoleChannel.h>
-#include <boost/python/object.hpp>
+#include <Poco/Channel.h>
 #include <memory>
 
 namespace Poco {
@@ -37,9 +35,23 @@ public:
   PythonLoggingChannel &operator=(PythonLoggingChannel &&) = delete;
 
   void log(const Poco::Message &msg) override;
+  void log(Poco::Message &&msg) override;
+  void close() override;
+  void flush();
 
 private:
-  std::unique_ptr<boost::python::object> m_pyLogger;
+  struct State;
+
+  void closeImpl();
+  void enqueue(Poco::Message msg);
+  /// Callback with the signature required by Py_AddPendingCall. It takes ownership of a heap-allocated
+  /// std::shared_ptr<State> so that the state outlives the channel if the call runs after it was destroyed.
+  static int pendingCallDrainQueue(void *stateHolder);
+  /// Deliver all queued messages to Python. The GIL must be held.
+  static void drainQueue(State &state);
+
+  /// Shared with any outstanding pending calls. It is set in the constructor and never reset.
+  const std::shared_ptr<State> m_state;
 };
 
 } // namespace Poco
