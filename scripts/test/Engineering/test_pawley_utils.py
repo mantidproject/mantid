@@ -9,11 +9,30 @@ from unittest.mock import patch, create_autospec, MagicMock
 import numpy as np
 from numpy import allclose, log, zeros_like, ones, trapezoid, array, linspace, sqrt
 from numpy.testing import assert_array_equal, assert_array_almost_equal
-from mantid.api import AnalysisDataService, FileFinder
-from mantid.simpleapi import CreateWorkspace, FlatBackground, EditInstrumentGeometry, ConvertUnits, LinearBackground
+from mantid.api import AnalysisDataService, FileFinder, FunctionFactory
+from mantid.simpleapi import (
+    CreateWorkspace,
+    FlatBackground,
+    EditInstrumentGeometry,
+    ConvertUnits,
+    LinearBackground,
+    LoadEmptyInstrument,
+    AddSampleLog,
+)
 from mantid.geometry import CrystalStructure
 from mantid.kernel import V3D
-from Engineering.pawley_utils import Phase, GaussianProfile, PVProfile, PawleyPattern1D, PawleyPattern2D, BackToBackGauss
+from Engineering.pawley_utils import (
+    Phase,
+    GaussianProfile,
+    PVProfile,
+    PawleyPattern1D,
+    PawleyPattern2D,
+    BackToBackGauss,
+    PoldiSidelobeProfile,
+    get_poldi_sidelobe_sigma,
+    POLDI_SIDELOBE_WIDTH_COEFF,
+    POLDI_SIDELOBE_FRACTION,
+)
 from plugins.algorithms.poldi_utils import load_poldi, _do_interp_with_flux_correction, _get_flux_arrays, simulate_2d_data
 
 
@@ -213,6 +232,67 @@ class ProfileTest(unittest.TestCase):
         self.assertAlmostEqual(param_dict["B"], 0.0240, delta=1e-4)
         self.assertAlmostEqual(param_dict["S"], 20.0, delta=1e-1)
         self.assertEqual(profile.func_name, "BackToBackExponential")
+
+    def test_default_peak_intensity_hooks_use_the_function(self):
+        gauss = FunctionFactory.Instance().createPeakFunction("Gaussian")
+        gauss.setParameter("PeakCentre", 1.0)
+        gauss.setParameter("Sigma", 0.01)
+        profile = GaussianProfile()
+        profile.set_peak_intensity(gauss, 2.0)
+        self.assertAlmostEqual(profile.get_peak_intensity(gauss), 2.0, delta=1e-6)
+
+
+class PoldiSidelobeProfileTest(unittest.TestCase):
+    CHOPPER_SPEED = 5000.0
+    DSPAC = 1.5
+
+    @classmethod
+    def setUpClass(cls):
+        cls.ws = cls._make_ws("ws_poldi_profile")
+
+    @classmethod
+    def tearDownClass(cls):
+        AnalysisDataService.clear()
+
+    @classmethod
+    def _make_ws(cls, name):
+        ws = LoadEmptyInstrument(Filename="POLDI_Definition_896.xml", OutputWorkspace=name)
+        AddSampleLog(Workspace=ws, LogName="chopperspeed", LogText=str(cls.CHOPPER_SPEED), LogType="Number")
+        return ws
+
+    def test_sidelobe_sigma_from_instrument_parameter(self):
+        # POLDI_Definition_896.xml defines sidelobe_width_coeff
+        self.assertAlmostEqual(get_poldi_sidelobe_sigma(self.ws), POLDI_SIDELOBE_WIDTH_COEFF / self.CHOPPER_SPEED)
+
+    def test_sidelobe_sigma_falls_back_to_the_module_default(self):
+        ws = CreateWorkspace(DataX=[1, 2], DataY=[1, 1], OutputWorkspace="ws_no_chopper_param")
+        EditInstrumentGeometry(Workspace=ws, PrimaryFlightPath=50, L2=1, Polar=90)
+        AddSampleLog(Workspace=ws, LogName="chopperspeed", LogText=str(self.CHOPPER_SPEED), LogType="Number")
+        self.assertAlmostEqual(get_poldi_sidelobe_sigma(ws), POLDI_SIDELOBE_WIDTH_COEFF / self.CHOPPER_SPEED)
+
+    def test_get_mantid_peak_params(self):
+        profile = PoldiSidelobeProfile(self.ws)
+        params = profile.get_mantid_peak_params(self.DSPAC)
+        self.assertEqual(profile.func_name, "PoldiSidelobeGaussian")
+        # the core width is the GaussianProfile parameterisation, unchanged
+        self.assertAlmostEqual(params["Sigma"], GaussianProfile().get_mantid_peak_params(self.DSPAC)["Sigma"])
+        self.assertAlmostEqual(params["SidelobeFraction"], POLDI_SIDELOBE_FRACTION)
+        self.assertAlmostEqual(params["SidelobeSigma"], POLDI_SIDELOBE_WIDTH_COEFF / self.CHOPPER_SPEED)
+
+    def test_sidelobe_fraction_is_refinable(self):
+        profile = PoldiSidelobeProfile(self.ws)
+        self.assertTrue(profile.default_isfree[profile.labels["sidelobe_frac"]])
+
+    def test_peak_intensity_is_the_core_area_not_the_integral(self):
+        func = FunctionFactory.Instance().createPeakFunction("PoldiSidelobeGaussian")
+        func.setParameter("Sigma", 0.002)
+        func.setParameter("SidelobeFraction", 0.06)
+        func.setParameter("SidelobeSigma", 0.039)
+        profile = PoldiSidelobeProfile(self.ws)
+        profile.set_peak_intensity(func, 3.0)
+        self.assertAlmostEqual(profile.get_peak_intensity(func), 3.0)
+        # the framework's own intensity() integrates the function, which is negative for this shape
+        self.assertLess(func.intensity(), 0.0)
 
 
 class PawleyPattern1DTest(unittest.TestCase):
@@ -503,6 +583,36 @@ class PawleyPattern2DTest(unittest.TestCase):
         assert_array_almost_equal(pawley.intens[0], mock_pawley1d.intens[0])
         assert_array_almost_equal(pawley.profile_params[0], mock_pawley1d.profile_params[0])
         mock_estimate_intens.assert_called_once()
+
+    @patch("Engineering.pawley_utils.get_poldi_sidelobe_sigma", return_value=0.039)
+    @patch("Engineering.pawley_utils.PawleyPattern2D._estimate_intensities")
+    @patch("Engineering.pawley_utils.logger")
+    def test_set_params_from_pawley1d_copies_shared_params_of_a_different_profile(self, mock_log, mock_estimate_intens, _mock_sigma):
+        # a sidelobe 1D fit seeding a Gaussian 2D fit: sig0/sig1/sig2 are shared, sidelobe_frac is not
+        mock_pawley1d = self._make_mock_pawley1d()
+        mock_pawley1d.profile = PoldiSidelobeProfile(self.ws)
+        mock_pawley1d.profile_params = [array([1.0, 2.0, 3.0, 0.08])]
+        mock_pawley1d.phases[0].get_param_names.return_value = self.phase.get_param_names()
+        pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=False, profile=GaussianProfile())
+
+        pawley.set_params_from_pawley1d(mock_pawley1d)
+
+        mock_log.error.assert_not_called()
+        assert_array_almost_equal(pawley.profile_params[0], [1.0, 2.0, 3.0])
+
+    @patch("Engineering.pawley_utils.PawleyPattern2D._estimate_intensities")
+    @patch("Engineering.pawley_utils.logger")
+    def test_set_params_from_pawley1d_warns_when_profiles_share_no_params(self, mock_log, mock_estimate_intens):
+        mock_pawley1d = self._make_mock_pawley1d()
+        mock_pawley1d.profile = BackToBackGauss()
+        mock_pawley1d.profile.labels = {"foo": 0}  # no labels in common with GaussianProfile
+        pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=False, profile=GaussianProfile())
+        initial_profile = pawley.profile_params[0].copy()
+
+        pawley.set_params_from_pawley1d(mock_pawley1d)
+
+        mock_log.warning.assert_called_once()
+        assert_array_almost_equal(pawley.profile_params[0], initial_profile)
 
     def _make_mock_pawley1d(self):
         mock_pawley1d = create_autospec(PawleyPattern1D)
