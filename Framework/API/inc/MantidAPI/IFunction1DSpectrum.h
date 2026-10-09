@@ -10,7 +10,7 @@
 
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger_fwd.h"
 
 namespace Mantid {
 namespace API {
