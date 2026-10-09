@@ -63,11 +63,16 @@ public:
 
   std::string getCalibrationFilePath() const override;
   void setCalibrationFilePath(std::string const &value) override;
+  std::string getSpecularPixel() const override;
+  void setSpecularPixel(std::optional<double> value) override;
+  void showSpecularPixelInvalid() override;
+  void showSpecularPixelValid() override;
 
   void disableAll() override;
   void enableAll() override;
   void enableDetectorCorrectionType() override;
   void disableDetectorCorrectionType() override;
+  void setInstrumentSettingsViewState(InstrumentSettingsViewState const &state) override;
 
 public slots:
   void onSettingsChanged();

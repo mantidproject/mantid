@@ -135,6 +135,7 @@ private:
     TS_ASSERT_EQUALS(gui->m_ui.detectorCorrectionTypeComboBox->currentIndex(),
                      map[QString("detectorCorrectionTypeComboBox")].toInt());
     TS_ASSERT_EQUALS(gui->m_ui.calibrationPathEdit->text(), map[QString("calibrationPathEdit")].toString());
+    TS_ASSERT_EQUALS(gui->m_ui.specularPixelEdit->text(), map[QString("specularPixelEdit")].toString());
   }
 
   void testRuns(const QtRunsView *gui, const ReductionJobs *redJobs, QtCatalogSearcher *searcher,
@@ -355,6 +356,7 @@ public:
     declareProperty("CorrectDetectors", "");
     declareProperty("ROIDetectorIDs", "");
     declareProperty("CalibrationFile", "");
+    declareProperty("NominalSpecularPixelSpectrumNo", 0.0);
   }
   void exec() override {}
 };
