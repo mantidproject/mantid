@@ -10,6 +10,7 @@ import os
 import signal
 import zlib
 from typing import Optional
+from sys import platform
 
 from mantid.kernel import ConfigService, ErrorReporter, Logger, UsageService
 from mantid.kernel.environment import is_linux
@@ -149,7 +150,7 @@ class ErrorReporterPresenter(object):
             return exit_code
 
         parsed_exit_code = int(exit_code)
-        if parsed_exit_code < 0:
+        if parsed_exit_code < 0 or (platform == "win32" and parsed_exit_code in signal.Signals):
             try:
                 interpreted_signal = signal.Signals(abs(parsed_exit_code))
             except ValueError:
