@@ -8,6 +8,7 @@
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/DataSelector.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/WorkspaceSelector.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
@@ -24,7 +25,7 @@ class QString;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class DLLExport IUserInputValidator {
+class EXPORT_OPT_MANTIDQT_COMMON IUserInputValidator {
 public:
   virtual ~IUserInputValidator() = default;
 
@@ -62,7 +63,7 @@ public:
  *
  *
  */
-class DLLExport UserInputValidator final : public IUserInputValidator {
+class EXPORT_OPT_MANTIDQT_COMMON UserInputValidator final : public IUserInputValidator {
 public:
   /// Default Constructor.
   UserInputValidator();
