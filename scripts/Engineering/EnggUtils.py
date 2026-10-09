@@ -960,8 +960,6 @@ def get_detector_ids_for_bank(bank):
         # make into list so that the `if in` check works
         bank_int = [bank_int]
 
-    detector_info = grouping.detectorInfo()
-    spectrum_info = grouping.spectrumInfo()
     for i in range(grouping.getNumberHistograms()):
         if grouping.y(i)[0] in bank_int:
             detector_ids.update(grouping.getSpectrum(i).getDetectorIDs())
