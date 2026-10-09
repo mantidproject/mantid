@@ -23,7 +23,7 @@ import mantid.kernel.environment as mtd_env
 # Find Qt plugins for development builds on some platforms
 plugins.setup_library_paths()
 
-from qtpy.QtGui import QIcon, QSurfaceFormat  # noqa: E402
+from qtpy.QtGui import QIcon, QSurfaceFormat, QColor, QPalette  # noqa: E402
 from qtpy.QtWidgets import QApplication  # noqa: E402
 from qtpy.QtCore import QCoreApplication, Qt  # noqa: E402
 
@@ -192,6 +192,10 @@ def qapplication():
 
             if app.styleHints().colorScheme() == QtCore_Qt.ColorScheme.Dark:
                 app.setStyle("Fusion")
+                palette = app.palette()
+                if hasattr(QPalette.ColorRole, "Accent"):
+                    palette.setColor(QPalette.ColorRole.Accent, QColor("#9a9a9a"))  # ticked fill
+                app.setPalette(palette)
         app.setOrganizationName(ORGANIZATION)
         app.setOrganizationDomain(ORG_DOMAIN)
         app.setApplicationName(APPNAME)
