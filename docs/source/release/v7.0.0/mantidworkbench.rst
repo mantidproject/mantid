@@ -53,6 +53,7 @@ New features
 - (`#42113 <https://github.com/mantidproject/mantid/pull/42113>`_) In the new Instrument View, the ``Grouping`` and ``Masking`` tabs now have a ``Create From Current Selection`` button, which creates an ROI or mask from the detectors currently selected in the projection. For example, detectors can be picked with the ``Select Bank/Tube`` option and then masked, without having to draw a shape around them.
 - (`#42270 <https://github.com/mantidproject/mantid/pull/42270>`_) In the new Instrument View, add an option to rotate a projection across the screen, similar to the ``U Correction`` option in the old Instrument View.
 - (`#42270 <https://github.com/mantidproject/mantid/pull/42270>`_) In the new Instrument View, improve the layout of the left-hand pane by arranging the buttons in two columns.
+- (`#42413 <https://github.com/mantidproject/mantid/pull/42413>`_) In the new Instrument View, ``Hover Pick`` now respects ``Select Bank/Tube``, showing the summed spectrum of the tube or bank under the cursor.
 
 Bugfixes
 ############

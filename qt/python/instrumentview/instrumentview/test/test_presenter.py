@@ -203,7 +203,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.end_peak_selection_in_lineplot.assert_called_once()
         self._mock_view.set_clear_point_picked_detectors_disabled.assert_called_once_with(True)
         self._mock_view.set_sum_spectra_checkbox_disabled.assert_called_once_with(True)
-        self._mock_view.set_select_bank_tube_disabled.assert_called_once_with(True)
+        self._mock_view.set_select_bank_tube_disabled.assert_not_called()
         self._mock_view.set_export_workspace_button_disabled.assert_called_once_with(True)
         self._mock_view.set_overlaid_shape_controls_enabled.assert_called_once_with(False)
         self._presenter._update_interactor_style.assert_called_once()
@@ -217,11 +217,35 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
         self._mock_view.set_clear_point_picked_detectors_disabled.assert_called_once_with(False)
         self._mock_view.set_sum_spectra_checkbox_disabled.assert_called_once_with(False)
-        self._mock_view.set_select_bank_tube_disabled.assert_called_once_with(False)
+        self._mock_view.set_select_bank_tube_disabled.assert_not_called()
         self._mock_view.set_export_workspace_button_disabled.assert_called_once_with(False)
         self._mock_view.set_overlaid_shape_controls_enabled.assert_called_once_with(True)
         self._presenter._update_interactor_style.assert_called_once()
         self._presenter.update_picked_detectors_on_view.assert_called_once()
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.extract_spectra_for_line_plot")
+    def test_update_hover_pick_plot_single_detector(self, mock_extract_spectra):
+        self._mock_view.current_selected_lineplot_unit.return_value = "TOF"
+
+        self._presenter._update_hover_pick_plot(3)
+
+        mock_extract_spectra.assert_called_once_with("TOF", True, mock.ANY)
+        np.testing.assert_array_equal(mock_extract_spectra.call_args.args[2], [3])
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.extract_spectra_for_line_plot")
+    def test_update_hover_pick_plot_sums_bank_tube(self, mock_extract_spectra):
+        self._mock_view.current_selected_lineplot_unit.return_value = "TOF"
+        self._mock_view.is_select_bank_tube_checked.return_value = True
+        expanded = np.zeros(np.count_nonzero(self._model.is_pickable), dtype=bool)
+        expanded[[2, 3, 4]] = True
+        self._model.expand_pickable_mask_to_parent_subtrees = MagicMock(return_value=expanded)
+
+        self._presenter._update_hover_pick_plot(3)
+
+        hovered_mask = self._model.expand_pickable_mask_to_parent_subtrees.call_args.args[0]
+        np.testing.assert_array_equal(np.flatnonzero(hovered_mask), [3])
+        mock_extract_spectra.assert_called_once_with("TOF", True, mock.ANY)
+        np.testing.assert_array_equal(mock_extract_spectra.call_args.args[2], [2, 3, 4])
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_integration_limits_reset_clicked")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_integration_units")
