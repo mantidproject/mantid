@@ -1,1 +1,1 @@
-- In :ref:`algm-ReflectometryReductionOne` and :ref:`algm-ReflectometrySumInQ` a bug has been fixed that reduced the impact of background subtraction whilst summing in Q.
+- In :ref:`algm-ReflectometryReductionOne` and :ref:`algm-ReflectometrySumInQ` bugs have been fixed that reduced the impact of background subtraction whilst summing in Q and incorrectly accumulated errors when projecting to virtual Q bins.
