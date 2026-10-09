@@ -1,0 +1,1 @@
+- This PR fixes color themes issues of the mantid workbench associated with systems dark color theme on Windows with Qt6. In addition, this dynamically applies dark color theme to the all the open tabs of the script editor once it is set from the workbench settings.

@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ResNormView.h"
 
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
-
 #include "ResNormPresenter.h"
 
 using namespace Mantid::API;
@@ -25,6 +25,7 @@ namespace MantidQt::CustomInterfaces {
 ResNormView::ResNormView(QWidget *parent)
     : QWidget(parent), m_presenter(), m_propTree(), m_dblManager(), m_dblEdFac(), m_properties(), m_selectors() {
   m_uiForm.setupUi(parent);
+  m_uiForm.ppPlot->setCanvasColour(MantidQt::MantidWidgets::isDarkMode() ? QColor("#1d1d1d") : QColor(255, 255, 255));
   setup();
 }
 
