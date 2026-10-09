@@ -199,6 +199,8 @@ class SliceViewerDataView(QWidget):
         layout.addWidget(self.status_bar, status_bar_row, 0, 1, 1)
         layout.setRowStretch(2, 1)
 
+        self.destroyed.connect(lambda: self._disconnect_cursor_trackers())
+
     def create_dimensions(self, dims_info, custom_image_info=False):
         self.dimensions = DimensionWidget(dims_info, parent=self)
         self.dimensions.dimensionsChanged.connect(self.presenter.dimensions_changed)
@@ -486,6 +488,12 @@ class SliceViewerDataView(QWidget):
             if self._line_plots and not self._region_selection_on:
                 self._line_plots.disconnect()
         self._image_info_tracker.on_cursor_outside_axes()
+
+    def _disconnect_cursor_trackers(self):
+        if self._image_info_tracker is not None:
+            self._image_info_tracker.disconnect()
+        if self._line_plots is not None and not self._region_selection_on:
+            self._line_plots.disconnect()
 
     def on_home_clicked(self):
         """Reset the view to encompass all of the data"""
