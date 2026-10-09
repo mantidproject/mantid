@@ -109,14 +109,14 @@ def start(options: argparse.ArgumentParser):
         # handle exit information
         exit_code = workbench_process.returncode if workbench_process.returncode is not None else 1
         if exit_code != 0:
+            import signal
+
             # start error reporter if requested
             if not options.no_error_reporter:
                 start_error_reporter(workbench_pid, exit_code)
 
             # a signal was emited so raise the signal from the application
-            if exit_code < 0:
-                import signal
-
+            if exit_code < 0 or (sys.platform == "win32" and exit_code in signal.Signals):
                 try:
                     sig_code = signal.Signals(abs(exit_code))
                     name = sig_code.name
