@@ -10,8 +10,8 @@ import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.kernel import logger
 from mantid.simpleapi import Load
-import SANSUtility as su
-import SANSadd2 as add
+import sans.common.utils as getFilePathFromWorkspace
+from sans.common.run_adder import add_runs
 
 import os
 
@@ -19,7 +19,7 @@ from sans.common.enums import SANSInstrument
 
 
 def unixLikePathFromWorkspace(ws):
-    return su.getFilePathFromWorkspace(ws).replace("\\", "/")
+    return getFilePathFromWorkspace(ws).replace("\\", "/")
 
 
 @ISISSansSystemTest(SANSInstrument.LOQ)
@@ -30,7 +30,7 @@ class SANSUtilityTest(systemtesting.MantidSystemTest):
         self.assertTrue("LOQ54432.raw" in unixLikePathFromWorkspace(ws))
         ws = Load("LOQ99618.RAW")
         self.assertTrue("LOQ/LOQ99618.RAW" in unixLikePathFromWorkspace(ws))
-        add.add_runs(("LOQ54432", "LOQ54432"), "LOQ", ".raw")
+        add_runs(("LOQ54432", "LOQ54432"), "LOQ", ".raw")
         ws = Load("LOQ54432-add")
         file_path = unixLikePathFromWorkspace(ws)
         logger.information("File Path from -add: " + str(file_path))

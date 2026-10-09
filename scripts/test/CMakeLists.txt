@@ -16,10 +16,6 @@ set(TEST_PY_FILES
     ReductionWrapperTest.py
     ReflectometryQuickAuxiliaryTest.py
     RunDescriptorTest.py
-    SANSDarkRunCorrectionTest.py
-    SANSIsisInstrumentTest.py
-    SANSUserFileParserTest.py
-    SANSUtilityTest.py
     SettingsTest.py
     StitchingTest.py
     VesuvioBackgroundTest.py

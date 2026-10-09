@@ -10,7 +10,7 @@ from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.api import FileFinder
 from mantid import config
 import sans.command_interface.ISISCommandInterface as ici
-import SANSadd2 as sansadd
+from sans.common.run_adder import add_runs
 
 import os
 
@@ -42,7 +42,7 @@ class SANSAddBatch(systemtesting.MantidSystemTest):
         print("sample_sans,99630-add,output_as, %s" % "99630sannotrans", file=f)
         f.close()
         runnum = "99630"
-        sansadd.add_runs((runnum, runnum), "LOQ", ".RAW")
+        add_runs((runnum, runnum), "LOQ", ".RAW")
 
         ici.Set1D()
         ici.MaskFile("MASK.094AA")
