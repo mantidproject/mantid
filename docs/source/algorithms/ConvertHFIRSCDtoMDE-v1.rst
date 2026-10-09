@@ -35,7 +35,9 @@ The incident wavelength of each input workspace is resolved in the same order as
 
 The ``Wavelength`` property therefore acts as a fallback. For a single input workspace, give at most one value. For a
 WorkspaceGroup, give either one value, used for every member that has no ``wavelength`` sample log, or one value per
-member, in group order. The resolved wavelength is stored in the ``wavelength`` sample log of the output.
+member, in group order. When a ``wavelength`` sample log is present and differs from the value given in the
+``Wavelength`` property, the property value is ignored and a warning is logged. The resolved wavelength is stored in
+the ``wavelength`` sample log of the output.
 
 Grouped input
 #############
@@ -49,7 +51,10 @@ member that caused it.
 - With ``MergeInputs=False`` (the default), the output is a WorkspaceGroup of MDEventWorkspaces in the order of the
   input group. Each member is named ``<OutputWorkspace>_<input member name>``, following the convention of
   :ref:`algm-HB3AAdjustSampleNorm`. A member of an input group that has no name is identified by its position,
-  starting at 1.
+  starting at 1. These names are given only when the algorithm stores its output in the Analysis Data Service, as
+  when it is run from Python or the GUI. When it is run as a child algorithm, the members are not named; if the
+  output group is later added to the Analysis Data Service, its members get the default names of a WorkspaceGroup,
+  such as ``<group name>_1``.
 - With ``MergeInputs=True``, the converted members are merged with :ref:`algm-MergeMD` into a single MDEventWorkspace,
   and no intermediate workspaces are kept. The ``SplitInto``, ``SplitThreshold`` and ``MaxRecursionDepth`` properties
   of this algorithm are passed to :ref:`algm-MergeMD`. Because :ref:`algm-HB3AAdjustSampleNorm` merges with the

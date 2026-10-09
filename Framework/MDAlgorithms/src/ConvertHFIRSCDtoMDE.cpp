@@ -28,6 +28,7 @@
 #include "boost/math/constants/constants.hpp"
 
 #include <sstream>
+#include <stdexcept>
 
 namespace Mantid::MDAlgorithms {
 
@@ -164,7 +165,7 @@ std::map<std::string, std::string> ConvertHFIRSCDtoMDE::validateInputs() {
     }
     if (checkWavelengths) {
       try {
-        resolveWavelength(*inputWS, fallbackWavelength(wavelengths, i));
+        resolveWavelength(*inputWS, fallbackWavelength(wavelengths, i), false);
       } catch (const std::runtime_error &err) {
         wavelengthMessages.emplace_back(prefix + err.what());
       }
@@ -255,7 +256,7 @@ void ConvertHFIRSCDtoMDE::exec() {
   const std::vector<double> wavelengths = this->getProperty("Wavelength");
 
   if (!group) {
-    const double wavelength = resolveWavelength(*inputWorkspaces.front(), fallbackWavelength(wavelengths, 0));
+    const double wavelength = resolveWavelength(*inputWorkspaces.front(), fallbackWavelength(wavelengths, 0), true);
     setProperty("OutputWorkspace", convertWorkspace(inputWorkspaces.front(), wavelength));
     return;
   }
@@ -264,7 +265,7 @@ void ConvertHFIRSCDtoMDE::exec() {
   std::vector<API::IMDEventWorkspace_sptr> outputWorkspaces;
   Progress progress(this, 0.0, mergeInputs ? CONVERSION_PROGRESS_FRACTION : 1.0, inputWorkspaces.size());
   for (size_t i = 0; i < inputWorkspaces.size(); ++i) {
-    const double wavelength = resolveWavelength(*inputWorkspaces[i], fallbackWavelength(wavelengths, i));
+    const double wavelength = resolveWavelength(*inputWorkspaces[i], fallbackWavelength(wavelengths, i), true);
     outputWorkspaces.emplace_back(convertWorkspace(inputWorkspaces[i], wavelength));
     progress.report("Converted " + memberName(*group, i));
   }
@@ -354,27 +355,35 @@ std::optional<double> ConvertHFIRSCDtoMDE::fallbackWavelength(const std::vector<
  * 'wavelength' sample log when present, otherwise the fallback value.
  * @param inputWS :: detector-space workspace to convert
  * @param fallback :: value to use when the sample log is missing
+ * @param logChoice :: log which value is used, and warn when the sample log overrides a different fallback value
  * @return the wavelength, in Angstrom
  * @throws std::runtime_error if the sample log is not a positive number, or if
  * neither the sample log nor the fallback is available
  */
 double ConvertHFIRSCDtoMDE::resolveWavelength(const API::IMDHistoWorkspace &inputWS,
-                                              const std::optional<double> &fallback) const {
+                                              const std::optional<double> &fallback, const bool logChoice) const {
   const auto &run = inputWS.getExperimentInfo(static_cast<uint16_t>(0))->run();
   if (run.hasProperty(WAVELENGTH_LOG)) {
     double wavelength{0.0};
     try {
       // HB3A files store the log as a string, which is converted here
       wavelength = run.getLogAsSingleValue(WAVELENGTH_LOG);
-    } catch (const std::invalid_argument &) {
+    } catch (const std::logic_error &) {
+      // std::stod throws std::invalid_argument for text and std::out_of_range for values beyond double range
       throw std::runtime_error("The '" + WAVELENGTH_LOG + "' sample log of the input workspace cannot be converted " +
                                "to a number: '" + run.getProperty(WAVELENGTH_LOG)->value() + "'");
     }
     if (!(wavelength > 0.0) || !std::isfinite(wavelength))
       throw std::runtime_error("The '" + WAVELENGTH_LOG + "' sample log of the input workspace must be a positive " +
                                "number, found " + std::to_string(wavelength));
-    g_log.information() << "Using wavelength " << wavelength << " Angstrom from the '" << WAVELENGTH_LOG
-                        << "' sample log\n";
+    if (logChoice) {
+      if (fallback && *fallback != wavelength)
+        g_log.warning() << "The Wavelength property value " << *fallback << " Angstrom is ignored because the '"
+                        << WAVELENGTH_LOG << "' sample log of the input workspace gives " << wavelength
+                        << " Angstrom\n";
+      g_log.information() << "Using wavelength " << wavelength << " Angstrom from the '" << WAVELENGTH_LOG
+                          << "' sample log\n";
+    }
     return wavelength;
   }
   if (!fallback)
@@ -382,7 +391,8 @@ double ConvertHFIRSCDtoMDE::resolveWavelength(const API::IMDHistoWorkspace &inpu
                              "' sample log and the Wavelength property is not set");
   if (!(*fallback > 0.0) || !std::isfinite(*fallback))
     throw std::runtime_error("The Wavelength property must be a positive number, found " + std::to_string(*fallback));
-  g_log.information() << "Using wavelength " << *fallback << " Angstrom from the Wavelength property\n";
+  if (logChoice)
+    g_log.information() << "Using wavelength " << *fallback << " Angstrom from the Wavelength property\n";
   return *fallback;
 }
 

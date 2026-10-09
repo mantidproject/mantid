@@ -159,6 +159,12 @@ public:
     assertWavelengthError(inputWS, "1.008", "cannot be converted to a number");
   }
 
+  void test_out_of_range_sample_log() {
+    auto inputWS = loadData();
+    inputWS->getExperimentInfo(0)->mutableRun().addProperty("wavelength", std::string("1e400"), true);
+    assertWavelengthError(inputWS, "1.008", "cannot be converted to a number");
+  }
+
   void test_several_wavelengths_for_single_input() { assertWavelengthError(loadData(), "1.008,1.5", "Only one value"); }
 
   void test_non_positive_wavelength_property() {

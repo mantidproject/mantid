@@ -38,7 +38,8 @@ private:
   API::IMDEventWorkspace_sptr mergeWorkspaces(const std::vector<API::IMDEventWorkspace_sptr> &workspaces);
   static std::vector<API::IMDHistoWorkspace_sptr> inputWorkspaceList(const API::Workspace_sptr &input);
   static std::optional<double> fallbackWavelength(const std::vector<double> &wavelengths, size_t index);
-  double resolveWavelength(const API::IMDHistoWorkspace &inputWS, const std::optional<double> &fallback) const;
+  double resolveWavelength(const API::IMDHistoWorkspace &inputWS, const std::optional<double> &fallback,
+                           bool logChoice) const;
 };
 
 } // namespace MDAlgorithms
