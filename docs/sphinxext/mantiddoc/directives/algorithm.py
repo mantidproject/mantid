@@ -135,3 +135,8 @@ def setup(app):
 
     # start framework manager to load plugins once
     FrameworkManager.Instance()
+
+    return {
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
+    }
