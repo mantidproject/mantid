@@ -116,6 +116,7 @@ def start(options: argparse.ArgumentParser):
                 start_error_reporter(workbench_pid, exit_code)
 
             # a signal was emited so raise the signal from the application
+            exit_code = 15  # OVERWRITE EXIT CODE FOR TEST ON WINDOWS
             if exit_code < 0 or (sys.platform == "win32" and exit_code in signal.Signals):
                 try:
                     sig_code = signal.Signals(abs(exit_code))
