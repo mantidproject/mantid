@@ -19,8 +19,7 @@ class HomeRunInfoWidgetModel(object):
         return str(self._data.current_run[0]) if self._data.current_run else ""
 
     def get_instrument_name(self):
-        inst = self._data.current_workspace.getInstrument()
-        return inst.getName()
+        return self._data.current_workspace.getInstrumentName()
 
     def get_log_value(self, log_name):
         log = self._data.get_sample_log(log_name)

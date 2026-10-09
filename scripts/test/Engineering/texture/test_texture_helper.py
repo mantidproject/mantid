@@ -394,10 +394,11 @@ class TestHelperPoleFigurePlots(BaseTextureTestClass):
         mock_get_debug.assert_called_once_with(ws_obj, "I")
         mock_plot_exp.assert_called_once_with(test_pfi, ("Dir1", "Dir2"), "I", None, ["row0", "row1"])
 
+    @patch(texture_utils_path + ".get_debug_info", return_value=[])
     @patch(texture_utils_path + "._retrieve_ws_object")
     @patch(texture_utils_path + ".get_pole_figure_data")
     @patch(texture_utils_path + ".plot_contour_pf")
-    def test_plot_pole_figure_contour_calls_plot_contour(self, mock_plot_contour, mock_get, mock_retrieve):
+    def test_plot_pole_figure_contour_calls_plot_contour(self, mock_plot_contour, mock_get, mock_retrieve, _mock_get_debug):
         test_pfi = np.ones((2, 3))
         mock_get.return_value = test_pfi
         mock_retrieve.return_value = self.mock_ws
@@ -408,10 +409,11 @@ class TestHelperPoleFigurePlots(BaseTextureTestClass):
         mock_plot_contour.assert_called_once_with(test_pfi, ("Dir1", "Dir2"), "I", None, 2.0)
         fig.savefig.assert_called_once_with(str(path.join("outdir", "test_ws_contour_2.0.png")))
 
+    @patch(texture_utils_path + ".get_debug_info", return_value=[])
     @patch(texture_utils_path + "._retrieve_ws_object")
     @patch(texture_utils_path + ".get_pole_figure_data", return_value=np.array([[0.0, 0.0, 1.0]]))
     @patch(texture_utils_path + ".plot_exp_pf")
-    def test_plot_pole_figure_save_dirs_string_only_saves_once(self, mock_plot_exp, mock_get, mock_retrieve):
+    def test_plot_pole_figure_save_dirs_string_only_saves_once(self, mock_plot_exp, mock_get, mock_retrieve, _mock_get_debug):
         fig = MagicMock()
         ax = MagicMock()
         mock_plot_exp.return_value = (fig, ax)
