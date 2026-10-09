@@ -29,7 +29,6 @@ set(INC_FILES
     inc/MantidPythonInterface/core/CallMethod.h
     inc/MantidPythonInterface/core/Copyable.h
     inc/MantidPythonInterface/core/DataServiceExporter.h
-    inc/MantidPythonInterface/core/DllConfig.h
     inc/MantidPythonInterface/core/ErrorHandling.h
     inc/MantidPythonInterface/core/ExtractSharedPtr.h
     inc/MantidPythonInterface/core/GlobalInterpreterLock.h
@@ -88,7 +87,20 @@ target_precompile_headers(
 )
 
 target_include_directories(
-  ${_target_name} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
+  ${_target_name} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+                         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include/Mantid>
+)
+
+# Auto-generate exports header
+generate_mantid_export_header(
+  ${_target_name}
+  FALSE
+  BASE_NAME
+  MANTID_PYTHONINTERFACE_CORE
+  EXPORT_MACRO_NAME
+  MANTID_PYTHONINTERFACE_CORE_DLL
+  EXPORT_FILE_NAME
+  MantidPythonInterface/core/DllConfig.h
 )
 target_include_directories(${_target_name} SYSTEM PUBLIC $<BUILD_INTERFACE:${Python_INCLUDE_DIRS}>)
 
@@ -126,4 +138,9 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endif()
 
 set(TARGET_EXPORT_NAME "MantidPythonInterfaceCoreTargets")
+install(
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/MantidPythonInterface/core/DllConfig.h
+  DESTINATION include/Mantid/MantidPythonInterface/core
+  COMPONENT Devel
+)
 mtd_install_framework_lib(TARGETS PythonInterfaceCore EXPORT_NAME ${TARGET_EXPORT_NAME})

@@ -16,6 +16,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"

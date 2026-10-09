@@ -8,6 +8,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
+#include "MantidPythonInterface/core/DllConfig.h"
 #include <boost/python/object.hpp>
 
 namespace Mantid {
@@ -19,7 +20,7 @@ namespace Converters {
  * attempt to convert a Kernel::VMD object from
  * it
  */
-struct DLLExport PyObjectToVMD {
+struct MANTID_PYTHONINTERFACE_CORE_DLL PyObjectToVMD {
   PyObjectToVMD(const boost::python::object &p);
   /// Produces a VMD object from the given PyObject
   Kernel::VMD operator()();

@@ -10,7 +10,7 @@
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger_fwd.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/V3D.h"

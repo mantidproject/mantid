@@ -13,7 +13,7 @@
 #include <sstream>
 #include <vector>
 
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger_fwd.h"
 
 #include "MantidGeometry/Surfaces/Cone.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"

@@ -10,6 +10,7 @@
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
 #include "boost/make_shared.hpp"

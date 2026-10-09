@@ -13,7 +13,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
 
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger_fwd.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"

@@ -12,6 +12,7 @@
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid {
 namespace CurveFitting {

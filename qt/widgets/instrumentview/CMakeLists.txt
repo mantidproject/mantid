@@ -81,7 +81,6 @@ set(INC_FILES
     inc/MantidQtWidgets/InstrumentView/CollapsibleStack.h
     inc/MantidQtWidgets/InstrumentView/ColorMap.h
     inc/MantidQtWidgets/InstrumentView/DetXMLFile.h
-    inc/MantidQtWidgets/InstrumentView/DllOption.h
     inc/MantidQtWidgets/InstrumentView/GLColor.h
     inc/MantidQtWidgets/InstrumentView/GLDisplay.h
     inc/MantidQtWidgets/InstrumentView/GridTextureFace.h
@@ -139,7 +138,7 @@ mtd_add_qt_library(
   UI ${UI_FILES}
   RES ../../../images/instrumentview.qrc
   DEFS IN_MANTIDQT_INSTRUMENTVIEW
-  INCLUDE_DIRS inc
+  INCLUDE_DIRS inc ${CMAKE_CURRENT_BINARY_DIR}
   LINK_LIBS Mantid::DataObjects
             ${CORE_MANTIDLIBS}
             Mantid::PythonInterfaceCore
@@ -159,3 +158,15 @@ mtd_add_qt_library(
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   add_subdirectory(test)
 endif()
+
+# Auto-generate exports header
+generate_mantid_export_header(
+  MantidQtWidgetsInstrumentViewQt${MANTID_QT_VERSION}
+  TRUE
+  BASE_NAME
+  MANTIDQT_INSTRUMENTVIEW
+  EXPORT_MACRO_NAME
+  EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW
+  EXPORT_FILE_NAME
+  MantidQtWidgets/InstrumentView/DllOption.h
+)

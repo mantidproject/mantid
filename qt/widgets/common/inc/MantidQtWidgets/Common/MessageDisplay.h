@@ -9,8 +9,8 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "DllOption.h"
 #include "MantidQtWidgets/Common/Configurable.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/Message.h"
 #include "MantidQtWidgets/Common/QtSignalChannel.h"
 

@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Strings.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
+#include "MantidQtWidgets/Spectroscopy/DllConfig.h"
 
 #include <memory>
 #include <optional>

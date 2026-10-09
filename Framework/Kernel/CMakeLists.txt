@@ -215,6 +215,7 @@ set(INC_FILES
     inc/MantidKernel/LogFilter.h
     inc/MantidKernel/LogParser.h
     inc/MantidKernel/Logger.h
+    inc/MantidKernel/Logger_fwd.h
     inc/MantidKernel/MDAxisValidator.h
     inc/MantidKernel/MDUnit.h
     inc/MantidKernel/MRUList.h

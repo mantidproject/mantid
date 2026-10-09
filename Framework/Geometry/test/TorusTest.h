@@ -11,7 +11,7 @@
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Torus.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger_fwd.h"
 #include "MantidKernel/V3D.h"
 
 using namespace Mantid;
