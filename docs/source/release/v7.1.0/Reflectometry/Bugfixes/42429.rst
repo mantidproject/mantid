@@ -1,0 +1,1 @@
+- In :ref:`algm-ReflectometryReductionOne` and :ref:`algm-ReflectometrySumInQ` a bug has been fixed that reduced the impact of background subtraction whilst summing in Q.
