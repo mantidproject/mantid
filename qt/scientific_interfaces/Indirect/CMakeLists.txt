@@ -1,6 +1,6 @@
 set(ALL_SRC_FILES)
 set(ALL_MOC_FILES)
-set(ALL_INC_FILES DllConfig.h)
+set(ALL_INC_FILES)
 set(ALL_UI_FILES)
 
 add_subdirectory(Common)
@@ -43,7 +43,7 @@ mtd_add_qt_library(
   NOMOC ${ALL_INC_FILES}
   UI ${ALL_UI_FILES}
   DEFS IN_MANTIDQT_INDIRECT PRECOMPILED ${PRECOMP_HEADERS}
-  INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
+  INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
   LINK_LIBS ${CORE_MANTIDLIBS} Mantid::PythonInterfaceCore ${POCO_LIBRARIES} ${Boost_LIBRARIES} Python::Python
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsPlotting MantidQtWidgetsMplCpp MantidQtWidgetsSpectroscopy
                    MantidQtIcons
@@ -56,3 +56,15 @@ mtd_add_qt_library(
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   add_subdirectory(test)
 endif()
+
+# Auto-generate exports header
+generate_mantid_export_header(
+  MantidScientificInterfacesIndirectQt${MANTID_QT_VERSION}
+  TRUE
+  BASE_NAME
+  MANTIDQT_INDIRECT
+  EXPORT_MACRO_NAME
+  MANTIDQT_INDIRECT_DLL
+  EXPORT_FILE_NAME
+  DllConfig.h
+)

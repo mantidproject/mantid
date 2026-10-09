@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllOption.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <QStringList>
 #include <QTableWidget>
 #include <mutex>

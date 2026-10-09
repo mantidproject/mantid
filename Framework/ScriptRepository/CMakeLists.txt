@@ -1,7 +1,7 @@
 # Mantid source
 set(SRC_FILES src/ScriptRepositoryImpl.cpp)
 
-set(INC_FILES inc/MantidScriptRepository/DllConfig.h inc/MantidScriptRepository/ScriptRepositoryImpl.h)
+set(INC_FILES inc/MantidScriptRepository/ScriptRepositoryImpl.h)
 
 set(TEST_FILES ScriptRepositoryTestImpl.h)
 
@@ -15,7 +15,20 @@ endif()
 add_library(ScriptRepository ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::ScriptRepository ALIAS ScriptRepository)
 target_include_directories(
-  ScriptRepository PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
+  ScriptRepository PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+                          $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include/Mantid>
+)
+
+# Auto-generate exports header
+generate_mantid_export_header(
+  ScriptRepository
+  FALSE
+  BASE_NAME
+  MANTID_SCRIPTREPOSITORY
+  EXPORT_MACRO_NAME
+  SCRIPT_DLL_EXPORT
+  EXPORT_FILE_NAME
+  MantidScriptRepository/DllConfig.h
 )
 
 # Add the unit tests directory
