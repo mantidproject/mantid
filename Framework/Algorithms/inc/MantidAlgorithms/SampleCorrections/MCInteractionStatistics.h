@@ -9,7 +9,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger_fwd.h"
 
 namespace Mantid {
 

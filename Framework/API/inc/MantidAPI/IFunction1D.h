@@ -12,7 +12,6 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidKernel/Logger.h"
 
 namespace Mantid {
 
@@ -69,9 +68,6 @@ protected:
   virtual void histogram1D(double *out, double left, const double *right, const size_t nBins) const;
   /// Derivatives of the histogram1D with respect to active parameters.
   virtual void histogramDerivative1D(Jacobian *jacobian, double left, const double *right, const size_t nBins) const;
-
-  /// Logger instance
-  static Kernel::Logger g_log;
 
   /// Making a friend
   friend class CurveFitting::Algorithms::Fit;

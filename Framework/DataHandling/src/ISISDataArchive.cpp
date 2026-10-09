@@ -11,6 +11,7 @@
 #include "MantidAPI/ArchiveSearchFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InternetHelper.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/StringTokenizer.h"
 #include <filesystem>
 

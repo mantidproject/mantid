@@ -9,7 +9,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Rendering/RenderingMesh.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger_fwd.h"
 #include "MantidKernel/V3D.h"
 
 #include <memory>

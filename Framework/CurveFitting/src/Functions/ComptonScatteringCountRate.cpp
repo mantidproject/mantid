@@ -8,6 +8,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidCurveFitting/AugmentedLagrangianOptimizer.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Math/Optimization/SLSQPMinimizer.h"
 
 #include <sstream>
