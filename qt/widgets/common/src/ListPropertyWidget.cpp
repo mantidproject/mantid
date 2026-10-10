@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/ListPropertyWidget.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Property.h"
 
 #include <QLabel>
 

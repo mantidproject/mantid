@@ -21,6 +21,7 @@
 #include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/NullValidator.h"
 #include <memory>
 #include <utility>
 

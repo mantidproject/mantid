@@ -30,8 +30,7 @@ namespace API {
 class MANTID_API_DLL IndexProperty : public Kernel::ArrayProperty<int64_t> {
 public:
   IndexProperty(const std::string &name, const IWorkspaceProperty &workspaceProp,
-                const IndexTypeProperty &indexTypeProp,
-                const Kernel::IValidator_sptr &validator = Kernel::IValidator_sptr(new Kernel::NullValidator));
+                const IndexTypeProperty &indexTypeProp, const Kernel::IValidator_sptr &validator = nullptr);
 
   IndexProperty(const IndexProperty &) = default;
   // Copy assignment is deleted since there are reference type members.

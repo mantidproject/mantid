@@ -14,7 +14,6 @@
 #include <boost/python/register_ptr_to_python.hpp>
 #include <memory>
 
-using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Mantid::PythonInterface::DataServiceExporter;
 using Mantid::PythonInterface::Registry::createPropertyManager;

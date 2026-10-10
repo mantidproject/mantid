@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/Property_fwd.h"
 #ifndef Q_MOC_RUN
 #include <memory>
 #endif

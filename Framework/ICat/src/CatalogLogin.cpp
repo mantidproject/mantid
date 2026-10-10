@@ -13,6 +13,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/MaskedProperty.h"
+#include "MantidKernel/NullValidator.h"
 
 #include <Poco/ActiveResult.h>
 

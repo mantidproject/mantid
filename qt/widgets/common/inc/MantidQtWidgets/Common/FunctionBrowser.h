@@ -8,7 +8,7 @@
 
 #include "MantidQtWidgets/Common/DllOption.h"
 
-#include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/IFunctionBrowser.h"
 

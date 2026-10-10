@@ -11,7 +11,6 @@
 //-----------------------------------------------------------------------------
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/NullValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 namespace Mantid {
@@ -23,7 +22,7 @@ template <class TYPE = double> class MatrixProperty : public PropertyWithValue<M
 
 public:
   /// Constructor
-  MatrixProperty(const std::string &propName, const IValidator_sptr &validator = IValidator_sptr(new NullValidator),
+  MatrixProperty(const std::string &propName, const IValidator_sptr &validator = nullptr,
                  unsigned int direction = Direction::Input);
   /// Copy constructor
   MatrixProperty(const MatrixProperty &rhs);

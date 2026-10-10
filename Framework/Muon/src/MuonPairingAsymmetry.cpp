@@ -14,6 +14,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/NullValidator.h"
 #include "MantidMuon/MuonAlgorithmHelper.h"
 #include <boost/format.hpp>
 

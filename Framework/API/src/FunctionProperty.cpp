@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidKernel/NullValidator.h"
 #include "MantidKernel/PropertyHistory.h"
 
 #include <json/value.h>
