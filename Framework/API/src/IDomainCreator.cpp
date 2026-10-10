@@ -10,6 +10,7 @@
 #include <utility>
 
 #include "MantidAPI/IDomainCreator.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/Workspace.h"
 
 namespace Mantid::API {

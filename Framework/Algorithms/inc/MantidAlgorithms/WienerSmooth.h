@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFunction_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidKernel/cow_ptr.h"

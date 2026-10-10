@@ -7,6 +7,7 @@
 #include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/IFunction.h"
 
 namespace Mantid::API::AlgorithmProperties {
 

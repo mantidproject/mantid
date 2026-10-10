@@ -10,7 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DomainCreatorFactory.h"
-#include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFunction_fwd.h"
 #include "MantidKernel/IPropertyManager.h"
 
 namespace Mantid {
