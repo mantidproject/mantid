@@ -1,0 +1,1 @@
+- Live data monitoring no longer stalls when C++ log messages are forwarded to Python while another Python thread holds the global interpreter lock.
