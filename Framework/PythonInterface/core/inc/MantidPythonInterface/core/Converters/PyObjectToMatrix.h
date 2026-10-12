@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
 #include "MantidPythonInterface/core/DllConfig.h"
 #include <boost/python/object.hpp>
 

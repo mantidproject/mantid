@@ -8,7 +8,6 @@
 
 #include "MantidKernel/Chainable.h"
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/System.h"
 #include <memory>
 #include <stdexcept>
 

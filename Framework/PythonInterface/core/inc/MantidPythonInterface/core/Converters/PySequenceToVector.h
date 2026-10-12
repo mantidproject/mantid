@@ -6,10 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
 #include <boost/python/extract.hpp>
 #include <boost/python/object.hpp>
 #include <vector>
+
+#include <string>
 
 namespace Mantid {
 namespace PythonInterface {
