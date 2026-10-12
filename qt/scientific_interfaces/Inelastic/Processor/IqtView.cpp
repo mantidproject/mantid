@@ -85,7 +85,8 @@ namespace MantidQt::CustomInterfaces {
 
 IqtView::IqtView(QWidget *parent) : QWidget(parent), m_presenter(), m_iqtTree(nullptr) {
   m_uiForm.setupUi(parent);
-  m_uiForm.ppPlot->setCanvasColour(MantidQt::MantidWidgets::isDarkMode() ? QColor("#1d1d1d") : QColor(255, 255, 255));
+  m_uiForm.ppPlot->setCanvasColour(MantidQt::MantidWidgets::isDarkMode() ? QColor(DARK_CANVAS_COLOUR)
+                                                                         : QColor(255, 255, 255));
   m_dblEdFac = new DoubleEditorFactory(this);
   m_dblManager = new QtDoublePropertyManager();
 }

@@ -40,7 +40,9 @@ StretchView::StretchView(QWidget *parent)
     : m_dblManager(new QtDoublePropertyManager()), m_properties(), m_propTree(new QtTreePropertyBrowser()),
       m_dblEdFac(new DoubleEditorFactory()) {
   m_uiForm.setupUi(parent);
-  m_uiForm.ppPlot->setCanvasColour(MantidQt::MantidWidgets::isDarkMode() ? QColor("#1d1d1d") : QColor(255, 255, 255));
+  m_uiForm.ppPlot->setCanvasColour(MantidQt::MantidWidgets::isDarkMode()
+                                       ? QColor(MantidQt::MantidWidgets::DARK_CANVAS_COLOUR)
+                                       : QColor(255, 255, 255));
 
   m_propTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 

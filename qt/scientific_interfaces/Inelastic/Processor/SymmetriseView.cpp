@@ -40,8 +40,8 @@ SymmetriseView::SymmetriseView(QWidget *parent) : QWidget(parent), m_presenter()
   m_enumManager = new QtEnumPropertyManager(); // "Suggestion"
 
   if (MantidQt::MantidWidgets::isDarkMode()) {
-    m_uiForm.ppRawPlot->setCanvasColour(QColor("#1d1d1d"));
-    m_uiForm.ppPreviewPlot->setCanvasColour(QColor("#1d1d1d"));
+    m_uiForm.ppRawPlot->setCanvasColour(QColor(MantidQt::MantidWidgets::DARK_CANVAS_COLOUR));
+    m_uiForm.ppPreviewPlot->setCanvasColour(QColor(MantidQt::MantidWidgets::DARK_CANVAS_COLOUR));
   } else {
     m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
     m_uiForm.ppPreviewPlot->setCanvasColour(QColor(240, 240, 240));

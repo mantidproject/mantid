@@ -12,7 +12,10 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
+inline const QColor DARK_CANVAS_COLOUR("#1d1d1d");
 inline bool isDarkMode() { return QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark; }
+inline QColor defaultLineColour() { return isDarkMode() ? QColor(Qt::white) : QColor(Qt::black); }
+inline QColor canvasColour(const QColor &light = Qt::white) { return isDarkMode() ? DARK_CANVAS_COLOUR : light; }
 
 } // namespace MantidWidgets
 } // namespace MantidQt

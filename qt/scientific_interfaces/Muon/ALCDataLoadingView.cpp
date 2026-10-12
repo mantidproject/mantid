@@ -49,7 +49,8 @@ void ALCDataLoadingView::initialize() {
   enableAlpha(false);
   showAlphaMessage(false);
 
-  m_ui.dataPlot->setCanvasColour(MantidQt::MantidWidgets::isDarkMode() ? QColor("#1d1d1d") : QColor(240, 240, 240));
+  m_ui.dataPlot->setCanvasColour(MantidQt::MantidWidgets::isDarkMode() ? QColor(DARK_CANVAS_COLOUR)
+                                                                       : QColor(240, 240, 240));
 
   // Error bars on the plot
   QStringList plotsWithErrors{"Data"};

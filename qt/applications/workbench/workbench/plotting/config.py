@@ -16,7 +16,7 @@ import warnings
 import matplotlib as mpl
 import matplotlib._pylab_helpers as _pylab_helpers
 from qtpy.QtWidgets import QApplication
-from qtpy.QtCore import Qt
+from mantidqt.utils.theme import is_dark_mode, DARK_FACECOLOR
 
 # local imports
 from .globalfiguremanager import GlobalFigureManager
@@ -27,7 +27,7 @@ MPL_BACKEND = "module://workbench.plotting.backend_workbench"
 # Our style defaults
 DEFAULT_RCPARAMS = {"figure.facecolor": "w", "figure.max_open_warning": 200}
 
-_DARK_BG_OUTER = "#1d1d1d"  # figure background (window margin)
+_DARK_BG_OUTER = DARK_FACECOLOR  # figure background (window margin)
 _DARK_BG_PANEL = "#2b2b2b"  # axes background (the actual plot area)
 _DARK_FG_PRIMARY = "#DAD8D8"  # labels, text, legend text - near-white, highest contrast
 _DARK_FG_SECONDARY = "#c8c8c8"  # ticks, spines, patch/hatch edges - legible but a step down
@@ -100,18 +100,13 @@ def init_mpl_gcf():
     setattr(_pylab_helpers, "Gcf", GlobalFigureManager)
 
 
-def _is_dark_mode() -> bool:
-    app = QApplication.instance()
-    return app is not None and app.styleHints().colorScheme() == Qt.ColorScheme.Dark
-
-
 def reset_rcparams_to_default():
     """
     Reset the rcParams to the default settings.
     """
     mpl.rcParams.clear()
     mpl.rc_file_defaults()
-    set_rcparams(DARK_RCPARAMS if _is_dark_mode() else DEFAULT_RCPARAMS)
+    set_rcparams(DARK_RCPARAMS if is_dark_mode() else DEFAULT_RCPARAMS)
 
     # We must keep our backend
     mpl.use(MPL_BACKEND)
@@ -125,17 +120,3 @@ def set_rcparams(rcp):
     # We must keep our backend
     assert "backend" not in rcp
     mpl.rcParams.update(rcp)
-
-
-def watch_for_theme_changes():
-    """
-    Watch for any dynamic changes to the system color theme and set appropriate rcParams
-    for matplotlib.
-    """
-    app = QApplication.instance()
-    if app is not None:
-        app.styleHints().colorSchemeChanged.connect(_on_colour_scheme_changed)
-
-
-def _on_colour_scheme_changed(_scheme):
-    reset_rcparams_to_default()

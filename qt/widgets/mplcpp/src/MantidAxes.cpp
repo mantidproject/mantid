@@ -68,7 +68,8 @@ ErrorbarContainer MantidAxes::errorbar(const Mantid::API::MatrixWorkspace_sptr &
   if (otherKwargs)
     kwargs = Python::qHashToDict(otherKwargs.value());
   kwargs["wkspIndex"] = wkspIndex;
-  kwargs["color"] = lineColour.toLatin1().constData();
+  if (!lineColour.isEmpty())
+    kwargs["color"] = lineColour.toLatin1().constData();
   kwargs["label"] = label.toLatin1().constData();
 
   return ErrorbarContainer{pyobj().attr("errorbar")(*args, **kwargs)};

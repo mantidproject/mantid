@@ -87,8 +87,8 @@ PreviewPlot *FitPlotView::createPlot(PreviewPlot *plot, QSize const &minimumSize
 
   plot->setMinimumSize(minimumSize);
   plot->setProperty("showLegend", QVariant(true));
-  plot->setProperty("canvasColour",
-                    QVariant(MantidQt::MantidWidgets::isDarkMode() ? QColor("#1d1d1d") : QColor(255, 255, 255)));
+  plot->setProperty("canvasColour", QVariant(MantidQt::MantidWidgets::isDarkMode() ? QColor(DARK_CANVAS_COLOUR)
+                                                                                   : QColor(255, 255, 255)));
 
   // Avoids squished plots
   plot->setTightLayout(tightLayoutKwargs());

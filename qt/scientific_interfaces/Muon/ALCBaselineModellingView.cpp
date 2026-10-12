@@ -28,8 +28,8 @@ void ALCBaselineModellingView::initialize() {
   connect(m_ui.fit, SIGNAL(clicked()), SLOT(handleFitRequested()));
 
   if (MantidQt::MantidWidgets::isDarkMode()) {
-    m_ui.dataPlot->setCanvasColour(QColor("#1d1d1d"));
-    m_ui.correctedPlot->setCanvasColour(QColor("#1d1d1d"));
+    m_ui.dataPlot->setCanvasColour(QColor(DARK_CANVAS_COLOUR));
+    m_ui.correctedPlot->setCanvasColour(QColor(DARK_CANVAS_COLOUR));
   } else {
     m_ui.dataPlot->setCanvasColour(QColor(240, 240, 240));
     m_ui.correctedPlot->setCanvasColour(QColor(240, 240, 240));
@@ -87,7 +87,7 @@ void ALCBaselineModellingView::setDataCurve(MatrixWorkspace_sptr workspace, std:
   const auto kwargs = getPlotKwargs(m_ui.dataPlot, "Data");
 
   m_ui.dataPlot->clear();
-  m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black, kwargs);
+  m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, defaultLineColour(), kwargs);
 }
 
 void ALCBaselineModellingView::setCorrectedCurve(MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex) {

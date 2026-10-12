@@ -15,7 +15,7 @@ from qtpy.QtCore import QRegularExpression
 from mantidqt.MPLwidgets import FigureCanvas, NavigationToolbar2QT
 from matplotlib.figure import Figure
 from scipy import constants
-from mantidqt.utils.theme import is_dark_mode
+from mantidqt.utils.theme import is_dark_mode, THEME_FG, DARK_FACECOLOR
 
 
 def calcQE(efix, tthlims, **kwargs):
@@ -210,10 +210,10 @@ class QECoverageGUI(QtWidgets.QWidget):
         self.figure_grid = QtWidgets.QVBoxLayout()
         self.figure_frame.setLayout(self.figure_grid)
         self.figure = Figure()
-        self.figure.patch.set_facecolor("#1d1d1d" if is_dark_mode() else "white")
+        self.figure.patch.set_facecolor(DARK_FACECOLOR if is_dark_mode() else "white")
         self.canvas = FigureCanvas(self.figure)
         self.axes = self.figure.add_subplot(111)
-        self.axes.axhline(color="k")
+        self.axes.axhline(color=THEME_FG)
         self.axes.set_xlabel(r"$|Q|$ ($\AA^{-1}$)")
         self.axes.set_ylabel("Energy Transfer (meV)")
         self.canvas.draw()
@@ -381,7 +381,7 @@ class QECoverageGUI(QtWidgets.QWidget):
         if not overplot:
             self.xlim = 0
             self.axes.clear()
-            self.axes.axhline(color="k")
+            self.axes.axhline(color=THEME_FG)
         Inst = self.direct_inst_box.currentText()
         for n in range(len(qe)):
             name = Inst + "_Ei=" + str(ei_vec[n])
@@ -413,7 +413,7 @@ class QECoverageGUI(QtWidgets.QWidget):
         if not overplot:
             self.xlim = 0
             self.axes.clear()
-            self.axes.axhline(color="k")
+            self.axes.axhline(color=THEME_FG)
         (line,) = self.axes.plot(qe[0][0], qe[0][1])
         line.set_label(inst + "_" + ana)
         if max(qe[0][0]) > self.xlim:

@@ -39,8 +39,8 @@ ISISDiagnostics::ISISDiagnostics(IDataReduction *idrUI, QWidget *parent) : DataR
   setOutputPlotOptionsPresenter(m_uiForm.ipoPlotOptions, PlotWidget::Spectra);
 
   if (MantidQt::MantidWidgets::isDarkMode()) {
-    m_uiForm.ppRawPlot->setCanvasColour(QColor("#1d1d1d"));
-    m_uiForm.ppSlicePreview->setCanvasColour(QColor("#1d1d1d"));
+    m_uiForm.ppRawPlot->setCanvasColour(QColor(MantidQt::MantidWidgets::DARK_CANVAS_COLOUR));
+    m_uiForm.ppSlicePreview->setCanvasColour(QColor(MantidQt::MantidWidgets::DARK_CANVAS_COLOUR));
   } else {
     m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
     m_uiForm.ppSlicePreview->setCanvasColour(QColor(240, 240, 240));

@@ -48,7 +48,9 @@ Transmission::Transmission(IDataReduction *idrUI, QWidget *parent) : DataReducti
   connect(m_uiForm.ckSumFiles, &QCheckBox::checkStateChanged, this,
           [this]() { Transmission::handleNewInputData(SenderType::sumCheckbox); });
 
-  m_uiForm.ppPlot->setCanvasColour(MantidQt::MantidWidgets::isDarkMode() ? QColor("#1d1d1d") : QColor(240, 240, 240));
+  m_uiForm.ppPlot->setCanvasColour(MantidQt::MantidWidgets::isDarkMode()
+                                       ? QColor(MantidQt::MantidWidgets::DARK_CANVAS_COLOUR)
+                                       : QColor(240, 240, 240));
 }
 
 Transmission::~Transmission() = default;

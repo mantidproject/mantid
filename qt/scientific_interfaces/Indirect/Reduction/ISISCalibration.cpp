@@ -64,8 +64,8 @@ ISISCalibration::ISISCalibration(IDataReduction *idrUI, QWidget *parent) : DataR
   setOutputPlotOptionsPresenter(m_uiForm.ipoPlotOptions, PlotWidget::SpectraBin);
 
   if (MantidQt::MantidWidgets::isDarkMode()) {
-    m_uiForm.ppCalibration->setCanvasColour(QColor("#1d1d1d"));
-    m_uiForm.ppResolution->setCanvasColour(QColor("#1d1d1d"));
+    m_uiForm.ppCalibration->setCanvasColour(QColor(DARK_CANVAS_COLOUR));
+    m_uiForm.ppResolution->setCanvasColour(QColor(DARK_CANVAS_COLOUR));
   } else {
     m_uiForm.ppCalibration->setCanvasColour(QColor(240, 240, 240));
     m_uiForm.ppResolution->setCanvasColour(QColor(240, 240, 240));

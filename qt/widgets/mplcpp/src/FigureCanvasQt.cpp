@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/Common/Python/Sip.h"
 #include "MantidQtWidgets/MplCpp/BackendQt.h"
 #include "MantidQtWidgets/MplCpp/Figure.h"
@@ -44,7 +45,7 @@ Python::Object createPyCanvasFromFigure(const Figure &fig) {
  */
 Python::Object createPyCanvas(const int subplotspec, const QString &projection) {
   Figure fig{true};
-  const bool dark = QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark;
+  const bool dark = MantidQt::MantidWidgets::isDarkMode();
   fig.setFaceColor(dark ? DEFAULT_FACECOLOR_DARK : DEFAULT_FACECOLOR_LIGHT);
 
   if (subplotspec > 0)

@@ -242,7 +242,7 @@ class WorkbenchProcessQSettingsStagingTest(unittest.TestCase):
             "workbench.app.mainwindow": SimpleNamespace(MainWindow=Mock(return_value=main_window)),
             "workbench.widgets.about.presenter": SimpleNamespace(AboutPresenter=about),
             "workbench.plugins.exception_handler": SimpleNamespace(exception_logger=Mock()),
-            "workbench.plotting.config": SimpleNamespace(initialize_matplotlib=Mock(), watch_for_theme_changes=Mock()),
+            "workbench.plotting.config": SimpleNamespace(initialize_matplotlib=Mock()),
         }
 
         with (
@@ -267,7 +267,7 @@ class WorkbenchProcessQSettingsStagingTest(unittest.TestCase):
             "workbench.app.mainwindow": SimpleNamespace(MainWindow=Mock(return_value=main_window)),
             "workbench.widgets.about.presenter": SimpleNamespace(AboutPresenter=Mock()),
             "workbench.plugins.exception_handler": SimpleNamespace(exception_logger=Mock()),
-            "workbench.plotting.config": SimpleNamespace(initialize_matplotlib=Mock(), watch_for_theme_changes=Mock()),
+            "workbench.plotting.config": SimpleNamespace(initialize_matplotlib=Mock()),
         }
 
         with (
@@ -302,7 +302,6 @@ class WorkbenchProcessQSettingsStagingTest(unittest.TestCase):
                 },
             ),
             patch("workbench.plotting.config.initialize_matplotlib", side_effect=lambda: events.append("matplotlib")),
-            patch("workbench.plotting.config.watch_for_theme_changes", side_effect=lambda: events.append("watch_theme")),
             patch("workbench.config.set_additional_windows_parent"),
             patch.object(workbench_process, "FrameworkManagerImpl"),
         ):

@@ -36,8 +36,9 @@ Mantid::Kernel::Logger g_log("ApplyAbsorptionCorrections");
 namespace MantidQt::CustomInterfaces {
 ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent) : CorrectionsTab(parent), m_spectra(0u) {
   m_uiForm.setupUi(parent);
-  m_uiForm.ppPreview->setCanvasColour(MantidQt::MantidWidgets::isDarkMode() ? QColor("#1d1d1d")
-                                                                            : QColor(255, 255, 255));
+  m_uiForm.ppPreview->setCanvasColour(MantidQt::MantidWidgets::isDarkMode()
+                                          ? QColor(MantidQt::MantidWidgets::DARK_CANVAS_COLOUR)
+                                          : QColor(255, 255, 255));
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
   setOutputPlotOptionsPresenter(m_uiForm.ipoPlotOptions, PlotWidget::SpectraSliceSurface);
 
@@ -95,7 +96,7 @@ void ApplyAbsorptionCorrections::newSample(const QString &dataName) {
   }
 
   // Plot the curve
-  plotInPreview("Sample", m_ppSampleWS, Qt::black);
+  plotInPreview("Sample", m_ppSampleWS, MantidQt::MantidWidgets::defaultLineColour());
   m_uiForm.spPreviewSpec->setMaximum(static_cast<int>(m_ppSampleWS->getNumberHistograms()) - 1);
   m_sampleWorkspaceName = dataName.toStdString();
   m_pythonExportWsName.clear();

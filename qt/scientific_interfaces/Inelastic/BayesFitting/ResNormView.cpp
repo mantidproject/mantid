@@ -25,7 +25,9 @@ namespace MantidQt::CustomInterfaces {
 ResNormView::ResNormView(QWidget *parent)
     : QWidget(parent), m_presenter(), m_propTree(), m_dblManager(), m_dblEdFac(), m_properties(), m_selectors() {
   m_uiForm.setupUi(parent);
-  m_uiForm.ppPlot->setCanvasColour(MantidQt::MantidWidgets::isDarkMode() ? QColor("#1d1d1d") : QColor(255, 255, 255));
+  m_uiForm.ppPlot->setCanvasColour(MantidQt::MantidWidgets::isDarkMode()
+                                       ? QColor(MantidQt::MantidWidgets::DARK_CANVAS_COLOUR)
+                                       : QColor(255, 255, 255));
   setup();
 }
 

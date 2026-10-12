@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/MplCpp/ColorConverter.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 #include "MantidQtWidgets/MplCpp/MantidAxes.h"
@@ -110,13 +111,14 @@ void PreviewPlot::addSpectrum(const QString &lineName, const Mantid::API::Matrix
   auto axes = m_canvas->gca<MantidAxes>();
   axes.setXScale(m_xAxisScale.c_str());
   axes.setYScale(m_yAxisScale.c_str());
-  const QString colourStr = lineColour.isValid() ? lineColour.name(QColor::HexRgb) : QString();
+  const auto colour =
+      (lineColour.isValid() ? lineColour : MantidQt::MantidWidgets::defaultLineColour()).name(QColor::HexRgb);
   if (m_linesErrorsCache.value(lineName)) {
     m_lines[lineName] = true;
-    axes.errorbar(ws, wsIndex, colourStr, lineName, plotKwargs);
+    axes.errorbar(ws, wsIndex, colour, lineName, plotKwargs);
   } else {
     m_lines[lineName] = false;
-    axes.plot(ws, wsIndex, colourStr, lineName, plotKwargs);
+    axes.plot(ws, wsIndex, colour, lineName, plotKwargs);
   }
 
   // Add line to stored line data
