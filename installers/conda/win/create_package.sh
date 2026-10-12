@@ -198,7 +198,10 @@ NSIS_SCRIPT="$SCRIPT_DRIVE_LETTER:${NSIS_SCRIPT:2}"
 LOG_DIR="$PWD/env_logs/nsislog"
 mkdir -p "$LOG_DIR"
 
-NSIS_OUTPUT_LOG="$LOG_DIR/nsis_log.txt"
+NSIS_LOG_UNIX="$LOG_DIR/nsis_log.txt"      # bash path, used to print the log on failure
+rm -f "$NSIS_LOG_UNIX"                     # don't show a stale log from a previous run
+
+NSIS_OUTPUT_LOG="$NSIS_LOG_UNIX"
 NSIS_OUTPUT_LOG=${NSIS_OUTPUT_LOG////\\}
 NSIS_OUTPUT_LOG="$SCRIPT_DRIVE_LETTER:${NSIS_OUTPUT_LOG:2}"
 
@@ -232,6 +235,13 @@ cmd.exe //C "START /wait "" $MAKENSIS_COMMAND /V1 /DVERSION=$MANTID_VERSION /O"$
 
 if [ ! -f "$OUTFILE_NAME" ]; then
   echo "Error creating package, no file found at $OUTFILE_NAME"
+  if [ -s "$NSIS_LOG_UNIX" ]; then
+    echo "---- makensis log ($NSIS_LOG_UNIX) ----"
+    cat "$NSIS_LOG_UNIX"
+    echo "---- end of makensis log ----"
+  else
+    echo "makensis log is missing or empty at $NSIS_LOG_UNIX; makensis may not have started"
+  fi
   exit 1
 fi
 
