@@ -12,7 +12,7 @@
 #include "ISlitCalculator.h"
 #include "MantidAPI/InstrumentDataService.h"
 
-#include "DllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "ui_SlitCalculator.h"
 #include <QDialog>
 

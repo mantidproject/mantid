@@ -75,7 +75,7 @@ mtd_add_qt_library(
   UI ${UI_FILES}
   RES ${RES_FILES}
   DEFS IN_MANTIDQT_SPECTROSCOPY
-  INCLUDE_DIRS inc
+  INCLUDE_DIRS inc ${CMAKE_CURRENT_BINARY_DIR}
   LINK_LIBS ${CORE_MANTIDLIBS}
             Mantid::PythonInterfaceCore
             ${POCO_LIBRARIES}
@@ -93,3 +93,15 @@ mtd_add_qt_library(
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   add_subdirectory(test)
 endif()
+
+# Auto-generate exports header
+generate_mantid_export_header(
+  MantidQtWidgetsSpectroscopyQt${MANTID_QT_VERSION}
+  FALSE
+  BASE_NAME
+  MANTID_SPECTROSCOPY
+  EXPORT_MACRO_NAME
+  MANTID_SPECTROSCOPY_DLL
+  EXPORT_FILE_NAME
+  MantidQtWidgets/Spectroscopy/DllConfig.h
+)

@@ -10,6 +10,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitConversion.h"
 
 using Attr = Mantid::API::IFunction::Attribute;

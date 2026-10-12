@@ -10,7 +10,7 @@
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger_fwd.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>

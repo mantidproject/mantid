@@ -9,6 +9,7 @@
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/core/Converters/NDArrayTypeIndex.h"
+#include "MantidPythonInterface/core/DllConfig.h"
 
 #include <boost/python/list.hpp>
 #define PY_ARRAY_UNIQUE_SYMBOL CORE_ARRAY_API
@@ -96,8 +97,8 @@ PyObject *wrapWithNDArray(const ElementType *carray, const int ndims, Py_intptr_
 // Explicit instantiations
 //-----------------------------------------------------------------------
 #define INSTANTIATE_WRAPNUMPY(ElementType)                                                                             \
-  template DLLExport PyObject *wrapWithNDArray<ElementType>(const ElementType *, const int ndims, Py_intptr_t *dims,   \
-                                                            const NumpyWrapMode mode, const OwnershipMode oMode);
+  template MANTID_PYTHONINTERFACE_CORE_DLL PyObject *wrapWithNDArray<ElementType>(                                     \
+      const ElementType *, const int ndims, Py_intptr_t *dims, const NumpyWrapMode mode, const OwnershipMode oMode);
 
 ///@cond Doxygen doesn't seem to like this...
 INSTANTIATE_WRAPNUMPY(int)

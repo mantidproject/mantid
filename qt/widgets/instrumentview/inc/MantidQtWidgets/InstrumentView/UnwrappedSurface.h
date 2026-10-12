@@ -10,7 +10,6 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
-#include "MantidQtWidgets/Common/WidgetDllOption.h"
 #include "ProjectionSurface.h"
 #include "UnwrappedDetector.h"
 #include <memory>

@@ -9,6 +9,7 @@
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/core/Converters/MatrixToNDArray.h"
 #include "MantidPythonInterface/core/Converters/NDArrayTypeIndex.h"
+#include "MantidPythonInterface/core/DllConfig.h"
 
 #define PY_ARRAY_UNIQUE_SYMBOL CORE_ARRAY_API
 #define NO_IMPORT_ARRAY
@@ -42,8 +43,8 @@ template <typename ContainerType> PyObject *wrapWithNDArray(const ContainerType 
 // Explicit instantiations
 //-----------------------------------------------------------------------
 #define INSTANTIATE_MATRIX_WRAP(ElementType)                                                                           \
-  template DLLExport PyObject *wrapWithNDArray<Kernel::Matrix<ElementType>>(const Kernel::Matrix<ElementType> &,       \
-                                                                            const NumpyWrapMode);
+  template MANTID_PYTHONINTERFACE_CORE_DLL PyObject *wrapWithNDArray<Kernel::Matrix<ElementType>>(                     \
+      const Kernel::Matrix<ElementType> &, const NumpyWrapMode);
 
 INSTANTIATE_MATRIX_WRAP(int);
 INSTANTIATE_MATRIX_WRAP(float);

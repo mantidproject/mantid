@@ -38,7 +38,7 @@ mtd_add_qt_library(
   MOC ${MPL_MOC_FILES}
   NOMOC ${MPL_INC_FILES}
   DEFS IN_MANTIDQT_PLOTTING
-  INCLUDE_DIRS inc
+  INCLUDE_DIRS inc ${CMAKE_CURRENT_BINARY_DIR}
   LINK_LIBS ${CORE_MANTIDLIBS} Mantid::PythonInterfaceCore ${POCO_LIBRARIES}
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsMplCpp
   INSTALL_DIR ${WORKBENCH_LIB_DIR}
@@ -73,3 +73,15 @@ if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   endif()
 
 endif()
+
+# Auto-generate exports header
+generate_mantid_export_header(
+  MantidQtWidgetsPlottingQt${MANTID_QT_VERSION}
+  TRUE
+  BASE_NAME
+  MANTIDQT_PLOTTING
+  EXPORT_MACRO_NAME
+  EXPORT_OPT_MANTIDQT_PLOTTING
+  EXPORT_FILE_NAME
+  MantidQtWidgets/Plotting/DllOption.h
+)

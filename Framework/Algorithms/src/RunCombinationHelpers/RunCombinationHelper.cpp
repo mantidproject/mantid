@@ -12,6 +12,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Unit.h"
 
 namespace Mantid::Algorithms {

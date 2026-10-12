@@ -8,7 +8,7 @@
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger_fwd.h"
 
 #include <list>
 #include <vector>

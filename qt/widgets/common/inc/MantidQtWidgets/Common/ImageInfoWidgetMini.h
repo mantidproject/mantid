@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "DllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/IImageInfoWidget.h"
 #include "MantidQtWidgets/Common/ImageInfoPresenter.h"
 #include <QLabel>

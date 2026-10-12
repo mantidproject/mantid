@@ -724,7 +724,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         # Planck's constant
         planck = scipy.constants.h
         # cm(-1) => K conversion
-        cm1_to_K = scipy.constants.codata.value("inverse meter-kelvin relationship") * 100
+        cm1_to_K = scipy.constants.value("inverse meter-kelvin relationship") * 100
 
         factor = (math.pow((2 * math.pi / laser_wavelength), 4) * planck) / (8 * math.pi**2 * 45) * 1e12
         x_sections = np.zeros(frequencies.size)

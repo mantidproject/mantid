@@ -11,7 +11,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger_fwd.h"
 #include "MantidKernel/System.h"
 
 #include <QDoubleValidator>

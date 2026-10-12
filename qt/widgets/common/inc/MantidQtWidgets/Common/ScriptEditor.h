@@ -9,7 +9,7 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "DllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <QDialog>
 #include <QTextDocument>
 #include <Qsci/qsciscintilla.h>

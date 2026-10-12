@@ -8,6 +8,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+#include "MantidKernel/Logger.h"
 
 #include <boost/math/special_functions/bessel.hpp>
 #include <cmath>

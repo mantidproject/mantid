@@ -10,6 +10,7 @@
 #include "MantidAPI/ImmutableCompositeFunction.h"
 #include "MantidCurveFitting/Functions/ElasticDiffSphere.h"
 #include "MantidCurveFitting/Functions/InelasticDiffSphere.h"
+#include "MantidKernel/Logger.h"
 
 #include <boost/math/special_functions/bessel.hpp>
 

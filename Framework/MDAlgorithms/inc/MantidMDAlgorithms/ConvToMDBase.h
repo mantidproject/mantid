@@ -10,7 +10,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger_fwd.h"
 
 #include "MantidMDAlgorithms/MDEventWSWrapper.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"

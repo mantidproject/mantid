@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllOption.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IAlgorithmRuntimeProps.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 
 #include <memory>
 

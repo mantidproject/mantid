@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllOption.h"
 #include "IGLDisplay.h"
 #include "IQtDisplay.h"
 #include "InstrumentDisplay.h"
 #include "InstrumentWidgetTypes.h"
+#include "MantidQtWidgets/InstrumentView/DllOption.h"
 #include "QtConnect.h"
 #include "QtMetaObject.h"
 #include "UnwrappedSurface.h"

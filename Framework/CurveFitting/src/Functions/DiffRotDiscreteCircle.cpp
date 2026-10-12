@@ -10,6 +10,7 @@
 #include "MantidAPI/ImmutableCompositeFunction.h"
 #include "MantidCurveFitting/Functions/ElasticDiffRotDiscreteCircle.h"
 #include "MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h"
+#include "MantidKernel/Logger.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("DiffRotDiscreteCircle");

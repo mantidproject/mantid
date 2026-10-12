@@ -7,7 +7,7 @@
 #pragma once
 #include "MantidDataHandling/LoadSingleMesh.h"
 #include "MantidDataHandling/ReadMaterial.h"
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger_fwd.h"
 
 #include <functional>
 #include <unordered_set>

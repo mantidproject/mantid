@@ -10,7 +10,6 @@
 
 #include "MantidAPI/FunctionDomainGeneral.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidKernel/Logger.h"
 
 namespace Mantid {
 namespace API {
@@ -48,9 +47,6 @@ public:
   ///     getDefaultDomainSize() * getNumberValuesPerArgument()
   /// The default size must not be infinite (max of size_t).
   virtual size_t getDefaultDomainSize() const;
-
-protected:
-  static Kernel::Logger g_log;
 };
 
 } // namespace API

@@ -8,8 +8,8 @@
 
 #include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 
-#include "../DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtWidgets/Spectroscopy/DllConfig.h"
 
 #include <optional>
 

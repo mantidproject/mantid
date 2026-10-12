@@ -410,18 +410,16 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         rect_det_id_end = component_info.pixelGridMaxDetectorID(bank_index)
         ws_has_detectors = False
 
+        spectrum_info = workspace.spectrumInfo()
         for ws_index in range(workspace.getNumberHistograms()):
-            try:
-                det = workspace.getDetector(ws_index)
-                if not det.isMonitor():
-                    det_id = det.getID()
-                    if not rect_det_id_start <= det_id <= rect_det_id_end:
-                        # Workspace contains data that is not from the rectangular detector
-                        return False
-                    ws_has_detectors = True
-            except RuntimeError:
-                # Ignore detectors that don't have IDs
+            # Ignore monitors and spectra that don't have detectors
+            if not spectrum_info.hasDetectors(ws_index) or spectrum_info.isMonitor(ws_index):
                 continue
+            for det_id in workspace.getSpectrum(ws_index).getDetectorIDs():
+                if not rect_det_id_start <= det_id <= rect_det_id_end:
+                    # Workspace contains data that is not from the rectangular detector
+                    return False
+            ws_has_detectors = True
 
         return ws_has_detectors
 

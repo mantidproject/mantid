@@ -206,8 +206,8 @@ bool Algorithm::getAlwaysStoreInADS() const { return m_alwaysStoreInADS; }
  */
 void Algorithm::setRethrows(const bool rethrow) { this->m_rethrow = rethrow; }
 
-/// True if the algorithm is running.
-bool Algorithm::isRunning() const { return (executionState() == ExecutionState::Running); }
+/// True if the algorithm is scheduled or running.
+bool Algorithm::isRunning() const { return m_runningAsync || executionState() == ExecutionState::Running; }
 
 /// True if the algorithm is ready for garbage collection.
 bool Algorithm::isReadyForGarbageCollection() const {
@@ -595,7 +595,6 @@ bool Algorithm::executeInternal() {
     notificationCenter().postNotification(new ErrorNotification(this, ex.what()));
     setResultState(ResultState::Failed);
     if (m_isChildAlgorithm || m_runningAsync || m_rethrow) {
-      m_runningAsync = false;
       throw;
     }
     return false;
@@ -718,7 +717,6 @@ bool Algorithm::executeInternal() {
       }
     }
   } catch (CancelException &ex) {
-    m_runningAsync = false;
     getLogger().warning() << this->name() << ": Execution cancelled by user.\n";
     m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
         (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
@@ -730,7 +728,6 @@ bool Algorithm::executeInternal() {
   }
   // Gaudi also specifically catches GaudiException & std:exception.
   catch (std::exception &ex) {
-    m_runningAsync = false;
     getLogger().error() << "Error in execution of algorithm " << this->name() << ":\n" << ex.what() << "\n";
     m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
         (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
@@ -742,7 +739,6 @@ bool Algorithm::executeInternal() {
   }
 
   catch (H5::Exception &ex) {
-    m_runningAsync = false;
     std::string errmsg;
     errmsg.append(ex.getCFuncName()).append(": ").append(ex.getCDetailMsg());
     getLogger().error() << "H5 Exception in execution of algorithm " << this->name() << ":\n" << errmsg << "\n";
@@ -757,8 +753,6 @@ bool Algorithm::executeInternal() {
 
   catch (...) {
     // Execution failed with an unknown exception object
-    m_runningAsync = false;
-
     m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
         (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
     setResultState(ResultState::Failed);
@@ -1286,12 +1280,10 @@ bool Algorithm::doCallProcessGroups(Mantid::Types::Core::DateAndTime &startTime)
     // send an ErrorNotification (because the child isn't registered with the
     // AlgorithmMonitor).
     setResultState(ResultState::Failed);
-    m_runningAsync = false;
     notificationCenter().postNotification(new ErrorNotification(this, ex.what()));
     throw;
   } catch (...) {
     setResultState(ResultState::Failed);
-    m_runningAsync = false;
     notificationCenter().postNotification(new ErrorNotification(this, "UNKNOWN Exception caught from processGroups"));
     throw;
   }
@@ -1606,7 +1598,7 @@ struct AsyncFlagHolder {
   /** Constructor
    * @param A :: reference to the running flag
    */
-  explicit AsyncFlagHolder(bool &running_flag) : m_running_flag(running_flag) { m_running_flag = true; }
+  explicit AsyncFlagHolder(std::atomic_bool &running_flag) : m_running_flag(running_flag) { m_running_flag = true; }
   /// Destructor
   ~AsyncFlagHolder() { m_running_flag = false; }
 
@@ -1614,7 +1606,7 @@ private:
   /// Default constructor
   AsyncFlagHolder() = delete;
   /// Running flag
-  bool &m_running_flag;
+  std::atomic_bool &m_running_flag;
 };
 } // namespace
 
@@ -1625,7 +1617,13 @@ private:
 Poco::ActiveResult<bool> Algorithm::executeAsync() {
   m_executeAsync =
       std::make_unique<Poco::ActiveMethod<bool, Poco::Void, Algorithm>>(this, &Algorithm::executeAsyncImpl);
-  return (*m_executeAsync)(Poco::Void());
+  m_runningAsync = true;
+  try {
+    return (*m_executeAsync)(Poco::Void());
+  } catch (...) {
+    m_runningAsync = false;
+    throw;
+  }
 }
 
 /**Callback when an algorithm is executed asynchronously
