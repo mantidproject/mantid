@@ -11,6 +11,7 @@
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/IValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/WarningSuppressions.h"
 

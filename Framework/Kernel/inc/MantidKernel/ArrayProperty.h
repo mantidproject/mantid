@@ -7,8 +7,7 @@
 #pragma once
 
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/IValidator.h"
-#include "MantidKernel/NullValidator.h"
+#include "MantidKernel/IValidator_fwd.h"
 #include "MantidKernel/Property.h"
 #include "PropertyWithValue.h"
 #include <string>
@@ -27,14 +26,12 @@ namespace Kernel {
  */
 template <typename T> class DLLExport ArrayProperty : public PropertyWithValue<std::vector<T>> {
 public:
-  ArrayProperty(const std::string &name, std::vector<T> vec,
-                const IValidator_sptr &validator = IValidator_sptr(new NullValidator),
+  ArrayProperty(const std::string &name, std::vector<T> vec, const IValidator_sptr &validator = nullptr,
                 const unsigned int direction = Direction::Input);
   ArrayProperty(const std::string &name, const IValidator_sptr &validator,
                 const unsigned int direction = Direction::Input);
   ArrayProperty(const std::string &name, const unsigned int direction = Direction::Input);
-  ArrayProperty(const std::string &name, const std::string &values,
-                const IValidator_sptr &validator = IValidator_sptr(new NullValidator),
+  ArrayProperty(const std::string &name, const std::string &values, const IValidator_sptr &validator = nullptr,
                 const unsigned int direction = Direction::Input);
 
   ArrayProperty(const ArrayProperty &);

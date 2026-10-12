@@ -9,7 +9,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IAlgorithmRuntimeProps.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
-#include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Strings.h"
