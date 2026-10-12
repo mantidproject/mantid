@@ -43,6 +43,7 @@ class Prop:
     OUTPUT_WS_FIRST_TRANS = "OutputWorkspaceFirstTransmission"
     OUTPUT_WS_SECOND_TRANS = "OutputWorkspaceSecondTransmission"
     OUTPUT_WS_TRANS = "OutputWorkspaceTransmission"
+    NOMINAL_SPECULAR_PIXEL = "NominalSpecularPixelSpectrumNo"
 
 
 class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
@@ -50,7 +51,6 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     _ADJUSTED_THETA_LOG = "reflectometry_adjusted_theta"
     _POLREF = "POLREF"
     _POLREF_START_WS_INDEX = 4
-    _POLREF_NOMINAL_SPECULAR_PIXEL_SPECTRUM_NO = 280.0  # This is temporary, will be dynamic in upcoming PR.
 
     def __init__(self):
         """Initialize an instance of the algorithm."""
@@ -108,12 +108,13 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         inputWorkspace = self._sumWorkspaces(inputWorkspaces, False)
         firstTransWorkspace = self._sumWorkspaces(firstTransWorkspaces, True)
         secondTransWorkspace = self._sumWorkspaces(secondTransWorkspaces, True)
+        nominal_specular_pixel = self.getProperty(Prop.NOMINAL_SPECULAR_PIXEL).value
         inputWorkspace, adjusted_theta = self._calibrate_workspace(inputWorkspace, adjust_theta=True)
         firstTransWorkspace, _ = self._calibrate_workspace(
-            firstTransWorkspace, experiment_angle=0, specular_spectrum_no=self._POLREF_NOMINAL_SPECULAR_PIXEL_SPECTRUM_NO
+            firstTransWorkspace, experiment_angle=0, specular_spectrum_no=nominal_specular_pixel
         )
         secondTransWorkspace, _ = self._calibrate_workspace(
-            secondTransWorkspace, experiment_angle=0, specular_spectrum_no=self._POLREF_NOMINAL_SPECULAR_PIXEL_SPECTRUM_NO
+            secondTransWorkspace, experiment_angle=0, specular_spectrum_no=nominal_specular_pixel
         )
         # Check if we will need to sum banks as part of the reduction
         self._should_sum_banks(inputWorkspace, firstTransWorkspace, secondTransWorkspace)
@@ -183,7 +184,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def _declareCalibrationProperties(self):
         """Copy properties from the calibration algorithm."""
-        self.copyProperties("ReflectometryISISCalibration", ["CalibrationFile"])
+        self.copyProperties("ReflectometryISISCalibration", ["CalibrationFile", Prop.NOMINAL_SPECULAR_PIXEL])
 
     def _declareSumBanksProperties(self):
         """Copy properties from the child sum banks algorithm"""
@@ -655,6 +656,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
         workspace = AnalysisDataService.retrieve(workspace_name)
         representative_workspace = self._representative_workspace(workspace)
+        self._validate_instrument_specific_calibration_properties(representative_workspace)
 
         if self._workspaceHasRequestedCalibration(workspace):
             return workspace_name, experiment_angle
@@ -702,8 +704,12 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         calibration_alg.setProperty("SpecularPixelSpectrumNo", specular_spectrum_no)
         calibration_alg.setProperty("ExperimentAngle", experiment_angle)
         calibration_alg.setProperty("AdjustExperimentAngle", adjust_theta)
-        calibration_alg.setProperty("NominalSpecularPixelSpectrumNo", self._POLREF_NOMINAL_SPECULAR_PIXEL_SPECTRUM_NO)
+        calibration_alg.setProperty(Prop.NOMINAL_SPECULAR_PIXEL, self.getProperty(Prop.NOMINAL_SPECULAR_PIXEL).value)
         return experiment_angle, True
+
+    def _validate_instrument_specific_calibration_properties(self, workspace):
+        if workspace.getInstrument().getName() == self._POLREF and self.getProperty("CorrectDetectors").value:
+            raise RuntimeError("CorrectDetectors must be False when CalibrationFile is provided for POLREF data")
 
     def _find_specular_pixel_spectrum_no(self, workspace):
         lines_alg = self.createChildAlgorithm("FindReflectometryLines")

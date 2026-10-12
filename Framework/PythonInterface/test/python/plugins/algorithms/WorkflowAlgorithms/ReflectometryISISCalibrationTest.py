@@ -318,6 +318,19 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "SpecularPixelSpectrumNo must be in the range 279 to 281"):
             alg._calculate_adjusted_theta(calibration_angles)
 
+    def test_polref_angle_correction_requires_nominal_specular_pixel(self):
+        issues = self._validate_polref_angle_correction_inputs()
+
+        self.assertEqual(
+            "NominalSpecularPixelSpectrumNo must be provided when adjusting the experiment angle",
+            issues["NominalSpecularPixelSpectrumNo"],
+        )
+
+    def test_polref_without_angle_correction_does_not_require_nominal_specular_pixel(self):
+        issues = self._validate_polref_angle_correction_inputs(adjust_experiment_angle=False)
+
+        self.assertNotIn("NominalSpecularPixelSpectrumNo", issues)
+
     def test_polref_workflow_inverts_descending_calibration_map_angles(self):
         input_ws_name = "test_1234"
         ws = self._create_sample_workspace(input_ws_name)
@@ -565,6 +578,21 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         }
         if workflow == "POLREF":
             args["ExperimentAngle"] = 0.5
+        return self._setup_algorithm(args).validateInputs()
+
+    def _validate_polref_angle_correction_inputs(self, adjust_experiment_angle=True):
+        angles = [0.05 * index for index in range(9)]
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=self._absolute_calibration_file_content(angles), extension=".dat")
+        ws = self._create_sample_workspace("test_1234")
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "InstrumentWorkflow": "POLREF",
+            "SpecularPixelSpectrumNo": 4.5,
+            "ExperimentAngle": 0.5,
+            "AdjustExperimentAngle": adjust_experiment_angle,
+            "OutputWorkspace": "test_calibrated",
+        }
         return self._setup_algorithm(args).validateInputs()
 
     def _setup_algorithm(self, args):

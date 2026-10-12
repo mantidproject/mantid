@@ -65,6 +65,7 @@ private:
   DetectorCorrectionType detectorCorrectionTypeFromView();
   DetectorCorrections detectorCorrectionsFromView();
   std::string calibrationFilePathFromView();
+  std::optional<double> specularPixelFromView();
   void updateModelFromView();
   void updateViewFromModel();
   void updateWidgetEnabledState();

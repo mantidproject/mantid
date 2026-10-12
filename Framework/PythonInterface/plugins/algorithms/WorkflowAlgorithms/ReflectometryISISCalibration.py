@@ -187,6 +187,14 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         for property_name in [self._SPECULAR_PIXEL_SPECTRUM_NO, self._EXPERIMENT_ANGLE]:
             if workflow_options.enable_property(property_name) and self.getProperty(property_name).isDefault:
                 issues[property_name] = f"{property_name} must be provided for the POLREF workflow"
+        if (
+            workflow_options.angle_correction_enabled
+            and self.getProperty(self._ADJUST_EXPERIMENT_ANGLE).value
+            and self.getProperty(self._NOMINAL_SPECULAR_PIXEL_SPECTRUM_NO).isDefault
+        ):
+            issues[self._NOMINAL_SPECULAR_PIXEL_SPECTRUM_NO] = (
+                f"{self._NOMINAL_SPECULAR_PIXEL_SPECTRUM_NO} must be provided when adjusting the experiment angle"
+            )
         return issues
 
     def _validate_calibration_file_header(self, filepath, workflow_options):
