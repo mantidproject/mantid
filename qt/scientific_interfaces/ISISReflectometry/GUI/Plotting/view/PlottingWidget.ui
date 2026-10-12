@@ -16,12 +16,6 @@
      <item>
       <layout class="QHBoxLayout" name="workspaceFilterLayout">
        <item>
-        <widget class="QCheckBox" name="filterIvsQBinned">
-         <property name="text"><string>IvsQBinned</string></property>
-         <property name="checked"><bool>true</bool></property>
-        </widget>
-       </item>
-       <item>
         <widget class="QCheckBox" name="filterIvsLambda">
          <property name="text"><string>IvsLambda</string></property>
         </widget>
@@ -29,6 +23,12 @@
        <item>
         <widget class="QCheckBox" name="filterIvsQ">
          <property name="text"><string>IvsQ</string></property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="filterIvsQBinned">
+         <property name="text"><string>IvsQBinned</string></property>
+         <property name="checked"><bool>true</bool></property>
         </widget>
        </item>
        <item>
