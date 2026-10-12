@@ -176,11 +176,13 @@ std::vector<std::string> QtPlottingWorkspaceTreeViewAdapter::selectedPlottingWor
   auto workspaces = std::vector<std::string>{};
   for (auto const &index : m_plottingWorkspaceTreeView->selectionModel()->selectedRows()) {
     auto const selectedIndex = itemIndex(index);
-    if (requiresCompleteWorkspaceGroupSelection(selectedIndex)) {
+    // Get workspace names associated with children of workspace group, if plot output type needs them
+    if (isAtomicWorkspaceGroup(selectedIndex)) {
       appendWorkspaceNames(selectedIndex, workspaces);
+      // Get workspace names, though not for children who's workspace will have been collected already through their
+      // parent
     } else if (itemType(selectedIndex) == PlottingWorkspaceTreeItemType::Workspace &&
-               canContributeSelection(selectedIndex) &&
-               !requiresCompleteWorkspaceGroupSelection(selectedIndex.parent())) {
+               canContributeSelection(selectedIndex) && !isAtomicWorkspaceGroup(selectedIndex.parent())) {
       auto name = workspaceName(selectedIndex);
       if (std::find(workspaces.cbegin(), workspaces.cend(), name) == workspaces.cend()) {
         workspaces.emplace_back(std::move(name));
@@ -266,8 +268,7 @@ std::string QtPlottingWorkspaceTreeViewAdapter::workspaceName(QModelIndex const 
 bool QtPlottingWorkspaceTreeViewAdapter::canSelectDirectly(QModelIndex const &index) const {
   auto const selectionMode =
       static_cast<PlottingWorkspaceTreeSelectionMode>(itemIndex(index).data(selectionModeRole).toInt());
-  return selectionMode == PlottingWorkspaceTreeSelectionMode::Direct ||
-         selectionMode == PlottingWorkspaceTreeSelectionMode::DirectAndParent;
+  return selectionMode == PlottingWorkspaceTreeSelectionMode::DirectAndParent;
 }
 
 bool QtPlottingWorkspaceTreeViewAdapter::canSelectViaParent(QModelIndex const &index) const {
@@ -287,7 +288,9 @@ bool QtPlottingWorkspaceTreeViewAdapter::isVisible(QModelIndex const &index) con
   return !m_plottingWorkspaceTreeView->isRowHidden(index.row(), index.parent());
 }
 
-bool QtPlottingWorkspaceTreeViewAdapter::requiresCompleteWorkspaceGroupSelection(QModelIndex const &index) const {
+// Infer an atomic workspace group when every child workspace is selectable only through its parent.
+// An atomic workspace group will require all of its children for the selected plot output type.
+bool QtPlottingWorkspaceTreeViewAdapter::isAtomicWorkspaceGroup(QModelIndex const &index) const {
   if (itemType(index) != PlottingWorkspaceTreeItemType::WorkspaceGroup || !canSelectDirectly(index) ||
       m_model.rowCount(index) == 0) {
     return false;
