@@ -177,6 +177,9 @@ logging.formatters.f1.class = PatternFormatter
 logging.formatters.f1.pattern = @CONSOLEPATTERN@
 logging.formatters.f1.times = local
 
+# maximum number of messages PythonLoggingChannel queues for Python (0 means unlimited)
+logging.python.queueSize = 10000
+
 workspace.sendto.SansView.arguments=[file]
 workspace.sendto.SansView.saveusing=SaveCanSAS1D
 workspace.sendto.SansView.target=%SANSVIEWPATH%/SansView.exe
