@@ -8,8 +8,7 @@
 #pragma once
 
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/IValidator.h"
-#include "MantidKernel/NullValidator.h"
+#include "MantidKernel/IValidator_fwd.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 #ifndef Q_MOC_RUN
@@ -78,7 +77,7 @@ public:
    *  @throw std::invalid_argument  if the name argument is empty
    */
   template <typename T>
-  void declareProperty(const std::string &name, T value, IValidator_sptr validator = std::make_shared<NullValidator>(),
+  void declareProperty(const std::string &name, T value, IValidator_sptr validator = nullptr,
                        const std::string &doc = "", const unsigned int direction = Direction::Input) {
     std::unique_ptr<PropertyWithValue<T>> p = std::make_unique<PropertyWithValue<T>>(name, value, validator, direction);
     declareProperty(std::move(p), doc);
@@ -97,8 +96,7 @@ public:
   template <typename T>
   void declareProperty(const std::string &name, T value, const std::string &doc,
                        const unsigned int direction = Direction::Input) {
-    std::unique_ptr<PropertyWithValue<T>> p =
-        std::make_unique<PropertyWithValue<T>>(name, value, std::make_shared<NullValidator>(), direction);
+    std::unique_ptr<PropertyWithValue<T>> p = std::make_unique<PropertyWithValue<T>>(name, value, direction);
     declareProperty(std::move(p), doc);
   }
 
@@ -111,8 +109,7 @@ public:
    *  @throw std::invalid_argument  if the name argument is empty
    */
   template <typename T> void declareProperty(const std::string &name, T value, const unsigned int direction) {
-    std::unique_ptr<PropertyWithValue<T>> p =
-        std::make_unique<PropertyWithValue<T>>(name, value, std::make_shared<NullValidator>(), direction);
+    std::unique_ptr<PropertyWithValue<T>> p = std::make_unique<PropertyWithValue<T>>(name, value, direction);
     declareProperty(std::move(p));
   }
 
@@ -134,8 +131,7 @@ public:
    *  @throw std::invalid_argument if the name argument is empty
    *  @throw std::invalid_argument if value is a nullptr
    */
-  void declareProperty(const std::string &name, const char *value,
-                       IValidator_sptr validator = std::make_shared<NullValidator>(),
+  void declareProperty(const std::string &name, const char *value, IValidator_sptr validator = nullptr,
                        const std::string &doc = std::string(), const unsigned int direction = Direction::Input) {
     if (value == nullptr)
       throw std::invalid_argument("Attempted to set " + name + " to nullptr");
@@ -164,8 +160,7 @@ public:
    *  @throw std::invalid_argument if value is a nullptr
    */
   void declareProperty(const std::string &name, const char *value, const std::string &doc,
-                       IValidator_sptr validator = std::make_shared<NullValidator>(),
-                       const unsigned int direction = Direction::Input) {
+                       IValidator_sptr validator = nullptr, const unsigned int direction = Direction::Input) {
     if (value == nullptr)
       throw std::invalid_argument("Attempted to set " + name + " to nullptr");
     // Simply call templated method, converting character array to a string
@@ -184,7 +179,7 @@ public:
     if (value == nullptr)
       throw std::invalid_argument("Attempted to set " + name + " to nullptr");
 
-    declareProperty(name, std::string(value), std::make_shared<NullValidator>(), "", direction);
+    declareProperty(name, std::string(value), nullptr, "", direction);
   }
 
   /// Removes the property from management

@@ -19,7 +19,7 @@ jobs:
     if: ${{ github.repository_owner == 'mantidproject' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: prince-chrismc/label-merge-conflicts-action@v3
+      - uses: prince-chrismc/label-merge-conflicts-action@21e6705eaa6aab66e4e486279389c8e3e4c465b7 # v3.0.4
         with:
           conflict_label_name: "Has Conflicts"
           github_token: ${{ secrets.GITHUB_TOKEN }}

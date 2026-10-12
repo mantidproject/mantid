@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidKernel/IValidator.h"
 #include "MantidPythonInterface/core/PropertyWithValueExporter.h"
 #include <boost/python/args.hpp>
 #include <boost/python/make_constructor.hpp>

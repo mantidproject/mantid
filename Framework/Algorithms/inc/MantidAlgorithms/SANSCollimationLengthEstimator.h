@@ -8,7 +8,7 @@
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidKernel/Property.h"
+#include "MantidKernel/Property_fwd.h"
 /**Helper class which provides the Collimation Length for SANS instruments
  */
 namespace Mantid {
