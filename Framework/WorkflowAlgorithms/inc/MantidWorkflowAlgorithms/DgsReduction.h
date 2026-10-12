@@ -8,7 +8,6 @@
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidKernel/PropertyManager.h"
-#include "MantidKernel/System.h"
 #include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {

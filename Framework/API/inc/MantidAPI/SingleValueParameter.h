@@ -7,11 +7,12 @@
 #pragma once
 
 #include "MantidAPI/ImplicitFunctionParameter.h"
-#include "MantidKernel/System.h"
 #ifndef Q_MOC_RUN
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #endif
+
+#include <string>
 
 namespace Mantid {
 namespace API {
