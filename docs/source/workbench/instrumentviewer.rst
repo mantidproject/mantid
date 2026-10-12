@@ -83,7 +83,7 @@ active.
     * - ``3D``
       - Select a detector
       - Drag to rotate
-      - Zoom
+      - Zoom about the cursor
     * - Flat projection
       - Select a detector
       - Reset the view
