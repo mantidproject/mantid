@@ -479,6 +479,7 @@ private:
       TS_ASSERT(std::none_of(props.begin(), props.end(), [](std::string prop) { return prop == "CalibrationFile"; }));
     } else {
       TS_ASSERT_EQUALS(result.getPropertyValue("CalibrationFile"), "test/calib_file.dat");
+      TS_ASSERT_EQUALS(result.getPropertyValue("NominalSpecularPixelSpectrumNo"), "280");
     }
   }
 

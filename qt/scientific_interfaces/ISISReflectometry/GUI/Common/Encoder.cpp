@@ -281,6 +281,7 @@ QMap<QString, QVariant> Encoder::encodeInstrument(const QtInstrumentView *gui) {
   instrumentMap.insert(QString("detectorCorrectionTypeComboBox"),
                        QVariant(gui->m_ui.detectorCorrectionTypeComboBox->currentIndex()));
   instrumentMap.insert(QString("calibrationPathEdit"), QVariant(gui->m_ui.calibrationPathEdit->text()));
+  instrumentMap.insert(QString("specularPixelEdit"), QVariant(gui->m_ui.specularPixelEdit->text()));
   return instrumentMap;
 }
 

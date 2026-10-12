@@ -21,7 +21,7 @@ The ``InstrumentWorkflow`` property controls the meaning of the calibration valu
 
 For the ``POLREF`` workflow, ``ExperimentAngle`` is the experiment theta angle in degrees, and ``SpecularPixelSpectrumNo`` is the fitted specular pixel spectrum number for the experiment. This spectrum number may be fractional, in which case linear interpolation is used when obtaining angles from the calibration file.
 
-When ``AdjustExperimentAngle`` is enabled (default disabled) for the ``POLREF`` workflow, the algorithm corrects ``ExperimentAngle`` using the nominal calibration-map angle for the specular pixel minus the interpolated angle at ``SpecularPixelSpectrumNo``. This subtraction order accounts for the inverted POLREF calibration-map coordinate. The result is recorded in the ``reflectometry_adjusted_theta`` sample log and is used to anchor the calibrated detector geometry.
+When ``AdjustExperimentAngle`` is enabled (default disabled) for the ``POLREF`` workflow, ``NominalSpecularPixelSpectrumNo`` must be provided. The algorithm corrects ``ExperimentAngle`` using the calibration-map angle for the provided nominal specular pixel minus the interpolated angle at ``SpecularPixelSpectrumNo``. This subtraction order accounts for the inverted POLREF calibration-map coordinate. The result is recorded in the ``reflectometry_adjusted_theta`` sample log and is used to anchor the calibrated detector geometry.
 
 The selected ``InstrumentWorkflow`` controls how detector positions are corrected. The ``Default`` workflow applies detector corrections as vertical shifts. The ``POLREF`` workflow rotates detectors around the sample.
 

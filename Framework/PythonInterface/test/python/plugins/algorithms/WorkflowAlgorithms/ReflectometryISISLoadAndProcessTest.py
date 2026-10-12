@@ -872,6 +872,46 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._assert_run_algorithm_succeeds(args, outputs)
         self._check_calibration(AnalysisDataService.retrieve("IvsQ_binned_45455"), is_calibrated=True)
 
+    def test_nominal_specular_pixel_is_unset_by_default(self):
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+
+        self.assertTrue(alg.getProperty("NominalSpecularPixelSpectrumNo").isDefault)
+
+    def test_nominal_specular_pixel_is_forwarded_to_polref_calibration(self):
+        workspace = MagicMock()
+        workspace.getInstrument.return_value.getName.return_value = "POLREF"
+        calibration_alg = MagicMock()
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("CorrectDetectors", False)
+        alg.setProperty("NominalSpecularPixelSpectrumNo", 281.5)
+
+        with (
+            patch.object(alg, "_find_specular_pixel_spectrum_no", return_value=282.0),
+            patch.object(alg, "_experiment_angle", return_value=0.5),
+        ):
+            alg._setInstrumentSpecificProperties(calibration_alg, workspace, adjust_theta=True)
+
+        calibration_alg.setProperty.assert_any_call("NominalSpecularPixelSpectrumNo", 281.5)
+
+    def test_polref_calibration_rejects_detector_correction(self):
+        workspace = MagicMock()
+        workspace.getInstrument.return_value.getName.return_value = "POLREF"
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+
+        with self.assertRaisesRegex(RuntimeError, "CorrectDetectors must be False when CalibrationFile is provided for POLREF data"):
+            alg._validate_instrument_specific_calibration_properties(workspace)
+
+    def test_non_polref_calibration_does_not_reject_detector_correction(self):
+        workspace = MagicMock()
+        workspace.getInstrument.return_value.getName.return_value = "INTER"
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+
+        alg._validate_instrument_specific_calibration_properties(workspace)
+
     def test_multiple_input_runs_are_calibrated_once_after_summing(self):
         args = self._default_options
         args["InputRunList"] = "INTER45455, INTER45455"

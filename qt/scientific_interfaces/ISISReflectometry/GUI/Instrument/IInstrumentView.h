@@ -8,6 +8,7 @@
 
 #include "Common/DllConfig.h"
 #include "Common/InstrumentParameters.h"
+#include "InstrumentSettingsViewState.h"
 #include "MantidAPI/Algorithm.h"
 
 namespace MantidQt {
@@ -71,11 +72,16 @@ public:
 
   virtual std::string getCalibrationFilePath() const = 0;
   virtual void setCalibrationFilePath(std::string const &value) = 0;
+  virtual std::string getSpecularPixel() const = 0;
+  virtual void setSpecularPixel(std::optional<double> value) = 0;
+  virtual void showSpecularPixelInvalid() = 0;
+  virtual void showSpecularPixelValid() = 0;
 
   virtual void disableAll() = 0;
   virtual void enableAll() = 0;
   virtual void enableDetectorCorrectionType() = 0;
   virtual void disableDetectorCorrectionType() = 0;
+  virtual void setInstrumentSettingsViewState(InstrumentSettingsViewState const &state) = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
