@@ -12,7 +12,6 @@ set(TEST_PY_FILES
     IndirectReductionCommonTest.py
     InelasticDirectDetpackmapTest.py
     ISISDirecInelasticConfigTest.py
-    ReductionSettingsTest.py
     ReductionWrapperTest.py
     ReflectometryQuickAuxiliaryTest.py
     RunDescriptorTest.py

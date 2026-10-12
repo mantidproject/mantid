@@ -10,7 +10,7 @@ import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.kernel import logger
 from mantid.simpleapi import Load
-import sans.common.utils as getFilePathFromWorkspace
+from sans.common.utils import getFilePathFromWorkspace
 from sans.common.run_adder import add_runs
 
 import os
