@@ -39,7 +39,9 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL PlotActionState {
 };
 
 /// Selection behaviour requested by the presenter for one displayed workspace tree row.
-enum class PlottingWorkspaceTreeSelectionMode { None, Direct, ParentOnly, DirectAndParent };
+/// None - Cannot be selected. ParentOnly - Can only be selected via selection of parent.
+/// DirectAndParent - Can be selected both directly and via selection of parent (default).
+enum class PlottingWorkspaceTreeSelectionMode { None, ParentOnly, DirectAndParent };
 
 /// View-facing state for one node in the plotting workspace tree.
 struct MANTIDQT_ISISREFLECTOMETRY_DLL PlottingWorkspaceTreeItemState {

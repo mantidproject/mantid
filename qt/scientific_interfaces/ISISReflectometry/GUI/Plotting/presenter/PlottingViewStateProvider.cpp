@@ -102,11 +102,8 @@ bool allWorkspaceDescendantsIncluded(PlottingWorkspaceTreeItem const &item, Plot
 }
 
 PlottingWorkspaceTreeSelectionMode selectionMode(bool canSelectDirectly, bool canSelectViaParent) {
-  if (canSelectDirectly && canSelectViaParent) {
-    return PlottingWorkspaceTreeSelectionMode::DirectAndParent;
-  }
   if (canSelectDirectly) {
-    return PlottingWorkspaceTreeSelectionMode::Direct;
+    return PlottingWorkspaceTreeSelectionMode::DirectAndParent;
   }
   if (canSelectViaParent) {
     return PlottingWorkspaceTreeSelectionMode::ParentOnly;

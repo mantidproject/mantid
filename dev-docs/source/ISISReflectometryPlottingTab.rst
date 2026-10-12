@@ -318,8 +318,8 @@ Defines the toolkit-independent types produced by
 * :code:`PlotActionState` controls enabled and checked states for plotting
   actions;
 * :code:`PlottingWorkspaceTreeSelectionMode` specifies whether a plotting
-  workspace tree row can be selected directly, through a parent, both, or
-  neither; and
+  workspace tree row can be selected directly and through a parent, through a
+  parent only, or neither; and
 * :code:`PlottingWorkspaceTreeItemState` is one evaluated node containing its
   label, domain metadata, children, muted state, and selection mode.
 
