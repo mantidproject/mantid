@@ -213,6 +213,8 @@ File::File(File const &f)
       m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0}, m_descriptor(f.m_descriptor) {
   if (!m_fileID.isValid())
     throw NXEXCEPTION("Error reopening file");
+  // turn off the automatic HDF error handling, as initOpenFile does, since the setting is per-thread
+  H5Eset_auto(H5E_DEFAULT, nullptr, nullptr);
 }
 
 // deconstructor
@@ -1123,6 +1125,7 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
   if (tclass == H5T_STRING) {
     memtype = H5Tcopy(m_current_type_id);
   } else {
+    // h5MemType returns a predefined type, which cannot be closed, so take a copy for memtype to own
     memtype = h5MemType(m_current_type_id);
   }
 

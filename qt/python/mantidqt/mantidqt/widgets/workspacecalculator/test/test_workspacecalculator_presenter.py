@@ -36,10 +36,8 @@ class WorkspaceCalculatorTest(unittest.TestCase):
         self.model.validateInputs = mock.Mock(return_value=(False, False, ["Input1: not valid", "Input2 not valid"]))
         self.model.performOperation = mock.Mock(return_value=(False, False, ["Input1: execution failed", "Input2: execution failed"]))
 
-        self.lhs_ws = "lhs_ws"
-        CreateSingleValuedWorkspace(DataValue=1.0, OutputWorkspace=self.lhs_ws)
-        self.rhs_ws = "rhs_ws"
-        CreateSingleValuedWorkspace(DataValue=2.0, OutputWorkspace=self.rhs_ws)
+        CreateSingleValuedWorkspace(DataValue=1.0, OutputWorkspace="lhs_ws")
+        CreateSingleValuedWorkspace(DataValue=2.0, OutputWorkspace="rhs_ws")
 
     def test_workspaceCalculator_onPressedGo_update_fail(self):
         """This tests signals when both inputs don't go through validation."""

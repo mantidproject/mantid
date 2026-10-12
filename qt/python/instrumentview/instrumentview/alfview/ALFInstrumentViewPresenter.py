@@ -5,16 +5,15 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.alfview.ALFInstrumentViewView import ALFInstrumentViewView
-from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
+from instrumentview.alfview.ALFInstrumentViewModel import ALFInstrumentViewModel
 from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
 from instrumentview.ComponentSelectionUtils import detector_component_indices_in_subtrees
 from instrumentview.Globals import CurrentTab
 
 import numpy as np
-from mantid.simpleapi import CreateSampleWorkspace, Rebin
+from mantid.simpleapi import AnalysisDataService, CreateSampleWorkspace, Rebin
 from qtpy.QtCore import QObject, QMetaObject, Q_ARG
 
 
@@ -29,7 +28,7 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
 
     def __init__(self, view=None):
         _placeholder_ws = CreateSampleWorkspace(InstrumentName="ALF", StoreInADS=False, OutputWorkspace="test_alfview")
-        super().__init__(ALFInstrumentViewView(), FullInstrumentViewModel(_placeholder_ws))
+        super().__init__(ALFInstrumentViewView(), ALFInstrumentViewModel(_placeholder_ws))
         self._view._select_bank_tube.toggle()
         self._view._render_mode_combo_box.setCurrentText(self._view._RENDER_MODE_SHAPES_FAST)
         self._view._projection_combo_box.setCurrentText(ProjectionType.CYLINDRICAL_Y.value)
@@ -38,6 +37,20 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
     def update_view(self, ws_name: str):
         self._reset_model_workspace(ws_name)
         self._update_view_main_plotter(refresh_limits=True)
+
+    def _replace_workspace_callback(self, ws_name, ws):
+        # This overwrite is needed to avoid alf view updating when other workspaces are renamed.
+        if ws_name != self._model.workspace.name():
+            return
+        self._reset_model_workspace(ws_name)
+
+    def _reset_model_workspace(self, ws_name: str) -> None:
+        self._model._workspace = AnalysisDataService.retrieve(ws_name)
+        self._model.setup()
+        self._reload_renderers()  # Clear cached renderers before rendering
+        self.update_plotter()
+        # Trigger reset in alf view
+        self._publish_selection_change(force_actor_refresh=True)
 
     def selected_detector_ids(self):
         return []
@@ -53,8 +66,16 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
         )
 
     def update_picked_detectors_on_view(self) -> None:
+        self._publish_selection_change(force_actor_refresh=False)
+
+    def _publish_selection_change(self, force_actor_refresh: bool) -> None:
         super().update_picked_detectors_on_view()
         self.notify_cpp_callback("notify_whole_tube_selected")
+        if force_actor_refresh:
+            # Replacing the workspace can keep the same selected tubes, which
+            # the ALF presenter de-duplicates. Explicitly request an actor-reset
+            # refresh so analysis still updates against the new workspace/actor.
+            self.notify_cpp_callback("notify_instrument_actor_reset")
 
     def on_roi_shape_changed(self) -> None:
         """Re-derive the selection from the rectangle overlaid on the projection.
@@ -69,13 +90,20 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
         self._callback_queue.put((self._on_roi_shape_changed, (centres,)))
 
     def _on_roi_shape_changed(self, centres: np.ndarray) -> None:
+        mask = self._roi_mask_from_centres(centres)
+        self._apply_roi_selection(mask)
+        self._publish_selection_change(force_actor_refresh=False)
+
+    def _roi_mask_from_centres(self, centres: np.ndarray) -> np.ndarray:
         mask = self._view.get_shape_mask(centres)
         if self._view.is_select_bank_tube_checked():
             mask = self._model.expand_pickable_mask_to_parent_subtrees(mask)
+        return mask
+
+    def _apply_roi_selection(self, mask: np.ndarray) -> None:
         # A single stored key so that moving the rectangle replaces the selection rather than adding to it
         self._model.set_detector_key(self._ROI_SELECTION_KEY, mask.tolist(), CurrentTab.Grouping)
         self._model.apply_detector_items([self._ROI_SELECTION_KEY], CurrentTab.Grouping)
-        self.update_picked_detectors_on_view()
 
     def rebin_button_clicked(self, params: str) -> None:
         # Rewrites the active workspace in the model

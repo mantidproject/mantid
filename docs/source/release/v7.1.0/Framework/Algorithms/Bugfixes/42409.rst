@@ -1,0 +1,1 @@
+- On Windows, algorithms that split their work into tasks, such as :ref:`algm-LoadEventNexus`, now respect the ``MultiThreaded.MaxCores`` setting rather than always using every core.

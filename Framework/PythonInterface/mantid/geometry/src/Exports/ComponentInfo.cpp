@@ -63,6 +63,34 @@ std::string pixelGridIdFillOrder(ComponentInfo const &self, size_t const compone
   return std::string(order.begin(), order.end());
 }
 
+/// Get the x-size of a Rectangular/Grid bank, possibly scaled.
+/// Raises RuntimeError if the component is not a Rectangular or Grid bank.
+double pixelGridXSize(ComponentInfo const &self, size_t const componentIndex) {
+  if (!self.isGridDetector(componentIndex)) {
+    throw std::runtime_error("ComponentInfo::pixelgridXSize: component is not a Rectangular or Grid bank");
+  }
+  double scalex = 1.0;
+  if (self.hasParameter(componentIndex, "scalex")) {
+    scalex = self.getNumberParameter(componentIndex, "scalex", false)[0];
+  }
+  PixelGridComponent const grid = self.pixelGridComponent(componentIndex);
+  return grid.nX * grid.xStep * scalex;
+}
+
+/// Get the y-size of a Rectangular/Grid bank, possibly scaled.
+/// Raises RuntimeError if the component is not a Rectangular or Grid bank.
+double pixelGridYSize(ComponentInfo const &self, size_t const componentIndex) {
+  if (!self.isGridDetector(componentIndex)) {
+    throw std::runtime_error("ComponentInfo::pixelgridYSize: component is not a Rectangular or Grid bank");
+  }
+  double scaley = 1.0;
+  if (self.hasParameter(componentIndex, "scaley")) {
+    scaley = self.getNumberParameter(componentIndex, "scaley", false)[0];
+  }
+  PixelGridComponent const grid = self.pixelGridComponent(componentIndex);
+  return grid.nY * grid.yStep * scaley;
+}
+
 // The C++ add*() methods take the description as an optional pointer. Python passes a
 // string, with the empty default standing in for "no description", since a parameter
 // description is only ever set to something non-empty.
@@ -338,6 +366,16 @@ void export_ComponentInfo() {
            "Rectangular/Grid bank identified by 'index', as a 3-character string "
            "permutation of 'x', 'y' and 'z'. Raises RuntimeError if the component is not "
            "a Rectangular or Grid bank.")
+
+      .def("pixelGridXSize", &pixelGridXSize, (arg("self"), arg("index")),
+           "Returns the x-size (width) in the Rectangular/Grid bank identified "
+           "by 'index'. Raises RuntimeError if the component is not a Rectangular or Grid "
+           "bank.")
+
+      .def("pixelGridYSize", &pixelGridYSize, (arg("self"), arg("index")),
+           "Returns the y-size (height) in the Rectangular/Grid bank identified "
+           "by 'index'. Raises RuntimeError if the component is not a Rectangular or Grid "
+           "bank.")
 
       .def("detectorIndexAtXYZ", &ComponentInfo::detectorIndexAtXYZ,
            (arg("self"), arg("index"), arg("x"), arg("y"), arg("z")),

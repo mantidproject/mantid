@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/ThreadPool.h"
@@ -139,6 +140,26 @@ public:
   }
 
   void test_Constructor() { ThreadPool p; }
+
+  void test_getNumPhysicalCores_is_limited_by_MaxCores() {
+    auto &config = ConfigService::Instance();
+    const std::string original = config.getString("MultiThreaded.MaxCores");
+
+    // 0 means use all the cores
+    config.setString("MultiThreaded.MaxCores", "0");
+    const size_t allCores = ThreadPool::getNumPhysicalCores();
+    TS_ASSERT_LESS_THAN(0, allCores);
+    // a limit above 0 is used, up to the number of cores there are
+    config.setString("MultiThreaded.MaxCores", "1");
+    TS_ASSERT_EQUALS(ThreadPool::getNumPhysicalCores(), 1);
+    config.setString("MultiThreaded.MaxCores", "100000");
+    TS_ASSERT_EQUALS(ThreadPool::getNumPhysicalCores(), allCores);
+    // a negative limit is ignored
+    config.setString("MultiThreaded.MaxCores", "-1");
+    TS_ASSERT_EQUALS(ThreadPool::getNumPhysicalCores(), allCores);
+
+    config.setString("MultiThreaded.MaxCores", original);
+  }
 
   void test_schedule() {
     ThreadPool p;

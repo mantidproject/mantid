@@ -21,7 +21,7 @@ import matplotlib.pyplot  # noqa
 try:
     from qtpy.QtCore import QString
 except ImportError:
-    QString = type("")
+    QString = str
 
 
 class GonioTableModel(QtCore.QAbstractTableModel):

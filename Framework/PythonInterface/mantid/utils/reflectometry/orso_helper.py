@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import concurrent.futures
 import numpy as np
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from typing import Optional, Union, List
 import re
 from orsopy.fileio.data_source import DataSource, Person, Experiment, Sample, SampleModel, Measurement, Polarization, InstrumentSettings
@@ -221,7 +221,7 @@ class MantidORSODataset:
         Takes a datetime string in UTC and returns a datetime object in local time
         """
         utc_datetime = cls._create_datetime_from_string(str_utc_datetime)
-        return utc_datetime.replace(tzinfo=timezone.utc).astimezone(tz=None)
+        return utc_datetime.replace(tzinfo=UTC).astimezone(tz=None)
 
 
 class MantidORSODataColumns:

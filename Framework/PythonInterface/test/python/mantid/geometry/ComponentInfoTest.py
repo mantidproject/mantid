@@ -815,6 +815,39 @@ class ComponentInfoTest(unittest.TestCase):
         # All component indices expected including self
         self.assertTrue(np.array_equal(root.componentsInSubtree, np.array([0, 1, 2, 3, 4, 5], dtype="uint64")))
 
+    def test_pixel_grid_xy_size(self):
+        info = self._ws_rect.componentInfo()
+
+        # check that the method fails on non-grid detectors
+        source = info.source()
+        with self.assertRaises(RuntimeError):
+            info.pixelGridXSize(source)
+        with self.assertRaises(RuntimeError):
+            info.pixelGridYSize(source)
+
+        # now try it on the grid detector bank
+        bank_index = info.indexOfAny("bank1")
+        sizeX = self._RECT_NUM_PIXELS * 0.008  # Each pixel is 8 mm in size, in WorkspaceCreationHelper
+        sizeY = self._RECT_NUM_PIXELS * 0.008  # Each pixel is 8 mm in size, in WorkspaceCreationHelper
+        self.assertEqual(info.pixelGridXSize(bank_index), sizeX)
+        self.assertEqual(info.pixelGridYSize(bank_index), sizeY)
+
+    def test_pixel_grid_xy_size_parametrized(self):
+        info = CloneWorkspace(self._ws_rect, StoreInADS=False).componentInfo()
+        bank_index = info.indexOfAny("bank1")
+
+        # add this parameter to the bank to rescale it
+        SCALE = 0.5
+        info.addDouble("scalex", SCALE, bank_index)
+        info.addDouble("scaley", SCALE, bank_index)
+
+        # now check it scaled
+        scaledSizeX = self._RECT_NUM_PIXELS * 0.008 * SCALE  # Each pixel is 8 mm in size, in WorkspaceCreationHelper
+        scaledSizeY = self._RECT_NUM_PIXELS * 0.008 * SCALE  # Each pixel is 8 mm in size, in WorkspaceCreationHelper
+
+        self.assertEqual(info.pixelGridXSize(bank_index), scaledSizeX)
+        self.assertEqual(info.pixelGridYSize(bank_index), scaledSizeY)
+
 
 if __name__ == "__main__":
     unittest.main()

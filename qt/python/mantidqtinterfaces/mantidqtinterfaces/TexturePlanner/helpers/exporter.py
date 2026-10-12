@@ -34,7 +34,7 @@ class OrientationExporter:
     def __init__(self, model: TexturePlannerModel):
         self._model = model
 
-    def _included(self) -> Generator[Orientation, None, None]:
+    def _included(self) -> Generator[Orientation]:
         return (o for o in self._model.orientations.values() if o.include)
 
     def output_as_sscanss(self, save_dir: str, filename: str) -> None:

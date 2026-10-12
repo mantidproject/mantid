@@ -48,8 +48,10 @@ Usage
 
     print("Masked Detectors")
     print("n ws    ws2")
+    spectrum_info = ws.spectrumInfo()
+    spectrum_info2 = ws2.spectrumInfo()
     for i in range (ws.getNumberHistograms()):
-        print("%i %-5s %s" % (i, ws.getDetector(i).isMasked(), ws2.getDetector(i).isMasked()))
+        print("%i %-5s %s" % (i, spectrum_info.isMasked(i), spectrum_info2.isMasked(i)))
 
     print("\nMasked detector IDs")
     print(maskList)
