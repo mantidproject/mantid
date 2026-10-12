@@ -783,5 +783,6 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
         set_checkbox(view.check_divergence, divergence)
         set_checkbox(view.check_attenTab, attenuation)
         click(view.btn_applyCorrections)
-        self.wait_for_async_task(self.correction_presenter.worker, what="corrections")
+        # MonteCarloAbsorption takes 2-4s locally and over twice that on the CI runners
+        self.wait_for_async_task(self.correction_presenter.worker, timeout=60.0, what="corrections")
         process_events(2)
