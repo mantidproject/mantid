@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/Property.h"
+#include "MantidKernel/Property_fwd.h"
 #include "MantidKernel/System.h"
 
 #include <QGridLayout>

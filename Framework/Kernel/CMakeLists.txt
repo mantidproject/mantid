@@ -200,6 +200,7 @@ set(INC_FILES
     inc/MantidKernel/ISaveable.h
     inc/MantidKernel/ITimeSeriesProperty.h
     inc/MantidKernel/IValidator.h
+    inc/MantidKernel/IValidator_fwd.h
     inc/MantidKernel/IndexSet.h
     inc/MantidKernel/Instantiator.h
     inc/MantidKernel/InstrumentInfo.h
@@ -249,6 +250,7 @@ set(INC_FILES
     inc/MantidKernel/PocoVersion.h
     inc/MantidKernel/ProgressBase.h
     inc/MantidKernel/Property.h
+    inc/MantidKernel/Property_fwd.h
     inc/MantidKernel/PropertyHelper.h
     inc/MantidKernel/PropertyHistory.h
     inc/MantidKernel/PropertyManager.h

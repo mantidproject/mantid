@@ -7,6 +7,7 @@
 #include "MantidICat/CatalogListInstruments.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/NullValidator.h"
 
 namespace Mantid::ICat {
 

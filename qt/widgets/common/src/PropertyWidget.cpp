@@ -9,6 +9,7 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/Property.h"
 
 #include <cfloat>
 #include <climits>

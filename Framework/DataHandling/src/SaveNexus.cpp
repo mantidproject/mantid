@@ -13,6 +13,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/NullValidator.h"
 
 #include <cmath>
 #include <memory>

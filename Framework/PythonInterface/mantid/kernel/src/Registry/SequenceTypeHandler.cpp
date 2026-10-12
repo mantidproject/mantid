@@ -9,6 +9,7 @@
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/IValidator.h"
 #include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 

@@ -11,7 +11,6 @@
 //----------------------------------
 #include "AlgorithmDialog.h"
 
-#include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidQtWidgets/Common/AlgorithmPropertiesWidget.h"
 #include <QHash>

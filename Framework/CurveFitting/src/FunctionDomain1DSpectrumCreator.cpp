@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <utility>
 
+#include "MantidAPI/IFunction.h"
 #include "MantidCurveFitting/FunctionDomain1DSpectrumCreator.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Points.h"
