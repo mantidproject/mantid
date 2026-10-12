@@ -11,10 +11,10 @@ import unittest
 # Python
 ###############################################################################
 from testhelpers import run_algorithm, WorkspaceCreationHelper
-from mantid.geometry import Instrument
+from mantid.geometry import ComponentInfo, Instrument
 from mantid.kernel import DateAndTime
 from mantid.api import Sample, Run
-from mantid.simpleapi import LoadEmptyInstrument
+from mantid.simpleapi import CreateSampleWorkspace, LoadEmptyInstrument, MoveInstrumentComponent, RotateInstrumentComponent
 
 
 class ExperimentInfoTest(unittest.TestCase):
@@ -28,7 +28,8 @@ class ExperimentInfoTest(unittest.TestCase):
             self.__class__._expt_ws = ws
 
     def test_information_access(self):
-        inst = self._expt_ws.getInstrument()
+        with self.assertWarns(DeprecationWarning):
+            inst = self._expt_ws.getInstrument()
         self.assertTrue(isinstance(inst, Instrument))
         self.assertEqual(self._expt_ws.getRunNumber(), 48127)
 
@@ -48,6 +49,25 @@ class ExperimentInfoTest(unittest.TestCase):
         detInfo = self._expt_ws.detectorInfo()
         # No instrument in test workspace, so size is 0.
         self.assertEqual(detInfo.size(), 0)
+
+    def test_baseComponentInfo_keeps_original_geometry_after_moves(self):
+        ws = CreateSampleWorkspace(NumBanks=2, BankPixelWidth=3, OutputWorkspace="base_component_info_ws")
+        component_info = ws.componentInfo()
+        base_component_info = ws.baseComponentInfo()
+        self.assertTrue(isinstance(base_component_info, ComponentInfo))
+        self.assertEqual(base_component_info.size(), component_info.size())
+        bank_index = component_info.indexOfAny("bank1")
+        original_position = component_info.position(bank_index)
+        original_rotation = component_info.rotation(bank_index)
+        self.assertEqual(base_component_info.position(bank_index), original_position)
+
+        MoveInstrumentComponent(Workspace=ws, ComponentName="bank1", X=0.1, Y=0.2, Z=0.3, RelativePosition=True)
+        RotateInstrumentComponent(Workspace=ws, ComponentName="bank1", X=0, Y=1, Z=0, Angle=30)
+
+        self.assertNotEqual(ws.componentInfo().position(bank_index), original_position)
+        self.assertNotEqual(ws.componentInfo().rotation(bank_index), original_rotation)
+        self.assertEqual(ws.baseComponentInfo().position(bank_index), original_position)
+        self.assertEqual(ws.baseComponentInfo().rotation(bank_index), original_rotation)
 
     def test_setSample(self):
         sample = Sample()
