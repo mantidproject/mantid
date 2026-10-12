@@ -181,7 +181,9 @@ selecting one may switch others off where the combination would be ambiguous.
 
 ``Hover Pick``
     Preview a single detector's spectrum and information by moving the mouse over it, without
-    clicking. The selection is not changed. Only available in the 2D projections.
+    clicking. The selection is not changed. Only available in the 2D projections. With
+    ``Select Bank/Tube`` on, the summed spectrum of the whole tube or bank under the cursor is shown
+    instead.
 
 ``Select Peaks``
     Clicking selects the nearest detector that has a peak on it, rather than the exact detector
