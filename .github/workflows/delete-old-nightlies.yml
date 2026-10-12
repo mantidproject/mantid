@@ -41,7 +41,7 @@ jobs:
         run: |
           echo "RELEASES_GITHUB_TOKEN is unset_token. The GITHUB_TOKEN secret is not available in this workflow context."
           exit 1
-      - uses: thomashampson/delete-older-releases@main
+      - uses: thomashampson/delete-older-releases@2ff234dfe6ad2757ac7e53d96e298fbe82b0fd56 # main
         with:
           keep_latest: 3
           # Nightly tags are of the form v{major}.{minor}.{date}.{time}
@@ -66,7 +66,7 @@ jobs:
           - mantiddocs
     steps:
       - name: check out setup-pixi action
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           sparse-checkout: |
             .github/actions/setup-pixi/
@@ -99,7 +99,7 @@ jobs:
           - mantiddocs
     steps:
       - name: check out setup-pixi action
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           sparse-checkout: |
             .github/actions/setup-pixi/

@@ -20,10 +20,10 @@ jobs:
 
     steps:
       - name: Checkout Mantid source
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Detect changes relevant to developer site
-        uses: dorny/paths-filter@v4
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: changes
         with:
           filters: .github/filters.yaml
@@ -34,7 +34,7 @@ jobs:
 
       - name: Setup pixi
         if: steps.changes.outputs.devsite == 'true'
-        uses: prefix-dev/setup-pixi@v0.10.2
+        uses: prefix-dev/setup-pixi@d3f436a425481402e6a95a1d1fc10331c708cd9e # v0.10.2
         with:
           pixi-version: v${{ steps.pixi-version.outputs.version }}
           frozen: true
@@ -45,7 +45,7 @@ jobs:
 
       - name: Checkout developer site repository
         if: ${{ steps.changes.outputs.devsite == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: mantidproject/developer
           ref: gh-pages
