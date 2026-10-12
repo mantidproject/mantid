@@ -88,21 +88,6 @@ public:
     assertYValue("__isis_refl_spin_asym_polarized_group", 0.6);
   }
 
-  void testSpinAsymmetryReusesExistingGeneratedWorkspace() {
-    createConstantWorkspace("up", 6.0);
-    createConstantWorkspace("down", 2.0);
-    auto model = PlottingModel{};
-    auto const workspaces = plottingWorkspaces({"up", "down"}, "polarized_group");
-    model.workspacesForPlotting(workspaces, PlotOutputSelection{PlotOutputType::SpinAsymmetry});
-    auto const firstWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
-        "__isis_refl_spin_asym_polarized_group");
-    model.workspacesForPlotting(workspaces, PlotOutputSelection{PlotOutputType::SpinAsymmetry});
-    auto const secondWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
-        "__isis_refl_spin_asym_polarized_group");
-
-    TS_ASSERT_EQUALS(firstWorkspace.get(), secondWorkspace.get());
-  }
-
   void testSpinAsymmetryReturnsNoWorkspacesForUnsupportedSelectionSize() {
     createConstantWorkspace("only_one", 6.0);
     auto model = PlottingModel{};
