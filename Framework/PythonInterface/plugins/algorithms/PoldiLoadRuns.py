@@ -176,7 +176,7 @@ class PoldiLoadRuns(PythonAlgorithm):
                 return
 
         # Otherwise, we can just group the output workspaces from above.
-        self.setProperty("OutputWorkspace", GroupWorkspaces(outputWorkspaces))
+        self.setProperty("OutputWorkspace", GroupWorkspaces(outputWorkspaces, StoreInADS=False))
 
     # Get the actual range of run numbers (truncated if number of files is not compatible with merge width)
     def getActualMergeRange(self, firstRun, lastRun, mergeWidth):

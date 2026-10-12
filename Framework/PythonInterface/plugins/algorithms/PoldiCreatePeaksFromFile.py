@@ -224,7 +224,7 @@ class PoldiCreatePeaksFromFile(PythonAlgorithm):
                 else:
                     workspaces.append(self._createPeaksFromCell(compound, dMin, dMax))
 
-            self.setProperty("OutputWorkspace", GroupWorkspaces(workspaces))
+            self.setProperty("OutputWorkspace", GroupWorkspaces(workspaces, StoreInADS=False))
 
         # All parse errors are caught here and logged as errors
         except ParseException as error:
