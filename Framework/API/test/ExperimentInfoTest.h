@@ -303,6 +303,65 @@ public:
     TS_ASSERT_EQUALS(original.componentInfo().position(sampleIndex), positionBefore);
   }
 
+  void test_baseComponentInfo_matches_componentInfo_before_any_move() {
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(1));
+
+    auto const &componentInfo = expInfo.componentInfo();
+    auto const &baseComponentInfo = expInfo.baseComponentInfo();
+    TS_ASSERT_EQUALS(baseComponentInfo.size(), componentInfo.size());
+    for (size_t index = 0; index < componentInfo.size(); ++index) {
+      TS_ASSERT_EQUALS(baseComponentInfo.name(index), componentInfo.name(index));
+      TS_ASSERT_EQUALS(baseComponentInfo.position(index), componentInfo.position(index));
+      TS_ASSERT_EQUALS(baseComponentInfo.rotation(index), componentInfo.rotation(index));
+    }
+  }
+
+  void test_baseComponentInfo_is_unaffected_by_moves_and_rotations() {
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(1));
+    size_t const sampleIndex = expInfo.componentInfo().sample();
+    constexpr size_t detectorIndex = 0;
+    V3D const samplePositionBefore = expInfo.componentInfo().position(sampleIndex);
+    V3D const detectorPositionBefore = expInfo.componentInfo().position(detectorIndex);
+    auto const detectorRotationBefore = expInfo.componentInfo().rotation(detectorIndex);
+    // build the base before moving, to check that it is not shared with the parametrized ComponentInfo
+    TS_ASSERT_EQUALS(expInfo.baseComponentInfo().position(sampleIndex), samplePositionBefore);
+
+    V3D const sampleMovedTo = samplePositionBefore + V3D(0.0, 0.0, 0.5);
+    expInfo.mutableComponentInfo().setPosition(sampleIndex, sampleMovedTo);
+    expInfo.mutableDetectorInfo().setPosition(detectorIndex, detectorPositionBefore + V3D(1.0, 2.0, 3.0));
+    expInfo.mutableComponentInfo().setRotation(detectorIndex, Quat(90.0, V3D(0.0, 1.0, 0.0)));
+
+    TS_ASSERT_EQUALS(expInfo.componentInfo().position(sampleIndex), sampleMovedTo);
+    auto const &baseComponentInfo = expInfo.baseComponentInfo();
+    TS_ASSERT_EQUALS(baseComponentInfo.position(sampleIndex), samplePositionBefore);
+    TS_ASSERT_EQUALS(baseComponentInfo.position(detectorIndex), detectorPositionBefore);
+    TS_ASSERT_EQUALS(baseComponentInfo.rotation(detectorIndex), detectorRotationBefore);
+  }
+
+  void test_baseComponentInfo_follows_setInstrument() {
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(1));
+    size_t const sizeOneBank = expInfo.baseComponentInfo().size();
+
+    expInfo.setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(2));
+    TS_ASSERT_EQUALS(expInfo.baseComponentInfo().size(), expInfo.componentInfo().size());
+    TS_ASSERT_DIFFERS(expInfo.baseComponentInfo().size(), sizeOneBank);
+  }
+
+  void test_baseComponentInfo_of_clone_ignores_moves_made_before_cloning() {
+    ExperimentInfo original;
+    original.setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(1));
+    size_t const sampleIndex = original.componentInfo().sample();
+    V3D const samplePositionBefore = original.componentInfo().position(sampleIndex);
+    original.mutableComponentInfo().setPosition(sampleIndex, samplePositionBefore + V3D(0.0, 0.0, 0.5));
+
+    std::unique_ptr<ExperimentInfo> const clone(original.cloneExperimentInfo());
+    TS_ASSERT_EQUALS(clone->baseComponentInfo().position(sampleIndex), samplePositionBefore);
+    TS_ASSERT_EQUALS(original.baseComponentInfo().position(sampleIndex), samplePositionBefore);
+  }
+
   /// The parameter store must be copied too, not shared, or a parameter added to the clone
   /// would appear on the original.
   void test_clone_does_not_share_parameters_with_original() {
