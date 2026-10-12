@@ -85,6 +85,7 @@ jobs:
           # Take the latest nightly workbench/Mantid stack and allow any
           # compatible mslice release the solver can install alongside it.
           mantidworkbench = { version = "*", channel = "mantid/label/nightly" }
+          qt6-main = "6.11.2" # temporary pin
           mslice = ">=2.15"
           pystog = ">=0.6.3"
           EOF
