@@ -551,10 +551,10 @@ class PropertyManager(NonIDF_Properties):
     # --------------------------------------------------------------------------------------------
 
     def reduction_instrument_warning(self, pInstrumentName):
-        if self.instr_name != pInstrumentName():
+        if self.instr_name != pInstrumentName:
             self.log(
                 "*** WARNING: Setting reduction properties of the instrument {0} from the instrument {1}.\n"
-                "*** This only works if both instruments have the same reduction properties!".format(self.instr_name, pInstrumentName()),
+                "*** This only works if both instruments have the same reduction properties!".format(self.instr_name, pInstrumentName),
                 "warning",
             )
 
