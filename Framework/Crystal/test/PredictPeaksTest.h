@@ -107,6 +107,17 @@ public:
       TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), hklTest);
     }
 
+    const auto &lattice = ws->sample().getOrientedLattice();
+    for (int i = 0; i < ws->getNumberPeaks(); ++i) {
+      const auto &peak = ws->getPeak(i);
+      const V3D qExpected = lattice.getUB() * peak.getHKL() * (2.0 * M_PI);
+      const V3D qSample = peak.getQSampleFrame();
+      TS_ASSERT_DELTA(qSample.X(), qExpected.X(), 1e-8);
+      TS_ASSERT_DELTA(qSample.Y(), qExpected.Y(), 1e-8);
+      TS_ASSERT_DELTA(qSample.Z(), qExpected.Z(), 1e-8);
+      TS_ASSERT_DELTA(peak.getDSpacing(), lattice.d(peak.getHKL()), 1e-8);
+    }
+
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }
@@ -371,6 +382,12 @@ public:
     TS_ASSERT_EQUALS(ws->getNumberPeaks(), 1);
     TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), V3D(1, 0, 0));
     TS_ASSERT_DELTA(ws->getPeak(0).getWavelength(), 1.5, 1e-6);
+
+    const V3D qExpected = ws->sample().getOrientedLattice().getUB() * V3D(1, 0, 0) * (2.0 * M_PI);
+    const V3D qSample = ws->getPeak(0).getQSampleFrame();
+    TS_ASSERT_DELTA(qSample.X(), qExpected.X(), 1e-8);
+    TS_ASSERT_DELTA(qSample.Y(), qExpected.Y(), 1e-8);
+    TS_ASSERT_DELTA(qSample.Z(), qExpected.Z(), 1e-8);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);

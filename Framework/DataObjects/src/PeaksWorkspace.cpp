@@ -672,6 +672,7 @@ void PeaksWorkspace::saveNexus(Nexus::File *file) const {
   std::vector<double> goniometerMatrix(9 * np);
   std::vector<std::string> shapes(np);
   std::vector<double> monitorCount(np);
+  std::vector<double> detPos(3 * np);
 
   // Populate column vectors from Peak Workspace
   size_t maxShapeJSONLength = 0;
@@ -702,6 +703,10 @@ void PeaksWorkspace::saveNexus(Nexus::File *file) const {
       intMNP[3 * i + 0] = mnp[0];
       intMNP[3 * i + 1] = mnp[1];
       intMNP[3 * i + 2] = mnp[2];
+      V3D pos = p.getDetPos();
+      detPos[3 * i + 0] = pos[0];
+      detPos[3 * i + 1] = pos[1];
+      detPos[3 * i + 2] = pos[2];
       Matrix<double> gm = p.getGoniometerMatrix();
       goniometerMatrix[9 * i + 0] = gm[0][0];
       goniometerMatrix[9 * i + 1] = gm[1][0];
@@ -888,6 +893,14 @@ void PeaksWorkspace::saveNexus(Nexus::File *file) const {
   file->putAttr("name", "Monitor Count");
   file->putAttr("interpret_as", specifyDouble);
   file->putAttr("units", "Not known");
+  file->closeData();
+
+  // Detector Position column
+  file->writeData("column_22", detPos, qlab_dims);
+  file->openData("column_22");
+  file->putAttr("name", "Detector Position");
+  file->putAttr("interpret_as", "A vector of 3 doubles");
+  file->putAttr("units", "m");
   file->closeData();
 
   // Goniometer Matrix Column
