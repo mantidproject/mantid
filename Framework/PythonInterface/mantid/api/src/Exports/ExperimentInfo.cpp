@@ -59,7 +59,7 @@ std::string getInstrumentFilenameWarn(const std::string &instName, const std::st
   if (PyErr_Warn(PyExc_DeprecationWarning, "ExperimentInfo.getInstrumentFilename() is deprecated.\n"
                                            "Use InstrumentFileFinder.getInstrumentFilename() instead.") < 0)
     throw boost::python::error_already_set();
-  return InstrumentFileFinder::getInstrumentFilename(instName, date)
+  return InstrumentFileFinder::getInstrumentFilename(instName, date);
 }
 
 GNU_DIAG_OFF("unused-local-typedef")
