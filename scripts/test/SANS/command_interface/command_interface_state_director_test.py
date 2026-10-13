@@ -64,6 +64,10 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         command = NParameterCommand(command_id=NParameterCommandId.SAMPLE_OFFSET, values=[23.6])
         self._assert_raises_nothing(command_interface.add_command, command)
 
+        # Sample thickness
+        command = NParameterCommand(command_id=NParameterCommandId.SAMPLE_THICKNESS, values=[2.5])
+        self._assert_raises_nothing(command_interface.add_command, command)
+
         # Sample scatter data
         command = DataCommand(command_id=DataCommandId.SAMPLE_SCATTER, file_name="SANS2D00022024", period=3)
         self._assert_raises_nothing(command_interface.add_command, command)
@@ -131,6 +135,7 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         self.assertEqual(state.reduction.reduction_dimensionality, ReductionDimensionality.TWO_DIM)
         self.assertEqual(state.convert_to_q.reduction_dimensionality, ReductionDimensionality.TWO_DIM)
         self.assertEqual(state.move.sample_offset, 23.6 / 1000.0)
+        self.assertEqual(state.scale.thickness, 2.5)
         self.assertEqual(state.data.sample_scatter, "SANS2D00022024")
         self.assertEqual(state.data.sample_scatter_period, 3)
         self.assertEqual(state.reduction.reduction_mode, ReductionMode.HAB)

@@ -367,6 +367,19 @@ def SetSampleOffset(value):
     director.add_command(sample_offset_command)
 
 
+def SetSampleThickness(thickness):
+    """
+    Set the sample thickness for reduction. This overrides the thickness stored in the data file.
+
+    @param thickness: thickness in mm
+    """
+    thickness = float(thickness)
+    if thickness <= 0.0:
+        raise ValueError("The sample thickness must be a positive value in mm, but got {0}.".format(thickness))
+    sample_thickness_command = NParameterCommand(command_id=NParameterCommandId.SAMPLE_THICKNESS, values=[thickness])
+    director.add_command(sample_thickness_command)
+
+
 def Detector(det_name):
     """
     Sets the detector which is being used for the reduction.

@@ -141,6 +141,20 @@ TransmissionCan
 Specify the transmission and direct beam runs that will be used for the analysis of the can run.
 The runs are loaded and with transmission :ref:`IDF <InstrumentDefinitionFile>`, if applicable, when Python encounters this command.
 
+SetSampleThickness
+^^^^^^^^^^^^^^^^^^
+
+.. code-block :: python
+
+    SetSampleThickness(thickness)
+
+Sets the sample thickness in mm, overriding the value stored in the sample data file and any thickness set in the user file.
+Use this to correct a sample thickness that was recorded incorrectly in the data file.
+The thickness must be a positive number, otherwise a ``ValueError`` is raised.
+It is used to calculate the sample volume for absolute scaling, so it only affects the reduced intensity
+for ``Disc`` and ``FlatPlate`` samples; the volume of a ``Cylinder`` sample does not depend on its thickness.
+The value applies to all subsequent reductions until ``Clean()`` is called.
+
 SetMonitorSpectrum
 ^^^^^^^^^^^^^^^^^^^
 
