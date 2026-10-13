@@ -119,6 +119,7 @@ public:
   void setFinalEnergy(double m_finalEnergy) override;
 
   virtual Mantid::Kernel::V3D getDetPos() const;
+  void setDetPos(const Mantid::Kernel::V3D &pos);
   double getL1() const override;
   double getL2() const override;
 

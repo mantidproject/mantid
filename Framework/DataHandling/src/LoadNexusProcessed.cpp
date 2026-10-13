@@ -1536,6 +1536,12 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
         double val = nxDouble[r];
         peakWS->getPeak(r).setMonitorCount(val);
       }
+    } else if (str == "column_22") {
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
+      nxDouble.load();
+      for (size_t r = 0; r < numberPeaks; ++r) {
+        peakWS->getPeak(r).setDetPos(V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]));
+      }
     }
   }
   // After all columns read set IntHKL if not set

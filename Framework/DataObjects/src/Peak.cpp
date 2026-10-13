@@ -721,6 +721,12 @@ void Peak::setInitialEnergy(double m_initialEnergy) { this->m_initialEnergy = m_
 Mantid::Kernel::V3D Peak::getDetPos() const { return detPos; }
 
 // -------------------------------------------------------------------------------------
+/** Set the detector position vector without changing the detector ID.
+ * Used when the peak is not at the centre of its detector, e.g. a predicted peak.
+ * @param pos :: position of the peak on the detector   */
+void Peak::setDetPos(const Mantid::Kernel::V3D &pos) { detPos = pos; }
+
+// -------------------------------------------------------------------------------------
 /** Return the L1 flight path length (source to sample), in meters. */
 double Peak::getL1() const { return (m_samplePos - sourcePos).norm(); }
 

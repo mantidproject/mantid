@@ -1264,6 +1264,50 @@ public:
     }
   }
 
+  void test_load_peaksWorkspace_detector_position() {
+    auto peaksTestWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
+    const std::string filename = FileFinder::Instance().getFullPath("unit_testing/MINITOPAZ_Definition.xml").string();
+    InstrumentDefinitionParser parser(filename, "MINITOPAZ", Strings::loadFile(filename));
+    auto instrument = parser.parseXML(nullptr);
+    peaksTestWS->populateInstrumentParameters();
+    peaksTestWS->setInstrument(instrument);
+    // move a peak away from the centre of its detector
+    auto &peak = peaksTestWS->getPeak(0);
+    const int detID = peak.getDetectorID();
+    const Mantid::Kernel::V3D detPos = peak.getDetPos() + Mantid::Kernel::V3D(0.001, 0.002, 0.003);
+    peak.setDetPos(detPos);
+
+    SaveNexusProcessed saveAlg;
+    saveAlg.setChild(true);
+    saveAlg.initialize();
+    saveAlg.setProperty("InputWorkspace", peaksTestWS);
+    saveAlg.setPropertyValue("Filename", "test_load_peaksWorkspace_detector_position.nxs");
+    saveAlg.execute();
+    std::string filePath = saveAlg.getPropertyValue("Filename");
+
+    LoadNexusProcessed loadAlg;
+    loadAlg.setChild(true);
+    loadAlg.initialize();
+    loadAlg.setPropertyValue("Filename", filePath);
+    loadAlg.setPropertyValue("OutputWorkspace", "dummy");
+    loadAlg.execute();
+
+    Mantid::API::Workspace_sptr loadedWS = loadAlg.getProperty("OutputWorkspace");
+    auto loadedPeaksWS = std::dynamic_pointer_cast<Mantid::DataObjects::PeaksWorkspace>(loadedWS);
+    TS_ASSERT(loadedPeaksWS);
+    TS_ASSERT_EQUALS(loadedPeaksWS->getNumberPeaks(), 2);
+    const auto &loadedPeak = loadedPeaksWS->getPeak(0);
+    TS_ASSERT_EQUALS(loadedPeak.getDetectorID(), detID);
+    TS_ASSERT_DELTA(loadedPeak.getDetPos().X(), detPos.X(), 1e-10);
+    TS_ASSERT_DELTA(loadedPeak.getDetPos().Y(), detPos.Y(), 1e-10);
+    TS_ASSERT_DELTA(loadedPeak.getDetPos().Z(), detPos.Z(), 1e-10);
+
+    AnalysisDataService::Instance().remove("dummy");
+    if (std::filesystem::exists(filePath)) {
+      std::filesystem::remove(filePath);
+    }
+  }
+
   void test_ws_run_title_failover_to_title() {
     IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("CreateWorkspace");
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
