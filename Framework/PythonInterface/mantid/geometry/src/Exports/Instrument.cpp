@@ -28,10 +28,12 @@ namespace {
 // of the index-based ComponentInfo/DetectorInfo access layers. See the
 // 'Instrument Access via SpectrumInfo, DetectorInfo, ComponentInfo' concept page.
 Instrument_const_sptr getBaseInstrumentDeprecated(const Instrument &self) {
-  PyErr_Warn(PyExc_DeprecationWarning, "Instrument.getBaseInstrument() is deprecated in Mantid 7.0.\n"
-                                       "Use ExperimentInfo.baseComponentInfo() instead. "
-                                       "For more information, see the instrument access layers concept page: "
-                                       "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html");
+  if (PyErr_Warn(PyExc_DeprecationWarning,
+                 "Instrument.getBaseInstrument() is deprecated in Mantid 7.0.\n"
+                 "Use ExperimentInfo.baseComponentInfo() instead. "
+                 "For more information, see the instrument access layers concept page: "
+                 "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html") < 0)
+    throw boost::python::error_already_set();
   return self.baseInstrument();
 }
 

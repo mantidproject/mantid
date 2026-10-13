@@ -368,11 +368,9 @@ void ExperimentInfo::populateInstrumentParameters() {
   Geometry::ParameterMap &paramMap = instrumentParameters();
   Geometry::PositionAndRotationAccumulator posAndRot;
 
-  // Get instrument and sample
   auto &compInfo = mutableComponentInfo();
-  const auto parInstrument = getInstrument();
-  const auto instrument = parInstrument->baseInstrument();
-  const auto &paramInfoFromIDF = instrument->getLogfileCache();
+  // sptr_instrument is always the base instrument, which holds the parameters read from the IDF
+  const auto &paramInfoFromIDF = sptr_instrument->getLogfileCache();
 
   std::map<const IComponent *, RTP> rtpParams;
 
@@ -1247,8 +1245,6 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
   Geometry::ParameterMap &pmap = this->instrumentParameters();
   auto &compInfo = mutableComponentInfo();
   auto &detInfo = mutableDetectorInfo();
-  const auto parInstrument = getInstrument();
-  const auto instr = parInstrument->baseInstrument();
 
   int options = Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY;
   options += Mantid::Kernel::StringTokenizer::TOK_TRIM;
@@ -1288,7 +1284,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
         // more lenient -- it accepts a bare name anywhere in the tree and lets path segments be
         // skipped -- so fall back to it rather than rejecting strings the old code accepted.
         // Reproducing that leniency on ComponentInfo is its own piece of work.
-        const auto *comp = instr->getComponentByName(comp_name).get();
+        const auto *comp = sptr_instrument->getComponentByName(comp_name).get();
         if (comp) {
           compIndex = compInfo.indexOfOrInvalid(comp->getComponentID());
         }
