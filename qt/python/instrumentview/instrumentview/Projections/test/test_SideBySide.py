@@ -13,6 +13,7 @@ import numpy as np
 from unittest.mock import MagicMock, patch
 import unittest
 from mantid.kernel import Quat
+from mantid.simpleapi import CreateSampleWorkspace
 
 
 class TestSideBySideProjection(unittest.TestCase):
@@ -145,10 +146,9 @@ class TestSideBySideProjection(unittest.TestCase):
     def test_construct_rectangles_and_grids(self, mock_panels_surface_calculator):
         side_by_side = self._create_side_by_side([5, 10, 15, 20, 25], True)
         ws = side_by_side._workspace
-        mock_bank = MagicMock()
-        mock_bank.getPos.return_value = [2, 2, 2]
-        mock_bank.getRotation.return_value = Quat(1, 1, 0, 0)
         component_info = ws.componentInfo()
+        component_info.position.return_value = [2, 2, 2]
+        component_info.rotation.return_value = Quat(1, 1, 0, 0)
         component_info.pixelGridMinDetectorID.return_value = 5
         component_info.pixelGridMaxDetectorID.return_value = 5
         component_info.pixelGridNX.return_value = 1
@@ -157,11 +157,43 @@ class TestSideBySideProjection(unittest.TestCase):
         component_info.pixelGridXStep.return_value = 1.0
         component_info.pixelGridYStep.return_value = 1.0
         component_info.pixelGridZStep.return_value = 0.0
-        ws.getInstrument().findGridDetectors.return_value = [mock_bank]
-        flat_banks = side_by_side._construct_rectangles_and_grids(side_by_side._workspace)
+        bank_index = 7
+        with patch.object(SideBySide, "_find_grid_bank_indices", return_value=[bank_index]) as mock_find_grid_banks:
+            flat_banks = side_by_side._construct_rectangles_and_grids(side_by_side._workspace)
+        mock_find_grid_banks.assert_called_once_with(component_info)
         self.assertEqual(1, len(flat_banks))
         self.assertEqual([5], flat_banks[0].detector_ids)
+        component_info.position.assert_called_with(bank_index)
+        component_info.rotation.assert_called_with(bank_index)
+        component_info.pixelGridNX.assert_called_with(bank_index)
         side_by_side._calculator.getSideBySideViewPos.assert_called_once()
+
+    def test_find_grid_bank_indices_matches_legacy_search(self):
+        # A real instrument with two rectangular banks; order and identity must match the
+        # legacy breadth-first Instrument.findGridDetectors()
+        ws = CreateSampleWorkspace(NumBanks=2, BankPixelWidth=2, StoreInADS=False)
+        component_info = ws.componentInfo()
+        indices = SideBySide._find_grid_bank_indices(component_info)
+        self.assertEqual(["bank1", "bank2"], [component_info.name(i) for i in indices])
+        self.assertTrue(all(component_info.isGridDetector(i) for i in indices))
+
+    def test_find_grid_bank_indices_breadth_first_and_pruned(self):
+        # Tree: root(0) -> [source(1), sample(2), slit1(3), assembly(4), gridA(5)]
+        #       slit1(3) -> [gridSlit(6)];  assembly(4) -> [gridB(7)]
+        names = ["root", "source", "sample", "slit1", "assembly", "gridA", "gridSlit", "gridB"]
+        children = {0: [1, 2, 3, 4, 5], 3: [6], 4: [7]}
+        grids = {5, 6, 7}
+        component_info = MagicMock()
+        component_info.root.return_value = 0
+        component_info.hasSource.return_value = True
+        component_info.source.return_value = 1
+        component_info.hasSample.return_value = True
+        component_info.sample.return_value = 2
+        component_info.name.side_effect = lambda i: names[i]
+        component_info.children.side_effect = lambda i: np.array(children.get(i, []), dtype=np.uint64)
+        component_info.isGridDetector.side_effect = lambda i: i in grids
+        # gridA is found at the first level before gridB in the nested assembly; gridSlit is pruned
+        self.assertEqual([5, 7], SideBySide._find_grid_bank_indices(component_info))
 
     @patch("instrumentview.Projections.Projection.Projection._calculate_detector_coordinates")
     @patch("instrumentview.Projections.SideBySide.PanelsSurfaceCalculator")

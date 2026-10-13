@@ -14,7 +14,7 @@ import re
 from abc import ABCMeta, abstractmethod
 from mantid.api import FileFinder
 from mantid.kernel import DateAndTime, ConfigService, Logger
-from mantid.api import AlgorithmManager, ExperimentInfo
+from mantid.api import AlgorithmManager, InstrumentFileFinder
 from sans.common.enums import SANSInstrument, FileType, SampleShape
 from sans.common.general_functions import get_instrument, instrument_name_correction, get_facility
 
@@ -230,14 +230,14 @@ def get_instrument_paths_for_sans_file(file_name=None, file_information=None):
     instrument_as_string = instrument.value
 
     # Get the idf file path
-    # IMPORTANT NOTE: I profiled the call to ExperimentInfo.getInstrumentFilename and it dominates
+    # IMPORTANT NOTE: I profiled the call to InstrumentFileFinder.getInstrumentFilename and it dominates
     #                 the state creation. Ironically this routine is exported from C++. The problem is
     #                 that we are performing XML parsing on the C++ side, which is costly. There is a
     #                 movement currently towards making the IDF redundant and storing instrument info
     #                 as native nexus information.
     # TODO for optimization: Add the IDF path to a global cache layer which takes the
     #                        instrument name and the from-to dates
-    idf_path = ExperimentInfo.getInstrumentFilename(instrument_as_string, measurement_time_as_string)
+    idf_path = InstrumentFileFinder.getInstrumentFilename(instrument_as_string, measurement_time_as_string)
     idf_path = os.path.normpath(idf_path)
 
     if not os.path.exists(idf_path):

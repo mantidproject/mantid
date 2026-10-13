@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+import warnings
 
 import Direct.ReductionHelpers as helpers
 
@@ -38,13 +39,13 @@ class DirectReductionHelpersTest(unittest.TestCase):
         return super(DirectReductionHelpersTest, self).__init__(methodName)
 
     @staticmethod
-    def getInstrument(InstrumentName="MAR"):
-        """test method used to obtain default instrument for testing"""
-        idf_file = api.ExperimentInfo.getInstrumentFilename(InstrumentName)
+    def getEmptyInstrumentWorkspace(InstrumentName="MAR"):
+        """test method used to obtain a workspace with the default instrument for testing"""
+        idf_file = api.InstrumentFileFinder.getInstrumentFilename(InstrumentName)
         tmp_ws_name = "__empty_" + InstrumentName
         if not mtd.doesExist(tmp_ws_name):
             LoadEmptyInstrument(Filename=idf_file, OutputWorkspace=tmp_ws_name)
-        return mtd[tmp_ws_name].getInstrument()
+        return mtd[tmp_ws_name]
 
     def test_build_subst_dictionary(self):
         self.assertEqual(dict(), helpers.build_subst_dictionary(""))
@@ -75,14 +76,31 @@ class DirectReductionHelpersTest(unittest.TestCase):
         self.assertEqual(myDict["C"], "A")
 
     def test_get_default_idf_param_list(self):
-        pInstr = self.getInstrument()
+        component_info = self.getEmptyInstrumentWorkspace().componentInfo()
 
-        param_list = helpers.get_default_idf_param_list(pInstr)
+        param_list = helpers.get_default_idf_param_list(component_info)
         self.assertTrue(isinstance(param_list, dict))
         # check couple of parameters which are certainly in IDF
         self.assertTrue("deltaE-mode" in param_list)
         self.assertTrue("normalise_method" in param_list)
         self.assertTrue("diag_samp_lo" in param_list)
+
+    def test_legacy_instrument_gives_same_defaults_as_component_info(self):
+        # users' reduction scripts may still pass an Instrument object, so both must agree
+        ws = self.getEmptyInstrumentWorkspace()
+        component_info = ws.componentInfo()
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            instrument = ws.getInstrument()
+            legacy_name = helpers.get_instrument_name(instrument)
+            legacy_list = helpers.get_default_idf_param_list(instrument)
+
+        self.assertEqual(helpers.get_instrument_name(component_info), "MARI")
+        self.assertEqual(legacy_name, "MARI")
+        self.assertEqual(helpers.get_default_idf_param_list(component_info), legacy_list)
+        # parameter lookup is case-insensitive for both
+        self.assertEqual(helpers.get_default_parameter(component_info, "DELTAE-MODE"), legacy_list["deltaE-mode"])
+        self.assertRaises(KeyError, helpers.get_default_parameter, component_info, "not_an_idf_parameter")
 
     def testbuild_properties_dict(self):
         kkdict = {}

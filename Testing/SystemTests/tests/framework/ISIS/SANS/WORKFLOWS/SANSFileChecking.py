@@ -13,7 +13,7 @@ Check that file manipulation works fine
 import unittest
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.api import ExperimentInfo
+from mantid.api import InstrumentFileFinder
 from mantid.kernel import config
 import SANSUtility as su
 import os
@@ -96,7 +96,7 @@ class SANSIDFLoadFromFileTest(unittest.TestCase):
         idf_path_workspace = None
         if exists:
             measurement_time = su.get_measurement_time_from_file(full_path)
-            idf_path_workspace = ExperimentInfo.getInstrumentFilename(instrument_name, measurement_time)
+            idf_path_workspace = InstrumentFileFinder.getInstrumentFilename(instrument_name, measurement_time)
         else:
             print("Missing data files. Path to system test data needs to be set.")
             self.fail()

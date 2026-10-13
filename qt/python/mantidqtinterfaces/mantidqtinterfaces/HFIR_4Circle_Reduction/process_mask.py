@@ -70,8 +70,12 @@ def get_region_of_interest(mask_ws_name):
     mask_matrix = numpy.ndarray(shape=(size_x, size_y), dtype="int")
 
     # mask or unmask all the matrix element according to mask workspace
+    detector_info = mask_ws.detectorInfo()
+    spectrum_info = mask_ws.spectrumInfo()
     for iws in range(mask_ws.getNumberHistograms()):
-        det_id = mask_ws.getDetector(iws).getID()
+        if not spectrum_info.hasDetectors(iws):
+            raise RuntimeError(f"No detectors found for workspace index {iws}")
+        det_id = detector_info.detid(spectrum_info.getSpectrumDefinition(iws)[0][0])
         pixel_2d_id = det_id / size_y, det_id % size_y
         mask_matrix[pixel_2d_id] = int(mask_ws.isMasked(iws))
     # END-FOR

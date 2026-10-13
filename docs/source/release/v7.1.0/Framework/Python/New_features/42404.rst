@@ -1,0 +1,1 @@
+- ``ExperimentInfo.baseComponentInfo()`` is now exposed to python. It returns a :class:`~mantid.geometry.ComponentInfo` for the instrument geometry as loaded from the instrument definition, before any moves, rotations or calibration were applied, replacing ``getInstrument().getBaseInstrument()``.

@@ -287,6 +287,13 @@ class SpectrumInfoTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             info.l2(10.0)
 
+    def test_l1_value(self):
+        spec_info = self._ws.spectrumInfo()
+        comp_info = self._ws.componentInfo()
+        specL1 = spec_info.l1()
+        specL2 = comp_info.sourcePosition().distance(comp_info.samplePosition())
+        self.assertEqual(specL1, specL2)
+
     def test_hasDetectors_exceptional(self):
         info = self._ws.spectrumInfo()
         with self.assertRaises(TypeError):
@@ -367,6 +374,16 @@ class SpectrumInfoTest(unittest.TestCase):
         info = self._ws.spectrumInfo()
         spectrumDefinition = info.getSpectrumDefinition(1)
         self.assertEqual(spectrumDefinition[0], (1, 0))
+
+    def test_spectrumDefintionGet_out_of_range_raises(self):
+        """Indexing past the end raises rather than reading out of bounds"""
+        info = self._ws.spectrumInfo()
+        # spectrum 0 has no detectors
+        with self.assertRaises(IndexError):
+            info.getSpectrumDefinition(0)[0]
+        spectrumDefinition = info.getSpectrumDefinition(1)
+        with self.assertRaises(IndexError):
+            spectrumDefinition[spectrumDefinition.size()]
 
 
 if __name__ == "__main__":

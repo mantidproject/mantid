@@ -1242,7 +1242,7 @@ class RunDescriptor(PropDescriptor):
         ws_calibration = calibration
         if use_ws_calibration:
             try:
-                ws_calibration = prop_helpers.get_default_parameter(loaded_ws.getInstrument(), "det_cal_file")
+                ws_calibration = prop_helpers.get_default_parameter(loaded_ws.componentInfo(), "det_cal_file")
                 if ws_calibration is None:
                     ws_calibration = calibration
                 if isinstance(ws_calibration, str) and ws_calibration.lower() == "none":

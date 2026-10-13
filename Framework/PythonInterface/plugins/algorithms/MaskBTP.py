@@ -154,7 +154,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         # load the instrument if there isn't a workspace provided
         deleteWS = False
         if not ws:
-            IDF = mantid.api.ExperimentInfo.getInstrumentFilename(self.instname)
+            IDF = mantid.api.InstrumentFileFinder.getInstrumentFilename(self.instname)
             ws = mantid.simpleapi.LoadEmptyInstrument(Filename=IDF, OutputWorkspace=self.instname + "MaskBTP")
             deleteWS = True  # if there is going to be an issue with the instrument provided
         self.instname = ws.getInstrumentName().strip()  # update the instrument name

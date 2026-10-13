@@ -229,10 +229,8 @@ class ISISLoadFilesMER(systemtesting.MantidSystemTest):
         self.assertEqual(ws.getNumberHistograms(), 69641)
         self.assertEqual(mon_ws.getNumberHistograms(), 69641)
         self.assertEqual(mon_ws.getIndexFromSpectrumNumber(69638), 69637)
-        det = mon_ws.getDetector(69632)
-        self.assertTrue(det.isMonitor())
-        det = mon_ws.getDetector(69631)
-        self.assertFalse(det.isMonitor())
+        self.assertTrue(mon_ws.spectrumInfo().isMonitor(69632))
+        self.assertFalse(mon_ws.spectrumInfo().isMonitor(69631))
 
         #  enable when bug #10980 is fixed
         propman.sample_run = None  # delete all
@@ -249,8 +247,7 @@ class ISISLoadFilesMER(systemtesting.MantidSystemTest):
         self.assertEqual(ws.getNumberHistograms(), 69632)
         self.assertEqual(mon_ws.getNumberHistograms(), 9)
         self.assertEqual(mon_ws.getIndexFromSpectrumNumber(69633), 0)
-        det = mon_ws.getDetector(0)
-        self.assertTrue(det.isMonitor())
+        self.assertTrue(mon_ws.spectrumInfo().isMonitor(0))
 
         ei_ws = GetAllEi(mon_ws, 69634, 69638, IgnoreSecondMonitor=False)
         self.assertTrue(isinstance(ei_ws, Workspace))
@@ -292,7 +289,7 @@ class ISISLoadFilesLET(systemtesting.MantidSystemTest):
         #
         ws = PropertyManager.sample_run.get_workspace()
         # apply IDF property, correspondent to this particular time interval
-        propman.update_defaults_from_instrument(ws.getInstrument())
+        propman.update_defaults_from_instrument(ws.componentInfo())
         self.assertEqual(int(propman.mon1_norm_spec), 40961)
         self.assertEqual(propman.ei_mon1_spec, 40966)
 

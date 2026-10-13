@@ -16,6 +16,7 @@ from mantid.simpleapi import (
     SetSampleMaterial,
 )
 from mantid import config
+from plugins.algorithms.component_info_utils import get_spectrum_detector_index
 import math
 
 
@@ -210,8 +211,8 @@ class IndirectTransmission(PythonAlgorithm):
             spectra_list = list(range(0, wsHandle.getNumberHistograms()))
             GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, SpectraList=spectra_list)
             wsHandle = mtd[workspace]
-            det = wsHandle.getDetector(0)
-            efixed = wsHandle.getEFixed(det.getID())
+            det_id = wsHandle.detectorInfo().detid(get_spectrum_detector_index(wsHandle.spectrumInfo(), 0))
+            efixed = wsHandle.getEFixed(det_id)
 
         return efixed
 

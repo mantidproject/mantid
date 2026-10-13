@@ -15,6 +15,7 @@ from mantid.dataobjects import EventWorkspace, Workspace2D, TableWorkspace
 from Engineering.common import path_handling
 from typing import Tuple, Sequence, List, TYPE_CHECKING
 from mantid.geometry import ComponentInfo
+from plugins.algorithms.component_info_utils import get_spectrum_detector_index
 
 if TYPE_CHECKING:
     from Engineering.common.calibration_info import CalibrationInfo
@@ -905,11 +906,12 @@ def get_ws_indices_for_bank(workspace, bank):
     @returns :: list of workspace indices for the bank
     """
     detector_ids = get_detector_ids_for_bank(bank)
+    detector_info = workspace.detectorInfo()
+    spectrum_info = workspace.spectrumInfo()
 
     def index_in_bank(index):
         try:
-            det = workspace.getDetector(index)
-            return det.getID() in detector_ids
+            return detector_info.detid(get_spectrum_detector_index(spectrum_info, index)) in detector_ids
         except RuntimeError:
             return False
 

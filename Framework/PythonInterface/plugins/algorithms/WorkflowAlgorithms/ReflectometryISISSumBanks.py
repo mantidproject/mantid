@@ -7,6 +7,7 @@
 
 from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspace, PropertyMode, WorkspaceProperty
 from mantid.kernel import Direction
+from plugins.algorithms.component_info_utils import find_rectangular_detector_indices
 
 
 class ReflectometryISISSumBanks(DataProcessorAlgorithm):
@@ -47,8 +48,7 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
         masked_workspace = self.mask_workspace(input_workspace)
 
         bank = self._get_rectangular_detector_component(input_workspace)
-        component_info = input_workspace.componentInfo()
-        num_banks = component_info.pixelGridNX(component_info.indexOfAny(bank.getName()))
+        num_banks = input_workspace.componentInfo().pixelGridNX(bank)
         if num_banks == 1:
             self.setProperty(self._OUTPUT_WS, masked_workspace)
             return
@@ -91,12 +91,14 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
     def sum_banks(self, workspace: MatrixWorkspace, num_banks: int):
         return self._run_child_with_out_props("SmoothNeighbours", InputWorkspace=workspace, SumPixelsX=num_banks, SumPixelsY=1)
 
-    def _get_rectangular_detector_component(self, workspace: MatrixWorkspace):
-        instrument = workspace.getInstrument()
-        if not instrument:
+    def _get_rectangular_detector_component(self, workspace: MatrixWorkspace) -> int:
+        """Returns the component index of the single rectangular detector in the workspace's instrument."""
+        component_info = workspace.componentInfo()
+        # An instrument with no components other than the root means none is attached
+        if len(component_info.children(component_info.root())) == 0:
             raise RuntimeError("The input workspace must have an instrument")
 
-        rect_detectors = instrument.findRectDetectors()
+        rect_detectors = find_rectangular_detector_indices(component_info)
         if len(rect_detectors) == 0:
             raise RuntimeError("The input workspace must contain a rectangular detector")
         if len(rect_detectors) > 1:

@@ -29,6 +29,7 @@ from mantid.api import AnalysisDataService as ADS
 from mantid.dataobjects import EventWorkspace, TableWorkspace, Workspace2D
 from mantid.simpleapi import CloneWorkspace, CreateWorkspace, DeleteWorkspace, Fit, GroupWorkspaces, RenameWorkspace
 from mantid.kernel import config
+from plugins.algorithms.component_info_utils import get_spectrum_detector_index
 
 # Calibration
 from ideal_tube import IdealTube
@@ -73,8 +74,9 @@ def create_tube_calibration_ws_by_ws_index_list(integrated_workspace, output_wor
 # Return the udet number and [x,y,z] position of the detector (or virtual detector) corresponding to spectra spectra_number
 # Thanks to Pascal Manuel for this function
 def get_detector_pos(work_handle, spectra_number):
-    udet = work_handle.getDetector(spectra_number)
-    return udet.getID(), udet.getPos()
+    spectrum_info = work_handle.spectrumInfo()
+    detector_id = work_handle.detectorInfo().detid(get_spectrum_detector_index(spectrum_info, spectra_number))
+    return detector_id, spectrum_info.position(spectra_number)
 
 
 # Given the center of a slit in pixels return the interpolated y
@@ -429,15 +431,18 @@ def getCalibratedPixelPositions(
     if len(pixels) != n_dets:
         print("Tube correction failed.")
         return det_IDs, det_positions
-    base_instrument = ws.getInstrument().getBaseInstrument()
+    base_component_info = ws.baseComponentInfo()
+    detector_info = ws.detectorInfo()
+    spectrum_info = ws.spectrumInfo()
+    # the (first) detector index of each spectrum in the tube; a detector index is also its component index
+    detector_indices = [get_spectrum_detector_index(spectrum_info, ws_index) for ws_index in which_tube]
     # Get tube unit vector
-    # get the detector from the baseInstrument, in order to get the positions
+    # get the detector positions from the base instrument, in order to get the positions
     # before any calibration being loaded.
-    det0 = base_instrument.getDetector(ws.getDetector(which_tube[0]).getID())
-    detN = base_instrument.getDetector(ws.getDetector(which_tube[-1]).getID())
-    d0pos, dNpos = det0.getPos(), detN.getPos()
+    d0pos = base_component_info.position(detector_indices[0])
+    dNpos = base_component_info.position(detector_indices[-1])
     # identical to norm of vector: |dNpos - d0pos|
-    tubeLength = det0.getDistance(detN)
+    tubeLength = d0pos.distance(dNpos)
     if tubeLength <= 0.0:
         print("Zero length tube cannot be calibrated, calibration failed.")
         return det_IDs, det_positions
@@ -451,13 +456,12 @@ def getCalibratedPixelPositions(
 
     # Move the pixel detectors (might not work for sloping tubes)
     for i in range(n_dets):
-        deti = ws.getDetector(which_tube[i])
         p_new = pixels[i]
         # again, the operation float * v3d is not defined, but v3d * float is,
         # so, I wrote the new pos as center + unit_vector * (float)
         new_pos = center + unit_vector * p_new
 
-        det_IDs.append(deti.getID())
+        det_IDs.append(detector_info.detid(detector_indices[i]))
         det_positions.append(new_pos)
 
     return det_IDs, det_positions

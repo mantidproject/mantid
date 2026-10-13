@@ -16,7 +16,7 @@ from reducer_singleton import ReductionSingleton
 import isis_reduction_steps
 import isis_reducer
 from centre_finder import is_workspace_which_requires_angle, BeamCenterLogger, CentreFinder, CentrePositioner, FindDirectionEnum
-from mantid.api import mtd, AnalysisDataService, ExperimentInfo, WorkspaceGroup
+from mantid.api import mtd, AnalysisDataService, InstrumentFileFinder, WorkspaceGroup
 from mantid.simpleapi import AddSampleLog, CloneWorkspace, DeleteWorkspace, GroupWorkspaces, RenameWorkspace, Scale
 import copy
 import os
@@ -1863,7 +1863,7 @@ def _get_idf_path_for_run(file_name):
     instrument_name = ReductionSingleton().get_instrument_name()
 
     # Get the path to the instrument definition file
-    idf_path_workspace = ExperimentInfo.getInstrumentFilename(instrument_name, measurement_time)
+    idf_path_workspace = InstrumentFileFinder.getInstrumentFilename(instrument_name, measurement_time)
     return os.path.normpath(idf_path_workspace)
 
 

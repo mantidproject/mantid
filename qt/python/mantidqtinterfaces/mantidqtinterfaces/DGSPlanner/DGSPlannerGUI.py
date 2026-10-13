@@ -249,7 +249,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                 instrumentName = "WAND"
 
             mantid.simpleapi.LoadEmptyInstrument(
-                mantid.api.ExperimentInfo.getInstrumentFilename(instrumentName), OutputWorkspace="__temp_instrument"
+                mantid.api.InstrumentFileFinder.getInstrumentFilename(instrumentName), OutputWorkspace="__temp_instrument"
             )
 
             if self.masterDict["instrument"] == "HYSPEC":

@@ -11,6 +11,7 @@ from mantid.api import PanelsSurfaceCalculator
 from mantid.dataobjects import Workspace2D
 from mantid.geometry import ComponentInfo
 from scipy.spatial.transform import Rotation
+from collections import deque
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional
 
@@ -128,17 +129,45 @@ class SideBySide(Projection, projection_types={ProjectionType.SIDE_BY_SIDE: {"ax
             for id in bank.detector_ids:
                 self._detector_id_to_flat_bank_map[id] = bank
 
+    @staticmethod
+    def _find_grid_bank_indices(component_info: ComponentInfo) -> list[int]:
+        """Return the component indices of all grid (and rectangular) banks.
+
+        Replicates the breadth-first search order and pruning rules of the legacy
+        Instrument.findGridDetectors(): the source, the sample, and any component named
+        "chopper-position", "supermirror" or starting with "slit" are skipped along with their
+        subtrees, and the search does not descend into a grid bank once found."""
+        source_index = component_info.source() if component_info.hasSource() else None
+        sample_index = component_info.sample() if component_info.hasSample() else None
+        grid_bank_indices = []
+        queue = deque(component_info.children(component_info.root()))
+        while queue:
+            index = int(queue.popleft())
+            name = component_info.name(index)
+            skip = (
+                index == source_index
+                or index == sample_index
+                or name == "chopper-position"
+                or name.startswith("slit")
+                or name == "supermirror"
+            )
+            if skip:
+                continue
+            if component_info.isGridDetector(index):
+                grid_bank_indices.append(index)
+            else:
+                queue.extend(component_info.children(index))
+        return grid_bank_indices
+
     def _construct_rectangles_and_grids(self, workspace: Workspace2D) -> list[FlatBankInfo]:
-        instrument = workspace.getInstrument()
-        rectangular_banks = instrument.findGridDetectors()
         component_info = self._workspace.componentInfo()
+        grid_bank_indices = self._find_grid_bank_indices(component_info)
         flat_banks = []
 
-        if len(rectangular_banks) == 0:
+        if len(grid_bank_indices) == 0:
             return flat_banks
 
-        for bank in rectangular_banks:
-            bank_index = component_info.indexOfAny(bank.getName())
+        for bank_index in grid_bank_indices:
             bank_detector_ids = np.array(
                 range(component_info.pixelGridMinDetectorID(bank_index), component_info.pixelGridMaxDetectorID(bank_index) + 1)
             )
@@ -148,8 +177,8 @@ class SideBySide(Projection, projection_types={ProjectionType.SIDE_BY_SIDE: {"ax
             flat_bank = FlatBankInfo()
             flat_bank.bank_type = "grid"
             flat_bank.detector_id_position_map.clear()
-            flat_bank.reference_position = np.array(bank.getPos())
-            rotation = bank.getRotation()
+            flat_bank.reference_position = np.array(component_info.position(bank_index))
+            rotation = component_info.rotation(bank_index)
             flat_bank.rotation = Rotation.from_quat([rotation.imagI(), rotation.imagJ(), rotation.imagK(), rotation.real()])
             flat_bank.detector_ids = list(valid_detector_ids)
             pixels = [

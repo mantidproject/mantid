@@ -24,6 +24,7 @@ from mantid.kernel import (
 import numpy as np
 from scipy.ndimage import label, maximum_position, binary_closing, sum_labels, uniform_filter1d, uniform_filter
 from scipy.signal import convolve
+from plugins.algorithms.component_info_utils import find_rectangular_detector_indices
 from plugins.algorithms.peakdata_utils import (
     InstrumentArrayConverter,
     get_fwhm_from_back_to_back_params,
@@ -149,15 +150,15 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
         peaks = self.exec_child_alg("CreatePeaksWorkspace", InstrumentWorkspace=ws, NumberOfPeaks=0, OutputWorkspace="_peaks")
 
         array_converter = InstrumentArrayConverter(ws)
-        banks = ws.getInstrument().findRectDetectors()
         component_info = ws.componentInfo()
         detector_info = ws.detectorInfo()
-        prog_reporter = Progress(self, start=0.0, end=1.0, nreports=len(banks))
-        for bank in banks:
-            prog_reporter.report(f"Searching in {bank.getName()}")
+        bank_indices = find_rectangular_detector_indices(component_info)
+        prog_reporter = Progress(self, start=0.0, end=1.0, nreports=len(bank_indices))
+        for bank_index in bank_indices:
+            bank_name = component_info.name(bank_index)
+            prog_reporter.report(f"Searching in {bank_name}")
             # add a dummy peak at center of detector (used in PeakData to get data arrays) - will be deleted after
             irow_to_del = peaks.getNumberPeaks()
-            bank_index = component_info.indexOfAny(bank.getName())
             npixels_x = component_info.pixelGridNX(bank_index)
             npixels_y = component_info.pixelGridNY(bank_index)
             detid = detector_info.detid(component_info.detectorIndexAtXYZ(bank_index, npixels_x // 2, npixels_y // 2, 0))
@@ -176,7 +177,7 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
                 nbins = self.getProperty("NBins").value
 
             # get data in detector coords
-            peak_data = array_converter.get_peak_data(dummy_pk, detid, bank.getName(), npixels_x, npixels_y, 1, 1)
+            peak_data = array_converter.get_peak_data(dummy_pk, detid, bank_name, npixels_x, npixels_y, 1, 1)
             _, y, esq, _ = peak_data.get_data_arrays()  # 3d arrays [rows x cols x tof]
             if peak_finding_strategy == "IOverSigma":
                 threshold = self.getProperty("ThresholdIoverSigma").value
@@ -251,7 +252,7 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             self.exec_child_alg("DeleteTableRows", TableWorkspace=peaks, Rows=[irow_to_del])
 
             # report number of peaks found
-            logger.notice(f"Found {peaks.getNumberPeaks() - irow_to_del} peaks in {bank.getName()}")
+            logger.notice(f"Found {peaks.getNumberPeaks() - irow_to_del} peaks in {bank_name}")
 
         # assign output
         self.setProperty("PeaksWorkspace", peaks)

@@ -6,9 +6,17 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 import unittest
-from mantid.simpleapi import LoadEmptyInstrument
+import warnings
+from mantid.simpleapi import CreateSampleWorkspace, CreateWorkspace, GroupDetectors, LoadEmptyInstrument
 
-from plugins.algorithms.component_info_utils import resolve_component_index
+from plugins.algorithms.component_info_utils import (
+    find_grid_detector_indices,
+    find_rectangular_detector_indices,
+    get_assembly_children,
+    get_detector_id,
+    get_spectrum_detector_index,
+    resolve_component_index,
+)
 
 
 class ComponentInfoUtilsTest(unittest.TestCase):
@@ -52,6 +60,66 @@ class ComponentInfoUtilsTest(unittest.TestCase):
 
         self.assertRaises(ValueError, resolve_component_index, "not_a_real_component", component_info)
         self.assertRaises(ValueError, resolve_component_index, "bank7/not_a_real_child", component_info)
+
+    def _assert_same_banks_as_legacy(self, ws):
+        component_info = ws.componentInfo()
+        # the deprecated Instrument search is the reference these helpers must reproduce, order included
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            instrument = ws.getInstrument()
+            legacy_rect_names = [bank.getFullName() for bank in instrument.findRectDetectors()]
+            legacy_grid_names = [bank.getFullName() for bank in instrument.findGridDetectors()]
+
+        self.assertEqual([component_info.fullName(index) for index in find_rectangular_detector_indices(component_info)], legacy_rect_names)
+        self.assertEqual([component_info.fullName(index) for index in find_grid_detector_indices(component_info)], legacy_grid_names)
+
+    def test_find_bank_indices_matches_legacy_on_sample_workspace(self):
+        ws = CreateSampleWorkspace(NumBanks=3, BankPixelWidth=4, NumMonitors=2, OutputWorkspace="sample_banks")
+        self.assertEqual(len(find_rectangular_detector_indices(ws.componentInfo())), 3)
+        self._assert_same_banks_as_legacy(ws)
+
+    def test_find_bank_indices_matches_legacy_on_sxd(self):
+        ws = LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace="sxd_empty")
+        self.assertGreater(len(find_rectangular_detector_indices(ws.componentInfo())), 0)
+        self._assert_same_banks_as_legacy(ws)
+
+    def test_find_bank_indices_empty_for_tube_instrument(self):
+        ws = LoadEmptyInstrument(InstrumentName="CORELLI", OutputWorkspace="corelli_empty")
+        self.assertEqual(find_rectangular_detector_indices(ws.componentInfo()), [])
+        self._assert_same_banks_as_legacy(ws)
+
+    def test_get_assembly_children_and_detector_id(self):
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=3, OutputWorkspace="sample_banks")
+        component_info = ws.componentInfo()
+        detector_info = ws.detectorInfo()
+        bank_index = component_info.indexOfAny("bank1")
+
+        columns = get_assembly_children(component_info, bank_index)
+        self.assertEqual(columns, [int(child) for child in component_info.children(bank_index)])
+        pixel_index = get_assembly_children(component_info, columns[0])[0]
+        self.assertEqual(get_detector_id(component_info, detector_info, pixel_index), detector_info.detid(pixel_index))
+
+        # a pixel is not an assembly, and a bank is not a detector
+        self.assertRaises(RuntimeError, get_assembly_children, component_info, pixel_index)
+        self.assertRaises(RuntimeError, get_detector_id, component_info, detector_info, bank_index)
+
+    def test_get_spectrum_detector_index_matches_legacy_detector_id(self):
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=3, OutputWorkspace="sample_banks")
+        # spectrum 0 groups three detectors, listed out of order to check the first is the lowest ID
+        grouped = GroupDetectors(InputWorkspace=ws, GroupingPattern="5+3+4,0,1-2", OutputWorkspace="grouped_banks")
+        for workspace in (ws, grouped):
+            detector_info = workspace.detectorInfo()
+            spectrum_info = workspace.spectrumInfo()
+            for ws_index in range(workspace.getNumberHistograms()):
+                # the deprecated getDetector(ws_index).getID() is the reference this must reproduce
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", DeprecationWarning)
+                    legacy_id = workspace.getDetector(ws_index).getID()
+                self.assertEqual(detector_info.detid(get_spectrum_detector_index(spectrum_info, ws_index)), legacy_id)
+
+    def test_get_spectrum_detector_index_raises_for_spectrum_without_detectors(self):
+        ws = CreateWorkspace(DataX=[1, 2], DataY=[1], NSpec=1, OutputWorkspace="no_detectors")
+        self.assertRaises(RuntimeError, get_spectrum_detector_index, ws.spectrumInfo(), 0)
 
 
 if __name__ == "__main__":

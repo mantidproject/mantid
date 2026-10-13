@@ -271,8 +271,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         ScaleX(InputWorkspace="ws", OutputWorkspace="ws", Operation="Add", Factor=-mon1_peak, InstrumentParameter="DelayTime", Combine=True)
         ws = mtd["ws"]
 
-        mon1_det = ws.getDetector(1)
-        mon1_pos = mon1_det.getPos()
+        mon1_pos = ws.spectrumInfo().position(1)
         component_info = ws.componentInfo()
         src_name = component_info.name(component_info.source())
         MoveInstrumentComponent(

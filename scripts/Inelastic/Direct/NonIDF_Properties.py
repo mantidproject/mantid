@@ -15,7 +15,7 @@ from Direct.PropertiesDescriptors import (
     VanadiumRMM,
 )
 from Direct.RunDescriptor import RunDescriptor, RunDescriptorDependent
-from mantid.api import mtd, ExperimentInfo
+from mantid.api import mtd, InstrumentFileFinder
 from mantid.kernel import config, logger
 from mantid.simpleapi import LoadEmptyInstrument
 from mantid import geometry
@@ -318,7 +318,7 @@ class NonIDF_Properties(object):
             elif isinstance(Instrument, str):  # instrument name defined
                 new_name, full_name, facility_ = prop_helpers.check_instrument_name(None, Instrument)
                 # idf_dir = config.getString('instrumentDefinitgeton.directory')
-                idf_file = ExperimentInfo.getInstrumentFilename(full_name)
+                idf_file = InstrumentFileFinder.getInstrumentFilename(full_name)
                 tmp_ws_name = "__empty_" + full_name
                 if not mtd.doesExist(tmp_ws_name):
                     LoadEmptyInstrument(Filename=idf_file, OutputWorkspace=tmp_ws_name)

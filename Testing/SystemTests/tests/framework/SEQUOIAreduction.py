@@ -16,6 +16,7 @@ import glob
 import numpy as np
 import mantid
 from mantid.api import mtd
+from plugins.algorithms.component_info_utils import get_spectrum_detector_index
 from mantid.simpleapi import (
     ChangeBinOffset,
     ConvertToDistribution,
@@ -85,10 +86,12 @@ class DirectInelaticSNSTest(systemtesting.MantidSystemTest):
         a = [[] for i in range(len(bin_angles))]  # list of list with detector IDs
         w = mtd[ws]
         origin = w.componentInfo().samplePosition()
+        detector_info = w.detectorInfo()
+        spectrum_info = w.spectrumInfo()
         for i in range(w.getNumberHistograms()):
             ang = w.getDetector(i).getTwoTheta(origin, mantid.kernel.V3D(0, 0, 1)) * 180 / np.pi
             index = int((ang - angmin) / angstep)
-            if (index >= 0) and (index < len(a)) and ((w.getDetector(i).getID()) > 0):
+            if (index >= 0) and (index < len(a)) and (detector_info.detid(get_spectrum_detector_index(spectrum_info, i)) > 0):
                 a[index].append(w.getSpectrum(i).getSpectrumNo())
         # create lists with angles and detector ID only for bins where there are detectors
         ang_list = []
