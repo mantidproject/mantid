@@ -764,6 +764,13 @@ void ComponentInfo::clearParameter(const size_t componentIndex, const std::strin
   }
 }
 
+void ComponentInfo::clearParameters() {
+  // Cleared in place, not replaced: the store is shared with the owning ParameterMap.
+  if (m_parameterInfo) {
+    m_parameterInfo->clear();
+  }
+}
+
 const ParameterInfo::ComponentParameters &ComponentInfo::parameters(const size_t componentIndex) const {
   static ParameterInfo::ComponentParameters const empty;
   return m_parameterInfo ? m_parameterInfo->parameters(componentIndex) : empty;
