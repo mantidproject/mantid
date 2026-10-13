@@ -10,7 +10,7 @@ import unittest
 import uuid
 
 from unittest import mock
-from sans.command_interface.ISISCommandInterface import Clean, MaskFile, set_save
+from sans.command_interface.ISISCommandInterface import Clean, MaskFile, SetSampleThickness, set_save
 from sans.common.enums import OutputMode
 
 
@@ -54,6 +54,15 @@ class ISISCommandInterfaceTest(unittest.TestCase):
         with mock.patch("sans.command_interface.ISISCommandInterface.find_full_file_path") as mocked_finder:
             mocked_finder.return_value = tmp_file.name
             self.assertIsNone(MaskFile(file_name))
+
+    def test_set_sample_thickness_raises_for_non_positive_values(self):
+        for thickness in [0.0, -1.5]:
+            with self.assertRaises(ValueError):
+                SetSampleThickness(thickness)
+
+    def test_set_sample_thickness_accepts_positive_values(self):
+        SetSampleThickness(2.5)
+        SetSampleThickness("1")
 
     def test_set_save_raises_an_error_with_wrong_save_algorithms(self):
         save_algs = [{"SaveBad": "txt"}, {"SaveRKH": "txt", "SaveBad": "txt"}]
