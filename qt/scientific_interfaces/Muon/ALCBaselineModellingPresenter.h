@@ -10,7 +10,6 @@
 #include "IALCBaselineModellingPresenter.h"
 #include "IALCBaselineModellingPresenterSubscriber.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidKernel/System.h"
 
 #include "DllConfig.h"
 

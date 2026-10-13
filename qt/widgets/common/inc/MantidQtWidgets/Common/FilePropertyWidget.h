@@ -8,7 +8,6 @@
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
-#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/TextPropertyWidget.h"
 #include <QPushButton>

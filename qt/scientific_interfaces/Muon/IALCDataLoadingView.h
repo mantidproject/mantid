@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <cstddef>
+
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/MuonPeriodInfo.h"
 #include <QFileSystemWatcher>
@@ -13,7 +15,6 @@
 
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/System.h"
 
 #include <optional>
 

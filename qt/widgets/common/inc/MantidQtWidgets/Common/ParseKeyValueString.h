@@ -13,7 +13,6 @@ into a map of key/value pairs.
 */
 
 #include "MantidAPI/IAlgorithmRuntimeProps.h"
-#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 
 #include <QString>

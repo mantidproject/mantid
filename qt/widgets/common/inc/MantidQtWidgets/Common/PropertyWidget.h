@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidKernel/Property_fwd.h"
-#include "MantidKernel/System.h"
 
 #include <QGridLayout>
 #include <QLabel>

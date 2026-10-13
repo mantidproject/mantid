@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Spectroscopy/DllConfig.h"
 #include "ui_OutputName.h"
 #include <QRegularExpressionValidator>

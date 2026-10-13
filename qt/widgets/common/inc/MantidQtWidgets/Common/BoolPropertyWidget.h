@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/PropertyWidget.h"
 #include <QCheckBox>

@@ -9,7 +9,6 @@
 #include "DataReductionTab.h"
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_ISISDiagnostics.h"
 
