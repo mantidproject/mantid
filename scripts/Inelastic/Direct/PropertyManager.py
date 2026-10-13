@@ -433,7 +433,7 @@ class PropertyManager(NonIDF_Properties):
     #
     # pylint: disable=too-many-branches
 
-    def update_defaults_from_instrument(self, pInstrument, ignore_changes=False):
+    def update_defaults_from_instrument(self, pInstrumentWS, ignore_changes=False):
         """Method used to update default parameters from the same instrument (with different parameters).
 
         Used if initial parameters correspond to instrument with one validity dates and
@@ -448,14 +448,14 @@ class PropertyManager(NonIDF_Properties):
                         of all properties changed when applying this method
 
         """
-        self.reduction_instrument_warning(pInstrument)
+        self.reduction_instrument_warning(pInstrumentWS.getInstrumentName())
 
         # Retrieve the properties, changed from interface earlier
         old_changes_list = self.getChangedProperties()
 
         old_changes = self.create_old_changes_dict(old_changes_list)
 
-        param_list = prop_helpers.get_default_idf_param_list(pInstrument, self.__subst_dict)
+        param_list = prop_helpers.get_default_idf_param_list(pInstrumentWS.getInstrument(), self.__subst_dict)
 
         # remove old changes which are not related to IDF (not to reapply it again)
         old_changes = self.remove_non_IDF_changes(old_changes, param_list)
@@ -550,13 +550,11 @@ class PropertyManager(NonIDF_Properties):
 
     # --------------------------------------------------------------------------------------------
 
-    def reduction_instrument_warning(self, pInstrument):
-        if self.instr_name != pInstrument.getName():
+    def reduction_instrument_warning(self, pInstrumentName):
+        if self.instr_name != pInstrumentName():
             self.log(
                 "*** WARNING: Setting reduction properties of the instrument {0} from the instrument {1}.\n"
-                "*** This only works if both instruments have the same reduction properties!".format(
-                    self.instr_name, pInstrument.getName()
-                ),
+                "*** This only works if both instruments have the same reduction properties!".format(self.instr_name, pInstrumentName()),
                 "warning",
             )
 
