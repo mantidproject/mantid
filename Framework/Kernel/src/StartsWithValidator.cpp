@@ -13,7 +13,14 @@
 namespace Mantid::Kernel {
 
 /// @cond
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"
+#endif
 template class MANTID_KERNEL_DLL ListValidator<std::string>;
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 /// @endcond
 
 /**

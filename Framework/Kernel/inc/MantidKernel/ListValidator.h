@@ -177,7 +177,7 @@ template <> inline std::string ListValidator<std::string>::checkValidity(const s
 }
 
 /// @cond
-extern template class MANTID_KERNEL_DLL ListValidator<std::string>;
+extern template class ListValidator<std::string>;
 /// @endcond
 
 } // namespace Kernel
