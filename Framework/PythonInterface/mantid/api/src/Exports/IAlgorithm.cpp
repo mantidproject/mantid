@@ -326,7 +326,8 @@ PyObject *getAlgorithmID(const IAlgorithm &self) {
  * @return Algorithm summary
  */
 std::string getOptionalMessage(const IAlgorithm &self) {
-  PyErr_Warn(PyExc_DeprecationWarning, ".getOptionalMessage() is deprecated. Use .summary() instead.");
+  if (PyErr_Warn(PyExc_DeprecationWarning, ".getOptionalMessage() is deprecated. Use .summary() instead.") < 0)
+    throw boost::python::error_already_set();
   return self.summary();
 }
 
@@ -335,7 +336,8 @@ std::string getOptionalMessage(const IAlgorithm &self) {
  * @return Algorithm summary
  */
 std::string getWikiSummary(const IAlgorithm &self) {
-  PyErr_Warn(PyExc_DeprecationWarning, ".getWikiSummary() is deprecated. Use .summary() instead.");
+  if (PyErr_Warn(PyExc_DeprecationWarning, ".getWikiSummary() is deprecated. Use .summary() instead.") < 0)
+    throw boost::python::error_already_set();
   return self.summary();
 }
 

@@ -14,8 +14,9 @@ using namespace boost::python;
 
 double deprecatedSignature(const std::string &src, const std::string &dest, const double srcValue, const double l1,
                            const double l2, const double theta, const DeltaEMode::Type emode, const double efixed) {
-  PyErr_Warn(PyExc_DeprecationWarning, ".run(src, dest, srcValue, l1, l2, theta, emode, efixed) is deprecated. "
-                                       "Use .run(src, dest, srcValue, l1, emode, params) instead.");
+  if (PyErr_Warn(PyExc_DeprecationWarning, ".run(src, dest, srcValue, l1, l2, theta, emode, efixed) is deprecated. "
+                                           "Use .run(src, dest, srcValue, l1, emode, params) instead.") < 0)
+    throw boost::python::error_already_set();
   return UnitConversion::run(src, dest, srcValue, l1, l2, theta, emode, efixed);
 }
 
