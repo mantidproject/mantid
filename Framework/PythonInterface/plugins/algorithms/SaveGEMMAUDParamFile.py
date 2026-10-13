@@ -154,7 +154,6 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
         # of a DetectorGroup's getPos()/getTwoTheta().
         spectrum_info = bank.spectrumInfo()
         component_info = bank.componentInfo()
-        detector = bank.getDetector(0)
 
         sample_pos = component_info.samplePosition()
         source_pos = component_info.sourcePosition()
@@ -163,7 +162,7 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
         beam_dir = sample_pos - source_pos
         detector_dir = det_pos - sample_pos
 
-        return math.degrees(beam_dir.angle(detector_dir)), math.degrees(detector.getPhi())
+        return math.degrees(beam_dir.angle(detector_dir)), math.degrees(math.atan2(det_pos.Y(), det_pos.X()))
 
     def _parse_gsas_param_file(self, gsas_filename):
         with open(gsas_filename) as prm_file:
