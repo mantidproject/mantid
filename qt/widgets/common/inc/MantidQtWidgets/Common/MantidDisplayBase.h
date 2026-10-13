@@ -8,7 +8,6 @@
 
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
-#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DistributionOptions.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/GraphOptions.h"

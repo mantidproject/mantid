@@ -12,7 +12,6 @@
 #include "SqwView.h"
 
 #include "MantidGeometry/IComponent.h"
-#include "MantidKernel/System.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

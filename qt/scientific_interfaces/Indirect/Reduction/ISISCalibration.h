@@ -7,7 +7,6 @@
 #pragma once
 
 #include "DataReductionTab.h"
-#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_ISISCalibration.h"

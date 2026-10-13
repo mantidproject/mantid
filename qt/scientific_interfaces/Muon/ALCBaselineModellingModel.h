@@ -7,7 +7,6 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "MantidKernel/System.h"
 
 #include "IALCBaselineModellingModel.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
