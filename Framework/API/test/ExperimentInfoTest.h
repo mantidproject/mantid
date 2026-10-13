@@ -78,9 +78,9 @@ public:
     TS_ASSERT_EQUALS(inst2->getName(), "MyTestInst");
 
     // But the base instrument does!
-    std::shared_ptr<const Instrument> inst3 = inst2->baseInstrument();
-    TS_ASSERT_EQUALS(inst3.get(), inst1.get());
-    TS_ASSERT_EQUALS(inst3->getName(), "MyTestInst");
+    const auto &baseComponentInfo = ws.baseComponentInfo();
+    TS_ASSERT_EQUALS(baseComponentInfo.componentID(baseComponentInfo.root()), inst1->getComponentID());
+    TS_ASSERT_EQUALS(baseComponentInfo.name(baseComponentInfo.root()), "MyTestInst");
   }
 
   void test_GetInstrumentMetadata() {

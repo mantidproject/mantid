@@ -74,7 +74,8 @@ class InstrumentTest(unittest.TestCase):
 
     def test_baseInstrument_Can_Be_Retrieved(self):
         inst = self.__testws.getInstrument()
-        base_inst = inst.getBaseInstrument()
+        with self.assertWarns(DeprecationWarning):
+            base_inst = inst.getBaseInstrument()
         self.assertEqual("testInst", base_inst.getName())
 
     def test_getMemorySize(self):

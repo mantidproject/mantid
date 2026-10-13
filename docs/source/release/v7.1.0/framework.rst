@@ -64,6 +64,10 @@ Bugfixes
 ############
 .. amalgamate:: Framework/Python/Bugfixes
 
+Deprecated
+############
+.. amalgamate:: Framework/Python/Deprecated
+
 
 Dependencies
 ------------------
