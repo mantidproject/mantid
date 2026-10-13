@@ -10,6 +10,7 @@
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DistributionOptions.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/GraphOptions.h"
 #include <QStringList>
 #include <map>
@@ -40,7 +41,7 @@ QWorkspaceDockView.
 \date   24-08-2016
 \version 1.0
 */
-class DLLExport MantidDisplayBase {
+class EXPORT_OPT_MANTIDQT_COMMON MantidDisplayBase {
 public:
   virtual ~MantidDisplayBase() = default;
 

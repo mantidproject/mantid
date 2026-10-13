@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 
 class QGridLayout;
 class QWidget;
@@ -24,7 +25,7 @@ class PropertyWidget;
 
   @date 2012-02-17
 */
-class DLLExport PropertyWidgetFactory {
+class EXPORT_OPT_MANTIDQT_COMMON PropertyWidgetFactory {
 public:
   PropertyWidgetFactory();
   virtual ~PropertyWidgetFactory();
