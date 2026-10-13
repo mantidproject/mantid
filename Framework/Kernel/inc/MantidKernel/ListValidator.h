@@ -176,5 +176,9 @@ template <> inline std::string ListValidator<std::string>::checkValidity(const s
   return os.str();
 }
 
+/// @cond
+extern template class MANTID_KERNEL_DLL ListValidator<std::string>;
+/// @endcond
+
 } // namespace Kernel
 } // namespace Mantid

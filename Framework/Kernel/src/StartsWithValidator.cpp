@@ -11,6 +11,11 @@
 #endif
 
 namespace Mantid::Kernel {
+
+/// @cond
+template class MANTID_KERNEL_DLL ListValidator<std::string>;
+/// @endcond
+
 /**
  * Constructor.
  * @param values :: A vector with the allowed values.
