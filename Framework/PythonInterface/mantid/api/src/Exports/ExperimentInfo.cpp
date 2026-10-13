@@ -46,12 +46,14 @@ list getResourceFilenames(const std::string &prefix, const list &fileFormats, co
 }
 
 Mantid::Geometry::Instrument_const_sptr getInstrumentDeprecated(const ExperimentInfo &self) {
+  /** TODO Uncomment this block for Mantid 7.1
   if (PyErr_Warn(PyExc_DeprecationWarning,
                  "'ExperimentInfo.getInstrument()' is deprecated in Mantid 7.0. "
                  "Use the componentInfo(), detectorInfo() and spectrumInfo() access layers instead. "
                  "See the 'Instrument Access via SpectrumInfo, DetectorInfo, ComponentInfo' concept page, "
                  "located at: https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html") < 0)
     throw boost::python::error_already_set();
+  */
   return self.getInstrument();
 }
 
