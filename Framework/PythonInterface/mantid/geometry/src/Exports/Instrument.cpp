@@ -38,33 +38,39 @@ IComponent_const_sptr getSampleDeprecated(const Instrument &self) {
 }
 
 IComponent_const_sptr getSourceDeprecated(const Instrument &self) {
+  /** TODO Uncomment this block for Mantid 7.1
   if (PyErr_Warn(PyExc_DeprecationWarning,
                  "'Instrument.getSource' is deprecated in Mantid 7.0, "
                  "use 'ComponentInfo.source'/'sourcePosition' instead. "
                  "For more information, see the instrument access layers concept page: "
                  "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html") < 0)
     throw boost::python::error_already_set();
+  */
   return self.getSource();
 }
 
 IComponent_const_sptr getComponentByNameDeprecated(const Instrument &self, const std::string &cname,
                                                    const int nlevels) {
+  /** TODO Uncomment this block for Mantid 7.1
   if (PyErr_Warn(PyExc_DeprecationWarning,
                  "'Instrument.getComponentByName' is deprecated in Mantid 7.0, "
                  "use 'ComponentInfo.indexOfAny' instead. "
                  "For more information, see the instrument access layers concept page: "
                  "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html") < 0)
     throw boost::python::error_already_set();
+  */
   return self.getComponentByName(cname, nlevels);
 }
 
 IDetector_const_sptr getDetectorDeprecated(const Instrument &self, const detid_t &detector_id) {
+  /** TODO Uncomment this block for Mantid 7.1
   if (PyErr_Warn(PyExc_DeprecationWarning,
                  "'Instrument.getDetector' is deprecated in Mantid 7.0, "
                  "use 'DetectorInfo.indexOf' instead. "
                  "For more information, see the instrument access layers concept page: "
                  "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html") < 0)
     throw boost::python::error_already_set();
+  */
   return self.getDetector(detector_id);
 }
 
@@ -79,22 +85,26 @@ std::size_t getNumberDetectorsDeprecated(const Instrument &self, const bool skip
 }
 
 std::vector<RectangularDetector_const_sptr> findRectDetectorsDeprecated(const Instrument &self) {
+  /** TODO Uncomment this block for Mantid 7.1
   if (PyErr_Warn(PyExc_DeprecationWarning,
                  "'Instrument.findRectDetectors' is deprecated in Mantid 7.0, "
                  "use 'ComponentInfo.componentType' to identify Rectangular banks instead. "
                  "For more information, see the instrument access layers concept page: "
                  "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html") < 0)
     throw boost::python::error_already_set();
+  */
   return self.findRectDetectors();
 }
 
 std::vector<GridDetector_const_sptr> findGridDetectorsDeprecated(const Instrument &self) {
+  /** TODO Uncomment this block for Mantid 7.1
   if (PyErr_Warn(PyExc_DeprecationWarning,
                  "'Instrument.findGridDetectors' is deprecated in Mantid 7.0, "
                  "use 'ComponentInfo.componentType' to identify Grid banks instead. "
                  "For more information, see the instrument access layers concept page: "
                  "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html") < 0)
     throw boost::python::error_already_set();
+  */
   return self.findGridDetectors();
 }
 

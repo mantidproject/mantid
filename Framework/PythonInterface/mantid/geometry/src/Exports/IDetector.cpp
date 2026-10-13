@@ -26,12 +26,14 @@ namespace {
 // index-based DetectorInfo/ComponentInfo access layers. See the 'Instrument
 // Access via SpectrumInfo, DetectorInfo, ComponentInfo' concept page.
 Mantid::detid_t getIDDeprecated(const IDetector &self) {
+  /** TODO Uncomment this block for Mantid 7.1
   if (PyErr_Warn(PyExc_DeprecationWarning,
                  "'IDetector.getID' is deprecated in Mantid 7.0, "
                  "use 'DetectorInfo.detectorIDs' instead. "
                  "For more information, see the instrument access layers concept page: "
                  "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html") < 0)
     throw boost::python::error_already_set();
+  */
   return self.getID();
 }
 

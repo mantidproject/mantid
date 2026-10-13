@@ -26,18 +26,15 @@ class InstrumentTest(unittest.TestCase):
         self.assertTrue(isinstance(sample_pos, Component))
 
     def test_getSource(self):
-        with self.assertWarns(DeprecationWarning):
-            source_pos = self.__testws.getInstrument().getSource()
+        source_pos = self.__testws.getInstrument().getSource()
         self.assertTrue(isinstance(source_pos, ObjComponent))
 
     def test_getComponentByName(self):
-        with self.assertWarns(DeprecationWarning):
-            comp = self.__testws.getInstrument().getComponentByName("pixel-0)")
+        comp = self.__testws.getInstrument().getComponentByName("pixel-0)")
         self.assertTrue(isinstance(comp, Detector))
 
     def test_getDetector(self):
-        with self.assertWarns(DeprecationWarning):
-            comp = self.__testws.getInstrument().getDetector(1)
+        comp = self.__testws.getInstrument().getDetector(1)
         self.assertTrue(isinstance(comp, Detector))
 
     def test_getNumberDetectors(self):
@@ -80,8 +77,7 @@ class InstrumentTest(unittest.TestCase):
     def test_baseInstrument_Can_Be_Retrieved(self):
         inst = self.__testws.getInstrument()
         base_inst = inst.getBaseInstrument()
-        with self.assertWarns(DeprecationWarning):
-            self.assertEqual("testInst", base_inst.getName())
+        self.assertEqual("testInst", base_inst.getName())
 
     def test_getMemorySize(self):
         mem = self.__testws.getInstrument().getMemorySize()
