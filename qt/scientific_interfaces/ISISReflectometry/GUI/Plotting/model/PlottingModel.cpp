@@ -295,10 +295,6 @@ std::string createSpinAsymmetryWorkspace(WorkspaceGroupInputs const &inputs) {
   }
 
   auto const outputWorkspace = std::string{spinAsymmetryWorkspacePrefix} + inputs.key;
-  if (workspaceExists(outputWorkspace)) {
-    return outputWorkspace;
-  }
-
   auto &ads = Mantid::API::AnalysisDataService::Instance();
   auto const upWorkspace = ads.retrieveWS<Mantid::API::MatrixWorkspace>(upDownWorkspaces->first);
   auto const downWorkspace = ads.retrieveWS<Mantid::API::MatrixWorkspace>(upDownWorkspaces->second);
