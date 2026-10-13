@@ -46,18 +46,20 @@ list getResourceFilenames(const std::string &prefix, const list &fileFormats, co
 }
 
 Mantid::Geometry::Instrument_const_sptr getInstrumentDeprecated(const ExperimentInfo &self) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             "'ExperimentInfo.getInstrument()' is deprecated in Mantid 7.0. "
-             "Use the componentInfo(), detectorInfo() and spectrumInfo() access layers instead. "
-             "See the 'Instrument Access via SpectrumInfo, DetectorInfo, ComponentInfo' concept page, "
-             "located at: https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html");
+  if (PyErr_Warn(PyExc_DeprecationWarning,
+                 "'ExperimentInfo.getInstrument()' is deprecated in Mantid 7.0. "
+                 "Use the componentInfo(), detectorInfo() and spectrumInfo() access layers instead. "
+                 "See the 'Instrument Access via SpectrumInfo, DetectorInfo, ComponentInfo' concept page, "
+                 "located at: https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html") < 0)
+    throw boost::python::error_already_set();
   return self.getInstrument();
 }
 
 std::string getInstrumentFilenameWarn(const std::string &instName, const std::string &date = "") {
-  PyErr_Warn(PyExc_DeprecationWarning, "ExperimentInfo.getInstrumentFilename() is deprecated.\n"
-                                       "Use InstrumentFileFinder.getInstrumentFilename() instead.");
-  return InstrumentFileFinder::getInstrumentFilename(instName, date);
+  if (PyErr_Warn(PyExc_DeprecationWarning, "ExperimentInfo.getInstrumentFilename() is deprecated.\n"
+                                           "Use InstrumentFileFinder.getInstrumentFilename() instead.") < 0)
+    throw boost::python::error_already_set();
+  return InstrumentFileFinder::getInstrumentFilename(instName, date)
 }
 
 GNU_DIAG_OFF("unused-local-typedef")
