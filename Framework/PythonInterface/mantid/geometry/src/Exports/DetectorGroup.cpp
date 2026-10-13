@@ -15,8 +15,9 @@ using namespace boost::python;
 
 namespace {
 bool isMaskedDeprecated(const DetectorGroup &self) {
-  PyErr_Warn(PyExc_DeprecationWarning, "'DetectorGroup::isMasked' is deprecated, "
-                                       "use 'SpectrumInfo::isMasked' instead.");
+  if (PyErr_Warn(PyExc_DeprecationWarning, "'DetectorGroup::isMasked' is deprecated, "
+                                           "use 'SpectrumInfo::isMasked' instead.") < 0)
+    throw boost::python::error_already_set();
   const auto &dets = self.getDetectors();
   bool masked = true;
   for (const auto &det : dets) {
@@ -27,9 +28,10 @@ bool isMaskedDeprecated(const DetectorGroup &self) {
 }
 
 bool isMonitorDeprecated(const DetectorGroup &self) {
-  PyErr_Warn(PyExc_DeprecationWarning, "'DetectorGroup::isMonitor' is "
-                                       "deprecated, use "
-                                       "'SpectrumInfo::isMonitor' instead.");
+  if (PyErr_Warn(PyExc_DeprecationWarning, "'DetectorGroup::isMonitor' is "
+                                           "deprecated, use "
+                                           "'SpectrumInfo::isMonitor' instead.") < 0)
+    throw boost::python::error_already_set();
   const auto &dets = self.getDetectors();
   return std::all_of(dets.cbegin(), dets.cend(),
                      [](const auto &det) { return det->parameterMap().detectorInfo().isMonitor(det->index()); });

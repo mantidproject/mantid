@@ -84,17 +84,12 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
         specInfo = inputWorkspace.spectrumInfo()
         for i in range(inputWorkspace.getNumberHistograms()):
             try:
-                det = inputWorkspace.getDetector(i)
                 y_value = inputWorkspace.y(i)[0]
                 if mask_query.isMasked(specInfo, i, y_value):  # check if masked
                     group = masking_flag
                 else:
                     group = not_masking_flag
-                detIDs = []
-                try:
-                    detIDs = det.getDetectorIDs()
-                except AttributeError:
-                    detIDs = [det.getID()]
+                detIDs = inputWorkspace.getSpectrum(i).getDetectorIDs()
                 calFile.writelines(self.FormatLine(i, did, 0.0, group, group) for did in detIDs)
             except RuntimeError:
                 # no detector for this spectra

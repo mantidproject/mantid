@@ -201,10 +201,12 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         outWS = mtd[outWSName]
         self.assertEqual(outWS.getNumberHistograms(), spectraCount)
         self.assertEqual(outWS.blocksize(), 1)
+        componentInfo = outWS.componentInfo()
+        detectorInfo = outWS.detectorInfo()
         for i in range(spectraCount):
             Ys = outWS.y(i)
-            detector = outWS.getDetector(i)
-            componentName = detector.getFullName()
+            # a detector's index is also its component index
+            componentName = componentInfo.fullName(detectorInfo.indexOf(outWS.getSpectrum(i).getDetectorIDs()[0]))
             if "tube_1" in componentName:
                 self.assertEqual(Ys[0], 1)
             else:

@@ -297,8 +297,7 @@ class DarkRunMonitorAndDetectorRemover(object):
             spectrumInfo = dark_run.spectrumInfo()
             for index in range(0, num_histograms):
                 if spectrumInfo.isMonitor(index):
-                    det = dark_run.getDetector(index)
-                    det_id_list.append(det.getID())
+                    det_id_list.append(dark_run.getSpectrum(index).getDetectorIDs()[0])
                     monitor_list.append(index)
         except:
             Logger("DarkRunMonitorAndDetectorRemover").information(

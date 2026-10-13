@@ -21,7 +21,8 @@ class InstrumentTest(unittest.TestCase):
         self.assertFalse(can_be_instantiated(Instrument))
 
     def test_getSample(self):
-        sample_pos = self.__testws.getInstrument().getSample()
+        with self.assertWarns(DeprecationWarning):
+            sample_pos = self.__testws.getInstrument().getSample()
         self.assertTrue(isinstance(sample_pos, Component))
 
     def test_getSource(self):
@@ -37,7 +38,8 @@ class InstrumentTest(unittest.TestCase):
         self.assertTrue(isinstance(comp, Detector))
 
     def test_getNumberDetectors(self):
-        num_detectors = self.__testws.getInstrument().getNumberDetectors()
+        with self.assertWarns(DeprecationWarning):
+            num_detectors = self.__testws.getInstrument().getNumberDetectors()
         self.assertEqual(num_detectors, 1)
 
     def test_getReferenceFrame(self):

@@ -79,7 +79,8 @@ void setUnits(IMDDimension &self, const std::string &units) {
  * @return name of the dimension.
  */
 std::string getName(const IMDDimension &self) {
-  PyErr_Warn(PyExc_DeprecationWarning, ".getName() is deprecated. Use .name instead.");
+  if (PyErr_Warn(PyExc_DeprecationWarning, ".getName() is deprecated. Use .name instead.") < 0)
+    throw boost::python::error_already_set();
   return self.getName();
 }
 

@@ -120,8 +120,9 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    */
   static void clearItems(SvcType &self, const bool silent) {
     if (self.size() > 0 && !silent) {
-      PyErr_Warn(PyExc_Warning, "Running ADS.clear() also removes all hidden workspaces.\n"
-                                "Mantid interfaces might still need some of these, for instance, MSlice.");
+      if (PyErr_Warn(PyExc_Warning, "Running ADS.clear() also removes all hidden workspaces.\n"
+                                    "Mantid interfaces might still need some of these, for instance, MSlice.") < 0)
+        throw boost::python::error_already_set();
     }
 
     ReleaseGlobalInterpreterLock releaseGIL;
