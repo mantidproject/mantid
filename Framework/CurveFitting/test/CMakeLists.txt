@@ -12,7 +12,6 @@ if(CXXTEST_FOUND)
     <MantidAPI/Algorithm.h>
     <MantidAPI/IFunction.h>
     <MantidAPI/IPeakFunction.h>
-    <MantidKernel/System.h>
     <set>
     <string>
     <vector>

@@ -7,7 +7,8 @@
 #pragma once
 
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidKernel/System.h"
+
+#include <cstdint>
 
 namespace Mantid {
 namespace DataObjects {

@@ -12,12 +12,12 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/StringTokenizer.h"
-#include "MantidKernel/System.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
 #endif
 #include <algorithm>
+#include <cstddef>
 #include <iosfwd>
 #include <map>
 #include <set>

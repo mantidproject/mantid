@@ -7,7 +7,9 @@
 #pragma once
 
 #include "MantidAPI/ImplicitFunctionParameter.h"
-#include "MantidKernel/System.h"
+
+#include <cstddef>
+#include <stdexcept>
 
 namespace Mantid {
 namespace API {

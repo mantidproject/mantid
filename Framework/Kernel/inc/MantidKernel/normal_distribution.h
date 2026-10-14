@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include <ios>
 #include <random>

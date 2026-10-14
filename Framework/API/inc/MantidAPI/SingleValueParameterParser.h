@@ -11,7 +11,6 @@
 //----------------------------------------------------------------------
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/System.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -27,6 +26,9 @@
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
 #endif
+
+#include <stdexcept>
+#include <string>
 
 namespace Mantid {
 namespace API {

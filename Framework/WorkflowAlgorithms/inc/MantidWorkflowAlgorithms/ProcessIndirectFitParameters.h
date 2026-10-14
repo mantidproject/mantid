@@ -8,8 +8,9 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidWorkflowAlgorithms/DllConfig.h"
+
+#include <cstddef>
 
 namespace Mantid {
 namespace Algorithms {
