@@ -21,6 +21,7 @@ from qtpy import QtCore
 from qtpy.QtGui import QCloseEvent
 from mantidqt.utils.qt import load_ui
 from mantidqt.icons import get_icon
+from mantidqt.widgets.tutorial.view import TutorialViewMixin
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.direction_fields import autosize_direction_fields
 from mantid.kernel import FeatureType
 from mantid import UsageService
@@ -68,7 +69,7 @@ _MATRIX_TOOLTIP = "Write the included orientations to a flattened rotation matri
 MIN_CANVAS_HEIGHT = 200
 
 
-class TexturePlannerView(QMainWindow, Ui_texplan):
+class TexturePlannerView(TutorialViewMixin, QMainWindow, Ui_texplan):
     sig_select_state_changed = QtCore.Signal()
     sig_include_state_changed = QtCore.Signal()
     # emitted from the SetSampleMaterial dialog's algorithm-finished callback (which runs on the
@@ -185,22 +186,11 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         self.toolbar.addWidget(spacer)
 
-        self.btn_tutorial = QPushButton()
-        self.btn_tutorial.setIcon(get_icon("mdi.school", "black", 1.2))
-        self.btn_tutorial.setToolTip("Guided tutorial")
-        # the action, not the button, is what controls visibility here: a toolbar re-shows the
-        # widget of any visible action, so hiding the button alone does not stick
-        self._tutorial_action = self.toolbar.addWidget(self.btn_tutorial)
+        self.add_tutorial_button(self.toolbar)
         self.addToolBar(QtCore.Qt.BottomToolBarArea, self.toolbar)
 
     def set_on_settings_clicked(self, slot: Callable) -> None:
         self.btn_settings.clicked.connect(slot)
-
-    def set_on_tutorial_clicked(self, slot: Callable) -> None:
-        self.btn_tutorial.clicked.connect(slot)
-
-    def set_tutorial_button_visible(self, visible: bool) -> None:
-        self._tutorial_action.setVisible(visible)
 
     def set_on_close(self, slot: Callable) -> None:
         self._on_close = slot
