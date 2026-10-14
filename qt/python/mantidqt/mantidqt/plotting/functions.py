@@ -13,6 +13,8 @@ our custom window.
 
 # std imports
 
+from dataclasses import dataclass
+
 import matplotlib
 import numpy as np
 
@@ -22,8 +24,9 @@ from mantid.plots.plotfunctions import manage_workspace_names, figure_title, plo
 
 from mantid.kernel import Logger, ConfigService
 from mantid.plots.datafunctions import add_colorbar_label
-from mantid.plots.utility import get_single_workspace_log_value, legend_set_draggable
-from mantidqt.plotting.figuretype import figure_type, FigureType
+from mantid.plots import MantidAxes
+from mantid.plots.utility import get_single_workspace_log_value, legend_set_draggable, MantidAxType
+from mantidqt.plotting.figuretype import axes_type, figure_type, FigureType
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
 from mantid.api import IMDHistoWorkspace
 
@@ -76,6 +79,94 @@ def current_figure_or_none():
         return plt.gcf()
     else:
         return None
+
+
+@dataclass
+class TiledAxesDetails:
+    ax: object
+    x_unit: str
+    y_unit: str
+
+
+def share_tiled_axes(fig, new_axes=None, share_x=True, share_y=True):
+    """Share matching axes between tiles in a Mantid figure.
+
+    Each dimension is shared when requested and its displayed workspace units
+    match. If ``new_axes`` is supplied, existing plot settings take precedence.
+    """
+    axes = [details for ax in fig.axes if (details := _tiled_axis_details(ax)) is not None]
+    existing_axes = {details.ax for details in axes if details.ax not in new_axes} if new_axes else set()
+    # axis which can be used a reference for sharing units etc.
+    x_existing_axes = existing_axes.copy() if share_x else None
+    y_existing_axes = existing_axes.copy() if share_y else None
+
+    # Share axes between all pairs of axes with matching units
+    for index, first in enumerate(axes):
+        for second in axes[index + 1 :]:
+            if x_existing_axes and first.x_unit == second.x_unit:
+                _share_axis(first.ax, second.ax, x_existing_axes, "x")
+            if y_existing_axes and first.y_unit == second.y_unit:
+                _share_axis(first.ax, second.ax, y_existing_axes, "y")
+
+    fig.canvas.draw_idle()
+
+
+def _tiled_axis_details(ax):
+    if (
+        not isinstance(ax, MantidAxes)
+        or not ax.axison
+        or not ax.tracked_workspaces
+        or not hasattr(ax, "_mantid_tiled_row")
+        or not hasattr(ax, "_mantid_tiled_col")
+    ):
+        return None
+
+    workspace_name = next(iter(ax.tracked_workspaces))
+    workspace = AnalysisDataService.retrieve(workspace_name)
+    if not isinstance(workspace, MatrixWorkspace):
+        return None
+
+    x_axis_index = 1 if _plot_axis(ax, workspace_name) == MantidAxType.BIN else 0
+    x_unit = _axis_unit(workspace, x_axis_index)
+    y_unit = _axis_unit(workspace, 1) if axes_type(ax) in (FigureType.Image, FigureType.Contour) else workspace.YUnit()
+    return TiledAxesDetails(ax, x_unit, y_unit)
+
+
+def _plot_axis(ax, workspace_name):
+    return next(
+        (args.get("axis", MantidAxType.SPECTRUM) for args in ax.creation_args if args.get("workspaces") == workspace_name),
+        MantidAxType.SPECTRUM,
+    )
+
+
+def _axis_unit(workspace, index):
+    unit = workspace.getAxis(index).getUnit()
+    return (unit.unitID(), unit.symbol().ascii() if unit.unitID() == "Label" else "")
+
+
+def _share_axis(first, second, existing_axes, dimension):
+    first_is_existing = first in existing_axes
+    second_is_existing = second in existing_axes
+    shared_axes = getattr(first, f"get_shared_{dimension}_axes")()
+    # If the axes are already shared, do nothing
+    if shared_axes.joined(first, second):
+        # If either axis is already existing, add both to existing axes to be used as future reference
+        if first_is_existing or second_is_existing:
+            existing_axes.update({first, second})
+        return
+
+    first_limits = getattr(first, f"get_{dimension}lim")()
+    second_limits = getattr(second, f"get_{dimension}lim")()
+    if first_is_existing or (first_is_existing == second_is_existing):
+        target, reference = second, first
+    else:
+        target, reference = first, second
+    getattr(target, f"share{dimension}")(reference)
+    # If either axis is already existing, add the target (non-reference) to existing axes to be used as future reference
+    if first_is_existing or second_is_existing:
+        existing_axes.add(target)
+    else:
+        getattr(target, f"set_{dimension}lim")(min(first_limits[0], second_limits[0]), max(first_limits[1], second_limits[1]))
 
 
 def plot_md_ws_from_names(names, errors, overplot, fig=None):

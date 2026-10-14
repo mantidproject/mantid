@@ -21,14 +21,19 @@ struct PresenterPlotRequest {
   QWidget *plotParent;
   bool addToExistingPlot;
   bool tiledVertically;
+  bool shareAxesWhenTiled;
 };
 
 /// Collect selected output controls and plotting target options from the view.
 PresenterPlotRequest plotRequestFor(IPlottingView &view, std::string const &instrumentName, PlotLayout layout) {
   auto outputSelection = view.selectedPlotOutputSelection();
   outputSelection.instrumentName = instrumentName;
-  return {std::move(outputSelection), layout, view.plotParent(), view.addToExistingPlot(),
-          layout == PlotLayout::Tiled && view.plotTiledVertically()};
+  return {std::move(outputSelection),
+          layout,
+          view.plotParent(),
+          view.addToExistingPlot(),
+          layout == PlotLayout::Tiled && view.plotTiledVertically(),
+          layout == PlotLayout::Tiled && view.shareAxesWhenTiled()};
 }
 } // namespace
 
@@ -122,13 +127,19 @@ void PlottingPresenter::plotSelectedWorkspaces(PlotLayout layout) {
 
   if (request.layout == PlotLayout::Individual) {
     for (auto const &workspace : workspacesToPlot) {
-      m_plotter->plot({{workspace}, options, request.plotParent, request.addToExistingPlot, request.tiledVertically});
+      m_plotter->plot({{workspace},
+                       options,
+                       request.plotParent,
+                       request.addToExistingPlot,
+                       request.tiledVertically,
+                       request.shareAxesWhenTiled});
     }
     updateActivePlotCompatibility();
     return;
   }
 
-  m_plotter->plot({workspacesToPlot, options, request.plotParent, request.addToExistingPlot, request.tiledVertically});
+  m_plotter->plot({workspacesToPlot, options, request.plotParent, request.addToExistingPlot, request.tiledVertically,
+                   request.shareAxesWhenTiled});
   updateActivePlotCompatibility();
 }
 
