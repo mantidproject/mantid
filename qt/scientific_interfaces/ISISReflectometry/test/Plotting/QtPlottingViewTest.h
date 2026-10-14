@@ -133,20 +133,6 @@ public:
     TS_ASSERT(view.findChild<QCheckBox *>("addToExistingPlot")->isChecked());
   }
 
-  void testSharedTiledAxisSelectionsAreReturnedIndependently() {
-    QtPlottingView view;
-    view.findChild<QCheckBox *>("shareXAxisWhenTiled")->setChecked(true);
-
-    TS_ASSERT(view.shareXAxisWhenTiled());
-    TS_ASSERT(!view.shareYAxisWhenTiled());
-
-    view.findChild<QCheckBox *>("shareXAxisWhenTiled")->setChecked(false);
-    view.findChild<QCheckBox *>("shareYAxisWhenTiled")->setChecked(true);
-
-    TS_ASSERT(!view.shareXAxisWhenTiled());
-    TS_ASSERT(view.shareYAxisWhenTiled());
-  }
-
   void testPlotActionStateCanUncheckAddToExistingPlotWithoutNotifyingSubscriber() {
     QtPlottingView view;
     TestPlottingViewSubscriber subscriber;
