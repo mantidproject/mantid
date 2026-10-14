@@ -8,6 +8,7 @@
 #include "LoadRaw/isisraw2.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
 #include "MantidNexus/NexusFile.h"
@@ -37,8 +38,8 @@ DECLARE_ALGORITHM(LoadDetectorInfo)
 
 /// Empty default constructor
 LoadDetectorInfo::LoadDetectorInfo()
-    : Algorithm(), m_baseInstrument(), m_samplePos(), m_moveDets(false), m_workspace(), m_instDelta(-1.0),
-      m_instPressure(-1.0), m_instThickness(-1.0) {}
+    : Algorithm(), m_samplePos(), m_moveDets(false), m_workspace(), m_instDelta(-1.0), m_instPressure(-1.0),
+      m_instThickness(-1.0) {}
 
 void LoadDetectorInfo::init() {
 
@@ -82,27 +83,25 @@ void LoadDetectorInfo::cacheInputs() {
   m_workspace = getProperty("Workspace");
   m_moveDets = getProperty("RelocateDets");
 
-  // Cache base instrument
-  m_baseInstrument = m_workspace->getInstrument()->baseInstrument();
-  Geometry::IComponent_const_sptr sample = m_workspace->getInstrument()->getSample();
-  if (sample)
-    m_samplePos = sample->getPos();
+  const auto &componentInfo = m_workspace->componentInfo();
+  if (componentInfo.hasSample())
+    m_samplePos = componentInfo.samplePosition();
 
   // cache values of instrument level parameters so we only change then if they
   // are different
-  const auto &pmap = m_workspace->constInstrumentParameters();
+  const size_t root = componentInfo.root();
   // delay
-  auto param = pmap.get(m_baseInstrument->getComponentID(), DELAY_PARAM);
-  if (param)
-    m_instDelta = param->value<double>();
+  auto values = componentInfo.getNumberParameter(root, DELAY_PARAM, false);
+  if (!values.empty())
+    m_instDelta = values.front();
   // pressure
-  param = pmap.get(m_baseInstrument->getComponentID(), PRESSURE_PARAM);
-  if (param)
-    m_instPressure = param->value<double>();
+  values = componentInfo.getNumberParameter(root, PRESSURE_PARAM, false);
+  if (!values.empty())
+    m_instPressure = values.front();
   // thickness
-  param = pmap.get(m_baseInstrument->getComponentID(), THICKNESS_PARAM);
-  if (param)
-    m_instThickness = param->value<double>();
+  values = componentInfo.getNumberParameter(root, THICKNESS_PARAM, false);
+  if (!values.empty())
+    m_instThickness = values.front();
 }
 
 /**

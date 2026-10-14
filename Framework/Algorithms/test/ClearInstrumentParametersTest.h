@@ -13,8 +13,10 @@
 #include "MantidAlgorithms/ClearInstrumentParameters.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/OptionalBool.h"
 
@@ -45,6 +47,82 @@ public:
     checkEmpty("nickel-holder", "testDouble");
     checkEmpty("nickel-holder", "testString");
     TS_ASSERT_EQUALS(oldPos, m_ws->detectorInfo().position(0));
+  }
+
+  void test_pixels_of_a_moved_and_rotated_bank_are_restored() {
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(1, 3, 1);
+    auto &componentInfo = ws->mutableComponentInfo();
+    const size_t bankIndex = componentInfo.indexOfAny("bank1");
+    const size_t pixelIndex = componentInfo.detectorsInSubtree(bankIndex).back();
+    const V3D bankPosition = componentInfo.position(bankIndex);
+    const Quat bankRotation = componentInfo.rotation(bankIndex);
+    const V3D pixelPosition = componentInfo.position(pixelIndex);
+    const Quat pixelRotation = componentInfo.rotation(pixelIndex);
+    const V3D pixelScale = componentInfo.scaleFactor(pixelIndex);
+
+    componentInfo.setRotation(bankIndex, Quat(30.0, V3D(0.0, 1.0, 0.0)));
+    componentInfo.setPosition(bankIndex, bankPosition + V3D(0.1, 0.2, 0.3));
+    // and a pixel calibrated relative to its bank, by less than V3D's comparison tolerance
+    componentInfo.setPosition(pixelIndex, componentInfo.position(pixelIndex) + V3D(1e-9, 0.0, 0.0));
+    componentInfo.setScaleFactor(pixelIndex, V3D(2.0, 2.0, 2.0));
+    TS_ASSERT_DIFFERS(componentInfo.position(pixelIndex), pixelPosition);
+
+    runClear(ws);
+
+    const auto &cleared = ws->componentInfo();
+    TS_ASSERT_EQUALS(cleared.position(bankIndex), bankPosition);
+    TS_ASSERT_EQUALS(cleared.rotation(bankIndex), bankRotation);
+    TS_ASSERT_EQUALS(cleared.rotation(pixelIndex), pixelRotation);
+    TS_ASSERT_EQUALS(cleared.scaleFactor(pixelIndex), pixelScale);
+    TS_ASSERT_DELTA(cleared.position(pixelIndex).X(), pixelPosition.X(), 1e-12);
+    TS_ASSERT_DELTA(cleared.position(pixelIndex).Y(), pixelPosition.Y(), 1e-12);
+    TS_ASSERT_DELTA(cleared.position(pixelIndex).Z(), pixelPosition.Z(), 1e-12);
+  }
+
+  void test_masks_are_cleared() {
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 1);
+    ws->mutableDetectorInfo().setMasked(1, true);
+
+    runClear(ws);
+
+    TS_ASSERT(!ws->detectorInfo().isMasked(1));
+  }
+
+  void test_parameters_can_be_added_after_clearing() {
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 1);
+    const size_t root = ws->componentInfo().root();
+    ws->mutableComponentInfo().addDouble(root, "before", 1.0);
+
+    runClear(ws);
+    ws->mutableComponentInfo().addDouble(root, "after", 2.0);
+
+    const auto &componentInfo = ws->componentInfo();
+    TS_ASSERT(!componentInfo.hasParameter(root, "before"));
+    TS_ASSERT_EQUALS(componentInfo.getNumberParameter(root, "after"), std::vector<double>{2.0});
+    // the legacy view shares the same store, so must agree
+    const auto *rootID = componentInfo.componentID(root);
+    TS_ASSERT(!ws->constInstrumentParameters().contains(rootID, "before"));
+    TS_ASSERT(ws->constInstrumentParameters().contains(rootID, "after"));
+  }
+
+  void test_workspace_with_detector_scan_is_rejected() {
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DDetectorScanWorkspaceWithFullInstrument(3, 1, 2);
+    ClearInstrumentParameters clearer;
+    clearer.initialize();
+    clearer.setChild(true);
+    clearer.setRethrows(true);
+    clearer.setProperty("Workspace", ws);
+    TS_ASSERT_THROWS(clearer.execute(), const std::runtime_error &);
+  }
+
+  void runClear(const MatrixWorkspace_sptr &ws) {
+    ClearInstrumentParameters clearer;
+    TS_ASSERT_THROWS_NOTHING(clearer.initialize());
+    clearer.setChild(true);
+    clearer.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(clearer.setProperty("Workspace", ws));
+    TS_ASSERT_THROWS_NOTHING(clearer.execute());
+    TS_ASSERT(clearer.isExecuted());
   }
 
   void setParam(const std::string &cName, const std::string &pName, const std::string &value) {

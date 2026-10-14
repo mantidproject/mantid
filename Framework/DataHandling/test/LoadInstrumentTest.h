@@ -20,6 +20,7 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/Instrument/InstrumentMetadata.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/OptionalBool.h"
@@ -174,14 +175,20 @@ public:
     // Get back the saved workspace
     MatrixWorkspace_sptr output = loader.getProperty("Workspace");
 
-    std::shared_ptr<const Instrument> i = output->getInstrument()->baseInstrument();
-    std::shared_ptr<const IComponent> source = i->getSource();
-    TS_ASSERT_EQUALS(source->getName(), "undulator");
-    TS_ASSERT_DELTA(source->getPos().Y(), 0.0, 0.01);
+    const auto *loadedInstrumentID = WorkspaceCreationHelper::baseInstrumentID(*output);
+    // The ID is the instrument's address, so keep the instrument alive: if it were freed, a reload could be allocated
+    // at the same address and the caching check below would pass even without caching.
+    // A cloned ExperimentInfo shares the base instrument, without copying any histogram data.
+    const std::unique_ptr<ExperimentInfo> keepLoadedInstrumentAlive(output->cloneExperimentInfo());
+    const auto &baseComponentInfo = output->baseComponentInfo();
+    const size_t sourceIndex = baseComponentInfo.source();
+    TS_ASSERT_EQUALS(baseComponentInfo.name(sourceIndex), "undulator");
+    TS_ASSERT_DELTA(baseComponentInfo.position(sourceIndex).Y(), 0.0, 0.01);
 
-    std::shared_ptr<const IComponent> samplepos = i->getSample();
-    TS_ASSERT_EQUALS(samplepos->getName(), "nickel-holder");
-    TS_ASSERT_DELTA(samplepos->getPos().Z(), 0.0, 0.01);
+    const size_t sampleIndex = baseComponentInfo.sample();
+    TS_ASSERT_EQUALS(baseComponentInfo.name(sampleIndex), "nickel-holder");
+    const V3D samplePos = baseComponentInfo.position(sampleIndex);
+    TS_ASSERT_DELTA(samplePos.Z(), 0.0, 0.01);
 
     const auto &detectorInfo = output->detectorInfo();
     const auto &ptrDet103 = detectorInfo.detector(detectorInfo.indexOf(103));
@@ -189,9 +196,9 @@ public:
     TS_ASSERT_EQUALS(ptrDet103.getName(), "HET_non_PSDtube");
     TS_ASSERT_DELTA(ptrDet103.getPos().X(), 0.3826351418, 0.01);
     TS_ASSERT_DELTA(ptrDet103.getPos().Z(), 2.4470, 0.01);
-    double d = ptrDet103.getPos().distance(samplepos->getPos());
+    double d = ptrDet103.getPos().distance(samplePos);
     TS_ASSERT_DELTA(d, 2.512, 0.0001);
-    double cmpDistance = ptrDet103.getDistance(*samplepos);
+    double cmpDistance = detectorInfo.l2(detectorInfo.indexOf(103));
     TS_ASSERT_DELTA(cmpDistance, 2.512, 0.0001);
 
     // test if detector with det_id=603 has been marked as a monitor
@@ -226,20 +233,20 @@ public:
     // being attached
     std::shared_ptr<Instrument> instr = std::make_shared<Instrument>();
     output->setInstrument(instr);
-    TS_ASSERT_EQUALS(output->getInstrument()->baseInstrument(), instr);
+    TS_ASSERT_EQUALS(WorkspaceCreationHelper::baseInstrumentID(*output), instr->getComponentID());
     LoadInstrument loadAgain;
     loadAgain.initialize();
     loadAgain.setPropertyValue("Filename", instrFilename);
     loadAgain.setProperty("Workspace", ws2D);
     loadAgain.setProperty("RewriteSpectraMap", OptionalBool(true));
     loadAgain.execute();
-    TS_ASSERT_EQUALS(output->getInstrument()->baseInstrument(), i);
+    TS_ASSERT_EQUALS(WorkspaceCreationHelper::baseInstrumentID(*output), loadedInstrumentID);
 
     // Valid-from/to1951-01-01 00:00:01
     Types::Core::DateAndTime validFrom("1951-01-01T00:00:01");
     Types::Core::DateAndTime validTo("2100-01-31 23:59:59");
-    TS_ASSERT_EQUALS(i->getValidFromDate(), validFrom);
-    TS_ASSERT_EQUALS(i->getValidToDate(), validTo);
+    TS_ASSERT_EQUALS(output->instrumentMetadata().validFromDate(), validFrom);
+    TS_ASSERT_EQUALS(output->instrumentMetadata().validToDate(), validTo);
   }
 
   void testExecSLS() {
@@ -554,7 +561,7 @@ public:
     TS_ASSERT_EQUALS(physicalInst->getDetector(1005)->getPos(), V3D(2, 1, 0));
 
     // Check the right instrument ended up on the workspace
-    TS_ASSERT_EQUALS(neutronicInst.get(), ws->getInstrument()->baseInstrument().get());
+    TS_ASSERT_EQUALS(neutronicInst->getComponentID(), WorkspaceCreationHelper::baseInstrumentID(*ws));
     // Check the neutronic positions
     const auto &detectorInfo = ws->detectorInfo();
     TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1000)), V3D(2, 2, 0));

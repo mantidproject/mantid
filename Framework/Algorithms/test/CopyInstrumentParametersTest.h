@@ -132,6 +132,7 @@ public:
     pmap->addDouble(instrument.get(), "T", 10);
     pmap->addString(instrument.get(), "some_param", "other_value");
     detectorInfoWs2.setPosition(1, V3D(6.0, 0.2, 0.7));
+    detectorInfoWs2.setMasked(2, true);
 
     // Set properties
     TS_ASSERT_THROWS_NOTHING(copyInstParam.setPropertyValue("InputWorkspace", wsName1));
@@ -172,6 +173,9 @@ public:
     TS_ASSERT_DELTA(newPos2.X(), 0.0, 0.0001);
     TS_ASSERT_DELTA(newPos2.Y(), 0.0, 0.0001);
     TS_ASSERT_DELTA(newPos2.Z(), -9.0, 0.0001);
+
+    // previous masking rejected
+    TS_ASSERT(!ws2->detectorInfo().isMasked(2));
 
     dataStore.remove(wsName1);
     dataStore.remove(wsName2);

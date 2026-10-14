@@ -11,6 +11,7 @@
 #include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidQtWidgets/Common/ImageInfoModelMatrixWS.h"
 #include "MantidQtWidgets/Common/QStringUtils.h"
 #include <cxxtest/TestSuite.h>
@@ -28,8 +29,8 @@ struct DirectEFixed {
   const std::string m_logName;
 
   MatrixWorkspace_sptr operator()(MatrixWorkspace_sptr ws) const {
-    auto &instParams = ws->instrumentParameters();
-    instParams.addString(ws->getInstrument()->baseInstrument().get(), "deltaE-mode", "Direct");
+    auto &componentInfo = ws->mutableComponentInfo();
+    componentInfo.addString(componentInfo.root(), "deltaE-mode", "Direct");
     ws->mutableRun().addProperty<double>(m_logName, 60., true);
     return ws;
   }
@@ -40,10 +41,9 @@ struct IndirectEFixed {
   const std::string m_paramName;
 
   MatrixWorkspace_sptr operator()(MatrixWorkspace_sptr ws) const {
-    auto &instParams = ws->instrumentParameters();
-    auto baseInst = ws->getInstrument()->baseInstrument().get();
-    instParams.addString(baseInst, "deltaE-mode", "Indirect");
-    instParams.addDouble(baseInst, m_paramName, 50.);
+    auto &componentInfo = ws->mutableComponentInfo();
+    componentInfo.addString(componentInfo.root(), "deltaE-mode", "Indirect");
+    componentInfo.addDouble(componentInfo.root(), m_paramName, 50.);
     return ws;
   }
 };

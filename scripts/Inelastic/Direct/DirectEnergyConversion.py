@@ -415,7 +415,7 @@ class DirectEnergyConversion(object):
         # not been modified from input parameters.
         # E.g.  detector number have changed
         old_changes = self.prop_man.getChangedProperties()
-        all_changes = self.prop_man.update_defaults_from_instrument(sample_ws.getInstrument())
+        all_changes = self.prop_man.update_defaults_from_instrument(sample_ws)
         workspace_defined_prop = all_changes.difference(old_changes)
         if len(workspace_defined_prop) > 0:
             prop_man.log("****************************************************************")

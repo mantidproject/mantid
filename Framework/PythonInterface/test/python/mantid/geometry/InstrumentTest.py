@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+import warnings
 from mantid.kernel import DateAndTime
 from mantid.geometry import Component, Detector, Instrument, ObjComponent, ReferenceFrame
 from testhelpers import can_be_instantiated, WorkspaceCreationHelper
@@ -76,8 +77,17 @@ class InstrumentTest(unittest.TestCase):
 
     def test_baseInstrument_Can_Be_Retrieved(self):
         inst = self.__testws.getInstrument()
-        base_inst = inst.getBaseInstrument()
+        with self.assertWarns(DeprecationWarning):
+            base_inst = inst.getBaseInstrument()
         self.assertEqual("testInst", base_inst.getName())
+
+    def test_getBaseInstrument_warning_can_be_raised_as_an_error(self):
+        inst = self.__testws.getInstrument()
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", DeprecationWarning)
+            # raised as the warning itself, not as a SystemError from the binding
+            with self.assertRaises(DeprecationWarning):
+                inst.getBaseInstrument()
 
     def test_getMemorySize(self):
         mem = self.__testws.getInstrument().getMemorySize()

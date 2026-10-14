@@ -1,0 +1,1 @@
+- :ref:`algm-ClearInstrumentParameters` now reports an error for workspaces with a detector scan, instead of silently discarding the scan and leaving the workspace in an inconsistent state.

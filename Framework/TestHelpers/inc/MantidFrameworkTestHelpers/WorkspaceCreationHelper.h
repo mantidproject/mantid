@@ -36,6 +36,9 @@
 #include <vector>
 
 namespace Mantid {
+namespace API {
+class ExperimentInfo;
+} // namespace API
 namespace DataObjects {
 class PeaksWorkspace;
 class LeanElasticPeaksWorkspace;
@@ -61,6 +64,11 @@ public:
     return out;
   }
 };
+/// The base instrument a workspace was built from, as identified by the root of its base ComponentInfo.
+/// Two workspaces built from the same instrument return the same value. This is the instrument's address, so it is
+/// only unique while the instrument is alive: keep an owner of it for as long as the value is compared against.
+const Mantid::Geometry::IComponent *baseInstrumentID(const Mantid::API::ExperimentInfo &expInfo);
+
 /** Stub algorithm for doing logging/progress reporting*/
 class StubAlgorithm : public Mantid::API::Algorithm {
 public:
