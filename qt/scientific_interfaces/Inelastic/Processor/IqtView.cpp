@@ -314,7 +314,7 @@ void IqtView::setRangeSelectorDefault(const MatrixWorkspace_sptr workspace, cons
   try {
     double rounded_min(range.first);
     double rounded_max(range.second);
-    const std::string instrName(workspace->getInstrument()->getName());
+    const std::string instrName(workspace->getInstrumentName());
     if (instrName == "BASIS") {
       xRangeSelector->setRange(range.first, range.second);
       m_dblManager->setValue(m_properties["ELow"], rounded_min);

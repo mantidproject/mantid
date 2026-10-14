@@ -52,7 +52,7 @@ void DiffPeaksWorkspaces::exec() {
   const double Tolerance = getProperty("Tolerance");
 
   // Warn if not the same instrument, sample
-  if (LHSWorkspace->getInstrument()->getName() != RHSWorkspace->getInstrument()->getName()) {
+  if (LHSWorkspace->getInstrumentName() != RHSWorkspace->getInstrumentName()) {
     g_log.warning("The two input workspaces do not appear to come from data "
                   "take on the same instrument");
   }

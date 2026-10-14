@@ -66,14 +66,14 @@ std::map<std::string, std::string> ConvertHFIRSCDtoMDE::validateInputs() {
     inputWSmsg << "Wrong dimensions";
   } else if (inputWS->getNumExperimentInfo() == 0) {
     inputWSmsg << "Missing experiment info";
-  } else if (inputWS->getExperimentInfo(0)->getInstrument()->getName() != "HB3A" &&
-             inputWS->getExperimentInfo(0)->getInstrument()->getName() != "WAND") {
+  } else if (inputWS->getExperimentInfo(0)->getInstrumentName() != "HB3A" &&
+             inputWS->getExperimentInfo(0)->getInstrumentName() != "WAND") {
     inputWSmsg << "This only works for DEMAND (HB3A) or WAND (HB2C)";
   } else if (inputWS->getDimension(2)->getNBins() != inputWS->getExperimentInfo(0)->run().getNumGoniometers()) {
     inputWSmsg << "goniometers not set correctly, did you run SetGoniometer "
                   "with Average=False";
   } else {
-    std::string instrument = inputWS->getExperimentInfo(0)->getInstrument()->getName();
+    std::string instrument = inputWS->getExperimentInfo(0)->getInstrumentName();
     const auto run = inputWS->getExperimentInfo(0)->run();
     size_t number_of_runs = inputWS->getDimension(2)->getNBins();
     std::vector<std::string> logs;
@@ -165,7 +165,7 @@ void ConvertHFIRSCDtoMDE::exec() {
 
   API::IMDHistoWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
   auto &expInfo = *(inputWS->getExperimentInfo(static_cast<uint16_t>(0)));
-  std::string instrument = expInfo.getInstrument()->getName();
+  std::string instrument = expInfo.getInstrumentName();
 
   std::vector<double> twotheta, azimuthal;
   std::vector<int> detectorID; // detector ID for each (twotheta, azimuthal), most useful when detector grouping done

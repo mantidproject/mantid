@@ -220,7 +220,7 @@ public:
     TS_ASSERT_DELTA(ws2.sample().getOrientedLattice().b(), 2.0, 1e-4);
     TS_ASSERT_DELTA(ws2.sample().getOrientedLattice().c(), 3.0, 1e-4);
     TS_ASSERT_DELTA(ws2.run().getProtonCharge(), 1.234, 0.001);
-    TS_ASSERT_EQUALS(ws2.getInstrument()->getName(), "MyTestInst");
+    TS_ASSERT_EQUALS(ws2.getInstrumentName(), "MyTestInst");
 
     // Changing stuff in the original workspace...
     ws.mutableSample().setName("test1");

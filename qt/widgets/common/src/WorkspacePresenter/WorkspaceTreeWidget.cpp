@@ -967,7 +967,7 @@ void WorkspaceTreeWidget::addMatrixWorkspaceMenuItems(QMenu *menu,
   menu->addAction(m_showInst);
   // Disable the 'show instrument' option if a workspace doesn't have an
   // instrument attached or if it does not have a spectra axis
-  m_showInst->setEnabled(matrixWS->getInstrument() && !matrixWS->getInstrument()->getName().empty() &&
+  m_showInst->setEnabled(matrixWS->getInstrument() && !matrixWS->getInstrumentName().empty() &&
                          matrixWS->getAxis(1)->isSpectra());
   menu->addSeparator();
   menu->addAction(m_plotSpec);

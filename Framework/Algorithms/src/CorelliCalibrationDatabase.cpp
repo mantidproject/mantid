@@ -398,7 +398,7 @@ std::map<std::string, std::string> CorelliCalibrationDatabase::validateInputs() 
   }
 
   // This algorithm will only work for CORELLI, check for CORELLI.
-  if (mInputWS->getInstrument()->getName() != "CORELLI")
+  if (mInputWS->getInstrumentName() != "CORELLI")
     errors["InputWorkspace"] = "This Algorithm will only work for Corelli.";
   // Must include start_time
   else if (!mInputWS->run().hasProperty("start_time") && !mInputWS->run().hasProperty("run_start"))

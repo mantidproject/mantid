@@ -59,7 +59,7 @@ std::map<std::string, std::string> CorelliCalibrationApply::validateInputs() {
   ws = getProperty("Workspace");
 
   // 1_check: input workspace is from CORELLI
-  if (ws->getInstrument()->getName() != "CORELLI") {
+  if (ws->getInstrumentName() != "CORELLI") {
     issues["Workspace"] = "CORELLI only algorithm, aborting";
   }
 

@@ -85,7 +85,7 @@ public:
       return;
 
     TS_ASSERT_EQUALS(in->getNumberHistograms(), out->getNumberHistograms());
-    TS_ASSERT_EQUALS(in->getInstrument()->getName(), out->getInstrument()->getName());
+    TS_ASSERT_EQUALS(in->getInstrumentName(), out->getInstrumentName());
     TS_ASSERT_EQUALS(in->getInstrument()->isParametrized(), out->getInstrument()->isParametrized());
     for (size_t i = 0; i < out->getNumberHistograms(); i++) {
       const auto &inSpec = in->getSpectrum(i);

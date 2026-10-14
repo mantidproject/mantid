@@ -1160,7 +1160,7 @@ createEventWorkspace3(const Mantid::DataObjects::EventWorkspace_const_sptr &sour
   // 4. Instrument
   Mantid::API::Algorithm_sptr loadInst = alg->createChildAlgorithm("LoadInstrument");
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-  loadInst->setPropertyValue("InstrumentName", sourceWS->getInstrument()->getName());
+  loadInst->setPropertyValue("InstrumentName", sourceWS->getInstrumentName());
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", outputWS);
   loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
   loadInst->executeAsChildAlg();

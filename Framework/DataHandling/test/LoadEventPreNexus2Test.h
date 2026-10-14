@@ -177,7 +177,7 @@ public:
     //--------------------------------------------------------
     // Now let's test if a copy works too
     EventWorkspace_sptr inputWS = ew;
-    TS_ASSERT_EQUALS(inputWS->getInstrument()->getName(), "CNCS");
+    TS_ASSERT_EQUALS(inputWS->getInstrumentName(), "CNCS");
 
     // Create a new one
     auto outputWS = inputWS->clone();
@@ -185,7 +185,7 @@ public:
     // Bunch of checks
     TS_ASSERT_EQUALS(outputWS->getNumberEvents(), inputWS->getNumberEvents());
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), inputWS->getNumberHistograms());
-    TS_ASSERT_EQUALS(outputWS->getInstrument()->getName(), "CNCS");
+    TS_ASSERT_EQUALS(outputWS->getInstrumentName(), "CNCS");
 
     std::size_t wkspIndex = 4348; // a good workspace index (with events)
     TS_ASSERT_EQUALS(outputWS->getSpectrum(wkspIndex).getNumberEvents(), 11);
