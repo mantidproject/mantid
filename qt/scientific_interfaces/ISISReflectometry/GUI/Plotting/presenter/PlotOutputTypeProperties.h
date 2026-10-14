@@ -8,7 +8,6 @@
 
 #include "GUI/Common/PlotOptions.h"
 #include "GUI/Plotting/model/PlottingWorkspace.h"
-#include "MantidKernel/System.h"
 #include <string>
 #include <vector>
 

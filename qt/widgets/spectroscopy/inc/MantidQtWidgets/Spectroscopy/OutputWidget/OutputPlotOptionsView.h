@@ -8,7 +8,6 @@
 
 #include "ui_OutputPlotOptions.h"
 
-#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Spectroscopy/DllConfig.h"
 

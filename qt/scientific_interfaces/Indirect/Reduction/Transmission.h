@@ -8,7 +8,6 @@
 
 #include "DataReductionTab.h"
 #include "DllConfig.h"
-#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_Transmission.h"
 

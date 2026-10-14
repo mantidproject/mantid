@@ -8,7 +8,6 @@ set(UI_FILES StepScan.ui)
 set(PRECOMP_HEADERS
     <MantidAPI/Algorithm.h>
     <MantidAPI/MatrixWorkspace_fwd.h>
-    <MantidKernel/System.h>
     <QDialog>
     <QString>
     <QWidget>

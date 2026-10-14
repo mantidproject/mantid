@@ -6,7 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
+#include <cstddef>
+
 #include "MantidQtWidgets/Common/MuonPeriodInfo.h"
 
 #include "DllConfig.h"
