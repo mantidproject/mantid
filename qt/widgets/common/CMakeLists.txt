@@ -349,6 +349,7 @@ set(QT${MANTID_QT_VERSION}_INC_FILES
     inc/MantidQtWidgets/Common/Python/Sip.h
     inc/MantidQtWidgets/Common/Python/Object.h
     inc/MantidQtWidgets/Common/Python/QHashToDict.h
+    inc/MantidQtWidgets/Common/ColorTheme.h
 )
 
 set(QT${MANTID_QT_VERSION}_UI_FILES

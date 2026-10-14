@@ -187,3 +187,13 @@ QColor AlternateCSPythonLexer::defaultPaper(int style) const {
   Q_UNUSED(style);
   return m_isDarkMode ? QColor(30, 30, 30) : QColor(255, 255, 255);
 }
+
+void AlternateCSPythonLexer::setDarkMode(bool dark) {
+  m_isDarkMode = dark;
+  for (int style = 0; style < 128; ++style) {
+    if (description(style).isEmpty())
+      continue;
+    setColor(defaultColor(style), style);
+    setPaper(defaultPaper(style), style);
+  }
+}

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCPeakFittingView.h"
 
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
 #include <QMessageBox>
@@ -35,7 +36,8 @@ void ALCPeakFittingView::initialize() {
 
   connect(m_ui.fit, &QPushButton::clicked, this, &ALCPeakFittingView::fitRequested);
 
-  m_ui.plot->setCanvasColour(Qt::white);
+  m_ui.plot->setCanvasColour(MantidQt::MantidWidgets::isDarkMode() ? QColor(MantidQt::MantidWidgets::DARK_CANVAS_COLOUR)
+                                                                   : Qt::white);
 
   // Error bars on the plot
   QStringList plotsWithErrors{"Corrected"};
@@ -62,7 +64,7 @@ void ALCPeakFittingView::setDataCurve(MatrixWorkspace_sptr workspace, std::size_
   kwargs.insert("distribution", QString("False").toLatin1().constData());
 
   m_ui.plot->clear();
-  m_ui.plot->addSpectrum("Corrected", workspace, workspaceIndex, Qt::black, kwargs);
+  m_ui.plot->addSpectrum("Corrected", workspace, workspaceIndex, MantidQt::MantidWidgets::defaultLineColour(), kwargs);
 }
 
 void ALCPeakFittingView::setFittedCurve(MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex) {

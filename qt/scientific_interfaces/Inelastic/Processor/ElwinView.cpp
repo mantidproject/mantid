@@ -7,6 +7,7 @@
 
 #include "ElwinView.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -40,6 +41,8 @@ ElwinView::ElwinView(QWidget *parent) : QWidget(parent), m_presenter(), m_elwTre
   m_grpManager = new QtGroupPropertyManager();
 
   m_uiForm.setupUi(parent);
+  m_uiForm.ppPlot->setCanvasColour(MantidQt::MantidWidgets::isDarkMode() ? QColor(DARK_CANVAS_COLOUR)
+                                                                         : QColor(255, 255, 255));
 }
 
 ElwinView::~ElwinView() {

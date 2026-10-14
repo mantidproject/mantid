@@ -10,6 +10,7 @@
 
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidQtIcons/Icon.h"
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/MplCpp/Plot.h"
 #include "MantidQtWidgets/Plotting/PeakPicker.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
@@ -263,7 +264,7 @@ void ALFAnalysisView::addSpectrum(Mantid::API::MatrixWorkspace_sptr const &works
   m_plot->clear();
   if (workspace) {
     m_peakPicker->setVisible(true);
-    m_plot->addSpectrum("Extracted Data", workspace, 0, Qt::black);
+    m_plot->addSpectrum("Extracted Data", workspace, 0, MantidQt::MantidWidgets::defaultLineColour());
   }
 }
 

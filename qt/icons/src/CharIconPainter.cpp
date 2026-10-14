@@ -6,6 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtIcons/CharIconPainter.h"
 #include "MantidQtIcons/Icon.h"
+#include <QColor>
+#include <QGuiApplication>
+#include <QPalette>
+#include <QStyleHints>
 #include <QVariant>
 #include <cmath>
 #include <stdexcept>
@@ -15,6 +19,17 @@ namespace MantidQt::Icons {
 namespace {
 const QString DEFAULT_COLOR("black");
 const QString DEFAULT_DEACTIVATED_COLOR("#c7c7c7");
+const QString DARK_DEACTIVATED_COLOR("#6a6a6a");
+
+QColor resolveIconColour(const QString &requested, QIcon::Mode mode) {
+  const bool dark = QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark;
+  if (mode == QIcon::Mode::Disabled)
+    return QColor(dark ? DARK_DEACTIVATED_COLOR : DEFAULT_DEACTIVATED_COLOR);
+  // "black" is the library default, so treat it as "no colour requested" and follow the theme
+  if (dark && (requested.isEmpty() || requested.compare("black", Qt::CaseInsensitive) == 0))
+    return QGuiApplication::palette().color(QPalette::ButtonText);
+  return QColor(requested);
+}
 } // namespace
 
 void CharIconPainter::paint(IconicFont *iconic, QPainter *painter, QRect rect, QIcon::Mode mode, QIcon::State state,
@@ -42,17 +57,15 @@ void CharIconPainter::paintIcon(IconicFont *iconic, QPainter *painter, QRect rec
   const auto charecter = iconic->findCharacterFromCharMap(prefix, charecterOption);
 
   // Set some defaults so it doesn't fail later if nothing was set
-  QString color(DEFAULT_COLOR);
+  QString requested(DEFAULT_COLOR);
   double scaleFactor(1.0);
-  if (mode == QIcon::Mode::Disabled) {
-    color = DEFAULT_DEACTIVATED_COLOR; // gray
-  } else if (colorVariant.canConvert<QString>()) {
-    color = colorVariant.toString();
+  if (colorVariant.canConvert<QString>()) {
+    requested = colorVariant.toString();
   }
   if (scaleVariant.canConvert<double>()) {
     scaleFactor = scaleVariant.toDouble();
   }
-  painter->setPen(QColor(color));
+  painter->setPen(resolveIconColour(requested, mode));
 
   // A 16 pixel-high icon yields a font size of 14, which is pixel perfect for
   // font-awesome. 16 * 0.875 = 14 The reason why the glyph size is smaller than
