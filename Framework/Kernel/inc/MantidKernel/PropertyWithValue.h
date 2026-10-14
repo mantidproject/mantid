@@ -29,7 +29,11 @@ namespace Kernel {
    http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 14/11/2007
 */
-template <typename TYPE> class DLLExport PropertyWithValue : public Property {
+#if !defined(_WIN32)
+template <typename TYPE> class MANTID_KERNEL_DLL PropertyWithValue : public Property {
+#else
+template <typename TYPE> class PropertyWithValue : public Property {
+#endif
 public:
   PropertyWithValue(std::string name, TYPE defaultValue, IValidator_sptr validator = nullptr,
                     const unsigned int direction = Direction::Input);

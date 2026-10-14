@@ -16,8 +16,7 @@ void Item::setState(State state) { m_itemState = ItemState(state); }
 
 std::string Item::message() const { return m_itemState.message(); }
 
-void Item::resetState(bool resetChildren) {
-  UNUSED_ARG(resetChildren);
+void Item::resetState([[maybe_unused]] bool resetChildren) {
   resetOutputs();
   m_itemState.reset();
 }
