@@ -65,8 +65,6 @@ private:
                           const double l2, const double theta, const double phi, const double delay,
                           const double pressure, const double thickness) const;
 
-  /// Cached instrument for this workspace
-  Geometry::Instrument_const_sptr m_baseInstrument;
   /// Cached sample position for this workspace
   Kernel::V3D m_samplePos;
   /// If set to true then update the detector positions base on the information

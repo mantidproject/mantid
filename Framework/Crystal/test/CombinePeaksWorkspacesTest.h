@@ -66,7 +66,7 @@ public:
     TS_ASSERT_EQUALS(ws->getPeak(0).getQLabFrame(), ws->getPeak(2).getQLabFrame())
     TS_ASSERT_EQUALS(ws->getPeak(1).getQLabFrame(), ws->getPeak(3).getQLabFrame())
     TS_ASSERT_DELTA(ws->getPeak(4).getWavelength(), 2.5, 0.001)
-    TS_ASSERT_EQUALS(ws->getInstrument()->baseInstrument(), lhsWS->getInstrument()->baseInstrument())
+    TS_ASSERT_EQUALS(WorkspaceCreationHelper::baseInstrumentID(*ws), WorkspaceCreationHelper::baseInstrumentID(*lhsWS))
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -99,7 +99,7 @@ public:
     TS_ASSERT_EQUALS(ws->getNumberPeaks(), 2)
     TS_ASSERT_EQUALS(ws->getPeak(0).getWavelength(), inWS->getPeak(0).getWavelength())
     TS_ASSERT_EQUALS(ws->getPeak(1).getWavelength(), inWS->getPeak(1).getWavelength())
-    TS_ASSERT_EQUALS(ws->getInstrument()->baseInstrument(), inWS->getInstrument()->baseInstrument())
+    TS_ASSERT_EQUALS(WorkspaceCreationHelper::baseInstrumentID(*ws), WorkspaceCreationHelper::baseInstrumentID(*inWS))
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -161,7 +161,7 @@ public:
     TS_ASSERT_EQUALS(ws->getPeak(4).getQLabFrame(), rhsWS->getPeak(0).getQLabFrame())
     TS_ASSERT_EQUALS(ws->getPeak(5).getQLabFrame(), rhsWS->getPeak(1).getQLabFrame())
     TS_ASSERT_EQUALS(ws->getPeak(6).getQLabFrame(), rhsWS->getPeak(2).getQLabFrame())
-    TS_ASSERT_EQUALS(ws->getInstrument()->baseInstrument(), lhsWS->getInstrument()->baseInstrument())
+    TS_ASSERT_EQUALS(WorkspaceCreationHelper::baseInstrumentID(*ws), WorkspaceCreationHelper::baseInstrumentID(*lhsWS))
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);

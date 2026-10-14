@@ -331,12 +331,16 @@ void StepScan::setupOptionControls() {
 
 void StepScan::launchInstrumentWindow() {
   // Gotta do this in python
-  std::string pyCode = "from mantidqt.widgets.instrumentview.api import get_instrumentview\n"
-                       "instrument_view = get_instrumentview('" +
-                       m_inputWSName +
-                       "')\n"
-                       "instrument_view.select_tab(2)\n"
-                       "instrument_view.show_view()";
+  std::string pyCode = "from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow\n"
+                       "from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel\n"
+                       "from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter\n"
+                       "from mantid.api import AnalysisDataService as ADS\n"
+                       "\n"
+                       "window = FullInstrumentViewWindow()\n"
+                       "window.show()\n"
+                       "FullInstrumentViewPresenter(window.get_instrument_view_widget(),\n"
+                       "                           FullInstrumentViewModel(ADS.retrieve('" +
+                       m_inputWSName + "')))";
   Mantid::PythonInterface::GlobalInterpreterLock lock;
   PyRun_SimpleString(pyCode.c_str());
 

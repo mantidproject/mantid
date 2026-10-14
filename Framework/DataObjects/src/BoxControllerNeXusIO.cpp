@@ -9,6 +9,7 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/MDBoxFlatTree.h"
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidKernel/ConfigService.h"
@@ -491,10 +492,10 @@ void BoxControllerNeXusIO::adjustEventDataBlock(std::vector<FloatOrDouble> &Bloc
 }
 
 // explicit instantiations
-template DLLExport void BoxControllerNeXusIO::adjustEventDataBlock<float>(std::vector<float> &Block,
-                                                                          const std::string &accessMode) const;
-template DLLExport void BoxControllerNeXusIO::adjustEventDataBlock<double>(std::vector<double> &Block,
-                                                                           const std::string &accessMode) const;
+template MANTID_DATAOBJECTS_DLL void
+BoxControllerNeXusIO::adjustEventDataBlock<float>(std::vector<float> &Block, const std::string &accessMode) const;
+template MANTID_DATAOBJECTS_DLL void
+BoxControllerNeXusIO::adjustEventDataBlock<double>(std::vector<double> &Block, const std::string &accessMode) const;
 
 template <typename Type>
 void BoxControllerNeXusIO::loadGenericBlock(std::vector<Type> &Block, const uint64_t blockPosition,

@@ -10,7 +10,6 @@
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidKernel/System.h"
 
 #include "DllConfig.h"
 

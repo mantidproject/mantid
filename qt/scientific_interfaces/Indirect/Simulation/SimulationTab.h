@@ -11,7 +11,6 @@
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidKernel/System.h"
 
 #include <MantidQtWidgets/Common/FileFinderWidget.h>
 #include <QWidget>

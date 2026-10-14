@@ -8,6 +8,7 @@
 #include "MantidAPI/Column.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidKernel/IPropertyManager.h"
 
 using namespace Mantid::Kernel;
@@ -74,7 +75,7 @@ bool SplittersWorkspace::removeSplitter(size_t index) {
 namespace Mantid::Kernel {
 
 template <>
-DLLExport Mantid::DataObjects::SplittersWorkspace_sptr
+MANTID_DATAOBJECTS_DLL Mantid::DataObjects::SplittersWorkspace_sptr
 IPropertyManager::getValue<Mantid::DataObjects::SplittersWorkspace_sptr>(const std::string &name) const {
   auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::DataObjects::SplittersWorkspace_sptr> *>(getPointerToProperty(name));
@@ -88,7 +89,7 @@ IPropertyManager::getValue<Mantid::DataObjects::SplittersWorkspace_sptr>(const s
 }
 
 template <>
-DLLExport Mantid::DataObjects::SplittersWorkspace_const_sptr
+MANTID_DATAOBJECTS_DLL Mantid::DataObjects::SplittersWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::DataObjects::SplittersWorkspace_const_sptr>(const std::string &name) const {
   auto const *prop =
       dynamic_cast<PropertyWithValue<Mantid::DataObjects::SplittersWorkspace_sptr> *>(getPointerToProperty(name));

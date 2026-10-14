@@ -10,7 +10,6 @@
 
 #include "DllConfig.h"
 #include "MantidAPI/GroupingLoader.h"
-#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
 #include "MuonAnalysisHelper.h"
 

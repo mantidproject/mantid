@@ -13,6 +13,7 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/EventWorkspaceMRU.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
@@ -750,7 +751,7 @@ void EventWorkspace::getIntegratedSpectra(std::vector<double> &out, const double
 
 namespace Mantid::Kernel {
 template <>
-DLLExport Mantid::DataObjects::EventWorkspace_sptr
+MANTID_DATAOBJECTS_DLL Mantid::DataObjects::EventWorkspace_sptr
 IPropertyManager::getValue<Mantid::DataObjects::EventWorkspace_sptr>(const std::string &name) const {
   auto *prop = dynamic_cast<PropertyWithValue<Mantid::DataObjects::EventWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
@@ -763,7 +764,7 @@ IPropertyManager::getValue<Mantid::DataObjects::EventWorkspace_sptr>(const std::
 }
 
 template <>
-DLLExport Mantid::DataObjects::EventWorkspace_const_sptr
+MANTID_DATAOBJECTS_DLL Mantid::DataObjects::EventWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::DataObjects::EventWorkspace_const_sptr>(const std::string &name) const {
   auto const *prop =
       dynamic_cast<PropertyWithValue<Mantid::DataObjects::EventWorkspace_sptr> *>(getPointerToProperty(name));

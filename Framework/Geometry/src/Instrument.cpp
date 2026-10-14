@@ -928,7 +928,7 @@ void Instrument::removeDetectorFinalize() {
 void Instrument::getBoundingBox(BoundingBox &assemblyBox) const {
   if (m_map) {
 
-    if (m_map->hasComponentInfo(this->baseInstrument().get())) {
+    if (m_map->hasComponentInfo(m_instr.get())) {
       assemblyBox = m_map->componentInfo().boundingBox(index(), &assemblyBox);
       return;
     }

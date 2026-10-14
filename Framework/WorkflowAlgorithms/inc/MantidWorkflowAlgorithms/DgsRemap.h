@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -16,7 +17,7 @@ namespace WorkflowAlgorithms {
  * workspace if appropriate information is passed. It can be run in reverse
  * (group then mask) mode.
  */
-class DLLExport DgsRemap final : public API::Algorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL DgsRemap final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

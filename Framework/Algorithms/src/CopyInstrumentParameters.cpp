@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CopyInstrumentParameters.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 
@@ -90,12 +91,11 @@ void CopyInstrumentParameters::exec() {
       targMap.add(targComp, param);
     }
 
-    // Clear old parameters. We also want to clear fields stored in DetectorInfo
-    // (masking, positions, rotations). By setting the base instrument (which
-    // does not include a ParameterMap or DetectorInfo) we make use of the
-    // mechanism in ExperimentInfo that builds a clean DetectorInfo from the
-    // instrument being set.
-    m_receivingWorkspace->setInstrument(inst2->baseInstrument());
+    // Clear old parameters, and the fields stored in DetectorInfo and ComponentInfo (masking, positions, rotations),
+    // returning the receiving instrument to its base geometry before the copied parameters are applied.
+    auto clear = createChildAlgorithm("ClearInstrumentParameters");
+    clear->setProperty("Workspace", m_receivingWorkspace);
+    clear->executeAsChildAlg();
     // ExperimentInfo::readParameterMap deals with extracting legacy information
     // from ParameterMap.
     m_receivingWorkspace->readParameterMap(targMap.asString());
@@ -106,27 +106,15 @@ void CopyInstrumentParameters::exec() {
   }
 }
 
-/** Retrieves the properties and checks that they have valid values.
- *  @throw std::invalid_argument If either workspace has no instrument or the
- * instruments have different base instruments.
+/** Checks whether the two workspaces have the same base instrument, recording the result in
+ * m_different_instrument_sp.
  */
 void CopyInstrumentParameters::checkProperties() {
 
-  // Check that both workspaces have an instrument
-  Instrument_const_sptr inst = m_givingWorkspace->getInstrument();
-  if (!inst) {
-    throw std::invalid_argument("Input workspace has no instrument");
-  }
-  Instrument_const_sptr inst2 = m_receivingWorkspace->getInstrument();
-  if (!inst2) {
-    throw std::invalid_argument("Output workspace has no instrument");
-  }
-
-  Instrument_const_sptr baseInstGiv = inst->baseInstrument();
-  Instrument_const_sptr baseInstRec = inst2->baseInstrument();
-
-  // Check that both workspaces have the same instrument name
-  if (baseInstRec != baseInstGiv) {
+  // A component ID is the address of the base component, so the IDs of the roots identify the base instruments
+  const auto &componentInfoGiv = m_givingWorkspace->componentInfo();
+  const auto &componentInfoRec = m_receivingWorkspace->componentInfo();
+  if (componentInfoGiv.componentID(componentInfoGiv.root()) != componentInfoRec.componentID(componentInfoRec.root())) {
     m_different_instrument_sp = true;
     g_log.warning() << "The base instrument in the output workspace is not the "
                        "same as the base instrument in the input workspace.\n";

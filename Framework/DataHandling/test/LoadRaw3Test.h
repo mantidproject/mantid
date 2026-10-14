@@ -12,6 +12,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -476,7 +477,8 @@ public:
     // But the data should be different
     TS_ASSERT_DIFFERS(outsptr1->y(1)[8], outsptr2->y(1)[8])
 
-    TS_ASSERT_EQUALS(outsptr1->getInstrument()->baseInstrument(), outsptr2->getInstrument()->baseInstrument())
+    TS_ASSERT_EQUALS(WorkspaceCreationHelper::baseInstrumentID(*outsptr1),
+                     WorkspaceCreationHelper::baseInstrumentID(*outsptr2))
     TS_ASSERT_EQUALS(&(outsptr1->sample()), &(outsptr2->sample()))
     TS_ASSERT_DIFFERS(&(outsptr1->run()), &(outsptr2->run()))
 

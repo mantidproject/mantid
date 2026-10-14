@@ -175,8 +175,6 @@ void PreprocessDetectorsToMD::processDetectorsPositions(const API::MatrixWorkspa
   g_log.information() << "Preprocessing detector locations in a target reciprocal space\n";
   //
   Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
-  // this->pBaseInstr                = instrument->baseInstrument();
-  //
   Geometry::IComponent_const_sptr source = instrument->getSource();
   Geometry::IComponent_const_sptr sample = instrument->getSample();
   if ((!source) || (!sample)) {

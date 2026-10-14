@@ -12,6 +12,7 @@
 #include "MantidKernel/IValidator.h"
 #include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/kernel/DllConfig.h"
 
 // See
 // http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
@@ -113,7 +114,7 @@ SequenceTypeHandler<ContainerType>::create(const std::string &name, const boost:
 // Concrete instantiations
 //-----------------------------------------------------------------------
 ///@cond
-#define INSTANTIATE(ElementType) template struct DLLExport SequenceTypeHandler<std::vector<ElementType>>;
+#define INSTANTIATE(ElementType) template struct PYTHON_KERNEL_DLL SequenceTypeHandler<std::vector<ElementType>>;
 
 INSTANTIATE(int)
 INSTANTIATE(long)

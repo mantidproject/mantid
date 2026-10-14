@@ -13,7 +13,6 @@ set(PRECOMP_HEADERS
     <MantidAPI/Algorithm.h>
     <MantidAPI/MatrixWorkspace.h>
     <MantidAPI/MatrixWorkspace_fwd.h>
-    <MantidKernel/System.h>
     <MantidQtWidgets/Common/UserInputValidator.h>
     <QDialog>
     <QFileInfo>

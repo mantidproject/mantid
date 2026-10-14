@@ -7,6 +7,7 @@
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidKernel/IPropertyManager.h"
 
 #include <fstream>
@@ -423,7 +424,7 @@ void SpecialWorkspace2D::copyFrom(std::shared_ptr<const SpecialWorkspace2D> sour
 namespace Mantid::Kernel {
 
 template <>
-DLLExport Mantid::DataObjects::SpecialWorkspace2D_sptr
+MANTID_DATAOBJECTS_DLL Mantid::DataObjects::SpecialWorkspace2D_sptr
 IPropertyManager::getValue<Mantid::DataObjects::SpecialWorkspace2D_sptr>(const std::string &name) const {
   auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::DataObjects::SpecialWorkspace2D_sptr> *>(getPointerToProperty(name));
@@ -437,7 +438,7 @@ IPropertyManager::getValue<Mantid::DataObjects::SpecialWorkspace2D_sptr>(const s
 }
 
 template <>
-DLLExport Mantid::DataObjects::SpecialWorkspace2D_const_sptr
+MANTID_DATAOBJECTS_DLL Mantid::DataObjects::SpecialWorkspace2D_const_sptr
 IPropertyManager::getValue<Mantid::DataObjects::SpecialWorkspace2D_const_sptr>(const std::string &name) const {
   auto const *prop =
       dynamic_cast<PropertyWithValue<Mantid::DataObjects::SpecialWorkspace2D_sptr> *>(getPointerToProperty(name));

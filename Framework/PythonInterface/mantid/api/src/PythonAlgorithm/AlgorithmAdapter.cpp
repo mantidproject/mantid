@@ -229,7 +229,8 @@ template <typename BaseAlgorithm> void AlgorithmAdapter<BaseAlgorithm>::setWikiS
                     "    \"" +
                     summary + "\"\n";
 
-  PyErr_Warn(PyExc_DeprecationWarning, msg.c_str());
+  if (PyErr_Warn(PyExc_DeprecationWarning, msg.c_str()) < 0)
+    throw boost::python::error_already_set();
   m_wikiSummary = summary;
 }
 

@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 
 #include <QComboBox>

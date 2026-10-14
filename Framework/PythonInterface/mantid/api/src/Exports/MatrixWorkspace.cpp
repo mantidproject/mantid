@@ -174,10 +174,11 @@ const Mantid::MantidVec &mutableDxData(MatrixWorkspace &self, const size_t index
  * @returns xData(self, index)
  */
 const Mantid::MantidVec &readXDeprecated(MatrixWorkspace &self, const size_t index) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             "`MatrixWorkspace.readX()` is deprecated in Mantid 7.0, use `MatrixWorkspace.x()` instead. "
-             "For more information, see the Histogram data concept page: "
-             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  if (PyErr_Warn(PyExc_DeprecationWarning,
+                 "`MatrixWorkspace.readX()` is deprecated in Mantid 7.0, use `MatrixWorkspace.x()` instead. "
+                 "For more information, see the Histogram data concept page: "
+                 "https://docs.mantidproject.org/nightly/concepts/HistogramData.html") < 0)
+    throw boost::python::error_already_set();
   return xData(self, index);
 }
 
@@ -188,10 +189,11 @@ const Mantid::MantidVec &readXDeprecated(MatrixWorkspace &self, const size_t ind
  * @returns yData(self, index)
  */
 const Mantid::MantidVec &readYDeprecated(MatrixWorkspace &self, const size_t index) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             "`MatrixWorkspace.readY()` is deprecated in Mantid 7.0, use `MatrixWorkspace.y()` instead. "
-             "For more information, see the Histogram data concept page: "
-             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  if (PyErr_Warn(PyExc_DeprecationWarning,
+                 "`MatrixWorkspace.readY()` is deprecated in Mantid 7.0, use `MatrixWorkspace.y()` instead. "
+                 "For more information, see the Histogram data concept page: "
+                 "https://docs.mantidproject.org/nightly/concepts/HistogramData.html") < 0)
+    throw boost::python::error_already_set();
   return yData(self, index);
 }
 
@@ -202,10 +204,11 @@ const Mantid::MantidVec &readYDeprecated(MatrixWorkspace &self, const size_t ind
  * @returns eData(self, index)
  */
 const Mantid::MantidVec &readEDeprecated(MatrixWorkspace &self, const size_t index) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             "`MatrixWorkspace.readE()` is deprecated in Mantid 7.0, use `MatrixWorkspace.e()` instead. "
-             "For more information, see the Histogram data concept page: "
-             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  if (PyErr_Warn(PyExc_DeprecationWarning,
+                 "`MatrixWorkspace.readE()` is deprecated in Mantid 7.0, use `MatrixWorkspace.e()` instead. "
+                 "For more information, see the Histogram data concept page: "
+                 "https://docs.mantidproject.org/nightly/concepts/HistogramData.html") < 0)
+    throw boost::python::error_already_set();
   return eData(self, index);
 }
 
@@ -216,10 +219,11 @@ const Mantid::MantidVec &readEDeprecated(MatrixWorkspace &self, const size_t ind
  * @returns dxData(self, index)
  */
 const Mantid::MantidVec &readDxDeprecated(MatrixWorkspace &self, const size_t index) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             "`MatrixWorkspace.readDx()` is deprecated in Mantid 7.0, use `MatrixWorkspace.dx()` instead. "
-             "For more information, see the Histogram data concept page: "
-             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  if (PyErr_Warn(PyExc_DeprecationWarning,
+                 "`MatrixWorkspace.readDx()` is deprecated in Mantid 7.0, use `MatrixWorkspace.dx()` instead. "
+                 "For more information, see the Histogram data concept page: "
+                 "https://docs.mantidproject.org/nightly/concepts/HistogramData.html") < 0)
+    throw boost::python::error_already_set();
   return dxData(self, index);
 }
 
@@ -230,10 +234,11 @@ const Mantid::MantidVec &readDxDeprecated(MatrixWorkspace &self, const size_t in
  * @returns mutableXData(self, index)
  */
 const Mantid::MantidVec &dataXDeprecated(MatrixWorkspace &self, const size_t index) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             "`MatrixWorkspace.dataX()` is deprecated in Mantid 7.0, use `MatrixWorkspace.mutableX()` instead. "
-             "For more information, see the Histogram data concept page: "
-             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  if (PyErr_Warn(PyExc_DeprecationWarning,
+                 "`MatrixWorkspace.dataX()` is deprecated in Mantid 7.0, use `MatrixWorkspace.mutableX()` instead. "
+                 "For more information, see the Histogram data concept page: "
+                 "https://docs.mantidproject.org/nightly/concepts/HistogramData.html") < 0)
+    throw boost::python::error_already_set();
   return mutableXData(self, index);
 }
 
@@ -244,10 +249,11 @@ const Mantid::MantidVec &dataXDeprecated(MatrixWorkspace &self, const size_t ind
  * @returns mutableYData(self, index)
  */
 const Mantid::MantidVec &dataYDeprecated(MatrixWorkspace &self, const size_t index) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             "`MatrixWorkspace.dataY()` is deprecated in Mantid 7.0, use `MatrixWorkspace.mutableY()` instead. "
-             "For more information, see the Histogram data concept page: "
-             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  if (PyErr_Warn(PyExc_DeprecationWarning,
+                 "`MatrixWorkspace.dataY()` is deprecated in Mantid 7.0, use `MatrixWorkspace.mutableY()` instead. "
+                 "For more information, see the Histogram data concept page: "
+                 "https://docs.mantidproject.org/nightly/concepts/HistogramData.html") < 0)
+    throw boost::python::error_already_set();
   return mutableYData(self, index);
 }
 
@@ -258,10 +264,11 @@ const Mantid::MantidVec &dataYDeprecated(MatrixWorkspace &self, const size_t ind
  * @returns mutableEData(self, index)
  */
 const Mantid::MantidVec &dataEDeprecated(MatrixWorkspace &self, const size_t index) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             "`MatrixWorkspace.dataE()` is deprecated in Mantid 7.0, use `MatrixWorkspace.mutableE()` instead. "
-             "For more information, see the Histogram data concept page: "
-             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  if (PyErr_Warn(PyExc_DeprecationWarning,
+                 "`MatrixWorkspace.dataE()` is deprecated in Mantid 7.0, use `MatrixWorkspace.mutableE()` instead. "
+                 "For more information, see the Histogram data concept page: "
+                 "https://docs.mantidproject.org/nightly/concepts/HistogramData.html") < 0)
+    throw boost::python::error_already_set();
   return mutableEData(self, index);
 }
 
@@ -272,10 +279,11 @@ const Mantid::MantidVec &dataEDeprecated(MatrixWorkspace &self, const size_t ind
  * @returns mutableDxData(self, index)
  */
 const Mantid::MantidVec &dataDxDeprecated(MatrixWorkspace &self, const size_t index) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             "`MatrixWorkspace.dataDx()` is deprecated in Mantid 7.0, use `MatrixWorkspace.mutableDx()` instead. "
-             "For more information, see the Histogram data concept page: "
-             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  if (PyErr_Warn(PyExc_DeprecationWarning,
+                 "`MatrixWorkspace.dataDx()` is deprecated in Mantid 7.0, use `MatrixWorkspace.mutableDx()` instead. "
+                 "For more information, see the Histogram data concept page: "
+                 "https://docs.mantidproject.org/nightly/concepts/HistogramData.html") < 0)
+    throw boost::python::error_already_set();
   return mutableDxData(self, index);
 }
 
@@ -326,10 +334,11 @@ void setDxFromPyObject(MatrixWorkspace &self, const size_t wsIndex, const boost:
  * @param values A numpy array. The length must match the size of the spectrum
  */
 void setXDeprecated(MatrixWorkspace &self, const size_t wsIndex, const boost::python::object &values) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             "`MatrixWorkspace.setX()` is deprecated in Mantid 7.0, use `MatrixWorkspace.setSharedX()` instead. "
-             "For more information, see the Histogram data concept page: "
-             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  if (PyErr_Warn(PyExc_DeprecationWarning,
+                 "`MatrixWorkspace.setX()` is deprecated in Mantid 7.0, use `MatrixWorkspace.setSharedX()` instead. "
+                 "For more information, see the Histogram data concept page: "
+                 "https://docs.mantidproject.org/nightly/concepts/HistogramData.html") < 0)
+    throw boost::python::error_already_set();
   setXFromPyObject(self, wsIndex, values);
 }
 
@@ -340,10 +349,11 @@ void setXDeprecated(MatrixWorkspace &self, const size_t wsIndex, const boost::py
  * @param values A numpy array. The length must match the size of the spectrum
  */
 void setYDeprecated(MatrixWorkspace &self, const size_t wsIndex, const boost::python::object &values) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             "`MatrixWorkspace.setY()` is deprecated in Mantid 7.0, use `MatrixWorkspace.setSharedY()` instead. "
-             "For more information, see the Histogram data concept page: "
-             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  if (PyErr_Warn(PyExc_DeprecationWarning,
+                 "`MatrixWorkspace.setY()` is deprecated in Mantid 7.0, use `MatrixWorkspace.setSharedY()` instead. "
+                 "For more information, see the Histogram data concept page: "
+                 "https://docs.mantidproject.org/nightly/concepts/HistogramData.html") < 0)
+    throw boost::python::error_already_set();
   setYFromPyObject(self, wsIndex, values);
 }
 
@@ -354,10 +364,11 @@ void setYDeprecated(MatrixWorkspace &self, const size_t wsIndex, const boost::py
  * @param values A numpy array. The length must match the size of the spectrum
  */
 void setEDeprecated(MatrixWorkspace &self, const size_t wsIndex, const boost::python::object &values) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             "`MatrixWorkspace.setE()` is deprecated in Mantid 7.0, use `MatrixWorkspace.setSharedE()` instead. "
-             "For more information, see the Histogram data concept page: "
-             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  if (PyErr_Warn(PyExc_DeprecationWarning,
+                 "`MatrixWorkspace.setE()` is deprecated in Mantid 7.0, use `MatrixWorkspace.setSharedE()` instead. "
+                 "For more information, see the Histogram data concept page: "
+                 "https://docs.mantidproject.org/nightly/concepts/HistogramData.html") < 0)
+    throw boost::python::error_already_set();
   setEFromPyObject(self, wsIndex, values);
 }
 
@@ -368,10 +379,11 @@ void setEDeprecated(MatrixWorkspace &self, const size_t wsIndex, const boost::py
  * @param values A numpy array. The length must match the size of the spectrum
  */
 void setDxDeprecated(MatrixWorkspace &self, const size_t wsIndex, const boost::python::object &values) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             "`MatrixWorkspace.setDx()` is deprecated in Mantid 7.0, use `MatrixWorkspace.setSharedDx()` instead. "
-             "For more information, see the Histogram data concept page: "
-             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  if (PyErr_Warn(PyExc_DeprecationWarning,
+                 "`MatrixWorkspace.setDx()` is deprecated in Mantid 7.0, use `MatrixWorkspace.setSharedDx()` instead. "
+                 "For more information, see the Histogram data concept page: "
+                 "https://docs.mantidproject.org/nightly/concepts/HistogramData.html") < 0)
+    throw boost::python::error_already_set();
   setDxFromPyObject(self, wsIndex, values);
 }
 
@@ -451,7 +463,8 @@ std::vector<double> getIntegratedCountsForWorkspaceIndices(MatrixWorkspace &self
  * @returns getRun()
  */
 Mantid::API::Run &getSampleDetailsDeprecated(MatrixWorkspace &self) {
-  PyErr_Warn(PyExc_DeprecationWarning, "``getSampleDetails`` is deprecated, use ``getRun`` instead.");
+  if (PyErr_Warn(PyExc_DeprecationWarning, "``getSampleDetails`` is deprecated, use ``getRun`` instead.") < 0)
+    throw boost::python::error_already_set();
   return self.mutableRun();
 }
 
@@ -462,7 +475,8 @@ Mantid::API::Run &getSampleDetailsDeprecated(MatrixWorkspace &self) {
  * @returns The blocksize()
  */
 std::size_t getNumberBinsDeprecated(MatrixWorkspace &self) {
-  PyErr_Warn(PyExc_DeprecationWarning, "``getNumberBins`` is deprecated, use ``blocksize`` instead.");
+  if (PyErr_Warn(PyExc_DeprecationWarning, "``getNumberBins`` is deprecated, use ``blocksize`` instead.") < 0)
+    throw boost::python::error_already_set();
   return self.blocksize();
 }
 
@@ -477,7 +491,8 @@ std::size_t getNumberBinsDeprecated(MatrixWorkspace &self) {
  * @returns The yIndexOfX(xValue, index, tolerance)
  */
 std::size_t binIndexOfDeprecated(MatrixWorkspace &self, const double xValue, const std::size_t index = 0) {
-  PyErr_Warn(PyExc_DeprecationWarning, "``binIndexOf`` is deprecated, use ``yIndexOfX`` instead.");
+  if (PyErr_Warn(PyExc_DeprecationWarning, "``binIndexOf`` is deprecated, use ``yIndexOfX`` instead.") < 0)
+    throw boost::python::error_already_set();
   return self.yIndexOfX(xValue, index);
 }
 

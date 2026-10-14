@@ -16,15 +16,17 @@ using namespace boost::python;
 
 namespace {
 bool isMaskedDeprecated(const Detector &self) {
-  PyErr_Warn(PyExc_DeprecationWarning, "'Detector::isMasked' is deprecated, "
-                                       "use 'DetectorInfo::isMasked' instead.");
+  if (PyErr_Warn(PyExc_DeprecationWarning, "'Detector::isMasked' is deprecated, "
+                                           "use 'DetectorInfo::isMasked' instead.") < 0)
+    throw boost::python::error_already_set();
   const auto &detInfo = self.parameterMap().detectorInfo();
   return detInfo.isMasked(self.index());
 }
 
 bool isMonitorDeprecated(const Detector &self) {
-  PyErr_Warn(PyExc_DeprecationWarning, "'Detector::isMonitor' is deprecated, "
-                                       "use 'DetectorInfo::isMonitor' instead.");
+  if (PyErr_Warn(PyExc_DeprecationWarning, "'Detector::isMonitor' is deprecated, "
+                                           "use 'DetectorInfo::isMonitor' instead.") < 0)
+    throw boost::python::error_already_set();
   const auto &detInfo = self.parameterMap().detectorInfo();
   return detInfo.isMonitor(self.index());
 }

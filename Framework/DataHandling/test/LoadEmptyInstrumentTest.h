@@ -13,6 +13,7 @@
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -1193,8 +1194,8 @@ public:
 
     // Sanity check that we are not comparing the same instrument (i.e. via some
     // smart caching)
-    TSM_ASSERT("Premise of comparision test broken!", wish_xml->getInstrument()->baseInstrument().get() !=
-                                                          wish_nexus->getInstrument()->baseInstrument().get());
+    TSM_ASSERT("Premise of comparision test broken!", WorkspaceCreationHelper::baseInstrumentID(*wish_xml) !=
+                                                          WorkspaceCreationHelper::baseInstrumentID(*wish_nexus));
 
     const auto &wish_nexus_detinfo = wish_nexus->detectorInfo();
     const auto &wish_xml_detinfo = wish_xml->detectorInfo();

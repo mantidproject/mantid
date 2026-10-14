@@ -24,12 +24,12 @@ namespace {
  * object
  */
 std::shared_ptr<Mantid::Geometry::IObject> getShape(const IObjComponent &self) {
-  /** TODO Uncomment this block for Mantid 7.1
-  PyErr_Warn(PyExc_DeprecationWarning, "'IObjComponent.shape' is deprecated in Mantid 7.0, "
-                                       "use 'ComponentInfo.shape' instead. "
-                                       "For more information, see the instrument access layers concept page: "
-                                       "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html");
-  */
+  if (PyErr_Warn(PyExc_DeprecationWarning,
+                 "'IObjComponent.shape' is deprecated in Mantid 7.0, "
+                 "use 'ComponentInfo.shape' instead. "
+                 "For more information, see the instrument access layers concept page: "
+                 "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html") < 0)
+    throw boost::python::error_already_set();
   return std::const_pointer_cast<Mantid::Geometry::IObject>(self.shape());
 }
 } // namespace

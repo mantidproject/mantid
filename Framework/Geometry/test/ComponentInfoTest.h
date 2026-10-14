@@ -1010,6 +1010,31 @@ public:
     TS_ASSERT(!componentInfo.hasParameter(bankIndex, "transient", false));
   }
 
+  void test_clearParameters_removes_all_of_them_from_the_shared_store() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    ParameterMap pmap;
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
+    auto &componentInfo = *std::get<0>(wrappers);
+    const size_t bankIndex = componentInfo.root() - 3;
+
+    componentInfo.addDouble(bankIndex, "transient", 1.0);
+    componentInfo.addString(componentInfo.root(), "label", "hello");
+    componentInfo.clearParameters();
+
+    TS_ASSERT(!componentInfo.hasParameter(bankIndex, "transient", false));
+    TS_ASSERT(!componentInfo.hasParameter(componentInfo.root(), "label", false));
+    TS_ASSERT(componentInfo.sharedParameterInfo()->empty());
+  }
+
+  void test_clearParameters_on_a_ComponentInfo_without_parameters_leaves_it_empty() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    auto &componentInfo = *std::get<0>(wrappers);
+
+    TS_ASSERT_THROWS_NOTHING(componentInfo.clearParameters());
+    TS_ASSERT(componentInfo.getParameterNames(componentInfo.root()).empty());
+  }
+
   /// Writing works even on a ComponentInfo built without a store, which is how a bare
   /// non-parametrized instrument arrives.
   void test_parameters_can_be_added_to_a_ComponentInfo_built_without_a_store() {

@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include <QLineEdit>
 

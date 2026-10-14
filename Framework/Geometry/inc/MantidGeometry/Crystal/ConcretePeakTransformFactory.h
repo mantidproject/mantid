@@ -16,7 +16,7 @@ namespace Geometry {
 Concrete PeakTransformFactory producing PeakTransforms of type provided by type
 argument
 */
-template <typename PeakTransformProduct> class DLLExport ConcretePeakTransformFactory : public PeakTransformFactory {
+template <typename PeakTransformProduct> class ConcretePeakTransformFactory : public PeakTransformFactory {
 public:
   /**
   Overriden Factory Method.
