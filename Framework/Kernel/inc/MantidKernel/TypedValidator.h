@@ -22,7 +22,7 @@ directly.
 
 A specialised type exists for std::shared_ptr types
  */
-template <typename HeldType> class DLLExport TypedValidator : public IValidator {
+template <typename HeldType> class TypedValidator : public IValidator {
 protected:
   /// Override this function to check the validity of the type
   virtual std::string checkValidity(const HeldType &) const = 0;
@@ -56,7 +56,7 @@ private:
  * The advantage of this is that Validator types then don't have to match
  * their types exactly.
  */
-template <typename ElementType> class DLLExport TypedValidator<std::shared_ptr<ElementType>> : public IValidator {
+template <typename ElementType> class TypedValidator<std::shared_ptr<ElementType>> : public IValidator {
   /// Shared ptr type
   using ElementType_sptr = std::shared_ptr<ElementType>;
 
@@ -91,9 +91,9 @@ private:
 // in Release mode
 // with clang and libc++. The simplest workaround is to compare hash codes.
 #ifdef __clang__
-    if (value.type().hash_code() == m_dataitemTypeID.hash_code())
+    if (value.type().hash_code() == dataitemTypeID().hash_code())
 #else
-    if (value.type() == m_dataitemTypeID)
+    if (value.type() == dataitemTypeID())
 #endif
     {
       return extractFromDataItem(value);
@@ -128,16 +128,12 @@ private:
     }
   }
   /// Typeid of DataItem_sptr
-  static const std::type_info &m_dataitemTypeID;
+  static const std::type_info &dataitemTypeID() { return typeid(std::shared_ptr<DataItem>); }
 };
 
 /// @cond
 // This switch off an warning because oxygen could not figureout that this is a
 // specialized type of the general one.
-/** Intialize the DataItem_sptr typeinfo
- */
-template <typename T>
-const std::type_info &TypedValidator<std::shared_ptr<T>>::m_dataitemTypeID = typeid(std::shared_ptr<DataItem>);
 } // namespace Kernel
 /// @endcond
 } // namespace Mantid

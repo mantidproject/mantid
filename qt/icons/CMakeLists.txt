@@ -14,7 +14,6 @@ mtd_add_qt_library(
   OSX_INSTALL_RPATH @loader_path/../MacOS @loader_path/../Frameworks
   LINUX_INSTALL_RPATH "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
 )
-# We require just the headers for system.h
 target_include_directories(
   MantidQtIconsQt${MANTID_QT_VERSION} PUBLIC $<TARGET_PROPERTY:Mantid::Kernel,INTERFACE_INCLUDE_DIRECTORIES>
 )

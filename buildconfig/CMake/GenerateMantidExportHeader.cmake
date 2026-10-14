@@ -57,7 +57,9 @@ function(GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
 #endif /* ${EXPORT_CONDITION} */\n\n\
  "
     )
-  elseif(PARSED_GENERATE_UNUSED_ARG)
+  endif()
+
+  if(PARSED_GENERATE_UNUSED_ARG)
     set(CUSTOM
         "${CUSTOM}\
 #ifndef UNUSED_ARG\n\
