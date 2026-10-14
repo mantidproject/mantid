@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+import warnings
 from sys import platform
 import numpy as np
 import os
@@ -31,6 +32,15 @@ from mantid.simpleapi import (
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------------
+
+
+def _instrument(workspace):
+    """The workspace's Instrument, which the Direct scripts still take, without the getInstrument() deprecation"""
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        return workspace.getInstrument()
+
+
 class DirectPropertyManagerTest(unittest.TestCase):
     def __init__(self, methodName):
         self.prop_man = PropertyManager("MAR")
@@ -46,7 +56,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
     @staticmethod
     def getInstrument(InstrumentName="MAR"):
         """test method used to obtain default instrument for testing"""
-        idf_file = api.ExperimentInfo.getInstrumentFilename(InstrumentName)
+        idf_file = api.InstrumentFileFinder.getInstrumentFilename(InstrumentName)
         tmp_ws_name = "__empty_" + InstrumentName
         if not mtd.doesExist(tmp_ws_name):
             LoadEmptyInstrument(Filename=idf_file, OutputWorkspace=tmp_ws_name)
@@ -442,7 +452,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         SetInstrumentParameter(ws, ParameterName="TestParam2", Value="initial1", ParameterType="String")
         SetInstrumentParameter(ws, ParameterName="TestParam3", Value="initial2", ParameterType="String")
 
-        instr = ws.getInstrument()
+        instr = _instrument(ws)
         propman = PropertyManager(instr)
 
         self.assertAlmostEqual(propman.TestParam1, 3.5)
@@ -479,7 +489,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         SetInstrumentParameter(ws, ParameterName="BaseParam2", Value="Val2", ParameterType="String")
         SetInstrumentParameter(ws, ParameterName="synonims", Value="ParaPara=BaseParam2", ParameterType="String")
 
-        instr = ws.getInstrument()
+        instr = _instrument(ws)
         propman = PropertyManager(instr)
 
         SampleResult = ["Val1", "Val2"]
@@ -517,7 +527,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
     def test_set_all_defaults_from_instrument(self):
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
         # idf_dir = config.getString('instrumentDefinition.directory')
-        idf_file = api.ExperimentInfo.getInstrumentFilename("LET", "2014-05-02 23:59:59")
+        idf_file = api.InstrumentFileFinder.getInstrumentFilename("LET", "2014-05-02 23:59:59")
         print(idf_file)
         LoadEmptyInstrument(Filename=idf_file, OutputWorkspace=ws)
 
