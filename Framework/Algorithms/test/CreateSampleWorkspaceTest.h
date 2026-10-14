@@ -188,7 +188,6 @@ public:
     V3D const bank2ToSample = compInfo.position(compInfo.indexOfAny("bank2")) - sample_pos;
 
     auto refFrame = outWS->componentInfo().referenceFrame();
-    auto refFrame = outWS->componentInfo().referenceFrame();
     TSM_ASSERT_EQUALS("Wrong offset applied for bank1", bankToSampleDistance,
                       refFrame->vecPointingAlongBeam().scalar_prod(bank1ToSample));
     TSM_ASSERT_EQUALS("Wrong offset applied for bank2", bankToSampleDistance * 2,
