@@ -21,7 +21,8 @@ struct PresenterPlotRequest {
   QWidget *plotParent;
   bool addToExistingPlot;
   bool tiledVertically;
-  bool shareAxesWhenTiled;
+  bool shareXAxisWhenTiled;
+  bool shareYAxisWhenTiled;
 };
 
 /// Collect selected output controls and plotting target options from the view.
@@ -33,7 +34,8 @@ PresenterPlotRequest plotRequestFor(IPlottingView &view, std::string const &inst
           view.plotParent(),
           view.addToExistingPlot(),
           layout == PlotLayout::Tiled && view.plotTiledVertically(),
-          layout == PlotLayout::Tiled && view.shareAxesWhenTiled()};
+          layout == PlotLayout::Tiled && view.shareXAxisWhenTiled(),
+          layout == PlotLayout::Tiled && view.shareYAxisWhenTiled()};
 }
 } // namespace
 
@@ -132,14 +134,15 @@ void PlottingPresenter::plotSelectedWorkspaces(PlotLayout layout) {
                        request.plotParent,
                        request.addToExistingPlot,
                        request.tiledVertically,
-                       request.shareAxesWhenTiled});
+                       request.shareXAxisWhenTiled,
+                       request.shareYAxisWhenTiled});
     }
     updateActivePlotCompatibility();
     return;
   }
 
   m_plotter->plot({workspacesToPlot, options, request.plotParent, request.addToExistingPlot, request.tiledVertically,
-                   request.shareAxesWhenTiled});
+                   request.shareXAxisWhenTiled, request.shareYAxisWhenTiled});
   updateActivePlotCompatibility();
 }
 

@@ -450,8 +450,9 @@ When shared tiled axes are requested, :code:`Plotter` delegates to the generic
 unit metadata from the workspaces tracked by each :code:`MantidAxes` and uses
 the stored Mantid tile metadata to select the plot at position (0, 0) as the
 reference. X and Y axes are shared independently with tiles whose respective
-units match the reference. For axes added to an existing figure, the new axis
-adopts the reference plot's current scale and limits.
+units match the reference, according to the separate X and Y selections in the
+interface. For axes added to an existing figure, the new axis adopts the
+reference plot's current scale and limits.
 
 The distinction between all axes and newly-created axes prevents labels and
 markers for a tiled addition from modifying plots that were already in the

@@ -60,7 +60,8 @@ public:
   MOCK_METHOD(PlotOutputSelection, selectedPlotOutputSelection, (), (const, override));
   MOCK_METHOD(bool, addToExistingPlot, (), (const, override));
   MOCK_METHOD(bool, plotTiledVertically, (), (const, override));
-  MOCK_METHOD(bool, shareAxesWhenTiled, (), (const, override));
+  MOCK_METHOD(bool, shareXAxisWhenTiled, (), (const, override));
+  MOCK_METHOD(bool, shareYAxisWhenTiled, (), (const, override));
   MOCK_METHOD(QWidget *, plotParent, (), (override));
   MOCK_METHOD(bool, confirmPlottingMultipleItems, (size_t), (const, override));
 };
@@ -704,7 +705,7 @@ public:
     presenter.notifyPlotTiledClicked();
   }
 
-  void testPlotTiledPassesShareAxesOptionToPlotter() {
+  void testPlotTiledPassesShareAxesOptionsToPlotter() {
     NiceMock<MockPlottingView> view;
     NiceMock<MockPlotter> plotter;
     PlotOptionsProvider plotOptionsProvider;
@@ -715,7 +716,8 @@ public:
     auto const outputSelection = PlotOutputSelection{PlotOutputType::ReflectivityCurve};
 
     populatePlottingWorkspaceTree(presenter, view, workspaces);
-    EXPECT_CALL(view, shareAxesWhenTiled()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(view, shareXAxisWhenTiled()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(view, shareYAxisWhenTiled()).Times(1).WillOnce(Return(false));
     EXPECT_CALL(view, selectedPlottingWorkspaceNames()).Times(2).WillRepeatedly(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
     EXPECT_CALL(plottingModel, workspacesForPlotting(selectedPlottingWorkspaces, outputSelection))
@@ -724,7 +726,7 @@ public:
     EXPECT_CALL(
         plotter,
         plot(PlotRequest{workspaces, reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve, PlotLayout::Tiled),
-                         nullptr, false, false, true}))
+                         nullptr, false, false, true, false}))
         .Times(1);
 
     presenter.notifyPlotTiledClicked();
