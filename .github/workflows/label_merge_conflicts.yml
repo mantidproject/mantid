@@ -10,13 +10,15 @@ on:
     types: [opened, synchronize, reopened]
 
 permissions:
-  issues: write
-  pull-requests: write
+  contents: read
 
 jobs:
   label-conflicts:
     # Do not run in forks.
     if: ${{ github.repository_owner == 'mantidproject' }}
+    permissions:
+      issues: write
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - uses: prince-chrismc/label-merge-conflicts-action@21e6705eaa6aab66e4e486279389c8e3e4c465b7 # v3.0.4

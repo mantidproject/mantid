@@ -24,6 +24,9 @@ on:
         default: false
         type: boolean
 
+permissions:
+  contents: read
+
 env:
   # the secrets are only available on branches in the main repository
   RELEASES_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN || 'unset_token' }}
@@ -34,6 +37,8 @@ env:
 jobs:
   github-releases:
     if: ${{ github.repository_owner == 'mantidproject' && (github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'github-releases') }}
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: fail if GITHUB_TOKEN is unavailable
