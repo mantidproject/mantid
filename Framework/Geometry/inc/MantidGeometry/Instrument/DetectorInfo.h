@@ -28,6 +28,7 @@ class SpectrumInfo;
 namespace Geometry {
 class IDetector;
 class Instrument;
+class ReferenceFrame;
 
 /** Geometry::DetectorInfo is an intermediate step towards a DetectorInfo that
   is part of Instrument-2.0. The aim is to provide a nearly identical interface

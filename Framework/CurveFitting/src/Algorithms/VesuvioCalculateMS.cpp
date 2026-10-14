@@ -268,14 +268,14 @@ void VesuvioCalculateMS::cacheInputs() {
   std::size_t foil_index;
   try {
     foil_index = compInfo.indexOfAny("foil-pos0");
-  } catch (std::invalid_argument) {
+  } catch (std::invalid_argument const &) {
     throw std::runtime_error("Workspace has no gold foil component defined.");
   }
   auto param = compInfo.getNumberParameter(foil_index, "hwhm_lorentz");
   if (param.empty()) {
     throw std::runtime_error("Foil component has no hwhm_lorentz parameter defined.");
   }
-  m_foilRes = param.first();
+  m_foilRes = param.front();
 }
 
 /**
