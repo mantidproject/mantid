@@ -61,7 +61,7 @@ def reflect_points_in_axis(points: np.ndarray, axis: np.ndarray) -> np.ndarray:
 
 def get_beam_axis(workspace) -> np.ndarray:
     """Return the beam axis vector for the given workspace."""
-    beam_axis = workspace.getInstrument().getReferenceFrame().vecPointingAlongBeam()
+    beam_axis = workspace.componentInfo().referenceFrame().vecPointingAlongBeam()
     beam_axis_norm = np.linalg.norm(beam_axis)
     if beam_axis_norm == 0.0:
         raise ValueError("Beam axis vector cannot be the zero vector.")
