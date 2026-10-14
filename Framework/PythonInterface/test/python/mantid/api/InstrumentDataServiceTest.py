@@ -61,7 +61,8 @@ class InstrumentDataServiceTest(unittest.TestCase):
         # Retrieve the instrument and check it is the same one.
         retrieved_pg3 = InstrumentDataService.retrieve(instrument_cache_name)
         self.assertIsInstance(retrieved_pg3, Instrument)
-        self.assertEqual(retrieved_pg3.getName(), "POWGEN")
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(retrieved_pg3.getName(), "POWGEN")
 
         # Check that the object is removed and the service is empty again.
         InstrumentDataService.remove(instrument_cache_name)

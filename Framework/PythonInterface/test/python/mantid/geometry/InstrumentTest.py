@@ -51,7 +51,8 @@ class InstrumentTest(unittest.TestCase):
         self.assertEqual(num_detectors, 1)
 
     def test_getReferenceFrame(self):
-        frame = self._instrument().getReferenceFrame()
+        with self.assertWarns(DeprecationWarning):
+            frame = self._instrument().getReferenceFrame()
         self.assertTrue(isinstance(frame, ReferenceFrame))
 
     def test_getFilename(self):
@@ -86,7 +87,8 @@ class InstrumentTest(unittest.TestCase):
         inst = self._instrument()
         with self.assertWarns(DeprecationWarning):
             base_inst = inst.getBaseInstrument()
-        self.assertEqual("testInst", base_inst.getName())
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual("testInst", base_inst.getName())
 
     def test_getBaseInstrument_warning_can_be_raised_as_an_error(self):
         inst = self._instrument()

@@ -20,6 +20,7 @@
 #include "MantidKernel/CompositeValidator.h"
 
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/CSGObject.h"
@@ -444,12 +445,11 @@ void VesuvioCalculateGammaBackground::createOutputWorkspaces() {
 
 void VesuvioCalculateGammaBackground::cacheInstrumentGeometry() {
   auto inst = m_inputWS->getInstrument();
-  auto refFrame = inst->getReferenceFrame();
+  const auto &componentInfo = m_inputWS->componentInfo();
+  auto refFrame = componentInfo.referenceFrame();
   auto upAxis = refFrame->pointingUp();
-  auto source = inst->getSource();
-  auto sample = inst->getSample();
-  m_samplePos = sample->getPos();
-  m_l1 = m_samplePos.distance(source->getPos());
+  m_samplePos = componentInfo.samplePosition();
+  m_l1 = componentInfo.l1();
 
   // foils
   auto changer = std::dynamic_pointer_cast<const Geometry::IObjComponent>(inst->getComponentByName("foil-changer"));

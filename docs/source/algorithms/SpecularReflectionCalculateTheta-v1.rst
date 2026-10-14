@@ -31,8 +31,7 @@ Usage
    import os
    instrument_def = os.path.join( config.getInstrumentDirectory() , "INTER_Definition.xml")
    ws = LoadEmptyInstrument(instrument_def)
-   inst = ws.getInstrument()
-   ref_frame = inst.getReferenceFrame()
+   ref_frame = ws.componentInfo().referenceFrame()
    upoffset = ref_frame.vecPointingUp()
    det_position = {ref_frame.pointingUpAxis(): 1.0, ref_frame.pointingAlongBeamAxis(): 1.0, ref_frame.pointingHorizontalAxis():0}
    MoveInstrumentComponent(ws, 'point-detector',RelativePosition=False, **det_position)

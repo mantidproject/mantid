@@ -11,7 +11,7 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -105,7 +105,7 @@ void HyspecScharpfCorrection::exec() {
   // Get number of spectra in this workspace
   const auto numberOfSpectra = static_cast<int64_t>(m_inputWS->getNumberHistograms());
   Mantid::Kernel::V3D samplePos = spectrumInfo.samplePosition();
-  const auto refFrame = m_inputWS->getInstrument()->getReferenceFrame();
+  const auto refFrame = m_inputWS->componentInfo().referenceFrame();
   API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
   for (int64_t i = 0; i < numberOfSpectra; ++i) {
@@ -164,7 +164,7 @@ void HyspecScharpfCorrection::execEvent() {
   // Get number of spectra in this workspace
   const auto numberOfSpectra = static_cast<int64_t>(m_inputWS->getNumberHistograms());
   Mantid::Kernel::V3D samplePos = spectrumInfo.samplePosition();
-  const auto refFrame = m_inputWS->getInstrument()->getReferenceFrame();
+  const auto refFrame = m_inputWS->componentInfo().referenceFrame();
   API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
   for (int64_t i = 0; i < numberOfSpectra; ++i) {

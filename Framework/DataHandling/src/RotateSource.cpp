@@ -7,6 +7,7 @@
 #include "MantidDataHandling/RotateSource.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
@@ -71,8 +72,9 @@ void RotateSource::exec() {
 
   if (angle != 0.) {
 
-    // Need the reference frame to decide around which axis to rotate
-    auto refFrame = inst->getReferenceFrame();
+    // Need the reference frame to decide around which axis to
+    auto const &compInfo = inputP->componentInfo();
+    auto refFrame = compInfo.referenceFrame();
     if (!refFrame) {
       throw std::runtime_error("Could not get a valid reference frame");
     }
@@ -89,18 +91,16 @@ void RotateSource::exec() {
     }
 
     // Get the source's position
-    auto source = inst->getSource();
-    if (!source) {
+    if (!compInfo.hasSource()) {
       throw std::runtime_error("Could not get the source's position");
     }
     // Get the sample's position
-    auto sample = inst->getSample();
-    if (!sample) {
+    if (!compInfo.hasSample()) {
       throw std::runtime_error("Could not get the sample's position");
     }
-    auto samplePos = sample->getPos();
+    auto samplePos = compInfo.samplePosition();
     // The vector we want to rotate
-    auto sourcePos = source->getPos() - samplePos;
+    auto sourcePos = compInfo.sourcePosition() - samplePos;
 
     // The new position
     Quat quat(angle, rotationAxis);
@@ -108,7 +108,7 @@ void RotateSource::exec() {
     sourcePos += samplePos;
 
     // The source's name
-    std::string sourceName = source->getName();
+    std::string sourceName = compInfo.name(compInfo.source());
 
     // Move the source to the new location
     auto move = this->createChildAlgorithm("MoveInstrumentComponent");
