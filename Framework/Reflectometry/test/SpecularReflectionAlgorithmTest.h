@@ -18,7 +18,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidReflectometry/SpecularReflectionAlgorithm.h"
@@ -72,11 +72,11 @@ protected:
   VerticalHorizontalOffsetType
   determine_vertical_and_horizontal_offsets(const MatrixWorkspace_sptr &ws,
                                             const std::string &detectorName = "point-detector") {
-    auto instrument = ws->getInstrument();
-    const V3D pointDetector = instrument->getComponentByName(detectorName)->getPos();
-    const V3D surfaceHolder = instrument->getComponentByName("some-surface-holder")->getPos();
-    const auto referenceFrame = instrument->getReferenceFrame();
-    const V3D sampleToDetector = pointDetector - surfaceHolder;
+    auto const &compInfo = ws->componentInfo();
+    auto const referenceFrame = compInfo.referenceFrame();
+    V3D const pointDetector = compInfo.position(compInfo.indexOfAny(detectorName));
+    V3D const surfaceHolder = compInfo.position(compInfo.indexOfAny("some-surface-holder"));
+    V3D const sampleToDetector = pointDetector - surfaceHolder;
 
     const double sampleToDetectorVerticalOffset = sampleToDetector.scalar_prod(referenceFrame->vecPointingUp());
     const double sampleToDetectorHorizontalOffset =

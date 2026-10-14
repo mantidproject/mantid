@@ -11,7 +11,6 @@ from mantid.api import (
 )
 import numpy as np
 from scipy.stats import moment
-from mantid.geometry import RectangularDetector, GridDetector
 import re
 from scipy.signal import convolve2d
 
@@ -30,12 +29,8 @@ class InstrumentArrayConverter:
 
     def __init__(self, ws):
         self.ws = ws
-        self.inst = ws.getInstrument()
-        if any(
-            self.inst[icomp]
-            for icomp in range(self.inst.nelements())
-            if isinstance(self.inst[icomp], RectangularDetector) or isinstance(self.inst[icomp], GridDetector)
-        ):
+        component_info = ws.componentInfo()
+        if any(component_info.isGridDetector(int(icomp)) for icomp in component_info.children(component_info.root())):
             # might not be true for all components due to presence of monitors etc.
             self.get_detid_array = self._get_detid_array_rect_detector
         else:
