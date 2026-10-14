@@ -8,6 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#define UNUSED_ARG(...) (void)(__VA_ARGS__)
+
 #include "MantidIndexing/SpectrumIndexSet.h"
 
 using namespace Mantid;
@@ -22,6 +24,6 @@ public:
 
   void test_has_correct_mixins() {
     SpectrumIndexSet data(0);
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG((dynamic_cast<detail::IndexSet<SpectrumIndexSet> &>(data))));
+    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::IndexSet<SpectrumIndexSet> &>(data)));
   }
 };
