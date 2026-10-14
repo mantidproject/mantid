@@ -262,7 +262,7 @@ class CentreFinder(object):
         ws = mtd[workspace]
         component_info = ws.componentInfo()
         quat = component_info.rotation(component_info.indexOfAny(self.detector))
-        cylinder_direction = ws.getInstrument().getReferenceFrame().vecPointingAlongBeam()
+        cylinder_direction = ws.componentInfo().referenceFrame().vecPointingAlongBeam()
         quat.rotate(cylinder_direction)
         return cylinder_direction.X(), cylinder_direction.Y(), cylinder_direction.Z()
 
