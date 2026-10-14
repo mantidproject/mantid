@@ -10,13 +10,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
 /**
     Workflow algorithm to compute a patched sensitivity correction for EQSANS.
 */
-class DLLExport ComputeSensitivity : public API::DataProcessorAlgorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL ComputeSensitivity : public API::DataProcessorAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "ComputeSensitivity"; }

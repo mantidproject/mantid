@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ThreadScheduler.h"
 
 #include <algorithm>
@@ -33,7 +34,7 @@ namespace Kernel {
  * @author Janik Zikovsky
  * @date 2011-02-25 16:39:43.233991
  */
-class DLLExport ThreadSchedulerMutexes : public ThreadScheduler {
+class ThreadSchedulerMutexes : public ThreadScheduler {
 public:
   ThreadSchedulerMutexes() = default;
 

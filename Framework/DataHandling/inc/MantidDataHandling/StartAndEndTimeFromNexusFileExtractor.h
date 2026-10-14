@@ -14,7 +14,7 @@ namespace Mantid {
 namespace DataHandling {
 /** Extracts the start and the end time from a Nexus file.
  */
-Mantid::Types::Core::DateAndTime DLLExport extractStartTime(const std::string &filename);
-Mantid::Types::Core::DateAndTime DLLExport extractEndTime(const std::string &filename);
+Mantid::Types::Core::DateAndTime MANTID_DATAHANDLING_DLL extractStartTime(const std::string &filename);
+Mantid::Types::Core::DateAndTime MANTID_DATAHANDLING_DLL extractEndTime(const std::string &filename);
 } // namespace DataHandling
 } // namespace Mantid

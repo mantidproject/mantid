@@ -81,7 +81,7 @@ private:
 // NearestNeighbours implementation
 //------------------------------------------------------------------------------
 
-template <int N = 3> class DLLExport NearestNeighbours {
+template <int N = 3> class NearestNeighbours {
 
 public:
   // typedefs for code brevity
