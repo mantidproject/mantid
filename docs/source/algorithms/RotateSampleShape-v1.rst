@@ -25,9 +25,11 @@ commas:
 -  The sense of rotation as 1 or -1: 1 for counter-clockwise, -1 for
    clockwise rotation.
 
-The sample shape would then be rotated by the goniometer before being used in the
-calculation of various attenuation corrections. This algorithm work for both CSG shapes
-(e.g. cylinders, flat plates etc.) and Mesh files.
+The rotation is applied to the sample shape within its own frame. Any goniometer on the
+workspace's run is left alone, to be applied by whatever goes on to use the shape; this
+algorithm does not enact it. Successive calls compose, so rotating by 90 degrees twice
+leaves the sample turned by 180. This algorithm works for both CSG shapes (e.g. cylinders,
+flat plates etc.) and Mesh files.
 
 
 Usage

@@ -226,9 +226,12 @@ void TranslateSampleShape::exec() {
   const auto dz = translationVector[2];
 
   if (isMeshShape) {
-    // Mesh shapes can be translated directly
-    auto meshShape = std::dynamic_pointer_cast<MeshObject>(ei->sample().getShapePtr());
+    // Translate a copy rather than the vertices where they lie: Sample's copy constructor shares the
+    // shape pointer, so shifting in place moved every cloned workspace's sample too. The CSG branch
+    // below has always replaced the pointer.
+    auto meshShape = std::dynamic_pointer_cast<MeshObject>(std::shared_ptr<IObject>(ei->sample().getShape().clone()));
     meshShape->translate(V3D(dx, dy, dz));
+    ei->mutableSample().setShape(meshShape);
   } else {
     // CSG shapes need to translate XML definition, then use this to set a new shape
     auto csgShape = std::dynamic_pointer_cast<CSGObject>(ei->sample().getShapePtr());
