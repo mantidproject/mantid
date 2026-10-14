@@ -7,7 +7,6 @@
 #include "Plotter.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #pragma push_macro("slots")
@@ -385,6 +384,21 @@ struct PlottedFigure {
   PostPlotTarget postPlotTarget;
 };
 
+/// Ask MantidQt to share compatible axes between tiles.
+void shareTiledAxes(PlottedFigure const &plottedFigure) {
+  using namespace MantidQt::Widgets::Common;
+
+  try {
+    auto const plottingFunctions = Python::Object(Python::NewRef(PyImport_ImportModule("mantidqt.plotting.functions")));
+    if (plottedFigure.postPlotTarget == PostPlotTarget::NewAxes)
+      plottingFunctions.attr("share_tiled_axes")(plottedFigure.figure, plottedFigure.newAxes);
+    else
+      plottingFunctions.attr("share_tiled_axes")(plottedFigure.figure);
+  } catch (Python::ErrorAlreadySet &) {
+    throw Mantid::PythonInterface::PythonException();
+  }
+}
+
 /// Plot a tiled line output by adding axes to an existing figure.
 ExistingTiledPlot plotTiledOnExistingFigure(MantidQt::Widgets::Common::Python::Object const &figure,
                                             std::vector<std::string> const &workspaces, PlotOptions const &options,
@@ -489,6 +503,8 @@ void applyPostPlotting(PlotRequest const &request, PlottedFigure const &plottedF
     if (options.horizontalMarker)
       addHorizontalMarkers(plottedFigure.figure, *options.horizontalMarker);
   }
+  if (request.shareAxesWhenTiled && options.layout == PlotLayout::Tiled)
+    shareTiledAxes(plottedFigure);
   setPlotWindowParent(plottedFigure.figure, request.parentWidget);
 }
 } // namespace

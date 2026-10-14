@@ -99,12 +99,13 @@ public:
     assertButton(optionsLayout->itemAt(12)->widget(), "plotTiled", "Plot tiled");
     assertCheckBox(optionsLayout->itemAt(13)->widget(), "addToExistingPlot", "Add to existing plot");
     assertCheckBox(optionsLayout->itemAt(14)->widget(), "plotTiledVertically", "Plot tiled vertically");
+    assertCheckBox(optionsLayout->itemAt(15)->widget(), "shareAxesWhenTiled", "Share axes between tiles");
   }
 
   void testPlotActionStateDisablesPlotButtons() {
     QtPlottingView view;
 
-    view.setPlotActionState({false, false, false, false, false, false});
+    view.setPlotActionState({false, false, false, false, false, false, false});
 
     assertPlotButtonsEnabled(view, false, false, false);
   }
@@ -112,10 +113,11 @@ public:
   void testPlotActionStateEnablesPlotButtons() {
     QtPlottingView view;
 
-    view.setPlotActionState({true, true, true, true, true, true});
+    view.setPlotActionState({true, true, true, true, true, true, true});
 
     assertPlotButtonsEnabled(view, true, true, true);
     TS_ASSERT(view.findChild<QCheckBox *>("plotTiledVertically")->isEnabled());
+    TS_ASSERT(view.findChild<QCheckBox *>("shareAxesWhenTiled")->isEnabled());
     TS_ASSERT(view.findChild<QCheckBox *>("addToExistingPlot")->isEnabled());
     TS_ASSERT(view.findChild<QCheckBox *>("addToExistingPlot")->isChecked());
   }
@@ -124,9 +126,9 @@ public:
     QtPlottingView view;
     TestPlottingViewSubscriber subscriber;
     view.subscribe(&subscriber);
-    view.setPlotActionState({true, true, true, true, true, true});
+    view.setPlotActionState({true, true, true, true, true, true, true});
 
-    view.setPlotActionState({true, true, true, true, true, false});
+    view.setPlotActionState({true, true, true, true, true, true, false});
 
     TS_ASSERT(!view.findChild<QCheckBox *>("addToExistingPlot")->isChecked());
     TS_ASSERT_EQUALS(subscriber.addToExistingPlotChanged, 0);
@@ -657,7 +659,7 @@ public:
     view.subscribe(&subscriber);
     view.setPlottingWorkspaceTreeItemStates(plottingWorkspaceTreeItemStates());
     view.setOutputSelectionEnabled(true);
-    view.setPlotActionState({true, true, true, true, true, false});
+    view.setPlotActionState({true, true, true, true, true, true, false});
     auto tree = plottingWorkspaceTree(view);
     click(tree, groupIndex(tree));
 

@@ -111,6 +111,7 @@ void QtPlottingView::setPlotActionState(PlotActionState const &state) {
   m_ui.plotOverplot->setEnabled(state.plotOverplotEnabled);
   m_ui.plotTiled->setEnabled(state.plotTiledEnabled);
   m_ui.plotTiledVertically->setEnabled(state.plotTiledVerticallyEnabled);
+  m_ui.shareAxesWhenTiled->setEnabled(state.shareAxesWhenTiledEnabled);
 }
 
 void QtPlottingView::setPlotOutputControlsState(PlotOutputControlsState const &state) {
@@ -153,6 +154,8 @@ PlotOutputSelection QtPlottingView::selectedPlotOutputSelection() const {
 bool QtPlottingView::addToExistingPlot() const { return m_ui.addToExistingPlot->isChecked(); }
 
 bool QtPlottingView::plotTiledVertically() const { return m_ui.plotTiledVertically->isChecked(); }
+
+bool QtPlottingView::shareAxesWhenTiled() const { return m_ui.shareAxesWhenTiled->isChecked(); }
 
 QWidget *QtPlottingView::plotParent() { return window(); }
 

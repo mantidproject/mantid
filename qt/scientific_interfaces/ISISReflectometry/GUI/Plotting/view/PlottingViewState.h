@@ -34,6 +34,7 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL PlotActionState {
   bool plotOverplotEnabled{false};
   bool plotTiledEnabled{false};
   bool plotTiledVerticallyEnabled{false};
+  bool shareAxesWhenTiledEnabled{false};
   bool addToExistingPlotEnabled{false};
   bool addToExistingPlotChecked{false};
 };

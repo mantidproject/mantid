@@ -60,6 +60,7 @@ public:
   MOCK_METHOD(PlotOutputSelection, selectedPlotOutputSelection, (), (const, override));
   MOCK_METHOD(bool, addToExistingPlot, (), (const, override));
   MOCK_METHOD(bool, plotTiledVertically, (), (const, override));
+  MOCK_METHOD(bool, shareAxesWhenTiled, (), (const, override));
   MOCK_METHOD(QWidget *, plotParent, (), (override));
   MOCK_METHOD(bool, confirmPlottingMultipleItems, (size_t), (const, override));
 };
@@ -698,6 +699,32 @@ public:
         plotter,
         plot(PlotRequest{workspaces, reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve, PlotLayout::Tiled),
                          nullptr, false, true}))
+        .Times(1);
+
+    presenter.notifyPlotTiledClicked();
+  }
+
+  void testPlotTiledPassesShareAxesOptionToPlotter() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider plotOptionsProvider;
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
+    auto const workspaces = std::vector<std::string>{"IvsQ_12345", "IvsQ_22345"};
+    auto const selectedPlottingWorkspaces = plottingWorkspaces(workspaces);
+    auto const outputSelection = PlotOutputSelection{PlotOutputType::ReflectivityCurve};
+
+    populatePlottingWorkspaceTree(presenter, view, workspaces);
+    EXPECT_CALL(view, shareAxesWhenTiled()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(view, selectedPlottingWorkspaceNames()).Times(2).WillRepeatedly(Return(workspaces));
+    EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
+    EXPECT_CALL(plottingModel, workspacesForPlotting(selectedPlottingWorkspaces, outputSelection))
+        .Times(1)
+        .WillOnce(Return(workspaces));
+    EXPECT_CALL(
+        plotter,
+        plot(PlotRequest{workspaces, reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve, PlotLayout::Tiled),
+                         nullptr, false, false, true}))
         .Times(1);
 
     presenter.notifyPlotTiledClicked();
