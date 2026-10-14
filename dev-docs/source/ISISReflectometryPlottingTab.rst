@@ -375,8 +375,8 @@ palette, allowing the tree to work in light and dark themes.
 
 Qt Designer definition for the Plotting tab. It declares the plotting workspace
 tree, plot output selector, detector-map and alignment axis controls, plotting
-buttons, vertical-tiling checkbox, shared-axis checkbox, and add-to-existing
-checkbox. Control policy is not encoded in the UI file; the presenter supplies it through
+buttons, vertical-tiling checkbox, shared axis checkboxes and add-to-existing checkbox.
+Control policy is not encoded in the UI file; the presenter supplies it through
 :code:`PlotActionState` and :code:`PlotOutputControlsState`.
 
 Shared Plotting Files
@@ -444,15 +444,6 @@ Reflectometry tab and whether its active axes can be overplotted.
 #. Apply post-plot processing to the appropriate axes: labels, optional
    horizontal markers, the Reflectometry figure marker, and transient window
    parenting.
-
-When shared tiled axes are requested, :code:`Plotter` delegates to the generic
-:code:`mantidqt.plotting.functions.share_tiled_axes` helper. The helper reads
-unit metadata from the workspaces tracked by each :code:`MantidAxes` and uses
-the stored Mantid tile metadata to select the plot at position (0, 0) as the
-reference. X and Y axes are shared independently with tiles whose respective
-units match the reference, according to the separate X and Y selections in the
-interface. For axes added to an existing figure, the new axis adopts the
-reference plot's current scale and limits.
 
 The distinction between all axes and newly-created axes prevents labels and
 markers for a tiled addition from modifying plots that were already in the
