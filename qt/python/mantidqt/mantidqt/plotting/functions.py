@@ -84,29 +84,26 @@ def current_figure_or_none():
 @dataclass
 class TiledAxesDetails:
     ax: object
+    row: int
+    column: int
     x_unit: str
     y_unit: str
 
 
 def share_tiled_axes(fig, new_axes=None, share_x=True, share_y=True):
-    """Share matching axes between tiles in a Mantid figure.
+    """Share axes matching the top-left tile in a Mantid figure.
 
     Each dimension is shared when requested and its displayed workspace units
     match. If ``new_axes`` is supplied, existing plot settings take precedence.
     """
     axes = [details for ax in fig.axes if (details := _tiled_axis_details(ax)) is not None]
-    existing_axes = {details.ax for details in axes if details.ax not in new_axes} if new_axes else set()
-    # axis which can be used a reference for sharing units etc.
-    x_existing_axes = existing_axes.copy() if share_x else None
-    y_existing_axes = existing_axes.copy() if share_y else None
+    reference = next(details for details in axes if details.row == 0 and details.column == 0)
+    combine_limits = new_axes is None
 
-    # Share axes between all pairs of axes with matching units
-    for index, first in enumerate(axes):
-        for second in axes[index + 1 :]:
-            if x_existing_axes and first.x_unit == second.x_unit:
-                _share_axis(first.ax, second.ax, x_existing_axes, "x")
-            if y_existing_axes and first.y_unit == second.y_unit:
-                _share_axis(first.ax, second.ax, y_existing_axes, "y")
+    if share_x:
+        _share_axis(axes, reference, "x", combine_limits)
+    if share_y:
+        _share_axis(axes, reference, "y", combine_limits)
 
     fig.canvas.draw_idle()
 
@@ -129,7 +126,7 @@ def _tiled_axis_details(ax):
     x_axis_index = 1 if _plot_axis(ax, workspace_name) == MantidAxType.BIN else 0
     x_unit = _axis_unit(workspace, x_axis_index)
     y_unit = _axis_unit(workspace, 1) if axes_type(ax) in (FigureType.Image, FigureType.Contour) else workspace.YUnit()
-    return TiledAxesDetails(ax, x_unit, y_unit)
+    return TiledAxesDetails(ax, ax._mantid_tiled_row, ax._mantid_tiled_col, x_unit, y_unit)
 
 
 def _plot_axis(ax, workspace_name):
@@ -144,29 +141,20 @@ def _axis_unit(workspace, index):
     return (unit.unitID(), unit.symbol().ascii() if unit.unitID() == "Label" else "")
 
 
-def _share_axis(first, second, existing_axes, dimension):
-    first_is_existing = first in existing_axes
-    second_is_existing = second in existing_axes
-    shared_axes = getattr(first, f"get_shared_{dimension}_axes")()
-    # If the axes are already shared, do nothing
-    if shared_axes.joined(first, second):
-        # If either axis is already existing, add both to existing axes to be used as future reference
-        if first_is_existing or second_is_existing:
-            existing_axes.update({first, second})
-        return
+def _share_axis(axes, reference, dimension, combine_limits):
+    unit = getattr(reference, f"{dimension}_unit")
+    compatible_axes = [details.ax for details in axes if getattr(details, f"{dimension}_unit") == unit]
+    limits = [getattr(ax, f"get_{dimension}lim")() for ax in compatible_axes]
+    shared_axes = getattr(reference.ax, f"get_shared_{dimension}_axes")()
 
-    first_limits = getattr(first, f"get_{dimension}lim")()
-    second_limits = getattr(second, f"get_{dimension}lim")()
-    if first_is_existing or (first_is_existing == second_is_existing):
-        target, reference = second, first
-    else:
-        target, reference = first, second
-    getattr(target, f"share{dimension}")(reference)
-    # If either axis is already existing, add the target (non-reference) to existing axes to be used as future reference
-    if first_is_existing or second_is_existing:
-        existing_axes.add(target)
-    else:
-        getattr(target, f"set_{dimension}lim")(min(first_limits[0], second_limits[0]), max(first_limits[1], second_limits[1]))
+    for ax in compatible_axes:
+        if ax is not reference.ax and not shared_axes.joined(reference.ax, ax):
+            getattr(ax, f"share{dimension}")(reference.ax)
+
+    if combine_limits:
+        getattr(reference.ax, f"set_{dimension}lim")(
+            min(axis_limits[0] for axis_limits in limits), max(axis_limits[1] for axis_limits in limits)
+        )
 
 
 def plot_md_ws_from_names(names, errors, overplot, fig=None):
