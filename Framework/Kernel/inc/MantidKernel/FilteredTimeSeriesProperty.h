@@ -7,8 +7,9 @@
 #pragma once
 
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
+#include <cstddef>
 
 namespace Mantid {
 using namespace Types::Core;
