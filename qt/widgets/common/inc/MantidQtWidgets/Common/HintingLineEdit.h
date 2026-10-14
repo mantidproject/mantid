@@ -8,7 +8,6 @@
 
 #include "Hint.h"
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 
 #include <QLineEdit>

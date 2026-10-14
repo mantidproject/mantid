@@ -8,7 +8,6 @@
 
 #include "DataProcessor.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "SymmetriseModel.h"
 #include "SymmetriseView.h"

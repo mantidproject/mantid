@@ -7,7 +7,6 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "MantidKernel/System.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"

@@ -7,7 +7,6 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
 #include <MantidQtWidgets/Common/FileFinderWidget.h>
 #include <QWidget>

@@ -6,12 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <cstddef>
+
 #include "DllConfig.h"
 #include "IALCDataLoadingModel.h"
 #include "IALCDataLoadingView.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/System.h"
 #include <atomic>
 
 namespace MantidQt::CustomInterfaces {

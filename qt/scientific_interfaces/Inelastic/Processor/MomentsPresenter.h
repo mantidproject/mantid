@@ -12,7 +12,6 @@
 #include "MomentsModel.h"
 #include "MomentsView.h"
 
-#include "MantidKernel/System.h"
 #include "ui_MomentsTab.h"
 
 #include <QFont>
