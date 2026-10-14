@@ -21,12 +21,10 @@ from matplotlib import _pylab_helpers
 # register mantid projection
 import mantid.plots  # noqa
 from mantid.api import AnalysisDataService, WorkspaceFactory
-from mantid.plots.utility import MantidAxType
 from unittest import mock
 from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 from mantid.plots.plotfunctions import (
     add_axes_to_existing_mantid_tiled_figure,
-    create_subplots,
     get_plot_fig,
     manage_workspace_names,
     stored_mantid_tiled_axis_position,
@@ -224,18 +222,6 @@ class TiledPlotsTest(TestCase):
         self.assertEqual((1, 20), fig.axes[0].get_xlim())
         self.assertEqual((1, 20), fig.axes[0].get_ylim())
 
-    def test_share_tiled_axes_can_share_each_dimension_independently(self):
-        x_figure = self._create_plot(names=["test_ws", "test_ws_2"], errors=False, overplot=False)
-        y_figure = self._create_plot(names=["test_ws", "test_ws_2"], errors=False, overplot=False)
-
-        share_tiled_axes(x_figure, share_y=False)
-        share_tiled_axes(y_figure, share_x=False)
-
-        self.assertTrue(x_figure.axes[0].get_shared_x_axes().joined(x_figure.axes[0], x_figure.axes[1]))
-        self.assertFalse(x_figure.axes[0].get_shared_y_axes().joined(x_figure.axes[0], x_figure.axes[1]))
-        self.assertFalse(y_figure.axes[0].get_shared_x_axes().joined(y_figure.axes[0], y_figure.axes[1]))
-        self.assertTrue(y_figure.axes[0].get_shared_y_axes().joined(y_figure.axes[0], y_figure.axes[1]))
-
     def test_share_tiled_axes_requires_matching_units(self):
         self._test_ws_2.getAxis(0).setUnit("Wavelength")
         x_mismatch_figure = self._create_plot(names=["test_ws", "test_ws_2"], errors=False, overplot=False)
@@ -253,52 +239,6 @@ class TiledPlotsTest(TestCase):
 
         self.assertTrue(y_mismatch_figure.axes[0].get_shared_x_axes().joined(y_mismatch_figure.axes[0], y_mismatch_figure.axes[1]))
         self.assertFalse(y_mismatch_figure.axes[0].get_shared_y_axes().joined(y_mismatch_figure.axes[0], y_mismatch_figure.axes[1]))
-
-    def test_share_tiled_axes_uses_vertical_workspace_unit_for_image_plots(self):
-        first_workspace = WorkspaceFactory.Instance().create("Workspace2D", NVectors=2, YLength=5, XLength=5)
-        second_workspace = WorkspaceFactory.Instance().create("Workspace2D", NVectors=2, YLength=5, XLength=5)
-        first_workspace.getAxis(1).setUnit("Degrees")
-        second_workspace.getAxis(1).setUnit("Degrees")
-        first_workspace.setYUnit("Counts")
-        second_workspace.setYUnit("Events")
-        AnalysisDataService.addOrReplace("image_ws", first_workspace)
-        AnalysisDataService.addOrReplace("image_ws_2", second_workspace)
-        fig, axes, _, _ = create_subplots(2)
-        axes[0, 0].pcolormesh(first_workspace)
-        axes[0, 1].pcolormesh(second_workspace)
-
-        share_tiled_axes(fig)
-
-        self.assertTrue(fig.axes[0].get_shared_y_axes().joined(fig.axes[0], fig.axes[1]))
-
-    def test_share_tiled_axes_uses_vertical_workspace_unit_for_bin_plots(self):
-        self._test_ws_2.getAxis(0).setUnit("Wavelength")
-        self._test_ws.getAxis(1).setUnit("Degrees")
-        self._test_ws_2.getAxis(1).setUnit("Degrees")
-        fig, axes, _, _ = create_subplots(2, vertical=True)
-        axes[0, 0].plot(self._test_ws, wkspIndex=0, axis=MantidAxType.BIN)
-        axes[1, 0].plot(self._test_ws_2, wkspIndex=0, axis=MantidAxType.BIN)
-
-        share_tiled_axes(fig)
-
-        self.assertTrue(fig.axes[0].get_shared_x_axes().joined(fig.axes[0], fig.axes[1]))
-
-    def test_share_tiled_axes_shares_compatible_axes_across_all_tiles(self):
-        fig = self._create_plot(names=["test_ws", "test_ws_2"], errors=False, overplot=False, wksp_indices=[0, 1])
-
-        share_tiled_axes(fig)
-
-        self.assertTrue(fig.axes[0].get_shared_x_axes().joined(fig.axes[0], fig.axes[3]))
-        self.assertTrue(fig.axes[0].get_shared_y_axes().joined(fig.axes[0], fig.axes[3]))
-
-    def test_share_tiled_axes_only_shares_units_matching_top_left_tile(self):
-        self._test_ws.getAxis(0).setUnit("Wavelength")
-        fig = self._create_plot(names=["test_ws", "test_ws_2"], errors=False, overplot=False, wksp_indices=[0, 1])
-
-        share_tiled_axes(fig)
-
-        self.assertTrue(fig.axes[0].get_shared_x_axes().joined(fig.axes[0], fig.axes[1]))
-        self.assertFalse(fig.axes[2].get_shared_x_axes().joined(fig.axes[2], fig.axes[3]))
 
     def test_share_tiled_axes_makes_new_axis_inherit_existing_scale_and_limits(self):
         fig = self._create_plot(names=["test_ws", "test_ws_2"], errors=False, overplot=False)

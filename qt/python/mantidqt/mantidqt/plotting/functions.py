@@ -123,13 +123,13 @@ def _tiled_axis_details(ax):
     if not isinstance(workspace, MatrixWorkspace):
         return None
 
-    x_axis_index = 1 if _plot_axis(ax, workspace_name) == MantidAxType.BIN else 0
+    x_axis_index = 1 if _plot_axis_type(ax, workspace_name) == MantidAxType.BIN else 0
     x_unit = _axis_unit(workspace, x_axis_index)
     y_unit = _axis_unit(workspace, 1) if axes_type(ax) in (FigureType.Image, FigureType.Contour) else workspace.YUnit()
     return TiledAxesDetails(ax, ax._mantid_tiled_row, ax._mantid_tiled_col, x_unit, y_unit)
 
 
-def _plot_axis(ax, workspace_name):
+def _plot_axis_type(ax, workspace_name):
     return next(
         (args.get("axis", MantidAxType.SPECTRUM) for args in ax.creation_args if args.get("workspaces") == workspace_name),
         MantidAxType.SPECTRUM,

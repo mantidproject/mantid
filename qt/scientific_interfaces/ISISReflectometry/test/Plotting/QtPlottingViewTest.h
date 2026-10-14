@@ -14,6 +14,7 @@
 #include <QCheckBox>
 #include <QColor>
 #include <QComboBox>
+#include <QHBoxLayout>
 #include <QItemSelectionModel>
 #include <QLabel>
 #include <QMouseEvent>
@@ -99,8 +100,12 @@ public:
     assertButton(optionsLayout->itemAt(11)->widget(), "plotOverplot", "Plot over");
     assertButton(optionsLayout->itemAt(12)->widget(), "plotTiled", "Plot tiled");
     assertCheckBox(optionsLayout->itemAt(13)->widget(), "addToExistingPlot", "Add to existing plot");
-    assertCheckBox(optionsLayout->itemAt(14)->widget(), "plotTiledVertically", "Plot tiled vertically");
-    auto const shareAxesLayout = optionsLayout->itemAt(15)->layout();
+    auto const tiledOptionsLayout = view.findChild<QVBoxLayout *>("tiledPlotOptionsLayout");
+    TS_ASSERT_EQUALS(optionsLayout->itemAt(14)->layout(), tiledOptionsLayout);
+    TS_ASSERT_EQUALS(tiledOptionsLayout->spacing(), 6);
+    assertCheckBox(tiledOptionsLayout->itemAt(0)->widget(), "plotTiledVertically", "Plot tiled vertically");
+    auto const shareAxesLayout = view.findChild<QHBoxLayout *>("shareAxesWhenTiledLayout");
+    TS_ASSERT_EQUALS(tiledOptionsLayout->itemAt(1)->layout(), shareAxesLayout);
     assertLabel(shareAxesLayout->itemAt(0)->widget(), "shareAxesWhenTiledLabel", "Share tiled axes:");
     assertCheckBox(shareAxesLayout->itemAt(1)->widget(), "shareXAxisWhenTiled", "X");
     assertCheckBox(shareAxesLayout->itemAt(2)->widget(), "shareYAxisWhenTiled", "Y");
