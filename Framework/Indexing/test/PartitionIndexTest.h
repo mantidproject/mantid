@@ -9,7 +9,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/WarningSuppressions.h"
-
 #include "MantidIndexing/PartitionIndex.h"
 
 using namespace Mantid;

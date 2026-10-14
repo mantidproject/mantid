@@ -9,7 +9,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/WarningSuppressions.h"
-
 #include "MantidIndexing/SpectrumNumber.h"
 
 using namespace Mantid;
