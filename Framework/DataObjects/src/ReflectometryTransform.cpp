@@ -18,7 +18,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -214,8 +214,7 @@ DetectorAngularCache initAngularCaches(const MatrixWorkspace *const workspace) {
   std::vector<double> twoThetaWidths(nhist);
   std::vector<double> detectorHeights(nhist);
 
-  auto inst = workspace->getInstrument();
-  const V3D upDirVec = inst->getReferenceFrame()->vecPointingUp();
+  const V3D upDirVec = workspace->componentInfo().referenceFrame()->vecPointingUp();
 
   const auto &spectrumInfo = workspace->spectrumInfo();
   const auto &detectorInfo = workspace->detectorInfo();

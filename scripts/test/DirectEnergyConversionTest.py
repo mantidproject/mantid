@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+import warnings
 import os
 
 import Direct.dgreduce as dgreduce
@@ -36,6 +37,13 @@ from mantid.simpleapi import (
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------------
+
+
+def _instrument(workspace):
+    """The workspace's Instrument, which the Direct scripts still take, without the getInstrument() deprecation"""
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        return workspace.getInstrument()
 
 
 class DirectEnergyConversionTest(unittest.TestCase):
@@ -127,7 +135,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         wb_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000)
         LoadInstrument(wb_ws, InstrumentName="MARI", RewriteSpectraMap=True)
 
-        tReducer = DirectEnergyConversion(wb_ws.getInstrument())
+        tReducer = DirectEnergyConversion(_instrument(wb_ws))
 
         mask_workspace = tReducer.diagnose(wb_ws)
         self.assertTrue(mask_workspace)
@@ -139,7 +147,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # LoadParameterFile(Workspace=wb_ws,ParameterXML = used_parameters)
         LoadInstrument(wb_ws, InstrumentName="MARI", RewriteSpectraMap=True)
 
-        tReducer = DirectEnergyConversion(wb_ws.getInstrument())
+        tReducer = DirectEnergyConversion(_instrument(wb_ws))
 
         white_ws = tReducer.do_white(wb_ws, None, None)
         self.assertTrue(white_ws)
@@ -174,7 +182,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         )
         LoadInstrument(mono_ws, InstrumentName="MARI", RewriteSpectraMap=True)
 
-        tReducer = DirectEnergyConversion(mono_ws.getInstrument())
+        tReducer = DirectEnergyConversion(_instrument(mono_ws))
         tReducer.prop_man.incident_energy = 5.0
         tReducer.prop_man.monovan_integr_range = [-10, 10]
         tReducer.wb_run = mono_ws
@@ -271,8 +279,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         ScaleX(InputWorkspace="ws", OutputWorkspace="ws", Operation="Add", Factor=-mon1_peak, InstrumentParameter="DelayTime", Combine=True)
         ws = mtd["ws"]
 
-        mon1_det = ws.getDetector(1)
-        mon1_pos = mon1_det.getPos()
+        mon1_pos = ws.spectrumInfo().position(1)
         component_info = ws.componentInfo()
         src_name = component_info.name(component_info.source())
         MoveInstrumentComponent(
@@ -329,7 +336,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         wb_clone = CloneWorkspace(wb_ws)
 
         # Run Mono
-        tReducer = DirectEnergyConversion(run.getInstrument())
+        tReducer = DirectEnergyConversion(_instrument(run))
         tReducer.energy_bins = [-20, 0.2, 60]
         ei_guess = 67.0
         mono_s = tReducer.mono_sample(run, ei_guess, wb_ws)
@@ -346,7 +353,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         )
         LoadInstrument(run, InstrumentName="MARI", RewriteSpectraMap=True)
 
-        red = DirectEnergyConversion(run.getInstrument())
+        red = DirectEnergyConversion(_instrument(run))
 
         red.prop_man.incident_energy = 26.2
         red.prop_man.energy_bins = [-20, 0.1, 20]
@@ -416,7 +423,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         wb_ws = Rebin(run, Params=[tMin, 1, tMax], PreserveEvents=False)
 
         # Run multirep
-        tReducer = DirectEnergyConversion(run.getInstrument())
+        tReducer = DirectEnergyConversion(_instrument(run))
         tReducer.prop_man.run_diagnostics = True
         tReducer.hard_mask_file = None
         tReducer.map_file = None
@@ -486,7 +493,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         CloneWorkspace(run_monitors, OutputWorkspace="run2_monitors")
 
         # Run multirep
-        tReducer = DirectEnergyConversion(run.getInstrument())
+        tReducer = DirectEnergyConversion(_instrument(run))
         tReducer.prop_man.run_diagnostics = True
         tReducer.hard_mask_file = None
         tReducer.map_file = None
@@ -563,7 +570,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         run2.setMonitorWorkspace(run2_monitors)
 
         # Run multirep
-        tReducer = DirectEnergyConversion(run.getInstrument())
+        tReducer = DirectEnergyConversion(_instrument(run))
         tReducer.prop_man.run_diagnostics = True
         tReducer.hard_mask_file = None
         tReducer.map_file = None
@@ -639,7 +646,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         SetInstrumentParameter(monitor_ws, ParameterName="mon2_norm_spec", ParameterType="Number", Value="1")
 
         # initiate test reducer
-        tReducer = DirectEnergyConversion(monitor_ws.getInstrument())
+        tReducer = DirectEnergyConversion(_instrument(monitor_ws))
         tReducer.prop_man.ei_mon_spectra = ([1, 2, 3], 6)
         tReducer.prop_man.normalise_method = "current"
         tReducer.prop_man.mon2_norm_spec = 2

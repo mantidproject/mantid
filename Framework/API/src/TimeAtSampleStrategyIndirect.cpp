@@ -9,7 +9,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Logger.h"
@@ -29,7 +29,7 @@ namespace Mantid::API {
  */
 TimeAtSampleStrategyIndirect::TimeAtSampleStrategyIndirect(MatrixWorkspace_const_sptr ws)
     : m_spectrumInfo(ws->spectrumInfo()), m_L1s(m_spectrumInfo.l1()),
-      m_beamDir(ws->getInstrument()->getReferenceFrame()->vecPointingAlongBeam()),
+      m_beamDir(ws->componentInfo().referenceFrame()->vecPointingAlongBeam()),
       m_paramMap(ws->constInstrumentParameters()) {}
 
 /**

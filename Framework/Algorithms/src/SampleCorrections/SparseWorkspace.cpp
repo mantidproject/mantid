@@ -11,6 +11,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -59,7 +60,7 @@ SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS, const size
 
   // Build a quite standard and somewhat complete instrument.
   auto instrument = std::make_shared<Geometry::Instrument>("MC_simulation_instrument");
-  const auto refFrame = modelWS.getInstrument()->getReferenceFrame();
+  const auto refFrame = modelWS.componentInfo().referenceFrame();
 
   instrument->setReferenceFrame(std::make_shared<Geometry::ReferenceFrame>(*refFrame));
   // The sparse instrument is build around origin.
