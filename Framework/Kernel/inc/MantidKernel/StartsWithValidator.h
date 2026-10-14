@@ -20,7 +20,7 @@ namespace Kernel {
    start with one
     of the strings in a defined list of possibilities.
 */
-class MANTID_KERNEL_DLL StartsWithValidator : public Kernel::StringListValidator {
+class DLLExport StartsWithValidator : public Kernel::StringListValidator {
 public:
   StartsWithValidator() = default;
   StartsWithValidator(const std::vector<std::string> &values);
