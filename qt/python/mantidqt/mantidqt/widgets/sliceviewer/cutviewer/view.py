@@ -181,7 +181,7 @@ class CutViewerView(QWidget):
         self.layout.addLayout(self.figure_layout)
         self.figure.canvas.mpl_connect("draw_event", self._on_figure_canvas_draw)
         self._is_drawing = False
-        self.destroyed.connect(lambda _=None, fig=fig: plt.close(fig))
+        self.destroyed.connect(lambda _, fig=fig: plt.close(fig))
 
     # When the figure redraws after e.g. the user changing an axis to log, then
     # for this view to see the update it requires an extra draw(). This method
