@@ -58,6 +58,7 @@ const Kernel::V3D toShapeFrame(const Kernel::V3D &point, const Beamline::Compone
  * @param componentIdToIndexMap : ID -> index translation map
  * @param shapes : Shapes for each component
  * @param parameterInfo : Index-keyed parameter store
+ * @param referenceFrame: A reference frame
  * */
 ComponentInfo::ComponentInfo(
     std::unique_ptr<Beamline::ComponentInfo> componentInfo,
