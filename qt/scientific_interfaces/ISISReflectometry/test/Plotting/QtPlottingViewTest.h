@@ -15,6 +15,7 @@
 #include <QColor>
 #include <QComboBox>
 #include <QItemSelectionModel>
+#include <QLabel>
 #include <QMouseEvent>
 #include <QPalette>
 #include <QPushButton>
@@ -99,7 +100,10 @@ public:
     assertButton(optionsLayout->itemAt(12)->widget(), "plotTiled", "Plot tiled");
     assertCheckBox(optionsLayout->itemAt(13)->widget(), "addToExistingPlot", "Add to existing plot");
     assertCheckBox(optionsLayout->itemAt(14)->widget(), "plotTiledVertically", "Plot tiled vertically");
-    assertCheckBox(optionsLayout->itemAt(15)->widget(), "shareAxesWhenTiled", "Share axes between tiles");
+    auto const shareAxesLayout = optionsLayout->itemAt(15)->layout();
+    assertLabel(shareAxesLayout->itemAt(0)->widget(), "shareAxesWhenTiledLabel", "Share tiled axes:");
+    assertCheckBox(shareAxesLayout->itemAt(1)->widget(), "shareXAxisWhenTiled", "X");
+    assertCheckBox(shareAxesLayout->itemAt(2)->widget(), "shareYAxisWhenTiled", "Y");
   }
 
   void testPlotActionStateDisablesPlotButtons() {
@@ -117,9 +121,25 @@ public:
 
     assertPlotButtonsEnabled(view, true, true, true);
     TS_ASSERT(view.findChild<QCheckBox *>("plotTiledVertically")->isEnabled());
-    TS_ASSERT(view.findChild<QCheckBox *>("shareAxesWhenTiled")->isEnabled());
+    TS_ASSERT(view.findChild<QLabel *>("shareAxesWhenTiledLabel")->isEnabled());
+    TS_ASSERT(view.findChild<QCheckBox *>("shareXAxisWhenTiled")->isEnabled());
+    TS_ASSERT(view.findChild<QCheckBox *>("shareYAxisWhenTiled")->isEnabled());
     TS_ASSERT(view.findChild<QCheckBox *>("addToExistingPlot")->isEnabled());
     TS_ASSERT(view.findChild<QCheckBox *>("addToExistingPlot")->isChecked());
+  }
+
+  void testSharedTiledAxisSelectionsAreReturnedIndependently() {
+    QtPlottingView view;
+    view.findChild<QCheckBox *>("shareXAxisWhenTiled")->setChecked(true);
+
+    TS_ASSERT(view.shareXAxisWhenTiled());
+    TS_ASSERT(!view.shareYAxisWhenTiled());
+
+    view.findChild<QCheckBox *>("shareXAxisWhenTiled")->setChecked(false);
+    view.findChild<QCheckBox *>("shareYAxisWhenTiled")->setChecked(true);
+
+    TS_ASSERT(!view.shareXAxisWhenTiled());
+    TS_ASSERT(view.shareYAxisWhenTiled());
   }
 
   void testPlotActionStateCanUncheckAddToExistingPlotWithoutNotifyingSubscriber() {
@@ -702,6 +722,13 @@ private:
     TS_ASSERT(checkBox);
     TS_ASSERT_EQUALS(checkBox->objectName().toStdString(), objectName);
     TS_ASSERT_EQUALS(checkBox->text().toStdString(), text);
+  }
+
+  void assertLabel(QWidget const *widget, std::string const &objectName, std::string const &text) const {
+    auto const label = dynamic_cast<QLabel const *>(widget);
+    TS_ASSERT(label);
+    TS_ASSERT_EQUALS(label->objectName().toStdString(), objectName);
+    TS_ASSERT_EQUALS(label->text().toStdString(), text);
   }
 
   void assertPlotButtonsEnabled(QtPlottingView &view, bool individual, bool overplot, bool tiled) const {

@@ -148,7 +148,7 @@ inline bool operator!=(PlotOptions const &lhs, PlotOptions const &rhs) { return 
 inline bool operator==(PlotRequest const &lhs, PlotRequest const &rhs) {
   return lhs.workspaces == rhs.workspaces && lhs.options == rhs.options && lhs.parentWidget == rhs.parentWidget &&
          lhs.addToExistingPlot == rhs.addToExistingPlot && lhs.tiledVertically == rhs.tiledVertically &&
-         lhs.shareAxesWhenTiled == rhs.shareAxesWhenTiled;
+         lhs.shareXAxisWhenTiled == rhs.shareXAxisWhenTiled && lhs.shareYAxisWhenTiled == rhs.shareYAxisWhenTiled;
 }
 
 inline bool operator!=(PlotRequest const &lhs, PlotRequest const &rhs) { return !(lhs == rhs); }

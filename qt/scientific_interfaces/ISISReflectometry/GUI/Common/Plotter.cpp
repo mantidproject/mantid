@@ -385,15 +385,14 @@ struct PlottedFigure {
 };
 
 /// Ask MantidQt to share compatible axes between tiles.
-void shareTiledAxes(PlottedFigure const &plottedFigure) {
+void shareTiledAxes(PlottedFigure const &plottedFigure, bool shareX, bool shareY) {
   using namespace MantidQt::Widgets::Common;
 
   try {
     auto const plottingFunctions = Python::Object(Python::NewRef(PyImport_ImportModule("mantidqt.plotting.functions")));
-    if (plottedFigure.postPlotTarget == PostPlotTarget::NewAxes)
-      plottingFunctions.attr("share_tiled_axes")(plottedFigure.figure, plottedFigure.newAxes);
-    else
-      plottingFunctions.attr("share_tiled_axes")(plottedFigure.figure);
+    auto const newAxes =
+        plottedFigure.postPlotTarget == PostPlotTarget::NewAxes ? plottedFigure.newAxes : Python::Object();
+    plottingFunctions.attr("share_tiled_axes")(plottedFigure.figure, newAxes, shareX, shareY);
   } catch (Python::ErrorAlreadySet &) {
     throw Mantid::PythonInterface::PythonException();
   }
@@ -503,8 +502,8 @@ void applyPostPlotting(PlotRequest const &request, PlottedFigure const &plottedF
     if (options.horizontalMarker)
       addHorizontalMarkers(plottedFigure.figure, *options.horizontalMarker);
   }
-  if (request.shareAxesWhenTiled && options.layout == PlotLayout::Tiled)
-    shareTiledAxes(plottedFigure);
+  if ((request.shareXAxisWhenTiled || request.shareYAxisWhenTiled) && options.layout == PlotLayout::Tiled)
+    shareTiledAxes(plottedFigure, request.shareXAxisWhenTiled, request.shareYAxisWhenTiled);
   setPlotWindowParent(plottedFigure.figure, request.parentWidget);
 }
 } // namespace

@@ -113,14 +113,48 @@
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="shareAxesWhenTiled">
-       <property name="toolTip">
-        <string>Share X and Y axes with the top-left tiled plot when their respective units match</string>
-       </property>
-       <property name="text">
-        <string>Share axes between tiles</string>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="shareAxesWhenTiledLayout">
+       <item>
+        <widget class="QLabel" name="shareAxesWhenTiledLabel">
+         <property name="text">
+          <string>Share tiled axes:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="shareXAxisWhenTiled">
+         <property name="toolTip">
+          <string>Share X axes with the top-left tiled plot when their units match</string>
+         </property>
+         <property name="text">
+          <string>X</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="shareYAxisWhenTiled">
+         <property name="toolTip">
+          <string>Share Y axes with the top-left tiled plot when their units match</string>
+         </property>
+         <property name="text">
+          <string>Y</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="shareAxesWhenTiledSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
      </item>
      <item>
       <spacer name="verticalSpacer">
