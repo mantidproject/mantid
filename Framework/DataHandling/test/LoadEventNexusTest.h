@@ -35,6 +35,17 @@ using namespace Mantid::DataHandling;
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
 
+namespace {
+size_t countMonitors(const DetectorInfo &detectorInfo) {
+  size_t count = 0;
+  for (size_t index = 0; index < detectorInfo.size(); ++index) {
+    if (detectorInfo.isMonitor(index))
+      ++count;
+  }
+  return count;
+}
+} // namespace
+
 class LoadEventNexusTest : public CxxTest::TestSuite {
 private:
   void do_test_filtering_start_and_end_filtered_loading(const bool metadataonly) {
@@ -1355,7 +1366,7 @@ public:
     TS_ASSERT_EQUALS(inst->getName(), "HYSPECA");
     TS_ASSERT_EQUALS(inst->getValidFromDate(), std::string("2011-Jul-20 17:02:48.437294000"));
     TS_ASSERT_EQUALS(inst->getNumberDetectors(), 20483);
-    TS_ASSERT_EQUALS(inst->baseInstrument()->getMonitorIDs().size(), 3);
+    TS_ASSERT_EQUALS(countMonitors(ws->detectorInfo()), 3);
     auto params = inst->getParameterMap();
     // Previously this was 49. Position/rotations are now stored in
     // ComponentInfo and DetectorInfo so the following four parameters are no
@@ -1387,7 +1398,7 @@ public:
                                              // file
     TS_ASSERT_EQUALS(inst->getName(), "CNCS");
     TS_ASSERT_EQUALS(inst->getNumberDetectors(), 51203);
-    TS_ASSERT_EQUALS(inst->baseInstrument()->getMonitorIDs().size(), 3);
+    TS_ASSERT_EQUALS(countMonitors(ws->detectorInfo()), 3);
 
     // check that CNCS_Parameters.xml has been loaded
     auto params = inst->getParameterMap();
@@ -1768,7 +1779,7 @@ public:
     auto instr = wksp->getInstrument();
     TS_ASSERT(instr);
     TS_ASSERT_EQUALS(instr->getName(), "MANDI_clone_bank26");
-    size_t monitors = instr->baseInstrument()->getMonitorIDs().size();
+    size_t monitors = countMonitors(wksp->detectorInfo());
     TS_ASSERT_EQUALS(instr->getNumberDetectors(/*skip monitors*/ true), bankSize);
     TS_ASSERT_EQUALS(instr->getNumberDetectors(/*skip monitors*/ false), bankSize + monitors);
 

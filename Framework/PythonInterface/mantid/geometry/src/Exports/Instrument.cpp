@@ -27,6 +27,16 @@ namespace {
 // Deprecation wrappers. Legacy Instrument-tree access is being retired in favour
 // of the index-based ComponentInfo/DetectorInfo access layers. See the
 // 'Instrument Access via SpectrumInfo, DetectorInfo, ComponentInfo' concept page.
+Instrument_const_sptr getBaseInstrumentDeprecated(const Instrument &self) {
+  if (PyErr_Warn(PyExc_DeprecationWarning,
+                 "Instrument.getBaseInstrument() is deprecated in Mantid 7.0.\n"
+                 "Use ExperimentInfo.baseComponentInfo() instead. "
+                 "For more information, see the instrument access layers concept page: "
+                 "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html") < 0)
+    throw boost::python::error_already_set();
+  return self.baseInstrument();
+}
+
 IComponent_const_sptr getSampleDeprecated(const Instrument &self) {
   if (PyErr_Warn(PyExc_DeprecationWarning,
                  "'Instrument.getSample' is deprecated in Mantid 7.0, "
@@ -170,8 +180,9 @@ void export_Instrument() {
       .def("setFilename", &Instrument::setFilename, (arg("self"), arg("filename")),
            "Set the name of the file that the original IDF was from")
 
-      .def("getBaseInstrument", &Instrument::baseInstrument, arg("self"), return_value_policy<RemoveConstSharedPtr>(),
-           "Return reference to the base instrument")
+      .def("getBaseInstrument", &getBaseInstrumentDeprecated, arg("self"), return_value_policy<RemoveConstSharedPtr>(),
+           "Return reference to the base instrument "
+           "(deprecated, use baseComponentInfo() on the workspace).")
 
       .def("findRectDetectors", &findRectDetectorsDeprecated, arg("self"),
            "Return a list of rectangular detectors "

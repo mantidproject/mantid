@@ -222,6 +222,8 @@ public:
   /// Remove every parameter of this name from this component. Matches the name case-sensitively,
   /// as ParameterMap::clearParametersByName() does.
   void clearParameter(const size_t componentIndex, const std::string &name);
+  /// Remove every parameter from every component.
+  void clearParameters();
 
   /// This allows ParameterMap to delegate to ParameterInfo,
   /// rather than keeping a parallel copy that would silently diverge.

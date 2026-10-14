@@ -15,6 +15,7 @@
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
@@ -312,6 +313,27 @@ public:
     TS_ASSERT_EQUALS(V3D(0, 0.2406324, 4.014795), pos);
 
     AnalysisDataService::Instance().remove(m_MariWS);
+  }
+
+  void test_values_equal_to_the_instrument_level_parameter_are_not_stored_per_detector() {
+    makeTestWorkspace(SmallTestDatFile::NDETECTS, NBINS, m_InoutWS);
+    auto WS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_InoutWS);
+    auto &componentInfo = WS->mutableComponentInfo();
+    componentInfo.addDouble(componentInfo.root(), "TubePressure", 10.0);
+
+    LoadDetectorInfo loader;
+    loader.initialize();
+    loader.setRethrows(true);
+    loader.setPropertyValue("Workspace", m_InoutWS);
+    loader.setPropertyValue("DataFilename", m_DatFile);
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    const auto &detInfo = WS->detectorInfo();
+    // detector 0 has the same pressure as the instrument, detector 3 differs from it
+    TS_ASSERT(!WS->componentInfo().hasParameter(detInfo.indexOf(0), "TubePressure", false));
+    TS_ASSERT(WS->componentInfo().hasParameter(detInfo.indexOf(3), "TubePressure", false));
+
+    AnalysisDataService::Instance().remove(m_InoutWS);
   }
 
   void loadRawFile() {

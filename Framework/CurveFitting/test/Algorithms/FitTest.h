@@ -22,6 +22,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 
 #include "MantidFrameworkTestHelpers/FunctionCreationHelper.h"
 #include "MantidFrameworkTestHelpers/MultiDomainFunctionHelper.h"
@@ -1596,9 +1597,8 @@ public:
 
     // Set efixed for indirect
     ws->mutableRun().addProperty<std::string>("deltaE-mode", "indirect", true);
-    auto &pmap = ws->instrumentParameters();
-    auto inst = ws->getInstrument()->baseInstrument();
-    pmap.addDouble(inst.get(), "EFixed", 20.0);
+    auto &componentInfo = ws->mutableComponentInfo();
+    componentInfo.addDouble(componentInfo.root(), "EFixed", 20.0);
     TS_ASSERT_THROWS_NOTHING(fitIndirect.execute());
     TS_ASSERT(fitIndirect.isExecuted());
 

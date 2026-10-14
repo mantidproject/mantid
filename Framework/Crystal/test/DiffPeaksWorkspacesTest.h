@@ -187,7 +187,7 @@ public:
     TS_ASSERT_EQUALS(ws->getPeak(2).getQLabFrame(), lhsWS->getPeak(2).getQLabFrame())
     TS_ASSERT_EQUALS(ws->getPeak(3).getQLabFrame(), lhsWS->getPeak(4).getQLabFrame())
     TS_ASSERT_EQUALS(ws->getPeak(4).getQLabFrame(), lhsWS->getPeak(5).getQLabFrame())
-    TS_ASSERT_EQUALS(ws->getInstrument()->baseInstrument(), lhsWS->getInstrument()->baseInstrument())
+    TS_ASSERT_EQUALS(WorkspaceCreationHelper::baseInstrumentID(*ws), WorkspaceCreationHelper::baseInstrumentID(*lhsWS))
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);

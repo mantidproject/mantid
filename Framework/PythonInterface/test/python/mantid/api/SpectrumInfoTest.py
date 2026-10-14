@@ -287,6 +287,13 @@ class SpectrumInfoTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             info.l2(10.0)
 
+    def test_l1_value(self):
+        spec_info = self._ws.spectrumInfo()
+        comp_info = self._ws.componentInfo()
+        specL1 = spec_info.l1()
+        specL2 = comp_info.sourcePosition().distance(comp_info.samplePosition())
+        self.assertEqual(specL1, specL2)
+
     def test_hasDetectors_exceptional(self):
         info = self._ws.spectrumInfo()
         with self.assertRaises(TypeError):
