@@ -197,14 +197,14 @@ def generate():
     for c in mdevent_types:
         lines.append("%s// Instantiations for %s" % (padding, c))
         for nd in dimensions:
-            lines.append("%s template class DLLExport %s<%d>;" % (padding, c, nd))
+            lines.append("%s template class MANTID_DATAOBJECTS_DLL %s<%d>;" % (padding, c, nd))
 
     # Classes with MDLeanEvent<x>,x
     for c in classes_cpp:
         lines.append("%s// Instantiations for %s" % (padding, c))
         for mdevent_type in mdevent_types:
             for nd in dimensions:
-                lines.append("%s template class DLLExport %s<%s<%d>, %d>;" % (padding, c, mdevent_type, nd, nd))
+                lines.append("%s template class MANTID_DATAOBJECTS_DLL %s<%s<%d>, %d>;" % (padding, c, mdevent_type, nd, nd))
         lines.append("\n ")
 
     lines += footer_lines + lines_after

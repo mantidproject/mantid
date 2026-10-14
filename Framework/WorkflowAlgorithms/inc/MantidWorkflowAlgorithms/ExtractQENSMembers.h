@@ -9,13 +9,14 @@
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
 
 /** ExtractQENSMembers : Extracts the fit members from a QENS fit
  */
-class DLLExport ExtractQENSMembers : public API::DataProcessorAlgorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL ExtractQENSMembers : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;

@@ -26,7 +26,7 @@ namespace API {
   @author Janik Zikovsky
   @date 2011-09-21
 */
-template <typename T> class DLLExport EnabledWhenWorkspaceIsType : public Kernel::IPropertySettings {
+template <typename T> class EnabledWhenWorkspaceIsType : public Kernel::IPropertySettings {
 public:
   //--------------------------------------------------------------------------------------------
   /** Constructor

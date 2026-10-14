@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Task.h"
 #include <functional>
 #include <stdexcept>
@@ -28,7 +29,7 @@ namespace Kernel {
  * @author Janik Zikovsky, SNS
  * @date Feb 8, 2011
  */
-class DLLExport FunctionTask final : public Task {
+class FunctionTask final : public Task {
 public:
   /// Typedef for a function with no arguments and no return
   using voidFunction = void (*)();

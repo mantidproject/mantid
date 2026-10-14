@@ -8,6 +8,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/IPropertyManager.h"
@@ -966,7 +967,7 @@ ITableWorkspace *PeaksWorkspace::doCloneColumns(const std::vector<std::string> &
 namespace Mantid::Kernel {
 
 template <>
-DLLExport Mantid::DataObjects::PeaksWorkspace_sptr
+MANTID_DATAOBJECTS_DLL Mantid::DataObjects::PeaksWorkspace_sptr
 IPropertyManager::getValue<Mantid::DataObjects::PeaksWorkspace_sptr>(const std::string &name) const {
   if (const auto *prop =
           dynamic_cast<PropertyWithValue<Mantid::DataObjects::PeaksWorkspace_sptr> *>(getPointerToProperty(name))) {
@@ -979,7 +980,7 @@ IPropertyManager::getValue<Mantid::DataObjects::PeaksWorkspace_sptr>(const std::
 }
 
 template <>
-DLLExport Mantid::DataObjects::PeaksWorkspace_const_sptr
+MANTID_DATAOBJECTS_DLL Mantid::DataObjects::PeaksWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::DataObjects::PeaksWorkspace_const_sptr>(const std::string &name) const {
   if (const auto *prop =
           dynamic_cast<PropertyWithValue<Mantid::DataObjects::PeaksWorkspace_sptr> *>(getPointerToProperty(name))) {

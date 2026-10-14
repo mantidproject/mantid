@@ -9,6 +9,7 @@
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/System.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -18,7 +19,7 @@ namespace WorkflowAlgorithms {
 
 @date 2012-06-06
  */
-class DLLExport DgsReduction : public API::DataProcessorAlgorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL DgsReduction : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

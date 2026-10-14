@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/CalculateReflectometryKiKf.h"
 #include "MantidDataObjects/ReflectometryTransform.h"
+#include "MantidReflectometry/DllConfig.h"
 
 namespace Mantid {
 namespace Reflectometry {
@@ -18,7 +19,7 @@ namespace Reflectometry {
 
   @date 2012-06-06
 */
-class DLLExport ReflectometryTransformKiKf : public DataObjects::ReflectometryTransform {
+class MANTID_REFLECTOMETRY_DLL ReflectometryTransformKiKf : public DataObjects::ReflectometryTransform {
 public:
   ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta, int version,
                              int numberOfBinsQx = 100, int numberOfBinsQz = 100);

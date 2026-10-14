@@ -9,6 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -20,7 +21,7 @@ namespace Algorithms {
   @author Elliot Oram, ISIS, RAL
   @date 12/08/2015
 */
-class DLLExport ProcessIndirectFitParameters final : public API::Algorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL ProcessIndirectFitParameters final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

@@ -18,7 +18,7 @@ namespace Kernel {
   @author Janik Zikovsky
   @date 2011-08-30
 */
-template <typename TYPE = double> class DLLExport VMDBase {
+template <typename TYPE = double> class MANTID_KERNEL_DLL VMDBase {
 public:
   VMDBase();
   VMDBase(size_t nd);

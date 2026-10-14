@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/MDTransfAxisNames.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 #include <boost/format.hpp>
 
 namespace Mantid::MDAlgorithms {
@@ -93,7 +94,7 @@ std::string makeAxisName(const Kernel::V3D &Dir, const std::vector<std::string> 
 
   return name;
 }
-std::string DLLExport sprintfd(const double data, const double eps) {
+std::string MANTID_MDALGORITHMS_DLL sprintfd(const double data, const double eps) {
   // truncate to eps decimal points
   double dist = std::round(data / eps) * eps;
   return boost::str(boost::format("%d") % dist);

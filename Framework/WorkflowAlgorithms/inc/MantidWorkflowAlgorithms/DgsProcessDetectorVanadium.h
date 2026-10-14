@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -20,7 +21,7 @@ convert to energy transfer process.
 
 @date 2012-07-25
  */
-class DLLExport DgsProcessDetectorVanadium final : public API::Algorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL DgsProcessDetectorVanadium final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
