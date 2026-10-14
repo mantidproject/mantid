@@ -448,10 +448,10 @@ Reflectometry tab and whether its active axes can be overplotted.
 When shared tiled axes are requested, :code:`Plotter` delegates to the generic
 :code:`mantidqt.plotting.functions.share_tiled_axes` helper. The helper reads
 unit metadata from the workspaces tracked by each :code:`MantidAxes` and uses
-the stored Mantid tile metadata to select plot axes. X and Y axes are shared
-independently across all tiles when their respective units match. For axes
-added to an existing figure, the new axis adopts the existing plot's current
-scale and limits.
+the stored Mantid tile metadata to select the plot at position (0, 0) as the
+reference. X and Y axes are shared independently with tiles whose respective
+units match the reference. For axes added to an existing figure, the new axis
+adopts the reference plot's current scale and limits.
 
 The distinction between all axes and newly-created axes prevents labels and
 markers for a tiled addition from modifying plots that were already in the

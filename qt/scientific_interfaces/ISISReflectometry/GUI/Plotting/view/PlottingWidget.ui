@@ -115,7 +115,7 @@
      <item>
       <widget class="QCheckBox" name="shareAxesWhenTiled">
        <property name="toolTip">
-        <string>Share X and Y axes between tiled plots when their respective units match</string>
+        <string>Share X and Y axes with the top-left tiled plot when their respective units match</string>
        </property>
        <property name="text">
         <string>Share axes between tiles</string>

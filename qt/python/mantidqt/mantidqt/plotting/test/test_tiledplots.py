@@ -291,6 +291,15 @@ class TiledPlotsTest(TestCase):
         self.assertTrue(fig.axes[0].get_shared_x_axes().joined(fig.axes[0], fig.axes[3]))
         self.assertTrue(fig.axes[0].get_shared_y_axes().joined(fig.axes[0], fig.axes[3]))
 
+    def test_share_tiled_axes_only_shares_units_matching_top_left_tile(self):
+        self._test_ws.getAxis(0).setUnit("Wavelength")
+        fig = self._create_plot(names=["test_ws", "test_ws_2"], errors=False, overplot=False, wksp_indices=[0, 1])
+
+        share_tiled_axes(fig)
+
+        self.assertTrue(fig.axes[0].get_shared_x_axes().joined(fig.axes[0], fig.axes[1]))
+        self.assertFalse(fig.axes[2].get_shared_x_axes().joined(fig.axes[2], fig.axes[3]))
+
     def test_share_tiled_axes_makes_new_axis_inherit_existing_scale_and_limits(self):
         fig = self._create_plot(names=["test_ws", "test_ws_2"], errors=False, overplot=False)
         fig.axes[0].set_ylim(2, 8)
