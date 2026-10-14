@@ -7,12 +7,14 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidBeamline/ComponentType.h"
 #include "MantidBeamline/PixelGridComponent.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SolidAngleParams.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
+#include "MantidPythonInterface/core/Policies/RemoveConst.h"
 #include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
 #include "MantidPythonInterface/geometry/ComponentInfoPythonIterator.h"
 
@@ -390,6 +392,10 @@ void export_ComponentInfo() {
            "Returns True if the name is a unique single occurance. Zero occurances yields False.")
 
       .def("root", &ComponentInfo::root, arg("self"), "Returns the index of the root component")
+      .def("referenceFrame", &ComponentInfo::referenceFrame, arg("self"), return_value_policy<RemoveConstSharedPtr>(),
+           "Returns the instrument's :class:`~mantid.geometry.ReferenceFrame`, which defines the axes pointing up "
+           "and along the beam, and the handedness. A default frame (Y up, Z along the beam, right-handed) if the "
+           "instrument has none.")
       .def("getMemorySize", &ComponentInfo::getMemorySize, arg("self"),
            "Return the memory footprint of the component info in bytes.")
       .def("shapeToComponentIndices", &shapeToComponentIndices, arg("self"),
