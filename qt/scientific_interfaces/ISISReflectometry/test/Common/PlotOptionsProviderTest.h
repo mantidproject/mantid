@@ -97,6 +97,7 @@ public:
     TS_ASSERT_EQUALS(options.layout, PlotLayout::Individual);
     TS_ASSERT_EQUALS(options.xAxis.label, "Detector ID");
     TS_ASSERT_EQUALS(options.yAxis.label, "Integrated Intensity");
+    TS_ASSERT(options.showErrors);
   }
 
   void testAlignmentOptionsUseSelectedXAxisUnits() {

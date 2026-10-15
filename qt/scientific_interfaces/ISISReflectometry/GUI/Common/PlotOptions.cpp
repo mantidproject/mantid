@@ -86,7 +86,7 @@ PlotOptions alignmentPlotOptions(AlignmentXAxis xAxis, PlotLayout layout) {
   options.layout = layout;
   options.xAxis = alignmentXAxis(xAxis);
   options.yAxis = PlotAxis{"Integrated Intensity", "", AxisScale::Linear};
-  options.showErrors = false;
+  options.showErrors = true;
   options.windowTitle = "ISIS Reflectometry Alignment";
   return options;
 }
