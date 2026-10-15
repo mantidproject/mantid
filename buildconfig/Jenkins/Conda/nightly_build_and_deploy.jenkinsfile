@@ -359,7 +359,11 @@ pipeline {
                 flatten: false
 
               package_conda("${PLATFORM}", "workbench")
-              archive_conda_packages("${PLATFORM}")
+
+              archiveArtifacts artifacts: "**/conda-bld/${platform}/mantidworkbench-*.conda",
+                allowEmptyArchive: false,
+                fingerprint: true,
+                onlyIfSuccessful: true
             }
             post {
               always {
