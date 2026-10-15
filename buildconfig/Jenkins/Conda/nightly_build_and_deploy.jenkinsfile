@@ -747,6 +747,7 @@ def lockfile_options() {
   if(!buildMantiddocs) {
     options += " --skip-docs"
   }
+  return options
 }
 
 // Determine whether this build should be marked as a prerelease on GitHub.
