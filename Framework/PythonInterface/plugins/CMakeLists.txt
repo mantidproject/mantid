@@ -397,6 +397,7 @@ set(PYTHON_PLUGINS
     functions/PCRmagnetfnorm.py
     functions/PEARLTransVoigt.py
     functions/PearsonIV.py
+    functions/PoldiSidelobeGaussian.py
     functions/Porod.py
     functions/PrimStretchedExpFT.py
     functions/RFresonance.py

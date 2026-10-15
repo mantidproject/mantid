@@ -248,6 +248,10 @@
      <parameter name="rotation_speed">
           <logfile id="chopperspeed" extract-single-value-as="first_value" />
      </parameter>
+     <!-- width of the correlation-method sidelobe: sigma (Ang) = value / chopper speed (rpm) -->
+     <parameter name="sidelobe_width_coeff">
+          <value val="196.0" />
+     </parameter>
 </component>
 <component type="sample" name="sample">
     <location x="0.0" y="0.0" z="0.0" />
