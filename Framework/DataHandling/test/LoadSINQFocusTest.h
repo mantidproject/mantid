@@ -56,7 +56,7 @@ public:
     MatrixWorkspace_sptr output2D = std::dynamic_pointer_cast<MatrixWorkspace>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 375);
-    TS_ASSERT_EQUALS(output2D->getInstrument()->getName(), "FOCUS");
+    TS_ASSERT_EQUALS(output2D->getInstrumentName(), "FOCUS");
     AnalysisDataService::Instance().clear();
   }
 

@@ -127,7 +127,7 @@ void CalculateTransmission::exec() {
   detid_t transMonitorID = getProperty("TransmissionMonitor");
   const std::vector<detid_t> transDetList = getProperty("TransmissionROI");
 
-  const bool usingSameInstrument = sampleWS->getInstrument()->getName() == directWS->getInstrument()->getName();
+  const bool usingSameInstrument = sampleWS->getInstrumentName() == directWS->getInstrumentName();
   if (!usingSameInstrument)
     throw std::invalid_argument("The input workspaces do not come from the same instrument.");
   if (!WorkspaceHelpers::matchingBins(sampleWS, directWS))

@@ -318,7 +318,7 @@ void SaveOpenGenieAscii::storeWorkspaceInformation() {
   // Workspace title
   addToOutputBuffer("title", m_stringType, m_inputWS->getTitle());
   // Instrument name
-  addToOutputBuffer("inst_name", m_stringType, m_inputWS->getInstrument()->getName());
+  addToOutputBuffer("inst_name", m_stringType, m_inputWS->getInstrumentName());
   // Number of bins
   addToOutputBuffer("ntc", m_intType, std::to_string(m_inputWS->blocksize()));
   // L1 (Source to sample distance)

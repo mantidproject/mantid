@@ -100,7 +100,7 @@ private:
   MatrixWorkspace_sptr create_workspace_with_fitting_functions(const std::string &result_unit = "Wavelength") {
     // Create a default workspace with no-fitting functions.
     MatrixWorkspace_sptr ws = create_workspace_with_no_fitting_functions();
-    const std::string instrumentName = ws->getInstrument()->getName();
+    const std::string instrumentName = ws->getInstrumentName();
 
     // Create a parameter file, with a root equation that will apply to all
     // detectors.
@@ -137,7 +137,7 @@ private:
   MatrixWorkspace_sptr create_workspace_with_incomplete_instrument_level_fitting_functions() {
     // Create a default workspace with no-fitting functions.
     MatrixWorkspace_sptr ws = create_workspace_with_no_fitting_functions();
-    const std::string instrumentName = ws->getInstrument()->getName();
+    const std::string instrumentName = ws->getInstrumentName();
 
     // Create a parameter file, with a root equation that will apply to all
     // detectors. NOTE THAT A0 IS SPECIFIED, but A1 IS NOT.
@@ -168,7 +168,7 @@ private:
   MatrixWorkspace_sptr create_workspace_with_detector_level_only_fit_functions() {
     // Create a default workspace with no-fitting functions.
     MatrixWorkspace_sptr ws = create_workspace_with_no_fitting_functions();
-    const std::string instrumentName = ws->getInstrument()->getName();
+    const std::string instrumentName = ws->getInstrumentName();
 
     const double A1 = 1;
     std::string componentLinks = "";
@@ -219,7 +219,7 @@ private:
       // Create a default workspace with no-fitting functions.
       ws = create_workspace_with_no_fitting_functions();
     }
-    const std::string instrumentName = ws->getInstrument()->getName();
+    const std::string instrumentName = ws->getInstrumentName();
 
     std::string componentLinks = "";
     const auto &spectrumInfo = ws->spectrumInfo();
@@ -550,7 +550,7 @@ public:
       WorkspaceGroup_sptr wsGroup = API::AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("testws");
       ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(0));
 
-      const std::string instrumentName = ws->getInstrument()->getName();
+      const std::string instrumentName = ws->getInstrumentName();
 
       // Create a parameter file, with a root equation that will apply to all
       // detectors.

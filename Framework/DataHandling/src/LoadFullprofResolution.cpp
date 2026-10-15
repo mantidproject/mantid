@@ -718,7 +718,7 @@ void LoadFullprofResolution::putParametersIntoWorkspace(const API::Column_const_
                                                         std::string &parameterXMLString) {
 
   // Get instrument name from matrix workspace
-  std::string instrumentName = ws->getInstrument()->getName();
+  std::string instrumentName = ws->getInstrumentName();
 
   // Convert table workspace column into DOM XML document
   //   Set up writer to Paremeter file

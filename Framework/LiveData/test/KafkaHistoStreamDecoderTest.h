@@ -89,7 +89,7 @@ public:
 private:
   void checkWorkspaceMetadata(const Mantid::DataObjects::Workspace2D &histoWksp) {
     TS_ASSERT(histoWksp.getInstrument());
-    TS_ASSERT_EQUALS("HRPDTEST", histoWksp.getInstrument()->getName());
+    TS_ASSERT_EQUALS("HRPDTEST", histoWksp.getInstrumentName());
     TS_ASSERT_EQUALS("2016-08-31T12:07:42", histoWksp.run().getPropertyValueAsType<std::string>("run_start"));
     std::array<Mantid::specnum_t, 5> specs = {{1, 2, 3, 4, 5}};
     std::array<Mantid::detid_t, 5> ids = {{1001, 1002, 1100, 901000, 10100}};

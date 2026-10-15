@@ -476,7 +476,7 @@ void LoadIsawPeaks::appendFile(const PeaksWorkspace_sptr &outWS, const std::stri
 
     std::ostringstream oss;
     std::string bankString = "bank";
-    if (outWS->getInstrument()->getName() == "WISH") {
+    if (outWS->getInstrumentName() == "WISH") {
       if (bankNum < 10)
         bankString = "WISHpanel0";
       else

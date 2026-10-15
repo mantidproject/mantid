@@ -43,7 +43,7 @@ public:
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), NUM_BANKS * PIXELS_PER_BANK);
     TS_ASSERT_EQUALS(ws->blocksize(), 1);
-    TS_ASSERT_EQUALS(ws->getInstrument()->getName(),
+    TS_ASSERT_EQUALS(ws->getInstrumentName(),
                      "basic"); // Name of the test instrument
     auto dets = ws->getSpectrum(0).getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
@@ -100,7 +100,7 @@ public:
 
     TS_ASSERT_EQUALS(cloned->getNumberHistograms(), NUM_BANKS * PIXELS_PER_BANK);
     TS_ASSERT_EQUALS(cloned->blocksize(), 1);
-    TS_ASSERT_EQUALS(cloned->getInstrument()->getName(),
+    TS_ASSERT_EQUALS(cloned->getInstrumentName(),
                      "basic"); // Name of the test instrument
     auto dets = cloned->getSpectrum(0).getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);

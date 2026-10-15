@@ -72,7 +72,7 @@ public:
       return;
     TS_ASSERT_DELTA(pw.getPeak(0).getWavelength(), 3.0, 1e-4);
     // Experiment info stuff got copied
-    TS_ASSERT_EQUALS(pw.getInstrument()->getName(), "SillyInstrument");
+    TS_ASSERT_EQUALS(pw.getInstrumentName(), "SillyInstrument");
     TS_ASSERT(pw.run().hasProperty("TestProp"));
   }
 

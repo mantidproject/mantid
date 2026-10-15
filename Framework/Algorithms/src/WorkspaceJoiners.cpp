@@ -154,7 +154,7 @@ DataObjects::EventWorkspace_sptr WorkspaceJoiners::execEvent(const DataObjects::
  *  @throw std::invalid_argument If the workspaces are not compatible
  */
 void WorkspaceJoiners::checkCompatibility(const API::MatrixWorkspace &ws1, const API::MatrixWorkspace &ws2) {
-  if (ws1.getInstrument()->getName() != ws2.getInstrument()->getName()) {
+  if (ws1.getInstrumentName() != ws2.getInstrumentName()) {
     const std::string message("The input workspaces are not compatible because "
                               "they come from different instruments");
     throw std::invalid_argument(message);
