@@ -85,5 +85,7 @@ New features
 Bugfixes
 ############
 - (`#41780 <https://github.com/mantidproject/mantid/pull/41780>`_) Fixed an issue of :ref:`SliceViewer <sliceviewer>` not showing data in non-orthogonal view when L is selected as one of the project axes by setting proper limits for the axes.
+- (`#42428 <https://github.com/mantidproject/mantid/pull/42428>`_) Fixed an error raised when reopening :ref:`SliceViewer <sliceviewer>` after using the non-axis-aligned cutting tool.
+- (`#42428 <https://github.com/mantidproject/mantid/pull/42428>`_) Fixed an error raised when moving the mouse over a plot after a :ref:`SliceViewer <sliceviewer>` window has been closed.
 
 :ref:`Release 7.0.0 <v7.0.0>`
