@@ -7,6 +7,7 @@
 import unittest
 
 from unittest.mock import Mock, call, patch
+from qtpy import sip
 from workbench.plotting.globalfiguremanager import FigureAction, GlobalFigureManager, GlobalFigureManagerObserver
 from workbench.plotting.observabledictionary import DictionaryAction
 
@@ -93,6 +94,26 @@ class TestGlobalFigureManagerInitialisation(unittest.TestCase):
 
         self.assertIs(observer, GlobalFigureManager.initialiseActiveFiguresObserver())
         self.assertEqual(1, GlobalFigureManager.observers.count(observer))
+
+    def test_active_figure_observer_is_recreated_if_qt_deleted_it(self):
+        # Qt deletes the observer when the QApplication it belongs to is destroyed
+        observer = GlobalFigureManager.initialiseActiveFiguresObserver()
+        sip.delete(observer)
+
+        new_observer = GlobalFigureManager.initialiseActiveFiguresObserver()
+
+        self.assertIsNot(observer, new_observer)
+        self.assertFalse(sip.isdeleted(new_observer))
+        self.assertNotIn(observer, GlobalFigureManager.observers)
+        self.assertEqual(1, GlobalFigureManager.observers.count(new_observer))
+
+    def test_notifying_observers_skips_deleted_active_figure_observer(self):
+        observer = GlobalFigureManager.initialiseActiveFiguresObserver()
+        sip.delete(observer)
+
+        GlobalFigureManager.notify_observers(FigureAction.OrderChanged, -1)
+
+        self.assertNotIn(observer, GlobalFigureManager.observers)
 
 
 class TestGlobalFigureManager(unittest.TestCase):
