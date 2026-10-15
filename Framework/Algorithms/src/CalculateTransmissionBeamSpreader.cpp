@@ -83,9 +83,9 @@ void CalculateTransmissionBeamSpreader::exec() {
   MatrixWorkspace_sptr direct_scatterWS = getProperty("DirectScatterRunWorkspace");
 
   // Check that the two input workspaces are from the same instrument
-  if (sample_spreaderWS->getInstrument()->getName() != direct_spreaderWS->getInstrument()->getName() ||
-      sample_spreaderWS->getInstrument()->getName() != sample_scatterWS->getInstrument()->getName() ||
-      sample_spreaderWS->getInstrument()->getName() != direct_scatterWS->getInstrument()->getName()) {
+  if (sample_spreaderWS->getInstrumentName() != direct_spreaderWS->getInstrumentName() ||
+      sample_spreaderWS->getInstrumentName() != sample_scatterWS->getInstrumentName() ||
+      sample_spreaderWS->getInstrumentName() != direct_scatterWS->getInstrumentName()) {
     g_log.error("The input workspaces do not come from the same instrument");
     throw std::invalid_argument("The input workspaces do not come from the same instrument");
   }

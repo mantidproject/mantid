@@ -63,7 +63,7 @@ void RunCombinationHelper::setReferenceProperties(const MatrixWorkspace_sptr &re
   m_isHistogramData = ref->isHistogramData();
   m_isDistribution = ref->isDistribution();
   m_isScanning = ref->detectorInfo().isScanning();
-  m_instrumentName = ref->getInstrument()->getName();
+  m_instrumentName = ref->getInstrumentName();
   if (m_numberSpectra) {
     m_hasDx.reserve(m_numberSpectra);
     for (unsigned int i = 0; i < m_numberSpectra; ++i)
@@ -96,7 +96,7 @@ std::string RunCombinationHelper::checkCompatibility(const MatrixWorkspace_sptr 
   if (m_isScanning && ws->detectorInfo().size() != m_numberDetectors)
     errors += "workspaces with detectors scans have different number of "
               "detectors; ";
-  if (ws->getInstrument()->getName() != m_instrumentName)
+  if (ws->getInstrumentName() != m_instrumentName)
     errors += "different instrument names; ";
   if (ws->getNumberHistograms() == m_numberSpectra) {
     if (!m_hasDx.empty()) {

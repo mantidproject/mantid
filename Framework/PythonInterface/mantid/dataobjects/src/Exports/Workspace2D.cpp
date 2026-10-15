@@ -92,7 +92,7 @@ public:
 
     dict state;
     state["title"] = ws.getTitle();
-    state["instrument_name"] = ws.getInstrument()->getName();
+    state["instrument_name"] = ws.getInstrumentName();
     state["instrument_xml"] = ws.instrumentMetadata().xmlText();
     state["unit_x"] = ws.getAxis(0)->unit()->unitID();
     state["unit_y"] = ws.getAxis(1)->unit()->unitID();

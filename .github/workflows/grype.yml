@@ -38,7 +38,7 @@ jobs:
 
     steps:
       - name: Checkout workflow dependencies
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           sparse-checkout: |
             .github/workflows/grype.yml
@@ -110,7 +110,7 @@ jobs:
           echo "::endgroup::"
       - name: Scan with Grype
         id: scan
-        uses: anchore/scan-action@v7
+        uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
         with:
           path: ${{ steps.pixi-project.outputs.environment_dir }}
           fail-build: false
@@ -135,7 +135,7 @@ jobs:
           echo "path=$report" >> "$GITHUB_OUTPUT"
 
       - name: Upload SARIF report
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: grype-sarif-${{ matrix.platform }}
           path: ${{ steps.report.outputs.path }}
@@ -155,14 +155,14 @@ jobs:
 
     steps:
       - name: Checkout workflow dependencies
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           sparse-checkout: |
             .github/actions/grype/merge_sarif.py
           sparse-checkout-cone-mode: false
 
       - name: Download SARIF reports
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: grype-sarif-*
           path: ${{ runner.temp }}/reports
@@ -175,7 +175,7 @@ jobs:
 
       - name: Upload vulnerability report
         if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.dry_run != 'true' }}
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
         with:
           sarif_file: ${{ runner.temp }}/grype.sarif
           # one category for all platforms, so the merged results are a single analysis

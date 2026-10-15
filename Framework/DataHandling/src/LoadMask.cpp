@@ -278,8 +278,8 @@ void LoadMask::exec() {
   this->intializeMaskWorkspace();
 
   if (m_sourceMapWS) { // check if the instruments are compatible
-    auto t_inst_name = m_maskWS->getInstrument()->getName();
-    auto r_inst_name = m_sourceMapWS->getInstrument()->getName();
+    auto t_inst_name = m_maskWS->getInstrumentName();
+    auto r_inst_name = m_sourceMapWS->getInstrumentName();
     if (t_inst_name != r_inst_name) {
       throw std::invalid_argument("If reference workspace is provided, it has "
                                   "to have instrument with the same name as "

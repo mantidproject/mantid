@@ -107,7 +107,7 @@ public:
       std::filesystem::remove(filePath);
 
       MatrixWorkspace_sptr output = loader.getProperty("Workspace");
-      const std::string loadedName = output->getInstrument()->getName();
+      const std::string loadedName = output->getInstrumentName();
       TS_ASSERT_EQUALS(expected, loadedName);
     };
 

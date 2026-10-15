@@ -161,7 +161,7 @@ std::size_t ALFInstrumentModel::runNumber(Mantid::API::MatrixWorkspace_sptr cons
 }
 
 bool ALFInstrumentModel::isALFData(MatrixWorkspace_const_sptr const &workspace) const {
-  return workspace->getInstrument()->getName() == INSTRUMENT_NAME;
+  return workspace->getInstrumentName() == INSTRUMENT_NAME;
 }
 
 bool ALFInstrumentModel::binningMismatch() const {

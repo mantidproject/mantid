@@ -327,7 +327,7 @@ public:
     // Workspace must not be uninitialised (no empty instrument).
     auto ews = std::dynamic_pointer_cast<DataObjects::EventWorkspace>(ws);
     TS_ASSERT_DIFFERS(ews, nullptr);
-    TS_ASSERT_DIFFERS(ews->getInstrument()->getName(), std::string{});
+    TS_ASSERT_DIFFERS(ews->getInstrumentName(), std::string{});
   }
 
   // ----- §6.3 Single & full run lifecycle -----

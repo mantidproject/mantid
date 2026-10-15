@@ -285,7 +285,6 @@ set(INC_FILES
     inc/MantidKernel/StringContainsValidator.h
     inc/MantidKernel/StringTokenizer.h
     inc/MantidKernel/Strings.h
-    inc/MantidKernel/System.h
     inc/MantidKernel/Task.h
     inc/MantidKernel/TestChannel.h
     inc/MantidKernel/ThreadPool.h
@@ -493,7 +492,6 @@ set_target_properties(Kernel PROPERTIES OUTPUT_NAME MantidKernel COMPILE_DEFINIT
 target_precompile_headers(
   Kernel
   PRIVATE
-  inc/MantidKernel/System.h
   <cstddef>
   <cstdint>
   <cstdio>

@@ -87,10 +87,10 @@ public:
     add_alg.setProperty("PeaksWorkspace", ws);
     add_alg.setProperty("RunWorkspace", run_ws);
     auto err_string = "The peak from " + run_ws->getName() + " comes from a different instrument (" +
-                      run_ws->getInstrument()->getName() +
+                      run_ws->getInstrumentName() +
                       ") to the peaks "
                       "already in the table (" +
-                      ws->getInstrument()->getName() + "). It could not be added.";
+                      ws->getInstrumentName() + "). It could not be added.";
     TS_ASSERT_THROWS_EQUALS(add_alg.execute(), std::runtime_error & e, e.what(), err_string)
 
     // Remove workspace from the data service.

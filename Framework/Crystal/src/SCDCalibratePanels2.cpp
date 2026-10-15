@@ -713,7 +713,7 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, const IPeaksWo
     // so the same component must be adjusted here for the applied correction
     // to match the fitted one. Rotating bankNN instead would rotate the panel
     // about the sample position rather than about its own centre.
-    if (pws->getInstrument()->getName().compare("CORELLI") == 0) {
+    if (pws->getInstrumentName().compare("CORELLI") == 0) {
       bn.append("/sixteenpack");
     }
     // update instrument for output

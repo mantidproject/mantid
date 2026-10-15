@@ -120,7 +120,7 @@ public:
     Mantid::Kernel::Property *logP = run.getLogData("run_number");
     TS_ASSERT_EQUALS(logP->value(), "53616")
     TS_ASSERT_EQUALS(run.getLogData("UserFile")->value(), "MASK.094AA");
-    TS_ASSERT_EQUALS(ws2d->getInstrument()->getName(), "LOQ")
+    TS_ASSERT_EQUALS(ws2d->getInstrumentName(), "LOQ")
 
     TS_ASSERT_EQUALS(ws2d->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(ws2d->x(0).size(), 143);
@@ -144,7 +144,7 @@ public:
     logP = run.getLogData("run_number");
     TS_ASSERT_EQUALS(logP->value(), "808")
     TS_ASSERT_EQUALS(run.getLogData("UserFile")->value(), "MASKSANS2D.091A");
-    TS_ASSERT_EQUALS(ws2d->getInstrument()->getName(), "SANS2D")
+    TS_ASSERT_EQUALS(ws2d->getInstrumentName(), "SANS2D")
 
     TS_ASSERT_EQUALS(ws2d->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(ws2d->x(0).size(), 23);

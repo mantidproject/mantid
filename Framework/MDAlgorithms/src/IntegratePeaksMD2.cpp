@@ -1257,7 +1257,7 @@ double IntegratePeaksMD2::calculateDistanceToEdge(const Mantid::Kernel::V3D &QLa
 void IntegratePeaksMD2::runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
                                          const std::string &property, const std::string &values) {
   // For CORELLI do not count as edge if next to another detector bank
-  if (property == "Tube" && peakWS->getInstrument()->getName() == "CORELLI") {
+  if (property == "Tube" && peakWS->getInstrumentName() == "CORELLI") {
     auto alg = createChildAlgorithm("MaskBTP");
     alg->setProperty<Workspace_sptr>("Workspace", peakWS);
     alg->setProperty("Bank", "1,7,12,17,22,27,30,59,63,69,74,79,84,89");

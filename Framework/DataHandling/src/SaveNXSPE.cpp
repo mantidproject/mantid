@@ -195,11 +195,11 @@ void SaveNXSPE::exec() {
   // NXinstrument
   nxFile.makeGroup("instrument", "NXinstrument", true);
   // Write the instrument name
-  nxFile.writeData("name", inputWS->getInstrument()->getName());
+  nxFile.writeData("name", inputWS->getInstrumentName());
   // and the short name
   nxFile.openData("name");
   // TODO: Get the instrument short name
-  nxFile.putAttr("short_name", inputWS->getInstrument()->getName());
+  nxFile.putAttr("short_name", inputWS->getInstrumentName());
   nxFile.closeData();
   nxFile.writeData("run_number", inputWS->getRunNumber());
 

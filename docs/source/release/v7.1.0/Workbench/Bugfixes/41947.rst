@@ -1,0 +1,1 @@
+- In Mantid Workbench, several problems with the dark colour theme on Windows have been resolved. In addition, the colour theme is now dynamically applied to all the open tabs of the script editor once it is set from the workbench settings.

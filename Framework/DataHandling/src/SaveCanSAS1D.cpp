@@ -644,7 +644,7 @@ void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
 
   // Set name(r)
   std::string sasInstrName = "\n\t\t\t<name>";
-  std::string instrname = m_workspace->getInstrument()->getName();
+  std::string instrname = m_workspace->getInstrumentName();
   // look for xml special characters and replace with entity refrence
   searchandreplaceSpecialChars(instrname);
   sasInstrName += instrname;

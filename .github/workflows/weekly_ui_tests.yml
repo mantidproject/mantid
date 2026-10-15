@@ -28,6 +28,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   automated-ui-tests:
     # scheduled runs on a fork would only queue against runners that do not exist there

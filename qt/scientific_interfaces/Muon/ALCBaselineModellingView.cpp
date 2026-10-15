@@ -7,6 +7,7 @@
 #include "ALCBaselineModellingView.h"
 
 #include "ALCBaselineModellingPresenter.h"
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
 #include <QMenu>
@@ -26,8 +27,13 @@ void ALCBaselineModellingView::initialize() {
   m_ui.setupUi(m_widget);
   connect(m_ui.fit, SIGNAL(clicked()), SLOT(handleFitRequested()));
 
-  m_ui.dataPlot->setCanvasColour(Qt::white);
-  m_ui.correctedPlot->setCanvasColour(Qt::white);
+  if (MantidQt::MantidWidgets::isDarkMode()) {
+    m_ui.dataPlot->setCanvasColour(QColor(DARK_CANVAS_COLOUR));
+    m_ui.correctedPlot->setCanvasColour(QColor(DARK_CANVAS_COLOUR));
+  } else {
+    m_ui.dataPlot->setCanvasColour(QColor(240, 240, 240));
+    m_ui.correctedPlot->setCanvasColour(QColor(240, 240, 240));
+  }
 
   // Error bars on the plot
   const QStringList dataPlotErrors{"Data"};
@@ -81,7 +87,7 @@ void ALCBaselineModellingView::setDataCurve(MatrixWorkspace_sptr workspace, std:
   const auto kwargs = getPlotKwargs(m_ui.dataPlot, "Data");
 
   m_ui.dataPlot->clear();
-  m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black, kwargs);
+  m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, defaultLineColour(), kwargs);
 }
 
 void ALCBaselineModellingView::setCorrectedCurve(MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex) {

@@ -8,8 +8,9 @@
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidKernel/System.h"
 #include "MantidWorkflowAlgorithms/DllConfig.h"
+
+#include <cstddef>
 
 namespace Mantid {
 namespace WorkflowAlgorithms {

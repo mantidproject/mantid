@@ -202,7 +202,9 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
             # Checks if the cell is BLANK, if so it returns the specified color for blank cells
             elif self.checkBlankCache(row, column):
                 return self.blank_cell_color
-
+        elif role == Qt.ForegroundRole:
+            # the cell backgrounds are fixed light colours, so keep the text black in any theme
+            return QtGui.QColor(Qt.black)
         elif role == Qt.ToolTipRole:
             tooltip = QVariant()
             if self.checkMaskedCache(row):

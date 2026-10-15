@@ -315,12 +315,12 @@ void SaveDiffCal::exec() {
   std::string instrumentName;
   std::string instrumentSource;
   if (bool(groupingWS)) {
-    instrumentName = groupingWS->getInstrument()->getName();
+    instrumentName = groupingWS->getInstrumentName();
     instrumentSource = groupingWS->instrumentMetadata().filename();
   }
   if (bool(maskWS)) {
     if (instrumentName.empty()) {
-      instrumentName = maskWS->getInstrument()->getName();
+      instrumentName = maskWS->getInstrumentName();
     }
     if (instrumentSource.empty()) {
       instrumentSource = maskWS->instrumentMetadata().filename();
