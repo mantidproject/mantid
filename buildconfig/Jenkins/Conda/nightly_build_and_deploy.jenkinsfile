@@ -373,6 +373,12 @@ pipeline {
 
     stage('Create conda lock file') {
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
+      when {
+        beforeAgent true
+        beforeOptions true
+        // Only run this stage when packages are built.
+        expression { params.BUILD_PACKAGE != 'none' }
+      }
       steps {
         checkoutSource("${GIT_SHA}")
 
