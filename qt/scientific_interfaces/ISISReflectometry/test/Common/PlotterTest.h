@@ -122,9 +122,34 @@ public:
     TS_ASSERT_EQUALS(currentFigureYAxisLabel(), "Spin Asymmetry");
   }
 
+  void testAddingVerticallyTiledSpinAsymmetryPlotPreservesReflectivityYAxisLabel() {
+    closeAllFigures();
+    createWorkspace("reflectivity");
+    createWorkspace("spin_asymmetry");
+
+    MantidQt::CustomInterfaces::ISISReflectometry::Plotter plotter;
+    plotter.plot({{"reflectivity"},
+                  MantidQt::CustomInterfaces::ISISReflectometry::reflectivityCurvePlotOptions(
+                      MantidQt::CustomInterfaces::ISISReflectometry::PlotOutputType::ReflectivityCurve,
+                      MantidQt::CustomInterfaces::ISISReflectometry::PlotLayout::Tiled)});
+    plotter.plot({{"spin_asymmetry"},
+                  MantidQt::CustomInterfaces::ISISReflectometry::spinAsymmetryPlotOptions(
+                      MantidQt::CustomInterfaces::ISISReflectometry::PlotLayout::Tiled),
+                  nullptr,
+                  true,
+                  true});
+
+    TS_ASSERT_EQUALS(currentFigureYAxisLabelsExcludingColorbars(),
+                     (std::vector<std::string>{"Reflectivity", "Spin Asymmetry"}));
+    TS_ASSERT(!currentFigureIsStale());
+  }
+
   void testDetectorMapPlotUsesConfiguredAxisLabels() {
     closeAllFigures();
-    createWorkspace("ws1");
+    auto &config = Mantid::Kernel::ConfigService::Instance();
+    auto const originalAutoDistribution = config.getString("graph1d.autodistribution");
+    config.setString("graph1d.autodistribution", "On");
+    createWorkspace("ws1", "Wavelength");
 
     MantidQt::CustomInterfaces::ISISReflectometry::Plotter plotter;
     plotter.plot({{"ws1"},
@@ -133,9 +158,10 @@ public:
                       MantidQt::CustomInterfaces::ISISReflectometry::DetectorMapYAxis::Theta,
                       MantidQt::CustomInterfaces::ISISReflectometry::PlotLayout::Individual)});
 
-    TS_ASSERT_EQUALS(currentFigureXAxisLabel(), "Lambda");
-    TS_ASSERT_EQUALS(currentFigureYAxisLabel(), "Theta");
-    TS_ASSERT_EQUALS(currentFigureColorbarLabel(), "Intensity");
+    TS_ASSERT_EQUALS(currentFigureXAxisLabel(), R"(Wavelength ($\AA$))");
+    TS_ASSERT_EQUALS(currentFigureYAxisLabel(), R"($\theta$ ($^\circ$))");
+    TS_ASSERT_EQUALS(currentFigureColorbarLabel(), R"(Counts ($\AA$)$^{-1}$)");
+    config.setString("graph1d.autodistribution", originalAutoDistribution);
   }
 
   void testTiledDetectorMapPlotUsesConfiguredYAxisLabelOnEveryPlotAxis() {
@@ -153,7 +179,7 @@ public:
     auto const yAxisLabels = currentFigureYAxisLabelsExcludingColorbars();
     TS_ASSERT_EQUALS(yAxisLabels.size(), 2);
     for (auto const &yAxisLabel : yAxisLabels) {
-      TS_ASSERT_EQUALS(yAxisLabel, "Theta");
+      TS_ASSERT_EQUALS(yAxisLabel, R"($\theta$ ($^\circ$))");
     }
   }
 
@@ -250,10 +276,11 @@ public:
   }
 
 private:
-  void createWorkspace(std::string const &name) {
+  void createWorkspace(std::string const &name, std::string const &xUnit = "TOF") {
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
     alg->initialize();
     alg->setProperty("OutputWorkspace", name);
+    alg->setProperty("XUnit", xUnit);
     alg->execute();
   }
 
@@ -286,6 +313,14 @@ private:
   std::string currentFigureXAxisLabel() { return currentFigureAxisLabel(0, "get_xlabel"); }
 
   std::string currentFigureColorbarLabel() { return currentFigureAxisLabel(1, "get_ylabel"); }
+
+  bool currentFigureIsStale() {
+    Mantid::PythonInterface::GlobalInterpreterLock lock;
+    MantidQt::Widgets::Common::Python::Object pyplot{
+        MantidQt::Widgets::Common::Python::NewRef(PyImport_ImportModule("matplotlib.pyplot"))};
+    auto const figure = MantidQt::Widgets::Common::Python::Object(pyplot.attr("gcf")());
+    return boost::python::extract<bool>(figure.attr("stale"))();
+  }
 
   std::vector<std::string> currentFigureYAxisLabelsExcludingColorbars() {
     Mantid::PythonInterface::GlobalInterpreterLock lock;

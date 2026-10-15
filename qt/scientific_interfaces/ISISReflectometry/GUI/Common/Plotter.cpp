@@ -521,6 +521,7 @@ void applyPostPlotting(PlotRequest const &request, PlottedFigure const &plottedF
       addHorizontalMarkers(plottedFigure.figure, *options.horizontalMarker);
   }
   setPlotWindowParent(plottedFigure.figure, request.parentWidget);
+  plottedFigure.figure.attr("canvas").attr("draw_idle")();
 }
 } // namespace
 
