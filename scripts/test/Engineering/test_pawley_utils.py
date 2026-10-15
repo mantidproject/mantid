@@ -1354,21 +1354,21 @@ class PoldiUtilsMaskingTest(unittest.TestCase):
         ws_sim = simulate_2d_data(self._make_masked_ws(), self.ws_1d, output_workspace="ws_sim_masked")
 
         # the masked spectrum is zeroed, not simulated (it is non-zero when unmasked)
-        self.assertTrue(np.any(ws_sim_ref.readY(self.IMASK) > 0))
-        assert_array_equal(ws_sim.readY(self.IMASK), zeros_like(ws_sim.readY(self.IMASK)))
+        self.assertTrue(np.any(ws_sim_ref.y(self.IMASK) > 0))
+        assert_array_equal(ws_sim.y(self.IMASK), zeros_like(ws_sim.y(self.IMASK)))
         # the remaining spectra are unaffected
         for ispec in (0, 1, 3, 4):
-            assert_array_almost_equal(ws_sim.readY(ispec), ws_sim_ref.readY(ispec))
+            assert_array_almost_equal(ws_sim.y(ispec), ws_sim_ref.y(ispec))
 
     def test_simulate_2d_data_zeroes_masked_spectra_holding_counts(self):
         # masking does not always zero the counts, so the simulation must zero them itself
         # rather than leaving the values carried over from the input workspace
         ws_masked = self._make_masked_ws()
-        ws_masked.setY(self.IMASK, ones(ws_masked.blocksize()))
+        ws_masked.setSharedY(self.IMASK, ones(ws_masked.blocksize()))
 
         ws_sim = simulate_2d_data(ws_masked, self.ws_1d, output_workspace="ws_sim_masked")
 
-        assert_array_equal(ws_sim.readY(self.IMASK), zeros_like(ws_sim.readY(self.IMASK)))
+        assert_array_equal(ws_sim.y(self.IMASK), zeros_like(ws_sim.y(self.IMASK)))
 
     def _make_low_tth_masked_ws(self):
         # the first spectra have the lowest two-theta, so masking them lowers the maximum d-spacing
@@ -1441,7 +1441,7 @@ class Poldi2DEvalMixinMaskingTest(unittest.TestCase):
         resids = np.asarray(pawley.eval_resids(pawley.get_free_params()))
 
         # masking does not always zero the counts, so put some back and check they are ignored
-        pawley.ws.setY(self.IMASK, 1e4 * ones(pawley.ws.blocksize()))
+        pawley.ws.setSharedY(self.IMASK, 1e4 * ones(pawley.ws.blocksize()))
         resids_with_counts = np.asarray(pawley.eval_resids(pawley.get_free_params()))
 
         assert_array_almost_equal(resids, resids_with_counts)

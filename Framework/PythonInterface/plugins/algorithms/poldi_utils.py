@@ -371,7 +371,7 @@ def simulate_2d_data(
         )
     # set y values - masked spectra are zeroed rather than simulated
     for ispec in np.flatnonzero(~is_live):
-        ws_sim.setY(int(ispec), np.zeros(ws_sim.blocksize()))
+        ws_sim.setSharedY(int(ispec), np.zeros(ws_sim.blocksize()))
     for ispec, yvec in zip(ilive, out):
         ws_sim.setSharedY(int(ispec), yvec)
     ADS.addOrReplace(output_workspace, ws_sim)
