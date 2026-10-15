@@ -154,14 +154,15 @@ void PropertyManager::filterByProperty(Mantid::Kernel::LogFilter *logFilter,
       std::unique_ptr<Property> filtered(nullptr);
       if (this->existsProperty(PropertyManager::getInvalidValuesFilterLogName(propName))) {
 
-        // add the filter to the passed in filters
+        // combine this log's invalid values filter with a copy of the passed in filter
         auto const *filterProp = getPointerToProperty(PropertyManager::getInvalidValuesFilterLogName(propName));
         auto const *tspFilterProp = dynamic_cast<TimeSeriesProperty<bool> const *>(filterProp);
         if (!tspFilterProp)
           break;
-        logFilter->addFilter(*tspFilterProp);
+        LogFilter propFilter(*filter);
+        propFilter.addFilter(*tspFilterProp);
 
-        filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries, *logFilter->filter());
+        filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries, *propFilter.filter());
       } else if (filter->size() > 0) {
         // attach the filter to the TimeSeriesProperty, thus creating  the FilteredTimeSeriesProperty<double>
         filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries, *filter);
