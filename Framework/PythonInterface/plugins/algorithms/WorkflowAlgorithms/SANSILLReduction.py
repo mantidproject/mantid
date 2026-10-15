@@ -775,7 +775,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
         if not self._check_processed_flag(solvent_ws, "Sample"):
             self.log().warning("Solvent input workspace is not processed as sample.")
         self._check_distances_match(mtd[ws], solvent_ws)
-        solvent_ws_name = solvent_ws.getName()
+        solvent_ws_name = solvent_ws.name()
         if self._mode != "TOF":
             self._check_wavelengths_match(mtd[ws], solvent_ws)
         else:
