@@ -114,7 +114,7 @@ Mantid::API::MatrixWorkspace_sptr extractSpectrum(Mantid::API::MatrixWorkspace_s
 }
 
 double theta(Mantid::API::MatrixWorkspace const &workspace, size_t const workspaceIndex) {
-  return workspace.spectrumInfo().twoTheta(workspaceIndex) * 90.0 / M_PI;
+  return workspace.spectrumInfo().signedTwoTheta(workspaceIndex) * 90.0 / M_PI;
 }
 
 double xValueForFractionalWorkspaceIndex(Mantid::API::MatrixWorkspace const &workspace, double const workspaceIndex,
