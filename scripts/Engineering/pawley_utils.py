@@ -1014,12 +1014,6 @@ class Poldi2DEvalMixin:
         ):
             self._reset_scales_and_bgs()
 
-    def _live_spectra(self) -> np.ndarray:
-        """Cached boolean mask of the spectra contributing to the fit (evaluated once per fit)."""
-        if getattr(self, "_islive", None) is None or len(self._islive) != self.ws.getNumberHistograms():
-            self._islive = get_live_spectra(self.ws)
-        return self._islive
-
     def _simulate_2d(self, params: np.ndarray[float]) -> Workspace2D:
         self.ws_1d.setSharedY(0, self.eval_profile(params))
         ws_sim = simulate_2d_data(self.ws, self.ws_1d, output_workspace=f"{self.ws.name()}_sim", lambda_max=self.lambda_max)
@@ -1047,7 +1041,7 @@ class Poldi2DEvalMixin:
             return self.scales, self.bgs
 
         ws_sim = self._simulate_2d(params)
-        live = self._live_spectra()
+        live = get_live_spectra(self.ws)
         # masked spectra are left at the neutral defaults - the lstsq is degenerate for an all-zero spectrum
         self._reset_scales_and_bgs()
         self.scales[live], self.bgs[live] = calculate_scales_and_bg(self.ws.extractY()[live], ws_sim.extractY()[live])
@@ -1061,7 +1055,7 @@ class Poldi2DEvalMixin:
 
     def eval_resids(self, params: np.ndarray[float]) -> np.ndarray[float]:
         ws_sim = self.eval_2d(params)
-        live = self._live_spectra()
+        live = get_live_spectra(self.ws)
         return (self.ws.extractY()[live] - ws_sim.extractY()[live]).flat
 
     def eval_profile(self, params: np.ndarray[float]) -> np.ndarray[float]:
@@ -1163,7 +1157,7 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
         self._reestimate_scales(self.get_free_params())
         if len(self.scales) > 0:
             # masked spectra sit at the neutral scale of 1 so must be excluded from the median
-            valid_scales = self.scales[self._live_spectra() & (self.scales > 0)]
+            valid_scales = self.scales[get_live_spectra(self.ws) & (self.scales > 0)]
             global_scale = float(np.median(valid_scales)) if len(valid_scales) > 0 else 1.0
             for iphase in range(len(self.phases)):
                 self.intens[iphase] *= global_scale

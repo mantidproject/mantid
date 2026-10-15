@@ -1426,6 +1426,16 @@ class Poldi2DEvalMixinMaskingTest(unittest.TestCase):
 
         self.assertEqual(nresids, (self.ws.getNumberHistograms() - 1) * self.ws.blocksize())
 
+    def test_eval_resids_uses_mask_applied_after_construction(self):
+        ws = CloneWorkspace(InputWorkspace=self.ws, OutputWorkspace="ws_2d_eval_masked_later")
+        pawley = PawleyPattern2D(ws, [self.phase], profile=GaussianProfile())
+        nresids = np.asarray(pawley.eval_resids(pawley.get_free_params())).size
+
+        MaskDetectors(Workspace=ws, WorkspaceIndexList=[self.IMASK])
+        nresids_masked = np.asarray(pawley.eval_resids(pawley.get_free_params())).size
+
+        self.assertEqual(nresids - nresids_masked, self.ws.blocksize())
+
     def test_eval_resids_ignores_counts_in_masked_spectra(self):
         pawley = self._make_masked_pawley()
         resids = np.asarray(pawley.eval_resids(pawley.get_free_params()))
