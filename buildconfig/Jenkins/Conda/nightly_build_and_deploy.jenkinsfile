@@ -382,6 +382,13 @@ pipeline {
       steps {
         checkoutSource("${GIT_SHA}")
 
+        copyArtifacts filter: "**/conda-bld/**/*.conda",
+          fingerprintArtifacts: true,
+          projectName: '${JOB_NAME}',
+          selector: specific('${BUILD_NUMBER}'),
+          target: './',
+          flatten: false
+
         script {
           // Determine which platforms to include in the lockfile.
           def platforms = params.BUILD_PACKAGE == 'all' ?
