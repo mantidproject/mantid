@@ -72,7 +72,8 @@ class PoldiAutoCorrelation(PythonAlgorithm):
             defaultValue=1,
             direction=Direction.Input,
             validator=IntBoundedValidator(lower=1),
-            doc="Number of groups to split poldi detectors into (returns a spectrum per group)",
+            doc="Number of groups to split poldi detectors into (returns a spectrum per group). Cannot exceed the number of "
+            "spectra, or the number of unmasked spectra if GroupingMode is 'Unmasked'.",
         )
         self.declareProperty(
             "GroupingMode",
@@ -102,8 +103,15 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         if not has_log or not has_chopper:
             issues["InputWorkspace"] = "InputWorkspace must have chopper component and chopperspeed log."
         n_groups = self.getProperty("NGroups").value
-        if get_live_spectra(ws).sum() < n_groups:
+        grouping_mode = self.getProperty("GroupingMode").value
+        n_live = get_live_spectra(ws).sum()
+        if n_live == 0:
+            issues["InputWorkspace"] = "InputWorkspace has no unmasked spectra with detectors."
+        elif grouping_mode == "Unmasked" and n_live < n_groups:
             issues["NGroups"] = f"InputWorkspace has fewer unmasked spectra with detectors than required for {n_groups} groups."
+        elif grouping_mode == "All" and ws.getNumberHistograms() < n_groups:
+            # "All" groups every spectrum, so groups of only masked spectra are allowed (and output as zero)
+            issues["NGroups"] = f"InputWorkspace has fewer spectra than required for {n_groups} groups."
         return issues
 
     def PyExec(self):

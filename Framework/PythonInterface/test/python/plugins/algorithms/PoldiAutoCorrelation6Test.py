@@ -115,14 +115,32 @@ class PoldiAutoCorrelation6Test(unittest.TestCase):
         assert_array_equal(ws_corr.y(0), np.zeros(ws_corr.blocksize()))
         self.assertTrue(np.any(ws_corr.y(1) > 0))
 
-    def test_exec_raises_if_too_few_unmasked_spectra_for_ngroups(self):
-        nunmasked = self.ws.getNumberHistograms() - self.nmasked
-        ws_all_masked = self._make_masked_ws("ws_all_masked", range(self.ws.getNumberHistograms()))
+    def test_exec_grouping_mode_all_allows_more_groups_than_unmasked_spectra(self):
+        ngroups = self.ws.getNumberHistograms() - self.nmasked + 1
+        ws_corr = PoldiAutoCorrelation(
+            InputWorkspace=self.ws_masked, OutputWorkspace="ws_corr_masked", NGroups=ngroups, GroupingMode="All", Version=6
+        )
 
-        for ws, ngroups in ((ws_all_masked, 1), (self.ws_masked, nunmasked + 1)):
-            with self.subTest(nspectra=ws.getNumberHistograms(), ngroups=ngroups):
-                with self.assertRaisesRegex(RuntimeError, "fewer unmasked spectra"):
-                    PoldiAutoCorrelation(InputWorkspace=ws, OutputWorkspace="ws_corr_invalid", NGroups=ngroups, Version=6)
+        ndets = np.array([len(ws_corr.getSpectrum(ispec).getDetectorIDs()) for ispec in range(ngroups)])
+        self.assertEqual(ndets.sum(), self.ws.getNumberHistograms() - self.nmasked)
+        iempty = np.flatnonzero(ndets == 0)
+        self.assertGreater(len(iempty), 0)
+        assert_array_equal(ws_corr.extractY()[iempty], 0.0)
+
+    def test_exec_raises_if_too_few_spectra_for_ngroups(self):
+        nspec = self.ws.getNumberHistograms()
+        nunmasked = nspec - self.nmasked
+        ws_all_masked = self._make_masked_ws("ws_all_masked", range(nspec))
+
+        for ws, mode, ngroups, msg in (
+            (ws_all_masked, "All", 1, "no unmasked spectra"),
+            (ws_all_masked, "Unmasked", 1, "no unmasked spectra"),
+            (self.ws_masked, "Unmasked", nunmasked + 1, "fewer unmasked spectra"),
+            (self.ws_masked, "All", nspec + 1, "fewer spectra"),
+        ):
+            with self.subTest(mode=mode, ngroups=ngroups, msg=msg):
+                with self.assertRaisesRegex(RuntimeError, msg):
+                    PoldiAutoCorrelation(InputWorkspace=ws, OutputWorkspace="ws_invalid", NGroups=ngroups, GroupingMode=mode, Version=6)
 
     def _assert_auto_corr_workspace(self, ws_corr):
         # assert min/max Q
