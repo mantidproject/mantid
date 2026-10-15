@@ -172,11 +172,13 @@ class PoldiAutoCorrelation(PythonAlgorithm):
 
     def _get_grouping(self, is_live: np.ndarray, ngroups: int) -> list[np.ndarray]:
         """Split the live spectra into a list of workspace indices per output spectrum."""
-        if self.getProperty("GroupingMode").value == "All":
-            # fixed boundaries over the whole detector, masked spectra dropped from their group
-            return [grp[is_live[grp]] for grp in np.array_split(np.arange(len(is_live)), ngroups)]
-        else:
+        if self.getProperty("GroupingMode").value == "Unmasked":
             return np.array_split(np.flatnonzero(is_live), ngroups)
+        # "All": fixed contiguous blocks over every spectrum, then drop the masked spectra from each block
+        groups = []
+        for block in np.array_split(np.arange(len(is_live)), ngroups):
+            groups.append(block[is_live[block]])
+        return groups
 
 
 def _sum_over_intermediate_correlation_func(generator):
