@@ -191,6 +191,19 @@ public:
     }
   }
 
+  void testAlignmentPlotUsesLineStylesForWorkspaceRoles() {
+    closeAllFigures();
+    createWorkspaceGroup("alignment_1", {"alignment_1_profile", "alignment_1_fitted_peak", "alignment_1_peak_centre"});
+
+    MantidQt::CustomInterfaces::ISISReflectometry::Plotter plotter;
+    plotter.plot({{"alignment_1"},
+                  MantidQt::CustomInterfaces::ISISReflectometry::alignmentPlotOptions(
+                      MantidQt::CustomInterfaces::ISISReflectometry::AlignmentXAxis::DetectorId,
+                      MantidQt::CustomInterfaces::ISISReflectometry::PlotLayout::Individual)});
+
+    TS_ASSERT_EQUALS(currentFigureLineStyles(), (std::vector<std::string>{"-", "--", ":"}));
+  }
+
   void testVerticallyTiledPlotPlacesSecondAxisBelowFirstAxis() {
     closeAllFigures();
     createWorkspace("ws1");
@@ -381,6 +394,20 @@ private:
       }
     }
     return lineCounts;
+  }
+
+  std::vector<std::string> currentFigureLineStyles() {
+    Mantid::PythonInterface::GlobalInterpreterLock lock;
+    MantidQt::Widgets::Common::Python::Object pyplot{
+        MantidQt::Widgets::Common::Python::NewRef(PyImport_ImportModule("matplotlib.pyplot"))};
+    auto const figure = MantidQt::Widgets::Common::Python::Object(pyplot.attr("gcf")());
+    auto const containers = MantidQt::Widgets::Common::Python::Object(figure.attr("axes")[0]).attr("containers");
+    auto lineStyles = std::vector<std::string>{};
+    for (auto index = 0; index < MantidQt::Widgets::Common::Python::Len(containers); ++index) {
+      auto const dataLine = MantidQt::Widgets::Common::Python::Object(containers[index][0]);
+      lineStyles.emplace_back(boost::python::extract<std::string>(dataLine.attr("get_linestyle")())());
+    }
+    return lineStyles;
   }
 
   void closeAllFigures() {
