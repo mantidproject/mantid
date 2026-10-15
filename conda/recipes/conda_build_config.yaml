@@ -28,7 +28,7 @@ python:
 
 # Aim to follow conda-forge
 libboost:
-  - '1.88.*'
+  - '1.90.*'
 
 cmake:
   - '>=4.2,<5'
