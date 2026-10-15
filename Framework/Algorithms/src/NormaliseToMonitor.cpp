@@ -329,7 +329,7 @@ std::map<std::string, std::string> NormaliseToMonitor::validateInputs() {
       issues["MonitorWorkspaceIndex"] = "The MonitorWorkspace must contain the MonitorWorkspaceIndex.";
     }
     MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
-    if (monWS->getInstrument()->getName() != inWS->getInstrument()->getName()) {
+    if (monWS->getInstrumentName() != inWS->getInstrumentName()) {
       issues["MonitorWorkspace"] = "The Input and Monitor workspaces must come "
                                    "from the same instrument.";
     }

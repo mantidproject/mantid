@@ -554,7 +554,7 @@ public:
     std::string name("testingInstr"); // name of the instrument
     auto ws = std::dynamic_pointer_cast<IEventWorkspace>(createSampleWorkspace(
         outWSName, "Event", "Flat background", "", 2, 1, 1000, false, "DeltaE", -10., 19., 0.5, 1, name));
-    TS_ASSERT_EQUALS(ws->getInstrument()->getName(), name)
+    TS_ASSERT_EQUALS(ws->getInstrumentName(), name)
     AnalysisDataService::Instance().remove(outWSName);
   }
 

@@ -85,7 +85,7 @@ void LoadIDFFromNexus::exec() {
   // Look for parameter correction file
   std::string parameterCorrectionFile = getPropertyValue("ParameterCorrectionFilePath");
   if (parameterCorrectionFile.empty()) {
-    parameterCorrectionFile = getParameterCorrectionFile(localWorkspace->getInstrument()->getName());
+    parameterCorrectionFile = getParameterCorrectionFile(localWorkspace->getInstrumentName());
   }
   g_log.debug() << "Parameter correction file: " << parameterCorrectionFile << "\n";
 
@@ -263,7 +263,7 @@ void LoadIDFFromNexus::loadParameterFile(const std::shared_ptr<API::MatrixWorksp
   g_log.debug("Loading the parameter definition...");
 
   // Search for XML parameter file which matches instrument and date
-  const std::string instName = ws->getInstrument()->getName();
+  const std::string instName = ws->getInstrumentName();
   const std::string runDate = ws->getWorkspaceStartDate();
   std::string fullPathParamIDF = InstrumentFileFinder::getParameterFilename(instName, runDate);
   if (!fullPathParamIDF.empty()) {

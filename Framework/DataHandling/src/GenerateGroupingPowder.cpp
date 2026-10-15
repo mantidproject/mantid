@@ -365,7 +365,7 @@ void GenerateGroupingPowder::saveAsXML() {
   AutoPtr<Document> pDoc = new Document;
   AutoPtr<Element> pRoot = pDoc->createElement("detector-grouping");
   pDoc->appendChild(pRoot);
-  pRoot->setAttribute("instrument", this->m_groupWS->getInstrument()->getName());
+  pRoot->setAttribute("instrument", this->m_groupWS->getInstrumentName());
 
   const double step = getProperty("AngleStep");
   const auto numSteps = int(180. / step + 1);

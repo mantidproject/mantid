@@ -90,7 +90,7 @@ std::map<std::string, std::string> DetermineSpinStateOrder::validateInputs() {
 
   if (isDefault("SpinFlipperLogName") || isDefault("SpinFlipperAverageCurrent")) {
     const auto firstItem = std::dynamic_pointer_cast<API::MatrixWorkspace>(wsGroup->getItem(0));
-    const auto instrument = firstItem->getInstrument()->getName();
+    const auto instrument = firstItem->getInstrumentName();
 
     if (instrument == "LARMOR") {
       m_spinFlipperLogName =

@@ -154,7 +154,7 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
     return dataversion.string();
 
   // get a list of all proposal directories
-  string instrument = wksp->getInstrument()->getName();
+  string instrument = wksp->getInstrumentName();
   std::filesystem::path base("/SNS/" + instrument + "/");
   // try short instrument name
   if (!std::filesystem::exists(base)) {

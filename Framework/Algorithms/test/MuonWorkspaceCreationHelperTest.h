@@ -271,7 +271,7 @@ public:
     MatrixWorkspace_sptr ws = createWorkspaceWithInstrumentandRun("MUSR", 12345, 10);
 
     TS_ASSERT_EQUALS(ws->mutableRun().getPropertyAsIntegerValue("run_number"), 12345);
-    TS_ASSERT_EQUALS(ws->getInstrument()->getName(), "MUSR");
+    TS_ASSERT_EQUALS(ws->getInstrumentName(), "MUSR");
   }
 
   void test_createWorkspaceGroupConsecutiveDetectorIDs_correct_workspace_names() {

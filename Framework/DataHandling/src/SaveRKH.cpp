@@ -86,7 +86,7 @@ void SaveRKH::exec() {
 /// Writes out the header of the output file
 void SaveRKH::writeHeader() {
   // The instrument name
-  m_outRKH << " " << m_workspace->getInstrument()->getName() << " ";
+  m_outRKH << " " << m_workspace->getInstrumentName() << " ";
   Poco::LocalDateTime timestamp;
   // The sample file has the format of the data/time as in this example Thu
   // 28-OCT-2004 12:23

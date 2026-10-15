@@ -220,7 +220,7 @@ ConvertToMDParent::preprocessDetectorsPositions(const Mantid::API::MatrixWorkspa
     if (nHist == nDetMap) {
       // let's take at least some precaution to ensure that instrument have not
       // changed
-      std::string currentWSInstrumentName = InWS2D->getInstrument()->getName();
+      std::string currentWSInstrumentName = InWS2D->getInstrumentName();
       std::string oldInstrName = TargTableWS->getLogs()->getPropertyValueAsType<std::string>("InstrumentName");
 
       if (oldInstrName == currentWSInstrumentName) {

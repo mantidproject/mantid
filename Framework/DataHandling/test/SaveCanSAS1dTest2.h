@@ -307,7 +307,7 @@ public:
     Run run = ws2d->run();
     Mantid::Kernel::Property *logP = run.getLogData("run_number");
     TS_ASSERT_EQUALS(logP->value(), "26173");
-    TS_ASSERT_EQUALS(ws2d->getInstrument()->getName(), "IRIS");
+    TS_ASSERT_EQUALS(ws2d->getInstrumentName(), "IRIS");
 
     TS_ASSERT_EQUALS(ws2d->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(ws2d->x(0).size(), 2000);
