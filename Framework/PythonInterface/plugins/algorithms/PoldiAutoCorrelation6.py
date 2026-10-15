@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PythonAlgorithm, Progress
-from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator, UnitParams, StringListValidator
+from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator, StringListValidator
 import numpy as np
 from plugins.algorithms.poldi_utils import (
     get_instrument_settings_from_log,
@@ -13,6 +13,8 @@ from plugins.algorithms.poldi_utils import (
     get_dspac_limits,
     get_final_dspac_array,
     get_live_spectra,
+    get_tths_and_l2s,
+    get_tof_d1Ang,
 )
 from joblib import Parallel, delayed
 from functools import reduce
@@ -112,33 +114,22 @@ class PoldiAutoCorrelation(PythonAlgorithm):
 
         cycle_time, slit_offsets, t0_const, l1_chop = get_instrument_settings_from_log(ws)
         # get detector positions from IDF
-        si = ws.spectrumInfo()
-        nspec = ws.getNumberHistograms()
         is_live = get_live_spectra(ws)
-        # masked spectra are zeroed rather than dropped so the arrays stay indexable by spectrum index
-        tths = np.array([si.twoTheta(ispec) if is_live[ispec] else 0.0 for ispec in range(nspec)])
-        l2s = np.asarray([si.l2(ispec) if is_live[ispec] else 0.0 for ispec in range(nspec)])
-        l1 = si.l1()
+        tths, l2s = get_tths_and_l2s(ws, is_live)
+        live_tths, live_l2s = tths[is_live], l2s[is_live]
         # determine npulses to include in calc
-        time_max = get_max_tof_from_chopper(l1, l1_chop, l2s[is_live], tths[is_live], lambda_max) + slit_offsets[-1]
+        time_max = get_max_tof_from_chopper(ws.spectrumInfo().l1(), l1_chop, live_l2s, live_tths, lambda_max) + slit_offsets[-1]
         npulses = int(time_max // cycle_time)
         # get final d-spacing array based on detector limits and wavelength range
         # in actuality not all d-spacings will be measured within the wavelength range in every pixel
         # but this is a small effect as detector doesn't cover much two-theta range
-        dspac_min, dspac_max = get_dspac_limits(tths[is_live].min(), tths[is_live].max(), lambda_min, lambda_max)
+        dspac_min, dspac_max = get_dspac_limits(live_tths.min(), live_tths.max(), lambda_min, lambda_max)
         bin_width = ws.x(0)[1] - ws.x(0)[0]
         dspacs = get_final_dspac_array(bin_width, dspac_min, dspac_max, time_max)[:, None]
         # perform auto-correlation (Eq. 7 in POLDI concept paper)
         ipulses = np.arange(npulses)[:, None]
         offsets = (ipulses * cycle_time + slit_offsets + t0_const).flatten()
-        # get time-of-flight from chopper to detector for neutron corresponding to d=1Ang
-        path_length_ratio = (l2s + l1 - l1_chop) / (l2s + l1)
-        tof_d1Ang = np.asarray(
-            [
-                si.diffractometerConstants(ispec)[UnitParams.difc] * path_length_ratio[ispec] if is_live[ispec] else 0.0
-                for ispec in range(nspec)
-            ]
-        )
+        tof_d1Ang = get_tof_d1Ang(ws, l2s, l1_chop, is_live)
 
         groups = self._get_grouping(is_live, ngroups)
         order = np.concatenate(groups)

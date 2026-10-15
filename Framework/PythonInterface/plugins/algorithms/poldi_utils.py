@@ -197,15 +197,53 @@ def get_live_spectra(ws: Workspace2D) -> np.ndarray[bool]:
     return np.array([si.hasDetectors(ispec) and not si.isMasked(ispec) for ispec in range(ws.getNumberHistograms())])
 
 
+def get_tths_and_l2s(ws: Workspace2D, is_live: np.ndarray[bool] | None = None) -> Tuple[np.ndarray[float], np.ndarray[float]]:
+    """
+    Function to get the two-theta and L2 of every spectrum in a workspace
+    :param ws: MatrixWorkspace containing POLDI data (raw instrument)
+    :param is_live: boolean array, True for spectra that are not masked (calculated from ws if not provided)
+    :return (tths, l2s): two-theta (rad) and sample to detector distance (m) of each spectrum - masked spectra are
+                         set to zero rather than removed, so the arrays can still be indexed by workspace index
+    """
+    if is_live is None:
+        is_live = get_live_spectra(ws)
+    si = ws.spectrumInfo()
+    tths = np.array([si.twoTheta(ispec) if is_live[ispec] else 0.0 for ispec in range(len(is_live))])
+    l2s = np.array([si.l2(ispec) if is_live[ispec] else 0.0 for ispec in range(len(is_live))])
+    return tths, l2s
+
+
+def get_tof_d1Ang(ws: Workspace2D, l2s: np.ndarray[float], l1_chop: float, is_live: np.ndarray[bool] | None = None) -> np.ndarray[float]:
+    """
+    Function to get the time-of-flight from chopper to detector of a neutron with d = 1 Ang for every spectrum
+    :param ws: MatrixWorkspace containing POLDI data (raw instrument)
+    :param l2s: sample to detector distance (m) of each spectrum
+    :param l1_chop: path length from source to chopper (m)
+    :param is_live: boolean array, True for spectra that are not masked (calculated from ws if not provided)
+    :return np.ndarray: time-of-flight (mus) of each spectrum - zero for masked spectra
+    """
+    if is_live is None:
+        is_live = get_live_spectra(ws)
+    si = ws.spectrumInfo()
+    l1 = si.l1()
+    path_length_ratio = (l2s + l1 - l1_chop) / (l2s + l1)
+    return np.array(
+        [
+            si.diffractometerConstants(ispec)[UnitParams.difc] * path_length_ratio[ispec] if is_live[ispec] else 0.0
+            for ispec in range(len(is_live))
+        ]
+    )
+
+
 def get_live_tths_and_l2s(ws: Workspace2D) -> Tuple[np.ndarray[float], np.ndarray[float]]:
     """
     Function to get the two-theta and L2 of the unmasked spectra in a workspace
     :param ws: MatrixWorkspace containing POLDI data (raw instrument)
     :return (tths, l2s): two-theta (rad) and sample to detector distance (m) of each unmasked spectrum
     """
-    si = ws.spectrumInfo()
-    ilive = np.flatnonzero(get_live_spectra(ws))
-    return np.array([si.twoTheta(int(ispec)) for ispec in ilive]), np.array([si.l2(int(ispec)) for ispec in ilive])
+    is_live = get_live_spectra(ws)
+    tths, l2s = get_tths_and_l2s(ws, is_live)
+    return tths[is_live], l2s[is_live]
 
 
 def get_dspac_limits_from_ws(ws: Workspace2D, lambda_min: float = 1.1, lambda_max: float = 5.0) -> Tuple[float, float]:
@@ -306,23 +344,16 @@ def simulate_2d_data(
         ws_sim = exec_alg("ExtractSpectra", InputWorkspace=ws_2d, DetectorList=np.array(ws_1d.getSpectrum(ispec).getDetectorIDs()))
     # get instrument settings
     cycle_time, slit_offsets, t0_const, l1_chop = get_instrument_settings_from_log(ws_sim)
-    si = ws_sim.spectrumInfo()
-    nspec = ws_sim.getNumberHistograms()
     is_live = get_live_spectra(ws_sim)
-    tths = np.array([si.twoTheta(ispec) if is_live[ispec] else 0.0 for ispec in range(nspec)])
-    l2s = np.array([si.l2(ispec) if is_live[ispec] else 0.0 for ispec in range(nspec)])
-    l1 = si.l1()
+    tths, l2s = get_tths_and_l2s(ws_sim, is_live)
     # get npulses to include
-    time_max = get_max_tof_from_chopper(l1, l1_chop, l2s[is_live], tths[is_live], lambda_max) + slit_offsets[-1]
+    time_max = get_max_tof_from_chopper(ws_sim.spectrumInfo().l1(), l1_chop, l2s[is_live], tths[is_live], lambda_max) + slit_offsets[-1]
     npulses = int(time_max // cycle_time)
     # simulate detected spectra
     ipulses = np.arange(npulses)[:, None]
     offsets = (ipulses * cycle_time - slit_offsets - t0_const).flatten()  # note different sign to auto-corr!
     tofs = ws_sim.x(0)[:, None] + offsets  # same for all spectra
-    path_length_ratio = (l2s + l1 - l1_chop) / (l2s + l1)
-    tof_d1Ang = np.asarray(
-        [si.diffractometerConstants(ispec)[UnitParams.difc] * path_length_ratio[ispec] if is_live[ispec] else 0.0 for ispec in range(nspec)]
-    )
+    tof_d1Ang = get_tof_d1Ang(ws_sim, l2s, l1_chop, is_live)
 
     ilive = np.flatnonzero(is_live)
     if flux_sample_points:
