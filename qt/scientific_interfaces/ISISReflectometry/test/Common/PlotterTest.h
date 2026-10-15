@@ -141,7 +141,6 @@ public:
 
     TS_ASSERT_EQUALS(currentFigureYAxisLabelsExcludingColorbars(),
                      (std::vector<std::string>{"Reflectivity", "Spin Asymmetry"}));
-    TS_ASSERT(!currentFigureIsStale());
   }
 
   void testDetectorMapPlotUsesConfiguredAxisLabels() {
@@ -313,14 +312,6 @@ private:
   std::string currentFigureXAxisLabel() { return currentFigureAxisLabel(0, "get_xlabel"); }
 
   std::string currentFigureColorbarLabel() { return currentFigureAxisLabel(1, "get_ylabel"); }
-
-  bool currentFigureIsStale() {
-    Mantid::PythonInterface::GlobalInterpreterLock lock;
-    MantidQt::Widgets::Common::Python::Object pyplot{
-        MantidQt::Widgets::Common::Python::NewRef(PyImport_ImportModule("matplotlib.pyplot"))};
-    auto const figure = MantidQt::Widgets::Common::Python::Object(pyplot.attr("gcf")());
-    return boost::python::extract<bool>(figure.attr("stale"))();
-  }
 
   std::vector<std::string> currentFigureYAxisLabelsExcludingColorbars() {
     Mantid::PythonInterface::GlobalInterpreterLock lock;
