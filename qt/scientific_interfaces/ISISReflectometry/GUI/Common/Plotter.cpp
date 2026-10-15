@@ -159,6 +159,35 @@ void applyAxisLabels(MantidQt::Widgets::Common::Python::Object const &figure, Pl
   }
 }
 
+/// Apply role-specific line styles to generated alignment workspace curves.
+void applyAlignmentLineStyles(MantidQt::Widgets::Common::Python::Object const &figure) {
+  using namespace MantidQt::Widgets::Common;
+
+  try {
+    forEachAxis(figure, [](Python::Object const &axis) {
+      auto const containers = axis.attr("containers");
+      auto const containerCount = Python::Len(containers);
+      // Loop through error bar containers
+      for (auto index = 0; index < containerCount; ++index) {
+        auto const container = Python::Object(containers[index]);
+        auto const workspaceName =
+            boost::python::extract<std::string>(axis.attr("get_workspace_name_from_artist")(container))();
+        auto const lineStyle = workspaceName.ends_with("_profile")       ? "-"
+                               : workspaceName.ends_with("_fitted_peak") ? "--"
+                               : workspaceName.ends_with("_peak_centre") ? ":"
+                                                                         : nullptr;
+        if (!lineStyle)
+          continue;
+
+        // index 0 contains data
+        Python::Object(container[0]).attr("set_linestyle")(lineStyle);
+      }
+    });
+  } catch (Python::ErrorAlreadySet &) {
+    throw Mantid::PythonInterface::PythonException();
+  }
+}
+
 /// Apply x/y labels to plot axes and z label to colorbar axes.
 void applyColorfillAxisLabels(MantidQt::Widgets::Common::Python::Object const &figure, PlotOptions const &options) {
   using namespace MantidQt::Widgets::Common;
@@ -478,6 +507,8 @@ PlottedFigure plotFigure(PlotRequest const &request, EvaluatedPlotRequest const 
 void applyPostPlotting(PlotRequest const &request, PlottedFigure const &plottedFigure) {
   auto const &options = request.options;
   markReflectometryFigure(plottedFigure.figure);
+  if (options.outputType == PlotOutputType::Alignment)
+    applyAlignmentLineStyles(plottedFigure.figure);
   if (plottedFigure.postPlotTarget == PostPlotTarget::ColorfillAxes) {
     applyColorfillAxisLabels(plottedFigure.figure, options);
   } else if (plottedFigure.postPlotTarget == PostPlotTarget::NewAxes) {
