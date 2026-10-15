@@ -1,1 +1,0 @@
-- Fixed certain files failing to load due to a bug in sample log filtering. Each sample log is now filtered only by its own invalid values, rather than also by the invalid values of other logs.
