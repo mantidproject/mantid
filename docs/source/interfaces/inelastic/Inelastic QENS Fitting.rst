@@ -305,6 +305,8 @@ The fit types available in Convolution are one, two or three :ref:`Lorentzians <
 :ref:`TeixeiraWater (SQE) <func-TeixeiraWaterSQE>`, :ref:`InelasticDiffSphere <func-InelasticDiffSphere>`,
 :ref:`InelasticDiffRotDiscreteCircle <func-InelasticDiffRotDiscreteCircle>`, :ref:`ElasticDiffSphere <func-ElasticDiffSphere>`,
 :ref:`ElasticDiffRotDiscreteCircle <func-ElasticDiffRotDiscreteCircle>` and :ref:`StretchedExpFT <func-StretchedExpFT>`.
+Each Lorentzian is shown in the preview plot by a pair of HWHM lines, which can be dragged to change the FWHM of
+that Lorentzian.
 
 .. interface:: QENS Fitting
   :width: 450
