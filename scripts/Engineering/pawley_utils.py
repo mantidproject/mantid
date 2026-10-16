@@ -13,7 +13,7 @@ from mantid.geometry import CrystalStructure, ReflectionGenerator, PointGroupFac
 from mantid.kernel import V3D, logger, UnitConversion, DeltaEModeType
 from typing import TYPE_CHECKING, Sequence, Any, Optional, Tuple
 from scipy.optimize import least_squares
-from plugins.algorithms.poldi_utils import simulate_2d_data, get_dspac_array_from_ws, get_dspac_limits_from_ws
+from plugins.algorithms.poldi_utils import simulate_2d_data, get_dspac_array_from_ws, get_dspac_limits_from_ws, get_live_spectra
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from enum import Enum
@@ -1041,7 +1041,10 @@ class Poldi2DEvalMixin:
             return self.scales, self.bgs
 
         ws_sim = self._simulate_2d(params)
-        self.scales, self.bgs = calculate_scales_and_bg(self.ws.extractY(), ws_sim.extractY())
+        live = get_live_spectra(self.ws)
+        # masked spectra are left at the neutral defaults - the lstsq is degenerate for an all-zero spectrum
+        self._reset_scales_and_bgs()
+        self.scales[live], self.bgs[live] = calculate_scales_and_bg(self.ws.extractY()[live], ws_sim.extractY()[live])
         return self.scales, self.bgs
 
     def eval_2d(self, params: np.ndarray[float]) -> Workspace2D:
@@ -1052,7 +1055,8 @@ class Poldi2DEvalMixin:
 
     def eval_resids(self, params: np.ndarray[float]) -> np.ndarray[float]:
         ws_sim = self.eval_2d(params)
-        return (self.ws.extractY() - ws_sim.extractY()).flat
+        live = get_live_spectra(self.ws)
+        return (self.ws.extractY()[live] - ws_sim.extractY()[live]).flat
 
     def eval_profile(self, params: np.ndarray[float]) -> np.ndarray[float]:
         self.set_free_params(params)
@@ -1152,7 +1156,8 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
         # correction factor.
         self._reestimate_scales(self.get_free_params())
         if len(self.scales) > 0:
-            valid_scales = self.scales[self.scales > 0]
+            # masked spectra sit at the neutral scale of 1 so must be excluded from the median
+            valid_scales = self.scales[get_live_spectra(self.ws) & (self.scales > 0)]
             global_scale = float(np.median(valid_scales)) if len(valid_scales) > 0 else 1.0
             for iphase in range(len(self.phases)):
                 self.intens[iphase] *= global_scale

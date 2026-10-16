@@ -39,6 +39,13 @@ some interpolation is required. There are two interpolation methods which can be
 ``InterpolationMethod`` parameter: ``Linear`` (default - as in [1]_) and ``Nearest``. The ``Nearest`` method is a
 roughly a factor of 2-3 quicker but is potentially less accurate.
 
+Masked spectra are omitted from the calculations. The way this interacts with the detector grouping
+behaviour is controlled by the ``GroupingMode``. ``All`` splits the detectors into groups first
+and then removes any which have been masked (giving consistent but potentially uneven groups). A group
+in which every detector is masked gives a spectrum of zeros, so ``NGroups`` can be as large as the
+number of spectra. ``Unmasked`` removes the masked detectors first and then splits whatever is left
+into the requested number of groups, so ``NGroups`` cannot exceed the number of unmasked spectra.
+
 Note by convention the correlation spectrum is converted from d-spacing into momentum transfer.
 
 Further details of the POLDI instrument and the reduction can be found in [1]_.
