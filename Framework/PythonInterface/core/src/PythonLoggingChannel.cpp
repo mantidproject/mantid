@@ -105,13 +105,20 @@ PythonLoggingChannel::PythonLoggingChannel() : m_state(std::make_shared<State>()
   m_state->pyLogger = std::make_unique<boost::python::object>(std::move(logger));
 }
 
-PythonLoggingChannel::~PythonLoggingChannel() { closeImpl(); }
+PythonLoggingChannel::~PythonLoggingChannel() {
+  try {
+    closeImpl();
+  } catch (...) {
+    // An exception must not escape the destructor. It cannot be reported through the logging framework that is
+    // being torn down, so any messages still queued are dropped.
+  }
+}
 
-void PythonLoggingChannel::log(const Poco::Message &msg) { enqueue(msg); }
+void PythonLoggingChannel::log(const Poco::Message &msg) { enqueue(Poco::Message(msg)); }
 
 void PythonLoggingChannel::log(Poco::Message &&msg) { enqueue(std::move(msg)); }
 
-void PythonLoggingChannel::enqueue(Poco::Message msg) {
+void PythonLoggingChannel::enqueue(Poco::Message &&msg) {
   // Py_AddPendingCall cannot be used once the interpreter has been shut down
   if (!Py_IsInitialized())
     return;
@@ -123,7 +130,7 @@ void PythonLoggingChannel::enqueue(Poco::Message msg) {
       return;
 
     if (m_state->queue.size() < m_state->maxQueueSize)
-      m_state->queue.emplace_back(msg);
+      m_state->queue.emplace_back(std::move(msg));
     else
       ++m_state->droppedMessages;
 
@@ -138,9 +145,11 @@ void PythonLoggingChannel::enqueue(Poco::Message msg) {
 
   // The pending call keeps the state alive in case it runs after this channel has been destroyed
   auto stateHolder = std::make_unique<std::shared_ptr<State>>(m_state);
-  if (Py_AddPendingCall(&PythonLoggingChannel::pendingCallDrainQueue, stateHolder.get()) == 0) {
-    stateHolder.release(); // ownership passed to pendingCallDrainQueue
-  } else {
+  // ownership is passed to pendingCallDrainQueue once the call is scheduled
+  auto *rawStateHolder = stateHolder.release();
+  if (Py_AddPendingCall(&PythonLoggingChannel::pendingCallDrainQueue, rawStateHolder) != 0) {
+    // the call was not scheduled, so take ownership back
+    stateHolder.reset(rawStateHolder);
     std::lock_guard lock(m_state->mutex);
     m_state->callbackScheduled = false;
   }

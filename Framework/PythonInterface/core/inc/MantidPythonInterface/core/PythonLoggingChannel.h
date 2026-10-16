@@ -43,7 +43,7 @@ private:
   struct State;
 
   void closeImpl();
-  void enqueue(Poco::Message msg);
+  void enqueue(Poco::Message &&msg);
   /// Callback with the signature required by Py_AddPendingCall. It takes ownership of a heap-allocated
   /// std::shared_ptr<State> so that the state outlives the channel if the call runs after it was destroyed.
   static int pendingCallDrainQueue(void *stateHolder);
