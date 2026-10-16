@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 
+#include <algorithm>
 #include <utility>
 
 using namespace MantidQt::Widgets::MplCpp;
@@ -75,19 +76,19 @@ void FitPlotPresenter::setXBounds(std::pair<double, double> const &bounds) { m_v
 
 void FitPlotPresenter::updateRangeSelectors() {
   updateBackgroundSelector();
-  updateHWHMSelector();
+  updateHWHMSelectors();
 }
 
 void FitPlotPresenter::handleStartXChanged(double value) { m_tab->handleStartXChanged(value); }
 
 void FitPlotPresenter::handleEndXChanged(double value) { m_tab->handleEndXChanged(value); }
 
-void FitPlotPresenter::handleHWHMMaximumChanged(double minimum) {
-  m_view->setHWHMMaximum(m_model->calculateHWHMMaximum(minimum));
+void FitPlotPresenter::handleHWHMMaximumChanged(std::size_t peakIndex, double minimum) {
+  m_view->setHWHMMaximum(peakIndex, m_model->calculateHWHMMaximum(peakIndex, minimum));
 }
 
-void FitPlotPresenter::handleHWHMMinimumChanged(double maximum) {
-  m_view->setHWHMMinimum(m_model->calculateHWHMMinimum(maximum));
+void FitPlotPresenter::handleHWHMMinimumChanged(std::size_t peakIndex, double maximum) {
+  m_view->setHWHMMinimum(peakIndex, m_model->calculateHWHMMinimum(peakIndex, maximum));
 }
 
 void FitPlotPresenter::appendLastDataToSelection(std::vector<std::string> const &displayNames) {
@@ -202,7 +203,6 @@ void FitPlotPresenter::plotDifference(MatrixWorkspace_sptr workspace, WorkspaceI
 
 void FitPlotPresenter::updatePlotRange(const std::pair<double, double> &range) {
   m_view->setFitRange(range.first, range.second);
-  m_view->setHWHMRange(range.first, range.second);
 }
 
 void FitPlotPresenter::updateFitRangeSelector() {
@@ -256,18 +256,14 @@ void FitPlotPresenter::clearGuess() {
   m_view->redrawPlots();
 }
 
-void FitPlotPresenter::updateHWHMSelector() {
-  const auto hwhm = m_model->getFirstHWHM();
-  m_view->setHWHMRangeVisible(hwhm ? true : false);
+void FitPlotPresenter::updateHWHMSelectors() {
+  const auto hwhms = m_model->getHWHMs();
+  const auto centres = m_model->getPeakCentres();
 
-  if (hwhm)
-    setHWHM(*hwhm);
-}
-
-void FitPlotPresenter::setHWHM(double hwhm) {
-  const auto centre = m_model->getFirstPeakCentre().value_or(0.);
-  m_view->setHWHMMaximum(centre + hwhm);
-  m_view->setHWHMMinimum(centre - hwhm);
+  std::vector<std::pair<double, double>> ranges;
+  for (auto i = 0u; i < std::min(hwhms.size(), centres.size()); ++i)
+    ranges.emplace_back(centres[i] - hwhms[i], centres[i] + hwhms[i]);
+  m_view->setHWHMRanges(ranges);
 }
 
 void FitPlotPresenter::updateBackgroundSelector() {
@@ -289,8 +285,8 @@ void FitPlotPresenter::plotSpectrum(WorkspaceIndex spectrum) const {
 
 void FitPlotPresenter::handleFitSingleSpectrum() { m_tab->handleSingleFitClicked(); }
 
-void FitPlotPresenter::handleFWHMChanged(double minimum, double maximum) {
-  m_tab->handleFwhmChanged(maximum - minimum);
+void FitPlotPresenter::handleFWHMChanged(std::size_t peakIndex, double minimum, double maximum) {
+  m_tab->handleFwhmChanged(peakIndex, maximum - minimum);
 }
 
 void FitPlotPresenter::handleBackgroundChanged(double value) { m_tab->handleBackgroundChanged(value); }
