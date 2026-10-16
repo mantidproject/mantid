@@ -1321,6 +1321,12 @@ class MantidFrameworkConfig:
         # Maximum number of threads
         config["MultiThreaded.MaxCores"] = "2"
 
+        # Do not let algorithms refuse to run over their estimate of the available memory. The Windows build servers
+        # run in a container on a virtual machine that is given memory on demand, so they report far less memory than
+        # they can really provide, which failed tests at random (#41818).
+        if sys.platform.startswith("win"):
+            config["algorithms.memorycheck"] = "Off"
+
         # datasearch
         if self.__datasearch:
             # turn on for 'all' facilities, 'on' is only for default facility
