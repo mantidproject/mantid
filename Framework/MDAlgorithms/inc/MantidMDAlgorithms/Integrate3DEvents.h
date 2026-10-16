@@ -11,6 +11,7 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 #include "MantidMDAlgorithms/DllConfig.h"
+#include "MantidMDAlgorithms/EllipsoidTrajectoryNorm.h"
 
 #include <memory>
 
@@ -69,6 +70,28 @@ using EventListMap =
     std::unordered_map<int64_t, std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>>>;
 using PeakQMap = std::unordered_map<int64_t, Mantid::Kernel::V3D>;
 
+/// Quantities from a flux/solid-angle normalized profile fit, for diagnostics
+struct ProfileFitNormalization {
+  /// summed event weight in the fit region
+  double counts{0.0};
+  /// fitted background counts in the fit region
+  double backgroundCounts{0.0};
+  /// expected counts per unit integrated intensity of the fitted peak
+  double peakNorm{0.0};
+  /// normalization of the fit region
+  double regionNorm{0.0};
+  /// coverage of the fit region
+  EllipsoidNormResult coverage;
+};
+
+/// Weighted event sums inside a peak ellipsoid and its background shell
+struct ShapeCounts {
+  double peak{0.0};
+  double peakErrorSq{0.0};
+  double shell{0.0};
+  double shellErrorSq{0.0};
+};
+
 class MANTID_MDALGORITHMS_DLL Integrate3DEvents {
 public:
   /// Construct object to store events around peaks and integrate peaks
@@ -117,6 +140,11 @@ public:
   void integrateUsingShape(const Mantid::DataObjects::PeakShapeEllipsoid &shape, const Mantid::Kernel::V3D &peak_q,
                            double &inti, double &sigi);
 
+  /// Weighted event sums (and error-squared sums) inside the peak ellipsoid
+  /// and the background shell of a shape supplied by the caller, centered on
+  /// peak_q, without the one percent background correction.
+  ShapeCounts countUsingShape(const Mantid::DataObjects::PeakShapeEllipsoid &shape, const Mantid::Kernel::V3D &peak_q);
+
   /// Integrate a peak using a shape supplied by the caller, by maximizing
   /// the Poisson log-likelihood of a Gaussian peak (amplitude fit) plus a
   /// flat background rate against the raw events, instead of counting
@@ -132,9 +160,14 @@ public:
   /// search. center returns the offset from peak_q actually used for the
   /// fit (unchanged from shape.translation() if adjustCenter is false), for
   /// the caller to persist as the output shape's translation if it wants to.
+  /// If norm is given, the expected counts are weighted by the flux and
+  /// solid angle along each detector pixel's trajectory through the fit
+  /// region (a sphere of the search radius about peak_q), so the intensity
+  /// is in normalized units, and normalization returns diagnostics.
   void integrateUsingShapeProfileFit(const Mantid::DataObjects::PeakShapeEllipsoid &shape,
                                      const Mantid::Kernel::V3D &peak_q, bool adjustCenter, Mantid::Kernel::V3D &center,
-                                     double &inti, double &sigi);
+                                     double &inti, double &sigi, const EllipsoidTrajectoryNorm *norm = nullptr,
+                                     ProfileFitNormalization *normalization = nullptr);
 
   /// Estimate the signal-to-noise ratio for a peak at the given position
   /// by fitting an ellipsoid to the events and comparing peak to background

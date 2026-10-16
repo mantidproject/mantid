@@ -454,6 +454,34 @@ void Integrate3DEvents::integrateUsingShape(const PeakShapeEllipsoid &shape, con
 }
 
 /**
+ * Sum the weighted events inside a fixed ellipsoidal shape and its background
+ * shell, centered on peak_q, as integrateUsingShape does but without
+ * combining them, and without the one percent background correction.
+ *
+ * @param shape   The ellipsoid shape (directions, peak radii, background
+ *                inner/outer radii) to count with.
+ * @param peak_q  Q-vector at which to center the shape.
+ * @return The weighted counts and error-squared sums in the peak and shell.
+ */
+ShapeCounts Integrate3DEvents::countUsingShape(const PeakShapeEllipsoid &shape, const V3D &peak_q) {
+  ShapeCounts counts;
+  auto result = getEvents(peak_q);
+  if (!result)
+    return counts;
+
+  const auto &events = *result;
+  const auto &directions = shape.directions();
+  const auto peak = numInEllipsoid(events, directions, shape.abcRadii());
+  const auto shell =
+      numInEllipsoidBkg(events, directions, shape.abcRadiiBackgroundOuter(), shape.abcRadiiBackgroundInner(), false);
+  counts.peak = peak.first;
+  counts.peakErrorSq = peak.second;
+  counts.shell = shell.first;
+  counts.shellErrorSq = shell.second;
+  return counts;
+}
+
+/**
  * Fits a Gaussian peak and constant background within the search radius and
  * returns the integrated Gaussian intensity.
  *
@@ -469,9 +497,15 @@ void Integrate3DEvents::integrateUsingShape(const PeakShapeEllipsoid &shape, con
  *               incremental shift from shape.translation()) if true.
  * @param inti Receives the fitted integrated peak intensity.
  * @param sigi Receives the standard deviation of the fitted intensity.
+ * @param norm If given, weight the expected counts by flux and solid angle
+ *             along each pixel's trajectory through the fit region, so the
+ *             intensity is in normalized units.
+ * @param normalization If given with norm, receives diagnostics of the fit.
  */
 void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &shape, const V3D &peak_q,
-                                                      bool adjustCenter, V3D &center, double &inti, double &sigi) {
+                                                      bool adjustCenter, V3D &center, double &inti, double &sigi,
+                                                      const EllipsoidTrajectoryNorm *norm,
+                                                      ProfileFitNormalization *normalization) {
   inti = 0.0;
   sigi = 0.0;
   center = shape.translation();
@@ -514,10 +548,39 @@ void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &
   // sum(g) over all space is translation-invariant, so normG does not
   // depend on the center offset c
   const auto normG = pow(2.0 * M_PI, 1.5) * sigmas[0] * sigmas[1] * sigmas[2];
-  const auto volume = (4.0 / 3.0) * M_PI * m_radius * m_radius * m_radius;
+  auto volume = (4.0 / 3.0) * M_PI * m_radius * m_radius * m_radius;
+
+  // With normalization, the expected counts are the flux and solid angle
+  // weighted integrals over the fit region (the sphere of the search radius)
+  // of the background rate, b * volume, and of the Gaussian, A * peakNorm(c),
+  // which then depends on the center. The events' own exposure factors do
+  // not depend on the parameters, so the per-event terms are unchanged.
+  EllipsoidChords region;
+  if (norm) {
+    const PeakEllipsoidFrame axes{V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    region = norm->chords(peak_q, axes, {m_radius, m_radius, m_radius});
+    volume = region.result.norm;
+    if (volume <= 0.0)
+      return;
+  }
+  auto peakNorm = [&](const V3D &c, V3D *gradient) {
+    if (!norm) {
+      if (gradient)
+        *gradient = V3D();
+      return normG;
+    }
+    const auto exposure = norm->integrateGaussian(region, peak_q + c, directions, sigmas);
+    if (gradient)
+      *gradient = exposure.gradient;
+    return exposure.value;
+  };
+  V3D peakNormGradient;
+  double peakNormAtCenter = peakNorm(center, &peakNormGradient);
+  if (peakNormAtCenter <= 0.0)
+    return;
 
   auto logLikelihood = [&](const V3D &c, double A, double b) {
-    double ll = -(A * normG + b * volume);
+    double ll = -(A * peakNorm(c, nullptr) + b * volume);
     for (const auto &event : events) {
       const V3D qOff = event.second - c;
       const auto gi = exp(-0.5 * qOff.scalar_prod(applyInvS(qOff)));
@@ -531,7 +594,7 @@ void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &
   computeKernel(center, g, w, invSq);
 
   double A = 0.0, b = 0.0, sigA = 0.0;
-  solvePoissonMatchedFilter(g, w, normG, volume, A, b, sigA);
+  solvePoissonMatchedFilter(g, w, peakNormAtCenter, volume, A, b, sigA);
 
   if (adjustCenter) {
     const auto maxShift = *std::min_element(sigmas.begin(), sigmas.end());
@@ -543,7 +606,8 @@ void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &
 
     for (int outer = 0; outer < 20; ++outer) {
       // Gauss-Newton step in the center, holding A, b fixed
-      double grad[3] = {0.0, 0.0, 0.0};
+      // the expected peak counts depend on the center only with normalization
+      double grad[3] = {-A * peakNormGradient.X(), -A * peakNormGradient.Y(), -A * peakNormGradient.Z()};
       double hess[3][3] = {{0.0}};
       for (size_t i = 0; i < g.size(); ++i) {
         const auto mu = std::max(A * g[i] + b, 1e-12);
@@ -585,9 +649,10 @@ void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &
 
       const auto converged = (newCenter - center).norm() < 1e-8 * (1.0 + maxShift);
       center = newCenter;
+      peakNormAtCenter = peakNorm(center, &peakNormGradient);
 
       computeKernel(center, g, w, invSq);
-      solvePoissonMatchedFilter(g, w, normG, volume, A, b, sigA);
+      solvePoissonMatchedFilter(g, w, peakNormAtCenter, volume, A, b, sigA);
 
       if (converged)
         break;
@@ -596,6 +661,14 @@ void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &
 
   inti = A * normG;
   sigi = sigA * normG;
+
+  if (norm && normalization) {
+    normalization->counts = std::accumulate(w.begin(), w.end(), 0.0);
+    normalization->backgroundCounts = b * volume;
+    normalization->peakNorm = peakNormAtCenter / normG;
+    normalization->regionNorm = volume;
+    normalization->coverage = region.result;
+  }
 }
 
 /**
