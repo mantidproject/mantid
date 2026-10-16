@@ -68,7 +68,6 @@ void findFunctionsWithParameter(const IFunction_sptr &function, const std::strin
   }
 }
 
-// The peaks (e.g. Lorentzians) in the first domain of the fit function, in the order they appear
 std::vector<IFunction_sptr> findPeaks(const MultiDomainFunction_sptr &function) {
   std::vector<IFunction_sptr> peaks;
   if (function && function->nFunctions() > 0)

@@ -431,7 +431,15 @@ std::string ConvFunctionTemplateModel::buildInelasticIsoRotDiffFunctionString() 
 }
 
 std::string ConvFunctionTemplateModel::buildPeaksFunctionString() const {
-  auto functions = buildLorentzianPeaksString();
+  std::string functions;
+  if (m_lorentzianType == LorentzianType::OneLorentzian) {
+    functions.append(buildLorentzianFunctionString());
+  } else if (m_lorentzianType == LorentzianType::TwoLorentzians) {
+    auto const lorentzian = buildLorentzianFunctionString();
+    functions.append(lorentzian);
+    functions.append(";");
+    functions.append(lorentzian);
+  }
   if (m_fitType == FitType::TeixeiraWater) {
     functions.append(buildTeixeiraFunctionString());
   } else if (m_fitType == FitType::TeixeiraWaterIqtFT) {

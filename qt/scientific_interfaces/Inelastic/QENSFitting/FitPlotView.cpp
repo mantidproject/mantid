@@ -27,7 +27,6 @@ QHash<QString, QVariant> tightLayoutKwargs() {
   return kwargs;
 }
 
-// Colours of the HWHM selectors for each peak, in order
 std::array<QColor, 3> const HWHM_COLOURS = {QColor(Qt::red), QColor(Qt::darkMagenta), QColor(Qt::darkCyan)};
 
 QString hwhmSelectorName(std::size_t peakIndex) { return "HWHM" + QString::number(peakIndex); }

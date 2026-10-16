@@ -75,7 +75,6 @@ public:
 
   virtual void setHWHMMinimum(std::size_t peakIndex, double minimum) = 0;
   virtual void setHWHMMaximum(std::size_t peakIndex, double maximum) = 0;
-  // Shows one HWHM selector per range, and hides any others
   virtual void setHWHMRanges(std::vector<std::pair<double, double>> const &ranges) = 0;
 
   virtual void clearPreviews() = 0;

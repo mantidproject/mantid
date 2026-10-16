@@ -253,8 +253,7 @@ IFunction_sptr firstFunctionWithParameter(IFunction_sptr function, const std::st
   return nullptr;
 }
 
-// Sets the parameter on the n-th function (counting from zero) with the given category and parameter. Returns true
-// if the parameter was set, otherwise n is decremented by the number of matching functions found.
+// n is decremented for each matching function skipped, so it can be shared across recursive calls
 bool setNthFunctionParameter(const IFunction_sptr &function, const std::string &category,
                              const std::string &parameterName, double value, std::size_t &n) {
   if (function->category() == category && function->hasParameter(parameterName)) {
