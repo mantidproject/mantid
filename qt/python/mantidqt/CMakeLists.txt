@@ -205,8 +205,11 @@ set(PYTHON_WIDGET_WORKBENCH_ONLY_TESTS
     mantidqt/widgets/tutorial/test/test_launcher.py
     mantidqt/widgets/tutorial/test/test_overlay.py
     mantidqt/widgets/tutorial/test/test_player.py
+    mantidqt/widgets/tutorial/test/test_presenter.py
+    mantidqt/widgets/tutorial/test/test_sandbox_base.py
     mantidqt/widgets/tutorial/test/test_shell.py
     mantidqt/widgets/tutorial/test/test_step.py
+    mantidqt/widgets/tutorial/test/test_view.py
     mantidqt/icons/test/test_icons.py
 )
 

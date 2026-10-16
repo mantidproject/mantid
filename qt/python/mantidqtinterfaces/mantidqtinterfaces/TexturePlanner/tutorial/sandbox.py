@@ -16,11 +16,9 @@ has open. Two things already in the interface make that safe rather than merely 
 
 So the sandbox needs no special isolation of its own - it needs to be *closed*, which is what
 ``teardown`` does.
-
-This object is also the context every tutorial step receives, which is why it exposes the view,
-the presenter and the model rather than only the window.
 """
 
+from mantidqt.widgets.tutorial.sandbox_base import InterfaceSandbox
 from mantidqtinterfaces.TexturePlanner.model import TexturePlannerModel
 from mantidqtinterfaces.TexturePlanner.presenter import TexturePlannerPresenter
 from mantidqtinterfaces.TexturePlanner.tutorial.demo_data import DemoData
@@ -34,42 +32,30 @@ from mantidqtinterfaces.TexturePlanner.view import TexturePlannerView
 DEMO_MC_EVENTS_PER_POINT = 3
 
 
-class TutorialSandbox:
-    """A Texture Planner built for the tutorial to drive, and the demo files it uses."""
+class TutorialSandbox(InterfaceSandbox):
+    """A Texture Planner built for the tutorial to drive, and the demo files it uses.
+
+    Closing is what removes the workspaces: ``closeEvent`` calls the presenter's ``on_close``,
+    which calls ``WorkspaceManager.cleanup``. Doing it by hand in ``teardown`` as well would be a
+    second place to keep in step with what a planner owns.
+    """
 
     def __init__(self, parent=None):
         self.data = DemoData()
 
-        self.model = TexturePlannerModel()
+        model = TexturePlannerModel()
         # register_usage=False: this window is Mantid opening the interface to demonstrate it, not
         # the user opening it to work, and counting it would inflate every real launch
-        self.view = TexturePlannerView(parent=parent, register_usage=False)
+        view = TexturePlannerView(parent=parent, register_usage=False)
         # offer_tutorial=False: this planner is the tutorial. Left True it would offer a tutorial
         # from inside one, and on a first-ever open would launch a second tour recursively
-        self.presenter = TexturePlannerPresenter(self.model, self.view, offer_tutorial=False)
+        super().__init__(model, view, TexturePlannerPresenter(model, view, offer_tutorial=False))
 
         # deliberately not given window flags or a title: the tutorial shell takes this view as a
         # child and is itself the window, so anything set here would never be seen
         self.model.absorption.mc_kwargs["EventsPerPoint"] = DEMO_MC_EVENTS_PER_POINT
 
-        self._torn_down = False
-
-    @property
-    def window(self):
-        return self.view
-
-    def teardown(self):
-        """Close the sandbox planner and remove its files. Safe to call more than once.
-
-        Closing is what removes the workspaces: ``closeEvent`` calls the presenter's ``on_close``,
-        which calls ``WorkspaceManager.cleanup``. Doing it by hand here as well would be a second
-        place to keep in step with what a planner owns.
-        """
-        if self._torn_down:
-            return
-        self._torn_down = True
-        self.view.close()
-        self.view.deleteLater()
+    def _cleanup(self):
         self.data.cleanup()
 
 
