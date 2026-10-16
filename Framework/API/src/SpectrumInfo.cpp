@@ -114,10 +114,10 @@ double SpectrumInfo::signedTwoTheta(const size_t index) const {
  */
 double SpectrumInfo::azimuthal(const size_t index) const {
   const auto spectrumDef = checkAndGetSpectrumDefinition(index);
-  auto phi = std::accumulate(
+  auto azimuthalSum = std::accumulate(
       spectrumDef.cbegin(), spectrumDef.cend(), 0.0,
       [this](double x, const std::pair<size_t, size_t> &detIndex) { return x + m_detectorInfo.azimuthal(detIndex); });
-  return phi / static_cast<double>(spectrumDef.size());
+  return azimuthalSum / static_cast<double>(spectrumDef.size());
 }
 
 /** Returns the average angle between the vectors from `observer` to each detector of the spectrum and `axis`.
