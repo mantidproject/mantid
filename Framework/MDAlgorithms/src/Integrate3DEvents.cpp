@@ -295,9 +295,10 @@ namespace {
  * @param A Output peak amplitude estimate.
  * @param b Output uniform background estimate.
  * @param sigA Output standard uncertainty of the peak amplitude.
+ * @param warmStart Start from the A and b passed in, if positive, rather than from crude estimates.
  */
 void solvePoissonMatchedFilter(const std::vector<double> &g, const std::vector<double> &w, double normG, double volume,
-                               double &A, double &b, double &sigA) {
+                               double &A, double &b, double &sigA, bool warmStart = false) {
   const auto n = g.size();
 
   auto logLikelihood = [&](double a, double bb) {
@@ -329,9 +330,11 @@ void solvePoissonMatchedFilter(const std::vector<double> &g, const std::vector<d
   // a flat background over the search volume, deliberately conservative so
   // the backtracking Newton solve below has a well-behaved starting point
   // regardless of the absolute scale of normG/volume/event counts
-  const double sumW = std::accumulate(w.begin(), w.end(), 0.0);
-  b = volume > 0 ? std::max(0.5 * sumW / volume, 1e-10) : 1e-10;
-  A = normG > 0 ? std::max(0.5 * sumW / normG, 1e-10) : 1e-10;
+  if (!(warmStart && A > 0.0 && b > 0.0)) {
+    const double sumW = std::accumulate(w.begin(), w.end(), 0.0);
+    b = volume > 0 ? std::max(0.5 * sumW / volume, 1e-10) : 1e-10;
+    A = normG > 0 ? std::max(0.5 * sumW / normG, 1e-10) : 1e-10;
+  }
 
   for (int iter = 0; iter < 100; ++iter) {
     double dA, dB, dAA, dBB, dAB;
@@ -882,78 +885,133 @@ void Integrate3DEvents::refineProfileShape(const std::vector<std::pair<std::pair
 
   auto quadratic = [](const SymMatrix &mm, const V3D &q) { return q.scalar_prod(multiply(mm, q)); };
 
+  // an event where the Gaussian is below exp(-FAR_EXPONENT) of its height
+  // (about 4e-18) contributes to the likelihood only through the background
+  constexpr double FAR_EXPONENT = 40.0;
+  // parameters: intensity, background, then the center (with adjustCenter), then the elements of M
+  const size_t nAll = n + 2;
+
   auto logLikelihood = [&](const V3D &c, const SymMatrix &mm, double I, double bkg) {
     const double h = height(mm);
     double ll = -(I * exposure(c, mm, nullptr, nullptr) + bkg * volume);
+    double farWeight = 0.0;
     for (const auto &event : events) {
-      const V3D q = event.second - c;
-      ll += event.first.first * std::log(std::max(I * h * std::exp(-0.5 * quadratic(mm, q)) + bkg, 1e-12));
+      const double e = 0.5 * quadratic(mm, event.second - c);
+      if (e > FAR_EXPONENT) {
+        farWeight += event.first.first;
+        continue;
+      }
+      ll += event.first.first * std::log(std::max(I * h * std::exp(-e) + bkg, 1e-12));
     }
-    return ll;
+    return ll + farWeight * std::log(std::max(bkg, 1e-12));
+  };
+
+  // gradient of ln L, and its Gauss-Newton (Fisher) information, over all the parameters
+  auto accumulate = [&](double I, double bkg, const V3D &c, const SymMatrix &mm, std::vector<double> &grad,
+                        std::vector<std::vector<double>> &information) {
+    V3D gradC;
+    SymMatrix gradM;
+    const double G = exposure(c, mm, &gradC, &gradM);
+    const auto cov = inverse(mm);
+    const double h = height(mm);
+    grad.assign(nAll, 0.0);
+    information.assign(nAll, std::vector<double>(nAll, 0.0));
+    grad[0] = -G;
+    grad[1] = -volume;
+    for (size_t r = 0; r < nCenter; ++r)
+      grad[2 + r] -= I * gradC[r];
+    for (size_t e = 0; e < 6; ++e)
+      grad[2 + nCenter + e] -= I * gradM[e] * multiplicity[e];
+    std::vector<double> J(nAll, 0.0);
+    double farWeight = 0.0;
+    for (const auto &event : events) {
+      const double weight = event.first.first;
+      const V3D q = event.second - c;
+      const V3D Mq = multiply(mm, q);
+      const double e = 0.5 * q.scalar_prod(Mq);
+      if (e > FAR_EXPONENT) {
+        farWeight += weight;
+        continue;
+      }
+      const double gh = h * std::exp(-e);
+      const double peak = I * gh;
+      const double mu = std::max(peak + bkg, 1e-12);
+      J[0] = gh;
+      J[1] = 1.0;
+      for (size_t r = 0; r < nCenter; ++r)
+        J[2 + r] = peak * Mq[r];
+      for (size_t k = 0; k < 6; ++k)
+        J[2 + nCenter + k] = peak * multiplicity[k] * 0.5 * (cov[k] - q[SYM_PAIRS[k][0]] * q[SYM_PAIRS[k][1]]);
+      for (size_t a = 0; a < nAll; ++a) {
+        grad[a] += weight * J[a] / mu;
+        for (size_t col = a; col < nAll; ++col)
+          information[a][col] += weight * J[a] * J[col] / (mu * mu);
+      }
+    }
+    // far events depend only on the background
+    const double muFar = std::max(bkg, 1e-12);
+    grad[1] += farWeight / muFar;
+    information[1][1] += farWeight / (muFar * muFar);
+    for (size_t a = 0; a < nAll; ++a)
+      for (size_t col = 0; col < a; ++col)
+        information[a][col] = information[col][a];
   };
 
   std::vector<double> g(events.size()), w(events.size());
   auto computeKernel = [&](const V3D &c, const SymMatrix &mm) {
     const double h = height(mm);
     for (size_t i = 0; i < events.size(); ++i) {
-      g[i] = h * std::exp(-0.5 * quadratic(mm, events[i].second - c));
+      const double e = 0.5 * quadratic(mm, events[i].second - c);
+      g[i] = e > FAR_EXPONENT ? 0.0 : h * std::exp(-e);
       w[i] = events[i].first.first;
     }
   };
 
   computeKernel(center, m);
   peakNorm = exposure(center, m, nullptr, nullptr);
-  solvePoissonMatchedFilter(g, w, peakNorm, volume, intensity, background, sigma);
+  solvePoissonMatchedFilter(g, w, peakNorm, volume, intensity, background, sigma, true);
 
+  // stop once an iteration gains less than this in ln L: the parameters are
+  // then well within a tenth of a standard deviation of the optimum, where
+  // ln L is within 1/2 of its maximum at one standard deviation
+  constexpr double LOG_LIKELIHOOD_TOLERANCE = 1e-3;
+
+  // damped Gauss-Newton steps in all the parameters at once, as the
+  // intensity, background and width are strongly correlated
+  double ll = logLikelihood(center, m, intensity, background);
   double lambda = 1e-3;
+  std::vector<double> grad;
+  std::vector<std::vector<double>> information;
   for (int iteration = 0; iteration < 50; ++iteration) {
-    V3D gradC;
-    SymMatrix gradM;
-    exposure(center, m, &gradC, &gradM);
-    const auto cov = inverse(m);
+    accumulate(intensity, background, center, m, grad, information);
 
-    // gradient, and Gauss-Newton (Fisher) approximation of the negative Hessian, holding I and b fixed
-    std::vector<double> grad(n, 0.0), J(n, 0.0);
-    std::vector<std::vector<double>> information(n, std::vector<double>(n, 0.0));
-    for (size_t r = 0; r < nCenter; ++r)
-      grad[r] -= intensity * gradC[r];
-    for (size_t e = 0; e < 6; ++e)
-      grad[nCenter + e] -= intensity * gradM[e] * multiplicity[e];
-    for (size_t i = 0; i < events.size(); ++i) {
-      const V3D q = events[i].second - center;
-      const V3D Mq = multiply(m, q);
-      const double peak = intensity * g[i];
-      const double mu = std::max(peak + background, 1e-12);
-      for (size_t r = 0; r < nCenter; ++r)
-        J[r] = peak * Mq[r];
-      for (size_t e = 0; e < 6; ++e)
-        J[nCenter + e] = peak * multiplicity[e] * 0.5 * (cov[e] - q[SYM_PAIRS[e][0]] * q[SYM_PAIRS[e][1]]);
-      for (size_t a = 0; a < n; ++a) {
-        grad[a] += w[i] * J[a] / mu;
-        for (size_t c = 0; c < n; ++c)
-          information[a][c] += w[i] * J[a] * J[c] / (mu * mu);
-      }
-    }
-
-    // a damped step that increases the likelihood within the bounds
-    const double llOld = logLikelihood(center, m, intensity, background);
     bool improved = false;
-    for (int attempt = 0; attempt < 8 && !improved; ++attempt) {
+    double gain = 0.0;
+    for (int attempt = 0; attempt < 4 && !improved; ++attempt) {
       auto damped = information;
-      for (size_t a = 0; a < n; ++a)
+      for (size_t a = 0; a < nAll; ++a)
         damped[a][a] = information[a][a] * (1.0 + lambda) + 1e-300;
       auto step = grad;
       if (solveLinear(damped, step)) {
-        for (double alpha = 1.0; alpha > 1e-4 && !improved; alpha *= 0.5) {
+        for (double alpha = 1.0; alpha > 1.0 / 64.0 && !improved; alpha *= 0.5) {
+          const double newIntensity = intensity + alpha * step[0];
+          const double newBackground = background + alpha * step[1];
+          if (newIntensity < 0.0 || newBackground < 0.0)
+            continue;
           V3D newCenter = center;
           if (adjustCenter)
-            newCenter += V3D(step[0], step[1], step[2]) * alpha;
+            newCenter += V3D(step[2], step[3], step[4]) * alpha;
           SymMatrix newM = m;
           for (size_t e = 0; e < 6; ++e)
-            newM[e] += alpha * step[nCenter + e];
+            newM[e] += alpha * step[2 + nCenter + e];
           if (determinant(newM) <= 0.0 || !feasible(newCenter, newM))
             continue;
-          if (logLikelihood(newCenter, newM, intensity, background) > llOld) {
+          const double newLL = logLikelihood(newCenter, newM, newIntensity, newBackground);
+          if (newLL > ll) {
+            gain = newLL - ll;
+            ll = newLL;
+            intensity = newIntensity;
+            background = newBackground;
             center = newCenter;
             m = newM;
             improved = true;
@@ -966,38 +1024,19 @@ void Integrate3DEvents::refineProfileShape(const std::vector<std::pair<std::pair
     if (!improved)
       break;
     lambda = std::max(lambda / 10.0, 1e-6);
-
-    computeKernel(center, m);
-    peakNorm = exposure(center, m, nullptr, nullptr);
-    solvePoissonMatchedFilter(g, w, peakNorm, volume, intensity, background, sigma);
-
-    if (logLikelihood(center, m, intensity, background) - llOld < 1e-9 * (1.0 + std::abs(llOld)))
+    if (gain < LOG_LIKELIHOOD_TOLERANCE)
       break;
   }
 
+  // the intensity and background for the refined shape
+  computeKernel(center, m);
+  peakNorm = exposure(center, m, nullptr, nullptr);
+  solvePoissonMatchedFilter(g, w, peakNorm, volume, intensity, background, sigma, true);
+
   // The uncertainty of the intensity with the shape fitted too: from the
-  // information over all the parameters (I, b, c, M), as the 2x2 one over
-  // (I, b) alone leaves out how much a wider peak can trade intensity for
-  // background.
-  const size_t nAll = n + 2;
-  std::vector<std::vector<double>> information(nAll, std::vector<double>(nAll, 0.0));
-  std::vector<double> J(nAll, 0.0);
-  const auto cov = inverse(m);
-  for (size_t i = 0; i < events.size(); ++i) {
-    const V3D q = events[i].second - center;
-    const V3D Mq = multiply(m, q);
-    const double peak = intensity * g[i];
-    const double mu = std::max(peak + background, 1e-12);
-    J[0] = g[i];
-    J[1] = 1.0;
-    for (size_t r = 0; r < nCenter; ++r)
-      J[2 + r] = peak * Mq[r];
-    for (size_t e = 0; e < 6; ++e)
-      J[2 + nCenter + e] = peak * multiplicity[e] * 0.5 * (cov[e] - q[SYM_PAIRS[e][0]] * q[SYM_PAIRS[e][1]]);
-    for (size_t a = 0; a < nAll; ++a)
-      for (size_t c = 0; c < nAll; ++c)
-        information[a][c] += w[i] * J[a] * J[c] / (mu * mu);
-  }
+  // information over all the parameters, as the 2x2 one over (I, b) alone
+  // leaves out how much a wider peak can trade intensity for background.
+  accumulate(intensity, background, center, m, grad, information);
   std::vector<double> unit(nAll, 0.0);
   unit[0] = 1.0;
   if (solveLinear(information, unit) && unit[0] > 0.0 && std::isfinite(unit[0]))

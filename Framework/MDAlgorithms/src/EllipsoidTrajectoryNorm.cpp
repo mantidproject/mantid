@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <limits>
 #include <numeric>
 #include <stdexcept>
 #include <unordered_map>
@@ -201,10 +202,8 @@ void fluxWeightedGaussianMoments(const double lo, const double hi, const double 
     const double z = (t - k0) / s;
     return h * std::exp(-0.5 * z * z);
   };
-  // antiderivatives of G, k G and k^2 G
+  // antiderivative of G
   auto e0 = [&](double t) { return erfScale * std::erf((t - k0) / (M_SQRT2 * s)); };
-  auto e1 = [&](double t) { return k0 * e0(t) - s * s * gauss(t); };
-  auto e2 = [&](double t) { return (k0 * k0 + s * s) * e0(t) - s * s * (t + k0) * gauss(t); };
   auto addMass = [&](double t, double mass) {
     const double g = gauss(t);
     m0 += mass * g;
@@ -229,6 +228,17 @@ void fluxWeightedGaussianMoments(const double lo, const double hi, const double 
         1, static_cast<std::size_t>(std::distance(begin, std::lower_bound(begin, end, windowLow))));
     const auto jEnd = std::min<std::size_t>(
         last, static_cast<std::size_t>(std::distance(begin, std::lower_bound(begin, end, windowHigh))));
+    // the antiderivatives at the start of the current interval, reused from the end of the previous one
+    double tPrev = std::numeric_limits<double>::quiet_NaN(), e0Prev = 0.0, gPrev = 0.0;
+    auto antiderivatives = [&](double t, double &e0t, double &gt) {
+      if (t == tPrev) {
+        e0t = e0Prev;
+        gt = gPrev;
+      } else {
+        e0t = e0(t);
+        gt = gauss(t);
+      }
+    };
     for (std::size_t j = jStart; j <= jEnd; ++j) {
       if (x[j] == x[j - 1]) {
         // Phi(x[j]) = y[j - 1], and y[j] just above it
@@ -240,10 +250,21 @@ void fluxWeightedGaussianMoments(const double lo, const double hi, const double 
       const double b = std::min(windowHigh, x[j]);
       if (b <= a)
         continue;
+      double e0a, ga, e0b, gb;
+      antiderivatives(a, e0a, ga);
+      e0b = e0(b);
+      gb = gauss(b);
+      tPrev = b;
+      e0Prev = e0b;
+      gPrev = gb;
+      // antiderivatives of k G and k^2 G in terms of those of G and G itself
+      const double e1a = k0 * e0a - s * s * ga, e1b = k0 * e0b - s * s * gb;
+      const double e2a = (k0 * k0 + s * s) * e0a - s * s * (a + k0) * ga;
+      const double e2b = (k0 * k0 + s * s) * e0b - s * s * (b + k0) * gb;
       const double slope = (y[j] - y[j - 1]) / (x[j] - x[j - 1]);
-      m0 += slope * (e0(b) - e0(a));
-      m1 += slope * (e1(b) - e1(a));
-      m2 += slope * (e2(b) - e2(a));
+      m0 += slope * (e0b - e0a);
+      m1 += slope * (e1b - e1a);
+      m2 += slope * (e2b - e2a);
     }
   }
   if (lo <= x[last] && x[last] < hi)
