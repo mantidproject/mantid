@@ -1893,7 +1893,7 @@ class MeasurementTimeFromNexusFileExtractor(object):
         super(MeasurementTimeFromNexusFileExtractor, self).__init__()
 
     def _get_str(self, v):
-        return v.tostring().decode("UTF-8")
+        return v.tobytes().decode("UTF-8")
 
     def _get_measurement_time_processed_file(self, h5entry):
         logs = h5entry["logs"]
