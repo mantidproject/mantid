@@ -7,6 +7,7 @@
 import base64
 import json
 import os
+import signal
 import zlib
 from typing import Optional
 
@@ -29,7 +30,7 @@ class ErrorReporterPresenter(object):
         """
         self.error_log = Logger("errorreports")
         self._view = view
-        self._exit_code = exit_code
+        self._exit_code = self._get_exit_code_description(exit_code)
         self._application = application
         self._traceback = traceback or ""
         self._cpp_traces = b""
@@ -141,6 +142,20 @@ class ErrorReporterPresenter(object):
             self.error_log.error("Failed to send error report http request returned status {}".format(status))
 
         return status
+
+    @staticmethod
+    def _get_exit_code_description(exit_code):
+        if not exit_code:
+            return exit_code
+
+        parsed_exit_code = int(exit_code)
+        if parsed_exit_code < 0:
+            try:
+                interpreted_signal = signal.Signals(abs(parsed_exit_code))
+            except ValueError:
+                return exit_code
+            return f"{exit_code} ({interpreted_signal.name})"
+        return exit_code
 
     def _cut_down_stacktrace(self):
         # server has a max size for the stack trace, if exceeded will cause an error
