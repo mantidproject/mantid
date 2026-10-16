@@ -8,8 +8,11 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/IValidator.h"
+#include <string>
 #include <typeinfo>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
@@ -22,7 +25,11 @@ directly.
 
 A specialised type exists for std::shared_ptr types
  */
+#if !defined(_WIN32)
+template <typename HeldType> class MANTID_KERNEL_DLL TypedValidator : public IValidator {
+#else
 template <typename HeldType> class TypedValidator : public IValidator {
+#endif
 protected:
   /// Override this function to check the validity of the type
   virtual std::string checkValidity(const HeldType &) const = 0;
@@ -56,7 +63,12 @@ private:
  * The advantage of this is that Validator types then don't have to match
  * their types exactly.
  */
+#if !defined(_WIN32)
+template <typename ElementType>
+class MANTID_KERNEL_DLL TypedValidator<std::shared_ptr<ElementType>> : public IValidator {
+#else
 template <typename ElementType> class TypedValidator<std::shared_ptr<ElementType>> : public IValidator {
+#endif
   /// Shared ptr type
   using ElementType_sptr = std::shared_ptr<ElementType>;
 
@@ -137,3 +149,12 @@ private:
 } // namespace Kernel
 /// @endcond
 } // namespace Mantid
+
+#if defined(_WIN32) && !defined(Kernel_EXPORTS)
+// These specializations are instantiated by exported validator classes. Keep
+// consumers from instantiating another copy of their inline base members.
+// Kernel itself provides the exported instantiations, and MSVC rejects extern
+// combined with dllexport.
+extern template class MANTID_KERNEL_DLL Mantid::Kernel::TypedValidator<std::string>;
+extern template class MANTID_KERNEL_DLL Mantid::Kernel::TypedValidator<std::vector<double>>;
+#endif
