@@ -90,9 +90,8 @@ public:
     auto *highValuesLog = dynamic_cast<VectorDoubleProperty *>(ei->getLog("MDNorm_high"));
     const auto &spectrumInfo = ei->spectrumInfo();
     for (size_t i = 0; i < 3; i++) {
-      const auto &detector = spectrumInfo.detector(i);
-      double theta = detector.getTwoTheta(Mantid::Kernel::V3D(0, 0, 0), Mantid::Kernel::V3D(0, 0, 1));
-      double phi = detector.getPhi();
+      double theta = spectrumInfo.twoTheta(i, Mantid::Kernel::V3D(0, 0, 0), Mantid::Kernel::V3D(0, 0, 1));
+      double phi = spectrumInfo.phi(i);
       double Qx = -sin(theta) * cos(phi);
       double lamMin = (*lowValuesLog)()[i];
       double lamMax = ((*highValuesLog)()[i]);
