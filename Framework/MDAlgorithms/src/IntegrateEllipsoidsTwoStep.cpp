@@ -496,10 +496,9 @@ void IntegrateEllipsoidsTwoStep::calculateE1(const Geometry::DetectorInfo &detec
     if (detectorInfo.isMonitor(i))
       continue; // skip monitor
     if (!detectorInfo.isMasked(i))
-      continue; // edge is masked so don't check if not masked
-    const auto &det = detectorInfo.detector(i);
-    double tt1 = det.getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)); // two theta
-    double ph1 = det.getPhi();                                // phi
+      continue;                                                        // edge is masked so don't check if not masked
+    double tt1 = detectorInfo.twoTheta(i, V3D(0, 0, 0), V3D(0, 0, 1)); // two theta
+    double ph1 = detectorInfo.phi(i);                                  // phi
     V3D E1 = V3D(-std::sin(tt1) * std::cos(ph1), -std::sin(tt1) * std::sin(ph1),
                  1. - std::cos(tt1)); // end of trajectory
     E1 = E1 * (1. / E1.norm());       // normalize

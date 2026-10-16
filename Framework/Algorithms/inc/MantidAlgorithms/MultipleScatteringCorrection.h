@@ -13,6 +13,9 @@
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
+namespace API {
+class SpectrumInfo;
+}
 namespace Algorithms {
 
 using namespace Geometry;
@@ -64,9 +67,9 @@ private:
   void calculateL12s(const MultipleScatteringCorrectionDistGraber &distGraber, //
                      std::vector<double> &L12s,                                //
                      const Geometry::IObject &shape);
-  void calculateL2Ds(const MultipleScatteringCorrectionDistGraber &distGraber, //
-                     const IDetector &detector,                                //
-                     std::vector<double> &L2Ds,                                //
+  void calculateL2Ds(const MultipleScatteringCorrectionDistGraber &distGraber,  //
+                     const API::SpectrumInfo &spectrumInfo, const size_t index, //
+                     std::vector<double> &L2Ds,                                 //
                      const Geometry::IObject &shape) const;
   void pairWiseSum(double &A1, double &A2,                                   //
                    const double linearCoefAbs,                               //
@@ -90,7 +93,7 @@ private:
                      const Geometry::IObject &shapeSample);
   void calculateL2Ds(const MultipleScatteringCorrectionDistGraber &distGraberContainer,     //
                      const MultipleScatteringCorrectionDistGraber &distGraberSample,        //
-                     const IDetector &detector,                                             //
+                     const API::SpectrumInfo &spectrumInfo, const size_t index,             //
                      std::vector<double> &container_L2Ds, std::vector<double> &sample_L2Ds, //
                      const Geometry::IObject &shapeContainer, const Geometry::IObject &shapeSample) const;
 

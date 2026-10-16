@@ -94,7 +94,7 @@ public:
     inverserubw /= M_PI;
     const auto &detectorInfo = inputWorkspace->detectorInfo();
     const auto detectorIndex = detectorInfo.indexOf(0);
-    const double phi = detectorInfo.detector(detectorIndex).getPhi();
+    const double phi = detectorInfo.phi(detectorIndex);
     const double twoTheta = detectorInfo.twoTheta(detectorIndex);
     for (dE = -0.99; dE < 0.99; dE += 0.05) {
       ki = std::sqrt(energyToK * Ei);

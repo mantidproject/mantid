@@ -85,8 +85,9 @@ class DirectInelaticSNSTest(systemtesting.MantidSystemTest):
         a = [[] for i in range(len(bin_angles))]  # list of list with detector IDs
         w = mtd[ws]
         origin = w.componentInfo().samplePosition()
+        spectrum_info = w.spectrumInfo()
         for i in range(w.getNumberHistograms()):
-            ang = w.getDetector(i).getTwoTheta(origin, mantid.kernel.V3D(0, 0, 1)) * 180 / np.pi
+            ang = spectrum_info.twoTheta(i, origin, mantid.kernel.V3D(0, 0, 1)) * 180 / np.pi
             index = int((ang - angmin) / angstep)
             if (index >= 0) and (index < len(a)) and ((w.getDetector(i).getID()) > 0):
                 a[index].append(w.getSpectrum(i).getSpectrumNo())

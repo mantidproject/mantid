@@ -13,6 +13,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidGeometry/Instrument.h"
@@ -33,23 +34,22 @@ std::string const D_SPACING_UNIT = "dSpacing";
 std::string const INSTRUMENT_NAME = "ALF";
 std::string const NOT_IN_ADS = "not_stored_in_ads";
 
-std::optional<double> getTwoTheta(Mantid::Geometry::Instrument_const_sptr instrument,
-                                  Mantid::Geometry::IDetector_const_sptr detector) {
-  if (!instrument || !detector) {
+std::optional<double> getTwoTheta(MatrixWorkspace_const_sptr const &workspace, std::size_t const workspaceIndex) {
+  if (!workspace) {
     return std::nullopt;
   }
-  auto const sample = instrument->getSample()->getPos();
-  auto const source = instrument->getSource()->getPos();
+  auto const &spectrumInfo = workspace->spectrumInfo();
+  auto const sample = spectrumInfo.samplePosition();
+  auto const source = spectrumInfo.sourcePosition();
 
-  return detector->getTwoTheta(sample, sample - source) * 180.0 / M_PI;
+  return spectrumInfo.twoTheta(workspaceIndex, sample, sample - source) * 180.0 / M_PI;
 }
 
 void appendTwoThetaClosestToZero(std::vector<double> &twoThetas,
                                  std::optional<std::pair<double, std::size_t>> &workspaceIndexClosestToZero,
-                                 MatrixWorkspace_const_sptr const &workspace,
-                                 Mantid::Geometry::Instrument_const_sptr instrument) {
+                                 MatrixWorkspace_const_sptr const &workspace) {
   if (workspaceIndexClosestToZero) {
-    auto const twoTheta = getTwoTheta(instrument, workspace->getDetector((*workspaceIndexClosestToZero).second));
+    auto const twoTheta = getTwoTheta(workspace, (*workspaceIndexClosestToZero).second);
     if (twoTheta) {
       twoThetas.emplace_back(*twoTheta);
     }
@@ -316,7 +316,6 @@ void ALFInstrumentModel::collectAndSortYByX(std::map<double, double> &xy, std::m
 
   auto const nDetectorsPerTube = m_tubes.front().size();
   auto const samplePosition = componentInfo.samplePosition();
-  auto const instrument = actor.getInstrument();
 
   Mantid::Kernel::V3D normal;
   std::size_t imin, imax;
@@ -329,7 +328,7 @@ void ALFInstrumentModel::collectAndSortYByX(std::map<double, double> &xy, std::m
       if (i % nDetectorsPerTube == 0) {
         normal = normalize(componentInfo.position(tubeDetectorIndices[i + 1]) - componentInfo.position(detectorIndex));
         actor.getBinMinMaxIndex(workspaceIndex, imin, imax);
-        appendTwoThetaClosestToZero(m_twoThetasClosestToZero, workspaceIndexClosestToZeroX, workspace, instrument);
+        appendTwoThetaClosestToZero(m_twoThetasClosestToZero, workspaceIndexClosestToZeroX, workspace);
       }
 
       if (workspaceIndex != MantidQt::MantidWidgets::InstrumentActor::INVALID_INDEX &&
@@ -346,7 +345,7 @@ void ALFInstrumentModel::collectAndSortYByX(std::map<double, double> &xy, std::m
       }
     }
   }
-  appendTwoThetaClosestToZero(m_twoThetasClosestToZero, workspaceIndexClosestToZeroX, workspace, instrument);
+  appendTwoThetaClosestToZero(m_twoThetasClosestToZero, workspaceIndexClosestToZeroX, workspace);
 }
 
 } // namespace MantidQt::CustomInterfaces

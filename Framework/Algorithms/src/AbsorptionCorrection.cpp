@@ -213,7 +213,7 @@ void AbsorptionCorrection::exec() {
     const auto &det = spectrumInfo.detector(i);
 
     std::vector<double> L2s(m_numVolumeElements);
-    calculateDistances(det, L2s);
+    calculateDistances(spectrumInfo, i, L2s);
 
     // If an indirect instrument, see if there's an efixed in the parameter map
     double lambdaFixed = m_lambdaFixed;
@@ -390,16 +390,18 @@ void AbsorptionCorrection::constructSample(API::Sample &sample) {
 }
 
 /// Calculate the distances traversed by the neutrons within the sample
-/// @param detector :: The detector we are working on
+/// @param spectrumInfo :: The spectrum info of the input workspace
+/// @param index :: The workspace index of the spectrum we are working on
 /// @param L2s :: A vector of the sample-detector distance for  each segment of
 /// the sample
-void AbsorptionCorrection::calculateDistances(const IDetector &detector, std::vector<double> &L2s) const {
-  V3D detectorPos(detector.getPos());
-  if (detector.nDets() > 1) {
+void AbsorptionCorrection::calculateDistances(const API::SpectrumInfo &spectrumInfo, const size_t index,
+                                              std::vector<double> &L2s) const {
+  V3D detectorPos(spectrumInfo.position(index));
+  if (spectrumInfo.spectrumDefinition(index).size() > 1) {
     // We need to make sure this is right for grouped detectors - should use
     // average theta & phi
-    detectorPos.spherical(detectorPos.norm(), detector.getTwoTheta(V3D(), V3D(0, 0, 1)) * 180.0 / M_PI,
-                          detector.getPhi() * 180.0 / M_PI);
+    detectorPos.spherical(detectorPos.norm(), spectrumInfo.twoTheta(index, V3D(), V3D(0, 0, 1)) * 180.0 / M_PI,
+                          spectrumInfo.phi(index) * 180.0 / M_PI);
   }
 
   for (size_t i = 0; i < m_numVolumeElements; ++i) {

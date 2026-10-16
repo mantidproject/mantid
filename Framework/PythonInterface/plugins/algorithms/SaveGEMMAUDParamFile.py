@@ -145,9 +145,6 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
         return "\n".join(str(param) for param in param_list)
 
     def _get_two_theta_and_phi(self, bank):
-        # detector.getPhi() has no *Info equivalent: it is the ambiguous, lab-frame atan2(y, x),
-        # not the sample-centred, reference-frame-relative DetectorInfo/SpectrumInfo.azimuthal()
-        #
         # two-theta is computed from the (possibly grouped) detector position rather than via
         # spectrum_info.twoTheta(0): the latter averages each detector's individual two-theta,
         # while this averages positions first then takes one angle, matching the legacy behaviour
@@ -162,7 +159,7 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
         beam_dir = sample_pos - source_pos
         detector_dir = det_pos - sample_pos
 
-        return math.degrees(beam_dir.angle(detector_dir)), math.degrees(math.atan2(det_pos.Y(), det_pos.X()))
+        return math.degrees(beam_dir.angle(detector_dir)), math.degrees(spectrum_info.phi(0))
 
     def _parse_gsas_param_file(self, gsas_filename):
         with open(gsas_filename) as prm_file:
