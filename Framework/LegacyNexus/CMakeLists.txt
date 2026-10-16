@@ -1,4 +1,6 @@
 set(SRC_FILES
+    src/H5ErrorHandling.h
+    src/H5ErrorHandling.cpp
     src/napi.cpp
     src/napi4.cpp
     src/napi5.cpp
@@ -23,7 +25,9 @@ set(INC_FILES
     inc/MantidLegacyNexus/NeXusFileID.h
 )
 
-set(TEST_FILES LegacyNeXusFileTest.h LegacyNeXusFileLeakTest.h LegacyNeXusFileNapiTest.h LegacyNeXusFileReadTest.h)
+set(TEST_FILES H5ErrorHandlingTest.h LegacyNeXusFileTest.h LegacyNeXusFileLeakTest.h LegacyNeXusFileNapiTest.h
+               LegacyNeXusFileReadTest.h
+)
 
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
