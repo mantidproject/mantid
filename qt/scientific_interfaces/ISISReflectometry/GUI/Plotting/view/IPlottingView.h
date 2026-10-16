@@ -63,6 +63,10 @@ public:
   virtual bool addToExistingPlot() const = 0;
   /// Return true if tiled plots should be arranged vertically first.
   virtual bool plotTiledVertically() const = 0;
+  /// Return true if compatible X axes should be shared between tiles.
+  virtual bool shareXAxisWhenTiled() const = 0;
+  /// Return true if compatible Y axes should be shared between tiles.
+  virtual bool shareYAxisWhenTiled() const = 0;
   /// Return the parent widget for plot windows.
   virtual QWidget *plotParent() = 0;
   /// Confirm large plot requests with the user.

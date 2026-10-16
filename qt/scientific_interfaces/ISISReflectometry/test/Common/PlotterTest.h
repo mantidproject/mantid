@@ -236,6 +236,44 @@ public:
     TS_ASSERT_EQUALS(currentFigureColorbarCount(), 1);
   }
 
+  void testTiledPlotsShareOnlyXAxisWhenRequested() {
+    createWorkspace("ws1");
+    createWorkspace("ws2");
+
+    MantidQt::CustomInterfaces::ISISReflectometry::Plotter plotter;
+    plotter.plot({{"ws1", "ws2"},
+                  MantidQt::CustomInterfaces::ISISReflectometry::reflectivityCurvePlotOptions(
+                      MantidQt::CustomInterfaces::ISISReflectometry::PlotOutputType::ReflectivityCurve,
+                      MantidQt::CustomInterfaces::ISISReflectometry::PlotLayout::Tiled),
+                  nullptr,
+                  false,
+                  false,
+                  true,
+                  false});
+
+    TS_ASSERT(currentFigureAxesShare(0, 1, "get_shared_x_axes"));
+    TS_ASSERT(!currentFigureAxesShare(0, 1, "get_shared_y_axes"));
+  }
+
+  void testTiledPlotsShareOnlyYAxisWhenRequested() {
+    createWorkspace("ws1");
+    createWorkspace("ws2");
+
+    MantidQt::CustomInterfaces::ISISReflectometry::Plotter plotter;
+    plotter.plot({{"ws1", "ws2"},
+                  MantidQt::CustomInterfaces::ISISReflectometry::reflectivityCurvePlotOptions(
+                      MantidQt::CustomInterfaces::ISISReflectometry::PlotOutputType::ReflectivityCurve,
+                      MantidQt::CustomInterfaces::ISISReflectometry::PlotLayout::Tiled),
+                  nullptr,
+                  false,
+                  false,
+                  false,
+                  true});
+
+    TS_ASSERT(!currentFigureAxesShare(0, 1, "get_shared_x_axes"));
+    TS_ASSERT(currentFigureAxesShare(0, 1, "get_shared_y_axes"));
+  }
+
 private:
   void createWorkspace(std::string const &name) {
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
@@ -266,6 +304,16 @@ private:
         MantidQt::Widgets::Common::Python::NewRef(PyImport_ImportModule("matplotlib.pyplot"))};
     auto const figureNumbers = pyplot.attr("get_fignums")();
     return static_cast<int>(PySequence_Size(figureNumbers.ptr()));
+  }
+
+  bool currentFigureAxesShare(int const firstIndex, int const secondIndex, char const *sharedAxesGetter) {
+    Mantid::PythonInterface::GlobalInterpreterLock lock;
+    MantidQt::Widgets::Common::Python::Object pyplot{
+        MantidQt::Widgets::Common::Python::NewRef(PyImport_ImportModule("matplotlib.pyplot"))};
+    auto const axes = pyplot.attr("gcf")().attr("axes");
+    auto const firstAxis = MantidQt::Widgets::Common::Python::Object(axes[firstIndex]);
+    auto const secondAxis = MantidQt::Widgets::Common::Python::Object(axes[secondIndex]);
+    return boost::python::extract<bool>(firstAxis.attr(sharedAxesGetter)().attr("joined")(firstAxis, secondAxis))();
   }
 
   std::string currentFigureYAxisLabel() { return currentFigureAxisLabel(0, "get_ylabel"); }

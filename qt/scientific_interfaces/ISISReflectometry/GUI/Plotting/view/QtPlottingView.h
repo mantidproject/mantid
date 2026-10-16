@@ -48,6 +48,10 @@ public:
   bool addToExistingPlot() const override;
   /// Return true if tiled plots should fill vertically before horizontally.
   bool plotTiledVertically() const override;
+  /// Return true if compatible X axes should be shared between tiles.
+  bool shareXAxisWhenTiled() const override;
+  /// Return true if compatible Y axes should be shared between tiles.
+  bool shareYAxisWhenTiled() const override;
   /// Return the widget to use as the parent for plot windows.
   QWidget *plotParent() override;
   /// Ask the user to confirm plotting a large number of items.

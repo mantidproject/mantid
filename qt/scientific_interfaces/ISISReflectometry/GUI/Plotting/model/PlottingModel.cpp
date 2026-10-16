@@ -140,7 +140,9 @@ void setDetectorMapYAxisValues(Mantid::API::MatrixWorkspace_sptr const &workspac
   for (size_t workspaceIndex = 0; workspaceIndex < workspace->getNumberHistograms(); ++workspaceIndex) {
     values.emplace_back(detectorMapYAxisValue(*workspace, workspaceIndex, yAxis));
   }
-  workspace->replaceAxis(1, std::make_unique<Mantid::API::NumericAxis>(std::move(values)));
+  auto axis = std::make_unique<Mantid::API::NumericAxis>(std::move(values));
+  axis->setUnit(yAxis == DetectorMapYAxis::Theta ? "Degrees" : "Empty");
+  workspace->replaceAxis(1, std::move(axis));
 }
 
 Mantid::API::MatrixWorkspace_sptr createPointWorkspace(size_t const numberOfPoints) {
@@ -149,6 +151,7 @@ Mantid::API::MatrixWorkspace_sptr createPointWorkspace(size_t const numberOfPoin
 
 void setAlignmentXAxisValues(Mantid::API::MatrixWorkspace_sptr const &profileWorkspace,
                              Mantid::API::MatrixWorkspace const &rawWorkspace, AlignmentXAxis const xAxis) {
+  profileWorkspace->getAxis(0)->setUnit(xAxis == AlignmentXAxis::Theta ? "Degrees" : "Empty");
   if (xAxis == AlignmentXAxis::DetectorId) {
     return;
   }
@@ -178,6 +181,7 @@ SpecularPeakFit fitSpecularPeak(Mantid::API::MatrixWorkspace_sptr const &workspa
 Mantid::API::MatrixWorkspace_sptr createPeakCentreWorkspace(Mantid::API::MatrixWorkspace_sptr const &profileWorkspace,
                                                             double const peakCentre) {
   auto peakCentreWorkspace = createPointWorkspace(2);
+  peakCentreWorkspace->getAxis(0)->unit() = profileWorkspace->getAxis(0)->unit();
   auto const &profileY = profileWorkspace->y(0);
   auto const firstFinite =
       std::find_if(profileY.cbegin(), profileY.cend(), [](double value) { return std::isfinite(value); });
