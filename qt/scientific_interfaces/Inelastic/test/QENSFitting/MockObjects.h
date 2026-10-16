@@ -66,7 +66,7 @@ public:
   MOCK_METHOD1(handleStartXChanged, void(double startX));
   MOCK_METHOD1(handleEndXChanged, void(double endX));
   MOCK_METHOD0(handlePlotSpectrumChanged, void());
-  MOCK_METHOD1(handleFwhmChanged, void(double fwhm));
+  MOCK_METHOD2(handleFwhmChanged, void(std::size_t peakIndex, double fwhm));
   MOCK_METHOD1(handleBackgroundChanged, void(double background));
 
   MOCK_METHOD0(handlePlotSelectedSpectra, void());
@@ -92,11 +92,11 @@ public:
   MOCK_CONST_METHOD0(getRange, std::pair<double, double>());
   MOCK_CONST_METHOD0(getWorkspaceRange, std::pair<double, double>());
   MOCK_CONST_METHOD0(getResultRange, std::pair<double, double>());
-  MOCK_CONST_METHOD0(getFirstHWHM, std::optional<double>());
-  MOCK_CONST_METHOD0(getFirstPeakCentre, std::optional<double>());
+  MOCK_CONST_METHOD0(getHWHMs, std::vector<double>());
+  MOCK_CONST_METHOD0(getPeakCentres, std::vector<double>());
   MOCK_CONST_METHOD0(getFirstBackgroundLevel, std::optional<double>());
-  MOCK_CONST_METHOD1(calculateHWHMMaximum, double(double maximum));
-  MOCK_CONST_METHOD1(calculateHWHMMinimum, double(double minimum));
+  MOCK_CONST_METHOD2(calculateHWHMMaximum, double(std::size_t peakIndex, double maximum));
+  MOCK_CONST_METHOD2(calculateHWHMMinimum, double(std::size_t peakIndex, double minimum));
   MOCK_CONST_METHOD0(canCalculateGuess, bool());
 
   MOCK_METHOD1(setActiveIndex, void(WorkspaceID workspaceID));
@@ -156,16 +156,15 @@ public:
   MOCK_METHOD1(setFitRangeBounds, void(std::pair<double, double> const &bounds));
 
   MOCK_METHOD1(setBackgroundRangeVisible, void(bool visible));
-  MOCK_METHOD1(setHWHMRangeVisible, void(bool visible));
 
   MOCK_METHOD1(allowRedraws, void(bool state));
   MOCK_METHOD0(redrawPlots, void());
 
   MOCK_CONST_METHOD1(displayMessage, void(std::string const &message));
 
-  MOCK_METHOD1(setHWHMMinimum, void(double minimum));
-  MOCK_METHOD1(setHWHMMaximum, void(double maximum));
-  MOCK_METHOD2(setHWHMRange, void(double minimum, double maximum));
+  MOCK_METHOD2(setHWHMMinimum, void(std::size_t peakIndex, double minimum));
+  MOCK_METHOD2(setHWHMMaximum, void(std::size_t peakIndex, double maximum));
+  MOCK_METHOD1(setHWHMRanges, void(std::vector<std::pair<double, double>> const &ranges));
 
   MOCK_METHOD0(clearPreviews, void());
 };
@@ -245,7 +244,7 @@ public:
                      std::unordered_map<std::string, ParameterValue>(WorkspaceID workspaceID, WorkspaceIndex spectrum));
 
   MOCK_METHOD1(setFitFunction, void(Mantid::API::MultiDomainFunction_sptr function));
-  MOCK_METHOD2(setFWHM, void(double fwhm, WorkspaceID WorkspaceID));
+  MOCK_METHOD3(setFWHM, void(double fwhm, std::size_t peakIndex, WorkspaceID WorkspaceID));
   MOCK_METHOD2(setBackground, void(double fwhm, WorkspaceID WorkspaceID));
   MOCK_METHOD3(setDefaultParameterValue, void(const std::string &name, double value, WorkspaceID workspaceID));
 
