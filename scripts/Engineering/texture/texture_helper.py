@@ -127,6 +127,9 @@ def show_texture_sample_shape(
 # (the Texture Planner's reference-workspace export) and the readers cannot drift apart.
 TEXTURE_DIRECTION_MATRIX_LOG = "TextureDirectionMatrix"
 TEXTURE_DIRECTION_LABELS_LOG = "TextureDirectionLabels"
+# the Euler convention (axes + senses) the Texture Planner's orientation files are written in
+EULER_AXES_LOG = "OrientationEulerAxes"
+EULER_SENSES_LOG = "OrientationEulerSenses"
 
 
 def has_texture_direction_info(ws: str | Workspace2D) -> bool:
@@ -137,11 +140,7 @@ def has_texture_direction_info(ws: str | Workspace2D) -> bool:
     which read_texture_direction_info_from_log cannot express - it always falls back to a default.
     The labels are not required: they default harmlessly, whereas the matrix is the meaningful part.
     """
-    if isinstance(ws, str):
-        if not ADS.doesExist(ws):
-            return False
-        ws = ADS.retrieve(ws)
-    return ws.getRun().hasProperty(TEXTURE_DIRECTION_MATRIX_LOG)
+    return _has_log(ws, TEXTURE_DIRECTION_MATRIX_LOG)
 
 
 def write_texture_direction_info_to_log(ws: str | Workspace2D, ax_transform: np.ndarray, dir_names: tuple[str, str, str]) -> None:
@@ -161,6 +160,24 @@ def read_texture_direction_info_from_log(
     Read Texture Sample Direction Information off SampleLogs populating missing logs with the provided defaults
     """
     return _read_ax_transform_from_log(ws, dir_matrix_default), _read_texture_dir_names_from_log(ws, dir_names_default)
+
+
+def write_euler_orientation_info_to_log(ws: str | Workspace2D, axes: str, senses: str) -> None:
+    """
+    Create SampleLogs with the Euler convention of the orientation file saved as:
+    -  OrientationEulerAxes (lab-frame axis letters, e.g. YXY)
+    -  OrientationEulerSenses (comma separated +/-1 per axis, e.g. -1,-1,-1)
+    """
+    AddSampleLog(Workspace=ws, LogName=EULER_AXES_LOG, LogText=axes)
+    AddSampleLog(Workspace=ws, LogName=EULER_SENSES_LOG, LogText=senses)
+
+
+def read_euler_orientation_info_from_log(ws: str | Workspace2D) -> tuple[str, str] | None:
+    """The (axes, senses) saved on ws, or None if it does not carry both logs."""
+    if not (_has_log(ws, EULER_AXES_LOG) and _has_log(ws, EULER_SENSES_LOG)):
+        return None
+    run = _retrieve_ws_object(ws).getRun()
+    return run.getLogData(EULER_AXES_LOG).value, run.getLogData(EULER_SENSES_LOG).value
 
 
 # ------------- writing helpers----------------------------------
@@ -184,6 +201,14 @@ def _write_texture_dir_names_to_log(ws: str | Workspace2D, dir_names: tuple[str,
 
 
 # --------------- reading helpers ----------------------------------
+
+
+def _has_log(ws: str | Workspace2D, log_name: str) -> bool:
+    if isinstance(ws, str):
+        if not ADS.doesExist(ws):
+            return False
+        ws = ADS.retrieve(ws)
+    return ws.getRun().hasProperty(log_name)
 
 
 def _read_texture_log(ws: str | Workspace2D, log_name: str, default: str) -> str:
