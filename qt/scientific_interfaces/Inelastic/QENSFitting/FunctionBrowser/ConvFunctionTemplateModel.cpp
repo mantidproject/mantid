@@ -8,10 +8,12 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/Strings.h"
 #include "MantidQtWidgets/Common/ConvolutionFunctionModel.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 
 #include <map>
+#include <vector>
 
 namespace {
 using namespace MantidQt::CustomInterfaces::Inelastic;
@@ -136,13 +138,10 @@ void ConvFunctionTemplateModel::checkSingleFunction(const IFunction_sptr &fun, b
                                                     bool &isFitTypeSet) {
   auto const name = fun->name();
   if (name == "Lorentzian") {
-    if (isLorentzianTypeSet && m_lorentzianType != LorentzianType::OneLorentzian) {
+    if (m_lorentzianType == LorentzianType::ThreeLorentzians) {
       throw std::runtime_error("Function has wrong structure.");
     }
-    if (isLorentzianTypeSet)
-      m_lorentzianType = LorentzianType::TwoLorentzians;
-    else
-      m_lorentzianType = LorentzianType::OneLorentzian;
+    m_lorentzianType = static_cast<LorentzianType>(getNumberOfPeaks() + 1);
     isLorentzianTypeSet = true;
   }
 
@@ -168,17 +167,11 @@ void ConvFunctionTemplateModel::addFunction(std::string const &prefix, std::stri
   auto const name = fun->name();
   std::string newPrefix;
   if (name == "Lorentzian") {
-    if (m_lorentzianType == LorentzianType::TwoLorentzians) {
+    if (m_lorentzianType == LorentzianType::ThreeLorentzians)
       throw std::runtime_error("Cannot add more Lorentzians.");
-    } else if (m_lorentzianType == LorentzianType::OneLorentzian) {
-      m_lorentzianType = LorentzianType::TwoLorentzians;
-      newPrefix = *getLor2Prefix();
-    } else if (m_lorentzianType == LorentzianType::None) {
-      m_lorentzianType = LorentzianType::OneLorentzian;
-      newPrefix = *getLor1Prefix();
-    } else {
-      throw std::runtime_error("Cannot add more Lorentzians.");
-    }
+    auto const numberOfPeaks = getNumberOfPeaks() + 1;
+    setSubType(ConvTypes::SubTypeIndex::Lorentzian, numberOfPeaks);
+    newPrefix = *getLorPrefix(numberOfPeaks - 1);
   } else if (name == "DeltaFunction") {
     if (hasDeltaFunction())
       throw std::runtime_error("Cannot add a DeltaFunction.");
@@ -208,17 +201,14 @@ void ConvFunctionTemplateModel::removeFunction(std::string const &prefix) {
     clear();
     return;
   }
-  auto prefix1 = getLor1Prefix();
-  if (prefix1 && *prefix1 == prefix) {
-    setSubType(ConvTypes::SubTypeIndex::Lorentzian, static_cast<int>(LorentzianType::None));
-    return;
+  for (auto i = 0; i < getNumberOfPeaks(); ++i) {
+    auto const lorPrefix = getLorPrefix(i);
+    if (lorPrefix && *lorPrefix == prefix) {
+      setSubType(ConvTypes::SubTypeIndex::Lorentzian, getNumberOfPeaks() - 1);
+      return;
+    }
   }
-  prefix1 = getLor2Prefix();
-  if (prefix1 && *prefix1 == prefix) {
-    setSubType(ConvTypes::SubTypeIndex::Lorentzian, static_cast<int>(LorentzianType::OneLorentzian));
-    return;
-  }
-  prefix1 = getDeltaPrefix();
+  auto prefix1 = getDeltaPrefix();
   if (prefix1 && *prefix1 == prefix) {
     setSubType(ConvTypes::SubTypeIndex::Delta, static_cast<int>(DeltaType::None));
     return;
@@ -321,22 +311,19 @@ std::map<std::size_t, int> ConvFunctionTemplateModel::getSubTypes() const {
 
 void ConvFunctionTemplateModel::tiePeakCentres() {
   auto const lor1PeakCentreName = getParameterName(ParamID::LOR1_PEAKCENTRE);
-  auto const lor2PeakCentreName = getParameterName(ParamID::LOR2_PEAKCENTRE);
-  if (!lor1PeakCentreName || !lor2PeakCentreName)
+  if (!lor1PeakCentreName)
     return;
   auto const tie = m_tiePeakCentresType == TiePeakCentresType::True ? *lor1PeakCentreName : "";
-  for (auto i = 0; i < getNumberDomains(); ++i) {
-    setLocalParameterTie(*lor2PeakCentreName, i, tie);
+  for (auto const paramID : {ParamID::LOR2_PEAKCENTRE, ParamID::LOR3_PEAKCENTRE}) {
+    if (auto const peakCentreName = getParameterName(paramID)) {
+      for (auto i = 0; i < getNumberDomains(); ++i) {
+        setLocalParameterTie(*peakCentreName, i, tie);
+      }
+    }
   }
 }
 
-int ConvFunctionTemplateModel::getNumberOfPeaks() const {
-  if (m_lorentzianType == LorentzianType::None)
-    return 0;
-  if (m_lorentzianType == LorentzianType::TwoLorentzians)
-    return 2;
-  return 1;
-}
+int ConvFunctionTemplateModel::getNumberOfPeaks() const { return static_cast<int>(m_lorentzianType); }
 
 std::optional<std::string> ConvFunctionTemplateModel::getPrefix(ParamID name) const {
   if (name >= ParamID::FLAT_BG_A0) {
@@ -349,7 +336,7 @@ std::optional<std::string> ConvFunctionTemplateModel::getPrefix(ParamID name) co
     return model()->fitTypePrefix();
   } else {
     auto const prefixes = model()->peakPrefixes();
-    auto const index = name > ParamID::LOR1_FWHM && name <= ParamID::LOR2_FWHM ? 1 : 0;
+    auto const index = (static_cast<int>(name) - static_cast<int>(ParamID::LOR1_AMPLITUDE)) / 3;
     if (!prefixes || index >= static_cast<int>(prefixes->size()))
       return std::optional<std::string>();
     return (*prefixes)[index];
@@ -444,15 +431,7 @@ std::string ConvFunctionTemplateModel::buildInelasticIsoRotDiffFunctionString() 
 }
 
 std::string ConvFunctionTemplateModel::buildPeaksFunctionString() const {
-  std::string functions;
-  if (m_lorentzianType == LorentzianType::OneLorentzian) {
-    functions.append(buildLorentzianFunctionString());
-  } else if (m_lorentzianType == LorentzianType::TwoLorentzians) {
-    auto const lorentzian = buildLorentzianFunctionString();
-    functions.append(lorentzian);
-    functions.append(";");
-    functions.append(lorentzian);
-  }
+  auto functions = buildLorentzianPeaksString();
   if (m_fitType == FitType::TeixeiraWater) {
     functions.append(buildTeixeiraFunctionString());
   } else if (m_fitType == FitType::TeixeiraWaterIqtFT) {
@@ -488,16 +467,8 @@ std::string ConvFunctionTemplateModel::buildPeaksFunctionString() const {
 }
 
 std::string ConvFunctionTemplateModel::buildLorentzianPeaksString() const {
-  std::string functions;
-  if (m_lorentzianType == LorentzianType::OneLorentzian) {
-    functions.append(buildLorentzianFunctionString());
-  } else if (m_lorentzianType == LorentzianType::TwoLorentzians) {
-    auto const lorentzian = buildLorentzianFunctionString();
-    functions.append(lorentzian);
-    functions.append(";");
-    functions.append(lorentzian);
-  }
-  return functions;
+  std::vector<std::string> lorentzians(getNumberOfPeaks(), buildLorentzianFunctionString());
+  return Mantid::Kernel::Strings::join(lorentzians.cbegin(), lorentzians.cend(), ";");
 }
 
 std::string ConvFunctionTemplateModel::buildFitTypeString() const {
@@ -542,18 +513,11 @@ std::string ConvFunctionTemplateModel::buildBackgroundFunctionString() const {
   return "name=" + m_backgroundSubtype.getFunctionName(m_backgroundType) + ",A0=0,constraints=(A0>0)";
 }
 
-std::optional<std::string> ConvFunctionTemplateModel::getLor1Prefix() const {
+std::optional<std::string> ConvFunctionTemplateModel::getLorPrefix(std::size_t index) const {
   auto const prefixes = model()->peakPrefixes();
-  if (!prefixes || prefixes->size() < 1)
+  if (!prefixes || prefixes->size() <= index)
     return std::optional<std::string>();
-  return (*prefixes)[0];
-}
-
-std::optional<std::string> ConvFunctionTemplateModel::getLor2Prefix() const {
-  auto const prefixes = model()->peakPrefixes();
-  if (!prefixes || prefixes->size() < 2)
-    return std::optional<std::string>();
-  return (*prefixes)[1];
+  return (*prefixes)[index];
 }
 
 std::optional<std::string> ConvFunctionTemplateModel::getFitTypePrefix() const { return model()->fitTypePrefix(); }
