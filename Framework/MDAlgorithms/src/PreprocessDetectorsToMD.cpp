@@ -260,7 +260,7 @@ void PreprocessDetectorsToMD::processDetectorsPositions(const API::MatrixWorkspa
     L2[liveDetectorsCount] = spectrumInfo.l2(i);
 
     double polar = spectrumInfo.twoTheta(i);
-    double azim = spDet.getPhi();
+    double azim = spectrumInfo.phi(i);
     TwoTheta[liveDetectorsCount] = polar;
     Azimuthal[liveDetectorsCount] = azim;
 
