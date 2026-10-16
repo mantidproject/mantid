@@ -1,0 +1,1 @@
+- The check that :ref:`algm-Rebin`, :ref:`algm-BinMD` and :ref:`algm-SliceMD` make before they run, that their output will fit in the available memory, can now be turned off by setting ``algorithms.memorycheck = Off`` in the :ref:`properties file <Properties File>`. This is useful on a machine whose reported available memory does not reflect what it can really provide.
