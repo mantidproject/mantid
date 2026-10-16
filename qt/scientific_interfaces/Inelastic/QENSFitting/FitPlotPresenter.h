@@ -39,10 +39,10 @@ public:
   virtual void handleStartXChanged(double value) = 0;
   virtual void handleEndXChanged(double value) = 0;
 
-  virtual void handleHWHMMinimumChanged(double maximum) = 0;
-  virtual void handleHWHMMaximumChanged(double minimum) = 0;
+  virtual void handleHWHMMinimumChanged(std::size_t peakIndex, double maximum) = 0;
+  virtual void handleHWHMMaximumChanged(std::size_t peakIndex, double minimum) = 0;
 
-  virtual void handleFWHMChanged(double minimum, double maximum) = 0;
+  virtual void handleFWHMChanged(std::size_t peakIndex, double minimum, double maximum) = 0;
   virtual void handleBackgroundChanged(double value) = 0;
 };
 
@@ -86,10 +86,10 @@ public:
   void handleStartXChanged(double value) override;
   void handleEndXChanged(double value) override;
 
-  void handleHWHMMinimumChanged(double maximum) override;
-  void handleHWHMMaximumChanged(double minimum) override;
+  void handleHWHMMinimumChanged(std::size_t peakIndex, double maximum) override;
+  void handleHWHMMaximumChanged(std::size_t peakIndex, double minimum) override;
 
-  void handleFWHMChanged(double minimum, double maximum) override;
+  void handleFWHMChanged(std::size_t peakIndex, double minimum, double maximum) override;
   void handleBackgroundChanged(double value) override;
 
 private:
@@ -104,8 +104,7 @@ private:
   void plotLines();
   void updatePlotRange(const std::pair<double, double> &range);
   void clearGuess();
-  void updateHWHMSelector();
-  void setHWHM(double value);
+  void updateHWHMSelectors();
   void updateBackgroundSelector();
   void updateFitRangeSelector();
   void setActiveIndex(WorkspaceID workspaceID);

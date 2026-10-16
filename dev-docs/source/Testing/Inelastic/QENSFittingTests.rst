@@ -98,8 +98,9 @@ Convolution tab
    (c)  Enable the ``Plot Guess`` checkbox - should not change anything, but should not break anything either!
 
 #. Change the ``Fit type`` to different functions and run fits
-#. Set ``Lorentzians`` to 3 and check that the parameters for a third Lorentzian appear, then click ``Run``. The fit
-   should complete, and the output workspace names should contain ``3L``
+#. Set ``Lorentzians`` to 3 and check that the parameters for a third Lorentzian appear, and that the preview plot shows
+   three pairs of HWHM lines in different colours. Drag one pair of lines; only the ``FWHM`` of that Lorentzian should
+   change. Click ``Run``; the fit should complete, and the output workspace names should contain ``3L``
 
 Function (Q) tab
 ----------------
