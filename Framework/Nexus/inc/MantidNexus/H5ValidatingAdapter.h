@@ -15,7 +15,7 @@
 #include <string>
 #include <vector>
 
-namespace Mantid::Nexus::H5ErrorHandling {
+namespace Mantid::Nexus::H5ValidatingAdapter {
 
 /** Identifies the HDF5 operation and object involved in a failure. */
 struct MANTID_NEXUS_DLL Context {
@@ -45,4 +45,4 @@ MANTID_NEXUS_DLL std::optional<std::string> readScalarVlenAttribute(hid_t attrib
 MANTID_NEXUS_DLL void selectHyperslab(hid_t dataspace, std::span<const dimsize_t> start,
                                       std::span<const dimsize_t> size, const Context &context);
 
-} // namespace Mantid::Nexus::H5ErrorHandling
+} // namespace Mantid::Nexus::H5ValidatingAdapter

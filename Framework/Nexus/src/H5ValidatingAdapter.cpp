@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidNexus/H5ErrorHandling.h"
+#include "MantidNexus/H5ValidatingAdapter.h"
 
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/UniqueID.h"
@@ -12,7 +12,7 @@
 #include <limits>
 #include <sstream>
 
-namespace Mantid::Nexus::H5ErrorHandling {
+namespace Mantid::Nexus::H5ValidatingAdapter {
 namespace {
 
 [[noreturn]] void throwError(const Context &context, const std::string &reason) {
@@ -166,4 +166,4 @@ void selectHyperslab(const hid_t dataspace, const std::span<const dimsize_t> sta
   checkStatus(H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, start.data(), nullptr, size.data(), nullptr), context);
 }
 
-} // namespace Mantid::Nexus::H5ErrorHandling
+} // namespace Mantid::Nexus::H5ValidatingAdapter

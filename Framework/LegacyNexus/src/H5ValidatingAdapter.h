@@ -15,7 +15,7 @@
 #include <string>
 #include <vector>
 
-namespace Mantid::LegacyNexus::H5ErrorHandling {
+namespace Mantid::LegacyNexus::H5ValidatingAdapter {
 
 struct Context {
   std::string operation;
@@ -45,4 +45,4 @@ MANTID_LEGACYNEXUS_DLL bool readVlenAttribute(hid_t attribute, hid_t datatype, h
 MANTID_LEGACYNEXUS_DLL bool selectHyperslab(hid_t dataspace, std::span<const hsize_t> start,
                                             std::span<const hsize_t> size, const Context &context);
 
-} // namespace Mantid::LegacyNexus::H5ErrorHandling
+} // namespace Mantid::LegacyNexus::H5ValidatingAdapter
