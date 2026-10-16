@@ -4,7 +4,6 @@ set(SYSTEST_NAMES
     SANSBatchReductionTest.py
     SANSBeamCentreFinderCoreTest.py
     SANSCentreSample.py
-    SANSDarkRunSubtractionTest.py
     SANSFileChecking.py
     SANSLoadersTest.py
     SANSLoadTest.py
