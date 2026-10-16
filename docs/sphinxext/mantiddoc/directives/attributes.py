@@ -70,3 +70,8 @@ def setup(app):
       app: The main Sphinx application object
     """
     app.add_directive("attributes", AttributesDirective)
+
+    return {
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
+    }
