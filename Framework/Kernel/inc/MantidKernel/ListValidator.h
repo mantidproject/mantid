@@ -163,6 +163,12 @@ protected:
 /// ListValidator<std::string> is used heavily
 using StringListValidator = ListValidator<std::string>;
 
+#if defined(_WIN32) && !defined(Kernel_EXPORTS)
+// Kernel itself provides the exported instantiation, and MSVC rejects extern
+// combined with dllexport.
+extern template class MANTID_KERNEL_DLL ListValidator<std::string>;
+#endif
+
 template <> inline std::string ListValidator<std::string>::checkValidity(const std::string &value) const {
   if (m_allowedValues.end() != std::find(m_allowedValues.begin(), m_allowedValues.end(), value)) {
     return "";

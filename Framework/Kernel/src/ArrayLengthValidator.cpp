@@ -165,6 +165,9 @@ template <typename TYPE> std::string ArrayLengthValidator<TYPE>::checkValidity(c
 
 // Required explicit instantiations
 template class ArrayLengthValidator<double>;
+#ifdef _WIN32
+template class MANTID_KERNEL_DLL TypedValidator<std::vector<double>>;
+#endif
 template class ArrayLengthValidator<int32_t>;
 template class ArrayLengthValidator<int64_t>;
 template class ArrayLengthValidator<std::string>;
