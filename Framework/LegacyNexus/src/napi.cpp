@@ -614,23 +614,29 @@ NXstatus NXgetdata(NXhandle fid, void *data) {
   int64_t iDim[NX_MAXRANK];
 
   const auto &nexusFuncs = handleToNexusFunc(fid);
-  LOCKED_CALL(nexusFuncs.nxgetinfo64(nexusFuncs.pNexusData, &rank, iDim, &type)); /* unstripped size if string */
+  status =
+      LOCKED_CALL(nexusFuncs.nxgetinfo64(nexusFuncs.pNexusData, &rank, iDim, &type)); /* unstripped size if string */
+  if (status != NXstatus::NX_OK)
+    return status;
   /* only strip one dimensional strings */
   if ((type == NXnumtype::CHAR) && (nexusFuncs.stripFlag == 1) && (rank == 1)) {
     char *pPtr;
     pPtr = static_cast<char *>(malloc((size_t)iDim[0] + 5));
+    if (pPtr == NULL)
+      return NXstatus::NX_ERROR;
     memset(pPtr, 0, (size_t)iDim[0] + 5);
     status = LOCKED_CALL(nexusFuncs.nxgetdata(nexusFuncs.pNexusData, pPtr));
+    if (status != NXstatus::NX_OK) {
+      free(pPtr);
+      return status;
+    }
     char const *pPtr2;
     pPtr2 = nxitrim(pPtr);
-#if defined(__GNUC__) && !(defined(__clang__))
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wstringop-truncation"
-#endif
-    strncpy(static_cast<char *>(data), pPtr2, strlen(pPtr2)); /* not NULL terminated by default */
-#if defined(__GNUC__) && !(defined(__clang__))
-#pragma GCC diagnostic pop
-#endif
+    const size_t length = strlen(pPtr2);
+    if (length == 0)
+      static_cast<char *>(data)[0] = '\0';
+    else
+      memcpy(data, pPtr2, length);
     free(pPtr);
   } else {
     status = LOCKED_CALL(nexusFuncs.nxgetdata(nexusFuncs.pNexusData, data));
@@ -657,6 +663,8 @@ NXstatus NXgetinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iT
   const auto &nexusFuncs = handleToNexusFunc(fid);
   *rank = 0;
   status = LOCKED_CALL(nexusFuncs.nxgetinfo64(nexusFuncs.pNexusData, rank, dimension, iType));
+  if (status != NXstatus::NX_OK)
+    return status;
   /*
      the length of a string may be trimmed....
    */
@@ -665,7 +673,11 @@ NXstatus NXgetinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iT
     pPtr = static_cast<char *>(malloc(static_cast<size_t>(dimension[0] + 1) * sizeof(char)));
     if (pPtr != NULL) {
       memset(pPtr, 0, static_cast<size_t>(dimension[0] + 1) * sizeof(char));
-      LOCKED_CALL(nexusFuncs.nxgetdata(nexusFuncs.pNexusData, pPtr));
+      const NXstatus readStatus = LOCKED_CALL(nexusFuncs.nxgetdata(nexusFuncs.pNexusData, pPtr));
+      if (readStatus != NXstatus::NX_OK) {
+        free(pPtr);
+        return readStatus;
+      }
       dimension[0] = static_cast<int64_t>(strlen(nxitrim(pPtr)));
       free(pPtr);
     }

@@ -9,6 +9,7 @@
 #include "MantidNexus/NexusDescriptorLazy.h"
 #include "test_helper.h"
 
+#include <H5Cpp.h>
 #include <filesystem>
 #include <fstream>
 #include <thread>
@@ -20,6 +21,20 @@ using Mantid::Nexus::NexusDescriptorLazy;
 class NexusDescriptorLazyTest : public CxxTest::TestSuite {
 
 public:
+  void test_unwritten_variable_length_nx_class_is_unknown() {
+    NexusTest::FileResource resource("NexusDescriptorLazy_empty_nx_class.h5");
+    {
+      H5::H5File file(resource.fullPath(), H5F_ACC_TRUNC);
+      auto group = file.createGroup("entry");
+      H5::StrType stringType(H5::PredType::C_S1, H5T_VARIABLE);
+      H5::DataSpace scalar(H5S_SCALAR);
+      group.createAttribute("NX_class", stringType, scalar);
+    }
+
+    NexusDescriptorLazy descriptor(resource.fullPath());
+    TS_ASSERT_EQUALS(descriptor.getAllEntries().at("/entry"), "UNKNOWN_CLASS");
+  }
+
   void test_fails_bad_file() {
     std::cout << "\nTesting bad file handling in NexusDescriptorLazy" << std::endl;
     // test opening a file that exists, but is unreadable

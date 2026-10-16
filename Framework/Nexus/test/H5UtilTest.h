@@ -252,6 +252,27 @@ public:
     removeFile(filename);
   }
 
+  void test_string_vector_preserves_unwritten_values_as_empty_strings() {
+    const std::string filename = "test_empty_string_vec.h5";
+    removeFile(filename);
+    {
+      H5File file(filename, H5F_ACC_TRUNC, H5Util::defaultFileAcc());
+      Group group = file.createGroup("entry");
+      const hsize_t dims[1]{2};
+      DataSpace dataspace(1, dims);
+      StrType datatype(0, H5T_VARIABLE);
+      group.createDataSet("values", datatype, dataspace);
+    }
+
+    {
+      H5File file(filename, H5F_ACC_RDONLY, H5Util::defaultFileAcc());
+      Group group = file.openGroup("entry");
+      const auto values = H5Util::readStringVector(group, "values");
+      TS_ASSERT_EQUALS(values, std::vector<std::string>({"", ""}));
+    }
+    removeFile(filename);
+  }
+
   void test_groupExists() {
     FileResource testInput("groupExists_test.h5");
     H5File h5(testInput.fullPath(), H5F_ACC_TRUNC, H5Util::defaultFileAcc());
