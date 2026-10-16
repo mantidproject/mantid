@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Memory.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 
 #include <cstdio>
@@ -569,6 +570,9 @@ size_t MemoryStats::getCurrentRSS() const {
  * @return error string if the requested memory would exceed the available memory; else empty string
  */
 std::string MemoryStats::checkAvailableMemory(std::size_t const requestedMemoryBytes) const {
+  if (!memoryCheckEnabled())
+    return "";
+
   std::string errorString;
   const auto availableMemory = this->availMem() * 1024; // Convert from KiB to bytes
   if (requestedMemoryBytes > availableMemory) {
@@ -579,6 +583,16 @@ std::string MemoryStats::checkAvailableMemory(std::size_t const requestedMemoryB
                   std::to_string(availableGB) + " GB is available.";
   }
   return errorString;
+}
+
+/** @brief Whether checkAvailableMemory compares a request against the available memory at all.
+ * This is controlled by the "algorithms.memorycheck" property, which is on unless it is set otherwise. Turning it
+ * off lets a calculation run on a machine whose reported available memory does not reflect what it can really
+ * provide, which is the case on machines that are given memory on demand and on our own build servers.
+ * @return true if the check should be made
+ */
+bool MemoryStats::memoryCheckEnabled() {
+  return ConfigService::Instance().getValue<bool>("algorithms.memorycheck").value_or(true);
 }
 
 // -------------------------- concrete instantiations
