@@ -427,8 +427,9 @@ std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> Instrum
   // Cross link Component and Detector info objects
   compInfo->setDetectorInfo(detInfo.get());
 
-  auto compInfoWrapper = std::make_unique<ComponentInfo>(std::move(compInfo), componentIds(), componentIdToIndexMap(),
-                                                         m_shapes, makeParameterInfo());
+  auto compInfoWrapper =
+      std::make_unique<ComponentInfo>(std::move(compInfo), componentIds(), componentIdToIndexMap(), m_shapes,
+                                      makeParameterInfo(), m_instrument->getReferenceFrame());
   auto detInfoWrapper =
       std::make_unique<DetectorInfo>(std::move(detInfo), m_instrument, detectorIds(), detectorIdToIndexMap());
 

@@ -13,6 +13,7 @@
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
@@ -63,10 +64,10 @@ ComponentInfo::ComponentInfo(
     std::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>> componentIds,
     std::shared_ptr<const std::unordered_map<Geometry::IComponent const *, size_t>> componentIdToIndexMap,
     std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> shapes,
-    std::shared_ptr<ParameterInfo> parameterInfo)
+    std::shared_ptr<ParameterInfo> parameterInfo, std::shared_ptr<const ReferenceFrame> referenceFrame)
     : m_componentInfo(std::move(componentInfo)), m_componentIds(std::move(componentIds)),
       m_compIDToIndex(std::move(componentIdToIndexMap)), m_shapes(std::move(shapes)),
-      m_parameterInfo(std::move(parameterInfo)) {
+      m_parameterInfo(std::move(parameterInfo)), m_referenceFrame(std::move(referenceFrame)) {
 
   if (m_componentIds->size() != m_compIDToIndex->size()) {
     throw std::invalid_argument("Inconsistent ID and Mapping input containers "
@@ -94,7 +95,8 @@ std::unique_ptr<Geometry::ComponentInfo> ComponentInfo::cloneWithoutDetectorInfo
  * ComponentInfo must be set up. */
 ComponentInfo::ComponentInfo(const ComponentInfo &other)
     : m_componentInfo(other.m_componentInfo->cloneWithoutDetectorInfo()), m_componentIds(other.m_componentIds),
-      m_compIDToIndex(other.m_compIDToIndex), m_shapes(other.m_shapes), m_parameterInfo(other.m_parameterInfo) {}
+      m_compIDToIndex(other.m_compIDToIndex), m_shapes(other.m_shapes), m_parameterInfo(other.m_parameterInfo),
+      m_referenceFrame(other.m_referenceFrame) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 ComponentInfo::~ComponentInfo() = default;
@@ -250,6 +252,13 @@ size_t ComponentInfo::root() const { return m_componentInfo->root(); }
 
 void ComponentInfo::setPosition(const size_t componentIndex, const Kernel::V3D &newPosition) {
   m_componentInfo->setPosition(componentIndex, Kernel::toVector3d(newPosition));
+}
+
+std::shared_ptr<const ReferenceFrame> ComponentInfo::referenceFrame() const {
+  if (m_referenceFrame)
+    return m_referenceFrame;
+  static const auto defaultFrame = std::make_shared<const ReferenceFrame>();
+  return defaultFrame;
 }
 
 void ComponentInfo::setRotation(const size_t componentIndex, const Kernel::Quat &newRotation) {

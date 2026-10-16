@@ -28,6 +28,7 @@ class SpectrumInfo;
 namespace Geometry {
 class IDetector;
 class Instrument;
+class ReferenceFrame;
 
 /** Geometry::DetectorInfo is an intermediate step towards a DetectorInfo that
   is part of Instrument-2.0. The aim is to provide a nearly identical interface
@@ -131,9 +132,10 @@ private:
   /// Pointer to the actual DetectorInfo object (non-wrapping part).
   std::unique_ptr<Beamline::DetectorInfo> m_detectorInfo;
 
-  std::shared_ptr<const Geometry::Instrument> m_instrument;
-  std::shared_ptr<const std::vector<detid_t>> m_detectorIDs;
-  std::shared_ptr<const std::unordered_map<detid_t, size_t>> m_detIDToIndex;
+  std::shared_ptr<Geometry::Instrument const> m_instrument;
+  std::shared_ptr<std::vector<detid_t> const> m_detectorIDs;
+  std::shared_ptr<std::unordered_map<detid_t, size_t> const> m_detIDToIndex;
+  std::shared_ptr<Geometry::ReferenceFrame const> m_referenceFrame;
 
   mutable std::vector<std::shared_ptr<const Geometry::IDetector>> m_lastDetector;
   mutable std::vector<size_t> m_lastIndex;

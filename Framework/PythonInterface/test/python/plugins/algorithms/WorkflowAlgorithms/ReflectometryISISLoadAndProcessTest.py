@@ -880,7 +880,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
 
     def test_nominal_specular_pixel_is_forwarded_to_polref_calibration(self):
         workspace = MagicMock()
-        workspace.getInstrument.return_value.getName.return_value = "POLREF"
+        workspace.getInstrumentName.return_value = "POLREF"
         calibration_alg = MagicMock()
         alg = ReflectometryISISLoadAndProcess()
         alg.initialize()
@@ -897,7 +897,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
 
     def test_polref_calibration_rejects_detector_correction(self):
         workspace = MagicMock()
-        workspace.getInstrument.return_value.getName.return_value = "POLREF"
+        workspace.getInstrumentName.return_value = "POLREF"
         alg = ReflectometryISISLoadAndProcess()
         alg.initialize()
 
@@ -906,7 +906,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
 
     def test_non_polref_calibration_does_not_reject_detector_correction(self):
         workspace = MagicMock()
-        workspace.getInstrument.return_value.getName.return_value = "INTER"
+        workspace.getInstrumentName.return_value = "INTER"
         alg = ReflectometryISISLoadAndProcess()
         alg.initialize()
 
