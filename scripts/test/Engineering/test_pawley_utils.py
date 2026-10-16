@@ -22,7 +22,8 @@ from mantid.simpleapi import (
 )
 from mantid.geometry import CrystalStructure
 from mantid.kernel import V3D
-from Engineering.pawley_utils import Phase, GaussianProfile, PVProfile, PawleyPattern1D, PawleyPattern2D, BackToBackGauss
+from Engineering.pawley_utils import Phase, GaussianProfile, PVProfile, PawleyPattern1D, BackToBackGauss
+from Engineering.poldi_pawley_utils import PawleyPattern2D
 from plugins.algorithms.poldi_utils import (
     load_poldi,
     _do_interp_with_flux_correction,
@@ -474,8 +475,8 @@ class PawleyPattern2DTest(unittest.TestCase):
         # sum of resids should be much smaller than global-scale=True (as background optimised)
         self.assertAlmostEqual(sum(resids), 0, delta=4e-10)
 
-    @patch("Engineering.pawley_utils.PawleyPattern2D._estimate_intensities")
-    @patch("Engineering.pawley_utils.logger")
+    @patch("Engineering.poldi_pawley_utils.PawleyPattern2D._estimate_intensities")
+    @patch("Engineering.poldi_pawley_utils.logger")
     def test_set_params_from_pawley1d_different_number_phases(self, mock_log, mock_estimate_intens):
         mock_pawley1d = self._make_mock_pawley1d()
         mock_pawley1d.phases = 2 * mock_pawley1d.phases
@@ -489,8 +490,8 @@ class PawleyPattern2DTest(unittest.TestCase):
         assert_array_almost_equal(pawley.profile_params[0], initial_profile)
         mock_estimate_intens.assert_not_called()
 
-    @patch("Engineering.pawley_utils.PawleyPattern2D._estimate_intensities")
-    @patch("Engineering.pawley_utils.logger")
+    @patch("Engineering.poldi_pawley_utils.PawleyPattern2D._estimate_intensities")
+    @patch("Engineering.poldi_pawley_utils.logger")
     def test_set_params_from_pawley1d_different_nhkls(self, mock_log, mock_estimate_intens):
         mock_pawley1d = self._make_mock_pawley1d()
         mock_pawley1d.phases[0].get_param_names.return_value = self.phase.get_param_names()
@@ -504,8 +505,8 @@ class PawleyPattern2DTest(unittest.TestCase):
         assert_array_almost_equal(pawley.profile_params[0], mock_pawley1d.profile_params[0])
         mock_estimate_intens.assert_not_called()
 
-    @patch("Engineering.pawley_utils.PawleyPattern2D._estimate_intensities")
-    @patch("Engineering.pawley_utils.logger")
+    @patch("Engineering.poldi_pawley_utils.PawleyPattern2D._estimate_intensities")
+    @patch("Engineering.poldi_pawley_utils.logger")
     def test_set_params_from_pawley1d_successful(self, mock_log, mock_estimate_intens):
         mock_pawley1d = self._make_mock_pawley1d()
         mock_pawley1d.phases[0].get_param_names.return_value = self.phase.get_param_names()
@@ -595,8 +596,8 @@ class PawleyPattern2DTest(unittest.TestCase):
         pawley.fit(bounds=explicit_bounds)
         self.assertIs(mock_ls.call_args[1]["bounds"], explicit_bounds)
 
-    @patch("Engineering.pawley_utils.PawleyPattern2D._estimate_intensities")
-    @patch("Engineering.pawley_utils.logger")
+    @patch("Engineering.poldi_pawley_utils.PawleyPattern2D._estimate_intensities")
+    @patch("Engineering.poldi_pawley_utils.logger")
     def test_set_params_from_pawley1d_preserves_existing_bounds(self, mock_log, mock_estimate_intens):
         mock_pawley1d = self._make_mock_pawley1d()
         mock_pawley1d.phases[0].nhkls.return_value = self.phase.nhkls()
@@ -671,7 +672,7 @@ class PawleyPattern2DNoConstraintsTest(unittest.TestCase):
         self.assertAlmostEqual(pawley.param_bounds_abs_min, 1e-6)
 
     @patch("Engineering.pawley_utils.OutputTableMixin.get_parameter_errors")
-    @patch("Engineering.pawley_utils.least_squares")
+    @patch("Engineering.poldi_pawley_utils.least_squares")
     def test_fit_passes_bounds_computed_from_initial_params(self, mock_ls, mock_err):
         frac, abs_min = 0.1, 1e-4
         pawley = PawleyPattern2D(**self.init_kwargs).create_no_constraints_fit(param_bounds_abs_min=abs_min)
@@ -686,7 +687,7 @@ class PawleyPattern2DNoConstraintsTest(unittest.TestCase):
         assert_array_almost_equal(ub, initial_params + expected_margin)
 
     @patch("Engineering.pawley_utils.OutputTableMixin.get_parameter_errors")
-    @patch("Engineering.pawley_utils.least_squares")
+    @patch("Engineering.poldi_pawley_utils.least_squares")
     def test_fit_uses_abs_min_floor_for_zero_valued_params(self, mock_ls, mock_err):
         abs_min = 1e-4
         # FlatBackground(A0=0) with global_scale=True gives a zero-valued free param
@@ -704,7 +705,7 @@ class PawleyPattern2DNoConstraintsTest(unittest.TestCase):
         assert_array_almost_equal(lb[zero_mask], np.full(zero_mask.sum(), -abs_min))
 
     @patch("Engineering.pawley_utils.OutputTableMixin.get_parameter_errors")
-    @patch("Engineering.pawley_utils.least_squares")
+    @patch("Engineering.poldi_pawley_utils.least_squares")
     def test_fit_does_not_override_explicit_bounds(self, mock_ls, mock_err):
         pawley = PawleyPattern2D(**self.init_kwargs).create_no_constraints_fit()
         pawley.set_bounds_all(mode="fractional", value=0.1)
