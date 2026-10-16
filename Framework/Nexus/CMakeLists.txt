@@ -1,4 +1,5 @@
 set(SRC_FILES
+    src/H5ErrorHandling.cpp
     src/H5Util.cpp
     src/NexusClasses.cpp
     src/inverted_napi.cpp
@@ -12,6 +13,7 @@ set(SRC_FILES
 )
 
 set(INC_FILES
+    inc/MantidNexus/H5ErrorHandling.h
     inc/MantidNexus/H5Util.h
     inc/MantidNexus/NexusClasses.h
     inc/MantidNexus/NexusIOHelper.h
@@ -27,6 +29,7 @@ set(INC_FILES
 )
 
 set(TEST_FILES
+    H5ErrorHandlingTest.h
     H5UtilTest.h
     NexusIOHelperTest.h
     NexusClassesTest.h

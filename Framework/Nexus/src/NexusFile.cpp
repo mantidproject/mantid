@@ -1,4 +1,5 @@
 #include "MantidNexus/NexusFile.h"
+#include "MantidNexus/H5ErrorHandling.h"
 #include "MantidNexus/H5Util.h"
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/hdf5_type_helper.h"
@@ -679,45 +680,37 @@ template <typename NumT> void File::putData(const vector<NumT> &data) {
 // GET DATA -- STRING / CHAR
 
 template <> void File::getData<char>(char *data) {
-  if (H5Iis_valid(m_current_data_id) <= 0) {
-    throw NXEXCEPTION("getData ERROR: no dataset open");
-  }
+  if (data == nullptr)
+    throw NXEXCEPTION("Supplied null pointer to hold data");
+  const H5ErrorHandling::Context context{__func__, m_filename, m_address.string()};
+  H5ErrorHandling::checkId(m_current_data_id, context);
 
-  hsize_t dims[H5S_MAX_RANK] = {0};
-  int rank = H5Sget_simple_extent_dims(m_current_space_id, dims, nullptr);
-  herr_t ret = -1;
+  const auto dims = H5ErrorHandling::dimensions(m_current_space_id, context);
+  const auto rank = static_cast<int>(dims.size());
   std::size_t size = 0;
   std::vector<char> buffer;
 
-  if (H5Tis_variable_str(m_current_type_id)) {
-    const hssize_t elementCount = H5Sget_simple_extent_npoints(m_current_space_id);
-    if (elementCount < 0)
-      throw NXEXCEPTION("getData ERROR: failed to determine variable-length string dataset size");
-    if (elementCount != 1)
-      throw NXEXCEPTION("getData ERROR: arrays of variable-length strings require a string-vector reader");
-
-    char *cdata = nullptr;
-    ret = H5Dread(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &cdata);
-    if (ret < 0)
-      throw NXEXCEPTION("getData ERROR: failed to read variable length string dataset");
-
-    if (cdata == nullptr) {
+  if (H5ErrorHandling::checkTriState(H5Tis_variable_str(m_current_type_id), context)) {
+    const auto value =
+        H5ErrorHandling::readScalarVlenDataset(m_current_data_id, m_current_type_id, m_current_space_id, context);
+    if (!value) {
       buffer.assign(1, '\0');
     } else {
-      size = strlen(cdata);
-      buffer.assign(cdata, cdata + size + 1);
-      H5free_memory(cdata);
+      size = value->size();
+      buffer.assign(value->begin(), value->end());
+      buffer.push_back('\0');
     }
   } else {
-    hsize_t len = H5Tget_size(m_current_type_id);
-    for (int i = 0; i < rank; i++) {
-      len *= (dims[i] > 1 ? dims[i] : 1);
-    }
+    const auto typeSize = H5Tget_size(m_current_type_id);
+    if (typeSize == 0)
+      throw NXEXCEPTION("getData ERROR: failed to determine string datatype size");
+    DimVector sizingDims{static_cast<dimsize_t>(typeSize)};
+    std::transform(dims.cbegin(), dims.cend(), std::back_inserter(sizingDims),
+                   [](const auto dimension) { return std::max<dimsize_t>(dimension, 1); });
+    const auto len = H5ErrorHandling::elementCount(sizingDims, context);
 
     buffer.resize(len + 1, '\0');
-    ret = H5Dread(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer.data());
-    if (ret < 0)
-      throw NXEXCEPTION("getData ERROR: failed to read string\n");
+    H5ErrorHandling::readDataset(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, buffer.data(), context);
 
     buffer[len] = '\0';
     size = len;
@@ -767,7 +760,8 @@ string File::getStrData() {
     throw NXEXCEPTION(msg.str());
   }
   // validate rank
-  int const rank = H5Sget_simple_extent_ndims(m_current_space_id);
+  const H5ErrorHandling::Context context{__func__, m_filename, m_address.string()};
+  int const rank = H5ErrorHandling::rank(m_current_space_id, context);
   if (rank > 1) {
     stringstream msg;
     msg << "getStrData() only understands rank<=1 data. Found rank=" << rank;
@@ -775,28 +769,13 @@ string File::getStrData() {
   }
   // determine storage size: type_size × npoints (mirrors H5Cpp's getInMemDataSize approach)
   dimsize_t storage_size;
-  if (H5Tis_variable_str(m_current_type_id)) {
-    const hssize_t elementCount = H5Sget_simple_extent_npoints(m_current_space_id);
-    if (elementCount < 0)
-      throw NXEXCEPTION("Failed to determine variable-length string dataset size");
-    if (elementCount != 1)
-      throw NXEXCEPTION("getStrData() does not support arrays of variable-length strings");
-    if (rank == 0) {
-      // H5Dvlen_get_buf_size is unreliable with H5S_SCALAR in some HDF5 versions.
-      char *vbuf = nullptr;
-      if (H5Dread(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vbuf) < 0)
-        throw NXEXCEPTION("Failed to read scalar variable-length string");
-      storage_size = vbuf == nullptr ? 0 : strlen(vbuf);
-      if (vbuf != nullptr)
-        H5free_memory(vbuf);
-    } else if (H5Dvlen_get_buf_size(m_current_data_id, m_current_type_id, m_current_space_id, &storage_size) < 0) {
-      throw NXEXCEPTION("Failed to read string length for variable-length string");
-    }
+  if (H5ErrorHandling::checkTriState(H5Tis_variable_str(m_current_type_id), context)) {
+    const auto value =
+        H5ErrorHandling::readScalarVlenDataset(m_current_data_id, m_current_type_id, m_current_space_id, context);
+    storage_size = value ? value->size() : 0;
   } else {
-    hssize_t npoints = H5Sget_simple_extent_npoints(m_current_space_id);
-    if (npoints < 0)
-      throw NXEXCEPTION("Failed to get dataspace extent");
-    storage_size = H5Tget_size(m_current_type_id) * static_cast<dimsize_t>(npoints);
+    storage_size = H5ErrorHandling::elementCount(
+        DimVector{H5ErrorHandling::elementCount(m_current_space_id, context), H5Tget_size(m_current_type_id)}, context);
   }
   std::vector<char> value(static_cast<size_t>(storage_size) + 1, '\0');
   this->getData(value.data());
@@ -810,32 +789,27 @@ template <typename NumT> void File::getData(NumT *data) {
     throw NXEXCEPTION("Supplied null pointer to hold data");
   }
 
-  if (H5Iis_valid(m_current_data_id) <= 0) {
-    throw NXEXCEPTION("No dataset open");
-  }
+  const H5ErrorHandling::Context context{__func__, m_filename, m_address.string()};
+  H5ErrorHandling::checkId(m_current_data_id, context);
 
-  herr_t ret = -1;
-  hsize_t dims[H5S_MAX_RANK];
-  H5Sget_simple_extent_dims(m_current_space_id, dims, nullptr);
-  hsize_t ndims = H5Sget_simple_extent_ndims(m_current_space_id);
+  const int ndims = H5ErrorHandling::rank(m_current_space_id, context);
 
   if (ndims == 0) {
     DataTypeID datatype = H5Dget_type(m_current_data_id);
     DataSpaceID filespace = H5Dget_space(m_current_data_id);
     DataSpaceID memspace_id = H5Screate(H5S_SCALAR);
-    H5Sselect_all(filespace);
-    ret = H5Dread(m_current_data_id, datatype, memspace_id, filespace, H5P_DEFAULT, data);
+    H5ErrorHandling::checkId(datatype, context);
+    H5ErrorHandling::checkId(filespace, context);
+    H5ErrorHandling::checkId(memspace_id, context);
+    H5ErrorHandling::checkStatus(H5Sselect_all(filespace), context);
+    H5ErrorHandling::readDataset(m_current_data_id, datatype, memspace_id, filespace, data, context);
   } else {
     if (H5Tget_class(m_current_type_id) == H5T_STRING) {
       this->getData<char>(reinterpret_cast<char *>(data));
       return;
     }
     hid_t memtype_id = h5MemType(m_current_type_id);
-    ret = H5Dread(m_current_data_id, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
-  }
-
-  if (ret < 0) {
-    throw NXEXCEPTION("Failed to read dataset");
+    H5ErrorHandling::readDataset(m_current_data_id, memtype_id, H5S_ALL, H5S_ALL, data, context);
   }
 }
 
@@ -848,9 +822,8 @@ template <typename NumT> void File::getData(vector<NumT> &data) {
     throw NXEXCEPTION(msg.str());
   }
   // determine the number of elements
-  size_t length =
-      std::accumulate(info.dims.cbegin(), info.dims.cend(), static_cast<size_t>(1),
-                      [](auto const subtotal, auto const &value) { return subtotal * static_cast<size_t>(value); });
+  const H5ErrorHandling::Context context{__func__, m_filename, m_address.string()};
+  const size_t length = H5ErrorHandling::elementCount(info.dims, context);
 
   // allocate memory to put the data into
   // need to use resize() rather than reserve() so vector length gets set
@@ -1117,6 +1090,7 @@ template <typename NumT> void File::putSlab(vector<NumT> const &data, dimsize_t 
 }
 
 template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, DimVector const &size) {
+  const H5ErrorHandling::Context context{__func__, m_filename, m_address.string()};
   if (data == nullptr) {
     throw NXEXCEPTION("Supplied null pointer to getSlab");
   }
@@ -1145,25 +1119,24 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
     memtype = h5MemType(m_current_type_id);
   }
 
-  herr_t iRet = -1;
-  int rank = H5Sget_simple_extent_ndims(m_current_space_id);
-  if (rank < 0) {
-    throw NXEXCEPTION("Failed to fetch rank for slab data");
-  } else if (start.size() != static_cast<size_t>(rank)) {
+  const int rank = H5ErrorHandling::rank(m_current_space_id, context);
+  if (start.size() != static_cast<size_t>(rank)) {
     stringstream msg;
     msg << "In getSlab supplied rank=" << start.size() << " must match dataset rank=" << rank;
     throw NXEXCEPTION(msg.str());
   } else if (rank == 0) { // this is an unslabbable SCALAR
     DataSpaceID memspace = H5Screate(H5S_SCALAR);
     DataSpaceID filespace = H5Dget_space(m_current_data_id);
-    H5Sselect_all(filespace);
-    iRet = H5Dread(m_current_data_id, memtype, memspace, filespace, H5P_DEFAULT, data);
+    H5ErrorHandling::checkId(memspace, context);
+    H5ErrorHandling::checkId(filespace, context);
+    H5ErrorHandling::checkStatus(H5Sselect_all(filespace), context);
+    H5ErrorHandling::readDataset(m_current_data_id, memtype, memspace, filespace, data, context);
   } else {
     DimVector myStart(start.cbegin(), start.cend());
     DimVector mySize(size.cbegin(), size.cend());
     DimVector mStart(rank, 0);
     if (tclass == H5T_STRING) {
-      if (H5Tis_variable_str(m_current_type_id))
+      if (H5ErrorHandling::checkTriState(H5Tis_variable_str(m_current_type_id), context))
         throw NXEXCEPTION("getSlab does not support variable-length string datasets");
       if (rank != 1)
         throw NXEXCEPTION("getSlab does not support multidimensional string datasets");
@@ -1171,58 +1144,44 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
       if (start[0] > stringSize || size[0] > stringSize - start[0])
         throw NXEXCEPTION("Requested string slab is outside the dataset bounds");
       std::vector<char> tmpData(stringSize + 1, '\0');
-      iRet = H5Dread(m_current_data_id, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmpData.data());
-      if (iRet >= 0)
-        memcpy(data, tmpData.data() + start[0], static_cast<size_t>(size[0]));
-      if (iRet < 0)
-        throw NXEXCEPTION("Reading slab failed");
+      H5ErrorHandling::readDataset(m_current_data_id, memtype, H5S_ALL, H5S_ALL, tmpData.data(), context);
+      memcpy(data, tmpData.data() + start[0], static_cast<size_t>(size[0]));
       return;
     }
 
-    iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart.data(), nullptr, mySize.data(), nullptr);
-    if (iRet < 0) {
-      throw NXEXCEPTION("Selecting slab failed");
-    }
+    H5ErrorHandling::selectHyperslab(m_current_space_id, myStart, mySize, context);
 
     DataSpaceID memspace = H5Screate_simple(rank, mySize.data(), nullptr);
-    iRet = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, mStart.data(), nullptr, mySize.data(), nullptr);
-    if (iRet < 0) {
-      throw NXEXCEPTION("Selecting memspace failed");
-    }
-    iRet = H5Dread(m_current_data_id, memtype, memspace, m_current_space_id, H5P_DEFAULT, data);
-  }
-  /* cleanup */
-  if (iRet < 0) {
-    throw NXEXCEPTION("Reading slab failed");
+    H5ErrorHandling::checkId(memspace, context);
+    H5ErrorHandling::selectHyperslab(memspace, mStart, mySize, context);
+    H5ErrorHandling::readDataset(m_current_data_id, memtype, memspace, m_current_space_id, data, context);
   }
 }
 
 void File::getDataCoerce(vector<int> &data) {
   Info info = this->getInfo();
+  const H5ErrorHandling::Context context{__func__, m_filename, m_address.string()};
   // if it is not a float or special
   if (!info.type.isFloat() && !info.type.isSpecial()) {
     if (H5Iis_valid(m_current_data_id) <= 0) {
       throw NXEXCEPTION("No dataset open");
     }
 
-    size_t length =
-        std::accumulate(info.dims.cbegin(), info.dims.cend(), static_cast<size_t>(1),
-                        [](auto const subtotal, auto const &value) { return subtotal * static_cast<size_t>(value); });
+    const size_t length = H5ErrorHandling::elementCount(info.dims, context);
     data.resize(length);
 
-    hsize_t ndims = H5Sget_simple_extent_ndims(m_current_space_id);
+    const int ndims = H5ErrorHandling::rank(m_current_space_id, context);
     DataTypeID datatype = H5Tcopy(H5T_NATIVE_INT);
-    herr_t ret = -1;
+    H5ErrorHandling::checkId(datatype, context);
     if (ndims == 0) {
       DataSpaceID filespace = H5Dget_space(m_current_data_id);
       DataSpaceID memspace = H5Screate(H5S_SCALAR);
-      H5Sselect_all(filespace);
-      ret = H5Dread(m_current_data_id, datatype, memspace, filespace, H5P_DEFAULT, data.data());
+      H5ErrorHandling::checkId(filespace, context);
+      H5ErrorHandling::checkId(memspace, context);
+      H5ErrorHandling::checkStatus(H5Sselect_all(filespace), context);
+      H5ErrorHandling::readDataset(m_current_data_id, datatype, memspace, filespace, data.data(), context);
     } else {
-      ret = H5Dread(m_current_data_id, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data.data());
-    }
-    if (ret < 0) {
-      throw NXEXCEPTION("Failed to read dataset");
+      H5ErrorHandling::readDataset(m_current_data_id, datatype, H5S_ALL, H5S_ALL, data.data(), context);
     }
   } else {
     throw NXEXCEPTION("NexusFile::getDataCoerce(): Could not coerce to int.");
@@ -1231,29 +1190,27 @@ void File::getDataCoerce(vector<int> &data) {
 
 void File::getDataCoerce(vector<double> &data) {
   Info info = this->getInfo();
+  const H5ErrorHandling::Context context{__func__, m_filename, m_address.string()};
   // if it is not a special
   if (!info.type.isSpecial()) {
     if (H5Iis_valid(m_current_data_id) <= 0) {
       throw NXEXCEPTION("No dataset open");
     }
-    size_t length =
-        std::accumulate(info.dims.cbegin(), info.dims.cend(), static_cast<size_t>(1),
-                        [](auto const subtotal, auto const &value) { return subtotal * static_cast<size_t>(value); });
+    const size_t length = H5ErrorHandling::elementCount(info.dims, context);
     data.resize(length);
 
-    hsize_t ndims = H5Sget_simple_extent_ndims(m_current_space_id);
+    const int ndims = H5ErrorHandling::rank(m_current_space_id, context);
     DataTypeID datatype = H5Tcopy(H5T_NATIVE_DOUBLE);
-    herr_t ret = -1;
+    H5ErrorHandling::checkId(datatype, context);
     if (ndims == 0) {
       DataSpaceID filespace = H5Dget_space(m_current_data_id);
       DataSpaceID memspace = H5Screate(H5S_SCALAR);
-      H5Sselect_all(filespace);
-      ret = H5Dread(m_current_data_id, datatype, memspace, filespace, H5P_DEFAULT, data.data());
+      H5ErrorHandling::checkId(filespace, context);
+      H5ErrorHandling::checkId(memspace, context);
+      H5ErrorHandling::checkStatus(H5Sselect_all(filespace), context);
+      H5ErrorHandling::readDataset(m_current_data_id, datatype, memspace, filespace, data.data(), context);
     } else {
-      ret = H5Dread(m_current_data_id, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data.data());
-    }
-    if (ret < 0) {
-      throw NXEXCEPTION("Failed to read dataset");
+      H5ErrorHandling::readDataset(m_current_data_id, datatype, H5S_ALL, H5S_ALL, data.data(), context);
     }
   } else {
     throw NXEXCEPTION("NexusFile::getDataCoerce(): Could not coerce to double.");
@@ -1376,6 +1333,7 @@ void File::readData(std::string const &dataName, std::string &data) {
 
 Info File::getInfo() {
   Info info;
+  const H5ErrorHandling::Context context{__func__, m_filename, m_address.string()};
 
   // check if there is an open dataset
   if (!isDataSetOpen()) {
@@ -1385,10 +1343,8 @@ Info File::getInfo() {
   // read information
   H5T_class_t tclass = H5Tget_class(m_current_type_id);
   info.type = hdf5ToNXType(tclass, m_current_type_id);
-  int rank = H5Sget_simple_extent_ndims(m_current_space_id);
-  if (rank < 0) {
-    throw NXEXCEPTION("Cannot get rank for current dataset");
-  } else if (rank == 0) {
+  int rank = H5ErrorHandling::rank(m_current_space_id, context);
+  if (rank == 0) {
     // HDF5 scalars have no dataspace dimensions.
     // String scalars: promote to rank-1 so the sizing and CHAR-trim blocks below
     // operate uniformly on dims[0].
@@ -1400,8 +1356,7 @@ Info File::getInfo() {
       info.dims = {1};
     }
   } else {
-    info.dims.resize(rank);
-    H5Sget_simple_extent_dims(m_current_space_id, info.dims.data(), nullptr);
+    info.dims = H5ErrorHandling::dimensions(m_current_space_id, context);
   }
   // For string datasets the last dimension is an element count, but callers expect
   // it to hold the byte length of the string.  Only apply when dims.back()==1
@@ -1411,19 +1366,10 @@ Info File::getInfo() {
   // so they fall into this branch uniformly.
   if (tclass == H5T_STRING && !info.dims.empty() && info.dims.back() == 1) {
     dimsize_t length;
-    if (H5Tis_variable_str(m_current_type_id)) {
-      if (H5Sget_simple_extent_ndims(m_current_space_id) == 0) {
-        // H5Dvlen_get_buf_size is unreliable with H5S_SCALAR in some HDF5 versions.
-        // Read the single vlen string and measure directly.
-        char *vbuf = nullptr;
-        if (H5Dread(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vbuf) < 0)
-          throw NXEXCEPTION("Failed to read scalar variable-length string length");
-        length = vbuf == nullptr ? 0 : strlen(vbuf);
-        if (vbuf != nullptr)
-          H5free_memory(vbuf);
-      } else if (H5Dvlen_get_buf_size(m_current_data_id, m_current_type_id, m_current_space_id, &length) < 0) {
-        throw NXEXCEPTION("Failed to read string length for variable-length string");
-      }
+    if (H5ErrorHandling::checkTriState(H5Tis_variable_str(m_current_type_id), context)) {
+      const auto value =
+          H5ErrorHandling::readScalarVlenDataset(m_current_data_id, m_current_type_id, m_current_space_id, context);
+      length = value ? value->size() : 0;
     } else {
       // fixed-length: byte width is encoded in the datatype itself
       length = H5Tget_size(m_current_type_id);
@@ -1571,9 +1517,10 @@ string File::getStrAttr(std::string const &name) {
 
 std::vector<AttrInfo> File::getAttrInfos() {
   hid_t current = getCurrentId();
+  const H5ErrorHandling::Context context{__func__, m_filename, m_address.string()};
   // get the number of attributes
   H5O_info2_t oinfo; /* Object info */
-  H5Oget_info3(current, &oinfo, H5O_INFO_NUM_ATTRS);
+  H5ErrorHandling::checkStatus(H5Oget_info3(current, &oinfo, H5O_INFO_NUM_ATTRS), context);
   std::size_t num_attr = oinfo.num_attrs;
   std::vector<AttrInfo> infos;
   infos.reserve(num_attr);
@@ -1581,46 +1528,47 @@ std::vector<AttrInfo> File::getAttrInfos() {
     // open the attribute -- see link below for example, implemented in H5::H5Object:getNumAttrs()
     // https://github.com/HDFGroup/hdf5/blob/51dd7758fe5d79ec61e457ff30c697ceccb32e90/c%2B%2B/src/H5Object.cpp#L192
     AttributeID attr = H5Aopen_by_idx(current, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, idx, H5P_DEFAULT, H5P_DEFAULT);
+    H5ErrorHandling::checkId(attr, context);
     // 1. get the attribute name
-    std::size_t namelen = H5Aget_name(attr, 0, nullptr);
-    char *cname = new char[namelen + 1];
-    H5Aget_name(attr, namelen + 1, cname);
-    cname[namelen] = '\0'; // ensure null termination
+    const auto namelen = H5Aget_name(attr, 0, nullptr);
+    if (namelen < 0)
+      throw NXEXCEPTION("ERROR determining attribute name");
+    std::vector<char> cname(static_cast<std::size_t>(namelen) + 1, '\0');
+    if (H5Aget_name(attr, cname.size(), cname.data()) < 0)
+      throw NXEXCEPTION("ERROR reading attribute name");
     // do not include the group class spec
-    if (GROUP_CLASS_SPEC == cname) {
-      delete[] cname;
+    if (GROUP_CLASS_SPEC == cname.data()) {
       continue;
     }
     // 2. get the attribute type
     DataTypeID attrtype = H5Aget_type(attr);
+    H5ErrorHandling::checkId(attrtype, context);
     H5T_class_t attrclass = H5Tget_class(attrtype);
     NXnumtype type = hdf5ToNXType(attrclass, attrtype);
     // 3. get the attribute length
     DataSpaceID attrspace = H5Aget_space(attr);
-    int rank = H5Sget_simple_extent_ndims(attrspace);
+    H5ErrorHandling::checkId(attrspace, context);
+    const int rank = H5ErrorHandling::rank(attrspace, context);
     if (rank > 2 || (rank == 2 && type != NXnumtype::CHAR)) {
-      delete[] cname;
       throw NXEXCEPTION("ERROR iterating through attributes found array attribute not understood by this api");
     }
-    DimVector dims(rank, 0);
-    H5Sget_simple_extent_dims(attrspace, dims.data(), nullptr);
+    const DimVector dims = H5ErrorHandling::dimensions(attrspace, context);
     std::size_t length = 1;
     if (type == NXnumtype::CHAR) {
-      length = getStrAttr(cname).size();
+      length = getStrAttr(cname.data()).size();
     }
-    for (int d = 0; d < rank; d++) {
-      length *= dims[d];
-    }
+    const auto dimensionCount = H5ErrorHandling::elementCount(dims, context);
+    length = H5ErrorHandling::elementCount(DimVector{length, dimensionCount}, context);
     // now add info to the vector
-    infos.emplace_back(type, length, cname);
-    delete[] cname;
+    infos.emplace_back(type, length, cname.data());
   }
   return infos;
 }
 
 bool File::hasAttr(const std::string &name) const {
   hid_t current = getCurrentId();
-  return H5Aexists(current, name.c_str()) > 0;
+  const H5ErrorHandling::Context context{__func__, m_filename, m_address.string()};
+  return H5ErrorHandling::checkTriState(H5Aexists(current, name.c_str()), context);
 }
 
 //------------------------------------------------------------------------------------------------------------------

@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexus/H5Util.h"
+#include "MantidNexus/H5ErrorHandling.h"
 #include "MantidNexus/UniqueID.h"
 #include <Poco/Logger.h>
 
@@ -312,23 +313,17 @@ std::vector<std::string> readStringVector(Group &group, const std::string &name)
 }
 
 std::vector<std::string> readStringVector(DataSet &dataset) {
-  hsize_t dims[1];
-  std::vector<std::string> result;
   DataSpace dataspace = dataset.getSpace();
   DataType datatype = dataset.getDataType();
+  const H5ErrorHandling::Context context{"readStringVector", {}, {}};
 
-  if (dataspace.getSimpleExtentNdims() != 1)
+  if (H5ErrorHandling::rank(dataspace.getId(), context) != 1)
     throw DataSpaceIException("readStringVector requires a rank-one dataset");
-  dataspace.getSimpleExtentDims(dims, nullptr);
-  result.reserve(dims[0]);
-
-  std::vector<char *> rdata(dims[0], nullptr);
-  dataset.read(rdata.data(), datatype);
-
-  for (size_t i = 0; i < dims[0]; ++i)
-    result.emplace_back(rdata[i] == nullptr ? std::string() : std::string(rdata[i]));
-
-  dataset.vlenReclaim(rdata.data(), datatype, dataspace);
+  const auto values = H5ErrorHandling::readVlenDataset(dataset.getId(), datatype.getId(), dataspace.getId(), context);
+  std::vector<std::string> result;
+  result.reserve(values.size());
+  std::transform(values.cbegin(), values.cend(), std::back_inserter(result),
+                 [](const auto &value) { return value.value_or(std::string{}); });
   dataset.close();
 
   return result;
