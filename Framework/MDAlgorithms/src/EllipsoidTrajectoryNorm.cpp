@@ -89,33 +89,40 @@ void forEachIntersection(const ScaledEllipsoid &e, const std::vector<double> &ux
     }
   }
 }
+/// the (row, column) of each element of a symmetric 3x3 matrix stored as xx, yy, zz, xy, xz, yz
+constexpr std::array<std::array<std::size_t, 2>, 6> SYMMETRIC_PAIRS{{{0, 0}, {1, 1}, {2, 2}, {0, 1}, {0, 2}, {1, 2}}};
+
 /// beyond this many standard deviations a Gaussian's contribution is negligible (exp(-32))
 constexpr double GAUSSIAN_CUTOFF = 8.0;
 
 /**
- * Integrals of G(k) and k G(k) with respect to Phi(k) over (lo, hi], for
+ * Integrals of G(k), k G(k) and k^2 G(k) with respect to Phi(k) over (lo, hi], for
  * G(k) = h exp(-(k - k0)^2 / (2 s^2)) and Phi the cumulative flux (x, y)
  * interpolated as interpolateIntegratedFlux does: linear between points,
  * with jumps at x[0] (from 0), at the end of the last interpolated interval
  * (to y.back()) and at any repeated x.
  */
 void fluxWeightedGaussianMoments(const double lo, const double hi, const double h, const double k0, const double s,
-                                 const std::vector<double> &x, const std::vector<double> &y, double &m0, double &m1) {
+                                 const std::vector<double> &x, const std::vector<double> &y, double &m0, double &m1,
+                                 double &m2) {
   m0 = 0.0;
   m1 = 0.0;
+  m2 = 0.0;
   const std::size_t spSize = y.size();
   const double erfScale = h * s * std::sqrt(M_PI / 2.0);
   auto gauss = [&](double t) {
     const double z = (t - k0) / s;
     return h * std::exp(-0.5 * z * z);
   };
-  // antiderivatives of G and k G
+  // antiderivatives of G, k G and k^2 G
   auto e0 = [&](double t) { return erfScale * std::erf((t - k0) / (M_SQRT2 * s)); };
   auto e1 = [&](double t) { return k0 * e0(t) - s * s * gauss(t); };
+  auto e2 = [&](double t) { return (k0 * k0 + s * s) * e0(t) - s * s * (t + k0) * gauss(t); };
   auto addMass = [&](double t, double mass) {
     const double g = gauss(t);
     m0 += mass * g;
     m1 += mass * g * t;
+    m2 += mass * g * t * t;
   };
 
   // Phi(x[0]) = y[0] and Phi = 0 below it
@@ -149,6 +156,7 @@ void fluxWeightedGaussianMoments(const double lo, const double hi, const double 
       const double slope = (y[j] - y[j - 1]) / (x[j] - x[j - 1]);
       m0 += slope * (e0(b) - e0(a));
       m1 += slope * (e1(b) - e1(a));
+      m2 += slope * (e2(b) - e2(a));
     }
   }
   if (lo <= x[last] && x[last] < hi)
@@ -338,12 +346,19 @@ GaussianExposure EllipsoidTrajectoryNorm::integrateGaussian(const EllipsoidChord
     const double distance2 = std::max(cc - b * b / a, 0.0);
     if (distance2 > GAUSSIAN_CUTOFF * GAUSSIAN_CUTOFF)
       continue;
-    double m0, m1;
+    double m0, m1, m2;
     fluxWeightedGaussianMoments(chords.kLow[n], chords.kHigh[n], std::exp(-0.5 * distance2), b / a, 1.0 / std::sqrt(a),
-                                m_fluxX[m_fluxIndex[p]], m_fluxY[m_fluxIndex[p]], m0, m1);
-    exposure.value += m_weight[p] * m0;
+                                m_fluxX[m_fluxIndex[p]], m_fluxY[m_fluxIndex[p]], m0, m1, m2);
+    const double wp = m_weight[p];
+    exposure.value += wp * m0;
     for (size_t i = 0; i < 3; ++i)
-      gradient[i] += m_weight[p] * (uScaled[i] * m1 - c[i] * m0);
+      gradient[i] += wp * (uScaled[i] * m1 - c[i] * m0);
+    // int (k u - c)(k u - c)^T g dPhi = u u^T m2 - (u c^T + c u^T) m1 + c c^T m0
+    const std::array<double, 3> ul{u.X(), u.Y(), u.Z()}, cl{centre.X(), centre.Y(), centre.Z()};
+    for (size_t e = 0; e < 6; ++e) {
+      const auto r = SYMMETRIC_PAIRS[e][0], q = SYMMETRIC_PAIRS[e][1];
+      exposure.secondMoment[e] += wp * (ul[r] * ul[q] * m2 - (ul[r] * cl[q] + cl[r] * ul[q]) * m1 + cl[r] * cl[q] * m0);
+    }
   }
   for (size_t i = 0; i < 3; ++i)
     exposure.gradient += axes[i] * gradient[i];

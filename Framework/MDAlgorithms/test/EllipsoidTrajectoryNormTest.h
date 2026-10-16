@@ -324,4 +324,84 @@ public:
       TS_ASSERT_DELTA(exposure.gradient[a], numerical, 1e-5 * exposure.value / 0.08);
     }
   }
+
+  void test_gaussian_second_moment_matches_numerical_integration() {
+    EllipsoidTrajectoryNorm norm;
+    std::vector<double> x, y;
+    for (int i = 0; i <= 400; ++i) {
+      x.emplace_back(0.05 * i);
+      y.emplace_back(x.back() * x.back() * (1.0 + 0.1 * std::sin(x.back())));
+    }
+    norm.addFluxSpectrum(x, y);
+    const V3D centre(1.0, -2.0, 3.0);
+    V3D cHat = centre;
+    cHat.normalize();
+    std::vector<V3D> us;
+    for (int i = -5; i <= 5; ++i)
+      for (int j = -5; j <= 5; ++j) {
+        us.emplace_back((cHat + V3D(0.01 * i, 0.01 * j, 0.005 * i)) * 0.7);
+        norm.addPixel(us.back(), 0.5, 0, 1.0, 15.0);
+      }
+    const auto chords = norm.chords(centre, AXES, sphere(0.4));
+    const auto dirs = rotatedAxes();
+    const PeakEllipsoidExtent sigmas{{0.08, 0.12, 0.15}};
+    const V3D gaussCentre = centre + V3D(0.02, -0.01, 0.03);
+    const auto exposure = norm.integrateGaussian(chords, gaussCentre, dirs, sigmas);
+
+    constexpr std::array<std::array<size_t, 2>, 6> pairs{{{0, 0}, {1, 1}, {2, 2}, {0, 1}, {0, 2}, {1, 2}}};
+    std::array<double, 6> expected{};
+    for (const auto &u : us) {
+      double k1, k2;
+      if (!EllipsoidTrajectoryNorm::intersect(u, centre, AXES, sphere(0.4), k1, k2))
+        continue;
+      k1 = std::max(k1, 1.0);
+      k2 = std::min(k2, 15.0);
+      const int steps = 20000;
+      const double dk = (k2 - k1) / steps;
+      for (int n = 0; n < steps; ++n) {
+        const double ka = k1 + n * dk;
+        const V3D q = u * (ka + 0.5 * dk) - gaussCentre;
+        double m = 0.0;
+        for (size_t a = 0; a < 3; ++a) {
+          const double comp = q.scalar_prod(dirs[a]) / sigmas[a];
+          m += comp * comp;
+        }
+        const double weight =
+            0.5 * std::exp(-0.5 * m) * (interpolateIntegratedFlux(ka + dk, x, y) - interpolateIntegratedFlux(ka, x, y));
+        for (size_t e = 0; e < 6; ++e)
+          expected[e] += weight * q[pairs[e][0]] * q[pairs[e][1]];
+      }
+    }
+    for (size_t e = 0; e < 6; ++e)
+      TS_ASSERT_DELTA(exposure.secondMoment[e], expected[e], 1e-5 * std::abs(expected[0]));
+  }
+
+  // The gradient of the exposure with respect to the inverse covariance is
+  // minus half the second moment: here along the inverse variance of one axis.
+  void test_gaussian_second_moment_is_shape_gradient() {
+    EllipsoidTrajectoryNorm norm;
+    std::vector<double> x, y;
+    for (int i = 0; i <= 400; ++i) {
+      x.emplace_back(0.05 * i);
+      y.emplace_back(x.back() * x.back());
+    }
+    norm.addFluxSpectrum(x, y);
+    const V3D centre(1.0, -2.0, 3.0);
+    V3D cHat = centre;
+    cHat.normalize();
+    for (int i = -5; i <= 5; ++i)
+      for (int j = -5; j <= 5; ++j)
+        norm.addPixel((cHat + V3D(0.01 * i, 0.01 * j, 0.005 * i)) * 0.7, 0.5, 0, 1.0, 15.0);
+    const auto chords = norm.chords(centre, AXES, sphere(0.4));
+    const V3D gaussCentre = centre + V3D(0.02, -0.01, 0.03);
+    const double sx = 0.08, sy = 0.12, sz = 0.15;
+    const auto exposure = norm.integrateGaussian(chords, gaussCentre, AXES, {{sx, sy, sz}});
+
+    // M_xx = 1 / sx^2
+    const double mxx = 1.0 / (sx * sx), dm = 1e-4 * mxx;
+    const double plus = norm.integrateGaussian(chords, gaussCentre, AXES, {{1.0 / std::sqrt(mxx + dm), sy, sz}}).value;
+    const double minus = norm.integrateGaussian(chords, gaussCentre, AXES, {{1.0 / std::sqrt(mxx - dm), sy, sz}}).value;
+    TS_ASSERT_DELTA((plus - minus) / (2 * dm), -0.5 * exposure.secondMoment[0],
+                    1e-5 * std::abs(exposure.secondMoment[0]));
+  }
 };

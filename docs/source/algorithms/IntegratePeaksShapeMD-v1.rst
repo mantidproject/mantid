@@ -164,6 +164,24 @@ peaks only partly covered by the detectors. With *AdjustCenter*, the
 gradient of :math:`G` with respect to the center is included in the
 center correction.
 
+With *AdjustShape*, the shape of each peak whose intensity (fitted with its
+stored shape) is at least *AdjustShapeMinSignalToNoise* standard deviations
+is refined too: the likelihood is maximized over the covariance of a
+normalized Gaussian (and with *AdjustCenter* its center) by damped
+Gauss-Newton steps, each kept only if it increases the likelihood, with each
+principal standard deviation kept within a factor *MaxShapeChange* of the
+stored shape's (in the stored shape's own frame). With normalization the
+expected counts depend on the shape through :math:`G`, whose gradient with
+respect to the inverse covariance is
+:math:`-\tfrac{1}{2} q \sum_p \Omega_p \int (k\mathbf{u}_p - \mathbf{c})
+(k\mathbf{u}_p - \mathbf{c})^T g\,d\Phi_p`, also evaluated exactly, so the
+refined shape is that of the intensity rather than of the counts, which the
+exposure distorts. The refined shape is written to the output peak, with its
+background radii scaled with it, and the uncertainty of a peak with a refined
+shape includes that of its shape. Weaker peaks keep their stored shape, as
+does a peak whose refined intensity, with that larger uncertainty, falls
+below *AdjustShapeMinSignalToNoise*.
+
 The events in the fit region are those nearest to the peak in reciprocal
 space, so *RegionRadius* should be less than half the shortest distance
 between peaks for the fit region to be the sphere assumed above. The
@@ -176,7 +194,7 @@ lines cross the peak ellipsoid (*NumPixels*), and whether any pixel's line
 through the ellipsoids lies partly outside its momentum range
 (*ClippedByMomentumRange*) or any masked detector's line crosses them
 (*MaskedDetectors*), which flag peaks whose count mode intensities may be
-biased. With *ProfileFit*, *CountsPeak* is the summed event weight in the
+biased, and whether the peak's shape was refined (*ShapeAdjusted*). With *ProfileFit*, *CountsPeak* is the summed event weight in the
 fit region, *CountsShell* the fitted background counts, *NormPeak* the
 expected counts per unit intensity of the fitted peak (so that
 :math:`I \cdot \mathit{NormPeak} + \mathit{CountsShell}` is the expected

@@ -94,6 +94,24 @@ void IntegratePeaksShapeMD::init() {
                   "the peak's stored Q. The peak's stored Q is not modified; the correction is "
                   "used only for this integration.");
 
+  declareProperty("AdjustShape", false,
+                  "Only used if ProfileFit is true. If true, also refine the shape (covariance) of "
+                  "each peak whose intensity is at least AdjustShapeMinSignalToNoise standard "
+                  "deviations, as part of the profile fit, with each principal standard deviation "
+                  "kept within MaxShapeChange of the peak's stored shape; weaker peaks, and peaks "
+                  "that fall below AdjustShapeMinSignalToNoise once the uncertainty of the refined "
+                  "shape is included, keep their stored shape. The refined shape is written to the "
+                  "output peak.");
+
+  auto atLeastOne = std::make_shared<BoundedValidator<double>>();
+  atLeastOne->setLower(1.0);
+  declareProperty("AdjustShapeMinSignalToNoise", 10.0, mustBePositive,
+                  "Only used if AdjustShape is true. The smallest intensity over its standard "
+                  "deviation (from a fit with the stored shape) for which a peak's shape is refined.");
+  declareProperty("MaxShapeChange", 2.0, atLeastOne,
+                  "Only used if AdjustShape is true. The largest factor by which each principal "
+                  "standard deviation of a refined shape may differ from the stored shape's.");
+
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("SolidAngleWorkspace", "", Direction::Input,
                                                                        PropertyMode::Optional),
                   "An input workspace containing integrated vanadium (a measure of the solid angle), "
@@ -116,7 +134,8 @@ void IntegratePeaksShapeMD::init() {
                   "Only used with SolidAngleWorkspace and FluxWorkspace. A table with one row per peak, "
                   "giving the raw counts and normalization in the peak ellipsoid and background shell, "
                   "the number of detector pixels covering the peak, and flags for peaks only partly "
-                  "covered by the momentum range of a pixel or by masked detectors. With ProfileFit, "
+                  "covered by the momentum range of a pixel or by masked detectors, and whether the "
+                  "peak's shape was refined by AdjustShape. With ProfileFit, "
                   "CountsPeak is the summed event weight in the fit region, CountsShell the fitted "
                   "background counts, NormPeak the expected counts per unit intensity of the fitted "
                   "peak, NormShell the normalization of the fit region, and the pixel count and flags "
@@ -130,6 +149,11 @@ void IntegratePeaksShapeMD::init() {
  */
 std::map<std::string, std::string> IntegratePeaksShapeMD::validateInputs() {
   std::map<std::string, std::string> issues;
+  const bool adjustShape = getProperty("AdjustShape");
+  const bool profileFit = getProperty("ProfileFit");
+  if (adjustShape && !profileFit)
+    issues["AdjustShape"] = "AdjustShape requires ProfileFit.";
+
   MatrixWorkspace_const_sptr solidAngleWS = getProperty("SolidAngleWorkspace");
   MatrixWorkspace_const_sptr fluxWS = getProperty("FluxWorkspace");
 
@@ -223,6 +247,7 @@ void IntegratePeaksShapeMD::exec() {
 
   const bool profileFit = getProperty("ProfileFit");
   const bool adjustCenter = getProperty("AdjustCenter");
+  const bool adjustShape = getProperty("AdjustShape");
 
   // flux/solid-angle normalization of each peak's ellipsoid and background
   // shell, from the intersections of the detector trajectories with them
@@ -262,6 +287,7 @@ void IntegratePeaksShapeMD::exec() {
     diagnostics->addColumn("int", "NumPixels");
     diagnostics->addColumn("bool", "ClippedByMomentumRange");
     diagnostics->addColumn("bool", "MaskedDetectors");
+    diagnostics->addColumn("bool", "ShapeAdjusted");
   }
 
   for (size_t i = 0; i < n_peaks; i++) {
@@ -273,20 +299,44 @@ void IntegratePeaksShapeMD::exec() {
     if (profileFit) {
       V3D center;
       ProfileFitNormalization fitNormalization;
+      ProfileFitShape shapeFit;
+      shapeFit.minSignalToNoise = getProperty("AdjustShapeMinSignalToNoise");
+      shapeFit.maxChange = getProperty("MaxShapeChange");
       integrator.integrateUsingShapeProfileFit(*shape, peak.getQLabFrame(), adjustCenter, center, inti, sigi,
-                                               norm ? &(*norm) : nullptr, &fitNormalization);
+                                               norm ? &(*norm) : nullptr, &fitNormalization,
+                                               adjustShape ? &shapeFit : nullptr);
+      const bool shapeAdjusted = adjustShape && shapeFit.adjusted;
       if (diagnostics) {
         TableRow row = diagnostics->appendRow();
         row << static_cast<int>(i) << fitNormalization.counts << fitNormalization.backgroundCounts
             << fitNormalization.peakNorm << fitNormalization.regionNorm
             << static_cast<int>(fitNormalization.coverage.numPixels) << fitNormalization.coverage.clipped
-            << fitNormalization.coverage.maskedIntersects;
+            << fitNormalization.coverage.maskedIntersects << shapeAdjusted;
       }
       // Persist a center correction found by AdjustCenter as the output
       // shape's translation -- peak.getQLabFrame() itself is left alone,
       // since it's tied to a specific detector pixel/TOF and isn't free to
       // move without checking that still corresponds to a valid trajectory.
-      if (adjustCenter && center != shape->translation()) {
+      // A refined shape replaces the stored directions and radii, with the
+      // background radii scaled with them.
+      if (shapeAdjusted) {
+        const auto &radii = shape->abcRadii();
+        const auto &inner = shape->abcRadiiBackgroundInner();
+        const auto &outer = shape->abcRadiiBackgroundOuter();
+        double innerFactor = 0.0, outerFactor = 0.0;
+        for (size_t k = 0; k < 3; ++k) {
+          innerFactor += inner[k] / radii[k] / 3.0;
+          outerFactor += outer[k] / radii[k] / 3.0;
+        }
+        PeakEllipsoidExtent newInner, newOuter;
+        for (size_t k = 0; k < 3; ++k) {
+          newInner[k] = shapeFit.sigmas[k] * innerFactor;
+          newOuter[k] = shapeFit.sigmas[k] * outerFactor;
+        }
+        peak.setPeakShape(new PeakShapeEllipsoid(shapeFit.directions, shapeFit.sigmas, newInner, newOuter,
+                                                 shape->frame(), shape->algorithmName(), shape->algorithmVersion(),
+                                                 center));
+      } else if (adjustCenter && center != shape->translation()) {
         peak.setPeakShape(new PeakShapeEllipsoid(
             shape->directions(), shape->abcRadii(), shape->abcRadiiBackgroundInner(), shape->abcRadiiBackgroundOuter(),
             shape->frame(), shape->algorithmName(), shape->algorithmVersion(), center));
@@ -314,7 +364,7 @@ void IntegratePeaksShapeMD::exec() {
         TableRow row = diagnostics->appendRow();
         row << static_cast<int>(i) << counts.peak << counts.shell << peakNorm << shellNorm
             << static_cast<int>(normPeak[i].numPixels) << (normPeak[i].clipped || normOuter[i].clipped)
-            << normOuter[i].maskedIntersects;
+            << normOuter[i].maskedIntersects << false;
       }
     } else {
       integrator.integrateUsingShape(*shape, peak.getQLabFrame(), inti, sigi);

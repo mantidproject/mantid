@@ -11,6 +11,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 
+#include <array>
 #include <cstddef>
 #include <vector>
 
@@ -50,6 +51,9 @@ struct EllipsoidChords {
 struct GaussianExposure {
   double value{0.0};
   Kernel::V3D gradient;
+  /// exposure-weighted second moment about the center, the sum of (Q - c)(Q - c)^T g dPhi, as xx, yy, zz, xy, xz,
+  /// yz; the gradient of value with respect to the inverse covariance is minus half of it
+  std::array<double, 6> secondMoment{};
 };
 
 /** @class EllipsoidTrajectoryNorm

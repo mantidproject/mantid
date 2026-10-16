@@ -150,7 +150,8 @@ integrateCounts(const MatrixWorkspace_sptr &inputWS, const PeaksWorkspace_sptr &
  * for every pixel.
  */
 void generateEvents(EventWorkspace &ws, const std::vector<V3D> &centers, const std::vector<double> &heights,
-                    double sigma, double background, double radius, double weightTimesFlux) {
+                    const PeakEllipsoidFrame &directions, const PeakEllipsoidExtent &sigmas, double background,
+                    double radius, double weightTimesFlux) {
   std::mt19937 rng(7);
   std::uniform_real_distribution<double> uniform(0.0, 1.0);
   const auto &spectrumInfo = ws.spectrumInfo();
@@ -171,7 +172,12 @@ void generateEvents(EventWorkspace &ws, const std::vector<V3D> &centers, const s
         continue;
       for (double k = k1; k < k2; k += dk) {
         const V3D q = u * (k + 0.5 * dk) - centers[c];
-        const double rate = heights[c] * std::exp(-0.5 * q.norm2() / (sigma * sigma)) + background;
+        double m = 0.0;
+        for (size_t k = 0; k < 3; ++k) {
+          const double comp = q.scalar_prod(directions[k]) / sigmas[k];
+          m += comp * comp;
+        }
+        const double rate = heights[c] * std::exp(-0.5 * m) + background;
         std::poisson_distribution<int> poisson(weightTimesFlux * rate * dk);
         for (int n = poisson(rng); n > 0; --n) {
           // time of flight for momentum kEvent, in microseconds
@@ -183,6 +189,42 @@ void generateEvents(EventWorkspace &ws, const std::vector<V3D> &centers, const s
       }
     }
   }
+}
+
+/// generateEvents for spherical Gaussians of standard deviation sigma
+void generateEvents(EventWorkspace &ws, const std::vector<V3D> &centers, const std::vector<double> &heights,
+                    double sigma, double background, double radius, double weightTimesFlux) {
+  generateEvents(ws, centers, heights, {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)}, {sigma, sigma, sigma}, background,
+                 radius, weightTimesFlux);
+}
+
+/// covariance of an ellipsoid as xx, yy, zz, xy, xz, yz
+std::array<double, 6> covariance(const PeakEllipsoidFrame &directions, const PeakEllipsoidExtent &sigmas) {
+  constexpr std::array<std::array<size_t, 2>, 6> pairs{{{0, 0}, {1, 1}, {2, 2}, {0, 1}, {0, 2}, {1, 2}}};
+  std::array<double, 6> cov{};
+  for (size_t k = 0; k < 3; ++k)
+    for (size_t e = 0; e < 6; ++e)
+      cov[e] += directions[k][pairs[e][0]] * directions[k][pairs[e][1]] * sigmas[k] * sigmas[k];
+  return cov;
+}
+
+/// relative (Frobenius) difference of two covariances
+double relativeDifference(const std::array<double, 6> &a, const std::array<double, 6> &b) {
+  double diff = 0.0, size = 0.0;
+  for (size_t e = 0; e < 6; ++e) {
+    const double weight = e < 3 ? 1.0 : 2.0;
+    diff += weight * (a[e] - b[e]) * (a[e] - b[e]);
+    size += weight * b[e] * b[e];
+  }
+  return std::sqrt(diff / size);
+}
+
+/// a frame rotated away from the lab axes
+PeakEllipsoidFrame tiltedAxes() {
+  V3D e0(1, 1, 0), e1(-1, 1, 1);
+  e0.normalize();
+  e1.normalize();
+  return {e0, e1, e0.cross_prod(e1)};
 }
 
 /// three peaks without events, for generateEvents, with spherical shapes
@@ -203,7 +245,8 @@ std::pair<EventWorkspace_sptr, PeaksWorkspace_sptr> buildEmptyPeaks() {
 std::pair<PeaksWorkspace_sptr, ITableWorkspace_sptr>
 integrateProfile(const MatrixWorkspace_sptr &inputWS, const PeaksWorkspace_sptr &peaksWS, double regionRadius,
                  const MatrixWorkspace_sptr &solidAngleWS, const MatrixWorkspace_sptr &fluxWS,
-                 bool adjustCenter = false) {
+                 bool adjustCenter = false, bool adjustShape = false, double maxShapeChange = 2.0,
+                 double minSignalToNoise = 10.0) {
   IntegratePeaksShapeMD alg;
   alg.setChild(true);
   alg.setRethrows(true);
@@ -213,6 +256,9 @@ integrateProfile(const MatrixWorkspace_sptr &inputWS, const PeaksWorkspace_sptr 
   alg.setProperty("RegionRadius", regionRadius);
   alg.setProperty("ProfileFit", true);
   alg.setProperty("AdjustCenter", adjustCenter);
+  alg.setProperty("AdjustShape", adjustShape);
+  alg.setProperty("MaxShapeChange", maxShapeChange);
+  alg.setProperty("AdjustShapeMinSignalToNoise", minSignalToNoise);
   alg.setProperty("SolidAngleWorkspace", solidAngleWS);
   alg.setProperty("FluxWorkspace", fluxWS);
   alg.setPropertyValue("OutputWorkspace", "out");
@@ -985,6 +1031,161 @@ public:
                        0.1 * sigma);
       TS_ASSERT_DELTA(profile->getPeak(i).getIntensity() / trueIntensity, 1.0, 0.03);
     }
+  }
+
+  void test_adjust_shape_requires_profile_fit() {
+    auto [eventWS, peaksWS] = buildThreePeaks();
+    IntegratePeaksShapeMD alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", eventWS);
+    alg.setProperty("PeaksWorkspace", peaksWS);
+    alg.setPropertyValue("OutputWorkspace", "out");
+    alg.setProperty("AdjustShape", true);
+    TS_ASSERT_EQUALS(alg.validateInputs().count("AdjustShape"), 1);
+    alg.setProperty("ProfileFit", true);
+    TS_ASSERT_EQUALS(alg.validateInputs().count("AdjustShape"), 0);
+  }
+
+  // Starting from a spherical shape, AdjustShape recovers the true,
+  // anisotropic and rotated, covariance of each peak, and its intensity.
+  void test_normalized_profile_fit_adjusts_shape() {
+    auto [eventWS, peaksWS] = buildEmptyPeaks();
+    const auto directions = tiltedAxes();
+    const PeakEllipsoidExtent sigmas{0.07, 0.1, 0.14};
+    const double height = 6000.0, background = 10.0, region = 0.45;
+    std::vector<V3D> centers;
+    for (int i = 0; i < peaksWS->getNumberPeaks(); ++i)
+      centers.emplace_back(peaksWS->getPeak(i).getQLabFrame());
+    generateEvents(*eventWS, centers, std::vector<double>(centers.size(), height), directions, sigmas, background,
+                   region + 0.05, 1.0);
+    addMDNormLogs(*eventWS, 1.0, 40.0, 1.0);
+    setSphericalShapes(*peaksWS, 0.1, 0.1, 0.1);
+    const auto [profile, diagnostics] =
+        integrateProfile(eventWS, peaksWS, region, createSolidAngleWorkspace(*eventWS, 1.0),
+                         createFluxWorkspace(*eventWS, 1.0, 50.0), true, true);
+
+    const double trueIntensity = height * std::pow(2.0 * M_PI, 1.5) * sigmas[0] * sigmas[1] * sigmas[2];
+    const auto trueCovariance = covariance(directions, sigmas);
+    for (int i = 0; i < profile->getNumberPeaks(); ++i) {
+      TS_ASSERT(diagnostics->cell<Boolean>(i, 8));
+      const auto *shape = dynamic_cast<const PeakShapeEllipsoid *>(&profile->getPeak(i).getPeakShape());
+      TS_ASSERT(shape);
+      TSM_ASSERT_LESS_THAN("Covariance of peak " + std::to_string(i),
+                           relativeDifference(covariance(shape->directions(), shape->abcRadii()), trueCovariance),
+                           0.06);
+      // within its uncertainty, which includes that of the refined shape
+      const auto &peak = profile->getPeak(i);
+      TSM_ASSERT_DELTA("Intensity of peak " + std::to_string(i), peak.getIntensity(), trueIntensity,
+                       4 * peak.getSigmaIntensity() + 0.005 * trueIntensity);
+      TS_ASSERT_LESS_THAN(shape->translation().norm(), 0.1 * sigmas[0]);
+    }
+  }
+
+  // With the pixels through the middle of a peak masked, the refined shape
+  // and intensity still follow the true ones.
+  void test_normalized_profile_fit_adjusts_shape_with_masked_block() {
+    auto [eventWS, peaksWS] = buildEmptyPeaks();
+    const auto directions = tiltedAxes();
+    const PeakEllipsoidExtent sigmas{0.07, 0.1, 0.14};
+    const double height = 6000.0, background = 10.0, region = 0.45;
+    std::vector<V3D> centers;
+    for (int i = 0; i < peaksWS->getNumberPeaks(); ++i)
+      centers.emplace_back(peaksWS->getPeak(i).getQLabFrame());
+    generateEvents(*eventWS, centers, std::vector<double>(centers.size(), height), directions, sigmas, background,
+                   region + 0.05, 1.0);
+    addMDNormLogs(*eventWS, 1.0, 40.0, 1.0);
+    auto &spectrumInfo = eventWS->mutableSpectrumInfo();
+    for (size_t i = 0; i < spectrumInfo.size(); ++i) {
+      const double polar = spectrumInfo.twoTheta(i);
+      const double azim = spectrumInfo.detector(i).getPhi();
+      const V3D u(-std::sin(polar) * std::cos(azim), -std::sin(polar) * std::sin(azim), 1.0 - std::cos(polar));
+      if (centers[0].cross_prod(u).norm() / u.norm() < 0.08)
+        spectrumInfo.setMasked(i, true);
+    }
+    setSphericalShapes(*peaksWS, 0.1, 0.1, 0.1);
+    const auto [profile, diagnostics] =
+        integrateProfile(eventWS, peaksWS, region, createSolidAngleWorkspace(*eventWS, 1.0),
+                         createFluxWorkspace(*eventWS, 1.0, 50.0), true, true);
+
+    const double trueIntensity = height * std::pow(2.0 * M_PI, 1.5) * sigmas[0] * sigmas[1] * sigmas[2];
+    TS_ASSERT(diagnostics->cell<Boolean>(0, 7));
+    TS_ASSERT(diagnostics->cell<Boolean>(0, 8));
+    const auto *shape = dynamic_cast<const PeakShapeEllipsoid *>(&profile->getPeak(0).getPeakShape());
+    TS_ASSERT_LESS_THAN(
+        relativeDifference(covariance(shape->directions(), shape->abcRadii()), covariance(directions, sigmas)), 0.12);
+    TS_ASSERT_DELTA(profile->getPeak(0).getIntensity(), trueIntensity,
+                    4 * profile->getPeak(0).getSigmaIntensity() + 0.005 * trueIntensity);
+  }
+
+  // A peak too weak to refine keeps its stored shape.
+  void test_adjust_shape_leaves_weak_peaks() {
+    auto [eventWS, peaksWS] = buildEmptyPeaks();
+    const double sigma = 0.1, background = 10.0, region = 0.4;
+    std::vector<V3D> centers;
+    for (int i = 0; i < peaksWS->getNumberPeaks(); ++i)
+      centers.emplace_back(peaksWS->getPeak(i).getQLabFrame());
+    generateEvents(*eventWS, centers, {6000.0, 0.0, 6000.0}, sigma, background, region + 0.05, 1.0);
+    addMDNormLogs(*eventWS, 1.0, 40.0, 1.0);
+    setSphericalShapes(*peaksWS, 0.08, 0.08, 0.08);
+    const auto [profile, diagnostics] =
+        integrateProfile(eventWS, peaksWS, region, createSolidAngleWorkspace(*eventWS, 1.0),
+                         createFluxWorkspace(*eventWS, 1.0, 50.0), false, true);
+    TS_ASSERT(diagnostics->cell<Boolean>(0, 8));
+    TS_ASSERT(!diagnostics->cell<Boolean>(1, 8));
+    const auto *shape = dynamic_cast<const PeakShapeEllipsoid *>(&profile->getPeak(1).getPeakShape());
+    for (size_t k = 0; k < 3; ++k)
+      TS_ASSERT_EQUALS(shape->abcRadii()[k], 0.08);
+  }
+
+  // A refined shape stays within MaxShapeChange of the stored one.
+  void test_adjust_shape_respects_max_change() {
+    auto [eventWS, peaksWS] = buildEmptyPeaks();
+    const double sigma = 0.1, background = 10.0, region = 0.4;
+    std::vector<V3D> centers;
+    for (int i = 0; i < peaksWS->getNumberPeaks(); ++i)
+      centers.emplace_back(peaksWS->getPeak(i).getQLabFrame());
+    generateEvents(*eventWS, centers, std::vector<double>(centers.size(), 6000.0), sigma, background, region + 0.05,
+                   1.0);
+    addMDNormLogs(*eventWS, 1.0, 40.0, 1.0);
+    // far too small a stored shape, so that the bound is reached
+    setSphericalShapes(*peaksWS, 0.04, 0.04, 0.04);
+    const auto profile = integrateProfile(eventWS, peaksWS, region, createSolidAngleWorkspace(*eventWS, 1.0),
+                                          createFluxWorkspace(*eventWS, 1.0, 50.0), false, true, 1.5)
+                             .first;
+    for (int i = 0; i < profile->getNumberPeaks(); ++i) {
+      const auto *shape = dynamic_cast<const PeakShapeEllipsoid *>(&profile->getPeak(i).getPeakShape());
+      for (size_t k = 0; k < 3; ++k) {
+        TS_ASSERT_LESS_THAN_EQUALS(shape->abcRadii()[k], 0.06 * (1 + 1e-9));
+        TS_ASSERT_LESS_THAN(0.05, shape->abcRadii()[k]);
+      }
+    }
+  }
+
+  // A refinement that leaves the peak less significant than the threshold,
+  // once the uncertainty of its shape is included, is not kept: here peak 1,
+  // whose shape is poorly constrained, while peaks 0 and 2 are refined.
+  void test_adjust_shape_keeps_stored_shape_if_refinement_loses_significance() {
+    auto [eventWS, peaksWS] = buildEmptyPeaks();
+    const auto directions = tiltedAxes();
+    const PeakEllipsoidExtent sigmas{0.07, 0.1, 0.14};
+    const double height = 6000.0, background = 10.0, region = 0.45;
+    std::vector<V3D> centers;
+    for (int i = 0; i < peaksWS->getNumberPeaks(); ++i)
+      centers.emplace_back(peaksWS->getPeak(i).getQLabFrame());
+    generateEvents(*eventWS, centers, std::vector<double>(centers.size(), height), directions, sigmas, background,
+                   region + 0.05, 1.0);
+    addMDNormLogs(*eventWS, 1.0, 40.0, 1.0);
+    setSphericalShapes(*peaksWS, 0.1, 0.1, 0.1);
+    const auto [profile, diagnostics] =
+        integrateProfile(eventWS, peaksWS, region, createSolidAngleWorkspace(*eventWS, 1.0),
+                         createFluxWorkspace(*eventWS, 1.0, 50.0), true, true, 2.0, 200.0);
+    TS_ASSERT(diagnostics->cell<Boolean>(0, 8));
+    TS_ASSERT(!diagnostics->cell<Boolean>(1, 8));
+    TS_ASSERT(diagnostics->cell<Boolean>(2, 8));
+    const auto *kept = dynamic_cast<const PeakShapeEllipsoid *>(&profile->getPeak(1).getPeakShape());
+    for (size_t k = 0; k < 3; ++k)
+      TS_ASSERT_EQUALS(kept->abcRadii()[k], 0.1);
+    TS_ASSERT_LESS_THAN(200.0, profile->getPeak(1).getIntensity() / profile->getPeak(1).getSigmaIntensity());
   }
 
 private:
