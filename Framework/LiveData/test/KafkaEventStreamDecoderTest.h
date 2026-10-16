@@ -486,7 +486,7 @@ private:
 
   void checkWorkspaceMetadata(const Mantid::DataObjects::EventWorkspace &eventWksp) {
     TS_ASSERT(eventWksp.getInstrument());
-    TS_ASSERT_EQUALS("HRPDTEST", eventWksp.getInstrument()->getName());
+    TS_ASSERT_EQUALS("HRPDTEST", eventWksp.getInstrumentName());
     TS_ASSERT_EQUALS("2016-08-31T12:07:42", eventWksp.run().getPropertyValueAsType<std::string>("run_start"));
     std::array<Mantid::specnum_t, 5> specs = {{1, 2, 3, 4, 5}};
     std::array<Mantid::detid_t, 5> ids = {{1001, 1002, 1100, 901000, 10100}};

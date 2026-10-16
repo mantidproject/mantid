@@ -121,7 +121,7 @@ void DetectorEfficiencyVariation::retrieveProperties(API::MatrixWorkspace_sptr &
                                                      int &startWsIndex, int &endWsIndex) {
   whiteBeam1 = getProperty("WhiteBeamBase");
   whiteBeam2 = getProperty("WhiteBeamCompare");
-  if (whiteBeam1->getInstrument()->getName() != whiteBeam2->getInstrument()->getName()) {
+  if (whiteBeam1->getInstrumentName() != whiteBeam2->getInstrumentName()) {
     throw std::invalid_argument("The two input white beam vanadium workspaces "
                                 "must be from the same instrument");
   }

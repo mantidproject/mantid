@@ -49,8 +49,8 @@ void AddPeak::exec() {
   MatrixWorkspace_sptr runWS = getProperty("RunWorkspace");
 
   // Check the instruments match before attempting to add a peak.
-  auto runInst = runWS->getInstrument()->getName();
-  auto peakInst = peaksWS->getInstrument()->getName();
+  auto runInst = runWS->getInstrumentName();
+  auto peakInst = peaksWS->getInstrumentName();
   if (peaksWS->getNumberPeaks() > 0 && (runInst != peakInst)) {
     throw std::runtime_error("The peak from " + runWS->getName() + " comes from a different instrument (" + runInst +
                              ") to the peaks "

@@ -409,7 +409,7 @@ std::string getRunLabel(const std::vector<Workspace_sptr> &wsList) {
   if (wsList.empty())
     throw std::invalid_argument("Unable to run on an empty list");
 
-  const std::string instrument = firstPeriod(wsList.front())->getInstrument()->getName();
+  const std::string instrument = firstPeriod(wsList.front())->getInstrumentName();
 
   // Extract the run numbers
   std::vector<int> runNumbers;
@@ -885,8 +885,8 @@ bool isReloadGroupingNecessary(const std::shared_ptr<Mantid::API::Workspace> &cu
   const auto currentData = firstPeriod(currentWorkspace);
 
   // Check if instrument has changed
-  const auto loadedInstrument = loadedData->getInstrument()->getName();
-  const auto currentInstrument = currentData->getInstrument()->getName();
+  const auto loadedInstrument = loadedData->getInstrumentName();
+  const auto currentInstrument = currentData->getInstrumentName();
   if (loadedInstrument != currentInstrument) {
     reloadNecessary = true;
   }

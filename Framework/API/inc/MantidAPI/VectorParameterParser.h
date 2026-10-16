@@ -10,7 +10,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/System.h"
 
 #include "MantidAPI/ImplicitFunctionParameterParser.h"
 
@@ -25,6 +24,11 @@
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
 #endif
+
+#include <cstddef>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace API {

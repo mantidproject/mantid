@@ -101,7 +101,7 @@ std::map<std::string, std::string> GenerateGoniometerIndependentBackground::vali
   const auto numHist = firstWS->getNumberHistograms();
   const auto blocksize = firstWS->blocksize();
   const auto eventType = firstWS->getEventType();
-  const auto instrumentName = firstWS->getInstrument()->getName();
+  const auto instrumentName = firstWS->getInstrumentName();
   double protonChargeMin = firstWS->run().getProtonCharge();
   double protonChargeMax = firstWS->run().getProtonCharge();
 
@@ -132,7 +132,7 @@ std::map<std::string, std::string> GenerateGoniometerIndependentBackground::vali
       break;
     }
 
-    if (ws->getInstrument()->getName() != instrumentName) {
+    if (ws->getInstrumentName() != instrumentName) {
       issues["InputWorkspaces"] = "Instrument name mismatch.";
       break;
     }

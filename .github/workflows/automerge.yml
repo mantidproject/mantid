@@ -7,6 +7,9 @@ on:
   push:
     branches: [ornl-next, release-next]
 
+permissions:
+  contents: read
+
 jobs:
   merge-release-into-main:
     runs-on: ubuntu-latest

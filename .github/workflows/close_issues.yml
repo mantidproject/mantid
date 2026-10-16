@@ -6,10 +6,16 @@ on:
     branches:
       - release-next
 
+permissions:
+  contents: read
+
 jobs:
   close-issue-on-pr-merge:
     # Do not run in forks.
     if: ${{ github.repository_owner == 'mantidproject' }}
+    permissions:
+      issues: write
+      pull-requests: read
     runs-on: ubuntu-latest
     steps:
       - name: Closes issues related to a merged pull request.

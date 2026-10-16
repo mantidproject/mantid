@@ -466,7 +466,6 @@ target_precompile_headers(
   <MantidKernel/Logger.h>
   <MantidKernel/Matrix.h>
   <MantidKernel/Quat.h>
-  <MantidKernel/System.h>
   <MantidKernel/V2D.h>
   <MantidKernel/V3D.h>
   <cfloat>

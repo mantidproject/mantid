@@ -61,7 +61,7 @@ std::map<std::string, std::string> CorelliCrossCorrelate::validateInputs() {
   }
 
   // This algorithm will only work for CORELLI, check for CORELLI.
-  if (inputWS->getInstrument()->getName() != "CORELLI")
+  if (inputWS->getInstrumentName() != "CORELLI")
     errors["InputWorkspace"] = "This Algorithm will only work for Corelli.";
 
   // Must include the correlation-chopper in the IDF.

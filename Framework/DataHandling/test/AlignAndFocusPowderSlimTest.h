@@ -1190,7 +1190,7 @@ public:
     config.phi = {0.0};
     auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm("PG3_4871_event.nxs", config));
 
-    TS_ASSERT_EQUALS(outputWS->getInstrument()->getName(), "POWGEN");
+    TS_ASSERT_EQUALS(outputWS->getInstrumentName(), "POWGEN");
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1874);
     TS_ASSERT_DELTA(outputWS->x(0).front(), 2258.57547, 1e-5);

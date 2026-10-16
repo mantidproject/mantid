@@ -61,7 +61,7 @@ std::string getRunLabel(const std::vector<Workspace_sptr> &wsList) {
   if (wsList.empty())
     throw std::invalid_argument("Unable to run on an empty list");
 
-  const std::string instrument = firstPeriod(wsList.front())->getInstrument()->getName();
+  const std::string instrument = firstPeriod(wsList.front())->getInstrumentName();
 
   // Extract the run numbers
   std::vector<int> runNumbers;

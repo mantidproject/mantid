@@ -48,7 +48,7 @@ private:
     TS_ASSERT(spectrumInfo.isMonitor(spectrumInfoSize - 2))
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 256 + 2)
     TS_ASSERT_EQUALS(output->blocksize(), 1000)
-    TS_ASSERT_EQUALS(output->getInstrument()->getName(), instrName)
+    TS_ASSERT_EQUALS(output->getInstrumentName(), instrName)
     // check the sum of all detector counts against Nexus file entry detsum
     TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("PSD.detsum"), detCounts(output))
     // spectrum number starts with 0
