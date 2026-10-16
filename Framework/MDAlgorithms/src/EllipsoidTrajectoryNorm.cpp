@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <numeric>
 #include <stdexcept>
 #include <unordered_map>
 
@@ -60,19 +61,23 @@ inline void stableRoots(double a, double b, double d, double disc, double &k1, d
 }
 
 /**
- * Test pixels [begin, end) of (ux, uy, uz) against the ellipsoid and call
- * onHit(p, k1, k2) for each one whose line crosses it.
+ * Test the pixels of (ux, uy, uz) listed in indices (all of them if it is
+ * null) against the ellipsoid and call onHit(p, k1, k2) for each one whose
+ * line crosses it.
  */
 template <typename OnHit>
 void forEachIntersection(const ScaledEllipsoid &e, const std::vector<double> &ux, const std::vector<double> &uy,
-                         const std::vector<double> &uz, OnHit &&onHit) {
-  const std::size_t n = ux.size();
+                         const std::vector<double> &uz, const std::vector<std::size_t> *indices, OnHit &&onHit) {
+  const std::size_t n = indices ? indices->size() : ux.size();
   const auto &ax = e.axes;
   std::array<double, BLOCK_SIZE> a, b, disc;
+  std::array<std::size_t, BLOCK_SIZE> pixel;
   for (std::size_t start = 0; start < n; start += BLOCK_SIZE) {
     const std::size_t len = std::min(BLOCK_SIZE, n - start);
+    for (std::size_t j = 0; j < len; ++j)
+      pixel[j] = indices ? (*indices)[start + j] : start + j;
     for (std::size_t j = 0; j < len; ++j) {
-      const std::size_t p = start + j;
+      const std::size_t p = pixel[j];
       const double s0 = ux[p] * ax[0].X() + uy[p] * ax[0].Y() + uz[p] * ax[0].Z();
       const double s1 = ux[p] * ax[1].X() + uy[p] * ax[1].Y() + uz[p] * ax[1].Z();
       const double s2 = ux[p] * ax[2].X() + uy[p] * ax[2].Y() + uz[p] * ax[2].Z();
@@ -85,9 +90,91 @@ void forEachIntersection(const ScaledEllipsoid &e, const std::vector<double> &ux
         continue;
       double k1, k2;
       stableRoots(a[j], b[j], e.d, disc[j], k1, k2);
-      onHit(start + j, k1, k2);
+      onHit(pixel[j], k1, k2);
     }
   }
+}
+
+/// the direction index bins lines in steps of this in polar and azimuthal angle
+constexpr double DIRECTION_BIN = M_PI / 360.0;
+constexpr std::size_t N_POLAR = 360;
+constexpr std::size_t N_AZIMUTH = 720;
+
+std::size_t directionBin(const double ux, const double uy, const double uz) {
+  const double polar = std::acos(std::clamp(uz / std::sqrt(ux * ux + uy * uy + uz * uz), -1.0, 1.0));
+  const double azimuth = std::atan2(uy, ux) + M_PI;
+  const auto i = std::min(static_cast<std::size_t>(polar / DIRECTION_BIN), N_POLAR - 1);
+  const auto j = std::min(static_cast<std::size_t>(azimuth / DIRECTION_BIN), N_AZIMUTH - 1);
+  return i * N_AZIMUTH + j;
+}
+
+/// group the pixels of (ux, uy, uz) by the direction bin of their lines
+void buildIndex(const std::vector<double> &ux, const std::vector<double> &uy, const std::vector<double> &uz,
+                std::vector<std::size_t> &order, std::vector<std::size_t> &start) {
+  std::vector<std::size_t> bins(ux.size());
+  start.assign(N_POLAR * N_AZIMUTH + 1, 0);
+  for (std::size_t p = 0; p < ux.size(); ++p) {
+    bins[p] = directionBin(ux[p], uy[p], uz[p]);
+    ++start[bins[p] + 1];
+  }
+  std::partial_sum(start.begin(), start.end(), start.begin());
+  order.resize(ux.size());
+  std::vector<std::size_t> next(start.begin(), start.end() - 1);
+  for (std::size_t p = 0; p < ux.size(); ++p)
+    order[next[bins[p]]++] = p;
+}
+
+/**
+ * The pixels of an index whose lines can reach a sphere of radius about
+ * centre: those in the bins overlapping the cone of half-angle
+ * asin(radius / |centre|) about it. Returns false if every pixel must be
+ * tested -- there is no index, or the sphere contains the origin.
+ */
+bool candidates(const std::vector<std::size_t> &order, const std::vector<std::size_t> &start, const V3D &centre,
+                const double radius, std::vector<std::size_t> &out) {
+  const double distance = centre.norm();
+  if (start.empty() || distance <= radius)
+    return false;
+  const double alpha = std::asin(radius / distance) + 1e-9;
+  const double polar = std::acos(std::clamp(centre.Z() / distance, -1.0, 1.0));
+  const double azimuth = std::atan2(centre.Y(), centre.X()) + M_PI;
+  const double polarLow = polar - alpha, polarHigh = polar + alpha;
+
+  const auto iLow = polarLow <= 0.0 ? 0 : static_cast<std::size_t>(polarLow / DIRECTION_BIN);
+  const auto iHigh =
+      polarHigh >= M_PI ? N_POLAR - 1 : std::min(static_cast<std::size_t>(polarHigh / DIRECTION_BIN), N_POLAR - 1);
+
+  // the cone's azimuthal half-width over that range of polar angle, if it does not contain a pole
+  bool allAzimuth = polarLow <= 0.0 || polarHigh >= M_PI;
+  long jLow = 0, jHigh = static_cast<long>(N_AZIMUTH) - 1;
+  if (!allAzimuth) {
+    const double sinMin = std::min(std::sin(polarLow), std::sin(polarHigh));
+    if (std::sin(alpha) >= sinMin) {
+      allAzimuth = true;
+    } else {
+      const double halfWidth = std::asin(std::sin(alpha) / sinMin);
+      jLow = static_cast<long>(std::floor((azimuth - halfWidth) / DIRECTION_BIN));
+      jHigh = static_cast<long>(std::floor((azimuth + halfWidth) / DIRECTION_BIN));
+      allAzimuth = jHigh - jLow + 1 >= static_cast<long>(N_AZIMUTH);
+    }
+  }
+
+  out.clear();
+  for (std::size_t i = iLow; i <= iHigh; ++i) {
+    if (allAzimuth) {
+      out.insert(out.end(), order.begin() + static_cast<std::ptrdiff_t>(start[i * N_AZIMUTH]),
+                 order.begin() + static_cast<std::ptrdiff_t>(start[(i + 1) * N_AZIMUTH]));
+      continue;
+    }
+    for (long j = jLow; j <= jHigh; ++j) {
+      const auto wrapped = static_cast<std::size_t>((j % static_cast<long>(N_AZIMUTH) + static_cast<long>(N_AZIMUTH)) %
+                                                    static_cast<long>(N_AZIMUTH));
+      const std::size_t bin = i * N_AZIMUTH + wrapped;
+      out.insert(out.end(), order.begin() + static_cast<std::ptrdiff_t>(start[bin]),
+                 order.begin() + static_cast<std::ptrdiff_t>(start[bin + 1]));
+    }
+  }
+  return true;
 }
 /// the (row, column) of each element of a symmetric 3x3 matrix stored as xx, yy, zz, xy, xz, yz
 constexpr std::array<std::array<std::size_t, 2>, 6> SYMMETRIC_PAIRS{{{0, 0}, {1, 1}, {2, 2}, {0, 1}, {0, 2}, {1, 2}}};
@@ -207,6 +294,7 @@ bool EllipsoidTrajectoryNorm::addPixel(const V3D &u, const double weight, const 
     throw std::out_of_range("EllipsoidTrajectoryNorm: flux spectrum index out of range.");
   if (u.norm2() < MIN_U_NORM2)
     return false;
+  m_indexStart.clear();
   m_ux.emplace_back(u.X());
   m_uy.emplace_back(u.Y());
   m_uz.emplace_back(u.Z());
@@ -220,12 +308,18 @@ bool EllipsoidTrajectoryNorm::addPixel(const V3D &u, const double weight, const 
 bool EllipsoidTrajectoryNorm::addMaskedPixel(const V3D &u, const double kMin, const double kMax) {
   if (u.norm2() < MIN_U_NORM2)
     return false;
+  m_maskedIndexStart.clear();
   m_maskedUx.emplace_back(u.X());
   m_maskedUy.emplace_back(u.Y());
   m_maskedUz.emplace_back(u.Z());
   m_maskedKMin.emplace_back(kMin);
   m_maskedKMax.emplace_back(kMax);
   return true;
+}
+
+void EllipsoidTrajectoryNorm::buildDirectionIndex() {
+  buildIndex(m_ux, m_uy, m_uz, m_indexOrder, m_indexStart);
+  buildIndex(m_maskedUx, m_maskedUy, m_maskedUz, m_maskedIndexOrder, m_maskedIndexStart);
 }
 
 bool EllipsoidTrajectoryNorm::intersect(const V3D &u, const V3D &centre,
@@ -256,7 +350,13 @@ EllipsoidNormResult EllipsoidTrajectoryNorm::integrate(const V3D &centre,
   EllipsoidNormResult result;
   const auto e = scaleEllipsoid(centre, directions, radii);
 
-  forEachIntersection(e, m_ux, m_uy, m_uz, [&](std::size_t p, double k1, double k2) {
+  // only the pixels whose lines can reach the ellipsoid's bounding sphere
+  const double bound = *std::max_element(radii.begin(), radii.end());
+  std::vector<std::size_t> nearby, maskedNearby;
+  const bool indexed = candidates(m_indexOrder, m_indexStart, centre, bound, nearby);
+  const bool maskedIndexed = candidates(m_maskedIndexOrder, m_maskedIndexStart, centre, bound, maskedNearby);
+
+  forEachIntersection(e, m_ux, m_uy, m_uz, indexed ? &nearby : nullptr, [&](std::size_t p, double k1, double k2) {
     if (k2 <= 0.0)
       return;
     if (k1 < m_kMin[p] || k2 > m_kMax[p])
@@ -271,10 +371,11 @@ EllipsoidNormResult EllipsoidTrajectoryNorm::integrate(const V3D &centre,
     ++result.numPixels;
   });
 
-  forEachIntersection(e, m_maskedUx, m_maskedUy, m_maskedUz, [&](std::size_t p, double k1, double k2) {
-    if (k2 > 0.0 && std::min(k2, m_maskedKMax[p]) > std::max(k1, m_maskedKMin[p]))
-      result.maskedIntersects = true;
-  });
+  forEachIntersection(e, m_maskedUx, m_maskedUy, m_maskedUz, maskedIndexed ? &maskedNearby : nullptr,
+                      [&](std::size_t p, double k1, double k2) {
+                        if (k2 > 0.0 && std::min(k2, m_maskedKMax[p]) > std::max(k1, m_maskedKMin[p]))
+                          result.maskedIntersects = true;
+                      });
 
   return result;
 }
@@ -285,7 +386,13 @@ EllipsoidChords EllipsoidTrajectoryNorm::chords(const V3D &centre, const DataObj
   auto &result = chords.result;
   const auto e = scaleEllipsoid(centre, directions, radii);
 
-  forEachIntersection(e, m_ux, m_uy, m_uz, [&](std::size_t p, double k1, double k2) {
+  // only the pixels whose lines can reach the ellipsoid's bounding sphere
+  const double bound = *std::max_element(radii.begin(), radii.end());
+  std::vector<std::size_t> nearby, maskedNearby;
+  const bool indexed = candidates(m_indexOrder, m_indexStart, centre, bound, nearby);
+  const bool maskedIndexed = candidates(m_maskedIndexOrder, m_maskedIndexStart, centre, bound, maskedNearby);
+
+  forEachIntersection(e, m_ux, m_uy, m_uz, indexed ? &nearby : nullptr, [&](std::size_t p, double k1, double k2) {
     if (k2 <= 0.0)
       return;
     if (k1 < m_kMin[p] || k2 > m_kMax[p])
@@ -303,10 +410,11 @@ EllipsoidChords EllipsoidTrajectoryNorm::chords(const V3D &centre, const DataObj
     chords.kHigh.emplace_back(hi);
   });
 
-  forEachIntersection(e, m_maskedUx, m_maskedUy, m_maskedUz, [&](std::size_t p, double k1, double k2) {
-    if (k2 > 0.0 && std::min(k2, m_maskedKMax[p]) > std::max(k1, m_maskedKMin[p]))
-      result.maskedIntersects = true;
-  });
+  forEachIntersection(e, m_maskedUx, m_maskedUy, m_maskedUz, maskedIndexed ? &maskedNearby : nullptr,
+                      [&](std::size_t p, double k1, double k2) {
+                        if (k2 > 0.0 && std::min(k2, m_maskedKMax[p]) > std::max(k1, m_maskedKMin[p]))
+                          result.maskedIntersects = true;
+                      });
 
   return chords;
 }
@@ -413,6 +521,7 @@ EllipsoidTrajectoryNorm EllipsoidTrajectoryNorm::fromWorkspaces(const API::Matri
     const double weight = solidAngleWS.y(solidIt->second)[0] * protonCharge;
     norm.addPixel(u, weight, it->second, lowValues[i], highValues[i]);
   }
+  // norm.buildDirectionIndex(); BENCH
   return norm;
 }
 

@@ -77,6 +77,10 @@ public:
   /// Add a masked pixel, used only to flag ellipsoids with missing coverage
   bool addMaskedPixel(const Kernel::V3D &u, double kMin, double kMax);
 
+  /// Index the pixels by the direction of their lines, so that an ellipsoid is tested only against the pixels whose
+  /// lines can reach it; adding pixels afterwards removes the index
+  void buildDirectionIndex();
+
   std::size_t numPixels() const { return m_ux.size(); }
   std::size_t numMaskedPixels() const { return m_maskedUx.size(); }
 
@@ -127,6 +131,9 @@ private:
   std::vector<double> m_maskedUx, m_maskedUy, m_maskedUz, m_maskedKMin, m_maskedKMax;
   // cumulative flux spectra
   std::vector<std::vector<double>> m_fluxX, m_fluxY;
+  // pixel indices grouped by the direction of their lines, in bins of polar and azimuthal angle: bin b holds
+  // order[start[b]] .. order[start[b + 1] - 1]; start is empty if there is no index
+  std::vector<std::size_t> m_indexOrder, m_indexStart, m_maskedIndexOrder, m_maskedIndexStart;
 };
 
 } // namespace Mantid::MDAlgorithms

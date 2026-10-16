@@ -14,6 +14,7 @@
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <limits>
+#include <random>
 #include <stdexcept>
 #include <vector>
 
@@ -403,5 +404,42 @@ public:
     const double minus = norm.integrateGaussian(chords, gaussCentre, AXES, {{1.0 / std::sqrt(mxx - dm), sy, sz}}).value;
     TS_ASSERT_DELTA((plus - minus) / (2 * dm), -0.5 * exposure.secondMoment[0],
                     1e-5 * std::abs(exposure.secondMoment[0]));
+  }
+
+  // Testing only the pixels in the direction index's cone gives the same
+  // results as testing every pixel, for lines in every direction, ellipsoids
+  // near the poles and across the azimuthal wrap, and masked pixels.
+  void test_direction_index_matches_testing_every_pixel() {
+    EllipsoidTrajectoryNorm all;
+    addFlatFlux(all, 1.0);
+    std::mt19937 rng(3);
+    std::uniform_real_distribution<double> uniform(-1.0, 1.0);
+    for (int n = 0; n < 20000; ++n) {
+      V3D u(uniform(rng), uniform(rng), uniform(rng));
+      if (u.norm() < 0.1)
+        continue;
+      if (n % 10 == 0)
+        all.addMaskedPixel(u, 1.0, 20.0);
+      else
+        all.addPixel(u, 1.0 + 0.001 * n, 0, 1.0, 20.0);
+    }
+    EllipsoidTrajectoryNorm indexed = all;
+    indexed.buildDirectionIndex();
+
+    const auto dirs = rotatedAxes();
+    const std::vector<V3D> centres{V3D(1, 2, 3),         V3D(0.01, 0.02, 4), V3D(0.02, -0.01, -4), V3D(-3, 0.001, 0.5),
+                                   V3D(-3, -0.001, 0.5), V3D(-2, 0.0, -1),   V3D(0.1, 0.1, 0.05)};
+    for (const auto &c : centres) {
+      for (double scale : {0.05, 0.3, 1.0}) {
+        const PeakEllipsoidExtent radii{{0.5 * scale, 0.8 * scale, scale}};
+        const auto a = all.integrate(c, dirs, radii);
+        const auto b = indexed.integrate(c, dirs, radii);
+        TS_ASSERT_DELTA(b.norm, a.norm, 1e-12 * (1.0 + a.norm));
+        TS_ASSERT_EQUALS(b.numPixels, a.numPixels);
+        TS_ASSERT_EQUALS(b.clipped, a.clipped);
+        TS_ASSERT_EQUALS(b.maskedIntersects, a.maskedIntersects);
+        TS_ASSERT_EQUALS(indexed.chords(c, dirs, radii).pixels.size(), all.chords(c, dirs, radii).pixels.size());
+      }
+    }
   }
 };
