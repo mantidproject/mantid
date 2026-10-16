@@ -18,6 +18,9 @@ namespace Mantid::Kernel {
 #pragma GCC diagnostic ignored "-Wattributes"
 #endif
 template class MANTID_KERNEL_DLL ListValidator<std::string>;
+#ifdef _WIN32
+template class MANTID_KERNEL_DLL TypedValidator<std::string>;
+#endif
 #if defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif

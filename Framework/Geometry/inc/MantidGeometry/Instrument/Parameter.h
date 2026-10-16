@@ -105,7 +105,11 @@ private:
 };
 
 /// Templated class for parameters of type \c Type
+#if !defined(_WIN32)
+template <class Type> class MANTID_GEOMETRY_DLL ParameterType : public Parameter {
+#else
 template <class Type> class ParameterType : public Parameter {
+#endif
 public:
   /// Constructor
   ParameterType() : Parameter(), m_value() {}
