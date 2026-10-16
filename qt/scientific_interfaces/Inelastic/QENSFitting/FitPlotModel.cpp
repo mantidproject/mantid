@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitPlotModel.h"
 
+#include <algorithm>
+#include <iterator>
 #include <utility>
 
 #include "ConvolutionModel.h"
@@ -174,16 +176,19 @@ FitDomainIndex FitPlotModel::getActiveDomainIndex() const {
 }
 
 std::vector<double> FitPlotModel::getHWHMs() const {
+  auto const peaks = findPeaks(m_activeFunction);
   std::vector<double> hwhms;
-  for (auto const &peak : findPeaks(m_activeFunction))
-    hwhms.emplace_back(peak->getParameter("FWHM") / 2.0);
+  std::transform(peaks.cbegin(), peaks.cend(), std::back_inserter(hwhms),
+                 [](auto const &peak) { return peak->getParameter("FWHM") / 2.0; });
   return hwhms;
 }
 
 std::vector<double> FitPlotModel::getPeakCentres() const {
+  auto const peaks = findPeaks(m_activeFunction);
   std::vector<double> centres;
-  for (auto const &peak : findPeaks(m_activeFunction))
-    centres.emplace_back(peak->hasParameter("PeakCentre") ? peak->getParameter("PeakCentre") : 0.0);
+  std::transform(peaks.cbegin(), peaks.cend(), std::back_inserter(centres), [](auto const &peak) {
+    return peak->hasParameter("PeakCentre") ? peak->getParameter("PeakCentre") : 0.0;
+  });
   return centres;
 }
 
