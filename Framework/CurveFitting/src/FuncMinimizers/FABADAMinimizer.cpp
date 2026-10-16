@@ -808,19 +808,23 @@ void FABADAMinimizer::outputPDF(std::vector<double> &xValues, std::vector<double
                                 int const &pdfLength) {
   setParameterXAndYValuesForPDF(xValues, yValues, reducedChain, convLength, pdfLength);
   auto parameterNames = m_fitFunction->getParameterNames();
-  parameterNames.emplace_back("Chi Squared");
-  auto const workspace = createWorkspace(xValues, yValues, int(m_nParams) + 1, parameterNames);
+  parameterNames.emplace_back("Chi_Squared");
 
-  const auto pdfName = getPropertyValue("PDF");
-  if (AnalysisDataService::Instance().doesExist(pdfName)) {
-    auto groupPDF = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(pdfName);
-    groupPDF->addWorkspace(workspace);
-    AnalysisDataService::Instance().addOrReplace(pdfName, groupPDF);
-  } else {
-    auto groupPDF = std::make_shared<WorkspaceGroup>();
-    groupPDF->addWorkspace(workspace);
-    AnalysisDataService::Instance().addOrReplace(pdfName, groupPDF);
+  const auto groupPdfName = getPropertyValue("PDF");
+  auto groupPdf = std::make_shared<WorkspaceGroup>();
+
+  for (int i = 0; i < static_cast<int>(parameterNames.size()); i++) {
+    int xstart = i * (pdfLength + 1);
+    int xend = xstart + (pdfLength + 1);
+    std::vector<double> x(xValues.begin() + xstart, xValues.begin() + xend);
+    int ystart = i * pdfLength;
+    int yend = ystart + pdfLength;
+    std::vector<double> y(yValues.begin() + ystart, yValues.begin() + yend);
+    auto const workspace = createWorkspace(x, y, 1, {parameterNames[i]});
+    AnalysisDataService::Instance().addOrReplace(groupPdfName + "_" + parameterNames[i], workspace);
+    groupPdf->addWorkspace(workspace);
   }
+  AnalysisDataService::Instance().addOrReplace(groupPdfName, groupPdf);
 }
 
 double FABADAMinimizer::getMostProbableChiSquared(std::size_t const &convLength,
