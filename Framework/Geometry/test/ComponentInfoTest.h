@@ -15,6 +15,7 @@
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Plane.h"
@@ -1024,6 +1025,51 @@ public:
     TS_ASSERT(!componentInfo.hasParameter(bankIndex, "transient", false));
     TS_ASSERT(!componentInfo.hasParameter(componentInfo.root(), "label", false));
     TS_ASSERT(componentInfo.sharedParameterInfo()->empty());
+  }
+
+  void test_referenceFrame_is_the_instruments() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    const auto frame = std::make_shared<ReferenceFrame>(X, Y, Left, "source");
+    instrument->setReferenceFrame(frame);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = *std::get<0>(wrappers);
+
+    TS_ASSERT_EQUALS(componentInfo.referenceFrame(), frame);
+    TS_ASSERT_EQUALS(componentInfo.referenceFrame()->pointingUp(), X);
+    TS_ASSERT_EQUALS(componentInfo.referenceFrame()->pointingAlongBeam(), Y);
+  }
+
+  void test_referenceFrame_of_a_parametrized_instrument_is_the_base_instruments() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    const auto frame = std::make_shared<ReferenceFrame>(Z, X, Right, "source");
+    instrument->setReferenceFrame(frame);
+    ParameterMap pmap;
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
+
+    TS_ASSERT_EQUALS(std::get<0>(wrappers)->referenceFrame(), frame);
+  }
+
+  void test_referenceFrame_is_kept_by_a_copy() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    const auto frame = std::make_shared<ReferenceFrame>(X, Y, Left, "source");
+    instrument->setReferenceFrame(frame);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto copy = std::get<0>(wrappers)->cloneWithoutDetectorInfo();
+
+    TS_ASSERT_EQUALS(copy->referenceFrame(), frame);
+  }
+
+  void test_referenceFrame_is_the_default_when_none_was_given() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    InstrumentVisitor visitor(instrument);
+    visitor.walkInstrument();
+    // built without a frame, as by a caller that passes none
+    ComponentInfo componentInfo(visitor.componentInfo(), visitor.componentIds(), visitor.componentIdToIndexMap(),
+                                std::make_shared<std::vector<std::shared_ptr<const IObject>>>(visitor.size()));
+
+    TS_ASSERT(componentInfo.referenceFrame());
+    TS_ASSERT_EQUALS(componentInfo.referenceFrame()->pointingUp(), Y);
+    TS_ASSERT_EQUALS(componentInfo.referenceFrame()->pointingAlongBeam(), Z);
   }
 
   void test_clearParameters_on_a_ComponentInfo_without_parameters_leaves_it_empty() {

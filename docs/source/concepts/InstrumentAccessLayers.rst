@@ -337,6 +337,8 @@ Almost every legacy accessor already has a modern Python home:
      - ``detectorInfo().indexOf(id)``
    * - ``Instrument.getSample()`` / ``getSource()``
      - ``componentInfo().sample()`` / ``source()`` (+ ``samplePosition``/``sourcePosition``)
+   * - ``Instrument.getReferenceFrame()``
+     - ``componentInfo().referenceFrame()``
    * - tree nav ``nelements`` / ``[]`` / ``len()``
      - ``componentInfo().children`` / ``parent`` / ``componentsInSubtree`` / ``detectorsInSubtree`` / iteration
    * - ``IObjComponent.shape()``

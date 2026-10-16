@@ -33,6 +33,7 @@ class V3D;
 namespace Geometry {
 class IComponent;
 class IObject;
+class ReferenceFrame;
 } // namespace Geometry
 
 namespace Beamline {
@@ -63,6 +64,9 @@ private:
 
   /// The instrument's named parameters, keyed by component index
   std::shared_ptr<ParameterInfo> m_parameterInfo;
+
+  /// The instrument's reference frame (up, along-beam and handedness), or null if none was given
+  std::shared_ptr<const ReferenceFrame> m_referenceFrame;
 
   template <class T> std::vector<T> getParameter(size_t componentIndex, const std::string &name, bool recursive) const;
 
@@ -99,7 +103,8 @@ public:
                 std::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>> componentIds,
                 std::shared_ptr<const std::unordered_map<Geometry::IComponent const *, size_t>> componentIdToIndexMap,
                 std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> shapes,
-                std::shared_ptr<ParameterInfo> parameterInfo = nullptr);
+                std::shared_ptr<ParameterInfo> parameterInfo = nullptr,
+                std::shared_ptr<const ReferenceFrame> referenceFrame = nullptr);
   ~ComponentInfo();
   /// Copy assignment is not possible for ComponentInfo
   ComponentInfo &operator=(const ComponentInfo &) = delete;
@@ -150,6 +155,9 @@ public:
   std::tuple<int, int, int> xyzForDetectorID(const size_t componentIndex, const detid_t detectorID) const;
   bool isGridDetector(size_t const componentIndex) const;
   size_t root() const;
+  /// The instrument's reference frame: which axes point up and along the beam, and its handedness.
+  /// A default frame (Y up, Z along the beam, right-handed) if this ComponentInfo was built without one.
+  std::shared_ptr<const ReferenceFrame> referenceFrame() const;
 
   const IComponent *componentID(const size_t componentIndex) const { return (*m_componentIds)[componentIndex]; }
   bool hasValidShape(const size_t componentIndex) const;
