@@ -11,7 +11,6 @@
 #include "../../Reduction/Instrument.h"
 #include "../../Reduction/LookupRow.h"
 #include "../../Reduction/RunsTable.h"
-#include "MantidFrameworkTestHelpers/FallbackBoostOptionalIO.h"
 
 #include <gmock/gmock.h>
 

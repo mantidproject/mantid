@@ -18,7 +18,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidFrameworkTestHelpers/FallbackBoostOptionalIO.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtWidgets/Plotting/MockExternalPlotter.h"
 

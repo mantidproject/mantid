@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidReflectometry/ReflectometryReductionOneAuto3.h"
-#include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/Workspace.h"

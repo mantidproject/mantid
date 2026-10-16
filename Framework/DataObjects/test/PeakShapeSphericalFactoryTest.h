@@ -21,7 +21,6 @@
 
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/PeakShapeSphericalFactory.h"
-#include "MantidFrameworkTestHelpers/FallbackBoostOptionalIO.h"
 #include "MantidJson/Json.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/VMD.h"

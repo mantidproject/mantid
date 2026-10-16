@@ -7,7 +7,6 @@
 #pragma once
 
 #include "../../../ISISReflectometry/Reduction/Group.h"
-#include "MantidFrameworkTestHelpers/FallbackBoostOptionalIO.h"
 
 #include <gmock/gmock.h>
 

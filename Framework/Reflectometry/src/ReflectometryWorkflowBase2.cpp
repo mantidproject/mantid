@@ -7,7 +7,6 @@
 #include "MantidReflectometry/ReflectometryWorkflowBase2.h"
 
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
