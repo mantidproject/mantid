@@ -14,6 +14,15 @@ namespace Mantid::Kernel {
 namespace {
 // local name for a time that has been made with the default constructor
 const DateAndTime UNSET_TIME(DateAndTime::GPS_EPOCH);
+// pretend end time for a filter that is open-ended
+const DateAndTime OPEN_END_TIME("2100-Jan-01 00:00:01");
+
+/// Convert a filter to a TimeROI, treating a single "use" time as open-ended
+TimeROI toTimeROI(const TimeSeriesProperty<bool> &filter) {
+  if (filter.lastValue() && filter.firstTime() == filter.lastTime())
+    return TimeROI(filter.lastTime(), OPEN_END_TIME);
+  return TimeROI(&filter);
+}
 } // namespace
 
 /**
@@ -82,7 +91,7 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
     filterOpenEnded = filter.lastValue();
 
     // TimeROI constructor does a ton of cleanup
-    TimeROI mine(&filter);
+    TimeROI mine = toTimeROI(filter);
 
     // put the results back into the TimeSeriesProperty
     this->setFilter(mine, filterOpenEnded);
@@ -94,20 +103,20 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
     auto filter1 = m_filter.get();
     auto filter2 = std::unique_ptr<TimeSeriesProperty<bool>>(filter.clone());
 
-    TimeInterval time1 = filter1->nthInterval(filter1->size() - 1);
-    TimeInterval time2 = filter2->nthInterval(filter2->size() - 1);
+    const DateAndTime time1 = filter1->lastTime();
+    const DateAndTime time2 = filter2->lastTime();
 
-    if (time1.start() < time2.start()) {
-      filter1->addValue(time2.start(),
+    if (time1 < time2) {
+      filter1->addValue(time2,
                         true); // should be f1->lastValue, but it doesnt
                                // matter for boolean AND
-    } else if (time2.start() < time1.start()) {
-      filter2->addValue(time1.start(), true);
+    } else if (time2 < time1) {
+      filter2->addValue(time1, true);
     }
 
     // temporary objects to handle the intersection calculation
-    TimeROI mine(filter1);
-    TimeROI theirs(filter2.get());
+    TimeROI mine = toTimeROI(*filter1);
+    TimeROI theirs = toTimeROI(*filter2);
     mine.update_intersection(theirs);
 
     // put the results into the TimeSeriesProperty
@@ -123,7 +132,7 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
     if (filterOpenEnded) {
       if (m_filter->size() == 1 && m_filter->lastValue()) {
         // create a pretend ROI from the start to the year 2100
-        timeroi.addROI(m_filter->lastTime(), DateAndTime("2100-Jan-01 00:00:01"));
+        timeroi.addROI(m_filter->lastTime(), OPEN_END_TIME);
       } else {
         // default constructor is fine
         timeroi = TimeROI(m_filter.get());
