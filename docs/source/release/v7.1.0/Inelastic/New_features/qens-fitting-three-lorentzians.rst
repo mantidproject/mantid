@@ -1,0 +1,1 @@
+- The :ref:`Convolution<convfit>` tab of the :ref:`QENS Fitting interface <interface-inelastic-qens-fitting>` can now fit up to three Lorentzians, previously limited to two.

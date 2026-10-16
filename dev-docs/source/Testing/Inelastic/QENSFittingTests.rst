@@ -98,6 +98,8 @@ Convolution tab
    (c)  Enable the ``Plot Guess`` checkbox - should not change anything, but should not break anything either!
 
 #. Change the ``Fit type`` to different functions and run fits
+#. Set ``Lorentzians`` to 3 and check that the parameters for a third Lorentzian appear, then click ``Run``. The fit
+   should complete, and the output workspace names should contain ``3L``
 
 Function (Q) tab
 ----------------
