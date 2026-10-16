@@ -17,7 +17,32 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Unit.h"
 
+#include <cmath>
+
 namespace Mantid::Geometry {
+namespace {
+double angleFromObserver(const Kernel::V3D &position, const Kernel::V3D &observer, const Kernel::V3D &axis) {
+  return (position - observer).angle(axis);
+}
+
+double signedAngleFromObserver(const Kernel::V3D &position, const Kernel::V3D &observer, const Kernel::V3D &axis,
+                               const Kernel::V3D &instrumentUp) {
+  const auto observerDetVec = position - observer;
+  double angle = observerDetVec.angle(axis);
+
+  const auto cross = axis.cross_prod(observerDetVec);
+  const auto normToSurface = axis.cross_prod(instrumentUp);
+  if (normToSurface.scalar_prod(cross) < 0) {
+    angle *= -1;
+  }
+  return angle;
+}
+
+double phiOfPosition(const Kernel::V3D &position) { return std::atan2(position.Y(), position.X()); }
+
+double applyPhiOffset(const double phi, const double offset) { return phi < 0 ? -(offset + phi) : offset - phi; }
+} // namespace
+
 /** Construct DetectorInfo based on an Instrument.
  *
  * The Instrument reference `instrument` must be the parameterized instrument
@@ -266,6 +291,73 @@ double DetectorInfo::azimuthal(const std::pair<size_t, size_t> &index) const {
   const double dotVertical = sampleDetVec.scalar_prod(vertical);
 
   return atan2(dotVertical, dotHorizontal);
+}
+
+/** Returns the angle between the vector from `observer` to the detector and `axis`.
+ *
+ * This is the Instrument-2.0 replacement for IDetector::getTwoTheta. Unlike twoTheta(index), the observer and axis are
+ * supplied by the caller rather than taken from the sample and beam, and no monitor check is performed.
+ */
+double DetectorInfo::twoTheta(const size_t index, const Kernel::V3D &observer, const Kernel::V3D &axis) const {
+  return angleFromObserver(position(index), observer, axis);
+}
+
+/// Returns the angle between the vector from `observer` to the detector and `axis`.
+double DetectorInfo::twoTheta(const std::pair<size_t, size_t> &index, const Kernel::V3D &observer,
+                              const Kernel::V3D &axis) const {
+  return angleFromObserver(position(index), observer, axis);
+}
+
+/** Returns the angle between the vector from `observer` to the detector and `axis`, signed according to the rotation
+ * direction relative to `axis` and `instrumentUp`.
+ *
+ * This is the Instrument-2.0 replacement for IDetector::getSignedTwoTheta. No monitor check is performed.
+ */
+double DetectorInfo::signedTwoTheta(const size_t index, const Kernel::V3D &observer, const Kernel::V3D &axis,
+                                    const Kernel::V3D &instrumentUp) const {
+  return signedAngleFromObserver(position(index), observer, axis, instrumentUp);
+}
+
+/// Returns the signed angle between the vector from `observer` to the detector and `axis`.
+double DetectorInfo::signedTwoTheta(const std::pair<size_t, size_t> &index, const Kernel::V3D &observer,
+                                    const Kernel::V3D &axis, const Kernel::V3D &instrumentUp) const {
+  return signedAngleFromObserver(position(index), observer, axis, instrumentUp);
+}
+
+/// Returns the signed angle between the vector from `observer` to the detector and `axis`, signed using the
+/// instrument's theta-sign axis (ReferenceFrame::vecThetaSign).
+double DetectorInfo::signedTwoTheta(const size_t index, const Kernel::V3D &observer, const Kernel::V3D &axis) const {
+  return signedTwoTheta(index, observer, axis, m_instrument->getReferenceFrame()->vecThetaSign());
+}
+
+/// Returns the signed angle between the vector from `observer` to the detector and `axis`, signed using the
+/// instrument's theta-sign axis (ReferenceFrame::vecThetaSign).
+double DetectorInfo::signedTwoTheta(const std::pair<size_t, size_t> &index, const Kernel::V3D &observer,
+                                    const Kernel::V3D &axis) const {
+  return signedTwoTheta(index, observer, axis, m_instrument->getReferenceFrame()->vecThetaSign());
+}
+
+/** Returns the angle of the detector position about the lab-frame z axis, atan2(y, x), in radians.
+ *
+ * This is the Instrument-2.0 replacement for IDetector::getPhi. It is measured from the lab origin and ignores the
+ * reference frame; see azimuthal() for the angle about the beam measured from the sample.
+ */
+double DetectorInfo::phi(const size_t index) const { return phiOfPosition(position(index)); }
+
+/// Returns the angle of the detector position about the lab-frame z axis, atan2(y, x), in radians.
+double DetectorInfo::phi(const std::pair<size_t, size_t> &index) const { return phiOfPosition(position(index)); }
+
+/** Returns phi() reflected about `offset` (radians): offset - phi for phi >= 0 and -(offset + phi) otherwise.
+ *
+ * This is the Instrument-2.0 replacement for IDetector::getPhiOffset.
+ */
+double DetectorInfo::phiOffset(const size_t index, const double offset) const {
+  return applyPhiOffset(phi(index), offset);
+}
+
+/// Returns phi() reflected about `offset` (radians).
+double DetectorInfo::phiOffset(const std::pair<size_t, size_t> &index, const double offset) const {
+  return applyPhiOffset(phi(index), offset);
 }
 
 std::tuple<double, double, double> DetectorInfo::diffractometerConstants(const size_t index,

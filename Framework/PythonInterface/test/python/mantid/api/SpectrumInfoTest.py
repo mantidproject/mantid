@@ -7,6 +7,7 @@
 import unittest
 from testhelpers import WorkspaceCreationHelper
 from mantid.kernel import V3D
+import numpy as np
 
 
 class SpectrumInfoTest(unittest.TestCase):
@@ -69,6 +70,37 @@ class SpectrumInfoTest(unittest.TestCase):
         """See if the returned value is a double (float in Python)."""
         info = self._ws.spectrumInfo()
         self.assertEqual(type(info.twoTheta(1)), float)
+
+    def test_angles_with_observer(self):
+        info = self._ws.spectrumInfo()
+        pos = np.array(info.position(1))
+        o, a, u = np.array([0.1, -0.2, 0.3]), np.array([0.0, 0.1, 1.0]), np.array([0.3, 1.0, 0.0])
+        v = pos - o
+        expected = np.arccos(np.dot(v, a) / (np.linalg.norm(v) * np.linalg.norm(a)))
+        sign = -1.0 if np.dot(np.cross(a, u), np.cross(a, v)) < 0 else 1.0
+        expected_phi = np.arctan2(pos[1], pos[0])
+        observer, axis, up = V3D(*o), V3D(*a), V3D(*u)
+        self.assertAlmostEqual(info.twoTheta(1, observer, axis), expected, places=12)
+        self.assertAlmostEqual(info.signedTwoTheta(1, observer, axis, up), sign * expected, places=12)
+        self.assertAlmostEqual(info.phi(1), expected_phi, places=12)
+        expected_offset = -(np.pi + expected_phi) if expected_phi < 0 else np.pi - expected_phi
+        self.assertAlmostEqual(info.phiOffset(1, np.pi), expected_offset, places=12)
+
+    def test_twoTheta_defaults(self):
+        info = self._ws.spectrumInfo()
+        index = 1
+        sample = info.samplePosition()
+        beam = sample - info.sourcePosition()
+        observer = V3D(0.1, -0.2, 0.3)
+        axis = V3D(0.0, 0.1, 1.0)
+        up = V3D(0.3, 1.0, 0.0)
+        self.assertEqual(info.twoTheta(index, sample, beam), info.twoTheta(index))
+        self.assertEqual(info.twoTheta(index, observer=observer), info.twoTheta(index, observer, beam))
+        self.assertEqual(info.twoTheta(index, axis=axis), info.twoTheta(index, sample, axis))
+        self.assertEqual(info.signedTwoTheta(index, sample, beam), info.signedTwoTheta(index))
+        self.assertEqual(info.signedTwoTheta(index, observer=observer), info.signedTwoTheta(index, observer, beam))
+        self.assertEqual(info.signedTwoTheta(index, axis=axis), info.signedTwoTheta(index, sample, axis))
+        self.assertEqual(info.signedTwoTheta(index, instrumentUp=up), info.signedTwoTheta(index, sample, beam, up))
 
     def test_geogAngles(self):
         """See if the returned value is a double (float in Python)."""
