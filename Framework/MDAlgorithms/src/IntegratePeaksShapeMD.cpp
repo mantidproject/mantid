@@ -8,14 +8,17 @@
 
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 
+#include "MantidMDAlgorithms/EllipsoidTrajectoryNorm.h"
 #include "MantidMDAlgorithms/Integrate3DEvents.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
@@ -23,6 +26,7 @@
 
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
+#include <optional>
 #include <string>
 
 using namespace Mantid::API;
@@ -90,9 +94,85 @@ void IntegratePeaksShapeMD::init() {
                   "the peak's stored Q. The peak's stored Q is not modified; the correction is "
                   "used only for this integration.");
 
+  declareProperty("AdjustShape", false,
+                  "Only used if ProfileFit is true. If true, also refine the shape (covariance) of "
+                  "each peak whose intensity is at least AdjustShapeMinSignalToNoise standard "
+                  "deviations, as part of the profile fit, with each principal standard deviation "
+                  "kept within MaxShapeChange of the peak's stored shape; weaker peaks, and peaks "
+                  "that fall below AdjustShapeMinSignalToNoise once the uncertainty of the refined "
+                  "shape is included, keep their stored shape. The refined shape is written to the "
+                  "output peak.");
+
+  auto atLeastOne = std::make_shared<BoundedValidator<double>>();
+  atLeastOne->setLower(1.0);
+  declareProperty("AdjustShapeMinSignalToNoise", 10.0, mustBePositive,
+                  "Only used if AdjustShape is true. The smallest intensity over its standard "
+                  "deviation (from a fit with the stored shape) for which a peak's shape is refined.");
+  declareProperty("MaxShapeChange", 2.0, atLeastOne,
+                  "Only used if AdjustShape is true. The largest factor by which each principal "
+                  "standard deviation of a refined shape may differ from the stored shape's.");
+
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("SolidAngleWorkspace", "", Direction::Input,
+                                                                       PropertyMode::Optional),
+                  "An input workspace containing integrated vanadium (a measure of the solid angle), "
+                  "as used by MDNorm. If set together with FluxWorkspace, each peak's intensity is "
+                  "normalized by flux and solid angle, and the InputWorkspace must have been cropped "
+                  "with CropWorkspaceForMDNorm.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("FluxWorkspace", "", Direction::Input,
+                                                                       PropertyMode::Optional),
+                  "An input workspace containing the integrated flux as a function of momentum, as "
+                  "used by MDNorm.");
+  setPropertyGroup("SolidAngleWorkspace", "Vanadium normalization");
+  setPropertyGroup("FluxWorkspace", "Vanadium normalization");
+
   declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
                   "with the peaks' integrated intensities.");
+
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputDiagnosticsWorkspace", "",
+                                                                       Direction::Output, PropertyMode::Optional),
+                  "Only used with SolidAngleWorkspace and FluxWorkspace. A table with one row per peak, "
+                  "giving the raw counts and normalization in the peak ellipsoid and background shell, "
+                  "the number of detector pixels covering the peak, and flags for peaks only partly "
+                  "covered by the momentum range of a pixel or by masked detectors, and whether the "
+                  "peak's shape was refined by AdjustShape. With ProfileFit, "
+                  "CountsPeak is the summed event weight in the fit region, CountsShell the fitted "
+                  "background counts, NormPeak the expected counts per unit intensity of the fitted "
+                  "peak, NormShell the normalization of the fit region, and the pixel count and flags "
+                  "refer to the fit region.");
+}
+
+/**
+ * @brief Checks that the normalization workspaces are given together, with the logs they require.
+ *
+ * @return A map from property names to error messages.
+ */
+std::map<std::string, std::string> IntegratePeaksShapeMD::validateInputs() {
+  std::map<std::string, std::string> issues;
+  const bool adjustShape = getProperty("AdjustShape");
+  const bool profileFit = getProperty("ProfileFit");
+  if (adjustShape && !profileFit)
+    issues["AdjustShape"] = "AdjustShape requires ProfileFit.";
+
+  MatrixWorkspace_const_sptr solidAngleWS = getProperty("SolidAngleWorkspace");
+  MatrixWorkspace_const_sptr fluxWS = getProperty("FluxWorkspace");
+
+  if (!solidAngleWS && !fluxWS) {
+    if (!isDefault("OutputDiagnosticsWorkspace"))
+      issues["OutputDiagnosticsWorkspace"] =
+          "OutputDiagnosticsWorkspace requires SolidAngleWorkspace and FluxWorkspace.";
+    return issues;
+  }
+  if (!solidAngleWS)
+    issues["SolidAngleWorkspace"] = "SolidAngleWorkspace must be set together with FluxWorkspace.";
+  if (!fluxWS)
+    issues["FluxWorkspace"] = "FluxWorkspace must be set together with SolidAngleWorkspace.";
+
+  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  if (inputWS && (!inputWS->run().hasProperty("MDNorm_low") || !inputWS->run().hasProperty("MDNorm_high")))
+    issues["InputWorkspace"] = "Missing MDNorm_low or MDNorm_high log. Please use CropWorkspaceForMDNorm on the "
+                               "InputWorkspace before integrating with SolidAngleWorkspace and FluxWorkspace.";
+  return issues;
 }
 
 /**
@@ -167,6 +247,48 @@ void IntegratePeaksShapeMD::exec() {
 
   const bool profileFit = getProperty("ProfileFit");
   const bool adjustCenter = getProperty("AdjustCenter");
+  const bool adjustShape = getProperty("AdjustShape");
+
+  // flux/solid-angle normalization of each peak's ellipsoid and background
+  // shell, from the intersections of the detector trajectories with them
+  MatrixWorkspace_sptr solidAngleWS = getProperty("SolidAngleWorkspace");
+  MatrixWorkspace_sptr fluxWS = getProperty("FluxWorkspace");
+  const bool normalize = solidAngleWS && fluxWS;
+  std::optional<EllipsoidTrajectoryNorm> norm;
+  std::vector<EllipsoidNormResult> normPeak, normInner, normOuter;
+  ITableWorkspace_sptr diagnostics;
+  if (normalize) {
+    norm = EllipsoidTrajectoryNorm::fromWorkspaces(*input_ws, *solidAngleWS, *fluxWS);
+    if (norm->numPixels() == 0)
+      throw std::runtime_error("No unmasked detectors of the InputWorkspace were found in both the "
+                               "SolidAngleWorkspace and the FluxWorkspace.");
+  }
+  if (normalize && !profileFit) {
+    normPeak.resize(n_peaks);
+    normInner.resize(n_peaks);
+    normOuter.resize(n_peaks);
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int i = 0; i < static_cast<int>(n_peaks); ++i) {
+      const auto &peak = peaks[i];
+      const auto *shape = dynamic_cast<const PeakShapeEllipsoid *>(&peak.getPeakShape());
+      const auto center = peak.getQLabFrame();
+      normPeak[i] = norm->integrate(center, shape->directions(), shape->abcRadii());
+      normInner[i] = norm->integrate(center, shape->directions(), shape->abcRadiiBackgroundInner());
+      normOuter[i] = norm->integrate(center, shape->directions(), shape->abcRadiiBackgroundOuter());
+    }
+  }
+  if (normalize && !isDefault("OutputDiagnosticsWorkspace")) {
+    diagnostics = std::make_shared<TableWorkspace>();
+    diagnostics->addColumn("int", "PeakIndex");
+    diagnostics->addColumn("double", "CountsPeak");
+    diagnostics->addColumn("double", "CountsShell");
+    diagnostics->addColumn("double", "NormPeak");
+    diagnostics->addColumn("double", "NormShell");
+    diagnostics->addColumn("int", "NumPixels");
+    diagnostics->addColumn("bool", "ClippedByMomentumRange");
+    diagnostics->addColumn("bool", "MaskedDetectors");
+    diagnostics->addColumn("bool", "ShapeAdjusted");
+  }
 
   for (size_t i = 0; i < n_peaks; i++) {
     auto &peak = peaks[i];
@@ -176,15 +298,73 @@ void IntegratePeaksShapeMD::exec() {
     double sigi = 0.0;
     if (profileFit) {
       V3D center;
-      integrator.integrateUsingShapeProfileFit(*shape, peak.getQLabFrame(), adjustCenter, center, inti, sigi);
+      ProfileFitNormalization fitNormalization;
+      ProfileFitShape shapeFit;
+      shapeFit.minSignalToNoise = getProperty("AdjustShapeMinSignalToNoise");
+      shapeFit.maxChange = getProperty("MaxShapeChange");
+      integrator.integrateUsingShapeProfileFit(*shape, peak.getQLabFrame(), adjustCenter, center, inti, sigi,
+                                               norm ? &(*norm) : nullptr, &fitNormalization,
+                                               adjustShape ? &shapeFit : nullptr);
+      const bool shapeAdjusted = adjustShape && shapeFit.adjusted;
+      if (diagnostics) {
+        TableRow row = diagnostics->appendRow();
+        row << static_cast<int>(i) << fitNormalization.counts << fitNormalization.backgroundCounts
+            << fitNormalization.peakNorm << fitNormalization.regionNorm
+            << static_cast<int>(fitNormalization.coverage.numPixels) << fitNormalization.coverage.clipped
+            << fitNormalization.coverage.maskedIntersects << shapeAdjusted;
+      }
       // Persist a center correction found by AdjustCenter as the output
       // shape's translation -- peak.getQLabFrame() itself is left alone,
       // since it's tied to a specific detector pixel/TOF and isn't free to
       // move without checking that still corresponds to a valid trajectory.
-      if (adjustCenter && center != shape->translation()) {
+      // A refined shape replaces the stored directions and radii, with the
+      // background radii scaled with them.
+      if (shapeAdjusted) {
+        const auto &radii = shape->abcRadii();
+        const auto &inner = shape->abcRadiiBackgroundInner();
+        const auto &outer = shape->abcRadiiBackgroundOuter();
+        double innerFactor = 0.0, outerFactor = 0.0;
+        for (size_t k = 0; k < 3; ++k) {
+          innerFactor += inner[k] / radii[k] / 3.0;
+          outerFactor += outer[k] / radii[k] / 3.0;
+        }
+        PeakEllipsoidExtent newInner, newOuter;
+        for (size_t k = 0; k < 3; ++k) {
+          newInner[k] = shapeFit.sigmas[k] * innerFactor;
+          newOuter[k] = shapeFit.sigmas[k] * outerFactor;
+        }
+        peak.setPeakShape(new PeakShapeEllipsoid(shapeFit.directions, shapeFit.sigmas, newInner, newOuter,
+                                                 shape->frame(), shape->algorithmName(), shape->algorithmVersion(),
+                                                 center));
+      } else if (adjustCenter && center != shape->translation()) {
         peak.setPeakShape(new PeakShapeEllipsoid(
             shape->directions(), shape->abcRadii(), shape->abcRadiiBackgroundInner(), shape->abcRadiiBackgroundOuter(),
             shape->frame(), shape->algorithmName(), shape->algorithmVersion(), center));
+      }
+    } else if (normalize) {
+      // I = V_peak * (N_peak / Norm_peak - N_shell / Norm_shell), the
+      // background-subtracted mean normalized signal over the peak ellipsoid
+      // times its volume, with the normalization treated as exact
+      const auto counts = integrator.countUsingShape(*shape, peak.getQLabFrame());
+      const double peakNorm = normPeak[i].norm;
+      const double shellNorm = normOuter[i].norm - normInner[i].norm;
+      const auto &radii = shape->abcRadii();
+      const double peakVolume = 4.0 / 3.0 * M_PI * radii[0] * radii[1] * radii[2];
+      if (peakNorm > 0.0) {
+        double signal = counts.peak / peakNorm;
+        double variance = counts.peakErrorSq / (peakNorm * peakNorm);
+        if (shellNorm > 0.0) {
+          signal -= counts.shell / shellNorm;
+          variance += counts.shellErrorSq / (shellNorm * shellNorm);
+        }
+        inti = peakVolume * signal;
+        sigi = peakVolume * std::sqrt(variance);
+      }
+      if (diagnostics) {
+        TableRow row = diagnostics->appendRow();
+        row << static_cast<int>(i) << counts.peak << counts.shell << peakNorm << shellNorm
+            << static_cast<int>(normPeak[i].numPixels) << (normPeak[i].clipped || normOuter[i].clipped)
+            << normOuter[i].maskedIntersects << false;
       }
     } else {
       integrator.integrateUsingShape(*shape, peak.getQLabFrame(), inti, sigi);
@@ -198,6 +378,8 @@ void IntegratePeaksShapeMD::exec() {
   // integrated.
   peak_ws->mutableRun().addProperty("PeaksIntegrated", 1, true);
   setProperty("OutputWorkspace", peak_ws);
+  if (diagnostics)
+    setProperty("OutputDiagnosticsWorkspace", diagnostics);
 }
 
 void IntegratePeaksShapeMD::qListFromEventWS(Integrate3DEvents &integrator, Progress &prog, EventWorkspace_sptr &wksp) {
@@ -220,9 +402,12 @@ void IntegratePeaksShapeMD::qListFromEventWS(Integrate3DEvents &integrator, Prog
 
   m_targWSDescr.m_PreprDetTable = table;
 
-  auto numSpectra = static_cast<int>(wksp->getNumberHistograms());
+  // the preprocessed detector table has one row per detector (monitors and
+  // spectra without detectors are left out), mapped to its spectrum by detIDMap
+  const auto numDetectors = static_cast<int>(table->getLogs()->getPropertyValueAsType<uint32_t>("ActualDetectorsNum"));
+  const auto &detIDMap = table->getColVector<size_t>("detIDMap");
   PARALLEL_FOR_IF(Kernel::threadSafe(*wksp))
-  for (int i = 0; i < numSpectra; ++i) {
+  for (int i = 0; i < numDetectors; ++i) {
     PARALLEL_START_INTERRUPT_REGION
 
     UnitsConversionHelper unitConverter;
@@ -231,8 +416,15 @@ void IntegratePeaksShapeMD::qListFromEventWS(Integrate3DEvents &integrator, Prog
     MDTransfQ3D qConverter;
     qConverter.initialize(m_targWSDescr);
 
+    // skip masked detectors, as ConvertToMD does
+    std::vector<Mantid::coord_t> locCoord(DIMS, 0.);
+    if (!qConverter.calcYDepCoordinates(locCoord, i)) {
+      prog.report();
+      continue;
+    }
+
     std::vector<double> buffer(DIMS);
-    EventList events = wksp->getSpectrum(i);
+    EventList events = wksp->getSpectrum(detIDMap[i]);
 
     events.switchTo(WEIGHTED_NOTIME);
     events.compressEvents(1e-5, &events);
@@ -242,9 +434,7 @@ void IntegratePeaksShapeMD::qListFromEventWS(Integrate3DEvents &integrator, Prog
       continue;
     }
 
-    std::vector<Mantid::coord_t> locCoord(DIMS, 0.);
     unitConverter.updateConversion(i);
-    qConverter.calcYDepCoordinates(locCoord, i);
 
     double signal(1.);
     double errorSq(1.);
@@ -297,9 +487,12 @@ void IntegratePeaksShapeMD::qListFromHistoWS(Integrate3DEvents &integrator, Prog
     throw(std::runtime_error("Can not retrieve results of \"PreprocessDetectorsToMD\""));
   m_targWSDescr.m_PreprDetTable = table;
 
-  auto numSpectra = static_cast<int>(wksp->getNumberHistograms());
+  // the preprocessed detector table has one row per detector (monitors and
+  // spectra without detectors are left out), mapped to its spectrum by detIDMap
+  const auto numDetectors = static_cast<int>(table->getLogs()->getPropertyValueAsType<uint32_t>("ActualDetectorsNum"));
+  const auto &detIDMap = table->getColVector<size_t>("detIDMap");
   PARALLEL_FOR_IF(Kernel::threadSafe(*wksp))
-  for (int i = 0; i < numSpectra; ++i) {
+  for (int i = 0; i < numDetectors; ++i) {
     PARALLEL_START_INTERRUPT_REGION
 
     UnitsConversionHelper unitConverter;
@@ -308,13 +501,19 @@ void IntegratePeaksShapeMD::qListFromHistoWS(Integrate3DEvents &integrator, Prog
     MDTransfQ3D qConverter;
     qConverter.initialize(m_targWSDescr);
 
-    const auto &xVals = wksp->points(i);
-    const auto &yVals = wksp->y(i);
-    const auto &eVals = wksp->e(i);
-
+    // skip masked detectors, as ConvertToMD does
     std::vector<Mantid::coord_t> locCoord(DIMS, 0.);
+    if (!qConverter.calcYDepCoordinates(locCoord, i)) {
+      prog.report();
+      continue;
+    }
+
+    const auto spectrum = detIDMap[i];
+    const auto &xVals = wksp->points(spectrum);
+    const auto &yVals = wksp->y(spectrum);
+    const auto &eVals = wksp->e(spectrum);
+
     unitConverter.updateConversion(i);
-    qConverter.calcYDepCoordinates(locCoord, i);
 
     double signal(1.);
     double errorSq(1.);
