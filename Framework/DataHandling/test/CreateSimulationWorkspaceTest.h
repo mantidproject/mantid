@@ -201,7 +201,7 @@ private:
     Mantid::Geometry::Instrument_const_sptr instr = outputWS->getInstrument();
 
     TS_ASSERT(instr);
-    TS_ASSERT_EQUALS(instr->getName(), name);
+    TS_ASSERT_EQUALS(outputWS->getInstrumentName(), name);
     TS_ASSERT_EQUALS(instr->getNumberDetectors(true), ndets);
   }
 

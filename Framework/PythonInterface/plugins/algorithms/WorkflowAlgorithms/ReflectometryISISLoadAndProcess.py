@@ -690,7 +690,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         return group
 
     def _setInstrumentSpecificProperties(self, calibration_alg, workspace, adjust_theta, experiment_angle=None, specular_spectrum_no=None):
-        if workspace.getInstrument().getName() != self._POLREF:
+        if workspace.getInstrumentName() != self._POLREF:
             return experiment_angle, False
 
         if specular_spectrum_no is None:
@@ -706,7 +706,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         return experiment_angle, True
 
     def _validate_instrument_specific_calibration_properties(self, workspace):
-        if workspace.getInstrument().getName() == self._POLREF and self.getProperty("CorrectDetectors").value:
+        if workspace.getInstrumentName() == self._POLREF and self.getProperty("CorrectDetectors").value:
             raise RuntimeError("CorrectDetectors must be False when CalibrationFile is provided for POLREF data")
 
     def _find_specular_pixel_spectrum_no(self, workspace):

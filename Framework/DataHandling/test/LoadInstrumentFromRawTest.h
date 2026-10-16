@@ -69,7 +69,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
 
     std::shared_ptr<const Instrument> i = output->getInstrument();
-    TS_ASSERT_EQUALS(i->getName(), "LOQ     ");
+    TS_ASSERT_EQUALS(output->getInstrumentName(), "LOQ     ");
     std::shared_ptr<const IComponent> source = i->getSource();
     TS_ASSERT_EQUALS(source->getName(), "Source");
     TS_ASSERT_DELTA(source->getPos().Z(), -11, 0.01);

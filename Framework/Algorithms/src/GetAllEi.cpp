@@ -181,7 +181,8 @@ void GetAllEi::exec() {
   // operation loses parameters map.
   m_chopper = pInstrument->getComponentByName("chopper-position");
   if (!m_chopper)
-    throw std::runtime_error("Instrument " + pInstrument->getName() + " does not have 'chopper-position' component");
+    throw std::runtime_error("Instrument " + inputWS->getInstrumentName() +
+                             " does not have 'chopper-position' component");
 
   auto phase = m_chopper->getNumberParameter("initial_phase");
 

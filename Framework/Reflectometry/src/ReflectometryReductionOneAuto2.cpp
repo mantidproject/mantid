@@ -1058,7 +1058,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::getFloodWorkspace() {
       try {
         // If the first part is a number treat all parts as run numbers
         boost::lexical_cast<size_t>(parts.front());
-        fileName = instrument->getName() + Strings::toString(parts);
+        fileName = inputWS->getInstrumentName() + Strings::toString(parts);
       } catch (const boost::bad_lexical_cast &) {
         // Do nothing fileName == floodRunParam
       }

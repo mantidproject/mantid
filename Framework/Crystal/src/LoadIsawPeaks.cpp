@@ -202,7 +202,7 @@ std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS, std::ifs
   // We cannot assume the peaks have bank type detector modules, so we have a
   // string to check this
   std::string bankPart = "bank";
-  if (instr->getName() == "WISH")
+  if (tempWS->getInstrumentName() == "WISH")
     bankPart = "WISHpanel";
   // Get all children
   const auto &componentInfo = outWS->componentInfo();
@@ -232,7 +232,7 @@ std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS, std::ifs
       Algorithm_sptr alg = createChildAlgorithm("MaskBTP");
       alg->setProperty<Workspace_sptr>("Workspace", outWS);
       alg->setProperty("Bank", maskBanks);
-      alg->setProperty("Instrument", instr->getName());
+      alg->setProperty("Instrument", tempWS->getInstrumentName());
       if (!alg->execute())
         throw std::runtime_error("MaskDetectors Child Algorithm has not executed successfully");
     } catch (...) {

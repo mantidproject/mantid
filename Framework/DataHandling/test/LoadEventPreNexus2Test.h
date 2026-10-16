@@ -167,8 +167,7 @@ public:
     TS_ASSERT_EQUALS(ew->getNumberHistograms(), numpixels_with_events);
 
     // Check if the instrument was loaded correctly
-    std::shared_ptr<const Instrument> inst = ew->getInstrument();
-    TS_ASSERT_EQUALS(inst->getName(), "CNCS");
+    TS_ASSERT_EQUALS(ew->getInstrumentName(), "CNCS");
 
     // Mapping between workspace index and spectrum number
     // Is the length good?

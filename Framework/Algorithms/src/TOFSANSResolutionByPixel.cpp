@@ -227,8 +227,7 @@ TOFSANSResolutionByPixel::getModeratorWorkspace(const Mantid::API::MatrixWorkspa
 void TOFSANSResolutionByPixel::checkInput(const Mantid::API::MatrixWorkspace_sptr &inWS) {
   // Make sure that input workspace has an instrument as we rely heavily on
   // thisa
-  auto inst = inWS->getInstrument();
-  if (inst->getName().empty()) {
+  if (inWS->getInstrumentName().empty()) {
     throw std::invalid_argument("TOFSANSResolutionByPixel: The input workspace "
                                 "does not contain an instrument");
   }

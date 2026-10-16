@@ -274,7 +274,7 @@ void MaskDetectors::handleMaskByMatrixWorkspace(const API::MatrixWorkspace_const
       g_log.warning() << "Number of detectors does not match between "
                          "mask workspace and input workspace";
 
-    if (instrument->getName() != maskInstrument->getName())
+    if (WS->getInstrumentName() != maskWs->getInstrumentName())
       g_log.warning() << "Mask is from a different instrument to the input "
                          "workspace. ";
 

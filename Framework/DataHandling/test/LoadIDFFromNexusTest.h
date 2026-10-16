@@ -81,7 +81,7 @@ public:
 
     // Test instrument name, source and sample
     std::shared_ptr<const Instrument> i = output->getInstrument();
-    TS_ASSERT_EQUALS(i->getName(), "LOQ");
+    TS_ASSERT_EQUALS(output->getInstrumentName(), "LOQ");
 
     std::shared_ptr<const IComponent> source = i->getSource();
     TS_ASSERT_EQUALS(source->getName(), "source");
