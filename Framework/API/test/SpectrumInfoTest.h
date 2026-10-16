@@ -226,6 +226,57 @@ public:
     TS_ASSERT_EQUALS(spectrumInfo.signedTwoTheta(GroupOfDets1And2), m_grouped.detectorSignedTwoTheta(*det));
   }
 
+  void test_angles_with_observer_match_legacy() {
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    assertAnglesMatchLegacy(m_workspace, spectrumInfo, {0, 1, 2, 3, 4});
+  }
+
+  void test_grouped_angles_with_observer_match_legacy() {
+    const auto &spectrumInfo = m_grouped.spectrumInfo();
+    assertAnglesMatchLegacy(m_grouped, spectrumInfo,
+                            {GroupOfDets2And3, GroupOfDets1And2, GroupOfDets1And4, GroupOfDets4And5, GroupOfAllDets});
+  }
+
+  void test_grouped_signedTwoTheta_with_observer_and_axis_matches_default() {
+    const auto &spectrumInfo = m_grouped.spectrumInfo();
+    const auto sample = spectrumInfo.samplePosition();
+    const auto beam = sample - spectrumInfo.sourcePosition();
+    for (const auto i : {GroupOfDets2And3, GroupOfDets1And2}) {
+      TS_ASSERT_DELTA(spectrumInfo.signedTwoTheta(i, sample, beam), spectrumInfo.signedTwoTheta(i), 1e-12);
+    }
+  }
+
+  void test_grouped_phi_uses_average_position() {
+    WorkspaceTester ws;
+    ws.initialize(1, 2, 1);
+    auto inst = std::make_shared<Instrument>("TestInstrument");
+    // Average position is (-1, 0, 1), i.e. phi = pi, whereas the average of the individual phis is 0
+    for (const auto &[id, pos] :
+         {std::pair<detid_t, V3D>{1, V3D(-1, 1, 1)}, std::pair<detid_t, V3D>{2, V3D(-1, -1, 1)}}) {
+      auto det = new Detector("pixel", id, inst.get());
+      det->setPos(pos);
+      inst->add(det);
+      inst->markAsDetector(det);
+    }
+    ws.setInstrument(inst);
+    ws.getSpectrum(0).setDetectorIDs({1, 2});
+    const auto &spectrumInfo = ws.spectrumInfo();
+    TS_ASSERT_DELTA(spectrumInfo.phi(0), M_PI, 1e-12);
+    TS_ASSERT_DELTA(spectrumInfo.phiOffset(0, M_PI), 0.0, 1e-12);
+    TS_ASSERT_DELTA(spectrumInfo.phi(0), ws.getDetector(0)->getPhi(), 1e-12);
+  }
+
+  void test_angles_with_observer_no_detectors() {
+    auto ws = makeDefaultWorkspace();
+    ws.getSpectrum(0).clearDetectorIDs();
+    const auto &spectrumInfo = ws.spectrumInfo();
+    const V3D origin, axis(0, 0, 1);
+    TS_ASSERT_THROWS(spectrumInfo.twoTheta(0, origin, axis), const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(spectrumInfo.signedTwoTheta(0, origin, axis, V3D(0, 1, 0)), const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(spectrumInfo.phi(0), const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(spectrumInfo.phiOffset(0, M_PI), const Exception::NotFoundError &);
+  }
+
   void test_azimuthal() {
     const auto &spectrumInfo = m_workspace.spectrumInfo();
     TS_ASSERT_DELTA(spectrumInfo.azimuthal(0), -1.570796, 1e-6);
@@ -551,6 +602,21 @@ private:
   WorkspaceTester m_workspace;
   WorkspaceTester m_workspaceNoInstrument;
   WorkspaceTester m_grouped;
+
+  void assertAnglesMatchLegacy(const MatrixWorkspace &ws, const SpectrumInfo &spectrumInfo,
+                               const std::vector<size_t> &indices) {
+    const V3D observer(0.1, -0.2, 0.3);
+    const V3D axis(0.0, 0.1, 1.0);
+    const V3D up(0.3, 1.0, 0.0);
+    for (const auto i : indices) {
+      const auto det = ws.getDetector(i);
+      TS_ASSERT_DELTA(spectrumInfo.twoTheta(i, observer, axis), det->getTwoTheta(observer, axis), 1e-12);
+      TS_ASSERT_DELTA(spectrumInfo.signedTwoTheta(i, observer, axis, up), det->getSignedTwoTheta(observer, axis, up),
+                      1e-12);
+      TS_ASSERT_DELTA(spectrumInfo.phi(i), det->getPhi(), 1e-12);
+      TS_ASSERT_DELTA(spectrumInfo.phiOffset(i, M_PI), det->getPhiOffset(M_PI), 1e-12);
+    }
+  }
 
   std::unique_ptr<MatrixWorkspace> makeWorkspace(size_t numSpectra) {
     auto ws = std::make_unique<WorkspaceTester>();

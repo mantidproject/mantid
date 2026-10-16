@@ -14,9 +14,11 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/Tolerance.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <algorithm>
+#include <cmath>
 #include <limits>
 #include <memory>
 
@@ -116,6 +118,79 @@ double SpectrumInfo::azimuthal(const size_t index) const {
       spectrumDef.cbegin(), spectrumDef.cend(), 0.0,
       [this](double x, const std::pair<size_t, size_t> &detIndex) { return x + m_detectorInfo.azimuthal(detIndex); });
   return phi / static_cast<double>(spectrumDef.size());
+}
+
+/** Returns the average angle between the vectors from `observer` to each detector of the spectrum and `axis`.
+ *
+ * This is the Instrument-2.0 replacement for IDetector::getTwoTheta. Unlike twoTheta(index), the observer and axis are
+ * supplied by the caller rather than taken from the sample and beam, and no monitor check is performed.
+ */
+double SpectrumInfo::twoTheta(const size_t index, const Kernel::V3D &observer, const Kernel::V3D &axis) const {
+  const auto &spectrumDef = checkAndGetSpectrumDefinition(index);
+  auto twoTheta = std::accumulate(spectrumDef.cbegin(), spectrumDef.cend(), 0.0,
+                                  [&](double x, const std::pair<size_t, size_t> &detIndex) {
+                                    return x + m_detectorInfo.twoTheta(detIndex, observer, axis);
+                                  });
+  return twoTheta / static_cast<double>(spectrumDef.size());
+}
+
+/** Returns the average signed angle between the vectors from `observer` to each detector of the spectrum and `axis`,
+ * signed according to the rotation direction relative to `axis` and `instrumentUp`.
+ *
+ * This is the Instrument-2.0 replacement for IDetector::getSignedTwoTheta. No monitor check is performed.
+ */
+double SpectrumInfo::signedTwoTheta(const size_t index, const Kernel::V3D &observer, const Kernel::V3D &axis,
+                                    const Kernel::V3D &instrumentUp) const {
+  const auto &spectrumDef = checkAndGetSpectrumDefinition(index);
+  auto signedTwoTheta = std::accumulate(
+      spectrumDef.cbegin(), spectrumDef.cend(), 0.0, [&](double x, const std::pair<size_t, size_t> &detIndex) {
+        return x + m_detectorInfo.signedTwoTheta(detIndex, observer, axis, instrumentUp);
+      });
+  return signedTwoTheta / static_cast<double>(spectrumDef.size());
+}
+
+/** Returns the average signed angle between the vectors from `observer` to each detector of the spectrum and `axis`,
+ * signed using the instrument's theta-sign axis (ReferenceFrame::vecThetaSign).
+ */
+double SpectrumInfo::signedTwoTheta(const size_t index, const Kernel::V3D &observer, const Kernel::V3D &axis) const {
+  const auto &spectrumDef = checkAndGetSpectrumDefinition(index);
+  auto signedTwoTheta = std::accumulate(spectrumDef.cbegin(), spectrumDef.cend(), 0.0,
+                                        [&](double x, const std::pair<size_t, size_t> &detIndex) {
+                                          return x + m_detectorInfo.signedTwoTheta(detIndex, observer, axis);
+                                        });
+  return signedTwoTheta / static_cast<double>(spectrumDef.size());
+}
+
+/** Returns the angle of the spectrum position about the lab-frame z axis, atan2(y, x), in radians.
+ *
+ * This is the Instrument-2.0 replacement for IDetector::getPhi. For a spectrum with several detectors the angle of the
+ * average position is returned, not the average of the angles. It is measured from the lab origin and ignores the
+ * reference frame; see azimuthal() for the angle about the beam measured from the sample.
+ */
+double SpectrumInfo::phi(const size_t index) const {
+  const auto &spectrumDef = checkAndGetSpectrumDefinition(index);
+  if (spectrumDef.size() == 1)
+    return m_detectorInfo.phi(spectrumDef[0]);
+  auto sumPos = std::accumulate(spectrumDef.cbegin(), spectrumDef.cend(), Kernel::V3D(),
+                                [this](const auto &x, const std::pair<size_t, size_t> &detIndex) {
+                                  return x + m_detectorInfo.position(detIndex);
+                                });
+  // Match DetectorGroup::getPos: tiny components should be zero, otherwise atan2 can flip between +pi and -pi
+  if (std::abs(sumPos[0]) < Kernel::Tolerance)
+    sumPos[0] = 0.0;
+  if (std::abs(sumPos[1]) < Kernel::Tolerance)
+    sumPos[1] = 0.0;
+  // Dividing by the detector count does not change the angle, so atan2 can use the sum directly
+  return std::atan2(sumPos[1], sumPos[0]);
+}
+
+/** Returns phi() reflected about `offset` (radians): offset - phi for phi >= 0 and -(offset + phi) otherwise.
+ *
+ * This is the Instrument-2.0 replacement for IDetector::getPhiOffset.
+ */
+double SpectrumInfo::phiOffset(const size_t index, const double offset) const {
+  const double phiValue = phi(index);
+  return phiValue < 0 ? -(offset + phiValue) : offset - phiValue;
 }
 
 /** Calculate latitude and longitude for given spectrum index.

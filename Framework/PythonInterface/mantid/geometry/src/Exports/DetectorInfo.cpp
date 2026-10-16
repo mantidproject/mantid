@@ -7,6 +7,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfoItem.h"
 #include "MantidGeometry/Instrument/DetectorInfoIterator.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
@@ -39,6 +40,37 @@ namespace {
 // Helper method to make the python iterator
 DetectorInfoPythonIterator make_pyiterator(DetectorInfo &detectorInfo) {
   return DetectorInfoPythonIterator(detectorInfo);
+}
+
+/// Observer defaults to the sample position
+V3D observerOrSample(const DetectorInfo &self, const object &observer) {
+  return observer.is_none() ? self.samplePosition() : extract<V3D>(observer)();
+}
+
+/// Axis defaults to the beam direction, from source to sample
+V3D axisOrBeam(const DetectorInfo &self, const object &axis) {
+  if (!axis.is_none())
+    return extract<V3D>(axis)();
+  const auto beamLine = self.samplePosition() - self.sourcePosition();
+  if (beamLine.nullVector())
+    throw Mantid::Kernel::Exception::InstrumentDefinitionError("Source and sample are at same position!");
+  return beamLine;
+}
+
+double twoTheta(const DetectorInfo &self, const size_t index, const object &observer, const object &axis) {
+  if (observer.is_none() && axis.is_none())
+    return self.twoTheta(index);
+  return self.twoTheta(index, observerOrSample(self, observer), axisOrBeam(self, axis));
+}
+
+double signedTwoTheta(const DetectorInfo &self, const size_t index, const object &observer, const object &axis,
+                      const object &instrumentUp) {
+  if (observer.is_none() && axis.is_none() && instrumentUp.is_none())
+    return self.signedTwoTheta(index);
+  if (instrumentUp.is_none())
+    return self.signedTwoTheta(index, observerOrSample(self, observer), axisOrBeam(self, axis));
+  return self.signedTwoTheta(index, observerOrSample(self, observer), axisOrBeam(self, axis),
+                             extract<V3D>(instrumentUp)());
 }
 /// return_value_policy for read-only numpy array
 using return_readonly_numpy = return_value_policy<Policies::VectorRefToNumpy<Converters::WrapReadOnly>>;
@@ -103,11 +135,11 @@ void export_DetectorInfo() {
 
   bool (DetectorInfo::*isMasked)(const size_t) const = &DetectorInfo::isMasked;
 
-  double (DetectorInfo::*twoTheta)(const size_t) const = &DetectorInfo::twoTheta;
-
-  double (DetectorInfo::*signedTwoTheta)(const size_t) const = &DetectorInfo::signedTwoTheta;
-
   double (DetectorInfo::*azimuthal)(const size_t) const = &DetectorInfo::azimuthal;
+
+  double (DetectorInfo::*phi)(const size_t) const = &DetectorInfo::phi;
+
+  double (DetectorInfo::*phiOffset)(const size_t, const double) const = &DetectorInfo::phiOffset;
 
   Mantid::Kernel::V3D (DetectorInfo::*position)(const size_t) const = &DetectorInfo::position;
 
@@ -151,13 +183,25 @@ void export_DetectorInfo() {
            "detector is equivalent to the content "
            "of the other detector.")
 
-      .def("twoTheta", twoTheta, (arg("self"), arg("index")),
-           "Returns 2 theta (scattering angle w.r.t beam direction).")
-      .def("signedTwoTheta", signedTwoTheta, (arg("self"), arg("index")),
-           "Returns signed 2 theta (signed scattering angle w.r.t beam direction).")
+      .def("twoTheta", &twoTheta, (arg("self"), arg("index"), arg("observer") = object(), arg("axis") = object()),
+           "Returns the angle in radians between the vector from the observer to the detector and the axis. The "
+           "observer defaults to the sample position and the axis to the beam direction, giving the scattering "
+           "angle 2 theta. With both defaults, monitors raise an error.")
+      .def("signedTwoTheta", &signedTwoTheta,
+           (arg("self"), arg("index"), arg("observer") = object(), arg("axis") = object(),
+            arg("instrumentUp") = object()),
+           "Returns the signed angle in radians between the vector from the observer to the detector and the axis. "
+           "The observer defaults to the sample position, the axis to the beam direction and instrumentUp to the "
+           "instrument's theta-sign axis, giving the signed scattering angle 2 theta. With all defaults, monitors "
+           "raise an error.")
       .def("azimuthal", azimuthal, (arg("self"), arg("index")),
            "Returns the out-of-plane angle in radians angle w.r.t. to "
            "vecPointingHorizontal")
+      .def("phi", phi, (arg("self"), arg("index")),
+           "Returns the angle in radians of the detector position about the lab-frame z axis, atan2(y, x).")
+      .def("phiOffset", phiOffset, (arg("self"), arg("index"), arg("offset")),
+           "Returns phi reflected about the offset (radians): offset - phi for phi >= 0, otherwise "
+           "-(offset + phi).")
       .def("position", position, (arg("self"), arg("index")),
            "Returns the absolute position of the detector where the detector "
            "is identified by 'index'.")
