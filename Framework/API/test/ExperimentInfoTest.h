@@ -520,7 +520,7 @@ public:
     th.reopenFile();
     TS_ASSERT_THROWS_NOTHING(ws2.loadExperimentInfoNexus(filename, th.file.get(), parameterStr));
     Instrument_const_sptr inst = ws2.getInstrument();
-    TS_ASSERT_EQUALS(inst->getName(), "GEM");
+    TS_ASSERT_EQUALS(ws2.getInstrumentName(), "GEM");
     TS_ASSERT(inst->getFilename().find("GEM_Definition.xml", 0) != std::string::npos);
     TS_ASSERT_EQUALS(parameterStr, "");
   }
@@ -543,8 +543,7 @@ public:
     std::string parameterStr;
     th.reopenFile();
     TS_ASSERT_THROWS_NOTHING(ws2.loadExperimentInfoNexus(filename, th.file.get(), parameterStr));
-    Instrument_const_sptr inst = ws2.getInstrument();
-    TS_ASSERT_EQUALS(inst->getName(), "");
+    TS_ASSERT_EQUALS(ws2.getInstrumentName(), "");
     TS_ASSERT_EQUALS(parameterStr, "");
   }
 
@@ -600,9 +599,8 @@ public:
     // Load the Nexus IDF info
     std::string params;
     TS_ASSERT_THROWS_NOTHING(ei.loadInstrumentInfoNexus(testFile, &nxFile, params));
-    Instrument_const_sptr inst = ei.getInstrument();
-    TS_ASSERT_EQUALS(inst->getName(), "LOQ"); // Check instrument name
-    TS_ASSERT_EQUALS(params.size(), 613);     // Check size of parameter string
+    TS_ASSERT_EQUALS(ei.getInstrumentName(), "LOQ"); // Check instrument name
+    TS_ASSERT_EQUALS(params.size(), 613);            // Check size of parameter string
   }
 
   void test_nexus_parameters() {

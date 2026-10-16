@@ -60,7 +60,7 @@ void CreateDummyCalFile::exec() {
   if (!inst)
     throw std::invalid_argument("The InputWorkspace does not have an instrument definition");
 
-  std::string instname = inst->getName();
+  std::string instname = inputW->getInstrumentName();
 
   // Get the names of groups
   groups = instname;

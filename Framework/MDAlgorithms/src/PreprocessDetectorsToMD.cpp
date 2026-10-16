@@ -195,7 +195,7 @@ void PreprocessDetectorsToMD::processDetectorsPositions(const API::MatrixWorkspa
                                                        inputWS->getTitle());
   }
   // Instrument name
-  std::string InstrName = instrument->getName();
+  std::string InstrName = inputWS->getInstrumentName();
   targWS->logs()->addProperty<std::string>("InstrumentName", InstrName,
                                            true); // "The name which should unique identify current instrument");
   targWS->logs()->addProperty<bool>("FakeDetectors", false, true);

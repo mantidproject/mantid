@@ -179,7 +179,7 @@ void LoadDiffCal::getInstrument(H5File &file) {
     if (childAlg->isExecuted()) {
       m_instrument = tempWS->getInstrument();
 
-      g_log.information() << "Loaded instrument \"" << m_instrument->getName() << "\" from \""
+      g_log.information() << "Loaded instrument \"" << tempWS->getInstrumentName() << "\" from \""
                           << tempWS->instrumentMetadata().filename() << "\"\n";
     } else {
       g_log.debug("LoadInstrument child algorithm did not execute successfully. No instrument will be associated with "

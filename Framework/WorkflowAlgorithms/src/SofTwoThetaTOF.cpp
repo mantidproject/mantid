@@ -152,7 +152,7 @@ double SofTwoThetaTOF::clarifyAngleStep(API::MatrixWorkspace const &ws) {
       throw std::invalid_argument("Missing " + Prop::ANGLE_STEP);
     }
     auto const &paramMap = ws.constInstrumentParameters();
-    auto const paramValues = paramMap.getDouble(instrument->getName(), "natural-angle-step");
+    auto const paramValues = paramMap.getDouble(ws.getInstrumentName(), "natural-angle-step");
     if (paramValues.empty()) {
       throw std::invalid_argument("Missing " + Prop::ANGLE_STEP +
                                   " or 'natural-angle-step' not defined in "

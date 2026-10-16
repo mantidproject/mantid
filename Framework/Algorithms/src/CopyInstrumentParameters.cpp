@@ -49,8 +49,8 @@ void CopyInstrumentParameters::exec() {
   if (m_different_instrument_sp) {
     Instrument_const_sptr inst1 = m_givingWorkspace->getInstrument();
     Instrument_const_sptr inst2 = m_receivingWorkspace->getInstrument();
-    auto Name1 = inst1->getName();
-    auto Name2 = inst2->getName();
+    auto Name1 = m_givingWorkspace->getInstrumentName();
+    auto Name2 = m_receivingWorkspace->getInstrumentName();
 
     Geometry::ParameterMap targMap;
 
