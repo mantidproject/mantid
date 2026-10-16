@@ -395,7 +395,7 @@ class TestRubberBandZoomInteractorStyle(unittest.TestCase):
 
     def test_rubber_band_actor_added_to_renderer(self):
         style, plotter = self._create_style()
-        plotter.renderer.AddActor2D.assert_called_once_with(style._rubber_band_actor)
+        plotter.renderer.AddViewProp.assert_called_once_with(style._rubber_band_actor)
 
     def test_left_press_without_modifier_shows_rubber_band_at_click_position(self):
         style, _, _ = self._create_style_with_super_spy()
