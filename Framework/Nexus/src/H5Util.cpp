@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexus/H5Util.h"
-#include "MantidNexus/H5ErrorHandling.h"
+#include "MantidNexus/H5ValidatingAdapter.h"
 #include "MantidNexus/UniqueID.h"
 #include <Poco/Logger.h>
 
@@ -315,11 +315,12 @@ std::vector<std::string> readStringVector(Group &group, const std::string &name)
 std::vector<std::string> readStringVector(DataSet &dataset) {
   DataSpace dataspace = dataset.getSpace();
   DataType datatype = dataset.getDataType();
-  const H5ErrorHandling::Context context{"readStringVector", {}, {}};
+  const H5ValidatingAdapter::Context context{"readStringVector", {}, {}};
 
-  if (H5ErrorHandling::rank(dataspace.getId(), context) != 1)
+  if (H5ValidatingAdapter::rank(dataspace.getId(), context) != 1)
     throw DataSpaceIException("readStringVector requires a rank-one dataset");
-  const auto values = H5ErrorHandling::readVlenDataset(dataset.getId(), datatype.getId(), dataspace.getId(), context);
+  const auto values =
+      H5ValidatingAdapter::readVlenDataset(dataset.getId(), datatype.getId(), dataspace.getId(), context);
   std::vector<std::string> result;
   result.reserve(values.size());
   std::transform(values.cbegin(), values.cend(), std::back_inserter(result),

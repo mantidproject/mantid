@@ -1,6 +1,6 @@
 set(SRC_FILES
-    src/H5ErrorHandling.h
-    src/H5ErrorHandling.cpp
+    src/H5ValidatingAdapter.h
+    src/H5ValidatingAdapter.cpp
     src/napi.cpp
     src/napi4.cpp
     src/napi5.cpp
@@ -25,7 +25,7 @@ set(INC_FILES
     inc/MantidLegacyNexus/NeXusFileID.h
 )
 
-set(TEST_FILES H5ErrorHandlingTest.h LegacyNeXusFileTest.h LegacyNeXusFileLeakTest.h LegacyNeXusFileNapiTest.h
+set(TEST_FILES H5ValidatingAdapterTest.h LegacyNeXusFileTest.h LegacyNeXusFileLeakTest.h LegacyNeXusFileNapiTest.h
                LegacyNeXusFileReadTest.h
 )
 

@@ -26,7 +26,7 @@
 #include <string>
 #define H5Aiterate_vers 2
 
-#include "H5ErrorHandling.h"
+#include "H5ValidatingAdapter.h"
 #include "MantidLegacyNexus/napiconfig.h"
 
 #ifdef WITH_HDF5
@@ -105,7 +105,7 @@ static pLgcyNexusFile5 NXI5assert(NXhandle fid) {
 static void NXI5KillDir(pLgcyNexusFile5 self) { self->iStack5[self->iStackPtr].iCurrentIDX = 0; }
 
 static herr_t readStringAttribute(hid_t attr, char **data) {
-  using namespace Mantid::LegacyNexus::H5ErrorHandling;
+  using namespace Mantid::LegacyNexus::H5ValidatingAdapter;
   const Context context{"reading string attribute", {}};
   *data = nullptr;
   const hid_t atype = H5Aget_type(attr);
@@ -120,7 +120,7 @@ static herr_t readStringAttribute(hid_t attr, char **data) {
 
   std::vector<hsize_t> dimensions;
   bool isVariable = false;
-  bool success = Mantid::LegacyNexus::H5ErrorHandling::dimensions(space, dimensions, context) &&
+  bool success = Mantid::LegacyNexus::H5ValidatingAdapter::dimensions(space, dimensions, context) &&
                  checkTriState(H5Tis_variable_str(atype), isVariable, context);
   std::string value;
   if (success && dimensions.empty()) {
@@ -674,7 +674,7 @@ NXstatus NX5opendata(NXhandle fid, CONSTCHAR *name) {
   pLgcyNexusFile5 pFile;
 
   pFile = NXI5assert(fid);
-  using namespace Mantid::LegacyNexus::H5ErrorHandling;
+  using namespace Mantid::LegacyNexus::H5ValidatingAdapter;
   const Context context{"opening dataset", name == nullptr ? std::string{} : name};
   if (name == nullptr) {
     NXReportError("ERROR: null dataset name supplied");
@@ -1095,7 +1095,7 @@ NXstatus NX5getdata(NXhandle fid, void *data) {
   pLgcyNexusFile5 pFile;
 
   pFile = NXI5assert(fid);
-  using namespace Mantid::LegacyNexus::H5ErrorHandling;
+  using namespace Mantid::LegacyNexus::H5ValidatingAdapter;
   const Context context{"reading dataset", pFile->iCurrentLD == nullptr ? std::string{} : pFile->iCurrentLD};
   /* check if there is an Dataset open */
   if (pFile->iCurrentD == 0) {
@@ -1167,7 +1167,7 @@ NXstatus NX5getinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *i
   pLgcyNexusFile5 pFile;
 
   pFile = NXI5assert(fid);
-  using namespace Mantid::LegacyNexus::H5ErrorHandling;
+  using namespace Mantid::LegacyNexus::H5ValidatingAdapter;
   const Context context{"reading dataset information",
                         pFile->iCurrentLD == nullptr ? std::string{} : pFile->iCurrentLD};
   if (rank == nullptr || dimension == nullptr || iType == nullptr) {
@@ -1239,7 +1239,7 @@ NXstatus NX5getattr(NXhandle fid, const char *name, void *data, int *datalen, NX
   char pBuffer[256];
 
   pFile = NXI5assert(fid);
-  using namespace Mantid::LegacyNexus::H5ErrorHandling;
+  using namespace Mantid::LegacyNexus::H5ValidatingAdapter;
   const Context context{"reading attribute", name == nullptr ? std::string{} : name};
 
   if (name == nullptr || data == nullptr || datalen == nullptr || iType == nullptr || *datalen <= 0) {
@@ -1262,7 +1262,7 @@ NXstatus NX5getattr(NXhandle fid, const char *name, void *data, int *datalen, NX
   std::vector<hsize_t> dimensions;
   std::size_t totalsize = 0;
   if (!checkId(filespace, context) ||
-      !Mantid::LegacyNexus::H5ErrorHandling::dimensions(filespace, dimensions, context) ||
+      !Mantid::LegacyNexus::H5ValidatingAdapter::dimensions(filespace, dimensions, context) ||
       !elementCount(dimensions, totalsize, context)) {
     if (filespace > 0)
       H5Sclose(filespace);
@@ -1416,7 +1416,7 @@ NXstatus NX5getattrainfo(NXhandle handle, NXname name, int *rank, int dim[], NXn
   hid_t vid;
 
   pFile = NXI5assert(handle);
-  using namespace Mantid::LegacyNexus::H5ErrorHandling;
+  using namespace Mantid::LegacyNexus::H5ValidatingAdapter;
   const Context context{"reading attribute information", name == nullptr ? std::string{} : name};
   if (name == nullptr || rank == nullptr || dim == nullptr || iType == nullptr) {
     NXReportError("ERROR: invalid output supplied while reading attribute information");
@@ -1436,7 +1436,7 @@ NXstatus NX5getattrainfo(NXhandle handle, NXname name, int *rank, int dim[], NXn
   const hid_t attrt = H5Aget_type(pFile->iCurrentA);
   std::vector<hsize_t> myDim;
   if (!checkId(filespace, context) || !checkId(attrt, context) ||
-      !Mantid::LegacyNexus::H5ErrorHandling::dimensions(filespace, myDim, context)) {
+      !Mantid::LegacyNexus::H5ValidatingAdapter::dimensions(filespace, myDim, context)) {
     if (filespace > 0)
       H5Sclose(filespace);
     if (attrt > 0)
