@@ -521,7 +521,7 @@ EllipsoidTrajectoryNorm EllipsoidTrajectoryNorm::fromWorkspaces(const API::Matri
     const double weight = solidAngleWS.y(solidIt->second)[0] * protonCharge;
     norm.addPixel(u, weight, it->second, lowValues[i], highValues[i]);
   }
-  // norm.buildDirectionIndex(); BENCH
+  norm.buildDirectionIndex();
   return norm;
 }
 
