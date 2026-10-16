@@ -82,7 +82,7 @@ void SaveIsawPeaks::exec() {
   // We cannot assume the peaks have bank type detector modules, so we have a
   // string to check this
   std::string bankPart = "bank";
-  if (inst->getName() == "WISH")
+  if (m_ws->getInstrumentName() == "WISH")
     bankPart = "WISHpanel";
 
   // Get all children
@@ -185,7 +185,7 @@ void SaveIsawPeaks::exec() {
   } else {
     out.open(filename.c_str());
 
-    const auto instrumentName = inst->getName();
+    const auto instrumentName = m_ws->getInstrumentName();
     std::string facilityName;
     try {
       facilityName = ConfigService::Instance().getInstrument(instrumentName).facility().name();
@@ -239,7 +239,7 @@ void SaveIsawPeaks::exec() {
       std::string bankName = mess.str();
       // Retrieve it
       std::shared_ptr<const IComponent> det = inst->getComponentByName(bankName);
-      if (inst->getName() == "CORELLI") // for Corelli with sixteenpack under bank
+      if (m_ws->getInstrumentName() == "CORELLI") // for Corelli with sixteenpack under bank
       {
         const size_t bankIndex = componentInfo.indexOfAny(bankName);
         const auto children = componentInfo.children(bankIndex);
@@ -467,7 +467,7 @@ V3D SaveIsawPeaks::findPixelPos(const std::string &bankName, int col, int row) {
     }
     int col0 = col - 1;
     // WISH detectors are in bank in this order in instrument
-    if (inst->getName() == "WISH")
+    if (m_ws->getInstrumentName() == "WISH")
       col0 = (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
 
     auto grandchildren = componentInfo.children(children[col0]);

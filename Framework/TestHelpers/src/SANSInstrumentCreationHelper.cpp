@@ -101,8 +101,8 @@ void SANSInstrumentCreationHelper::runLoadMappingTable(const Mantid::DataObjects
   // Number of monitors should be consistent with data file format
   if (nMonitors != 2) {
     std::stringstream error;
-    error << "Geometry error for " << instrument->getName() << ": Spice data format defines 2 monitors, " << nMonitors
-          << " were/was found";
+    error << "Geometry error for " << workspace->getInstrumentName() << ": Spice data format defines 2 monitors, "
+          << nMonitors << " were/was found";
     throw std::runtime_error(error.str());
   }
   if (nxbins >= 0) {

@@ -740,8 +740,7 @@ std::map<std::string, std::string> LoadMask::validateInputs() {
       IDF_provided = false;
     }
     try {
-      auto inst = inputWS->getInstrument();
-      std::string Name = inst->getName();
+      std::string Name = inputWS->getInstrumentName();
       boost::algorithm::to_lower(Name);
       if (Name != InstrName && !IDF_provided) {
         result["RefWorkspace"] = "If both reference workspace and instrument name are defined, "

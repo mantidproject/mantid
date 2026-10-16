@@ -33,7 +33,7 @@ public:
     // specific checks
     const Instrument_const_sptr inst = ws->getInstrument();
     TS_ASSERT(inst);
-    TS_ASSERT_EQUALS(inst->getName(), "MUSR");
+    TS_ASSERT_EQUALS(ws->getInstrumentName(), "MUSR");
 
     const IComponent_const_sptr sample = inst->getSample();
     const V3D samplepos = sample->getPos();

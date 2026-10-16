@@ -172,8 +172,7 @@ public:
     ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     // Check the instrument name
-    Instrument_const_sptr inst = ws->getInstrument();
-    TS_ASSERT(inst->getName() == "POWGEN");
+    TS_ASSERT(ws->getInstrumentName() == "POWGEN");
 
     // Check the total number of detectors
     check_workspace_detectors(ws, 43121);

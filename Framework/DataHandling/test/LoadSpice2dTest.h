@@ -110,7 +110,7 @@ public:
     Mantid::Geometry::Instrument_const_sptr i = ws2d->getInstrument();
     std::shared_ptr<const Mantid::Geometry::IComponent> source = i->getSource();
 
-    TS_ASSERT_EQUALS(i->getName(), "GPSANS");
+    TS_ASSERT_EQUALS(ws2d->getInstrumentName(), "GPSANS");
     TS_ASSERT_EQUALS(source->getName(), "source");
 
     // Check parameters for sample aperture
