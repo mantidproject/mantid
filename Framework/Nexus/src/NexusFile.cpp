@@ -690,14 +690,24 @@ template <> void File::getData<char>(char *data) {
   std::vector<char> buffer;
 
   if (H5Tis_variable_str(m_current_type_id)) {
+    const hssize_t elementCount = H5Sget_simple_extent_npoints(m_current_space_id);
+    if (elementCount < 0)
+      throw NXEXCEPTION("getData ERROR: failed to determine variable-length string dataset size");
+    if (elementCount != 1)
+      throw NXEXCEPTION("getData ERROR: arrays of variable-length strings require a string-vector reader");
+
     char *cdata = nullptr;
     ret = H5Dread(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &cdata);
-    if (ret < 0 || cdata == nullptr)
+    if (ret < 0)
       throw NXEXCEPTION("getData ERROR: failed to read variable length string dataset");
 
-    size = strlen(cdata);
-    buffer.assign(cdata, cdata + size + 1);
-    H5free_memory(cdata);
+    if (cdata == nullptr) {
+      buffer.assign(1, '\0');
+    } else {
+      size = strlen(cdata);
+      buffer.assign(cdata, cdata + size + 1);
+      H5free_memory(cdata);
+    }
   } else {
     hsize_t len = H5Tget_size(m_current_type_id);
     for (int i = 0; i < rank; i++) {
@@ -766,13 +776,19 @@ string File::getStrData() {
   // determine storage size: type_size × npoints (mirrors H5Cpp's getInMemDataSize approach)
   dimsize_t storage_size;
   if (H5Tis_variable_str(m_current_type_id)) {
+    const hssize_t elementCount = H5Sget_simple_extent_npoints(m_current_space_id);
+    if (elementCount < 0)
+      throw NXEXCEPTION("Failed to determine variable-length string dataset size");
+    if (elementCount != 1)
+      throw NXEXCEPTION("getStrData() does not support arrays of variable-length strings");
     if (rank == 0) {
       // H5Dvlen_get_buf_size is unreliable with H5S_SCALAR in some HDF5 versions.
       char *vbuf = nullptr;
-      if (H5Dread(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vbuf) < 0 || !vbuf)
+      if (H5Dread(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vbuf) < 0)
         throw NXEXCEPTION("Failed to read scalar variable-length string");
-      storage_size = strlen(vbuf);
-      H5free_memory(vbuf);
+      storage_size = vbuf == nullptr ? 0 : strlen(vbuf);
+      if (vbuf != nullptr)
+        H5free_memory(vbuf);
     } else if (H5Dvlen_get_buf_size(m_current_data_id, m_current_type_id, m_current_space_id, &storage_size) < 0) {
       throw NXEXCEPTION("Failed to read string length for variable-length string");
     }
@@ -1133,6 +1149,10 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
   int rank = H5Sget_simple_extent_ndims(m_current_space_id);
   if (rank < 0) {
     throw NXEXCEPTION("Failed to fetch rank for slab data");
+  } else if (start.size() != static_cast<size_t>(rank)) {
+    stringstream msg;
+    msg << "In getSlab supplied rank=" << start.size() << " must match dataset rank=" << rank;
+    throw NXEXCEPTION(msg.str());
   } else if (rank == 0) { // this is an unslabbable SCALAR
     DataSpaceID memspace = H5Screate(H5S_SCALAR);
     DataSpaceID filespace = H5Dget_space(m_current_data_id);
@@ -1142,13 +1162,21 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
     DimVector myStart(start.cbegin(), start.cend());
     DimVector mySize(size.cbegin(), size.cend());
     DimVector mStart(rank, 0);
-    // this does not work for multidimensional string arrays.
-    NXnumtype mtype(NXnumtype::BAD);
     if (tclass == H5T_STRING) {
-      mtype = NXnumtype::CHAR;
-      if (mySize[0] == 1) {
-        mySize[0] = H5Tget_size(m_current_type_id);
-      }
+      if (H5Tis_variable_str(m_current_type_id))
+        throw NXEXCEPTION("getSlab does not support variable-length string datasets");
+      if (rank != 1)
+        throw NXEXCEPTION("getSlab does not support multidimensional string datasets");
+      const size_t stringSize = H5Tget_size(m_current_type_id);
+      if (start[0] > stringSize || size[0] > stringSize - start[0])
+        throw NXEXCEPTION("Requested string slab is outside the dataset bounds");
+      std::vector<char> tmpData(stringSize + 1, '\0');
+      iRet = H5Dread(m_current_data_id, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmpData.data());
+      if (iRet >= 0)
+        memcpy(data, tmpData.data() + start[0], static_cast<size_t>(size[0]));
+      if (iRet < 0)
+        throw NXEXCEPTION("Reading slab failed");
+      return;
     }
 
     iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart.data(), nullptr, mySize.data(), nullptr);
@@ -1161,16 +1189,7 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
     if (iRet < 0) {
       throw NXEXCEPTION("Selecting memspace failed");
     }
-    // read slab
-    if (mtype == NXnumtype::CHAR) {
-      std::vector<char> tmp_data(mySize[0] + 1, '\0');
-      iRet = H5Dread(m_current_data_id, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_data.data());
-      char const *data1;
-      data1 = tmp_data.data() + myStart[0];
-      strncpy(static_cast<char *>(static_cast<void *>(data)), data1, size[0]);
-    } else {
-      iRet = H5Dread(m_current_data_id, memtype, memspace, m_current_space_id, H5P_DEFAULT, data);
-    }
+    iRet = H5Dread(m_current_data_id, memtype, memspace, m_current_space_id, H5P_DEFAULT, data);
   }
   /* cleanup */
   if (iRet < 0) {
@@ -1397,10 +1416,11 @@ Info File::getInfo() {
         // H5Dvlen_get_buf_size is unreliable with H5S_SCALAR in some HDF5 versions.
         // Read the single vlen string and measure directly.
         char *vbuf = nullptr;
-        if (H5Dread(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vbuf) < 0 || !vbuf)
+        if (H5Dread(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vbuf) < 0)
           throw NXEXCEPTION("Failed to read scalar variable-length string length");
-        length = strlen(vbuf);
-        H5free_memory(vbuf);
+        length = vbuf == nullptr ? 0 : strlen(vbuf);
+        if (vbuf != nullptr)
+          H5free_memory(vbuf);
       } else if (H5Dvlen_get_buf_size(m_current_data_id, m_current_type_id, m_current_space_id, &length) < 0) {
         throw NXEXCEPTION("Failed to read string length for variable-length string");
       }

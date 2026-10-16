@@ -313,23 +313,23 @@ std::vector<std::string> readStringVector(Group &group, const std::string &name)
 
 std::vector<std::string> readStringVector(DataSet &dataset) {
   hsize_t dims[1];
-  char **rdata;
   std::vector<std::string> result;
   DataSpace dataspace = dataset.getSpace();
   DataType datatype = dataset.getDataType();
 
+  if (dataspace.getSimpleExtentNdims() != 1)
+    throw DataSpaceIException("readStringVector requires a rank-one dataset");
   dataspace.getSimpleExtentDims(dims, nullptr);
   result.reserve(dims[0]);
 
-  rdata = new char *[dims[0]];
-  dataset.read(rdata, datatype);
+  std::vector<char *> rdata(dims[0], nullptr);
+  dataset.read(rdata.data(), datatype);
 
   for (size_t i = 0; i < dims[0]; ++i)
-    result.emplace_back(std::string(rdata[i]));
+    result.emplace_back(rdata[i] == nullptr ? std::string() : std::string(rdata[i]));
 
-  dataset.vlenReclaim(rdata, datatype, dataspace);
+  dataset.vlenReclaim(rdata.data(), datatype, dataspace);
   dataset.close();
-  delete[] rdata;
 
   return result;
 }

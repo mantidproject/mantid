@@ -39,7 +39,7 @@ template <herr_t (*H5Xclose)(hid_t)> std::string readNXClass(Mantid::Nexus::Uniq
       if (H5Tis_variable_str(atype)) {
         // variable length string
         char *rdata = nullptr;
-        if (H5Aread(attrID, atype, &rdata) >= 0) {
+        if (H5Aread(attrID, atype, &rdata) >= 0 && rdata != nullptr) {
           nxClass = std::string(rdata);
         }
         // reclaim memory allocated for rdata by HDF5
@@ -48,7 +48,8 @@ template <herr_t (*H5Xclose)(hid_t)> std::string readNXClass(Mantid::Nexus::Uniq
         // fixed length string
         std::size_t size = H5Tget_size(atype);
         nxClass.resize(size);
-        H5Aread(attrID, atype, nxClass.data());
+        if (H5Aread(attrID, atype, nxClass.data()) < 0)
+          nxClass = UNKNOWN_CLASS;
       }
     }
   }
