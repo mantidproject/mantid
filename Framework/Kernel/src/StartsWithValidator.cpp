@@ -9,8 +9,22 @@
 #ifndef Q_MOC_RUN
 #include <memory>
 #endif
+#include <sstream>
 
 namespace Mantid::Kernel {
+
+template <> std::string ListValidator<std::string>::checkValidity(const std::string &value) const {
+  if (m_allowedValues.end() != std::find(m_allowedValues.begin(), m_allowedValues.end(), value)) {
+    return "";
+  }
+  if (value.empty())
+    return "Select a value";
+  if (isAlias(value))
+    return "_alias";
+  std::ostringstream os;
+  os << "The value \"" << value << "\" is not in the list of allowed values";
+  return os.str();
+}
 
 /// @cond
 #if defined(__GNUC__)

@@ -30,6 +30,14 @@ template <typename HeldType> class MANTID_KERNEL_DLL TypedValidator : public IVa
 #else
 template <typename HeldType> class TypedValidator : public IValidator {
 #endif
+public:
+  TypedValidator() = default;
+  TypedValidator(const TypedValidator &) = default;
+  TypedValidator(TypedValidator &&);
+  TypedValidator &operator=(const TypedValidator &) = default;
+  TypedValidator &operator=(TypedValidator &&);
+  ~TypedValidator() override = default;
+
 protected:
   /// Override this function to check the validity of the type
   virtual std::string checkValidity(const HeldType &) const = 0;
@@ -50,6 +58,12 @@ private:
     }
   }
 };
+
+// The move operations are defaulted out of line so that they are user-provided:
+// an exported explicit instantiation then exports them, whereas MSVC does not
+// export implicitly-declared move members.
+template <typename HeldType> TypedValidator<HeldType>::TypedValidator(TypedValidator &&) = default;
+template <typename HeldType> TypedValidator<HeldType> &TypedValidator<HeldType>::operator=(TypedValidator &&) = default;
 
 /**
  * Specialization for std::shared_ptr<T> types.
