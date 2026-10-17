@@ -39,7 +39,6 @@ class_X_Y
 *:*${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ANN/*
 
 // LegacyNexus - quarantined C code, not to be modified
-nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi.cpp
 nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp
 nullPointerArithmeticOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp
 

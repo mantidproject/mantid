@@ -7,6 +7,7 @@
 
 #include "MantidNexus/NexusDescriptorLazy.h"
 #include "MantidNexus/H5Util.h"
+#include "MantidNexus/H5ValidatingAdapter.h"
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/UniqueID.h"
 
@@ -30,26 +31,28 @@ static std::unordered_set<std::string> const SPECIAL_ADDRESS{"/entry", "/entry0"
 static std::string const UNKNOWN_CLASS = "UNKNOWN_CLASS";
 
 namespace {
-template <herr_t (*H5Xclose)(hid_t)> std::string readNXClass(Mantid::Nexus::UniqueID<H5Xclose> const &oid) {
+template <herr_t (*H5Xclose)(hid_t)>
+std::string readNXClass(Mantid::Nexus::UniqueID<H5Xclose> const &oid, const std::string &filename,
+                        const std::string &object) {
+  const Mantid::Nexus::H5ValidatingAdapter::Context context{"read NX_class attribute", filename, object};
   std::string nxClass = UNKNOWN_CLASS;
-  if (H5Aexists(oid, Mantid::Nexus::GROUP_CLASS_SPEC.c_str()) > 0) {
+  if (Mantid::Nexus::H5ValidatingAdapter::checkTriState(H5Aexists(oid, Mantid::Nexus::GROUP_CLASS_SPEC.c_str()),
+                                                        context)) {
     Mantid::Nexus::AttributeID attrID = H5Aopen(oid, Mantid::Nexus::GROUP_CLASS_SPEC.c_str(), H5P_DEFAULT);
-    if (attrID.isValid()) {
-      Mantid::Nexus::DataTypeID atype(H5Aget_type(attrID));
-      if (H5Tis_variable_str(atype)) {
-        // variable length string
-        char *rdata = nullptr;
-        if (H5Aread(attrID, atype, &rdata) >= 0) {
-          nxClass = std::string(rdata);
-        }
-        // reclaim memory allocated for rdata by HDF5
-        H5free_memory(rdata);
-      } else {
-        // fixed length string
-        std::size_t size = H5Tget_size(atype);
-        nxClass.resize(size);
-        H5Aread(attrID, atype, nxClass.data());
-      }
+    Mantid::Nexus::H5ValidatingAdapter::checkId(attrID, context);
+    Mantid::Nexus::DataTypeID atype(H5Aget_type(attrID));
+    Mantid::Nexus::H5ValidatingAdapter::checkId(atype, context);
+    if (Mantid::Nexus::H5ValidatingAdapter::checkTriState(H5Tis_variable_str(atype), context)) {
+      const auto value = Mantid::Nexus::H5ValidatingAdapter::readScalarVlenAttribute(attrID, context);
+      if (value)
+        nxClass = *value;
+    } else {
+      const std::size_t size = H5Tget_size(atype);
+      if (size == 0)
+        throw Mantid::Nexus::Exception("Failed to determine NX_class attribute size", context.operation,
+                                       context.filename);
+      nxClass.resize(size);
+      Mantid::Nexus::H5ValidatingAdapter::checkStatus(H5Aread(attrID, atype, nxClass.data()), context);
     }
   }
   return nxClass;
@@ -80,18 +83,20 @@ bool NexusDescriptorLazy::isEntry(std::string const &entryName) const {
     // if we know it does exist, return
     return true;
   } else {
-    if (H5Oexists_by_name(m_fileID, entryName.c_str(), H5P_DEFAULT) > 0) {
+    const H5ValidatingAdapter::Context context{"inspect NeXus entry", m_filename, entryName};
+    if (H5ValidatingAdapter::checkTriState(H5Oexists_by_name(m_fileID, entryName.c_str(), H5P_DEFAULT), context)) {
       // if it is there, save the correct class type for it
       std::string nxclass;
       H5O_info_t oinfo;
       // otherwise, try to open this group and see if it is there
       UniqueID<&H5Oclose> entryID(H5Oopen(m_fileID, entryName.c_str(), H5P_DEFAULT));
-      H5Oget_info(entryID, &oinfo, H5O_INFO_BASIC);
+      H5ValidatingAdapter::checkId(entryID, context);
+      H5ValidatingAdapter::checkStatus(H5Oget_info(entryID, &oinfo, H5O_INFO_BASIC), context);
       if (oinfo.type == H5O_TYPE_DATASET) {
         nxclass = SCIENTIFIC_DATA_SET;
       } else {
         // read NX_class attribute
-        nxclass = readNXClass(entryID);
+        nxclass = readNXClass(entryID, m_filename, entryName);
       }
       // modifying m_allEntries, need write lock
       std::lock_guard<std::shared_mutex> lock(m_readNexusMutex);
@@ -145,7 +150,8 @@ bool NexusDescriptorLazy::hasRootAttr(std::string const &name) const {
     return true;
   } else {
     // check the file since it wasn't in the cache
-    if (H5Aexists(m_fileID, name.c_str()) > 0) {
+    const H5ValidatingAdapter::Context context{"inspect root attribute", m_filename, name};
+    if (H5ValidatingAdapter::checkTriState(H5Aexists(m_fileID, name.c_str()), context)) {
       // mutex has the wrong name, but it's what we have
       std::lock_guard<std::shared_mutex> lock(m_readNexusMutex);
       m_rootAttrs.emplace(name);
@@ -163,9 +169,13 @@ std::string NexusDescriptorLazy::getStrData(std::string const &address) {
     // open the data set and get its string data
     // using H5Cpp interface because trying to read string data is an absolute nightmare with the C API
     DataSetID did(H5Dopen(m_fileID, address.c_str(), H5P_DEFAULT));
-    H5::DataSet dataset(did);
+    const H5ValidatingAdapter::Context context{"read string dataset", m_filename, address};
+    H5ValidatingAdapter::checkId(did, context);
+    H5::DataSet dataset(did.release());
     H5::DataType dtype = dataset.getDataType();
-    if (dtype.isVariableStr() || dtype.getClass() == H5T_STRING) {
+    if (dtype.isVariableStr()) {
+      strData = H5ValidatingAdapter::readScalarVlenDataset(dataset.getId(), context).value_or("");
+    } else if (dtype.getClass() == H5T_STRING) {
       dataset.read(strData, dtype, dataset.getSpace());
     }
   }
@@ -177,26 +187,32 @@ std::string NexusDescriptorLazy::getStrData(std::string const &address) {
 void NexusDescriptorLazy::loadGroups(std::map<std::string, std::string> &allEntries, std::string const &address,
                                      unsigned int depth, const unsigned int maxDepth) {
   GroupID groupID(H5Gopen(m_fileID, address.c_str(), H5P_DEFAULT));
-  if (!groupID.isValid()) {
-    return;
-  }
+  const H5ValidatingAdapter::Context context{"load NeXus group", m_filename, address};
+  H5ValidatingAdapter::checkId(groupID, context);
 
   // get NX_class attribute
-  allEntries[address] = readNXClass(groupID);
+  allEntries[address] = readNXClass(groupID, m_filename, address);
 
   if (depth >= maxDepth)
     return;
 
   // iterate over members
   hsize_t numObjs = 0;
-  H5Gget_num_objs(groupID.get(), &numObjs);
+  H5ValidatingAdapter::checkStatus(H5Gget_num_objs(groupID.get(), &numObjs), context);
   for (hsize_t i = 0; i < numObjs; i++) {
-    H5G_obj_t type = H5Gget_objtype_by_idx(groupID, i);
-    ssize_t name_len = H5Gget_objname_by_idx(groupID, i, nullptr, 0);
-    if (name_len <= 0)
-      continue;
-    std::string memberName(name_len, 'X');                              // fill with X for obvious errors
-    H5Gget_objname_by_idx(groupID, i, memberName.data(), name_len + 1); // +1 for null terminator,
+    const H5G_obj_t type = H5Gget_objtype_by_idx(groupID, i);
+    if (type == H5G_UNKNOWN)
+      throw Exception("Failed to determine the type of a NeXus group member", context.operation, context.filename);
+
+    const ssize_t nameLength = H5Gget_objname_by_idx(groupID, i, nullptr, 0);
+    if (nameLength <= 0)
+      throw Exception("Failed to determine the name of a NeXus group member", context.operation, context.filename);
+
+    std::string memberName(static_cast<std::size_t>(nameLength) + 1, '\0');
+    const ssize_t copiedLength = H5Gget_objname_by_idx(groupID, i, memberName.data(), memberName.size());
+    if (copiedLength != nameLength)
+      throw Exception("Failed to read the name of a NeXus group member", context.operation, context.filename);
+    memberName.resize(static_cast<std::size_t>(nameLength));
     std::string memberAddress = address;
     if (!memberAddress.ends_with("/"))
       memberAddress += "/";
@@ -277,21 +293,25 @@ const NexusDescriptorLazy::CacheValue_t NexusDescriptorLazy::_getDataValue(const
     return CRS_t::NXNOT_DATASET;
 
   DataSetID entryID(H5Dopen(m_fileID, datasetAddress.c_str(), H5P_DEFAULT));
-  H5::DataSet dataset(entryID);
+  const H5ValidatingAdapter::Context context{"read cached dataset", m_filename, datasetAddress};
+  H5ValidatingAdapter::checkId(entryID, context);
+  H5::DataSet dataset(entryID.release());
   H5::DataType dtype = dataset.getDataType();
 
   // Case of a string (fixed or variable length) type
-  if (dtype.isVariableStr() || dtype.getClass() == H5T_STRING) {
+  if (dtype.isVariableStr()) {
+    return H5ValidatingAdapter::readScalarVlenDataset(dataset.getId(), context).value_or("");
+  } else if (dtype.getClass() == H5T_STRING) {
     std::string strData;
     dataset.read(strData, dtype, dataset.getSpace());
     return strData;
   } else if (dtype.getClass() == H5T_FLOAT) { // only simple floats for the moment
     float value = 0.0;
-    dataset.read(&value, H5T_NATIVE_FLOAT);
+    dataset.read(&value, H5::PredType::NATIVE_FLOAT);
     return value;
   } else if (dtype.getClass() == H5T_INTEGER) { // only simple integers for the moment
     int value = 0;
-    dataset.read(&value, H5T_NATIVE_INT);
+    dataset.read(&value, H5::PredType::NATIVE_INT);
     return value;
   } else
     return CRS_t::NXWRONG_TYPE;

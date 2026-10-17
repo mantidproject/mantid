@@ -11,12 +11,14 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidLegacyNexus/NeXusException.hpp"
 #include "MantidLegacyNexus/NeXusFile.hpp"
+#include "MantidLegacyNexus/NexusClasses.h"
 #include "test_helper.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <hdf5.h>
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -39,6 +41,92 @@ public:
   // // This means the constructor isn't called when running other tests
   static LegacyNeXusFileTest *createSuite() { return new LegacyNeXusFileTest(); }
   static void destroySuite(LegacyNeXusFileTest *suite) { delete suite; }
+
+  static hid_t createEntry(const hid_t fileId) {
+    const hid_t group = H5Gcreate2(fileId, "entry", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    const hid_t attrSpace = H5Screate(H5S_SCALAR);
+    const hid_t attrType = H5Tcopy(H5T_C_S1);
+    H5Tset_size(attrType, 8);
+    const hid_t attr = H5Acreate2(group, "NX_class", attrType, attrSpace, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr, attrType, "NXentry");
+    H5Aclose(attr);
+    H5Tclose(attrType);
+    H5Sclose(attrSpace);
+    return group;
+  }
+
+  void test_unwritten_scalar_variable_length_string_is_read_as_empty() {
+    const std::string filename("LegacyNexus_empty_vlen_string.h5");
+    std::filesystem::remove(filename);
+    const hid_t fileId = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    const hid_t group = createEntry(fileId);
+    const hid_t dataSpace = H5Screate(H5S_SCALAR);
+    const hid_t dataType = H5Tcopy(H5T_C_S1);
+    H5Tset_size(dataType, H5T_VARIABLE);
+    const hid_t dataSet = H5Dcreate2(group, "description", dataType, dataSpace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dclose(dataSet);
+    H5Tclose(dataType);
+    H5Sclose(dataSpace);
+    H5Gclose(group);
+    H5Fclose(fileId);
+
+    File file(filename, NXACC_READ);
+    file.openGroup("entry", "NXentry");
+    file.openData("description");
+    const auto info = file.getInfo();
+    std::vector<char> value(static_cast<size_t>(info.dims[0]) + 1, 'x');
+    TS_ASSERT_THROWS_NOTHING(file.getData(value.data()));
+    TS_ASSERT_EQUALS(value[0], '\0');
+    file.close();
+    std::filesystem::remove(filename);
+  }
+
+  void test_variable_length_string_array_reports_an_error() {
+    const std::string filename("LegacyNexus_vlen_string_array.h5");
+    std::filesystem::remove(filename);
+    const hid_t fileId = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    const hid_t group = createEntry(fileId);
+    const hsize_t dims[1]{2};
+    const hid_t dataSpace = H5Screate_simple(1, dims, nullptr);
+    const hid_t dataType = H5Tcopy(H5T_C_S1);
+    H5Tset_size(dataType, H5T_VARIABLE);
+    const hid_t dataSet = H5Dcreate2(group, "labels", dataType, dataSpace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    const char *values[2]{"first", "second"};
+    H5Dwrite(dataSet, dataType, H5S_ALL, H5S_ALL, H5P_DEFAULT, values);
+    H5Dclose(dataSet);
+    H5Tclose(dataType);
+    H5Sclose(dataSpace);
+    H5Gclose(group);
+    H5Fclose(fileId);
+
+    File file(filename, NXACC_READ);
+    file.openGroup("entry", "NXentry");
+    file.openData("labels");
+    TS_ASSERT_THROWS(file.getInfo(), const Exception &);
+    file.close();
+    std::filesystem::remove(filename);
+  }
+
+  void test_nexus_classes_reject_dataset_rank_greater_than_four() {
+    const std::string filename("LegacyNexus_rank_five.h5");
+    std::filesystem::remove(filename);
+    const hid_t fileId = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    const hid_t group = createEntry(fileId);
+    const hsize_t dims[5]{1, 1, 1, 1, 1};
+    const hid_t dataSpace = H5Screate_simple(5, dims, nullptr);
+    const hid_t dataSet =
+        H5Dcreate2(group, "rank_five", H5T_NATIVE_INT, dataSpace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dclose(dataSet);
+    H5Sclose(dataSpace);
+    H5Gclose(group);
+    H5Fclose(fileId);
+
+    {
+      NXRoot root(filename);
+      TS_ASSERT_THROWS(root.openFirstEntry(), const Exception &);
+    }
+    std::filesystem::remove(filename);
+  }
 
   void test_open_group_h5() { impl_test_open_group(NexusFormat::HDF5); }
   void test_open_group_h4() { impl_test_open_group(NexusFormat::HDF4); }
