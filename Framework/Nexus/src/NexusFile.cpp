@@ -14,6 +14,7 @@
 #include <filesystem>
 #include <hdf5.h>
 #include <iostream>
+#include <iterator>
 #include <limits>
 #include <numeric>
 #include <sstream>
@@ -338,8 +339,8 @@ void File::openAddress(std::string const &address) {
   }
 
   m_gid_stack.assign(1, 0);
-  for (auto &group : newGroups)
-    m_gid_stack.emplace_back(group.release());
+  std::transform(newGroups.begin(), newGroups.end(), std::back_inserter(m_gid_stack),
+                 [](auto &group) { return group.release(); });
   m_current_group_id = m_gid_stack.back();
   m_current_data_id = newDataset.release();
   m_current_type_id = newDatatype.release();
