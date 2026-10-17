@@ -155,7 +155,8 @@ std::optional<std::string> readScalarVlenDataset(const hid_t dataset, const Cont
   if (elementCount(dataspace, context) != 1)
     throwError(context, "Expected a scalar or single-element HDF5 string dataset");
   auto values = readVlenDataset(dataset, datatype, dataspace, context);
-  return std::move(values.front());
+  auto value = std::move(values.front());
+  return value;
 }
 
 std::optional<std::string> readScalarVlenAttribute(const hid_t attribute, const Context &context) {
