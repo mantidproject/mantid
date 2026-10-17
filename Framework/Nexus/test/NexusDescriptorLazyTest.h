@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidNexus/NexusDescriptorLazy.h"
+#include "MantidNexus/NexusException.h"
 #include "test_helper.h"
 
 #include <H5Cpp.h>
@@ -21,6 +22,16 @@ using Mantid::Nexus::NexusDescriptorLazy;
 class NexusDescriptorLazyTest : public CxxTest::TestSuite {
 
 public:
+  void test_constructor_throws_for_a_dangling_link() {
+    NexusTest::FileResource resource("NexusDescriptorLazy_dangling_link.h5");
+    {
+      H5::H5File file(resource.fullPath(), H5F_ACC_TRUNC);
+      TS_ASSERT(H5Lcreate_soft("/missing", file.getId(), "/dangling", H5P_DEFAULT, H5P_DEFAULT) >= 0);
+    }
+
+    TS_ASSERT_THROWS(NexusDescriptorLazy descriptor(resource.fullPath()), const Mantid::Nexus::Exception &);
+  }
+
   void test_unwritten_variable_length_nx_class_is_unknown() {
     NexusTest::FileResource resource("NexusDescriptorLazy_empty_nx_class.h5");
     {

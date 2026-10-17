@@ -33,6 +33,39 @@ void reclaimVlen(hid_t datatype, hid_t dataspace, void *data, const Context &con
   checkStatus(H5Dvlen_reclaim(datatype, dataspace, H5P_DEFAULT, data), context);
 }
 
+std::vector<std::optional<std::string>> readVlenDataset(const hid_t dataset, const hid_t datatype,
+                                                        const hid_t dataspace, const Context &context) {
+  requireVariableString(datatype, context);
+  const auto count = elementCount(dataspace, context);
+  std::vector<char *> raw(count, nullptr);
+  if (count > 0) {
+    try {
+      readDataset(dataset, datatype, H5S_ALL, H5S_ALL, raw.data(), context);
+    } catch (...) {
+      H5Dvlen_reclaim(datatype, dataspace, H5P_DEFAULT, raw.data());
+      throw;
+    }
+  }
+
+  std::vector<std::optional<std::string>> result;
+  result.reserve(count);
+  try {
+    for (const auto value : raw) {
+      if (value == nullptr)
+        result.emplace_back(std::nullopt);
+      else
+        result.emplace_back(std::string(value));
+    }
+  } catch (...) {
+    if (count > 0)
+      H5Dvlen_reclaim(datatype, dataspace, H5P_DEFAULT, raw.data());
+    throw;
+  }
+  if (count > 0)
+    reclaimVlen(datatype, dataspace, raw.data(), context);
+  return result;
+}
+
 } // namespace
 
 void checkStatus(const herr_t status, const Context &context) {
@@ -95,48 +128,43 @@ void readDataset(const hid_t dataset, const hid_t memoryType, const hid_t memory
   checkStatus(H5Dread(dataset, memoryType, memorySpace, fileSpace, H5P_DEFAULT, data), context);
 }
 
-std::vector<std::optional<std::string>> readVlenDataset(const hid_t dataset, const hid_t datatype,
-                                                        const hid_t dataspace, const Context &context) {
+void writeDataset(const hid_t dataset, const hid_t memoryType, const hid_t memorySpace, const hid_t fileSpace,
+                  const void *data, const Context &context) {
   checkId(dataset, context);
-  checkId(dataspace, context);
-  requireVariableString(datatype, context);
-  const auto count = elementCount(dataspace, context);
-  std::vector<char *> raw(count, nullptr);
-  if (count > 0)
-    readDataset(dataset, datatype, H5S_ALL, H5S_ALL, raw.data(), context);
-
-  std::vector<std::optional<std::string>> result;
-  result.reserve(count);
-  try {
-    for (const auto value : raw) {
-      if (value == nullptr)
-        result.emplace_back(std::nullopt);
-      else
-        result.emplace_back(std::string(value));
-    }
-  } catch (...) {
-    if (count > 0)
-      H5Dvlen_reclaim(datatype, dataspace, H5P_DEFAULT, raw.data());
-    throw;
-  }
-  if (count > 0)
-    reclaimVlen(datatype, dataspace, raw.data(), context);
-  return result;
+  checkId(memoryType, context);
+  if (data == nullptr)
+    throwError(context, "Cannot write a null buffer to an HDF5 dataset");
+  checkStatus(H5Dwrite(dataset, memoryType, memorySpace, fileSpace, H5P_DEFAULT, data), context);
 }
 
-std::optional<std::string> readScalarVlenDataset(const hid_t dataset, const hid_t datatype, const hid_t dataspace,
-                                                 const Context &context) {
+std::vector<std::optional<std::string>> readVlenDataset(const hid_t dataset, const Context &context) {
+  checkId(dataset, context);
+  UniqueID<&H5Tclose> datatype{H5Dget_type(dataset)};
+  UniqueID<&H5Sclose> dataspace{H5Dget_space(dataset)};
+  checkId(datatype, context);
+  checkId(dataspace, context);
+  return readVlenDataset(dataset, datatype, dataspace, context);
+}
+
+std::optional<std::string> readScalarVlenDataset(const hid_t dataset, const Context &context) {
+  checkId(dataset, context);
+  UniqueID<&H5Tclose> datatype{H5Dget_type(dataset)};
+  UniqueID<&H5Sclose> dataspace{H5Dget_space(dataset)};
+  checkId(datatype, context);
+  checkId(dataspace, context);
   if (elementCount(dataspace, context) != 1)
     throwError(context, "Expected a scalar or single-element HDF5 string dataset");
-  return readVlenDataset(dataset, datatype, dataspace, context).front();
+  auto values = readVlenDataset(dataset, datatype, dataspace, context);
+  return std::move(values.front());
 }
 
-std::optional<std::string> readScalarVlenAttribute(const hid_t attribute, const hid_t datatype,
-                                                   const Context &context) {
+std::optional<std::string> readScalarVlenAttribute(const hid_t attribute, const Context &context) {
   checkId(attribute, context);
-  requireVariableString(datatype, context);
+  UniqueID<&H5Tclose> datatype{H5Aget_type(attribute)};
   UniqueID<&H5Sclose> dataspace{H5Aget_space(attribute)};
+  checkId(datatype, context);
   checkId(dataspace, context);
+  requireVariableString(datatype, context);
   if (elementCount(dataspace, context) != 1)
     throwError(context, "Expected a scalar or single-element HDF5 string attribute");
   char *raw = nullptr;

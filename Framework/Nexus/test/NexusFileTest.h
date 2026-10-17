@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidNexus/H5Util.h"
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 #include "MantidTypes/Core/DateAndTime.h"
@@ -19,6 +20,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <map>
 #include <regex>
 #include <sstream>
@@ -88,6 +90,101 @@ public:
     const Mantid::Nexus::DimVector start{0};
     const Mantid::Nexus::DimVector size{1};
     TS_ASSERT_THROWS(file.getSlab(&output, start, size), const Mantid::Nexus::Exception &);
+  }
+
+  void test_putSlab_rejects_invalid_coordinates() {
+    FileResource resource("NexusFile_put_slab_coordinates.h5");
+    Mantid::Nexus::File file(resource.fullPath(), NXaccess::CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+    file.makeData("values", NXnumtype::INT32, Mantid::Nexus::DimVector{2, 2}, true);
+
+    const int input{1};
+    TS_ASSERT_THROWS(file.putSlab(&input, Mantid::Nexus::DimVector{0}, Mantid::Nexus::DimVector{1}),
+                     const Mantid::Nexus::Exception &);
+    TS_ASSERT_THROWS(file.putSlab(&input,
+                                  Mantid::Nexus::DimVector{std::numeric_limits<Mantid::Nexus::dimsize_t>::max(), 0},
+                                  Mantid::Nexus::DimVector{1, 1}),
+                     const Mantid::Nexus::Exception &);
+    TS_ASSERT_THROWS(file.putSlab(std::vector<int>{1}, Mantid::Nexus::DimVector{0, 0}, Mantid::Nexus::DimVector{2, 2}),
+                     const Mantid::Nexus::Exception &);
+  }
+
+  void test_getData_returns_an_empty_vector_for_an_empty_numeric_dataset() {
+    FileResource resource("NexusFile_empty_numeric_dataset.h5");
+    {
+      H5::H5File h5File(resource.fullPath(), H5F_ACC_TRUNC);
+      const hsize_t dims[1]{0};
+      const H5::DataSpace dataSpace(1, dims);
+      h5File.createDataSet("values", H5::PredType::NATIVE_INT, dataSpace);
+    }
+
+    Mantid::Nexus::File file(resource.fullPath(), NXaccess::READ);
+    file.openData("values");
+    std::vector<int> values;
+    TS_ASSERT_THROWS_NOTHING(file.getData(values));
+    TS_ASSERT(values.empty());
+  }
+
+  void test_openAddress_preserves_current_location_when_a_cached_target_cannot_be_opened() {
+    FileResource resource("NexusFile_transactional_open_address.h5");
+    Mantid::Nexus::File file(resource.fullPath(), NXaccess::CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+    file.makeData("values", NXnumtype::INT32, Mantid::Nexus::DimVector{1}, false);
+    file.flush();
+
+    const hid_t rawFile =
+        H5Fopen(resource.fullPath().c_str(), H5F_ACC_RDWR, Mantid::Nexus::H5Util::defaultFileAcc().getId());
+    TS_ASSERT(rawFile > 0);
+    if (rawFile <= 0)
+      return;
+    TS_ASSERT(H5Ldelete(rawFile, "/entry/values", H5P_DEFAULT) >= 0);
+    TS_ASSERT(H5Fflush(rawFile, H5F_SCOPE_GLOBAL) >= 0);
+    TS_ASSERT(H5Fclose(rawFile) >= 0);
+
+    TS_ASSERT_THROWS(file.openAddress("/entry/values"), const Mantid::Nexus::Exception &);
+    TS_ASSERT_EQUALS(file.getAddress(), "/entry");
+    TS_ASSERT(file.getEntries().empty());
+  }
+
+  void test_getEntries_throws_for_a_dangling_link() {
+    FileResource resource("NexusFile_dangling_link.h5");
+    Mantid::Nexus::File file(resource.fullPath(), NXaccess::CREATE5);
+    file.flush();
+
+    const hid_t rawFile =
+        H5Fopen(resource.fullPath().c_str(), H5F_ACC_RDWR, Mantid::Nexus::H5Util::defaultFileAcc().getId());
+    TS_ASSERT(rawFile > 0);
+    if (rawFile <= 0)
+      return;
+    TS_ASSERT(H5Lcreate_soft("/missing", rawFile, "/dangling", H5P_DEFAULT, H5P_DEFAULT) >= 0);
+    TS_ASSERT(H5Fflush(rawFile, H5F_SCOPE_GLOBAL) >= 0);
+    TS_ASSERT(H5Fclose(rawFile) >= 0);
+
+    TS_ASSERT_THROWS(file.getEntries(), const Mantid::Nexus::Exception &);
+  }
+
+  void test_makeLink_throws_when_the_destination_already_exists() {
+    FileResource resource("NexusFile_duplicate_link.h5");
+    Mantid::Nexus::File file(resource.fullPath(), NXaccess::CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+    file.makeData("values", NXnumtype::INT32, Mantid::Nexus::DimVector{1}, true);
+    const auto target = file.getDataID();
+    file.closeData();
+    file.makeGroup("links", "NXcollection", true);
+
+    file.makeLink(target);
+    TS_ASSERT_THROWS(file.makeLink(target), const Mantid::Nexus::Exception &);
+  }
+
+  void test_makeCompData_rejects_an_invalid_datatype_without_registering_the_dataset() {
+    FileResource resource("NexusFile_invalid_compressed_data.h5");
+    Mantid::Nexus::File file(resource.fullPath(), NXaccess::CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+
+    TS_ASSERT_THROWS(file.makeCompData("values", NXnumtype::BAD, Mantid::Nexus::DimVector{1}, NXcompression::NONE,
+                                       Mantid::Nexus::DimVector{1}),
+                     const Mantid::Nexus::Exception &);
+    TS_ASSERT(!file.hasData("values"));
   }
 
   void test_getSlab_reads_only_the_requested_fixed_length_string_range() {

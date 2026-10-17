@@ -35,12 +35,11 @@ MANTID_NEXUS_DLL std::size_t elementCount(hid_t dataspace, const Context &contex
 
 MANTID_NEXUS_DLL void readDataset(hid_t dataset, hid_t memoryType, hid_t memorySpace, hid_t fileSpace, void *data,
                                   const Context &context);
-MANTID_NEXUS_DLL std::optional<std::string> readScalarVlenDataset(hid_t dataset, hid_t datatype, hid_t dataspace,
-                                                                  const Context &context);
-MANTID_NEXUS_DLL std::vector<std::optional<std::string>> readVlenDataset(hid_t dataset, hid_t datatype, hid_t dataspace,
-                                                                         const Context &context);
-MANTID_NEXUS_DLL std::optional<std::string> readScalarVlenAttribute(hid_t attribute, hid_t datatype,
-                                                                    const Context &context);
+MANTID_NEXUS_DLL void writeDataset(hid_t dataset, hid_t memoryType, hid_t memorySpace, hid_t fileSpace,
+                                   const void *data, const Context &context);
+MANTID_NEXUS_DLL std::optional<std::string> readScalarVlenDataset(hid_t dataset, const Context &context);
+MANTID_NEXUS_DLL std::vector<std::optional<std::string>> readVlenDataset(hid_t dataset, const Context &context);
+MANTID_NEXUS_DLL std::optional<std::string> readScalarVlenAttribute(hid_t attribute, const Context &context);
 
 MANTID_NEXUS_DLL void selectHyperslab(hid_t dataspace, std::span<const dimsize_t> start,
                                       std::span<const dimsize_t> size, const Context &context);
