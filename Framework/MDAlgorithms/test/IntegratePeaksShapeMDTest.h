@@ -246,7 +246,7 @@ std::pair<PeaksWorkspace_sptr, ITableWorkspace_sptr>
 integrateProfile(const MatrixWorkspace_sptr &inputWS, const PeaksWorkspace_sptr &peaksWS, double regionRadius,
                  const MatrixWorkspace_sptr &solidAngleWS, const MatrixWorkspace_sptr &fluxWS,
                  bool adjustCenter = false, bool adjustShape = false, double maxShapeChange = 2.0,
-                 double minSignalToNoise = 10.0) {
+                 double minSignalToNoise = 10.0, double maxCenterShift = 3.0) {
   IntegratePeaksShapeMD alg;
   alg.setChild(true);
   alg.setRethrows(true);
@@ -259,6 +259,7 @@ integrateProfile(const MatrixWorkspace_sptr &inputWS, const PeaksWorkspace_sptr 
   alg.setProperty("AdjustShape", adjustShape);
   alg.setProperty("MaxShapeChange", maxShapeChange);
   alg.setProperty("AdjustShapeMinSignalToNoise", minSignalToNoise);
+  alg.setProperty("MaxCenterShift", maxCenterShift);
   alg.setProperty("SolidAngleWorkspace", solidAngleWS);
   alg.setProperty("FluxWorkspace", fluxWS);
   alg.setPropertyValue("OutputWorkspace", "out");
@@ -1186,6 +1187,168 @@ public:
     for (size_t k = 0; k < 3; ++k)
       TS_ASSERT_EQUALS(kept->abcRadii()[k], 0.1);
     TS_ASSERT_LESS_THAN(200.0, profile->getPeak(1).getIntensity() / profile->getPeak(1).getSigmaIntensity());
+  }
+
+  // A peak predicted several of its stored shape's standard deviations away
+  // along the shape's narrow axis, e.g. from an imperfect calibration, is
+  // found from the mode of its counts and refined to its true center and
+  // shape, within MaxCenterShift of the stored center.
+  void test_adjust_shape_and_center_reaches_peak_far_along_narrow_axis() {
+    auto [eventWS, peaksWS] = buildEmptyPeaks();
+    const auto directions = tiltedAxes();
+    const PeakEllipsoidExtent sigmas{0.04, 0.1, 0.14};
+    const double height = 6000.0, background = 10.0, region = 0.45;
+    // 2.5 standard deviations along the narrow axis
+    const V3D offset = directions[0] * (2.5 * sigmas[0]);
+    std::vector<V3D> centers;
+    for (int i = 0; i < peaksWS->getNumberPeaks(); ++i)
+      centers.emplace_back(peaksWS->getPeak(i).getQLabFrame() + offset);
+    // events throughout the fit region, which is about the stored center
+    generateEvents(*eventWS, centers, std::vector<double>(centers.size(), height), directions, sigmas, background,
+                   region + offset.norm() + 0.05, 1.0);
+    addMDNormLogs(*eventWS, 1.0, 40.0, 1.0);
+    // the stored shape is the true one
+    for (int i = 0; i < peaksWS->getNumberPeaks(); ++i)
+      peaksWS->getPeak(i).setPeakShape(new PeakShapeEllipsoid(directions, sigmas, sigmas, sigmas, Kernel::QLab));
+    const auto sa = createSolidAngleWorkspace(*eventWS, 1.0);
+    const auto fl = createFluxWorkspace(*eventWS, 1.0, 50.0);
+    const auto [profile, diagnostics] = integrateProfile(eventWS, peaksWS, region, sa, fl, true, true);
+
+    const double trueIntensity = height * std::pow(2.0 * M_PI, 1.5) * sigmas[0] * sigmas[1] * sigmas[2];
+    const auto trueCovariance = covariance(directions, sigmas);
+    for (int i = 0; i < profile->getNumberPeaks(); ++i) {
+      TS_ASSERT(diagnostics->cell<Boolean>(i, 8));
+      const auto *shape = dynamic_cast<const PeakShapeEllipsoid *>(&profile->getPeak(i).getPeakShape());
+      TS_ASSERT(shape);
+      // in standard deviations along each principal axis
+      double error = 0.0;
+      for (size_t k = 0; k < 3; ++k)
+        error += std::pow((shape->translation() - offset).scalar_prod(directions[k]) / sigmas[k], 2);
+      TSM_ASSERT_LESS_THAN("Center of peak " + std::to_string(i), std::sqrt(error), 0.1);
+      TSM_ASSERT_LESS_THAN("Covariance of peak " + std::to_string(i),
+                           relativeDifference(covariance(shape->directions(), shape->abcRadii()), trueCovariance),
+                           0.06);
+      const auto &peak = profile->getPeak(i);
+      TSM_ASSERT_DELTA("Intensity of peak " + std::to_string(i), peak.getIntensity(), trueIntensity,
+                       4 * peak.getSigmaIntensity() + 0.005 * trueIntensity);
+    }
+
+    // with a tighter bound, the center stops at it
+    const auto bounded = integrateProfile(eventWS, peaksWS, region, sa, fl, true, true, 2.0, 10.0, 1.0).first;
+    for (int i = 0; i < bounded->getNumberPeaks(); ++i) {
+      const auto *shape = dynamic_cast<const PeakShapeEllipsoid *>(&bounded->getPeak(i).getPeakShape());
+      double distance = 0.0;
+      for (size_t k = 0; k < 3; ++k)
+        distance += std::pow(shape->translation().scalar_prod(directions[k]) / sigmas[k], 2);
+      TS_ASSERT_LESS_THAN_EQUALS(std::sqrt(distance), 1.0 + 1e-6);
+    }
+  }
+
+  // A peak predicted far enough away to look too weak to refine at its
+  // stored center is found from the mode of its counts, and refined.
+  void test_adjust_shape_and_center_finds_peak_that_looks_weak_where_predicted() {
+    auto [eventWS, peaksWS] = buildEmptyPeaks();
+    const auto directions = tiltedAxes();
+    const PeakEllipsoidExtent sigmas{0.04, 0.1, 0.14};
+    const double height = 200.0, background = 10.0, region = 0.45;
+    // 3 standard deviations along the narrow axis
+    const V3D offset = directions[0] * (3.0 * sigmas[0]);
+    std::vector<V3D> centers;
+    for (int i = 0; i < peaksWS->getNumberPeaks(); ++i)
+      centers.emplace_back(peaksWS->getPeak(i).getQLabFrame() + offset);
+    // events throughout the fit region, which is about the stored center
+    generateEvents(*eventWS, centers, std::vector<double>(centers.size(), height), directions, sigmas, background,
+                   region + offset.norm() + 0.05, 1.0);
+    addMDNormLogs(*eventWS, 1.0, 40.0, 1.0);
+    for (int i = 0; i < peaksWS->getNumberPeaks(); ++i)
+      peaksWS->getPeak(i).setPeakShape(new PeakShapeEllipsoid(directions, sigmas, sigmas, sigmas, Kernel::QLab));
+    const auto sa = createSolidAngleWorkspace(*eventWS, 1.0);
+    const auto fl = createFluxWorkspace(*eventWS, 1.0, 50.0);
+
+    // with the stored shape and center, the peaks are below the threshold for refinement
+    const auto stored = integrateProfile(eventWS, peaksWS, region, sa, fl).first;
+    const auto [profile, diagnostics] = integrateProfile(eventWS, peaksWS, region, sa, fl, true, true, 2.0, 10.0, 4.0);
+
+    const double trueIntensity = height * std::pow(2.0 * M_PI, 1.5) * sigmas[0] * sigmas[1] * sigmas[2];
+    // peak 1 is only partly covered by the detectors, and too weak even at its true center
+    for (int i : {0, 2}) {
+      TS_ASSERT_LESS_THAN(stored->getPeak(i).getIntensity() / stored->getPeak(i).getSigmaIntensity(), 10.0);
+      TS_ASSERT(diagnostics->cell<Boolean>(i, 8));
+      const auto *shape = dynamic_cast<const PeakShapeEllipsoid *>(&profile->getPeak(i).getPeakShape());
+      double error = 0.0;
+      for (size_t k = 0; k < 3; ++k)
+        error += std::pow((shape->translation() - offset).scalar_prod(directions[k]) / sigmas[k], 2);
+      TSM_ASSERT_LESS_THAN("Center of peak " + std::to_string(i), std::sqrt(error), 0.2);
+      const auto &peak = profile->getPeak(i);
+      TSM_ASSERT_DELTA("Intensity of peak " + std::to_string(i), peak.getIntensity(), trueIntensity,
+                       4 * peak.getSigmaIntensity());
+    }
+  }
+
+  // With AdjustShape, peaks too weak to refine keep their stored center as
+  // well as their stored shape, rather than having it refined on its own.
+  void test_adjust_shape_and_center_leaves_weak_peaks_centered() {
+    auto [eventWS, peaksWS] = buildEmptyPeaks();
+    const double region = 0.45;
+    std::vector<V3D> centers;
+    for (int i = 0; i < peaksWS->getNumberPeaks(); ++i)
+      centers.emplace_back(peaksWS->getPeak(i).getQLabFrame());
+    generateEvents(*eventWS, centers, {0.0, 6000.0, 0.0}, 0.1, 200.0, region + 0.05, 1.0);
+    addMDNormLogs(*eventWS, 1.0, 40.0, 1.0);
+    setSphericalShapes(*peaksWS, 0.1, 0.1, 0.1);
+    const auto [profile, diagnostics] =
+        integrateProfile(eventWS, peaksWS, region, createSolidAngleWorkspace(*eventWS, 1.0),
+                         createFluxWorkspace(*eventWS, 1.0, 50.0), true, true);
+    for (int i : {0, 2}) {
+      TS_ASSERT(!diagnostics->cell<Boolean>(i, 8));
+      const auto *shape = dynamic_cast<const PeakShapeEllipsoid *>(&profile->getPeak(i).getPeakShape());
+      TS_ASSERT_EQUALS(shape->translation(), V3D(0, 0, 0));
+    }
+    TS_ASSERT(diagnostics->cell<Boolean>(1, 8));
+  }
+
+  // Compressing the events into weighted events, with weights that are
+  // counts, gives the same refined shape and intensity.
+  void test_adjust_shape_with_compressed_weighted_events() {
+    auto [eventWS, peaksWS] = buildEmptyPeaks();
+    const auto directions = tiltedAxes();
+    const PeakEllipsoidExtent sigmas{0.07, 0.1, 0.14};
+    const double region = 0.45;
+    std::vector<V3D> centers;
+    for (int i = 0; i < peaksWS->getNumberPeaks(); ++i)
+      centers.emplace_back(peaksWS->getPeak(i).getQLabFrame());
+    generateEvents(*eventWS, centers, std::vector<double>(centers.size(), 6000.0), directions, sigmas, 10.0,
+                   region + 0.05, 1.0);
+    addMDNormLogs(*eventWS, 1.0, 40.0, 1.0);
+    setSphericalShapes(*peaksWS, 0.1, 0.1, 0.1);
+    const auto sa = createSolidAngleWorkspace(*eventWS, 1.0);
+    const auto fl = createFluxWorkspace(*eventWS, 1.0, 50.0);
+    const auto raw = integrateProfile(eventWS, peaksWS, region, sa, fl, true, true).first;
+
+    // merge events within 2 microseconds, about 0.1% in momentum
+    MatrixWorkspace_sptr compressedWS = eventWS->clone();
+    auto compressed = std::dynamic_pointer_cast<EventWorkspace>(compressedWS);
+    size_t numRaw = 0, numCompressed = 0;
+    for (size_t i = 0; i < compressed->getNumberHistograms(); ++i) {
+      auto &events = compressed->getSpectrum(i);
+      numRaw += events.getNumberEvents();
+      events.compressEvents(2.0, &events);
+      numCompressed += events.getNumberEvents();
+    }
+    TS_ASSERT_LESS_THAN(numCompressed, numRaw);
+    const auto weighted = integrateProfile(compressedWS, peaksWS, region, sa, fl, true, true).first;
+
+    for (int i = 0; i < raw->getNumberPeaks(); ++i) {
+      const auto &a = raw->getPeak(i);
+      const auto &b = weighted->getPeak(i);
+      TS_ASSERT_DELTA(b.getIntensity(), a.getIntensity(), 0.5 * a.getSigmaIntensity());
+      TS_ASSERT_DELTA(b.getSigmaIntensity(), a.getSigmaIntensity(), 0.05 * a.getSigmaIntensity());
+      const auto *sa_ = dynamic_cast<const PeakShapeEllipsoid *>(&a.getPeakShape());
+      const auto *sb = dynamic_cast<const PeakShapeEllipsoid *>(&b.getPeakShape());
+      TS_ASSERT_LESS_THAN(relativeDifference(covariance(sb->directions(), sb->abcRadii()),
+                                             covariance(sa_->directions(), sa_->abcRadii())),
+                          0.02);
+    }
   }
 
 private:

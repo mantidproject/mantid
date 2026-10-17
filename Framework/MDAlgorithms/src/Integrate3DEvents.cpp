@@ -659,6 +659,43 @@ void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &
     return ll;
   };
 
+  // the distance of an offset in standard deviations of the supplied shape
+  auto mahalanobis = [&](const V3D &v) { return std::sqrt(v.scalar_prod(applyInvS(v))); };
+
+  // The mode of the counts smoothed by the supplied shape, found by mean shift from c0, within maxShift
+  // standard deviations of c0: first with a kernel twice as wide, to reach a peak several standard deviations
+  // away, then with the shape itself. A uniform background is centered on the kernel, so it slows the shift but
+  // does not move where it ends up.
+  auto countsMode = [&](const V3D &c0, const double maxShift) {
+    V3D c = c0;
+    for (const double scale : {2.0, 1.0}) {
+      for (int iteration = 0; iteration < 50; ++iteration) {
+        double sumWeight = 0.0;
+        V3D sumQ;
+        for (const auto &event : events) {
+          const V3D qOff = event.second - c;
+          const double e = 0.5 * qOff.scalar_prod(applyInvS(qOff)) / (scale * scale);
+          if (e > 40.0)
+            continue;
+          const double weight = event.first.first * exp(-e);
+          sumWeight += weight;
+          sumQ += event.second * weight;
+        }
+        if (!(sumWeight > 0.0))
+          return c;
+        V3D next = sumQ * (1.0 / sumWeight);
+        const auto distance = mahalanobis(next - c0);
+        if (distance > maxShift)
+          next = c0 + (next - c0) * (maxShift / distance);
+        const auto move = mahalanobis(next - c);
+        c = next;
+        if (move < 1e-3)
+          break;
+      }
+    }
+    return c;
+  };
+
   std::vector<double> g, w;
   std::vector<V3D> invSq;
   computeKernel(center, g, w, invSq);
@@ -668,17 +705,41 @@ void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &
 
   // refine the shape of a strong enough peak; a weaker one keeps the supplied shape
   if (shapeFit) {
+    shapeFit->attempted = false;
     shapeFit->adjusted = false;
     shapeFit->directions = directions;
     shapeFit->sigmas = sigmas;
-    if (std::isfinite(sigA) && sigA > 0.0 && A / sigA >= shapeFit->minSignalToNoise) {
-      double intensity = A * normG, background = b, sigma = sigA * normG, peakNormRefined = 0.0;
-      V3D refinedCenter = center;
+    // With the center refined too, the fit starts from the mode of the counts if the peak is more significant
+    // there than at its stored center, as a peak predicted several standard deviations away (e.g. from an
+    // imperfect calibration) is out of reach of the fit's local steps and looks weaker than it is.
+    V3D seedCenter = center;
+    double seedA = A, seedB = b, seedSigA = sigA;
+    if (adjustCenter) {
+      const auto mode = countsMode(center, shapeFit->maxCenterShift);
+      std::vector<double> gMode, wMode;
+      std::vector<V3D> invSqMode;
+      computeKernel(mode, gMode, wMode, invSqMode);
+      double modeA = 0.0, modeB = 0.0, modeSigA = 0.0;
+      const double modePeakNorm = peakNorm(mode, nullptr);
+      if (modePeakNorm > 0.0) {
+        solvePoissonMatchedFilter(gMode, wMode, modePeakNorm, volume, modeA, modeB, modeSigA);
+        if (std::isfinite(modeSigA) && modeSigA > 0.0 && (!(sigA > 0.0) || modeA / modeSigA > A / sigA)) {
+          seedCenter = mode;
+          seedA = modeA;
+          seedB = modeB;
+          seedSigA = modeSigA;
+        }
+      }
+    }
+    if (std::isfinite(seedSigA) && seedSigA > 0.0 && seedA / seedSigA >= shapeFit->minSignalToNoise) {
+      shapeFit->attempted = true;
+      double intensity = seedA * normG, background = seedB, sigma = seedSigA * normG, peakNormRefined = 0.0;
+      V3D refinedCenter = seedCenter;
       PeakEllipsoidFrame refinedDirections;
       PeakEllipsoidExtent refinedSigmas;
       refineProfileShape(events, peak_q, norm, region, volume, adjustCenter, directions, sigmas, shapeFit->maxChange,
-                         refinedCenter, intensity, background, sigma, peakNormRefined, refinedDirections,
-                         refinedSigmas);
+                         center, shapeFit->maxCenterShift, refinedCenter, intensity, background, sigma, peakNormRefined,
+                         refinedDirections, refinedSigmas);
       // keep the refinement only if the peak is still as significant with its refined shape (with that shape's
       // uncertainty included); otherwise the supplied shape is kept, as for a weaker peak
       if (std::isfinite(sigma) && sigma > 0.0 && intensity / sigma >= shapeFit->minSignalToNoise) {
@@ -700,7 +761,9 @@ void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &
     }
   }
 
-  if (adjustCenter) {
+  // with shape refinement, the center is refined only together with the
+  // shape of a strong enough peak, above; a weaker peak keeps its center
+  if (adjustCenter && !shapeFit) {
     const auto maxShift = *std::min_element(sigmas.begin(), sigmas.end());
     // seedCenter is where this call started (shape.translation()); maxShift
     // bounds the *incremental* correction made in this call, not the total
@@ -786,10 +849,10 @@ void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &
  * per unit intensity (1 without normalization, as the Gaussian is
  * normalized). Each step is a Levenberg-Marquardt step in (c, M) with I and b
  * held fixed, kept only if it increases the likelihood and stays within the
- * bounds -- the center within one of the supplied shape's standard
- * deviations of where it started, and each principal standard deviation
- * within maxChange of the supplied shape's (in the supplied shape's own
- * frame) -- after which I and b are solved again.
+ * bounds -- the center within maxCenterShift of the supplied shape's
+ * standard deviations (in its own frame) of origin, and each principal
+ * standard deviation within maxChange of the supplied shape's (in the
+ * supplied shape's own frame) -- after which I and b are solved again.
  *
  * @param events Events about the peak, relative to peak_q.
  * @param peak_q Q-vector of the peak.
@@ -800,7 +863,9 @@ void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &
  * @param priorDirections Principal axes of the supplied shape.
  * @param priorSigmas Principal standard deviations of the supplied shape.
  * @param maxChange Largest factor by which a principal standard deviation may change.
- * @param center Center offset from peak_q; updated.
+ * @param origin Center offset from peak_q the center is bounded about.
+ * @param maxCenterShift Largest distance of the center from origin, in standard deviations of the supplied shape.
+ * @param center Center offset from peak_q to start from; updated.
  * @param intensity Integrated intensity; updated.
  * @param background Background rate; updated.
  * @param sigma Receives the standard deviation of the intensity, for the refined shape.
@@ -812,7 +877,8 @@ void Integrate3DEvents::refineProfileShape(const std::vector<std::pair<std::pair
                                            const V3D &peak_q, const EllipsoidTrajectoryNorm *norm,
                                            const EllipsoidChords &region, const double volume, const bool adjustCenter,
                                            const PeakEllipsoidFrame &priorDirections,
-                                           const PeakEllipsoidExtent &priorSigmas, const double maxChange, V3D &center,
+                                           const PeakEllipsoidExtent &priorSigmas, const double maxChange,
+                                           const V3D &origin, const double maxCenterShift, V3D &center,
                                            double &intensity, double &background, double &sigma, double &peakNorm,
                                            PeakEllipsoidFrame &directions, PeakEllipsoidExtent &sigmas) {
   SymMatrix m{};
@@ -821,8 +887,7 @@ void Integrate3DEvents::refineProfileShape(const std::vector<std::pair<std::pair
       m[e] +=
           priorDirections[k][SYM_PAIRS[e][0]] * priorDirections[k][SYM_PAIRS[e][1]] / (priorSigmas[k] * priorSigmas[k]);
 
-  const auto maxShift = *std::min_element(priorSigmas.begin(), priorSigmas.end());
-  const V3D seedCenter = center;
+  const SymMatrix prior = m;
   const size_t nCenter = adjustCenter ? 3 : 0;
   const size_t n = nCenter + 6;
   // an off-diagonal element of M appears twice in the matrix
@@ -844,7 +909,8 @@ void Integrate3DEvents::refineProfileShape(const std::vector<std::pair<std::pair
   // within the bounds: in the supplied shape's frame, scaled by its standard
   // deviations, the eigenvalues of M are between 1/maxChange^2 and maxChange^2
   auto feasible = [&](const V3D &c, const SymMatrix &mm) {
-    if ((c - seedCenter).norm() > maxShift)
+    const V3D shift = c - origin;
+    if (shift.scalar_prod(multiply(prior, shift)) > maxCenterShift * maxCenterShift)
       return false;
     Kernel::DblMatrix scaled(3, 3);
     for (size_t k = 0; k < 3; ++k)

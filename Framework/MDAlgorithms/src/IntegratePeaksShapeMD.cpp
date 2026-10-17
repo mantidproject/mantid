@@ -25,6 +25,7 @@
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
 
 #include <boost/math/special_functions/round.hpp>
+#include <chrono>
 #include <cmath>
 #include <optional>
 #include <string>
@@ -101,7 +102,10 @@ void IntegratePeaksShapeMD::init() {
                   "kept within MaxShapeChange of the peak's stored shape; weaker peaks, and peaks "
                   "that fall below AdjustShapeMinSignalToNoise once the uncertainty of the refined "
                   "shape is included, keep their stored shape. The refined shape is written to the "
-                  "output peak.");
+                  "output peak. With AdjustCenter too, the center is refined only together with the "
+                  "shape, within MaxCenterShift of the stored center, starting from the mode of the "
+                  "counts if the peak is more significant there, so peaks that keep their stored "
+                  "shape keep their stored center.");
 
   auto atLeastOne = std::make_shared<BoundedValidator<double>>();
   atLeastOne->setLower(1.0);
@@ -111,6 +115,10 @@ void IntegratePeaksShapeMD::init() {
   declareProperty("MaxShapeChange", 2.0, atLeastOne,
                   "Only used if AdjustShape is true. The largest factor by which each principal "
                   "standard deviation of a refined shape may differ from the stored shape's.");
+  declareProperty("MaxCenterShift", 3.0, mustBePositive,
+                  "Only used if AdjustShape and AdjustCenter are true. The largest distance a refined "
+                  "center may move from the stored one, in standard deviations of the stored shape "
+                  "along each of its principal axes.");
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("SolidAngleWorkspace", "", Direction::Input,
                                                                        PropertyMode::Optional),
@@ -134,8 +142,9 @@ void IntegratePeaksShapeMD::init() {
                   "Only used with SolidAngleWorkspace and FluxWorkspace. A table with one row per peak, "
                   "giving the raw counts and normalization in the peak ellipsoid and background shell, "
                   "the number of detector pixels covering the peak, and flags for peaks only partly "
-                  "covered by the momentum range of a pixel or by masked detectors, and whether the "
-                  "peak's shape was refined by AdjustShape. With ProfileFit, "
+                  "covered by the momentum range of a pixel or by masked detectors, whether the "
+                  "peak's shape was refined by AdjustShape, and the time spent integrating it. With "
+                  "ProfileFit, "
                   "CountsPeak is the summed event weight in the fit region, CountsShell the fitted "
                   "background counts, NormPeak the expected counts per unit intensity of the fitted "
                   "peak, NormShell the normalization of the fit region, and the pixel count and flags "
@@ -238,12 +247,18 @@ void IntegratePeaksShapeMD::exec() {
   const bool useOnePercentBackgroundCorrection = getProperty("UseOnePercentBackgroundCorrection");
   Integrate3DEvents integrator(qList, UBinv, getProperty("RegionRadius"), useOnePercentBackgroundCorrection);
 
+  using Clock = std::chrono::steady_clock;
+  auto seconds = [](Clock::time_point start) { return std::chrono::duration<double>(Clock::now() - start).count(); };
+  const auto eventsStart = Clock::now();
+
   Progress prog(this, 0.0, 1.0, input_ws->getNumberHistograms());
   if (eventWS) {
     qListFromEventWS(integrator, prog, eventWS);
   } else {
     qListFromHistoWS(integrator, prog, histoWS);
   }
+  const double eventsSeconds = seconds(eventsStart);
+  const auto normalizationStart = Clock::now();
 
   const bool profileFit = getProperty("ProfileFit");
   const bool adjustCenter = getProperty("AdjustCenter");
@@ -288,7 +303,13 @@ void IntegratePeaksShapeMD::exec() {
     diagnostics->addColumn("bool", "ClippedByMomentumRange");
     diagnostics->addColumn("bool", "MaskedDetectors");
     diagnostics->addColumn("bool", "ShapeAdjusted");
+    diagnostics->addColumn("double", "FitSeconds");
   }
+  const double normalizationSeconds = seconds(normalizationStart);
+
+  // time spent integrating peaks, by outcome
+  double fixedSeconds = 0.0, refinedSeconds = 0.0, rejectedSeconds = 0.0;
+  int numFixed = 0, numRefined = 0, numRejected = 0;
 
   for (size_t i = 0; i < n_peaks; i++) {
     auto &peak = peaks[i];
@@ -302,16 +323,29 @@ void IntegratePeaksShapeMD::exec() {
       ProfileFitShape shapeFit;
       shapeFit.minSignalToNoise = getProperty("AdjustShapeMinSignalToNoise");
       shapeFit.maxChange = getProperty("MaxShapeChange");
+      shapeFit.maxCenterShift = getProperty("MaxCenterShift");
+      const auto fitStart = Clock::now();
       integrator.integrateUsingShapeProfileFit(*shape, peak.getQLabFrame(), adjustCenter, center, inti, sigi,
                                                norm ? &(*norm) : nullptr, &fitNormalization,
                                                adjustShape ? &shapeFit : nullptr);
+      const double fitSeconds = seconds(fitStart);
       const bool shapeAdjusted = adjustShape && shapeFit.adjusted;
+      if (shapeAdjusted) {
+        refinedSeconds += fitSeconds;
+        ++numRefined;
+      } else if (adjustShape && shapeFit.attempted) {
+        rejectedSeconds += fitSeconds;
+        ++numRejected;
+      } else {
+        fixedSeconds += fitSeconds;
+        ++numFixed;
+      }
       if (diagnostics) {
         TableRow row = diagnostics->appendRow();
         row << static_cast<int>(i) << fitNormalization.counts << fitNormalization.backgroundCounts
             << fitNormalization.peakNorm << fitNormalization.regionNorm
             << static_cast<int>(fitNormalization.coverage.numPixels) << fitNormalization.coverage.clipped
-            << fitNormalization.coverage.maskedIntersects << shapeAdjusted;
+            << fitNormalization.coverage.maskedIntersects << shapeAdjusted << fitSeconds;
       }
       // Persist a center correction found by AdjustCenter as the output
       // shape's translation -- peak.getQLabFrame() itself is left alone,
@@ -345,6 +379,7 @@ void IntegratePeaksShapeMD::exec() {
       // I = V_peak * (N_peak / Norm_peak - N_shell / Norm_shell), the
       // background-subtracted mean normalized signal over the peak ellipsoid
       // times its volume, with the normalization treated as exact
+      const auto fitStart = Clock::now();
       const auto counts = integrator.countUsingShape(*shape, peak.getQLabFrame());
       const double peakNorm = normPeak[i].norm;
       const double shellNorm = normOuter[i].norm - normInner[i].norm;
@@ -360,11 +395,14 @@ void IntegratePeaksShapeMD::exec() {
         inti = peakVolume * signal;
         sigi = peakVolume * std::sqrt(variance);
       }
+      const double fitSeconds = seconds(fitStart);
+      fixedSeconds += fitSeconds;
+      ++numFixed;
       if (diagnostics) {
         TableRow row = diagnostics->appendRow();
         row << static_cast<int>(i) << counts.peak << counts.shell << peakNorm << shellNorm
             << static_cast<int>(normPeak[i].numPixels) << (normPeak[i].clipped || normOuter[i].clipped)
-            << normOuter[i].maskedIntersects << false;
+            << normOuter[i].maskedIntersects << false << fitSeconds;
       }
     } else {
       integrator.integrateUsingShape(*shape, peak.getQLabFrame(), inti, sigi);
@@ -373,6 +411,13 @@ void IntegratePeaksShapeMD::exec() {
     peak.setIntensity(inti);
     peak.setSigmaIntensity(sigi);
   }
+
+  g_log.notice() << "Gathered events in " << eventsSeconds << " s, set up normalization in " << normalizationSeconds
+                 << " s, integrated " << numFixed << " peaks with their stored shapes in " << fixedSeconds << " s";
+  if (adjustShape)
+    g_log.notice() << ", refined the shapes of " << numRefined << " peaks in " << refinedSeconds
+                   << " s and rejected the refinements of " << numRejected << " peaks in " << rejectedSeconds << " s";
+  g_log.notice() << "\n";
 
   // This flag is used by the PeaksWorkspace to evaluate whether it has been
   // integrated.

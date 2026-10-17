@@ -90,7 +90,11 @@ struct ProfileFitShape {
   double minSignalToNoise{10.0};
   /// each principal standard deviation may change by at most this factor from the supplied shape's
   double maxChange{2.0};
-  /// whether the shape was refined
+  /// with the center, it may move at most this many of the supplied shape's standard deviations (in its own frame)
+  double maxCenterShift{3.0};
+  /// whether the peak was strong enough for its shape to be refined
+  bool attempted{false};
+  /// whether the shape was refined (and the refinement kept)
   bool adjusted{false};
   /// principal axes and standard deviations of the refined shape, or of the supplied one if not refined
   DataObjects::PeakEllipsoidFrame directions;
@@ -178,7 +182,8 @@ public:
   /// region (a sphere of the search radius about peak_q), so the intensity
   /// is in normalized units, and normalization returns diagnostics. If
   /// shapeFit is given and the peak is strong enough, the shape (and with
-  /// adjustCenter the center) is refined too, within shapeFit's bounds.
+  /// adjustCenter the center) is refined too, within shapeFit's bounds; a
+  /// weaker peak then keeps both its shape and its center.
   void integrateUsingShapeProfileFit(const Mantid::DataObjects::PeakShapeEllipsoid &shape,
                                      const Mantid::Kernel::V3D &peak_q, bool adjustCenter, Mantid::Kernel::V3D &center,
                                      double &inti, double &sigi, const EllipsoidTrajectoryNorm *norm = nullptr,
@@ -197,9 +202,9 @@ private:
                                  const EllipsoidChords &region, double volume, bool adjustCenter,
                                  const DataObjects::PeakEllipsoidFrame &priorDirections,
                                  const DataObjects::PeakEllipsoidExtent &priorSigmas, double maxChange,
-                                 Mantid::Kernel::V3D &center, double &intensity, double &background, double &sigma,
-                                 double &peakNorm, DataObjects::PeakEllipsoidFrame &directions,
-                                 DataObjects::PeakEllipsoidExtent &sigmas);
+                                 const Mantid::Kernel::V3D &origin, double maxCenterShift, Mantid::Kernel::V3D &center,
+                                 double &intensity, double &background, double &sigma, double &peakNorm,
+                                 DataObjects::PeakEllipsoidFrame &directions, DataObjects::PeakEllipsoidExtent &sigmas);
 
   /// Get a list of events for a given Q
   const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> *

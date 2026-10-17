@@ -180,7 +180,17 @@ exposure distorts. The refined shape is written to the output peak, with its
 background radii scaled with it, and the uncertainty of a peak with a refined
 shape includes that of its shape. Weaker peaks keep their stored shape, as
 does a peak whose refined intensity, with that larger uncertainty, falls
-below *AdjustShapeMinSignalToNoise*.
+below *AdjustShapeMinSignalToNoise*. With *AdjustCenter* too, the center is
+refined only together with the shape, so a peak that keeps its stored shape
+also keeps its stored center. The refined center may move up to
+*MaxCenterShift* standard deviations of the stored shape (in its own frame)
+from the stored center, as a predicted position can be several standard
+deviations off along a narrow axis, e.g. from an imperfect calibration. Such
+a peak is out of reach of the local Gauss-Newton steps, and looks weaker at
+its stored center than it is, so the fit, and the significance test, start
+from the mode of the counts smoothed by the stored shape (found by mean
+shift, first with a kernel twice as wide) if the peak is more significant
+there.
 
 The events in the fit region are those nearest to the peak in reciprocal
 space, so *RegionRadius* should be less than half the shortest distance
@@ -194,7 +204,10 @@ lines cross the peak ellipsoid (*NumPixels*), and whether any pixel's line
 through the ellipsoids lies partly outside its momentum range
 (*ClippedByMomentumRange*) or any masked detector's line crosses them
 (*MaskedDetectors*), which flag peaks whose count mode intensities may be
-biased, and whether the peak's shape was refined (*ShapeAdjusted*). With *ProfileFit*, *CountsPeak* is the summed event weight in the
+biased, whether the peak's shape was refined (*ShapeAdjusted*), and the
+time spent integrating it (*FitSeconds*). A summary of the time spent
+gathering events, setting up the normalization and integrating the peaks
+is logged. With *ProfileFit*, *CountsPeak* is the summed event weight in the
 fit region, *CountsShell* the fitted background counts, *NormPeak* the
 expected counts per unit intensity of the fitted peak (so that
 :math:`I \cdot \mathit{NormPeak} + \mathit{CountsShell}` is the expected
