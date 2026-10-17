@@ -314,13 +314,11 @@ std::vector<std::string> readStringVector(Group &group, const std::string &name)
 
 std::vector<std::string> readStringVector(DataSet &dataset) {
   DataSpace dataspace = dataset.getSpace();
-  DataType datatype = dataset.getDataType();
   const H5ValidatingAdapter::Context context{"readStringVector", {}, {}};
 
   if (H5ValidatingAdapter::rank(dataspace.getId(), context) != 1)
     throw DataSpaceIException("readStringVector requires a rank-one dataset");
-  const auto values =
-      H5ValidatingAdapter::readVlenDataset(dataset.getId(), datatype.getId(), dataspace.getId(), context);
+  const auto values = H5ValidatingAdapter::readVlenDataset(dataset.getId(), context);
   std::vector<std::string> result;
   result.reserve(values.size());
   std::transform(values.cbegin(), values.cend(), std::back_inserter(result),
@@ -331,8 +329,8 @@ std::vector<std::string> readStringVector(DataSet &dataset) {
 }
 
 bool hasAttribute(const H5::H5Object &object, const char *attributeName) {
-  const htri_t exists = H5Aexists(object.getId(), attributeName);
-  return exists > 0;
+  const H5ValidatingAdapter::Context context{"check attribute", {}, attributeName};
+  return H5ValidatingAdapter::checkTriState(H5Aexists(object.getId(), attributeName), context);
 }
 
 void readStringAttribute(const H5::H5Object &object, const std::string &attributeName, std::string &output) {

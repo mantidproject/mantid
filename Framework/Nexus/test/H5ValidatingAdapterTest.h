@@ -46,8 +46,8 @@ public:
     H5::DataSpace space(H5S_SCALAR);
     H5::DataSet dataset = file.createDataSet("value", type, space);
 
-    const auto value = Mantid::Nexus::H5ValidatingAdapter::readScalarVlenDataset(
-        dataset.getId(), type.getId(), space.getId(), context("read scalar string"));
+    const auto value =
+        Mantid::Nexus::H5ValidatingAdapter::readScalarVlenDataset(dataset.getId(), context("read scalar string"));
     TS_ASSERT(!value.has_value());
   }
 
@@ -61,8 +61,8 @@ public:
     const char *input[2]{"present", nullptr};
     dataset.write(input, type);
 
-    const auto values = Mantid::Nexus::H5ValidatingAdapter::readVlenDataset(
-        dataset.getId(), type.getId(), space.getId(), context("read string vector"));
+    const auto values =
+        Mantid::Nexus::H5ValidatingAdapter::readVlenDataset(dataset.getId(), context("read string vector"));
     TS_ASSERT_EQUALS(values.size(), 2);
     TS_ASSERT_EQUALS(values[0].value(), "present");
     TS_ASSERT(!values[1].has_value());
@@ -75,7 +75,7 @@ public:
     H5::DataSpace space(H5S_SCALAR);
     H5::Attribute attribute = file.createAttribute("value", type, space);
 
-    const auto value = Mantid::Nexus::H5ValidatingAdapter::readScalarVlenAttribute(attribute.getId(), type.getId(),
+    const auto value = Mantid::Nexus::H5ValidatingAdapter::readScalarVlenAttribute(attribute.getId(),
                                                                                    context("read scalar attribute"));
     TS_ASSERT(!value.has_value());
   }

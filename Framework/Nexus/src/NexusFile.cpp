@@ -14,6 +14,7 @@
 #include <filesystem>
 #include <hdf5.h>
 #include <iostream>
+#include <limits>
 #include <numeric>
 #include <sstream>
 #include <typeinfo>
@@ -65,15 +66,17 @@ template <typename NumT> static string toString(const vector<NumT> &data) {
 }
 
 static herr_t getEntriesCallback(hid_t gid, const char *name, const H5L_info2_t *, void *data) {
-  H5O_info2_t oinfo;
+  H5O_info2_t oinfo{};
   if (H5Oget_info_by_name3(gid, name, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-    return 0;
-  using namespace Mantid::Nexus;
-  auto &res = *static_cast<Entries *>(data);
-  std::string classStr(UNKNOWN_GROUP_SPEC);
-  if (oinfo.type == H5O_TYPE_GROUP) {
-    GroupID child{H5Gopen2(gid, name, H5P_DEFAULT)};
-    if (child.isValid()) {
+    return -1;
+  try {
+    using namespace Mantid::Nexus;
+    auto &res = *static_cast<Entries *>(data);
+    std::string classStr(UNKNOWN_GROUP_SPEC);
+    if (oinfo.type == H5O_TYPE_GROUP) {
+      GroupID child{H5Gopen2(gid, name, H5P_DEFAULT)};
+      if (!child.isValid())
+        return -1;
       H5::Group grp(child);
       if (grp.attrExists(GROUP_CLASS_SPEC)) {
         std::string className;
@@ -81,12 +84,16 @@ static herr_t getEntriesCallback(hid_t gid, const char *name, const H5L_info2_t 
         attr.read(attr.getDataType(), className);
         classStr = className.empty() ? UNKNOWN_GROUP_SPEC : std::move(className);
       }
+    } else if (oinfo.type == H5O_TYPE_DATASET) {
+      classStr = SCIENTIFIC_DATA_SET;
     }
-  } else if (oinfo.type == H5O_TYPE_DATASET) {
-    classStr = SCIENTIFIC_DATA_SET;
+    res[name] = classStr;
+    return 0;
+  } catch (...) {
+    // Exceptions must not cross the C callback boundary. Returning a negative
+    // status lets H5Literate report the failure through the validating adapter.
+    return -1;
   }
-  res[name] = classStr;
-  return 0;
 }
 
 } // end of anonymous namespace
@@ -283,64 +290,60 @@ void File::openAddress(std::string const &address) {
     throw NXEXCEPTION("Address " + address + " is not valid");
   }
 
-  // if a dataset is open, close it
-  if (isDataSetOpen()) {
-    H5Dclose(m_current_data_id);
-    H5Tclose(m_current_type_id);
-    H5Sclose(m_current_space_id);
-    m_current_data_id = INVALID_HID;
-    m_current_space_id = INVALID_HID;
-    m_current_type_id = INVALID_HID;
-  }
+  const H5ValidatingAdapter::Context context{__func__, m_filename, absaddr.string()};
+  std::vector<GroupID> newGroups;
+  DataSetID newDataset;
+  DataTypeID newDatatype;
+  DataSpaceID newDataspace;
 
-  // close all groups in the stack
-  for (hid_t const &gid : m_gid_stack) {
-    if (H5Iis_valid(gid) > 0) {
-      H5Gclose(gid);
-    }
-  }
-  m_gid_stack.clear();
-  m_gid_stack.push_back(0);
-  m_address = NexusAddress::root();
-
-  // if we wanted to go to root, then stop here
-  if (absaddr == NexusAddress::root()) {
-    m_current_group_id = 0; // root!
-    return;
-  }
-
-  // open all groups in the address
-  NexusAddress groupstack(absaddr.parent_path());
+  // Resolve the complete target before changing the currently open address.
+  NexusAddress groupstack(absaddr == NexusAddress::root() ? NexusAddress::root() : absaddr.parent_path());
   NexusAddress fromroot;
-  if (groupstack.isRoot()) {
-    m_current_group_id = 0; // root!
-  } else {
-    m_current_group_id = m_fileID.get();
+  if (!groupstack.isRoot()) {
     for (auto const &name : groupstack.parts()) {
       fromroot /= name;
       if (m_descriptor.isEntry(fromroot, m_descriptor.classTypeForName(fromroot))) {
-        hid_t gid = H5Gopen(m_fileID, fromroot.c_str(), H5P_DEFAULT);
-        m_gid_stack.push_back(gid);
-        // update stack in case of failure
-        m_current_group_id = gid;
-        m_address = fromroot;
+        GroupID group{H5Gopen(m_fileID, fromroot.c_str(), H5P_DEFAULT)};
+        H5ValidatingAdapter::checkId(group, context);
+        newGroups.emplace_back(std::move(group));
       } else {
         throw NXEXCEPTION("Failed to open " + name + " while opening " + absaddr);
       }
     }
   }
-  // open the last element -- either a group or a dataset
-  if (hasData(absaddr)) { // is a dataset
-    m_current_data_id = H5Dopen(m_fileID, absaddr.c_str(), H5P_DEFAULT);
-    m_current_type_id = H5Dget_type(m_current_data_id);
-    m_current_space_id = H5Dget_space(m_current_data_id);
-  } else if (hasAddress(absaddr)) { // not a dataset but exists = is a group
-    hid_t gid = H5Gopen(m_fileID, absaddr.c_str(), H5P_DEFAULT);
-    m_gid_stack.push_back(gid);
-    m_current_group_id = gid;
-  } else {
-    throw NXEXCEPTION("Failed to open final element of address " + absaddr);
+
+  if (absaddr != NexusAddress::root()) {
+    if (hasData(absaddr)) {
+      newDataset.reset(H5Dopen(m_fileID, absaddr.c_str(), H5P_DEFAULT));
+      H5ValidatingAdapter::checkId(newDataset, context);
+      newDatatype.reset(H5Dget_type(newDataset));
+      H5ValidatingAdapter::checkId(newDatatype, context);
+      newDataspace.reset(H5Dget_space(newDataset));
+      H5ValidatingAdapter::checkId(newDataspace, context);
+    } else {
+      GroupID group{H5Gopen(m_fileID, absaddr.c_str(), H5P_DEFAULT)};
+      H5ValidatingAdapter::checkId(group, context);
+      newGroups.emplace_back(std::move(group));
+    }
   }
+
+  if (isDataSetOpen()) {
+    H5Dclose(m_current_data_id);
+    H5Tclose(m_current_type_id);
+    H5Sclose(m_current_space_id);
+  }
+  for (hid_t const gid : m_gid_stack) {
+    if (H5Iis_valid(gid) > 0)
+      H5Gclose(gid);
+  }
+
+  m_gid_stack.assign(1, 0);
+  for (auto &group : newGroups)
+    m_gid_stack.emplace_back(group.release());
+  m_current_group_id = m_gid_stack.back();
+  m_current_data_id = newDataset.release();
+  m_current_type_id = newDatatype.release();
+  m_current_space_id = newDataspace.release();
   m_address = absaddr;
 }
 
@@ -691,8 +694,7 @@ template <> void File::getData<char>(char *data) {
   std::vector<char> buffer;
 
   if (H5ValidatingAdapter::checkTriState(H5Tis_variable_str(m_current_type_id), context)) {
-    const auto value =
-        H5ValidatingAdapter::readScalarVlenDataset(m_current_data_id, m_current_type_id, m_current_space_id, context);
+    const auto value = H5ValidatingAdapter::readScalarVlenDataset(m_current_data_id, context);
     if (!value) {
       buffer.assign(1, '\0');
     } else {
@@ -770,8 +772,7 @@ string File::getStrData() {
   // determine storage size: type_size × npoints (mirrors H5Cpp's getInMemDataSize approach)
   dimsize_t storage_size;
   if (H5ValidatingAdapter::checkTriState(H5Tis_variable_str(m_current_type_id), context)) {
-    const auto value =
-        H5ValidatingAdapter::readScalarVlenDataset(m_current_data_id, m_current_type_id, m_current_space_id, context);
+    const auto value = H5ValidatingAdapter::readScalarVlenDataset(m_current_data_id, context);
     storage_size = value ? value->size() : 0;
   } else {
     storage_size = H5ValidatingAdapter::elementCount(
@@ -802,7 +803,6 @@ template <typename NumT> void File::getData(NumT *data) {
     H5ValidatingAdapter::checkId(datatype, context);
     H5ValidatingAdapter::checkId(filespace, context);
     H5ValidatingAdapter::checkId(memspace_id, context);
-    H5ValidatingAdapter::checkStatus(H5Sselect_all(filespace), context);
     H5ValidatingAdapter::readDataset(m_current_data_id, datatype, memspace_id, filespace, data, context);
   } else {
     if (H5Tget_class(m_current_type_id) == H5T_STRING) {
@@ -829,6 +829,9 @@ template <typename NumT> void File::getData(vector<NumT> &data) {
   // allocate memory to put the data into
   // need to use resize() rather than reserve() so vector length gets set
   data.resize(length);
+
+  if (data.empty())
+    return;
 
   // fetch the data
   this->getData<NumT>(data.data());
@@ -865,6 +868,8 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     msg << "No group open for makedata on " << name;
     throw NXEXCEPTION(msg.str());
   }
+  const NexusAddress absaddr(formAbsoluteAddress(name));
+  const H5ValidatingAdapter::Context context{__func__, m_filename, absaddr.string()};
 
   // check if any data is unlimited
   bool unlimited = std::any_of(dims.cbegin(), dims.cend(), [](auto x) -> bool { return x == NX_UNLIMITED || x <= 0; });
@@ -886,6 +891,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
 
   // create the correct datatype for this numeric type
   DataTypeID datatype = H5Tcopy(nxToHDF5Type(type));
+  H5ValidatingAdapter::checkId(datatype, context);
 
   // create a dataspace
   DataSpaceID dataspace;
@@ -904,63 +910,42 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
       chunkdims.back() = 1;
     }
     dataspace = H5Screate_simple(rank, mydim1.data(), maxdims.data());
-    H5Tset_size(datatype, byte_zahl);
+    H5ValidatingAdapter::checkId(dataspace, context);
+    H5ValidatingAdapter::checkStatus(H5Tset_size(datatype, byte_zahl), context);
   } else {
     if (unlimited) {
       dataspace = H5Screate_simple(rank, mydim.data(), maxdims.data());
     } else {
       dataspace = H5Screate_simple(rank, mydim.data(), nullptr);
     }
+    H5ValidatingAdapter::checkId(dataspace, context);
   }
 
   // set the compression parameters
   ParameterID cparms = H5Pcreate(H5P_DATASET_CREATE);
+  H5ValidatingAdapter::checkId(cparms, context);
   if (comp == NXcompression::LZW) {
-    herr_t ret = H5Pset_chunk(cparms, rank, chunkdims.data());
-    if (ret < 0) {
-      msg << "Size of chunks could not be set";
-      throw NXEXCEPTION(msg.str());
-    }
-    H5Pset_shuffle(cparms); // mrt: improves compression
-    H5Pset_deflate(cparms, DEFAULT_DEFLATE_LEVEL);
+    H5ValidatingAdapter::checkStatus(H5Pset_chunk(cparms, rank, chunkdims.data()), context);
+    H5ValidatingAdapter::checkStatus(H5Pset_shuffle(cparms), context); // mrt: improves compression
+    H5ValidatingAdapter::checkStatus(H5Pset_deflate(cparms, DEFAULT_DEFLATE_LEVEL), context);
   }
   // NOTE if compression is NONE but a dimension is unlimited, then it still compresses by CHUNK.
   // this behavior is inherited from napi
   else if (comp == NXcompression::NONE) {
     if (unlimited) {
-      herr_t ret = H5Pset_chunk(cparms, rank, chunkdims.data());
-      if (ret < 0) {
-        msg << "Size of chunks could not be set";
-        throw NXEXCEPTION(msg.str());
-      }
-    } else {
-      cparms.reset(H5Pcopy(H5P_DEFAULT));
+      H5ValidatingAdapter::checkStatus(H5Pset_chunk(cparms, rank, chunkdims.data()), context);
     }
   } else if (comp == NXcompression::CHUNK) {
-    herr_t ret = H5Pset_chunk(cparms, rank, chunkdims.data());
-    if (ret < 0) {
-      msg << "Size of chunks could not be set";
-      throw NXEXCEPTION(msg.str());
-    }
+    H5ValidatingAdapter::checkStatus(H5Pset_chunk(cparms, rank, chunkdims.data()), context);
   } else {
     g_log->error("HDF5 doesn't support selected compression method! Dataset created without compression");
-    cparms.reset(H5Pcopy(H5P_DEFAULT));
   }
 
   // create the dataset with the compression parameters
-  NexusAddress absaddr(formAbsoluteAddress(name));
   DataSetID dataset = H5Dcreate(m_fileID, absaddr.c_str(), datatype, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
-  if (!dataset.isValid()) {
-    msg << "Creating chunked dataset failed";
-    throw NXEXCEPTION(msg.str());
-  }
-  if (unlimited) {
-    herr_t ret = H5Dset_extent(dataset, mydim.data());
-    if (ret < 0) {
-      msg << "Cannot create dataset " << name;
-      throw NXEXCEPTION(msg.str());
-    }
-  }
+  H5ValidatingAdapter::checkId(dataset, context);
+  if (unlimited)
+    H5ValidatingAdapter::checkStatus(H5Dset_extent(dataset, mydim.data()), context);
   // cleanup
   registerEntry(absaddr, SCIENTIFIC_DATA_SET);
   if (open_data) {
@@ -972,108 +957,70 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
 }
 
 template <typename NumT> void File::putSlab(NumT const *data, DimVector const &start, DimVector const &size) {
-  if (data == nullptr) {
+  if (data == nullptr)
     throw NXEXCEPTION("Data specified as null");
-  }
-  if (start.empty()) {
+  if (start.empty())
     throw NXEXCEPTION("Supplied empty start");
-  }
-  if (size.empty()) {
+  if (size.empty())
     throw NXEXCEPTION("Supplied empty size");
-  }
   if (start.size() != size.size()) {
     stringstream msg;
     msg << "Supplied start rank=" << start.size() << " must match supplied size rank=" << size.size();
     throw NXEXCEPTION(msg.str());
   }
-  stringstream msg;
-  msg << "putSlab(data, " << toString(start) << ", " << toString(size) << ") failed: ";
 
-  /* check if there is a Dataset open */
-  if (!isDataSetOpen()) {
-    msg << "no dataset open";
+  if (!isDataSetOpen())
+    throw NXEXCEPTION("putSlab failed: no dataset open");
+
+  const H5ValidatingAdapter::Context context{__func__, m_filename, m_address.string()};
+  const int rank = H5ValidatingAdapter::rank(m_current_space_id, context);
+  if (start.size() != static_cast<std::size_t>(rank)) {
+    stringstream msg;
+    msg << "Supplied slab rank=" << start.size() << " must match dataset rank=" << rank;
     throw NXEXCEPTION(msg.str());
   }
 
-  // copy over start, size vectors
   DimVector myStart(start.cbegin(), start.cend());
   DimVector mySize(size.cbegin(), size.cend());
-  DimVector dsize(size.size(), 0);
-  std::transform(start.cbegin(), start.cend(), size.cbegin(), dsize.begin(), std::plus<dimsize_t>());
-  // get rank and stored dimensions
-  int rank = H5Sget_simple_extent_ndims(m_current_space_id);
-  if (rank < 0) {
-    msg << "cannot get rank";
-    throw NXEXCEPTION(msg.str());
-  }
-  DimVector thedims(rank, 0), maxdims(rank, 0);
-  int iRet = H5Sget_simple_extent_dims(m_current_space_id, thedims.data(), maxdims.data());
-  if (iRet < 0) {
-    msg << "cannot get dimensions";
-    throw NXEXCEPTION(msg.str());
-  }
 
   // for string data, use 1 in the final dimension
   if (H5Tget_class(m_current_type_id) == H5T_STRING) {
     mySize.back() = 1;
     myStart.back() = 0;
-    dsize.back() = 1;
   }
 
-  // if any dimensions are unlimited,
-  if (std::any_of(maxdims.cbegin(), maxdims.cend(), [](auto x) -> bool { return x == H5S_UNLIMITED; })) {
-    for (int i = 0; i < rank; i++) {
-      if (dsize[i] < thedims[i]) {
-        dsize[i] = thedims[i];
-      }
-    }
-    iRet = H5Dset_extent(m_current_data_id, dsize.data());
-    if (iRet < 0) {
-      msg << "extend slab failed";
-      throw NXEXCEPTION(msg.str());
-    }
-
-    // define slab
-    DataSpaceID filespace = H5Dget_space(m_current_data_id);
-    iRet = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, myStart.data(), nullptr, mySize.data(), nullptr);
-    if (iRet < 0) {
-      msg << "selecting slab failed";
-      throw NXEXCEPTION(msg.str());
-    }
-    // write slab
-    DataSpaceID dataspace = H5Screate_simple(rank, mySize.data(), nullptr);
-    iRet = H5Dwrite(m_current_data_id, m_current_type_id, dataspace, filespace, H5P_DEFAULT, data);
-    if (iRet < 0) {
-      msg << "writing slab failed";
-      throw NXEXCEPTION(msg.str());
-    }
-    /* update with new size */
-    iRet = H5Sclose(m_current_space_id);
-    if (iRet < 0) {
-      msg << "updating size failed";
-      throw NXEXCEPTION(msg.str());
-    }
-    m_current_space_id = filespace.release();
-  } else { // no unlimited dimensions
-    // define slab
-    iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart.data(), nullptr, mySize.data(), nullptr);
-    // deal with HDF errors
-    if (iRet < 0) {
-      msg << "selecting slab failed";
-      throw NXEXCEPTION(msg.str());
-    }
-    // write slab
-    DataSpaceID dataspace = H5Screate_simple(rank, mySize.data(), nullptr);
-    iRet = H5Dwrite(m_current_data_id, m_current_type_id, dataspace, m_current_space_id, H5P_DEFAULT, data);
-    if (iRet < 0) {
-      msg << "writing slab failed";
-      throw NXEXCEPTION(msg.str());
-    }
+  DimVector requestedExtent(static_cast<std::size_t>(rank), 0);
+  for (std::size_t i = 0; i < requestedExtent.size(); ++i) {
+    if (myStart[i] > std::numeric_limits<dimsize_t>::max() - mySize[i])
+      throw NXEXCEPTION("Requested slab extent exceeds the supported range");
+    requestedExtent[i] = myStart[i] + mySize[i];
   }
-  // cleanup
-  if (iRet < 0) {
-    msg << "closing slab failed";
-    throw NXEXCEPTION(msg.str());
+
+  DimVector currentExtent(static_cast<std::size_t>(rank), 0);
+  DimVector maximumExtent(static_cast<std::size_t>(rank), 0);
+  H5ValidatingAdapter::checkStatus(
+      H5Sget_simple_extent_dims(m_current_space_id, currentExtent.data(), maximumExtent.data()), context);
+
+  DataSpaceID extendedFilespace;
+  hid_t filespace = m_current_space_id;
+  if (std::any_of(maximumExtent.cbegin(), maximumExtent.cend(),
+                  [](const auto extent) { return extent == H5S_UNLIMITED; })) {
+    for (std::size_t i = 0; i < requestedExtent.size(); ++i)
+      requestedExtent[i] = std::max(requestedExtent[i], currentExtent[i]);
+    H5ValidatingAdapter::checkStatus(H5Dset_extent(m_current_data_id, requestedExtent.data()), context);
+    extendedFilespace.reset(H5Dget_space(m_current_data_id));
+    H5ValidatingAdapter::checkId(extendedFilespace, context);
+    filespace = extendedFilespace;
+  }
+
+  H5ValidatingAdapter::selectHyperslab(filespace, myStart, mySize, context);
+  DataSpaceID memorySpace{H5Screate_simple(rank, mySize.data(), nullptr)};
+  H5ValidatingAdapter::checkId(memorySpace, context);
+  H5ValidatingAdapter::writeDataset(m_current_data_id, m_current_type_id, memorySpace, filespace, data, context);
+
+  if (extendedFilespace.isValid()) {
+    H5ValidatingAdapter::checkStatus(H5Sclose(m_current_space_id), context);
+    m_current_space_id = extendedFilespace.release();
   }
 }
 
@@ -1081,6 +1028,9 @@ template <typename NumT> void File::putSlab(vector<NumT> const &data, DimVector 
   if (data.empty()) {
     throw NXEXCEPTION("Supplied empty data to putSlab");
   }
+  const H5ValidatingAdapter::Context context{__func__, m_filename, m_address.string()};
+  if (H5ValidatingAdapter::elementCount(size, context) > data.size())
+    throw NXEXCEPTION("Supplied data is smaller than the requested slab");
   this->putSlab(data.data(), start, size);
 }
 
@@ -1110,6 +1060,13 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
     throw NXEXCEPTION(msg.str());
   }
 
+  const int rank = H5ValidatingAdapter::rank(m_current_space_id, context);
+  if (start.size() != static_cast<size_t>(rank)) {
+    stringstream msg;
+    msg << "In getSlab supplied rank=" << start.size() << " must match dataset rank=" << rank;
+    throw NXEXCEPTION(msg.str());
+  }
+
   /* map datatypes of other platforms */
   DataTypeID memtype;
   H5T_class_t tclass = H5Tget_class(m_current_type_id);
@@ -1119,44 +1076,29 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
     // h5MemType returns a predefined type, which cannot be closed, so take a copy for memtype to own
     memtype = h5MemType(m_current_type_id);
   }
+  H5ValidatingAdapter::checkId(memtype, context);
 
-  const int rank = H5ValidatingAdapter::rank(m_current_space_id, context);
-  if (start.size() != static_cast<size_t>(rank)) {
-    stringstream msg;
-    msg << "In getSlab supplied rank=" << start.size() << " must match dataset rank=" << rank;
-    throw NXEXCEPTION(msg.str());
-  } else if (rank == 0) { // this is an unslabbable SCALAR
-    DataSpaceID memspace = H5Screate(H5S_SCALAR);
-    DataSpaceID filespace = H5Dget_space(m_current_data_id);
-    H5ValidatingAdapter::checkId(memspace, context);
-    H5ValidatingAdapter::checkId(filespace, context);
-    H5ValidatingAdapter::checkStatus(H5Sselect_all(filespace), context);
-    H5ValidatingAdapter::readDataset(m_current_data_id, memtype, memspace, filespace, data, context);
-  } else {
-    DimVector myStart(start.cbegin(), start.cend());
-    DimVector mySize(size.cbegin(), size.cend());
-    DimVector mStart(rank, 0);
-    if (tclass == H5T_STRING) {
-      if (H5ValidatingAdapter::checkTriState(H5Tis_variable_str(m_current_type_id), context))
-        throw NXEXCEPTION("getSlab does not support variable-length string datasets");
-      if (rank != 1)
-        throw NXEXCEPTION("getSlab does not support multidimensional string datasets");
-      const size_t stringSize = H5Tget_size(m_current_type_id);
-      if (start[0] > stringSize || size[0] > stringSize - start[0])
-        throw NXEXCEPTION("Requested string slab is outside the dataset bounds");
-      std::vector<char> tmpData(stringSize + 1, '\0');
-      H5ValidatingAdapter::readDataset(m_current_data_id, memtype, H5S_ALL, H5S_ALL, tmpData.data(), context);
-      memcpy(data, tmpData.data() + start[0], static_cast<size_t>(size[0]));
-      return;
-    }
-
-    H5ValidatingAdapter::selectHyperslab(m_current_space_id, myStart, mySize, context);
-
-    DataSpaceID memspace = H5Screate_simple(rank, mySize.data(), nullptr);
-    H5ValidatingAdapter::checkId(memspace, context);
-    H5ValidatingAdapter::selectHyperslab(memspace, mStart, mySize, context);
-    H5ValidatingAdapter::readDataset(m_current_data_id, memtype, memspace, m_current_space_id, data, context);
+  DimVector myStart(start.cbegin(), start.cend());
+  DimVector mySize(size.cbegin(), size.cend());
+  if (tclass == H5T_STRING) {
+    if (H5ValidatingAdapter::checkTriState(H5Tis_variable_str(m_current_type_id), context))
+      throw NXEXCEPTION("getSlab does not support variable-length string datasets");
+    if (rank != 1)
+      throw NXEXCEPTION("getSlab does not support multidimensional string datasets");
+    const size_t stringSize = H5Tget_size(m_current_type_id);
+    if (start[0] > stringSize || size[0] > stringSize - start[0])
+      throw NXEXCEPTION("Requested string slab is outside the dataset bounds");
+    std::vector<char> tmpData(stringSize + 1, '\0');
+    H5ValidatingAdapter::readDataset(m_current_data_id, memtype, H5S_ALL, H5S_ALL, tmpData.data(), context);
+    memcpy(data, tmpData.data() + start[0], static_cast<size_t>(size[0]));
+    return;
   }
+
+  H5ValidatingAdapter::selectHyperslab(m_current_space_id, myStart, mySize, context);
+
+  DataSpaceID memspace = H5Screate_simple(rank, mySize.data(), nullptr);
+  H5ValidatingAdapter::checkId(memspace, context);
+  H5ValidatingAdapter::readDataset(m_current_data_id, memtype, memspace, m_current_space_id, data, context);
 }
 
 void File::getDataCoerce(vector<int> &data) {
@@ -1170,6 +1112,8 @@ void File::getDataCoerce(vector<int> &data) {
 
     const size_t length = H5ValidatingAdapter::elementCount(info.dims, context);
     data.resize(length);
+    if (data.empty())
+      return;
 
     const int ndims = H5ValidatingAdapter::rank(m_current_space_id, context);
     DataTypeID datatype = H5Tcopy(H5T_NATIVE_INT);
@@ -1179,7 +1123,6 @@ void File::getDataCoerce(vector<int> &data) {
       DataSpaceID memspace = H5Screate(H5S_SCALAR);
       H5ValidatingAdapter::checkId(filespace, context);
       H5ValidatingAdapter::checkId(memspace, context);
-      H5ValidatingAdapter::checkStatus(H5Sselect_all(filespace), context);
       H5ValidatingAdapter::readDataset(m_current_data_id, datatype, memspace, filespace, data.data(), context);
     } else {
       H5ValidatingAdapter::readDataset(m_current_data_id, datatype, H5S_ALL, H5S_ALL, data.data(), context);
@@ -1199,6 +1142,8 @@ void File::getDataCoerce(vector<double> &data) {
     }
     const size_t length = H5ValidatingAdapter::elementCount(info.dims, context);
     data.resize(length);
+    if (data.empty())
+      return;
 
     const int ndims = H5ValidatingAdapter::rank(m_current_space_id, context);
     DataTypeID datatype = H5Tcopy(H5T_NATIVE_DOUBLE);
@@ -1208,7 +1153,6 @@ void File::getDataCoerce(vector<double> &data) {
       DataSpaceID memspace = H5Screate(H5S_SCALAR);
       H5ValidatingAdapter::checkId(filespace, context);
       H5ValidatingAdapter::checkId(memspace, context);
-      H5ValidatingAdapter::checkStatus(H5Sselect_all(filespace), context);
       H5ValidatingAdapter::readDataset(m_current_data_id, datatype, memspace, filespace, data.data(), context);
     } else {
       H5ValidatingAdapter::readDataset(m_current_data_id, datatype, H5S_ALL, H5S_ALL, data.data(), context);
@@ -1368,8 +1312,7 @@ Info File::getInfo() {
   if (tclass == H5T_STRING && !info.dims.empty() && info.dims.back() == 1) {
     dimsize_t length;
     if (H5ValidatingAdapter::checkTriState(H5Tis_variable_str(m_current_type_id), context)) {
-      const auto value =
-          H5ValidatingAdapter::readScalarVlenDataset(m_current_data_id, m_current_type_id, m_current_space_id, context);
+      const auto value = H5ValidatingAdapter::readScalarVlenDataset(m_current_data_id, context);
       length = value ? value->size() : 0;
     } else {
       // fixed-length: byte width is encoded in the datatype itself
@@ -1396,7 +1339,9 @@ Entries File::getEntries() const {
 void File::getEntries(Entries &result) const {
   result.clear();
   hid_t parent_id = getCurrentObject()->getId();
-  H5Literate(parent_id, H5_INDEX_NAME, H5_ITER_NATIVE, nullptr, &getEntriesCallback, &result);
+  const H5ValidatingAdapter::Context context{__func__, m_filename, m_address.string()};
+  H5ValidatingAdapter::checkStatus(
+      H5Literate(parent_id, H5_INDEX_NAME, H5_ITER_NATIVE, nullptr, &getEntriesCallback, &result), context);
 }
 
 std::string File::getTopLevelEntryName() const {
@@ -1619,7 +1564,10 @@ void File::makeLink(NXlink const &link) {
 
   // build addressname to link from our current group and the name of the thing to link
   std::string linkTarget(groupAddress(m_address) / itemName);
-  H5Lcreate_hard(m_fileID, link.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT, H5P_DEFAULT);
+  const H5ValidatingAdapter::Context context{__func__, m_filename, linkTarget};
+  H5ValidatingAdapter::checkStatus(
+      H5Lcreate_hard(m_fileID, link.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT, H5P_DEFAULT),
+      context);
 
   // register the entry
   registerEntry(linkTarget, m_descriptor.classTypeForName(link.targetAddress));

@@ -43,7 +43,7 @@ std::string readNXClass(Mantid::Nexus::UniqueID<H5Xclose> const &oid, const std:
     Mantid::Nexus::DataTypeID atype(H5Aget_type(attrID));
     Mantid::Nexus::H5ValidatingAdapter::checkId(atype, context);
     if (Mantid::Nexus::H5ValidatingAdapter::checkTriState(H5Tis_variable_str(atype), context)) {
-      const auto value = Mantid::Nexus::H5ValidatingAdapter::readScalarVlenAttribute(attrID, atype, context);
+      const auto value = Mantid::Nexus::H5ValidatingAdapter::readScalarVlenAttribute(attrID, context);
       if (value)
         nxClass = *value;
     } else {
@@ -174,9 +174,7 @@ std::string NexusDescriptorLazy::getStrData(std::string const &address) {
     H5::DataSet dataset(did.release());
     H5::DataType dtype = dataset.getDataType();
     if (dtype.isVariableStr()) {
-      const auto space = dataset.getSpace();
-      strData = H5ValidatingAdapter::readScalarVlenDataset(dataset.getId(), dtype.getId(), space.getId(), context)
-                    .value_or("");
+      strData = H5ValidatingAdapter::readScalarVlenDataset(dataset.getId(), context).value_or("");
     } else if (dtype.getClass() == H5T_STRING) {
       dataset.read(strData, dtype, dataset.getSpace());
     }
@@ -202,12 +200,19 @@ void NexusDescriptorLazy::loadGroups(std::map<std::string, std::string> &allEntr
   hsize_t numObjs = 0;
   H5ValidatingAdapter::checkStatus(H5Gget_num_objs(groupID.get(), &numObjs), context);
   for (hsize_t i = 0; i < numObjs; i++) {
-    H5G_obj_t type = H5Gget_objtype_by_idx(groupID, i);
-    ssize_t name_len = H5Gget_objname_by_idx(groupID, i, nullptr, 0);
-    if (name_len <= 0)
-      continue;
-    std::string memberName(name_len, 'X');                              // fill with X for obvious errors
-    H5Gget_objname_by_idx(groupID, i, memberName.data(), name_len + 1); // +1 for null terminator,
+    const H5G_obj_t type = H5Gget_objtype_by_idx(groupID, i);
+    if (type == H5G_UNKNOWN)
+      throw Exception("Failed to determine the type of a NeXus group member", context.operation, context.filename);
+
+    const ssize_t nameLength = H5Gget_objname_by_idx(groupID, i, nullptr, 0);
+    if (nameLength <= 0)
+      throw Exception("Failed to determine the name of a NeXus group member", context.operation, context.filename);
+
+    std::string memberName(static_cast<std::size_t>(nameLength) + 1, '\0');
+    const ssize_t copiedLength = H5Gget_objname_by_idx(groupID, i, memberName.data(), memberName.size());
+    if (copiedLength != nameLength)
+      throw Exception("Failed to read the name of a NeXus group member", context.operation, context.filename);
+    memberName.resize(static_cast<std::size_t>(nameLength));
     std::string memberAddress = address;
     if (!memberAddress.ends_with("/"))
       memberAddress += "/";
@@ -295,20 +300,18 @@ const NexusDescriptorLazy::CacheValue_t NexusDescriptorLazy::_getDataValue(const
 
   // Case of a string (fixed or variable length) type
   if (dtype.isVariableStr()) {
-    const auto space = dataset.getSpace();
-    return H5ValidatingAdapter::readScalarVlenDataset(dataset.getId(), dtype.getId(), space.getId(), context)
-        .value_or("");
+    return H5ValidatingAdapter::readScalarVlenDataset(dataset.getId(), context).value_or("");
   } else if (dtype.getClass() == H5T_STRING) {
     std::string strData;
     dataset.read(strData, dtype, dataset.getSpace());
     return strData;
   } else if (dtype.getClass() == H5T_FLOAT) { // only simple floats for the moment
     float value = 0.0;
-    dataset.read(&value, H5T_NATIVE_FLOAT);
+    dataset.read(&value, H5::PredType::NATIVE_FLOAT);
     return value;
   } else if (dtype.getClass() == H5T_INTEGER) { // only simple integers for the moment
     int value = 0;
-    dataset.read(&value, H5T_NATIVE_INT);
+    dataset.read(&value, H5::PredType::NATIVE_INT);
     return value;
   } else
     return CRS_t::NXWRONG_TYPE;
