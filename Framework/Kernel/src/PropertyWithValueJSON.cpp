@@ -9,6 +9,7 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerProperty.h"
+#include "MantidKernel/PropertyWithValue.hxx"
 #include <json/value.h>
 #include <map>
 
