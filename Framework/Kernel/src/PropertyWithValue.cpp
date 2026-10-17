@@ -52,6 +52,10 @@ template class MANTID_KERNEL_DLL PropertyWithValue<Matrix<int>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<std::vector<int32_t>>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<std::vector<std::string>>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::shared_ptr<PropertyManager>>;
+#ifdef _WIN32
+template MANTID_KERNEL_DLL const std::shared_ptr<PropertyManager> &
+PropertyWithValue<std::shared_ptr<PropertyManager>>::operator()() const;
+#endif
 #if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)
 // nexus does not support writeData for long type on mac, so we save as int64
 template <> void PropertyWithValue<long>::saveProperty(Nexus::File *file) {
@@ -77,21 +81,26 @@ template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<std::vector<long 
 #endif
 /// @endcond
 
-// The explicit template instantiations for some types does not have an export
-// macro
-// since this produces a warning on "gcc: warning: type attributes ignored after
-// type is already define". We can remove the issue, by removing the visibility
-// attribute
+#if defined(_WIN32) || defined(__APPLE__)
+template class MANTID_KERNEL_DLL PropertyWithValue<float>;
+template class MANTID_KERNEL_DLL PropertyWithValue<double>;
+template class MANTID_KERNEL_DLL PropertyWithValue<int32_t>;
+template class MANTID_KERNEL_DLL PropertyWithValue<uint32_t>;
+template class MANTID_KERNEL_DLL PropertyWithValue<int64_t>;
+template class MANTID_KERNEL_DLL PropertyWithValue<uint64_t>;
+template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<double>>;
+template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<int32_t>>;
+template class MANTID_KERNEL_DLL PropertyWithValue<std::string>;
+#else
 template class PropertyWithValue<float>;
 template class PropertyWithValue<double>;
 template class PropertyWithValue<int32_t>;
 template class PropertyWithValue<uint32_t>;
 template class PropertyWithValue<int64_t>;
 template class PropertyWithValue<uint64_t>;
-
 template class PropertyWithValue<std::vector<double>>;
 template class PropertyWithValue<std::vector<int32_t>>;
-
 template class PropertyWithValue<std::string>;
+#endif
 
 } // namespace Mantid::Kernel

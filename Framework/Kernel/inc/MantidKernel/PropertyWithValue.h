@@ -29,7 +29,11 @@ namespace Kernel {
    http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 14/11/2007
 */
-template <typename TYPE> class DLLExport PropertyWithValue : public Property {
+#if !defined(_WIN32)
+template <typename TYPE> class MANTID_KERNEL_DLL PropertyWithValue : public Property {
+#else
+template <typename TYPE> class PropertyWithValue : public Property {
+#endif
 public:
   PropertyWithValue(std::string name, TYPE defaultValue, IValidator_sptr validator = nullptr,
                     const unsigned int direction = Direction::Input);
@@ -95,6 +99,22 @@ template <> MANTID_KERNEL_DLL void PropertyWithValue<uint64_t>::saveProperty(Nex
 template <> MANTID_KERNEL_DLL void PropertyWithValue<std::string>::saveProperty(Nexus::File *file);
 template <> MANTID_KERNEL_DLL void PropertyWithValue<std::vector<double>>::saveProperty(Nexus::File *file);
 template <> MANTID_KERNEL_DLL void PropertyWithValue<std::vector<int32_t>>::saveProperty(Nexus::File *file);
+
+#if defined(_WIN32) && !defined(Kernel_EXPORTS)
+// These specializations are exported from MantidKernel. Keep consumers that
+// include PropertyWithValue.hxx from instantiating duplicate copies.
+// Kernel itself provides the exported instantiations, and MSVC rejects extern
+// combined with dllexport.
+extern template class MANTID_KERNEL_DLL PropertyWithValue<float>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<double>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<int32_t>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<uint32_t>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<int64_t>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<uint64_t>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<double>>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<int32_t>>;
+extern template class MANTID_KERNEL_DLL PropertyWithValue<std::string>;
+#endif
 
 template <typename TYPE> Logger PropertyWithValue<TYPE>::g_logger("PropertyWithValue");
 

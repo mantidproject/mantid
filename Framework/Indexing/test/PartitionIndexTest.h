@@ -8,6 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#define UNUSED_ARG(...) (void)(__VA_ARGS__)
+
 #include "MantidIndexing/PartitionIndex.h"
 
 using namespace Mantid;
@@ -22,6 +24,6 @@ public:
 
   void test_has_correct_mixins() {
     PartitionIndex data(0);
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG((dynamic_cast<detail::IndexType<PartitionIndex, int> &>(data))));
+    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::IndexType<PartitionIndex, int> &>(data)));
   }
 };

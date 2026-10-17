@@ -9,8 +9,22 @@
 #ifndef Q_MOC_RUN
 #include <memory>
 #endif
+#include <sstream>
 
 namespace Mantid::Kernel {
+
+template <> std::string ListValidator<std::string>::checkValidity(const std::string &value) const {
+  if (m_allowedValues.end() != std::find(m_allowedValues.begin(), m_allowedValues.end(), value)) {
+    return "";
+  }
+  if (value.empty())
+    return "Select a value";
+  if (isAlias(value))
+    return "_alias";
+  std::ostringstream os;
+  os << "The value \"" << value << "\" is not in the list of allowed values";
+  return os.str();
+}
 
 /// @cond
 #if defined(__GNUC__)
@@ -18,6 +32,9 @@ namespace Mantid::Kernel {
 #pragma GCC diagnostic ignored "-Wattributes"
 #endif
 template class MANTID_KERNEL_DLL ListValidator<std::string>;
+#ifdef _WIN32
+template class MANTID_KERNEL_DLL TypedValidator<std::string>;
+#endif
 #if defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif

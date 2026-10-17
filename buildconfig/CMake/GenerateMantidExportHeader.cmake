@@ -2,8 +2,8 @@ include(GenerateExportHeader)
 
 # Generate the DllConfig.h for a target.
 #
-# generate_mantid_export_header(<target> <generate_extern> [BASE_NAME <name>] [EXPORT_MACRO_NAME <name>]
-# [EXPORT_FILE_NAME <path>] [EXTERN_MACRO_NAME <name>])
+# generate_mantid_export_header(<target> <generate_extern> [GENERATE_UNUSED_ARG] [BASE_NAME <name>] [EXPORT_MACRO_NAME
+# <name>] [EXPORT_FILE_NAME <path>] [EXTERN_MACRO_NAME <name>])
 #
 # By default the generated header follows the Framework convention: it is written to Mantid<target>/DllConfig.h and
 # exports with MANTID_<TARGET>_DLL. Sub-packages that predate this function use different macro names and header
@@ -12,8 +12,9 @@ include(GenerateExportHeader)
 # Whether the macro expands to dllexport or dllimport is decided by the target's DEFINE_SYMBOL property, which CMake
 # defaults to <target>_EXPORTS.
 function(GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
+  set(options GENERATE_UNUSED_ARG)
   set(oneValueArgs BASE_NAME EXPORT_MACRO_NAME EXPORT_FILE_NAME EXTERN_MACRO_NAME)
-  cmake_parse_arguments(PARSED "" "${oneValueArgs}" "" ${ARGN})
+  cmake_parse_arguments(PARSED "${options}" "${oneValueArgs}" "" ${ARGN})
 
   string(TOUPPER "${TARGET_LIBRARY}" TARGET_NAME)
 
@@ -48,19 +49,17 @@ function(GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
   if(GENERATE_EXTERN)
     set(CUSTOM
         "${CUSTOM}\
-// MantidKernel/System.h will be removed\n\
-#include \"MantidKernel/System.h\"\n\n\
 // Use extern keyword in client code to suppress class template instantiation\n\
 #ifdef ${EXPORT_CONDITION}\n\
 #define ${PARSED_EXTERN_MACRO_NAME}\n\
 #else\n\
-// EXTERN_IMPORT is defined in MantidKernel/System.h\n
-#define ${PARSED_EXTERN_MACRO_NAME} EXTERN_IMPORT\n\
+#define ${PARSED_EXTERN_MACRO_NAME} extern\n\
 #endif /* ${EXPORT_CONDITION} */\n\n\
  "
     )
-  else()
-    # UNUSED_ARG is defined and cstdint is included in MantidKernel/System.h
+  endif()
+
+  if(PARSED_GENERATE_UNUSED_ARG)
     set(CUSTOM
         "${CUSTOM}\
 #ifndef UNUSED_ARG\n\
@@ -69,7 +68,7 @@ function(GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
 #include <cstdint>\n"
     )
 
-  endif(GENERATE_EXTERN)
+  endif()
 
   generate_export_header(
     "${TARGET_LIBRARY}"
