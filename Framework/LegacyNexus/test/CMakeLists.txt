@@ -6,7 +6,6 @@ if(CXXTEST_FOUND)
   cxxtest_add_test(LegacyNexusTest ${TEST_FILES})
 
   target_link_libraries(LegacyNexusTest PRIVATE Mantid::LegacyNexus)
-  target_include_directories(LegacyNexusTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
   add_framework_test_helpers(LegacyNexusTest)
 
   if(TARGET GTest::gmock AND TARGET GTest::gtest)

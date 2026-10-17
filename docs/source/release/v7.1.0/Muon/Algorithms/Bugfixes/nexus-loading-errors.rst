@@ -1,1 +1,0 @@
-- :ref:`algm-LoadMuonNexus` now handles empty or unsupported NeXus string data with a normal loading error instead of terminating Mantid.

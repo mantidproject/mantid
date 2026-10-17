@@ -26,14 +26,12 @@
 #include <string>
 #define H5Aiterate_vers 2
 
-#include "H5ValidatingAdapter.h"
 #include "MantidLegacyNexus/napiconfig.h"
 
 #ifdef WITH_HDF5
 
 #include <assert.h>
 #include <cstring>
-#include <limits>
 #include <map>
 #include <stdlib.h>
 #include <string.h>
@@ -105,86 +103,72 @@ static pLgcyNexusFile5 NXI5assert(NXhandle fid) {
 static void NXI5KillDir(pLgcyNexusFile5 self) { self->iStack5[self->iStackPtr].iCurrentIDX = 0; }
 
 static herr_t readStringAttribute(hid_t attr, char **data) {
-  using namespace Mantid::LegacyNexus::H5ValidatingAdapter;
-  const Context context{"reading string attribute", {}};
-  *data = nullptr;
-  const hid_t atype = H5Aget_type(attr);
-  const hid_t space = H5Aget_space(attr);
-  if (!checkId(atype, context) || !checkId(space, context)) {
-    if (atype > 0)
-      H5Tclose(atype);
-    if (space > 0)
-      H5Sclose(space);
+  herr_t iRet = 0;
+  hid_t atype = -1;
+  hid_t space;
+  int ndims;
+  hsize_t thedims[H5S_MAX_RANK], sdim;
+
+  atype = H5Aget_type(attr);
+  sdim = H5Tget_size(atype);
+  space = H5Aget_space(attr);
+  ndims = H5Sget_simple_extent_dims(space, thedims, NULL);
+
+  if (ndims == 0) {
+    if (H5Tis_variable_str(atype)) {
+      hid_t btype = H5Tget_native_type(atype, H5T_DIR_ASCEND);
+      iRet = H5Aread(attr, btype, data);
+      H5Tclose(btype);
+    } else {
+      *data = static_cast<char *>(malloc(sdim + 1));
+      iRet = H5Aread(attr, atype, *data);
+      (*data)[sdim] = '\0';
+    }
+  } else if (ndims == 1) {
+    char **strings;
+
+    strings = static_cast<char **>(malloc(thedims[0] * sizeof(char *)));
+
+    if (!H5Tis_variable_str(atype)) {
+      strings[0] = static_cast<char *>(malloc(thedims[0] * sdim * sizeof(char)));
+      for (hsize_t i = 1; i < thedims[0]; i++) {
+        strings[i] = strings[0] + i * sdim;
+      }
+    }
+
+    iRet = H5Aread(attr, atype, strings[0]);
+    *data = static_cast<char *>(calloc((sdim + 2) * thedims[0], sizeof(char)));
+    for (hsize_t i = 0; i < thedims[0]; i++) {
+      if (i == 0) {
+        strncpy(*data, strings[i], sdim);
+      } else {
+        strcat(*data, ", ");
+        strncat(*data, strings[i], sdim);
+      }
+    }
+    if (H5Tis_variable_str(atype)) {
+      H5Dvlen_reclaim(atype, space, H5P_DEFAULT, strings);
+    } else {
+      free(strings[0]);
+    }
+
+    free(strings);
+  } else {
+    *data = strdup(" higher dimensional string array");
+  }
+
+  H5Tclose(atype);
+  H5Sclose(space);
+  if (iRet < 0)
     return static_cast<herr_t>(NXstatus::NX_ERROR);
-  }
-
-  std::vector<hsize_t> dimensions;
-  bool isVariable = false;
-  bool success = Mantid::LegacyNexus::H5ValidatingAdapter::dimensions(space, dimensions, context) &&
-                 checkTriState(H5Tis_variable_str(atype), isVariable, context);
-  std::string value;
-  if (success && dimensions.empty()) {
-    if (isVariable) {
-      success = readScalarVlenAttribute(attr, atype, value, context);
-    } else {
-      const auto size = H5Tget_size(atype);
-      std::vector<char> buffer(size + 1, '\0');
-      success = size > 0 && readAttribute(attr, atype, buffer.data(), context);
-      if (success)
-        value.assign(buffer.data(), strnlen(buffer.data(), size));
-    }
-  } else if (success && dimensions.size() == 1) {
-    const auto count = static_cast<std::size_t>(dimensions[0]);
-    std::vector<std::string> strings;
-    if (isVariable) {
-      success = readVlenAttribute(attr, atype, space, strings, context);
-    } else {
-      const auto stringSize = H5Tget_size(atype);
-      std::size_t byteCount = 0;
-      success = stringSize > 0 && elementCount(std::vector<hsize_t>{dimensions[0], stringSize}, byteCount, context);
-      std::vector<char> buffer(byteCount, '\0');
-      if (success && byteCount > 0)
-        success = readAttribute(attr, atype, buffer.data(), context);
-      if (success) {
-        strings.reserve(count);
-        for (std::size_t i = 0; i < count; ++i)
-          strings.emplace_back(buffer.data() + i * stringSize, strnlen(buffer.data() + i * stringSize, stringSize));
-      }
-    }
-    if (success) {
-      for (std::size_t i = 0; i < strings.size(); ++i) {
-        if (i > 0)
-          value += ", ";
-        value += strings[i];
-      }
-    }
-  } else if (success) {
-    value = " higher dimensional string array";
-  }
-
-  if (success) {
-    *data = static_cast<char *>(malloc(value.size() + 1));
-    if (*data == nullptr) {
-      NXReportError("ERROR: not enough memory to read string attribute");
-      success = false;
-    } else {
-      memcpy(*data, value.c_str(), value.size() + 1);
-    }
-  }
-  success = checkStatus(H5Tclose(atype), context) && success;
-  success = checkStatus(H5Sclose(space), context) && success;
-  return static_cast<herr_t>(success ? NXstatus::NX_OK : NXstatus::NX_ERROR);
+  return static_cast<herr_t>(NXstatus::NX_OK);
 }
 
 static herr_t readStringAttributeN(hid_t attr, char *data, int maxlen) {
-  if (data == nullptr || maxlen <= 0) {
-    NXReportError("ERROR: invalid output buffer for string attribute");
-    return static_cast<herr_t>(NXstatus::NX_ERROR);
-  }
   herr_t iRet;
   char *vdat = NULL;
   iRet = readStringAttribute(attr, &vdat);
-  if (iRet == static_cast<herr_t>(NXstatus::NX_OK) && vdat != nullptr) {
+  if (iRet >= 0) {
 #if defined(__GNUC__) && !(defined(__clang__))
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstringop-truncation"
@@ -194,8 +178,8 @@ static herr_t readStringAttributeN(hid_t attr, char *data, int maxlen) {
 #if defined(__GNUC__) && !(defined(__clang__))
 #pragma GCC diagnostic pop
 #endif
+    free(vdat);
   }
-  free(vdat);
   data[maxlen - 1] = '\0';
   return iRet;
 }
@@ -674,36 +658,28 @@ NXstatus NX5opendata(NXhandle fid, CONSTCHAR *name) {
   pLgcyNexusFile5 pFile;
 
   pFile = NXI5assert(fid);
-  using namespace Mantid::LegacyNexus::H5ValidatingAdapter;
-  const Context context{"opening dataset", name == nullptr ? std::string{} : name};
-  if (name == nullptr) {
-    NXReportError("ERROR: null dataset name supplied");
-    return NXstatus::NX_ERROR;
-  }
   /* clear pending attribute directories first */
   NXI5KillAttDir(pFile);
 
   /* find the ID number and open the dataset */
   pFile->iCurrentD = H5Dopen(pFile->iCurrentG, name, H5P_DEFAULT);
-  if (!checkId(pFile->iCurrentD, context)) {
-    pFile->iCurrentD = 0;
+  if (pFile->iCurrentD < 0) {
+    char pBuffer[256];
+    sprintf(pBuffer, "ERROR: dataset \"%s\" not found at this level", name);
+    NXReportError(pBuffer);
     return NXstatus::NX_ERROR;
   }
   /* find the ID number of datatype */
   pFile->iCurrentT = H5Dget_type(pFile->iCurrentD);
-  if (!checkId(pFile->iCurrentT, context)) {
-    H5Dclose(pFile->iCurrentD);
-    pFile->iCurrentD = 0;
+  if (pFile->iCurrentT < 0) {
+    NXReportError("ERROR: error opening dataset");
     pFile->iCurrentT = 0;
     return NXstatus::NX_ERROR;
   }
   /* find the ID number of dataspace */
   pFile->iCurrentS = H5Dget_space(pFile->iCurrentD);
-  if (!checkId(pFile->iCurrentS, context)) {
-    H5Tclose(pFile->iCurrentT);
-    H5Dclose(pFile->iCurrentD);
-    pFile->iCurrentD = 0;
-    pFile->iCurrentT = 0;
+  if (pFile->iCurrentS < 0) {
+    NXReportError("ERROR:HDF error opening dataset");
     pFile->iCurrentS = 0;
     return NXstatus::NX_ERROR;
   }
@@ -1093,87 +1069,109 @@ NXstatus NX5getnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *d
 
 NXstatus NX5getdata(NXhandle fid, void *data) {
   pLgcyNexusFile5 pFile;
+  int iStart[H5S_MAX_RANK], status;
+  hid_t memtype_id;
+  H5T_class_t tclass;
+  hsize_t ndims, dims[H5S_MAX_RANK];
 
   pFile = NXI5assert(fid);
-  using namespace Mantid::LegacyNexus::H5ValidatingAdapter;
-  const Context context{"reading dataset", pFile->iCurrentLD == nullptr ? std::string{} : pFile->iCurrentLD};
   /* check if there is an Dataset open */
   if (pFile->iCurrentD == 0) {
     NXReportError("ERROR: no dataset open");
     return NXstatus::NX_ERROR;
   }
-  if (data == nullptr) {
-    NXReportError("ERROR: null output buffer supplied for dataset");
-    return NXstatus::NX_ERROR;
-  }
-  int ndims = 0;
-  if (!rank(pFile->iCurrentS, ndims, context))
-    return NXstatus::NX_ERROR;
+  ndims = static_cast<hsize_t>(H5Sget_simple_extent_dims(pFile->iCurrentS, dims, NULL));
 
   if (ndims == 0) { /* SCALAR dataset */
-    const hid_t datatype = H5Dget_type(pFile->iCurrentD);
-    const hid_t filespace = H5Dget_space(pFile->iCurrentD);
-    if (!checkId(datatype, context) || !checkId(filespace, context)) {
-      if (datatype > 0)
-        H5Tclose(datatype);
-      if (filespace > 0)
-        H5Sclose(filespace);
-      return NXstatus::NX_ERROR;
-    }
-    bool isVariable = false;
-    bool success = checkTriState(H5Tis_variable_str(pFile->iCurrentT), isVariable, context);
-    if (success && isVariable) {
-      std::string value;
-      success = readScalarVlenDataset(pFile->iCurrentD, datatype, filespace, value, context);
-      if (success)
-        memcpy(data, value.c_str(), value.size() + 1);
+    hid_t datatype = H5Dget_type(pFile->iCurrentD);
+    hid_t filespace = H5Dget_space(pFile->iCurrentD);
+
+    tclass = H5Tget_class(datatype);
+
+    if (H5Tis_variable_str(pFile->iCurrentT)) {
+      char *strdata = NULL;
+      status = H5Dread(pFile->iCurrentD, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &strdata);
+      if (status >= 0) {
+        if (strdata != NULL) {
+          const size_t length = strlen(strdata);
+          memcpy(data, strdata, length + 1);
+        } else {
+          // An unwritten variable-length string has a valid null fill value.
+          static_cast<char *>(data)[0] = '\0';
+        }
+      }
+      if (strdata != NULL)
+        H5free_memory(strdata);
     } else {
-      const hid_t memspace = H5Screate(H5S_SCALAR);
-      success = success && checkId(memspace, context) && checkStatus(H5Sselect_all(filespace), context) &&
-                readDataset(pFile->iCurrentD, datatype, memspace, filespace, data, context);
-      if (memspace > 0)
-        success = checkStatus(H5Sclose(memspace), context) && success;
+      memtype_id = H5Screate(H5S_SCALAR);
+      H5Sselect_all(filespace);
+      status = H5Dread(pFile->iCurrentD, datatype, memtype_id, filespace, H5P_DEFAULT, data);
+      H5Sclose(memtype_id);
     }
-    success = checkStatus(H5Sclose(filespace), context) && success;
-    success = checkStatus(H5Tclose(datatype), context) && success;
-    return success ? NXstatus::NX_OK : NXstatus::NX_ERROR;
+
+    H5Sclose(filespace);
+    H5Tclose(datatype);
+    if (status < 0)
+      return NXstatus::NX_ERROR;
+    return NXstatus::NX_OK;
   }
 
+  memset(iStart, 0, H5S_MAX_RANK * sizeof(int));
   /* map datatypes of other plateforms */
-  const H5T_class_t tclass = H5Tget_class(pFile->iCurrentT);
-  bool isVariable = false;
-  if (!checkTriState(H5Tis_variable_str(pFile->iCurrentT), isVariable, context))
-    return NXstatus::NX_ERROR;
-  if (isVariable) {
-    std::string value;
-    if (readScalarVlenDataset(pFile->iCurrentD, pFile->iCurrentT, pFile->iCurrentS, value, context)) {
-      memcpy(data, value.c_str(), value.size() + 1);
+  tclass = H5Tget_class(pFile->iCurrentT);
+  if (H5Tis_variable_str(pFile->iCurrentT)) {
+    const hssize_t elementCount = H5Sget_simple_extent_npoints(pFile->iCurrentS);
+    if (elementCount == 1) {
+      char *strdata = NULL;
+      memtype_id = H5Tcopy(H5T_C_S1);
+      H5Tset_size(memtype_id, H5T_VARIABLE);
+      status = H5Dread(pFile->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &strdata);
+      if (status >= 0) {
+        if (strdata == NULL) {
+          static_cast<char *>(data)[0] = '\0';
+        } else {
+          const size_t length = strlen(strdata);
+          memcpy(data, strdata, length + 1);
+          H5free_memory(strdata);
+        }
+      }
+      H5Tclose(memtype_id);
+      if (status < 0) {
+        NXReportError("ERROR: failed to transfer variable-length string dataset");
+        return NXstatus::NX_ERROR;
+      }
       return NXstatus::NX_OK;
     }
+    // The NAPI char-buffer interface has no way to describe an array of
+    // independently allocated strings or the capacity of the output buffer.
+    // Reject this shape instead of allowing HDF5 to write pointer data into a
+    // character buffer.
+    NXReportError("ERROR: arrays of variable-length strings are not supported");
     return NXstatus::NX_ERROR;
   } else if (tclass == H5T_STRING) {
-    return readDataset(pFile->iCurrentD, pFile->iCurrentT, H5S_ALL, H5S_ALL, data, context) ? NXstatus::NX_OK
-                                                                                            : NXstatus::NX_ERROR;
+    status = H5Dread(pFile->iCurrentD, pFile->iCurrentT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
   } else {
-    const hid_t memtype = h5MemType(pFile->iCurrentT);
-    return readDataset(pFile->iCurrentD, memtype, H5S_ALL, H5S_ALL, data, context) ? NXstatus::NX_OK
-                                                                                   : NXstatus::NX_ERROR;
+    memtype_id = h5MemType(pFile->iCurrentT);
+    status = H5Dread(pFile->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
   }
+  if (status < 0) {
+    NXReportError("ERROR: failed to transfer dataset");
+    return NXstatus::NX_ERROR;
+  }
+  return NXstatus::NX_OK;
 }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX5getinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iType) {
   pLgcyNexusFile5 pFile;
+  int i, iRank, mType;
+  hsize_t myDim[H5S_MAX_RANK];
+  H5T_class_t tclass;
+  hid_t memType;
+  char *vlData = NULL;
 
   pFile = NXI5assert(fid);
-  using namespace Mantid::LegacyNexus::H5ValidatingAdapter;
-  const Context context{"reading dataset information",
-                        pFile->iCurrentLD == nullptr ? std::string{} : pFile->iCurrentLD};
-  if (rank == nullptr || dimension == nullptr || iType == nullptr) {
-    NXReportError("ERROR: invalid output supplied while reading dataset information");
-    return NXstatus::NX_ERROR;
-  }
   /* check if there is an Dataset open */
   if (pFile->iCurrentD == 0) {
     NXReportError("ERROR: no dataset open");
@@ -1181,37 +1179,52 @@ NXstatus NX5getinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *i
   }
 
   /* read information */
-  const H5T_class_t tclass = H5Tget_class(pFile->iCurrentT);
-  const int mType = hdf5ToNXType(tclass, pFile->iCurrentT);
-  std::vector<hsize_t> myDim;
-  if (!dimensions(pFile->iCurrentS, myDim, context))
+  tclass = H5Tget_class(pFile->iCurrentT);
+  mType = hdf5ToNXType(tclass, pFile->iCurrentT);
+  iRank = H5Sget_simple_extent_dims(pFile->iCurrentS, myDim, NULL);
+  if (iRank < 0) {
+    NXReportError("ERROR: cannot determine dataset dimensions");
     return NXstatus::NX_ERROR;
-  int iRank = static_cast<int>(myDim.size());
+  }
   if (iRank == 0) {
     iRank = 1; /* we pretend */
-    myDim.push_back(1);
+    myDim[0] = 1;
+  } else {
+    H5Sget_simple_extent_dims(pFile->iCurrentS, myDim, NULL);
+    hsize_t total_dims_size = 1;
+    for (i = 0; i < iRank; ++i) {
+      total_dims_size *= myDim[i];
+    }
+    UNUSED_ARG(total_dims_size);
   }
   /* conversion to proper ints for the platform */
   *iType = static_cast<NXnumtype>(mType);
   if (tclass == H5T_STRING && myDim[iRank - 1] == 1) {
-    bool isVariable = false;
-    if (!checkTriState(H5Tis_variable_str(pFile->iCurrentT), isVariable, context))
-      return NXstatus::NX_ERROR;
-    if (isVariable) {
-      std::string value;
-      if (!readScalarVlenDataset(pFile->iCurrentD, pFile->iCurrentT, pFile->iCurrentS, value, context))
+    if (H5Tis_variable_str(pFile->iCurrentT)) {
+      const hssize_t elementCount = H5Sget_simple_extent_npoints(pFile->iCurrentS);
+      if (elementCount != 1) {
+        NXReportError("ERROR: arrays of variable-length strings are not supported");
         return NXstatus::NX_ERROR;
-      myDim[iRank - 1] = value.empty() ? 1 : value.size() + 1;
+      }
+      memType = H5Tcopy(H5T_C_S1);
+      H5Tset_size(memType, H5T_VARIABLE);
+      const herr_t readStatus = H5Dread(pFile->iCurrentD, memType, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vlData);
+      if (readStatus < 0) {
+        H5Tclose(memType);
+        NXReportError("ERROR: cannot read variable-length string dataset");
+        return NXstatus::NX_ERROR;
+      }
+      if (vlData != NULL) {
+        myDim[iRank - 1] = strlen(vlData) + 1;
+        H5free_memory(vlData);
+      }
+      H5Tclose(memType);
     } else {
       myDim[iRank - 1] = H5Tget_size(pFile->iCurrentT);
     }
   }
   *rank = (int)iRank;
-  for (int i = 0; i < iRank; i++) {
-    if (myDim[i] > static_cast<hsize_t>(std::numeric_limits<int64_t>::max())) {
-      NXReportError("ERROR: dataset dimension exceeds the supported range");
-      return NXstatus::NX_ERROR;
-    }
+  for (i = 0; i < iRank; i++) {
     dimension[i] = (int64_t)myDim[i];
   }
   return NXstatus::NX_OK;
@@ -1234,18 +1247,12 @@ herr_t attr_info(hid_t loc_id, const char *name, const H5A_info_t *unused, void 
 NXstatus NX5getattr(NXhandle fid, const char *name, void *data, int *datalen, NXnumtype *iType) {
   pLgcyNexusFile5 pFile;
   hid_t vid, iNew;
+  hsize_t dims[H5S_MAX_RANK], totalsize;
   herr_t iRet;
   hid_t type, filespace;
   char pBuffer[256];
 
   pFile = NXI5assert(fid);
-  using namespace Mantid::LegacyNexus::H5ValidatingAdapter;
-  const Context context{"reading attribute", name == nullptr ? std::string{} : name};
-
-  if (name == nullptr || data == nullptr || datalen == nullptr || iType == nullptr || *datalen <= 0) {
-    NXReportError("ERROR: invalid argument supplied while reading attribute");
-    return NXstatus::NX_ERROR;
-  }
 
   type = nxToHDF5Type(*iType);
 
@@ -1259,49 +1266,36 @@ NXstatus NX5getattr(NXhandle fid, const char *name, void *data, int *datalen, NX
   }
   pFile->iCurrentA = iNew;
   filespace = H5Aget_space(pFile->iCurrentA);
-  std::vector<hsize_t> dimensions;
-  std::size_t totalsize = 0;
-  if (!checkId(filespace, context) ||
-      !Mantid::LegacyNexus::H5ValidatingAdapter::dimensions(filespace, dimensions, context) ||
-      !elementCount(dimensions, totalsize, context)) {
-    if (filespace > 0)
-      H5Sclose(filespace);
-    H5Aclose(pFile->iCurrentA);
-    killAttVID(pFile, vid);
-    return NXstatus::NX_ERROR;
+  totalsize = 1;
+  const auto ndims = H5Sget_simple_extent_dims(filespace, dims, NULL);
+  for (int i = 0; i < ndims; i++) {
+    totalsize *= dims[i];
   }
-  if (!dimensions.empty() && totalsize > 1) {
+  if (ndims != 0 && totalsize > 1) {
     NXReportError("ERROR: attribute arrays not supported by this api");
-    H5Sclose(filespace);
-    H5Aclose(pFile->iCurrentA);
-    killAttVID(pFile, vid);
     return NXstatus::NX_ERROR;
   }
 
   /* finally read the data */
   if (type == H5T_C_S1) {
     iRet = readStringAttributeN(pFile->iCurrentA, static_cast<char *>(data), *datalen);
-    *datalen = iRet == static_cast<herr_t>(NXstatus::NX_OK) ? static_cast<int>(strlen(static_cast<char *>(data))) : 0;
+    *datalen = static_cast<int>(strlen(static_cast<char *>(data)));
   } else {
-    iRet = readAttribute(pFile->iCurrentA, type, data, context) ? static_cast<herr_t>(NXstatus::NX_OK)
-                                                                : static_cast<herr_t>(NXstatus::NX_ERROR);
+    iRet = H5Aread(pFile->iCurrentA, type, data);
     *datalen = 1;
   }
 
-  if (iRet != static_cast<herr_t>(NXstatus::NX_OK)) {
+  if (iRet < 0) {
     sprintf(pBuffer, "ERROR: could not read attribute data for \"%s\"", name);
     NXReportError(pBuffer);
-    H5Sclose(filespace);
-    H5Aclose(pFile->iCurrentA);
     killAttVID(pFile, vid);
     return NXstatus::NX_ERROR;
   }
 
-  const bool closeSucceeded =
-      checkStatus(H5Sclose(filespace), context) && checkStatus(H5Aclose(pFile->iCurrentA), context);
+  H5Aclose(pFile->iCurrentA);
 
   killAttVID(pFile, vid);
-  return closeSucceeded ? NXstatus::NX_OK : NXstatus::NX_ERROR;
+  return NXstatus::NX_OK;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -1413,88 +1407,74 @@ NXstatus NX5getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NX
 /*------------------------------------------------------------------------*/
 NXstatus NX5getattrainfo(NXhandle handle, NXname name, int *rank, int dim[], NXnumtype *iType) {
   pLgcyNexusFile5 pFile;
+  int iRet, mType;
   hid_t vid;
+  hid_t filespace, attrt, memtype;
+  hsize_t myDim[H5S_MAX_RANK];
+  H5T_class_t tclass;
+  char *vlStr = NULL;
 
   pFile = NXI5assert(handle);
-  using namespace Mantid::LegacyNexus::H5ValidatingAdapter;
-  const Context context{"reading attribute information", name == nullptr ? std::string{} : name};
-  if (name == nullptr || rank == nullptr || dim == nullptr || iType == nullptr) {
-    NXReportError("ERROR: invalid output supplied while reading attribute information");
-    return NXstatus::NX_ERROR;
-  }
 
   vid = getAttVID(pFile);
   pFile->iCurrentA = H5Aopen_by_name(vid, ".", name, H5P_DEFAULT, H5P_DEFAULT);
   if (pFile->iCurrentA < 0) {
     pFile->iCurrentA = 0;
     NXReportError("ERROR: unable to open attribute");
-    killAttVID(pFile, vid);
     return NXstatus::NX_ERROR;
   }
 
-  const hid_t filespace = H5Aget_space(pFile->iCurrentA);
-  const hid_t attrt = H5Aget_type(pFile->iCurrentA);
-  std::vector<hsize_t> myDim;
-  if (!checkId(filespace, context) || !checkId(attrt, context) ||
-      !Mantid::LegacyNexus::H5ValidatingAdapter::dimensions(filespace, myDim, context)) {
-    if (filespace > 0)
-      H5Sclose(filespace);
-    if (attrt > 0)
-      H5Tclose(attrt);
-    H5Aclose(pFile->iCurrentA);
-    killAttVID(pFile, vid);
+  filespace = H5Aget_space(pFile->iCurrentA);
+  auto myrank = H5Sget_simple_extent_ndims(filespace);
+  iRet = H5Sget_simple_extent_dims(filespace, myDim, NULL);
+  if (iRet < 0) {
+    NXReportError("ERROR: Cannot determine attribute dimensions");
     return NXstatus::NX_ERROR;
   }
 
   /* read information */
-  const H5T_class_t tclass = H5Tget_class(attrt);
-  const int mType = hdf5ToNXType(tclass, attrt);
+  attrt = H5Aget_type(pFile->iCurrentA);
+  tclass = H5Tget_class(attrt);
+  mType = hdf5ToNXType(tclass, attrt);
 
   /* conversion to proper ints for the platform */
   *iType = static_cast<NXnumtype>(mType);
 
   if (tclass == H5T_STRING) {
-    bool isVariable = false;
-    if (!checkTriState(H5Tis_variable_str(attrt), isVariable, context)) {
-      H5Sclose(filespace);
-      H5Tclose(attrt);
-      H5Aclose(pFile->iCurrentA);
-      killAttVID(pFile, vid);
-      return NXstatus::NX_ERROR;
-    }
-    if (isVariable) {
-      std::string value;
-      if (!readScalarVlenAttribute(pFile->iCurrentA, attrt, value, context)) {
-        H5Sclose(filespace);
-        H5Tclose(attrt);
-        H5Aclose(pFile->iCurrentA);
-        killAttVID(pFile, vid);
+    myrank++;
+    if (H5Tis_variable_str(attrt)) {
+      const hssize_t elementCount = H5Sget_simple_extent_npoints(filespace);
+      if (elementCount != 1) {
+        NXReportError("ERROR: arrays of variable-length string attributes are not supported");
         return NXstatus::NX_ERROR;
       }
-      myDim.push_back(value.empty() ? 1 : value.size() + 1);
+      myDim[myrank - 1] = 1;
+      memtype = H5Tcopy(H5T_C_S1);
+      H5Tset_size(memtype, H5T_VARIABLE);
+      if (H5Aread(pFile->iCurrentA, memtype, &vlStr) < 0) {
+        H5Tclose(memtype);
+        NXReportError("ERROR: cannot read variable-length string attribute");
+        return NXstatus::NX_ERROR;
+      }
+      if (vlStr != NULL) {
+        myDim[myrank - 1] = strlen(vlStr) + 1;
+        H5free_memory(vlStr);
+      }
+      H5Tclose(memtype);
     } else {
-      myDim.push_back(H5Tget_size(attrt));
+      myDim[myrank - 1] = H5Tget_size(attrt);
     }
-  } else if (myDim.empty()) {
-    myDim.push_back(1); /* we pretend */
+  } else if (myrank == 0) {
+    myrank = 1; /* we pretend */
+    myDim[0] = 1;
   }
 
-  bool success = true;
-  for (std::size_t i = 0; i < myDim.size(); i++) {
-    if (myDim[i] > static_cast<hsize_t>(std::numeric_limits<int>::max())) {
-      NXReportError("ERROR: attribute dimension exceeds the supported range");
-      success = false;
-      break;
-    }
+  for (int i = 0; i < myrank; i++) {
     dim[i] = static_cast<int>(myDim[i]);
   }
-  *rank = static_cast<int>(myDim.size());
+  *rank = static_cast<int>(myrank);
 
-  success = checkStatus(H5Sclose(filespace), context) && success;
-  success = checkStatus(H5Tclose(attrt), context) && success;
-  success = checkStatus(H5Aclose(pFile->iCurrentA), context) && success;
-  killAttVID(pFile, vid);
-  return success ? NXstatus::NX_OK : NXstatus::NX_ERROR;
+  return NXstatus::NX_OK;
 }
 
 /*------------------------------------------------------------------------*/
