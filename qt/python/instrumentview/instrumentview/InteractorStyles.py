@@ -46,7 +46,7 @@ class RubberBandZoomInteractorStyle(vtkInteractorStyleRubberBandZoom):
         self._ignore_rubberband_interaction = False
         self._rubber_band_start = None
         self._rubber_band_poly, self._rubber_band_actor = self._create_rubber_band_actor()
-        self.plotter.renderer.AddActor2D(self._rubber_band_actor)
+        self.plotter.renderer.AddViewProp(self._rubber_band_actor)
         self.update_default_camera_state()
         self.AddObserver(vtkCommand.RightButtonPressEvent, lambda *_: self._reset_camera())
         self.RemoveObservers(vtkCommand.LeftButtonPressEvent)
