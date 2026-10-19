@@ -11,11 +11,14 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/MDBoxBase.h"
+#include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDGridBox.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidKernel/ProgressBase.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -219,3 +222,59 @@ private:
 } // namespace DataObjects
 
 } // namespace Mantid
+
+// Instantiated and exported by DataObjects/src/PropertyWithValue.cpp
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<
+        std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDEvent<1>, 1>>>);
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<
+        std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDEvent<2>, 2>>>);
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<
+        std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDEvent<3>, 3>>>);
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<
+        std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDEvent<4>, 4>>>);
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<
+        std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDEvent<5>, 5>>>);
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<
+        std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDEvent<6>, 6>>>);
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<
+        std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDEvent<7>, 7>>>);
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<
+        std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDEvent<8>, 8>>>);
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<
+        std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDEvent<9>, 9>>>);
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<
+        std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDLeanEvent<1>, 1>>>);
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<
+        std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDLeanEvent<2>, 2>>>);
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<
+        std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDLeanEvent<3>, 3>>>);
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<
+        std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDLeanEvent<4>, 4>>>);
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<
+        std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDLeanEvent<5>, 5>>>);
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<
+        std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDLeanEvent<6>, 6>>>);
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<
+        std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDLeanEvent<7>, 7>>>);
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<
+        std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDLeanEvent<8>, 8>>>);
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<
+        std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDLeanEvent<9>, 9>>>);

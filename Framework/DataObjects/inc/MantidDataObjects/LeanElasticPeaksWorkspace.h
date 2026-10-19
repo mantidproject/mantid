@@ -12,6 +12,7 @@
 #include "MantidDataObjects/LeanElasticPeak.h"
 #include "MantidDataObjects/PeakColumn.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/V3D.h"
 
@@ -258,3 +259,7 @@ using LeanElasticPeaksWorkspace_sptr = std::shared_ptr<LeanElasticPeaksWorkspace
 using LeanElasticPeaksWorkspace_const_sptr = std::shared_ptr<const LeanElasticPeaksWorkspace>;
 } // namespace DataObjects
 } // namespace Mantid
+
+// Instantiated and exported by DataObjects/src/PropertyWithValue.cpp
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::DataObjects::LeanElasticPeaksWorkspace>>);

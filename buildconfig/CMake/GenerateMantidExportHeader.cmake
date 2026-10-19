@@ -59,6 +59,29 @@ function(GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
     )
   endif()
 
+  # <BASE_NAME>_EXTERN_TEMPLATE(X<T>) declares an explicit instantiation that this library defines, with `template class
+  # <EXPORT_MACRO_NAME> X<T>;`, and exports. Declare it in a header that every translation unit naming X<T> includes,
+  # inside the library as well as outside it: with hidden visibility, a single implicit instantiation in the library
+  # hides the exported symbols. MSVC does not allow extern together with dllexport, so the declaration is dropped inside
+  # the library there.
+  if(WIN32)
+    set(CUSTOM
+        "${CUSTOM}\
+// Declare an explicit instantiation that this library defines and exports\n\
+#ifdef ${EXPORT_CONDITION}\n\
+#define ${PARSED_BASE_NAME}_EXTERN_TEMPLATE(...) static_assert(true)\n\
+#else\n\
+#define ${PARSED_BASE_NAME}_EXTERN_TEMPLATE(...) extern template class ${PARSED_EXPORT_MACRO_NAME} __VA_ARGS__\n\
+#endif /* ${EXPORT_CONDITION} */\n\n"
+    )
+  else()
+    set(CUSTOM
+        "${CUSTOM}\
+// Declare an explicit instantiation that this library defines and exports\n\
+#define ${PARSED_BASE_NAME}_EXTERN_TEMPLATE(...) extern template class ${PARSED_EXPORT_MACRO_NAME} __VA_ARGS__\n\n"
+    )
+  endif()
+
   if(PARSED_GENERATE_UNUSED_ARG)
     set(CUSTOM
         "${CUSTOM}\

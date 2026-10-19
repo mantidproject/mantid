@@ -12,6 +12,7 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/WarningSuppressions.h"
 
 #include <atomic>
@@ -639,3 +640,6 @@ using MatrixWorkspace_const_sptr = std::shared_ptr<const MatrixWorkspace>;
 
 } // namespace API
 } // namespace Mantid
+
+// Instantiated and exported by API/src/PropertyWithValue.cpp
+MANTID_API_EXTERN_TEMPLATE(Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::API::MatrixWorkspace>>);

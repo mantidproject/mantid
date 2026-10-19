@@ -5,7 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/Matrix.h"
+#include "MantidKernel/MatrixProperty.h"
+#include "MantidKernel/OptionalBool.h"
 
 // PropertyWithValue implementation
 #include "MantidKernel/PropertyManager.h"
@@ -14,31 +15,26 @@
 
 namespace Mantid::Kernel {
 
-#define PROPERTYWITHVALUE_SAVEPROPERTY(type)                                                                           \
-  template <> void PropertyWithValue<type>::saveProperty(Nexus::File *file) {                                          \
-    file->makeGroup(this->name(), "NXlog", true);                                                                      \
-    file->writeData("value", m_value);                                                                                 \
-    file->openData("value");                                                                                           \
-    file->putAttr("units", this->units());                                                                             \
-    file->closeData();                                                                                                 \
-    file->closeGroup();                                                                                                \
-  }
-
-PROPERTYWITHVALUE_SAVEPROPERTY(float)
-PROPERTYWITHVALUE_SAVEPROPERTY(double)
-PROPERTYWITHVALUE_SAVEPROPERTY(int32_t)
-PROPERTYWITHVALUE_SAVEPROPERTY(uint32_t)
-PROPERTYWITHVALUE_SAVEPROPERTY(int64_t)
-PROPERTYWITHVALUE_SAVEPROPERTY(uint64_t)
-PROPERTYWITHVALUE_SAVEPROPERTY(std::string)
-PROPERTYWITHVALUE_SAVEPROPERTY(std::vector<double>)
-PROPERTYWITHVALUE_SAVEPROPERTY(std::vector<int32_t>)
-
 /// @cond
+// The headers declare these with MANTID_KERNEL_EXTERN_TEMPLATE, which already
+// carries the export attribute, so gcc warns that the one here is ignored.
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"
+#endif
+template class MANTID_KERNEL_DLL PropertyWithValue<float>;
+template class MANTID_KERNEL_DLL PropertyWithValue<double>;
+template class MANTID_KERNEL_DLL PropertyWithValue<int32_t>;
+template class MANTID_KERNEL_DLL PropertyWithValue<uint32_t>;
+template class MANTID_KERNEL_DLL PropertyWithValue<int64_t>;
+template class MANTID_KERNEL_DLL PropertyWithValue<uint64_t>;
 template class MANTID_KERNEL_DLL PropertyWithValue<uint16_t>;
 template class MANTID_KERNEL_DLL PropertyWithValue<bool>;
 template class MANTID_KERNEL_DLL PropertyWithValue<OptionalBool>;
+template class MANTID_KERNEL_DLL PropertyWithValue<std::string>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<float>>;
+template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<double>>;
+template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<int32_t>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<uint16_t>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<uint32_t>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<int64_t>>;
@@ -46,26 +42,13 @@ template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<uint64_t>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<bool>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<OptionalBool>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<std::string>>;
+template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<std::vector<int32_t>>>;
+template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<std::vector<std::string>>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<Matrix<float>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<Matrix<double>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<Matrix<int>>;
-template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<std::vector<int32_t>>>;
-template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<std::vector<std::string>>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::shared_ptr<PropertyManager>>;
-#ifdef _WIN32
-template MANTID_KERNEL_DLL const std::shared_ptr<PropertyManager> &
-PropertyWithValue<std::shared_ptr<PropertyManager>>::operator()() const;
-#endif
 #if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)
-// nexus does not support writeData for long type on mac, so we save as int64
-template <> void PropertyWithValue<long>::saveProperty(Nexus::File *file) {
-  file->makeGroup(this->name(), "NXlog", true);
-  file->writeData("value", static_cast<int64_t>(m_value));
-  file->openData("value");
-  file->putAttr("units", this->units());
-  file->closeData();
-  file->closeGroup();
-}
 template class MANTID_KERNEL_DLL PropertyWithValue<long>;
 template class MANTID_KERNEL_DLL PropertyWithValue<unsigned long>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<long>>;
@@ -79,28 +62,9 @@ template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<long long>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<unsigned long long>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<std::vector<long long>>>;
 #endif
-/// @endcond
-
-#if defined(_WIN32) || defined(__APPLE__)
-template class MANTID_KERNEL_DLL PropertyWithValue<float>;
-template class MANTID_KERNEL_DLL PropertyWithValue<double>;
-template class MANTID_KERNEL_DLL PropertyWithValue<int32_t>;
-template class MANTID_KERNEL_DLL PropertyWithValue<uint32_t>;
-template class MANTID_KERNEL_DLL PropertyWithValue<int64_t>;
-template class MANTID_KERNEL_DLL PropertyWithValue<uint64_t>;
-template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<double>>;
-template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<int32_t>>;
-template class MANTID_KERNEL_DLL PropertyWithValue<std::string>;
-#else
-template class PropertyWithValue<float>;
-template class PropertyWithValue<double>;
-template class PropertyWithValue<int32_t>;
-template class PropertyWithValue<uint32_t>;
-template class PropertyWithValue<int64_t>;
-template class PropertyWithValue<uint64_t>;
-template class PropertyWithValue<std::vector<double>>;
-template class PropertyWithValue<std::vector<int32_t>>;
-template class PropertyWithValue<std::string>;
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
 #endif
+/// @endcond
 
 } // namespace Mantid::Kernel
