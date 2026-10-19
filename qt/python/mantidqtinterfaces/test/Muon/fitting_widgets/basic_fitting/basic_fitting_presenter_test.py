@@ -7,7 +7,7 @@
 import unittest
 from unittest import mock
 
-from mantid.api import FrameworkManager, FunctionFactory
+from mantid.api import FrameworkManager, FunctionFactory, MultiDomainFunction
 from mantid.simpleapi import CreateEmptyTableWorkspace
 from mantidqt.widgets.fitscriptgenerator import FittingMode
 from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import (
@@ -496,6 +496,20 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
 
         self.presenter._get_single_fit_functions_from_view.assert_called_once_with()
         self.mock_model_single_fit_functions.assert_called_once_with(self.single_fit_functions)
+
+    def test_that_get_single_fit_functions_from_view_returns_a_function_per_dataset_for_empty_product_functions(self):
+        multi_domain_function = MultiDomainFunction()
+        for domain_index in range(len(self.dataset_names)):
+            multi_domain_function.add(FunctionFactory.createFunction("ProductFunction"))
+            multi_domain_function.setDomainIndex(domain_index, domain_index)
+        # The FunctionBrowser returns a clone of its MultiDomainFunction
+        self.mock_view_fit_object.return_value = multi_domain_function.clone()
+
+        single_fit_functions = self.presenter._get_single_fit_functions_from_view()
+
+        self.assertEqual(len(single_fit_functions), len(self.dataset_names))
+        for function in single_fit_functions:
+            self.assertEqual(function.name(), "ProductFunction")
 
     def test_that_update_fit_statuses_and_chi_squared_in_view_from_model_will_update_the_local_and_global_statuses_in_the_view(self):
         self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model()

@@ -1185,6 +1185,11 @@ public:
     delete mfun;
   }
 
+  void test_empty_function_string_is_its_name() {
+    CompositeFunction empty;
+    TS_ASSERT_EQUALS(empty.asString(), "name=CompositeFunction");
+  }
+
   void test_setWorkspaceWorks() {
     CompositeFunction *mfun = new CompositeFunction;
     IFunction_sptr g1 = IFunction_sptr(new Gauss());
