@@ -13,6 +13,7 @@ import gc
 from enum import Enum
 
 # 3rd party imports
+from qtpy import sip
 from qtpy.QtCore import QCoreApplication, QObject, Signal
 
 # local imports
@@ -115,6 +116,7 @@ class GlobalFigureManager(object):
     @classmethod
     def initialiseActiveFiguresObserver(cls):
         """Create and register the active-figure observer once, then attach it to Qt."""
+        cls._remove_deleted_observers()
         observer = next(
             (observer for observer in cls.observers if isinstance(observer, GlobalFigureManagerActiveFigureObserver)),
             None,
@@ -124,6 +126,14 @@ class GlobalFigureManager(object):
             cls.add_observer(observer)
         observer.attach_parent_application()
         return observer
+
+    @classmethod
+    def _remove_deleted_observers(cls):
+        """
+        Drop QObject observers whose C++ object has been deleted. This happens to the
+        active-figure observer when the QApplication it belongs to is destroyed.
+        """
+        cls.observers[:] = [observer for observer in cls.observers if not (isinstance(observer, QObject) and sip.isdeleted(observer))]
 
     @classmethod
     def get_fig_manager(cls, num):
@@ -296,6 +306,7 @@ class GlobalFigureManager(object):
         :param action: A FigureAction enum for the action called
         :param figure_number: The unique fig number (key in the dict)
         """
+        cls._remove_deleted_observers()
         for observer in cls.observers:
             observer.notify(action, figure_number)
 
