@@ -51,7 +51,7 @@
       "name": "osx-arm64-ci",
       "description": "Build options for a CI build on an Arm macOS machine",
       "cacheVariables": {
-        "CMAKE_DISABLE_PRECOMPILE_HEADERS": "OFF"
+        "CMAKE_DISABLE_PRECOMPILE_HEADERS": "ON"
       },
       "inherits": [
         "osx-default",
