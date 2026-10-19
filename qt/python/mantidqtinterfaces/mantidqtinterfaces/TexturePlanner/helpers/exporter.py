@@ -59,7 +59,9 @@ class OrientationExporter:
         logger.notice(f"Orientation data written to '{save_file}' as Rotation Matrices")
 
     def output_as_euler(self, save_dir: str, filename: str) -> None:
-        axes = self._model.orientations.orientation_kwargs["Axes"]
+        # scipy reads lowercase axes as extrinsic; the planner and Eng Diff loaders compound the axes
+        # intrinsically whatever their case, so the angles must be written in that convention
+        axes = self._model.orientations.orientation_kwargs["Axes"].upper()
         senses = self._model.orientations.orientation_kwargs["Senses"].split(",")
         lines = []
         save_file = os.path.join(save_dir, filename + ".txt")
