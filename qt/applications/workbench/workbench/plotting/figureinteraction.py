@@ -29,7 +29,7 @@ from matplotlib.collections import Collection
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 # mantid imports
-from mantid.api import AnalysisDataService as ads
+from mantid.api import AnalysisDataService as ads, MatrixWorkspace
 from mantid.plots import datafunctions, MantidAxes, axesfunctions, MantidAxes3D, LegendProperties
 from mantid.plots.utility import zoom, MantidAxType, legend_set_draggable, PlotNormalizationType
 from mantidqt.plotting.figuretype import FigureType, figure_type
@@ -957,12 +957,18 @@ class FigureInteraction(object):
         if fig_type not in [FigureType.Line, FigureType.Errorbar, FigureType.Waterfall]:
             return False
 
-        plotted_x_is_q = []
-        for workspace_name, _ in ax.tracked_workspaces.items():
-            ws = ads.retrieve(workspace_name)
-            plotted_x_is_q.append(ws.getAxis(0).getUnit().unitID() == "MomentumTransfer")
+        if not ax.tracked_workspaces:
+            return False
 
-        return all(plotted_x_is_q)
+        for workspace_name in ax.tracked_workspaces:
+            ws = ads.retrieve(workspace_name)
+            if not isinstance(ws, MatrixWorkspace):
+                return False
+
+            if ws.getAxis(0).getUnit().unitID() != "MomentumTransfer":
+                return False
+            
+        return True
 
     def _quick_change_axes(self, ax, x_scale_type=None, y_scale_type=None):
         """

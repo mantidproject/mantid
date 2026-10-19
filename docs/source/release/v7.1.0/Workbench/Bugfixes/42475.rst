@@ -1,0 +1,1 @@
+- This PR fixes the broken context menu in :ref:`slice viewer <sliceviewer>` when right clicked on a cut intensity plot.
