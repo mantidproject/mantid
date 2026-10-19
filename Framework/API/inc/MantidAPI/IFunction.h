@@ -17,6 +17,7 @@
 #include "MantidAPI/ParameterTie.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Unit_fwd.h"
 #include "MantidKernel/WarningSuppressions.h"
 
@@ -776,3 +777,6 @@ protected:
 
 } // namespace API
 } // namespace Mantid
+
+// Instantiated and exported by API/src/PropertyWithValue.cpp
+MANTID_API_EXTERN_TEMPLATE(Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::API::IFunction>>);

@@ -6,10 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MDGeometry.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include <cstdint>
 #include <vector>
@@ -148,3 +150,6 @@ using IMDWorkspace_sptr = std::shared_ptr<IMDWorkspace>;
 using IMDWorkspace_const_sptr = std::shared_ptr<const IMDWorkspace>;
 } // namespace API
 } // namespace Mantid
+
+// Instantiated and exported by API/src/PropertyWithValue.cpp
+MANTID_API_EXTERN_TEMPLATE(Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::API::IMDWorkspace>>);

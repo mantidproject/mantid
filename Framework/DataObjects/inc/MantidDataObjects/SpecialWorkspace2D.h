@@ -7,8 +7,10 @@
 #pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -96,6 +98,10 @@ using SpecialWorkspace2D_const_sptr = std::shared_ptr<const SpecialWorkspace2D>;
 
 } // namespace DataObjects
 } // namespace Mantid
+
+// Instantiated and exported by DataObjects/src/PropertyWithValue.cpp
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::DataObjects::SpecialWorkspace2D>>);
 
 #ifndef DataObjects_EXPORTS
 #include "MantidAPI/WorkspaceProperty.h"

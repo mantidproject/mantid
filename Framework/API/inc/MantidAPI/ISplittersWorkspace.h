@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/SplittingInterval.h"
 
 namespace Mantid {
@@ -68,3 +69,6 @@ using ISplittersWorkspace_const_sptr = std::shared_ptr<const ISplittersWorkspace
 
 } // namespace API
 } // namespace Mantid
+
+// Instantiated and exported by API/src/PropertyWithValue.cpp
+MANTID_API_EXTERN_TEMPLATE(Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::API::ISplittersWorkspace>>);

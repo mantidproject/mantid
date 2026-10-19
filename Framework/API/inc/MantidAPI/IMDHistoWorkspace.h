@@ -10,6 +10,7 @@
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 namespace Mantid {
 namespace API {
@@ -89,3 +90,6 @@ private:
 
 } // namespace API
 } // namespace Mantid
+
+// Instantiated and exported by API/src/PropertyWithValue.cpp
+MANTID_API_EXTERN_TEMPLATE(Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::API::IMDHistoWorkspace>>);

@@ -27,6 +27,12 @@
 namespace Mantid::Kernel {
 
 /// @cond
+// The headers of these types declare them with MANTID_API_EXTERN_TEMPLATE, which already carries the export
+// attribute, so gcc warns that the one here is ignored.
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"
+#endif
 template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::IAlgorithm>>;
 template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::IEventWorkspace>>;
 template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::IFunction>>;
@@ -41,6 +47,9 @@ template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::MatrixWorks
 template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::Workspace>>;
 template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::WorkspaceGroup>>;
 template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::ExperimentInfo>>;
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 /// @endcond
 
 } // namespace Mantid::Kernel

@@ -7,7 +7,9 @@
 #pragma once
 
 #include "MantidAPI/ISplittersWorkspace.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/SplittingInterval.h"
 
 #ifdef _MSC_VER
@@ -62,6 +64,10 @@ using SplittersWorkspace_const_sptr = std::shared_ptr<const SplittersWorkspace>;
 
 } // namespace DataObjects
 } // namespace Mantid
+
+// Instantiated and exported by DataObjects/src/PropertyWithValue.cpp
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::DataObjects::SplittersWorkspace>>);
 
 #ifndef DataObjects_EXPORTS
 #include "MantidAPI/WorkspaceProperty.h"
