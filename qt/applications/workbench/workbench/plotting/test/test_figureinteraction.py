@@ -34,6 +34,7 @@ from mantidqt.plotting.functions import plot, pcolormesh_from_names, plot_contou
 from mantidqt.utils.qt.testing import start_qapplication
 from workbench.plotting.figureinteraction import FigureInteraction, LogNorm
 
+
 @start_qapplication
 class FigureInteractionTest(unittest.TestCase):
     @classmethod
@@ -398,7 +399,6 @@ class FigureInteractionTest(unittest.TestCase):
 
         anonymous_menu = QMenu()
         self.assertEqual(None, self.interactor._add_normalization_option_menu(anonymous_menu, self.ax))
-
 
     def test_can_normalize_by_q_is_false_when_no_workspaces_tracked(self):
         _, self.ax = plt.subplots(subplot_kw={"projection": "mantid"})

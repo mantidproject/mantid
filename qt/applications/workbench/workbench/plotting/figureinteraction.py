@@ -967,7 +967,7 @@ class FigureInteraction(object):
 
             if ws.getAxis(0).getUnit().unitID() != "MomentumTransfer":
                 return False
-            
+
         return True
 
     def _quick_change_axes(self, ax, x_scale_type=None, y_scale_type=None):
