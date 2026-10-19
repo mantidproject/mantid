@@ -14,12 +14,15 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
+#include "MantidKernel/Strings.h"
 
 namespace Mantid {
 using namespace API;
 using namespace DataObjects;
 
 namespace MDAlgorithms::MDAlgorithmsTestHelper {
+
+std::string makeUniqueId() { return Kernel::Strings::randomString(12); }
 
 /** Make a (optionally) file backed MDEventWorkspace with nEvents fake data
  *points

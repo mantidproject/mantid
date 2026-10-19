@@ -12,10 +12,11 @@
 #include "MantidFrameworkTestHelpers/BinaryOperationMDTestHelper.h"
 #include "MantidFrameworkTestHelpers/MDAlgorithmsTestHelper.h"
 #include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
-#include "MantidKernel/Strings.h"
 #include "MantidMDAlgorithms/MinusMD.h"
 
 #include <cxxtest/TestSuite.h>
+
+#include <format>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -148,21 +149,21 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 
-  void test_mem_minus_mem() { do_test(false, false, 0, Mantid::Kernel::Strings::randomString(12)); }
+  void test_mem_minus_mem() { do_test(false, false, 0, MDAlgorithmsTestHelper::makeUniqueId()); }
 
-  void test_mem_minus_mem_inPlace() { do_test(false, false, 1, Mantid::Kernel::Strings::randomString(12)); }
+  void test_mem_minus_mem_inPlace() { do_test(false, false, 1, MDAlgorithmsTestHelper::makeUniqueId()); }
 
-  void test_file_minus_mem() { do_test(true, false, 0, Mantid::Kernel::Strings::randomString(12)); }
+  void test_file_minus_mem() { do_test(true, false, 0, MDAlgorithmsTestHelper::makeUniqueId()); }
 
-  void test_file_minus_mem_inPlace() { do_test(true, false, 1, Mantid::Kernel::Strings::randomString(12)); }
+  void test_file_minus_mem_inPlace() { do_test(true, false, 1, MDAlgorithmsTestHelper::makeUniqueId()); }
 
-  void test_mem_minus_file_inPlace() { do_test(false, true, 1, Mantid::Kernel::Strings::randomString(12)); }
+  void test_mem_minus_file_inPlace() { do_test(false, true, 1, MDAlgorithmsTestHelper::makeUniqueId()); }
 
-  void test_file_minus_file() { do_test(true, true, 0, Mantid::Kernel::Strings::randomString(12)); }
+  void test_file_minus_file() { do_test(true, true, 0, MDAlgorithmsTestHelper::makeUniqueId()); }
 
-  void test_file_minus_file_inPlace() { do_test(true, true, 1, Mantid::Kernel::Strings::randomString(12)); }
+  void test_file_minus_file_inPlace() { do_test(true, true, 1, MDAlgorithmsTestHelper::makeUniqueId()); }
 
-  void test_mem_masked_plus_mem() { do_test(false, false, 0, Mantid::Kernel::Strings::randomString(12), 1); }
+  void test_mem_masked_plus_mem() { do_test(false, false, 0, MDAlgorithmsTestHelper::makeUniqueId(), 1); }
 
-  void test_masked_file_plus_file_inPlace() { do_test(true, true, 1, Mantid::Kernel::Strings::randomString(12), 1); }
+  void test_masked_file_plus_file_inPlace() { do_test(true, true, 1, MDAlgorithmsTestHelper::makeUniqueId(), 1); }
 };
