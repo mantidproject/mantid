@@ -111,6 +111,25 @@ public:
     assertCheckBox(shareAxesLayout->itemAt(2)->widget(), "shareYAxisWhenTiled", "Y");
   }
 
+  void testPlotOptionsReflectCheckboxState() {
+    QtPlottingView view;
+
+    TS_ASSERT(!view.shouldAddToExistingPlot());
+    TS_ASSERT(!view.shouldPlotTiledVertically());
+    TS_ASSERT(!view.shouldShareXAxisWhenTiled());
+    TS_ASSERT(!view.shouldShareYAxisWhenTiled());
+
+    view.findChild<QCheckBox *>("addToExistingPlot")->setChecked(true);
+    view.findChild<QCheckBox *>("plotTiledVertically")->setChecked(true);
+    view.findChild<QCheckBox *>("shareXAxisWhenTiled")->setChecked(true);
+    view.findChild<QCheckBox *>("shareYAxisWhenTiled")->setChecked(true);
+
+    TS_ASSERT(view.shouldAddToExistingPlot());
+    TS_ASSERT(view.shouldPlotTiledVertically());
+    TS_ASSERT(view.shouldShareXAxisWhenTiled());
+    TS_ASSERT(view.shouldShareYAxisWhenTiled());
+  }
+
   void testPlotActionStateDisablesPlotButtons() {
     QtPlottingView view;
 

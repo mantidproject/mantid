@@ -153,13 +153,13 @@ PlotOutputSelection QtPlottingView::selectedPlotOutputSelection() const {
           static_cast<AlignmentXAxis>(m_ui.alignmentXAxis->currentData().toInt())};
 }
 
-bool QtPlottingView::addToExistingPlot() const { return m_ui.addToExistingPlot->isChecked(); }
+bool QtPlottingView::shouldAddToExistingPlot() const { return m_ui.addToExistingPlot->isChecked(); }
 
-bool QtPlottingView::plotTiledVertically() const { return m_ui.plotTiledVertically->isChecked(); }
+bool QtPlottingView::shouldPlotTiledVertically() const { return m_ui.plotTiledVertically->isChecked(); }
 
-bool QtPlottingView::shareXAxisWhenTiled() const { return m_ui.shareXAxisWhenTiled->isChecked(); }
+bool QtPlottingView::shouldShareXAxisWhenTiled() const { return m_ui.shareXAxisWhenTiled->isChecked(); }
 
-bool QtPlottingView::shareYAxisWhenTiled() const { return m_ui.shareYAxisWhenTiled->isChecked(); }
+bool QtPlottingView::shouldShareYAxisWhenTiled() const { return m_ui.shareYAxisWhenTiled->isChecked(); }
 
 QWidget *QtPlottingView::plotParent() { return window(); }
 

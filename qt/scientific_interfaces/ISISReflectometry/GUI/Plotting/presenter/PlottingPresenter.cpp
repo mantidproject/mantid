@@ -32,10 +32,10 @@ PresenterPlotRequest plotRequestFor(IPlottingView &view, std::string const &inst
   return {std::move(outputSelection),
           layout,
           view.plotParent(),
-          view.addToExistingPlot(),
-          layout == PlotLayout::Tiled && view.plotTiledVertically(),
-          layout == PlotLayout::Tiled && view.shareXAxisWhenTiled(),
-          layout == PlotLayout::Tiled && view.shareYAxisWhenTiled()};
+          view.shouldAddToExistingPlot(),
+          layout == PlotLayout::Tiled && view.shouldPlotTiledVertically(),
+          layout == PlotLayout::Tiled && view.shouldShareXAxisWhenTiled(),
+          layout == PlotLayout::Tiled && view.shouldShareYAxisWhenTiled()};
 }
 } // namespace
 
@@ -186,7 +186,7 @@ void PlottingPresenter::updatePlotActionState() const {
 
   m_view->setPlotActionState(m_viewStateProvider.plotActionState(
       m_outputSelectionEnabled, m_view->selectedPlottingWorkspaceNames().size(),
-      m_view->selectedPlottingWorkspaceGroupCount(), *selectedOutputType, m_view->addToExistingPlot(),
+      m_view->selectedPlottingWorkspaceGroupCount(), *selectedOutputType, m_view->shouldAddToExistingPlot(),
       m_hasActiveReflectometryFigure, m_activePlotOverplotCompatible));
 }
 
