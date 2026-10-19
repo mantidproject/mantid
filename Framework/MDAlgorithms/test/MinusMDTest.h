@@ -12,6 +12,7 @@
 #include "MantidFrameworkTestHelpers/BinaryOperationMDTestHelper.h"
 #include "MantidFrameworkTestHelpers/MDAlgorithmsTestHelper.h"
 #include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
+#include "MantidKernel/Strings.h"
 #include "MantidMDAlgorithms/MinusMD.h"
 
 #include <cxxtest/TestSuite.h>
@@ -147,21 +148,21 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 
-  void test_mem_minus_mem() { do_test(false, false, 0, "mem_minus_mem"); }
+  void test_mem_minus_mem() { do_test(false, false, 0, Mantid::Kernel::Strings::randomString(12)); }
 
-  void test_mem_minus_mem_inPlace() { do_test(false, false, 1, "mem_minus_mem_inPlace"); }
+  void test_mem_minus_mem_inPlace() { do_test(false, false, 1, Mantid::Kernel::Strings::randomString(12)); }
 
-  void test_file_minus_mem() { do_test(true, false, 0, "file_minus_mem"); }
+  void test_file_minus_mem() { do_test(true, false, 0, Mantid::Kernel::Strings::randomString(12)); }
 
-  void test_file_minus_mem_inPlace() { do_test(true, false, 1, "file_minus_mem_inPlace"); }
+  void test_file_minus_mem_inPlace() { do_test(true, false, 1, Mantid::Kernel::Strings::randomString(12)); }
 
-  void test_mem_minus_file_inPlace() { do_test(false, true, 1, "mem_minus_file_inPlace"); }
+  void test_mem_minus_file_inPlace() { do_test(false, true, 1, Mantid::Kernel::Strings::randomString(12)); }
 
-  void test_file_minus_file() { do_test(true, true, 0, "file_minus_file"); }
+  void test_file_minus_file() { do_test(true, true, 0, Mantid::Kernel::Strings::randomString(12)); }
 
-  void test_file_minus_file_inPlace() { do_test(true, true, 1, "file_minus_file_inPlace"); }
+  void test_file_minus_file_inPlace() { do_test(true, true, 1, Mantid::Kernel::Strings::randomString(12)); }
 
-  void test_mem_masked_plus_mem() { do_test(false, false, 0, "mem_masked_plus_mem", 1); }
+  void test_mem_masked_plus_mem() { do_test(false, false, 0, Mantid::Kernel::Strings::randomString(12), 1); }
 
-  void test_masked_file_plus_file_inPlace() { do_test(true, true, 1, "masked_file_plus_file_inPlace", 1); }
+  void test_masked_file_plus_file_inPlace() { do_test(true, true, 1, Mantid::Kernel::Strings::randomString(12), 1); }
 };
