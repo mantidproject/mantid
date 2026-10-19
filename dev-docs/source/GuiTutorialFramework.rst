@@ -45,25 +45,20 @@ Consequences of this:
 * Your interface must be safe to instantiate twice. In practice that means workspace names must be
   unique per instance, and closing the window must clean up after itself.
 
-A sandbox is any object with a ``window`` attribute and a ``teardown()`` method. It is also passed
-to every step as the *context*, so put on it whatever the steps need to reach:
+A sandbox is any object with a ``window`` attribute and a ``teardown()`` method; subclassing
+``mantidqt.widgets.tutorial.sandbox_base.InterfaceSandbox`` provides both. It is also passed to every
+step as the *context*, so put on it whatever the steps need to reach:
 
 .. code-block:: python
 
-    class TutorialSandbox:
+    class TutorialSandbox(InterfaceSandbox):
         def __init__(self, parent=None):
             self.data = DemoData()                       # generated demo files
-            self.model = MyModel()
-            self.view = MyView(parent=parent, register_usage=False)
-            self.presenter = MyPresenter(self.model, self.view, offer_tutorial=False)
+            model = MyModel()
+            view = MyView(parent=parent, register_usage=False)
+            super().__init__(model, view, MyPresenter(model, view, offer_tutorial=False))
 
-        @property
-        def window(self):
-            return self.view
-
-        def teardown(self):
-            self.view.close()                            # cleans up via closeEvent
-            self.view.deleteLater()
+        def _cleanup(self):                              # after the view is closed
             self.data.cleanup()
 
 Two traps of this pattern:
@@ -225,31 +220,49 @@ problems for tests. They are deliberately *not* shared: the test helpers raise `
 Launching it
 ############
 
+The presenter inherits ``TutorialPresenter`` and the view ``TutorialViewMixin``, which between them
+provide the tutorial button, opening (or raising) the tour, offering it on a first open, and closing
+it with the interface:
+
 .. code-block:: python
 
-    from mantidqt.widgets.tutorial.launcher import run_tutorial, should_show_on_startup
+    from mantidqt.widgets.tutorial.presenter import TutorialPresenter
+    from mantidqt.widgets.tutorial.view import TutorialViewMixin
 
-    def open_tutorial(self, mark_as_seen=False):
-        self._tutorial_session = run_tutorial(
-            sandbox_factory=make_sandbox_factory(parent=self.view),
-            chapters=CHAPTERS,
-            parent=self.view,
-            settings_key="MyInterface",
-            mark_as_seen=mark_as_seen,
-        )
+    class MyView(TutorialViewMixin, QMainWindow):
+        def __init__(self, parent=None):
+            ...
+            self.add_tutorial_button(self.toolbar)       # a QToolBar or a QLayout
 
-Keep the returned session alive for as long as the tour runs — it owns the sandbox window.
+    class MyPresenter(TutorialPresenter):
+        TUTORIAL_SETTINGS_KEY = "MyInterface"
+        TUTORIAL_TITLE = "My Interface — Tutorial"
+
+        def __init__(self, model, view, offer_tutorial=True):
+            ...
+            self.setup_tutorial(view, offer_tutorial)    # last, once the view is populated
+
+        def on_close(self):
+            self.close_tutorial()
+            ...
+
+        def tutorial_chapters(self):
+            return CHAPTERS
+
+        def make_tutorial_sandbox_factory(self):
+            from myinterface.tutorial.sandbox import make_sandbox_factory  # avoids an import cycle
+            return make_sandbox_factory(parent=self.view)
+
+``TutorialPresenter`` has no ``__init__`` of its own, so it combines with other bases such as
+``AlgorithmObserver``. Under the hood it calls ``run_tutorial`` from
+``mantidqt.widgets.tutorial.launcher``, and keeps the returned session alive for as long as the
+tour runs — it owns the sandbox window.
 
 ``should_show_on_startup(key)`` / ``mark_seen(key)`` store a flag under
 ``CustomInterfaces/<key>/tutorial_seen``. The flag is set when the tutorial is *offered*, not when
 it is completed: someone who closes it immediately has made their decision, and the toolbar button
-keeps it available. Offer it from the event loop rather than from the presenter's constructor, or
-the window it should appear over has not been laid out yet:
-
-.. code-block:: python
-
-    if should_show_on_startup("MyInterface"):
-        QTimer.singleShot(0, lambda: self.open_tutorial(mark_as_seen=True))
+keeps it available. ``TutorialPresenter`` offers it from the event loop rather than from the
+presenter's constructor, or the window it should appear over would not have been laid out yet.
 
 Testing a tour
 ##############
