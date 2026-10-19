@@ -172,10 +172,10 @@ void applyAlignmentLineStyles(MantidQt::Widgets::Common::Python::Object const &f
         auto const container = Python::Object(containers[index]);
         auto const workspaceName =
             boost::python::extract<std::string>(axis.attr("get_workspace_name_from_artist")(container))();
-        auto const lineStyle = workspaceName.ends_with("_profile")       ? "-"
-                               : workspaceName.ends_with("_fitted_peak") ? "--"
-                               : workspaceName.ends_with("_peak_centre") ? ":"
-                                                                         : nullptr;
+        auto const lineStyle = workspaceName.ends_with(alignmentProfileWorkspaceSuffix)      ? "-"
+                               : workspaceName.ends_with(alignmentFittedPeakWorkspaceSuffix) ? "--"
+                               : workspaceName.ends_with(alignmentPeakCentreWorkspaceSuffix) ? ":"
+                                                                                             : nullptr;
         if (!lineStyle)
           continue;
 

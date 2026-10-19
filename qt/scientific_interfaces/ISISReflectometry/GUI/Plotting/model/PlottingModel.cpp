@@ -393,9 +393,9 @@ std::string createAlignmentWorkspace(PlottingWorkspace const &workspace, Alignme
     return outputWorkspace;
   }
 
-  auto const rawProfileWorkspace = outputWorkspace + "_profile";
-  auto const fittedPeakWorkspace = outputWorkspace + "_fitted_peak";
-  auto const peakCentreWorkspace = outputWorkspace + "_peak_centre";
+  auto const rawProfileWorkspace = outputWorkspace + alignmentProfileWorkspaceSuffix;
+  auto const fittedPeakWorkspace = outputWorkspace + alignmentFittedPeakWorkspaceSuffix;
+  auto const peakCentreWorkspace = outputWorkspace + alignmentPeakCentreWorkspaceSuffix;
 
   auto detectorSpectraWorkspace = extractDetectorSpectra(rawWorkspace, instrumentName);
   auto peakFit = fitSpecularPeak(detectorSpectraWorkspace);
