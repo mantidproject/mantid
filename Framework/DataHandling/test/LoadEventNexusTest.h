@@ -549,63 +549,6 @@ public:
     TS_ASSERT_EQUALS(WS->getNumberEvents(), WS2->getNumberEvents());
     // Memory used should be lower (or the same at worst)
     TS_ASSERT_LESS_THAN_EQUALS(WS2->getMemorySize(), WS->getMemorySize());
-
-    // Longer, more thorough test
-    if (false) {
-      auto load = AlgorithmManager::Instance().create("LoadEventPreNexus", 1);
-      load->setPropertyValue("OutputWorkspace", "cncs_pre");
-      load->setPropertyValue("EventFilename", "CNCS_7860_neutron_event.dat");
-      load->setPropertyValue("PulseidFilename", "CNCS_7860_pulseid.dat");
-      load->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
-      load->execute();
-      TS_ASSERT(load->isExecuted());
-      EventWorkspace_sptr WS2 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("cncs_pre");
-      // Valid WS and it is an EventWorkspace
-      TS_ASSERT(WS2);
-
-      // Let's compare the proton_charge logs
-      TimeSeriesProperty<double> *log =
-          dynamic_cast<TimeSeriesProperty<double> *>(WS->mutableRun().getProperty("proton_charge"));
-      std::map<DateAndTime, double> logMap = log->valueAsCorrectMap();
-      TimeSeriesProperty<double> *log2 =
-          dynamic_cast<TimeSeriesProperty<double> *>(WS2->mutableRun().getProperty("proton_charge"));
-      std::map<DateAndTime, double> logMap2 = log2->valueAsCorrectMap();
-      std::map<DateAndTime, double>::iterator it, it2;
-
-      it = logMap.begin();
-      it2 = logMap2.begin();
-      for (; it != logMap.end();) {
-        // Same times within a millisecond
-        // TS_ASSERT_DELTA( it->first, it2->first,
-        // DateAndTime::durationFromSeconds(1e-3));
-        // Same times?
-        TS_ASSERT_LESS_THAN(fabs(DateAndTime::secondsFromDuration(it->first - it2->first)),
-                            1); // TODO: Fix the nexus file times here
-        // Same proton charge?
-        TS_ASSERT_DELTA(it->second, it2->second, 1e-5);
-        it++;
-        it2++;
-      }
-
-      constexpr std::size_t pixelID = 2000;
-
-      const std::vector<TofEvent> events1 = WS->getSpectrum(pixelID).getEvents();
-      const std::vector<TofEvent> events2 = WS2->getSpectrum(pixelID).getEvents();
-
-      // std::cout << events1.size() << '\n';
-      TS_ASSERT_EQUALS(events1.size(), events2.size());
-      if (events1.size() == events2.size()) {
-        for (size_t i = 0; i < events1.size(); i++) {
-          TS_ASSERT_DELTA(events1[i].tof(), events2[i].tof(), 0.05);
-          TS_ASSERT_DELTA(events1[i].pulseTime(), events2[i].pulseTime(),
-                          1e9); // TODO:: Fix nexus start times
-          // std::cout << (events1[i].pulseTime()-start)/1e9 << " - " <<
-          // (events2[i].pulseTime()-start)/1e9 << " sec\n";
-          // std::cout << "Pulse time diff " << (events1[i].pulseTime() -
-          // events2[i].pulseTime())/1e9 << " sec\n";
-        }
-      }
-    }
   }
 
   void test_TOF_filtered_loading() {

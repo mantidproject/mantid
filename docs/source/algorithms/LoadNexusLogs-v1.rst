@@ -84,16 +84,14 @@ NOTE: The pattern matching (globing) in ``BlockList`` supports the following:
 Usage
 -----
 
-As described above, normal usage of this algorithm is not necessary. however, at SNS
-there are preNeXus files available. The following uses this mechanism and then adds
-the logs.
+As described above, normal usage of this algorithm is not necessary. The following
+loads an event NeXus file without its logs and then adds them using this algorithm.
 
 .. include:: ../usagedata-note.txt
 
 .. testcode:: Ex
 
-    ws = LoadEventPreNexus("CNCS_7860_neutron_event.dat")
-    # Five logs are already present
+    ws = LoadEventNexus("CNCS_7860_event.nxs", LoadLogs=False)
     print("Number of original logs = {}".format(len(ws.getRun().keys())))
     phase_log = "Phase1"
     # Try to get a log that doesn't exist yet
@@ -114,9 +112,9 @@ Output:
 
 .. testoutput:: Ex
 
-    Number of original logs = 5
+    Number of original logs = 8
     Phase1 log does not exist!
-    Number of final logs = 44
+    Number of final logs = 49
     Phase1 log size = 46
 
 .. categories::
