@@ -156,13 +156,14 @@ class TestOrientationExporter_OutputAsEuler(unittest.TestCase):
         orient.R.as_euler.return_value = np.asarray(euler_return)
         return orient
 
-    def test_uses_axes_from_orientation_kwargs(self, mock_logger):
-        orient = self._make_orient_with_mock_R([10.0, 20.0, 30.0])
-        model = _make_model(orientations={0: orient}, axes="zyx", senses="1,1,1")
+    def test_lowercase_axes_are_written_in_the_intrinsic_convention(self, mock_logger):
+        # scipy reads lowercase axes as extrinsic, which would write different angles for this rotation
+        R = Rotation.from_euler("ZYX", [10.0, 20.0, 30.0], degrees=True)
+        model = _make_model(orientations={0: _make_orientation(R=R)}, axes="zyx", senses="1,1,1")
 
-        self._run(model)
+        content, _ = self._run(model)
 
-        orient.R.as_euler.assert_called_once_with("zyx", degrees=True)
+        np.testing.assert_allclose([float(v) for v in content.split()], [10.0, 20.0, 30.0], atol=0.01)
 
     def test_applies_senses_per_axis(self, mock_logger):
         orient = self._make_orient_with_mock_R([10.0, 20.0, 30.0])
