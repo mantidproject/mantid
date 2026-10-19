@@ -253,10 +253,15 @@ IFunction_sptr firstFunctionWithParameter(IFunction_sptr function, const std::st
   return nullptr;
 }
 
+bool hasCategory(const IFunction_sptr &function, const std::string &category) {
+  auto const categories = function->categories();
+  return std::find(categories.cbegin(), categories.cend(), category) != categories.cend();
+}
+
 // n is decremented for each matching function skipped, so it can be shared across recursive calls
 bool setNthFunctionParameter(const IFunction_sptr &function, const std::string &category,
                              const std::string &parameterName, double value, std::size_t &n) {
-  if (function->category() == category && function->hasParameter(parameterName)) {
+  if (hasCategory(function, category) && function->hasParameter(parameterName)) {
     if (n == 0) {
       function->setParameter(parameterName, value);
       return true;
