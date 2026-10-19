@@ -116,14 +116,15 @@ def start(options: argparse.ArgumentParser):
                 start_error_reporter(workbench_pid, exit_code)
 
             # a signal was emited so raise the signal from the application
-            if exit_code < 0 or (sys.platform == "win32" and exit_code in signal.Signals):
+            platform_is_windows = sys.platform == "win32"
+            if exit_code < 0 or (platform_is_windows and exit_code in signal.Signals):
                 try:
                     sig_code = signal.Signals(abs(exit_code))
                     name = sig_code.name
                     print("Received signal:", name)
                 except ValueError:
                     pass
-                signal.raise_signal(sig_code)  # this will exit the mainloop
+                not platform_is_windows and signal.raise_signal(sig_code)  # this will exit the mainloop
 
             # application returned non-zero that wasn't interpreted as a signal, return it as an exit code
             sys.exit(exit_code)
