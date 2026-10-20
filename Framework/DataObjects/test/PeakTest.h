@@ -596,6 +596,19 @@ public:
     std::for_each(angles.begin(), angles.end(), testTheta);
   }
 
+  void test_virtual_detector_position_is_absolute_when_sample_not_at_origin() {
+    const V3D samplePos(0.1, 0.2, 0.3);
+    const auto offsetSampleInst =
+        ComponentCreationHelper::createMinimalInstrument(V3D(-10.0, 0.2, 0.3), samplePos, V3D(5.0, 0.0, 0.0));
+    const double theta = 0.5;
+
+    Peak p(offsetSampleInst, theta, 2.0);
+
+    TS_ASSERT_EQUALS(p.getDetectorID(), -1);
+    TS_ASSERT_EQUALS(p.getDetPos(), samplePos + V3D(sin(theta), 0., cos(theta)));
+    TS_ASSERT_DELTA(p.getL2(), 1.0, 1e-10);
+  }
+
   /** Create peaks using Q in the lab frame,
    * then find the corresponding detector ID */
   void test_findDetector() {
