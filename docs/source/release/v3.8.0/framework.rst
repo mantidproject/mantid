@@ -46,7 +46,7 @@ New
 - SaveDiffFittingAscii an algorithm which saves a TableWorkspace containing
   diffraction fitting results as an ASCII file
 
-- :ref:`UnwrapMonitorsInTOF <algm-UnwrapMonitorsInTOF>` handles the data which was collected beyond the end of a frame.
+- UnwrapMonitorsInTOF handles the data which was collected beyond the end of a frame.
 
 - :ref:`ExtractMonitors <algm-ExtractMonitors>` an algorithm to extract the monitor spectra into a new workspace. Can also be
   used to create a workspace with just the detectors, or two workspaces, one with the monitors and one with the detectors.

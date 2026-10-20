@@ -375,9 +375,6 @@ class ISISReducer(Reducer):
         # which gets used during cropping and Transmission calculation
         self.dark_run_subtraction = isis_reduction_steps.DarkRunSubtraction()
 
-        # Unwrap monitors
-        self._unwrap_monitors = False
-
     def set_instrument(self, configuration):
         """
         Sets the instrument and put in the default beam center (usually the
@@ -962,11 +959,3 @@ class ISISReducer(Reducer):
             if sample.loader.wksp_name + "_monitors" in mtd.getObjectNames():
                 was_event = True
         return was_event
-
-    def get_unwrap_monitors(self):
-        return self._unwrap_monitors
-
-    def set_unwrap_monitors(self, value):
-        self._unwrap_monitors = value
-
-    unwrap_monitors = property(get_unwrap_monitors, set_unwrap_monitors, None, None)
