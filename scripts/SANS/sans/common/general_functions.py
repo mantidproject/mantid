@@ -14,6 +14,8 @@ from copy import deepcopy
 import json
 from typing import Tuple, Optional, List
 
+import numpy as np
+
 from mantid.api import AlgorithmManager, AnalysisDataService, isSameWorkspaceObject
 from sans.common.constant_containers import SANSInstrument_enum_list, SANSInstrument_string_list, SANSInstrument_string_as_key_NoInstrument
 from sans.common.constants import SANS_FILE_TAG, ALL_PERIODS, SANS2D, EMPTY_NAME, REDUCED_CAN_TAG
@@ -55,7 +57,10 @@ def get_log_value(run, log_name, log_type):
     """
     try:
         # Scalar case
-        output = log_type(run.getLogData(log_name).value)
+        log_value = run.getLogData(log_name).value
+        if isinstance(log_value, np.ndarray):
+            raise TypeError("Log value is an array")
+        output = log_type(log_value)
     except TypeError:
         # We must be dealing with a vectorized case, ie a time series
         log_property = run.getLogData(log_name)

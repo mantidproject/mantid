@@ -368,7 +368,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
             self.setProperty("OutputWorkspace", qxy)
         else:
             if ws_sam.run().getProperty("source_aperture").value:
-                sourceapertureradius = float(ws_sam.run().getProperty("source_aperture").value) / 2.0
+                sourceapertureradius = float(np.asarray(ws_sam.run().getProperty("source_aperture").value).item()) / 2.0
                 if sourceapertureradius > SOURCE_APERTURE_RADIUS_MAX:
                     sourceapertureradius = SOURCE_APERTURE_RADIUS
                     print("sourceapertureradius value cannot be retrieved; generic value of 20mm taken")
@@ -377,7 +377,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
                 print("sourceapertureradius value cannot be retrieved; generic value of 20mm taken")
 
             if ws_sam.run().getProperty("sample_aperture").value:
-                sampleapertureradius = float(ws_sam.run().getProperty("source_aperture").value) / 2.0
+                sampleapertureradius = float(np.asarray(ws_sam.run().getProperty("source_aperture").value).item()) / 2.0
                 if sampleapertureradius > SAMPLE_APERTURE_RADIUS_MAX:
                     sampleapertureradius = SAMPLE_APERTURE_RADIUS
                     print("sampleapertureradius value cannot be retrieved; generic value of 6.25mm taken")
@@ -433,16 +433,16 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         return float(duration.total_microseconds())
 
     def _get_bm_counts(self, ws):
-        return float(ws.run().getProperty("bm_counts").value)
+        return float(np.asarray(ws.run().getProperty("bm_counts").value).item())
 
     def _get_frame_count(self, ws):
-        return float(ws.run().getProperty("frame_count").value)
+        return float(np.asarray(ws.run().getProperty("frame_count").value).item())
 
     def _get_period(self, ws):
-        return float(ws.run().getProperty("period").value)
+        return float(np.asarray(ws.run().getProperty("period").value).item())
 
     def _get_l1(self, ws):
-        return float(ws.run().getProperty("L1").value)
+        return float(np.asarray(ws.run().getProperty("L1").value).item())
 
     def _apply_mask(self, ws, mask):
         alg = self.createChildAlgorithm("MaskDetectors")
