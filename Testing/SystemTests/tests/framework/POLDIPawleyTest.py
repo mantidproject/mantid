@@ -16,7 +16,7 @@ from plugins.algorithms.poldi_utils import load_poldi_h5f
 class POLDIPawleyWorkflow(systemtesting.MantidSystemTest):
     def setUp(self):
         fpath_data = FileFinder.getFullPath("poldi2025n012174.hdf")  # for np.loadtxt so need full path
-        self.ws = load_poldi_h5f(fpath_data, "POLDI_Definition_896.xml", t0=5.824e-02, t0_const=-12.68, output_workspace="poldi_silicon")
+        self.ws = load_poldi_h5f(fpath_data, "POLDI_Definition.xml", output_workspace="poldi_silicon")
         self.ws_autocorr = PoldiAutoCorrelation(self.ws, OutputWorkspace=self.ws.name() + "_ac", NGroups=4)
         self.ws_autocorr = ConvertUnits(InputWorkspace=self.ws_autocorr, OutputWorkspace=self.ws_autocorr.name(), Target="dSpacing")
         self.ws_autocorr = ConvertToPointData(InputWorkspace=self.ws_autocorr, OutputWorkspace=self.ws_autocorr.name())

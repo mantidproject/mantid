@@ -75,17 +75,16 @@ def load_poldi(
 def load_poldi_h5f(
     fpath_data: str,
     fpath_idf: str,
-    t0: float = 0.025701,
-    t0_const: float = 85.0,
+    t0: float | None = None,
+    t0_const: float | None = None,
     output_workspace: str = "ws",
 ):
     """
     Function to load POLDI v2 data from ASCII file containing array of counts
     :param fpath_data: filepath of ASCII file with counts
     :param fpath_idf: filepath to instrument definition file
-    :param chopper_speed: chopper speed used on instrument (rpm)
-    :param t0: time offset applied to slit openings (fraction of cycle time)
-    :param t0_const: TZERO diffractometer constant for instrument
+    :param t0: time offset applied to slit openings (fraction of cycle time), overrides the parameter file if given
+    :param t0_const: TZERO diffractometer constant for instrument, overrides the parameter file if given
     :param output_workspace: output workspace name
     :return ws: workspace containing POLDI data
     """
@@ -115,23 +114,16 @@ def load_poldi_h5f(
     ws = exec_alg("ConvertToPointData", InputWorkspace=ws)
     # add some logs (will eventually be set in file)
     exec_alg("AddSampleLog", Workspace=ws, LogName="chopperspeed", LogText=str(chopper_speed), LogType="Number")
-    # set t0 (would normally live in parameter file)
-    exec_alg(
-        "SetInstrumentParameter",
-        Workspace=ws,
-        ComponentName="chopper",
-        ParameterName="t0",
-        ParameterType="Number",
-        Value=str(t0),
-    )
-    exec_alg(
-        "SetInstrumentParameter",
-        Workspace=ws,
-        ComponentName="chopper",
-        ParameterName="t0_const",
-        ParameterType="Number",
-        Value=str(t0_const),
-    )
+    for name, value in (("t0", t0), ("t0_const", t0_const)):
+        if value is not None:
+            exec_alg(
+                "SetInstrumentParameter",
+                Workspace=ws,
+                ComponentName="chopper",
+                ParameterName=name,
+                ParameterType="Number",
+                Value=str(value),
+            )
     # add monitor counts
     exec_alg("AddSampleLog", Workspace=ws, LogName="gd_prtn_chrg", LogText=str(monitor_count), LogType="Number")
     ADS.addOrReplace(output_workspace, ws)
