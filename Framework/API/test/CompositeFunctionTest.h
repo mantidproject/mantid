@@ -1190,6 +1190,15 @@ public:
     TS_ASSERT_EQUALS(empty.asString(), "name=CompositeFunction");
   }
 
+  void test_empty_function_string_keeps_parent_local_attributes() {
+    // Expose the protected writeToString, which a parent such as MultiDomainFunction calls with its local attributes
+    struct EmptyComposite : public CompositeFunction {
+      using CompositeFunction::writeToString;
+    };
+    EmptyComposite empty;
+    TS_ASSERT_EQUALS(empty.writeToString(",$domains=i"), "name=CompositeFunction,$domains=i");
+  }
+
   void test_setWorkspaceWorks() {
     CompositeFunction *mfun = new CompositeFunction;
     IFunction_sptr g1 = IFunction_sptr(new Gauss());
