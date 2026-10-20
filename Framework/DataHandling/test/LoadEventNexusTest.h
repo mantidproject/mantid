@@ -1363,7 +1363,7 @@ public:
 
     auto ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws);
     auto inst = ws->getInstrument();
-    TS_ASSERT_EQUALS(inst->getName(), "HYSPECA");
+    TS_ASSERT_EQUALS(ws->getInstrumentName(), "HYSPECA");
     TS_ASSERT_EQUALS(inst->getValidFromDate(), std::string("2011-Jul-20 17:02:48.437294000"));
     TS_ASSERT_EQUALS(inst->getNumberDetectors(), 20483);
     TS_ASSERT_EQUALS(countMonitors(ws->detectorInfo()), 3);
@@ -1396,7 +1396,7 @@ public:
     TS_ASSERT(!inst->getFilename().empty()); // This is how we know we didn't
                                              // get it from inside the nexus
                                              // file
-    TS_ASSERT_EQUALS(inst->getName(), "CNCS");
+    TS_ASSERT_EQUALS(ws->getInstrumentName(), "CNCS");
     TS_ASSERT_EQUALS(inst->getNumberDetectors(), 51203);
     TS_ASSERT_EQUALS(countMonitors(ws->detectorInfo()), 3);
 
@@ -1778,7 +1778,7 @@ public:
     TS_ASSERT(wksp);
     auto instr = wksp->getInstrument();
     TS_ASSERT(instr);
-    TS_ASSERT_EQUALS(instr->getName(), "MANDI_clone_bank26");
+    TS_ASSERT_EQUALS(wksp->getInstrumentName(), "MANDI_clone_bank26");
     size_t monitors = countMonitors(wksp->detectorInfo());
     TS_ASSERT_EQUALS(instr->getNumberDetectors(/*skip monitors*/ true), bankSize);
     TS_ASSERT_EQUALS(instr->getNumberDetectors(/*skip monitors*/ false), bankSize + monitors);
@@ -1794,7 +1794,7 @@ public:
     time2 = clock() - time2;
     EventWorkspace_sptr wksp_full = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsname_full);
     auto instr_full = wksp_full->getInstrument();
-    TS_ASSERT_EQUALS(instr_full->getName(), "MANDI");
+    TS_ASSERT_EQUALS(wksp_full->getInstrumentName(), "MANDI");
     TS_ASSERT_EQUALS(bankSize * numBanks + monitors, instr_full->getNumberDetectors());
 
     // ensure that loading only one bank does not take substantially longer than full instrument

@@ -145,8 +145,7 @@ void SaveDetectorsGrouping::printToXML(const std::map<int, std::vector<detid_t>>
                                        const std::string &xmlfilename) {
 
   // 1. Get Instrument information
-  const auto &instrument = mGroupWS->getInstrument();
-  const std::string instrumentName = instrument->getName();
+  const std::string instrumentName = mGroupWS->getInstrumentName();
   g_log.debug() << "Instrument " << instrumentName << '\n';
 
   // 2. Start document (XML)

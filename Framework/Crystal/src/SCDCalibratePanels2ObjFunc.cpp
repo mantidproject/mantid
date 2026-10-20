@@ -66,8 +66,7 @@ void SCDCalibratePanels2ObjFunc::setPeakWorkspace(IPeaksWorkspace_sptr &pws, con
   m_cmpt = componentName;
 
   // Special adjustment for CORELLI
-  Instrument_sptr inst = std::const_pointer_cast<Instrument>(m_pws->getInstrument());
-  if (inst->getName().compare("CORELLI") == 0 && m_cmpt != "moderator")
+  if (m_pws->getInstrumentName().compare("CORELLI") == 0 && m_cmpt != "moderator")
     // the second check is just to ensure that no accidental passing in
     // a bank name with sixteenpack already appended
     if (!m_cmpt.ends_with("/sixteenpack"))

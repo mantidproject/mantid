@@ -266,7 +266,7 @@ void EditInstrumentGeometry::exec() {
       g_log.error(errmsg);
       throw std::runtime_error(errmsg);
     }
-    instrumentName = originstrument->getName();
+    instrumentName = workspace->getInstrumentName();
   }
 
   // Create a new instrument from scratch.

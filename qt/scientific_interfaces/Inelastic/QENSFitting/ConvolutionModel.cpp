@@ -33,7 +33,7 @@ void readAnalyserFromFile(const std::string &analyser, const MatrixWorkspace_spt
   auto const idfDirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
   auto const reflection = instrument->getStringParameter("reflection")[0];
   auto const parameterFile =
-      idfDirectory + instrument->getName() + "_" + analyser + "_" + reflection + "_Parameters.xml";
+      idfDirectory + workspace->getInstrumentName() + "_" + analyser + "_" + reflection + "_Parameters.xml";
 
   auto loadParamFile = loadParameterFileAlgorithm(workspace->getName(), parameterFile);
   loadParamFile->execute();

@@ -155,7 +155,7 @@ std::map<std::string, std::string> ConvertHFIRSCDtoMDE::validateInputs() {
       inputMessages.emplace_back(prefix + inputWSmsg);
       continue;
     }
-    const std::string memberInstrument = inputWS->getExperimentInfo(0)->getInstrument()->getName();
+    const std::string memberInstrument = inputWS->getExperimentInfo(0)->getInstrumentName();
     if (instrument.empty()) {
       instrument = memberInstrument;
       instrumentOwner = group ? memberName(*group, i) : "";
