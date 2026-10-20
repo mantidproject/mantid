@@ -176,6 +176,39 @@ public:
     TSM_ASSERT("getProperty has not returned a FilteredProperty as expected", filteredProp);
   }
 
+  void testFilterByLogDoesNotApplyOneLogsInvalidValuesToAnother() {
+    const auto createInvalidValues = [](const std::string &name, const std::vector<bool> &values) {
+      auto invalid = std::make_unique<TimeSeriesProperty<bool>>(PropertyManager::getInvalidValuesFilterLogName(name));
+      const std::vector<std::string> times{"2007-11-30T16:17:00", "2007-11-30T16:17:10", "2007-11-30T16:17:20",
+                                           "2007-11-30T16:17:30", "2007-11-30T16:17:40"};
+      for (size_t i = 0; i < times.size(); ++i)
+        invalid->addValue(times[i], values[i]);
+      return invalid;
+    };
+    const std::unique_ptr<TimeSeriesProperty<bool>> baseFilter(createTestFilter());
+
+    // log1 is invalid part way through the filter region, log2 is always valid
+    PropertyManagerHelper manager;
+    manager.declareProperty(createTestSeries("log1"));
+    manager.declareProperty(createInvalidValues("log1", {true, true, true, false, false}));
+    manager.declareProperty(createTestSeries("log2"));
+    manager.declareProperty(createInvalidValues("log2", {true, true, true, true, true}));
+    LogFilter filter(*baseFilter);
+    manager.filterByProperty(&filter);
+
+    // log2 filtered on its own
+    PropertyManagerHelper reference;
+    reference.declareProperty(createTestSeries("log2"));
+    reference.declareProperty(createInvalidValues("log2", {true, true, true, true, true}));
+    LogFilter referenceFilter(*baseFilter);
+    reference.filterByProperty(&referenceFilter);
+
+    auto log2 = dynamic_cast<TimeSeriesProperty<double> *>(manager.getPointerToProperty("log2"));
+    auto referenceLog2 = dynamic_cast<TimeSeriesProperty<double> *>(reference.getPointerToProperty("log2"));
+    TS_ASSERT_EQUALS(log2->size(), referenceLog2->size());
+    TS_ASSERT_EQUALS(log2->filteredValuesAsVector(), referenceLog2->filteredValuesAsVector());
+  }
+
   void testCopyConstructor() {
     PropertyManagerHelper mgr1;
     mgr1.declareProperty("aProp", 10);
