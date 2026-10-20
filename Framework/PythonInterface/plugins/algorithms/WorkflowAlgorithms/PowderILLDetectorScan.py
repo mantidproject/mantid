@@ -250,7 +250,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
             self._progress.report("Applying detector efficiencies")
             LoadNexusProcessed(Filename=calib_file, OutputWorkspace="__det_eff")
             for ws in input_group:
-                name = ws.getName()
+                name = ws.name()
                 ExtractMonitors(InputWorkspace=name, DetectorWorkspace=name)
                 ApplyDetectorScanEffCorr(InputWorkspace=name, DetectorEfficiencyWorkspace="__det_eff", OutputWorkspace=name)
 
@@ -277,7 +277,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         components = self.getPropertyValue("ComponentsToReduce")
         if components:
             for ws in input_group:
-                CropToComponent(InputWorkspace=ws.getName(), OutputWorkspace=ws.getName(), ComponentNames=components)
+                CropToComponent(InputWorkspace=ws.name(), OutputWorkspace=ws.name(), ComponentNames=components)
 
         self._progress.report("Doing Output2DTubes Option")
         if self.getProperty("Output2DTubes").value:

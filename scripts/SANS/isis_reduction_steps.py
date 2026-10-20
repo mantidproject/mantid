@@ -1492,14 +1492,13 @@ class DarkRunSubtraction(object):
         @returns a list with monitor spectra
         """
         monitor_indices = []
+        spectrum_info = monitor_workspace.spectrumInfo()
         for ws_index in range(monitor_workspace.getNumberHistograms()):
-            try:
-                det = monitor_workspace.getDetector(ws_index)
-            except RuntimeError:
+            if not spectrum_info.hasDetectors(ws_index):
                 # Skip the rest after finding the first spectra with no detectors,
                 # which is a big speed increase for SANS2D.
                 break
-            if det.isMonitor():
+            if spectrum_info.isMonitor(ws_index):
                 monitor_indices.append(ws_index)
         return monitor_indices
 
@@ -2254,8 +2253,9 @@ class TransmissionCalc(ReductionStep):
         # monitors
         if tmp.getNumberHistograms() > 0:
             ws_index = 0
+            spectrum_info = tmp.spectrumInfo()
             for ws_index in range(tmp.getNumberHistograms()):
-                if tmp.getDetector(ws_index).isMonitor():
+                if spectrum_info.isMonitor(ws_index):
                     spectrum_number = tmp.getSpectrum(ws_index).getSpectrumNo()
                     back_start_mon, back_end_mon = inst.get_TOFs(spectrum_number)
                     if back_start_mon and back_end_mon:
