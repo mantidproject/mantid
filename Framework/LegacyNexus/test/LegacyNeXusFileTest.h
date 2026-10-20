@@ -21,6 +21,7 @@
 #include <hdf5.h>
 #include <iostream>
 #include <map>
+#include <mfhdf.h>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -53,6 +54,32 @@ public:
     H5Tclose(attrType);
     H5Sclose(attrSpace);
     return group;
+  }
+
+  void test_hdf4_data_read_failure_reports_an_error() {
+    const std::string filename("LegacyNexus_missing_external_data.hdf");
+    const std::string externalFilename("LegacyNexus_missing_external_data.raw");
+    std::filesystem::remove(filename);
+    std::filesystem::remove(externalFilename);
+
+    const int32 fileId = SDstart(filename.c_str(), DFACC_CREATE);
+    int32 dims[1]{1};
+    const int32 dataSet = SDcreate(fileId, "data", DFNT_INT32, 1, dims);
+    TS_ASSERT_EQUALS(SDsetexternalfile(dataSet, externalFilename.c_str(), 0), SUCCEED);
+    int32 start[1]{0};
+    int32 edge[1]{1};
+    int32 value = 42;
+    TS_ASSERT_EQUALS(SDwritedata(dataSet, start, nullptr, edge, &value), SUCCEED);
+    TS_ASSERT_EQUALS(SDendaccess(dataSet), SUCCEED);
+    TS_ASSERT_EQUALS(SDend(fileId), SUCCEED);
+    std::filesystem::remove(externalFilename);
+
+    File file(filename, NXACC_READ);
+    file.openData("data");
+    int32 loadedValue = 0;
+    TS_ASSERT_THROWS(file.getData(&loadedValue), const Exception &);
+    file.close();
+    std::filesystem::remove(filename);
   }
 
   void test_unwritten_scalar_variable_length_string_is_read_as_empty() {
@@ -104,6 +131,86 @@ public:
     file.openData("labels");
     TS_ASSERT_THROWS(file.getInfo(), const Exception &);
     file.close();
+    std::filesystem::remove(filename);
+  }
+
+  void test_null_variable_length_string_dataset_reports_an_error() {
+    const std::string filename("LegacyNexus_null_vlen_string.h5");
+    std::filesystem::remove(filename);
+    const hid_t fileId = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    const hid_t group = createEntry(fileId);
+    const hid_t dataSpace = H5Screate(H5S_NULL);
+    const hid_t dataType = H5Tcopy(H5T_C_S1);
+    H5Tset_size(dataType, H5T_VARIABLE);
+    const hid_t dataSet = H5Dcreate2(group, "description", dataType, dataSpace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dclose(dataSet);
+    H5Tclose(dataType);
+    H5Sclose(dataSpace);
+    H5Gclose(group);
+    H5Fclose(fileId);
+
+    File file(filename, NXACC_READ);
+    file.openGroup("entry", "NXentry");
+    file.openData("description");
+    TS_ASSERT_THROWS(file.getInfo(), const Exception &);
+    file.close();
+    std::filesystem::remove(filename);
+  }
+
+  void test_unwritten_scalar_variable_length_string_attribute_has_space_for_null_terminator() {
+    const std::string filename("LegacyNexus_empty_vlen_string_attribute.h5");
+    std::filesystem::remove(filename);
+    const hid_t fileId = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    const hid_t group = createEntry(fileId);
+    const hid_t attributeSpace = H5Screate(H5S_SCALAR);
+    const hid_t attributeType = H5Tcopy(H5T_C_S1);
+    H5Tset_size(attributeType, H5T_VARIABLE);
+    const hid_t attribute = H5Acreate2(group, "description", attributeType, attributeSpace, H5P_DEFAULT, H5P_DEFAULT);
+    H5Aclose(attribute);
+    H5Tclose(attributeType);
+    H5Sclose(attributeSpace);
+    H5Gclose(group);
+    H5Fclose(fileId);
+
+    {
+      File file(filename, NXACC_READ);
+      file.openGroup("entry", "NXentry");
+      const auto attributes = file.getAttrInfos();
+      TS_ASSERT_EQUALS(attributes.size(), 1);
+      TS_ASSERT_EQUALS(attributes.front().name, "description");
+      TS_ASSERT_EQUALS(attributes.front().type, NXnumtype::CHAR);
+      TS_ASSERT_EQUALS(attributes.front().length, 1);
+      file.close();
+    }
+
+    std::filesystem::remove(filename);
+  }
+
+  void test_variable_length_string_attribute_array_reports_an_error() {
+    const std::string filename("LegacyNexus_vlen_string_attribute_array.h5");
+    std::filesystem::remove(filename);
+    const hid_t fileId = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    const hid_t group = createEntry(fileId);
+    const hsize_t dims[1]{2};
+    const hid_t attributeSpace = H5Screate_simple(1, dims, nullptr);
+    const hid_t attributeType = H5Tcopy(H5T_C_S1);
+    H5Tset_size(attributeType, H5T_VARIABLE);
+    const hid_t attribute = H5Acreate2(group, "labels", attributeType, attributeSpace, H5P_DEFAULT, H5P_DEFAULT);
+    const char *values[2]{"first", "second"};
+    H5Awrite(attribute, attributeType, values);
+    H5Aclose(attribute);
+    H5Tclose(attributeType);
+    H5Sclose(attributeSpace);
+    H5Gclose(group);
+    H5Fclose(fileId);
+
+    {
+      File file(filename, NXACC_READ);
+      file.openGroup("entry", "NXentry");
+      TS_ASSERT_THROWS(file.getAttrInfos(), const Exception &);
+      file.close();
+    }
+
     std::filesystem::remove(filename);
   }
 

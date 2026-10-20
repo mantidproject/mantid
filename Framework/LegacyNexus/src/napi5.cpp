@@ -732,6 +732,29 @@ static void killAttVID(const pLgcyNexusFile5 pFile, hid_t vid) {
   }
 }
 
+static NXstatus validateSingleVariableLengthStringElement(hid_t dataspace, const char *objectKind) {
+  const hssize_t elementCount = H5Sget_simple_extent_npoints(dataspace);
+  char message[256];
+  if (elementCount < 0) {
+    snprintf(message, sizeof(message), "ERROR: cannot determine element count for variable-length string %s",
+             objectKind);
+    NXReportError(message);
+    return NXstatus::NX_ERROR;
+  }
+  if (elementCount == 0) {
+    snprintf(message, sizeof(message), "ERROR: null variable-length string %s dataspaces are not supported",
+             objectKind);
+    NXReportError(message);
+    return NXstatus::NX_ERROR;
+  }
+  if (elementCount > 1) {
+    snprintf(message, sizeof(message), "ERROR: arrays of variable-length string %ss are not supported", objectKind);
+    NXReportError(message);
+    return NXstatus::NX_ERROR;
+  }
+  return NXstatus::NX_OK;
+}
+
 /* ------------------------------------------------------------------- */
 
 NXstatus NX5getdataID(NXhandle fid, NXlink *sRes) {
@@ -1120,34 +1143,27 @@ NXstatus NX5getdata(NXhandle fid, void *data) {
   /* map datatypes of other plateforms */
   tclass = H5Tget_class(pFile->iCurrentT);
   if (H5Tis_variable_str(pFile->iCurrentT)) {
-    const hssize_t elementCount = H5Sget_simple_extent_npoints(pFile->iCurrentS);
-    if (elementCount == 1) {
-      char *strdata = NULL;
-      memtype_id = H5Tcopy(H5T_C_S1);
-      H5Tset_size(memtype_id, H5T_VARIABLE);
-      status = H5Dread(pFile->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &strdata);
-      if (status >= 0) {
-        if (strdata == NULL) {
-          static_cast<char *>(data)[0] = '\0';
-        } else {
-          const size_t length = strlen(strdata);
-          memcpy(data, strdata, length + 1);
-          H5free_memory(strdata);
-        }
+    if (validateSingleVariableLengthStringElement(pFile->iCurrentS, "dataset") != NXstatus::NX_OK)
+      return NXstatus::NX_ERROR;
+    char *strdata = NULL;
+    memtype_id = H5Tcopy(H5T_C_S1);
+    H5Tset_size(memtype_id, H5T_VARIABLE);
+    status = H5Dread(pFile->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &strdata);
+    if (status >= 0) {
+      if (strdata == NULL) {
+        static_cast<char *>(data)[0] = '\0';
+      } else {
+        const size_t length = strlen(strdata);
+        memcpy(data, strdata, length + 1);
+        H5free_memory(strdata);
       }
-      H5Tclose(memtype_id);
-      if (status < 0) {
-        NXReportError("ERROR: failed to transfer variable-length string dataset");
-        return NXstatus::NX_ERROR;
-      }
-      return NXstatus::NX_OK;
     }
-    // The NAPI char-buffer interface has no way to describe an array of
-    // independently allocated strings or the capacity of the output buffer.
-    // Reject this shape instead of allowing HDF5 to write pointer data into a
-    // character buffer.
-    NXReportError("ERROR: arrays of variable-length strings are not supported");
-    return NXstatus::NX_ERROR;
+    H5Tclose(memtype_id);
+    if (status < 0) {
+      NXReportError("ERROR: failed to transfer variable-length string dataset");
+      return NXstatus::NX_ERROR;
+    }
+    return NXstatus::NX_OK;
   } else if (tclass == H5T_STRING) {
     status = H5Dread(pFile->iCurrentD, pFile->iCurrentT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
   } else {
@@ -1201,11 +1217,8 @@ NXstatus NX5getinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *i
   *iType = static_cast<NXnumtype>(mType);
   if (tclass == H5T_STRING && myDim[iRank - 1] == 1) {
     if (H5Tis_variable_str(pFile->iCurrentT)) {
-      const hssize_t elementCount = H5Sget_simple_extent_npoints(pFile->iCurrentS);
-      if (elementCount != 1) {
-        NXReportError("ERROR: arrays of variable-length strings are not supported");
+      if (validateSingleVariableLengthStringElement(pFile->iCurrentS, "dataset") != NXstatus::NX_OK)
         return NXstatus::NX_ERROR;
-      }
       memType = H5Tcopy(H5T_C_S1);
       H5Tset_size(memType, H5T_VARIABLE);
       const herr_t readStatus = H5Dread(pFile->iCurrentD, memType, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vlData);
@@ -1443,11 +1456,8 @@ NXstatus NX5getattrainfo(NXhandle handle, NXname name, int *rank, int dim[], NXn
   if (tclass == H5T_STRING) {
     myrank++;
     if (H5Tis_variable_str(attrt)) {
-      const hssize_t elementCount = H5Sget_simple_extent_npoints(filespace);
-      if (elementCount != 1) {
-        NXReportError("ERROR: arrays of variable-length string attributes are not supported");
+      if (validateSingleVariableLengthStringElement(filespace, "attribute") != NXstatus::NX_OK)
         return NXstatus::NX_ERROR;
-      }
       myDim[myrank - 1] = 1;
       memtype = H5Tcopy(H5T_C_S1);
       H5Tset_size(memtype, H5T_VARIABLE);
