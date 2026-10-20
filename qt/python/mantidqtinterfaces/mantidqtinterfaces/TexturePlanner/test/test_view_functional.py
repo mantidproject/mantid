@@ -45,7 +45,11 @@ from mantid.simpleapi import (
 )
 from Engineering.common.instrument_config import SUPPORTED_INSTRUMENTS
 from Engineering.common.xml_shapes import get_cube_xml
-from Engineering.texture.texture_helper import convert_to_sscanss_frame, read_texture_direction_info_from_log
+from Engineering.texture.texture_helper import (
+    convert_to_sscanss_frame,
+    read_euler_orientation_info_from_log,
+    read_texture_direction_info_from_log,
+)
 
 from mantidqtinterfaces.TexturePlanner.model import TexturePlannerModel
 from mantidqtinterfaces.TexturePlanner.settings.settings_model import DEFAULT_SETTINGS
@@ -405,6 +409,14 @@ class TestInitialState(_FunctionalTestBase):
     def test_export_combo_lists_base_formats_without_transmission_weighting(self):
         items = [self.view.cmbExportFormat.itemText(i) for i in range(self.view.cmbExportFormat.count())]
         self.assertEqual(items, [EXPORT_SSCANSS, "Euler Orientation File", EXPORT_MATRIX, EXPORT_REFERENCE_WS])
+
+    def test_save_euler_checkbox_only_shown_for_reference_workspace(self):
+        self.assertTrue(self.view.chkSaveEulerOnRef.isHidden())
+        self.view.cmbExportFormat.setCurrentText(EXPORT_REFERENCE_WS)
+        self.assertFalse(self.view.chkSaveEulerOnRef.isHidden())
+        self.assertFalse(self.view.chkSaveEulerOnRef.isChecked())
+        self.view.cmbExportFormat.setCurrentText(EXPORT_SSCANSS)
+        self.assertTrue(self.view.chkSaveEulerOnRef.isHidden())
 
     def test_starts_with_one_orientation(self):
         self.assertEqual(self.model.orientations.get_num_orientations(), 1)
@@ -1830,6 +1842,22 @@ class TestExportContents(_FunctionalTestBase):
         loaded = LoadNexus(Filename=os.path.join(self._tmpdir, "run.nxs"), OutputWorkspace="__texplan_test_ref_untransformed")
         matrix, _ = read_texture_direction_info_from_log(loaded)
         np.testing.assert_allclose(matrix, np.eye(3), atol=1e-9)
+
+    def test_reference_workspace_carries_the_euler_settings_when_asked(self):
+        self.model.orientations.orientation_kwargs.update({"Axes": "zxz", "Senses": "1,-1,1"})
+        self.view.cmbExportFormat.setCurrentText(EXPORT_REFERENCE_WS)
+        self._click_checkbox(self.view.chkSaveEulerOnRef)
+        self._click(self.view.btnExport)
+
+        loaded = LoadNexus(Filename=os.path.join(self._tmpdir, "run.nxs"), OutputWorkspace="__texplan_test_ref_euler")
+        self.assertEqual(read_euler_orientation_info_from_log(loaded), ("ZXZ", "1,-1,1"))
+
+    def test_reference_workspace_has_no_euler_settings_by_default(self):
+        self.view.cmbExportFormat.setCurrentText(EXPORT_REFERENCE_WS)
+        self._click(self.view.btnExport)
+
+        loaded = LoadNexus(Filename=os.path.join(self._tmpdir, "run.nxs"), OutputWorkspace="__texplan_test_ref_no_euler")
+        self.assertIsNone(read_euler_orientation_info_from_log(loaded))
 
 
 class TestPoleFigureReference(_FunctionalTestBase):

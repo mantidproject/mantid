@@ -15,7 +15,11 @@ from mantid.simpleapi import (
 )
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import logger
-from Engineering.texture.texture_helper import convert_to_sscanss_frame, write_texture_direction_info_to_log
+from Engineering.texture.texture_helper import (
+    convert_to_sscanss_frame,
+    write_euler_orientation_info_to_log,
+    write_texture_direction_info_to_log,
+)
 from typing import TYPE_CHECKING, Generator
 
 if TYPE_CHECKING:
@@ -107,11 +111,15 @@ class OrientationExporter:
             f.writelines(f"{global_max / per_min}\n" for per_min in per_orientation_min)
         logger.notice(f"Transmission weighting written to '{save_file}'")
 
-    def output_as_reference_workspace(self, save_dir, filename):
+    def output_as_reference_workspace(self, save_dir: str, filename: str, save_euler: bool = False) -> None:
         ref_wsname = self._model.workspaces.WS_REFERENCE
         try:
             self._build_reference_ws(ref_wsname)
             write_texture_direction_info_to_log(ref_wsname, self._model.effective_ax_transform, self._model.dir_names)
+            if save_euler:
+                kwargs = self._model.orientations.orientation_kwargs
+                # the Euler export writes in the upper-case (intrinsic) convention, so record that one
+                write_euler_orientation_info_to_log(ref_wsname, kwargs["Axes"].upper(), kwargs["Senses"])
             save_file = os.path.join(save_dir, filename + ".nxs")
             SaveNexus(InputWorkspace=ref_wsname, Filename=save_file)
             logger.notice(f"Reference workspace saved to '{save_file}'")
