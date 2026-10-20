@@ -597,6 +597,12 @@ public:
     }
   }
 
+  void test_randomString_produces_different_values() {
+    const auto first = randomString(12);
+    const auto second = randomString(12);
+    TS_ASSERT_DIFFERS(first, second);
+  }
+
   void test_endsWith_when_the_suffix_is_smaller_than_the_str() {
     TS_ASSERT(endsWith("ATestString", "String"));
     TS_ASSERT(!endsWith("AStringTest", "String"));

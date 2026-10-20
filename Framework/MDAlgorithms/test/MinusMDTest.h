@@ -16,6 +16,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <format>
+
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
@@ -28,12 +30,12 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void mask_workspace(const int mask_workspace) {
+  void mask_workspace(const int mask_workspace, const std::string &lhsWsName, const std::string &rhsWsName) {
     if (mask_workspace == 1) {
-      FrameworkManager::Instance().exec("MaskMD", 6, "Workspace", "MinusMDTest_lhs", "Dimensions", "Axis0,Axis1,Axis2",
+      FrameworkManager::Instance().exec("MaskMD", 6, "Workspace", lhsWsName.c_str(), "Dimensions", "Axis0,Axis1,Axis2",
                                         "Extents", "0,10,0,10,0,10");
     } else if (mask_workspace == 2) {
-      FrameworkManager::Instance().exec("MaskMD", 6, "Workspace", "MinusMDTest_rhs", "Dimensions", "Axis0,Axis1,Axis2",
+      FrameworkManager::Instance().exec("MaskMD", 6, "Workspace", rhsWsName.c_str(), "Dimensions", "Axis0,Axis1,Axis2",
                                         "Extents", "0,10,0,10,0,10");
     }
   }
@@ -51,24 +53,26 @@ public:
     BinaryOperationMDTestHelper::doTest("MinusMD", "scalar", "histo_A", "out", false /*fails*/);
   }
 
-  void do_test(bool lhs_file, bool rhs_file, int inPlace, int mask_ws_num = 0) {
+  void do_test(bool lhs_file, bool rhs_file, int inPlace, const std::string &uniqueId, int mask_ws_num = 0) {
     AnalysisDataService::Instance().clear();
     // Make two input workspaces
-    MDEventWorkspace3Lean::sptr lhs = MDAlgorithmsTestHelper::makeFileBackedMDEW("MinusMDTest_lhs", lhs_file);
-    MDEventWorkspace3Lean::sptr rhs = MDAlgorithmsTestHelper::makeFileBackedMDEW("MinusMDTest_rhs", rhs_file);
+    const std::string lhs_file_name = std::format("MinusMDTest_lhs_{}", uniqueId);
+    const std::string rhs_file_name = std::format("MinusMDTest_rhs_{}", uniqueId);
+    MDEventWorkspace3Lean::sptr lhs = MDAlgorithmsTestHelper::makeFileBackedMDEW(lhs_file_name, lhs_file);
+    MDEventWorkspace3Lean::sptr rhs = MDAlgorithmsTestHelper::makeFileBackedMDEW(rhs_file_name, rhs_file);
     std::string outWSName = "MinusMDTest_out";
     if (inPlace == 1)
-      outWSName = "MinusMDTest_lhs";
+      outWSName = lhs_file_name;
     else if (inPlace == 2)
-      outWSName = "MinusMDTest_rhs";
+      outWSName = rhs_file_name;
 
-    mask_workspace(mask_ws_num);
+    mask_workspace(mask_ws_num, lhs_file_name, rhs_file_name);
 
     MinusMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("LHSWorkspace", "MinusMDTest_lhs"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("RHSWorkspace", "MinusMDTest_rhs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("LHSWorkspace", lhs_file_name));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("RHSWorkspace", rhs_file_name));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
@@ -145,21 +149,21 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 
-  void test_mem_minus_mem() { do_test(false, false, 0); }
+  void test_mem_minus_mem() { do_test(false, false, 0, MDAlgorithmsTestHelper::makeUniqueId()); }
 
-  void test_mem_minus_mem_inPlace() { do_test(false, false, 1); }
+  void test_mem_minus_mem_inPlace() { do_test(false, false, 1, MDAlgorithmsTestHelper::makeUniqueId()); }
 
-  void test_file_minus_mem() { do_test(true, false, 0); }
+  void test_file_minus_mem() { do_test(true, false, 0, MDAlgorithmsTestHelper::makeUniqueId()); }
 
-  void test_file_minus_mem_inPlace() { do_test(true, false, 1); }
+  void test_file_minus_mem_inPlace() { do_test(true, false, 1, MDAlgorithmsTestHelper::makeUniqueId()); }
 
-  void test_mem_minus_file_inPlace() { do_test(false, true, 1); }
+  void test_mem_minus_file_inPlace() { do_test(false, true, 1, MDAlgorithmsTestHelper::makeUniqueId()); }
 
-  void test_file_minus_file() { do_test(true, true, 0); }
+  void test_file_minus_file() { do_test(true, true, 0, MDAlgorithmsTestHelper::makeUniqueId()); }
 
-  void test_file_minus_file_inPlace() { do_test(true, true, 1); }
+  void test_file_minus_file_inPlace() { do_test(true, true, 1, MDAlgorithmsTestHelper::makeUniqueId()); }
 
-  void test_mem_masked_plus_mem() { do_test(false, false, 0, 1); }
+  void test_mem_masked_plus_mem() { do_test(false, false, 0, MDAlgorithmsTestHelper::makeUniqueId(), 1); }
 
-  void test_masked_file_plus_file_inPlace() { do_test(true, true, 1, 1); }
+  void test_masked_file_plus_file_inPlace() { do_test(true, true, 1, MDAlgorithmsTestHelper::makeUniqueId(), 1); }
 };
