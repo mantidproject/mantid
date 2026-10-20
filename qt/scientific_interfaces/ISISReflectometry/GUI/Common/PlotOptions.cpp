@@ -14,9 +14,9 @@ namespace {
 PlotAxis detectorMapXAxis(DetectorMapXAxis axis) {
   switch (axis) {
   case DetectorMapXAxis::TimeOfFlight:
-    return PlotAxis{"Time of Flight", "", AxisScale::Linear};
+    return PlotAxis{"Time of Flight", R"($\mu s$)", AxisScale::Linear};
   case DetectorMapXAxis::Lambda:
-    return PlotAxis{"Lambda", "", AxisScale::Linear};
+    return PlotAxis{"Wavelength", R"($\AA$)", AxisScale::Linear};
   }
   throw std::runtime_error("Unexpected detector map x axis.");
 }
@@ -26,7 +26,7 @@ PlotAxis detectorMapYAxis(DetectorMapYAxis axis) {
   case DetectorMapYAxis::DetectorId:
     return PlotAxis{"Detector Index", "", AxisScale::Linear};
   case DetectorMapYAxis::Theta:
-    return PlotAxis{"Theta", "", AxisScale::Linear};
+    return PlotAxis{R"($\theta$)", R"($^\circ$)", AxisScale::Linear};
   }
   throw std::runtime_error("Unexpected detector map y axis.");
 }
@@ -34,9 +34,9 @@ PlotAxis detectorMapYAxis(DetectorMapYAxis axis) {
 PlotAxis alignmentXAxis(AlignmentXAxis axis) {
   switch (axis) {
   case AlignmentXAxis::DetectorId:
-    return PlotAxis{"Detector ID", "", AxisScale::Linear};
+    return PlotAxis{"Detector Index", "", AxisScale::Linear};
   case AlignmentXAxis::Theta:
-    return PlotAxis{"Theta", "", AxisScale::Linear};
+    return PlotAxis{R"($\theta$)", R"($^\circ$)", AxisScale::Linear};
   }
   throw std::runtime_error("Unexpected alignment x axis.");
 }
@@ -47,8 +47,8 @@ PlotOptions reflectivityCurvePlotOptions(PlotOutputType outputType, PlotLayout l
   options.outputType = outputType;
   options.plotStyle = PlotStyle::Line;
   options.layout = layout;
-  options.xAxis = PlotAxis{"Q", "", AxisScale::Log};
-  options.yAxis = PlotAxis{"I", "", AxisScale::Log};
+  options.xAxis = PlotAxis{"Q", R"($\AA^{-1}$)", AxisScale::Log};
+  options.yAxis = PlotAxis{"Reflectivity", "", AxisScale::Log};
   options.showErrors = true;
   options.windowTitle = "ISIS Reflectometry Plot";
   return options;
@@ -61,7 +61,6 @@ PlotOptions detectorMapPlotOptions(DetectorMapXAxis xAxis, DetectorMapYAxis yAxi
   options.layout = layout;
   options.xAxis = detectorMapXAxis(xAxis);
   options.yAxis = detectorMapYAxis(yAxis);
-  options.zAxis = PlotAxis{"Intensity", "", AxisScale::Linear};
   options.windowTitle = "ISIS Reflectometry Detector Map";
   return options;
 }
@@ -71,7 +70,7 @@ PlotOptions spinAsymmetryPlotOptions(PlotLayout layout) {
   options.outputType = PlotOutputType::SpinAsymmetry;
   options.plotStyle = PlotStyle::Line;
   options.layout = layout;
-  options.xAxis = PlotAxis{"Q", "", AxisScale::Log};
+  options.xAxis = PlotAxis{"Q", R"($\AA^{-1}$)", AxisScale::Log};
   options.yAxis = PlotAxis{"Spin Asymmetry", "", AxisScale::Linear};
   options.showErrors = true;
   options.horizontalMarker = 0.0;
@@ -85,8 +84,8 @@ PlotOptions alignmentPlotOptions(AlignmentXAxis xAxis, PlotLayout layout) {
   options.plotStyle = PlotStyle::Line;
   options.layout = layout;
   options.xAxis = alignmentXAxis(xAxis);
-  options.yAxis = PlotAxis{"Integrated Intensity", "", AxisScale::Linear};
-  options.showErrors = false;
+  options.yAxis = PlotAxis{"Integrated Intensity", "Counts", AxisScale::Linear};
+  options.showErrors = true;
   options.windowTitle = "ISIS Reflectometry Alignment";
   return options;
 }

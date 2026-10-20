@@ -15,6 +15,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/V3D.h"
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>
@@ -168,6 +170,25 @@ public:
     assertXValue("__isis_refl_align_IvsQ_12345_theta_profile", lowerTheta, 96);
     assertXValue("__isis_refl_align_IvsQ_12345_theta_peak_centre", expectedCentreTheta, 0, 1e-6);
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_theta_fitted_peak"));
+  }
+
+  void testAlignmentMapsDetectorPositionsOnEitherSideOfBeamCentreToSignedTheta() {
+    createConstantWorkspace("IvsQ_12345", -100.0);
+    createAlignmentInputWorkspace("raw_input_name", "12345", alignmentYValues(100.35, 7.0));
+    auto const rawWorkspace =
+        Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("raw_input_name");
+    setSpectrumDetectorYPosition(rawWorkspace, 100, -0.1);
+    setSpectrumDetectorYPosition(rawWorkspace, 101, 0.1);
+    createTOFGroup({"raw_input_name"});
+    auto outputSelection = alignmentOutputSelection();
+    outputSelection.alignmentXAxis = AlignmentXAxis::Theta;
+
+    PlottingModel{}.workspacesForPlotting(plottingWorkspaces({"IvsQ_12345"}), outputSelection);
+
+    auto const profileWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+        "__isis_refl_align_IvsQ_12345_theta_profile");
+    TS_ASSERT_LESS_THAN(profileWorkspace->x(0)[96], 0.0);
+    TS_ASSERT_LESS_THAN(0.0, profileWorkspace->x(0)[97]);
   }
 
   void testAlignmentPeakCentreMarkerIgnoresInvalidProfileValues() {
@@ -506,6 +527,16 @@ private:
       }
     }
     Mantid::API::AnalysisDataService::Instance().addOrReplace(name, workspace);
+  }
+
+  void setSpectrumDetectorYPosition(Mantid::API::MatrixWorkspace_sptr const &workspace, size_t const workspaceIndex,
+                                    double const yPosition) {
+    auto &detectorInfo = workspace->mutableDetectorInfo();
+    for (auto const detectorId : workspace->getSpectrum(workspaceIndex).getDetectorIDs()) {
+      auto const detectorIndex = detectorInfo.indexOf(detectorId);
+      auto const position = detectorInfo.position(detectorIndex);
+      detectorInfo.setPosition(detectorIndex, {position.X(), yPosition, position.Z()});
+    }
   }
 
   void createTOFGroup(std::vector<std::string> const &workspaceNames, std::string const &groupName = "TOF") {
