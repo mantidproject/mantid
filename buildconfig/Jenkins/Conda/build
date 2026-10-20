@@ -39,7 +39,7 @@ if [[ ${JOB_NAME} == *pull_requests* ]]; then
     EXTRA_CMAKE_FLAGS+=" -DPR_JOB=True"
 fi
 
-# MPI library is needed for some system tests and doc tests, so we always want it avalaible on Linux
+# MPI library is needed for some system tests and doc tests, so we always want it available on Linux
 if [[ $OSTYPE == "linux"* ]]; then
     EXTRA_CMAKE_FLAGS+=" -DMPI_BUILD=ON"
 fi

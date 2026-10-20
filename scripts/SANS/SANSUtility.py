@@ -1652,7 +1652,7 @@ def convert_to_string_list(to_convert):
     """
     Convert a comma-separted string to a Python string list in a string form
     "file1.xml, file2.xml" -> "['file1.xml','file2.xml']"
-    :param to_convert :: a comma-spearated string
+    :param to_convert :: a comma-separated string
     """
     string_list = to_convert.replace(" ", "").split(",")
     output_string = "[" + ",".join("'" + element + "'" for element in string_list) + "]"

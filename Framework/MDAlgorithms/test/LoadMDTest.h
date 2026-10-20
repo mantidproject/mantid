@@ -573,7 +573,7 @@ public:
     TS_ASSERT_EQUALS(appliedCoordinateSystem, loadedWS->getSpecialCoordinateSystem());
   }
 
-  // backwards-compatability check for coordinate in log
+  // backwards-compatibility check for coordinate in log
   void test_load_coordinate_system_MDEventWorkspace_from_experiment_info() {
     Mantid::Geometry::QSample frame;
     MDEventWorkspace1Lean::sptr mdeventWS = MDEventsTestHelper::makeMDEWWithFrames<1>(10, 0.0, 10.0, frame, 2);
@@ -606,7 +606,7 @@ public:
     TS_ASSERT_EQUALS(appliedCoordinateSystem, loadedWS->getSpecialCoordinateSystem());
   }
 
-  // backwards-compatability check for coordinate in log
+  // backwards-compatibility check for coordinate in log
   void test_load_coordinate_system_MDHistoWorkspace_from_experiment_info() {
     Mantid::Geometry::QSample frame;
     auto mdhistoWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceWithMDFrame(2.5, 2, frame, 10, 10.0, 3.5, "", 4.5);

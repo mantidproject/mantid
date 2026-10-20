@@ -377,7 +377,7 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(m_transWS);
   }
 
-  /// Load and convert some monitor spectra to create some non-trival input data
+  /// Load and convert some monitor spectra to create some non-trivial input data
   void loadSampleLOQMonitors() {
     // load a couple of real monitor spectra
     std::string wkspName("LOQ48097");

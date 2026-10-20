@@ -171,7 +171,7 @@ template <typename Derived, typename ElemType> std::string VectorParameter<Deriv
   std::string valueXMLtext;
   for (size_t i = 0; i < m_size; i++) {
     if (i < (m_size - 1)) {
-      valueXMLtext.append(ElementTraits<ElemType>::formatCS(m_arry[i])); // Comma-seperated
+      valueXMLtext.append(ElementTraits<ElemType>::formatCS(m_arry[i])); // Comma-separated
     } else {
       valueXMLtext.append(ElementTraits<ElemType>::format(m_arry[i])); // No comma separation for last value
     }

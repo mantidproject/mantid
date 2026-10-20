@@ -846,7 +846,7 @@ OperandType BinaryOperation::getOperandType(const API::MatrixWorkspace_const_spt
   if (!ws->axes())
     return eNumber;
 
-  // TODO: Check if it is a single-colum one, then
+  // TODO: Check if it is a single-column one, then
   //  return Number;
 
   // Otherwise, we take it as a histogram (workspace 2D)

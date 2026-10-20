@@ -68,7 +68,7 @@ void IPowderDiffPeakFunction::setParameter(const std::string &name, const double
 /** Get peak centre
  */
 double IPowderDiffPeakFunction::centre() const {
-  // Re-calcualte peak parameters if required
+  // Re-calculate peak parameters if required
   if (m_hasNewParameterValue)
     calculateParameters(false);
 

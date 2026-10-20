@@ -312,7 +312,7 @@
             <string>Transfer the selected run(s) into the processing table</string>
            </property>
            <property name="whatsThis">
-            <string>This transfers the currenly-selected runs in the Search table into the main table, ready for processing</string>
+            <string>This transfers the currently-selected runs in the Search table into the main table, ready for processing</string>
            </property>
            <property name="text">
             <string>Transfer</string>
@@ -493,7 +493,7 @@
     <string>Transfer the selected run(s) into the processing table</string>
    </property>
    <property name="whatsThis">
-    <string>This transfers the currenly-selected runs in the Search table into the main table, ready for processing</string>
+    <string>This transfers the currently-selected runs in the Search table into the main table, ready for processing</string>
    </property>
   </action>
   <action name="actionAutoreducePause">

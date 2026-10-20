@@ -586,7 +586,8 @@ FileTypeDescriptor FindDetectorsPar::get_ASCII_header(std::string const &fileNam
     get_my_line(data_stream, buffer.data(), buffer.size(), EOL);
     if (buffer.front() != '#') {
       g_log.error() << " File " << fileName << "interpreted as SPE does not have symbol # in the second row\n";
-      throw(Kernel::Exception::FileError(" File interpreted as SPE does not have symbol # in the second row", fileName));
+      throw(
+          Kernel::Exception::FileError(" File interpreted as SPE does not have symbol # in the second row", fileName));
     }
     file_descriptor.data_start_position = data_stream.tellg(); // if it is SPE file then the data begin after the
                                                                // second line;

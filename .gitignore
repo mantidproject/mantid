@@ -428,7 +428,7 @@ mambaforge/
 miniconda3/
 miniforge/
 
-# in source build of conda pacakges
+# in source build of conda packages
 conda/recipes/channeldata.json
 conda/recipes/index.html
 conda/recipes/linux-64/

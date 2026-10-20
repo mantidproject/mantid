@@ -994,7 +994,7 @@ void RefinePowderInstrumentParameters::calculateThermalNeutronSpecial(const IFun
   }
 }
 
-//------- Related to Algorith's Output
+//------- Related to Algorithm's Output
 //-------------------------------------------------------------------
 
 /** Get peak positions from peak functions

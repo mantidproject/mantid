@@ -544,8 +544,8 @@ void AlignAndFocusPowder::exec() {
     //  pixel position can be used when converting back to TOF.
     //  With the recent changes in Unit.h, Mantid is using the averaged DIFC attached to workspace to convert from
     //  d-spacing to TOF by default, which unfortunately breaks the intended workflow here.
-    //  To bypass this issue, we are going to remove the attached parameter map so that Unit.h cannot perform the default
-    //  conversion, which will effectively forcing Mantid to revert back to the original intended method.
+    //  To bypass this issue, we are going to remove the attached parameter map so that Unit.h cannot perform the
+    //  default conversion, which will effectively forcing Mantid to revert back to the original intended method.
     Workspace_sptr outputw = std::dynamic_pointer_cast<Workspace>(m_outputW);
     API::IAlgorithm_sptr applyDiffCalAlg = createChildAlgorithm("ApplyDiffCal");
     applyDiffCalAlg->setProperty("InstrumentWorkspace", outputw);

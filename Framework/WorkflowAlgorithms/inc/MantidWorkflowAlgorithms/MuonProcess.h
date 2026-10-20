@@ -31,7 +31,7 @@ private:
   void init() override;
   void exec() override;
 
-  // We dont' want processGroups to be called
+  // We don't want processGroups to be called
   bool checkGroups() override { return false; }
 
   /// Groups specified workspace group according to specified

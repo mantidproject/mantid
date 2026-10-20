@@ -360,7 +360,7 @@ template <typename BaseAlgorithm> void AlgorithmAdapter<BaseAlgorithm>::exec() {
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------
-// Concrete instantiations (allows explicit locating of tempate-body definitions)
+// Concrete instantiations (allows explicit locating of template-body definitions)
 //-----------------------------------------------------------------------------------------------------------------------------
 
 /// API::Algorithm as base

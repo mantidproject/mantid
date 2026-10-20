@@ -332,8 +332,8 @@ void GramCharlierComptonProfile::convoluteVoigt(double *result, const size_t nDa
  * Used to cache some values when the workspace has been set
  * @param workspace A pointer to the workspace
  * @param wi A workspace index
- * @param startX Starting x-vaue (unused).
- * @param endX Ending x-vaue (unused).
+ * @param startX Starting x-value (unused).
+ * @param endX Ending x-value (unused).
  */
 void GramCharlierComptonProfile::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
                                                     double startX, double endX) {

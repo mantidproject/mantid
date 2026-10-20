@@ -152,7 +152,7 @@ Output
   Number of detectors is 1
 
 Example 2: specifying detector IDs
-#################################
+##################################
 
 .. testcode:: ExDet
 

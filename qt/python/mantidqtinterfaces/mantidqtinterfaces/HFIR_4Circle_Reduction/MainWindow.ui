@@ -3178,7 +3178,7 @@ p, li { white-space: pre-wrap; }
                  </font>
                 </property>
                 <property name="text">
-                 <string>Tab 'Caclulate UB'</string>
+                 <string>Tab 'Calculate UB'</string>
                 </property>
                </widget>
               </item>

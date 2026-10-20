@@ -286,7 +286,7 @@ Fit settings
 | **Fit type**             | The type of fitting for the transmission calculation                                           |
 |                          | This can be *Linear*, *Logarithmic* or *Polynomial*.                                           |
 +--------------------------+------------------------------------------------------------------------------------------------+
-| **Polynomial order**      | If *Polynomial* has been chosen in the **Fit type** input, then the polynomial order of the    |
+| **Polynomial order**     | If *Polynomial* has been chosen in the **Fit type** input, then the polynomial order of the    |
 |                          | fit can be set here.                                                                           |
 +--------------------------+------------------------------------------------------------------------------------------------+
 | **Custom wavelength**    | A custom wavelength range for the fit can be specified here.                                   |

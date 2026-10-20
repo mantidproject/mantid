@@ -818,7 +818,7 @@ int writeFile(const std::string &Fname, const V<T, A> &X, const V<T, A> &Y) {
 //------------------------------------------------------------------------------------------------
 /**
  *  Write out the three container into a file with
- *  column free-formated data in the form :
+ *  column free-formatted data in the form :
  *   - X  Y Err
  *   If Err does not exist (or is short) 0.0 is substituted.
  *  @param X :: X column
