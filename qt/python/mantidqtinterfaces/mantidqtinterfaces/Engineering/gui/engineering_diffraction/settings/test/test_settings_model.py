@@ -123,6 +123,14 @@ class SettingsModelTest(unittest.TestCase):
             self.model.validate_euler_settings(settings, True)
             mock_logger.error.assert_called_once()
 
+    def test_euler_settings_error(self):
+        self.assertEqual("", self.model.euler_settings_error("YZY", "1,-1,1"))
+        self.assertIn("X, Y and Z", self.model.euler_settings_error("YQY", "1,-1,1"))
+        self.assertIn("equal number", self.model.euler_settings_error("YZ", "1,-1,1"))
+        self.assertIn("+/-1", self.model.euler_settings_error("YZY", "a,b,c"))
+        # parses as integers but not +/-1, which used to be reported with an empty message
+        self.assertIn("+/-1", self.model.euler_settings_error("YZY", "1,2,1"))
+
     @patch(dir_path + "settings_model.logger")
     def test_validate_reference_frame(self, mock_logger):
         r2o2 = (2**0.5) / 2
