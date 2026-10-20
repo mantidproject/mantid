@@ -9,6 +9,10 @@ import unittest
 import numpy as np
 from unittest.mock import patch, MagicMock, call
 
+from mantid.api import AnalysisDataService as ADS
+from mantid.simpleapi import CreateWorkspace
+from Engineering.texture.texture_helper import write_euler_orientation_info_to_log
+
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.correction.model import (
     CorrectionModel,
 )
@@ -200,6 +204,24 @@ class TestReferenceTextureDirections(unittest.TestCase):
         mock_read.assert_called_once_with("ref_ws")
         np.testing.assert_allclose(matrix, np.eye(3))
         self.assertEqual(names, ("RD", "ND", "TD"))
+
+
+class TestReferenceEulerSettings(unittest.TestCase):
+    def setUp(self):
+        self.model = CorrectionModel()
+
+    def test_returns_none_when_no_reference_is_set(self):
+        self.model.set_reference_ws(None)
+
+        self.assertIsNone(self.model.get_reference_euler_settings())
+
+    def test_returns_the_settings_saved_on_the_reference(self):
+        ws = CreateWorkspace(DataX=[0, 1], DataY=[1], OutputWorkspace="__ref_euler_ws")
+        self.addCleanup(ADS.remove, "__ref_euler_ws")
+        write_euler_orientation_info_to_log(ws, "ZXZ", "1,-1,1")
+        self.model.set_reference_ws("__ref_euler_ws")
+
+        self.assertEqual(self.model.get_reference_euler_settings(), ("ZXZ", "1,-1,1"))
 
 
 if __name__ == "__main__":

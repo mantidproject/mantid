@@ -16,6 +16,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.rb_scope import RbScope, RbScopeConsumer
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.instrument_scope import InstrumentScope, InstrumentScopeConsumer
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting, set_setting
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_model import SettingsModel
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_presenter import ShowSamplePresenter
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.correction.model import CorrectionModel
@@ -54,7 +55,7 @@ class TextureCorrectionPresenter(RbScopeConsumer, InstrumentScopeConsumer, Algor
         self.current_calibration = CalibrationInfo(instrument=self.instrument)
 
         self.correction_notifier = GenericObservable()
-        # fired when a loaded reference workspace rewrites the sample directions, so the settings
+        # fired when a loaded reference workspace rewrites the sample directions or Euler settings, so the settings
         # dialog can drop its cached copy rather than saving the pre-load values back over them
         self.reference_frame_notifier = GenericObservable()
 
@@ -141,7 +142,12 @@ class TextureCorrectionPresenter(RbScopeConsumer, InstrumentScopeConsumer, Algor
     def _on_load_ref_clicked(self) -> None:
         self.model.load_ref(self.view.get_reference_file())
         self.update_reference_info()
-        if self._get_setting("read_texture_dirs_from_ref", bool) and self._adopt_reference_texture_directions():
+        changed = False
+        if self._get_setting("read_texture_dirs_from_ref", bool):
+            changed |= self._adopt_reference_texture_directions()
+        if self._get_setting("read_euler_from_ref", bool):
+            changed |= self._adopt_reference_euler_settings()
+        if changed:
             self.reference_frame_notifier.notify_subscribers()
 
     def _adopt_reference_texture_directions(self) -> bool:
@@ -165,6 +171,23 @@ class TextureCorrectionPresenter(RbScopeConsumer, InstrumentScopeConsumer, Algor
         }
         new_values.update(zip(("rd_name", "nd_name", "td_name"), dir_names))
         return self._adopt_settings("Sample directions", new_values, self._same_direction_setting)
+
+    def _adopt_reference_euler_settings(self) -> bool:
+        """Replace the Euler scheme and sense with the ones saved on the just-loaded reference workspace,
+        returning whether any setting changed. Whether the orientation file is Euler is left alone."""
+        euler = self.model.get_reference_euler_settings()
+        if euler is None:
+            logger.notice(
+                f"Reference workspace '{self.model.get_reference_ws()}' carries no Euler orientation settings; "
+                "the configured Euler scheme and sense are unchanged."
+            )
+            return False
+        scheme, sense = euler
+        if error := SettingsModel.euler_settings_error(scheme, sense):
+            logger.warning(f"The Euler settings on reference workspace '{self.model.get_reference_ws()}' were not adopted: {error}")
+            return False
+        new_values = {"euler_angles_scheme": scheme, "euler_angles_sense": sense}
+        return self._adopt_settings("Euler settings", new_values, self._same_euler_setting)
 
     def _adopt_settings(self, description: str, new_values: Dict[str, str], is_same: Callable[[str, str, str], bool]) -> bool:
         """Write new_values under the active RB, logging each value that actually changed so an
@@ -197,6 +220,14 @@ class TextureCorrectionPresenter(RbScopeConsumer, InstrumentScopeConsumer, Algor
         except (AttributeError, ValueError):
             return False  # unreadable (or unset) settings are always worth overwriting
         return old == [float(x) for x in new_value.split(",")]
+
+    @staticmethod
+    def _same_euler_setting(_key: str, old_value: str, new_value: str) -> bool:
+        # "zxz" and "ZXZ", or "1, -1" and "1,-1", configure the same convention
+        def normalise(value):
+            return (value or "").replace(" ", "").upper()
+
+        return normalise(old_value) == normalise(new_value)
 
     def on_apply_clicked(self) -> None:
         wss = self.view.get_selected_workspaces()
