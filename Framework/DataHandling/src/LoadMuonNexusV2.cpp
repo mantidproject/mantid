@@ -119,7 +119,8 @@ void LoadMuonNexusV2::init() {
       std::make_unique<WorkspaceProperty<Workspace>>("TimeZeroTable", "", Direction::Output, PropertyMode::Optional),
       "TableWorkspace containing time zero values per spectra.");
 
-  declareProperty("CorrectTime", true, "Boolean flag controlling whether time should be corrected by timezero.",
+  declareProperty("CorrectTime", true,
+                  "Boolean flag controlling whether time, and the FirstGoodData log, should be corrected by timezero.",
                   Direction::Input);
 
   declareProperty(
