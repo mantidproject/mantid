@@ -1129,7 +1129,7 @@ class FullInstrumentViewView(QWidget):
         self, min_edit: QLineEdit, max_edit: QLineEdit, slider: QDoubleRangeSlider, reset_button: QPushButton, limits: tuple[float, float]
     ) -> None:
         lower, upper = limits
-        enabled = upper > lower
+        enabled = bool(upper > lower)
         for widget in (min_edit, max_edit, slider, reset_button):
             widget.setEnabled(enabled)
         if not enabled:
