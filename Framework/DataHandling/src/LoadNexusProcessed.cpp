@@ -1537,10 +1537,14 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
         peakWS->getPeak(r).setMonitorCount(val);
       }
     } else if (str == "column_22") {
+      // Offset from the detector centre (or from the sample position if there is no detector),
+      // so this must be read after the detector ID in column_1
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
       for (size_t r = 0; r < numberPeaks; ++r) {
-        peakWS->getPeak(r).setDetPos(V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]));
+        auto &peak = peakWS->getPeak(r);
+        const V3D offset(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
+        peak.setDetPos((peak.getDetector() ? peak.getDetectorPosition() : peak.getSamplePos()) + offset);
       }
     }
   }

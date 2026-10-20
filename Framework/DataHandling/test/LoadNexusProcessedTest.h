@@ -1274,8 +1274,12 @@ public:
     // move a peak away from the centre of its detector
     auto &peak = peaksTestWS->getPeak(0);
     const int detID = peak.getDetectorID();
-    const Mantid::Kernel::V3D detPos = peak.getDetPos() + Mantid::Kernel::V3D(0.001, 0.002, 0.003);
-    peak.setDetPos(detPos);
+    const V3D offset(0.001, 0.002, 0.003);
+    peak.setDetPos(peak.getDetPos() + offset);
+    // add a peak that is not on a detector
+    const Peak noDetPeak(instrument, 0.5, 1.0);
+    const V3D noDetPos = noDetPeak.getDetPos();
+    peaksTestWS->addPeak(noDetPeak);
 
     SaveNexusProcessed saveAlg;
     saveAlg.setChild(true);
@@ -1295,12 +1299,30 @@ public:
     Mantid::API::Workspace_sptr loadedWS = loadAlg.getProperty("OutputWorkspace");
     auto loadedPeaksWS = std::dynamic_pointer_cast<Mantid::DataObjects::PeaksWorkspace>(loadedWS);
     TS_ASSERT(loadedPeaksWS);
-    TS_ASSERT_EQUALS(loadedPeaksWS->getNumberPeaks(), 2);
-    const auto &loadedPeak = loadedPeaksWS->getPeak(0);
-    TS_ASSERT_EQUALS(loadedPeak.getDetectorID(), detID);
-    TS_ASSERT_DELTA(loadedPeak.getDetPos().X(), detPos.X(), 1e-10);
-    TS_ASSERT_DELTA(loadedPeak.getDetPos().Y(), detPos.Y(), 1e-10);
-    TS_ASSERT_DELTA(loadedPeak.getDetPos().Z(), detPos.Z(), 1e-10);
+    TS_ASSERT_EQUALS(loadedPeaksWS->getNumberPeaks(), 3);
+
+    // The peaks were created on a different instrument to the one saved, so the reloaded detector positions differ.
+    // The offset from the detector centre should be kept.
+    const auto &movedPeak = loadedPeaksWS->getPeak(0);
+    TS_ASSERT_EQUALS(movedPeak.getDetectorID(), detID);
+    const V3D expectedPos = movedPeak.getDetectorPosition() + offset;
+    TS_ASSERT_DELTA(movedPeak.getDetPos().X(), expectedPos.X(), 1e-10);
+    TS_ASSERT_DELTA(movedPeak.getDetPos().Y(), expectedPos.Y(), 1e-10);
+    TS_ASSERT_DELTA(movedPeak.getDetPos().Z(), expectedPos.Z(), 1e-10);
+
+    // A peak at the centre of its detector stays there
+    const auto &centredPeak = loadedPeaksWS->getPeak(1);
+    const V3D centre = centredPeak.getDetectorPosition();
+    TS_ASSERT_DELTA(centredPeak.getDetPos().X(), centre.X(), 1e-10);
+    TS_ASSERT_DELTA(centredPeak.getDetPos().Y(), centre.Y(), 1e-10);
+    TS_ASSERT_DELTA(centredPeak.getDetPos().Z(), centre.Z(), 1e-10);
+
+    // A peak with no detector keeps its absolute position
+    const auto &loadedNoDetPeak = loadedPeaksWS->getPeak(2);
+    TS_ASSERT_EQUALS(loadedNoDetPeak.getDetectorID(), -1);
+    TS_ASSERT_DELTA(loadedNoDetPeak.getDetPos().X(), noDetPos.X(), 1e-10);
+    TS_ASSERT_DELTA(loadedNoDetPeak.getDetPos().Y(), noDetPos.Y(), 1e-10);
+    TS_ASSERT_DELTA(loadedNoDetPeak.getDetPos().Z(), noDetPos.Z(), 1e-10);
 
     AnalysisDataService::Instance().remove("dummy");
     if (std::filesystem::exists(filePath)) {
