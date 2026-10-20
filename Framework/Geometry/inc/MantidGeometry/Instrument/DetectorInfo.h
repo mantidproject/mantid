@@ -76,6 +76,19 @@ public:
   double signedTwoTheta(const std::pair<size_t, size_t> &index) const;
   double azimuthal(const size_t index) const;
   double azimuthal(const std::pair<size_t, size_t> &index) const;
+  double twoTheta(const size_t index, const Kernel::V3D &observer, const Kernel::V3D &axis) const;
+  double twoTheta(const std::pair<size_t, size_t> &index, const Kernel::V3D &observer, const Kernel::V3D &axis) const;
+  double signedTwoTheta(const size_t index, const Kernel::V3D &observer, const Kernel::V3D &axis,
+                        const Kernel::V3D &instrumentUp) const;
+  double signedTwoTheta(const size_t index, const Kernel::V3D &observer, const Kernel::V3D &axis) const;
+  double signedTwoTheta(const std::pair<size_t, size_t> &index, const Kernel::V3D &observer,
+                        const Kernel::V3D &axis) const;
+  double signedTwoTheta(const std::pair<size_t, size_t> &index, const Kernel::V3D &observer, const Kernel::V3D &axis,
+                        const Kernel::V3D &instrumentUp) const;
+  double phi(const size_t index) const;
+  double phi(const std::pair<size_t, size_t> &index) const;
+  double phiOffset(const size_t index, const double offset) const;
+  double phiOffset(const std::pair<size_t, size_t> &index, const double offset) const;
   std::tuple<double, double, double> diffractometerConstants(const size_t index, std::vector<detid_t> &calibratedDets,
                                                              std::vector<detid_t> &uncalibratedDets) const;
   double difcUncalibrated(const size_t index) const;
