@@ -35,7 +35,7 @@ class ALFInstrumentViewView(FullInstrumentViewView):
 
         super().__init__(parent)
 
-        # NOTE: After __init__ to overwride lineplot with placeholder
+        # NOTE: After __init__ to override lineplot with placeholder
         self._detector_info_group_box.setVisible(False)
 
     def _parse_rebin_args(self, text: str):

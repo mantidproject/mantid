@@ -555,7 +555,7 @@ public:
   void invalidateCommonBinsFlag() { m_isCommonBinsFlagValid.store(false); }
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   MatrixWorkspace(const MatrixWorkspace &other);
 
   MatrixWorkspace();

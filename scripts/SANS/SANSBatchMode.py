@@ -516,7 +516,7 @@ def read_trans_runs(runs, sample_or_can, format):
 
 def delete_workspaces(workspaces):
     """
-    Delete the list of workspaces if possible but fail siliently if there is
+    Delete the list of workspaces if possible but fail silently if there is
     a problem
     @param workspaces: the list to delete
     """

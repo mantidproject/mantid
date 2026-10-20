@@ -41,7 +41,7 @@ Logger g_log("FilterEventsTest");
 /* TODO LIST
  *  1. Remove all Ptest
  *  2. Add a new unit test for grouping workspaces in the end
- *  3. Add a new unit test for throwing grouping workspaces if name is not vaid
+ *  3. Add a new unit test for throwing grouping workspaces if name is not valid
  *  4. Add a new unit test for excluding sample logs
  *  5. Parallelizing spliting logs?
  *  6. Speed test
@@ -644,7 +644,7 @@ public:
       TS_ASSERT_EQUALS(ws7->getNumberEvents(), ws7->getNumberHistograms());
     }
 
-    // FIXME - Should find a way to delete all workspaces holding splitted
+    // FIXME - Should find a way to delete all workspaces holding split
     // events
 
     AnalysisDataService::Instance().remove("MockDirectEventWS");

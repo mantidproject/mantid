@@ -32,7 +32,7 @@ The parameter :math:`m` can take values in the range :math:`[0, \infty)` and it 
 .. math:: P_L \equiv P(x, h, x_0, \Gamma, m_L),
 .. math:: P_R \equiv P(x, h, x_0, \Gamma, m_R).
 
-In other words, it is assumed that the asymmetric Pearson VII function uses two halves of the Pearson VII with a common  peak hight, peak centre, and full width at half maximum. As a result, the asymmetric Pearson VII distribution takes five parameters: :math:`h, x_0, \Gamma, m_L, m_R`. For the sake of stability of the numerical implementation of asymmetric Pearson VII distribution in Mantid, one operates with the weight parameter :math:`w \equiv 1/\Gamma`, i. e. :math:`A = A(x, h, x_0, w, m_L, m_R)`.
+In other words, it is assumed that the asymmetric Pearson VII function uses two halves of the Pearson VII with a common  peak height, peak centre, and full width at half maximum. As a result, the asymmetric Pearson VII distribution takes five parameters: :math:`h, x_0, \Gamma, m_L, m_R`. For the sake of stability of the numerical implementation of asymmetric Pearson VII distribution in Mantid, one operates with the weight parameter :math:`w \equiv 1/\Gamma`, i. e. :math:`A = A(x, h, x_0, w, m_L, m_R)`.
 
 Analytic Derivatives
 --------------------

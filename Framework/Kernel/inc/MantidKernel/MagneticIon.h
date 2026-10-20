@@ -41,7 +41,7 @@ struct MANTID_KERNEL_DLL MagneticIon {
   /// The atomic symbol. In other words the one or two character abbreviation.
   std::string symbol;
 
-  /// The charge of the ion, or 0 for neutral atom. Note thet all charges are
+  /// The charge of the ion, or 0 for neutral atom. Note that all charges are
   /// not negative
   uint16_t charge;
 

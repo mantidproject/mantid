@@ -182,7 +182,7 @@ public:
   \brief Exception for a call to an abstract class function
 
   For a method virtual abstract class exists that
-  needs to have instance because of interation over
+  needs to have instance because of iteration over
   a base class pointer. e.g
   vector<AbsBase*> Vec;
   for(vc=Vec.begin();vc!=Vec.end();vc++)

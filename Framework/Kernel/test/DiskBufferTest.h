@@ -608,7 +608,7 @@ public:
     dbuf.toWrite(blockD);
     // small block, nothing still sitting in the buffer
     TS_ASSERT_EQUALS(SaveableTesterWithFile::fakeFile, "AABBBCCCCCBBBBBBB");
-    // this will remove block from the cash and place the file to sutable
+    // this will remove block from the cash and place the file to suitable
     // position
     dbuf.flushCache();
     TS_ASSERT_EQUALS(SaveableTesterWithFile::fakeFile, "AADDBCCCCCBBBBBBB");

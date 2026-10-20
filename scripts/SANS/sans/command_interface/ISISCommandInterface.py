@@ -910,7 +910,7 @@ def WavRangeReduction(
         states=[state], use_optimizations=True, output_mode=output_mode, output_diagnostic_names=output_diagnostic_names
     )
     # -----------------------------------------------------------
-    # Return the name fo the reduced workspace (or WorkspaceGroup)
+    # Return the name of the reduced workspace (or WorkspaceGroup)
     # -----------------------------------------------------------
     reduction_mode = state.reduction.reduction_mode
     is_group = is_part_of_reduced_output_workspace_group(state)

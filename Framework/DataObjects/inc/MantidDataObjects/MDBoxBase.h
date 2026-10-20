@@ -89,7 +89,7 @@ public:
   // -------------------------------------------
   /** The method to convert events in a box into a table of
    * coodrinates/signal/errors casted into coord_t type
-   *   Used to conver events into plain data array. Does nothing for GridBox */
+   *   Used to convert events into plain data array. Does nothing for GridBox */
   void getEventsData(std::vector<coord_t> & /*coordTable*/, size_t &nColumns) const override { nColumns = 0; }
   /** The method to convert the table of data into vector of events
    *   Used to convert from a vector of values (2D table in Fortran

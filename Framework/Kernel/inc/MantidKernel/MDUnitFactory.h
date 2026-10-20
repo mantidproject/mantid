@@ -50,7 +50,7 @@ using MDUnitFactory_uptr = std::unique_ptr<MDUnitFactory>;
 
 using MDUnitFactory_const_uptr = std::unique_ptr<const MDUnitFactory>;
 
-/// Convience method. Pre-constructed builder chain.
+/// Convenience method. Pre-constructed builder chain.
 MDUnitFactory_uptr MANTID_KERNEL_DLL makeMDUnitFactoryChain();
 
 } // namespace Kernel

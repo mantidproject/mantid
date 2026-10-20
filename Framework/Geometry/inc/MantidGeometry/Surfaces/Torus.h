@@ -23,7 +23,7 @@ namespace Geometry {
   three parameters:
   - Iradius :: inner radius of the torus
   - Dradius :: displaced radius (the radius away from the plane)
-  - Displacement :: elipse displacment from the centre.
+  - Displacement :: ellipse displacment from the centre.
   These are c,b,a in that order.
 */
 

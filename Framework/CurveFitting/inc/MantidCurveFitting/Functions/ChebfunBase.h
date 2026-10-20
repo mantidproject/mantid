@@ -56,7 +56,7 @@ the approximation:
   - solving of (integro-)differential equations
   - etc
 
-This calss doesn't represent a function approximation itself but keeps
+This class doesn't represent a function approximation itself but keeps
 proerties that can be shared by multiple approximations.
 
 This class is based on the ideas from the Chebfun matlab package

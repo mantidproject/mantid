@@ -193,7 +193,7 @@ void SCDCalibratePanels2::init() {
   // ---------------------
   // ----- samplePos -----
   // ---------------------
-  declareProperty("TuneSamplePosition", false, "Fine tunning sample position");
+  declareProperty("TuneSamplePosition", false, "Fine tuning sample position");
   declareProperty("SearchRadiusSamplePos", 0.1, mustBeNonNegative,
                   "Search radius of sample position change (in meters), used to constrain optimization search space");
   // editability
@@ -402,7 +402,7 @@ void SCDCalibratePanels2::exec() {
   }
 
   if (tuneSamplePos && !calibrateL1) {
-    g_log.notice() << "** Tunning sample position only as requested\n";
+    g_log.notice() << "** Tuning sample position only as requested\n";
     optimizeSamplePos(m_pws, pws_original);
   }
 
@@ -552,7 +552,7 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, const IPeaksWo
     const std::string pwsBankiName = "_pws_" + bankname;
 
     // Find out whether to skip the calibration by user's specification
-    // This check is only requied when mCalibBankName is not empty string
+    // This check is only required when mCalibBankName is not empty string
     if (mCalibBankName != "") {
       bool isbank = (bankname == mCalibBankName);
       std::stringstream ss;

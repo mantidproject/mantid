@@ -19,7 +19,7 @@ from mantidqtinterfaces.Muon.GUI.Common.muon_pair import MuonPair
 from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
-# Ony want to test frequency specific aspects
+# Only want to test frequency specific aspects
 # the rest is covered in muon_context_test.py
 @start_qapplication
 class MuonContextWithFrequencyTest(unittest.TestCase):

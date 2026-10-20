@@ -1079,7 +1079,7 @@ def FitTrans():
     # inequalities
     A = np.zeros(len(x0))
     A[0:3] = 0  # setang1 *no constraint
-    A[3 : 4 + neqv1 - 1] = -1.0  # pkmult1 Contrains intensities to be positive
+    A[3 : 4 + neqv1 - 1] = -1.0  # pkmult1 Constrains intensities to be positive
     A[4 + neqv1 - 1 : 6 + neqv1] = 0.0  # setang2 *no constraint
     A[6 + neqv1 : 7 + neqv1 + neqv2 - 1] = -1.0  # pkmult2
     A[6 + neqv1 + neqv2] = -1.0  # sf Scale factor must be +ve

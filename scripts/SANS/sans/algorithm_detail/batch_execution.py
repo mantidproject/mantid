@@ -563,7 +563,7 @@ def provide_loaded_data(state, use_optimizations, workspace_to_name, workspace_t
                               ADS.
     :param workspace_to_name: a map of SANSDataType vs output-property name of SANSLoad for workspaces
     :param workspace_to_monitor: a map of SANSDataType vs output-property name of SANSLoad for monitor workspaces
-    :return: a list fo workspaces and a list of monitor workspaces
+    :return: a list of workspaces and a list of monitor workspaces
     """
     # Load the data
     state_serialized = Serializer.to_json(state)

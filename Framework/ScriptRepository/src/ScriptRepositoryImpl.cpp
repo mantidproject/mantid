@@ -613,7 +613,7 @@ void ScriptRepositoryImpl::download_directory(const std::string &directory_path)
     // skip all entries that are not children of directory_path
     // the map will list the entries in alphabetical order, so,
     // when it first find the directory, it will list all the
-    // childrens of this directory, and them,
+    // children of this directory, and them,
     // it will list other things, so we can, break the loop
     if (entry.first.find(directory_path) != 0) {
       if (found)
@@ -1312,7 +1312,7 @@ std::string ScriptRepositoryImpl::convertPath(const std::string &path) {
     return path;
   } else {
     // the path is inside the local repository
-    // remove the repo_path from te absolute path
+    // remove the repo_path from the absolute path
     // +1 to remove the slash /
     std::string retpath(absolute_path.begin() + pos + local_repository.size(), absolute_path.end());
     // g_log.debug() << "ConvertPath: Entered: " << path << " return: " <<

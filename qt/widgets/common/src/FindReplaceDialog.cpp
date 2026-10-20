@@ -138,7 +138,7 @@ void FindReplaceDialog::addReplaceButtons() {
 //------------------------------------------------------
 /**
  * Find the current search term
- * @param backwards :: If true then the search procedes backwards from the
+ * @param backwards :: If true then the search proceeds backwards from the
  * cursor's current position
  * @returns A boolean indicating success/failure
  */

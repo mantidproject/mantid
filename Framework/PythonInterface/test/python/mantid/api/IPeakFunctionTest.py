@@ -60,7 +60,7 @@ class RectangularFunction(IPeakFunction):
 
     def intensityErrorLocal(self):
         r"""Analytical expression for the error in the integrated intensity arising from errors in
-        uncorrelated fit paramaters"""
+        uncorrelated fit parameters"""
         height = self.getParameterValue("Height")
         height_error = self.getError("Height")
         fwhm = self.getParameterValue("Fwhm")

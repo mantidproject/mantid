@@ -35,7 +35,7 @@ private:
   /// will be specified via fetchInputPropertyName.
   virtual bool useCustomInputPropertyName() const { return false; }
 
-  /// Convenience typdef for workspace names.
+  /// Convenience typedef for workspace names.
   using VecWSGroupType = MultiPeriodGroupWorker::VecWSGroupType;
   /// multi period group workspaces.
   VecWSGroupType m_multiPeriodGroups;

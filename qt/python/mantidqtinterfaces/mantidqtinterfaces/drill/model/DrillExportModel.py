@@ -117,7 +117,7 @@ class DrillExportModel:
 
     def _validCriteria(self, ws, algo):
         """
-        Check if the criteria of the export algorithm is valid ot not.
+        Check if the criteria of the export algorithm is valid or not.
 
         Args:
             ws (name): name of the workspace on which the critaeria will be

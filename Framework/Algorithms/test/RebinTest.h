@@ -897,7 +897,7 @@ public:
   }
 
   void test_inversePowerValidateInverseSquareRoot() {
-    // Test that the validator which forbid breating more than 10000 bins works in an inverse square root case
+    // Test that the validator which forbid creating more than 10000 bins works in an inverse square root case
     // We test both because they rely on different formula to compute the expected number of bins.
     std::cout << "Testing failure with inverse power square root series with modeset" << std::endl;
     Workspace2D_sptr test_1D = Create1DWorkspace(51);

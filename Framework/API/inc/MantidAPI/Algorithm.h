@@ -396,7 +396,7 @@ protected:
   /// get whether we are tracking the history for this algorithm,
   bool trackingHistory();
   /// Copy workspace history from input workspaces to output workspaces and
-  /// record the history for ths algorithm
+  /// record the history for this algorithm
   virtual void fillHistory();
   /// Copy workspace history from input workspaces to provided vector of output workspaces
   void fillHistory(const std::vector<Workspace_sptr> &outputWorkspaces);

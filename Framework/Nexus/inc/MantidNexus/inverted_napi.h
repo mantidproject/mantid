@@ -90,7 +90,7 @@ MANTID_NEXUS_DLL NXstatus NXputdata(NXhandle fid, char const *data);
  * position in the file: at root level, a global attribute is written, if
  * agroup is open but no dataset, a group attribute is written, if a dataset is
  * open, a dataset attribute is written.
- * This type of attribute can only contain a signle numerical value or a
+ * This type of attribute can only contain a single numerical value or a
  * single string. For multiple values use NXputattra
  * \param handle A NeXus file handle as initialized by NXopen.
  * \param name The name of the attribute.
@@ -130,7 +130,7 @@ MANTID_NEXUS_DLL NXstatus NXgetinfo64(NXhandle fid, std::size_t &rank, Mantid::N
 
 /**
  * Read an attribute containing a single string or numerical value.
- * Use NXgetattra for attributes with dimensions. (Recommened as the general case.)
+ * Use NXgetattra for attributes with dimensions. (Recommended as the general case.)
  * \param handle A NeXus file handle as initialized by NXopen.
  * \param name The name of the atrribute to read.
  * \param data A pointer to a memory area large enough to hold the attributes value.

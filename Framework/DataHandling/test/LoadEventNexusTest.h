@@ -306,7 +306,7 @@ public:
     TS_ASSERT_EQUALS(eventWS->counts(1)[0], 2.0);
     TS_ASSERT_EQUALS(eventWS->counts(2)[0], 1.0);
     TS_ASSERT_EQUALS(eventWS->counts(122879)[0],
-                     4.0); // Regession test for miss
+                     4.0); // Regression test for miss
                            // setting max detector and
                            // subsequent incorrect event
                            // count

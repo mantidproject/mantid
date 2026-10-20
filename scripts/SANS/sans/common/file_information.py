@@ -169,7 +169,7 @@ def get_instrument_paths_for_sans_file(file_name=None, file_information=None):
     """
     Gets the Instrument Definition File (IDF) path and the Instrument Parameter Path (IPF) path associated with a file.
 
-    :param file_name: the file name is a name fo a SANS data file, e.g. SANS2D0001234. This or the file_information
+    :param file_name: the file name is a name of a SANS data file, e.g. SANS2D0001234. This or the file_information
                       has to be specified.
     :param file_information: a file_information object. either this or the file_name has to be specified.
     :return: the IDF path and the IPF path

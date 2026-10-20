@@ -509,7 +509,7 @@ def completeCalibration(filename):
     # this data can not be used to calibrate the E1 window, so, let's remove it.
     e1_window = list(range(560, 577))
     aux = numpy.setdiff1d(complete_range, b2_window)
-    # the group that have 3 stripts are all the tubes except the b2 window and e window.
+    # the group that have 3 strips are all the tubes except the b2 window and e window.
     range_3_strips = numpy.setdiff1d(aux, e1_window)
 
     calibrationTable, peak3Table = tube.calibrate(

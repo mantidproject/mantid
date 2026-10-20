@@ -239,7 +239,7 @@ public:
                             "\t\t\t<value val=\"HABA\"/>\n"
                             "\t\t</parameter>\n"
                             "\t</component-link>\n"
-                            "</parameter-file>"; // Contents coverted to string by means of
+                            "</parameter-file>"; // Contents converted to string by means of
     // http://tomeko.net/online_tools/cpp_text_escape.php?lang=en
     std::string pFilename = "parameter_file_referred_to.xml";
     ScopedFile pFile(pContents, pFilename);
@@ -321,7 +321,7 @@ public:
                             "\t\t\t<value val=\"HABR\"/>\n"
                             "\t\t</parameter>\n"
                             "\t</component-link>\n"
-                            "</parameter-file>"; // Contents coverted to string by means of
+                            "</parameter-file>"; // Contents converted to string by means of
     // http://tomeko.net/online_tools/cpp_text_escape.php?lang=en
     std::string pFilename = "parameter_file_referred_to.xml";
     ScopedFile pFile(pContents, pFilename);

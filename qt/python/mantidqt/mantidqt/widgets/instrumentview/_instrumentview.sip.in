@@ -318,7 +318,7 @@ public:
 
     Args:
         value: minimum value for the color bar
-        apply: flag to apply the change other than color bar by sending singal out.
+        apply: flag to apply the change other than color bar by sending signal out.
 %End
 
   void setMaxValue(double value, bool apply);
@@ -329,7 +329,7 @@ public:
 
     Args:
         value: maximum value for the color bar
-        apply: flag to apply the change other than color bar by sending singal out.
+        apply: flag to apply the change other than color bar by sending signal out.
 %End
 
   void setRange(double minValue, double maxValue, bool apply);
@@ -341,7 +341,7 @@ public:
     Args:
         minValue: minimum value for the color bar
         maxValue: maximum value for the color bar
-        apply: flag to apply the change other than color bar by sending singal out.
+        apply: flag to apply the change other than color bar by sending signal out.
 %End
 
   void setLegendScaleType(int index);

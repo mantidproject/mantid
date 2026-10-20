@@ -15,7 +15,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** WienerSmooth algorithm performes smoothing data in a spectrum of a matrix
+/** WienerSmooth algorithm performs smoothing data in a spectrum of a matrix
   workspace
   using the Wiener filter smoothing.
 */

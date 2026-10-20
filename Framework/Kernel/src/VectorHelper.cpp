@@ -671,7 +671,7 @@ bool isConstantValue(std::span<double const> arra) {
   for (; val != val;) {
     ++i;
     if (i == arra.end()) {
-      // all values are contant (NAN)
+      // all values are constant (NAN)
       return true;
     }
     val = *i;

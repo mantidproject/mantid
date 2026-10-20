@@ -195,7 +195,7 @@ double GetEi2::calculateEi(const double initial_guess) {
   if ((mon1 == EMPTY_INT()) || (mon2 == EMPTY_INT())) {
     throw std::invalid_argument("Could not determine spectrum number to use. Try to set it explicitly");
   }
-  // Covert spectrum numbers to workspace indices
+  // Convert spectrum numbers to workspace indices
   std::vector<specnum_t> spec_nums(2, mon1);
   spec_nums[1] = mon2;
   // get the index number of the histogram for the first monitor

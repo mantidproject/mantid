@@ -243,7 +243,7 @@ void AlignAndFocusPowderSlim::init() {
   auto l1Validator = std::make_shared<CompositeValidator>();
   l1Validator->add(mandatoryDblValidator);
   l1Validator->add(positiveDblValidator);
-  // for L2, 2theta, phi, mandatory arrays with positive valyes
+  // for L2, 2theta, phi, mandatory arrays with positive values
   auto mandatoryDblArrayValidator = std::make_shared<MandatoryValidator<std::vector<double>>>();
   auto positionArrayValidator = std::make_shared<CompositeValidator>();
   positionArrayValidator->add(mandatoryDblArrayValidator);

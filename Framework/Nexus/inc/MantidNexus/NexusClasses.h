@@ -568,7 +568,7 @@ public:
   /// Opens this NXClass using File::openGroupAddress(). Can be slow (or is slow)
   void open();
   /// Opens this NXClass using File::openGroup(). It is fast, but the parent of this class must be open at
-  /// the time of calling. openNXClass uses open() (the slow one). To open calss using openLocal() do:
+  /// the time of calling. openNXClass uses open() (the slow one). To open class using openLocal() do:
   ///     NXTheClass class(parent,name);
   ///     class.openLocal();
   ///     // work with class

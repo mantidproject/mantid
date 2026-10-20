@@ -174,10 +174,10 @@ public:
   /// Overridable method to custom-sort the workspace
   virtual void sort(std::vector<std::pair<std::string, bool>> &criteria);
 
-  /// Access the column with name \c name trough a ColumnVector object
+  /// Access the column with name \c name through a ColumnVector object
   TableColumnHelper getVector(const std::string &name);
 
-  /// Access the column with name \c name trough a ColumnVector object
+  /// Access the column with name \c name through a ColumnVector object
   TableConstColumnHelper getVector(const std::string &name) const;
   template <class T>
   /**  Get a reference to a data element
@@ -284,7 +284,7 @@ public:
   void modified();
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   ITableWorkspace(const ITableWorkspace &) = default;
 
   /**  Resize a column.
@@ -295,7 +295,7 @@ protected:
 
   /**  Insert a new element into a column.
          @param c :: Pointer to the column
-         @param index :: Index in the column before which a new element wil be
+         @param index :: Index in the column before which a new element will be
      inserted.
    */
   void insertInColumn(Column *c, size_t index) { c->insert(index); }

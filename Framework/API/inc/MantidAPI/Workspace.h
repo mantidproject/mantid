@@ -85,7 +85,7 @@ public:
   const WorkspaceHistory &getHistory() const { return *m_history; }
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   Workspace(const Workspace &);
 
 private:

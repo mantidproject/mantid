@@ -1157,7 +1157,7 @@ class SANS2D(ISISInstrument):
         self.FRONT_DET_Z, self... which are extracted from the sample workspace at apply_detector_log.
 
         This is done to allow the function move_components to use the correct values and not to use
-        all the values for TRANS ans SAMPLE the same, as sometimes, this assumption is not valid.
+        all the values for TRANS and SAMPLE the same, as sometimes, this assumption is not valid.
 
         The reason for this method is explained at the ticket http://trac.mantidproject.org/mantid/ticket/7314.
         """
@@ -1539,7 +1539,7 @@ class LARMOR(ISISInstrument):
         it takes as default value the self.BENCH_ROT, which are extracted from the sample workspace
         at apply_detector_log.
         This is done to allow the function move_components to use the correct values and not to use
-        all the values for TRANS ans SAMPLE the same, as sometimes, this assumption is not valid.
+        all the values for TRANS and SAMPLE the same, as sometimes, this assumption is not valid.
         The reason for this method is explained at the ticket http://trac.mantidproject.org/mantid/ticket/7314.
         """
         # set the default value for these variables

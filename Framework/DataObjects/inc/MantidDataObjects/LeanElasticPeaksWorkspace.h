@@ -46,7 +46,7 @@ public:
 
   /** Get access to shared pointer containing workspace porperties. This
    function is there to provide common interface of iTableWorkspace
-    * Despite it is non-constant method, one should be very carefull using it to
+    * Despite it is non-constant method, one should be very careful using it to
    change the log values when cloning of a table workspace can occur
       as the changes may depend on the order of PeakWorkspace cloning & changes
    applyed through this pointer.
@@ -159,7 +159,7 @@ public:
   void saveNexus(Nexus::File *file) const override;
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   LeanElasticPeaksWorkspace(const LeanElasticPeaksWorkspace &other);
 
 private:

@@ -17,9 +17,9 @@ class MeshObject;
 }
 namespace DataHandling {
 
-/// Typdef for a shared pointer
+/// Typedef for a shared pointer
 using MeshObject_sptr = std::shared_ptr<Geometry::MeshObject>;
-/// Typdef for a shared pointer to a const object
+/// Typedef for a shared pointer to a const object
 using MeshObject_const_sptr = std::shared_ptr<const Geometry::MeshObject>;
 
 /**

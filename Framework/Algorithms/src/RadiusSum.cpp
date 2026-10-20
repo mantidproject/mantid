@@ -205,7 +205,7 @@ void RadiusSum::cacheInputPropertyValues() {
   else
     centre = V3D(centre_aux[0], centre_aux[1], centre_aux[2]);
 
-  g_log.debug() << "Copy the remaning properties: MinRadius, MaxRadius and NumBins\n";
+  g_log.debug() << "Copy the remaining properties: MinRadius, MaxRadius and NumBins\n";
   min_radius = getProperty("MinRadius");
   max_radius = getProperty("MaxRadius");
   num_bins = getProperty("NumBins");

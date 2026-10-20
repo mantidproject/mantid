@@ -106,7 +106,7 @@ bool MeshObject::isValid(const Kernel::V3D &point) const {
 }
 
 /**
- * Determines wither point is on the surface.
+ * Determines whether point is on the surface.
  * @param point :: Point to check
  * @returns true if the point is on the surface
  */

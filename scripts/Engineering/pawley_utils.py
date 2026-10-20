@@ -382,7 +382,7 @@ class MtdFuncMixin:
         # relevant only for subsequent unconstrained fits - not used in Pawley fits
         bg_func_names = FunctionFactory.Instance().getBackgroundFunctionNames()
         if isinstance(param_names, str):
-            param_names = [param_names]  # force ot be list with single element
+            param_names = [param_names]  # force to be list with single element
         for func in self.comp_func:
             if func.name not in bg_func_names:
                 for param_name in param_names:

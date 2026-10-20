@@ -168,7 +168,7 @@ struct TCPStreamEventDataSetup {
   bool isValid() const { return head.isValid() && head_setup.isValid() && (head.type == TCPStreamEventHeader::Setup); }
 };
 
-// placeholder fro SE data
+// placeholder for SE data
 struct TCPStreamEventDataSE {
   TCPStreamEventHeader head; ///< details of ISIS frame data was collected in
   /// and the number of neutron events in this packet

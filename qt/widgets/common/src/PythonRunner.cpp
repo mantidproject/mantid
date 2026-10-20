@@ -69,7 +69,7 @@ QString PythonRunner::runPythonCode(const QString &code, bool no_output) {
 /** This Python helper function converts a list of strings into one
  * string that Python will recognise as a Python tuple
  * @param list string entries
- * @return the strings as a comma separated list in brakets
+ * @return the strings as a comma separated list in brackets
  */
 const QString PythonRunner::stringList2Tuple(const QStringList &list) {
   QString tuple("(");

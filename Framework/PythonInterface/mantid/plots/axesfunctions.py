@@ -379,7 +379,7 @@ def scatter(axes, workspace, *args, **kwargs):
 def contour(axes, workspace, *args, **kwargs):
     """
     Essentially the same as :meth:`matplotlib.axes.Axes.contour`
-    but calculates the countour levels. Currently this only works with
+    but calculates the contour levels. Currently this only works with
     workspaces that have a constant number of bins between spectra.
 
     :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
@@ -418,7 +418,7 @@ def contour(axes, workspace, *args, **kwargs):
 def contourf(axes, workspace, *args, **kwargs):
     """
     Essentially the same as :meth:`matplotlib.axes.Axes.contourf`
-    but calculates the countour levels. Currently this only works with
+    but calculates the contour levels. Currently this only works with
     workspaces that have a constant number of bins between spectra.
 
     :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting

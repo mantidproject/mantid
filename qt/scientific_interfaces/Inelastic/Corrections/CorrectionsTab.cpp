@@ -76,7 +76,7 @@ bool CorrectionsTab::checkWorkspaceBinningMatches(const MatrixWorkspace_const_sp
 }
 
 /**
- * Adds a unit converstion step to the batch algorithm queue.
+ * Adds a unit conversion step to the batch algorithm queue.
  *
  * Note that if converting diffraction data in wavelength then eMode must be
  *set.

@@ -49,14 +49,14 @@ TableRowHelper ITableWorkspace::appendRow() {
 }
 
 /**
- * Access the column with name \c name trough a ColumnVector object
+ * Access the column with name \c name through a ColumnVector object
  * @param name :: The name of the column
  * @returns The named column
  */
 TableColumnHelper ITableWorkspace::getVector(const std::string &name) { return TableColumnHelper(this, name); }
 
 /**
- * Access the column with name \c name trough a ColumnVector object (const)
+ * Access the column with name \c name through a ColumnVector object (const)
  * @param name :: The name of the column
  * @returns The named column
  */

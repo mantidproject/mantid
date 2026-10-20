@@ -90,7 +90,7 @@ public:
     for (unsigned int i = 0; i < fit.size(); ++i) {
       // Should all be 1 because I used the same workspace twice as the input
       TS_ASSERT_DELTA(fit[i], 1.0, 0.0005)
-      // a linear fit thorugh all 1s should result in all 1s
+      // a linear fit through all 1s should result in all 1s
       TS_ASSERT_DELTA(fit[i], unfit[i], 0.0005)
     }
 
@@ -131,7 +131,7 @@ public:
     for (unsigned int i = 0; i < fit.size(); ++i) {
       // Should all be 1 because I used the same workspace twice as the input
       TS_ASSERT_DELTA(fit[i], 1.0, 0.0005)
-      // a linear fit thorugh all 1s should result in all 1s
+      // a linear fit through all 1s should result in all 1s
       TS_ASSERT_DELTA(fit[i], unfit[i], 0.0005)
     }
 

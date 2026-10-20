@@ -386,7 +386,7 @@ QIcon ScriptRepositoryView::RepoDelegate::getIcon(const QString &state) const {
   return icon;
 }
 
-/** Reacts to the iteraction with the user when he clicks on the buttons
+/** Reacts to the interaction with the user when he clicks on the buttons
  *displayed at paint.
  *
  *  Given the state of an entry (folder/file) there is only on available action.
@@ -485,7 +485,7 @@ void ScriptRepositoryView::CheckBoxDelegate::paint(QPainter *painter, const QSty
   QApplication::style()->drawPrimitive(QStyle::PE_IndicatorItemViewItemCheck, &modifiedOption, painter);
 }
 
-/** Reacts to the iteraction with the user when he clicks on the buttons
+/** Reacts to the interaction with the user when he clicks on the buttons
  *displayed at paint.
  *
  *  Given the state of an entry (folder/file) there is only on available action.

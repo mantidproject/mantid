@@ -154,7 +154,7 @@ class RunBilbyReduction:
         # Error message & Stop - to add
 
         if ((not StartTime) and (EndTime)) or ((StartTime) and (not EndTime)):
-            raise ValueError("Check StartTime and EndTime values; either both or none shall be intered.")
+            raise ValueError("Check StartTime and EndTime values; either both or none shall be entered.")
 
         if (not StartTime) and (not EndTime):
             ws_sam = mantid_api.LoadBBY(sam_file)

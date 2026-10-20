@@ -382,7 +382,7 @@ private:
   bool m_highBackground;
 
   //----- Result criterias ---------------
-  /// peak positon tolerance case b, c and d
+  /// peak position tolerance case b, c and d
   bool m_peakPosTolCase234;
 };
 

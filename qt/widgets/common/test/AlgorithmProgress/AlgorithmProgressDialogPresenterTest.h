@@ -68,7 +68,7 @@ public:
   }
 
   /** This test runs the dev algorithm and sees if it was
-   *  currectly tracked during start/updates/end
+   *  correctly tracked during start/updates/end
    */
   void testAlgorithmIsTrackedCorrectly() {
     auto mockedView = createMockView();

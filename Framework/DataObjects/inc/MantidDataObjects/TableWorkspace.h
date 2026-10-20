@@ -262,7 +262,7 @@ public:
   void sort(std::vector<std::pair<std::string, bool>> &criteria) override;
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   TableWorkspace(const TableWorkspace &other);
 
 private:

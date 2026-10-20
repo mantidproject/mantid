@@ -96,7 +96,7 @@ class DualPlotMaxentPanePresenterTest(unittest.TestCase):
         self.presenter._maxent_ws_name = "maxent"
         indices = [1, 3]
         self.presenter.handle_time_data_updated = mock.Mock(return_value=(["a"], [0]))
-        # cant pass values as they are changed in the function being tested
+        # can't pass values as they are changed in the function being tested
         self.model.add_reconstructed_data.return_value = (["unit", "test"], [1, 3])
         self.presenter.add_list_to_plot = mock.Mock()
         self.figure_presenter._options_presenter = mock.Mock()

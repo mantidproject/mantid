@@ -71,7 +71,7 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         return "SingleCrystalDiffuseReduction"
 
     def summary(self):
-        return "Single Crystal Diffuse Scattering Reduction, normalisation, symmetry and background substraction"
+        return "Single Crystal Diffuse Scattering Reduction, normalisation, symmetry and background subtraction"
 
     def PyInit(self):
         # files to reduce

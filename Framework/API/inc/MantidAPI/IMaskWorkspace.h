@@ -49,7 +49,7 @@ public:
   std::unique_ptr<IMaskWorkspace> clone() const { return std::unique_ptr<IMaskWorkspace>(doInterfaceClone()); }
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   IMaskWorkspace(const IMaskWorkspace &other) { (void)other; }
 
   /// returns a clone of the workspace as the interface

@@ -696,7 +696,7 @@ public:
     TS_ASSERT_EQUALS(statsRoiAll.time_standard_deviation, STDDEV_SIMPLE);
     TS_ASSERT_EQUALS(statsRoiAll.duration, 18.);
 
-    // single TimeROI to include values [3,4] with the preceeding 2 being implicit
+    // single TimeROI to include values [3,4] with the preceding 2 being implicit
     roi.clear();
     roi.addROI(EPOCH + 3., EPOCH + 7.);
     const auto statsROIOne = prop->getStatistics(&roi);

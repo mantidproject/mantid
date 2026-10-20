@@ -41,7 +41,7 @@ public:
   static const std::string CommentLineStartFlag();
 
 private:
-  /// Typdef for the white-space separated file data type.
+  /// Typedef for the white-space separated file data type.
   using DataCollectionType = std::deque<std::string>;
   /// All read-in data.
   DataCollectionType m_file_data;

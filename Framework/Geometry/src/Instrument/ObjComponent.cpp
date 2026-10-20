@@ -172,7 +172,7 @@ double ObjComponent::solidAngle(const Geometry::SolidAngleParams &params) const 
  * @param absoluteBB :: [InOut] The bounding box for this object component will
  * be stored here.
  * if BB alignment is different from axis alignment, the system of coordinates
- * to alighn is taken fron
+ * to align is taken from
  * the absoluteBB
  */
 void ObjComponent::getBoundingBox(BoundingBox &absoluteBB) const {

@@ -784,7 +784,7 @@ Experiment and Instrument Settings Tabs
   *The experiment Settings tab*
 
 The **Experiment Settings** and **Instrument Settings** tabs can be used to
-specify options for the reduction and post-processing releting to a specific
+specify options for the reduction and post-processing relating to a specific
 experiment. The Experiment settings are variables that are mostly set by the
 user, whereas the **Instrument Settings** are variables relating to the
 instrument used to perform the reduction. Both are populated with default

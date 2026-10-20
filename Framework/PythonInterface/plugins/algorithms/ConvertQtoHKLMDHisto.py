@@ -153,7 +153,7 @@ class ConvertQtoHKLMDHisto(PythonAlgorithm):
             OutputBins=bins,
         )
 
-        # Restort frame to original
+        # Restore frame to original
         SetMDFrame(InputWorkspace=input_ws, MDFrame=current_frame, Axes="0,1,2")
 
         self.setProperty("OutputWorkspace", mdhist)

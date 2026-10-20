@@ -90,7 +90,7 @@ void polint(const double xa[], const double ya[], const int n, const double x, d
       hp = xa[i + m] - x;
       w = c[i + 1] - d[i];
       if ((den = ho - hp) == 0.0) { // error message!!!
-        throw std::runtime_error("Error in routin polint");
+        throw std::runtime_error("Error in routine polint");
       }
       den = w / den;
       d[i] = hp * den;

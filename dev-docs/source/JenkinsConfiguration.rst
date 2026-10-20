@@ -30,7 +30,7 @@ First install the prerequisites tools that cannot be provided through conda:
 
 #. Install the `Command line Visual C++ 2019 build tools <https://visualstudio.microsoft.com/downloads/>`__.
    2019 matches the version used by conda-forge.
-   You may need to scroll to the botton and "click Older Downloads" to find it.
+   You may need to scroll to the bottom and "click Older Downloads" to find it.
    Once the installer has downloaded run it as administrator and select the
    C++ workload.
 #. Install `Git for Windows <https://git-scm.com/download/win>`__ using the

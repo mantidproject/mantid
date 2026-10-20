@@ -9,7 +9,7 @@
 //
 namespace Mantid {
 namespace MDAlgorithms {
-/**   Class provides commont interface for various classes performing rebinning
+/**   Class provides common interface for various classes performing rebinning
  operations;
 
  A rebinning class is selected from availible classes which do rebinning

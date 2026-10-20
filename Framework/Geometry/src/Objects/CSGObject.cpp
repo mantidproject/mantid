@@ -758,7 +758,7 @@ bool CSGObject::isValid(const std::map<int, int> &SMap) const {
 
 /**
  * Uses the topRule* to create a surface list
- * by iterating throught the tree
+ * by iterating through the tree
  * @param outFlag :: Sends output to standard error if true
  * @return 1 (should be number of surfaces)
  */

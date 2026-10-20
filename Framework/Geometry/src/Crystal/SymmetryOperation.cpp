@@ -63,7 +63,7 @@ void SymmetryOperation::init(const MatrixVectorPair<int, V3R> &matrixVectorPair)
 /// Returns a const reference to the internally stored matrix
 const Kernel::IntMatrix &SymmetryOperation::matrix() const { return m_matrixVectorPair.getMatrix(); }
 
-/// Returns a const reference to the internall stored vector
+/// Returns a const reference to the internally stored vector
 const V3R &SymmetryOperation::vector() const { return m_matrixVectorPair.getVector(); }
 
 /**

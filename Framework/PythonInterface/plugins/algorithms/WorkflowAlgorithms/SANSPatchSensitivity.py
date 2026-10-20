@@ -15,7 +15,7 @@ class SANSPatchSensitivity(PythonAlgorithm):
     """
     Calculate the detector sensitivity and patch the pixels that are masked in a second workspace.
 
-    Patchs the InputWorkspace based on the mask difined in PatchWorkspace.
+    Patches the InputWorkspace based on the mask defined in PatchWorkspace.
     For the masked peaks calculates a regression
 
     """

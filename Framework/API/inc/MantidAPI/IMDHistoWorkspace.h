@@ -77,7 +77,7 @@ public:
   virtual bool hasOrientedLattice() const override { return MultipleExperimentInfos::hasOrientedLattice(); }
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   IMDHistoWorkspace(const IMDHistoWorkspace &) = default;
 
   const std::string toString() const override;

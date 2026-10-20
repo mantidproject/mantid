@@ -20,7 +20,7 @@ One can choose any orientation for the momentum axes (to get the first axis to b
 **Note:** In order to calculate the trajectories, the algorithm relies on finding information about detector
 trajectories stored in the workspace. The algorithm :ref:`CropWorkspaceForMDNorm <algm-CropWorkspaceForMDNorm>` must
 be run *before* converting to multidimensional workspace. Optionally, in aaddition, one can recalculate the extents of the trajectories
-using the :ref:`RecalculateTrajectoriesExtents  <algm-RecalculateTrajectoriesExtents>` algorithm after convering to the
+using the :ref:`RecalculateTrajectoriesExtents  <algm-RecalculateTrajectoriesExtents>` algorithm after converting to the
 multidimensional workspace.
 
 The solid angle workspace is a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` that contains the solid angle/efficiency of the detectors.

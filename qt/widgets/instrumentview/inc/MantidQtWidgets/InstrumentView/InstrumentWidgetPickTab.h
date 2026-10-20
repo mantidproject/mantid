@@ -282,7 +282,7 @@ private:
 };
 
 /**
- * Class contining the logic of plotting the data in detectors/tubes.
+ * Class containing the logic of plotting the data in detectors/tubes.
  */
 class DetectorPlotController : public QObject {
   Q_OBJECT

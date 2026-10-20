@@ -27,7 +27,7 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetTab : public QFrame, pu
   Q_OBJECT
 public:
   explicit InstrumentWidgetTab(InstrumentWidget *parent);
-  /// Called by InstrumentWidget after the projection surface crated
+  /// Called by InstrumentWidget after the projection surface created
   /// Use it for surface-specific initialization
   virtual void initSurface() {}
   /// Add tab-specific items to the context menu

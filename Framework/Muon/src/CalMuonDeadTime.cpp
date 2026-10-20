@@ -209,7 +209,7 @@ void CalMuonDeadTime::exec() {
       API::TableRow t = outTable->appendRow();
       t << wsindex + 1 << -(A1 / A0) * time_bin * numGoodFrames;
     } else {
-      g_log.warning() << "Fit falled. Status = " << fitStatus << "\nFor workspace index " << i << '\n';
+      g_log.warning() << "Fit failed. Status = " << fitStatus << "\nFor workspace index " << i << '\n';
     }
   }
 

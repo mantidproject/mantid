@@ -67,7 +67,7 @@ public:
   void clearFileBacked(bool loadDiskBackedData) override;
   void clear() override;
   void clearDataFromMemory() override { /*it seems works on boxes only though recursive
-                                  clearing makes sence, not yet implemented*/
+                                  clearing makes sense, not yet implemented*/
   }
   /**Save the box at specific disk position using the class, respoinsible for
    * the file IO. */

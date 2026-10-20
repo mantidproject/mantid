@@ -560,7 +560,7 @@ void AlignAndFocusPowder::exec() {
   if (!m_resonanceLower.empty()) {
     m_outputW = filterResonances(m_outputW);
   }
-  m_progress->report(); // the step wil be really fast if the option isn't selected
+  m_progress->report(); // the step will be really fast if the option isn't selected
 
   // ----------------- WACKY LORENTZ THING HERE
   // TODO should call LorentzCorrection as a sub-algorithm

@@ -221,7 +221,7 @@ public:
                                  const coord_t length, signal_t &signal, signal_t &errorSquared,
                                  std::vector<signal_t> &signal_fit) const = 0;
 
-  /** Split sub-boxes, if this is possible and neede for this box */
+  /** Split sub-boxes, if this is possible and needed for this box */
   virtual void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = nullptr) = 0;
   /** Recalculate signal etc. */
   virtual void refreshCache(Kernel::ThreadScheduler * /*ts*/ = nullptr) = 0;

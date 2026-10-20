@@ -321,7 +321,7 @@ def process_frame(frame):
     if current_instruction == "CACHE":
         # Since 3.11, some bytcode instructions have several CACHE instructions after them.
         # last_i will be pointing at the last of those CACHE instructions after the call function.
-        # We want it pointing at the call fuction, as assign it to the largets offset in call_function_locs
+        # We want it pointing at the call fuction, as assign it to the largest offset in call_function_locs
         # which is < last_i
         # https://docs.python.org/3/whatsnew/3.11.html#cpython-bytecode-changes
         last_i = [offset for offset in call_function_locs.keys() if offset < last_i][-1]

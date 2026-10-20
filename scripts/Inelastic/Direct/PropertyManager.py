@@ -231,7 +231,7 @@ class PropertyManager(NonIDF_Properties):
         # end
 
         if name in self.__descriptors:
-            # This can only happen only if descriptor is called through synonims dictionary
+            # This can only happen only if descriptor is called through synonyms dictionary
             # This to work, all descriptors should define getter to return self on Null instance.
             descr = getattr(PropertyManager, name)
             return descr.__get__(self, name)
@@ -440,7 +440,7 @@ class PropertyManager(NonIDF_Properties):
         current instrument has different validity dates and different default values for
         these dates.
 
-        List of synonims is not modified and new properties are not added assuming that
+        List of synonyms is not modified and new properties are not added assuming that
         recent dictionary and properties are most comprehensive one
 
         ignore_changes==True when changes, caused by setting properties from instrument are not recorded

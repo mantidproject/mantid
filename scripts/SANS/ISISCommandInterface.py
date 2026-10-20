@@ -795,7 +795,7 @@ def _WavRangeReduction(name_suffix=None):
 
 def delete_workspaces(workspaces):
     """
-    Delete the list of workspaces if possible but fail siliently if there is
+    Delete the list of workspaces if possible but fail silently if there is
     a problem
     @param workspaces: the list to delete
     """
@@ -854,7 +854,7 @@ def PhiRanges(phis, plot=True):
 
     _printMessage("PhiRanges( %s,plot=%s)" % (str(phis), plot))
 
-    # todo covert their string into Python array
+    # todo convert their string into Python array
 
     if len(phis) / 2 != float(len(phis)) / 2.0:
         raise RuntimeError("Phi ranges must be given as pairs")

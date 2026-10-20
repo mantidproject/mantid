@@ -22,7 +22,7 @@ namespace Crystal {
 
 /** PeakBackground : Extension of HardThresholdBackground to consider regions of
 the image as background if they are outside
-the peaks radius limits (no mater what their theshold is). For pixels inside the
+the peaks radius limits (no matter what their theshold is). For pixels inside the
 radius, they must also be above the threshold value.
 */
 

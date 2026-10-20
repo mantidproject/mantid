@@ -156,7 +156,7 @@ void ConvertCWSDExpToMomentum::createVirtualInstrument() {
  */
 API::IMDEventWorkspace_sptr ConvertCWSDExpToMomentum::createExperimentMDWorkspace() {
 
-  // Create workspace in Q_sample with dimenion as 3
+  // Create workspace in Q_sample with dimension as 3
   size_t nDimension = 3;
   IMDEventWorkspace_sptr mdws = MDEventFactory::CreateMDWorkspace(nDimension, "MDEvent");
 
@@ -176,7 +176,7 @@ API::IMDEventWorkspace_sptr ConvertCWSDExpToMomentum::createExperimentMDWorkspac
   // Add dimensions
   // FIXME - Should I give out a better value???
   if (m_extentMins.size() != 3 || m_extentMaxs.size() != 3 || m_numBins.size() != 3) {
-    // Default dimenion
+    // Default dimension
     m_extentMins.resize(3, -10.0);
     m_extentMaxs.resize(3, 10.0);
     m_numBins.resize(3, 100);
@@ -378,7 +378,7 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(const Matrix
                 << ", momentum = " << momentum << "\n"
                 << "k_i = " << ki.toString() << "\n";
 
-  // Go though each spectrum to conver to MDEvent
+  // Go though each spectrum to convert to MDEvent
   size_t numspec = dataws->getNumberHistograms();
   const auto &specInfo = dataws->spectrumInfo();
   double maxsignal = 0;

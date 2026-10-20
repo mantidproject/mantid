@@ -115,7 +115,7 @@ def cc_calibrate_groups(
     :param output_basename: Optional name to use for temporary and output workspace
     :param previous_calibration: Optional previous diffcal workspace
     :param Step: step size for binning of data and input for GetDetectorOffsets, default 0.001
-    :param DReference: Derefernce parameter for GetDetectorOffsets, default 1.2615
+    :param DReference: DReference parameter for GetDetectorOffsets, default 1.2615
     :param Xmin: Minimum d-spacing for CrossCorrelate, default 1.22
     :param Xmax: Maximum d-spacing for CrossCorrelate, default 1.30
     :param MaxDSpaceShift: MaxDSpaceShift paramter for CrossCorrelate, default None

@@ -258,7 +258,7 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
           # The firste two numbers following each entry specify the range
           # of eight-packs corresponding each specific region. The third
           # number specifies the pixel width and the forth number is for
-          # the exponential intended to be used for seach specific region.
+          # the exponential intended to be used for search specific region.
           #
           # Non- back or forward scattering regions.
           range_1: [0, 13, 0.02, 2.5]

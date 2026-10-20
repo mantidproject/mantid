@@ -249,7 +249,7 @@ void ExtractMaskToTable::copyTableWorkspaceContent(const TableWorkspace_sptr &so
   std::vector<std::string> targetcolnames = targetWS->getColumnNames();
   if (sourcecolnames.size() != targetcolnames.size()) {
     std::stringstream errmsg;
-    errmsg << "Soruce table workspace " << sourceWS->getName() << " has different number of columns ("
+    errmsg << "Source table workspace " << sourceWS->getName() << " has different number of columns ("
            << sourcecolnames.size() << ") than target table workspace's (" << targetcolnames.size() << ")";
     throw std::runtime_error(errmsg.str());
   }

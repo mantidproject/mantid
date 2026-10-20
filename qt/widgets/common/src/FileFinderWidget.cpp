@@ -264,7 +264,7 @@ bool FileFinderWidget::extsAsSingleOption() const { return m_extsAsSingleOption;
 /**
  * Sets whether the file dialog should display the exts as a single list or as
  * multiple items
- * @param value :: If true the file dialog wil contain a single entry will all
+ * @param value :: If true the file dialog will contain a single entry will all
  * filters
  */
 void FileFinderWidget::extsAsSingleOption(const bool value) { m_extsAsSingleOption = value; }

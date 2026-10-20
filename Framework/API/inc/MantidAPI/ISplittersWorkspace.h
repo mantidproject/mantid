@@ -54,7 +54,7 @@ public:
   virtual bool removeSplitter(size_t splitterindex) = 0;
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   ISplittersWorkspace(const ISplittersWorkspace &) = default;
 
 private:

@@ -67,7 +67,7 @@ public:
   bool nonZeroF() const;
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   RebinnedOutput(const RebinnedOutput &) = default;
 
   /// Called by initialize() in MatrixWorkspace

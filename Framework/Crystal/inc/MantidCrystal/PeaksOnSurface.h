@@ -12,7 +12,7 @@ namespace Mantid {
 namespace Crystal {
 
 /** PeaksOnSurface : Check peak workspace interaction with a single surface. Any
-  peaks whos extents intersect the plane are identified.
+  peaks whose extents intersect the plane are identified.
 */
 class MANTID_CRYSTAL_DLL PeaksOnSurface : public PeaksIntersection {
 public:

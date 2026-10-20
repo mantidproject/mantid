@@ -301,7 +301,7 @@ void LoadILLSANS::getMonitorIndices(const std::string &filename) {
    * The below tries to access names of scanned variables. These should exist only for omega scans of D16B,
    * and will not be there for other instruments and modes of measurement (D16B gamma scan for example).
    * Therefore, any issue from accessing this data is wrapped in try-catch clause. Assumed is proper order
-   * of monitors: Monitor1 should preceed Monitor2 in the scanned variables. The order of these indices
+   * of monitors: Monitor1 should precede Monitor2 in the scanned variables. The order of these indices
    * in the variables_names will be used to load the monitor data.
    *
    * This method needs to be run before NeXus file is opened with NX library, otherwise it is not possible

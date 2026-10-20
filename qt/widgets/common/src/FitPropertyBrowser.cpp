@@ -273,7 +273,7 @@ void FitPropertyBrowser::initLayout(QWidget *w) { initBasicLayout(w); }
  *   1. SIGNALs/SLOTs when properties change.
  *   2. Actions and associated SIGNALs/SLOTs.
  * @param w widget parenting the action menus and the property tree browser
- * @return push botton for the fit menu
+ * @return push button for the fit menu
  */
 QPushButton *FitPropertyBrowser::createFitMenuButton(QWidget *w) {
   auto *btnFit = new QPushButton("Fit");
@@ -332,7 +332,7 @@ void FitPropertyBrowser::populateFitMenuButton(QSignalMapper *fitMapper, QMenu *
 void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   QPushButton *btnFit = createFitMenuButton(w);
   btnFit->setObjectName("button_Fit");
-  // to be able to change windows title from tread
+  // to be able to change windows title from thread
   connect(this, SIGNAL(changeWindowTitle(const QString &)), this, SLOT(setWindowTitle(const QString &)));
 
   /* Create the top level group */

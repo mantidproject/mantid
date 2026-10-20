@@ -37,7 +37,7 @@ private:
                               alg.getProperty(propertyName));
   }
 
-  /// Helper method to test application of the recusion depth
+  /// Helper method to test application of the recursion depth
   void doTestRecursionDepth(const bool bTakeDepthFromInput, const int maxDepth = 0) {
     SliceMD alg;
     alg.initialize();

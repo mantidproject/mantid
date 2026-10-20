@@ -18,7 +18,7 @@
 namespace Mantid {
 namespace Algorithms {
 /**Takes a muon workspace as input and calculates the
-asymmetry, using a function fo the form
+asymmetry, using a function of the form
 
 N_0* [ 1 + sum_j f(t,{lambda}_j) ]
 

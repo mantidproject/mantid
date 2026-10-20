@@ -35,7 +35,7 @@ And the efficiency is calculated from the polarization as :
 
    \epsilon_{F} = \frac{1 + P_{F}}{2}
 
-The errors are calculated with error propagation from the partial derivatives with respect ot the transmission amplitudes:
+The errors are calculated with error propagation from the partial derivatives with respect to the transmission amplitudes:
 
 .. math::
 

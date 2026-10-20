@@ -301,7 +301,7 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetnextentry(Mantid::Lega
 
 /**
  * Read an attribute containing a single string or numerical value.
- * Use NXgetattra for attributes with dimensions. (Recommened as the general
+ * Use NXgetattra for attributes with dimensions. (Recommended as the general
  case.)
  * \param handle A NeXus file handle as initialized by NXopen.
  * \param name The name of the atrribute to read.

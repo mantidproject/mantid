@@ -278,7 +278,7 @@ API::IMDEventWorkspace_sptr ConvertCWSDMDtoHKL::createHKLMDWorkspace(const std::
     throw std::invalid_argument("Input vectors for HKL, signal and detector "
                                 "IDs are of different size!");
 
-  // Create workspace in Q_sample with dimenion as 3
+  // Create workspace in Q_sample with dimension as 3
   size_t nDimension = 3;
   IMDEventWorkspace_sptr mdws = MDEventFactory::CreateMDWorkspace(nDimension, "MDEvent");
 
@@ -321,7 +321,7 @@ API::IMDEventWorkspace_sptr ConvertCWSDMDtoHKL::createHKLMDWorkspace(const std::
   MDEventWorkspace<MDEvent<3>, 3>::sptr mdws_mdevt_3 = std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(mdws);
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
-  // Go though each spectrum to conver to MDEvent
+  // Go though each spectrum to convert to MDEvent
   for (size_t iq = 0; iq < vec_hkl.size(); ++iq) {
     Kernel::V3D hkl = vec_hkl[iq];
     std::vector<Mantid::coord_t> millerindex(3);

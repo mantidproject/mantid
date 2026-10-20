@@ -212,7 +212,7 @@ private:
    * @return True if it is true
    */
   bool is_op_symbol(const char c) const;
-  std::shared_ptr<Operators> m_operators; ///< pointer ot the operators
+  std::shared_ptr<Operators> m_operators; ///< pointer to the operators
 };
 
 } // namespace API

@@ -802,7 +802,7 @@ class RunDescriptorTest(unittest.TestCase):
 
         ref_ws = mtd["ref_ws"]
 
-        # Errors if two matrix workspaces extacted from each other are not extracted
+        # Errors if two matrix workspaces extracted from each other are not extracted
         ref_ws = ref_ws - 0.1 * ref_ws
 
         resWs = mtd["resWs"]
@@ -844,7 +844,7 @@ class RunDescriptorTest(unittest.TestCase):
         resWs = PropertyManager.sample_run.get_workspace()
         self.assertTrue(resWs.run().hasProperty("empty_bg_removed"))
 
-        # Errors if two matrix workspaces extacted from each other are not extracted
+        # Errors if two matrix workspaces extracted from each other are not extracted
         ref_ws = ref_ws - 0.1 * ref_ws
         difr = CompareWorkspaces(ref_ws, resWs)
         self.assertTrue(difr.Result)

@@ -14,7 +14,7 @@
 namespace Mantid {
 namespace MDAlgorithms {
 /**  The class which wraps MD Events factory and allow to work with a
-N-dimensional templated MDEvent workspace like usuall class with n-dimension as
+N-dimensional templated MDEvent workspace like usual class with n-dimension as
 a parameter
 *
 *   Introduced to decrease code bloat and increase efficiency of methods and
@@ -79,7 +79,7 @@ private:
   /// maximal nuber of dimensions, currently supported by the class;
   enum { MAX_N_DIM = 8 };
   /// actual number of dimensions, initiated in current MD workspace; 0 if not
-  /// initated;
+  /// initiated;
   size_t m_NDimensions;
   /// pointer to taret  MD workspace:
   API::IMDEventWorkspace_sptr m_Workspace;

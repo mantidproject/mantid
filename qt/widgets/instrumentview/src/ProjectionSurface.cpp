@@ -620,7 +620,7 @@ void ProjectionSurface::drawPeakAlignmentMarkers(QPainter &painter) const {
 
 /**
  * Returns the current controller. If the controller doesn't exist throws a
- * logic_error exceotion.
+ * logic_error exception.
  */
 InputController *ProjectionSurface::getController() const {
   InputController *controller = m_inputControllers[m_interactionMode];

@@ -657,7 +657,7 @@ The script should produce the following output:
         F d -3 c: 6 absence violations,  3 additional absences, 45 matches
     The best matching space group is: F d -3 m
 
-In this case, the script gave the right answer, because the list of reflections was created using the crystal structure of silicon, which, as mentioned above, belongs to space group type :math:`Fd\bar{3}m`. The systematic absences derived from the symmetry operations explain all observations (and absences) expcept three. These are caused by the Si-atom on a special position. The presence of atoms in special positions can lead to incorrect determination of the space group because the introduced additional reflection conditions may match those of a different space group.
+In this case, the script gave the right answer, because the list of reflections was created using the crystal structure of silicon, which, as mentioned above, belongs to space group type :math:`Fd\bar{3}m`. The systematic absences derived from the symmetry operations explain all observations (and absences) except three. These are caused by the Si-atom on a special position. The presence of atoms in special positions can lead to incorrect determination of the space group because the introduced additional reflection conditions may match those of a different space group.
 
 .. [ITAPointGroups] International Tables for Crystallography (2006). Vol. A, ch. 10.1, p. 762
 

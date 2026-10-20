@@ -41,7 +41,7 @@ public:
   inline size_t npoints() const override { return 4; }
   /// Is a point inside this polygon
   bool contains(const Kernel::V2D &point) const override;
-  /// Is a the given polygon completely encosed by this one
+  /// Is a the given polygon completely enclosed by this one
   bool contains(const ConvexPolygon &poly) const override;
   /**
    * Compute the area of the polygon using triangulation. As this is a

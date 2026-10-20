@@ -2059,7 +2059,7 @@ std::pair<size_t, double> MatrixWorkspace::getXIndex(size_t i, double x, bool is
  * histogram data, e.g. &MatrixWorkspace::mutableY.
  * @param mutableData :: Accessor for the data to copy the image to.
  * @param image :: An image to copy the data from.
- * @param start :: Startinf workspace indx to copy data to.
+ * @param start :: Startinf workspace index to copy data to.
  * @param parallelExecution :: Should inner loop run as parallel operation
  */
 template <class Accessor>
@@ -2100,7 +2100,7 @@ void MatrixWorkspace::setImage(Accessor mutableData, const MantidImage &image, s
 /**
  * Copy the data (Y's) from an image to this workspace.
  * @param image :: An image to copy the data from.
- * @param start :: Startinf workspace indx to copy data to.
+ * @param start :: Startinf workspace index to copy data to.
  * @param parallelExecution :: Should inner loop run as parallel operation
  */
 void MatrixWorkspace::setImageY(const MantidImage &image, size_t start, bool parallelExecution) {
@@ -2110,7 +2110,7 @@ void MatrixWorkspace::setImageY(const MantidImage &image, size_t start, bool par
 /**
  * Copy the data from an image to this workspace's errors.
  * @param image :: An image to copy the data from.
- * @param start :: Startinf workspace indx to copy data to.
+ * @param start :: Startinf workspace index to copy data to.
  * @param parallelExecution :: Should inner loop run as parallel operation
  */
 void MatrixWorkspace::setImageE(const MantidImage &image, size_t start, bool parallelExecution) {

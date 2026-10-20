@@ -119,7 +119,7 @@ void LoadSampleEnvironment::init() {
                   "to be used to calculate the number density.");
   const std::vector<std::string> units({"Atoms", "Formula Units"});
   declareProperty("NumberDensityUnit", units.front(), std::make_shared<StringListValidator>(units),
-                  "Choose which units SampleNumberDensity referes to.");
+                  "Choose which units SampleNumberDensity refers to.");
 
   // Perform Group Associations.
   std::string formulaGrp("By Formula or Atomic Number");

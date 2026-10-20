@@ -108,7 +108,7 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
 
     if (time1 < time2) {
       filter1->addValue(time2,
-                        true); // should be f1->lastValue, but it doesnt
+                        true); // should be f1->lastValue, but it doesn't
                                // matter for boolean AND
     } else if (time2 < time1) {
       filter2->addValue(time1, true);

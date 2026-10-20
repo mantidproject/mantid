@@ -41,7 +41,7 @@ PoldiInstrumentAdapter::PoldiInstrumentAdapter(const MatrixWorkspace_const_sptr 
 
 /** Constructor with instrument and run information arguments
  *
- * This constructor internall calls
+ * This constructor internally calls
  *PoldiInstrumentAdapter::initializeFromInstrumentAndRun.
  *
  * @param mantidInstrument :: Const shared pointer to

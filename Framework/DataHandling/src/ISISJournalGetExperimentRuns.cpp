@@ -40,7 +40,7 @@ static constexpr const char *RUN_TITLE = "title";
  *
  * @param journal : a journal for the instrument and cycle of interest
  * @param investigationId : the experiment identifier for the investigation
- * @returns : a vector contining the data (name, number and title) for each run
+ * @returns : a vector containing the data (name, number and title) for each run
  * @throws : if there is an error fetching the data
  */
 std::vector<IJournal::RunData> getRuns(IJournal *journal, std::string const &investigationId) {

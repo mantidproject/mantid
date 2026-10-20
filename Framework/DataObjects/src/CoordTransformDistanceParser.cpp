@@ -21,7 +21,7 @@ Create the transform object.
 */
 Mantid::API::CoordTransform *
 CoordTransformDistanceParser::createTransform(Poco::XML::Element *coordTransElement) const {
-  // Typdef the parameter parsers required.
+  // Typedef the parameter parsers required.
   using InDimParameterParser = Mantid::API::SingleValueParameterParser<Mantid::API::InDimParameter>;
   using OutDimParameterParser = Mantid::API::SingleValueParameterParser<Mantid::API::OutDimParameter>;
   using CoordCenterParser = Mantid::API::VectorParameterParser<CoordCenterVectorParam>;

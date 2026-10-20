@@ -3125,7 +3125,7 @@ void EventList::maskTof(const double tofMin, const double tofMax) {
   if (tofMax <= tofMin)
     throw std::runtime_error("EventList::maskTof: tofMax must be > tofMin");
 
-  // don't do anything with an emply list
+  // don't do anything with an empty list
   if (this->getNumberEvents() == 0)
     return;
 
@@ -3195,7 +3195,7 @@ void EventList::maskCondition(const std::vector<bool> &mask) {
   if (this->getNumberEvents() != mask.size())
     throw std::runtime_error("EventList::maskTof: tofMax must be > tofMin");
 
-  // don't do anything with an emply list
+  // don't do anything with an empty list
   if (this->getNumberEvents() == 0)
     return;
 
@@ -4500,7 +4500,7 @@ template <class T>
 void EventList::convertUnitsViaTofHelper(typename std::vector<T> &events, Mantid::Kernel::Unit const *fromUnit,
                                          Mantid::Kernel::Unit const *toUnit) {
   for (auto &itev : events) {
-    // Conver to TOF
+    // Convert to TOF
     const double tof = fromUnit->singleToTOF(itev.m_tof);
     // And back from TOF to whatever
     itev.m_tof = toUnit->singleFromTOF(tof);

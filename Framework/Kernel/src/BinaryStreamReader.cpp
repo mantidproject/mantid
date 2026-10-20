@@ -187,7 +187,7 @@ BinaryStreamReader &BinaryStreamReader::operator>>(uint32_t &value) {
 
 /**
  * Read an array of int16_t into the given vector.
- * @param value The array to fille. Its size is increased if necessary
+ * @param value The array to fill. Its size is increased if necessary
  * @param nvals The number values to attempt to read from the stream
  * @return A reference to the BinaryStreamReader object
  */

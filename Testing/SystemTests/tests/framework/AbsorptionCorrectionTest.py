@@ -1130,7 +1130,7 @@ class CompareAbsorptionCorrectionToInternationalTablesSphere(systemtesting.Manti
 
 def create_test_ws():
     """
-    This creates a workspace with 19 detectors with 2theta from every 5 degress from 0 to 90
+    This creates a workspace with 19 detectors with 2theta from every 5 degrees from 0 to 90
     """
     wavelength = 1.7982
 

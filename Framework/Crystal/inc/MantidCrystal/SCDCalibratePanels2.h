@@ -89,7 +89,7 @@ private:
   void optimizeBanks(Mantid::API::IPeaksWorkspace_sptr pws, const Mantid::API::IPeaksWorkspace_sptr &pws_original,
                      const bool &docalibsize, const double &sizesearchradius, const bool &fixdetxyratio);
 
-  /// Private function for fine tunning sample position
+  /// Private function for fine tuning sample position
   void optimizeSamplePos(Mantid::API::IPeaksWorkspace_sptr pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
 
   /// Helper function for selecting peaks based on given bank name

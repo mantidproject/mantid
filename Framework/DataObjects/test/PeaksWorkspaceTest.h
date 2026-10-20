@@ -442,7 +442,7 @@ public:
     TSM_ASSERT_EQUALS("This detector id does not match what we expect from the "
                       "instrument definition",
                       1, detector->getID());
-    TSM_ASSERT_EQUALS("Thie detector position is wrong", params.detectorPosition, detector->getPos());
+    TSM_ASSERT_EQUALS("The detector position is wrong", params.detectorPosition, detector->getPos());
     TSM_ASSERT_EQUALS("Goniometer has not been set properly", params.goniometer.getR(), peak->getGoniometerMatrix());
   }
 

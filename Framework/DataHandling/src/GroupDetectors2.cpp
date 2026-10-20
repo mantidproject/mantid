@@ -356,7 +356,7 @@ void GroupDetectors2::getGroups(const API::MatrixWorkspace_const_sptr &workspace
     m_GroupWsInds[0] = workspace->getIndicesFromSpectra(spectraList);
     g_log.debug() << "Converted " << spectraList.size() << " spectra numbers into spectra indices to be combined\n";
   } else { // go through the rest of the properties in order of decreasing
-           // presidence, abort when we get the data we need ignore the rest
+           // precedence, abort when we get the data we need ignore the rest
     if (!detectorList.empty()) {
       // we are going to group on the basis of detector IDs, convert from
       // detectors to workspace indices
@@ -415,7 +415,7 @@ void GroupDetectors2::getGroups(const API::MatrixWorkspace_const_sptr &workspace
  */
 void GroupDetectors2::processFile(const std::string &fname, const API::MatrixWorkspace_const_sptr &workspace,
                                   std::vector<int64_t> &unUsedSpec) {
-  // tring to open the file the user told us exists, skip down 20 lines to find
+  // trying to open the file the user told us exists, skip down 20 lines to find
   // out what happens if we can read from it
   g_log.debug() << "Opening input file ... " << fname;
   std::ifstream File(fname.c_str(), std::ios::in);

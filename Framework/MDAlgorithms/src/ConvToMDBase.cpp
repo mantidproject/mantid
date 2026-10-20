@@ -16,7 +16,7 @@ namespace Mantid::MDAlgorithms {
 // logger for conversion
 Kernel::Logger ConvToMDBase::g_Log("MD-Algorithms");
 
-/** method which initates all main class variables
+/** method which initiates all main class variables
  * @param WSD        -- class describing the target workspace.
  *                      the algorithm uses target workspace limints,
  * transformation matix from source to the target workspace and the parameters,

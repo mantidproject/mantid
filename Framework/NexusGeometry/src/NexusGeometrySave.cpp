@@ -579,9 +579,9 @@ void validateInputs(AbstractLogger &logger, const std::string &fullPath, const G
   }
 
   if (Mantid::Kernel::V3D{0, 0, 0} != compInfo.samplePosition()) {
-    logger.error("The sample positon is required to be at the origin. "
+    logger.error("The sample position is required to be at the origin. "
                  "Instrument not saved.");
-    throw std::invalid_argument("The sample positon is required to be at the origin");
+    throw std::invalid_argument("The sample position is required to be at the origin");
   }
 
   if (!compInfo.hasSource()) {

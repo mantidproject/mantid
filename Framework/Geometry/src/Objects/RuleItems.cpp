@@ -289,7 +289,7 @@ bool Intersection::isValid(const Kernel::V3D &Vec) const
 bool Intersection::isValid(const std::map<int, int> &MX) const
 /**
   Use MX to determine if the surface truth etc is
-  valie
+  valid
   @param MX :: map of key + logical value XOR sign
   @retval 1 ::  Both sides are valid
   @retval 0 :: Either side is invalid.
@@ -316,7 +316,7 @@ int Intersection::simplify()
 }
 
 /**
- * find the common bounding box with the two childs of intersection
+ * find the common bounding box with the two children of intersection
  * @param xmax :: Maximum value for the bounding box in x direction
  * @param ymax :: Maximum value for the bounding box in y direction
  * @param zmax :: Maximum value for the bounding box in z direction
@@ -567,7 +567,7 @@ bool Union::isValid(const Kernel::V3D &Vec) const
 bool Union::isValid(const std::map<int, int> &MX) const
 /**
   Use MX to determine if the surface truth etc is
-  valie
+  valid
   @param MX :: map of key + logical value XOR sign
   @retval 1 :: if either side is valid
   @retval 0 :: Neither side is valid
@@ -1027,7 +1027,7 @@ bool CompObj::isValid(const Kernel::V3D &Pt) const
 /**
   Determines if a point  is valid.
   Checks to see if the point is valid in the object
-  and returns ture if it is not valid.
+  and returns true if it is not valid.
   @param  Pt :: Point to test
   @retval not valid in the object
   @retval true is no object is set
@@ -1446,7 +1446,7 @@ bool CompGrp::isValid(const Kernel::V3D &Pt) const
 /**
   Determines if a point  is valid.
   Checks to see if the point is valid in the object
-  and returns ture if it is not valid.
+  and returns true if it is not valid.
   Note the complementary reverse in the test.
   @param  Pt :: Point to test
   @retval not valid in the object

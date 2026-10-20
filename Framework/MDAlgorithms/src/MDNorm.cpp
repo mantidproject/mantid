@@ -416,7 +416,7 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
   std::shared_ptr<IMDHistoWorkspace> tempNormWS = this->getProperty("TemporaryNormalizationWorkspace");
   Mantid::API::IMDHistoWorkspace_sptr tempDataWS = this->getProperty("TemporaryDataWorkspace");
 
-  // check that either both or neuther accumulation workspaces are provied
+  // check that either both or neuther accumulation workspaces are provided
   if ((tempNormWS && !tempDataWS) || (!tempNormWS && tempDataWS)) {
     errorMessage.emplace("TemporaryDataWorkspace", "Must provide either no accumulation workspaces or,"
                                                    "both TemporaryNormalizationWorkspaces and TemporaryDataWorkspace");

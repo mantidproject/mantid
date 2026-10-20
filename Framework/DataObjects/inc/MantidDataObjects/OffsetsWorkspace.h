@@ -35,7 +35,7 @@ public:
   const std::string id() const override { return "OffsetsWorkspace"; }
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   OffsetsWorkspace(const OffsetsWorkspace &) = default;
 
 private:

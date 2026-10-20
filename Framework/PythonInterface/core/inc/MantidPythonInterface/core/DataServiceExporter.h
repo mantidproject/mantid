@@ -132,7 +132,7 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
   /**
    * Extract a SvcPtrType C++ value from the Python object
    * @param pyvalue Value of the
-   * @return The extracted value or thows an std::invalid_argument error
+   * @return The extracted value or throws an std::invalid_argument error
    */
   static SvcPtrType extractCppValue(const boost::python::object &pyvalue) {
     // Test for a weak pointer first

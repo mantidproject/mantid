@@ -94,7 +94,7 @@ void ProcessBackground::init() {
   vector<string> funcoptions{"N/A", "FitGivenDataPoints", "UserFunction"};
   auto fovalidator = std::make_shared<StringListValidator>(funcoptions);
   declareProperty("SelectionMode", "N/A", fovalidator,
-                  "If choise is UserFunction, background will be selected by "
+                  "If choice is UserFunction, background will be selected by "
                   "an input background "
                   "function.  Otherwise, background function will be fitted "
                   "from user's input data points.");

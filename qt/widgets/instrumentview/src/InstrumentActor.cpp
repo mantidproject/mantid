@@ -710,7 +710,7 @@ void InstrumentActor::loadColorMap(const std::pair<QString, bool> &cmap, bool re
 //------------------------------------------------------------------------------
 /** Get the detector position
  *
- * @param pickID :: pick Index maching the getDetector() calls;
+ * @param pickID :: pick Index matching the getDetector() calls;
  * @return the real-space position of the detector
  */
 const Mantid::Kernel::V3D InstrumentActor::getDetPos(size_t pickID) const {

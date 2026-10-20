@@ -496,7 +496,7 @@ void AlgorithmHistoryWindow::unrollAll(int state) {
   // Iterate all items in tree which have child algorithms to be unrolled
   QTreeWidgetItemIterator it(m_Historytree, QTreeWidgetItemIterator::HasChildren);
   while (*it) {
-    // set state of unroll based on checkbox sate
+    // set state of unroll based on checkbox state
     if (state == Qt::Checked)
       (*it)->setCheckState(1, Qt::Checked);
     else

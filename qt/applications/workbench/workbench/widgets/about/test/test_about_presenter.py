@@ -74,7 +74,7 @@ class AboutPresenterTest(TestCase):
     def test_should_show_on_startup_no_facility(self, MockConfigService):
         MockConfigService.getString.return_value = ""
         self.assertTrue(
-            AboutPresenter.should_show_on_startup(), "If the facilty is not set then should_show_on_startup should always be true"
+            AboutPresenter.should_show_on_startup(), "If the facility is not set then should_show_on_startup should always be true"
         )
         MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY), call(AboutPresenter.INSTRUMENT)])
 
@@ -82,7 +82,7 @@ class AboutPresenterTest(TestCase):
     def test_should_show_on_startup_invalid_facility(self, MockConfigService):
         MockConfigService.getFacility.side_effect = RuntimeError("Invalid Facility name")
         self.assertTrue(
-            AboutPresenter.should_show_on_startup(), "If the facilty is invalid then should_show_on_startup should always be true"
+            AboutPresenter.should_show_on_startup(), "If the facility is invalid then should_show_on_startup should always be true"
         )
         MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY), call(AboutPresenter.INSTRUMENT)])
         MockConfigService.getFacility.assert_has_calls([call("FACILITY1")])

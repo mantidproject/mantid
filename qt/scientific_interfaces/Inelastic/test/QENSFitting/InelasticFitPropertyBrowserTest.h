@@ -175,7 +175,7 @@ public:
   }
 
   void test_updateMultiDatasetParameters_with_function_does_not_throw() {
-    // EXPECT_CALL can not be used with a function becauyse FOR SOMME REASION IT
+    // EXPECT_CALL can not be used with a function becauyse FOR SOME REASION IT
     // IS BEING PASSED AS AN OBJECT INSTEAD OF A POINTER.
     auto fun = FunctionFactory::Instance().createInitialized("name=LinearBackground,A0=0,A1=0");
     m_browser->updateMultiDatasetParameters(*fun);

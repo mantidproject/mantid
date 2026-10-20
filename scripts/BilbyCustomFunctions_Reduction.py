@@ -360,7 +360,7 @@ def correction_tubes_shift(ws_to_correct, path_to_shifts_file):
 
 def correct_element_one_stripe(panel, pixelsize, shift, ws):
     """Technical for CorrectionTubesShift.
-    Sutable for one Cd stripe correction and for the stripes on BorAl mask on left curtain"""
+    Suitable for one Cd stripe correction and for the stripes on BorAl mask on left curtain"""
 
     eightpack = ["eight_pack1", "eight_pack2", "eight_pack3", "eight_pack4", "eight_pack5"]
     tube = ["tube1", "tube2", "tube3", "tube4", "tube5", "tube6", "tube7", "tube8"]

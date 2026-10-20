@@ -70,7 +70,7 @@ private:
   bool isCompatible(const std::shared_ptr<const SpecialWorkspace2D> &ws);
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   SpecialWorkspace2D(const SpecialWorkspace2D &) = default;
 
   void init(const size_t &NVectors, const size_t &XLength, const size_t &YLength) override;

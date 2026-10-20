@@ -241,7 +241,7 @@ void RecalculateTrajectoriesExtents::exec() {
           highValues[i] = lowValues[i];
           continue;
         }
-        // either intersection or completely indide the box
+        // either intersection or completely inside the box
         if ((qxmin - qSampleLow.X()) * (qxmin - qSampleHigh.X()) < 0) {
           double kfIntersection =
               (qxmin - qSampleLow.X()) * (kfmax - kfmin) / (qSampleHigh.X() - qSampleLow.X()) + kfmin;

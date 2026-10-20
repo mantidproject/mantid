@@ -83,7 +83,7 @@ struct SpectraInfo {
   IntArray detectorList;
 };
 
-// Helper typdef.
+// Helper typedef.
 using SpectraInfo_optional = std::optional<SpectraInfo>;
 
 /**

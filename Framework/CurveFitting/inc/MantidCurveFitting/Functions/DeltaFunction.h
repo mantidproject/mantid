@@ -18,7 +18,7 @@ namespace CurveFitting {
 namespace Functions {
 /**
 
-Delta function. Makes sence in Convolution only.
+Delta function. Makes sense in Convolution only.
 
 @author Roman Tolchenov, Tessella plc
 @date 02/09/2010

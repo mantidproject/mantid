@@ -145,7 +145,7 @@ public:
     TS_ASSERT_EQUALS(extractString(A), "-1 pz 6\n");
     Matrix<double> rotMat(3, 3);
     makeMatrix(rotMat);
-    // rotating z plane 90 degress w.r.t x axis
+    // rotating z plane 90 degrees w.r.t x axis
     A.rotate(rotMat);
     TS_ASSERT_EQUALS(extractString(A), "-1 py 6\n");
   }

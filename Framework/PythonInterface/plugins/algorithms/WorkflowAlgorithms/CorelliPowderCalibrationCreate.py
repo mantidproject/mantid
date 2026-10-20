@@ -104,7 +104,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
     #: - Component: name of the instrument component (e.g. 'moderator', 'bank42/sixteenpack')
     #: - Xposition, YPosition, ZPosition: location of the instrument component in the lab frame (units in meters)
     #: - XdirectionCosine, YdirectionCosine, ZdirectionCosine, RotationAngle: direction cosines and rotation angle
-    #: (in degress) defining a rotation in the lab frame that orients the instrument component
+    #: (in degrees) defining a rotation in the lab frame that orients the instrument component
     adjustment_items = [
         "ComponentName",
         "Xposition",
@@ -500,7 +500,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         r"""
         Create one spectra of fitted peaks in d-spacing for each pixel or group of detectors
 
-        This algorithm will perform a unit converstion from TOF to d-spacing. The instrument geometry
+        This algorithm will perform a unit conversion from TOF to d-spacing. The instrument geometry
         for the conversion is proviged by the instrument embedded in `workspace_with_instrument`,
         instead of the instrument embedded in `fitted_in_tof`.
 

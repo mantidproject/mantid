@@ -144,7 +144,7 @@ protected:
   std::unique_ptr<MDGeometryNotificationHelper> m_notificationHelper;
 
   /** the matrix which transforms momentums from orthogonal Q-system to
-     Orthogonal HKL or non-orthogonal HKL system alighned WRT to arbitrary
+     Orthogonal HKL or non-orthogonal HKL system aligned WRT to arbitrary
      coordinate system requested
      See the UB matrix formalizm, pg 7 for further details on implementation.
      Small variation here is that in also includes either B-matrix or orthogonal

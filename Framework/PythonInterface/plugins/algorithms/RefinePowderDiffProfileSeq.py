@@ -586,7 +586,7 @@ class SeqRefineProfile(object):
         self._currstep = self._lastValidStep + 1
         self.glog.notice("Current step is %d" % (self._currstep))
 
-        # Set up for other informatin
+        # Set up for other information
         # Peak type
         self._peakType = self._recordws.cell(0, 9).strip()
         # Background type

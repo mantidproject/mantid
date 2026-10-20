@@ -107,7 +107,7 @@ private:
                            double peakrightbound, const std::map<std::string, double> &rightpeakparammap,
                            double &finalchi2);
 
-  /// Fit signle peak by Monte Carlo/simulated annealing
+  /// Fit single peak by Monte Carlo/simulated annealing
   bool fitSinglePeakSimulatedAnnealing(const Functions::BackToBackExponential_sptr &peak,
                                        const std::vector<std::string> &paramtodomc);
 

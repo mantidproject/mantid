@@ -28,7 +28,7 @@ public:
   /// @return If index empty - total function, otherwise - function at index
   virtual Mantid::API::IFunction_const_sptr function(std::string const &index) const = 0;
 
-  /// @return Index of the function currently seleted in the Function Browser
+  /// @return Index of the function currently selected in the Function Browser
   virtual std::optional<std::string> currentFunctionIndex() const = 0;
 
   /// @return A peak currently represented by the peak picker

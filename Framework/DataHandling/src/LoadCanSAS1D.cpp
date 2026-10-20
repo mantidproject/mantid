@@ -299,7 +299,7 @@ void LoadCanSAS1D::check(const Poco::XML::Element *const toCheck, const std::str
 }
 /** Appends the first workspace to the second workspace. The second workspace
  * will became a group unless
- *  it was initially empty, in that situation it becames a copy of the first
+ *  it was initially empty, in that situation it becomes a copy of the first
  * workspace
  * @param[in] newWork the new data to add
  * @param[in] newWorkName the name that the new workspace will take

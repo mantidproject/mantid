@@ -816,7 +816,7 @@ bool FitPowderDiffPeaks::doFit1PeakBackground(const Workspace2D_sptr &dataws, si
 }
 
 //----------------------------------------------------------------------------------------------
-/** Fit signle peak by Monte Carlo/simulated annealing
+/** Fit single peak by Monte Carlo/simulated annealing
  */
 bool FitPowderDiffPeaks::fitSinglePeakSimulatedAnnealing(const BackToBackExponential_sptr &peak,
                                                          const vector<string> &paramtodomc) {
@@ -1399,7 +1399,7 @@ void FitPowderDiffPeaks::calculatePeakFitBoundary(size_t ileftpeak, size_t irigh
  * @param dataws :: The data workspace
  * @param peakfunction :: An instance of the BackToBackExponential peak
  *function
- * @param guessedfwhm: Guessed fwhm in order to constain the peak.  If
+ * @param guessedfwhm: Guessed fwhm in order to constrain the peak.  If
  *negative, then no constraint
  */
 std::pair<bool, double> FitPowderDiffPeaks::doFitPeak(const Workspace2D_sptr &dataws,

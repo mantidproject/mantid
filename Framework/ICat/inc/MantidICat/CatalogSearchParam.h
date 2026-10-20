@@ -91,7 +91,7 @@ private:
   time_t m_startDate;
   /// end date
   time_t m_endDate;
-  /// investigation anme
+  /// investigation name
   std::string m_investigationName;
   /// Datafile name
   std::string m_datafileName;

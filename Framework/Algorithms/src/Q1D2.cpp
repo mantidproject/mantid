@@ -334,7 +334,7 @@ API::MatrixWorkspace_sptr Q1D2::setUpOutputWorkspace(const std::vector<double> &
  *  @param pixelAdj [in] if not NULL this is workspace contains single bins with
  * the adjustments, e.g. detector efficencies, for the given ws index
  *  @param wavePixelAdj [in] if not NULL this is workspace that contains the
- * adjustments for the pixels and wavelenght dependend values.
+ * adjustments for the pixels and wavelenght dependent values.
  *  @param binNorms [in] pointer to a contigious array of doubles that are the
  * wavelength correction from waveAdj workspace, can be NULL
  *  @param binNormEs [in] pointer to a contigious array of doubles which
@@ -512,7 +512,7 @@ void Q1D2::normToMask(const size_t offSet, const size_t wsIndex, const Histogram
     for (it = mask.begin(); it != mask.end(); ++it) {
       size_t outBin = it->first;
       if (outBin < offSet) {
-        // this masked bin wasn't in the range being delt with anyway
+        // this masked bin wasn't in the range being dealt with anyway
         continue;
       }
       outBin -= offSet;
@@ -577,7 +577,7 @@ void Q1D2::convertWavetoQ(const SpectrumInfo &spectrumInfo, const size_t wsInd, 
  *  @param[in] OutQs the array of output Q bin boundaries, this finds the bin
  * that contains the QIn value
  *  @param[in] QToFind the Q value to find the correct bin for
- *  @param[in, out] loc points to the bin boundary (in the OutQs array) whos Q
+ *  @param[in, out] loc points to the bin boundary (in the OutQs array) whose Q
  * is higher than QToFind and higher by the smallest amount. Algorithm starts by
  * checking the value of loc passed and then all the bins _downwards_ through
  * the array

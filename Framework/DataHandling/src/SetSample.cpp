@@ -76,7 +76,7 @@ const std::string CONTAINER("Container");
 /// Static Path string
 const std::string PATH("Path");
 } // namespace SEArgs
-/// Provate namespace storing geometry args
+/// Private namespace storing geometry args
 namespace GeometryArgs {
 /// Static Shape string
 const std::string SHAPE("Shape");

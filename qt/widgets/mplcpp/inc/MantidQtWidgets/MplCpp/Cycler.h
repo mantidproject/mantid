@@ -19,7 +19,7 @@ namespace MplCpp {
 /**
  * @brief The Cycler class combines the functionality of Cycler
  * object from the cycler module with Python's itertools.cycle functionality
- * to create an interable that endlessly loops around a sequence of values.
+ * to create an iterable that endlessly loops around a sequence of values.
  * The call operator is used to produce the next value in the cycle
  */
 class MANTID_MPLCPP_DLL Cycler : public Common::Python::InstanceHolder {

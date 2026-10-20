@@ -69,7 +69,7 @@ protected:
   int splitIntoColumns(std::list<std::string> &columns, const std::string &str) const;
   /// Fill the given vector with the data values
   void fillInputValues(std::vector<double> &values, const std::list<std::string> &columns) const;
-  // write the values in the current line to teh end fo teh current spectra
+  // write the values in the current line to teh end of teh current spectra
   void addToCurrentSpectra(const std::list<std::string> &columns);
   // check that the number of columns in the current line match the number found
   // previously

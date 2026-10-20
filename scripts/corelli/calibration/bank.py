@@ -434,7 +434,7 @@ def mask_bank(bank_name: str, tubes_fit_success: np.ndarray, output_table: str) 
     If all tubes were fit successfully, no `TableWorkspace` is created, and `None` is returned.
 
     :param bank_name: a string of the form 'bankI' where 'I' is a bank number
-    :param tubes_fit_success: array of boolean containing a True/False entry for each tube, indicating wether
+    :param tubes_fit_success: array of boolean containing a True/False entry for each tube, indicating whether
     the tube was successfully calibrated.
     :param output_table: name of the output TableWorkspace containing one column for detector ID from tubes
     not successfully calibrated.

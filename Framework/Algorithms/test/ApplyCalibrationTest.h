@@ -170,7 +170,7 @@ public:
   }
 
   void testComplex() {
-    /* The purpse of this test is to test the algorithm when the relative
+    /* The purpose of this test is to test the algorithm when the relative
      * positioning and rotation
      * of components is complicated. This is the case for the MAPS instrument
      * and so here we

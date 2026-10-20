@@ -50,7 +50,7 @@ public:
   virtual void clearMRU() const = 0;
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   IEventWorkspace(const IEventWorkspace &) = default;
 
   const std::string toString() const override;

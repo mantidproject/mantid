@@ -199,16 +199,16 @@ protected: // for testing purposes
  * spherical coordinate system */
 class DetParameters {
 public:
-  /// azimuthal detector's angle in spherical coordinate system alighned with
+  /// azimuthal detector's angle in spherical coordinate system aligned with
   /// the beam
   double azimutAngle;
-  /// polar detector's angle in spherical coordinate system alighned with the
+  /// polar detector's angle in spherical coordinate system aligned with the
   /// beam
   double polarAngle;
   /// scattering source -- detector' distance
   double secondaryFlightPath;
   /// linear or angular size of the bounding box encapsulating detector and
-  /// alighned tangentially to the constant scattering angle circle
+  /// aligned tangentially to the constant scattering angle circle
   double azimWidth, polarWidth;
   /// the detector's ID
   int64_t detID;

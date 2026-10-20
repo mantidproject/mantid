@@ -101,7 +101,7 @@ def preprocess_banks(input_workspace: str, output_workspace: str) -> Workspace2D
     """
     CloneWorkspace(InputWorkspace=str(input_workspace), OutputWorkspace=output_workspace)
 
-    # inline function for 1D singal cleaning
+    # inline function for 1D signal cleaning
     # NOTE: an inline function here is by choice as it should only be used for data
     #       pre-processing only
     def clean_signals(
@@ -276,7 +276,7 @@ def calibrate_tube(
         assert marker in tube_name, f"{tube_name} does not uniquely specify one tube"
     peak_height, peak_width = -shadow_height, shadow_width
     # Initial guess for the peak positions, assuming:
-    # - the center of the wire mesh coincides with the center ot the tube_calib_fit_params
+    # - the center of the wire mesh coincides with the center of the tube_calib_fit_params
     # - wires cast a shadow on a perfectly calibrated tube
     fit_extent = (fit_domain / PIXELS_PER_TUBE) * TUBE_LENGTH  # fit domain in meters
     assert fit_extent < WIRE_GAP, "The fit domain cannot be larger than the distance between consecutive wires"

@@ -112,12 +112,12 @@ class DrillView(QMainWindow):
     loadRundex = Signal()
 
     """
-    Sent when the user aks for data saving.
+    Sent when the user asks for data saving.
     """
     saveRundex = Signal()
 
     """
-    Sent when the user aks for data saving in a new file.
+    Sent when the user asks for data saving in a new file.
     """
     saveRundexAs = Signal()
 

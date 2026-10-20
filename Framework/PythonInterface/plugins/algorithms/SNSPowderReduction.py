@@ -1298,7 +1298,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return filer_wall
 
     def getNumberOfSplittedWorkspace(self, splitwksp):
-        """Get number of splitted workspaces due to input splitwksp
+        """Get number of split workspaces due to input splitwksp
 
         Return : integer
         """
@@ -1734,7 +1734,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         wsgroup = mtd[base_name]
         tempwsnamelist = wsgroup.getNames()
         # logging
-        dbstr = "[Fx951] Splitted workspace names: "
+        dbstr = "[Fx951] Split workspace names: "
         for ws_name in tempwsnamelist:
             dbstr += "%s, " % (ws_name)
         self.log().debug(dbstr)

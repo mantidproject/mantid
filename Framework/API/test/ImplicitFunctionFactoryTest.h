@@ -145,7 +145,7 @@ public:
   }
 
   void testCreateThrows() {
-    TSM_ASSERT_THROWS("Should have thrown exeption on use of create rather than "
+    TSM_ASSERT_THROWS("Should have thrown exception on use of create rather than "
                       "createunwrapped.",
                       Mantid::API::ImplicitFunctionFactory::Instance().create(""), const std::runtime_error &);
   }

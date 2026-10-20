@@ -46,7 +46,7 @@ void ConvertToMatrixWorkspace::exec() {
     // few event lists.
     eventW->sortAll(TOF_SORT, &prog);
 
-    // Create the output workspace. This will copy many aspects fron the input
+    // Create the output workspace. This will copy many aspects from the input
     // one.
     outputWorkspace = create<Workspace2D>(*inputWorkspace);
 

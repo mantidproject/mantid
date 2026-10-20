@@ -172,7 +172,7 @@ MantidVec createXAxis(MatrixWorkspace *const ws, const double gradX, const doubl
 
 /**
  * Create a new Y, or Vertical Axis for the output workspace
- * @param ws : Workspace to attache the vertical axis to
+ * @param ws : Workspace to attach the vertical axis to
  * @param xAxisVec : Vector of x axis increments
  * @param gradY : Gradient used in linear transform from index to Y-scale
  * @param cyToUnit : C-offset used in the linear transform

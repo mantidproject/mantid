@@ -199,7 +199,7 @@ class CompareSampleLogs(PythonAlgorithm):
     def PyExec(self):
         self.wslist = self._expand_groups()
 
-        # no sence to compare sample logs for one workspace
+        # no sense to compare sample logs for one workspace
         if len(self.wslist) < 2:
             message = "At least 2 workspaces must be given as an input."
             self.log().error(message)

@@ -858,7 +858,7 @@ void LeBailFunction::setFitProfileParameter(const string &paramname, double minv
     g_log.debug() << "LeBailFunction::Fit(Tie) / " << tiepart1 << " / " << tiepart2 << " /\n";
   }
 
-  // Set contrains of the parameter on any of the tied parameter.
+  // Set constraints of the parameter on any of the tied parameter.
   std::stringstream parss;
   parss << "f0." << paramname;
   string parnamef0 = parss.str();

@@ -472,7 +472,7 @@ void RingProfile::processNumericImageRingProfile(const API::MatrixWorkspace_sptr
     getBinForPixel(inputWS, i, bin_n);
 
     // accumulate the values from the spectrum to the target bin
-    // each column has it correspondend bin_position inside bin_n
+    // each column has it corresponding bin_position inside bin_n
     const auto &refY = inputWS->y(i);
     for (size_t j = 0; j < bin_n.size(); j++) {
 

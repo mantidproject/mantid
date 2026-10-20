@@ -954,7 +954,7 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
       continue;
     }
 
-    // Covert the pixel ID from DAS pixel to our pixel ID
+    // Convert the pixel ID from DAS pixel to our pixel ID
     // downstream monitor pixel for SNAP
     if (pid == 1073741843)
       pid = 1179648;
@@ -1109,7 +1109,7 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
 
 //-----------------------------------------------------------------------------
 /**
- * Add a sample environment log for the proton chage (charge of the pulse in
+ * Add a sample environment log for the proton charge (charge of the pulse in
  *picoCoulombs)
  * and set the scalar value (total proton charge, microAmps*hours, on the
  *sample)

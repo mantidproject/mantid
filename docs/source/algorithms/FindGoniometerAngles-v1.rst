@@ -10,7 +10,7 @@
 Description
 -----------
 
-Do a brute force search for the goniometer rotation angles that maximize the number of peaks indexed by the UB on the peaks workspace.  The peaks must have peaks from only one run.  The search will start with the goniometer position set on the PeaksWoskpace and deviations from that goniometer up to MaxAngle will be tried, seaching for the gonomater angles that maximize the number of peaks indexed and minimize the total indexing error. This algorithm was ported from ISAW.
+Do a brute force search for the goniometer rotation angles that maximize the number of peaks indexed by the UB on the peaks workspace.  The peaks must have peaks from only one run.  The search will start with the goniometer position set on the PeaksWoskpace and deviations from that goniometer up to MaxAngle will be tried, searching for the gonomater angles that maximize the number of peaks indexed and minimize the total indexing error. This algorithm was ported from ISAW.
 
 The best goniometer angles found will be returned in terms of phi, chi, omega ("YZY") and if Apply is selected then the goniometer will be updated on the PeaksWorkspace and the Peaks.
 

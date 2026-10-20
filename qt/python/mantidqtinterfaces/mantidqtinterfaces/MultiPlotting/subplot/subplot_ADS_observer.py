@@ -23,7 +23,7 @@ class SubplotADSObserver(AnalysisDataServiceObserver):
     def deleteHandle(self, workspace_name, workspace):
         """
         Called when the ADS has deleted a workspace. Checks
-        subplots for anly lines for that workspace and removes them.
+        subplots for any lines for that workspace and removes them.
         :param workspace_name: The name of the workspace
         :param workspace: not used
         """

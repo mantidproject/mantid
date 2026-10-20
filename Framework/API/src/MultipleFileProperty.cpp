@@ -290,7 +290,7 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
 
       if (plusTokenStrings.size() > 1) {
         // See [3] in header documentation.  Basically, for reasons of
-        // ambiguity, we cant add together plusTokens if they contain a range
+        // ambiguity, we can't add together plusTokens if they contain a range
         // of files.  So throw on any instances of this when there is more than
         // plusToken.
         if (f.size() > 1)

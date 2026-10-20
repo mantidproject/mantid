@@ -473,7 +473,7 @@ bool Matrix<T>::operator!=(const Matrix<T> &A) const
 /**
 Element by Element comparison
 @param A :: Matrix to check
-@return true :: on succees
+@return true :: on success
 @return false :: failure
 */
 {

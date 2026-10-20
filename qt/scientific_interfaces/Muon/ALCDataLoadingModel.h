@@ -78,7 +78,7 @@ private:
   /// Files that are loaded
   std::vector<std::string> m_filesToLoad;
 
-  /// Last run added by auto was addes as range
+  /// Last run added by auto was added as range
   std::atomic_bool m_wasLastAutoRange;
 
   /// Variables used to update available muon info

@@ -72,7 +72,7 @@ class DirectValidationTest(unittest.TestCase):
         """Test validation function used by Abins with pychop instruments
 
         If the wrong incident energy / chopper setting are used together, there
-        is no transmission ans pychop will raise errors. The validator should
+        is no transmission and pychop will raise errors. The validator should
         catch this before performing intensity calculations.
         """
 

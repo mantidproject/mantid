@@ -16,7 +16,7 @@ class StandardSC(IFunction1D):
         return "Muon\\MuonGeneric"
 
     def init(self):
-        self.declareParameter("A0", 0.16, "Amplitude of interal field oscillation")
+        self.declareParameter("A0", 0.16, "Amplitude of internal field oscillation")
         self.declareParameter("Sigma", 0.2, "Gaussian decay rate")
         self.declareParameter("FieldSC", 300.0, "Internal Field (G)")
         self.declareParameter("FieldBG", 300.0, "External Field (G)")

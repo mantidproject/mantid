@@ -67,7 +67,7 @@ public:
   size_t getNumDims() const override;
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   WorkspaceSingleValue(const WorkspaceSingleValue &other);
 
 private:

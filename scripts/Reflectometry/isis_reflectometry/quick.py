@@ -658,7 +658,7 @@ def nrPACorrection(Wksp, crho, calpha, cAp, cPp):  # UpUpWksp,UpDownWksp,DownUpW
         Ap = mtd["PCAp"]
         Pp = mtd["PCPp"]
 
-        # Use the polynomial corretion fn instead
+        # Use the polynomial correction fn instead
         PolynomialCorrection(InputWorkspace="PCalpha", OutputWorkspace="PCalpha", Coefficients=calpha, Operation="Multiply")
         PolynomialCorrection(InputWorkspace="PCrho", OutputWorkspace="PCrho", Coefficients=crho, Operation="Multiply")
         PolynomialCorrection(InputWorkspace="PCAp", OutputWorkspace="PCAp", Coefficients=cAp, Operation="Multiply")

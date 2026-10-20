@@ -570,7 +570,7 @@ private:
   /** evalulate the derivative numerically for an arbitrary parameter at x
    * calculate \partial pV() / \partial p_i  where i = 0, 1, 2, 3, 4.
    * @param ap7 : IPeakFunction pointer to AsymmetricPearsonVII
-   * @param param_index: index of the parameter (peak hight: 0; peak centre: 1;
+   * @param param_index: index of the parameter (peak height: 0; peak centre: 1;
    * fwhm: 2; left shape parameter: 3; right shape parameter: 4)
    * @param min_value: minimum value of the parameter to evalulate the
    * derivative

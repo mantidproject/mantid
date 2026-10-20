@@ -94,7 +94,7 @@ public:
   virtual size_t npoints() const;
   /// Is a point inside this polygon
   virtual bool contains(const Kernel::V2D &point) const;
-  /// Is a the given polygon completely encosed by this one
+  /// Is a the given polygon completely enclosed by this one
   virtual bool contains(const ConvexPolygon &poly) const;
   /// Compute the area of the polygon using triangulation
   virtual double area() const;

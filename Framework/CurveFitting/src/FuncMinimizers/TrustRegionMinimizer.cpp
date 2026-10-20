@@ -601,7 +601,7 @@ void rootsQuadratic(double a0, double a1, double a2, double tol, int &nroots, do
       nroots = 0;
       root1 = ZERO;
       root2 = ZERO;
-    } else { // distint real roots
+    } else { // distinct real roots
       auto d = -HALF * (a1 + sign(sqrt(root2), a1));
       nroots = 2;
       root1 = d / a2;

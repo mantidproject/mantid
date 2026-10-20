@@ -306,7 +306,7 @@ public:
     TS_ASSERT(unitsalg->isExecuted());
     m_workspace = unitsalg->getProperty("OutputWorkspace");
 
-    // Convert the specturm axis ot signed_theta
+    // Convert the specturm axis to signed_theta
     auto specaxisalg = AlgorithmManager::Instance().createUnmanaged("ConvertSpectrumAxis");
     specaxisalg->setChild(true);
     specaxisalg->initialize();

@@ -174,7 +174,7 @@ public:
   };
 
   /**
-   * Simple struct to constain function to evaluate attribute validators that is required in both attributes and
+   * Simple struct to contain function to evaluate attribute validators that is required in both attributes and
    * visitors.
    */
   struct ValidatorEvaluator {

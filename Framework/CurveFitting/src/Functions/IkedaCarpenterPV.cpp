@@ -54,7 +54,7 @@ void IkedaCarpenterPV::setHeight(const double h) {
   setParameter("I", 1);
   double h0 = height();
 
-  // to avoid devide by zero and to insane value for I to be set
+  // to avoid divide by zero and to insane value for I to be set
   double minCutOff = 100.0 * std::numeric_limits<double>::min();
   if (h0 > 0 && h0 < minCutOff)
     h0 = minCutOff;

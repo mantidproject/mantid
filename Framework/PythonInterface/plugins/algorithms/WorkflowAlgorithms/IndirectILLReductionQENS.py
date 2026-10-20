@@ -448,7 +448,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         @param run :: runnumber
         @throws RuntimeError : if the size of the left and right wings do not match in 2-wings case
                                and the unmirror option is 1 or >3
-        @throws RuntimeError : if the mirros sense in the alignment run is inconsistent
+        @throws RuntimeError : if the mirror sense in the alignment run is inconsistent
         """
 
         outname = ws + "_tmp"

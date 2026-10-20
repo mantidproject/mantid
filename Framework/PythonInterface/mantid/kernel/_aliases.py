@@ -26,7 +26,7 @@ def lazy_instance_access(cls, key_as_str=False):
 
     :param cls: The singleton class type
     :param key_as_str: When ``True``, the key supplied to ``__getitem__``, ``__setitem__``,
-    ``__delitem__``, and ``__contains__`` will be converted to a str. ``None`` wil return ``False``
+    ``__delitem__``, and ``__contains__`` will be converted to a str. ``None`` will return ``False``
     for ``__contains__``
     :return: A new LazySingletonHolder wrapping cls
     """

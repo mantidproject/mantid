@@ -144,7 +144,7 @@ public:
 
     // Try again with different property value
     alg.setProperty("DataWorkspace", dataWSGood);
-    TSM_ASSERT_EQUALS("Interated dim should not be counted.", 0, alg.validateInputs().size());
+    TSM_ASSERT_EQUALS("Integrated dim should not be counted.", 0, alg.validateInputs().size());
   }
 
   void test_basic_shape_check() {

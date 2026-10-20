@@ -738,7 +738,7 @@ Instrument cache.
     // test utility to check output file
     NexusFileReader tester(destinationFile);
 
-    // assert dataset 'orientation' doesnt exist
+    // assert dataset 'orientation' doesn't exist
     bool hasRotation = tester.hasDataset(ORIENTATION, path);
     TS_ASSERT(!hasRotation);
   }
@@ -903,7 +903,7 @@ Instrument cache.
 
     // test instrument with rotation of source of zero
     auto instrument = ComponentCreationHelper::createInstrumentWithSourceRotation(
-        sourceLocation, Mantid::Kernel::V3D(0.0, 0.0, 0.0) /*samle position*/, detectorLocation, sourceRotation);
+        sourceLocation, Mantid::Kernel::V3D(0.0, 0.0, 0.0) /*sample position*/, detectorLocation, sourceRotation);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     FullNXPath transformationsPath = {DEFAULT_ROOT_ENTRY_NAME, "test-instrument" /*instrument name*/,

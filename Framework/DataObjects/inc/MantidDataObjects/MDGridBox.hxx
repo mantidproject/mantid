@@ -789,7 +789,7 @@ TMDE(void MDGridBox)::integrateSphere(API::CoordTransform &radiusTransform, cons
   Kernel::Utils::NestedForLoop::SetUp(nd, vertices_max, 0);
   for (size_t d = 0; d < nd; ++d) {
     vertices_max[d] = split[d] + 1;
-    // cache box sizes and min box valyes for performance
+    // cache box sizes and min box values for performance
     boxSize[d] = static_cast<coord_t>(m_SubBoxSize[d]);
     minBoxVal[d] = static_cast<coord_t>(this->extents[d].getMin());
   }
@@ -1020,7 +1020,7 @@ TMDE(void MDGridBox)::integrateCylinder(Mantid::API::CoordTransform &radiusTrans
   Kernel::Utils::NestedForLoop::SetUp(nd, vertices_max, 0);
   for (size_t d = 0; d < nd; ++d) {
     vertices_max[d] = split[d] + 1;
-    // cache box sizes and min box valyes for performance
+    // cache box sizes and min box values for performance
     boxSize[d] = static_cast<coord_t>(m_SubBoxSize[d]);
     minBoxVal[d] = static_cast<coord_t>(this->extents[d].getMin());
   }
@@ -1205,7 +1205,7 @@ TMDE(void MDGridBox)::unmask() {
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
 /* Internal TMP class to simplify adding events to the box for events and lean
- * events using single interface. One would nead to overload the box class
+ * events using single interface. One would need to overload the box class
  * otherwise*/
 template <typename MDE, size_t nd> struct IF_EVENT {
 public:

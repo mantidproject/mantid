@@ -97,7 +97,7 @@ TMDE(MDBox)::MDBox(API::BoxController *const splitter, const uint32_t depth,
  * @param depth :: recursive split depth
  * @param extentsVector :: size of the box
  * @param begin :: iterator to start
- * @param end :: iterator before ened (not included)
+ * @param end :: iterator before end (not included)
  */
 template <typename MDE, size_t nd>
 MDBox<MDE, nd>::MDBox(Mantid::API::BoxController *const bc, const uint32_t depth,

@@ -16,7 +16,7 @@ namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
 /**
-Provide stetch exponential function for Muon scientists
+Provide stretch exponential function for Muon scientists
 
 @author Karl Palmen, ISIS, RAL
 @date 12/03/2012

@@ -165,7 +165,7 @@ class Sample(object):
 
     def reload(self, reducer):
         """When changing the detector bank for LOQ, it may be necessary to reload the
-        data file, so to move te detector bank to the center of the scattering beam pattern.
+        data file, so to move the detector bank to the center of the scattering beam pattern.
         The reload method, allows to reload the data, moving to the correct center,
         and applying the same inputs used in the creation of the `Sample` object.
         """

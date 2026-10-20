@@ -1051,7 +1051,7 @@ size_t split_path(const std::string &path, std::vector<std::string> &path_compon
       ic--;
       if (ic < 0)
         throw(std::invalid_argument("path contains relative references to a "
-                                    "folder outside of the seach tree"));
+                                    "folder outside of the search tree"));
       it1 = it2;
       continue;
     }
@@ -1072,7 +1072,7 @@ size_t split_path(const std::string &path, std::vector<std::string> &path_compon
  * @returns :: number of the candidate in the input vector of strings if the
  candidate belongs to the group
                or -1 if it does not.
-               Returns the number of the first maching entry in the group if
+               Returns the number of the first matching entry in the group if
  there are duplicated entries in the group
  */
 int isMember(const std::vector<std::string> &group, const std::string &candidate) {

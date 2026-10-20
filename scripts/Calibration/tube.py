@@ -264,7 +264,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
 
     .. note::
 
-      The known positions are given in the same unit as the spacial position
+      The known positions are given in the same unit as the spatial position
       (3D) and having the center of the tube as the origin.
 
     Hence, this section will define a function that:

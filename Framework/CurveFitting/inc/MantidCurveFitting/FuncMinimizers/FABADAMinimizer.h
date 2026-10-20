@@ -66,7 +66,7 @@ private:
   void convergenceCheck();
   /// Refrigerates the system if appropriate
   void simAnnealingRefrigeration();
-  /// Decides wheather iteration must continue or not
+  /// Decides whether iteration must continue or not
   bool iterationContinuation();
   /// Output Markov chains
   void outputChains();

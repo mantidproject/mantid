@@ -25,7 +25,7 @@ namespace Algorithms {
     t2rad     Ratio of thickness of tube wall to the
              radius
     sintheta  Sine of the angle between the cylinder
-             axis and the directin of travel of the
+             axis and the direction of travel of the
              neutron i.e. sintheta=1.0d0 when
              neutron hits the detector perpendicular
              to the cylinder axis.

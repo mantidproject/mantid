@@ -918,7 +918,7 @@ Interval::Interval(const QString &intervalString) {
 Interval::Interval(const Interval &copy) { init(copy.m_start, copy.m_end); }
 
 bool Interval::merge(const Interval &other) {
-  // If cant merge, return false
+  // If can't merge, return false
   if (!canMerge(other))
     return false;
 
@@ -1089,8 +1089,8 @@ void IntervalList::addInterval(Interval interval) {
           // then add its index to the list of intervals to be deleted
           deleteList.append(j);
         }
-        // else if it cant, there is no need to continue checking whether
-        // any other intervals can alse be merged
+        // else if it can't, there is no need to continue checking whether
+        // any other intervals can also be merged
         else {
           break;
         }

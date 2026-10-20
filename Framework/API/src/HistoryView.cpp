@@ -155,7 +155,7 @@ void HistoryView::rollChildren(std::vector<HistoryItem>::iterator it) {
  * history objects that are also unrolled. This method does nothing if
  * the history object has no children.
  *
- * @param it :: iterator to the list of history item objects at the positon to
+ * @param it :: iterator to the list of history item objects at the position to
  *roll
  */
 void HistoryView::roll(std::vector<HistoryItem>::iterator &it) {
@@ -174,7 +174,7 @@ void HistoryView::roll(std::vector<HistoryItem>::iterator &it) {
 }
 
 /**
- * Filter the list of history items to remove any anlgorithms whos start
+ * Filter the list of history items to remove any anlgorithms whose start
  * time is outside of the given range.
  *
  * @param start Start of time range

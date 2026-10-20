@@ -96,7 +96,7 @@ In its final form, we will be able to do things like the following (things not i
   errors[1]; // 10.0
   errors[2]; // 2.0
 
-  // Arithmetics with histograms (*)
+  // Arithmetic with histograms (*)
   histogram1 += histogram2; // Checks size, throws if mismatched!
   auto counts = histogram1.counts();
   counts[0]; // 4.0
@@ -125,7 +125,7 @@ In its final form, we will be able to do things like the following (things not i
 
 Further planned features:
 
-- Arithmetics will all sub-types (``BinEdges``, ``Points``, ``Counts``, and ``Frequencies``, and also their respective ``Variances`` and ``StandardDeviations``).
+- Arithmetic will all sub-types (``BinEdges``, ``Points``, ``Counts``, and ``Frequencies``, and also their respective ``Variances`` and ``StandardDeviations``).
 - Generating bin edges (linear, logarithmic, ...).
 - Extend the ``Histogram`` interface with more common operations.
 - Non-member functions for more complex operations on histograms such as rebinning.

@@ -257,7 +257,7 @@ double EQSANSTofStructure::getTofOffset(const EventWorkspace_const_sptr &inputWS
       frame_wl_2 = chopper_wl_2[i];
       first = false;
     } else {
-      if (frame_skipping && i == 2) // ignore chopper 1 and 2 forthe shortest wl.
+      if (frame_skipping && i == 2) // ignore chopper 1 and 2 for the shortest wl.
       {
         frame_wl_1 = chopper_wl_1[i];
         frame_srcpulse_wl_1 = chopper_srcpulse_wl_1[i];
@@ -293,7 +293,7 @@ double EQSANSTofStructure::getTofOffset(const EventWorkspace_const_sptr &inputWS
         frameskip_wl_2 = chopper_frameskip_wl_2[i];
         first_skip = false;
       } else {
-        if (i == 2) // ignore chopper 1 and 2 forthe longest wl.
+        if (i == 2) // ignore chopper 1 and 2 for the longest wl.
           frameskip_wl_2 = chopper_frameskip_wl_2[i];
 
         if (chopper_frameskip_wl_1[i] < chopper_frameskip_wl_2[i] && frameskip_wl_1 < chopper_frameskip_wl_1[i])

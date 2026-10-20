@@ -446,7 +446,7 @@ int slsqp_(int *m, int *meq, const int *la, int *n, double *x, double *xl, doubl
   /* *                                                                     * */
   /* *  DATE:           APRIL - OCTOBER, 1981.                             * */
   /* *  STATUS:         DECEMBER, 31-ST, 1984.                             * */
-  /* *  STATUS:         MARCH   , 21-ST, 1987, REVISED TO FORTAN 77        * */
+  /* *  STATUS:         MARCH   , 21-ST, 1987, REVISED TO FORTRAN 77        * */
   /* *  STATUS:         MARCH   , 20-th, 1989, REVISED TO MS-FORTRAN       * */
   /* *  STATUS:         APRIL   , 14-th, 1989, HESSE   in-line coded       * */
   /* *  STATUS:         FEBRUARY, 28-th, 1991, FORTRAN/2 Version 1.04      * */

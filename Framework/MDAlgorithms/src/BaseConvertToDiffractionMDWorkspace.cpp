@@ -31,7 +31,7 @@ using namespace Mantid::Geometry;
 
 namespace Mantid::MDAlgorithms {
 
-/**Small class to diable propery on interface */
+/**Small class to diable property on interface */
 class DisabledProperty : public EnabledWhenProperty {
 public:
   DisabledProperty() : EnabledWhenProperty("NonExistingProperty", IS_DEFAULT) {}

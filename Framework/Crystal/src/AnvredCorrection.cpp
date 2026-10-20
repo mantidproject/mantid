@@ -579,7 +579,7 @@ double AnvredCorrection::slantPathLength(const Instrument_const_sptr &inst, cons
 
 double AnvredCorrection::scale_exec(std::string &bankName, const double lambda, const double depth,
                                     const Instrument_const_sptr &inst, const double pathlength, double eventWeight) {
-  // correct for the slant path throught the scintillator glass
+  // correct for the slant path through the scintillator glass
   const double mu = (9.614 * lambda) + 0.266;            // mu for GS20 glass
   const double eff_center = 1.0 - std::exp(-mu * depth); // efficiency at center of detector
   const double eff_R = 1.0 - exp(-mu * pathlength);      // efficiency at point R

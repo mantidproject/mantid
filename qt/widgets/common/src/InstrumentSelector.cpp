@@ -92,7 +92,7 @@ QString InstrumentSelector::getFacility() { return QString::fromStdString(m_curr
 
 /**
  * Sets the facility instruments should be loaded from and refeshes the list.
- * @param facilityName Name of facilty
+ * @param facilityName Name of facility
  */
 void InstrumentSelector::setFacility(const QString &facilityName) { fillWithInstrumentsFromFacility(facilityName); }
 

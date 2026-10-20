@@ -83,7 +83,7 @@ chopper_system:
       default: True             # If this key is omitted, the variant without any option is used as default
     Intermediate:
       choppers:                 # Note that we need to leave the required number of dashes to indicate
-        -                       #   choppers whos parameters have not changed.
+        -                       #   choppers whose parameters have not changed.
         -
         -
         -
@@ -97,7 +97,7 @@ chopper_system:
          [0, 1],
          [1, 0]]
       choppers:                 # Note that we need to leave the required number of dashes to indicate
-        -                       #   choppers whos parameters have not changed.
+        -                       #   choppers whose parameters have not changed.
         -
         -
         -

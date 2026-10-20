@@ -419,7 +419,7 @@ QModelIndex RepoModel::index(int row, int column, const QModelIndex &parent) con
   // for parent that refers to file and not to folder.
   if (!hasIndex(row, column, parent))
     return QModelIndex();
-  // retrieve the pointer ot the RepoItem from the parent
+  // retrieve the pointer to the RepoItem from the parent
   const RepoItem *parentItem;
   if (!parent.isValid())
     parentItem = rootItem;

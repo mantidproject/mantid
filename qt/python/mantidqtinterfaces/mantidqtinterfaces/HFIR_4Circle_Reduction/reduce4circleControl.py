@@ -903,7 +903,7 @@ class CWSCDReductionControl(object):
         :return:
         """
         # check inputs
-        assert isinstance(exp_number, int), "Experiment numbe {0} must be an integer but not a {1}".format(exp_number, type(exp_number))
+        assert isinstance(exp_number, int), "Experiment number {0} must be an integer but not a {1}".format(exp_number, type(exp_number))
 
         if exp_number not in self._userWavelengthDict:
             return None

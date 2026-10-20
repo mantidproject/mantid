@@ -240,7 +240,7 @@ void export_Run() {
       .def("endTime", &Run::endTime, arg("self"), "Return the total ending time of the run.")
 
       .def("getTimeROI", &Run::getTimeROI, arg("self"), return_value_policy<reference_existing_object>(),
-           "Return the time regoin of interest")
+           "Return the time region of interest")
 
       //-------------------- Dictionary access----------------------------
       .def("get", &getWithDefault, (arg("self"), arg("key"), arg("default")),

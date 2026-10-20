@@ -235,7 +235,7 @@ void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet, const TI
   g_log.debug() << "Starting to copy the ungrouped spectra\n";
   double prog4Copy = (1. - 1. * static_cast<double>(m_FracCompl)) / static_cast<double>(unGroupedSet.size());
 
-  // go thorugh all the spectra in the input workspace
+  // go through all the spectra in the input workspace
   for (auto copyFrIt : unGroupedSet) {
     if (copyFrIt == USED)
       continue; // Marked as not to be used

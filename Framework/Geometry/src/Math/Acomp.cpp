@@ -1406,7 +1406,7 @@ given a inner bracket expand that etc.
   }
 
   //
-  // First:: Union take presidence over Intersection
+  // First:: Union take precedence over Intersection
   //      :: check brackets
   int blevel = 0; // bracket level
   for (char i : Ln) {

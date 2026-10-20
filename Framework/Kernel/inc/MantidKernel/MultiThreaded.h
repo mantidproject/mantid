@@ -159,7 +159,7 @@ template <typename T, typename BinaryOp> void AtomicOp(std::atomic<T> &f, T d, B
   PRAGMA(omp parallel for firstprivate(variable1, variable2) )
 
 /** Ensures that the next execution line or block is only executed if
- * there are multple threads execting in this region
+ * there are multple threads executing in this region
  */
 #define IF_PARALLEL if (omp_get_num_threads() > 1)
 

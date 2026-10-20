@@ -97,7 +97,7 @@ protected:
   /// void functionDeriv1D(Jacobian* out, const double* xValues, const size_t
   /// nData) const;
 
-  /// General implemenation of derivative
+  /// General implementation of derivative
   // void functionDerivLocal(Jacobian* out, const double* xValues, const size_t
   // nData) const;
 

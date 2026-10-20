@@ -259,7 +259,7 @@ std::shared_ptr<CSGObject> ShapeFactory::createShape(Poco::XML::Element *pElem) 
     }
 
     // Here do the actually swapping of strings
-    // but only if the algebra containes all the shapes
+    // but only if the algebra contains all the shapes
     if (allFound.size() == idMatching.size()) {
       std::map<size_t, std::string, std::greater<size_t>>::iterator iter2;
       for (iter2 = allFound.begin(); iter2 != allFound.end(); ++iter2) {

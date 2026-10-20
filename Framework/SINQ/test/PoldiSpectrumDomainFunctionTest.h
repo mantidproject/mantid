@@ -228,7 +228,7 @@ public:
    * https://github.com/mantidproject/mantid/issues/10340
    * (orginally trac issue #9497) is fixed, then it will pass.
    *
-   * As of 2016/06/22 thre is still an issue with the precision in the
+   * As of 2016/06/22 there is still an issue with the precision in the
    * conversion to/from strings
    */
   void ___testCreateInitialized() {

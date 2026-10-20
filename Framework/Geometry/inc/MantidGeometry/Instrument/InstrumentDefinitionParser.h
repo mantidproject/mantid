@@ -103,7 +103,7 @@ private:
 
   /// Structure for holding detector IDs
   struct IdList {
-    /// Used to count the number of detector encounted so far
+    /// Used to count the number of detector encountered so far
     int counted;
     /// list of detector IDs
     std::vector<int> vec;

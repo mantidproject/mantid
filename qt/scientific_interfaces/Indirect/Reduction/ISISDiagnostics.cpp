@@ -109,12 +109,12 @@ ISISDiagnostics::ISISDiagnostics(IDataReduction *idrUI, QWidget *parent) : DataR
   connect(backgroundRangeSelector, &MantidWidgets::RangeSelector::selectionChanged, this,
           &ISISDiagnostics::rangeSelectorDropped);
 
-  // Update range selctors when a property is changed
+  // Update range selectors when a property is changed
   connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ISISDiagnostics::doublePropertyChanged);
   // Enable/disable second range options when checkbox is toggled
   connect(m_blnManager, &QtBoolPropertyManager::valueChanged, this, &ISISDiagnostics::sliceTwoRanges);
   // Enables/disables calibration file selection when user toggles Use
-  // Calibratin File checkbox
+  // Calibration File checkbox
   connect(m_uiForm.ckUseCalibration, &QCheckBox::toggled, this, &ISISDiagnostics::sliceCalib);
   // Plot slice miniplot when file has finished loading
   connect(m_uiForm.dsInputFiles, &FileFinderWidget::filesFoundChanged, this, &ISISDiagnostics::handleNewFile);

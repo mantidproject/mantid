@@ -1131,7 +1131,7 @@ def nrPACorrection(UpUpWksp, UpDownWksp, DownUpWksp, DownDownWksp):
     # rho.mutableY(0)[i]=rho.y(0)[i]+crho[j]*x**j
     # Ap.mutableY(0)[i]=Ap.y(0)[i]+cAp[j]*x**j
     # Pp.mutableY(0)[i]=Pp.y(0)[i]+cPp[j]*x**j
-    # Use the polynomial corretion fn instead
+    # Use the polynomial correction fn instead
     PolynomialCorrection(InputWorkspace="PCalpha", OutputWorkspace="PCalpha", Coefficients=calpha, Operation="Multiply")
     PolynomialCorrection(InputWorkspace="PCrho", OutputWorkspace="PCrho", Coefficients=crho, Operation="Multiply")
     PolynomialCorrection(InputWorkspace="PCAp", OutputWorkspace="PCAp", Coefficients=cAp, Operation="Multiply")

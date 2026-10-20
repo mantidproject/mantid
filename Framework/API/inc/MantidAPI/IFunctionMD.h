@@ -63,7 +63,7 @@ protected:
   void evaluateFunction(const FunctionDomainMD &domain, FunctionValues &values) const;
 
   virtual void useDimension(const std::string &id);
-  /// Do finction initialization after useAllDimensions() was called
+  /// Do function initialization after useAllDimensions() was called
   virtual void initDimensions() {}
   /// Does the function evaluation. Must be implemented in derived classes.
   virtual double functionMD(const IMDIterator &r) const = 0;

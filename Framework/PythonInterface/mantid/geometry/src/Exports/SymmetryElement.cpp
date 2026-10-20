@@ -53,7 +53,7 @@ void export_SymmetryElement() {
            "Returns the Hermann-Mauguin symbol for the element.")
       .def("getAxis", &getAxis, arg("self"),
            "Returns the symmetry axis or [0,0,0] for "
-           "identiy, inversion and translations.")
+           "identity, inversion and translations.")
       .def("getRotationSense", &getRotationSense, arg("self"),
            "Returns the rotation sense of a rotation axis or None"
            "if the element is not a rotation.");

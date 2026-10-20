@@ -868,9 +868,9 @@ Poco::XML::Element *InstrumentDefinitionParser::getParentComponent(const Poco::X
     }
   } else {
     g_log.error("Argument to function getParentComponent must be a XML element "
-                "whos parent is an element.");
+                "whose parent is an element.");
     throw std::logic_error("Argument to function getParentComponent must be a "
-                           "XML element whos parent is an element.");
+                           "XML element whose parent is an element.");
   }
 
   return pCompElem;
@@ -2660,7 +2660,7 @@ void InstrumentDefinitionParser::createNeutronicInstrument() {
  *  @param pElem ::  Poco::XML \<type\> element that we want to adjust
  *  @param isTypeAssembly [in] :: tell whether any other type, but the special
  * one treated here, is assembly or not
- *  @param getTypeElement [in] :: contain pointers to all types but the onces
+ *  @param getTypeElement [in] :: contain pointers to all types but the ones
  * treated here
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML

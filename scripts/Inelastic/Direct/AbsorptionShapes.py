@@ -299,7 +299,7 @@ class anAbsorptionShape(object):
         n_elements = len(value)
         if n_elements < len(mandatory_prop_list):
             raise TypeError(
-                "*** {0} shape parameter needes at least {1} imput parameters namely: {2}".format(
+                "*** {0} shape parameter needs at least {1} imput parameters namely: {2}".format(
                     shape_name, len(mandatory_prop_list), mandatory_prop_list
                 )
             )

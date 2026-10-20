@@ -101,9 +101,9 @@ private:
   IObject_sptr m_sampleShape = nullptr;
 };
 
-/// Typdef for a shared pointer
+/// Typedef for a shared pointer
 using Container_sptr = std::shared_ptr<Container>;
-/// Typdef for a shared pointer to a const object
+/// Typedef for a shared pointer to a const object
 using Container_const_sptr = std::shared_ptr<const Container>;
 
 } // namespace Geometry

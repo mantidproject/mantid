@@ -550,7 +550,7 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(DataObjects::Workspace2D_s
   auto tempUnit = std::string(1, m_header.temp.at(m_header.temp.size() - 1));
   addToSampleLog("sample_temp_unit", tempUnit, outputWorkspace);
 
-  // When poping the back off the temperature it is meant to remove the unit
+  // When popping the back off the temperature it is meant to remove the unit
   m_header.temp.pop_back();
   try {
     double temperature = std::stod(m_header.temp);

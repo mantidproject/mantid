@@ -17,7 +17,7 @@ from mantid.api import IFunction1D, FunctionFactory
 
 
 # The model of Peters & Kneller (J Chem Phys 139 165102 2013) takes into account motional heterogeneity.
-# The elastic intensity is propotional to 1/(1+msd*Q^2/6*beta)^beta
+# The elastic intensity is proportional to 1/(1+msd*Q^2/6*beta)^beta
 # where the mean square displacement msd = <r^2> and beta is the paramter of the Gamma function Gamma(beta)
 
 

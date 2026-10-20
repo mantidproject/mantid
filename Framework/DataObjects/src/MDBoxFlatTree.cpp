@@ -590,7 +590,7 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes, API::
     totalNumEvents += numEvents;
     if (box_type == 1) {
       // --- Make a MDBox -----
-      if (BoxStructureOnly) { // create box with undefined numer of events --
+      if (BoxStructureOnly) { // create box with undefined number of events --
                               // differs from 0 number of events by not calling
                               // reserve(0) on underlying vectors.
         ibox = MDEventFactory::createBox(size_t(m_nDim), MDEventFactory::BoxType(iEventType), bc, extentsVector,

@@ -47,7 +47,7 @@ bool Quadrilateral::contains(const Kernel::V2D &point) const {
 }
 
 /**
- * @return True if the given polygon is completely encosed by this one
+ * @return True if the given polygon is completely enclosed by this one
  */
 bool Quadrilateral::contains(const ConvexPolygon &poly) const {
   ConvexPolygon quadAsPoly = this->toPoly();

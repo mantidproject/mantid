@@ -240,7 +240,7 @@ public:
     MatrixWorkspace_sptr goodWS = create_2d_workspace();
     RingProfile alg;
 
-    // selecting 4 bins from 45 degres in clockwise sense
+    // selecting 4 bins from 45 degrees in clockwise sense
     // and for the ring that will get only the numbers 1,2,3,4
 
     configure_ring_profile(alg, goodWS, std::vector<double>(2, 0.0), 4, 45.0, 0.115, 0.13, false);

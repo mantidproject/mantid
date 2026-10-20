@@ -763,7 +763,7 @@ class AlignComponents(PythonAlgorithm):
         r"""first and last detector ID's in a component
         @param str component: name of the component assembly
         @param mantid.geometry.componentInfo component_info: object holding information for the instrument components
-        @return tuple: firt and last detector ID's
+        @return tuple: first and last detector ID's
         """
         index = resolve_component_index(component, component_info)  # component-info index
         # component-info indexes for all detector pixels in this components

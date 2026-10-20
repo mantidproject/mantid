@@ -89,7 +89,7 @@ private:
                                           std::vector<double> &coeficients);
   /// Calls the rebin algorithm
   API::MatrixWorkspace_sptr rebin(const std::vector<double> &binParams, const API::MatrixWorkspace_sptr &ws);
-  /// Outpus message to log if the detector at the given index is not a monitor
+  /// Outputs message to log if the detector at the given index is not a monitor
   /// in both input workspaces.
   void logIfNotMonitor(const API::MatrixWorkspace_sptr &sampleWS, const API::MatrixWorkspace_sptr &directWS,
                        size_t index);

@@ -44,7 +44,7 @@ If you would like to follow along with all the below steps using your own experi
 #. Sample Material Information, this is solely for attenuation correction and so the accuracy of the information will be determined by the accuracy required by your experiment (see :py:obj:`Material <mantid.kernel.Material>` for more info)
 #. Correct definition of the Sample Shape in its initial state when the goniometer is homed/default (this would ideally be how the sample shape information is provided above, but the shape definition could be defined in a different orientation and transformed to the initial state if necessary)
 #. Orientation Information for each experimental run, either provided as transformation matrices or euler angles (if using euler angles you must know the axes of rotation for the goniometer and the sense of these rotations - *take care to get this correct*)
-#. Sample Directions relative to sample shape (texture can be defined relative to intrinsic directions of the sample, for example the Rolling, Normal and Tranverse Directions)
+#. Sample Directions relative to sample shape (texture can be defined relative to intrinsic directions of the sample, for example the Rolling, Normal and Transverse Directions)
 #. The Shape of the experimental Gauge Volume
 #. The Beam Diveregence Parameters
 #. Crystal Structure either as lattice definition (see :ref:`Crystal structure and reflections`) or a ``CIF`` file

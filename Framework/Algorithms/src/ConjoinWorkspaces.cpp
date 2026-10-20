@@ -133,7 +133,7 @@ void ConjoinWorkspaces::checkForOverlap(const MatrixWorkspace &ws1, const Matrix
     }
   }
 
-  // Now go throught the spectrum numbers & UDETS in the 2nd workspace, making
+  // Now go through the spectrum numbers & UDETS in the 2nd workspace, making
   // sure that there's no overlap
   const size_t &nhist2 = ws2.getNumberHistograms();
   for (size_t j = 0; j < nhist2; ++j) {

@@ -86,7 +86,7 @@ class AngularAutoCorrelationsSingleAxis(PythonAlgorithm):
                 elements.append(str(element))
             atoms_to_species[key] = str(element)
 
-        # Check wether user-specified species present in the trajectory file
+        # Check whether user-specified species present in the trajectory file
         if type1.lower() not in elements:
             raise RuntimeError("Species one not found in the trajectory file. Please try again...")
         if type2.lower() not in elements:

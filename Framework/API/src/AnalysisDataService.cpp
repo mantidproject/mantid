@@ -56,7 +56,7 @@ const std::string AnalysisDataServiceImpl::isValid(const std::string &name) cons
 }
 
 /**
- * Overwridden add member to attach the name to the workspace when a workspace
+ * Overridden add member to attach the name to the workspace when a workspace
  * object is added to the service
  * If the name already exists then this throws a std::runtime_error. If a
  * workspace group is added adds the
@@ -95,7 +95,7 @@ void AnalysisDataServiceImpl::add(const std::string &name, const std::shared_ptr
 }
 
 /**
- * Overwridden addOrReplace member to attach the name to the workspace when a
+ * Overridden addOrReplace member to attach the name to the workspace when a
  * workspace object is added to the service.
  * This will overwrite one of the same name. If the workspace is group adds or
  * replaces its members.
@@ -337,7 +337,7 @@ void AnalysisDataServiceImpl::removeFromGroup(const std::string &groupName, cons
     throw std::runtime_error("Workspace " + groupName + " is not a workspace group.");
   }
   if (!group->contains(wsName)) {
-    throw std::runtime_error("WorkspaceGroup " + groupName + " does not containt workspace " + wsName);
+    throw std::runtime_error("WorkspaceGroup " + groupName + " does not contain workspace " + wsName);
   }
   group->removeByADS(wsName);
   notificationCenter.postNotification(new GroupUpdatedNotification(groupName));

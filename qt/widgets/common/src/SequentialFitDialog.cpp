@@ -576,7 +576,7 @@ void SequentialFitDialog::plotAgainstLog(bool yes) {
   ui.lblSpectrum->setVisible(yes);
   ui.sbSpectrum->setVisible(yes);
   // if (yes)
-  //{// plot agains log value
+  //{// plot against log value
   //  ui.tWorkspaces->showColumn(3);
   //  ui.tWorkspaces->horizontalHeaderItem(2)->setData(Qt::DisplayRole,"Spectrum");
   //  int spec = defaultSpectrum();

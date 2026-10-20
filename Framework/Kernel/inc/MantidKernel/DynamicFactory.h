@@ -95,7 +95,7 @@ public:
   /// macro).
   /// If the class name is unknown, a NotFoundException is thrown.
   /// @param className :: the name of the class you wish to create
-  /// @return a shared pointer ot the base class
+  /// @return a shared pointer to the base class
   virtual std::shared_ptr<Base> create(const std::string &className) const {
     auto it = _map.find(className);
     if (it != _map.end())

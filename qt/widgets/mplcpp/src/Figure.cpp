@@ -104,7 +104,7 @@ void Figure::setWindowTitle(const char *title) {
  * @param left The X coordinate of the lower-left corner
  * @param bottom The Y coordinate of the lower-left corner
  * @param width The width of the Axes
- * @param height The heigh of the Axes
+ * @param height The height of the Axes
  * @return A new Axes instance
  */
 Axes Figure::addAxes(double left, double bottom, double width, double height) {

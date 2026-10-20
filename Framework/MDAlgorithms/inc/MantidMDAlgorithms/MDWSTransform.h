@@ -30,7 +30,7 @@ namespace CnvrtToMD {
 enum CoordScaling {
   NoScaling,   //< momentums in A^-1
   SingleScale, //< momentuns divided by  2*Pi/Lattice -- equivalend to d-spacing
-  // in some sence
+  // in some sense
   OrthogonalHKLScale, //< each momentum component divided by appropriate lattice
   // parameter; equivalent to hkl for reclenear lattice
   HKLScale, //< non-orthogonal system for non-reclenear lattice

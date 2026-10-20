@@ -66,7 +66,7 @@ public:
 
   //---------------------------------------------------------------------------------------------
   /** Add a peak to the list
-   * @param position :: V3D positon of the peak.
+   * @param position :: V3D position of the peak.
    * @param frame :: Coordinate system frame of the peak position.
    */
   virtual void addPeak(const Kernel::V3D &position, const Kernel::SpecialCoordinateSystem &frame) = 0;
@@ -172,7 +172,7 @@ public:
   std::string m_convention;
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   IPeaksWorkspace(const IPeaksWorkspace &) = default;
 
   const std::string toString() const override;

@@ -193,7 +193,7 @@ public:
 
     // Test flexible constructor
     TS_ASSERT_THROWS_NOTHING(MeshObject(triangles, vertices, Mantid::Kernel::Material()));
-    // Test eficient constructor
+    // Test efficient constructor
     TS_ASSERT_THROWS_NOTHING(MeshObject(std::move(triangles), std::move(vertices), Mantid::Kernel::Material()));
   }
 

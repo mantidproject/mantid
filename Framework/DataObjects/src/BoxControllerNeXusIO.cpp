@@ -215,7 +215,7 @@ void BoxControllerNeXusIO::OpenAndCheckEventGroup() {
   m_File->getAttr("version", fileGroupVersion);
 
   if (fileGroupVersion != m_EventsVersion)
-    throw Kernel::Exception::FileError("Trying to open existing data grop to write new event data but the "
+    throw Kernel::Exception::FileError("Trying to open existing data group to write new event data but the "
                                        "group with differetn version: " +
                                            fileGroupVersion + " already exists ",
                                        m_fileName);

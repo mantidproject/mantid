@@ -96,7 +96,7 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
         self.declareProperty("ScaleFactor", 1.0, doc="scale the integrated intensity by this value")
         self.declareProperty("ChiSqMax", 10.0, doc="Fitting resulting in chi-sqaured higher than this won't be added to the output")
         self.declareProperty(
-            "SignalNoiseMin", 1.0, doc="Minimum Signal/Noice ratio (Intensity/SigmaIntensity) of peak to be added to the output"
+            "SignalNoiseMin", 1.0, doc="Minimum Signal/Noise ratio (Intensity/SigmaIntensity) of peak to be added to the output"
         )
         self.declareProperty("ApplyLorentz", True, doc="If to apply Lorentz Correction to intensity")
 

@@ -168,7 +168,7 @@ class DrillSettingsDialog(QDialog):
 
     def __init__(self, presenter, parent=None):
         """
-        Initialize ths dialog. Connect the static buttons.
+        Initialize this dialog. Connect the static buttons.
         """
         super(DrillSettingsDialog, self).__init__(parent)
         self.here = os.path.dirname(os.path.realpath(__file__))

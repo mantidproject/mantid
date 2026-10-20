@@ -66,7 +66,7 @@ protected:
 // Helper typedef for a shared pointer of this type.
 using CoordTransform_sptr = std::shared_ptr<CoordTransform>;
 
-// Helper typdef for a const shared pointer of this type.
+// Helper typedef for a const shared pointer of this type.
 using CoordTransform_const_sptr = std::shared_ptr<const CoordTransform>;
 
 } // namespace API

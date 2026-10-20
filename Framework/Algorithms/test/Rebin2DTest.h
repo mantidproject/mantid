@@ -151,7 +151,7 @@ public:
   void test_Rebin2D_With_EventWorkspace() {
     EventWorkspace_sptr inputWS = createEmptyEventWorkspace();
     MatrixWorkspace_sptr outputWS = runAlgorithm(inputWS, "5.,4.,25.", "-0.5,1,9.5");
-    // Doesnt check if result is correct, just that an inputws of EventWorkspace doesnt crash it
+    // Doesn't check if result is correct, just that an inputws of EventWorkspace doesn't crash it
   }
 
   void test_Rebin2D_With_Bin_Width_Less_Than_One_And_Not_Distribution() {

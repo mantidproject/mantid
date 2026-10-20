@@ -123,7 +123,7 @@ size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra) {
       if (!m_QConverter->calcMatrixCoord(XtargetUnits[j], locCoord, signal, errorSq))
         continue; // skip ND outside the range
       //  ADD RESULTING EVENTS TO THE BUFFER
-      // coppy all data into data buffer for future transformation into events;
+      // copy all data into data buffer for future transformation into events;
       sig_err[2 * nBufEvents + 0] = float(signal);
       sig_err[2 * nBufEvents + 1] = float(errorSq);
       expInfoIndex[nBufEvents] = m_ExpInfoIndex;

@@ -57,7 +57,7 @@ public:
     if (ws.get()) {
       TS_ASSERT_EQUALS(900, ws->getNPoints());
     } else {
-      TS_FAIL("event workspace has not beed build");
+      TS_FAIL("event workspace has not been build");
     }
   }
 
@@ -82,7 +82,7 @@ public:
     if (ws.get()) {
       TS_ASSERT_EQUALS(900, ws->getNPoints());
     } else {
-      TS_FAIL("event workspace has not beed build");
+      TS_FAIL("event workspace has not been build");
     }
     m_wsEv->mutableRun().setGoniometer(gonio, false); // Change back to not using log
   }
@@ -104,7 +104,7 @@ public:
     if (ws.get()) {
       TS_ASSERT_EQUALS(450, ws->getNPoints()); // Expect half the events as for non-UseLogTimes
     } else {
-      TS_FAIL("event workspace has not beed build");
+      TS_FAIL("event workspace has not been build");
     }
     m_wsEv->mutableRun().setGoniometer(gonio, false); // Change back to not using log
   }

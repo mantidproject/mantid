@@ -214,7 +214,7 @@ void SumSpectra::exec() {
   size_t numZeros(0);   // number of spectra which have 0 value in the first column (used in special cases of evaluating
                         // how good Poissonian statistics is)
 
-  // Get the input workspace -- ths may be a temporary workspace with the special values replaced
+  // Get the input workspace -- this may be a temporary workspace with the special values replaced
   MatrixWorkspace_const_sptr localworkspace = replaceSpecialValues();
   auto spectrumInfo = localworkspace->spectrumInfo();
   m_numberOfSpectra = static_cast<int>(localworkspace->getNumberHistograms());

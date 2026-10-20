@@ -162,7 +162,7 @@ template <typename MDE, size_t nd> void SaveMD::doSaveEvents(typename MDEventWor
           // save boxes directly using the boxes file postion, precalculated in boxFlatStructure.
           saveableTag->save();
           // remove boxes data from memory. This will actually correctly set the
-          // tag indicatin that data were not loaded.
+          // tag indicating that data were not loaded.
           saveableTag->clearDataFromMemory();
           // put boxes into write buffer wich will save them when necessary
           // Saver->toWrite(saveTag);

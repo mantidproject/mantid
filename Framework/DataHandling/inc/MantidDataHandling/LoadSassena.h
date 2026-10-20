@@ -63,7 +63,7 @@ protected:
                          const DataObjects::Workspace2D_sptr &ws, const std::string &description);
   /// Read info about one HDF5 dataset, log if error
   void dataSetInfo(const H5::H5File &h5file, const std::string &setName, hsize_t *dims) const;
-  /// Read dataset data to a buffer ot type double
+  /// Read dataset data to a buffer of type double
   void dataSetDouble(const H5::H5File &h5file, const std::string &setName, std::vector<double> &buf);
   /// Load qvectors dataset, calculate modulus of vectors
   HistogramData::Points loadQvectors(const H5::H5File &h5file, const API::WorkspaceGroup_sptr &gws,

@@ -142,7 +142,7 @@ possible to create groups of samples. Within a group, a master sample can be
 designated. The values of the parameters of the master sample will be used when
 processing all rows in the group.
 
-Paramaters can still be overriden manually whithin a group by entering a sample
+Parameters can still be overriden manually whithin a group by entering a sample
 specific value in the table. The special `DEFAULT` value can be use to override
 a master sample parameter with its default value. The priority for the parameter
 values is as follow:

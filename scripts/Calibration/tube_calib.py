@@ -536,7 +536,7 @@ def getCalibration(
     :param peaksTable: Peaks table into which the peaks positions will be put
     :param overridePeaks: dictionary with tube indexes keys and an array of peaks in pixels to override those
         that would be fitted for one tube
-    :param excludeShortTubes: Exlude tubes shorter than specified length from calibration
+    :param excludeShortTubes: Exclude tubes shorter than specified length from calibration
     :param plotTube: List of tube indexes that will be ploted
     :param range_list: list of the tube indexes that will be calibrated. Default None, means all the tubes in tubeSet
     :param polinFit: Order of the polynomial to fit against the known positions. Acceptable: 2, 3

@@ -367,7 +367,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
         workspace_group_lab_can_norm = WorkspaceGroup()
         workspace_group_hab_can_count = WorkspaceGroup()
         workspace_group_hab_can_norm = WorkspaceGroup()
-        # Find the partial output bundles fo LAB Can and HAB Can if they exist
+        # Find the partial output bundles for LAB Can and HAB Can if they exist
         for event_slice_bundles in output_bundles_parts:
             for output_bundle_part in event_slice_bundles:
                 if output_bundle_part.data_type is DataType.CAN:

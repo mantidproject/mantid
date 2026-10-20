@@ -166,7 +166,7 @@ void MaskDetectorsIf::retrieveProperties() {
   m_inputW = getProperty("InputWorkspace");
   m_value = getProperty("Value");
 
-  // Get the selction mode (select if or deselect if)
+  // Get the selection mode (select if or deselect if)
   std::string select_mode = getProperty("Mode");
   if (select_mode == "SelectIf")
     m_select_on = true;

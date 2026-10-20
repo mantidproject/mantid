@@ -41,7 +41,7 @@ using API::Workspace;
 namespace {
 
 /// Helper struct for helping with joining exclusion ranges.
-/// Endge points of the ranges can be wrapped in this struct
+/// Edge points of the ranges can be wrapped in this struct
 /// and sorted together without loosing their function.
 struct RangePoint {
   enum Kind : char { Openning, Closing };

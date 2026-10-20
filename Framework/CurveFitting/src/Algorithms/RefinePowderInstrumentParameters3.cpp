@@ -41,7 +41,7 @@ void RefinePowderInstrumentParameters3::init() {
   // Peak position workspace
   declareProperty(
       std::make_unique<WorkspaceProperty<Workspace2D>>("InputPeakPositionWorkspace", "Anonymous", Direction::Input),
-      "Data workspace containing workspace positions in TOF agains dSpacing.");
+      "Data workspace containing workspace positions in TOF against dSpacing.");
 
   // Workspace Index
   declareProperty("WorkspaceIndex", 0, "Workspace Index of the peak positions in PeakPositionWorkspace.");
@@ -50,7 +50,7 @@ void RefinePowderInstrumentParameters3::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<Workspace2D>>("OutputPeakPositionWorkspace", "Anonymous2", Direction::Output),
       "Output data workspace containing refined workspace positions in TOF "
-      "agains dSpacing.");
+      "against dSpacing.");
 
   // Input Table workspace containing instrument profile parameters
   declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("InputInstrumentParameterWorkspace", "Anonymous3",
@@ -823,7 +823,7 @@ double RefinePowderInstrumentParameters3::calculateFunctionError(const IFunction
  * @param powerfit :: a flag to choose a robust algorithm to fit function
  *
  * Return: double chi2 of the final (best) solution.  If fitting fails, chi2
- *wil be maximum double
+ *will be maximum double
  */
 double RefinePowderInstrumentParameters3::fitFunction(const IFunction_sptr &function, const Workspace2D_sptr &dataws,
                                                       int wsindex, bool powerfit) {
@@ -1006,7 +1006,7 @@ TableWorkspace_sptr RefinePowderInstrumentParameters3::genOutputProfileTable(map
 }
 
 //----------------------------------------------------------------------------------------------
-/** Add a parameter to parameter map.  If this parametere does exist, then
+/** Add a parameter to parameter map.  If this parameter does exist, then
  * replace the value
  * of it.
  * @param parameters:  map

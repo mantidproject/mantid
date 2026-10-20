@@ -848,7 +848,7 @@ def bundle_added_event_data_as_group(out_file_path, out_file_monitors_path, _is_
     @param out_file_path : the file path of the event data file
     @param out_file_monitors_path : the file name path of the monitors file
     @param _is_multi_period: if the data set is multiperiod (unused)
-    @return the name fo the new group workspace file
+    @return the name of the new group workspace file
     """
 
     # This is a validation and extracting name out of path

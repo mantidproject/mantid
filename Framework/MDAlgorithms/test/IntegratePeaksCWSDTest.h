@@ -40,7 +40,7 @@ IMDEventWorkspace_sptr createMDWorkspace(const std::vector<Mantid::Kernel::V3D> 
   TS_ASSERT_EQUALS(vec_event_qsample.size(), vec_event_run.size());
 
   // Create MDEVENTWorkspace
-  // Create workspace in Q_sample with dimenion as 3
+  // Create workspace in Q_sample with dimension as 3
   size_t nDimension = 3;
   IMDEventWorkspace_sptr mdws = MDEventFactory::CreateMDWorkspace(nDimension, "MDEvent");
 
@@ -83,7 +83,7 @@ IMDEventWorkspace_sptr createMDWorkspace(const std::vector<Mantid::Kernel::V3D> 
   MDEventWorkspace<MDEvent<3>, 3>::sptr mdws_mdevt_3 = std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(mdws);
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
-  // Go though each spectrum to conver to MDEvent
+  // Go though each spectrum to convert to MDEvent
   for (size_t iq = 0; iq < vec_event_qsample.size(); ++iq) {
     Mantid::Kernel::V3D qsample = vec_event_qsample[iq];
     std::vector<Mantid::coord_t> millerindex(3);

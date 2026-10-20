@@ -45,7 +45,7 @@ using Kernel::V3D;
 Plane::Plane()
     : Quadratic(), m_normVec(1.0, 0.0, 0.0), m_distance(0)
 /**
-  Constructor: sets plane in y-z plane and throught origin
+  Constructor: sets plane in y-z plane and through origin
 */
 {
   setBaseEqn();
@@ -176,7 +176,7 @@ double Plane::distance(const Kernel::V3D &A) const
   Determine the distance of point A from the plane
   returns a value relative to the normal
   @param A :: point to get distance from
-  @return singed distance from point
+  @return signed distance from point
 */
 {
   return A.scalar_prod(m_normVec) - m_distance;

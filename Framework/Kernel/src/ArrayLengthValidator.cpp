@@ -62,19 +62,19 @@ template <typename TYPE> bool ArrayLengthValidator<TYPE>::hasMinLength() const {
 template <typename TYPE> bool ArrayLengthValidator<TYPE>::hasMaxLength() const { return this->m_hasArraySizeMax; }
 
 /**
-  Function to retun the set length
+  Function to return the set length
   @returns  m_arraySize
  */
 template <typename TYPE> const size_t &ArrayLengthValidator<TYPE>::getLength() const { return this->m_arraySize; }
 
 /**
-  Function to retun the set minimum length
+  Function to return the set minimum length
   @returns  m_arraySize
  */
 template <typename TYPE> const size_t &ArrayLengthValidator<TYPE>::getMinLength() const { return this->m_arraySizeMin; }
 
 /**
-  Function to retun the set maximum length
+  Function to return the set maximum length
   @returns  m_arraySize
  */
 template <typename TYPE> const size_t &ArrayLengthValidator<TYPE>::getMaxLength() const { return this->m_arraySizeMax; }

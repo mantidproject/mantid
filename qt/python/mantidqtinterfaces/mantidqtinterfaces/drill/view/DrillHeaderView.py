@@ -173,7 +173,7 @@ class DrillHeaderView(QHeaderView):
         mouse pointer.
 
         Args:
-            event (QMouseEvent): mouse press envent
+            event (QMouseEvent): mouse press event
         """
         li = self.logicalIndexAt(event.pos())
         if self.mouseOnButton(event.pos(), li):

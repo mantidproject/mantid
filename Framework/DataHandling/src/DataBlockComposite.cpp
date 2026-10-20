@@ -291,7 +291,7 @@ void DataBlockComposite::truncate(specnum_t specMin, specnum_t specMax) {
   auto lastDataBlockReverseIterator =
       std::find_if(m_dataBlocks.rbegin(), m_dataBlocks.rend(), isNotCompletelyCutOffFromMax);
 
-  // Check the case where the actuall don't have any spectrum numbers in the
+  // Check the case where the actual don't have any spectrum numbers in the
   // truncation interval
   // e.g    |-----|   |------|   |----|    or |-----|   |------|   |----|
   //     | |                                         | |

@@ -535,7 +535,7 @@ double VesuvioCalculateMS::generateE0(CurveFitting::MSVesuvioHelper::RandomVaria
  * @param dtof Error in time resolution (us)
  * @param en0 Value of the incident energy
  * @param dl1 S.d of moderator to sample distance
- * @return tof Guass TOF modified for asymmetric pulse
+ * @return tof Gauss TOF modified for asymmetric pulse
  */
 double VesuvioCalculateMS::generateTOF(CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng, const double en0,
                                        const double dtof, const double dl1) const {

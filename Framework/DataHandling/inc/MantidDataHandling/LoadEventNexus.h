@@ -116,7 +116,7 @@ public:
   template <typename T>
   static void loadEntryMetadata(const std::string &nexusfilename, T WS, const std::string &entry_name);
 
-  /// Load instrument from Nexus file if possible, else from IDF spacified by Nexus file
+  /// Load instrument from Nexus file if possible, else from IDF specified by Nexus file
   template <typename T>
   static bool loadInstrument(const std::string &nexusfilename, T localWorkspace, const std::string &top_entry_name,
                              Algorithm *alg, const Nexus::NexusDescriptor *descriptor = nullptr);

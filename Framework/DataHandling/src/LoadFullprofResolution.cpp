@@ -564,7 +564,7 @@ void LoadFullprofResolution::parseBankLine(string line, double &cwl, int &bankid
     v.clear();
     boost::split(v, infostr, boost::is_any_of("=A"));
     for (size_t i = 0; i < v.size(); ++i) {
-      g_log.debug() << "Last CWL splitted.  Term " << i << ": \t\t"
+      g_log.debug() << "Last CWL split.  Term " << i << ": \t\t"
                     << "'" << v[i] << "'\n";
       string candidate = v[i];
       boost::algorithm::trim(candidate);

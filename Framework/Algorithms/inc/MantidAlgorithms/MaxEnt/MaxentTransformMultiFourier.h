@@ -40,7 +40,7 @@ public:
   std::vector<double> imageToData(const std::vector<double> &image) override;
   // Transforms from data space to image space
   std::vector<double> dataToImage(const std::vector<double> &data) override;
-  // Set the adjustments to be applie to data when converted from image
+  // Set the adjustments to be applied to data when converted from image
   void setAdjustments(const std::vector<double> &linAdj, const std::vector<double> &constAdj);
 
 private:

@@ -73,7 +73,7 @@ class DiagnosticsPage(QtWidgets.QWidget, Ui_DiagnosticsPage):
 
     def add_listener(self, listener):
         if not isinstance(listener, DiagnosticsPage.DiagnosticsPageListener):
-            raise ValueError("The listener ist not of type DiagnosticTabListener but rather {}".format(type(listener)))
+            raise ValueError("The listener is not of type DiagnosticTabListener but rather {}".format(type(listener)))
         self._diagnostics_page_listeners.append(listener)
 
     def clear_listeners(self):

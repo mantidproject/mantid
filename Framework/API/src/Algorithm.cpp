@@ -1066,7 +1066,7 @@ void Algorithm::linkHistoryWithLastChild() {
   }
 }
 
-/** Indicates that this algrithms history should be tracked regardless of if it
+/** Indicates that this algorithm's history should be tracked regardless of if it
  * is a child.
  *  @param parentHist :: the parent algorithm history object the history in.
  */

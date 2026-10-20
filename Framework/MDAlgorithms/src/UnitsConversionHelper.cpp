@@ -38,7 +38,7 @@ CnvrtToMD::ConvertUnits UnitsConversionHelper::analyzeUnitsConversion(const std:
 
   // check if unit conversion is possible at all:
   if (Kernel::Strings::isMember(AllKnownUnits, UnitsFrom) < 0)
-    throw(std::invalid_argument(" Can not initate conversion from unknown unit: " + UnitsFrom));
+    throw(std::invalid_argument(" Can not initiate conversion from unknown unit: " + UnitsFrom));
 
   if (Kernel::Strings::isMember(AllKnownUnits, UnitsFrom) < 0)
     throw(std::invalid_argument(" Can not initiate conversion to unknown unit: " + UnitsTo));

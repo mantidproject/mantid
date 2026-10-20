@@ -465,7 +465,7 @@ public:
     TS_ASSERT_EQUALS(pi.isValid(), "");
     std::string errorMsg = pi.setValue("");
     // when the string can't be converted to the correct type we get a system
-    // dependent meassage that in this case should look like the string below
+    // dependent message that in this case should look like the string below
     TS_ASSERT_EQUALS(errorMsg.find("Could not set property test. Can not convert \"\" to ", 0), 0);
 
     // double tests

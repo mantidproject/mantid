@@ -675,7 +675,7 @@ size_t LoadISISNexus2::prepareSpectraBlocks(std::map<specnum_t, std::string> &mo
  * Check if any spectra block ranges overlap.
  *
  * Iterate over the sorted list of spectra blocks and check
- * if the last element of the preceeding block is less than
+ * if the last element of the preceding block is less than
  * the first element of the next block.
  */
 void LoadISISNexus2::checkOverlappingSpectraRange() {

@@ -296,7 +296,7 @@ the transformation matrices from SscansS2 reference frame into mantid. In princi
    import matplotlib.pyplot as plt
    import numpy as np
 
-   # script to covert a file with flattened matrices that have been generated in sscanss (and
+   # script to convert a file with flattened matrices that have been generated in sscanss (and
    # thus us in the sscanss reference frame where beam = X, detector = Y, roof = Z) into a
    # matrix that is in the mantid reference frame
 
@@ -611,7 +611,7 @@ Additionally to fitting the peak, the table will also contain a numerical integr
    # otherwise set root directory here:
    root_dir = fr"path\to\User\{exp_name}"
 
-   # Next the folder contraining the workspaces you want to fit
+   # Next the folder containing the workspaces you want to fit
    file_folder = "Focus"
    # These are likely within a sub-folder specified by the detector grouping
    GROUP = get_instr_config(instr).group

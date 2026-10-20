@@ -380,7 +380,7 @@ In the case of :ref:`algm-DirectILLAutoProcess`, the self-attenuation correction
 Workspace compatibility
 =======================
 
-Mantid can be picky with binning when doing arithmetics between workspaces. This is an issue for the time-of-flight instruments at ILL as the time axis needs to be corrected to correspond to a physical flight distance. Even thought data is recorded with the same nominal wavelength, the actual value written in the NeXus files may differ between runs. Incident energy calibration further complicates matters. As the correction to the time-of-flight axis depends on the wavelength, two datasets loaded into Mantid with :ref:`algm-DirectILLCollectData` may have slightly different time-of-flight axis. This prevents arithmetics between the workspaces. The situation is most often encountered between a sample and the corresponding empty container.
+Mantid can be picky with binning when doing arithmetic between workspaces. This is an issue for the time-of-flight instruments at ILL as the time axis needs to be corrected to correspond to a physical flight distance. Even thought data is recorded with the same nominal wavelength, the actual value written in the NeXus files may differ between runs. Incident energy calibration further complicates matters. As the correction to the time-of-flight axis depends on the wavelength, two datasets loaded into Mantid with :ref:`algm-DirectILLCollectData` may have slightly different time-of-flight axis. This prevents arithmetic between the workspaces. The situation is most often encountered between a sample and the corresponding empty container.
 
 To alleviate the situation, the output workspaces of :ref:`algm-DirectILLCollectData` can be forced to use the same wavelength. The following Python script shows how to propagate the calibrated incident energy from the first loaded workspace into the rest:
 
@@ -531,7 +531,7 @@ For the correction to be taken into account, the `EmptyContainerWorkspace` needs
 Interpolation of container data to different temperatures
 ---------------------------------------------------------
 
-Sometimes the empty container is not measured at all the experiment's temperature points. One can use Mantid's workspace arithmetics to perform simple linear interpolation in temperature:
+Sometimes the empty container is not measured at all the experiment's temperature points. One can use Mantid's workspace arithmetic to perform simple linear interpolation in temperature:
 
 .. testsetup:: ContainerInterpolation
 

@@ -84,7 +84,7 @@ def pyexec_setup(remove_temp, new_options):
     Parameters
     ----------
     remove_temp: bool
-        Determine wether to remove the temporary workspaces
+        Determine whether to remove the temporary workspaces
     new_options: dict
         Dictionary of mantid configuration options to be modified.
 

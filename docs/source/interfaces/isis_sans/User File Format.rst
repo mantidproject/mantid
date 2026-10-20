@@ -541,7 +541,7 @@ Syntax
     SET CENTRE/HAB x y
     SET SCALES s a b c d
 
-Note x and y are in units of mm. For LOQ instrument, the origin is at te bottom left corner of the main detector.
+Note x and y are in units of mm. For LOQ instrument, the origin is at the bottom left corner of the main detector.
 
 Qualifiers
 ^^^^^^^^^^

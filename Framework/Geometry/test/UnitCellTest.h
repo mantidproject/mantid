@@ -93,7 +93,7 @@ public:
 
   void test_Advanced() {
     // test more advanced calculations
-    // the new Gstar shold yield a=2.5, b=6, c=8, alpha=93, beta=88, gamma=97.
+    // the new Gstar should yield a=2.5, b=6, c=8, alpha=93, beta=88, gamma=97.
     DblMatrix newGstar(3, 3);
     newGstar[0][0] = 0.162546756312;
     newGstar[0][1] = 0.00815256992072;

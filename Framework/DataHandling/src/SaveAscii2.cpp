@@ -569,7 +569,7 @@ void SaveAscii2::writeTableWorkspace(const ITableWorkspace_const_sptr &tws, cons
 
 /**
  * Retrieves sample log value and its unit. In case they are not defined they
- * are replaced with 'not defined' meassage and empty string, respectively.
+ * are replaced with 'not defined' message and empty string, respectively.
  * @param logName :: The user-defined identifier for sample log
  * @return A pair of strings containing sample log value and its unit
  */

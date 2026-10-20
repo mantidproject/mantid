@@ -38,7 +38,7 @@ ISISRAW2::ISISRAW2() : ISISRAW(nullptr, false), ndes(0), outbuff(nullptr), m_buf
  *   @param file :: The file handle to use
  *   @param from_file :: Whether to read from or write to a file
  *   @param read_data :: Whether to go on to read the data
- *   @return file readin exit code, 0 is OK
+ *   @return file reading exit code, 0 is OK
  **/
 int ISISRAW2::ioRAW(FILE *file, bool from_file, bool read_data) {
   (void)read_data; // Avoid compiler warning

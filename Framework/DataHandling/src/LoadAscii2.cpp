@@ -310,7 +310,7 @@ void LoadAscii2::parseLine(const std::string &line, std::list<std::string> &colu
     } else if (cols == 1) {
       // a size of 1 is a spectra ID as long as there are no alphabetic
       // characters in it. Signifies the start of a new spectra if it wasn't
-      // preceeded with a blank line
+      // preceded with a blank line
       newSpectra();
 
       // at this point both vectors should be the same size (or the ID counter

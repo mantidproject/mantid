@@ -152,7 +152,7 @@ void LeBailFit::init() {
 
   // Make each reflection visible
   declareProperty("IndicationPeakHeight", 0.0,
-                  "Heigh of peaks (reflections) if its calculated height is "
+                  "Height of peaks (reflections) if its calculated height is "
                   "smaller than user-defined minimum.");
   setPropertySettings("IndicationPeakHeight",
                       std::make_unique<VisibleWhenProperty>("Function", IS_EQUAL_TO, "Calculation"));

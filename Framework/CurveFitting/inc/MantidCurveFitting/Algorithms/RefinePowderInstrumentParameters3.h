@@ -119,7 +119,7 @@ private:
   DataObjects::TableWorkspace_sptr genOutputProfileTable(std::map<std::string, Parameter> parameters, double startchi2,
                                                          double finalchi2);
 
-  /// Add a parameter to parameter map.  If this parametere does exist, then
+  /// Add a parameter to parameter map.  If this parameter does exist, then
   /// replace the value of it
   void addOrReplace(std::map<std::string, Parameter> &parameters, const std::string &parname, double parvalue);
 

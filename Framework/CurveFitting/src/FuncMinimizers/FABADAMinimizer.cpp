@@ -277,7 +277,7 @@ bool FABADAMinimizer::iterate(size_t /*iteration*/) {
   // if overexploring or Simulated Annealing completed
   convergenceCheck(); // updates m_converged
 
-  // Check wheather it is refrigeration time or not (for Simulated Annealing)
+  // Check whether it is refrigeration time or not (for Simulated Annealing)
   if (m_leftRefrPoints != 0 && m_counter == m_simAnnealingItStep) {
     simAnnealingRefrigeration();
   }
@@ -660,7 +660,7 @@ bool FABADAMinimizer::iterationContinuation() {
     }
   } else {
     // If convergence has been reached, continue until we complete the chain
-    // length. Otherwise, stop interations.
+    // length. Otherwise, stop iterations.
     return m_counter < m_chainIterations;
   }
   // can we even get here? -> Nope (we should not, so we do not want it to

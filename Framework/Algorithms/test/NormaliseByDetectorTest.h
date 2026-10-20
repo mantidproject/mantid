@@ -539,7 +539,7 @@ public:
       unitsalg->setPropertyValue("Target", "Wavelength");
       unitsalg->execute();
 
-      // Convert the specturm axis ot signed_theta
+      // Convert the specturm axis to signed_theta
       auto specaxisalg = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
       specaxisalg->initialize();
       specaxisalg->setPropertyValue("InputWorkspace", "testws");

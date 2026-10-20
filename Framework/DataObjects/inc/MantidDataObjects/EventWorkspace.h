@@ -157,7 +157,7 @@ public:
   EventWorkspace &operator=(const EventWorkspace &other) = delete;
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   EventWorkspace(const EventWorkspace &other);
 
 private:

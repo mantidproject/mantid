@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
- Base class for common rebinning testing performed by test clases such as
+ Base class for common rebinning testing performed by test classes such as
  RebinByPulseTime and RebinByTimeAtSample
  */
 

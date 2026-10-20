@@ -98,7 +98,7 @@ Example Output at `performance_config.performance.filename` file:
 **Example 3 - Use AlgoTimeRegister to measure time - initialization omitted:**
 The :py:obj:`~mantid.api.AlgoTimeRegister` initialization can be omitted,
 if a Mantid algorithm is the first command in the script and the time before this is not needed.
-In any other case, initialization should be specified very eary on, in the script.
+In any other case, initialization should be specified very early on, in the script.
 
 .. code:: python
 
