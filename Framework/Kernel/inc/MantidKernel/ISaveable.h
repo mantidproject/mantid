@@ -92,10 +92,10 @@ public:
   //-----------------------------------------------------------------------------------------------
   // INTERFACE:
 
-  /// Save the data - to be overriden
+  /// Save the data - to be overridden
   virtual void save() const = 0;
 
-  /// Load the data - to be overriden
+  /// Load the data - to be overridden
   virtual void load() = 0;
 
   /// Method to flush the data to disk and ensure it is written.
@@ -126,7 +126,7 @@ protected:
      unchanged from the previous
       save/load operation */
   bool m_dataChanged;
-  // this tracks the history of operations, occuring over the data.
+  // this tracks the history of operations, occurring over the data.
   /// this boolean indicates if the data were saved on HDD and have physical
   /// representation on it (though this representation may be incorrect as data
   /// changed in memory)
@@ -146,7 +146,7 @@ private:
   /// Number of events saved in the file, after the start index location
   uint64_t m_fileNumEvents;
 
-  /// the functions below have to be availible to DiskBuffer and nobody else. To
+  /// the functions below have to be available to DiskBuffer and nobody else. To
   /// highlight this we make them private
   friend class DiskBuffer;
   /** save at specific file location the specific amount of data;

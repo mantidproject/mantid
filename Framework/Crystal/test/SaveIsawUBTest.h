@@ -179,7 +179,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save_ub_alg.execute(););
     TS_ASSERT(save_ub_alg.isExecuted());
 
-    // load UB (will now be different to one orignally applied)
+    // load UB (will now be different to one originally applied)
     LoadIsawUB load_ub_alg;
     TS_ASSERT_THROWS_NOTHING(load_ub_alg.initialize())
     TS_ASSERT(load_ub_alg.isInitialized())
@@ -220,7 +220,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save_ub_alg.execute(););
     TS_ASSERT(save_ub_alg.isExecuted());
 
-    // load UB (will now be different to one orignally applied)
+    // load UB (will now be different to one originally applied)
     LoadIsawUB load_ub_alg;
     TS_ASSERT_THROWS_NOTHING(load_ub_alg.initialize())
     TS_ASSERT(load_ub_alg.isInitialized())

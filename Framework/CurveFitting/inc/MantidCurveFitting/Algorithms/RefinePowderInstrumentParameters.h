@@ -35,7 +35,7 @@ namespace Algorithms {
 
 
   [ASSUMPTIONS]
-  1.   CYRSTAL LATTICE IS CORRECT!  AS FOR FITTING INSTRUMENT PARAMETER, IT IS A
+  1.   CRYSTAL LATTICE IS CORRECT!  AS FOR FITTING INSTRUMENT PARAMETER, IT IS A
   GIVEN VALUE.
 */
 class MANTID_CURVEFITTING_DLL RefinePowderInstrumentParameters final : public API::Algorithm,
@@ -165,7 +165,7 @@ private:
   Functions::ThermalNeutronDtoTOFFunction_sptr m_Function;
 };
 
-/** Formular for linear iterpolation: X = [(xf-x0)*Y - (xf*y0-x0*yf)]/(yf-y0)
+/** Formular for linear interpolation: X = [(xf-x0)*Y - (xf*y0-x0*yf)]/(yf-y0)
  */
 inline double linearInterpolateX(double x0, double xf, double y0, double yf, double y) {
   double x = ((xf - x0) * y - (xf * y0 - x0 * yf)) / (yf - y0);

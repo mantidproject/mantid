@@ -70,7 +70,7 @@ void GeneralDomainCreator::declareDatasetProperties(const std::string &suffix, b
   }
 }
 
-/// Retrive the input workspace from the property manager.
+/// Retrieve the input workspace from the property manager.
 std::shared_ptr<API::ITableWorkspace> GeneralDomainCreator::getInputWorkspace() const {
   auto workspacePropertyName = m_workspacePropertyNames.front();
   if (!m_manager->existsProperty(workspacePropertyName)) {

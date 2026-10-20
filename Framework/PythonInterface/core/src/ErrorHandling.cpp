@@ -24,7 +24,7 @@ namespace Mantid::PythonInterface {
 namespace {
 
 /**
- * Unroll a traceback as a string reprsentation and append it to the stream
+ * Unroll a traceback as a string representation and append it to the stream
  * @param msg A stream reference for building up the msg
  * @param traceback A Python traceback object
  * @param root True if this is the root of the traceback, false otherwise

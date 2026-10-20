@@ -17,7 +17,7 @@ namespace Algorithms {
 /** SampleLogsBehaviour : This class holds information relating to the
   behaviour of the sample log merging. It holds a map of all the sample log
   parameters to merge, how to merge them, and the associated tolerances.
-  Algorithms which already define paramter names for the instrument parameter
+  Algorithms which already define parameter names for the instrument parameter
   file are ConjoinXRuns and MergeRuns. Please use different names for new
   algorithms.
 */

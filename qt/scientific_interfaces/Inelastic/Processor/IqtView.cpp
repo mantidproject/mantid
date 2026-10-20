@@ -337,7 +337,7 @@ void IqtView::setRangeSelectorDefault(const MatrixWorkspace_sptr workspace, cons
         rounded_min += 0.1;
       }
 
-      // check incase we have a really small range
+      // check in case we have a really small range
       if (fabs(rounded_min) > 0 && fabs(rounded_max) > 0) {
         xRangeSelector->setRange(rounded_min, rounded_max);
         m_dblManager->setValue(m_properties["ELow"], rounded_min);

@@ -17,7 +17,7 @@ In addition the s1 (omega rotation), duration, run_number and monitor count is r
 file and included in the logs of the OutputWorkspace.
 
 Normalization can be optionally performed in the same process, provided that the necessary Vanadium data is specified.
-There's also the posibility of not normalizing the data but saving the normalization workspace
+There's also the possibility of not normalizing the data but saving the normalization workspace
 alongside the main data workspace for later use in MDNorm.
 
 By default, the algorithm will try to locate the Vanadium data using IPTS and run number.

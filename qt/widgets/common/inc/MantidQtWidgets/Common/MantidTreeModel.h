@@ -100,7 +100,7 @@ public slots:
   void plotContour(bool accepted, int plotIndex, const QString &axisName, const QString &logName,
                    const std::set<double> &customLogValues, const QList<QString> &workspaceNames) override;
 
-  // Inteface methods
+  // Interface methods
   // ONLY REQUIRED TO STATIFY MantidDisplayBase INTERFACE
   void showSpectrumViewer() override;
   void showSliceViewer() override;
@@ -117,7 +117,7 @@ public slots:
   void showCritical(const QString & /*unused*/) override;
 
 private:
-  // overide copy operations
+  // override copy operations
   MantidTreeModel(const MantidTreeModel &);
   MantidTreeModel &operator=(const MantidTreeModel &);
 };

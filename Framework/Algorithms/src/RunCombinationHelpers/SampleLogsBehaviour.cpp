@@ -68,7 +68,7 @@ const std::string SampleLogsBehaviour::SUM_DOC = "A comma separated list of the 
                                                  "Sample logs must be numeric.";
 
 /**
- * Create and initialise an object that is responsbile for keeping track of the
+ * Create and initialise an object that is responsible for keeping track of the
  * merge types, and performing the merge or warning/error for sample logs when
  * calling MergeRuns.
  *
@@ -134,7 +134,7 @@ void SampleLogsBehaviour::createSampleLogsMapsFromInstrumentParams(SampleLogsMap
  * @param params a string containing a comma separated list of the sample logs
  * to merge for this behaviour
  * @param ws the base workspace that the other workspaces are merged into
- * @param paramsTolerances a string containing a comma spearated list of the
+ * @param paramsTolerances a string containing a comma separated list of the
  * tolerances for this merge behaviour (optional)
  * @param skipIfInPrimaryMap whether to skip if in the member variable map
  * (optional, default false)
@@ -446,7 +446,7 @@ void SampleLogsBehaviour::updateTimeSeriesProperty(const MatrixWorkspace &addeeW
     double value = addeeWS.run().getLogAsSingleValue(name);
     timeSeriesProp->addValue(startTime, value);
   }
-  // Remove this to supress a warning, we will put it back after adding the
+  // Remove this to suppress a warning, we will put it back after adding the
   // workspaces in MergeRuns
   const Property *addeeWSProperty = addeeWS.run().getProperty(name);
   m_addeeLogMap.emplace_back(std::shared_ptr<Property>(addeeWSProperty->clone()));
@@ -571,7 +571,7 @@ void SampleLogsBehaviour::setUpdatedSampleLogs(const MatrixWorkspace_sptr &outWS
 
 /**
  * When doing a time series merge we need to remove, then add back the sample
- *log in the addee workspace to supress a warning about it not being a
+ *log in the addee workspace to suppress a warning about it not being a
  *TimeSeriesProperty. Here we remove the original property.
  *
  * @param addeeWS the workspace being merged
@@ -585,7 +585,7 @@ void SampleLogsBehaviour::removeSampleLogsFromWorkspace(const MatrixWorkspace_sp
 
 /**
  * When doing a time series merge we need to remove, then add back the sample
- *log in the addee workspace to supress a warning about it not being a
+ *log in the addee workspace to suppress a warning about it not being a
  *TimeSeriesProperty. Here we add back the original property, as the original
  *workspace should remain unchanged.
  *

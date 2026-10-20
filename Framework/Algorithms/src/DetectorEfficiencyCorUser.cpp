@@ -92,7 +92,7 @@ void DetectorEfficiencyCorUser::exec() {
  * Efficiency = f(Ei-DeltaE) / f(Ei)
  * @param eff0 :: calculated f(Ei)
  * @param e :: reference to the parser's energy parameter
- * @param parser :: muParser used to evalute f(e)
+ * @param parser :: muParser used to evaluate f(e)
  * @param index :: the workspace index of the histogram to correct
  */
 void DetectorEfficiencyCorUser::correctHistogram(const size_t index, const double eff0, double &e,

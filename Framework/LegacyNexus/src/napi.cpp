@@ -368,7 +368,7 @@ static NXstatus NXinternalopenImpl(NXaccess am, NexusFileID *fileRecord) {
 
   auto fHandle = std::make_unique<LgcyFunction>();
   /*
-     test the strip flag. Elimnate it for the rest of the tests to work
+     test the strip flag. Eliminate it for the rest of the tests to work
    */
   fHandle->stripFlag = 1;
   if (am & NXACC_NOSTRIP) {
@@ -708,7 +708,7 @@ static int isDataSetOpen(NXhandle hfil) {
   NXlink id;
 
   /*
-     This uses the (sensible) feauture that NXgetdataID returns NX_ERROR
+     This uses the (sensible) feature that NXgetdataID returns NX_ERROR
      when no dataset is open
    */
   if (NXgetdataID(hfil, &id) == NXstatus::NX_ERROR) {
@@ -723,7 +723,7 @@ static int isRoot(NXhandle hfil) {
   NXlink id;
 
   /*
-     This uses the feauture that NXgetgroupID returns NX_ERROR
+     This uses the feature that NXgetgroupID returns NX_ERROR
      when we are at root level
    */
   if (NXgetgroupID(hfil, &id) == NXstatus::NX_ERROR) {

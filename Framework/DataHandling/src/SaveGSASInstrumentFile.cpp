@@ -38,7 +38,7 @@ public:
 
   /// Get bank IDs in configuration
   const std::vector<unsigned int> &getBankIDs() const;
-  /// Check wehther a bank is defined
+  /// Check whether a bank is defined
   bool hasBank(unsigned int bankid) const;
   /// Get a parameter from a bank
   double getParameter(unsigned int bankid, const std::string &paramname) const;
@@ -975,10 +975,10 @@ double SaveGSASInstrumentFile::getProfileParameterValue(const map<string, double
 }
 
 //----------------------------------------------------------------------------------------------
-/** Calcualte range of data on d-spacing from TOF.
+/** Calculate range of data on d-spacing from TOF.
  * Algorithm: use the approximation from Dtt1.  The part with thermal neutron
  * has complex operation
- * on d ralated.
+ * on d related.
  * @return :: d-space value
  */
 double SaveGSASInstrumentFile::calDspRange(double dtt1, double zero, double tof) {

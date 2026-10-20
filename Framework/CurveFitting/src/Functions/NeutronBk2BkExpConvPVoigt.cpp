@@ -55,7 +55,7 @@ void NeutronBk2BkExpConvPVoigt::init() {
   declareParameter("Dtt2", 1.0, "coefficient 2 for d-spacing calculation for epithermal neutron part");
   declareParameter("Zero", 0.0, "Zero shift for epithermal neutron");
 
-  // Peak profile related (4 ~ 7) Back to back Expoential
+  // Peak profile related (4 ~ 7) Back to back Exponential
   declareParameter("Alph0", 1.6, "exponential constant for rising part of epithermal neutron pulse");
   declareParameter("Alph1", 1.5, "exponential constant for rising part of expithermal neutron pulse");
   declareParameter("Beta0", 1.6, "exponential constant of decaying part of epithermal neutron pulse");
@@ -89,7 +89,7 @@ void NeutronBk2BkExpConvPVoigt::init() {
   declareParameter("K", 0.0, "Miller index K. ");
   declareParameter("L", 0.0, "Miller index L. ");
 
-  // Some build-in constant
+  // Some built-in constant
   LATTICEINDEX = 14;
   HEIGHTINDEX = 0;
 
@@ -193,7 +193,7 @@ void NeutronBk2BkExpConvPVoigt::calculateParameters(bool explicitoutput) const {
 
   double dh, tof_h, eta, alpha, beta, H, sigma2, gamma, N;
 
-  // Calcualte Peak Position d-spacing if necessary
+  // Calculate Peak Position d-spacing if necessary
   if (m_cellParamValueChanged) {
     // TODO : make it more general to all type of lattice structure
     m_unitCell.set(latticeconstant, latticeconstant, latticeconstant, 90.0, 90.0, 90.0);
@@ -222,7 +222,7 @@ void NeutronBk2BkExpConvPVoigt::calculateParameters(bool explicitoutput) const {
                 << "(Gam-0 = " << gam0 << ", Gam-1 = " << gam1 << ", Gam-2 = " << gam2 << ")."
                 << "\n";
 
-  // Calcualte H for the peak
+  // Calculate H for the peak
   calHandEta(sigma2, gamma, H, eta);
 
   N = alpha * beta * 0.5 / (alpha + beta);
@@ -309,7 +309,7 @@ void NeutronBk2BkExpConvPVoigt::function(std::span<double> const out, std::span<
   else
     g_log.debug("Function() has no new parameters to calculate. ");
 
-  // Get some other parmeters
+  // Get some other parameters
   const double HEIGHT = getParameter(HEIGHTINDEX);
   const double INVERT_SQRT2SIGMA = 1.0 / sqrt(2.0 * m_Sigma2);
 
@@ -322,7 +322,7 @@ void NeutronBk2BkExpConvPVoigt::function(std::span<double> const out, std::span<
   const double RIGHT_VALUE = m_centre + RANGE;
   auto iter_end = std::lower_bound(iter, xValues.end(), RIGHT_VALUE);
 
-  // Calcualte
+  // Calculate
   std::size_t pos(std::distance(xValues.begin(), iter)); // second loop variable
   for (; iter != iter_end; ++iter) {
     out[pos] = HEIGHT * calOmega(*iter - m_centre, m_eta, m_N, m_Alpha, m_Beta, m_fwhm, m_Sigma2, INVERT_SQRT2SIGMA);
@@ -346,7 +346,7 @@ void NeutronBk2BkExpConvPVoigt::function1D(double *out, const double *xValues, c
 
   // On each data point
   const double RANGE = m_fwhm * PEAKRANGE;
-  g_log.debug() << "[F002] Peak centre = " << m_centre << "; Calcualtion Range = " << RANGE << ".\n";
+  g_log.debug() << "[F002] Peak centre = " << m_centre << "; Calculation Range = " << RANGE << ".\n";
 
   for (size_t i = 0; i < nData; ++i) {
     if (fabs(xValues[i] - m_centre) < RANGE) {
@@ -364,7 +364,7 @@ void NeutronBk2BkExpConvPVoigt::function1D(double *out, const double *xValues, c
 }
 
 //----------------------------------------------------------------------------------------------
-/** Calcualte H and eta for the peak
+/** Calculate H and eta for the peak
  */
 void NeutronBk2BkExpConvPVoigt::calHandEta(double sigma2, double gamma, double &H, double &eta) const {
   // 1. Calculate H
@@ -389,7 +389,7 @@ void NeutronBk2BkExpConvPVoigt::calHandEta(double sigma2, double gamma, double &
 
 //----------------------------------------------------------------------------------------------
 /** Calculate Omega(x) = ... ...
- * This is the core component to calcualte peak profile
+ * This is the core component to calculate peak profile
  */
 double NeutronBk2BkExpConvPVoigt::calOmega(const double x, const double eta, const double N, const double alpha,
                                            const double beta, const double H, const double sigma2,

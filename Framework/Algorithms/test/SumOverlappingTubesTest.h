@@ -608,7 +608,7 @@ public:
     TS_ASSERT_DELTA(totalCounts, double(N_TUBES) * double(N_PIXELS_PER_TUBE), 1e-6)
 
     // An analytic comparison is a little harder for this case, do a quick check
-    // of an arbitary value
+    // of an arbitrary value
     TS_ASSERT_DELTA(outWS->getSpectrum(0).y()[2], 10., 1e-6)
 
     AnalysisDataService::Instance().remove("testWS");

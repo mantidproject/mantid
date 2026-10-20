@@ -54,7 +54,7 @@ private:
   void processUnion(const std::string &);
   int joinDepth();                ///< Search table to uplift objects
   int removeEqComp();             ///< Remove non-unique items
-  int copySimilar(const Acomp &); ///< Join two componenet of similar type
+  int copySimilar(const Acomp &); ///< Join two component of similar type
 
   void addUnit(const std::vector<int> &,
                const BnId &); ///< Adds a Binary state to the Component
@@ -95,12 +95,12 @@ public:
   int isNull() const;               ///< is nothing in the comp.
   int isSingle() const;             ///< only one part
   int contains(const Acomp &) const;
-  int isInter() const { return Intersect; }     ///< Deterimine if inter/union
+  int isInter() const { return Intersect; }     ///< Determine if inter/union
   int isTrue(const std::map<int, int> &) const; ///< Determine if the rule is true.
 
   void Sort();                                     ///< Sort the Units+Comp items
   void getLiterals(std::map<int, int> &) const;    ///< Get literals (+/- different)
-  void getAbsLiterals(std::map<int, int> &) const; ///< Get literals (positve)
+  void getAbsLiterals(std::map<int, int> &) const; ///< Get literals (positive)
   std::vector<int> getKeys() const;
   int logicalEqual(const Acomp &) const;
 
@@ -108,12 +108,12 @@ public:
   int makeCNFobject(); ///< Make the object into CNF form (Product of Sums)
 
   void complement();                             ///< Take complement of component
-  std::pair<Acomp, Acomp> algDiv(const Acomp &); ///< Carry out Algebric division
+  std::pair<Acomp, Acomp> algDiv(const Acomp &); ///< Carry out Algebraic division
   void setString(const std::string &);           ///< Processes a line of type abc'+efg
   void writeFull(std::ostream &,
                  int const = 0) const;           ///< Full write out to determine state
-  std::string display() const;                   ///< Pretty print statment
-  std::string displayDepth(int const = 0) const; ///< Really pretty print statment of tree
+  std::string display() const;                   ///< Pretty print statement
+  std::string displayDepth(int const = 0) const; ///< Really pretty print statement of tree
 
   void printImplicates(const std::vector<BnId> &, const Kernel::Matrix<int> &) const;
 };

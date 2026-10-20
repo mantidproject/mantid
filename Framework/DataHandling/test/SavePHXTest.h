@@ -146,7 +146,7 @@ public:
       }
 
       for (size_t i = 0; i < test.size(); i++) {
-        TSM_ASSERT_DELTA("wrong sring: " + count[ic] + "  obtained from file;", sample_value[i], test[i], 1e-3);
+        TSM_ASSERT_DELTA("wrong string: " + count[ic] + "  obtained from file;", sample_value[i], test[i], 1e-3);
       }
       ic++;
     }
@@ -186,7 +186,7 @@ private:
     loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     loader.execute();
 
-    // required to get it passed the algorthms validator
+    // required to get it passed the algorithms validator
     inputWS->setDistribution(true);
 
     return inputWS;

@@ -755,7 +755,7 @@ void GenerateEventsFilter::processMultipleValueFilters(double minvalue, double v
   }
   g_log.information(dbsplitss.str());
 
-  // Check split interval obtained wehther is with valid size
+  // Check split interval obtained whether is with valid size
   if (logvalueranges.size() < 2) {
     g_log.warning("There is no log value interval existing.");
     return;
@@ -839,7 +839,7 @@ void GenerateEventsFilter::makeFilterBySingleValue(double min, double max, doubl
     if (isGood)
       numgood++;
 
-    // Log status (time/value/value changing direciton) is changed
+    // Log status (time/value/value changing direction) is changed
     if (isGood != lastGood) {
       // We switched from bad to good or good to bad
       if (isGood) {
@@ -1115,7 +1115,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesParallel(const map<size_t,
           g_log.debug() << "Splitter at the end of thread " << i << " is extended from " << origtime << " to " << newt0
                         << "\n";
         } else {
-          // 2 different and continous spliiter: ideal case without any
+          // 2 different and continuous splitter: ideal case without any
           // operation
           ;
         }
@@ -1305,7 +1305,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
           }
         } // [In-bound: Inside interval]
         else {
-          // [Situation] Fall between interval (which is not likley happen)
+          // [Situation] Fall between interval (which is not likely happen)
           currindex = -1;
           g_log.warning() << "Not likely to happen! Current value = " << currValue
                           << " is  within value range but its index = " << index << " has no map to group index. "
@@ -1553,7 +1553,7 @@ size_t GenerateEventsFilter::searchValue(const std::vector<double> &sorteddata, 
     // smaller to the value to search
     --index;
   } else if (value == sorteddata[index] && index % 2 == 1) {
-    // value to search is on the boudary, i..e, a,b,b,c,c,....,x,x,y
+    // value to search is on the boundary, i..e, a,b,b,c,c,....,x,x,y
     ++index;
 
     // return if out of range

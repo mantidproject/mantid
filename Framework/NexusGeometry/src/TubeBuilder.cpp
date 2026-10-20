@@ -46,7 +46,7 @@ const std::vector<int> &TubeBuilder::detIDs() const { return m_detIDs; }
 std::shared_ptr<const Mantid::Geometry::IObject> TubeBuilder::shape() const {
   using namespace Eigen;
   Matrix<double, 3, 3> points;
-  // calcualte height vector;
+  // calculate height vector;
   // Centre shape about (0, 0, 0)
   Eigen::Vector3d p1 = m_positions.front();
   Eigen::Vector3d p2 = m_positions.back();

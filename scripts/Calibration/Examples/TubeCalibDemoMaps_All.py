@@ -14,7 +14,7 @@ the :func:`tube.calibrate`.
 It starts from the simplest way to perform a calibration. It them increase the complexity
 of dealing with real calibration work, when particularities of the instrument must be considered
 
-At the end, it gives a suggestion on a techinique to investigate and improve the calibration itself.
+At the end, it gives a suggestion on a technique to investigate and improve the calibration itself.
 
 Minimal Input
 ~~~~~~~~~~~~~
@@ -297,8 +297,8 @@ def improvingCalibrationOfListOfTubes(filename):
     define_peaks = {
         19: [10, 80.9771, 123.221, 164.993, 245.717],  # the first one was bad
         37: [6.36, 80.9347, 122.941, 165.104, 248.32],  # the first one was bad
-        71: [8.62752, 85.074, 124.919, 164.116, 246.82],  # the last one was bad - check if we can inprove
-        75: [14.4285, 90.087, 128.987, 167.047, 242.62],  # the last one was bad - check if we can inprove
+        71: [8.62752, 85.074, 124.919, 164.116, 246.82],  # the last one was bad - check if we can improve
+        75: [14.4285, 90.087, 128.987, 167.047, 242.62],  # the last one was bad - check if we can improve
         181: [11.726, 94.0496, 137.816, 180, 255],  # the third peak was lost
         186: [11.9382, 71.5203, 107, 147.727, 239.041],  # lost the second peak
         234: [4.84, 82.7824, 123.125, 163.945, 241.877],  # the first one was bad
@@ -479,8 +479,8 @@ def completeCalibration(filename):
     # correct the definition of the peaks for the following indexes
     # define_peaks = {19:[10, 80.9771, 123.221, 164.993, 245.717], # the first one was bad
     # 	37: [6.36, 80.9347, 122.941, 165.104, 248.32], # the first one was bad
-    # 	71: [8.62752, 85.074, 124.919, 164.116, 246.82 ], # the last one was bad - check if we can inprove
-    # 	75: [14.4285, 90.087, 128.987, 167.047, 242.62], # the last one was bad - check if we can inprove
+    # 	71: [8.62752, 85.074, 124.919, 164.116, 246.82 ], # the last one was bad - check if we can improve
+    # 	75: [14.4285, 90.087, 128.987, 167.047, 242.62], # the last one was bad - check if we can improve
     # 	181: [11.726, 94.0496, 137.816,  180, 255], # the third peak was lost
     # 	186:[11.9382, 71.5203, 107, 147.727, 239.041], #lost the second peak
     # 	234: [4.84, 82.7824, 123.125, 163.945, 241.877], # the first one was bad

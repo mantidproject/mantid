@@ -218,8 +218,8 @@ Rule *Intersection::findKey(const int KeyN)
 /**
   Finds the leaf with the surface number KeyN
   @param KeyN :: Number to search for
-  @retval 0 :: no leaf with that key number availiable
-  @retval Rule* if an appropiate leaf is found
+  @retval 0 :: no leaf with that key number available
+  @retval Rule* if an appropriate leaf is found
 */
 {
   Rule *PtrOut = (A) ? A->findKey(KeyN) : nullptr;
@@ -510,8 +510,8 @@ Rule *Union::findKey(const int KeyN)
 /**
   Finds the leaf with the surface number KeyN
   @param KeyN :: Number to search for
-  @retval 0 :: no leaf with that key number availiable
-  @retval Rule* if an appropiate leaf is found
+  @retval 0 :: no leaf with that key number available
+  @retval Rule* if an appropriate leaf is found
 */
 {
 
@@ -732,8 +732,8 @@ Rule *SurfPoint::findKey(const int KeyNum)
 /**
   Finds the leaf with the surface number KeyN
   @param KeyNum :: Number to search for
-  @retval 0 :: no leaf with that key number availiable
-  @retval Rule* if an appropiate leaf is found
+  @retval 0 :: no leaf with that key number available
+  @retval Rule* if an appropriate leaf is found
 */
 {
   return (KeyNum == keyN) ? this : nullptr;
@@ -1223,7 +1223,7 @@ void BoolValue::setLeaf(std::unique_ptr<Rule> aR, const int /*unused*/)
   This REQUIRES that aR is of type SurfPoint
   @param aR :: new rule
 
-  secont argument ignored ( Null side point)
+  second argument ignored ( Null side point)
 */
 {
   // std::cerr<<"Calling BoolValue setLeaf"<<'\n';

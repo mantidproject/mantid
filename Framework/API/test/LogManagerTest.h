@@ -718,7 +718,7 @@ public:
     run_expect.addProperty(tsp->cloneInTimeROI(roi), true);
     run_expect.setTimeROI(roi);
 
-    // Create a cloned-in-roi copy of the orginal run info object
+    // Create a cloned-in-roi copy of the original run info object
     LogManager *run_result_ptr = run_input.cloneInTimeROI(roi);
     // Make sure the copy is different from the original, i.e. the roi really filters out some data
     TS_ASSERT(*run_result_ptr != run_input);

@@ -253,7 +253,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
             if len(wkspname) == 0:
                 wkspname = str(wksp)
 
-            # check for the entry alread existing in append mode
+            # check for the entry already existing in append mode
             if append and wkspname in handle.keys():
                 raise IOError("NXentry named '%s' already exists in '%s'" % (wkspname, filename))
 

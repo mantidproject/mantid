@@ -104,7 +104,7 @@ protected:
   void setRangeSelectorMax(QtProperty *minProperty, QtProperty *maxProperty,
                            MantidWidgets::RangeSelector *rangeSelector, double newValue);
 
-  /// Function to run an algorithm on a seperate thread
+  /// Function to run an algorithm on a separate thread
   void runAlgorithm(const Mantid::API::IAlgorithm_sptr &algorithm);
 
   /// Checks the ADS for a workspace named `workspaceName`,
@@ -138,7 +138,7 @@ protected:
   /// QtCheckBoxFactory
   QtCheckBoxFactory *m_blnEdFac;
 
-  /// Algorithm runner object to execute chains algorithms on a seperate thread
+  /// Algorithm runner object to execute chains algorithms on a separate thread
   /// from the GUI
   MantidQt::API::BatchAlgorithmRunner *m_batchAlgoRunner;
 

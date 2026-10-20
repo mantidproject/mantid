@@ -220,7 +220,7 @@ void PlotPeakByLogValue::exec() {
 
   IFunction_sptr ifunSingle = isMultiDomainFunction ? inputFunction->getFunction(0) : inputFunction;
 
-  // for inidividual fittings store the initial parameters
+  // for individual fittings store the initial parameters
   std::vector<double> initialParams(ifunSingle->nParams());
   if (individual) {
     for (size_t i = 0; i < initialParams.size(); ++i) {

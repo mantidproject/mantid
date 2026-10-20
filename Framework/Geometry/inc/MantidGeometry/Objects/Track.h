@@ -38,7 +38,7 @@ namespace Geometry {
 */
 struct MANTID_GEOMETRY_DLL Link {
   /**
-   * Constuctor
+   * Constructor
    * @param entry :: Kernel::V3D point to start
    * @param exit :: Kernel::V3D point to end track
    * @param totalDistance :: Total distance from start of track
@@ -105,7 +105,7 @@ MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &os, const TrackDirect
  */
 struct IntersectionPoint {
   /**
-   * Constuctor
+   * Constructor
    * @param direction :: Indicates the direction of travel of the track with
    * respect to the object: +1 is entering, -1 is leaving.
    * @param end :: The end point for this partial segment
@@ -193,18 +193,18 @@ public:
   const Kernel::V3D &direction() const { return m_line.getDirect(); }
   /// Returns the sum of all the links distInsideObject in the track
   double totalDistInsideObject() const;
-  /// Returns an interator to the start of the set of links
+  /// Returns an iterator to the start of the set of links
   LType::iterator begin() { return m_links.begin(); }
-  /// Returns an interator to one-past-the-end of the set of links
+  /// Returns an iterator to one-past-the-end of the set of links
   LType::iterator end() { return m_links.end(); }
-  /// Returns an interator to the start of the set of links (const version)
+  /// Returns an iterator to the start of the set of links (const version)
   LType::const_iterator begin() const { return m_links.begin(); }
-  /// Returns an interator to one-past-the-end of the set of links (const
+  /// Returns an iterator to one-past-the-end of the set of links (const
   /// version)
   LType::const_iterator end() const { return m_links.end(); }
-  /// Returns an interator to the start of the set of links (const version)
+  /// Returns an iterator to the start of the set of links (const version)
   LType::const_iterator cbegin() const { return m_links.cbegin(); }
-  /// Returns an interator to one-past-the-end of the set of links (const
+  /// Returns an iterator to one-past-the-end of the set of links (const
   /// version)
   LType::const_iterator cend() const { return m_links.cend(); }
   /// Returns a reference to the first link

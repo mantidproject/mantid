@@ -88,7 +88,7 @@ function(add_python_package pkg_name)
     set(_pkg_depends ${_pkg_depends} ${_egg_link_dir}/sitecustomize.py)
   endif()
 
-  # add the pacakge to the ALL target
+  # add the package to the ALL target
   add_custom_target(${pkg_name} ALL DEPENDS ${_pkg_depends})
 
   # When running the install target, run the following code instead that defers to the `pip install` command. It assumes

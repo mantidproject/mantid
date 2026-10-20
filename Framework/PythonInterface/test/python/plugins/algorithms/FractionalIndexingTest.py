@@ -16,8 +16,8 @@ import fractional_indexing as indexing
 class FractionIndexingTests(unittest.TestCase):
     def setUp(self):
         # Need to set the random seed because the scipy kmeans algorithm
-        # randomly initilizes the starting centroids. This can lead to a
-        # different but equivilent indexing.
+        # randomly initializes the starting centroids. This can lead to a
+        # different but equivalent indexing.
         np.random.seed(10)
 
     def test_find_bases_with_1d_modulation(self):

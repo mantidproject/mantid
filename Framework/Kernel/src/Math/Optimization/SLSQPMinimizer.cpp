@@ -79,7 +79,7 @@ std::vector<double> SLSQPMinimizer::minimize(const std::vector<double> &x0) cons
 }
 
 /**
- * Computes the gradient w.r.t to each paramter
+ * Computes the gradient w.r.t to each parameter
  * @param grad Output array to store gradient
  * @param x Current x pt
  */
@@ -320,7 +320,7 @@ int slsqp_(int *m, int *meq, const int *la, int *n, double *x, double *xl, doubl
   /* *    M              IS THE TOTAL NUMBER OF CONSTRAINTS, M .GE. 0      * */
   /* *    MEQ            IS THE NUMBER OF EQUALITY CONSTRAINTS, MEQ .GE. 0 * */
   /* *    LA             SEE A, LA .GE. MAX(M,1)                           * */
-  /* *    N              IS THE NUMBER OF VARIBLES, N .GE. 1               * */
+  /* *    N              IS THE NUMBER OF VARIABLES, N .GE. 1               * */
   /* *  * X()            X() STORES THE CURRENT ITERATE OF THE N VECTOR X  * */
   /* *                   ON ENTRY X() MUST BE INITIALIZED. ON EXIT X()     * */
   /* *                   STORES THE SOLUTION VECTOR X IF MODE = 0.         * */
@@ -360,7 +360,7 @@ int slsqp_(int *m, int *meq, const int *la, int *n, double *x, double *xl, doubl
   /* *                1: FUNCTION EVALUATION, (F&C)                        * */
   /* *                                                                     * */
   /* *                   FAILURE MODES:                                    * */
-  /* *                2: NUMBER OF EQUALITY CONTRAINTS LARGER THAN N       * */
+  /* *                2: NUMBER OF EQUALITY CONSTRAINTS LARGER THAN N       * */
   /* *                3: MORE THAN 3*N ITERATIONS IN LSQ SUBPROBLEM        * */
   /* *                4: INEQUALITY CONSTRAINTS INCOMPATIBLE               * */
   /* *                5: SINGULAR MATRIX E IN LSQ SUBPROBLEM               * */
@@ -1085,7 +1085,7 @@ int lsei_(double *c__, double *d__, double *e, double *f, double *g, double *h__
   /*     ON ENTRY, THE USER HAS TO PROVIDE THE ARRAYS C, D, E, F, G, AND H. */
   /*     ON RETURN, ALL ARRAYS WILL BE CHANGED BY THE SUBROUTINE. */
   /*     X     STORES THE SOLUTION VECTOR */
-  /*     XNORM STORES THE RESIDUUM OF THE SOLUTION IN EUCLIDIAN NORM */
+  /*     XNORM STORES THE RESIDUUM OF THE SOLUTION IN EUCLIDEAN NORM */
   /*     W     STORES THE VECTOR OF LAGRANGE MULTIPLIERS IN ITS FIRST */
   /*           MC+MG ELEMENTS */
   /*     MODE  IS A SUCCESS-FAILURE FLAG WITH THE FOLLOWING MEANINGS: */
@@ -1270,7 +1270,7 @@ int lsi_(double *e, double *f, double *g, double *h__, const int *le, const int 
   /*     ON ENTRY, THE USER HAS TO PROVIDE THE ARRAYS E, F, G, AND H. */
   /*     ON RETURN, ALL ARRAYS WILL BE CHANGED BY THE SUBROUTINE. */
   /*     X     STORES THE SOLUTION VECTOR */
-  /*     XNORM STORES THE RESIDUUM OF THE SOLUTION IN EUCLIDIAN NORM */
+  /*     XNORM STORES THE RESIDUUM OF THE SOLUTION IN EUCLIDEAN NORM */
   /*     W     STORES THE VECTOR OF LAGRANGE MULTIPLIERS IN ITS FIRST */
   /*           MG ELEMENTS */
   /*     MODE  IS A SUCCESS-FAILURE FLAG WITH THE FOLLOWING MEANINGS: */
@@ -1381,7 +1381,7 @@ int ldp_(double *g, const int *mg, const int *m, const int *n, double *h__, doub
   /*     REMARK: G(),H() WILL NOT BE CHANGED DURING CALCULATIONS BY LDP */
   /*     X()          ON ENTRY X() NEED NOT BE INITIALIZED. */
   /*                  ON EXIT X() STORES THE SOLUTION VECTOR X IF MODE=1. */
-  /*     XNORM        ON EXIT XNORM STORES THE EUCLIDIAN NORM OF THE */
+  /*     XNORM        ON EXIT XNORM STORES THE EUCLIDEAN NORM OF THE */
   /*                  SOLUTION VECTOR IF COMPUTATION IS SUCCESSFUL */
   /*     W()          W IS A ONE DIMENSIONAL WORKING SPACE, THE LENGTH */
   /*                  OF WHICH SHOULD BE AT LEAST (M+2)*(N+1) + 2*M */
@@ -1770,7 +1770,7 @@ int hfti_(double *a, const int *mda, const int *m, const int *n, double *b, cons
   /*     TAU              ABSOLUTE TOLERANCE PARAMETER FOR PSEUDORANK */
   /*                      DETERMINATION, PROVIDED BY THE USER. */
   /*     KRANK            PSEUDORANK OF A, SET BY THE SUBROUTINE. */
-  /*     RNORM            ON EXIT, RNORM(J) WILL CONTAIN THE EUCLIDIAN */
+  /*     RNORM            ON EXIT, RNORM(J) WILL CONTAIN THE EUCLIDEAN */
   /*                      NORM OF THE RESIDUAL VECTOR FOR THE PROBLEM */
   /*                      DEFINED BY THE J-TH COLUMN VECTOR OF THE ARRAY B. */
   /*     H(), G()         ARRAYS OF WORKING SPACE OF LENGTH >= N. */

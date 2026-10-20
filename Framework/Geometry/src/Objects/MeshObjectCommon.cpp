@@ -69,7 +69,7 @@ double getTriangleSolidAngle(const Kernel::V3D &a, const Kernel::V3D &b, const K
  * @param point : point to test
  * @param v1 : first vertex of triangle
  * @param v2 : second vertex of triangle
- * @param v3 : thrid vertex of triangle
+ * @param v3 : third vertex of triangle
  * @return True only point if is on triangle
  */
 bool isOnTriangle(const Kernel::V3D &point, const Kernel::V3D &v1, const Kernel::V3D &v2, const Kernel::V3D &v3) {

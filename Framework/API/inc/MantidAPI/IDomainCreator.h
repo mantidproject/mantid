@@ -40,7 +40,7 @@ class MANTID_API_DLL IDomainCreator {
 public:
   /// Type of domain to create.
   enum DomainType { Simple = 0, Sequential, Parallel };
-  /// Constrcutor
+  /// Constructor
   IDomainCreator(Kernel::IPropertyManager *manager, std::vector<std::string> workspacePropertyNames,
                  DomainType domainType = Simple);
   /// Virtual destructor
@@ -68,7 +68,7 @@ public:
   /// fitting data and weights.
   ///  Implementations must check whether it's empty or not. If values pointer
   ///  is empty create new values instance
-  ///  of an appropriate type otherwise extend it if neccessary.
+  ///  of an appropriate type otherwise extend it if necessary.
   /// @param i0 :: Starting index in values for the fitting data.
   /// Implementations must make sure values has enough room
   ///   for the data from index i0 to the end of the container.

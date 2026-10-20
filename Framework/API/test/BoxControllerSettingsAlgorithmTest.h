@@ -144,7 +144,7 @@ public:
     TS_ASSERT_EQUALS(maxRecursionDepth, actualMaxRecursionDepth);
   }
 
-  // Test that the user providied values for spliting have precedence.
+  // Test that the user providied values for splitting have precedence.
   void test_ignore_instrument_parameters() {
     const int splitInto = 8;
     const int splitThreshold = 16;

@@ -15,7 +15,7 @@ namespace Mantid {
   \date April 2005
   \version 1.0
 
-  Class maintians a type first/second/third triple
+  Class maintains a type first/second/third triple
   similar to std::pair except all are identical
 */
 
@@ -46,7 +46,7 @@ public:
   \date April 2005
   \version 1.0
 
-  Class maintians a different type first/second/third triple
+  Class maintains a different type first/second/third triple
   All are of a different type
 */
 

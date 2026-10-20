@@ -236,9 +236,9 @@ std::string CatalogDownloadDataFiles::saveFiletoDisk(std::istream &rs, const std
  * as the Poco::Net library httpget throws an exception when the nd server n/w
  * is slow
  * I'm testing the download from mantid server.
- * as the downlaod method I've written is private I can't access that in unit
+ * as the download method I've written is private I can't access that in unit
  * testing.
- * so adding this public method to call the private downlaod method and testing.
+ * so adding this public method to call the private download method and testing.
  * @param URL :: URL of the file to download
  * @param fileName :: name of the file
  * @return Full path of where file is saved to

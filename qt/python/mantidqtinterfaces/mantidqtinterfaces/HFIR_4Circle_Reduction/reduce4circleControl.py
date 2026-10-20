@@ -1660,7 +1660,7 @@ class CWSCDReductionControl(object):
         # check input
         assert isinstance(roi_name, str), "ROI name {0} must be a string but not a {1}".format(roi_name, type(roi_name))
 
-        # check whether it is in the dicationary and has a mask workspace set
+        # check whether it is in the dictionary and has a mask workspace set
         has = True
         if roi_name not in self._roiDict:
             has = False

@@ -616,7 +616,7 @@ bool Algorithm::executeInternal() {
           errorLog << "Invalid value for " << error.first << ": " << error.second << "\n";
         else {
           numErrors -= 1; // don't count it as an error
-          warnLog << "validateInputs() references non-existant property \"" << error.first << "\"\n";
+          warnLog << "validateInputs() references non-existent property \"" << error.first << "\"\n";
         }
       }
       // Throw because something was invalid
@@ -843,7 +843,7 @@ void Algorithm::store() {
 /** Create a Child Algorithm.  A call to this method creates a child algorithm
  *object.
  *  Using this mechanism instead of creating daughter
- *  algorithms directly via the new operator is prefered since then
+ *  algorithms directly via the new operator is preferred since then
  *  the framework can take care of all of the necessary book-keeping.
  *
  *  @param name ::           The concrete algorithm class of the Child Algorithm

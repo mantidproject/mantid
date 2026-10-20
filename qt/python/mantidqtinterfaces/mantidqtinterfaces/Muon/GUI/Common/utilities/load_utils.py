@@ -17,7 +17,7 @@ from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import
 
 class LoadUtils(object):
     """
-    A simple class for identifing the current run
+    A simple class for identifying the current run
     and it can return the name, run and instrument.
     The current run is the same as the one in MuonAnalysis
     """

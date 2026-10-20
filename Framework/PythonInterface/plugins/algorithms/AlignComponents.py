@@ -502,7 +502,7 @@ class AlignComponents(PythonAlgorithm):
                             )
                         )
 
-                # scipy.opimize.minimize with the L-BFGS-B algorithm
+                # scipy.optimize.minimize with the L-BFGS-B algorithm
                 results: OptimizeResult = minimize(
                     self._minimisation_func,
                     x0=x0List,
@@ -595,7 +595,7 @@ class AlignComponents(PythonAlgorithm):
 
             minimizer_selection = self.getProperty("Minimizer").value
             if minimizer_selection == "L-BFGS-B":
-                # scipy.opimize.minimize with the L-BFGS-B algorithm
+                # scipy.optimize.minimize with the L-BFGS-B algorithm
                 results: OptimizeResult = minimize(
                     self._minimisation_func,
                     x0=x0List,
@@ -619,7 +619,7 @@ class AlignComponents(PythonAlgorithm):
             comp_sample_distance_end = (comp_pos - sample_position_end).norm()
 
             component_adjustments = [0.0] * 7  # 3 for translation, 3 for rotation axis, 1 for rotation angle
-            component_displacements = [0.0] * 7  # 1 for distnace, 3 for translation, 3 for Euler angles
+            component_displacements = [0.0] * 7  # 1 for distance, 3 for translation, 3 for Euler angles
             component_displacements[0] = 1000 * (comp_sample_distance_end - comp_sample_distance_begin)  # in mili-meters
 
             if self._move:

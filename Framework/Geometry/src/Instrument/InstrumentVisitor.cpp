@@ -334,7 +334,7 @@ void InstrumentVisitor::markAsSourceOrSample(ComponentID componentId, const size
 size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
   auto detectorIndex = m_detectorIdToIndexMap->at(detector.getID());
 
-  /* Already allocated we just need to index into the inital front-detector
+  /* Already allocated we just need to index into the initial front-detector
    * part of the collection.
    * 1. Guarantee on grouping detectors by type such that the first n
    * components

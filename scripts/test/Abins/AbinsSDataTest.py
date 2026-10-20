@@ -57,7 +57,7 @@ class AbinsSpectraTest(unittest.TestCase):
         )
         output_spectra = add_autoconvolution_spectra(spectra, max_order=4)
 
-        # Check only the approriate orders were included
+        # Check only the appropriate orders were included
         assert set(spectrum.metadata["quantum_order"] for spectrum in output_spectra) == set(range(1, 5))
         for order in 1, 2:
             selection = output_spectra.select(quantum_order=order)

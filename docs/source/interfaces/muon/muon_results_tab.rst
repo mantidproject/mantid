@@ -50,7 +50,7 @@ Output
 
 **Table Name** The output tableworkspace's name is given here.
 
-**Output results** This will put put the fit funtions for the selected runs along with the selected log values for that run.
+**Output results** This will put put the fit functions for the selected runs along with the selected log values for that run.
 
 Used By
 ^^^^^^^

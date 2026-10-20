@@ -240,7 +240,7 @@ std::string PoldiPeakCollection::intensityTypeToString(PoldiPeakCollection::Inte
     return "Integral";
   }
 
-  throw std::runtime_error("Unkown intensity type can not be processed.");
+  throw std::runtime_error("Unknown intensity type can not be processed.");
 }
 
 PoldiPeakCollection::IntensityType PoldiPeakCollection::intensityTypeFromString(std::string typeString) const {

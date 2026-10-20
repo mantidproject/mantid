@@ -24,7 +24,7 @@ Helper method that takes a string and performs a cast to the specified type.
 Throws an invalid_argument exception if the argument cannot be cast to the
 target type.
 @param str : input string
-@return strongly typed value typed to the specfied type argument.
+@return strongly typed value typed to the specified type argument.
 */
 template <typename T> T convert(const std::string &str) {
   std::istringstream iss(str);
@@ -171,7 +171,7 @@ void ImportMDEventWorkspace::quickFileCheck() {
   if ((posDiffMDEvent - 1) % columnsForFullEvents != 0) {
     if ((posDiffMDEvent - 1) % columnsForLeanEvents != 0) {
       std::stringstream stream;
-      stream << "With the dimenionality found to be " << nDimensions << ". Should either have " << columnsForLeanEvents
+      stream << "With the dimensionality found to be " << nDimensions << ". Should either have " << columnsForLeanEvents
              << " or " << columnsForFullEvents << " in each row";
       throw std::invalid_argument(stream.str());
     }
@@ -233,7 +233,7 @@ void ImportMDEventWorkspace::exec() {
   if (0 == nActualColumns) {
     m_nDataObjects = 0;
     g_log.warning() << "The number of actual columns found in the file "
-                       "(exlcuding comments) is zero\n";
+                       "(excluding comments) is zero\n";
   } else {
     m_nDataObjects = posDiffMDEvent / nActualColumns;
   }

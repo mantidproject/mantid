@@ -12,7 +12,7 @@ from mantid.simpleapi import TimeSlice, Load
 class TimeSliceTest(unittest.TestCase):
     def test_basic(self):
         """
-        Test to ensure that algorithm completes succesfully.
+        Test to ensure that algorithm completes successfully.
         """
 
         TimeSlice(

@@ -19,7 +19,7 @@ namespace Algorithms {
    fail
    the tests, have their spectra masked on the output workspace and those
    passing
-   the tests are left with a postive value in the bin
+   the tests are left with a positive value in the bin
 
    Required Properties:
    <UL>

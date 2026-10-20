@@ -92,7 +92,7 @@ public:
   /**
    * Set function parameter value read from a QtProperty
    * @param prop :: The (double) property with the new parameter value
-   * @return true if successfull
+   * @return true if successful
    */
   bool setParameter(QtProperty *prop);
 
@@ -143,7 +143,7 @@ public:
   void setCentre(const double &c);
   void setFwhm(const double &w);
   void setBase(const double &b) { m_base = b; }
-  void calcBase();    //< caclulate baseline from workspace data
+  void calcBase();    //< calculate baseline from workspace data
   void calcBaseAll(); //< calc baseline for all peaks in the function
   /// Estimate the FwHM for a peak
   double EstimateFwhm() const;

@@ -72,7 +72,7 @@ DECLARE_ARCHIVESEARCH(ORNLDataArchive, SNSDataSearch)
  *
  * 2) It accepts a *collection* of basenames, but can only ever output a
  *    *single* file path.  An inspection of the surrounding code in FileFinder
- *    will show that this has been done as a workaround to accomodate caseless-
+ *    will show that this has been done as a workaround to accommodate caseless-
  *    searching of directories on platforms where case make a difference.
  *
  *    (So, when it says "getArchivePath", it really does mean *path* -- if you
@@ -146,7 +146,7 @@ ORNLDataArchive::getArchivePath(const std::set<std::string> &basenames,
   // purposes) then we must instead create one using the settings in the
   // currently-running instance of Mantid, making sure to run it in an
   // "unauthenticated" mode.  If we were to authenticate we'd be able to see
-  // more information, but that would require users logging in and publically
+  // more information, but that would require users logging in and publicly
   // available information is more than enough for our purposes here, anyway.
   auto defaultOncat = ONCat::fromMantidSettings();
   auto *oncat = m_oncat ? m_oncat.get() : defaultOncat.get();
@@ -254,7 +254,7 @@ ORNLDataArchive::getArchivePaths(const std::vector<std::string> &hintstrs) const
   // purposes) then we must instead create one using the settings in the
   // currently-running instance of Mantid, making sure to run it in an
   // "unauthenticated" mode.  If we were to authenticate we'd be able to see
-  // more information, but that would require users logging in and publically
+  // more information, but that would require users logging in and publicly
   // available information is more than enough for our purposes here, anyway.
   auto defaultOncat = ONCat::fromMantidSettings();
   auto *oncat = m_oncat ? m_oncat.get() : defaultOncat.get();

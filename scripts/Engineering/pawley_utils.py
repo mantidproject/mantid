@@ -189,7 +189,7 @@ class Phase:
         self.spgr = crystal_structure.getSpaceGroup()
         if not self.spgr.isAllowedUnitCell(self.unit_cell):
             raise ValueError("Unit cell not compatible with spacegroup")
-        # add hkls - check if compatible wth spacegorup
+        # add hkls - check if compatible with spacegorup
         self.hkls = []
         if hkls is not None:
             self.set_hkls(hkls)
@@ -321,7 +321,7 @@ class Phase:
     def hkl_string_to_indices(self, hkl_str: str, delimiter: Optional[str] = None) -> Optional[Sequence[int]]:
         # if no delimiter is given uses the one set on the phase
         delim = delimiter or self.hkl_str_delimiter
-        # if delimeter is "" we can use the string as the iterable
+        # if delimiter is "" we can use the string as the iterable
         iterable = hkl_str.split(delim) if delim else hkl_str
         err_msg = f"Can't convert input string ('{hkl_str}') to H,K, and L indices. Delimiter being used is: '{delim}'"
         try:

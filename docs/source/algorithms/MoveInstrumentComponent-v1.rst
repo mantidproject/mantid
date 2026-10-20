@@ -20,7 +20,7 @@ You can either specify an absolute position or a relative position. The
 relative position will be applied to the current position, so applying
 this twice will move the detector twice.
 
-If you move a component that is made up of smaller parts (such as a bank is made up of detectors, or a tube is made up of pixels) then the smaller parts will be transated along with the component.
+If you move a component that is made up of smaller parts (such as a bank is made up of detectors, or a tube is made up of pixels) then the smaller parts will be translated along with the component.
 
 Usage
 -----

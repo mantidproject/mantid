@@ -204,7 +204,7 @@ class EnggCalibrate(PythonAlgorithm):
         on the peak positions to produce the DIFC and TZERO as used in GSAS.
 
         @param focused_ws :: focused workspace to do the fitting on
-        @param expected_peaks_d :: expected peaks, used as intial peak positions for the
+        @param expected_peaks_d :: expected peaks, used as initial peak positions for the
         fitting, in d-spacing units
         @param prog :: progress reporter
 

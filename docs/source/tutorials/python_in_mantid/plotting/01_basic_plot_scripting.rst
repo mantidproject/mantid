@@ -234,7 +234,7 @@ Output:
     cbar.set_label('Intensity (arb. units)') #add text to colorbar
     #fig.show()
 
-`Contour lines <https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.contour.html>`_ can be overlayed on a 2D colorfill:
+`Contour lines <https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.contour.html>`_ can be overlaid on a 2D colorfill:
 
 .. plot::
    :include-source:

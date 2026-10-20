@@ -63,7 +63,7 @@ private:
   template <size_t ND, template <size_t> class MDEventType>
   void appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc);
 
-  // Specilization for MD event types
+  // Specialization for MD event types
   template <size_t ND> void appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc);
 
   template <typename EventType, size_t ND, template <size_t> class MDEventType>
@@ -204,7 +204,7 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API:
   }
 }
 
-// Specilization for MD event types
+// Specialization for MD event types
 template <size_t ND>
 void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc) {
   switch (mdEventType<ND>()) {

@@ -81,7 +81,7 @@ void LoadISISPolarizationEfficiencies::init() {
 }
 
 /// Load efficiencies from files and put them into a single workspace.
-/// @param props :: Names of properties containg names of files to load.
+/// @param props :: Names of properties containing names of files to load.
 MatrixWorkspace_sptr LoadISISPolarizationEfficiencies::createEfficiencies(std::vector<std::string> const &props) {
 
   auto alg = createChildAlgorithm("JoinISISPolarizationEfficiencies");

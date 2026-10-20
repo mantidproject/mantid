@@ -15,7 +15,7 @@ import json
 
 class IPeakTest(unittest.TestCase):
     def setUp(self):
-        # IPeak cannot currently be instatiated so this is a quick way
+        # IPeak cannot currently be instantiated so this is a quick way
         # getting a handle to a peak object
         ws = CreateSimulationWorkspace("SXD", BinParams="1,1,10")
         # load IDF pre cycle 19_1 when bank 1 upgraded and position was changed

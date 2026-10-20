@@ -43,7 +43,7 @@ public:
 
   void test_label_warning_message_if_workspace_exists_on_ads() {
     auto textColor = "color: darkRed";
-    auto text = "Output Name is in use, workspace will be overriden.";
+    auto text = "Output Name is in use, workspace will be overridden.";
 
     ON_CALL(*m_view, getCurrentOutputName()).WillByDefault(Return("test_red"));
     EXPECT_CALL(*m_view, setWarningLabel(text, textColor)).Times(1);

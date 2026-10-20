@@ -43,7 +43,7 @@ void ALCPeakFittingView::initialize() {
   QStringList plotsWithErrors{"Corrected"};
   m_ui.plot->setLinesWithErrors(plotsWithErrors);
 
-  // TODO: the peak picker is broken, these are being dissabled for release and will be fixed in maintinance.
+  // TODO: the peak picker is broken, these are being disabled for release and will be fixed in maintinance.
   // (auto-delete option)
   // m_peakPicker = new MantidWidgets::PeakPicker(m_ui.plot, Qt::red);
 

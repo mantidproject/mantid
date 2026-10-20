@@ -245,11 +245,11 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
     bool loaded;
     std::string errmsg;
 
-    std::stringstream filess;
+    std::stringstream files;
     if (m_isBaseName)
-      filess << m_dataDir << sep;
-    filess << rawfilename;
-    std::string filename(filess.str());
+      files << m_dataDir << sep;
+    files << rawfilename;
+    std::string filename(files.str());
 
     spicews = loadSpiceData(filename, loaded, errmsg);
     if (!loaded) {
@@ -315,7 +315,7 @@ void ConvertCWSDExpToMomentum::setupTransferMatrix(const API::MatrixWorkspace_sp
   // Check sample logs
   if (!dataws->run().hasProperty("_omega") || !dataws->run().hasProperty("_chi") || !dataws->run().hasProperty("_phi"))
     throw std::runtime_error("Data workspace does not have sample log _phi, _chi or _omega. "
-                             "Unable to set goniometer and calcualte roation matrix R.");
+                             "Unable to set goniometer and calculate rotation matrix R.");
 
   // Call algorithm SetGoniometer
   auto setalg = createChildAlgorithm("SetGoniometer");
@@ -365,7 +365,7 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(const Matrix
       std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(m_outputWS);
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
-  // Calcualte k_i: it is assumed that all k_i are same for one Pt.
+  // Calculate k_i: it is assumed that all k_i are same for one Pt.
   // number, i.e., one 2D XML file
   Kernel::V3D sourcePos = dataws->getInstrument()->getSource()->getPos();
   Kernel::V3D samplePos = dataws->getInstrument()->getSample()->getPos();
@@ -407,7 +407,7 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(const Matrix
     g_log.debug() << "Insert DetID " << detid << ", signal = " << signal << ", with q_sample = " << q_sample[0] << ", "
                   << q_sample[1] << ", " << q_sample[2] << "\n";
 
-    // Update some statistical inforamtion
+    // Update some statistical information
     if (signal > maxsignal)
       maxsignal = signal;
     ++nummdevents;
@@ -430,7 +430,7 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(const Matrix
   expinfo->mutableRun().addProperty("run_number", scan_run_number);
   expinfo->mutableRun().addProperty("duration", measuretime);
   expinfo->mutableRun().addProperty("monitor", monitor_counts);
-  // Add all the other propertys from original data workspace
+  // Add all the other properties from original data workspace
   const std::vector<Kernel::Property *> vec_property = dataws->run().getProperties();
   for (auto property : vec_property) {
     expinfo->mutableRun().addProperty(property->clone());
@@ -525,7 +525,7 @@ Kernel::V3D ConvertCWSDExpToMomentum::convertToQSample(const Kernel::V3D &sample
                                                        std::vector<coord_t> &qSample,
                                                        const Kernel::DblMatrix &rotationMatrix) {
 
-  // Use detector position and wavelength/Q to calcualte Q_lab
+  // Use detector position and wavelength/Q to calculate Q_lab
   Kernel::V3D kf;
   kf = (detPos - samplePos) * (momentum / (detPos - samplePos).norm());
   Kernel::V3D q_lab = ki - kf;

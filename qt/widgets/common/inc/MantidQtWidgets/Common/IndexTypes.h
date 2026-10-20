@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //
-// This file contains the implimentation of type safe indices for use
+// This file contains the implementation of type safe indices for use
 // in the indirect interface code.
 // TODO merge this to use the generic index framework from IndexType.h
 #pragma once
@@ -17,8 +17,8 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-/** A struct to impliment strongly typed integers, without implicit conversion.
- * Currently operations and comparitors are only defined between instances of
+/** A struct to implement strongly typed integers, without implicit conversion.
+ * Currently operations and comparators are only defined between instances of
  * the same type.
  */
 template <int Class> struct IndexType {

@@ -148,7 +148,7 @@ private:
   void exec() override;
   void execEvent();
 
-  /// read in the input parameters and see what findout what will be to grouped
+  /// read in the input parameters and see what find out what will be to grouped
   void getGroups(const API::MatrixWorkspace_const_sptr &workspace, std::vector<int64_t> &unUsedSpec);
   /// gets the list of spectra _index_ _numbers_ from a file of _spectra_
   /// _numbers_
@@ -171,7 +171,7 @@ private:
   /// used while reading the file reads reads spectra numbers from the string
   /// and returns spectra indexes
   void readSpectraIndexes(const std::string &line, const spec2index_map &specs2index, std::vector<size_t> &output,
-                          std::vector<int64_t> &unUsedSpec, const std::string &seperator = "#");
+                          std::vector<int64_t> &unUsedSpec, const std::string &separator = "#");
 
   /// Estimate how much what has been read from the input file constitutes
   /// progress for the algorithm

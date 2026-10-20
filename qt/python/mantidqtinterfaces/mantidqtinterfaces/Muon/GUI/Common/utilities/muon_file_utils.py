@@ -93,7 +93,7 @@ def file_path_for_instrument_and_run(instrument, run):
 def remove_duplicated_files_from_list(file_list):
     """
     Split filenames from their paths, and remove duplicates, keeping the
-    first ocurrence in the list.
+    first occurrence in the list.
 
     Example
 

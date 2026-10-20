@@ -80,7 +80,7 @@ public:
 
     // This algorithm dies because another thread has the same output
     std::shared_ptr<MonitorLiveData> alg2 = makeAlgo("fake1");
-    TSM_ASSERT("validateInputs should complaing (return a non-empty map)", !alg2->validateInputs().empty());
+    TSM_ASSERT("validateInputs should complaining (return a non-empty map)", !alg2->validateInputs().empty());
 
     // Abort the thread.
     alg1->cancel();
@@ -98,7 +98,7 @@ public:
 
     // This algorithm dies because another thread has the same output
     std::shared_ptr<MonitorLiveData> alg2 = makeAlgo("fake2", "accum1");
-    TSM_ASSERT("validateInputs should complaing (return a non-empty map)", !alg2->validateInputs().empty());
+    TSM_ASSERT("validateInputs should complaining (return a non-empty map)", !alg2->validateInputs().empty());
 
     // Abort the thread.
     alg1->cancel();

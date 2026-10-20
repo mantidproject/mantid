@@ -581,7 +581,7 @@ void PDLoadCharacterizations::readExpIni(const std::string &filename, API::ITabl
     if (splitted.size() < 2)
       continue;
 
-    // update the various charaterization runs in every row
+    // update the various characterization runs in every row
     for (size_t row = 0; row < rowCount; ++row) {
       if (splitted[0] == EXP_INI_VAN_KEY) {
         wksp->getRef<std::string>("vanadium", row) = splitted[1];

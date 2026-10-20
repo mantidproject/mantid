@@ -122,7 +122,7 @@ static int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
   fitParams->fit1D->function(fitParams->parameters, f->data, fitParams->X, fitParams->n);
 
   // function() return calculated data values. Need to convert this values into
-  // calculated-observed devided by error values used by GSL
+  // calculated-observed divided by error values used by GSL
 
   for (size_t i = 0; i < fitParams->n; i++)
     f->data[i] = (f->data[i] - fitParams->Y[i]) / fitParams->sigmaData[i];
@@ -148,7 +148,7 @@ static int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
   fitParams->fit1D->functionDeriv(fitParams->parameters, &fitParams->J, fitParams->X, fitParams->n);
 
   // functionDeriv() return derivatives of calculated data values. Need to
-  // convert this values into derivatives of calculated-observed devided
+  // convert this values into derivatives of calculated-observed divided
   // by error values used by GSL
 
   for (size_t iY = 0; iY < fitParams->n; iY++)
@@ -189,7 +189,7 @@ static double gsl_costFunction(const gsl_vector *x, void *params) {
   fitParams->fit1D->function(fitParams->parameters, l_forSimplexLSwrap, fitParams->X, fitParams->n);
 
   // function() return calculated data values. Need to convert this values into
-  // calculated-observed devided by error values used by GSL
+  // calculated-observed divided by error values used by GSL
   for (size_t i = 0; i < fitParams->n; i++)
     l_forSimplexLSwrap[i] = (l_forSimplexLSwrap[i] - fitParams->Y[i]) / fitParams->sigmaData[i];
 

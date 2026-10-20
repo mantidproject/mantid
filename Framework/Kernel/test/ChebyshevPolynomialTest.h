@@ -22,7 +22,7 @@ public:
   void test_values_are_correct_for_x_in_range() {
     const double delta(1e-12);
 
-    // The exapansions for the polynomials were found at
+    // The expansions for the polynomials were found at
     // http://mathworld.wolfram.com/ChebyshevPolynomialoftheFirstKind.html
     ChebyshevPolynomial chebp;
     const double x(0.75), xsq(x * x);

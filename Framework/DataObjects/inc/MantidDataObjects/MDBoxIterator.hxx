@@ -53,7 +53,7 @@ TMDE(MDBoxIterator)::MDBoxIterator(API::IMDNode *topBox, size_t maxDepth, bool l
 }
 
 //----------------------------------------------------------------------------------------------
-/** Common construction code in the absense of constructor chaining.
+/** Common construction code in the absence of constructor chaining.
  *
  * @param topBox :: top-level parent box.
  * @param maxDepth :: maximum depth to go to

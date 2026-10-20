@@ -137,7 +137,7 @@ public:
                       const bool excludeMonitors) const override;
   /// Set a component (and all its children) visible.
   void setComponentVisible(size_t componentIndex);
-  /// Set visibilit of all components.
+  /// Set visibility of all components.
   void setAllComponentsVisibility(bool /*on*/);
   /// Check if any child is visible
   bool hasChildVisible() const;

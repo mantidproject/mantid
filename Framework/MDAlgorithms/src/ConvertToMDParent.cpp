@@ -119,7 +119,7 @@ void ConvertToMDParent::init() {
                   "the same instrument."
                   ".. warning:: Dangerous if one uses number of workspaces with modified "
                   "derived instrument one after another."
-                  " *In this case this property has to be set to* **\"-\"** *sting (minus "
+                  " *In this case this property has to be set to* **\"-\"** *string (minus "
                   "without quotes) or empty (possible from script only) "
                   "to force the workspace recalculation each time the algorithm is "
                   "invoked.*");

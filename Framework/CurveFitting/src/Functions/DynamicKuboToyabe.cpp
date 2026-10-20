@@ -37,7 +37,7 @@ void DynamicKuboToyabe::init() {
 // Midpoint method
 double midpnt(double func(const double, const double, const double), const double a, const double b, const int n,
               const double g, const double w0) {
-  // quote & modified from numerical recipe 2nd edtion (page147)
+  // quote & modified from numerical recipe 2nd edition (page147)
 
   static double s;
 

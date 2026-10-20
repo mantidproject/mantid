@@ -23,7 +23,7 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "ProjectMD"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override { return "Sum a MDHistoWorkspace along a choosen dimension"; }
+  const std::string summary() const override { return "Sum a MDHistoWorkspace along a chosen dimension"; }
 
   /// Algorithm's version
   int version() const override { return (1); }

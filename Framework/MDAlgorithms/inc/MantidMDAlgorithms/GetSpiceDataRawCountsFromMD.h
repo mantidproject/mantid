@@ -48,13 +48,13 @@ private:
                             std::vector<double> &vecX, std::vector<double> &vecY, std::string &xlabel,
                             std::string &ylabel, bool donormalize);
 
-  /// Export a detector's counts accross all runs
+  /// Export a detector's counts across all runs
   void exportIndividualDetCounts(const API::IMDEventWorkspace_const_sptr &datamdws,
                                  const API::IMDEventWorkspace_const_sptr &monitormdws, const int detid,
                                  std::vector<double> &vecX, std::vector<double> &vecY, std::string &xlabel,
                                  std::string &ylabel, const bool &donormalize);
 
-  /// Export sample log values accross all runs
+  /// Export sample log values across all runs
   void exportSampleLogValue(const API::IMDEventWorkspace_const_sptr &datamdws, const std::string &samplelogname,
                             std::vector<double> &vecX, std::vector<double> &vecY, std::string &xlabel,
                             std::string &ylabel);

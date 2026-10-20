@@ -30,7 +30,7 @@ namespace DataHandling {
    that may
     contain spaces.
 
-    The algoritm requires an input filename. If this filename is the name of a
+    The algorithm requires an input filename. If this filename is the name of a
     raw datafile the algorithm will attempt to read in all the log files
    associated
     with that log file. Otherwise it will assume the filename specified is the

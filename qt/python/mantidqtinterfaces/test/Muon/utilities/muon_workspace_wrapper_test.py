@@ -50,7 +50,7 @@ class MuonWorkspaceTest(unittest.TestCase):
 
     It has some extra functionality which allows the workspace to be put in the ADS inside a "folder
     structure" using workspace groups. So for example if I give the name "dir1/dir2/name" then a
-    workspace called "name" will be placed inside a group called "dir2" which will istelf be placed
+    workspace called "name" will be placed inside a group called "dir2" which will itself be placed
     inside a group called "dir1".
 
     This allows the complex array of different workspaces from the muon interface to be structured

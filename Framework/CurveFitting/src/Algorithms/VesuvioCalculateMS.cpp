@@ -315,7 +315,7 @@ void VesuvioCalculateMS::calculateMS(CurveFitting::MSVesuvioHelper::RandomVariat
  * scatterings on a chosen detector
  * @param rng A reference to a PseudoRandomNumberGenerator
  * @param detpar Detector information describing the final detector position
- * @param respar Resolution information on the intrument as a whole
+ * @param respar Resolution information on the instrument as a whole
  * @param simulCounts Simulation object used to storing the calculated number of
  * counts
  */
@@ -364,7 +364,7 @@ void VesuvioCalculateMS::assignToOutput(const CurveFitting::MSVesuvioHelper::Sim
 /**
  * @param rng A reference to a PseudoRandomNumberGenerator
  * @param detpar Detector information describing the final detector position
- * @param respar Resolution information on the intrument as a whole
+ * @param respar Resolution information on the instrument as a whole
  * @param simulation [Output] Store the calculated counts here
  * @return The sum of the weights for all scatters
  */
@@ -722,7 +722,7 @@ V3D VesuvioCalculateMS::generateDetectorPos(CurveFitting::MSVesuvioHelper::Rando
   if (ntries == MAX_SCATTER_PT_TRIES) {
     // Assume it is very close to the surface so that the distance travelled
     // would
-    // be a neglible contribution
+    // be a negligible contribution
     distToExit = 0.0;
   }
   return detPos;
@@ -733,7 +733,7 @@ V3D VesuvioCalculateMS::generateDetectorPos(CurveFitting::MSVesuvioHelper::Rando
  * @param rng A reference to a PseudoRandomNumberGenerator
  * @param angle Detector angle from sample
  * @param e1nom The nominal final energy of the analyzer
- * @param e1res The resoltion in energy of the analyser
+ * @param e1res The resolution in energy of the analyser
  * @return A value for the final energy of the neutron
  */
 double VesuvioCalculateMS::generateE1(CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng, const double angle,

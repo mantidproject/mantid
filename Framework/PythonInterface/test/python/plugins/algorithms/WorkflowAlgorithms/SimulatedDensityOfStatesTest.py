@@ -213,7 +213,7 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
 
     def test_non_isotpe_element_indices_loading(self):
         """
-        Test that the individual indices for each element can be loaded seperately
+        Test that the individual indices for each element can be loaded separately
         Tests parse_chemical_and_ws_name for non-isotope + indices
         """
         wks_grp = SimulatedDensityOfStates(PHONONFile=self._phonon_file, SpectrumType="DOS", CalculateIonIndices=True, Ions="H,C,O")

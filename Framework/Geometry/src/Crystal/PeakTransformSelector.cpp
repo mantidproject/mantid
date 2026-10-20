@@ -89,7 +89,7 @@ PeakTransformFactory_sptr PeakTransformSelector::makeChoice(const std::string &l
 }
 
 /**
-Can any of the registered peak transform factories peform the requested
+Can any of the registered peak transform factories perform the requested
 transformation.
 @param labelX: X-label to use in determining selection.
 @param labelY: Y-label to use in determining selection.

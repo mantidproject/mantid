@@ -142,7 +142,7 @@ public:
   static int NumberIndexed_3D(const Kernel::V3D &a_dir, const Kernel::V3D &b_dir, const Kernel::V3D &c_dir,
                               const std::vector<Kernel::V3D> &q_vectors, double tolerance);
 
-  /// Given a UB, get list of Miller indices for specifed Qs and tolerance
+  /// Given a UB, get list of Miller indices for specified Qs and tolerance
   static int CalculateMillerIndices(const Kernel::DblMatrix &UB, const std::vector<Kernel::V3D> &q_vectors,
                                     double tolerance, std::vector<Kernel::V3D> &miller_indices, double &ave_error);
 

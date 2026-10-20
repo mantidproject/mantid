@@ -97,7 +97,7 @@ def find_sans_file(file_name):
     if not full_path and not file_name.endswith(".nxs"):
         full_path = find_full_file_path(file_name + ".nxs")
     if not full_path:
-        # TODO: If we only provide a run number for example 98843 for LOQ measurments, but have LARMOR specified as the
+        # TODO: If we only provide a run number for example 98843 for LOQ measurements, but have LARMOR specified as the
         #       Mantid instrument, then the FileFinder will search itself to death. This is a general Mantid issue.
         #       One way to handle this graceful would be a timeout option.
         runs = FileFinder.findRuns(file_name)

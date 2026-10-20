@@ -418,7 +418,7 @@ void FilterEvents::processAlgorithmProperties() {
   m_filterByPulseTime = this->getProperty("FilterByPulseTime");
 
   //***************************************
-  // Information on the Ouptut Workspaces
+  // Information on the Output Workspaces
   //   - OutputWorkspaceBaseName
   //   - GroupWorkspaces
   //***************************************
@@ -857,7 +857,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
   vector<string> colnames = m_detCorrectWorkspace->getColumnNames();
   bool hasshift = false;
   if (colnames.size() < 2)
-    throw runtime_error("Input table workspace is not valide.");
+    throw runtime_error("Input table workspace is not valid.");
   else if (colnames.size() >= 3)
     hasshift = true;
 

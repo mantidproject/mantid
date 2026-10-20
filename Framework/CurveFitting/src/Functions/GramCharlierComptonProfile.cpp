@@ -132,15 +132,15 @@ void GramCharlierComptonProfile::setHermiteCoefficients(const std::string &coeff
  * The input string gives whether each even Hermite polnomial is active or not
  */
 void GramCharlierComptonProfile::declareGramCharlierParameters() {
-  // Gram-Chelier parameters are the even coefficents of the Hermite
+  // Gram-Chelier parameters are the even coefficients of the Hermite
   // polynomials, i.e
-  // setting hermite coefficients to "1 0 1" uses coefficents C_0,C_4 and C_2 is
+  // setting hermite coefficients to "1 0 1" uses coefficients C_0,C_4 and C_2 is
   // skipped.
   for (size_t i = 0; i < m_hermite.size(); ++i) {
     if (m_hermite[i] > 0) {
       std::ostringstream os;
       os << HERMITE_PREFIX << 2 * i;
-      this->declareParameter(os.str(), 1.0, "Hermite polynomial coefficent");
+      this->declareParameter(os.str(), 1.0, "Hermite polynomial coefficient");
     }
   }
 }

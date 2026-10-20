@@ -70,7 +70,7 @@ QColor ScriptEditor::g_error_colour = QColor("red");
 // Public member functions
 //------------------------------------------------
 /**
- * Construction based on a string defining the langauge used
+ * Construction based on a string defining the language used
  * for syntax highlighting
  * @param lexerName A string choosing the name of a lexer
  * @param font A reference to the initial font to be used in the editor
@@ -438,7 +438,7 @@ void ScriptEditor::updateCompletionAPI(const QStringList &keywords) {
    * correctly.
    *
    * This line adds a single character that is guaranteed to be after all of
-   * the other completions (due to ascii ordering) but is not alpha-numeric so
+   * the other completions (due to ascii ordering) but is not alphanumeric so
    * a user would not want to complete on it. Even better it won't show up in
    * the auto complete list because a user has to type at least 2 characters
    * for that to appear.
@@ -452,7 +452,7 @@ void ScriptEditor::updateCompletionAPI(const QStringList &keywords) {
 /**
  * Mark the file as having been modified by the user. There is a setModified(bool)
  * method on QsciScintilla, but the documentation says that it won't do anything if
- * you pass in true to that method. As a workarond, this method will overwrite a
+ * you pass in true to that method. As a workaround, this method will overwrite a
  * line of text with the same text.
  */
 void ScriptEditor::markFileAsModified() { this->setText(0, text(0), 0); }

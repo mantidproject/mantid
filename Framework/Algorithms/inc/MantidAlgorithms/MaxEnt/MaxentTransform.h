@@ -22,7 +22,7 @@ public:
   MaxentTransform() = default;
   // Destructor
   virtual ~MaxentTransform() = default;
-  // Transfoms form image space to data space
+  // Transforms form image space to data space
   virtual std::vector<double> imageToData(const std::vector<double> &image) = 0;
   // Transforms from data space to image space
   virtual std::vector<double> dataToImage(const std::vector<double> &data) = 0;

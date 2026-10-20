@@ -192,7 +192,7 @@ public:
   std::unique_ptr<Nexus::File> m_file;
 
 private:
-  /// Intialisation code
+  /// Initialisation code
   void init() override;
 
   /// Execution code

@@ -774,7 +774,7 @@ public:
     TS_ASSERT_EQUALS(appliedCoordinateSystem, loadedPeaksWS->getSpecialCoordinateSystem());
   }
 
-  // backwards compatability check
+  // backwards compatibility check
   void test_coordinates_saved_and_loaded_on_peaks_workspace_from_expt_info() {
     auto peaksTestWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
     // Loading a peaks workspace without a instrument from an IDF doesn't work

@@ -187,7 +187,7 @@ class CurvesTabWidgetPresenter:
     def populate_select_axes_combo_box(self):
         """
         Add Axes names to 'select axes' combo box.
-        Names are generated similary to in AxesTabWidgetPresenter
+        Names are generated similarly to in AxesTabWidgetPresenter
         """
         # Sort names by axes position
         names = []

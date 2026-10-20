@@ -155,7 +155,7 @@ std::vector<detid_t> ExtractMaskToTable::parseMaskTable(const DataObjects::Table
 /** Parse a string containing list in format (x, xx-yy, x, x, ...) to a vector
  * of detid_t
  * @param liststr :: string containing list to parse
- * @returns :: vector genrated from input string containing the list
+ * @returns :: vector generated from input string containing the list
  */
 std::vector<detid_t> ExtractMaskToTable::parseStringToVector(const std::string &liststr) {
   std::vector<detid_t> detidvec;
@@ -165,7 +165,7 @@ std::vector<detid_t> ExtractMaskToTable::parseStringToVector(const std::string &
   if (!detlist.isValid().empty()) {
     std::stringstream errss;
     errss << "String '" << liststr << "' is unable to be converted to a list of detectors IDs. "
-          << "Validation mesage: " << detlist.isValid();
+          << "Validation message: " << detlist.isValid();
     g_log.error(errss.str());
     throw std::runtime_error(errss.str());
   }

@@ -293,7 +293,7 @@ def load_existing_calibration_files(calibration: "CalibrationInfo") -> str | Non
 
 def write_diff_consts_to_table_from_prm(prm_filepath: str) -> None:
     """
-    read diff consntants from prm file and write in table workspace
+    read diff constants from prm file and write in table workspace
     :param prm_filepath: path to prm file
     """
     diff_consts = read_diff_constants_from_prm(prm_filepath)

@@ -136,7 +136,7 @@ class SubPlotContextTest(unittest.TestCase):
             patch.return_value = tuple([line()])
             self.context.addLine(ws, 3)
             self.context.addLine(ws2, 3)
-        # check inital set up
+        # check initial set up
         keys = self.context.ws.keys()
         expect = [ws, ws2]
         for key in expect:

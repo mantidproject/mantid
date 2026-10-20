@@ -532,7 +532,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
 
     def _overlayed_peaks_workspaces(self):
         """
-        :return: A list of names of the current PeaksWorkspaces overlayed
+        :return: A list of names of the current PeaksWorkspaces overlaid
         """
         current_workspaces = []
         if self._peaks_presenter is not None:

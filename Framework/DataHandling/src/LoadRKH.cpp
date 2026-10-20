@@ -280,9 +280,9 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
   }
 
   if (readStart < 1 || readEnd < 1 || readEnd < readStart || readStart > totalPoints || readEnd > totalPoints) {
-    g_log.error("Invalid data range specfied.");
+    g_log.error("Invalid data range specified.");
     m_fileIn.close();
-    throw std::invalid_argument("Invalid data range specfied.");
+    throw std::invalid_argument("Invalid data range specified.");
   }
 
   g_log.information() << "Reading started on data line: " << readStart << "\n";
@@ -386,7 +386,7 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
 }
 /** Reads the header information from a file containing 2D data
  *  @param[in] initalLine the second line in the file
- *  @param[out] outWrksp the workspace that the data will be writen to
+ *  @param[out] outWrksp the workspace that the data will be written to
  *  @param[out] axis0Data x-values for the workspace
  *  @return a progress bar object
  *  @throw NotFoundError if there is compulsulary data is missing from the file
@@ -517,7 +517,7 @@ const std::string LoadRKH::readUnit(const std::string &line) {
     if ((!unit.starts_with('(')) || (unit.find(')') != unit.size())) {
       std::string qCode = std::to_string(SaveRKH::Q_CODE);
       if (symbol == qCode && theQuantity == "q" &&
-          (unit == "(1/Angstrom)" || unit == "(Angstrom^-1)")) { // 6 q (1/Angstrom) is the synatx for
+          (unit == "(1/Angstrom)" || unit == "(Angstrom^-1)")) { // 6 q (1/Angstrom) is the syntax for
                                                                  // MomentumTransfer
         return "MomentumTransfer";
       }

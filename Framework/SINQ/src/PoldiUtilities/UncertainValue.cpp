@@ -56,7 +56,7 @@ UncertainValue UncertainValue::operator*(double d) { return UncertainValue(m_val
 
 UncertainValue UncertainValue::operator/(double d) {
   if (d == 0.0) {
-    throw std::domain_error("Divsion by 0 is not allowed.");
+    throw std::domain_error("Division by 0 is not allowed.");
   }
 
   return UncertainValue(m_value / d, m_error / d);
@@ -70,7 +70,7 @@ UncertainValue operator*(double d, const UncertainValue &v) { return UncertainVa
 
 UncertainValue operator/(double d, const UncertainValue &v) {
   if (v.value() == 0.0) {
-    throw std::domain_error("Divsion by 0 is not allowed.");
+    throw std::domain_error("Division by 0 is not allowed.");
   }
 
   return UncertainValue(d / v.value(), d / pow(v.value(), 2.0) * v.error());

@@ -17,7 +17,7 @@ from mantid.plots.plotfunctions import plot
 # -----------------------------------------------------------------------------
 LOGGER = Logger("mantid.plots.plotCompatability")
 # ================================================
-# Compatability functions
+# Compatibility functions
 # ================================================
 
 

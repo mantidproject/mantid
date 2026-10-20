@@ -3554,7 +3554,7 @@ QPushButton:checked{ background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1
              </font>
             </property>
             <property name="toolTip">
-             <string>Flourine</string>
+             <string>Fluorine</string>
             </property>
             <property name="autoFillBackground">
              <bool>false</bool>

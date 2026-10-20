@@ -31,7 +31,7 @@ std::string EnvironmentHistory::osName() const { return ConfigService::Instance(
 std::string EnvironmentHistory::osVersion() const { return ConfigService::Instance().getOSVersion(); }
 
 /** Prints a text representation of itself
- *  @param os :: The ouput stream to write to
+ *  @param os :: The output stream to write to
  *  @param indent :: an indentation value to make pretty printing of object and
  * sub-objects
  */
@@ -42,9 +42,9 @@ void EnvironmentHistory::printSelf(std::ostream &os, const int indent) const {
 }
 
 /** Prints a text representation
- *  @param os :: The ouput stream to write to
+ *  @param os :: The output stream to write to
  *  @param EH :: The EnvironmentHistory to output
- *  @returns The ouput stream
+ *  @returns The output stream
  */
 std::ostream &operator<<(std::ostream &os, const EnvironmentHistory &EH) {
   EH.printSelf(os);

@@ -40,7 +40,7 @@ using Kernel::V3D;
 Cylinder::Cylinder()
     : Quadratic(), m_centre(), m_normal(1, 0, 0), m_normVec(0), m_radius(0.0)
 /**
- Standard Constructor creats a cylinder (radius 0)
+ Standard Constructor creates a cylinder (radius 0)
  along the x axis
  */
 {

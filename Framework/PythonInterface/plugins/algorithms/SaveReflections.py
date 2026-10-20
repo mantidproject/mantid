@@ -84,7 +84,7 @@ class SaveReflections(PythonAlgorithm):
         return "Saves single crystal reflections to a variety of formats"
 
     def PyInit(self):
-        """Initilize the algorithms properties"""
+        """Initialize the algorithms properties"""
 
         self.declareProperty(IPeaksWorkspaceProperty("InputWorkspace", "", Direction.Input), doc="The name of the peaks worksapce to save")
 
@@ -162,7 +162,7 @@ class SaveReflections(PythonAlgorithm):
                 f"There are no peaks with Intens/Sigma >= {min_i_over_sig} in peak workspace {workspace.name()}. "
                 f"An empty file will be produced."
             )
-        # get batch numebrs using run numbers
+        # get batch numbers using run numbers
         if output_format != ReflectionFormat.GSAS:
             if self.getProperty("SeparateBatchNumbers").value:
                 _, batch_nums = np.unique(filtered_workspace.column("RunNumber"), return_inverse=True)
@@ -508,7 +508,7 @@ class SaveHKLFormat(object):
 
         :param file_name: the file name to output data to.
         :param workspace: the PeaksWorkspace to write to file.
-        :param _: Ignored parameter for compatability with other savers
+        :param _: Ignored parameter for compatibility with other savers
         """
         if has_modulated_indexing(workspace):
             raise RuntimeError("Cannot currently save modulated structures to GSAS or SHELX formats")

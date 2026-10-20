@@ -15,10 +15,10 @@ namespace DataObjects {
 
 //===============================================================================================
 /** Two classes responsible for implementing methods which automatically
-save/load MDBox in conjuction with
+save/load MDBox in conjunction with
 DiskBuffer
 One class responsible for saving events into nexus and another one -- for
-identifying the data positions in a file in conjuction with DB
+identifying the data positions in a file in conjunction with DB
 
 @date March 15, 2013
 */

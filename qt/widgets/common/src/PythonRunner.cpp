@@ -41,7 +41,7 @@ QString PythonRunner::runPythonCode(const QString &code, bool no_output) {
 
   // Otherwise we need to gather the information from stdout. This is achieved
   // by redirecting the stdout stream
-  // to a temproary file and then reading its contents
+  // to a temporary file and then reading its contents
   // A QTemporaryFile object is used since the file is automatically deleted
   // when the object goes out of scope
   QTemporaryFile tmp_file;

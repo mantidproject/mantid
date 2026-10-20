@@ -185,13 +185,13 @@ void GetSpiceDataRawCountsFromMD::exportDetCountsOfRun(const API::IMDEventWorksp
   // Set up label
   xlabel = "Degrees";
   if (donormalize)
-    ylabel = "Noramlized Intensity";
+    ylabel = "Normalized Intensity";
   else
     ylabel = "Counts";
 }
 
 //----------------------------------------------------------------------------------------------
-/** Export a detector's counts accross all runs
+/** Export a detector's counts across all runs
  * @brief GetSpiceDataRawCountsFromMD::exportIndividualDetCounts
  * @param datamdws
  * @param monitormdws
@@ -262,13 +262,13 @@ void GetSpiceDataRawCountsFromMD::exportIndividualDetCounts(const API::IMDEventW
   if (get2theta)
     xlabel = "Degrees";
   if (donormalize)
-    ylabel = "Noramlized Intensity";
+    ylabel = "Normalized Intensity";
   else
     ylabel = "Counts";
 }
 
 //----------------------------------------------------------------------------------------------
-/** Export sample log values accross all runs
+/** Export sample log values across all runs
  * @brief GetSpiceDataRawCountsFromMD::exportSampleLogValue
  * @param datamdws
  * @param samplelogname :: name of the sample log to be exported

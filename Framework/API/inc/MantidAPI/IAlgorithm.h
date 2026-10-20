@@ -119,12 +119,12 @@ public:
   /// Gets the current execution state
   virtual ExecutionState executionState() const = 0;
 
-  /// Gets the currnet result State
+  /// Gets the current result State
   virtual ResultState resultState() const = 0;
 
   /// Check whether the algorithm is initialized properly
   virtual bool isInitialized() const = 0;
-  /// Check whether the algorithm has been executed sucessfully
+  /// Check whether the algorithm has been executed successfully
   virtual bool isExecuted() const = 0;
 
   /// Raises the cancel flag. interuption_point() method if called inside exec()

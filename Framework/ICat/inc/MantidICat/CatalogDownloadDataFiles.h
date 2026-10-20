@@ -22,7 +22,7 @@ namespace ICat {
 
  <UL>
   <LI> Filenames - List of files to download </LI>
-  <LI> InputWorkspace - The name of the workspace whioch stored the last
+  <LI> InputWorkspace - The name of the workspace which stored the last
  investigation search results </LI>
   <LI> FileLocations - List of files with location which is downloaded </LI>
  </UL>

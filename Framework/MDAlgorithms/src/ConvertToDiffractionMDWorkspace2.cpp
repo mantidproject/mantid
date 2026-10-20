@@ -37,7 +37,7 @@ DECLARE_ALGORITHM(ConvertToDiffractionMDWorkspace2)
 /** Initialize the algorithm's properties.
  */
 void ConvertToDiffractionMDWorkspace2::init() {
-  // initilise common properties between versions
+  // initialise common properties between versions
   BaseConvertToDiffractionMDWorkspace::init();
 
   std::vector<double> extents = {-50.0, 50.0};

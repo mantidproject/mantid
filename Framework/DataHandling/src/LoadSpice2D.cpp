@@ -349,7 +349,7 @@ void LoadSpice2D::createWorkspace(const std::vector<int> &data, const std::strin
   m_workspace->setYUnit("");
 
   int specID = 0;
-  // Store monitor counts in the beggining
+  // Store monitor counts in the beginning
   store_value(m_workspace, specID++, monitor1_counts, monitor1_counts > 0 ? sqrt(monitor1_counts) : 0.0, m_wavelength,
               m_dwavelength);
   store_value(m_workspace, specID++, monitor2_counts, 0.0, m_wavelength, m_dwavelength);
@@ -385,7 +385,7 @@ template <class T> void LoadSpice2D::addRunProperty(const std::string &name, con
 /**
  * Sets the beam trap as Run Property
  * There's several beamstrap position. We have to find the maximum of every
- *motor above certain treshold.
+ *motor above certain threshold.
  * The maximum motor position will be the trap in use.
  *
  * Notes:

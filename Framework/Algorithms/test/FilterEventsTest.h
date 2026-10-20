@@ -43,7 +43,7 @@ Logger g_log("FilterEventsTest");
  *  2. Add a new unit test for grouping workspaces in the end
  *  3. Add a new unit test for throwing grouping workspaces if name is not valid
  *  4. Add a new unit test for excluding sample logs
- *  5. Parallelizing spliting logs?
+ *  5. Parallelizing splitting logs?
  *  6. Speed test
  *    6.1 with or without splitting logs;
  *    6.2 different types of splitters workspaces;
@@ -103,7 +103,7 @@ public:
     g_log.notice("\ntest_protonCharge...");
     int64_t runstart_i64 = 10000000000; // 10 seconds, beginning of the fake run
     int64_t pulsedt = 10000000;         // 1/100 seconds in nanoseconds, time between consecutive pulses
-    int64_t tofdt = 1000000;            // 1 milisecond in nanoseconds, spacing between neutrons events within a pulse
+    int64_t tofdt = 1000000;            // 1 millisecond in nanoseconds, spacing between neutrons events within a pulse
     size_t numpulses = 1000;
 
     // Create EventWorkspace with 10 detector-banks, each bank containing one pixel.
@@ -125,7 +125,7 @@ public:
     //   2     1990-Jan-01 00:00:19.985000000
     //  -1     1990-Jan-01 00:00:19.995000000
     std::string name{"splitterPeriodic"};
-    int64_t start{runstart_i64 + 5000 * 1000}; // an offset of 5 miliseconds, in nanoseconds
+    int64_t start{runstart_i64 + 5000 * 1000}; // an offset of 5 milliseconds, in nanoseconds
     int64_t end{runstart_i64 + pulsedt * static_cast<int64_t>(numpulses)};
     int64_t splitInterval{pulsedt};
     int splitterCount{3}; // number of destination workspaces
@@ -197,8 +197,8 @@ public:
   void run_FilterNoCorrection(EventType eventType) {
     g_log.notice("\ntest_FilterNoCorrection...");
     int64_t runstart_i64 = 20000000000;  // 20 seconds, beginning of the fake run
-    int64_t pulsedt = 100 * 1000 * 1000; // 100 miliseconds, time between consecutive pulses
-    int64_t tofdt = 10 * 1000 * 1000;    // 10 miliseconds, spacing between neutrons events within a pulse
+    int64_t pulsedt = 100 * 1000 * 1000; // 100 milliseconds, time between consecutive pulses
+    int64_t tofdt = 10 * 1000 * 1000;    // 10 milliseconds, spacing between neutrons events within a pulse
     size_t numpulses = 5;
 
     // Create EventWorkspace with 10 detector-banks, each bank containing one pixel.
@@ -748,8 +748,8 @@ public:
     g_log.notice("\ntest_FilterRelativeTime...");
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;  // 20 seconds, beginning of the fake run
-    int64_t pulsedt = 100 * 1000 * 1000; // 100 miliseconds, time between consecutive pulses
-    int64_t tofdt = 10 * 1000 * 1000;    // 10 miliseconds, spacing between neutrons events within a pulse
+    int64_t pulsedt = 100 * 1000 * 1000; // 100 milliseconds, time between consecutive pulses
+    int64_t tofdt = 10 * 1000 * 1000;    // 10 milliseconds, spacing between neutrons events within a pulse
     size_t numpulses = 5;
 
     // Create EventWorkspace with 10 detector-banks, each bank containing one pixel.
@@ -1469,7 +1469,7 @@ public:
     std::vector<TofEvent> events;
     for (const auto &pulseTime : pulseTimes)
       for (int64_t e = 0; e < N_EVENTS_IN_PULSE; e++) {
-        double tof = nanosecToMilisec * static_cast<double>(e * tofdt); // TOF in miliseconds
+        double tof = nanosecToMilisec * static_cast<double>(e * tofdt); // TOF in milliseconds
         TofEvent event(tof, pulseTime);
         events.emplace_back(event);
       }
@@ -1534,7 +1534,7 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Create an EventWorkspace to mimic direct inelastic scattering insturment.
+  /** Create an EventWorkspace to mimic direct inelastic scattering instrument.
    * This workspace will have the same neutron events as the test case in EventList.
    * @param runstart_i64 : start run date from Mantid's Epoch time, in nanoseconds
    * @param pulsedt : time between consecutive pulses, in nanoseconds
@@ -1881,7 +1881,7 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Create a Splitter for fast fequency log for output
+  /** Create a Splitter for fast frequency log for output
    * The splitter is within every pulse.  2 groups of splitters are created.
    *In each pulse
    * 1. group 0: 0.2 dT ~ 0.4 dT    dT = pulsedt

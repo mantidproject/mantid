@@ -29,7 +29,7 @@ protected:
   /// Initialise the properties associated with the generic import (those to do
   /// with dimensionality).
   void initGenericImportProps();
-  /// Getter for the number of bins (product accross all dimensions)
+  /// Getter for the number of bins (product across all dimensions)
   size_t getBinProduct() const { return m_bin_product; }
 
 private:

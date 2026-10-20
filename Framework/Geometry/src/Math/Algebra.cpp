@@ -70,7 +70,7 @@ bool Algebra::operator!=(const Algebra &A) const
 Algebra &Algebra::operator+=(const Algebra &M)
 /**
   Adds this by M algebrically
-  @param M :: Algebric object to add
+  @param M :: Algebraic object to add
   @return *this
 */
 {
@@ -81,7 +81,7 @@ Algebra &Algebra::operator+=(const Algebra &M)
 Algebra &Algebra::operator*=(const Algebra &M)
 /**
   Multiplies this by M algebrically
-  @param M :: Algebric object to multiply by
+  @param M :: Algebraic object to multiply by
   @return *this
 */
 {
@@ -115,7 +115,7 @@ Algebra Algebra::operator*(const Algebra &M) const
 
 void Algebra::Complement()
 /**
-  Takes the complement of the algebric
+  Takes the complement of the algebraic
   function.
 */
 {
@@ -198,7 +198,7 @@ int Algebra::setFunctionObjStr(const std::string &A)
   Fill the algebra (AComp) with an object given an
   MCNPX String.
   The string type is of 3 : 5 : 6 -4 #( xx  )
-  - where #( ) surroud the string
+  - where #( ) surround the string
   @param A :: string to process (stripped of id,density etc)
   @retval -1 ::  Failure
   @retval 0 ::  Success
@@ -313,7 +313,7 @@ int Algebra::countLiterals() const
 int Algebra::logicalEqual(const Algebra &A) const
 /**
   Calculate if two functions are logically
-  equivilent (exhaustive search)
+  equivalent (exhaustive search)
   @param A :: Algrebra to testg
   @return True/False
  */

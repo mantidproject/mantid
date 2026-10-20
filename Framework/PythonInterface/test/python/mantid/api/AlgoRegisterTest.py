@@ -185,7 +185,7 @@ class AlgoTimeRegisterAddTimeTest(unittest.TestCase):
     def test_addTime_threading(self):
         with amend_config(**self.performance_config):
             # time entry
-            # call the above algorithm from another thread to verfy the thread entry is correct
+            # call the above algorithm from another thread to verify the thread entry is correct
             x = threading.Thread(target=self.test_addTime_algo)
             x.start()
             x.join()

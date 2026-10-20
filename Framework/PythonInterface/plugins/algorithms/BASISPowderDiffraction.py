@@ -50,7 +50,7 @@ temp_prefix = "_tp_"  # marks a workspace as temporary
 
 
 class VDAS(Enum):
-    """Specifices the version of the Data Acquisition System (DAS)"""
+    """Specifies the version of the Data Acquisition System (DAS)"""
 
     v1900_2018 = 0  # Up to Dec 31 2018
     v2019_2100 = 1  # From Jan 01 2018
@@ -177,7 +177,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         self._qbins = None
         self._short_inst = "BSS"
         self._temps = None
-        self._bkg = None  # Events workspace for brackground runs
+        self._bkg = None  # Events workspace for background runs
         self._bkg_scale = None
         self._van = None  # workspace for vanadium files
         self._v_mask = None  # mask pixels with low-counts in vanadium runs
@@ -299,7 +299,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         self.declareProperty("VanadiumRuns", "", "Vanadium run numbers")
         self.setPropertyGroup("VanadiumRuns", vanadium_title)
         #
-        # Aditional output properties
+        # Additional output properties
         #
         titleAddionalOutput = "Additional Output"
         self.declareProperty("RemoveTemporaryWorkspaces", True, direction=Direction.Input, doc="Remove temporary workspaces and files")

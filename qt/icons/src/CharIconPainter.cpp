@@ -54,7 +54,7 @@ void CharIconPainter::paintIcon(IconicFont *iconic, QPainter *painter, QRect rec
   const auto scaleVariant = options[QString("scaleFactor")];
   const auto charecterOption = options[QString("character")].toString();
   const auto prefix = options[QString("prefix")].toString();
-  const auto charecter = iconic->findCharacterFromCharMap(prefix, charecterOption);
+  const auto character = iconic->findCharacterFromCharMap(prefix, charecterOption);
 
   // Set some defaults so it doesn't fail later if nothing was set
   QString requested(DEFAULT_COLOR);
@@ -73,9 +73,9 @@ void CharIconPainter::paintIcon(IconicFont *iconic, QPainter *painter, QRect rec
   const auto drawSize = static_cast<int>(std::floor(0.875 * std::round(rect.height() * scaleFactor)));
 
   bool unicodeGenerationSuccess;
-  const auto unicode = QChar(charecter.toUInt(&unicodeGenerationSuccess, 16));
+  const auto unicode = QChar(character.toUInt(&unicodeGenerationSuccess, 16));
   if (!unicodeGenerationSuccess) {
-    throw std::invalid_argument("Failed to convert hex value: \"" + charecter.toStdString() + "\" to unicode.");
+    throw std::invalid_argument("Failed to convert hex value: \"" + character.toStdString() + "\" to unicode.");
   }
 
   painter->setFont(iconic->getFont(prefix, drawSize));

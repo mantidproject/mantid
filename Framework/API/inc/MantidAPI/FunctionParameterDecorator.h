@@ -79,7 +79,7 @@ public:
   void setError(const std::string &name, double err) override;
 
   /// Return parameter index of decorated function from a parameter reference.
-  /// Usefull for constraints and ties in composite functions.
+  /// Useful for constraints and ties in composite functions.
   size_t getParameterIndex(const ParameterReference &ref) const override;
 
   /// Returns the number of attributes associated with the decorated function.

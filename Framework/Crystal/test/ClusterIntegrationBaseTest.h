@@ -82,7 +82,7 @@ protected:
     Workspace_sptr temp = mdworkspaceAlg->getProperty("OutputWorkspace");
     IMDEventWorkspace_sptr mdws = std::dynamic_pointer_cast<IMDEventWorkspace>(temp);
 
-    // --- Set speical coordinates on fake mdworkspace --
+    // --- Set special coordinates on fake mdworkspace --
     auto coordsAlg = AlgorithmManager::Instance().createUnmanaged("SetSpecialCoordinates");
     coordsAlg->setChild(true);
     coordsAlg->initialize();
@@ -94,7 +94,7 @@ protected:
     PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
     peakWS->setInstrument(inst);
 
-    // --- Set speical coordinates on fake PeaksWorkspace --
+    // --- Set special coordinates on fake PeaksWorkspace --
     coordsAlg = AlgorithmManager::Instance().createUnmanaged("SetSpecialCoordinates");
     coordsAlg->setChild(true);
     coordsAlg->initialize();

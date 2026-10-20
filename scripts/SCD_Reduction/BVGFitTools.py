@@ -732,7 +732,7 @@ def bvg(A, mu, sigma, x, y, bg):
     """
     bvg is the bivariate gaussian.  This function is a convenient wrapper for
     multivariate_normal.
-    Intput:
+    Input:
         A: amplitude
         mu: 2 element array containing [muX, muY]
         sigma: SIGMA matrix [[sigX**2, sigX*sigY*sigP],[sigX*sigY*sigP,sigY**2]]

@@ -232,7 +232,7 @@ private:
   void init() override;
   void exec() override;
 
-  /// Process input propeties
+  /// Process input properties
   void processProperties();
 
   /// Check the input properties and functions

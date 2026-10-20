@@ -18,7 +18,7 @@ namespace Mantid {
 namespace DataObjects {
 
 // Typedef for a map for mapping width of neighbours (key) to permutations
-// needed in the calcualtion.
+// needed in the calculation.
 using PermutationsMap = std::map<std::vector<int>, std::vector<int64_t>>;
 // Typedef for extents
 using MDExtentPair = boost::tuple<Mantid::coord_t, Mantid::coord_t>; // Min/Max pair
@@ -152,7 +152,7 @@ protected:
   /// Array to find indices from linear indices
   size_t *m_indexMaker;
 
-  /// Neigbour finding permutations for face touching neighbours (3 by 3 width).
+  /// Neighbour finding permutations for face touching neighbours (3 by 3 width).
   mutable std::vector<int64_t> m_permutationsFaceTouching;
 
   /// Neighbour finding permutations map for vertex touching. Keyed via the

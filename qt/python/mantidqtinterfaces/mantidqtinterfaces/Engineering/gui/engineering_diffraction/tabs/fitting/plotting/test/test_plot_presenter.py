@@ -202,7 +202,7 @@ class FittingPlotPresenterTest(unittest.TestCase):
                 )
 
     def test_setup_toolbar(self):
-        # Get's called during setup, so let's begin with a blank slate.
+        # Gets called during setup, so let's begin with a blank slate.
         self.view.reset_mock()
 
         self.presenter.setup_toolbar()

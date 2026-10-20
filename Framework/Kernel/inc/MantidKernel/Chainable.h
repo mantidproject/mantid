@@ -23,7 +23,7 @@ Otherwise you could do this
 
  factory.setSuccessor(new Factory).create()
 
- and create would be bypass the chain of resposibility, which should be executed
+ and create would be bypass the chain of responsibility, which should be executed
 along the chain top to bottom.
 **/
 

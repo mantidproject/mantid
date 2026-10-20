@@ -68,7 +68,7 @@ namespace Mantid::Algorithms {
 /** Range tolerance
  * This is required for machine precision reasons. Used to adjust StartOverlap
  *and EndOverlap so that they are
- * inclusive of bin boundaries if they are sitting ontop of the bin boundaries.
+ * inclusive of bin boundaries if they are sitting on top of the bin boundaries.
  */
 const double Stitch1D::range_tolerance = 1e-9;
 // Register the algorithm into the AlgorithmFactory
@@ -205,7 +205,7 @@ std::map<std::string, std::string> Stitch1D::validateInputs(void) {
  to inhabit
  @param intesectionMax :: The maximum possible value for the overlapping region
  to inhabit
- @return a double contianing the start of the overlapping region
+ @return a double containing the start of the overlapping region
  */
 double Stitch1D::getStartOverlap(const double intesectionMin, const double intesectionMax) const {
   Property const *startOverlapProp = this->getProperty("StartOverlap");
@@ -234,7 +234,7 @@ double Stitch1D::getStartOverlap(const double intesectionMin, const double intes
  to inhabit
  @param intesectionMax :: The maximum possible value for the overlapping region
  to inhabit
- @return a double contianing the end of the overlapping region
+ @return a double containing the end of the overlapping region
  */
 double Stitch1D::getEndOverlap(const double intesectionMin, const double intesectionMax) const {
   Property const *endOverlapProp = this->getProperty("EndOverlap");
@@ -262,7 +262,7 @@ double Stitch1D::getEndOverlap(const double intesectionMin, const double intesec
  @param lhsWS :: The left hand side input workspace
  @param rhsWS :: The right hand side input workspace
  @param scaleRHS :: Scale the right hand side workspace
- @return a vector<double> contianing the rebinning parameters
+ @return a vector<double> containing the rebinning parameters
  */
 std::vector<double> Stitch1D::getRebinParams(MatrixWorkspace_const_sptr &lhsWS, MatrixWorkspace_const_sptr &rhsWS,
                                              const bool scaleRHS) const {

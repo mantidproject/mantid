@@ -335,7 +335,7 @@ class ReductionWrapperTest(unittest.TestCase):
         # Update modification time manually as some OS and some tests do not update it properly
         m_time = m_time + 1
         os.utime(test_log, (m_time, m_time))
-        # next attempt is successfull
+        # next attempt is successful
         ok, run_num, info = th._check_progress_log_run_completed(1001)
         self.assertEqual(info, "")
         self.assertEqual(run_num, 1001)

@@ -28,7 +28,7 @@ ThreadSafeLogStreamBuf::ThreadSafeLogStreamBuf(Poco::Logger &logger, Poco::Messa
 int ThreadSafeLogStreamBuf::overflow(char c) { return Poco::UnbufferedStreamBuf::overflow(c); }
 
 /**
- * If the character is an EOL character then write the buffered messsage to the
+ * If the character is an EOL character then write the buffered message to the
  * chosen device(s). If
  * not, buffer the character
  * @param c :: The input character
@@ -47,7 +47,7 @@ int ThreadSafeLogStreamBuf::writeToDevice(char c) {
 }
 
 /**
- * accumulate a message to the thread safe accummulator.
+ * accumulate a message to the thread safe accumulator.
  * @param message :: The log message
  */
 void ThreadSafeLogStreamBuf::accumulate(const std::string &message) {
@@ -172,7 +172,7 @@ ThreadSafeLogStream &ThreadSafeLogStream::warning(const std::string &message) {
 }
 
 /**
- * Return a reference tothe log stream with the priority set to notice
+ * Return a reference to the log stream with the priority set to notice
  * @returns A reference to the log stream with notice priority level
  */
 ThreadSafeLogStream &ThreadSafeLogStream::notice() { return priority(Poco::Message::PRIO_NOTICE); }

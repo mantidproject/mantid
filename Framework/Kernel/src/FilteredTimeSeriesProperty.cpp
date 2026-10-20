@@ -150,7 +150,7 @@ template <typename TYPE> TimeInterval FilteredTimeSeriesProperty<TYPE>::nthInter
   // Calculate time interval
   Kernel::TimeInterval deltaT;
   if (m_filter->useAll()) {
-    // No filter uses the parent class implmentation
+    // No filter uses the parent class implementation
     deltaT = TimeSeriesProperty<TYPE>::nthInterval(n);
   } else {
     this->applyFilter();

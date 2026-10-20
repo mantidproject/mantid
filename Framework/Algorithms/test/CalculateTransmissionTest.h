@@ -239,7 +239,7 @@ public:
     Mantid::API::MatrixWorkspace_const_sptr extra = std::dynamic_pointer_cast<MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("CalculateTransmissionTest_extra"));
 
-    // these values were dervived from the debugger when exprolation was first
+    // these values were derived from the debugger when exprolation was first
     // added and are believed to be correct on that basis
     TS_ASSERT_DELTA(extra->y(0)[0], 0.2, 0.8937)
     TS_ASSERT_DELTA(extra->y(0)[8], 0.2, 0.8801)
@@ -379,7 +379,7 @@ public:
 
   /// Load and convert some monitor spectra to create some non-trival input data
   void loadSampleLOQMonitors() {
-    // load a couple of real montior spectra
+    // load a couple of real monitor spectra
     std::string wkspName("LOQ48097");
     LoadRaw3 loader;
     loader.initialize();

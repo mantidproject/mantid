@@ -39,10 +39,10 @@ BnId::BnId()
 BnId::BnId(const size_t A, const unsigned int X)
     : size(A), PI(1), Tnum(0), Znum(0), Tval(A)
 /**
-  Constructer that creates a true/false mapping
+  Constructor that creates a true/false mapping
   without the  undetermined option
   @param A :: size of the vector Tval. (number of surfaces)
-  @param X :: interger for of the binary representation
+  @param X :: integer for of the binary representation
 */
 {
   unsigned int cnt = 1;
@@ -145,7 +145,7 @@ int BnId::operator[](const int A) const
 
 int BnId::operator++(int)
 /**
-  convertion to ++operator (prefix)
+  conversion to ++operator (prefix)
   from operator++ (postfix)
   @retval 0 :: the function has looped (carry flag)
   @retval 1 :: no loop occored
@@ -180,7 +180,7 @@ int BnId::operator++()
 
 int BnId::operator--(const int)
 /**
-  Convertion to --operator (prefix)
+  Conversion to --operator (prefix)
   from operator-- (postfix)
   @retval 0 :: the function has looped (carry flag)
   @retval 1 :: no loop occored
@@ -265,7 +265,7 @@ std::pair<int, BnId> BnId::makeCombination(const BnId &A) const
   Output
     -  0 :: nothing to do.
     -  1 :: complement found
-    - -1 :: items are too differnt
+    - -1 :: items are too different
   @return pair<status,BnId> of possible new PI
   BnId is valid only if status ==1
 */

@@ -71,7 +71,7 @@ struct ComponentWorkspaceMapping {
   std::shared_ptr<int> scatterCount = std::make_shared<int>(0);
 };
 
-/** Object for holding collimator parameteres loaded from instrument parameters file
+/** Object for holding collimator parameters loaded from instrument parameters file
  */
 struct CollimatorInfo {
   double m_innerRadius;

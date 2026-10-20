@@ -112,7 +112,7 @@ void NormaliseByDetector::processHistogram(size_t wsIndex, const MatrixWorkspace
     const Geometry::FitParameter &fitParam = tryParseFunctionParameter(param, det);
 
     if (fitParam.getFormula().empty()) {
-      throw std::runtime_error("A Forumla has not been provided for a fit function");
+      throw std::runtime_error("A Formula has not been provided for a fit function");
     } else {
       const std::string &resultUnitStr = fitParam.getResultUnit();
       if (!resultUnitStr.empty() && resultUnitStr != "Wavelength") {

@@ -28,7 +28,7 @@ public:
   Figure(bool tightLayout = true);
 
   /**
-   * @brief Access (and create if necessar) the active Axes
+   * @brief Access (and create if necessary) the active Axes
    * @return An instance of Axes attached to the figure
    */
   template <typename AxesType = Axes> inline AxesType gca() const {

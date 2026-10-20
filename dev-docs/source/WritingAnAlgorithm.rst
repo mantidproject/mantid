@@ -123,7 +123,7 @@ There are many overloaded signatures for ``declareProperty()`` which are intende
    :lines: 43-57
    :linenos:
 
-This example shows a couple of different ways of declaring properites.
+This example shows a couple of different ways of declaring properties.
 They all have a couple of features in common:
 
 * Every property has a name. Here they are ``InputWorkspace``, ``NumberToApply``, ``WayToApply``, and ``OutputWorkspace``
@@ -174,7 +174,7 @@ check that casting it to its intended type succeeded before attempting to use it
 Execution
 #########
 
-Like initialization, the ``exec()`` method you write is not directly, but can be indirectly called via the ``execute()`` method of the algorith
+Like initialization, the ``exec()`` method you write is not directly, but can be indirectly called via the ``execute()`` method of the algorithm
 There are other methods that will do the same thing in different modes.
 All of them eventually call the `API::Algorithm::executeInternal() <https://github.com/mantidproject/mantid/blob/main/Framework/API/src/Algorithm.cpp#L509>`_ which does the following
 

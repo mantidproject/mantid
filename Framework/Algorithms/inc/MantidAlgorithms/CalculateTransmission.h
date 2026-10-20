@@ -78,7 +78,7 @@ private:
 
   /// Pull out a single spectrum from a 2D workspace
   API::MatrixWorkspace_sptr extractSpectra(const API::MatrixWorkspace_sptr &ws, const std::vector<size_t> &indices);
-  /// Returns a workspace with the evaulation of the fit to the calculated
+  /// Returns a workspace with the evaluation of the fit to the calculated
   /// transmission fraction
   API::MatrixWorkspace_sptr fit(const API::MatrixWorkspace_sptr &raw, const std::vector<double> &rebinParams,
                                 const std::string &fitMethod);
@@ -86,7 +86,7 @@ private:
   API::MatrixWorkspace_sptr fitData(const API::MatrixWorkspace_sptr &WS, double &grad, double &offset);
   /// Call the Polynomial fitting algorithm as a child algorithm
   API::MatrixWorkspace_sptr fitPolynomial(const API::MatrixWorkspace_sptr &WS, int order,
-                                          std::vector<double> &coeficients);
+                                          std::vector<double> &coefficients);
   /// Calls the rebin algorithm
   API::MatrixWorkspace_sptr rebin(const std::vector<double> &binParams, const API::MatrixWorkspace_sptr &ws);
   /// Outputs message to log if the detector at the given index is not a monitor

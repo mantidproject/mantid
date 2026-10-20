@@ -120,7 +120,7 @@ bool WorkspaceBoundingBox::isValidIndex(const std::size_t index) const {
 }
 
 /** Sets member variables x/y to new x/y based on
- *  spectrum info and historgram data at the given index
+ *  spectrum info and histogram data at the given index
  *
  *  @param index :: index of spectrum data
  *  @return number of points of histogram data at index

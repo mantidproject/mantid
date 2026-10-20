@@ -137,7 +137,7 @@ class BivariateGaussian(IFunction1D):
     def setConstraints(self, boundsDict, penalty=None):
         """
         setConstraints sets fitting constraints for the mbvg function.
-        Intput:
+        Input:
             boundsDict: a dictionary object where each key is a parameter as a string
                         ('A', 'MuX', 'MuY', 'SigX', 'SigY', 'SigP', 'Bg') and the value is
                         an array with the lower bound and upper bound
@@ -164,7 +164,7 @@ class BivariateGaussian(IFunction1D):
                 it must contain nX*nY*2 elements.
             2) 3D array of size A*B*2. A and B are arbitrary integers.
         Output:
-            a 2D array either size nX*nY (intput type 1) or A*B (input type 2) with intensities
+            a 2D array either size nX*nY (input type 1) or A*B (input type 2) with intensities
             of the BivariateGaussian.
         """
         if t.ndim == 1:
@@ -206,7 +206,7 @@ class BivariateGaussian(IFunction1D):
         Z += Bg
         return Z
 
-    # Evaluate the function for a differnt set of paremeters (trialc)
+    # Evaluate the function for a different set of parameters (trialc)
     def function1DDiffParams(self, xvals, trialc):
         # First, grab the original parameters and set to trialc
         c = np.zeros(self.numParams())
@@ -217,7 +217,7 @@ class BivariateGaussian(IFunction1D):
         # Get the trial values
         f_trial = self.function1D(xvals)
 
-        # Now return to the orignial
+        # Now return to the original
         for i in range(self.numParams()):
             self.setParameter(i, c[i])
         return f_trial

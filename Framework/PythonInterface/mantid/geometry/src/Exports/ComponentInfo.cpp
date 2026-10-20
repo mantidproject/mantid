@@ -274,7 +274,7 @@ void export_ComponentInfo() {
            "Returns the scale factor for the component identified by 'index'.")
 
       .def("setScaleFactor", &ComponentInfo::setScaleFactor, (arg("self"), arg("index"), arg("scaleFactor")),
-           "Set the scale factor of the component identifed by 'index'.")
+           "Set the scale factor of the component identified by 'index'.")
 
       .def("hasValidShape", &ComponentInfo::hasValidShape, (arg("self"), arg("index")),
            "Returns True if the component identified by 'index' has a valid "
@@ -389,7 +389,7 @@ void export_ComponentInfo() {
            "ValueError if name not found")
 
       .def("uniqueName", &ComponentInfo::uniqueName, (arg("self"), arg("name")),
-           "Returns True if the name is a unique single occurance. Zero occurances yields False.")
+           "Returns True if the name is a unique single occurrence. Zero occurrences yields False.")
 
       .def("root", &ComponentInfo::root, arg("self"), "Returns the index of the root component")
       .def("referenceFrame", &ComponentInfo::referenceFrame, arg("self"), return_value_policy<RemoveConstSharedPtr>(),

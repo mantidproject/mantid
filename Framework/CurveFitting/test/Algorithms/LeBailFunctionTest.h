@@ -210,7 +210,7 @@ public:
     TS_ASSERT_DELTA(vecX[imax110], 87244.031, 0.01);
     cout << "Max value of peak 110 is at TOF = " << vecX[imax111] << " as the " << imax111 << "-th points.\n";
 
-    // Calculate diffraction patters
+    // Calculate diffraction patterns
     lebailfunction.function(vecX, true, false);
     TS_ASSERT_THROWS_ANYTHING(lebailfunction.function(vecX, true, true));
 
@@ -491,7 +491,7 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Generate data (vectors) containg twin peak w/o background
+  /** Generate data (vectors) containing twin peak w/o background
    */
   void generateTwinPeakData(std::vector<double> &vecX, std::vector<double> &vecY, std::vector<double> &vecE) {
     // These data of reflection (932) and (852)

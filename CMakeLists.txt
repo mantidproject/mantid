@@ -44,7 +44,7 @@ If system is specified a valid mantid framework installation must be present on 
 )
 set_property(CACHE MANTID_FRAMEWORK_LIB PROPERTY STRINGS "BUILD" "SYSTEM")
 
-# set this for compatability, as previously if enable_workbench was off we didn't build the qt element we can override
+# set this for compatibility, as previously if enable_workbench was off we didn't build the qt element we can override
 # this behavior on the command line.
 if(NOT ENABLE_WORKBENCH)
   set(_mantidqt_option "OFF")
@@ -55,7 +55,7 @@ endif()
 set(MANTID_QT_LIB
     ${_mantidqt_option}
     CACHE STRING "Mantid qt build options, valid options are (OFF, BUILD, SYSTEM).
-If system is specificed a valid mantid qt installation must be present on the system, e.g. from conda"
+If system is specified a valid mantid qt installation must be present on the system, e.g. from conda"
 )
 set_property(CACHE MANTID_QT_LIB PROPERTY STRINGS "OFF" "BUILD" "SYSTEM")
 

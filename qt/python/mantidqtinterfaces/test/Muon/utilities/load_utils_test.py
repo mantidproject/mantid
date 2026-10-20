@@ -90,7 +90,7 @@ class MuonFileUtilsTest(unittest.TestCase):
         instrument_names = ["hifi", "Hifi", "hIfI", "hifI"]
         run_number = "125846.nxs"
         for name in instrument_names:
-            # this will alway return all caps for the name -> use upper
+            # this will always return all caps for the name -> use upper
             mock_get_name.return_value = mock_path + name.upper() + run_number
             # load will have correct path -> use wrong path for filename
             filename = utils.get_correct_file_path(wrong_path + name + run_number, alg)

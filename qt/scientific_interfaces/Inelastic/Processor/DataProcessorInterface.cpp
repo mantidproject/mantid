@@ -115,11 +115,11 @@ QString DataProcessorInterface::getInstrumentParameterFrom(const Mantid::Geometr
 }
 
 /**
- * Tasks to be carried out after an empty instument has finished loading
+ * Tasks to be carried out after an empty instrument has finished loading
  */
 void DataProcessorInterface::instrumentLoadingDone(bool error) {
   if (error) {
-    g_log.warning("Instument loading failed! This instrument (or "
+    g_log.warning("Instrument loading failed! This instrument (or "
                   "analyser/reflection configuration) may not be supported by "
                   "this interface.");
     return;

@@ -71,7 +71,7 @@ private:
     mdworkspaceAlg->execute();
     IMDHistoWorkspace_sptr inWS = mdworkspaceAlg->getProperty("OutputWorkspace");
 
-    // --- Set speical coordinates on fake mdworkspace --
+    // --- Set special coordinates on fake mdworkspace --
     auto coordsAlg = AlgorithmManager::Instance().createUnmanaged("SetSpecialCoordinates");
     coordsAlg->setChild(true);
     coordsAlg->initialize();

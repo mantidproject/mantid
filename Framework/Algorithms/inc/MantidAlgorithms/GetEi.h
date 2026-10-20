@@ -52,7 +52,7 @@ public:
   const std::string category() const override { return "Inelastic\\Ei"; }
 
 private:
-  /// name of the tempory workspace that we create and use
+  /// name of the temporary workspace that we create and use
   API::MatrixWorkspace_sptr m_tempWS;
   /// An estimate of the percentage of the algorithm runtimes that has been
   /// completed
@@ -60,7 +60,7 @@ private:
   /// used by the function findHalfLoc to indicate whether to search left or
   /// right
   enum direction {
-    GO_LEFT = -1, ///< flag value to serch left
+    GO_LEFT = -1, ///< flag value to search left
     GO_RIGHT = 1  ///< flag value to search right
   };
 
@@ -89,7 +89,7 @@ private:
   /// ignore peaks where the half width times the ratio of the peak height to
   /// the background is less this
   static const double PEAK_THRESH_A;
-  /// for peaks where the distance to the half heigth is less than this number
+  /// for peaks where the distance to the half height is less than this number
   /// of bins in either direction e.g. the FWHM is less than twice this number
   static const int64_t PEAK_THRESH_W;
 

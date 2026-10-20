@@ -125,7 +125,7 @@ public:
   bool allowMultipleFiles() const { return m_uiForm.rfFileInput->allowMultipleFiles(); }
 
   /**
-   * Set whether this widget allows multiple files to be specifed or not
+   * Set whether this widget allows multiple files to be specified or not
    * @param allow :: If true then the widget will accept multiple files else
    * only
    * a

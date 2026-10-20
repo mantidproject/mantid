@@ -28,7 +28,7 @@ namespace API {
  *
  * 3. The last thing to actually have something take effect is by overriding
  * the relevant handle function e.g. when observing all override
- * anyChangeHandle and anything done in that overriden method will happen
+ * anyChangeHandle and anything done in that overridden method will happen
  * every time something changes in the AnalysisDataService.
  *
  * This works in both C++ and Python, some functionality is limited in

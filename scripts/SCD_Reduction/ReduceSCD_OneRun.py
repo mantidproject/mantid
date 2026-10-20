@@ -241,7 +241,7 @@ if read_UB:
     # Read orientation matrix from file
     LoadIsawUB(InputWorkspace=peaks_ws, Filename=UB_filename)
     if optimize_UB:
-        # Optimize the specifiec UB for better peak prediction
+        # Optimize the specific UB for better peak prediction
         uc_a = peaks_ws.sample().getOrientedLattice().a()
         uc_b = peaks_ws.sample().getOrientedLattice().b()
         uc_c = peaks_ws.sample().getOrientedLattice().c()

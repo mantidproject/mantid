@@ -25,7 +25,7 @@ using namespace CurveFitting;
 DECLARE_FUNCTION(ThermalNeutronBk2BkExpSigma)
 
 //----------------------------------------------------------------------------------------------
-/** Defintion of parameter
+/** Definition of parameter
  */
 void ThermalNeutronBk2BkExpSigma::init() {
   declareParameter("Sig0", 0.0);

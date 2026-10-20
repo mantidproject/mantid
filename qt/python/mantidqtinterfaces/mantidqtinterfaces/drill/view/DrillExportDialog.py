@@ -24,7 +24,7 @@ class DrillExportDialog(QDialog):
     _presenter = None
 
     """
-    Dictionnary of algorithm (names, ext) tuples and their corresponding
+    Dictionary of algorithm (names, ext) tuples and their corresponding
     QCheckBox.
     """
     _widgets = None
@@ -82,7 +82,7 @@ class DrillExportDialog(QDialog):
         Set the check state of algorithm.
 
         Args:
-            sates (dict((str, str): bool)): activation state for each algorithm
+            states (dict((str, str): bool)): activation state for each algorithm
                                             (name, ext) tuple
         """
         for a, s in states.items():

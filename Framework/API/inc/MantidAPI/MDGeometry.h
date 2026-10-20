@@ -99,11 +99,11 @@ public:
   /// corresponds to 0,0,0... in this workspace
   void setOrigin(const Mantid::Kernel::VMD &orig) { m_origin = orig; }
   /// set the transformation from Q in crystal cartezian coordinate system to Q
-  /// in orthogonal or real HKL coordiate system alined with arbitrary slicing
+  /// in orthogonal or real HKL coordinate system aligned with arbitrary slicing
   /// plane
   void setWTransf(const Kernel::DblMatrix &WTransf) { m_Wtransf = WTransf; }
   /// get the transformation from Qin crystal cartezian coordinate system to Q
-  /// in orthogonal or real HKL coordiate system alined with arbitrary slicing
+  /// in orthogonal or real HKL coordinate system aligned with arbitrary slicing
   /// plane
   const Kernel::DblMatrix &getWTransf() const { return m_Wtransf; }
 
@@ -115,7 +115,7 @@ public:
   friend class MDGeometryNotificationHelper;
 
 protected:
-  /// Function called when observer objects recieves a notification
+  /// Function called when observer objects receives a notification
   void deleteNotificationReceived(const std::shared_ptr<const Workspace> &replaced);
 
   /// Function called when observer detects a workspace is replaced
@@ -150,7 +150,7 @@ protected:
      Small variation here is that in also includes either B-matrix or orthogonal
      B-matrix */
   Kernel::DblMatrix m_Wtransf; // TODO: should be reconciled with the vectors
-                               // below and be either always synchroneous or
+                               // below and be either always synchronous or
                                // only one set remains
   /// Vector of the basis vector (in the original workspace) for each dimension
   /// of this workspace.

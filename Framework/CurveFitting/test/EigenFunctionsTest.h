@@ -77,7 +77,7 @@ public:
 
   void assert_gsl_eigen_equal(const gsl_matrix *gslM, const Eigen::MatrixXd &eM) {
     if (gslM->size1 != (size_t)eM.rows() || gslM->size2 != (size_t)eM.cols()) {
-      throw std::invalid_argument("Matricies are not of equal size");
+      throw std::invalid_argument("Matrices are not of equal size");
     }
     for (size_t i = 0; i < gslM->size2; i++) {
       for (size_t j = 0; j < gslM->size1; j++) {

@@ -81,7 +81,7 @@ void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr, con
   API::MatrixWorkspace_const_sptr inWS2D = targetWSDescr.getInWS();
   if (!inWS2D)
     throw(std::runtime_error("UnitsConversionHelper::initialize Should not be "
-                             "able to call this function when workpsace is "
+                             "able to call this function when workspace is "
                              "undefined"));
 
   API::NumericAxis *pAxis = dynamic_cast<API::NumericAxis *>(inWS2D->getAxis(0));

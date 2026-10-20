@@ -115,7 +115,7 @@ def start(options: argparse.ArgumentParser):
             if not options.no_error_reporter:
                 start_error_reporter(workbench_pid, exit_code)
 
-            # a signal was emited so raise the signal from the application
+            # a signal was emitted so raise the signal from the application
             platform_is_windows = sys.platform == "win32"
             if exit_code < 0 or (platform_is_windows and exit_code in signal.Signals):
                 try:

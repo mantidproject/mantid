@@ -400,7 +400,7 @@ public:
   }
 
   //----------------------------------
-  /** Nine possibilies of adding event lists together
+  /** Nine possibilities of adding event lists together
    * (3 lhs x 3 rhs types).
    */
   void test_switch_on_the_fly_when_appending_lists_all_nine_possibilities() {
@@ -1094,7 +1094,7 @@ public:
     MantidVec shared_x;
     /*
      * Note in the loop below, steps are made in stages of BIN_DELTA, while we
-     * populated the orignal event list with events distributed in steps of 1
+     * populated the original event list with events distributed in steps of 1
      * TOFevent per BIN_DELTA/2,
      * therefore we should expect 2 events in each bin in our output.
      */
@@ -1545,7 +1545,7 @@ public:
     DummyUnit1 fromUnit;
     DummyUnit2 toUnit;
     TS_ASSERT_THROWS_ANYTHING(el.convertUnitsViaTof(nullptr, nullptr));
-    // Not initalized
+    // Not initialized
     TS_ASSERT_THROWS_ANYTHING(el.convertUnitsViaTof(&fromUnit, &toUnit));
   }
 
@@ -2823,7 +2823,7 @@ public:
   void test_YMode_affects_event_data_interpretation() {
     // Data generated from the events is put into the histogram as Y and E.
     // Depending on the YMode, this is interpreted as Counts or Frequencies. In
-    // particular, data generated from events is *not* forcibly intepreted as
+    // particular, data generated from events is *not* forcibly interpreted as
     // counts, i.e., internally we do not use Histogram.setCounts(), since the
     // bin width may be absorbed into the event weight.
     EventList e;
@@ -2834,7 +2834,7 @@ public:
     auto countHist = e.histogram();
     TS_ASSERT_EQUALS(countHist.counts()[0], 2.0);
     TS_ASSERT_EQUALS(countHist.counts()[1], 1.0);
-    // Intepret events as if weighted by bin width, happens, e.g., in 'Divide'.
+    // Interpret events as if weighted by bin width, happens, e.g., in 'Divide'.
     e.setYMode(HistogramData::Histogram::YMode::Frequencies);
     auto freqHist = e.histogram();
     TS_ASSERT_EQUALS(freqHist.counts()[0], 4.0);
@@ -3023,7 +3023,7 @@ public:
 
   /** Constructor */
   EventListTestPerformance() {
-    // Source for a randome event list
+    // Source for a random event list
     el_random_source.clear();
     for (size_t i = 0; i < 2000000; i++)
       el_random_source += TofEvent((rand() % 200000) * 0.05, rand() % 1000);

@@ -14,7 +14,7 @@ namespace Algorithms {
 /**
   Extract the masking from a given workspace.
 
-  The output workspce is a MaskWorkspace with a single X bin where:
+  The output workspace is a MaskWorkspace with a single X bin where:
   <UL>
   <LI>1 = masked;</LI>
   <LI>0 = unmasked.</LI>

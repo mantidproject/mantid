@@ -86,7 +86,7 @@ void JoinISISPolarizationEfficiencies::init() {
 }
 
 /// Load efficientcies from files and put them into a single workspace.
-/// @param props :: Names of properties containg names of files to load.
+/// @param props :: Names of properties containing names of files to load.
 MatrixWorkspace_sptr JoinISISPolarizationEfficiencies::createEfficiencies(std::vector<std::string> const &props) {
   std::vector<MatrixWorkspace_sptr> workspaces;
   for (auto const &propName : props) {

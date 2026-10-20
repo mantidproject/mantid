@@ -116,7 +116,7 @@ void Algorithm::setWorkspaceInputProperties(const std::string &name, const std::
   doSetInputProperties<std::string, T2, T1>(name, wsName, type, list);
 }
 
-/** Mechanism for retriving the index property. This method can only be used
+/** Mechanism for retrieving the index property. This method can only be used
 if T is convertible to a MatrixWorkspace.
 
 @param name Property name

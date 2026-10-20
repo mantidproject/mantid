@@ -43,7 +43,7 @@ public:
   /**Return the pointer to the structure responsible for saving the box on disk
    * if the workspace occupies too much memory */
   virtual Kernel::ISaveable *getISaveable() = 0;
-  /**Return the pointer to the sconst tructure responsible for saving the box on
+  /**Return the pointer to the sconst structure responsible for saving the box on
    * disk if the workspace occupies too much memory */
   virtual Kernel::ISaveable *getISaveable() const = 0;
   /** initiate the structure responsible for swapping the box on HDD if out of
@@ -146,7 +146,7 @@ public:
   virtual uint64_t getTotalDataSize() const = 0;
 
   /** The method to convert events in a box into a table of
-   * coodrinates/signal/errors casted into coord_t type
+   * coordinates/signal/errors casted into coord_t type
    *   Used to save events from plain binary file
    *   @param coordTable -- vector of events parameters
    *   @param nColumns    -- number of parameters for each event

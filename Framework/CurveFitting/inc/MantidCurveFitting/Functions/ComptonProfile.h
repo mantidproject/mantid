@@ -43,7 +43,7 @@ public:
   void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wsIndex, double startX,
                           double endX) override;
 
-  /// Initiate a Y-space value chache rebuild when workspace of mass are
+  /// Initiate a Y-space value cache rebuild when workspace of mass are
   /// changed.
   void buildCaches();
 

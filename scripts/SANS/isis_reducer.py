@@ -292,7 +292,7 @@ class ISISReducer(Reducer):
         #        self._tidy = [self._zero_error_flags]
         self._tidy = [self._rem_nans]
 
-        # the last step in the list must be ConvertToQ or can processing wont work
+        # the last step in the list must be ConvertToQ or can processing won't work
         self._conv_Q = proc_TOF + proc_wav + [self.to_Q]
 
         # list of steps to completely reduce a workspace
@@ -544,7 +544,7 @@ class ISISReducer(Reducer):
 
         can_steps = self._conv_Q
         if not run_Q:
-            # the last step in the list must be ConvertToQ or this wont work
+            # the last step in the list must be ConvertToQ or this won't work
             can_steps = can_steps[0 : len(can_steps) - 1]
 
         # the reducer is completely setup, run it

@@ -69,7 +69,7 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
     def summary(self):
         return (
             "Integrate single-crystal Bragg peaks in MatrixWorkspaces by fitting peaks TOF in adjacent "
-            "pixels unitl I/sigma of the peak in a pixel is below a threshold. Algorithm is adapted and extended"
+            "pixels until I/sigma of the peak in a pixel is below a threshold. Algorithm is adapted and extended"
             "from an algorithm in Gutmann, M. J. (2005). SXD2001. ISIS Facility, RAL"
         )
 
@@ -140,14 +140,14 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
             defaultValue="Rsq",
             direction=Direction.Input,
             validator=StringListValidator(["RSq", "ChiSq", "Poisson"]),
-            doc="Cost funtion to minimise",
+            doc="Cost function to minimise",
         )
         self.declareProperty(
             name="PeakFunction",
             defaultValue="BackToBackExponential",
             direction=Direction.Input,
             validator=StringListValidator(["BackToBackExponential", "Gaussian"]),
-            doc="Peak profile funtion to fit.",
+            doc="Peak profile function to fit.",
         )
         self.declareProperty(
             StringArrayProperty(name="FixPeakParameters", direction=Direction.Input),

@@ -121,7 +121,7 @@ void ExternalPlotter::plotSpectra(std::string const &workspaceName, std::string 
  * @param workspaceName The name of the workspace to plot
  * @param workspaceIndices The indices within the workspace to plot (e.g.
  * '0-2,5,7-10')
- * @param errorBars Boolean value to add/remove erorr bars
+ * @param errorBars Boolean value to add/remove error bars
  * @param kwargs The kwargs to be used when plotting the workspace
  */
 void ExternalPlotter::plotSpectra(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars,

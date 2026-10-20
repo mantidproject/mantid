@@ -213,7 +213,7 @@ class MARIReductionFromFileCache(ISISDirectInelasticReduction):
         self.red._debug_wait_for_files_operation = self.prepare_test_file
         self._counter = 0
 
-        # Add test log files, which mimicks information,
+        # Add test log files, which mimics information,
         # recorded when file have been added to archive
         test_dir = config.getString("defaultsave.directory")
         test_log = os.path.join(test_dir, "lastrun.txt")

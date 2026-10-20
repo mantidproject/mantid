@@ -19,7 +19,7 @@ Kernel::Logger ConvToMDBase::g_Log("MD-Algorithms");
 /** method which initiates all main class variables
  * @param WSD        -- class describing the target workspace.
  *                      the algorithm uses target workspace limints,
- * transformation matix from source to the target workspace and the parameters,
+ * transformation matrix from source to the target workspace and the parameters,
  * needed for
  *                      unit conversion (if any)
  * @param inWSWrapper -- shared pointer to target MD Event workspace to add
@@ -106,9 +106,9 @@ size_t ConvToMDBase::initialize(const MDAlgorithms::MDWSDescription &WSD,
 /** empty default constructor */
 ConvToMDBase::ConvToMDBase()
     : m_NDims(0),           // wrong non-initialized
-      m_ExpInfoIndex(0),    // defauld associated experiment-info index is 0
+      m_ExpInfoIndex(0),    // default associated experiment-info index is 0
       m_NSpectra(0),        // no valid spectra by default.
-      m_NumThreads(-1),     // run with all cores availible
+      m_NumThreads(-1),     // run with all cores available
       m_ignoreZeros(false), // 0-s added to workspace
       m_coordinateSystem(Mantid::Kernel::None), m_useLogTimes(false) {}
 

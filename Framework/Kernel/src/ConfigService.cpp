@@ -230,7 +230,7 @@ ConfigServiceImpl::~ConfigServiceImpl() {
  * by checking the following places:
  *  - The current working directory
  *  - The executable directory
- *  - The directory defined by the MANTIDPATH enviroment var
+ *  - The directory defined by the MANTIDPATH environment var
  *  - OSX only: the directory two directories up from the executable (which
  *    is the base on the OSX package.
  *
@@ -589,7 +589,7 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
     filestr << "## MantidWorkbench\n";
     filestr << "##\n\n";
     filestr << "## Hides categories from the algorithm list in MantidWorkbench\n";
-    filestr << "#algorithms.catagories.hidden=Muons,Inelastic\n\n";
+    filestr << "#algorithms.categories.hidden=Muons,Inelastic\n\n";
     filestr << "## Show invisible workspaces\n";
     filestr << "#MantidOptions.InvisibleWorkspaces=0\n";
     filestr << "## Re-use plot instances for different plot types\n";
@@ -765,7 +765,7 @@ void ConfigServiceImpl::saveConfig(const std::string &filename) const {
   writer.close();
 }
 
-/** Searches for a string within the currently loaded configuaration values and
+/** Searches for a string within the currently loaded configuration values and
  *  returns the value as a string. If the key is one of those that was a
  *possible relative path
  *  then the local store is searched first.
@@ -791,7 +791,7 @@ std::string ConfigServiceImpl::getString(const std::string &keyName, bool pathAb
   return {};
 }
 
-/** Searches for keys within the currently loaded configuaration values and
+/** Searches for keys within the currently loaded configuration values and
  *  returns them as strings in a vector.
  *
  *  @param keyName :: The case sensitive name of the property that you need the
@@ -1170,7 +1170,7 @@ std::string getValueFromStdOut(const std::string &orig, const std::string &key) 
 /**
  * Gets the name of the operating system version in a human readable form.
  *
- * @returns The operating system desciption
+ * @returns The operating system description
  */
 std::string ConfigServiceImpl::getOSVersionReadable() {
   std::string description;
@@ -1772,7 +1772,7 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
         throw std::runtime_error("The facility definition file " + fileName + " defines no facilities");
       }
 
-      // if we got here we have suceeded and can exit the loop
+      // if we got here we have succeeded and can exit the loop
       success = true;
     } catch (std::runtime_error &ex) {
       // log this failure to load a file
@@ -1783,7 +1783,7 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
       if (attemptIndex == fileNames.size()) {
         const std::string errorMessage = "No more Facilities.xml files can be found, Mantid will not be "
                                          "able to start, Sorry.  Try reinstalling Mantid.";
-        // This is one of the few times that both logging a messge and throwing
+        // This is one of the few times that both logging a message and throwing
         // might make sense
         // as the error reporter tends to swallow the thrown message.
         g_log.error() << errorMessage << "\n";

@@ -56,7 +56,7 @@ public:
 
   void testAddLegend() {
     FigureCanvasQt canvas{111};
-    // This return is needed for compatability with mpl 1.5 so that Line2D
+    // This return is needed for compatibility with mpl 1.5 so that Line2D
     // object reference is kept alive.
     auto line = canvas.gca().plot({1, 2, 3, 4, 5}, {1, 2, 3, 4, 5}, QString("ro"), QString("Line1"));
     auto legend = canvas.gca().legend(true);

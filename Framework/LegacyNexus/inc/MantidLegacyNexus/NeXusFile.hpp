@@ -35,10 +35,10 @@ enum NXcompression { CHUNK = NX_CHUNK, NONE = NX_COMP_NONE, LZW = NX_COMP_LZW, R
 typedef std::multimap<std::string, std::string> TypeMap;
 
 /**
- * This structure holds the type and dimensions of a primative field/array.
+ * This structure holds the type and dimensions of a primitive field/array.
  */
 struct Info {
-  /** The primative type for the field. */
+  /** The primitive type for the field. */
   NXnumtype type;
   /** The dimensions of the file. */
   std::vector<int64_t> dims;
@@ -46,7 +46,7 @@ struct Info {
 
 /** Information about an attribute. */
 struct AttrInfo {
-  /** The primative type for the attribute. */
+  /** The primitive type for the attribute. */
   NXnumtype type;
   /** The length of the attribute. */
   unsigned length;

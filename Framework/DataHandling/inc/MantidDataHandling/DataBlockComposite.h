@@ -34,7 +34,7 @@ public:
 
   bool operator==(const DataBlockComposite &other) const;
 
-  // DataBlockComposite only mehtods
+  // DataBlockComposite only methods
   void addDataBlock(const DataBlock &dataBlock);
   std::vector<DataBlock> getDataBlocks();
   DataBlockComposite operator+(const DataBlockComposite &other);
@@ -70,7 +70,7 @@ void populateDataBlockCompositeWithContainer(DataBlockComposite &dataBlockCompos
 
   // Handles the case when an element is a monitor. It needs to crate a data
   // block
-  // for potential specturm numbers before the monitor and a data block for
+  // for potential spectrum numbers before the monitor and a data block for
   // the
   // monitor itself
   struct HandleWhenElementIsMonitor {

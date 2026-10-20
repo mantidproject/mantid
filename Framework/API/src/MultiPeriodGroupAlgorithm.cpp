@@ -18,7 +18,7 @@ MultiPeriodGroupAlgorithm::MultiPeriodGroupAlgorithm() : m_worker(new MultiPerio
 
 /** Check the input workspace properties for groups.
  *
- * Overriden from base Algorithm class.
+ * Overridden from base Algorithm class.
  *
  * Checks to see if the inputs are MULTIPERIOD group data.
  *
@@ -40,7 +40,7 @@ bool MultiPeriodGroupAlgorithm::checkGroups() {
     return Algorithm::checkGroups(); // Delegate to algorithm base class.
   } else {
     // Evaluates to True if multiperiod, that way algorithm will call the
-    // overrriden processGroups.
+    // overridden processGroups.
     return true;
   }
 }
@@ -48,7 +48,7 @@ bool MultiPeriodGroupAlgorithm::checkGroups() {
 //--------------------------------------------------------------------------------------------
 /** Process WorkspaceGroup inputs.
  *
- * Overriden from Algorithm base class.
+ * Overridden from Algorithm base class.
  *
  * This should be called after checkGroups(), which sets up required members.
  * It goes through each member of the group(s), creates and sets an algorithm

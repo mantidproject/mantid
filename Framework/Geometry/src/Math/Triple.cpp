@@ -83,7 +83,7 @@ bool Triple<T>::operator!=(const Triple<T> &A) const
 template <typename T>
 bool Triple<T>::operator<(const Triple<T> &A) const
 /**
-  Operator< takes first to last precidence.
+  Operator< takes first to last precedence.
   @param A :: Triple to compare
   @return this < A
 */
@@ -104,7 +104,7 @@ bool Triple<T>::operator<(const Triple<T> &A) const
 template <typename T>
 bool Triple<T>::operator>(const Triple<T> &A) const
 /**
-  Operator> takes first to last precidence.
+  Operator> takes first to last precedence.
   Uses operator<  to obtain value.
   Note it does not uses 1-(A<this)
   @param A :: Triple to compare
@@ -234,7 +234,7 @@ bool DTriple<F, S, T>::operator!=(const DTriple<F, S, T> &A) const
 template <typename F, typename S, typename T>
 bool DTriple<F, S, T>::operator<(const DTriple<F, S, T> &A) const
 /**
-  Operator< takes first to last precidence.
+  Operator< takes first to last precedence.
   @param A :: Triple to compare
   @return this < A
 */
@@ -255,7 +255,7 @@ bool DTriple<F, S, T>::operator<(const DTriple<F, S, T> &A) const
 template <typename F, typename S, typename T>
 bool DTriple<F, S, T>::operator>(const DTriple<F, S, T> &A) const
 /**
-  Operator> takes first to last precidence.
+  Operator> takes first to last precedence.
   @param A :: Triple to compare
   @return this < A
 */

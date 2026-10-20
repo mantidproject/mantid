@@ -324,7 +324,7 @@ API::MatrixWorkspace_sptr DirectILLTubeBackground::applyDiagnostics(API::MatrixW
 /**
  * @brief Return a list of component names for the algorithm to process.
  * @param instrument an instrument
- * @return a list of comopnent names
+ * @return a list of component names
  * @throw std::runtime_error if the names cannot be found anywhere
  */
 std::vector<std::string> DirectILLTubeBackground::components(Geometry::Instrument const &instrument) {

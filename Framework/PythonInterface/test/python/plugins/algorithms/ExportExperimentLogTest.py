@@ -259,7 +259,7 @@ class ExportExperimentLogTest(unittest.TestCase):
         terms = firstdataline.strip().split("\t")
         self.assertEqual(len(terms), 4)
 
-        # Locate the previos file
+        # Locate the previous file
 
         # Rename old file and reset the file mode
 

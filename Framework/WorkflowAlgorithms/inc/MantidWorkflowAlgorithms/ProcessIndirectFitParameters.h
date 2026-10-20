@@ -17,7 +17,7 @@ namespace Algorithms {
 
 /** ProcessIndirectFitParameters : Convert a parameter table output by
   PlotPeakByLogValue to a MatrixWorkspace. This will make a spectrum for each
-  parameter name using the x_column vairable as the x values for the spectrum.
+  parameter name using the x_column variable as the x values for the spectrum.
 
   @author Elliot Oram, ISIS, RAL
   @date 12/08/2015

@@ -218,7 +218,7 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin, c
  */
 template <typename MDE, size_t nd> void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   BoxController_sptr bc = ws->getBoxController();
-  // store exisiting write buffer size for the future
+  // store existing write buffer size for the future
   // uint64_t writeBufSize =bc->getDiskBuffer().getWriteBufferSize();
   // and disable write buffer (if any) for input MD Events for this algorithm
   // purposes;

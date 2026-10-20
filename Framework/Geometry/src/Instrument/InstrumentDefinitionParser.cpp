@@ -1005,7 +1005,7 @@ void InstrumentDefinitionParser::readDefaults(Poco::XML::Element *defaults) {
 
   // Check if the IDF specifies that this is an indirect geometry instrument
   // that includes
-  // both physical and 'neutronic' postions.
+  // both physical and 'neutronic' positions.
   // Any neutronic position tags will be ignored if this tag is missing
   if (defaults->getChildElement("indirect-neutronic-positions"))
     m_indirectPositions = true;
@@ -2078,7 +2078,7 @@ void InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp, co
 
   // The purpose below is to have a quicker way to judge if pElem contains a
   // parameter, see
-  // defintion of m_hasParameterElement for more info
+  // definition of m_hasParameterElement for more info
   if (m_hasParameterElement_beenSet)
     if (m_hasParameterElement.end() == std::find(m_hasParameterElement.begin(), m_hasParameterElement.end(), pElem))
       return;

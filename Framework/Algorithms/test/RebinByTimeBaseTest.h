@@ -342,7 +342,7 @@ public:
   }
 
   void test_execute_with_multiple_spectra() {
-    const int nSpectra = 10; // multipe spectra created in input workspace.
+    const int nSpectra = 10; // multiple spectra created in input workspace.
     const int pulseTimeMin = 0;
     const int pulseTimeMax = 20;
     const int nUninformDistributedEvents = 20;
@@ -398,7 +398,7 @@ public:
     MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
     auto &X = outWS->x(0);
 
-    // Check that xmin and xmax have been caclulated correctly.
+    // Check that xmin and xmax have been calculated correctly.
     TS_ASSERT_EQUALS(nBinsToBinTo, X.size());
     // Added 1 nanosecond to start time
     TS_ASSERT_DELTA(pulseTimeMin + double(step) / 2 - 1.e-9, X.front(), 1e-12);
@@ -448,7 +448,7 @@ public:
     MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
     auto &X = outWS->x(0);
 
-    // Check that xmin and xmax have been caclulated correctly.
+    // Check that xmin and xmax have been calculated correctly.
     TS_ASSERT_EQUALS(nBinsToBinTo + 1, X.size());
     TS_ASSERT_DELTA(pulseTimeMin, X.front(), 1e-12);
     TS_ASSERT_DELTA(pulseTimeMax, X.back(), 1e-12);

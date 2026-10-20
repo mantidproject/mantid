@@ -84,7 +84,7 @@ void SCDCalibratePanels2ObjFunc::setPeakWorkspace(IPeaksWorkspace_sptr &pws, con
 }
 
 /**
- * @brief Evalute the objective function with given feature vector X
+ * @brief Evaluate the objective function with given feature vector X
  *
  * @param out     :: Q_calculated, which means yValues should be set to
  * Q_measured when setting up the Fit algorithm

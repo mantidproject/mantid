@@ -47,7 +47,7 @@ private:
   double m_StartX;
   /// Upper x boundary. The default is  1
   double m_EndX;
-  /// Keep intermediate calculatons
+  /// Keep intermediate calculations
   mutable std::valarray<double> m_b;
 };
 

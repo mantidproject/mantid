@@ -130,7 +130,7 @@ class BackCommandParser(object):
         # Convert to capital and split the string
         to_check = self._prepare_argument(arguments)
 
-        # We expect 3 arguemnts for the standard chain and 4 arguments
+        # We expect 3 arguments for the standard chain and 4 arguments
         # for the special monitor chain
         if len(to_check) != 4 and len(to_check) != 3:
             return False

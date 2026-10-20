@@ -464,7 +464,7 @@ void readArray1DCoerce(const H5::DataSet &dataset, std::vector<OutT> &output, co
 
   if (offset >= length_actual && offset != 0) {
     std::stringstream msg;
-    msg << "Tried to read offset=" << offset << " into array that is only lenght=" << length_actual << " long";
+    msg << "Tried to read offset=" << offset << " into array that is only length=" << length_actual << " long";
     throw std::runtime_error(msg.str());
   }
 

@@ -135,7 +135,7 @@ protected:
   bool isEmpty(const std::string &value) const { return value.empty(); }
 
   /**
-   * Test if a value is an alias of an alowed value.
+   * Test if a value is an alias of an allowed value.
    * @param value :: Value to test.
    * @return :: True if it's an alias.
    */
@@ -145,7 +145,7 @@ protected:
   }
 
   /**
-   * Test if a value is an alias of an alowed value.
+   * Test if a value is an alias of an allowed value.
    * @param value :: Value to test.
    * @return :: True if it's an alias.
    */

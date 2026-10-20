@@ -17,7 +17,7 @@
 namespace Mantid {
 namespace LiveData {
 
-/// connect to an event mode control progam and read live events
+/// connect to an event mode control program and read live events
 int liveData(const std::string &host) {
   Kernel::Logger g_log = Kernel::Logger("example");
   static char *junk_buffer[10000];

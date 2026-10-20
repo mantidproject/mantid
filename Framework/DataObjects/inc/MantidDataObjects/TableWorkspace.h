@@ -98,9 +98,9 @@ public:
   std::vector<std::string> getColumnNames() const override;
   /// Number of rows in the workspace.
   size_t rowCount() const override { return m_rowCount; }
-  /**Get access to shared pointer containing workspace porperties */
+  /**Get access to shared pointer containing workspace properties */
   API::LogManager_sptr logs() override { return m_LogManager; }
-  /**Get constant access to shared pointer containing workspace porperties */
+  /**Get constant access to shared pointer containing workspace properties */
   API::LogManager_const_sptr getLogs() const override { return m_LogManager; }
 
   /** get access to column vector for index i.
@@ -162,10 +162,10 @@ public:
     }
   }
   /**Non-throwing access to the pointer to the column data array for the column
-   * with given name. Returns null on error or if the coulmn has not been found
+   * with given name. Returns null on error or if the column has not been found
    * No checks if one tries to use pointer to work out of the array limits are
    * performed; The pointer has to be received right before usage as
-   * underlying vectoor changes within the table workspace immidiately make
+   * underlying vectoor changes within the table workspace immediately make
    * this pointer invalid. Nasty method. Use only if no choice.      */
   template <class T> T *getColDataArray(const std::string &name) {
     auto ci = std::find_if(m_columns.begin(), m_columns.end(), FindName(name));
@@ -178,11 +178,11 @@ public:
       return nullptr;
   }
   /**Non-throwing const access to the pointer to the column data array for the
-   * column with given name. Returns null on error or if the coulmn has not been
+   * column with given name. Returns null on error or if the column has not been
    * found
    * No checks if one tries to use pointer to work out of the array limits are
    * performed; The pointer has to be received right before usage as
-   * underlying vectoor changes within the table workspace immidiately make
+   * underlying vectoor changes within the table workspace immediately make
    * this pointer invalid. Nasty method. Use only if no choice.      */
   template <class T> T *getColDataArray(const std::string &name) const {
     auto ci = std::find_if(m_columns.begin(), m_columns.end(), FindName(name));
@@ -200,7 +200,7 @@ public:
   /// Inserts a row before row pointed to by index and fills it with default
   /// vales.
   size_t insertRow(size_t index) override;
-  /// Delets a row if it exists.
+  /// Deletes a row if it exists.
   void removeRow(size_t index) override;
 
   /** This method finds the row and column index of an integer cell value in a

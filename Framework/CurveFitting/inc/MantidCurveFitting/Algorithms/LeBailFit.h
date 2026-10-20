@@ -93,7 +93,7 @@ private:
   /// Calculate LeBail pattern from from input peak parameters
   void execPatternCalculation();
 
-  /// Calcualte background by fitting peak heights
+  /// Calculate background by fitting peak heights
   void execRefineBackground();
 
   //--------------  Functions to set up the Le Bail Fit -----------------
@@ -107,7 +107,7 @@ private:
   void processInputBackground();
 
   //--------------  Le Bail Formular: Calculate Peak Intensities ------------
-  /// Calcualte peak heights from model to data
+  /// Calculate peak heights from model to data
   bool calculatePeaksIntensities(API::MatrixWorkspace_sptr dataws, size_t workspaceindex, bool zerobackground,
                                  std::vector<double> &allpeaksvalues);
 

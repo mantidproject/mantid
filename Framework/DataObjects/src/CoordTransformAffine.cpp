@@ -280,7 +280,7 @@ void CoordTransformAffine::apply(const coord_t *inputVector, coord_t *outVector)
     for (in = 0; in < inD; ++in)
       outVal += rawMatrixRow[in] * inputVector[in];
 
-    // The last input coordinate is "1" always (made homogenous coordinate out
+    // The last input coordinate is "1" always (made homogeneous coordinate out
     // of the input x,y,etc.)
     outVal += rawMatrixRow[in];
     // Save in the output

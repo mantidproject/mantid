@@ -142,7 +142,7 @@ possible to create groups of samples. Within a group, a master sample can be
 designated. The values of the parameters of the master sample will be used when
 processing all rows in the group.
 
-Parameters can still be overriden manually whithin a group by entering a sample
+Parameters can still be overridden manually within a group by entering a sample
 specific value in the table. The special `DEFAULT` value can be use to override
 a master sample parameter with its default value. The priority for the parameter
 values is as follow:
@@ -202,7 +202,7 @@ from the tool bar.
 .. image:: ../../images/drill-export.png
    :align: center
 
-For each acquisition mode, a list of adapated algorithms will be displayed in
+For each acquisition mode, a list of adapted algorithms will be displayed in
 that dialog. Some of them are activated by default but the user is free to
 select the ones he wants. All checked algorithms will be applied on all output
 workspaces of all processed rows. The exported files are saved in the Mantid

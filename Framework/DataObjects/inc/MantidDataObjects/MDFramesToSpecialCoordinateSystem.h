@@ -15,7 +15,7 @@ namespace Mantid {
 namespace DataObjects {
 
 /** MDFrameFromMDWorkspace: Each dimension of the MDWorkspace contains an
-    MDFrame. The acutal frame which is common to all dimensions is extracted.
+    MDFrame. The actual frame which is common to all dimensions is extracted.
 */
 class MANTID_DATAOBJECTS_DLL MDFramesToSpecialCoordinateSystem {
 public:

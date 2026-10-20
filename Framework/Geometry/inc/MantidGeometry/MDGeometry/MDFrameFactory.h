@@ -29,7 +29,7 @@ public:
   MDFrameArgument(const std::string &_frameString) : unitString(""), frameString(_frameString) {}
 };
 
-/** MDFrameFactory.h : Chain of repsonsibility factory for the MDFrameFactory
+/** MDFrameFactory.h : Chain of responsibility factory for the MDFrameFactory
  */
 class MANTID_GEOMETRY_DLL MDFrameFactory : public Kernel::ChainableFactory<MDFrameFactory, MDFrame, MDFrameArgument> {};
 

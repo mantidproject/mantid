@@ -152,7 +152,7 @@ public:
   void test_devUncommittedLocalNewer() { runTest("1.2.3.dev55+uncommitted", "v1.2.1", false); }
   void test_devUncommittedRemoteNewer() { runTest("1.2.3.dev55+uncommitted", "v1.4.7", true); }
 
-  // Want anyhting other than numbers to be ignored when splitting the version string into numbers.
+  // Want anything other than numbers to be ignored when splitting the version string into numbers.
   void test_tweakVersionNumber() { runSplitVersionString("1.2.3+tweak.morestuff", {1, 2, 3}); }
   void test_devVersionNumber() { runSplitVersionString("1.2.3.dev55", {1, 2, 3}); }
   void test_devUncommittedVersionNumber() { runSplitVersionString("1.2.3.dev55+uncommitted", {1, 2, 3}); }

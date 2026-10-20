@@ -45,7 +45,7 @@ private:
   Mantid::API::MatrixWorkspace_const_sptr m_inputWS;
   /// The output workspace, maybe the same as the input one
   Mantid::API::MatrixWorkspace_sptr m_outputWS;
-  /// In plane angle beween polarization and incident beam (in degrees)
+  /// In plane angle between polarization and incident beam (in degrees)
   double m_angle;
   /// Lower limit  for abs(cos(2*Scharpf angle)), below which intensities are 0
   double m_precision;

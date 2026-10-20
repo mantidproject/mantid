@@ -200,7 +200,7 @@ int FindPeakBackground::findBackground(const HistogramData::Histogram &histogram
     }
     size_t min_peak, max_peak;
     if (!peaks.empty()) {
-      g_log.debug() << "Peaks' size = " << peaks.size() << " -> esitmate background. \n";
+      g_log.debug() << "Peaks' size = " << peaks.size() << " -> estimate background. \n";
       if (peaks.back().stop == 0)
         peaks.back().stop = n - 1;
       std::sort(peaks.begin(), peaks.end(), by_len());

@@ -791,7 +791,7 @@ public:
 
   void test_CNCSMonitors() {
     std::cout << "test CNCS monitors\n" << std::flush;
-    // Re-uses the workspace loaded in test_partial_spectra_loading to save a
+    // Reuses the workspace loaded in test_partial_spectra_loading to save a
     // load execution
     // This is a very simple test for performance issues. There's no real event
     // data, so this just check that the algorithm creates a consistent output
@@ -1025,7 +1025,7 @@ public:
 
   void test_Load_And_CompressEvents_tolerance_0() {
     std::cout << "test CNCS compress tol 0\n" << std::flush;
-    // the is to verify that the compresssion works when the CompressTolerance=0
+    // the is to verify that the compression works when the CompressTolerance=0
     // create compressed
     const std::string filename{"CNCS_7860_event.nxs"};
 

@@ -241,7 +241,7 @@ void SaveAscii2::exec() {
       idx.insert(i);
     }
   }
-  // figure out how to read in readX and have them be seperate lists
+  // figure out how to read in readX and have them be separate lists
 
   // Add spectra list into the index list
   if (!spec_list.empty()) {
@@ -613,7 +613,7 @@ void SaveAscii2::write1DHistoCut(const IMDHistoWorkspace_const_sptr &mdws, const
                                  const std::string &comment) {
   auto dims = mdws->getNonIntegratedDimensions();
   if (dims.size() != 1) {
-    throw std::runtime_error("SaveAscii does not support saving multidimentional MDHistoWorkspace, and only supports "
+    throw std::runtime_error("SaveAscii does not support saving multidimensional MDHistoWorkspace, and only supports "
                              "1D MDHistoWorkspaces cuts");
   }
 

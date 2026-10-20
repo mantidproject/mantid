@@ -25,9 +25,9 @@ public:
   MultiPeriodGroupAlgorithm();
 
 private:
-  /// Overriden from Algorithm base
+  /// Overridden from Algorithm base
   bool checkGroups() override;
-  /// Overriden from Algorithm base.
+  /// Overridden from Algorithm base.
   bool processGroups() override;
   /// Method to provide the name for the input workspace property.
   virtual std::string fetchInputPropertyName() const = 0;

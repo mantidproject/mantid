@@ -108,7 +108,7 @@ void MuonProcess::init() {
   declareProperty("CropWorkspace", true,
                   "Determines if the input workspace "
                   "should be cropped at Xmax, Xmin is "
-                  "still aplied.");
+                  "still applied.");
 
   declareProperty("WorkspaceName", "", "The name of the input workspace");
 }

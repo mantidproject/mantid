@@ -136,7 +136,7 @@ class ProjectRecoveryLoader(object):
 
     def _open_script_in_editor_call(self, script):
         """
-        Open script in editor method invokation to guarantee it occurring on the correct thread.
+        Open script in editor method invocation to guarantee it occurring on the correct thread.
         :param script: String; Path to the script
         :return:
         """

@@ -18,7 +18,7 @@ def parse_mask(xml_name):
     :param xml_name:
     :return:
     """
-    # get root and 'Data' ndoe
+    # get root and 'Data' node
     tree = ET.parse(xml_name)
     root = tree.getroot()
     main_mask_node = None

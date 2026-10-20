@@ -33,7 +33,7 @@ def build_macro(padding, min_dimension=1, max_dimensions=4, const=""):
     """Return the macro code CALL_MDEVENT_FUNCTION
     Parameter:
         min_dimension :: to avoid compiler warnings, limit to dimensions higher than this
-        mad_dimension :: by default, maximal numner of dimesnions to be generated
+        mad_dimension :: by default, maximal number of dimensions to be generated
         const :: set to "const " to make a const equivalent
     """
     # for the calling function macro

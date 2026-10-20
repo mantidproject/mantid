@@ -48,9 +48,9 @@ std::string MuonPeriodInfo::readSampleLog(const MatrixWorkspace_sptr &ws, const 
 }
 
 /**
- * Parses a string separated by a delimeter
+ * Parses a string separated by a delimiter
  * @param log :: Sample log string to be parsed
- * @param delim :: Delimeter to be used when splitting the sample log
+ * @param delim :: Delimiter to be used when splitting the sample log
  * @returns :: Vector of string values from the sample log string
  */
 std::vector<std::string> MuonPeriodInfo::parseSampleLog(const std::string &log, const std::string &delim) {

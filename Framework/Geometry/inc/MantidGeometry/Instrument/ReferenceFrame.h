@@ -14,7 +14,7 @@ namespace Mantid {
 namespace Geometry {
 /// Type to describe pointing along options
 enum PointingAlong { X = 0, Y = 1, Z = 2 };
-/// Type to distingusih between l and r handedness
+/// Type to distinguish between l and r handedness
 enum Handedness { Left, Right };
 
 /** ReferenceFrame : Holds reference frame information from the geometry

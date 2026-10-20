@@ -118,7 +118,7 @@ def cc_calibrate_groups(
     :param DReference: DReference parameter for GetDetectorOffsets, default 1.2615
     :param Xmin: Minimum d-spacing for CrossCorrelate, default 1.22
     :param Xmax: Maximum d-spacing for CrossCorrelate, default 1.30
-    :param MaxDSpaceShift: MaxDSpaceShift paramter for CrossCorrelate, default None
+    :param MaxDSpaceShift: MaxDSpaceShift parameter for CrossCorrelate, default None
     :param OffsetThreshold: Convergence threshold for cycling cross correlation, default 1E-4
     :param SkipCrossCorrelation: Skip cross correlation for specified groups
     :param PeakFunction: Peak function to use for extracting the offset
@@ -293,7 +293,7 @@ def pdcalibration_groups(
     :param group_ws: grouping workspace, e.g. output from LoadDetectorsGroupingFile
     :param cc_diffcal: DiffCal workspace which is the output from cc_calibrate_groups
     :param to_skip: Groups to skip the cross correlation stage
-    :param output_basename: Optional name to use for temporay and output workspace
+    :param output_basename: Optional name to use for temporary and output workspace
     :param previous_calibration: Optional previous diffcal workspace
     :param PeakPositions: PeakPositions parameter of PDCalibration, default Diamond peaks
     :param TofBinning: TofBinning parameter of PDCalibration, default (300,-.001,16666.7)
@@ -484,7 +484,7 @@ def do_group_calibration(data_ws, group_ws, previous_calibration=None, output_ba
     :param data_ws: Input calibration raw data (in TOF), assumed to already be correctly masked
     :param group_ws: grouping workspace, e.g. output from LoadDetectorsGroupingFile
     :param previous_calibration: Optional previous diffcal workspace
-    :param output_basename: name to use for temporay and output workspace, default group_calibration
+    :param output_basename: name to use for temporary and output workspace, default group_calibration
     :param cc_kwargs: dict of parameters to pass to cc_calibrate_groups
     :param pdcal_kwargs: dict of parameters to pass to pdcalibration_groups
     :return: The final diffcal after running cc_calibrate_groups and  pdcalibration_groups

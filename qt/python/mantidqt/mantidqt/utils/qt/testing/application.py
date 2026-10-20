@@ -33,7 +33,7 @@ def get_application(name=""):
     """
     Initialise and return the global application object
     :param name: Optional application name
-    :return: Global appliction object
+    :return: Global application object
     """
     global _QAPP
 

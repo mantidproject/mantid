@@ -40,7 +40,7 @@ private:
   /// Derivative to overwrite
   void functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) override;
 
-  /// Core function (inline) to calcualte TOF_h from d-spacing
+  /// Core function (inline) to calculate TOF_h from d-spacing
   inline double corefunction(double dh, double width, double tcross, double alph0, double alph1, double alph0t,
                              double alph1t) const;
 };

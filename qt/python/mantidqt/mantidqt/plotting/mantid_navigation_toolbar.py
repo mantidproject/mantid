@@ -79,7 +79,7 @@ class MantidNavigationToolbar(NavigationToolbar2, QToolBar):
 
     message = Signal(str)
 
-    # Default tool items, may be overriden in sub classes
+    # Default tool items, may be overridden in sub classes
     toolitems = (
         MantidStandardNavigationTools.HOME,
         MantidStandardNavigationTools.PAN,

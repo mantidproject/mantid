@@ -202,7 +202,7 @@ class VesuvioAnalysis(PythonAlgorithm):
                 for section in cross_section:
                     for ch in section:
                         if ch not in ["+", "-", "*", "/", ".", "(", ")"] and not ch.isdigit():
-                            issues["ConstraintsProfile"] = "ScatteringCrossSection must be a valid mathmatical expression. " + ch
+                            issues["ConstraintsProfile"] = "ScatteringCrossSection must be a valid mathematical expression. " + ch
                 state = constraints.column("State")
                 for f in [flag for flag in state]:
                     if f not in ["eq", "ineq"]:
@@ -217,7 +217,7 @@ class VesuvioAnalysis(PythonAlgorithm):
         run_string = self.getProperty("Runs").value
         for ch in run_string:
             if ch not in ["-", ","] and not ch.isdigit():
-                issues["Runs"] = "Runs are list, can use - for a range or commas to seperate runs. "
+                issues["Runs"] = "Runs are list, can use - for a range or commas to separate runs. "
 
         masks = self.getProperty("SpectraToBeMasked").value
         spec = [j for j in range(spectra[0], spectra[1] + 1)]

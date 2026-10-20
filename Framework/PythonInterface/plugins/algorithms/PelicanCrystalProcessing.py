@@ -177,7 +177,7 @@ class PelicanCrystalProcessing(DataProcessorAlgorithm):
                     ],
                 )
 
-            # the pelican reduction saves a tempory file 'PLN00nnnn_sample.nxs' and 'PLN00nnnn.nxs' to
+            # the pelican reduction saves a temporary file 'PLN00nnnn_sample.nxs' and 'PLN00nnnn.nxs' to
             # speed up processing, remove these files to save space
             if scratch_folder:
                 for sfile in ["PLN{:07d}_sample.nxs", "PLN{:07d}.nxs"]:

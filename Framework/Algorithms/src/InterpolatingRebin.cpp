@@ -149,7 +149,7 @@ void InterpolatingRebin::exec() {
  *  @param[in] inputW workspace with un-interpolated data
  *  @param[in] XValues_new new x-values to interpolated to
  *  @param[out] outputW this will contain the interpolated data, the lengths of
- * the histograms must corrospond with the number of x-values in XValues_new
+ * the histograms must correspond with the number of x-values in XValues_new
  */
 void InterpolatingRebin::outputYandEValues(const API::MatrixWorkspace_const_sptr &inputW,
                                            const HistogramData::BinEdges &XValues_new,
@@ -181,7 +181,7 @@ void InterpolatingRebin::outputYandEValues(const API::MatrixWorkspace_const_sptr
 }
 
 /**Uses cubic splines to interpolate the mean rate of change of the integral
- *  over the inputed data bins to that for the user supplied bins.
+ *  over the inputted data bins to that for the user supplied bins.
  *  Note that this algorithm was implemented to provide a little more resolution
  *  on high count rate data. Whether it is more accurate than the standard rebin
  *  for all, or your, application needs more thought.
@@ -222,7 +222,7 @@ Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram, 
   Points xCensNew(size_new);
   VectorHelper::convertToBinCentre(xNew, xCensNew.mutableRawData());
 
-  // find the range of input values whose x-values just suround the output
+  // find the range of input values whose x-values just surround the output
   // x-values
   size_t oldIn1 = std::lower_bound(xCensOld.begin(), xCensOld.end(), xCensNew.front()) - xCensOld.begin();
   if (oldIn1 == 0) { // the lowest interpolation value might be out of range but
@@ -245,8 +245,8 @@ Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram, 
     }
   }
 
-  // check that the intepolation points fit well enough within the data for
-  // reliable intepolation to be done
+  // check that the interpolation points fit well enough within the data for
+  // reliable interpolation to be done
   bool goodRangeLow(false), goodRangeHigh(false), canInterpol(false);
   if (oldIn1 > 1) { // set the range of the fit, including more input data to
                     // improve accuracy
@@ -277,7 +277,7 @@ Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram, 
     if (VectorHelper::isConstantValue(yOld)) {
       // this copies the single y-value into the output array, errors are still
       // calculated from the nearest input data points
-      // this is as much as we need to do in this (trival) case
+      // this is as much as we need to do in this (trivial) case
       return noInterpolation(oldHistogram, xNew);
     } else { // some points are two close to the edge of the data
 

@@ -37,10 +37,10 @@ Eigen::MatrixXd covar_from_jacobian(const map_type &J, double epsrel) {
   Eigen::Index rank = 0;
   if (r11 > 0.0) {
     for (Eigen::Index k = 0; k < nc; ++k) {
-      if (std::abs(R(k, k)) > epsrel * r11) { // column considered linerally independant
+      if (std::abs(R(k, k)) > epsrel * r11) { // column considered linerally independent
         ++rank;
       } else {
-        break; // with pivoting, following first dependent subsequent cols should also be dependant
+        break; // with pivoting, following first dependent subsequent cols should also be dependent
       }
     }
   } else {

@@ -40,7 +40,7 @@ Shape2D::Shape2D()
 }
 
 /**
- * Calls virtual drawShape() method to draw the actial shape.
+ * Calls virtual drawShape() method to draw the actual shape.
  * Draws bounding rect and control points if the shape is selected.
  *
  * @param painter :: QPainter used for drawing.
@@ -970,7 +970,7 @@ QPointF Shape2DSector::getShapeControlPoint(size_t i) const {
  * 0 is outer radius, 1 is inner, 2 is starting angle, 3 is ending.
  * @param i :: index of the control point changed
  * @param pos :: the new position of the control point (might not be where it is
- * palced at the end of the update though, since there are constraints to take
+ * placed at the end of the update though, since there are constraints to take
  * into account)
  */
 void Shape2DSector::setShapeControlPoint(size_t i, const QPointF &pos) {

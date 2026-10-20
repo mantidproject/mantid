@@ -96,7 +96,7 @@ void FindSXPeaks::init() {
 
   declareProperty("AbsoluteBackground", 30.0, mustBePositiveDouble,
                   "Peaks which are below the specified absolute background are discarded."
-                  " The background is gloabally specified for all spectra. Inspect your "
+                  " The background is globally specified for all spectra. Inspect your "
                   "data in the InstrumentView to get a good feeling for the background "
                   "threshold.\n"
                   "Background thresholds which are too low will mistake noise for peaks.");

@@ -54,7 +54,7 @@ private:
 };
 
 /**
- * Get's a parameter which may hold a value of one of two different types.
+ * Gets a parameter which may hold a value of one of two different types.
  * Tries the type T1 and then T2.
  *
  * Returns a variant containing an empty vector of T2 in the
@@ -82,7 +82,7 @@ public:
 };
 
 /**
- * Get's a parameter which may hold a value of one of 3 or more types.
+ * Gets a parameter which may hold a value of one of 3 or more types.
  * Tries the types in the left to right order as specified.
  *
  * Returns a variant containing an empty vector of the last type in the

@@ -23,7 +23,7 @@ namespace Crystal {
 // fit to ln(1/A*) = sum_{icoef=0}^{N=7} pc[7-icoef][ith]*(muR)^icoef
 // A*(muR=0) = 1 so pc[7][ith] = 0 (fixed not fitted)
 // Fit performed in MATLAB using least-squares minimisation
-// after Dwiggins, jr., acta cryst. A, 31, 146 (1975) - (but for sphere instread of cylinder)
+// after Dwiggins, jr., acta cryst. A, 31, 146 (1975) - (but for sphere instead of cylinder)
 const double pc[8][19] = {{-6.4910e-07, -6.8938e-07, -7.8149e-07, 8.1682e-08, 1.8008e-06, 3.3916e-06, 4.5095e-06,
                            4.7970e-06, 4.4934e-06, 3.6700e-06, 2.5881e-06, 1.5007e-06, 3.7669e-07, -7.9487e-07,
                            -1.7935e-06, -2.5563e-06, -3.1113e-06, -3.3993e-06, -3.5091e-06},
@@ -51,7 +51,7 @@ const double pc[8][19] = {{-6.4910e-07, -6.8938e-07, -7.8149e-07, 8.1682e-08, 1.
 
 const double MAX_WAVELENGTH = 50.0; // max in lamda_weight table
 
-const double STEPS_PER_ANGSTROM = 100; // resolution of lamda table
+const double STEPS_PER_ANGSTROM = 100; // resolution of lambda table
 
 const int NUM_WAVELENGTHS = static_cast<int>(std::ceil(MAX_WAVELENGTH * STEPS_PER_ANGSTROM));
 
@@ -136,16 +136,16 @@ private:
 
   void retrieveBaseProperties();
   // void constructSample(API::Sample& sample);
-  double getEventWeight(const double lamda, const double two_theta, bool &muRTooLarge);
+  double getEventWeight(const double lambda, const double two_theta, bool &muRTooLarge);
   void BuildLamdaWeights();
   double absor_sphere(const double twoth, const double wl, bool &muRTooLarge);
   double scale_exec(std::string &bankName, const double lambda, const double depth,
                     const Geometry::Instrument_const_sptr &inst, const double pathlength, double eventWeight);
 
   double m_smu;                       ///< linear scattering coefficient in 1/cm
-  double m_amu;                       ///< linear absoprtion coefficient in 1/cm
+  double m_amu;                       ///< linear absorption coefficient in 1/cm
   double m_radius;                    ///< sample radius in cm
-  double m_power_th;                  ///< Power of lamda in BuildLamdaWeights
+  double m_power_th;                  ///< Power of lambda in BuildLamdaWeights
   std::vector<double> m_lamda_weight; ///< lmabda weights
   bool m_onlySphericalAbsorption;
   bool m_returnTransmissionOnly;

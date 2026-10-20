@@ -47,7 +47,7 @@ private:
   /// Function that together with m_index uniquely identify the parameter.
   IFunction *m_function;
   /// Index of the parameter in m_function. It is assumed that this index
-  /// uniquely identifies the parameter withing m_function
+  /// uniquely identifies the parameter within m_function
   std::size_t m_index;
   /// Flag to mark as default the value of an object associated with this
   /// reference: a tie or a constraint.

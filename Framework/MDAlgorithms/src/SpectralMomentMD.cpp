@@ -93,7 +93,7 @@ void SpectralMomentMD::exec() {
 
   API::IMDEventWorkspace_sptr output_ws(0);
   if (input_ws->getName() == output_ws_name) {
-    // Calcualte in-place
+    // Calculate in-place
     output_ws = input_ws;
   } else {
     // Clone input workace to output workspace
@@ -140,10 +140,10 @@ void SpectralMomentMD::applyScaling(typename Mantid::DataObjects::MDEventWorkspa
       // Add events, with bounds checking
       for (auto it = events.begin(); it != events.end(); ++it) {
         // Create the event
-        // do calculattion
+        // do calculation
         float factor = static_cast<float>(std::pow(it->getCenter(mDeltaEIndex), mExponent));
 
-        // calcalate and set intesity
+        // calculate and set intensity
         auto intensity = it->getSignal() * factor;
         it->setSignal(intensity);
 

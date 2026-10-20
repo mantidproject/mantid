@@ -99,7 +99,7 @@ class SliceViewerView(QWidget, ObservingView):
 
     def query_peaks_to_overlay(self, current_overlayed_names):
         """Display a dialog to the user to ask which peaks to overlay
-        :param current_overlayed_names: A list of names that are currently overlayed
+        :param current_overlayed_names: A list of names that are currently overlaid
         :returns: A list of workspace names to overlay on the display
         """
         model = PeaksWorkspaceSelectorModel(mantid.api.AnalysisDataService.Instance(), checked_names=current_overlayed_names)

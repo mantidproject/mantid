@@ -80,7 +80,7 @@ void SymmetriseModel::reflectNegativeToPositive() {
 void SymmetriseModel::setWorkspaceName(std::string const &workspaceName) {
   m_inputWorkspace = workspaceName;
   m_reflectedInputWorkspace = m_inputWorkspace + "_reflected";
-  // the last 4 characters in the workspace name are '_red' the ouput workspace name is inserting '_sym' before that
+  // the last 4 characters in the workspace name are '_red' the output workspace name is inserting '_sym' before that
   // '_red'
   m_positiveOutputWorkspace = workspaceName.substr(0, workspaceName.size() - 4) + "_sym_pn" +
                               workspaceName.substr(workspaceName.size() - 4, workspaceName.size());

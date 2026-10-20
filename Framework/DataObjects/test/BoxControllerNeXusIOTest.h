@@ -220,7 +220,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(FullPathFile = pSaver->getFileName());
 
     size_t nEvents = 20;
-    // the number of colums corresponfs to
+    // the number of columns corresponfs to
     size_t nColumns = pSaver->getNDataColums();
     std::vector<FROM> toWrite(nColumns * nEvents);
     for (size_t i = 0; i < nEvents; i++) {

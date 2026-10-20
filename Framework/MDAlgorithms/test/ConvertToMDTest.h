@@ -444,7 +444,7 @@ public:
       TS_ASSERT_THROWS_NOTHING(convert_alg->execute());
       Mantid::API::IMDEventWorkspace_sptr out_ws = convert_alg->getProperty("OutputWorkspace");
 
-      // Asssert
+      // Assert
       file_name = out_ws->getBoxController()->getFilename();
 
       auto load_alg = AlgorithmManager::Instance().createUnmanaged("LoadMD");

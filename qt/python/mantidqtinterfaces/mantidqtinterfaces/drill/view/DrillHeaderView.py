@@ -202,7 +202,7 @@ class DrillHeaderView(QHeaderView):
     def changeSectionFolding(self, li):
         """
         Change the section folding state. This function is called when a push
-        button is relased. It folds the correponding unfolded section and
+        button is released. It folds the corresponding unfolded section and
         unfolded the corresponding folded section. When folding occurs, the
         size and the text of the section are saved. They are reloaded when the
         section is unfolded.

@@ -183,7 +183,7 @@ bool MANTID_GEOMETRY_DLL intersection(const ConvexPolygon &P, const ConvexPolygo
   } // end-for
 
   // Reaching this point means we have no intersections
-  // of the polygon edges. There is the possiblity that
+  // of the polygon edges. There is the possibility that
   // the larger polygon completely encloses the smaller
   // in which case no edge intersections would be found
   // but there is an overlap

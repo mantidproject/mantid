@@ -463,7 +463,7 @@ class DirectEnergyConversion(object):
             n_spectra = 0
         prop_man.log(header.format(n_spectra, n_masked_spectra), "notice")
         # --------------------------------------------------------------------------------------------------
-        #       Remove emtpy background if one is defined
+        #       Remove empty background if one is defined
         # --------------------------------------------------------------------------------------------------
         self.remove_empty_background(masking)
         # --------------------------------------------------------------------------------------------------
@@ -1949,7 +1949,7 @@ class DirectEnergyConversion(object):
 
         if prop_man.energy_bins:  # It should already be a distribution.
             ConvertToDistribution(Workspace=result_ws)
-        # nullify negarive signals if necessary
+        # nullify negative signals if necessary
         if prop_man.check_background and (hasattr(prop_man, "nullify_negative_signal") and prop_man.nullify_negative_signal):
             zeroBg = CreateWorkspace(DataX="0,1", DataY=0, DataE=0, UnitX="TOF")
             result_ws = RemoveBackground(result_ws, BkgWorkspace=zeroBg, Emode="Direct", NullifyNegativeValues=True)

@@ -38,7 +38,7 @@ void ISaveable::setFilePosition(uint64_t newPos, size_t newSize, bool wasSaved) 
   m_wasSaved = wasSaved;
 }
 
-// ----------- PRIVATE, only DB availible
+// ----------- PRIVATE, only DB available
 
 /** private function which used by the disk buffer to save the contents of the
  object

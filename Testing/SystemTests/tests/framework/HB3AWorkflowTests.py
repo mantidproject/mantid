@@ -338,7 +338,7 @@ class SatellitePeaksFakeData(systemtesting.MantidSystemTest):
                             sat_hkl.append(q)
                             FakeMDEventData(MD_Q_sample, PeakParams="100,{},{},{},0.02".format(*q_sample))
 
-        # Check that this fake workpsace gives us the expected UB
+        # Check that this fake workspace gives us the expected UB
         peaks = FindPeaksMD(MD_Q_sample, PeakDistanceThreshold=1, OutputType="LeanElasticPeak")
         FindUBUsingFFT(peaks, MinD=5, MaxD=20)
         ShowPossibleCells(peaks)

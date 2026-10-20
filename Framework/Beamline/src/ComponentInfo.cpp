@@ -72,7 +72,7 @@ ComponentInfo::ComponentInfo(
       m_sourceIndex(sourceIndex), m_sampleIndex(sampleIndex), m_detectorInfo(nullptr) {
   if (m_rotations->size() != m_positions->size()) {
     throw std::invalid_argument("ComponentInfo should have been provided same "
-                                "number of postions and rotations");
+                                "number of positions and rotations");
   }
   if (m_positions->size() != nonDetectorSize()) {
     throw std::invalid_argument("ComponentInfo should have as many positions "
@@ -229,7 +229,7 @@ Eigen::Quaterniond ComponentInfo::rotation(const std::pair<size_t, size_t> &inde
  *RectangularDetectors
  * see Instrument::makeLegacyParmeterMap for correct handling of those cases.
  *
- * BEWARE of peformance on repeated calls to this method as the transformation
+ * BEWARE of performance on repeated calls to this method as the transformation
  *has to
  * be established every time, independent of whether the parent remains the
  *same.

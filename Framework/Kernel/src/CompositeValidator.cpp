@@ -121,14 +121,14 @@ std::string CompositeValidator::checkAny(const boost::any &value) const {
  *
  * Returns empty string if no errors were found.
  *
- * @param valid :: whether all the validator succeded
+ * @param valid :: whether all the validator succeeded
  * @param errors :: the combined list of errors from the child validators
  * @return a user friendly message with all the child validator messages
  * combined.
  */
 std::string CompositeValidator::buildErrorMessage(const bool valid, const std::string &errors) const {
   if (!valid) {
-    return "Invalid property. You must statisfy one of the following "
+    return "Invalid property. You must satisfy one of the following "
            "conditions:\n" +
            errors;
   } else {

@@ -197,7 +197,7 @@ void LoadMuonNexus::addToSampleLog(const std::string &logName, const int logNumb
 }
 
 /**
- * Fucntion to add a single string as a sample log to a workspace
+ * Function to add a single string as a sample log to a workspace
  */
 void LoadMuonNexus::addToSampleLog(const std::string &logName, const std::string &logString,
                                    DataObjects::Workspace2D_sptr &ws) {

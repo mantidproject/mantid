@@ -16,7 +16,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 class MantidTreeWidget;
 
-/**A class derived from QTreeWidgetItem, to accomodate
+/**A class derived from QTreeWidgetItem, to accommodate
  * sorting on the items in a MantidTreeWidget.
  */
 class EXPORT_OPT_MANTIDQT_COMMON MantidTreeWidgetItem : public QTreeWidgetItem {

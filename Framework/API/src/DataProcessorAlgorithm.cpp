@@ -39,7 +39,7 @@ GenericDataProcessorAlgorithm<Base>::GenericDataProcessorAlgorithm()
 /** Create a Child Algorithm.  A call to this method creates a child algorithm
  *object.
  *  Using this mechanism instead of creating daughter
- *  algorithms directly via the new operator is prefered since then
+ *  algorithms directly via the new operator is preferred since then
  *  the framework can take care of all of the necessary book-keeping.
  *
  *  Overrides the method of the same name in Algorithm to enable history
@@ -167,7 +167,7 @@ template <class Base> std::string GenericDataProcessorAlgorithm<Base>::getProper
  */
 template <class Base>
 PropertyManagerOwner::TypedValue GenericDataProcessorAlgorithm<Base>::getProperty(const std::string &name) const {
-  // explicitely specifying a property wins
+  // explicitly specifying a property wins
   if (!Base::isDefault(name)) {
     return Base::getProperty(name);
   }
@@ -300,7 +300,7 @@ template <class Base> void GenericDataProcessorAlgorithm<Base>::forwardPropertie
 }
 
 //------------------------------------------------------------------------------------------
-// Binary opration implementations for DPA so it can record history
+// Binary operation implementations for DPA so it can record history
 //------------------------------------------------------------------------------------------
 
 /**
@@ -385,7 +385,7 @@ MatrixWorkspace_sptr GenericDataProcessorAlgorithm<Base>::plus(const MatrixWorks
 }
 
 /**
- * Subract a matrix workspace from another matrix workspace
+ * Subtract a matrix workspace from another matrix workspace
  * @param lhs :: the workspace on the left hand side of the subtraction symbol
  * @param rhs :: the workspace on the right hand side of the subtraction symbol
  * @return matrix workspace resulting from the operation
@@ -398,7 +398,7 @@ MatrixWorkspace_sptr GenericDataProcessorAlgorithm<Base>::minus(const MatrixWork
 }
 
 /**
- * Subract a single value from a matrix workspace
+ * Subtract a single value from a matrix workspace
  * @param lhs :: the workspace on the left hand side of the subtraction symbol
  * @param rhsValue :: the workspace on the right hand side of the subtraction
  * symbol

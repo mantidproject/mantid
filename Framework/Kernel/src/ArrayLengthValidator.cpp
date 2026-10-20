@@ -22,7 +22,7 @@ ArrayLengthValidator<TYPE>::ArrayLengthValidator()
       m_hasArraySizeMin(false), m_arraySizeMax(size_t(0)), m_hasArraySizeMax(false) {}
 //----------------------------------------------------------------------------------------------
 /** Constructor
- * @param len:: the legth of the array
+ * @param len:: the length of the array
  */
 template <typename TYPE>
 ArrayLengthValidator<TYPE>::ArrayLengthValidator(const size_t len)
@@ -30,8 +30,8 @@ ArrayLengthValidator<TYPE>::ArrayLengthValidator(const size_t len)
       m_hasArraySizeMin(false), m_arraySizeMax(size_t(0)), m_hasArraySizeMax(false) {}
 //----------------------------------------------------------------------------------------------
 /** Constructor
- * @param lenmin:: the minimum legth of the array
- * @param lenmax:: the maximum legth of the array
+ * @param lenmin:: the minimum length of the array
+ * @param lenmax:: the maximum length of the array
  */
 template <typename TYPE>
 ArrayLengthValidator<TYPE>::ArrayLengthValidator(const size_t lenmin, const size_t lenmax)
@@ -147,7 +147,7 @@ template <typename TYPE> IValidator_sptr ArrayLengthValidator<TYPE>::clone() con
 
 /**
 Private function to check validity
-@returns a string. The string is emty if everything is OK, otherwise returns the
+@returns a string. The string is empty if everything is OK, otherwise returns the
 error
 */
 template <typename TYPE> std::string ArrayLengthValidator<TYPE>::checkValidity(const std::vector<TYPE> &value) const {

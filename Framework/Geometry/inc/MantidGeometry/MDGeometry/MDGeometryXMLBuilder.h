@@ -94,11 +94,11 @@ private:
   /// Instantiate and apply the checking policy.
   void applyPolicyChecking(const IMDDimension &dimensionToAdd) const;
 
-  /// Flag indicating that some change in the inputs has occured. Triggers full
+  /// Flag indicating that some change in the inputs has occurred. Triggers full
   /// recreation.
   mutable bool m_changed;
 
-  /// Variable suports lazy calculation.
+  /// Variable supports lazy calculation.
   mutable std::string m_lastResult;
 };
 

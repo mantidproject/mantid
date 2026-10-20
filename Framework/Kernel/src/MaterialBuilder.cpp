@@ -57,7 +57,7 @@ MaterialBuilder &MaterialBuilder::setFormula(const std::string &formula) {
 
   if (m_atomicNo) {
     throw std::runtime_error("MaterialBuilder::setFormula() - Atomic no. "
-                             "already set, cannot use formula aswell.");
+                             "already set, cannot use formula as well.");
   }
   if (formula.empty()) {
     throw std::invalid_argument("MaterialBuilder::setFormula() - Empty formula provided.");
@@ -80,7 +80,7 @@ MaterialBuilder &MaterialBuilder::setFormula(const std::string &formula) {
 MaterialBuilder &MaterialBuilder::setAtomicNumber(int atomicNumber) {
   if (!m_formula.empty()) {
     throw std::runtime_error("MaterialBuilder::setAtomicNumber() - Formula "
-                             "already set, cannot use atomic number aswell.");
+                             "already set, cannot use atomic number as well.");
   }
   m_atomicNo = atomicNumber;
   return *this;
@@ -286,7 +286,7 @@ Material MaterialBuilder::build() const {
 
 /**
  * Create the NeutronAtom object from the atomic number
- * @return A new NeutronAtom object with the defined proprties
+ * @return A new NeutronAtom object with the defined properties
  */
 Material::ChemicalFormula MaterialBuilder::createCompositionFromAtomicNumber() const {
   Material::FormulaUnit unit{std::make_shared<PhysicalConstants::Atom>(

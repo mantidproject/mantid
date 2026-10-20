@@ -263,7 +263,7 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 
-  // test that the algorithm will faill in absolute/relative mode using offsets <= -1
+  // test that the algorithm will fail in absolute/relative mode using offsets <= -1
   void test_failure_negative_DIFC() {
     /**
      * In absolute/relative mode, the DIFC is updated as

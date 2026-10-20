@@ -79,7 +79,7 @@ The algorithm proceeds as follows. For each spectrum:
 
      - accumulate this wavelength-specific factor across all `NEvents`
 
-#. average the accumulated attentuation factors over `NEvents` and assign this as the correction factor for
+#. average the accumulated attenuation factors over `NEvents` and assign this as the correction factor for
    this :math:`\lambda_{step}`. Calculate the error as the standard deviation of the accumulated attenuation factors divided by :math:`\sqrt{NEvents}`
 
 #. finally, if `ResimulateTracksForDifferentWavelengths` = True, interpolate through the unsimulated wavelength points using the selected method

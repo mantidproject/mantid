@@ -667,7 +667,7 @@ void PDCalibration::exec() {
   // center, in d-spacing units
   const auto windowsInDSpacing = dSpacingWindows(m_peaksInDspacing, peakWindow);
 
-  // get spectrum info to check workspace index correpsonds to a valid spectrum
+  // get spectrum info to check workspace index corresponds to a valid spectrum
   const auto &spectrumInfo = m_uncalibratedWS->spectrumInfo();
 
   // Scan the table containing the fit parameters for every peak, retrieve the
@@ -739,7 +739,7 @@ void PDCalibration::exec() {
         // extract these from the peak function (not efficient)
         auto peakfunc = std::dynamic_pointer_cast<API::IPeakFunction>(
             API::FunctionFactory::Instance().createFunction(peakFunction));
-        // set peak functio nparameters from fit
+        // set peak function nparameters from fit
         for (size_t ipar = 0; ipar < peakfunc->nParams(); ipar++) {
           peakfunc->setParameter(ipar, fittedTable->getRef<double>(peakfunc->parameterName(ipar), rowIndexInFitTable));
         }
@@ -952,7 +952,7 @@ double gsl_costFunction(const gsl_vector *v, void *peaks) {
  * @param t0 :: will store optimized TZERO fit parameter
  * @param difa :: will store optimized DIFA fit parameter
 
- * @return cummulative error of the fit, zero if the fit fails
+ * @return cumulative error of the fit, zero if the fit fails
  */
 double fitDIFCtZeroDIFA(std::vector<double> &peaks, double &difc, double &t0, double &difa) {
   const auto numParams = static_cast<size_t>(peaks[1]);
@@ -1163,7 +1163,7 @@ vector<double> PDCalibration::dSpacingWindows(const std::vector<double> &centres
 
 /**
  * Return a function that converts from d-spacing to TOF units for a particular
- * pixel, evaulating the GSAS conversion formula:
+ * pixel, evaluating the GSAS conversion formula:
  *                  TOF = DIFC∗d + DIFA∗d^2 + TZERO
  *
  * @param detIds :: set of detector IDs
@@ -1423,11 +1423,11 @@ void PDCalibration::createInformationWorkspaces() {
   m_peakHeightTable->addColumn("int", "detid");
 
   for (double dSpacing : m_peaksInDspacing) {
-    std::stringstream namess;
-    namess << "@" << std::setprecision(5) << dSpacing;
-    m_peakPositionTable->addColumn("double", namess.str());
-    m_peakWidthTable->addColumn("double", namess.str());
-    m_peakHeightTable->addColumn("double", namess.str());
+    std::stringstream names;
+    names << "@" << std::setprecision(5) << dSpacing;
+    m_peakPositionTable->addColumn("double", names.str());
+    m_peakWidthTable->addColumn("double", names.str());
+    m_peakHeightTable->addColumn("double", names.str());
   }
   m_peakPositionTable->addColumn("double", "chisq");
   m_peakPositionTable->addColumn("double", "normchisq");

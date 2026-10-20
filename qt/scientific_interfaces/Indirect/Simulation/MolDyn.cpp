@@ -107,7 +107,7 @@ void MolDyn::algorithmComplete(bool error) {
 void MolDyn::restoreSettings(const API::FileFinderSettings &settings) { m_uiForm.mwRun->restoreSettings(settings); }
 
 /**
- * Selects wheter to load the history of a workspace for the resolution data selector loader
+ * Selects whether to load the history of a workspace for the resolution data selector loader
  *
  * @param doLoadHistory :: If true, the data selector loads the history of the added workspaces.
  */

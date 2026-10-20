@@ -44,9 +44,9 @@ GLColor::~GLColor() = default;
 /**
  * This method sets the Red, Green, Blue, Alpha values of the color
  * @param red :: Red component of color value between [0 - 1]
- * @param green :: Green Componenent of color value between [0 - 1]
- * @param blue :: Blue Componenent of color value between [0 - 1]
- * @param alpha :: Alpha componenet of color value between [0 - 1]
+ * @param green :: Green Component of color value between [0 - 1]
+ * @param blue :: Blue Component of color value between [0 - 1]
+ * @param alpha :: Alpha component of color value between [0 - 1]
  */
 void GLColor::set(float red, float green, float blue, float alpha) {
   m_rgba[0] = (unsigned char)(red * 255);
@@ -58,9 +58,9 @@ void GLColor::set(float red, float green, float blue, float alpha) {
 /**
  * This method sets the Red, Green, Blue, Alpha values of the color
  * @param red :: Red component of color value between [0 - 1]
- * @param green :: Green Componenent of color value between [0 - 1]
- * @param blue :: Blue Componenent of color value between [0 - 1]
- * @param alpha :: Alpha componenet of color value between [0 - 1]
+ * @param green :: Green Component of color value between [0 - 1]
+ * @param blue :: Blue Component of color value between [0 - 1]
+ * @param alpha :: Alpha component of color value between [0 - 1]
  */
 void GLColor::get(float &red, float &green, float &blue, float &alpha) const {
   red = float(m_rgba[0]) / 255;

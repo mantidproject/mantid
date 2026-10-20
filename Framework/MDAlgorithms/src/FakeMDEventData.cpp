@@ -48,7 +48,7 @@ void FakeMDEventData::init() {
   declareProperty(std::make_unique<ArrayProperty<double>>("EllipsoidParams", ""),
                   "Add an nd ellipsoidal peak with a multivariate normal distribution\n"
                   "around a central point (x1,...x_N). The ellipsoid is defined by an\n"
-                  "N eigenvectors with N elements and N eigenvalues which correpsond \n"
+                  "N eigenvectors with N elements and N eigenvalues which correspond \n"
                   "to the variance along the principal axes. The final argument is \n"
                   "doCounts which can be either negative or positive. If doCounts<0\n"
                   "then all events have a count of 1, else if doCounts>0 then the\n"

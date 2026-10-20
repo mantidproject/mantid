@@ -92,7 +92,7 @@ namespace Mantid::MDAlgorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertMDHistoToMatrixWorkspace)
 
-/// Decalare the properties
+/// Declare the properties
 void ConvertMDHistoToMatrixWorkspace::init() {
   declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input IMDHistoWorkspace.");

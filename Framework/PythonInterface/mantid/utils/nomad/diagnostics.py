@@ -48,7 +48,7 @@ class _NOMADMedianDetectorTest:
         config: dict
     """
 
-    # Instrument geomtry
+    # Instrument geometry
     # TODO these quantities should be derived from the instrument object
     MONITOR_COUNT = 2  # number of upstream monitors
     PANEL_COUNT = 6

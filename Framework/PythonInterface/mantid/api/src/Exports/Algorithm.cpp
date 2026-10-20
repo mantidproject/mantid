@@ -223,7 +223,7 @@ void export_leaf_classes() {
       .def("fromString", &Algorithm::fromString, "Initialize the algorithm from a string representation")
       .staticmethod("fromString")
       .def("createChildAlgorithm", raw_function(&createChildWithProps, std::size_t(1)),
-           "Creates and intializes a named child algorithm. Output workspaces "
+           "Creates and initializes a named child algorithm. Output workspaces "
            "are given a dummy name.")
       .def("declareProperty", (declarePropertyType1)&PythonAlgorithm::declarePyAlgProperty,
            declarePropertyType1_Overload((arg("self"), arg("prop"), arg("doc") = "")))

@@ -100,7 +100,7 @@ void DetectorEfficiencyVariation::exec() {
   g_log.notice() << "Tests failed " << numFailed << " spectra. "
                  << "These have been masked on the OutputWorkspace\n";
 
-  // counts1 was overwriten by the last function, now register it
+  // counts1 was overwritten by the last function, now register it
   setProperty("NumberOfFailures", numFailed);
 }
 

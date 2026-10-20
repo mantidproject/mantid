@@ -40,7 +40,7 @@ Kernel::Logger g_log("BivariateNormal");
 
 DECLARE_FUNCTION(BivariateNormal)
 
-// Indicies into Attrib array( local variable in initCommon
+// Indices into Attrib array( local variable in initCommon
 #define S_int 0
 #define S_xint 1
 #define S_yint 2
@@ -54,7 +54,7 @@ DECLARE_FUNCTION(BivariateNormal)
 #define S_xy 10
 #define S_1 11
 
-// Indicies into the LastParams array
+// Indices into the LastParams array
 #define IBACK 0
 #define ITINTENS 1
 #define IXMEAN 2

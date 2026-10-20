@@ -88,13 +88,13 @@ are equal. Sort of the class is required.
 @return A==*this
 */
 {
-  // Size not equal then definately not equal
+  // Size not equal then definitely not equal
   if (A.Units.size() != Units.size())
     return false;
   if (A.Comp.size() != Comp.size())
     return false;
   // Intersect not the same (unless size==1)
-  if (A.Intersect != Intersect && Units.size() + Comp.size() != 1) // Intersect type is not relevent
+  if (A.Intersect != Intersect && Units.size() + Comp.size() != 1) // Intersect type is not relevant
     return false;                                                  // if singular.
 
   // If Units not empty compare each and determine
@@ -117,7 +117,7 @@ are equal. Sort of the class is required.
 
 bool Acomp::operator<(const Acomp &A) const
 /**
-Comparitor operator:: Comparies the
+Comparator operator:: Comparies the
 unit list (which is already sorted)
 part by part.  The sort is ASSUMED.
 Then the Comp units (which are not)
@@ -175,7 +175,7 @@ Operator + (union addition)
   if (Intersect)             // If this is an intersection
   {                          // we need to have a union
     Acomp Ax = Acomp(*this); // make copy
-    Units.clear();           // remove everthing else
+    Units.clear();           // remove everything else
     Comp.clear();
     Intersect = 0; // make this into a Union
     addComp(Ax);   // add oldThis to the list
@@ -258,7 +258,7 @@ Complementary subtraction is by making A-B == A*B'
 
 bool Acomp::operator>(const Acomp &A) const
 /**
-Operator> takes first to last precidence.
+Operator> takes first to last precedence.
 Uses operator<  to obtain value.
 Note it does not uses 1-(A<this)
 @param  A :: object to compare
@@ -279,7 +279,7 @@ with A. e.g. (a+b) * (ced) == (a+b)ced
   if (!Intersect)            // If this is an intersection
   {                          // we need to have a union
     Acomp Ax = Acomp(*this); // make copy
-    Units.clear();           // remove everthing else
+    Units.clear();           // remove everything else
     Comp.clear();
     Intersect = 1; // make this into a Union
     addComp(Ax);   // add oldThis to the list
@@ -309,8 +309,8 @@ void Acomp::addComp(const Acomp &AX)
 /**
 Adds a pointer to the Comp list.
 If the pointer is singular, extracts the
-object and adds that componenet.
-Assumes that the component is sorted and inserts appropiately.
+object and adds that component.
+Assumes that the component is sorted and inserts appropriately.
 @param AX :: Acomp component to add
 */
 {
@@ -525,7 +525,7 @@ adds it to the main Units object.
 
 void Acomp::assignDNF(const std::vector<int> &Index, const std::vector<BnId> &A)
 /**
-Assign the object to the Essentual PI in the vector
+Assign the object to the Essential PI in the vector
 A. This will make the form DNF.
 @param Index :: SurfNumbers
 @param A :: Vector of BnId's that are valid
@@ -554,7 +554,7 @@ A. This will make the form DNF.
 
 void Acomp::assignCNF(const std::vector<int> &Index, const std::vector<BnId> &A)
 /**
-Assign the object to the Essentual PI in the vector
+Assign the object to the Essential PI in the vector
 A. This will make the form DNF.
 @param Index :: SurfNumbers
 @param A :: Vector of BnId's that are valid
@@ -595,7 +595,7 @@ Decends down the Comp Tree.
 */
 {
   std::sort(Units.begin(), Units.end());
-  // Sort each decending object first
+  // Sort each descending object first
   std::for_each(Comp.begin(), Comp.end(), std::mem_fn(&Acomp::Sort));
   // use the sorted components to sort our component list
   std::sort(Comp.begin(), Comp.end());
@@ -607,7 +607,7 @@ This function attempts to make the function
 a read one form. Assumes that it is either DNF or
 CNF form
 @retval 0 if fails
-@retval 1 if success (and sets it into the appropiate form)
+@retval 1 if success (and sets it into the appropriate form)
 */
 {
   std::map<int, int> LitSet;
@@ -630,11 +630,11 @@ Test that the system that is logically the same:
 @retval 1 :: true
 */
 {
-  std::map<int, int> litMap; // keynumber :: number of occurances
+  std::map<int, int> litMap; // keynumber :: number of occurrences
   getAbsLiterals(litMap);
 
   A.getAbsLiterals(litMap);
-  std::map<int, int> Base; // keynumber :: number of occurances
+  std::map<int, int> Base; // keynumber :: number of occurrences
   std::vector<int> keyNumbers;
 
   std::map<int, int>::const_iterator mc;
@@ -654,7 +654,7 @@ Test that the system that is logically the same:
 
 int Acomp::isNull() const
 /**
-@return 1 if there are no memebers
+@return 1 if there are no members
 */
 {
   return ((Units.empty() && Comp.empty()) ? 1 : 0);
@@ -861,7 +861,7 @@ i.e. one pass.
 
 int Acomp::makeEPI(std::vector<BnId> &DNFobj, std::vector<BnId> &PIform) const
 /**
-Creates an essentual PI list (note: this is
+Creates an essential PI list (note: this is
 not unique).
 Given the list form the EPI based on the Quine-McClusky method.
 
@@ -911,7 +911,7 @@ It is set on exit (to the EPI)
   // First remove singlets:
   //
   for (dx = DNFactive.begin(); dx != DNFactive.end(); ++dx) {
-    if (*dx >= 0 && DNFscore[*dx] == 1) // EPI (definately)
+    if (*dx >= 0 && DNFscore[*dx] == 1) // EPI (definitely)
     {
       px = std::find_if(PIactive.cbegin(), PIactive.cend(), [&](const int pi) { return Grid[pi][*dx]; });
 
@@ -937,7 +937,7 @@ It is set on exit (to the EPI)
 
   // First Make a new matrix for speed.  Useful ???
   Kernel::Matrix<int> Cmat(PIactive.size(),
-                           DNFactive.size()); // corrolation matrix
+                           DNFactive.size()); // correlation matrix
   int cm(0);
   for (px = PIactive.begin(); px != PIactive.end(); ++px) {
     int dm(0);
@@ -955,12 +955,12 @@ It is set on exit (to the EPI)
   int vecI, di; // variable for later
   for (int Icount = 1; Icount < Psize; Icount++) {
     // This counter is a ripple counter, ie 1,2,3 where no numbers
-    // are the same. BUT it is acutally 0->N 0->N 0->N
+    // are the same. BUT it is actually 0->N 0->N 0->N
     // index by A, A+1 ,A+2  etc
     RotaryCounter Index(Icount, Psize);
     do {
 
-      for (di = 0; di < Dsize; di++) // check each orignal position
+      for (di = 0; di < Dsize; di++) // check each original position
       {
         for (vecI = 0; vecI < Icount; vecI++) {
           if (Cmat[Index[vecI]][di])
@@ -993,7 +993,7 @@ Get the key numbers in the system
 @return Key of literals
 */
 {
-  std::map<int, int> litMap; // keynumber :: number of occurances
+  std::map<int, int> litMap; // keynumber :: number of occurrences
   std::vector<int> keyNumbers;
   getAbsLiterals(litMap);
   std::map<int, int>::const_iterator mc;
@@ -1016,7 +1016,7 @@ DNF objects are output into the function parameters.
 @retval -1 :: on error.
 */
 {
-  std::map<int, int> litMap; // keynumber :: number of occurances
+  std::map<int, int> litMap; // keynumber :: number of occurrences
   std::map<int, int> Base;   // keynumber :: value
   getAbsLiterals(litMap);
 
@@ -1127,7 +1127,7 @@ DNF objects are output into the function parameters.
 @retval -1 :: on error.
 */
 {
-  std::map<int, int> litMap; // keynumber :: number of occurances
+  std::map<int, int> litMap; // keynumber :: number of occurrences
   std::map<int, int> Base;   // keynumber :: value
   getAbsLiterals(litMap);
 
@@ -1169,7 +1169,7 @@ the Base state.
   // Deal with case of a single object (then join
   // doesn't matter
   auto retJoin = static_cast<int>(Units.size() + Comp.size());
-  if (retJoin != 1) // single unit is alway ok
+  if (retJoin != 1) // single unit is always ok
     retJoin = 1 - Intersect;
 
   int S, V;
@@ -1298,7 +1298,7 @@ Assumes that Units is sorted.
 
 int Acomp::joinDepth()
 /**
-Searchs down the tree to find if any
+Searches down the tree to find if any
 singles exist and up-promotes them.
 @throw ColErr::ExBase on mal-formed state
 @return number of up-promotions.
@@ -1445,7 +1445,7 @@ Gets the size of the Units and the Comp
 int Acomp::itemN(const int Index) const
 /**
 Assessor function to get a unit number
-@param Index :: Number of Unit to aquire
+@param Index :: Number of Unit to acquire
 @return Units[Index] or 0 on failure
 */
 {
@@ -1457,7 +1457,7 @@ Assessor function to get a unit number
 const Acomp *Acomp::itemC(const int Index) const
 /**
 Assessor function to get a Comp points
-@param Index :: Number of Comp to aquire
+@param Index :: Number of Comp to acquire
 @return Comp[Index] or 0 on failure
 */
 {

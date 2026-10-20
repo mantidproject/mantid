@@ -273,7 +273,7 @@ private:
   /// flag to show that the pamarameters in table are raw parameters or
   /// effective parameters
   bool m_rawPeaksTable;
-  /// matrix workspace contained calcalated peaks+background from fitted result
+  /// matrix workspace contained calculated peaks+background from fitted result
   /// it has same number of spectra of input workspace even if only part of
   /// spectra to have peaks to fit
   API::MatrixWorkspace_sptr m_fittedPeakWS;
@@ -381,7 +381,7 @@ private:
   /// flag for high background
   bool m_highBackground;
 
-  //----- Result criterias ---------------
+  //----- Result criteria ---------------
   /// peak position tolerance case b, c and d
   bool m_peakPosTolCase234;
 };

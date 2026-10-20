@@ -205,7 +205,7 @@ public:
   }
 
   void test_constructor_setting_default_x() {
-    // Do the workspace, but don't set x explicity
+    // Do the workspace, but don't set x explicitly
     ew = createEventWorkspace(true, false);
     TS_ASSERT_EQUALS(ew->getNumberHistograms(), NUMPIXELS);
     TS_ASSERT_EQUALS(ew->blocksize(), 1);

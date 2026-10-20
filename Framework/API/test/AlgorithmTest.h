@@ -363,7 +363,7 @@ public:
     alg.setProperty("PropertyA", 12);
     alg.setProperty("PropertyB", 5);
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
-    // Algoritm never executed as property validation failed
+    // Algorithm never executed as property validation failed
     TS_ASSERT(!alg.isExecuted());
     TS_ASSERT_EQUALS(ExecutionState::Initialized, alg.executionState());
     TS_ASSERT_EQUALS(ResultState::NotFinished, alg.resultState());

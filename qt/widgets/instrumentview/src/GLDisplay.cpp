@@ -107,7 +107,7 @@ void GLDisplay::resizeGL(int width, int height) {
 }
 
 /**
- * Called when a context menu event is recieved
+ * Called when a context menu event is received
  */
 void GLDisplay::contextMenuEvent(QContextMenuEvent *event) {
   UNUSED_ARG(event) // avoid compiler warning

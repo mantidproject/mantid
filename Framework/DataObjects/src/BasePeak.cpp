@@ -310,7 +310,7 @@ void BasePeak::setPeakShape(Mantid::Geometry::PeakShape *shape) { this->m_peakSh
 void BasePeak::setPeakShape(Mantid::Geometry::PeakShape_const_sptr shape) { this->m_peakShape = std::move(shape); }
 
 /**
- * @brief Assignement operator overload
+ * @brief Assignment operator overload
  * @param other : Other peak object to assign from
  * @return this
  */

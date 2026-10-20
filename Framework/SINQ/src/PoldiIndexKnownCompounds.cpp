@@ -130,7 +130,7 @@ void PoldiIndexKnownCompounds::initializeUnindexedPeaks() {
  *
  *  This method creates as many empty PoldiPeakCollections as expected phases
  *are given as a parameter to this method.
- *  If a point group is stored in the workspace, it is transfered to the new
+ *  If a point group is stored in the workspace, it is transferred to the new
  *workspace.
  *
  *  @param expectedPhases :: Vector of peak collections for expected phases.

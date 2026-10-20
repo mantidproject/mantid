@@ -10,7 +10,7 @@ from mantid.simpleapi import AbsorptionCorrection, CreateWorkspace, EditInstrume
 
 
 class CompareAbsorptionCorrectionToInternationalTablesCylinder(systemtesting.MantidSystemTest):
-    """This test is comparing the values calulated by the
+    """This test is comparing the values calculated by the
     AbsorptionCorrection algorithm for a cylinder to the values in the
     tables 6.3.3.2 from "International Tables for Crystallography
     Volume C: Mathematical, physical and chemical tables"
@@ -571,7 +571,7 @@ class CompareAbsorptionCorrectionToInternationalTablesCylinder(systemtesting.Man
 
 
 class CompareAbsorptionCorrectionToInternationalTablesSphere(systemtesting.MantidSystemTest):
-    """This test is comparing the values calulated by the
+    """This test is comparing the values calculated by the
     AbsorptionCorrection algorithm for a sphere to the values in the
     tables 6.3.3.3 from "International Tables for Crystallography
     Volume C: Mathematical, physical and chemical tables"

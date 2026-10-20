@@ -32,7 +32,7 @@ namespace Mantid::API {
 /** create new box controller from the existing one. Drops file-based state if
  * the box-controller was file-based   */
 BoxController *BoxController::clone() const {
-  // reset the clone file IO controller to avoid dublicated file based
+  // reset the clone file IO controller to avoid duplicated file based
   // operations for different box controllers
   return new BoxController(*this);
 }
@@ -190,7 +190,7 @@ std::string BoxController::toXMLString() const {
 }
 /** the function left for compartibility with the previous bc python interface.
  @return  -- the file name of the file used for backup if file backup mode is
- enabled or emtpy sting if the workspace is not file backed   */
+ enabled or empty string if the workspace is not file backed   */
 std::string BoxController::getFilename() const {
   if (m_fileIO)
     return m_fileIO->getFileName();

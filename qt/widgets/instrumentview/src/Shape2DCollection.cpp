@@ -215,7 +215,7 @@ void Shape2DCollection::deselectAll() {
 
 /**
  * Resize the current shape by moving the right-bottom control point to a
- * loaction on the screen.
+ * location on the screen.
  */
 void Shape2DCollection::moveRightBottomTo(int x, int y) {
   if (m_currentShape && m_currentShape->isEditing()) {
@@ -299,7 +299,7 @@ void Shape2DCollection::touchShapeOrControlPointAt(int x, int y) {
       QApplication::restoreOverrideCursor();
 
       // Since shapes can be flipped by, for example, dragging the bottom left point past the bottom right,
-      // m_currentCP can't be relyed upon to describe a point's relative position (e.g top left)
+      // m_currentCP can't be relied upon to describe a point's relative position (e.g top left)
       QPointF centre = m_currentShape->origin();
       QPointF cp = m_currentShape->getControlPoint(m_currentCP);
       QPointF difference = centre - cp;

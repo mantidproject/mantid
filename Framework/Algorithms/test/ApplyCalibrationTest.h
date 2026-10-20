@@ -50,7 +50,7 @@ public:
 
   void testSimple() {
     int ndets = 3;
-    // Create workspace with paremeterised instrument and put into data store
+    // Create workspace with parameterised instrument and put into data store
     Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(ndets, 10, true);
     const std::string wsName("ApplyCabrationWs");
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();

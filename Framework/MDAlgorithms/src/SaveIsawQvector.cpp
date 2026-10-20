@@ -94,7 +94,7 @@ void SaveIsawQvector::exec() {
     if (!handle.is_open())
       throw std::runtime_error("Failed to open file for writing");
   }
-  // set up a descripter of where we are going
+  // set up a descriptor of where we are going
   this->initTargetWSDescr(wksp);
 
   size_t coord_map[DIMS] = {0, 1, 2};      // x->x, y->y, z->z
@@ -115,7 +115,7 @@ void SaveIsawQvector::exec() {
                    [](const auto value) { return -value; });
   }
 
-  // units conersion helper
+  // units conversion helper
   UnitsConversionHelper unitConv;
   unitConv.initialize(m_targWSDescr, "Momentum");
 

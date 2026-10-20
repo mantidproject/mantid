@@ -141,8 +141,8 @@ class AxesTabWidgetView(QWidget):
     def set_x_axis_selector_click(self):
         self.axis_tab_bar.setCurrentIndex(0)
 
-    def set_scale_combo_box_enabled(self, eneabled):
-        self.scale_combo_box.setEnabled(eneabled)
+    def set_scale_combo_box_enabled(self, enabled):
+        self.scale_combo_box.setEnabled(enabled)
 
     def get_axis(self):
         return "xyz"[self.axis_tab_bar.currentIndex()]

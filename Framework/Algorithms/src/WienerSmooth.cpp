@@ -235,7 +235,7 @@ API::MatrixWorkspace_sptr WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspac
   // a square
   // root of the power spectrum
   auto &powerSpec = fourierOut->mutableY(2);
-  // convert the modulus to power spectrum wich is the base of the Wiener filter
+  // convert the modulus to power spectrum which is the base of the Wiener filter
   std::transform(powerSpec.begin(), powerSpec.end(), powerSpec.begin(), PowerSpectrum());
 
   // estimate power spectrum's noise as the average of its high frequency half
@@ -390,7 +390,7 @@ std::pair<double, double> WienerSmooth::getStartEnd(const Mantid::HistogramData:
 }
 
 /**
- * Exctract the input spectrum into a separate workspace.
+ * Extract the input spectrum into a separate workspace.
  * @param inputWS :: The input workspace.
  * @param wsIndex :: The index of the input spectrum.
  * @return :: Workspace with the copied spectrum.

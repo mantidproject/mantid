@@ -295,7 +295,7 @@ API::Workspace_sptr LoadAscii2::readTable(std::ifstream &file) {
 
 /**
  * Check the start of the file for the first data set, then set the number of
- * columns that hsould be expected thereafter
+ * columns that should be expected thereafter
  * @param[in] line : The current line of data
  * @param[in] columns : the columns of values in the current line of data
  */
@@ -530,7 +530,7 @@ void LoadAscii2::processHeader(std::ifstream &file) {
         }
       } else {
         // an empty line is legitimate but make sure there aren't too many in
-        // sucession as we need to see data
+        // succession as we need to see data
         ++matchingRows;
         ++validRows;
         ++blankRows;
@@ -546,9 +546,9 @@ void LoadAscii2::processHeader(std::ifstream &file) {
       }
 
       // to reduce the chance of finding problems later,
-      // the concurrent data should also have the same nubmer of columns
+      // the concurrent data should also have the same number of columns
       // if the data has a different number of columns to the previous lines
-      // start the coutner again assuming those previous lines were header info
+      // start the counter again assuming those previous lines were header info
       if (lineCols == numCols || lineCols == 1) {
         // line is valid increment the counter
         ++matchingRows;
@@ -642,7 +642,7 @@ void LoadAscii2::inconsistantIDCheck() const {
   // we need to do a check regarding spectra ids before doing anything else
   // is this the first bin in the spectra? if not this check has already been
   // done for this spectra
-  // If the ID vector is completly empty then it's ok we're assigning them later
+  // If the ID vector is completely empty then it's ok we're assigning them later
   // if there are equal or less IDs than there are spectra, then there's been no
   // ID assigned to this spectra and there should be
   if (m_spectraStart && m_spectrumIDcount != 0 && !(m_spectra.size() < m_spectrumIDcount)) {
@@ -665,7 +665,7 @@ void LoadAscii2::newSpectra() {
     } else if (m_lastBins == m_curBins) {
       m_curBins = 0;
     } else {
-      throw std::runtime_error("Number of bins per spectra not consistant.");
+      throw std::runtime_error("Number of bins per spectra not consistent.");
     }
 
     if (m_curSpectra) {

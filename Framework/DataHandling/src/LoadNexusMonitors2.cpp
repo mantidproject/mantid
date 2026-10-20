@@ -458,7 +458,7 @@ bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
 
 //------------------------------------------------------------------------------
 /**
- * Splits multiperiod histogram data into seperate workspaces and puts them in
+ * Splits multiperiod histogram data into separate workspaces and puts them in
  * a group
  *
  * @param numPeriods :: number of periods

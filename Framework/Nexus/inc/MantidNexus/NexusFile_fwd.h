@@ -132,12 +132,12 @@ typedef std::pair<std::string, std::string> Entry;
 typedef std::map<std::string, std::string> Entries;
 
 /**
- * This structure holds the type and dimensions of a primative field/array.
+ * This structure holds the type and dimensions of a primitive field/array.
  * \li type: NXnumtype for data type
  * \li dims: DimVector, size is rank
  */
 struct Info {
-  /** The primative type for the field. */
+  /** The primitive type for the field. */
   NXnumtype type;
   /** The dimensions of the file. */
   DimVector dims;

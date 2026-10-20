@@ -223,7 +223,7 @@ void LoadDNSSCD::loadHuber(const ITableWorkspace_sptr &tws) {
   for (auto &ds : m_data) {
     ds.huber = huber[0];
   }
-  // dublicate runs for each huber in the table
+  // duplicate runs for each huber in the table
   std::vector<ExpData> old(m_data);
   for (size_t i = 1; i < huber.size(); ++i) {
     for (auto &ds : old) {
@@ -240,7 +240,7 @@ Mantid::API::ITableWorkspace_sptr LoadDNSSCD::saveHuber() {
   std::vector<double> huber;
   huber.reserve(m_data.size());
   std::transform(m_data.cbegin(), m_data.cend(), std::back_inserter(huber), [](const auto &ds) { return ds.huber; });
-  // remove dublicates
+  // remove duplicates
   std::sort(huber.begin(), huber.end());
   huber.erase(unique(huber.begin(), huber.end()), huber.end());
 

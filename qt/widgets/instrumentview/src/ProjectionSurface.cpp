@@ -321,7 +321,7 @@ void ProjectionSurface::updateDetectors() {
   clear();
   this->init();
   // if integration range in the instrument actor has changed
-  // update visiblity of peak markers
+  // update visibility of peak markers
   setPeakVisibility();
   m_viewRect = viewRectCache;
 }
@@ -397,7 +397,7 @@ void ProjectionSurface::setInteractionMode(int mode) {
 }
 
 /**
- * Return detector id at image coordinats x,y if in pick mode. -1 otherwise
+ * Return detector id at image coordinates x,y if in pick mode. -1 otherwise
  */
 int ProjectionSurface::getDetectorID(int x, int y) const {
   size_t pickID = getPickID(x, y);

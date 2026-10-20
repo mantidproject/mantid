@@ -1131,10 +1131,10 @@ void Instrument::saveNexus(Nexus::File *file, const std::string &group) const {
 
 /* A private helper function so save information about a set of detectors to
  * Nexus
- *  @param file :: open Nexus file ready to recieve the info about the set of
+ *  @param file :: open Nexus file ready to receive the info about the set of
  * detectors
  *                 a group must be open that has only one call of this function.
- *  @param detIDs :: the dectector IDs of the detectors belonging to the set
+ *  @param detIDs :: the detector IDs of the detectors belonging to the set
  */
 void Instrument::saveDetectorSetInfoToNexus(Nexus::File *file, const std::vector<detid_t> &detIDs) const {
 

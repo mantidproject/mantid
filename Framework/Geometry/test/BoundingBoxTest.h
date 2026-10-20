@@ -317,8 +317,8 @@ private:
     TS_ASSERT_EQUALS(bbox.isPointInside(V3D(0.0, 0.0, 0.0)), true);
 
     const double tol = Mantid::Kernel::Tolerance;
-    /// The test is a strictly less-than test so when outside we need slighly
-    /// more than the tolerance to be truely outside
+    /// The test is a strictly less-than test so when outside we need slightly
+    /// more than the tolerance to be truly outside
     double singleDimValue = insideTest ? unit - tol : unit + tol + 0.01 * tol;
     // Near, but inside, +X-edge
     TS_ASSERT_EQUALS(bbox.isPointInside(V3D(singleDimValue, 0.0, 0.0)), insideTest);

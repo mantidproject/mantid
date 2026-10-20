@@ -83,7 +83,7 @@ ISISInstrumentDataCache::validateInstrumentAndNumber(const std::string &fileName
   std::string fileNameCopy = fileName;
   std::string suffix = FileFinder::Instance().extractAllowedSuffix(fileNameCopy);
   if (!suffix.empty()) {
-    throw std::invalid_argument("Unsuported format: Suffix detected: " + suffix);
+    throw std::invalid_argument("Unsupported format: Suffix detected: " + suffix);
   }
 
   auto [instrName, runNumber] = splitIntoInstrumentAndNumber(fileName);

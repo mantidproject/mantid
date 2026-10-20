@@ -97,7 +97,7 @@ private:
   }
 
   // Get a sample results table in the format used by the catalog search
-  // algoorithm, CatalogGetDataFiles
+  // algorithm, CatalogGetDataFiles
   ITableWorkspace_sptr getSampleCatalogResults() {
     auto table = WorkspaceFactory::Instance().createTable();
     table->addColumn("str", "Name");
@@ -123,7 +123,7 @@ private:
   }
 
   // Get a sample results table in the format used by the catalog search
-  // algoorithm, ISISJournalGetExperimentRuns
+  // algorithm, ISISJournalGetExperimentRuns
   ITableWorkspace_sptr getSampleJournalResults() {
     auto table = WorkspaceFactory::Instance().createTable();
     table->addColumn("str", "Name");

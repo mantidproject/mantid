@@ -32,7 +32,7 @@ public:
   const std::string category() const override { return "Muon\\DataHandling"; }
   /// Algorithm's summary for identification
   const std::string summary() const override {
-    return "Load a file containing grouping/pairing infromation (XML format) "
+    return "Load a file containing grouping/pairing information (XML format) "
            "and apply the grouping and pairing analysis to the input "
            "workspace.";
   }

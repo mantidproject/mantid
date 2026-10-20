@@ -90,7 +90,7 @@ class SampleLogs(ObservingPresenter):
         selected_rows = self.view.get_selected_row_indexes()
         # set experiment info of model to one from view
         self.model.set_exp(self.view.get_exp())
-        # create a new table as eveything has changed
+        # create a new table as everything has changed
         self.setup_table()
         # reselect previously selected rows
         self.view.set_selected_rows(selected_rows)

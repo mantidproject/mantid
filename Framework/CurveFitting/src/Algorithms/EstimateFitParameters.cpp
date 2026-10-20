@@ -334,7 +334,7 @@ void EstimateFitParameters::execConcrete() {
   auto func = costFunction->getFittingFunction();
 
   // Use additional constraints on parameters tied in some way
-  // to the varied parameters to exculde unwanted results.
+  // to the varied parameters to exclude unwanted results.
   std::vector<std::unique_ptr<IConstraint>> constraints;
   std::string constraintStr = getProperty("Constraints");
   if (!constraintStr.empty()) {

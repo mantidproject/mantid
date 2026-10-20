@@ -81,7 +81,7 @@ std::string checkBinning(const std::vector<double> &binning) {
         error = "Min must be < max limit for binning";
       }
     } else {
-      error = "Unknown binning prameters for dimension.";
+      error = "Unknown binning parameters for dimension.";
     }
   }
   return error;
@@ -210,7 +210,7 @@ MDHistoWorkspace_sptr createShapedOutput(IMDHistoWorkspace const *const inWS,
  * increment the iterator. Masked bins do not contribute.
  * @param iterator : Iterator to use in sum
  * @param box : Box implicit function defining valid region.
- * @param sumSignal : Accumlation in/out ref.
+ * @param sumSignal : Accumulation in/out ref.
  * @param sumSQErrors : Accumulation error in/out ref. Squared value.
  * @param sumNEvents : Accumulation n_event in/out ref.
  */
@@ -309,7 +309,7 @@ void IntegrateMDHistoWorkspace::exec() {
       /* ceil(wout/win) = n_pixels in input corresponding to 1 pixel in output.
          The width vector is the total width. So we always need to double it to
          take account of the whole region.
-         For example, 8/4 = 2, but thats only 1 pixel on each side of the
+         For example, 8/4 = 2, but that's only 1 pixel on each side of the
          center, we need 2 * that to give the correct answer of 4.
       */
       widthVector[i] = 2 * static_cast<int>(std::ceil(binWidthsOut[i] / inWS->getDimension(i)->getBinWidth()));
@@ -319,7 +319,7 @@ void IntegrateMDHistoWorkspace::exec() {
       }
     }
 
-    // Outer loop over the output workspace iterator poistions.
+    // Outer loop over the output workspace iterator positions.
     const int nThreads = Mantid::API::FrameworkManager::Instance().getNumOMPThreads(); // NThreads to Request
 
     auto outIterators = outWS->createIterators(nThreads, nullptr);
@@ -393,7 +393,7 @@ void IntegrateMDHistoWorkspace::exec() {
 }
 
 /**
- * Overriden validate inputs
+ * Overridden validate inputs
  * @return map of property names to problems for bad inputs
  */
 std::map<std::string, std::string> Mantid::MDAlgorithms::IntegrateMDHistoWorkspace::validateInputs() {

@@ -139,7 +139,7 @@ private:
   /** Helper function to create a instance of NearestNeighbourResults
    *
    * @param k :: the number of neighbours searched for
-   * @param nnIndexList :: the ordered list of indicies matching the closest k
+   * @param nnIndexList :: the ordered list of indices matching the closest k
    *neighbours
    * @param nnDistList :: the ordered list of distances matching the closest k
    *neighbours

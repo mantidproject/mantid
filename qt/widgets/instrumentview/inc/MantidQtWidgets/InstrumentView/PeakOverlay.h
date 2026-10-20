@@ -143,7 +143,7 @@ private:
 
   QMultiHash<int, PeakMarker2D *> m_det2marker; ///< detector ID to PeakMarker2D map
   mutable QList<PeakHKL> m_labels;
-  std::shared_ptr<Mantid::API::IPeaksWorkspace> m_peaksWorkspace; ///< peaks to be drawn ontop of the surface
+  std::shared_ptr<Mantid::API::IPeaksWorkspace> m_peaksWorkspace; ///< peaks to be drawn on top of the surface
   UnwrappedSurface *m_surface;                                    ///< pointer to the surface this overlay is applied to
   mutable int m_precision;
   mutable bool m_showRows;   ///< flag to show peak row index

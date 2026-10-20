@@ -146,7 +146,7 @@ void InstrumentBuilder::addBank(const std::string &localName, const Eigen::Vecto
 
 std::unique_ptr<const Geometry::Instrument> InstrumentBuilder::createInstrument() {
   sortDetectors();
-  // Create the new replacement first incase it throws
+  // Create the new replacement first in case it throws
   auto temp = std::make_unique<Geometry::Instrument>(m_instrument->getName());
   auto *product = m_instrument.release();
   m_instrument = std::move(temp);

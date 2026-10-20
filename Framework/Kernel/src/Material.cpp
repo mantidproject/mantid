@@ -255,7 +255,7 @@ double Material::totalScatterXSection() const { return m_totalScatterXSection; }
 /**
  * Get the absorption cross section for a given wavelength
  * @param lambda :: The wavelength to evaluate the cross section
- * @returns The value of the absoprtion cross section at
+ * @returns The value of the absorption cross section at
  * the given wavelength
  */
 double Material::absorbXSection(const double lambda) const { return m_linearAbsorpXSectionByWL * lambda; }
@@ -443,7 +443,7 @@ double Material::totalScatterLength(const double lambda) const {
 double Material::cohScatterLengthSqrd(const double lambda) const {
   UNUSED_ARG(lambda);
 
-  // these have already acconted for single atom case
+  // these have already accounted for single atom case
   const double real = this->cohScatterLengthReal();
   const double imag = this->cohScatterLengthImg();
 

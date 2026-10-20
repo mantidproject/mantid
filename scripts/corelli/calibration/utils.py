@@ -50,10 +50,10 @@ WIRE_GAP_IN_PIXELS = 15  # in pixels, distance between wire shadows along the tu
 
 def wire_positions(units: str = "pixels") -> np.ndarray:
     r"""
-    Vertical positions of the standar set of 16 wires. It's assumed that the center of the 16 wires
+    Vertical positions of the standard set of 16 wires. It's assumed that the center of the 16 wires
     coincides with the center of a tube.
 
-    :param units: either one of 'pixels' or 'meters'. If pixels, the bottom of the tube correspons
+    :param units: either one of 'pixels' or 'meters'. If pixels, the bottom of the tube corresponds
     to pixel 1. If 'meters', the center of the tube corresponds to the origin of coordinates.
 
     :raises: AssertionError when incorrect units are passed
@@ -134,7 +134,7 @@ def preprocess_banks(input_workspace: str, output_workspace: str) -> Workspace2D
         _data = np.array([_ws.y(me) for me in range(i, i + PIXELS_PER_TUBE)])
         _data = clean_signals(_data)
         for j in range(PIXELS_PER_TUBE):
-            _ws.setSharedY(i + j, _data[j])  # This apprently is the correct way to update Y
+            _ws.setSharedY(i + j, _data[j])  # This apparently is the correct way to update Y
 
     return _ws
 

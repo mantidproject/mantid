@@ -38,7 +38,7 @@ namespace {
 
 /// Helper struct for helping with joining exclusion ranges.
 /// Edge points of the ranges can be wrapped in this struct
-/// and sorted together without loosing their function.
+/// and sorted together without losing their function.
 struct RangePoint {
   enum Kind : char { Opening, Closing };
   /// The kind of the point: either opening or closing the range.
@@ -69,7 +69,7 @@ void joinOverlappingRanges(std::vector<double> &exclude) {
   }
   // The situation here is similar to matching brackets in an expression.
   // If we sort all the points in the input vector remembering their kind
-  // then a separate exclusion region starts with the first openning bracket
+  // then a separate exclusion region starts with the first opening bracket
   // and ends with the matching closing bracket. All brackets (points) inside
   // them can be dropped.
 
@@ -85,16 +85,16 @@ void joinOverlappingRanges(std::vector<double> &exclude) {
 
   // Clear the argument vector.
   exclude.clear();
-  // Start the level counter which shows the number of unmatched openning
+  // Start the level counter which shows the number of unmatched opening
   // brackets.
   size_t level(0);
   for (auto &point : points) {
     if (point.kind == RangePoint::Opening) {
       if (level == 0) {
-        // First openning bracket starts a new exclusion range.
+        // First opening bracket starts a new exclusion range.
         exclude.emplace_back(point.value);
       }
-      // Each openning bracket increases the level
+      // Each opening bracket increases the level
       ++level;
     } else {
       if (level == 1) {
@@ -261,14 +261,14 @@ void TableWorkspaceDomainCreator::createDomain(std::shared_ptr<API::FunctionDoma
     } else if (!std::isfinite(y)) {
       // nan or inf data
       if (!m_ignoreInvalidData)
-        throw std::runtime_error("Infinte number or NaN found in input data.");
+        throw std::runtime_error("Infinite number or NaN found in input data.");
       y = 0.0; // leaving inf or nan would break the fit
     } else if (m_noErrCol) {
       weight = 1.0;
     } else if (!std::isfinite(error)) {
       // nan or inf error
       if (!m_ignoreInvalidData)
-        throw std::runtime_error("Infinte number or NaN found in input data.");
+        throw std::runtime_error("Infinite number or NaN found in input data.");
     } else if (error <= 0) {
       if (!m_ignoreInvalidData)
         weight = 1.0;

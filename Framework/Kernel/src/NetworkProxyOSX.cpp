@@ -169,7 +169,7 @@ ProxyInfo proxyFromDictionary(CFDictionaryRef dict, CFStringRef enableKey, CFStr
 }
 
 /**
- * Specifially look for http proxy settings.
+ * Specifically look for http proxy settings.
  * @param dict :
  * @return Return the proxy info object.
  */

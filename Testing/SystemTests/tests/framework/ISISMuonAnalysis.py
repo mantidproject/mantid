@@ -26,7 +26,7 @@ class ISISMuonAnalysis(systemtesting.MantidSystemTest, metaclass=ABCMeta):
         - instr_name: A string giving the instrument name.
         - sample_run: An integer run number of the sample
         - period_data: A boolean denoting whether the file has period data.
-        - asym: A boolean to tell whether the plot type is assymetry or not.
+        - asym: A boolean to tell whether the plot type is asymmetry or not.
         - x_min: Float value of the minimum x.
         - x_max: Float value of the maximum x.
         - rebin: Boolean to tell whether rebinning is to be done.

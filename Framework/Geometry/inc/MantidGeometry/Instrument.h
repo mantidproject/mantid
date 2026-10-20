@@ -196,7 +196,7 @@ public:
 
   /// Set reference Frame
   void setReferenceFrame(std::shared_ptr<ReferenceFrame> frame);
-  /// Get refernce Frame
+  /// Get reference Frame
   std::shared_ptr<const ReferenceFrame> getReferenceFrame() const;
 
   /// To determine whether the instrument contains elements of some type

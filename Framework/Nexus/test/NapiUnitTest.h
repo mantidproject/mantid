@@ -170,7 +170,7 @@ public:
     TS_ASSERT_EQUALS(datatype, NXnumtype::CHAR);
 
     // read into a string through .data()
-    // NOTE this requries that the string already be the correct size.
+    // NOTE this requires that the string already be the correct size.
     // If it is too long, the string will contain junk data
     // If too short, the string will not contain all of the data
     string readme(30, 'A'); // pre-fill with junk

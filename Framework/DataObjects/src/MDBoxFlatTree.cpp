@@ -29,7 +29,7 @@ void EmplaceExperimentBlockNum(const std::string &name, std::list<uint16_t> &exp
     try {
       auto num = boost::lexical_cast<uint16_t>(name.substr(10, name.size() - 10));
       if (num < std::numeric_limits<uint16_t>::max() - 1) {
-        // dublicated experiment info names are impossible due to the
+        // duplicated experiment info names are impossible due to the
         // structure of the nexus file but missing -- can be found.
         experimentBlockNum.emplace_back(num);
       }
@@ -439,7 +439,7 @@ void MDBoxFlatTree::loadExperimentInfos(Mantid::Nexus::File *const file, const s
     std::string groupName = "experiment" + Kernel::Strings::toString(*itr);
     if (lazy) {
       auto ei = std::make_shared<API::FileBackedExperimentInfo>(filename, file->getAddress() + "/" + groupName);
-      // And add it to the mutliple experiment info.
+      // And add it to the multiple experiment info.
       mei->addExperimentInfo(ei);
     } else {
       auto ei = std::make_shared<API::ExperimentInfo>();
@@ -454,7 +454,7 @@ void MDBoxFlatTree::loadExperimentInfos(Mantid::Nexus::File *const file, const s
         } else {
           ei->readParameterMap(parameterStr);
         }
-        // And add it to the mutliple experiment info.
+        // And add it to the multiple experiment info.
         mei->addExperimentInfo(ei);
       } catch (std::exception &e) {
         g_log.information("Error loading section '" + groupName + "' of nxs file.");
@@ -497,7 +497,7 @@ void MDBoxFlatTree::loadExperimentInfos(Mantid::Nexus::File *const file, const s
     std::string groupName = "experiment" + Kernel::Strings::toString(*itr);
     if (lazy) {
       auto ei = std::make_shared<API::FileBackedExperimentInfo>(filename, file->getAddress() + "/" + groupName);
-      // And add it to the mutliple experiment info.
+      // And add it to the multiple experiment info.
       mei->addExperimentInfo(ei);
     } else {
       auto ei = std::make_shared<API::ExperimentInfo>();
@@ -512,7 +512,7 @@ void MDBoxFlatTree::loadExperimentInfos(Mantid::Nexus::File *const file, const s
         } else {
           ei->readParameterMap(parameterStr);
         }
-        // And add it to the mutliple experiment info.
+        // And add it to the multiple experiment info.
         mei->addExperimentInfo(ei);
       } catch (std::exception &e) {
         g_log.information("Error loading section '" + groupName + "' of nxs file.");
@@ -558,7 +558,7 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes, API::
   m_nDim = static_cast<int>(bc->getNDims());
   auto maxNdim = int(MDEventFactory::getMaxNumDim());
   if (m_nDim <= 0 || m_nDim > maxNdim)
-    throw std::runtime_error("Workspace dimesnions are not defined properly in the box controller");
+    throw std::runtime_error("Workspace dimensions are not defined properly in the box controller");
 
   int iEventType(0);
   if (m_eventType == "MDLeanEvent")
@@ -582,7 +582,7 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes, API::
       extentsVector[d].setExtents(static_cast<double>(m_Extents[i * m_nDim * 2 + d * 2]),
                                   static_cast<double>(m_Extents[i * m_nDim * 2 + d * 2 + 1]));
 
-    // retrieve initial and file location and the numner of the events which
+    // retrieve initial and file location and the number of the events which
     // belong to this box stored on the HDD
     uint64_t indexStart = m_BoxEventIndex[i * 2];
     uint64_t numEvents = m_BoxEventIndex[i * 2 + 1];

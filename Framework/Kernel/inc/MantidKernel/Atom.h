@@ -13,7 +13,7 @@
 namespace Mantid {
 namespace PhysicalConstants {
 /**
- * Struture to hold the common information for an atom. This also allows access
+ * Structure to hold the common information for an atom. This also allows access
  * to the NeutronAtom information by a pointer. The information in this table
  * is generated using the DANSE project's periodictable python module.
  */

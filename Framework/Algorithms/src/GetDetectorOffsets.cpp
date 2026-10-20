@@ -65,7 +65,7 @@ void GetDetectorOffsets::init() {
                   std::make_shared<StringListValidator>(FunctionFactory::Instance().getFunctionNames<IPeakFunction>()),
                   "The function type for fitting the peaks.");
   declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("EstimateFWHM", false),
-                  "Whether to esimate FWHM of peak function when estimating fit parameters");
+                  "Whether to estimate FWHM of peak function when estimating fit parameters");
   declareProperty("MaxOffset", 1.0, "Maximum absolute value of offsets; default is 1");
 
   /* Signed mode calculates offset in number of bins */

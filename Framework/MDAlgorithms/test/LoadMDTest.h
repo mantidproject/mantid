@@ -933,12 +933,12 @@ public:
     // We expect the first three dimensions to be QSample and the fourth to be a
     // GeneralFrame
     for (int index = 0; index < 3; ++index) {
-      TSM_ASSERT_EQUALS("The first three dimension should contain an Unkown frame",
+      TSM_ASSERT_EQUALS("The first three dimension should contain an Unknown frame",
                         iws->getDimension(index)->getMDFrame().name(),
                         Mantid::Geometry::UnknownFrame::UnknownFrameName);
     }
 
-    TSM_ASSERT_EQUALS("The fourth dimension should contain an Unkown frame", iws->getDimension(3)->getMDFrame().name(),
+    TSM_ASSERT_EQUALS("The fourth dimension should contain an Unknown frame", iws->getDimension(3)->getMDFrame().name(),
                       Mantid::Geometry::UnknownFrame::UnknownFrameName);
     // Clean up
     if (iws) {

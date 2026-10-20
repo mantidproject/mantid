@@ -630,7 +630,7 @@ public:
     const int numWeakEvents = 100;
     generatePeak(event_Qs, peak_1, 0.1, numStrongEvents, 1); // strong peak
     generatePeak(event_Qs, peak_2, 0.1, numWeakEvents, 1);   // weak peak
-    generatePeak(event_Qs, peak_2, 0.1, 0, 1);               // non-existant peak
+    generatePeak(event_Qs, peak_2, 0.1, 0, 1);               // non-existent peak
 
     IntegrationParameters params;
     params.peakRadius = 1.0;

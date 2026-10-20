@@ -41,7 +41,7 @@ namespace Mantid::Crystal {
 
 DECLARE_ALGORITHM(IntegratePeakTimeSlices)
 
-// Attr, m_AttributeValues, and StatBase indicies
+// Attr, m_AttributeValues, and StatBase indices
 #define IStartRow 0
 #define IStartCol 1
 #define INRows 2
@@ -64,7 +64,7 @@ DECLARE_ALGORITHM(IntegratePeakTimeSlices)
 #define IVarBoundary 19
 #define NAttributes 20
 
-// Parameter indicies
+// Parameter indices
 #define IBACK 0
 #define ITINTENS 1
 #define IXMEAN 2
@@ -1047,7 +1047,7 @@ bool DataModeHandler::setStatBase(std::vector<double> const &statBase)
       row_calc = lastRow;
       back_calc = b;
       Intensity_calc = statBase[IIntensities] - b * nCells;
-      if (Vx_calc <= 0 || Vy_calc <= 0) // EdgePeak but not big enuf
+      if (Vx_calc <= 0 || Vy_calc <= 0) // EdgePeak but not big enough
         return true;
 
       const double params[] = {back_calc, Intensity_calc, col_calc, row_calc, Vx_calc, Vy_calc, Vxy_calc};
@@ -1394,7 +1394,7 @@ void IntegratePeakTimeSlices::SetUpData(MatrixWorkspace_sptr &Data, MatrixWorksp
 }
 
 /**
- * Prepares the data for futher analysis adding meta data and marking data on
+ * Prepares the data for further analysis adding meta data and marking data on
  * the edges of detectors
  * @param Data: Output workspace
  * @param inpWkSpace: Input workspace
@@ -2512,4 +2512,4 @@ double DataModeHandler::CalcSampleIntensityMultiplier(const double *params) cons
 }
 
 } // namespace Mantid::Crystal
-// Attr indicies
+// Attr indices

@@ -44,7 +44,7 @@ class from one subproject. CMakeList.txt is adjusted. For details, run:
 Profiling
 ---------
 
-Profiling could mean tracking start-up, the progress of an algoirthm or performance. See :doc:`ProfilingOverview` for more details.
+Profiling could mean tracking start-up, the progress of an algorithm or performance. See :doc:`ProfilingOverview` for more details.
 
 Leak checking etc
 -----------------

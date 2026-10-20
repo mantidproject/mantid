@@ -99,7 +99,7 @@ private:
   void getDetectorGeometry(const Geometry::IDetector &det, double &detRadius, Kernel::V3D &detAxis);
   /// Computes the distance to the given shape from a starting point
   double distToSurface(const Kernel::V3D &start, const Geometry::IObject *shape) const;
-  /// Computes the detector efficiency for a given paramater
+  /// Computes the detector efficiency for a given parameter
   double detectorEfficiency(const double alpha) const;
   /// Computes an approximate expansion of a Chebysev polynomial
   double chebevApprox(double a, double b, const double exspansionCoefs[], double x) const;

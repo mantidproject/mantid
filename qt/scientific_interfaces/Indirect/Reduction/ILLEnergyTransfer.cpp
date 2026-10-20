@@ -165,7 +165,7 @@ void ILLEnergyTransfer::handleRun() {
     reductionAlg->setProperty("SumRuns", m_uiForm.ckSum->isChecked());
     reductionAlg->setProperty("CropDeadMonitorChannels", m_uiForm.cbCrop->isChecked());
 
-    // Calibraiton peak range
+    // Calibration peak range
     if (!calibrationFilename.toStdString().empty()) {
       auto range = m_uiForm.lePeakRange->text().split(',');
       m_peakRange[0] = range[0].toDouble();

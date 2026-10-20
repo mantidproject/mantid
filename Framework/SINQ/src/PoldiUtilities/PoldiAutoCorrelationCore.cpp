@@ -163,7 +163,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(const DataObje
      * intensity value through,
      * taking into account the d-Value and the weight. Since the calculations
      * for different d-Values do not
-     * depend on eachother, the for-loop is marked as a candidate for
+     * depend on each other, the for-loop is marked as a candidate for
      * parallelization. Since the calculation
      * of the intensity is rather complex and typical d-grids consist of ~5000
      * elements, the parallelization

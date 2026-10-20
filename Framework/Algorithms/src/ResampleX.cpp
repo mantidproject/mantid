@@ -118,7 +118,7 @@ string determineXMinMax(const MatrixWorkspace_sptr &inputWS, vector<double> &xmi
     xmaxs.insert(xmaxs.end(), numSpectra - xmaxs.size(), value);
   }
 
-  // should the individiual values be calculated?
+  // should the individual values be calculated?
   const bool updateXMins = xmins.empty(); // they weren't set
   const bool updateXMaxs = xmaxs.empty(); // they weren't set
 
@@ -213,7 +213,7 @@ double ResampleX::determineBinning(MantidVec &xValues, const double xmin, const 
       throw std::invalid_argument("Cannot calculate log of xmax=0");
     if (xmin < 0. && xmax > 0.) {
       std::stringstream msg;
-      msg << "Cannot calculate logorithmic binning that changes sign (xmin=" << xmin << ", xmax=" << xmax << ")";
+      msg << "Cannot calculate logarithmic binning that changes sign (xmin=" << xmin << ", xmax=" << xmax << ")";
       throw std::invalid_argument(msg.str());
     }
 

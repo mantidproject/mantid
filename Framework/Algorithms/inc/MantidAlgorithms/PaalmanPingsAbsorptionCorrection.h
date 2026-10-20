@@ -104,7 +104,7 @@ private:
   /// interpolated linearly
   int64_t m_xStep; ///< The step in bin number between adjacent points
 
-  /// Create the gague volume for the correction
+  /// Create the gauge volume for the correction
   std::shared_ptr<const Geometry::IObject> constructGaugeVolume();
   double m_cubeSideSample;    ///< The length of the side of an element cube in m
   double m_cubeSideContainer; ///< The length of the side of an element cube in m

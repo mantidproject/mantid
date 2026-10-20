@@ -188,7 +188,7 @@ From here, the transformation to each run's sample orientation is exactly the sa
 On ENGINX, there are two main goniometers used - the Eulerian Cradle and the Cybaman. Extracting the state transformations for these two goniometers
 setups is done with different approaches, but should provide coverage for a broad range of additional setups.
 
-The general procedure for transfering these pieces of information onto the relevant workspaces is as follows. First define a "Reference Workspace" upon which the initial
+The general procedure for transferring these pieces of information onto the relevant workspaces is as follows. First define a "Reference Workspace" upon which the initial
 sample shape and orientation can be saved (along with any information on material which might be used for absorption correction). Next, load in all the run workspaces
 corresponding to this experiment. Load an orientation file to set the goniometer transformation on the individual workspaces. Finally, copy the sample definition across from the
 reference workspace to each of the run workspaces.

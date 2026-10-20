@@ -510,7 +510,7 @@ public:
       }
     }
     if (error_count > 0) {
-      cout << "files are diffrent\n";
+      cout << "files are different\n";
       return false;
     } else {
       cout << "files are the same\n";

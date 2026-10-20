@@ -39,7 +39,7 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
         self.declareProperty("AlongTubes", "1", mantid.kernel.StringListValidator(py), "Number of pixels across tubes to be grouped")
         self.declareProperty("AcrossTubes", "1", mantid.kernel.StringListValidator(px), "Number of pixels across tubes to be grouped")
         self.declareProperty(
-            "Instrument", instrument[0], mantid.kernel.StringListValidator(instrument), "The instrument for wich to create grouping"
+            "Instrument", instrument[0], mantid.kernel.StringListValidator(instrument), "The instrument for which to create grouping"
         )
 
         IDF_enabled = mantid.kernel.VisibleWhenProperty("Instrument", mantid.kernel.PropertyCriterion.IsEqualTo, "InstrumentDefinitionFile")

@@ -28,7 +28,7 @@ from mantid.simpleapi import (
 class PoldiDataAnalysis(PythonAlgorithm):
     """
     This workflow algorithm uses all of the POLDI specific algorithms to perform a complete data analysis,
-    starting from the correlation method and preliminary 1D-fits, proceeding with either one or two passses
+    starting from the correlation method and preliminary 1D-fits, proceeding with either one or two passes
     of 2D-fitting.
 
     All resulting workspaces are grouped together at the end so that they are all in one place.

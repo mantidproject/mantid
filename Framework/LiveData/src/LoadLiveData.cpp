@@ -43,7 +43,7 @@ void copyInstrument(const API::Workspace *source, API::Workspace *target) {
   if (!source || !target)
     return;
 
-  // Special handling for Worspace Groups.
+  // Special handling for Workspace Groups.
   if (source->isGroup() && target->isGroup()) {
     auto *sourceGroup = dynamic_cast<const API::WorkspaceGroup *>(source);
     auto const *targetGroup = dynamic_cast<API::WorkspaceGroup *>(target);
@@ -188,7 +188,7 @@ Mantid::API::Workspace_sptr LoadLiveData::runProcessing(Mantid::API::Workspace_s
 
 //----------------------------------------------------------------------------------------------
 /** Perform the processing on the chunk of workspace data, using the
- * algorithm or scrip given in the algorithm properties
+ * algorithm or script given in the algorithm properties
  *
  * @param chunkWS :: chunk workspace to process
  * @return the processed workspace sptr
@@ -322,7 +322,7 @@ void LoadLiveData::addMDWSChunk(Workspace_sptr &accumWS, const Workspace_sptr &c
  * @param chunkWS :: processed live data chunk workspace
  */
 void LoadLiveData::replaceChunk(Mantid::API::Workspace_sptr chunkWS) {
-  // We keep a temporary to the orignal workspace containing the instrument
+  // We keep a temporary to the original workspace containing the instrument
   auto instrumentWS = m_accumWS;
   // When the algorithm exits the chunk workspace will be renamed
   // and overwrite the old one

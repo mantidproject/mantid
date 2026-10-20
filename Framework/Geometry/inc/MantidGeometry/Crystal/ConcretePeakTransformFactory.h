@@ -19,7 +19,7 @@ argument
 template <typename PeakTransformProduct> class ConcretePeakTransformFactory : public PeakTransformFactory {
 public:
   /**
-  Overriden Factory Method.
+  Overridden Factory Method.
   @param xPlotLabel : X-axis plot label
   @param yPlotLabel : Y-axis plot label
   */
@@ -28,7 +28,7 @@ public:
   }
 
   /**
-  Overriden Factory Method.
+  Overridden Factory Method.
   */
   PeakTransform_sptr createDefaultTransform() const override { return std::make_shared<PeakTransformProduct>(); }
 };

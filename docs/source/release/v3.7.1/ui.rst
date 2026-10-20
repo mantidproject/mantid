@@ -16,7 +16,7 @@ Line plots
 
 - The default for plotting line plots has been changed to include plotting error bars on every data point.
   This in general makes more sense than the previous approach of missing some points based on the data density.
-- However it can make dense data plots with errors look more obscured, so if you preferred the old approach you can change it back by unselecting the option Draw All Errors in the View->Prefences menu.
+- However it can make dense data plots with errors look more obscured, so if you preferred the old approach you can change it back by unselecting the option Draw All Errors in the View->Preferences menu.
 
 .. figure::  ../../images/R37PlotAllErrorsOption.png
    :align: center

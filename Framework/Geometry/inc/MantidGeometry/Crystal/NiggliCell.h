@@ -32,7 +32,7 @@ public:
   // UnitCell constructor
   NiggliCell(const UnitCell &uc, const Kernel::DblMatrix &Umatrix = Kernel::DblMatrix(3, 3, true));
   // Access private variables
-  /// Check if a,b,c cell has angles satifying Niggli condition within epsilon
+  /// Check if a,b,c cell has angles satisfying Niggli condition within epsilon
   static bool HasNiggliAngles(const Kernel::V3D &a_dir, const Kernel::V3D &b_dir, const Kernel::V3D &c_dir,
                               double epsilon);
 

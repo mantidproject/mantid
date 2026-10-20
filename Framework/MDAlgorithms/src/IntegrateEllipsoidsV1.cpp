@@ -456,7 +456,7 @@ void IntegrateEllipsoidsV1::exec() {
 
   // get the events and add
   // them to the inegrator
-  // set up a descripter of where we are going
+  // set up a descriptor of where we are going
   this->initTargetWSDescr(wksp);
 
   // set up the progress bar

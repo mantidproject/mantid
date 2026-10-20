@@ -29,7 +29,7 @@ value of type std::optional<T> will be returned.
  * @param alg : A pointer to the algorithm to which the property belongs
  * @param propName : The name of the property in the algorithm
  * @param instrument : A pointer to the instrument
- * @param idf_name : The name of the property in the Instrument Defintion
+ * @param idf_name : The name of the property in the Instrument Definition
  * @return A value of type T that is either the default value or the user
  * supplied value.
  *
@@ -60,7 +60,7 @@ T checkForMandatoryInstrumentDefault(const Mantid::API::Algorithm *const alg, co
  * @param alg : A pointer to the algorithm to which the property belongs
  * @param propName : The name of the property in the algorithm
  * @param instrument : A pointer to the instrument
- * @param idf_name : The name of the property in the Instrument Defintion
+ * @param idf_name : The name of the property in the Instrument Definition
  * @return A boost optional value of type T that is either the default value,
  * the user supplied value or an uninitialized std::optional.
  *

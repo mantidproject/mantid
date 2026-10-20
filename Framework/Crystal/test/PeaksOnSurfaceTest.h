@@ -295,7 +295,7 @@ therefore does cross the surface boundaries.
     const double delta = 0.01;
     const V3D lineStart(-1, 1, 0);
     const V3D lineEnd(1, 1, 0);
-    const V3D line = lineEnd - lineStart; // Defines a line running horzontal
+    const V3D line = lineEnd - lineStart; // Defines a line running horizontal
                                           // along x at y = 1 and z = 0, between
                                           // x = -1 and 1
 
@@ -318,7 +318,7 @@ therefore does cross the surface boundaries.
 };
 
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------
-Perfomance Tests
+Performance Tests
 -------------------------------------------------------------------------------------------------------------------------------------------------------*/
 class PeaksOnSurfaceTestPerformance : public CxxTest::TestSuite {
 

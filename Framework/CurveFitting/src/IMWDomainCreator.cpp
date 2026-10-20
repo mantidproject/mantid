@@ -296,7 +296,7 @@ std::shared_ptr<API::Workspace> IMWDomainCreator::createOutputWorkspace(
     m_manager->setProperty(outputWorkspacePropertyName, ws);
   }
 
-  // If the input is a not an EventWorkspace and is a distrubution, then convert
+  // If the input is a not an EventWorkspace and is a distribution, then convert
   // the output also to a distribution
   if (!std::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(m_matrixWorkspace)) {
     if (m_matrixWorkspace->isDistribution()) {
@@ -313,7 +313,7 @@ std::shared_ptr<API::Workspace> IMWDomainCreator::createOutputWorkspace(
  */
 void IMWDomainCreator::appendCompositeFunctionMembers(std::list<API::IFunction_sptr> &functionList,
                                                       const API::IFunction_sptr &function) const {
-  // if function is a Convolution then output of convolved model's mebers may be
+  // if function is a Convolution then output of convolved model's members may be
   // required
   if (m_convolutionCompositeMembers && std::dynamic_pointer_cast<Functions::Convolution>(function)) {
     appendConvolvedCompositeFunctionMembers(functionList, function);

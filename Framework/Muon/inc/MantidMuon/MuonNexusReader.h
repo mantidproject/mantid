@@ -41,7 +41,7 @@ private:
   void openFirstNXentry(Mantid::LegacyNexus::File &handle);
   bool readMuonLogData(Mantid::LegacyNexus::File &handle); ///< method to read the fields of open NXlog section
   std::vector<std::vector<float>> m_logValues,             ///< array of values for i'th NXlog section
-      m_logTimes;                                          ///< arrys of times for i'th NXlog section
+      m_logTimes;                                          ///< arrays of times for i'th NXlog section
   std::vector<std::vector<std::string>> m_logStringValues; ///< array of string values for i'th NXlog section
   std::string m_startTime;                                 ///< string startTime which must be read from Nexus
   /// file to base all NXlog times on
@@ -76,7 +76,7 @@ public:
                                                 /// return sample name
   std::string const &getSampleName() const { return m_nexusSampleName; };
   int numberOfLogs() const;                  ///< Number of NXlog sections read from file
-  int getLogLength(const int i) const;       ///< Lenght of i'th log
+  int getLogLength(const int i) const;       ///< Length of i'th log
   std::string getLogName(const int i) const; ///< Name of i'th log
   void getLogValues(const int &logNumber, const int &logSequence, std::time_t &logTime,
                     double &value); ///< get logSequence pair of logNumber log

@@ -165,7 +165,7 @@ class SXD(BaseSX):
         :param peaks: peak table with a UB
         :param save_dir: for xml file containing calibration
         :param tol: for indexing (good to pick a relatively large tol as lots of peaks are required in each bank)
-        :param idf_filename: name of .xml for SXD instrument defintion (used if workspace not loaded for a given run)
+        :param idf_filename: name of .xml for SXD instrument definition (used if workspace not loaded for a given run)
         :param **kwargs: key word arguments for SCDCalibratePanels
         :return: xml_path: path to detector calibration xml file which can be applied using apply_calibration_xml or in the class init
         """
@@ -189,7 +189,7 @@ class SXD(BaseSX):
             wsname = "empty"
             mantid.LoadEmptyInstrument(Filename=idf_filename, OutputWorkspace=ws, EnableLogging=False)
         peaks_name = SXD.retrieve(peaks).name()
-        # report inital indexing
+        # report initial indexing
         nindexed, *_ = mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol_to_report, CommonUBForAll=False, EnableLogging=False)
         logger.notice(f"Indexed initially = {nindexed}/{npeaks} peaks within {tol_to_report}")
         mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol, CommonUBForAll=False, EnableLogging=False)
@@ -231,7 +231,7 @@ class SXD(BaseSX):
                 BankName="bank" + str(ibank),
                 EnableLogging=False,
             )
-            # report inital indexing
+            # report initial indexing
             npeaks_bank = SXD.retrieve(peaks_bank).getNumberPeaks()
             nindexed, *_ = mantid.IndexPeaks(PeaksWorkspace=peaks_bank, Tolerance=tol_to_report, CommonUBForAll=False, EnableLogging=False)
             logger.notice(f"Indexed before optimization = {nindexed}/{npeaks_bank} peaks within {tol_to_report}")
@@ -298,7 +298,7 @@ class SXD(BaseSX):
         Apply .xml calibration file to workspaces loaded (and peak workspaces if present) - subsequent runs loaded
         will automatically have the new calibration
         :param xml_path: path to xml cal file
-        :param idf_filename:  name of .xml for SXD instrument defintion (used if workspace not loaded for a given run)
+        :param idf_filename:  name of .xml for SXD instrument definition (used if workspace not loaded for a given run)
         """
         use_empty = False
         ws = self.get_ws_name(run)

@@ -74,7 +74,7 @@ public:
       // the first event has the weight of the fine histogram width
       TS_ASSERT_DELTA(raw_events->front().weight(), divisor, .1);
 
-      // confim that all events were added
+      // confirm that all events were added
       const double total_weight =
           std::accumulate(raw_events->cbegin(), raw_events->cend(), 0.,
                           [](const auto &current, const auto &value) { return current + value.weight(); });

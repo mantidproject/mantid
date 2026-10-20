@@ -650,7 +650,7 @@ void export_MatrixWorkspace() {
            "Returns workspace index correspondent to the given spectrum "
            "number. Throws if no such spectrum is present in the workspace")
       .def("getIndicesFromDetectorIDs", &getIndicesFromDetectorIDs, (arg("self"), arg("detID_list")),
-           "Returns a list of workspace indices from the corrresponding "
+           "Returns a list of workspace indices from the corresponding "
            "detector IDs.")
       .def("getDetectorIDToWorkspaceIndexMap", &getDetectorIDToWorkspaceIndexMap,
            (arg("self"), arg("throwIfMultipleDets"), arg("ignoreIfNoValidDets")),
@@ -685,7 +685,7 @@ void export_MatrixWorkspace() {
            "masked, otherwise an exception will be thrown")
       .def("findY", &findY, (arg("self"), arg("value"), arg("start") = make_tuple(0, 0)),
            "Find first index in Y equal to value. Start may be specified to "
-           "begin at a specifc index. Returns tuple with the "
+           "begin at a specific index. Returns tuple with the "
            "histogram and bin indices.")
       .def("getSampleDetails", &getSampleDetailsDeprecated, arg("self"), return_internal_reference<>(),
            "Return the Run object for this workspace (deprecated, use "

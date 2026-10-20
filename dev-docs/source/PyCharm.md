@@ -269,7 +269,7 @@ Advantages of this approach:
 - You can have multiple instances of PyCharm running with environment configuration for separate repositories.
   This is otherwise not possible, as all PyCharm instances seem to share a parent process and environment.
   (as is the case of 11/01/2019, it might change in the future)
-- This makes possible switching projects for multiple repositories via the File > Open Recent ... menu, as when the new project is opened its environment won't be poluted with environment variables from the last one.
+- This makes possible switching projects for multiple repositories via the File > Open Recent ... menu, as when the new project is opened its environment won't be polluted with environment variables from the last one.
 - This can cause errors when the external dependencies aren't quite the same between all the repositories, as some packages might be missing, or be different versions.
 
 Disadvantages:
@@ -400,6 +400,6 @@ Please add to this list if you find a useful plugin of your own
 
 Note: Requires PyCharm Professional.
 
-PyCharm supports deployment and syncronisation of written code to a remote server via SSH.
+PyCharm supports deployment and synchronisation of written code to a remote server via SSH.
 
 Open a local copy of the project and then follow the guides here for [configuring the remote interpreter](https://www.jetbrains.com/help/pycharm/configuring-remote-interpreters-via-ssh.html) and [creating a deployment configuration](https://www.jetbrains.com/help/pycharm/creating-a-remote-server-configuration.html).

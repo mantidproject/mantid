@@ -253,7 +253,7 @@ public:
     IPeakFunction_sptr pv = getInitializedPV(x0, intensity, fwhm, min_eta);
     // Mantid::CurveFitting::Jacobian jacobian(1, 4);
 
-    // evalulate at N points
+    // evaluate at N points
     std::vector<double> xvalues{-1}; // consider to expand to [-2, -1, 0]
     for (double x : xvalues) {
       // calculate by Jacobian (analytically)
@@ -264,7 +264,7 @@ public:
       std::vector<double> vec_jocob_deriv;
       double param_value = min_eta;
       while (param_value < max_eta - eta_resolution) {
-        // update eta and calcualte Jocobian
+        // update eta and calculate Jocobian
         pv->setParameter(0, param_value);
         pv->functionDeriv(domain, jacobian);
         // get value and add to the vector
@@ -302,7 +302,7 @@ public:
     // create function
     IPeakFunction_sptr pv = getInitializedPV(x0, min_intensity, fwhm, eta);
 
-    // evalulate at N points
+    // evaluate at N points
     std::vector<double> xvalues{-1}; // consider to expand to [-2, -1, 0]
     for (double x : xvalues) {
       // calculate by Jacobian (analytically)
@@ -313,7 +313,7 @@ public:
       std::vector<double> vec_jocob_deriv;
       double param_value = min_intensity;
       while (param_value < max_intensity - intensity_resolution) {
-        // update intensity (index=1) and calcualte Jocobian
+        // update intensity (index=1) and calculate Jocobian
         pv->setParameter(1, param_value);
         pv->functionDeriv(domain, jacobian);
         // get value and add to the vector
@@ -350,7 +350,7 @@ public:
     // create function
     IPeakFunction_sptr pv = getInitializedPV(min_x0, intensity, fwhm, eta);
 
-    // evalulate at N points
+    // evaluate at N points
     std::vector<double> xvalues{-1}; // consider to expand to [-2, -1, 0]
     for (double x : xvalues) {
       // calculate by Jacobian (analytically)
@@ -361,7 +361,7 @@ public:
       std::vector<double> vec_jocob_deriv;
       double param_value = min_x0;
       while (param_value < max_x0 - x0_resolution) {
-        // update eta and calcualte Jocobian
+        // update eta and calculate Jocobian
         pv->setParameter(2, param_value);
         pv->functionDeriv(domain, jacobian);
         // get value and add to the vector
@@ -397,7 +397,7 @@ public:
     // create function
     IPeakFunction_sptr pv = getInitializedPV(x0, intensity, min_fwhm, eta);
 
-    // evalulate at N points
+    // evaluate at N points
     std::vector<double> xvalues{-1}; // consider to expand to [-2, -1, 0]
     for (double x : xvalues) {
       // calculate by Jacobian (analytically)
@@ -408,7 +408,7 @@ public:
       std::vector<double> vec_jocob_deriv;
       double param_value = min_fwhm;
       while (param_value < max_fwhm - fwhm_resolution) {
-        // update eta and calcualte Jocobian
+        // update eta and calculate Jocobian
         pv->setParameter(3, param_value);
         pv->functionDeriv(domain, jacobian);
         // get value and add to the vector
@@ -464,14 +464,14 @@ private:
     return result.result;
   }
 
-  /** evalulate the derivative numerically for an arbitrary parameter at x
+  /** evaluate the derivative numerically for an arbitrary parameter at x
    * calculate \partial pV() / \partial p_i  where i = 0, 1, 2 or 3 for mixing,
    * @param pv : IPeakFunction pointer to PseudoVoigt
    * @param param_index: index of the parameter (mixing: 0; I: 1; x0: 2; FHWM:
    * 3)
-   * @param min_value: minimum value of the parameter to evalulate the
+   * @param min_value: minimum value of the parameter to evaluate the
    * derivative
-   * @param max_value: maximum value of the parameter to evalulate the
+   * @param max_value: maximum value of the parameter to evaluate the
    * derivative
    * @param resolution: resolution (min step)
    * @param x:x value
@@ -501,7 +501,7 @@ private:
       param_value += resolution;
     }
 
-    // evalulate derivative to parameter (single way dx = (f(x+h) - f(x))/h
+    // evaluate derivative to parameter (single way dx = (f(x+h) - f(x))/h
     deriv_vec.resize(param_vec.size() - 1);
     for (size_t i = 0; i < param_vec.size() - 1; ++i) {
       deriv_vec[i] = (pv_vec[i + 1] - pv_vec[i]) / resolution;

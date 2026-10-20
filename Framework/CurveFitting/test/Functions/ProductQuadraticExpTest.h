@@ -44,7 +44,7 @@ private:
   /** Helper method
 With the input arguments
 1) Creates the target ProductQuadraticFunction.
-2) Creates and equavalent Product function using other Fit function framework
+2) Creates and equivalent Product function using other Fit function framework
 types.
 3) Manually calculates the expected output given that the underlying equation is
 so simple.
@@ -84,7 +84,7 @@ to check that the results are equal.
     FunctionDomain1DVector domain(xValues);
     FunctionValues valuesBenchmark(domain);
     FunctionValues valuesLinExpDecay(domain);
-    // Peform function evaluations.
+    // Perform function evaluations.
     benchmark.function(domain, valuesBenchmark);
     func.function(domain, valuesLinExpDecay);
 

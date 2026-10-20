@@ -93,7 +93,7 @@ SelectFunctionDialog::SelectFunctionDialog(QWidget *parent, const std::vector<st
 
 /**
  * Complete the QComboBox with the available functions for fitting
- * @param registeredFunctions :: [input] Vector of avaiblable functions
+ * @param registeredFunctions :: [input] Vector of available functions
  */
 void SelectFunctionDialog::addSearchBoxFunctionNames(const std::vector<std::string> &registeredFunctions) {
   for (const auto &function : registeredFunctions) {
@@ -182,7 +182,7 @@ void SelectFunctionDialog::constructFunctionTree(
 SelectFunctionDialog::~SelectFunctionDialog() { delete m_form; }
 
 /**
- * Sets the minimum height of the function tree to ensure that all catagories are visible when the dialog is opened.
+ * Sets the minimum height of the function tree to ensure that all categories are visible when the dialog is opened.
  * This method ensures the correct minimum size is used for any screen resolution.
  */
 void SelectFunctionDialog::setMinimumHeightOfFunctionTree() {

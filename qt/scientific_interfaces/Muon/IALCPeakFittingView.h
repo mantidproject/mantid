@@ -69,7 +69,7 @@ public slots:
 
   /// Update a single parameter in Function Browser
   /// @param funcIndex :: Index of the function where to update parameter
-  /// @param paramName :: Name of the parameter to udpate
+  /// @param paramName :: Name of the parameter to update
   /// @param value :: New parameter value
   virtual void setParameter(std::string const &funcIndex, std::string const &paramName, double value) = 0;
 

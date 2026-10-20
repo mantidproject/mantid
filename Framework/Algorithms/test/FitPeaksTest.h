@@ -851,14 +851,14 @@ public:
       }
     }
 
-    // Verify calcualated model
+    // Verify calculated model
     if (fitted_ws_exist) {
       // workspace for calculated peaks from fitted data
       TS_ASSERT_EQUALS(model_ws->getNumberHistograms(), input_ws->getNumberHistograms());
     }
 
     if (peak_param_ws_exist) {
-      // workspace for calcualted peak parameters
+      // workspace for calculated peak parameters
       TS_ASSERT_EQUALS(peak_param_ws->rowCount(), (4 * num_histograms));
       // check third spectrum
       size_t iws = 2;
@@ -972,14 +972,14 @@ public:
       }
     }
 
-    // Verify calcualated model
+    // Verify calculated model
     if (fitted_ws_exist) {
       // workspace for calculated peaks from fitted data
       TS_ASSERT_EQUALS(model_ws->getNumberHistograms(), input_ws->getNumberHistograms());
     }
 
     if (peak_param_ws_exist) {
-      // workspace for calcualted peak parameters
+      // workspace for calculated peak parameters
       TS_ASSERT_EQUALS(peak_param_ws->rowCount(), (exp_positions.size() * num_histograms));
     }
 

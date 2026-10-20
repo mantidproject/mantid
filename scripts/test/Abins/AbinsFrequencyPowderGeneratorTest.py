@@ -159,7 +159,7 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
         assert_array_equal(rand_fundamentals, fundamentals)
         assert_array_equal(fund_coeffs, np.arange(len(rand_fundamentals), dtype=INT_TYPE))
 
-        # Calcualate some doubles
+        # Calculate some doubles
         doubles, double_coeffs = abins.FrequencyPowderGenerator.construct_freq_combinations(
             previous_array=fundamentals,
             previous_coefficients=fund_coeffs,

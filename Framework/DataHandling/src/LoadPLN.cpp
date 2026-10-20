@@ -630,7 +630,7 @@ void LoadPLN::exec(const std::string &hdfFile, const std::string &eventFile) {
   logManager.addProperty("end_time", endTime.toISO8601String());
   logManager.addProperty<double>("dur", eventCounter.duration());
 
-  // Finally add the time-series evironment parameters explicitly
+  // Finally add the time-series environment parameters explicitly
   loadEnvironParameters(hdfFile, logManager);
 
   setProperty("OutputWorkspace", m_localWorkspace);

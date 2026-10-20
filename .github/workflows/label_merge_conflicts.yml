@@ -25,7 +25,7 @@ jobs:
         with:
           conflict_label_name: "Has Conflicts"
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          # These are optional incase you need to adjust for the limitations described below
+          # These are optional in case you need to adjust for the limitations described below
           max_retries: 5
           wait_ms: 15000
           detect_merge_changes: false

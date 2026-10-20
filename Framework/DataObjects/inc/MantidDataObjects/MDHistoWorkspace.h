@@ -144,7 +144,7 @@ public:
    * speed/testing */
   const bool *getMaskArray() const { return m_masks.get(); }
 
-  /** Return the aray of bin widths  (the linear length of a box) for each
+  /** Return the array of bin widths  (the linear length of a box) for each
    * dimension */
   const coord_t *getBinWidths() const { return m_boxLength.data(); }
 

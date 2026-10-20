@@ -104,7 +104,7 @@ private:
   /// Set parameter values to function from Parameter map
   void setFunctionParameterValues(const API::IFunction_sptr &function, std::map<std::string, Parameter> params);
 
-  /// Update parameter values to Parameter map from fuction map
+  /// Update parameter values to Parameter map from function map
   void updateFunctionParameterValues(API::IFunction_sptr function, std::map<std::string, Parameter> &params);
 
   /// Set parameter fitting setup (boundary, fix or unfix) to function from
@@ -124,7 +124,7 @@ private:
   void addOrReplace(std::map<std::string, Parameter> &parameters, const std::string &parname, double parvalue);
 
   //--------  Variables ------------------------------------------------------
-  /// Data workspace containg peak positions
+  /// Data workspace containing peak positions
   DataObjects::Workspace2D_sptr m_dataWS;
 
   /// Workspace index of the peak positions

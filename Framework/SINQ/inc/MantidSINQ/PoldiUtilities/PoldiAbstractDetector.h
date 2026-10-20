@@ -21,7 +21,7 @@ namespace Poldi {
  *
   Abstract representation of detector, used for POLDI related calculations.
  Calculation
-  methods are the repsonsibility of concrete implementations.
+  methods are the responsibility of concrete implementations.
 
     @author Michael Wedel, Paul Scherrer Institut - SINQ
     @date 07/02/2014

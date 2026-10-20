@@ -52,7 +52,7 @@ int LoadTBL::confidence(Kernel::FileDescriptor &descriptor) const {
     Kernel::Strings::extractToEOL(stream, firstLine);
     try {
       std::vector<std::string> columns;
-      if (getCells(firstLine, columns, 16, true) == 17) // right ammount of columns
+      if (getCells(firstLine, columns, 16, true) == 17) // right amount of columns
       {
         if (filePath.compare(filenameLength - 4, 4, ".tbl") == 0) {
           confidence = 40;

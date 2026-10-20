@@ -259,7 +259,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     The default operation is to fit the pixels positions against the known
     positions with a quadratic function in order to define an operation to
     move all the pixels to their real positions. If necessary, the user may
-    select to fit using a polinomial of 3rd order, through the parameter
+    select to fit using a polynomial of 3rd order, through the parameter
     **fitPolyn**.
 
     .. note::
@@ -342,7 +342,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     :param calibTable: Pass the calibration table, it will them append the values to the provided one and return it. \
     (see: :py:mod:`~Examples.TubeCalibDemoMerlin`)
 
-    :param plotTube: If given, the tube whose index is in plotTube will be ploted as well as its fitted peaks, it can \
+    :param plotTube: If given, the tube whose index is in plotTube will be plotted as well as its fitted peaks, it can \
     receive a list of indexes to plot.(see: :py:func:`~Examples.TubeCalibDemoMaps_All.changeMarginAndExpectedValue`)
 
     :param excludeShortTubes: Do not calibrate tubes whose length is smaller than given value. (see at \
@@ -837,7 +837,7 @@ class _CalibrationParameterHelper(object):
             if polin_fit not in [1, 2, 3]:
                 raise RuntimeError(
                     "Wrong argument {0}. "
-                    "It expects a number 1 for linear, 2 for quadratic, or 3 for 3rd polinomial order"
+                    "It expects a number 1 for linear, 2 for quadratic, or 3 for 3rd polynomial order"
                     "when fitting the pixels positions against the known positions".format(self.FITPOLIN)
                 )
             else:

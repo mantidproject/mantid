@@ -123,7 +123,7 @@ class AbinsAlgorithmMethodsTest(unittest.TestCase):
             self.assertAlmostEqual(xc, expected)
 
     def test_get_atom_selection(self):
-        """Get selected symbols and idices from pre-split user input"""
+        """Get selected symbols and indices from pre-split user input"""
 
         for selection, expected in [
             (["atom_1", "Si"], ([1], ["Si"])),

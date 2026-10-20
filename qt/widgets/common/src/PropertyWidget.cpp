@@ -35,7 +35,7 @@ namespace // anonymous
  * @param s :: the string to convert.
  * @returns :: the converted number
  *
- * @throws std::runtime_error :: if conversion was unsuccesful.
+ * @throws std::runtime_error :: if conversion was unsuccessful.
  */
 double stringToRoundedNumber(const std::string &s) {
   // Using std::istringstream is a nice way to do string-to-double conversion
@@ -201,7 +201,7 @@ PropertyWidget::PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent, 
     // HACK - In this mode a property widget is not a true self-contained
     // widget: it has no children
     //        of its own. By default, when added to a parent widget, it will be
-    //        drawn invisble
+    //        drawn invisible
     //        at the top left of the parent widget and obscure mouse clicks etc.
     //        The hack fix is to lower it down the visible stack.
     this->lower();

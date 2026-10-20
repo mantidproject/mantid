@@ -140,7 +140,7 @@ bool DataSelector::isWorkspaceSelectorVisible() const { return !isFileSelectorVi
 /**
  * Check if the data selector is in a valid state
  *
- * Checks using the relvant widgets isValid method depending
+ * Checks using the relevant widgets isValid method depending
  * on what view is currently being shown
  * @param autoLoad :: Whether to automatically load the data if it is not found in the ADS.
  * @return :: If the data selector is valid

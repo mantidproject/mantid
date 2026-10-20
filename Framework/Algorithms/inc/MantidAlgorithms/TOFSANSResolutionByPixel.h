@@ -16,7 +16,7 @@
 namespace Mantid {
 namespace Algorithms {
 /**
-    Calculates the TOF-SANS Q-resolution for each wavelenght and pixel using
+    Calculates the TOF-SANS Q-resolution for each wavelength and pixel using
    formula
     by Mildner and Carpenter.
 

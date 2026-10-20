@@ -107,7 +107,7 @@ public:
 
   void setName(const std::string &name);
 
-  /// Overridden function that checks whether the property, if not overriden
+  /// Overridden function that checks whether the property, if not overridden
   /// returns ""
   virtual std::string isValid() const;
 
@@ -120,7 +120,7 @@ public:
   /** Clears the vector of PropertySettings for this property */
   void clearSettings();
 
-  /// Overriden function that returns if property has the same value that it was
+  /// Overridden function that returns if property has the same value that it was
   /// initialised with, if applicable
   virtual bool isDefault() const = 0;
   /// Whether to save input values
@@ -148,7 +148,7 @@ public:
   /// unacceptable the value is not changed but a string is returned
   /// A const char * can be implicitly converted to both Json::Value
   /// and std::string so using simple setValue for both functions
-  /// causes an abiguity error
+  /// causes an ambiguity error
   virtual std::string setValueFromJson(const Json::Value &) = 0;
   /// Set the value of the property via a reference to another property.
   virtual std::string setValueFromProperty(const Property &right) = 0;

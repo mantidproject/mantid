@@ -40,7 +40,7 @@ Release the resource from management.
 */
 void ScopedFile::release() const { this->m_filename.clear(); }
 
-/// Assignement.
+/// Assignment.
 ScopedFile &ScopedFile::operator=(const ScopedFile &other) {
   if (this != &other) {
     this->m_file.close();

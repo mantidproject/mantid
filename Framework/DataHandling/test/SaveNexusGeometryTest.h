@@ -110,7 +110,7 @@ public:
 
   void test_valid_fileName_with_invalid_extension_propagates_throw() {
     /*
-    test saveInstrument propagates invalid_argument in executuion of algorithm
+    test saveInstrument propagates invalid_argument in execution of algorithm
     when invalid file extension is passed into fileName property.
     */
 

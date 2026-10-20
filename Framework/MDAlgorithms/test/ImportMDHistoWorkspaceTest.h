@@ -62,7 +62,7 @@ class ImportMDHistoWorkspaceTest : public CxxTest::TestSuite {
 private:
   /**
   Test helper method, builds a standard version of the algorithm, onto which
-  properties can be overriden in indivdual tests.
+  properties can be overridden in individual tests.
   Helps make tests easy to read.
   */
   std::shared_ptr<IAlgorithm> make_standard_algorithm(const MDFileObject &fileObject) {
@@ -159,7 +159,7 @@ public:
   void test_throws_when_more_bins_expected_than_entries_in_file() {
     MDFileObject fileObject("test_file_for_load_md_histo_workspace_test_.txt",
                             3 * 3); // bin size set to 3, so 3*3*2, entries will
-                                    // be in the file! i.e file corrsponds to 2D
+                                    // be in the file! i.e file corresponds to 2D
                                     // md workspace.
     auto alg = make_standard_algorithm(fileObject);
     alg->setPropertyValue("Extents", "-1,1,-1,1,-1,1");
@@ -176,7 +176,7 @@ public:
     MDFileObject fileObject("test_file_for_load_md_histo_workspace_test_.txt",
                             3 * 3 * 3); // bin size set to 3, so 3*3*3*2,
                                         // entries will be in the file! i.e file
-                                        // corrsponds to 3D md workspace.
+                                        // corresponds to 3D md workspace.
     auto alg = make_standard_algorithm(fileObject);
     alg->setPropertyValue("Extents", "-1,1,-1,1,-1,1");
     alg->setPropertyValue("NumberOfBins", "3,3,2"); // but the number of bins

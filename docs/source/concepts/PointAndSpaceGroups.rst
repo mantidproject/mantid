@@ -562,7 +562,7 @@ The script produces the following output:
     Order of space group: 24
     Site multiplicity: 6
 
-There are four symmmetry operations that leave the coordinates :math:`x,2x,1/4` unchanged, they fulfill the group axioms. Dividing the order of the space group by the order of the site symmetry group gives the correct site multiplicity 6.
+There are four symmetry operations that leave the coordinates :math:`x,2x,1/4` unchanged, they fulfill the group axioms. Dividing the order of the space group by the order of the site symmetry group gives the correct site multiplicity 6.
 
 .. _SpaceGroupCheck:
 

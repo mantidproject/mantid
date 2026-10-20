@@ -42,7 +42,7 @@ public:
   const std::string name() const override { return "ToyAlgorithm"; } ///< Algorithm's name for identification
   int version() const override { return 2; }                         ///< Algorithm's version for identification
   const std::string category() const override { return "Cat,Leopard,Mink"; }
-  const std::string categorySeparator() const override { return ","; } ///< testing the ability to change the seperator
+  const std::string categorySeparator() const override { return ","; } ///< testing the ability to change the separator
   const std::string alias() const override { return "Dog"; }
   const std::string summary() const override { return "Test summary"; }
   void init() override {

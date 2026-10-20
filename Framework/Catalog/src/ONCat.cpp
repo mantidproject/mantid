@@ -187,7 +187,7 @@ void ONCat::logout() {
 }
 
 /**
- * Log in as part of the Resource Ownder Credentials flow so that
+ * Log in as part of the Resource Owner Credentials flow so that
  * authenticated resources may be accessed on behalf of a user.
  *
  * @param username : The XCAMS / UCAMS ID of the user.

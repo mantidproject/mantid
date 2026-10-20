@@ -24,7 +24,7 @@ public:
   static void destroySuite(StartAndEndTimeFromNexusFileExtractorTest *suite) { delete suite; }
 
   void test_that_throws_for_non_sense_file() {
-    // Arrrange
+    // Arrange
     std::string filename = "file_doesnt_exist.nxs";
 
     // Act + Assert

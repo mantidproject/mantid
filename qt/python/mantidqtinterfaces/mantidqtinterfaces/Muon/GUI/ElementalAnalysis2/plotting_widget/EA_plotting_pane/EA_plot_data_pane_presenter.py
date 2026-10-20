@@ -91,7 +91,7 @@ class EAPlotDataPanePresenter(BasePanePresenter):
 
     def check_selected_groups_if_rebinned(self):
         """
-        Checkes if at least one selected groups in context have a rebinned workspace
+        Checks if at least one selected groups in context have a rebinned workspace
         """
         is_rebinned = []
         for group_name in self.context.group_context.selected_groups:

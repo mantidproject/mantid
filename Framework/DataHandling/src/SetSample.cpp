@@ -546,7 +546,7 @@ void SetSample::exec() {
     PropertyManager materialArgsCompatible = materialSettingsEnsureLegacyCompatibility(*materialArgs);
     // add the sample volume if it was defined/determined
     if (sampleVolume > 0.) {
-      // only add the volume if it isn't already specfied
+      // only add the volume if it isn't already specified
       if (!materialArgsCompatible.existsProperty("Volume")) {
         materialArgsCompatible.declareProperty(std::make_unique<PropertyWithValue<double>>("Volume", sampleVolume));
       }
@@ -866,7 +866,7 @@ std::string SetSample::createFlatPlateXML(const Kernel::PropertyManager &args, c
   const double szX = (widthInCM * 5e-3);
   const double szY = (heightInCM * 5e-3);
   const double szZ = (thickInCM * 5e-3);
-  // Contruct cuboid corners. Define points about origin, rotate and then
+  // Construct cuboid corners. Define points about origin, rotate and then
   // translate to final center position
   auto lfb = makeV3D(szX, -szY, -szZ);
   auto lft = makeV3D(szX, szY, -szZ);
@@ -909,7 +909,7 @@ std::string SetSample::createFlatPlateXML(const Kernel::PropertyManager &args, c
 
 /**
  * Create the XML required to define a flat plate holder from the given args
- * Flate plate holder is a CSG union of 2 flat plates one on each side of the
+ * Flat plate holder is a CSG union of 2 flat plates one on each side of the
  * sample
  * The front and back holders are supposed to have the same width and height and
  * angle as the sample Only the centre needs to be calculated taking into

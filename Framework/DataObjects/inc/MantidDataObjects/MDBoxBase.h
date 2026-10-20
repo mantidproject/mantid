@@ -88,7 +88,7 @@ public:
   // -------------------------------- Events-Related
   // -------------------------------------------
   /** The method to convert events in a box into a table of
-   * coodrinates/signal/errors casted into coord_t type
+   * coordinates/signal/errors casted into coord_t type
    *   Used to convert events into plain data array. Does nothing for GridBox */
   void getEventsData(std::vector<coord_t> & /*coordTable*/, size_t &nColumns) const override { nColumns = 0; }
   /** The method to convert the table of data into vector of events
@@ -146,7 +146,7 @@ public:
    * @param max :: max edge of the dimension
 
    * Dangerous function with side effects as volume and possibly other box
-   statistics has to be recalculated after this excecuted.
+   statistics has to be recalculated after this executed.
    * has not done so because of productivity reasons;
    */
   void setExtents(size_t dim, double min, double max) {

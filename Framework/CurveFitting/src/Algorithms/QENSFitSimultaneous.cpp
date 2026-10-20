@@ -321,7 +321,7 @@ void QENSFitSimultaneous::initConcrete() {
 
   declareProperty("Minimizer", "Levenberg-Marquardt", minimizerValidator, "Minimizer to use for fitting.");
   declareProperty("CalcErrors", false,
-                  "Set to true to calcuate errors when output isn't created "
+                  "Set to true to calculate errors when output isn't created "
                   "(default is false).");
   declareProperty("ExtractMembers", false,
                   "If true, then each member of the fit will be extracted"

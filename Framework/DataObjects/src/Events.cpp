@@ -94,7 +94,7 @@ bool WeightedEvent::operator==(const WeightedEvent &rhs) const {
  * @param tolPulse the tolerance of a difference in m_pulsetime
  * in nanoseconds.
  *
- * @return True if the are the same within the specifed tolerances
+ * @return True if the are the same within the specified tolerances
  */
 bool WeightedEvent::equals(const WeightedEvent &rhs, const double tolTof, const double tolWeight,
                            const int64_t tolPulse) const {
@@ -211,7 +211,7 @@ bool WeightedEventNoTime::operator==(const WeightedEventNoTime &rhs) const {
  * @param tolWeight the tolerance of a difference in m_weight
  * and m_errorSquared.
  *
- * @return True if the are the same within the specifed tolerances
+ * @return True if the are the same within the specified tolerances
  */
 bool WeightedEventNoTime::equals(const WeightedEventNoTime &rhs, const double tolTof, const double tolWeight) const {
   if (std::fabs(this->m_tof - rhs.m_tof) > tolTof)

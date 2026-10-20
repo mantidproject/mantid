@@ -36,7 +36,7 @@ PeakBackground::PeakBackground(IPeaksWorkspace_const_sptr peaksWS, const double 
   }
 }
 
-/// Virutal constructor
+/// Virtual constructor
 PeakBackground *PeakBackground::clone() const { return new PeakBackground(*this); }
 
 bool PeakBackground::isBackground(Mantid::API::IMDIterator *iterator) const {

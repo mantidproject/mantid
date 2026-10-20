@@ -136,7 +136,7 @@ void MapNeXusToProperty(const Nexus::NXEntry &entry, const std::string &address,
   logManager.addProperty<T>(name, value * factor);
 }
 
-// sting is a special case
+// string is a special case
 template <>
 void MapNeXusToProperty<std::string>(Nexus::NXEntry const &entry, const std::string &address, const std::string &defval,
                                      API::LogManager &logManager, const std::string &name,
@@ -189,7 +189,7 @@ template <typename T, typename F> void mapRangeToIndex(const std::string &line, 
   }
 }
 
-// secant invert fucntion
+// secant invert function
 //
 template <typename F> double invert(double y, const F &f, double x0 = 0.0, const double eps = 1e-16) {
   // secant method
@@ -357,11 +357,11 @@ public:
 namespace EMU {
 
 // Implement emu specific handlers for the more general EMU events. The main
-// differences with the current impementation of handlers:
+// differences with the current implementation of handlers:
 // - tof needs to be derived from the observed time because of the doppler drive
 // - emu includes direct and indirect virtual detectors that account for
 //   alternate paths
-// - the loader returns the doppler and auxillary time along with the
+// - the loader returns the doppler and auxiliary time along with the
 //   absolute time rather than just the primary observed time that is
 //   equivalent to tof
 //
@@ -744,7 +744,7 @@ template <typename FD> void LoadEMU<FD>::exec(const std::string &hdfFile, const 
   std::vector<EventVector_pt> eventVectors(numberHistograms, nullptr);
   std::vector<size_t> eventCounts(numberHistograms, 0);
 
-  // Discriminating between direct and analysed is based on the auxillary time
+  // Discriminating between direct and analysed is based on the auxiliary time
   // and is determined by the graphite chopper frequency and v2 which are stable
   // so these limits are kept in the instrument parameter file. Convert from
   // milsec to microsec.

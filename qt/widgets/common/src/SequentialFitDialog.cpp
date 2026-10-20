@@ -602,7 +602,7 @@ void SequentialFitDialog::plotAgainstLog(bool yes) {
 }
 
 /**
- * Update the dialog's controls apropriately.
+ * Update the dialog's controls appropriately.
  */
 void SequentialFitDialog::selectionChanged() {
   ui.btnDelete->setEnabled(ui.tWorkspaces->selectionModel()->hasSelection());

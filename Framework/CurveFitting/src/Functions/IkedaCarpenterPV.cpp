@@ -123,7 +123,7 @@ void IkedaCarpenterPV::init() {
   this->lowerConstraint0("Beta0");
   declareParameter("Kappa", 46.0, "Controls contribution of slow decay term");
   this->lowerConstraint0("Kappa");
-  declareParameter("SigmaSquared", 1.0, "standard deviation squared (Voigt Guassian broadening)");
+  declareParameter("SigmaSquared", 1.0, "standard deviation squared (Voigt Gaussian broadening)");
   this->lowerConstraint0("SigmaSquared");
   declareParameter("Gamma", 1.0, "Voigt Lorentzian broadening");
   this->lowerConstraint0("Gamma");

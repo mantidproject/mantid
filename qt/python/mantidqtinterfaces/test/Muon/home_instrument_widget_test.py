@@ -198,7 +198,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.assertTrue(result)
 
     def test_validate_variable_rebin_string_of_length_greater_than_three_must_have_bins_line_up(self):
-        result, messag = self.model.validate_variable_rebin_string("1,5,21")
+        result, message = self.model.validate_variable_rebin_string("1,5,21")
 
         self.assertTrue(result)
 

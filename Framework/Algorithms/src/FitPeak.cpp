@@ -147,7 +147,7 @@ void FitOneSinglePeak::setFittingMethod(std::string minimizer, const std::string
 /** Set FWHM of the peak by guessing.
  * Result is stored to m_vecFWHM
  * @param usrwidth :: peak FWHM given by user (in input peak function)
- * @param minfwhm :: minimim FWHM in unit of pixel
+ * @param minfwhm :: minimum FWHM in unit of pixel
  * @param maxfwhm :: maximum FWHM in unit of pixel
  * @param stepsize :: step of FWHM in unit of pixel
  * @param fitwithsteppedfwhm :: boolean flag whether setting a series of FWHM
@@ -182,7 +182,7 @@ void FitOneSinglePeak::setupGuessedFWHM(double usrwidth, int minfwhm, int maxfwh
 
   m_peakWidthSet = true;
 
-  // From user specified minimum value to maximim value
+  // From user specified minimum value to maximum value
   if (!fitwithsteppedfwhm) {
     if (m_vecFWHM.empty())
       throw runtime_error("Logic error in setup guessed FWHM.  ");
@@ -202,7 +202,7 @@ void FitOneSinglePeak::setupGuessedFWHM(double usrwidth, int minfwhm, int maxfwh
 
   for (int iwidth = minfwhm; iwidth <= maxfwhm; iwidth += stepsize) {
     // There are 3 possible situation: peak at left edge, peak in proper range,
-    // peak at righ edge
+    // peak at right edge
     int ileftside = i_centre - iwidth / 2;
     if (ileftside < 0)
       ileftside = 0;
@@ -599,7 +599,7 @@ void FitOneSinglePeak::pop(const std::map<std::string, double> &funcparammap, co
 }
 
 //----------------------------------------------------------------------------------------------
-/** Calcualte chi-square for single domain data
+/** Calculate chi-square for single domain data
  * @brief FitOneSinglePeak::calChiSquareSD
  * @param fitfunc
  * @param dataws
@@ -702,7 +702,7 @@ double FitOneSinglePeak::fitFunctionSD(IFunction_sptr fitfunc, const MatrixWorks
  * @param dataws :: matrix workspace to fit with
  * @param wsindex :: workspace index of the spectrum in matrix workspace
  * @param vec_xmin :: minimin values of domains
- * @param vec_xmax :: maximim values of domains
+ * @param vec_xmax :: maximum values of domains
  */
 double FitOneSinglePeak::fitFunctionMD(const IFunction_sptr &fitfunc, const MatrixWorkspace_sptr &dataws,
                                        size_t wsindex, vector<double> vec_xmin, vector<double> vec_xmax) {
@@ -754,7 +754,7 @@ double FitOneSinglePeak::fitFunctionMD(const IFunction_sptr &fitfunc, const Matr
   fit->setProperty("Minimizer", m_minimizer);
   fit->setProperty("CostFunction", "Least squares");
 
-  m_sstream << "FitMultiDomain: Funcion " << funcmd->name() << ": "
+  m_sstream << "FitMultiDomain: Function " << funcmd->name() << ": "
             << "Range: (" << vec_xmin[0] << ", " << vec_xmax[0] << ") and (" << vec_xmin[1] << ", " << vec_xmax[1]
             << "); " << funcmd->asString() << "\n";
 
@@ -792,7 +792,7 @@ double FitOneSinglePeak::fitCompositeFunction(const API::IPeakFunction_sptr &pea
                                               const API::IBackgroundFunction_sptr &bkgdfunc,
                                               const API::MatrixWorkspace_sptr &dataws, size_t wsindex, double startx,
                                               double endx) {
-  // Construct composit function
+  // Construct composite function
   std::shared_ptr<CompositeFunction> compfunc = std::make_shared<CompositeFunction>();
   compfunc->addFunction(peakfunc);
   compfunc->addFunction(bkgdfunc);
@@ -908,7 +908,7 @@ API::IBackgroundFunction_sptr FitOneSinglePeak::fitBackground(API::IBackgroundFu
 }
 
 //----------------------------------------------------------------------------------------------
-/** Process and store fitting reuslt
+/** Process and store fitting result
  * @param rwp :: Rwp of the fitted function to the data
  * @param storebkgd :: flag to store the background function value or not
  */
@@ -1237,7 +1237,7 @@ void FitPeak::processProperties() {
     if (m_minGuessedPeakWidth > m_maxGuessedPeakWidth) {
       std::stringstream errss;
       errss << "User specified wrong guessed peak width parameters (must be "
-               "postive and make sense). "
+               "positive and make sense). "
             << "User inputs are min = " << m_minGuessedPeakWidth << ", max = " << m_maxGuessedPeakWidth
             << ", step = " << m_fwhmFitStep;
       g_log.error(errss.str());
@@ -1283,7 +1283,7 @@ void FitPeak::createFunctions() {
   bool usedefaultbkgdparorder = false;
   string bkgdtype = parseFunctionTypeFull(bkgdtyperaw, usedefaultbkgdparorder);
 
-  // FIXME - Fix the inconsistency in nameing the background
+  // FIXME - Fix the inconsistency in naming the background
   if (bkgdtype == "Flat" || bkgdtype == "Linear")
     bkgdtype += "Background";
 

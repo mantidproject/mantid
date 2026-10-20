@@ -89,7 +89,7 @@ public:
     MockIMDIterator mockIterator;
     EXPECT_CALL(mockIterator, getNormalizedSignal()).WillOnce(Return(threshold + 1)); // Returns above the threshold.
     EXPECT_CALL(mockIterator, getCenter()).WillOnce(Return(hklPeak)); // Returns center as being on the peak.
-                                                                      // Thefore within range.
+                                                                      // Therefore within range.
 
     TSM_ASSERT("MD data in this peak region is not background", !strategy.isBackground(&mockIterator));
 

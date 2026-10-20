@@ -76,7 +76,7 @@ void RemoveLowResTOF::init() {
                   "The minimum time-of-flight of the frame (in microseconds). "
                   "If not set the data range will be used.");
   declareProperty("MinWavelength", Mantid::EMPTY_DBL(), validator,
-                  "The minimum wavelength for measurement. This overides all "
+                  "The minimum wavelength for measurement. This overrides all "
                   "other parameters if specified.");
 
   // hide things when people cjoose the minimum wavelength

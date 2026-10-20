@@ -67,7 +67,7 @@ IconicFont::IconicFont() : m_fontnames(), m_charmap(), m_painter() {
 QIcon IconicFont::getIcon(const QStringList &iconNames, const QList<QHash<QString, QVariant>> &options) {
 
   QList<QHash<QString, QVariant>> actualOptions;
-  // Assume there may be mutliple
+  // Assume there may be multiple
   if (iconNames.size() != options.size()) {
     throw std::invalid_argument("Icon names passed and options are not the same length");
   }
@@ -115,12 +115,12 @@ void IconicFont::addValuesToOptions(QList<QHash<QString, QVariant>> &options, co
   const auto foundFontForPrefix = m_fontnames[prefix];
   if (foundFontForPrefix.isNull()) {
     throw std::invalid_argument(
-        ("The prefix: \"" + prefix + "\" does not represent a set of icons currently availible").toStdString());
+        ("The prefix: \"" + prefix + "\" does not represent a set of icons currently available").toStdString());
   }
 
   if (findCharacterFromCharMap(prefix, character).isNull()) {
     throw std::invalid_argument(
-        ("The icon: \"" + prefix + "." + character + "\" is not a icon currently availible in the library")
+        ("The icon: \"" + prefix + "." + character + "\" is not a icon currently available in the library")
             .toStdString());
   }
 

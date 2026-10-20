@@ -181,7 +181,7 @@ void PeakFitResult::setRecord(size_t ipeak, const double cost, const double peak
 }
 
 //----------------------------------------------------------------------------------------------
-/** The peak postition should be negative and indicates what went wrong
+/** The peak position should be negative and indicates what went wrong
  * @param ipeak :: index of the peak in user-specified peak position vector
  * @param peak_position :: bad peak position indicating reason of bad fit
  */
@@ -190,7 +190,7 @@ void PeakFitResult::setBadRecord(size_t ipeak, const double peak_position) {
   if (ipeak >= m_costs.size())
     throw std::runtime_error("Peak index is out of range");
   if (peak_position >= 0.)
-    throw std::runtime_error("Can only set negative postion for bad record");
+    throw std::runtime_error("Can only set negative position for bad record");
 
   // set the values
   m_costs[ipeak] = DBL_MAX;
@@ -314,8 +314,8 @@ void FitPeaks::init() {
   // properties about peak profile
   const std::vector<std::string> peakNames = FunctionFactory::Instance().getFunctionNames<API::IPeakFunction>();
   declareProperty(PropertyNames::PEAK_FUNC, "Gaussian", std::make_shared<StringListValidator>(peakNames),
-                  "Use of a BackToBackExponential profile is only reccomended if the "
-                  "coeficients to calculate A and B are defined in the instrument "
+                  "Use of a BackToBackExponential profile is only recommended if the "
+                  "coefficients to calculate A and B are defined in the instrument "
                   "Parameters.xml file.");
   const vector<string> bkgdtypes{"Flat", "Linear", "Quadratic"};
   declareProperty(PropertyNames::BACK_FUNC, "Linear", std::make_shared<StringListValidator>(bkgdtypes),
@@ -622,7 +622,7 @@ void FitPeaks::exec() {
   // fit peaks
   auto fit_results = fitPeaks();
 
-  // set the output workspaces to properites
+  // set the output workspaces to properties
   processOutputs(fit_results);
 }
 
@@ -875,9 +875,9 @@ void FitPeaks::processInputFitRanges() {
       m_getPeakFitWindow = [this](std::size_t wi, std::size_t ipeak) -> std::pair<double, double> {
         this->checkWorkspaceIndices(wi);
         this->checkPeakIndices(wi, ipeak);
-        // calcualte peak window by delta(d)/d
+        // calculate peak window by delta(d)/d
         double peak_pos = this->m_getExpectedPeakPositions(wi)[ipeak];
-        // calcalate expected peak width
+        // calculate expected peak width
         double estimate_peak_width = peak_pos * m_peakWidthPercentage;
         // using the NUMBER THREE to estimate the peak window
         double THREE = 3.0;
@@ -1360,7 +1360,7 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
       // Decide whether to estimate peak width by observation
       // If no peaks fitted in the same or cross spectrum then the user supplied
       // parameters will be used if present and the width will not be estimated
-      // (note this will overwrite parameter values caluclated from
+      // (note this will overwrite parameter values calculated from
       // Parameters.xml)
       // When CopyLastGoodPeakParameters is disabled, treat each peak as if it
       // has no fitted neighbour so that user-specified initial values are
@@ -1468,7 +1468,7 @@ bool FitPeaks::decideToEstimatePeakParams(const bool firstPeakInSpectrum, const 
           peak_function->setParameter(param_index, param_value);
       }
     } else {
-      // using the fitted paramters from the previous fitting result
+      // using the fitted parameters from the previous fitting result
       // do noting
     }
   } else {
@@ -2249,7 +2249,7 @@ void FitPeaks::generateFittedParametersValueWorkspaces() {
 
   // for error workspace
   std::string fiterror_table_name = getPropertyValue(PropertyNames::OUTPUT_WKSP_PARAM_ERRS);
-  // do nothing if user does not specifiy
+  // do nothing if user does not specify
   if (fiterror_table_name.empty()) {
     // not specified
     m_fitErrorTable = nullptr;
@@ -2294,7 +2294,7 @@ void FitPeaks::processOutputs(std::vector<std::shared_ptr<FitPeaksAlgorithm::Pea
 
   // optional
   if (m_fittedPeakWS && m_fittedParamTable) {
-    g_log.debug("about to calcualte fitted peaks");
+    g_log.debug("about to calculate fitted peaks");
     calculateFittedPeaks(std::move(fit_result_vec));
     setProperty(PropertyNames::OUTPUT_WKSP_MODEL, m_fittedPeakWS);
   }
@@ -2559,7 +2559,7 @@ void FitPeaks::writeFitResult(size_t wi, const std::vector<double> &expected_pos
     // get row number
     size_t row_index = out_wi * m_numPeaksToFit + ipeak;
 
-    // treat as different cases for writing out raw or effective parametr
+    // treat as different cases for writing out raw or effective parameter
     if (m_rawPeaksTable) {
       // duplicate from FitPeakResult to table workspace
       for (size_t iparam = 0; iparam < num_peakfunc_params + num_bkgd_params; ++iparam) {

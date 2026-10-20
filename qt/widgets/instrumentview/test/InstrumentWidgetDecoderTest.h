@@ -70,7 +70,7 @@ public:
     unwrappedSurface->setPeaksWorkspace(pw);
     TS_ASSERT_EQUALS(unwrappedSurface->getPeakOverlayCount(), 1)
 
-    // Add the same peak worspace again, shouldn't increase the number of overlays
+    // Add the same peak workspace again, shouldn't increase the number of overlays
     unwrappedSurface->setPeaksWorkspace(pw);
     TS_ASSERT_EQUALS(unwrappedSurface->getPeakOverlayCount(), 1)
 

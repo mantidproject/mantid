@@ -46,7 +46,7 @@ public:
   /// Default constructor
   CompositeFunction();
 
-  /* Overriden methods */
+  /* Overridden methods */
 
   /// Returns the function's name
   std::string name() const override { return "CompositeFunction"; }

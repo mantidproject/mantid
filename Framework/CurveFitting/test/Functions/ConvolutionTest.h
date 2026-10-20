@@ -376,7 +376,7 @@ public:
   }
 
   /*
-   * Convolve a Gausian (resolution) with a Delta-Dirac
+   * Convolve a Gaussian (resolution) with a Delta-Dirac
    */
   void testConvolvingWithDeltaDirac() {
     Convolution conv;

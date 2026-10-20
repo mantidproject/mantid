@@ -322,7 +322,7 @@ void PreprocessDetectorsToMD::updateMasksState(const API::MatrixWorkspace_const_
   const size_t nRows = inputWS->getNumberHistograms();
   if (nHist != nRows)
     throw std::invalid_argument(" source workspace " + inputWS->getName() + " and target workspace " +
-                                targWS->getName() + " are inconsistent as have different numner of detectors");
+                                targWS->getName() + " are inconsistent as have different number of detectors");
 
   uint32_t liveDetectorsCount(0);
   const auto &spectrumInfo = inputWS->spectrumInfo();

@@ -310,10 +310,10 @@ Raster calculateHollowCylinder(const V3D &beamDirection, const IObject &integSha
     // NOTE:
     // For example, if the hollow cylinder consist of an inner cylinder surface with
     // two annulus, and two annulus for the hollow ring (i.e. total four annulus for
-    // the outter cylinder surface). We have
+    // the outer cylinder surface). We have
     // Ni = [6,  12,  18, 24]
     //              ^
-    //       inner    outter
+    //       inner    outer
     const auto nSteps = params.innerRadius / deltaR;
     size_t Ni = static_cast<size_t>(nSteps) * 6;
     // loop over annuli

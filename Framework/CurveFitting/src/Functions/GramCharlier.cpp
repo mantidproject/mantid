@@ -19,7 +19,7 @@ DECLARE_FUNCTION(GramCharlier)
  * called by the base class at the appropriate time
  */
 void GramCharlier::init() {
-  // Default values are abitrary non-zero values that are "typical"
+  // Default values are arbitrary non-zero values that are "typical"
   // --------------------------- !!!WARNING!!! -------------------------
   // Do not reorder these parameters without altering the index access
   // in function1D

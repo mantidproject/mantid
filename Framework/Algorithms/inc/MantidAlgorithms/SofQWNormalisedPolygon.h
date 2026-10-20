@@ -20,7 +20,7 @@ Converts a 2D workspace that has axes of energy transfer against spectrum number
 to
 one that gives intensity as a function of momentum transfer against energy. This
 version
-uses proper parallelpiped rebinning to compute the overlap of the various
+uses proper parallelepiped rebinning to compute the overlap of the various
 overlapping
 weights.
 

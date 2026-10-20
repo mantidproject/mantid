@@ -50,7 +50,7 @@ class PoldiAutoCorrelation(PythonAlgorithm):
             defaultValue=1.1,
             direction=Direction.Input,
             validator=positive_float_validator,
-            doc="Minium wavelength to consider.",
+            doc="Minimum wavelength to consider.",
         )
         self.declareProperty(
             "WavelengthMax",

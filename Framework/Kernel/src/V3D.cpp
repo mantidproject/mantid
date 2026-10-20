@@ -22,10 +22,10 @@ using boost::integer::gcd;
 
 namespace {
 /** transform vector into form, used to describe directions in crystallogaphical
- * coodinate system, assuming that the vector describes perpendicular to a
+ * coordinate system, assuming that the vector describes perpendicular to a
  * crystallogaphic plain or is close to such plain.
  *
- * As crystallographical coordinate sytem is based on 3 integers, eps is used
+ * As crystallographical coordinate system is based on 3 integers, eps is used
  * as accuracy to convert into integers
  */
 double nearInt(double val, double eps, double mult) noexcept {
@@ -250,7 +250,7 @@ bool V3D::unitVector(const double tolerance) const noexcept {
    @param tolerance :: Tolerance accepted
    @retval range -3,-2,-1 1,2,3  if the vector
    is orientaged within tolerance on the x,y,z direction (the sign
-   indecates the direction to the +ve side )
+   indicates the direction to the +ve side )
    @retval 0 :: No master direction
 */
 int V3D::masterDir(const double tolerance) const noexcept {

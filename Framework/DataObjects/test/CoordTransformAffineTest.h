@@ -38,7 +38,7 @@ private:
       TS_ASSERT_DELTA(value[i], expected[i], 1e-4);
   }
 
-  /** Helper to create a rotation tranformation*/
+  /** Helper to create a rotation transformation*/
   Mantid::Kernel::Matrix<coord_t> createRotationTransform(const Mantid::Kernel::V3D &ax, const Mantid::Kernel::V3D &ay,
                                                           const Mantid::Kernel::V3D &az, const Mantid::Kernel::V3D &bx,
                                                           const Mantid::Kernel::V3D &by,

@@ -47,7 +47,7 @@ float Timer::elapsed_no_reset() const {
 /// Explicitly reset the timer.
 void Timer::reset() { m_start = std::chrono::high_resolution_clock::now(); }
 
-/// Convert the elapsed time (without reseting) to a string.
+/// Convert the elapsed time (without resetting) to a string.
 std::string Timer::str() const {
   std::stringstream buffer;
   buffer << this->elapsed_no_reset() << " sec";

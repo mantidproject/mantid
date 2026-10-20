@@ -16,7 +16,7 @@ workspace must be set.
 
 Where a Workspace is specified the support for translating Fullprof
 resolution parameters into the workspace for subsequent fitting is
-limitted to Fullprof:
+limited to Fullprof:
 
 -  NPROF=13, Ikeda-Carpender pseudo-Voigt translated into
    :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` according to

@@ -314,7 +314,7 @@ void PDDetermineCharacterizations::setDefaultsInPropManager() {
 }
 
 /**
- * Set the run number in the property manager from algoritm inputs.
+ * Set the run number in the property manager from algorithm inputs.
  * @param inputName
  * @param propName
  */

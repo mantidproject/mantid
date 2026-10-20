@@ -185,7 +185,7 @@ def SCDCalibratePanels2DiagnosticsPlotBank(
         hkl = np.array(pk.getIntHKL())
         qsample = 2 * np.pi * (ub @ hkl)
         qlab = gm @ qsample
-        # utilize the IDF embeded in current pws
+        # utilize the IDF embedded in current pws
         pk_new = pws.createPeak(qlab)
         pws.addPeak(pk_new)
         entry_new = pws.row(i + npeaks)
@@ -252,7 +252,7 @@ def SCDCalibratePanels2DiagnosticsPlot(
             mode: ["modern", "legacy"]
     @param showPlots: open diagnostics plots after generating them.
 
-    @returs: None
+    @returns: None
     """
     # parse input
     pws = mtd[peaksWorkspace] if isinstance(peaksWorkspace, str) else peaksWorkspace

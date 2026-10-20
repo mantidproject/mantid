@@ -668,7 +668,7 @@ public:
               "p 0 -.70710678118 .70710678118 0.5"};
     std::shared_ptr<CSGObject> F = createCuboid(planes);
     TS_ASSERT_EQUALS(F->getPointInObject(pt), 1); // This now succeeds
-    // Test use of defineBoundingBox to explictly set the bounding box, when the
+    // Test use of defineBoundingBox to explicitly set the bounding box, when the
     // automatic method fails
     F->defineBoundingBox(0.5, -0.5 * M_SQRT1_2, -0.5 * M_SQRT1_2, -0.5, -M_SQRT2 - 0.5 * M_SQRT1_2,
                          -M_SQRT2 - 0.5 * M_SQRT1_2);

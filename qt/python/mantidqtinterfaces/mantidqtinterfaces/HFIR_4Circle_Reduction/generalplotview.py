@@ -81,7 +81,7 @@ class GeneralPlotWindow(QMainWindow):
 
     def plot_data(self, vec_x, vec_y, vec_e, x_label, y_label):  # '2theta', 'Gaussian-Sigma')
         """
-        plot data on canvase
+        plot data on canvas
         :param vec_x:
         :param vec_y:
         :param vec_e:

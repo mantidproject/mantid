@@ -21,9 +21,9 @@ class DarkRunCorrection(object):
         # Only applicable if the data is uniform
         self._use_mean = False
 
-        # Should we use time logs or uamph logs to calculat the normalization ratio.
+        # Should we use time logs or uamph logs to calculate the normalization ratio.
         # In the former case we treat the dark run signal as uniform, ie constant
-        # (excpt for stat. fluctuations) over time. In the latter case it is treated
+        # (except for stat. fluctuations) over time. In the latter case it is treated
         # as non-uniform
         self._use_time = True
 
@@ -95,7 +95,7 @@ class DarkRunCorrection(object):
 
 class DarkRunNormalizationExtractor(object):
     """
-    Extrats the normalization ratio from the scatter workspace
+    Extracts the normalization ratio from the scatter workspace
     and the dark run workspace depending. The normalization ratio
     can be either calculated as a ratio of good proton charges or
     a ratio of measurement times
@@ -138,7 +138,7 @@ class DarkRunNormalizationExtractor(object):
             raise RuntimeError(
                 "DarkRunCorrection: The workspace does not have a "
                 + log_entry
-                + "log entry. This is required for calculating the noramlization"
+                + "log entry. This is required for calculating the normalization"
                 "of the dark run."
             )
         entry = run.getProperty(log_entry)
@@ -167,7 +167,7 @@ class DarkRunNormalizationExtractor(object):
             raise RuntimeError(
                 "DarkRunCorrection: The workspace does not have a "
                 + log_entry
-                + "log entry. This is required for calculating the noramlization"
+                + "log entry. This is required for calculating the normalization"
                 "of the dark run."
             )
         prop = run.getProperty(log_entry)

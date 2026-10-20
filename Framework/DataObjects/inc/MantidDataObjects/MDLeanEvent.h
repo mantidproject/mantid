@@ -50,7 +50,7 @@ template <size_t nd> void swap(MDLeanEvent<nd> &first, MDLeanEvent<nd> &second);
  * "physical" meaning of the union used in MDLeanEvent
  * to store coordinates or index. If some class is
  * defines the type EventAccessType = EventAccessor,
- * it can call private retrieve functions throuhg the
+ * it can call private retrieve functions through the
  * api described in MDLeanEvent (struct AccessFor).
  * Keeping the event state in the coordinates mode
  * is the concern of EventAccessor itself.
@@ -65,7 +65,7 @@ template <size_t nd> class MANTID_DATAOBJECTS_DLL MDLeanEvent {
 #endif
 public:
   /**
-   * Additional index type defenitions
+   * Additional index type definitions
    */
   using IntT = typename morton_index::IndexTypes<nd, coord_t>::IntType;
   using MortonT = typename morton_index::IndexTypes<nd, coord_t>::MortonType;
@@ -120,7 +120,7 @@ protected:
 private:
   /**
    * Calculate Morton index for center coordinates for
-   * given space and ovveride the memory used for
+   * given space and override the memory used for
    * storing center with index
    * @param space :: given space
    */
@@ -333,7 +333,7 @@ public:
    @return ncols    -- the number of colunts  in the data (it is nd+2 here but
    may be different for other data types)
    @return totalSignal -- total signal in the vector of events
-   @return totalErr   -- total error corresponting to the vector of events
+   @return totalErr   -- total error corresponding to the vector of events
   */
   static inline void eventsToData(const std::vector<MDLeanEvent<nd>> &mdLeanEvents, std::vector<coord_t> &data,
                                   size_t &ncols, double &totalSignal, double &totalErrSq) {

@@ -69,7 +69,7 @@ public:
 private:
   void assertDataMatches(const Line2D &line, const std::vector<double> &expectedX,
                          const std::vector<double> &expectedY) {
-    // check owned vector mathces
+    // check owned vector matches
     TS_ASSERT_EQUALS(expectedX, line.rawData().xaxis)
     TS_ASSERT_EQUALS(expectedY, line.rawData().yaxis)
 

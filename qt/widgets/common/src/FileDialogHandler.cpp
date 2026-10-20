@@ -91,7 +91,7 @@ QString getFilter(const Mantid::Kernel::Property *baseProp) {
  * as the first and All Files as the last
  *
  * @param exts :: vector of extensions
- * @return a string that filters files by extenstions
+ * @return a string that filters files by extensions
  */
 QString getFilter(const std::vector<std::string> &exts) {
   QString filter("");

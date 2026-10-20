@@ -630,7 +630,7 @@ public:
   }
 
   /** Divide/Multiply work_in1 by work_in2.
-   * If outputIsEvent is true, check that the ouput is a EventWorkspace.
+   * If outputIsEvent is true, check that the output is a EventWorkspace.
    * If expectedValue and expectedError are specified, look for all data items to be those values.
    *
    * @param work_in1

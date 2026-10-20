@@ -389,7 +389,7 @@ void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmOutputTypeProperty(IAlgor
   alg.setProperty("OutputType", outputType);
 }
 
-// Set grouping properies of MuonProcess
+// Set grouping properties of MuonProcess
 void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmGroupingProperties(IAlgorithm &alg,
                                                                           const Muon::AnalysisOptions &options) const {
 

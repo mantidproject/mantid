@@ -430,7 +430,7 @@ protected:
   std::vector<WorkspaceVector> m_unrolledInputWorkspaces;
   /// Size of the group(s) being processed
   size_t m_groupSize;
-  /// distinguish between base processGroups() and overriden/algorithm specific
+  /// distinguish between base processGroups() and overridden/algorithm specific
   /// versions
   bool m_usingBaseProcessGroups = false;
   /// Opt-in for overridden processGroups() implementations that want the parent

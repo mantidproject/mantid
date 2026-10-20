@@ -62,7 +62,7 @@ MatrixWorkspace_sptr makeInputWS(const bool distribution, const bool perf_test =
       Mantid::API::WorkspaceHelpers::makeDistribution(ws);
     }
   } else {
-    // create histograms with points (which cannot be a distirbution)
+    // create histograms with points (which cannot be a distribution)
     ws = WorkspaceCreationHelper::create2DWorkspacePoints(int(nhist), int(nbins), x0 + 0.5, deltax);
     // convert axis from spectrum to theta
     auto thetaAxis = std::make_unique<NumericAxis>(nhist);

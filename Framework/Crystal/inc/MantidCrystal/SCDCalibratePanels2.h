@@ -112,7 +112,7 @@ private:
   void saveXmlFile(const std::string &FileName, const boost::container::flat_set<std::string> &AllBankNames,
                    std::shared_ptr<Geometry::Instrument> &instrument, const Geometry::ParameterMap &pmap);
 
-  /// Save to ISAW type det calibration output for backward compatiblity
+  /// Save to ISAW type det calibration output for backward compatibility
   void saveIsawDetCal(const std::string &filename, boost::container::flat_set<std::string> &AllBankName,
                       std::shared_ptr<Geometry::Instrument> &instrument, double T0);
 

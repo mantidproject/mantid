@@ -62,7 +62,7 @@ def ProcessVana(rnum, cycle):
     mantid.Divide(LHSWorkspace="Vana", RHSWorkspace="Abs_corr", OutputWorkspace="Vana_Abs")
     mantid.DeleteWorkspace("Vana")
     mantid.DeleteWorkspace("Abs_corr")
-    # Smoot data with redius 3
+    # Smooth data with redius 3
     mantid.SmoothNeighbours(InputWorkspace="Vana_Abs", OutputWorkspace="Vana_smoot", Radius=3)
     mantid.DeleteWorkspace("Vana_Abs")
     # SmoothData38428
@@ -175,7 +175,7 @@ def Integrate_elips(rnum, RegionRadius, Scale, wDir, MinDSpacing, MinWavelength,
 # User Defined Parameters      #3
 # ################# #
 Process_Vanadium = True
-# Wotking Directory
+# Working Directory
 wDir = "/home/zcm06287/NaCL_analysis/"
 # Find Peaks
 long_cell = 4
@@ -211,7 +211,7 @@ Integrate_predicted = 1
 #  Body centred, All-face centred, Rhombohedrally centred, obverse, Rhombohedrally centred, reverse,
 #  Hexagonally centred, reverse?]
 ReflectionCondition = "All-face centred"
-# min d spacing and lamda for the predicted peaks
+# min d spacing and lambda for the predicted peaks
 MinDSpacing = 0.5
 MinWavelength = 1.0
 # Parameters for Intensity Vs Radius

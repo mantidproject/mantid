@@ -14,7 +14,7 @@
 namespace Mantid {
 namespace Kernel {
 
-/** ChainableFactory : Chain of Responsiblity generic factory
+/** ChainableFactory : Chain of Responsibility generic factory
  */
 template <typename Factory, typename Product, typename Argument> class ChainableFactory : public Chainable<Factory> {
 public:
@@ -39,7 +39,7 @@ private:
   /// Create the product
   virtual Product *createRaw(const Argument &argument) const = 0;
 
-  /// Indicate an ability to intepret the string
+  /// Indicate an ability to interpret the string
   virtual bool canInterpret(const Argument &unitString) const = 0;
 };
 

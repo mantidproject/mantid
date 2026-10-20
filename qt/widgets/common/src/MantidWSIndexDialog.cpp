@@ -603,7 +603,7 @@ void MantidWSIndexWidget::populateLogComboBox() {
   // First item should be "Workspace index"
   m_logSelector->addItem(WORKSPACE_NAME);
 
-  // Create a map of all logs and their double represenation to compare against.
+  // Create a map of all logs and their double representation to compare against.
   // Only logs that can be converted to a double and are not all equal will make
   // the final cut
   // it is map[logname] = (isconstantvalue, value)
@@ -672,8 +672,8 @@ bool MantidWSIndexWidget::isSuitableForLogValues(const QString &plotOption) cons
 
 /**
  * Check to see if *all* workspaces have a spectrum axis.
- * If even one does not have a spectra axis, then we wont
- * ask the user to enter spectra Numberss - only workspace indices.
+ * If even one does not have a spectra axis, then we won't
+ * ask the user to enter spectra Numbers - only workspace indices.
  */
 void MantidWSIndexWidget::checkForSpectraAxes() {
   QList<QString>::const_iterator it = m_wsNames.constBegin();
@@ -1073,7 +1073,7 @@ void IntervalList::addInterval(Interval interval) {
   for (int i = static_cast<int>(m_list.size()) - 1; i >= 0; i--) {
     // if new interval is completely higher than this interval
     if (interval.start() > m_list.at(i).end() + 1) {
-      // add new interval as a seperate interval
+      // add new interval as a separate interval
       m_list.append(interval);
       added = true;
       break;

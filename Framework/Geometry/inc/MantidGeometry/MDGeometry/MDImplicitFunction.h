@@ -248,10 +248,10 @@ protected:
   /// number of dimensions for which this object can be applied
   size_t m_nd;
 
-  /// Vector of all the planes applying for this implict function
+  /// Vector of all the planes applying for this implicit function
   std::vector<MDPlane> m_planes;
 
-  /// Cached number of planes (for a sligh speed-up)
+  /// Cached number of planes (for a slight speed-up)
   size_t m_numPlanes;
 };
 

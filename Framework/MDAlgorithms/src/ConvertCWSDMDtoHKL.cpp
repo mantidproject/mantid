@@ -53,7 +53,7 @@ void ConvertCWSDMDtoHKL::init() {
                   "Input Peaks Workspace");
 
   declareProperty(std::make_unique<ArrayProperty<double>>("UBMatrix"),
-                  "A comma seperated list of doubles for UB matrix from (0,0), (0,1)"
+                  "A comma separated list of doubles for UB matrix from (0,0), (0,1)"
                   "... (2,1),(2,2)");
 
   declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("OutputWorkspace", "", Direction::Output),

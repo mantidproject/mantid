@@ -61,7 +61,7 @@ TMDE(MDGridBox)::MDGridBox(std::shared_ptr<API::BoxController> &bc, const uint32
   initGridBox();
 }
 
-/// common part of MDGridBox contstructor;
+/// common part of MDGridBox constructor;
 template <typename MDE, size_t nd> size_t MDGridBox<MDE, nd>::initGridBox() {
   if (!this->m_BoxController)
     throw std::runtime_error("MDGridBox::ctor(): No BoxController specified in box.");
@@ -128,7 +128,7 @@ void MDGridBox<MDE, nd>::fillBoxShell(const size_t tot, const coord_t ChildInver
   for (size_t d = 0; d < nd; d++)
     indices[d] = 0;
 
-  // get inital free ID for the boxes, which would be created by this command
+  // get initial free ID for the boxes, which would be created by this command
   // Splitting an input MDBox requires creating a bunch of children
   // But the IDs of these children MUST be sequential. Hence the critical block
   // within claimIDRange,
@@ -508,7 +508,7 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes, size_t max
     // This is the number of vertices for each box, e.g. 8 in 3D
     size_t verticesPerBox = 1 << nd;
 
-    /* There is a fixed relationship betwen a vertex (in a linear index) and its
+    /* There is a fixed relationship between a vertex (in a linear index) and its
      * neighbors for a given box. This array calculates this:  */
     auto vertexNeighborsOffsets = new size_t[verticesPerBox];
 
@@ -854,7 +854,7 @@ TMDE(void MDGridBox)::integrateSphere(API::CoordTransform &radiusTransform, cons
 
   // NOTE:
   //    The following section is just trying to uncover the peak center so that
-  //    we can compute the distance bewteen peak center and box center correctly
+  //    we can compute the distance between peak center and box center correctly
   //    without worrying about the skew coming from coordTransformDistnace.
   auto tmpRadiusTransform = dynamic_cast<CoordTransformDistance *>(&radiusTransform);
   if (tmpRadiusTransform == nullptr) {
@@ -890,7 +890,7 @@ TMDE(void MDGridBox)::integrateSphere(API::CoordTransform &radiusTransform, cons
     //  -- there are only two cases (see below) where we can
     //     skip the box and its children, and it requires
     //     the knowledge of how box and peak are spatially
-    //     positioned in Euclidian space.
+    //     positioned in Euclidean space.
     // NOTE:
     //  For ellipsoid, we are using the long semi-axis, which
     //  means we will inevitablly search some empty boxes, but
@@ -1236,7 +1236,7 @@ public:
 /** Create and Add several (N) events into correspondent boxes; If the event is
  out/at of bounds it may be placed in very peculiar place!
  *
- * @param sigErrSq   :: vector of N-signals and errors where errror follows
+ * @param sigErrSq   :: vector of N-signals and errors where error follows
  signal
  * @param Coord      :: vector of MD event coordinates, nd(number of dimensions)
  coordinates for each event
@@ -1359,7 +1359,7 @@ TMDE(inline void MDGridBox)::setChild(size_t index, MDGridBox<MDE, nd> *newChild
   // set new box, supposetly gridded
   this->m_Children[index] = newChild;
 }
-/**Recursively make this and all underlaying boxes file-backed. Not(yet?)
+/**Recursively make this and all underlying boxes file-backed. Not(yet?)
  * implemented for gridboxes */
 TMDE(void MDGridBox)::setFileBacked(const uint64_t /*fileLocation*/, const size_t /*fileSize*/,
                                     const bool /*markSaved*/) {

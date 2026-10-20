@@ -269,7 +269,7 @@ Usage
    Scatter_2_Isotropic = CloneWorkspace('MuscatResultsIsotropic_Scatter_2')
 
 
-   # q=2ksin(theta), so q spike corresonds to single scatter spike at ~60 degrees, double scatter spikes at 0 and 120 degrees
+   # q=2ksin(theta), so q spike corresponds to single scatter spike at ~60 degrees, double scatter spikes at 0 and 120 degrees
    msplot = plotBin('Scatter_2_DeltaFunction',0)
    msplot = plotBin('Scatter_1_DeltaFunction',0, window=msplot)
    msplot = plotBin('Scatter_2_Isotropic',0, window=msplot)

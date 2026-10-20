@@ -66,7 +66,7 @@ the workspace
 * it is  expected that all MD coordinates are within the ranges of MD defined
 workspace, so no checks are performed
 
-   tempate parameter:
+   template parameter:
      * nd -- number of dimensions
 
 *@param sigErr   -- pointer to the beginning of 2*data_size array containing
@@ -155,7 +155,7 @@ size_t MDEventWSWrapper::nDimensions() const {
 
 /** function creates empty MD event workspace with given parameters (workspace
  *factory) and stores internal pointer to this workspace for further usage.
- *  IT ASLO SETS UP W-TRANSFORMATON. TODO: reconcile w-transformation with MD
+ *  IT ALSO SETS UP W-TRANSFORMATON. TODO: reconcile w-transformation with MD
  *geometry.
  *
  *@param WSD the class which describes an MD workspace
@@ -197,7 +197,7 @@ void MDEventWSWrapper::setMDWS(API::IMDEventWorkspace_sptr spWS) {
  * settings when this event occurred
  *@param detId : pointer to the beginning of dataSize array containing
  *detector id-s
- *@param Coord : pointer to the beginning of dataSize*nd array containig the
+ *@param Coord : pointer to the beginning of dataSize*nd array containing the
  *coordinates od nd-dimensional events
  *@param dataSize -- the length of the vector of MD events
  */
@@ -216,7 +216,7 @@ void MDEventWSWrapper::addMDData(std::vector<float> &sigErr, std::vector<uint16_
 manager know that it has whole responsibility for the workspace
 (As the algorithm is static, it will hold the pointer to the workspace
 otherwise, not allowing the WS manager to delete WS on request or when it finds
-this usefull)*/
+this useful)*/
 void MDEventWSWrapper::releaseWorkspace() {
   // decrease the sp count by one
   m_Workspace.reset();

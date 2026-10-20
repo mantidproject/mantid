@@ -483,7 +483,7 @@ private:
 };
 
 // -----------------------------------------------------------------------------
-// Varing period data stream with run and event messages
+// Varying period data stream with run and event messages
 // -----------------------------------------------------------------------------
 class FakeVariablePeriodSubscriber : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:

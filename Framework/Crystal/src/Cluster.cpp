@@ -70,7 +70,7 @@ void Cluster::writeTo(Mantid::API::IMDHistoWorkspace_sptr ws) const {
 ICluster::ClusterIntegratedValues Cluster::integrate(Mantid::API::IMDHistoWorkspace_const_sptr ws) const {
   double errorIntSQ = 0;
   double sigInt = 0;
-  // Integrate accross indexes owned by this workspace.
+  // Integrate across indexes owned by this workspace.
   for (auto index : m_indexes) {
     sigInt += ws->getSignalAt(index);
     double errorSQ = ws->getErrorAt(index);

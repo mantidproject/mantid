@@ -85,7 +85,7 @@ public:
   }
   void setFirst() {
     if (!_hkls.empty()) {
-      auto it = _hkls.begin(); // Take the first possiblity
+      auto it = _hkls.begin(); // Take the first possibility
       it++;
       _hkls.erase(it, _hkls.end()); // Erase all others!
     }
@@ -102,11 +102,11 @@ public:
         const index &index1 = *it1;
         const index &index2 = *it2;
 
-        // calculate angle between each fictional primative vector on both this and other.
+        // calculate angle between each fictional primitive vector on both this and other.
         double reciprocalAngle = uc.recAngle(index1._h, index1._k, index1._l, index2._h, index2._k, index2._l, 1);
 
         // If peak angles are the same as the dspacing angles we can say that this peak corresponds to privatve vector
-        // hkl and the other corresponds to primative vector hkl
+        // hkl and the other corresponds to primitive vector hkl
         if (std::abs(reciprocalAngle - measured_angle) < tolerance) {
           s1.insert(index1);
           s2.insert(index2);

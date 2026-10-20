@@ -133,7 +133,7 @@ public:
   void setErroralpha(double _alphaerr, const int angleunit = angDegrees);
   void setErrorbeta(double _betaerr, const int angleunit = angDegrees);
   void setErrorgamma(double _gammaerr, const int angleunit = angDegrees);
-  // Get errors in latice parameters
+  // Get errors in lattice parameters
   double errora() const;
   double errorb() const;
   double errorc() const;

@@ -41,7 +41,7 @@ void WorkspaceBuilder::setNumPixels(const int numPixels) {
 
 /** Add a peak to the data set to be generated
  *
- * This will create a peak in the event workspace at the given HKL postion.
+ * This will create a peak in the event workspace at the given HKL position.
  *
  * The sigmas parameter is a tuple that controls the distribution of events in
  * the workspace. The first two elements control the x and y variance on the

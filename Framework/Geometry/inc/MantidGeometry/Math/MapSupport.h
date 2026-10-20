@@ -106,7 +106,7 @@ public:
   \version 1.0
 
   This functor takes a map of key,Pointer and
-  deletes the memory associated with teh pointer.
+  deletes the memory associated with the pointer.
 */
 
 template <typename KeyPart, typename PtrPart> class mapDelete {
@@ -161,7 +161,7 @@ public:
 
   This functor takes a map of key,value
   returns just the value. It is built so that
-  the useage is
+  the usage is
    - sndValue<a,b>(MapInstance)
   This avoids needing to call bind2nd each occasion.
 

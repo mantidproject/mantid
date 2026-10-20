@@ -86,7 +86,7 @@ void TransformHKL::exec() {
   std::ostringstream str_stream;
   str_stream << hkl_tran;
   std::string hkl_tran_string = str_stream.str();
-  g_log.notice() << "Applying Tranformation " << hkl_tran_string << '\n';
+  g_log.notice() << "Applying Transformation " << hkl_tran_string << '\n';
 
   if (hkl_tran.numRows() != 3 || hkl_tran.numCols() != 3) {
     throw std::runtime_error("ERROR: The specified transform must be a 3 X 3 matrix.\n" + hkl_tran_string);

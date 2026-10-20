@@ -362,7 +362,7 @@ public:
   }
 
   /*
-   The angular range of the in-plane component of an in-plane detector is rougly 15 degrees. The angular step size is
+   The angular range of the in-plane component of an in-plane detector is roughly 15 degrees. The angular step size is
    chosen to be slightly larger than that to reduce the overall number of groups that will be generated. The
    out-of-plane detector bank centers are roughly at the same two-theta angle as the in-plane, but your mileage may
    vary.
@@ -451,7 +451,7 @@ public:
      bank 52 approx 57-73 - center is group 3
      bank 62 approx 75-89 - center is group 4
      some pixels will make it into group 7
-     ** Must relabel the groups +1 to accound for change
+     ** Must relabel the groups +1 to account for change
      */
     const double ang1 = -65.3;
     const double ang2 = 104.95;

@@ -75,7 +75,7 @@ class MergeCalFiles(PythonAlgorithm):
                     (number, UDET, offset, select, group) = self.ProcessLine(line)
                 except ValueError:
                     pass
-                # remeber all of the values
+                # remember all of the values
                 updateDict[UDET] = (offset, select, group)
 
         updateFile.close()

@@ -255,7 +255,7 @@ added. It does not check the points for validity.
   return lambdaPair(ix, SQ, PntOut);
 }
 
-// SETING
+// SETTING
 
 int Line::setLine(const Kernel::V3D &O, const Kernel::V3D &D)
 /**

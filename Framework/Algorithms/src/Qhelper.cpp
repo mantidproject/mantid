@@ -20,7 +20,7 @@ using namespace Geometry;
   @param dataWS data workspace
   @param binAdj (WavelengthAdj) workpace that will be checked to see if it has
   one spectrum and the same number of bins as dataWS
-  @param detectAdj (PixelAdj) passing NULL for this wont raise an error, if set
+  @param detectAdj (PixelAdj) passing NULL for this won't raise an error, if set
   it will be checked this workspace has as many histograms as dataWS each with
   one bin
   @param qResolution: the QResolution workspace
@@ -58,7 +58,7 @@ void Qhelper::examineInput(const API::MatrixWorkspace_const_sptr &dataWS, const 
   @param dataWS data workspace
   @param binAdj (WavelengthAdj) workpace that will be checked to see if it has
   one spectrum and the same number of bins as dataWS
-  @param detectAdj (PixelAdj) passing NULL for this wont raise an error, if set
+  @param detectAdj (PixelAdj) passing NULL for this won't raise an error, if set
   it will be checked this workspace has as many histograms as dataWS each with
   one bin
   @throw invalid_argument if the workspaces are not mututially compatible
@@ -88,12 +88,12 @@ void Qhelper::examineInput(const API::MatrixWorkspace_const_sptr &dataWS, const 
       }
     }
     if (binAdj->isDistribution() != dataWS->isDistribution()) {
-      throw std::invalid_argument("The distrbution/raw counts status of the "
+      throw std::invalid_argument("The distribution/raw counts status of the "
                                   "wavelengthAdj and DetBankWorkspace must be "
                                   "the same, use ConvertToDistribution");
     }
   } else if (!dataWS->isDistribution()) {
-    // throw std::invalid_argument("The data workspace must be a distrbution if
+    // throw std::invalid_argument("The data workspace must be a distribution if
     // there is no Wavelength dependent adjustment");
   }
 
@@ -171,12 +171,12 @@ size_t Qhelper::waveLengthCutOff(const API::MatrixWorkspace_const_sptr &dataWS, 
   return std::lower_bound(Xs.begin(), Xs.end(), WMin) - Xs.begin();
 }
 
-/** This method performs the common work between Qxy and Q1D2 if algorihtm
+/** This method performs the common work between Qxy and Q1D2 if algorithm
 parameter OutputParts=True.
     It simply outputs two workspaces as output parameters.
 sumOfCounts/sumOfNormFactors equals the
     main output of Qxy or Q1D2
-*  @param alg algoritm
+*  @param alg algorithm
 *  @param sumOfCounts sum of counts
 *  @param sumOfNormFactors sum of normalisation factors
 */

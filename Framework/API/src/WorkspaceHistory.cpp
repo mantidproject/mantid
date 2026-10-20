@@ -157,7 +157,7 @@ std::shared_ptr<IAlgorithm> WorkspaceHistory::lastAlgorithm() const {
 }
 
 /** Prints a text representation of itself
- *  @param os :: The ouput stream to write to
+ *  @param os :: The output stream to write to
  *  @param indent :: an indentation value to make pretty printing of object and
  * sub-objects
  */
@@ -444,9 +444,9 @@ std::shared_ptr<HistoryView> WorkspaceHistory::createView() const { return std::
 
 //------------------------------------------------------------------------------------------------
 /** Prints a text representation
- * @param os :: The ouput stream to write to
+ * @param os :: The output stream to write to
  * @param WH :: The WorkspaceHistory to output
- * @returns The ouput stream
+ * @returns The output stream
  */
 std::ostream &operator<<(std::ostream &os, const WorkspaceHistory &WH) {
   WH.printSelf(os);

@@ -98,7 +98,7 @@ public:
     Group evenBiggerGroup(symOps);
     TS_ASSERT_EQUALS(evenBiggerGroup.order(), 3);
 
-    // Multiple occurences of the same operation do not count
+    // Multiple occurrences of the same operation do not count
     symOps.emplace_back(SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
     Group sameAsBefore(symOps);
     TS_ASSERT_EQUALS(sameAsBefore.order(), 3);

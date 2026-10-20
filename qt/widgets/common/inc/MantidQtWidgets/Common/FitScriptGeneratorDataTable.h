@@ -93,7 +93,7 @@ private:
 using ColumnIndex = FitScriptGeneratorDataTable::ColumnIndex;
 
 /**
- * This class is used for formating the type of data allowed in each of the
+ * This class is used for formatting the type of data allowed in each of the
  * tables columns. It is also used for setting various column properties, and
  * will paint a row when it is hovered over.
  */

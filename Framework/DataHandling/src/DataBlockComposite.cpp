@@ -128,7 +128,7 @@ std::vector<SpectrumPair> getSlicedIntervals(SpectrumPair original, const std::v
            (original.first < toRemove.second) && (toRemove.second < original.second);
   };
 
-  // Use that removeIntervals has oredred, non-overlapping intervals
+  // Use that removeIntervals has ordered, non-overlapping intervals
   // Subtract all the removeIntervals
   std::vector<SpectrumPair> newIntervals;
   for (auto &removeInterval : removeIntervals) {

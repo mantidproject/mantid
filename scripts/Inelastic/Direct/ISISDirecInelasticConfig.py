@@ -375,7 +375,7 @@ class MantidConfigDirectInelastic(object):
      see https://github.com/mantidproject/scriptrepository for details
      3) The data can be found in archive, mounted at /archive/NDXxxxxx/Instrument/data/cycle_XX_Y
 
-     4)There are number of other assumptions about script path, used scripts, Mantid confg,
+     4)There are number of other assumptions about script path, used scripts, Mantid config,
        and other folders
        All these assumptions are summarized within __init__
 

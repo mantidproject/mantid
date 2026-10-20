@@ -53,7 +53,7 @@ class CustomTextElidingDelegateTest(unittest.TestCase):
         # for matching
         drawn_text = painter.drawText.call_args[0][2]
         self.assertTrue(drawn_text.startswith("3.141592"))
-        # Qt uses the 'horizontal ellipsis' unicode symbol for ellision.
+        # Qt uses the 'horizontal ellipsis' unicode symbol for elision.
         # To avoid confusion with it look like 3 separate '.' characters in code
         # we use the unicode codepoint directly
         self.assertTrue(drawn_text.endswith(b"\xe2\x80\xa6".decode("utf-8")))

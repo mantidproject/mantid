@@ -126,7 +126,7 @@ std::string ErrorReporter::generateErrorMessage() const {
 }
 
 /** Submits a post request to the specified url with the message as the body
- @param message : String containg json formatted error message
+ @param message : String containing json formatted error message
  @param url : The url to send the post request to
 */
 Kernel::InternetHelper::HTTPStatus ErrorReporter::sendReport(const std::string &message, const std::string &url) {

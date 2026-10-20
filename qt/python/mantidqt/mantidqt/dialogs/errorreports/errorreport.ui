@@ -122,7 +122,7 @@
      <item>
       <widget class="QLabel" name="email_notice_text">
        <property name="text">
-        <string>Notice: An email adress is currently required to submit an error report.</string>
+        <string>Notice: An email address is currently required to submit an error report.</string>
        </property>
       </widget>
      </item>
@@ -217,7 +217,7 @@
         <item>
          <widget class="QLabel" name="label_5">
           <property name="text">
-           <string>An unexpected exception has occured.</string>
+           <string>An unexpected exception has occurred.</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>

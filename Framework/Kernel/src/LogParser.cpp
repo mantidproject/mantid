@@ -46,7 +46,7 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName, cons
   // Change times and new values read from file
   std::multimap<std::string, std::string> change_times;
 
-  // Read in the data and determin if it is numeric
+  // Read in the data and determine if it is numeric
   std::string str, old_data;
   bool isNumeric(false);
   std::string stime, sdata;

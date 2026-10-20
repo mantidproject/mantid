@@ -89,13 +89,13 @@ void CalMuonDeadTime::exec() {
     }
   }();
 
-  // Do the initial setup of the ouput table-workspace
+  // Do the initial setup of the output table-workspace
 
   API::ITableWorkspace_sptr outTable = std::make_shared<TableWorkspace>();
   outTable->addColumn("int", "spectrum");
   outTable->addColumn("double", "dead-time");
 
-  // Start created a temperary workspace with data we are going to fit
+  // Start created a temporary workspace with data we are going to fit
   // against. First step is to crop to only include data between firstgooddata
   // and lastgooddata
 

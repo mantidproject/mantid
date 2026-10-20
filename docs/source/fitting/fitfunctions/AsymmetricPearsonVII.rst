@@ -27,7 +27,7 @@ The four free parameters that the Pearson VII function :math:`P(x, h, x_0, \Gamm
 -  :math:`\Gamma` - the full width at half maximum
 -  :math:`m` - the function's shape parameter
 
-The parameter :math:`m` can take values in the range :math:`[0, \infty)` and it determines whether :math:`P(x, h, x_0, \Gamma, m)` is more close to a Lorentzian or a Gaussian. When :math:`m=1` it's a Lorentzian, whereas when :math:`m \rightarrow \infty` it's a Gaussian. The "left" and "right" Pearson VII functions :math:`P_L(x)` and :math:`P_R(x)` take identical parameters :math:`h, x_0, \Gamma`, but diffent :math:`m`, so that
+The parameter :math:`m` can take values in the range :math:`[0, \infty)` and it determines whether :math:`P(x, h, x_0, \Gamma, m)` is more close to a Lorentzian or a Gaussian. When :math:`m=1` it's a Lorentzian, whereas when :math:`m \rightarrow \infty` it's a Gaussian. The "left" and "right" Pearson VII functions :math:`P_L(x)` and :math:`P_R(x)` take identical parameters :math:`h, x_0, \Gamma`, but different :math:`m`, so that
 
 .. math:: P_L \equiv P(x, h, x_0, \Gamma, m_L),
 .. math:: P_R \equiv P(x, h, x_0, \Gamma, m_R).

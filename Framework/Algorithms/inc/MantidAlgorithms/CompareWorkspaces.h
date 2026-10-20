@@ -41,7 +41,7 @@ namespace Algorithms {
  * true) </LI>
  * <LI> CheckMasking    - Whether to check that the bin masking matches
  * (default: true) </LI>
- * <LI> CheckSample     - Whether to check that the sample object mathces
+ * <LI> CheckSample     - Whether to check that the sample object matches
  * (default: false) </LI>
  * </UL>
  *

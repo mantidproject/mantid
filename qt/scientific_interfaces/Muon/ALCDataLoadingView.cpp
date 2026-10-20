@@ -107,7 +107,7 @@ void ALCDataLoadingView::initialize() {
 
 /**
  * Initialised instrument combo box with Muon instruments and sets index to user
- * defualt instrument if available otherwise set as HIFI
+ * default instrument if available otherwise set as HIFI
  */
 void ALCDataLoadingView::initInstruments() {
   // Initialising so do not want to send signals here
@@ -441,7 +441,7 @@ bool ALCDataLoadingView::isAlphaEnabled() const { return m_ui.alpha->isEnabled()
 
 void ALCDataLoadingView::setAlphaValue(const std::string &alpha) { m_ui.alpha->setText(QString::fromStdString(alpha)); }
 
-// Get alpha value, defualt value 1
+// Get alpha value, default value 1
 std::string ALCDataLoadingView::getAlphaValue() const {
   if (!m_ui.alpha->text().isEmpty())
     return m_ui.alpha->text().toStdString();

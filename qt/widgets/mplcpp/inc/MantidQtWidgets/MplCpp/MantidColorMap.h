@@ -12,7 +12,7 @@
 #include <QRgb>
 #include <QString>
 
-// Forward delcarations
+// Forward declarations
 class QWidget;
 
 namespace MantidQt {

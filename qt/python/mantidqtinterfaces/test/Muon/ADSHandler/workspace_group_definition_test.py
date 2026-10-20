@@ -133,7 +133,7 @@ class WorkspaceGroupDefinitionTest(unittest.TestCase):
         ws2 = create_workspace(instrument + run + "bwd" + extension)
         _ = create_workspace("EMU" + run + "fwd" + extension)
         _ = create_workspace(instrument + run + "fwd" + "FD")
-        # there was a bug that meant tables didnt work
+        # there was a bug that meant tables didn't work
         table_name = create_table_workspace(instrument + run + "table" + extension)
 
         add_to_group(instrument, extension)
@@ -157,7 +157,7 @@ class WorkspaceGroupDefinitionTest(unittest.TestCase):
         ws4 = create_workspace(instrument + run2 + "bwd" + extension)
         _ = create_workspace("EMU" + run + "fwd" + extension)
         _ = create_workspace(instrument + run + "fwd" + "FD")
-        # there was a bug that meant tables didnt work
+        # there was a bug that meant tables didn't work
         table_name = create_table_workspace(instrument + run + "table" + extension)
 
         add_to_group(instrument, extension)
@@ -188,7 +188,7 @@ class WorkspaceGroupDefinitionTest(unittest.TestCase):
         ws2 = create_workspace(instrument + run + "bwd" + extension)
         _ = create_workspace("EMU" + run + "fwd" + extension)
         _ = create_workspace(instrument + run + "fwd" + "FD")
-        # there was a bug that meant tables didnt work
+        # there was a bug that meant tables didn't work
         table_name = create_table_workspace(instrument + run + "table" + extension)
 
         make_group([ws2], "group")

@@ -44,7 +44,7 @@ private:
   /** Helper method
 With the input arguments
 1) Creates the target ProductLinearFunction.
-2) Creates and equavalent Product function using other Fit function framework
+2) Creates and equivalent Product function using other Fit function framework
 types.
 3) Manually calculates the expected output given that the underlying equation is
 so simple.
@@ -83,7 +83,7 @@ to check that the results are equal.
     FunctionValues valuesLinExpDecay(domain);
     Mantid::CurveFitting::Jacobian jacobianNumerical(nResults, 4);
     Mantid::CurveFitting::Jacobian jacobianLinExpDecay(nResults, 4);
-    // Peform function evaluations.
+    // Perform function evaluations.
     benchmark.function(domain, valuesBenchmark);
     func.function(domain, valuesLinExpDecay);
     // Perform function derivative evaluations.

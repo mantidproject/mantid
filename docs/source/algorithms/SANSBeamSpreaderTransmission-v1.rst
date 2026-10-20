@@ -9,7 +9,7 @@
 Description
 -----------
 
-Worfklow algorithm used to compute and apply the sample transmission correction using
+Workflow algorithm used to compute and apply the sample transmission correction using
 the beam spreader ("glassy carbon") method. The transmission is calculated by the
 :ref:`CalculateTransmission <algm-CalculateTransmission>` as follows:
 

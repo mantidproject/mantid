@@ -239,7 +239,7 @@ template <typename MDE, size_t nd> void IntegratePeaksMD::integrate(typename MDE
   // processed, though occasionally it will process all 8 requested in the
   // script without crashing.  Since the lower level codes already use OpenMP,
   // parallelizing at this level is only marginally useful, giving about a
-  // 5-10% speedup.  Perhaps is should just be removed permanantly, but for
+  // 5-10% speedup.  Perhaps is should just be removed permanently, but for
   // now it is commented out to avoid the seg faults.  Refs #5533
   // PRAGMA_OMP(parallel for schedule(dynamic, 10) )
   for (int i = 0; i < peakWS->getNumberPeaks(); ++i) {

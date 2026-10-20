@@ -118,7 +118,7 @@ public:
   }
 
   static Matrix<double> getTestNiggliUB() // triclinic P
-  {                                       // artifical example
+  {                                       // artificial example
     Matrix<double> UB(3, 3, false);
     V3D row_0(1, .2, 3);
     V3D row_1(4, 5, 0);

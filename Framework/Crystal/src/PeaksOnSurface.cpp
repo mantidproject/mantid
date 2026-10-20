@@ -44,23 +44,23 @@ void PeaksOnSurface::init() {
   declareProperty(std::make_unique<ArrayProperty<double>>("Vertex1", std::vector<double>(), manditoryExtents->clone()),
                   "A comma separated list of cartesian coordinates for the "
                   "lower left vertex of the surface. Values to be specified in "
-                  "the CoordinateFrame choosen.");
+                  "the CoordinateFrame chosen.");
 
   declareProperty(std::make_unique<ArrayProperty<double>>("Vertex2", std::vector<double>(), manditoryExtents->clone()),
                   "A comma separated list of cartesian coordinates for the "
                   "upper left vertex of the surface. Values to be specified in "
-                  "the CoordinateFrame choosen.");
+                  "the CoordinateFrame chosen.");
 
   declareProperty(std::make_unique<ArrayProperty<double>>("Vertex3", std::vector<double>(), manditoryExtents->clone()),
                   "A comma separated list of cartesian coordinates for the "
                   "upper right vertex of the surface. Values to be specified "
-                  "in the CoordinateFrame choosen.");
+                  "in the CoordinateFrame chosen.");
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>("Vertex4", std::vector<double>(), std::move(manditoryExtents)),
       "A comma separated list of cartesian coordinates for the "
       "lower right vertex of the surface. Values to be specified "
-      "in the CoordinateFrame choosen.");
+      "in the CoordinateFrame chosen.");
 }
 
 void PeaksOnSurface::validateExtentsInput() const {
@@ -117,12 +117,12 @@ bool PeaksOnSurface::pointInsideAllExtents(const V3D &testPoint, const V3D &peak
   const double peakRadius = getPeakRadius();
 
   /*
-  Either, the sphere interesects one of the line segments, which define the
+  Either, the sphere intersects one of the line segments, which define the
   bounding edges of the surface,
   OR, the test point lies somewhere on the surface within the extents. We need
   to check for both.
 
-  The sphere may not necessarily interesect one of the line segments in order to
+  The sphere may not necessarily intersect one of the line segments in order to
   be in contact with the surface, for example, if the peak center as
   perpendicular to the
   surface, and the radius such that it only just touched the surface. In this

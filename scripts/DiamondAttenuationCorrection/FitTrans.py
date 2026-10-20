@@ -111,7 +111,7 @@ def mod(a, b):
 
 def forbidden(h, k, l):
     """
-    %returns logical positive if this hkl is fobidden according to
+    %returns logical positive if this hkl is forbidden according to
     %   diamond reflections conditions....
     """
     ah = abs(h)
@@ -329,12 +329,12 @@ def pkintread(hkl, loc):
     % [i,j] = size(x);
     % dipspec = zeros(i,j); %array containing dip spectrum
     % difspec = zeros(i,j); %array containing diffraction spectrum
-    % d = x/sqrt(2);    %dspacings for this lamda range at 90 degrees
+    % d = x/sqrt(2);    %dspacings for this lambda range at 90 degrees
 
     % In order to calculate the scattered intensity I from the Fcalc^2, need to
     % apply the Buras-Gerward formula:
     %
-    % Fcalc^2 = I*2*sin(theta)^2/(lamda^2*A*E*incFlux*detEffic)
+    % Fcalc^2 = I*2*sin(theta)^2/(lambda^2*A*E*incFlux*detEffic)
     """
     pkint = np.zeros(nref)
 
@@ -935,7 +935,7 @@ def FitTrans():
     # global initial conditions
     sf = 1
     pktype = 1  # 1 = Gaussian, only current working peaktype
-    pkwid = 0.003  # peak width 'sig' is quadratic in lamda
+    pkwid = 0.003  # peak width 'sig' is quadratic in lambda
     pkwid2 = 2e-4  # sig = pkwid*lam+pkwid2*lam^2
 
     #####################

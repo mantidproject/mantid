@@ -103,7 +103,7 @@ void LoadQKK::exec() {
 
   // Add dummy source and samplepos to instrument
 
-  // Create an instrument component wich will represent the sample position.
+  // Create an instrument component which will represent the sample position.
   Geometry::Component *samplepos = new Geometry::Component("Sample", instrument.get());
   instrument->add(samplepos);
   instrument->markAsSamplePos(samplepos);

@@ -78,7 +78,7 @@ class DrillTask(QRunnable):
 
     def addStartedCallback(self, callback):
         """
-        Add a callback in the start callbaks list.
+        Add a callback in the start callbacks list.
 
         Args:
             callback (function): callback
@@ -87,7 +87,7 @@ class DrillTask(QRunnable):
 
     def addSuccessCallback(self, callback):
         """
-        Add a callback in the success callbaks list.
+        Add a callback in the success callbacks list.
 
         Args:
             callback (function): callback
@@ -143,7 +143,7 @@ class DrillTask(QRunnable):
 
         Args:
             returnCode (int): return code of the task
-            errorMsg (str): optionnal error message
+            errorMsg (str): optional error message
         """
         if returnCode == 0:
             for fct in self._successCallbacks:

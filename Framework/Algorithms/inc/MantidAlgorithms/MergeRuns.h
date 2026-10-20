@@ -51,7 +51,7 @@ namespace Algorithms {
 */
 
 namespace MergeRunsParameter {
-/// MergeRuns parameter names of the paramter file for sample log merging
+/// MergeRuns parameter names of the parameter file for sample log merging
 static const std::string SUM_MERGE = "sample_logs_sum";
 static const std::string TIME_SERIES_MERGE = "sample_logs_time_series";
 static const std::string LIST_MERGE = "sample_logs_list";
@@ -76,11 +76,11 @@ public:
   const std::vector<std::string> seeAlso() const override { return {"ConjoinWorkspaces"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Merging"; }
-  // Overriden MultiPeriodGroupAlgorithm method.
+  // Overridden MultiPeriodGroupAlgorithm method.
   bool useCustomInputPropertyName() const override;
 
 protected:
-  /// Overriden fillHistory method to correctly store history from merged
+  /// Overridden fillHistory method to correctly store history from merged
   /// workspaces
   void fillHistory() override;
 
@@ -91,7 +91,7 @@ private:
   void execEvent();
   void execHistogram(const std::vector<std::string> &inputs);
   void buildAdditionTables();
-  // Overriden MultiPeriodGroupAlgorithm method.
+  // Overridden MultiPeriodGroupAlgorithm method.
   std::string fetchInputPropertyName() const override;
 
   /// An addition table is a list of pairs: First int = workspace index in the

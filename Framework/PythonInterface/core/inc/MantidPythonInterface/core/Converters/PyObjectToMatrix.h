@@ -17,7 +17,7 @@ namespace Converters {
  * Takes a Python object and if it supports
  * indexing and is two dimensional it attempts to
  * convert it to a Kernel::Matrix object. Note, this
- * currently only suuports Matrix<double>
+ * currently only supports Matrix<double>
  */
 struct MANTID_PYTHONINTERFACE_CORE_DLL PyObjectToMatrix {
   PyObjectToMatrix(const boost::python::object &p);

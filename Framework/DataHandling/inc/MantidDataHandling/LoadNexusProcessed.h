@@ -172,7 +172,7 @@ private:
   /// calculates the workspace size
   std::size_t calculateWorkspaceSize(const std::size_t numberofspectra, bool gen_filtered_list = false);
 
-  /// Accellerated multiperiod loading
+  /// Accelerated multiperiod loading
   Mantid::API::Workspace_sptr doAccelleratedMultiPeriodLoading(Mantid::Nexus::NXRoot &root,
                                                                const std::string &entryName,
                                                                Mantid::API::MatrixWorkspace_sptr &tempMatrixWorkspace,
@@ -188,7 +188,7 @@ private:
   /// Numeric values for the second axis, if applicable
   MantidVec m_axis1vals;
 
-  /// Flag set if list of spectra to save is specifed
+  /// Flag set if list of spectra to save is specified
   bool m_list;
   /// Flag set if interval of spectra to write is set
   bool m_interval;

@@ -398,7 +398,7 @@ AnalysisDataServiceImpl::AnalysisDataServiceImpl()
 const std::string &AnalysisDataServiceImpl::illegalCharacters() const { return m_illegalChars; }
 
 /**
- * Set the list of illegal characeters
+ * Set the list of illegal characters
  * @param illegalChars A string containing the characters, as one long string,
  * that are not to be accepted by the ADS
  * NOTE: This only affects further additions to the ADS

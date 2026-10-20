@@ -403,7 +403,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
     def _fit_beam_width(self, input_ws):
         """
         Groups detectors vertically and fits the horizontal beam width with a Gaussian distribution to obtain
-        horizontal beam resolution wich is added to sample logs under 'BeamWidthVertical' entry.
+        horizontal beam resolution which is added to sample logs under 'BeamWidthVertical' entry.
         :param input_ws: Empty beam workspace
         """
         tmp_ws = input_ws + "_beam_width"
@@ -658,7 +658,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
         """
         Applies the beam center correction
         @param ws: input workspace
-        @parma beam_ws: empty beam workspace
+        @param beam_ws: empty beam workspace
         """
         if not self._check_processed_flag(beam_ws, "Beam"):
             self.log().warning("Beam input workspace is not processed as beam.")
@@ -835,7 +835,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
         Perform the normalization by sample thickness. In case the provided
         thickness is -1, this method will try to get it from the sample
         logs.
-        @param ws : input workspace on wich the normalization is applied.
+        @param ws : input workspace on which the normalization is applied.
         """
         thickness = self.getProperty("SampleThickness").value
         if thickness == -1:

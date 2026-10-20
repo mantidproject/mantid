@@ -117,7 +117,7 @@ std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &sepa
   // Define minimum size for using threading
   int min_size = 500 * nmaxThreads;
 
-  // Get the distance between begining and end
+  // Get the distance between beginning and end
   int dist = static_cast<int>(std::distance(begin, end));
 
   if (dist < min_size) {
@@ -436,7 +436,7 @@ template <typename Integer> std::vector<std::vector<Integer>> parseGroups(const 
 }
 
 /**
- * Generates random alpha-numeric string.
+ * Generates random alphanumeric string.
  * @param len :: Length of the string
  * @return Random string of the given length
  */

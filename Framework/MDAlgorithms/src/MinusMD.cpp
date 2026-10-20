@@ -88,7 +88,7 @@ template <typename MDE, size_t nd> void MinusMD::doMinus(typename MDEventWorkspa
       box1->addEvents(eventsCopy);
       box->releaseEvents();
     }
-    prog.report("Substracting Events");
+    prog.report("Subtracting Events");
   } while (it2.next());
 
   this->progress(0.41, "Splitting Boxes");

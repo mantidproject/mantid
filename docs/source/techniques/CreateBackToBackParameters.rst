@@ -16,7 +16,7 @@ The fullprof param file (also called fullprof resolution file) below describes d
 
 - The 1st set of parameters refer to the detectors of the bank scattering bank. In HPRD_Definition.xml called "bank_bsk"
 - The 2nd set of parameters refer to the detectors of the 90 degree bank. In HPRD_Definition.xml called "bank_90degnew"
-- The 3nd set of parameters refer to the collection of detectors grouped with the name "bank_1a" HPRD_Definition.xml called "bank_90degnew"
+- The 3rd set of parameters refer to the collection of detectors grouped with the name "bank_1a" HPRD_Definition.xml called "bank_90degnew"
 
 .. code-block:: text
 

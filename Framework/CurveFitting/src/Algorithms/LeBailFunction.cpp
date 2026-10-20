@@ -236,9 +236,9 @@ void LeBailFunction::setPeakCentreTolerance(double peakpostol, double tofmin, do
  * @param peakhkls :: list of Miller indexes (HKL)
  */
 void LeBailFunction::addPeaks(const std::vector<std::vector<int>> &peakhkls) {
-  // Prerequisit
+  // Prerequisite
   if (!m_isInputValue)
-    throw runtime_error("Client must set up profile parameter vlaues by calling "
+    throw runtime_error("Client must set up profile parameter values by calling "
                         "setProfileParameterValues() first! ");
 
   // Add peaks
@@ -429,7 +429,7 @@ bool LeBailFunction::calculateGroupPeakIntensities(vector<pair<double, IPowderDi
   size_t ndata = iright - ileft;
   if (ileft >= iright) {
     stringstream errss;
-    errss << "[Calcualte Peak Intensity] Group range is unphysical.  iLeft = " << ileft << ", iRight = " << iright
+    errss << "[Calculate Peak Intensity] Group range is unphysical.  iLeft = " << ileft << ", iRight = " << iright
           << "; Number of peaks = " << peakgroup.size() << "; Left boundary = " << leftbound
           << ", Right boundary = " << rightbound << "; Left peak FWHM = " << leftpeak->fwhm()
           << ", Right peak FWHM = " << rightpeak->fwhm();
@@ -690,7 +690,7 @@ void LeBailFunction::setProfileParameterValues(map<std::string, double> parammap
 /** Group peaks together
  * @param peakgroupvec:  output vector containing peaks grouped together.
  * @param outboundpeakvec: output vector containing peaks out of bound range
- * @param xmin : minimim x value of the data
+ * @param xmin : minimum x value of the data
  * @param xmax : maximum x value of the data
  * Disabled argument: MatrixWorkspace_sptr dataws, size_t workspaceindex,
  */
@@ -777,7 +777,7 @@ void LeBailFunction::groupPeaks(vector<vector<pair<double, IPowderDiffPeakFuncti
   } // ENDWHILE
 
   while (ipk < m_numPeaks) {
-    // Group peaks out of uppper boundary to a separate vector of peaks
+    // Group peaks out of upper boundary to a separate vector of peaks
     outboundpeakvec.emplace_back(m_dspPeakVec[ipk].second);
     ipk += 1;
   }

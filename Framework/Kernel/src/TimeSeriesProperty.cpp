@@ -96,7 +96,7 @@ template <typename TYPE> Property *TimeSeriesProperty<TYPE>::cloneInTimeROI(cons
 }
 
 /**
- * "Virutal copy constructor with a time shift
+ * "Virtual copy constructor with a time shift
  * @param timeShift :: a time shift in seconds
  */
 template <typename TYPE> Property *TimeSeriesProperty<TYPE>::cloneWithTimeShift(const double timeShift) const {
@@ -901,7 +901,7 @@ template <typename TYPE> std::map<DateAndTime, TYPE> TimeSeriesProperty<TYPE>::v
   // 1. Sort if necessary
   sortIfNecessary();
 
-  // 2. Data Strcture
+  // 2. Data Structure
   std::map<DateAndTime, TYPE> asMap;
 
   if (!m_values.empty()) {
@@ -2076,7 +2076,7 @@ template <> void TimeSeriesProperty<std::string>::saveProperty(Nexus::File *file
  * Helper function to save a TimeSeriesProperty<bool>
  * At the time of writing NeXus does not support boolean directly. We will use a
  * UINT8
- * for the value and add an attribute boolean to inidcate it is actually a bool
+ * for the value and add an attribute boolean to indicate it is actually a bool
  */
 template <> void TimeSeriesProperty<bool>::saveProperty(Nexus::File *file) {
   std::vector<bool> value = this->valuesAsVector();
@@ -2150,7 +2150,7 @@ void TimeSeriesProperty<std::string>::histogramData(const Types::Core::DateAndTi
   UNUSED_ARG(tMin);
   UNUSED_ARG(tMax);
   UNUSED_ARG(counts);
-  throw std::runtime_error("histogramData is not implememnted for time series "
+  throw std::runtime_error("histogramData is not implemented for time series "
                            "properties containing strings");
 }
 

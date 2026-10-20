@@ -39,7 +39,7 @@ DECLARE_ALGORITHM(ConvertToDiffractionMDWorkspace3)
 /** Initialize the algorithm's properties.
  */
 void ConvertToDiffractionMDWorkspace3::init() {
-  // initilise common properties between versions
+  // initialise common properties between versions
   BaseConvertToDiffractionMDWorkspace::init();
 
   std::vector<double> extents;

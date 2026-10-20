@@ -26,7 +26,7 @@ MatrixProperty<TYPE>::MatrixProperty(const std::string &propName, const IValidat
 
 /**
  * Copy constructor
- * @param rhs :: Contruct this object from rhs
+ * @param rhs :: Construct this object from rhs
  */
 template <typename TYPE>
 MatrixProperty<TYPE>::MatrixProperty(const MatrixProperty &rhs) : PropertyWithValue<HeldType>(rhs) {}

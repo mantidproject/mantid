@@ -68,7 +68,7 @@ private:
   /**
    * Attempts to extract the TYPE from the boost any object and if
    * the type is a DataItem_sptr then it attempts to downcast the value to
-   * the concrete type sepcified by the validator
+   * the concrete type specified by the validator
    * @param value :: The values to verify
    * @returns An error message to display to users or an empty string on no
    * error
@@ -134,7 +134,7 @@ private:
 /// @cond
 // This switch off an warning because oxygen could not figureout that this is a
 // specialized type of the general one.
-/** Intialize the DataItem_sptr typeinfo
+/** Initialize the DataItem_sptr typeinfo
  */
 template <typename T>
 const std::type_info &TypedValidator<std::shared_ptr<T>>::m_dataitemTypeID = typeid(std::shared_ptr<DataItem>);

@@ -300,7 +300,7 @@ public:
 private:
   std::string dataFile, tempFile, tempFile2, tempFile3;
 
-  /** Create a tiny 2x2 workspace in a tempory file that should
+  /** Create a tiny 2x2 workspace in a temporary file that should
    *  be deleted
    */
   void writeTestFile() {

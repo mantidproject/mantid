@@ -137,7 +137,7 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspace(
     ws2d = WorkspaceCreationHelper::create2DWorkspaceFromFunction(ones(), static_cast<int>(nhist), x0, x1, dx, true);
   }
 
-  // Set the units to Wavelength (is needed for both types of worspaces)
+  // Set the units to Wavelength (is needed for both types of workspaces)
   ws2d->getAxis(0)->setUnit("Wavelength");
 
   // Add the instrument with a single detector

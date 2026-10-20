@@ -63,7 +63,7 @@ private:
                                       const Muon::AnalysisOptions &options) const;
 
   void setMuonProcessAlgorithmOutputTypeProperty(IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
-  /// Set grouping properies of MuonProcess
+  /// Set grouping properties of MuonProcess
   void setMuonProcessAlgorithmGroupingProperties(IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
 
   void setMuonProcessAlgorithmTimeProperties(IAlgorithm &alg, const Muon::AnalysisOptions &options) const;

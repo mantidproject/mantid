@@ -31,7 +31,7 @@ Citation::Citation(const std::string &doi, const std::string &bibtex, const std:
                    const std::string &url, const std::string &description)
     : m_doi(doi), m_bibtex(bibtex), m_endnote(endnote), m_url(url), m_description(description) {
   if (doi.empty() && bibtex.empty() && endnote.empty() && url.empty() && description.empty())
-    throw std::invalid_argument("No arguements were given!");
+    throw std::invalid_argument("No arguments were given!");
 
   // This is an initial implementation that expects it but it should be possible
   // to generate one from the other

@@ -46,7 +46,7 @@ bool KafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
 
   auto instrumentInfo = Kernel::ConfigService::Instance().getInstrument(m_instrumentName);
 
-  // Get topics from Facilites.xml if available otherwise use defaults.
+  // Get topics from Facilities.xml if available otherwise use defaults.
   auto topics = instrumentInfo.topicInfoList();
 
   std::string eventTopic(m_instrumentName + KafkaTopicSubscriber::EVENT_TOPIC_SUFFIX),

@@ -86,7 +86,7 @@ public:
     TS_ASSERT_EQUALS(a.getCenter(2), 2.5);
   }
 
-  /** Note: the copy constructor is not explicitely written but rather is filled
+  /** Note: the copy constructor is not explicitly written but rather is filled
    * in by the compiler */
   void test_CopyConstructor() {
     coord_t coords[3] = {0.125, 1.25, 2.5};

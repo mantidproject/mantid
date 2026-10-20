@@ -367,7 +367,7 @@ public:
 
   void test_IdealCrossPolarizationCaseFullCorrections() {
     auto crossPolarizationEffWS = idealEfficiencies(DEFAULT_EDGES, false);
-    // Cross polarized ideal efficiencies should give us the same ouput as for ideal efficiencies but in the reverse
+    // Cross polarized ideal efficiencies should give us the same output as for ideal efficiencies but in the reverse
     // order
     const std::array<std::string, 4> POL_DIRS{{"--", "-+", "+-", "++"}};
     idealCaseFullCorrectionsTest(DEFAULT_EDGES, crossPolarizationEffWS, POL_DIRS);

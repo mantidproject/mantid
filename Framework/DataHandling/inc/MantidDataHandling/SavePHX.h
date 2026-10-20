@@ -56,7 +56,7 @@ private:
   void init() override;
   /// Execution code
   void exec() override;
-  /// The name of the table workpsace with detectors positions used in tests
+  /// The name of the table workspace with detectors positions used in tests
   std::string det_par_ws_name;
 };
 } // namespace DataHandling

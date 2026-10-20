@@ -56,7 +56,7 @@ public:
 
 private:
   //----- Overwrite IFunction ------------------------------------------------
-  /// Fuction local
+  /// Function local
   // void functionLocal(double* out, const double* xValues, const size_t
   // nData)const;
   /// Derivative
@@ -70,7 +70,7 @@ private:
   void init() override;
 
 private:
-  /// Calcualte H and Eta
+  /// Calculate H and Eta
   void calHandEta(double sigma2, double gamma, double &H, double &eta) const;
 
   /// Calculate peak profile I(TOF) = Omega(TOF)

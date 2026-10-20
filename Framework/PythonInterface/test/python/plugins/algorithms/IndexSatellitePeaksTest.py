@@ -13,7 +13,7 @@ import numpy.testing as npt
 class IndexSatellitePeaksTest(unittest.TestCase):
     def setUp(self):
         # Need to set the random seed because the scipy kmeans algorithm
-        # randomly initilizes the starting centroids.
+        # randomly initializes the starting centroids.
         np.random.seed(100)
         self._nuclear_peaks = Load("WISH_peak_hkl_small.nxs", OutputWorkspace="nuclear_peaks")
         self._peaks = Load("refine_satellites_fixed_q_test.nxs", OutputWorkspace="peaks")

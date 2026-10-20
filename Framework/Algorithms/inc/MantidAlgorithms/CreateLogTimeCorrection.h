@@ -50,7 +50,7 @@ private:
   /// Log geometry information
   void logGeometryInformation(const Geometry::DetectorInfo &detectorInfo) const;
 
-  /// Calculate the log time correction for each pixel, i.e., correcton from
+  /// Calculate the log time correction for each pixel, i.e., correction from
   /// event time at detector to time at sample
   std::vector<double> calculateCorrections(const Geometry::DetectorInfo &detectorInfo) const;
 

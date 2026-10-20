@@ -16,7 +16,7 @@ namespace API {
 class MatrixWorkspace;
 class SpectrumInfo;
 
-/** TimeAtSampleStrategyElastic : Time at sample stragegy for elastic scattering
+/** TimeAtSampleStrategyElastic : Time at sample strategy for elastic scattering
  */
 class MANTID_API_DLL TimeAtSampleStrategyElastic : public TimeAtSampleStrategy {
 public:

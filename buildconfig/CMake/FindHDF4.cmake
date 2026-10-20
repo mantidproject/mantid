@@ -36,7 +36,7 @@ if(HDF4_DF_LIBRARY MATCHES HDF4_DF_LIBRARY-NOTFOUND)
 else()
   get_filename_component(HDF4_LIBRARY_DIRS ${HDF4_DF_LIBRARY} PATH)
   message(STATUS "Found HDF4 DF library: ${HDF4_DF_LIBRARY}")
-  message(STATUS "HDF4 libary path: ${HDF4_LIBRARY_DIRS}")
+  message(STATUS "HDF4 library path: ${HDF4_LIBRARY_DIRS}")
 endif()
 
 find_library(

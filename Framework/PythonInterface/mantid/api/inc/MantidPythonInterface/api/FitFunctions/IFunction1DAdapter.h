@@ -27,7 +27,7 @@ namespace PythonInterface {
  */
 #if defined(_MSC_VER) && _MSC_VER >= 1900
 // All Python tests segfault on MSVC 2015 if the virtual specifiers are included
-// The segault happens on initializing this constructor. Conversely on all other
+// The segfault happens on initializing this constructor. Conversely on all other
 // compilers it won't even compile without the virtual specifier.
 class IFunction1DAdapter : public API::ParamFunction, public API::IFunction1D, public IFunctionAdapter {
 #else

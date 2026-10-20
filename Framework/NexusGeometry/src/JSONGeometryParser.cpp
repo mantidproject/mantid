@@ -533,7 +533,7 @@ void JSONGeometryParser::extractChopperContent() {
   }
 }
 
-/** Parses instrument geometry which is formated in JSON corresponding to the
+/** Parses instrument geometry which is formatted in JSON corresponding to the
 hdf5 nexus structure.
 @param jsonGeometry - JSON string representing the nexus style instrument
 @throws std::invalid_argument if the geometry string is invalid.

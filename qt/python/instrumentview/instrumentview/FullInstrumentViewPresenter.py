@@ -914,7 +914,7 @@ class FullInstrumentViewPresenter:
     def refresh_plotter_peaks(self) -> None:
         self._view.clear_overlay_meshes()
         self._view.plot_overlay_meshes(*self._model.get_peak_overlay_arguments(self._selected_peaks_workspaces()))
-        # Everytime the pyvista plotter gets updated with peaks, the button for peak picking should be updated
+        # Every time the pyvista plotter gets updated with peaks, the button for peak picking should be updated
         self._view.set_select_peaks_enabled(self._view.has_any_peak_overlays_in_pyvista_plotter())
 
     def refresh_lineplot_peaks(self) -> None:

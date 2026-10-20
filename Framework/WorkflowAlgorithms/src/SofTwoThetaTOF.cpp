@@ -128,7 +128,7 @@ void SofTwoThetaTOF::init() {
   declareProperty(std::make_unique<API::FileProperty>(Prop::FILENAME, "", API::FileProperty::OptionalSave,
                                                       std::vector<std::string>{".xml"}),
                   "A grouping file that will be created; a corresponding .par "
-                  "file wille be created as well.");
+                  "file will be created as well.");
 }
 
 /** Execute the algorithm.

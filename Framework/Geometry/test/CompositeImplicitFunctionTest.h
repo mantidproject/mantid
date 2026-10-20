@@ -19,7 +19,7 @@ using namespace Mantid::Geometry;
 
 class CompositeImplicitFunctionTest : public CxxTest::TestSuite {
 private:
-  // Fake ImplicitFunction to verify abstract treatement of nested functions by
+  // Fake ImplicitFunction to verify abstract treatment of nested functions by
   // composite.
   class MockImplicitFunction : public Mantid::Geometry::MDImplicitFunction {
   public:

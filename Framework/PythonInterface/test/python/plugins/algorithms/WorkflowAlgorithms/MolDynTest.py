@@ -36,7 +36,7 @@ class MolDynTest(unittest.TestCase):
         Load a function from an nMOLDYN 4 export.
         """
         # This test requires the directory to be provided, this is in the
-        # UnitTest directory so do get this from the serch directories
+        # UnitTest directory so do get this from the search directories
         data_dirs = config["datasearch.directories"].split(";")
         unit_test_data_dir = [p for p in data_dirs if "UnitTest" in p][0]
         data_directory = os.path.join(unit_test_data_dir, "nmoldyn4_data")
@@ -53,7 +53,7 @@ class MolDynTest(unittest.TestCase):
         self.assertEqual(len(moldyn_group), 1)
         self.assertEqual(moldyn_group[0].name(), "NaF_DISF_Sqw-total")
 
-        # Get max enery from result workspace
+        # Get max energy from result workspace
         x_data = moldyn_group[0].x(0)
         x_max = x_data[len(x_data) - 1]
 

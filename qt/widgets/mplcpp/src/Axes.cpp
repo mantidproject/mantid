@@ -323,7 +323,7 @@ void Axes::setYLim(double min, double max) const {
 
 /**
  * @brief Recompute the data limits from the current artists.
- * @param visibleOnly If true then only include visble artists in the
+ * @param visibleOnly If true then only include visible artists in the
  * calculation
  */
 void Axes::relim(bool visibleOnly) { callMethodNoCheck<void, bool>(pyobj(), "relim", visibleOnly); }

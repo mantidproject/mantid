@@ -209,7 +209,7 @@ public:
     pw->addPeak(p4);
 
     std::vector<std::pair<std::string, bool>> criteria;
-    // Sort by decending wavelength then decending dspacing
+    // Sort by descending wavelength then descending dspacing
     criteria.emplace_back(std::pair<std::string, bool>("wavelength", false));
     criteria.emplace_back(std::pair<std::string, bool>("dspacing", false));
     pw->sort(criteria);
@@ -224,7 +224,7 @@ public:
     TS_ASSERT_DELTA(pw->getPeak(4).getWavelength(), 3.0, 1e-5);
     TS_ASSERT_DELTA(pw->getPeak(4).getDSpacing(), M_PI, 1e-5);
 
-    // Sort by wavelength ascending then decending dspacing
+    // Sort by wavelength ascending then descending dspacing
     criteria.clear();
     criteria.emplace_back(std::pair<std::string, bool>("wavelength", true));
     criteria.emplace_back(std::pair<std::string, bool>("dspacing", false));

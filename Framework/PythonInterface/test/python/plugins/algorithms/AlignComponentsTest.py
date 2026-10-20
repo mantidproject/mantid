@@ -42,7 +42,7 @@ class AlignComponentsTest(unittest.TestCase):
         The first workspace index corresponds to a pixel centered on the beam axis, hence the scattering angle is zero
         and the corresponding d-spacing is infinite.
 
-        Correspondence betwee
+        Correspondence between
         """
 
         def serve_instrument(output_workspace):
@@ -89,11 +89,11 @@ class AlignComponentsTest(unittest.TestCase):
         column_info = [("int", "detid"), ("double", "@5.1483"), ("double", "@5.2070")]
         [table_tofs.addColumn(c_type, c_name) for c_type, c_name in column_info]
         table_tofs.addRow([4, float("nan"), 10000.0])
-        table_tofs.addRow([5, float("nan"), 10000.0])  # a peak in TOF correspoding to a peak of 306.5928 Angstroms
-        table_tofs.addRow([6, 10000.0, float("nan")])  # a peak in TOF correspoding to a peak of 306.5928 Angstroms
-        table_tofs.addRow([7, 10000.0, float("nan")])  # a peak in TOF correspoding to a peak of 216.7940 Angstroms
+        table_tofs.addRow([5, float("nan"), 10000.0])  # a peak in TOF corresponding to a peak of 306.5928 Angstroms
+        table_tofs.addRow([6, 10000.0, float("nan")])  # a peak in TOF corresponding to a peak of 306.5928 Angstroms
+        table_tofs.addRow([7, 10000.0, float("nan")])  # a peak in TOF corresponding to a peak of 216.7940 Angstroms
 
-        # perturb the position of the bank with a translation or the order of a few milimeters
+        # perturb the position of the bank with a translation or the order of a few millimeters
         component = "bank1"
         xyz_shift = V3D(0.005, 0.010, 0.007)
         CloneWorkspace(InputWorkspace="original", OutputWorkspace="perturbed")

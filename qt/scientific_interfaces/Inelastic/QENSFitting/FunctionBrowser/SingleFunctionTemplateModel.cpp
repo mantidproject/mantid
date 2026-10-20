@@ -105,7 +105,7 @@ const std::string &SingleFunctionTemplateModel::getFitType() { return m_fitType;
 EstimationDataSelector SingleFunctionTemplateModel::getEstimationDataSelector() const {
   return [](std::span<double const> const x, std::span<double const> const y,
             const std::pair<double, double> range) -> DataForParameterEstimation {
-    // Find data thats within range
+    // Find data that's within range
     double xmin = range.first;
     double xmax = range.second;
     if (xmax - xmin < 1e-5) {

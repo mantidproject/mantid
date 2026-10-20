@@ -124,7 +124,7 @@ std::map<std::string, std::string> PSIBackgroundSubtraction::validateInputs() {
 
 void PSIBackgroundSubtraction::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  // Caclulate and subtract background from inputWS
+  // Calculate and subtract background from inputWS
   calculateBackgroundUsingFit(inputWS);
 }
 
@@ -169,7 +169,7 @@ void PSIBackgroundSubtraction::calculateBackgroundUsingFit(MatrixWorkspace_sptr 
  * Setup the fit algorithm used to obtain the background from PSI data
  of a FlatBackground and ExpDecayMuon, on the second half of the PSI data.
  * @param wsName ::  Input workspace name
- * @return Initalised fitting algorithm
+ * @return Initialised fitting algorithm
  */
 IAlgorithm_sptr PSIBackgroundSubtraction::setupFitAlgorithm(const std::string &wsName) {
   auto fit = createChildAlgorithm("Fit");

@@ -77,7 +77,7 @@ private:
   using MapIV = std::unordered_map<specnum_t, Vertex>;
 
   /// Construct the graph based on the given number of neighbours and the
-  /// current instument and spectra-detector mapping
+  /// current instrument and spectra-detector mapping
   void build(const int noNeighbours);
   /// Query the graph for the default number of nearest neighbours to specified
   /// detector
@@ -96,7 +96,7 @@ private:
   boost::property_map<Graph, boost::edge_name_t>::type m_edgeLength;
   /// V3D for scaling
   Kernel::V3D m_scale;
-  /// Cached radius value. used to avoid uncessary recalculations.
+  /// Cached radius value. used to avoid unnecessary recalculations.
   mutable double m_radius;
   /// Flag indicating that masked detectors should be ignored
   bool m_bIgnoreMaskedDetectors;

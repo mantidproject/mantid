@@ -22,7 +22,7 @@ namespace Policies {
 namespace {
 
 //-----------------------------------------------------------------------
-// Polciy implementation
+// Policy implementation
 //-----------------------------------------------------------------------
 
 // The entry point for the policy is in the struct AsType below. It does

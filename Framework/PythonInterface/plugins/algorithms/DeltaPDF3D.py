@@ -166,22 +166,22 @@ class DeltaPDF3D(PythonAlgorithm):
 
         window_function = self.getProperty("WindowFunction").value
         if window_function != "None":
-            paramater = self.getProperty("WindowParameter").value
+            parameter = self.getProperty("WindowParameter").value
             _, _, Xbins, _ = self._get_dim_params(inWS.getXDimension())
             _, _, Ybins, _ = self._get_dim_params(inWS.getYDimension())
             _, _, Zbins, _ = self._get_dim_params(inWS.getZDimension())
             if window_function == "Gaussian":
                 progress.report("Applying Gaussian window")
-                window = self._gaussian_window((Xbins, Ybins, Zbins), paramater)
+                window = self._gaussian_window((Xbins, Ybins, Zbins), parameter)
             elif window_function == "Blackman":
                 progress.report("Applying Blackman window")
                 window = self._blackman_window((Xbins, Ybins, Zbins))
             elif window_function == "Tukey":
                 progress.report("Applying Tukey window")
-                window = self._tukey_window((Xbins, Ybins, Zbins), paramater)
+                window = self._tukey_window((Xbins, Ybins, Zbins), parameter)
             elif window_function == "Kaiser":
                 progress.report("Applying Kaiser window")
-                window = self._kaiser_window((Xbins, Ybins, Zbins), paramater)
+                window = self._kaiser_window((Xbins, Ybins, Zbins), parameter)
             signal = np.multiply(signal, window)
 
         if self.getProperty("Method").value == "Punch and fill":

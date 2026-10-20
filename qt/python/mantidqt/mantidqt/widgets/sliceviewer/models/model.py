@@ -399,7 +399,7 @@ class SliceViewerModel(SliceViewerBaseModel):
         workspace = self._get_ws()
         dim_limits = _dimension_limits(workspace, slicepoint, bin_params, dimension_indices, limits)
 
-        # Construct paramters to integrate everything first and overrid per cut
+        # Construct parameters to integrate everything first and overrid per cut
         params = {f"P{n + 1}Bin": [*dim_limits[n]] for n in range(workspace.getNumDims())}
         xindex, yindex = WorkspaceInfo.display_indices(slicepoint, transpose)
 
@@ -628,7 +628,7 @@ class SliceViewerModel(SliceViewerBaseModel):
         """
         Return 3-tuple of xcut_name,ycut_name,status message depending on the cut type request.
         :param cut: Single letter denoting the cut type: x, y, c
-        :raises RuntimeError: if an unkown cut type is requested
+        :raises RuntimeError: if an unknown cut type is requested
         """
         xcut_name, ycut_name = self._xcut_name, self._ycut_name
         if cut == "x":

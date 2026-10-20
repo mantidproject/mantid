@@ -32,7 +32,7 @@ private:
   void init() override;
 
 private:
-  // method to covnert extents to the properties of ConvertMD
+  // method to convert extents to the properties of ConvertMD
   void convertExtents(const std::vector<double> &Extents, std::vector<double> &minVal,
                       std::vector<double> &maxVal) override;
 

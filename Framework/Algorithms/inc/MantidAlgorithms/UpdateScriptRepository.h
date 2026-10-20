@@ -14,7 +14,7 @@ namespace Algorithms {
 
 /** UpdateScriptRepository : Check the MantidWeb, for updates of the
     ScriptRepository. It will execute the ScriptRepository::check4update.
-    Pratically, it will checkout the state of the Central Repository, and
+    Practically, it will checkout the state of the Central Repository, and
     after, it will download all the scripts marked as AutoUpdate.
 */
 class MANTID_ALGORITHMS_DLL UpdateScriptRepository final : public API::Algorithm {

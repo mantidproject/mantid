@@ -613,7 +613,7 @@ this investigation. This will:
 If the investigation has not started yet, the results list will initially be
 empty. However, polling will begin and runs will be found and processed as soon
 as they become available. Note that there may be a slight delay in the run
-finishing and its file becoming availble on the archive.
+finishing and its file becoming available on the archive.
 
 Invalid/excluded runs
 =====================
@@ -838,7 +838,7 @@ single run/workspace or a number of runs/workspaces that will be summed before
 processing. Specific spectra of interest can be specified for the input runs
 and separate spectra, if required, can be specified for the transmission runs -
 if the latter are not specified then the ``ROI`` will also be used for
-the transmission runs. If both a First and Second tranmission input is
+the transmission runs. If both a First and Second transmission input is
 specified, then they will be stitched using the options specified.
 
 When polarization corrections are enabled, the **Input SpinState Order** field can be used to specify the

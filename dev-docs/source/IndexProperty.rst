@@ -12,7 +12,7 @@ a property collecting workspace index information should have. Firstly, there is
 the workspace itself. Therefore users could enter invalid input e.g negative numbers, or numbers outside of
 the range of spectra held by the workspace, unless bounded validators or used. Finally, any conversion between "index types" i.e. conversion from
 spectrum numbers to workspace indices (also known as spectrum indices) must be managed by the algorithm developer. This style
-of development is very error prone and could lead to inconsitencies across algorithms as
+of development is very error prone and could lead to inconsistencies across algorithms as
 each developer may have a different approach to addressing the aforementioned issues.
 
 The ``IndexProperty`` in Mantid provides a consistent interface for algorithms

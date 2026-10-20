@@ -36,7 +36,7 @@ public:
 
   /// Gets the type of the validator
   std::string getType() const { return "composite"; }
-  /// Return the instersection of allowed values from children
+  /// Return the intersection of allowed values from children
   std::vector<std::string> allowedValues() const override;
   /// Clones this and the children into a new Validator
   IValidator_sptr clone() const override;

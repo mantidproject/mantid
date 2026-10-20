@@ -69,7 +69,7 @@ protected:
   int splitIntoColumns(std::list<std::string> &columns, const std::string &str) const;
   /// Fill the given vector with the data values
   void fillInputValues(std::vector<double> &values, const std::list<std::string> &columns) const;
-  // write the values in the current line to teh end of teh current spectra
+  // write the values in the current line to the end of the current spectra
   void addToCurrentSpectra(const std::list<std::string> &columns);
   // check that the number of columns in the current line match the number found
   // previously
@@ -78,7 +78,7 @@ protected:
   void parseLine(const std::string &line, std::list<std::string> &columns);
   // find the number of columns we should expect from now on
   void setcolumns(std::ifstream &file, std::string &line, std::list<std::string> &columns);
-  // wirte the spectra to the workspace
+  // write the spectra to the workspace
   void writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace, const size_t &numSpectra) const;
   // Process the header information. This implementation just skips it entirely.
   void processHeader(std::ifstream &file);

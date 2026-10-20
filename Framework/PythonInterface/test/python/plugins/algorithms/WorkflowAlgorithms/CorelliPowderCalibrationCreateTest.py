@@ -56,7 +56,7 @@ class CorelliPowderCalibrationCreateTest(unittest.TestCase):
         MoveInstrumentComponent(Workspace="test_workspace_dSpacing", ComponentName="bank1", X=4.0, y=0.0, z=0.0, RelativePosition=False)
         # Eight peaks now in TOF. Only when the instrument is located 4m downstream along the X-axis will we obtain
         # the correct d-Spacings if we convert back to dSpacings units. If we perturb the instrument and convert
-        # back to dSpacing units, we'll obtain eight peaks centered at d-spacings sligthly different than the
+        # back to dSpacing units, we'll obtain eight peaks centered at d-spacings slightly different than the
         # reference values
         ConvertUnits(InputWorkspace="test_workspace_dSpacing", Target="TOF", EMode="Elastic", OutputWorkspace="test_workspace_TOF")
         Rebin(InputWorkspace="test_workspace_TOF", Params=[300, 1.0, 16666.7], OutputWorkspace="test_workspace_TOF")

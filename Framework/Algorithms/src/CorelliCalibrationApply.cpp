@@ -110,7 +110,7 @@ void CorelliCalibrationApply::exec() {
   2. sample-position: this is often referred to as "sample" in other
                       instrument definition, but the CORELLI instrument uses
                       a more verbose version here.
-  3. the tranlation vector calcuated in upstream is the absolute coordinates
+  3. the translation vector calculated in upstream is the absolute coordinates
      of each component (in lab frame), therefore we need to toggle the option
      RelativePosition off here.
   */
@@ -142,7 +142,7 @@ void CorelliCalibrationApply::exec() {
      - bank42/sixteenpack: the reference framework is the sixteenpack, where
                            the origin is the geometry center of the
                            sixteenpack.
-     Given that the rotation angle is calucated w.r.t. sixteenpack, we need
+     Given that the rotation angle is calculated w.r.t. sixteenpack, we need
      to make sure that the provided table has the correct component names
      defined in it.
   2. The Algorithm, RotateInstrumentComponent, actually does the rotation in

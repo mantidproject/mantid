@@ -87,7 +87,7 @@ void PseudoVoigt::init() {
   // init the peak height setup parameters
   m_height = 1.; // peak height set by user
 
-  // parameter set history: all start from an arbitary out of boundary value
+  // parameter set history: all start from an arbitrary out of boundary value
   // (100 as easy). if set, order set to 0
   m_set_history_distances.resize(4, 128);
   // 0: mixing, 1: intensity, 2: fwhm, 3: height
@@ -124,7 +124,7 @@ void PseudoVoigt::functionLocal(double *out, const double *xValues, const size_t
   }
 }
 
-/** calcualte derivative analytically
+/** calculate derivative analytically
  * @param out :: array with calculated derivatives
  * @param xValues :: input X array
  * @param nData :: data size
@@ -137,7 +137,7 @@ void PseudoVoigt::functionDerivLocal(Jacobian *out, const double *xValues, const
   double gFraction = getParameter("Mixing");
   double lFraction = 1.0 - gFraction;
 
-  // calcualte constants
+  // calculate constants
   const double a_g = cal_ag(gamma);
   const double b_g = cal_bg(gamma);
   const double gamma_div_2 = 0.5 * gamma;
@@ -174,7 +174,7 @@ void PseudoVoigt::functionDerivLocal(Jacobian *out, const double *xValues, const
   }
 }
 
-/// override because setParameter(size_t i ...) is overriden
+/// override because setParameter(size_t i ...) is overridden
 void PseudoVoigt::setParameter(const std::string &name, const double &value, bool explicitlySet) {
   g_log.debug() << "[PV] Set " << name << " as " << value << "\n";
   API::IPeakFunction::setParameter(name, value, explicitlySet);
@@ -182,7 +182,7 @@ void PseudoVoigt::setParameter(const std::string &name, const double &value, boo
 
 /** set parameter by parameter index
  * Parameter set up scenaio:
- * - as both intensity and height are set explicity: calculate mixing and set
+ * - as both intensity and height are set explicitly: calculate mixing and set
  * non-explicitly
  * - as both intensity and height are set but intensity is not set explicitly:
  * do nothing else

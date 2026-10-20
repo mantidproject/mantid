@@ -94,7 +94,7 @@ void ALCBaselineModellingModel::fit(IFunction_const_sptr function, const std::ve
 void ALCBaselineModellingModel::setData(MatrixWorkspace_sptr data) { m_data = std::move(data); }
 
 /**
- * Disable points in the workpsace in the way that points which are not included
+ * Disable points in the workspace in the way that points which are not included
  * in any of specified
  * sections are not used when fitting given workspace
  * @param ws :: Workspace to disable points in

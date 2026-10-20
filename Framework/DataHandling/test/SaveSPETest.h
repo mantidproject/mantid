@@ -189,7 +189,7 @@ private:
     // mask the detector
     inputWS->mutableDetectorInfo().setMasked(THEMASKED, true);
 
-    // required to get it passed the algorthms validator
+    // required to get it passed the algorithms validator
     inputWS->setDistribution(true);
 
     return inputWS;

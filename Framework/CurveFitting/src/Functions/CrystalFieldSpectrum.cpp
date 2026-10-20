@@ -139,7 +139,7 @@ std::string CrystalFieldSpectrum::writeToString(const std::string &parentLocalAt
     const auto &peak = dynamic_cast<IPeakFunction &>(*spectrum.getFunction(ip));
     // Print parameters of the important peaks only
     if (ip < m_nPeaks) {
-      // Print peak's atributes
+      // Print peak's attributes
       const auto attrNames = peak.getAttributeNames();
       for (const auto &attName : attrNames) {
         const std::string attValue = peak.getAttribute(attName).value();

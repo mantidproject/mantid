@@ -18,7 +18,7 @@
 namespace Mantid {
 namespace Geometry {
 
-// TODO moving from boost::optional to std::optoinal in this file is non-trivial
+// TODO moving from boost::optional to std::optional in this file is non-trivial
 using ParsedRationalNumber = boost::fusion::vector<int, boost::optional<int>>;
 
 class MatrixVectorPairBuilder {

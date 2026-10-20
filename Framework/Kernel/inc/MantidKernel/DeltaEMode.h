@@ -32,7 +32,7 @@ struct MANTID_KERNEL_DLL DeltaEMode {
     Indirect = 2,
     Undefined //< The type for the situations, where instrument can not be
     // reasonably defined (e.g.  ws with detector information lost)
-    /// this mode should not be displayed among modes availible to select but
+    /// this mode should not be displayed among modes available to select but
     /// may have string representation
   };
   /// Return a string representation of the given mode

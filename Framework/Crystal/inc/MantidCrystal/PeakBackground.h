@@ -22,7 +22,7 @@ namespace Crystal {
 
 /** PeakBackground : Extension of HardThresholdBackground to consider regions of
 the image as background if they are outside
-the peaks radius limits (no matter what their theshold is). For pixels inside the
+the peaks radius limits (no matter what their threshold is). For pixels inside the
 radius, they must also be above the threshold value.
 */
 
@@ -43,13 +43,13 @@ public:
                  const double &thresholdSignal, const Mantid::API::MDNormalization normalisation,
                  const Mantid::Kernel::SpecialCoordinateSystem coordinates);
 
-  /// Overriden is background function
+  /// Overridden is background function
   bool isBackground(Mantid::API::IMDIterator *iterator) const override;
 
-  /// Overriden configure iterator function.
+  /// Overridden configure iterator function.
   void configureIterator(Mantid::API::IMDIterator *const iterator) const override;
 
-  /// Virutal constructor
+  /// Virtual constructor
   PeakBackground *clone() const override;
 };
 

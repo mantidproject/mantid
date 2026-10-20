@@ -417,7 +417,7 @@ public:
     TS_ASSERT(existingMask);
     TS_ASSERT(inputWS);
 
-    // Mask workspace index 0,3,4 in MaskWS. These will be maped to index 3,5 in
+    // Mask workspace index 0,3,4 in MaskWS. These will be mapped to index 3,5 in
     // the test input
     existingMask->mutableY(0)[0] = 1.0;
     existingMask->mutableY(3)[0] = 1.0;
@@ -501,7 +501,7 @@ public:
     const int numMaskWSSpec(90);
     setUpWS(false, existingMaskName, true, numMaskWSSpec);
     MatrixWorkspace_sptr existingMask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(existingMaskName);
-    // Mask workspace index 0,20,55 in MaskWS. These will converted maped to
+    // Mask workspace index 0,20,55 in MaskWS. These will converted mapped to
     //  indexes 1,2,5 in the target workspace.
     mask_block(existingMask, 0, 10);
     mask_block(existingMask, 20, 10);
@@ -556,7 +556,7 @@ public:
     const int numMaskWSSpec(90);
     setUpWS(false, existingMaskName, true, numMaskWSSpec);
     MatrixWorkspace_sptr existingMask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(existingMaskName);
-    // Mask workspace index 1,20,55 in MaskWS. These will converted maped to
+    // Mask workspace index 1,20,55 in MaskWS. These will converted mapped to
     //  indexes 1,2,5 in the target workspace.
     existingMask->mutableY(10)[0] = 1.0;
     existingMask->mutableY(20)[0] = 1.0;

@@ -163,7 +163,7 @@ void HFIRLoad::exec() {
 
   // Get the sample-detector distance
   // If SampleDetectorDistance is provided, use it!
-  // Otherwise get's "sample-detector-distance" from the data file
+  // Otherwise gets "sample-detector-distance" from the data file
   // And uses SampleDetectorDistanceOffset if given!
   double sdd = 0.0;
   const double sample_det_dist = getProperty("SampleDetectorDistance");

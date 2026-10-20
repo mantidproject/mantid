@@ -371,7 +371,7 @@ workspaces for the second chunk:
           OutputBackgroundNormalizationWorkspace='bkgNorm2')
 
 
-Note that the output workspaces after the second call to the algorithm will contain procesed
+Note that the output workspaces after the second call to the algorithm will contain processed
 information from both chunks.
 
 .. categories::

@@ -94,7 +94,7 @@ class HorizontalMarker(QObject):
     def redraw_legend(self):
         """
         After we redraw the marker, the marker will appear above the legend
-        hence we'll have to redraw the legend to place it back ontop
+        hence we'll have to redraw the legend to place it back on top
         """
         if self.axis.get_legend():
             self.axis.draw_artist(self.axis.get_legend())
@@ -277,7 +277,7 @@ class VerticalMarker(QObject):
     def redraw_legend(self):
         """
         After we redraw the marker, the marker will appear above the legend
-        hence we'll have to redraw the legend to place it back ontop
+        hence we'll have to redraw the legend to place it back on top
         """
         if self.axis.get_legend():
             self.axis.draw_artist(self.axis.get_legend())

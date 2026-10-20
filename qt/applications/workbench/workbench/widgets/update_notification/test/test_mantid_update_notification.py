@@ -16,7 +16,7 @@ class ShowPromptTest(unittest.TestCase):
     @staticmethod
     def _make_mock_box(clicked_button_label):
         """Build a MagicMock standing in for the QMessageBox instance,
-        wired up so clickedButton() returns whichever button choosen."""
+        wired up so clickedButton() returns whichever button chosen."""
         mock_box = MagicMock()
         buttons_by_label = {}
 

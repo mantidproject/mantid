@@ -304,7 +304,7 @@ and integrated peaks can also be saved in an ISAW format peaks file,
 by choosing Save Isaw Peaks from the File item on the MantidEV menu
 bar.  This will save the peaks in a simple ASCII file as shown below.
 The peaks file begins with a table of information about the instrument
-and the detctors.  Following that information is a list of the peaks
+and the detectors.  Following that information is a list of the peaks
 from each detector module.  The h,k,l of each peak is listed, together
 with the row, column and time channel where the peak occurred.  The
 integrated intensity and estimated standard deviation for the

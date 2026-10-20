@@ -92,7 +92,7 @@ public:
     alg.setPropertyValue("HighThreshold", "21.01");
     alg.setPropertyValue("RangeLower", "-1");
 
-    // Testing behavour with Range_lower or Range_upper not set
+    // Testing behaviour with Range_lower or Range_upper not set
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 

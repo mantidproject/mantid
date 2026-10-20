@@ -41,7 +41,7 @@ class FunctionHandler;
 */
 class MANTID_API_DLL IFunction1D : public virtual IFunction {
 public:
-  /* Overidden methods */
+  /* Overridden methods */
 
   void function(const FunctionDomain &domain, FunctionValues &values) const override;
   void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) override;

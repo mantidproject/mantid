@@ -103,7 +103,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(res = algToBeTested.getProperty("EntryNumber"));
     TS_ASSERT(res == entryNumber);
 
-    // Test that nexus precessed file is successfully loaded
+    // Test that nexus processed file is successfully loaded
     // The loading of the current version of nexus processed is tested here.
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT(algToBeTested.isExecuted());
@@ -236,7 +236,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(result = algToBeTested.getPropertyValue("OutputWorkspace"));
     TS_ASSERT(!result.compare(myOutputSpace));
 
-    // Test that nexus precessed file is successfully loaded
+    // Test that nexus processed file is successfully loaded
     // The loading of the current version of nexus processed is tested here.
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT(algToBeTested.isExecuted());

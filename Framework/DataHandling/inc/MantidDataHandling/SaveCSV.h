@@ -35,7 +35,7 @@ Optional Properties:
 </UL>
 
 The format of the saved ascii CSV file for a 1D worksspace consists of three
-columns where the numbers of each row are seperated by the Seperator and
+columns where the numbers of each row are separated by the Separator and
 each line by the LineSeperator.
 
 The format of the saved CSV file for a 2D workspace is as follows:
@@ -95,10 +95,10 @@ private:
   /// The name of the file used for storing the workspace
   std::string m_filename;
 
-  /// The seperator for the CSV file
+  /// The separator for the CSV file
   std::string m_separator;
 
-  /// The line seperator for the CSV file
+  /// The line separator for the CSV file
   std::string m_lineSeparator;
 };
 

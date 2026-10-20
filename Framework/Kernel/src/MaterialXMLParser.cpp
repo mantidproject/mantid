@@ -198,7 +198,7 @@ Material MaterialXMLParser::parse(Poco::XML::Element *element, const std::string
   const auto id = attrs->getNamedItem(ID_ATT);
   if (!id || id->nodeValue().empty()) {
     throw std::invalid_argument("MaterialXMLReader::read() - No 'id' tag found "
-                                "or emptry string provided.");
+                                "or empty string provided.");
   }
   attrs->removeNamedItem(ID_ATT);
 

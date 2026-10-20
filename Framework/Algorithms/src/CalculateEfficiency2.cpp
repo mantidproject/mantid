@@ -199,7 +199,7 @@ void CalculateEfficiency2::validateGroupInput() {
 /**
  * Process groups and merge entries if MergeGroup property is set.
  *
- * @return A boolean true if execution was sucessful, false otherwise
+ * @return A boolean true if execution was successful, false otherwise
  */
 bool CalculateEfficiency2::processGroups() {
 
@@ -283,7 +283,7 @@ void CalculateEfficiency2::averageAndNormalizePixels(MatrixWorkspace &workspace,
     const auto yOriginal = y.front();
 
     // Skip if we have a monitor, the detector is masked, or it has already been
-    // marked as outside of the threashold by being set to EMPTY_DBL
+    // marked as outside of the threshold by being set to EMPTY_DBL
     if (spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i) || isEmpty(yOriginal))
       continue;
 

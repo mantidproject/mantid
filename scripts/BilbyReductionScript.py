@@ -38,7 +38,7 @@ class RunBilbyReduction:
         index_reduction_settings = [self.reduction_settings_index]  # INDEX OF THE LINE WITH REDUCTION SETTINGS
 
         if len(index_reduction_settings) > 1:  # must be single choice
-            raise ValueError("Please check your choice of reduction settigns; only single value is allowed")
+            raise ValueError("Please check your choice of reduction settings; only single value is allowed")
 
         # ID to evaluate - INPUT, in any combination of 'a-b' or ',c', or empty line; empty line means evaluate all files listed in csv
         self.index_files_to_reduce = self.file_index

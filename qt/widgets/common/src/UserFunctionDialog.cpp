@@ -283,7 +283,7 @@ QSet<QString> UserFunctionDialog::categoryNames() const {
 /**
  * Returns function names in category cat.
  * @param cat :: The category for which functions will be returned.
- * @return A set of funtion names.
+ * @return A set of function names.
  */
 QSet<QString> UserFunctionDialog::functionNames(const QString &cat) const {
   QSet<QString> out;
@@ -523,8 +523,8 @@ InputFunctionNameDialog::InputFunctionNameDialog(QWidget *parent, const QString 
 
 /**
  * Return the entered category and function name and comment
- * @param category :: A string to recieve the category
- * @param name :: A string to recieve the function name
+ * @param category :: A string to receive the category
+ * @param name :: A string to receive the function name
  * @param comment ::
  */
 void InputFunctionNameDialog::getFunctionName(QString &category, QString &name, QString &comment) {

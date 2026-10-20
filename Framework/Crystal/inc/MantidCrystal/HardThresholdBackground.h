@@ -18,13 +18,13 @@ namespace Crystal {
 */
 class MANTID_CRYSTAL_DLL HardThresholdBackground : public BackgroundStrategy {
 public:
-  /// Contructor
+  /// Constructor
   HardThresholdBackground(const double thresholdSignal, const Mantid::API::MDNormalization normalization);
 
-  /// Overriden isBackground
+  /// Overridden isBackground
   bool isBackground(Mantid::API::IMDIterator *iterator) const override;
 
-  /// Overriden configureIterator.
+  /// Overridden configureIterator.
   void configureIterator(Mantid::API::IMDIterator *const iterator) const override;
 
   /// Virtual constructor

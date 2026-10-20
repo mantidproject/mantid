@@ -1175,7 +1175,7 @@ class RunDescriptor(PropDescriptor):
         #
         try:  # LoadEventNexus does not understand Separate and throws.
             # And event loader always loads monitors separately, so this issue used to
-            # call appropritate load command
+            # call appropriate load command
             Load(Filename=data_file, OutputWorkspace=ws_name, LoadMonitors=mon_load_option)
         except ValueError:  # if loader thrown, its probably event file rejected "separate" options
             Load(Filename=data_file, OutputWorkspace=ws_name, LoadMonitors=True, MonitorsLoadOnly="Histogram")

@@ -45,12 +45,12 @@ public:
   // CAN NOT RELY ON THE CONTENTS OF THE CLASS (THEY ARE VIRTUAL STATIC METHODS)
   /** return the number of dimensions, calculated by the transformation from the
      workspace.
-     Depending on EMode, this numebr here is either 3 or 4 and do not depend on
+     Depending on EMode, this number here is either 3 or 4 and do not depend on
      input workspace*/
   unsigned int
   getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
                        API::MatrixWorkspace_const_sptr inWS = API::MatrixWorkspace_const_sptr()) const override;
-  /**function returns units ID-s which this transformation prodiuces its ouptut.
+  /**function returns units ID-s which this transformation prodiuces its output.
      It is Momentum and Momentum and DelteE in inelastic modes */
   std::vector<std::string>
   outputUnitID(Kernel::DeltaEMode::Type dEmode,

@@ -302,7 +302,7 @@ public:
     if ((index + 1) % 3 == 0) {
       return index - 1;
     }
-    // suppress warinings
+    // suppress warnings
     return index;
   }
 

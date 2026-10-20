@@ -229,7 +229,7 @@ double Cone::distance(const Kernel::V3D &Pt) const
 /**
  Calculates the distance from the point to the Cone
  does not calculate the point on the cone that is closest
- @param Pt :: Point to calcuate from
+ @param Pt :: Point to calculate from
 
  - normalise to a cone vertex at the origin
  - calculate the angle between the axis and the Point
@@ -275,7 +275,7 @@ int Cone::side(const Kernel::V3D &R) const {
 /**
  Calculate if the point R is on
  the cone (Note: have to be careful here
- since angle calcuation calcuates an angle.
+ since angle calculation calculates an angle.
  We need a distance for tolerance!)
  @param R :: Point to check
  */
@@ -339,7 +339,7 @@ void Cone::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin
    @param ymin :: as for xmin
    @param zmax :: as for xmax
    @param zmin :: as for xmin
-   ///TODO: its bit difficult to find resonable AABB
+   ///TODO: its bit difficult to find reasonable AABB
    ///For now it will return the same bounding box as input
    */
   if (Normal.X() != 0 && Normal.Y() == 0 && Normal.Z() == 0) {

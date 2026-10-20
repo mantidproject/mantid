@@ -138,7 +138,7 @@ void MaskBinsFromTable::processMaskBinWorkspace(const TableWorkspace_sptr &maskt
   // Check column names type and sequence
   vector<std::string> colnames = masktblws->getColumnNames();
 
-  // check colum name order
+  // check column name order
   id_xmin = -1;
   id_xmax = -1;
   id_spec = -1;

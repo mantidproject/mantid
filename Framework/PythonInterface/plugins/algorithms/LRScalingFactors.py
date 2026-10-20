@@ -226,7 +226,7 @@ class LRScalingFactors(PythonAlgorithm):
         # internal reference value to be used with the following runs.
         if self.wavelength is None:
             self.wavelength = wl
-        # Check that the wavelength is the same as our reference within tolerence.
+        # Check that the wavelength is the same as our reference within tolerance.
         elif abs(wl - self.wavelength) > self.wavelength_tolerance:
             raise RuntimeError("Supplied runs don't have matching wavelengths.")
 

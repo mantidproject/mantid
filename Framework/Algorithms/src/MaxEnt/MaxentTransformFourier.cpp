@@ -77,7 +77,7 @@ std::vector<double> MaxentTransformFourier::dataToImage(const std::vector<double
     throw std::invalid_argument("Cannot transform to image space");
   }
 
-  /*  Fourier transofrm */
+  /*  Fourier transform */
   gsl_fft_complex_wavetable *wavetable = gsl_fft_complex_wavetable_alloc(n / 2);
   gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(n / 2);
   gsl_fft_complex_forward(complexData.data(), 1, n / 2, wavetable, workspace);

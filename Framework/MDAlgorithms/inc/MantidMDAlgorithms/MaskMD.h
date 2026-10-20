@@ -15,7 +15,7 @@ namespace MDAlgorithms {
 std::vector<std::string> MANTID_MDALGORITHMS_DLL parseDimensionNames(const std::string &names_string);
 
 /** MaskMD : Mask an MDWorkspace. Can provide complex masking shapes over an
-  exisitng MDWorkspace. Operates on a MDWorkspace in-situ.
+  existing MDWorkspace. Operates on a MDWorkspace in-situ.
 
   @date 2012-03-01
 */

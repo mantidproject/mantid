@@ -44,12 +44,12 @@ public:
   LeanElasticPeaksWorkspace();
   LeanElasticPeaksWorkspace &operator=(const LeanElasticPeaksWorkspace &other) = delete;
 
-  /** Get access to shared pointer containing workspace porperties. This
+  /** Get access to shared pointer containing workspace properties. This
    function is there to provide common interface of iTableWorkspace
     * Despite it is non-constant method, one should be very careful using it to
    change the log values when cloning of a table workspace can occur
       as the changes may depend on the order of PeakWorkspace cloning & changes
-   applyed through this pointer.
+   applied through this pointer.
     * See PeakWorkspaceTest (test_getSetLogAccess) -- for example of this
    behaviour.
     * Use mutableRun interface to change log values rather then this method.

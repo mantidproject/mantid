@@ -18,7 +18,7 @@ namespace Geometry {
  *
  * A builder for the MDHistogram workspace. Required to construct a valid
  *MDHistogram dimension, where values can
- * cannot easily be brought togeter at once. Also allows potential construction
+ * cannot easily be brought together at once. Also allows potential construction
  *values to be overwritten simply.
  *
  * @author Owen Arnold @ Tessella/ISIS

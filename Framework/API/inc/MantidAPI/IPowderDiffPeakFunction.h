@@ -44,7 +44,7 @@ public:
 
   //--------------- ThermalNeutron peak function special
   //---------------------------------------
-  /// Set Miller Indicies
+  /// Set Miller Indices
   virtual void setMillerIndex(int h, int k, int l);
 
   /// Get Miller Index from this peak

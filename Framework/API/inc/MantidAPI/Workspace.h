@@ -58,7 +58,7 @@ public:
   Workspace &operator=(const Workspace &other) = delete;
   // DataItem interface
   /** Marks the workspace as safe for multiple threads to edit data
-   * simutaneously.
+   * simultaneously.
    * Workspace creation is always considered to be a single threaded operation.
    * @return true if the workspace is suitable for multithreaded operations,
    * otherwise false.

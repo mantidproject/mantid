@@ -1408,7 +1408,7 @@ Integrate3DEvents::ellipseIntegrateEvents(const std::vector<Kernel::V3D> &E1Vec,
   // the peak ellipsoid, and of the inner and outer surface
   // of the background ellipsoidal shell, respectively.
   // They will specify the size as the number of standard
-  // deviations in the direction of each of the pricipal
+  // deviations in the direction of each of the principal
   // axes that the ellipsoid will extend from the center.
   double r1, r2, r3;
 

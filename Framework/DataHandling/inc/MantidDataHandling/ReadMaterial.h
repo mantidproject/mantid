@@ -72,7 +72,7 @@ public:
    * any errors in the inputs.
    *
    * @param params A struct containing all the parameters to be set.
-   * @returns A map containing the relevent failure messages, if any.
+   * @returns A map containing the relevant failure messages, if any.
    */
   static ValidationErrors validateInputs(const MaterialParameters &params);
   /**

@@ -270,7 +270,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         return get_efixed(workspace)
 
     def _process_container_workspace(self, container_workspace, prog_container):
-        # Appy container shift if needed
+        # Apply container shift if needed
         if self._shift_can:
             # Use temp workspace so we don't modify data
             prog_container.report("Shifting can")

@@ -242,7 +242,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
             defaultValue=0.0,
             direction=Direction.Input,
             validator=FloatBoundedValidator(lower=0.0),
-            doc="Intenisty/Sigma threshold below which a peak is considered weak.",
+            doc="Intensity/Sigma threshold below which a peak is considered weak.",
         )
         optimise_shoebox_enabled = EnabledWhenProperty("OptimiseShoebox", PropertyCriterion.IsDefault)
         self.setPropertySettings("WeakPeakStrategy", optimise_shoebox_enabled)

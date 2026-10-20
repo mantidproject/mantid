@@ -46,7 +46,7 @@ std::string removeSubPath(const std::string &labelIn) {
 std::string removePath(const std::string &labelIn) {
   std::string useThisLabel;
   std::string tmp = labelIn;
-  size_t end = tmp.find_first_of(","); // always seperate by commas
+  size_t end = tmp.find_first_of(","); // always separate by commas
 
   if (end != std::string::npos) {
     while (end != std::string::npos) {

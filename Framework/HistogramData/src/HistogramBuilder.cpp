@@ -13,7 +13,7 @@ namespace Mantid::HistogramData {
 void HistogramBuilder::setDistribution(bool isDistribution) { m_isDistribution = isDistribution; }
 
 /// Return a Histogram based on previously set information. Throws if
-/// information is incomplete are inconsisten.
+/// information is incomplete are inconsistent.
 Histogram HistogramBuilder::build() const {
   if (!m_x)
     throw std::runtime_error("HistogramBuilder: No X data has been set");

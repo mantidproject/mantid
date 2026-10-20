@@ -99,7 +99,7 @@ PropertyManager_sptr createPropertyManager(const Json::Value &keyValues);
 MANTID_KERNEL_DLL std::unique_ptr<Property> decodeAsProperty(const std::string &name, const Json::Value &value);
 
 namespace pwvjdetail {
-// There is a known isssue with jsoncpp and ambiguous overloads when called
+// There is a known issue with jsoncpp and ambiguous overloads when called
 // with long/unsigned long. We disambigate this by defining a generic
 // template that passes through its type and provide specializations
 // for the integer types to map these to appropriate Json integer types

@@ -39,7 +39,7 @@ The algorithm proceeds in this way:
    -  The U matrix of each run is found for a given set of lattice parameters using :ref:`algm-CalculateUMatrix`.
 
 
-Useage
+Usage
 -----------
 
 **Example:**

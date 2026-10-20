@@ -75,7 +75,7 @@ MANTID_NEXUS_DLL NXstatus NXopendata(NXhandle fid, std::string const &name);
 MANTID_NEXUS_DLL NXstatus NXclosedata(NXhandle fid);
 
 /**
- * Write data to a datset which has previouly been opened with NXopendata.
+ * Write data to a dataset which has previously been opened with NXopendata.
  * This writes all the data in one go. Data should be a pointer to a memory
  * area matching the datatype and dimensions of the dataset.
  * \param handle A NeXus file handle as initialized by NXopen.
@@ -107,7 +107,7 @@ MANTID_NEXUS_DLL NXstatus NXputattr(NXhandle fid, std::string const &name, char 
  * Read a complete dataset from the currently open dataset into memory.
  * \param handle A NeXus file handle as initialized by NXopen.
  * \param data A pointer to the memory area where to read the data, too. Data must point to a memory
- * area large enough to accomodate the data read. Otherwise your program may behave in unexpected
+ * area large enough to accommodate the data read. Otherwise your program may behave in unexpected
  * and unwelcome ways.
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
@@ -115,7 +115,7 @@ MANTID_NEXUS_DLL NXstatus NXputattr(NXhandle fid, std::string const &name, char 
 MANTID_NEXUS_DLL NXstatus NXgetdata(NXhandle fid, char *data);
 
 /**
- * Retrieve information about the curretly open dataset.
+ * Retrieve information about the currently open dataset.
  * \param handle A NeXus file handle as initialized by NXopen.
  * \param rank A pointer to an integer which will be filled with the rank of
  * the dataset.
@@ -132,7 +132,7 @@ MANTID_NEXUS_DLL NXstatus NXgetinfo64(NXhandle fid, std::size_t &rank, Mantid::N
  * Read an attribute containing a single string or numerical value.
  * Use NXgetattra for attributes with dimensions. (Recommended as the general case.)
  * \param handle A NeXus file handle as initialized by NXopen.
- * \param name The name of the atrribute to read.
+ * \param name The name of the attribute to read.
  * \param data A pointer to a memory area large enough to hold the attributes value.
  * \param iDataLen The length of data in bytes.
  * \param iType A pointer to an integer which will had been set to the NeXus data type of the attribute.

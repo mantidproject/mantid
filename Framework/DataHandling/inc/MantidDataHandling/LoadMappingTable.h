@@ -23,7 +23,7 @@ is the pointer to IDetector. The association is one to many, i.e. a spectrum can
 have one or many
 detectors contributing to it. Alternatively the same spectrum can contribute to
 different spectra
-(for example in DAE2 (Data Aquisition Electronic) when a spectra containing
+(for example in DAE2 (Data Acquisition Electronic) when a spectra containing
 electronically focussed data is created simultaneously
 with individual spectra). LoadMappingTable is an algorithm and as such inherits
 from the Algorithm class and overrides the init() & exec() methods.

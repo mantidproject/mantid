@@ -212,7 +212,7 @@ void OptimizeCrystalPlacement::exec() {
 
   std::string OptRunNums;
 
-  //--------- Setting Function and Constraint argumens to PeakHKLErrors
+  //--------- Setting Function and Constraint arguments to PeakHKLErrors
   //---------------
   std::vector<std::string> ChRunNumList;
   std::string predChar;

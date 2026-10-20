@@ -11,7 +11,7 @@ namespace Kernel {
 
 /** Based on the article: A Fast, Compact Approximation of the Exponential
  *Function
- * by Nicol N. Schraudolph and on the slighly modified version:
+ * by Nicol N. Schraudolph and on the slightly modified version:
  * On a Fast, Compact Approximation of the Exponential Function
  * Neural Computation archive
  * Volume 12 ,  Issue 9  (September 2000)

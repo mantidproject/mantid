@@ -26,7 +26,7 @@ class SANSLOQMinimalBatchReductionTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         # note increased tolerance to something which quite high
-        # this is partly a temperary measure, but also justified by
+        # this is partly a temporary measure, but also justified by
         # when overlaying the two options they overlap very well --> what does this comment mean?
         self.tolerance = 1.0e1
         self.disableChecking.append("Instrument")

@@ -12,7 +12,7 @@ namespace Mantid {
 namespace Crystal {
 
 /** PeaksInRegion : Find peaks that are either inside a box region, or that have
-  a radius of sufficent size, that they intersect the box.
+  a radius of sufficient size, that they intersect the box.
 */
 class MANTID_CRYSTAL_DLL PeaksInRegion : public PeaksIntersection {
 public:
@@ -28,7 +28,7 @@ private:
   void init() override;
   void exec() override;
 
-  // Overriden base class methods.
+  // Overridden base class methods.
   void validateExtentsInput() const override;
   int numberOfFaces() const override;
   VecVecV3D createFaces() const override;

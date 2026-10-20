@@ -721,7 +721,7 @@ void LoadFullprofResolution::putParametersIntoWorkspace(const API::Column_const_
   std::string instrumentName = ws->getInstrumentName();
 
   // Convert table workspace column into DOM XML document
-  //   Set up writer to Paremeter file
+  //   Set up writer to Parameter file
   DOMWriter writer;
   writer.setNewLine("\n");
   writer.setOptions(XMLWriter::PRETTY_PRINT);
@@ -917,7 +917,7 @@ std::string LoadFullprofResolution::getXMLParameterName(const std::string &name)
 
 /*
  * Get the value string to put in the XML eq attribute of the formula element of
- * the paramenter element
+ * the parameter element
  * given the name of the parameter in the table workspace.
  */
 std::string LoadFullprofResolution::getXMLEqValue(const API::Column_const_sptr &column, const std::string &name) {
@@ -929,7 +929,7 @@ std::string LoadFullprofResolution::getXMLEqValue(const API::Column_const_sptr &
 
 /*
  * Get the value string to put in the XML eq attribute of the formula element of
- * the SQUARED paramenter element
+ * the SQUARED parameter element
  * given the name of the parameter in the table workspace.
  */
 std::string LoadFullprofResolution::getXMLSquaredEqValue(const API::Column_const_sptr &column,

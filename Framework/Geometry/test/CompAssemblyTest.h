@@ -426,7 +426,7 @@ public:
     // check relative values have not moved
     TS_ASSERT_EQUALS(comp.getRelativeRot(), rot1 * rot2);
     TS_ASSERT_EQUALS(comp.getRelativePos(), beforeParentPos);
-    // but the absolute pos should have changed due to the parents roatation
+    // but the absolute pos should have changed due to the parents rotation
     // (the parent is centered on the origin)
     TS_ASSERT_DIFFERS(comp.getPos(), beforeParentPos);
     TS_ASSERT_EQUALS(comp.getPos(), V3D(-1, 1, 1));

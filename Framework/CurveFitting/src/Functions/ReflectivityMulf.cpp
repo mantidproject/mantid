@@ -39,7 +39,7 @@ void ReflectivityMulf::init() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Function to calcualte reflectivity
+/** Function to calculate reflectivity
  */
 void ReflectivityMulf::function1D(double *out, const double *xValues, const size_t nData) const {
   // 1. Use a vector for all coefficient

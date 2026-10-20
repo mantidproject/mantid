@@ -365,7 +365,7 @@ def _to_text(item: ElementTree.Element) -> str:
 
 
 def _collapse_bools(bools: List[str]) -> bool:
-    """Intepret T T T/F F F from vasprun.xml varray as True/False"""
+    """Interpret T T T/F F F from vasprun.xml varray as True/False"""
     if bools == ["T", "T", "T"]:
         return True
     elif bools == ["F", "F", "F"]:

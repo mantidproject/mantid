@@ -84,7 +84,7 @@ std::unique_ptr<Geometry::MeshObject> LoadBinaryStl::readShape() {
 }
 
 void LoadBinaryStl::readTriangle(Kernel::BinaryStreamReader streamReader, uint32_t &vertexCount) {
-  // read in the verticies
+  // read in the vertices
   for (int i = 0; i < 3; i++) {
     float xVal;
     float yVal;

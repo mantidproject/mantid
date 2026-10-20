@@ -22,7 +22,7 @@ namespace detail {
 
   The first template parameter is the type of the inheriting class. This is the
   CRTP (curiously recurring template pattern). This parameter is not directly
-  used, but guarentees that, e.g., Points and BinEdges are separate and
+  used, but guarantees that, e.g., Points and BinEdges are separate and
   incompatible types, since their base class is not the same (VectorOf<Points>
   and VectorOf<BinEdges>). Without this template parameter we risk that, e.g.,
   assignment operators allow assigning Points to an object of type BinEdges.

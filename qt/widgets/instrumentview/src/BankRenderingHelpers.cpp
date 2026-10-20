@@ -401,7 +401,7 @@ void renderRectangularBank(const Mantid::Geometry::ComponentInfo &compInfo, size
     xstep = shapeInfo.points()[0].X() - shapeInfo.points()[1].X();
     ystep = shapeInfo.points()[1].Y() - shapeInfo.points()[2].Y();
   } else {
-    // cylnders, etc
+    // cylinders, etc
     xstep = shapeInfo.points()[0].X() - shapeInfo.points()[1].X();
     ystep = shapeInfo.points()[0].Y() - shapeInfo.points()[1].Y();
   }

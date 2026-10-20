@@ -17,7 +17,7 @@ Usage
 **Example - get all information from logs**
 
 This assumes that all of the logs are present and contain valid information.
-The environment is partially specified as ``InAir`` so the framework knows to look into the correct `environement file <https://github.com/mantidproject/mantid/blob/master/instrument/sampleenvironments/SNS/InAir.xml>`_.
+The environment is partially specified as ``InAir`` so the framework knows to look into the correct `environment file <https://github.com/mantidproject/mantid/blob/master/instrument/sampleenvironments/SNS/InAir.xml>`_.
 
 .. code-block:: python
 

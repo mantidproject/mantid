@@ -203,7 +203,7 @@ void createVerticalAxis(MatrixWorkspace *const ws, const MantidVec &xAxisVec, co
 /**
  * A map detector ID and Q ranges
  * This method looks unnecessary as it could be calculated on the fly but
- * the parallelization means that lazy instantation slows it down due to the
+ * the parallelization means that lazy instantiation slows it down due to the
  * necessary CRITICAL sections required to update the cache. The Q range
  * values are required very frequently so the total time is more than
  * offset by this precaching step

@@ -38,7 +38,7 @@ struct Product {
 };
 
 //----------------------------------------------------------------------------------------------
-/** Initalise generic importing properties.
+/** Initialise generic importing properties.
  */
 void ImportMDHistoWorkspaceBase::initGenericImportProps() {
   auto validator = std::make_shared<CompositeValidator>();
@@ -76,7 +76,7 @@ void ImportMDHistoWorkspaceBase::initGenericImportProps() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Create an empty output workspace from the generic properies. This gives a
+/** Create an empty output workspace from the generic properties. This gives a
 new workspace with dimensions provided, but signal and
 error arrays will not yet be set.
 */

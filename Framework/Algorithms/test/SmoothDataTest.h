@@ -111,7 +111,7 @@ public:
     TS_ASSERT(smooth.isExecuted());
 
     MatrixWorkspace_const_sptr output = smooth.getProperty("OutputWorkspace");
-    // as alg child is set true, wouldnt need to use AnalysisDataService
+    // as alg child is set true, wouldn't need to use AnalysisDataService
     const auto &Y = output->y(0);
     const auto &X = output->x(0);
     const auto &E = output->e(0);

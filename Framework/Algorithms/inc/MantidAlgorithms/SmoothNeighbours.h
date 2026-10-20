@@ -87,7 +87,7 @@ private:
   void findNeighboursRectangular();
   void findNeighboursUbiquitous();
 
-  /// Sets the weighting stragegy.
+  /// Sets the weighting strategy.
   void setWeightingStrategy(const std::string &strategyName, double &cutOff);
   /// Translate the entered radius into meters.
   double translateToMeters(const std::string &radiusUnits, const double &enteredRadius) const;

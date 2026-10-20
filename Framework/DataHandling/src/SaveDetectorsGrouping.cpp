@@ -196,7 +196,7 @@ void SaveDetectorsGrouping::printToXML(const std::map<int, std::vector<detid_t>>
       } else if (ist == ied) {
         ss << ist;
       } else {
-        throw std::invalid_argument("Impossible to have this sitaution!");
+        throw std::invalid_argument("Impossible to have this situation!");
       }
       // add ","
       if (i < groupdetidrange.second.size() / 2 - 1) {

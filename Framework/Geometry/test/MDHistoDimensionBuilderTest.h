@@ -145,7 +145,7 @@ public:
 
     // Make another
     MDHistoDimensionBuilder builderB;
-    // Do assignement
+    // Do assignment
     builderB = builderA;
 
     // Test assignment constancy via products

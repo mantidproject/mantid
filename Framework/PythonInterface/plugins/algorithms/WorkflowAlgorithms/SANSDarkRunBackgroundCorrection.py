@@ -346,7 +346,7 @@ class DarkRunMonitorAndDetectorRemover(object):
 
     def set_mixed_monitor_detector_dark_run(self, dark_run, monitor_selection):
         """
-        We only unset the monitors which are not sepcifically listed
+        We only unset the monitors which are not specifically listed
         @param dark_run: the dark run
         @param monitor_selection: the monitors which are selected
         @raise RuntimeError: If the selected monitor workspace index does not exist.
@@ -409,7 +409,7 @@ class DarkRunMonitorAndDetectorRemover(object):
         @param dark_run: the dark run workspace
         @param list_dataY: the old Y data
         @param list_dataE: the old E data
-        @param monitor_list: a colleciton of monitors
+        @param monitor_list: a collection of monitors
         @returns the reset dark run workspace
         """
         counter = 0
@@ -423,16 +423,16 @@ class DarkRunMonitorAndDetectorRemover(object):
 
     def _set_only_selected_monitors(self, dark_run, list_dataY, list_dataE, monitor_list, selected_monitors):
         """
-        Resets indivisual monitors
+        Resets individual monitors
         @param dark_run: the dark run workspace
         @param list_dataY: the old Y data
         @param list_dataE: the old E data
-        @param monitor_list: a colleciton of monitors
+        @param monitor_list: a collection of monitors
         @param selected_monitors: a collection of monitors which need to be reset
         @returns the reset dark run workspace
         """
         # The selected monitors is a detector ID, hence we need to compare it with
-        # a detector ID, but we use the assoicated workspace index to correct the data
+        # a detector ID, but we use the associated workspace index to correct the data
         counter = 0
         for ws_index, det_id in monitor_list:
             # Only add the data back for the specified monitors

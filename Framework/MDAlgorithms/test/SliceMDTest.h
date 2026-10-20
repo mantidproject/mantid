@@ -25,7 +25,7 @@ using Mantid::coord_t;
 class SliceMDTest : public CxxTest::TestSuite {
 
 private:
-  /// Helper method to verify the existance of a given property name on the
+  /// Helper method to verify the existence of a given property name on the
   /// algorithm
   void doTestPropertyExistance(const std::string &propertyName) {
     SliceMD alg;
@@ -70,11 +70,11 @@ private:
     Mantid::Kernel::Property *p = alg.getProperty("MaxRecursionDepth");
     if (bTakeDepthFromInput) {
       TSM_ASSERT_EQUALS("MaxRecusionDepth property should NOT be enabled", false, p->getSettings()[0]->isEnabled(&alg));
-      TSM_ASSERT_EQUALS("Should have passed the maxium depth onto the ouput workspace.",
+      TSM_ASSERT_EQUALS("Should have passed the maximum depth onto the output workspace.",
                         in_ws->getBoxController()->getMaxDepth(), out->getBoxController()->getMaxDepth());
     } else {
       TSM_ASSERT_EQUALS("MaxRecusionDepth property should be enabled", true, p->getSettings()[0]->isEnabled(&alg));
-      TSM_ASSERT_EQUALS("Should have passed the maxium depth onto the ouput "
+      TSM_ASSERT_EQUALS("Should have passed the maximum depth onto the output "
                         "workspace from the input workspace.",
                         size_t(maxDepth), out->getBoxController()->getMaxDepth());
     }

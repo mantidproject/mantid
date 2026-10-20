@@ -334,11 +334,11 @@ API::MatrixWorkspace_sptr Q1D2::setUpOutputWorkspace(const std::vector<double> &
  *  @param pixelAdj [in] if not NULL this is workspace contains single bins with
  * the adjustments, e.g. detector efficencies, for the given ws index
  *  @param wavePixelAdj [in] if not NULL this is workspace that contains the
- * adjustments for the pixels and wavelenght dependent values.
- *  @param binNorms [in] pointer to a contigious array of doubles that are the
+ * adjustments for the pixels and wavelength dependent values.
+ *  @param binNorms [in] pointer to a contiguous array of doubles that are the
  * wavelength correction from waveAdj workspace, can be NULL
- *  @param binNormEs [in] pointer to a contigious array of doubles which
- * corrospond to the corrections and are their errors, can be NULL
+ *  @param binNormEs [in] pointer to a contiguous array of doubles which
+ * correspond to the corrections and are their errors, can be NULL
  *  @param norm [out] normalization for each bin, including soild angle, pixel
  * correction, the proportion that is not masked and the normalization workspace
  *  @param normETo2 [out] this pointer must point to the end of the norm array,
@@ -409,9 +409,9 @@ void Q1D2::pixelWeight(const API::MatrixWorkspace_const_sptr &pixelAdj, const si
 
 /** Calculates the contribution to the normalization terms from each bin in a
  * spectrum
- *  @param[in] c pointer to the start of a contigious array of wavelength
+ *  @param[in] c pointer to the start of a contiguous array of wavelength
  * dependent normalization terms
- *  @param[in] Dc pointer to the start of a contigious array that corrosponds to
+ *  @param[in] Dc pointer to the start of a contiguous array that corresponds to
  * wavelength dependent term, having its error
  *  @param[in,out] bInOut normalization for each bin, this method multiplise
  * this by the proportion that is not masked and the normalization workspace
@@ -442,9 +442,9 @@ void Q1D2::addWaveAdj(const double *c, const double *Dc, HistogramData::Histogra
 }
 /** Calculates the contribution to the normalization terms from each bin in a
  * spectrum
- *  @param[in] c pointer to the start of a contigious array of wavelength
+ *  @param[in] c pointer to the start of a contiguous array of wavelength
  * dependent normalization terms
- *  @param[in] Dc pointer to the start of a contigious array that corrosponds to
+ *  @param[in] Dc pointer to the start of a contiguous array that corresponds to
  * wavelength dependent term, having its error
  *  @param[in,out] bInOut normalization for each bin, this method multiplise
  * this by the proportion that is not masked and the normalization workspace
@@ -542,7 +542,7 @@ void Q1D2::convertWavetoQ(const SpectrumInfo &spectrumInfo, const size_t wsInd, 
                           const size_t offset, HistogramData::HistogramY::iterator Qs, const double extraLength) const {
   static const double FOUR_PI = 4.0 * M_PI;
 
-  // wavelengths (lamda) to be converted to Q
+  // wavelengths (lambda) to be converted to Q
   auto waves = m_dataWS->x(wsInd).cbegin() + offset;
   // going from bin boundaries to bin centered x-values the size goes down one
   const auto end = m_dataWS->x(wsInd).end() - 1;
@@ -571,9 +571,9 @@ void Q1D2::convertWavetoQ(const SpectrumInfo &spectrumInfo, const size_t wsInd, 
 }
 /** This is a slightly "clever" method as it makes some guesses about where is
  * best
- *  to look for the right Q bin based on the fact that the input Qs (calcualted
+ *  to look for the right Q bin based on the fact that the input Qs (calculated
  * from wavelengths) tend
- *  to go down while the output Qs are always in accending order
+ *  to go down while the output Qs are always in ascending order
  *  @param[in] OutQs the array of output Q bin boundaries, this finds the bin
  * that contains the QIn value
  *  @param[in] QToFind the Q value to find the correct bin for
@@ -610,7 +610,7 @@ void Q1D2::getQBinPlus1(const HistogramData::HistogramX &OutQs, const double QTo
 
 /** Divides the number of counts in each output Q bin by the wrighting ("number
  * that would expected to arrive")
- *  The errors are propogated using the uncorrolated error estimate for
+ *  The errors are propagated using the uncorrelated error estimate for
  * multiplication/division
  *  @param[in] normSum the weighting for each bin
  *  @param[in] normError2 square of the error on the normalization

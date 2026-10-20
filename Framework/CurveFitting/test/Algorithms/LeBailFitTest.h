@@ -64,7 +64,7 @@ void genPeakParametersBackgroundLessData(std::map<std::string, double> &paramval
 }
 
 //----------------------------------------------------------------------------------------------
-/** Genearte peak parameters for data with background.  Bank 7
+/** Generate peak parameters for data with background.  Bank 7
  */
 void genPeakParameterBank7(std::map<std::string, double> &paramvaluemap) {
   paramvaluemap.clear();
@@ -261,7 +261,7 @@ API::MatrixWorkspace_sptr generateSeparateTwoPeaksData2() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Generate data (vectors) containg twin peak w/o background
+/** Generate data (vectors) containing twin peak w/o background
  */
 API::MatrixWorkspace_sptr generateTwinPeakData() {
 
@@ -409,7 +409,7 @@ API::MatrixWorkspace_sptr createInputDataWorkspace(int option) {
 
 //----------------------------------------------------------------------------------------------
 /** Create parameter workspace for peak calculation.
- * If a parameter is to be modifed by absolute value, then this parameter
+ * If a parameter is to be modified by absolute value, then this parameter
  * will be fit.
  * @param parammodifymap :: map containing parameter and its value to update
  * from original
@@ -602,7 +602,7 @@ public:
     << outws->y(1)[i] << '\n';
     */
 
-    // 4. Calcualte data
+    // 4. Calculate data
     double y25 = 1366.40;
     double y59 = 0.2857;
     double y86 = 649.464;
@@ -705,7 +705,7 @@ public:
     << outws->y(1)[i] << '\n';
     */
 
-    // 4. Calcualte data
+    // 4. Calculate data
     double y25 = 1366.40;
     double y59 = 0.2857;
     double y86 = 649.464;
@@ -725,7 +725,7 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Test on peak calcualtion with non-trivial background
+  /** Test on peak calculation with non-trivial background
    */
   void test_CalculationModeFull() {
     // 1. Create input workspace
@@ -966,7 +966,7 @@ public:
     hkls.emplace_back(r111);
 
     size_t numpeaks = hkls.size();
-    std::cout << "[TESTx349] Nmber of (file imported) peaks = " << hkls.size() << '\n';
+    std::cout << "[TESTx349] Number of (file imported) peaks = " << hkls.size() << '\n';
 
     // b) data
     dataws = createInputDataWorkspace(4);
@@ -989,7 +989,7 @@ public:
     fitregion.emplace_back(56198.0);
     fitregion.emplace_back(151239.0);
 
-    // 3. Genearte LeBailFit algorithm and set it up
+    // 3. Generate LeBailFit algorithm and set it up
     LeBailFit lbfit;
     lbfit.initialize();
 
@@ -1139,7 +1139,7 @@ public:
 
 #if 0
 
-    // 4. Calcualte data
+    // 4. Calculate data
     double y25 = 1360.20;
     double y59 = 0.285529;
     double y86 = 648.998;

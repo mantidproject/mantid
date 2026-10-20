@@ -669,7 +669,7 @@ void LoadPLNnxs::exec() {
   logManager.addProperty("end_time", endDateTime.toISO8601String());
   logManager.addProperty<double>("dur", eventCounter.duration());
 
-  // Finally add the time-series evironment parameters explicitly
+  // Finally add the time-series environment parameters explicitly
   loadEnvironParameters(nxsEntry, startTime, endTime, logManager);
 
   setProperty("OutputWorkspace", m_localWorkspace);

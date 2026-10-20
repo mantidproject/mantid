@@ -23,7 +23,7 @@ class CreateMDHistoWorkspaceTest : public CxxTest::TestSuite {
 private:
   /**
   Helper method to make a standard algorithm. Properties on this algorithm can
-  be overriden in individual tests.
+  be overridden in individual tests.
   */
   IAlgorithm_sptr make_standard_algorithm(const std::string &outWSName) {
     auto alg = std::make_shared<CreateMDHistoWorkspace>();

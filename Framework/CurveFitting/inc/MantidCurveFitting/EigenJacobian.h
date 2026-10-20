@@ -23,7 +23,7 @@ Two implementations of Jacobian.
 class EigenJacobian : public API::Jacobian {
   /// The internal jacobian matrix
   EigenMatrix m_J;
-  /// Maps declared indeces to active. For fixed (tied) parameters holds -1
+  /// Maps declared indices to active. For fixed (tied) parameters holds -1
   std::vector<int> m_index;
 
 public:

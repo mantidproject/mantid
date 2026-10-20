@@ -34,7 +34,7 @@ static const std::string INPUT_SPIN_STATES("InputSpinStates");
 static const std::string OUTPUT_SPIN_STATES("OutputSpinStates");
 static const std::string ADD_SPIN_STATE_LOG{"AddSpinStateToLog"};
 
-// Default order for PA anaysis
+// Default order for PA analysis
 static const std::vector<std::string> defaultSpinStatesForPA = {
     Mantid::Algorithms::SpinStateConfigurationsFredrikze::PARA_PARA,
     Mantid::Algorithms::SpinStateConfigurationsFredrikze::PARA_ANTI,

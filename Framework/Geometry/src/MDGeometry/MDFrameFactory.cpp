@@ -23,7 +23,7 @@ GeneralFrame *GeneralFrameFactory::createRaw(const MDFrameArgument &argument) co
   return new GeneralFrame(argument.frameString, MDUnit_uptr(mdUnit->clone()));
 }
 
-/// Indicate an ability to intepret the string
+/// Indicate an ability to interpret the string
 bool GeneralFrameFactory::canInterpret(const MDFrameArgument &argument) const {
   auto canInterpret = true;
   if (argument.frameString == UnknownFrame::UnknownFrameName) {
@@ -78,7 +78,7 @@ UnknownFrame *UnknownFrameFactory::createRaw(const MDFrameArgument &argument) co
   return new UnknownFrame(MDUnit_uptr(mdUnit->clone()));
 }
 
-/// Indicate an ability to intepret the string
+/// Indicate an ability to interpret the string
 bool UnknownFrameFactory::canInterpret(const MDFrameArgument & /*unitString*/) const {
   return true; // This can interpret everything
 }

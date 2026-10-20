@@ -49,7 +49,7 @@ For each predicted fractional peak, the local centroid (the radius of which is
 defined by `PeakRadius`) in the MD data is found and this is taken as the actual
 position of the satellite peaks.
 
-Finally the found satellite peaks are integerated using the
+Finally the found satellite peaks are integrated using the
 :ref:`IntegratePeaksMD <algm-IntegratePeaksMD-v2>` algorithm with the parameters `PeakRadius`,
 `BackgroundInnerRadius`, and `BackgroundOuterRadius`. Satellite peaks are
 discarded if there I/sigma value is less than the parameter `IOverSigma`.

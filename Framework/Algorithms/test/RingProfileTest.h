@@ -343,7 +343,7 @@ public:
   void test__profile_of_rectangular_startangle_minus45_anticlock() {
     MatrixWorkspace_sptr goodWS = create_rectangular_instrument_workspace();
     RingProfile alg;
-    // put the centre in the midle of the panel, but in the origin in Z
+    // put the centre in the middle of the panel, but in the origin in Z
     // (X=0.016, Y= 0.016, Z=0.0)
     std::vector<double> centre(3, 0.016);
     centre[2] = 0.0;
@@ -367,7 +367,7 @@ public:
   void test__profile_of_rectangular_startangle_45_anticlock() {
     MatrixWorkspace_sptr goodWS = create_rectangular_instrument_workspace();
     RingProfile alg;
-    // put the centre in the midle of the panel, but in the origin in Z
+    // put the centre in the middle of the panel, but in the origin in Z
     // (X=0.016, Y= 0.016, Z=0.0)
     std::vector<double> centre(3, 0.016);
     centre[2] = 0.0;
@@ -388,7 +388,7 @@ public:
   void test__profile_of_rectangular_startangle_45_clock() {
     MatrixWorkspace_sptr goodWS = create_rectangular_instrument_workspace();
     RingProfile alg;
-    // put the centre in the midle of the panel, but in the origin in Z
+    // put the centre in the middle of the panel, but in the origin in Z
     // (X=0.016, Y= 0.016, Z=0.0)
     std::vector<double> centre(3, 0.016);
     centre[2] = 0.0;
@@ -409,7 +409,7 @@ public:
   void test__profile_of_rectangular_bigger_ring_and_more_bins() {
     MatrixWorkspace_sptr goodWS = create_rectangular_instrument_workspace();
     RingProfile alg;
-    // put the centre in the midle of the panel, but in the origin in Z
+    // put the centre in the middle of the panel, but in the origin in Z
     // (X=0.016, Y= 0.016, Z=0.0)
     std::vector<double> centre(3, 0.016);
     centre[2] = 0.0;

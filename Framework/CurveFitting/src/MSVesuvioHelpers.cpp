@@ -24,7 +24,7 @@ namespace Mantid::CurveFitting::MSVesuvioHelper {
  * @return A value to use for the final energy
  */
 double finalEnergyAuDD(const double randv) {
-  // Tabulated values of absoprtion energies from S.F. Mughabghab, Neutron Cross
+  // Tabulated values of absorption energies from S.F. Mughabghab, Neutron Cross
   // Sections, Academic
   // Press, Orlando, Florida, 1984.
   static const std::vector<double> ENERGIES = {
@@ -100,7 +100,7 @@ double finalEnergyAuDD(const double randv) {
  * @return A value to use for the final energy
  */
 double finalEnergyAuYap(const double randv) {
-  // Tabulated values of absoprtion energies from S.F. Mughabghab, Neutron Cross
+  // Tabulated values of absorption energies from S.F. Mughabghab, Neutron Cross
   // Sections, Academic
   // Press, Orlando, Florida, 1984.
   static const std::vector<double> ENERGIES = {

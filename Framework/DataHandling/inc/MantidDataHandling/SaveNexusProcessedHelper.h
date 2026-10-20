@@ -45,7 +45,7 @@ public:
   /// Default constructor
   NexusFileIO();
 
-  /// Contructor with Progress supplied
+  /// Constructor with Progress supplied
   NexusFileIO(API::Progress *prog);
 
   /// Destructor
@@ -96,7 +96,7 @@ private:
   /// Write a simple value plus possible attributes
   bool writeNxValue(const std::string &name, const std::string &value, const std::vector<std::string> &attributes,
                     const std::vector<std::string> &avalues) const;
-  /// search for exisiting MantidWorkpace_n entries in opened file
+  /// search for existing MantidWorkpace_n entries in opened file
   int findMantidWSEntries() const;
 
   /// nexus file name

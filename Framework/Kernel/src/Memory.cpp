@@ -196,7 +196,7 @@ void MemoryStats::process_mem_system(size_t &sys_avail, size_t &sys_total) {
    * a lot smaller than it should be. To be completely correct we also
    * need to add the value of the "Buffers" as well.
    *
-   * The only way I can see as to get acces to the Cached value is
+   * The only way I can see as to get access to the Cached value is
    * from the /proc/meminfo file so if this is not successful I'll
    * fall back to using the sysconf method and forget the cache
    * RJT(18/2/10) : Should we be using sysinfo() here?
@@ -465,7 +465,7 @@ double MemoryStats::getFreeRatio() const {
   return 100. * static_cast<double>(this->avail_memory) / static_cast<double>(this->total_memory);
 }
 
-/// Convenience function for writting out to stream.
+/// Convenience function for writing out to stream.
 std::ostream &operator<<(std::ostream &out, const MemoryStats &stats) {
   if (stats.ignore != MEMORY_STATS_IGNORE_PROCESS) {
     out << "virtual[" << stats.vmUsageStr() << "] ";

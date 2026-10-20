@@ -30,7 +30,7 @@ private:
   void init() override;
   void exec() override;
 
-  // Overriden base class methods.
+  // Overridden base class methods.
   void validateExtentsInput() const override;
   int numberOfFaces() const override;
   VecVecV3D createFaces() const override;
@@ -48,7 +48,7 @@ private:
   Mantid::Kernel::V3D m_vertex3; // upper right
   Mantid::Kernel::V3D m_vertex4; // lower right
 
-  // Lines used in bounary calculations.
+  // Lines used in boundary calculations.
   Mantid::Kernel::V3D m_line1;
   Mantid::Kernel::V3D m_line2;
   Mantid::Kernel::V3D m_line3;

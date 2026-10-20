@@ -54,7 +54,7 @@ bool SetDefaultWhenProperty::applyChanges(const IPropertyManager *algo, const st
       return true;
     }
   } catch (const Exception::NotFoundError &) {
-    g_log.warning() << "`SetDefaultWhenProperty::applyChanges`: one of the properies '" << currentPropName << "' or '"
+    g_log.warning() << "`SetDefaultWhenProperty::applyChanges`: one of the properties '" << currentPropName << "' or '"
                     << m_watchedPropName << "\n"
                     << "   is not present on the algorithm.\n";
   } catch (const std::runtime_error &e) {

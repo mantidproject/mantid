@@ -140,7 +140,7 @@ Doing presenter-view communication with connections is the cleaner of
 the two, so this method should be used unless writing a GUI in
 C++. You'll notice that, in both cases, the view never passes data
 (for example, the input from a text box) directly to the presenter,
-instead it justs tells the presenter that something needs to be
+instead it just tells the presenter that something needs to be
 done. In passive-view MVP the presenter, in handling this, gets any
 data it needs from the view using the view's **get** methods.
 

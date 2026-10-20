@@ -78,12 +78,12 @@ void HistogramDomainCreator::createDomain(std::shared_ptr<FunctionDomain> &domai
     if (!std::isfinite(y)) // nan or inf data
     {
       if (!m_ignoreInvalidData)
-        throw std::runtime_error("Infinte number or NaN found in input data.");
+        throw std::runtime_error("Infinite number or NaN found in input data.");
       y = 0.0;                        // leaving inf or nan would break the fit
     } else if (!std::isfinite(error)) // nan or inf error
     {
       if (!m_ignoreInvalidData)
-        throw std::runtime_error("Infinte number or NaN found in input data.");
+        throw std::runtime_error("Infinite number or NaN found in input data.");
     } else if (error <= 0) {
       if (!m_ignoreInvalidData)
         weight = 1.0;

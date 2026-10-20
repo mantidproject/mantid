@@ -217,7 +217,7 @@ GetEi::getMonitorWsIndexs(const API::MatrixWorkspace_const_sptr &WS, specnum_t s
     throw Exception::NotFoundError("GetEi::getMonitorWsIndexs()", specNum1);
   }
 
-  // nowe the second monitor
+  // now the second monitor
   specNumTemp[0] = specNum2;
   auto wsIndexTemp = WS->getIndicesFromSpectra(specNumTemp);
   if (wsIndexTemp.size() != 1) { // the monitor spectrum isn't present in the
@@ -233,7 +233,7 @@ GetEi::getMonitorWsIndexs(const API::MatrixWorkspace_const_sptr &WS, specnum_t s
 }
 /** Uses E_KE = mv^2/2 and s = vt to calculate the time required for a neutron
  *  to travel a distance, s
- * @param s :: ditance travelled in meters
+ * @param s :: distance travelled in meters
  * @param E_KE :: kinetic energy in meV
  * @return the time to taken to travel that uninterrupted distance in seconds
  */

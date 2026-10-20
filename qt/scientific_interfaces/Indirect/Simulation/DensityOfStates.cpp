@@ -167,7 +167,7 @@ void DensityOfStates::handleFileChange() {
     m_uiForm.ckCrossSectionScale->setChecked(false);
   }
 
-  // Enable partial DOS related optons when they can be used
+  // Enable partial DOS related options when they can be used
   m_uiForm.lwIons->setEnabled(pdosAvailable);
   m_uiForm.pbSelectAllIons->setEnabled(pdosAvailable);
   m_uiForm.pbDeselectAllIons->setEnabled(pdosAvailable);

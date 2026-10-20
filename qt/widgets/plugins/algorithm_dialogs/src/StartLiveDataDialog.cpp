@@ -44,7 +44,7 @@ private:
 };
 
 #ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
+// this breaks new namespace declaration rules; need to find a better fix
 template class Mantid::Kernel::SingletonHolder<LiveDataAlgInputHistoryImpl>;
 #endif /* _WIN32 */
 /// The specific instantiation of the templated type
@@ -60,7 +60,7 @@ private:
 };
 
 #ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
+// this breaks new namespace declaration rules; need to find a better fix
 template class Mantid::Kernel::SingletonHolder<LiveDataPostProcessingAlgInputHistoryImpl>;
 #endif /* _WIN32 */
 /// The specific instantiation of the templated type
@@ -423,7 +423,7 @@ void StartLiveDataDialog::initListenerPropLayout(const QString &listener) {
     }
 
     // set the instrument and listener properties early to get the listener's properties
-    // this will be overriden by the same values in parseInput() function
+    // this will be overridden by the same values in parseInput() function
     m_algorithm->setPropertyValue("Instrument", ui.cmbInstrument->currentText().toStdString());
     m_algorithm->setPropertyValue("Listener", listener.toStdString());
     // find the listener's properties
@@ -520,7 +520,7 @@ void StartLiveDataDialog::updateConnectionChoices(const QString &inst_name) {
  * @param connection Name of selected live listener connection
  */
 void StartLiveDataDialog::updateConnectionDetails(const QString &connection) {
-  // Custom connections just enable editting connection parameters
+  // Custom connections just enable editing connection parameters
   if (connection == CUSTOM_CONNECTION) {
     ui.cmbConnListener->setEnabled(true);
     ui.edtConnAddress->setEnabled(true);

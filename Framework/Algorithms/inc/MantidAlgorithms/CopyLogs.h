@@ -44,7 +44,7 @@ private:
 
   /// appends new logs and overwrites existing logs.
   void mergeReplaceExisting(const std::vector<Kernel::Property *> &inputLogs, API::Run &outputRun);
-  /// appends new logs but leaves exisitng logs untouched.
+  /// appends new logs but leaves existing logs untouched.
   void mergeKeepExisting(const std::vector<Kernel::Property *> &inputLogs, API::Run &outputRun);
   /// appends new logs and removes all existing logs.
   void wipeExisting(const std::vector<Kernel::Property *> &inputLogs, API::Run &outputRun);

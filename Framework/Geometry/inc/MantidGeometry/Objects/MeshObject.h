@@ -162,7 +162,7 @@ private:
   /// Cache for object's bounding box
   mutable BoundingBox m_boundingBox;
 
-  /// Tolerence distance
+  /// Tolerance distance
   const double M_TOLERANCE = 0.000001;
 
   /// Geometry Handle for rendering

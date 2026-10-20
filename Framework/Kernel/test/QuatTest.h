@@ -285,20 +285,20 @@ public:
 
     double x1 = (rotMatrix[0] * some.X() + rotMatrix[1] * some.Y() + rotMatrix[2] * some.Z()) * targ_norm / some_norm;
     TSM_ASSERT_DELTA("X -coordinate obtained using the rotation matxis have to "
-                     "coinside with the one obtained by rotation via quat",
+                     "coincide with the one obtained by rotation via quat",
                      x1, target.X(), FLT_EPSILON);
 
     double y1 = (rotMatrix[3] * some.X() + rotMatrix[4] * some.Y() + rotMatrix[5] * some.Z()) * targ_norm / some_norm;
     TSM_ASSERT_DELTA("Y -coordinate obtained using the rotation matxis have to "
-                     "coinside with the one obtained by rotation via quat",
+                     "coincide with the one obtained by rotation via quat",
                      y1, target.Y(), FLT_EPSILON);
 
     double z1 = (rotMatrix[6] * some.X() + rotMatrix[7] * some.Y() + rotMatrix[8] * some.Z()) * targ_norm / some_norm;
     TSM_ASSERT_DELTA("Z -coordinate obtained using the rotation matxis have to "
-                     "coinside with the one obtained by rotation via quat",
+                     "coincide with the one obtained by rotation via quat",
                      z1, target.Z(), FLT_EPSILON);
 
-    // if the vectors are not notmalized (not equal), the angle between the
+    // if the vectors are not normalized (not equal), the angle between the
     // vectors calculated by the constructor below would not be equal to the
     // one, calculated
     // above.
@@ -317,17 +317,17 @@ public:
 
     x1 = (rotMatrix2[0] * some.X() + rotMatrix2[1] * some.Y() + rotMatrix2[2] * some.Z());
     TSM_ASSERT_DELTA("X -coordinate obtained using the rotation matxis have to "
-                     "coinside with the one obtained by rotation via quat",
+                     "coincide with the one obtained by rotation via quat",
                      x1, target.X(), FLT_EPSILON);
 
     y1 = (rotMatrix2[3] * some.X() + rotMatrix2[4] * some.Y() + rotMatrix2[5] * some.Z());
     TSM_ASSERT_DELTA("Y -coordinate obtained using the rotation matxis have to "
-                     "coinside with the one obtained by rotation via quat",
+                     "coincide with the one obtained by rotation via quat",
                      y1, target.Y(), FLT_EPSILON);
 
     z1 = (rotMatrix2[6] * some.X() + rotMatrix2[7] * some.Y() + rotMatrix2[8] * some.Z());
     TSM_ASSERT_DELTA("Z -coordinate obtained using the rotation matxis have to "
-                     "coinside with the one obtained by rotation via quat",
+                     "coincide with the one obtained by rotation via quat",
                      z1, target.Z(), FLT_EPSILON);
   }
   void testUnitQuatFromUnitRotMatrix() {

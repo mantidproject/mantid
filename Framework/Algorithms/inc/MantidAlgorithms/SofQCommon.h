@@ -11,7 +11,7 @@
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDetector.h"
 // Routines used by all SofQW algorithms intended to provide united
-// user interface to all SofQ algorihtms.
+// user interface to all SofQ algorithms.
 namespace Mantid {
 namespace Algorithms {
 

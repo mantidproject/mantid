@@ -339,7 +339,7 @@ void CalculateCarpenterSampleCorrection::calculate_abs_correction(const double a
   else if (wavelength.size() == NUM_Y)
     is_histogram = false;
   else
-    throw std::runtime_error("Data is neither historgram or density");
+    throw std::runtime_error("Data is neither histogram or density");
 
   // initialize Z array for this angle
   vector<double> Z = createZ(angle_deg);
@@ -368,7 +368,7 @@ void CalculateCarpenterSampleCorrection::calculate_ms_correction(const double an
   else if (wavelength.size() == NUM_Y)
     is_histogram = false;
   else
-    throw std::runtime_error("Data is neither historgram or density");
+    throw std::runtime_error("Data is neither histogram or density");
 
   // initialize Z array for this angle
   vector<double> Z = createZ(angle_deg);

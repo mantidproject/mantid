@@ -1240,8 +1240,8 @@ class SpectraToMonitorsList(PropDescriptor):
             else:
                 spectra = spectra_list.split(",")
                 result = []
-                for spectum in spectra:
-                    result.append(int(spectum))
+                for spectrum in spectra:
+                    result.append(int(spectrum))
 
         else:
             if isinstance(spectra_list, list):
@@ -1373,7 +1373,7 @@ class DiagSpectra(PropDescriptor):
                     bank_spectra.append((start, end))
             return bank_spectra
         else:
-            raise ValueError("Spectra For diagnostics can be a string inthe form (num1,num2);(num3,num4) etc. or None")
+            raise ValueError("Spectra For diagnostics can be a string in the form (num1,num2);(num3,num4) etc. or None")
 
 
 # end class DiagSpectra
@@ -1829,7 +1829,7 @@ class AbsorptionShapesContainer(PropDescriptor):
     for the absorption on correspondent shapes.
 
     NOT IMPLEMENTED: should also handle conversion
-    from a shape to its text representaton and v.v.
+    from a shape to its text representation and v.v.
     (using AbsorptionShape appropriate classes)
 
     """

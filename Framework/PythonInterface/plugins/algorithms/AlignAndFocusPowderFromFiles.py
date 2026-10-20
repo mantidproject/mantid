@@ -412,7 +412,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         alignandfocusargs += additional_props or []
         reductionPropertiesName = self.getProperty("ReductionProperties").valueAsStr
         if reductionPropertiesName not in PropertyManagerDataService:
-            reductionPropertiesName = ""  # do not specify non-existant manager
+            reductionPropertiesName = ""  # do not specify non-existent manager
 
         return CreateCacheFilename(
             Prefix=prefix,

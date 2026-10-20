@@ -151,7 +151,7 @@ void FunctionBrowser::setDatasets(const std::vector<std::string> &datasetNames) 
 
 /// Sets the datasets being fitted. They will be displayed by the
 /// local parameter editing dialog.
-/// @param datasets :: Names of workspaces to be fitted maped to a spectra list.
+/// @param datasets :: Names of workspaces to be fitted mapped to a spectra list.
 void FunctionBrowser::setDatasets(const QList<FunctionModelDataset> &datasets) { m_presenter->setDatasets(datasets); }
 
 /**

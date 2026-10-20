@@ -318,7 +318,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         alg.execute()
         table = alg.getProperty("OutputWorkspace").value
 
-        # Note: the colums 'Detector ID' and 'Detector Position' must have those
+        # Note: the columns 'Detector ID' and 'Detector Position' must have those
         # exact names (expected by child alg. ApplyCalibration in EnggFocus)
         table.addColumn("int", "Detector ID")
         table.addColumn("V3D", "Old Detector Position")

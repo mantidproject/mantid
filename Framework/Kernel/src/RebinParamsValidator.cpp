@@ -15,7 +15,7 @@ RebinParamsValidator::RebinParamsValidator(bool allowEmpty, bool allowRange)
 
 IValidator_sptr RebinParamsValidator::clone() const { return std::make_shared<RebinParamsValidator>(*this); }
 
-/** Check on the inputed bin boundaries and widths.
+/** Check on the inputted bin boundaries and widths.
  *  @param value :: The parameter array to check
  *  @return A user level description of any problem or "" if there is no problem
  */

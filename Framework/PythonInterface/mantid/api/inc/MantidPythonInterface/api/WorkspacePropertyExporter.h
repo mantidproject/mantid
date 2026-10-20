@@ -80,7 +80,7 @@ template <typename WorkspaceType> struct WorkspacePropertyExporter {
 
   /**
    * Ensure the stored type is always a Workspace_sptr
-   * This allows a reference to a Workspace_sptr to be used withh
+   * This allows a reference to a Workspace_sptr to be used with
    * boost::python::extract
    */
   static Mantid::API::Workspace_sptr value(const TypedWorkspaceProperty &self) { return self.operator()(); }

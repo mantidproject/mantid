@@ -79,7 +79,7 @@ void Fit::initConcrete() {
                   "default is to use the name of the original data workspace as prefix "
                   "followed by suffixes _Workspace, _Parameters, etc.");
   declareProperty("CalcErrors", false,
-                  "Set to true to calcuate errors when output isn't created "
+                  "Set to true to calculate errors when output isn't created "
                   "(default is false).");
   declareProperty("OutputCompositeMembers", false,
                   "If true and CreateOutput is true then the value of each "
@@ -429,7 +429,7 @@ void Fit::execConcrete() {
   // Run the minimizer
   auto nIterations = runMinimizer();
 
-  // Finilize the minimizer.
+  // Finalize the minimizer.
   finalizeMinimizer(nIterations);
 
   // fit ended, creating output

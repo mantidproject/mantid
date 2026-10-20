@@ -114,7 +114,7 @@ SXPeak::SXPeak(double t, double phi, double intensity, const std::vector<int> &s
 }
 
 /**
-Object comparision
+Object comparison
 @param rhs : other SXPeak
 @param tolerance : tolerance
 */
@@ -459,7 +459,7 @@ PeakList AllPeaksStrategy::dofindSXPeaks(const HistogramData::HistogramX &x, con
   // Get all peaks from the container
   auto foundPeaks = getAllPeaks(x, y, low, high, m_backgroundStrategy);
 
-  // Filter the found peaks having the mininum number of bins
+  // Filter the found peaks having the minimum number of bins
   filterPeaksForMinBins(foundPeaks);
 
   // Convert the found peaks to SXPeaks
@@ -499,7 +499,7 @@ AllPeaksStrategy::getAllPeaks(const HistogramData::HistogramX &x, const Histogra
 
     // There are four scenarios:
     // 1. Not recording + below threshold => continue
-    // 2. Not recording + above treshold => start recording
+    // 2. Not recording + above threshold => start recording
     // 3. Recording + below threshold => stop recording
     // 4. Recording + above threshold => continue recording
     if (!isRecording && (!std::isfinite(signal) || !isAboveThreshold)) {
@@ -542,7 +542,7 @@ PeakList NSigmaPeaksStrategy::dofindSXPeaks(const HistogramData::HistogramX &x, 
                                             const int workspaceIndex) const {
   auto nsigmaPeaks = getAllNSigmaPeaks(x, y, e, low, high);
 
-  // Filter the found peaks having the mininum number of bins
+  // Filter the found peaks having the minimum number of bins
   filterPeaksForMinBins(nsigmaPeaks);
 
   auto sxPeaks = convertToSXPeaks(x, y, nsigmaPeaks, workspaceIndex);

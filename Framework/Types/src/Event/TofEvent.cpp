@@ -33,7 +33,7 @@ bool TofEvent::operator>(const TofEvent &rhs) const { return (this->m_tof > rhs.
  * @param tolPulse the tolerance of a difference in m_pulsetime
  * in nanoseconds.
  *
- * @return True if the are the same within the specifed tolerances
+ * @return True if the are the same within the specified tolerances
  */
 bool TofEvent::equals(const TofEvent &rhs, const double tolTof, const int64_t tolPulse) const {
   // compare m_tof

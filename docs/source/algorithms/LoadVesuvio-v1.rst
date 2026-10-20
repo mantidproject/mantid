@@ -29,7 +29,7 @@ Information on Vesuvio operation
 
 Vesuvio as an instrument has the ability to analyse both forward and back scattering from the sample. In addition, when data is collected,
 foils are put in front of, or remove from, the detectors. The foils are different for forward and back scattering. In forward scattering,
-there are only 2 foils states, the foil is either in front of the detector (foil in) or not infront of the detector (foil out). In back
+there are only 2 foils states, the foil is either in front of the detector (foil in) or not in front of the detector (foil out). In back
 scattering there are 3 foil states. Like in forward scattering there is both a foil in and foil out state, but in addition to this there
 is also a foil thick state which is where a thicker foil is placed in front of the detector.
 

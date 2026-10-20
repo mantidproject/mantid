@@ -80,7 +80,7 @@ protected:
   /// Flag to indicate if finalize has been called, and if errors/variance used
   bool m_finalized;
 
-  /// Flag to indiciate if the finalized data used squared errors
+  /// Flag to indicate if the finalized data used squared errors
   bool m_hasSqrdErrs;
 
 private:

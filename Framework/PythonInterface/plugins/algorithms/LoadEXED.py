@@ -136,7 +136,7 @@ class LoadEXED(PythonAlgorithm):
                 "OMEGA_MAG will be ignored."
             )
             self.log().warning("Please make sure that the detector positions in the instrument definition are correct.")
-        # Separate monitors into seperate workspace
+        # Separate monitors into separate workspace
         __temp_monitors = ExtractSpectra(
             InputWorkspace=wsn,
             WorkspaceIndexList=",".join([str(s) for s in range(nrows - 2, nrows)]),
@@ -230,5 +230,5 @@ class LoadEXED(PythonAlgorithm):
         return tmp_lst
 
 
-# Register algorthm with Mantid.
+# Register algorithm with Mantid.
 AlgorithmFactory.subscribe(LoadEXED)

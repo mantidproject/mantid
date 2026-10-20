@@ -50,7 +50,7 @@ public:
     ReferenceFrame frame1(Y, Z, Right, "source");
     ReferenceFrame frame2(Z, X, Right, "source");
 
-    TSM_ASSERT("Should be positive because test vector is paralell to along "
+    TSM_ASSERT("Should be positive because test vector is parallel to along "
                "beam vector",
                frame1.isVectorPointingAlongBeam(testVector));
     TSM_ASSERT("Should be negative because test vector is perpendicular to "

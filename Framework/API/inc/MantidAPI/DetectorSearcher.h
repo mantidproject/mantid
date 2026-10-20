@@ -75,7 +75,7 @@ private:
   const Geometry::DetectorInfo &m_detInfo;
   /// handle to the instrument to search for detectors in
   Geometry::Instrument_const_sptr m_instrument;
-  /// vector of detector indicies used in the search
+  /// vector of detector indices used in the search
   std::vector<size_t> m_indexMap;
   /// Detector search cache for fast look-up of detectors
   std::unique_ptr<Kernel::NearestNeighbours<3>> m_detectorCacheSearch;

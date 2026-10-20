@@ -110,7 +110,7 @@ void SaveTBL::writeColumnNames(std::ofstream &file, std::vector<std::string> con
  * Writes the given value to file, checking if it needs to be surrounded in
  * quotes due to a comma being included
  * @param val : the string to be written
- * @param file : the ouput file stream
+ * @param file : the output file stream
  * @param endsep : boolean true to include a comma after the data
  * @param endline : boolean true to put an EOL at the end of this data value
  */

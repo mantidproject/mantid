@@ -156,7 +156,7 @@ public:
   }
   /// Grow the bounding box so that it also encompasses the given box
   void grow(const BoundingBox &other);
-  /// change the BB alighnment, providing new coordinate system to align it to.
+  /// change the BB alignment, providing new coordinate system to align it to.
   void setBoxAlignment(const Kernel::V3D &R0, const std::vector<Kernel::V3D> &orts);
   /// set BB in to undefined state with min=FLT_MAX>max=-FLT_MAX
   void nullify();

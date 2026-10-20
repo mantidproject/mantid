@@ -70,7 +70,7 @@ public:
   void setLexer(QsciLexer * /*codelexer*/) override final;
   // Make the object resize to margin to fit the contents
   void setAutoMarginResize();
-  /// Enable the auto complete. Default is for backwards compatability
+  /// Enable the auto complete. Default is for backwards compatibility
   /// with existing code
   void enableAutoCompletion(AutoCompletionSource source = QsciScintilla::AcsAPIs);
   /// Disable the auto complete
@@ -98,7 +98,7 @@ public:
   /// Return a pointer to the object responsible for code completion
   inline QsciAPIs *scintillaAPI() const { return m_completer; }
 
-  /// Replace all occurences of a string
+  /// Replace all occurrences of a string
   void replaceAll(const QString &search, const QString &replace, bool regex, bool caseSensitive, bool matchWords,
                   bool wrap, bool forward = true);
 

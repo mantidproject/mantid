@@ -70,7 +70,7 @@ private:
   void init() override;
   void exec(const std::string &hdfFile, const std::string &eventFile);
 
-  // region of intereset
+  // region of interest
   std::vector<bool> createRoiVector(const std::string &seltubes, const std::string &maskfile);
 
 protected:

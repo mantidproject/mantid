@@ -25,7 +25,7 @@ using namespace CurveFitting;
 DECLARE_FUNCTION(ThermalNeutronBk2BkExpBeta)
 
 //----------------------------------------------------------------------------------------------
-/** Defintion of parameter
+/** Definition of parameter
  */
 void ThermalNeutronBk2BkExpBeta::init() {
   declareParameter("Width", 1.0);

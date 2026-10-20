@@ -44,7 +44,7 @@ Bugfixes
 * Empty group workspaces can now be deleted rather than needing to be ungrouped.
 * Fixed a bug in :ref:`Project Recovery<Project Recovery>` when attempting to remove non-empty directories and raising the error reporter.
 * Users are no longer able to add a peak to the Fit Property Browser by clicking with the interactive tool outside of the axes (which would cause an error).
-* An unhandled exeception no longer occurs when attempting to open the Fit Property Browser on a bin plot.
+* An unhandled exception no longer occurs when attempting to open the Fit Property Browser on a bin plot.
 
 InstrumentViewer
 ----------------

@@ -45,7 +45,7 @@ template <> MANTID_KERNEL_DLL bool checkIsEmpty(const long &value) {
 }
 #if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)
 /**
- * Specialization of checkIsEmpty for 64 bit intiger
+ * Specialization of checkIsEmpty for 64 bit integer
  * @param value :: A int64_t value
  * @return True if the value is considered empty, see EmptyValues.h
  */

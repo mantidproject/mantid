@@ -74,7 +74,7 @@ class DrillRundexIO:
             exp = json_data[RundexSettings.EXPERIMENT_JSON_KEY]
             drill.setCycleAndExperiment(cycle, exp)
 
-        # visual setings
+        # visual settings
         if RundexSettings.VISUAL_SETTINGS_JSON_KEY in json_data:
             visualSettings = json_data[RundexSettings.VISUAL_SETTINGS_JSON_KEY]
         else:
@@ -139,7 +139,7 @@ class DrillRundexIO:
         if exp:
             json_data[RundexSettings.EXPERIMENT_JSON_KEY] = exp
 
-        # visual setings
+        # visual settings
         visualSettings = drill.getVisualSettings()
         if visualSettings:
             json_data[RundexSettings.VISUAL_SETTINGS_JSON_KEY] = visualSettings

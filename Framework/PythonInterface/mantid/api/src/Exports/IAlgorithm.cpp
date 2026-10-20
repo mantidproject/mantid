@@ -283,7 +283,7 @@ private:
  * @param self :: A reference to the calling object
  */
 bool executeProxy(object &self) {
-  // We need to do 2 things before we execute the algorthm:
+  // We need to do 2 things before we execute the algorithm:
   //   1. store a reference to this algorithm mapped to the current thread ID to
   //      allow it to be looked up when an abort request is received
   //   2. release the GIL, drop the Python threadstate and reset anything

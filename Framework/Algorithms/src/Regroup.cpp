@@ -63,7 +63,7 @@ void Regroup::exec() {
 
   const auto histnumber = static_cast<int>(inputW->getNumberHistograms());
   auto &XValues_old = inputW->x(0);
-  std::vector<int> xoldIndex; // indeces of new x in XValues_old
+  std::vector<int> xoldIndex; // indices of new x in XValues_old
   // create new output X axis
   std::vector<double> xAxisTmp;
   int ntcnew = newAxis(rb_params, XValues_old, xAxisTmp, xoldIndex);
@@ -118,7 +118,7 @@ void Regroup::exec() {
  * @param xold :: old x array of data
  * @param yold :: old y array of data
  * @param eold :: old error array of data
- * @param xoldIndex :: indeces of new x in XValues_old
+ * @param xoldIndex :: indices of new x in XValues_old
  * @param ynew :: new y array of data
  * @param enew :: new error array of data
  * @param distribution :: flag defining if distribution data (1) or not (0)
@@ -165,13 +165,13 @@ void Regroup::rebin(const HistogramX &xold, const HistogramY &yold, const Histog
   }
 }
 
-/** Creates a new  output X array  according to specific boundary defnitions
+/** Creates a new  output X array  according to specific boundary definitions
  *
  *  @param params ::    rebin parameters input [x_1, delta_1,x_2, ...
  *,x_n-1,delta_n-1,x_n)
  *  @param xold ::      the current x array
  *  @param xnew ::      new output workspace x array
- *  @param xoldIndex :: indeces of new x in XValues_old
+ *  @param xoldIndex :: indices of new x in XValues_old
  *  @return The number of bin boundaries in the new X array
  **/
 int Regroup::newAxis(const std::vector<double> &params, std::span<double const> const xold, std::vector<double> &xnew,

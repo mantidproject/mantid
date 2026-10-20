@@ -39,7 +39,7 @@ Logger g_log("GitHubApiHelper");
 
 const std::string RATE_LIMIT_URL("https://api.github.com/rate_limit");
 
-// key to retreive api token from ConfigService
+// key to retrieve api token from ConfigService
 const std::string CONFIG_KEY_GITHUB_TOKEN("network.github.api_token");
 
 std::string formatRateLimit(const int rateLimit, const int remaining, const int expires) {

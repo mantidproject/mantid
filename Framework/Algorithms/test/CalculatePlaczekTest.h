@@ -161,7 +161,7 @@ private:
     return amplitude;
   }
 
-  // generate incident spectrum derivitive
+  // generate incident spectrum derivative
   // NOTE:
   //  The first order derivative of the mocked spectrum above is
   //        -4(-3.5125 + 8.68 x - 5.4375 x^2 + x^3)  x \in (0.05, 2)
@@ -204,10 +204,10 @@ private:
     // make the amplitude vector
     yVec = generateIncidentSpectrum(xVec);
 
-    // make the first order derivitive vector
+    // make the first order derivative vector
     yPrimeVec = generateIncidentSpectrumPrime(xVec);
 
-    // make the second order derivitive vector
+    // make the second order derivative vector
     yPrimePrimeVec = generateIncidentSpectrumPrimePrime(xVec);
 
     // extend the y vector to contain the other two dimension
@@ -244,7 +244,7 @@ private:
     // make the amplitude vector
     yVec = generateIncidentSpectrum(xVec);
 
-    // make the first order derivitive vector
+    // make the first order derivative vector
     yPrimeVec = generateIncidentSpectrumPrime(xVec);
 
     // extend the y vector to contain the other two dimension

@@ -21,12 +21,12 @@ namespace Mantid::PythonInterface {
  * class then get_override always returns true, regardless of whether the
  * method has been overridden in Python.
  *
- * An example is the algorithm hierachy. We export the IAlgorithm interface
+ * An example is the algorithm hierarchy. We export the IAlgorithm interface
  * with the name method attach to it. If a class in Python does not
  * override the name method then get_override still claims that the
  * override exists because it has found the IAlgorithm one
  * @param obj :: A pointer to a PyObject
- * @param attr :: A string containin the attribute name
+ * @param attr :: A string containing the attribute name
  * @returns True if the type dictionary contains the attribute
  */
 bool typeHasAttribute(PyObject *obj, const char *attr) {
@@ -37,7 +37,7 @@ bool typeHasAttribute(PyObject *obj, const char *attr) {
 
 /** Same as above but taking a wrapper reference instead
  * @param wrapper :: A reference to a Wrapper object
- * @param attr :: A string containin the attribute name
+ * @param attr :: A string containing the attribute name
  * @returns True if the type dictionary contains the attribute
  */
 bool typeHasAttribute(const boost::python::detail::wrapper_base &wrapper, const char *attr) {

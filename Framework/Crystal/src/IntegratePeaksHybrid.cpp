@@ -134,7 +134,7 @@ void IntegratePeaksHybrid::init() {
 
 const std::string IntegratePeaksHybrid::summary() const {
   return "Integrate single crystal peaks using connected component analysis. "
-         "Binning invididual to each peak.";
+         "Binning individual to each peak.";
 }
 
 //----------------------------------------------------------------------------------------------

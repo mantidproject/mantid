@@ -349,7 +349,7 @@ class SeqRefineProfile(object):
 
         # Replace 'Refine' of step 0 to ID (it is always empty)
         self._recordws.setCell(0, 5, self._ID)
-        # Replace 'InputProfileWorkspace' by profile type (it is alwasy same as output)
+        # Replace 'InputProfileWorkspace' by profile type (it is always same as output)
         self._recordws.setCell(0, 9, self._peakType)
 
         self._isSetup = True
@@ -542,7 +542,7 @@ class SeqRefineProfile(object):
         while self._recordwsLastRowValid is False and lastrow >= 0:
             profilewsname = self._recordws.cell(lastrow, 1)
             if profilewsname == "":
-                self.glog.warning("Profile workspace name is emtpy in row %d!" % (lastrow))
+                self.glog.warning("Profile workspace name is empty in row %d!" % (lastrow))
                 lastrow -= 1
             else:
                 self._recordwsLastRowValid = True
@@ -576,7 +576,7 @@ class SeqRefineProfile(object):
                 bkgdtype = self._recordws.cell(lastrow, 3).strip()
                 bkgdparamwsname = self._recordws.cell(lastrow, 4).strip()
                 if profilewsname == "":
-                    raise NotImplementedError("Profile workspace name is emtpy in row %d.  It is not supposed to happen." % (lastvalidrow))
+                    raise NotImplementedError("Profile workspace name is empty in row %d.  It is not supposed to happen." % (lastvalidrow))
                 break
         # ENDWHILE
         if profilewsname == "":

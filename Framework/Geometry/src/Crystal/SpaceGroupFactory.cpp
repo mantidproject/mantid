@@ -21,7 +21,7 @@
 namespace Mantid::Geometry {
 
 /// Free function that tries to parse the given list of symmetry operations and
-/// returns true if successfull.
+/// returns true if successful.
 bool isValidGeneratorString(const std::string &generatorString) {
   std::vector<std::string> generatorStrings;
   boost::split(generatorStrings, generatorString, boost::is_any_of(";"));
@@ -192,7 +192,7 @@ void TransformationSpaceGroupGenerator::setBaseAndTransformation(const std::stri
 }
 
 /// Constructor of TabulatedSpaceGroupGenerator, throws an std::runtime_error
-/// exception if generatorInformation cannot be intepreted as symmetry
+/// exception if generatorInformation cannot be interpreted as symmetry
 /// operations.
 TabulatedSpaceGroupGenerator::TabulatedSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
                                                            const std::string &generatorInformation)

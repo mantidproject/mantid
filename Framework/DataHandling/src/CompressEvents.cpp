@@ -49,7 +49,7 @@ void CompressEvents::init() {
                   "The tolerance on each event's X value (normally TOF, but may be a "
                   "different unit if you have used ConvertUnits).\n"
                   "Any events within Tolerance will be summed into a single event. When compressing where positive is "
-                  "linear tolerance, negative is logorithmic tolerance, and zero indicates that time-of-flight must be "
+                  "linear tolerance, negative is logarithmic tolerance, and zero indicates that time-of-flight must be "
                   "identical to compress.");
 
   declareProperty(
@@ -116,7 +116,7 @@ void CompressEvents::exec() {
     addTimer("sortByTOF", timerStart, std::chrono::high_resolution_clock::now());
   }
 
-  // created required variables if using unsorted methdo
+  // created required variables if using unsorted method
   auto histogram_bin_edges = std::make_shared<std::vector<double>>();
   size_t num_edges{0};
   if (!compressFat && !sortFirst && !(inputWS->getSortType() == TOF_SORT)) {

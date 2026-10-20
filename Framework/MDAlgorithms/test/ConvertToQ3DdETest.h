@@ -91,7 +91,7 @@ public:
     // clear stuff from analysis data service for test to work in specified way
     AnalysisDataService::Instance().remove("EnergyTransfer4DWS");
 
-    TSM_ASSERT_THROWS_NOTHING("the inital is not in the units of energy transfer",
+    TSM_ASSERT_THROWS_NOTHING("the initial is not in the units of energy transfer",
                               pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "Q3D"));
@@ -99,7 +99,7 @@ public:
 
     pAlg->execute();
     if (!pAlg->isExecuted()) {
-      TSM_ASSERT("have not executed convertToMD without min-max limits specied ", false);
+      TSM_ASSERT("have not executed convertToMD without min-max limits specified ", false);
       return;
     }
 
@@ -129,7 +129,7 @@ public:
     // clear stuff from analysis data service for test to work in specified way
     AnalysisDataService::Instance().remove("EnergyTransfer4DWS");
 
-    TSM_ASSERT_THROWS_NOTHING("the inital is not in the units of energy transfer",
+    TSM_ASSERT_THROWS_NOTHING("the initial is not in the units of energy transfer",
                               pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer5DWS"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "Q3D"));
@@ -138,7 +138,7 @@ public:
 
     pAlg->execute();
     if (!pAlg->isExecuted()) {
-      TSM_ASSERT("have not executed convertToMD without min-max limits specied ", false);
+      TSM_ASSERT("have not executed convertToMD without min-max limits specified ", false);
       return;
     }
 
@@ -184,7 +184,7 @@ public:
     //  pAlg->setRethrows(true);
     pAlg->execute();
     if (!pAlg->isExecuted()) {
-      TSM_ASSERT("have not executed convertToMD with only min limits specied ", false);
+      TSM_ASSERT("have not executed convertToMD with only min limits specified ", false);
       return;
     }
 
@@ -206,7 +206,7 @@ public:
     }
   }
   void testExecFine() {
-    // create model processed workpsace with 10x10 cylindrical detectors, 10
+    // create model processed workspace with 10x10 cylindrical detectors, 10
     // energy levels and oriented lattice
     Mantid::API::MatrixWorkspace_sptr ws2D =
         WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100, 10, true);
@@ -227,7 +227,7 @@ public:
     TSM_ASSERT("Should be successful ", pAlg->isExecuted());
   }
   void testExecAndAdd() {
-    // create model processed workpsace with 10x10 cylindrical detectors, 10
+    // create model processed workspace with 10x10 cylindrical detectors, 10
     // energy levels and oriented lattice
     Mantid::API::MatrixWorkspace_sptr ws2D =
         WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100, 10, true);
@@ -249,7 +249,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MaxValues", " 50., 50., 50, 20"));
 
     pAlg->execute();
-    TSM_ASSERT("Should succseed as adding should work fine ", pAlg->isExecuted());
+    TSM_ASSERT("Should succeed as adding should work fine ", pAlg->isExecuted());
   }
 
   // check the results;
@@ -269,7 +269,7 @@ public:
 
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
-    TSM_ASSERT_THROWS_NOTHING("the inital is not in the units of energy transfer",
+    TSM_ASSERT_THROWS_NOTHING("the initial is not in the units of energy transfer",
                               pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
@@ -285,7 +285,7 @@ public:
   }
 
   void testWithExistingLatticeTrowsLowEnergy() {
-    // create model processed workpsace with 10x10 cylindrical detectors, 10
+    // create model processed workspace with 10x10 cylindrical detectors, 10
     // energy levels and oriented lattice
     Mantid::API::MatrixWorkspace_sptr ws2D =
         WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100, 10, true);
@@ -315,7 +315,7 @@ public:
     auto childAlg = AlgorithmManager::Instance().create("ConvertUnits");
     TSM_ASSERT("Can not initialize Mantid algorithm framework", childAlg);
     if (!childAlg) {
-      throw(std::runtime_error("Can not initalize/Load MantidAlgorithm dll"));
+      throw(std::runtime_error("Can not initialize/Load MantidAlgorithm dll"));
     }
   }
 };

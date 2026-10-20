@@ -201,7 +201,7 @@ class LoadDNSLegacy(PythonAlgorithm):
 
             epp_user = self.getProperty("ElasticChannel").value
 
-            # for comissioning period EPP in the data file is not relevant
+            # for commissioning period EPP in the data file is not relevant
             in_comissioning = self.tof_comissioning
             if (epp_user < 1) and (in_comissioning == "no") and metadata.tof_elastic_channel:
                 epp_user = metadata.tof_elastic_channel

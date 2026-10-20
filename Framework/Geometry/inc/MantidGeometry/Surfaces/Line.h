@@ -29,12 +29,12 @@ class Sphere;
 
 /**
 \class Line
-\brief Impliments a line
+\brief Implements a line
 \author S. Ansell
 \date Apr 2005
 \version 0.7
 
-Impliments the line
+Implements the line
 \f[ r=\vec{O} + \lambda \vec{n} \f]
 ChangeLog:
 22.04.2008: Sri,  Missing MANTID_GEOMETRY_DLL and Destructor was virtual it's
@@ -67,7 +67,7 @@ public:
   int intersect(PType &, const Sphere &) const;
 
 private:
-  Kernel::V3D m_origin;    ///< Orign point (on plane)
+  Kernel::V3D m_origin;    ///< Origin point (on plane)
   Kernel::V3D m_direction; ///< Direction of outer surface (Unit Vector)
 
   int lambdaPair(const int ix, const std::pair<std::complex<double>, std::complex<double>> &SQ, PType &PntOut) const;

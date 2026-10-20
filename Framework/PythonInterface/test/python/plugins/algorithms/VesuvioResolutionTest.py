@@ -18,7 +18,7 @@ class VesuvioResolutionTest(unittest.TestCase):
 
     def test_basic_resolution(self):
         """
-        Tests a baisc run of the algorithm.
+        Tests a basic run of the algorithm.
         """
 
         tof, ysp = VesuvioResolution(Workspace=self._sample_ws, Mass=1.0079)

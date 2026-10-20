@@ -190,7 +190,7 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
         self.assertEqual(data1.getSignalArray().max(), 16)
         self.assertEqual(data1.getErrorSquaredArray().max(), 16)
 
-        # normlise by time, data 2 seconds
+        # normalise by time, data 2 seconds
         data2 = HB3AAdjustSampleNorm(
             InputWorkspaces=self._input_ws, OutputWorkspace="__hb3a_detector_time", OutputType="Detector", NormaliseBy="Time"
         )
@@ -214,7 +214,7 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
         self.assertAlmostEqual(data4.getSignalArray().max(), 16 / 25)
         self.assertAlmostEqual(data4.getErrorSquaredArray().max(), (16 / 25) ** 2 * (1 / 16 + 1 / 25))
 
-        # normlise by time, data 2 seconds
+        # normalise by time, data 2 seconds
         data5 = HB3AAdjustSampleNorm(
             InputWorkspaces=self._input_ws,
             VanadiumWorkspace=mtd[self._van_ws],

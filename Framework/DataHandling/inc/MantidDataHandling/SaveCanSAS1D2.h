@@ -35,7 +35,7 @@ the files be written iostream functions outside xml libraries.
 The second version of CanSAS1D implements the version 1.1, whose schema is found
 at
 http://www.cansas.org/formats/1.1/cansas1d.xsd. See the tutorial for more
-infomation
+information
 about: http://www.cansas.org/svn/1dwg/trunk/doc/cansas-1d-1_1-manual.pdf.
 
 The first version of SaveCanSAS1D implemented the version 1.0 of CanSAS.
@@ -50,7 +50,7 @@ So, the SaveCanSAS1D2 will extend SaveCanSAS1D in the following:
    - TransmissionCan - The workspace for the transmission can
  - Extension of the SaveCanSAS1D2::init method in order to introduce these
 workspaces properties.
- - Overide the SaveCanSAS1D2::createSASRootElement to conform the new header.
+ - Override the SaveCanSAS1D2::createSASRootElement to conform the new header.
  - Introduction of the method to deal with the new element:
 SaveCanSAS1D2::createSASTransElement.
  - Override the SaveCanSAS1D2::exec method to introduce this new element when

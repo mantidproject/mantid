@@ -481,7 +481,7 @@ void LoadNexusProcessed::exec() {
 
         /*
         For multiperiod workspaces we can accelerate the loading by making
-        resonable assumptions about the differences between the workspaces
+        reasonable assumptions about the differences between the workspaces
         Only Y, E and log data entries should vary. Therefore we can clone our
         temp workspace, and overwrite those things we are interested in.
         */
@@ -519,7 +519,7 @@ void LoadNexusProcessed::exec() {
   if (nWorkspaceEntries == 1 || !bDefaultEntryNumber) {
     loadNexusGeometry(*getValue<API::Workspace_sptr>("OutputWorkspace"), static_cast<size_t>(entryNumber), g_log,
                       std::string(getProperty("Filename")));
-    // NOTE: if this is a specialworkspace2d there are some additonal initialization steps that need to happen
+    // NOTE: if this is a specialworkspace2d there are some additional initialization steps that need to happen
     // such as updating the detector id mapping
     // as this is skipped by initializing the workspace and injecting values.
     std::shared_ptr<SpecialWorkspace2D> specialLocalWorkspace =
@@ -919,7 +919,7 @@ void LoadNexusProcessed::loadVectorColumn(const NXData &tableData, const std::st
     const size_t rowCount = info.dims[0];
     const size_t blockSize = info.dims[1];
 
-    // This might've been done already, but doing it twice should't do any harm
+    // This might've been done already, but doing it twice shouldn't do any harm
     tableWs->setRowCount(rowCount);
 
     data.load();
@@ -2208,7 +2208,7 @@ void LoadNexusProcessed::readBinMasking(const NXData &wksp_cls, const API::Matri
  * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a
  * given
  * blocksize. This assumes that the
- * xbins have alread been cached
+ * xbins have already been cached
  * @param data :: The NXDataSet object of y values
  * @param errors :: The NXDataSet object of error values
  * @param farea :: The NXDataSet object of fraction area values
@@ -2283,7 +2283,7 @@ void LoadNexusProcessed::loadBlock(NXDouble &data, NXDouble &errors, NXDouble &f
  * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a
  * given
  * blocksize. This assumes that the
- * xbins have alread been cached
+ * xbins have already been cached
  * @param data :: The NXDataSet object of y values
  * @param errors :: The NXDataSet object of error values
  * @param farea :: The NXDataSet object of fraction area values

@@ -531,7 +531,7 @@ std::vector<double> ChebfunBase::calcA(const std::vector<double> &p) const {
 
 /**
  * Calculate function values at chebyshev points given chebyshev
- * expansion coefficiens (inverse of calcA()).
+ * expansion coefficients (inverse of calcA()).
  * @param a :: Chebyshev expansion coefficients.
  * @return Function values.
  */
@@ -752,7 +752,7 @@ std::vector<double> ChebfunBase::smooth(const std::vector<double> &xvalues, cons
 
   std::vector<double> powerSpec(n);
   assert(powerSpec.size() == n);
-  // convert the a-coeffs to power spectrum wich is the base of the Wiener
+  // convert the a-coeffs to power spectrum which is the base of the Wiener
   // filter
   std::transform(a.begin(), a.end(), powerSpec.begin(), AbsValue);
 

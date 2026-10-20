@@ -147,7 +147,7 @@ def calibrateMerlin(filename):
     )
     analisePeakTable(peakTable, "door1to7_peaks")
 
-    # The door 3 is a special case, because it is composed by diffent kind of tubes.
+    # The door 3 is a special case, because it is composed by different kind of tubes.
     # door 3 tubes: 5_8, 5_7, 5_6, 5_5, 5_4, 5_3, 5_2, 5_1, 4_8, 4_7, 4_6, 4_5, 4_4, 4_3, 4_2, 4_1, 3_8, 3_7, 3_6, 3_5, 3_4
     # obeys the same rules as the doors 7, 6, 5, 4, 2, 1
     # For the tubes 3_3, 3_2, 3_1 -> it is better to skip the central peak
@@ -174,7 +174,7 @@ def calibrateMerlin(filename):
     # to the center of the upper tube as origin is necessary to subtract them with  the half_diff_center
     doorpos = knownPositions[[5, 6, 7, 8]] - half_diff_center
     doorfunc = [1, 1, 2, 2]
-    # for the smal tubes, automatically searching for the peak position in pixel was not working quite well,
+    # for the small tubes, automatically searching for the peak position in pixel was not working quite well,
     # so we will give the approximate position for these tubes through fitPar argument
     fitPar = TubeCalibFitParams([216, 527, 826, 989])
     fitPar.setAutomatic(True)
@@ -191,7 +191,7 @@ def calibrateMerlin(filename):
     doorpos = knownPositions[[0, 1, 2, 3]] + half_diff_center
     doorfunc = [2, 2, 1, 1]
 
-    # for the smal tubes, automatically searching for the peak position in pixel was not working quite well,
+    # for the small tubes, automatically searching for the peak position in pixel was not working quite well,
     # so we will give the approximate position for these tubes through fitPar argument
     fitPar = TubeCalibFitParams([50, 202, 664, 815])
     fitPar.setAutomatic(True)

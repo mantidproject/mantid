@@ -431,7 +431,7 @@ RectF UnwrappedSurface::getSurfaceBounds() const {
 }
 
 /**
- * Set a peaks workspace to be drawn ontop of the workspace.
+ * Set a peaks workspace to be drawn on top of the workspace.
  * @param pws :: A shared pointer to the workspace.
  */
 void UnwrappedSurface::setPeaksWorkspace(const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws) {

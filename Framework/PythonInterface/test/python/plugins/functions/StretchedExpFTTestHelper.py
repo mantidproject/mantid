@@ -109,7 +109,7 @@ def do_fit(tg, fString, shape):
             rf = 100  # make the energy domain a grid 100 times finer
             efine = np.arange(E[0] - de, E[-1] + 2 * de, de / rf)
             values = functor(efine)  # evaluate on the finer grid
-            primitive = np.cumsum(values) / rf  # cummulative sum, giving the integral
+            primitive = np.cumsum(values) / rf  # cumulative sum, giving the integral
             # bb are bin boundaries delimiting bins of width de and centered at the E values
             bb = (E[1:] + E[:-1]) / 2  # internal bin boundaries
             bb = np.insert(bb, 0, 2 * E[0] - bb[0])  # external lower bin boundary

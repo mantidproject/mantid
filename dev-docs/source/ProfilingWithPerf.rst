@@ -6,7 +6,7 @@ Profiling with perf
 ===================
 
 Perf is a tool designed for use with the linux kernel, but can be used to profile user apps as well.
-It is available on all linuxes, but requries root permission to enable.
+It is available on all linuxes, but requires root permission to enable.
 Much of this information was originally gained from `Nick Tompson's Performance Tuning Tutorail <https://github.com/NAThompson/performance_tuning_tutorial>`_ held at Oak Ridge National Laboratory.
 
 .. note::

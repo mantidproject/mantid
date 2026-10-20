@@ -524,7 +524,7 @@ class VesuvioCorrections(VesuvioBase):
             # obtained by iterative numerical solution of the Eq:
             # 1-exp(-n*dens*sigma) = measured scattering power of the sample.
             # For this, a program like THICK must be used.
-            # The program THICK also uses sigma/int_sum to be consistent with the prgram
+            # The program THICK also uses sigma/int_sum to be consistent with the program
             # DINSMS_BATCH
 
             width_prop = "f%d.Width" % i
@@ -591,7 +591,7 @@ class VesuvioCorrections(VesuvioBase):
         # obtained by iterative numerical solution of the Eq:
         # 1-exp(-n*dens*sigma) = measured scattering power of the sample.
         # For this, a program like THICK must be used.
-        # The program THICK also uses sigma/int_sum to be consistent with the prgram DINSMS_BATCH
+        # The program THICK also uses sigma/int_sum to be consistent with the program DINSMS_BATCH
         # The algorithm VesuvioCalculateMs called by the algorithm VesuvioCorrections takes the
         # parameter AtomicProperties with the absolute intensities, contraty to DINSMS_BATCH which
         # takes in relative intensities.

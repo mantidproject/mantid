@@ -64,7 +64,7 @@ def unique_workspace_name(n: int = 5, prefix: Optional[str] = "", suffix: Option
 
 def temp_workspace_generator(temp_workspaces):
     r"""
-    Create a funtion that serve a unique workspace name and position it to be later deleted
+    Create a function that serve a unique workspace name and position it to be later deleted
 
     @param temp_workspaces :: list of workspaces to be deleted after algorithm has finished
 
@@ -392,7 +392,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         # Create a WorkspaceGroup with the orientation diagnostics
         GroupWorkspaces(InputWorkspaces=adjustment_diagnostics, OutputWorkspace=prefix_output + "bank_adjustment_diagnostics")
 
-        # clean up at the end (only happens if algorithm completes sucessfully)
+        # clean up at the end (only happens if algorithm completes successfully)
         [DeleteWorkspace(name) for name in temporary_workspaces if AnalysisDataService.doesExist(name)]
 
     def run_algorithm(self, name: str, start_progress: float, end_progress: float, soft_crash=True, **kwargs):

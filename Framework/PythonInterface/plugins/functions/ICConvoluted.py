@@ -101,7 +101,7 @@ class IkedaCarpenterConvoluted(IFunction1D):
 
         return f_int
 
-    # Evaluate the function for a differnt set of paremeters (trialc)
+    # Evaluate the function for a different set of parameters (trialc)
     def function1DDiffParams(self, xvals, trialc):
         # First, grab the original parameters and set to trialc
         c = np.zeros(self.numParams())
@@ -112,7 +112,7 @@ class IkedaCarpenterConvoluted(IFunction1D):
         # Get the trial values
         f_trial = self.function1D(xvals)
 
-        # Now return to the orignial
+        # Now return to the original
         for i in range(self.numParams()):
             self.setParameter(i, c[i])
         return f_trial

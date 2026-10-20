@@ -255,7 +255,7 @@ void CrossCorrelate::exec() {
     const double normalisation = referenceNorm * tempNorm;
     const double normalisationE2 = pow((referenceNorm * tempNormE), 2) + pow((tempNorm * referenceNormE), 2);
 
-    // Get referenceSpectr to the ouput spectrum
+    // Get referenceSpectr to the output spectrum
     auto &outY = out->mutableY(currentSpecIndex_szt);
     auto &outE = out->mutableE(currentSpecIndex_szt);
 

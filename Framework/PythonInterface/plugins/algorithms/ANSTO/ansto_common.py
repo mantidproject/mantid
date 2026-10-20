@@ -427,7 +427,7 @@ def hdf_files_from_runs(all_runs: str, search_dirs: List[str], file_prefix: str,
 def extract_hdf_params(fpath: str, tags: List[HdfKey]) -> Tuple[Dict[str, Any], Dict[str, Dict[str, str]]]:
     # gets the parameters from the base file to be able to complete the setup
     # such as, doppler amplitude and speed
-    # if the hdf parameter is mssing and no default is provide an
+    # if the hdf parameter is missing and no default is provide an
     # exception is raised
 
     values = {}
@@ -556,7 +556,7 @@ class FilterPixelsTubes:
                 evl.clear(False)
 
     def _finalise_and_mask(self, ws_tag: str, output_ws: str):
-        # mask the spectra, exlicitly convert numpy.int32 to int as MaskDetectors fails
+        # mask the spectra, explicitly convert numpy.int32 to int as MaskDetectors fails
         mask = np.invert(self._include)
         masked_spectra = [int(x) for x in np.arange(self._nhist)[mask]]
         MaskDetectors(Workspace=ws_tag, SpectraList=masked_spectra)
@@ -584,7 +584,7 @@ class ScratchFolder:
     to the scratch folder as a nexus file. If it needs to be reloaded it looks for
     an existing nexus file first.
     When a merged file is saved to the scratch folder the loader options are
-    appended to the run log. A merged file is successfuly restored if the loader
+    appended to the run log. A merged file is successfully restored if the loader
     options match.
     """
 
@@ -1000,7 +1000,7 @@ def fractional_map(
     for grid, base_pixel in zip(grids, base_pixels):
         # Note the mapping from pixel to theta, q, q**2 is a smooth function
         # it is reasonable to use a cubic interpolation of the map.
-        # However, the current 2D spline implementaions from scipy only provide
+        # However, the current 2D spline implementations from scipy only provide
         # nearest neighbour extrapolation. To handle the edge points the extrapolation
         # is handled manually before the
 

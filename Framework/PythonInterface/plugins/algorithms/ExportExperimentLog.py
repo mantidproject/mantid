@@ -34,7 +34,7 @@ class ExportExperimentLog(PythonAlgorithm):
     _headerTitles = None
     _filemode = None
 
-    def summmary(self):
+    def summary(self):
         return "Exports experimental log."
 
     def category(self):
@@ -323,7 +323,7 @@ class ExportExperimentLog(PythonAlgorithm):
             if skip is False:
                 headertitle = self._headerTitles[il]
             if headertitle is not None and headertitle in self._ovrdTitleValueDict.keys():
-                # overriden
+                # overridden
                 value = self._ovrdTitleValueDict[headertitle]
 
             else:

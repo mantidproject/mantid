@@ -159,12 +159,12 @@ template <typename MDE, size_t nd> void SaveMD::doSaveEvents(typename MDEventWor
           // do not spend time on empty or masked boxes
           if (boxe->getDataInMemorySize() == 0 || boxe->getIsMasked())
             continue;
-          // save boxes directly using the boxes file postion, precalculated in boxFlatStructure.
+          // save boxes directly using the boxes file position, precalculated in boxFlatStructure.
           saveableTag->save();
           // remove boxes data from memory. This will actually correctly set the
           // tag indicating that data were not loaded.
           saveableTag->clearDataFromMemory();
-          // put boxes into write buffer wich will save them when necessary
+          // put boxes into write buffer which will save them when necessary
           // Saver->toWrite(saveTag);
           prog->report("Saving Box");
         }

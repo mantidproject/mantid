@@ -160,7 +160,7 @@ public:
   /// vales.
   virtual size_t insertRow(size_t index) = 0;
 
-  /// Delets a row if it exists.
+  /// Deletes a row if it exists.
   virtual void removeRow(size_t index) = 0;
 
   /// Appends a row.
@@ -314,7 +314,7 @@ private:
 
 // =====================================================================================
 /** @class ColumnVector
-     ColumnVector gives access to the column elements without alowing its
+     ColumnVector gives access to the column elements without allowing its
    resizing.
      Created by TableWorkspace::getVector(...)
  */
@@ -349,7 +349,7 @@ private:
 };
 
 /** @class ConstColumnVector
-     ConstColumnVector gives const access to the column elements without alowing
+     ConstColumnVector gives const access to the column elements without allowing
    its resizing.
      Created by TableWorkspace::getVector(...)
  */

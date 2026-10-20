@@ -243,7 +243,7 @@ void LoadSpiceXML2DDet::processInputs() {
   m_idfFileName = getPropertyValue("InstrumentFilename");
   m_detSampleDistanceShift = getProperty("ShiftedDetectorDistance");
 
-  // Retreive sample environment data from SPICE scan table workspace
+  // Retrieve sample environment data from SPICE scan table workspace
   std::string spicetablewsname = getPropertyValue("SpiceTableWorkspace");
   if (!spicetablewsname.empty())
     m_hasScanTable = true;
@@ -882,7 +882,7 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(const MatrixWorkspace_sptr 
 
   bool foundlog = false;
   for (size_t ir = 0; ir < numrows; ++ir) {
-    // loop over the table workspace to find the row of the spcified pt number
+    // loop over the table workspace to find the row of the specified pt number
     int localpt = spicetablews->cell<int>(ir, 0);
     if (localpt != ptnumber)
       continue;

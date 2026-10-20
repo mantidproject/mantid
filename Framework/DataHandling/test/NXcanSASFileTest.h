@@ -65,7 +65,7 @@ protected:
     // beam height
     assertNumArrDataSet(aperture, sasInstrumentApertureGapHeight, beamHeight, "Beam height should match.");
     // beam width
-    assertNumArrDataSet(aperture, sasInstrumentApertureGapWidth, beamWidth, "Beam witdh should match.");
+    assertNumArrDataSet(aperture, sasInstrumentApertureGapWidth, beamWidth, "Beam width should match.");
   }
 
   void do_assert_detector(const H5::Group &instrument, const std::vector<std::string> &detectors) {
@@ -287,7 +287,7 @@ protected:
     assertMDNumArrEntries(qDataSet, size, reference, offset);
 
     // qy
-    // indices are swaped storing qy
+    // indices are swapped storing qy
     qDataSet = data.openDataSet(sasDataQ + "y");
     std::generate(reference.begin(), reference.end(), [i = 1]() mutable { return i++; });
     assertMDNumArrEntries(qDataSet, size, reference, offset);

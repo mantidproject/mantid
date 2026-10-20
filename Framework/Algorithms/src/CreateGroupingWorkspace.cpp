@@ -420,7 +420,7 @@ std::map<detid_t, int> makeGroupingByNumGroups(const std::string &compName, int 
                                                const Instrument_const_sptr &inst, Progress &prog) {
   std::map<detid_t, int> detIDtoGroup;
 
-  // Get detectors for given instument component
+  // Get detectors for given instrument component
   std::vector<IDetector_const_sptr> detectors;
   inst->getDetectorsInBank(detectors, compName);
   size_t numDetectors = detectors.size();

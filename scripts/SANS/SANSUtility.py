@@ -212,7 +212,7 @@ def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
             # to get an obtruse angle, a wedge that's more than half the area, we need to add the semi-inifinite volumes
             xmldef += '<algebra val="#(pla:pla2)" />'
         else:
-            # an acute angle, wedge is more less half the area, we need to use the intesection of those semi-inifinite volumes
+            # an acute angle, wedge is more less half the area, we need to use the intersection of those semi-inifinite volumes
             xmldef += '<algebra val="#(pla pla2)" />'
 
     MaskDetectorsInShape(Workspace=workspace, ShapeXML=xmldef)
@@ -1409,7 +1409,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
                 run = workspace.getRun()
                 prop = run.getProperty(element)
                 prop.clear()
-                # Get the cummulated values and times
+                # Get the cumulated values and times
                 times, values = self._get_cummulative_sample_logs(element)
                 self._populate_property(prop, times, values, self._type_map[element])
 
@@ -1457,7 +1457,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
         # Now merge and sort the two entries
         time_merged, value_merged = self._create_merged_values_and_times(times_lhs, values_raw_lhs, times_rhs, values_raw_rhs)
 
-        # Create cummulated values
+        # Create cumulated values
         time_final = time_merged
         value_final = self._create_cummulated_values(value_merged)
 
@@ -1465,7 +1465,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
 
     def _create_cummulated_values(self, values):
         """
-        Creates cummulated values
+        Creates cumulated values
         :param time: a time array
         :param value: a value array which is the basis for the accumulation
         """

@@ -78,7 +78,7 @@ std::string cleanse_comments(const std::string &l) {
   return l.substr(0, commentBegin);
 }
 
-/// Removes whitspace from 'l'.
+/// Removes whitespace from 'l'.
 void cleanse_whitespace(std::string &l) { l.erase(std::remove_if(l.begin(), l.end(), isspace), l.end()); }
 
 /// Returns true if `l` contains the limits array.

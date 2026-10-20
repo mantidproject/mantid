@@ -87,7 +87,7 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name, const std::v
 
 /**
  * Check if this property is optional
- * @returns True if the property is optinal, false otherwise
+ * @returns True if the property is optional, false otherwise
  */
 bool MultipleFileProperty::isOptional() const { return (m_action == FileProperty::OptionalLoad); }
 
@@ -116,7 +116,7 @@ std::string MultipleFileProperty::isEmptyValueValid() const {
  */
 std::string MultipleFileProperty::setValue(const std::string &propValue) {
   // No empty value is allowed, unless optional.
-  // This is yet aditional check that is beyond the underlying
+  // This is yet additional check that is beyond the underlying
   // MultiFileValidator, so isOptional needs to be inspected here as well
   if (propValue.empty() && !isOptional())
     return "No file(s) specified.";

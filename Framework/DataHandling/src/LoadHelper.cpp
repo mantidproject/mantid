@@ -94,7 +94,7 @@ double LoadHelper::calculateEnergy(double wavelength) {
  */
 double LoadHelper::calculateTOF(double distance, double wavelength) {
   if (wavelength <= 0) {
-    throw std::runtime_error("Wavelenght is <= 0");
+    throw std::runtime_error("Wavelength is <= 0");
   }
 
   double velocity = PhysicalConstants::h / (PhysicalConstants::NeutronMass * wavelength * 1e-10); // m/s
@@ -303,7 +303,7 @@ std::string LoadHelper::dateTimeInIsoFormat(const std::string &dateToParse) {
   namespace bt = boost::posix_time;
   try {
     // Try to convert to a boost date as an iso string. If it works, we are already in ISO and no conversion is
-    // requiered.
+    // required.
     bt::from_iso_extended_string(dateToParse);
     return dateToParse;
 

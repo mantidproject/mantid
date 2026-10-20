@@ -113,7 +113,7 @@ protected:
   /// Holds a copy of the names of the fitting parameters
   std::vector<std::string> m_parameterNames;
 
-  /// Number of parameters (incuding fixed).
+  /// Number of parameters (including fixed).
   size_t nParams() const { return m_parameterNames.size(); }
 
   friend struct FitData;

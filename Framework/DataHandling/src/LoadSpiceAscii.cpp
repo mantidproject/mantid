@@ -175,7 +175,7 @@ bool LoadSpiceAscii::validateLogNamesType(const std::vector<std::string> &floatl
   vec_lognamelist.emplace_back(intlognames);
   vec_lognamelist.emplace_back(strlognames);
 
-  // Check whther there is any intersction among 3 sets
+  // Check whether there is any intersction among 3 sets
   bool hascommon = false;
   for (size_t i = 0; i < 3; ++i)
     for (size_t j = i + 1; j < 3; ++j) {

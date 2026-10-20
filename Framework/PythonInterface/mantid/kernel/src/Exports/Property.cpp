@@ -87,7 +87,7 @@ PyObject *unitAsUnicode(const Property &self) {
 
 /**
  * Return the units string as a Python bytes object. Provides access
- * to the raw bytes in case the standar .units conversion fails with an decoding
+ * to the raw bytes in case the standard .units conversion fails with an decoding
  * error
  */
 PyObject *unitsAsBytes(const Property &self) { return PyBytes_FromString(self.units().c_str()); }
@@ -168,7 +168,7 @@ void export_Property() {
 
       .add_property("unitsAsBytes", &unitsAsBytes,
                     "The units attached to this property as a encoded bytes object. It "
-                    "is assumed the caller knows the correct endcoding used.")
+                    "is assumed the caller knows the correct encoding used.")
 
       .add_property("value", &Property::value, &Property::setValue,
                     "The value of the property. For a generic property, equivalent to valueAsStr.")

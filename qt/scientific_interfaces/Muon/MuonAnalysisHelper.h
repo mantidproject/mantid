@@ -167,7 +167,7 @@ private slots:
   void saveWidgetValue();
 
 private:
-  /// Return a signal (which can be used instead of SIGNAL()) which is emmited
+  /// Return a signal (which can be used instead of SIGNAL()) which is emitted
   /// when given widget is changed
   const char *changedSignal(QWidget *widget);
 

@@ -38,7 +38,7 @@ public:
 
   void testPopulate() {
     AlgorithmHistory AH = createTestHistory();
-    // dump output to sting
+    // dump output to string
     std::ostringstream output;
     output.exceptions(std::ios::failbit | std::ios::badbit);
     TS_ASSERT_THROWS_NOTHING(output << AH);
@@ -202,7 +202,7 @@ private:
     std::tm *timeinfo = new std::tm;
     timeinfo->tm_isdst = -1;
 
-    /* The datetime must match that in the strng above */
+    /* The datetime must match that in the string above */
     std::time(&rawtime);
     timeinfo->tm_year = 108;
     timeinfo->tm_mon = 1;

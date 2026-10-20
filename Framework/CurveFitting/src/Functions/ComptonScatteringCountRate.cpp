@@ -128,7 +128,7 @@ struct BkgdNorm2 {
 } // namespace
 
 /**
- * Calculates the new values for the intensity coefficents
+ * Calculates the new values for the intensity coefficients
  */
 void ComptonScatteringCountRate::iterationStarting() {
   /**
@@ -206,7 +206,7 @@ void ComptonScatteringCountRate::updateCMatrixValues() const {
   }
   // Using different minimizer for background constraints as the original is not
   // stable
-  // The background one requires the contraints are specified as <= 0
+  // The background one requires the constraints are specified as <= 0
   if (m_bkgdPolyN > 0) {
     m_cmatrix *= -1.0;
   }

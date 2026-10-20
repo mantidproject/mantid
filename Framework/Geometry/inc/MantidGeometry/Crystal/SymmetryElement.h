@@ -144,7 +144,7 @@ using SymmetryElementWithAxis_sptr = std::shared_ptr<SymmetryElementWithAxis>;
     rotation sense, these will be set to default values ((0,0,0) and positive
     rotation sense).
 
-    Symbol determination is perfomed by SymmetryElementRotationGenerator, which
+    Symbol determination is performed by SymmetryElementRotationGenerator, which
     uses the SymmetryOperation to derive the Herrman-Mauguin symbol.
  */
 class MANTID_GEOMETRY_DLL SymmetryElementRotation : public SymmetryElementWithAxis {
@@ -171,7 +171,7 @@ using SymmetryElementRotation_sptr = std::shared_ptr<SymmetryElementRotation>;
     inherited from SymmetryElementWithAxis is perpendicular to the actual
     mirror-plane. The translation is (0,0,0) by default.
 
-    Symbol determination is perfomed by SymmetryElementMirrorGenerator, which
+    Symbol determination is performed by SymmetryElementMirrorGenerator, which
     uses the SymmetryOperation to derive the Herrman-Mauguin symbol.
  */
 class MANTID_GEOMETRY_DLL SymmetryElementMirror : public SymmetryElementWithAxis {

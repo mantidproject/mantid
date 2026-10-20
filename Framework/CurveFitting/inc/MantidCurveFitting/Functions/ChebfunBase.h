@@ -44,7 +44,7 @@ If it fails to find an n smaller than some maximum number it returns
 an empty shared pointer.
 
 Knowing the vector of the function values (P) at the n+1 base x-points and the
-related vector of the Chebyshev expansion coefficients (A) (claculated
+related vector of the Chebyshev expansion coefficients (A) (calculated
 by calcA(...) method) allows one to perform various manipulations on
 the approximation:
   - algebraic operations: +,-,*,/
@@ -57,7 +57,7 @@ the approximation:
   - etc
 
 This class doesn't represent a function approximation itself but keeps
-proerties that can be shared by multiple approximations.
+properties that can be shared by multiple approximations.
 
 This class is based on the ideas from the Chebfun matlab package
 (http://www.chebfun.org/).
@@ -131,7 +131,7 @@ public:
   std::vector<double> smooth(const std::vector<double> &xvalues, const std::vector<double> &yvalues) const;
 
 private:
-  /// Private assingment operator to stress the immutability of ChebfunBase.
+  /// Private assignment operator to stress the immutability of ChebfunBase.
   ChebfunBase &operator=(const ChebfunBase &other) = delete;
   ChebfunBase &operator=(ChebfunBase &&other) = delete;
   /// Calculate the x-values based on the (start,end) interval.

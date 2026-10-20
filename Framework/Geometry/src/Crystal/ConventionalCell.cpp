@@ -89,7 +89,7 @@ Kernel::DblMatrix ConventionalCell::GetNewUB() const { return Kernel::DblMatrix(
  *  Get a copy of the transform that maps the original HKL values to new
  *  HKL values corresponding to the conventional cell.
  *
- *  @return  a 3x3 matrix with the HKL tranformation.
+ *  @return  a 3x3 matrix with the HKL transformation.
  */
 Kernel::DblMatrix ConventionalCell::GetHKL_Tran() const { return Kernel::DblMatrix(hkl_tran); }
 

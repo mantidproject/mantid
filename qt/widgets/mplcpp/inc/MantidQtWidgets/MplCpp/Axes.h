@@ -30,7 +30,7 @@ public:
 /**
  * Provides access to a matplotlib.Axes instance. The raw Python object
  * can be retrieved but convenient C++ methods are provided for use
- * in simplfying common operations.
+ * in simplifying common operations.
  */
 class MANTID_MPLCPP_DLL Axes : public Common::Python::InstanceHolder {
 public:

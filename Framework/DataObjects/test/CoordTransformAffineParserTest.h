@@ -54,10 +54,10 @@ public:
     TS_ASSERT_EQUALS(7, product[2][1]);
     TS_ASSERT_EQUALS(8, product[2][2]);
 
-    // Circular check. Acutally hard to debug, but gives certainty that
+    // Circular check. Actually hard to debug, but gives certainty that
     // serialization and deserialization cause no side effects.
-    TSM_ASSERT_EQUALS("Parsing has not occured correctly if the output is not "
-                      "equal to the intput",
+    TSM_ASSERT_EQUALS("Parsing has not occurred correctly if the output is not "
+                      "equal to the input",
                       transform->toXMLString(), xmlToParse);
 
     delete transform;

@@ -61,7 +61,7 @@ template <typename Derived, typename ValType> bool SingleValueParameter<Derived,
 }
 
 //----------------------------------------------------------------
-/* Overloaded assignement operator. Utilises CRTP to peform assignements in
+/* Overloaded assignment operator. Utilises CRTP to perform assignments in
 terms of derived class.
 @param other : object to use as origin for assignment.
 @return Ref to assigned object.

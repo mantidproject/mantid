@@ -774,11 +774,11 @@ public:
   }
 
   /** Divide/Multiply work_in1 by work_in2.
-   * If outputIsEvent is true, check that the ouput is a EventWorkspace.
+   * If outputIsEvent is true, check that the output is a EventWorkspace.
    * If expectedValue and expectedError are specified, look for all data items to be those values.
    *
    * @param algorithmWillCommute :: the algorithm will swap LHS and RHS when calculating.
-   *        Take that into accound when calculating the expected result.
+   *        Take that into account when calculating the expected result.
    *
    */
   MatrixWorkspace_sptr performTest(const MatrixWorkspace_sptr work_in1, const MatrixWorkspace_sptr work_in2,

@@ -51,7 +51,7 @@ def broaden_spectrum(frequencies, bins, s_dft, sigma, scheme="gaussian_truncated
               the results are visually acceptable for a slowly-varying instrumental broadening function, with greatly
               reduced computation time. The default spacing factor of sqrt(2) gives error of ~1%.
         - interpolate_coarse: The approximate interpolative scheme (above) with a spacing factor of 2, which yields
-              error of ~5%. This is more likely to cause artefacts in the results... but it is very fast. Not recomended
+              error of ~5%. This is more likely to cause artefacts in the results... but it is very fast. Not recommended
               for production calculations.
 
     :type scheme: str

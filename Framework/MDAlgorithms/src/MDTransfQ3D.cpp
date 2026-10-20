@@ -10,7 +10,7 @@
 
 namespace Mantid::MDAlgorithms {
 
-// register the class, whith conversion factory under Q3D name
+// register the class, with conversion factory under Q3D name
 DECLARE_MD_TRANSFID(MDTransfQ3D, Q3D)
 
 /** method returns number of matrix dimensions calculated by this class
@@ -26,7 +26,7 @@ unsigned int MDTransfQ3D::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
   case (Kernel::DeltaEMode::Elastic):
     return 3;
   default:
-    throw(std::invalid_argument("Unknow or unsupported energy conversion mode"));
+    throw(std::invalid_argument("Unknown or unsupported energy conversion mode"));
   }
 }
 
@@ -176,7 +176,7 @@ bool MDTransfQ3D::calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) {
   return true;
 }
 
-/** function initalizes all variables necessary for converting workspace
+/** function initializes all variables necessary for converting workspace
  * variables into MD variables in ModQ (elastic/inelastic) cases  */
 void MDTransfQ3D::initialize(const MDWSDescription &ConvParams) {
   m_pEfixedArray = nullptr;
@@ -233,13 +233,13 @@ void MDTransfQ3D::initialize(const MDWSDescription &ConvParams) {
                                  "corrections"));
     }
   }
-  // use detectors masks untill signals are masked by 0 instead of NaN
+  // use detectors masks until signals are masked by 0 instead of NaN
   m_pDetMasks = ConvParams.m_PreprDetTable->getColDataArray<int>("detMask");
   m_AbsMin = ConvParams.absMin();
 }
 /**method returns default ID-s for ModQ elastic and inelastic modes. The ID-s
 are related to the units,
-* this class produces its ouptut in.
+* this class produces its output in.
 *@param dEmode   -- energy conversion mode
 *@param inWS -- Input workspace
 *@return       -- vector of default dimension ID-s for correspondent energy
@@ -272,7 +272,7 @@ std::vector<std::string> MDTransfQ3D::getDefaultDimID(Kernel::DeltaEMode::Type d
   return default_dim_ID;
 }
 
-/**function returns units ID-s which this transformation prodiuces its ouptut.
+/**function returns units ID-s which this transformation prodiuces its output.
  * @param dEmode   -- energy conversion mode
  * @param inWS -- input workspace
  * @return
@@ -283,7 +283,7 @@ std::vector<std::string> MDTransfQ3D::outputUnitID(Kernel::DeltaEMode::Type dEmo
   std::vector<std::string> UnitID = this->getDefaultDimID(dEmode, inWS);
 
   // TODO: is it really momentum transfer, as MomentumTransfer units are seems
-  // bound to elastic mode only (at least accorting to Units description on
+  // bound to elastic mode only (at least according to Units description on
   // Wiki)?
   std::string kUnits("MomentumTransfer");
   if (dEmode == Kernel::DeltaEMode::Elastic)

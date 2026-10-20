@@ -17,7 +17,7 @@ that were masked
 When masking the phi angle the absolute value of phi is used.
 
 The three angle options are subtly different:
-* ``TwoTheta`` is the detector's :math:`2 \theta` value as calcualted from the downstream beam. This is the angle from the pole and not constrained to be in-plane.
+* ``TwoTheta`` is the detector's :math:`2 \theta` value as calculated from the downstream beam. This is the angle from the pole and not constrained to be in-plane.
 * ``Phi`` is the detector's angle with respect to the positive z-axis not constrained to be in-plane. For many geometries this will be the same as the ``TwoTheta`` option.
 * ``InPlane`` is the detector's angle with respect to the positive z-axis constrained within the x-z-plane.
 

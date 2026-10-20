@@ -172,7 +172,7 @@ void DiffractionFocussing::RebinWorkspace(API::MatrixWorkspace_sptr &workspace) 
   calculateRebinParams(workspace, min, max, step);
   std::vector<double> paramArray{min, -step, max};
 
-  g_log.information() << "Rebinning from " << min << " to " << max << " in " << step << " logaritmic steps.\n";
+  g_log.information() << "Rebinning from " << min << " to " << max << " in " << step << " logarithmic steps.\n";
 
   auto childAlg = createChildAlgorithm("Rebin");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);

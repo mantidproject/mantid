@@ -200,7 +200,7 @@ protected:
   bool isBoolAttribute(QtProperty *prop) const;
   /// Check if property is a vector attribute
   bool isVectorAttribute(QtProperty *prop) const;
-  /// Check if property is a function paramater
+  /// Check if property is a function parameter
   bool isParameter(QtProperty *prop) const;
   /// Get attribute as a string
   double getParameter(QtProperty *prop) const;
@@ -231,7 +231,7 @@ protected:
   bool hasTie(QtProperty *prop) const;
   /// Check if a property is a tie
   bool isTie(QtProperty *prop) const;
-  /// Get a tie for a paramater
+  /// Get a tie for a parameter
   QString getTie(QtProperty *prop) const;
 
   /// Add a constraint property

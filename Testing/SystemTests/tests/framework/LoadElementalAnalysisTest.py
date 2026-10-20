@@ -86,7 +86,7 @@ class LoadPartialElementalAnalysisTest(systemtesting.MantidSystemTest):
         detector1_ws = AnalysisDataService.retrieve("2683; Detector 1")
         detectorSpectrumAxis = detector1_ws.getAxis(1)
         self.assertEqual(detectorSpectrumAxis.length(), 3)
-        # Check that the Prompt and Delay Spectra in Dectector 1 workspace do not contain any values
+        # Check that the Prompt and Delay Spectra in Detector 1 workspace do not contain any values
         # and therefore max and min should be 0
         detector1_prompt = detector1_ws.y(0)
         detector1_delay = detector1_ws.y(1)

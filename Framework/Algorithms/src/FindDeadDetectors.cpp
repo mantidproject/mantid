@@ -124,7 +124,7 @@ MatrixWorkspace_sptr FindDeadDetectors::integrateWorkspace() {
 
   auto childAlg = createChildAlgorithm("Integration");
   // Now execute integration.
-  // pass inputed values straight to Integration, checking must be done there
+  // pass inputted values straight to Integration, checking must be done there
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", getProperty("InputWorkspace"));
   childAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", getProperty("OutputWorkspace"));
   childAlg->setProperty<double>("RangeLower", getProperty("RangeLower"));

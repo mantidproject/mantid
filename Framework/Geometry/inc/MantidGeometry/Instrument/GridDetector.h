@@ -92,7 +92,7 @@ public:
   Kernel::V3D getPosAtXYZ(int const x, int const y, int const z) const;
 
   // This should inherit the getBoundingBox implementation from  CompAssembly
-  // but the multiple inheritance seems to confuse it so we'll explicityly tell
+  // but the multiple inheritance seems to confuse it so we'll explicitly tell
   // it that here
   using CompAssembly::getBoundingBox;
 

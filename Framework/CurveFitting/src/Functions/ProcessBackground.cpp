@@ -401,7 +401,7 @@ void ProcessBackground::selectBkgdPoints() {
     throw runtime_error("N/A is not supported.");
   }
 
-  // Fit the background points if output backgrond parameter workspace is given
+  // Fit the background points if output background parameter workspace is given
   // explicitly
   string outbkgdparwsname = getPropertyValue("OutputBackgroundParameterWorkspace");
   if (!outbkgdparwsname.empty() && outbkgdparwsname != "_dummy02") {
@@ -518,7 +518,7 @@ void ProcessBackground::selectFromGivenFunction() {
 /** Select background automatically
  */
 DataObjects::Workspace2D_sptr ProcessBackground::autoBackgroundSelection(const Workspace2D_sptr &bkgdWS) {
-  // Get background type and create bakground function
+  // Get background type and create background function
   BackgroundFunction_sptr bkgdfunction = createBackgroundFunction(m_bkgdType);
 
   int bkgdorder = getProperty("BackgroundOrder");
@@ -533,7 +533,7 @@ DataObjects::Workspace2D_sptr ProcessBackground::autoBackgroundSelection(const W
                       << "-th order " << bkgdfunction->name() << " (background) function" << bkgdfunction->asString()
                       << "\n";
 
-  // Fit input (a few) background pionts to get initial guess
+  // Fit input (a few) background points to get initial guess
   API::IAlgorithm_sptr fit;
   try {
     fit = this->createChildAlgorithm("Fit", 0.0, 0.2, true);
@@ -610,7 +610,7 @@ Workspace2D_sptr ProcessBackground::filterForBackground(const BackgroundFunction
   if (isEmpty(negnoisetolerance))
     negnoisetolerance = posnoisetolerance;
 
-  // Calcualte theoretical values
+  // Calculate theoretical values
   const auto &x = m_dataWS->x(m_wsIndex);
   API::FunctionDomain1DVector domain(x);
   API::FunctionValues values(domain);
@@ -673,7 +673,7 @@ Workspace2D_sptr ProcessBackground::filterForBackground(const BackgroundFunction
 /** Fit background function
  */
 void ProcessBackground::fitBackgroundFunction(const std::string &bkgdfunctiontype) {
-  // Get background type and create bakground function
+  // Get background type and create background function
   BackgroundFunction_sptr bkgdfunction = createBackgroundFunction(bkgdfunctiontype);
 
   int bkgdorder = getProperty("OutputBackgroundOrder");
@@ -691,7 +691,7 @@ void ProcessBackground::fitBackgroundFunction(const std::string &bkgdfunctiontyp
                       << m_outputWS->getNumberHistograms() << " spectra."
                       << "\n";
 
-  // Fit input (a few) background pionts to get initial guess
+  // Fit input (a few) background points to get initial guess
   API::IAlgorithm_sptr fit;
   try {
     fit = this->createChildAlgorithm("Fit", 0.9, 1.0, true);

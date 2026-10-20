@@ -91,7 +91,7 @@ void PolarizationAngleCorrectionMD::exec() {
 
   API::IMDEventWorkspace_sptr output_ws(0);
   if (input_ws->getName() == output_ws_name) {
-    // Calcualte in-place
+    // Calculate in-place
     output_ws = input_ws;
   } else {
     // Clone input workace to output workspace
@@ -191,7 +191,7 @@ void PolarizationAngleCorrectionMD::applyPolarizationAngleCorrection(
           factor = static_cast<float>(1. / cosine2alpha);
         }
 
-        // calcalate and set intesity: I *= F
+        // calculate and set intensity: I *= F
         auto intensity = it->getSignal() * factor;
         it->setSignal(intensity);
 
@@ -277,10 +277,10 @@ std::string PolarizationAngleCorrectionMD::checkInputMDDimension() {
 /**
  * @brief Check whether sample log Ei is validad or not
  * Temperature value can be specified by either property Temperature, or
- * it can be calcualted from sample temperture log in the MDWorkspace
+ * it can be calculated from sample temperature log in the MDWorkspace
  */
 std::string PolarizationAngleCorrectionMD::checkEi(const API::IMDEventWorkspace_sptr &mdws) {
-  // Get temperture sample log name
+  // Get temperature sample log name
   std::string Estring("Ei");
   std::stringstream eiss;
 

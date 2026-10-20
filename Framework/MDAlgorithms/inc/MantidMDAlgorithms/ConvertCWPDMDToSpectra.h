@@ -29,7 +29,7 @@ inline double calculateDspaceFrom2Theta(const double &twotheta, const double &wa
 }
 
 //----------------------------------------------------------------------------------------------
-/** Calcualte detector's 2theta value from d-spacing value
+/** Calculate detector's 2theta value from d-spacing value
  * 2theta = 2*asin(lambda/2/d)
  * @brief calculate2ThetaFromD
  * @param dspace
@@ -65,7 +65,7 @@ inline double calcualte2ThetaFromQ(const double &q, const double &wavelength) {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Calculate 2theta value of detector postion from sample position
+/** Calculate 2theta value of detector position from sample position
  * @brief calculate2Theta
  * @param detpos
  * @param samplepos

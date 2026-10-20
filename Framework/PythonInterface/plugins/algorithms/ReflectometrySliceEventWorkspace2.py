@@ -75,7 +75,7 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
             self._validate_group_inputs(input_ws, monitor_ws, issues)
             return issues
         if monitor_ws.isGroup():
-            issues["MonitorWorkspaceName"] = "A monitor workspace group may only be provided alongside an eqivalent input workspace group."
+            issues["MonitorWorkspaceName"] = "A monitor workspace group may only be provided alongside an equivalent input workspace group."
         self._validate_single_workspace(input_ws, issues)
         return issues
 
@@ -297,7 +297,7 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         alg.execute()
 
     def _clean_up(self, monitor_ws_group):
-        """Remove worspaces added to the ADS"""
+        """Remove workspaces added to the ADS"""
         monitor_ws_names = [ws.name() for ws in monitor_ws_group]
         self._ungroup_ws(monitor_ws_group)
         for ws_name in monitor_ws_names:

@@ -60,7 +60,7 @@ public:
   void test_asks_successor_to_create() {
 
     MockMDUnitFactory factoryPrimary;
-    // We say that the string is uknown on the primary factory
+    // We say that the string is unknown on the primary factory
     EXPECT_CALL(factoryPrimary, canInterpret(_)).WillOnce(Return(false));
     // So we DONT expect to then be asked to create an instance of THAT product
     EXPECT_CALL(factoryPrimary, createRaw(_)).Times(0);
@@ -81,7 +81,7 @@ public:
   void test_no_successor_throws() {
 
     MockMDUnitFactory factoryPrimary;
-    // We say that the string is uknown on the primary factory
+    // We say that the string is unknown on the primary factory
     EXPECT_CALL(factoryPrimary, canInterpret(_)).WillOnce(Return(false));
     // So we DONT expect to then be asked to create an instance of THAT product
     EXPECT_CALL(factoryPrimary, createRaw(_)).Times(0);

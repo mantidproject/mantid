@@ -125,7 +125,7 @@ class VelocityAutoCorrelations(PythonAlgorithm):
         logger.information("Calculating velocities...")
         start_time = time.time()
 
-        # Initialise velocity arrray. Note that the first dimension is 2 elements shorter than the coordinate array.
+        # Initialise velocity array. Note that the first dimension is 2 elements shorter than the coordinate array.
         # Use finite difference methods to evaluate the time-derivative to 1st order
         # Shape: (# of particles) x (timesteps-2) x (# of spatial dimensions)
         velocities = np.zeros((n_particles, n_timesteps - 1, n_dimensions))
@@ -162,7 +162,7 @@ class VelocityAutoCorrelations(PythonAlgorithm):
 
         logger.information(str(time.time() - start_time) + " s")
 
-        # Neutron incoherent scattering lengths (fm) weighted by isotope abundancies
+        # Neutron incoherent scattering lengths (fm) weighted by isotope abundances
         # Sources:
         # https://www.ncnr.nist.gov/resources/n-lengths/list.html
         # http://www.ati.ac.at/~neutropt/scattering/RecommendedScatteringLengthsOfElements.PDF

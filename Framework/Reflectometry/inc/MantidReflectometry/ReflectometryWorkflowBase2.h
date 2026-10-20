@@ -104,7 +104,7 @@ protected:
   void initTransmissionOutputProperties();
   /// Initialize properties for stitching transmission runs
   void initStitchProperties();
-  /// Initialize corection algorithm properties
+  /// Initialize correction algorithm properties
   void initAlgorithmicProperties(bool autodetect = false);
   /// Initialize momentum transfer properties
   void initMomentumTransferProperties();

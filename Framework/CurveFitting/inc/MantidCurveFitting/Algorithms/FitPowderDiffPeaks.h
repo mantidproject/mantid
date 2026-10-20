@@ -242,7 +242,7 @@ private:
   /// Create a Workspace2D for fitted peaks (pattern)
   DataObjects::Workspace2D_sptr genOutputFittedPatternWorkspace(const std::vector<double> &pattern, int workspaceindex);
 
-  /// Calcualte the value of a single peak in a given range.
+  /// Calculate the value of a single peak in a given range.
   void calculate1PeakGroup(std::vector<size_t> peakindexes, Functions::BackgroundFunction_sptr background);
 
   /// Parse the fitting result
@@ -295,7 +295,7 @@ private:
   /// Data for each individual peaks. (HKL)^2, vector index, function values
   std::vector<double> m_peakData;
 
-  /// Peak parmeter names
+  /// Peak parameter names
   std::vector<std::string> mPeakParameterNames;
 
   /// TOF vector of data workspace to process with
@@ -323,7 +323,7 @@ private:
   /// Fit mode
   enum { ROBUSTFIT, TRUSTINPUTFIT } m_fitMode;
 
-  /// Choice to generate peak profile paramter starting value
+  /// Choice to generate peak profile parameter starting value
   enum { HKLCALCULATION, FROMBRAGGTABLE } m_genPeakStartingValue;
 
   /// Right most peak HKL
@@ -345,7 +345,7 @@ private:
   bool m_fitPeakBackgroundComposite;
 };
 
-/** Formular for linear iterpolation: X = [(xf-x0)*Y - (xf*y0-x0*yf)]/(yf-y0)
+/** Formular for linear interpolation: X = [(xf-x0)*Y - (xf*y0-x0*yf)]/(yf-y0)
  */
 inline double linearInterpolateX(double x0, double xf, double y0, double yf, double y) {
   double x = ((xf - x0) * y - (xf * y0 - x0 * yf)) / (yf - y0);

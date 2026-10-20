@@ -111,7 +111,7 @@ std::shared_ptr<API::MatrixWorkspace> IntegrateFlux::createOutputWorkspace(const
   API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
       std::shared_ptr<const API::MatrixWorkspace>(&inputWS, NoEventWorkspaceDeleting()), nSpec, nX, nX);
 
-  // claculate the integration points and save them in the x-vactors of
+  // calculate the integration points and save them in the x-vactors of
   // integrFlux
   double xMin = inputWS.getXMin();
   double xMax = inputWS.getXMax();
@@ -457,7 +457,7 @@ void IntegrateFlux::integrateSpectraPointData(const API::MatrixWorkspace &inputW
 }
 
 /**
- * Calculate the maximun number of points in the integration grid.
+ * Calculate the maximum number of points in the integration grid.
  * @param inputWS :: An input workspace.
  */
 size_t IntegrateFlux::getMaxNumberOfPoints(const API::MatrixWorkspace &inputWS) const {

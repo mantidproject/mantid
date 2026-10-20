@@ -97,7 +97,7 @@ private:
   /// Load fullprof resolution file.
   void loadFullprofResolutionFile(const std::string &irffilename);
 
-  /// Calcualte d-space value.
+  /// Calculate d-space value.
   double calDspRange(double dtt1, double zero, double tof);
 
   // TODO Replace it with gsl's erfc()

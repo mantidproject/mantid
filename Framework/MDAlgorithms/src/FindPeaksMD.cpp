@@ -155,7 +155,7 @@ void FindPeaksMD::init() {
                           "PeakFindingStrategy", Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO, volumeNormalization));
 
   declareProperty(std::make_unique<PropertyWithValue<double>>("SignalThresholdFactor", 1.5, Direction::Input),
-                  "The overal signal value (not density!) normalized by the "
+                  "The overall signal value (not density!) normalized by the "
                   "number of events is compared to the specified signal "
                   "threshold. Boxes which are below this threshold are NOT "
                   "considered to be peaks."
@@ -498,7 +498,7 @@ template <typename MDE, size_t nd> void FindPeaksMD::findPeaks(typename MDEventW
       for (size_t d = 0; d < nd; d++)
         g_log.debug() << (d > 0 ? "," : "") << boxCenter[d];
       g_log.debug() << "; Density = " << density << '\n';
-      // Report progres for each box found.
+      // Report progress for each box found.
       prog->report("Finding Peaks");
     }
   }
@@ -529,7 +529,7 @@ template <typename MDE, size_t nd> void FindPeaksMD::findPeaks(typename MDEventW
       // Create the peak
       addLeanElasticPeak(Q, binCount);
 
-      // Report progres for each box found.
+      // Report progress for each box found.
       prog->report("Adding Peaks");
 
     } // for each box found
@@ -717,7 +717,7 @@ void FindPeaksMD::findPeaksHisto(const Mantid::DataObjects::MDHistoWorkspace_spt
       peakBoxes.emplace_back(index);
       g_log.debug() << "Found box at index " << index;
       g_log.debug() << "; Density = " << density << '\n';
-      // Report progres for each box found.
+      // Report progress for each box found.
       prog->report("Finding Peaks");
     }
   }
@@ -737,7 +737,7 @@ void FindPeaksMD::findPeaksHisto(const Mantid::DataObjects::MDHistoWorkspace_spt
       // Create the peak
       addLeanElasticPeak(Q, binCount);
 
-      // Report progres for each box found.
+      // Report progress for each box found.
       prog->report("Adding Peaks");
 
     } // for each box found
@@ -768,7 +768,7 @@ void FindPeaksMD::findPeaksHisto(const Mantid::DataObjects::MDHistoWorkspace_spt
         else
           addPeak(compInfo, Q, binCount, tracer);
 
-        // Report progres for each box found.
+        // Report progress for each box found.
         prog->report("Adding Peaks");
 
       } // for each box found

@@ -97,7 +97,7 @@ DetectorInfo::~DetectorInfo() = default;
  * - Positions that differ by less than 1 nm = 1e-9 m are considered equivalent.
  * - Rotations that imply relative position changes of less than 1 nm = 1e-9 m
  *   with a rotation center that is 1000 m away are considered equivalent.
- * Note that in both cases the actual limit may be lower, but it is guarenteed
+ * Note that in both cases the actual limit may be lower, but it is guaranteed
  * that any LARGER differences are NOT considered equivalent. */
 bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
   return m_detectorInfo->isEquivalent(*other.m_detectorInfo);

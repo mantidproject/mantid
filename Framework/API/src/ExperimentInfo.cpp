@@ -618,7 +618,7 @@ int ExperimentInfo::getRunNumber() const {
 }
 
 /**
- * Returns the emode for this run. It first searchs the run logs for a
+ * Returns the emode for this run. It first searches the run logs for a
  * "deltaE-mode" log and falls back to
  * the instrument if one is not found. If neither exist then the run is
  * considered Elastic.

@@ -214,7 +214,7 @@ void FindPeaks::processAlgorithmProperties() {
   if (t1 > t2 || t1 <= 0 || t3 <= 0) {
     std::stringstream errss;
     errss << "User specified wrong guessed peak width parameters (must be "
-             "postive and make sense). "
+             "positive and make sense). "
           << "User inputs are min = " << t1 << ", max = " << t2 << ", step = " << t3;
     g_log.warning(errss.str());
     throw std::runtime_error(errss.str());
@@ -774,7 +774,7 @@ void FindPeaks::fitPeakGivenFWHM(const API::MatrixWorkspace_sptr &input, const i
     i_min = 1;
 
   if (hasleftpeak) {
-    // Use 2/3 distance as the seperation for right peak
+    // Use 2/3 distance as the separation for right peak
     double xmin = vecX[i_min];
     double peaksepline = center_guess - (center_guess - leftpeakcentre) * 0.66;
     if (xmin < peaksepline)
@@ -1057,7 +1057,7 @@ int FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input, int spectru
  * @param fwhm :: (output) estimated fwhm
  * @param leftfwhm :: (output) left side fhwm
  * @param rightfwhm :: (output) right side fwhm
- * @return error mesage
+ * @return error message
  */
 std::string FindPeaks::estimatePeakParameters(const HistogramX &vecX, const HistogramY &vecY, size_t i_min,
                                               size_t i_max, const std::vector<double> &vecbkgdparvalues,
@@ -1224,7 +1224,7 @@ void FindPeaks::estimateBackground(const HistogramX &X, const HistogramY &Y, con
   xf = xf / static_cast<double>(numavg);
   yf = yf / static_cast<double>(numavg);
 
-  // Esitmate
+  // Estimate
   vecbkgdparvalues[2] = 0.;
   if (m_bkgdOrder >= 1) {
     // linear background

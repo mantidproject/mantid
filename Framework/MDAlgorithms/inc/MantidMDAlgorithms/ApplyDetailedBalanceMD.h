@@ -27,7 +27,7 @@ public:
   const std::string summary() const override;
 
 private:
-  /// Initialize the proeprties
+  /// Initialize the properties
   void init() override;
   /// Run the algorithm
   void exec() override;

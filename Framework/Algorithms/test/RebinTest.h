@@ -60,7 +60,7 @@ public:
     rebin.setPropertyValue("InputWorkspace", IN_WKSP);
     rebin.setPropertyValue("OutputWorkspace", OUT_WKSP);
     rebin.setProperty("Params", std::vector<double>{WIDTH});
-    // verify that with the single rebin param, the algo will successfuly execute
+    // verify that with the single rebin param, the algo will successfully execute
     TS_ASSERT_THROWS_NOTHING(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
 
@@ -529,7 +529,7 @@ public:
       }
     }
     // the above formula tests the criterian that must be true for masking,
-    // however we need some more specific tests incase outY.empty() or something
+    // however we need some more specific tests in case outY.empty() or something
     TS_ASSERT_DELTA(outY[1], 0.0, 0.000001)
     TS_ASSERT_DELTA(outY[2], 0.25, 0.000001)
     TS_ASSERT_DELTA(outY[3], 3.0, 0.000001)
@@ -583,7 +583,7 @@ public:
       }
     }
     // the above formula tests the criterian that must be true for masking,
-    // however we need some more specific tests incase outY.empty() or something
+    // however we need some more specific tests in case outY.empty() or something
     TS_ASSERT_DELTA(outY[1], 0.0, 0.000001)
     TS_ASSERT_DELTA(outY[2], 1.0, 0.000001)
     TS_ASSERT_DELTA(outY[3], 6.0, 0.000001)
@@ -851,7 +851,7 @@ public:
   }
 
   void test_inversePowerHarmonic() {
-    // Test InversePower in a simple case of harmonic serie
+    // Test InversePower in a simple case of harmonic series
     Workspace2D_sptr test_1D = Create1DWorkspace(51);
     test_1D->setDistribution(false);
     AnalysisDataService::Instance().add("test_Rebin_revLog", test_1D);

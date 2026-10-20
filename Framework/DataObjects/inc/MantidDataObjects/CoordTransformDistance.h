@@ -61,7 +61,7 @@ protected:
   /// Coordinates at the center
   std::vector<coord_t> m_center;
 
-  /// Parmeter where True is set for those dimensions that are considered when
+  /// Parameter where True is set for those dimensions that are considered when
   /// calculating distance
   std::vector<bool> m_dimensionsUsed;
 

@@ -43,7 +43,7 @@ public:
     TS_ASSERT(getalg.isInitialized());
   }
 
-  /** Test outpout event workspace
+  /** Test output event workspace
    */
   void test_OutputEventWorkspace() {
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
@@ -74,7 +74,7 @@ public:
     return;
   }
 
-  /** Test outpout Workspace2D
+  /** Test output Workspace2D
    */
   void test_Output2DWorkspace() {
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
@@ -109,7 +109,7 @@ public:
     return;
   }
 
-  /** Test outpout Workspace2D with start and stop time
+  /** Test output Workspace2D with start and stop time
    */
   void test_Output2DWorkspaceTimeRange() {
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
@@ -149,7 +149,7 @@ public:
     return;
   }
 
-  /** Test outpout Workspace2D with start and stop time
+  /** Test output Workspace2D with start and stop time
    */
   void test_Output2DWorkspaceNanosecond() {
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
@@ -189,7 +189,7 @@ public:
     return;
   }
 
-  /** Test outpout Workspace2D with limited number
+  /** Test output Workspace2D with limited number
    */
   void test_Output2DWorkspacePartialLog() {
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();

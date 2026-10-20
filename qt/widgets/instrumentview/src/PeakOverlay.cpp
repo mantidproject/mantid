@@ -94,7 +94,7 @@ void PeakHKL::print() const {
 }
 
 /**
- * Creates formated string for outputting h,k, or l
+ * Creates formatted string for outputting h,k, or l
  *
  * @param h :: Value to output.
  * @param prec :: Precision as a number of decimal places.

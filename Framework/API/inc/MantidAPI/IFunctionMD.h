@@ -48,7 +48,7 @@ class FunctionDomainMD;
 */
 class MANTID_API_DLL IFunctionMD : public virtual IFunction {
 public:
-  /* Overidden methods */
+  /* Overridden methods */
 
   /// Virtual copy constructor
   std::shared_ptr<IFunction> clone() const override;

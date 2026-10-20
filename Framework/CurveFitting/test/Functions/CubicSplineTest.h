@@ -83,7 +83,7 @@ public:
     cspline.setAttributeValue("n", 10);
 
     for (int i = 0; i < 10; ++i) {
-      // set the x values to be some arbitary value
+      // set the x values to be some arbitrary value
       cspline.setXAttribute(i, i * 2);
 
       auto index = std::to_string(i);

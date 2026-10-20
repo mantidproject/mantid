@@ -253,7 +253,7 @@ MatrixWorkspace_sptr LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceDat
 
       // setting the error vector
       // If there is no error of the intensity recorded, then
-      // it is assumed to be the sqare root of the intensity
+      // it is assumed to be the square root of the intensity
       Element *idevElem = elem->getChildElement("Idev");
       if (idevElem) {
         check(qElem, "Idev");
@@ -385,7 +385,7 @@ void LoadCanSAS1D::createSampleInformation(const Poco::XML::Element *const sasEn
   auto sasCollimationElement = sasInstrumentElement->getChildElement("SAScollimation");
   check(sasCollimationElement, "<SAScollimation>");
 
-  // Since we have shipped a sligthly invalid CanSAS1D format we need to
+  // Since we have shipped a slightly invalid CanSAS1D format we need to
   // make sure that we can read those files back in again
   bool isInValidOldFormat = true;
   try {

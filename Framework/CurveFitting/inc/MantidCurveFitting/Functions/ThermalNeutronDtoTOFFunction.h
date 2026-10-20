@@ -44,7 +44,7 @@ protected:
   void init() override;
 
 private:
-  /// Core function (inline) to calcualte TOF_h from d-spacing
+  /// Core function (inline) to calculate TOF_h from d-spacing
   inline double corefunction(double dh, double dtt1, double dtt1t, double dtt2t, double zero, double zerot,
                              double width, double tcross) const;
 
@@ -64,7 +64,7 @@ private:
 
 using ThermalNeutronDtoTOFFunction_sptr = std::shared_ptr<ThermalNeutronDtoTOFFunction>;
 
-/// Calcualte TOF from d-spacing value for thermal neutron
+/// Calculate TOF from d-spacing value for thermal neutron
 inline double calThermalNeutronTOF(double dh, double dtt1, double dtt1t, double dtt2t, double zero, double zerot,
                                    double width, double tcross) {
   double n = 0.5 * gsl_sf_erfc(width * (tcross - 1 / dh));

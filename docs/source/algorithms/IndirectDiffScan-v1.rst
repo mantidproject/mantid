@@ -8,7 +8,7 @@
 
 Description
 -----------
-This algortithm is to speed up the workflow for Indirect Inelastic diffraction reduction.
+This algorithm is to speed up the workflow for Indirect Inelastic diffraction reduction.
 Uses :ref:`ISISIndirectDiffractionReduction <algm-ISISIndirectDiffractionReduction>` in diffspec mode with several parameters at fixed values.
 Also extracts the temperature from each run and creates a workspace of all runs with respect to temperature.
 

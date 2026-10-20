@@ -52,14 +52,14 @@ class DrillModelTest(unittest.TestCase):
         mSettings.THREADS_NUMBER = {"a1": 10, "a2": 20}
         self.model._initController = mock.Mock()
         self.model._initProcessingParameters = mock.Mock()
-        # invalid aquisition mode
+        # invalid acquisition mode
         self.model.instrument = None
         self.model.setAcquisitionMode("a1")
         self.assertIsNone(self.model.acquisitionMode)
         self.model.instrument = "i1"
         self.model.setAcquisitionMode("test_invalid")
         self.assertIsNone(self.model.acquisitionMode)
-        # valide acquisition mode
+        # valid acquisition mode
         self.model.setAcquisitionMode("a2")
         self.assertEqual(self.model.acquisitionMode, "a2")
         self.mTasksPool.setMaxThreadCount.assert_called_once_with(20)

@@ -276,7 +276,7 @@ void VesuvioL1ThetaResolution::loadInstrument() {
     std::string headerFormat = headerFormats[numCols];
     if (headerFormat.empty()) {
       std::stringstream error;
-      error << "Unrecognised PAR file header. Number of colums: " << numCols << " (expected either 5 or 6.";
+      error << "Unrecognised PAR file header. Number of columns: " << numCols << " (expected either 5 or 6.";
       throw std::runtime_error(error.str());
     }
     g_log.debug() << "PAR file header format: " << headerFormat << '\n';
@@ -353,7 +353,7 @@ void VesuvioL1ThetaResolution::calculateDetector(const IDetector &detector,
 
   // Get as many events as defined by NumEvents
   // This loop is not iteration limited but highly unlikely to ever become
-  // infinate
+  // infinite
   while (l1Values.size() < static_cast<size_t>(numEvents)) {
     const double xs = -sampleWidth / 2 + sampleWidth * flatRandomVariateGen();
     const double ys = 0.0;

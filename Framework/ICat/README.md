@@ -8,7 +8,7 @@ The ICAT developers have released a [script](https://code.google.com/p/icatproje
 $ ./wsdl.sh https://icatisis.esc.rl.ac.uk
 ```
 
-To generate the source declartion file needed by `soapcpp2` you need to run `wsdl2h` against both the `xsd` file and the `wsdl`:
+To generate the source declaration file needed by `soapcpp2` you need to run `wsdl2h` against both the `xsd` file and the `wsdl`:
 
 ```sh
 // Note: the "ICATCompat" related commands and files in the ICAT provided script are not required.

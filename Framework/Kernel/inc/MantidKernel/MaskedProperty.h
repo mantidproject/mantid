@@ -17,7 +17,7 @@
    display,
          log window etc and log file .The masked property will be displayed.
      This class is specialised for string and masks the property value with
-   charcater "*"
+   character "*"
 
     @class Mantid::Kernel::MaskedProperty
  */

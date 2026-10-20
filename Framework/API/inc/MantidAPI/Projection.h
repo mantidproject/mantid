@@ -45,7 +45,7 @@ public:
   double getOffset(size_t nd);
   /// Retrieves the axis vector for the given dimension
   Kernel::V3D getAxis(size_t nd);
-  /// Retrives the unit of the given dimension
+  /// Retrieves the unit of the given dimension
   ProjectionUnit getUnit(size_t nd);
   /// Set the offset for a given dimension
   void setOffset(size_t nd, double offset);

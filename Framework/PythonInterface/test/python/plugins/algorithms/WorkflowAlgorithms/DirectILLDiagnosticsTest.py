@@ -118,7 +118,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             ys = beamWS.mutableY(i)
             ys *= 0.0
         # Second range is partially covered by the beam stop.
-        # Actually, only this range will be recongnized as beam stop's shadow.
+        # Actually, only this range will be recognized as beam stop's shadow.
         for i in range(92, 105):
             ys = beamWS.mutableY(i)
             ys *= 0.0

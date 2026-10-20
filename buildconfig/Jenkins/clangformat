@@ -33,7 +33,7 @@ else
   ${CLANG_FORMAT} --version
 fi
 
-# git needs to have a minimal coniguration for git commit to work
+# git needs to have a minimal configuration for git commit to work
 if [ "$(git config user.name)" == "" ]; then
   git config user.name mantid-builder
 fi

@@ -15,7 +15,7 @@ namespace Algorithms {
 /** WeightingStrategy :
 
   Abstract weighting strategy, which can be applied to calculate individual
-  weights for each pixel based upon disance from epicenter. Generated for use
+  weights for each pixel based upon distance from epicenter. Generated for use
   with SmoothNeighbours.
 
   @date 2011-11-30

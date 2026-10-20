@@ -401,7 +401,7 @@ std::vector<IArchiveSearch_sptr> FileFinderImpl::getArchiveSearch(const Kernel::
 /**
  * Find a path to a single file from a hint.
  * @param hintstr :: hint string to look for filename.
- * @param extensionsProvided :: Vector of aditional file extensions to consider. Optional.
+ * @param extensionsProvided :: Vector of additional file extensions to consider. Optional.
  *                  If not provided, facility extensions used.
  * @param useOnlyExtensionsProvided :: Optional bool.
  *                  If it's true (and extensionsProvided is not empty),

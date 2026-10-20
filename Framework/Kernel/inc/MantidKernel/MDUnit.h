@@ -14,7 +14,7 @@
 namespace Mantid {
 namespace Kernel {
 
-/** MDUnit : Unit type for multidimensional data types. Not convertable to/from
+/** MDUnit : Unit type for multidimensional data types. Not convertible to/from
   TOF unlike Unit.
 */
 class MANTID_KERNEL_DLL MDUnit {

@@ -139,7 +139,7 @@ EnumeratedString<E, names> EnumeratedStringProperty<E, names>::operator()() cons
 }
 
 /** If the value has been set, then it is valid.
- *  @returns "" if the value is valid or a discription of the problem
+ *  @returns "" if the value is valid or a description of the problem
  */
 template <class E, std::vector<std::string> const *const names>
 std::string EnumeratedStringProperty<E, names>::isValid() const {

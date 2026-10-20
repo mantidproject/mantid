@@ -326,7 +326,7 @@ def calculate_usphi(omg0, theta2ave, chiave, phiave):
 
 
 def calculate_absorption_correction_spice(exp_number, scan_number, lattice, ub_matrix):
-    """calculate absorption correcton from a SPICE ub matrix
+    """calculate absorption correction from a SPICE ub matrix
 
     Example: -0.1482003, -0.0376897, 0.0665967,
              -0.0494848, 0.2256107, 0.0025953,

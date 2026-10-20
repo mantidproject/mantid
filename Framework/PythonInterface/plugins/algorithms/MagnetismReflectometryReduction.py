@@ -462,7 +462,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         q_workspace = SumSpectra(InputWorkspace=workspace)
         q_workspace.getAxis(0).setUnit("MomentumTransfer")
 
-        # Get the distance fromthe moderator to the detector
+        # Get the distance from the moderator to the detector
         run_object = workspace.getRun()
         sample_detector_distance = run_object["SampleDetDis"].getStatistics().mean
         source_sample_distance = run_object["ModeratorSamDis"].getStatistics().mean

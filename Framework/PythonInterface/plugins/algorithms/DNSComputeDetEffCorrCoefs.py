@@ -173,7 +173,7 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
 
     def _subtract_background(self, datalist, bglist, deterota):
         """
-        subracts background
+        subtracts background
         """
         result = dict.fromkeys(deterota)
         for angle in deterota:
@@ -231,7 +231,7 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
         sfvana, nsfvana = self._sort_workspaces(vana_workspaces, deterota)
         sfbg, nsfbg = self._sort_workspaces(bg_workspaces, deterota)
 
-        # subract background
+        # subtract background
         sfv = self._subtract_background(sfvana, sfbg, deterota)
         nsfv = self._subtract_background(nsfvana, nsfbg, deterota)
         total = self._sum_signal(sfv, nsfv, deterota)

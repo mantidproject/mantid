@@ -24,7 +24,7 @@ public:
     std::vector<double> coeffs = {0.5, 2.4, -3.2, -1.7, 2.1};
 
     const double x(0.75);
-    // Expected values computed on paper using reccurrence relation
+    // Expected values computed on paper using recurrence relation
     // http://docs.scipy.org/doc/numpy-dev/reference/generated/numpy.polynomial.chebyshev.chebval.html#numpy.polynomial.chebyshev.chebval
     TS_ASSERT_DELTA(0.5, ChebyshevSeries(0)(coeffs, x), delta);
     TS_ASSERT_DELTA(2.3, ChebyshevSeries(1)(coeffs, x), delta);

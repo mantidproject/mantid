@@ -24,7 +24,7 @@
  ----------------------------------------------------------------------------*/
 /** \file
  * Documentation for the NeXus-API version 4.4.3
- * 2000-2011, the NeXus International Advisory Commitee
+ * 2000-2011, the NeXus International Advisory Committee
  * \defgroup c_main C API
  * \defgroup c_types Data Types
  * \ingroup c_main
@@ -150,7 +150,7 @@
  * \li NXACC_CREATEXML create an XML NeXus file.
  * see #NXaccess_mode
  * Support for HDF-4 is deprecated.
- * \param pHandle A file handle which will be initialized upon successfull completeion of NXopen.
+ * \param pHandle A file handle which will be initialized upon successful completion of NXopen.
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_init
  */
@@ -254,7 +254,7 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetdataID(Mantid::LegacyN
  * Read a complete dataset from the currently open dataset into memory.
  * \param handle A NeXus file handle as initialized by NXopen.
  * \param data A pointer to the memory area where to read the data, too. Data must point to a memory
- * area large enough to accomodate the data read. Otherwise your program may behave in unexpected
+ * area large enough to accommodate the data read. Otherwise your program may behave in unexpected
  * and unwelcome ways.
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
@@ -262,7 +262,7 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetdataID(Mantid::LegacyN
 MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetdata(Mantid::LegacyNexus::NXhandle handle, void *data);
 
 /**
- * Retrieve information about the curretly open dataset.
+ * Retrieve information about the currently open dataset.
  * \param handle A NeXus file handle as initialized by NXopen.
  * \param rank A pointer to an integer which will be filled with the rank of
  * the dataset.
@@ -283,7 +283,7 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetinfo64(Mantid::LegacyN
                                                                  Mantid::LegacyNexus::NXnumtype *datatype);
 
 /**
- * Get the next entry in the currently open group. This is for retrieving infromation about the
+ * Get the next entry in the currently open group. This is for retrieving information about the
  * content of a NeXus group. In order to search a group #NXgetnextentry is called in a loop until
  * #NXgetnextentry returns NX_EOD which indicates that there are no further items in the group.
  * Reset search using #NXinitgroupdir
@@ -304,7 +304,7 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetnextentry(Mantid::Lega
  * Use NXgetattra for attributes with dimensions. (Recommended as the general
  case.)
  * \param handle A NeXus file handle as initialized by NXopen.
- * \param name The name of the atrribute to read.
+ * \param name The name of the attribute to read.
  * \param data A pointer to a memory area large enough to hold the attributes
  value.
  * \param iDataLen The length of data in bytes.

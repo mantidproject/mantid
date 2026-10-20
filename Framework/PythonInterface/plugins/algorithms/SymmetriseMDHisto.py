@@ -18,7 +18,7 @@ class SymmetriseMDHisto(PythonAlgorithm):
         return "Symmetrise MDHistoWorkspace using symmetry operations of Laue class point group."
 
     def PyInit(self):
-        """Initilize the algorithms properties"""
+        """Initialize the algorithms properties"""
 
         self.declareProperty(
             IMDHistoWorkspaceProperty("InputWorkspace", "", Direction.Input),

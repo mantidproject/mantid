@@ -131,7 +131,7 @@ private:
   std::vector<double> m_criteria;
   /// Maximum number of iterations
   size_t m_maxIter;
-  /// Bool that idicates if a varible has changed at some self iteration
+  /// Bool that indicates if a variable has changed at some self iteration
   std::vector<bool> m_parChanged;
   /// Simulated Annealing temperature
   double m_temperature;

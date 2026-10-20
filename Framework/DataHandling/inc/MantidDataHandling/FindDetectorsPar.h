@@ -116,7 +116,7 @@ transformation of these arrays into strings.
 algorithm,
 @date 17/05/2012
  */
-// predefine class, used to cashe precalculated detector's parameters
+// predefine class, used to cache precalculated detector's parameters
 class DetParameters;
 
 class MANTID_DATAHANDLING_DLL FindDetectorsPar : public API::Algorithm {
@@ -126,7 +126,7 @@ public:
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "The algorithm returns the angular parameters and second flight "
-           "path for a workspace detectors (data, usually availble in par or "
+           "path for a workspace detectors (data, usually available in par or "
            "phx file)";
   }
 
@@ -154,7 +154,7 @@ private:
    *    instead of azimuthal_width and polar_width */
   bool m_SizesAreLinear = false;
 
-  // numner of real(valid and non-monitor) detectors calculated by the alvorithm
+  // number of real(valid and non-monitor) detectors calculated by the algorithm
   size_t m_nDetectors = 0;
   // the vectors which represent detector's parameters as linear structure
   std::vector<double> azimuthal;
@@ -181,15 +181,15 @@ private:
   size_t loadParFile(const std::string &fileName);
 
 protected: // for testing purposes
-  /**!  function calculates number of colums in an ASCII file, assuming that
-   * colums are separated by spaces */
+  /**!  function calculates number of columns in an ASCII file, assuming that
+   * columns are separated by spaces */
   int count_changes(const char *const Buf, size_t buf_size);
   /**! The function reads line from input stream and puts it into buffer.
    *   It behaves like std::ifstream getline but the getline reads additional
    * symbol from a row in a Unix-formatted file under windows;*/
   size_t get_my_line(std::ifstream &in, char *buf, size_t buf_size, const char DELIM);
   /// load file header and identify which file (PHX,PAR or SPE) it belongs to.
-  /// It also identifies the position of the begining of the data
+  /// It also identifies the position of the beginning of the data
   FileTypeDescriptor get_ASCII_header(std::string const &fileName, std::ifstream &data_stream);
   /// load PAR or PHX file
   void load_plain(std::ifstream &stream, std::vector<double> &Data, FileTypeDescriptor const &FILE_TYPE);
@@ -228,7 +228,7 @@ class AvrgDetector {
   // if azimuthal and polar sizes expressed in angular or linear units
   bool m_useSphericalSizes;
   double m_AzimMin, m_PolarMin, m_AzimMax, m_PolarMax;
-  /// numbr of primary detectors, contributing into this detector
+  /// number of primary detectors, contributing into this detector
   size_t m_nComponents;
 
 public:

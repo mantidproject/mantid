@@ -437,7 +437,7 @@ With empty container data, the steps to reduce the experimental data might look 
 
 #. Calculate the absorption corrections for the sample.
 
-#. Apply the absoprtion corrections and subtract the container.
+#. Apply the absorption corrections and subtract the container.
 
 #. Reduce the data applying vanadium calibration coefficients and diagnostics mask.
 

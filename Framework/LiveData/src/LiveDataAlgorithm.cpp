@@ -135,7 +135,7 @@ void LiveDataAlgorithm::initProps() {
   std::vector<std::string> propOptions{"Add", "Replace", "Append"};
   declareProperty("AccumulationMethod", "Add", std::make_shared<StringListValidator>(propOptions),
                   "Method to use for accumulating each chunk of live data.\n"
-                  " - Add: the processed chunk will be summed to the previous outpu "
+                  " - Add: the processed chunk will be summed to the previous output "
                   "(default).\n"
                   " - Replace: the processed chunk will replace the previous output.\n"
                   " - Append: the spectra of the chunk will be appended to the output "

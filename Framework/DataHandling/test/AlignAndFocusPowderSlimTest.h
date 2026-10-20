@@ -464,7 +464,7 @@ public:
     TS_ASSERT_EQUALS(run_timeroi.timeAtIndex(0), outputWS->run().startTime() + 200.);
     TS_ASSERT_EQUALS(run_timeroi.timeAtIndex(1), outputWS->run().startTime() + 300.);
 
-    // check that the logs are filtered corerctly by checking first and last pulse times
+    // check that the logs are filtered correctly by checking first and last pulse times
     TS_ASSERT_DELTA(outputWS->run().getFirstPulseTime().totalNanoseconds(),
                     (outputWS->run().startTime() + 200.).totalNanoseconds(), 1e8 /* 0.1 sec */);
     TS_ASSERT_DELTA(outputWS->run().getLastPulseTime().totalNanoseconds(),

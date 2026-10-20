@@ -214,7 +214,7 @@ void MaskDetectors::exec() {
  * @param maskWs :: pointer to the mask workspace to use.
  * @param WS :: pointer to the workspace to be masked.
  * @param detectorList :: list of detectors to be masked.
- * @param indexList :: list of workspace indicies to be masked.
+ * @param indexList :: list of workspace indices to be masked.
  * @param rangeInfo :: information about the spectrum range to use when masking
  */
 void MaskDetectors::handleMaskByMaskWorkspace(const MaskWorkspace_const_sptr &maskWs,
@@ -233,7 +233,7 @@ void MaskDetectors::handleMaskByMaskWorkspace(const MaskWorkspace_const_sptr &ma
     g_log.notice("Masking using detectors IDs");
     extractMaskedWSDetIDs(detectorList, maskWs);
   } else {
-    g_log.notice("Masking using workspace indicies");
+    g_log.notice("Masking using workspace indices");
     appendToIndexListFromMaskWS(indexList, maskWs, rangeInfo);
   }
 }
@@ -246,7 +246,7 @@ void MaskDetectors::handleMaskByMaskWorkspace(const MaskWorkspace_const_sptr &ma
  * @param maskWs :: pointer to the workspace to use as a mask.
  * @param WS :: pointer to the workspace to be masked.
  * @param detectorList :: list of detectors to be masked.
- * @param indexList :: list of workspace indicies to be masked.
+ * @param indexList :: list of workspace indices to be masked.
  * @param rangeInfo :: information about the spectrum range to use when masking
  */
 void MaskDetectors::handleMaskByMatrixWorkspace(const API::MatrixWorkspace_const_sptr &maskWs,
@@ -261,7 +261,7 @@ void MaskDetectors::handleMaskByMatrixWorkspace(const API::MatrixWorkspace_const
   // Check the provided workspace has the same number of spectra as the
   // input, if so assume index list
   if (nHist == WS->getNumberHistograms()) {
-    g_log.notice("Masking using workspace indicies");
+    g_log.notice("Masking using workspace indices");
     appendToIndexListFromWS(indexList, maskWs, rangeInfo);
     // Check they both have instrument and then use detector based masking
   } else if (instrument && maskInstrument) {
@@ -499,7 +499,7 @@ void MaskDetectors::appendToDetectorListFromWS(std::vector<detid_t> &detectorLis
   const auto endIndex = std::get<1>(range_info);
   const auto &detMap = inputWs->getDetectorIDToWorkspaceIndexMap();
 
-  // check if the detid is in the range of workspace indeces available
+  // check if the detid is in the range of workspace indices available
   auto condition = [detMap, startIndex, endIndex](const auto id) {
     const auto &wksp_index = detMap.at(id);
     return !(wksp_index < startIndex || wksp_index > endIndex);

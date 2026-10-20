@@ -33,7 +33,7 @@ void CreatePeaksWorkspace::init() {
   declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
   // explicit control of output peak workspace type
-  // Full: standar peak workspace
+  // Full: standard peak workspace
   // Lean: LeanElasticPeakWorkspace
   const std::vector<std::string> peakworkspaceTypes{"Peak", "LeanElasticPeak"};
   declareProperty("OutputType", "Peak", std::make_shared<StringListValidator>(peakworkspaceTypes),

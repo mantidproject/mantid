@@ -40,7 +40,7 @@ namespace API {
                 if (MantidQt::API::MantidDialog::handle(receiver,e))
                     return true; // stops event propagation
                 else
-                   // do somethig else ...
+                   // do something else ...
             }
 
             return res;

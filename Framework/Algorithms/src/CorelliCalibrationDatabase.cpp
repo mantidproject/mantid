@@ -48,7 +48,7 @@ CalibrationTableHandler::CalibrationTableHandler() : mCalibWS{nullptr}, isSingle
 
 //-----------------------------------------------------------------------------
 /**
- * @brief Create an empty calibration table (multi-component) or an emtpy
+ * @brief Create an empty calibration table (multi-component) or an empty
  * history-of-compoment-positions table
  *
  * @param wsname: workspace name.  If we pass a name, then register the
@@ -91,7 +91,7 @@ DataObjects::TableWorkspace_sptr CalibrationTableHandler::createCalibrationTable
  * @brief Check whether a TableWorkspace is a valid Corelli calibration table
  * for all components.
  *
- * @details Cheks performed are correct number of columns and columns names
+ * @details Checks performed are correct number of columns and columns names
  *
  * @param calibws: Calibration table workspace
  * @param errormsg: (output) error message
@@ -561,7 +561,7 @@ void CorelliCalibrationDatabase::createOutputCalibrationTable(std::map<std::stri
 }
 
 // Create the summary CSV file
-// File name exampe: corelli_instrument_20202015.csv
+// File name example: corelli_instrument_20202015.csv
 void CorelliCalibrationDatabase::saveCalibrationTable(const std::string &calibdbdir) {
   // file name
   std::string filename = "corelli_instrument_" + mDateStamp + ".csv";
@@ -679,13 +679,13 @@ void CorelliCalibrationDatabase::setComponentMap(const std::vector<std::string> 
 }
 
 /**
- * @brief Retrieve the names of certain intrument compoments
+ * @brief Retrieve the names of certain instrument components
  *
  * @details names of interest are are "moderator", "sample-position",
  * "bank1/sixteenpack",..,"bank91/sixteenpack"
  *
  * @param ws : Any workspace containing instrument
- * @return  : vector including of all the compoments in the order as
+ * @return  : vector including of all the components in the order as
  * moderator, sample-position, bank1, bank2, ...
  */
 std::vector<std::string> CorelliCalibrationDatabase::retrieveInstrumentComponents(const MatrixWorkspace_sptr &ws) {

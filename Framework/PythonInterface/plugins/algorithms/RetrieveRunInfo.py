@@ -35,7 +35,7 @@ class FileBackedWsIterator(object):
         if len(filenames) < 1:
             raise ValueError("Expected at least one filename.")
 
-        # In the general case, we may or may not have checked for the existance
+        # In the general case, we may or may not have checked for the existence
         # of the files previously, so before we even start iterating throw if
         # any are missing.
         missing_files = list(filterfalse(os.path.exists, filenames))
@@ -155,5 +155,5 @@ class RetrieveRunInfo(PythonAlgorithm):
         self.setPropertyValue("OutputWorkspace", output_ws_name)
 
 
-# Register algorthm with Mantid.
+# Register algorithm with Mantid.
 AlgorithmFactory.subscribe(RetrieveRunInfo)

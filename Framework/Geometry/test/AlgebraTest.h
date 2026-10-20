@@ -74,7 +74,7 @@ public:
     A.makeCNF();
     TS_ASSERT_EQUALS(A.display(), "(f+x)(x+y+z)");
 
-    // Start with a DNF form wiht common factor:
+    // Start with a DNF form with common factor:
     A.setFunction("aq+acp+ace");
     TS_ASSERT_EQUALS(A.display(), "(ace)+(acp)+(aq)");
     A.makeCNF();

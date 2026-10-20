@@ -29,7 +29,7 @@ public:
   std::string setValueFromProperty(const Property &) override { return ""; }
   std::string setDataItem(const std::shared_ptr<DataItem> &) override { return ""; }
   bool isDefault() const override { return true; }
-  std::string getDefault() const override { return "Is not implemented in this class, should be overriden"; }
+  std::string getDefault() const override { return "Is not implemented in this class, should be overridden"; }
   Property &operator+=(Property const *) override { return *this; }
 };
 

@@ -72,11 +72,11 @@ public:
   /// the accessor verify if there are boxes in box-splitter cash which need
   /// splitting;
   bool ifNeedsSplitting() const { return m_needSplitting; }
-  /// method splits list of boxes not yet uses thread sheduler but may be later
+  /// method splits list of boxes not yet uses thread scheduler but may be later
   void splitList(Kernel::ThreadScheduler *) { (this->*(mdBoxListSplitter[m_NDimensions]))(); }
 
 private:
-  /// maximal nuber of dimensions, currently supported by the class;
+  /// maximal number of dimensions, currently supported by the class;
   enum { MAX_N_DIM = 8 };
   /// actual number of dimensions, initiated in current MD workspace; 0 if not
   /// initiated;
@@ -84,11 +84,11 @@ private:
   /// pointer to taret  MD workspace:
   API::IMDEventWorkspace_sptr m_Workspace;
 
-  /// VECTORS OF FUNCTION POINTERS to different number of dimensions methdods
+  /// VECTORS OF FUNCTION POINTERS to different number of dimensions methods
   /// vector holding function pointers to the code, creating different number of
-  /// dimension worspace as function of dimensions number
+  /// dimension workspace as function of dimensions number
   std::vector<fpCreateWS> wsCreator;
-  /// vector holding function pointers to the code, which adds diffrent
+  /// vector holding function pointers to the code, which adds different
   /// dimension number events to the workspace
   std::vector<fpAddData> mdEvAddAndForget;
   /// vector holding function pointers to the code, which refreshes centroid
@@ -101,7 +101,7 @@ private:
   // helper class to generate methaloop on MD workspaces dimensions:
   template <size_t i> friend class LOOP;
 
-  // internal function tempates to generate as function of dimensions and
+  // internal function templates to generate as function of dimensions and
   // assign to function pointers
   template <size_t nd>
   void addMDDataND(const float *sigErr, const uint16_t *expInfoIndex, const uint16_t *goniometerIndex,

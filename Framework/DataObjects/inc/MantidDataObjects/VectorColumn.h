@@ -23,7 +23,7 @@ namespace DataObjects {
 /** VectorColumn : table column type capable of storing vectors of primitive
   types.
 
-  Plese add more specializations to VectorColumn.cpp as you need them. I don't
+  Please add more specializations to VectorColumn.cpp as you need them. I don't
   guarantee
   it will work correctly with complex or user types, but it might.
 */

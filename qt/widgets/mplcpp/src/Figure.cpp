@@ -132,7 +132,7 @@ Axes Figure::addSubPlot(const int subplotspec, const QString &projection) {
 
 /**
  * @brief Add a colorbar to this figure
- * @param mappable An objet providing the mapping of data to rgb colors
+ * @param mappable An object providing the mapping of data to rgb colors
  * @param cax An axes instance to hold the color bar
  * @param ticks An optional array or ticker.Locator object to control tick
  * placement

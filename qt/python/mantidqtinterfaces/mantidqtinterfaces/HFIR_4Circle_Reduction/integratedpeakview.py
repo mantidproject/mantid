@@ -198,7 +198,7 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
 
 class GeneralPurposedPlotView(mplgraphicsview.MplGraphicsView):
     """
-    Extended matplotlib based 1D plot viewer for general-purposed useage
+    Extended matplotlib based 1D plot viewer for general-purposed usage
     """
 
     def __init__(self, parent):

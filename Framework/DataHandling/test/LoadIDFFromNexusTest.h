@@ -106,7 +106,7 @@ public:
     TS_ASSERT_EQUALS(ptrDetHab.getID(), 16734);
     TS_ASSERT_EQUALS(ptrDetHab.getName(), "HAB-pixel");
 
-    // Test a non-existant detector
+    // Test a non-existent detector
     TS_ASSERT_THROWS(detectorInfo.detector(detectorInfo.indexOf(16735)), const std::out_of_range &);
 
     // Check the monitors are correctly marked

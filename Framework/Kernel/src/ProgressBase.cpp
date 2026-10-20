@@ -98,7 +98,7 @@ void ProgressBase::report(const std::string &msg) {
     @param msg :: Optional message string
 */
 void ProgressBase::report(int64_t i, const std::string &msg) {
-  // Set the loop coutner to the spot specified.
+  // Set the loop counter to the spot specified.
   m_i = i;
   if (m_i - m_last_reported < m_notifyStep)
     return;

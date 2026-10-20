@@ -368,7 +368,7 @@ void PreviewPlot::setLinesWithoutErrors(const QStringList &labels) {
 }
 
 /**
- * Toggle for programatic legend visibility toggle
+ * Toggle for programmatic legend visibility toggle
  * @param visible If True the legend is visible on the canvas
  */
 void PreviewPlot::showLegend(bool visible) { m_contextLegend->setChecked(visible); }
@@ -422,7 +422,7 @@ bool PreviewPlot::eventFilter(QObject *watched, QEvent *evt) {
 }
 
 /**
- * Handler called when the event filter recieves a mouse press event
+ * Handler called when the event filter receives a mouse press event
  * @param evt A pointer to the event
  * @return True if the event propagation should be stopped, false otherwise
  */
@@ -441,7 +441,7 @@ bool PreviewPlot::handleMousePressEvent(QMouseEvent *evt) {
 }
 
 /**
- * Handler called when the event filter recieves a mouse release event
+ * Handler called when the event filter receives a mouse release event
  * @param evt A pointer to the event
  * @return True if the event propagation should be stopped, false otherwise
  */
@@ -460,7 +460,7 @@ bool PreviewPlot::handleMouseReleaseEvent(QMouseEvent *evt) {
 }
 
 /**
- * Handler called when the event filter recieves a mouse move event
+ * Handler called when the event filter receives a mouse move event
  * @param evt A pointer to the event
  * @return True if the event propagation should be stopped, false otherwise
  */
@@ -477,7 +477,7 @@ bool PreviewPlot::handleMouseMoveEvent(QMouseEvent *evt) {
 }
 
 /**
- * Handler called when the event filter recieves a window resize event
+ * Handler called when the event filter receives a window resize event
  * @return True if the event propagation should be stopped, false otherwise
  */
 bool PreviewPlot::handleWindowResizeEvent() {

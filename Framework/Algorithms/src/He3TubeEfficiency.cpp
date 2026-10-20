@@ -429,7 +429,7 @@ void He3TubeEfficiency::execEvent() {
   this->logErrors();
 }
 
-/** Private function to calculate the effeciency correction from
+/** Private function to calculate the efficiency correction from
  * points(wavelength)
  * @param effCorrection :: Vector that will hold the values for each wavelength
  * @param wavelength :: The points calculated from the histogram

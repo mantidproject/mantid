@@ -46,7 +46,7 @@ Improved
 - :ref:`ApplyDetailedBalance <algm-ApplyDetailedBalance>`: User can select the dynamic susceptibility versus energy or frequency.
 - :ref:`PredictPeaks <algm-PredictPeaks-v1>` is now faster on instruments that do not have rectangular detectors. The speed up with vary from instrument to instrument, but for CORELLI this was shown to reduce execution time from ~64 mins to < 1 min.
 - :ref:`MergeRuns <algm-MergeRuns>` now has a sum option and more control over failure when binning is different or sample logs do not match.
-- Made it possible for LiveListeners to read properties from the calling Algorithm. This gives greater flexiblity for authors of LiveListener plugins.
+- Made it possible for LiveListeners to read properties from the calling Algorithm. This gives greater flexibility for authors of LiveListener plugins.
 - Improved verification of IDFs
 - :ref:`AddSampleLog <algm-AddSampleLog>` now can optionionally take a MatrixWorkspace for the time and value of the newly-added TimeSeriesProperty sample log.
 - :ref:`ExportTimeSeriesLog <algm-ExportTimeSeriesLog>` now can export the first derivative of the sample log as an opotion.

@@ -89,7 +89,7 @@ void CreateLogTimeCorrection::logGeometryInformation(const Geometry::DetectorInf
 }
 
 //----------------------------------------------------------------------------------------------
-/** Calculate the log time correction for each pixel, i.e., correcton from event
+/** Calculate the log time correction for each pixel, i.e., correction from event
  * time at detector
  * to time at sample
  */

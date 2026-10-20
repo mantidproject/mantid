@@ -1267,7 +1267,7 @@ def nrPNRFn(  # noqa: C901
             RotateInstrumentComponent(wksp + "det", "DetectorBench", X="-1.0", Angle=str(a1))
             floodnorm(wksp + "det", floodfile)
             if subbgd == 1:
-                # Subract a per spectrum background
+                # Subtract a per spectrum background
                 Minus(wksp + "det", wbgdtemp, OutputWorkspace=wksp + "det")
                 ResetNegatives(InputWorkspace=wksp + "det", OutputWorkspace=wksp + "det", AddMinimum="0", ResetValue="0.0")
                 GroupDetectors(

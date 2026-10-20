@@ -104,7 +104,7 @@ std::string getDataFieldAddress(const NexusType nexusType, const TimeType type) 
     }
     break;
   default:
-    throw std::runtime_error("Unkown Nexus format. Not able to extract a date and time.");
+    throw std::runtime_error("Unknown Nexus format. Not able to extract a date and time.");
   };
 
   return datafieldaddress;

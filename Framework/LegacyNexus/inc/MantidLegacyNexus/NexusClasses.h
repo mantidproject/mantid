@@ -211,7 +211,7 @@ public:
    *  @param i :: The index along dim0()
    *  @param j :: The index along dim1()
    *  @throw runtime_error if the data have not been loaded / initialized.
-   *  @throw range_error if the indeces point outside the buffer.
+   *  @throw range_error if the indices point outside the buffer.
    *  @return A reference to the value
    */
   const T &operator()(int i, int j) const { return this->operator[](i * dim1() + j); }
@@ -221,7 +221,7 @@ public:
    *  @param j :: The index along dim1()
    *  @param k :: The index along dim2()
    *  @throw runtime_error if the data have not been loaded / initialized.
-   *  @throw range_error if the indeces point outside the buffer.
+   *  @throw range_error if the indices point outside the buffer.
    *  @return A reference to the value
    */
   const T &operator()(int i, int j, int k) const { return this->operator[]((i * dim1() + j) * dim2() + k); }

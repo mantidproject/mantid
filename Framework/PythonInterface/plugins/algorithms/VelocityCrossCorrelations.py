@@ -128,7 +128,7 @@ class VelocityCrossCorrelations(PythonAlgorithm):
         logger.information("Calculating velocities...")
         start_time = time.time()
 
-        # Initialise velocity arrray. Note that the first dimension is 2 elements shorter than the coordinate array.
+        # Initialise velocity array. Note that the first dimension is 2 elements shorter than the coordinate array.
         # Use finite difference methods to evaluate the time-derivative to 1st order
         # Shape: (# of particles) x (timesteps-2) x (# of spatial dimensions)
 
@@ -272,7 +272,7 @@ class VelocityCrossCorrelations(PythonAlgorithm):
             "cm": 9.5,
         }
 
-        logger.information("Averaging correlation Fourier transforms & scaling with the coherent neutron scattering lenghts...")
+        logger.information("Averaging correlation Fourier transforms & scaling with the coherent neutron scattering lengths...")
         start_time = time.time()
 
         # Scaling cross-correlations with the scattering lengths

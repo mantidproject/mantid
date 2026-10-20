@@ -41,7 +41,7 @@ Algorithms
 
 Properties
 ##########
--  String properties of algoithms are now trimmed of whitespace by default before being used by the algorithm.  So "  My filename   " will be trimmed to "My filename".
+-  String properties of algorithms are now trimmed of whitespace by default before being used by the algorithm.  So "  My filename   " will be trimmed to "My filename".
 
 New
 ###

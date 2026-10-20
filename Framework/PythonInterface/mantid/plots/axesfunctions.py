@@ -63,7 +63,7 @@ def _pcolormesh_nonortho(axes, workspace, nonortho_tr, *args, **kwargs):
     :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
     :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.api.IMDHistoWorkspace`
                       to extract the data from
-    :param nonortho_tr: Callable accepting two numpy arrays to transfrom from nonorthogonal
+    :param nonortho_tr: Callable accepting two numpy arrays to transform from nonorthogonal
                         coordinates to rectilinear image coordinates
     :param transpose: ``bool`` to transpose the x and y axes of the plotted dimensions of an MDHistoWorkspace
     """
@@ -840,7 +840,7 @@ def update_colorplot_datalimits(axes, mappables, axis="both"):
     :param axis: {'both', 'x', 'y'} which axis to operate on.
     """
     # ax.relim in matplotlib < 2.2 doesn't take into account of images
-    # and it doesn't support collections at all as of verison 3 so we'll take
+    # and it doesn't support collections at all as of version 3 so we'll take
     # over
     if not isinstance(mappables, collections.abc.Iterable):
         mappables = [mappables]

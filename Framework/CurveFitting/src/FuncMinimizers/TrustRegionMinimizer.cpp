@@ -537,7 +537,7 @@ double maxAbsVal(const DoubleFortranVector &v) {
 /** Find the minimum and maximum elements of a vector.
  *  @param v :: The searched vector.
  *  @returns :: A pair of doubles where the first is the minimum and
- *      the second is the maxumum.
+ *      the second is the maximum.
  */
 std::pair<double, double> minMaxValues(const DoubleFortranVector &v) {
   auto p = v.indicesOfMinMaxElements();
@@ -639,7 +639,7 @@ void rootsQuadratic(double a0, double a1, double a2, double tol, int &nroots, do
     }
   }
 
-  //  perfom a Newton iteration to ensure that the roots are accurate
+  //  perform a Newton iteration to ensure that the roots are accurate
 
   if (nroots >= 1) {
     auto p = (a2 * root1 + a1) * root1 + a0;
@@ -776,7 +776,7 @@ void rootsCubic(double a0, double a1, double a2, double a3, double tol, int &nro
     }
   }
 
-  //  perfom a Newton iteration to ensure that the roots are accurate
+  //  perform a Newton iteration to ensure that the roots are accurate
   double p = ((a3 * root1 + a2) * root1 + a1) * root1 + a0;
   double pprime = (THREE * a3 * root1 + TWO * a2) * root1 + a1;
   if (pprime != ZERO) {
@@ -1282,7 +1282,7 @@ void TrustRegionMinimizer::calculateStep(const DoubleFortranMatrix &J, const Dou
   //
   //  where D is diagonal
   //
-  //  our probem in naturally in the form
+  //  our problem in naturally in the form
   //
   //  d = arg min_p   v^T p + 0.5 * p^T H p
   //        s.t. ||p|| \leq Delta

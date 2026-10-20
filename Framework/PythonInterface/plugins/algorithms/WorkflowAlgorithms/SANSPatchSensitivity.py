@@ -66,7 +66,7 @@ class SANSPatchSensitivity(PythonAlgorithm):
 
     def __get_component_to_patch(self, workspace, component_name):
         """
-        Get the component name to apply the pacth
+        Get the component name to apply the patch
         Either from the field or from the IDF parameters
         """
         instrument = workspace.getInstrument()
@@ -118,7 +118,7 @@ class SANSPatchSensitivity(PythonAlgorithm):
                 e_to_calculate_fit.append(in_ws.e(detector_idx).sum())
 
         degree = self.getProperty("DegreeOfThePolynomial").value
-        # Returns coeffcients for the polynomial fit
+        # Returns coefficients for the polynomial fit
 
         if len(id_to_calculate_fit) <= 50:
             Logger("SANSPatchSensitivity").warning("Tube %s has not enough data for polyfit." % tube_in_input_ws.getFullName())

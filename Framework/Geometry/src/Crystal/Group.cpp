@@ -127,7 +127,7 @@ bool Group::isInvariant(const Kernel::DblMatrix &tensor, double tolerance) const
 /// Returns true if both groups contain the same set of symmetry operations.
 bool Group::operator==(const Group &other) const { return m_operationSet == other.m_operationSet; }
 
-/// Returns true if groups are different from eachother.
+/// Returns true if groups are different from each other.
 bool Group::operator!=(const Group &other) const { return !(this->operator==(other)); }
 
 /// Checks whether a certain group axiom is fulfilled, can be used as a more

@@ -89,7 +89,7 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
     def _get_spectra_index(self, input_ws):
         """
-        Gets the index of the two monitors and first detector for the current instrument configurtion.
+        Gets the index of the two monitors and first detector for the current instrument configuration.
         Assumes monitors are named monitor1 and monitor2
         """
 
@@ -153,7 +153,7 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         out_ws = "_unwrap_mon_out"
 
         # Unwrap monitor - inWS contains M1,M2,S1 - outWS contains unwrapped Mon
-        # Unwrap s1>2 to L of S2 (M2) ie 38.76  Ouput is in wavelength
+        # Unwrap s1>2 to L of S2 (M2) ie 38.76  Output is in wavelength
         _, join = UnwrapMonitor(InputWorkspace=input_ws, OutputWorkspace=out_ws, LRef="37.86")
 
         # Fill bad (dip) in spectrum

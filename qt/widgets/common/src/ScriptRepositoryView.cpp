@@ -49,7 +49,7 @@ const QString install_mantid_label =
 const QString installation_in_progress = "<html><head/><body><p><span style=\" font-weight:600;\">"
                                          "Installing Script Repository Installation in background!</span></p>"
                                          "<p>You may continue to use mantid.</p>"
-                                         "<p>The Result Log willl give you information of the installation "
+                                         "<p>The Result Log will give you information of the installation "
                                          "progress.</p>"
                                          "<p>When finished, please, reopen the <span style=\" "
                                          "font-weight:600;\">Script Repository</span>. </p></body></html>";
@@ -403,7 +403,7 @@ QIcon ScriptRepositoryView::RepoDelegate::getIcon(const QString &state) const {
  *   - Download: for the other cases
  *
  * @param event: The event given by the framework
- * @param model: Pointer to the model needed to retrive the status of the entry
+ * @param model: Pointer to the model needed to retrieve the status of the entry
  * @param index: identifies the entry (file/folder)
  * @param option: Provided by the framewor, and passed on to the base class.
  * @return true if it handles or false to ignore.
@@ -502,7 +502,7 @@ void ScriptRepositoryView::CheckBoxDelegate::paint(QPainter *painter, const QSty
  *  trigger the action 'setFalse' if the current state is 'true'.
  *
  * @param event: The event given by the framework
- * @param model: Pointer to the model needed to retrive the status of the entry
+ * @param model: Pointer to the model needed to retrieve the status of the entry
  * @param index: identifies the entry (file/folder)
  * @param option: Provided by the framewor, and passed on to the base class.
  * @return true if it handles or false to ignore.
@@ -518,7 +518,7 @@ bool ScriptRepositoryView::CheckBoxDelegate::editorEvent(QEvent *event, QAbstrac
     return model->setData(index, action, Qt::EditRole);
   } else {
     // QStyledItemDelegate::editorEvent(event, model, option, index);
-    return true; // Does not allow the event to be catched by another one
+    return true; // Does not allow the event to be caught by another one
   }
 }
 

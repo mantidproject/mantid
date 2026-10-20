@@ -20,7 +20,7 @@
  * linked to the unittest executable and is therefore loaded
  * by the OS. On Windows each DLL has a private symbol table
  * and importing mantid.kernel as part of the unit test
- * only intializes the numpy c api for that copy of the
+ * only initializes the numpy c api for that copy of the
  * shared library. The unittest executable also sees a secondary
  * copy from the dynamic linking. The C API pointer for this
  * copy of the library also needs initializing and this function

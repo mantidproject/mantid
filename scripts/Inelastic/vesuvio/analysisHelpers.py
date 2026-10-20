@@ -93,13 +93,13 @@ def fun_derivative3(x, fun, g_log):  # Used to evaluate numerically the FSE term
         denom[i] = x[i + 1] - x[i]
 
     denom = np.power(denom, 3.0)
-    indicies = [1, 2, 3, 4, 5, 6]
+    indices = [1, 2, 3, 4, 5, 6]
     factors = [-1584.0, 387.0, 488.0, -192.0, 24.0, -1.0]
 
     for i in range(6, len(fun) - 6):
         tmp = 0.0
-        for j in range(len(indicies)):
-            tmp += factors[j] * fun[i + indicies[j]] - factors[j] * fun[i - indicies[j]]
+        for j in range(len(indices)):
+            tmp += factors[j] * fun[i + indices[j]] - factors[j] * fun[i - indices[j]]
         if denom[i] != 0:
             derivative[i] = tmp / denom[i]
         else:

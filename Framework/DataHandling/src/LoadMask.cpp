@@ -252,7 +252,7 @@ void LoadMask::init() {
                   "ISIS ASCII. ");
   declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("RefWorkspace", "", Direction::Input,
                                                                             PropertyMode::Optional),
-                  "The name of the workspace wich defines instrument and spectra, "
+                  "The name of the workspace which defines instrument and spectra, "
                   "used as the source of the spectra-detector map for the mask to load. "
                   "The instrument, attached to this workspace has to be the same as the "
                   "one specified by 'Instrument' property");
@@ -511,7 +511,7 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask, std::vector<int32_t> &mask
 }
 
 //----------------------------------------------------------------------------------------------
-/** Initalize Poco XML Parser
+/** Initialize Poco XML Parser
  * @param filename  -- name of the xml file to process.
  */
 void LoadMask::initializeXMLParser(const std::string &filename) {
@@ -622,7 +622,7 @@ void LoadMask::parseXML() {
 
   convertToVector(singleSp, pairSp, m_maskSpecID);
   convertToVector(maskSingleDet, maskPairDet, m_maskDetID);
-  // NOTE: -- TODO: NOT IMPLEMENTD -- if unmasking is implemented, should be
+  // NOTE: -- TODO: NOT IMPLEMENTED -- if unmasking is implemented, should be
   // enabled
   // convertToVector(umaskSingleDet, umaskPairDet, m_unMaskDetID);
 }

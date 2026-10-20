@@ -173,7 +173,7 @@ MatrixWorkspace_sptr CorrectToFile::loadInFile(const std::string &corrFile) {
  */
 void CorrectToFile::doWkspAlgebra(const API::MatrixWorkspace_sptr &lhs, const API::MatrixWorkspace_sptr &rhs,
                                   const std::string &algName, API::MatrixWorkspace_sptr &result) {
-  g_log.information() << "Initalising the algorithm " << algName << '\n';
+  g_log.information() << "Initialising the algorithm " << algName << '\n';
   progress(LOAD_TIME, "Applying correction");
   auto algebra = createChildAlgorithm(algName, LOAD_TIME, 1.0);
   algebra->setProperty("LHSWorkspace", lhs);

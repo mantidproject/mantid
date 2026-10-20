@@ -358,7 +358,7 @@ p, li { white-space: pre-wrap; }
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Directory to save outcome of the data reduction&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="text">
-                  <string>Working Direcotry</string>
+                  <string>Working Directory</string>
                  </property>
                 </widget>
                </item>

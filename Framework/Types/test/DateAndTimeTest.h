@@ -185,7 +185,7 @@ public:
 
     a = DateAndTime("1990-01-02 00:01:02.345");
     p = boost::posix_time::from_iso_string("19900102T000002.000");
-    // boost ptime gets converted to ptime implicitely
+    // boost ptime gets converted to ptime implicitly
     td = a - p;
     TS_ASSERT_EQUALS(td, DateAndTime::durationFromNanoseconds(int64_t(60345000000LL)));
   }

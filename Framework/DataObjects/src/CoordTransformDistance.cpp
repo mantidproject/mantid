@@ -88,7 +88,7 @@ void CoordTransformDistance::apply(const coord_t *inputVector, coord_t *outVecto
   if (outD == 1) {
     coord_t distanceSquared = 0;
     if (m_eigenvals.size() == 3) {
-      // ellipsoid transfrom with ratio of axes given by standard deviation
+      // ellipsoid transform with ratio of axes given by standard deviation
       // i.e. sqrt(eigenvals)
       for (size_t d = 0; d < inD; d++) {
         // do dot prod with eigenvector

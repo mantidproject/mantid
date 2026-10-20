@@ -65,7 +65,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    // Get ouput
+    // Get output
     MatrixWorkspace_sptr outws =
         std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("ReducedData"));
     TS_ASSERT(outws);
@@ -123,7 +123,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    // Get ouput
+    // Get output
     MatrixWorkspace_sptr outws =
         std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("ReducedData"));
     TS_ASSERT(outws);
@@ -165,7 +165,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    // Get ouput
+    // Get output
     MatrixWorkspace_sptr outws =
         std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("ReducedData"));
     TS_ASSERT(outws);
@@ -258,7 +258,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    // Get ouput
+    // Get output
     MatrixWorkspace_sptr outws =
         std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("ReducedData"));
     TS_ASSERT(outws);

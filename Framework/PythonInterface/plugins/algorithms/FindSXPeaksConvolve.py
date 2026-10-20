@@ -43,7 +43,7 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
         return ["FindSXPeaks"]
 
     def summary(self):
-        return "Find single-crystal Bragg peaks in MatrixWorkspaces for instruments comprising rectangular detctors (such as SXD at ISIS)."
+        return "Find single-crystal Bragg peaks in MatrixWorkspaces for instruments comprising rectangular detectors (such as SXD at ISIS)."
 
     def PyInit(self):
         # Input

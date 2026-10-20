@@ -29,7 +29,7 @@ class CharIconPainter;
  * occurs both via the paint and pixmap functions on the objects made with this
  * class.
  *
- * The ownership of this object should be taken by a QIcon that recieves this as
+ * The ownership of this object should be taken by a QIcon that receives this as
  * it's constructor.
  */
 class EXPORT_OPT_MANTIDQT_ICONS CharIconEngine : public QIconEngine {

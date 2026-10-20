@@ -85,7 +85,7 @@ void MuonGroupDetectors::exec() {
 
     auto &detectorIDs = table->cell<std::vector<int>>(*rowIt, 0);
 
-    // Recieve detector IDs, but need workspace indices to group, so convert
+    // Receive detector IDs, but need workspace indices to group, so convert
     std::vector<size_t> wsIndices = inWS->getIndicesFromDetectorIDs(detectorIDs);
 
     if (wsIndices.size() != detectorIDs.size())

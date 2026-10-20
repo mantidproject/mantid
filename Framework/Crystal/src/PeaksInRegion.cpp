@@ -56,7 +56,7 @@ void PeaksInRegion::validateExtentsInput() const {
   const size_t facesN = this->numberOfFaces();
   std::stringstream outbuff;
   if (m_extents.size() != facesN) {
-    throw std::invalid_argument("Six commma separated entries for the extents expected");
+    throw std::invalid_argument("Six comma separated entries for the extents expected");
   }
   if (m_extents[0] > m_extents[1]) {
     outbuff << "xmin > xmax " << m_extents[0] << " > " << m_extents[1];

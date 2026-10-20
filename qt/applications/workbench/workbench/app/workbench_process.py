@@ -172,7 +172,7 @@ def qapplication():
         # share OpenGL contexts across the application
         QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
 
-        # set global compatability profile for OpenGL
+        # set global compatibility profile for OpenGL
         # We use deprecated OpenGL calls so anything with a profile version >= 3
         # causes widgets like the instrument view to fail to render
         gl_surface_format = QSurfaceFormat.defaultFormat()

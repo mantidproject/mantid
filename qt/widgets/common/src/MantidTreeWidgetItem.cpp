@@ -27,7 +27,7 @@ MantidTreeWidgetItem::MantidTreeWidgetItem(MantidTreeWidget *parent)
 MantidTreeWidgetItem::MantidTreeWidgetItem(const QStringList &list, MantidTreeWidget *parent)
     : QTreeWidgetItem(list), m_parent(parent), m_sortPos(0) {}
 
-/**Overidden operator.
+/**Overridden operator.
  * Must be passed its parent MantidTreeWidget, to facilitate correct sorting.
  */
 bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other) const {

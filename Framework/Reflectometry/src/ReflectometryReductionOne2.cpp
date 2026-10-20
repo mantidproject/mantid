@@ -35,7 +35,7 @@ using namespace Mantid::Indexing;
 
 namespace Mantid::Reflectometry {
 
-/*Anonomous namespace */
+/*Anonymous namespace */
 namespace {
 
 std::string const OUTPUT_WORKSPACE_DEFAULT_PREFIX("IvsQ");
@@ -513,7 +513,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(const Ma
   if (xUnit->unitID() == "TOF") {
 
     // If TransmissionProcessingInstructions are not passed then use
-    // passed processing instrucions
+    // passed processing instructions
     std::string transmissionCommands = "";
     if (getPointerToProperty("TransmissionProcessingInstructions")->isDefault()) {
       transmissionCommands = m_processingInstructions;
@@ -706,7 +706,7 @@ bool ReflectometryReductionOne2::summingInQ() const {
 }
 
 /**
- * Find and cache the indicies of the detectors of interest
+ * Find and cache the indices of the detectors of interest
  */
 void ReflectometryReductionOne2::findDetectorGroups() {
   std::string instructions = m_processingInstructionsWorkspaceIndex;
@@ -739,7 +739,7 @@ void ReflectometryReductionOne2::findDetectorGroups() {
  * Find and cache the angle theta0 from which lines of constant Q emanate
  */
 void ReflectometryReductionOne2::findTheta0() {
-  // Only requried if summing in Q
+  // Only required if summing in Q
   if (!summingInQ()) {
     return;
   }
@@ -781,7 +781,7 @@ void ReflectometryReductionOne2::findTheta0() {
  * @throws : if the angle could not be found
  */
 double ReflectometryReductionOne2::twoThetaR(const std::vector<size_t> &detectors) {
-  // Get the twoTheta value for the destinaion pixel that we're projecting onto
+  // Get the twoTheta value for the destination pixel that we're projecting onto
   double twoThetaR = getDetectorTwoTheta(m_spectrumInfo, twoThetaRDetectorIdx(detectors));
   if (getPropertyValue("ReductionType") == "DivergentBeam") {
     // The angle that should be used in the final conversion to Q is

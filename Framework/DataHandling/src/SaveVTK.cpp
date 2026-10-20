@@ -28,7 +28,7 @@ using namespace API;
 SaveVTK::SaveVTK() : m_Xmin(0), m_Xmax(0) {}
 
 /**
- * Initilisation method.
+ * Initialisation method.
  * Simply declares the properties that this algorithm possesses
  */
 void SaveVTK::init() {

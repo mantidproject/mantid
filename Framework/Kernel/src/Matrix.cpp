@@ -257,7 +257,7 @@ template <typename T>
 Matrix<T> &Matrix<T>::operator+=(const Matrix<T> &A)
 /**
 Matrix addition THIS + A
-If the size is different then 0 is added where appropiate
+If the size is different then 0 is added where appropriate
 Matrix A is not expanded.
 @param A :: Matrix to add
 @return Matrix(this + A)
@@ -278,7 +278,7 @@ template <typename T>
 Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &A)
 /**
 Matrix subtractoin THIS - A
-If the size is different then 0 is added where appropiate
+If the size is different then 0 is added where appropriate
 Matrix A is not expanded.
 @param A :: Matrix to add
 @return Ma
@@ -299,7 +299,7 @@ template <typename T>
 Matrix<T> Matrix<T>::operator+(const Matrix<T> &A) const
 /**
 Matrix addition THIS + A
-If the size is different then 0 is added where appropiate
+If the size is different then 0 is added where appropriate
 Matrix A is not expanded.
 @param A :: Matrix to add
 @return Matrix(this + A)
@@ -314,7 +314,7 @@ Matrix<T> Matrix<T>::operator-(const Matrix<T> &A) const
 /**
 Matrix subtraction THIS - A
 If the size is different then 0 is subtracted where
-appropiate. This matrix determines the size
+appropriate. This matrix determines the size
 @param A :: Matrix to add
 @return Matrix(this + A)
 */
@@ -388,7 +388,7 @@ template <typename T>
 V3D Matrix<T>::operator*(const V3D &Vx) const
 /**
 Matrix multiplication THIS * V
-@param Vx :: Colunm vector to multiply by
+@param Vx :: Column vector to multiply by
 @throw MisMatch<size_t> if there is a size mismatch.
 @return Matrix(This * A)
 */
@@ -660,7 +660,7 @@ Zeros all elements of the matrix
 template <typename T>
 void Matrix<T>::identityMatrix()
 /**
-Makes the matrix an idenity matrix.
+Makes the matrix an identity matrix.
 Zeros all the terms outside of the square
 */
 {
@@ -674,7 +674,7 @@ Zeros all the terms outside of the square
 }
 template <typename T> void Matrix<T>::setColumn(const size_t nCol, const std::vector<T> &newCol) {
   if (nCol >= this->m_numColumns) {
-    throw(std::invalid_argument("nCol requested> nCol availible"));
+    throw(std::invalid_argument("nCol requested> nCol available"));
   }
   size_t m_numRowsM = newCol.size();
   if (m_numRows < m_numRowsM)
@@ -685,7 +685,7 @@ template <typename T> void Matrix<T>::setColumn(const size_t nCol, const std::ve
 }
 template <typename T> void Matrix<T>::setRow(const size_t nRow, const std::vector<T> &newRow) {
   if (nRow >= this->m_numRows) {
-    throw(std::invalid_argument("nRow requested> nRow availible"));
+    throw(std::invalid_argument("nRow requested> nRow available"));
   }
   size_t m_numColumnsM = newRow.size();
   if (m_numColumns < m_numColumnsM)
@@ -1083,7 +1083,7 @@ the lower part is zero.
         jmax = j;
       }
     }
-    if (Pmax < 1e-8) // maxtrix signular
+    if (Pmax < 1e-8) // maxtrix singular
     {
       //          std::cerr<<"Matrix Singular"<<'\n';
       return 0;
@@ -1678,7 +1678,7 @@ template <typename T> void fillFromStream(std::istream &is, Kernel::Matrix<T> &i
 
 ///\cond TEMPLATE
 
-// Explicit instatiations. Avoid duplicate symbol definitions in
+// Explicit instantiations. Avoid duplicate symbol definitions in
 // client libraries. This must match the explicit declaration list
 // in the header. MSVC/gcc differ in whether these symbols need to be
 // marked as exported

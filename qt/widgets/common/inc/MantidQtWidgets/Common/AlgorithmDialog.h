@@ -228,7 +228,7 @@ protected slots:
 protected:
   /// Parse out the input from the dialog
   void parse();
-  /// Test if the given name's widget has been explicity asked to be enabled
+  /// Test if the given name's widget has been explicitly asked to be enabled
   bool requestedToKeepEnabled(const QString &propName) const;
   /// Get the property value from either the previous input store or from Python
   /// argument

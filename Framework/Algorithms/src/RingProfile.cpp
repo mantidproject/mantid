@@ -355,7 +355,7 @@ void RingProfile::checkInputsForNumericWorkspace(const API::MatrixWorkspace_sptr
   // check minradius is inside the limits of the region of the instrument
   if (centre_x - min_radius > max_v_x || centre_x + min_radius < min_v_x || centre_y - min_radius > max_v_y ||
       centre_y + min_radius < min_v_y)
-    throw std::invalid_argument("The minimun radius is outside the region of the instrument");
+    throw std::invalid_argument("The minimum radius is outside the region of the instrument");
 }
 
 /**
@@ -494,7 +494,7 @@ void RingProfile::processNumericImageRingProfile(const API::MatrixWorkspace_sptr
  *ring defined as minRadio and maxRadio.
  *
  * To do this, it deducts the pixel position. This deduction follows the
- *followin assumption:
+ *following assumption:
  *
  *  - the spectrum_index == row number
  *  - the position in the 'Y' direction is given by getAxis(1)[spectrum_index]

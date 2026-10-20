@@ -131,7 +131,7 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
     scale_microsec = def_clock_scale / 1000.0;
   }
 
-  // the initial time is not set correctly so wait until primary and auxillary
+  // the initial time is not set correctly so wait until primary and auxiliary
   // time have been reset before sending events
   int64_t primary_time = 0;
   int64_t auxillary_time = 0;
@@ -218,7 +218,7 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
       throw std::runtime_error("Failure in event decoding");
     case DECODE_OOB_BYTE_1: // first OOB header byte
                             // OOB event Byte 1:  Bit 0 = 1 = OOB event, Bit 1 =
-                            // mode (only mode=0 suported currently), Bits 2-5 =
+                            // mode (only mode=0 supported currently), Bits 2-5 =
                             // c (OOB event type), Bits 6-7 = bitfieldsize_x
                             // / 8. bitfieldsize_x and following 2-bit
                             // bitfieldsizes are the number of bytes used to
@@ -319,7 +319,7 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
             }
           }
         } else {
-          // if times are ok pass the event trhough the call back, time units in
+          // if times are ok pass the event through the call back, time units in
           // nsec
           if (primary_ok && auxillary_ok)
             handler.addEvent(x, y, static_cast<double>(primary_time) * scale_microsec,
@@ -329,8 +329,8 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
 
       if (frame_start_event) {
         // reset timestamp at start of a new frame
-        // the auxillary time is only available in OOB mode
-        // otherwise, auxillary time = primary time
+        // the auxiliary time is only available in OOB mode
+        // otherwise, auxiliary time = primary time
         primary_time = 0;
         primary_ok = true;
         if (!oob_en) {

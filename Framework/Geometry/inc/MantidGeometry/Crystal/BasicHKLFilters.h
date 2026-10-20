@@ -70,7 +70,7 @@ public:
  *
  * This class takes a UnitCell object and calculates the spacing of
  * the lattice planes for each HKL. If the lattice spacing is within
- * the spcified range of values, the reflection is allowed.
+ * the specified range of values, the reflection is allowed.
  *
  * If the first constructor with only dMin is used, dMax is taken to
  * be the lattice parameter with the largest value. There can not be

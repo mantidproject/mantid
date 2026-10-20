@@ -45,7 +45,7 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
     def summary(self):
         return (
             "Finds multiple UB matrices using lattice parameters - can be used to find UBs in the presence of "
-            "mutiple domains, crystallites or in the presence of spurious peaks."
+            "multiple domains, crystallites or in the presence of spurious peaks."
         )
 
     def PyInit(self):

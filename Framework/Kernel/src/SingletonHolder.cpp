@@ -20,7 +20,7 @@ CleanupList &cleanupList() {
 
 /// Intended to be registered to atexit() that will clean up
 /// all registered singletons
-/// This function may be registed with atexit() more than once, so it needs to
+/// This function may be registered with atexit() more than once, so it needs to
 /// clear the list once it has called all the functions
 void cleanupSingletons() {
   auto &deleters = cleanupList();

@@ -70,7 +70,7 @@ private:
 
   void loadVisualNormalization(const std::string &key, std::optional<Mantid::API::MDNormalization> &normalization);
 
-  /// Load all the affine matricies
+  /// Load all the affine matrices
   void loadAffineMatricies(const API::IMDWorkspace_sptr &ws);
   /// Load a given affine matrix
   API::CoordTransform *loadAffineMatrix(const std::string &entry_name);
@@ -78,7 +78,7 @@ private:
   /// Sets MDFrames for workspaces from legacy files
   void setMDFrameOnWorkspaceFromLegacyFile(const API::IMDWorkspace_sptr &ws);
 
-  /// Checks if a worspace is a certain type of legacy file
+  /// Checks if a workspace is a certain type of legacy file
   void checkForRequiredLegacyFixup(const API::IMDWorkspace_sptr &ws);
 
   /// Negative scaling for Q dimensions

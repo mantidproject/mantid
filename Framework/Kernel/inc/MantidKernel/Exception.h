@@ -48,7 +48,7 @@ namespace Kernel {
         <li><b>std::invalid_argument</b> - Thrown to report invalid arguments to
   functions.</li>
         <li><b>NotImplementedError</b> - Thrown if accessing areas of code that
-  are not implmented yet.</li>
+  are not implemented yet.</li>
       </ul>
       </li>
       <li><b>std::runtime_error</b> - Superclass for all runtime errors, never
@@ -114,7 +114,7 @@ public:
 /// happened
 class MANTID_KERNEL_DLL ParseError final : public FileError {
 private:
-  /// Number of the line where the error occured
+  /// Number of the line where the error occurred
   const int m_lineNumber;
   /// The message returned by what()
   std::string m_outMessage;

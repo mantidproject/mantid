@@ -262,7 +262,7 @@ class Mask(ReductionStep):
 
     def _infinite_cylinder(self, centre, radius, axis, id="shape"):
         """
-        Generates xml code for an infintely long cylinder
+        Generates xml code for an infinitely long cylinder
         @param centre: a tuple for a point on the axis
         @param radius: cylinder radius
         @param axis: cylinder orientation
@@ -294,7 +294,7 @@ class Mask(ReductionStep):
 
     def _finite_cylinder(self, centre, radius, height, axis, id="shape"):
         """
-        Generates xml code for an infintely long cylinder
+        Generates xml code for an infinitely long cylinder
         @param centre: a tuple for a point on the axis
         @param radius: cylinder radius
         @param height: cylinder height

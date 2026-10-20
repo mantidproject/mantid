@@ -93,7 +93,7 @@ void sanityCheck(const Histogram &input, const Histogram &output, const size_t m
   }
   if (outPoints.front() < inPoints.front() || outPoints.back() > inPoints.back()) {
     throw std::runtime_error("interpolate - input does not cover all points in "
-                             "output. Extrapolation not suppoted.");
+                             "output. Extrapolation not supported.");
   }
   if (!std::is_sorted(inPoints.cbegin(), inPoints.cend())) {
     throw std::runtime_error("interpolate - input X data must be sorted in ascending order.");

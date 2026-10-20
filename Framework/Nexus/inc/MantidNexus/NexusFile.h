@@ -212,7 +212,7 @@ private:
   // EXPLORE FILE LEVEL ENTRIES / ATTRIBUTES
 
   /** get the ID of current open location
-   * \returns if a datset is open, the ID of the dataset; else ID of open group
+   * \returns if a dataset is open, the ID of the dataset; else ID of open group
    */
   hid_t getCurrentId() const;
 
@@ -263,7 +263,7 @@ public:
    * Create a data field with the specified information.
    *
    * \param name The name of the field to create (i.e. "distance").
-   * \param type The primative type of the field (i.e. "Nexus::FLOAT32").
+   * \param type The primitive type of the field (i.e. "Nexus::FLOAT32").
    * \param dims The dimensions of the field.
    * \param open_data Whether or not to open the data after creating it.
    */
@@ -273,7 +273,7 @@ public:
    * Create a data field with the specified information.
    *
    * \param name The name of the field to create (i.e. "distance").
-   * \param type The primative type of the field (i.e. "Nexus::FLOAT32").
+   * \param type The primitive type of the field (i.e. "Nexus::FLOAT32").
    * \param length For 1D data, the length of the 1D array
    * \param open_data Whether or not to open the data after creating it.
    */

@@ -68,7 +68,7 @@ PoldiAbstractDetector_sptr PoldiInstrumentAdapter::detector() const { return m_d
 
 /** Returns the spectrum stored in the adapter
  *
- * @return PoldiSourceSpectrum, as given in the insturment configuration.
+ * @return PoldiSourceSpectrum, as given in the instrument configuration.
  */
 PoldiSourceSpectrum_sptr PoldiInstrumentAdapter::spectrum() const { return m_spectrum; }
 
@@ -183,7 +183,7 @@ double PoldiInstrumentAdapter::getChopperSpeedTargetFromRun(const Run &runInform
  * Checks if the chopper speed matches the target value
  *
  * If runInformation contains the chopper target speed, this method checks
- *whether the actural speed
+ *whether the actual speed
  * agrees with the target.
  *
  * If the information is not present, it's most likely an older data file, where
@@ -221,7 +221,7 @@ bool PoldiInstrumentAdapter::chopperSpeedMatchesTarget(const Run &runInformation
  *requested
  * data type, an std::invalid_argument exception is thrown.
  *
- * @param runInformation :: Run information that cotains the property with
+ * @param runInformation :: Run information that contains the property with
  *propertyName
  * @param propertyName :: Property name that should be extracted
  * @return Value of property as double

@@ -33,7 +33,7 @@ class HistogramIterator;
 /** Histogram
 
   Histogram is a container for objects that together represent a histogram. In
-  the simpest case this are bin edges, counts (e.g., neutron counts from an
+  the simplest case this are bin edges, counts (e.g., neutron counts from an
   experiment), and statistical uncertainties for these counts. These three
   objects are also referred to as X, Y, and E data of the histogram.
 

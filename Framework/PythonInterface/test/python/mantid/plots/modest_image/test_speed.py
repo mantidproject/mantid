@@ -85,7 +85,7 @@ def main():
     print("Test image dimensions: %i x %i" % data.shape)
     for im in [mi.AxesImage, ModestImage]:
         print("**********************************")
-        print("Performace Tests for %s" % im.__name__)
+        print("Performance Tests for %s" % im.__name__)
         print("**********************************")
         time_draw(im)
         time_move(im)

@@ -59,7 +59,7 @@ class AlgHistoryTreeWidget : public QTreeWidget {
 
 signals:
   void updateAlgorithmHistoryWindow(Mantid::API::AlgorithmHistory_const_sptr algHistory);
-  void unrollAlgorithmHistory(const std::vector<int> &indicies);
+  void unrollAlgorithmHistory(const std::vector<int> &indices);
   void rollAlgorithmHistory(int index);
 
 public:

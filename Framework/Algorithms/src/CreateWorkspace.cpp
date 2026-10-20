@@ -68,7 +68,7 @@ void CreateWorkspace::init() {
       "Name of a parent workspace.");
   declareProperty(std::make_unique<ArrayProperty<double>>("Dx"), "X error values for workspace (optional).");
   declareProperty("ParallelStorageMode", "",
-                  "The parallel storage mode of the output workspace for MPI builds. This paramter has been deprecated "
+                  "The parallel storage mode of the output workspace for MPI builds. This parameter has been deprecated "
                   "and will be ignored because MPI support has been removed from Mantid. ");
 }
 

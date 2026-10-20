@@ -389,7 +389,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("SpectrumMetaData", "SpectrumNumber,Q,Angle"));
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
-    // the algorithm will have used a defualt and written a file to disk
+    // the algorithm will have used a default and written a file to disk
     TS_ASSERT(std::filesystem::exists(filename));
     std::filesystem::remove(filename);
 
@@ -605,7 +605,7 @@ public:
     // the problem is that this will throw regardless as no numbers below zero can
     // get in so i have to go over the bounds
     // so i have to either force Max higher or overlap, and both are tested
-    // separatly
+    // separately
     // the validator seems to replace "-1" with the same as EMPTY_INT() so the
     // bounds aren't checked
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMax", "7"));
@@ -664,7 +664,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
-    // the algorithm will have used a defualt and written a file to disk
+    // the algorithm will have used a default and written a file to disk
     TS_ASSERT(std::filesystem::exists(filename));
     std::filesystem::remove(filename);
 
@@ -757,7 +757,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
-    // the algorithm will have used a defualt and written a file to disk
+    // the algorithm will have used a default and written a file to disk
     TS_ASSERT(std::filesystem::exists(filename));
     std::filesystem::remove(filename);
 
@@ -915,7 +915,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
-    // the algorithm will have used a defualt and written a file to disk
+    // the algorithm will have used a default and written a file to disk
     TS_ASSERT(std::filesystem::exists(filename));
     std::filesystem::remove(filename);
 

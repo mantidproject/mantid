@@ -46,10 +46,10 @@ class EnggVanadiumCorrectionsTest(unittest.TestCase):
         # absolutely wrong properties passed
         self.assertRaises(TypeError, sapi.EnggVanadiumCorrections, File="foo", Bank="1")
 
-        # Wrong (mispelled) Workspace property
+        # Wrong (misspelled) Workspace property
         self.assertRaises(TypeError, sapi.EnggVanadiumCorrections, InputWorkspace="anything_goes")
 
-        # mispelled VanadiumWorkspace
+        # misspelled VanadiumWorkspace
         self.assertRaises(
             TypeError,
             sapi.EnggVanadiumCorrections,
@@ -58,7 +58,7 @@ class EnggVanadiumCorrectionsTest(unittest.TestCase):
             CurvesWorkspace=self.__class__._van_curves_ws,
         )
 
-        # mispelled CurvesWorkspace
+        # misspelled CurvesWorkspace
         self.assertRaises(
             TypeError,
             sapi.EnggVanadiumCorrections,
@@ -66,7 +66,7 @@ class EnggVanadiumCorrectionsTest(unittest.TestCase):
             CurveWorkspace=self.__class__._van_curves_ws,
         )
 
-        # mispelled IntegrationWorkspace
+        # misspelled IntegrationWorkspace
         self.assertRaises(
             TypeError,
             sapi.EnggVanadiumCorrections,
@@ -74,7 +74,7 @@ class EnggVanadiumCorrectionsTest(unittest.TestCase):
             CurvesWorkspace=self.__class__._van_curves_ws,
         )
 
-        # mispelled SplineBreakPoints
+        # misspelled SplineBreakPoints
         self.assertRaises(
             TypeError,
             sapi.EnggVanadiumCorrections,

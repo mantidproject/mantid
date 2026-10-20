@@ -18,7 +18,7 @@ namespace Crystal {
 class ICluster;
 class ImplClusterRegister;
 
-/** ClusterRegister : A fly-weight ICluster regeister. Handles the logic of
+/** ClusterRegister : A fly-weight ICluster register. Handles the logic of
   merging clusters.
 */
 class MANTID_CRYSTAL_DLL ClusterRegister {

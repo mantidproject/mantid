@@ -20,7 +20,7 @@ namespace DataObjects {
   Uses LOKI techniques for choosing the overload addition operation based on
   embedded type arguments in the respective MDLeanEventTypes. This solution is
   nice because depending upon the workspace type, only one of the private
-  addEvent funtions is instantiated. For usage, you only need to know the
+  addEvent functions is instantiated. For usage, you only need to know the
   dimensionality of the workspace,
   not the underlying type of MDEvent being used.
 

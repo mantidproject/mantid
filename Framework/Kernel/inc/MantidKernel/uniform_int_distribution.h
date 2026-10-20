@@ -14,7 +14,7 @@
 // https://github.com/llvm-mirror/libcxx/blob/master/include/algorithm#L2965
 //
 // Each of our supported platforms has the header but minor differences in the
-// results yield problems consistency of our tests across platorms.
+// results yield problems consistency of our tests across platforms.
 //
 // Modifications to enable compilation:
 //  * define required macros just for this header

@@ -118,7 +118,7 @@ void PointByPointVCorrection::exec() {
     //       here, but that seemed to have strange effects in Windows Debug
     //       builds which caused the unit tests
     //       to sometimes fail.  Maybe this is some compiler bug to do with
-    //       using bind2nd within the parrallel macros.
+    //       using bind2nd within the parallel macros.
 
     // Now result is s_i/v_i*Dlam_i*(sum_i s_i)/(sum_i S_i/v_i*Dlam_i)
     std::transform(resultY.begin(), resultY.end(), resultY.begin(), [&factor](double rY) { return rY * factor; });

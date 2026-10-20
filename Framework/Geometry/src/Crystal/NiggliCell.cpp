@@ -135,10 +135,10 @@ NiggliCell::NiggliCell(const UnitCell &uc, const DblMatrix &Umatrix) : UnitCell(
 }
 
 /**
-    Check if a,b,c cell has angles satifying Niggli condition within epsilon.
+    Check if a,b,c cell has angles satisfying Niggli condition within epsilon.
     Specifically, check if all angles are strictly less than 90 degrees,
     or all angles are greater than or equal to 90 degrees.  The inequality
-    requirements are relaxed by an amount specified by the paramter epsilon
+    requirements are relaxed by an amount specified by the parameter epsilon
     to accommodate some experimental and/or rounding error in the calculated
     angles.
 

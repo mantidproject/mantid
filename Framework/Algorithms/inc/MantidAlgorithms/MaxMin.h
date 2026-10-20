@@ -30,7 +30,7 @@ namespace Algorithms {
 
     Optional Properties (assume that you count from zero):
     <UL>
-    <LI> ShowMin - boolean value to show the minimum (defult=false). If set to
+    <LI> ShowMin - boolean value to show the minimum (default=false). If set to
    true, it will show minimum, else it will show maximum</LI>
     <LI> Range_lower - The X value to search from (default 0)</LI>
     <LI> Range_upper - The X value to search to (default max)</LI>

@@ -377,7 +377,7 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent, const std::strin
   auto yrf = m_yvalues[(y * w) + x + w + 1];
   auto yrb = m_yvalues[(y * w) + x + 1];
 
-  // calculate midpoint of trapeziod
+  // calculate midpoint of trapezoid
   auto xpos = (xlb + xlf + xrf + xrb) / 4;
   auto ypos = (ylb + ylf + yrf + yrb) / 4;
 

@@ -45,7 +45,7 @@ public:
 
   void testEventWS() {
     pAlg->execute();
-    TSM_ASSERT("Should finish succesfully", pAlg->isExecuted());
+    TSM_ASSERT("Should finish successfully", pAlg->isExecuted());
     Mantid::API::Workspace_sptr spws;
     TS_ASSERT_THROWS_NOTHING(spws = AnalysisDataService::Instance().retrieve("testMDEvWorkspace"));
     TSM_ASSERT(" Worskpace should be retrieved", spws.get());
@@ -70,7 +70,7 @@ public:
     pAlg->setPropertyValue("MinValues", "-10,-10,-10,-100");
     pAlg->setPropertyValue("MaxValues", " 10, 10, 10, 100");
     pAlg->execute();
-    TSM_ASSERT("Should finish succesfully", pAlg->isExecuted());
+    TSM_ASSERT("Should finish successfully", pAlg->isExecuted());
     Mantid::API::Workspace_sptr spws;
     TS_ASSERT_THROWS_NOTHING(spws = AnalysisDataService::Instance().retrieve("testMDEvWorkspace"));
     TSM_ASSERT(" Worskpace should be retrieved", spws.get());

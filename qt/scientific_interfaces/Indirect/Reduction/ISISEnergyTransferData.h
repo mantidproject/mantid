@@ -26,7 +26,7 @@
   IETSaveData(line 260): contains the parameters used in saving the workspaces
   IETGroupOption(line 282): contains the available group options
   IETRebinType(289): contains the types of rebinning
-  IETGroupingConstants(295): constants used during the goruping process
+  IETGroupingConstants(295): constants used during the grouping process
 */
 
 namespace MantidQt::CustomInterfaces {

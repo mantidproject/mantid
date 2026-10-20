@@ -156,7 +156,7 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(const API::MatrixWorkspace_sptr 
  *  THIS METHOD ASSUMES THAT THE FITTING WAS DONE TO A GAUSSIAN FUNCTION.
  *  Note that the error value is left unchanged.
  *  @param input ::     The input workspace
- *  @param peakslist :: The succesfully fitted peaks
+ *  @param peakslist :: The successfully fitted peaks
  *  @return A workspace containing the peak-subtracted data
  */
 API::MatrixWorkspace_sptr StripPeaks::removePeaks(const API::MatrixWorkspace_const_sptr &input,

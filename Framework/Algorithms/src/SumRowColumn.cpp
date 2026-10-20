@@ -111,7 +111,7 @@ MatrixWorkspace_sptr SumRowColumn::integrateWorkspace() {
   g_log.debug() << "Integrating input workspace\n";
 
   auto childAlg = createChildAlgorithm("Integration");
-  // pass inputed values straight to this Child Algorithm, checking must be done
+  // pass inputted values straight to this Child Algorithm, checking must be done
   // there
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", getProperty("InputWorkspace"));
   childAlg->setProperty<double>("RangeLower", getProperty("XMin"));

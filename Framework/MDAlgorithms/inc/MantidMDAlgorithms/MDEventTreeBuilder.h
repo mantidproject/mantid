@@ -19,7 +19,7 @@ namespace MDAlgorithms {
  * Class to create the box structure of MDWorkspace. The algorithm:
  * The MASTER thread starting to build tree structure recursively,
  * if it finds the subtask to distribute N events N < threshold, the
- * it delegates this independent subtask to other thread, syncronisation
+ * it delegates this independent subtask to other thread, synchronisation
  * is implemented with queue and mutex.
  * @tparam ND :: number of Dimensions
  * @tparam MDEventType :: Type of created MDEvent [MDLeanEvent, MDEvent]

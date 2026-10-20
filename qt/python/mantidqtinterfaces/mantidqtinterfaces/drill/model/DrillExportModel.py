@@ -47,7 +47,7 @@ class DrillExportModel:
 
     def __init__(self, acquisitionMode):
         """
-        Create the export model by providing an aquisition mode.
+        Create the export model by providing an acquisition mode.
 
         Args:
             acquisitionMode (str): acquisition mode

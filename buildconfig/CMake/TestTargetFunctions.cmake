@@ -5,7 +5,7 @@ macro(add_framework_test_helpers target_name)
   )
   add_dependencies(${target_name} FrameworkTestHelpers)
 
-  # These are from the test helpers target, unfortuantely due to https://gitlab.kitware.com/cmake/cmake/-/issues/18090
+  # These are from the test helpers target, unfortunately due to https://gitlab.kitware.com/cmake/cmake/-/issues/18090
   # we have to manually specify this on a per-target basis as CMake isn't trusted to deduplicate the linked libs itself
 
   # This matches FrameworkTestHelper/CMakelists.txt

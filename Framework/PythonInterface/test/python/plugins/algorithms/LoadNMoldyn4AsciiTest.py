@@ -21,7 +21,7 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
 
     def setUp(self):
         # This test requires the directory to be provided, this is in the
-        # UnitTest directory so do get this from the serch directories
+        # UnitTest directory so do get this from the search directories
         data_dirs = config["datasearch.directories"].split(";")
         unit_test_data_dir = [p for p in data_dirs if "UnitTest" in p][0]
         self._data_directory = os.path.join(unit_test_data_dir, "nmoldyn4_data")

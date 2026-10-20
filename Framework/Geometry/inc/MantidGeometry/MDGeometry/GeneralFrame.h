@@ -15,7 +15,7 @@
 namespace Mantid {
 namespace Geometry {
 
-/** GeneralFrame : Any MDFrame that isn't related to momemtum transfer
+/** GeneralFrame : Any MDFrame that isn't related to momentum transfer
  */
 class MANTID_GEOMETRY_DLL GeneralFrame : public MDFrame {
 public:

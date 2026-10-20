@@ -131,7 +131,7 @@ public:
   //-----------------------------------------------------------------------------------
   /** Return into how many to split along a dimension for the top level
    *
-   * @return the splits in each dimesion for the top level
+   * @return the splits in each dimension for the top level
    */
   std::optional<std::vector<size_t>> getSplitTopInto() const {
     //      if (dim >= nd)
@@ -384,7 +384,7 @@ public:
   //-----------------------------------------------------------------------------------
   // increase the counter, calculatinb events at max;
   void rizeEventAtMax() { ++m_numEventsAtMax; }
-  /// return the numner of events, which are sitting at max depth and would be
+  /// return the number of events, which are sitting at max depth and would be
   /// split if not due to the max depth of the box they are occupying
   size_t getNumEventAtMax() const { return m_numEventsAtMax; }
   /// get range of id-s and increment box ID by this range;
@@ -468,7 +468,7 @@ private:
   /// Splitting # for all dimensions
   std::vector<size_t> m_splitInto;
 
-  /// Splittin # for all dimensions in the top level
+  /// Splitting # for all dimensions in the top level
   std::optional<std::vector<size_t>> m_splitTopInto;
 
   /// When you split a MDBox, it becomes this many sub-boxes

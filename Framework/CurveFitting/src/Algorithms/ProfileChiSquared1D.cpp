@@ -84,7 +84,7 @@ public:
     function->setParameter(m_fixedParameterIndex, originalParamValues[m_fixedParameterIndex] + p);
     function->fix(m_fixedParameterIndex);
 
-    // re run the fit to minimze the unfixed parameters
+    // re run the fit to minimize the unfixed parameters
     m_fitalg->execute();
     // find change in chi 2
     // num free parameters is the number of global free parameters - the 1 we've
@@ -408,7 +408,7 @@ void ProfileChiSquared1D::unfixParameters() {
   }
 }
 
-/// Restore the "fixed" status of previously unfixed paramters.
+/// Restore the "fixed" status of previously unfixed parameters.
 void ProfileChiSquared1D::refixParameters() {
   for (auto &fixedParameter : m_fixedParameters) {
     m_function->fix(fixedParameter);

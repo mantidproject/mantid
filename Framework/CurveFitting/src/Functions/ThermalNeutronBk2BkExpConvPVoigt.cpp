@@ -63,7 +63,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::init() {
   declareParameter("Width", 1.0, "width of the crossover region");
   declareParameter("Tcross", 1.0, "position of the centre of the crossover region");
 
-  // Peak profile related (9 ~ 16) Back to back Expoential
+  // Peak profile related (9 ~ 16) Back to back Exponential
   declareParameter("Alph0", 1.6, "exponential constant for rising part of epithermal neutron pulse");
   declareParameter("Alph1", 1.5, "exponential constant for rising part of expithermal neutron pulse");
   declareParameter("Beta0", 1.6, "exponential constant of decaying part of epithermal neutron pulse");
@@ -240,7 +240,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::calculateParameters(bool explicitoutput) 
 
   double dh, tof_h, eta, alpha, beta, H, sigma2, gamma, N;
 
-  // Calcualte Peak Position d-spacing and TOF
+  // Calculate Peak Position d-spacing and TOF
   if (m_cellParamValueChanged) {
     m_unitCell.set(latticeconstant, latticeconstant, latticeconstant, 90.0, 90.0, 90.0);
     dh = m_unitCell.d(mH, mK, mL);
@@ -269,7 +269,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::calculateParameters(bool explicitoutput) 
   sigma2 = sig0 * sig0 + sig1 * sig1 * std::pow(dh, 2) + sig2 * sig2 * std::pow(dh, 4);
   gamma = gam0 + gam1 * dh + gam2 * std::pow(dh, 2);
 
-  // - Calcualte H for the peak
+  // - Calculate H for the peak
   calHandEta(sigma2, gamma, H, eta);
 
   N = alpha * beta * 0.5 / (alpha + beta);
@@ -353,7 +353,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::functionLocal(double *out, const double *
     if (!(omega > -DBL_MAX && omega < DBL_MAX))
     {
      // Output with error
-     g_log.error() << "Calcuate Peak " << mH << ", " << mK << ", " << mL << "
+     g_log.error() << "Calculate Peak " << mH << ", " << mK << ", " << mL << "
     wrong!\n";
      bool explicitoutput = true;
      calculateParameters(d_h, tof_h, eta, alpha, beta, H, sigma2, gamma, N,
@@ -403,7 +403,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::function(std::span<double> const out,
   const double RIGHT_VALUE = m_centre + RANGE;
   auto iter_end = std::lower_bound(iter, xValues.end(), RIGHT_VALUE);
 
-  // 2. Calcualte
+  // 2. Calculate
   std::size_t pos(std::distance(xValues.begin(), iter)); // second loop variable
   for (; iter != iter_end; ++iter) {
     out[pos] = HEIGHT * calOmega(*iter - m_centre, m_eta, m_N, m_Alpha, m_Beta, m_fwhm, m_Sigma2, INVERT_SQRT2SIGMA);
@@ -467,7 +467,7 @@ double ThermalNeutronBk2BkExpConvPVoigt::fwhm() const
 
 //-------------  Private Function To Calculate Peak Profile
 //--------------------------------------------
-/** Calcualte H and eta for the peak
+/** Calculate H and eta for the peak
  */
 void ThermalNeutronBk2BkExpConvPVoigt::calHandEta(double sigma2, double gamma, double &H, double &eta) const {
   // 1. Calculate H
@@ -490,7 +490,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::calHandEta(double sigma2, double gamma, d
 
 //----------------------------------------------------------------------------------------------
 /** Calculate Omega(x) = ... ...
- * This is the core component to calcualte peak profile
+ * This is the core component to calculate peak profile
  */
 double ThermalNeutronBk2BkExpConvPVoigt::calOmega(const double x, const double eta, const double N, const double alpha,
                                                   const double beta, const double H, const double sigma2,

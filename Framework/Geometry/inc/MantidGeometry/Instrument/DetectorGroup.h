@@ -16,7 +16,7 @@ namespace Geometry {
 /** Holds a collection of detectors.
 Responds to IDetector methods as though it were a single detector.
 Currently, detectors in a group are treated as pointlike (or at least)
-homogenous entities. This means that it's up to the use to make
+homogeneous entities. This means that it's up to the use to make
 only sensible groupings of similar detectors since no weighting according
 to solid angle size takes place and the DetectorGroup's position is just
 a simple average of its constituents.
@@ -66,7 +66,7 @@ public:
   std::set<std::string> getParameterNames(bool recursive = true) const override;
   /// Returns a boolean indicating whether the parameter exists or not
   bool hasParameter(const std::string &name, bool recursive = true) const override;
-  // Hack used untill Geomertry can not exprot different types parematers
+  // Hack used until Geomertry can not export different types parematers
   // properly
   std::string getParameterType(const std::string &name, bool recursive = true) const override;
   /**

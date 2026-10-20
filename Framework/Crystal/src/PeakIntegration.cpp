@@ -136,7 +136,7 @@ void PeakIntegration::exec() {
     double col = peak.getCol();
     double row = peak.getRow();
 
-    // Average integer postion
+    // Average integer position
     int XPeak = boost::math::iround(col);
     int YPeak = boost::math::iround(row);
 

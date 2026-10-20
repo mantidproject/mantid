@@ -24,7 +24,7 @@ For D7 1-dimensional detector, it supports 3 types of pixel alignment relative t
 
 - **Nexus** is the alignment option where the pixel positions relative to banks are read from data available in D7 raw `.nxs` files
 
-- **YIGFile** is the alignment option that uses an Intrument Parameter File filled with *2theta* positions for each pixel relative to the bank *2theta*
+- **YIGFile** is the alignment option that uses an Instrument Parameter File filled with *2theta* positions for each pixel relative to the bank *2theta*
 
 All alignment methods allow for independent movement of banks.
 

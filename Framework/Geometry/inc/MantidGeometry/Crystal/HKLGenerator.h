@@ -73,7 +73,7 @@ namespace Geometry {
   actual filtering.
 
   Please be aware that the iterator increments infinitely if it passes the
-  specified maximimum HKL. In that case K and L remain constant while H is
+  specified maximum HKL. In that case K and L remain constant while H is
   incremented (until it overflows).
 
       @author Michael Wedel, ESS

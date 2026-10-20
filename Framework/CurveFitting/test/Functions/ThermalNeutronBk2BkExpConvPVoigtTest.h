@@ -24,7 +24,7 @@ public:
   static ThermalNeutronBk2BkExpConvPVoigtTest *createSuite() { return new ThermalNeutronBk2BkExpConvPVoigtTest(); }
   static void destroySuite(ThermalNeutronBk2BkExpConvPVoigtTest *suite) { delete suite; }
 
-  /** Test overriden set parameter value functions
+  /** Test overridden set parameter value functions
    */
   void test_setParameter() {
     ThermalNeutronBk2BkExpConvPVoigt peak;
@@ -48,7 +48,7 @@ public:
     cout << "Parameter Dtt1: Set To 123456.78.  Value got = " << parvalue2 << '\n';
   }
 
-  /** Test on calcualte peak parameters
+  /** Test on calculate peak parameters
    */
   void test_CalculatePeakParameters() {
     // 0. Mock data
@@ -198,7 +198,7 @@ public:
     return;
   }
 
-  /** Test on calcualte peak parameters including Gamma (i.e., E1())
+  /** Test on calculate peak parameters including Gamma (i.e., E1())
    * Parameter and data is from PG3_11485, Bank 1, (200) @ TOF = 46963
    */
   void test_CalculatePeakParameters2() {

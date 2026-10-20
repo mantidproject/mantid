@@ -28,7 +28,7 @@ class InfoIteratorBase : public boost::iterator_facade<InfoIteratorBase<T, InfoI
 public:
   /**
    * Constructor for base iterator
-   * @param info : Info object (T) to provide iterator ontop of.
+   * @param info : Info object (T) to provide iterator on top of.
    * @param index : start point of iterator
    * @param totalSize : Represents maximum length of info. i.e. total number of
    * items that can be iterated over.

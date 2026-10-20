@@ -147,7 +147,7 @@ void SaveCanSAS1D::exec() {
   }
 
   // write xml manually as the user requires a specific format were the
-  // placement of new line characters is controled
+  // placement of new line characters is controlled
   // and this can't be done in using the stylesheet part in Poco or libXML
   prepareFileToWriteEntry(getPropertyValue("FileName"));
 
@@ -162,7 +162,7 @@ void SaveCanSAS1D::exec() {
   m_outFile << sasRun;
 
   std::string dataUnit = m_workspace->YUnitLabel();
-  // look for xml special characters and replace with entity refrence
+  // look for xml special characters and replace with entity reference
   searchandreplaceSpecialChars(dataUnit);
 
   std::string sasData;
@@ -211,7 +211,7 @@ void SaveCanSAS1D::prepareFileToWriteEntry(const std::string &fileName) {
   bool append(getProperty("Append"));
 
   // write xml manually as the user requires a specific format were the
-  // placement of new line characters is controled
+  // placement of new line characters is controlled
   // and this can't be done in using the stylesheet part in Poco or libXML
   if (append) {
     append = openForAppending(fileName);
@@ -265,7 +265,7 @@ void SaveCanSAS1D::findEndofLastEntry() {
     // check we're in the correct place in the file
     static const char LAST_TAG[LAST_TAG_LEN + 1] = "</SASentry>";
     if (std::string(test_tag, LAST_TAG_LEN) != std::string(LAST_TAG, LAST_TAG_LEN)) {
-      // we'll allow some extra charaters so there is some variablity in where
+      // we'll allow some extra characters so there is some variablity in where
       // the tag might be found
       bool tagFound(false);
       // UNCERT should be less than the length of a SASentry
@@ -289,7 +289,7 @@ void SaveCanSAS1D::findEndofLastEntry() {
     // prepare to write to the place found by reading
     m_outFile.seekp(m_outFile.tellg(), std::ios::beg);
   } catch (std::fstream::failure &) {
-    // give users more explaination about no being able to read their files
+    // give users more explanation about no being able to read their files
     throw std::logic_error("Trouble reading existing data in the output file, "
                            "are you appending to an invalid CanSAS1D file?");
   }
@@ -297,7 +297,7 @@ void SaveCanSAS1D::findEndofLastEntry() {
 /** Write xml header tags including the root element and starting the SASentry
  *  element
  *  @param fileName :: the name of the file to write to
- *  @throw FileError if the file can't be opened or writen to
+ *  @throw FileError if the file can't be opened or written to
  */
 void SaveCanSAS1D::writeHeader(const std::string &fileName) {
   try {
@@ -326,7 +326,7 @@ void SaveCanSAS1D::searchandreplaceSpecialChars(std::string &input) {
       findIndex = input.find(specialchar, searchIndex);
       if (findIndex != std::string::npos) {
         searchIndex = findIndex + 1;
-        // replace with xml entity refrence
+        // replace with xml entity reference
         replacewithEntityReference(input, findIndex);
 
       } else {
@@ -380,7 +380,7 @@ void SaveCanSAS1D::createSASRootElement(std::string &rootElem) {
  */
 void SaveCanSAS1D::createSASTitleElement(std::string &sasTitle) {
   std::string title = m_workspace->getTitle();
-  // look for xml special characters and replace with entity refrence
+  // look for xml special characters and replace with entity reference
   searchandreplaceSpecialChars(title);
   sasTitle = "\n\t\t<Title>";
   sasTitle += title;
@@ -415,7 +415,7 @@ void SaveCanSAS1D::createSASRunElement(std::string &sasRun) {
  */
 void SaveCanSAS1D::createSASDataElement(std::string &sasData, size_t workspaceIndex) {
   std::string dataUnit = m_workspace->YUnitLabel();
-  // look for xml special characters and replace with entity refrence
+  // look for xml special characters and replace with entity reference
   searchandreplaceSpecialChars(dataUnit);
 
   // Workspaces that come out of the ISIS SANS reduction have had their
@@ -483,7 +483,7 @@ void SaveCanSAS1D::createSASSampleElement(std::string &sasSample) {
   // outFile<<sasSample;
   std::string sasSampleId = "\n\t\t\t<ID>";
   std::string sampleid = m_workspace->getTitle();
-  // look for xml special characters and replace with entity refrence
+  // look for xml special characters and replace with entity reference
   searchandreplaceSpecialChars(sampleid);
   sasSampleId += sampleid;
   sasSampleId += "</ID>";
@@ -630,7 +630,7 @@ void SaveCanSAS1D::createSASProcessElement(std::string &sasProcess) {
  *   SASsource(r)
  *     radiation(r)
  *   SAScollimation(r)
- *     aperature[name]
+ *     aperture[name]
  *       size
  *         x[units]
  *         y[units]
@@ -645,7 +645,7 @@ void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
   // Set name(r)
   std::string sasInstrName = "\n\t\t\t<name>";
   std::string instrname = m_workspace->getInstrumentName();
-  // look for xml special characters and replace with entity refrence
+  // look for xml special characters and replace with entity reference
   searchandreplaceSpecialChars(instrname);
   sasInstrName += instrname;
   sasInstrName += "</name>";

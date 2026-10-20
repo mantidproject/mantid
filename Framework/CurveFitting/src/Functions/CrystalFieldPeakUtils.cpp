@@ -245,7 +245,7 @@ void updatePeak(API::IPeakFunction &peak, double centre, double intensity, const
 }
 
 /// Update the peaks parameters after recalculationof the crystal field.
-/// @param spectrum :: A composite function containings the peaks to update.
+/// @param spectrum :: A composite function containing the peaks to update.
 ///                    May contain other functions (background) fix indices
 ///                    < iFirst.
 /// @param peakShape :: A shape of each peak as a name of an IPeakFunction.

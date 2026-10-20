@@ -258,7 +258,7 @@ def get_region_of_interest(workspace, radius=None, roi_files=None, mask_files=No
 
     The region of interest can be made up of a circle of detectors (with a given radius)
     around the beam centre, and/or one or more mask files, and/or the main detector bank.
-    Note that the mask files wont actually be used for masking, we're just piggy-backing
+    Note that the mask files won't actually be used for masking, we're just piggy-backing
     on the functionality that they provide. Note that in the case of a radius, we have
     to ensure that we do not use a workspace which already has masked detectors, since
     they would contribute to the ROI.

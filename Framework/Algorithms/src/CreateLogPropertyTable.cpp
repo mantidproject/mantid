@@ -149,7 +149,7 @@ namespace {
  *
  * "All"   - Retrieve pointers to all the children of a group.
  * "First" - Only retrieve a pointer to the first child of a group.
- * "None"  - No pointers are retreived.
+ * "None"  - No pointers are retrieved.
  *
  * @param wsNames     :: the list of workspaces to retrieve pointers to.
  * @param groupPolicy :: the policy by which to deal with group workspaces.
@@ -160,7 +160,7 @@ std::vector<MatrixWorkspace_sptr> retrieveMatrixWsList(const std::vector<std::st
                                                        GroupPolicy groupPolicy) {
   std::vector<MatrixWorkspace_sptr> matrixWsList;
 
-  // Get all the workspaces which are to be inspected for log proeprties.
+  // Get all the workspaces which are to be inspected for log properties.
   auto &ADS = AnalysisDataService::Instance();
   for (const auto &wsName : wsNames) {
 

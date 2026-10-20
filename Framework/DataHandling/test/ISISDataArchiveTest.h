@@ -44,7 +44,7 @@ protected:
 
   /**
    * Mocked out fileExists.
-   * Mock searchs for files with extensions.
+   * Mock searches for files with extensions.
    * This is a simplistic version. Will return m_mockFileExists
    * for any `path`.
    * Except for hard-coded case of path ending in .txt

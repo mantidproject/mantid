@@ -31,7 +31,7 @@ public:
 
 protected:
   ~PeaksIntersection() override = default;
-  /// Initalize the common properties.
+  /// Initialize the common properties.
   void initBaseProperties();
 
   /// Run the algorithm.
@@ -51,7 +51,7 @@ private:
   virtual bool pointInsideAllExtents(const Mantid::Kernel::V3D &testPoints,
                                      const Mantid::Kernel::V3D &peakCenter) const = 0;
 
-  /// Verfifies that the normals have been set up correctly such that the touch
+  /// Verifies that the normals have been set up correctly such that the touch
   /// point falls onto the plane. Use for debugging.
   virtual void checkTouchPoint(const Mantid::Kernel::V3D &touchPoint, const Mantid::Kernel::V3D &normal,
                                const Mantid::Kernel::V3D &faceVertex) const = 0;

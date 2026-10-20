@@ -80,7 +80,7 @@ unset(_code)
 unset(_result)
 unset(_output)
 
-# Handle switching between previously configured Python verions
+# Handle switching between previously configured Python versions
 if(Python_INCLUDE_DIR AND NOT Python_INCLUDE_DIR MATCHES ".*${Python_VERSION_MAJOR}\.${Python_VERSION_MINOR}.*")
   message(STATUS "Python version has changed. Clearing previous Python configuration.")
   unset_cached_python_variables()

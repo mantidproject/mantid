@@ -138,8 +138,8 @@ size_t doConnectedComponentLabeling(IMDIterator *iterator, BackgroundStrategy *c
           /* Record labels which appear to belong to the same cluster, but
            cannot be combined in this
            pass and will later need to be conjoined and resolved. As Labels
-           cannot be guarnteed to be
-           correcly provided for all neighbours until the end. We must store
+           cannot be guaranteed to be
+           correctly provided for all neighbours until the end. We must store
            indexes instead.
            */
           edgeIndexVec.emplace_back(currentIndex, neighIndex);

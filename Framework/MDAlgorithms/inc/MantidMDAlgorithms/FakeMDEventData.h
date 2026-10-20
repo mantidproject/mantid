@@ -26,7 +26,7 @@ public:
            "MDEventWorkspace, for use in testing.\nYou can create a blank "
            "MDEventWorkspace with CreateMDWorkspace.";
   }
-  /// Algorithm's verion for identification
+  /// Algorithm's version for identification
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override { return {"CreateMDWorkspace", "EvaluateMDFunction"}; }
   /// Algorithm's category for identification

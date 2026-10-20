@@ -138,7 +138,7 @@ public:
 
   void tearDown() override {
     API::AnalysisDataService::Instance().remove("input");
-    API::AnalysisDataService::Instance().remove("ouput");
+    API::AnalysisDataService::Instance().remove("output");
   }
 
   void test_exec() {

@@ -56,7 +56,7 @@ chopper_system:
       isDouble: True            # Is this a double disk system?
       isPhaseIndependent: False # Is this disk to be phased independently?
   # Now define how the frequencies of the choppers should be related
-  # This is an NxM matrix A where N is the number of choppers and M is the number of indepdent frequencies
+  # This is an NxM matrix A where N is the number of choppers and M is the number of independent frequencies
   # Such that A.F will give the N required frequencies for each chopper from the M input frequencies
   frequency_matrix:             # LET is run with two main frequencies:
     [[0, 0.5],                  #   f1: The frequency of the resolution chopper (Disk 5)

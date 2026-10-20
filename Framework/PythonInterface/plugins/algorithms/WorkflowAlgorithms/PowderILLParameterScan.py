@@ -65,7 +65,7 @@ class PowderILLParameterScan(PythonAlgorithm):
     def _hide(self, name):
         return "__" + self._out_name + "_" + name
 
-    def _hide_run(selfs, runnumber):
+    def _hide_run(self, runnumber):
         return "__" + runnumber
 
     def category(self):

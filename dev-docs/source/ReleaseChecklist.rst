@@ -169,7 +169,7 @@ Beta Testing Begins
 
       python release_editor.py --release 6.5.0 --git_token <your_git_token_here>
 
-  * Check the script has run correctly by checking all individual rst files have been moved into their respective 'used' directories. You could use the `unused_release_note_finder.py script <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/unused_release_note_finder.py>`__ for this (explained further bellow).
+  * Check the script has run correctly by checking all individual rst files have been moved into their respective 'used' directories. You could use the `unused_release_note_finder.py script <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/unused_release_note_finder.py>`__ for this (explained further below).
   * Look over the files to make sure they look roughly correct then submit a PR to be merged into ``release-next``.
 
 * Initial changes:
@@ -231,7 +231,7 @@ all of the Local Project Managers.
 
 * Check that all people with release roles are added to the *\#release-roles*
   Slack channel and others are removed.
-* Post on the *\#annoucements* slack channel reminding developers of the impending
+* Post on the *\#announcements* slack channel reminding developers of the impending
   release and stating that they have only 5 days left before the feature freeze.
 * Hold the release showcase meeting described above.
 
@@ -242,7 +242,7 @@ Feature Freeze Begins
 * Create a `project board <https://github.com/orgs/mantidproject/projects/>`__ to
   track the issues for the release
 * After the message that the release branch has been created, post on the
-  *\#annoucements* slack channel that only critical work should be merged to
+  *\#announcements* slack channel that only critical work should be merged to
   that branch. You can use an adapted version of the
   following announcement:
 

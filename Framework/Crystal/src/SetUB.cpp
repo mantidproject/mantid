@@ -70,7 +70,7 @@ void SetUB::init() {
                         "In plane vector perpendicular to k_i, when goniometer is at 0");
   this->declareProperty(std::make_unique<ArrayProperty<double>>("UB", std::move(zeroes), threeVthree), "UB Matrix");
   this->declareProperty(std::make_unique<PropertyWithValue<int>>("MDSampleNumber", EMPTY_INT(), Direction::Input),
-                        "For an MD workspace, the sample number to wich to "
+                        "For an MD workspace, the sample number to which to "
                         "attach an oriented lattice (starting from 0). No "
                         "number, or negative number, means that it will copy "
                         "to all samples");

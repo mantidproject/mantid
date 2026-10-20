@@ -517,7 +517,7 @@ void ISISHistoDataListener::loadTimeRegimes() {
         std::vector<int> monitorIndices;
         getIntArray("MDET", monitorIndices, nmon);
 
-        // we make an assumtion that regime 2 is used for monitors only
+        // we make an assumption that regime 2 is used for monitors only
         if (monitorIndices.empty()) {
           throw std::runtime_error("Time regime 2 is expected to be used for "
                                    "monitors but none are found.");

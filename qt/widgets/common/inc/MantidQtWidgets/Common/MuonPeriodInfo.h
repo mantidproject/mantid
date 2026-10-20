@@ -23,7 +23,7 @@ class EXPORT_OPT_MANTIDQT_COMMON MuonPeriodInfo : public QWidget {
 public:
   /// Reads the data of the sample log from the workspace
   static std::string readSampleLog(const Mantid::API::MatrixWorkspace_sptr &ws, const std::string &logName);
-  /// Splits a string separated by a delimeter
+  /// Splits a string separated by a delimiter
   static std::vector<std::string> parseSampleLog(const std::string &log, const std::string &delim);
   /// Unifies the length of all vectors given
   static std::vector<std::vector<std::string>> makeCorrections(std::vector<std::vector<std::string>> &logs);

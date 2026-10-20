@@ -200,7 +200,7 @@ void export_Run() {
       .def("getTimeAveragedValue", &Run::getTimeAveragedValue, (arg("self"), arg("name")),
            "Returns the time averaged value of a log")
       .def("getStatistics", &Run::getStatistics, (arg("self"), arg("name")),
-           "Returns the all of the statistics about the obect")
+           "Returns the all of the statistics about the object")
       .def("getProperties", &Run::getProperties, arg("self"), return_internal_reference<>(),
            "Return the list of run properties managed by this object.")
 

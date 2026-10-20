@@ -416,7 +416,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
 
     def initByName(self, name, *args, **kwargs):
         """
-        intialise composite function of named type.
+        initialise composite function of named type.
         E.g. "ProductFunction"
         This function would be protected in c++
         and should not be called directly except
@@ -803,7 +803,7 @@ _ExportedIFunction1D = IFunction1D
 
 
 class _IFunction1DWrapperCreator(_ExportedIFunction1D):
-    """Overriden IFunction1D class that allows creation of
+    """Overridden IFunction1D class that allows creation of
     FunctionWrappers for newly defined fit functions.
 
     User defined function inherit from this class.

@@ -82,7 +82,7 @@ void SaveDaveGrp::exec() {
   std::string xunit = ws->getAxis(0)->unit()->label();
   std::string yunit = ws->getAxis(1)->unit()->label();
   if (yunit == "Angstrom^-1")
-    yunit = "1/Angstroms"; // backwards compatability with old versions
+    yunit = "1/Angstroms"; // backwards compatibility with old versions
   if (toMicroeV && (xunit == "meV"))
     xToMicroeV = true;
   if (toMicroeV && (yunit == "meV"))

@@ -698,7 +698,7 @@ int GroupDetectors2::readInt(const std::string &line) {
       // we expected an integer but there were more things on the line, before
       // any #
       g_log.debug() << "Error: found " << data.count() << " strings the first string is " << data[0] << '\n';
-      throw std::invalid_argument("Problem reading file, a singe integer expected");
+      throw std::invalid_argument("Problem reading file, a single integer expected");
     }
   }
   // we haven't found any data, return the nodata condition
@@ -785,15 +785,15 @@ void GroupDetectors2::readFile(const spec2index_map &specs2index, std::istream &
  *  @param output :: the list of integers, with any ranges expanded
  *  @param unUsedSpec :: the list of spectra indexes that have been included in
  * a group (so far)
- *  @param seperator :: the symbol for the index range separator
+ *  @param separator :: the symbol for the index range separator
  *  @throw invalid_argument when a number couldn't be found or the number is not
  * in the spectra map
  */
 void GroupDetectors2::readSpectraIndexes(const std::string &line, const spec2index_map &specs2index,
                                          std::vector<size_t> &output, std::vector<int64_t> &unUsedSpec,
-                                         const std::string &seperator) {
+                                         const std::string &separator) {
   // remove comments and white space
-  Mantid::Kernel::StringTokenizer dataComment(line, seperator, IGNORE_SPACES);
+  Mantid::Kernel::StringTokenizer dataComment(line, separator, IGNORE_SPACES);
   for (const auto &itr : dataComment) {
     std::vector<size_t> specNums;
     specNums.reserve(output.capacity());

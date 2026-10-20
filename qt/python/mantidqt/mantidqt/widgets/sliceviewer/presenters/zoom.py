@@ -15,7 +15,7 @@ def _noop():
 
 class ScrollZoomMixin:
     """
-    Mixin class to add zoom on scolling mouse wheel capability to a
+    Mixin class to add zoom on scrolling mouse wheel capability to a
     matplotlib axes on a figure canvas
     """
 
@@ -73,7 +73,7 @@ class ScrollZoomMixin:
 
     def disable_zoom_on_scroll(self):
         """
-        Disconnect from the scoll event if it as been attached. If it has not
+        Disconnect from the scroll event if it as been attached. If it has not
         been attached then this is a noop.
         """
         try:

@@ -226,7 +226,7 @@ public:
   void testSystemValues() {
     // we cannot test the return values here as they will differ based on the
     // environment.
-    // therfore we will just check they return a non empty string.
+    // therefore we will just check they return a non empty string.
     std::string osName = ConfigService::Instance().getOSName();
     TS_ASSERT_LESS_THAN(0,
                         osName.length()); // check that the string is not empty

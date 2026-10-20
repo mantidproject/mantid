@@ -34,7 +34,7 @@ BoxControllerDummyIO::BoxControllerDummyIO(const Mantid::API::BoxController *bc)
 coordinate
 * As save/load operations use void data type, these function allow set up/get
 the type name provided for the IO operations
-*  and the size of the data type in bytes (e.g. the  class dependant physical
+*  and the size of the data type in bytes (e.g. the  class dependent physical
 meaning of the blockSize and blockPosition used
 *  by save/load operations
 *@param blockSize -- size (in bytes) of the blockPosition and blockSize used in
@@ -62,7 +62,7 @@ void BoxControllerDummyIO::setDataType(const size_t blockSize, const std::string
 
 /** As save/load operations use void data type, these function allow set up/get
  *the type name provided for the IO operations
- *  and the size of the data type in bytes (e.g. the  class dependant physical
+ *  and the size of the data type in bytes (e.g. the  class dependent physical
  *meaning of the blockSize and blockPosition used
  *  by save/load operations
  * @param CoordSize -- size (in bytes) of the blockPosition and blockSize used in save/load operations
@@ -78,7 +78,7 @@ void BoxControllerDummyIO::getDataType(size_t &CoordSize, std::string &typeName)
  *@param fileName the name of the file to open.
  *                 if file name has word exist, the file is opened as existing
  *with 100 floats equal 2.
- *                 othewise if assumed to be new and size 0
+ *                 otherwise if assumed to be new and size 0
  *@param mode  opening mode (read ("r" ) or read/write "w")
  */
 bool BoxControllerDummyIO::openFile(const std::string &fileName, const std::string &mode) {
@@ -141,7 +141,7 @@ void BoxControllerDummyIO::saveBlock(const std::vector<float> &DataBlock, const 
  @param blockPosition -- the position of the data block within the data file
  @param nPoints       -- number of data points to read from the file. The
  datapoint size is defined when opened file or by calling the setDataType
- directrly
+ directly
 
  *Throws if attempted to read data outside of the file.
 */
@@ -149,7 +149,7 @@ void BoxControllerDummyIO::loadBlock(std::vector<float> &Block, const uint64_t b
                                      const size_t nPoints) const {
   std::lock_guard<std::mutex> _lock(m_fileMutex);
   if (blockPosition + nPoints > this->getFileLength())
-    throw Mantid::Kernel::Exception::FileError("Attemtp to read behind the file end", m_fileName);
+    throw Mantid::Kernel::Exception::FileError("Attempt to read behind the file end", m_fileName);
 
   Block.resize(nPoints * m_EventSize);
   for (size_t i = 0; i < nPoints * m_EventSize; i++) {

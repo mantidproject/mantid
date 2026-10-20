@@ -13,7 +13,7 @@ This algorithm fits the variation of the width of the resolution file to give a
 stretch factor and fits the peak intensities by normalising the peak area to
 unity and performing a linear fit with the vanadium.
 
-The outpout workspace is a WorkspaceGroup containing two MatrixWorkspaces named
+The output workspace is a WorkspaceGroup containing two MatrixWorkspaces named
 *_Intensity* and *_Stretch* with the fitted parameters.
 
 Workflow

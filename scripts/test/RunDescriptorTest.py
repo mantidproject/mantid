@@ -381,7 +381,7 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertEqual(len(runs), 3)
         self.assertTrue(propman.sum_runs)
 
-        # check asigning file with path
+        # check assigning file with path
         propman.sample_run = "c:/data/MAR10382.nxs"
         self.assertEqual(propman.sample_run, 10382)
         self.assertEqual(PropertyManager.sample_run._run_list._last_ind2sum, 1)
@@ -762,7 +762,7 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertEqual("Monitors", mod_ws.name())
 
     def test_remove_background_matrix_minus_event(self):
-        # Verify situation if sampe workspace is in histogram mode with monitors loaded with workspace
+        # Verify situation if sample workspace is in histogram mode with monitors loaded with workspace
         # and background is event workspace with monitors loaded separately
         wksp = CreateSampleWorkspace(
             Function="Multiple Peaks",

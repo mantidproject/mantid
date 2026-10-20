@@ -156,7 +156,7 @@ void SaveFullprofResolution::parseTableWorkspace() {
   g_log.debug(dbmsgss.str());
 
   if (colnames[0] != "Name")
-    throw runtime_error("First colunm must be 'Name'");
+    throw runtime_error("First column must be 'Name'");
 
   // Read out a list of parameter names
   size_t numpars = m_profileTableWS->rowCount();

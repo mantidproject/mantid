@@ -196,7 +196,7 @@ def qangle(
       goniometer constraints (bool): Flag to restrict the range of the goniometer
       goniometer_range (numpy array): Goniometer angle range in degrees (in the -180 to 180 range)
 
-    Retuns:
+    Returns:
     -------
       (namedtuple): namedtuple containing
         - Q_lab_x, Q_lab_y, Q_lab_z (numpy arrays): Q in the lab frame

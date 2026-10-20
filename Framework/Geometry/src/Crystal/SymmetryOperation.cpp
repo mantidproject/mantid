@@ -70,7 +70,7 @@ const V3R &SymmetryOperation::vector() const { return m_matrixVectorPair.getVect
  * @brief SymmetryOperation::reducedVector
  *
  * According to ITA, 11.2, the translation component of a symmetry operation
- * can be termined with the following algorithm. First, a matrix \f$W\f$ is
+ * can be terminated with the following algorithm. First, a matrix \f$W\f$ is
  * calculated using the symmetry operation \f$S\f$ and its powers up to its
  * order \f$k\f$, adding the matrices of the resulting operations:
  *
@@ -187,7 +187,7 @@ bool SymmetryOperation::operator==(const SymmetryOperation &other) const {
 /// using the identifier strings.
 bool SymmetryOperation::operator<(const SymmetryOperation &other) const { return m_identifier < other.m_identifier; }
 
-/// Returns true if operatios are not equal
+/// Returns true if operations are not equal
 bool SymmetryOperation::operator!=(const SymmetryOperation &other) const { return !(this->operator==(other)); }
 
 /// Returns the order of the symmetry operation based on the matrix. From

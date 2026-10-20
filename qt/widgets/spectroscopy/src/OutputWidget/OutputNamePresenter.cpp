@@ -33,7 +33,7 @@ void OutputNamePresenter::generateWarningLabel() const {
   auto textColor = "color: darkGreen";
   auto text = "Unused name, new workspace will be created";
   if (MantidWidgets::WorkspaceUtils::doesExistInADS(m_view->getCurrentOutputName())) {
-    text = "Output Name is in use, workspace will be overriden.";
+    text = "Output Name is in use, workspace will be overridden.";
     textColor = "color: darkRed";
   }
   m_view->setWarningLabel(text, textColor);
