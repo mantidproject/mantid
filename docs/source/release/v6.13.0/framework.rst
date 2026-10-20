@@ -86,7 +86,7 @@ Bugfixes
 
 Deprecated
 ############
-- :ref:`algm-IntegratePeaksMD-v1` has been deprecated, use :ref:`algm-IntegratePeaksMD-v2` instead.
+- ``IntegratePeaksMD v1`` has been deprecated, use :ref:`algm-IntegratePeaksMD-v2` instead.
 - :ref:`UnwrapMonitorsInTOF <algm-UnwrapMonitorsInTOF>` has been deprecated. There is no replacement.
 - :ref:`UnwrapSNS <algm-UnwrapSNS>` has been deprecated. There is no replacement.
 - Property ``UnwrapRef`` has been deprecated for algorithms that previously called deprecated algorithm
@@ -97,7 +97,7 @@ Deprecated
   - :ref:`SNSPowderReduction <algm-SNSPowderReduction>`
 
 - :ref:`LoadEventPreNexus <algm-LoadEventPreNexus>` has been deprecated. There is no replacement.
-- :ref:`IntegratePeaksCWSD <algm-IntegratePeaksCWSD>` has been deprecated. There is no replacement.
+- ``IntegratePeaksCWSD`` has been deprecated. There is no replacement.
 
 Removed
 ############

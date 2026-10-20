@@ -41,8 +41,7 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 2; };
   const std::vector<std::string> seeAlso() const override {
-    return {"CentroidPeaksMD", "IntegratePeaksHybrid", "IntegratePeaksMDHKL", "IntegratePeaksUsingClusters",
-            "IntegratePeaksCWSD"};
+    return {"CentroidPeaksMD", "IntegratePeaksHybrid", "IntegratePeaksMDHKL", "IntegratePeaksUsingClusters"};
   }
   /// Algorithm's category for identification
   const std::string category() const override { return "MDAlgorithms\\Peaks;Crystal\\Integration"; }
