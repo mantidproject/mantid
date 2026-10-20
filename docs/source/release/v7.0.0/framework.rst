@@ -95,6 +95,7 @@ New features
 Bugfixes
 ############
 - (`#41794 <https://github.com/mantidproject/mantid/pull/41794>`_) Fixed a boundary-condition bug in ``MDGridBox`` splitting where events exactly on a child box's upper boundary could be dropped during serial or threaded splitting.
+- (`#42494 <https://github.com/mantidproject/mantid/pull/42494>`_) Fixed certain files failing to load due to a bug in sample log filtering. Each sample log is now filtered only by its own invalid values, rather than also by the invalid values of other logs.
 
 
 Live Data
