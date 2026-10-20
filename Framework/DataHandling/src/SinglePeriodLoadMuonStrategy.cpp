@@ -93,7 +93,7 @@ Workspace_sptr SinglePeriodLoadMuonStrategy::getTimeZeroTable() {
   return createTimeZeroTable(numSpec, timeZeros);
 }
 /**
- * Performs time-zero correction on the loaded workspace.
+ * Performs time-zero correction on the loaded workspace's time axis and FirstGoodData log.
  */
 void SinglePeriodLoadMuonStrategy::applyTimeZeroCorrection() {
   double timeZero = m_nexusLoader.loadTimeZeroFromNexusFile();
@@ -102,6 +102,9 @@ void SinglePeriodLoadMuonStrategy::applyTimeZeroCorrection() {
     auto &timeAxis = m_workspace.mutableX(i);
     timeAxis = timeAxis - timeZero;
   }
+  // The FirstGoodData log is relative to time zero, consistent with LoadMuonNexus v1
+  double firstGoodData = m_nexusLoader.loadFirstGoodDataFromNexus();
+  m_workspace.mutableRun().addProperty("FirstGoodData", firstGoodData - timeZero, true);
 }
 /**
  * Finds the detectors which are loaded in the stored workspace
