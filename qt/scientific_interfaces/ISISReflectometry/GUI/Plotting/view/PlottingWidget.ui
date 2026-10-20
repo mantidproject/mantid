@@ -79,6 +79,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="plotIndividual">
+       <property name="toolTip">
+        <string>Plot each selection in an individual plot window</string>
+       </property>
        <property name="text">
         <string>Plot</string>
        </property>
@@ -86,6 +89,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="plotOverplot">
+       <property name="toolTip">
+        <string>Plot all selections in a single plot window</string>
+       </property>
        <property name="text">
         <string>Plot over</string>
        </property>
@@ -100,6 +106,9 @@
      </item>
      <item>
       <widget class="QCheckBox" name="addToExistingPlot">
+       <property name="toolTip">
+        <string>Add selection to the most recent plot window created by this interface</string>
+       </property>
        <property name="text">
         <string>Add to existing plot</string>
        </property>

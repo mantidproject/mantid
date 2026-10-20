@@ -114,7 +114,7 @@ Mantid::API::MatrixWorkspace_sptr extractSpectrum(Mantid::API::MatrixWorkspace_s
 }
 
 double theta(Mantid::API::MatrixWorkspace const &workspace, size_t const workspaceIndex) {
-  return workspace.spectrumInfo().twoTheta(workspaceIndex) * 90.0 / M_PI;
+  return workspace.spectrumInfo().signedTwoTheta(workspaceIndex) * 90.0 / M_PI;
 }
 
 double xValueForFractionalWorkspaceIndex(Mantid::API::MatrixWorkspace const &workspace, double const workspaceIndex,
@@ -393,9 +393,9 @@ std::string createAlignmentWorkspace(PlottingWorkspace const &workspace, Alignme
     return outputWorkspace;
   }
 
-  auto const rawProfileWorkspace = outputWorkspace + "_profile";
-  auto const fittedPeakWorkspace = outputWorkspace + "_fitted_peak";
-  auto const peakCentreWorkspace = outputWorkspace + "_peak_centre";
+  auto const rawProfileWorkspace = outputWorkspace + alignmentProfileWorkspaceSuffix;
+  auto const fittedPeakWorkspace = outputWorkspace + alignmentFittedPeakWorkspaceSuffix;
+  auto const peakCentreWorkspace = outputWorkspace + alignmentPeakCentreWorkspaceSuffix;
 
   auto detectorSpectraWorkspace = extractDetectorSpectra(rawWorkspace, instrumentName);
   auto peakFit = fitSpecularPeak(detectorSpectraWorkspace);
