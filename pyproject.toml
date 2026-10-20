@@ -95,3 +95,10 @@ method = "minor"
 distance = "{base_version}.dev{distance}"
 dirty = "{base_version}+uncommitted"
 distance-dirty = "{base_version}.dev{distance}+uncommitted"
+
+[tool.codespell]
+# Ref: https://github.com/codespell-project/codespell#using-a-config-file
+skip = '.git,.gitignore,.gitattributes,*.pdf,*.svg,*.lock,*.css,*-min.*'
+check-hidden = true
+# ignore-regex = ''
+# ignore-words-list = ''
