@@ -216,7 +216,7 @@ predictFractionalPeaks(Algorithm *const alg, const bool requirePeaksOnDetector, 
                        const Mantid::Crystal::ModulationProperties &modulationProps, SearchStrategy searchStrategy) {
   using Mantid::Geometry::InstrumentRayTracer;
 
-  const InstrumentRayTracer tracer(inputPeaks.getInstrument());
+  const InstrumentRayTracer tracer(inputPeaks.componentInfo(), inputPeaks.detectorInfo());
   const auto &UB = inputPeaks.sample().getOrientedLattice().getUB();
   const auto &offsets = modulationProps.offsets;
   auto outPeaks = createOutputWorkspace(inputPeaks, modulationProps);
