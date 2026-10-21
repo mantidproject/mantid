@@ -97,91 +97,91 @@ public:
   static void destroySuite(IBeamProfileTest *suite) { delete suite; }
 
   void test_beamMissesSample() {
-    const auto sample = createCuboid(1., 1., 5., V3D(0., 0., 0.), "sample");
+    auto const sample = createCuboid(1., 1., 5., V3D(0., 0., 0.), "sample");
     auto experiment = createExperimentWithSlitBeam(V3D(0., 10., -10.), 10., 10.);
 
-    const auto beamProfile = BeamProfileFactory::createBeamProfile(*experiment->getInstrument(), experiment->sample());
-    const auto intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
+    auto const beamProfile = BeamProfileFactory::createBeamProfile(experiment->componentInfo(), experiment->sample());
+    auto const intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
 
     TS_ASSERT_EQUALS(intersectionVolume, nullptr);
   }
 
   void test_sampleEntirelyWithinBeam() {
-    const auto sample = createCuboid(1., 1., 5., V3D(0., 0., 0.), "sample");
+    auto const sample = createCuboid(1., 1., 5., V3D(0., 0., 0.), "sample");
     auto experiment = createExperimentWithSlitBeam(V3D(0., 0., -10.), 10., 10.);
 
-    const auto beamProfile = BeamProfileFactory::createBeamProfile(*experiment->getInstrument(), experiment->sample());
-    const auto intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
+    auto const beamProfile = BeamProfileFactory::createBeamProfile(experiment->componentInfo(), experiment->sample());
+    auto const intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
 
     checkIntersectionVolume(intersectionVolume, 2., 2., 10.);
   }
 
   void test_beamHalfHeightOfSample() {
-    const auto sample = createCuboid(1., 5., 6., V3D(0., 0., 0.), "sample");
+    auto const sample = createCuboid(1., 5., 6., V3D(0., 0., 0.), "sample");
     auto experiment = createExperimentWithSlitBeam(V3D(0., 0., -5.), 10., 5.);
 
-    const auto beamProfile = BeamProfileFactory::createBeamProfile(*experiment->getInstrument(), experiment->sample());
-    const auto intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
+    auto const beamProfile = BeamProfileFactory::createBeamProfile(experiment->componentInfo(), experiment->sample());
+    auto const intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
 
     checkIntersectionVolume(intersectionVolume, 2., 5., 12.);
   }
 
   void test_beamHalfWidthOfSample() {
-    const auto sample = createCuboid(5., 1., 6., V3D(0., 0., 0.), "sample");
+    auto const sample = createCuboid(5., 1., 6., V3D(0., 0., 0.), "sample");
     auto experiment = createExperimentWithSlitBeam(V3D(0., 0., -5.), 5., 10.);
 
-    const auto beamProfile = BeamProfileFactory::createBeamProfile(*experiment->getInstrument(), experiment->sample());
-    const auto intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
+    auto const beamProfile = BeamProfileFactory::createBeamProfile(experiment->componentInfo(), experiment->sample());
+    auto const intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
 
     checkIntersectionVolume(intersectionVolume, 5., 2., 12.);
   }
 
   void test_beamHalfWidthAndHeightOfSample() {
-    const auto sample = createCuboid(5., 5., 6., V3D(0., 0., 0.), "sample");
+    auto const sample = createCuboid(5., 5., 6., V3D(0., 0., 0.), "sample");
     auto experiment = createExperimentWithSlitBeam(V3D(0., 0., -5.), 5., 5.);
 
-    const auto beamProfile = BeamProfileFactory::createBeamProfile(*experiment->getInstrument(), experiment->sample());
-    const auto intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
+    auto const beamProfile = BeamProfileFactory::createBeamProfile(experiment->componentInfo(), experiment->sample());
+    auto const intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
 
     checkIntersectionVolume(intersectionVolume, 5., 5., 12.);
   }
 
   void test_beamMissesSampleCylinder() {
-    const auto sample = createCuboid(1., 1., 5., V3D(0., 0., 0.), "sample");
+    auto const sample = createCuboid(1., 1., 5., V3D(0., 0., 0.), "sample");
     auto experiment = createExperimentWithCircleBeam(V3D(0., 10., -10.), 1.);
 
-    const auto beamProfile = BeamProfileFactory::createBeamProfile(*experiment->getInstrument(), experiment->sample());
-    const auto intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
+    auto const beamProfile = BeamProfileFactory::createBeamProfile(experiment->componentInfo(), experiment->sample());
+    auto const intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
 
     TS_ASSERT_EQUALS(intersectionVolume, nullptr);
   }
 
   void test_beamHitsSampleCylinder() {
-    const auto sample = createCuboid(1., 1., 6., V3D(0., 0., 0.), "sample");
+    auto const sample = createCuboid(1., 1., 6., V3D(0., 0., 0.), "sample");
     auto experiment = createExperimentWithCircleBeam(V3D(0., 0., -10.), 1.);
 
-    const auto beamProfile = BeamProfileFactory::createBeamProfile(*experiment->getInstrument(), experiment->sample());
-    const auto intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
+    auto const beamProfile = BeamProfileFactory::createBeamProfile(experiment->componentInfo(), experiment->sample());
+    auto const intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
 
     checkIntersectionVolume(intersectionVolume, 2., 2., 12.);
   }
 
   void test_beamNotOnZAxis() {
-    const auto sample = createCuboid(2., 15., 5., V3D(0., 0., 0.), "sample");
+    auto const sample = createCuboid(2., 15., 5., V3D(0., 0., 0.), "sample");
     auto experiment = createExperimentWithSlitBeam(V3D(0., -10., 0.), 10., 20.);
 
-    const auto beamProfile = BeamProfileFactory::createBeamProfile(*experiment->getInstrument(), experiment->sample());
-    const auto intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
+    auto const beamProfile = BeamProfileFactory::createBeamProfile(experiment->componentInfo(), experiment->sample());
+    auto const intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
 
     checkIntersectionVolume(intersectionVolume, 4., 30., 10.);
   }
 
   void test_bigSampleSmallBeamNotOnZAxis() {
-    const auto sample = createCuboid(10., 10., 10., V3D(0., 0., 0.), "sample");
+    auto const sample = createCuboid(10., 10., 10., V3D(0., 0., 0.), "sample");
     auto experiment = createExperimentWithSlitBeam(V3D(0., -10., 0.), 5., 5.);
 
-    const auto beamProfile = BeamProfileFactory::createBeamProfile(*experiment->getInstrument(), experiment->sample());
-    const auto intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
+    auto const beamProfile = BeamProfileFactory::createBeamProfile(experiment->componentInfo(), experiment->sample());
+    auto const intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
 
     checkIntersectionVolume(intersectionVolume, 5., 20., 5.);
   }
