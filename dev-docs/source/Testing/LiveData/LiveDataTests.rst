@@ -67,32 +67,24 @@ Running this algorithm will produce "``FakeISISHistoDAE started``" in the Messag
 ADARA Fake Event
 ################
 
-This approach reads from an SNS pre-nexus file or an event-nexus file to recreate realistic event data, however It is a little more fiddly to setup.
+This approach reads from an event-nexus file to recreate realistic event data, however It is a little more fiddly to setup.
 
 #. Find the file ``Mantid.user.properties``. Its location will be:
 
    - Windows: ``C:\MantidInstall\bin``
    - Mac or linux: ``~/.mantid`` (i.e. in a ``.mantid`` directory under your home directory)
 
-#. To use a pre-nexus file, use the ``REF_L_32035_neutron_event.dat`` file (located in the ``TrainingCourseData`` folder), open the ``Mantid.user.properties`` file in your favorite text editor and add the following lines:
-
-   ::
-
-    fileeventdatalistener.filename=REF_L_32035_neutron_event.dat
-    fileeventdatalistener.chunks=300
-
-   A event nexus file can also be used instead, for example:
+#. Open the ``Mantid.user.properties`` file in your favorite text editor and add the following lines, for example to use an event nexus file:
 
    ::
 
     fileeventdatalistener.filename=EQSANS_6071_event.nxs
+    fileeventdatalistener.chunks=300
 
    For MantidWorkbench to find these files, they must be in a directory listed under "Data Search Directories" in the "Manage User Directories" menu. Chunking for files can be determined by using the :ref:`DetermineChunking <algm-DetermineChunking>` algorithm.
 
 #. Start MantidWorkbench
 #. Use the instrument ``ADARA_FileReader`` in the ``TEST_LIVE`` facility in the Settings dialog (MantidWorkbench).  There is no need to stop this fake instrument.
-
-The data from this file comprises almost 50,000 events across 77,824 histograms, with TOF values between 6,000 and 23,000 microseconds.
 
 Starting a live data session
 ----------------------------

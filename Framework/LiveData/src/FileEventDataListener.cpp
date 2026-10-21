@@ -44,10 +44,7 @@ FileEventDataListener::FileEventDataListener()
     } else {
       auto loader = FileLoaderRegistry::Instance().chooseLoader(m_filename);
       m_loaderName = loader->name();
-      if (m_loaderName == "LoadEventPreNexus") {
-        m_filePropName = "EventFilename";
-        m_canLoadMonitors = false;
-      } else if (m_loaderName == "LoadEventNexus") {
+      if (m_loaderName == "LoadEventNexus") {
         m_filePropName = "Filename";
         m_canLoadMonitors = true;
       } else {

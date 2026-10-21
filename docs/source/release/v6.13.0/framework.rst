@@ -96,7 +96,7 @@ Deprecated
   - :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>`
   - :ref:`SNSPowderReduction <algm-SNSPowderReduction>`
 
-- :ref:`LoadEventPreNexus <algm-LoadEventPreNexus>` has been deprecated. There is no replacement.
+- ``LoadEventPreNexus`` has been deprecated. There is no replacement.
 - :ref:`IntegratePeaksCWSD <algm-IntegratePeaksCWSD>` has been deprecated. There is no replacement.
 
 Removed
@@ -125,7 +125,7 @@ New features
 
 Deprecated
 ############
-- Both :ref:`LoadPreNexus <algm-LoadPreNexus>` and :ref:`LoadPreNexusMonitors <algm-LoadPreNexusMonitors>` have been
+- Both ``LoadPreNexus`` and ``LoadPreNexusMonitors`` have been
   deprecated. There are no replacements.
 
 Removed

@@ -58,7 +58,6 @@ set(SRC_FILES
     src/LoadEventAsWorkspace2D.cpp
     src/LoadEventNexus.cpp
     src/LoadEventNexusIndexSetup.cpp
-    src/LoadEventPreNexus2.cpp
     src/LoadFITS.cpp
     src/LoadFullprofResolution.cpp
     src/LoadGSASInstrumentFile.cpp
@@ -106,8 +105,6 @@ set(SRC_FILES
     src/LoadPLNnxs.cpp
     src/LoadPSIMuonBin.cpp
     src/LoadParameterFile.cpp
-    src/LoadPreNexus.cpp
-    src/LoadPreNexusMonitors.cpp
     src/LoadQKK.cpp
     src/LoadRKH.cpp
     src/LoadRaw/byte_rel_comp.cpp
@@ -120,7 +117,6 @@ set(SRC_FILES
     src/LoadRawHelper.cpp
     src/LoadRawSpectrum0.cpp
     src/LoadSESANS.cpp
-    src/LoadSINQFocus.cpp
     src/LoadSPE.cpp
     src/LoadSampleDetailsFromRaw.cpp
     src/LoadSampleEnvironment.cpp
@@ -285,7 +281,6 @@ set(INC_FILES
     inc/MantidDataHandling/LoadEventAsWorkspace2D.h
     inc/MantidDataHandling/LoadEventNexus.h
     inc/MantidDataHandling/LoadEventNexusIndexSetup.h
-    inc/MantidDataHandling/LoadEventPreNexus2.h
     inc/MantidDataHandling/LoadFITS.h
     inc/MantidDataHandling/LoadFullprofResolution.h
     inc/MantidDataHandling/LoadGSASInstrumentFile.h
@@ -333,8 +328,6 @@ set(INC_FILES
     inc/MantidDataHandling/LoadPLNnxs.h
     inc/MantidDataHandling/LoadPSIMuonBin.h
     inc/MantidDataHandling/LoadParameterFile.h
-    inc/MantidDataHandling/LoadPreNexus.h
-    inc/MantidDataHandling/LoadPreNexusMonitors.h
     inc/MantidDataHandling/LoadQKK.h
     inc/MantidDataHandling/LoadRKH.h
     inc/MantidDataHandling/LoadRaw3.h
@@ -342,7 +335,6 @@ set(INC_FILES
     inc/MantidDataHandling/LoadRawHelper.h
     inc/MantidDataHandling/LoadRawSpectrum0.h
     inc/MantidDataHandling/LoadSESANS.h
-    inc/MantidDataHandling/LoadSINQFocus.h
     inc/MantidDataHandling/LoadSPE.h
     inc/MantidDataHandling/LoadSampleDetailsFromRaw.h
     inc/MantidDataHandling/LoadSampleEnvironment.h
@@ -509,7 +501,6 @@ set(TEST_FILES
     LoadEventAsWorkspace2DTest.h
     LoadEventNexusIndexSetupTest.h
     LoadEventNexusTest.h
-    LoadEventPreNexus2Test.h
     LoadFITSTest.h
     LoadFullprofResolutionTest.h
     LoadGSASInstrumentFileTest.h
@@ -554,8 +545,6 @@ set(TEST_FILES
     LoadPLNnxsTest.h
     LoadPSIMuonBinTest.h
     LoadParameterFileTest.h
-    LoadPreNexusMonitorsTest.h
-    LoadPreNexusTest.h
     LoadQKKTest.h
     LoadRKHTest.h
     LoadRaw3Test.h
@@ -563,7 +552,6 @@ set(TEST_FILES
     LoadRawSaveNxsLoadNxsTest.h
     LoadRawSpectrum0Test.h
     LoadSESANSTest.h
-    LoadSINQFocusTest.h
     LoadSPETest.h
     LoadSampleDetailsFromRawTest.h
     LoadSampleEnvironmentTest.h

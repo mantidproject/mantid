@@ -13,9 +13,9 @@
 
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAlgorithms/ChangeBinOffset.h"
-#include "MantidDataHandling/LoadEventPreNexus2.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -101,16 +101,13 @@ public:
 
   void setup_Event() {
     this->inputSpace = "eventWS";
-    Mantid::DataHandling::LoadEventPreNexus2 loader;
-    loader.initialize();
-    std::string eventfile("CNCS_7860_neutron_event.dat");
-    std::string pulsefile("CNCS_7860_pulseid.dat");
-    loader.setPropertyValue("EventFilename", eventfile);
-    loader.setPropertyValue("PulseidFilename", pulsefile);
-    loader.setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
-    loader.setPropertyValue("OutputWorkspace", this->inputSpace);
-    loader.execute();
-    TS_ASSERT(loader.isExecuted());
+    auto loader = AlgorithmManager::Instance().createUnmanaged("LoadEventNexus");
+    loader->initialize();
+    loader->setPropertyValue("Filename", "CNCS_7860_event.nxs");
+    loader->setProperty("LoadLogs", false);
+    loader->setPropertyValue("OutputWorkspace", this->inputSpace);
+    loader->execute();
+    TS_ASSERT(loader->isExecuted());
   }
 
   void testExecEvents() {
