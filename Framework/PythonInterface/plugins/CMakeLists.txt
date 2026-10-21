@@ -51,6 +51,7 @@ set(PYTHON_PLUGINS
     algorithms/DPDFreduction.py
     algorithms/DakotaChiSquared.py
     algorithms/DeltaPDF3D.py
+    algorithms/diffraction_utils.py
     algorithms/LoadElementalAnalysisData.py
     algorithms/ElasticEMUauReduction.py
     algorithms/EnggCalibrate.py
@@ -127,7 +128,6 @@ set(PYTHON_PLUGINS
     algorithms/LoadNMoldyn3Ascii.py
     algorithms/LoadNMoldyn4Ascii.py
     algorithms/LoadNMoldyn4Ascii1D.py
-    algorithms/LoadPreNexusLive.py
     algorithms/LoadSANS1MLZ.py
     algorithms/LoadSINQ.py
     algorithms/LoadSINQFile.py

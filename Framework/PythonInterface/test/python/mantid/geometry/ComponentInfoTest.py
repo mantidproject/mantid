@@ -10,8 +10,8 @@ from testhelpers import WorkspaceCreationHelper
 from mantid.kernel import V3D
 from mantid.kernel import Quat
 import mantid.geometry
-from mantid.geometry import ComponentInfo, ComponentType, CSGObject
-from mantid.simpleapi import CloneWorkspace, CreateWorkspace
+from mantid.geometry import ComponentInfo, ComponentType, CSGObject, ReferenceFrame
+from mantid.simpleapi import CloneWorkspace, CreateWorkspace, LoadEmptyInstrument
 
 
 class ComponentInfoTest(unittest.TestCase):
@@ -34,6 +34,19 @@ class ComponentInfoTest(unittest.TestCase):
 
     The following test cases test normal usage of the exposed methods.
     """
+
+    def test_referenceFrame(self):
+        frame = self._ws.componentInfo().referenceFrame()
+        self.assertIsInstance(frame, ReferenceFrame)
+        self.assertEqual(frame.vecPointingUp(), V3D(0, 1, 0))
+        self.assertEqual(frame.vecPointingAlongBeam(), V3D(0, 0, 1))
+
+    def test_referenceFrame_is_the_instruments_own(self):
+        # POLREF's frame has Z up and X along the beam, unlike the default
+        ws = LoadEmptyInstrument(InstrumentName="POLREF", StoreInADS=False)
+        frame = ws.componentInfo().referenceFrame()
+        self.assertEqual(frame.pointingUpAxis(), "Z")
+        self.assertEqual(frame.pointingAlongBeamAxis(), "X")
 
     def test_len(self):
         """Check that there are only 6 components"""

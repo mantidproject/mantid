@@ -1,0 +1,1 @@
+- :class:`~mantid.geometry.ComponentInfo` has a new method ``referenceFrame()``, returning the instrument's :class:`~mantid.geometry.ReferenceFrame` (which axes point up and along the beam), as ``Instrument.getReferenceFrame()`` did. Use it as ``workspace.componentInfo().referenceFrame()``. See :ref:`InstrumentAccessLayers`.

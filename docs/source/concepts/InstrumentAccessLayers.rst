@@ -337,6 +337,8 @@ Almost every legacy accessor already has a modern Python home:
      - ``detectorInfo().indexOf(id)``
    * - ``Instrument.getSample()`` / ``getSource()``
      - ``componentInfo().sample()`` / ``source()`` (+ ``samplePosition``/``sourcePosition``)
+   * - ``Instrument.getReferenceFrame()``
+     - ``componentInfo().referenceFrame()``
    * - tree nav ``nelements`` / ``[]`` / ``len()``
      - ``componentInfo().children`` / ``parent`` / ``componentsInSubtree`` / ``detectorsInSubtree`` / iteration
    * - ``IObjComponent.shape()``
@@ -347,8 +349,12 @@ Almost every legacy accessor already has a modern Python home:
      - ``detectorInfo().detectorIDs()``
    * - ``Instrument.getBaseInstrument()`` (geometry before any moves or calibration)
      - ``baseComponentInfo()`` on the workspace; it has the same component indices as ``componentInfo()`` (already deprecated)
-   * - ``IDetector.getTwoTheta()`` / ``getPhi()``
-     - ``detectorInfo().twoTheta(index)`` / ``azimuthal(index)``
+   * - ``IDetector.getTwoTheta(observer, axis)`` / ``getSignedTwoTheta(observer, axis, up)``
+     - ``detectorInfo().twoTheta(index, observer, axis)`` / ``signedTwoTheta(index, observer, axis, up)``; omit the
+       observer and axis for the scattering angle from the sample w.r.t. the beam (raises for monitors)
+   * - ``IDetector.getPhi()`` / ``getPhiOffset(offset)``
+     - ``detectorInfo().phi(index)`` / ``phiOffset(index, offset)``: the lab-frame ``atan2(y, x)``, not
+       ``azimuthal(index)``, which is measured about the beam from the sample
    * - ``Detector.isMasked()`` / ``isMonitor()``
      - ``detectorInfo().isMasked(index)`` / ``isMonitor(index)`` (already deprecated)
 

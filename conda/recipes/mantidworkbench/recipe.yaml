@@ -42,7 +42,7 @@ requirements:
     - mantidqt == ${{ version }}
     - psutil ${{ psutil }}
     - python ${{ python }}
-    - matplotlib ${{ matplotlib }}
+    - matplotlib-base ${{ matplotlib }}
     - pyvista ${{ pyvista }}
     - pyvistaqt ${{ pyvistaqt }}
     - superqt

@@ -14,7 +14,9 @@
 #include <QCheckBox>
 #include <QColor>
 #include <QComboBox>
+#include <QHBoxLayout>
 #include <QItemSelectionModel>
+#include <QLabel>
 #include <QMouseEvent>
 #include <QPalette>
 #include <QPushButton>
@@ -98,13 +100,40 @@ public:
     assertButton(optionsLayout->itemAt(11)->widget(), "plotOverplot", "Plot over");
     assertButton(optionsLayout->itemAt(12)->widget(), "plotTiled", "Plot tiled");
     assertCheckBox(optionsLayout->itemAt(13)->widget(), "addToExistingPlot", "Add to existing plot");
-    assertCheckBox(optionsLayout->itemAt(14)->widget(), "plotTiledVertically", "Plot tiled vertically");
+    auto const tiledOptionsLayout = view.findChild<QVBoxLayout *>("tiledPlotOptionsLayout");
+    TS_ASSERT_EQUALS(optionsLayout->itemAt(14)->layout(), tiledOptionsLayout);
+    TS_ASSERT_EQUALS(tiledOptionsLayout->spacing(), 6);
+    assertCheckBox(tiledOptionsLayout->itemAt(0)->widget(), "plotTiledVertically", "Plot tiled vertically");
+    auto const shareAxesLayout = view.findChild<QHBoxLayout *>("shareAxesWhenTiledLayout");
+    TS_ASSERT_EQUALS(tiledOptionsLayout->itemAt(1)->layout(), shareAxesLayout);
+    assertLabel(shareAxesLayout->itemAt(0)->widget(), "shareAxesWhenTiledLabel", "Share tiled axes:");
+    assertCheckBox(shareAxesLayout->itemAt(1)->widget(), "shareXAxisWhenTiled", "X");
+    assertCheckBox(shareAxesLayout->itemAt(2)->widget(), "shareYAxisWhenTiled", "Y");
+  }
+
+  void testPlotOptionsReflectCheckboxState() {
+    QtPlottingView view;
+
+    TS_ASSERT(!view.shouldAddToExistingPlot());
+    TS_ASSERT(!view.shouldPlotTiledVertically());
+    TS_ASSERT(!view.shouldShareXAxisWhenTiled());
+    TS_ASSERT(!view.shouldShareYAxisWhenTiled());
+
+    view.findChild<QCheckBox *>("addToExistingPlot")->setChecked(true);
+    view.findChild<QCheckBox *>("plotTiledVertically")->setChecked(true);
+    view.findChild<QCheckBox *>("shareXAxisWhenTiled")->setChecked(true);
+    view.findChild<QCheckBox *>("shareYAxisWhenTiled")->setChecked(true);
+
+    TS_ASSERT(view.shouldAddToExistingPlot());
+    TS_ASSERT(view.shouldPlotTiledVertically());
+    TS_ASSERT(view.shouldShareXAxisWhenTiled());
+    TS_ASSERT(view.shouldShareYAxisWhenTiled());
   }
 
   void testPlotActionStateDisablesPlotButtons() {
     QtPlottingView view;
 
-    view.setPlotActionState({false, false, false, false, false, false});
+    view.setPlotActionState({false, false, false, false, false, false, false});
 
     assertPlotButtonsEnabled(view, false, false, false);
   }
@@ -112,10 +141,13 @@ public:
   void testPlotActionStateEnablesPlotButtons() {
     QtPlottingView view;
 
-    view.setPlotActionState({true, true, true, true, true, true});
+    view.setPlotActionState({true, true, true, true, true, true, true});
 
     assertPlotButtonsEnabled(view, true, true, true);
     TS_ASSERT(view.findChild<QCheckBox *>("plotTiledVertically")->isEnabled());
+    TS_ASSERT(view.findChild<QLabel *>("shareAxesWhenTiledLabel")->isEnabled());
+    TS_ASSERT(view.findChild<QCheckBox *>("shareXAxisWhenTiled")->isEnabled());
+    TS_ASSERT(view.findChild<QCheckBox *>("shareYAxisWhenTiled")->isEnabled());
     TS_ASSERT(view.findChild<QCheckBox *>("addToExistingPlot")->isEnabled());
     TS_ASSERT(view.findChild<QCheckBox *>("addToExistingPlot")->isChecked());
   }
@@ -124,9 +156,9 @@ public:
     QtPlottingView view;
     TestPlottingViewSubscriber subscriber;
     view.subscribe(&subscriber);
-    view.setPlotActionState({true, true, true, true, true, true});
+    view.setPlotActionState({true, true, true, true, true, true, true});
 
-    view.setPlotActionState({true, true, true, true, true, false});
+    view.setPlotActionState({true, true, true, true, true, true, false});
 
     TS_ASSERT(!view.findChild<QCheckBox *>("addToExistingPlot")->isChecked());
     TS_ASSERT_EQUALS(subscriber.addToExistingPlotChanged, 0);
@@ -657,7 +689,7 @@ public:
     view.subscribe(&subscriber);
     view.setPlottingWorkspaceTreeItemStates(plottingWorkspaceTreeItemStates());
     view.setOutputSelectionEnabled(true);
-    view.setPlotActionState({true, true, true, true, true, false});
+    view.setPlotActionState({true, true, true, true, true, true, false});
     auto tree = plottingWorkspaceTree(view);
     click(tree, groupIndex(tree));
 
@@ -700,6 +732,13 @@ private:
     TS_ASSERT(checkBox);
     TS_ASSERT_EQUALS(checkBox->objectName().toStdString(), objectName);
     TS_ASSERT_EQUALS(checkBox->text().toStdString(), text);
+  }
+
+  void assertLabel(QWidget const *widget, std::string const &objectName, std::string const &text) const {
+    auto const label = dynamic_cast<QLabel const *>(widget);
+    TS_ASSERT(label);
+    TS_ASSERT_EQUALS(label->objectName().toStdString(), objectName);
+    TS_ASSERT_EQUALS(label->text().toStdString(), text);
   }
 
   void assertPlotButtonsEnabled(QtPlottingView &view, bool individual, bool overplot, bool tiled) const {

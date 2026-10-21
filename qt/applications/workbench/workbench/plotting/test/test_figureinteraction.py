@@ -28,7 +28,7 @@ from mantid.plots import MantidAxes
 from mantid.plots.utility import PlotNormalizationType
 from unittest import mock
 from unittest.mock import MagicMock, PropertyMock, call, patch
-from mantid.simpleapi import CreateWorkspace
+from mantid.simpleapi import CreateWorkspace, CreateMDHistoWorkspace
 from mantidqt.plotting.figuretype import FigureType
 from mantidqt.plotting.functions import plot, pcolormesh_from_names, plot_contour, pcolormesh
 from mantidqt.utils.qt.testing import start_qapplication
@@ -399,6 +399,37 @@ class FigureInteractionTest(unittest.TestCase):
 
         anonymous_menu = QMenu()
         self.assertEqual(None, self.interactor._add_normalization_option_menu(anonymous_menu, self.ax))
+
+    def test_can_normalize_by_q_is_false_when_no_workspaces_tracked(self):
+        _, self.ax = plt.subplots(subplot_kw={"projection": "mantid"})
+        self.ax.plot([1, 2], [1, 2], label="myLabel")
+
+        self.assertFalse(self.interactor._can_normalize_by_q(self.ax))
+
+    def test_can_normalize_by_q_is_false_for_non_q_workspace(self):
+        _, self.ax = plt.subplots(subplot_kw={"projection": "mantid"})
+        self.ax.plot(self.ws, specNum=1)
+        self.assertFalse(self.interactor._can_normalize_by_q(self.ax))
+
+    def test_can_normalize_by_q_is_false_for_md_histo_workspace_cut(self):
+        md_ws = CreateMDHistoWorkspace(
+            Dimensionality=1,
+            Extents="-1,1",
+            SignalInput=[1.0, 2.0, 3.0, 4.0],
+            ErrorInput=[0.1, 0.1, 0.1, 0.1],
+            NumberOfBins=4,
+            Names="Q",
+            Units="Angstrom^-1",
+            OutputWorkspace="md_cut_ws",
+        )
+        try:
+            _, self.ax = plt.subplots(subplot_kw={"projection": "mantid"})
+            self.ax.plot(md_ws)
+            self.assertFalse(self.interactor._can_normalize_by_q(self.ax))
+            # building the menu must not raise either (this is the right-click path)
+            self.interactor._add_normalization_option_menu(QMenu(), self.ax)
+        finally:
+            md_ws.delete()
 
     # Failure tests
     def test_construction_with_non_qt_canvas_raises_exception(self):
