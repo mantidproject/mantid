@@ -488,6 +488,8 @@ The ISIS Calibration tab operates on raw TOF data files. Before starting this wo
    :ref:`convfit-example-workflow`. The _calib file is used in the
    :ref:`isis-diagnostics-example-workflow`.
 
+.. _isis-diagnostics:
+
 ISIS Diagnostics
 ----------------
 
@@ -570,6 +572,7 @@ The ISIS Diagnostics tab operates on raw TOF data files. Before starting this wo
 
 Go to the :ref:`transmission-example-workflow`.
 
+.. _indirect-data-reduction-transmission:
 
 Transmission
 ------------
