@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -53,8 +53,8 @@ def get_tths_and_l2s(ws: Workspace2D, is_live: np.ndarray[bool] | None = None) -
     if is_live is None:
         is_live = get_live_spectra(ws)
     si = ws.spectrumInfo()
-    tths = np.array([si.twoTheta(ispec) if is_live[ispec] else 0.0 for ispec in range(len(is_live))])
-    l2s = np.array([si.l2(ispec) if is_live[ispec] else 0.0 for ispec in range(len(is_live))])
+    tths = np.array([si.twoTheta(ispec) if live_spec else 0.0 for ispec, live_spec in enumerate(is_live)])
+    l2s = np.array([si.l2(ispec) if live_spec else 0.0 for ispec, live_spec in enumerate(is_live)])
     return tths, l2s
 
 

@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -46,7 +46,7 @@ class PawleyPattern2DTest(unittest.TestCase):
     def test_set_global_scale_false_with_bg(self):
         pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile(), bg_func=FlatBackground(A0=2))
         pawley.set_global_scale(False)
-        self.assertTrue(allclose(pawley.bg_params, 0))  # zero global bg (optimised with scale for each spectrum)
+        self.asser_allclose(pawley.bg_params, 0)  # zero global bg (optimised with scale for each spectrum)
         self.assertFalse(pawley.bg_isfree.any(), 0)  # background fixed
 
     def test_eval_profile(self):
