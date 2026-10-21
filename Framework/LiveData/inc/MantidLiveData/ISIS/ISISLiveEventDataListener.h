@@ -174,7 +174,7 @@ protected:
   std::atomic<bool> m_stopThread;
   /// Holds on to any exceptions that were thrown in the background thread so
   /// that we
-  /// can re-throw them in the forground thread
+  /// can re-throw them in the foreground thread
   std::shared_ptr<std::runtime_error> m_backgroundException;
 
   /// Used to buffer events between calls to extractData()

@@ -61,7 +61,7 @@ MANTID_KERNEL_DLL SplittingIntervalVec operator|(const SplittingIntervalVec &a, 
 MANTID_KERNEL_DLL SplittingIntervalVec operator~(const SplittingIntervalVec &a);
 
 // -------------- Helper Functions ---------------------
-// for every workspace index, create a TimeROI out of its associated spliting intervals
+// for every workspace index, create a TimeROI out of its associated splitting intervals
 MANTID_KERNEL_DLL std::map<int, TimeROI> timeROIsFromSplitters(const SplittingIntervalVec &splitters);
 
 } // Namespace Kernel

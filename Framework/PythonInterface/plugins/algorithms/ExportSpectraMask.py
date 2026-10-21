@@ -101,7 +101,7 @@ def writeISISmasks(filename, masks, nSpectraInRow=8):
        which can be used separately
 
        namely, if one have array 1,2,3,4, 20, 30,31,32
-       file will have the following ASCII stings:
+       file will have the following ASCII strings:
        1-4 20 30-32
 
        nSpectaInRow indicates the number of the separate spectra ID (numbers) which the program

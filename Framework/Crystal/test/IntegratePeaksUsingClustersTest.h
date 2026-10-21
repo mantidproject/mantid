@@ -119,9 +119,9 @@ public:
     TSM_ASSERT_EQUALS("Should only have one type of label", 1, labelIds.size());
     TSM_ASSERT("Should have 'empy' label", does_contain(labelIds, 0));
 
-    TSM_ASSERT_EQUALS("Integrated intensity should be zero since no integration has occured", 0,
+    TSM_ASSERT_EQUALS("Integrated intensity should be zero since no integration has occurred", 0,
                       outPeaksWS->getPeak(0).getIntensity());
-    TSM_ASSERT_EQUALS("Integrated intensity should be zero since no integration has occured", 0,
+    TSM_ASSERT_EQUALS("Integrated intensity should be zero since no integration has occurred", 0,
                       outPeaksWS->getPeak(0).getSigmaIntensity());
   }
 

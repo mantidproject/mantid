@@ -47,7 +47,7 @@ public:
 
   /**
    * Inserts a pair of disjoint elements. Determines whether they can be used to
-   * reorder existing sets of lables.
+   * reorder existing sets of labels.
    * @param a : One part of pair
    * @param b : Other part of pair
    * @return : true if a new cluster was required for the insertion.
@@ -68,7 +68,7 @@ public:
       } else {
         containingNone.emplace_back(cluster); // Current iterated set contains
                                               // NEITHER of these labels. It can
-                                              // therfore be ignored.
+                                              // therefore be ignored.
       }
     }
     // ------------ Process equivalent sets
@@ -85,8 +85,8 @@ public:
       // implement copy and swap. Rebuild the sets.
       GroupType temp = containingNone;
       GroupType::value_type masterSet;
-      masterSet.insert(aLabel); // Incase it doesn't already contain a
-      masterSet.insert(bLabel); // Incase it doesn't already contain b
+      masterSet.insert(aLabel); // In case it doesn't already contain a
+      masterSet.insert(bLabel); // In case it doesn't already contain b
       for (auto &childSet : containingAny) {
         masterSet.insert(childSet.begin(),
                          childSet.end()); // Build the master set.

@@ -89,7 +89,7 @@ void EventWorkspace::init(const std::size_t &NVectors, const std::size_t &XLengt
   }
 
   // Set each X vector to have one bin of 0 & extremely close to zero
-  // Move the rhs very,very slightly just incase something doesn't like them
+  // Move the rhs very,very slightly just in case something doesn't like them
   // being the same
   HistogramData::BinEdges edges{0.0, std::numeric_limits<double>::min()};
 
@@ -235,7 +235,7 @@ double EventWorkspace::getTofMin() const { return this->getEventXMin(); }
 double EventWorkspace::getTofMax() const { return this->getEventXMax(); }
 
 /**
- Get the minimum pulse time for events accross the entire workspace.
+ Get the minimum pulse time for events across the entire workspace.
  @return minimum pulse time as a DateAndTime.
  */
 DateAndTime EventWorkspace::getPulseTimeMin() const {
@@ -253,7 +253,7 @@ DateAndTime EventWorkspace::getPulseTimeMin() const {
 }
 
 /**
- Get the maximum pulse time for events accross the entire workspace.
+ Get the maximum pulse time for events across the entire workspace.
  @return maximum pulse time as a DateAndTime.
  */
 DateAndTime EventWorkspace::getPulseTimeMax() const {
@@ -270,7 +270,7 @@ DateAndTime EventWorkspace::getPulseTimeMax() const {
   return tMax;
 }
 /**
-Get the maximum and mimumum pulse time for events accross the entire workspace.
+Get the maximum and mimumum pulse time for events across the entire workspace.
 @param Tmin minimal pulse time as a DateAndTime.
 @param Tmax maximal pulse time as a DateAndTime.
 */

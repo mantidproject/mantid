@@ -14,7 +14,7 @@
 namespace Mantid {
 namespace Kernel {
 
-/** MDUnitFactory : Abstract type. Factory method with chain of reponsibility
+/** MDUnitFactory : Abstract type. Factory method with chain of responsibility
   succession for creating MDUnits.
 */
 class MANTID_KERNEL_DLL MDUnitFactory : public ChainableFactory<MDUnitFactory, MDUnit, std::string> {
@@ -23,7 +23,7 @@ private:
   /// Create the product
   MDUnit *createRaw(const std::string &unitString) const override = 0;
 
-  /// Indicate an ability to intepret the string
+  /// Indicate an ability to interpret the string
   bool canInterpret(const std::string &unitString) const override = 0;
 };
 
@@ -50,7 +50,7 @@ using MDUnitFactory_uptr = std::unique_ptr<MDUnitFactory>;
 
 using MDUnitFactory_const_uptr = std::unique_ptr<const MDUnitFactory>;
 
-/// Convience method. Pre-constructed builder chain.
+/// Convenience method. Pre-constructed builder chain.
 MDUnitFactory_uptr MANTID_KERNEL_DLL makeMDUnitFactoryChain();
 
 } // namespace Kernel

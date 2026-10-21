@@ -729,7 +729,7 @@ double Peak::getL1() const { return (m_samplePos - sourcePos).norm(); }
 double Peak::getL2() const { return (detPos - m_samplePos).norm(); }
 
 /**
- * @brief Assignement operator overload
+ * @brief Assignment operator overload
  * @param other : Other peak object to assign from
  * @return this
  */

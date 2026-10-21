@@ -23,7 +23,7 @@ namespace {
 /**
  * Definition for our own Instantiator type for use with the
  * LiveListenerFactory dynamic factory. The default DynamicFactory subscribe
- * peforms hidden object creation! That makes proper use of mocking impossible.
+ * performs hidden object creation! That makes proper use of mocking impossible.
  */
 class MockLiveListenerInstantiator : public Mantid::Kernel::Instantiator<MockLiveListener, Mantid::API::ILiveListener> {
 public:

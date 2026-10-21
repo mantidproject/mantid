@@ -528,7 +528,7 @@ def getDQFracHKL(UB, frac=0.5):
 def getHKLMask(UB, frac=0.5, dQPixel=0.005, dQ=None):
     """
     getHKLMask returns the qMask used throughout most of the fitting.
-    Intput:
+    Input:
         UB: the UB matrix (3x3 numpy array)
         frac: the fraction around (hkl) you want to consider.
         dQPixel: the side length of each voxel
@@ -579,7 +579,7 @@ def padeWrapper(x, a, b, c, d, f, g, h, i, j, k):
 
 def pade(c, x):
     """
-    Stadnard 4th order pade approximant.
+    Standard 4th order pade approximant.
     For use with moderator characterization, c are the coefficients
     and x is the energy (in eV)
     """
@@ -713,7 +713,7 @@ def getTOFWS(
     Output:
         tofWS - a mantid containing the TOF profile.  X-axis is TOF (units: us) and
                Y-axis is the number of events.
-        pp_lambda - the most likey number of bg events.
+        pp_lambda - the most likely number of bg events.
     """
     # Find the qVoxels to use
     n_events = box.getNumEventsArray()
@@ -973,7 +973,7 @@ def doICCFit(
 ):
     """
     doICCFit - Carries out the actual least squares fit for the TOF workspace.
-    Intput:
+    Input:
         tofWS - a workspace with x being timepoints and y being the TOF profile
         energy - peak energy
         flightPath - L1 + L2 (in m)
@@ -1105,7 +1105,7 @@ def integrateSample(
             zBG - the z score at which we consider events to be signal.  Set to negative to not use.
     `       bgPolyOrder - the polynomial order the background is fit to for the TOF profile.  Typically
                 the background is removed by only keeping signal, so linear is sufficient to take care of
-                any small residual bakcground.
+                any small residual background.
             doIterativeBackgroundFitting - do not use; leave as False.  TODO: Remove this
             q_frame - str; either 'sample' or 'lab'
             progressFile - the name of a file which will write the current peak number every 100 peaks.  Useful

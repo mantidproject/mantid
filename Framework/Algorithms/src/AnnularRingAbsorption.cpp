@@ -87,7 +87,7 @@ void AnnularRingAbsorption::init() {
   positiveInt->setLower(1);
   declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt,
                   "The number of wavelength points for which a simulation is "
-                  "atttempted (default: all points)");
+                  "attempted (default: all points)");
   declareProperty("EventsPerPoint", 300, positiveInt,
                   "The number of \"neutron\" events to generate per simulated point");
   declareProperty("SeedValue", 123456789, positiveInt, "Seed the random number generator with this value");

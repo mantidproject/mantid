@@ -28,7 +28,7 @@ jobs:
 
   merge-ornl-into-main:
     runs-on: ubuntu-latest
-    # run on ornl-next branche and do not run in forks
+    # run on ornl-next branch and do not run in forks
     if: ${{ github.ref_name == 'ornl-next' && github.repository_owner == 'mantidproject' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

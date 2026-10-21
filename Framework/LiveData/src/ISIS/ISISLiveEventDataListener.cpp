@@ -211,7 +211,7 @@ int ISISLiveEventDataListener::runNumber() const { return m_runNumber; }
 
 /** The main function for the background thread
  *
- * Loops until the forground thread requests it to stop.  Reads data from the
+ * Loops until the foreground thread requests it to stop.  Reads data from the
  *network,
  * parses it and stores the resulting events (and other metadata) in a temporary
  * workspace.
@@ -296,7 +296,7 @@ void ISISLiveEventDataListener::run() {
                      "read thread.\n";
     m_isConnected = false;
     m_backgroundException =
-        std::shared_ptr<std::runtime_error>(new std::runtime_error("Unknown error in backgound thread"));
+        std::shared_ptr<std::runtime_error>(new std::runtime_error("Unknown error in background thread"));
   }
 }
 
@@ -319,7 +319,7 @@ void ISISLiveEventDataListener::initEventBuffer(const TCPStreamEventDataSetup &s
   m_eventBuffer[0]->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
   m_eventBuffer[0]->setYUnit("Counts");
 
-  // Set the spectra-detector maping
+  // Set the spectra-detector mapping
   loadSpectraMap();
 
   // Load the instrument

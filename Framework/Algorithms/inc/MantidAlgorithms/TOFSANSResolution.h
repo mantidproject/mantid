@@ -41,7 +41,7 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL TOFSANSResolution : public API::Algorithm {
 public:
-  /// Defatult constructor
+  /// Default constructor
   TOFSANSResolution();
   /// Default destructor
   ~TOFSANSResolution() override = default;

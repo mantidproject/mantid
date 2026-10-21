@@ -212,7 +212,7 @@ workspace as:
 .. math:: G(i,j,n) = S(i,j,n)/(M(n)\eta(n)T(n)F_{i j})
 
 That is the normalization was performed before the Q calculation which
-gives the same probilities at high numbers of particles counts but
+gives the same probabilities at high numbers of particles counts but
 weighted noisy, low count data too highly, giving more noise in
 :math:`P_I(Q)`.
 

@@ -19,7 +19,7 @@ The sliced workspaces are then rebinned to histogram data and combined with the 
 WorkspaceGroup Processing
 #########################
 
-This version of the algortithm processes :py:obj:`WorkspaceGroups <mantid.api.WorkspaceGroup>` in a different way to :ref:`algm-ReflectometrySliceEventWorkspace-v1`.
+This version of the algorithm processes :py:obj:`WorkspaceGroups <mantid.api.WorkspaceGroup>` in a different way to :ref:`algm-ReflectometrySliceEventWorkspace-v1`.
 For a given input group :math:`G` with :math:`x` workspaces being split into :math:`n` slices (:math:`S`), the old method would produce a group of groups in the following form:
 
 :math:`G(G_1(S(1_1), ..., S(1_n)), ..., G_x(S(x_1), ..., S(x_n)))`

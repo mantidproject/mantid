@@ -12,7 +12,7 @@ namespace Mantid::MDAlgorithms {
 using namespace Mantid::Kernel;
 
 MDTransfAxisNames::MDTransfAxisNames() : m_DefaultDimID(CnvrtToMD::nDefaultID) {
-  // this defines default dimension ID-s which are used to indentify dimensions
+  // this defines default dimension ID-s which are used to identify dimensions
   // when using the target MD workspace later
   // for ModQ transformation:
   m_DefaultDimID[CnvrtToMD::ModQ_ID] = "|Q|";

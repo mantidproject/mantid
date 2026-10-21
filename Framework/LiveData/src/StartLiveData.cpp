@@ -238,7 +238,7 @@ void StartLiveData::exec() {
 
     // Check for possible cancellation
     interruption_point();
-    // Launch asyncronously
+    // Launch asynchronously
     monitorAlg->executeAsync();
 
     // Set the output property that passes back a handle to the ongoing live

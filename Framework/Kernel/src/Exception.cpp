@@ -26,7 +26,7 @@ FileError::FileError(const std::string &Desc, std::string FName)
 FileError::FileError(const FileError &A) : std::runtime_error(A), fileName(A.fileName) {}
 
 /** Writes out the range and limits
-        @returns a char array of foramtted error information
+        @returns a char array of formatted error information
 */
 const char *FileError::what() const noexcept { return outMessage.c_str(); }
 
@@ -53,7 +53,7 @@ const char *ParseError::what() const noexcept { return m_outMessage.c_str(); }
 NotImplementedError::NotImplementedError(const std::string &Desc) : std::logic_error(Desc) {}
 
 /** Writes out the range and limits
-        @returns a char array of foramtted error information
+        @returns a char array of formatted error information
 */
 const char *NotImplementedError::what() const noexcept { return std::logic_error::what(); }
 
@@ -101,7 +101,7 @@ NotFoundError::NotFoundError(const std::string &Desc, const std::size_t &ObjectN
 NotFoundError::NotFoundError(const NotFoundError &A) : std::runtime_error(A), objectName(A.objectName) {}
 
 /** Writes out the range and limits
-        @returns a char array of foramtted error information
+        @returns a char array of formatted error information
 */
 const char *NotFoundError::what() const noexcept { return outMessage.c_str(); }
 
@@ -121,7 +121,7 @@ ExistsError::ExistsError(const std::string &Desc, std::string ObjectName)
 ExistsError::ExistsError(const ExistsError &A) : std::runtime_error(A), objectName(A.objectName) {}
 
 /** Writes out the range and limits
-        @returns a char array of foramtted error information
+        @returns a char array of formatted error information
 */
 const char *ExistsError::what() const noexcept { return outMessage.c_str(); }
 
@@ -139,7 +139,7 @@ AbsObjMethod::AbsObjMethod(std::string ObjectName) : std::runtime_error(""), obj
 AbsObjMethod::AbsObjMethod(const AbsObjMethod &A) : std::runtime_error(A), objectName(A.objectName) {}
 
 /** Writes out the range and limits
-        @returns a char array of foramtted error information
+        @returns a char array of formatted error information
 */
 const char *AbsObjMethod::what() const noexcept { return outMessage.c_str(); }
 
@@ -168,7 +168,7 @@ InstrumentDefinitionError::InstrumentDefinitionError(const InstrumentDefinitionE
     : std::runtime_error(A), objectName(A.objectName) {}
 
 /** Writes out the range and limits
-        @returns a char array of foramtted error information
+        @returns a char array of formatted error information
 */
 const char *InstrumentDefinitionError::what() const noexcept { return outMessage.c_str(); }
 
@@ -195,7 +195,7 @@ OpenGLError::OpenGLError(const std::string &Desc) : std::runtime_error(Desc) {
 OpenGLError::OpenGLError(const OpenGLError &A) : std::runtime_error(A), objectName(A.objectName) {}
 
 /** Writes out the range and limits
-        @returns a char array of foramtted error information
+        @returns a char array of formatted error information
 */
 const char *OpenGLError::what() const noexcept { return outMessage.c_str(); }
 

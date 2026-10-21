@@ -151,7 +151,7 @@ void RotateSampleShape::prepareGoniometerAxes(Goniometer &gon) {
 
       int ccw = 0;
       if (!Strings::convert(tokens[4], ccw)) {
-        throw std::invalid_argument("Error converting sense of roation '" + tokens[4] + "' to a number.");
+        throw std::invalid_argument("Error converting sense of rotation '" + tokens[4] + "' to a number.");
       }
       if (ccw != 1 && ccw != -1) {
         throw std::invalid_argument("The sense of rotation parameter must only be 1 (ccw) or -1 (cw)");

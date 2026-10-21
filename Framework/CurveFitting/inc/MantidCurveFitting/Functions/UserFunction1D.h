@@ -40,7 +40,7 @@ Direction::Output</LI>
 <LI> InitialParameters - A list of initial values for the parameters in the
 function. It is a comma separated
         list of name=value items where name is the name of a parameter and value
-is its initial vlaue.
+is its initial value.
         The name=value pairs can appear in any order in the list. The parameters
 that are not set in this property
         will be given the default initial value of 0.0</LI>

@@ -32,7 +32,7 @@ namespace {
 std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
   /**
    * Create cube of side length size with specified centre,
-   * parellel to axes and non-negative vertex coordinates.
+   * parallel to axes and non-negative vertex coordinates.
    */
   double min = 0.0 - 0.5 * size;
   double max = 0.5 * size;
@@ -75,7 +75,7 @@ std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
 std::unique_ptr<MeshObject> createCube(const double size) {
   /**
    * Create cube of side length size with vertex at origin,
-   * parellel to axes and non-negative vertex coordinates.
+   * parallel to axes and non-negative vertex coordinates.
    */
   return createCube(size, V3D(0.5 * size, 0.5 * size, 0.5 * size));
 }
@@ -193,7 +193,7 @@ public:
 
     // Test flexible constructor
     TS_ASSERT_THROWS_NOTHING(MeshObject(triangles, vertices, Mantid::Kernel::Material()));
-    // Test eficient constructor
+    // Test efficient constructor
     TS_ASSERT_THROWS_NOTHING(MeshObject(std::move(triangles), std::move(vertices), Mantid::Kernel::Material()));
   }
 

@@ -54,7 +54,7 @@ void IkedaCarpenterPV::setHeight(const double h) {
   setParameter("I", 1);
   double h0 = height();
 
-  // to avoid devide by zero and to insane value for I to be set
+  // to avoid divide by zero and to insane value for I to be set
   double minCutOff = 100.0 * std::numeric_limits<double>::min();
   if (h0 > 0 && h0 < minCutOff)
     h0 = minCutOff;
@@ -123,7 +123,7 @@ void IkedaCarpenterPV::init() {
   this->lowerConstraint0("Beta0");
   declareParameter("Kappa", 46.0, "Controls contribution of slow decay term");
   this->lowerConstraint0("Kappa");
-  declareParameter("SigmaSquared", 1.0, "standard deviation squared (Voigt Guassian broadening)");
+  declareParameter("SigmaSquared", 1.0, "standard deviation squared (Voigt Gaussian broadening)");
   this->lowerConstraint0("SigmaSquared");
   declareParameter("Gamma", 1.0, "Voigt Lorentzian broadening");
   this->lowerConstraint0("Gamma");

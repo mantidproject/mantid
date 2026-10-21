@@ -69,7 +69,7 @@ void DiffractionFocussing2::init() {
   declareProperty(std::make_unique<ArrayProperty<double>>("DMax"),
                   "Maximum x values, one value for each output specta or single value which is common to all");
   declareProperty(std::make_unique<ArrayProperty<double>>("Delta"),
-                  "Step parameters for rebin, positive values are constant step-size, negative are logorithmic. One "
+                  "Step parameters for rebin, positive values are constant step-size, negative are logarithmic. One "
                   "value for each output specta or single value which is common to all");
   declareProperty("FullBinsOnly", false, "Omit the final bin if it's width is smaller than the step size");
 }
@@ -255,7 +255,7 @@ void DiffractionFocussing2::exec() {
   if (nGroups <= 0) {
     throw std::runtime_error("No selected Detectors found in .cal file for "
                              "input range. Please ensure spectra range has "
-                             "atleast one selected detector.");
+                             "at least one selected detector.");
   }
   // Check the number of points
   if (nPoints <= 0) {
@@ -584,7 +584,7 @@ void DiffractionFocussing2::execEvent() {
         // Reset Histogram instead of BinEdges, the latter forbids size change.
         eventOutputW->setHistogram(workspaceIndex, BinEdges(git->second.cowData()));
       else
-        // Just use the 1st X vector it found, instead of nothin.
+        // Just use the 1st X vector it found, instead of nothing.
         // Reset Histogram instead of BinEdges, the latter forbids size change.
         eventOutputW->setHistogram(workspaceIndex, BinEdges(group2xvector.begin()->second.cowData()));
     } else

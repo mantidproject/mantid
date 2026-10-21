@@ -275,13 +275,13 @@ void ScriptRepositoryImpl::connect(const std::string &server) { doDownloadFile(s
 
 /** Implements the ScriptRepository::install method.
 
- The instalation consists of:
+ The installation consists of:
 
  - creation of the folder for the ScriptRepository (if it does not exists).
  - download of the repository.json file (Make it hidden)
  - creation of the local.json file. (Make if hidden)
 
- The installation will also upate the ScriptLocalRepository setting, if
+ The installation will also update the ScriptLocalRepository setting, if
  necessary,
  to match the given path.
 
@@ -368,7 +368,7 @@ void ScriptRepositoryImpl::ensureValidRepository() {
 
 /** Implements ScriptRepository::info
 
- For each entry inside the repository, there are some usefull information, that
+ For each entry inside the repository, there are some useful information, that
  are stored in
  a ::ScriptInfo struct.
 
@@ -501,12 +501,12 @@ std::vector<std::string> ScriptRepositoryImpl::listFiles() {
         enum CHANGES { UNCH = 0, REMO = 0X1, LOC = 0X2, BOTH = 0X3 };
         int st = UNCH;
         // the file is local_changed, if the date of the current file is
-        // diferent
+        // different
         // from the downloaded one.
         if (entry.current_date != entry.downloaded_date)
           st |= LOC;
         // the file is remote_changed if the date of the pub_date file is
-        // diferent from the local downloaded pubdate.
+        // different from the local downloaded pubdate.
         if (entry.pub_date > entry.downloaded_pubdate)
           st |= REMO;
 
@@ -613,7 +613,7 @@ void ScriptRepositoryImpl::download_directory(const std::string &directory_path)
     // skip all entries that are not children of directory_path
     // the map will list the entries in alphabetical order, so,
     // when it first find the directory, it will list all the
-    // childrens of this directory, and them,
+    // children of this directory, and them,
     // it will list other things, so we can, break the loop
     if (entry.first.find(directory_path) != 0) {
       if (found)
@@ -919,7 +919,7 @@ int ScriptRepositoryImpl::setAutoUpdate(const std::string &input_path, bool opti
  perform
  unit tests, but also, helps the definition of a clear separation of the logic
  and
- organization of the ScriptRepository, from the conneciton to the Mantid Web
+ organization of the ScriptRepository, from the connection to the Mantid Web
  service,
  making it more decoupled.
 
@@ -1030,7 +1030,7 @@ void ScriptRepositoryImpl::parseLocalRepository(Repository &repo) {
 
  The parseDownloadedEntries will remove all the entries that are not
  shown anymore inside the local file system or the central repository.
- This is usefull to understand that a file has been deleted.
+ This is useful to understand that a file has been deleted.
 
  :param repo: Reference to the pointer so to update it with the information
 
@@ -1228,7 +1228,7 @@ bool ScriptRepositoryImpl::isEntryValid(const std::string &path) {
 
     if (boost::regex_match(path, re1))
       return false;
-    // TODO: apply the pattern ingore checking
+    // TODO: apply the pattern ignore checking
   } catch (std::exception &ex) {
     g_log.warning() << "Pattern exception : " << ignoreregex << ": " << ex.what() << '\n';
   }
@@ -1312,7 +1312,7 @@ std::string ScriptRepositoryImpl::convertPath(const std::string &path) {
     return path;
   } else {
     // the path is inside the local repository
-    // remove the repo_path from te absolute path
+    // remove the repo_path from the absolute path
     // +1 to remove the slash /
     std::string retpath(absolute_path.begin() + pos + local_repository.size(), absolute_path.end());
     // g_log.debug() << "ConvertPath: Entered: " << path << " return: " <<

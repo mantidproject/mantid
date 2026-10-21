@@ -35,13 +35,13 @@ existing file;
 
 -  The algorithm will check whether the specified log file names, titles
    and their orders are exactly same as those in the file to append to;
--  If any difference is deteced, the old file will be renamed in the
+-  If any difference is detected, the old file will be renamed in the
    same directory. And a new file will be generated.
 
 Missing Sample Logs
 -------------------
 
-If there is any sample log specified in the properites but does not
+If there is any sample log specified in the properties but does not
 exist in the workspace, a zero float value will be put to the experiment
 log information line, as the preference of instrument scientist.
 

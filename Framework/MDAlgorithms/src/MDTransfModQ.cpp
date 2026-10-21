@@ -11,7 +11,7 @@
 #include "MantidMDAlgorithms/DisplayNormalizationSetter.h"
 
 namespace Mantid::MDAlgorithms {
-// register the class, whith conversion factory under ModQ name
+// register the class, with conversion factory under ModQ name
 // clang-format off
 DECLARE_MD_TRANSFID(MDTransfModQ, |Q|)
 // clang-format on
@@ -353,7 +353,7 @@ std::vector<std::string> MDTransfModQ::outputUnitID(Kernel::DeltaEMode::Type dEm
   UNUSED_ARG(inWS);
   std::vector<std::string> UnitID = this->getDefaultDimID(dEmode, inWS);
   // TODO: is it really momentum transfer, as MomentumTransfer units are seems
-  // bound to elastic mode only (at least accorting to Units description on
+  // bound to elastic mode only (at least according to Units description on
   // Wiki)?
   if (dEmode == Kernel::DeltaEMode::Elastic) {
     UnitID[0] = "Momentum";

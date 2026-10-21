@@ -63,7 +63,7 @@ private:
 
   void processTimeRange();
 
-  /// Calcualte the distribution of delta T in time stamps
+  /// Calculate the distribution of delta T in time stamps
   DataObjects::Workspace2D_sptr calDistributions(std::vector<Types::Core::DateAndTime> timevec, double stepsize);
 
   void exportLog(API::MatrixWorkspace_sptr ws, std::vector<Types::Core::DateAndTime> abstimevec, double dts);

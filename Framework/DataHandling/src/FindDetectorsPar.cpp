@@ -52,7 +52,7 @@ void FindDetectorsPar::init() {
                   "An optional file that contains of the list of angular "
                   "parameters for the detectors and detectors groups;\n"
                   "If specified, will use data from file instead of the data, "
-                  "calculated from the instument description");
+                  "calculated from the instrument description");
 
   //
   declareProperty("OutputParTable", "",
@@ -67,7 +67,7 @@ void FindDetectorsPar::exec() {
   // Number of spectra
   const auto nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
 
-  // try to load par file if one is availible
+  // try to load par file if one is available
   std::string fileName = this->getProperty("ParFile");
   if (!(fileName.empty() || fileName == "not_used.par")) {
     if (!std::filesystem::exists(fileName)) {
@@ -170,7 +170,7 @@ void FindDetectorsPar::setOutputTable() {
 constexpr double rad2deg = 180.0 / M_PI;
 
 /** method calculates an angle closest to the initial one taken on a ring
-  * e.g. given inital angle 179 deg and another one -179 closest one to 179 is
+  * e.g. given initial angle 179 deg and another one -179 closest one to 179 is
   181
   @param baseAngle -- the angle to be close to
   @param anAngle   -- the angle which ring image may be requested
@@ -187,7 +187,7 @@ double AvrgDetector::nearAngle(const double &baseAngle, const double &anAngle) {
     return anAngle;
 }
 
-/** method to cacluate the detectors parameters and add them to the detectors
+/** method to calculate the detectors parameters and add them to the detectors
  *averages
  *@param det      -- reference to the Mantid Detector
  *@param Observer -- sample position or the centre of the polar system of
@@ -246,7 +246,7 @@ void AvrgDetector::addDetInfo(const Geometry::IDetector &det, const Kernel::V3D 
 
   det.getBoundingBox(bbox);
 
-  // linear extensions of the bounding box orientied tangentially to the equal
+  // linear extensions of the bounding box oriented tangentially to the equal
   // scattering angle circle
   double azimMin = bbox.zMin();
   double azimMax = bbox.zMax();
@@ -307,7 +307,7 @@ of the detector or detector's group in
 void FindDetectorsPar::calcDetPar(const Geometry::IDetector &detector, const Kernel::V3D &observer,
                                   DetParameters &detParameters) {
 
-  // get number of basic detectors within the composit detector
+  // get number of basic detectors within the composite detector
   size_t nDetectors = detector.nDets();
   // define summator
   AvrgDetector detSum;
@@ -361,7 +361,7 @@ void FindDetectorsPar::extractAndLinearize(const std::vector<DetParameters> &det
     detID[nDetectors] = static_cast<size_t>(parameter.detID);
     nDetectors++;
   }
-  // store caluclated value
+  // store calculated value
   m_nDetectors = nDetectors;
 
   // resize to actual detector's number
@@ -393,7 +393,7 @@ size_t FindDetectorsPar::loadParFile(const std::string &fileName) {
 
   if (current_ASCII_file.Type == PAR_type) {
     m_SizesAreLinear = true;
-    Block_size = 5; // this value coinside with the value defined in load_plain
+    Block_size = 5; // this value coincide with the value defined in load_plain
     shift = 0;
     azimuthalWidth.resize(m_nDetectors);
     polarWidth.resize(m_nDetectors);
@@ -410,7 +410,7 @@ size_t FindDetectorsPar::loadParFile(const std::string &fileName) {
 
   } else if (current_ASCII_file.Type == PHX_type) {
     m_SizesAreLinear = false;
-    Block_size = 6; // this value coinside with the value defined in load_plain
+    Block_size = 6; // this value coincide with the value defined in load_plain
     shift = 1;
     azimuthalWidth.resize(m_nDetectors);
     polarWidth.resize(m_nDetectors);
@@ -457,7 +457,7 @@ int FindDetectorsPar::count_changes(const char *const Buf, size_t buf_size) {
   bool is_space(true);
   int space_to_symbol_change(0);
   size_t symbols_start(0);
-  // supress leading spaces;
+  // suppress leading spaces;
   for (size_t i = 0; i < buf_size; i++) {
     if (Buf[i] == 0)
       break;
@@ -510,8 +510,8 @@ size_t FindDetectorsPar::get_my_line(std::ifstream &in, char *buf, size_t buf_si
  *  SPE, PAR or PHS
  *
  *  if none three above identified, returns "undefined" type
- *  it also returns the FileTypeDescriptor, which identifyes the position of the
- *data in correcponding ASCII file
+ *  it also returns the FileTypeDescriptor, which identifies the position of the
+ *data in corresponding ASCII file
  *  plus characteristics of the data extracted from correspondent data header.
  */
 FileTypeDescriptor FindDetectorsPar::get_ASCII_header(std::string const &fileName, std::ifstream &data_stream) {
@@ -575,18 +575,19 @@ FileTypeDescriptor FindDetectorsPar::get_ASCII_header(std::string const &fileNam
     file_descriptor.nData_blocks = static_cast<size_t>(nData_blocks);
     if (nDatas != 2) {
       g_log.error() << " File " << fileName
-                    << " iterpreted as SPE but does "
+                    << " interpreted as SPE but does "
                        "not have two numbers in the "
                        "first row\n";
-      throw(Kernel::Exception::FileError(" File iterpreted as SPE but does not "
+      throw(Kernel::Exception::FileError(" File interpreted as SPE but does not "
                                          "have two numbers in the first row",
                                          fileName));
     }
     file_descriptor.Type = SPE_type;
     get_my_line(data_stream, buffer.data(), buffer.size(), EOL);
     if (buffer.front() != '#') {
-      g_log.error() << " File " << fileName << "iterpreted as SPE does not have symbol # in the second row\n";
-      throw(Kernel::Exception::FileError(" File iterpreted as SPE does not have symbol # in the second row", fileName));
+      g_log.error() << " File " << fileName << "interpreted as SPE does not have symbol # in the second row\n";
+      throw(
+          Kernel::Exception::FileError(" File interpreted as SPE does not have symbol # in the second row", fileName));
     }
     file_descriptor.data_start_position = data_stream.tellg(); // if it is SPE file then the data begin after the
                                                                // second line;

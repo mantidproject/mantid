@@ -78,8 +78,8 @@ std::optional<LookupRow> LookupTable::findLookupRow(std::string const &title, st
 std::optional<LookupRow> LookupTable::searchByTheta(std::vector<LookupRow> lookupRows,
                                                     std::optional<double> const &thetaAngle, double tolerance) const {
   std::vector<LookupRow> matchingRows;
-  auto predicate = [thetaAngle, tolerance](LookupRow const &candiate) -> bool {
-    return !candiate.isWildcard() && equalWithinTolerance(*thetaAngle, candiate.thetaOrWildcard().value(), tolerance);
+  auto predicate = [thetaAngle, tolerance](LookupRow const &candidate) -> bool {
+    return !candidate.isWildcard() && equalWithinTolerance(*thetaAngle, candidate.thetaOrWildcard().value(), tolerance);
   };
 
   std::copy_if(lookupRows.cbegin(), lookupRows.cend(), std::back_inserter(matchingRows), predicate);

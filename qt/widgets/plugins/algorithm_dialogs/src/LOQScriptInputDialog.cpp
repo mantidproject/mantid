@@ -65,7 +65,7 @@ void LOQScriptInputDialog::initLayout() {
  * Retrieve the input from the dialog
  */
 void LOQScriptInputDialog::parseInput() {
-  // All elements within the dialog are public memebers of the
+  // All elements within the dialog are public members of the
   // LOQScriptInputDialog class
   // and have the names given to them in Qt Designer
 

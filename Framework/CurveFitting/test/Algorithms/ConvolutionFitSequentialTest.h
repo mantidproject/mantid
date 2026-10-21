@@ -161,7 +161,7 @@ public:
 
     TS_ASSERT_EQUALS(matrixMember->blocksize(), resWs->blocksize());
 
-    // Check oringal Log was copied correctly
+    // Check original Log was copied correctly
     auto &memberRun = matrixMember->mutableRun();
     auto &originalRun = redWs->mutableRun();
     TS_ASSERT_EQUALS(memberRun.getLogData().at(3)->value(), originalRun.getLogData().at(1)->value());

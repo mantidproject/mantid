@@ -178,7 +178,7 @@ void LoadPSIMuonBin::exec() {
 
   auto largestBinValue = outputWorkspace->x(0)[outputWorkspace->x(0).size() - 1];
 
-  // Since the arrray is all 0s before adding them this can't get min
+  // Since the array is all 0s before adding them this can't get min
   // element so just get first element
   auto lastGoodDataSpecIndex = static_cast<int>(m_header.lastGood[0]);
   setProperty("LastGoodData", outputWorkspace->x(0)[lastGoodDataSpecIndex]);
@@ -550,7 +550,7 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(DataObjects::Workspace2D_s
   auto tempUnit = std::string(1, m_header.temp.at(m_header.temp.size() - 1));
   addToSampleLog("sample_temp_unit", tempUnit, outputWorkspace);
 
-  // When poping the back off the temperature it is meant to remove the unit
+  // When popping the back off the temperature it is meant to remove the unit
   m_header.temp.pop_back();
   try {
     double temperature = std::stod(m_header.temp);
@@ -682,11 +682,11 @@ namespace {
 std::string findTitlesFromLine(const std::string &line) {
   bool titlesFound = false;
   std::string foundTitles = "";
-  for (const auto &charecter : line) {
-    if (charecter == ':') {
+  for (const auto &character : line) {
+    if (character == ':') {
       titlesFound = true;
     } else if (titlesFound) {
-      foundTitles += charecter;
+      foundTitles += character;
     }
   }
   return foundTitles;
@@ -720,7 +720,7 @@ void LoadPSIMuonBin::processHeaderLine(const std::string &line) {
     // Find sample log titles from the header
     processTitleHeaderLine(line);
   } else if (std::find(std::begin(PSI_MONTHS), std::end(PSI_MONTHS), line.substr(5, 3)) != std::end(PSI_MONTHS)) {
-    // If the line contains a Month in the PSI format then assume it conains a
+    // If the line contains a Month in the PSI format then assume it contains a
     // date on the line. 5 is the index of the line that is where the month is
     // found and 3 is the length of the month.
     processDateHeaderLine(line);
@@ -731,8 +731,8 @@ void LoadPSIMuonBin::readInTemperatureFileHeader(const std::string &contents) {
   const int uselessLines = 6;
   int lineNo = 0;
   std::string line = "";
-  for (const auto charecter : contents) {
-    if (charecter == '\n') {
+  for (const auto character : contents) {
+    if (character == '\n') {
       if (line.empty() || line[0] != '!') {
         return;
       } else if (lineNo > uselessLines) {
@@ -741,7 +741,7 @@ void LoadPSIMuonBin::readInTemperatureFileHeader(const std::string &contents) {
       ++lineNo;
       line = "";
     } else {
-      line += charecter;
+      line += character;
     }
   }
 }

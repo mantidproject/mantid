@@ -42,7 +42,7 @@ private:
   /// the location that the neutron would have been detected at if it continued
   /// in a straight line, without gravity
   mutable Kernel::V3D m_cachedLineOfSight;
-  /// the drop that was last caclulated, this allows m_cachedDetLoc to be
+  /// the drop that was last calculated, this allows m_cachedDetLoc to be
   /// recalculated each time without its original value being stored
   mutable double m_cachedDrop;
 

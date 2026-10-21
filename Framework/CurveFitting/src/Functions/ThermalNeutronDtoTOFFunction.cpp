@@ -87,9 +87,9 @@ void ThermalNeutronDtoTOFFunction::functionDeriv1D(Jacobian *out, const double *
   const double width = getParameter("Width");
   const double tcross = getParameter("Tcross");
 
-  // 2. Calcualtion
+  // 2. Calculation
   for (size_t i = 0; i < nData; ++i) {
-    // a) Some calcualtion
+    // a) Some calculation
     double x = xValues[i];
     double n = 0.5 * gsl_sf_erfc(width * (tcross - 1 / x));
     double u = width * (tcross - 1 / x);

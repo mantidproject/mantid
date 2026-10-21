@@ -50,7 +50,7 @@ temp_prefix = "_tp_"  # marks a workspace as temporary
 
 
 class VDAS(Enum):
-    """Specifices the version of the Data Acquisition System (DAS)"""
+    """Specifies the version of the Data Acquisition System (DAS)"""
 
     v1900_2018 = 0  # Up to Dec 31 2018
     v2019_2100 = 1  # From Jan 01 2018
@@ -117,7 +117,7 @@ def pyexec_setup(remove_temp, new_options):
     Parameters
     ----------
     remove_temp: bool
-        Determine wether to remove the temporary workspaces
+        Determine whether to remove the temporary workspaces
     new_options: dict
         Dictionary of mantid configuration options to be modified.
 
@@ -177,7 +177,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         self._qbins = None
         self._short_inst = "BSS"
         self._temps = None
-        self._bkg = None  # Events workspace for brackground runs
+        self._bkg = None  # Events workspace for background runs
         self._bkg_scale = None
         self._van = None  # workspace for vanadium files
         self._v_mask = None  # mask pixels with low-counts in vanadium runs
@@ -266,7 +266,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         self.setPropertyGroup("FluxNormalizationType", title_flux_normalization)
 
         self.declareProperty(
-            FloatArrayProperty("MomentumTransferBins", [0.1, 0.0025, 2.5], direction=Direction.Input),  # invers A
+            FloatArrayProperty("MomentumTransferBins", [0.1, 0.0025, 2.5], direction=Direction.Input),  # inverse A
             "Momentum transfer binning scheme",
         )
 
@@ -299,7 +299,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         self.declareProperty("VanadiumRuns", "", "Vanadium run numbers")
         self.setPropertyGroup("VanadiumRuns", vanadium_title)
         #
-        # Aditional output properties
+        # Additional output properties
         #
         titleAddionalOutput = "Additional Output"
         self.declareProperty("RemoveTemporaryWorkspaces", True, direction=Direction.Input, doc="Remove temporary workspaces and files")

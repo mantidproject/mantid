@@ -96,7 +96,7 @@ private:
   /// Cleans a given layout.
   void cleanLayoutOfDimensions(QLayout *layout);
 
-  /// Clear out any exisiting dimension widgets.
+  /// Clear out any existing dimension widgets.
   void clearExistingDimensions();
 
   /// Determine if the dimension history has changed.

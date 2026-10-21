@@ -8,7 +8,7 @@ Algorithms and instruments
 New
 ###
 
-- New EQ-SANS instrument definition file to adjust the position of the detector array accoring to log entry "detectorZ".
+- New EQ-SANS instrument definition file to adjust the position of the detector array according to log entry "detectorZ".
 - New D16 instrument definition file and loader to manage SANS data.
 
 Improved

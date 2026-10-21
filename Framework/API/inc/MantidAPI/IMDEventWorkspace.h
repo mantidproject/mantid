@@ -105,7 +105,7 @@ public:
   virtual void setBox(API::IMDNode *box) = 0;
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   IMDEventWorkspace(const IMDEventWorkspace &) = default;
 
   const std::string toString() const override;

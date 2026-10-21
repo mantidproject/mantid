@@ -296,7 +296,7 @@ void FunctionParameterDecorator::tie(const std::string &parName, const std::stri
   m_wrappedFunction->tie(parName, expr, isDefault);
 }
 
-/// Forwads addTie-call to the decorated function.
+/// Forwards addTie-call to the decorated function.
 void FunctionParameterDecorator::addTie(std::unique_ptr<ParameterTie> tie) {
   throwIfNoFunctionSet();
 

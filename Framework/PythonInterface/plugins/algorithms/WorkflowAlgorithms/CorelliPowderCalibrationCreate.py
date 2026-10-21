@@ -64,7 +64,7 @@ def unique_workspace_name(n: int = 5, prefix: Optional[str] = "", suffix: Option
 
 def temp_workspace_generator(temp_workspaces):
     r"""
-    Create a funtion that serve a unique workspace name and position it to be later deleted
+    Create a function that serve a unique workspace name and position it to be later deleted
 
     @param temp_workspaces :: list of workspaces to be deleted after algorithm has finished
 
@@ -104,7 +104,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
     #: - Component: name of the instrument component (e.g. 'moderator', 'bank42/sixteenpack')
     #: - Xposition, YPosition, ZPosition: location of the instrument component in the lab frame (units in meters)
     #: - XdirectionCosine, YdirectionCosine, ZdirectionCosine, RotationAngle: direction cosines and rotation angle
-    #: (in degress) defining a rotation in the lab frame that orients the instrument component
+    #: (in degrees) defining a rotation in the lab frame that orients the instrument component
     adjustment_items = [
         "ComponentName",
         "Xposition",
@@ -392,7 +392,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         # Create a WorkspaceGroup with the orientation diagnostics
         GroupWorkspaces(InputWorkspaces=adjustment_diagnostics, OutputWorkspace=prefix_output + "bank_adjustment_diagnostics")
 
-        # clean up at the end (only happens if algorithm completes sucessfully)
+        # clean up at the end (only happens if algorithm completes successfully)
         [DeleteWorkspace(name) for name in temporary_workspaces if AnalysisDataService.doesExist(name)]
 
     def run_algorithm(self, name: str, start_progress: float, end_progress: float, soft_crash=True, **kwargs):
@@ -500,7 +500,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         r"""
         Create one spectra of fitted peaks in d-spacing for each pixel or group of detectors
 
-        This algorithm will perform a unit converstion from TOF to d-spacing. The instrument geometry
+        This algorithm will perform a unit conversion from TOF to d-spacing. The instrument geometry
         for the conversion is proviged by the instrument embedded in `workspace_with_instrument`,
         instead of the instrument embedded in `fitted_in_tof`.
 

@@ -48,7 +48,7 @@ DECLARE_ALGORITHM(ConvertToDiffractionMDWorkspace)
 /** Constructor
  */
 ConvertToDiffractionMDWorkspace::ConvertToDiffractionMDWorkspace()
-    : ClearInputWorkspace(false), // imput workspace should be left untouched
+    : ClearInputWorkspace(false), // input workspace should be left untouched
       OneEventPerBin(false),      // it is very expensive otherwise
       Append(true),               // append data to existing target MD workspace if one exist
       LorentzCorrection(false),   // not doing Lorents
@@ -321,7 +321,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
   IMDEventWorkspace_sptr i_out = getProperty("OutputWorkspace");
   ws = std::dynamic_pointer_cast<DataObjects::MDEventWorkspace<DataObjects::MDLeanEvent<3>, 3>>(i_out);
 
-  // Initalize the matrix to 3x3 identity
+  // Initialize the matrix to 3x3 identity
   mat = Kernel::Matrix<double>(3, 3, true);
 
   // ----------------- Handle the type of output

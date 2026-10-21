@@ -371,13 +371,13 @@ public:
     // Nexus::File::readData() and it won't be found
     TS_ASSERT_THROWS_ANYTHING(history.loadNexus(testfile.file.get()));
     const auto &histories = history.getAlgorithmHistories();
-    // only one will exist as it will throw on the second (wihtout the data) and
+    // only one will exist as it will throw on the second (without the data) and
     // skip the rest
     TS_ASSERT_EQUALS(1, histories.size());
   }
 
   void test_LoadNexus_Short_Data() {
-    // fifth file - 3 algorithms one wiht only one line of data
+    // fifth file - 3 algorithms one with only one line of data
     NexusTestHelper testfile(true);
     failiure_testfile_setup(5, testfile);
     WorkspaceHistory history;
@@ -395,7 +395,7 @@ public:
     NexusTestHelper testfile(true);
     failiure_testfile_setup(6, testfile);
     WorkspaceHistory history;
-    // nothign will throw but nothing will be loaded either as the data is
+    // nothing will throw but nothing will be loaded either as the data is
     // invalid
     TS_ASSERT_THROWS_NOTHING(history.loadNexus(testfile.file.get()));
     const auto &histories = history.getAlgorithmHistories();

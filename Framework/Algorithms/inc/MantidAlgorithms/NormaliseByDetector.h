@@ -50,7 +50,7 @@ private:
   /// Block to process histograms.
   std::shared_ptr<Mantid::API::MatrixWorkspace>
   processHistograms(const std::shared_ptr<Mantid::API::MatrixWorkspace> &inWS);
-  /// Process indivdual histogram.
+  /// Process individual histogram.
   void processHistogram(size_t wsIndex, const std::shared_ptr<const Mantid::API::MatrixWorkspace> &inWS,
                         const std::shared_ptr<Mantid::API::MatrixWorkspace> &denominatorWS,
                         Mantid::API::Progress &prog);

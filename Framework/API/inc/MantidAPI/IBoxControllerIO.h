@@ -11,12 +11,12 @@
 namespace Mantid {
 namespace API {
 
-/** The header describes interface to IO Operations perfomed by the box
+/** The header describes interface to IO Operations performed by the box
  controller
  *  May be replaced by a boost filestream in a future.
  *  It also currently assumes disk buffer usage.
  *  Disk buffer also assumes that actual IO operations performed by the class,
- inhereted from this one are thread-safe
+ inherited from this one are thread-safe
  *
  * @date March 21, 2013
 
@@ -30,7 +30,7 @@ public:
    present in the string file is opened in read/write mode.
                         it is opened in read mode otherwise
    * @return false if the file had been already opened. Throws if problems with
-   openeing */
+   opening */
   virtual bool openFile(const std::string &fileName, const std::string &mode) = 0;
   /**@return true if file is already opened */
   virtual bool isOpened() const = 0;
@@ -43,7 +43,7 @@ public:
   virtual void saveBlock(const std::vector<float> & /* DataBlock */, const uint64_t /*blockPosition*/) const = 0;
   /**Save a double data block in the specified file position */
   virtual void saveBlock(const std::vector<double> & /* DataBlock */, const uint64_t /*blockPosition*/) const = 0;
-  /** load known size float data block from spefied file position */
+  /** load known size float data block from specified file position */
   virtual void loadBlock(std::vector<float> & /* Block */, const uint64_t /*blockPosition*/,
                          const size_t /*BlockSize*/) const = 0;
   virtual void loadBlock(std::vector<double> & /* Block */, const uint64_t /*blockPosition*/,
@@ -59,7 +59,7 @@ public:
 
   /** As save/load operations use void data type, these function allow set
    * up/get  the type name provided for the IO operations
-   *  and the size of the data type in bytes (e.g. the  class dependant physical
+   *  and the size of the data type in bytes (e.g. the  class dependent physical
    * meaning of the blockSize and blockPosition used
    *  by save/load operations     */
   virtual void setDataType(const size_t blockSize, const std::string &typeName) = 0;

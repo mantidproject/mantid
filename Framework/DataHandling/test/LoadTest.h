@@ -109,7 +109,7 @@ public:
     for (auto &loadraw_prop : loadraw_props) {
       TS_ASSERT_EQUALS(loader.existsProperty(loadraw_prop), false);
     }
-    // After setting the file property, the algorithm should have aquired the
+    // After setting the file property, the algorithm should have acquired the
     // appropriate properties
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "IRS38633.raw"));
     // Now

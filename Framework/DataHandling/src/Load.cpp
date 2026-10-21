@@ -216,7 +216,7 @@ void Load::findFilenameProperty(const API::IAlgorithm_sptr &loader) {
     }
   }
 
-  // throw an exception if somehting nothing was found
+  // throw an exception if something nothing was found
   if (m_filenamePropName.empty()) {
     // unset member variables
     setPropertyValue("LoaderName", "");
@@ -664,7 +664,7 @@ API::Workspace_sptr Load::plusWs(Workspace_sptr ws1, const Workspace_sptr &ws2) 
   if (group1 && group2) {
     // If we're dealing with groups, then the child workspaces must be added
     // separately - setProperty
-    // wont work otherwise.
+    // won't work otherwise.
     std::vector<std::string> group1ChildWsNames = group1->getNames();
     std::vector<std::string> group2ChildWsNames = group2->getNames();
 

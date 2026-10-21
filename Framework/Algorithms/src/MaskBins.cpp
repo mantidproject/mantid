@@ -97,7 +97,7 @@ void MaskBins::exec() {
 
     Progress progress(this, 0.0, 1.0, indexSet.size());
     // Parallel running has problems with a race condition, leading to
-    // occaisional test failures and crashes
+    // occasional test failures and crashes
 
     for (const auto wi : indexSet) {
       MantidVec::difference_type startBinLoop(startBin), endBinLoop(endBin);

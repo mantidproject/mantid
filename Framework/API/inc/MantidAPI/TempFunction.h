@@ -97,10 +97,10 @@ public:
   /// Restores a declared parameter i to the active status
   virtual void restoreActive(size_t i) { m_function->restoreActive(i); }
 
-  /// Return parameter index from a parameter reference. Usefull for constraints
+  /// Return parameter index from a parameter reference. Useful for constraints
   /// and ties in composite functions
   virtual size_t getParameterIndex(const ParameterReference &ref) const { return m_function->getParameterIndex(ref); }
-  /// Get a function containing the parameter refered to by the reference. In
+  /// Get a function containing the parameter referred to by the reference. In
   /// case of a simple function
   /// it will be the same as ParameterReference::getFunction(). In case of a
   /// CompositeFunction it returns

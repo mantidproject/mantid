@@ -41,7 +41,7 @@ QString PythonRunner::runPythonCode(const QString &code, bool no_output) {
 
   // Otherwise we need to gather the information from stdout. This is achieved
   // by redirecting the stdout stream
-  // to a temproary file and then reading its contents
+  // to a temporary file and then reading its contents
   // A QTemporaryFile object is used since the file is automatically deleted
   // when the object goes out of scope
   QTemporaryFile tmp_file;
@@ -69,7 +69,7 @@ QString PythonRunner::runPythonCode(const QString &code, bool no_output) {
 /** This Python helper function converts a list of strings into one
  * string that Python will recognise as a Python tuple
  * @param list string entries
- * @return the strings as a comma separated list in brakets
+ * @return the strings as a comma separated list in brackets
  */
 const QString PythonRunner::stringList2Tuple(const QStringList &list) {
   QString tuple("(");

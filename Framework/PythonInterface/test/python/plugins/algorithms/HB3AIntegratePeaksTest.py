@@ -49,7 +49,7 @@ class HB3AIntegratePeaksTest(unittest.TestCase):
 
         self.assertTrue(int_peaks2.hasIntegratedPeaks())
 
-        # Check that peaks match - the sigma intensity shouldnt change even after lorentz
+        # Check that peaks match - the sigma intensity shouldn't change even after lorentz
         for p in range(int_peaks2.getNumberPeaks()):
             peak1 = int_peaks.getPeak(p)
             peak2 = int_peaks2.getPeak(p)

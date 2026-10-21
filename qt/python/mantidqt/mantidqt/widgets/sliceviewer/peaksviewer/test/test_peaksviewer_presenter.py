@@ -27,7 +27,7 @@ def create_test_model(name):
 
 
 def create_mock_model(name):
-    """Create a mock object to test calss"""
+    """Create a mock object to test class"""
     mock_ws = create_autospec(PeaksWorkspace, instance=True)
     mock_ws.name.return_value = name
     mock = create_autospec(PeaksViewerModel, instance=True)
@@ -115,7 +115,7 @@ class PeaksViewerPresenterTest(unittest.TestCase):
         self.mock_view.set_axes_limits.assert_called_once_with(*viewlimits, auto_transform=False)
 
     def test_single_peak_selection_if_peaks_not_drawn(self, mock_peaks_list_presenter):
-        # peaks not drawn if one fo viewing axes non-Q
+        # peaks not drawn if one of viewing axes non-Q
         name = "ws1"
         mock_model = create_mock_model(name)
         mock_model.has_representations_drawn.return_value = False

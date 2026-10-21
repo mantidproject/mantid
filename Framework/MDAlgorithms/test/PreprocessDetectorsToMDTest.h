@@ -131,7 +131,7 @@ public:
     API::Workspace_sptr wsOut = API::AnalysisDataService::Instance().retrieve("PreprocDetectorsWS");
     TSM_ASSERT("can not retrieve table worksapce from analysis data service ", wsOut);
     DataObjects::TableWorkspace_sptr tws = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(wsOut);
-    TSM_ASSERT("can not interpet the workspace as table workspace", tws);
+    TSM_ASSERT("can not interpret the workspace as table workspace", tws);
 
     double L1(0);
     uint32_t nDet(0);
@@ -161,7 +161,7 @@ public:
     API::Workspace_sptr wsOut = API::AnalysisDataService::Instance().retrieve("PreprocDetectorsWS");
     TSM_ASSERT("can not retrieve table worksapce from analysis data service ", wsOut);
     DataObjects::TableWorkspace_sptr tws = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(wsOut);
-    TSM_ASSERT("can not interpet the workspace as table workspace", tws);
+    TSM_ASSERT("can not interpret the workspace as table workspace", tws);
 
     auto &Efixed = tws->getColVector<float>("eFixed");
     for (size_t i = 0; i < Efixed.size(); i++) {
@@ -183,7 +183,7 @@ public:
     API::Workspace_sptr wsOut = API::AnalysisDataService::Instance().retrieve("PreprocDetectorsWSMasks");
     TSM_ASSERT("can not retrieve table worksapce from analysis data service ", wsOut);
     DataObjects::TableWorkspace_sptr tws = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(wsOut);
-    TSM_ASSERT("can not interpet the workspace as table workspace", tws);
+    TSM_ASSERT("can not interpret the workspace as table workspace", tws);
 
     auto &maskCol = tws->getColVector<int>("detMask");
     for (size_t i = 0; i < maskCol.size(); i++) {
@@ -232,7 +232,7 @@ public:
     API::Workspace_sptr wsOut = API::AnalysisDataService::Instance().retrieve("PreprocDetectorsWSMasks");
     TSM_ASSERT("can not retrieve table worksapce from analysis data service ", wsOut);
     DataObjects::TableWorkspace_sptr tws = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(wsOut);
-    TSM_ASSERT("can not interpet the workspace as table workspace", tws);
+    TSM_ASSERT("can not interpret the workspace as table workspace", tws);
 
     TSM_ASSERT_THROWS("No such column", tws->getColVector<int>("detMask"), const std::runtime_error &);
 

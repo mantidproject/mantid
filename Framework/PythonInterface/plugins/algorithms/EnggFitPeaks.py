@@ -526,7 +526,7 @@ class EnggFitPeaks(PythonAlgorithm):
         It applies for example a simple rule: if the peak center is
         negative, it is obviously a fit failure. This is sometimes not so straightforward
         from the error estimates and Chi^2 values returned from Fit, as there seem to be
-        a small percentage of cases with numberical issues (nan, zeros, etc.).
+        a small percentage of cases with numerical issues (nan, zeros, etc.).
 
         @param fitted_params :: parameters fitted from Fit algorithm
         @param in_wks :: input workspace where a spectrum was fitted

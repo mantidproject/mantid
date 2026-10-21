@@ -362,7 +362,7 @@ void PredictFractionalPeaks::init() {
 
 /**
  * Validate the input once all values are set
- * @return A map<string,string> containting an help messages for the user
+ * @return A map<string,string> containing an help messages for the user
  */
 std::map<std::string, std::string> PredictFractionalPeaks::validateInputs() {
   std::map<std::string, std::string> helpMessages;
@@ -436,7 +436,7 @@ void PredictFractionalPeaks::exec() {
  * offsets
  */
 ModulationProperties PredictFractionalPeaks::getModulationInfo() {
-  // Input validation ensures that we have either specified offests or
+  // Input validation ensures that we have either specified offsets or
   // modulation vectors
   const int maxOrder = getProperty(ModulationProperties::MaxOrder);
 

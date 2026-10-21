@@ -868,9 +868,9 @@ Poco::XML::Element *InstrumentDefinitionParser::getParentComponent(const Poco::X
     }
   } else {
     g_log.error("Argument to function getParentComponent must be a XML element "
-                "whos parent is an element.");
+                "whose parent is an element.");
     throw std::logic_error("Argument to function getParentComponent must be a "
-                           "XML element whos parent is an element.");
+                           "XML element whose parent is an element.");
   }
 
   return pCompElem;
@@ -1005,7 +1005,7 @@ void InstrumentDefinitionParser::readDefaults(Poco::XML::Element *defaults) {
 
   // Check if the IDF specifies that this is an indirect geometry instrument
   // that includes
-  // both physical and 'neutronic' postions.
+  // both physical and 'neutronic' positions.
   // Any neutronic position tags will be ignored if this tag is missing
   if (defaults->getChildElement("indirect-neutronic-positions"))
     m_indirectPositions = true;
@@ -2078,7 +2078,7 @@ void InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp, co
 
   // The purpose below is to have a quicker way to judge if pElem contains a
   // parameter, see
-  // defintion of m_hasParameterElement for more info
+  // definition of m_hasParameterElement for more info
   if (m_hasParameterElement_beenSet)
     if (m_hasParameterElement.end() == std::find(m_hasParameterElement.begin(), m_hasParameterElement.end(), pElem))
       return;
@@ -2660,7 +2660,7 @@ void InstrumentDefinitionParser::createNeutronicInstrument() {
  *  @param pElem ::  Poco::XML \<type\> element that we want to adjust
  *  @param isTypeAssembly [in] :: tell whether any other type, but the special
  * one treated here, is assembly or not
- *  @param getTypeElement [in] :: contain pointers to all types but the onces
+ *  @param getTypeElement [in] :: contain pointers to all types but the ones
  * treated here
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML

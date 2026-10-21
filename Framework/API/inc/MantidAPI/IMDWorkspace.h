@@ -111,7 +111,7 @@ public:
   /// file-based information and close related files.
   virtual void clearFileBacked(bool /* loadFileContentsToMemory*/) {}
   /// this is the method to build table workspace from any workspace. It does
-  /// not have much sence and may be placed here erroneously
+  /// not have much sense and may be placed here erroneously
   virtual ITableWorkspace_sptr makeBoxTable(size_t /*start*/, size_t /* num*/) {
     throw Kernel::Exception::NotImplementedError("This method is not generally implemented ");
   }
@@ -129,7 +129,7 @@ public:
   virtual bool hasOrientedLattice() const = 0;
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   IMDWorkspace(const IMDWorkspace &) = default;
 
   void makeSinglePointWithNaN(std::vector<coord_t> &x, std::vector<signal_t> &y, std::vector<signal_t> &e) const;

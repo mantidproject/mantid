@@ -171,7 +171,7 @@ void ReadGroupsFromFile::readGroupingFile(const std::string &filename) {
 
 //-----------------------------------------------------------------------------------------------
 /**
- * Reads detctor ids for groups from an XML grouping file, such as one created
+ * Reads detector ids for groups from an XML grouping file, such as one created
  * by the SpatialGrouping algorithm.
  * @param filename :: path and name of input file
  * @throw FileError is there is a problem with the XML file

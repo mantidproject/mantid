@@ -13,13 +13,13 @@ namespace MantidQt {
 namespace API {
 /** RepoTreeView : A specialization of QTreeView class that emits signal every
  * time the selection change. It extends the currentChanged method in order to
- * add the emition of the signal currentCell.
+ * add the emission of the signal currentCell.
  */
 class EXPORT_OPT_MANTIDQT_COMMON RepoTreeView : public QTreeView {
   Q_OBJECT
 
 public:
-  // constuctor
+  // constructor
   RepoTreeView(QWidget *parent = nullptr) : QTreeView(parent) {};
   // destructor - not virtual, because this is not intended to be base
   ~RepoTreeView() override {};

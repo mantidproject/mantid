@@ -464,7 +464,7 @@ public:
     TS_ASSERT((!Mantid::API::equals(ews1, ews2)));
     auto result = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_msgs");
     auto message = result->String(0, 0);
-    TS_ASSERT_EQUALS(message, "Total 300 (in 300) events are differrent. 0 have different "
+    TS_ASSERT_EQUALS(message, "Total 300 (in 300) events are different. 0 have different "
                               "TOF; 0 have different pulse time; 0 have different in both "
                               "TOF and pulse time; 300 have different weights.\nMismatched "
                               "event lists include 10 of total 10 spectra. \n0, ");
@@ -490,7 +490,7 @@ public:
     TS_ASSERT((!Mantid::API::equals(ews1, ews2)));
     auto result = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_msgs");
     auto message = result->String(0, 0);
-    TS_ASSERT_EQUALS(message, "Total 300 (in 300) events are differrent. 0 have different "
+    TS_ASSERT_EQUALS(message, "Total 300 (in 300) events are different. 0 have different "
                               "TOF; 0 have different pulse time; 0 have different in both "
                               "TOF and pulse time; 300 have different weights.\nMismatched "
                               "event lists include 10 of total 10 spectra. \n0, ");

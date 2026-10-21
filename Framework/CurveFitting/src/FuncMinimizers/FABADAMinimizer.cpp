@@ -87,7 +87,7 @@ FABADAMinimizer::FABADAMinimizer()
                   " between them.");
   declareProperty("ConvergenceCriteria", 0.01, "Variance in Cost Function for considering convergence reached.");
   declareProperty("InnactiveConvergenceCriterion", static_cast<size_t>(5),
-                  "Number of Innactive Regenerations to consider"
+                  "Number of Inactive Regenerations to consider"
                   " a certain parameter to be converged");
   declareProperty("JumpAcceptanceRate", 0.6666666, "Desired jumping acceptance rate");
   // Simulated Annealing properties
@@ -209,7 +209,7 @@ bool FABADAMinimizer::iterate(size_t /*iteration*/) {
       // If not, changes it.
       boundApplication(i, newValue, step);
       // Obs: As well as checking whether the ties are not contradictory is
-      // too constly, if there are tied parameters that are bounded,
+      // too costly, if there are tied parameters that are bounded,
       // checking that the boundedness is fulfilled for all the parameters
       // is costly too (extremely costly if the relations get complex,
       // which is plausible). Therefore it is not yet implemented and
@@ -277,7 +277,7 @@ bool FABADAMinimizer::iterate(size_t /*iteration*/) {
   // if overexploring or Simulated Annealing completed
   convergenceCheck(); // updates m_converged
 
-  // Check wheather it is refrigeration time or not (for Simulated Annealing)
+  // Check whether it is refrigeration time or not (for Simulated Annealing)
   if (m_leftRefrPoints != 0 && m_counter == m_simAnnealingItStep) {
     simAnnealingRefrigeration();
   }
@@ -660,7 +660,7 @@ bool FABADAMinimizer::iterationContinuation() {
     }
   } else {
     // If convergence has been reached, continue until we complete the chain
-    // length. Otherwise, stop interations.
+    // length. Otherwise, stop iterations.
     return m_counter < m_chainIterations;
   }
   // can we even get here? -> Nope (we should not, so we do not want it to
@@ -930,7 +930,7 @@ void FABADAMinimizer::calculateConvChainAndBestParameters(size_t convLength, int
       reducedChain.emplace_back(std::move(v));
     }
 
-    // Calculate the reducedConvergedChain for the cost fuction.
+    // Calculate the reducedConvergedChain for the cost function.
     for (size_t k = 1; k < convLength; ++k) {
       reducedChain[m_nParams].emplace_back(m_chain[m_nParams][nSteps * k + m_convPoint]);
     }
@@ -977,7 +977,7 @@ void FABADAMinimizer::calculateConvChainAndBestParameters(size_t convLength, int
   }
 }
 
-/** Initialze member variables related to fitting parameters
+/** Initialize member variables related to fitting parameters
  *
  */
 void FABADAMinimizer::initChainsAndParameters() {
@@ -1017,7 +1017,7 @@ void FABADAMinimizer::initChainsAndParameters() {
 
     // Initialize chains
     m_chain.emplace_back(std::vector<double>(1, param));
-    // Initilize jump parameters
+    // Initialize jump parameters
     m_jump.emplace_back(param != 0.0 ? std::abs(param / 10) : 0.01);
   }
   m_chi2 = m_leastSquares->val();

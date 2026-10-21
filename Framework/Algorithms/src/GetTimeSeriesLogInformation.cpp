@@ -75,7 +75,7 @@ void GetTimeSeriesLogInformation::init() {
 /** Main execution
  */
 void GetTimeSeriesLogInformation::exec() {
-  // 1. Get wrokspace, log property and etc.
+  // 1. Get workspace, log property and etc.
   m_dataWS = this->getProperty("InputWorkspace");
   if (!m_dataWS) {
     throw runtime_error("Inputworkspace cannot be parsed to a MatrixWorkspace.");
@@ -143,7 +143,7 @@ void GetTimeSeriesLogInformation::exec() {
  * inside the given time range.
  */
 void GetTimeSeriesLogInformation::processTimeRange() {
-  // Orignal
+  // Original
   m_intInfoMap.emplace("Items", m_log->size());
 
   // Input time
@@ -467,7 +467,7 @@ void GetTimeSeriesLogInformation::checkLogBasicInforamtion() {
   */
 
   // 4. Output
-  /* Temporily disabled
+  /* Temporarily disabled
   g_log.notice() << "Run Start = " << t0.totalNanoseconds() << '\n';
   g_log.notice() << "First Log: " << "Absolute Time = " <<
   m_timeVec[0].totalNanoseconds() << "(ns), "
@@ -504,7 +504,7 @@ void GetTimeSeriesLogInformation::checkLogBasicInforamtion() {
 void GetTimeSeriesLogInformation::checkLogValueChanging(const vector<DateAndTime> &timevec,
                                                         const vector<double> &values, double delta) {
   std::stringstream ss;
-  ss << "Alternating Threashold = " << delta << '\n';
+  ss << "Alternating Threshold = " << delta << '\n';
 
   size_t numchange = 0;
   for (size_t i = 1; i < values.size(); i++) {

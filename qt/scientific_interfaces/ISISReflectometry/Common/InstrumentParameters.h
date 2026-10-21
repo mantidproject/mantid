@@ -73,7 +73,7 @@ public:
    * in the file.
    *
    * If the property is in the file but is not one of the specified types a type
-   * missmatch error will be recorded.
+   * mismatch error will be recorded.
    */
   template <typename T, typename... Ts> boost::variant<T, Ts...> mandatoryVariant(std::string const &parameterName) {
     try {

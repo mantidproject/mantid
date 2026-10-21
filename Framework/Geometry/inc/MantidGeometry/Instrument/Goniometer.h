@@ -95,7 +95,7 @@ public:
   size_t getNumberAxes() const;
   // Make a default universal goniometer
   void makeUniversalGoniometer();
-  // Return Euler angles acording to a convention
+  // Return Euler angles according to a convention
   std::vector<double> getEulerAngles(const std::string &convention = "YZX");
 
   // determine the convention from the motor axes

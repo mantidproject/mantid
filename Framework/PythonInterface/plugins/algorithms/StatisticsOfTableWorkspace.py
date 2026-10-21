@@ -35,7 +35,7 @@ class StatisticsOfTableWorkspace(PythonAlgorithm):
         return "Utility\\Workspaces"
 
     def summary(self):
-        return "Calcuates columns statistics of a table workspace."
+        return "Calculates columns statistics of a table workspace."
 
     def PyInit(self):
         self.declareProperty(ITableWorkspaceProperty("InputWorkspace", "", Direction.Input), doc="Input table workspace.")

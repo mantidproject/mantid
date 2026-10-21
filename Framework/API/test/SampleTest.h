@@ -408,7 +408,7 @@ public:
     Sample sample;
     const Material material;
 
-    // create square-based pyramid, with a square face for the base and trangular faces for the others
+    // create square-based pyramid, with a square face for the base and triangular faces for the others
     const std::vector<V3D> vertices{V3D(0.0, 0.0, 0.0), V3D(2.0, 0.0, 0.0), V3D(0.0, 2.0, 0.0), V3D(2.0, 2.0, 0.0),
                                     V3D(2.0, 2.0, 2.0)};
     // winding order should be CCW from outside the face

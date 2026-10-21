@@ -179,7 +179,7 @@ bool Sample::hasEnvironment() const { return (m_environment != nullptr); }
  */
 const SampleEnvironment &Sample::getEnvironment() const {
   if (!m_environment) {
-    throw std::runtime_error("Sample::getEnvironment - No sample enviroment has been defined.");
+    throw std::runtime_error("Sample::getEnvironment - No sample environment has been defined.");
   }
   return *m_environment;
 }
@@ -246,7 +246,7 @@ bool Sample::hasCrystalStructure() const {
 void Sample::clearCrystalStructure() { m_crystalStructure.reset(); }
 
 /**
- * Set the geometry flag that is specfied in the raw file within the SPB_STRUCT
+ * Set the geometry flag that is specified in the raw file within the SPB_STRUCT
  * 1 = cylinder, 2 = flat plate, 3 = disc, 4 = single crystal
  * @param geom_id :: The flag for the geometry
  */

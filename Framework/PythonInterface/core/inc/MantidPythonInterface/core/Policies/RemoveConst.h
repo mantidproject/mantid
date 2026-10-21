@@ -47,7 +47,7 @@ template <typename T> struct IsConstSharedPtr : std::false_type {};
 template <typename T> struct IsConstSharedPtr<std::shared_ptr<const T>> : std::true_type {};
 
 //-----------------------------------------------------------------------
-// Polciy implementations
+// Policy implementations
 //-----------------------------------------------------------------------
 
 // The entry point for the policy is in the struct RemoveConst below. It does

@@ -360,7 +360,7 @@ std::vector<size_t> PanelsSurfaceCalculator::tubeDetectorParentIDs(const Compone
       this->setBankVisited(componentInfo, bankIndex, visited);
       return tubes;
     }
-    // Now we found all the tubes that may form a flat struture.
+    // Now we found all the tubes that may form a flat structure.
     // Use two of the tubes to calculate the normal to the plain of that structure
     normal = tubes.size() > 1 ? this->calculateBankNormal(componentInfo, tubes) : V3D();
     // If some of the tubes are not perpendicular to the normal the structure

@@ -96,7 +96,7 @@ void MantidTreeModel::showAlgorithmDialog(const QString &algName, QHash<QString,
       alg->setPropertyValue(it.key().toStdString(), it.value().toStdString());
     }
   } catch (std::exception &ex) {
-    g_log.error() << "Error setting the properties for algotithm " << algName.toStdString() << ": " << ex.what()
+    g_log.error() << "Error setting the properties for algorithm " << algName.toStdString() << ": " << ex.what()
                   << '\n';
     return;
   }

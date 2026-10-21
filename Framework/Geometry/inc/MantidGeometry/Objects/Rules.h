@@ -214,7 +214,7 @@ class MANTID_GEOMETRY_DLL SurfPoint : public Rule {
 private:
   std::shared_ptr<Surface> m_key; ///< Actual Surface Base Object
   SurfPoint *doClone() const override;
-  int keyN; ///< Key Number (identifer)
+  int keyN; ///< Key Number (identifier)
   int sign; ///< +/- in Object unit
 public:
   SurfPoint();
@@ -302,7 +302,7 @@ public:
 
 /**
 \class CompGrp
-\brief Compemented Grup
+\brief Compemented Group
 \author S.Ansell
 \version 1.0
 \date January 2006

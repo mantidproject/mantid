@@ -28,7 +28,7 @@ void CPUTimer::reset() {
   m_wallClockTime.reset();
 }
 
-/** Calculate the elapsed CPU time, reseting the timer if specified
+/** Calculate the elapsed CPU time, resetting the timer if specified
  *
  * @param doReset :: true to reset the timer
  * @return time in CPU seconds
@@ -46,7 +46,7 @@ float CPUTimer::elapsedCPU(bool doReset) {
   return retval;
 }
 
-/** Calculate the elapsed wall-clock time, reseting the timer if specified
+/** Calculate the elapsed wall-clock time, resetting the timer if specified
  *
  * @param doReset :: true to reset the timer
  * @return wall-clock time, in seconds

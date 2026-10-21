@@ -181,7 +181,7 @@ class PeaksViewerPresenter:
     @staticmethod
     def _raise_error_if_workspace_incompatible(ws):
         """
-        :param ws: A reference to an object to check for compatability
+        :param ws: A reference to an object to check for compatibility
         """
         if not hasattr(ws, "getNumberPeaks"):
             raise ValueError("Expected a PeaksWorkspace. Found {}.".format(type(ws)))
@@ -248,7 +248,7 @@ class PeaksViewerCollectionPresenter:
                 names_to_overlay_final.remove(name)
                 continue
 
-        # anything left in names_already overlayed then needs to be removed
+        # anything left in names_already overlaid then needs to be removed
         if names_already_overlayed:
             for name in names_already_overlayed:
                 self.remove_peaksworkspace(name)

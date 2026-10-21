@@ -1097,7 +1097,7 @@ class MaskParser(UserFileComponentParser):
             output = {MaskId.LINE: mask_line(width=line_values[0], angle=line_values[1], x=line_values[2], y=line_values[3])}
         else:
             raise ValueError(
-                "MaskParser: Line mask accepts wither 2 or 4 parameters, but {0} parameters were passed in.".format(length_values)
+                "MaskParser: Line mask accepts either 2 or 4 parameters, but {0} parameters were passed in.".format(length_values)
             )
         return output
 

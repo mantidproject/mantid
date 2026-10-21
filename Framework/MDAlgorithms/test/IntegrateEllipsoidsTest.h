@@ -220,7 +220,7 @@ private:
 
       /* We expect an axis of the ellipsoid to be mostly
        * along Qhkl (probably the principal axis (i.e.
-       * direction of max varaince) but not necassarily)
+       * direction of max variance) but not necassarily)
        */
       double minangle = M_PI / 2;
       for (size_t ii = 0; ii < dirs.size(); ii++) {
@@ -231,7 +231,7 @@ private:
         }
         minangle = std::min(minangle, angle);
       }
-      TS_ASSERT_LESS_THAN(minangle, 0.05); // aprox 3 deg
+      TS_ASSERT_LESS_THAN(minangle, 0.05); // approx 3 deg
     }
   }
 

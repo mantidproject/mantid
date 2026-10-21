@@ -45,7 +45,7 @@ class MaskingTable(QtWidgets.QWidget, Ui_MaskingTable):
 
     def add_listener(self, listener):
         if not isinstance(listener, MaskingTable.MaskingTableListener):
-            raise ValueError("The listener ist not of type MaskingTableListener but rather {}".format(type(listener)))
+            raise ValueError("The listener is not of type MaskingTableListener but rather {}".format(type(listener)))
         self._masking_tab_listeners.append(listener)
 
     def clear_listeners(self):

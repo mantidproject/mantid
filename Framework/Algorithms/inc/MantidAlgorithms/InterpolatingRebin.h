@@ -21,8 +21,8 @@ class Points;
 } // namespace HistogramData
 namespace Algorithms {
 /**Uses cubic splines to interpolate the mean rate of change of the integral
-  over the inputed data bins to that for the user supplied bins.
-  Note that this algorithm was inplemented to provide a little more resolution
+  over the inputted data bins to that for the user supplied bins.
+  Note that this algorithm was implemented to provide a little more resolution
   on high count rate data. Whether it is more accurate than the standard rebin
   for all, or your, applications requires thought.
   The input data must be a distribution (proportional to the rate of change e.g.

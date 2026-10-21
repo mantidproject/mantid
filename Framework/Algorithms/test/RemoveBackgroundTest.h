@@ -198,7 +198,7 @@ public:
     auto &Ebg = bgWS->mutableE(0);
     Ebg[0] = 0;
 
-    // remove background. If bacground is fully 0, algorithm just removes
+    // remove background. If background is fully 0, algorithm just removes
     // negative values
     Algorithms::RemoveBackground bkgRem;
     bkgRem.initialize();

@@ -194,7 +194,7 @@ public:
     loader->setDataType(c.getCoordType(), c.getEventType());
 
     // Create and open the test dummy file with 1000 floats in it (have to
-    // recalulate to events differently)
+    // recalculate to events differently)
     sc->setFileBacked(loader, "existingDummy");
 
     // Tell it we have 10 events on file located after first three events ;
@@ -490,7 +490,7 @@ public:
     dbuf->flushCache();
     TS_ASSERT_EQUALS(dbuf->getWriteBufferUsed(), 0);
 
-    // this operation should not happends in real lifa as it destroys
+    // this operation should not happens in real lifa as it destroys
     // file-backed stuff but here we do it just to allow the following operation
     // to work
     bc->getFileIO()->closeFile();
@@ -549,7 +549,7 @@ public:
       return;
     TS_ASSERT_DELTA(events2[123].getSignal(), 456.0, 1e-5);
 
-    // this operation should not happends in real lifa as it destroys
+    // this operation should not happens in real lifa as it destroys
     // file-backed stuff but here we do it just to allow the following operation
     // to work
     bc->getFileIO()->closeFile();
@@ -636,7 +636,7 @@ public:
     const std::vector<MDLeanEvent<3>> &events0a = c.getEvents();
 
     TS_ASSERT_DELTA(events0a[599].getSignal(), 995., 1.e-6);
-    // no writing shuld happen, just discarded from memory
+    // no writing should happen, just discarded from memory
     c.releaseEvents();
     dbuf->flushCache();
     TS_ASSERT_EQUALS(dbuf->getFileLength(), 3000);
@@ -655,7 +655,7 @@ public:
     TS_ASSERT_DELTA(events3[1499].getSignal(), 789.0, 1e-5);
     c3.releaseEvents();
 
-    // this operation should not happends in real lifa as it destroys
+    // this operation should not happens in real lifa as it destroys
     // file-backed stuff but here we do it just to allow the following operation
     // to work
     bc->getFileIO()->closeFile();

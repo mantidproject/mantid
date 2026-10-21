@@ -43,7 +43,7 @@ public:
   /**Return the pointer to the structure responsible for saving the box on disk
    * if the workspace occupies too much memory */
   virtual Kernel::ISaveable *getISaveable() = 0;
-  /**Return the pointer to the sconst tructure responsible for saving the box on
+  /**Return the pointer to the sconst structure responsible for saving the box on
    * disk if the workspace occupies too much memory */
   virtual Kernel::ISaveable *getISaveable() const = 0;
   /** initiate the structure responsible for swapping the box on HDD if out of
@@ -146,7 +146,7 @@ public:
   virtual uint64_t getTotalDataSize() const = 0;
 
   /** The method to convert events in a box into a table of
-   * coodrinates/signal/errors casted into coord_t type
+   * coordinates/signal/errors casted into coord_t type
    *   Used to save events from plain binary file
    *   @param coordTable -- vector of events parameters
    *   @param nColumns    -- number of parameters for each event
@@ -221,7 +221,7 @@ public:
                                  const coord_t length, signal_t &signal, signal_t &errorSquared,
                                  std::vector<signal_t> &signal_fit) const = 0;
 
-  /** Split sub-boxes, if this is possible and neede for this box */
+  /** Split sub-boxes, if this is possible and needed for this box */
   virtual void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = nullptr) = 0;
   /** Recalculate signal etc. */
   virtual void refreshCache(Kernel::ThreadScheduler * /*ts*/ = nullptr) = 0;

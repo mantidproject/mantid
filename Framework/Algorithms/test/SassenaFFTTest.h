@@ -186,10 +186,10 @@ private:
    * Gaussian centered at zero and with positive times only
    * @param sigma standard deviation
    */
-  void Gaussian(MantidVec &xv, MantidVec &yv, const double &Heigth, const double &sigma) {
+  void Gaussian(MantidVec &xv, MantidVec &yv, const double &Height, const double &sigma) {
     for (size_t i = 0; i < xv.size(); i++) {
       double z = xv[i] / sigma;
-      yv[i] = Heigth * exp(-z * z / 2.0);
+      yv[i] = Height * exp(-z * z / 2.0);
     }
   } // void Gaussian
 
@@ -209,7 +209,7 @@ private:
    * standard deviation sigma.
    * sigma increases as sigma0*2^nspectra
    */
-  void createWorkspace2D(const std::string &wsName, const double &Heigth, const double &sigma0,
+  void createWorkspace2D(const std::string &wsName, const double &Height, const double &sigma0,
                          const size_t &nspectra) {
     DataObjects::Workspace2D_sptr ws(new DataObjects::Workspace2D);
     ws->initialize(nspectra, nbins,
@@ -229,7 +229,7 @@ private:
     for (size_t i = 0; i < nspectra; i++) {
       ws->mutableX(i) = xv;
       double sigma = sigma0 / (1 + static_cast<double>(i));
-      this->Gaussian(xv, yv, Heigth, sigma);
+      this->Gaussian(xv, yv, Height, sigma);
       ws->mutableY(i) = yv;
     }
 
@@ -247,25 +247,25 @@ private:
 
     const size_t nspectra(4); // assume four Q-values
     std::string wsName = gwsName + "_fqt.Re";
-    double Heigth = params[0];
+    double Height = params[0];
     double sigma = params[1];
-    this->createWorkspace2D(wsName, Heigth, sigma, nspectra);
+    this->createWorkspace2D(wsName, Height, sigma, nspectra);
     // this->printWorkspace2D("/tmp/fqt.Re.dat",wsName); // uncomment line for
     // debugging purposes only
     gws->add(wsName);
 
     wsName = gwsName + "_fqt.Im";
-    Heigth = params[2];
+    Height = params[2];
     sigma = params[3];
-    this->createWorkspace2D(wsName, Heigth, sigma, nspectra);
+    this->createWorkspace2D(wsName, Height, sigma, nspectra);
     // this->printWorkspace2D("/tmp/fqt.Im.dat",wsName); // uncomment line for
     // debugging purposes only
     gws->add(wsName);
 
     wsName = gwsName + "_fqt0";
-    Heigth = params[4];
+    Height = params[4];
     sigma = params[5];
-    this->createWorkspace2D(wsName, Heigth, sigma, 1);
+    this->createWorkspace2D(wsName, Height, sigma, 1);
     gws->add(wsName);
 
   } // void  createGroupWorkspace

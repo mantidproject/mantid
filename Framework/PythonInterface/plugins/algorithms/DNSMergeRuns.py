@@ -131,7 +131,7 @@ class DNSMergeRuns(PythonAlgorithm):
         """
         arr = []
         beamDirection = V3D(0, 0, 1)
-        # merge workspaces, existance has been checked by _can_merge function
+        # merge workspaces, existence has been checked by _can_merge function
         for ws_name in self.workspace_names:
             wks = api.AnalysisDataService.retrieve(ws_name)
             spectrum_info = wks.spectrumInfo()
@@ -145,13 +145,13 @@ class DNSMergeRuns(PythonAlgorithm):
             for i in range(n_hists):
                 arr.append([two_theta[i], dataY[i], dataE[i]])
         data = np.array(arr)
-        # sum up intensities for dublicated angles
+        # sum up intensities for duplicated angles
         data_sorted = data[np.argsort(data[:, 0])]
         # unique values
         unX = np.unique(data_sorted[:, 0])
         if len(data_sorted[:, 0]) - len(unX) > 0:
             arr = []
-            self.log().information("There are dublicated 2Theta angles in the dataset. Sum up the intensities.")
+            self.log().information("There are duplicated 2Theta angles in the dataset. Sum up the intensities.")
             # we must sum up the values
             for i in range(len(unX)):
                 idx = np.where(np.fabs(data_sorted[:, 0] - unX[i]) < 1e-4)

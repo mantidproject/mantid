@@ -374,7 +374,7 @@ used.
   /*
 ====================================================================
 
-NEXUS TRANSFOMATIONS TESTS
+NEXUS TRANSFORMATIONS TESTS
 
 DESCRIPTION:
 
@@ -392,8 +392,8 @@ Instrument cache.
 
     /*
    test scenario: pass into saveInstrument an instrument with manually set
-   non-zero rotation in a detector bank. Expectation: test utilty will search
-   file for orientaion dataset, read the magnitude of the angle, and the axis
+   non-zero rotation in a detector bank. Expectation: test utility will search
+   file for orientation dataset, read the magnitude of the angle, and the axis
    vector. The output quaternion from file will be compared to the input
    quaternion manually set. Asserts that they are approximately equal,
    indicating that saveinstrument has correctly written the orientation data.
@@ -431,10 +431,10 @@ Instrument cache.
     std::vector<double> axisInFile = tester.readDoubleVectorFrom_d_Attribute(attributeName, ORIENTATION, path);
     V3D axisVectorInFile = {axisInFile[0], axisInFile[1], axisInFile[2]};
 
-    // Eigen copy of bankRotation for assertation
+    // Eigen copy of bankRotation for assertion
     Eigen::Quaterniond bankRotationCopy = Mantid::Kernel::toQuaterniond(bankRotation);
 
-    // bank rotation in file as eigen Quaternion for assertation
+    // bank rotation in file as eigen Quaternion for assertion
     Eigen::Quaterniond rotationInFile = Mantid::Kernel::toQuaterniond(Quat(angleInFile, axisVectorInFile));
 
     TS_ASSERT(rotationInFile.isApprox(bankRotationCopy));
@@ -444,8 +444,8 @@ Instrument cache.
 
     /*
     test scenario: pass into saveInstrument an instrument with manually set
-    non-zero rotation in a monitor. Expectation: test utilty will search
-    file for orientaion dataset, read the magnitude of the angle, and the
+    non-zero rotation in a monitor. Expectation: test utility will search
+    file for orientation dataset, read the magnitude of the angle, and the
     axis vector. The output quaternion from file will be compared to the
     input quaternion manually set. Asserts that they are approximately equal,
     indicating that saveinstrument has correctly written the orientation
@@ -481,10 +481,10 @@ Instrument cache.
     std::vector<double> axisInFile = tester.readDoubleVectorFrom_d_Attribute(attributeName, ORIENTATION, path);
     V3D axisVectorInFile = {axisInFile[0], axisInFile[1], axisInFile[2]};
 
-    // Eigen copy of monitorRotation for assertation
+    // Eigen copy of monitorRotation for assertion
     Eigen::Quaterniond monitorRotationCopy = Mantid::Kernel::toQuaterniond(monitorRotation);
 
-    // bank rotation in file as eigen Quaternion for assertation
+    // bank rotation in file as eigen Quaternion for assertion
     Eigen::Quaterniond rotationInFile = Mantid::Kernel::toQuaterniond(Quat(angleInFile, axisVectorInFile));
 
     TS_ASSERT(rotationInFile.isApprox(monitorRotationCopy));
@@ -494,7 +494,7 @@ Instrument cache.
 
     /*
     test scenario: pass into saveInstrument an instrument with manually set
-    non-zero translation in the source. Expectation: test utilty will search
+    non-zero translation in the source. Expectation: test utility will search
     file for location dataset, read the norm of the vector, and the unit vector.
     The output vector from file will be compared to the input vector manually
     set. Asserts that they are approximately equal, indicating that
@@ -531,7 +531,7 @@ Instrument cache.
     std::vector<double> data = tester.readDoubleVectorFrom_d_Attribute(attributeName, LOCATION, path);
     Eigen::Vector3d unitVecInFile = {data[0], data[1], data[2]};
 
-    // Eigen copy of sourceRotation for assertation
+    // Eigen copy of sourceRotation for assertion
     Eigen::Vector3d sourceLocationCopy = Mantid::Kernel::toVector3d(sourceLocation);
 
     auto positionInFile = normInFile * unitVecInFile;
@@ -543,8 +543,8 @@ Instrument cache.
 
     /*
     test scenario: pass into saveInstrument an instrument with manually set
-    non-zero rotation in the source. Expectation: test utilty will search file
-    for orientaion dataset, read the magnitude of the angle, and the axis
+    non-zero rotation in the source. Expectation: test utility will search file
+    for orientation dataset, read the magnitude of the angle, and the axis
     vector. The output quaternion from file will be compared to the input
     quaternion manually set. Asserts that they are approximately equal,
     indicating that saveinstrument has correctly written the orientation data.
@@ -580,10 +580,10 @@ Instrument cache.
     std::vector<double> axisInFile = tester.readDoubleVectorFrom_d_Attribute(attributeName, ORIENTATION, path);
     V3D axisVectorInFile = {axisInFile[0], axisInFile[1], axisInFile[2]};
 
-    // Eigen copy of sourceRotation for assertation
+    // Eigen copy of sourceRotation for assertion
     Eigen::Quaterniond sourceRotationCopy = Mantid::Kernel::toQuaterniond(sourceRotation);
 
-    // source rotation in file as eigen Quaternion for assertation
+    // source rotation in file as eigen Quaternion for assertion
     Eigen::Quaterniond rotationInFile = Mantid::Kernel::toQuaterniond(Quat(angleInFile, axisVectorInFile));
 
     TS_ASSERT(rotationInFile.isApprox(sourceRotationCopy));
@@ -593,7 +593,7 @@ Instrument cache.
 
     /*
     test scenario: pass into saveInstrument an instrument with zero source
-    translation. Inspection: test utilty will search file for location
+    translation. Inspection: test utility will search file for location
     dataset and should return false, indicating that saveInstrument
     identified the transformation as effectively zero, and did not write the
     transformation to file
@@ -624,7 +624,7 @@ Instrument cache.
     FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, "test-instrument" /*instrument name*/, "source" /*source name*/,
                        TRANSFORMATIONS};
 
-    // assertations
+    // assertions
     bool hasLocation = tester.hasDataset(LOCATION, path);
     TS_ASSERT(!hasLocation);
   }
@@ -633,7 +633,7 @@ Instrument cache.
 
     /*
    test scenario: pass into saveInstrument an instrument with zero detector bank
-   rotation. Inspection: test utilty will search file for orientation
+   rotation. Inspection: test utility will search file for orientation
    dataset and should return false, indicating that saveInstrument
    identified the transformation as effectively zero, and did not write the
    transformation to file
@@ -673,7 +673,7 @@ Instrument cache.
 
     /*
     test scenario: pass into saveInstrument an instrument with zero monitor
-    rotation. Inspection: test utilty will search file for orientation dataset
+    rotation. Inspection: test utility will search file for orientation dataset
     and should return false, indicating that saveInstrument identified the
     transformation as effectively zero, and did not write the transformation to
     file
@@ -708,7 +708,7 @@ Instrument cache.
 
     /*
     test scenario: pass into saveInstrument an instrument with zero source
-    rotation. Inspection: test utilty will search file for orientation dataset
+    rotation. Inspection: test utility will search file for orientation dataset
     and should return false, indicating that saveInstrument identified the
     transformation as effectively zero, and did not write the transformation to
     file
@@ -738,7 +738,7 @@ Instrument cache.
     // test utility to check output file
     NexusFileReader tester(destinationFile);
 
-    // assert dataset 'orientation' doesnt exist
+    // assert dataset 'orientation' doesn't exist
     bool hasRotation = tester.hasDataset(ORIENTATION, path);
     TS_ASSERT(!hasRotation);
   }
@@ -782,7 +782,7 @@ Instrument cache.
     FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, "test-instrument-with-detector-rotations" /*instrument name*/,
                        "detector-stage" /*bank name*/};
 
-    // initalise to zero for case when an offset is not written to file,
+    // initialise to zero for case when an offset is not written to file,
     // thus its values are zero
 
     // read the xyz offset of the pixel from the output file
@@ -828,7 +828,7 @@ Instrument cache.
     /*
         test scenario: saveInstrument called with zero translation, and some
     non-zero rotation in source. Expected behaviour is: (dataset) 'depends_on'
-    has value /absoulute/path/to/orientation, and (dataset) 'orientation' has
+    has value /absolute/path/to/orientation, and (dataset) 'orientation' has
     dAttribute (AKA attribute of dataset) 'depends_on' with value "."
     */
 
@@ -903,7 +903,7 @@ Instrument cache.
 
     // test instrument with rotation of source of zero
     auto instrument = ComponentCreationHelper::createInstrumentWithSourceRotation(
-        sourceLocation, Mantid::Kernel::V3D(0.0, 0.0, 0.0) /*samle position*/, detectorLocation, sourceRotation);
+        sourceLocation, Mantid::Kernel::V3D(0.0, 0.0, 0.0) /*sample position*/, detectorLocation, sourceRotation);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     FullNXPath transformationsPath = {DEFAULT_ROOT_ENTRY_NAME, "test-instrument" /*instrument name*/,
@@ -947,9 +947,9 @@ Instrument cache.
     /*
         test scenario: saveInstrument called with non-zero rotation, and some
         non-zero translation in source. Expected behaviour is: (dataset)
-       'depends_on' has value "/absoulute/path/to/orientation", (dataset)
+       'depends_on' has value "/absolute/path/to/orientation", (dataset)
        'orientation' has dAttribute (AKA attribute of dataset) 'depends_on' with
-        value "/absoulute/path/to/location", and (dataset) 'location' has
+        value "/absolute/path/to/location", and (dataset) 'location' has
         dAttribute 'depends_on' with value "."
          */
 

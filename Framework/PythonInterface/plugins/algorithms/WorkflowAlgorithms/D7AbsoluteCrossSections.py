@@ -205,7 +205,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         self.declareProperty(
             WorkspaceGroupProperty("RotatedXYZWorkspace", "", direction=Direction.Input, optional=PropertyMode.Optional),
-            doc="The workspace used in 10p method when data is taken as two XYZ measurements rotated by 45 degress.",
+            doc="The workspace used in 10p method when data is taken as two XYZ measurements rotated by 45 degrees.",
         )
 
         self.declareProperty(

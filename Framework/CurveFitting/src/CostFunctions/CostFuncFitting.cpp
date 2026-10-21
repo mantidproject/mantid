@@ -236,7 +236,7 @@ void CostFuncFitting::applyTies() {
   }
 }
 
-/// Reset the fitting function (neccessary if parameters get fixed/unfixed)
+/// Reset the fitting function (necessary if parameters get fixed/unfixed)
 void CostFuncFitting::reset() const {
   m_numberFunParams = m_function->nParams();
   m_indexMap.clear();

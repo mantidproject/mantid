@@ -27,7 +27,7 @@ namespace MantidWidgets {
 
 /**
  * Class Shape2DCollection is a collection of 2D shapes.
- * It supports operations on teh shapes such as adding, removing, and aditting
+ * It supports operations on the shapes such as adding, removing, and aditting
  *either
  * with the mouse via control points (CPs) or via properties.
  *
@@ -163,7 +163,7 @@ protected:
   Shape2D *m_currentShape;           ///< shape selected to edit (change size/shape)
   size_t m_currentCP;                ///< control point of m_currentShape selected to edit
   QList<Shape2D *> m_selectedShapes; ///< A list of selected shapes (can be moved or deleted)
-  QList<Shape2D *> m_copiedShapes;   ///< A list of shapes to be pasted if requiered
+  QList<Shape2D *> m_copiedShapes;   ///< A list of shapes to be pasted if required
   bool m_overridingCursor;
   bool m_cursorOverShape;
   bool m_cursorOverControlPoint;

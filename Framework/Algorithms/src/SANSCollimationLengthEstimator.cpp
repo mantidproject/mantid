@@ -175,7 +175,7 @@ double SANSCollimationLengthEstimator::getGuideValue(const Mantid::Kernel::Prope
     auto val = doubleProperty->value();
     if (checkForDouble(val)) {
       g_log.warning("SANSCollimationLengthEstimator: The Guide was not "
-                    "recoginized as a TimeSeriesProperty, but rather as a "
+                    "recognized as a TimeSeriesProperty, but rather as a "
                     "Numeric.");
       return boost::lexical_cast<double, std::string>(val);
     }

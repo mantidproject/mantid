@@ -80,7 +80,7 @@ public:
     TS_ASSERT_EQUALS(errorMap.size(), 1);
     TS_ASSERT_EQUALS(errorMap.begin()->first, "LogName");
 
-    // Check protest when tsp log given, but min value greate than max
+    // Check protest when tsp log given, but min value greater than max
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogName", "TSP"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MinimumValue", 2.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaximumValue", 1.0));

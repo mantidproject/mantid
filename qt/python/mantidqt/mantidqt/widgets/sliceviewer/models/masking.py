@@ -362,7 +362,7 @@ class PolyCursorInfo(CursorInfoBase):
     def generate_inverted_table_rows(self):
         rows = []
 
-        # Get the axis limits to mask eveything outside the selected polygon
+        # Get the axis limits to mask everything outside the selected polygon
         x_axis_min, x_axis_max = self._x_limits
         spec_min, spec_max = self._y_limits
         spec_min = int(ceil(spec_min))

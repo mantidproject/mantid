@@ -31,7 +31,7 @@ using namespace Mantid::Geometry;
 
 namespace Mantid::MDAlgorithms {
 
-/**Small class to diable propery on interface */
+/**Small class to disable property on interface */
 class DisabledProperty : public EnabledWhenProperty {
 public:
   DisabledProperty() : EnabledWhenProperty("NonExistingProperty", IS_DEFAULT) {}
@@ -99,7 +99,7 @@ void BaseConvertToDiffractionMDWorkspace::init() {
  * @param  TargFrame -- the string, describing target transformation frame in
  *the form accepted by convertToDiffractionWorksapce
  * @param  TargFrameName -- the string describing target transformation frame
- *in the form acepted by convertToMD
+ *in the form accepted by convertToMD
  * @param  ScalingName    -- default coordinate scaling name accepted by
  *convertToMD;
  */

@@ -300,7 +300,7 @@ void MaxentCalculator::iterate(const std::vector<double> &data, const std::vecto
     }
   }
 
-  // Symmetrise s2, c2: reflect accross the diagonal
+  // Symmetrise s2, c2: reflect across the diagonal
   for (size_t k = 0; k < dim; k++) {
     for (size_t l = k + 1; l < dim; l++) {
       m_coeffs.s2[k][l] = m_coeffs.s2[l][k];

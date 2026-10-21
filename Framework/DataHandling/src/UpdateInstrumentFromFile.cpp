@@ -150,7 +150,7 @@ void UpdateInstrumentFromFile::updateFromRaw(const std::string &filename) {
   } else {
     phi = std::vector<float>(numDetector, 0.0);
   }
-  g_log.information() << "Setting detector postions from RAW file.\n";
+  g_log.information() << "Setting detector positions from RAW file.\n";
   setDetectorPositions(detID, l2, theta, phi);
 }
 
@@ -182,7 +182,7 @@ void UpdateInstrumentFromFile::updateFromNeXus(Nexus::File &nxFile) {
   nxFile.getData(phi);
   nxFile.closeData();
 
-  g_log.information() << "Setting detector postions from NeXus file.\n";
+  g_log.information() << "Setting detector positions from NeXus file.\n";
   setDetectorPositions(detID, l2, theta, phi);
 }
 
@@ -273,7 +273,7 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
       is >> value;
       if (i < header.colCount - 1 && is.eof()) {
         // If stringstream is at EOF & we are not at the last column then
-        // there aren't enought columns in the file
+        // there aren't enough columns in the file
         throw std::runtime_error("UpdateInstrumentFromFile::updateFromAscii - "
                                  "File contains fewer than expected number of "
                                  "columns, check AsciiHeader property.");

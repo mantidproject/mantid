@@ -171,9 +171,9 @@ protected:
    * Wrapper to the NXgetslab.
    *
    * @param data :: The pointer to the buffer accepting the data from the file.
-   * @param start :: The array of starting indeces to read in from the file. The size of the array must be equal to the
+   * @param start :: The array of starting indices to read in from the file. The size of the array must be equal to the
    * rank of the data.
-   * @param size :: The array of numbers of data elements to read along each dimenstion. The number of dimensions (the
+   * @param size :: The array of numbers of data elements to read along each dimension. The number of dimensions (the
    * size of the array) must be equal to the rank of the data.
    * @throw runtime_error if the operation fails.
    */
@@ -246,7 +246,7 @@ public:
    * @param i :: The index along dim0()
    * @param j :: The index along dim1()
    * @throw runtime_error if the data have not been loaded / initialized.
-   * @throw range_error if the indeces point outside the buffer.
+   * @throw range_error if the indices point outside the buffer.
    * @return A reference to the value
    */
   const T &operator()(std::size_t i, std::size_t j) const { return this->operator[](i * dim1() + j); }
@@ -259,7 +259,7 @@ public:
    * @param j :: The index along dim1()
    * @param k :: The index along dim2()
    * @throw runtime_error if the data have not been loaded / initialized.
-   * @throw range_error if the indeces point outside the buffer.
+   * @throw range_error if the indices point outside the buffer.
    * @return A reference to the value
    */
   const T &operator()(std::size_t i, std::size_t j, std::size_t k) const {
@@ -345,7 +345,7 @@ public:
    * datasets currently
    * @param i :: Calling load with non-negative i reads in a chunk of dimension rank()-1 and i is the index of the
    * chunk. The rank of the data must be >= 1
-   * @param j :: Non-negative value makes it read a chunk of dimension rank()-2. i and j are its indeces. The rank of
+   * @param j :: Non-negative value makes it read a chunk of dimension rank()-2. i and j are its indices. The rank of
    * the data must be >= 2
    */
   void load(dimsize_t const blocksize, dimsize_t const i, dimsize_t const j) {
@@ -568,7 +568,7 @@ public:
   /// Opens this NXClass using File::openGroupAddress(). Can be slow (or is slow)
   void open();
   /// Opens this NXClass using File::openGroup(). It is fast, but the parent of this class must be open at
-  /// the time of calling. openNXClass uses open() (the slow one). To open calss using openLocal() do:
+  /// the time of calling. openNXClass uses open() (the slow one). To open class using openLocal() do:
   ///     NXTheClass class(parent,name);
   ///     class.openLocal();
   ///     // work with class

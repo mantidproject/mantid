@@ -25,9 +25,9 @@ public:
   MultiPeriodGroupAlgorithm();
 
 private:
-  /// Overriden from Algorithm base
+  /// Overridden from Algorithm base
   bool checkGroups() override;
-  /// Overriden from Algorithm base.
+  /// Overridden from Algorithm base.
   bool processGroups() override;
   /// Method to provide the name for the input workspace property.
   virtual std::string fetchInputPropertyName() const = 0;
@@ -35,7 +35,7 @@ private:
   /// will be specified via fetchInputPropertyName.
   virtual bool useCustomInputPropertyName() const { return false; }
 
-  /// Convenience typdef for workspace names.
+  /// Convenience typedef for workspace names.
   using VecWSGroupType = MultiPeriodGroupWorker::VecWSGroupType;
   /// multi period group workspaces.
   VecWSGroupType m_multiPeriodGroups;

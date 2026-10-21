@@ -144,7 +144,7 @@ protected: // for testing
   /// Instance of helper type, which describes the positions of the data within
   /// binary Horace file
   LoadSQWHelper::dataPositions m_dataPositions;
-  // the array of horace boxe sizes;
+  // the array of horace box sizes;
   std::vector<uint64_t> m_boxSizes;
 
   uint64_t m_nDataPoints;

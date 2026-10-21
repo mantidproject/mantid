@@ -153,5 +153,5 @@ NXstatus NXgetattr(NXhandle fid, std::string const &name, char *data, std::size_
 
 /*--------------------------------------------------------------------
   Ah yeah, everyone! It's NeXus Time! B-)
-  Chill out, relax, and let's party like it's stil 1989
+  Chill out, relax, and let's party like it's still 1989
   ---------------------------------------------------------------------*/

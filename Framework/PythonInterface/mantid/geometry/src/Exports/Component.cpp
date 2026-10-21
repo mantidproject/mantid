@@ -107,7 +107,7 @@ void export_Component() {
            "parameterized component")
 
       // HACK -- python should return parameters regardless of type. this is
-      // untill rows below do not work
+      // until rows below do not work
       .def("getParameterType", &Component::getParameterType,
            Component_getParameterType((arg("self"), arg("pname"), arg("recursive") = true)))
       .def("getFittingParameter", &Component::getFittingParameter, (arg("self"), arg("pname"), arg("xvalue")),

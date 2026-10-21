@@ -103,10 +103,10 @@ bool LoadAsciiStl::readSTLLine(std::ifstream &file, std::string const &type) {
   if (getline(file, line)) {
     boost::trim(line);
     if (line.size() < type.size() || line.substr(0, type.size()) != type) {
-      // Before throwing, check for endsolid statment
+      // Before throwing, check for endsolid statement
       const std::string type2 = "endsolid";
       if (line.size() < type2.size() || line.substr(0, type2.size()) != type2) {
-        throw Kernel::Exception::ParseError("Expected STL line begining with " + type + " or " + type2, m_filename,
+        throw Kernel::Exception::ParseError("Expected STL line beginning with " + type + " or " + type2, m_filename,
                                             m_lineNumber);
       } else {
         return false; // ends reading at endsolid

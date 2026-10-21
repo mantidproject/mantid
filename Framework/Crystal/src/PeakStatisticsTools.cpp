@@ -305,7 +305,7 @@ double PeaksStatistics::getRMS(const std::vector<double> &data) const {
   return sqrt(sumOfSquares / static_cast<double>(data.size()));
 }
 
-/// Returns the lowest and hights wavelength in the peak list.
+/// Returns the lowest and highest wavelength in the peak list.
 std::pair<double, double> PeaksStatistics::getDSpacingLimits(const std::vector<Peak> &peaks) const {
   if (peaks.empty()) {
     return std::make_pair(0.0, 0.0);

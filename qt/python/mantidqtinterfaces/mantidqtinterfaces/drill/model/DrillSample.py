@@ -220,7 +220,7 @@ class DrillSample(QObject):
 
     def onParameterChanged(self):
         """
-        Triggered when a parameter changed its value. This function udpates the
+        Triggered when a parameter changed its value. This function updates the
         sample status.
         """
         if self._status is not None:
@@ -256,7 +256,7 @@ class DrillSample(QObject):
 
     def getParameterValues(self):
         """
-        Get the parameters as a dictionnary.
+        Get the parameters as a dictionary.
 
         Returns:
             dict(str: str): parameters
@@ -275,7 +275,7 @@ class DrillSample(QObject):
         """
         Triggered when the sample process succeed.
         """
-        logger.information("Processing of sample {0} finished with sucess".format(self._index + 1))
+        logger.information("Processing of sample {0} finished with success".format(self._index + 1))
         if self._exporter is not None:
             self._exporter.run(self)
         self._status = self.STATUS_PROCESSED

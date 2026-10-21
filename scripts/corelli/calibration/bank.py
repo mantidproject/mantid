@@ -79,7 +79,7 @@ def fit_bank(
     :param shadow_height: initial guess for the decrease in neutron counts caused by the calibrating wire
     :param shadow_width: initial guess for the number of pixels shadowed by the calibrating wire
     :param fit_domain: number of pixels over which a calibrating wire may have any significant influence
-    :param minimum_intensity: mininum number of neutron counts per pixel to warrant a significant fit
+    :param minimum_intensity: minimum number of neutron counts per pixel to warrant a significant fit
     session. This number is compared against the neutron counts per pixel, averaged over all pixels in the bank
     :param calibration_table: output TableWorkspace containing one column for detector ID and one column
     for its calibrated XYZ coordinates, in meters
@@ -93,7 +93,7 @@ def fit_bank(
         table holds values and errors for the optimized coefficients of the polynomial that fits the peak positions (in
         pixel coordinates) to the known wire positions (along the Y-coordinate). The last entry in the table
         holds the goodness-of-fit, chi-square value. The name of each individual TableWorkspace is the string
-        `parameters_table_group` plus the suffix `_I`, where `I` is the tube index in the bank, startin at zero.
+        `parameters_table_group` plus the suffix `_I`, where `I` is the tube index in the bank, starting at zero.
         If set to `None`, no group workspace is generated.
 
     :raises AssertionError: the input workspace is of incorrect type or cannot be found
@@ -167,7 +167,7 @@ def collect_bank_fit_results(
         the polynomial that fits the peak positions (in pixel coordinates) to the known slit positions
         (along the Y-coordinate). The last entry in the table holds the goodness-of-fit, chi-square value.
         The name of each individual TableWorkspace is the string `parameters_table_group` plus the
-        suffix `_I`, where `I` is the tube index in the bank, startin at zero. If set to `None`, no
+        suffix `_I`, where `I` is the tube index in the bank, starting at zero. If set to `None`, no
         group workspace is generated.
 
     :return: reference to the fit results workspace. Return `None` if no fit results are provided
@@ -434,7 +434,7 @@ def mask_bank(bank_name: str, tubes_fit_success: np.ndarray, output_table: str) 
     If all tubes were fit successfully, no `TableWorkspace` is created, and `None` is returned.
 
     :param bank_name: a string of the form 'bankI' where 'I' is a bank number
-    :param tubes_fit_success: array of boolean containing a True/False entry for each tube, indicating wether
+    :param tubes_fit_success: array of boolean containing a True/False entry for each tube, indicating whether
     the tube was successfully calibrated.
     :param output_table: name of the output TableWorkspace containing one column for detector ID from tubes
     not successfully calibrated.
@@ -494,7 +494,7 @@ def calibrate_bank(
     :param shadow_height: initial guess for the decrease in neutron counts caused by the calibrating wire
     :param shadow_width: initial guess for the number of pixels shadowed by the calibrating wire
     :param fit_domain: number of pixels over which a calibrating wire may have any significant influence
-    :param minimum_intensity: mininum number of neutron counts per pixel to warrant a significant fit session.
+    :param minimum_intensity: minimum number of neutron counts per pixel to warrant a significant fit session.
         This number is compared against the neutron counts per pixel, averaged over all pixels in the bank
 
     :return: Workspace2D handles for the calibration and mask tables

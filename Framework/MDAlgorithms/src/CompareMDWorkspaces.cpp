@@ -125,7 +125,7 @@ public:
   }
 
   SimpleMDEvent &operator=(const SimpleMDEvent &event2) {
-    // coordiate
+    // coordinate
     size_t numdirs = mCoordinates.size();
     for (size_t i = 0; i < numdirs; ++i)
       mCoordinates[i] = event2.mCoordinates[i];

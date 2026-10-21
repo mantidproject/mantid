@@ -161,7 +161,7 @@ public:
 
 /// Typedef of a shared pointer to a IComponent
 using IComponent_sptr = std::shared_ptr<IComponent>;
-/// Typdef of a shared pointer to a const IComponent
+/// Typedef of a shared pointer to a const IComponent
 using IComponent_const_sptr = std::shared_ptr<const IComponent>;
 
 } // Namespace Geometry

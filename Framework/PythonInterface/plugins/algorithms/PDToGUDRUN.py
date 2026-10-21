@@ -85,12 +85,12 @@ class PDToGUDRUN(DataProcessorAlgorithm):
 
         self.declareProperty(
             FloatArrayProperty("Binning", values=[0.0, 0.0, 0.0], direction=Direction.Input),
-            "Positive is linear bins, negative is logorithmic",
+            "Positive is linear bins, negative is logarithmic",
         )
         self.declareProperty(
             "ResampleX",
             0,
-            'Number of bins in x-axis. Non-zero value overrides "Params" property. ' + "Negative value means logorithmic binning.",
+            'Number of bins in x-axis. Non-zero value overrides "Params" property. ' + "Negative value means logarithmic binning.",
         )
         self.declareProperty(
             "SetUncertainties",

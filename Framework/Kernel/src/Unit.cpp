@@ -720,7 +720,7 @@ double dSpacing::singleFromTOF(const double tof) const {
   }
 
   // citardauq formula hides non-zero root if tof==tzero
-  // wich means that the constantTerm == 0
+  // which means that the constantTerm == 0
   if (tof == tzero) {
     if (difa < 0.)
       return -difc / difa;
@@ -1323,7 +1323,7 @@ Unit *SpinEchoTime::clone() const { return new SpinEchoTime(*this); }
 /* Time
  * ================================================================================
  *
- * Time is an independant unit to others related to energy and neutron
+ * Time is an independent unit to others related to energy and neutron
  */
 DECLARE_UNIT(Time)
 

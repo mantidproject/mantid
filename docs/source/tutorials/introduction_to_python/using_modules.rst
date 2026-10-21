@@ -114,7 +114,7 @@ directory paths onto *sys.path* within your python session.
    >>> sys.path.append({Path to mymodule directory})
    >>> import mymodule
 
-Python's Standarad Library
+Python's Standard Library
 --------------------------
 
 -  Python comes with a large number of standard modules that offer a
@@ -178,7 +178,7 @@ os.path
    print(os.path.basename(fullpath))  # prints 'run1.txt'
    print(os.path.dirname(fullpath))  # prints 'C:\Users\Files'
 
-   # A userful function is expanduser which can expand the '~' token to a
+   # A useful function is expanduser which can expand the '~' token to a
    # user's directory (Documents and Settings\username on WinXP  and
    # /home/username on Linux/OSX)
    print(os.path.expanduser('~/test')) # prints /home/[MYUSERNAME]/test on

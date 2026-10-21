@@ -109,16 +109,16 @@ public:
   /// rest of the event list is cached to disk
   bool isDataAdded() const;
 
-  /**Get vector of events to change. Beware, that calling this funtion for
+  /**Get vector of events to change. Beware, that calling this function for
     file-based workspace sets both dataChanged and dataBusy flags
     first forces disk buffer to write the object contents to HDD when disk
     buffer is full and the second one prevents DB
-    from clearing object from memory untill the events are released. One HAS TO
+    from clearing object from memory until the events are released. One HAS TO
     call releaseEvents when finished using data on file-based WS    */
   std::vector<MDE> &getEvents();
-  /**Get vector of constant events to use. Beware, that calling this funtion for
+  /**Get vector of constant events to use. Beware, that calling this function for
      file-based workspace sets dataBusy flag
-     This flag prevents DB from clearing object from memory untill the events
+     This flag prevents DB from clearing object from memory until the events
      are released.
      One HAS TO call releaseEvents when finished using data on file-based WS to
      allow DB clearing them  */
@@ -213,7 +213,7 @@ public:
   /// Typedef for a shared pointer to a MDBox
   using sptr = std::shared_ptr<MDBox<MDE, nd>>;
 
-  /// Typedef for a vector of the conatined events
+  /// Typedef for a vector of the contained events
   using vec_t = std::vector<MDE>;
 };
 

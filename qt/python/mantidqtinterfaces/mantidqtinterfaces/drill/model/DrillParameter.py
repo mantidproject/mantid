@@ -89,7 +89,7 @@ class DrillParameter(QObject):
 
     def initFromProperty(self, mantidProperty):
         """
-        Inititialize the parameter from a mantid property. This method populates
+        Initialize the parameter from a mantid property. This method populates
         the type, documentation, allowed values of the parameters. It also sets
         the value to the property default value.
 

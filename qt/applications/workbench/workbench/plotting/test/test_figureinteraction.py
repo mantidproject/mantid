@@ -965,7 +965,7 @@ class FigureInteractionTest(unittest.TestCase):
         fig_manager_mock = MagicMock(canvas=mock_canvas)
         fig_interactor = FigureInteraction(fig_manager_mock)
 
-        # Earlier versions of matplotlib do not store the data assciated with a
+        # Earlier versions of matplotlib do not store the data associated with a
         # line with high precision and hence we need to set a lower tolerance
         # when making comparisons of this data
         if matplotlib.__version__ < "2":

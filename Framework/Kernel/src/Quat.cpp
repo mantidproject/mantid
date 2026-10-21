@@ -79,7 +79,7 @@ Quat::Quat(const double _deg, const V3D &_axis) { setAngleAxis(_deg, _axis); }
  *  Specify the X,Y,Z vectors of the rotated reference frame, assuming that
  *  the initial X,Y,Z vectors are aligned as expected: X=(1,0,0), Y=(0,1,0),
  *Z=(0,0,1).
- *  The resuting quaternion rotates XYZ axes onto the provided rX, rY, rZ.
+ *  The resulting quaternion rotates XYZ axes onto the provided rX, rY, rZ.
  *
  * @param rX :: rotated X reference axis; unit vector.
  * @param rY :: rotated Y reference axis; unit vector.
@@ -127,7 +127,7 @@ bool Quat::isNull(const double tolerance) const {
   return (fabs(pw) < tolerance);
 }
 
-/// Extracts the angle of roatation and axis
+/// Extracts the angle of rotation and axis
 /// @param _deg :: the angle of rotation
 /// @param _ax0 :: The first component of the axis
 /// @param _ax1 :: The second component of the axis
@@ -190,7 +190,7 @@ void Quat::operator()(const Quat &q) {
  *  Specify the X,Y,Z vectors of the rotated reference frame, assuming that
  *  the initial X,Y,Z vectors are aligned as expected: X=(1,0,0), Y=(0,1,0),
  *Z=(0,0,1).
- *  The resuting quaternion rotates XYZ axes onto the provided rX, rY, rZ.
+ *  The resulting quaternion rotates XYZ axes onto the provided rX, rY, rZ.
  *
  * @param rX :: rotated X reference axis; unit vector.
  * @param rY :: rotated Y reference axis; unit vector.
@@ -465,10 +465,10 @@ std::vector<double> Quat::getRotation(bool check_normalisation, bool throw_on_er
     if (fabs(normSq - 1) > FLT_EPSILON) {
       if (throw_on_errors) {
         g_log.error() << " A non-unit quaternion used to obtain a rotation "
-                         "matrix; need to notmalize it first\n";
+                         "matrix; need to normalize it first\n";
         throw(std::invalid_argument("Attempt to use non-normalized quaternion "
                                     "to define rotation matrix; need to "
-                                    "notmalize it first"));
+                                    "normalize it first"));
       } else {
         g_log.information() << " Warning; a non-unit quaternion used to obtain "
                                "the rotation matrix; using normalized quat\n";

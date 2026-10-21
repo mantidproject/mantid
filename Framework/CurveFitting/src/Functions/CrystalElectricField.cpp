@@ -570,7 +570,7 @@ void diagonalise(const ComplexFortranMatrix &hamiltonian, DoubleFortranVector &e
 
   h.eigenSystemHermitian(eigenvalues, eigenvectors);
 
-  // Get the indicies of the eigenvalues sorted in ascending order
+  // Get the indices of the eigenvalues sorted in ascending order
   auto sortedIndices = eigenvalues.sortIndices();
 
   // Shift the lowest energy level to 0
@@ -674,13 +674,13 @@ void calculateEigensystem(DoubleFortranVector &eigenvalues, ComplexFortranMatrix
   //-------------------------------------------------------------------
   // Rotate the crystal field quantisation axis by the specified
   // Euler angles. In some cases the number of CF parameters can be
-  // reduced by chosing the quantisation axis along a high symmetry
+  // reduced by choosing the quantisation axis along a high symmetry
   // rotation axis, rather than along a crystallographic axis.
   // The eigenvalues should remain the same, but the eigenvectors will
   // change.
   // The rotation is done using a Wigner D-matrix. As noted by
   // Buckmaster, the Stevens operators cannot be rotated as is, because
-  // the have an inconsistent normalisation between differen k, q terms
+  // the have an inconsistent normalisation between different k, q terms
   // Thus they have to be converted to and from the "Wybourne"
   // normalisation using the epsilon / omega values.
   // There was a bug in the original FOCUS code. Multiplying by
@@ -783,7 +783,7 @@ int no(int i, const IntFortranVector &d, int n) {
 }
 
 /// Find out how many degenerated energy levels exists.
-/// Store the intensities of the degenarated levels.
+/// Store the intensities of the degenerated levels.
 /// @param energy :: The energies.
 /// @param mat :: The transition matrix elements. (Intensities without
 ///    considering degeneracy).
@@ -831,7 +831,7 @@ void deg_on(const DoubleFortranVector &energy, const DoubleFortranMatrix &mat, I
   e_energies.allocate(n_energies);
   i_energies.allocate(n_energies, n_energies);
 
-  // store the intensities of the degenarated levels
+  // store the intensities of the degenerated levels
   i_energies.zero();
   for (int i = 1; i <= dim; ++i) {
     int ii = no(i, tempDegeneration, n_energies);

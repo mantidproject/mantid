@@ -194,7 +194,7 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
     try {
       header.bitsPerPixel = boost::lexical_cast<int>(tmpBitPix);
     } catch (std::exception &e) {
-      throw std::runtime_error("Coult not interpret the entry number of bits per pixel (" + m_headerBitDepthKey +
+      throw std::runtime_error("Could not interpret the entry number of bits per pixel (" + m_headerBitDepthKey +
                                ") as an integer. Error: " + e.what());
     }
     // Check that the files use valid BITPIX values
@@ -255,7 +255,7 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
     try {
       header.scale = boost::lexical_cast<double>(header.headerKeys[m_headerScaleKey]);
     } catch (std::exception &e) {
-      throw std::runtime_error("Coult not interpret the entry number of bits per pixel (" + m_headerBitDepthKey +
+      throw std::runtime_error("Could not interpret the entry number of bits per pixel (" + m_headerBitDepthKey +
                                " = " + header.headerKeys[m_headerScaleKey] +
                                ") as a floating point number (double). Error: " + e.what());
     }
@@ -283,7 +283,7 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
         }
         header.offset = static_cast<int>(doff);
       } catch (std::exception &e) {
-        throw std::runtime_error("Coult not interpret the entry number of data offset (" + m_headerOffsetKey + " = " +
+        throw std::runtime_error("Could not interpret the entry number of data offset (" + m_headerOffsetKey + " = " +
                                  header.headerKeys[m_headerOffsetKey] +
                                  ") as an integer number nor a floating point "
                                  "number (double). Error: " +
@@ -533,7 +533,7 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
 
       // Add non-comment key/values. These hey and value are separated by the
       // character '='. All keys should be unique.
-      // This will simply and silenty ignore any entry without the '='
+      // This will simply and silently ignore any entry without the '='
       auto eqPos = part.find('=');
       if (eqPos > 0) {
         std::string key = part.substr(0, eqPos);

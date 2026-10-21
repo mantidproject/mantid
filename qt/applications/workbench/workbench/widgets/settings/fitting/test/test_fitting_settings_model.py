@@ -56,7 +56,7 @@ class FittingSettingsModelTest(BaseSettingsModelTest):
     @patch(GET_SAVED_VALUE_PATCH_PATH)
     def test_get_default_peak(self, get_saved_value_mock: MagicMock):
         self._assert_getter_with_different_values(
-            get_saved_value_mock, self.model.get_default_peak, ["guassian", "expDecay"], call(FittingProperties.DEFAULT_PEAK.value)
+            get_saved_value_mock, self.model.get_default_peak, ["gaussian", "expDecay"], call(FittingProperties.DEFAULT_PEAK.value)
         )
 
     @patch(GET_SAVED_VALUE_PATCH_PATH)
@@ -74,7 +74,7 @@ class FittingSettingsModelTest(BaseSettingsModelTest):
     @patch(ADD_CHANGE_PATCH_PATH)
     def test_set_auto_background(self, add_change_mock: MagicMock):
         self._assert_setter_with_different_values(
-            add_change_mock, self.model.set_auto_background, ["Ploynomial", "Linear"], FittingProperties.AUTO_BACKGROUND.value
+            add_change_mock, self.model.set_auto_background, ["Polynomial", "Linear"], FittingProperties.AUTO_BACKGROUND.value
         )
 
     @patch(ADD_CHANGE_PATCH_PATH)

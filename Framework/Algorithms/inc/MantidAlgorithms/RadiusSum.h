@@ -72,7 +72,7 @@ private:
    *  From the input, it is defined the limits of distances as:
    *  Dominium => [min_radius, max_radius]
    *
-   *  Besides, it is defined that this dominium is splited in num_bins.
+   *  Besides, it is defined that this dominium is split in num_bins.
    *
    *  Hence, each bin will follow this rule:
    *

@@ -87,7 +87,7 @@ KafkaTopicSubscriber::~KafkaTopicSubscriber() {
      * Wait for RdKafka to decommission.
      * This is not strictly needed (with check outq_len() above), but
      * allows RdKafka to clean up all its resources before the application
-     * exits so that memory profilers such as valgrind wont complain about
+     * exits so that memory profilers such as valgrind won't complain about
      * memory leaks.
      */
     RdKafka::wait_destroyed(5000);

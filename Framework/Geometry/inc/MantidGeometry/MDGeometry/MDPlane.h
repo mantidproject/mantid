@@ -28,7 +28,7 @@ namespace Geometry {
 
   Any plane can be defined with:
     - A vector that is normal to its surface. The components
-      of the vector becomes the coefficents in the equation
+      of the vector becomes the coefficients in the equation
     - A point that is on the plane, which gives the RHS
       of the equation b = point . normal
 

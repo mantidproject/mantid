@@ -264,7 +264,7 @@ void CalculateCountRate::calcRateLog(DataObjects::EventWorkspace_sptr &InputWork
 }
 /** histogram event list into visualization workspace
  * @param el       :: event list to rebin into visualization workspace
- * @param spectraLocks :: pointer to the array of mutexes to lock modifyed
+ * @param spectraLocks :: pointer to the array of mutexes to lock modified
  *                        visualization workspace spectra for a thread
  */
 void CalculateCountRate::histogramEvents(const DataObjects::EventList &el, std::mutex *spectraLocks) {
@@ -430,7 +430,7 @@ void CalculateCountRate::setOutLogParameters(const DataObjects::EventWorkspace_s
   if (useLogAccuracy) {
     // Let's try to establish log step (it should be constant in real
     // applications) and define
-    // binning in such a way, that each historgam bin accomodates
+    // binning in such a way, that each historgam bin accommodates
     // single log value.
     auto iTMax = runTMax.totalNanoseconds();
     auto iTMin = m_TRangeMin.totalNanoseconds();

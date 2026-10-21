@@ -53,7 +53,7 @@ event-based data it might be beneficial to select the NumberOfEventNormalization
 will disable the `DensityThresholdFactor` property and enable the `SignalThresholdFactor` property.
 The algorithmic steps remain the same as above but instead of using the signal density as the sorting
 quantity the signal count (total weighted event sum divided by the number of events) is used. If
-the events are weighted this will result in boxes with signal counts larger than one for peaks and for the majority of background counts the signal count will be 1. Hence it is possible to discriminate between peaks and background. Note that the NumberOfEventNormalization selection of the `PeakFindingStrategy` property  does not make sense for all scenarios and infact might not produce useful results for your particular case.
+the events are weighted this will result in boxes with signal counts larger than one for peaks and for the majority of background counts the signal count will be 1. Hence it is possible to discriminate between peaks and background. Note that the NumberOfEventNormalization selection of the `PeakFindingStrategy` property  does not make sense for all scenarios and in fact might not produce useful results for your particular case.
 
 
 Calculate Goniometer For Constant Wavelength

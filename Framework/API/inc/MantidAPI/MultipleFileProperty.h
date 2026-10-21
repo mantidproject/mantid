@@ -19,7 +19,7 @@ namespace API {
   A property to allow a user to specify multiple files to load.
 
   The current functionality is such that there are two basic forms of syntax.
-  For the puposes
+  For the purposes
   of documentation we'll call these the "Long Form" and "Short Form".
 
   ------------------------------------------------------------------------------------------------------
@@ -92,7 +92,7 @@ namespace API {
 
   The value returned by getProperty is of type
   std::vector<std::vector<std::string>>. While the property itself does
-  expand ranges, the value needs some intepretation by the client code.
+  expand ranges, the value needs some interpretation by the client code.
   Specifically, values inside the same std::vector<std::string> should
   be added together, while values between them should be treated
   separately. In other words, if the value was [[a1,a2], [b1,b2]]. The
@@ -143,7 +143,7 @@ private:
   /// will handle
   std::string m_defaultExt;
   /// The action type of this property
-  /// Load (dafault) or OptionalLoad are supported
+  /// Load (default) or OptionalLoad are supported
   unsigned int m_action{2};
   /// Last value of propValue used in
   /// MultipleFileProperty::setValueAsMultipleFiles

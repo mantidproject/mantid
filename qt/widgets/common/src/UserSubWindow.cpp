@@ -144,7 +144,7 @@ QString UserSubWindow::openFileDialog(const bool save, const QStringList &exts) 
   return filename;
 }
 /** Returns a pointer to a new validator QLabel. The code is copied from
- *  AlgorithmDialog.cpp and wont know if the validator label changes there
+ *  AlgorithmDialog.cpp and won't know if the validator label changes there
  *  @param parent :: a pointer to an object that will look after it deleting it
  */
 QLabel *UserSubWindow::newValidator(QWidget *parent) {

@@ -111,7 +111,7 @@ class anAbsorptionShape(object):
     #
     @property
     def material(self):
-        """Contains the material, used in absorbtion correction calculations"""
+        """Contains the material, used in absorption correction calculations"""
         return self._Material
 
     @material.setter
@@ -299,7 +299,7 @@ class anAbsorptionShape(object):
         n_elements = len(value)
         if n_elements < len(mandatory_prop_list):
             raise TypeError(
-                "*** {0} shape parameter needes at least {1} imput parameters namely: {2}".format(
+                "*** {0} shape parameter needs at least {1} input parameters namely: {2}".format(
                     shape_name, len(mandatory_prop_list), mandatory_prop_list
                 )
             )
@@ -460,7 +460,7 @@ class FlatPlate(anAbsorptionShape):
 
     Usage of the defined Plate class instance:
     Correct absorption on the defined plate using AbsorptionCorrections algorithm:
-    ws = abs.correct_absorption(ws,{'is_fast':True,Additiona FlatPlateAbsorption algorithm parameters})
+    ws = abs.correct_absorption(ws,{'is_fast':True,Additional FlatPlateAbsorption algorithm parameters})
 
     Correct absorption on the defined Plate using Monte-Carlo Absorption algorithm:
     ws = ads.correct_absorption(ws,{'is_mc':True,AdditionalMonte-Carlo Absorption parameters});
@@ -556,7 +556,7 @@ class HollowCylinder(anAbsorptionShape):
 
     #
     def _add_xml_hollow_cylinder(self, ws):
-        # xml shape is normaly defined in meters
+        # xml shape is normally defined in meters
         sample_xml_template = (
             """<hollow-cylinder id="HOLL_CYL">
             <centre-of-bottom-base x="{0}" y="{1}" z="{2}" />
@@ -666,7 +666,7 @@ class Sphere(anAbsorptionShape):
             self._add_xml_sphere(self._testWorkspace)
 
     def _add_xml_sphere(self, ws):
-        # xml shape is normaly defined in meters
+        # xml shape is normally defined in meters
         sample_xml_template = (
             """<sphere id="WHOLE_SPHERE">
             <centre x="{0}" y="{1}" z="{2}" />

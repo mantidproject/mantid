@@ -69,7 +69,7 @@ const double BIN_WIDTH_ERROR_LEVEL = 0.5;
  * @param itCount [input] The number of iterations this alg used for each
  * spectrum
  * @param yLabel :: [input] y-label to use for returned ws
- * @return : ws cut down in lenght to maxIt
+ * @return : ws cut down in length to maxIt
  */
 MatrixWorkspace_sptr removeZeros(MatrixWorkspace_sptr &ws, const std::vector<size_t> &itCount,
                                  const std::string &yLabel) {
@@ -184,10 +184,10 @@ void MaxEnt::init() {
 
   declareProperty(std::make_unique<PropertyWithValue<double>>("MaxAngle", 0.001, mustBeNonNegative, Direction::Input),
                   "Maximum degree of non-parallelism between S (the entropy) and C "
-                  "(chi-squared). These needs to be parallel. Chosing a smaller "
+                  "(chi-squared). These needs to be parallel. Choosing a smaller "
                   "shouldn't change the output. However, if you find this is the "
                   "case please let the Mantid team know since this indicates that "
-                  "the default value of this proporty may need changing or "
+                  "the default value of this property may need changing or "
                   "other changes to this implementation are required.");
 
   mustBePositive = std::make_shared<BoundedValidator<size_t>>();

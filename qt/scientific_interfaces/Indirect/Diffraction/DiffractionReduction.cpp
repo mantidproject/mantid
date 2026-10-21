@@ -103,7 +103,7 @@ void DiffractionReduction::initLayout() {
   // Update invalid rebinning markers
   validateRebin();
 
-  // Update instrument dependant widgets
+  // Update instrument dependent widgets
   m_uiForm.iicInstrumentConfiguration->updateInstrumentConfigurations(
       m_uiForm.iicInstrumentConfiguration->getInstrumentName());
 }

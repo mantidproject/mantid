@@ -41,7 +41,7 @@ For better results
 * Peak fit window: this is an option
 
   a. specified by user
-  b. figured out by :ref:`FindPeakBackground <algm-FindPeakBackground>`, and peak FWHM estimated from the height and integrated intensity in the window assuming a Gaussian distribution (overwriting the peak profile parameters initialised from the reuslt of the previous spectrum).
+  b. figured out by :ref:`FindPeakBackground <algm-FindPeakBackground>`, and peak FWHM estimated from the height and integrated intensity in the window assuming a Gaussian distribution (overwriting the peak profile parameters initialised from the result of the previous spectrum).
   c. if the workspace is in unit dSpacing and :math:`\Delta d/d`
 
 * Peak position tolerance: there could be three cases for how the peak position tolerance is specified.

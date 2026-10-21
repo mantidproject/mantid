@@ -445,7 +445,7 @@
              <bool>true</bool>
             </property>
             <property name="text">
-             <string>Alpha is only avaiable with single period data</string>
+             <string>Alpha is only available with single period data</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

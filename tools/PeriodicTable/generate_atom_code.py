@@ -70,7 +70,7 @@ def writeElement(handle, element):
 
 
 def readExisting(filename):
-    # open the file and scoop up everyting
+    # open the file and scoop up everything
     handle = open(filename, "r")
     lines = handle.readlines()
     handle.close()
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     # setup the file for the elements and isotopes
     print("writing information to %s" % filename)
     handle = open(filename, "w")
-    handle.write(code_before)  # write out what was before the delimitor
+    handle.write(code_before)  # write out what was before the delimiter
     handle.write(DELIMITOR_START + "\n")
     handle.write("/// @cond\n")
 
@@ -145,7 +145,7 @@ if __name__ == "__main__":
     handle.write("}};\n")
     handle.write(DELIMITOR_STOP + "\n")
 
-    # write out what was after the delimitor
+    # write out what was after the delimiter
     handle.write(code_after)
 
     # close the file

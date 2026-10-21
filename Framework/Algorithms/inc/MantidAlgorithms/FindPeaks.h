@@ -163,7 +163,7 @@ private:
   // Properties saved in the algo.
   API::MatrixWorkspace_sptr m_dataWS;    ///< workspace to check for peaks
   int m_inputPeakFWHM;                   ///< holder for the requested peak FWHM
-  Indexing::SpectrumIndexSet m_indexSet; ///< list of workspace indicies to
+  Indexing::SpectrumIndexSet m_indexSet; ///< list of workspace indices to
                                          ///< check
   bool m_highBackground;                 ///< flag for find relatively weak peak in high
   /// background

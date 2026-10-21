@@ -54,7 +54,7 @@ void XIntegrationScrollBar::resizeEvent(QResizeEvent * /*unused*/) {
 void XIntegrationScrollBar::mouseMoveEvent(QMouseEvent *e) { QFrame::mouseMoveEvent(e); }
 
 /**
- * Process events comming to the slider
+ * Process events coming to the slider
  * @param object :: pointer to the slider
  * @param e :: event
  */

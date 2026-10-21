@@ -78,7 +78,7 @@ class SNAPReduce(DataProcessorAlgorithm):
         return self.IPTS_dir
 
     def smooth(self, data, order):
-        # This smooths data based on linear weigthed average around
+        # This smooths data based on linear weighted average around
         # point i for example for an order of 7 the i point is
         # weighted 4, i=/- 1 weighted 3, i+/-2 weighted 2 and i+/-3
         # weighted 1 this input is only the y values
@@ -108,7 +108,7 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         return out
 
-    def peak_clip(self, data, win=30, decrese=True, LLS=True, smooth_window=0):
+    def peak_clip(self, data, win=30, decrease=True, LLS=True, smooth_window=0):
         start_data = np.copy(data)
 
         window = win
@@ -122,7 +122,7 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         temp = data.copy()
 
-        if decrese:
+        if decrease:
             scan = list(range(window + 1, 0, -1))
         else:
             scan = list(range(1, window + 1))
@@ -213,7 +213,7 @@ class SNAPReduce(DataProcessorAlgorithm):
             StringListValidator(nor_corr),
             "If needed what type of input to use as normalization, Extracted from "
             + "Data uses a background determination that is peak independent.This "
-            + "implemantation can be tested in algorithm SNAP Peak Clipping Background",
+            + "implementation can be tested in algorithm SNAP Peak Clipping Background",
         )
 
         self.declareProperty(
@@ -456,7 +456,7 @@ class SNAPReduce(DataProcessorAlgorithm):
 
             for h in range(n_histo):
                 peak_clip_WS.setSharedY(
-                    h, self.peak_clip(peak_clip_WS.y(h), win=window, decrese=True, LLS=True, smooth_window=smooth_range)
+                    h, self.peak_clip(peak_clip_WS.y(h), win=window, decrease=True, LLS=True, smooth_window=smooth_range)
                 )
             return str(peak_clip_WS)
         else:  # other values are already held in normWS
@@ -755,7 +755,7 @@ class SNAPReduce(DataProcessorAlgorithm):
             if not_wanted in dict_repr:
                 del dict_repr[not_wanted]
         """
-        hack to fix the entry for the default JSON represenation of property DetCalFilename, which is saved as a list of lists
+        hack to fix the entry for the default JSON representation of property DetCalFilename, which is saved as a list of lists
         Example: "DetCalFilename": [ ["/SNS/SNAP/IPTS-26217/shared/E76p2_W65p3.detcal"],
                                      ["/SNS/SNAP/IPTS-26217/shared/E76p2_W65p5.detcal"]]
                  must become:

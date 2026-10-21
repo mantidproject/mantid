@@ -148,7 +148,7 @@ void DiskBuffer::writeOldObjects() {
             // function;
             obj->saveAt(fileIndexStart, NumObjEvents);
             // this is questionable operation, which adjust file size in case
-            // when the file postions were allocated externaly
+            // when the file positions were allocated externally
             if (fileIndexStart + NumObjEvents > m_fileLength)
               m_fileLength = fileIndexStart + NumObjEvents;
           } else // just clean the object up -- it just occupies memory

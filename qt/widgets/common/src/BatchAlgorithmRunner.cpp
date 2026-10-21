@@ -84,7 +84,7 @@ void BatchAlgorithmRunner::removeAllObservers() {
  *
  * Defaults to true
  *
- * @param stopOnFailure Flase to continue to tnd of queue on failure
+ * @param stopOnFailure False to continue to tnd of queue on failure
  */
 void BatchAlgorithmRunner::stopOnFailure(bool stopOnFailure) { m_stopOnFailure = stopOnFailure; }
 

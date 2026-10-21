@@ -218,8 +218,8 @@ Rule *Intersection::findKey(const int KeyN)
 /**
   Finds the leaf with the surface number KeyN
   @param KeyN :: Number to search for
-  @retval 0 :: no leaf with that key number availiable
-  @retval Rule* if an appropiate leaf is found
+  @retval 0 :: no leaf with that key number available
+  @retval Rule* if an appropriate leaf is found
 */
 {
   Rule *PtrOut = (A) ? A->findKey(KeyN) : nullptr;
@@ -289,7 +289,7 @@ bool Intersection::isValid(const Kernel::V3D &Vec) const
 bool Intersection::isValid(const std::map<int, int> &MX) const
 /**
   Use MX to determine if the surface truth etc is
-  valie
+  valid
   @param MX :: map of key + logical value XOR sign
   @retval 1 ::  Both sides are valid
   @retval 0 :: Either side is invalid.
@@ -316,7 +316,7 @@ int Intersection::simplify()
 }
 
 /**
- * find the common bounding box with the two childs of intersection
+ * find the common bounding box with the two children of intersection
  * @param xmax :: Maximum value for the bounding box in x direction
  * @param ymax :: Maximum value for the bounding box in y direction
  * @param zmax :: Maximum value for the bounding box in z direction
@@ -510,8 +510,8 @@ Rule *Union::findKey(const int KeyN)
 /**
   Finds the leaf with the surface number KeyN
   @param KeyN :: Number to search for
-  @retval 0 :: no leaf with that key number availiable
-  @retval Rule* if an appropiate leaf is found
+  @retval 0 :: no leaf with that key number available
+  @retval Rule* if an appropriate leaf is found
 */
 {
 
@@ -567,7 +567,7 @@ bool Union::isValid(const Kernel::V3D &Vec) const
 bool Union::isValid(const std::map<int, int> &MX) const
 /**
   Use MX to determine if the surface truth etc is
-  valie
+  valid
   @param MX :: map of key + logical value XOR sign
   @retval 1 :: if either side is valid
   @retval 0 :: Neither side is valid
@@ -732,8 +732,8 @@ Rule *SurfPoint::findKey(const int KeyNum)
 /**
   Finds the leaf with the surface number KeyN
   @param KeyNum :: Number to search for
-  @retval 0 :: no leaf with that key number availiable
-  @retval Rule* if an appropiate leaf is found
+  @retval 0 :: no leaf with that key number available
+  @retval Rule* if an appropriate leaf is found
 */
 {
   return (KeyNum == keyN) ? this : nullptr;
@@ -1027,7 +1027,7 @@ bool CompObj::isValid(const Kernel::V3D &Pt) const
 /**
   Determines if a point  is valid.
   Checks to see if the point is valid in the object
-  and returns ture if it is not valid.
+  and returns true if it is not valid.
   @param  Pt :: Point to test
   @retval not valid in the object
   @retval true is no object is set
@@ -1223,7 +1223,7 @@ void BoolValue::setLeaf(std::unique_ptr<Rule> aR, const int /*unused*/)
   This REQUIRES that aR is of type SurfPoint
   @param aR :: new rule
 
-  secont argument ignored ( Null side point)
+  second argument ignored ( Null side point)
 */
 {
   // std::cerr<<"Calling BoolValue setLeaf"<<'\n';
@@ -1446,7 +1446,7 @@ bool CompGrp::isValid(const Kernel::V3D &Pt) const
 /**
   Determines if a point  is valid.
   Checks to see if the point is valid in the object
-  and returns ture if it is not valid.
+  and returns true if it is not valid.
   Note the complementary reverse in the test.
   @param  Pt :: Point to test
   @retval not valid in the object

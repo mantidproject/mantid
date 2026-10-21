@@ -53,7 +53,7 @@ int PoldiFitPeaks2D::version() const { return 1; }
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string PoldiFitPeaks2D::category() const { return "SINQ\\Poldi"; }
 
-/// Very short algorithm summary. @see Algorith::summary
+/// Very short algorithm summary. @see Algorithm::summary
 const std::string PoldiFitPeaks2D::summary() const { return "Calculates a POLDI 2D-spectrum."; }
 
 /// Validate inputs for algorithm in case PawleyFit is used.

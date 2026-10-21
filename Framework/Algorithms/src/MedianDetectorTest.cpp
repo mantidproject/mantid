@@ -113,7 +113,7 @@ void MedianDetectorTest::exec() {
   // 2. Mask outliers
   int numFailed = maskOutliers(median, countsWS, specmap);
 
-  // 3. Recalulate the median
+  // 3. Recalculate the median
   median = calculateMedian(*countsWS, excludeZeroes, specmap);
   for (medit = median.begin(); medit != median.end(); ++medit) {
     g_log.information() << "Median value with outliers removed = " << (*medit) << "\n";

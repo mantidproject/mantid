@@ -32,7 +32,7 @@ namespace Mantid::MDAlgorithms {
  */
 SlicingAlgorithm::SlicingAlgorithm()
     : m_transform(), m_transformFromOriginal(), m_transformToOriginal(), m_transformFromIntermediate(),
-      m_transformToIntermediate(), m_axisAligned(true), m_outD(0), // unititialized and should be invalid
+      m_transformToIntermediate(), m_axisAligned(true), m_outD(0), // uninitialized and should be invalid
       m_NormalizeBasisVectors(false) {}
 
 /** Initialize the algorithm's properties.
@@ -76,7 +76,7 @@ void SlicingAlgorithm::initSlicingProps() {
                         "Format: 'name, units, x,y,z,..'.\n"
                         "  name : string for the name of the output dimension.\n"
                         "  units : string for the units of the output dimension.\n"
-                        "  x,y,z,...: vector definining the basis in the input dimensions "
+                        "  x,y,z,...: vector defining the basis in the input dimensions "
                         "space.\n"
                         "Leave blank for NONE.");
     setPropertySettings(propName, ps());
@@ -375,7 +375,7 @@ void SlicingAlgorithm::createGeneralTransform() {
     g_log.information() << '\n';
   }
 
-  // Now, convert the original vector to the coordinates of the ORIGNAL ws, if
+  // Now, convert the original vector to the coordinates of the ORIGINAL ws, if
   // any
   if (m_originalWS) {
     CoordTransform const *toOrig = m_inWS->getTransformToOriginal();

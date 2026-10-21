@@ -42,14 +42,14 @@ class EnggCalibrateTest(unittest.TestCase):
         # No InputWorkspace property (required)
         self.assertRaises(TypeError, sapi.EnggCalibrate, File="foo", Bank="1")
 
-        # Wrong (mispelled) InputWorkspace property
+        # Wrong (misspelled) InputWorkspace property
         self.assertRaises(TypeError, sapi.EnggCalibrate, InputWorkpace="anything_goes", Bank="2")
 
-        # mispelled ExpectedPeaks
+        # misspelled ExpectedPeaks
         tbl = sapi.CreateEmptyTableWorkspace(OutputWorkspace="test_table")
         self.assertRaises(TypeError, sapi.EnggCalibrate, Inputworkspace=self.__class__._data_ws, DetectorPositions=tbl, Bank="2", Peaks="2")
 
-        # mispelled DetectorPositions
+        # misspelled DetectorPositions
         self.assertRaises(TypeError, sapi.EnggCalibrate, InputWorkspace=self.__class__._data_ws, Detectors=tbl, Bank="2", Peaks="2")
 
         # There's no output workspace

@@ -196,7 +196,7 @@ double gsl_peak_wrapper(double x, void *parameters) {
   double y;
 
   /* For the integration to work properly, functionLocal has to be used instead
-   * of the more general function-method due to the fact that the overriden
+   * of the more general function-method due to the fact that the overridden
    * function-method
    * in IPeakFunction cuts off at some point. For slowly decaying peak functions
    * such as Lorentzians, this is introduces large deviations for integrations

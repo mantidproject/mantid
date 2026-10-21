@@ -33,7 +33,7 @@ bool fileExists(const std::string &filename);
  */
 class SCRIPT_DLL_EXPORT ScriptRepositoryImpl : public ScriptRepository {
   /**
-     Keep the usefull information for each entry of the repository.
+     Keep the useful information for each entry of the repository.
    */
   class RepositoryEntry {
   public:

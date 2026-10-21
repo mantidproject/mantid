@@ -53,7 +53,7 @@ public:
   /// Creates an instance of a function
   std::shared_ptr<IFunction> createInitialized(const std::string &input) const;
 
-  /// Creates an instnce of an inizialised multidomain function where each
+  /// Creates an instance of an initialised multidomain function where each
   /// domain has the same function.
   std::shared_ptr<MultiDomainFunction> createInitializedMultiDomainFunction(const std::string &input,
                                                                             size_t domainNumber) const;

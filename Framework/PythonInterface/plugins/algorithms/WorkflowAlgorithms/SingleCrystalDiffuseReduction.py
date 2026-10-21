@@ -71,7 +71,7 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         return "SingleCrystalDiffuseReduction"
 
     def summary(self):
-        return "Single Crystal Diffuse Scattering Reduction, normalisation, symmetry and background substraction"
+        return "Single Crystal Diffuse Scattering Reduction, normalisation, symmetry and background subtraction"
 
     def PyInit(self):
         # files to reduce
@@ -149,7 +149,7 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         )
         self.declareProperty(
             MatrixWorkspaceProperty("CopyInstrumentParameters", "", optional=PropertyMode.Optional, direction=Direction.Input),
-            doc="The input workpsace from which :ref:`CopyInstrumentParameters <algm-CopyInstrumentParameters>` "
+            doc="The input workspace from which :ref:`CopyInstrumentParameters <algm-CopyInstrumentParameters>` "
             "will copy parameters to data",
         )
         self.declareProperty(

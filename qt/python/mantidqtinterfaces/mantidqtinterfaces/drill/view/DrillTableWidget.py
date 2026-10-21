@@ -92,7 +92,7 @@ class DrillTableWidget(QTableWidget):
 
     def addRow(self, position):
         """
-        Add a row in the table at a given valid postion.
+        Add a row in the table at a given valid position.
 
         Args:
             position (int): row index
@@ -143,7 +143,7 @@ class DrillTableWidget(QTableWidget):
             name (str): name of the column
 
         Returns:
-            QTableWidgetItem: the table item, None if the colum/row does not
+            QTableWidgetItem: the table item, None if the column/row does not
                               exist
         """
         if name not in self._columns or row >= self.rowCount():

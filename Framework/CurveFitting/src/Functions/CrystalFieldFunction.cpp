@@ -219,7 +219,7 @@ size_t CrystalFieldFunction::nParams() const {
   if (!m_source) {
     // This method can be called on an uninitialised function (by tests for
     // example).
-    // Return 0 so no exception is thrown an it should prevent attemts to access
+    // Return 0 so no exception is thrown an it should prevent attempts to access
     // parameters.
     return 0;
   }

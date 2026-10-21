@@ -67,7 +67,7 @@ public:
   bool nonZeroF() const;
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   RebinnedOutput(const RebinnedOutput &) = default;
 
   /// Called by initialize() in MatrixWorkspace
@@ -80,7 +80,7 @@ protected:
   /// Flag to indicate if finalize has been called, and if errors/variance used
   bool m_finalized;
 
-  /// Flag to indiciate if the finalized data used squared errors
+  /// Flag to indicate if the finalized data used squared errors
   bool m_hasSqrdErrs;
 
 private:

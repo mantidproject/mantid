@@ -64,7 +64,7 @@ int QtSearchModel::rowCount(const QModelIndex &) const { return static_cast<int>
 int QtSearchModel::columnCount(const QModelIndex &) const { return static_cast<int>(Column::NUM_COLUMNS); }
 
 /**
-Overrident data method, allows consuming view to extract data for an index and
+Overridden data method, allows consuming view to extract data for an index and
 role.
 @param index : For which to extract the data
 @param role : Role mode

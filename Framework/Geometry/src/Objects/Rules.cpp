@@ -104,10 +104,10 @@ int Rule::removeComplementary(std::unique_ptr<Rule> &TopRule)
       {
         // In the simplification we don't need
         // to add anything to the tree.
-        // This call the appropiate intersection/Union
+        // This call the appropriate intersection/Union
         // TrueCount 1 is a simple simplification
-        //           -1 alway true
-        //           -2 alway false
+        //           -1 always true
+        //           -2 always false
         const int tcount(tmpA->simplify());
 
         if (tcount == 1) // Deep simplification
@@ -145,7 +145,7 @@ int Rule::makeCNFcopy(std::unique_ptr<Rule> &TopRule)
   an intersection to a union.
   Since the type of a class can't be changed
   it is necessary to have a static function,
-  so that the place that TopRule points is changable
+  so that the place that TopRule points is changeable
   @return number of changes
 */
 {
@@ -252,7 +252,7 @@ int Rule::makeCNFcopy(std::unique_ptr<Rule> &TopRule)
             // It is the top rule therefore, replace the toprule
             TopRule = std::move(partReplace);
 
-          // Now we have to go back to the begining again and start again.
+          // Now we have to go back to the beginning again and start again.
           active = 1; // Exit loop
         }
       }
@@ -274,7 +274,7 @@ int Rule::makeCNF(std::unique_ptr<Rule> &TopRule)
   an intersection to a union.
   Since the type of a class can't be changed
   it is necessary to have a static function,
-  so that the place that TopRule points is changable
+  so that the place that TopRule points is changeable
 
   @retval 0 on failure
   @retval 1 on success
@@ -305,7 +305,7 @@ int Rule::makeCNF(std::unique_ptr<Rule> &TopRule)
     if (!TopRule->checkParents())
       logger.debug() << "Parents False\n";
     while (!active && !TreeLine.empty()) {
-      // Ok get and remvoe the top item from the stack.
+      // Ok get and remove the top item from the stack.
       tmpA = TreeLine.top();
       TreeLine.pop();
 
@@ -364,7 +364,7 @@ int Rule::makeCNF(std::unique_ptr<Rule> &TopRule)
             Pnt->setLeaf(std::move(partReplace), leafN);
           } else
             TopRule = std::move(partReplace);
-          // Now we have to go back to the begining again and start again.
+          // Now we have to go back to the beginning again and start again.
           active = 1; // Exit loop
         }
       }
@@ -534,7 +534,7 @@ int Rule::commonType() const
 */
 {
   // initial type
-  const int rtype = this->type(); // note the dereference to get non-common comonents
+  const int rtype = this->type(); // note the dereference to get non-common components
   if (!rtype)
     return 0;
   // now this must be an intersection or a Union
@@ -560,7 +560,7 @@ int Rule::commonType() const
 
 int Rule::substituteSurf(const int SurfN, const int newSurfN, const std::shared_ptr<Surface> &SPtr)
 /**
-  Substitues a surface item if within a rule
+  Substitutes a surface item if within a rule
   @param SurfN :: Number number to change
   @param newSurfN :: New surface number (if -ve then the key is reversed)
   @param SPtr :: New surface Pointer

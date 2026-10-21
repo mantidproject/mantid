@@ -380,7 +380,7 @@ For each measurement, the background :math:`B_i` is calculated as
 
 .. math:: B_i = \frac{\sum^{(pt)}_{\{d_i\}}n_{d_i}}{F^{(a)}_{d_i}}
 
-where :math:`F^{(a)}` is the normlization of either time or beam monitor counts,
+where :math:`F^{(a)}` is the normalization of either time or beam monitor counts,
 and :math:`n_{d_i}` is the neutron counts of measumrent :math:`d_i`.
 
 Then the estimation of the normalized background for each measurement is

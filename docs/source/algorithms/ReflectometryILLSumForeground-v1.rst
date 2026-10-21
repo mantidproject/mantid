@@ -17,7 +17,7 @@ The following diagram gives an overview of the algorithm:
 
 .. diagram:: ReflectometryILLSumForeground-v1_wkflw.dot
 
-The algorihtm runs :ref:`ReflectometryBeamStatistics <algm-ReflectometryBeamStatistics>` when processing the reflected beam. This adds some sample log entries to *OutputWorkspace* and *DirectLineWorkspace*. See the :ref:`algorithm's documentation <algm-ReflectometryBeamStatistics>` for more details.
+The algorithm runs :ref:`ReflectometryBeamStatistics <algm-ReflectometryBeamStatistics>` when processing the reflected beam. This adds some sample log entries to *OutputWorkspace* and *DirectLineWorkspace*. See the :ref:`algorithm's documentation <algm-ReflectometryBeamStatistics>` for more details.
 
 Summation type
 ##############

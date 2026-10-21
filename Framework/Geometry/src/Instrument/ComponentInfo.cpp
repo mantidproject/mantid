@@ -396,7 +396,7 @@ double ComponentInfo::solidAngle(const size_t componentIndex, const Geometry::So
  * just the 4 vertex detectors within.
  *
  * Find the vertexes
- * Grow the bounding box by each vetex
+ * Grow the bounding box by each vertex
  * Record detectors that form part of this bank that are enclosed and therefore
  * already inclusive of the external bounding box Based on the number of
  * sub-components, which are also fully enclosed, skip the component iterator
@@ -568,7 +568,7 @@ const ComponentInfoConstIt ComponentInfo::cbegin() { return ComponentInfoConstIt
 const ComponentInfoConstIt ComponentInfo::cend() { return ComponentInfoConstIt(*this, size(), size()); }
 
 size_t ComponentInfo::findBankParent(size_t index, const std::string &bankPart) const {
-  constexpr size_t noBankParent{0}; // index 0 will always be a dectector and never a bank
+  constexpr size_t noBankParent{0}; // index 0 will always be a detector and never a bank
   // if this component is a bank, return the parent
   if (name(index).starts_with(bankPart)) {
     return parent(index);

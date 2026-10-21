@@ -87,7 +87,7 @@ double PolyBase::operator[](const int i) const
 /**
   Accessor to component
   @param i :: index
-  @return Coeficient c_i
+  @return Coefficient c_i
  */
 {
   if (i > iDegree || i < 0)
@@ -99,7 +99,7 @@ double &PolyBase::operator[](const int i)
 /**
   Accessor to component
   @param i :: index
-  @return Coeficient c_i
+  @return Coefficient c_i
  */
 {
   if (i > iDegree || i < 0)
@@ -204,7 +204,7 @@ PolyBase PolyBase::operator*(const PolyBase &A) const
 PolyBase PolyBase::operator+(const double V) const
 /**
   PolyBase addition
-  @param V :: Value Addtion
+  @param V :: Value Addition
   @return (*this+V);
  */
 {
@@ -215,7 +215,7 @@ PolyBase PolyBase::operator+(const double V) const
 PolyBase PolyBase::operator-(const double V) const
 /**
   PolyBase substractr
-  @param V :: Value substract
+  @param V :: Value subtract
   @return (*this-V);
  */
 {
@@ -272,7 +272,7 @@ PolyBase &PolyBase::operator-=(const double V)
 PolyBase &PolyBase::operator*=(const double V)
 /**
   PolyBase multiplication
-  @param V :: Value to multipication
+  @param V :: Value to multiplication
   @return (*this*V);
  */
 {
@@ -349,7 +349,7 @@ void PolyBase::compress(const double epsilon)
   Two part process remove coefficients of zero or near zero:
   Reduce degree by eliminating all (nearly) zero leading coefficients
   and by making the leading coefficient one.
-  @param epsilon :: coeficient to use to decide if a values is zero
+  @param epsilon :: coefficient to use to decide if a values is zero
  */
 {
   const double eps((epsilon > 0.0) ? epsilon : Eaccuracy);
@@ -462,7 +462,7 @@ std::vector<std::complex<double>> PolyBase::calcRoots(const double epsilon)
     solveCubic(Out[0], Out[1], Out[2]);
     return Out;
   }
-  // THERE IS A QUARTIC / QUINTIC Solution availiable but...
+  // THERE IS A QUARTIC / QUINTIC Solution available but...
   // WS contains the hessian matrix if required (eigenvalues/vectors)
   //
   gsl_poly_complex_workspace *WS(gsl_poly_complex_workspace_alloc(iDegree + 1));

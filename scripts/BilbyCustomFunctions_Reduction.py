@@ -225,7 +225,7 @@ def output_header(
     corrections_related_details = "Empty beam transmission and blocked beam scattering: " + empty_beam_transmission + " and " + blocked_beam
     header.append(corrections_related_details)
 
-    masks = "Sample and trasmission masks: " + sample_mask + " and " + transmission_mask + "\n"
+    masks = "Sample and transmission masks: " + sample_mask + " and " + transmission_mask + "\n"
     header.append(masks)
 
     return header
@@ -304,7 +304,7 @@ def wavelengh_slices(wavelength_intervals, binning_wavelength_ini, wav_delta):
             raise ValueError("wav_delta is too large for the upper range of wavelength")
         if math.fmod((wav2 - wav1), wav_delta) == 0.0:  # if reminder is 0
             n = (wav2 - wav1) / wav_delta
-        else:  # if reminder is greater than 0, to trancate the maximum wavelength in the range
+        else:  # if reminder is greater than 0, to truncate the maximum wavelength in the range
             n = math.floor((wav2 - wav1) / wav_delta)
             max_wave_length = wav1 + n * wav_delta
             print(
@@ -360,7 +360,7 @@ def correction_tubes_shift(ws_to_correct, path_to_shifts_file):
 
 def correct_element_one_stripe(panel, pixelsize, shift, ws):
     """Technical for CorrectionTubesShift.
-    Sutable for one Cd stripe correction and for the stripes on BorAl mask on left curtain"""
+    Suitable for one Cd stripe correction and for the stripes on BorAl mask on left curtain"""
 
     eightpack = ["eight_pack1", "eight_pack2", "eight_pack3", "eight_pack4", "eight_pack5"]
     tube = ["tube1", "tube2", "tube3", "tube4", "tube5", "tube6", "tube7", "tube8"]
@@ -420,7 +420,7 @@ def correction_based_on_experiment(ws_to_correct):
 ##############################################################################
 
 
-""" Final detectors' alignement has been done using laser tracker in January, 2016.
+""" Final detectors' alignment has been done using laser tracker in January, 2016.
     To correct data collected before that, some extra shift hardcoded here, shall be applied """
 
 

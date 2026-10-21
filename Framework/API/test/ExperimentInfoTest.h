@@ -759,11 +759,11 @@ public:
     TS_ASSERT_EQUALS(compInfo.detectorsInSubtree(compInfo.indexOf(detCompId))[0], targetDetectorIndex);
 
     size_t detectorIndex = 0; // interchangeable as either component or detector index
-    TSM_ASSERT_EQUALS("Gurantee violated of detectorindex == componentIndex",
+    TSM_ASSERT_EQUALS("Guarantee violated of detectorindex == componentIndex",
                       compInfo.detectorsInSubtree(detectorIndex), std::vector<size_t>{detectorIndex});
 
     detectorIndex = 99; // interchangeable as either component or detector index
-    TSM_ASSERT_EQUALS("Gurantee violated of detectorindex == componentIndex",
+    TSM_ASSERT_EQUALS("Guarantee violated of detectorindex == componentIndex",
                       compInfo.detectorsInSubtree(detectorIndex), std::vector<size_t>{detectorIndex});
   }
 

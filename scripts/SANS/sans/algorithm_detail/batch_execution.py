@@ -563,7 +563,7 @@ def provide_loaded_data(state, use_optimizations, workspace_to_name, workspace_t
                               ADS.
     :param workspace_to_name: a map of SANSDataType vs output-property name of SANSLoad for workspaces
     :param workspace_to_monitor: a map of SANSDataType vs output-property name of SANSLoad for monitor workspaces
-    :return: a list fo workspaces and a list of monitor workspaces
+    :return: a list of workspaces and a list of monitor workspaces
     """
     # Load the data
     state_serialized = Serializer.to_json(state)
@@ -1809,7 +1809,7 @@ def get_all_names_to_save(reduction_packages, save_can):
 def get_event_slice_names_to_save(reduction_packages, save_can):
     """
     Extracts all the output names from a list of reduction packages which contain event sliced data.
-    The workspaces in these reduction packages are gruop workspaces, except for transmissions.
+    The workspaces in these reduction packages are group workspaces, except for transmissions.
 
     :param reduction_packages: a list of reduction packages
     :param save_can: a bool, whether or not to save unsubtracted can workspace

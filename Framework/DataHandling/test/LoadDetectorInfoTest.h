@@ -66,7 +66,7 @@ std::string det_phi[] = {"-105", "-110", "-115", "-120", "-125", "-130"};
 void writeSmallDatFile(const std::string &filename) {
   std::ofstream file(filename.c_str());
   const int NOTUSED = -123456;
-  file << "DETECTOR.DAT writen by LoadDetectorInfoTest\n";
+  file << "DETECTOR.DAT written by LoadDetectorInfoTest\n";
   file << 165888 << " " << 14 << '\n';
   file << "det no.  offset    l2     code     theta        phi         w_x     "
           "    w_y         w_z         f_x         f_y         f_z         a_x "
@@ -182,7 +182,7 @@ void writeLargeTestDatFile(const std::string &filename, const int ndets) {
 
   std::ofstream file(filename.c_str());
   const int NOTUSED = -123456;
-  file << "DETECTOR.DAT writen by LoadDetectorInfoTest\n";
+  file << "DETECTOR.DAT written by LoadDetectorInfoTest\n";
   file << 165888 << " " << 14 << '\n';
   file << "det no.  offset    l2     code     theta        phi         w_x     "
           "    w_y         w_z         f_x         f_y         f_z         a_x "

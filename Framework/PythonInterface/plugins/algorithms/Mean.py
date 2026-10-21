@@ -23,7 +23,7 @@ class Mean(PythonAlgorithm):
         return "Mean"
 
     def summary(self):
-        return "Calculates the arithemetic mean of the workspaces provided."
+        return "Calculates the arithmetic mean of the workspaces provided."
 
     def PyInit(self):
         mustHaveWorkspaceNames = StringMandatoryValidator()

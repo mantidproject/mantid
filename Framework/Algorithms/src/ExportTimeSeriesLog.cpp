@@ -49,7 +49,7 @@ void ExportTimeSeriesLog::init() {
 
   declareProperty("CalculateFirstDerivative", false,
                   "If specified then the first derivative of exported data "
-                  "will be calcualted and put to spectrum 1.");
+                  "will be calculated and put to spectrum 1.");
 
   declareProperty("LogName", "", "Log's name to filter events.");
 
@@ -99,7 +99,7 @@ void ExportTimeSeriesLog::exec() {
   exportLog(logname, time_unit, start_time, stop_time, exportEpochTime, outputeventworkspace, numberoutputentries,
             cal1stderiv);
 
-  // calcualte first derivative
+  // calculate first derivative
   if (cal1stderiv)
     calculateFirstDerivative(outputeventworkspace);
 
@@ -119,7 +119,7 @@ void ExportTimeSeriesLog::exec() {
  * @param exportepoch :: flag to output time as epoch time/absolute time
  * @param outputeventws :: boolean.  output workspace is event workspace if
  * @param numentries :: number of log entries to export
- * @param cal_first_deriv :: flag to calcualte the first derivative
+ * @param cal_first_deriv :: flag to calculate the first derivative
  */
 void ExportTimeSeriesLog::exportLog(const std::string &logname, const std::string &timeunit, const double &starttime,
                                     const double &stoptime, const bool exportepoch, bool outputeventws, int numentries,
@@ -368,7 +368,7 @@ void ExportTimeSeriesLog::calculateFirstDerivative(bool is_event_ws) {
     return;
   }
 
-  // calcualte output
+  // calculate output
   size_t datasize = m_outWS->mutableX(1).size();
   auto vecX = m_outWS->mutableX(0);
   auto vecY = m_outWS->mutableY(0);

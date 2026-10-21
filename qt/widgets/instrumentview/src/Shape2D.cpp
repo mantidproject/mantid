@@ -40,7 +40,7 @@ Shape2D::Shape2D()
 }
 
 /**
- * Calls virtual drawShape() method to draw the actial shape.
+ * Calls virtual drawShape() method to draw the actual shape.
  * Draws bounding rect and control points if the shape is selected.
  *
  * @param painter :: QPainter used for drawing.
@@ -847,9 +847,9 @@ void Shape2DSector::refit() {
  * @brief Shape2DSector::computeScaling
  * Used when updating the bounding box after the user dragged a corner. Given
  * the constraints of a circular sector, the new bounding box cannot be exactly
- * the one drawed by the mouse of the user, and thus a number of corrections are
+ * the one drawn by the mouse of the user, and thus a number of corrections are
  * needed.
- * This method thus corrects this new value and then modifies the difining
+ * This method thus corrects this new value and then modifies the defining
  * parameters of the sector accordingly.
  *
  * @param BBoxCorner :: the corner modified by the user, before it has been
@@ -970,7 +970,7 @@ QPointF Shape2DSector::getShapeControlPoint(size_t i) const {
  * 0 is outer radius, 1 is inner, 2 is starting angle, 3 is ending.
  * @param i :: index of the control point changed
  * @param pos :: the new position of the control point (might not be where it is
- * palced at the end of the update though, since there are constraints to take
+ * placed at the end of the update though, since there are constraints to take
  * into account)
  */
 void Shape2DSector::setShapeControlPoint(size_t i, const QPointF &pos) {

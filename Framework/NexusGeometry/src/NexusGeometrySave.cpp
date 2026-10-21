@@ -60,7 +60,7 @@ struct SpectraMappings {
  * eager check.
  *
  * @param parentGroup : H5 parent group.
- * @param childGroupName : intended name of the child goup.
+ * @param childGroupName : intended name of the child group.
  * @return : new H5 Group object with name <childGroupName> if did not throw.
  */
 inline H5::Group tryCreateGroup(const H5::Group &parentGroup, const std::string &childGroupName) {
@@ -155,7 +155,7 @@ H5::StrType strTypeOfSize(const std::string &str) {
  */
 void writeStrDataset(H5::Group &grp, const std::string &dSetName, const std::string &dSetVal,
                      const H5::DataSpace &dataSpace = SCALAR) {
-  // TODO. may need to review if we shoud in fact replace.
+  // TODO. may need to review if we should in fact replace.
   if (!utilities::findDataset(grp, dSetName)) {
     H5::StrType dataType = strTypeOfSize(dSetVal);
     H5::DataSet dSet = grp.createDataSet(dSetName, dataType, dataSpace);
@@ -467,7 +467,7 @@ inline void writeOrientation(H5::Group &grp, const Eigen::Quaterniond &rotation,
 
   int arank = 1;                          // rank of attribute
   hsize_t adims[static_cast<hsize_t>(3)]; // dimensions of attribute
-  adims[0] = static_cast<hsize_t>(3);     // datapoints in attibute dimension 0
+  adims[0] = static_cast<hsize_t>(3);     // datapoints in attribute dimension 0
 
   aspace = H5::DataSpace(arank, adims, nullptr); // dataspace for attribute
   vector = orientation.createAttribute(VECTOR, H5::PredType::NATIVE_DOUBLE,
@@ -579,9 +579,9 @@ void validateInputs(AbstractLogger &logger, const std::string &fullPath, const G
   }
 
   if (Mantid::Kernel::V3D{0, 0, 0} != compInfo.samplePosition()) {
-    logger.error("The sample positon is required to be at the origin. "
+    logger.error("The sample position is required to be at the origin. "
                  "Instrument not saved.");
-    throw std::invalid_argument("The sample positon is required to be at the origin");
+    throw std::invalid_argument("The sample position is required to be at the origin");
   }
 
   if (!compInfo.hasSource()) {
@@ -614,7 +614,7 @@ public:
   enum class Mode { Trunc, Append };
 
   explicit NexusGeometrySaveImpl(Mode mode) : m_mode(mode) {}
-  NexusGeometrySaveImpl(const NexusGeometrySaveImpl &) = delete; // No intention to suport copies
+  NexusGeometrySaveImpl(const NexusGeometrySaveImpl &) = delete; // No intention to support copies
 
   /*
    * Function: NXInstrument
@@ -706,7 +706,7 @@ public:
         dependency = transformations.getObjName() + "/" + ORIENTATION;
 
         // If location dataset is written to group also, then dependency for
-        // orientation dataset containg the rotation transformation will be
+        // orientation dataset containing the rotation transformation will be
         // location. Else dependency for orientation is self.
         std::string rotationDependency =
             locationIsOrigin ? NO_DEPENDENCY : transformations.getObjName() + "/" + LOCATION;
@@ -769,7 +769,7 @@ public:
         dependency = transformations.getObjName() + "/" + ORIENTATION;
 
         // If location dataset is written to group also, then dependency for
-        // orientation dataset containg the rotation transformation will be
+        // orientation dataset containing the rotation transformation will be
         // location. Else dependency for orientation is self.
         std::string rotationDependency =
             locationIsOrigin ? NO_DEPENDENCY : transformations.getObjName() + "/" + LOCATION;

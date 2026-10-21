@@ -232,7 +232,7 @@ public:
   }
 
   void test_exec_difc() {
-    // setup the peak postions based on transformation from detID=155
+    // setup the peak positions based on transformation from detID=155
     std::vector<double> dValues = convertPosToD(DIFC_155);
 
     const std::string prefix{"PDCalibration_difc"};
@@ -282,7 +282,7 @@ public:
 
   void test_exec_difc_tzero() {
     using Mantid::Kernel::UnitParams;
-    // setup the peak postions based on transformation from detID=155
+    // setup the peak positions based on transformation from detID=155
     const double TZERO = 20.;
     std::vector<double> dValues(PEAK_TOFS);
     Mantid::Kernel::Units::dSpacing dSpacingUnit;
@@ -339,7 +339,7 @@ public:
 
   void test_exec_difc_tzero_difa() {
     using Mantid::Kernel::UnitParams;
-    // setup the peak postions based on transformation from detID=155
+    // setup the peak positions based on transformation from detID=155
     // allow refining DIFA, but don't set the transformation to require it
     const double TZERO = 20.;
     const double DIFA = 0.05;
@@ -477,7 +477,7 @@ public:
     cropWS.setPropertyValue("XMax", xmax);
     cropWS.execute();
 
-    // setup the peak postions based on transformation from detID=155
+    // setup the peak positions based on transformation from detID=155
     std::vector<double> dValues(PEAK_TOFS);
 
     Mantid::Kernel::Units::dSpacing dSpacingUnit;
@@ -525,9 +525,9 @@ public:
   }
 
   void test_exec_fit_diff_constants_with_chisq() {
-    // setup the peak postions based on transformation from detID=155
+    // setup the peak positions based on transformation from detID=155
     // allow refining DIFA, but don't set the transformation to require it
-    // setup the peak postions based on transformation from detID=155
+    // setup the peak positions based on transformation from detID=155
     std::vector<double> dValues = convertPosToD(DIFC_155);
 
     const std::string prefix{"PDCalibration_difc"};
@@ -549,7 +549,7 @@ public:
     ITableWorkspace_sptr errorTable =
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(prefix + "diag_fiterror");
     TS_ASSERT(errorTable);
-    // check the column titles correpsond to names of Gaussian fit parameters
+    // check the column titles correspond to names of Gaussian fit parameters
     // not the generic height, centre, width
     TS_ASSERT_EQUALS(errorTable->getColumnNames()[4], "Sigma");
 
@@ -573,7 +573,7 @@ public:
   }
 
   void test_exec_grouped_detectors() {
-    // setup the peak postions based on transformation from detID=155
+    // setup the peak positions based on transformation from detID=155
     std::vector<double> dValues = convertPosToD(DIFC_155);
 
     const std::string prefix{"PDCalibration_difc"};
@@ -607,7 +607,7 @@ public:
   }
 
   void test_exec_grouped_detectors_limit_spectra() {
-    // setup the peak postions based on transformation from detID=155
+    // setup the peak positions based on transformation from detID=155
     std::vector<double> dValues = convertPosToD(DIFC_155);
 
     const std::string prefix{"PDCalibration_difc"};
@@ -735,7 +735,7 @@ public:
 
     // Note: this section duplicates setup from "test_exec_difc".
 
-    // setup the peak postions based on transformation from detID=155
+    // setup the peak positions based on transformation from detID=155
     std::vector<double> dValues = convertPosToD(DIFC_155);
 
     TS_ASSERT_THROWS_NOTHING(algorithmProperties.setProperty("InputWorkspace", inputWSName));
@@ -1185,7 +1185,7 @@ public:
 
   void setUp() override {
     using Mantid::Kernel::UnitParams;
-    // setup the peak postions based on transformation from detID=155
+    // setup the peak positions based on transformation from detID=155
     std::vector<double> dValues(PEAK_TOFS.size());
     Mantid::Kernel::Units::dSpacing dSpacingUnit;
     std::vector<double> unusedy;

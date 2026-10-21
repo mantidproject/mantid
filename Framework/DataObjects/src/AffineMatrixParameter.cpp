@@ -12,7 +12,7 @@ namespace Mantid::DataObjects {
 /** Constructor
  *
  * @param outD the number of output dimensions
- * @param inD the nubmer of input dimensions
+ * @param inD the number of input dimensions
  */
 AffineMatrixParameter::AffineMatrixParameter(size_t outD, size_t inD) : m_affineMatrix(outD + 1, inD + 1) {
   m_isValid = false;
@@ -122,7 +122,7 @@ bool AffineMatrixParameter::isValid() const { return m_isValid; }
 AffineMatrixParameter &AffineMatrixParameter::operator=(const AffineMatrixParameter &other) {
   if ((other.m_affineMatrix.numCols() != this->m_affineMatrix.numCols()) ||
       (other.m_affineMatrix.numRows() != this->m_affineMatrix.numRows())) {
-    throw std::runtime_error("Cannot make assignemnts between "
+    throw std::runtime_error("Cannot make assignments between "
                              "AffineMatrixParameter when the matrixes are of "
                              "different sizes.");
   }

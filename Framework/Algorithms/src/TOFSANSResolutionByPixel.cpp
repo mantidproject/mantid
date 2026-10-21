@@ -155,7 +155,7 @@ void TOFSANSResolutionByPixel::exec() {
 
     // Get handles on the outputWorkspace
     auto &yOut = outWS->mutableY(i);
-    // for each wavelenght bin of each pixel calculate a q-resolution
+    // for each wavelength bin of each pixel calculate a q-resolution
     for (size_t j = 0; j < xLength - 1; j++) {
       // use the midpoint of each bin
       const double wl = (xIn[j + 1] + xIn[j]) / 2.0;
@@ -168,7 +168,7 @@ void TOFSANSResolutionByPixel::exec() {
       }
       const double q = factor / wl;
 
-      // wavelenght spread from bin assumed to be
+      // wavelength spread from bin assumed to be
       const double sigmaSpreadFromBin = xIn[j + 1] - xIn[j];
 
       // Get the uncertainty in Q
@@ -204,7 +204,7 @@ MatrixWorkspace_sptr TOFSANSResolutionByPixel::setupOutputWorkspace(const Matrix
 /**
  * Get the moderator workspace
  * @param inputWorkspace: the input workspace
- * @returns the moderator workspace wiht the correct wavelength binning
+ * @returns the moderator workspace with the correct wavelength binning
  */
 MatrixWorkspace_sptr
 TOFSANSResolutionByPixel::getModeratorWorkspace(const Mantid::API::MatrixWorkspace_sptr &inputWorkspace) {

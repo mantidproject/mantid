@@ -205,7 +205,7 @@ void RadiusSum::cacheInputPropertyValues() {
   else
     centre = V3D(centre_aux[0], centre_aux[1], centre_aux[2]);
 
-  g_log.debug() << "Copy the remaning properties: MinRadius, MaxRadius and NumBins\n";
+  g_log.debug() << "Copy the remaining properties: MinRadius, MaxRadius and NumBins\n";
   min_radius = getProperty("MinRadius");
   max_radius = getProperty("MaxRadius");
   num_bins = getProperty("NumBins");
@@ -348,7 +348,7 @@ std::vector<double> RadiusSum::getBoundariesOfInstrument(const API::MatrixWorksp
   //   - The first spectrum No (non monitor) is associated with one detector
   //   while the last spectrum No (non monitor)
   //     is associated with one detector.
-  //   - They are in complete oposite direction.
+  //   - They are in complete opposite direction.
   //
   //   Consider the following 'image' (where the ID is the number and the
   //   position is where it is displayed)
@@ -493,7 +493,7 @@ void RadiusSum::numBinsIsReasonable() {
     g_log.warning() << "The number of bins provided is too big. "
                     << "It corresponds to a separation smaller than the image "
                        "resolution (detector size). "
-                    << "A resonable number is smaller than "
+                    << "A reasonable number is smaller than "
                     << static_cast<int>((max_radius - min_radius) / min_bin_size) << '\n';
 }
 

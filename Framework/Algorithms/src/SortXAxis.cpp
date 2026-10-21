@@ -120,7 +120,7 @@ void SortXAxis::sortIndicesByX(std::vector<std::size_t> &workspaceIndices, const
  *
  * @param workspaceIndices the sorted vector of indices
  * @param inputWorkspace the unsorted initial workspace
- * @param outputWorkspace the emptry output workspace
+ * @param outputWorkspace the empty output workspace
  * @param specNum the Spectrum it is currently copying over
  */
 void SortXAxis::copyXandDxToOutputWorkspace(const std::vector<std::size_t> &workspaceIndices,

@@ -355,9 +355,9 @@ void FittingModel::updateFitTypeString() {
 
   m_fitString.clear();
   for (auto const &fitFunctionName : FUNCTION_STRINGS) {
-    auto occurances = getNumberOfCustomFunctions(multiDomainFunction, fitFunctionName.first);
-    if (occurances > 0) {
-      m_fitString += std::to_string(occurances) + fitFunctionName.second;
+    auto occurrences = getNumberOfCustomFunctions(multiDomainFunction, fitFunctionName.first);
+    if (occurrences > 0) {
+      m_fitString += std::to_string(occurrences) + fitFunctionName.second;
     }
   }
 

@@ -34,14 +34,14 @@ Test 1: Offline documentation test on the workbench.
 #. Go to ``Help -> Mantid Help`` on the navigation bar of **Mantid Workbench**. A **Qt-Help** window should appear with the documentation.
    Close the window.
 #. Check that both clicking on ``Help -> Mantid Concepts`` and ``Help -> Algorithm Descriptions`` opens the documentation again, redirecting to the
-   appropiate sections of it.
+   appropriate sections of it.
 #. Check that clicking on ``Help -> Mantid Homepage`` and ``Help -> Mantid Forum`` prompts a new web browser window linking to the respective sites.
 #. Check that clicking on ``Help -> About Mantid Workbench`` prompts the startup Mantid splash screen.
 #. On **Mantid Workbench**, press F1 key, same help window as before should appear. Rest of the test will continue on the **Mantid - Help** window.
 #. On the ``Index`` tab, scroll down until the end of the list. Double-click on ``ZFMuonium`` and ``ZFdipole`` and check that both pages are displayed.
 #. Go to the ``Search`` tab, and search for ``ZFMuonium``, first result should link to ``ZFMuonium`` page of the documentation.
 #. Click on ``Print...`` button. It should prompt the print dialog window. Close it.
-#. Click on the ``Previous`` button (just right of ``Print...`` button) continuosly until you return to the **Home** page of the documentation.
+#. Click on the ``Previous`` button (just right of ``Print...`` button) continuously until you return to the **Home** page of the documentation.
 #. On the **Home** page of the documentation. Click on ``MantidWorkbench`` hyperlink. Within ``MantidWorkbench``, try and open
    some of the documentation pages.
 #. Click on ``Home`` button to return to the main documentation page.

@@ -47,7 +47,7 @@ size_t ConvertToHistogram::getNewXSize(const std::size_t ySize) const { return y
 /**
  * Calculate the histogram boundaries. For uniform bins this should work
  * correctly
- * and should be convertable back to point data. For non-uniform bins the
+ * and should be convertible back to point data. For non-uniform bins the
  * boundaries
  * are guessed such that the boundary goes mid-way between each point
  * @param inputX :: A const reference to the input data

@@ -13,7 +13,7 @@ import numpy as np
 
 class DNSFlippingRatioCorr(PythonAlgorithm):
     """
-    Peforms flipping ratio correction of the given dataset
+    Performs flipping ratio correction of the given dataset
     using the NiCr data
     This algorithm is written for the DNS @ MLZ,
     but can be adjusted for other instruments if needed.

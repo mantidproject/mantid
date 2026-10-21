@@ -93,7 +93,7 @@ void MuonPreProcess::validateTableInputs(std::map<std::string, std::string> &err
       if (timeZeroTable->rowCount() > ws->getNumberHistograms()) {
         errors["TimeZeroTable"] = "TimeZeroTable must have as many rows as "
                                   "there are spectra in InputWorkspace. Use TimeOffset to apply same "
-                                  "time correcton to all data";
+                                  "time correction to all data";
       }
     }
   }

@@ -144,7 +144,7 @@ def open_in_window(widget_or_name, script, attach_debugger=True, pause=0, close_
         until the next step.
         The test can yield a generator. In this case it will be iterated over until it stops
         and the iterations of the main script continue.
-    :param attach_debugger: If true pause to let the user to attache a debugger before starting
+    :param attach_debugger: If true pause to let the user to attach a debugger before starting
         application.
     :param pause: A number of seconds to wait between the iterations.
     :param close_on_finish: An option to close the widget after the script finishes.

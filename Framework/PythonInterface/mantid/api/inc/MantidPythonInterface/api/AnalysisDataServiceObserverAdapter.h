@@ -17,7 +17,7 @@ namespace PythonInterface {
 A wrapper class helping to export AnalysisDataServiceObserver to python.
 It provides access from the C++ side to methods defined in python
 on subclasses of AnalysisDataServiceObserver.
-This allows the virtual methods to be overriden by python subclasses.
+This allows the virtual methods to be overridden by python subclasses.
  */
 
 class PYTHON_API_DLL AnalysisDataServiceObserverAdapter : public API::AnalysisDataServiceObserver {

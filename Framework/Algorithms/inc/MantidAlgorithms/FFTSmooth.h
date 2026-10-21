@@ -48,7 +48,7 @@ private:
   /// The input workspace
   API::MatrixWorkspace_sptr m_inWS;
   /// Temporary workspace for keeping the unfiltered Fourier transform of the
-  /// imput spectrum
+  /// input spectrum
   API::MatrixWorkspace_sptr m_unfilteredWS;
   /// Temporary workspace for keeping the filtered spectrum
   API::MatrixWorkspace_sptr m_filteredWS;

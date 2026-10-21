@@ -47,7 +47,7 @@ class DrillExportModel:
 
     def __init__(self, acquisitionMode):
         """
-        Create the export model by providing an aquisition mode.
+        Create the export model by providing an acquisition mode.
 
         Args:
             acquisitionMode (str): acquisition mode
@@ -117,7 +117,7 @@ class DrillExportModel:
 
     def _validCriteria(self, ws, algo):
         """
-        Check if the criteria of the export algorithm is valid ot not.
+        Check if the criteria of the export algorithm is valid or not.
 
         Args:
             ws (name): name of the workspace on which the critaeria will be

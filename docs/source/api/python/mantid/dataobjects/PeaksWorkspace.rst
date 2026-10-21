@@ -41,7 +41,7 @@ Each peak object contains several pieces of information. Not all of them are nec
 The Peak Shape
 ~~~~~~~~~~~~~~
 
-Each Peak object contains a PeakShape. Typically the integration algorithms which act on, and return PeaksWorkspaces set the shape of the peaks. The PeakShape is owned by the Peak, not the PeaksWorkspace, so when PeaksWorkspaces are split, or concatinated, the integration shapes are unaltered. Aside from the Null Peak Shape, each peak shape contains at least the following information.
+Each Peak object contains a PeakShape. Typically the integration algorithms which act on, and return PeaksWorkspaces set the shape of the peaks. The PeakShape is owned by the Peak, not the PeaksWorkspace, so when PeaksWorkspaces are split, or concatenated, the integration shapes are unaltered. Aside from the Null Peak Shape, each peak shape contains at least the following information.
 
 * The algorithm used to perform the integration
 * The version of the algorithm used to perform the integration

@@ -19,7 +19,7 @@ namespace Algorithms {
 /**
   This is an abstract base class for sharing methods between algorithms that
   operate only
-  on X data. Inheriting classes should overide the isRequired,
+  on X data. Inheriting classes should override the isRequired,
   checkInputWorkspace, getNewXSize and
   setXData methods to return the appropriate values.
 

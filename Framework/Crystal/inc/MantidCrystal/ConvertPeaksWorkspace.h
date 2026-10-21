@@ -22,7 +22,7 @@ namespace Crystal {
  *    - all Peaks are casted to LeanElasticPeaks
  *    - all instrument related information is lost
  *  - LeanElasticPeaksWorkspace -> PeaksWorkspace
- *    - requires a donor workspace to provide insturment information
+ *    - requires a donor workspace to provide instrument information
  *    - all LeanElasticPeaks are casted to Peaks
  *       - peaks with negative wavelength is skipped (aka losing some peaks)
  *       - the instrument from the donor workspace is added to each individual Peak

@@ -94,7 +94,7 @@ public:
     std::string filename = "testFile.txt";
     alg.setPropertyValue("OutputFile", filename);
 
-    // Testing behavour with Range_lower or Range_upper not set
+    // Testing behaviour with Range_lower or Range_upper not set
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
     std::vector<int> deadDets;

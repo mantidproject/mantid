@@ -56,7 +56,7 @@ std::string tidyWorkspaceName(const std::string &s) {
  * @tparam MAP a type with `std::map` like iterators
  * @param[in,out] table the table to be cleaned
  * @param[in] ioMapping input/output property lookup table
- * @throw std::runtime_error in case of errorneous entries in `table`
+ * @throw std::runtime_error in case of erroneous entries in `table`
  */
 template <typename MAP> void cleanPropertyTable(const ITableWorkspace_sptr &table, const MAP &ioMapping) {
   // Some output columns may be processed several times, but this should
@@ -196,7 +196,7 @@ void WorkflowAlgorithmRunner::exec() {
  * @param[in,out] queue a queue of row indexes in order of execution
  * @param[in] ioMap input/output property lookup table
  * @param[in,out] rowsBeingQueued a set of rows currently being configured
- * @throw std::runtime_error in several errorneous cases
+ * @throw std::runtime_error in several erroneous cases
  */
 template <typename QUEUE, typename MAP>
 void WorkflowAlgorithmRunner::configureRow(ITableWorkspace_sptr setupTable, ITableWorkspace_sptr propertyTable,

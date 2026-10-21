@@ -775,7 +775,7 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
 
     def _helium_analyzer_efficiency_at_scattering_run_time(self, ws_name: str):
         """
-        Runs the helium analyzer efficiency algorithm at arbirary time
+        Runs the helium analyzer efficiency algorithm at arbitrary time
         and rebins the efficiency ws to the set reduction binning
         """
         pol_params = {}

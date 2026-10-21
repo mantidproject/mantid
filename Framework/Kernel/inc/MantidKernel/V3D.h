@@ -50,7 +50,7 @@ public:
   std::size_t size() const noexcept { return m_pt.size(); }
 
   /**
-    Addtion operator
+    Addition operator
      @param v :: Vector to add
      @return *this+v;
   */
@@ -141,7 +141,7 @@ public:
   constexpr V3D operator*(const double D) const noexcept { return V3D(m_pt[0] * D, m_pt[1] * D, m_pt[2] * D); }
 
   /**
-    Scalar divsion
+    Scalar division
     @param D :: value to scale
     @return this / D
   */
@@ -271,7 +271,7 @@ public:
   /// Vector length squared
   constexpr double norm2() const noexcept { return m_pt[0] * m_pt[0] + m_pt[1] * m_pt[1] + m_pt[2] * m_pt[2]; }
   /// transform vector into form, used to describe directions in
-  /// crystallogaphical coodinate system
+  /// crystallogaphical coordinate system
   double toMillerIndexes(double eps = 1.e-3);
   /**
     Calculates the cross product. Returns (this * v).

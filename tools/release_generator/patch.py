@@ -111,7 +111,7 @@ def formatImpact(pullrequests):
             length_title = temp
     impact_format = "| {number:%dd} | {title:%d} |          | **unknown**  |" % (length_number, length_title)
 
-    # sorry for this looking wierd
+    # sorry for this looking weird
     impact_join = [length_number + 2, length_title + 2, 10, 14]
     title_format = "|{:%d}|{:%d}|{:%d}|{:%d}|" % tuple(impact_join)
     title_join = "+" + "+".join(["=" * length for length in impact_join]) + "+"

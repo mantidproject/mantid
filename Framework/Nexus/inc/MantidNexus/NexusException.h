@@ -29,7 +29,7 @@ public:
   const std::string filename() const throw();
 
 private:
-  std::string m_functionname; ///< Function this exception is associted with
+  std::string m_functionname; ///< Function this exception is associated with
   std::string m_filename;     ///< File this exception is associated with
 };
 

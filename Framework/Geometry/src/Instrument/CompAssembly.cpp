@@ -358,7 +358,7 @@ void CompAssembly::getBoundingBox(BoundingBox &assemblyBox) const {
     }
 
     // Loop over the children and define a box large enough for all of them
-    assemblyBox = BoundingBox(); // this makes assembly box always axis alighned
+    assemblyBox = BoundingBox(); // this makes assembly box always axis aligned
     int nchildren = nelements();
     for (int i = 0; i < nchildren; ++i) {
       IComponent_sptr comp = this->operator[](i);

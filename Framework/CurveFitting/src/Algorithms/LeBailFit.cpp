@@ -152,7 +152,7 @@ void LeBailFit::init() {
 
   // Make each reflection visible
   declareProperty("IndicationPeakHeight", 0.0,
-                  "Heigh of peaks (reflections) if its calculated height is "
+                  "Height of peaks (reflections) if its calculated height is "
                   "smaller than user-defined minimum.");
   setPropertySettings("IndicationPeakHeight",
                       std::make_unique<VisibleWhenProperty>("Function", IS_EQUAL_TO, "Calculation"));
@@ -161,7 +161,7 @@ void LeBailFit::init() {
   declareProperty("UseInputPeakHeights", true,
                   "For 'Calculation' mode only, use peak heights specified in "
                   "ReflectionWorkspace. "
-                  "Otherwise, calcualte peaks' heights. ");
+                  "Otherwise, calculate peaks' heights. ");
   setPropertySettings("UseInputPeakHeights",
                       std::make_unique<VisibleWhenProperty>("Function", IS_EQUAL_TO, "Calculation"));
 
@@ -193,7 +193,7 @@ void LeBailFit::init() {
   auto mcwsprop = std::make_unique<WorkspaceProperty<TableWorkspace>>("MCSetupWorkspace", "", Direction::Input,
                                                                       PropertyMode::Optional);
   declareProperty(std::move(mcwsprop), "Name of table workspace containing parameters' "
-                                       "setup for Monte Carlo simualted annearling. ");
+                                       "setup for Monte Carlo simulated annearling. ");
   setPropertySettings("MCSetupWorkspace", std::make_unique<VisibleWhenProperty>("Function", IS_EQUAL_TO, "MonteCarlo"));
 
   declareProperty("RandomSeed", 1, "Random number seed.");
@@ -256,7 +256,7 @@ void LeBailFit::exec() {
     // All peaks within range are physical and good to refine
     m_inputParameterPhysical = true;
   } else {
-    // Some peaks within range have unphysical parameters.  Just calcualtion for
+    // Some peaks within range have unphysical parameters.  Just calculation for
     // reference
     m_inputParameterPhysical = false;
     g_log.warning() << "Input instrument parameters values cause some peaks to have "
@@ -384,7 +384,7 @@ void LeBailFit::processInputBackground() {
 //=======================
 
 //----------------------------------------------------------------------------------------------
-/** Calcualte LeBail diffraction pattern:
+/** Calculate LeBail diffraction pattern:
  *  Output spectra:
  *  0: data;  1: calculated pattern; 3: difference
  *  4: input pattern w/o background
@@ -421,7 +421,7 @@ void LeBailFit::execPatternCalculation() {
   // Set up output workspaces
   m_outputWS->mutableY(DATADIFFINDEX) = m_outputWS->y(OBSDATAINDEX) - m_outputWS->y(CALDATAINDEX);
 
-  // Calcualte individual peaks
+  // Calculate individual peaks
   bool ploteachpeak = this->getProperty("PlotIndividualPeaks");
   g_log.information() << "Output individual peaks  = " << ploteachpeak << ".\n";
   if (ploteachpeak) {
@@ -500,7 +500,7 @@ void LeBailFit::execRefineBackground() {
     // a) Store current setup
     storeBackgroundParameters(m_bkgdParameterBuffer);
 
-    // b) Propose new values and evalulate
+    // b) Propose new values and evaluate
     proposeNewBackgroundValues();
     Rfactor newR(DBL_MAX, DBL_MAX);
     m_backgroundFunction->function(domain, values);
@@ -564,7 +564,7 @@ void LeBailFit::execRefineBackground() {
   g_log.notice() << "[RefineBackground] Best Rwp = " << bestR.Rwp << ",  vs. recovered best Rwp = " << outputR.Rwp
                  << ".\n";
 
-  // 4. Add data (0: experimental, 1: calcualted, 2: difference)
+  // 4. Add data (0: experimental, 1: calculated, 2: difference)
   auto &vecY1 = m_outputWS->mutableY(1);
   auto &vecY2 = m_outputWS->mutableY(2);
   for (size_t i = 0; i < numpts; ++i) {
@@ -1240,7 +1240,7 @@ void LeBailFit::exportInstrumentParameterToTable(const std::map<std::string, Par
     chi2row << "Chi2" << m_lebailCalChi2 << "t" << 0.0 << 0.0 << 0.0 << 0.0 << 0.0 << 0.0;
   }
 
-  // 4. Add to output peroperty
+  // 4. Add to output property
   setProperty("OutputParameterWorkspace", parameterws);
 }
 
@@ -1358,7 +1358,7 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, map<string, Parameter>
   m_outputWS->mutableY(INPUTBKGDINDEX) = vecBkgd;
   m_outputWS->mutableY(INPUTPUREPEAKINDEX) = vecInY - vecBkgd;
 
-  // Calcualte starting Rwp and etc
+  // Calculate starting Rwp and etc
   const auto &vecPurePeak = m_outputWS->y(INPUTPUREPEAKINDEX);
 
   map<string, double> pardblmap = convertToDoubleMap(parammap);
@@ -1368,7 +1368,7 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, map<string, Parameter>
     // Throw exception if starting values are not valid for all
     throw runtime_error("Starting value of instrument profile parameters can "
                         "generate peaks with"
-                        " unphyiscal parameters values.");
+                        " unphysical parameters values.");
   }
 
   doMarkovChain(parammap, vecX, vecPurePeak, vecBkgd, maxcycles, startR, randomseed);
@@ -1388,7 +1388,7 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, map<string, Parameter>
   vecCalY += vecBkgd;
   // Diff
   vecDiff = vecInY - vecCalY;
-  // Calcualted without background (pure peaks)
+  // Calculated without background (pure peaks)
   vecCalPurePeak = vecCalPurePeaks;
   // Different between calculated peaks and raw data
   vecCalBkgd = vecInY - vecCalPurePeaks;
@@ -1648,13 +1648,13 @@ void LeBailFit::setupRandomWalkStrategyFromTable(const DataObjects::TableWorkspa
 /** Set up Monte Carlo random walk strategy
  */
 void LeBailFit::setupBuiltInRandomWalkStrategy() {
-  g_log.information("Set up random walk strategy from build-in. ");
+  g_log.information("Set up random walk strategy from built-in. ");
 
   stringstream dboutss;
   dboutss << "Monte Carlo minimizer refines: ";
 
   // 1. Monte Carlo groups
-  // a. Instrument gemetry
+  // a. Instrument geometry
   vector<string> geomparams;
   addParameterToMCMinimize(geomparams, "Dtt1");
   addParameterToMCMinimize(geomparams, "Dtt1t");
@@ -1794,7 +1794,7 @@ void LeBailFit::addParameterToMCMinimize(vector<string> &parnamesforMC, const st
   pariter = m_funcParameters.find(parname);
   if (pariter == m_funcParameters.end()) {
     stringstream errss;
-    errss << "Parameter " << parname << " does not exisit Le Bail function parameters. ";
+    errss << "Parameter " << parname << " does not exist Le Bail function parameters. ";
     g_log.error(errss.str());
     throw runtime_error(errss.str());
   }
@@ -1988,7 +1988,7 @@ bool LeBailFit::proposeNewValues(const vector<string> &mcgroup, Rfactor r, map<s
         // Negative direction to previous direction
         stepsize = -1.0 * fabs(stepsize) * static_cast<double>(param.movedirection * prevRightDirection);
       } else if (randirint < 0.4) {
-        // No preferance and thus do nothing
+        // No preference and thus do nothing
       } else {
         // Positive direction to previous direction
         stepsize = fabs(stepsize) * static_cast<double>(param.movedirection * prevRightDirection);

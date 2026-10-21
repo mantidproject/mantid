@@ -95,9 +95,9 @@ void ThresholdMD::exec() {
   const int64_t nPoints = inputWS->getNPoints();
 
   using namespace std::placeholders;
-  boost::function<bool(double)> comparitor = std::bind(std::less<double>(), std::placeholders::_1, referenceValue);
+  boost::function<bool(double)> comparator = std::bind(std::less<double>(), std::placeholders::_1, referenceValue);
   if (condition == GreaterThan()) {
-    comparitor = std::bind(std::greater<double>(), std::placeholders::_1, referenceValue);
+    comparator = std::bind(std::greater<double>(), std::placeholders::_1, referenceValue);
   }
 
   Progress prog(this, 0.0, 1.0, 100);
@@ -110,7 +110,7 @@ void ThresholdMD::exec() {
   for (int64_t i = 0; i < nPoints; ++i) {
     PARALLEL_START_INTERRUPT_REGION
     const double signalAt = inputWS->getSignalAt(i);
-    if (comparitor(signalAt)) {
+    if (comparator(signalAt)) {
       outWS->setSignalAt(i, customOverwriteValue);
     }
     if (i % frequency == 0) {

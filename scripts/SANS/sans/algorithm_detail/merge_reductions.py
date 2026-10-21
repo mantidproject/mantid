@@ -213,7 +213,7 @@ def get_partial_workspaces(primary_detector, secondary_detector, reduction_mode_
 
 def get_shift_and_scale_parameter(reduction_mode_vs_output_bundles):
     """
-    Gets the shfit and scale parameter from a set of OutputBundles
+    Gets the shift and scale parameter from a set of OutputBundles
 
     :param reduction_mode_vs_output_bundles: a ReductionMode vs OutputBundle map
     :return: the shift, scale and fit mode.

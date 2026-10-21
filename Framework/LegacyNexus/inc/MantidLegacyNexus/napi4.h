@@ -37,7 +37,7 @@ extern NXstatus NX4getnextattra(NXhandle handle, NXname pName, int *rank, int di
 void NX4assignFunctions(LgcyFunction &fHandle);
 
 /*
- *  HDF changed from MAX_VAR_DIMS to H4_MAX_VAR_DIMS aronud 9/5/2007
+ *  HDF changed from MAX_VAR_DIMS to H4_MAX_VAR_DIMS around 9/5/2007
  *  to avoid potential conflicts with NetCDF-3 library
  */
 #ifndef H4_MAX_VAR_DIMS

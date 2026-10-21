@@ -43,7 +43,7 @@ private:
   /// Save the MDHistoWorkspace.
   void doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws);
 
-  /// Save all the affine matricies
+  /// Save all the affine matrices
   void saveAffineTransformMatricies(Nexus::File *const file, API::IMDWorkspace_const_sptr ws);
   /// Save a given affine matrix
   void saveAffineTransformMatrix(Nexus::File *const file, API::CoordTransform *transform, std::string entry_name);

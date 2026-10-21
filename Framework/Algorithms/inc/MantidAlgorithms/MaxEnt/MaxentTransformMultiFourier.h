@@ -22,7 +22,7 @@ using MaxentSpaceComplex_sptr = std::shared_ptr<MaxentSpaceComplex>;
   in which which the data has multiple spectra concatenatenated.
 
   In transforming from data to image, the spectra are added together
-  before tranforming to a single image.
+  before transforming to a single image.
   In transforming the image to data, copies to the transformed data
   (one for each spectrum) are concatenated and then have the supplied
   adjustments applied.
@@ -36,11 +36,11 @@ public:
   MaxentTransformMultiFourier() = delete;
   // Constructor
   MaxentTransformMultiFourier(const MaxentSpaceComplex_sptr &dataSpace, MaxentSpace_sptr imageSpace, size_t numSpec);
-  // Transfoms form image space to data space
+  // Transforms form image space to data space
   std::vector<double> imageToData(const std::vector<double> &image) override;
   // Transforms from data space to image space
   std::vector<double> dataToImage(const std::vector<double> &data) override;
-  // Set the adjustments to be applie to data when converted from image
+  // Set the adjustments to be applied to data when converted from image
   void setAdjustments(const std::vector<double> &linAdj, const std::vector<double> &constAdj);
 
 private:

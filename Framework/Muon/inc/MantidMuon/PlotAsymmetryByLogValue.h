@@ -95,7 +95,7 @@ private:
   void saveResultsToADS(API::MatrixWorkspace_sptr &outWS, int nplots);
   /// Check input properties
   void checkProperties(size_t &firstRunNumber, size_t &lastRunNumber);
-  /// Get path to the direcotry from a file name
+  /// Get path to the directory from a file name
   std::string getDirectoryFromFileName(const std::string &fileName) const;
   /// Uses FirstRun and LastRun to populate filenames vector
   void populateFileNamesFromFirstLast(std::string firstRun, std::string lastRun);

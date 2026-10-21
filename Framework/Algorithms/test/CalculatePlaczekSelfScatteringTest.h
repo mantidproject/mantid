@@ -48,7 +48,7 @@ public:
     return amplitude;
   }
 
-  // generate incident spectrum derivitive
+  // generate incident spectrum derivative
   std::vector<double> generateIncidentSpectrumPrime(const Mantid::HistogramData::HistogramX &lambda,
                                                     double phiMax = 6324.0, double phiEpi = 786.0, double alpha = 0.099,
                                                     double lambda1 = 0.67143, double lambda2 = 0.06075,
@@ -92,7 +92,7 @@ public:
     alg->setProperty("NSpec", 2);
     alg->setProperty("UnitX", "Wavelength");
     alg->execute();
-    // retreve output workspace from ADS
+    // retrieve output workspace from ADS
     MatrixWorkspace_sptr outWs =
         Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("incident_spectrum_ws");
     return outWs;

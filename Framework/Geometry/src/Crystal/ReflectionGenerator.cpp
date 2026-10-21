@@ -81,13 +81,13 @@ std::vector<Kernel::V3D> ReflectionGenerator::getHKLs(double dMin, double dMax,
   return hkls;
 }
 
-/// Returns a list of symetrically independent HKLs within the specified
+/// Returns a list of symmetrically independent HKLs within the specified
 /// d-limits using the default reflection condition filter.
 std::vector<V3D> ReflectionGenerator::getUniqueHKLs(double dMin, double dMax) const {
   return getUniqueHKLs(dMin, dMax, m_defaultHKLFilter);
 }
 
-/// Returns a list of symetrically independent HKLs within the specified
+/// Returns a list of symmetrically independent HKLs within the specified
 /// d-limits using the specified reflection condition filter.
 std::vector<V3D> ReflectionGenerator::getUniqueHKLs(double dMin, double dMax,
                                                     const HKLFilter_const_sptr &reflectionConditionFilter) const {

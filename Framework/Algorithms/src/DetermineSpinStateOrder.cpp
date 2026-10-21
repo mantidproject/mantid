@@ -64,7 +64,7 @@ void DetermineSpinStateOrder::init() {
                   "period has the flipper active or not (can be inferred if data is from LARMOR or ZOOM).",
                   Direction::Input);
   declareProperty("SpinStates", std::string(""),
-                  "A comma-seperated string of the spin states of each of the run periods e.g '11, 10, 01, 00'",
+                  "A comma-separated string of the spin states of each of the run periods e.g '11, 10, 01, 00'",
                   Direction::Output);
 }
 

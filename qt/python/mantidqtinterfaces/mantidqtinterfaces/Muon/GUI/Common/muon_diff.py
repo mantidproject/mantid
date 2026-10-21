@@ -12,7 +12,7 @@ class MuonDiff(MuonBase):
     """
     Simple structure to store information on a difference.
     - The name is set at initialization and after that cannot be changed.
-    - The difference has two properies positive and negative used in the calculation
+    - The difference has two properties positive and negative used in the calculation
     - The difference can be between two groups or two pairs only
     - The workspace associated to the difference can be set, but must be of type MuonWorkspaceWrapper.
     """

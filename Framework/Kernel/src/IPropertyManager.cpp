@@ -62,7 +62,7 @@ bool IPropertyManager::existsProperty(const std::string &name) const {
 
 /**
  * Set values of the properties existing in this manager to the values of
- * properties with the same name in another manger.
+ * properties with the same name in another manager.
  * @param other A property manager to copy property values from.
  */
 void IPropertyManager::updatePropertyValues(const IPropertyManager &other) {

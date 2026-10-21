@@ -335,8 +335,8 @@ GNU_DIAG_OFF("array-bounds")
  *
  * @param split0 :: for uneven splitting
  * @param split1 :: for uneven splitting
- * @param dimensionMin :: minimum dimesion extent
- * @param dimensionMax :: maximum dimesion extent
+ * @param dimensionMin :: minimum dimension extent
+ * @param dimensionMax :: maximum dimension extent
  */
 template <size_t nd>
 static MDGridBox<MDLeanEvent<nd>, nd> *makeMDGridBox(size_t split0 = 10, size_t split1 = 10, coord_t dimensionMin = 0.0,
@@ -352,7 +352,7 @@ static MDGridBox<MDLeanEvent<nd>, nd> *makeMDGridBox(size_t split0 = 10, size_t 
   // Set the size to 10.0 in all directions
   auto box = std::make_unique<MDBox<MDLeanEvent<nd>, nd>>(splitter);
   for (size_t d = 0; d < nd; d++)
-    // carefull! function with the side effects!
+    // careful! function with the side effects!
     box->setExtents(d, dimensionMin, dimensionMax);
   // calc volume necessary
   box->calcVolume();

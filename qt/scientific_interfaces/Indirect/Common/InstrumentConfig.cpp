@@ -221,7 +221,7 @@ QString InstrumentConfig::getReflectionName() { return m_uiForm.cbReflection->cu
  * Updates the analyser and reflection names in the UI when an instrument is
  *selected.
  *
- * @param instrumentName Nmae of instrument
+ * @param instrumentName Name of instrument
  */
 void InstrumentConfig::updateInstrumentConfigurations(const QString &instrumentName) {
   if (instrumentName.isEmpty())
@@ -362,7 +362,7 @@ void InstrumentConfig::filterDisabledInstruments() {
 }
 
 /**
- * Controls the visiblity of analyser and reflection options
+ * Controls the visibility of analyser and reflection options
  *
  * @param visible whether to show the options or not
  */

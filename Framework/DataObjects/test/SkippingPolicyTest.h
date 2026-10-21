@@ -21,6 +21,6 @@ public:
   void test_SkipNothing() {
     SkipNothing skipNothing;
     SkippingPolicy &p = skipNothing;
-    TSM_ASSERT_EQUALS("Should alway return False", false, p.keepGoing());
+    TSM_ASSERT_EQUALS("Should always return False", false, p.keepGoing());
   }
 };

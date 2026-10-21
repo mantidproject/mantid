@@ -154,7 +154,7 @@ ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value, 
   return result;
 }
 
-// Concrete instantations
+// Concrete instantiations
 template IMDWorkspace_sptr performBinaryOp(const IMDWorkspace_sptr, const IMDWorkspace_sptr, const std::string &,
                                            const std::string &name, bool, bool);
 template WorkspaceGroup_sptr performBinaryOp(const IMDWorkspace_sptr, const WorkspaceGroup_sptr, const std::string &,

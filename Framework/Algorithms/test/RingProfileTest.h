@@ -240,7 +240,7 @@ public:
     MatrixWorkspace_sptr goodWS = create_2d_workspace();
     RingProfile alg;
 
-    // selecting 4 bins from 45 degres in clockwise sense
+    // selecting 4 bins from 45 degrees in clockwise sense
     // and for the ring that will get only the numbers 1,2,3,4
 
     configure_ring_profile(alg, goodWS, std::vector<double>(2, 0.0), 4, 45.0, 0.115, 0.13, false);
@@ -343,7 +343,7 @@ public:
   void test__profile_of_rectangular_startangle_minus45_anticlock() {
     MatrixWorkspace_sptr goodWS = create_rectangular_instrument_workspace();
     RingProfile alg;
-    // put the centre in the midle of the panel, but in the origin in Z
+    // put the centre in the middle of the panel, but in the origin in Z
     // (X=0.016, Y= 0.016, Z=0.0)
     std::vector<double> centre(3, 0.016);
     centre[2] = 0.0;
@@ -367,7 +367,7 @@ public:
   void test__profile_of_rectangular_startangle_45_anticlock() {
     MatrixWorkspace_sptr goodWS = create_rectangular_instrument_workspace();
     RingProfile alg;
-    // put the centre in the midle of the panel, but in the origin in Z
+    // put the centre in the middle of the panel, but in the origin in Z
     // (X=0.016, Y= 0.016, Z=0.0)
     std::vector<double> centre(3, 0.016);
     centre[2] = 0.0;
@@ -388,7 +388,7 @@ public:
   void test__profile_of_rectangular_startangle_45_clock() {
     MatrixWorkspace_sptr goodWS = create_rectangular_instrument_workspace();
     RingProfile alg;
-    // put the centre in the midle of the panel, but in the origin in Z
+    // put the centre in the middle of the panel, but in the origin in Z
     // (X=0.016, Y= 0.016, Z=0.0)
     std::vector<double> centre(3, 0.016);
     centre[2] = 0.0;
@@ -409,7 +409,7 @@ public:
   void test__profile_of_rectangular_bigger_ring_and_more_bins() {
     MatrixWorkspace_sptr goodWS = create_rectangular_instrument_workspace();
     RingProfile alg;
-    // put the centre in the midle of the panel, but in the origin in Z
+    // put the centre in the middle of the panel, but in the origin in Z
     // (X=0.016, Y= 0.016, Z=0.0)
     std::vector<double> centre(3, 0.016);
     centre[2] = 0.0;

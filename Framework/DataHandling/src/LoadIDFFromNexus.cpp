@@ -51,7 +51,7 @@ void LoadIDFFromNexus::init() {
       "InstrumentParentPath", std::string(""),
       "Path name within the Nexus tree of the folder containing the instrument folder. "
       "For example it is 'raw_data_1' for an ISIS raw Nexus file and 'mantid_workspace_1' for a processed nexus file. "
-      "Only a one level path is curently supported",
+      "Only a one level path is currently supported",
       Direction::Input);
   declareProperty("ParameterCorrectionFilePath", std::string(""),
                   "Full path name of Parameter Correction file. "

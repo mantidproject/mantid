@@ -104,7 +104,7 @@ void Rebin2D::exec() {
   // correct signal and errors (so that weights of input ws is accounted for).
   if (inputHasFA && !useFractionalArea) {
     g_log.warning("Input workspace has bin fractions (e.g. from a "
-                  "parallelpiped rebin like SofQW3). To give accurate results, "
+                  "parallelepiped rebin like SofQW3). To give accurate results, "
                   "fractional area tracking has been turn on.");
     useFractionalArea = true;
   }

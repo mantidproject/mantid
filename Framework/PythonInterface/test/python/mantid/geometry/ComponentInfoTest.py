@@ -153,12 +153,12 @@ class ComponentInfoTest(unittest.TestCase):
         self.assertEqual(type(info.sample()), int)
 
     def test_sourcePosition(self):
-        """Check that the source postition is a V3D object"""
+        """Check that the source position is a V3D object"""
         info = self._ws.componentInfo()
         self.assertEqual(type(info.sourcePosition()), V3D)
 
     def test_samplePosition(self):
-        """Check that the sample postition is a V3D object"""
+        """Check that the sample position is a V3D object"""
         info = self._ws.componentInfo()
         self.assertEqual(type(info.samplePosition()), V3D)
 
@@ -430,7 +430,7 @@ class ComponentInfoTest(unittest.TestCase):
         self.assertGreater(large_ws.componentInfo().getMemorySize(), small_ws.componentInfo().getMemorySize())
 
     def test_createWorkspaceAndComponentInfo(self):
-        """Try to create a workspace and see if ComponentInfo object is accessable"""
+        """Try to create a workspace and see if ComponentInfo object is accessible"""
         dataX = [1, 2, 3, 4, 5]
         dataY = [1, 2, 3, 4, 5]
         workspace = CreateWorkspace(DataX=dataX, DataY=dataY)

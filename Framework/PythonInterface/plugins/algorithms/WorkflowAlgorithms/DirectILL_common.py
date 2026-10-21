@@ -151,7 +151,7 @@ def convertToWorkspaceIndex(i, ws, indexType=INDEX_TYPE_DET_ID):
 
 
 def convertListToWorkspaceIndices(indices, ws, indexType=INDEX_TYPE_DET_ID):
-    """Convert a list of spectrum nubmers/detector IDs to workspace indices."""
+    """Convert a list of spectrum numbers/detector IDs to workspace indices."""
     return [convertToWorkspaceIndex(i, ws, indexType) for i in indices]
 
 

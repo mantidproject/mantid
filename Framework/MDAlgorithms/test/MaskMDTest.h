@@ -113,7 +113,7 @@ public:
     alg.initialize();
     alg.setRethrows(true);
     alg.setPropertyValue("Workspace", wsName);
-    alg.setPropertyValue("Dimensions", "Axis0, Axis1"); // wrong number of dimenion ids provided.
+    alg.setPropertyValue("Dimensions", "Axis0, Axis1"); // wrong number of dimension ids provided.
     alg.setPropertyValue("Extents", "0,10,0,10,0,10");
     TS_ASSERT_THROWS_ANYTHING(alg.execute()); // fail input validators
   }
@@ -156,7 +156,7 @@ public:
     alg.initialize();
     alg.setPropertyValue("Workspace", wsName);
     alg.setPropertyValue("Dimensions",
-                         "AxisName0, Axis1, Axis2"); // Use dimenion name for
+                         "AxisName0, Axis1, Axis2"); // Use dimension name for
                                                      // one of the dimensions.
     alg.setPropertyValue("Extents", "0,10,0,10,0,10");
     TSM_ASSERT_THROWS_NOTHING("Should be okay to use either dimension names or ids.", alg.execute());

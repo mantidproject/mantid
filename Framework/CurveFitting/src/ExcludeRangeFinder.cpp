@@ -55,7 +55,7 @@ bool ExcludeRangeFinder::isExcluded(double value) {
 }
 
 /// Find the range from m_exclude that may contain points x >= p .
-/// @param p :: An x value to use in the seach.
+/// @param p :: An x value to use in the search.
 void ExcludeRangeFinder::findNextExcludedRange(double p) {
   if (p > m_exclude.back()) {
     // If the value is past the last point stop any searches or checks.

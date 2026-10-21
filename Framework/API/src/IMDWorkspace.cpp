@@ -171,13 +171,13 @@ IMDWorkspace::LinePlot IMDWorkspace::getLinePlot(const Mantid::Kernel::VMD &star
 
 /**
 @return normalization preferred for visualization. Set to none for the generic
-case, but overriden elsewhere.
+case, but overridden elsewhere.
 */
 MDNormalization IMDWorkspace::displayNormalization() const { return NoNormalization; }
 
 /**
 @return normalization preferred for visualization of histo workspaces. Set to
-none for the generic case, but overriden elsewhere.
+none for the generic case, but overridden elsewhere.
 */
 MDNormalization IMDWorkspace::displayNormalizationHisto() const { return NoNormalization; }
 } // namespace Mantid::API

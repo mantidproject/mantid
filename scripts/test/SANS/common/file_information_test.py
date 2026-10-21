@@ -112,7 +112,7 @@ class SANSFileInformationTest(unittest.TestCase):
         file_information = factory.create_sans_file_information(file_name)
         file_information_2 = factory.create_sans_file_information(file_name)
 
-        # Two identical file informations should be equal even if they are different objects
+        # Two identical file information should be equal even if they are different objects
         self.assertEqual(file_information, file_information_2)
 
     def test_that_can_extract_information_for_added_histogram_data_and_nexus_format(self):

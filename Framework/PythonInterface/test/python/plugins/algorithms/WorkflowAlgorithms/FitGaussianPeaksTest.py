@@ -520,12 +520,12 @@ class FitGaussianPeaksTest(unittest.TestCase):
             centre_index = 10
             # win_size is ( FitWindowSize -1)/2 as method estimate_single_parameters expects in this form
             win_size = 5
-            arguements = mock_estimate_params.call_args_list[0][0]
-            self.assertSequenceEqual(list(arguements[0]), x_val)
-            self.assertSequenceEqual(list(arguements[1]), y_val)
-            self.assertEqual(arguements[2], centre_index)
-            self.assertEqual(arguements[3], win_size)
-            self.assertEqual(len(arguements), 4)
+            arguments = mock_estimate_params.call_args_list[0][0]
+            self.assertSequenceEqual(list(arguments[0]), x_val)
+            self.assertSequenceEqual(list(arguments[1]), y_val)
+            self.assertEqual(arguments[2], centre_index)
+            self.assertEqual(arguments[3], win_size)
+            self.assertEqual(len(arguments), 4)
 
     def test_algorithm_estimates_fit_window(self):
         x_val = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]
@@ -547,12 +547,12 @@ class FitGaussianPeaksTest(unittest.TestCase):
                 is ignored
             """
             win_size = 2
-            arguements = mock_estimate_params.call_args_list[0][0]
-            self.assertSequenceEqual(list(arguements[0]), x_val)
-            self.assertSequenceEqual(list(arguements[1]), y_val)
-            self.assertEqual(arguements[2], centre_index)
-            self.assertEqual(arguements[3], win_size)
-            self.assertEqual(len(arguements), 4)
+            arguments = mock_estimate_params.call_args_list[0][0]
+            self.assertSequenceEqual(list(arguments[0]), x_val)
+            self.assertSequenceEqual(list(arguments[1]), y_val)
+            self.assertEqual(arguments[2], centre_index)
+            self.assertEqual(arguments[3], win_size)
+            self.assertEqual(len(arguments), 4)
 
 
 if __name__ == "__main__":

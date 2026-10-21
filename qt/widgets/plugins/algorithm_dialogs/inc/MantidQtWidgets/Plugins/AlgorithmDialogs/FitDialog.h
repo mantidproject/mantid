@@ -145,7 +145,7 @@ protected:
   QString m_wsPropName;
   /// Workspace name widget
   QComboBox *m_workspaceName;
-  /// Dynamic propeties widget
+  /// Dynamic properties widget
   DynamicPropertiesWidget *m_dynamicProperties;
 
   /// The main layout

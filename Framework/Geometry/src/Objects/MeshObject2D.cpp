@@ -229,7 +229,7 @@ int MeshObject2D::interceptSurface(Geometry::Track &ut) const {
   const auto t =
       -(ut.startPoint().scalar_prod(norm) + m_planeParameters.p0.scalar_prod(norm)) / ut.direction().scalar_prod(norm);
 
-  // Intersects infinite plane. No point evaluating individual segements if this
+  // Intersects infinite plane. No point evaluating individual segments if this
   // fails
   if (t >= 0) {
     Kernel::V3D intersection;
@@ -259,7 +259,7 @@ double MeshObject2D::distance(const Track &ut) const {
   const auto t =
       -(ut.startPoint().scalar_prod(norm) + m_planeParameters.p0.scalar_prod(norm)) / ut.direction().scalar_prod(norm);
 
-  // Intersects infinite plane. No point evaluating individual segements if this
+  // Intersects infinite plane. No point evaluating individual segments if this
   // fails
   if (t >= 0) {
     Kernel::V3D intersection;

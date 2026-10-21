@@ -33,7 +33,7 @@ public:
 private:
   /// Disabled copy constructor
   PeakTransformSelector(const PeakTransformSelector &);
-  /// Disabled assigment operator
+  /// Disabled assignment operator
   PeakTransformSelector &operator=(const PeakTransformSelector &);
   /// Collection of candidate factories.
   using Factories = std::set<PeakTransformFactory_sptr>;

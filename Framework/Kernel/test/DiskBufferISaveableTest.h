@@ -33,7 +33,7 @@ public:
   size_t getFileId() const { return id; }
   //-----------------------------------------------------------------------------------------------
 
-  /// Save the data - to be overriden
+  /// Save the data - to be overridden
   void save() const override {
     // Fake writing to a file
     std::ostringstream out;
@@ -44,7 +44,7 @@ public:
     this->m_wasSaved = true;
   }
 
-  /// Load the data - to be overriden
+  /// Load the data - to be overridden
   void load() override { this->setLoaded(true); };
 
   /// Method to flush the data to disk and ensure it is written.
@@ -170,7 +170,7 @@ public:
     dbuf.toWrite(data[3].get());
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,3,");
     dbuf.toWrite(data[4].get());
-    // Everything get written immidiately;
+    // Everything get written immediately;
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,3,4,");
     ISaveableTester::fakeFile = "";
   }
@@ -191,7 +191,7 @@ public:
   }
 
   //--------------------------------------------------------------------------------
-  /** Buffer allocates file positions, so sorts according to the alloction order
+  /** Buffer allocates file positions, so sorts according to the allocation order
    * by the DiskBuffer */
   void test_writesOutDBOrder() {
     // Room for 3 in the to-write cache

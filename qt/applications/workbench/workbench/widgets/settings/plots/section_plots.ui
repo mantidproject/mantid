@@ -872,7 +872,7 @@
               <item>
                <widget class="QLabel" name="draw_style_label">
                 <property name="text">
-                 <string>Draw Syle</string>
+                 <string>Draw Style</string>
                 </property>
                </widget>
               </item>

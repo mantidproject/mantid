@@ -360,7 +360,7 @@ void SaveHKL::exec() {
         bankSequence = static_cast<int>(std::distance(uniqueBanks.begin(), uniqueBanks.find(bank)));
         runSequence = static_cast<int>(std::distance(uniqueRuns.begin(), uniqueRuns.find(runNumber)));
         if (correctPeaks) {
-          // correct for the slant path throught the scintillator glass
+          // correct for the slant path through the scintillator glass
           double mu = (9.614 * lambda) + 0.266; // mu for GS20 glass
           double depth = 0.2;
           double eff_center = 1.0 - std::exp(-mu * depth); // efficiency at center of detector

@@ -430,7 +430,7 @@ public:
     TS_ASSERT(splitter.valueAtTime(DateAndTime(20, 0)) == convertedSplitter->valueAtTime(DateAndTime(20, 0)) &&
               convertedSplitter->valueAtTime(DateAndTime(20, 0)) == TimeSplitter::NO_TARGET);
 
-    // test shifing all input indexes by 1
+    // test shifting all input indexes by 1
     TS_ASSERT(convertedSplitter->getWorkspaceIndexName(0, 1) == "1"); // 0 becomes 1
     TS_ASSERT(convertedSplitter->getWorkspaceIndexName(3, 1) == "4"); // 3 becomes 4
     TS_ASSERT(convertedSplitter->getWorkspaceIndexName(2, 1) == "3"); // 2 becomes 3

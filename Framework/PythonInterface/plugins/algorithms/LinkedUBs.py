@@ -48,7 +48,7 @@ class LinkedUBs(DataProcessorAlgorithm):
     def summary(self):
         return "Links the indexing of a given run to the UB of a reference\
          run. PredictedPeaks should be calculated via goniometer rotation of\
-          the reference UB. Use of this algorithm will result in a seperate\
+          the reference UB. Use of this algorithm will result in a separate\
            (linked) UB for each goniometer setting considered."
 
     def PyInit(self):

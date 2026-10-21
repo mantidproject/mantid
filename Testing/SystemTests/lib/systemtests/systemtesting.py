@@ -1374,7 +1374,7 @@ def isValidTestClass(class_obj):
 #########################################################################
 # Function to return a string describing the environment
 # (platform) of this test. Cache this result so we don't query it n times
-# for every Sytem test that exists
+# for every System test that exists
 #########################################################################
 @functools.lru_cache(maxsize=1)
 def envAsString():

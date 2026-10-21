@@ -42,7 +42,7 @@ protected:
   Cone &operator=(const Cone &) = delete;
 
 public:
-  /// Public identifer
+  /// Public identifier
   std::string className() const override { return "Cone"; }
   Cone();
   std::unique_ptr<Cone> clone() const;

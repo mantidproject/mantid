@@ -267,7 +267,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         if geometry_correction_flag:
             logger.error("The geometry correction for the Q conversion has not been implemented.")
 
-        # Get the distance fromthe moderator to the detector
+        # Get the distance from the moderator to the detector
         spectrum_info = ws_event_data.spectrumInfo()
         source_sample_distance = spectrum_info.l1()
         sample_detector_distance = spectrum_info.position(0).getZ()

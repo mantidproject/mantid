@@ -120,7 +120,7 @@ The following methods are useful helpers on ``ComponentInfo`` that allow the ext
 
 **Indexing**
 
-The ``ComponentInfo`` object is accessed by an index going from 0 to the number of components (including the instrument iteself). **The component index for a detector is EQUAL to the detector index**, this is an important point to understand. In other words, a detector with a Detector Index of 5, for the purposes of working with a ``DetectorInfo`` and  will have a Component Index of 5, when working with a ``ComponentInfo``. Explained in yet another way: The first 0 - n components referenced in the ``ComponentInfo`` are detectors, where n is the total number of detectors. This guarantee can be leveraged to provide speedups, as some of the examples will show.
+The ``ComponentInfo`` object is accessed by an index going from 0 to the number of components (including the instrument itself). **The component index for a detector is EQUAL to the detector index**, this is an important point to understand. In other words, a detector with a Detector Index of 5, for the purposes of working with a ``DetectorInfo`` and  will have a Component Index of 5, when working with a ``ComponentInfo``. Explained in yet another way: The first 0 - n components referenced in the ``ComponentInfo`` are detectors, where n is the total number of detectors. This guarantee can be leveraged to provide speedups, as some of the examples will show.
 
 A ``ComponentID`` for compatibility with older code, and be extracted from ``ComponentInfo::componentID(componentIndex)``, but such calls should be avoided where possible.
 
@@ -290,7 +290,7 @@ and ``indexOfAny()`` raises a ``ValueError`` rather than returning ``None`` as
 Useful Tips
 ___________
 
-* Creation of ``ComponentInfo`` is not cheap enough to perform uncessarily inside loops. For const access, ``ws.componentInfo()`` should be called outside of loops that enumerate over all components.
+* Creation of ``ComponentInfo`` is not cheap enough to perform unnecessarily inside loops. For const access, ``ws.componentInfo()`` should be called outside of loops that enumerate over all components.
 * If a ``ComponentInfo`` object is required for more than one workspace, include the workspace name in the variable name to avoid confusion.
 * Get the ``ComponentInfo`` object as a const-ref and use ``const auto &componentInfo = ws->componentInfo();``, do not get a non-const reference unless you really do need to modify the object, and ensure that the ``&`` is always included to prevent accidental copies.
 * ``ComponentInfo`` is widely forward declared. Ensure that you import - ``#include "MantidGeometry/Instrument/ComponentInfo.h"``

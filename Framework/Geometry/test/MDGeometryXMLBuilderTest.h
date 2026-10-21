@@ -123,7 +123,7 @@ public:
     MDGeometryBuilderXML<NoDimensionPolicy> B;
     B = A;
 
-    // Test that the outputs of the original and the one ovewritten are the
+    // Test that the outputs of the original and the one overwritten are the
     // same.
     TSM_ASSERT_EQUALS("Assignment has failed to clone the original.", A.create(), B.create());
   }
@@ -387,7 +387,7 @@ public:
     builder.addZDimension(pDimensionZ);
     builder.addTDimension(pDimensionT);
 
-    // Only practicle way to check the xml output in the absense of xsd is as
+    // Only practicle way to check the xml output in the absence of xsd is as
     // part of a dom tree.
     Poco::XML::DOMParser pParser;
     std::string xmlToParse = builder.create(); // Serialize the geometry.

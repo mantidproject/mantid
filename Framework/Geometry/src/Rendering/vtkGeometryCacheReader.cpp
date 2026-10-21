@@ -136,7 +136,7 @@ void vtkGeometryCacheReader::readPoints(Poco::XML::Element *pEle, int noOfPoints
 }
 
 /**
- * Read triangle face indexs
+ * Read triangle face indices
  */
 void vtkGeometryCacheReader::readTriangles(Poco::XML::Element *pEle, int noOfTriangles, std::vector<uint32_t> &faces) {
   if (pEle == nullptr) {

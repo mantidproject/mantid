@@ -38,8 +38,8 @@ class PlotDataPanePresenter(BasePanePresenter):
         return False
 
     def handle_data_updated(self, autoscale=True, hold_on=False):
-        workspace_list, indicies = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(), self._view.get_plot_type())
-        self.add_list_to_plot(workspace_list, indicies, hold=hold_on, autoscale=autoscale)
+        workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(), self._view.get_plot_type())
+        self.add_list_to_plot(workspace_list, indices, hold=hold_on, autoscale=autoscale)
 
     def handle_added_or_removed_group_or_pair_to_plot(self, group_pair_info):
         """

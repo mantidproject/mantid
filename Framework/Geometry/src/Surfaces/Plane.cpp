@@ -45,7 +45,7 @@ using Kernel::V3D;
 Plane::Plane()
     : Quadratic(), m_normVec(1.0, 0.0, 0.0), m_distance(0)
 /**
-  Constructor: sets plane in y-z plane and throught origin
+  Constructor: sets plane in y-z plane and through origin
 */
 {
   setBaseEqn();
@@ -176,7 +176,7 @@ double Plane::distance(const Kernel::V3D &A) const
   Determine the distance of point A from the plane
   returns a value relative to the normal
   @param A :: point to get distance from
-  @return singed distance from point
+  @return signed distance from point
 */
 {
   return A.scalar_prod(m_normVec) - m_distance;
@@ -203,11 +203,11 @@ Kernel::V3D Plane::crossProd(const Plane &A) const
 
 int Plane::side(const Kernel::V3D &A) const
 /**
-  Calcualates the side that the point is on
+  Calculates the side that the point is on
   @param A :: test point
   @retval +ve :: on the same side as the normal
   @retval -ve :: the  opposite side
-  @retval 0 :: A is on the plane itself (within tolerence)
+  @retval 0 :: A is on the plane itself (within tolerance)
 */
 {
   const double Dp = m_normVec.scalar_prod(A) - m_distance;
@@ -218,7 +218,7 @@ int Plane::side(const Kernel::V3D &A) const
 
 bool Plane::onSurface(const Kernel::V3D &A) const
 /**
-   Calcuate the side that the point is on
+   Calculate the side that the point is on
    and returns success if it is on the surface.
    - Uses getSurfaceTolerance to determine the closeness
 */

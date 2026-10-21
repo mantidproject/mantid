@@ -36,7 +36,7 @@
 #endif
 
 /**
- * Function arguments are sometimes unused in certain implmentations
+ * Function arguments are sometimes unused in certain implementations
  * but are required for documentation purposes.
  * This is a macro to silence compiler warnings about the subject
  */

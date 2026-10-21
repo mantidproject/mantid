@@ -214,7 +214,7 @@ MatrixWorkspace_sptr PoldiTruncateData::getCroppedWorkspace(const MatrixWorkspac
 
 /** Returns a MatrixWorkspace with all extra counts
  *
- *  This method takes the input workspce and exracts the extranous time bins
+ *  This method takes the input workspace and extracts the extraneous time bins
  *that do
  *  not match the experimental parameters. In an experiment with a chopper cycle
  *time

@@ -711,7 +711,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         self._report.toLog(self.log())
 
     def _eiCalibrationEnabled(self, mainWS):
-        """Return true if incident energy calibration should be perfomed, false if not."""
+        """Return true if incident energy calibration should be performed, false if not."""
         calibration = self.getProperty(common.PROP_INCIDENT_ENERGY_CALIBRATION).value
         state = None
         ENABLED_AUTOMATICALLY = 1

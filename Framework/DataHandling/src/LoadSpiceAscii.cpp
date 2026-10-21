@@ -175,7 +175,7 @@ bool LoadSpiceAscii::validateLogNamesType(const std::vector<std::string> &floatl
   vec_lognamelist.emplace_back(intlognames);
   vec_lognamelist.emplace_back(strlognames);
 
-  // Check whther there is any intersction among 3 sets
+  // Check whether there is any intersction among 3 sets
   bool hascommon = false;
   for (size_t i = 0; i < 3; ++i)
     for (size_t j = i + 1; j < 3; ++j) {
@@ -231,7 +231,7 @@ void LoadSpiceAscii::parseSPICEAscii(const std::string &filename, std::vector<st
         std::vector<std::string> terms;
         boost::split(terms, line, boost::is_any_of("="));
         boost::trim(terms[0]);
-        g_log.debug() << "Title = " << terms[0] << ", number of splitted terms = " << terms.size() << "\n";
+        g_log.debug() << "Title = " << terms[0] << ", number of split terms = " << terms.size() << "\n";
         std::string infovalue;
         if (terms.size() == 2) {
           infovalue = terms[1];

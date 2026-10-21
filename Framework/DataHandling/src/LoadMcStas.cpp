@@ -271,7 +271,7 @@ std::vector<std::string> LoadMcStas::readEventData(const std::vector<std::string
     // The number of data column for each neutron is here hardcoded to (p, x,
     // y,  n, id, t)
     // Thus  we have
-    // column  0 : p 	neutron wight
+    // column  0 : p 	neutron weight
     // column  1 : x 	x coordinate
     // column  2 : y 	y coordinate
     // column  3 : n 	accumulated number of neutrons

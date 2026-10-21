@@ -143,7 +143,7 @@ class AboutViewWidget(QWidget):
             window_scaling = 0.4
             width = int(screen_width * window_scaling)
 
-            # also calculate the intended width but using the hieght and a standard screen aspect ratio
+            # also calculate the intended width but using the height and a standard screen aspect ratio
             width_by_height = int(screen_height * WIDESCREEN_ASPECT_RATIO * window_scaling)
             # take the smaller of the width from the screen width and height
             if width_by_height < width:

@@ -268,7 +268,7 @@ def _extract_region(
 
 def _index_range_spectraaxis(workspace: MatrixWorkspace, ymin: float, ymax: float):
     """
-    Return the workspace indicies for the given ymin/ymax values on the given workspace
+    Return the workspace indices for the given ymin/ymax values on the given workspace
     :param workspace: A MatrixWorkspace object spectra Y Axis
     :param ymin: Minimum Y value in range
     :param ymax: Maximum Y value in range

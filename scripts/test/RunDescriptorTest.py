@@ -381,7 +381,7 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertEqual(len(runs), 3)
         self.assertTrue(propman.sum_runs)
 
-        # check asigning file with path
+        # check assigning file with path
         propman.sample_run = "c:/data/MAR10382.nxs"
         self.assertEqual(propman.sample_run, 10382)
         self.assertEqual(PropertyManager.sample_run._run_list._last_ind2sum, 1)
@@ -762,7 +762,7 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertEqual("Monitors", mod_ws.name())
 
     def test_remove_background_matrix_minus_event(self):
-        # Verify situation if sampe workspace is in histogram mode with monitors loaded with workspace
+        # Verify situation if sample workspace is in histogram mode with monitors loaded with workspace
         # and background is event workspace with monitors loaded separately
         wksp = CreateSampleWorkspace(
             Function="Multiple Peaks",
@@ -802,7 +802,7 @@ class RunDescriptorTest(unittest.TestCase):
 
         ref_ws = mtd["ref_ws"]
 
-        # Errors if two matrix workspaces extacted from each other are not extracted
+        # Errors if two matrix workspaces extracted from each other are not extracted
         ref_ws = ref_ws - 0.1 * ref_ws
 
         resWs = mtd["resWs"]
@@ -844,7 +844,7 @@ class RunDescriptorTest(unittest.TestCase):
         resWs = PropertyManager.sample_run.get_workspace()
         self.assertTrue(resWs.run().hasProperty("empty_bg_removed"))
 
-        # Errors if two matrix workspaces extacted from each other are not extracted
+        # Errors if two matrix workspaces extracted from each other are not extracted
         ref_ws = ref_ws - 0.1 * ref_ws
         difr = CompareWorkspaces(ref_ws, resWs)
         self.assertTrue(difr.Result)

@@ -112,7 +112,7 @@ public:
   void observeADSClear(bool on = true);
 
 protected:
-  /** Handler of the delete notifications. Could be overriden in inherited
+  /** Handler of the delete notifications. Could be overridden in inherited
   classes.
   The default handler is provided (doing nothing).
   @param wsName :: The name of the deleted workspace.
@@ -123,13 +123,13 @@ protected:
     Q_UNUSED(ws);
   }
 
-  /** Handler of the delete notifications. Could be overriden in inherited
+  /** Handler of the delete notifications. Could be overridden in inherited
   classes.
   The default handler is provided (doing nothing).
   @param wsName :: The name of the deleted workspace.
   */
   virtual void postDeleteHandle(const std::string &wsName) { Q_UNUSED(wsName); }
-  /** Handler of the add notifications. Could be overriden in inherited classes.
+  /** Handler of the add notifications. Could be overridden in inherited classes.
   The default handler is provided (doing nothing).
   @param wsName :: The name of the added workspace.
   @param ws :: The shared pointer to the workspace to be added.
@@ -138,7 +138,7 @@ protected:
     Q_UNUSED(wsName);
     Q_UNUSED(ws);
   }
-  /** Handler of the AfterReplace notifications. Could be overriden in inherited
+  /** Handler of the AfterReplace notifications. Could be overridden in inherited
   classes.
   The default handler is provided (doing nothing).
   @param wsName :: The name of the deleted workspace.
@@ -149,7 +149,7 @@ protected:
     Q_UNUSED(ws);
   }
 
-  /** Handler of the Rename notifications. Could be overriden in inherited
+  /** Handler of the Rename notifications. Could be overridden in inherited
   classes.
   The default handler is provided (doing nothing).
   @param oldName :: The old name of a workspace

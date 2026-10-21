@@ -35,7 +35,7 @@ Mantid::coord_t getDExact(Mantid::coord_t location, Mantid::coord_t origin, Mant
   //                              Location
   // Goal: Find distance to closest bin centre:
   // 1. Get the predecimal value of the location: here 0
-  // 2. Add and subtract 0.5 to find two possible centres: here -0.5 adn + 0.5
+  // 2. Add and subtract 0.5 to find two possible centres: here -0.5 and + 0.5
   // 3. Find the centre which minimizes the difference to the location
   // 4. Keep the difference (distance) that was calculation in the step above
 
@@ -49,7 +49,7 @@ Mantid::coord_t getDExact(Mantid::coord_t location, Mantid::coord_t origin, Mant
 
   const auto difference = diff1 < diff2 ? diff1 : diff2;
 
-  // If the differnce is within the tolerance, ie the location is essentially on
+  // If the difference is within the tolerance, ie the location is essentially on
   // the centre, then
   // we want to be on the left of that centre. The correct index for when we are
   // on the centre,
@@ -59,7 +59,7 @@ Mantid::coord_t getDExact(Mantid::coord_t location, Mantid::coord_t origin, Mant
       dExact -= tolerance; // When we have an exact hit in the centre, give it a
                            // nudge to the lower bin boundary
     } else {
-      dExact -= 2 * difference; // Need to subtract twice the differnce, in
+      dExact -= 2 * difference; // Need to subtract twice the difference, in
                                 // order to be guaranteed below the centre
     }
   }
@@ -167,7 +167,7 @@ void MDHistoWorkspaceIterator::init(const MDHistoWorkspace *workspace, Mantid::G
   m_indexMax = new size_t[m_nd];
   m_indexMaker = new size_t[m_nd];
   Utils::NestedForLoop::SetUp(m_nd, m_index, 0);
-  // Initalize all these values
+  // Initialize all these values
   for (size_t d = 0; d < m_nd; d++) {
     IMDDimension_const_sptr dim = m_ws->getDimension(d);
     m_center[d] = 0;
@@ -242,7 +242,7 @@ size_t MDHistoWorkspaceIterator::getDataSize() const { return size_t(m_max - m_b
 void MDHistoWorkspaceIterator::jumpTo(size_t index) { m_pos = uint64_t(index + m_begin); }
 
 /**
- * Jump the iterator to the nearest valid position correspoinding to the centre
+ * Jump the iterator to the nearest valid position corresponding to the centre
  * current position of the desired iterator position.
  * @param fromLocation : destination or nearest to.
  * @return absolute distance of end position from requested position.

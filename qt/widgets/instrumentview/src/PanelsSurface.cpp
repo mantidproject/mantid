@@ -263,7 +263,7 @@ std::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
       addTubes(index, tubes);
     if (tubes.empty())
       return bankIndex;
-    // Now we found all the tubes that may form a flat struture.
+    // Now we found all the tubes that may form a flat structure.
     // Use two of the tubes to calculate the normal to the plain of that structure
     normal = tubes.size() > 1 ? this->m_calculator.calculateBankNormal(componentInfo, tubes) : V3D();
     // If some of the tubes are not perpendicular to the normal the structure

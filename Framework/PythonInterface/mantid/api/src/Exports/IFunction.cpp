@@ -212,7 +212,7 @@ void export_IFunction() {
            "Return a description of the ith parameter")
 
       .def("isExplicitlySet", &IFunction::isExplicitlySet, (arg("self"), arg("i")),
-           "Return whether the ith parameter needs to be explicitely set")
+           "Return whether the ith parameter needs to be explicitly set")
 
       .def("getParameterValue", (double (IFunction::*)(size_t) const) & IFunction::getParameter,
            (arg("self"), arg("i")), "Get the value of the ith parameter")
@@ -343,7 +343,7 @@ void export_IFunction() {
       .def("getParamDescr", &IFunction::parameterDescription, (arg("self"), arg("i")),
            "Return a description of the ith parameter")
       .def("getParamExplicit", &IFunction::isExplicitlySet, (arg("self"), arg("i")),
-           "Return whether the ith parameter needs to be explicitely set")
+           "Return whether the ith parameter needs to be explicitly set")
       .def("getParamValue", (double (IFunction::*)(std::size_t) const) & IFunction::getParameter,
            (arg("self"), arg("i")), "Get the value of the ith parameter")
       .def("getParameterIndex", &IFunction::parameterIndex, (arg("self"), arg("name")),

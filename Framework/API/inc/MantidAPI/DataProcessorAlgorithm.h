@@ -63,9 +63,9 @@ protected:
   /// Add a single value to a matrix workspace
   MatrixWorkspace_sptr plus(const MatrixWorkspace_sptr lhs, const double &rhsValue);
 
-  /// Subract a matrix workspace by another matrix workspace
+  /// Subtract a matrix workspace by another matrix workspace
   MatrixWorkspace_sptr minus(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
-  /// Subract a single value from a matrix workspace
+  /// Subtract a single value from a matrix workspace
   MatrixWorkspace_sptr minus(const MatrixWorkspace_sptr lhs, const double &rhsValue);
 
 private:

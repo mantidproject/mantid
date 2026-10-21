@@ -41,7 +41,7 @@ public:
 
   //--------------- ThermalNeutron peak function special
   //---------------------------------------
-  /// Set Miller Indicies
+  /// Set Miller Indices
   // virtual void setMillerIndex(int h, int k, int l);
 
   /// Get Miller Index from this peak
@@ -53,7 +53,7 @@ public:
   /// Calculate peak parameters (alpha, beta, sigma2..)
   void calculateParameters(bool explicitoutput) const override;
 
-  /// Core function to calcualte peak values for whole region
+  /// Core function to calculate peak values for whole region
   // void functionLocal(vector<double>& out, const vector<double> &xValues)
   // const;
 
@@ -84,7 +84,7 @@ public:
 
 private:
   //----- Overwrite IFunction ------------------------------------------------
-  /// Fuction local
+  /// Function local
   void functionLocal(double *out, const double *xValues, const size_t nData) const;
   /// Derivative
   virtual void functionDerivLocal(API::Jacobian *out, const double *xValues, const size_t nData);
@@ -97,7 +97,7 @@ private:
   static int s_peakRadius;
 
   //--------  Private Functions -----------------------------------
-  /// Calcualte H and Eta
+  /// Calculate H and Eta
   void calHandEta(double sigma2, double gamma, double &H, double &eta) const;
 
   /// Calculate peak center
@@ -143,7 +143,7 @@ private:
   mutable bool m_cancel;
   /// Set if an exception is thrown, and not caught, within a parallel region
   mutable bool m_parallelException;
-  /// Flag to show whether the unit cell has been calcualted
+  /// Flag to show whether the unit cell has been calculated
   mutable bool m_dspaceCalculated;
 
   /// Flag to indicate whether there is new parameter value set after

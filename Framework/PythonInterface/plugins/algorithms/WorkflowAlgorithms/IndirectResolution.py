@@ -30,7 +30,7 @@ class IndirectResolution(DataProcessorAlgorithm):
         return "Creates a resolution workspace for an indirect inelastic instrument."
 
     def PyInit(self):
-        self.declareProperty(StringArrayProperty(name="InputFiles"), doc="Comma seperated list if input files")
+        self.declareProperty(StringArrayProperty(name="InputFiles"), doc="Comma separated list if input files")
 
         self.declareProperty(
             name="Instrument",

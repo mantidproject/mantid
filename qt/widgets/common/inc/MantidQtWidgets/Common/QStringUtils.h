@@ -12,10 +12,10 @@
 namespace MantidQt {
 namespace API {
 /**
- * Internal version of QString::fromStdWString. On MSVC Qt4 rquired
+ * Internal version of QString::fromStdWString. On MSVC Qt4 required
  * /Z:wchar_t- but Qt5 does not. For simplicity we
  * remove the /Z:wchar_t- compiler option and
- * define the functionality interally.
+ * define the functionality internally.
  * @param str A pointer to the raw wchar_t string
  */
 inline QString toQStringInternal(const wchar_t *str) {
@@ -25,10 +25,10 @@ inline QString toQStringInternal(const wchar_t *str) {
 }
 
 /**
- * Internal version of QString::fromStdWString. On MSVC Qt4 rquired
+ * Internal version of QString::fromStdWString. On MSVC Qt4 required
  * /Z:wchar_t- but Qt5 does not. For simplicity we
  * remove the /Z:wchar_t- compiler option and
- * define the functionality interally.
+ * define the functionality internally.
  * @param str A std::wstring object
  */
 inline QString toQStringInternal(const std::wstring &str) {

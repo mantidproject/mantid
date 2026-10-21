@@ -25,7 +25,7 @@ namespace Algorithms {
     t2rad     Ratio of thickness of tube wall to the
              radius
     sintheta  Sine of the angle between the cylinder
-             axis and the directin of travel of the
+             axis and the direction of travel of the
              neutron i.e. sintheta=1.0d0 when
              neutron hits the detector perpendicular
              to the cylinder axis.
@@ -99,7 +99,7 @@ private:
   void getDetectorGeometry(const Geometry::IDetector &det, double &detRadius, Kernel::V3D &detAxis);
   /// Computes the distance to the given shape from a starting point
   double distToSurface(const Kernel::V3D &start, const Geometry::IObject *shape) const;
-  /// Computes the detector efficiency for a given paramater
+  /// Computes the detector efficiency for a given parameter
   double detectorEfficiency(const double alpha) const;
   /// Computes an approximate expansion of a Chebysev polynomial
   double chebevApprox(double a, double b, const double exspansionCoefs[], double x) const;

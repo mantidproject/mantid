@@ -264,7 +264,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         @param  files :: list of input files (i.e. , and + separated string)
         @param  label :: label of error message if nothing left after filtering
         @throws RuntimeError :: when nothing left after filtering
-        @return :: the list of input files that passsed the criteria
+        @return :: the list of input files that passed the criteria
         """
 
         files = SelectNexusFilesByMetadata(files, self._criteria)
@@ -448,7 +448,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         @param run :: runnumber
         @throws RuntimeError : if the size of the left and right wings do not match in 2-wings case
                                and the unmirror option is 1 or >3
-        @throws RuntimeError : if the mirros sense in the alignment run is inconsistent
+        @throws RuntimeError : if the mirror sense in the alignment run is inconsistent
         """
 
         outname = ws + "_tmp"

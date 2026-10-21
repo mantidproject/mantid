@@ -149,7 +149,7 @@ void LoadIsawUB::readModulatedUB(std::ifstream &in, DblMatrix &ub) {
 
   DblMatrix U = latt->getU();
 
-  // Swap rows around to accound for IPNS convention
+  // Swap rows around to account for IPNS convention
   DblMatrix U2 = U;
   // Swap rows around
   for (size_t r = 0; r < 3; r++) {

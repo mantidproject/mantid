@@ -130,7 +130,7 @@ public:
     auto copy = cow;
     TS_ASSERT(!cow.unique());
     TS_ASSERT_EQUALS(cow.use_count(), 2);
-    // acessing copy makes a copy of data, so ref count in cow drops
+    // accessing copy makes a copy of data, so ref count in cow drops
     copy.access();
     TS_ASSERT(cow.unique());
     TS_ASSERT_EQUALS(cow.use_count(), 1);

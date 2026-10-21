@@ -210,14 +210,14 @@ public:
   void test_flippers_wildes_no_pnr() {
     auto alg = createAlgorithm(WILDES_METHOD, WILDES_METHOD, "PNR");
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(4));
-    // Error: Property PolarizationAnalysis canot be used with the Wildes
+    // Error: Property PolarizationAnalysis cannot be used with the Wildes
     // method
     TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
   void test_flippers_wildes_no_pa() {
     auto alg = createAlgorithm(WILDES_METHOD, WILDES_METHOD, "PA");
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(4));
-    // Error: Property PolarizationAnalysis canot be used with the Wildes
+    // Error: Property PolarizationAnalysis cannot be used with the Wildes
     TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
   void test_polarization_analysis_pnr() {
@@ -300,7 +300,7 @@ public:
     auto alg = createAlgorithm(FREDRIKZE_METHOD, FREDRIKZE_METHOD);
     alg->setProperty("InputWorkspaceGroup", createWorkspaceGroup(4));
     alg->setProperty("Flippers", "00, 01, 10, 11");
-    // Error: Property Flippers canot be used with the Fredrikze method
+    // Error: Property Flippers cannot be used with the Fredrikze method
     TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::invalid_argument &e, std::string(e.what()),
                             "Property Flippers cannot be used with the Fredrikze method.");
   }

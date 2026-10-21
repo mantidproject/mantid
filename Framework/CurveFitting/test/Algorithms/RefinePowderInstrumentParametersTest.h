@@ -41,7 +41,7 @@ public:
     return;
   }
 
-  /** Fit with one shifted parmeter 'Zero' of old bank 7 data
+  /** Fit with one shifted parameter 'Zero' of old bank 7 data
    */
   void Passed_test_FitZero() {
     // 1. Generate testing workspace

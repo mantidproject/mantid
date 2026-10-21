@@ -61,7 +61,7 @@ using PeakTransform_const_sptr = std::shared_ptr<const PeakTransform>;
 
 /**
 @class PeakTransformException
-Exceptions occuring when PeakTransformations cannot be formed.
+Exceptions occurring when PeakTransformations cannot be formed.
 */
 class MANTID_GEOMETRY_DLL PeakTransformException : public std::exception {
 public:

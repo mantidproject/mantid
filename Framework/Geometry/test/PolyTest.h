@@ -221,7 +221,7 @@ public:
 
 private:
   template <int VCount> std::string extractString(PolyVar<VCount> &pv) {
-    // dump output to sting
+    // dump output to string
     std::ostringstream output;
     output.exceptions(std::ios::failbit | std::ios::badbit);
     TS_ASSERT_THROWS_NOTHING(output << pv);

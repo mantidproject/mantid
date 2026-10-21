@@ -28,7 +28,7 @@ public:
   /// @return If index empty - total function, otherwise - function at index
   virtual Mantid::API::IFunction_const_sptr function(std::string const &index) const = 0;
 
-  /// @return Index of the function currently seleted in the Function Browser
+  /// @return Index of the function currently selected in the Function Browser
   virtual std::optional<std::string> currentFunctionIndex() const = 0;
 
   /// @return A peak currently represented by the peak picker
@@ -69,7 +69,7 @@ public slots:
 
   /// Update a single parameter in Function Browser
   /// @param funcIndex :: Index of the function where to update parameter
-  /// @param paramName :: Name of the parameter to udpate
+  /// @param paramName :: Name of the parameter to update
   /// @param value :: New parameter value
   virtual void setParameter(std::string const &funcIndex, std::string const &paramName, double value) = 0;
 

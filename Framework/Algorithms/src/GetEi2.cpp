@@ -36,7 +36,7 @@ namespace Mantid::Algorithms {
 DECLARE_ALGORITHM(GetEi2)
 
 /**
- * Default contructor
+ * Default constructor
  */
 GetEi2::GetEi2()
     : Algorithm(), m_input_ws(), m_peak1_pos(0, 0.0), m_fixedei(false), m_tof_window(0.1), m_peak_signif(2.0),
@@ -85,7 +85,7 @@ void GetEi2::init()
                   "first monitor, which defaults to the last monitor the beam "
                   "hits before the sample, is greatest. It is the mean X value "
                   "for the bin with the highest number of counts per second "
-                  "and is also writen to Mantid's log.",
+                  "and is also written to Mantid's log.",
                   Direction::Output);
 
   declareProperty("FirstMonitorIndex", 0, "The workspace index of the first monitor in the input workspace.",
@@ -195,7 +195,7 @@ double GetEi2::calculateEi(const double initial_guess) {
   if ((mon1 == EMPTY_INT()) || (mon2 == EMPTY_INT())) {
     throw std::invalid_argument("Could not determine spectrum number to use. Try to set it explicitly");
   }
-  // Covert spectrum numbers to workspace indices
+  // Convert spectrum numbers to workspace indices
   std::vector<specnum_t> spec_nums(2, mon1);
   spec_nums[1] = mon2;
   // get the index number of the histogram for the first monitor
@@ -207,7 +207,7 @@ double GetEi2::calculateEi(const double initial_guess) {
     throw std::runtime_error("Error retrieving monitor spectra spectra from input workspace.");
   }
 
-  // Calculate actual peak postion for each monitor peak
+  // Calculate actual peak position for each monitor peak
   double peak_times[2] = {0.0, 0.0};
   double det_distances[2] = {0.0, 0.0};
   const auto &spectrumInfo = m_input_ws->spectrumInfo();
@@ -518,7 +518,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
     // A broad peak with many local maxima on the side can cause the algorithm to give the same indices for the two
     // points (ip1 and ip2) either side of the half-width point. Noise may also result in equal y values for different
     // ip1 and ip2 points which would cause a divide-by-zero error in the xp_hh calculation below. We know the
-    // algorithm isn't perfect so move one index until the y values are differnt.
+    // algorithm isn't perfect so move one index until the y values are different.
     if (peak_y[ip1] == peak_y[ip2]) {
       g_log.warning() << "A peak with a local maxima on the trailing edge has "
                          "been found. The estimation of the "
@@ -552,7 +552,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
     // A broad peak with many local maxima on the side can cause the algorithm to give the same indices for the two
     // points (im1 and im2) either side of the half-width point. Noise may also result in equal y values for different
     // im1 and im2 points which would cause a divide-by-zero error in the xp_hh calculation below. We know the
-    // algorithm isn't perfect so move one index until the y values are differnt.
+    // algorithm isn't perfect so move one index until the y values are different.
     if (peak_y[im1] == peak_y[im2]) {
       g_log.warning() << "A peak with a local maxima on the rising edge has "
                          "been found. The estimation of the "
@@ -707,7 +707,7 @@ void GetEi2::integrate(double &integral_val, double &integral_err, const Histogr
 }
 
 /**
- * Store the value of Ei wihin the log data on the Sample object
+ * Store the value of Ei within the log data on the Sample object
  * @param ei :: The value of the incident energy of the neutron
  */
 void GetEi2::storeEi(const double ei) const {

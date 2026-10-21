@@ -176,7 +176,7 @@ public:
     // Test equality operator
     TS_ASSERT(*e1 == *e2);
 
-    // Test inequality oeprator
+    // Test inequality operator
     TS_ASSERT(*e1 != *wl);
 
     delete e1;

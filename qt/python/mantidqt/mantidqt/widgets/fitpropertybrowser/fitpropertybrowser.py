@@ -167,7 +167,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         Overwrite fwhm if has not been set already - this is for back to back exponential type funcs
         which have had the width parameter (S) as func d-spacing refined for a standard sample (coefs stored in
-        instrument Paramters.xml) and has already been set.
+        instrument Parameters.xml) and has already been set.
         :param fun: peak function prefix
         :param fwhm: estimated fwhm of peak added
         """

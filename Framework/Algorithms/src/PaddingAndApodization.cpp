@@ -190,7 +190,7 @@ HistogramData::Histogram PaddingAndApodization::addPadding(const HistogramData::
   // assume approx evenly spaced
   if (xData.size() < 2) {
     throw std::invalid_argument("The xData does not contain "
-                                "enought data points to add padding"
+                                "enough data points to add padding"
                                 "dx = 0");
   }
   const double dx = xData[1] - xData[0];

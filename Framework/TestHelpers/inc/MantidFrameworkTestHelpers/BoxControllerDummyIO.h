@@ -78,7 +78,7 @@ private:
   const Mantid::API::BoxController *m_bc;
 
   mutable std::mutex m_fileMutex;
-  /// number of bytes in the event coorinates (coord_t length). Set by
+  /// number of bytes in the event coordinates (coord_t length). Set by
   /// setDataType but can be defined statically with coord_t
   unsigned int m_CoordSize;
   unsigned int m_EventSize;

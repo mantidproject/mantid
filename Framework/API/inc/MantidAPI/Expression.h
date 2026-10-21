@@ -42,13 +42,13 @@ public:
     ParsingError(const std::string &msg);
   };
 
-  /// Default contructor
+  /// Default constructor
   Expression();
-  /// contructor
+  /// constructor
   Expression(const std::vector<std::string> &ops);
-  /// contructor
+  /// constructor
   Expression(const std::vector<std::string> &binary, const std::unordered_set<std::string> &unary);
-  /// copy contructor
+  /// copy constructor
   Expression(const Expression &expr);
   /// Assignment operator
   Expression &operator=(const Expression &expr);
@@ -75,7 +75,7 @@ public:
   /// Returns the top level terms of the expression (function arguments). For a
   /// variable it empty.
   const std::vector<Expression> &terms() const { return m_terms; }
-  /// Returns the number of argumens
+  /// Returns the number of arguments
   size_t size() const { return m_terms.size(); }
   /// Const Iterator tpyedef
   using iterator = std::vector<Expression>::const_iterator;
@@ -119,7 +119,7 @@ public:
   static const std::vector<std::string> DEFAULT_OPS_STR;
 
 private:
-  /// copy contructor
+  /// copy constructor
   Expression(const Expression *pexpr);
   /**
    * This is a struct to mark a token in a string expression.
@@ -212,7 +212,7 @@ private:
    * @return True if it is true
    */
   bool is_op_symbol(const char c) const;
-  std::shared_ptr<Operators> m_operators; ///< pointer ot the operators
+  std::shared_ptr<Operators> m_operators; ///< pointer to the operators
 };
 
 } // namespace API

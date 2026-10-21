@@ -157,7 +157,7 @@ signals:
   /// Resize the current shape by moving the right-bottom control point to a
   /// location on the screen
   void moveRightBottomTo(int /*_t1*/, int /*_t2*/);
-  /// Select a shape or a conrol point at a location on the screen.
+  /// Select a shape or a control point at a location on the screen.
   void selectAt(int /*_t1*/, int /*_t2*/);
   /// Select a shape with ctrl key pressed at a location on the screen.
   void selectCtrlAt(int /*_t1*/, int /*_t2*/);

@@ -32,9 +32,9 @@ using Geometry::SampleEnvironment;
  */
 void CopySample::init() {
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
-                  "An input workspace from wich to copy sample information.");
+                  "An input workspace from which to copy sample information.");
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::InOut),
-                  "An output workspace to wich to copy sample information..");
+                  "An output workspace to which to copy sample information..");
   declareProperty(std::make_unique<PropertyWithValue<bool>>("CopyName", true, Direction::Input),
                   "Copy the name of the sample");
   declareProperty(std::make_unique<PropertyWithValue<bool>>("CopyMaterial", true, Direction::Input),

@@ -38,7 +38,7 @@ CnvrtToMD::ConvertUnits UnitsConversionHelper::analyzeUnitsConversion(const std:
 
   // check if unit conversion is possible at all:
   if (Kernel::Strings::isMember(AllKnownUnits, UnitsFrom) < 0)
-    throw(std::invalid_argument(" Can not initate conversion from unknown unit: " + UnitsFrom));
+    throw(std::invalid_argument(" Can not initiate conversion from unknown unit: " + UnitsFrom));
 
   if (Kernel::Strings::isMember(AllKnownUnits, UnitsFrom) < 0)
     throw(std::invalid_argument(" Can not initiate conversion to unknown unit: " + UnitsTo));
@@ -81,7 +81,7 @@ void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr, con
   API::MatrixWorkspace_const_sptr inWS2D = targetWSDescr.getInWS();
   if (!inWS2D)
     throw(std::runtime_error("UnitsConversionHelper::initialize Should not be "
-                             "able to call this function when workpsace is "
+                             "able to call this function when workspace is "
                              "undefined"));
 
   API::NumericAxis *pAxis = dynamic_cast<API::NumericAxis *>(inWS2D->getAxis(0));

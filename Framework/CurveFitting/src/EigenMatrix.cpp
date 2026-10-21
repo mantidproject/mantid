@@ -65,7 +65,7 @@ EigenMatrix::EigenMatrix(const Kernel::Matrix<double> &M)
     : m_data(M.numRows() * M.numCols()), m_view(EigenMatrix_View(m_data.data(), M.numRows(), M.numCols())) {
 
   // Mantid::Kernel::Matrix stores row by row, so have to transpose initial matrix.
-  // To do this we copy into an eign matrix, then tranpose.
+  // To do this we copy into an eign matrix, then transpose.
   auto tempVec = M.getVector();
   Eigen::MatrixXd tempMatrTr = EigenMatrix_View(tempVec.data(), M.numCols(), M.numRows()).matrix_mutator();
   Eigen::MatrixXd tempMatr = tempMatrTr.transpose();
@@ -85,7 +85,7 @@ EigenMatrix::EigenMatrix(const Kernel::Matrix<double> &M, size_t row, size_t col
   resize(nRows, nCols);
 
   // Mantid::Kernel::Matrix stores row by row, so have to transpose initial matrix before taking view.
-  // To do this we copy into an eign matrix, tranpose, then take a sub matrix.
+  // To do this we copy into an eign matrix, transpose, then take a sub matrix.
   auto tempVec = M.getVector();
   Eigen::MatrixXd tempMatrTr = EigenMatrix_View(tempVec.data(), M.numCols(), M.numRows()).matrix_mutator();
   Eigen::MatrixXd tempMatr = tempMatrTr.transpose();
@@ -142,7 +142,7 @@ size_t EigenMatrix::size2() const { return m_view.cols(); }
 /// set an element
 /// @param i :: The row
 /// @param j :: The column
-/// @param value :: The new vaule
+/// @param value :: The new value
 void EigenMatrix::set(size_t i, size_t j, double value) {
   if (isEmpty()) {
     throw std::out_of_range("Matrix is empty.");
@@ -238,7 +238,7 @@ EigenVector EigenMatrix::operator*(const EigenVector &v) const {
 /// @throws std::invalid_argument if the input matrix has a wrong size.
 EigenMatrix EigenMatrix::operator*(const EigenMatrix &m) const {
   if (m.size1() != size2()) {
-    throw std::invalid_argument("Matrix by matrix multiplication: matricies are of incompatible sizes.");
+    throw std::invalid_argument("Matrix by matrix multiplication: matrices are of incompatible sizes.");
   }
 
   EigenMatrix res;

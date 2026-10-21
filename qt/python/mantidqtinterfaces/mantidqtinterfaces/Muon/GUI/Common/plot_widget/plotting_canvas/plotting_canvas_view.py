@@ -28,7 +28,7 @@ from textwrap import wrap
 from matplotlib.ticker import StrMethodFormatter, NullFormatter
 from mantidqt.MPLwidgets import FigureCanvas
 
-# Default color cycle using Matplotlib color codes C0, C1...ect
+# Default color cycle using Matplotlib color codes C0, C1...etc
 NUMBER_OF_COLOURS = 10
 DEFAULT_COLOR_CYCLE = ["C" + str(index) for index in range(NUMBER_OF_COLOURS)]
 

@@ -396,7 +396,7 @@ protected:
   /// get whether we are tracking the history for this algorithm,
   bool trackingHistory();
   /// Copy workspace history from input workspaces to output workspaces and
-  /// record the history for ths algorithm
+  /// record the history for this algorithm
   virtual void fillHistory();
   /// Copy workspace history from input workspaces to provided vector of output workspaces
   void fillHistory(const std::vector<Workspace_sptr> &outputWorkspaces);
@@ -430,7 +430,7 @@ protected:
   std::vector<WorkspaceVector> m_unrolledInputWorkspaces;
   /// Size of the group(s) being processed
   size_t m_groupSize;
-  /// distinguish between base processGroups() and overriden/algorithm specific
+  /// distinguish between base processGroups() and overridden/algorithm specific
   /// versions
   bool m_usingBaseProcessGroups = false;
   /// Opt-in for overridden processGroups() implementations that want the parent

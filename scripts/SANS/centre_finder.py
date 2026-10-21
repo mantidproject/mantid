@@ -341,7 +341,7 @@ class CentrePositioner(object):
         """
         Produce the initial position. This is important especially for the LARMOR
         case where we can have an additional BENCH Rotation.
-        @returns the initital position for coord1 and coord2
+        @returns the initial position for coord1 and coord2
         """
         return self.position_provider.produce_initial_position(self.coord1_start, self.coord2_start)
 
@@ -397,7 +397,7 @@ class BeamCentrePositionUpdaterFactory(object):  # pylint: disable=R0903
 
 class BeamCentrePositionUpdater(object):  # pylint: disable=R0903
     """
-    Handles the position updates, ie if we are only intereseted in left/right or up/down or all
+    Handles the position updates, ie if we are only interested in left/right or up/down or all
     """
 
     def __init__(self):
@@ -718,7 +718,7 @@ class PositionProviderAngleY(PositionProvider):
         @param coord1: first coordinate in degree
         @returns the first coordinate in degree/COORD1SF
         """
-        # At this point we want to take out the offset, hence we need to substract it.
+        # At this point we want to take out the offset, hence we need to subtract it.
         return (coord1 - self.coord1_offset) / self.coord1_scale_factor
 
     def produce_initial_position(self, coord1, coord2):
@@ -805,7 +805,7 @@ class BeamCenterLogger(object):
             initial_msg = "beta_start"
         else:
             initial_msg = "x_start"
-        # We need to substract the offset from the coordinate, since we do not want to display the offset
+        # We need to subtract the offset from the coordinate, since we do not want to display the offset
         # which is on the data
         val1 = (coord1 - self.offset_coord1) * self.coord1_scale_factor
         val2 = (coord2 - self.offset_coord2) * self.coord2_scale_factor
@@ -835,7 +835,7 @@ class BeamCenterLogger(object):
         @param resid1: the residual of the first coordinate
         @param resid2: the residual of the second coordinate
         """
-        # We need to substract the offset from the coordinate, since we do not want to display the offset
+        # We need to subtract the offset from the coordinate, since we do not want to display the offset
         # which is on the data
         val1 = (coord1 - self.offset_coord1) * self.coord1_scale_factor
         val2 = (coord2 - self.offset_coord2) * self.coord2_scale_factor

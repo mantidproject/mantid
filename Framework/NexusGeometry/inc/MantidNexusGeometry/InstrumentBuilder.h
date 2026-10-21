@@ -58,7 +58,7 @@ public:
   std::unique_ptr<const Geometry::Instrument> createInstrument();
 
 private:
-  /// Add a single tube to the last registed bank
+  /// Add a single tube to the last registered bank
   void doAddTube(const std::string &compName, const detail::TubeBuilder &tube,
                  const std::shared_ptr<const Mantid::Geometry::IObject> &pixelShape);
   /// Sorts detectors

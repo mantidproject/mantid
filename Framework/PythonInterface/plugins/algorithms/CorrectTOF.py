@@ -64,9 +64,9 @@ class CorrectTOF(PythonAlgorithm):
         # check for required properties
         run = input_workspace.getRun()
         if not run.hasProperty("wavelength"):
-            issues["InputWorkspace"] = "Input workpsace must have sample log wavelength."
+            issues["InputWorkspace"] = "Input workspace must have sample log wavelength."
         if not run.hasProperty("TOF1"):
-            issues["InputWorkspace"] = "Input workpsace must have sample log TOF1."
+            issues["InputWorkspace"] = "Input workspace must have sample log TOF1."
         # check EPP table
         table = self.getProperty("EPPTable").value
         if table.rowCount() != input_workspace.getNumberHistograms():
@@ -97,7 +97,7 @@ class CorrectTOF(PythonAlgorithm):
 
         detector_info = inputws.detectorInfo()
         for idx in range(outws.getNumberHistograms()):
-            # correct TOF only if fit of EPP was succesful
+            # correct TOF only if fit of EPP was successful
             if t_fit[idx] > 0:
                 det_id = outws.getSpectrum(idx).getDetectorIDs()[0]
                 sdd = detector_info.l2(detector_info.indexOf(det_id))

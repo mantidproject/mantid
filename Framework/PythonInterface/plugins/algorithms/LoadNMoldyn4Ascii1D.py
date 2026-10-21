@@ -131,7 +131,7 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
         unit_match = UNIT_REGEX.match(line)
         if unit_match:
             header_data[0] = unit_match.group(1)
-        # Attempt to match fucntion name
+        # Attempt to match function name
         func_match = FUNC_NAME_REGEX.match(line)
         if func_match:
             header_data[1] = func_match.group(1)
@@ -226,7 +226,7 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
         return all_gx
 
     def convolutor(self, y_data, all_gx, x_data):
-        # Convolutes two functions, ouputting a numpy array of the convolution
+        # Convolutes two functions, outputting a numpy array of the convolution
 
         g_of_x = []
         for i in range(len(x_data)):

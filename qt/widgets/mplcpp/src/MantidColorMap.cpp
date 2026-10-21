@@ -93,7 +93,7 @@ void MantidColorMap::setupDefaultMap() { loadMap(defaultCMapName()); }
 /**
  * Load the given colormap into the object
  * @param name The name of an existing colormap
- * @return True if it suceeded, false otherwise
+ * @return True if it succeeded, false otherwise
  */
 bool MantidColorMap::loadMap(const QString &name) {
   if (cmapExists(name)) {

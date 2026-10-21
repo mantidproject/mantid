@@ -191,7 +191,7 @@ std::string QtSaveView::getPrefix() const { return m_ui.prefixEdit->text().toStd
  */
 std::string QtSaveView::getFilter() const { return m_ui.filterEdit->text().toStdString(); }
 
-/** Returns the custom model defination
+/** Returns the custom model definition
  * @return :: The model
  */
 std::string QtSaveView::getModel() const { return m_ui.modelEdit->text().toStdString(); }

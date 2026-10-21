@@ -51,7 +51,7 @@ struct FunctionData {
 };
 
 /**
- * Evaluate a constaint given by a constraint matrix
+ * Evaluate a constraint given by a constraint matrix
  * @param cmatrix A matrix of constraint coefficients
  * @param index Index of the row defining the constraint
  * @param n The number of parameters
@@ -70,7 +70,7 @@ double evaluateConstraint(const DblMatrix &cmatrix, const size_t index, const si
 }
 
 /**
- * Evaulate stopping criteria
+ * Evaluate stopping criteria
  * @param vold Old value
  * @param vnew New value
  * @param reltol Relative tolerance

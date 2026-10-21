@@ -162,7 +162,7 @@ void UnwrapMonitor::exec() {
  * ranges start & end
  */
 const std::vector<int> UnwrapMonitor::unwrapX(std::vector<double> &newX, const int &spectrum, const double &Ld) {
-  // Create and initalise the vector that will store the bin ranges, and will be
+  // Create and initialise the vector that will store the bin ranges, and will be
   // returned
   // Elements are: 0 - Lower range start, 1 - Lower range end, 2 - Upper range
   // start

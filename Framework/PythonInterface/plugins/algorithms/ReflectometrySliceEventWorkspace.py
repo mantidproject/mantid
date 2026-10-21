@@ -265,7 +265,7 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         return alg.getProperty("OutputWorkspace").value
 
     def _clean_up(self):
-        """Remove worspaces added to the ADS"""
+        """Remove workspaces added to the ADS"""
         monitor_ws_names = [ws.name() for ws in self._monitor_ws_group]
         alg = self.createChildAlgorithm("UnGroupWorkspace")
         alg.setProperty("InputWorkspace", self._monitor_ws_group_name)

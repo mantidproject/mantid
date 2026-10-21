@@ -61,13 +61,13 @@ public:
    *@return the const pointer the const object. The GridBox is not saveable at
    *the moment so it is always NULL */
   Kernel::ISaveable *getISaveable() const override { return nullptr; }
-  /**Recursively make all underlaying boxes file-backed*/
+  /**Recursively make all underlying boxes file-backed*/
   void setFileBacked(const uint64_t /*fileLocation*/, const size_t /*fileSize*/, const bool /*markSaved*/) override;
   void setFileBacked() override;
   void clearFileBacked(bool loadDiskBackedData) override;
   void clear() override;
   void clearDataFromMemory() override { /*it seems works on boxes only though recursive
-                                  clearing makes sence, not yet implemented*/
+                                  clearing makes sense, not yet implemented*/
   }
   /**Save the box at specific disk position using the class, respoinsible for
    * the file IO. */
@@ -91,7 +91,7 @@ public:
    *  @return the total number of points (events) in this box  (in memory and
    * in file if present)     */
   uint64_t getNPoints() const override { return nPoints; }
-  /// @return the amount of memory that the object's data ocupy. Currently uses
+  /// @return the amount of memory that the object's data occupy. Currently uses
   /// cached value.
   uint64_t getTotalDataSize() const override { return nPoints; }
   /**  @return the number of points (events) this box keeps in memory. May be
@@ -237,7 +237,7 @@ private:
   MDGridBox(const MDGridBox<MDE, nd> &box);
   /**Private constructor as it does not work without box controller */
   MDGridBox() = default;
-  /// common part of MDGridBox contstructor;
+  /// common part of MDGridBox constructor;
   size_t initGridBox();
 };
 

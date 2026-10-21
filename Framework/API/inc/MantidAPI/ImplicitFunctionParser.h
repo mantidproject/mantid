@@ -40,7 +40,7 @@
 namespace Mantid {
 namespace API {
 /**
- XML Parser for function types. See chain of reponsibility pattern.
+ XML Parser for function types. See chain of responsibility pattern.
 
  @author Owen Arnold, Tessella plc
  @date 01/10/2010

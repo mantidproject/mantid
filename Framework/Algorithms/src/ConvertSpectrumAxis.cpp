@@ -119,7 +119,7 @@ void ConvertSpectrumAxis::exec() {
       throw std::runtime_error("Unable to convert spectrum axis values on all spectra");
     }
   } else {
-    // Set up binding to memeber funtion. Avoids condition as part of loop over
+    // Set up binding to member function. Avoids condition as part of loop over
     // nHistograms.
     using namespace std::placeholders;
     std::function<double(const IDetector &)> thetaFunction;

@@ -236,11 +236,11 @@ class MANTID_KERNEL_DLL ThreadSchedulerLIFO : public ThreadSchedulerFIFO {
 /** A Largest Cost Thread Scheduler.
  *
  * The scheduled tasks are run so that the most time-consuming
- * (highest cost) taks are run first.
+ * (highest cost) tasks are run first.
  * This tends to optimize task allocation the best.
  * http://en.wikipedia.org/wiki/Bin_packing_problem
  *
- * Interally, it uses a multimap to keep elements sorted while inserting them.
+ * Internally, it uses a multimap to keep elements sorted while inserting them.
  */
 class MANTID_KERNEL_DLL ThreadSchedulerLargestCost : public ThreadScheduler {
 public:

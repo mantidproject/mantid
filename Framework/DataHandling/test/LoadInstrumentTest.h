@@ -549,7 +549,7 @@ public:
     // They should not be the same object
     TS_ASSERT_DIFFERS(physicalInst.get(), neutronicInst.get());
     // Not true in general, but in this case we should not be getting a
-    // paramaterized instrument
+    // parameterized instrument
     TS_ASSERT(!physicalInst->isParametrized());
 
     // Check the positions of the 6 detectors in the physical instrument
@@ -757,7 +757,7 @@ public:
     TS_ASSERT_EQUALS(instr->getDefaultView(), "3D");
     IDS.clear();
 
-    // explicitely set the default instrument view
+    // explicitly set the default instrument view
     const std::string instrumentXMLwithView =
         Mantid::Kernel::Strings::replace(instrumentXML, "<!-- view -->", "<default-view view=\"cylindrical_y\"/>");
 
@@ -793,7 +793,7 @@ private:
   // @param paramFilename Expected parameter file to be loaded as part of
   // LoadInstrument
   // @param par A specific parameter to check if have been loaded
-  // @param runStart specific date and time info to mark the workpsace with
+  // @param runStart specific date and time info to mark the workspace with
   void doTestParameterFileSelection(const std::string &filename, const std::string &paramFilename,
                                     const std::string &par, const std::string &runStart) {
     InstrumentDataService::Instance().clear();

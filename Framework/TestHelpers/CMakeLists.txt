@@ -75,7 +75,7 @@ add_library(Mantid::FrameworkTestHelpers ALIAS FrameworkTestHelpers)
 add_library(Mantid::FrameWorkTestHelpersHeaders ALIAS FrameWorkTestHelpersHeaders)
 set_target_properties(FrameworkTestHelpers PROPERTIES EXCLUDE_FROM_ALL TRUE FOLDER "UnitTests")
 
-# Unfortunately the INTERFACE property does not propegate through
+# Unfortunately the INTERFACE property does not propagate through
 target_include_directories(FrameworkTestHelpers PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>)
 
 target_include_directories(FrameWorkTestHelpersHeaders INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>)

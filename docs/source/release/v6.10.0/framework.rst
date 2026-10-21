@@ -55,7 +55,7 @@ Bugfixes
 
   - :ref:`algm-Abins` algorithm sets the value
     ``abins.parameters.sampling["bin_width"]`` while running. Previously this
-    overrided the default sampling of :ref:`algm-Abins2D` instruments if set.
+    overrode the default sampling of :ref:`algm-Abins2D` instruments if set.
   - This did not cause results to be incorrect, but sampled
     them on a different mesh to the expected one and could limit
     resolution.

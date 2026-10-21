@@ -44,7 +44,7 @@ Quadratic::Quadratic()
 
 double Quadratic::eqnValue(const Kernel::V3D &Pt) const
 /**
-  Helper function to calcuate the value
+  Helper function to calculate the value
   of the equation at a fixed point
   @param Pt :: Point to determine the equation surface
   value at
@@ -107,7 +107,7 @@ void Quadratic::matrixForm(Kernel::Matrix<double> &A, Kernel::V3D &B, double &C)
   @param C :: Constant value
 */
 {
-  A.setMem(3, 3); // set incase memory out
+  A.setMem(3, 3); // set in case memory out
   for (int i = 0; i < 3; i++)
     A[i][i] = BaseEqn[i];
 
@@ -122,7 +122,7 @@ void Quadratic::matrixForm(Kernel::Matrix<double> &A, Kernel::V3D &B, double &C)
 
 double Quadratic::distance(const Kernel::V3D &Pt) const
 /**
-  Proper calcuation of a point to a general surface
+  Proper calculation of a point to a general surface
   @param Pt :: Point to calculate distance from surace
   @return distance from point to surface (signed)
 */
@@ -297,7 +297,7 @@ void Quadratic::rotate(const Kernel::Matrix<double> &MX)
 
 void Quadratic::print() const
 /**
-  Print out the genreal equation
+  Print out the general equation
   for debugging.
 */
 {

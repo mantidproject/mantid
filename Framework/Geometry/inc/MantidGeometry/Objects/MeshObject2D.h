@@ -24,7 +24,7 @@ class GeometryHandler;
 
   Defines an IObject implemented as a 2D mesh composed of triangles. Avoids
   assumptions made in MeshObject to do with closed surfaces, non-zero volumes
-  and assoicated additional runtime costs. The number of vertices is limited to
+  and associated additional runtime costs. The number of vertices is limited to
   2^16 based on index type.
 */
 class MANTID_GEOMETRY_DLL MeshObject2D : public IObject {

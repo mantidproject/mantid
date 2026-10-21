@@ -19,7 +19,7 @@ class Instrument;
 namespace DataHandling {
 /**
 
-Update detector positions initially loaded in from Instrument Defintion File
+Update detector positions initially loaded in from Instrument Definition File
 (IDF) from information in the provided files.
 Note doing this will result in a slower performance (likely slightly slower
 performance) compared to specifying the

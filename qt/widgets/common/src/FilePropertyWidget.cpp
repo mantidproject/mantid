@@ -95,7 +95,7 @@ QString FilePropertyWidget::openFileDialog(Mantid::Kernel::Property *baseProp) {
 
   /* MG 20/07/09: Static functions such as these that use native Windows and MAC
      dialogs
-     in those environments are alot faster. This is unforunately at the expense
+     in those environments are a lot faster. This is unfortunately at the expense
      of
      shell-like pattern matching, i.e. [0-9].
   */

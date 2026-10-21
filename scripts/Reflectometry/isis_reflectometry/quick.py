@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, too-many-branches, too-few-public-methods, too-many-arguments, too-many-locals
-"""SVN Info:      The variables below will only get subsituted at svn checkout if
+"""SVN Info:      The variables below will only get substituted at svn checkout if
         the repository is configured for variable substitution.
 
     $Id$
@@ -482,7 +482,7 @@ def transCorr(
             i0_monitor_index,
         )
 
-    # got sometimes very slight binning diferences, so do this again:
+    # got sometimes very slight binning differences, so do this again:
     _i_vs_lam_trans = RebinToWorkspace(WorkspaceToRebin=_transWS, WorkspaceToMatch=i_vs_lam, OutputWorkspace=_transWS.name())
     # Normalise by transmission run.
     _i_vs_lam_corrected = i_vs_lam / _i_vs_lam_trans
@@ -658,7 +658,7 @@ def nrPACorrection(Wksp, crho, calpha, cAp, cPp):  # UpUpWksp,UpDownWksp,DownUpW
         Ap = mtd["PCAp"]
         Pp = mtd["PCPp"]
 
-        # Use the polynomial corretion fn instead
+        # Use the polynomial correction fn instead
         PolynomialCorrection(InputWorkspace="PCalpha", OutputWorkspace="PCalpha", Coefficients=calpha, Operation="Multiply")
         PolynomialCorrection(InputWorkspace="PCrho", OutputWorkspace="PCrho", Coefficients=crho, Operation="Multiply")
         PolynomialCorrection(InputWorkspace="PCAp", OutputWorkspace="PCAp", Coefficients=cAp, Operation="Multiply")

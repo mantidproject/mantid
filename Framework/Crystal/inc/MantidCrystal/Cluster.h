@@ -60,7 +60,7 @@ public:
 private:
   /// Disabled copy construction
   Cluster(const Cluster &);
-  /// Disabled assignement
+  /// Disabled assignment
   Cluster &operator=(const Cluster &);
   /// original label on cluster
   size_t m_originalLabel;

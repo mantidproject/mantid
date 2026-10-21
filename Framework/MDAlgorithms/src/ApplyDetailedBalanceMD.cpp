@@ -88,7 +88,7 @@ void ApplyDetailedBalanceMD::exec() {
 
   API::IMDEventWorkspace_sptr output_ws(0);
   if (input_ws->getName() == output_ws_name) {
-    // Calcualte in-place
+    // Calculate in-place
     output_ws = input_ws;
   } else {
     // Clone input workace to output workspace
@@ -180,7 +180,7 @@ std::string ApplyDetailedBalanceMD::checkInputMDDimension() {
     mDeltaEIndex = 3;
   } else {
     // Error
-    g_log.error() << "Coordiate system = " << coordsys << " does not meet requirement: \n";
+    g_log.error() << "Coordinate system = " << coordsys << " does not meet requirement: \n";
     for (size_t i = 0; i < numdims; ++i) {
       g_log.error() << i << "-th dim: " << inputws->getDimension(i)->getName() << "\n";
     }
@@ -216,7 +216,7 @@ void ApplyDetailedBalanceMD::applyDetailedBalance(typename Mantid::DataObjects::
       // Add events, with bounds checking
       for (auto it = events.begin(); it != events.end(); ++it) {
         // Create the event
-        // do calculattion
+        // do calculation
         float temperature(static_cast<float>(mExpinfoTemperatureMean[it->getExpInfoIndex()]));
         float factor;
 
@@ -237,7 +237,7 @@ void ApplyDetailedBalanceMD::applyDetailedBalance(typename Mantid::DataObjects::
           }
         }
 
-        // calcalate and set intesity
+        // calculate and set intensity
         auto intensity = it->getSignal() * factor;
         it->setSignal(intensity);
 
@@ -261,10 +261,10 @@ void ApplyDetailedBalanceMD::applyDetailedBalance(typename Mantid::DataObjects::
 /**
  * @brief Retrieve sample temperature
  * Temperature value can be specified by either property Temperature, or
- * it can be calcualted from sample temperture log in the MDWorkspace
+ * it can be calculated from sample temperature log in the MDWorkspace
  */
 std::string ApplyDetailedBalanceMD::getTemperature(const API::IMDEventWorkspace_sptr &mdws) {
-  // Get temperture sample log name
+  // Get temperature sample log name
   std::string Tstring = getProperty("Temperature");
   std::string temperature_error("");
 
@@ -298,7 +298,7 @@ std::string ApplyDetailedBalanceMD::getTemperature(const API::IMDEventWorkspace_
       } else {
         // specified sample log does not exist
         std::stringstream errss;
-        errss << "ExperimentInfo " << i << " does not have tempertaure log " << Tstring;
+        errss << "ExperimentInfo " << i << " does not have temperature log " << Tstring;
         temperature_error += errss.str() + "\n";
       }
     } else {

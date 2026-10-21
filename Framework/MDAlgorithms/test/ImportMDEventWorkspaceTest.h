@@ -29,7 +29,7 @@ a virtual file of the type expected
 by the ImportMDEventWorkspace algorithm.
 
 This type is particularly useful when generating corrupt file contents, as it
-allows individual apects of the file contents to be modified independently.
+allows individual aspects of the file contents to be modified independently.
 */
 class FileContentsBuilder {
 private:

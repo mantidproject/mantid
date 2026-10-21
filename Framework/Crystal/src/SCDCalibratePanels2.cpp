@@ -193,7 +193,7 @@ void SCDCalibratePanels2::init() {
   // ---------------------
   // ----- samplePos -----
   // ---------------------
-  declareProperty("TuneSamplePosition", false, "Fine tunning sample position");
+  declareProperty("TuneSamplePosition", false, "Fine tuning sample position");
   declareProperty("SearchRadiusSamplePos", 0.1, mustBeNonNegative,
                   "Search radius of sample position change (in meters), used to constrain optimization search space");
   // editability
@@ -341,7 +341,7 @@ void SCDCalibratePanels2::exec() {
   getBankNames(m_pws);
 
   // DEV ONLY
-  // !!!WARNNING!!!
+  // !!!WARNING!!!
   //    Profiling a parameter space can be time-consuming and may freeze up your
   //    computing resources for days, therefore please proceed with caution.
   if (profL1) {
@@ -402,7 +402,7 @@ void SCDCalibratePanels2::exec() {
   }
 
   if (tuneSamplePos && !calibrateL1) {
-    g_log.notice() << "** Tunning sample position only as requested\n";
+    g_log.notice() << "** Tuning sample position only as requested\n";
     optimizeSamplePos(m_pws, pws_original);
   }
 
@@ -552,7 +552,7 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, const IPeaksWo
     const std::string pwsBankiName = "_pws_" + bankname;
 
     // Find out whether to skip the calibration by user's specification
-    // This check is only requied when mCalibBankName is not empty string
+    // This check is only required when mCalibBankName is not empty string
     if (mCalibBankName != "") {
       bool isbank = (bankname == mCalibBankName);
       std::stringstream ss;
@@ -588,7 +588,7 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, const IPeaksWo
     //-- step 1: prepare a mocked workspace with QSample as its yValues
     MatrixWorkspace_sptr wsBankCali = getIdealQSampleAsHistogram1D(pwsBanki);
 
-    //-- step 2&3: invoke fit to find both traslation and rotation
+    //-- step 2&3: invoke fit to find both translation and rotation
     auto fitBank_alg = createChildAlgorithm("Fit", -1, -1, false);
     //---- setup obj fun def
     auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
@@ -745,7 +745,7 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, const IPeaksWo
  *        qSameple_measured
  *
  * @note this function currently only returns dT0=0, and the reason
- *       is still unkown.
+ *       is still unknown.
  *
  * @param pws
  * @param pws_original
@@ -852,7 +852,7 @@ void SCDCalibratePanels2::optimizeSamplePos(IPeaksWorkspace_sptr pws, IPeaksWork
   double dsy_optimized = rst->getRef<double>("Value", 8);
   double dsz_optimized = rst->getRef<double>("Value", 9);
 
-  // apply the calibration results to pws for ouptut file
+  // apply the calibration results to pws for output file
   adjustComponent(dsx_optimized, dsy_optimized, dsz_optimized, 0.0, 0.0, 0.0, EMPTY_DBL(), EMPTY_DBL(),
                   "sample-position", pws);
   int npks = pws->getNumberPeaks();
@@ -895,7 +895,7 @@ void SCDCalibratePanels2::parseLatticeConstant(const IPeaksWorkspace_sptr &pws) 
 }
 
 /**
- * @brief update UB matrix embeded in the peakworkspace using lattice constants
+ * @brief update UB matrix embedded in the peakworkspace using lattice constants
  *        and redo the peak indexation afterwards
  *
  * @param pws

@@ -61,7 +61,7 @@ template <typename Derived, typename ElemType> bool VectorParameter<Derived, Ele
 //----------------------------------------------------------------------
 /* Assignment
 @param other : object to assign from.
-@return ref to assined object.
+@return ref to assigned object.
 */
 template <typename Derived, typename ElemType>
 Derived &VectorParameter<Derived, ElemType>::assignFrom(const Derived &other) {
@@ -79,7 +79,7 @@ Derived &VectorParameter<Derived, ElemType>::assignFrom(const Derived &other) {
 }
 
 //----------------------------------------------------------------------
-/* Overriden equality operator
+/* Overridden equality operator
 @param other : object to compare with
 @return true if to be considered equal
 */
@@ -100,7 +100,7 @@ bool VectorParameter<Derived, ElemType>::operator==(const Derived &other) const 
 }
 
 //----------------------------------------------------------------------
-/* Overriden not equals operator
+/* Overridden not equals operator
 @param other : object to compare with
 @return true if to be considered not equal
 */
@@ -171,16 +171,16 @@ template <typename Derived, typename ElemType> std::string VectorParameter<Deriv
   std::string valueXMLtext;
   for (size_t i = 0; i < m_size; i++) {
     if (i < (m_size - 1)) {
-      valueXMLtext.append(ElementTraits<ElemType>::formatCS(m_arry[i])); // Comma-seperated
+      valueXMLtext.append(ElementTraits<ElemType>::formatCS(m_arry[i])); // Comma-separated
     } else {
-      valueXMLtext.append(ElementTraits<ElemType>::format(m_arry[i])); // No comma sepearation for last value
+      valueXMLtext.append(ElementTraits<ElemType>::format(m_arry[i])); // No comma separation for last value
     }
   }
   return this->parameterXMLTemplate(valueXMLtext);
 }
 
 //----------------------------------------------------------------------
-/* Overrriden array operator
+/* Overridden array operator
 @param index : array index to access.
 @return ref to the element at the specified index.
 */

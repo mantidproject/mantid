@@ -25,7 +25,7 @@ namespace DataObjects {
  * @tparam MDE :: the type of MDEvent in the workspace. This can be, e.g.
  *                MDLeanEvent<nd> or MDEvent<nd>
  * @tparam nd :: the number of dimensions that each MDEvent will be tracking.
- *               an usigned int > 0.
+ *               an unsigned int > 0.
  *               nd must match the number of dimensions in the MDE type!
  *
  *
@@ -188,7 +188,7 @@ public:
   Mantid::API::MDNormalization displayNormalization() const override;
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other);
 
   /// Insert box bisects in position-along-line coords in a single dimension

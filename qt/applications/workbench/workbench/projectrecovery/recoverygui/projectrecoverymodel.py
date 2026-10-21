@@ -200,7 +200,7 @@ class ProjectRecoveryModel(QObject):
     def _fill_row(self, path, checkpoint_name):
         """
         Add a list to self.rows list to represent the rows
-        :param path: Srting; The path in which to fill from
+        :param path: String; The path in which to fill from
         :param checkpoint_name: String; The checkpoint name to use to fill this row
         """
         num_of_ws = str(self.find_number_of_workspaces_in_directory(path))

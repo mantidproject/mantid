@@ -72,7 +72,7 @@ class LoadAndCheckBase(systemtesting.MantidSystemTest, metaclass=ABCMeta):
         if isinstance(a, WorkspaceGroup):
             self.assertEqual(a.size(), b.size())
             self.assertEqual(a.size(), n_periods)
-            # Loop through each workspace in the group and apply some simple comaprison checks.
+            # Loop through each workspace in the group and apply some simple comparison checks.
             for i in range(0, a.size()):
                 self.do_check_workspace_shape(a[i], b[i])
             if self.enable_instrument_checking():

@@ -67,8 +67,8 @@ void ComptonProfile::setUpForFit() {
  * Also caches parameters from the instrument
  * @param workspace The workspace set as input
  * @param wsIndex A workspace index
- * @param startX Starting x-vaue (unused).
- * @param endX Ending x-vaue (unused).
+ * @param startX Starting x-value (unused).
+ * @param endX Ending x-value (unused).
  */
 void ComptonProfile::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wsIndex,
                                         double startX, double endX) {

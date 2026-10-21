@@ -159,8 +159,8 @@ std::pair<std::vector<std::string>, std::string> FindFilesWorker::getFilesFromAl
  * @param result :: the result to return to the main thread.
  */
 void FindFilesWorker::finishSearching(const FindFilesSearchResults &result) {
-  // Before emitting our search results, we need to check if we have recieved
-  // a signal to disconnect as this search is no longer relevent. By calling
+  // Before emitting our search results, we need to check if we have received
+  // a signal to disconnect as this search is no longer relevant. By calling
   // process events here we ensure that if the result is no longer needed the
   // emitted signal is just ignored.
   QCoreApplication::processEvents();
@@ -170,7 +170,7 @@ void FindFilesWorker::finishSearching(const FindFilesSearchResults &result) {
 
 /** Create a struct containing the results of the search.
  *
- * This will contain a string with an error (empty string if no error occured),
+ * This will contain a string with an error (empty string if no error occurred),
  * a vector of filenames, and a value to display on the property of an algorithm
  *
  * @param error :: A user friendly error message or the empty string

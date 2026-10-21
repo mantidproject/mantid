@@ -295,7 +295,7 @@ class PlotsLoader(object):
             LegendProperties.create_legend(legend, ax)
 
     def update_properties(self, ax, properties):
-        # Support for additonal plot options accessible from general settings
+        # Support for additional plot options accessible from general settings
         if "tickParams" in properties.keys():
             ax.xaxis.set_tick_params(which="major", **properties["tickParams"]["xaxis"]["major"])
             ax.xaxis.set_tick_params(which="minor", **properties["tickParams"]["xaxis"]["minor"])
@@ -399,7 +399,7 @@ class PlotsLoader(object):
         image.set_label(dic["label"])
         image.set_cmap(colormaps[dic["cmap"]])
         image.set_interpolation(dic["interpolation"])
-        # Try and make the cmap line up but sometimes it wont
+        # Try and make the cmap line up but sometimes it won't
         try:
             image.axes.set_cmap(colormaps[dic["cmap"]])
         except AttributeError as e:

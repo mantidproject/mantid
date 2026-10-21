@@ -50,7 +50,7 @@ public:
   void testSplitEmptyPath() {
     std::vector<std::string> result;
     TSM_ASSERT(" should return 0", !split_path("", result));
-    TSM_ASSERT(" final path should be emtpy", result.empty());
+    TSM_ASSERT(" final path should be empty", result.empty());
   }
   void testSplitRemoveSpaces() {
     std::vector<std::string> result;
@@ -134,7 +134,7 @@ public:
   void testExtractWord()
   /**
      Applies a test to the extractWord
-     The object is to find a suitable lenght
+     The object is to find a suitable length
      of a string in a group of words
      @retval -1 :: failed find word in string
      when the pattern exists.
@@ -662,7 +662,7 @@ public:
   }
 
   void test_strmakef_badfmt() {
-    // create an invalid formatting and ensure an empty stirng is returned
+    // create an invalid formatting and ensure an empty string is returned
 #if !defined(_WIN32)
     std::string res = strmakef("invalid: %lc", (wint_t)0xFFFFFFFF);
 #else

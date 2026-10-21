@@ -186,7 +186,7 @@ MDEventFactory::CreateMDWorkspace(size_t nd, const std::string &eventType,
 
 /** Create a MDBox or MDGridBoxof the given type
 @param nDimensions  :: number of dimensions
-@param Type         :: enum descibing the box (MDBox or MDGridBox) and the event
+@param Type         :: enum describing the box (MDBox or MDGridBox) and the event
 type (MDEvent or MDLeanEvent)
 @param splitter     :: shared pointer to the box controller responsible for
 splitting boxes. The BC is not incremented as boxes take usual pointer from this
@@ -226,10 +226,10 @@ API::IMDNode *MDEventFactory::createBox(size_t nDimensions, MDEventFactory::BoxT
 //------------------------------- FACTORY METHODS END
 //--------------------------------------------------------------------------------------------------------------
 
-/// static vector, conaining the pointers to the functions creating MD boxes
+/// static vector, containing the pointers to the functions creating MD boxes
 std::vector<MDEventFactory::fpCreateBox>
 MDEventFactory::boxCreatorFP(MDEventFactory::NumBoxTypes *(MDEventFactory::MAX_MD_DIMENSIONS_NUM + 1), nullptr);
-// static vector, conaining the pointers to the functions creating MD Workspaces
+// static vector, containing the pointers to the functions creating MD Workspaces
 std::vector<MDEventFactory::fpCreateMDWS> MDEventFactory::wsCreatorFP(MDEventFactory::MAX_MD_DIMENSIONS_NUM + 1,
                                                                       nullptr);
 

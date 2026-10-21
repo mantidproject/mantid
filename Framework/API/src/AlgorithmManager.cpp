@@ -136,7 +136,7 @@ void AlgorithmManagerImpl::notifyAlgorithmStarting(AlgorithmID id) {
   notificationCenter.postNotification(new AlgorithmStartingNotification(alg));
 }
 
-/// Returns all running (& managed) occurances of the named algorithm, oldest
+/// Returns all running (& managed) occurrences of the named algorithm, oldest
 /// first
 std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstancesOf(const std::string &algorithmName) const {
   std::vector<IAlgorithm_const_sptr> theRunningInstances;
@@ -147,7 +147,7 @@ std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstancesOf(cons
   return theRunningInstances;
 }
 
-/// Returns all running (& managed) occurances of any algorithm, oldest
+/// Returns all running (& managed) occurrences of any algorithm, oldest
 /// first
 std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstances() const {
   std::vector<IAlgorithm_const_sptr> theRunningInstances;

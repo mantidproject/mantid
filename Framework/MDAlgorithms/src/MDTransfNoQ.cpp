@@ -10,11 +10,11 @@
 
 namespace Mantid::MDAlgorithms {
 
-// register the class, whith conversion factory under NoQ name
+// register the class, with conversion factory under NoQ name
 DECLARE_MD_TRANSFID(MDTransfNoQ, CopyToMD)
 
 /** Method fills-in all additional properties requested by user and not defined
- *by matrix workspace itselt.
+ *by matrix workspace itself.
  *  it fills in [nd - (1 or 2 -- depending on input ws)] values into the Coord
  *vector;
  *
@@ -94,7 +94,7 @@ std::vector<double> MDTransfNoQ::getExtremumPoints(const double xMin, const doub
 
 /** return the number of dimensions, calculated by the transformation from the
 workspace.
-Depending on ws axis units, the numebr here is either 1 or 2* and is independent
+Depending on ws axis units, the number here is either 1 or 2* and is independent
 on emode*/
 unsigned int MDTransfNoQ::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
                                                API::MatrixWorkspace_const_sptr inWS) const {
@@ -123,7 +123,7 @@ void MDTransfNoQ::getAxes(const API::MatrixWorkspace_const_sptr &inWS, API::Nume
   pYAxis = dynamic_cast<API::NumericAxis *>(inWS->getAxis(1));
 }
 
-/**function returns units ID-s which this transformation prodiuces its ouptut.
+/**function returns units ID-s which this transformation prodiuces its output.
 here it is usually input ws units, which are independent on emode
 * @param  mode -- current energy analysis mode (not used in NoQ mode)
 * @param  inWS -- input matrix workspace shared pointer
@@ -152,7 +152,7 @@ std::vector<std::string> MDTransfNoQ::getDefaultDimID(Kernel::DeltaEMode::Type m
                                                       API::MatrixWorkspace_const_sptr inWS) const {
   return this->outputUnitID(mode, inWS);
 }
-/**  returns the units, the input ws is actually in as they coinside with input
+/**  returns the units, the input ws is actually in as they coincide with input
  * units for this class */
 const std::string MDTransfNoQ::inputUnitID(Kernel::DeltaEMode::Type mode, API::MatrixWorkspace_const_sptr inWS) const {
   UNUSED_ARG(mode);

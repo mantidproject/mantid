@@ -50,10 +50,10 @@ WIRE_GAP_IN_PIXELS = 15  # in pixels, distance between wire shadows along the tu
 
 def wire_positions(units: str = "pixels") -> np.ndarray:
     r"""
-    Vertical positions of the standar set of 16 wires. It's assumed that the center of the 16 wires
+    Vertical positions of the standard set of 16 wires. It's assumed that the center of the 16 wires
     coincides with the center of a tube.
 
-    :param units: either one of 'pixels' or 'meters'. If pixels, the bottom of the tube correspons
+    :param units: either one of 'pixels' or 'meters'. If pixels, the bottom of the tube corresponds
     to pixel 1. If 'meters', the center of the tube corresponds to the origin of coordinates.
 
     :raises: AssertionError when incorrect units are passed
@@ -101,7 +101,7 @@ def preprocess_banks(input_workspace: str, output_workspace: str) -> Workspace2D
     """
     CloneWorkspace(InputWorkspace=str(input_workspace), OutputWorkspace=output_workspace)
 
-    # inline function for 1D singal cleaning
+    # inline function for 1D signal cleaning
     # NOTE: an inline function here is by choice as it should only be used for data
     #       pre-processing only
     def clean_signals(
@@ -134,7 +134,7 @@ def preprocess_banks(input_workspace: str, output_workspace: str) -> Workspace2D
         _data = np.array([_ws.y(me) for me in range(i, i + PIXELS_PER_TUBE)])
         _data = clean_signals(_data)
         for j in range(PIXELS_PER_TUBE):
-            _ws.setSharedY(i + j, _data[j])  # This apprently is the correct way to update Y
+            _ws.setSharedY(i + j, _data[j])  # This apparently is the correct way to update Y
 
     return _ws
 
@@ -276,7 +276,7 @@ def calibrate_tube(
         assert marker in tube_name, f"{tube_name} does not uniquely specify one tube"
     peak_height, peak_width = -shadow_height, shadow_width
     # Initial guess for the peak positions, assuming:
-    # - the center of the wire mesh coincides with the center ot the tube_calib_fit_params
+    # - the center of the wire mesh coincides with the center of the tube_calib_fit_params
     # - wires cast a shadow on a perfectly calibrated tube
     fit_extent = (fit_domain / PIXELS_PER_TUBE) * TUBE_LENGTH  # fit domain in meters
     assert fit_extent < WIRE_GAP, "The fit domain cannot be larger than the distance between consecutive wires"

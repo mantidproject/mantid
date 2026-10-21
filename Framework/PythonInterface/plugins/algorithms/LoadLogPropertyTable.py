@@ -40,7 +40,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
         )
         self.declareProperty(
             StringArrayProperty("LogNames", direction=Direction.Input),
-            "The comma seperated list of properties to include. \n" + "The full list will be printed if an invalid value is used.",
+            "The comma separated list of properties to include. \n" + "The full list will be printed if an invalid value is used.",
         )
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output), "Table of results")
 

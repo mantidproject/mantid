@@ -37,7 +37,7 @@ void DynamicKuboToyabe::init() {
 // Midpoint method
 double midpnt(double func(const double, const double, const double), const double a, const double b, const int n,
               const double g, const double w0) {
-  // quote & modified from numerical recipe 2nd edtion (page147)
+  // quote & modified from numerical recipe 2nd edition (page147)
 
   static double s;
 
@@ -90,7 +90,7 @@ void polint(const double xa[], const double ya[], const int n, const double x, d
       hp = xa[i + m] - x;
       w = c[i + 1] - d[i];
       if ((den = ho - hp) == 0.0) { // error message!!!
-        throw std::runtime_error("Error in routin polint");
+        throw std::runtime_error("Error in routine polint");
       }
       den = w / den;
       d[i] = hp * den;

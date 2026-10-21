@@ -65,7 +65,7 @@ public:
   static void appendCalibration(const DataObjects::TableWorkspace_sptr &tablews, const std::string &datestamp,
                                 const ComponentPosition &pos);
 
-  /// Get the last entry (latest update) of a compoent calibrated position
+  /// Get the last entry (latest update) of a component calibrated position
   static ComponentPosition getLatestCalibratedPosition(const DataObjects::TableWorkspace_sptr &componentcaltable);
 
   /// Get the calibration position in the table (component table or full

@@ -35,7 +35,7 @@ public:
   const std::string name() const override { return "PoissonErrors"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Calculates the gaussian approxiamtion of Poisson error based on a "
+    return "Calculates the gaussian approximation of Poisson error based on a "
            "matching workspace containing the original counts.";
   }
 

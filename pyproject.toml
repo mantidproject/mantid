@@ -95,3 +95,14 @@ method = "minor"
 distance = "{base_version}.dev{distance}"
 dirty = "{base_version}+uncommitted"
 distance-dirty = "{base_version}.dev{distance}+uncommitted"
+
+[tool.codespell]
+# Ref: https://github.com/codespell-project/codespell#using-a-config-file
+skip = '.git,.git-meta,.gitattributes,.*cache,.venv,.tox,.eggs,*.egg-info,__pycache__,.pixi,*.pdf,*.svg,*.lock,*.css,*.min.*,*-min.*,.npm,*/build/*,./build,instrument,cxxtest,gcovr,*.pdn,*.dat,*.DAT,*.cif,*/diagrams/*.xml,*/images/Workbench/*.xml,GSoap,GSoapGenerated,ANN,flatbuffers'
+check-hidden = true
+# Ignore URLs, and camelCase and PascalCase identifiers (common in code)
+ignore-regex = 'https?://\S+|\b[a-z]+[A-Z]\w*\b|\b[A-Z][a-z]+[A-Z]\w*\b'
+# Identifiers (nd = number of dimensions, pres = presenter, ...), element symbols,
+# instrument/log/PV names, domain terms and valid variant spellings;
+# elease: from the [Rr]elease glob in .gitignore
+ignore-words-list = 'elease,activ,adaptee,afile,alph,anc,ans,asymmmetry,automatize,botton,boxe,bu,cach,cant,classe,clen,co-ordinate,co-ordinates,commun,constain,constrint,contrains,convertor,correc,couldnt,curren,delt,derefernce,dezember,discus,doesnt,doub,dout,dthe,dum,edn,efine,enew,entrie,extracter,fiter,fle,fo,fro,gaus,hart,heigh,hight,implemenation,implementors,inactivate,indx,ine,ines,inout,ist,ivalid,lamba,lene,memor,mial,monserrat,mot,nam,nd,nin,noone,numer,oce,ond,orthorombic,ot,paramaters,parm,parms,pre-empts,precessing,pres,propt,re-declared,re-use,re-used,re-using,replicae,rin,runn,sav,secon,semaphor,ser,shif,splitted,substraction,synonims,te,testin,thi,thirdparty,ths,tht,trian,tring,trough,tru,tthe,unparseable,vertexes,vlone,whos,winn,wit,wither,withs'

@@ -65,7 +65,7 @@ IMDHistoWorkspace_sptr create_HKL_MDWS(double min = -10, double max = 10, int nu
   mdworkspaceAlg->execute();
   IMDHistoWorkspace_sptr inWS = mdworkspaceAlg->getProperty("OutputWorkspace");
 
-  // --- Set speical coordinates on fake mdworkspace --
+  // --- Set special coordinates on fake mdworkspace --
   auto coordsAlg = AlgorithmManager::Instance().createUnmanaged("SetSpecialCoordinates");
   coordsAlg->setChild(true);
   coordsAlg->initialize();
@@ -498,7 +498,7 @@ public:
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
     m_filterWS = create_peaks_WS(inst);
 
-    // Add 50 cluster points and correspoinding peaks.
+    // Add 50 cluster points and corresponding peaks.
     for (int i = 0; i < nBins; i += 2) {
       m_inWS->setSignalAt(i, static_cast<Mantid::signal_t>(i));
 

@@ -19,7 +19,7 @@ class RepoModel;
 /** ScriptRepositoryView : Provide the User Interface to the ScriptRepository.
   It does so through the Mantid Model View Framework. It is composed by a
   specialized QTreeView (RepoTreeView) and a TextBrowser. The TreeView is
-  populated with the RepoModel, wich wrappers the ScriptRepository. Inside this
+  populated with the RepoModel, which wrappers the ScriptRepository. Inside this
   class, there are two nested classes that will implement delegates to the
   columns of Status and AutoUpdate in order to improve the User Experience.
 */
@@ -47,7 +47,7 @@ class EXPORT_OPT_MANTIDQT_COMMON ScriptRepositoryView : public MantidDialog {
   };
 
 public:
-  // constuctor
+  // constructor
   ScriptRepositoryView(QWidget *parent = nullptr);
   // destructor - not virtual, because this is not intended to be base
   ~ScriptRepositoryView() override;

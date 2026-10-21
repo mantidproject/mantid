@@ -201,7 +201,7 @@ public:
     TS_ASSERT_EQUALS(A.display(), "c+((a+b)(a+c)(a+d)(c+f)(c+x+y+z)(d+f)(d+x+y+z))");
   }
 
-  void testAlgDiv() { // Problem with Algebric division
+  void testAlgDiv() { // Problem with Algebraic division
     // Acomp A;
     // A.setString("a'bcd+a(cd+ff(x+y+z))");
     // TS_ASSERT_EQUALS(A.display(),"(a\'bcd)+(a((cd)+(f(x+y+z))))");

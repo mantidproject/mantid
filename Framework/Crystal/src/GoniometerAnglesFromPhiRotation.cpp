@@ -36,7 +36,7 @@ void GoniometerAnglesFromPhiRotation::init() {
 
   declareProperty("Tolerance", .12, "Integer offset for h,k,and l values to be considered valid.(def=.12)");
 
-  declareProperty("MIND", -1.0, "Minimium d-spacing to consider,(def=-1)");
+  declareProperty("MIND", -1.0, "Minimum d-spacing to consider,(def=-1)");
   declareProperty("MAXD", -1.0, "Maximum d-spacing to consider,(def=-1)");
 
   declareProperty("Run1Phi", 0.0, "Phi for Run 1(def=0.0)");

@@ -375,7 +375,7 @@ std::vector<DblMatrix> ScalarUtils::GetRelatedUBs(const DblMatrix &UB, double fa
       b_temp = reflections[row][1];
       c_temp = reflections[row][2];
       // for each accepted reflection, try all
-      // modified premutations that preserve the
+      // modified permutations that preserve the
       // handedness AND keep the cell edges
       // nearly ordered as a <= b <= c.
       m_a_temp = a_temp * (-1.0);

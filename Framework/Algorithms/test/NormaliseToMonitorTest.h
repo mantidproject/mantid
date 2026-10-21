@@ -356,7 +356,7 @@ public:
     // this function is usually called by GUI when senning input workspace. It
     // should read monitors and report the condition changed
     TS_ASSERT(monSpec->getSettings()[0]->isConditionChanged(&norm6));
-    // this funciton is called by gui when the above is true. It should not
+    // this function is called by gui when the above is true. It should not
     // throw and change the validator
     IPropertySettings const *pSett(nullptr);
     TS_ASSERT_THROWS_NOTHING(pSett = monSpec->getSettings()[0].get());
@@ -379,7 +379,7 @@ public:
     // this function is usually called by GUI when setting an input workspace.
     // It should read monitors and report the condition changed
     TS_ASSERT(monSpec->getSettings()[0]->isConditionChanged(&norm6));
-    // this funciton is called by gui when the above is true. It should not
+    // this function is called by gui when the above is true. It should not
     // throw and change the validator
     TS_ASSERT_THROWS_NOTHING(pSett = monSpec->getSettings()[0].get());
     TS_ASSERT_THROWS_NOTHING(pSett->applyChanges(&norm6, monSpec->name()));

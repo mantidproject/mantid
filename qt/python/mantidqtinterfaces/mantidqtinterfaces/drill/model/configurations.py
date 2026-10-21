@@ -42,7 +42,7 @@ class RundexSettings(object):
     DIRECT_TOF = "TOF"
     SPECTRO_PSCAN = "Sample scan"
 
-    # correspondance between instrument and technique
+    # correspondence between instrument and technique
     TECHNIQUE = {
         D11: SANS,
         D16: SANS,
@@ -61,7 +61,7 @@ class RundexSettings(object):
         SHARP: DIRECT,
     }
 
-    # correspondance between instrument and acquisition mode
+    # correspondence between instrument and acquisition mode
     ACQUISITION_MODES = {
         D11: [SANS_ACQ, SANS_MULTI],
         D16: [SANS_ACQ, SANS_PSCAN],
@@ -273,7 +273,7 @@ class RundexSettings(object):
 
     # settings for each acquisition mode
 
-    # optionnal flags
+    # optional flags
     FLAGS = {REFL_POL: {"PolarizationOption": "Polarized"}, REFL_NPOL: {"PolarizationOption": "NonPolarized"}}
     SETTINGS = {
         SANS_ACQ: [

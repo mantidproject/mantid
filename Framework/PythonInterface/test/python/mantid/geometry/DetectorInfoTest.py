@@ -140,7 +140,7 @@ class DetectorInfoTest(unittest.TestCase):
 
     def test_createWorkspaceAndDetectorInfo(self):
         """Try to create a workspace and see if DetectorInfo object
-        is accessable"""
+        is accessible"""
         dataX = [1, 2, 3, 4, 5]
         dataY = [1, 2, 3, 4, 5]
         workspace = CreateWorkspace(DataX=dataX, DataY=dataY)

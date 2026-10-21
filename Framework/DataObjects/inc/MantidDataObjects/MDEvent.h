@@ -211,7 +211,7 @@ public:
    @return ncols    -- the number of colunts  in the data (it is nd+4 here but
    may be different for other data types)
    @return totalSignal -- total signal in the vector of events
-   @return totalErr   -- total error corresponting to the vector of events
+   @return totalErr   -- total error corresponding to the vector of events
   */
   static inline void eventsToData(const std::vector<MDEvent<nd>> &events, std::vector<coord_t> &data, size_t &ncols,
                                   double &totalSignal, double &totalErrSq) {

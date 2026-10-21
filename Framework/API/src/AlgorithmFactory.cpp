@@ -116,7 +116,7 @@ bool AlgorithmFactoryImpl::exists(const std::string &algorithmName, const int ve
   }
 }
 
-/** Creates a mangled name for interal storage
+/** Creates a mangled name for internal storage
  * @param name :: the name of the Algrorithm
  * @param version :: the version of the algroithm
  * @returns a mangled name string
@@ -127,7 +127,7 @@ std::string AlgorithmFactoryImpl::createName(const std::string &name, const int 
   return (oss.str());
 }
 
-/** Decodes a mangled name for interal storage
+/** Decodes a mangled name for internal storage
  * @param mangledName :: the mangled name of the Algrorithm
  * @returns a pair of the name and version
  */
@@ -247,7 +247,7 @@ int AlgorithmFactoryImpl::highestVersion(const std::string &algorithmName) const
  * Factory itself and
  * any cleanly constructed algorithms stored here.
  * @returns The map of the categories, together with a true false value
- * difining if they are hidden
+ * defining if they are hidden
  */
 const std::map<std::string, bool> AlgorithmFactoryImpl::getCategoriesWithState() const {
   std::map<std::string, bool> resultCategories;

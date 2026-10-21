@@ -28,7 +28,7 @@ Polynomial::Polynomial() : m_n(0) {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Function to calcualte polynomial
+/** Function to calculate polynomial
  */
 void Polynomial::function1D(double *out, const double *xValues, const size_t nData) const {
   // 1. Use a vector for all coefficient

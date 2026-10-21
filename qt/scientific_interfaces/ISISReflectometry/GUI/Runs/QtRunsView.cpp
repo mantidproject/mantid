@@ -180,7 +180,7 @@ void QtRunsView::setInstrumentList(const std::vector<std::string> &instruments, 
 /**
 Set the range of the progress bar
 @param min : The minimum value of the bar
-@param max : The maxmimum value of the bar
+@param max : The maximum value of the bar
 */
 void QtRunsView::setProgressRange(int min, int max) {
   m_ui.progressBar->setRange(min, max);

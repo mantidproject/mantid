@@ -9,7 +9,7 @@
 //  - cos, sin func uses radians
 //  - Quat class uses degrees
 //  - The overall strategy here is that the correct answer is always the engineering position,
-//    and we are moving the insturment to the wrong location (i.e. needs calibration) so that
+//    and we are moving the instrument to the wrong location (i.e. needs calibration) so that
 //    the calibration can move it back to the correct position
 
 #pragma once
@@ -123,7 +123,7 @@ public:
     double useless[5];
     size_t order(1000);
 
-    // calcualte function value
+    // calculate function value
     testfunc.function1D(out.get(), useless, order);
 
     std::vector<double> golderrorstart{2.69624,  1.91549, -4.81046, 3.37157, 1.91529,
@@ -178,7 +178,7 @@ public:
     double useless[5];
     size_t order(1000);
 
-    // calcualte function value
+    // calculate function value
     testfunc.function1D(out.get(), useless, order);
 
     // Peak indexes
@@ -213,7 +213,7 @@ public:
       }
     }
 
-    // Evalulate with detector of bank27 scaled to (0.9, 1.1)
+    // Evaluate with detector of bank27 scaled to (0.9, 1.1)
     testfunc.setParameter("ScaleX", 0.9);
     testfunc.setParameter("ScaleY", 1.1);
     testfunc.function1D(out.get(), useless, order);

@@ -13,7 +13,7 @@ This algorithm allows the integration of data along a parameter. It has been des
 it can normally be applied to other instruments and techniques.
 
 Given a file containing a scan, this algorithm performs usual reduction for SANS detectors, and then
-produces a 2D ouput, with the x-axis being the x-axis of the detector, and the y-axis the parameter used for the scan.
+produces a 2D output, with the x-axis being the x-axis of the detector, and the y-axis the parameter used for the scan.
 The data is thus the sum of each column of pixels of the detector, stacked one above the others and sorted by the
 integration parameter.
 The OutputJoinedWorkspace contains, if asked for, the reduced data on one workspace, along the axis defined by the parameter.

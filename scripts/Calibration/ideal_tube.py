@@ -16,7 +16,7 @@ class IdealTube(object):
     The IdealTube specifies where the peaks formed by slits or edges should occur.
 
     They can be considered as the known positions as well.
-    It does also keep informatin about the shape of the known_positions, if they are
+    It does also keep information about the shape of the known_positions, if they are
     peaks or edges.
 
     First you create an ideal tube by calling the empty constructor idealTube().

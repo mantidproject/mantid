@@ -43,7 +43,7 @@ public:
    * ------------------------------------------------------------------------------------------
    */
 
-  // Test out of bounds constuction arguments
+  // Test out of bounds construction arguments
   void testSXPeakConstructorThrowsIfNegativeIntensity() {
     auto workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
     const auto &spectrumInfo = workspace->spectrumInfo();

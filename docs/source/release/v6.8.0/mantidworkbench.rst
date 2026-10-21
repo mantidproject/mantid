@@ -56,7 +56,7 @@ New features
 Bugfixes
 ############
 - Entering particular values (i.e 0,111) into the colour bar limit text boxes, will no longer cause an error.
-- Resolved issue with projection matrix calclulation using basis vectors with non-q dimensions.
+- Resolved issue with projection matrix calculation using basis vectors with non-q dimensions.
 
 
 :ref:`Release 6.8.0 <v6.8.0>`

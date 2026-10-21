@@ -124,7 +124,7 @@ void Property::clearSettings() { m_settings.clear(); }
 bool Property::remember() const { return m_remember; }
 
 /**
- * Set wheter to remeber this property input
+ * Set whether to remember this property input
  * @param remember :: true to remember
  */
 void Property::setRemember(bool remember) { m_remember = remember; }

@@ -21,7 +21,7 @@ typedef char NXname[128];
  * \li NXACC_READ read-only
  * \li NXACC_RDWR open an existing file for reading and writing.
  * \li NXACC_CREATE create a NeXus HDF-4 file
- * \li NXACC_CREATE4 create a NeXus HDF-4 file -- this is discouraged, and will no loger be supported
+ * \li NXACC_CREATE4 create a NeXus HDF-4 file -- this is discouraged, and will no longer be supported
  * \li NXACC_CREATE5 create a NeXus HDF-5 file.
  * \li NXACC_CREATEXML create a NeXus XML file -- this is no longer be supported, exists for legacy reasons
  * \li NXACC_CHECKNAMESYNTAX Check names conform to NeXus allowed characters.

@@ -58,7 +58,7 @@ public:
 
     auto &algFactory = AlgorithmFactory::Instance();
 
-    // get the nubmer of algorithms it already has
+    // get the number of algorithms it already has
     std::vector<std::string> keys = algFactory.getKeys();
     size_t noOfAlgs = keys.size();
 
@@ -68,7 +68,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(algFactory.unsubscribe("ToyAlgorithm", 1));
     TS_ASSERT_THROWS_NOTHING(algFactory.unsubscribe("ToyAlgorithm", 2));
 
-    // get the nubmer of algorithms it has now
+    // get the number of algorithms it has now
     keys = algFactory.getKeys();
     size_t noOfAlgsAfter = keys.size();
 

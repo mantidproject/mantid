@@ -60,7 +60,7 @@ FREQUENCY_EXTENSIONS = {"MOD": "mod", "RE": "Re", "IM": "Im", "MAXENT": "MaxEnt"
 
 class FrequencyContext(object):
     """
-    A simple class for identifing the current run
+    A simple class for identifying the current run
     and it can return the name, run and instrument.
     The current run is the same as the one in MuonAnalysis
     """

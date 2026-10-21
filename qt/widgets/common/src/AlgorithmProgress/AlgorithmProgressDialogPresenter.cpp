@@ -18,7 +18,7 @@ AlgorithmProgressDialogPresenter::AlgorithmProgressDialogPresenter(QWidget *pare
     : AlgorithmProgressPresenterBase(parent), m_view{view}, m_model{model}, m_progressBars{RunningAlgorithms()} {
   model.setDialog(this);
 
-  // Intital setup of any running algorithms
+  // Initial setup of any running algorithms
   auto runningAlgorithms = Mantid::API::AlgorithmManager::Instance().runningInstances();
 
   for (const auto &alg : runningAlgorithms) {

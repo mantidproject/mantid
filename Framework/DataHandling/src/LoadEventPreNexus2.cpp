@@ -360,7 +360,7 @@ void LoadEventPreNexus2::exec() {
   // Correct event indexes mased by veto flag
   unmaskVetoEventIndex();
 
-  // Optinally output event number / pulse file
+  // Optionally output event number / pulse file
   std::string diswsname = getPropertyValue("EventNumberWorkspace");
   if (!diswsname.empty()) {
     MatrixWorkspace_sptr disws = generateEventDistribtionWorkspace();
@@ -507,7 +507,7 @@ API::MatrixWorkspace_sptr LoadEventPreNexus2::generateEventDistribtionWorkspace(
 }
 
 //----------------------------------------------------------------------------------------------
-/** Process imbed logs (marked by bad pixel IDs)
+/** Process embed logs (marked by bad pixel IDs)
  */
 void LoadEventPreNexus2::processImbedLogs() {
   for (const auto pid : this->wrongdetids) {
@@ -518,7 +518,7 @@ void LoadEventPreNexus2::processImbedLogs() {
       g_log.error() << "Wrong Index " << mindex << " for Pixel " << pid << '\n';
       throw std::invalid_argument("Wrong array index for pixel from map");
     } else {
-      g_log.information() << "Processing imbed log marked by Pixel " << pid
+      g_log.information() << "Processing embed log marked by Pixel " << pid
                           << " with size = " << this->wrongdetid_pulsetimes[mindex].size() << '\n';
     }
 
@@ -529,7 +529,7 @@ void LoadEventPreNexus2::processImbedLogs() {
     // d. Add this to log
     this->addToWorkspaceLog(logname, mindex);
 
-    g_log.notice() << "Processed imbedded log " << logname << "\n";
+    g_log.notice() << "Processed embedded log " << logname << "\n";
 
   } // ENDFOR pit
 }
@@ -954,7 +954,7 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
       continue;
     }
 
-    // Covert the pixel ID from DAS pixel to our pixel ID
+    // Convert the pixel ID from DAS pixel to our pixel ID
     // downstream monitor pixel for SNAP
     if (pid == 1073741843)
       pid = 1179648;
@@ -1109,7 +1109,7 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
 
 //-----------------------------------------------------------------------------
 /**
- * Add a sample environment log for the proton chage (charge of the pulse in
+ * Add a sample environment log for the proton charge (charge of the pulse in
  *picoCoulombs)
  * and set the scalar value (total proton charge, microAmps*hours, on the
  *sample)

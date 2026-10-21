@@ -20,7 +20,7 @@ PeriodicTableWidget::PeriodicTableWidget(QWidget *parent) : QWidget(parent) {
   ui.Groups->setVisible(false);
 }
 
-// slot for showing group legend dependant on state of radioButton
+// slot for showing group legend dependent on state of radioButton
 void PeriodicTableWidget::showGroupLegend(bool checked) {
   if (checked) {
     ui.Groups->setVisible(true);
@@ -321,7 +321,7 @@ void PeriodicTableWidget::populateGroupVectors() {
   Halogens.push_back(ui.At); // Astatine
   Halogens.push_back(ui.Cl); // Chlorine
   Halogens.push_back(ui.Br); // Bromine
-  Halogens.push_back(ui.F);  // Flourine
+  Halogens.push_back(ui.F);  // Fluorine
   Halogens.push_back(ui.I);  // Iodine
   // Populate Noble Gases
   NobleGases.push_back(ui.Ar); // Argon

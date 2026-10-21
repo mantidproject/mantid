@@ -261,7 +261,7 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj, const std::string &prop_n
   // get run start
   Types::Core::DateAndTime startTime = getRunStart(run_obj);
 
-  // initialze the TimeSeriesProperty and add unit
+  // initialize the TimeSeriesProperty and add unit
   if (is_int_series) {
     auto tsp = std::make_unique<TimeSeriesProperty<int>>(prop_name);
     if (use_single_value) {

@@ -48,7 +48,7 @@ public:
     TS_ASSERT_EQUALS(scatterer->getNeutronAtom().z_number, 1);
     TS_ASSERT_EQUALS(scatterer->getNeutronAtom().a_number, 2);
 
-    // non-existant element should error
+    // non-existent element should error
     TS_ASSERT_THROWS_ANYTHING(scatterer->setProperty("Element", "Random"));
   }
 

@@ -65,7 +65,7 @@ public:
   // Workspaces
   Mantid::API::MatrixWorkspace_sptr execute(const Mantid::API::MatrixWorkspace_const_sptr &inputWs) const;
 
-  /// Execuate transformation using normalised polynomial binning
+  /// Execute transformation using normalised polynomial binning
   Mantid::API::MatrixWorkspace_sptr executeNormPoly(const Mantid::API::MatrixWorkspace_const_sptr &inputWS,
                                                     std::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
                                                     bool dumpVertexes, const std::string &outputDimensions) const;

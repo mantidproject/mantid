@@ -52,7 +52,7 @@ int LoadTBL::confidence(Kernel::FileDescriptor &descriptor) const {
     Kernel::Strings::extractToEOL(stream, firstLine);
     try {
       std::vector<std::string> columns;
-      if (getCells(firstLine, columns, 16, true) == 17) // right ammount of columns
+      if (getCells(firstLine, columns, 16, true) == 17) // right amount of columns
       {
         if (filePath.compare(filenameLength - 4, 4, ".tbl") == 0) {
           confidence = 40;
@@ -219,7 +219,7 @@ size_t LoadTBL::getCells(std::string line, std::vector<std::string> &cols, size_
       }
       // now go through and split it up manually. Throw if we find ourselves in
       // a
-      // positon where we'd add a 18th value to the vector
+      // position where we'd add a 18th value to the vector
       csvParse(line, cols, quoteBounds, expectedCommas);
     }
   } else {

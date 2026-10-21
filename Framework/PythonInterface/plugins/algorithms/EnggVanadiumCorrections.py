@@ -191,7 +191,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         @param prog :: progress reporter
 
         @returns two workspaces: the integration and the curves. The integration workspace is a
-        matrix workspace as produced by the algotithm 'Integration'. The curves workspace is a
+        matrix workspace as produced by the algorithm 'Integration'. The curves workspace is a
         matrix workspace as produced in the outputs of the algorithm 'Fit'
         """
         prog.report("Calculating integration spectra")
@@ -313,7 +313,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         self.log().information("Fitting Vanadium curve for bank %s, using function '%s', result: %s" % (bank, function_descriptor, success))
 
         failure_msg = (
-            "It seems that this algorithm failed to to fit a function to the summed spectra of a bank. The function definiton was: '%s'"
+            "It seems that this algorithm failed to to fit a function to the summed spectra of a bank. The function definition was: '%s'"
         ) % function_descriptor
 
         output_params_prop_name = "OutputParameters"
@@ -339,7 +339,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
 
     def _prepare_curves_ws(self, curves_dict):
         """
-        Simply concantenates or appends fitting output workspaces as produced by the algorithm Fit (with 3
+        Simply concatenates or appends fitting output workspaces as produced by the algorithm Fit (with 3
         spectra each). The groups of 3 spectra are added sorted by the bank ID (number). This could also
         produce a workspace group with the individual workspaces in it, but the AppendSpectra solution
         seems simpler.

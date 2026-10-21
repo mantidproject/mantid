@@ -1383,7 +1383,7 @@ void WorkspaceTreeWidget::saveToProgram() {
         // Create a new save based on what files the new program can open
         auto alg = m_mantidDisplayModel->createAlgorithm(saveUsing);
 
-        // Get the file extention based on the workspace
+        // Get the file extension based on the workspace
         Property *prop = alg->getProperty("Filename");
         auto *fileProp = dynamic_cast<FileProperty *>(prop);
         std::string ext;

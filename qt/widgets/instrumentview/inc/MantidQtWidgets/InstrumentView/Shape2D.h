@@ -60,7 +60,7 @@ public:
 
   // --- Public pure virtual methods --- //
 
-  /// Virtual "costructor".
+  /// Virtual "constructor".
   virtual Shape2D *clone() const = 0;
   /// modify path so painter.drawPath(path) could be used to draw the shape.
   /// needed for filling in complex shapes
@@ -122,7 +122,7 @@ public:
   void setScalable(bool on) { m_scalable = on; }
   /// Can the shape be scaled by Shape2DCollection's transformation?
   bool isScalable() const { return m_scalable; }
-  /// Set the shape editable. Makes visible the bounding rect and teh control
+  /// Set the shape editable. Makes visible the bounding rect and the control
   /// points.
   void edit(bool on) { m_editing = on; }
   /// Check if the shape is being edited.
@@ -196,7 +196,7 @@ protected:
   bool m_visible;  ///< flag to show or hide the shape
 
 private:
-  /// Instantiate specifc shapes from a type string
+  /// Instantiate specific shapes from a type string
   static Shape2D *loadShape2DFromType(const std::string &type, const std::string &lines);
 
   friend class InstrumentWidgetEncoder;

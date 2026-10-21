@@ -162,7 +162,7 @@ std::size_t estimateNumberOfBins(std::vector<double> const &params, double const
  *step are not included. (Default=True)
  *  @param[in] xMinHint x_1 if params contains only delta_1.
  *  @param[in] xMaxHint x_2 if params contains only delta_1.
- *  @param[in] useReverseLogarithmic wheter or not to use reverse logarithmic for bins
+ *  @param[in] useReverseLogarithmic whether or not to use reverse logarithmic for bins
  *  @param[in] power the power in case of inverse power sum. Must be between 0 and 1 or is ignored.
  *  @return The number of bin boundaries in the new axis
  **/
@@ -671,7 +671,7 @@ bool isConstantValue(std::span<double const> arra) {
   for (; val != val;) {
     ++i;
     if (i == arra.end()) {
-      // all values are contant (NAN)
+      // all values are constant (NAN)
       return true;
     }
     val = *i;

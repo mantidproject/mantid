@@ -31,7 +31,7 @@ namespace Algorithms {
     <LI> GivingWorkspace - The name of the Matrix Workspace containing the
    instrument to transfer. </LI>
     <LI> RecievingWorkspace - The name of the Matrix workspace for same
-   instrument to receive the tranferred instrument. </LI>
+   instrument to receive the transferred instrument. </LI>
     </UL>
 
     The instrument in RecievingWorkspace has its parameters replaced by those in

@@ -62,16 +62,16 @@ class EnggFocusTest(unittest.TestCase):
         # No InputWorkspace property
         self.assertRaises(TypeError, EnggFocus, Bank="1", OutputWorkspace="nop")
 
-        # Mispelled InputWorkspace prop
+        # Misspelled InputWorkspace prop
         self.assertRaises(TypeError, EnggFocus, InputWrkspace="anything_goes", Bank="1", OutputWorkspace="nop")
 
         # Wrong InputWorkspace name
         self.assertRaises(ValueError, EnggFocus, InputWorkspace="foo_is_not_there", Bank="1", OutputWorkspace="nop")
 
-        # mispelled bank
+        # misspelled bank
         self.assertRaises(TypeError, EnggFocus, InputWorkspace=self.__class__._data_ws, bnk="2", OutputWorkspace="nop")
 
-        # mispelled DetectorsPosition
+        # misspelled DetectorsPosition
         tbl = CreateEmptyTableWorkspace()
         self.assertRaises(TypeError, EnggFocus, InputWorkspace=self.__class__._data_ws, Detectors=tbl, OutputWorkspace="nop")
 

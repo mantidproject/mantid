@@ -66,7 +66,7 @@ std::string shorten(const std::string &input, const size_t max_length) {
 /** Return a string with all matching occurence-strings
  *
  * @param input :: input string
- * @param find_what :: will search for all occurences of this string
+ * @param find_what :: will search for all occurrences of this string
  * @param replace_with :: ... and replace them with this.
  * @return the modified string.
  */
@@ -288,7 +288,7 @@ int getPartLine(std::istream &fh, std::string &Out, std::string &Excess, const i
     auto ss = new char[spc + 1];
     const auto clen = static_cast<int>(spc - Out.length());
     fh.getline(ss, clen, '\n');
-    ss[clen + 1] = 0; // incase line failed to read completely
+    ss[clen + 1] = 0; // in case line failed to read completely
     Out += static_cast<std::string>(ss);
     delete[] ss;
     // remove trailing comments
@@ -479,7 +479,7 @@ void writeMCNPX(const std::string &Line, std::ostream &OX) {
 
 //------------------------------------------------------------------------------------------------
 /**
- *  Splits the sting into parts that are space delminated.
+ *  Splits the string into parts that are space delminated.
  *  @param Ln :: line component to strip
  *  @return vector of components
  */
@@ -533,7 +533,7 @@ float getVAXnum(const float A) {
 
   Bd.f = A;
   sign = (Bd.ival & 0x8000) ? -1 : 1;
-  expt = ((Bd.ival & 0x7f80) >> 7); // reveresed ?
+  expt = ((Bd.ival & 0x7f80) >> 7); // reversed ?
   if (!expt)
     return 0.0;
 
@@ -818,7 +818,7 @@ int writeFile(const std::string &Fname, const V<T, A> &X, const V<T, A> &Y) {
 //------------------------------------------------------------------------------------------------
 /**
  *  Write out the three container into a file with
- *  column free-formated data in the form :
+ *  column free-formatted data in the form :
  *   - X  Y Err
  *   If Err does not exist (or is short) 0.0 is substituted.
  *  @param X :: X column
@@ -917,7 +917,7 @@ template <typename T> int setValues(const std::string &Line, const std::vector<i
     }
     cnt++; // Add only to cnt [sc/oc in while loop]
   }
-  // Success since loop only gets here if sc is exhaused.
+  // Success since loop only gets here if sc is exhausted.
   return 0;
 }
 
@@ -1051,7 +1051,7 @@ size_t split_path(const std::string &path, std::vector<std::string> &path_compon
       ic--;
       if (ic < 0)
         throw(std::invalid_argument("path contains relative references to a "
-                                    "folder outside of the seach tree"));
+                                    "folder outside of the search tree"));
       it1 = it2;
       continue;
     }
@@ -1072,7 +1072,7 @@ size_t split_path(const std::string &path, std::vector<std::string> &path_compon
  * @returns :: number of the candidate in the input vector of strings if the
  candidate belongs to the group
                or -1 if it does not.
-               Returns the number of the first maching entry in the group if
+               Returns the number of the first matching entry in the group if
  there are duplicated entries in the group
  */
 int isMember(const std::vector<std::string> &group, const std::string &candidate) {

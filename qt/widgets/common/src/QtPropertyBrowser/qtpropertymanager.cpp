@@ -919,7 +919,7 @@ public:
    QRegularExpression &regExp)
 
     This signal is emitted whenever a property created by this manager
-    changes its currenlty set regular expression, passing a pointer to
+    changes its currently set regular expression, passing a pointer to
     the \a property and the new \a regExp as parameters.
 
     \sa setRegExp()

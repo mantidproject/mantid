@@ -170,7 +170,7 @@ public:
   static ScriptRepositoryTestImpl *createSuite() { return new ScriptRepositoryTestImpl(); }
   static void destroySuite(ScriptRepositoryTestImpl *suite) { delete suite; }
 
-  // ensure that all tests will be perfomed in a fresh repository
+  // ensure that all tests will be performed in a fresh repository
   void setUp() override {
     ConfigServiceImpl &config = ConfigService::Instance();
     backup_local_repository_path = config.getString("ScriptLocalRepository");
@@ -245,7 +245,7 @@ public:
 
     // after the installation, all the others instances of ScriptRepositoryImpl
     // should be valid,
-    // by geting the information from the ScriptRepository settings.
+    // by getting the information from the ScriptRepository settings.
     auto other = std::make_unique<ScriptRepositoryImplLocal>();
     TSM_ASSERT("All the others should recognize that this is a valid repository", other->isValid());
   }
@@ -591,7 +591,7 @@ public:
     TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::BOTH_UNCHANGED);
     TS_ASSERT(repo->fileStatus(dir_name) == Mantid::API::BOTH_UNCHANGED);
 
-    // we will simulate the change of the file, by, changin the local.json
+    // we will simulate the change of the file, by, changing the local.json
     // file
 
     std::ofstream ss(std::string(local_rep).append("/local.json"));
@@ -693,7 +693,7 @@ public:
     // do download
     TS_ASSERT_THROWS_NOTHING(repo->download(file_name));
 
-    // we will simulate the change of the file, by, changin the local.json
+    // we will simulate the change of the file, by, changing the local.json
     // file
 
     std::ofstream ss(std::string(local_rep).append("/local.json"));
@@ -756,7 +756,7 @@ public:
 
     std::string curr_python_direc = config.getString("pythonscripts.directories");
     std::string direc = std::string(local_rep).append("TofConv/");
-    // make all the back slashs direct slashs, for comparing the path
+    // make all the back slashes direct slashes, for comparing the path
     // required for windows.
     boost::replace_all(curr_python_direc, "\\", "/");
     boost::replace_all(direc, "\\", "/");

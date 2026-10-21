@@ -41,7 +41,7 @@ DECLARE_DIALOG(FitDialog)
  * Constructor.
  * @param parent :: Parent dialog.
  * @param domainIndex: Number that allows to identify the InputWorkspace formed
- * with the followin rule InputWorkspace_[domainIndex]
+ * with the following rule InputWorkspace_[domainIndex]
  */
 InputWorkspaceWidget::InputWorkspaceWidget(FitDialog *parent, int domainIndex)
     : QWidget(parent), m_fitDialog(parent), m_domainIndex(domainIndex), m_wsPropName("InputWorkspace"),

@@ -57,7 +57,7 @@ public:
     COOLGUY dude3(dude1);
     TS_ASSERT_EQUALS(dude3, dude1);
 
-    // test constructor from strng literal
+    // test constructor from string literal
     COOLGUY dude4("William");
     TS_ASSERT_EQUALS(dude4, CoolGuys::Bill)
   }

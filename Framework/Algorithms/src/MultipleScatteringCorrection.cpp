@@ -209,7 +209,7 @@ void MultipleScatteringCorrection::exec() {
     //
     setProperty("OutputWorkspace", outWS);
   } else {
-    // With validator guarding the gate, this should never happen. However, just incase it
+    // With validator guarding the gate, this should never happen. However, just in case it
     // does, we should throw an exception.
     throw std::invalid_argument("Invalid method: " + method);
   }

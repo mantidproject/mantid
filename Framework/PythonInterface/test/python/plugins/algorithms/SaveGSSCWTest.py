@@ -143,7 +143,7 @@ class SaveGSSCWTest(unittest.TestCase):
             else:
                 assert len(line) == 80, f"Line {li}: {line} contains {len(line)} characters but not 80. Its last character is [{line[-1]}]"
 
-        # line 0 is emtpy
+        # line 0 is empty
         assert contents[0].strip() == "", "First line must be empty but not >{}<".format(contents[0].strip())
 
         # line 1 is for information

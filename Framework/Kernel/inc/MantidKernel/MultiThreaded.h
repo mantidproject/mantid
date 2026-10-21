@@ -87,7 +87,7 @@ template <typename T, typename BinaryOp> void AtomicOp(std::atomic<T> &f, T d, B
   PARALLEL_SET_DYNAMIC(false);
 #endif //_MSC_VER
 
-/** Begins a block to skip processing is the algorithm has been interupted
+/** Begins a block to skip processing is the algorithm has been interrupted
  * Note the end of the block if not defined that must be added by including
  * PARALLEL_END_INTERRUPT_REGION at the end of the loop
  */
@@ -95,7 +95,7 @@ template <typename T, typename BinaryOp> void AtomicOp(std::atomic<T> &f, T d, B
   if (!m_parallelException && !m_cancel) {                                                                             \
     try {
 
-/** Ends a block to skip processing is the algorithm has been interupted
+/** Ends a block to skip processing is the algorithm has been interrupted
  * Note the start of the block if not defined that must be added by including
  * PARALLEL_START_INTERRUPT_REGION at the start of the loop
  */
@@ -112,7 +112,7 @@ template <typename T, typename BinaryOp> void AtomicOp(std::atomic<T> &f, T d, B
   }                                                                                                                    \
   } // End of if block in PARALLEL_START_INTERRUPT_REGION
 
-/** Adds a check after a Parallel region to see if it was interupted
+/** Adds a check after a Parallel region to see if it was interrupted
  */
 #define PARALLEL_CHECK_INTERRUPT_REGION                                                                                \
   if (m_parallelException) {                                                                                           \
@@ -129,7 +129,7 @@ template <typename T, typename BinaryOp> void AtomicOp(std::atomic<T> &f, T d, B
 #include <omp.h>
 
 /** Includes code to add OpenMP commands to run the next for loop in parallel.
- *   This includes an arbirary check: condition.
+ *   This includes an arbitrary check: condition.
  *   "condition" must evaluate to TRUE in order for the
  *   code to be executed in parallel
  */
@@ -159,7 +159,7 @@ template <typename T, typename BinaryOp> void AtomicOp(std::atomic<T> &f, T d, B
   PRAGMA(omp parallel for firstprivate(variable1, variable2) )
 
 /** Ensures that the next execution line or block is only executed if
- * there are multple threads execting in this region
+ * there are multiple threads executing in this region
  */
 #define IF_PARALLEL if (omp_get_num_threads() > 1)
 
@@ -214,7 +214,7 @@ inline void setMaxCoresToConfig() {
 
 #else //_OPENMP
 
-/// Empty definitions - to enable set your complier to enable openMP
+/// Empty definitions - to enable set your compiler to enable openMP
 #define PARALLEL_FOR_IF(condition)
 #define PARALLEL_FOR_NO_WSP_CHECK()
 #define PARALLEL_FOR_NOWS_CHECK_FIRSTPRIVATE(variable)

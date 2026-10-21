@@ -25,7 +25,7 @@ from mantidqt.utils import AddedToSysPath
 from mantidqt.utils.asynchronous import AsyncTask, BlockingAsyncTaskWithCallback
 from mantidqt.utils.qt import import_qt
 
-# Core object to execute the code with optinal progress tracking
+# Core object to execute the code with optional progress tracking
 CodeExecution = import_qt("..._common", "mantidqt.widgets.codeeditor", "CodeExecution")
 
 EMPTY_FILENAME_ID = "<string>"

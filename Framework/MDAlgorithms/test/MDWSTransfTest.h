@@ -253,7 +253,7 @@ public:
 
     //     // crystal misalighned -- this test does not fully holds
     //     Mantid::Kernel::Matrix<double> Uhor(3,3,true);
-    ////    Horace Umatrix build on the coordinate system, constructed aroung
+    ////    Horace Umatrix build on the coordinate system, constructed around
     /// two vectors u=[0.9,0.1,0] and v=[0.1,0.9,0.1]
     //     // 0.9939   0.1104  0.00
     //     //-0.1097   0.9876  0.1125
@@ -320,7 +320,7 @@ public:
     // 1.2215   -0.2928  -0.1147
     //    0    1.1650   -0.0011
     //    0         0    1.1244
-    Kernel::Matrix<double> U2RLU(3, 3); // 0 deg rotation, these settins results in inverse B-matrix:
+    Kernel::Matrix<double> U2RLU(3, 3); // 0 deg rotation, these settings results in inverse B-matrix:
     U2RLU[0][0] = 1.2215;
     U2RLU[0][1] = -0.2928;
     U2RLU[0][2] = -0.1147;

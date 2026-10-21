@@ -525,7 +525,7 @@ void PlotAsymmetryByLogValue::saveResultsToADS(MatrixWorkspace_sptr &outWS, int 
   // Save results to ADS
   // We can't set an output property to store the results as this algorithm
   // is executed as a child algorithm in the Muon ALC interface
-  // If current results were saved as a property we couln't used
+  // If current results were saved as a property we couldn't used
   // the functionality to re-use previous results in ALC
   AnalysisDataService::Instance().addOrReplace(m_currResName, outWS);
 }
@@ -589,7 +589,7 @@ void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN, std::string &l
       g_log.warning() << "First and last run are not in the same directory. File " << pathLast
                       << " will be used instead.\n";
     } else if (std::filesystem::exists(pathFirst)) {
-      // ...or viceversa
+      // ...or vice-versa
       fnBase = lastBase;
       fnExt = lastExt;
       g_log.warning() << "First and last run are not in the same directory. File " << pathFirst

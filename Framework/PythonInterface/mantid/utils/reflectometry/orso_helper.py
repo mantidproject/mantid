@@ -153,7 +153,7 @@ class MantidORSODataset:
                         if "could not locate density information for material" in str(layers):
                             logger.error(
                                 f"The provided model description '{model}' contains an error because the "
-                                "density information of atleast one of the materials in the stack couldn't "
+                                "density information of at least one of the materials in the stack couldn't "
                                 "be located. Please check that the string follows the correct ORSO format "
                                 "and the materials in the stack are defined correctly"
                             )

@@ -86,12 +86,12 @@ void FitPowderDiffPeaks::init() {
   // Input/output peaks table workspace
   declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("BraggPeakParameterWorkspace", "AnonymousPeak",
                                                                       Direction::Input),
-                  "TableWorkspace containg all peaks' parameters.");
+                  "TableWorkspace containing all peaks' parameters.");
 
   // Input and output instrument parameters table workspace
   declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("InstrumentParameterWorkspace",
                                                                       "AnonymousInstrument", Direction::InOut),
-                  "TableWorkspace containg instrument's parameters.");
+                  "TableWorkspace containing instrument's parameters.");
 
   // Workspace to output fitted peak parameters
   declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("OutputBraggPeakParameterWorkspace",
@@ -136,7 +136,7 @@ void FitPowderDiffPeaks::init() {
   auto propvalidator = std::make_shared<StringListValidator>(genpeakoptions);
   declareProperty("PeakParametersStartingValueFrom", "(HKL) & Calculation", propvalidator,
                   "Choice of how to generate starting values of "
-                  "Bragg peak profile parmeters.");
+                  "Bragg peak profile parameters.");
 
   declareProperty("MinimumPeakHeight", 0.20,
                   "Minimum peak height (with background removed) "
@@ -816,7 +816,7 @@ bool FitPowderDiffPeaks::doFit1PeakBackground(const Workspace2D_sptr &dataws, si
 }
 
 //----------------------------------------------------------------------------------------------
-/** Fit signle peak by Monte Carlo/simulated annealing
+/** Fit single peak by Monte Carlo/simulated annealing
  */
 bool FitPowderDiffPeaks::fitSinglePeakSimulatedAnnealing(const BackToBackExponential_sptr &peak,
                                                          const vector<string> &paramtodomc) {
@@ -1156,7 +1156,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(const BackToBackExponential_sptr
     annhilatedpeak = true;
     return false;
   } else {
-    // Max hieght is larger than user defined minimum.  Fit it
+    // Max height is larger than user defined minimum.  Fit it
     annhilatedpeak = false;
   }
 
@@ -1322,7 +1322,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(const BackToBackExponential_sptr
     FunctionDomain1DVector domain(peakdataws->x(1));
     plotFunction(peak, backgroundfunction, domain);
   } else {
-    // Throw exception if fit peak bad.  This is NOT a PERMANANT solution.
+    // Throw exception if fit peak bad.  This is NOT a PERMANENT solution.
     stringstream errss;
     errss << "Fit Peak @ " << peak->centre() << " Error!  Chi^2 (false) = " << chi2
           << ". Do Not Know How To Proceed To Next Peak!";
@@ -1391,15 +1391,15 @@ void FitPowderDiffPeaks::calculatePeakFitBoundary(size_t ileftpeak, size_t irigh
 //=======================  Fit 1 Set of Overlapped Peaks ======================
 
 //----------------------------------------------------------------------------
-/** Fit peak with flexiblity in multiple steps
- * Prerequisit:
+/** Fit peak with flexibility in multiple steps
+ * Prerequisite:
  * 1. Peak parameters are set up to the peak function
  * 2. Background is removed
  *
  * @param dataws :: The data workspace
  * @param peakfunction :: An instance of the BackToBackExponential peak
  *function
- * @param guessedfwhm: Guessed fwhm in order to constain the peak.  If
+ * @param guessedfwhm: Guessed fwhm in order to constrain the peak.  If
  *negative, then no constraint
  */
 std::pair<bool, double> FitPowderDiffPeaks::doFitPeak(const Workspace2D_sptr &dataws,
@@ -1921,7 +1921,7 @@ void FitPowderDiffPeaks::estimatePeakHeightsLeBail(const Workspace2D_sptr &dataw
     peakvalues.emplace_back(peakvalue);
   }
 
-  // 2. Calcualte peak values
+  // 2. Calculate peak values
   size_t isum = peaks.size();
   for (size_t ipk = 0; ipk < peaks.size(); ++ipk) {
     BackToBackExponential_sptr thispeak = peaks[ipk];
@@ -2395,7 +2395,7 @@ pair<TableWorkspace_sptr, TableWorkspace_sptr> FitPowderDiffPeaks::genPeakParame
 }
 
 //----------------------------------------------------------------------------------------------
-/** Genearte peaks from input workspace;
+/** Generate peaks from input workspace;
  * Each peak within requirement will put into both (1) m_peaks and (2)
  * m_peaksmap
  */
@@ -2421,7 +2421,7 @@ void FitPowderDiffPeaks::genPeaksFromTable(const TableWorkspace_sptr &peakparamw
   vector<map<std::string, int>> peakhkls;
   this->parseBraggPeakTable(peakparamws, peakparametermaps, peakhkls);
 
-  // Create a map to convert the Bragg peak Table paramter name to Back to back
+  // Create a map to convert the Bragg peak Table parameter name to Back to back
   // exponential+pseudo-voigt
   map<string, string> bk2bk2braggmap{{"A", "Alpha"},  {"B", "Beta"},  {"X0", "TOF_h"},
                                      {"I", "Height"}, {"S", "Sigma"}, {"S2", "Sigma2"}};
@@ -2483,7 +2483,7 @@ void FitPowderDiffPeaks::genPeaksFromTable(const TableWorkspace_sptr &peakparamw
       }
     }
     if (deliter != m_vecPeakFunctions.end()) {
-      // Find the real minum
+      // Find the real minimum
       int indminhkl = static_cast<int>(deliter - m_vecPeakFunctions.begin());
       int ind1stpeak = indminhkl - m_numPeaksLowerToMin;
       if (ind1stpeak > 0) {
@@ -2491,7 +2491,7 @@ void FitPowderDiffPeaks::genPeaksFromTable(const TableWorkspace_sptr &peakparamw
         m_vecPeakFunctions.erase(m_vecPeakFunctions.begin(), deliter);
       }
     } else {
-      // Miminum HKL peak does not exist
+      // Minimum HKL peak does not exist
       vector<int> hkl = m_minimumHKL;
       g_log.warning() << "Minimum peak " << hkl[0] << ", " << hkl[1] << ", " << hkl[2] << " does not exit. \n";
     }
@@ -2586,8 +2586,8 @@ BackToBackExponential_sptr FitPowderDiffPeaks::genPeak(map<string, int> hklmap, 
     }
 
     if (caltofonly) {
-      // c) Calcualte d->TOF only
-      //    Calcualte d-spacing
+      // c) Calculate d->TOF only
+      //    Calculate d-spacing
       d_h = m_unitCell.d(hkl[0], hkl[1], hkl[2]);
       //                  d_h = calCubicDSpace(latticesize, hkl[0], hkl[1],
       //                  hkl[2]);
@@ -2600,7 +2600,7 @@ BackToBackExponential_sptr FitPowderDiffPeaks::genPeak(map<string, int> hklmap, 
         return newpeakptr;
       }
 
-      //   Calcualte TOF_h
+      //   Calculate TOF_h
       double tof_h = calThermalNeutronTOF(d_h, dtt1, dtt1t, dtt2t, zero, zerot, width, tcross);
       newpeakptr->setCentre(tof_h);
     } else {
@@ -2937,7 +2937,7 @@ void estimateBackgroundCoarse(const DataObjects::Workspace2D_sptr &dataws, const
   background->setParameter("A0", b0);
   background->setParameter("A1", b1);
 
-  // 4. Calcualte background
+  // 4. Calculate background
   FunctionDomain1DVector domain(X);
   FunctionValues values(domain);
   background->function(domain, values);
@@ -2949,7 +2949,7 @@ void estimateBackgroundCoarse(const DataObjects::Workspace2D_sptr &dataws, const
 
 //-----------------------------------------------------------------------------------------------------------
 /** Estimate peak parameters;
- * Prerequisit:
+ * Prerequisite:
  * (1) Background removed
  * (2) Peak is inside
  * Algorithm: From the top.  Get the maximum value. Calculate the half maximum
@@ -3013,7 +3013,7 @@ bool observePeakParameters(const Workspace2D_sptr &dataws, size_t wsindex, doubl
   double y0 = Y[index];
   double yf = Y[index + 1];
 
-  // Formular for linear iterpolation: X = [(xf-x0)*Y - (xf*y0-x0*yf)]/(yf-y0)
+  // Formular for linear interpolation: X = [(xf-x0)*Y - (xf*y0-x0*yf)]/(yf-y0)
   double xl = linearInterpolateX(x0, xf, y0, yf, halfMax);
 
   double lefthalffwhm = centre - xl;
@@ -3040,7 +3040,7 @@ bool observePeakParameters(const Workspace2D_sptr &dataws, size_t wsindex, doubl
   y0 = Y[index - 1];
   yf = Y[index];
 
-  // Formula for linear iterpolation: X = [(xf-x0)*Y - (xf*y0-x0*yf)]/(yf-y0)
+  // Formula for linear interpolation: X = [(xf-x0)*Y - (xf*y0-x0*yf)]/(yf-y0)
   double xr = linearInterpolateX(x0, xf, y0, yf, halfMax);
 
   double righthalffwhm = xr - centre;

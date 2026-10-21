@@ -15,7 +15,7 @@ scaling data should give the true centre point location of each pixel
 detector in the instrument. This may be obtained by a calibration run
 and post-processing of the results. Since the calibration data may vary
 with time, it is not convenient to store it in the instrument XML
-definition file. Instead it can be stored as an ACSII file with the
+definition file. Instead it can be stored as an ASCII file with the
 extension ".sca" or within the ".raw" file associated with the data, as
 data on the position of each detector (r,theta,phi).
 

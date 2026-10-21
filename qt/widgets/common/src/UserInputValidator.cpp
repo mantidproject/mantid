@@ -226,7 +226,7 @@ bool UserInputValidator::checkRangeIsEnclosed(const QString &outerName, std::pai
  * of a given width.  Due to the nature of doubles, we use a tolerance value.
  *
  * @param lower     :: the lower bound of the range
- * @param binWidth  :: the wdith of the bin
+ * @param binWidth  :: the width of the bin
  * @param upper     :: the upper bound of the range
  * @param tolerance :: the tolerance with which to judge range / bin
  *suitablility
@@ -417,7 +417,7 @@ std::string UserInputValidator::generateErrorMessage() const {
 bool UserInputValidator::isAllInputValid() const { return !m_error; }
 
 /**
- * Sets a validation label that is displyed next to the widget on the UI.
+ * Sets a validation label that is displayed next to the widget on the UI.
  *
  * @param errorLabel Label to change
  * @param valid If the input was valid

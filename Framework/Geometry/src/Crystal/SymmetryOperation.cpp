@@ -63,14 +63,14 @@ void SymmetryOperation::init(const MatrixVectorPair<int, V3R> &matrixVectorPair)
 /// Returns a const reference to the internally stored matrix
 const Kernel::IntMatrix &SymmetryOperation::matrix() const { return m_matrixVectorPair.getMatrix(); }
 
-/// Returns a const reference to the internall stored vector
+/// Returns a const reference to the internally stored vector
 const V3R &SymmetryOperation::vector() const { return m_matrixVectorPair.getVector(); }
 
 /**
  * @brief SymmetryOperation::reducedVector
  *
  * According to ITA, 11.2, the translation component of a symmetry operation
- * can be termined with the following algorithm. First, a matrix \f$W\f$ is
+ * can be terminated with the following algorithm. First, a matrix \f$W\f$ is
  * calculated using the symmetry operation \f$S\f$ and its powers up to its
  * order \f$k\f$, adding the matrices of the resulting operations:
  *
@@ -187,7 +187,7 @@ bool SymmetryOperation::operator==(const SymmetryOperation &other) const {
 /// using the identifier strings.
 bool SymmetryOperation::operator<(const SymmetryOperation &other) const { return m_identifier < other.m_identifier; }
 
-/// Returns true if operatios are not equal
+/// Returns true if operations are not equal
 bool SymmetryOperation::operator!=(const SymmetryOperation &other) const { return !(this->operator==(other)); }
 
 /// Returns the order of the symmetry operation based on the matrix. From

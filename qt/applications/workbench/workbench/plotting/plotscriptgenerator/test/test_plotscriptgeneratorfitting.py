@@ -28,7 +28,7 @@ EXAMPLE_FIT_PROPERTIES = {
     "WorkspaceIndex": 4,
 }
 
-# This is an example of whats returned by the method getFitAlgorithmParameters in the FitPropertyBrowser
+# This is an example of what's returned by the method getFitAlgorithmParameters in the FitPropertyBrowser
 EXAMPLE_FIT_ALG_PROPERTIES = json.dumps({"name": "Fit", "properties": EXAMPLE_FIT_PROPERTIES, "version": 1})
 
 

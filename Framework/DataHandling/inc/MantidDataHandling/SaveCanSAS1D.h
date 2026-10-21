@@ -92,7 +92,7 @@ public:
 protected:
   /// Overwrites Algorithm method.
   void init() override;
-  /// overriden method sets appending for workspace groups
+  /// overridden method sets appending for workspace groups
   void setOtherProperties(API::IAlgorithm *alg, const std::string &propertyName, const std::string &propertyValue,
                           int perioidNum) override;
   /// Overwrites Algorithm method
@@ -110,7 +110,7 @@ protected:
   /// this method searches for xml special characters and replace with entity
   /// references
   void searchandreplaceSpecialChars(std::string &input);
-  /// replaces the charcter at index in the input string with xml entity
+  /// replaces the character at index in the input string with xml entity
   /// reference(eg.replace '&' with "&amp;")
   void replacewithEntityReference(std::string &input, const std::string::size_type &index);
   /// sasroot element

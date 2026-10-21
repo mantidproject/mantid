@@ -51,12 +51,12 @@ public:
   // STATIC METHODS)
   /** return the number of dimensions, calculated by the transformation from the
      workspace.
-     Depending on EMode, this numebr here is either 1 or 2 and do not depend on
+     Depending on EMode, this number here is either 1 or 2 and do not depend on
      input workspace*/
   unsigned int
   getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
                        API::MatrixWorkspace_const_sptr inWS = API::MatrixWorkspace_const_sptr()) const override;
-  /**function returns units ID-s which this transformation prodiuces its ouptut.
+  /**function returns units ID-s which this transformation prodiuces its output.
      It is Momentum and Momentum and DelteE in inelastic modes */
   std::vector<std::string>
   outputUnitID(Kernel::DeltaEMode::Type dEmode,
@@ -110,7 +110,7 @@ protected:
   // instruments; This one is relewant to indirect instruments only;
   float *m_pEfixedArray;
   // pointer to the array which contains detectors masks. TODO: It is here
-  // untill Mantid masks spectra by 0 instead of NaNs, when switched to NaN-s --
+  // until Mantid masks spectra by 0 instead of NaNs, when switched to NaN-s --
   // remove
   int *m_pDetMasks;
   bool m_invertRot; // whether rot matrix requires inverting prior to solving q

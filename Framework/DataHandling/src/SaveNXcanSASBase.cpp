@@ -471,7 +471,7 @@ void SaveNXcanSASBase::addPolarizedData(H5::Group &group, const WorkspaceGroup_s
  */
 void SaveNXcanSASBase::savePolarizedGroup(const WorkspaceGroup_sptr &wsGroup, const std::filesystem::path &path) const {
   auto file = prepareFile(path);
-  // Necessary metdata will be taken from first workspace of the group
+  // Necessary metadata will be taken from first workspace of the group
   auto workspace = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(0));
   areAxesNumeric(workspace, static_cast<int>(getWorkspaceDimensionality(workspace)));
 

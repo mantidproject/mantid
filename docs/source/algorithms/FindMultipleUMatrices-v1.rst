@@ -29,7 +29,7 @@ Peaks with relatively higher d-spacing are easier to index correctly, try using 
 d-spacing peaks to start.
 
 
-Useage
+Usage
 ------
 
 **Example:**

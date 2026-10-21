@@ -19,7 +19,7 @@ namespace Geometry {
  */
 class MANTID_GEOMETRY_DLL PeakShape {
 public:
-  /// Coordinte frame used upon creation
+  /// Coordinate frame used upon creation
   virtual Mantid::Kernel::SpecialCoordinateSystem frame() const = 0;
   /// Serialize
   virtual std::string toJSON() const = 0;

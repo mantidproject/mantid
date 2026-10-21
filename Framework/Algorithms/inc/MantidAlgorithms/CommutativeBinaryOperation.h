@@ -25,7 +25,7 @@ class MANTID_ALGORITHMS_DLL CommutativeBinaryOperation : public BinaryOperation 
 public:
 protected:
   // Overridden BinaryOperation method
-  /// Checks the overall size compatability of two workspaces
+  /// Checks the overall size compatibility of two workspaces
   std::string checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
                                      const API::MatrixWorkspace_const_sptr rhs) const override;
 };

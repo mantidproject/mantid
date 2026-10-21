@@ -29,7 +29,7 @@ class DualPlotMaxentPanePresenter(BasePanePresenter):
         self._view.set_slot_for_selection_changed(self.update_selection)
         # sync view and model
         self._model.set_selection(self.view.get_selection_for_plot)
-        # private memeber
+        # private member
         self._maxent_ws_name = None
         # connections
         self.method_changed = GenericObserverWithArgPassing(self.change_time_plot)

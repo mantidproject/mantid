@@ -53,7 +53,7 @@ protected:
   Cylinder &operator=(const Cylinder &) = delete;
 
 public:
-  /// Public identifer
+  /// Public identifier
   std::string className() const override { return "Cylinder"; }
 
   Cylinder();

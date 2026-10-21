@@ -42,7 +42,7 @@ private:
   /// separate a given string to a vector of comma separated strings
   std::vector<std::string> separateComma(const std::string &);
   /// separates a given string to vector of vector of numbers using colon as the
-  /// delimeter
+  /// delimiter
   std::vector<std::vector<unsigned int>> separateColon(const std::string &input);
   /// separate delimiter string from input string and return a vector of numbers
   /// created from the separated string

@@ -257,7 +257,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         @param  files :: list of input files (i.e. , and + separated string)
         @param  label :: label of error message if nothing left after filtering
         @throws RuntimeError :: when nothing left after filtering
-        @return :: the list of input files that passsed the criteria
+        @return :: the list of input files that passed the criteria
         """
 
         files = SelectNexusFilesByMetadata(files, self._criteria)

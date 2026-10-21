@@ -131,7 +131,7 @@ void NexusFileIO::openNexusWrite(const std::string &fileName, NexusFileIO::optio
       // Use the entry number provided.
       count = entryNumber.value();
     } else {
-      // Have to figure it our ourselves. Requires opening the exisitng file to
+      // Have to figure it our ourselves. Requires opening the existing file to
       // get the information via a search.
       count = findMantidWSEntries();
     }

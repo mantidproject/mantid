@@ -421,11 +421,11 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors, bool bexclu
   // optional properties specify that only some spectra have to be loaded
   bool range_supplied(false);
 
-  // Get the spectrum selection which were specfied by the user
+  // Get the spectrum selection which were specified by the user
   specnum_t spec_min = getProperty("SpectrumMin");
   specnum_t spec_max = getProperty("SpectrumMax");
 
-  // If spearate monitors or excluded monitors is selected then we
+  // If separate monitors or excluded monitors is selected then we
   // need to build up a wsIndex to spectrum number map as well,
   // since we cannot rely on contiguous blocks of detectors
   if (bexcludeMonitor || bseparateMonitors) {
@@ -555,7 +555,7 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors, bool bexclu
       }
 
       // Handle case where the composite is empty since it only contained
-      // monitors, but we want to load the monitors sepearately. In this case we
+      // monitors, but we want to load the monitors separately. In this case we
       // should set the loadBlock to the selected monitors.
       if (bseparateMonitors && composite.isEmpty()) {
         composite = m_monBlockInfo;
@@ -602,7 +602,7 @@ provided a list of spectrum numbers.
 @param range_supplied: if true specifies that the range of values provided
 below have to be processed rather then spectra list
 @param hasSpectraList: did the user specify a spectrum list
-@param dataBlockComposite: a data block composite specfiying the spectra
+@param dataBlockComposite: a data block composite specifying the spectra
 intervals
 **/
 void LoadISISNexus2::buildSpectraInd2SpectraNumMap(bool range_supplied, bool hasSpectraList,
@@ -675,7 +675,7 @@ size_t LoadISISNexus2::prepareSpectraBlocks(std::map<specnum_t, std::string> &mo
  * Check if any spectra block ranges overlap.
  *
  * Iterate over the sorted list of spectra blocks and check
- * if the last element of the preceeding block is less than
+ * if the last element of the preceding block is less than
  * the first element of the next block.
  */
 void LoadISISNexus2::checkOverlappingSpectraRange() {
@@ -999,7 +999,7 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(const NXEntry &entry, std::vector
 
   // If the monitors are to be pulled into the same workspace as the detector
   // information,
-  // then the number of periods and the number of channels has to conincide
+  // then the number of periods and the number of channels has to coincide
   if (nmons > 0 && ((m_detBlockInfo.getNumberOfPeriods() != m_monBlockInfo.getNumberOfPeriods()) ||
                     (m_detBlockInfo.getNumberOfChannels() != m_monBlockInfo.getNumberOfChannels()))) {
     if (!removeMonitors) {
@@ -1012,7 +1012,7 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(const NXEntry &entry, std::vector
     }
 
     // Force the monitors to be removed and separate if the periods and channels
-    // don't conincide
+    // don't coincide
     // between monitors and detectors.
     separateMonitors = true;
     removeMonitors = true;

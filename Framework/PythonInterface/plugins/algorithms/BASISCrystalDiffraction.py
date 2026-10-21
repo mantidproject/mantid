@@ -54,7 +54,7 @@ from mantid.kernel import Direction, FloatArrayProperty, FloatArrayLengthValidat
 
 
 class VDAS(Enum):
-    """Specifices the version of the Data Acquisition System (DAS)"""
+    """Specifies the version of the Data Acquisition System (DAS)"""
 
     v1900_2018 = 0  # Up to Dec 31 2018
     v2019_2100 = 1  # From Jan 01 2018
@@ -118,7 +118,7 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         self._short_inst = "BSS"
         self._long_inst = "BASIS"
         self._temps = None
-        self._bkg = None  # Events workspace for brackground runs
+        self._bkg = None  # Events workspace for background runs
         self._bkg_scale = None
         self._vanadium_files = None
         self._momentum_range = None

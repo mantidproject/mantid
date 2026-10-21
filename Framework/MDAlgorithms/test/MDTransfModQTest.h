@@ -199,7 +199,7 @@ public:
     std::vector<double> minVal(nDims, -FLT_MAX), maxVal(nDims, FLT_MAX);
     WSDescr.setMinMax(minVal, maxVal);
 
-    TSM_ASSERT_THROWS("No detectors yet defined, so should thow run time error: ", ModQTransf.initialize(WSDescr),
+    TSM_ASSERT_THROWS("No detectors yet defined, so should throw run time error: ", ModQTransf.initialize(WSDescr),
                       const std::runtime_error &);
 
     // let's preprocess detectors positions to go any further

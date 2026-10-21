@@ -183,7 +183,7 @@ class BayesStretch2(QuickBayesTemplate):
 
     def make_contour(self, X, Y, Z, spec, name):
         """
-        Create a countour workspace
+        Create a contour workspace
         :param X: the x data for the contour (e.g. FWHM)
         :param Y: the y data for the contour (e.g. beta)
         :param Z: the z data for the contour (e.g. the cost function)
@@ -218,7 +218,7 @@ class BayesStretch2(QuickBayesTemplate):
 
     def make_slice_ws(self, slice_list, x_data, x_unit, name):
         """
-        Creates a workspace of a slice of the countour plot
+        Creates a workspace of a slice of the contour plot
         :param slice_list: the z values from the slice
         :param x_data: the x values for the slice
         :param x_unit: the unit for the x data

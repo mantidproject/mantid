@@ -21,7 +21,7 @@
 namespace MantidQt::MantidWidgets {
 
 /**
-Helper comparitor class used to determine if a workspace is not of a given type.
+Helper comparator class used to determine if a workspace is not of a given type.
 */
 class WorkspaceIsNotOfType {
 private:
@@ -62,8 +62,8 @@ SelectWorkspacesDialog::SelectWorkspacesDialog(QWidget *parent, const std::strin
   const Mantid::API::AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   using VecWorkspaces = std::vector<Mantid::API::Workspace_sptr>;
   VecWorkspaces workspaces = ADS.getObjects();
-  WorkspaceIsNotOfType comparitor(typeFilter);
-  workspaces.erase(std::remove_if(workspaces.begin(), workspaces.end(), comparitor), workspaces.end());
+  WorkspaceIsNotOfType comparator(typeFilter);
+  workspaces.erase(std::remove_if(workspaces.begin(), workspaces.end(), comparator), workspaces.end());
   QStringList tmp;
   for (VecWorkspaces::const_iterator it = workspaces.begin(); it != workspaces.end(); ++it) {
     // if(useFilter && ADS::

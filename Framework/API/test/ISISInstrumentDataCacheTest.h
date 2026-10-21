@@ -93,7 +93,7 @@ public:
   void testInstrWithSuffix() {
     ISISInstrumentDataCache dc(m_dataCacheDir);
     TS_ASSERT_THROWS_EQUALS(dc.getFileParentDirectoryPath("LOQ11111-add"), const std::invalid_argument &e,
-                            std::string(e.what()), "Unsuported format: Suffix detected: -add");
+                            std::string(e.what()), "Unsupported format: Suffix detected: -add");
   }
 
   void testBadInput() {

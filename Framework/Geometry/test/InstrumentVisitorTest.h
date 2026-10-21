@@ -135,7 +135,7 @@ public:
     // Create the visitor.
     const size_t detectorIndex = 0; // Internally we expect detector index to start at 0
 
-    const size_t instrumentIndex = 3; // Instrument is always hightest index.
+    const size_t instrumentIndex = 3; // Instrument is always highest index.
 
     InstrumentVisitor visitor(visitee);
     // Visit everything

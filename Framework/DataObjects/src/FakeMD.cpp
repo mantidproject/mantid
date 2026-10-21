@@ -152,9 +152,9 @@ template <typename MDE, size_t nd> void FakeMD::addFakePeak(typename MDEventWork
  * Function that adds a fake single-crystal peak with a multivariate normal
  * distribution (an ellipsoid) around a central point (x1,...x_N).
  * The ellipsoid is defined by N eigenvectors with N elements and
- * N eigenvalues which correpsond to the variance along the principal axes.
+ * N eigenvalues which correspond to the variance along the principal axes.
  * The peak is generated from an affine transformation of a uniform normal
- * distirbution of variance = 1.
+ * distribution of variance = 1.
  *
  * @param ws A pointer to the workspace that receives the events
  */

@@ -446,7 +446,7 @@ std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(const 
 
   std::vector<std::string> wsIndices;
   boost::split(wsIndices, m_processingInstructionsWorkspaceIndex, boost::is_any_of(":,-+"));
-  // vector of comopnents
+  // vector of components
   std::vector<std::string> detectors;
 
   try {

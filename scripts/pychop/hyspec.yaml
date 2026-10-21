@@ -1,6 +1,6 @@
 name: HYSPEC
 # Input file for PyChop for the HYSPEC spectrometer at SNS.
-# At a minium, the "chopper_system" and "moderator" entries must be present
+# At a minimum, the "chopper_system" and "moderator" entries must be present
 
 # This file uses pulse widths data computed from the SNS_IRP2_TD_BL5_30o70p_fit_fit.dat file
 # See https://jupyter.sns.gov/user/lj7/notebooks/dv/sns-chops/resolution/HYSPEC/moderator%20fitfit.ipynb#
@@ -49,7 +49,7 @@ chopper_system:
 #      isDouble: False           # Is this a double disk system?
 #      isPhaseIndependent: False # Is this disk to be phased independently?
   # Now define how the frequencies of the choppers should be related
-  # This is an NxM matrix A where N is the number of choppers and M is the number of indepdent frequencies
+  # This is an NxM matrix A where N is the number of choppers and M is the number of independent frequencies
   # Such that A.F will give the N required frequencies for each chopper from the M input frequencies
   frequency_matrix:             # HYSPEC is run with one main frequency:
     [[0],
@@ -67,7 +67,7 @@ chopper_system:
   ei_limits: [3.6, 61.0]            # Limits on ei for multirep calculations (reps outside range ignored)
   flux_ref_slot: 40             # Reference slot width (mm) for flux transmission calculation (disk choppers only)
   flux_ref_freq: 180            # Reference final chopper freq (Hz) for flux transmission calc (disk choppers only)
-  # Can define variants which overide one of the above parameters
+  # Can define variants which override one of the above parameters
 
 detector:
   name: He3 PSD tubes

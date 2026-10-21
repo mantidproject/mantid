@@ -15,7 +15,7 @@ namespace MDAlgorithms {
    CnvrtToMD algorithm
    *  from the input parameters of the algorithm and parameters, retrieved from
    input and
-   *  (if availible) output MD workspace
+   *  (if available) output MD workspace
    *
    *  The parameters are mainly related to MDTransfQ3D though are partially
    applicable to MDTransfModQ (scaling)
@@ -26,17 +26,17 @@ namespace MDAlgorithms {
    @date 2012-03-20
 */
 namespace CnvrtToMD {
-/// enum descrines availble momentum scalings, interpreted by this class
+/// enum descrines available momentum scalings, interpreted by this class
 enum CoordScaling {
   NoScaling,   //< momentums in A^-1
   SingleScale, //< momentuns divided by  2*Pi/Lattice -- equivalend to d-spacing
-  // in some sence
+  // in some sense
   OrthogonalHKLScale, //< each momentum component divided by appropriate lattice
   // parameter; equivalent to hkl for reclenear lattice
   HKLScale, //< non-orthogonal system for non-reclenear lattice
   NCoordScalings
 };
-/// enum describes availible target coordinate systems for Q3D mode
+/// enum describes available target coordinate systems for Q3D mode
 enum TargetFrame {
   LabFrame, //< * '''Q (lab frame)''': this calculates the momentum transfer
             //(ki-kf) for each event is calculated in the experimental lab
@@ -115,8 +115,8 @@ protected: // for testing
                                       CnvrtToMD::CoordScaling &ScaleID) const;
 
   CnvrtToMD::TargetFrame findTargetFrame(MDAlgorithms::MDWSDescription &TargWSDescription) const;
-  // helper function which verifies, if the input information availble on the
-  // workspace consistent with the frame requiested
+  // helper function which verifies, if the input information available on the
+  // workspace consistent with the frame requested
   void checkTargetFrame(const MDAlgorithms::MDWSDescription &TargWSDescription,
                         const CnvrtToMD::TargetFrame CoordFrameID) const;
 };

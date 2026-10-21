@@ -414,7 +414,7 @@ public:
 
 /** Removes i-th parameter's tie if it is tied or does nothing.
  * @param i :: The index of the tied parameter.
- * @return True if successfull
+ * @return True if successful
  */
 bool IFunction::removeTie(size_t i) {
   if (i >= nParams()) {
@@ -479,7 +479,7 @@ IConstraint *IFunction::getConstraint(size_t i) const {
 }
 
 /** Remove a constraint
- * @param parName :: The name of a parameter which constarint to remove.
+ * @param parName :: The name of a parameter which constraint to remove.
  */
 void IFunction::removeConstraint(const std::string &parName) {
   size_t iPar = parameterIndex(parName);

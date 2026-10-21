@@ -28,7 +28,7 @@ class ShapeInfo;
 namespace RenderingHelpers {
 /// Render IObjComponent
 MANTID_GEOMETRY_DLL void renderIObjComponent(const IObjComponent &objComp);
-/// Render Traingulated Surface
+/// Render Triangulated Surface
 MANTID_GEOMETRY_DLL void renderTriangulated(detail::GeometryTriangulator &triangulator);
 /// Renders a sphere, cuboid, hexahedron, cone or cylinder
 MANTID_GEOMETRY_DLL void renderShape(const detail::ShapeInfo &shapeInfo);

@@ -30,7 +30,7 @@ protected:
   public:
     explicit AlgorithmTask(T *parent, const std::string &name)
         : m_parent(parent), m_name(name), m_firstTaskFlag(false), m_activeDependantTaskSet(0) {
-      addDependantTaskSet(); // Start with one dependant task set by default
+      addDependantTaskSet(); // Start with one dependent task set by default
     }
     size_t addDependantTaskSet() {
       m_dependantTasks.emplace_back();
@@ -40,7 +40,7 @@ protected:
     void setDependantTask(const std::string &task, const std::string &output_name = "", const std::string &alias = "",
                           const size_t dependantTaskSet = 0) {
       if (dependantTaskSet >= m_dependantTasks.size())
-        throw std::runtime_error("Dependant task set index " + std::to_string(dependantTaskSet) +
+        throw std::runtime_error("Dependent task set index " + std::to_string(dependantTaskSet) +
                                  " is out of range for task " + m_name);
       if (output_name.empty()) {
         // If no output name is provided, assume the whole task output is required
@@ -96,7 +96,7 @@ protected:
     }
 
   private:
-    // vector of dependent task sets: map of dependant task name: dependant outputs (task name, alias pairs)
+    // vector of dependent task sets: map of dependent task name: dependent outputs (task name, alias pairs)
     std::vector<std::unordered_map<std::string, std::vector<std::pair<std::string, std::string>>>> m_dependantTasks;
     std::string m_name;
     std::vector<std::string> m_expectedOutputs;
@@ -174,9 +174,9 @@ protected:
       }
     }
 
-    // check if output from dependant tasks is available in m_algorithmTaskOutputs. This is set by dependant tasks
+    // check if output from dependent tasks is available in m_algorithmTaskOutputs. This is set by dependent tasks
     std::vector<std::string> evaluateDependentTasks() {
-      // If this is the first task, we expect the dependant outputs to be set as algorithm properties rather than
+      // If this is the first task, we expect the dependent outputs to be set as algorithm properties rather than
       // outputs from other tasks
       if (m_firstTaskFlag)
         return {};

@@ -262,7 +262,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   m_save_as_table_xrange_exclude = new QAction("As Detector Mask to table", this);
   m_save_as_table_xrange_exclude->setToolTip("Save current detector mask to a table workspace with x-range. "
                                              "The name of output table workspace is 'MaskBinTable'. "
-                                             "If the output table workspace has alrady exist, then "
+                                             "If the output table workspace has already exist, then "
                                              "the newly masked detectors will be added to output workspace.");
   connect(m_save_as_table_xrange_exclude, SIGNAL(triggered()), this, SLOT(saveMaskToTable()));
 
@@ -697,7 +697,7 @@ void InstrumentWidgetMaskTab::doubleChanged(QtProperty *prop) {
       }
     }
   }
-  // when the user validates the field's edit, the view is immediatly updated
+  // when the user validates the field's edit, the view is immediately updated
   m_instrWidget->updateInstrumentView();
   m_instrWidget->update();
 }
@@ -1053,7 +1053,7 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
 }
 
 /**
- * Generate a unique name for the mask worspace which will be saved in the ADS.
+ * Generate a unique name for the mask workspace which will be saved in the ADS.
  * It will have a form MaskWorkspace[_#]
  */
 std::string InstrumentWidgetMaskTab::generateMaskWorkspaceName(bool temp) const {
@@ -1333,7 +1333,7 @@ std::string InstrumentWidgetMaskTab::saveToProject() const {
 /** Save a mask workspace containing masks applied to the instrument view
  *
  * This will save masks which have been applied to the instrument view actor
- * but have not be applied to the workspace or exported to a seperate
+ * but have not be applied to the workspace or exported to a separate
  * workspace/table already
  *
  * @param name :: the name to call the workspace in the project folder

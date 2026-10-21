@@ -159,7 +159,7 @@ class CursorInfoTest(unittest.TestCase):
     def test_cursor_at_max_data_extents_returns_cursor_info(self):
         # this happens when the cursor is released outside the top and right edges of the colorfill plot in ROI mode
         mock_image = _create_mock_image()
-        cinfo = cursor_info(mock_image, 1, 3)  # max limt of x and y axes
+        cinfo = cursor_info(mock_image, 1, 3)  # max limit of x and y axes
         np.testing.assert_array_equal(cinfo.point, [5, 5])  # shape of data array
 
 

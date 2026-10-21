@@ -114,7 +114,7 @@ public:
       }
 
       for (size_t i = 0; i < test.size(); i++) {
-        TSM_ASSERT_DELTA("wrong sring: " + count[ic] + " column: " + column_name[i] + " obtained from file;",
+        TSM_ASSERT_DELTA("wrong string: " + count[ic] + " column: " + column_name[i] + " obtained from file;",
                          sample_value[i], test[i], 1e-3);
       }
       ic++;
@@ -156,7 +156,7 @@ private:
     loader.setPropertyValue("Workspace", input);
     loader.execute();
 
-    // required to get it passed the algorthms validator
+    // required to get it passed the algorithms validator
     inputWS->setDistribution(true);
 
     return inputWS;

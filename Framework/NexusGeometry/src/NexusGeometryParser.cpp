@@ -345,7 +345,7 @@ private:
    *
    * W = Wn x ... W2 x W1
    *
-   * Each W describes a Homogenous Transformation
+   * Each W describes a Homogeneous Transformation
    *
    * R | T
    * -   -
@@ -735,7 +735,7 @@ public:
     // Open all detector subgroups
     const std::vector<Group> detectorGroups = openDetectorGroups(parent);
     for (auto &detectorGroup : detectorGroups) {
-      // Transform in homogenous coordinates. Offsets will be rotated then bank
+      // Transform in homogeneous coordinates. Offsets will be rotated then bank
       // translation applied.
       auto debug = detectorGroup.getObjName();
       Eigen::Transform<double, 3, 2> transforms = getTransformations(file, detectorGroup);

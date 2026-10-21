@@ -19,7 +19,7 @@ ConfigObserver::ConfigObserver() : m_valueChangeListener(*this, &ConfigObserver:
  * Copying a config observer is the same as default constructing one.
  *
  * It is necessary to create a new listener object with the this pointer
- * in order for the correct object to recieve the notification.
+ * in order for the correct object to receive the notification.
  *
  * @param other The observer to copy.
  */

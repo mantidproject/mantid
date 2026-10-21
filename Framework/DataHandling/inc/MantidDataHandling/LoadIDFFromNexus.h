@@ -51,7 +51,7 @@ public:
   /// Get the parameter correction file, if it exists else return ""
   std::string getParameterCorrectionFile(const std::string &instName);
 
-  /// Read parameter correction file, return applicabel parameter file and
+  /// Read parameter correction file, return applicable parameter file and
   /// whether to append
   void readParameterCorrectionFile(const std::string &correction_file, const std::string &date,
                                    std::string &parameter_file, bool &append);

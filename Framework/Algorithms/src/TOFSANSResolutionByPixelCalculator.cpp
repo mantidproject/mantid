@@ -9,7 +9,7 @@
 namespace Mantid::Algorithms {
 
 /**
- * Calculates the wavelength-independent prefactor for the resolutin calculation
+ * Calculates the wavelength-independent prefactor for the resolution calculation
  * @param r1: the aperture of the source
  * @param r2: the aperture of the sample
  * @param deltaR: the radius uncertainty

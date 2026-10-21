@@ -150,7 +150,7 @@ BinaryStreamWriter &BinaryStreamWriter::operator<<(const uint32_t &value) {
 
 /**
  * write an array of int16_t from the given vector.
- * @param value The array to fille. Its size is increased if necessary
+ * @param value The array to fill. Its size is increased if necessary
  * @param nvals The number values to attempt to write to the stream
  * @return A reference to the BinaryStreamWriter object
  */

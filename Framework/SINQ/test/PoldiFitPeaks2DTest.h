@@ -113,7 +113,7 @@ public:
     TS_ASSERT(integratedTestPeaks != testPeaks);
     TS_ASSERT_EQUALS(integratedTestPeaks->peakCount(), testPeaks->peakCount());
 
-    // checking the actual integration result agains reference.
+    // checking the actual integration result against reference.
     PoldiPeakCollection_sptr integratedReference(new PoldiPeakCollection(PoldiPeakCollection::Integral));
     for (size_t i = 0; i < testPeaks->peakCount(); ++i) {
       PoldiPeak_sptr peak = testPeaks->peak(i)->clonePeak();

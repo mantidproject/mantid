@@ -128,7 +128,7 @@ std::vector<SpectrumPair> getSlicedIntervals(SpectrumPair original, const std::v
            (original.first < toRemove.second) && (toRemove.second < original.second);
   };
 
-  // Use that removeIntervals has oredred, non-overlapping intervals
+  // Use that removeIntervals has ordered, non-overlapping intervals
   // Subtract all the removeIntervals
   std::vector<SpectrumPair> newIntervals;
   for (auto &removeInterval : removeIntervals) {
@@ -163,7 +163,7 @@ std::vector<SpectrumPair> getSlicedIntervals(SpectrumPair original, const std::v
   // There might be some remainder in the original interval, e.g if there
   // wasn't
   // a full overlap removal
-  // or no righ-hand-side overlap of a removal interval
+  // or no right-hand-side overlap of a removal interval
   if ((original.first != INVALIDINTERVALVALUE) && (original.second != INVALIDINTERVALVALUE)) {
     newIntervals.emplace_back(original);
   }
@@ -291,7 +291,7 @@ void DataBlockComposite::truncate(specnum_t specMin, specnum_t specMax) {
   auto lastDataBlockReverseIterator =
       std::find_if(m_dataBlocks.rbegin(), m_dataBlocks.rend(), isNotCompletelyCutOffFromMax);
 
-  // Check the case where the actuall don't have any spectrum numbers in the
+  // Check the case where the actual don't have any spectrum numbers in the
   // truncation interval
   // e.g    |-----|   |------|   |----|    or |-----|   |------|   |----|
   //     | |                                         | |

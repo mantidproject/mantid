@@ -71,7 +71,7 @@ void FindPeaksConvolve::init() {
                   "Minimum Signal/Noise ratio for a peak to be considered significant");
   declareProperty("MergeNearbyPeaks", true,
                   "Attempt to remove inflections in the data, where a local"
-                  " minima/maxima occurs which is not signficiant enough to be considered a peak");
+                  " minima/maxima occurs which is not significant enough to be considered a peak");
   declareProperty("FindHighestDataPointInPeak", false,
                   "When searching for peaks in the raw data around the iOverSigma maxima, take the highest value,"
                   " rather than favouring datapoints closer to the maxima");
@@ -147,7 +147,7 @@ const std::string FindPeaksConvolve::validateWorkspaceIndexInput() const {
     const int endWSIndex = m_specNums.back();
     int specCount = static_cast<int>(m_inputDataWS->getNumberHistograms());
     if (startWSIndex > specCount - 1 || endWSIndex > specCount - 1) {
-      err_str += "Specified Workspace indicies out of range. ";
+      err_str += "Specified Workspace indices out of range. ";
     }
   }
   return err_str;

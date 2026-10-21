@@ -259,7 +259,7 @@ std::shared_ptr<CSGObject> ShapeFactory::createShape(Poco::XML::Element *pElem) 
     }
 
     // Here do the actually swapping of strings
-    // but only if the algebra containes all the shapes
+    // but only if the algebra contains all the shapes
     if (allFound.size() == idMatching.size()) {
       std::map<size_t, std::string, std::greater<size_t>>::iterator iter2;
       for (iter2 = allFound.begin(); iter2 != allFound.end(); ++iter2) {
@@ -269,7 +269,7 @@ std::shared_ptr<CSGObject> ShapeFactory::createShape(Poco::XML::Element *pElem) 
     }
   }
   if (defaultAlgebra) {
-    algebraFromUser = ""; // reset in case we are overwriten invalid string
+    algebraFromUser = ""; // reset in case we are overwritten invalid string
     std::map<std::string, std::string>::iterator iter;
     for (iter = idMatching.begin(); iter != idMatching.end(); ++iter) {
       algebraFromUser.append(iter->second + " "); // default is intersection
@@ -331,7 +331,7 @@ std::string ShapeFactory::parseSphere(Poco::XML::Element *pElem, std::map<int, s
   V3D centre = pElemCentre ? parsePosition(pElemCentre) : DEFAULT_CENTRE;
 
   // Only rotate the normal vector by the rotate-all and goniometer tags
-  // Special case: do not obey rotate tag as rotation around the centre of sphere is unneccessary
+  // Special case: do not obey rotate tag as rotation around the centre of sphere is unnecessary
   if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, true)) {
     // Apply automatic rotation due to the rotate-all tag
     centre.rotate(m_rotateAllMatrix);
@@ -1379,7 +1379,7 @@ Poco::XML::Element *ShapeFactory::getShapeElement(Poco::XML::Element *pElem, con
  * @throw std::invalid_argument if XML string is invalid.
  */
 Poco::XML::Element *ShapeFactory::getOptionalShapeElement(Poco::XML::Element *pElem, const std::string &name) {
-  // Allow zero or one occurances of subelements with the given name.
+  // Allow zero or one occurrences of subelements with the given name.
   Poco::AutoPtr<NodeList> pNL = pElem->getElementsByTagName(name);
   if (pNL->length() == 0)
     return nullptr;

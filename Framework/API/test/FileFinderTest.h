@@ -520,7 +520,7 @@ public:
 
     // Refs #4916 -- The FileFinder findRun() method is revised to continue
     // search using the facility supplied extensions
-    // if the user supplied filename (containg extension) couldn't be found.
+    // if the user supplied filename (containing extension) couldn't be found.
     // Regardless of the platform, this test case
     // would be successful now.
     TS_ASSERT(std::filesystem::exists(pathOn));

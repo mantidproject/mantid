@@ -107,7 +107,7 @@ public:
     distance = V3D(-2, -2, 0); // Bottom right
     TSM_ASSERT_EQUALS("Bottom right not calculated properly", 1, strategy.weightAt(distance));
     distance = V3D(2, 0, 0); // zero y at max x.
-    TSM_ASSERT_EQUALS("Max x with y = 0 not calculated propertly", 3, strategy.weightAt(distance));
+    TSM_ASSERT_EQUALS("Max x with y = 0 not calculated properly", 3, strategy.weightAt(distance));
     distance = V3D(0, 0, 0); // No distance
     TSM_ASSERT_EQUALS("Center not calculated properly", 5, strategy.weightAt(distance));
   }

@@ -97,7 +97,7 @@ void AlgorithmObserver::stopObservingManager() {
 
 /// @cond Doxygen cannot handle the macro around the argument name
 
-/** Handler of the progress notifications. Must be overriden in inherited
+/** Handler of the progress notifications. Must be overridden in inherited
 classes.
 The default handler is provided (doing nothing).
 @param alg :: Pointer to the algorithm sending the notification.
@@ -115,25 +115,25 @@ void AlgorithmObserver::progressHandle(const IAlgorithm *alg, double p, const st
   UNUSED_ARG(progressPrecision)
 }
 
-/** Handler of the start notifications. Must be overriden in inherited classes.
+/** Handler of the start notifications. Must be overridden in inherited classes.
 The default handler is provided (doing nothing).
 @param alg :: Shared Pointer to the algorithm sending the notification.
 */
 void AlgorithmObserver::startingHandle(IAlgorithm_sptr alg) { UNUSED_ARG(alg) }
 
-/** Handler of the start notifications. Must be overriden in inherited classes.
+/** Handler of the start notifications. Must be overridden in inherited classes.
 The default handler is provided (doing nothing).
 @param alg :: Pointer to the algorithm sending the notification.
 */
 void AlgorithmObserver::startHandle(const IAlgorithm *alg) { UNUSED_ARG(alg) }
 
-/** Handler of the finish notifications. Must be overriden in inherited classes.
+/** Handler of the finish notifications. Must be overridden in inherited classes.
  The default handler is provided (doing nothing).
  @param alg :: Pointer to the algorithm sending the notification.
 */
 void AlgorithmObserver::finishHandle(const IAlgorithm *alg) { UNUSED_ARG(alg) }
 
-/** Handler of the error notifications. Must be overriden in inherited classes.
+/** Handler of the error notifications. Must be overridden in inherited classes.
 The default handler is provided (doing nothing).
 @param alg :: Pointer to the algorithm sending the notification.
 @param what :: The error message

@@ -135,7 +135,7 @@ private:
                         const double &minvalue, const double &maxvalue, const Types::Core::DateAndTime &startT,
                         const Types::Core::DateAndTime &stopT, const bool &filterIncrease, const bool &filterDecrease);
 
-  /// Determine the chaning direction of log value
+  /// Determine the changing direction of log value
   int determineChangingDirection(int startindex);
 
   /// Find the end of the run

@@ -114,7 +114,7 @@ public:
   /// Request to cancel processing the batch
   void cancelBatch();
 
-  /// Sets if the execuion should be stopped if an error is detected
+  /// Sets if the execution should be stopped if an error is detected
   void stopOnFailure(bool stopOnFailure);
 
 signals:

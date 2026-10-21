@@ -331,7 +331,7 @@ API::MatrixWorkspace_sptr ReflectometrySumInQ::constructIvsLamWS(const API::Matr
   // Create the output workspace
   API::MatrixWorkspace_sptr outputWS = DataObjects::create<DataObjects::Workspace2D>(detectorWS, 1, modelHistogram);
 
-  // Set the detector IDs and specturm number from the twoThetaR detector.
+  // Set the detector IDs and spectrum number from the twoThetaR detector.
   const auto &thetaSpec = detectorWS.getSpectrum(refAngles.referenceWSIndex);
   auto &outSpec = outputWS->getSpectrum(0);
   outSpec.clearDetectorIDs();

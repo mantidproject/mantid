@@ -267,7 +267,7 @@ class MatchPeaks(PythonAlgorithm):
                 if abs(peak_plus_error_bin - mid_bin) < tolerance and fit["FitStatus"] == "success":
                     # fit succeeded, and fitted peak is within acceptance range, take it
                     peak_bin[i] = input_ws.yIndexOfX(fit["PeakCentre"])
-                    logger.debug("Fit successfull, peak inside tolerance")
+                    logger.debug("Fit successful, peak inside tolerance")
                 elif abs(max_pos - mid_bin) < tolerance:
                     # fit not reliable, take the maximum if within acceptance
                     peak_bin[i] = max_pos

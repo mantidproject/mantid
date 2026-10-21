@@ -131,7 +131,7 @@ void addSample(const Mantid::API::MatrixWorkspace_sptr &ws, const Environment en
                                    1 /*number density*/)));
       ws->mutableSample().setShape(shape);
     } else if (environment == Environment::CylinderSamplePlusGV) {
-      // Define a cylindrical sample shape orientated with axis perpedicular to beam
+      // Define a cylindrical sample shape orientated with axis perpendicular to beam
       constexpr double sampleRadius{0.01};
       constexpr double sampleHeight{0.1};
       const V3D sampleBaseCentre{0., -sampleHeight / 2., 0.};
@@ -447,7 +447,7 @@ public:
     auto yData = outputWS->getSpectrum(0).y();
 
     constexpr double delta(1e-02);
-    // calculated theoretical absoprtion for this cylinder, using https://doi.org/10.1107/S0567739471000652
+    // calculated theoretical absorption for this cylinder, using https://doi.org/10.1107/S0567739471000652
     const double calculatedAttFactor = 0.14047;
     TS_ASSERT_DELTA(calculatedAttFactor / yData[0], 1.0, delta); // 'within 1%' tolerance
   }

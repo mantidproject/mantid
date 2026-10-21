@@ -343,7 +343,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
             self.set_fit_enabled(False)
             self.set_superplot_enabled(False)
 
-        # reenable script generation for colormaps
+        # re-enable script generation for colormaps
         if self.is_colormap(fig):
             self.set_generate_plot_script_enabled(True)
 

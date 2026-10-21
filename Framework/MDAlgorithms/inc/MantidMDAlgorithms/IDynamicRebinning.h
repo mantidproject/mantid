@@ -9,10 +9,10 @@
 //
 namespace Mantid {
 namespace MDAlgorithms {
-/**   Class provides commont interface for various classes performing rebinning
+/**   Class provides common interface for various classes performing rebinning
  operations;
 
- A rebinning class is selected from availible classes which do rebinning
+ A rebinning class is selected from available classes which do rebinning
  operations on
  user request and the ability to do the job.
 
@@ -36,13 +36,13 @@ public:
   virtual size_t preselect_cells() = 0;
   /** function takes input multidimensional data points (pixels, events) stored
      in the source data buffer and
-     *  rebins these data (adds them) to MD image of the taget workspace;
+     *  rebins these data (adds them) to MD image of the target workspace;
      * Alternative (USA)vdescription: Identifies the locations of the datapoints
      in the multidimensional grid of the target workspace
      * and calculates the statistical properties of these points
 
       * Outputs:
-        Returns    true if more data availible and need to be rebinned;
+        Returns    true if more data available and need to be rebinned;
     */
   virtual bool rebin_data_chunk() = 0;
   /** The same as rebin_data_chunk but retains the datapoints (pixels)

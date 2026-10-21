@@ -99,7 +99,7 @@ void ApplyTransmissionCorrection::exec() {
   if (thetaDependent) {
     MatrixWorkspace_sptr inputWS = getProperty(PropertyNames::INPUT_WKSP);
 
-    // initial values of tranmission come from the value
+    // initial values of transmission come from the value
     HistogramY TrIn(inputWS->y(0).size(), trans_value);
     HistogramE ETrIn(inputWS->y(0).size(), trans_error);
 

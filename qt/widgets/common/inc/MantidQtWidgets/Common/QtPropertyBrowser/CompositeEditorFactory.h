@@ -10,9 +10,9 @@
 #include <QPushButton>
 
 /**
- * Composite factory for a particular property manger type.
+ * Composite factory for a particular property manager type.
  * Client must specify a secondary factory for properties with a particular
- * option set. If this option is set crates editor using the scondary factory.
+ * option set. If this option is set crates editor using the secondary factory.
  * Creates the default editor (with the factory passed to the constructor)
  * if the option isn't set or property doesn't have this option.
  * @param ManagerType :: Manager class to use

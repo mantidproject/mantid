@@ -352,7 +352,7 @@ public:
 
   void test_intersection_one_empty() { runIntersectionTest(CHRISTMAS, TimeROI(), 0.); }
 
-  // this is a test lifted from a situation that arrises in DataHandlingTest and FilterLog
+  // this is a test lifted from a situation that arises in DataHandlingTest and FilterLog
   void test_intersection_ISISRunLogs() {
     TimeROI left;
     left.addROI("2008-Jun-17 11:20:09", "2008-Jun-17 11:20:11");
@@ -373,7 +373,7 @@ public:
     TimeROI intersection;
     intersection.addROI("2008-Jun-17 11:21:16", "2008-Jun-17 11:21:18");
 
-    // intersection with the right answer should yeild the right answer
+    // intersection with the right answer should yield the right answer
     runIntersectionTest(left, intersection, intersection.durationInSeconds());
     runIntersectionTest(right, intersection, intersection.durationInSeconds());
     runIntersectionTest(left, right, intersection.durationInSeconds());

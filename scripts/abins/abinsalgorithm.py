@@ -49,7 +49,7 @@ import abins.parameters
 
 
 class AbinsAlgorithm:
-    """Class providing shared utility for multiple inheritence by 1D, 2D implementations"""
+    """Class providing shared utility for multiple inheritance by 1D, 2D implementations"""
 
     def get_common_properties(self) -> None:
         """From user input, set properties common to Abins 1D and 2D versions"""

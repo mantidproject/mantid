@@ -60,7 +60,7 @@ public:
         // last point
         return x[m_index] - x[m_index - 1];
       } else {
-        // everything inbetween
+        // everything in between
         return 0.5 * (x[m_index + 1] - x[m_index - 1]);
       }
     } else {

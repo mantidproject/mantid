@@ -391,9 +391,9 @@ public:
 
     m_c.eigenSystemHermitian(v, m_cr);
 
-    auto indicies = v.sortIndices();
-    v.sort(indicies);
-    m_cr.sortColumns(indicies);
+    auto indices = v.sortIndices();
+    v.sort(indices);
+    m_cr.sortColumns(indices);
 
     auto res = m_cr.ctr() * m_cr;
 

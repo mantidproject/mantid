@@ -29,7 +29,7 @@ You can choose to attempt a full recovery, to open a recovery script or not to a
 
 If full project recovery runs successfully the scripting window will remain open in MantidWorkbench. It is safe to close this after a recovery.
 
-If Project Recovery fails to run successfully it will open a GUI that will give users the option to select a specific checkpoint, try the last checkpoint again, open a specific checkpoint in a script window or start mantid normally without any project recovery occuring. (See image)
+If Project Recovery fails to run successfully it will open a GUI that will give users the option to select a specific checkpoint, try the last checkpoint again, open a specific checkpoint in a script window or start mantid normally without any project recovery occurring. (See image)
 
 .. image:: ../images/ProjectRecoveryFailureDialog.png
     :width: 400px
@@ -38,7 +38,7 @@ If Project Recovery fails to run successfully it will open a GUI that will give 
 
 **NB** This is an early version of project recovery. We think that it is a lot better than nothing, but we know it won't always work. Known caveats are listed below. Moreover, we would sincerely appreciate feedback and input from users. Contact us at `mantid-help@mantidproject.org <mailto:mantid-help@mantidproject.org>`__.
 
-The settings for project recovery, including switiching the feature on/off, and how to set them, are listed at the bottom of this page.
+The settings for project recovery, including switching the feature on/off, and how to set them, are listed at the bottom of this page.
 
 Caveats
 -------

@@ -29,7 +29,7 @@ class GeneralFittingModel(BasicFittingModel):
     """
 
     def __init__(self, context: MuonContext, fitting_context: GeneralFittingContext):
-        """Initialize the GeneralFittingModel with emtpy fit data."""
+        """Initialize the GeneralFittingModel with empty fit data."""
         super(GeneralFittingModel, self).__init__(context, fitting_context)
 
     def clear_simultaneous_fit_function(self) -> None:

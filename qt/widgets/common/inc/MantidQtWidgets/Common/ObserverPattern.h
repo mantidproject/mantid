@@ -58,7 +58,7 @@ public:
   VoidObserver() : m_slot(nullptr) {};
   ~VoidObserver() {};
   /**
-   * Sets the function/slot for the oberver
+   * Sets the function/slot for the observer
    * @param func:: the void function we want to call when the observer
    * sends a notify signal
    **/

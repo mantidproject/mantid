@@ -174,7 +174,7 @@ void LoadRawHelper::readTitle(FILE *file, std::string &title) {
 }
 /**skips the histogram from raw file
  *@param file :: pointer to the raw file
- *@param hist :: postion in the file to skip
+ *@param hist :: position in the file to skip
  */
 void LoadRawHelper::skipData(FILE *file, int hist) { isisRaw().skipData(file, hist); }
 void LoadRawHelper::skipData(FILE *file, int64_t hist) { skipData(file, static_cast<int>(hist)); }
@@ -200,7 +200,7 @@ void LoadRawHelper::reset() { m_isis_raw.reset(); }
 
 /**reads the histogram from raw file
  * @param file :: pointer to the raw file
- * @param hist :: postion in the file to read
+ * @param hist :: position in the file to read
  * @return flag is data is read
  */
 bool LoadRawHelper::readData(FILE *file, int hist) { return isisRaw().readData(file, hist); }
@@ -443,7 +443,7 @@ void LoadRawHelper::setWorkspaceData(const DataObjects::Workspace2D_sptr &newWor
     newWorkspace->setSharedX(wsIndex, timeChannelsVec[0]);
   else {
 
-    // Use std::vector::at just incase spectrum missing from spec array
+    // Use std::vector::at just in case spectrum missing from spec array
     newWorkspace->setSharedX(wsIndex, timeChannelsVec.at(m_specTimeRegimes[nspecNum] - 1));
   }
 }

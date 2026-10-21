@@ -55,7 +55,7 @@ public:
   }
 
   /**
-   * Test convesion of a MD workspace to a 2D MatrixWorkspace.
+   * Test conversion of a MD workspace to a 2D MatrixWorkspace.
    *
    * @param ndims :: Number of dimensions in the input MDHistoWorkspace. ndims
    *>= 2.

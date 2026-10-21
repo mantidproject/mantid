@@ -116,7 +116,7 @@ public:
 
   /** @name Public methods */
   //@{
-  /// Toggle between the normal view and the "filpped" view (from behind)
+  /// Toggle between the normal view and the "flipped" view (from behind)
   void setFlippedView(bool on);
   /// Is the surface showing the flipped view?
   bool isFlippedView() const { return m_flippedView; }
@@ -161,7 +161,7 @@ protected:
    * normal
    * to the surface at the detector's position.
    * @param udet :: A detector.
-   * @param R :: The result rotaion.
+   * @param R :: The result rotation.
    */
   virtual void rotate(const UnwrappedDetector &udet, Mantid::Kernel::Quat &R) const = 0;
   virtual void calcUV(UnwrappedDetector &udet);
@@ -169,7 +169,7 @@ protected:
   virtual QString getDimInfo() const;
   /// Called in non-picking drawSimpleToImage to draw something other than
   /// detectors
-  /// Useful for debuging
+  /// Useful for debugging
   virtual void drawCustom(QPainter * /*unused*/) const {}
   //@}
 

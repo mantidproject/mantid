@@ -152,7 +152,7 @@ public:
   /// Delete the peaks workspace.
   void deletePeaksWorkspace(const Mantid::API::IPeaksWorkspace_sptr &pws);
 
-  /// Alter data from a script. These just foward calls to the 3D widget
+  /// Alter data from a script. These just forward calls to the 3D widget
   void setColorMapMinValue(double minValue);
   void setColorMapMaxValue(double maxValue);
   void setColorMapRange(double minValue, double maxValue);

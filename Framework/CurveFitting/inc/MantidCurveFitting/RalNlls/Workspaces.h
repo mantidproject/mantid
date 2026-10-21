@@ -148,7 +148,7 @@ struct nlls_options {
 
   // O U T P U T   C O N T R O L S !!!
 
-  /// Shall we output progess vectors at termination of the routine?
+  /// Shall we output progress vectors at termination of the routine?
   bool output_progress_vectors = false;
 
 }; // struct nlls_options

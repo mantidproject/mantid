@@ -709,7 +709,7 @@ class PyChopGui(QMainWindow):
         return txt
 
     def showText(self, *args):
-        # The args are not used, but button clicked returns a bool for cheked state
+        # The args are not used, but button clicked returns a bool for checked state
         """
         Creates a dialog to show the generated text output.
         """
@@ -737,7 +737,7 @@ class PyChopGui(QMainWindow):
         self.txtloop.exec()
 
     def saveText(self, *args):
-        # The args are not used, but button clicked returns a bool for cheked state
+        # The args are not used, but button clicked returns a bool for checked state
         """
         Saves the generated text to a file (opens file dialog).
         """

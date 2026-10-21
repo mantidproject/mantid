@@ -30,7 +30,7 @@ GravitySANSHelper::GravitySANSHelper(const API::SpectrumInfo &spectrumInfo, cons
   // the full calculation only once increases the speed a lot
   m_dropPerAngstrom2 = gravitationalDrop(spectrumInfo.l2(index), 1e-10, extraLength);
 }
-/** Caclulates the sin of the that the neutron left the sample at, before the
+/** Calculates the sin of the that the neutron left the sample at, before the
  * effect of gravity
  *  @param wavAngstroms :: the neutrons' wave length in Angstoms
  *  @return the sin of theta

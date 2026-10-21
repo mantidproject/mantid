@@ -23,7 +23,7 @@ const int UNSET_GROUP{-1};
 // Register the workspace
 DECLARE_WORKSPACE(GroupingWorkspace)
 
-/** Constructor, buiding with give dimensions
+/** Constructor, building with give dimensions
  * @param numvectors: input size of the vector/histogram number for this
  * workspace
  */

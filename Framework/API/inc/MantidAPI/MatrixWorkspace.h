@@ -407,7 +407,7 @@ public:
   virtual void generateHistogram(const std::size_t index, std::span<double const> X, MantidVec &Y, MantidVec &E,
                                  bool skipError = false) const = 0;
 
-  /// Return a vector with the integrated counts for all spectra withing the
+  /// Return a vector with the integrated counts for all spectra within the
   /// given range
   virtual void getIntegratedSpectra(std::vector<double> &out, const double minX, const double maxX,
                                     const bool entireRange) const;
@@ -490,7 +490,7 @@ public:
   uint64_t getNEvents() const override { return this->getNPoints(); }
   /// Dimension id for x-dimension.
   static const std::string xDimensionId;
-  /// Dimensin id for y-dimension.
+  /// Dimension id for y-dimension.
   static const std::string yDimensionId;
   /// Generate a line plot through the matrix workspace.
   LinePlot getLinePlot(const Mantid::Kernel::VMD &start, const Mantid::Kernel::VMD &end,
@@ -508,7 +508,7 @@ public:
 
   /// Apply masking.
   void setMDMasking(std::unique_ptr<Mantid::Geometry::MDImplicitFunction> maskingRegion) override;
-  /// Clear exsting masking.
+  /// Clear existing masking.
   void clearMDMasking() override;
 
   /// @return the special coordinate system used if any.
@@ -555,7 +555,7 @@ public:
   void invalidateCommonBinsFlag() { m_isCommonBinsFlagValid.store(false); }
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   MatrixWorkspace(const MatrixWorkspace &other);
 
   MatrixWorkspace();

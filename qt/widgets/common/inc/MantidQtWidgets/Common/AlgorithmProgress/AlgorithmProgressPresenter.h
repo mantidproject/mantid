@@ -53,7 +53,7 @@ private:
   /// The view that contains the progress widget.
   /// The creator of the view also owns the view (Python), not this presenter.
   IAlgorithmProgressWidget *m_view;
-  /// Atimer to meaure how long since the last progress report
+  /// Atimer to measure how long since the last progress report
   Mantid::Kernel::Timer m_timer;
 };
 } // namespace MantidWidgets

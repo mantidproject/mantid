@@ -47,10 +47,10 @@ public:
     Mantid::API::CoordTransform *transform = nullptr;
     TS_ASSERT_THROWS_NOTHING(transform = parser.createTransform(pRootElem));
 
-    // Circular check. Acutally hard to debug, but gives certainty that
+    // Circular check. Actually hard to debug, but gives certainty that
     // serialization and deserialization cause no side effects.
-    TSM_ASSERT_EQUALS("Parsing has not occured correctly if the output is not "
-                      "equal to the intput",
+    TSM_ASSERT_EQUALS("Parsing has not occurred correctly if the output is not "
+                      "equal to the input",
                       transform->toXMLString(), xmlToParse);
 
     delete transform;

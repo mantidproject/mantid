@@ -139,7 +139,7 @@ public:
                       expectedNumberOfSpectra, numberOfSpectra);
 
     TSM_ASSERT_EQUALS("The min should be the absolute min of 2", min1, min);
-    TSM_ASSERT_EQUALS("The max should be the aboslute max of 49", max2, max);
+    TSM_ASSERT_EQUALS("The max should be the absolute max of 49", max2, max);
   }
 
   void test_adding_composites_prouduces_correct_new_composite() {

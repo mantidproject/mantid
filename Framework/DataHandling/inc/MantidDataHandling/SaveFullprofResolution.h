@@ -52,7 +52,7 @@ private:
   /// Parse input workspace to map of parameters
   void parseTableWorkspace();
 
-  /// Check wether a profile parameter map has the parameter
+  /// Check whether a profile parameter map has the parameter
   bool has_key(std::map<std::string, double> profmap, const std::string &key);
 
   /// Map containing the name of value of each parameter required by .irf file

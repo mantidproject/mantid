@@ -66,7 +66,7 @@ private:
   void excludeMonitors(FILE *file, const int &period, const std::vector<specnum_t> &monitorList,
                        const DataObjects::Workspace2D_sptr &ws_sptr);
 
-  /// creates output workspace whcih includes monitors
+  /// creates output workspace which includes monitors
   void includeMonitors(FILE *file, const int64_t &period, const DataObjects::Workspace2D_sptr &ws_sptr);
 
   /// creates two output workspaces none normal workspace and separate one for

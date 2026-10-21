@@ -189,7 +189,7 @@ void LoadHFIRSANS::setTimes() {
 }
 
 /**
- * Sets the wavelength as class atributes
+ * Sets the wavelength as class attributes
  * */
 void LoadHFIRSANS::setWavelength() {
 
@@ -368,7 +368,7 @@ void LoadHFIRSANS::createWorkspace() {
   auto countingTime = boost::lexical_cast<double>(m_metadata["Counters/time"]);
 
   int specID = 0;
-  // Store monitor counts in the beggining
+  // Store monitor counts in the beginning
   storeValue(specID++, monitorCounts, monitorCounts > 0 ? sqrt(monitorCounts) : 0.0, m_wavelength, m_dwavelength);
 
   storeValue(specID++, countingTime, 0.0, m_wavelength, m_dwavelength);
@@ -400,7 +400,7 @@ template <class T> void LoadHFIRSANS::addRunTimeSeriesProperty(const std::string
 /**
  * Sets the beam trap as Run Property
  * There's several beamstrap position. We have to find the maximum of every
- *motor above certain treshold.
+ *motor above certain threshold.
  * The maximum motor position will be the trap in use.
  *
  * Notes:

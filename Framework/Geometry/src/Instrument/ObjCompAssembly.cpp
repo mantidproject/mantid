@@ -584,7 +584,7 @@ std::shared_ptr<IObject> ObjCompAssembly::createOutline() {
 
 /**
  * Sets the outline shape for this assembly
- * @param obj :: The outline shape created previously fith createOutline()
+ * @param obj :: The outline shape created previously with createOutline()
  */
 void ObjCompAssembly::setOutline(std::shared_ptr<const IObject> obj) { m_shape = std::move(obj); }
 

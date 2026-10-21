@@ -175,7 +175,7 @@ void LoadMD::exec() {
   // QConvention (Inelastic or Crystallography)
   this->loadQConvention();
 
-  // Display normalization settting
+  // Display normalization setting
   if (m_file->hasAddress("/" + entryName + "/" + VISUAL_NORMALIZATION_KEY)) {
     this->loadVisualNormalization(VISUAL_NORMALIZATION_KEY, m_visualNormalization);
   }
@@ -632,7 +632,7 @@ CoordTransform *LoadMD::loadAffineMatrix(const std::string &entry_name) {
 
 /**
  * Set MDFrames for workspaces from legacy files
- * @param ws:: poitner to the workspace which needs to be corrected
+ * @param ws:: pointer to the workspace which needs to be corrected
  */
 void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(const API::IMDWorkspace_sptr &ws) {
 
@@ -686,7 +686,7 @@ void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(const API::IMDWorkspace_sptr &w
       setMDFrameAlg->executeAsChildAlg();
     }
   } catch (...) {
-    g_log.warning() << "LoadMD: An issue occured while trying to correct "
+    g_log.warning() << "LoadMD: An issue occurred while trying to correct "
                        "MDFrames. Trying to revert to original.\n";
     // Revert to the old frames.
     Algorithm_sptr setMDFrameAlg = this->createChildAlgorithm("SetMDFrame");

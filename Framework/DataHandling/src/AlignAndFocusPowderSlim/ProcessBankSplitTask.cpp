@@ -63,7 +63,7 @@ void ProcessBankSplitTask::operator()(const tbb::blocked_range<size_t> &range) c
     std::string tof_unit;
     Nexus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
     // now the calibration for the output group can be created
-    // which detectors go into the current group - assumes ouput spectrum number is one more than workspace index
+    // which detectors go into the current group - assumes output spectrum number is one more than workspace index
     const auto calibrations = this->getCalibrations(tof_unit, bank_index);
 
     // declare arrays once so memory can be reused

@@ -243,7 +243,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", scopedWorkspace.name());
     alg.setProperty("RelativeTimeOffset", timeShift);
 
-    // We expect to see no exception because we are using realative times
+    // We expect to see no exception because we are using relative times
     TS_ASSERT_THROWS_NOTHING(alg.execute());
   }
 

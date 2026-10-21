@@ -52,7 +52,7 @@ private:
   void init() override;
   /// Run the algorithm
   void exec() override;
-  /// Valudate inputs
+  /// Validate inputs
   std::vector<std::string> validExtensions() const { return {"xml", "msk"}; }
   std::map<std::string, std::string> validateInputs() override;
   /// Initialize XML parser

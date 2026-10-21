@@ -29,7 +29,7 @@ inline bool isJsonAtomic(bp::object const &obj) {
   return jsonAllowedTypes.count(objname) > 0;
 }
 
-/** Recurisvely JSONify the object, including replacing custom class objects with a dictionary representation
+/** Recursively JSONify the object, including replacing custom class objects with a dictionary representation
  * At each stage in the process, will check if the value is one of the above types, or a list-like object.
  * If the object is one of the atomic types, it remains.  If it is a list-like, the below is run on each individual
  * element. If not, the object is replaced with a dictionary, run recursively on each individual value

@@ -72,7 +72,7 @@ class DPDFreduction(api.PythonAlgorithm):
         self.declareProperty("NormalizeSlices", False, "Do we normalize each slice?", direction=kapi.Direction.Input)
         self.setPropertyGroup("NormalizeSlices", titleConfigurationOptions)
 
-        # Ouptut parameters
+        # Output parameters
         titleOuptutOptions = "Output"
         self.declareProperty("CleanWorkspaces", True, "Do we clean intermediate steps?", direction=kapi.Direction.Input)
         self.setPropertyGroup("CleanWorkspaces", titleOuptutOptions)
@@ -276,7 +276,7 @@ class DPDFreduction(api.PythonAlgorithm):
         sapi.GenerateGroupingPowder(InputWorkspace=wn_reduced, GroupingWorkspace="gws", AngleStep=dtheta, GroupingFilename=group_file_name)
         group_file_handle.close()
         sapi.GroupDetectors(InputWorkspace=wn_reduced, MapFile=group_file_name, OutputWorkspace=wn_ste)
-        # Group detectors according to theta angle for the emtpy can run
+        # Group detectors according to theta angle for the empty can run
         if self._ecruns:
             sapi.GroupDetectors(InputWorkspace=wn_ec_reduced, MapFile=group_file_name, OutputWorkspace=wn_ec_ste)
             # Subtract the empty can from the can+sample
@@ -359,7 +359,7 @@ class DPDFreduction(api.PythonAlgorithm):
                 if sapi.mtd.doesExist(name):
                     sapi.DeleteWorkspace(name)
 
-        # Ouput some info as a Notice in the log
+        # Output some info as a Notice in the log
         ebins = ", ".join(["{0:.2f}".format(x) for x in self._ebins])
         qbins = ", ".join(["{0:.2f}".format(x) for x in self._qbins])
         tbins = "{0:.2f} {1:.2f} {2:.2f}".format(min_i_theta * dtheta, dtheta, max_i_theta * dtheta)

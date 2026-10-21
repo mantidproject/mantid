@@ -315,7 +315,7 @@ int Mantid3MFFileIO::generateRandomColor() {
 }
 
 /* Basic write to 3MF. Since Mantid is storing each instance of a shape
- * as a separate mesh there's no possiblity of reusing meshes as supported
+ * as a separate mesh there's no possibility of reusing meshes as supported
  * by 3MF
  * @param meshObjects vector of Mantid mesh objects for environment components
  * to write out to file

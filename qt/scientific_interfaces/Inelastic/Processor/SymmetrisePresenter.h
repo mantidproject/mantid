@@ -79,7 +79,7 @@ private:
 
   ISymmetriseView *m_view;
   std::unique_ptr<ISymmetriseModel> m_model;
-  // wether batch algorunner is running preview or run buttons
+  // whether batch algorunner is running preview or run buttons
   bool m_isPreview;
 };
 } // namespace CustomInterfaces

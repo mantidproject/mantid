@@ -58,7 +58,7 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(Algorithm const *const sourceAlg) 
 
   // Handles the case in which the algorithm is providing a non-workspace
   // property as an input.
-  // This is currenly the case for algorithms that take an array of strings as
+  // This is currently the case for algorithms that take an array of strings as
   // an input where each entry is the name of a workspace.
   if (this->useCustomWorkspaceProperty()) {
     using WorkspaceNameType = std::vector<std::string>;
@@ -71,7 +71,7 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(Algorithm const *const sourceAlg) 
                                "not string Arrays are not currently "
                                "supported.");
       /*Note that we could extend this algorithm to cover other input property
-       * types if required, but we don't need that funtionality now.*/
+       * types if required, but we don't need that functionality now.*/
     }
 
     WorkspaceNameType workspaces = sourceAlg->getProperty(this->m_workspacePropertyName);
@@ -109,7 +109,7 @@ bool MultiPeriodGroupWorker::useCustomWorkspaceProperty() const { return !this->
  * nested workspaces at that period within all group workspaces.
  *
  * This requires a little explanation, because this is the reason that this
- * algorithm needs a customised overriden checkGroups and processGroups
+ * algorithm needs a customised overridden checkGroups and processGroups
  * method:
  *
  * Say you have two multiperiod group workspaces A and B and an output workspace
@@ -169,7 +169,7 @@ void MultiPeriodGroupWorker::copyInputWorkspaceProperties(IAlgorithm *targetAlg,
 //--------------------------------------------------------------------------------------------
 /** Process WorkspaceGroup inputs.
  *
- * Overriden from Algorithm base class.
+ * Overridden from Algorithm base class.
  *
  * This should be called after checkGroups(), which sets up required members.
  * It goes through each member of the group(s), creates and sets an algorithm
@@ -261,7 +261,7 @@ void MultiPeriodGroupWorker::validateMultiPeriodGroupInputs(const VecWSGroupType
         Property const *nPeriodsProperty = currentNestedWS->run().getLogData("nperiods");
         size_t nPeriods = std::stoul(nPeriodsProperty->value());
         if (nPeriods != benchMarkGroupSize) {
-          throw std::runtime_error("Missmatch between nperiods log and the "
+          throw std::runtime_error("Mismatch between nperiods log and the "
                                    "number of workspaces in the input group: " +
                                    vecMultiPeriodGroups[i]->getName());
         }

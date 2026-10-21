@@ -153,7 +153,7 @@ class LRReductionWithReference(DataProcessorAlgorithm):
         :param model_description: dict that holds parameters for the
                                   theoretical Refl1D model.
 
-            Example dict for paramters:
+            Example dict for parameters:
             {
                 'back_sld': 2.07,
                 'back_roughness': 1.0,

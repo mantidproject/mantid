@@ -105,7 +105,7 @@ void CylinderAbsorption::retrieveProperties() {
 
   // if the user supplied both, then just ignore the built-in shape
   if (userSuppliedHeight && userSuppliedRadius) {
-    g_log.information("Chosing user supplied sample geometry in CylinderAbsorption");
+    g_log.information("Choosing user supplied sample geometry in CylinderAbsorption");
     return;
   }
 

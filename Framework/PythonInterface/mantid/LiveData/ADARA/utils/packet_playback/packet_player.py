@@ -671,7 +671,7 @@ class Player:
 
         # In MULTI_PACKET mode: this is inefficient, as we re-open once per packet, however:
         # - this allows us to keep the output section in one place;
-        # - the overhead should be negligable in comparison to network socket I/O.
+        # - the overhead should be negligible in comparison to network socket I/O.
         mode = "wb" if self._file_output_mode is Player.FileOutputMode.SINGLE_PACKET else "ab"
 
         with open(file_path, mode) as f:

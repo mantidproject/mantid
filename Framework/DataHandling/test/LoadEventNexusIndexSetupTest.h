@@ -191,7 +191,7 @@ public:
   }
 
   /* compare this test body with test_makeIndexInfo_from_bank. The main difference is that the instrument components are
-   * specifed backwards. This is consistent with VULCAN IDF */
+   * specified backwards. This is consistent with VULCAN IDF */
   void test_makeIndexInfo_from_bank_backwards() {
     LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), EMPTY_INT(), {});
     const auto indexInfo = indexSetup.makeIndexInfo({"det-12", "det-2"}); // intentionally backwards

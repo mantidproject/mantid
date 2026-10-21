@@ -111,10 +111,10 @@ def index_q_vectors(qs, tolerance=0.03):
     This function will automatically attempt infer the correct number of
     additional dimensions required to index the given list of q vectors.
 
-    :param qs: the q vectors to find indicies for
-    :param tolerance: the tolerance on whether two equivilent or multiple qs
-        should be classifed as the same.
-    :return: ndarray of indicies for each q vector
+    :param qs: the q vectors to find indices for
+    :param tolerance: the tolerance on whether two equivalent or multiple qs
+        should be classified as the same.
+    :return: ndarray of indices for each q vector
     """
 
     ndim, bases = find_bases(qs, tolerance)
@@ -134,7 +134,7 @@ def cluster_qs(qs, k=None, threshold=1.5):
     :param threshold: cophenetic distance cut off point for new clusters (optional)
     :returns: tuple (clusters, k)
         Where:
-            list -- clusters is a list of cluster indicies which each q belongs to
+            list -- clusters is a list of cluster indices which each q belongs to
             int -- k is the number of clusters used
     """
     if k is not None:
@@ -177,9 +177,9 @@ def find_q_vectors(nuclear_hkls, sats_hkls):
 def find_nearest_integer_peaks(nuclear_hkls, sat_hkls):
     """Find the nearest integer peak for each fractional peak
 
-    This will perform a spatial search to find the intger peak which is nearest the fractional satellite peak.
+    This will perform a spatial search to find the integer peak which is nearest the fractional satellite peak.
 
-    :param nuclear_hkls: the hkl poistions of each of the nuclear peaks.
+    :param nuclear_hkls: the hkl positions of each of the nuclear peaks.
     :param sat_hkls: the fractional hkl position of the satellite peaks.
     :returns: np.ndarray -- 2D array of HKL integer values for each fractional peak
     """

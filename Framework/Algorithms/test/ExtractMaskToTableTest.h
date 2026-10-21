@@ -44,7 +44,7 @@ public:
 
     vector<int> vecA;
 
-    // Case: A constains B
+    // Case: A contains B
     vecA.reserve(20);
     for (size_t i = 0; i < 20; ++i) {
       vecA.emplace_back(static_cast<int>(i) + 5);

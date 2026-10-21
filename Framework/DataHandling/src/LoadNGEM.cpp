@@ -246,8 +246,8 @@ int LoadNGEM::confidence(Kernel::FileDescriptor &descriptor) const {
  */
 void LoadNGEM::init() {
   // Filename property.
-  const std::vector<std::string> extentions{".edb"};
-  declareProperty(std::make_unique<API::MultipleFileProperty>("Filename", extentions),
+  const std::vector<std::string> extensions{".edb"};
+  declareProperty(std::make_unique<API::MultipleFileProperty>("Filename", extensions),
                   "The name of the nGEM file to load. Selecting multiple files will "
                   "combine them into one workspace.");
   // Output workspace
@@ -266,11 +266,11 @@ void LoadNGEM::init() {
   declareProperty("MinToF", std::numeric_limits<double>::max(),
                   "The minimum ToF bin edge, inclusive. Required if PreserveEvents=False. If PreserveEvents=True and "
                   "MinToF is default, value will "
-                  "be dervied from event data.");
+                  "be derived from event data.");
   declareProperty("MaxToF", -std::numeric_limits<double>::max(),
                   "The maximum ToF bin edge, exclusive. Required if PreserveEvents=False. If PreserveEvents=True and "
                   "MaxToF is default, value will "
-                  "be dervied from event data.");
+                  "be derived from event data.");
 
   declareProperty("MinEventsPerFrame", 0, mustBePositive,
                   "The minimum number of events required in a frame before a "
@@ -624,7 +624,7 @@ LoadDataResult LoadNGEM::readDataAsHistograms(double &minToF, double &maxToF, co
  *
  * @param minToF The minimum ToF value to consider
  * @param maxToF The maximum ToF value to consider
- * @param tof The time of flight associated witht he evenr
+ * @param tof The time of flight associated with he evenr
  * @param binWidth The width of each histogram bin
  * @param pixel The detector pixel index.
  */
@@ -667,7 +667,7 @@ LoadDataStrategyHisto::LoadDataStrategyHisto(const double minToF, const double m
  *
  * @param minToF The minimum ToF value to consider
  * @param maxToF The maximum ToF value to consider
- * @param tof The time of flight associated witht he evenr
+ * @param tof The time of flight associated with he evenr
  * @param binWidth The width of each histogram bin
  * @param pixel The detector pixel index.
  */

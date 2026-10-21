@@ -73,7 +73,7 @@ void CalculateEfficiency::exec() {
   }
 
   // BioSANS has 2 detectors and the front masks the back!!!!
-  // We must mask the shaded part to calculate efficency
+  // We must mask the shaded part to calculate efficiency
   std::vector<int> maskedEdges = getProperty("MaskedEdges");
   if (!maskedEdges.empty() && (maskedEdges[0] > 0 || maskedEdges[1] > 0 || maskedEdges[2] > 0 || maskedEdges[3] > 0)) {
     g_log.debug() << "CalculateEfficiency: Masking edges length = " << maskedEdges.size() << ")"

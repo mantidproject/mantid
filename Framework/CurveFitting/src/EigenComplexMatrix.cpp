@@ -86,7 +86,7 @@ size_t ComplexMatrix::size2() const { return m_matrix.cols(); }
 /// set an element
 /// @param i :: The row
 /// @param j :: The column
-/// @param value :: The new vaule
+/// @param value :: The new value
 void ComplexMatrix::set(const size_t i, const size_t j, const ComplexType value) {
   if (i < size1() && j < size2()) {
     m_matrix(i, j) = value;
@@ -158,7 +158,7 @@ ComplexMatrix &ComplexMatrix::operator*=(const ComplexType &d) {
 /// Multiply this matrix by a matrix
 ComplexMatrix ComplexMatrix::operator*(const EigenMatrix &m) const {
   if (m.size1() != size2()) {
-    throw std::invalid_argument("Matrix by matrix multiplication: matricies are of incompatible sizes.");
+    throw std::invalid_argument("Matrix by matrix multiplication: matrices are of incompatible sizes.");
   }
 
   ComplexMatrix res(m.size1(), size2());
@@ -169,7 +169,7 @@ ComplexMatrix ComplexMatrix::operator*(const EigenMatrix &m) const {
 /// Multiply this matrix by a complex matrix
 ComplexMatrix ComplexMatrix::operator*(const ComplexMatrix &m) const {
   if (m.size1() != size2()) {
-    throw std::invalid_argument("Matrix by matrix multiplication: matricies are of incompatible sizes.");
+    throw std::invalid_argument("Matrix by matrix multiplication: matrices are of incompatible sizes.");
   }
 
   ComplexMatrix res(m.size1(), size2());

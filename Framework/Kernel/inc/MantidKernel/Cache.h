@@ -91,7 +91,7 @@ public:
    * Attempts to retrieve a value from the cache, with optional cache stats
    * tracking @see USE_CACHE_STATS compiler define
    * @param key The key for the requested value
-   * @param value An output reference for the value, set to the curretn value if
+   * @param value An output reference for the value, set to the current value if
    * found, otherwise it is untouched
    * @returns True if the value was found, false otherwise
    */
@@ -125,7 +125,7 @@ private:
   /**
    * Attempts to retrieve a value from the cache
    * @param key The key for the requested value
-   * @param value An output reference for the value, set to the curretn value if
+   * @param value An output reference for the value, set to the current value if
    * found, otherwise it is untouched
    * @returns True if the value was found, false otherwise
    */

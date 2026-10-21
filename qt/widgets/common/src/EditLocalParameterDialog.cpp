@@ -155,7 +155,7 @@ const QStringList &EditLocalParameterDialog::getTies() const { return m_ties; }
 const QStringList &EditLocalParameterDialog::getConstraints() const { return m_constraints; }
 
 /// Fix/unfix a single parameter.
-/// @param index :: Index of a paramter to fix or unfix.
+/// @param index :: Index of a parameter to fix or unfix.
 /// @param fix :: Fix (true) or unfix (false).
 void EditLocalParameterDialog::fixParameter(int index, bool fix) {
   m_fixes[index] = fix;
@@ -164,7 +164,7 @@ void EditLocalParameterDialog::fixParameter(int index, bool fix) {
 }
 
 /// Set a new tie for a parameter
-/// @param index :: Index of a paramter to tie.
+/// @param index :: Index of a parameter to tie.
 /// @param tie :: A tie string.
 void EditLocalParameterDialog::setTie(int index, QString tie) {
   m_ties[index] = std::move(tie);

@@ -34,7 +34,7 @@ double StructureFactorCalculator::getFSquared(const Kernel::V3D &hkl) const {
  * Returns structure factors for each HKL in the container
  *
  * The default implementation uses StructureFactorCalculator::getF() to get
- * the structure factor for each HKL. This behavior can be overriden in
+ * the structure factor for each HKL. This behavior can be overridden in
  * sub-classes for example to implement this in a more efficient way.
  *
  * @param hkls :: Vector of HKLs.
@@ -53,7 +53,7 @@ std::vector<StructureFactor> StructureFactorCalculator::getFs(const std::vector<
  * Returns structure factors for each HKL in the container
  *
  * The default implementation uses StructureFactorCalculator::getFSquared() with
- * each HKL. This behavior can be overriden in
+ * each HKL. This behavior can be overridden in
  * sub-classes for example to implement this in a more efficient way.
  *
  * @param hkls :: Vector of HKLs.
@@ -69,7 +69,7 @@ std::vector<double> StructureFactorCalculator::getFsSquared(const std::vector<Ke
 }
 
 /// This function is called from
-/// StructureFactorCalculator::setCrystalStructure() and can be overriden to
+/// StructureFactorCalculator::setCrystalStructure() and can be overridden to
 /// perform additional actions.
 void StructureFactorCalculator::crystalStructureSetHook(const CrystalStructure &crystalStructure) {
   UNUSED_ARG(crystalStructure)

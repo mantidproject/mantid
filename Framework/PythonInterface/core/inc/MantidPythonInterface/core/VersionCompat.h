@@ -8,7 +8,7 @@
 
 #include "MantidPythonInterface/core/WrapPython.h"
 
-// Macros for 2/3 compatability
+// Macros for 2/3 compatibility
 #if PY_VERSION_HEX >= 0x03000000
 #define IS_PY3K
 #define INT_CHECK PyLong_Check

@@ -259,7 +259,7 @@ def SetMergeQRange(q_min=None, q_max=None):
 
 
 def SetDetectorMaskFiles(filenames):
-    assert isinstance(filenames, str), "Expected a command seperated list of filenames, got %r instead" % filenames
+    assert isinstance(filenames, str), "Expected a command separated list of filenames, got %r instead" % filenames
     ReductionSingleton().settings["MaskFiles"] = filenames
     _printMessage("#Set masking file names to {0}".format(filenames))
 
@@ -795,7 +795,7 @@ def _WavRangeReduction(name_suffix=None):
 
 def delete_workspaces(workspaces):
     """
-    Delete the list of workspaces if possible but fail siliently if there is
+    Delete the list of workspaces if possible but fail silently if there is
     a problem
     @param workspaces: the list to delete
     """
@@ -854,7 +854,7 @@ def PhiRanges(phis, plot=True):
 
     _printMessage("PhiRanges( %s,plot=%s)" % (str(phis), plot))
 
-    # todo covert their string into Python array
+    # todo convert their string into Python array
 
     if len(phis) / 2 != float(len(phis)) / 2.0:
         raise RuntimeError("Phi ranges must be given as pairs")
@@ -1420,7 +1420,7 @@ def UnsetTransmissionMonitorSpectrum():
 
 def GetTransmissionMonitorSpectrumShift():
     """
-    Gets the addditional shift for the transmission monitor spectrum.
+    Gets the additional shift for the transmission monitor spectrum.
     This currently only exists for SANS2D
     @return: transmission monitor spectrum
     """
@@ -1432,7 +1432,7 @@ def GetTransmissionMonitorSpectrumShift():
 
 def SetTransmissionMonitorSpectrumShift(trans_mon_shift):
     """
-    Sets the transmission monitor spectrum shfit.
+    Sets the transmission monitor spectrum shift.
     @param trans_mon_shift :: The spectrum shift to set.
     """
     if su.is_convertible_to_float(trans_mon_shift):
@@ -1564,7 +1564,7 @@ def AddRuns(
     )
 
 
-##################### Accesor functions for QResolution
+##################### Accessor functions for QResolution
 def get_q_resolution_moderator():
     """
     Gets the moderator file path
@@ -1669,7 +1669,7 @@ def set_q_resolution_delta_r(delta_r):
 def get_q_resolution_a1():
     """
     Get the A1 diameter
-    @returns the diameter for the first aperature in mm
+    @returns the diameter for the first aperture in mm
     """
     val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_a1, "A1")
     print(str(val))
@@ -1688,7 +1688,7 @@ def set_q_resolution_a1(a1):
 def get_q_resolution_a2():
     """
     Get the A2 diameter
-    @returns the diameter for the second aperature in mm
+    @returns the diameter for the second aperture in mm
     """
     val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_a2, "A2")
     print(str(val))
@@ -1825,7 +1825,7 @@ def get_q_resolution_float(func, msg):
 
 def are_settings_consistent():
     """
-    Runs the consistency check over all reductionssteps and reports cosistency
+    Runs the consistency check over all reductionssteps and reports consistency
     issues to the user. The user needs to sort out these issues.
     """
     try:
@@ -1914,7 +1914,7 @@ def get_current_idf_path_in_reducer():
     return idf_path_reducer
 
 
-##################### Accesor functions for BackgroundCorrection
+##################### Accessor functions for BackgroundCorrection
 def set_background_correction(run_number, is_time_based, is_mon, is_mean, mon_numbers=None):
     """
     Set a background correction setting.

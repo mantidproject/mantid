@@ -23,15 +23,15 @@ void export_InstrumentInfo() {
       .def("name", &InstrumentInfo::name, arg("self"), return_value_policy<copy_const_reference>(),
            ""
            "Returns the full name of the instrument as defined in the "
-           "Facilites.xml file")
+           "Facilities.xml file")
 
       .def("shortName", &InstrumentInfo::shortName, arg("self"), return_value_policy<copy_const_reference>(),
-           "Returns the abbreviated name of the instrument as definined in the "
-           "Facilites.xml file")
+           "Returns the abbreviated name of the instrument as defined in the "
+           "Facilities.xml file")
 
       .def("__str__", &InstrumentInfo::shortName, arg("self"), return_value_policy<copy_const_reference>(),
-           "Returns the abbreviated name of the instrument as definined in the "
-           "Facilites.xml file")
+           "Returns the abbreviated name of the instrument as defined in the "
+           "Facilities.xml file")
 
       .def("zeroPadding", &InstrumentInfo::zeroPadding, (arg("self"), arg("runNumber")),
            "Returns zero padding for this instrument")

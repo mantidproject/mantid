@@ -110,7 +110,7 @@ double SofQCommon::q(const double deltaE, const double twoTheta, const Geometry:
  * @param ws a workspace
  * @param minE minimum energy transfer in ws
  * @param maxE maximum energy transfer in ws
- * @return a pair containing global minimun and maximum Q
+ * @return a pair containing global minimum and maximum Q
  */
 std::pair<double, double> SofQCommon::qBinHints(const API::MatrixWorkspace &ws, const double minE,
                                                 const double maxE) const {
@@ -157,7 +157,7 @@ double SofQCommon::indirectQ(const double deltaE, const double twoTheta, const G
  * @param ws a workspace
  * @param minE minimum energy transfer in ws
  * @param maxE maximum energy transfer in ws
- * @return a pair containing global minimun and maximum Q
+ * @return a pair containing global minimum and maximum Q
  */
 std::pair<double, double> SofQCommon::qBinHintsDirect(const API::MatrixWorkspace &ws, const double minE,
                                                       const double maxE) const {
@@ -199,7 +199,7 @@ std::pair<double, double> SofQCommon::qBinHintsDirect(const API::MatrixWorkspace
  * @param ws a workspace
  * @param minE minimum energy transfer in ws
  * @param maxE maximum energy transfer in ws
- * @return a pair containing global minimun and maximum Q
+ * @return a pair containing global minimum and maximum Q
  */
 std::pair<double, double> SofQCommon::qBinHintsIndirect(const API::MatrixWorkspace &ws, const double minE,
                                                         const double maxE) const {

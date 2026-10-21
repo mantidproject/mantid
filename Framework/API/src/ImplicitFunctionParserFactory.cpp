@@ -23,7 +23,7 @@ ImplicitFunctionParser *
 ImplicitFunctionParserFactoryImpl::createImplicitFunctionParserFromXML(Poco::XML::Element *functionElement) const {
   const std::string &name = functionElement->localName();
   if (name != "Function") {
-    throw std::runtime_error("Root node must be a Funtion element. Unable to determine parsers.");
+    throw std::runtime_error("Root node must be a Function element. Unable to determine parsers.");
   }
 
   Poco::XML::Element *typeElement = functionElement->getChildElement("Type");

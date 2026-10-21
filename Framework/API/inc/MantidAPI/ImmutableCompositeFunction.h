@@ -18,14 +18,14 @@ namespace API {
 /**
     Immutable composite function is a composite function which members cannot be
    added or removed
-    after creation. Only a derived class can add functions in its contructor (or
+    after creation. Only a derived class can add functions in its constructor (or
    methods).
     The function factory treat an ImmutableCompositeFunction as a simple
    function.
 */
 class MANTID_API_DLL ImmutableCompositeFunction : public CompositeFunction {
 public:
-  /* Overriden methods */
+  /* Overridden methods */
 
   /// Returns the function's name
   std::string name() const override { return "ImmutableCompositeFunction"; }
@@ -65,7 +65,7 @@ protected:
   std::string writeToString(const std::string &parentLocalAttributesStr = "") const override;
 
 private:
-  /// Keep paramater aliases
+  /// Keep parameter aliases
   std::map<std::string, size_t> m_aliases;
 };
 

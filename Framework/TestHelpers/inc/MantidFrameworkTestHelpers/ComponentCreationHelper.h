@@ -201,7 +201,7 @@ Mantid::Geometry::Instrument_sptr createTestUnnamedRectangular2(int num_banks, i
 /// Creates a geometrically nonsensical virtual instrument to be populated with detectors later
 Mantid::Geometry::Instrument_sptr createEmptyInstrument();
 
-/// Creates a mimimal valid virtual instrument.
+/// Creates a minimal valid virtual instrument.
 Mantid::Geometry::Instrument_sptr createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
                                                           const Mantid::Kernel::V3D &samplePos,
                                                           const Mantid::Kernel::V3D &detectorPos);

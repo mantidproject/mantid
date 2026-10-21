@@ -35,7 +35,7 @@ public:
   // through as a shared_ptr to python code, so we cannot pass ourselves
   class StubRegionObserver : public Mantid::API::RegionSelectorObserver {
   public:
-    // subscribe so we can get the notifcation passed back to us
+    // subscribe so we can get the notification passed back to us
     void subscribe(RegionSelectorObserver *notifyee) { m_notifyee = notifyee; }
     // override the notification and just pass it through
     void notifyRegionChanged() override { m_notifyee->notifyRegionChanged(); }

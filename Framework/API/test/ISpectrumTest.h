@@ -95,7 +95,7 @@ public:
     s.setPointStandardDeviations(0);
     TS_ASSERT(s.hasDx());
 
-    // setDX vesion 2
+    // setDX version 2
     SpectrumTester s4(Histogram::XMode::Points, Histogram::YMode::Counts);
     auto Dx_vec_ptr_type = std::make_shared<Mantid::HistogramData::HistogramDx>(0);
     s4.setSharedDx(Dx_vec_ptr_type);

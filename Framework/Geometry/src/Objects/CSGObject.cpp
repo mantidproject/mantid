@@ -673,7 +673,7 @@ std::unique_ptr<CompGrp> CSGObject::procComp(std::unique_ptr<Rule> ruleItem) con
 * - (a) Uses the Surface list to check those surface
 * that the point is on.
 * - (b) Creates a list of normals to the touching surfaces
-* - (c) Checks if normals and "normal pair bisection vector" are contary.
+* - (c) Checks if normals and "normal pair bisection vector" are contrary.
 * If any are found to be so the point is
 * on a surface.
 * - (d) Return 1 / 0 depending on test (c)
@@ -711,7 +711,7 @@ bool CSGObject::isOnSide(const Kernel::V3D &point) const {
       } catch (std::runtime_error &) {
       }
     }
-  // Ok everthing failed
+  // Ok everything failed
   return false;
 }
 
@@ -758,7 +758,7 @@ bool CSGObject::isValid(const std::map<int, int> &SMap) const {
 
 /**
  * Uses the topRule* to create a surface list
- * by iterating throught the tree
+ * by iterating through the tree
  * @param outFlag :: Sends output to standard error if true
  * @return 1 (should be number of surfaces)
  */
@@ -953,9 +953,9 @@ void CSGObject::procString(const std::string &lineStr) {
   std::map<int, std::unique_ptr<Rule>> RuleList; // List for the rules
   int Ridx = 0;                                  // Current index (not necessary size of RuleList
   // SURFACE REPLACEMENT
-  // Now replace all free planes/Surfaces with appropiate Rxxx
-  std::unique_ptr<SurfPoint> TmpR; // Tempory Rule storage position
-  std::unique_ptr<CompObj> TmpO;   // Tempory Rule storage position
+  // Now replace all free planes/Surfaces with appropriate Rxxx
+  std::unique_ptr<SurfPoint> TmpR; // Temporary Rule storage position
+  std::unique_ptr<CompObj> TmpO;   // Temporary Rule storage position
 
   std::string Ln = lineStr;
   // Remove all surfaces :
@@ -1244,7 +1244,7 @@ double CSGObject::rayTraceSolidAngle(const Kernel::V3D &observer) const {
   int count = 0, countPhi;
   sum = 0.;
   for (itheta = 1; itheta <= res; itheta++) {
-    // itegrate theta from 0 to maximum from bounding box, or PI otherwise
+    // integrate theta from 0 to maximum from bounding box, or PI otherwise
     theta = thetaMax * (itheta - 0.5) / res;
     resPhi = static_cast<int>(res * sin(theta));
     if (resPhi < resPhiMin)
@@ -1964,7 +1964,7 @@ std::optional<Kernel::V3D> CSGObject::generatePointInObject(PseudoRandomNumberGe
   // If the shape fills its bounding box well enough then the most efficient
   // way to get the point is just brute force. We'll try that first with
   // just a few attempts.
-  // Increasing the brute force attemps speeds up the shapes that fill
+  // Increasing the brute force attempts speeds up the shapes that fill
   // the bounding box but slows down shapes that leave lots of void
   // within the box. So there is a sweet spot which depends on the actual
   // shape, its dimension and orientation.
@@ -2010,7 +2010,7 @@ std::optional<Kernel::V3D> CSGObject::generatePointInObject(Kernel::PseudoRandom
   std::optional<V3D> point{std::nullopt};
   // We'll first try brute force. If the shape fills its bounding box
   // well enough, this should be the fastest method.
-  // Increasing the brute force attemps speeds up the shapes that fill
+  // Increasing the brute force attempts speeds up the shapes that fill
   // the bounding box well but slows down shapes that leave lots of void
   // within the box. So there is a sweet spot which depends on the actual
   // shape, its dimension and orientation.

@@ -48,7 +48,7 @@ public:
   std::string className() const override { return "Sphere"; }
   // Visit acceptor
   void acceptVisitor(BaseVisit &A) const override { A.Accept(*this); }
-  /// Set the sphere defination by input string in MCNP format
+  /// Set the sphere definition by input string in MCNP format
   int setSurface(const std::string &) override;
   /// Checks the given input point to be inside, outside or on the surface of
   /// sphere

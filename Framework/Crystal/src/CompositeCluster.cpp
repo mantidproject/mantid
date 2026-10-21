@@ -12,14 +12,14 @@
 
 namespace {
 /**
- * Helper comparitor for finding IClusters based on an input label.
+ * Helper comparator for finding IClusters based on an input label.
  */
-class Comparitor {
+class Comparator {
 private:
   size_t m_label;
 
 public:
-  explicit Comparitor(const size_t &label) : m_label(label) {}
+  explicit Comparator(const size_t &label) : m_label(label) {}
   bool operator()(const std::shared_ptr<Mantid::Crystal::ICluster> &pCluster) const {
     return pCluster->containsLabel(m_label);
   }
@@ -167,8 +167,8 @@ void CompositeCluster::add(std::shared_ptr<ICluster> &toOwn) {
  * @return True only if that label is contained.
  */
 bool CompositeCluster::containsLabel(const size_t &label) const {
-  Comparitor comparitor(label);
-  return m_ownedClusters.end() != std::find_if(m_ownedClusters.begin(), m_ownedClusters.end(), comparitor);
+  Comparator comparator(label);
+  return m_ownedClusters.end() != std::find_if(m_ownedClusters.begin(), m_ownedClusters.end(), comparator);
 }
 
 } // namespace Mantid::Crystal

@@ -202,7 +202,7 @@ class ExportExperimentLogTest(unittest.TestCase):
     def test_exportFileAppend2(self):
         """Test to export file in appending mode
         In this case, the original file will be renamed and a new file will
-        be creatd
+        be created
         """
         import time
 
@@ -259,7 +259,7 @@ class ExportExperimentLogTest(unittest.TestCase):
         terms = firstdataline.strip().split("\t")
         self.assertEqual(len(terms), 4)
 
-        # Locate the previos file
+        # Locate the previous file
 
         # Rename old file and reset the file mode
 

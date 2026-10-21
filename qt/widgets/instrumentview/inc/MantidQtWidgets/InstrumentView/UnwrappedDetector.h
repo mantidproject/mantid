@@ -26,7 +26,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 /**
 \class UnwrappedDetector
-\brief Class helper for drawing detectors on unwraped surfaces
+\brief Class helper for drawing detectors on unwrapped surfaces
 \date 15 Nov 2010
 \author Roman Tolchenov, Tessella plc
 

@@ -256,7 +256,7 @@ int SNSLiveEventDataListener::sendHelloPacket(const void *buf, int size) {
 
 /// The main function for the background thread
 
-/// Loops until the forground thread requests it to stop.  Reads data from the
+/// Loops until the foreground thread requests it to stop.  Reads data from the
 /// network, parses it and stores the resulting events (and other metadata) in
 /// a temporary workspace.
 void SNSLiveEventDataListener::run() {
@@ -517,7 +517,7 @@ void SNSLiveEventDataListener::run() {
 
 /// Overrides the default function defined in ADARA::Parser and processes
 /// data from ADARA::BankedEventPkt packets.  Parsed events are stored
-/// in the temporary workspace until the forground thread retrieves
+/// in the temporary workspace until the foreground thread retrieves
 /// them.
 /// @see extractData()
 /// @param pkt The packet to be parsed
@@ -905,7 +905,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
 
   // Note: all other possibilities for pkt.status() can be ignored
 
-  // Check to see if we can/should complete the initialzation steps
+  // Check to see if we can/should complete the initialization steps
   if (!m_workspaceInitialized) {
     if (readyForInitPart2()) {
       initWorkspacePart2();
@@ -966,7 +966,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableU32Pkt &pkt) {
     }
   }
 
-  // Check to see if we can complete the initialzation steps
+  // Check to see if we can complete the initialization steps
   if (!m_workspaceInitialized) {
     if (readyForInitPart2()) {
       initWorkspacePart2();
@@ -1010,7 +1010,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableDoublePkt &pkt) {
     }
   }
 
-  // Check to see if we can complete the initialzation steps
+  // Check to see if we can complete the initialization steps
   if (!m_workspaceInitialized) {
     if (readyForInitPart2()) {
       initWorkspacePart2();
@@ -1031,7 +1031,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableDoublePkt &pkt) {
 /// @param pkt The packet to be parsed
 /// @return Returns false if there were no problems.  Returns true if there
 /// was an error and packet parsing should be interrupted
-/// @remarks As of Februrary 2013, the SMS does not actually send out packets
+/// @remarks As of February 2013, the SMS does not actually send out packets
 /// of this type.  As such, this particular function has received very little
 /// testing.
 bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableStringPkt &pkt) {
@@ -1057,7 +1057,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableStringPkt &pkt) {
     }
   }
 
-  // Check to see if we can complete the initialzation steps
+  // Check to see if we can complete the initialization steps
   if (!m_workspaceInitialized) {
     if (readyForInitPart2()) {
       initWorkspacePart2();
@@ -1067,11 +1067,11 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableStringPkt &pkt) {
   return false;
 }
 
-/// Parse a device decriptor packet
+/// Parse a device descriptor packet
 
 /// Overrides the default function defined in ADARA::Parser and processes
 /// data from ADARA::DeviceDecriptorPkt packets.  These packets contain
-/// XML text decribing variables that will be received in subsequent
+/// XML text describing variables that will be received in subsequent
 /// ADARA::VariableU32Pkt, ADARA::VariableDoublePkt and
 /// ADARA::VariableStringPkt packets.
 /// @see rxPacket( const ADARA::VariableU32Pkt &)
@@ -1162,7 +1162,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
           // because
           // the type is specified as a string in the XML, but we pass the
           // actual keyword
-          // to the template declaration.  Hense all the if...else if...else
+          // to the template declaration.  Hence all the if...else if...else
           // stuff...
           Property *prop = nullptr;
           if (pvType == "double") {
@@ -1449,7 +1449,7 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
 
   // We always want to have at least one value for the scan index time
   // series.  We may have already gotten a scan start packet by the time we
-  // get here and therefor don't need to do anything.  If not, we need to put
+  // get here and therefore don't need to do anything.  If not, we need to put
   // a 0 into the time series.
   if (m_eventBuffer->mutableRun().getTimeSeriesProperty<int>(SCAN_PROPERTY)->size() == 0) {
     m_eventBuffer->mutableRun().getTimeSeriesProperty<int>(SCAN_PROPERTY)->addValue(m_dataStartTime, 0);

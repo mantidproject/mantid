@@ -43,7 +43,7 @@ class TestCutViewerModel(unittest.TestCase):
         self.presenter.view.set_bin_params.assert_called_once_with(in_vecs, in_extents, in_nbins)
         mock_update_cut.assert_called_once()
         mock_get_cut_rep.assert_called_once()
-        args = mock_get_cut_rep.call_args[0]  # for some reason assert_called_once_with struggles wth np arrays here
+        args = mock_get_cut_rep.call_args[0]  # for some reason assert_called_once_with struggles with np arrays here
         self.assertTrue(array_equal(in_vecs[:-1, :], args[0]))  # only has 2D slice
         self.assertTrue(array_equal(in_extents[:, :-1], args[1]))
         self.assertTrue(array_equal(in_nbins[:-1], args[2]))

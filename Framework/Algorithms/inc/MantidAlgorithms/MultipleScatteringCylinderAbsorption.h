@@ -18,7 +18,7 @@ class HistogramE;
 namespace Algorithms {
 /** Multiple scattering absorption correction, originally used to
     correct vanadium spectrum at IPNS.  Algorithm originally worked
-    out by Jack Carpenter and Asfia Huq and implmented in Java by
+    out by Jack Carpenter and Asfia Huq and implemented in Java by
     Alok Chatterjee.  Translated to C++ by Dennis Mikkelson.
 
     @author Dennis Mikkelson

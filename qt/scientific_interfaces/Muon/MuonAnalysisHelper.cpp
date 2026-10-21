@@ -119,7 +119,7 @@ size_t numPeriods(const Workspace_sptr &ws) {
 }
 
 /**
- * Print various informaion about the run
+ * Print various information about the run
  * @param runWs :: Run workspace to retrieve information from
  * @param out :: Stream to print to
  */
@@ -323,7 +323,7 @@ void WidgetAutoSaver::saveWidgetValue() {
   } else if (auto w = qobject_cast<QSpinBox *>(sender)) {
     writer.setValue(senderName, w->value());
   }
-  // ... add more as neccessary
+  // ... add more as necessary
 }
 
 /**
@@ -349,7 +349,7 @@ void WidgetAutoSaver::loadWidgetValue(QWidget *widget) {
   } else if (auto w = qobject_cast<QSpinBox *>(widget)) {
     w->setValue(value.toInt());
   }
-  // ... add more as neccessary
+  // ... add more as necessary
 }
 
 /**

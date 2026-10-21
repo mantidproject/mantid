@@ -363,7 +363,7 @@ std::string SampleEnvironmentSpecParser::findFile(const std::string &filename) c
 
 /**
  * Create a mesh shape from an STL input file. This can't be in the ShapeFactory
- * because that is in Geometry. This function needs acccess to the STL readers
+ * because that is in Geometry. This function needs access to the STL readers
  * @param stlFileElement A pointer to an XML \<stlfile\> element
  * @return A new Object instance of the given type
  */

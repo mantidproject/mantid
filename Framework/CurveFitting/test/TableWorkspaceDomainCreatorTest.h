@@ -359,7 +359,7 @@ public:
     API::FunctionDomain_sptr domain;
     API::FunctionValues_sptr values;
 
-    // Requires a property manager to make a workspce
+    // Requires a property manager to make a workspace
     auto propManager = std::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
     propManager->declareProperty(

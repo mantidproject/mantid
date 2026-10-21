@@ -118,7 +118,7 @@ private:
   /// Pointer to the const events vector. Only initialized when needed.
   mutable const std::vector<MDE> *m_events;
 
-  // Skipping policy, controlls recursive calls to next().
+  // Skipping policy, controls recursive calls to next().
   SkippingPolicy_scptr m_skippingPolicy;
 };
 

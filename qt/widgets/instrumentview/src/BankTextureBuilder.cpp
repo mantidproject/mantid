@@ -10,7 +10,7 @@
 
 using Mantid::Beamline::ComponentType;
 
-namespace { // anonymous namespace for helper funcitons
+namespace { // anonymous namespace for helper functions
 void createTexture(const Mantid::Geometry::ComponentInfo &compInfo, const std::vector<size_t> &children,
                    const std::vector<MantidQt::MantidWidgets::GLColor> &colors, std::vector<char> &texture,
                    size_t texSizeX) {

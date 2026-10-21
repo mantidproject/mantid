@@ -15,7 +15,7 @@ panel centers and orientations are adjusted so the error in Q
 positions from the theoretical Q positions is minimized.
 Given a set of peaks indexed by :math:`(h_i, k_i, l_i)`, we
 modify the instrument parameters, p, and then find  Q in the sample frame,
-:math:`\rm Q_{sample}` that mininizes the following:
+:math:`\rm Q_{sample}` that minimizes the following:
 
 .. math::
 

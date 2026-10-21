@@ -291,7 +291,7 @@ public:
     }
     std::cout << "Total " << errorcounts << " errors \n";
   }
-  /*Calculate werid spectra number as function of index */
+  /*Calculate weird spectra number as function of index */
   size_t calc_spec_num(size_t index) {
     if ((index + 3) % 3 == 0) {
       return index + 3;
@@ -302,7 +302,7 @@ public:
     if ((index + 1) % 3 == 0) {
       return index - 1;
     }
-    // suppress warinings
+    // suppress warnings
     return index;
   }
 

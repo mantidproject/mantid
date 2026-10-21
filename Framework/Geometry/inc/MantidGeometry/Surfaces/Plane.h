@@ -37,7 +37,7 @@ private:
   Kernel::V3D m_normVec; ///< Normal vector
   double m_distance;     ///< Distance from origin
 
-  std::size_t planeType() const; ///< are we alined on an axis
+  std::size_t planeType() const; ///< are we aligned on an axis
   Plane *doClone() const override;
 
 protected:

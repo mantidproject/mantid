@@ -56,7 +56,7 @@ public:
   std::vector<detid_t> getDetectorIDsOfGroup(const int groupID) const;
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   GroupingWorkspace(const GroupingWorkspace &) = default;
 
 private:

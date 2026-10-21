@@ -76,7 +76,7 @@ void SaveCSV::exec() {
   m_separator = getPropertyValue("Separator");
   m_lineSeparator = getPropertyValue("LineSeparator");
   g_log.debug() << "Parameters: Filename='" << m_filename << "' "
-                << "Seperator='" << m_separator << "' "
+                << "Separator='" << m_separator << "' "
                 << "LineSeparator='" << m_lineSeparator << "' \n";
 
   // prepare to save to file
@@ -94,7 +94,7 @@ void SaveCSV::exec() {
   // get workspace ID string. to check the data type
 
   const std::string workspaceID = inputWorkspace->id();
-  // seperating out code depending on the workspace ID
+  // separating out code depending on the workspace ID
 
   if (workspaceID.find("Workspace2D") != std::string::npos) {
     const Workspace2D_sptr localworkspace = std::dynamic_pointer_cast<Workspace2D>(inputWorkspace);

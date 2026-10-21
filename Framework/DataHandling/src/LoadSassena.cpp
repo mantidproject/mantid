@@ -87,7 +87,7 @@ bool compare(const mypair &left, const mypair &right) { return left.first < righ
  * @param h5file file identifier
  * @param gws pointer to WorkspaceGroup being filled
  * @param sorting_indexes permutation of qvmod indexes to render it in
- * increasing order of momemtum transfer
+ * increasing order of momentum transfer
  */
 HistogramData::Points LoadSassena::loadQvectors(const H5::H5File &h5file, const API::WorkspaceGroup_sptr &gws,
                                                 std::vector<int> &sorting_indexes) {
@@ -160,7 +160,7 @@ HistogramData::Points LoadSassena::loadQvectors(const H5::H5File &h5file, const 
  * @param setName string name of dataset
  * @param qvmod vector of Q-vectors' moduli
  * @param sorting_indexes permutation of qvmod indexes to render it in
- * increasing order of momemtum transfer
+ * increasing order of momentum transfer
  */
 void LoadSassena::loadFQ(const H5::H5File &h5file, const API::WorkspaceGroup_sptr &gws, const std::string &setName,
                          const HistogramData::Points &qvmod, const std::vector<int> &sorting_indexes) {
@@ -209,7 +209,7 @@ void LoadSassena::loadFQ(const H5::H5File &h5file, const API::WorkspaceGroup_spt
  * @param setName string name of dataset
  * @param qvmod vector of Q-vectors' moduli
  * @param sorting_indexes permutation of qvmod indexes to render it in
- * increasing order of momemtum transfer
+ * increasing order of momentum transfer
  */
 void LoadSassena::loadFQT(const H5::H5File &h5file, const API::WorkspaceGroup_sptr &gws, const std::string &setName,
                           const HistogramData::Points &qvmod, const std::vector<int> &sorting_indexes) {

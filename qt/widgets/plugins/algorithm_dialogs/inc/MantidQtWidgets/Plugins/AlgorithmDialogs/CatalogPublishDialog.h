@@ -25,7 +25,7 @@ public:
   CatalogPublishDialog(QWidget *parent = nullptr);
 
 private:
-  /// Create the inital layout.
+  /// Create the initial layout.
   void initLayout() override;
   /// Populate the investigation number combo-box with investigations that the
   /// user can publish to.
@@ -36,7 +36,7 @@ private slots:
   void workspaceSelected(const QString &wsName);
   /// Set the "FileName" property when a file is selected from the file browser.
   void fileSelected();
-  /// Diables fields on dialog to improve usability
+  /// Disables fields on dialog to improve usability
   void disableDialog();
   /// Set session property when user selects an investigation to publish to.
   void setSessionProperty(int index);

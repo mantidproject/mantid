@@ -75,7 +75,7 @@ protected:
   void countNumberOfDomains();
   void countValueOffsets(const CompositeDomain &domain) const;
 
-  /// Domain index map: finction -> domain
+  /// Domain index map: function -> domain
   std::map<size_t, std::vector<size_t>> m_domains;
   /// Number of domains this MultiDomainFunction operates on. == number of
   /// different values in m_domains

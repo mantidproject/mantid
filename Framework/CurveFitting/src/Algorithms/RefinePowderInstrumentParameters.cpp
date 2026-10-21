@@ -68,12 +68,12 @@ void RefinePowderInstrumentParameters::init() {
   // Input/output peaks table workspace
   declareProperty(std::make_unique<API::WorkspaceProperty<DataObjects::TableWorkspace>>("BraggPeakParameterWorkspace",
                                                                                         "Anonymous", Direction::Input),
-                  "TableWorkspace containg all peaks' parameters.");
+                  "TableWorkspace containing all peaks' parameters.");
 
   // Input and output instrument parameters table workspace
   declareProperty(std::make_unique<API::WorkspaceProperty<DataObjects::TableWorkspace>>(
                       "InstrumentParameterWorkspace", "AnonymousInstrument", Direction::InOut),
-                  "TableWorkspace containg instrument's parameters.");
+                  "TableWorkspace containing instrument's parameters.");
 
   // Output workspace
   declareProperty(std::make_unique<API::WorkspaceProperty<DataObjects::Workspace2D>>("OutputWorkspace", "AnonymousOut",
@@ -104,11 +104,11 @@ void RefinePowderInstrumentParameters::init() {
   declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>("ParametersToFit"),
                   "Names of the parameters to fit. ");
 
-  // Mininum allowed peak's sigma (avoid wrong fitting peak with very narrow
+  // Minimum allowed peak's sigma (avoid wrong fitting peak with very narrow
   // width)
   declareProperty("MinSigma", 1.0, "Minimum allowed value for Sigma of a peak.");
 
-  // Method to calcualte the standard error of peaks
+  // Method to calculate the standard error of peaks
   vector<string> stdoptions{"ConstantValue", "InvertedPeakHeight"};
   auto listvalidator = std::make_shared<Kernel::StringListValidator>(stdoptions);
   declareProperty("StandardError", "ConstantValue", listvalidator,
@@ -499,7 +499,7 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(const vector<s
     m_Function->setParameter(parname, parvalue);
   }
 
-  // Calcualte the function's initial statistic
+  // Calculate the function's initial statistic
   m_BestGSLChi2 = calculateFunctionStatistic(m_Function, m_dataWS, 0);
   g_log.debug() << "Function with starting values has Chi2 = " << m_BestGSLChi2 << " (GSL L.M) \n";
 
@@ -589,7 +589,7 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(const vector<s
       throw;
     }
 
-    // b. Calcualte the new
+    // b. Calculate the new
     double newchi2 = calculateD2TOFFunction(m_Function, domain, values, rawY, rawE);
 
     // Optionally fit
@@ -605,7 +605,7 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(const vector<s
       bool fitgood = fitFunction(func4fit, gslchi2);
 
       if (fitgood) {
-        // iii. Caculate
+        // iii. Calculate
         double homchi2 = calculateD2TOFFunction(func4fit, domain, values, rawY, rawE);
 
         if (gslchi2 < m_BestGSLChi2)
@@ -725,7 +725,7 @@ double RefinePowderInstrumentParameters::calculateD2TOFFunction(const API::IFunc
     throw std::runtime_error("Input domain, values and raw data have different sizes.");
   }
 
-  // 2. Calculate vlaues
+  // 2. Calculate values
   func->function(domain, values);
 
   // 3. Calculate the difference
@@ -742,7 +742,7 @@ double RefinePowderInstrumentParameters::calculateD2TOFFunction(const API::IFunc
 
 //------------------------------- Processing Inputs
 //----------------------------------------
-/** Genearte peaks from input workspace
+/** Generate peaks from input workspace
  * m_Peaks are stored in a map.  (HKL) is the key
  */
 void RefinePowderInstrumentParameters::genPeaksFromTable(const DataObjects::TableWorkspace_sptr &peakparamws) {
@@ -994,7 +994,7 @@ void RefinePowderInstrumentParameters::calculateThermalNeutronSpecial(const IFun
   }
 }
 
-//------- Related to Algorith's Output
+//------- Related to Algorithm's Output
 //-------------------------------------------------------------------
 
 /** Get peak positions from peak functions

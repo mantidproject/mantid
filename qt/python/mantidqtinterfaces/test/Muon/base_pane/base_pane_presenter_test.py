@@ -56,7 +56,7 @@ class BasePanePresenterTest(unittest.TestCase):
 
     def test_setup_view_connections(self):
         # this will be called as part of setup
-        # so expect the calles to have been made
+        # so expect the calls to have been made
         self.view.on_tiled_by_type_changed.assert_called_once_with(self.presenter.handle_tiled_by_type_changed)
         self.view.on_plot_tiled_checkbox_changed.assert_called_once_with(self.presenter.handle_plot_tiled_state_changed)
         self.view.on_external_plot_pressed.assert_called_once_with(self.presenter.handle_external_plot_requested)

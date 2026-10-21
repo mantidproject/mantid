@@ -228,7 +228,7 @@ bool FileProperty::isDirectoryProperty() const { return m_action == Directory ||
 
 /**
  * Check if this property is optional
- * @returns True if the property is optinal, false otherwise
+ * @returns True if the property is optional, false otherwise
  */
 bool FileProperty::isOptional() const {
   return (m_action == OptionalLoad || m_action == OptionalSave || m_action == OptionalDirectory);

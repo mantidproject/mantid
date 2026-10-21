@@ -330,7 +330,7 @@ void SCDCalibratePanels::findT0(int nPeaks, const DataObjects::PeaksWorkspace_sp
   fitT0_alg->setProperty("InputWorkspace", T0WS);
   fitT0_alg->setProperty("CreateOutput", true);
   fitT0_alg->setProperty("Output", "fit");
-  // Does not converge with derviative minimizers
+  // Does not converge with derivative minimizers
   fitT0_alg->setProperty("Minimizer", "Simplex");
   fitT0_alg->setProperty("MaxIterations", 1000);
   fitT0_alg->executeAsChildAlg();

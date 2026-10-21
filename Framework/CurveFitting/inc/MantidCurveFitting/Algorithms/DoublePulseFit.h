@@ -70,7 +70,7 @@ to n-1 where n is the number of domains required for the function. All the
 workspace properties
 have to be set.
 
-After a "InputWorkspace[_#]" property is set more dynamic proeprties can be
+After a "InputWorkspace[_#]" property is set more dynamic properties can be
 declared. This depends
 on the functions and the type of the workspace. For example, if "Function" is
 IFunction1D and
@@ -84,7 +84,7 @@ properties:
   <LI>OutputNormalisedCovarianceMatrix - A TableWorkspace with the covariance
 matrix</LI>
   <LI>OutputParameters - A TableWorkspace with the optimized parameters</LI>
-  <LI>OutputWorkspace - Optional: some functions and input workspaces may alow
+  <LI>OutputWorkspace - Optional: some functions and input workspaces may allow
 to create a workspace
       with the calculated values</LI>
 </UL>

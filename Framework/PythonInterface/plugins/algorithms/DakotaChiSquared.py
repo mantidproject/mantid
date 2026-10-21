@@ -23,7 +23,7 @@ class DakotaChiSquared(PythonAlgorithm):
         """Return name"""
         return "DakotaChiSquared"
 
-    def summmary(self):
+    def summary(self):
         return "Compare two nexus files containing matrix workspaces and output chi squared into a file"
 
     def PyInit(self):

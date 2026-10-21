@@ -273,7 +273,7 @@ void FitPropertyBrowser::initLayout(QWidget *w) { initBasicLayout(w); }
  *   1. SIGNALs/SLOTs when properties change.
  *   2. Actions and associated SIGNALs/SLOTs.
  * @param w widget parenting the action menus and the property tree browser
- * @return push botton for the fit menu
+ * @return push button for the fit menu
  */
 QPushButton *FitPropertyBrowser::createFitMenuButton(QWidget *w) {
   auto *btnFit = new QPushButton("Fit");
@@ -332,7 +332,7 @@ void FitPropertyBrowser::populateFitMenuButton(QSignalMapper *fitMapper, QMenu *
 void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   QPushButton *btnFit = createFitMenuButton(w);
   btnFit->setObjectName("button_Fit");
-  // to be able to change windows title from tread
+  // to be able to change windows title from thread
   connect(this, SIGNAL(changeWindowTitle(const QString &)), this, SLOT(setWindowTitle(const QString &)));
 
   /* Create the top level group */
@@ -1659,7 +1659,7 @@ void FitPropertyBrowser::doFit(int maxIterations) {
       if (alg->getPropertyValue("EvaluationType") != "Histogram")
         alg->setProperty("Exclude", getExcludeRange());
       else {
-        g_log.warning("Exclude property not avaliable when evaluating as a histogram.");
+        g_log.warning("Exclude property not available when evaluating as a histogram.");
       }
     }
     observeFinish(alg);
@@ -1798,7 +1798,7 @@ void FitPropertyBrowser::showEvent(QShowEvent *e) {
 }
 
 /**
- * Disconnect from the AnalysisDataService when hiden
+ * Disconnect from the AnalysisDataService when hidden
  */
 void FitPropertyBrowser::hideEvent(QHideEvent *e) {
   (void)e;
@@ -2909,7 +2909,7 @@ void FitPropertyBrowser::processMultiBGResults() {
 
   QApplication::setOverrideCursor(Qt::WaitCursor);
   // create a TableWorkspace: first column - function index
-  // other colomns - the parameters
+  // other columns - the parameters
   Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
   table->addColumn("int", "Index");
   for (const QString &par : parNames) {
@@ -3207,7 +3207,7 @@ QStringList FitPropertyBrowser::getParameterNames() const {
 const std::string &FitPropertyBrowser::getFitAlgorithmParameters() const { return m_fitAlgParameters; }
 
 /**=================================================================================================
- * Get Fit Algorithm output statuss
+ * Get Fit Algorithm output status
  */
 const std::string &FitPropertyBrowser::getFitAlgorithmOutputStatus() const { return m_fitAlgOutputStatus; }
 

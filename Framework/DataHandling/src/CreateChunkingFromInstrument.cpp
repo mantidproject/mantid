@@ -126,7 +126,7 @@ void CreateChunkingFromInstrument::init() {
 map<string, string> CreateChunkingFromInstrument::validateInputs() {
   map<string, string> result;
 
-  // get the input paramters
+  // get the input parameters
   string filename = getPropertyValue(PARAM_IN_FILE);
   string inWSname = getPropertyValue(PARAM_IN_WKSP);
   string instName = getPropertyValue(PARAM_INST_NAME);

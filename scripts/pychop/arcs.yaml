@@ -77,7 +77,7 @@ chopper_system:
           fluxcorr: 3.0         # (Empirical/Fudge) factor to scale calculated flux by
           isPi: False           # Should the PI pulse (at 180 deg rotation) be transmitted by this package?
   # Now define how the frequencies of the choppers should be related
-  # This is an NxM matrix A where N is the number of choppers and M is the number of indepdent frequencies
+  # This is an NxM matrix A where N is the number of choppers and M is the number of independent frequencies
   # Such that A.F will give the N required frequencies for each chopper from the M input frequencies
   frequency_matrix:
     [[1]]                       # f1 is the Fermi frequency

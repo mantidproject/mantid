@@ -20,7 +20,7 @@ class SwapWidths(DataProcessorAlgorithm):
         return "Workflow\\MIDAS;Inelastic"
 
     def summary(self):
-        return "Creates a calibration workspace in energy trnasfer for IN16B."
+        return "Creates a calibration workspace in energy transfer for IN16B."
 
     def PyInit(self):
         self.declareProperty(WorkspaceProperty("InputWorkspace", "", direction=Direction.Input), doc="Input workspace")

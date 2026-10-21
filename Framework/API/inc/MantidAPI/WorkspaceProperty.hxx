@@ -444,7 +444,7 @@ template <typename TYPE> void WorkspaceProperty<TYPE>::clear() {
   Kernel::PropertyWithValue<std::shared_ptr<TYPE>>::m_value = std::shared_ptr<TYPE>();
 }
 
-/** Attempts to retreive the data from the ADS
+/** Attempts to retrieve the data from the ADS
  *  if the data is not foung the internal pointer is set to null.
  */
 template <typename TYPE> void WorkspaceProperty<TYPE>::retrieveWorkspaceFromADS() {

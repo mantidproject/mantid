@@ -170,7 +170,7 @@ public:
     const size_t histogram_count = 73729;
     const size_t monitor_count = 1;
 
-    // mostly the same code as loadDataFile, but some of the TOF features cant
+    // mostly the same code as loadDataFile, but some of the TOF features can't
     // be called
     LoadILLTOF3 loader;
     loader.setRethrows(true);

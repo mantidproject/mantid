@@ -48,7 +48,7 @@ namespace Algorithms {
 
  Since the new X boundaries depend on the group and not the entire workspace,
  this focusing algorithm does not create overestimated Xranges for multi-group
- intruments.
+ instruments.
 
  Required Properties:
  <UL>

@@ -387,7 +387,7 @@ void GeneratePeaks::importPeakFromVector(std::vector<std::pair<double, API::IFun
 void GeneratePeaks::generatePeaks(
     const std::map<specnum_t, std::vector<std::pair<double, API::IFunction_sptr>>> &functionmap,
     const API::MatrixWorkspace_sptr &dataWS) {
-  // Calcualte function
+  // Calculate function
   std::map<specnum_t, std::vector<std::pair<double, API::IFunction_sptr>>>::const_iterator mapiter;
   for (mapiter = functionmap.begin(); mapiter != functionmap.end(); ++mapiter) {
     // Get spec id and translated to wsindex in the output workspace
@@ -511,7 +511,7 @@ void GeneratePeaks::processTableColumnNames() {
                                  [this](const auto &name) { return !hasParameter(m_peakFunction, name); });
     if (it != m_funcParameterNames.cbegin() + numpeakparams) {
       std::stringstream errss;
-      errss << "Peak function " << m_peakFunction->name() << " does not have paramter " << *it << "\n"
+      errss << "Peak function " << m_peakFunction->name() << " does not have parameter " << *it << "\n"
             << "Allowed function parameters are ";
       std::vector<std::string> parnames = m_peakFunction->getParameterNames();
       for (auto const &parname : parnames)
@@ -523,7 +523,7 @@ void GeneratePeaks::processTableColumnNames() {
     for (size_t i = 0; i < numbkgdparams; ++i) {
       if (!hasParameter(m_bkgdFunction, m_funcParameterNames[i + numpeakparams])) {
         std::stringstream errss;
-        errss << "Background function does not have paramter " << m_funcParameterNames[i + numpeakparams];
+        errss << "Background function does not have parameter " << m_funcParameterNames[i + numpeakparams];
         throw std::runtime_error(errss.str());
       }
     }

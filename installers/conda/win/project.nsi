@@ -94,7 +94,7 @@ Var SV_ALLUSERS
 # On clicking install, uninstall any instance of mantid that exists in the target directory.
 # Some anti-virus software will remove the uninstaller. If this happens we check whether pythonw.exe, which is needed
 # to run Mantid, exists. If it does we stop the installation otherwise the installer attempts to overwrite any
-# exisiting files and users may lose data and their user proprties settings. In some instances this overwrite will
+# existing files and users may lose data and their user properties settings. In some instances this overwrite will
 # result in a version of Mantid that will not open at all.
 Function in.uninstallIfExistsInTargetDirectory
     IfFileExists $INSTDIR\uninstall.exe uninstall_exists no_uninstall

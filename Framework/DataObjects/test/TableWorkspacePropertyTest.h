@@ -70,7 +70,7 @@ public:
   TableWorkspacePropertyTest() {
     t.reset(new TableWorkspace(10));
     t->addColumn("str", "Name");
-    t->addColumn("int", "Nunber");
+    t->addColumn("int", "Number");
     AnalysisDataService::Instance().add("tst", std::dynamic_pointer_cast<Workspace>(t));
   }
 

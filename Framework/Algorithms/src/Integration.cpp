@@ -59,7 +59,7 @@ void Integration::init() {
 }
 
 /**
- * Std-style comparision function object (satisfies the requirements of Compare)
+ * Std-style comparison function object (satisfies the requirements of Compare)
  * @return true if first argument < second argument (with some
  * tolerance/epsilon)
  */

@@ -792,7 +792,7 @@ void QtTreePropertyBrowser::setHeaderVisible(bool visible) {
 
 /**
     \property QtTreePropertyBrowser::resizeMode
-    \brief the resize mode of setions in the header.
+    \brief the resize mode of sections in the header.
 */
 
 QtTreePropertyBrowser::ResizeMode QtTreePropertyBrowser::resizeMode() const { return d_ptr->m_resizeMode; }
@@ -823,7 +823,7 @@ void QtTreePropertyBrowser::setResizeMode(QtTreePropertyBrowser::ResizeMode mode
 
 /**
     \property QtTreePropertyBrowser::splitterPosition
-    \brief the position of the splitter between the colunms.
+    \brief the position of the splitter between the columns.
 */
 
 int QtTreePropertyBrowser::splitterPosition() const { return d_ptr->m_treeWidget->header()->sectionSize(0); }

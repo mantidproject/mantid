@@ -71,7 +71,7 @@ void FullprofPolynomial::functionDeriv1D(API::Jacobian *out, const double *xValu
     out->set(i, 0, pow_x);
     // Rest
     for (int j = 1; j < m_n; ++j) {
-      // It does dirivative to B_j
+      // It does derivative to B_j
       pow_x *= x;
       out->set(i, j, pow_x);
     }

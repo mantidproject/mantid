@@ -51,7 +51,7 @@ const constexpr double RAD_TO_DEG = 180. / M_PI;
     The number of peaks used to obtain an initial indexing is specified by
   the "NumInitial" parameter.  Good values for this are typically around
   10-15, though with accurate peak positions, and good values for the lattice
-  paramters, as few as 2 can be used.  Using substantially more than 15 peaks
+  parameters, as few as 2 can be used.  Using substantially more than 15 peaks
   initially typically has no benefit and increases execution time.
 
   @param  UB                  3x3 matrix that will be set to the UB matrix
@@ -107,7 +107,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors, 
   }
 
   if (num_initial < 2) {
-    throw std::invalid_argument("Find_UB(): number of peaks for inital scan must be > 2");
+    throw std::invalid_argument("Find_UB(): number of peaks for initial scan must be > 2");
   }
 
   if (degrees_per_step <= 0) {
@@ -293,7 +293,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors, 
   }
 
   if (num_initial < 3) {
-    throw std::invalid_argument("Find_UB(): number of peaks for inital scan must be > 2");
+    throw std::invalid_argument("Find_UB(): number of peaks for initial scan must be > 2");
   }
 
   if (degrees_per_step <= 0) {
@@ -848,7 +848,7 @@ double IndexingUtils::Optimize_6dUB(DblMatrix &UB, DblMatrix &ModUB, const std::
  is returned.  This method is used to optimize the UB matrix and ModUB matrix
  once an initial indexing has been found.
 
- ModUB matrix is a 3x3 defines the modulation vectors in Q-sample. each colomn
+ ModUB matrix is a 3x3 defines the modulation vectors in Q-sample. each column
  corresponds to a modulation vector.
 
 
@@ -1687,7 +1687,7 @@ double IndexingUtils::GetFirstMaxIndex(const double magnitude_fft[], size_t N, d
     @param directions   List of possible vectors for a, b, c.  This list MUST
                         be sorted in order of increasing magnitude.
     @param a_index      The index to use for the a vector.  The b and c
-                        vectors will be choosen from LATER positions in the
+                        vectors will be chosen from LATER positions in the
                         directions list.
     @param min_d        Minimum possible real space unit cell edge length.
     @param max_d        Maximum possible real space unit cell edge length.
@@ -2634,7 +2634,7 @@ std::vector<V3D> IndexingUtils::MakeHemisphereDirections(int n_steps) {
           with the axis.
 
   @throws std::invalid_argument exception if the number of steps is <= 0, or
-                                if the axix length is 0.
+                                if the axis length is 0.
  */
 std::vector<V3D> IndexingUtils::MakeCircleDirections(int n_steps, const Mantid::Kernel::V3D &axis,
                                                      double angle_degrees) {

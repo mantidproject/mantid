@@ -29,7 +29,7 @@ class QLabel;
 namespace MantidQt {
 namespace CustomDialogs {
 
-// Forward declartion
+// Forward declaration
 class ShapeDetails;
 
 /**
@@ -73,7 +73,7 @@ struct Operation {
   /// Default constructor
   Operation(int op = 0) : binaryop(op) {}
 
-  /// Return the string that represnts the result of this operation
+  /// Return the string that represents the result of this operation
   QString toString(const QString &left, const QString &right) const;
 
   /// The stored operation

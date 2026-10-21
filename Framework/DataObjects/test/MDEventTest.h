@@ -70,7 +70,7 @@ public:
     TS_ASSERT_EQUALS(b.getDetectorID(), 456789);
   }
 
-  /** Note: the copy constructor is not explicitely written but rather is filled
+  /** Note: the copy constructor is not explicitly written but rather is filled
    * in by the compiler */
   void test_CopyConstructor() {
     Mantid::coord_t coords[3] = {0.125, 1.25, 2.5};

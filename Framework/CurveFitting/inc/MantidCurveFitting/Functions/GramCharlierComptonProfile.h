@@ -33,7 +33,7 @@ private:
   void declareAttributes() override;
   /// Set an attribute value (and possibly cache its value)
   void setAttribute(const std::string &name, const Attribute &value) override;
-  /// Parse the active hermite polynomial coefficents
+  /// Parse the active hermite polynomial coefficients
   void setHermiteCoefficients(const std::string &coeffs);
   /// Declare the Gram-Charlier (Hermite) coefficients
   void declareGramCharlierParameters();
@@ -43,7 +43,7 @@ private:
   /// Fill in the columns of the matrix for this mass
   size_t fillConstraintMatrix(Kernel::DblMatrix &cmatrix, const size_t start,
                               const HistogramData::HistogramE &errors) const override;
-  /// Compute the sum for all Hermite polynomial coefficents
+  /// Compute the sum for all Hermite polynomial coefficients
   void massProfile(double *result, const size_t nData) const override;
   /// Compute the contribution to mass profile nth Hermite polynomial
   /// coefficient
@@ -59,7 +59,7 @@ private:
   /// Pre-calculate the Y-space values
   void cacheYSpaceValues(const HistogramData::Points &tseconds, const Algorithms::DetectorParams &detpar) override;
 
-  /// The active hermite coefficents
+  /// The active hermite coefficients
   std::vector<short> m_hermite;
   /// Y values over a finer range
   std::vector<double> m_yfine;

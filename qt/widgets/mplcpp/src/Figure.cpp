@@ -104,7 +104,7 @@ void Figure::setWindowTitle(const char *title) {
  * @param left The X coordinate of the lower-left corner
  * @param bottom The Y coordinate of the lower-left corner
  * @param width The width of the Axes
- * @param height The heigh of the Axes
+ * @param height The height of the Axes
  * @return A new Axes instance
  */
 Axes Figure::addAxes(double left, double bottom, double width, double height) {
@@ -132,7 +132,7 @@ Axes Figure::addSubPlot(const int subplotspec, const QString &projection) {
 
 /**
  * @brief Add a colorbar to this figure
- * @param mappable An objet providing the mapping of data to rgb colors
+ * @param mappable An object providing the mapping of data to rgb colors
  * @param cax An axes instance to hold the color bar
  * @param ticks An optional array or ticker.Locator object to control tick
  * placement

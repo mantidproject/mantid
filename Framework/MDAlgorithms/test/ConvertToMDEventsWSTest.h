@@ -45,7 +45,7 @@ public:
 
   void testEventWS() {
     pAlg->execute();
-    TSM_ASSERT("Should finish succesfully", pAlg->isExecuted());
+    TSM_ASSERT("Should finish successfully", pAlg->isExecuted());
     Mantid::API::Workspace_sptr spws;
     TS_ASSERT_THROWS_NOTHING(spws = AnalysisDataService::Instance().retrieve("testMDEvWorkspace"));
     TSM_ASSERT(" Worskpace should be retrieved", spws.get());
@@ -57,7 +57,7 @@ public:
     if (ws.get()) {
       TS_ASSERT_EQUALS(900, ws->getNPoints());
     } else {
-      TS_FAIL("event workspace has not beed build");
+      TS_FAIL("event workspace has not been build");
     }
   }
 
@@ -70,7 +70,7 @@ public:
     pAlg->setPropertyValue("MinValues", "-10,-10,-10,-100");
     pAlg->setPropertyValue("MaxValues", " 10, 10, 10, 100");
     pAlg->execute();
-    TSM_ASSERT("Should finish succesfully", pAlg->isExecuted());
+    TSM_ASSERT("Should finish successfully", pAlg->isExecuted());
     Mantid::API::Workspace_sptr spws;
     TS_ASSERT_THROWS_NOTHING(spws = AnalysisDataService::Instance().retrieve("testMDEvWorkspace"));
     TSM_ASSERT(" Worskpace should be retrieved", spws.get());
@@ -82,7 +82,7 @@ public:
     if (ws.get()) {
       TS_ASSERT_EQUALS(900, ws->getNPoints());
     } else {
-      TS_FAIL("event workspace has not beed build");
+      TS_FAIL("event workspace has not been build");
     }
     m_wsEv->mutableRun().setGoniometer(gonio, false); // Change back to not using log
   }
@@ -104,7 +104,7 @@ public:
     if (ws.get()) {
       TS_ASSERT_EQUALS(450, ws->getNPoints()); // Expect half the events as for non-UseLogTimes
     } else {
-      TS_FAIL("event workspace has not beed build");
+      TS_FAIL("event workspace has not been build");
     }
     m_wsEv->mutableRun().setGoniometer(gonio, false); // Change back to not using log
   }

@@ -9,7 +9,7 @@
 //  - cos, sin func uses radians
 //  - Quat class uses degrees
 //  - The overall strategy here is that the correct answer is always the engineering position,
-//    and we are moving the insturment to the wrong location (i.e. needs calibration) so that
+//    and we are moving the instrument to the wrong location (i.e. needs calibration) so that
 //    the calibration can move it back to the correct position
 
 #pragma once

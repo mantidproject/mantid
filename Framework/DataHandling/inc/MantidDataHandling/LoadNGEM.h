@@ -166,7 +166,7 @@ private:
   void createCountWorkspace(const std::vector<double> &frameEventCounts);
   /// Load the instrument and attach to the data workspace.
   void loadInstrument(API::MatrixWorkspace_sptr &dataWorkspace);
-  /// Validate the imputs into the algorithm, overrides.
+  /// Validate the inputs into the algorithm, overrides.
   std::map<std::string, std::string> validateInputs() override;
   /// Validate events per frame inputs
   std::vector<std::pair<std::string, std::string>> validateEventsPerFrame();

@@ -11,7 +11,7 @@ Description
 -----------
 
 Mask specified detectors in an instrument.
-This algorithm is just a simplfied version of MaskDetectors and has been deprecated.
+This algorithm is just a simplified version of MaskDetectors and has been deprecated.
 Please use :ref:`MaskDetectors <algm-MaskDetectors>` instead.
 
 Usage

@@ -38,7 +38,7 @@ public:
   }
 
   /**
-   * @brief Evaluate the function at one particular enery value
+   * @brief Evaluate the function at one particular energy value
    */
   void test_function_gives_expected_value_for_given_input() {
     auto func = createTestHallRossSQE();

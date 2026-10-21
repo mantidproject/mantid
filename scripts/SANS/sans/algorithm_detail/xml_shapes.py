@@ -51,7 +51,7 @@ def infinite_plane(shape_id, plane_pt, normal_pt):
 
 def infinite_cylinder(centre, radius, axis, shape_id="shape"):
     """
-    Generates xml code for an infintely long cylinder
+    Generates xml code for an infinitely long cylinder
     :param centre: a tuple for a point on the axis
     :param radius: cylinder radius
     :param axis: cylinder orientation
@@ -84,7 +84,7 @@ def infinite_cylinder(centre, radius, axis, shape_id="shape"):
 
 def finite_cylinder(centre, radius, height, axis, shape_id="shape"):
     """
-    Generates xml code for an infintely long cylinder
+    Generates xml code for an infinitely long cylinder
     :param centre: a tuple for a point on the axis
     :param radius: cylinder radius
     :param height: cylinder height

@@ -42,7 +42,7 @@ SimpleChebfun::SimpleChebfun(size_t n, const API::IFunction &fun, double start, 
 /// @param start :: The start (lower bound) of an interval on the x-axis.
 /// @param end :: The end (upper bound) of an interval on the x-axis.
 /// @param accuracy :: The accuracy of the approximation.
-/// @param badSize :: If automatic approxiamtion fails the base will have this
+/// @param badSize :: If automatic approximation fails the base will have this
 /// size.
 SimpleChebfun::SimpleChebfun(const ChebfunFunctionType &fun, double start, double end, double accuracy, size_t badSize)
     : m_badFit(false) {

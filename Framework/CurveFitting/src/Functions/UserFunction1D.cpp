@@ -100,7 +100,7 @@ void UserFunction1D::prepare() {
 }*/
 
 /** Calculate the fitting function.
- *  @param in :: A pointer ot the input function parameters
+ *  @param in :: A pointer to the input function parameters
  *  @param out :: A pointer to the output fitting function buffer. The buffer
  * must be large enough to receive nData double values.
  *        The fitting procedure will try to minimise Sum(out[i]^2)

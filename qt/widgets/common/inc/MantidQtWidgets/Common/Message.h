@@ -32,7 +32,7 @@ public:
   /// Priority matches Mantid Logger priority
   using Priority = Mantid::Kernel::Logger::Priority;
 
-  /// Default constuctor required by Qt meta-type system
+  /// Default constructor required by Qt meta-type system
   Message();
   /// Construct a message from a QString with a given priority (default=notice)
   Message(QString text, Priority priority = Priority::PRIO_NOTICE, const QString &scriptPath = "");

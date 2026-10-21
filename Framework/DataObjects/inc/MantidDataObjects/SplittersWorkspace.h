@@ -49,7 +49,7 @@ public:
   bool removeSplitter(size_t) override;
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   SplittersWorkspace(const SplittersWorkspace &) = default;
 
 private:

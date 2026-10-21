@@ -278,7 +278,7 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         mock_ax.xaxis.minorTicks = [None]
 
         # If this fails then the internals of matplotlib have changed, and axes.py for ticks needs to be re-thought.
-        # This fails because it is an object being made to the spec defined in matplotlib so should definetely contain
+        # This fails because it is an object being made to the spec defined in matplotlib so should definitely contain
         # This object, mock or not.
         self.assertTrue(hasattr(mock_ax.xaxis, "_major_tick_kw"))
         self.assertTrue(hasattr(mock_ax.xaxis, "_minor_tick_kw"))

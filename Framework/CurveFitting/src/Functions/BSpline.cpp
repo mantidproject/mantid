@@ -134,7 +134,7 @@ size_t BSpline::evaluateBasisFunctions(EigenVector &B, const double x, size_t cu
  *
  * @param x :: a position along the spline
  * @param currentBBase :: The last return value from this function (for looping efficiency, given x will
- * always be in accending order)
+ * always be in ascending order)
  * @param clamped :: if the spline is to be clamped or not (BSpline only currently supports clamped).
  * @returns :: The index of the span to which point x corresponds, base 0, not including spans between the
  * clamped knots.

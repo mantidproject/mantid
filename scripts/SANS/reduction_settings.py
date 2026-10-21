@@ -8,7 +8,7 @@
 The aim of this file is to change the way in which we pass settings around
 between reduction steps.  The benefits to this new method are as follows:
 
-1) Settings become easily transferrable between the C++/Python layers.
+1) Settings become easily transferable between the C++/Python layers.
    Previously, the only way for the GUI to get/set variables in the reducer
    was to do something like:
 

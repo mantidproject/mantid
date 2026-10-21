@@ -101,7 +101,7 @@ public:
 
     // Set the User override to be used to return the expected path.
     EXPECT_CALL(mockConfigService, preferredMountPoint())
-        .WillRepeatedly(Return(OptionalPath(expectedPath))); // overriden path.
+        .WillRepeatedly(Return(OptionalPath(expectedPath))); // overridden path.
 
     EXPECT_CALL(host, clone()).WillOnce(Return(mockCatInfo)); // because the input gets cloned, we
                                                               // need to set our expectations upon the
@@ -128,7 +128,7 @@ public:
 
     // Set the User override to be used to return the expected path.
     EXPECT_CALL(mockConfigService, preferredMountPoint())
-        .WillRepeatedly(Return(OptionalPath(expectedPath))); // overriden path.
+        .WillRepeatedly(Return(OptionalPath(expectedPath))); // overridden path.
 
     EXPECT_CALL(host, clone()).WillOnce(Return(mockCatInfo)); // because the input gets cloned, we
                                                               // need to set our expectations upon the
@@ -155,7 +155,7 @@ public:
 
     // Set the User override to be used to return the expected path.
     EXPECT_CALL(mockConfigService, preferredMountPoint())
-        .WillRepeatedly(Return(OptionalPath(expectedPath))); // overriden path.
+        .WillRepeatedly(Return(OptionalPath(expectedPath))); // overridden path.
 
     EXPECT_CALL(host, clone()).WillOnce(Return(mockCatInfo)); // because the input gets cloned, we
                                                               // need to set our expectations upon the

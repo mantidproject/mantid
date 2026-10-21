@@ -435,7 +435,7 @@ std::ostream &Logger::getLogStream(const Logger::Priority &priority) {
 /**
  * Adjust a log priority level based off the m_levelOffset
  * @param proposedLevel :: The proposed level
- * @returns The offseted level
+ * @returns The offset level
  */
 Logger::Priority Logger::applyLevelOffset(Logger::Priority proposedLevel) {
   int retVal = proposedLevel;

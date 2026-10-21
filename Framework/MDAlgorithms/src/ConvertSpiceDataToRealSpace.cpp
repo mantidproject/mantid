@@ -482,7 +482,7 @@ void ConvertSpiceDataToRealSpace::appendSampleLogs(const IMDEventWorkspace_sptr 
  */
 void ConvertSpiceDataToRealSpace::addExperimentInfos(const API::IMDEventWorkspace_sptr &mdws,
                                                      const std::vector<API::MatrixWorkspace_sptr> &vec_ws2d) {
-  // Add N experiment info as there are N measurment points
+  // Add N experiment info as there are N measurement points
   for (const auto &ws2d : vec_ws2d) {
     // Create an ExperimentInfo object
     ExperimentInfo_sptr tmp_expinfo = std::make_shared<ExperimentInfo>();

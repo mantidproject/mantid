@@ -163,7 +163,7 @@ public:
   /// Constructor. Opens a file.
   LoadGroupMapFile(const std::string &fileName, Kernel::Logger &log);
 
-  /// Desctructor. Closes a file.
+  /// Destructor. Closes a file.
   ~LoadGroupMapFile();
 
   /// Parses grouping information from .map file

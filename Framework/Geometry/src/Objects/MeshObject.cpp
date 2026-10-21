@@ -106,7 +106,7 @@ bool MeshObject::isValid(const Kernel::V3D &point) const {
 }
 
 /**
- * Determines wither point is on the surface.
+ * Determines whether point is on the surface.
  * @param point :: Point to check
  * @returns true if the point is on the surface
  */
@@ -507,7 +507,7 @@ void MeshObject::multiply(const Kernel::Matrix<double> &matrix) {
     throw "Transformation matrix must be 4 x 4";
   }
 
-  // create homogenous coordinates for the input vector with 4th element
+  // create homogeneous coordinates for the input vector with 4th element
   // equal to 1 (position)
   for (Kernel::V3D &vertex : m_vertices) {
     std::vector<double> vertexin(4);

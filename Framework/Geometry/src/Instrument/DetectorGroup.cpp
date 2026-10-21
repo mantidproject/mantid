@@ -229,7 +229,7 @@ bool DetectorGroup::isOnSide(const V3D &point) const {
  * storage
  * found in the storage map
  *  @param point :: if a point is found its coordinates will be stored in this
- * varible
+ * variable
  *  @return 1 if point found, 0 otherwise
  */
 int DetectorGroup::getPointInObject(V3D &point) const {

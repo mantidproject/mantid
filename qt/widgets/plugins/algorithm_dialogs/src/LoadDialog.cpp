@@ -133,7 +133,7 @@ void LoadDialog::resultInspectionFinished() {
   // Makes it so the dialog is still resizable if it is kept open
   m_form.propertyLayout->setEnabled(true);
 
-  // Check that the file still exists just incase it somehow got removed
+  // Check that the file still exists just in case it somehow got removed
   std::string errMess = getAlgorithm()->getPointerToProperty("Filename")->isValid();
   if (!errMess.empty()) {
     m_currentFiles = "";

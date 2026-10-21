@@ -52,7 +52,7 @@ template <typename TYPE> IValidator_sptr ArrayBoundedValidator<TYPE>::clone() co
  * Function that actually does the work of checking the validity of the
  * array elements.
  * @param value :: the array to be checked
- * @return a listing of the indicies that fail the bounds checks
+ * @return a listing of the indices that fail the bounds checks
  */
 template <typename TYPE> std::string ArrayBoundedValidator<TYPE>::checkValidity(const std::vector<TYPE> &value) const {
   // declare a class that can do conversions to string

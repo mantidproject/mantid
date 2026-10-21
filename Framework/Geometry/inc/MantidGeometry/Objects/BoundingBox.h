@@ -113,7 +113,7 @@ public:
   double angularWidth(const Kernel::V3D &observer) const;
   /// Check if it is normal axis aligned bounding box or not.
   inline bool isAxisAligned() const { return is_axis_aligned; }
-  /// returns the coordinate system to which BB is alighned to;
+  /// returns the coordinate system to which BB is aligned to;
   std::vector<Kernel::V3D> const &getCoordSystem() const { return coord_system; }
   //@}
 
@@ -156,7 +156,7 @@ public:
   }
   /// Grow the bounding box so that it also encompasses the given box
   void grow(const BoundingBox &other);
-  /// change the BB alighnment, providing new coordinate system to alighn it to.
+  /// change the BB alignment, providing new coordinate system to align it to.
   void setBoxAlignment(const Kernel::V3D &R0, const std::vector<Kernel::V3D> &orts);
   /// set BB in to undefined state with min=FLT_MAX>max=-FLT_MAX
   void nullify();
@@ -182,7 +182,7 @@ private:
   bool is_axis_aligned;
   /** if the bounding box is not axis aligned, the vector below describes the
    coordinate system,
-   to which the bounding box is alighned to. The vector has 4 members, with
+   to which the bounding box is aligned to. The vector has 4 members, with
    first describing
    new coordinate system center and three others -- orts of this system */
   std::vector<Kernel::V3D> coord_system;

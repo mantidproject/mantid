@@ -154,7 +154,7 @@ public:
         boost::to_upper(lineout);
         TS_ASSERT_EQUALS(linein.substr(0, 12), lineout.substr(0, 12)); // We have an extra "transfer"
                                                                        // in "Q transfer", and "(ueV)"
-                                                                       // insted of "(micro eV)"
+                                                                       // instead of "(micro eV)"
       }
       double din, dout;
       for (i = 0; i < 60; i++) {

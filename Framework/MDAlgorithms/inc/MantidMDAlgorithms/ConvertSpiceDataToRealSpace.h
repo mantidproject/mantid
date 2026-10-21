@@ -18,7 +18,7 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-/** ConvertSpiceDataToRealSpace : Convert data from SPICE file to singals
+/** ConvertSpiceDataToRealSpace : Convert data from SPICE file to signals
   in real space contained in MDEventWrokspaces
 */
 class MANTID_MDALGORITHMS_DLL ConvertSpiceDataToRealSpace final : public API::Algorithm {
@@ -39,7 +39,7 @@ public:
   // virtual int confidence(Kernel::FileDescriptor &descriptor) const;
 
 private:
-  /// Typdef for the white-space separated file data type.
+  /// Typedef for the white-space separated file data type.
   using DataCollectionType = std::deque<std::string>;
 
   /// Initialisation code

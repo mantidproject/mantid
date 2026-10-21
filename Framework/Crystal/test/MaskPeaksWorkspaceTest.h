@@ -84,7 +84,7 @@ public:
   void test_MINITOPAZ() { do_test_MINITOPAZ(TOF); }
 
   /*
-   * Test make peaks with ralative TOF range
+   * Test make peaks with relative TOF range
    */
   void do_test_TOFRange(EventType type) {
 

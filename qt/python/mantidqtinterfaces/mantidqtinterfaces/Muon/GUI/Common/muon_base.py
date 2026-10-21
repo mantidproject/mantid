@@ -13,17 +13,17 @@ import itertools
 
 class MuonRun(object):
     """
-    Holds the experimental runs a dataset corrosponds to.
+    Holds the experimental runs a dataset corresponds to.
     Due to the ability to co-add runs on load this can be one to many.
-    This is used to index and referance by dataset.
+    This is used to index and reference by dataset.
     """
 
     def __init__(self, run_numbers: List[int]):
         self._runs = tuple(run_numbers)
 
     """
-    A range of runs should be returned seperated by a dash whilst
-    non-cosecutive runs should be comma seperated.
+    A range of runs should be returned separated by a dash whilst
+    non-cosecutive runs should be comma separated.
     For example (62260, 62261, 62263, 62270)
     should return '62260-62263, 62270'
     """

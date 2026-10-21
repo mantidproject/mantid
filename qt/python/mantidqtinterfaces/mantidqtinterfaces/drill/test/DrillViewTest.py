@@ -207,7 +207,7 @@ class DrillViewTest(unittest.TestCase):
         self.view.table.getSelectedRows.return_value = []
         self.view.del_selected_rows()
         self.view.table.deleteRow.assert_not_called()
-        # selction
+        # selection
         self.view.table.getSelectedRows.return_value = [0, 1, 2]
         self.view.del_selected_rows()
         calls = [mock.call(2), mock.call(1), mock.call(0)]

@@ -94,7 +94,7 @@ void PeakHKL::print() const {
 }
 
 /**
- * Creates formated string for outputting h,k, or l
+ * Creates formatted string for outputting h,k, or l
  *
  * @param h :: Value to output.
  * @param prec :: Precision as a number of decimal places.
@@ -328,7 +328,7 @@ void PeakOverlay::draw(QPainter &painter) const {
 /**---------------------------------------------------------------------
  * Return a list of markers put onto a detector
  * @param detID :: A detector ID for which markers are to be returned.
- * @return :: A list of zero ot more markers.
+ * @return :: A list of zero or more markers.
  */
 QList<PeakMarker2D *> PeakOverlay::getMarkersWithID(int detID) const { return m_det2marker.values(detID); }
 

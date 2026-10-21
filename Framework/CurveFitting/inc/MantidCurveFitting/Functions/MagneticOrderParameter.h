@@ -15,7 +15,7 @@ namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
 /**
-Provide Magnetic Order Paramtere fit function interface to IFunction.
+Provide Magnetic Order Parameter fit function interface to IFunction.
 I.e. the function:y = A0(1-(x/Tc)^alpha)^beta.
 Where A0 = amplitude
 alpha = balance parameter

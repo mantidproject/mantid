@@ -110,22 +110,22 @@ double LeanElasticPeak::getWavelength() const { return m_wavelength; }
  * peak,
  * using the geometry of the detector  */
 double LeanElasticPeak::getTOF() const {
-  throw Exception::NotImplementedError("LeanElasticPeak::getTOF(): no detector infomation in LeanElasticPeak");
+  throw Exception::NotImplementedError("LeanElasticPeak::getTOF(): no detector information in LeanElasticPeak");
 }
 
 // returns the detectorID of the pixel, throws NotImplementedError for LeanElasticPeak
 int LeanElasticPeak::getDetectorID() const {
-  throw Exception::NotImplementedError("LeanElasticPeak::getDetectorID(): no detector infomation in LeanElasticPeak");
+  throw Exception::NotImplementedError("LeanElasticPeak::getDetectorID(): no detector information in LeanElasticPeak");
 }
 
 /// returns the row (y) of the pixel of the detector, throws NotImplementedError for LeanElasticPeak
 int LeanElasticPeak::getRow() const {
-  throw Exception::NotImplementedError("LeanElasticPeak::getRow(): no detector infomation in LeanElasticPeak");
+  throw Exception::NotImplementedError("LeanElasticPeak::getRow(): no detector information in LeanElasticPeak");
 }
 
 /// returns the column (x) of the pixel of the detector, throws NotImplementedError for LeanElasticPeak
 int LeanElasticPeak::getCol() const {
-  throw Exception::NotImplementedError("LeanElasticPeak::getCol(): no detector infomation in LeanElasticPeak");
+  throw Exception::NotImplementedError("LeanElasticPeak::getCol(): no detector information in LeanElasticPeak");
 }
 
 // -------------------------------------------------------------------------------------
@@ -262,7 +262,7 @@ double LeanElasticPeak::getL2() const {
 }
 
 /**
- * @brief Assignement operator overload
+ * @brief Assignment operator overload
  * @param other : Other peak object to assign from
  * @return this
  */

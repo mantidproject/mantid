@@ -52,7 +52,7 @@ def get_log_value(run, log_name, log_type):
     left to do. In the case of a vector we select the first element whose time_stamp is after the start time of the run
     :param run: a Run object.
     :param log_name: the name of the log entry
-    :param log_type: the expected type fo the log entry
+    :param log_type: the expected type of the log entry
     :return: the log entry
     """
     try:
@@ -729,7 +729,7 @@ def get_standard_output_workspace_name(state, reduction_data_type, wav_range, in
     :param state: a SANSState object
     :param reduction_data_type: which reduced data type is being looked at, ie HAB, LAB or Merged
     :param include_slice_limits: optional bool. If True, add slice limits to the name.
-    :return: the name of the reduced workspace, and the base name fo the reduced workspace
+    :return: the name of the reduced workspace, and the base name of the reduced workspace
     """
     # 1. Short run number
     data = state.data

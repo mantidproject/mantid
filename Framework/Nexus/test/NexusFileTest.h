@@ -84,7 +84,7 @@ public:
   }
 
   void test_can_open_existing() {
-    cout << "\ntest open exisitng\n" << std::flush;
+    cout << "\ntest open existing\n" << std::flush;
 
     FileResource resource("test_nexus_file_init.h5");
     std::string filename = resource.fullPath();
@@ -1034,7 +1034,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(file.openAddress(expected));
     TS_ASSERT_EQUALS(file.getAddress(), "/" + expected);
 
-    // failling should leave path alone
+    // failing should leave path alone
     TS_ASSERT_THROWS(file.openAddress("/pants"), Mantid::Nexus::Exception &);
     TS_ASSERT_EQUALS(file.getAddress(), "/" + expected);
 
@@ -1250,7 +1250,7 @@ public:
   }
 
   void test_get_bad_attr_fails() {
-    cout << "\ntest atttribute -- bad\n";
+    cout << "\ntest attribute -- bad\n";
 
     // open a file
     FileResource resource("test_nexus_attr_bad.h5");
@@ -1377,7 +1377,7 @@ public:
   }
 
   void test_existing_attr_resolved() {
-    // test that attributes in existing files are corectly resolved
+    // test that attributes in existing files are correctly resolved
     // this prevents a regression that will otherwise show up in tests of LoadMD and various python algorithms
     cout << "\ntest open existing file with system-dependent type\n";
 
@@ -1706,7 +1706,7 @@ public:
     {
       Mantid::Nexus::File file(filename, NXaccess::READ);
 
-      // prepate two threads to copy the file and read a different group
+      // prepare two threads to copy the file and read a different group
       constexpr int N{2};
       std::string addr1(2, 'x'), addr2(2, 'a');
       std::vector<std::thread> threads(N);
@@ -1767,7 +1767,7 @@ public:
       file1.openGroup("entry1", "NXshorts");
       TS_ASSERT_EQUALS(file1.getAddress(), "/entry1");
       TS_ASSERT_EQUALS(file1.getStrAttr("info"), "some info");
-      { // sccope file2
+      { // scope file2
         // copy the file and go to a different entry
         Mantid::Nexus::File file2(file1);
         TS_ASSERT_EQUALS(file2.getAddress(), "/");
@@ -1807,7 +1807,7 @@ public:
       // open the file and go to an entry
       Mantid::Nexus::File file1(filename, NXaccess::READ);
       Mantid::Nexus::File *pfile = &file1;
-      { // sccope file2
+      { // scope file2
         // copy the file and go to a different entry
         Mantid::Nexus::File file2(pfile);
         file2.openGroup("entry", "NXshorts");

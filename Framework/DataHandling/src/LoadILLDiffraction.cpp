@@ -48,7 +48,7 @@ constexpr size_t D20_NUMBER_PIXELS = 1600;
 // This defines the number of dead pixels on each side in low resolution mode
 constexpr size_t D20_NUMBER_DEAD_PIXELS = 32;
 // This defines the number of monitors in the instrument. If there are cases
-// where this is no longer one this decleration should be moved.
+// where this is no longer one this declaration should be moved.
 constexpr size_t NUMBER_MONITORS = 1;
 // This is the angular size of a pixel in degrees (in low resolution mode)
 constexpr double D20_PIXEL_SIZE = 0.1;

@@ -242,7 +242,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
 
         :param completed_event_slices: a list containing a single list of output bundle parts
         """
-        # Find the partial output bundles fo LAB Can and HAB Can if they exist
+        # Find the partial output bundles for LAB Can and HAB Can if they exist
         lab_can_counts, hab_can_counts = WorkspaceGroup(), WorkspaceGroup()
         lab_can_norms, hab_can_norms = WorkspaceGroup(), WorkspaceGroup()
 

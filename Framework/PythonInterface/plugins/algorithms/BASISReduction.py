@@ -84,7 +84,7 @@ def pyexec_setup(remove_temp, new_options):
     Parameters
     ----------
     remove_temp: bool
-        Determine wether to remove the temporary workspaces
+        Determine whether to remove the temporary workspaces
     new_options: dict
         Dictionary of mantid configuration options to be modified.
 
@@ -242,7 +242,7 @@ class BASISReduction(PythonAlgorithm):
         self.declareProperty(
             "ExcludeTimeSegment",
             "",
-            "Exclude a contigous time segment; "
+            "Exclude a contiguous time segment; "
             + 'Examples: "71546:0-60" filter run 71546 from '
             + 'start to 60 seconds, "71546:300-600", '
             + '"71546:120-end" from 120s to the end of the run',
@@ -341,7 +341,7 @@ the first two hours"""
         self.setPropertySettings("PsiOffset", nxspe_enabled)
         self.setPropertyGroup("PsiOffset", title_nxspe)
 
-        # Aditional output properties
+        # Additional output properties
         titleAddionalOutput = "Additional Output"
         self.declareProperty(
             "OutputSusceptibilityFrequencyNXS",

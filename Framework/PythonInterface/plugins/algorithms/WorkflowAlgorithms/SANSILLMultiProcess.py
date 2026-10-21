@@ -297,7 +297,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
 
         # ==================================STITCH OPTIONS=================================#
 
-        self.declareProperty(name="PerformStitching", defaultValue=True, doc="Wheter or not to perform stitching.")
+        self.declareProperty(name="PerformStitching", defaultValue=True, doc="Whether or not to perform stitching.")
         self.setPropertyGroup("PerformStitching", "Stitch Options")
 
         stitch_options = ["ManualScaleFactors", "TieScaleFactors", "ScaleFactorCalculation"]
@@ -708,7 +708,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     # ================================PROCESS REDUCTIONS================================#
 
     def process_tr_dark_current(self, i):
-        """Processes the dark current at the tranmission configuration"""
+        """Processes the dark current at the transmission configuration"""
         runs = self.getPropertyValue("TrDarkCurrentRuns")
         if runs:
             tr_dark_current = runs.split(",")[i]
@@ -725,7 +725,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             return ""
 
     def process_tr_empty_beam(self, i, tr_dark_current_ws):
-        """Processes the empty beam at the tranmission configuration"""
+        """Processes the empty beam at the transmission configuration"""
         runs = self.getPropertyValue("TrEmptyBeamRuns")
         if runs:
             tr_empty_beam = runs.split(",")[i]

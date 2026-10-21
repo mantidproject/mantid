@@ -161,7 +161,7 @@ std::vector<std::vector<size_t>> IntegrateByComponent::makeInstrumentMap(const A
 
 /**
  * @brief This function will check how to group spectra when calculating median
- * @param countsWS the workspace to check for componets/parents
+ * @param countsWS the workspace to check for components/parents
  * @param parents  how many levels above detector to create the grouping
  * @return vector of vectors, containing each spectrum that belongs to each
  * group

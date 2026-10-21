@@ -20,7 +20,7 @@ analysis to determine regions of interest around each peak of the
 labels assigned to each cluster for diagnostic and visualisation
 purposes.
 
-**The algorithm makes no assmptions about Peak shape or size** and can
+**The algorithm makes no assumptions about Peak shape or size** and can
 therefore be used where integration over defined shapes
 :ref:`algm-IntegratePeaksMD` and
 :ref:`algm-IntegrateEllipsoids`, for example, will not

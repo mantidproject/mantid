@@ -85,7 +85,7 @@ void ScalarMappable::setNorm(const NormalizeBase &norm) {
 
 /**
  * Reset the mappable limits
- * @param vmin An optional new minmum value
+ * @param vmin An optional new minimum value
  * @param vmax An optional new maximum value
  */
 void ScalarMappable::setClim(std::optional<double> vmin, std::optional<double> vmax) {

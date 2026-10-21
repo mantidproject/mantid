@@ -197,7 +197,7 @@ std::vector<double> executeFit(Mantid::API::Algorithm &fit, const std::string &f
 }
 
 /** Return a Fit algorithm compatible string representing a polynomial.
- *  @param name a string respresenting the name of the polynomial
+ *  @param name a string representing the name of the polynomial
  *  @param parameters a vector containing the polynomial coefficients
  *  @return a function string
  */

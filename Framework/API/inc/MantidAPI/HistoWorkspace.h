@@ -17,7 +17,7 @@ namespace API {
   creation: Many algorithms create a new MatrixWorkspace from a parent workspace
   without keeping the events, but keeping any potential sub type of
   MatrixWorkspace. HistoWorkspace provides a common base type for all non-event
-  MatrixWorkspaces. See DataObjects/WorkspaceCreation.h for mor details.
+  MatrixWorkspaces. See DataObjects/WorkspaceCreation.h for more details.
 */
 class MANTID_API_DLL HistoWorkspace : public MatrixWorkspace {
 public:

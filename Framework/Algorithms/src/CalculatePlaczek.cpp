@@ -71,7 +71,7 @@ std::pair<double, double> calculateSummationTerm(const Kernel::Material &materia
 DECLARE_ALGORITHM(CalculatePlaczek)
 
 //----------------------------------------------------------------------------------------------
-// NOTE: the template seems to prefer having the implemenation in the cpp file
+// NOTE: the template seems to prefer having the implementation in the cpp file
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string CalculatePlaczek::name() const { return "CalculatePlaczek"; }

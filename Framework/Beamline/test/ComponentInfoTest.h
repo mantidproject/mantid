@@ -544,7 +544,7 @@ public:
     TSM_ASSERT("Rotations should exactly match as we are overwriting with an "
                "abs rotation",
                actualRootRotation.isApprox(requestedRotation));
-    TSM_ASSERT_DELTA("Acutal rotation should be 90 deg around y", std::asin(actualRootRotation.y()) * 2, theta, 1e-4);
+    TSM_ASSERT_DELTA("Actual rotation should be 90 deg around y", std::asin(actualRootRotation.y()) * 2, theta, 1e-4);
 
     auto actualDetRotation = info.rotation(detectorIndex);
     TSM_ASSERT_DELTA("Detector rotation should be accumulation existing 45 + "
@@ -767,7 +767,7 @@ public:
     TSM_ASSERT("For a root (no parent) relative rotations are always the same as "
                "absolute ones",
                info.relativeRotation(rootIndex).isApprox(info.rotation(rootIndex)));
-    TSM_ASSERT_DELTA("90 degree RELATIVE rotation between root ans sub-assembly",
+    TSM_ASSERT_DELTA("90 degree RELATIVE rotation between root and sub-assembly",
                      info.relativeRotation(rootIndex).angularDistance(info.relativeRotation(subAssemblyIndex)), theta,
                      1e-6);
   }

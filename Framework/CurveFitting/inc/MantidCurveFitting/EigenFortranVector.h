@@ -120,7 +120,7 @@ typename FortranVector<VectorClass>::ElementRefType FortranVector<VectorClass>::
 }
 
 /// Move the data of this vector to a newly created vector of the bas class.
-/// Do not use this vector after calling this method. The intension of it is
+/// Do not use this vector after calling this method. The intention of it is
 /// to keep fortran-style calculations separate from C++-style.
 template <class VectorClass> VectorClass FortranVector<VectorClass>::moveToBaseVector() {
   return VectorClass(std::move(*this));

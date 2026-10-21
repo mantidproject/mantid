@@ -195,7 +195,7 @@ private:
     return centres;
   }
 
-  // Mininum setup for GetEiMonDet3.
+  // Minimum setup for GetEiMonDet3.
   static void setupSimple(const MatrixWorkspace_sptr &ws, GetEiMonDet3 &algorithm) {
     algorithm.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())

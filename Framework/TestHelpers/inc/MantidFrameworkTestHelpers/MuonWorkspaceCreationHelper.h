@@ -115,7 +115,7 @@ Mantid::API::MatrixWorkspace_sptr createWorkspaceWithInstrumentandRun(const std:
                                                                       size_t nSpectra = 1);
 
 // Creates a grouped workspace containing multiple workspaces with multiple
-// spectra, the detector IDs are consequtive across the spectra, starting from 1
+// spectra, the detector IDs are consecutive across the spectra, starting from 1
 Mantid::API::WorkspaceGroup_sptr createWorkspaceGroupConsecutiveDetectorIDs(const int &nWorkspaces, size_t nspec,
                                                                             size_t maxt,
                                                                             const std::string &wsGroupName);

@@ -102,7 +102,7 @@ class BayesQuasi2(QuickBayesTemplate):
         :param max_features: the maximum number of features used
         :param name_params: the name of parameters workspace
         :param name_prob: the name of the probability worksapce
-        :return workspace of fit paramters and workspace of loglikelihoods (probs)
+        :return workspace of fit parameters and workspace of loglikelihoods (probs)
         """
         axis_names = []
         y_data = []

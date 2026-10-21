@@ -138,7 +138,7 @@ void ConvertCWPDMDToSpectra::exec() {
     binsize = binParams[0];
     g_log.warning() << "Only bin size " << binParams[0]
                     << " is specified.  Xmin and Xmax "
-                       " will be calcualted from motor positions and wavelength.  "
+                       " will be calculated from motor positions and wavelength.  "
                        "More CPU time will be used."
                     << "\n";
   } else if (binParams.size() == 3) {

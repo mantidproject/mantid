@@ -44,7 +44,7 @@ public:
 
   //--------------- ThermalNeutron peak function special
   //---------------------------------------
-  /// Set Miller Indicies
+  /// Set Miller Indices
   virtual void setMillerIndex(int h, int k, int l);
 
   /// Get Miller Index from this peak
@@ -97,7 +97,7 @@ protected:
   /// void functionDeriv1D(Jacobian* out, const double* xValues, const size_t
   /// nData) const;
 
-  /// General implemenation of derivative
+  /// General implementation of derivative
   // void functionDerivLocal(Jacobian* out, const double* xValues, const size_t
   // nData) const;
 

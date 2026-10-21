@@ -122,7 +122,7 @@ public:
 
     remove(fileName.c_str());
     // check -- this workspace and wrong par file have to result in warning and
-    // internal algorithm excecuted;
+    // internal algorithm executed;
     Mantid::DataObjects::TableWorkspace_sptr spResult =
         AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>("DET_PAR_ASCII");
 

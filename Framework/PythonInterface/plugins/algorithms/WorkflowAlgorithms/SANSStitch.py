@@ -323,7 +323,7 @@ class SANSStitch(DataProcessorAlgorithm):
             q_high_angle_can = self._divide(cF_can, nF_can)
             q_low_angle_can = self._divide(cR_can, nR_can)
 
-            # Now we can do the can subraction.
+            # Now we can do the can subtraction.
             q_high_angle = self._subract(q_high_angle, q_high_angle_can)
             q_low_angle = self._subract(q_low_angle, q_low_angle_can)
 
@@ -423,7 +423,7 @@ class SANSStitch(DataProcessorAlgorithm):
         process_can = self.getProperty("ProcessCan")
         if bool(process_can.value):
             workspace_property_names = ["HABCountsCan", "HABNormCan", "LABCountsCan", "LABNormCan"]
-            # Check existance
+            # Check existence
             self._validate_provided(workspace_property_names, errors)
             # Check Q units
             self._validate_units(workspace_property_names, errors)

@@ -47,7 +47,7 @@ class ExamplePeakFunction(IPeakFunction):
         # not as part of the fit itself e.g. number of terms to evaluate in some expression
         # They must have a default value.
         # It is advisable to look at the setAttributeValue function below and take local copies
-        # of attributes so that they do not have to be retrieved repeatedly througout the fitting.
+        # of attributes so that they do not have to be retrieved repeatedly throughout the fitting.
         self.declareAttribute("NTerms", 1)
 
     def functionLocal(self, xvals):
@@ -129,7 +129,7 @@ class ExamplePeakFunction(IPeakFunction):
             param_value = math.sqrt(math.fabs(1.0 / value))
         else:
             param_value = value
-        # Final explicit arugment is required to be false here by framework
+        # Final explicit argument is required to be false here by framework
         self.setParameter(index, param_value, False)
 
         param_value = self.getParameterValue(index)

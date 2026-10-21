@@ -18,7 +18,7 @@ class AddFeature(ABC):
         self._add_features(GUI)
 
     def _get_features(self, feature_dict):
-        # Determines which  fetures need to be added
+        # Determines which  features need to be added
         raise NotImplementedError("get features not implemented")
 
     def _add_features(self, GUI):

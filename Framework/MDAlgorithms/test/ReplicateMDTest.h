@@ -144,7 +144,7 @@ public:
 
     // Try again with different property value
     alg.setProperty("DataWorkspace", dataWSGood);
-    TSM_ASSERT_EQUALS("Interated dim should not be counted.", 0, alg.validateInputs().size());
+    TSM_ASSERT_EQUALS("Integrated dim should not be counted.", 0, alg.validateInputs().size());
   }
 
   void test_basic_shape_check() {
@@ -218,11 +218,11 @@ public:
     // Check the output data. Should be horizontally invariant, but vertically
     // increasing
 
-    TSM_ASSERT_EQUALS("Neighours horizontal. Should be the same.", outWS->getSignalAt(0), outWS->getSignalAt(1));
-    TSM_ASSERT_DIFFERS("Neighours vertical. Should be different.", outWS->getSignalAt(0),
-                       outWS->getSignalAt(shapeShape[0] /*one row verically down*/));
+    TSM_ASSERT_EQUALS("Neighbours horizontal. Should be the same.", outWS->getSignalAt(0), outWS->getSignalAt(1));
+    TSM_ASSERT_DIFFERS("Neighbours vertical. Should be different.", outWS->getSignalAt(0),
+                       outWS->getSignalAt(shapeShape[0] /*one row vertically down*/));
     TSM_ASSERT_EQUALS("Vertical points should be same in data and output", dataWS->getSignalAt(dataShape[0]),
-                      outWS->getSignalAt(shapeShape[0] /*one row verically down*/));
+                      outWS->getSignalAt(shapeShape[0] /*one row vertically down*/));
   }
 
   void test_replicate_1d_horizontal() {

@@ -267,7 +267,7 @@ class NonIDF_Properties(object):
         """The full path to the file, containing log describing the last run number,
         uploaded to archive on ISIS. Only after a file has been added to the archive,
         the data are available for reduction. The information is used by reduction
-        script, which runs during experiment and waits until data files redy for reduction.
+        script, which runs during experiment and waits until data files ready for reduction.
         """
         if self._archive_upload_log_file is None:
             if len(NonIDF_Properties.archive_upload_log_template) > 0:

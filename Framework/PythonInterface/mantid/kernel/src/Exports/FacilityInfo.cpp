@@ -19,10 +19,10 @@ void export_FacilityInfo() {
 
   class_<FacilityInfo>("FacilityInfo", no_init)
       .def("name", &FacilityInfo::name, arg("self"), return_value_policy<copy_const_reference>(),
-           "Returns name of the facility as definined in the Facilities.xml "
+           "Returns name of the facility as defined in the Facilities.xml "
            "file")
       .def("__str__", &FacilityInfo::name, arg("self"), return_value_policy<copy_const_reference>(),
-           "Returns name of the facility as definined in the Facilities.xml "
+           "Returns name of the facility as defined in the Facilities.xml "
            "file")
       .def("zeroPadding", &FacilityInfo::zeroPadding, arg("self"), "Returns default zero padding for this facility")
       .def("delimiter", &FacilityInfo::delimiter, arg("self"), return_value_policy<copy_const_reference>(),

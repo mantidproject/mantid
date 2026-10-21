@@ -43,7 +43,7 @@ namespace {
  * @param base Directory to serve as base for absolute paths
  */
 inline std::string pythonExecutable(const fs::path &) {
-  // We assume the conda environement is activated and python will be found
+  // We assume the conda environment is activated and python will be found
   // on the PATH
   return bp::search_path(PYTHON_EXECUTABLE_PATH).generic_string();
 }
@@ -137,7 +137,7 @@ void showErrorReporter(const fs::path &dirOfExe, const int workbenchExitCode) {
  * the error reporter is duplicated across shell, ps1 scripts on the
  * various platforms.
  *
- * This is designed to be a mimimum standalone executable that does nothing
+ * This is designed to be a minimum standalone executable that does nothing
  * but start other applications. Any argument parsing logic should be done
  * in the startup routines for workbench or errorreporter. There is a single
  * exception on macOS that is documented in appendArguments().

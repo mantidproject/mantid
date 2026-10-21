@@ -89,13 +89,13 @@ public:
   virtual std::shared_ptr<GeometryHandler> getGeometryHandler() const = 0;
 };
 
-/// Typdef for a shared pointer
+/// Typedef for a shared pointer
 using IObject_sptr = std::shared_ptr<IObject>;
-/// Typdef for a shared pointer to a const object
+/// Typedef for a shared pointer to a const object
 using IObject_const_sptr = std::shared_ptr<const IObject>;
-/// Typdef for a unique pointer
+/// Typedef for a unique pointer
 using IObject_uptr = std::unique_ptr<IObject>;
-/// Typdef for a unique pointer to a const object
+/// Typedef for a unique pointer to a const object
 using IObject_const_uptr = std::unique_ptr<const IObject>;
 
 } // namespace Geometry

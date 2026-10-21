@@ -45,8 +45,8 @@ void export_TimeROI() {
       .def("useNone", &TimeROI::useNone, "True if all times are ignore")
       .def("numberOfRegions", &TimeROI::numberOfRegions, arg("self"), "Number of regions of interest")
       .def("firstTime", &TimeROI::firstTime,
-           "First time in the object. Will generate an execption if useAll() is True.")
-      .def("lastTime", &TimeROI::lastTime, "Last time in the object. Will generate an execption if useAll() is True.")
+           "First time in the object. Will generate an exception if useAll() is True.")
+      .def("lastTime", &TimeROI::lastTime, "Last time in the object. Will generate an exception if useAll() is True.")
       .def("toTimeIntervals", &getTimeIntervals, arg("self"),
            "Returns a list of start and stop times for all time intervals");
 }

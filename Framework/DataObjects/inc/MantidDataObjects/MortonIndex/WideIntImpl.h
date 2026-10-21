@@ -255,9 +255,9 @@ template <size_t Bits, typename Signed> struct wide_integer<Bits, Signed>::_impl
   template <typename T2, typename = std::enable_if<std::is_integral<T2>::value && std::is_unsigned<T2>::value>>
   constexpr static wide_integer<Bits, signed> shift_left(const wide_integer<Bits, signed> &rhs, T2 n) {
     // static_assert(is_negative(rhs), "shift left for negative lhsbers is
-    // underfined!");
+    // undefined!");
     if (is_negative(rhs)) {
-      throw std::runtime_error("shift left for negative lhsbers is underfined!");
+      throw std::runtime_error("shift left for negative lhsbers is undefined!");
     }
     return wide_integer<Bits, signed>(shift_left(wide_integer<Bits, unsigned>(rhs), n));
   }

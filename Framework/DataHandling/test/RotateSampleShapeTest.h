@@ -154,7 +154,7 @@ public:
   std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
     /**
      * Create cube of side length size with specified centre,
-     * parellel to axes and non-negative vertex coordinates.
+     * parallel to axes and non-negative vertex coordinates.
      */
     double min = 0.0 - 0.5 * size;
     double max = 0.5 * size;

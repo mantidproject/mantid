@@ -41,7 +41,7 @@ public:
   double m_totalVolume;                        ///< The total volume of the sample
 
 private:
-  const Geometry::IObject *m_sampleShape; ///< The shape pointer is handeled by sample object, not distGraber
+  const Geometry::IObject *m_sampleShape; ///< The shape pointer is handled by sample object, not distGraber
   const double m_elementSize;             ///< Size of the sample in m.
 };
 

@@ -61,7 +61,7 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
     def editSettings(self, settingValues, mDialog):
         """
         Edit the settings window. This method will edit all the provided
-        settings and set them to their correcponding value.
+        settings and set them to their corresponding value.
 
         Args:
             settingValues (dict(str:str)): setting name and value to be set

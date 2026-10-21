@@ -173,7 +173,7 @@ class DrillModel(QObject):
         controller is also setup.
 
         Args:
-            mode (str): aquisition mode name
+            mode (str): acquisition mode name
         """
         if (self.instrument is None) or (mode not in RundexSettings.ACQUISITION_MODES[self.instrument]):
             return
@@ -412,7 +412,7 @@ class DrillModel(QObject):
         """
         Get the keyword arguments to be provided to an algorithm. This will
         merge the global settings and the row specific settings in a single
-        dictionnary. It will also remove all the empty parameters.
+        dictionary. It will also remove all the empty parameters.
 
         Args:
             sample (int): sample index

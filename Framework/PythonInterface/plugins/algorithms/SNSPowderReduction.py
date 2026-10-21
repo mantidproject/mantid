@@ -226,7 +226,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         )
         self.declareProperty(
             FloatArrayProperty("Binning", values=[0.0, 0.0, 0.0], direction=Direction.Input),
-            "Positive is linear bins, negative is logorithmic.",
+            "Positive is linear bins, negative is logarithmic.",
         )  # Params
         self.copyProperties("AlignAndFocusPowderFromFiles", ["ResampleX"])
         self.declareProperty(
@@ -587,7 +587,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             #    - was created with a different method
             #       -> delete the current one, then carry on
             #  - no history (processing list of runs)
-            #    -> carry on as a single call wiht list of runs ensures that same method is used.
+            #    -> carry on as a single call with list of runs ensures that same method is used.
             can_run_ws_name, _ = self._generate_container_run_name(can_run_numbers, samRunIndex)
             if can_run_ws_name in mtd:
                 hstry = mtd[can_run_ws_name].getHistory()
@@ -1298,7 +1298,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return filer_wall
 
     def getNumberOfSplittedWorkspace(self, splitwksp):
-        """Get number of splitted workspaces due to input splitwksp
+        """Get number of split workspaces due to input splitwksp
 
         Return : integer
         """
@@ -1734,7 +1734,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         wsgroup = mtd[base_name]
         tempwsnamelist = wsgroup.getNames()
         # logging
-        dbstr = "[Fx951] Splitted workspace names: "
+        dbstr = "[Fx951] Split workspace names: "
         for ws_name in tempwsnamelist:
             dbstr += "%s, " % (ws_name)
         self.log().debug(dbstr)

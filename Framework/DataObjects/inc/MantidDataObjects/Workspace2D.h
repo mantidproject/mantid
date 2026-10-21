@@ -84,7 +84,7 @@ public:
                      bool loadAsRectImg = false, double scale_1 = 1.0, [[maybe_unused]] bool parallelExecution = true);
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   Workspace2D(const Workspace2D &other);
 
   /// Called by initialize()

@@ -42,7 +42,7 @@ void SpectrumAlgorithm::declareWorkspaceIndexSetProperties(const std::string &in
                   "a list '12,15,26,28' gives '10-20,26,28'.");
 }
 
-/** Returns a validated IndexSet refering to spectra in workspace.
+/** Returns a validated IndexSet referring to spectra in workspace.
  *
  * If declareSpectrumWorkspaceProperties() has been called in init(), the user
  * defined range and/or index list will be used to construct the set, otherwise

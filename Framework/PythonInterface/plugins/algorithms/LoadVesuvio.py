@@ -737,7 +737,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
         wsindex = self._ws_index  # The current spectra to examine
         for i in range(self._nperiods):
-            # Gets the sum(1,2) of the yvalues at the bin indexs
+            # Gets the sum(1,2) of the yvalues at the bin indices
             yvalues = self._raw_grp[i].y(wsindex)
             self.sum1[i] = np.sum(yvalues[sum1_indices])
             self.sum2[i] = np.sum(yvalues[sum2_indices])

@@ -580,7 +580,7 @@ private:
     save.setPropertyValue("Filename", getTestFileName());
     std::string filePath = save.getPropertyValue("Filename");
     if (cols < 3) {
-      // saveascii2 doens't save 2 column files it has to be made manually
+      // saveascii2 doesn't save 2 column files it has to be made manually
       std::ofstream file(filePath.c_str());
       if (scientific) {
         file << std::scientific;

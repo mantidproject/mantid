@@ -171,7 +171,7 @@ void InstrumentRayTracer::fireRay(Track &testRay) const {
       m_boxCache[node->getComponentID()] = bbox;
     }
 
-    // Quick test. If this suceeds moved on to test the children
+    // Quick test. If this succeeds moved on to test the children
     if (bbox.doesLineIntersect(testRay)) {
       if (ICompAssembly_const_sptr assembly = std::dynamic_pointer_cast<const ICompAssembly>(node)) {
         assembly->testIntersectionWithChildren(testRay, nodeQueue);

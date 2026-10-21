@@ -41,13 +41,13 @@ class IndexSatellitePeaks(PythonAlgorithm):
         self.declareProperty(
             IPeaksWorkspaceProperty(name="OutputWorkspace", defaultValue="", direction=Direction.Output),
             doc="The indexed satellite peaks. This will be a  \
-                             table workspace with miller indicies h, k, l, m1, \
+                             table workspace with miller indices h, k, l, m1, \
                              m2, ..., mn.",
         )
 
         self.declareProperty("Tolerance", 0.3, direction=Direction.Input, doc="Tolerance on the noise of the q vectors")
 
-        self.declareProperty("NumOfQs", 1, direction=Direction.Input, doc="Number of independant q vectors")
+        self.declareProperty("NumOfQs", 1, direction=Direction.Input, doc="Number of independent q vectors")
 
         self.declareProperty(
             "ClusterThreshold",

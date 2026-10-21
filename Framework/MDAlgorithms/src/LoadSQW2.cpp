@@ -700,7 +700,7 @@ size_t LoadSQW2::addEventFromBuffer(const float *pixel) {
  * The assumption is that the pixels on input are in the Q_sample (crystal)
  * frame as they are defined in Horace
  * @param centers Coordinates assumed to be in the crystal cartesian frame.
- * The array should be atleast 3 in size
+ * The array should be at least 3 in size
  */
 void LoadSQW2::toOutputFrame(coord_t *centers) {
   if (m_outputFrame == "Q_sample")

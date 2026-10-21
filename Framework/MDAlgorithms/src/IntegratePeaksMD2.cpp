@@ -546,7 +546,7 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
                                        *std::max_element(BackgroundInnerRadius.begin(), BackgroundInnerRadius.end());
       BackgroundOuterRadiusVector[i] = adaptiveQBackgroundMultiplier * lenQpeak +
                                        *std::max_element(BackgroundOuterRadius.begin(), BackgroundOuterRadius.end());
-      // define the radius squared for a sphere intially
+      // define the radius squared for a sphere initially
       CoordTransformDistance getRadiusSq(nd, center, dimensionsUsed);
       // set spherical shape
       PeakShape *sphereShape =
@@ -946,7 +946,7 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
  * vectors provided
  *
  *  @param ws             input workspace
- *  @param getRadiusSq    Coord transfrom for sphere
+ *  @param getRadiusSq    Coord transform for sphere
  *  @param pos            V3D of peak centre
  *  @param radiusSquared  radius that defines spherical region for covarariance
  *  @param qAxisIsFixed      bool to fix an eigenvector along direction pos
@@ -976,7 +976,7 @@ void IntegratePeaksMD2::findEllipsoid(const typename MDEventWorkspace<MDE, nd>::
     auto *box = dynamic_cast<MDBox<MDE, nd> *>(MDiter.getBox());
     if (box && !box->getIsMasked()) {
 
-      // simple check whether box is defintely not contained
+      // simple check whether box is definitely not contained
       coord_t boxCenter[nd];
       box->getCenter(boxCenter);
       V3D displacement;   // vector between peak pos and box center
@@ -1086,7 +1086,7 @@ void IntegratePeaksMD2::calcCovar(const std::vector<std::pair<V3D, double>> &pea
         }
       }
 
-      // if prev cov_mat chec
+      // if prev cov_mat check
       if (useEvent) {
         const auto signal = event.second;
         w_sum += signal;
@@ -1181,10 +1181,10 @@ void IntegratePeaksMD2::calcCovar(const std::vector<std::pair<V3D, double>> &pea
  * Get the inverse of the matrix P. Left multiply a vector by Pinv to transform
  * from Qlab to basis Qhat, and uhat,vhat in plane perpendicular to Q. P is a
  * matrix with columns corresponding to new basis vectors. The inverse of P is
- * equivalent to the transpose (as for any roation matrix)
+ * equivalent to the transpose (as for any rotation matrix)
  *
  *  @param q     Qlab of peak center.
- *  @param Pinv  3 x 3 matrix with rows correpsonding to new basis vectors
+ *  @param Pinv  3 x 3 matrix with rows corresponding to new basis vectors
  */
 void IntegratePeaksMD2::getPinv(const V3D &q, Kernel::Matrix<double> &Pinv) {
   // loop over 3 mutually-orthogonal vectors  until get one with

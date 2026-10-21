@@ -74,7 +74,7 @@ public:
 
   /// Get the captured results of a file search
   FindFilesSearchResults getResults() { return m_results; };
-  /// Get if the finished searching signal was recieved
+  /// Get if the finished searching signal was received
   bool isFinishedSignalRecieved() { return m_finishedSignalRecieved; };
 
 public slots:
@@ -91,7 +91,7 @@ signals:
 private:
   /// Results captured from the worker thread.
   FindFilesSearchResults m_results;
-  /// Whether a finished signal was recieved
+  /// Whether a finished signal was received
   bool m_finishedSignalRecieved;
 };
 

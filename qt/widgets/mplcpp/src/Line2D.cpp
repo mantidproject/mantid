@@ -20,14 +20,14 @@ using namespace MantidQt::Widgets::Common;
 namespace MantidQt::Widgets::MplCpp {
 
 /**
- * Contruct a wrapper around an existing matplotlib Line2D instance.
+ * Construct a wrapper around an existing matplotlib Line2D instance.
  * @param obj An existing Line2D instance
  */
 Line2D::Line2D(Python::Object obj) : Artist(std::move(obj)), m_dataOwner{} {}
 
 /**
- * @brief Contruct a wrapper around an existing matplotlib Line2D instance.
- * Usally Axes.plot is used to create one of these so that an the Line2D
+ * @brief Construct a wrapper around an existing matplotlib Line2D instance.
+ * Usually Axes.plot is used to create one of these so that an the Line2D
  * object already contains the data. This object assumes the Line2D
  * instance contains a view on to the data in the 2 vectors passed here so
  * this object becomes the owner of this data. The Line2D s detached from on
@@ -44,7 +44,7 @@ Line2D::Line2D(Python::Object obj, std::vector<double> &&xdataOwner, std::vector
 }
 
 /**
- * @brief Contruct a wrapper around an existing matplotlib.lines.Line2D instance
+ * @brief Construct a wrapper around an existing matplotlib.lines.Line2D instance
  * This object owns the data that is part of the Line2D instance. It assumes the
  * Line2D contains numpy arrays that are simple a view on to the existing data
  * that is part of the given Y and X arrays.

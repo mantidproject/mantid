@@ -246,7 +246,7 @@ class SampleLogsView(QSplitter, ObservingView):
         return [row.row() for row in self.table.selectionModel().selectedRows()]
 
     def set_selected_rows(self, rows):
-        """Set seleceted rows in table"""
+        """Set selected rows in table"""
         mode = QItemSelectionModel.Select | QItemSelectionModel.Rows
         for row in rows:
             self.table.selectionModel().select(self.model.index(row, 0), mode)

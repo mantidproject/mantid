@@ -213,7 +213,7 @@ public:
     double x = Rot[0] * dir.X() + Rot[3] * dir.Y() + Rot[6] * dir.Z();
     double y = Rot[1] * dir.X() + Rot[4] * dir.Y() + Rot[7] * dir.Z();
     double z = Rot[2] * dir.X() + Rot[5] * dir.Y() + Rot[8] * dir.Z();
-    // this freeses the interface but unclear how to propelry indentify the
+    // this freeses the interface but unclear how to propelry identify the
     TSM_ASSERT_DELTA("X-coord should be specified correctly", 1.4915578672621419, x, 1.e-5);
     TSM_ASSERT_DELTA("Y-coord should be specified correctly", 0.18234563931714265, y, 1.e-5);
     TSM_ASSERT_DELTA("Z-coord should be specified correctly", -0.020536948488997286, z, 1.e-5);

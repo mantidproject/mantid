@@ -208,7 +208,7 @@ class Symmetrise(PythonAlgorithm):
             issues["XMin"] = "XMin must be less than XMax"
             issues["XMax"] = "XMax must be greater than XMin"
 
-        # Valudate X range against workspace X range
+        # Validate X range against workspace X range
         sample_x = input_workspace.x(0)
         sample_x_min = sample_x.min()
         sample_x_max = sample_x.max()

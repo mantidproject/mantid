@@ -58,7 +58,7 @@ std::shared_ptr<Algorithm> createUnmanaged(AlgorithmManagerImpl *self, const std
 
 void clear(AlgorithmManagerImpl *self) {
   /// TODO We should release the GIL here otherwise we risk deadlock (see issue #33895). However, doing so causes
-  /// test failures because it exposes an unreleated bug to do with the way we handle shared_ptrs to Python objects
+  /// test failures because it exposes an unrelated bug to do with the way we handle shared_ptrs to Python objects
   /// (see #33924). Fixing that is not trivial, so I am reverting this change until it can be resolved properly.
   // ReleaseGlobalInterpreterLock releaseGIL;
   return self->clear();

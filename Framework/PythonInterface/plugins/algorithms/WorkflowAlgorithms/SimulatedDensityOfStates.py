@@ -80,7 +80,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         self.declareProperty(name="StickHeight", defaultValue=0.01, doc="Intensity of peaks in stick diagram.")
 
-        self.declareProperty(name="Scale", defaultValue=1.0, doc="Scale the intesity by the given factor. Default is no scaling.")
+        self.declareProperty(name="Scale", defaultValue=1.0, doc="Scale the intensity by the given factor. Default is no scaling.")
 
         self.declareProperty(name="BinWidth", defaultValue=1.0, doc="Set histogram resolution for binning (eV or cm**-1). Default is 1")
 
@@ -409,7 +409,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         @param xmin - minimum X value
         @param hist - array of counts for each bin
-        @param peaks - the indicies of each non-zero point in the data
+        @param peaks - the indices of each non-zero point in the data
         @return the fitted y data
         """
         energies = np.arange(xmin, xmin + hist.size)
@@ -462,7 +462,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         Draw a stick diagram for peaks.
 
         @param hist - array of counts for each bin
-        @param peaks - the indicies of each non-zero point in the data
+        @param peaks - the indices of each non-zero point in the data
         @param dos_shape - shape of the DOS array with broadened peaks
         @return the y data
         """
@@ -481,7 +481,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         Both the partial workspaces and the summed total are returned.
 
-        @param partial_ions Dict of ions to caculate DoS for
+        @param partial_ions Dict of ions to calculate DoS for
         @param frequencies Frequencies read from file
         @param eigenvectors Eigenvectors read from file
         @param weights Weights for each frequency block

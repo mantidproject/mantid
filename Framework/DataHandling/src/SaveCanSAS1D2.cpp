@@ -77,7 +77,7 @@ void SaveCanSAS1D2::init() {
   declareProperty("SampleDirectRunNumber", "", "The run number for the sample direct workspace. Optional.");
   declareProperty("CanScatterRunNumber", "", "The run number for the can scatter workspace. Optional.");
   declareProperty("CanDirectRunNumber", "", "The run number for the can direct workspace. Optional.");
-  declareProperty("OneSpectrumPerFile", false, "If true, each spectrum will be saved in an invididual file");
+  declareProperty("OneSpectrumPerFile", false, "If true, each spectrum will be saved in an individual file");
 
   declareProperty(
       "BackgroundSubtractionWorkspace", "",
@@ -103,7 +103,7 @@ void SaveCanSAS1D2::exec() {
   }
 
   // write xml manually as the user requires a specific format were the
-  // placement of new line characters is controled
+  // placement of new line characters is controlled
   // and this can't be done in using the stylesheet part in Poco or libXML
 
   size_t i = 0;
@@ -143,7 +143,7 @@ void SaveCanSAS1D2::exec() {
     m_outFile << sasRun;
 
     std::string dataUnit = m_workspace->YUnitLabel();
-    // look for xml special characters and replace with entity refrence
+    // look for xml special characters and replace with entity reference
     searchandreplaceSpecialChars(dataUnit);
 
     std::string sasData;
@@ -386,7 +386,7 @@ void SaveCanSAS1D2::createSASTransElement(std::string &sasTrans, const std::stri
 /** Write xml header tags including the root element and starting the SASentry
  *  element, this overrides the method in SaveCanSAS1D
  *  @param fileName :: the name of the file to write to
- *  @throw FileError if the file can't be opened or writen to
+ *  @throw FileError if the file can't be opened or written to
  */
 void SaveCanSAS1D2::writeHeader(const std::string &fileName) {
   try {

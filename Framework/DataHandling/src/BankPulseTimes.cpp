@@ -15,7 +15,7 @@ using namespace Mantid::Kernel;
 //===============================================================================================
 
 namespace {
-// these values are simliar to those in EventList::EventSortType
+// these values are similar to those in EventList::EventSortType
 enum PulseSorting { UNKNOWN, UNSORTED, PULSETIME_SORT };
 
 } // namespace

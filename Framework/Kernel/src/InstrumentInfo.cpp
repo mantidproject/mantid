@@ -180,26 +180,26 @@ void InstrumentInfo::fillZeroPadding(const Poco::XML::Element *elem) {
   unsigned long n = pNL_zeropadding->length();
 
   for (unsigned long i = 0; i < n; ++i) {
-    auto elemenent = dynamic_cast<Poco::XML::Element *>(pNL_zeropadding->item(i));
-    if (!elemenent)
+    auto element = dynamic_cast<Poco::XML::Element *>(pNL_zeropadding->item(i));
+    if (!element)
       continue;
     // read the zero padding size
-    if (!elemenent->hasAttribute("size")) {
+    if (!element->hasAttribute("size")) {
       throw std::runtime_error("Zeropadding size is missing for instrument " + m_name);
     }
-    auto &sizeStr = elemenent->getAttribute("size");
+    auto &sizeStr = element->getAttribute("size");
     int size = 0;
     if (!Mantid::Kernel::Strings::convert(sizeStr, size)) {
       throw std::runtime_error("Zeropadding size must be an integer value (instrument " + m_name + ")");
     }
     // read the start run number
     unsigned int startRunNumber = 0;
-    if (!elemenent->hasAttribute("startRunNumber")) {
+    if (!element->hasAttribute("startRunNumber")) {
       if (!m_zeroPadding.empty()) {
         throw std::runtime_error("Zeropadding size is missing for instrument " + m_name);
       }
     } else {
-      auto &startRunNumberStr = elemenent->getAttribute("startRunNumber");
+      auto &startRunNumberStr = element->getAttribute("startRunNumber");
       try {
         startRunNumber = boost::lexical_cast<unsigned int>(startRunNumberStr);
       } catch (...) {
@@ -210,8 +210,8 @@ void InstrumentInfo::fillZeroPadding(const Poco::XML::Element *elem) {
     }
     // read the file prefix
     std::string prefix = m_shortName;
-    if (elemenent->hasAttribute("prefix")) {
-      prefix = elemenent->getAttribute("prefix");
+    if (element->hasAttribute("prefix")) {
+      prefix = element->getAttribute("prefix");
     }
     m_zeroPadding[startRunNumber] = std::make_pair(prefix, size);
   }
@@ -275,7 +275,7 @@ void InstrumentInfo::fillLiveData(const Poco::XML::Element *elem) {
     try {
       m_kafkaTopics.emplace_back(this, topic);
     } catch (...) {
-      g_log.error() << "Exception occured while loading livedata for " << m_name
+      g_log.error() << "Exception occurred while loading livedata for " << m_name
                     << " instrument. Skipping kafka topic.\n";
     }
   }

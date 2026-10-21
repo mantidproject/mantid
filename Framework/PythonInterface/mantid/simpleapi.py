@@ -1276,7 +1276,7 @@ def _translate():
 
 def _attach_algorithm_func_as_method(method_name, algorithm_wrapper, algm_object):
     """
-    Attachs the given algorithm free function to those types specified by the algorithm
+    Attaches the given algorithm free function to those types specified by the algorithm
     :param method_name: The name of the new method on the type
     :param algorithm_wrapper: Function object whose signature should be f(*args,**kwargs) and when
                              called will run the selected algorithm

@@ -41,7 +41,7 @@ if(USE_TBBMALLOC)
       message(WARNING "TBB malloc proxy not found even though USE_TBBMALLOC is ON. Continuing without it.")
     endif()
   endif()
-  # if it can't be found still carry on as the build will work. The package depenendencies will install it for the end
+  # if it can't be found still carry on as the build will work. The package dependencies will install it for the end
   # users
 else(USE_TBBMALLOC)
   message(STATUS "TBB malloc will not be included in startup scripts")

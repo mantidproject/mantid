@@ -44,12 +44,12 @@ std::string trimTie(const std::string &stringTie) {
 std::string rmInsertFunction(const std::string &originalTie) {
   auto stringTie = originalTie;
   // check the tie only exists in the user function (f)
-  auto seperator = stringTie.find_first_of("=");
+  auto separator = stringTie.find_first_of("=");
   // the wrapped name added 9 characters
-  auto LHName = stringTie.substr(0, seperator);
+  auto LHName = stringTie.substr(0, separator);
   LHName = trimTie(LHName);
   // this one includes = sign
-  auto RHName = stringTie.substr(seperator, std::string::npos);
+  auto RHName = stringTie.substr(separator, std::string::npos);
   RHName = trimTie(RHName);
 
   return LHName + RHName;
@@ -346,7 +346,7 @@ ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(const Mantid::API::I
       auto originalTie = original->getTie(index);
       if (originalTie) {
         auto stringTie = originalTie->asString();
-        // change name to reflect new postion
+        // change name to reflect new position
         auto insertPosition = stringTie.find_first_of(".");
         stringTie.insert(insertPosition + 1, INSERT_FUNCTION);
         // need to change the other side of =

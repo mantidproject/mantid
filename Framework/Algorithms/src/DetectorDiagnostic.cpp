@@ -445,7 +445,7 @@ MatrixWorkspace_sptr DetectorDiagnostic::integrateSpectra(const MatrixWorkspace_
   childAlg->setProperty("InputWorkspace", inputWS);
   childAlg->setProperty("StartWorkspaceIndex", indexMin);
   childAlg->setProperty("EndWorkspaceIndex", indexMax);
-  // pass inputed values straight to this integration trusting the checking done
+  // pass inputted values straight to this integration trusting the checking done
   // there
   childAlg->setProperty("RangeLower", lower);
   childAlg->setProperty("RangeUpper", upper);

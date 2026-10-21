@@ -190,7 +190,7 @@ public:
   /// IntervalList it is validating against.
   IntervalListValidator(QObject *parent, IntervalList intervals);
 
-  /// Overriden method to validate a given QString, at a particular position
+  /// Overridden method to validate a given QString, at a particular position
   State validate(QString & /*unused*/, int & /*unused*/) const override;
 
 private:
@@ -212,7 +212,7 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidWSIndexWidget : public QWidget {
     explicit QLineEditWithErrorMark(QWidget *parent = nullptr);
     /// virtual destructor to allow Qt to deallocate all objects
     ~QLineEditWithErrorMark() override {};
-    /// provide acess to the QLineEdit
+    /// provide access to the QLineEdit
     QLineEdit *lineEdit() { return _lineEdit; };
     /// if Error is not empty, it will make the * label visible and set the
     /// tooltip as the error.

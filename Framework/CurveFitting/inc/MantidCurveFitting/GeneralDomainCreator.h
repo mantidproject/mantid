@@ -62,7 +62,7 @@ public:
   void declareDatasetProperties(const std::string &suffix = "", bool addProp = true) override;
 
 private:
-  /// Retrive the input workspace from the property manager.
+  /// Retrieve the input workspace from the property manager.
   std::shared_ptr<API::ITableWorkspace> getInputWorkspace() const;
   // Names of additional properties
   /// Property names for columns in a TableWorkspace to be passed to

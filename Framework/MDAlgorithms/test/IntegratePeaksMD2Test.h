@@ -883,7 +883,7 @@ public:
       TS_ASSERT_DELTA(translation[idim], 0.0, 0.005);
     }
 
-    // check axes corrsepond to 3 stdevs
+    // check axes correspond to 3 stdevs
     auto radii = ellipsoidShape->abcRadii();
     for (size_t idim = 0; idim < eigenvals.size(); idim++) {
       TS_ASSERT_DELTA(radii[idim] * radii[idim], 9 * eigenvals[idim], 0.05);

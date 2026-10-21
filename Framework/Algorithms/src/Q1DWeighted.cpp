@@ -317,10 +317,10 @@ void Q1DWeighted::getWedgeParams(const std::vector<std::string> &params,
 
 /**
  * @brief Q1DWeighted::checkIfSymetricalWedge
- * Check if the symetrical wedge to the one defined by the parameters is already
+ * Check if the symmetrical wedge to the one defined by the parameters is already
  * registered in the parameter list
  * @param wedge the wedge whose symmetrical we are looking for
- * @return true if a symetrical wedge already exists
+ * @return true if a symmetrical wedge already exists
  */
 bool Q1DWeighted::checkIfSymetricalWedge(Q1DWeighted::Wedge &wedge) {
   return std::any_of(m_wedgesParameters.cbegin(), m_wedgesParameters.cend(),
@@ -329,7 +329,7 @@ bool Q1DWeighted::checkIfSymetricalWedge(Q1DWeighted::Wedge &wedge) {
 
 /**
  * @brief Q1DWeighted::checkIfSuperposedWedges
- * Check if some wedges ahev the same angleMiddle, which is not something the
+ * Check if some wedges have the same angleMiddle, which is not something the
  * user should be wanting.
  * Assume the wedges vector has already been sorted.
  */

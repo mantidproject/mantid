@@ -14,7 +14,7 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DATA_MIRROR="$("${SCRIPT_DIR}/data_mirrors")"
-# Clean buld if required
+# Clean build if required
 BUILD_DIR=$WORKSPACE/build
 
 if [[ $CLEAN_BUILD == true ]]; then
@@ -35,7 +35,7 @@ rm -fr $userconfig_dir
 mkdir -p $userconfig_dir
 touch $userconfig_dir/Mantid.user.properties
 
-# TODO: Remove -DENABLE_WORKBENCH=FALSE when the perfomance test machine has Qt5
+# TODO: Remove -DENABLE_WORKBENCH=FALSE when the performance test machine has Qt5
 cd $BUILD_DIR
 cmake -G 'Ninja' -DDATA_STORE_MIRROR=${DATA_MIRROR} -DCMAKE_BUILD_TYPE=Release -DTESTING_TIMEOUT=600 -DCXXTEST_ADD_PERFORMANCE=TRUE -DENABLE_WORKBENCH=FALSE $WORKSPACE
 ninja -j$BUILD_THREADS

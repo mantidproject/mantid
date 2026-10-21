@@ -173,7 +173,7 @@ private:
     double d1, d2, d3, dEnd; // There are 3 bins
     std::string separator;
 
-    // Evalute the first line. We are expecting only one line for the Xvalues
+    // Evaluate the first line. We are expecting only one line for the Xvalues
     // here.
     getline(stream, line);
     dataStream.str(std::string());

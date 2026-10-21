@@ -49,7 +49,7 @@ struct MANTID_KERNEL_DLL Statistics {
   Statistics();
 };
 
-/// Controls the computation of statisical data
+/// Controls the computation of statistical data
 struct StatOptions {
   enum Flag {
     SortedData = 1,        // is the data sorted?

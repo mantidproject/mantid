@@ -42,7 +42,7 @@ class ObjCompAssembly;
   features.
 
   This visitor ensures only minimal changes are required to any of the
-  IComponent/Instrument1.0 hierachy in order to fully process it. It also
+  IComponent/Instrument1.0 hierarchy in order to fully process it. It also
   eliminates the need for any dynamic casting. Note that InstrumentVisitor
   provides accessors for the client to extract visited information such as
   ComponentIDs.

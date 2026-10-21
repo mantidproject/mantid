@@ -294,12 +294,12 @@ template <typename TYPE> const TYPE &PropertyWithValue<TYPE>::operator()() const
  */
 template <typename TYPE> PropertyWithValue<TYPE>::operator const TYPE &() const { return m_value; }
 
-/** Check the value chosen for the property is OK, unless overidden it just
+/** Check the value chosen for the property is OK, unless overridden it just
  * calls the validator's isValid()
  *  N.B. Problems found in validator are written to the log
  *  if you this function to do checking outside a validator may want
  * to do more logging
- *  @returns "" if the value is valid or a discription of the problem
+ *  @returns "" if the value is valid or a description of the problem
  */
 template <typename TYPE> std::string PropertyWithValue<TYPE>::isValid() const { return m_validator->isValid(m_value); }
 

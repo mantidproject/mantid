@@ -671,7 +671,7 @@ constexpr double j_Au5[3][9] = {{0.3292, 18.073, 1.0376, 9.957, -2.2028, 2.257, 
 /// Typedef the map type
 using IonIndex = std::unordered_map<std::string, MagneticIon>;
 
-/// Forward decalre intializer
+/// Forward declare initializer
 void createIonLookup(IonIndex &ion_map);
 
 /// Returns a reference to the static lookup map

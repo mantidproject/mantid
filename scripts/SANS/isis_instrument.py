@@ -1019,7 +1019,7 @@ class LOQ(ISISInstrument):
             xshift = xshift + det.x_corr / 1000.0
             yshift = yshift + det.y_corr / 1000.0
 
-        # Set the beam centre position afte the move, leave as they were
+        # Set the beam centre position after the move, leave as they were
         self.beam_centre_pos1_after_move = xbeam
         self.beam_centre_pos2_after_move = ybeam
 
@@ -1157,7 +1157,7 @@ class SANS2D(ISISInstrument):
         self.FRONT_DET_Z, self... which are extracted from the sample workspace at apply_detector_log.
 
         This is done to allow the function move_components to use the correct values and not to use
-        all the values for TRANS ans SAMPLE the same, as sometimes, this assumption is not valid.
+        all the values for TRANS and SAMPLE the same, as sometimes, this assumption is not valid.
 
         The reason for this method is explained at the ticket http://trac.mantidproject.org/mantid/ticket/7314.
         """
@@ -1298,7 +1298,7 @@ class SANS2D(ISISInstrument):
             beam_cen = [0.0, 0.0]
             det_cen = [-xbeam, -ybeam]
 
-        # Set the beam centre position afte the move, leave as they were
+        # Set the beam centre position after the move, leave as they were
         self.beam_centre_pos1_after_move = xbeam
         self.beam_centre_pos2_after_move = ybeam
 
@@ -1539,7 +1539,7 @@ class LARMOR(ISISInstrument):
         it takes as default value the self.BENCH_ROT, which are extracted from the sample workspace
         at apply_detector_log.
         This is done to allow the function move_components to use the correct values and not to use
-        all the values for TRANS ans SAMPLE the same, as sometimes, this assumption is not valid.
+        all the values for TRANS and SAMPLE the same, as sometimes, this assumption is not valid.
         The reason for this method is explained at the ticket http://trac.mantidproject.org/mantid/ticket/7314.
         """
         # set the default value for these variables
@@ -1703,7 +1703,7 @@ class LARMOR(ISISInstrument):
         # Deal with the angle value
         self._rotate_around_y_axis(workspace=ws, component_name=detBench.name(), x_beam=xbeam, x_scale_factor=XSF, bench_rotation=BENCH_ROT)
 
-        # Set the beam centre position afte the move
+        # Set the beam centre position after the move
         self.beam_centre_pos1_after_move = xbeam  # Need to provide the angle in 1000th of a degree
         self.beam_centre_pos2_after_move = ybeam
 

@@ -201,7 +201,7 @@ void CompareWorkspaces::exec() {
  * Process two groups and ensure the Result string is set properly on the final
  * algorithm.
  *
- * @return A boolean true if execution was sucessful, false otherwise
+ * @return A boolean true if execution was successful, false otherwise
  */
 bool CompareWorkspaces::processGroups() {
   m_result = true;
@@ -563,7 +563,7 @@ bool CompareWorkspaces::compareEventWorkspaces(const DataObjects::EventWorkspace
         mess << "Total " << numUnequalNumEventsSpectra << " spectra have different number of events. "
              << "\n";
 
-      mess << "Total " << numUnequalEvents << " (in " << ews1.getNumberEvents() << ") events are differrent. "
+      mess << "Total " << numUnequalEvents << " (in " << ews1.getNumberEvents() << ") events are different. "
            << numUnequalTOFEvents << " have different TOF; " << numUnequalPulseEvents << " have different pulse time; "
            << numUnequalBothEvents << " have different in both TOF and pulse time; " << numUnequalWeights
            << " have different weights."
@@ -648,7 +648,7 @@ bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
       const auto &E2 = ws2->e(i);
 
       if (Y1.size() != Y2.size()) {
-        g_log.debug() << "Spectra " << i << " have different lenghts, " << X1.size() << " vs " << X2.size() << "\n";
+        g_log.debug() << "Spectra " << i << " have different lengths, " << X1.size() << " vs " << X2.size() << "\n";
         recordMismatch("Mismatch in spectra length");
         PARALLEL_CRITICAL(resultBool)
         resultBool = false;

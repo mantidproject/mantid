@@ -24,7 +24,7 @@ class ElasticEMUauReductionAxisTest(systemtesting.MantidSystemTest):
         zpath = FileFinder.getFullPath("EMUauElasticTestData.zip")
         zfile = zipfile.ZipFile(zpath)
 
-        # expand to tempory folder and perform the reduction
+        # expand to temporary folder and perform the reduction
         with tempfile.TemporaryDirectory() as tempdir:
             zfile.extractall(tempdir)
             prevdir = os.getcwd()
@@ -54,7 +54,7 @@ class ElasticEMUauReductionSingleScanAxisTest(systemtesting.MantidSystemTest):
         zpath = FileFinder.getFullPath("EMUauElasticTestData.zip")
         zfile = zipfile.ZipFile(zpath)
 
-        # expand to tempory folder and perform the reduction
+        # expand to temporary folder and perform the reduction
         with tempfile.TemporaryDirectory() as tempdir:
             zfile.extractall(tempdir)
             prevdir = os.getcwd()
@@ -86,7 +86,7 @@ class ElasticEMUauReductionWSTest(systemtesting.MantidSystemTest):
         zpath = FileFinder.getFullPath("EMUauElasticTestData.zip")
         zfile = zipfile.ZipFile(zpath)
 
-        # expand to tempory folder and perform the reduction
+        # expand to temporary folder and perform the reduction
         with tempfile.TemporaryDirectory() as tempdir:
             zfile.extractall(tempdir)
             prevdir = os.getcwd()

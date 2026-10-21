@@ -44,7 +44,7 @@ public:
     TS_ASSERT(!rebin.isExecuted())
 
     // set the new bins to be less than half the size of the old, one in every 2
-    // old bins and one in every 5 old will coinside
+    // old bins and one in every 5 old will coincide
     rebin.setPropertyValue("Params", "2.225,0.2,15");
     TS_ASSERT_THROWS_NOTHING(rebin.execute())
     TS_ASSERT(rebin.isExecuted())
@@ -62,7 +62,7 @@ public:
     TS_ASSERT_EQUALS(outY.size(), ceil((15 - 2.225) / 0.2));
     TS_ASSERT_EQUALS(outE.size(), ceil((15 - 2.225) / 0.2));
 
-    // this intepolated data was found by running the debugger on this test
+    // this interpolated data was found by running the debugger on this test
     TS_ASSERT_DELTA(outX[0], 2.225, 0.00001);
     TS_ASSERT_DELTA(outY[0], 3.9, 0.0001);
     TS_ASSERT_DELTA(outE[0], 0.4875, 0.0001);
@@ -131,7 +131,7 @@ public:
     rebin.setPropertyValue("OutputWorkspace", "InterpolatingRebinTest_out_nondist");
 
     // set the new bins to be less than half the size of the old, one in every 2
-    // old bins and one in every 5 old will coinside
+    // old bins and one in every 5 old will coincide
     rebin.setPropertyValue("Params", "2.225,0.2,15");
     TS_ASSERT_THROWS_NOTHING(rebin.execute())
     TS_ASSERT(rebin.isExecuted())
@@ -144,7 +144,7 @@ public:
     const auto &outY = rebindata->y(0);
     const auto &outE = rebindata->e(0);
 
-    // this intepolated data was found by running the debugger on this test
+    // this interpolated data was found by running the debugger on this test
     TS_ASSERT_DELTA(outX[0], 2.225, 0.00001);
     TS_ASSERT_DELTA(outY[0], 1.0400, 0.0001);
     TS_ASSERT_DELTA(outE[0], 0.1300, 0.0001);
@@ -233,7 +233,7 @@ public:
     rebin.setPropertyValue("OutputWorkspace", "InterpolatingRebinTest_out_nulldata");
 
     // set the new bins to be less than half the size of the old, one in every 2
-    // old bins and one in every 5 old will coinside
+    // old bins and one in every 5 old will coincide
     rebin.setPropertyValue("Params", "2,0.2,11");
     TS_ASSERT_THROWS_NOTHING(rebin.execute())
     TS_ASSERT(rebin.isExecuted())

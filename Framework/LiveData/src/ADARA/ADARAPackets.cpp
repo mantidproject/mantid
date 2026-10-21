@@ -192,7 +192,7 @@ BankedEventPkt::BankedEventPkt(const BankedEventPkt &pkt)
 // section headers and bank headers.
 
 // A packet can have 0 or more sources and each source can have 0 or more events.
-// That means the only payload we're guarenteed to have is the first 4 fields.
+// That means the only payload we're guaranteed to have is the first 4 fields.
 // After that, we've got to start checking against the payload len...
 const Event *BankedEventPkt::firstEvent() const {
   m_curEvent = nullptr;

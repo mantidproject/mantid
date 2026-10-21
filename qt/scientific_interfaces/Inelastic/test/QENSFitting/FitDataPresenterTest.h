@@ -82,7 +82,7 @@ MATCHER_P(NoCheck, selector, "") { return arg != selector; }
 EstimationDataSelector getEstimationDataSelector() {
   return [](std::span<double const> const x, std::span<double const> const y,
             const std::pair<double, double> range) -> DataForParameterEstimation {
-    // Find data thats within range
+    // Find data that's within range
     double xmin = range.first;
     double xmax = range.second;
 

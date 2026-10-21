@@ -178,7 +178,7 @@ public:
       m_YSum += i;
     }
 
-    // most error values will be small so that they wont affect the tests
+    // most error values will be small so that they won't affect the tests
     CountStandardDeviations smallErrors(specLength - 1, 0.01 * m_YSum / specLength);
     // if the SignificanceTest property is set to one, knowing what happens in
     // the loop below, these errors will just make or break the tests

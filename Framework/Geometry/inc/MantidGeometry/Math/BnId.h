@@ -26,8 +26,8 @@ namespace Geometry {
 
   This class holds a tri-state variable
   of -1 (false) 0 (not-important) 1 (true) against
-  each of the possible input desisions. It has
-  arbitrary lenght (unlike using a long integer)
+  each of the possible input decisions. It has
+  arbitrary length (unlike using a long integer)
   \todo Could be improved by using a set of
   unsigned integers.
 
@@ -58,7 +58,7 @@ public:
   int operator--();                    ///< subtraction operator (returns !carry flag)
 
   int equivalent(const BnId &) const; ///< Equal but - is assume to be ok
-  void reverse();                     ///< Swap -1 to 1 adn leaver the zeros
+  void reverse();                     ///< Swap -1 to 1 and leaver the zeros
 
   int PIstatus() const { return PI; } ///< PI accessor
   void setPI(const int A) { PI = A; } ///< PI accessor

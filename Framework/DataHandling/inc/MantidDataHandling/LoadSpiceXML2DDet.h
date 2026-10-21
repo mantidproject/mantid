@@ -120,7 +120,7 @@ private:
   double m_detSampleDistanceShift;
   /// Flag to show whether the SPICE scan table workspace is given
   bool m_hasScanTable;
-  /// Pt number for the sample logs to load with presense of Spice scan table
+  /// Pt number for the sample logs to load with presence of Spice scan table
   /// workspace
   int m_ptNumber4Log;
   /// IDF file name to override Mantid's

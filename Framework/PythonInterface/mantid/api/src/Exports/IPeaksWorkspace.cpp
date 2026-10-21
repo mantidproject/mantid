@@ -137,7 +137,7 @@ public:
 private:
   // type alias for the member function to wrap
   template <typename T> using MemberFunc = void (IPeak::*)(T value);
-  // special type alias for V3D functions that take an addtional parameter
+  // special type alias for V3D functions that take an additional parameter
   using MemberFuncV3D = void (IPeak::*)(const V3D &value, std::optional<double>);
   // type alias for the setter function
   using SetterType = std::function<void(IPeak &peak, const object)>;

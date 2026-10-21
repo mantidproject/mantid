@@ -223,7 +223,7 @@ void IndexSXPeaks::exec() {
 
   // Now we can index the input/output peaks workspace
   // If there are peak indexes uses those to find actual peaks in the workspace
-  // and overrite HKL
+  // and overwrite HKL
   for (std::size_t i = 0; i < npeaks; i++) {
     int row = 0;
     try {

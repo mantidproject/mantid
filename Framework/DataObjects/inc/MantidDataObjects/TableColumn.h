@@ -26,7 +26,7 @@ namespace DataObjects {
     Class TableColumn implements abstract class Column for any copyable data
    type.
     A TableColumn is created using TableWorkspace::addColumn(type,name).
-    type is the simbolic name of the data type which must be first declared with
+    type is the symbolic name of the data type which must be first declared with
     DECLARE_TABLECOLUMN macro. Predeclared types are:
 
     "int"    for int
@@ -56,7 +56,7 @@ template <class Type> class MANTID_DATAOBJECTS_DLL TableColumn : public API::Col
     InconvertibleToDoubleType(const Type &) {}
     /// Constructor
     InconvertibleToDoubleType(const double &) {}
-    /// Convertion to double throws a runtime_error.
+    /// Conversion to double throws a runtime_error.
     operator double() const {
       throw std::runtime_error(std::string("Cannot convert ") + typeid(Type).name() + " to double.");
     }

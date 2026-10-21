@@ -90,7 +90,7 @@ class PeakDataSkew(PeakData):
         # get xlimits
         dx = frac_width * self.xpos
         self.xmin, self.xmax = self.xpos - 0.5 * dx, self.xpos + 0.5 * dx
-        # find peak mask with intial x-limits
+        # find peak mask with initial x-limits
         self.x_integrated_data, self.peak_mask, self.non_bg_mask, peak_label = self.find_peak_mask(self.xmin, self.xmax, use_nearest)
         self.status = self._is_peak_mask_valid(
             self.peak_mask, peak_label, npk_min, density_min, nrow_max, ncol_max, min_npixels_per_vacancy, max_nvacancies, integrate_on_edge

@@ -44,7 +44,7 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
     # ------------------------------------------------------------------------------
 
     def PyInit(self):
-        self.declareProperty(FileProperty("Directory", "", action=FileAction.Directory), doc="Path to directory containg .dat files")
+        self.declareProperty(FileProperty("Directory", "", action=FileAction.Directory), doc="Path to directory containing .dat files")
 
         self.declareProperty(StringArrayProperty("Functions"), doc="Names of functions to attempt to load from file")
 

@@ -60,7 +60,7 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
             doc=(
                 "Temperature during the experiment (in "
                 + "Kelvins) if temperature is not given in the sample logs "
-                + "or needs to be overriden."
+                + "or needs to be overridden."
             ),
         )
         self.declareProperty("EnableDWF", True, "Enable or disable the Debye-Waller correction.")

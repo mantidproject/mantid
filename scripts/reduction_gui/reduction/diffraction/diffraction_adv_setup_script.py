@@ -160,7 +160,7 @@ class AdvancedSetupScript(BaseScriptElement):
         pardict["FilterBadPulses"] = self.filterbadpulses
         pardict["BackgroundSmoothParams"] = self.bkgdsmoothpars
         # these two parameters cannot be specified at the same time so
-        # initally set them at their default values
+        # initially set them at their default values
         pardict["PushDataPositive"] = "None"
         pardict["OffsetData"] = 0.0
         if self.pushdatapositive == "None":

@@ -48,10 +48,10 @@ public:
   //***** output WS definition interface:
   /** return the number of dimensions, calculated by the transformation from the
      workspace.
-      Depending on ws axis units, the numebr here is either 1 or 2* and is
+      Depending on ws axis units, the number here is either 1 or 2* and is
      independent on emode*/
   unsigned int getNMatrixDimensions(Kernel::DeltaEMode::Type mode, API::MatrixWorkspace_const_sptr inWS) const override;
-  /**function returns units ID-s which this transformation prodiuces its ouptut.
+  /**function returns units ID-s which this transformation prodiuces its output.
      here it is usually input ws units, which are independent on emode */
   std::vector<std::string> outputUnitID(Kernel::DeltaEMode::Type mode,
                                         API::MatrixWorkspace_const_sptr inWS) const override;

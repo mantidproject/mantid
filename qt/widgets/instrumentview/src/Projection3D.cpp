@@ -410,7 +410,7 @@ void Projection3D::setLightingModel(bool picking) const {
     glEnable(GL_LINE_SMOOTH); // Set line should be drawn smoothly
     glEnable(GL_NORMALIZE);   // Slow normal normalization
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,
-                  GL_TRUE); // This model lits both sides of the triangle
+                  GL_TRUE); // This model lights both sides of the triangle
 
     const float lamp0_intensity = 0.3f;
     const float lamp1_intensity = 0.7f;

@@ -21,10 +21,10 @@
 
 /*  Following A.J.Schultz's anvred, the weight factors should be:
  *
- *    sin^2(theta) / (lamda^4 * spec * eff * trans)
+ *    sin^2(theta) / (lambda^4 * spec * eff * trans)
  *
  *  where theta = scattering_angle/2
- *        lamda = wavelength (in angstroms?)
+ *        lambda = wavelength (in angstroms?)
  *        spec  = incident spectrum correction
  *        eff   = pixel efficiency
  *        trans = absorption correction
@@ -41,14 +41,14 @@
  *  The wavelength dependent portion of the correction is saved in
  *  the array lamda_weight[].
  *  The time-of-flight is converted to wave length by multiplying
- *  by tof_to_lamda[id], then (int)STEPS_PER_ANGSTROM * lamda
+ *  by tof_to_lamda[id], then (int)STEPS_PER_ANGSTROM * lambda
  *  gives an index into the table lamda_weight[].
  *
  *  The lamda_weight[] array contains values like:
  *
- *      1/(lamda^power * spec(lamda))
+ *      1/(lambda^power * spec(lambda))
  *
- *  which are pre-calculated for each lamda.  These values are
+ *  which are pre-calculated for each lambda.  These values are
  *  saved in the array lamda_weight[].  The optimal value to use
  *  for the power should be determined when a good incident spectrum
  *  has been determined.  Currently, power=3 when used with an
@@ -57,8 +57,8 @@
  *
  *  The pixel efficiency and incident spectrum correction are NOT CURRENTLY
  *USED.
- *  The absorption correction, trans, depends on both lamda and the pixel,
- *  Which is a fairly expensive calulation when done for each event.
+ *  The absorption correction, trans, depends on both lambda and the pixel,
+ *  Which is a fairly expensive calculation when done for each event.
  */
 
 namespace Mantid::Crystal {
@@ -112,7 +112,7 @@ void AnvredCorrection::init() {
   declareProperty("ReturnTransmissionOnly", false,
                   "Corrections applied to data if false (default).\n"
                   "If true, only return the transmission coefficient.");
-  declareProperty("PowerLambda", 4.0, "Power of lamda ");
+  declareProperty("PowerLambda", 4.0, "Power of lambda ");
   declareProperty("DetectorBankScaleFactors", false,
                   "No scale factors if false (default).\n"
                   "If true, use scale factors from instrument parameter map.");
@@ -409,24 +409,24 @@ void AnvredCorrection::retrieveBaseProperties() {
 }
 
 /**
- *  Get the weight factor that would be used for an event occuring
+ *  Get the weight factor that would be used for an event occurring
  *  at the specified wavelength, with the specified two_theta value.
  *
- *  @param  lamda      The wavelength of an event.
+ *  @param  lambda      The wavelength of an event.
  *  @param  two_theta  The scattering angle of the event.
  *  @param muRTooLarge bool to warn in muR limit exceeded in absorption correction
  *  @return The weight factor for the specified position and wavelength.
  */
-double AnvredCorrection::getEventWeight(const double lamda, const double two_theta, bool &muRTooLarge) {
+double AnvredCorrection::getEventWeight(const double lambda, const double two_theta, bool &muRTooLarge) {
   double transinv = 1;
   if (m_radius > 0)
-    transinv = absor_sphere(two_theta, lamda, muRTooLarge);
+    transinv = absor_sphere(two_theta, lambda, muRTooLarge);
   // Only Spherical absorption correction
   if (m_onlySphericalAbsorption || m_returnTransmissionOnly)
     return transinv;
 
   // Resolution of the lambda table
-  auto lamda_index = static_cast<size_t>(STEPS_PER_ANGSTROM * lamda);
+  auto lamda_index = static_cast<size_t>(STEPS_PER_ANGSTROM * lambda);
 
   if (lamda_index >= m_lamda_weight.size())
     lamda_index = m_lamda_weight.size() - 1;
@@ -522,7 +522,7 @@ double AnvredCorrection::calc_Astar(const double theta, const double mur) {
  *  more bin boundary than the number of bins.
  *    The entries in the table produced are:
  *
- *     1/( lamda^power * spec(lamda) )
+ *     1/( lambda^power * spec(lambda) )
  *
  *  Where power was chosen to give a relatively uniform intensity display
  *  in 3D.  The power is currently 3 if an incident spectrum is present
@@ -544,8 +544,8 @@ void AnvredCorrection::BuildLamdaWeights() {
     // value.
     m_lamda_weight.reserve(NUM_WAVELENGTHS);
     for (int i = 0; i < NUM_WAVELENGTHS; i++) {
-      double lamda = static_cast<double>(i) / STEPS_PER_ANGSTROM;
-      m_lamda_weight.emplace_back(1 / std::pow(lamda, m_power_th));
+      double lambda = static_cast<double>(i) / STEPS_PER_ANGSTROM;
+      m_lamda_weight.emplace_back(1 / std::pow(lambda, m_power_th));
     }
   }
 }
@@ -579,7 +579,7 @@ double AnvredCorrection::slantPathLength(const Instrument_const_sptr &inst, cons
 
 double AnvredCorrection::scale_exec(std::string &bankName, const double lambda, const double depth,
                                     const Instrument_const_sptr &inst, const double pathlength, double eventWeight) {
-  // correct for the slant path throught the scintillator glass
+  // correct for the slant path through the scintillator glass
   const double mu = (9.614 * lambda) + 0.266;            // mu for GS20 glass
   const double eff_center = 1.0 - std::exp(-mu * depth); // efficiency at center of detector
   const double eff_R = 1.0 - exp(-mu * pathlength);      // efficiency at point R

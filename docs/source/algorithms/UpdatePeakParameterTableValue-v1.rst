@@ -14,7 +14,7 @@ diffractomer instrument profile calibration, TableWorkspace containing
 the peak profile parameters' information are used as input and output.
 *UpdatePeakParameterTableValue* gives user the method to change the
 value of parameters' information, including its status to fit, value,
-minimum/maximum value (for boundary contrains) and step size (for Monte
+minimum/maximum value (for boundary constraints) and step size (for Monte
 Carlo optimizer).
 
 Format of TableWorkspace

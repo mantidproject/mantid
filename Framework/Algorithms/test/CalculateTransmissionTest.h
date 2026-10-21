@@ -90,7 +90,7 @@ public:
     for (unsigned int i = 0; i < fit.size(); ++i) {
       // Should all be 1 because I used the same workspace twice as the input
       TS_ASSERT_DELTA(fit[i], 1.0, 0.0005)
-      // a linear fit thorugh all 1s should result in all 1s
+      // a linear fit through all 1s should result in all 1s
       TS_ASSERT_DELTA(fit[i], unfit[i], 0.0005)
     }
 
@@ -131,7 +131,7 @@ public:
     for (unsigned int i = 0; i < fit.size(); ++i) {
       // Should all be 1 because I used the same workspace twice as the input
       TS_ASSERT_DELTA(fit[i], 1.0, 0.0005)
-      // a linear fit thorugh all 1s should result in all 1s
+      // a linear fit through all 1s should result in all 1s
       TS_ASSERT_DELTA(fit[i], unfit[i], 0.0005)
     }
 
@@ -239,7 +239,7 @@ public:
     Mantid::API::MatrixWorkspace_const_sptr extra = std::dynamic_pointer_cast<MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("CalculateTransmissionTest_extra"));
 
-    // these values were dervived from the debugger when exprolation was first
+    // these values were derived from the debugger when exprolation was first
     // added and are believed to be correct on that basis
     TS_ASSERT_DELTA(extra->y(0)[0], 0.2, 0.8937)
     TS_ASSERT_DELTA(extra->y(0)[8], 0.2, 0.8801)
@@ -377,9 +377,9 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(m_transWS);
   }
 
-  /// Load and convert some monitor spectra to create some non-trival input data
+  /// Load and convert some monitor spectra to create some non-trivial input data
   void loadSampleLOQMonitors() {
-    // load a couple of real montior spectra
+    // load a couple of real monitor spectra
     std::string wkspName("LOQ48097");
     LoadRaw3 loader;
     loader.initialize();

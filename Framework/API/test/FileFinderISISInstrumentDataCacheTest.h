@@ -31,7 +31,7 @@ public:
   static void destroySuite(FileFinderISISInstrumentDataCacheTest *suite) { delete suite; }
 
   FileFinderISISInstrumentDataCacheTest()
-      : // The constructor will create a temporary directory that mimicks the data cache structure and
+      : // The constructor will create a temporary directory that mimics the data cache structure and
         // populate it with the files defined here
         m_filesToCreate({"MER40871.nxs", "MAR26045.raw", "WISH39495.s01", "LOQ106084.nxs", "LARMOR26462.nxs",
                          "ZOOM4656.RAW", "GEM90421.nxs"}),

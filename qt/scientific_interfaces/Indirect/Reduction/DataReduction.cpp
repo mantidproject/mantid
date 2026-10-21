@@ -106,7 +106,7 @@ void DataReduction::initLayout() {
   connect(m_uiForm.pbSettings, &QPushButton::clicked, this, &DataReduction::settings);
   // Connect "?" (Help) Button
   connect(m_uiForm.pbHelp, &QPushButton::clicked, this, &DataReduction::help);
-  // Connect the Python export buton
+  // Connect the Python export button
   connect(m_uiForm.pbPythonExport, &QPushButton::clicked, this, &DataReduction::exportTabPython);
   // Connect the "Manage User Directories" Button
   connect(m_uiForm.pbManageDirectories, &QPushButton::clicked, this, &DataReduction::manageUserDirectories);
@@ -344,11 +344,11 @@ QString DataReduction::getInstrumentParameterFrom(const Mantid::Geometry::ICompo
 }
 
 /**
- * Tasks to be carried out after an empty instument has finished loading
+ * Tasks to be carried out after an empty instrument has finished loading
  */
 void DataReduction::instrumentLoadingDone(bool error) {
   if (error) {
-    g_log.warning("Instument loading failed! This instrument (or "
+    g_log.warning("Instrument loading failed! This instrument (or "
                   "analyser/reflection configuration) may not be supported by "
                   "the interface.");
     return;
@@ -452,7 +452,7 @@ void DataReduction::filterUiForFacility(const QString &facility) {
 
   // Add the required tabs
   for (auto &enabledTab : enabledTabs) {
-    // Connect the insturment changed signal
+    // Connect the instrument changed signal
     connect(this, &DataReduction::newInstrumentConfiguration, m_tabs[enabledTab].second,
             &DataReductionTab::newInstrumentConfiguration);
 
@@ -467,7 +467,7 @@ void DataReduction::filterUiForFacility(const QString &facility) {
 }
 
 /**
- * Controls the visiblity of analyser and reflection options
+ * Controls the visibility of analyser and reflection options
  *
  * @param visible whether to show the options or not
  */

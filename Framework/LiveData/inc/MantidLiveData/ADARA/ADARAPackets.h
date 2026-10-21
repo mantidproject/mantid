@@ -272,7 +272,7 @@ public:
   uint32_t vetoFlags() const { return (m_fields[3] >> 20) & 0xfff; }
   uint32_t flags() const { return m_fields[3] & 0xfffff; }
 
-  // TODO implment bank/event accessors
+  // TODO implement bank/event accessors
 
 private:
   const uint32_t *m_fields;

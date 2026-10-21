@@ -134,7 +134,7 @@ void CatalogPublishDialog::fileSelected() {
 }
 
 /**
- * Diables fields on dialog to improve usability
+ * Disables fields on dialog to improve usability
  */
 void CatalogPublishDialog::disableDialog() {
   m_uiForm.scrollArea->setDisabled(true);

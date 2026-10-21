@@ -415,5 +415,5 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         self.setProperty("OutputParamsWorkspace", params_ws)
 
 
-# Register algorith with Mantid
+# Register algorithm with Mantid
 AlgorithmFactory.subscribe(IntegratePeaksProfileFitting)

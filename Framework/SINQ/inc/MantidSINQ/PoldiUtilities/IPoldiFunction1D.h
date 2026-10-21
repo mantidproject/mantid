@@ -15,7 +15,7 @@ namespace Poldi {
 
 /** IPoldiFunction1D :
 
-    This is an auxilliary interface that has to be implemented by
+    This is an auxiliary interface that has to be implemented by
     functions that are supposed to be used for POLDI fits.
 
     This way the calculation of a theoretical diffractogram can be

@@ -337,7 +337,7 @@ double ReflectometryMomentumTransfer::interslitDistance(const API::MatrixWorkspa
   return ReflectometryBeamStatistics::slitSeparation(instrument, slit1Name, slit2Name);
 }
 
-/** Read the slit size from samle logs.
+/** Read the slit size from sample logs.
  *
  * @param ws workspace to investigate
  * @param logEntry name of the slit opening sample log

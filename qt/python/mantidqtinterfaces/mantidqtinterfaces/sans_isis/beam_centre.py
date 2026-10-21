@@ -64,7 +64,7 @@ class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
 
     def add_listener(self, listener):
         if not isinstance(listener, BeamCentre.BeamCentreListener):
-            raise ValueError("The listener ist not of type BeamCentreListener but rather {}".format(type(listener)))
+            raise ValueError("The listener is not of type BeamCentreListener but rather {}".format(type(listener)))
         self._beam_centre_tab_listeners.append(listener)
 
     def clear_listeners(self):

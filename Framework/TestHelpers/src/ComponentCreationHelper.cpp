@@ -444,7 +444,7 @@ Mantid::Geometry::Instrument_sptr createCylInstrumentWithDetInGivenPositions(con
   std::sort(az.begin(), az.end());
   std::sort(po.begin(), po.end());
   // very crude identification of interdetector distance; no need in more
-  // accurate caluclations for example;
+  // accurate calculations for example;
   for (size_t i = 0; i < L2.size(); i++) {
     if (L2[i] < L2_min)
       L2_min = L2[i];

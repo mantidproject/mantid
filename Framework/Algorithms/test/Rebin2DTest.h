@@ -62,7 +62,7 @@ MatrixWorkspace_sptr makeInputWS(const bool distribution, const bool perf_test =
       Mantid::API::WorkspaceHelpers::makeDistribution(ws);
     }
   } else {
-    // create histograms with points (which cannot be a distirbution)
+    // create histograms with points (which cannot be a distribution)
     ws = WorkspaceCreationHelper::create2DWorkspacePoints(int(nhist), int(nbins), x0 + 0.5, deltax);
     // convert axis from spectrum to theta
     auto thetaAxis = std::make_unique<NumericAxis>(nhist);
@@ -151,7 +151,7 @@ public:
   void test_Rebin2D_With_EventWorkspace() {
     EventWorkspace_sptr inputWS = createEmptyEventWorkspace();
     MatrixWorkspace_sptr outputWS = runAlgorithm(inputWS, "5.,4.,25.", "-0.5,1,9.5");
-    // Doesnt check if result is correct, just that an inputws of EventWorkspace doesnt crash it
+    // Doesn't check if result is correct, just that an inputws of EventWorkspace doesn't crash it
   }
 
   void test_Rebin2D_With_Bin_Width_Less_Than_One_And_Not_Distribution() {

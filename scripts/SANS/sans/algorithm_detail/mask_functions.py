@@ -38,7 +38,7 @@ def get_geometry_information(ipf_path, detector_type):
        and width. This provides an override for the number of pixels
     :param ipf_path: The path to the Instrument Parameter File.
     :param detector_type: The type of detector for which we should get the information.
-    :return: Geometry information for LAB and HAB as well as the firs
+    :return: Geometry information for LAB and HAB as well as the first
     """
 
     def create_detector_shape_bundle(num_columns, non_rectangle_width, num_rows, non_rectangle_height, num_pixels):
@@ -73,7 +73,7 @@ def get_geometry_information(ipf_path, detector_type):
     elif detector_type is DetectorType.HAB:
         prefix = "high-angle-detector-"
     else:
-        raise RuntimeError("MaskingParser: Tyring to get information for unknown detector {0}".format(str(detector_type)))
+        raise RuntimeError("MaskingParser: Trying to get information for unknown detector {0}".format(str(detector_type)))
 
     search_items_for_detectors = ["num-columns", "non-rectangle-width", "num-rows", "non-rectangle-height", "num-pixels"]
     search_items = [prefix + item for item in search_items_for_detectors]

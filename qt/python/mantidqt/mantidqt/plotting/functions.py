@@ -51,7 +51,7 @@ def can_overplot():
     Checks if overplotting on the current figure can proceed
     with the given options
 
-    :return: A 2-tuple of boolean indicating compatability and
+    :return: A 2-tuple of boolean indicating compatibility and
     a string containing an error message if the current figure is not
     compatible.
     """

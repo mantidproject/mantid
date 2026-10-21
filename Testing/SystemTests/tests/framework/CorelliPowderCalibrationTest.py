@@ -216,7 +216,7 @@ class CorelliCalibrationApplyTest(MantidSystemTest):
         # NOTE:
         #  Currently comparing the two workspace will yield False even if the implementation
         #  is exactly the same as the C++ counter parts.
-        #  Given that this is just a place holder for more comprehensive systemtest onece
+        #  Given that this is just a place holder for more comprehensive systemtest once
         #  the upstream calibration algorithm is complete, we are skipping the checking here.
         print(msg)
         # if rst is False:

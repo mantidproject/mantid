@@ -29,7 +29,7 @@ namespace API {
  */
 class MANTID_API_DLL MultiPeriodGroupWorker {
 public:
-  /// Convenience typdef for workspace names.
+  /// Convenience typedef for workspace names.
   using VecWSGroupType = std::vector<WorkspaceGroup_sptr>;
   /// Constructor
   MultiPeriodGroupWorker() = default;
@@ -49,7 +49,7 @@ private:
   // Disable assignment
   MultiPeriodGroupWorker &operator=(const MultiPeriodGroupWorker &);
 
-  /// Try ot add a workspace to the group of input workspaces.
+  /// Try to add a workspace to the group of input workspaces.
   void tryAddInputWorkspaceToInputGroups(const Workspace_sptr &ws, VecWSGroupType &vecMultiPeriodWorkspaceGroups,
                                          VecWSGroupType &vecWorkspaceGroups) const;
 

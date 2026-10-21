@@ -93,7 +93,7 @@ public:
         << "Lmabda_lpws = " << pws_from_lpws->getPeak(0).getWavelength() << "\n";
     g_log.notice() << msg.str();
     // NOTE:
-    // QSample will vary slighly after the casting
+    // QSample will vary slightly after the casting
     for (size_t i = 0; i < 3; ++i) {
       TS_ASSERT_DELTA(lpws->getPeak(0).getQSampleFrame()[i], pws_from_lpws->getPeak(0).getQSampleFrame()[i], 1e-4);
     }

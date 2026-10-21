@@ -46,7 +46,7 @@ struct EXPORT_OPT_MANTIDQT_COMMON FindFilesSearchParameters {
  * slot on the QObject.
  */
 struct EXPORT_OPT_MANTIDQT_COMMON FindFilesSearchResults {
-  /// A string repsresenting the error message. Empty if the search succeded.
+  /// A string repsresenting the error message. Empty if the search succeeded.
   std::string error;
   /// A list of filenames that matched the search hint.
   std::vector<std::string> filenames;

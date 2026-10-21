@@ -43,7 +43,7 @@ void MDGeometryXMLParser::validate() const {
 }
 
 /**
-Peforms the processing associated with these transformations.
+Performs the processing associated with these transformations.
 */
 void MDGeometryXMLParser::execute() {
   Poco::XML::DOMParser pParser;
@@ -227,7 +227,7 @@ Mantid::Geometry::VecIMDDimension_sptr MDGeometryXMLParser::getAllDimensions() c
 }
 
 /**
- Determine wheter x dimension is present.
+ Determine whether x dimension is present.
  @return true if available.
 */
 bool MDGeometryXMLParser::hasXDimension() const {
@@ -236,7 +236,7 @@ bool MDGeometryXMLParser::hasXDimension() const {
 }
 
 /**
- Determine wheter y dimension is present.
+ Determine whether y dimension is present.
  @return true if available.
 */
 bool MDGeometryXMLParser::hasYDimension() const {
@@ -245,7 +245,7 @@ bool MDGeometryXMLParser::hasYDimension() const {
 }
 
 /**
- Determine wheter z dimension is present.
+ Determine whether z dimension is present.
  @return true if available.
 */
 bool MDGeometryXMLParser::hasZDimension() const {
@@ -254,7 +254,7 @@ bool MDGeometryXMLParser::hasZDimension() const {
 }
 
 /**
- Determine wheter t dimension is present.
+ Determine whether t dimension is present.
  @return true if available.
 */
 bool MDGeometryXMLParser::hasTDimension() const {
@@ -270,7 +270,7 @@ Setter for the root element.
 void MDGeometryXMLParser::SetRootNodeCheck(std::string elementName) { m_rootNodeName = std::move(elementName); }
 
 /**
-Assignement operator
+Assignment operator
 @param other : existing MDGeometryXMLParser to assign from.
 */
 MDGeometryXMLParser &MDGeometryXMLParser::operator=(const MDGeometryXMLParser &other) {

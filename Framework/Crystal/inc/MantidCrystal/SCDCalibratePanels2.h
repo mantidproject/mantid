@@ -89,7 +89,7 @@ private:
   void optimizeBanks(Mantid::API::IPeaksWorkspace_sptr pws, const Mantid::API::IPeaksWorkspace_sptr &pws_original,
                      const bool &docalibsize, const double &sizesearchradius, const bool &fixdetxyratio);
 
-  /// Private function for fine tunning sample position
+  /// Private function for fine tuning sample position
   void optimizeSamplePos(Mantid::API::IPeaksWorkspace_sptr pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
 
   /// Helper function for selecting peaks based on given bank name
@@ -112,7 +112,7 @@ private:
   void saveXmlFile(const std::string &FileName, const boost::container::flat_set<std::string> &AllBankNames,
                    std::shared_ptr<Geometry::Instrument> &instrument, const Geometry::ParameterMap &pmap);
 
-  /// Save to ISAW type det calibration output for backward compatiblity
+  /// Save to ISAW type det calibration output for backward compatibility
   void saveIsawDetCal(const std::string &filename, boost::container::flat_set<std::string> &AllBankName,
                       std::shared_ptr<Geometry::Instrument> &instrument, double T0);
 

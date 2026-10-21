@@ -302,7 +302,7 @@ herr_t set_str_attribute(hid_t parent_id, CONSTCHAR *name, CONSTCHAR *buffer) {
   }
 
   if (H5Awrite(attr_id, type_id, buffer) < 0) {
-    sprintf(pBuffer, "ERROR: failed writting %s attribute", name);
+    sprintf(pBuffer, "ERROR: failed writing %s attribute", name);
     NXReportError(pBuffer);
     return -1;
   }
@@ -741,7 +741,7 @@ NXstatus NX5getdataID(NXhandle fid, NXlink *sRes) {
 
   pFile = NXI5assert(fid);
 
-  /* we cannot return ID's when no datset is open */
+  /* we cannot return ID's when no dataset is open */
   if (pFile->iCurrentD <= 0) {
     return NXstatus::NX_ERROR;
   }

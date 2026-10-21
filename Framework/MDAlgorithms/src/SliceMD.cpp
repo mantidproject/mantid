@@ -98,7 +98,7 @@ template <size_t nd, size_t ond> inline void copyEvent(const MDEvent<nd> &srcEve
  */
 template <typename MDE, size_t nd, typename OMDE, size_t ond>
 void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
-  // Create the ouput workspace
+  // Create the output workspace
   typename MDEventWorkspace<OMDE, ond>::sptr outWS(new MDEventWorkspace<OMDE, ond>());
   for (auto &binDimension : m_binDimensions) {
     outWS->addDimension(binDimension);

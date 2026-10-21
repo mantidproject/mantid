@@ -302,7 +302,7 @@ void FitMD::setParameters() const {
 
 /**
  * Set the range
- * @param startIndex :: Starting index in the worspace
+ * @param startIndex :: Starting index in the workspace
  * @param count :: Size of the domain
  */
 void FitMD::setRange(size_t startIndex, size_t count) {

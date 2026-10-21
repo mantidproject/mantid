@@ -105,7 +105,7 @@ def _do_binary_operation(op, self, rhs, lhs_vars, inplace, reverse):
         _workspace_op_tmps = []
     else:
         if type(resultws) is WorkspaceGroup:
-            # Ensure the members are removed aswell
+            # Ensure the members are removed as well
             members = resultws.getNames()
             for member in members:
                 _workspace_op_tmps.append(member)

@@ -81,7 +81,7 @@ private:
   /// Set up detector calibration parameters for elastic scattering instrument
   API::TimeAtSampleStrategy *setupElasticTOFCorrection() const;
 
-  /// Set up detector calibration parmaeters for direct inelastic scattering
+  /// Set up detector calibration parameters for direct inelastic scattering
   /// instrument
   API::TimeAtSampleStrategy *setupDirectTOFCorrection() const;
 

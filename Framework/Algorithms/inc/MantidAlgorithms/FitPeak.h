@@ -139,7 +139,7 @@ private:
   bool m_peakRangeSet;
   /// Flag whether the peak width is set
   bool m_peakWidthSet;
-  /// Peak widnow is set up
+  /// Peak window is set up
   bool m_peakWindowSet;
   /// Flag to apply peak position tolerance
   bool m_usePeakPositionTolerance;
@@ -232,7 +232,7 @@ private:
   void init() override;
   void exec() override;
 
-  /// Process input propeties
+  /// Process input properties
   void processProperties();
 
   /// Check the input properties and functions
@@ -283,7 +283,7 @@ private:
   /// Create functions
   void createFunctions();
 
-  /// Check the fitted peak value to see whether it is valud
+  /// Check the fitted peak value to see whether it is valid
   double checkFittedPeak(API::IPeakFunction_sptr peakfunc, double costfuncvalue, std::string &errorreason);
 
   /// Generate table workspace

@@ -367,7 +367,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
         workspace_group_lab_can_norm = WorkspaceGroup()
         workspace_group_hab_can_count = WorkspaceGroup()
         workspace_group_hab_can_norm = WorkspaceGroup()
-        # Find the partial output bundles fo LAB Can and HAB Can if they exist
+        # Find the partial output bundles for LAB Can and HAB Can if they exist
         for event_slice_bundles in output_bundles_parts:
             for output_bundle_part in event_slice_bundles:
                 if output_bundle_part.data_type is DataType.CAN:
@@ -472,7 +472,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
             if transmission_bundle.data_type is DataType.CAN:
                 if does_can_workspace_exist_on_ads(calculated_transmission_workspace):
                     # The workspace is cloned here because the transmission runs are diagnostic output so even though
-                    # the values already exist they need to be labelled seperately for each reduction.
+                    # the values already exist they need to be labelled separately for each reduction.
                     calculated_transmission_workspace = CloneWorkspace(calculated_transmission_workspace, StoreInADS=False)
                 if does_can_workspace_exist_on_ads(unfitted_transmission_workspace):
                     unfitted_transmission_workspace = CloneWorkspace(unfitted_transmission_workspace, StoreInADS=False)

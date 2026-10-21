@@ -176,7 +176,7 @@ bool RenameWorkspace::processGroups() {
         alg->execute();
       } catch (Kernel::Exception::NotFoundError &ex) {
         // Will wind up here if group has somehow got messed up and a member
-        // doesn't exist. Should't be possible!
+        // doesn't exist. Shouldn't be possible!
         g_log.error() << ex.what() << '\n';
       }
     }

@@ -108,7 +108,7 @@ bool ConvexPolygon::contains(const Kernel::V2D &point) const {
 
 ///
 /**
- *  Is the given polygon completely encosed by this one
+ *  Is the given polygon completely enclosed by this one
  * @param poly Another polygon
  * @return True if the given polygon is enclosed by this, false otherwise
  */

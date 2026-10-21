@@ -15,7 +15,7 @@ namespace Mantid::Kernel {
 /**
  * @param ascii A plain-text label containing only ascii characters
  * @param unicode A label that can contain unicode characters
- * @param latex A text label containg the ascii characters with latex formatting
+ * @param latex A text label containing the ascii characters with latex formatting
  */
 UnitLabel::UnitLabel(AsciiString ascii, Utf8String unicode, AsciiString latex)
     : m_ascii(std::move(ascii)), m_utf8(std::move(unicode)), m_latex(std::move(latex)) {}

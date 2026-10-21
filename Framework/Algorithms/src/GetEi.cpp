@@ -121,7 +121,7 @@ void GetEi::exec() {
   double t_monitor1 = getPeakCentre(inWS, indexes[1], peakLoc1);
   g_log.information() << "The second peak has been found at TOF = " << t_monitor1 << " microseconds\n";
 
-  // assumes that the source and the both mintors lie on one straight line, the
+  // assumes that the source and the both monitors lie on one straight line, the
   // 1e-6 converts microseconds to seconds as the mean speed needs to be in m/s
   double meanSpeed = (dist2moni1 - dist2moni0) / (1e-6 * (t_monitor1 - t_monitor0));
 
@@ -217,7 +217,7 @@ GetEi::getMonitorWsIndexs(const API::MatrixWorkspace_const_sptr &WS, specnum_t s
     throw Exception::NotFoundError("GetEi::getMonitorWsIndexs()", specNum1);
   }
 
-  // nowe the second monitor
+  // now the second monitor
   specNumTemp[0] = specNum2;
   auto wsIndexTemp = WS->getIndicesFromSpectra(specNumTemp);
   if (wsIndexTemp.size() != 1) { // the monitor spectrum isn't present in the
@@ -233,7 +233,7 @@ GetEi::getMonitorWsIndexs(const API::MatrixWorkspace_const_sptr &WS, specnum_t s
 }
 /** Uses E_KE = mv^2/2 and s = vt to calculate the time required for a neutron
  *  to travel a distance, s
- * @param s :: ditance travelled in meters
+ * @param s :: distance travelled in meters
  * @param E_KE :: kinetic energy in meV
  * @return the time to taken to travel that uninterrupted distance in seconds
  */
@@ -297,7 +297,7 @@ double GetEi::getPeakCentre(const API::MatrixWorkspace_const_sptr &WS, const siz
   // this is better for asymmetric peaks
   // first loop backwards along the histogram to get the first half height point
   const double lHalf = findHalfLoc(centreGausInd, height, backGroundlev, GO_LEFT);
-  // go forewards to get the half height on the otherside of the peak
+  // go forwards to get the half height on the otherside of the peak
   const double rHalf = findHalfLoc(centreGausInd, height, backGroundlev, GO_RIGHT);
   // the peak centre is defined as the mean of the two half height times
   return (lHalf + rHalf) / 2;

@@ -85,7 +85,7 @@ Python
 New features
 ############
 - Created documentation for :mod:`mantid.dataobjects` python bindings.
-- Fix python fuction ``assert_almost_equal`` to fail for non-equal workspaces.
+- Fix python function ``assert_almost_equal`` to fail for non-equal workspaces.
 - The python function ``assert_almost_equal`` for testing if two modules are within a tolerance was reworked.
 
 Bugfixes

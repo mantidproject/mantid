@@ -185,7 +185,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         return
 
     def _calTimeOffset(self, logtimesdict, loglength):
-        """Calcualte the time epoch in local time"""
+        """Calculate the time epoch in local time"""
         # Find out local time
         if loglength > 0:
             # Locate time0
@@ -355,7 +355,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         reltime = (thislogtime - self._starttime) / np.timedelta64(1, "s")  # time from start of run in seconds
         wbuf = "%.6f\t%.6f\t" % (abstime, reltime)
 
-        # Log valuess
+        # Log values
         for i in range(len(logvaluelist)):
             timeindex = currtimeindexes[i]
             if i not in nexttimelogindexes:

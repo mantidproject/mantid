@@ -211,7 +211,7 @@ std::vector<std::vector<unsigned int>> Parser::parseMultiRunString(std::string r
                         runString.begin(), runString.end(), isspace),
                     runString.end());
   }
-  // Only numeric characters, or occurances of plus, minus, comma and colon are
+  // Only numeric characters, or occurrences of plus, minus, comma and colon are
   // allowed.
   if (!matchesFully(runString, "([0-9]|\\+|\\-|,|:)+")) {
     throw std::runtime_error("Non-numeric or otherwise unaccetable character(s) detected.");
@@ -277,7 +277,7 @@ void Parser::split() {
   if (m_multiFileName.empty())
     throw std::runtime_error("No file name to parse.");
 
-  // Clear whitespace before getting extentions and directories, if requested.
+  // Clear whitespace before getting extensions and directories, if requested.
   if (trimWhiteSpaces()) {
     m_multiFileName.erase(std::remove_if( // ("Erase-remove" idiom.)
                               m_multiFileName.begin(), m_multiFileName.end(), isspace),
@@ -424,7 +424,7 @@ std::string GenerateFileName::operator()(const unsigned int run) {
 RunRangeList::RunRangeList() : m_rangeList() {}
 
 /**
- * Adds a run to the list of run ranges.  Not particularly effecient.
+ * Adds a run to the list of run ranges.  Not particularly efficient.
  *
  * @param run :: the run to add.
  */
@@ -660,7 +660,7 @@ bool matchesFully(const std::string &stringToMatch, const std::string &regexStri
 
 /**
  * Finds a given regex in a given string, and returns the part of the string
- * that matches the regex.  Returns "" if there is no occurance of the regex.
+ * that matches the regex.  Returns "" if there is no occurrence of the regex.
  *
  * @param regex - the regular expression to find within the string
  * @param toParse - the string within to find the regex

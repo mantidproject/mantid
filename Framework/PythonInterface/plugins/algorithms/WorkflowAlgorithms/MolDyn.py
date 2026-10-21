@@ -149,7 +149,7 @@ class MolDyn(PythonAlgorithm):
         """
         Creates a resolution workspace.
 
-        @param num_sample_hist Number of histgrams required in workspace
+        @param num_sample_hist Number of histograms required in workspace
         @returns The generated resolution workspace
         """
         res_ws_name = self.getPropertyValue("Resolution")

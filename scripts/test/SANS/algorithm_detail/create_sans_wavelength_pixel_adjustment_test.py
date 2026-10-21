@@ -190,7 +190,7 @@ class CreateSANSWavelengthPixelAdjustmentTest(unittest.TestCase):
         crop_alg = mock_alg(output_ws=MagicMock(name="cropped_ws"))
         mock_create_unmanaged_algorithm.side_effect = [load_alg, instrument_alg, crop_alg]
 
-        # Setup the dectector type and get_component_name mocks
+        # Setup the detector type and get_component_name mocks
         mock_detector_type.return_value = MagicMock(name="det_type_obj")
         mock_get_component_name.return_value = "component"
 

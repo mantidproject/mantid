@@ -160,7 +160,7 @@ public:
   /// vales.
   virtual size_t insertRow(size_t index) = 0;
 
-  /// Delets a row if it exists.
+  /// Deletes a row if it exists.
   virtual void removeRow(size_t index) = 0;
 
   /// Appends a row.
@@ -174,10 +174,10 @@ public:
   /// Overridable method to custom-sort the workspace
   virtual void sort(std::vector<std::pair<std::string, bool>> &criteria);
 
-  /// Access the column with name \c name trough a ColumnVector object
+  /// Access the column with name \c name through a ColumnVector object
   TableColumnHelper getVector(const std::string &name);
 
-  /// Access the column with name \c name trough a ColumnVector object
+  /// Access the column with name \c name through a ColumnVector object
   TableConstColumnHelper getVector(const std::string &name) const;
   template <class T>
   /**  Get a reference to a data element
@@ -284,7 +284,7 @@ public:
   void modified();
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   ITableWorkspace(const ITableWorkspace &) = default;
 
   /**  Resize a column.
@@ -295,7 +295,7 @@ protected:
 
   /**  Insert a new element into a column.
          @param c :: Pointer to the column
-         @param index :: Index in the column before which a new element wil be
+         @param index :: Index in the column before which a new element will be
      inserted.
    */
   void insertInColumn(Column *c, size_t index) { c->insert(index); }
@@ -314,7 +314,7 @@ private:
 
 // =====================================================================================
 /** @class ColumnVector
-     ColumnVector gives access to the column elements without alowing its
+     ColumnVector gives access to the column elements without allowing its
    resizing.
      Created by TableWorkspace::getVector(...)
  */
@@ -349,7 +349,7 @@ private:
 };
 
 /** @class ConstColumnVector
-     ConstColumnVector gives const access to the column elements without alowing
+     ConstColumnVector gives const access to the column elements without allowing
    its resizing.
      Created by TableWorkspace::getVector(...)
  */

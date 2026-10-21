@@ -108,7 +108,7 @@ class LoadWANDSCD(PythonAlgorithm):
         self.declareProperty(
             "ApplyGoniometerTilt",
             False,
-            "Apply the goniometer sgl and sgu tilts to the UB-matrix. This is for backwards compatability only.",
+            "Apply the goniometer sgl and sgu tilts to the UB-matrix. This is for backwards compatibility only.",
         )
 
         # Output workspace/data info

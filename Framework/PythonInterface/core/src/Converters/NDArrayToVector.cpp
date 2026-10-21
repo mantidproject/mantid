@@ -55,7 +55,7 @@ namespace {
  * Templated structure to fill a container
  * with values from a numpy array. It is assumed range pointed
  * to by the starting iterator has been preallocated to at least the
- * number of elements in the array and that the array is not emtpy
+ * number of elements in the array and that the array is not empty
  */
 template <typename DestElementType> struct CopyToImpl {
   void operator()(typename Converters::NDArrayToVector<DestElementType>::TypedVectorIterator first,

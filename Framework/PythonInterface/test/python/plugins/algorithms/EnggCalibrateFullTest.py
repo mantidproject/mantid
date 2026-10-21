@@ -31,10 +31,10 @@ class EnggCalibrateFullTest(unittest.TestCase):
         # Wrong workspace name
         self.assertRaises(ValueError, EnggCalibrateFull, Workspace="this_ws_is_not_there.not", Bank="2")
 
-        # mispelled ExpectedPeaks
+        # misspelled ExpectedPeaks
         self.assertRaises(TypeError, EnggCalibrateFull, Workspace=self.__class__._data_ws, Bank="2", Peaks="2")
 
-        # mispelled OutDetPosFilename
+        # misspelled OutDetPosFilename
         self.assertRaises(TypeError, EnggCalibrateFull, OutDetPosFile="any.csv", Workspace=self.__class__._data_ws, Bank="2", Peaks="2")
 
         # all fine, except missing OutDetPosTable (output)
@@ -66,7 +66,7 @@ class EnggCalibrateFullTest(unittest.TestCase):
 
     def test_run_ok_but_bad_data(self):
         """
-        Tests a run that doesn't go well becaus of inappropriate data is used here.
+        Tests a run that doesn't go well because of inappropriate data is used here.
         """
 
         # This is not a realistic CalibrateFull run, but it just runs fine

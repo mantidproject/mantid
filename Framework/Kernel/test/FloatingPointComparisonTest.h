@@ -58,7 +58,7 @@ public:
     double const diff = std::ldexp(std::numeric_limits<double>::epsilon(), std::ilogb(a));
     // the difference is a sizeable number and not by itself insignificant
     TS_ASSERT_LESS_THAN(0x1.p50, diff);
-    // the numbers are technicaly different
+    // the numbers are technically different
     TS_ASSERT_DIFFERS(a, a + diff);
     // but they compare different
     TS_ASSERT(Mantid::Kernel::equals(a, a + diff));

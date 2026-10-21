@@ -112,12 +112,12 @@ class DrillView(QMainWindow):
     loadRundex = Signal()
 
     """
-    Sent when the user aks for data saving.
+    Sent when the user asks for data saving.
     """
     saveRundex = Signal()
 
     """
-    Sent when the user aks for data saving in a new file.
+    Sent when the user asks for data saving in a new file.
     """
     saveRundexAs = Signal()
 
@@ -483,7 +483,7 @@ class DrillView(QMainWindow):
 
     def getAcquisitionMode(self):
         """
-        Get the selected acquistion mode.
+        Get the selected acquisition mode.
 
         Returns:
             str: acquisition mode
@@ -600,7 +600,7 @@ class DrillView(QMainWindow):
         Deal with the visual settings that the model saved.
 
         Args:
-            visualSettings (dict): dictionnary containing some visual
+            visualSettings (dict): dictionary containing some visual
                                    parameters that the view can deal with
         """
         # folded columns

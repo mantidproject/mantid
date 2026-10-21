@@ -1087,7 +1087,7 @@ def set_initial_dimensions(ax):
 def remove_and_return_errorbar_cap_lines(ax):
     # Matplotlib holds the line objects representing errorbar caps in the same list as the actual curves on a plot.
     # This causes problems for waterfall plots so here they are removed from the list and placed into a different
-    # list, which is returned so they can be readded later.
+    # list, which is returned so they can be re-added later.
     errorbar_cap_lines = []
     for line in ax.get_lines():
         # The lines with the label "_nolegend_" are either actual curves with errorbars, or errorbar cap lines.

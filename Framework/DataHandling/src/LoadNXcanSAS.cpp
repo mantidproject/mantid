@@ -107,7 +107,7 @@ void loadTitle(const H5::Group &entry, const Workspace_sptr &workspace) {
 //----- Polarization ----- //
 
 /**
- * Checks wheter there is Pin or Pout axis in the Data Group of the loaded file.
+ * Checks whether there is Pin or Pout axis in the Data Group of the loaded file.
  * @param group: H5Group to inspect
  */
 bool checkPolarization(const H5::Group &group) {
@@ -268,7 +268,7 @@ void loadInstrument(const Mantid::API::MatrixWorkspace_sptr &workspace, const In
  * signal (I) can either be 1D or 2D (1 x M vector or N x M matrix - N: number of spectra, M:number of bins per
  * spectra-), and Q has the same dimensions as I (vector for 1D contained in a Q dataset, or a matrix for 2D split into
  * two datasets Qx and Qy). When the data is polarized, the signal dataset has a larger number of dimensions to
- * accomodate all the spin states that were saved from different workspaces. For 1D data: 2 x 1 x M (half-polarized) or
+ * accommodate all the spin states that were saved from different workspaces. For 1D data: 2 x 1 x M (half-polarized) or
  * 2 x 2 x M (full-polarized). For 2D data: 2 x 1 x N x M (half-polarized) or 2 x 2 x N (full-polarized). As the Q
  * ranges were the same for all the spin state workspaces saved into the signal dataset, the dimensions of the Q
  * datasets are the same as in the non-polarized data, therefore, we trim them. (This discussion is equivalent for axes
@@ -347,7 +347,7 @@ struct WorkspaceDataInserter {
  * Reads data from the h5 file and stores in the workspace through the data inserter struct
  * @param dataSet: Dataset to read data from
  * @param inserter: Inserter struct helping to insert data into the appropriate axes of the workspace
- * @param slabShape: Vector containg the shape of the slice that's to be extracted from the dataset
+ * @param slabShape: Vector containing the shape of the slice that's to be extracted from the dataset
  * @param nPoints : Number of points (or bins) to select in the 1D slab.
  * @param nHistograms: Number of histograms (iteration reference)
  * @param offset: Offset position on the dataset.
@@ -415,7 +415,7 @@ bool fileHasTransmissionEntry(const H5::Group &entry, const std::string &name) {
 }
 
 /**
- * Takes transmission signal and Q from the corresponding group in the H5 File and puts in a tranmission workspace
+ * Takes transmission signal and Q from the corresponding group in the H5 File and puts in a transmission workspace
  * @param transmission: Group containing transmission or transmission can datasets.
  * @param workspace: Matrix workspace containing transmission data.
  */

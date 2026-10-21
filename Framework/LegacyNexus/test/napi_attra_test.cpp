@@ -182,7 +182,7 @@ int main(int argc, char *argv[]) {
       fprintf(stderr, "=== in unexpected code path\n");
       break;
     }
-    /* interate over attributes */
+    /* iterate over attributes */
     fprintf(stderr, "iterating over attributes\n");
 
     if (NXgetattrinfo(fileid, &i) != NXstatus::NX_OK)

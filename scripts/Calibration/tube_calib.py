@@ -153,13 +153,13 @@ def fit_gaussian(fit_par, index, ws, output_ws):
         above_half_line = len(numpy.where(values > half)[0])
         beyond_half_line = len(values) - above_half_line
         if above_half_line < beyond_half_line:
-            # means that there are few values above the midle, so it is a peak
+            # means that there are few values above the middle, so it is a peak
             centre = numpy.argmax(values) + min_index
             background = min_value
             height = max_value - background
             width = len(numpy.where(values > height / 2 + background))
         else:
-            # means that there are many values above the midle, so it is a trough
+            # means that there are many values above the middle, so it is a trough
             centre = numpy.argmin(values) + min_index
             background = max_value
             height = min_value - max_value  # negative value
@@ -481,7 +481,7 @@ def read_peak_file(file_name):
     # split the entries to the main values:
     # For example:
     # MERLIN/door1/tube_1_1 [34.199347724575574, 525.5864438725401, 1001.7456248836971]
-    # Will be splited as:
+    # Will be split as:
     # ['MERLIN/door1/tube_1_1', '', '34.199347724575574', '', '525.5864438725401', '', '1001.7456248836971', '', '', '']
     pattern = re.compile(r"[\[\],\s\r]")
     save_directory = config["defaultsave.directory"]
@@ -536,8 +536,8 @@ def getCalibration(
     :param peaksTable: Peaks table into which the peaks positions will be put
     :param overridePeaks: dictionary with tube indexes keys and an array of peaks in pixels to override those
         that would be fitted for one tube
-    :param excludeShortTubes: Exlude tubes shorter than specified length from calibration
-    :param plotTube: List of tube indexes that will be ploted
+    :param excludeShortTubes: Exclude tubes shorter than specified length from calibration
+    :param plotTube: List of tube indexes that will be plotted
     :param range_list: list of the tube indexes that will be calibrated. Default None, means all the tubes in tubeSet
     :param polinFit: Order of the polynomial to fit against the known positions. Acceptable: 2, 3
     :param peaksTestMode: true if shoving detectors that are reckoned to be at peak away (for test purposes)

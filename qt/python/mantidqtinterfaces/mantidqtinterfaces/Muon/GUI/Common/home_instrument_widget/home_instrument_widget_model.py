@@ -35,7 +35,7 @@ class InstrumentWidgetModel(object):
         if "TimeZero" in self._context.gui_context.keys():
             time_zero = self._context.gui_context["TimeZero"]
         else:
-            # default to loaded value, keep a record of the data vaue
+            # default to loaded value, keep a record of the data value
             self._context.gui_context["TimeZero"] = self._data.current_data["TimeZero"]
             time_zero = self._context.gui_context["TimeZero"]
         return time_zero
@@ -136,4 +136,4 @@ class InstrumentWidgetModel(object):
         if len(variable_rebin_list) == 1:
             return (True, "")
         else:
-            return (False, "Variable rebin string must have 2 or an odd number of entires")
+            return (False, "Variable rebin string must have 2 or an odd number of entries")

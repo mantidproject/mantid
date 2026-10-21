@@ -866,7 +866,7 @@ public:
     max.emplace_back(10.f);
     max.emplace_back(10.f);
 
-    // Create an function that encompases ALL of the total bins.
+    // Create an function that encompasses ALL of the total bins.
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
 
     ws->setMDMasking(std::move(function));
@@ -994,7 +994,7 @@ public:
     max.emplace_back(10.f);
     max.emplace_back(10.f);
 
-    // Create an function that encompases ALL of the total bins.
+    // Create an function that encompasses ALL of the total bins.
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
     doTestMasking(std::move(function), 1000); // 1000 out of 1000 bins masked
   }
@@ -1011,7 +1011,7 @@ public:
     max.emplace_back(10.f);
     max.emplace_back(4.99f);
 
-    // Create an function that encompases 1/2 of the total bins.
+    // Create an function that encompasses 1/2 of the total bins.
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
     doTestMasking(std::move(function), 500); // 500 out of 1000 bins masked
   }

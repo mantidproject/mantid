@@ -553,7 +553,7 @@ protected:
   /// disabled
   bool m_changeSlotsEnabled;
   /// if true the output name will be guessed every time workspace name is
-  /// changeed
+  /// changed
   bool m_guessOutputName;
 
   /// A list of registered functions
@@ -581,7 +581,7 @@ private:
   QPushButton *createFitMenuButton(QWidget *w);
   /// Check if the workspace can be used in the fit
   virtual bool isWorkspaceValid(Mantid::API::Workspace_sptr /*ws*/) const;
-  /// Find QtBrowserItem for a property prop among the chidren of
+  /// Find QtBrowserItem for a property prop among the children of
   QtBrowserItem *findItem(QtBrowserItem *parent, QtProperty *prop) const;
 
   /// disable undo when the function changes

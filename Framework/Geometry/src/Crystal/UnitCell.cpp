@@ -787,7 +787,7 @@ void UnitCell::calculateG() {
 
 /// Private function to calculate #Gstar matrix
 void UnitCell::calculateGstar() {
-  // Reciprocal metrix tensor is simply the inverse of the direct one
+  // Reciprocal metric tensor is simply the inverse of the direct one
   double det = G.determinant();
   if (det == 0) {
     throw std::range_error("UnitCell not properly initialized");

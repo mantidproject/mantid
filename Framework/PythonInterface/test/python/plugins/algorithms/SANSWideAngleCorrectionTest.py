@@ -68,7 +68,7 @@ class SANSWideAngleCorrectionTest(unittest.TestCase):
         Trans = CreateWorkspace([0.3, 1, 2], [1, 2])
         self.assertRaisesRegex(
             RuntimeError,
-            "Uncompatible sizes. Transmission must have the same bins of sample values",
+            "Incompatible sizes. Transmission must have the same bins of sample values",
             SANSWideAngleCorrection,
             self._sample,
             Trans,

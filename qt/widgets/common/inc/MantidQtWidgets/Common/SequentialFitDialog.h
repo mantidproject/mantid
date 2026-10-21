@@ -117,7 +117,7 @@ private:
 
   QString name(int row) const;
 
-  // name of the output wokrspace
+  // name of the output workspace
   std::string m_outputName;
 };
 } // namespace MantidWidgets

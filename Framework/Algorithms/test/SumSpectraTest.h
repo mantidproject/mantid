@@ -248,7 +248,7 @@ public:
     alg.execute();
     alg.isExecuted();
 
-    // Run again woth weighted sum
+    // Run again with weighted sum
     const std::string outputSpace2 = "SumSpectraOut2";
     alg.setProperty("InputWorkspace", inputSpace);
     alg.setPropertyValue("OutputWorkspace", outputSpace2);

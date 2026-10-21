@@ -186,7 +186,7 @@ void LoadDetectorsGroupingFile::exec() {
 }
 
 /*
- * Convert Componenet -> Detector IDs -> Workspace Indices -> set group ID
+ * Convert Component -> Detector IDs -> Workspace Indices -> set group ID
  */
 void LoadDetectorsGroupingFile::setByComponents() {
 
@@ -370,7 +370,7 @@ void LoadGroupXMLFile::loadXMLFile(const std::string &xmlfilename) {
 }
 
 /*
- * Initalize Poco XML Parser
+ * Initialize Poco XML Parser
  */
 void LoadGroupXMLFile::initializeXMLParser(const std::string &filename) {
   const std::string xmlText = Kernel::Strings::loadFile(filename);
@@ -634,7 +634,7 @@ void LoadGroupMapFile::parseFile() {
         if (!nextDataLine(line))
           throw std::invalid_argument("Premature end of file, expecting spectra list");
 
-        // Parse line with range. Exceptions will be catched as all others.
+        // Parse line with range. Exceptions will be caught as all others.
         std::vector<int> readSpectra = Kernel::Strings::parseRange(line, " ");
 
         groupSpectra.insert(groupSpectra.end(), readSpectra.begin(), readSpectra.end());

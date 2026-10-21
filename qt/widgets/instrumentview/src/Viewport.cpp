@@ -188,7 +188,7 @@ void Viewport::applyProjection() const {
  * @param point :: The projection point on the sphere in model coordinates
  */
 Mantid::Kernel::V3D Viewport::projectOnSphere(int a, int b) const {
-  // z initiaised to zero if out of the sphere
+  // z initialised to zero if out of the sphere
   double z = 0;
   auto x = static_cast<double>((2.0 * a - m_dimensions.width()) / m_dimensions.width());
   auto y = static_cast<double>((m_dimensions.height() - 2.0 * b) / m_dimensions.height());
@@ -302,7 +302,7 @@ void Viewport::setViewToZNegative() {
 }
 
 /**
- * Adjusts the current projection coordinates based on a any prevoius calls
+ * Adjusts the current projection coordinates based on a any previous calls
  * to change the view. Note that this does not issue any drawing commands
  * it sets up the internal matrices for the next call to applyProjection
  * by the view code.

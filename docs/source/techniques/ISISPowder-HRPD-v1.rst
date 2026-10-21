@@ -457,7 +457,7 @@ do_solid_angle_corrections
 *optional*
 
 Indicates whether or not to run solid angle corrections,
-on a vanadium this creaes the correction file as well as dividing by it,
+on a vanadium this creates the correction file as well as dividing by it,
 on focus this attempts to load in the correction file and then divides by it.
 
 Example Input

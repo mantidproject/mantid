@@ -438,7 +438,7 @@ void LoadNexusMonitors2::runLoadLogs(const std::string &filename, const API::Mat
 
 //------------------------------------------------------------------------------
 /**
- * Helper method to make sure that a file is / can be openend as a NeXus file
+ * Helper method to make sure that a file is / can be opened as a NeXus file
  *
  * @param fname :: name of the file
  * @return True if opening the file as NeXus and retrieving entries succeeds
@@ -458,7 +458,7 @@ bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
 
 //------------------------------------------------------------------------------
 /**
- * Splits multiperiod histogram data into seperate workspaces and puts them in
+ * Splits multiperiod histogram data into separate workspaces and puts them in
  * a group
  *
  * @param numPeriods :: number of periods

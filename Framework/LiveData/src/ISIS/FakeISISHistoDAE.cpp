@@ -66,7 +66,7 @@ public:
   ~TestServerConnection() override {
     // std::cerr << "Test connection deleted\n";
   }
-  /// Sends an OK message when there is nothing to send or an error occured
+  /// Sends an OK message when there is nothing to send or an error occurred
   void sendOK() {
     isisds_command_header_t comm;
     memset(&comm, 0, sizeof(comm));

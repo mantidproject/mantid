@@ -33,10 +33,10 @@ static void default_status_reporter(int status, int code, const char *message) {
   printf("IDC: %d %d %s\n", status, code, message);
 }
 
-/** pointer to current IDC error reporing function */
+/** pointer to current IDC error reporting function */
 static idc_error_report_t status_reporter = default_status_reporter;
 
-// diable warning about vsprintf and strncpy
+// disable warning about vsprintf and strncpy
 // #pragma warning(disable:4996)
 /** report an error */
 int IDCreport(int status, int code, const char *format, ...) {

@@ -17,7 +17,7 @@ def compute_alpha(z, slicepoint, slicedim_width):
     @detail If a value cannot be computed, for zero dimension width for example, then
     ALPHA_MAX is returned.
     returns ALPHA_MAX when z == slicepoint
-    rturns ALPHA_MIN when |z - slicepoint| == slicedim_width * VIEW_FRACTION
+    returns ALPHA_MIN when |z - slicepoint| == slicedim_width * VIEW_FRACTION
     Example: if slice_dim_width=0.2 Angstroms, a peak will not be shown when its z coordinate
     lies outside the [0.497, 0.503] range.
     :param z: Z position of center out of slice plane

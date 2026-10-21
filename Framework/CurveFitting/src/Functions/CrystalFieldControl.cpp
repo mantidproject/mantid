@@ -139,7 +139,7 @@ void CrystalFieldControl::checkConsistent() {
     // control functions.
     const auto nSpec = m_temperatures.size();
     if (nSpec > 1 && nSpec > nFunctions()) {
-      // Some of the member control funtions must be spectra
+      // Some of the member control functions must be spectra
       throw std::logic_error("Too few spectrum functions.");
     }
     // Check if the FWHMX and FWHMY attributes of the spectrum

@@ -82,7 +82,7 @@ public:
 
   // This should inherit the getBoundingBox implementation from  CompAssembly
   // but
-  // the multiple inheritance seems to confuse it so we'll explicityly tell it
+  // the multiple inheritance seems to confuse it so we'll explicitly tell it
   // that here
   using CompAssembly::getBoundingBox;
 

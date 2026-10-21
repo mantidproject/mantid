@@ -57,7 +57,7 @@ public:
   }
 
   /**
-   * @brief Evaluate the function at one particular enery value
+   * @brief Evaluate the function at one particular energy value
    */
   void test_function_gives_expected_value_for_given_input() {
     auto func = createTestInelasticIsoRotDiff();
@@ -74,7 +74,7 @@ public:
   void test_normalization() {
     auto func = createTestInelasticIsoRotDiff();
     func->setParameter("Tau", 50.0);  // make it peaky
-    func->setAttributeValue("N", 25); // more terms for more precission
+    func->setAttributeValue("N", 25); // more terms for more precision
     double dE(0.0001);                // dE is 1micro-eV
     const size_t nData(20000);
     // Create the domain of energy values

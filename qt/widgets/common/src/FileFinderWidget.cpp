@@ -147,7 +147,7 @@ void FileFinderWidget::setLabelMinWidth(const int width) { m_uiForm.textLabel->s
 bool FileFinderWidget::allowMultipleFiles() const { return m_allowMultipleFiles; }
 
 /**
- * Set whether this widget allows multiple files to be specifed or not
+ * Set whether this widget allows multiple files to be specified or not
  * @param allow :: If true then the widget will accept multiple files else only
  * a single file may be specified
  */
@@ -264,7 +264,7 @@ bool FileFinderWidget::extsAsSingleOption() const { return m_extsAsSingleOption;
 /**
  * Sets whether the file dialog should display the exts as a single list or as
  * multiple items
- * @param value :: If true the file dialog wil contain a single entry will all
+ * @param value :: If true the file dialog will contain a single entry will all
  * filters
  */
 void FileFinderWidget::extsAsSingleOption(const bool value) { m_extsAsSingleOption = value; }
@@ -322,14 +322,14 @@ QString FileFinderWidget::getFirstFilename() const {
  */
 bool FileFinderWidget::isEmpty() const { return m_uiForm.fileEditor->text().isEmpty(); }
 
-/** The verbatum, unexpanded text, that was entered into the box
+/** The verbatim, unexpanded text, that was entered into the box
  *  @return the contents shown in the Line Edit
  */
 QString FileFinderWidget::getText() const { return m_uiForm.fileEditor->text(); }
 
 /** The number the user entered into the entryNum lineEdit
  * or NO_ENTRY_NUM on error. Checking if isValid is true should
- * eliminate the possiblity of getting NO_ENTRY_NUM
+ * eliminate the possibility of getting NO_ENTRY_NUM
  */
 int FileFinderWidget::getEntryNum() const {
   if (m_uiForm.entryNum->text().isEmpty() || (!m_multiEntry)) {
@@ -432,7 +432,7 @@ void FileFinderWidget::setLiveAlgorithm(const IAlgorithm_sptr &monitorLiveData) 
  * Gets the instrument currently set by the override property.
  *
  * If no override is set then the instrument set by default instrument
- *configurtion
+ *configuration
  * option will be used and this function returns an empty string.
  *
  * @return Name of instrument, empty if not set
@@ -760,7 +760,7 @@ QStringList FileFinderWidget::getFileExtensionsFromAlgorithm(const QString &algN
   return fileExts;
 }
 
-/** Lauches a load file browser allowing a user to select multiple
+/** Launches a load file browser allowing a user to select multiple
  *  files
  *  @return the names of the selected files as a comma separated list
  */

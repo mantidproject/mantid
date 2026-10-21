@@ -344,7 +344,7 @@ void WorkspaceGroup::removeItem(const size_t index) {
  * This also deletes the workspace group when the last member of it gets
  * deleted.
  *
- * @param notice :: A pointer to a workspace delete notificiation object
+ * @param notice :: A pointer to a workspace delete notification object
  */
 void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotification_ptr notice) {
   std::unique_lock<std::recursive_mutex> _lock(m_mutex);
@@ -355,7 +355,7 @@ void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotif
   if (deletedName != this->getName()) {
     this->removeByADS(deletedName);
     if (isEmpty()) {
-      // We are about to get deleted so we don't want to recieve any
+      // We are about to get deleted so we don't want to receive any
       // notifications
       // The unique lock needs to be unlocked at this point as the workspace
       // is about to destroy itself. We have to make sure that the mutex is
@@ -492,7 +492,7 @@ bool WorkspaceGroup::isGroupPeaksWorkspaces() const {
  * @param workspaceToCheck :: A workspace to check.
  * @param level :: The current nesting level. Intended for internal use only
  * by WorkspaceGroup.
- * @return :: True if the worspace is found in any of the nested groups in
+ * @return :: True if the workspace is found in any of the nested groups in
  * this group.
  */
 bool WorkspaceGroup::isInGroup(const Workspace &workspaceToCheck, size_t level) const {

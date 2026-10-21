@@ -69,7 +69,7 @@ class EXPORT_OPT_MANTIDQT_COMMON RepoModel : public QAbstractItemModel {
   Q_OBJECT
 
   /** A nested class to help RepoModel to implement the QAbstractItemModel.
-      This class in indended to keep track of the path inside the Repository
+      This class in intended to keep track of the path inside the Repository
       of the entries, in such a way the repomodel will be able to get from the
       index the path.
       The RepoModel::appendChild allows the RepoModel to reconstruct the tree of

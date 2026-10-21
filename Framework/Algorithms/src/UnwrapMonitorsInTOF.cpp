@@ -90,7 +90,7 @@ Mantid::HistogramData::Points getPoints(Mantid::API::MatrixWorkspace const *work
 
   // Calculate the doubled up bit. To do this we need to:
   // 1. Get the last element of the original BinEdges
-  // 2. For each entry in the BinEdges calcualte the increment and add it to the
+  // 2. For each entry in the BinEdges calculate the increment and add it to the
   // last element. In addition
   //    we have to make sure that there is a spacing between the last element
   //    and the newly append last+1 element
@@ -194,7 +194,7 @@ Mantid::HistogramData::Counts getCounts(Mantid::API::MatrixWorkspace const *work
   std::advance(doubledDataIterator, counts.size());
   std::copy(std::begin(counts), std::end(counts), doubledDataIterator);
 
-  // Now set everything to zero entires which correspond to TOF which is less
+  // Now set everything to zero entries which correspond to TOF which is less
   // than minTof and more than maxTof
   auto minAndMaxIndex = getMinAndMaxIndex(minMaxTof, points);
   if (minMaxTof.minTof != specialTimeOfFlightCutoff) {

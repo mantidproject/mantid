@@ -240,7 +240,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             if not isinstance(sample_ws, MatrixWorkspace):
                 issues["SampleWorkspace"] = "The SampleWorkspace must be a MatrixWorkspace."
             elif sample_ws.getAxis(0).getUnit().unitID() != "Wavelength":
-                # require both sample and can ws have wavelenght as x-axis
+                # require both sample and can ws have wavelength as x-axis
                 issues["SampleWorkspace"] = "The SampleWorkspace must have units of wavelength."
 
             if use_can:

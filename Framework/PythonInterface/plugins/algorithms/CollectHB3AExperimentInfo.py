@@ -210,7 +210,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         for i in range(len(rawptlist)):
             curpt = rawptlist[i]
             if curpt == -1:
-                # begining of a scan
+                # beginning of a scan
                 sublist = []
                 self._ptListList.append(sublist)
             else:

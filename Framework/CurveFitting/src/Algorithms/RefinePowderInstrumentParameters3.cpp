@@ -41,7 +41,7 @@ void RefinePowderInstrumentParameters3::init() {
   // Peak position workspace
   declareProperty(
       std::make_unique<WorkspaceProperty<Workspace2D>>("InputPeakPositionWorkspace", "Anonymous", Direction::Input),
-      "Data workspace containing workspace positions in TOF agains dSpacing.");
+      "Data workspace containing workspace positions in TOF against dSpacing.");
 
   // Workspace Index
   declareProperty("WorkspaceIndex", 0, "Workspace Index of the peak positions in PeakPositionWorkspace.");
@@ -50,12 +50,12 @@ void RefinePowderInstrumentParameters3::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<Workspace2D>>("OutputPeakPositionWorkspace", "Anonymous2", Direction::Output),
       "Output data workspace containing refined workspace positions in TOF "
-      "agains dSpacing.");
+      "against dSpacing.");
 
   // Input Table workspace containing instrument profile parameters
   declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("InputInstrumentParameterWorkspace", "Anonymous3",
                                                                       Direction::Input),
-                  "INput tableWorkspace containg instrument's parameters.");
+                  "INput tableWorkspace containing instrument's parameters.");
 
   // Output table workspace containing the refined parameters
   declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("OutputInstrumentParameterWorkspace",
@@ -73,7 +73,7 @@ void RefinePowderInstrumentParameters3::init() {
   // Random seed
   declareProperty("MonteCarloRandomSeed", 0, "Random seed for Monte Carlo simulation. ");
 
-  // Method to calcualte the standard error of peaks
+  // Method to calculate the standard error of peaks
   vector<string> stdoptions{"ConstantValue", "UseInputValue"};
   auto listvalidator = std::make_shared<Kernel::StringListValidator>(stdoptions);
   declareProperty("StandardError", "ConstantValue", listvalidator,
@@ -117,7 +117,7 @@ void RefinePowderInstrumentParameters3::exec() {
   API::FunctionValues rawvalues(domain);
   m_positionFunc->function(domain, rawvalues);
 
-  // d) Calcualte statistic
+  // d) Calculate statistic
   double startchi2 = calculateFunctionError(m_positionFunc, m_dataWS, m_wsIndex);
 
   // b) Fit by type
@@ -177,7 +177,7 @@ void RefinePowderInstrumentParameters3::processInputProperties() {
     throw runtime_error("Input RefinementAlgorithm is not supported.");
   }
 
-  // Stanard error mode
+  // Standard error mode
   string stdmode = getProperty("StandardError");
   if (stdmode == "ConstantValue")
     m_stdMode = CONSTANT;
@@ -370,7 +370,7 @@ double RefinePowderInstrumentParameters3::doSimulatedAnnealing(map<string, Param
       proposeNewValues(mcgroups[igroup], parammap, propparammap,
                        chisqx); // , prevbetterchi2);
 
-      // b) Calcualte function and chi^2
+      // b) Calculate function and chi^2
       double propchisq = calculateFunction(propparammap, vecY);
 
       /*
@@ -521,7 +521,7 @@ void RefinePowderInstrumentParameters3::proposeNewValues(const vector<string> &m
       }
       else if (randirint < 0.4)
       {
-        // No preferance
+        // No preference
         stepsize = stepsize;
       }
       else
@@ -647,7 +647,7 @@ void RefinePowderInstrumentParameters3::setupRandomWalkStrategy(map<string, Para
   dboutss << "Monte Carlo minimizer refines: ";
 
   // 1. Monte Carlo groups
-  // a. Instrument gemetry
+  // a. Instrument geometry
   vector<string> geomparams;
   addParameterToMCMinimize(geomparams, "Dtt1", parammap);
   addParameterToMCMinimize(geomparams, "Dtt1t", parammap);
@@ -721,7 +721,7 @@ void RefinePowderInstrumentParameters3::addParameterToMCMinimize(vector<string> 
   pariter = parammap.find(parname);
   if (pariter == parammap.end()) {
     stringstream errss;
-    errss << "Parameter " << parname << " does not exisit Le Bail function parameters. ";
+    errss << "Parameter " << parname << " does not exist Le Bail function parameters. ";
     g_log.error(errss.str());
     throw runtime_error(errss.str());
   }
@@ -751,7 +751,7 @@ double RefinePowderInstrumentParameters3::calculateFunction(const map<string, Pa
 
   m_positionFunc->function1D(vecY, vecX);
 
-  // 3. Calcualte error
+  // 3. Calculate error
   double chisq = calculateFunctionChiSquare(vecY, m_dataWS->y(m_wsIndex), m_dataWS->e(m_wsIndex));
 
   return chisq;
@@ -823,7 +823,7 @@ double RefinePowderInstrumentParameters3::calculateFunctionError(const IFunction
  * @param powerfit :: a flag to choose a robust algorithm to fit function
  *
  * Return: double chi2 of the final (best) solution.  If fitting fails, chi2
- *wil be maximum double
+ *will be maximum double
  */
 double RefinePowderInstrumentParameters3::fitFunction(const IFunction_sptr &function, const Workspace2D_sptr &dataws,
                                                       int wsindex, bool powerfit) {
@@ -1006,7 +1006,7 @@ TableWorkspace_sptr RefinePowderInstrumentParameters3::genOutputProfileTable(map
 }
 
 //----------------------------------------------------------------------------------------------
-/** Add a parameter to parameter map.  If this parametere does exist, then
+/** Add a parameter to parameter map.  If this parameter does exist, then
  * replace the value
  * of it.
  * @param parameters:  map
@@ -1107,7 +1107,7 @@ void RefinePowderInstrumentParameters3::setFunctionParameterValues(const IFuncti
   g_log.information(msgss.str());
 }
 
-/** Update parameter values to Parameter map from fuction map
+/** Update parameter values to Parameter map from function map
 void
 RefinePowderInstrumentParameters3::updateFunctionParameterValues(IFunction_sptr
 function,
@@ -1195,7 +1195,7 @@ void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(const IFun
 
 //----------------------------------------------------------------------------------------------
 /** Copy parameters from source to target, i.e., clear the target and make it
- * exacly same as
+ * exactly same as
  * source;
  */
 void duplicateParameters(const map<string, Parameter> &source, map<string, Parameter> &target) {
@@ -1213,7 +1213,7 @@ void duplicateParameters(const map<string, Parameter> &source, map<string, Param
 
 //----------------------------------------------------------------------------------------------
 /** Copy parameters from source to target, i.e., clear the target and make it
- * exacly same as
+ * exactly same as
  * source;
  */
 void copyParametersValues(const map<string, Parameter> &source, map<string, Parameter> &target) {

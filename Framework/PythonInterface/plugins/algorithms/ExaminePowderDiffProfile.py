@@ -48,7 +48,7 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
         """ """
         return "ExaminePowderDiffProfile"
 
-    def summmary(self):
+    def summary(self):
         return "Examine peak profile parameters by Le Bail fit."
 
     def PyInit(self):
@@ -86,7 +86,7 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
         )
         self.declareProperty(FileProperty("ProfileFilename", "", FileAction.OptionalLoad, [".irf"]), "Name of input data file.")
         self.declareProperty("Lattice", -0.0, "Lattice size of the cubic unit cell.")
-        self.declareProperty("GenerateInformationWS", False, "Optional to genearte profile table workspace and Bragg peak table. ")
+        self.declareProperty("GenerateInformationWS", False, "Optional to generate profile table workspace and Bragg peak table. ")
 
         # Background
         self.declareProperty(

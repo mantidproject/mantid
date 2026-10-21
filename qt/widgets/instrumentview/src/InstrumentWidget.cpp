@@ -635,7 +635,7 @@ void InstrumentWidget::setSurfaceType(int type) {
       QMessageBox::critical(this, QCoreApplication::applicationName() + " Error",
                             "Surface cannot be created because of an exception:\n\n  " + errorMessage +
                                 "\n\nPlease select a different surface type.");
-      // if suface change was initialized by the GUI this should ensure its
+      // if surface change was initialized by the GUI this should ensure its
       // consistency
       emit surfaceTypeChanged(m_surfaceType);
       return;

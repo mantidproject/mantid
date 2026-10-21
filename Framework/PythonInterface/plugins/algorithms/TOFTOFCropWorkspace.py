@@ -51,11 +51,11 @@ class TOFTOFCropWorkspace(PythonAlgorithm):
         # check for required properties
         run = input_workspace.getRun()
         if not run.hasProperty("channel_width"):
-            issues["InputWorkspace"] = "Input workpsace must have sample log channel_width."
+            issues["InputWorkspace"] = "Input workspace must have sample log channel_width."
         if not run.hasProperty("full_channels"):
-            issues["InputWorkspace"] = "Input workpsace must have sample log full_channels."
+            issues["InputWorkspace"] = "Input workspace must have sample log full_channels."
         if not run.hasProperty("TOF1"):
-            issues["InputWorkspace"] = "Input workpsace must have sample log TOF1."
+            issues["InputWorkspace"] = "Input workspace must have sample log TOF1."
 
         return issues
 

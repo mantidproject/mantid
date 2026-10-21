@@ -46,7 +46,7 @@ template <typename vector_like> size_t findXIndex(const vector_like &vecx, const
  * @param peak_center_index :: estimated peak center's index in histogram
  * (output)
  * @param peak_height :: estimated peak height (output)
- * @return :: state whether peak center can be found by obervation
+ * @return :: state whether peak center can be found by observation
  */
 int observePeakCenter(const Histogram &histogram, const FunctionValues &bkgd_values, size_t start_index,
                       size_t stop_index, double &peak_center, size_t &peak_center_index, double &peak_height) {
@@ -142,7 +142,7 @@ double observePeakFwhm(const Histogram &histogram, const FunctionValues &bkgd_va
  * (1) peak center (2) peak intensity  (3) peak width depending on peak type
  * In order to make the estimation better, a pre-defined background function is
  * used to remove
- * the background from the obervation data
+ * the background from the observation data
  * @param histogram :: Histogram instance containing experimental data
  * @param peak_window :: pair of X-value to specify the peak range
  * @param peakfunction :: (in/out) peak function to set observed value to
@@ -151,7 +151,7 @@ double observePeakFwhm(const Histogram &histogram, const FunctionValues &bkgd_va
  * @param peakWidthEstimateApproach :: whether to guess fwhm from instrument or observation
  * @param peakWidthPercentage :: fwhm scaling factor when guessing from instrument
  * @param minPeakHeight :: function parameters will only be set if estimated peak height is larger
- * @return :: obervation success or not
+ * @return :: observation success or not
  */
 int estimatePeakParameters(const Histogram &histogram, const std::pair<size_t, size_t> &peak_window,
                            const API::IPeakFunction_sptr &peakfunction,

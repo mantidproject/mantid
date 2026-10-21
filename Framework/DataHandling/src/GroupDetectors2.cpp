@@ -356,7 +356,7 @@ void GroupDetectors2::getGroups(const API::MatrixWorkspace_const_sptr &workspace
     m_GroupWsInds[0] = workspace->getIndicesFromSpectra(spectraList);
     g_log.debug() << "Converted " << spectraList.size() << " spectra numbers into spectra indices to be combined\n";
   } else { // go through the rest of the properties in order of decreasing
-           // presidence, abort when we get the data we need ignore the rest
+           // precedence, abort when we get the data we need ignore the rest
     if (!detectorList.empty()) {
       // we are going to group on the basis of detector IDs, convert from
       // detectors to workspace indices
@@ -415,7 +415,7 @@ void GroupDetectors2::getGroups(const API::MatrixWorkspace_const_sptr &workspace
  */
 void GroupDetectors2::processFile(const std::string &fname, const API::MatrixWorkspace_const_sptr &workspace,
                                   std::vector<int64_t> &unUsedSpec) {
-  // tring to open the file the user told us exists, skip down 20 lines to find
+  // trying to open the file the user told us exists, skip down 20 lines to find
   // out what happens if we can read from it
   g_log.debug() << "Opening input file ... " << fname;
   std::ifstream File(fname.c_str(), std::ios::in);
@@ -698,7 +698,7 @@ int GroupDetectors2::readInt(const std::string &line) {
       // we expected an integer but there were more things on the line, before
       // any #
       g_log.debug() << "Error: found " << data.count() << " strings the first string is " << data[0] << '\n';
-      throw std::invalid_argument("Problem reading file, a singe integer expected");
+      throw std::invalid_argument("Problem reading file, a single integer expected");
     }
   }
   // we haven't found any data, return the nodata condition
@@ -785,15 +785,15 @@ void GroupDetectors2::readFile(const spec2index_map &specs2index, std::istream &
  *  @param output :: the list of integers, with any ranges expanded
  *  @param unUsedSpec :: the list of spectra indexes that have been included in
  * a group (so far)
- *  @param seperator :: the symbol for the index range separator
+ *  @param separator :: the symbol for the index range separator
  *  @throw invalid_argument when a number couldn't be found or the number is not
  * in the spectra map
  */
 void GroupDetectors2::readSpectraIndexes(const std::string &line, const spec2index_map &specs2index,
                                          std::vector<size_t> &output, std::vector<int64_t> &unUsedSpec,
-                                         const std::string &seperator) {
+                                         const std::string &separator) {
   // remove comments and white space
-  Mantid::Kernel::StringTokenizer dataComment(line, seperator, IGNORE_SPACES);
+  Mantid::Kernel::StringTokenizer dataComment(line, separator, IGNORE_SPACES);
   for (const auto &itr : dataComment) {
     std::vector<size_t> specNums;
     specNums.reserve(output.capacity());

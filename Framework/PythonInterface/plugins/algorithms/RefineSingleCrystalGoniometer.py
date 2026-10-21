@@ -464,7 +464,7 @@ class RefineSingleCrystalGoniometer(PythonAlgorithm):
         Parameters
         ----------
         cell : str
-            Lattice centering to constrain paramters.
+            Lattice centering to constrain parameters.
         peaks : PeaksWorkspace
             Workspace to update with the refined goniometer matrices and UB.
             Passed explicitly rather than re-read from the "Peaks" property,

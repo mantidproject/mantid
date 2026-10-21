@@ -308,7 +308,7 @@ void MDNormBase::calculateNormalization(const std::vector<coord_t> &otherValues,
 }
 
 /**
- * Computes the normalization for the input workspace for the case of a continous rotation
+ * Computes the normalization for the input workspace for the case of a continuous rotation
  * @param otherValues non HKLE dimensions
  * @param expInfoIndex current experiment info index
  * @param so - (default: nullptr) symmetry operation (only when called by MDNorm)

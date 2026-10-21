@@ -290,7 +290,7 @@ public:
     std::vector<std::string> cols{"Runs", "Angle", "Transmission", "Energy", "Spin", "Group", "Options"};
     TS_ASSERT_EQUALS(outputWS->getColumnNames(), cols);
     TableRow row = outputWS->getRow(0);
-    // we added no rows so we should get runtime error when we try to acheive a
+    // we added no rows so we should get runtime error when we try to achieve a
     // cell from a row that doesn't exist
     TS_ASSERT_THROWS_ANYTHING(row.cell<std::string>(0));
   }

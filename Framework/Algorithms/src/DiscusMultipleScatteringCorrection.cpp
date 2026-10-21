@@ -189,7 +189,7 @@ void DiscusMultipleScatteringCorrection::init() {
   declareProperty("RadialCollimator", false,
                   "Enable use of a radial collimator that assign zero weights to tracks where the final scatter "
                   "is not in a position that allows the final track segment to pass through the collimator corridor "
-                  "which spans from the guage volume toward the each detector");
+                  "which spans from the gauge volume toward the each detector");
 }
 
 /**
@@ -829,7 +829,7 @@ DiscusMultipleScatteringCorrection::generateInputKOutputWList(const double efixe
 /**
  * Prepare a profile of Q*S(Q) that will later be used to calculate a cumulative probability distribution
  * for use in importance sampling
- * @param qmax The maxmimum q value required based on the data in the InputWorkspace
+ * @param qmax The maximum q value required based on the data in the InputWorkspace
  */
 void DiscusMultipleScatteringCorrection::prepareQSQ(double qmax) {
   for (auto &SQWSMapping : m_SQWSs) {
@@ -1357,7 +1357,7 @@ GNU_DIAG_OFF("free-nonheap-object")
  * @param kinc The incident wavevector
  * @param wValues A vector of overall energy transfers
  * @param specialSingleScatterCalc Boolean indicating whether special single
- * @param detectorInfo Obeject to get detector information
+ * @param detectorInfo Object to get detector information
  * @param histogramIndex Index for the current histogram being processed
  * @return An average weight across all of the paths
  */
@@ -1415,7 +1415,7 @@ GNU_DIAG_ON("free-nonheap-object")
  * @param kinc The incident wavevector
  * @param wValues A vector of overall energy transfers
  * @param specialSingleScatterCalc Boolean indicating whether special single
- * @param detectorInfo Obeject to get detector information
+ * @param detectorInfo Object to get detector information
  * @param histogramIndex Index of the current histogram being processed
  * @return A tuple containing a success/fail boolean and the calculated weights
  * across the n-1 multiple scatters
@@ -1535,8 +1535,8 @@ std::tuple<bool, std::vector<double>> DiscusMultipleScatteringCorrection::scatte
 }
 
 /*
- * Construct a hexahedron shape extending from the detector's front face across the collimator openning window toward
- the sample with a legth as twice the distance from sample to detector.
+ * Construct a hexahedron shape extending from the detector's front face across the collimator opening window toward
+ the sample with a length as twice the distance from sample to detector.
  */
 const std::shared_ptr<Geometry::CSGObject> DiscusMultipleScatteringCorrection::createCollimatorHexahedronShape(
     const Kernel::V3D &samplePos, const Mantid::Geometry::DetectorInfo &detectorInfo, const size_t &histogramIndex) {
@@ -1610,7 +1610,7 @@ const std::shared_ptr<Geometry::CSGObject> DiscusMultipleScatteringCorrection::c
   const auto unitVecAlongRightTopLeg = Kernel::normalize(colOpenningRightTopPos - detRightFrontTopPos);
   const auto unitVecAlongRightBottomLeg = Kernel::normalize(colOpenningRightBottomPos - detRightFrontBottomPos);
 
-  // Positions of the hexahedron extended towards the sample for each of its legs to have a length twice the lenght of
+  // Positions of the hexahedron extended towards the sample for each of its legs to have a length twice the length of
   // sample to detector
   double sampleCentreToDetDistance = (detCentrePos - samplePos).norm();
   const auto leftFrontBottomPoint = detRightFrontTopPos + unitVecAlongRightTopLeg * sampleCentreToDetDistance * 2.0;

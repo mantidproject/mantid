@@ -60,14 +60,14 @@ InstrumentSelector::~InstrumentSelector() {
 const QStringList &InstrumentSelector::getTechniques() const { return m_techniques; }
 
 /**
- * Returns if the list of instruments will be refeshed when the facility
+ * Returns if the list of instruments will be refreshed when the facility
  * changes.
  * @return If facility auto update is enabled
  */
 bool InstrumentSelector::getAutoUpdate() { return m_updateOnFacilityChange; }
 
 /**
- * Sets if the list of instruments should be updated folowing a facility change.
+ * Sets if the list of instruments should be updated following a facility change.
  * @param autoUpdate If instruments are to be updated
  */
 void InstrumentSelector::setAutoUpdate(bool autoUpdate) { m_updateOnFacilityChange = autoUpdate; }
@@ -91,8 +91,8 @@ void InstrumentSelector::setTechniques(const QStringList &techniques) {
 QString InstrumentSelector::getFacility() { return QString::fromStdString(m_currentFacility->name()); }
 
 /**
- * Sets the facility instruments should be loaded from and refeshes the list.
- * @param facilityName Name of facilty
+ * Sets the facility instruments should be loaded from and refreshes the list.
+ * @param facilityName Name of facility
  */
 void InstrumentSelector::setFacility(const QString &facilityName) { fillWithInstrumentsFromFacility(facilityName); }
 

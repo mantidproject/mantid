@@ -40,7 +40,7 @@ typedef std::size_t param_t;
  * The "Params" property of this class should be declared as an ArrayProperty.
  * However, it was originally written to allow many things to serve as an array delimiter.
  * To properly make this an ArrayProperty, while still allowing old behavior, we can use
- * a standatd ArrayProperty and change all of the delimiters to commas.
+ * a standard ArrayProperty and change all of the delimiters to commas.
  */
 class FFTParamsProperty : public ArrayProperty<param_t> {
 public:

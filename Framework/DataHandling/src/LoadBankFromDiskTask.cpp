@@ -259,7 +259,7 @@ std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadTof(Nexus::File &f
   return event_time_of_flight;
 }
 
-/** Load weight of weigthed events if they exist
+/** Load weight of weighted events if they exist
  * @param file An Nexus::File object opened at the correct group
  * @returns A new array containing the weights or a nullptr if the weights
  * are not present
@@ -410,7 +410,7 @@ void LoadBankFromDiskTask::run() {
     m_loadError = true;
   }
 
-  // Close up the file even if errors occured.
+  // Close up the file even if errors occurred.
   file.closeGroup();
   file.close();
 
@@ -499,7 +499,7 @@ void LoadBankFromDiskTask::run() {
     // delta >= 0 is linear, < 0 is log
     double delta = m_loader.alg->compressTolerance;
 
-    // make a vector of logorithmic bins
+    // make a vector of logarithmic bins
     auto histogram_bin_edges = std::make_shared<std::vector<double>>();
     std::vector<double> const params{tof_min_fixed, delta, tof_max_fixed + std::abs(delta)};
     Mantid::Kernel::VectorHelper::createAxisFromRebinParams(params, *histogram_bin_edges);

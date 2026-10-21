@@ -65,7 +65,7 @@ void ImageInfoWidget::hideColumn(const int index) { QTableWidget::hideColumn(ind
 
 void ImageInfoWidget::showColumn(const int index) { QTableWidget::showColumn(index); }
 
-// Set presenter flag for wether to show or hide the signal column
+// Set presenter flag for whether to show or hide the signal column
 void ImageInfoWidget::setShowSignal(const bool showSignal) { m_presenter->setShowSignal(showSignal); }
 
 } // namespace MantidQt::MantidWidgets

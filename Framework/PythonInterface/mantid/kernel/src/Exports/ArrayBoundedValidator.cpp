@@ -22,7 +22,7 @@ namespace {
  * Factory function to allow more flexibility in the constructor
  * @param lower An optional lower bound
  * @param upper An optional upper bound
- * @param exclusive Optional argument specifiying if the bounds are exclusive
+ * @param exclusive Optional argument specifying if the bounds are exclusive
  * @returns A pointer to a new BoundedValidator object
  */
 template <typename T>

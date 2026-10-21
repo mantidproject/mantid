@@ -138,7 +138,7 @@ def build_properties_dict(param_map, synonims, descr_list=[]):
     The properties, which have simple values are added to dictionary in the form:
     properties_dict[prop_name]=(False,value);
 
-    The properties, expressed trough the values of other properties
+    The properties, expressed through the values of other properties
     e.g. strings in a form key1 = key2:key3
     are added to the dictionary in the form:
     in the form properties_dict[key1]=(True,['key2','key3'])

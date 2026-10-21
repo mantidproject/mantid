@@ -49,7 +49,7 @@ std::map<std::string, std::string> RemoveSpectra::validateInputs() {
 
   const std::vector<size_t> indexList = getProperty("WorkspaceIndices");
   for (const auto &index : indexList) {
-    // index >= 0 is assumed as it should be a const long unsinged int
+    // index >= 0 is assumed as it should be a const long unsigned int
     if (index >= inputWS->getNumberHistograms()) {
       errors.insert(std::make_pair("WorkspaceIndices", "Passed Workspace Index: " + std::to_string(index) +
                                                            " is not valid for passed InputWorkspace"));

@@ -54,7 +54,7 @@ private:
 private:
   /// Store a map of thread indices to messages
   std::map<Poco::Thread::TID, std::string> m_messages;
-  /// Store a map of thread indices to accummulators of messages
+  /// Store a map of thread indices to accumulators of messages
   std::map<Poco::Thread::TID, std::string> m_accumulator;
   /// mutex protecting logstream
   std::mutex m_mutex;
@@ -140,7 +140,7 @@ public:
   ThreadSafeLogStream &debug(const std::string &message);
   /// Sets the priority for log messages.
   ThreadSafeLogStream &priority(Poco::Message::Priority priority);
-  /// accumulates the message to the accummulator buffer
+  /// accumulates the message to the accumulator buffer
   ThreadSafeLogStream &accumulate(const std::string &message);
   /// Returns and flushes the accumulated messages
   std::string flush();

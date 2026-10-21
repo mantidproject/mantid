@@ -198,7 +198,7 @@ public:
     // create function
     IPeakFunction_sptr ap7 = getInitializedAPVII(min_ph, pc, width, ml, mr);
 
-    // evalulate at N points
+    // evaluate at N points
     std::vector<double> xValues{-1};
     for (double x : xValues) {
       // calculate by Jacobian (analytically)
@@ -209,7 +209,7 @@ public:
       std::vector<double> vec_jocob_deriv;
       double param_value = min_ph;
       while (param_value < max_ph - ph_resolution) {
-        // update parameter and calcualte Jocobian
+        // update parameter and calculate Jocobian
         ap7->setParameter(0, param_value);
         ap7->functionDeriv(domain, jacobian);
         // get value and add to the vector
@@ -246,7 +246,7 @@ public:
     // create function
     IPeakFunction_sptr ap7 = getInitializedAPVII(ph, min_pc, width, ml, mr);
 
-    // evalulate at N points
+    // evaluate at N points
     std::vector<double> xValues{-1};
     for (double x : xValues) {
       // calculate by Jacobian (analytically)
@@ -257,7 +257,7 @@ public:
       std::vector<double> vec_jocob_deriv;
       double param_value = min_pc;
       while (param_value < max_pc - pc_resolution) {
-        // update parameter and calcualte Jocobian
+        // update parameter and calculate Jocobian
         ap7->setParameter(1, param_value);
         ap7->functionDeriv(domain, jacobian);
         // get value and add to the vector
@@ -294,7 +294,7 @@ public:
     // create function
     IPeakFunction_sptr ap7 = getInitializedAPVII(ph, pc, min_width, ml, mr);
 
-    // evalulate at N points
+    // evaluate at N points
     std::vector<double> xValues{0};
     for (double x : xValues) {
       // calculate by Jacobian (analytically)
@@ -305,7 +305,7 @@ public:
       std::vector<double> vec_jocob_deriv;
       double param_value = min_width;
       while (param_value < max_width - width_resolution) {
-        // update parameter and calcualte Jocobian
+        // update parameter and calculate Jocobian
         ap7->setParameter(2, param_value);
         ap7->functionDeriv(domain, jacobian);
         // get value and add to the vector
@@ -343,7 +343,7 @@ public:
     // create function
     IPeakFunction_sptr ap7 = getInitializedAPVII(ph, pc, width, min_ml, mr);
 
-    // evalulate at N points
+    // evaluate at N points
     std::vector<double> xValues{1.2};
     for (double x : xValues) {
       // calculate by Jacobian (analytically)
@@ -354,7 +354,7 @@ public:
       std::vector<double> vec_jocob_deriv;
       double param_value = min_ml;
       while (param_value < max_ml - ml_resolution) {
-        // update parameter and calcualte Jocobian
+        // update parameter and calculate Jocobian
         ap7->setParameter(3, param_value);
         ap7->functionDeriv(domain, jacobian);
         // get value and add to the vector
@@ -391,7 +391,7 @@ public:
     // create function
     IPeakFunction_sptr ap7 = getInitializedAPVII(ph, pc, width, ml, min_mr);
 
-    // evalulate at N points
+    // evaluate at N points
     std::vector<double> xValues{-1};
     for (double x : xValues) {
       // calculate by Jacobian (analytically)
@@ -402,7 +402,7 @@ public:
       std::vector<double> vec_jocob_deriv;
       double param_value = min_mr;
       while (param_value < max_mr - mr_resolution) {
-        // update parameter and calcualte Jocobian
+        // update parameter and calculate Jocobian
         ap7->setParameter(4, param_value);
         ap7->functionDeriv(domain, jacobian);
         // get value and add to the vector
@@ -567,14 +567,14 @@ private:
     return result.result;
   }
 
-  /** evalulate the derivative numerically for an arbitrary parameter at x
+  /** evaluate the derivative numerically for an arbitrary parameter at x
    * calculate \partial pV() / \partial p_i  where i = 0, 1, 2, 3, 4.
    * @param ap7 : IPeakFunction pointer to AsymmetricPearsonVII
-   * @param param_index: index of the parameter (peak hight: 0; peak centre: 1;
+   * @param param_index: index of the parameter (peak height: 0; peak centre: 1;
    * fwhm: 2; left shape parameter: 3; right shape parameter: 4)
-   * @param min_value: minimum value of the parameter to evalulate the
+   * @param min_value: minimum value of the parameter to evaluate the
    * derivative
-   * @param max_value: maximum value of the parameter to evalulate the
+   * @param max_value: maximum value of the parameter to evaluate the
    * derivative
    * @param resolution: resolution (min step)
    * @param x:x value
@@ -604,7 +604,7 @@ private:
       param_value += resolution;
     }
 
-    // evalulate derivative to parameter (single way dx = (f(x+h) - f(x))/h
+    // evaluate derivative to parameter (single way dx = (f(x+h) - f(x))/h
     deriv_vec.resize(param_vec.size() - 1);
     for (size_t i = 0; i < param_vec.size() - 1; ++i) {
       deriv_vec[i] = (ap7_vec[i + 1] - ap7_vec[i]) / resolution;

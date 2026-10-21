@@ -254,7 +254,7 @@ void DgsReduction::init() {
   this->declareProperty("BackgroundTofEnd", EMPTY_DBL(), mustBePositive, "End TOF for the background check.");
   this->setPropertySettings("BackgroundTofEnd",
                             std::make_unique<VisibleWhenProperty>("BackgroundCheck", IS_EQUAL_TO, "1"));
-  this->declareProperty("RejectZeroBackground", false, "If true, check the background region for anomolies.");
+  this->declareProperty("RejectZeroBackground", false, "If true, check the background region for anomalies.");
   this->declareProperty("PsdBleed", false, "If true, perform a PSD bleed test.");
   this->declareProperty("MaxFramerate", EMPTY_DBL(), "The maximum framerate to check.");
   this->setPropertySettings("MaxFramerate", std::make_unique<VisibleWhenProperty>("PsdBleed", IS_EQUAL_TO, "1"));

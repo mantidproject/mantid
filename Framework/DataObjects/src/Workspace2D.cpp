@@ -169,7 +169,7 @@ std::size_t Workspace2D::getMaxNumberBins() const {
 /**
  * Copy the data (Y's) from an image to this workspace.
  * @param image :: An image to copy the data from.
- * @param start :: Startinf workspace indx to copy data to.
+ * @param start :: Startinf workspace index to copy data to.
  * @param parallelExecution :: Should inner loop run as parallel operation
  */
 void Workspace2D::setImageY(const MantidImage &image, size_t start, bool parallelExecution) {
@@ -180,7 +180,7 @@ void Workspace2D::setImageY(const MantidImage &image, size_t start, bool paralle
 /**
  * Copy the data from an image to this workspace's errors.
  * @param image :: An image to copy the data from.
- * @param start :: Startinf workspace indx to copy data to.
+ * @param start :: Startinf workspace index to copy data to.
  * @param parallelExecution :: Should inner loop run as parallel operation
  */
 void Workspace2D::setImageE(const MantidImage &image, size_t start, bool parallelExecution) {
@@ -194,7 +194,7 @@ void Workspace2D::setImageE(const MantidImage &image, size_t start, bool paralle
  *
  * @param imageY :: An image to copy the data from.
  * @param imageE :: An image to copy the errors from.
- * @param start :: Startinf workspace indx to copy data to.
+ * @param start :: Startinf workspace index to copy data to.
  *
  * @param loadAsRectImg :: load using one histogram per row and one
  * bin per column, instead of the default one histogram per pixel

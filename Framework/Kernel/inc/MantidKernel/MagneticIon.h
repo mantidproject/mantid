@@ -13,7 +13,7 @@
 namespace Mantid {
 namespace PhysicalConstants {
 /**
- * Struture to hold information about magnetic form factor for 3d, 4d,
+ * Structure to hold information about magnetic form factor for 3d, 4d,
  * rare earth, and actinide atoms and ions. Data is taken from International
  * Tables for Crystalography, volume C, section 4.4.5
  * http://it.iucr.org/Cb/ch4o4v0001/sec4o4o5/
@@ -41,7 +41,7 @@ struct MANTID_KERNEL_DLL MagneticIon {
   /// The atomic symbol. In other words the one or two character abbreviation.
   std::string symbol;
 
-  /// The charge of the ion, or 0 for neutral atom. Note thet all charges are
+  /// The charge of the ion, or 0 for neutral atom. Note that all charges are
   /// not negative
   uint16_t charge;
 

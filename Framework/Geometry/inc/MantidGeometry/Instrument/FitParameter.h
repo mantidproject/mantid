@@ -28,9 +28,9 @@ public:
   /// Constructor
   FitParameter() : m_value(0.0), m_tie(""), m_function("") {};
 
-  /// get paramter value
+  /// get parameter value
   double getValue(const double &at) const;
-  /// get paramter value
+  /// get parameter value
   double getValue() const;
   /// set parameter value
   void setValue(double value) { m_value = value; }

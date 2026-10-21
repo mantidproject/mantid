@@ -69,13 +69,13 @@ class MatchSpectra(PythonAlgorithm):
         elif reference[0] < testing[0]:
             refLower = np.searchsorted(reference, testing[0])
             if refLower == reference.size:
-                msg = "Falied to find {} in reference spectrum x-axis (spectrum={})".format(testing[0], spectrumNum)
+                msg = "Failed to find {} in reference spectrum x-axis (spectrum={})".format(testing[0], spectrumNum)
                 self.log().notice(msg)
                 return BAD_RESULT
         else:
             tstLower = np.searchsorted(testing, reference[0])
             if tstLower == testing.size:
-                msg = "Falied to find {} in the x-axis of the spectrum being matched (spectrum={})".format(reference[0], spectrumNum)
+                msg = "Failed to find {} in the x-axis of the spectrum being matched (spectrum={})".format(reference[0], spectrumNum)
                 self.log().notice(msg)
                 return BAD_RESULT
 
@@ -90,13 +90,13 @@ class MatchSpectra(PythonAlgorithm):
         elif reference[refUpper] < testing[tstUpper]:
             tstUpper = np.searchsorted(testing, reference[refUpper])
             if reference[refUpper] != testing[tstUpper]:
-                msg = "Falied to find {} in the x-axis of the spectrum being matched (spectrum={})".format(reference[-1], spectrumNum)
+                msg = "Failed to find {} in the x-axis of the spectrum being matched (spectrum={})".format(reference[-1], spectrumNum)
                 self.log().notice(msg)
                 return BAD_RESULT
         else:
             refUpper = np.searchsorted(reference, testing[tstUpper])
             if reference[refUpper] != testing[tstUpper]:
-                msg = "Falied to find {} in reference spectrum x-axis (spectrum={})".format(testing[-1], spectrumNum)
+                msg = "Failed to find {} in reference spectrum x-axis (spectrum={})".format(testing[-1], spectrumNum)
                 self.log().notice(msg)
                 return BAD_RESULT
 

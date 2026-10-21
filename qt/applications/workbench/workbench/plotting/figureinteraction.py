@@ -441,7 +441,7 @@ class FigureInteraction(object):
         :param event: The MouseEvent that generated this call
         """
         if not event.inaxes:
-            # the current context menus are ony relevant for axes
+            # the current context menus are only relevant for axes
             return
 
         fig_type = figure_type(self.canvas.figure)

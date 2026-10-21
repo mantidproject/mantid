@@ -51,7 +51,7 @@ public:
     m_prog->report(0, "Client Connected");
     sendInitialSetup();
   }
-  /// Sends an OK message when there is nothing to send or an error occured
+  /// Sends an OK message when there is nothing to send or an error occurred
   void sendOK() {
     std::string comm = "OK";
     socket().sendBytes(comm.c_str(), static_cast<int>(comm.size()));

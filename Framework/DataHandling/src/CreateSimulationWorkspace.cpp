@@ -308,7 +308,7 @@ void CreateSimulationWorkspace::createGroupingsFromTables(const int *specTable, 
 }
 
 /**
- * @returns The bin bounadries for the new workspace
+ * @returns The bin boundaries for the new workspace
  */
 BinEdges CreateSimulationWorkspace::createBinBoundaries() const {
   const std::vector<double> rbparams = getProperty("BinParams");

@@ -130,7 +130,7 @@ void ConvertToMDMinMaxGlobal::exec() {
     auto conv = createChildAlgorithm("ConvertUnits", 0.0, 0.9);
     conv->setProperty<MatrixWorkspace_sptr>("InputWorkspace", ws);
     conv->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", wstemp);
-    // Calculate maxumum momentum transfer Q
+    // Calculate maximum momentum transfer Q
     if (GeometryMode == "Elastic") {
       conv->setProperty("Target", "Momentum");
       conv->setProperty("Emode", "Elastic");

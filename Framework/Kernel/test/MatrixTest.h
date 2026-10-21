@@ -263,17 +263,17 @@ public:
   void testFromVectorThrows() {
     std::vector<double> data(5, 0);
 
-    TSM_ASSERT_THROWS("building matrix by this construcor and data with wrong "
+    TSM_ASSERT_THROWS("building matrix by this constructor and data with wrong "
                       "number of elements should throw",
                       (Matrix<double>(data)), const std::invalid_argument &);
   }
 
   void testFromVectorAndDimensions() {
     std::vector<int> data{1, 2, 3, 4, 5, 6};
-    TSM_ASSERT_THROWS("building matrix with worng dimension should fail", (Matrix<int>(data, 4, 5)),
+    TSM_ASSERT_THROWS("building matrix with wrong dimension should fail", (Matrix<int>(data, 4, 5)),
                       const std::invalid_argument &);
     Matrix<int> myMat;
-    TSM_ASSERT_THROWS_NOTHING("building matrix by this construcor and data "
+    TSM_ASSERT_THROWS_NOTHING("building matrix by this constructor and data "
                               "with correct number of elements should not "
                               "throw",
                               myMat = Matrix<int>(data, 2, 3));

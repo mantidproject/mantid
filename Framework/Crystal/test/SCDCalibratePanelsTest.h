@@ -61,7 +61,7 @@ public:
 
     // verify the results
     ITableWorkspace_sptr results = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("params_bank47");
-    // TODO: Some of the fit parameters that are below are extermly sensitive to
+    // TODO: Some of the fit parameters that are below are extremely sensitive to
     // rounding errors in the algorithm LoadIsawPeaks and floating point math in
     // the instrument code. Ideally the assertions should be on something else.
     TS_ASSERT_DELTA(-0.0031, results->cell<double>(0, 1), 1e-3);

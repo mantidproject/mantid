@@ -113,7 +113,7 @@ RepoModel::RepoModel(QObject *parent) : QAbstractItemModel(parent) {
   setupModelData(rootItem);
 }
 
-/// desctructor of repomodel.
+/// destructor of repomodel.
 RepoModel::~RepoModel() { delete rootItem; }
 /**Provide access to the data through the defined QAbstractItemModel definition.
    The index parameter defines how to access the corresponded data while the
@@ -401,7 +401,7 @@ QVariant RepoModel::headerData(int section, Qt::Orientation orientation, int rol
 
 /** An hierarchical structure is able to define any point giving the parent, the
  *row and the
- *  column. This method is ment to be used to the View to iterate through the
+ *  column. This method is meant to be used to the View to iterate through the
  *model.
  *
  * @param row: the index of the children  (file/folder) under the given
@@ -419,7 +419,7 @@ QModelIndex RepoModel::index(int row, int column, const QModelIndex &parent) con
   // for parent that refers to file and not to folder.
   if (!hasIndex(row, column, parent))
     return QModelIndex();
-  // retrieve the pointer ot the RepoItem from the parent
+  // retrieve the pointer to the RepoItem from the parent
   const RepoItem *parentItem;
   if (!parent.isValid())
     parentItem = rootItem;
@@ -438,7 +438,7 @@ QModelIndex RepoModel::index(int row, int column, const QModelIndex &parent) con
 /** Provide the parent of a given entry, through the QModelIndex abstraction.
  *
  * @param index: The QModelIndex that identifies one entry.
- * @return A QModelIndex that indentifies the parent of the given index.
+ * @return A QModelIndex that identifies the parent of the given index.
  */
 QModelIndex RepoModel::parent(const QModelIndex &index) const {
   if (!index.isValid())

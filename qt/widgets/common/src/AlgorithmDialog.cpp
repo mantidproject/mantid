@@ -420,7 +420,7 @@ void AlgorithmDialog::addOptionalMessage(QVBoxLayout *mainLay) {
 /**
  * Was this dialog raised from a script? This is important when deciding what to
  * do with properties that have old input
- * @returns A boolean inidcating whether we are being called from a script
+ * @returns A boolean indicating whether we are being called from a script
  */
 bool AlgorithmDialog::isForScript() const { return m_forScript; }
 
@@ -480,7 +480,7 @@ void AlgorithmDialog::untie(const QString &property) {
  * @param widget :: The widget that will collect the input
  * @param property :: The name of the property to tie the given widget to
  * @param parent_layout :: An optional pointer to a QLayout class that is
- * reponsible for managing the passed widget.
+ * responsible for managing the passed widget.
  * If given, a validator label will be added for the given input widget
  * @param readHistory :: If true then a history value will be retrieved
  *
@@ -819,9 +819,9 @@ void AlgorithmDialog::addEnabledAndDisableLists(const QStringList &enabled, cons
 
 //------------------------------------------------------------------------------------------------
 /**
- * Returns true if the parameter name has been explicity requested to be kept
+ * Returns true if the parameter name has been explicitly requested to be kept
  * enabled. If the parameter
- * has been explicity requested to be disabled then return false as well as if
+ * has been explicitly requested to be disabled then return false as well as if
  * neither have been specified
  */
 bool AlgorithmDialog::requestedToKeepEnabled(const QString &propName) const {

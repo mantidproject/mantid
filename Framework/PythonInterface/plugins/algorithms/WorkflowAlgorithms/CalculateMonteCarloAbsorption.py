@@ -922,7 +922,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
     def _tranpose_ws(self, workspace):
         """
-        Tranposes the specified workspace.
+        Transposes the specified workspace.
 
         :param workspace:   The workspace to transpose.
         :return:            The transpose of the specified workspace.

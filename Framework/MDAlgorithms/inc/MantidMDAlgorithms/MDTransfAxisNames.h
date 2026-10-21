@@ -20,12 +20,12 @@ namespace MDAlgorithms {
 
 /** describes default dimensions ID currently used by multidimensional workspace
  *
- *  DimensionID is the short name which used to retrieve this dimesnion from MD
+ *  DimensionID is the short name which used to retrieve this dimension from MD
  *workspace.
  *  The names themself are defined in constructor  */
 namespace CnvrtToMD {
 enum defaultDimID {
-  ModQ_ID,   //< the defauld |Q| id for mod Q or powder mode
+  ModQ_ID,   //< the default |Q| id for mod Q or powder mode
   Q1_ID,     //< 1 of 3 dimID in Q3D mode
   Q2_ID,     //< 2 of 3 dimID in Q3D mode
   Q3_ID,     //< 3 of 3 dimID in Q3D mode

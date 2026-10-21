@@ -1023,7 +1023,7 @@ std::string InstrumentWidgetPickTab::saveToProject() const {
 //=====================================================================================//
 
 /**
- * Create and setup iteself.
+ * Create and setup itself.
  * @param tab :: QObject parent - the tab.
  * @param instrWidget :: A pointer to an InstrumentWidget instance.
  * @param infoDisplay :: Widget on which to display the information.
@@ -1034,7 +1034,7 @@ ComponentInfoController::ComponentInfoController(InstrumentWidgetPickTab *tab, c
       m_instrWidgetBlocked(false), m_currentPickID(std::numeric_limits<size_t>::max()) {}
 
 /**
- * Display info on a component refered to by a pick ID.
+ * Display info on a component referred to by a pick ID.
  * @param pickID :: A pick ID of a component.
  */
 void ComponentInfoController::displayInfo(size_t pickID) {
@@ -1343,7 +1343,7 @@ void DetectorPlotController::setPlotData(size_t pickID) {
 }
 
 /**
- * Set curev data from multiple detectors: sum their spectra.
+ * Set curve data from multiple detectors: sum their spectra.
  * @param detIndices :: A list of detector Indices.
  */
 void DetectorPlotController::setPlotData(const std::vector<size_t> &detIndices) {
@@ -1524,7 +1524,7 @@ void DetectorPlotController::plotTubeIntegrals(size_t detindex) {
   auto xAxisCaption = getTubeXLabel();
   auto parent = componentInfo.parent(detindex);
   // curve label: "tube_name (detid) Integrals"
-  // detid is included to distiguish tubes with the same name
+  // detid is included to distinguish tubes with the same name
   QString label = QString::fromStdString(componentInfo.name(parent)) + " (" +
                   QString::number(actor.getDetID(detindex)) + ") Integrals/" + getTubeXUnitsName();
   m_plot->setData(std::move(x), std::move(y), std::move(xAxisCaption), std::move(label));
@@ -1664,7 +1664,7 @@ void DetectorPlotController::prepareDataForIntegralsPlot(size_t detindex, std::v
   }
   // collect and sort xy pairs in xymap
   std::map<double, double> xymap, errmap;
-  // get the first detector in the tube for lenth calculation
+  // get the first detector in the tube for length calculation
   if (!componentInfo.isDetector(ass[0])) {
     // it's not an assembly of detectors,
     // could be a mixture of monitors and other components

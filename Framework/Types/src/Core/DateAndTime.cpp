@@ -209,7 +209,7 @@ void DateAndTime::set_from_ptime(const boost::posix_time::ptime &_ptime) {
     if (_nanoseconds < 0) {
       if (_ptime.date().year() >= 1990) {
         // nanoseconds is negative despite the year being higher than 1990
-        // ... means overflow occured
+        // ... means overflow occurred
         this->setToMaximum();
       }
     } else if (_nanoseconds > 0) {

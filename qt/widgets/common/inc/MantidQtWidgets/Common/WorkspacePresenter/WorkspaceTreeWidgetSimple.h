@@ -34,7 +34,7 @@ class MantidTreeWidget;
 /**
 \class  WorkspaceTreeWidgetSimple
 \brief  WorkspaceTreeWidget implementation for the Workbench - required for some
-function overides
+function overrides
 */
 class EXPORT_OPT_MANTIDQT_COMMON WorkspaceTreeWidgetSimple : public WorkspaceTreeWidget {
   Q_OBJECT

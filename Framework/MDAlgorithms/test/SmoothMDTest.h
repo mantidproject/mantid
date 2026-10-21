@@ -355,7 +355,7 @@ public:
                       out->getSignalAt(1));
 
     TSM_ASSERT_EQUALS("Second to last index should have a smoothed using 1 "
-                      "neighbour only neighour at 9 should be ignored",
+                      "neighbour only neighbour at 9 should be ignored",
                       (toSmooth->getSignalAt(8) + toSmooth->getSignalAt(7)) / 2, out->getSignalAt(8));
 
     TSM_ASSERT("Last index should have a smoothed Value of NaN", std::isnan(out->getSignalAt(9)));

@@ -89,7 +89,7 @@ T &
     __attribute__((noinline))
 #endif
     SingletonHolder<T>::Instance() {
-  // Initialiazing a local static is thread-safe in C++11
+  // Initializing a local static is thread-safe in C++11
   // The inline lambda call is used to create the singleton once
   // and register an atexit function to delete it
   static T *instance = []() {

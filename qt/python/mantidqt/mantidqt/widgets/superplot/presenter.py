@@ -211,7 +211,7 @@ class SuperplotPresenter:
     def on_visibility_changed(self, visible):
         """
         Triggered when the visibility of the superplot widget changed. This
-        funcion rescale the figure to be sure that the axis and labels are not
+        function rescale the figure to be sure that the axis and labels are not
         hidden behind the dockwidgets.
 
         Args:
@@ -407,7 +407,7 @@ class SuperplotPresenter:
         try:
             self._canvas.draw()
         except:
-            # exception are thown by the mantid plot layer
+            # exception are thrown by the mantid plot layer
             pass
 
     def _remove_unneeded_curves(self, replot: bool):
@@ -494,7 +494,7 @@ class SuperplotPresenter:
 
     def _fill_plot_kwargs(self, ws_name: str, spectrum: int, normalise: bool, mode: str, color: str) -> dict:
         """
-        Fill the keywork arguments dictionnary needed by the mantid plot
+        Fill the keyword arguments dictionary needed by the mantid plot
         function.
 
         Args:
@@ -506,7 +506,7 @@ class SuperplotPresenter:
             color (str): color of the curve
 
         Returns:
-            dict(str: str): plot keywork arguments
+            dict(str: str): plot keyword arguments
         """
         kwargs = dict()
         kwargs["wkspIndex"] = spectrum

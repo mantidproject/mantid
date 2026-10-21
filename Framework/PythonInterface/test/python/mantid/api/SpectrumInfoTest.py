@@ -27,13 +27,13 @@ class SpectrumInfoTest(unittest.TestCase):
     """
 
     def test_len(self):
-        """Check that the number of spectra we initailly created
+        """Check that the number of spectra we initially created
         is the same as in memory."""
         info = self._ws.spectrumInfo()
         self.assertEqual(len(info), 3)
 
     def test_size(self):
-        """Check that the number of spectra we initailly created
+        """Check that the number of spectra we initially created
         is the same as in memory."""
         info = self._ws.spectrumInfo()
         self.assertEqual(info.size(), 3)

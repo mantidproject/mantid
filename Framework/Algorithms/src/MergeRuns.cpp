@@ -514,7 +514,7 @@ std::vector<double> MergeRuns::calculateRebinParams(std::span<double const> cons
 }
 
 //------------------------------------------------------------------------------------------------
-/** Calculates the rebin paramters in the case where the two input workspaces do
+/** Calculates the rebin parameters in the case where the two input workspaces do
  * not overlap at all.
  *  @param X1 ::     The bin boundaries from the first workspace
  *  @param X2 ::     The bin boundaries from the second workspace
@@ -649,7 +649,7 @@ API::MatrixWorkspace_sptr MergeRuns::rebinInput(const API::MatrixWorkspace_sptr 
   return rebin->getProperty("OutputWorkspace");
 }
 
-/** Overriden fillHistory method to correctly store history from merged
+/** Overridden fillHistory method to correctly store history from merged
  * workspaces.
  */
 void MergeRuns::fillHistory() {

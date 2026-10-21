@@ -123,7 +123,7 @@ public:
   /// Query if a given type exists somewhere in the file
   bool classTypeExists(std::string const &classType) const;
 
-  /// Query if a given type exists as a decendant of the supplied parentPath. It is expected to be used only to check
+  /// Query if a given type exists as a descendant of the supplied parentPath. It is expected to be used only to check
   /// for direct children.
   bool classTypeExistsChild(const std::string &parentPath, const std::string &classType) const;
 

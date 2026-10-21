@@ -309,7 +309,7 @@
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;checks selected files.&lt;/p&gt;&lt;p&gt;You can use multiselection with Shift and Strg.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
-           <string>Select Highligted</string>
+           <string>Select Highlighted</string>
           </property>
          </widget>
         </item>

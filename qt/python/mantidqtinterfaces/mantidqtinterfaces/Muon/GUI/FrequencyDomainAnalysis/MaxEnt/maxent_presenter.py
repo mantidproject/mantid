@@ -156,7 +156,7 @@ class MaxEntPresenter(object):
     def handleFinished(self):
         self.activate()
         self.calculation_finished_notifier.notify_subscribers(self._maxent_output_workspace_name)
-        # if phase table is outputed
+        # if phase table is outputted
         if self.view.output_reconstructed_spectra and SPECTRA in self._optional_output_names.keys():
             ws = MuonWorkspaceWrapper(self._optional_output_names[SPECTRA]).workspace
             if self.use_groups:

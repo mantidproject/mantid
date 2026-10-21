@@ -71,7 +71,7 @@ class NormaliseByDetectorTest : public CxxTest::TestSuite {
 private:
   /** Helper function, creates a histogram workspace with an instrument with 2
      detectors, and 2 spectra.
-      Y-values are flat accross the x bins. Which makes it easy to calculate the
+      Y-values are flat across the x bins. Which makes it easy to calculate the
      expected value for any fit function applied to the X-data.
   */
   MatrixWorkspace_sptr create_workspace_with_no_fitting_functions() {
@@ -94,7 +94,7 @@ private:
 
   /**
    Helper function, applies fit functions from a fabricated, fake instrument
-   parameter file ontop of an existing instrument definition.
+   parameter file on top of an existing instrument definition.
    The fit function is set at the instrument level.
   */
   MatrixWorkspace_sptr create_workspace_with_fitting_functions(const std::string &result_unit = "Wavelength") {
@@ -129,7 +129,7 @@ private:
 
   /**
  Helper function, applies fit functions from a fabricated, fake instrument
- parameter file ontop of an existing instrument definition.
+ parameter file on top of an existing instrument definition.
  The fit function is set at the instrument level. HOWEVER, this instrument
  definition is corrupted in that at the instrument level, ONLY ONE OF THE TWO
  PARAMETERS FOR LINEARFIT (A0) IS PROVIDED.
@@ -162,7 +162,7 @@ private:
 
   /**
   Helper function, applies fit functions from a fabricated, fake instrument
-  parameter file ontop of an existing instrument definition.
+  parameter file on top of an existing instrument definition.
   The fit function is different for every detector.
  */
   MatrixWorkspace_sptr create_workspace_with_detector_level_only_fit_functions() {
@@ -208,7 +208,7 @@ private:
 
   /**
   Helper function, applies fit functions from a fabricated, fake instrument
-  parameter file ontop of an existing instrument definition.
+  parameter file on top of an existing instrument definition.
   The fit function is different for every detector. HOWEVER, ONLY ONE OF THE TWO
   PARAMETERS FOR LINEARFIT (A1) IS PROVIDED.
  */
@@ -539,7 +539,7 @@ public:
       unitsalg->setPropertyValue("Target", "Wavelength");
       unitsalg->execute();
 
-      // Convert the specturm axis ot signed_theta
+      // Convert the spectrum axis to signed_theta
       auto specaxisalg = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
       specaxisalg->initialize();
       specaxisalg->setPropertyValue("InputWorkspace", "testws");

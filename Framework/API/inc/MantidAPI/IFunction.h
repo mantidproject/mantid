@@ -60,7 +60,7 @@ template <class... Ts> AttributeLambdaVisitor(Ts...) -> AttributeLambdaVisitor<T
 
 /** This is an interface to a fitting function - a semi-abstarct class.
     Functions derived from IFunction can be used with the Fit algorithm.
-    IFunction defines the structure of a fitting funtion.
+    IFunction defines the structure of a fitting function.
 
     A function has a number of named parameters (not arguments), type double, on
    which it depends.
@@ -94,11 +94,11 @@ template <class... Ts> AttributeLambdaVisitor(Ts...) -> AttributeLambdaVisitor<T
    directly.
     Instead it uses other - active - parameters. In simple case the active
    parameters are the
-    same as the declared ones. But they can be overidden if the declared
+    same as the declared ones. But they can be overridden if the declared
    parameters make fit unstable.
     There are as many active parameters as there are the declared ones. A
    one-to-one transformation
-    must exist between the active and the declared parameters. Overide
+    must exist between the active and the declared parameters. Override
    activeParameter and
     setActiveParameter methods to implement this transformation. An example is
    Gaussian where
@@ -174,7 +174,7 @@ public:
   };
 
   /**
-   * Simple struct to constain function to evaluate attribute validators that is required in both attributes and
+   * Simple struct to contain function to evaluate attribute validators that is required in both attributes and
    * visitors.
    */
   struct ValidatorEvaluator {
@@ -194,7 +194,7 @@ public:
   };
 
   /**
-   * Atribute visitor class. It provides a separate access method
+   * Attribute visitor class. It provides a separate access method
    * for each attribute type. When applied to a particular attribute
    * the appropriate method will be used. The child classes must
    * implement the virtual AttributeVisitor::apply methods. See
@@ -257,15 +257,15 @@ public:
     T operator()(const std::vector<double> &v) const { return apply(v); }
 
   protected:
-    /// Implement this mathod to access attribute as string
+    /// Implement this method to access attribute as string
     virtual T apply(const std::string &str) const = 0;
-    /// Implement this mathod to access attribute as double
+    /// Implement this method to access attribute as double
     virtual T apply(const double &d) const = 0;
-    /// Implement this mathod to access attribute as int
+    /// Implement this method to access attribute as int
     virtual T apply(const int &i) const = 0;
-    /// Implement this mathod to access attribute as bool
+    /// Implement this method to access attribute as bool
     virtual T apply(const bool &i) const = 0;
-    /// Implement this mathod to access attribute as vector
+    /// Implement this method to access attribute as vector
     virtual T apply(const std::vector<double> &) const = 0;
 
     /// Evaluates the validator associated with attribute this visitor is to visit.
@@ -281,7 +281,7 @@ public:
 
   /// Attribute is a non-fitting parameter.
   /// It can be one of the types: std::string, int, or double
-  /// Examples: file name, polinomial order
+  /// Examples: file name, polynomial order
   class MANTID_API_DLL Attribute {
   public:
     /// Create empty string attribute
@@ -326,10 +326,10 @@ public:
     /// Returns string value if attribute is a string, throws exception
     /// otherwise
     std::string asString() const;
-    /// Returns a string value that is guarenteed to be quoted for use in places
+    /// Returns a string value that is guaranteed to be quoted for use in places
     /// where the string is used as the displayed value.
     std::string asQuotedString() const;
-    /// Returns a string value that is guarenteed to be unquoted.
+    /// Returns a string value that is guaranteed to be unquoted.
     std::string asUnquotedString() const;
     /// Returns int value if attribute is a int, throws exception otherwise
     int asInt() const;
@@ -372,8 +372,8 @@ public:
   };
 
   /**
-   * Atribute validator visitor class. It is used to access
-   * m_data of a specificed attribute in order to
+   * Attribute validator visitor class. It is used to access
+   * m_data of a specified attribute in order to
    * evaluate the current value of the attribute against
    * the associated validator, for all allowed types.
    */
@@ -443,14 +443,14 @@ public:
   virtual const std::string category() const { return "General"; }
   /// Function to return all of the categories that contain this algorithm
   virtual const std::vector<std::string> categories() const;
-  /// Function to return the sperator token for the category string. A default
+  /// Function to return the separator token for the category string. A default
   /// implementation ';' is provided
   virtual const std::string categorySeparator() const { return ";"; }
 
   /// Evaluates the function for all arguments in the domain.
   /// @param domain :: Provides arguments for the function.
   /// @param values :: A buffer to store the function values. It must be large
-  /// enogh to store domain.size() values.
+  /// enough to store domain.size() values.
   virtual void function(const FunctionDomain &domain, FunctionValues &values) const = 0;
   /// Derivatives of function with respect to active parameters.
   virtual void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian);
@@ -518,7 +518,7 @@ public:
   /// Fix all active parameters
   void fixAllActive(bool isDefault = false);
 
-  /// Return parameter index from a parameter reference. Usefull for constraints
+  /// Return parameter index from a parameter reference. Useful for constraints
   /// and ties in composite functions
   virtual size_t getParameterIndex(const ParameterReference &ref) const = 0;
   /// Return a vector with all parameter names

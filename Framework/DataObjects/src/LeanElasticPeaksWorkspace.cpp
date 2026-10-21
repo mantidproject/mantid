@@ -676,13 +676,13 @@ Kernel::SpecialCoordinateSystem LeanElasticPeaksWorkspace::getSpecialCoordinateS
 struct NullDeleter {
   template <typename T> void operator()(T * /*unused*/) {}
 };
-/**Get access to shared pointer containing workspace porperties */
+/**Get access to shared pointer containing workspace properties */
 API::LogManager_sptr LeanElasticPeaksWorkspace::logs() {
   return API::LogManager_sptr(&(this->mutableRun()), NullDeleter());
 }
 
-/** Get constant access to shared pointer containing workspace porperties;
- * Copies logs into new LogManager variable Meaningfull only for some
+/** Get constant access to shared pointer containing workspace properties;
+ * Copies logs into new LogManager variable Meaningful only for some
  * multithereaded methods when a thread wants to have its own copy of logs */
 API::LogManager_const_sptr LeanElasticPeaksWorkspace::getLogs() const {
   return API::LogManager_const_sptr(new API::LogManager(this->run()));

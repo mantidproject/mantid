@@ -168,7 +168,7 @@ class DrillSettingsDialog(QDialog):
 
     def __init__(self, presenter, parent=None):
         """
-        Initialize ths dialog. Connect the static buttons.
+        Initialize this dialog. Connect the static buttons.
         """
         super(DrillSettingsDialog, self).__init__(parent)
         self.here = os.path.dirname(os.path.realpath(__file__))
@@ -223,7 +223,7 @@ class DrillSettingsDialog(QDialog):
 
     def setSettings(self, settings):
         """
-        Fill the settings with values by providing a dictionnary.
+        Fill the settings with values by providing a dictionary.
 
         Args:
             settings (dict(str: any)): settings name and value. Value can be
@@ -236,7 +236,7 @@ class DrillSettingsDialog(QDialog):
 
     def getSettings(self):
         """
-        Get all the settings as a dictionnary.
+        Get all the settings as a dictionary.
 
         Returns:
             dict(str: any): setting name and value.
@@ -277,7 +277,7 @@ class DrillSettingsDialog(QDialog):
         This method is called when the validation has been done. It changes the
         stylesheet of the corresponding widget to inform the user on the
         parameter state (valid or not). It changes the widget tooltip to
-        display the error msg. It also toogles the state of the validation
+        display the error msg. It also toggles the state of the validation
         button depending on the presence or not of invalid values in the dialog.
 
         Args:

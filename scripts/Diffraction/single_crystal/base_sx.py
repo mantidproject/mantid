@@ -878,7 +878,7 @@ class BaseSX(ABC):
             gonio_axes[iaxis] = Rotation.from_euler(euler_axes, result.x[: len(euler_axes)], degrees=True).apply(gonio_axes[iaxis])
             if not fix_angles:
                 gonio_angles[:, iaxis] = result.x[len(euler_axes) :]
-            # get average U matrix accross all runs (using new goniometer)
+            # get average U matrix across all runs (using new goniometer)
             if apply:
                 for iws, peaks in enumerate(pk_ws_list):
                     gonio_rots = [
@@ -902,13 +902,13 @@ class BaseSX(ABC):
         # add up total angle difference in rotation to get from predicted to observed U for all runs
         angle_sum = 0
         for irun, urot in enumerate(umats_rot):
-            # caluclate predicted goniometer rotation
+            # calculate predicted goniometer rotation
             gonio_rots = [
                 Rotation.from_rotvec(axis * these_gonio_angles[irun, iax], degrees=True).as_matrix()
                 for iax, axis in enumerate(these_gonio_axes)
             ]
             urot_predict = reduce(lambda x, y: x @ y, gonio_rots) @ umat_ref
-            # add rotation angle between prediced and observed U
+            # add rotation angle between predicted and observed U
             angle_sum = angle_sum + Rotation.from_matrix(urot_predict @ urot.T).magnitude()
         return angle_sum
 

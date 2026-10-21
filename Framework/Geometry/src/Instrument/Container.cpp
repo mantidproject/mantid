@@ -29,7 +29,7 @@ constexpr const char *VAL_ATT = "val";
 //------------------------------------------------------------------------------
 /**
  * Update the values of the XML tree tags specified. It assumes that the
- * value is specifed using an attribute named 'val'
+ * value is specified using an attribute named 'val'
  * @param root A pointer to an element whose childnodes contain "val" attributes
  * to be updated
  * @param args A hash of tag names to values

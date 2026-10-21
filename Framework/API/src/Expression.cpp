@@ -83,13 +83,13 @@ Expression::Expression() {
   add_unary(unary);
 }
 
-/// contructor
+/// constructor
 Expression::Expression(const std::vector<std::string> &ops) {
   m_operators.reset(new Operators());
   add_operators(ops);
 }
 
-/// contructor
+/// constructor
 Expression::Expression(const std::vector<std::string> &binary, const std::unordered_set<std::string> &unary) {
   m_operators.reset(new Operators());
   add_operators(binary);

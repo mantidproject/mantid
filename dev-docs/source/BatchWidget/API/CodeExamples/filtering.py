@@ -54,5 +54,5 @@ def setup(self):
     self.table.appendChildRowOf(row([2]), [cell("A1")])  #   A1
 
     self.table.filterRowsBy(make_regex_filter(self.table, "A[0-9]+", col=0))
-    # Applying this filter excludes B0 since neither itself not it's decendant's contents
+    # Applying this filter excludes B0 since neither itself not it's descendant's contents
     # match the regex given.

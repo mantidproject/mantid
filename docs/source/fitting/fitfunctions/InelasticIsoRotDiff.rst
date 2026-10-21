@@ -53,7 +53,7 @@ with the inelastic component of a rotator. The resolution is modeled as
 a normal distribution. We insert a random noise in the rotator.
 Finally, we choose a linear background noise.
 The goal is to find out the radius of the rotator. the relaxation time,
-and the overal intensity of the signal with a fit to the following model:
+and the overall intensity of the signal with a fit to the following model:
 
 :math:`S(Q,E) = \cdot R(Q,E) \otimes InelasticIsoRotDiff(Q,E) + (a+bE)`
 

@@ -447,7 +447,7 @@ void ApplyMuonDetectorGroupPairing::setMuonProcessAlgorithmProperties(IAlgorithm
   alg.setProperty("OutputType", "PairAsymmetry");
 }
 
-// Set grouping properies of MuonProcess
+// Set grouping properties of MuonProcess
 void ApplyMuonDetectorGroupPairing::setMuonProcessAlgorithmGroupingProperties(
     IAlgorithm &alg, const Muon::AnalysisOptions &options) const {
 

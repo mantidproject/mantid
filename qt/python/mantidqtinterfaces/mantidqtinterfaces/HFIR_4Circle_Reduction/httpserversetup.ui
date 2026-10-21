@@ -105,7 +105,7 @@
       <item row="0" column="1">
        <widget class="QLineEdit" name="lineEdit_localSrcDir">
         <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cache on local disk.  The dowloaded data will be saved to here. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cache on local disk.  The downloaded data will be saved to here. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
       </item>

@@ -69,7 +69,7 @@ public:
   bool isConsistentWithDetectorMasks() const { return isConsistentWithDetectorMasks(detectorInfo()); }
 
 protected:
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   MaskWorkspace(const MaskWorkspace &) = default;
 
   /// Return human-readable string

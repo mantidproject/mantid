@@ -115,7 +115,7 @@ void TimeROI::addROI(const Types::Core::DateAndTime &startTime, const Types::Cor
         }
         output.push_back(interval);
       } else {
-        throw std::runtime_error("encountered supposedly imposible place in TimeROI::addROI");
+        throw std::runtime_error("encountered supposedly impossible place in TimeROI::addROI");
       }
     }
     if (!union_added)

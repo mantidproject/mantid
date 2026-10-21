@@ -182,7 +182,7 @@ void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr &eventWS, EventAc
   PARALLEL_CHECK_INTERRUPT_REGION
 
   if (oversizedChanelIndexCounterA > 0) {
-    g_log.warning() << "Bad chanel indices: " << oversizedChanelIndexCounterA << std::endl;
+    g_log.warning() << "Bad channel indices: " << oversizedChanelIndexCounterA << std::endl;
   }
   if (oversizedPosCounterA > 0) {
     g_log.warning() << "Bad position values: " << oversizedPosCounterA << std::endl;
@@ -222,7 +222,7 @@ std::vector<std::vector<uint8_t>> LoadDNSEvent::split_File(FileByteStream &file,
 
   while (!file.eof()) {
     result.push_back(std::vector<uint8_t>());
-    // read a big chunck of file:
+    // read a big chunk of file:
     auto &data = result.back();
     data.resize(chunckSize);
     try {
@@ -240,7 +240,7 @@ std::vector<std::vector<uint8_t>> LoadDNSEvent::split_File(FileByteStream &file,
 
     try {
       data.resize(data.size() + windowSize);
-      // accomodate for possible relocation of vector...:
+      // accommodate for possible relocation of vector...:
       current_window = &*(data.end() - windowSize);
       windowAsArray = reinterpret_cast<std::array<uint8_t, windowSize> *>(current_window);
       file.readRaw(current_window[0], windowSize);
@@ -248,7 +248,7 @@ std::vector<std::vector<uint8_t>> LoadDNSEvent::split_File(FileByteStream &file,
       while ((*windowAsArray != block_sep) && (!file.eof())) {
         const auto orig_data_size = data.size();
         data.resize(orig_data_size + 1);
-        // accomodate for possible relocation of vector...:
+        // accommodate for possible relocation of vector...:
         current_window = (&data.back() - windowSize + 1);
         windowAsArray = reinterpret_cast<std::array<uint8_t, windowSize> *>(current_window);
         file.readRaw(current_window[windowSize - 1], 1);
@@ -281,7 +281,7 @@ LoadDNSEvent::EventAccumulator LoadDNSEvent::parse_File(FileByteStream &file, co
     evtAcc.neutronEvents.resize(m_detectorPixelCount);
   }
 
-  // parse individual file chuncks:
+  // parse individual file chunks:
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < static_cast<int>(filechuncks.size()); ++i) {
     auto filechunck = filechuncks[static_cast<size_t>(i)];
@@ -330,7 +330,7 @@ void LoadDNSEvent::parse_Block(VectorByteStream &file, EventAccumulator &eventAc
 void LoadDNSEvent::parse_BlockSeparator(VectorByteStream &file) {
   auto separator = file.readRaw(separator_t());
   if (separator != block_sep) {
-    throw std::runtime_error(std::string("File Integrety LOST. 0x"));
+    throw std::runtime_error(std::string("File Integrity LOST. 0x"));
   }
 }
 
@@ -427,7 +427,7 @@ void LoadDNSEvent::parse_andAddEvent(VectorByteStream &file, const LoadDNSEvent:
 void LoadDNSEvent::parse_EndSignature(FileByteStream &file) {
   auto separator = file.readRaw(separator_t());
   if (separator != closing_sig) {
-    throw std::runtime_error(std::string("File Integrety LOST. 0x"));
+    throw std::runtime_error(std::string("File Integrity LOST. 0x"));
   }
 }
 

@@ -9,7 +9,7 @@
 namespace Mantid::Algorithms {
 
 ///@cond Doxygen has problems for decltype for some reason.
-/// Returns std::mem_fn object refering to MatrixWorkspace::mutableX().
+/// Returns std::mem_fn object referring to MatrixWorkspace::mutableX().
 decltype(std::mem_fn(&API::MatrixWorkspace::mutableX)) MatrixWorkspaceAccess::x =
     std::mem_fn(&API::MatrixWorkspace::mutableX);
 ///@endcond

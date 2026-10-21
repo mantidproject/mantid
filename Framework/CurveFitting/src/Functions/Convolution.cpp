@@ -138,8 +138,8 @@ void Convolution::function(const FunctionDomain &domain, FunctionValues &values)
   auto ixN = nData - ixP - 1; // negative x-values (ixP+ixN=nData-1)
 
   // determine whether to use FFT or Direct calculations
-  int assymmetry = abs(static_cast<int>(ixP - ixN));
-  if (xValues[0] * xValues[nData - 1] < 0 && assymmetry > tolerance * static_cast<double>(ixP + ixN)) {
+  int asymmetry = abs(static_cast<int>(ixP - ixN));
+  if (xValues[0] * xValues[nData - 1] < 0 && asymmetry > tolerance * static_cast<double>(ixP + ixN)) {
     functionDirectMode(domain, values);
   } else {
     functionFFTMode(domain, values);
@@ -321,7 +321,7 @@ void Convolution::functionFFTMode(const FunctionDomain &domain, FunctionValues &
  * Calculates convolution of the two member functions when the
  * domain is not symmetric with respect to inversion E --> -E.
  * The direct mode is slower than the FFT mode. This is meant to be a temporary
- * method until the need for a faster computation of asymetric domain arises.
+ * method until the need for a faster computation of asymmetric domain arises.
  * @param domain :: space on which the function acts
  * @param values :: buffer to store the values returned by the function after
  * acting on the domain.
@@ -338,7 +338,7 @@ void Convolution::functionDirectMode(const FunctionDomain &domain, FunctionValue
   refreshResolution();
 
   // double the domain where to evaluate the convolution. Guarantees complete
-  // overlap betwen convolution and signal in the original range.
+  // overlap between convolution and signal in the original range.
   const size_t mData = nData + ixN + ixP; // equal to 2*nData-1
   std::vector<double> xValuesExtdVec(mData);
   double *xValuesExtd = xValuesExtdVec.data();

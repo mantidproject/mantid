@@ -79,7 +79,7 @@ public:
 
   void test_1d_one_node() {
     IMDHistoWorkspace_sptr inWS =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 1); // Single node. Simpliest possible test case
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 1); // Single node. Simplest possible test case
 
     MockBackgroundStrategy mockStrategy;
     EXPECT_CALL(mockStrategy, isBackground(_))
@@ -180,7 +180,7 @@ public:
     MockBackgroundStrategy mockStrategy;
     EXPECT_CALL(mockStrategy, configureIterator(_)).Times(1);
     /*
-     * We use the is background strategy to set up three disconected blocks for
+     * We use the is background strategy to set up three disconnected blocks for
      * us.
      * */
     EXPECT_CALL(mockStrategy, isBackground(_))

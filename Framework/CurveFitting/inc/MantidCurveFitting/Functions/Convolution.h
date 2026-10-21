@@ -19,7 +19,7 @@ namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
 /**
-Performes convolution of two functions.
+Performs convolution of two functions.
 
 
 @author Roman Tolchenov, Tessella plc

@@ -242,7 +242,7 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
       // Check first 3 dimension for Q lab,
       for (size_t i = 0; i < 3; i++) {
         if (bkgdWS->getDimension(i)->getMDFrame().name() != Mantid::Geometry::QLab::QLabName) {
-          errorMessage.emplace("BackgroundWorkspace", "The input backgound workspace must be in Q_lab");
+          errorMessage.emplace("BackgroundWorkspace", "The input background workspace must be in Q_lab");
         }
       }
 
@@ -416,7 +416,7 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
   std::shared_ptr<IMDHistoWorkspace> tempNormWS = this->getProperty("TemporaryNormalizationWorkspace");
   Mantid::API::IMDHistoWorkspace_sptr tempDataWS = this->getProperty("TemporaryDataWorkspace");
 
-  // check that either both or neuther accumulation workspaces are provied
+  // check that either both or neuther accumulation workspaces are provided
   if ((tempNormWS && !tempDataWS) || (!tempNormWS && tempDataWS)) {
     errorMessage.emplace("TemporaryDataWorkspace", "Must provide either no accumulation workspaces or,"
                                                    "both TemporaryNormalizationWorkspaces and TemporaryDataWorkspace");
@@ -455,7 +455,7 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
                                                                       "specified but at least one of these is not.");
   } else if (bkgdWS && tempDataWS && !tempBkgdDataWS) {
     errorMessage.emplace("TemporaryDataWorkspace",
-                         "With Background is specifed and TemporaryDataWorkspace is specifed, "
+                         "With Background is specified and TemporaryDataWorkspace is specified, "
                          "TemporaryBackgroundDataWorkspace must be specified.");
   } else if (tempBkgdDataWS && tempNormWS) {
     // check when they both exist
@@ -547,7 +547,7 @@ void MDNorm::exec() {
     }
   }
 
-  // Calculate (BinMD) input sample MDE to MDH and create noramlization MDH from
+  // Calculate (BinMD) input sample MDE to MDH and create normalization MDH from
   // it
   auto outputDataWS = binInputWS(symmetryOps);
   if (m_monochromatic) {
@@ -895,7 +895,7 @@ void MDNorm::createBackgroundNormalizationWS(const DataObjects::MDHistoWorkspace
 void MDNorm::validateBinningForTemporaryDataWorkspace(const std::map<std::string, std::string> &parameters,
                                                       const Mantid::API::IMDHistoWorkspace_sptr &tempDataWS) {
 
-  // parse the paramters map and get extents from tempDataWS
+  // parse the parameters map and get extents from tempDataWS
   const std::string numBinsStr = parameters.at("OutputBins");
   const std::string extentsStr = parameters.at("OutputExtents");
   const std::vector<size_t> numBins = VectorHelper::splitStringIntoVector<size_t>(numBinsStr);
@@ -1186,7 +1186,7 @@ MDNorm::binBackgroundWS(const std::vector<Geometry::SymmetryOperation> &symmetry
         Qtransform = rotMatrix * soMatrix * m_W;
       }
 
-      // Set up BinMD for this symmetry opeation
+      // Set up BinMD for this symmetry operation
       double progress_fraction = 1. / static_cast<double>(symmetryOps.size() * numexpinfo);
       auto binMD =
           createChildAlgorithm("BinMD", soIndex * 0.3 * progress_fraction, (soIndex + 1) * 0.3 * progress_fraction);

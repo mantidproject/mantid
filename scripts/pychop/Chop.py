@@ -77,7 +77,7 @@ def achop(Ei, freq, dslat, pslit, radius, rho):
     !    rho     slit radius of curvature (m)                    R*8
     !    w       angular frequency of rotor (rad/sec)            R*8
     !    ei      energy the rotor has been phased for (meV)      R*8
-    !    area    intergral                                       R*8
+    !    area    integral                                       R*8
     !    ierr    error indicator                                 integer
     !               =0  no problems
     !               =1  if no transmission  AREA set to zero

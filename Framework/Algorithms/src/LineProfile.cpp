@@ -253,12 +253,12 @@ double averageMode(const double sum, const size_t n, const size_t /*unused*/) no
 }
 
 /**
- * A mode function for weigthed summing. The weight is inversely proportional
+ * A mode function for weighted summing. The weight is inversely proportional
  * to the number of data points in the sum.
  * @param sum A sum of data points.
  * @param n Number of summed points.
  * @param nTot Total number of possible points, including NaNs and infs.
- * @return The weigthed sum.
+ * @return The weighted sum.
  */
 double sumMode(const double sum, const size_t n, const size_t nTot) noexcept {
   return static_cast<double>(nTot) / static_cast<double>(n) * sum;
@@ -322,7 +322,7 @@ void LineProfile::init() {
       "A single histogram workspace containing the profile.");
   declareProperty(PropertyNames::CENTRE, EMPTY_DBL(), mandatoryDouble, "Centre of the line.");
   declareProperty(PropertyNames::HALF_WIDTH, EMPTY_DBL(), mandatoryPositiveDouble,
-                  "Half of the width over which to calcualte the profile.");
+                  "Half of the width over which to calculate the profile.");
   const std::array<std::string, 2> directions = {{DirectionChoices::HORIZONTAL, DirectionChoices::VERTICAL}};
   declareProperty(PropertyNames::DIRECTION, DirectionChoices::HORIZONTAL,
                   std::make_shared<ListValidator<std::string>>(directions), "Orientation of the profile line.");

@@ -130,7 +130,7 @@ std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> &inPar
 std::map<std::string, std::string> Rebin::validateInputs() {
   std::map<std::string, std::string> helpMessages;
 
-  // determing the binning mode, if present, or use default setting
+  // determining the binning mode, if present, or use default setting
   BINMODE binMode;
   if (existsProperty(PropertyNames::BINMODE)) {
     binMode = getPropertyValue(PropertyNames::BINMODE);

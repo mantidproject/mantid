@@ -273,7 +273,7 @@ public:
   }
 };
 
-/* Peformance testing */
+/* Performance testing */
 class ConvertToReflectometryQTestPerformance : public CxxTest::TestSuite {
 private:
   MatrixWorkspace_sptr m_workspace;
@@ -306,7 +306,7 @@ public:
     TS_ASSERT(unitsalg->isExecuted());
     m_workspace = unitsalg->getProperty("OutputWorkspace");
 
-    // Convert the specturm axis ot signed_theta
+    // Convert the spectrum axis to signed_theta
     auto specaxisalg = AlgorithmManager::Instance().createUnmanaged("ConvertSpectrumAxis");
     specaxisalg->setChild(true);
     specaxisalg->initialize();

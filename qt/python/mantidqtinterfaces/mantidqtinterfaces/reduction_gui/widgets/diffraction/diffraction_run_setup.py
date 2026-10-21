@@ -333,7 +333,7 @@ class RunSetupWidget(BaseWidget):
             self._content.lineEdit_expIniFile.setText(exp_ini_file_name)
 
     def _outputdir_browse(self):
-        """Event handling for browing output directory"""
+        """Event handling for browsing output directory"""
         dirname = self.dir_browse_dialog()
         if dirname:
             self._content.outputdir_edit.setText(dirname)

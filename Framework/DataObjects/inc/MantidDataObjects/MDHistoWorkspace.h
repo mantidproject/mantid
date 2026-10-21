@@ -144,7 +144,7 @@ public:
    * speed/testing */
   const bool *getMaskArray() const { return m_masks.get(); }
 
-  /** Return the aray of bin withs  (the linear length of a box) for each
+  /** Return the array of bin widths  (the linear length of a box) for each
    * dimension */
   const coord_t *getBinWidths() const { return m_boxLength.data(); }
 
@@ -447,7 +447,7 @@ protected:
   LinePlot getLinePoints(const Mantid::Kernel::VMD &start, const Mantid::Kernel::VMD &end,
                          Mantid::API::MDNormalization normalize, const bool bin_centres) const;
 
-  /// Protected copy constructor. May be used by childs for cloning.
+  /// Protected copy constructor. May be used by children for cloning.
   MDHistoWorkspace(const MDHistoWorkspace &other);
 
   /// Linear array of masks for each bin. Avoids using vector<bool>

@@ -120,7 +120,7 @@ public:
   //
   //	std::string extractString(const Surface& pv)
   //	{
-  //		//dump output to sting
+  //		//dump output to string
   //		std::ostringstream output;
   //		output.exceptions( std::ios::failbit | std::ios::badbit );
   //		TS_ASSERT_THROWS_NOTHING(pv.write(output));

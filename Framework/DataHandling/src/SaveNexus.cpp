@@ -155,7 +155,7 @@ void SaveNexus::runSaveNexusProcessed() {
 }
 
 /**
-Overriden process groups.
+Overridden process groups.
 */
 bool SaveNexus::processGroups() {
   this->exec();

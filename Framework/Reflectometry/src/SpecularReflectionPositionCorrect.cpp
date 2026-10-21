@@ -174,7 +174,7 @@ void SpecularReflectionPositionCorrect::moveDetectors(const API::MatrixWorkspace
 
 /**
  * Correct the position of the detectors based on the input theta value.
- * @param toCorrect : Workspace to correct detector posisitions on.
+ * @param toCorrect : Workspace to correct detector positions on.
  * @param twoThetaInDeg : 2* Theta in degrees to use in correction calculations.
  * @param sample : Pointer to the sample
  * @param detector : Pointer to a given detector

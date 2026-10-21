@@ -26,7 +26,7 @@ class EAAutoTabModelTest(unittest.TestCase):
     def test_update_match_table_when_table_has_more_than_3_rows(self):
         correct_table_entries = ["9999", "Detector 1", "Ag , Au , Fe"]
         # Create source tables
-        likelyhood_table = CreateEmptyTableWorkspace(OutputWorkspace="likelyhood")
+        likelyhood_table = CreateEmptyTableWorkspace(OutputWorkspace="likelihood")
         likelyhood_table.addColumn("str", "Element")
         likelyhood_table.addColumn("int", "Likelihood")
         likelyhood_table.addRow(["Ag", 20])
@@ -39,31 +39,31 @@ class EAAutoTabModelTest(unittest.TestCase):
         likelyhood_table.addRow(["O", 3])
 
         # Run function
-        self.model.update_match_table("likelyhood", "9999; Detector 1")
+        self.model.update_match_table("likelihood", "9999; Detector 1")
 
         # Assert statements
         self.assertEqual(self.model.table_entries.get(), correct_table_entries)
 
         # Delete tables from ADS
-        self.delete_if_present("likelyhood")
+        self.delete_if_present("likelihood")
 
     def test_update_match_table_when_table_has_less_than_3_rows(self):
         correct_table_entries = ["9999", "Detector 3", "Al , C"]
         # Create source tables
-        likelyhood_table = CreateEmptyTableWorkspace(OutputWorkspace="likelyhood")
+        likelyhood_table = CreateEmptyTableWorkspace(OutputWorkspace="likelihood")
         likelyhood_table.addColumn("str", "Element")
         likelyhood_table.addColumn("int", "Likelihood")
         likelyhood_table.addRow(["Al", 20])
         likelyhood_table.addRow(["C", 18])
 
         # Run function
-        self.model.update_match_table("likelyhood", "9999; Detector 3")
+        self.model.update_match_table("likelihood", "9999; Detector 3")
 
         # Assert statements
         self.assertEqual(self.model.table_entries.get(), correct_table_entries)
 
         # Delete tables from ADS
-        self.delete_if_present("likelyhood")
+        self.delete_if_present("likelihood")
 
     @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.retrieve_ws")
     @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.EAAutoTabModel._run_find_peak_algorithm")

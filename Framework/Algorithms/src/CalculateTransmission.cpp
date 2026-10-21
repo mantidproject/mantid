@@ -282,7 +282,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::fit(const API::MatrixWorkspace_
 
   // these are calculated by the call to fit below
   double grad(0.0), offset(0.0);
-  std::vector<double> coeficients;
+  std::vector<double> coefficients;
   const bool logFit = (fitMethod == "Log");
   if (logFit) {
     g_log.debug("Fitting to the logarithm of the transmission");
@@ -310,7 +310,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::fit(const API::MatrixWorkspace_
     std::stringstream info;
     info << "Fitting the transmission to polynomial order=" << order;
     g_log.information(info.str());
-    output = fitPolynomial(output, order, coeficients);
+    output = fitPolynomial(output, order, coefficients);
   }
 
   progress.report("CalculateTransmission: Performing fit");
@@ -353,8 +353,8 @@ API::MatrixWorkspace_sptr CalculateTransmission::fit(const API::MatrixWorkspace_
         double aux = 0;
         double x_v = 0.5 * (X[i] + X[i + 1]);
 
-        for (int j = 0; j < static_cast<int>(coeficients.size()); ++j) {
-          aux += coeficients[j] * std::pow(x_v, j);
+        for (int j = 0; j < static_cast<int>(coefficients.size()); ++j) {
+          aux += coefficients[j] * std::pow(x_v, j);
         }
         Y[i] = aux;
       }
@@ -400,10 +400,10 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitData(const API::MatrixWorksp
  * expected for the transmission.
  * @param[in] WS The single-spectrum workspace to fit
  * @param[in] order The order of the polynomial from 2 to 6
- * @param[out] coeficients of the polynomial. c[0] + c[1]x + c[2]x^2 + ...
+ * @param[out] coefficients of the polynomial. c[0] + c[1]x + c[2]x^2 + ...
  */
 API::MatrixWorkspace_sptr CalculateTransmission::fitPolynomial(const API::MatrixWorkspace_sptr &WS, int order,
-                                                               std::vector<double> &coeficients) {
+                                                               std::vector<double> &coefficients) {
   g_log.notice("Fitting the experimental transmission curve fitpolyno");
   double start = m_done;
   auto childAlg = createChildAlgorithm("Fit", start, m_done = 0.9);
@@ -423,9 +423,9 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitPolynomial(const API::Matrix
   }
 
   // Only get to here if successful
-  coeficients.resize(order + 1);
+  coefficients.resize(order + 1);
   for (int i = 0; i <= order; i++) {
-    coeficients[i] = polyfit->getParameter(i);
+    coefficients[i] = polyfit->getParameter(i);
   }
   return this->extractSpectra(childAlg->getProperty("OutputWorkspace"), std::vector<size_t>(1, 1));
 }

@@ -83,7 +83,7 @@ class TestHelpWindowModelConfigService(unittest.TestCase):
 
     @patch(CONFIG_SERVICE_LOOKUP_PATH)
     def test_init_when_config_returns_empty_props_path_uses_online(self, mock_ConfigService):
-        """Test online mode when ConfigService returns emtpy path."""
+        """Test online mode when ConfigService returns empty path."""
         mock_ConfigService.getPropertiesDir.return_value = ""
 
         model = HelpWindowModel()

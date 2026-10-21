@@ -4,8 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-/** The class discribes one dimension of multidimensional dataset representing
-an ortogonal dimension and linear axis.
+/** The class describes one dimension of multidimensional dataset representing
+an orthogonal dimension and linear axis.
 *
 *   Abstract type for a multi dimensional dimension. Gives a read-only layer to
 the concrete implementation.

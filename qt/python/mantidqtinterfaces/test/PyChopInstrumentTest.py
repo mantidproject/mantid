@@ -365,7 +365,7 @@ class PyChopGuiTests(unittest.TestCase):
     def test_merlin_specials(self):
         # Tests Merlin special routines are called for Merlin
         self.window.setInstrument("MERLIN")
-        # Checks that the pulse removal phase is hiden from users unless the
+        # Checks that the pulse removal phase is hidden from users unless the
         # "instrument_scientist" mode is enabled
         self.window.instSciAct.isChecked = mock.MagicMock(return_value=False)
         self.window.widgets["Chopper0Phase"]["Edit"].hide.assert_called()

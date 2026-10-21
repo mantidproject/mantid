@@ -94,7 +94,7 @@ void AlgorithmHistory::setProperties(const Algorithm *const alg) {
 }
 
 /**
- *  Fill the algoirthm history object after it has been created.
+ *  Fill the algorithm history object after it has been created.
  *  @param alg ::      A pointer to the algorithm for which the history should
  * be constructed
  *  @param start ::    The start time of the algorithm execution (optional)
@@ -247,9 +247,9 @@ AlgorithmHistory &AlgorithmHistory::operator=(const AlgorithmHistory &A) {
 }
 
 /** Prints a text representation
- * @param os :: The ouput stream to write to
+ * @param os :: The output stream to write to
  * @param AH :: The AlgorithmHistory to output
- * @returns The ouput stream
+ * @returns The output stream
  */
 std::ostream &operator<<(std::ostream &os, const AlgorithmHistory &AH) {
   AH.printSelf(os);

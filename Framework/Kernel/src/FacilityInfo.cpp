@@ -116,8 +116,8 @@ void FacilityInfo::fillArchiveNames(const Poco::XML::Element *elem) {
   } else if (pNL_archives->length() == 1) {
     Poco::AutoPtr<Poco::XML::NodeList> pNL_interfaces = elem->getElementsByTagName("archiveSearch");
     for (unsigned int i = 0; i < pNL_interfaces->length(); ++i) {
-      auto *elemenent = dynamic_cast<Poco::XML::Element *>(pNL_interfaces->item(i));
-      std::string plugin = elemenent->getAttribute("plugin");
+      auto *element = dynamic_cast<Poco::XML::Element *>(pNL_interfaces->item(i));
+      std::string plugin = element->getAttribute("plugin");
       if (!plugin.empty()) {
         m_archiveSearch.emplace_back(plugin);
       }
@@ -147,13 +147,13 @@ void FacilityInfo::fillInstruments(const Poco::XML::Element *elem) {
   m_instruments.reserve(n);
 
   for (unsigned long i = 0; i < n; ++i) {
-    auto *elemenent = dynamic_cast<Poco::XML::Element *>(pNL_instrument->item(i));
-    if (elemenent) {
+    auto *element = dynamic_cast<Poco::XML::Element *>(pNL_instrument->item(i));
+    if (element) {
       try {
-        InstrumentInfo instr(this, elemenent);
+        InstrumentInfo instr(this, element);
         m_instruments.emplace_back(instr);
       } catch (std::runtime_error &e) { /*skip this instrument*/
-        g_log.warning("Failed to load instument for: " + m_name + ": " + e.what());
+        g_log.warning("Failed to load instrument for: " + m_name + ": " + e.what());
       }
     }
   }

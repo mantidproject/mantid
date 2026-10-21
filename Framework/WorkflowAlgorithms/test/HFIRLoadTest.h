@@ -16,7 +16,7 @@ class HFIRLoadTest : public CxxTest::TestSuite {
 public:
   /**
    * No distances given in the input!
-   * It get's everything from the data file
+   * It gets everything from the data file
    */
   void testDefaults() {
 

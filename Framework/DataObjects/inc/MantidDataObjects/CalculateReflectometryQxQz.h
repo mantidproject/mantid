@@ -64,7 +64,7 @@ public:
 
   /**
    Executes the calculation to determine Qx
-   @param wavelength : wavelenght in Anstroms
+   @param wavelength : wavelength in Anstroms
    */
   double calculateDim0(double wavelength) const override {
     double wavenumber = 2 * M_PI / wavelength;
@@ -73,7 +73,7 @@ public:
 
   /**
    Executes the calculation to determine Qz
-   @param wavelength : wavelenght in Anstroms
+   @param wavelength : wavelength in Anstroms
    */
   double calculateDim1(double wavelength) const override {
     double wavenumber = 2 * M_PI / wavelength;

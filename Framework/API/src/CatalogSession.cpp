@@ -21,7 +21,7 @@ CatalogSession::CatalogSession(std::string sessionID, std::string facility, std:
 
 /**
  * Obtain the session ID for the catalog created.
- * @return The sesssion Id of the catalog created.
+ * @return The session Id of the catalog created.
  */
 const std::string &CatalogSession::getSessionId() const { return m_sessionID; }
 

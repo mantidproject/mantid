@@ -27,7 +27,7 @@ void NotificationService::showMessage(const QString &title, const QString &messa
   if (isEnabled() && isSupportedByOS()) {
     if ((g_lastMessage != message) || (g_lastTitle != title) ||
         (g_timer.elapsed_no_reset() > MIN_SECONDS_BETWEEN_IDENTICAL_NOTIFICATIONS)) {
-      // remeber the last message details
+      // remember the last message details
       g_lastMessage = message;
       g_lastTitle = title;
       g_timer.reset();

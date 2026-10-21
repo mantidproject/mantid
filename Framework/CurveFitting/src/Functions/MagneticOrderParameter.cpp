@@ -69,7 +69,7 @@ void MagneticOrderParameter::functionDeriv1D(Jacobian *out, const double *xValue
 
     double diffAlpha = -Amp * Beta * xCalcAlpha * log(xCalc) * diffAmpMin;
     double diffBeta = Amp * diffAmp * log(1 - xCalcAlpha);
-    // we can only take a log of a positive number. If thats not possible the diffBeta should be 0.
+    // we can only take a log of a positive number. If that's not possible the diffBeta should be 0.
     if ((1 - xCalcAlpha) <= 0.0) {
       diffBeta = 0;
     }

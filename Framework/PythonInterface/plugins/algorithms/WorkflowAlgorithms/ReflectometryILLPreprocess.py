@@ -206,7 +206,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         return 1 if first_angle < last_angle else -1
 
     def category(self):
-        """Return the categories of the algrithm."""
+        """Return the categories of the algorithm."""
         return "ILL\\Reflectometry;Workflow\\Reflectometry"
 
     def name(self):

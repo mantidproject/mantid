@@ -55,7 +55,7 @@ class SaveINS(PythonAlgorithm):
         return "Saves .ins input file for SHELX single-crystal refinement."
 
     def PyInit(self):
-        """Initilize the algorithms properties"""
+        """Initialize the algorithms properties"""
 
         self.declareProperty(
             WorkspaceProperty("InputWorkspace", "", Direction.Input),

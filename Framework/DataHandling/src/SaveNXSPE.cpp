@@ -296,7 +296,7 @@ void SaveNXSPE::exec() {
     // or we have reached the end of the workspace and not completely filled
     // the buffer
     if (bufferCounter == chunkRows || i == nHist - 1) {
-      // techincally only need to update for the very last slab but
+      // technically only need to update for the very last slab but
       // this is always correct and avoids an if statement
       slabSize[0] = bufferCounter;
       nxFile.openData("data");

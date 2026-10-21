@@ -27,7 +27,7 @@ DECLARE_FUNCTION(AsymmetricPearsonVII)
 AsymmetricPearsonVII::AsymmetricPearsonVII() : IPeakFunction() {}
 
 void AsymmetricPearsonVII::init() {
-  declareParameter("PeakHeight", 1.0, "Hight of the peak");
+  declareParameter("PeakHeight", 1.0, "Height of the peak");
   declareParameter("PeakCentre", 0.0, "Location of the peak");
   declareParameter("Width", 0.1, "Full width at half maximum");
   declareParameter("LeftShape", 1.0, "Left shape parameter");

@@ -78,7 +78,7 @@ Goniometer::Goniometer(const DblMatrix &rot) {
 Goniometer::Goniometer(const Goniometer &other)
     : m_R(other.m_R), m_motors(other.m_motors), m_initFromR(other.m_initFromR) {}
 
-/// Copy assigment constructor
+/// Copy assignment constructor
 Goniometer &Goniometer::operator=(const Goniometer &other) {
   if (this != &other) {
     m_R = other.m_R;
@@ -302,7 +302,7 @@ void Goniometer::makeUniversalGoniometer() {
   this->pushAxis("phi", 0., 1., 0., 0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
 }
 
-/** Return Euler angles acording to a convention
+/** Return Euler angles according to a convention
  * @param convention :: the convention used to calculate Euler Angles. The
  * UniversalGoniometer is YZY, a triple axis goniometer at HFIR is YZX
  */

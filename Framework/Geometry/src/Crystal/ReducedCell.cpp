@@ -532,7 +532,7 @@ void ReducedCell::init(size_t f_num, double a_a, double b_b, double c_c, double 
 }
 
 /**
- *  Adjust tranform and centering according to foot note b of the paper
+ *  Adjust transform and centering according to foot note b of the paper
  */
 void ReducedCell::foot_note_b(double a_a, double a_c) {
   if (a_a < 4 * fabs(a_c)) // foot note b
@@ -543,7 +543,7 @@ void ReducedCell::foot_note_b(double a_a, double a_c) {
 }
 
 /**
- *  Adjust tranform and centering according to foot note c of the paper
+ *  Adjust transform and centering according to foot note c of the paper
  */
 void ReducedCell::foot_note_c(double b_b, double b_c) {
   if (b_b < 4 * fabs(b_c)) // foot note c
@@ -554,7 +554,7 @@ void ReducedCell::foot_note_c(double b_b, double b_c) {
 }
 
 /**
- *  Adjust tranform and centering according to foot note d of the paper
+ *  Adjust transform and centering according to foot note d of the paper
  */
 void ReducedCell::foot_note_d(double c_c, double b_c) {
   if (c_c < 4 * fabs(b_c)) // foot note d
@@ -565,7 +565,7 @@ void ReducedCell::foot_note_d(double c_c, double b_c) {
 }
 
 /**
- *  Adjust tranform and centering according to foot note e of the paper
+ *  Adjust transform and centering according to foot note e of the paper
  */
 void ReducedCell::foot_note_e(double a_a, double c_c, double a_c) {
   if (3 * a_a < c_c + 2 * fabs(a_c)) // foot note e
@@ -576,7 +576,7 @@ void ReducedCell::foot_note_e(double a_a, double c_c, double a_c) {
 }
 
 /**
- *  Adjust tranform and centering according to foot note f of the paper
+ *  Adjust transform and centering according to foot note f of the paper
  */
 void ReducedCell::foot_note_f(double b_b, double c_c, double b_c) {
   if (3 * b_b < c_c + 2 * fabs(b_c)) // foot note f
@@ -587,7 +587,7 @@ void ReducedCell::foot_note_f(double b_b, double c_c, double b_c) {
 }
 
 /**
- * Adjust the tranformation for this reduced cell by premultiplying
+ * Adjust the transformation for this reduced cell by premultiplying
  * by modification transform 0 or 1.
  */
 void ReducedCell::premultiply(size_t index) {
@@ -618,7 +618,7 @@ std::string ReducedCell::GetCentering() const { return std::string(centering); }
 
 /**
  * Get the maximum absolute weighted difference between the scalars
- * for the specifed ReducedCellInfo object and this ReducedCellInfo.
+ * for the specified ReducedCellInfo object and this ReducedCellInfo.
  * A fairly complicated weighting is used to make the effect of a
  * difference in cell edge length on lattice corner positions is
  * comparable to the effect of a difference in the angles.

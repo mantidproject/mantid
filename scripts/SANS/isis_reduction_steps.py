@@ -713,7 +713,7 @@ class Mask_ISIS(ReductionStep):
 
     def _infinite_cylinder(self, centre, radius, axis, id="shape"):
         """
-        Generates xml code for an infintely long cylinder
+        Generates xml code for an infinitely long cylinder
         @param centre: a tuple for a point on the axis
         @param radius: cylinder radius
         @param axis: cylinder orientation
@@ -745,7 +745,7 @@ class Mask_ISIS(ReductionStep):
 
     def _finite_cylinder(self, centre, radius, height, axis, id="shape"):
         """
-        Generates xml code for an infintely long cylinder
+        Generates xml code for an infinitely long cylinder
         @param centre: a tuple for a point on the axis
         @param radius: cylinder radius
         @param height: cylinder height
@@ -1056,7 +1056,7 @@ class Mask_ISIS(ReductionStep):
                 # to get an obtruse angle, a wedge that's more than half the area, we need to add the semi-inifinite volumes
                 self._lim_phi_xml += '<algebra val="#(' + id + "_plane1:" + id + '_plane2)" />'
             else:
-                # an acute angle, wedge is more less half the area, we need to use the intesection of those semi-inifinite volumes
+                # an acute angle, wedge is more less half the area, we need to use the intersection of those semi-inifinite volumes
                 self._lim_phi_xml += '<algebra val="#(' + id + "_plane1 " + id + '_plane2)" />'
 
     def _mask_line(self, startPoint, length, width, angle):
@@ -1664,7 +1664,7 @@ class DarkRunSubtraction(object):
             alg_load.initialize()
             alg_load.setChild(True)
             alg_load.setProperty("Filename", dark_run_file_path)
-            # We specifically grab the first entry here. When the Nexus file is a Group worspace (due
+            # We specifically grab the first entry here. When the Nexus file is a Group workspace (due
             # to added files) then we specifically only want the first workspace.
             alg_load.setProperty("EntryNumber", 1)
             alg_load.setProperty("OutputWorkspace", dark_run_ws_name)
@@ -2306,7 +2306,7 @@ class TransmissionCalc(ReductionStep):
 
         The region of interest can be made up of a circle of detectors (with a given radius)
         around the beam centre, and/or one or more mask files, and/or the main detector bank.
-        Note that the mask files wont actually be used for masking, we're just piggy-backing
+        Note that the mask files won't actually be used for masking, we're just piggy-backing
         on the functionality that they provide. Note that in the case of a radius, we have
         to ensure that we do not use a workspace which already has masked detectors, since
         they would contribute to the ROI.
@@ -2748,7 +2748,7 @@ class ConvertToQISIS(ReductionStep):
         self._use_gravity = self._DEFAULT_GRAV
         # used to implement a default setting for gravity that can be over written but doesn't over write
         self._grav_set = False
-        # can be used to add an additional length to the neutron path during the correction for gravity in the Q calcuation
+        # can be used to add an additional length to the neutron path during the correction for gravity in the Q calculation
         self._grav_extra_length = self._DEFAULT_EXTRA_LENGTH
         # used to implement a default setting for extra length for gravity; seee _grav_set
         self._grav_extra_length_set = False
@@ -2816,7 +2816,7 @@ class ConvertToQISIS(ReductionStep):
         Add extra length when correcting for gravity when calculating Q
         @param extra_length : additional length for the gravity correction during the calculation of Q
         @param override: over write the setting from a previous call to this method (default is True).
-                         This was added because of the way _set_gravity is layed out.
+                         This was added because of the way _set_gravity is laid out.
         """
         if override:
             self._grav_extra_length_set = True
@@ -4160,7 +4160,7 @@ class UserFile(ReductionStep):
 
     def _read_unwrap_monitors_line(self, arguments, reducer):
         """
-        Checks if the montiors should be unwrapped. The arguments can be either ON or OFF. We don't care here about
+        Checks if the monitors should be unwrapped. The arguments can be either ON or OFF. We don't care here about
         any preceding slash
         Args:
             arguments: the arguments string

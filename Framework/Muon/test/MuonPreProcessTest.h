@@ -228,7 +228,7 @@ public:
     auto errors = alg->validateInputs();
     const auto expected = "TimeZeroTable must have as many rows as there are "
                           "spectra in InputWorkspace. Use TimeOffset to apply "
-                          "same time correcton to all data";
+                          "same time correction to all data";
 
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
     TS_ASSERT_EQUALS(errors["TimeZeroTable"], expected);

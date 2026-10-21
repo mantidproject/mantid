@@ -101,7 +101,7 @@ void CompactMD::findFirstNonZeroMinMaxExtents(const IMDHistoWorkspace_sptr &inpu
 }
 
 /**
- * Initiliase the algorithm's properties.
+ * Initialise the algorithm's properties.
  */
 void CompactMD::init() {
   // input workspace to compact

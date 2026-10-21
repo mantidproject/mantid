@@ -48,7 +48,7 @@ public:
     ReciprocalLatticeUnit unit;
     InverseAngstromsUnit other;
     TSM_ASSERT("Simple conversion possible", unit.canConvertTo(other));
-    TSM_ASSERT_DIFFERS("Convertable, but not the same", unit, other);
+    TSM_ASSERT_DIFFERS("Convertible, but not the same", unit, other);
   }
 
   void test_InverseAngstroms_getUnitLabel() {
@@ -67,7 +67,7 @@ public:
     ReciprocalLatticeUnit unit;
     InverseAngstromsUnit other;
     TSM_ASSERT("Simple conversion possible", unit.canConvertTo(other));
-    TSM_ASSERT_DIFFERS("Convertable, but not the same", unit, other);
+    TSM_ASSERT_DIFFERS("Convertible, but not the same", unit, other);
   }
 
   void test_labelUnit_getUnitLabel() {
@@ -83,7 +83,7 @@ public:
     LabelUnit a("Bar");
     LabelUnit b("Bar");
     TS_ASSERT(a.canConvertTo(b));
-    TSM_ASSERT_EQUALS("Convertable, and same type", a, b);
+    TSM_ASSERT_EQUALS("Convertible, and same type", a, b);
   }
 
   void test_LabelUnit_canConvert_to_other() {

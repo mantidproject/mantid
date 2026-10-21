@@ -68,7 +68,7 @@ can be called from different algorithms.
         "Si",                # sample_formula
         1.165,               # mass_density
         element_size=2,      # integration element cube in mm
-        cache_dir="/tmp",    # cache diretory for speeding up repeated calculation
+        cache_dir="/tmp",    # cache directory for speeding up repeated calculation
         )
 
 

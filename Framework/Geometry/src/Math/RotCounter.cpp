@@ -16,7 +16,7 @@ std::ostream &operator<<(std::ostream &OX, const RotaryCounter &A)
   Output stream assesor
   @param OX :: Output stream
   @param A :: RotaryCounter to writeout
-  @return the ouput stream
+  @return the output stream
  */
 {
   A.write(OX);
@@ -38,7 +38,7 @@ RotaryCounter::RotaryCounter(const int S, const int N)
 
 bool RotaryCounter::operator==(const RotaryCounter &A) const
 /**
-  Chec to find if Counters identical in ALL respects
+  Check to find if Counters identical in ALL respects
   @param A :: Counter to compare
   @retval 1 :: All things identical
   @retval 0 :: Something not the same
@@ -57,7 +57,7 @@ bool RotaryCounter::operator==(const RotaryCounter &A) const
 
 bool RotaryCounter::operator>(const RotaryCounter &A) const
 /**
-  Determines the precidence of the RotaryCounters
+  Determines the precedence of the RotaryCounters
   Operator works on the 0 to high index
   @param A :: RotaryCounter to compare
   @return This > A
@@ -79,7 +79,7 @@ bool RotaryCounter::operator>(const RotaryCounter &A) const
 
 bool RotaryCounter::operator<(const RotaryCounter &A) const
 /**
-  Determines the precidence of the RotaryCounters
+  Determines the precedence of the RotaryCounters
   Operator works on the 0 to high index
   @param A :: RotaryCounter to compare
   @return This < A
@@ -100,7 +100,7 @@ bool RotaryCounter::operator<(const RotaryCounter &A) const
 
 int RotaryCounter::operator++(int a)
 /**
-  Convertion to ++operator (prefix)
+  Conversion to ++operator (prefix)
   from operator++ (postfix)
   @param a :: ignored
   @return ++operator
@@ -137,7 +137,7 @@ int RotaryCounter::operator++()
 
 int RotaryCounter::operator--(int a)
 /**
-  convertion to --operator (prefix)
+  conversion to --operator (prefix)
   from operator-- (postfix)
   @param a :: ignored
   @return --operator

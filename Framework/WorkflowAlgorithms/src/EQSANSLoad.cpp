@@ -625,7 +625,7 @@ void EQSANSLoad::exec() {
     readConfigFile(config_file);
   } else if (use_config) {
     use_config = false;
-    g_log.error() << "Cound not find config file for workspace " << getPropertyValue("OutputWorkspace") << '\n';
+    g_log.error() << "Could not find config file for workspace " << getPropertyValue("OutputWorkspace") << '\n';
     m_output_message +=
         "   Could not find configuration file for run " + Poco::NumberFormatter::format(run_number) + "\n";
   }

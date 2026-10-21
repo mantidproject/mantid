@@ -218,7 +218,7 @@ static int32 NXIFindSDS(NXhandle fid, CONSTCHAR *name) {
     iN = Vntagrefs(self->iCurrentVG);
     for (i = 0; i < iN; i++) {
       Vgettagref(self->iCurrentVG, i, &iTag, &iRef);
-      /* we are now writing using DFTAG_NDG, but need others for backward compatability */
+      /* we are now writing using DFTAG_NDG, but need others for backward compatibility */
       if ((iTag == DFTAG_SDG) || (iTag == DFTAG_NDG) || (iTag == DFTAG_SDS)) {
         iNew = SDreftoindex(self->iSID, iRef);
         iNew = SDselect(self->iSID, iNew);
@@ -727,7 +727,7 @@ NXstatus NX4getnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *d
       pFile->iStack[pFile->iStackPtr].iCurDir++;
       Vdetach(iTemp);
       return NXstatus::NX_OK;
-      /* we are now writing using DFTAG_NDG, but need others for backward compatability */
+      /* we are now writing using DFTAG_NDG, but need others for backward compatibility */
     } else if ((pFile->iStack[iStackPtr].iTagDir[iCurDir] == DFTAG_SDG) ||
                (pFile->iStack[iStackPtr].iTagDir[iCurDir] == DFTAG_NDG) ||
                (pFile->iStack[iStackPtr].iTagDir[iCurDir] == DFTAG_SDS)) {

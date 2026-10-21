@@ -29,7 +29,7 @@ void MCInteractionVolume::init() {
   if (m_env) {
     try {
       if (m_env->nelements() == 0) {
-        throw std::invalid_argument("MCInteractionVolume() - Sample enviroment has zero components.");
+        throw std::invalid_argument("MCInteractionVolume() - Sample environment has zero components.");
       }
     } catch (std::runtime_error &) {
       // swallow this as no defined environment from getEnvironment

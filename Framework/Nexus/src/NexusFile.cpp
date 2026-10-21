@@ -156,7 +156,7 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
   // turn off the automatic HDF error handling
   H5Eset_auto(H5E_DEFAULT, nullptr, nullptr);
 
-  // create file acccess property list
+  // create file access property list
   ParameterID fapl = H5Pcopy(H5Util::defaultFileAcc().getId());
 
   UniqueFileID temp_fid;
@@ -664,7 +664,7 @@ template <> MANTID_NEXUS_DLL void File::putData(std::string const *data) { this-
 
 void File::putData(std::string const &data) {
   if (data.empty()) {
-    throw NXEXCEPTION("Supplied empty stirng to putData");
+    throw NXEXCEPTION("Supplied empty string to putData");
   }
   this->putData<char>(data.c_str());
 }
@@ -1624,7 +1624,7 @@ NXlink File::getGroupID() {
 
 NXlink File::getDataID() {
   NXlink link;
-  /* we cannot return ID's when no datset is open */
+  /* we cannot return ID's when no dataset is open */
   if (!isDataSetOpen()) {
     throw NXEXCEPTION("getDataID failed, No current dataset open");
   }

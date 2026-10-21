@@ -23,7 +23,7 @@ const double EPSILON = std::numeric_limits<double>::epsilon();
 // Public methods
 //-----------------------------------------------------------------------------
 /**
- * Contructor taking two points, start and end
+ * Constructor taking two points, start and end
  */
 PolygonEdge::PolygonEdge(const Kernel::V2D &start, const Kernel::V2D &end)
     : m_start(start), m_end(end), m_dir(m_end - m_start) {}

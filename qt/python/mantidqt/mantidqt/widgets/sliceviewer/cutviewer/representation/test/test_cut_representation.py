@@ -39,7 +39,7 @@ class LinePlotsTest(unittest.TestCase):
         transform_no = mock.MagicMock()
         transform_no.tr = mock.MagicMock()
 
-        # rotate anticlockwise by 90 degrees and scale - code requires tranformation to leave origin unaltered
+        # rotate anticlockwise by 90 degrees and scale - code requires transformation to leave origin unaltered
         def return_different(arg1, arg2):
             return -0.5 * arg2, 0.5 * arg1
 

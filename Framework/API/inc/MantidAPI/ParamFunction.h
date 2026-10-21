@@ -68,7 +68,7 @@ public:
   /// Set the fitting error for a parameter by name
   void setError(const std::string &name, double err) override;
 
-  /// Return parameter index from a parameter reference. Usefull for constraints
+  /// Return parameter index from a parameter reference. Useful for constraints
   /// and ties in composite functions
   size_t getParameterIndex(const ParameterReference &ref) const override;
   /// Get the containing function

@@ -8,7 +8,7 @@ Introduction
 ------------
 
 These are unscripted tests for PSI data and introduce background corrections.
-For continous sources background corrections are very important.
+For continuous sources background corrections are very important.
 Fitting a flat background to the data (sometimes along with a exp decay), it is possible to remove the background from the data.
 
 ------------------------------------
@@ -36,7 +36,7 @@ Auto Background Corrections Test
 - Go to the **Corrections** tab
 - For the ``Background`` select ``Auto``
 - The plots will now average around 0
-- The values should be (approximatley):
+- The values should be (approximately):
 	- Forw: ``19.2``
 	- Back: ``93.6``
 	- Left: ``104.4``

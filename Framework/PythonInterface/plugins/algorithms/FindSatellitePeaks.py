@@ -85,7 +85,7 @@ class FindSatellitePeaks(DataProcessorAlgorithm):
             "IOverSigma",
             2,
             direction=Direction.Input,
-            doc="The I/sigma threshold use to identify if peaks exist. This is passed direclty to FilterPeaks",
+            doc="The I/sigma threshold use to identify if peaks exist. This is passed directly to FilterPeaks",
         )
 
     def PyExec(self):

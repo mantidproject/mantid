@@ -79,7 +79,7 @@ public:
   ComplexVector &operator*=(const ComplexType d);
   /// Add a complex number
   ComplexVector &operator+=(const ComplexType &d);
-  /// Sort Vector by indicies provided
+  /// Sort Vector by indices provided
   void sort(const std::vector<size_t> &indices);
   /// Get index of the minimum element
 

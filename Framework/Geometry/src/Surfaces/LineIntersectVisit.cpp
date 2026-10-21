@@ -31,7 +31,7 @@ LineIntersectVisit::LineIntersectVisit(const Kernel::V3D &point, const Kernel::V
 void LineIntersectVisit::Accept(const Surface &Surf)
 /**
   Process an intersect track
-  @param Surf :: Surface to use int line Interesect
+  @param Surf :: Surface to use int line Intersect
 */
 {
   (void)Surf; // Avoid compiler warning
@@ -41,7 +41,7 @@ void LineIntersectVisit::Accept(const Surface &Surf)
 void LineIntersectVisit::Accept(const Quadratic &Surf)
 /**
   Process an intersect track
-  @param Surf :: Surface to use int line Interesect
+  @param Surf :: Surface to use int line Intersect
 */
 {
   m_line.intersect(m_intersectionPointsOut, Surf);
@@ -50,7 +50,7 @@ void LineIntersectVisit::Accept(const Quadratic &Surf)
 void LineIntersectVisit::Accept(const Plane &Surf)
 /**
   Process an intersect track
-  @param Surf :: Surface to use int line Interesect
+  @param Surf :: Surface to use int line Intersect
 */
 {
   m_line.intersect(m_intersectionPointsOut, Surf);
@@ -59,7 +59,7 @@ void LineIntersectVisit::Accept(const Plane &Surf)
 void LineIntersectVisit::Accept(const Cone &Surf)
 /**
   Process an intersect track
-  @param Surf :: Surface to use int line Interesect
+  @param Surf :: Surface to use int line Intersect
 */
 {
   m_line.intersect(m_intersectionPointsOut, Surf);
@@ -68,7 +68,7 @@ void LineIntersectVisit::Accept(const Cone &Surf)
 void LineIntersectVisit::Accept(const Cylinder &Surf)
 /**
   Process an intersect track
-  @param Surf :: Surface to use int line Interesect
+  @param Surf :: Surface to use int line Intersect
 */
 {
   m_line.intersect(m_intersectionPointsOut, Surf);
@@ -77,7 +77,7 @@ void LineIntersectVisit::Accept(const Cylinder &Surf)
 void LineIntersectVisit::Accept(const Sphere &Surf)
 /**
   Process an intersect track
-  @param Surf :: Surface to use int line Interesect
+  @param Surf :: Surface to use int line Intersect
 */
 {
   m_line.intersect(m_intersectionPointsOut, Surf);
@@ -86,7 +86,7 @@ void LineIntersectVisit::Accept(const Sphere &Surf)
 void LineIntersectVisit::Accept(const General &Surf)
 /**
   Process an intersect track
-  @param Surf :: Surface to use int line Interesect
+  @param Surf :: Surface to use int line Intersect
 */
 {
   m_line.intersect(m_intersectionPointsOut, Surf);

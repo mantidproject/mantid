@@ -574,7 +574,7 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_
     extractAlg->setProperty("WorkspaceIndexList", indices);
     extractAlg->execute();
     detectorWS = extractAlg->getProperty("OutputWorkspace");
-    // Update the workspace indicies to match the new workspace
+    // Update the workspace indices to match the new workspace
     m_processingInstructionsWorkspaceIndex =
         convertProcessingInstructionsToWorkspaceIndices(m_processingInstructions, detectorWS);
   }
@@ -892,7 +892,7 @@ std::string ReflectometryWorkflowBase2::convertProcessingInstructionsToSpectrumN
   std::string ignoreThese = "-,:+";
   for (const char instruction : instructions) {
     if (std::find(ignoreThese.begin(), ignoreThese.end(), instruction) != ignoreThese.end()) {
-      // Found a spacer so add currentNumber to converted after seperator
+      // Found a spacer so add currentNumber to converted after separator
       converted.append(convertToSpectrumNumber(currentNumber, ws));
       converted.push_back(instruction);
       currentNumber = "";

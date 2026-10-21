@@ -35,7 +35,7 @@ LegacyNexusDescriptor::LegacyNexusDescriptor(const std::string &filename)
     throw std::invalid_argument("NexusDescriptor() - File '" + filename + "' does not exist");
   }
   try {
-    // this is very expesive as it walk the entire file
+    // this is very expensive as it walk the entire file
     initialize(filename);
   } catch (Mantid::LegacyNexus::Exception &e) {
     throw std::invalid_argument("NexusDescriptor::initialize - File '" + filename +

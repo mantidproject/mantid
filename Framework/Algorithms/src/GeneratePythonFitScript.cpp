@@ -78,7 +78,7 @@ std::string getFileContents(std::string const &filename) {
   std::ifstream filestream(directory + "/" + filename);
   if (!filestream) {
     filestream.close();
-    throw std::runtime_error("Error occured when attempting to load file: " + filename);
+    throw std::runtime_error("Error occurred when attempting to load file: " + filename);
   }
 
   std::string fileText((std::istreambuf_iterator<char>(filestream)), std::istreambuf_iterator<char>());

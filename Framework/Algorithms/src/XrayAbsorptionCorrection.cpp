@@ -98,7 +98,7 @@ double XrayAbsorptionCorrection::degreesToRadians(double degrees) { return M_PI 
 /**
  * Calculates the position of the detector.
  * @param detectorAngle double of angle of detector
- * @param detectorDistance distance betweeen sample and detector
+ * @param detectorDistance distance between sample and detector
  * @return V3D object of position of detector
  */
 Kernel::V3D XrayAbsorptionCorrection::calculateDetectorPos(double const detectorAngle, double detectorDistance) {

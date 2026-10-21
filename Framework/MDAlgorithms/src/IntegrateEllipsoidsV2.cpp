@@ -185,7 +185,7 @@ void IntegrateEllipsoidsV2::initInstance(API::Algorithm &alg) {
   alg.removeProperty("SatelliteBackgroundInnerSize", false);
   alg.removeProperty("SatelliteBackgroundOuterSize", false);
 
-  // satellite realted properties
+  // satellite related properties
   alg.declareProperty("SatelliteRegionRadius", EMPTY_DBL(), mustBePositive,
                       "Only events at most this distance from a satellite peak will be considered when integration");
   alg.declareProperty("SatellitePeakSize", EMPTY_DBL(), mustBePositive,
@@ -359,7 +359,7 @@ void IntegrateEllipsoidsV2::exec() {
 
   // get the events and add
   // them to the inegrator
-  // set up a descripter of where we are going
+  // set up a descriptor of where we are going
   this->initTargetWSDescr(wksp);
 
   // set up the progress bar
@@ -507,7 +507,7 @@ void IntegrateEllipsoidsV2::exec() {
   peak_ws->mutableRun().addProperty("PeakRadius", PeakRadiusVector, true);
   peak_ws->mutableRun().addProperty("BackgroundInnerRadius", BackgroundInnerRadiusVector, true);
   peak_ws->mutableRun().addProperty("BackgroundOuterRadius", BackgroundOuterRadiusVector, true);
-  // These falgs are related to the satellite peaks and specific to the algorithm.
+  // These flags are related to the satellite peaks and specific to the algorithm.
   peak_ws->mutableRun().addProperty("SatellitePeakRadius", SatellitePeakRadiusVector, true);
   peak_ws->mutableRun().addProperty("SatelliteBackgroundInnerRadius", SatelliteBackgroundInnerRadiusVector, true);
   peak_ws->mutableRun().addProperty("SatelliteBackgroundOuterRadius", SatelliteBackgroundOuterRadiusVector, true);

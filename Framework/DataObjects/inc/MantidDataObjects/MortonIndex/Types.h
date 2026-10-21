@@ -43,10 +43,10 @@ template <size_t ND> using BinIndices = Eigen::Matrix<size_t, 1, static_cast<int
 using Morton96 = uint96_t;
 
 /**
- * This structure binds the size of accesible memory to store
+ * This structure binds the size of accessible memory to store
  * the Morton index to the Morton index type. Typically this
  * size is number_of_dimensions * sizeof(coordinate_type)
- * @tparam SZ :: the size of accesible memory.
+ * @tparam SZ :: the size of accessible memory.
  */
 template <size_t SZ> struct MortonIndex {
   using type = uint256_t;

@@ -142,7 +142,7 @@ public:
     WSD.buildFromMatrixWS(ws2D, "|Q|", "Direct");
     WSD.m_PreprDetTable = detLoc;
 
-    // initalize Convert to TOF
+    // initialize Convert to TOF
     TS_ASSERT_THROWS_NOTHING(Conv.initialize(WSD, "TOF"));
     double t_1 = Conv.convertUnits(3.);
     double t_2 = Conv.convertUnits(10);
@@ -229,7 +229,7 @@ public:
     WSD.buildFromMatrixWS(ws2D, "Q3D", "Elastic");
     WSD.m_PreprDetTable = detLoc;
 
-    // initalize Convert from energy to momentum, forcing convert wia TOF
+    // initialize Convert from energy to momentum, forcing convert wia TOF
     TS_ASSERT_THROWS_NOTHING(Conv.initialize(WSD, "Momentum", true));
 
     std::vector<double> Momentums(n_bins);
@@ -245,7 +245,7 @@ public:
     TS_ASSERT_DELTA(1, range.first, 1.e-8);
     TS_ASSERT_DELTA(10000, range.second, 1.e-8);
 
-    // initalize Convert from momentum to energy, forcing convert wia TOF
+    // initialize Convert from momentum to energy, forcing convert wia TOF
     pAxis0 = std::make_unique<NumericAxis>(n_bins - 1);
     pAxis0->setUnit("Momentum");
     ws2D->replaceAxis(0, std::move(pAxis0));

@@ -180,7 +180,7 @@ void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
   // SpectrumDefinitions and assign other data (such as per-spectrum masking
   // flags, which do not exist yet). Furthermore, since currently detector
   // groupings are still stored in ISpectrum (in addition to the
-  // SpectrumDefinitions in SpectrumInfo), an assigment of SpectrumDefinitions
+  // SpectrumDefinitions in SpectrumInfo), an assignment of SpectrumDefinitions
   // in SpectrumInfo would lead to inconsistent workspaces. SpectrumDefinitions
   // are thus assigned by IndexInfo, which acts at a highler level and is
   // typically used at construction time of a workspace, i.e., there is no data
@@ -1195,8 +1195,8 @@ bool MatrixWorkspace::isIntegerBins() const {
  *  by (1-weight) as well as the mask flags (m_masks) being updated. This
  * function doesn't protect the writes to the
  *  y and e-value arrays and so is not safe if called by multiple threads
- * working on the same spectrum. Writing to the mask set is marked parrallel
- * critical so different spectra can be analysised in parallel
+ * working on the same spectrum. Writing to the mask set is marked parallel
+ * critical so different spectra can be analysed in parallel
  *  @param workspaceIndex :: The workspace index of the bin
  *  @param binIndex ::      The index of the bin in the spectrum
  *  @param weight ::        'How heavily' the bin is to be masked. =1 for full
@@ -2059,7 +2059,7 @@ std::pair<size_t, double> MatrixWorkspace::getXIndex(size_t i, double x, bool is
  * histogram data, e.g. &MatrixWorkspace::mutableY.
  * @param mutableData :: Accessor for the data to copy the image to.
  * @param image :: An image to copy the data from.
- * @param start :: Startinf workspace indx to copy data to.
+ * @param start :: Startinf workspace index to copy data to.
  * @param parallelExecution :: Should inner loop run as parallel operation
  */
 template <class Accessor>
@@ -2087,7 +2087,7 @@ void MatrixWorkspace::setImage(Accessor mutableData, const MantidImage &image, s
   for (int i = 0; i < static_cast<int>(height); ++i) {
     auto &row = image[i];
     if (row.size() != width) {
-      throw std::runtime_error("Canot set image: image is corrupted.");
+      throw std::runtime_error("Cannot set image: image is corrupted.");
     }
     size_t spec = start + static_cast<size_t>(i) * width;
     auto rowEnd = row.end();
@@ -2100,7 +2100,7 @@ void MatrixWorkspace::setImage(Accessor mutableData, const MantidImage &image, s
 /**
  * Copy the data (Y's) from an image to this workspace.
  * @param image :: An image to copy the data from.
- * @param start :: Startinf workspace indx to copy data to.
+ * @param start :: Startinf workspace index to copy data to.
  * @param parallelExecution :: Should inner loop run as parallel operation
  */
 void MatrixWorkspace::setImageY(const MantidImage &image, size_t start, bool parallelExecution) {
@@ -2110,7 +2110,7 @@ void MatrixWorkspace::setImageY(const MantidImage &image, size_t start, bool par
 /**
  * Copy the data from an image to this workspace's errors.
  * @param image :: An image to copy the data from.
- * @param start :: Startinf workspace indx to copy data to.
+ * @param start :: Startinf workspace index to copy data to.
  * @param parallelExecution :: Should inner loop run as parallel operation
  */
 void MatrixWorkspace::setImageE(const MantidImage &image, size_t start, bool parallelExecution) {

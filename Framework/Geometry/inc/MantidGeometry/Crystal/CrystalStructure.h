@@ -39,7 +39,7 @@ class StructureFactorCalculator;
     constructed from three strings that contain the corresponding information.
 
     The unit cell string must consist of 3 or 6 floating point numbers, which
-    are 3 lenghts in Angström and 3 angles in degree. If the angles are not
+    are 3 lengths in Angström and 3 angles in degree. If the angles are not
     supplied, they are assumed to be 90 degrees.
 
     The space group string must be a valid space group that is registered into

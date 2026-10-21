@@ -128,7 +128,7 @@ if(ENABLE_WORKBENCH)
       set(ROOT_DIR "\${INSTALLDIR}")
       set(PREAMBLE "${SYS_PREAMBLE_TEXT}")
       set(DEST_FILENAME_SUFFIX ".standalone")
-      # Need to set this, otherwise stanalone won't launch on some linux distributions
+      # Need to set this, otherwise standalone won't launch on some linux distributions
       set(XKB_CONFIG_ROOT_COMMAND "XKB_CONFIG_ROOT=\${INSTALLDIR}/share/X11/xkb")
     else()
       message(FATAL_ERROR "Unknown installation type '${install_type}' for workbench startup scripts")

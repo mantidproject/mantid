@@ -101,7 +101,7 @@ std::vector<double> RefAxis::createBinBoundaries() const {
 }
 
 const std::vector<double> &RefAxis::getValues() const {
-  throw std::runtime_error("Calling getValues() on RefAxis is forbidded.");
+  throw std::runtime_error("Calling getValues() on RefAxis is forbidden.");
 }
 
 double RefAxis::getMin() const {

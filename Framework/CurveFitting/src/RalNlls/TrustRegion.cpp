@@ -40,7 +40,7 @@ void matmultInner(const DoubleFortranMatrix &J, DoubleFortranMatrix &A) {
  *   of J.
  *  @param J :: The matrix.
  *  @param s1 :: The largest sv.
- *  @param sn :: The smalles sv.
+ *  @param sn :: The smallest sv.
  */
 void getSvdJ(const DoubleFortranMatrix &J, double &s1, double &sn) {
   Eigen::BDCSVD<Eigen::MatrixXd> svd(J.inspector());
@@ -266,7 +266,7 @@ void testConvergence(double normF, double normJF, double normF0, double normJF0,
 
 /**  Apply_scaling
  *   input  Jacobian matrix, J
- *   ouput  scaled Hessisan, H, and J^Tf, v.
+ *   output  scaled Hessisan, H, and J^Tf, v.
  *
  *   Calculates a diagonal scaling W, stored in w.diag
  *   updates v(i) -> (1/W_i) * v(i)

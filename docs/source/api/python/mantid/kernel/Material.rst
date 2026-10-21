@@ -74,14 +74,14 @@ where :math:`f` is the packing fraction
 
 It can be specified in one of several ways:
 
-1. Specifiying it directly with ``EffectiveNumberDensity``
+1. Specifying it directly with ``EffectiveNumberDensity``
 2. Specifying the mass density. In this case the effective number density is calculated as follows:
 
 .. math:: \rho_{n,eff} = \frac{N_{atoms} \rho_m N_A}{\sum_{i}n_{i}M_i}
 
 where :math:`\rho_m` is the mass density, :math:`N_A` is the Avogadro constant, and :math:`M_i` is the relative molecular mass of the ith atom.
 
-3. The default behaviour is to set it equal to the full number density multipled by the optional packing fraction (which is assumed to be 1 if not supplied)
+3. The default behaviour is to set it equal to the full number density multiplied by the optional packing fraction (which is assumed to be 1 if not supplied)
 
 
 The effective number density, :math:`\rho_{n,eff}`, should be used for :ref:`absorption calculations<Sample Corrections>`.

@@ -1132,7 +1132,7 @@ public:
 
   void test_getCoordAtSignal_regression() {
     /*
-    Having more spectrum numbers (acutally vertical axis increments) than x bins
+    Having more spectrum numbers (actually vertical axis increments) than x bins
     in VolumeNormalisation mode
     should not cause any issues.
     */
@@ -2193,7 +2193,7 @@ public:
       std::copy(xValues.begin(), xValues.end(), workspace.mutableX(wsIndex).begin());
     }
     MantidVec integratedValues;
-    // the enitre range
+    // the entire range
     workspace.getIntegratedSpectra(integratedValues, 0, 0, true);
     MantidVec expected = {10., 0., 0., 4., 6.};
     TS_ASSERT_EQUALS(integratedValues, expected);
@@ -2423,7 +2423,7 @@ public:
 
     /*
      * Simulate the L2 calculation performed via the Workspace/Instrument
-     * interface. Repeat several times to benchmark any caching/optmisation that
+     * interface. Repeat several times to benchmark any caching/optimisation that
      * might be taken place in parameter maps.
      */
     auto instrument = m_workspaceSans.getInstrument();

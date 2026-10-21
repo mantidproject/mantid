@@ -52,7 +52,7 @@ const std::string
 
 /** Give the gap between the two slits, in meters.
  *
- * @param instrument an instrument which containts the slit components
+ * @param instrument an instrument which contains the slit components
  * @param slit1Name name of the first slit component
  * @param slit2Name name of the second slit component
  * @return the slit gap, in meters

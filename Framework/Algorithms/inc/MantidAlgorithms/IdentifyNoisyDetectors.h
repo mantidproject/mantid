@@ -26,7 +26,7 @@ public:
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "This algorithm creates a single-column workspace where the Y "
-           "values are populated withs 1s and 0s, 0 signifying that the "
+           "values are populated with 1s and 0s, 0 signifying that the "
            "detector is to be considered 'bad' based on the method described "
            "below.";
   }

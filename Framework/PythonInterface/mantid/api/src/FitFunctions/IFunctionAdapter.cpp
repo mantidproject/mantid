@@ -184,7 +184,7 @@ PyObject *IFunctionAdapter::getAttributeValue(const IFunction &self, const API::
     result = to_python_value<const std::vector<double> &>()(attr.asVector());
   else
     throw std::runtime_error("Unknown attribute type, cannot convert C++ type "
-                             "to Python. Contact developement team.");
+                             "to Python. Contact development team.");
   return result;
 }
 
@@ -280,7 +280,7 @@ void IFunctionAdapter::evaluateFunction(double *out, const double *xValues, cons
   // and
   // will check for each function call whether the wrapped method exists. It
   // also avoid unnecessary construction of
-  // boost::python::objects whn using boost::python::call_method
+  // boost::python::objects when using boost::python::call_method
 
   PyObject *result =
       PyObject_CallMethod(getSelf(), const_cast<char *>(m_functionName.c_str()), const_cast<char *>("(O)"), xvals);

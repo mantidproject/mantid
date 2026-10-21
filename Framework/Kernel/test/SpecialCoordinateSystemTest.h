@@ -15,7 +15,7 @@ using namespace Mantid::Kernel;
  * We are testing the enum because the order of the elements in the enum is
  * critical. There are various places in the codebase where the
  * enum integer values are assumed to be constant. A proper fix for this would
- * be a type replacment enum->object, but while that has not been done,
+ * be a type replacement enum->object, but while that has not been done,
  * a santiy check (these tests) on the enum ordering will prevent unintentional
  * reordering.
  */

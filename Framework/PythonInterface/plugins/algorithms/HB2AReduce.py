@@ -135,7 +135,7 @@ class HB2AReduce(PythonAlgorithm):
             name="OutputFormat",
             defaultValue="GSAS",
             validator=StringListValidator(["XYE", "GSAS"]),
-            doc="Supportted output format: XYE (.dat), GSAS (.gss)",
+            doc="Supported output format: XYE (.dat), GSAS (.gss)",
         )
         self.setPropertySettings("OutputFormat", condition)
         self.declareProperty(

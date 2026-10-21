@@ -34,7 +34,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
     """
 
     def __init__(self, context: MuonContext, fitting_context: TFAsymmetryFittingContext):
-        """Initialize the TFAsymmetryFittingModel with emtpy fit data."""
+        """Initialize the TFAsymmetryFittingModel with empty fit data."""
         super(TFAsymmetryFittingModel, self).__init__(context, fitting_context)
 
     @GeneralFittingModel.dataset_names.setter

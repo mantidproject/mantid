@@ -538,7 +538,7 @@ public:
     TSM_ASSERT_DELTA("Should have a signal value of 4", ws->getSignalAt(4), static_cast<Mantid::signal_t>(4.0), 1e-4);
     TSM_ASSERT_DELTA("Should have a signal value of 5", ws->getSignalAt(5), static_cast<Mantid::signal_t>(5.0), 1e-4);
 
-    // We expect that the signals have not chagned. The first bin and the last
+    // We expect that the signals have not changed. The first bin and the last
     // bin of the original workspace were trimmed, hence
     // we expect to have signal values of 1, 2, 3, 4 for the new workspace
     TSM_ASSERT_DELTA("Should have a signal value of 1", outWS->getSignalAt(0), static_cast<Mantid::signal_t>(1.0),

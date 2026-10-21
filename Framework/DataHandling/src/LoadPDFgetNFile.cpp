@@ -293,7 +293,7 @@ size_t calcVecSize(const std::vector<double> &data0, std::vector<size_t> &numpts
       // In the middle of a set of data
       ++vecsize;
     }
-    // Loop variable udpate
+    // Loop variable update
     prex = curx;
   } // ENDFOR
 

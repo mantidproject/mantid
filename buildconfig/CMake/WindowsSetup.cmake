@@ -62,7 +62,7 @@ else()
 endif()
 
 # Define a new configuration for debugging with conda. Crucially it must link to the MSVC release runtime but we switch
-# off all optimzations
+# off all optimizations
 set(_conda_debug_cfg_name DebugWithRelRuntime)
 string(TOUPPER ${_conda_debug_cfg_name} _conda_debug_cfg_name_upper)
 include(CCacheSetup)

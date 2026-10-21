@@ -171,7 +171,7 @@ public:
     const size_t detIdx = 0;  // detector index
     // Eigen copy of the detector offset that was specified in the instrument
     Eigen::Vector3d expected_offset = Mantid::Kernel::toVector3d(detectorOffset);
-    // ofsset returned by offsetFromAncestor
+    // offset returned by offsetFromAncestor
     auto returnedOffset = offsetFromAncestor(compInfo, bankIdx, detIdx);
     // assert offsetFromAncestor gives back the detector offset
 

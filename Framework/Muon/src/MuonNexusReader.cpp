@@ -35,7 +35,7 @@ const std::string PERIOD_OUTPUT("period_output");
 const std::string TOTAL_COUNTS_PERIOD("total_counts_period");
 const std::string PERIOD_LABELS("period_labels");
 
-/// Function to convert vectors into a string separated by a delimeter delim
+/// Function to convert vectors into a string separated by a delimiter delim
 template <class T> std::string convertVectorToString(T values, const std::string &delim) {
   std::string result("");
   if (!values.empty()) {
@@ -157,7 +157,7 @@ void MuonNexusReader::readFromFile(const string &filename) {
 }
 
 /**
- * Try to read in vairous peices of period information.
+ * Try to read in various pieces of period information.
  * Period info includes:
  * - Period sequences
  * - Period Names

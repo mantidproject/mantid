@@ -323,7 +323,7 @@ double RotationSurface::applyUCorrection(double u) const {
 
 /**
  * Set new value for the u-correction.
- * Correct all uv corrdinates of detectors.
+ * Correct all uv coordinates of detectors.
  */
 void RotationSurface::setUCorrection(double umin, double umax) {
   m_u_min = umin;

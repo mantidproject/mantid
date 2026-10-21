@@ -38,7 +38,7 @@ void export_Quat() {
   // Quat class
   class_<Quat>("Quat",
                "Quaternions are the 3D generalization of complex numbers. "
-               "Quaternions are used for roations in 3D spaces and often "
+               "Quaternions are used for rotations in 3D spaces and often "
                "implemented for "
                "computer graphics applications.",
                init<>(arg("self"), "Construct a default Quat that will perform no transformation."))

@@ -120,7 +120,7 @@ def __get_cache_name(
             }.items()
         ]
 
-        # use mantid build-in alg to generate the cache filename and sha1
+        # use mantid built-in alg to generate the cache filename and sha1
         ascii_hash = ""
         for cache_dir in cache_dirs:
             ascii_name, ascii_hash = mantid.simpleapi.CreateCacheFilename(

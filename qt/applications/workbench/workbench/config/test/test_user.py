@@ -88,7 +88,7 @@ class ConfigUserTest(TestCase):
 
         try:
             cfg = UserConfig(name, name, {"main": {"default": 42}})
-            self.assertTrue(cfg.has("unrelated"))  # interited from above
+            self.assertTrue(cfg.has("unrelated"))  # inherited from above
             self.assertTrue(cfg.has("main/default"))
             self.assertEqual(42, cfg.get("main/default", type=int))
             self.assertFalse(cfg.qsettings.contains("main/default"))

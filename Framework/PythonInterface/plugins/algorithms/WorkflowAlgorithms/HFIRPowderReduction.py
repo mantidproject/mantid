@@ -130,7 +130,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             "VanadiumDiameter",
             Property.EMPTY_DBL,  # cm
             FloatBoundedValidator(lower=0.0),  # must be positive
-            doc="Vanadium rod diamter (cm)",
+            doc="Vanadium rod diameter (cm)",
         )
         self.declareProperty(
             "VanadiumHeight",

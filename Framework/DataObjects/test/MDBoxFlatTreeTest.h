@@ -25,7 +25,7 @@ public:
 
   MDBoxFlatTreeTest() {
     using Mantid::DataObjects::MDEventsTestHelper::makeFakeMDEventWorkspace;
-    // make non-file backet mdEv workspace with 10000 events
+    // make non-file backed mdEv workspace with 10000 events
     spEw3 = makeFakeMDEventWorkspace("TestLeanEvWS", 10000);
   }
 

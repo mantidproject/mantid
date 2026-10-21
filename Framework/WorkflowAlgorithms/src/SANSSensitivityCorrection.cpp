@@ -83,7 +83,7 @@ void SANSSensitivityCorrection::init() {
 }
 
 /**checks the file by opening it and reading few lines
- *  @param filePath :: name of the file inluding its path
+ *  @param filePath :: name of the file including its path
  *  @return an integer value how much this algorithm can load the file
  */
 bool SANSSensitivityCorrection::fileCheck(const std::string &filePath) {

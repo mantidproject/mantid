@@ -76,7 +76,7 @@ private:
 
 ///// Singleton declaration
 // #ifdef _WIN32
-//     // this breaks new namespace declaraion rules; need to find a better fix
+//     // this breaks new namespace declaration rules; need to find a better fix
 //     template class MANTID_KERNEL_DLL
 //     Mantid::Kernel::SingletonHolder<ThreadPoolImpl>;
 // #endif /* _WIN32 */

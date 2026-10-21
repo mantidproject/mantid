@@ -102,7 +102,7 @@ void PropertyHandler::init() {
   int itype =
       static_cast<int>(m_browser->m_enumManager->enumNames(m_type).indexOf(QString::fromStdString(m_fun->name())));
   m_browser->m_enumManager->setValue(m_type, itype);
-  // create worspace and workspace index properties if parent is a MultiBG
+  // create workspace and workspace index properties if parent is a MultiBG
   initWorkspace();
 
   // create attribute properties
@@ -174,7 +174,7 @@ protected:
   }
   /// Create vector property
   QtProperty *apply(const std::vector<double> &b) const override {
-    // throw std::runtime_error("Vector attribute property not implememted.");
+    // throw std::runtime_error("Vector attribute property not implemented.");
     QtProperty *prop = m_browser->m_vectorManager->addProperty(m_name);
     m_browser->m_vectorSizeManager->blockSignals(true);
     QtProperty *sizeProp = m_browser->m_vectorSizeManager->addProperty("Size");
@@ -666,7 +666,7 @@ PropertyHandler *PropertyHandler::findHandler(const Mantid::API::IFunction *fun)
 /**
  * Set function parameter value read from a QtProperty
  * @param prop :: The (double) property with the new parameter value
- * @return true if successfull
+ * @return true if successful
  */
 bool PropertyHandler::setParameter(QtProperty *prop) {
   if (m_parameters.contains(prop)) {
@@ -832,7 +832,7 @@ private:
  * @param prop :: The property with the new attribute value
  * @param resetProperties :: Flag to reset all properties of the handled
  * function.
- * @return true if successfull
+ * @return true if successful
  */
 bool PropertyHandler::setAttribute(QtProperty *prop, bool resetProperties) {
   if (m_attributes.contains(prop)) {

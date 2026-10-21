@@ -91,13 +91,13 @@ TMDE(MDBox)::MDBox(API::BoxController *const splitter, const uint32_t depth,
 }
 
 /**
- * contructor for explicit creation of MDGridBox with known
+ * constructor for explicit creation of MDGridBox with known
  * events in it
  * @param bc :: shared pointer to the BoxController, owned by workspace
  * @param depth :: recursive split depth
  * @param extentsVector :: size of the box
  * @param begin :: iterator to start
- * @param end :: iterator before ened (not included)
+ * @param end :: iterator before end (not included)
  */
 template <typename MDE, size_t nd>
 MDBox<MDE, nd>::MDBox(Mantid::API::BoxController *const bc, const uint32_t depth,
@@ -788,13 +788,13 @@ TMDE(void MDBox)::saveAt(API::IBoxControllerIO *const FileSaver, uint64_t positi
 TMDE(void MDBox)::reserveMemoryForLoad(uint64_t size) { this->data.reserve(size); }
 
 /**Load the box data of specified size from the disk location provided using the
- *class, respoinsible for the file IO and append them to exisiting events
- * Clear events vector first if overwriting the exisitng events is necessary.
+ *class, respoinsible for the file IO and append them to existing events
+ * Clear events vector first if overwriting the existing events is necessary.
  *
  * @param FileSaver    -- the pointer to the class, responsible for file IO
  * @param filePosition -- the place in the direct access file, where necessary
  *data are located
- * @param nEvents      -- number of events reqested to load
+ * @param nEvents      -- number of events requested to load
  * @param tableDataTemp -- overload allows for passing previously allocated temporary memory
  */
 TMDE(void MDBox)::loadAndAddFrom(API::IBoxControllerIO *const FileSaver, uint64_t filePosition, size_t nEvents,
@@ -817,13 +817,13 @@ TMDE(void MDBox)::loadAndAddFrom(API::IBoxControllerIO *const FileSaver, uint64_
 }
 
 /**Load the box data of specified size from the disk location provided using the
- *class, respoinsible for the file IO and append them to exisiting events
- * Clear events vector first if overwriting the exisitng events is necessary.
+ *class, respoinsible for the file IO and append them to existing events
+ * Clear events vector first if overwriting the existing events is necessary.
  *
  * @param FileSaver    -- the pointer to the class, responsible for file IO
  * @param filePosition -- the place in the direct access file, where necessary
  *data are located
- * @param nEvents      -- number of events reqested to load
+ * @param nEvents      -- number of events requested to load
  */
 TMDE(void MDBox)::loadAndAddFrom(API::IBoxControllerIO *const FileSaver, uint64_t filePosition, size_t nEvents) {
   if (nEvents == 0)

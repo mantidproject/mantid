@@ -116,7 +116,7 @@ PropertyManager &PropertyManager::operator+=(const PropertyManager &rhs) {
       // Use the property's += operator to add THAT. Isn't abstraction fun?!
       (*lhs_prop) += it->second.get();
     } catch (Exception::NotFoundError &) {
-      // The property isnt on the lhs.
+      // The property isn't on the lhs.
       // Let's copy it
       auto copy = std::unique_ptr<Property>(it->second->clone());
       // And we add a copy of that property to *this

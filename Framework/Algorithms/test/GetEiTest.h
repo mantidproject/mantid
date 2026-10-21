@@ -261,13 +261,13 @@ public:
 
   /**
    * Modify the test workspace so that one of the monitors has a local maximum on the trailing edge
-   * of the peak. Preivously, this would result in a divide-by-zero error.
+   * of the peak. Previously, this would result in a divide-by-zero error.
    */
   void testNoisyDataOnTrailingEdge() {
     MatrixWorkspace_sptr testWS = GetEiTestHelper::createTestWorkspaceWithMonitors();
 
     auto &yValues = testWS->mutableY(0);
-    // Find index of peak value and calcualte half height.
+    // Find index of peak value and calculate half height.
     int64_t iPeak = std::max_element(yValues.cbegin(), yValues.cend()) - yValues.begin();
     double yPeak = yValues[iPeak];
     double halfHeight = yPeak * 0.5;
@@ -300,13 +300,13 @@ public:
 
   /**
    * Modify the test workspace so that one of the monitors has a local maximum on the leading edge
-   * of the peak. Preivously, this would result in a divide-by-zero error.
+   * of the peak. Previously, this would result in a divide-by-zero error.
    */
   void testNoisyDataOnLeadingEdge() {
     MatrixWorkspace_sptr testWS = GetEiTestHelper::createTestWorkspaceWithMonitors();
 
     auto &yValues = testWS->mutableY(0);
-    // Find index of peak value and calcualte half height.
+    // Find index of peak value and calculate half height.
     int64_t iPeak = std::max_element(yValues.cbegin(), yValues.cend()) - yValues.begin();
     double yPeak = yValues[iPeak];
     double halfHeight = yPeak * 0.5;

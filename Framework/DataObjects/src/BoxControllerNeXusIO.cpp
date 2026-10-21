@@ -215,7 +215,7 @@ void BoxControllerNeXusIO::OpenAndCheckEventGroup() {
   m_File->getAttr("version", fileGroupVersion);
 
   if (fileGroupVersion != m_EventsVersion)
-    throw Kernel::Exception::FileError("Trying to open existing data grop to write new event data but the "
+    throw Kernel::Exception::FileError("Trying to open existing data group to write new event data but the "
                                        "group with differetn version: " +
                                            fileGroupVersion + " already exists ",
                                        m_fileName);
@@ -501,7 +501,7 @@ template <typename Type>
 void BoxControllerNeXusIO::loadGenericBlock(std::vector<Type> &Block, const uint64_t blockPosition,
                                             const size_t nPoints) const {
   if (blockPosition + nPoints > this->getFileLength())
-    throw Kernel::Exception::FileError("Attemtp to read behind the file end", m_fileName);
+    throw Kernel::Exception::FileError("Attempt to read behind the file end", m_fileName);
 
   Nexus::DimVector start(2, 0);
   start[0] = blockPosition;
@@ -518,7 +518,7 @@ void BoxControllerNeXusIO::loadGenericBlock(std::vector<Type> &Block, const uint
   adjustEventDataBlock(Block, "READ"); // insert goniometer info if necessary
 }
 
-/** Helper funcion which allows to convert one data fomat into another */
+/** Helper function which allows to convert one data format into another */
 template <typename FROM, typename TO> void convertFormats(const std::vector<FROM> &inData, std::vector<TO> &outData) {
   outData.reserve(inData.size());
   for (size_t i = 0; i < inData.size(); i++) {

@@ -503,7 +503,7 @@ public:
 
     auto bc = outWS->getBoxController();
     TSM_ASSERT_EQUALS("Boxes should not have split into more than the 1 bin we "
-                      "specificed in PnBin properties, because CutMD should "
+                      "specified in PnBin properties, because CutMD should "
                       "specify MaxRecursionDepth=1 in SliceMD",
                       bc->getTotalNumMDBoxes(), 1);
 

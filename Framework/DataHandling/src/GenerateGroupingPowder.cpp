@@ -87,7 +87,7 @@ public:
 
 class CircularOrderedLabelor : public Labelor {
   /**
-   * Labels using unsigned twoTheta, with no gaps in labeld groups
+   * Labels using unsigned twoTheta, with no gaps in labelled groups
    * Groups are labeled in order of twoTheta
    * First, angles are sorted then sphere is divided into bands of width tt_step.
    * Within each band, at most two possibilities for label

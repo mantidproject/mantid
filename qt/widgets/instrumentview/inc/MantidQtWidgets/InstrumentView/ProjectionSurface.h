@@ -121,7 +121,7 @@ public:
   virtual size_t getDetector(int x, int y) const;
   /// NULL deselects components and selects the whole instrument
   virtual void componentSelected(size_t componentIndex) = 0;
-  /// fill in a list of detector indices which were selected by the selction
+  /// fill in a list of detector indices which were selected by the selection
   /// tool
   virtual void getSelectedDetectors(std::vector<size_t> &detIndices) = 0;
   /// fill in a list of detector indices which were masked by the mask shapes
@@ -226,7 +226,7 @@ public:
   /// @param value :: New value
   void setCurrentPoint(const QString &prop, const QPointF &value) { m_maskShapes.setCurrentPoint(prop, value); }
 
-  /// Check if a point on the scren is under any of the mask shapes
+  /// Check if a point on the screen is under any of the mask shapes
   bool isMasked(double x, double y) const { return m_maskShapes.isMasked(x, y); }
   /// Check if there are any masks defined
   bool hasMasks() const { return m_maskShapes.size() > 0; }

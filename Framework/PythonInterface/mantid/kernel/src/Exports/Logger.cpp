@@ -72,11 +72,11 @@ void export_Logger() {
       .def("__init__", make_constructor(&create, default_call_policies(), args("name")))
       .def("fatal", fatal, (arg("self"), arg("message")),
            "Send a message at fatal priority: "
-           "An unrecoverable error has occured and the application will "
+           "An unrecoverable error has occurred and the application will "
            "terminate")
       .def("error", error, (arg("self"), arg("message")),
            "Send a message at error priority: "
-           "An error has occured but the framework is able to handle it and "
+           "An error has occurred but the framework is able to handle it and "
            "continue")
       .def("warning", warning, (arg("self"), arg("message")),
            "Send a message at warning priority: "

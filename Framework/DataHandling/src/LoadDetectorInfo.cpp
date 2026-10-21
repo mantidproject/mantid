@@ -330,7 +330,7 @@ void LoadDetectorInfo::readLibisisNxs(Nexus::File &nxsFile, DetectorInfo &detInf
  */
 void LoadDetectorInfo::readNXSDotDat(Nexus::File &nxsFile, DetectorInfo &detInfo) const {
   std::vector<int32_t> fileIDs;
-  nxsFile.readData<int32_t>("detID", fileIDs); // containts both ids & codes
+  nxsFile.readData<int32_t>("detID", fileIDs); // contains both ids & codes
   std::vector<float> fileOffsets;
   nxsFile.readData<float>("timeOffsets", fileOffsets);
   const size_t numDets = fileOffsets.size() / 2;

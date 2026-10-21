@@ -710,7 +710,7 @@ void InstrumentActor::loadColorMap(const std::pair<QString, bool> &cmap, bool re
 //------------------------------------------------------------------------------
 /** Get the detector position
  *
- * @param pickID :: pick Index maching the getDetector() calls;
+ * @param pickID :: pick Index matching the getDetector() calls;
  * @return the real-space position of the detector
  */
 const Mantid::Kernel::V3D InstrumentActor::getDetPos(size_t pickID) const {
@@ -1223,7 +1223,7 @@ void InstrumentActor::setGridLayer(bool isUsingLayer, int layer) const {
 const InstrumentRenderer &InstrumentActor::getInstrumentRenderer() const { return *m_renderer; }
 
 /** If instrument.geometry.view is set to Default or Physical, then the physical
- * instrument componentInfo is returned. Othewise this returns the neutronic
+ * instrument componentInfo is returned. Otherwise this returns the neutronic
  * version.
  */
 const Mantid::Geometry::ComponentInfo &InstrumentActor::componentInfo() const {
@@ -1234,7 +1234,7 @@ const Mantid::Geometry::ComponentInfo &InstrumentActor::componentInfo() const {
 }
 
 /** If instrument.geometry.view is set to Default or Physical, then the physical
- * instrument detectorInfo is returned. Othewise this returns the neutronic
+ * instrument detectorInfo is returned. Otherwise this returns the neutronic
  * version.
  */
 const Mantid::Geometry::DetectorInfo &InstrumentActor::detectorInfo() const {

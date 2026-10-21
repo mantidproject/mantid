@@ -48,7 +48,7 @@ class SelectNexusFilesByMetadata(PythonAlgorithm):
         self.declareProperty(
             name="NexusCriteria",
             defaultValue="",
-            doc="Logical expresion for metadata criteria using python syntax. "
+            doc="Logical expression for metadata criteria using python syntax. "
             "Provide full absolute names for nexus entries enclosed with $ symbol from both sides.",
         )
         self.declareProperty(

@@ -127,7 +127,7 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Test algorithm with loading HB3A with instrument and presense of SPICE
+  /** Test algorithm with loading HB3A with instrument and presence of SPICE
    * scan table such that it will override 2theta value in the XML file
    * Test: Set 2theta = 0
    *  1. Detector should be symmetric along the X-axis and about the center of

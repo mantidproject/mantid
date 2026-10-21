@@ -31,7 +31,7 @@ MCInteractionStatistics::MCInteractionStatistics(const detid_t detectorID, const
     env = &sample.getEnvironment();
     assert(env);
     if (env->nelements() == 0) {
-      throw std::invalid_argument("MCInteractionStatistics() - Sample enviroment has zero components.");
+      throw std::invalid_argument("MCInteractionStatistics() - Sample environment has zero components.");
     }
   } catch (std::runtime_error &) {
     // swallow this as no defined environment from getEnvironment

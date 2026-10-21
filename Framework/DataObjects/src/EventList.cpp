@@ -569,7 +569,7 @@ template <class T1, class T2> void EventList::minusHelper(std::vector<T1> &event
   events.reserve(events.size() + more_events.size());
   /* In the event of subtracting in place, calling the end() vector would make
    * it point at the wrong place
-   * Using it caused a segault, Ticket #2306.
+   * Using it caused a segfault, Ticket #2306.
    * So we cache the end (this speeds up too).
    */
   // We call the constructor for T1. In the case of WeightedEventNoTime, the pulse time will just be ignored.
@@ -1153,16 +1153,16 @@ void EventList::sortTimeAtSample(const double &tofFactor, const double &tofShift
   // Perform sort.
   switch (eventType) {
   case TOF: {
-    CompareTimeAtSample<TofEvent> comparitor(tofFactor, tofShift);
-    switchable_sort(events->begin(), events->end(), comparitor);
+    CompareTimeAtSample<TofEvent> comparator(tofFactor, tofShift);
+    switchable_sort(events->begin(), events->end(), comparator);
   } break;
   case WEIGHTED: {
-    CompareTimeAtSample<WeightedEvent> comparitor(tofFactor, tofShift);
-    switchable_sort(weightedEvents->begin(), weightedEvents->end(), comparitor);
+    CompareTimeAtSample<WeightedEvent> comparator(tofFactor, tofShift);
+    switchable_sort(weightedEvents->begin(), weightedEvents->end(), comparator);
   } break;
   case WEIGHTED_NOTIME: {
-    CompareTimeAtSample<WeightedEventNoTime> comparitor(tofFactor, tofShift);
-    switchable_sort(weightedEventsNoTime->begin(), weightedEventsNoTime->end(), comparitor);
+    CompareTimeAtSample<WeightedEventNoTime> comparator(tofFactor, tofShift);
+    switchable_sort(weightedEventsNoTime->begin(), weightedEventsNoTime->end(), comparator);
   } break;
   }
   // Save the order to avoid unnecessary re-sorting.
@@ -3125,7 +3125,7 @@ void EventList::maskTof(const double tofMin, const double tofMax) {
   if (tofMax <= tofMin)
     throw std::runtime_error("EventList::maskTof: tofMax must be > tofMin");
 
-  // don't do anything with an emply list
+  // don't do anything with an empty list
   if (this->getNumberEvents() == 0)
     return;
 
@@ -3195,7 +3195,7 @@ void EventList::maskCondition(const std::vector<bool> &mask) {
   if (this->getNumberEvents() != mask.size())
     throw std::runtime_error("EventList::maskTof: tofMax must be > tofMin");
 
-  // don't do anything with an emply list
+  // don't do anything with an empty list
   if (this->getNumberEvents() == 0)
     return;
 
@@ -4500,7 +4500,7 @@ template <class T>
 void EventList::convertUnitsViaTofHelper(typename std::vector<T> &events, Mantid::Kernel::Unit const *fromUnit,
                                          Mantid::Kernel::Unit const *toUnit) {
   for (auto &itev : events) {
-    // Conver to TOF
+    // Convert to TOF
     const double tof = fromUnit->singleToTOF(itev.m_tof);
     // And back from TOF to whatever
     itev.m_tof = toUnit->singleFromTOF(tof);

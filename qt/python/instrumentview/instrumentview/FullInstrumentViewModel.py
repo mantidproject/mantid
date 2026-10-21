@@ -862,7 +862,7 @@ class FullInstrumentViewModel:
         located_peaks_by_pws = [self._located_peaks(peaks, self._workspace_x_unit) for peaks in peaks_by_pws]
         labels_by_pws = [[p.label for p, _ in peaks] for peaks in located_peaks_by_pws]
         # Convert peak units to currently plotted units
-        # NOTE: Need to get x coords in workspace unit for better acuracy
+        # NOTE: Need to get x coords in workspace unit for better accuracy
         # Cannot trust units in peak workspaces
         converted_x = [
             [

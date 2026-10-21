@@ -439,7 +439,7 @@
            </font>
           </property>
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This check box is used with two push buttons&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;1. &amp;quot;Sum Counts&amp;quot;: when checked,  peaks will be fitted with Gaussian&lt;/p&gt;&lt;p&gt;2. &amp;quot;Plot&amp;quot; (to the right side): when checked, calculated data (from peak fitting) will be plot agains the original data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This check box is used with two push buttons&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;1. &amp;quot;Sum Counts&amp;quot;: when checked,  peaks will be fitted with Gaussian&lt;/p&gt;&lt;p&gt;2. &amp;quot;Plot&amp;quot; (to the right side): when checked, calculated data (from peak fitting) will be plot against the original data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string>Fit</string>

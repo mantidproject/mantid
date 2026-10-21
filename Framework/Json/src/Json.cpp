@@ -16,7 +16,7 @@ namespace Mantid::JsonHelpers {
  * false and writing to a string the error.
  *
  * @param json the json to be converted to a string.
- * @param indentation the indentation can be anything, if nothing is passed then indentations and newline charecters
+ * @param indentation the indentation can be anything, if nothing is passed then indentations and newline characters
  * will be ignored. Defaults to nothing.
  * @return std::string
  */
@@ -51,7 +51,7 @@ Json::Value stringToJson(const std::string &json) {
  *
  * @param jsonString The string that is going to be parsed into a Json::Value
  * @param jsonValue InOut variable that has the Json::Value emplaced into it
- * @param errors InOut varable that has the error
+ * @param errors InOut variable that has the error
  * @return true on successful parse
  * @return false on failed parse
  */
