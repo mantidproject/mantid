@@ -835,8 +835,11 @@ void RunsTablePresenter::notifyPlotSelectedPressed() {
   const auto rows = m_model.selectedRows();
 
   for (const auto &row : rows) {
-    if (row.state() == State::ITEM_SUCCESS)
-      workspaces.emplace_back(row.reducedWorkspaceNames().iVsQBinned());
+    if (row.state() == State::ITEM_SUCCESS) {
+      for (const auto &ws : row.reducedWorkspaceNames().iVsQBinned()) {
+        workspaces.emplace_back(ws);
+      }
+    }
   }
 
   if (workspaces.empty())
@@ -852,7 +855,8 @@ void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
 
   for (const auto *group : groups) {
     if (group->state() == State::ITEM_SUCCESS)
-      workspaces.emplace_back(group->postprocessedWorkspaceName());
+      std::for_each(group->postprocessedWorkspaceNames().cbegin(), group->postprocessedWorkspaceNames().cend(),
+                    [&workspaces](auto const &workspaceName) { workspaces.emplace_back(workspaceName); });
   }
 
   if (workspaces.empty())

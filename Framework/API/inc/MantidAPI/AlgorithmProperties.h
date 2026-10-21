@@ -54,6 +54,9 @@ void MANTID_API_DLL updateFromMap(IAlgorithmRuntimeProps &properties,
 std::string MANTID_API_DLL getOutputWorkspace(const Mantid::API::IAlgorithm_sptr &algorithm,
                                               std::string const &property);
 
+std::vector<std::string> MANTID_API_DLL getMultipleOutputWorkspaces(const Mantid::API::IAlgorithm_sptr &algorithm,
+                                                                    std::string const &property);
+
 template <typename VALUE_TYPE>
 void update(std::string const &property, std::vector<VALUE_TYPE> const &values,
             Mantid::API::IAlgorithmRuntimeProps &properties, bool const convertToString = true) {

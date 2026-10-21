@@ -45,7 +45,7 @@ public:
   ReductionWorkspaces const &reducedWorkspaceNames() const;
   std::optional<size_t> const &lookupIndex() const;
 
-  void setOutputNames(std::vector<std::string> const &outputNames) override;
+  void setOutputNames(std::vector<std::vector<std::string>> const &outputNames) override;
   void setOutputQRange(RangeInQ qRange);
   void setLookupIndex(std::optional<size_t> lookupIndex);
   void resetOutputs() override;

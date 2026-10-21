@@ -39,7 +39,7 @@ public:
   friend void swap(Group &first, Group &second) {
     std::swap(first.m_name, second.m_name);
     std::swap(first.m_rows, second.m_rows);
-    std::swap(first.m_postprocessedWorkspaceName, second.m_postprocessedWorkspaceName);
+    std::swap(first.m_postprocessedWorkspaceNames, second.m_postprocessedWorkspaceNames);
     std::swap(first.m_itemState, second.m_itemState);
     std::swap(first.m_skipped, second.m_skipped);
   }
@@ -48,7 +48,7 @@ public:
   bool isGroup() const override;
   bool isPreview() const override;
   bool requiresProcessing(bool reprocessFailed) const override;
-  void setOutputNames(std::vector<std::string> const &outputNames) override;
+  void setOutputNames(std::vector<std::vector<std::string>> const &outputNames) override;
   void resetOutputs() override;
   int totalItems() const override;
   int completedItems() const override;
@@ -61,7 +61,7 @@ public:
   void setName(std::string const &name) override;
   bool hasPostprocessing() const override;
   bool requiresPostprocessing(bool reprocessFailed) const override;
-  std::string postprocessedWorkspaceName() const override;
+  std::vector<std::string> postprocessedWorkspaceNames() const override;
 
   void appendEmptyRow() override;
   void appendRow(std::optional<Row> const &row) override;
@@ -86,7 +86,7 @@ public:
 
 private:
   std::string m_name;
-  std::string m_postprocessedWorkspaceName;
+  std::vector<std::string> m_postprocessedWorkspaceNames;
   std::vector<std::optional<Row>> m_rows;
   friend class Encoder;
 

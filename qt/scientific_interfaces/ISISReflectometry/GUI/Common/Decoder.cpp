@@ -27,6 +27,16 @@
 #include <QSignalBlocker>
 #include <utility>
 
+namespace {
+std::vector<std::string> getStringVectorFromQList(QList<QVariant> listToConvert) {
+  std::vector<std::string> toReturn;
+  toReturn.reserve(listToConvert.size());
+  std::transform(listToConvert.cbegin(), listToConvert.cend(), std::back_inserter(toReturn),
+                 [](const auto &element) { return element.toString().toStdString(); });
+  return toReturn;
+}
+} // namespace
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 BatchPresenter *Decoder::findBatchPresenter(const QtBatchView *gui, const IMainWindowView *view) {
@@ -325,7 +335,7 @@ MantidQt::CustomInterfaces::ISISReflectometry::Group Decoder::decodeGroup(const 
     auto itemState = map[QString("itemState")].toInt();
     group.setState(State(itemState));
   }
-  group.m_postprocessedWorkspaceName = map[QString("postprocessedWorkspaceName")].toString().toStdString();
+  group.m_postprocessedWorkspaceNames = getStringVectorFromQList(map[QString("postprocessedWorkspaceNames")].toList());
   return group;
 }
 
@@ -440,15 +450,13 @@ Decoder::decodeSearchResult(const QMap<QString, QVariant> &map) {
 }
 
 ReductionWorkspaces Decoder::decodeReductionWorkspace(const QMap<QString, QVariant> &map) {
-  std::vector<std::string> inputRunNumbers;
-  const auto inputRunList = map[QString("inputRunNumbers")].toList();
-  std::transform(inputRunList.cbegin(), inputRunList.cend(), std::back_inserter(inputRunNumbers),
-                 [](const auto &elem) { return elem.toString().toStdString(); });
+  std::vector<std::string> inputRunNumbers = getStringVectorFromQList(map[QString("inputRunNumbers")].toList());
   auto transmissionRunPair = decodeTransmissionRunPair(map[QString("transPair")].toMap());
   ReductionWorkspaces redWs(inputRunNumbers, transmissionRunPair);
-  redWs.setOutputNames(map[QString("iVsLambda")].toString().toStdString(),
-                       map[QString("iVsQ")].toString().toStdString(),
-                       map[QString("iVsQBinned")].toString().toStdString());
+  const auto iVsLambdas = getStringVectorFromQList(map[QString("iVsLambda")].toList());
+  const auto iVsQs = getStringVectorFromQList(map[QString("iVsQ")].toList());
+  const auto iVsQBinneds = getStringVectorFromQList(map[QString("iVsQBinned")].toList());
+  redWs.setOutputNames(iVsLambdas, iVsQs, iVsQBinneds);
   return redWs;
 }
 
