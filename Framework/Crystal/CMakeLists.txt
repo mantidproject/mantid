@@ -28,7 +28,6 @@ set(SRC_FILES
     src/HasUB.cpp
     src/IndexPeaks.cpp
     src/IndexSXPeaks.cpp
-    src/IntegratePeakTimeSlices.cpp
     src/IntegratePeaksHybrid.cpp
     src/IntegratePeaksUsingClusters.cpp
     src/LoadHKL.cpp
@@ -43,7 +42,6 @@ set(SRC_FILES
     src/PeakBackground.cpp
     src/PeakClusterProjection.cpp
     src/PeakHKLErrors.cpp
-    src/PeakIntegration.cpp
     src/PeakIntensityVsRadius.cpp
     src/PeakStatisticsTools.cpp
     src/PeaksInRegion.cpp
@@ -107,7 +105,6 @@ set(INC_FILES
     inc/MantidCrystal/ICluster.h
     inc/MantidCrystal/IndexPeaks.h
     inc/MantidCrystal/IndexSXPeaks.h
-    inc/MantidCrystal/IntegratePeakTimeSlices.h
     inc/MantidCrystal/IntegratePeaksHybrid.h
     inc/MantidCrystal/IntegratePeaksUsingClusters.h
     inc/MantidCrystal/LoadHKL.h
@@ -122,7 +119,6 @@ set(INC_FILES
     inc/MantidCrystal/PeakBackground.h
     inc/MantidCrystal/PeakClusterProjection.h
     inc/MantidCrystal/PeakHKLErrors.h
-    inc/MantidCrystal/PeakIntegration.h
     inc/MantidCrystal/PeakIntensityVsRadius.h
     inc/MantidCrystal/PeakStatisticsTools.h
     inc/MantidCrystal/PeaksInRegion.h
@@ -182,7 +178,6 @@ set(TEST_FILES
     HasUBTest.h
     IndexPeaksTest.h
     IndexSXPeaksTest.h
-    IntegratePeakTimeSlicesTest.h
     IntegratePeaksHybridTest.h
     IntegratePeaksUsingClustersTest.h
     LoadHKLTest.h
@@ -196,7 +191,6 @@ set(TEST_FILES
     PeakBackgroundTest.h
     PeakClusterProjectionTest.h
     PeakHKLErrorsTest.h
-    PeakIntegrationTest.h
     PeakIntensityVsRadiusTest.h
     PeakStatisticsToolsTest.h
     PeaksInRegionTest.h

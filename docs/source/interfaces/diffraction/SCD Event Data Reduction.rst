@@ -132,24 +132,13 @@ indexes of each peak and a corresponding transform is applied to the
 Integrate
 ^^^^^^^^^
 
-There are currently three options for doing the peak integration.  The
+There are currently two options for doing the peak integration.  The
 spherical integration seems to be the best option in most cases, since
-it is fast and has given values as good as the other options in the
+it is fast and has given values as good as the other option in the
 cases we have tested.  Spherical integration uses spherical regions of
 a specified size in reciprocal space.
 
-Alternatively, 2-D Fitting Integration is done using histogrammed data
-in detector space.  A 2-D Gaussian with background is fitted to the
-counts on each time-of-flight slice in a peak region.  The resulting
-background estimate together with the actual counts on that slice are
-used to obtain the net integrated counts on that slice.  The net
-integrated counts on the set of slices through the peak can be
-optionally fitted with an Ikeda-Carpenter function, or just summed to
-obtain the total net intensity for the whole peak.  Due to the cost of
-the fitting calculations, this integration method takes substantially
-more time than the other two options.
-
-The third option, Ellipsoidal Integration, is another reciprocal space
+The second option, Ellipsoidal Integration, is another reciprocal space
 integration similar to the spherical integration, except that it uses
 ellipsoidal regions determined from the principal axes of the cloud of
 events near a peak.  This is slightly slower than the spherical
@@ -357,8 +346,6 @@ The algorithms used by each tab are:
 
   * :ref:`ConvertToMD <algm-ConvertToMD>`  (NOT using the Lorentz correction, to get integrated raw counts)
   * :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>`
-  * :ref:`Rebin <algm-Rebin>` (Forms time-of-flight histograms for detector-space integration)
-  * :ref:`PeakIntegration <algm-PeakIntegration>`
   * :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids>`
 
 .. categories:: Interfaces Diffraction

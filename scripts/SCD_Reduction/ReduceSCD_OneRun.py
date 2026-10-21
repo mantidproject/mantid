@@ -15,9 +15,9 @@
 # ReduceSCD_Parallel.py script, after this script and configuration file has
 # been tested to work properly for one run. This script will load, find peaks,
 # index and integrate either found or predicted peaks for the specified run.
-# Either sphere integration or the Mantid PeakIntegration algorithms are
-# currently supported, but it may be updated to support other integration
-# methods.  Users should make a directory to hold the output of this script,
+# Sphere, ellipsoid and cylindrical integration are currently supported,
+# but it may be updated to support other integration methods.  Users should
+# make a directory to hold the output of this script,
 # and must specify that output directory in the configuration file that
 # provides the parameters to this script.
 #
@@ -64,11 +64,9 @@ from mantid.simpleapi import (
     SelectCellOfType,
     LoadIsawUB,
     LoadNexusMonitors,
-    PeakIntegration,
     PredictPeaks,
     SaveNexus,
     SaveIsawUB,
-    Rebin,
 )
 from mantid.api import AnalysisDataService
 from mantid import apiVersion, FileFinder
@@ -122,20 +120,17 @@ max_pred_dspacing = params_dictionary["max_pred_dspacing"]
 
 use_sphere_integration = params_dictionary.get("use_sphere_integration", True)
 use_ellipse_integration = params_dictionary.get("use_ellipse_integration", False)
-use_fit_peaks_integration = params_dictionary.get("use_fit_peaks_integration", False)
 use_cylindrical_integration = params_dictionary.get("use_cylindrical_integration", False)
+if params_dictionary.get("use_fit_peaks_integration", False):
+    raise ValueError(
+        "use_fit_peaks_integration is no longer supported because the PeakIntegration algorithm has been removed. "
+        "Use sphere, ellipse or cylindrical integration instead."
+    )
 
 peak_radius = params_dictionary["peak_radius"]
 bkg_inner_radius = params_dictionary["bkg_inner_radius"]
 bkg_outer_radius = params_dictionary["bkg_outer_radius"]
 integrate_if_edge_peak = params_dictionary["integrate_if_edge_peak"]
-
-rebin_step = params_dictionary["rebin_step"]
-preserve_events = params_dictionary["preserve_events"]
-use_ikeda_carpenter = params_dictionary["use_ikeda_carpenter"]
-n_bad_edge_pixels = params_dictionary["n_bad_edge_pixels"]
-
-rebin_params = min_tof + "," + rebin_step + "," + max_tof
 
 ellipse_region_radius = params_dictionary["ellipse_region_radius"]
 ellipse_size_specified = params_dictionary["ellipse_size_specified"]
@@ -279,7 +274,7 @@ else:
 #
 # Get complete list of peaks to be integrated and load the UB matrix into
 # the predicted peaks workspace, so that information can be used by the
-# PeakIntegration algorithm.
+# integration algorithms.
 #
 if integrate_predicted_peaks:
     print("PREDICTING peaks to integrate....")
@@ -367,16 +362,6 @@ elif use_cylindrical_integration:
         IntegrateIfOnEdge=integrate_if_edge_peak,
         Cylinder=use_cylindrical_integration,
         CylinderLength=cylinder_length,
-    )
-
-elif use_fit_peaks_integration:
-    event_ws = Rebin(InputWorkspace=event_ws, Params=rebin_params, PreserveEvents=preserve_events)
-    peaks_ws = PeakIntegration(
-        InPeaksWorkspace=peaks_ws,
-        InputWorkspace=event_ws,
-        IkedaCarpenterTOF=use_ikeda_carpenter,
-        MatchingRunNo=True,
-        NBadEdgePixels=n_bad_edge_pixels,
     )
 
 elif use_ellipse_integration:
