@@ -7,11 +7,16 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
 
 #include <map>
 #include <string>
 #include <vector>
+
+namespace Mantid::Nexus {
+class NexusDescriptor;
+}
 
 namespace Mantid::DataHandling {
 
@@ -30,6 +35,8 @@ private:
   void init() override;
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
+  API::MatrixWorkspace_sptr loadMetadata(const std::string &filename, const std::string &entryName,
+                                         const Nexus::NexusDescriptor &descriptor);
 };
 
 } // namespace Mantid::DataHandling

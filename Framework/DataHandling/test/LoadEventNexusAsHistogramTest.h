@@ -86,6 +86,78 @@ public:
     TS_ASSERT_EQUALS(workspace->y(1)[1], 1.0);
   }
 
+  void test_processing_strategies_counter_types_and_binning_produce_identical_histograms() {
+    FileResource resource("LoadEventNexusAsHistogramStrategiesTest.nxs", false, true);
+    createFile(resource.fullPath(), false);
+    {
+      H5::H5File file(resource.fullPath(), H5F_ACC_RDWR);
+      auto entry = file.openGroup("raw_data_1");
+      addEventGroup(entry, "empty_events", {}, {}, {}, {});
+    }
+
+    for (const auto &strategy : {"Auto", "Pipeline", "ParallelEvents"}) {
+      for (const auto &counter : {"UInt32", "UInt64"}) {
+        for (const auto &binning : {"Native", "Double"}) {
+          LoadEventNexusAsHistogram algorithm;
+          algorithm.setChild(true);
+          algorithm.initialize();
+          algorithm.setPropertyValue("Filename", resource.fullPath());
+          algorithm.setPropertyValue("OutputWorkspace", "unused");
+          algorithm.setProperty("NumberOfSpectra", 2);
+          algorithm.setProperty("Params", std::vector<double>{0.0, 16.0, 32.0});
+          algorithm.setProperty("ReadSizeFromDisk", 2);
+          algorithm.setProperty("MaxInFlightChunks", 2);
+          algorithm.setPropertyValue("ProcessingStrategy", strategy);
+          algorithm.setPropertyValue("AccumulatorType", counter);
+          algorithm.setPropertyValue("TimeBinningStrategy", binning);
+          algorithm.setProperty("LoadInstrument", false);
+          algorithm.setProperty("LoadLogs", false);
+
+          TS_ASSERT(algorithm.execute());
+          Mantid::DataObjects::Workspace2D_sptr workspace = algorithm.getProperty("OutputWorkspace");
+          TS_ASSERT_EQUALS(workspace->y(0)[0], 2.0);
+          TS_ASSERT_EQUALS(workspace->y(0)[1], 0.0);
+          TS_ASSERT_EQUALS(workspace->y(1)[0], 1.0);
+          TS_ASSERT_EQUALS(workspace->y(1)[1], 1.0);
+          TS_ASSERT_EQUALS(workspace->e(0)[0], std::sqrt(2.0));
+          TS_ASSERT_EQUALS(workspace->e(0)[1], 0.0);
+          TS_ASSERT_EQUALS(workspace->e(1)[0], 1.0);
+          TS_ASSERT_EQUALS(workspace->e(1)[1], 1.0);
+        }
+      }
+    }
+  }
+
+  void test_rejects_mismatched_event_dataset_lengths() {
+    for (const std::string dataset : {"event_time_offset", "pulse_height"}) {
+      FileResource resource("LoadEventNexusAsHistogramDatasetLengthsTest.nxs", false, true);
+      {
+        H5::H5File file(resource.fullPath(), H5F_ACC_TRUNC);
+        auto entry = file.createGroup("entry");
+        writeStringAttribute(entry, "NX_class", "NXentry");
+        const auto times =
+            dataset == "event_time_offset" ? std::vector<uint32_t>{1000} : std::vector<uint32_t>{1000, 17000};
+        const auto heights = dataset == "pulse_height" ? std::vector<double>{1.0} : std::vector<double>{1.0, 1.0};
+        addEventGroup(entry, "events", {0, 1}, times, heights, {0});
+      }
+
+      LoadEventNexusAsHistogram algorithm;
+      algorithm.setChild(true);
+      algorithm.setRethrows(true);
+      algorithm.initialize();
+      algorithm.setPropertyValue("Filename", resource.fullPath());
+      algorithm.setPropertyValue("OutputWorkspace", "unused");
+      algorithm.setProperty("LoadInstrument", false);
+      algorithm.setProperty("LoadLogs", false);
+
+      const std::string expected = dataset == "event_time_offset"
+                                       ? "event_id and event_time_offset have different lengths in '/entry/events'."
+                                       : "pulse_height has a different length from event_id in '/entry/events'.";
+      TS_ASSERT_THROWS_EQUALS(algorithm.execute(), const std::runtime_error &error, std::string(error.what()),
+                              expected);
+    }
+  }
+
   void test_prefers_raw_data_entry_and_excludes_error_and_unmapped_events() {
     FileResource resource("LoadEventNexusAsHistogramEntrySelectionTest.nxs", false, true);
     createFile(resource.fullPath(), false);

@@ -332,6 +332,269 @@ std::vector<std::string> eventGroupsInEntry(const std::set<std::string> &allEven
   return result;
 }
 
+struct HistogramOptions {
+  size_t numberOfSpectra;
+  std::vector<double> params;
+  int eventIDOffset;
+  double minimumPulseHeight;
+  size_t readSize;
+  std::string processingStrategy;
+  std::string timeBinningStrategy;
+  std::string accumulatorType;
+  size_t maxInFlightChunks;
+  size_t numberOfBins{0};
+};
+
+HistogramOptions readHistogramOptions(const API::Algorithm &algorithm) {
+  return {static_cast<size_t>(static_cast<int>(algorithm.getProperty("NumberOfSpectra"))),
+          algorithm.getProperty("Params"),
+          algorithm.getProperty("EventIDOffset"),
+          algorithm.getProperty("MinimumPulseHeight"),
+          static_cast<size_t>(static_cast<int>(algorithm.getProperty("ReadSizeFromDisk"))),
+          algorithm.getPropertyValue("ProcessingStrategy"),
+          algorithm.getPropertyValue("TimeBinningStrategy"),
+          algorithm.getPropertyValue("AccumulatorType"),
+          static_cast<size_t>(static_cast<int>(algorithm.getProperty("MaxInFlightChunks")))};
+}
+
+struct EventGroup {
+  H5::DataSet idDataset;
+  H5::DataSet timeDataset;
+  H5::DataSet pulseHeightDataset;
+  size_t numberOfEvents;
+  bool hasPulseHeight;
+  TimeStorage storage;
+  double timeScale;
+  bool useNativeBinning;
+};
+
+EventGroup openEventGroup(const H5::H5File &file, const std::string &groupAddress, const HistogramOptions &options) {
+  const auto eventGroup = file.openGroup(groupAddress);
+  validateSinglePeriod(eventGroup);
+
+  const auto idName = datasetName(eventGroup, "event_id", "event_pixel_id");
+  const auto timeName = datasetName(eventGroup, "event_time_offset", "event_time_of_flight");
+  auto idDataset = eventGroup.openDataSet(idName);
+  auto timeDataset = eventGroup.openDataSet(timeName);
+  const size_t numberOfEvents = datasetSize(idDataset);
+  if (datasetSize(timeDataset) != numberOfEvents)
+    throw std::runtime_error("event_id and event_time_offset have different lengths in '" + groupAddress + "'.");
+
+  const bool hasPulseHeight = linkExists(eventGroup, "pulse_height");
+  H5::DataSet pulseHeightDataset;
+  if (hasPulseHeight) {
+    pulseHeightDataset = eventGroup.openDataSet("pulse_height");
+    if (datasetSize(pulseHeightDataset) != numberOfEvents)
+      throw std::runtime_error("pulse_height has a different length from event_id in '" + groupAddress + "'.");
+  }
+
+  const auto storage = timeStorage(timeDataset);
+  const double timeScale = microsecondsPerFileUnit(timeDataset);
+  const bool nativeBinningAvailable = canUseNativeBinning(storage, options.params, timeScale);
+  if (options.timeBinningStrategy == "Native" && !nativeBinningAvailable)
+    throw std::runtime_error("TimeBinningStrategy=Native cannot represent Params exactly in the unsigned integer "
+                             "units of event_time_offset in '" +
+                             groupAddress + "'.");
+  const bool useNativeBinning =
+      options.timeBinningStrategy == "Native" || (options.timeBinningStrategy == "Auto" && nativeBinningAvailable);
+
+  return {std::move(idDataset),
+          std::move(timeDataset),
+          std::move(pulseHeightDataset),
+          numberOfEvents,
+          hasPulseHeight,
+          storage,
+          timeScale,
+          useNativeBinning};
+}
+
+struct ProcessingPlan {
+  bool usePipeline;
+  size_t maxInFlightChunks;
+};
+
+ProcessingPlan chooseProcessingPlan(const EventGroup &group, const HistogramOptions &options) {
+  const size_t numberOfChunks = (group.numberOfEvents + options.readSize - 1) / options.readSize;
+  const size_t bytesPerChunk = options.readSize * (sizeof(uint32_t) + timeStorageSize(group.storage) +
+                                                   (group.hasPulseHeight ? sizeof(double) : 0));
+  const size_t availableConcurrency = static_cast<size_t>(std::max(1, tbb::this_task_arena::max_concurrency()));
+  const size_t chunksWithinBudget = std::max<size_t>(1, PIPELINE_MEMORY_BUDGET / std::max<size_t>(1, bytesPerChunk));
+  const size_t automaticTokens = std::min(availableConcurrency, chunksWithinBudget);
+  const size_t requestedTokens = options.maxInFlightChunks == 0 ? automaticTokens : options.maxInFlightChunks;
+  const size_t maxTokens = std::max<size_t>(1, std::min(requestedTokens, std::max<size_t>(1, numberOfChunks)));
+  const bool usePipeline = options.processingStrategy == "Pipeline" ||
+                           (options.processingStrategy == "Auto" && numberOfChunks > 1 && maxTokens > 1);
+  return {usePipeline, maxTokens};
+}
+
+uint64_t countInputEvents(const H5::H5File &file, const std::vector<std::string> &groupAddresses) {
+  uint64_t totalEvents = 0;
+  for (const auto &groupAddress : groupAddresses) {
+    const auto eventGroup = file.openGroup(groupAddress);
+    const auto idName = datasetName(eventGroup, "event_id", "event_pixel_id");
+    const auto numberOfEvents = datasetSize(eventGroup.openDataSet(idName));
+    if (numberOfEvents > std::numeric_limits<uint64_t>::max() - totalEvents)
+      throw std::runtime_error("The total number of events cannot be represented by a 64-bit counter.");
+    totalEvents += static_cast<uint64_t>(numberOfEvents);
+  }
+  return totalEvents;
+}
+
+bool useUInt32Accumulators(const uint64_t totalEvents, const std::string &requestedType) {
+  if (requestedType == "UInt32" && totalEvents > std::numeric_limits<uint32_t>::max())
+    throw std::runtime_error("AccumulatorType=UInt32 is unsafe because the input contains more than 2^32-1 events.");
+  return requestedType == "UInt32" || (requestedType == "Auto" && totalEvents <= std::numeric_limits<uint32_t>::max());
+}
+
+template <typename CounterType> using ThreadLocalCounts = tbb::enumerable_thread_specific<std::vector<CounterType>>;
+
+template <typename CounterType>
+void histogramChunk(std::vector<CounterType> &counts, const EventChunk &chunk, const EventGroup &group,
+                    const HistogramOptions &options) {
+  std::visit(
+      [&](const auto &eventTimes) {
+        histogramRange(counts, chunk, eventTimes, 0, chunk.length, options.numberOfSpectra, options.numberOfBins,
+                       options.eventIDOffset, options.minimumPulseHeight, group.hasPulseHeight, options.params,
+                       group.timeScale, group.useNativeBinning);
+      },
+      chunk.eventTimes);
+}
+
+// HDF5 reads are serial; only the histogramming stage runs concurrently.
+template <typename CounterType>
+uint64_t processPipeline(const EventGroup &group, const HistogramOptions &options, const size_t maxTokens,
+                         ThreadLocalCounts<CounterType> &threadCounts) {
+  size_t nextOffset = 0;
+  uint64_t eventsRead = 0;
+  std::vector<std::unique_ptr<EventChunk>> availableChunks;
+  std::mutex availableChunksMutex;
+
+  const auto readNextChunk = [&](tbb::flow_control &flowControl) {
+    if (nextOffset >= group.numberOfEvents) {
+      flowControl.stop();
+      return std::unique_ptr<EventChunk>{};
+    }
+
+    std::unique_ptr<EventChunk> chunk;
+    {
+      const std::scoped_lock lock(availableChunksMutex);
+      if (!availableChunks.empty()) {
+        chunk = std::move(availableChunks.back());
+        availableChunks.pop_back();
+      }
+    }
+    if (!chunk)
+      chunk = std::make_unique<EventChunk>(group.storage);
+
+    const size_t length = std::min(options.readSize, group.numberOfEvents - nextOffset);
+    readChunk(*chunk, group.idDataset, group.timeDataset, group.pulseHeightDataset, group.hasPulseHeight, length,
+              nextOffset);
+    nextOffset += length;
+    eventsRead += length;
+    return chunk;
+  };
+
+  const auto histogramNextChunk = [&](std::unique_ptr<EventChunk> chunk) {
+    histogramChunk(threadCounts.local(), *chunk, group, options);
+    const std::scoped_lock lock(availableChunksMutex);
+    availableChunks.emplace_back(std::move(chunk));
+  };
+
+  tbb::parallel_pipeline(
+      maxTokens,
+      tbb::make_filter<void, std::unique_ptr<EventChunk>>(tbb::filter_mode::serial_in_order, readNextChunk) &
+          tbb::make_filter<std::unique_ptr<EventChunk>, void>(tbb::filter_mode::parallel, histogramNextChunk));
+  return eventsRead;
+}
+
+template <typename CounterType>
+uint64_t processParallelEvents(const EventGroup &group, const HistogramOptions &options,
+                               ThreadLocalCounts<CounterType> &threadCounts) {
+  uint64_t eventsRead = 0;
+  EventChunk chunk(group.storage);
+  for (size_t offset = 0; offset < group.numberOfEvents; offset += options.readSize) {
+    const size_t length = std::min(options.readSize, group.numberOfEvents - offset);
+    readChunk(chunk, group.idDataset, group.timeDataset, group.pulseHeightDataset, group.hasPulseHeight, length,
+              offset);
+    std::visit(
+        [&](const auto &eventTimes) {
+          tbb::parallel_for(tbb::blocked_range<size_t>(0, length, PARALLEL_GRAIN_SIZE),
+                            [&](const tbb::blocked_range<size_t> &range) {
+                              histogramRange(threadCounts.local(), chunk, eventTimes, range.begin(), range.end(),
+                                             options.numberOfSpectra, options.numberOfBins, options.eventIDOffset,
+                                             options.minimumPulseHeight, group.hasPulseHeight, options.params,
+                                             group.timeScale, group.useNativeBinning);
+                            });
+        },
+        chunk.eventTimes);
+    eventsRead += length;
+  }
+  return eventsRead;
+}
+
+struct HistogramResult {
+  std::vector<uint64_t> counts;
+  uint64_t eventsRead;
+};
+
+template <typename CounterType>
+HistogramResult histogramGroups(const H5::H5File &file, const std::vector<std::string> &groupAddresses,
+                                const HistogramOptions &options, API::Progress &progress) {
+  const size_t histogramSize = options.numberOfSpectra * options.numberOfBins;
+  ThreadLocalCounts<CounterType> threadCounts([histogramSize]() { return std::vector<CounterType>(histogramSize, 0); });
+  uint64_t eventsRead = 0;
+  for (const auto &groupAddress : groupAddresses) {
+    const auto group = openEventGroup(file, groupAddress, options);
+    const auto plan = chooseProcessingPlan(group, options);
+    if (plan.usePipeline)
+      eventsRead += processPipeline(group, options, plan.maxInFlightChunks, threadCounts);
+    else
+      eventsRead += processParallelEvents(group, options, threadCounts);
+    progress.report("Histogramming events");
+  }
+
+  std::vector<uint64_t> counts(histogramSize, 0);
+  for (const auto &localCounts : threadCounts)
+    std::transform(counts.cbegin(), counts.cend(), localCounts.cbegin(), counts.begin(), std::plus<>());
+  return {std::move(counts), eventsRead};
+}
+
+std::shared_ptr<Workspace2D> createOutputWorkspace(const MatrixWorkspace_sptr &metadataWorkspace,
+                                                   const size_t numberOfSpectra, const std::vector<double> &binEdges,
+                                                   const std::string &filename) {
+  const size_t numberOfBins = binEdges.size() - 1;
+  auto workspace = std::dynamic_pointer_cast<Workspace2D>(
+      API::WorkspaceFactory::Instance().create(metadataWorkspace, numberOfSpectra, binEdges.size(), numberOfBins));
+  const auto sharedX = Kernel::make_cow<HistogramData::HistogramX>(binEdges);
+  for (size_t workspaceIndex = 0; workspaceIndex < numberOfSpectra; ++workspaceIndex) {
+    workspace->setSharedX(workspaceIndex, sharedX);
+    auto &spectrum = workspace->getSpectrum(workspaceIndex);
+    spectrum.setSpectrumNo(static_cast<specnum_t>(workspaceIndex + 1));
+    spectrum.clearDetectorIDs();
+    spectrum.setDetectorID(static_cast<detid_t>(workspaceIndex + 1));
+  }
+  workspace->getAxis(0)->setUnit("TOF");
+  workspace->setYUnit("Counts");
+  workspace->mutableRun().addProperty("Filename", filename, true);
+  return workspace;
+}
+
+uint64_t storeHistogram(const HistogramResult &histogram, Workspace2D &workspace) {
+  const size_t numberOfBins = workspace.blocksize();
+  uint64_t acceptedEvents = 0;
+  for (size_t workspaceIndex = 0; workspaceIndex < workspace.getNumberHistograms(); ++workspaceIndex) {
+    auto &y = workspace.mutableY(workspaceIndex);
+    auto &e = workspace.mutableE(workspaceIndex);
+    for (size_t bin = 0; bin < numberOfBins; ++bin) {
+      const auto count = histogram.counts[workspaceIndex * numberOfBins + bin];
+      y[bin] = static_cast<double>(count);
+      e[bin] = std::sqrt(y[bin]);
+      acceptedEvents += count;
+    }
+  }
+  return acceptedEvents;
+}
+
 } // namespace
 
 DECLARE_ALGORITHM(LoadEventNexusAsHistogram)
@@ -419,26 +682,8 @@ std::map<std::string, std::string> LoadEventNexusAsHistogram::validateInputs() {
   return errors;
 }
 
-void LoadEventNexusAsHistogram::exec() {
-  const std::string filename = getPropertyValue("Filename");
-  const Nexus::NexusDescriptor descriptor(filename);
-  const auto allEventGroups = descriptor.allAddressesOfType("NXevent_data");
-  const auto entryName = selectEntryName(descriptor, getPropertyValue("NXentryName"), allEventGroups);
-  const auto eventGroupAddresses = eventGroupsInEntry(allEventGroups, entryName);
-
-  const int numberOfSpectraProperty = getProperty("NumberOfSpectra");
-  const size_t numberOfSpectra = static_cast<size_t>(numberOfSpectraProperty);
-  const int eventIDOffset = getProperty("EventIDOffset");
-  const double minimumPulseHeight = getProperty("MinimumPulseHeight");
-  const int readSizeProperty = getProperty("ReadSizeFromDisk");
-  const size_t readSize = static_cast<size_t>(readSizeProperty);
-  const std::vector<double> params = getProperty("Params");
-
-  std::vector<double> binEdges;
-  Kernel::VectorHelper::createAxisFromRebinParams(params, binEdges, true, false);
-  const size_t numberOfBins = binEdges.size() - 1;
-  const size_t histogramSize = numberOfSpectra * numberOfBins;
-
+MatrixWorkspace_sptr LoadEventNexusAsHistogram::loadMetadata(const std::string &filename, const std::string &entryName,
+                                                             const Nexus::NexusDescriptor &descriptor) {
   MatrixWorkspace_sptr metadataWorkspace = API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
   try {
     LoadEventNexus::loadEntryMetadata(filename, metadataWorkspace, entryName);
@@ -463,181 +708,35 @@ void LoadEventNexusAsHistogram::exec() {
       g_log.warning("The instrument definition could not be loaded.");
   }
 
-  auto outputWorkspace = std::dynamic_pointer_cast<Workspace2D>(
-      API::WorkspaceFactory::Instance().create(metadataWorkspace, numberOfSpectra, binEdges.size(), numberOfBins));
-  const auto sharedX = Kernel::make_cow<HistogramData::HistogramX>(binEdges);
-  for (size_t workspaceIndex = 0; workspaceIndex < numberOfSpectra; ++workspaceIndex) {
-    outputWorkspace->setSharedX(workspaceIndex, sharedX);
-    auto &spectrum = outputWorkspace->getSpectrum(workspaceIndex);
-    spectrum.setSpectrumNo(static_cast<specnum_t>(workspaceIndex + 1));
-    spectrum.clearDetectorIDs();
-    spectrum.setDetectorID(static_cast<detid_t>(workspaceIndex + 1));
-  }
-  outputWorkspace->getAxis(0)->setUnit("TOF");
-  outputWorkspace->setYUnit("Counts");
-  outputWorkspace->mutableRun().addProperty("Filename", filename, true);
+  return metadataWorkspace;
+}
+
+void LoadEventNexusAsHistogram::exec() {
+  const std::string filename = getPropertyValue("Filename");
+  const Nexus::NexusDescriptor descriptor(filename);
+  const auto allEventGroups = descriptor.allAddressesOfType("NXevent_data");
+  const auto entryName = selectEntryName(descriptor, getPropertyValue("NXentryName"), allEventGroups);
+  const auto groupAddresses = eventGroupsInEntry(allEventGroups, entryName);
+
+  auto options = readHistogramOptions(*this);
+  std::vector<double> binEdges;
+  Kernel::VectorHelper::createAxisFromRebinParams(options.params, binEdges, true, false);
+  options.numberOfBins = binEdges.size() - 1;
+
+  const auto metadataWorkspace = loadMetadata(filename, entryName, descriptor);
+  auto outputWorkspace = createOutputWorkspace(metadataWorkspace, options.numberOfSpectra, binEdges, filename);
 
   H5::H5File file(filename, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
-  API::Progress progress(this, 0.2, 0.95, eventGroupAddresses.size());
-  uint64_t totalEvents = 0;
-  for (const auto &groupAddress : eventGroupAddresses) {
-    const auto eventGroup = file.openGroup(groupAddress);
-    const auto idName = datasetName(eventGroup, "event_id", "event_pixel_id");
-    const auto numberOfEvents = datasetSize(eventGroup.openDataSet(idName));
-    if (numberOfEvents > std::numeric_limits<uint64_t>::max() - totalEvents)
-      throw std::runtime_error("The total number of events cannot be represented by a 64-bit counter.");
-    totalEvents += static_cast<uint64_t>(numberOfEvents);
-  }
-
-  const std::string requestedProcessingStrategy = getPropertyValue("ProcessingStrategy");
-  const std::string requestedTimeBinningStrategy = getPropertyValue("TimeBinningStrategy");
-  const std::string requestedAccumulatorType = getPropertyValue("AccumulatorType");
-  const int maxInFlightChunksProperty = getProperty("MaxInFlightChunks");
-  if (requestedAccumulatorType == "UInt32" && totalEvents > std::numeric_limits<uint32_t>::max())
-    throw std::runtime_error("AccumulatorType=UInt32 is unsafe because the input contains more than 2^32-1 events.");
-  const bool useUInt32 = requestedAccumulatorType == "UInt32" ||
-                         (requestedAccumulatorType == "Auto" && totalEvents <= std::numeric_limits<uint32_t>::max());
-
-  const auto histogramAllGroups = [&]<typename CounterType>() {
-    tbb::enumerable_thread_specific<std::vector<CounterType>> threadCounts(
-        [histogramSize]() { return std::vector<CounterType>(histogramSize, 0); });
-    uint64_t eventsRead = 0;
-
-    for (const auto &groupAddress : eventGroupAddresses) {
-      auto eventGroup = file.openGroup(groupAddress);
-      validateSinglePeriod(eventGroup);
-
-      const auto idName = datasetName(eventGroup, "event_id", "event_pixel_id");
-      const auto timeName = datasetName(eventGroup, "event_time_offset", "event_time_of_flight");
-      auto idDataset = eventGroup.openDataSet(idName);
-      auto timeDataset = eventGroup.openDataSet(timeName);
-      const size_t numberOfEvents = datasetSize(idDataset);
-      if (datasetSize(timeDataset) != numberOfEvents)
-        throw std::runtime_error("event_id and event_time_offset have different lengths in '" + groupAddress + "'.");
-
-      const bool hasPulseHeight = linkExists(eventGroup, "pulse_height");
-      H5::DataSet pulseHeightDataset;
-      if (hasPulseHeight) {
-        pulseHeightDataset = eventGroup.openDataSet("pulse_height");
-        if (datasetSize(pulseHeightDataset) != numberOfEvents)
-          throw std::runtime_error("pulse_height has a different length from event_id in '" + groupAddress + "'.");
-      }
-
-      const auto storage = timeStorage(timeDataset);
-      const double timeScale = microsecondsPerFileUnit(timeDataset);
-      const bool nativeBinningAvailable = canUseNativeBinning(storage, params, timeScale);
-      if (requestedTimeBinningStrategy == "Native" && !nativeBinningAvailable)
-        throw std::runtime_error("TimeBinningStrategy=Native cannot represent Params exactly in the unsigned integer "
-                                 "units of event_time_offset in '" +
-                                 groupAddress + "'.");
-      const bool useNativeBinning = requestedTimeBinningStrategy == "Native" ||
-                                    (requestedTimeBinningStrategy == "Auto" && nativeBinningAvailable);
-
-      const size_t numberOfChunks = (numberOfEvents + readSize - 1) / readSize;
-      const size_t bytesPerChunk =
-          readSize * (sizeof(uint32_t) + timeStorageSize(storage) + (hasPulseHeight ? sizeof(double) : 0));
-      const size_t availableConcurrency = static_cast<size_t>(std::max(1, tbb::this_task_arena::max_concurrency()));
-      const size_t chunksWithinBudget =
-          std::max<size_t>(1, PIPELINE_MEMORY_BUDGET / std::max<size_t>(1, bytesPerChunk));
-      const size_t automaticTokens = std::min(availableConcurrency, chunksWithinBudget);
-      const size_t requestedTokens =
-          maxInFlightChunksProperty == 0 ? automaticTokens : static_cast<size_t>(maxInFlightChunksProperty);
-      const size_t maxTokens = std::max<size_t>(1, std::min(requestedTokens, std::max<size_t>(1, numberOfChunks)));
-      const bool usePipeline = requestedProcessingStrategy == "Pipeline" ||
-                               (requestedProcessingStrategy == "Auto" && numberOfChunks > 1 && maxTokens > 1);
-
-      const auto histogramChunk = [&](const EventChunk &chunk, const size_t begin, const size_t end,
-                                      std::vector<CounterType> &localCounts) {
-        std::visit(
-            [&](const auto &eventTimes) {
-              histogramRange(localCounts, chunk, eventTimes, begin, end, numberOfSpectra, numberOfBins, eventIDOffset,
-                             minimumPulseHeight, hasPulseHeight, params, timeScale, useNativeBinning);
-            },
-            chunk.eventTimes);
-      };
-
-      if (usePipeline) {
-        size_t nextOffset = 0;
-        std::vector<std::unique_ptr<EventChunk>> availableChunks;
-        std::mutex availableChunksMutex;
-        tbb::parallel_pipeline(maxTokens, tbb::make_filter<void, std::unique_ptr<EventChunk>>(
-                                              tbb::filter_mode::serial_in_order,
-                                              [&](tbb::flow_control &flowControl) {
-                                                if (nextOffset >= numberOfEvents) {
-                                                  flowControl.stop();
-                                                  return std::unique_ptr<EventChunk>{};
-                                                }
-
-                                                std::unique_ptr<EventChunk> chunk;
-                                                {
-                                                  const std::scoped_lock lock(availableChunksMutex);
-                                                  if (!availableChunks.empty()) {
-                                                    chunk = std::move(availableChunks.back());
-                                                    availableChunks.pop_back();
-                                                  }
-                                                }
-                                                if (!chunk)
-                                                  chunk = std::make_unique<EventChunk>(storage);
-
-                                                const size_t length = std::min(readSize, numberOfEvents - nextOffset);
-                                                readChunk(*chunk, idDataset, timeDataset, pulseHeightDataset,
-                                                          hasPulseHeight, length, nextOffset);
-                                                nextOffset += length;
-                                                eventsRead += length;
-                                                return chunk;
-                                              }) &
-                                              tbb::make_filter<std::unique_ptr<EventChunk>, void>(
-                                                  tbb::filter_mode::parallel, [&](std::unique_ptr<EventChunk> chunk) {
-                                                    histogramChunk(*chunk, 0, chunk->length, threadCounts.local());
-                                                    const std::scoped_lock lock(availableChunksMutex);
-                                                    availableChunks.emplace_back(std::move(chunk));
-                                                  }));
-      } else {
-        EventChunk chunk(storage);
-        for (size_t offset = 0; offset < numberOfEvents; offset += readSize) {
-          const size_t length = std::min(readSize, numberOfEvents - offset);
-          readChunk(chunk, idDataset, timeDataset, pulseHeightDataset, hasPulseHeight, length, offset);
-          std::visit(
-              [&](const auto &eventTimes) {
-                tbb::parallel_for(tbb::blocked_range<size_t>(0, length, PARALLEL_GRAIN_SIZE),
-                                  [&](const tbb::blocked_range<size_t> &range) {
-                                    histogramRange(threadCounts.local(), chunk, eventTimes, range.begin(), range.end(),
-                                                   numberOfSpectra, numberOfBins, eventIDOffset, minimumPulseHeight,
-                                                   hasPulseHeight, params, timeScale, useNativeBinning);
-                                  });
-              },
-              chunk.eventTimes);
-          eventsRead += length;
-        }
-      }
-      progress.report("Histogramming events");
-    }
-
-    std::vector<uint64_t> counts(histogramSize, 0);
-    for (const auto &localCounts : threadCounts)
-      std::transform(counts.cbegin(), counts.cend(), localCounts.cbegin(), counts.begin(), std::plus<>());
-    return std::make_pair(std::move(counts), eventsRead);
-  };
-
-  auto [counts, eventsRead] = [&] {
+  API::Progress progress(this, 0.2, 0.95, groupAddresses.size());
+  const bool useUInt32 = useUInt32Accumulators(countInputEvents(file, groupAddresses), options.accumulatorType);
+  const auto histogram = [&] {
     if (useUInt32)
-      return histogramAllGroups.template operator()<uint32_t>();
-    return histogramAllGroups.template operator()<uint64_t>();
+      return histogramGroups<uint32_t>(file, groupAddresses, options, progress);
+    return histogramGroups<uint64_t>(file, groupAddresses, options, progress);
   }();
 
-  uint64_t acceptedEvents = 0;
-  for (size_t workspaceIndex = 0; workspaceIndex < numberOfSpectra; ++workspaceIndex) {
-    auto &y = outputWorkspace->mutableY(workspaceIndex);
-    auto &e = outputWorkspace->mutableE(workspaceIndex);
-    for (size_t bin = 0; bin < numberOfBins; ++bin) {
-      const auto count = counts[workspaceIndex * numberOfBins + bin];
-      y[bin] = static_cast<double>(count);
-      e[bin] = std::sqrt(y[bin]);
-      acceptedEvents += count;
-    }
-  }
-  g_log.information() << "Histogrammed " << acceptedEvents << " of " << eventsRead << " events.\n";
-
+  const auto acceptedEvents = storeHistogram(histogram, *outputWorkspace);
+  g_log.information() << "Histogrammed " << acceptedEvents << " of " << histogram.eventsRead << " events.\n";
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
