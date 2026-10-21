@@ -90,7 +90,7 @@ Deprecated
 - UnwrapMonitorsInTOF has been deprecated. There is no replacement.
 - UnwrapSNS has been deprecated. There is no replacement.
 - Property ``UnwrapRef`` has been deprecated for algorithms that previously called deprecated algorithm
-  :ref:`algm-UnwrapSNS`:
+  UnwrapSNS:
 
   - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`,
   - :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>`
