@@ -120,15 +120,14 @@ public:
     };
 
     for (size_t pointNo = 0; pointNo < info.size(); ++pointNo) {
-      const auto &det = info.detector(pointNo);
-      const auto q = convertDetectorPositionToQ(det);
+      const auto q = convertDetectorPositionToQ(info, pointNo);
       checkResult(q, pointNo);
     }
   }
 
-  V3D convertDetectorPositionToQ(const IDetector &det) {
-    const auto tt1 = det.getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)); // two theta
-    const auto ph1 = det.getPhi();                                // phi
+  V3D convertDetectorPositionToQ(const DetectorInfo &info, const size_t index) {
+    const auto tt1 = info.twoTheta(index, V3D(0, 0, 0), V3D(0, 0, 1)); // two theta
+    const auto ph1 = info.phi(index);                                  // phi
     auto E1 = V3D(-std::sin(tt1) * std::cos(ph1), -std::sin(tt1) * std::sin(ph1),
                   1. - std::cos(tt1)); // end of trajectory
     return E1 * (1. / E1.norm());      // normalize
