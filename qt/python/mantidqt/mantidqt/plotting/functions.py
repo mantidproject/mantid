@@ -13,6 +13,8 @@ our custom window.
 
 # std imports
 
+from dataclasses import dataclass
+
 import matplotlib
 import numpy as np
 
@@ -22,8 +24,9 @@ from mantid.plots.plotfunctions import manage_workspace_names, figure_title, plo
 
 from mantid.kernel import Logger, ConfigService
 from mantid.plots.datafunctions import add_colorbar_label
-from mantid.plots.utility import get_single_workspace_log_value, legend_set_draggable
-from mantidqt.plotting.figuretype import figure_type, FigureType
+from mantid.plots import MantidAxes
+from mantid.plots.utility import get_single_workspace_log_value, legend_set_draggable, MantidAxType
+from mantidqt.plotting.figuretype import axes_type, figure_type, FigureType
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
 from mantid.api import IMDHistoWorkspace
 
@@ -76,6 +79,82 @@ def current_figure_or_none():
         return plt.gcf()
     else:
         return None
+
+
+@dataclass
+class TiledAxesDetails:
+    ax: object
+    row: int
+    column: int
+    x_unit: str
+    y_unit: str
+
+
+def share_tiled_axes(fig, new_axes=None, share_x=True, share_y=True):
+    """Share axes matching the top-left tile in a Mantid figure.
+
+    Each dimension is shared when requested and its displayed workspace units
+    match. If ``new_axes`` is supplied, existing plot settings take precedence.
+    """
+    axes = [details for ax in fig.axes if (details := _tiled_axis_details(ax)) is not None]
+    reference = next(details for details in axes if details.row == 0 and details.column == 0)
+    combine_limits = new_axes is None
+
+    if share_x:
+        _share_axis(axes, reference, "x", combine_limits)
+    if share_y:
+        _share_axis(axes, reference, "y", combine_limits)
+
+    fig.canvas.draw_idle()
+
+
+def _tiled_axis_details(ax):
+    if (
+        not isinstance(ax, MantidAxes)
+        or not ax.axison
+        or not ax.tracked_workspaces
+        or not hasattr(ax, "_mantid_tiled_row")
+        or not hasattr(ax, "_mantid_tiled_col")
+    ):
+        return None
+
+    workspace_name = next(iter(ax.tracked_workspaces))
+    workspace = AnalysisDataService.retrieve(workspace_name)
+    if not isinstance(workspace, MatrixWorkspace):
+        return None
+
+    x_axis_index = 1 if _plot_axis_type(ax, workspace_name) == MantidAxType.BIN else 0
+    x_unit = _axis_unit(workspace, x_axis_index)
+    y_unit = _axis_unit(workspace, 1) if axes_type(ax) in (FigureType.Image, FigureType.Contour) else workspace.YUnit()
+    return TiledAxesDetails(ax, ax._mantid_tiled_row, ax._mantid_tiled_col, x_unit, y_unit)
+
+
+def _plot_axis_type(ax, workspace_name):
+    return next(
+        (args.get("axis", MantidAxType.SPECTRUM) for args in ax.creation_args if args.get("workspaces") == workspace_name),
+        MantidAxType.SPECTRUM,
+    )
+
+
+def _axis_unit(workspace, index):
+    unit = workspace.getAxis(index).getUnit()
+    return (unit.unitID(), unit.symbol().ascii() if unit.unitID() == "Label" else "")
+
+
+def _share_axis(axes, reference, dimension, combine_limits):
+    unit = getattr(reference, f"{dimension}_unit")
+    compatible_axes = [details.ax for details in axes if getattr(details, f"{dimension}_unit") == unit]
+    limits = [getattr(ax, f"get_{dimension}lim")() for ax in compatible_axes]
+    shared_axes = getattr(reference.ax, f"get_shared_{dimension}_axes")()
+
+    for ax in compatible_axes:
+        if ax is not reference.ax and not shared_axes.joined(reference.ax, ax):
+            getattr(ax, f"share{dimension}")(reference.ax)
+
+    if combine_limits:
+        getattr(reference.ax, f"set_{dimension}lim")(
+            min(axis_limits[0] for axis_limits in limits), max(axis_limits[1] for axis_limits in limits)
+        )
 
 
 def plot_md_ws_from_names(names, errors, overplot, fig=None):

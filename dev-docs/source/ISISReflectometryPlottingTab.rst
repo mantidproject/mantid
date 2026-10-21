@@ -375,8 +375,8 @@ palette, allowing the tree to work in light and dark themes.
 
 Qt Designer definition for the Plotting tab. It declares the plotting workspace
 tree, plot output selector, detector-map and alignment axis controls, plotting
-buttons, vertical-tiling checkbox, and add-to-existing checkbox. Control policy
-is not encoded in the UI file; the presenter supplies it through
+buttons, vertical-tiling checkbox, shared axis checkboxes and add-to-existing checkbox.
+Control policy is not encoded in the UI file; the presenter supplies it through
 :code:`PlotActionState` and :code:`PlotOutputControlsState`.
 
 Shared Plotting Files

@@ -26,6 +26,7 @@ public:
     TS_ASSERT_EQUALS(state.plotOverplotEnabled, true);
     TS_ASSERT_EQUALS(state.plotTiledEnabled, true);
     TS_ASSERT_EQUALS(state.plotTiledVerticallyEnabled, true);
+    TS_ASSERT_EQUALS(state.shareAxesWhenTiledEnabled, true);
     TS_ASSERT_EQUALS(state.addToExistingPlotEnabled, true);
     TS_ASSERT_EQUALS(state.addToExistingPlotChecked, true);
   }
@@ -39,6 +40,7 @@ public:
     TS_ASSERT_EQUALS(state.plotOverplotEnabled, false);
     TS_ASSERT_EQUALS(state.plotTiledEnabled, true);
     TS_ASSERT_EQUALS(state.plotTiledVerticallyEnabled, true);
+    TS_ASSERT_EQUALS(state.shareAxesWhenTiledEnabled, true);
     TS_ASSERT_EQUALS(state.addToExistingPlotEnabled, true);
     TS_ASSERT_EQUALS(state.addToExistingPlotChecked, true);
   }
@@ -52,6 +54,7 @@ public:
     TS_ASSERT_EQUALS(state.plotOverplotEnabled, false);
     TS_ASSERT_EQUALS(state.plotTiledEnabled, false);
     TS_ASSERT_EQUALS(state.plotTiledVerticallyEnabled, true);
+    TS_ASSERT_EQUALS(state.shareAxesWhenTiledEnabled, true);
     TS_ASSERT_EQUALS(state.addToExistingPlotEnabled, false);
     TS_ASSERT_EQUALS(state.addToExistingPlotChecked, false);
   }

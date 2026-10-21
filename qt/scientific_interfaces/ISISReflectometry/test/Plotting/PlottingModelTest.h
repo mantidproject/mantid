@@ -169,6 +169,12 @@ public:
     auto const expectedCentreTheta = lowerTheta + 0.35 * (upperTheta - lowerTheta);
     assertXValue("__isis_refl_align_IvsQ_12345_theta_profile", lowerTheta, 96);
     assertXValue("__isis_refl_align_IvsQ_12345_theta_peak_centre", expectedCentreTheta, 0, 1e-6);
+    auto const profile = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+        "__isis_refl_align_IvsQ_12345_theta_profile");
+    auto const peakCentre = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+        "__isis_refl_align_IvsQ_12345_theta_peak_centre");
+    TS_ASSERT_EQUALS(profile->getAxis(0)->unit()->unitID(), "Degrees");
+    TS_ASSERT_EQUALS(peakCentre->getAxis(0)->unit()->unitID(), "Degrees");
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_theta_fitted_peak"));
   }
 
@@ -400,6 +406,7 @@ public:
     auto outputWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
         "__isis_refl_det_map_IvsQ_12345_theta");
     TS_ASSERT_DIFFERS((*(outputWorkspace->getAxis(1)))(0), 0.0);
+    TS_ASSERT_EQUALS(outputWorkspace->getAxis(1)->unit()->unitID(), "Degrees");
   }
 
   void testDetectorMapReusesExistingGeneratedWorkspace() {

@@ -21,14 +21,21 @@ struct PresenterPlotRequest {
   QWidget *plotParent;
   bool addToExistingPlot;
   bool tiledVertically;
+  bool shareXAxisWhenTiled;
+  bool shareYAxisWhenTiled;
 };
 
 /// Collect selected output controls and plotting target options from the view.
 PresenterPlotRequest plotRequestFor(IPlottingView &view, std::string const &instrumentName, PlotLayout layout) {
   auto outputSelection = view.selectedPlotOutputSelection();
   outputSelection.instrumentName = instrumentName;
-  return {std::move(outputSelection), layout, view.plotParent(), view.addToExistingPlot(),
-          layout == PlotLayout::Tiled && view.plotTiledVertically()};
+  return {std::move(outputSelection),
+          layout,
+          view.plotParent(),
+          view.shouldAddToExistingPlot(),
+          layout == PlotLayout::Tiled && view.shouldPlotTiledVertically(),
+          layout == PlotLayout::Tiled && view.shouldShareXAxisWhenTiled(),
+          layout == PlotLayout::Tiled && view.shouldShareYAxisWhenTiled()};
 }
 } // namespace
 
@@ -122,13 +129,20 @@ void PlottingPresenter::plotSelectedWorkspaces(PlotLayout layout) {
 
   if (request.layout == PlotLayout::Individual) {
     for (auto const &workspace : workspacesToPlot) {
-      m_plotter->plot({{workspace}, options, request.plotParent, request.addToExistingPlot, request.tiledVertically});
+      m_plotter->plot({{workspace},
+                       options,
+                       request.plotParent,
+                       request.addToExistingPlot,
+                       request.tiledVertically,
+                       request.shareXAxisWhenTiled,
+                       request.shareYAxisWhenTiled});
     }
     updateActivePlotCompatibility();
     return;
   }
 
-  m_plotter->plot({workspacesToPlot, options, request.plotParent, request.addToExistingPlot, request.tiledVertically});
+  m_plotter->plot({workspacesToPlot, options, request.plotParent, request.addToExistingPlot, request.tiledVertically,
+                   request.shareXAxisWhenTiled, request.shareYAxisWhenTiled});
   updateActivePlotCompatibility();
 }
 
@@ -172,7 +186,7 @@ void PlottingPresenter::updatePlotActionState() const {
 
   m_view->setPlotActionState(m_viewStateProvider.plotActionState(
       m_outputSelectionEnabled, m_view->selectedPlottingWorkspaceNames().size(),
-      m_view->selectedPlottingWorkspaceGroupCount(), *selectedOutputType, m_view->addToExistingPlot(),
+      m_view->selectedPlottingWorkspaceGroupCount(), *selectedOutputType, m_view->shouldAddToExistingPlot(),
       m_hasActiveReflectometryFigure, m_activePlotOverplotCompatible));
 }
 
