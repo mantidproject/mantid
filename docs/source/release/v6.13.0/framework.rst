@@ -125,7 +125,7 @@ New features
 
 Deprecated
 ############
-- Both :ref:`LoadPreNexus <algm-LoadPreNexus>` and :ref:`LoadPreNexusMonitors <algm-LoadPreNexusMonitors>` have been
+- Both ``LoadPreNexus`` and ``LoadPreNexusMonitors`` have been
   deprecated. There are no replacements.
 
 Removed
