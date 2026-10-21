@@ -290,11 +290,10 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
   MatrixWorkspace &simulationWS = useSparseInstrument ? *sparseWS : *outputWS;
   const MatrixWorkspace &instrumentWS = useSparseInstrument ? simulationWS : inputWS;
   // Cache information about the workspace that will be used repeatedly
-  auto instrument = instrumentWS.getInstrument();
   const auto nhists = static_cast<int64_t>(instrumentWS.getNumberHistograms());
 
   EFixedProvider efixed(instrumentWS);
-  auto beamProfile = BeamProfileFactory::createBeamProfile(*instrument, inputWS.sample());
+  auto beamProfile = BeamProfileFactory::createBeamProfile(instrumentWS.componentInfo(), inputWS.sample());
 
   // Configure progress
   Progress prog(this, 0.0, 1.0, nhists);

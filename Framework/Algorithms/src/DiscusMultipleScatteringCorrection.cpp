@@ -2192,8 +2192,8 @@ void DiscusMultipleScatteringCorrection::prepareSampleBeamGeometry(const API::Ma
     m_activeRegion.grow(envBox);
   }
   m_instrument = inputWS->getInstrument();
-  m_beamProfile = BeamProfileFactory::createBeamProfile(*m_instrument, inputWS->sample());
   auto const &compInfo = inputWS->componentInfo();
+  m_beamProfile = BeamProfileFactory::createBeamProfile(compInfo, inputWS->sample());
   m_refframe = compInfo.referenceFrame();
   m_sourcePos = compInfo.sourcePosition();
 }
