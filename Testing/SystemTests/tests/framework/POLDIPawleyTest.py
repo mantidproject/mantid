@@ -9,7 +9,8 @@ import systemtesting
 import numpy as np
 from mantid.api import AnalysisDataService as ADS, FileFinder
 from mantid.simpleapi import PoldiAutoCorrelation, ConvertUnits, ConvertToPointData, ExtractSpectra, FlatBackground
-from Engineering.pawley_utils import Phase, GaussianProfile, PawleyPattern1D, PawleyPattern2D
+from Engineering.pawley_utils import Phase, GaussianProfile, PawleyPattern1D
+from Engineering.poldi_pawley_utils import PawleyPattern2D
 from plugins.algorithms.poldi_utils import load_poldi_h5f
 
 
