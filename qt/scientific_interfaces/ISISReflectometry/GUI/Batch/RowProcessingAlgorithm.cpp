@@ -244,10 +244,24 @@ std::optional<double> getDouble(const IAlgorithm_sptr &algorithm, std::string co
 void updateRowFromOutputProperties(const IAlgorithm_sptr &algorithm, Item &item) {
   auto &row = dynamic_cast<Row &>(item);
 
+  std::vector<std::string> iVsLams;
+  std::vector<std::string> iVsQs;
+  std::vector<std::string> iVsQBins;
+
   auto const iVsLam = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspaceWavelength");
   auto const iVsQ = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspace");
   auto const iVsQBin = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspaceBinned");
-  row.setOutputNames(std::vector<std::string>{iVsLam, iVsQ, iVsQBin});
+  if (iVsQ.empty() && iVsLam.empty() && iVsQBin.empty()) {
+    iVsLams = AlgorithmProperties::getMultipleOutputWorkspaces(algorithm, "OutputWorkspacesWavelength");
+    iVsQs = AlgorithmProperties::getMultipleOutputWorkspaces(algorithm, "OutputWorkspaces");
+    iVsQBins = AlgorithmProperties::getMultipleOutputWorkspaces(algorithm, "OutputWorkspacesBinned");
+  } else {
+    iVsLams = {iVsLam};
+    iVsQs = {iVsQ};
+    iVsQBins = {iVsQBin};
+  }
+
+  row.setOutputNames(std::vector<std::vector<std::string>>{iVsLams, iVsQs, iVsQBins});
 
   auto qRange = RangeInQ(getDouble(algorithm, "MomentumTransferMin"), getDouble(algorithm, "MomentumTransferStep"),
                          getDouble(algorithm, "MomentumTransferMax"));

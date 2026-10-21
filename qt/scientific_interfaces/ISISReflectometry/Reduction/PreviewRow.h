@@ -42,7 +42,7 @@ public:
   int completedItems() const override;
 
   void renameOutputWorkspace(std::string const &, std::string const &) override {}
-  void setOutputNames(std::vector<std::string> const &) override {}
+  void setOutputNames(std::vector<std::vector<std::string>> const &) override {}
 
   Mantid::API::Workspace_sptr getLoadedWs() const noexcept;
   Mantid::API::Workspace_sptr getSummedWs() const noexcept;

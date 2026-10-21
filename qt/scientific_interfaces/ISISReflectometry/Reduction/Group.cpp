@@ -14,7 +14,7 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 Group::Group(std::string name, std::vector<std::optional<Row>> rows)
-    : m_name(std::move(name)), m_postprocessedWorkspaceName(), m_rows(std::move(rows)) {
+    : m_name(std::move(name)), m_postprocessedWorkspaceNames(), m_rows(std::move(rows)) {
   setAllRowParentsImpl();
 }
 
@@ -24,8 +24,8 @@ Group::Group(
     : m_name(std::move(name)), m_rows() {}
 
 Group::Group(const Group &old_group)
-    : IGroup(old_group), m_name(old_group.m_name), m_postprocessedWorkspaceName(old_group.m_postprocessedWorkspaceName),
-      m_rows(old_group.m_rows) {
+    : IGroup(old_group), m_name(old_group.m_name),
+      m_postprocessedWorkspaceNames(old_group.m_postprocessedWorkspaceNames), m_rows(old_group.m_rows) {
   setAllRowParentsImpl();
 }
 
@@ -89,7 +89,7 @@ bool Group::requiresPostprocessing(bool reprocessFailed) const {
   return allChildRowsSucceeded();
 }
 
-std::string Group::postprocessedWorkspaceName() const { return m_postprocessedWorkspaceName; }
+std::vector<std::string> Group::postprocessedWorkspaceNames() const { return m_postprocessedWorkspaceNames; }
 
 std::optional<int> Group::indexOfRowWithTheta(double theta, double tolerance) const {
   return indexOf(m_rows, [theta, tolerance](std::optional<Row> const &row) -> bool {
@@ -129,14 +129,14 @@ void Group::appendRow(std::optional<Row> const &row) {
   notifyChildStateChanged();
 }
 
-void Group::setOutputNames(std::vector<std::string> const &outputNames) {
+void Group::setOutputNames(std::vector<std::vector<std::string>> const &outputNames) {
   if (outputNames.size() != 1)
-    throw std::runtime_error("Invalid number of output workspaces for group");
+    throw std::runtime_error("Invalid number of output workspace lists for group");
 
-  m_postprocessedWorkspaceName = outputNames[0];
+  m_postprocessedWorkspaceNames = outputNames[0];
 }
 
-void Group::resetOutputs() { m_postprocessedWorkspaceName = ""; }
+void Group::resetOutputs() { m_postprocessedWorkspaceNames = {}; }
 
 void Group::appendEmptyRow() {
   Item::resetState();
@@ -218,8 +218,7 @@ std::optional<std::reference_wrapper<Item>> Group::getItemWithOutputWorkspaceOrN
 }
 
 void Group::renameOutputWorkspace(std::string const &oldName, std::string const &newName) {
-  UNUSED_ARG(oldName);
-  m_postprocessedWorkspaceName = newName;
+  std::replace(m_postprocessedWorkspaceNames.begin(), m_postprocessedWorkspaceNames.end(), oldName, newName);
 }
 
 int Group::totalItems() const {
@@ -270,7 +269,7 @@ bool Group::allChildRowsSucceeded() const {
 bool operator!=(Group const &lhs, Group const &rhs) { return !(lhs == rhs); }
 
 bool operator==(Group const &lhs, Group const &rhs) {
-  return lhs.name() == rhs.name() && lhs.postprocessedWorkspaceName() == rhs.postprocessedWorkspaceName() &&
+  return lhs.name() == rhs.name() && lhs.postprocessedWorkspaceNames() == rhs.postprocessedWorkspaceNames() &&
          lhs.rows() == rhs.rows();
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
