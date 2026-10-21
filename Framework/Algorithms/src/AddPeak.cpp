@@ -68,7 +68,7 @@ void AddPeak::exec() {
 
   double theta2 = detectorInfo.twoTheta(detectorIndex);
   const Mantid::Geometry::IDetector &det = detectorInfo.detector(detectorIndex);
-  double phi = det.getPhi();
+  double phi = detectorInfo.phi(detectorIndex);
 
   // In the inelastic convention, Q = ki - kf.
   // qSign later in algorithm will change to kf - ki for Crystallography

@@ -192,9 +192,8 @@ void RecalculateTrajectoriesExtents::exec() {
           highValues[i] = lowValues[i];
           continue;
         }
-        const auto &detector = spectrumInfo.detector(i);
-        double theta = detector.getTwoTheta(sample, beamDir);
-        double phi = detector.getPhi();
+        double theta = spectrumInfo.twoTheta(i, sample, beamDir);
+        double phi = spectrumInfo.phi(i);
         V3D qout(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)), qin(0., 0., 1.), qLabLow, qLabHigh,
             qSampleLow, qSampleHigh;
         double kfmin, kfmax;
