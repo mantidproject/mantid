@@ -87,6 +87,8 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL PlotRequest {
   QWidget *parentWidget{nullptr};
   bool addToExistingPlot{false};
   bool tiledVertically{false};
+  bool shareXAxisWhenTiled{false};
+  bool shareYAxisWhenTiled{false};
 };
 
 /// Create plot options for a reflectivity-curve style output.

@@ -58,8 +58,10 @@ public:
   MOCK_METHOD(size_t, selectedPlottingWorkspaceGroupCount, (), (const, override));
   MOCK_METHOD(std::optional<PlotOutputType>, selectedPlotOutputType, (), (const, override));
   MOCK_METHOD(PlotOutputSelection, selectedPlotOutputSelection, (), (const, override));
-  MOCK_METHOD(bool, addToExistingPlot, (), (const, override));
-  MOCK_METHOD(bool, plotTiledVertically, (), (const, override));
+  MOCK_METHOD(bool, shouldAddToExistingPlot, (), (const, override));
+  MOCK_METHOD(bool, shouldPlotTiledVertically, (), (const, override));
+  MOCK_METHOD(bool, shouldShareXAxisWhenTiled, (), (const, override));
+  MOCK_METHOD(bool, shouldShareYAxisWhenTiled, (), (const, override));
   MOCK_METHOD(QWidget *, plotParent, (), (override));
   MOCK_METHOD(bool, confirmPlottingMultipleItems, (size_t), (const, override));
 };
@@ -589,7 +591,7 @@ public:
     auto const outputSelection = PlotOutputSelection{PlotOutputType::ReflectivityCurve};
 
     populatePlottingWorkspaceTree(presenter, view, workspaces);
-    EXPECT_CALL(view, addToExistingPlot()).WillRepeatedly(Return(true));
+    EXPECT_CALL(view, shouldAddToExistingPlot()).WillRepeatedly(Return(true));
     EXPECT_CALL(view, selectedPlottingWorkspaceNames()).Times(2).WillRepeatedly(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
     EXPECT_CALL(plottingModel, workspacesForPlotting(selectedPlottingWorkspaces, outputSelection))
@@ -662,7 +664,7 @@ public:
     auto const outputSelection = PlotOutputSelection{PlotOutputType::ReflectivityCurve};
 
     populatePlottingWorkspaceTree(presenter, view, workspaces);
-    EXPECT_CALL(view, addToExistingPlot()).WillRepeatedly(Return(true));
+    EXPECT_CALL(view, shouldAddToExistingPlot()).WillRepeatedly(Return(true));
     EXPECT_CALL(view, selectedPlottingWorkspaceNames()).Times(2).WillRepeatedly(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
     EXPECT_CALL(plottingModel, workspacesForPlotting(selectedPlottingWorkspaces, outputSelection))
@@ -688,7 +690,7 @@ public:
     auto const outputSelection = PlotOutputSelection{PlotOutputType::ReflectivityCurve};
 
     populatePlottingWorkspaceTree(presenter, view, workspaces);
-    EXPECT_CALL(view, plotTiledVertically()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(view, shouldPlotTiledVertically()).Times(1).WillOnce(Return(true));
     EXPECT_CALL(view, selectedPlottingWorkspaceNames()).Times(2).WillRepeatedly(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
     EXPECT_CALL(plottingModel, workspacesForPlotting(selectedPlottingWorkspaces, outputSelection))
@@ -698,6 +700,33 @@ public:
         plotter,
         plot(PlotRequest{workspaces, reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve, PlotLayout::Tiled),
                          nullptr, false, true}))
+        .Times(1);
+
+    presenter.notifyPlotTiledClicked();
+  }
+
+  void testPlotTiledPassesShareAxesOptionsToPlotter() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider plotOptionsProvider;
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
+    auto const workspaces = std::vector<std::string>{"IvsQ_12345", "IvsQ_22345"};
+    auto const selectedPlottingWorkspaces = plottingWorkspaces(workspaces);
+    auto const outputSelection = PlotOutputSelection{PlotOutputType::ReflectivityCurve};
+
+    populatePlottingWorkspaceTree(presenter, view, workspaces);
+    EXPECT_CALL(view, shouldShareXAxisWhenTiled()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(view, shouldShareYAxisWhenTiled()).Times(1).WillOnce(Return(false));
+    EXPECT_CALL(view, selectedPlottingWorkspaceNames()).Times(2).WillRepeatedly(Return(workspaces));
+    EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
+    EXPECT_CALL(plottingModel, workspacesForPlotting(selectedPlottingWorkspaces, outputSelection))
+        .Times(1)
+        .WillOnce(Return(workspaces));
+    EXPECT_CALL(
+        plotter,
+        plot(PlotRequest{workspaces, reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve, PlotLayout::Tiled),
+                         nullptr, false, false, true, false}))
         .Times(1);
 
     presenter.notifyPlotTiledClicked();

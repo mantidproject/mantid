@@ -111,6 +111,9 @@ void QtPlottingView::setPlotActionState(PlotActionState const &state) {
   m_ui.plotOverplot->setEnabled(state.plotOverplotEnabled);
   m_ui.plotTiled->setEnabled(state.plotTiledEnabled);
   m_ui.plotTiledVertically->setEnabled(state.plotTiledVerticallyEnabled);
+  m_ui.shareAxesWhenTiledLabel->setEnabled(state.shareAxesWhenTiledEnabled);
+  m_ui.shareXAxisWhenTiled->setEnabled(state.shareAxesWhenTiledEnabled);
+  m_ui.shareYAxisWhenTiled->setEnabled(state.shareAxesWhenTiledEnabled);
 }
 
 void QtPlottingView::setPlotOutputControlsState(PlotOutputControlsState const &state) {
@@ -150,9 +153,13 @@ PlotOutputSelection QtPlottingView::selectedPlotOutputSelection() const {
           static_cast<AlignmentXAxis>(m_ui.alignmentXAxis->currentData().toInt())};
 }
 
-bool QtPlottingView::addToExistingPlot() const { return m_ui.addToExistingPlot->isChecked(); }
+bool QtPlottingView::shouldAddToExistingPlot() const { return m_ui.addToExistingPlot->isChecked(); }
 
-bool QtPlottingView::plotTiledVertically() const { return m_ui.plotTiledVertically->isChecked(); }
+bool QtPlottingView::shouldPlotTiledVertically() const { return m_ui.plotTiledVertically->isChecked(); }
+
+bool QtPlottingView::shouldShareXAxisWhenTiled() const { return m_ui.shareXAxisWhenTiled->isChecked(); }
+
+bool QtPlottingView::shouldShareYAxisWhenTiled() const { return m_ui.shareYAxisWhenTiled->isChecked(); }
 
 QWidget *QtPlottingView::plotParent() { return window(); }
 
