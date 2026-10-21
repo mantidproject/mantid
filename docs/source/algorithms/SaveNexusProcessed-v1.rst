@@ -33,6 +33,29 @@ TimeSeriesProperty data within the workspace will be saved as NXlog
 sections in the Nexus file. Only floating point logs are stored and
 loaded at present.
 
+Histogram performance options
+#############################
+
+The default settings preserve histogram values and uncertainties with LZW compression and write one spectrum
+per NeXus call. The following options allow saving speed, file size and temporary memory to be traded off:
+
+* ``CompressHistogramData=False`` disables compression for histogram values, Y uncertainties, X uncertainties
+  and fractional areas. This usually speeds up saving but produces larger files. The default is ``True``.
+  Instrument, log and detector-mapping compression is unaffected. ``CompressNexus`` continues to control
+  compression of preserved events separately.
+* ``HistogramWriteBlockSize`` sets the maximum number of spectra packed into each data write for rectangular
+  histogram arrays. Its default of ``1`` preserves the existing write path. Larger values reduce NeXus calls
+  at the cost of a temporary buffer of approximately ``block size * bins * 8`` bytes, bounded by the number
+  of spectra selected. On-disk compression chunks are unchanged. Ragged arrays retain one-spectrum writes.
+  Spectrum selection and ordering are preserved, including a final partial block.
+
+These options apply to histogram output, including EventWorkspaces saved with ``PreserveEvents=False``.
+Histogram values and uncertainties are always preserved.
+
+For example, an uncompressed histogram save using larger writes can be requested with::
+
+    SaveNexusProcessed(ws, path, CompressHistogramData=False, HistogramWriteBlockSize=16)
+
 EventWorkspaces
 ###############
 

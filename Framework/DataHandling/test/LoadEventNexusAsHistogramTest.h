@@ -86,6 +86,40 @@ public:
     TS_ASSERT_EQUALS(workspace->y(1)[1], 1.0);
   }
 
+  void test_prefers_raw_data_entry_and_excludes_error_and_unmapped_events() {
+    FileResource resource("LoadEventNexusAsHistogramEntrySelectionTest.nxs", false, true);
+    createFile(resource.fullPath(), false);
+    {
+      H5::H5File file(resource.fullPath(), H5F_ACC_RDWR);
+      auto preferred = file.openGroup("raw_data_1");
+      addEventGroup(preferred, "bank_error_events", {0}, {1000}, {1.0}, {0});
+      addEventGroup(preferred, "bank_unmapped_events", {0}, {1000}, {1.0}, {0});
+      auto other = file.createGroup("aaa");
+      writeStringAttribute(other, "NX_class", "NXentry");
+      addEventGroup(other, "events", {0}, {17000}, {1.0}, {0});
+    }
+
+    for (const auto &entry : {std::string{}, std::string{"/aaa"}}) {
+      LoadEventNexusAsHistogram algorithm;
+      algorithm.setChild(true);
+      algorithm.initialize();
+      algorithm.setPropertyValue("Filename", resource.fullPath());
+      algorithm.setPropertyValue("OutputWorkspace", "unused");
+      algorithm.setPropertyValue("NXentryName", entry);
+      algorithm.setProperty("NumberOfSpectra", 2);
+      algorithm.setProperty("Params", std::vector<double>{0.0, 16.0, 32.0});
+      algorithm.setProperty("LoadInstrument", false);
+      algorithm.setProperty("LoadLogs", false);
+
+      TS_ASSERT(algorithm.execute());
+      Mantid::DataObjects::Workspace2D_sptr workspace = algorithm.getProperty("OutputWorkspace");
+      TS_ASSERT_EQUALS(workspace->y(0)[0], entry.empty() ? 2.0 : 0.0);
+      TS_ASSERT_EQUALS(workspace->y(0)[1], entry.empty() ? 0.0 : 1.0);
+      TS_ASSERT_EQUALS(workspace->y(1)[0], entry.empty() ? 1.0 : 0.0);
+      TS_ASSERT_EQUALS(workspace->y(1)[1], entry.empty() ? 1.0 : 0.0);
+    }
+  }
+
   void test_missing_pulse_height_does_not_apply_amplitude_filter() {
     FileResource resource("LoadEventNexusAsHistogramNoPulseHeightTest.nxs", false, true);
     createFileWithoutPulseHeight(resource.fullPath());

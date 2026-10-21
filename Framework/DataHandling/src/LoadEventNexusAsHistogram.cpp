@@ -39,6 +39,7 @@
 #include <cmath>
 #include <cstdint>
 #include <functional>
+#include <iterator>
 #include <limits>
 #include <memory>
 #include <mutex>
@@ -165,10 +166,9 @@ std::string selectEntryName(const Nexus::NexusDescriptor &descriptor, const std:
     return name;
   }
 
-  for (const auto &address : eventGroups) {
-    if (entryNameFromAddress(address) == "raw_data_1")
-      return "raw_data_1";
-  }
+  if (std::any_of(eventGroups.cbegin(), eventGroups.cend(),
+                  [](const auto &address) { return entryNameFromAddress(address) == "raw_data_1"; }))
+    return "raw_data_1";
   if (!eventGroups.empty())
     return entryNameFromAddress(*eventGroups.begin());
   throw std::runtime_error("No NXevent_data entries were found in the file.");
@@ -322,11 +322,11 @@ void validateSinglePeriod(const H5::Group &eventGroup) {
 std::vector<std::string> eventGroupsInEntry(const std::set<std::string> &allEventGroups, const std::string &entryName) {
   const std::string prefix = '/' + entryName + '/';
   std::vector<std::string> result;
-  for (const auto &address : allEventGroups) {
-    if (address.starts_with(prefix) && !address.ends_with("bank_error_events") &&
-        !address.ends_with("bank_unmapped_events"))
-      result.emplace_back(address);
-  }
+  std::copy_if(allEventGroups.cbegin(), allEventGroups.cend(), std::back_inserter(result),
+               [&prefix](const auto &address) {
+                 return address.starts_with(prefix) && !address.ends_with("bank_error_events") &&
+                        !address.ends_with("bank_unmapped_events");
+               });
   if (result.empty())
     throw std::runtime_error("No NXevent_data entries were found below NXentry '" + entryName + "'.");
   return result;
@@ -619,8 +619,11 @@ void LoadEventNexusAsHistogram::exec() {
     return std::make_pair(std::move(counts), eventsRead);
   };
 
-  auto [counts, eventsRead] = useUInt32 ? histogramAllGroups.template operator()<uint32_t>()
-                                        : histogramAllGroups.template operator()<uint64_t>();
+  auto [counts, eventsRead] = [&] {
+    if (useUInt32)
+      return histogramAllGroups.template operator()<uint32_t>();
+    return histogramAllGroups.template operator()<uint64_t>();
+  }();
 
   uint64_t acceptedEvents = 0;
   for (size_t workspaceIndex = 0; workspaceIndex < numberOfSpectra; ++workspaceIndex) {
