@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import patch, create_autospec, MagicMock
 import numpy as np
 from numpy import allclose, zeros_like, ones, trapezoid, array, linspace
-from numpy.testing import assert_array_equal, assert_array_almost_equal
+from numpy.testing import assert_array_equal, assert_array_almost_equal, assert_allclose
 from mantid.api import AnalysisDataService, FileFinder
 from mantid.simpleapi import CreateWorkspace, FlatBackground, CloneWorkspace, MaskDetectors, ExtractSpectra
 from Engineering.pawley_utils import Phase, GaussianProfile, PawleyPattern1D
@@ -46,7 +46,7 @@ class PawleyPattern2DTest(unittest.TestCase):
     def test_set_global_scale_false_with_bg(self):
         pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile(), bg_func=FlatBackground(A0=2))
         pawley.set_global_scale(False)
-        self.asser_allclose(pawley.bg_params, 0)  # zero global bg (optimised with scale for each spectrum)
+        assert_allclose(pawley.bg_params, 0)  # zero global bg (optimised with scale for each spectrum)
         self.assertFalse(pawley.bg_isfree.any(), 0)  # background fixed
 
     def test_eval_profile(self):
