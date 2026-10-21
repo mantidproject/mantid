@@ -51,6 +51,7 @@ set(PYTHON_PLUGINS
     algorithms/DPDFreduction.py
     algorithms/DakotaChiSquared.py
     algorithms/DeltaPDF3D.py
+    algorithms/diffraction_utils.py
     algorithms/LoadElementalAnalysisData.py
     algorithms/ElasticEMUauReduction.py
     algorithms/EnggCalibrate.py
