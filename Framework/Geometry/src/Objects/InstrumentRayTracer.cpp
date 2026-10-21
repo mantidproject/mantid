@@ -183,8 +183,6 @@ void InstrumentRayTracer::testIntersectionWithShape(size_t const index, Track &t
   Track probeTrack(trkStart, trkDirection);
   shape.interceptSurface(probeTrack);
 
-  // ComponentID is only used as a handle, so this is never written through
-  auto *const compID = const_cast<IComponent *>(compInfo.componentID(index));
   for (auto const &link : probeTrack) {
     V3D in = link.entryPoint;
     rot.rotate(in);
@@ -194,7 +192,9 @@ void InstrumentRayTracer::testIntersectionWithShape(size_t const index, Track &t
     rot.rotate(out);
     out *= scale;
     out += pos;
-    testRay.addLink(in, out, out.distance(testRay.startPoint()), shape, compID);
+    // ComponentID is only used as a handle, so this is never written through
+    testRay.addLink(in, out, out.distance(testRay.startPoint()), shape,
+                    const_cast<IComponent *>(compInfo.componentID(index)));
   }
 }
 
@@ -248,8 +248,8 @@ void InstrumentRayTracer::testIntersectionWithGrid(size_t const index, Track &te
 
   size_t const pixel = compInfo.detectorIndexAtXYZ(index, xIndex, yIndex, 0);
   // ComponentID is only used as a handle, so this is never written through
-  auto *const compID = const_cast<IComponent *>(compInfo.componentID(pixel));
-  testRay.addLink(intersec, intersec, 0.0, compInfo.shape(pixel), compID);
+  testRay.addLink(intersec, intersec, 0.0, compInfo.shape(pixel),
+                  const_cast<IComponent *>(compInfo.componentID(pixel)));
 }
 
 ///**
