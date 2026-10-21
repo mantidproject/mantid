@@ -21,7 +21,7 @@ Bugfixes
 Deprecated
 ############
 - ``LoadPreNexusLive`` has been deprecated. There is no replacement.
-- :ref:`algm-SCDCalibratePanels-v1` has been deprecated, use :ref:`algm-SCDCalibratePanels-v2` instead.
+- SCDCalibratePanels v1 has been deprecated, use :ref:`algm-SCDCalibratePanels-v2` instead.
 - Removed the experimental multiprocess loader from :ref:`algm-LoadEventNexus` and deprecated the ``LoadType`` property.
 
 Removed

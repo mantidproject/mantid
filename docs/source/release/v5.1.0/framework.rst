@@ -38,9 +38,9 @@ Algorithms
   - A new Operator option has been added ``NotFinite`` that allows you to mask detectors that contain infinite or `NaN <https://en.wikipedia.org/wiki/NaN>`_ values.
 
 - A form of reversible masking that could lead to misleading and incorrect results has been removed from Mantid,
-  this means that ClearMaskedSpectra is no longer necessary after calling :ref:`MaskInstrument <algm-MaskInstrument>` and :ref:`MaskDetectorsIf <algm-MaskDetectorsIf>`.
+  this means that ClearMaskedSpectra is no longer necessary after calling MaskInstrument and :ref:`MaskDetectorsIf <algm-MaskDetectorsIf>`.
   ClearMaskedSpectra has been removed as it no longer has a use,
-  and :ref:`MaskInstrument <algm-MaskInstrument>` is now deprecated and you should use :ref:`MaskDetectors <algm-MaskDetectors>` instead.
+  and MaskInstrument is now deprecated and you should use :ref:`MaskDetectors <algm-MaskDetectors>` instead.
 
 - Enhanced :ref:`LoadNGEM <algm-LoadNGEM>` to handle partially written events in the data file.
   When such incomplete data is encountered, it is skipped until the next valid data is encountered and a warning is printed at algorithm completion of the total number of data bytes discarded.
