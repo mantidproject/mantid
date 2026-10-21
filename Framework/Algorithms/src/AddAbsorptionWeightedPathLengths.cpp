@@ -114,9 +114,7 @@ void AddAbsorptionWeightedPathLengths::exec() {
     inputWS->setInstrument(inst);
   }
 
-  auto instrument = inputWS->getInstrument();
-
-  auto beamProfile = BeamProfileFactory::createBeamProfile(*instrument, inputWS->sample());
+  auto beamProfile = BeamProfileFactory::createBeamProfile(inputWS->componentInfo(), inputWS->sample());
   // Configure strategy
   std::shared_ptr<IMCInteractionVolume> interactionVol =
       MCInteractionVolume::create(inputWS->sample(), maxScatterPtAttempts);

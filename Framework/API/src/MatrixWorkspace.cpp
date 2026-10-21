@@ -14,6 +14,7 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -914,7 +915,7 @@ double MatrixWorkspace::detectorSignedTwoTheta(const Geometry::IDetector &det) c
     throw Kernel::Exception::InstrumentDefinitionError("Source and sample are at same position!");
   }
   // Get the instrument up axis.
-  const V3D &thetaSignAxis = instrument->getReferenceFrame()->vecThetaSign();
+  V3D const &thetaSignAxis = componentInfo().referenceFrame()->vecThetaSign();
   return det.getSignedTwoTheta(samplePos, beamLine, thetaSignAxis);
 }
 
