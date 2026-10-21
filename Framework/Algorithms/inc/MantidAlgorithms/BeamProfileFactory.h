@@ -8,15 +8,15 @@
 
 #include "MantidAPI/Sample.h"
 #include "MantidAlgorithms/SampleCorrections/IBeamProfile.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 
 namespace Mantid {
 namespace Algorithms {
 
 class MANTID_ALGORITHMS_DLL BeamProfileFactory {
 public:
-  static std::unique_ptr<IBeamProfile> createBeamProfile(const Geometry::Instrument &instrument,
-                                                         const API::Sample &sample);
+  static std::unique_ptr<IBeamProfile> createBeamProfile(Geometry::ComponentInfo const &componentInfo,
+                                                         API::Sample const &sample);
 };
 
 } // namespace Algorithms

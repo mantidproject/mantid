@@ -8,6 +8,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -167,7 +168,7 @@ void SpecularReflectionPositionCorrect2::exec() {
   // Sample-to-detector
   const V3D sampleToDetector = detectorPosition - samplePosition;
   const double l2 = sampleToDetector.norm();
-  const auto referenceFrame = inst->getReferenceFrame();
+  auto const referenceFrame = inWS->componentInfo().referenceFrame();
   const auto alongDir = referenceFrame->vecPointingAlongBeam();
   const double beamOffsetOld = sampleToDetector.scalar_prod(alongDir);
 

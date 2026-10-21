@@ -8,6 +8,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
@@ -201,7 +202,7 @@ double SpecularReflectionAlgorithm::calculateTwoTheta() const {
 
   const V3D detSample = detector->getPos() - sample->getPos();
 
-  std::shared_ptr<const ReferenceFrame> refFrame = instrument->getReferenceFrame();
+  std::shared_ptr<ReferenceFrame const> const refFrame = inWS->componentInfo().referenceFrame();
 
   const double upoffset = refFrame->vecPointingUp().scalar_prod(detSample);
   const double beamoffset = refFrame->vecPointingAlongBeam().scalar_prod(detSample);

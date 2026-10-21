@@ -54,7 +54,7 @@ DetectorInfo::DetectorInfo(std::unique_ptr<Beamline::DetectorInfo> detectorInfo,
                            std::shared_ptr<const std::unordered_map<detid_t, size_t>> detIdToIndexMap)
     : m_detectorInfo(std::move(detectorInfo)), m_instrument(std::move(instrument)),
       m_detectorIDs(std::move(detectorIds)), m_detIDToIndex(std::move(detIdToIndexMap)),
-      m_referenceFrame(instrument->getReferenceFrame()), m_lastDetector(PARALLEL_GET_MAX_THREADS),
+      m_referenceFrame(m_instrument->getReferenceFrame()), m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
 
   // Note: This does not seem possible currently (the instrument objects is
@@ -329,14 +329,14 @@ double DetectorInfo::signedTwoTheta(const std::pair<size_t, size_t> &index, cons
 /// Returns the signed angle between the vector from `observer` to the detector and `axis`, signed using the
 /// instrument's theta-sign axis (ReferenceFrame::vecThetaSign).
 double DetectorInfo::signedTwoTheta(const size_t index, const Kernel::V3D &observer, const Kernel::V3D &axis) const {
-  return signedTwoTheta(index, observer, axis, m_instrument->getReferenceFrame()->vecThetaSign());
+  return signedTwoTheta(index, observer, axis, m_referenceFrame->vecThetaSign());
 }
 
 /// Returns the signed angle between the vector from `observer` to the detector and `axis`, signed using the
 /// instrument's theta-sign axis (ReferenceFrame::vecThetaSign).
 double DetectorInfo::signedTwoTheta(const std::pair<size_t, size_t> &index, const Kernel::V3D &observer,
                                     const Kernel::V3D &axis) const {
-  return signedTwoTheta(index, observer, axis, m_instrument->getReferenceFrame()->vecThetaSign());
+  return signedTwoTheta(index, observer, axis, m_referenceFrame->vecThetaSign());
 }
 
 /** Returns the angle of the detector position about the lab-frame z axis, atan2(y, x), in radians.
