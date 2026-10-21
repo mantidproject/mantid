@@ -4,26 +4,24 @@ Mantid Workbench Changes
 
 New Features
 ------------
-- (`#41652 <https://github.com/mantidproject/mantid/pull/41652>`_) Mantid on Linux has moved from Qt5 to Qt6.
-- (`#42141 <https://github.com/mantidproject/mantid/pull/42141>`_) A new property `CheckMantidVersion.NotifyUpdateOnStartup` has been added to the Mantid.properties file which is enabled by default.
-- (`#42141 <https://github.com/mantidproject/mantid/pull/42141>`_) The same property can be updated via the check box in General Settings as "Prompt to update Mantid Workbench on startup" in the mantid workbench.
-- (`#42141 <https://github.com/mantidproject/mantid/pull/42141>`_) This introduces a more persuasive prompt on the startup to update mantid workbench and can be disabled by setting with `0` in your Mantid.properties file.
-- (`#42141 <https://github.com/mantidproject/mantid/pull/42141>`_) The user can also disable the prompt by unchecking the check box in General Settings or by clicking on the "Don't show this again" button in the update notification dialog.
-- (`#41746 <https://github.com/mantidproject/mantid/pull/41746>`_) The sample logs viewer allows copying the selected variable name to clipboard
-- (`#41895 <https://github.com/mantidproject/mantid/pull/41895>`_) The :ref:`Script Repository <WorkbenchScriptRepository>` is now read-only. Scripts can still be downloaded and kept up to date, but they can no longer be uploaded to, or deleted from, the central repository through Mantid. To contribute or remove scripts, use the `script repository on GitHub <https://github.com/mantidproject/scriptrepository>`_ directly. The ``Delete`` column has been removed from the interface, and the ``UploaderWebServer`` property has been removed from the properties file.
-- (`#41928 <https://github.com/mantidproject/mantid/pull/41928>`_) new command line argument ``--qt-rm-lockfiles`` forcibly removes lockfiles created by QSettings. This is not available on Windows.
-- (`#42145 <https://github.com/mantidproject/mantid/pull/42145>`_) The default font size for the plot title, axis labels, and tick labels on plots can now be set on the :ref:`Plots tab of the Settings <PlotSettings>`. The values are saved to the user properties as ``plots.titleFontSize``, ``plots.axesLabelFontSize`` and ``plots.ticks.labelSize``.
+- (`#41652 <https://github.com/mantidproject/mantid/pull/41652>`_) Upgraded from Qt 5 to Qt 6.
+- (`#42141 <https://github.com/mantidproject/mantid/pull/42141>`_) A new property `CheckMantidVersion.NotifyUpdateOnStartup` has been added to the Mantid.properties and is enabled by default.
+  This setting controls whether Mantid Workbench prompts users to update on startup.
+  It can be changed in ``Mantid.properties`` (set to 0 to disable the prompt) or via the "Prompt to update Mantid Workbench on startup" checkbox in General Settings.
+  Users can also disable future prompts by clicking "Don't show this again" in the update notification dialog.
+- (`#41746 <https://github.com/mantidproject/mantid/pull/41746>`_) The sample logs viewer now allows users to copy the selected variable name to the clipboard.
+- (`#41895 <https://github.com/mantidproject/mantid/pull/41895>`_) The :ref:`Script Repository <WorkbenchScriptRepository>` is now read-only. Scripts can still be downloaded and updated, but uploading and deleting scripts through Mantid is no longer possible. To contribute or remove scripts, use the `script repository on GitHub <https://github.com/mantidproject/scriptrepository>`_ directly. The ``Delete`` column has been removed from the interface, and the ``UploaderWebServer`` property has been removed from ``Mantid.properties``.
+- (`#41928 <https://github.com/mantidproject/mantid/pull/41928>`_) A new ``--qt-rm-lockfiles`` command line argument forcibly removes lockfiles created by ``QSettings``. This option is not available on Windows.
+- (`#42145 <https://github.com/mantidproject/mantid/pull/42145>`_) The default font sizes for plot titles, axis labels, and tick labels can now be configured on the :ref:`Plots tab of the Settings <PlotSettings>`. The values are saved in the user properties ``plots.titleFontSize``, ``plots.axesLabelFontSize`` and ``plots.ticks.labelSize``.
 
 
 Bugfixes
 --------
-- (`#41715 <https://github.com/mantidproject/mantid/pull/41715>`_) The :menuselection:`File --> Save Project as...` dialog now correctly skips an unmodified :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>` when monitors are loaded and ``Save Altered Workspaces Only`` is selected without resulting in mantid crashing.
-- (`#42001 <https://github.com/mantidproject/mantid/pull/42001>`_) :ref:`Script generation<generate_plot_script>` of a mantid plot now considers the device pixel ratio and figure layout to generate the script.
-- (`#41804 <https://github.com/mantidproject/mantid/pull/41804>`_) The Error Reporter Dialog now stores remembered contact information in its own settings file instead of the Workbench settings file. Previously saved Workbench contact information remains
-  available as a read-only fallback for values not yet set in the new file. With ``Remember Me`` ticked, the name and email are remembered whichever button is clicked, and they are never sent
-  if ``Don't share any information`` is clicked. Unticking ``Remember Me`` clears any remembered contact information. The settings file is only updated when this information changes.
-- (`#42041 <https://github.com/mantidproject/mantid/pull/42041>`_) Fixed a crash in Fit Property Browser ocurring when trying to find peaks for HRP data due to an unhandled exception raised from the :ref:`Levenberg-MarquardtMD minimizer <LevenbergMarquardtMD>`.
-- (`#41938 <https://github.com/mantidproject/mantid/pull/41938>`_) The :ref:`Project Recovery <Project Recovery>` feature is now guarded against a ``TypeError`` emanating from the ``listdir_fullpath`` method.
+- (`#41715 <https://github.com/mantidproject/mantid/pull/41715>`_) The :menuselection:`File --> Save Project as...` dialog no longer crashes when monitors are loaded and ``Save Altered Workspaces Only`` is selected. Unmodified :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>` objects are now correctly skipped in this case.
+- (`#42001 <https://github.com/mantidproject/mantid/pull/42001>`_) :ref:`Script generation<generate_plot_script>` for mantid plots now accounts for the device pixel ratio and figure layout.
+- (`#41804 <https://github.com/mantidproject/mantid/pull/41804>`_) The Error Reporter dialog now handles remembered contact information more consistently. When ``Remember Me`` is ticked, the name and email address are remembered regardless of which button is clicked. Unticking ``Remember Me`` clears the remembered information.
+- (`#42041 <https://github.com/mantidproject/mantid/pull/42041>`_) Fixed a crash in the Fit Property Browser when finding peaks in HRP training course data.
+- (`#41938 <https://github.com/mantidproject/mantid/pull/41938>`_) Project Recovery no longer crashes when encountering an unexpected error while listing files.
 - (`#41948 <https://github.com/mantidproject/mantid/pull/41948>`_) In the ISIS Reflectometry interface, fixed a bug where the (new) Instrument View would not fill the available space in the dock when first opened. The view now correctly fills the dock area upon initial display.
 - (`#41948 <https://github.com/mantidproject/mantid/pull/41948>`_) In the ALF View interface, fixed bug where the "Add ROI" button was not working. The button now correctly adds a new ROI to the view when clicked.
 - (`#41948 <https://github.com/mantidproject/mantid/pull/41948>`_) In the ALF View interface, fixed an error on opening the interface.
