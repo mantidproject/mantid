@@ -16,8 +16,11 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/LoadEventNexusIndexSetup.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidHistogramData/HistogramX.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -48,6 +51,7 @@
 #include <stdexcept>
 #include <string>
 #include <type_traits>
+#include <unordered_map>
 #include <variant>
 #include <vector>
 
@@ -266,10 +270,65 @@ bool canUseNativeBinning(const TimeStorage storage, const std::vector<double> &p
       EventChunk::makeTimeValues(storage));
 }
 
-template <typename CounterType, typename TimeType>
+struct ContiguousEventMapping {
+  int offset;
+  int64_t operator()(const uint32_t eventID) const { return static_cast<int64_t>(eventID) - offset; }
+};
+
+uint32_t mappingEventID(const int64_t id) {
+  if (id < 0 || id > std::numeric_limits<uint32_t>::max())
+    throw std::runtime_error("Instrument mapping requires non-negative, 32-bit event IDs.");
+  return static_cast<uint32_t>(id);
+}
+
+class InstrumentEventMapping {
+public:
+  InstrumentEventMapping(const detid2index_map &workspaceMapping, const std::vector<uint32_t> &monitorEventIDs) {
+    std::unordered_map<uint32_t, int64_t> indices;
+    for (const auto id : monitorEventIDs)
+      indices.emplace(id, -1);
+    for (const auto &[eventID, index] : workspaceMapping)
+      indices[mappingEventID(eventID)] = static_cast<int64_t>(index);
+    if (indices.empty())
+      throw std::runtime_error("The instrument mapping contains no event IDs.");
+    const auto [min, max] = std::minmax_element(indices.cbegin(), indices.cend(),
+                                                [](const auto &a, const auto &b) { return a.first < b.first; });
+    m_minID = min->first;
+    const uint64_t span = static_cast<uint64_t>(max->first) - m_minID + 1;
+    constexpr size_t maxDenseBytes = 64 * 1024 * 1024;
+    if (span <= 8 * indices.size() && span <= maxDenseBytes / sizeof(int64_t)) {
+      m_dense.assign(static_cast<size_t>(span), UNKNOWN);
+      for (const auto &[eventID, index] : indices)
+        m_dense[eventID - m_minID] = index;
+    } else {
+      m_sparse = std::move(indices);
+    }
+  }
+
+  int64_t operator()(const uint32_t eventID) const {
+    int64_t index = UNKNOWN;
+    if (!m_dense.empty()) {
+      if (eventID >= m_minID && static_cast<uint64_t>(eventID) - m_minID < m_dense.size())
+        index = m_dense[eventID - m_minID];
+    } else if (const auto found = m_sparse.find(eventID); found != m_sparse.end()) {
+      index = found->second;
+    }
+    if (index == UNKNOWN)
+      throw std::runtime_error("Event ID " + std::to_string(eventID) + " is not present in the instrument mapping.");
+    return index;
+  }
+
+private:
+  static constexpr int64_t UNKNOWN = -2;
+  uint32_t m_minID{0};
+  std::vector<int64_t> m_dense;
+  std::unordered_map<uint32_t, int64_t> m_sparse;
+};
+
+template <typename CounterType, typename TimeType, typename EventMapping>
 void histogramRange(std::vector<CounterType> &counts, const EventChunk &chunk, const std::vector<TimeType> &eventTimes,
                     const size_t begin, const size_t end, const size_t numberOfSpectra, const size_t numberOfBins,
-                    const int eventIDOffset, const double minimumPulseHeight, const bool hasPulseHeight,
+                    const EventMapping &eventMapping, const double minimumPulseHeight, const bool hasPulseHeight,
                     const std::vector<double> &params, const double timeScale, const bool useNativeBinning) {
   if (useNativeBinning) {
     const auto binning = nativeBinning<TimeType>(params, timeScale);
@@ -278,8 +337,7 @@ void histogramRange(std::vector<CounterType> &counts, const EventChunk &chunk, c
     for (size_t eventIndex = begin; eventIndex != end; ++eventIndex) {
       if (hasPulseHeight && !(chunk.pulseHeights[eventIndex] > minimumPulseHeight))
         continue;
-      const int64_t workspaceIndex =
-          static_cast<int64_t>(chunk.eventIDs[eventIndex]) - static_cast<int64_t>(eventIDOffset);
+      const int64_t workspaceIndex = eventMapping(chunk.eventIDs[eventIndex]);
       if (workspaceIndex < 0 || workspaceIndex >= static_cast<int64_t>(numberOfSpectra))
         continue;
 
@@ -294,8 +352,7 @@ void histogramRange(std::vector<CounterType> &counts, const EventChunk &chunk, c
     for (size_t eventIndex = begin; eventIndex != end; ++eventIndex) {
       if (hasPulseHeight && !(chunk.pulseHeights[eventIndex] > minimumPulseHeight))
         continue;
-      const int64_t workspaceIndex =
-          static_cast<int64_t>(chunk.eventIDs[eventIndex]) - static_cast<int64_t>(eventIDOffset);
+      const int64_t workspaceIndex = eventMapping(chunk.eventIDs[eventIndex]);
       if (workspaceIndex < 0 || workspaceIndex >= static_cast<int64_t>(numberOfSpectra))
         continue;
 
@@ -343,6 +400,8 @@ struct HistogramOptions {
   std::string accumulatorType;
   size_t maxInFlightChunks;
   size_t numberOfBins{0};
+  bool filterByPulseHeight{true};
+  std::optional<InstrumentEventMapping> instrumentMapping;
 };
 
 HistogramOptions readHistogramOptions(const API::Algorithm &algorithm) {
@@ -354,7 +413,10 @@ HistogramOptions readHistogramOptions(const API::Algorithm &algorithm) {
           algorithm.getPropertyValue("ProcessingStrategy"),
           algorithm.getPropertyValue("TimeBinningStrategy"),
           algorithm.getPropertyValue("AccumulatorType"),
-          static_cast<size_t>(static_cast<int>(algorithm.getProperty("MaxInFlightChunks")))};
+          static_cast<size_t>(static_cast<int>(algorithm.getProperty("MaxInFlightChunks"))),
+          0,
+          algorithm.getProperty("FilterByPulseHeight"),
+          std::nullopt};
 }
 
 struct EventGroup {
@@ -380,7 +442,7 @@ EventGroup openEventGroup(const H5::H5File &file, const std::string &groupAddres
   if (datasetSize(timeDataset) != numberOfEvents)
     throw std::runtime_error("event_id and event_time_offset have different lengths in '" + groupAddress + "'.");
 
-  const bool hasPulseHeight = linkExists(eventGroup, "pulse_height");
+  const bool hasPulseHeight = options.filterByPulseHeight && linkExists(eventGroup, "pulse_height");
   H5::DataSet pulseHeightDataset;
   if (hasPulseHeight) {
     pulseHeightDataset = eventGroup.openDataSet("pulse_height");
@@ -448,15 +510,27 @@ bool useUInt32Accumulators(const uint64_t totalEvents, const std::string &reques
 
 template <typename CounterType> using ThreadLocalCounts = tbb::enumerable_thread_specific<std::vector<CounterType>>;
 
+template <typename CounterType, typename TimeType>
+void histogramEventRange(std::vector<CounterType> &counts, const EventChunk &chunk,
+                         const std::vector<TimeType> &eventTimes, const size_t begin, const size_t end,
+                         const EventGroup &group, const HistogramOptions &options) {
+  const auto histogram = [&](const auto &mapping) {
+    histogramRange(counts, chunk, eventTimes, begin, end, options.numberOfSpectra, options.numberOfBins, mapping,
+                   options.minimumPulseHeight, group.hasPulseHeight, options.params, group.timeScale,
+                   group.useNativeBinning);
+  };
+  // Dispatch once per range so the default event loop retains arithmetic-only mapping.
+  if (options.instrumentMapping)
+    histogram(*options.instrumentMapping);
+  else
+    histogram(ContiguousEventMapping{options.eventIDOffset});
+}
+
 template <typename CounterType>
 void histogramChunk(std::vector<CounterType> &counts, const EventChunk &chunk, const EventGroup &group,
                     const HistogramOptions &options) {
   std::visit(
-      [&](const auto &eventTimes) {
-        histogramRange(counts, chunk, eventTimes, 0, chunk.length, options.numberOfSpectra, options.numberOfBins,
-                       options.eventIDOffset, options.minimumPulseHeight, group.hasPulseHeight, options.params,
-                       group.timeScale, group.useNativeBinning);
-      },
+      [&](const auto &eventTimes) { histogramEventRange(counts, chunk, eventTimes, 0, chunk.length, group, options); },
       chunk.eventTimes);
 }
 
@@ -520,10 +594,8 @@ uint64_t processParallelEvents(const EventGroup &group, const HistogramOptions &
         [&](const auto &eventTimes) {
           tbb::parallel_for(tbb::blocked_range<size_t>(0, length, PARALLEL_GRAIN_SIZE),
                             [&](const tbb::blocked_range<size_t> &range) {
-                              histogramRange(threadCounts.local(), chunk, eventTimes, range.begin(), range.end(),
-                                             options.numberOfSpectra, options.numberOfBins, options.eventIDOffset,
-                                             options.minimumPulseHeight, group.hasPulseHeight, options.params,
-                                             group.timeScale, group.useNativeBinning);
+                              histogramEventRange(threadCounts.local(), chunk, eventTimes, range.begin(), range.end(),
+                                                  group, options);
                             });
         },
         chunk.eventTimes);
@@ -595,6 +667,25 @@ uint64_t storeHistogram(const HistogramResult &histogram, Workspace2D &workspace
   return acceptedEvents;
 }
 
+struct InstrumentSetup {
+  Indexing::IndexInfo indexInfo;
+  std::vector<uint32_t> monitorEventIDs;
+};
+
+InstrumentSetup createInstrumentSetup(const MatrixWorkspace_sptr &metadataWorkspace) {
+  const auto instrument = metadataWorkspace->getInstrument();
+  if (instrument->getDetectorIDs(true).empty())
+    throw std::runtime_error("LoadInstrument=True requires a successfully loaded instrument with detectors.");
+
+  LoadEventNexusIndexSetup indexSetup(metadataWorkspace, EMPTY_INT(), EMPTY_INT(), {});
+  std::vector<uint32_t> monitorEventIDs;
+  for (const auto id : instrument->getMonitorIDs()) {
+    if (id >= 0)
+      monitorEventIDs.emplace_back(mappingEventID(id));
+  }
+  return {indexSetup.makeIndexInfo(), std::move(monitorEventIDs)};
+}
+
 } // namespace
 
 DECLARE_ALGORITHM(LoadEventNexusAsHistogram)
@@ -624,13 +715,19 @@ void LoadEventNexusAsHistogram::init() {
 
   auto positiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
-  declareProperty("NumberOfSpectra", 64, positiveInt,
-                  "Number of output spectra. Event IDs are mapped to workspace indices after applying EventIDOffset.");
+  declareProperty(
+      "NumberOfSpectra", 64, positiveInt,
+      "Number of output spectra when LoadInstrument=False. When LoadInstrument=True the default is ignored; "
+      "a non-default value must match the derived spectrum count.");
   declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("Params", std::vector<double>{0.0, 0.016, 32.768},
                                                                   std::make_shared<Kernel::RebinParamsValidator>()),
                   "Linear histogram binning in microseconds: start, width, end.");
   declareProperty("EventIDOffset", 0,
-                  "Value subtracted from each event ID to obtain its zero-based output workspace index.");
+                  "Value subtracted from each event ID to obtain its zero-based output workspace index when "
+                  "LoadInstrument=False. Must be zero when LoadInstrument=True.");
+  declareProperty("FilterByPulseHeight", true,
+                  "Apply MinimumPulseHeight when pulse_height is present. If false, do not read or filter "
+                  "pulse_height; detector and time-range selection still apply.");
   declareProperty("MinimumPulseHeight", 0.0,
                   "Events are retained only when pulse_height is strictly greater than this value. The filter is "
                   "not applied when pulse_height is absent.");
@@ -654,7 +751,9 @@ void LoadEventNexusAsHistogram::init() {
                   std::make_shared<Kernel::StringListValidator>(std::vector<std::string>{"Auto", "UInt32", "UInt64"}),
                   "Select 32- or 64-bit thread-local histogram counters. Auto uses 32-bit counters only when the "
                   "total event count proves that they cannot overflow.");
-  declareProperty("LoadInstrument", true, "Load the instrument definition into the output workspace.");
+  declareProperty("LoadInstrument", true,
+                  "Load the instrument definition and map physical detector IDs to output spectra. If false, "
+                  "use EventIDOffset and NumberOfSpectra to map event IDs arithmetically without an instrument.");
   declareProperty("LoadLogs", true, "Load sample logs into the output workspace.");
   declareProperty("LoadNexusInstrumentXML", true,
                   "When loading the instrument, prefer an instrument definition embedded in the NeXus file.");
@@ -666,6 +765,11 @@ void LoadEventNexusAsHistogram::init() {
 
 std::map<std::string, std::string> LoadEventNexusAsHistogram::validateInputs() {
   std::map<std::string, std::string> errors;
+  if (getProperty("LoadInstrument")) {
+    const int offset = getProperty("EventIDOffset");
+    if (offset != 0)
+      errors["EventIDOffset"] = "EventIDOffset applies only when LoadInstrument=False.";
+  }
   const std::vector<double> params = getProperty("Params");
   if (params.size() != 3) {
     errors["Params"] = "Exactly three values are required: start, width, end.";
@@ -716,6 +820,9 @@ void LoadEventNexusAsHistogram::exec() {
   const Nexus::NexusDescriptor descriptor(filename);
   const auto allEventGroups = descriptor.allAddressesOfType("NXevent_data");
   const auto entryName = selectEntryName(descriptor, getPropertyValue("NXentryName"), allEventGroups);
+  H5::H5File file(filename, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
+  if (getProperty("LoadInstrument") && linkExists(file.openGroup(entryName), "isis_vms_compat"))
+    throw std::runtime_error("LoadInstrument=True does not support legacy isis_vms_compat mapping.");
   const auto groupAddresses = eventGroupsInEntry(allEventGroups, entryName);
 
   auto options = readHistogramOptions(*this);
@@ -724,9 +831,20 @@ void LoadEventNexusAsHistogram::exec() {
   options.numberOfBins = binEdges.size() - 1;
 
   const auto metadataWorkspace = loadMetadata(filename, entryName, descriptor);
+  std::optional<InstrumentSetup> instrumentSetup;
+  if (getProperty("LoadInstrument")) {
+    instrumentSetup.emplace(createInstrumentSetup(metadataWorkspace));
+    if (!isDefault("NumberOfSpectra") && options.numberOfSpectra != instrumentSetup->indexInfo.size())
+      throw std::runtime_error("NumberOfSpectra does not match the instrument mapping.");
+    options.numberOfSpectra = instrumentSetup->indexInfo.size();
+  }
   auto outputWorkspace = createOutputWorkspace(metadataWorkspace, options.numberOfSpectra, binEdges, filename);
+  if (instrumentSetup) {
+    outputWorkspace->setIndexInfo(instrumentSetup->indexInfo);
+    options.instrumentMapping.emplace(outputWorkspace->getDetectorIDToWorkspaceIndexMap(),
+                                      instrumentSetup->monitorEventIDs);
+  }
 
-  H5::H5File file(filename, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
   API::Progress progress(this, 0.2, 0.95, groupAddresses.size());
   const bool useUInt32 = useUInt32Accumulators(countInputEvents(file, groupAddresses), options.accumulatorType);
   const auto histogram = [&] {

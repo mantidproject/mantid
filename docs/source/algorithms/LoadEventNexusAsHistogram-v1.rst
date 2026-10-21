@@ -13,55 +13,72 @@ Description
 :ref:`Workspace2D <Workspace2D>`. It does not construct an intermediate :ref:`EventWorkspace <EventWorkspace>`.
 This is useful when the required output binning is known in advance and event-level operations are not required.
 
-Event IDs are converted to zero-based workspace indices by subtracting ``EventIDOffset``. The default offset of zero
-matches MNeuEventLib files, in which event ID 0 represents the first spectrum. Output spectrum and detector numbers
-begin at 1.
+By default, ``LoadInstrument=True`` loads the instrument and maps events using **physical detector IDs**.
+``EventIDOffset`` must be zero. The spectrum count is derived from the instrument; a non-default
+``NumberOfSpectra`` must match this count. The instrument can be loaded from embedded XML or through the existing
+Mantid instrument-loading mechanism, controlled by ``LoadNexusInstrumentXML``. Each non-monitor detector gets its own
+spectrum, numbered from 1 in the same order as :ref:`algm-LoadEventNexus`. Known monitors are excluded from output
+spectra. Unknown event IDs raise an error instead of guessing an offset or silently discarding detector events.
+Failure to load an instrument with detectors also raises an error. Other file-specific mapping conventions are not
+inferred automatically. The algorithm does not perform diffraction focusing or calibration.
+
+With ``LoadInstrument=False``, no instrument is loaded. Event IDs are converted to zero-based workspace indices by
+subtracting ``EventIDOffset``. For example, use an offset of zero when event ID 0 represents the first spectrum, or
+an offset of one when event ID 1 represents the first spectrum. Output spectrum and detector numbers start at 1;
+``NumberOfSpectra`` sets the output size. Set these two properties to match the file's event-ID numbering.
+
+Legacy ``isis_vms_compat`` mapping is not supported with ``LoadInstrument=True``. If the selected NeXus entry
+contains this group, the algorithm raises an error before loading instrument metadata or events. Use
+:ref:`algm-LoadEventNexus` when these detector associations are required. With ``LoadInstrument=False``, the group is
+ignored without reading or validating its mapping; detector associations from the legacy mapping are not preserved.
 
 ``Params`` accepts exactly three values: the first bin edge, a positive linear bin width, and the final bin edge, all
 in microseconds. The units attribute on ``event_time_offset`` is used to convert nanoseconds, microseconds,
 milliseconds, or seconds to microseconds before binning.
 
-When ``pulse_height`` is present, an event is retained only if its value is strictly greater than
-``MinimumPulseHeight``. This reproduces MNeuEventLib's default amplitude filter. Event IDs and times outside the
-requested output range are ignored. Version 1 supports single-period files only.
+With the default ``FilterByPulseHeight=True``, when ``pulse_height`` is present, an event is retained only if its
+value is strictly greater than ``MinimumPulseHeight``.
+``FilterByPulseHeight=False`` skips reading and validating that dataset and accepts events regardless of amplitude,
+including zero, negative and non-finite pulse heights. Detector mapping and time-range selection still apply.
+Here pulse height is an individual detector event's amplitude, not a source-pulse selection.
+With ``LoadInstrument=False``, event IDs outside the requested spectrum range are ignored. Times outside the
+requested histogram range are ignored regardless of instrument loading. Version 1 supports single-period files only.
 
 Performance tuning
 ------------------
 
-By default, ``ProcessingStrategy=Auto`` overlaps serial NeXus reads with histogramming of earlier chunks when the
-input contains multiple chunks and more than one worker is available. HDF5 access remains serial; only in-memory
-histogramming is parallel. This makes the pipeline independent of HDF5 thread-safety and uses Mantid's cross-platform
-oneTBB runtime. ``ParallelEvents`` instead finishes each read before dividing that chunk's events between workers.
-``Pipeline`` forces the pipelined path.
+The default ``Auto`` settings are suitable for most files. The following properties allow loading speed and memory
+use to be tuned without changing the requested histogram:
 
-``MaxInFlightChunks`` limits pipeline memory usage. Its default of zero selects a limit from available concurrency
-and a 256 MiB chunk-buffer budget. Set a positive value to tune throughput and memory use for a particular system.
-``ReadSizeFromDisk`` controls the number of events in each chunk; larger chunks can reduce HDF5 call overhead but use
-more memory and provide fewer independent pipeline tasks.
+* ``ProcessingStrategy`` controls how reading and histogramming are scheduled. ``Pipeline`` overlaps reading with
+  processing earlier chunks. ``ParallelEvents`` reads a chunk before processing its events in parallel. ``Auto``
+  selects a strategy based on the input size and available workers.
+* ``ReadSizeFromDisk`` sets the maximum number of events read in each chunk. Larger chunks can reduce reading
+  overhead but require more memory.
+* ``MaxInFlightChunks`` limits the number of chunks held by the pipeline. Zero selects an automatic limit.
+  A smaller positive value can reduce memory use; a larger value may improve throughput.
+* ``TimeBinningStrategy`` selects the numerical binning method. ``Auto`` uses exact integer binning when the input
+  time format and ``Params`` allow it, otherwise double-precision binning. ``Native`` requires exact integer binning
+  and reports an error when it is unavailable; ``Double`` always uses double precision.
+* ``AccumulatorType`` selects the integer count range. ``Auto`` chooses between ``UInt32`` and ``UInt64`` based on
+  the input event count. ``UInt32`` uses less memory but is rejected if the input event count makes it unsafe.
 
-The loader reads ``event_time_offset`` into its on-disk numeric type. ``TimeBinningStrategy=Auto`` uses integer
-arithmetic in the file's native units when the dataset contains unsigned integers and every value in ``Params`` can
-be represented exactly in those units. It otherwise uses double-precision microseconds. ``Native`` and ``Double``
-force either path; ``Native`` reports an error when exact native-unit binning is unavailable.
-
-``AccumulatorType=Auto`` uses 32-bit thread-local histogram counters only when the total number of input events is no
-greater than the largest 32-bit count, which proves that no individual bin can overflow. It uses 64-bit counters for
-larger inputs. The explicit ``UInt32`` and ``UInt64`` settings are available for controlled comparisons; ``UInt32``
-is rejected when the total input event count makes it unsafe.
+Disabling ``LoadInstrument`` or ``FilterByPulseHeight`` can reduce loading work, but changes detector associations
+or event selection respectively. Use these options only when those changes are appropriate for your analysis.
 
 Usage
 -----
 
+This example loads the POWGEN event file ``PG3_5226_event.nxs`` into 100-microsecond bins spanning 0 to 17000
+microseconds. The default ``LoadInstrument=True`` preserves physical detector associations and determines the
+number of output spectra. Keep the default ``LoadLogs=True`` for this historical dataset: its run date is needed
+to select the correct instrument definition.
+
 .. code-block:: python
 
    output = LoadEventNexusAsHistogram(
-       Filename="HIFI00207031.nxs",
-       NumberOfSpectra=64,
-       Params="0,0.016,32.768",
-       EventIDOffset=0,
-       ProcessingStrategy="Auto",
-       TimeBinningStrategy="Auto",
-       AccumulatorType="Auto",
+       Filename="PG3_5226_event.nxs",
+       Params="0,100,17000",
    )
 
 .. categories::
