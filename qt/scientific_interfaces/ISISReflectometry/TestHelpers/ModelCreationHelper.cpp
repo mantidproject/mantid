@@ -20,7 +20,7 @@ namespace { // unnamed
 Row makeRowWithOutputNames(std::vector<std::string> const &outputNames) {
   auto row = Row({}, 0.0, TransmissionRunPair(), RangeInQ(), std::nullopt, ReductionOptionsMap(),
                  ReductionWorkspaces({}, TransmissionRunPair()));
-  row.setOutputNames(outputNames);
+  row.setOutputNames({{outputNames[0]}, {outputNames[1]}, {outputNames[2]}});
   return row;
 }
 } // namespace

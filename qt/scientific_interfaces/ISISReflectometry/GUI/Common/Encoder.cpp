@@ -132,8 +132,12 @@ QMap<QString, QVariant> Encoder::encodeGroup(const MantidQt::CustomInterfaces::I
   QMap<QString, QVariant> groupMap;
   groupMap.insert(QString("name"), QVariant(QString::fromStdString(group.m_name)));
   groupMap.insert(QString("itemState"), QVariant(static_cast<int>(group.state())));
-  groupMap.insert(QString("postprocessedWorkspaceName"),
-                  QVariant(QString::fromStdString(group.m_postprocessedWorkspaceName)));
+  QList<QVariant> postprocessedWorkspaceNames;
+  std::for_each(group.m_postprocessedWorkspaceNames.cbegin(), group.m_postprocessedWorkspaceNames.cend(),
+                [&postprocessedWorkspaceNames](auto const &postprocessedWsName) {
+                  postprocessedWorkspaceNames.append(QVariant(QString::fromStdString(postprocessedWsName)));
+                });
+  groupMap.insert(QString("postprocessedWorkspaceNames"), QVariant(postprocessedWorkspaceNames));
   groupMap.insert(QString("rows"), QVariant(encodeRows(group)));
   return groupMap;
 }
@@ -187,12 +191,25 @@ QMap<QString, QVariant> Encoder::encodeReductionWorkspace(const ReductionWorkspa
   for (const auto &inputRunNum : redWs.m_inputRunNumbers) {
     inputRunNumbers.append(QVariant(QString::fromStdString(inputRunNum)));
   }
+  QList<QVariant> iVsLambdas;
+  for (const auto &iVsLambda : redWs.m_iVsLambda) {
+    iVsLambdas.append(QVariant(QString::fromStdString(iVsLambda)));
+  }
+  QList<QVariant> iVsQs;
+  for (const auto &iVsQs : redWs.m_iVsQ) {
+    iVsLambdas.append(QVariant(QString::fromStdString(iVsQs)));
+  }
+  QList<QVariant> iVsQBinneds;
+  for (const auto &iVsQBinned : redWs.m_iVsLambda) {
+    iVsLambdas.append(QVariant(QString::fromStdString(iVsQBinned)));
+  }
+
   QMap<QString, QVariant> reductionMap;
   reductionMap.insert(QString("inputRunNumbers"), QVariant(inputRunNumbers));
   reductionMap.insert(QString("transPair"), QVariant(encodeTransmissionRunPair(redWs.m_transmissionRuns)));
-  reductionMap.insert(QString("iVsLambda"), QVariant(QString::fromStdString(redWs.m_iVsLambda)));
-  reductionMap.insert(QString("iVsQ"), QVariant(QString::fromStdString(redWs.m_iVsQ)));
-  reductionMap.insert(QString("iVsQBinned"), QVariant(QString::fromStdString(redWs.m_iVsQBinned)));
+  reductionMap.insert(QString("iVsLambda"), QVariant(iVsLambdas));
+  reductionMap.insert(QString("iVsQ"), QVariant(iVsQs));
+  reductionMap.insert(QString("iVsQBinned"), QVariant(iVsQBinneds));
   return reductionMap;
 }
 

@@ -185,9 +185,30 @@ std::deque<IConfiguredAlgorithm_sptr> BatchJobManager::getAlgorithms() {
  * @returns : the list of configured algorithms
  */
 std::deque<IConfiguredAlgorithm_sptr> BatchJobManager::algorithmForPostprocessingGroup(Group &group) {
-  auto algorithm = GroupProcessing::createConfiguredAlgorithm(m_batch, group);
+  if (group.rows().size() < 2) {
+    throw std::runtime_error("Must have at least two rows for post-processing a group.");
+  }
+  // TODO
+  // for row in group
+  //   check each row has the same number of slices
+  //   if so, create one algorithm per slice, with the inputs being the slice workspace (unbinned/iVsQ) from each row
+
+  auto const nSlices = group.rows()[0]->reducedWorkspaceNames().iVsQ().size();
+  std::for_each(std::next(group.rows().cbegin()), group.rows().cend(), [nSlices](auto const &row) -> void {
+    if (row->reducedWorkspaceNames().iVsQ().size() != nSlices) {
+      throw std::runtime_error("All rows must have equal numbers of slices to perform stitching post-processing.");
+    }
+  });
+
   auto algorithms = std::deque<IConfiguredAlgorithm_sptr>();
-  algorithms.emplace_back(std::move(algorithm));
+  for (size_t i = 0; i < nSlices; i++) {
+    auto workspaces = std::vector<std::string>{};
+    std::for_each(group.rows().cbegin(), group.rows().cend(), [&workspaces, i](auto const &row) -> void {
+      workspaces.emplace_back(row->reducedWorkspaceNames().iVsQ()[i]);
+    });
+    auto algorithm = GroupProcessing::createConfiguredAlgorithm(m_batch, group, std::move(workspaces));
+    algorithms.emplace_back(std::move(algorithm));
+  }
   return algorithms;
 }
 
@@ -290,13 +311,15 @@ std::vector<std::string> BatchJobManager::algorithmOutputWorkspacesToSave(IConfi
 }
 
 std::vector<std::string> BatchJobManager::getWorkspacesToSave(Group const &group, bool includeRows) const {
-  auto workspaces = std::vector<std::string>{group.postprocessedWorkspaceName()};
+  auto workspaces = group.postprocessedWorkspaceNames();
 
   if (includeRows) {
     auto const &rows = group.rows();
     for (auto &row : rows) {
       if (row) {
-        workspaces.emplace_back(row.value().reducedWorkspaceNames().iVsQBinned());
+        auto const &binnedWorkspaces = row.value().reducedWorkspaceNames().iVsQBinned();
+        workspaces.reserve(workspaces.size() + std::distance(binnedWorkspaces.cbegin(), binnedWorkspaces.cend()));
+        workspaces.insert(workspaces.end(), binnedWorkspaces.cbegin(), binnedWorkspaces.cend());
       }
     }
   }
@@ -313,8 +336,9 @@ std::vector<std::string> BatchJobManager::getWorkspacesToSave(Row const &row) co
   if (group && group->hasPostprocessing())
     return workspaces;
 
-  // We currently only save the binned workspace in Q
-  workspaces.emplace_back(row.reducedWorkspaceNames().iVsQBinned());
+  auto const &binnedWorkspaces = row.reducedWorkspaceNames().iVsQBinned();
+  workspaces.reserve(workspaces.size() + std::distance(binnedWorkspaces.cbegin(), binnedWorkspaces.cend()));
+  workspaces.insert(workspaces.end(), binnedWorkspaces.cbegin(), binnedWorkspaces.cend());
   return workspaces;
 }
 

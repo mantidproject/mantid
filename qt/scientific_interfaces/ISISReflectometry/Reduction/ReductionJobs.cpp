@@ -232,8 +232,10 @@ MantidWidgets::Batch::RowLocation ReductionJobs::getLocation(Row const &row) con
 std::optional<std::reference_wrapper<Item>> ReductionJobs::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   for (auto &group : m_groups) {
     // Return this group if it has the output we're looking for
-    if (group.postprocessedWorkspaceName() == wsName)
+    if (std::find(group.postprocessedWorkspaceNames().cbegin(), group.postprocessedWorkspaceNames().cend(), wsName) !=
+        group.postprocessedWorkspaceNames().cend()) {
       return group;
+    }
     // If it has a child row with this workspace output, return it
     auto maybeRow = group.getItemWithOutputWorkspaceOrNone(wsName);
     if (maybeRow.has_value())
