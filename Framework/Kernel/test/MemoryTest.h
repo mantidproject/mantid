@@ -9,10 +9,14 @@
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ThreadPool.h"
+
+#include <limits>
+#include <string>
 
 using namespace Mantid::Kernel;
 
@@ -24,6 +28,25 @@ void MemoryTest_myTaskFunction() {
 
 class MemoryTest : public CxxTest::TestSuite {
 public:
+  void setUp() override {
+    m_memoryCheck = MemoryStats::memoryCheckEnabled() ? "On" : "Off";
+    ConfigService::Instance().setString("algorithms.memorycheck", "On");
+  }
+
+  void tearDown() override { ConfigService::Instance().setString("algorithms.memorycheck", m_memoryCheck); }
+
+  void test_checkAvailableMemory() {
+    MemoryStats mem;
+    TS_ASSERT(mem.checkAvailableMemory(1).empty());
+    TS_ASSERT(!mem.checkAvailableMemory(std::numeric_limits<std::size_t>::max()).empty());
+  }
+
+  void test_checkAvailableMemory_is_skipped_when_turned_off() {
+    MemoryStats mem;
+    ConfigService::Instance().setString("algorithms.memorycheck", "Off");
+    TS_ASSERT(mem.checkAvailableMemory(std::numeric_limits<std::size_t>::max()).empty());
+  }
+
   void test_update() {
     MemoryStats mem;
     TS_ASSERT_THROWS_NOTHING(mem.update());
@@ -57,4 +80,7 @@ public:
     }
     pool.joinAll();
   }
+
+private:
+  std::string m_memoryCheck;
 };
