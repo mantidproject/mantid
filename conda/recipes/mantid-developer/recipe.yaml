@@ -27,7 +27,7 @@ requirements:
     - libboost-python-devel ${{ libboost }}
     - librdkafka ${{ librdkafka }}
     - mantid-sphinx-theme ${{ mantid_sphinx_theme }}
-    - matplotlib ${{ matplotlib }}
+    - matplotlib-base ${{ matplotlib }}
     - muparser ${{ muparser }}
     - myst-parser ${{ mystparser }}
     - ninja ${{ ninja }}

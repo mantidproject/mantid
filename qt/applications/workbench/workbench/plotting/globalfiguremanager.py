@@ -10,10 +10,13 @@
 # std imports
 import atexit
 import gc
+from enum import Enum
 
 # 3rd party imports
+from qtpy import sip
+from qtpy.QtCore import QCoreApplication, QObject, Signal
 
-from enum import Enum
+# local imports
 from .observabledictionary import DictionaryAction, ObservableDictionary
 
 
@@ -24,6 +27,22 @@ class FigureAction(Enum):
     Renamed = 3
     OrderChanged = 4
     VisibilityChanged = 5
+
+
+class GlobalFigureManagerActiveFigureObserver(QObject):
+    """Publishes changes to the active matplotlib figure."""
+
+    active_figure_changed = Signal()
+
+    def notify(self, action, _):
+        if action == FigureAction.OrderChanged:
+            self.active_figure_changed.emit()
+
+    def attach_parent_application(self):
+        """Attach this observer to the Qt application when it is available."""
+        application = QCoreApplication.instance()
+        if application is not None and self.parent() is None:
+            self.setParent(application)
 
 
 class GlobalFigureManagerObserver(object):
@@ -93,6 +112,28 @@ class GlobalFigureManager(object):
         :return:
         """
         cls.figs.add_observer(GlobalFigureManagerObserver(cls))
+
+    @classmethod
+    def initialiseActiveFiguresObserver(cls):
+        """Create and register the active-figure observer once, then attach it to Qt."""
+        cls._remove_deleted_observers()
+        observer = next(
+            (observer for observer in cls.observers if isinstance(observer, GlobalFigureManagerActiveFigureObserver)),
+            None,
+        )
+        if observer is None:
+            observer = GlobalFigureManagerActiveFigureObserver()
+            cls.add_observer(observer)
+        observer.attach_parent_application()
+        return observer
+
+    @classmethod
+    def _remove_deleted_observers(cls):
+        """
+        Drop QObject observers whose C++ object has been deleted. This happens to the
+        active-figure observer when the QApplication it belongs to is destroyed.
+        """
+        cls.observers[:] = [observer for observer in cls.observers if not (isinstance(observer, QObject) and sip.isdeleted(observer))]
 
     @classmethod
     def get_fig_manager(cls, num):
@@ -247,8 +288,6 @@ class GlobalFigureManager(object):
         return last_shown_order_dict
 
     # ---------------------- Observer methods ---------------------
-    # This is currently very simple as the only observer is
-    # permanently registered to this class.
 
     @classmethod
     def add_observer(cls, observer):
@@ -267,6 +306,7 @@ class GlobalFigureManager(object):
         :param action: A FigureAction enum for the action called
         :param figure_number: The unique fig number (key in the dict)
         """
+        cls._remove_deleted_observers()
         for observer in cls.observers:
             observer.notify(action, figure_number)
 
@@ -288,4 +328,5 @@ class GlobalFigureManager(object):
 
 
 GlobalFigureManager.initialiseFiguresObserver()
+GlobalFigureManager.initialiseActiveFiguresObserver()
 atexit.register(GlobalFigureManager.destroy_all)

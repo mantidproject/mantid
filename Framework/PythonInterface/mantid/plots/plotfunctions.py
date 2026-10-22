@@ -223,6 +223,52 @@ def plot(
     return _update_show_figure(fig)
 
 
+@manage_workspace_names
+def plot_workspaces_on_existing_mantid_axis(
+    workspaces,
+    axis,
+    wksp_indices=None,
+    errors=False,
+    plot_kwargs=None,
+    ax_properties=None,
+    window_title=None,
+):
+    """
+    Plot the given workspaces directly on the supplied axis without inspecting or replacing other axes in the figure.
+
+    This is for callers that have already created and positioned the target axis, for example when adding one tile to
+    an existing figure.
+    """
+    if not isinstance(axis, MantidAxes):
+        raise TypeError("plot_workspaces_on_existing_mantid_axis requires a MantidAxes target axis")
+
+    if plot_kwargs is None:
+        plot_kwargs = {}
+    if wksp_indices is None:
+        wksp_indices = [0]
+
+    raise_if_not_sequence(workspaces, "workspaces", MatrixWorkspace)
+    raise_if_not_sequence(wksp_indices, "wksp_indices")
+    workspaces = [ws for ws in workspaces if isinstance(ws, MatrixWorkspace)]
+
+    _add_default_plot_kwargs_from_settings(plot_kwargs, errors)
+
+    if ax_properties:
+        scales_to_amend = [scale for scale in ["x", "y"] if f"{scale}scale" in ax_properties]
+        mod_ax_properties = ax_properties
+        for scale_id in scales_to_amend:
+            mod_ax_properties = _apply_scale_properties(ax_properties, scale_id, axis)
+        if mod_ax_properties:
+            axis.set(**_post_process_props(mod_ax_properties))
+
+    _do_single_plot(axis, workspaces, errors, False, wksp_indices, "wkspIndex", plot_kwargs)
+
+    fig = axis.figure
+    if window_title and fig.canvas.manager is not None:
+        fig.canvas.manager.set_window_title(window_title)
+    return _update_show_figure(fig)
+
+
 def _overplot_waterfall(ax, no_of_lines):
     """
     If overplotting onto a waterfall axes, convert lines to waterfall (add x and y offset) before overplotting.
@@ -260,7 +306,7 @@ def _update_show_figure(fig):
     return fig
 
 
-def create_subplots(nplots, fig=None, layout_engine="tight"):
+def create_subplots(nplots, fig=None, layout_engine="tight", vertical=False):
     """
     Create a set of subplots suitable for a given number of plots. A stripped down
     version of plt.subplots that can accept an existing figure instance.
@@ -269,18 +315,14 @@ def create_subplots(nplots, fig=None, layout_engine="tight"):
     :param nplots: The number of plots required
     :param fig: An optional figure. It is cleared before plotting the new contents
     :param layout_engine: The string name of the layout engine to be used for the plot
+    :param vertical: If True then fill tiled positions top-to-bottom first, then left-to-right.
     :return: fig, axes, ncrows, ncols
     """
     import matplotlib.pyplot as plt
 
-    square_side_len = int(math.ceil(math.sqrt(nplots)))
-    nrows, ncols = square_side_len, square_side_len
-    if square_side_len * square_side_len != nplots:
-        # not a square number - square_side_len x square_side_len
-        # will be large enough but we could end up with an empty
-        # row so chop that off
-        if nplots <= (nrows - 1) * ncols:
-            nrows -= 1
+    nrows, ncols = tiled_axes_layout(nplots)
+    if vertical:
+        nrows, ncols = ncols, nrows
 
     if fig is None:
         fig = plt.figure()
@@ -295,12 +337,85 @@ def create_subplots(nplots, fig=None, layout_engine="tight"):
 
     gs = GridSpec(nrows, ncols, fig)
     ax0 = fig.add_subplot(gs[0, 0], projection=PROJECTION)
+    set_mantid_tiled_axis_position(ax0, 0, 0)
     axes[0] = ax0
     for i in range(1, nplots):
-        axes[i] = fig.add_subplot(gs[i // ncols, i % ncols], projection=PROJECTION)
+        row, col = tiled_axis_grid_position(i, nrows, ncols, vertical)
+        axes[i] = fig.add_subplot(gs[row, col], projection=PROJECTION)
+        set_mantid_tiled_axis_position(axes[i], row, col)
 
     axes = axes.reshape(nrows, ncols)
     return fig, axes, nrows, ncols
+
+
+def add_axes_to_existing_mantid_tiled_figure(fig, axes_num, layout_engine="tight", vertical=False):
+    """
+    Add axes to an existing figure and arrange the existing and new axes as a tiled plot.
+
+    :param fig: The figure receiving new axes.
+    :param axes_num: The number of axes to add.
+    :param layout_engine: The layout engine to use for the updated tiled figure.
+    :param vertical: If True then fill tiled positions top-to-bottom first, then left-to-right.
+    :return: A list containing the new axes.
+    """
+    existing_axes = list(fig.axes)
+    existing_axes_num = len(existing_axes)
+    nplots = existing_axes_num + axes_num
+    nrows, ncols = tiled_axes_layout(nplots)
+    if vertical:
+        nrows, ncols = ncols, nrows
+
+    fig.set_layout_engine(layout=layout_engine)
+    grid_spec = GridSpec(nrows, ncols, fig)
+
+    occupied_positions = set()
+    for ax in existing_axes:
+        row, col = stored_mantid_tiled_axis_position(ax, nrows, ncols)
+        occupied_positions.add((row, col))
+        ax.set_subplotspec(grid_spec[row, col])
+        set_mantid_tiled_axis_position(ax, row, col)
+
+    new_axes = []
+    candidate_index = 0
+    for _ in range(axes_num):
+        while True:
+            row, col = tiled_axis_grid_position(candidate_index, nrows, ncols, vertical)
+            candidate_index += 1
+            if (row, col) not in occupied_positions:
+                break
+        occupied_positions.add((row, col))
+        new_axis = fig.add_subplot(grid_spec[row, col], projection=PROJECTION)
+        set_mantid_tiled_axis_position(new_axis, row, col)
+        new_axes.append(new_axis)
+    return new_axes
+
+
+def tiled_axes_layout(nplots):
+    square_side_len = int(math.ceil(math.sqrt(nplots)))
+    nrows, ncols = square_side_len, square_side_len
+    if square_side_len * square_side_len != nplots and nplots <= (nrows - 1) * ncols:
+        nrows -= 1
+    return nrows, ncols
+
+
+def tiled_axis_grid_position(index, nrows, ncols, vertical=False):
+    if vertical:
+        return index % nrows, index // nrows
+    return index // ncols, index % ncols
+
+
+def stored_mantid_tiled_axis_position(axis, nrows, ncols):
+    row, col = getattr(axis, "_mantid_tiled_row", None), getattr(axis, "_mantid_tiled_col", None)
+    if row is None or col is None:
+        raise ValueError("Existing tiled axes must have a stored Mantid tile position")
+    if row >= nrows or col >= ncols:
+        raise ValueError("Existing tiled axis position is outside the new tiled layout")
+    return row, col
+
+
+def set_mantid_tiled_axis_position(axis, row, col):
+    axis._mantid_tiled_row = row
+    axis._mantid_tiled_col = col
 
 
 def raise_if_not_sequence(value, seq_name, element_type=None):

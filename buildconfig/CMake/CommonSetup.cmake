@@ -75,7 +75,7 @@ if(BUILD_MANTIDFRAMEWORK OR BUILD_MANTIDQT)
   endif()
 
   set(Boost_VERBOSE "ON")
-  find_package(Boost CONFIG REQUIRED COMPONENTS date_time regex serialization filesystem system)
+  find_package(Boost CONFIG REQUIRED COMPONENTS date_time regex serialization filesystem)
   add_definitions(-DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB -DBOOST_BIND_GLOBAL_PLACEHOLDERS)
   # Need this defined globally for our log time values
   add_definitions(-DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG)
