@@ -169,14 +169,9 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         sample_pos = component_info.samplePosition()
         beam_dir = sample_pos - component_info.sourcePosition()
         for i in range(nhist):
-            if spectrum_info.isMonitor(i):
-                # spectrum_info.twoTheta() throws for monitors (see SpectrumInfo.cpp); replicate
-                # the legacy IDetector.getTwoTheta(), which computed the raw geometric angle
-                # unconditionally, since this workspace's spectra are not guaranteed to exclude monitors.
-                two_theta = (spectrum_info.position(i) - sample_pos).angle(beam_dir)
-            else:
-                two_theta = spectrum_info.twoTheta(i)
-            thetasort[i] = 0.5 * two_theta
+            # passing the observer and axis explicitly does not throw for monitors, unlike
+            # spectrum_info.twoTheta(i), since this workspace's spectra are not guaranteed to exclude monitors.
+            thetasort[i] = 0.5 * spectrum_info.twoTheta(i, sample_pos, beam_dir)
 
         # T in K
         temperature = self.get_temperature()

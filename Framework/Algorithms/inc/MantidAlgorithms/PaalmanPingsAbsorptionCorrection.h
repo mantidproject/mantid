@@ -18,7 +18,8 @@ namespace Mantid {
 
 namespace API {
 class Sample;
-}
+class SpectrumInfo;
+} // namespace API
 namespace Geometry {
 class IDetector;
 class IObject;
@@ -63,7 +64,7 @@ private:
 
   void retrieveBaseProperties();
   void constructSample(API::Sample &sample);
-  void calculateDistances(const Geometry::IDetector &detector, std::vector<double> &sample_L2s,
+  void calculateDistances(const API::SpectrumInfo &spectrumInfo, const size_t index, std::vector<double> &sample_L2s,
                           std::vector<double> &sample_container_L2s, std::vector<double> &container_L2s,
                           std::vector<double> &container_sample_L2s) const;
   void doIntegration(double &integral, double &crossIntegral, const double linearCoefAbs,

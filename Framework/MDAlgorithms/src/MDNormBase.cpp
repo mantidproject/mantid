@@ -492,8 +492,8 @@ void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const
       continue;
     }
     const auto &detector = spectrumInfo.detector(i);
-    double theta = detector.getTwoTheta(m_samplePos, m_beamDir);
-    double phi = detector.getPhi();
+    double theta = spectrumInfo.twoTheta(i, m_samplePos, m_beamDir);
+    double phi = spectrumInfo.phi(i);
     // If the detector is a group, this should be the ID of the first detector
     const auto detID = detector.getID();
 

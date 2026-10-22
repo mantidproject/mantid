@@ -16,6 +16,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/InstrumentMetadata.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -301,6 +302,20 @@ public:
 
     TS_ASSERT_EQUALS(clone->componentInfo().position(sampleIndex), movedTo);
     TS_ASSERT_EQUALS(original.componentInfo().position(sampleIndex), positionBefore);
+  }
+
+  void test_componentInfo_has_the_instruments_reference_frame() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    const auto frame = std::make_shared<ReferenceFrame>(X, Y, Left, "source");
+    instrument->setReferenceFrame(frame);
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(instrument);
+
+    TS_ASSERT_EQUALS(expInfo.componentInfo().referenceFrame(), frame);
+    TS_ASSERT_EQUALS(expInfo.baseComponentInfo().referenceFrame(), frame);
+    // and of a clone, which copies the parametrized instrument
+    std::unique_ptr<ExperimentInfo> const clone(expInfo.cloneExperimentInfo());
+    TS_ASSERT_EQUALS(clone->componentInfo().referenceFrame(), frame);
   }
 
   void test_baseComponentInfo_matches_componentInfo_before_any_move() {
