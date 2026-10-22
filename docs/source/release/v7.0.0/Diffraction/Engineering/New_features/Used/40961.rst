@@ -1,1 +1,0 @@
-- New :ref:`Texture Planning User Interface <Texture_Planner-ref>` for aiding the user in planning and executing Texture Analysis experiments. See the linked docs for more information.
