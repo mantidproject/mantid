@@ -1273,7 +1273,7 @@ class DirectEnergyConversion(object):
                     )
                     mon1_det = monitor_ws.getDetector(mon1_index)
                     mon1_pos = mon1_det.getPos()
-                    src_name - monitor_ws.componentInfo().name(monitor_ws.componentInfo().source())
+                    src_name = monitor_ws.componentInfo().name(monitor_ws.componentInfo().source())
                 # pylint: disable=bare-except
                 except:
                     src_name = None
