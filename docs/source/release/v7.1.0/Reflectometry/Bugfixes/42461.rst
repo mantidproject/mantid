@@ -1,0 +1,1 @@
+- Editing a cell in the search results table on the Runs tab of the :ref:`ISIS Reflectometry <interface-isis-refl>` interface no longer clears the text that was already in the cell.
