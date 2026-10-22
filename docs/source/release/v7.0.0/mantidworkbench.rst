@@ -7,7 +7,7 @@ New Features
 - (`#41652 <https://github.com/mantidproject/mantid/pull/41652>`_) Upgraded from Qt 5 to Qt 6.
 - (`#42141 <https://github.com/mantidproject/mantid/pull/42141>`_) A new property ``CheckMantidVersion.NotifyUpdateOnStartup`` has been added to the Mantid.properties and is enabled by default.
   This setting controls whether Mantid Workbench prompts users to update on startup.
-  It can be changed in ``Mantid.properties`` (set to 0 to disable the prompt) or via the "Prompt to update Mantid Workbench on startup" checkbox in General Settings.
+  It can be changed in ``Mantid.properties`` (set to 0 to disable the prompt) or via the "Prompt to update Mantid Workbench on startup" checkbox in :ref:`General Settings <GeneralSettings>`.
   Users can also disable future prompts by clicking "Don't show this again" in the update notification dialog.
 - (`#41746 <https://github.com/mantidproject/mantid/pull/41746>`_) The sample logs viewer now allows users to copy the selected variable name to the clipboard.
 - (`#41895 <https://github.com/mantidproject/mantid/pull/41895>`_) The :ref:`Script Repository <WorkbenchScriptRepository>` is now read-only. Scripts can still be downloaded and updated, but uploading and deleting scripts through Mantid is no longer possible. To contribute or remove scripts, use the `script repository on GitHub <https://github.com/mantidproject/scriptrepository>`_ directly. The ``Delete`` column has been removed from the interface, and the ``UploaderWebServer`` property has been removed from ``Mantid.properties``.
@@ -23,7 +23,7 @@ Bugfixes
 - (`#41938 <https://github.com/mantidproject/mantid/pull/41938>`_) :ref:`Project Recovery<Project Recovery>` no longer crashes when encountering an unexpected error while listing files.
 - (`#41949 <https://github.com/mantidproject/mantid/pull/41949>`_) Opening interfaces or changing default directories no longer unnecessarily rewrites and locks the Mantid Workbench settings file.
 - (`#42037 <https://github.com/mantidproject/mantid/pull/42037>`_) On Linux systems with an NFS-backed configuration directory, Workbench now stages its ``QSettings files`` in the local cache. This avoids lock-file failures when running multiple Workbench instances and preserves conflicting settings for recovery. Existing settings for the Mantid Reduction interface must be migrated once to the staged INI file.
-- (`#42396 <https://github.com/mantidproject/mantid/pull/42396>`_) Fixed a memory leak where the most recently opened window, such as a plot or the new Instrument View, was not released from memory when closed.
+- (`#42396 <https://github.com/mantidproject/mantid/pull/42396>`_) Fixed a memory leak where the most recently opened window, such as a plot or the new :ref:`Instrument View<InstrumentViewer>`, was not released from memory when closed.
 
 
 InstrumentViewer
