@@ -149,7 +149,7 @@ class SideBySide(Projection, projection_types={ProjectionType.SIDE_BY_SIDE: {"ax
             flat_bank.bank_type = "grid"
             flat_bank.detector_id_position_map.clear()
             flat_bank.reference_position = np.array(bank.getPos())
-            rotation = bank.getRotation()
+            rotation = component_info.rotation(bank_index)
             flat_bank.rotation = Rotation.from_quat([rotation.imagI(), rotation.imagJ(), rotation.imagK(), rotation.real()])
             flat_bank.detector_ids = list(valid_detector_ids)
             pixels = [
