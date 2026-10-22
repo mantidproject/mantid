@@ -53,7 +53,8 @@ public:
   DetectorInfo(std::unique_ptr<Beamline::DetectorInfo> detectorInfo,
                std::shared_ptr<const Geometry::Instrument> instrument,
                std::shared_ptr<const std::vector<detid_t>> detectorIds,
-               std::shared_ptr<const std::unordered_map<detid_t, size_t>> detIdToIndexMap);
+               std::shared_ptr<const std::unordered_map<detid_t, size_t>> detIdToIndexMap,
+               std::shared_ptr<ParameterInfo> parameterInfo, std::shared_ptr<ReferenceFrame const> referenceFrame);
   DetectorInfo(const DetectorInfo &other);
   DetectorInfo &operator=(const DetectorInfo &rhs);
   ~DetectorInfo();

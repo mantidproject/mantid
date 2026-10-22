@@ -47,16 +47,18 @@ double applyPhiOffset(const double phi, const double offset) { return phi < 0 ? 
  *
  * The Instrument reference `instrument` must be the parameterized instrument
  * obtained from a workspace. Detector ID -> index map provided as constructor
- * argument. */
+ * argument. The ParameterInfo and ReferenceFrame must be the same objects held
+ * by the matching ComponentInfo. */
 DetectorInfo::DetectorInfo(std::unique_ptr<Beamline::DetectorInfo> detectorInfo,
                            std::shared_ptr<const Geometry::Instrument> instrument,
                            std::shared_ptr<const std::vector<detid_t>> detectorIds,
-                           std::shared_ptr<const std::unordered_map<detid_t, size_t>> detIdToIndexMap)
+                           std::shared_ptr<const std::unordered_map<detid_t, size_t>> detIdToIndexMap,
+                           std::shared_ptr<ParameterInfo> parameterInfo,
+                           std::shared_ptr<ReferenceFrame const> referenceFrame)
     : m_detectorInfo(std::move(detectorInfo)), m_instrument(std::move(instrument)),
       m_detectorIDs(std::move(detectorIds)), m_detIDToIndex(std::move(detIdToIndexMap)),
-      m_parameterInfo(m_instrument->getParameterMap()->sharedParameterInfo()),
-      m_referenceFrame(m_instrument->getReferenceFrame()), m_lastDetector(PARALLEL_GET_MAX_THREADS),
-      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
+      m_parameterInfo(std::move(parameterInfo)), m_referenceFrame(std::move(referenceFrame)),
+      m_lastDetector(PARALLEL_GET_MAX_THREADS), m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
 
   // Note: This does not seem possible currently (the instrument objects is
   // always allocated, even if it is empty), so this will not fail.
