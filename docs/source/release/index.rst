@@ -13,7 +13,7 @@ Release Notes
 
 .. plot:: release/versions.py
 
-* v7.0.0 - in progress - :doc:`release notes <v7.0.0/index>`
+* v7.0.0 - 2026-10-27 - :doc:`release notes <v7.0.0/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v6.16.1>`__
 * v6.16.1 - 2026-07-02 - :doc:`release notes <v6.16.1/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v6.16.1>`__
 * v6.16.0 - 2026-06-25 - :doc:`release notes <v6.16.0/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v6.16.0>`__
 * v6.15.0 - 2026-02-23 - :doc:`release notes <v6.15.0/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v6.15.0>`__
