@@ -56,7 +56,7 @@ fi"
 )
 
 # definitions to preload tbbmalloc but not if we are using address sanitizer as this confuses things. Whenever tbbmalloc
-# is deliberately not preloaded, MANTID_DISABLE_TBBMALLOC stops the mantid-tbbmalloc.pth hook of the conda package from
+# is deliberately not preloaded, MANTID_DISABLE_TBBMALLOC stops the mantid-tbbmalloc.pth hook in site-packages from
 # restarting python with it.
 string(TOLOWER "${USE_SANITIZER}" USE_SANITIZERS_LOWER)
 if(${USE_SANITIZERS_LOWER} MATCHES "address")
