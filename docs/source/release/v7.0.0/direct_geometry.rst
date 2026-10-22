@@ -8,7 +8,7 @@ General
 New features
 ############
 - (`#41830 <https://github.com/mantidproject/mantid/pull/41830>`_) The :ref:`algm-SofQW` algorithm no longer has a ``Method`` property, since ``SofQWCentre`` and ``SofQWPolygon`` have been removed in this release. It now wraps :ref:`algm-SofQWNormalisedPolygon` directly.
-
+- (`#41532 <https://github.com/mantidproject/mantid/pull/41532>`_, `#41948 <https://github.com/mantidproject/mantid/pull/41948>`_) :ref:`ALFView <ALFView-ref>` now uses the new Instrument View.
 
 MSlice
 ------

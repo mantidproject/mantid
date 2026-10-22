@@ -1321,6 +1321,11 @@ class MantidFrameworkConfig:
         # Maximum number of threads
         config["MultiThreaded.MaxCores"] = "2"
 
+        # The available memory reported on the Windows and macOS build servers is unreliable, so the memory check in
+        # algorithms such as Rebin made system tests fail at random (#41818).
+        if sys.platform.startswith(("win", "darwin")):
+            config["algorithms.memorycheck"] = "Off"
+
         # datasearch
         if self.__datasearch:
             # turn on for 'all' facilities, 'on' is only for default facility
