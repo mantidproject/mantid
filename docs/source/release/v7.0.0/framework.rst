@@ -57,7 +57,7 @@ Deprecated
 Removed
 ############
 - (`#41830 <https://github.com/mantidproject/mantid/pull/41830>`_) Removed ``SofQWCentre`` and ``SofQWPolygon`` (deprecated since release 6.12.0).
-- (`#41781 <https://github.com/mantidproject/mantid/pull/41781>`_) Removed the deprecated ``BayesQuasi`` and BayesStretch`` algorithms, which were based on the ``quasielasticbayes`` library. Users should now use the new ``quickbayes`` replacements, :ref:`algm-BayesQuasi2` and :ref:`algm-BayesStretch2`, respectively.
+- (`#41781 <https://github.com/mantidproject/mantid/pull/41781>`_) Removed the deprecated ``BayesQuasi`` and ``BayesStretch`` algorithms, which were based on the ``quasielasticbayes`` library. Users should now use the new ``quickbayes`` replacements, :ref:`algm-BayesQuasi2` and :ref:`algm-BayesStretch2`, respectively.
 
 Fit Functions
 -------------
