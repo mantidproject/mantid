@@ -10,7 +10,8 @@ Description
 -----------
 
 ``LoadEventNexusAsHistogram`` reads events from each ``NXevent_data`` group and bins them directly into a
-:ref:`Workspace2D <Workspace2D>`. It does not construct an intermediate :ref:`EventWorkspace <EventWorkspace>`.
+:py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>`. It does not construct an intermediate
+:py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`.
 This is useful when the required output binning is known in advance and event-level operations are not required.
 
 By default, ``LoadInstrument=True`` loads the instrument and maps events using **physical detector IDs**.
