@@ -48,8 +48,9 @@ requested histogram range are ignored regardless of instrument loading. Version 
 Performance tuning
 ------------------
 
-The default ``Auto`` settings are suitable for most files. The following properties allow loading speed and memory
-use to be tuned without changing the requested histogram:
+The default settings are suitable for most files. The algorithm automatically selects the binning method and a
+safe histogram counter size. The following properties allow loading speed and memory use to be tuned without
+changing the requested histogram:
 
 * ``ProcessingStrategy`` controls how reading and histogramming are scheduled. ``Pipeline`` overlaps reading with
   processing earlier chunks. ``ParallelEvents`` reads a chunk before processing its events in parallel. ``Auto``
@@ -58,11 +59,6 @@ use to be tuned without changing the requested histogram:
   overhead but require more memory.
 * ``MaxInFlightChunks`` limits the number of chunks held by the pipeline. Zero selects an automatic limit.
   A smaller positive value can reduce memory use; a larger value may improve throughput.
-* ``TimeBinningStrategy`` selects the numerical binning method. ``Auto`` uses exact integer binning when the input
-  time format and ``Params`` allow it, otherwise double-precision binning. ``Native`` requires exact integer binning
-  and reports an error when it is unavailable; ``Double`` always uses double precision.
-* ``AccumulatorType`` selects the integer count range. ``Auto`` chooses between ``UInt32`` and ``UInt64`` based on
-  the input event count. ``UInt32`` uses less memory but is rejected if the input event count makes it unsafe.
 
 Disabling ``LoadInstrument`` or ``FilterByPulseHeight`` can reduce loading work, but changes detector associations
 or event selection respectively. Use these options only when those changes are appropriate for your analysis.

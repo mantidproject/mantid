@@ -35,7 +35,7 @@ public:
   static LoadEventNexusAsHistogramTest *createSuite() { return new LoadEventNexusAsHistogramTest(); }
   static void destroySuite(LoadEventNexusAsHistogramTest *suite) { delete suite; }
 
-  void test_default_instrument_loading_maps_physical_ids_without_a_separate_mapping_property() {
+  void test_default_instrument_loading_maps_physical_ids() {
     FileResource resource("LoadEventNexusAsHistogramDefaultInstrumentMapping.nxs", false, true);
     createInstrumentFile(resource.fullPath(), 20, {20, 10, 11});
     LoadEventNexusAsHistogram algorithm;
@@ -43,7 +43,6 @@ public:
     algorithm.setRethrows(true);
     algorithm.initialize();
     TS_ASSERT_EQUALS(algorithm.getPropertyValue("LoadInstrument"), "1");
-    TS_ASSERT(!algorithm.existsProperty("DetectorMapping"));
     algorithm.setPropertyValue("Filename", resource.fullPath());
     algorithm.setPropertyValue("OutputWorkspace", "unused");
     algorithm.setProperty("Params", std::vector<double>{0.0, 16.0, 32.0});
@@ -69,14 +68,14 @@ public:
           {0});
     }
     for (const auto &strategy : {"Pipeline", "ParallelEvents"}) {
-      for (const auto &binning : {"Native", "Double"}) {
+      for (const double binWidth : {16.0, 15.9995}) {
         for (const bool filter : {true, false}) {
           LoadEventNexusAsHistogram algorithm;
           configure(algorithm, resource.fullPath());
           TS_ASSERT_EQUALS(algorithm.getPropertyValue("FilterByPulseHeight"), "1");
           algorithm.setProperty("FilterByPulseHeight", filter);
           algorithm.setPropertyValue("ProcessingStrategy", strategy);
-          algorithm.setPropertyValue("TimeBinningStrategy", binning);
+          algorithm.setProperty("Params", std::vector<double>{0.0, binWidth, 2 * binWidth});
           TS_ASSERT(algorithm.execute());
           Mantid::DataObjects::Workspace2D_sptr workspace = algorithm.getProperty("OutputWorkspace");
           TS_ASSERT_EQUALS(workspace->y(0)[0], filter ? 1.0 : 4.0);
@@ -109,12 +108,12 @@ public:
       FileResource resource("LoadEventNexusAsHistogramInstrumentIDs.nxs", false, true);
       createInstrumentFile(resource.fullPath(), secondID, {secondID, 10, 11});
       for (const auto &strategy : {"Pipeline", "ParallelEvents"}) {
-        for (const auto &binning : {"Native", "Double"}) {
+        for (const double binWidth : {16.0, 15.9995}) {
           LoadEventNexusAsHistogram algorithm;
           configure(algorithm, resource.fullPath());
           algorithm.setProperty("LoadInstrument", true);
           algorithm.setPropertyValue("ProcessingStrategy", strategy);
-          algorithm.setPropertyValue("TimeBinningStrategy", binning);
+          algorithm.setProperty("Params", std::vector<double>{0.0, binWidth, 2 * binWidth});
           // The default of 64 is not used; derive two non-monitor spectra.
           algorithm.setProperty("NumberOfSpectra", 64);
           TS_ASSERT(algorithm.execute());
@@ -251,8 +250,6 @@ public:
     algorithm.setProperty("ReadSizeFromDisk", 2);
     algorithm.setPropertyValue("ProcessingStrategy", "Pipeline");
     algorithm.setProperty("MaxInFlightChunks", 2);
-    algorithm.setPropertyValue("TimeBinningStrategy", "Native");
-    algorithm.setPropertyValue("AccumulatorType", "UInt32");
     algorithm.setProperty("LoadInstrument", false);
     algorithm.setProperty("LoadLogs", false);
 
@@ -296,7 +293,7 @@ public:
     TS_ASSERT_EQUALS(workspace->y(1)[1], 1.0);
   }
 
-  void test_processing_strategies_counter_types_and_binning_produce_identical_histograms() {
+  void test_processing_strategies_produce_expected_histograms_with_automatic_binning() {
     FileResource resource("LoadEventNexusAsHistogramStrategiesTest.nxs", false, true);
     createFile(resource.fullPath(), false);
     {
@@ -306,34 +303,30 @@ public:
     }
 
     for (const auto &strategy : {"Auto", "Pipeline", "ParallelEvents"}) {
-      for (const auto &counter : {"UInt32", "UInt64"}) {
-        for (const auto &binning : {"Native", "Double"}) {
-          LoadEventNexusAsHistogram algorithm;
-          algorithm.setChild(true);
-          algorithm.initialize();
-          algorithm.setPropertyValue("Filename", resource.fullPath());
-          algorithm.setPropertyValue("OutputWorkspace", "unused");
-          algorithm.setProperty("NumberOfSpectra", 2);
-          algorithm.setProperty("Params", std::vector<double>{0.0, 16.0, 32.0});
-          algorithm.setProperty("ReadSizeFromDisk", 2);
-          algorithm.setProperty("MaxInFlightChunks", 2);
-          algorithm.setPropertyValue("ProcessingStrategy", strategy);
-          algorithm.setPropertyValue("AccumulatorType", counter);
-          algorithm.setPropertyValue("TimeBinningStrategy", binning);
-          algorithm.setProperty("LoadInstrument", false);
-          algorithm.setProperty("LoadLogs", false);
+      for (const double binWidth : {16.0, 15.9995}) {
+        LoadEventNexusAsHistogram algorithm;
+        algorithm.setChild(true);
+        algorithm.initialize();
+        algorithm.setPropertyValue("Filename", resource.fullPath());
+        algorithm.setPropertyValue("OutputWorkspace", "unused");
+        algorithm.setProperty("NumberOfSpectra", 2);
+        algorithm.setProperty("Params", std::vector<double>{0.0, binWidth, 2 * binWidth});
+        algorithm.setProperty("ReadSizeFromDisk", 2);
+        algorithm.setProperty("MaxInFlightChunks", 2);
+        algorithm.setPropertyValue("ProcessingStrategy", strategy);
+        algorithm.setProperty("LoadInstrument", false);
+        algorithm.setProperty("LoadLogs", false);
 
-          TS_ASSERT(algorithm.execute());
-          Mantid::DataObjects::Workspace2D_sptr workspace = algorithm.getProperty("OutputWorkspace");
-          TS_ASSERT_EQUALS(workspace->y(0)[0], 2.0);
-          TS_ASSERT_EQUALS(workspace->y(0)[1], 0.0);
-          TS_ASSERT_EQUALS(workspace->y(1)[0], 1.0);
-          TS_ASSERT_EQUALS(workspace->y(1)[1], 1.0);
-          TS_ASSERT_EQUALS(workspace->e(0)[0], std::sqrt(2.0));
-          TS_ASSERT_EQUALS(workspace->e(0)[1], 0.0);
-          TS_ASSERT_EQUALS(workspace->e(1)[0], 1.0);
-          TS_ASSERT_EQUALS(workspace->e(1)[1], 1.0);
-        }
+        TS_ASSERT(algorithm.execute());
+        Mantid::DataObjects::Workspace2D_sptr workspace = algorithm.getProperty("OutputWorkspace");
+        TS_ASSERT_EQUALS(workspace->y(0)[0], 2.0);
+        TS_ASSERT_EQUALS(workspace->y(0)[1], 0.0);
+        TS_ASSERT_EQUALS(workspace->y(1)[0], 1.0);
+        TS_ASSERT_EQUALS(workspace->y(1)[1], 1.0);
+        TS_ASSERT_EQUALS(workspace->e(0)[0], std::sqrt(2.0));
+        TS_ASSERT_EQUALS(workspace->e(0)[1], 0.0);
+        TS_ASSERT_EQUALS(workspace->e(1)[0], 1.0);
+        TS_ASSERT_EQUALS(workspace->e(1)[1], 1.0);
       }
     }
   }
@@ -422,7 +415,7 @@ public:
     TS_ASSERT_EQUALS(workspace->y(0)[0], 1.0);
   }
 
-  void test_parallel_events_double_binning_and_uint64_accumulators_match_expected_counts() {
+  void test_integer_event_times_with_fractional_native_bin_width_use_double_binning() {
     FileResource resource("LoadEventNexusAsHistogramFallbacksTest.nxs", false, true);
     createFile(resource.fullPath(), false);
 
@@ -432,11 +425,9 @@ public:
     algorithm.setPropertyValue("Filename", resource.fullPath());
     algorithm.setPropertyValue("OutputWorkspace", "unused");
     algorithm.setProperty("NumberOfSpectra", 2);
-    algorithm.setProperty("Params", std::vector<double>{0.0, 16.0, 32.0});
+    algorithm.setProperty("Params", std::vector<double>{0.0, 15.9995, 31.999});
     algorithm.setProperty("ReadSizeFromDisk", 2);
     algorithm.setPropertyValue("ProcessingStrategy", "ParallelEvents");
-    algorithm.setPropertyValue("TimeBinningStrategy", "Double");
-    algorithm.setPropertyValue("AccumulatorType", "UInt64");
     algorithm.setProperty("LoadInstrument", false);
     algorithm.setProperty("LoadLogs", false);
 
@@ -446,6 +437,7 @@ public:
     TS_ASSERT_EQUALS(workspace->y(0)[1], 0.0);
     TS_ASSERT_EQUALS(workspace->y(1)[0], 1.0);
     TS_ASSERT_EQUALS(workspace->y(1)[1], 1.0);
+    TS_ASSERT_EQUALS(workspace->x(0)[1], 15.9995);
   }
 
   void test_native_binning_reads_uint64_event_times_without_converting_to_double() {
@@ -459,7 +451,6 @@ public:
     algorithm.setPropertyValue("OutputWorkspace", "unused");
     algorithm.setProperty("NumberOfSpectra", 1);
     algorithm.setProperty("Params", std::vector<double>{0.0, 16.0, 32.0});
-    algorithm.setPropertyValue("TimeBinningStrategy", "Native");
     algorithm.setProperty("LoadInstrument", false);
     algorithm.setProperty("LoadLogs", false);
 
@@ -469,7 +460,7 @@ public:
     TS_ASSERT_EQUALS(workspace->y(0)[1], 2.0);
   }
 
-  void test_float_event_times_use_double_binning_and_reject_forced_native_binning() {
+  void test_float_event_times_automatically_use_double_binning() {
     FileResource resource("LoadEventNexusAsHistogramFloatTimesTest.nxs", false, true);
     createFloatTimeFile(resource.fullPath());
 
@@ -487,19 +478,6 @@ public:
     Mantid::DataObjects::Workspace2D_sptr workspace = algorithm.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(workspace->y(0)[0], 2.0);
     TS_ASSERT_EQUALS(workspace->y(0)[1], 2.0);
-
-    LoadEventNexusAsHistogram forcedNative;
-    forcedNative.setChild(true);
-    forcedNative.setRethrows(true);
-    forcedNative.initialize();
-    forcedNative.setPropertyValue("Filename", resource.fullPath());
-    forcedNative.setPropertyValue("OutputWorkspace", "unused");
-    forcedNative.setProperty("NumberOfSpectra", 1);
-    forcedNative.setProperty("Params", std::vector<double>{0.0, 16.0, 32.0});
-    forcedNative.setPropertyValue("TimeBinningStrategy", "Native");
-    forcedNative.setProperty("LoadInstrument", false);
-    forcedNative.setProperty("LoadLogs", false);
-    TS_ASSERT_THROWS(forcedNative.execute(), const std::runtime_error &);
   }
 
   void test_rejects_multiple_periods() {

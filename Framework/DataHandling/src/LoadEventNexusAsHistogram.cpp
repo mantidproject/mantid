@@ -396,8 +396,6 @@ struct HistogramOptions {
   double minimumPulseHeight;
   size_t readSize;
   std::string processingStrategy;
-  std::string timeBinningStrategy;
-  std::string accumulatorType;
   size_t maxInFlightChunks;
   size_t numberOfBins{0};
   bool filterByPulseHeight{true};
@@ -411,8 +409,6 @@ HistogramOptions readHistogramOptions(const API::Algorithm &algorithm) {
           algorithm.getProperty("MinimumPulseHeight"),
           static_cast<size_t>(static_cast<int>(algorithm.getProperty("ReadSizeFromDisk"))),
           algorithm.getPropertyValue("ProcessingStrategy"),
-          algorithm.getPropertyValue("TimeBinningStrategy"),
-          algorithm.getPropertyValue("AccumulatorType"),
           static_cast<size_t>(static_cast<int>(algorithm.getProperty("MaxInFlightChunks"))),
           0,
           algorithm.getProperty("FilterByPulseHeight"),
@@ -452,13 +448,6 @@ EventGroup openEventGroup(const H5::H5File &file, const std::string &groupAddres
 
   const auto storage = timeStorage(timeDataset);
   const double timeScale = microsecondsPerFileUnit(timeDataset);
-  const bool nativeBinningAvailable = canUseNativeBinning(storage, options.params, timeScale);
-  if (options.timeBinningStrategy == "Native" && !nativeBinningAvailable)
-    throw std::runtime_error("TimeBinningStrategy=Native cannot represent Params exactly in the unsigned integer "
-                             "units of event_time_offset in '" +
-                             groupAddress + "'.");
-  const bool useNativeBinning =
-      options.timeBinningStrategy == "Native" || (options.timeBinningStrategy == "Auto" && nativeBinningAvailable);
 
   return {std::move(idDataset),
           std::move(timeDataset),
@@ -467,7 +456,7 @@ EventGroup openEventGroup(const H5::H5File &file, const std::string &groupAddres
           hasPulseHeight,
           storage,
           timeScale,
-          useNativeBinning};
+          canUseNativeBinning(storage, options.params, timeScale)};
 }
 
 struct ProcessingPlan {
@@ -500,12 +489,6 @@ uint64_t countInputEvents(const H5::H5File &file, const std::vector<std::string>
     totalEvents += static_cast<uint64_t>(numberOfEvents);
   }
   return totalEvents;
-}
-
-bool useUInt32Accumulators(const uint64_t totalEvents, const std::string &requestedType) {
-  if (requestedType == "UInt32" && totalEvents > std::numeric_limits<uint32_t>::max())
-    throw std::runtime_error("AccumulatorType=UInt32 is unsafe because the input contains more than 2^32-1 events.");
-  return requestedType == "UInt32" || (requestedType == "Auto" && totalEvents <= std::numeric_limits<uint32_t>::max());
 }
 
 template <typename CounterType> using ThreadLocalCounts = tbb::enumerable_thread_specific<std::vector<CounterType>>;
@@ -743,14 +726,6 @@ void LoadEventNexusAsHistogram::init() {
   declareProperty("MaxInFlightChunks", 0, nonNegativeInt,
                   "Maximum number of chunks held by the pipeline. Zero selects a limit from available concurrency "
                   "and a bounded memory budget.");
-  declareProperty("TimeBinningStrategy", "Auto",
-                  std::make_shared<Kernel::StringListValidator>(std::vector<std::string>{"Auto", "Native", "Double"}),
-                  "Use exact integer arithmetic in the event-time dataset's native units when possible, always use "
-                  "double-precision microseconds, or select automatically.");
-  declareProperty("AccumulatorType", "Auto",
-                  std::make_shared<Kernel::StringListValidator>(std::vector<std::string>{"Auto", "UInt32", "UInt64"}),
-                  "Select 32- or 64-bit thread-local histogram counters. Auto uses 32-bit counters only when the "
-                  "total event count proves that they cannot overflow.");
   declareProperty("LoadInstrument", true,
                   "Load the instrument definition and map physical detector IDs to output spectra. If false, "
                   "use EventIDOffset and NumberOfSpectra to map event IDs arithmetically without an instrument.");
@@ -846,7 +821,7 @@ void LoadEventNexusAsHistogram::exec() {
   }
 
   API::Progress progress(this, 0.2, 0.95, groupAddresses.size());
-  const bool useUInt32 = useUInt32Accumulators(countInputEvents(file, groupAddresses), options.accumulatorType);
+  const bool useUInt32 = countInputEvents(file, groupAddresses) <= std::numeric_limits<uint32_t>::max();
   const auto histogram = [&] {
     if (useUInt32)
       return histogramGroups<uint32_t>(file, groupAddresses, options, progress);
