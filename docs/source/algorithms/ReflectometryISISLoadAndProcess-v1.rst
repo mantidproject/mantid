@@ -29,7 +29,14 @@ If a value is provided for the ``CalibrationFile`` property, input runs are summ
 
 If a calibration file is provided for POLREF data, a specific POLREF calibration workflow is invoked via :ref:`algm-ReflectometryISISCalibration`. In this case, ``CorrectDetectors`` must be set to ``False`` as the detector position correction is applied as part of the calibration workflow.
 
-For the POLREF calibration workflow, the experiment angle is taken from ``ThetaIn`` or, when ``ThetaIn`` is not supplied, from the run log selected by ``ThetaLogName``. The nominal specular pixel spectrum number must be supplied using ``NominalSpecularPixelSpectrumNo``. The fractional measured specular-pixel index is obtained through fitting the specular peak on the summed sample workspace. The experiment angle is then corrected by the difference between the angular positions of the nominal and measured specular pixels. This adjusted angle is used both for detector calibration and reduction.
+For the POLREF calibration workflow, the experiment angle is taken from ``ThetaIn`` or, when ``ThetaIn`` is not supplied, from the run log selected by ``ThetaLogName``. At least one of ``NominalSpecularPixelSpectrumNo`` and ``ActualSpecularPixelSpectrumNumber`` must be supplied. Both accept fractional spectrum numbers; calibration-map angles are linearly interpolated where necessary.
+
+The experiment angle is corrected by the difference between the angular positions of the nominal and measured specular pixels
+- If only ``NominalSpecularPixelSpectrumNo`` is supplied, the measured specular pixel is obtained by fitting the specular peak on the summed sample workspace.
+- If ``ActualSpecularPixelSpectrumNumber`` is supplied, its value is used as the measured specular pixel instead of fitting the peak.
+
+When angle correction is enabled, the corrected angle is the experiment angle plus the calibration-map angle at the nominal pixel minus the calibration-map angle at the actual or fitted pixel. The resulting experiment angle is used both for detector calibration and reduction. Transmission workspaces are aligned at zero experiment angle using the nominal pixel (or the actual pixel when nominal is omitted), without fitting or angle correction.
+
 If time slicing is enabled, the input run must be an event workspace and have monitors loaded; otherwise, it must be a histogram workspace. If the workspace already exists but is the incorrect type or is missing monitors, it will be reloaded.
 
 Input runs can be combined before reduction by supplying a comma-separated list of run numbers. They will be summed using the :ref:`algm-MergeRuns` algorithm. Similarly, multiple input workspaces for the first and/or second transmission inputs can be summed prior to reduction.

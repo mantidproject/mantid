@@ -4,7 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import math
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock, call, patch
 
 from mantid import config, FileFinder
@@ -17,6 +20,7 @@ from mantid.simpleapi import (
     CropWorkspace,
     GroupWorkspaces,
     JoinISISPolarizationEfficiencies,
+    LoadEmptyInstrument,
     Rebin,
 )
 from plugins.algorithms.WorkflowAlgorithms.ReflectometryISISLoadAndProcess import ReflectometryISISLoadAndProcess
@@ -894,6 +898,122 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             alg._setInstrumentSpecificProperties(calibration_alg, workspace, adjust_theta=True)
 
         calibration_alg.setProperty.assert_any_call("NominalSpecularPixelSpectrumNo", 281.5)
+        calibration_alg.setProperty.assert_any_call("SpecularPixelSpectrumNo", 282.0)
+        calibration_alg.setProperty.assert_any_call("AdjustExperimentAngle", True)
+
+    def test_actual_specular_pixel_is_unset_by_default(self):
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+
+        self.assertTrue(alg.getProperty("ActualSpecularPixelSpectrumNumber").isDefault)
+
+    def test_actual_specular_pixel_rejects_negative_values(self):
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+
+        with self.assertRaises(ValueError):
+            alg.setProperty("ActualSpecularPixelSpectrumNumber", -0.5)
+
+    def test_actual_specular_pixel_bypasses_fitting_and_controls_angle_correction(self):
+        for nominal, expected_nominal, correct_angle in [(None, 282.5, False), (282.5, 282.5, False), (281.0, 281.0, True)]:
+            with self.subTest(nominal=nominal):
+                workspace = MagicMock()
+                workspace.getInstrumentName.return_value = "POLREF"
+                calibration_alg = MagicMock()
+                alg = ReflectometryISISLoadAndProcess()
+                alg.initialize()
+                alg.setProperty("CorrectDetectors", False)
+                alg.setProperty("ActualSpecularPixelSpectrumNumber", 282.5)
+                if nominal is not None:
+                    alg.setProperty("NominalSpecularPixelSpectrumNo", nominal)
+
+                alg._validate_instrument_specific_calibration_properties(workspace)
+                with patch.object(alg, "_find_specular_pixel_spectrum_no") as fit:
+                    angle, has_geometry = alg._setInstrumentSpecificProperties(calibration_alg, workspace, True, experiment_angle=0.5)
+
+                fit.assert_not_called()
+                self.assertEqual(0.5, angle)
+                self.assertTrue(has_geometry)
+                calibration_alg.setProperty.assert_any_call("SpecularPixelSpectrumNo", 282.5)
+                calibration_alg.setProperty.assert_any_call("NominalSpecularPixelSpectrumNo", expected_nominal)
+                calibration_alg.setProperty.assert_any_call("AdjustExperimentAngle", correct_angle)
+
+    def test_polref_specular_pixel_inputs_produce_expected_angle_and_detector_alignment(self):
+        cases = [(280.5, None, 0.5), (280.5, 280.5, 0.5), (280.5, 280.0, 0.55), (None, 280.0, 0.55)]
+        with TemporaryDirectory() as directory:
+            calibration_file = Path(directory) / "calibration.dat"
+            calibration_file.write_text("spectrumnumber angle\n279 0.2\n280 0.1\n281 0.0\n")
+            for actual, nominal, expected_angle in cases:
+                with self.subTest(actual=actual, nominal=nominal):
+                    LoadEmptyInstrument(InstrumentName="POLREF", OutputWorkspace="TOF_1")
+                    alg = ReflectometryISISLoadAndProcess()
+                    alg.initialize()
+                    alg.setProperty("CalibrationFile", str(calibration_file))
+                    alg.setProperty("CorrectDetectors", False)
+                    alg.setProperty("ThetaIn", 0.5)
+                    if actual is not None:
+                        alg.setProperty("ActualSpecularPixelSpectrumNumber", actual)
+                    if nominal is not None:
+                        alg.setProperty("NominalSpecularPixelSpectrumNo", nominal)
+
+                    with patch.object(alg, "_find_specular_pixel_spectrum_no", return_value=280.5) as fit:
+                        _, angle = alg._calibrate_workspace("TOF_1", adjust_theta=True)
+
+                    if actual is None:
+                        fit.assert_called_once()
+                    else:
+                        fit.assert_not_called()
+                    self.assertAlmostEqual(expected_angle, angle)
+                    output = AnalysisDataService.retrieve("TOF_1")
+                    self.assertEqual(expected_angle != 0.5, output.run().hasProperty("reflectometry_adjusted_theta"))
+                    indices = [output.getIndexFromSpectrumNumber(number) for number in (280, 281)]
+                    actual_two_theta = sum(math.degrees(output.spectrumInfo().signedTwoTheta(index)) for index in indices) / 2.0
+                    self.assertAlmostEqual(2.0 * expected_angle, actual_two_theta)
+
+    def test_polref_calibration_requires_actual_or_nominal_specular_pixel(self):
+        workspace = MagicMock()
+        workspace.getInstrumentName.return_value = "POLREF"
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("CorrectDetectors", False)
+
+        with self.assertRaisesRegex(RuntimeError, "ActualSpecularPixelSpectrumNumber or NominalSpecularPixelSpectrumNo must be provided"):
+            alg._validate_instrument_specific_calibration_properties(workspace)
+
+    def test_transmission_calibration_uses_nominal_pixel_without_fitting_or_angle_correction(self):
+        workspace = MagicMock()
+        workspace.getInstrumentName.return_value = "POLREF"
+        calibration_alg = MagicMock()
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("ActualSpecularPixelSpectrumNumber", 282.5)
+        alg.setProperty("NominalSpecularPixelSpectrumNo", 280.0)
+
+        with patch.object(alg, "_find_specular_pixel_spectrum_no") as fit:
+            alg._setInstrumentSpecificProperties(calibration_alg, workspace, False, experiment_angle=0.0, specular_spectrum_no=280.0)
+
+        fit.assert_not_called()
+        calibration_alg.setProperty.assert_any_call("SpecularPixelSpectrumNo", 280.0)
+        calibration_alg.setProperty.assert_any_call("ExperimentAngle", 0.0)
+        calibration_alg.setProperty.assert_any_call("AdjustExperimentAngle", False)
+
+    def test_sample_calibration_returns_experiment_angle_when_angle_correction_is_disabled(self):
+        self._create_workspace(1, "TOF_")
+        workspace = AnalysisDataService.retrieve("TOF_1")
+        calibration_alg = MagicMock()
+        calibration_alg.getProperty.return_value.value = workspace
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("CalibrationFile", self._CALIBRATION_TEST_DATA)
+
+        with (
+            patch.object(alg, "createChildAlgorithm", return_value=calibration_alg),
+            patch.object(alg, "_setInstrumentSpecificProperties", return_value=(0.5, True)),
+        ):
+            _, angle = alg._calibrate_workspace("TOF_1", adjust_theta=True)
+
+        self.assertEqual(0.5, angle)
+        self.assertFalse(workspace.run().hasProperty("reflectometry_adjusted_theta"))
 
     def test_polref_calibration_rejects_detector_correction(self):
         workspace = MagicMock()
