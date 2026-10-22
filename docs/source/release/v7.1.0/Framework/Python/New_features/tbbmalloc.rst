@@ -1,0 +1,1 @@
+- On Linux, ``python``, ``ipython`` and Jupyter kernels in a conda environment with ``mantid`` installed now use the same faster memory allocator (``tbbmalloc``) as MantidWorkbench. Loading a large VULCAN event file with :ref:`algm-LoadEventNexus` from Python took about 25% less time. Set ``MANTID_DISABLE_TBBMALLOC=1`` to keep the system allocator; see :ref:`PythonNotebook`.

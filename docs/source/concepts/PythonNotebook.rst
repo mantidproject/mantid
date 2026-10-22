@@ -51,6 +51,21 @@ Run a notebook:
 Download an Example Notebook `here <http://sourceforge.net/projects/mantid/files/IPython%20Notebook/Introduction%20to%20using%20Mantid%20with%20IPython%20Notebook.ipynb/download>`_.
 
 
+Memory Allocator on Linux
+=========================
+
+On Linux, MantidWorkbench uses Intel TBB's scalable memory allocator (``tbbmalloc``),
+which makes many multithreaded algorithms, such as :ref:`algm-LoadEventNexus`, faster than with the system allocator.
+When ``mantid`` is installed with conda, every ``python``, ``ipython`` or Jupyter kernel started from that environment
+uses the same allocator:
+at startup, before any of your code runs, Python restarts itself once with
+``LD_PRELOAD`` set to the environment's ``libtbbmalloc_proxy.so.2``.
+Programs started from that Python process inherit ``LD_PRELOAD`` and use it too.
+
+``tbbmalloc`` can use more memory than the system allocator, because it keeps freed memory for reuse.
+To use the system allocator instead, set the environment variable ``MANTID_DISABLE_TBBMALLOC=1``
+before starting Python, or start Python with ``-S``.
+
 Script and Notebook Generation
 ==============================
 
