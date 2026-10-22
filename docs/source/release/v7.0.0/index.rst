@@ -4,19 +4,24 @@
 Mantid 7.0.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/7_0_release/new_iview.png
    :class: screenshot
    :width: 385px
    :align: right
 
-.. contents:: Table of Contents
-   :local:
-
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
-
 We are proud to announce version 7.0.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+Key features of this major release include:
+
+- The new :ref:`Instrument View<InstrumentViewer>` is now the default.
+- Upgraded from Qt 5 to Qt 6.
+- A new :ref:`Texture Experiment Planner <Texture_Planner-ref>` user interface.
+- New capabilities for reducing ISIS polarised reflectometry datasets.
+- Simplified workspace data access through the ``x()`` and ``mutableX()`` methods of Histogram objects. The older vector-based methods (``readX``, ``dataX``, etc.) have been fully deprecated and replaced throughout Mantid.
+- Extended indirect data reduction workflows for the OSIRIS silicon analyser upgrade.
+- The :ref:`ConvertToMD <algm-ConvertToMD>` algorithm can now process continuous rotation single-crystal data without intermediate angular binning, reducing memory and disk space requirements.
+- Upgraded to Python 3.13. See the `Python 3.13 release notes <https://docs.python.org/3/whatsnew/3.13.html>`__ for more details.
+- The :ref:`Script Repository <WorkbenchScriptRepository>` is now read-only when accessed through Mantid Workbench.
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the

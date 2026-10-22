@@ -1,1 +1,0 @@
-- POLARIS now provides sensible starting parameters for :ref:`Back2BackExponential <func-BackToBackExponential>`
