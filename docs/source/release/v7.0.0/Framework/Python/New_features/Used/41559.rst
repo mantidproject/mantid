@@ -1,1 +1,0 @@
-- ``MeshObject`` now has ``getBoundingBox`` exposed to python.

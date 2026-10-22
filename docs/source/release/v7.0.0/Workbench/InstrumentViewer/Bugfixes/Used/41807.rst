@@ -1,1 +1,0 @@
-- In new Instrument View, sped up initial opening and building of the detector mesh
