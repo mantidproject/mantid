@@ -89,7 +89,7 @@ public:
     auto generateFiles = [&tmpDir, &originalFilePath](const std::string &name) {
       std::filesystem::path tmpFilePath = tmpDir / name;
 
-      std::filesystem::copy_file(originalFilePath, tmpFilePath);
+      std::filesystem::copy_file(originalFilePath, tmpFilePath, std::filesystem::copy_options::skip_existing);
 
       return tmpFilePath;
     };
