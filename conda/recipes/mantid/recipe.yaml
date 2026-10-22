@@ -112,6 +112,8 @@ outputs:
         - if: linux
           then:
             - libglu ${{ libglu }}
+            # provides libtbbmalloc_proxy.so.2 for mantid-tbbmalloc.pth
+            - tbb ${{ tbb }}
         - if: win
           then:
             - lib3mf
@@ -140,6 +142,11 @@ outputs:
           imports:
             - mantid
             - mantid.kernel
+      - if: linux
+        then:
+          - script:
+              - python -c "assert 'libtbbmalloc_proxy' in open('/proc/self/maps').read()"
+              - MANTID_DISABLE_TBBMALLOC=1 python -c "assert 'libtbbmalloc_proxy' not in open('/proc/self/maps').read()"
 
     about:
       summary: Mantid provides a framework that supports high-performance computing and visualisation of materials science data.
