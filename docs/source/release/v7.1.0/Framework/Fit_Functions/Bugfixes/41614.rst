@@ -1,0 +1,1 @@
+- Copying or saving a multi-domain fit function that contains an empty composite function, such as an empty ``ProductFunction``, now keeps each member assigned to its own dataset. Previously, all members were assigned to the first dataset.

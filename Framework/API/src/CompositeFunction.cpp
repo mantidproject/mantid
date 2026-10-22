@@ -95,9 +95,9 @@ void CompositeFunction::init() {}
 std::string CompositeFunction::writeToString(const std::string &parentLocalAttributesStr) const {
   std::ostringstream ostr;
 
-  // if empty just return function name
+  // if empty just return function name, keeping any local attributes set by the parent (eg $domains)
   if (nFunctions() == 0) {
-    return "name=" + name();
+    return "name=" + name() + parentLocalAttributesStr;
   }
 
   if (name() != "CompositeFunction" || nGlobalAttributes() > NUMDEFAULTATTRIBUTES ||
