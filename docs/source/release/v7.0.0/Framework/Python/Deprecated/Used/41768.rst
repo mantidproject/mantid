@@ -1,1 +1,0 @@
-- ``ComponentInfo`` now exposes ``solidAngle(index, observer)`` and ``componentType(index)`` (returning a :class:`~mantid.geometry.ComponentType`) to python. These provide index-based replacements for ``IDetector.solidAngle`` and the ``RectangularDetector``/``GridDetector`` type checks, as part of the migration to the ``ComponentInfo``/``DetectorInfo`` access layers.
