@@ -78,6 +78,7 @@ exclude = [
 "Framework/Doxygen/**" = ["INP001"]
 "qt/icons/**" = ["INP001"]
 "Framework/DataObjects/src/**" = ["INP001"]
+"Framework/PythonInterface/tbbmalloc/**" = ["INP001"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 20

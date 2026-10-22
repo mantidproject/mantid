@@ -29,8 +29,3 @@ cmake --build .
 # regenerate the type stubs from this build before install copies the mantid package
 cmake --build . --target simpleapi_stubs
 cmake --build . --target install
-
-# Start plain python, ipython and Jupyter kernels with tbbmalloc preloaded, as launch_mantidworkbench does
-if [[ "${target_platform}" == linux-* ]]; then
-  cp "${RECIPE_DIR}"/tbbmalloc/mantid-tbbmalloc.pth "${RECIPE_DIR}"/tbbmalloc/_mantid_tbbmalloc_preload.py "${SP_DIR}"/
-fi
