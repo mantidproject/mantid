@@ -1491,6 +1491,7 @@ Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
   const auto parInstrument = ParComponentFactory::createInstrument(
       std::shared_ptr<const Instrument>(this, NoDeleting()), std::shared_ptr<ParameterMap>(&pmap, NoDeleting()));
   detInfo->m_instrument = parInstrument;
+  detInfo->m_parameterInfo = parInstrument->getParameterMap()->sharedParameterInfo();
   return {std::move(compInfo), std::move(detInfo)};
 }
 
