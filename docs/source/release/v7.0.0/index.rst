@@ -4,19 +4,24 @@
 Mantid 7.0.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/7_0_release/new_iview.png
    :class: screenshot
    :width: 385px
    :align: right
 
-.. contents:: Table of Contents
-   :local:
-
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
-
 We are proud to announce version 7.0.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+Key features of this major release include:
+
+- New instrument view
+- Qt 5 to Qt 6
+- Texture planning GUI
+- Polarised reflectivity.
+- Histogram 1.0 deprecation
+- OSIRIS silicon analyser
+- convert to MD
+- Upgraded Python to 3.13. See the `Python 3.13 release notes <https://docs.python.org/3/whatsnew/3.13.html>`__ for more details.
+- Script repository
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
