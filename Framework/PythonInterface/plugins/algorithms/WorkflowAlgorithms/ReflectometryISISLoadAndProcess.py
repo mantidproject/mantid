@@ -13,6 +13,7 @@ from mantid.kernel import (
     CompositeValidator,
     Direction,
     EnabledWhenProperty,
+    FloatBoundedValidator,
     IntBoundedValidator,
     Property,
     PropertyCriterion,
@@ -44,6 +45,7 @@ class Prop:
     OUTPUT_WS_SECOND_TRANS = "OutputWorkspaceSecondTransmission"
     OUTPUT_WS_TRANS = "OutputWorkspaceTransmission"
     NOMINAL_SPECULAR_PIXEL = "NominalSpecularPixelSpectrumNo"
+    ACTUAL_SPECULAR_PIXEL = "ActualSpecularPixelSpectrumNumber"
 
 
 class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
@@ -109,6 +111,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         firstTransWorkspace = self._sumWorkspaces(firstTransWorkspaces, True)
         secondTransWorkspace = self._sumWorkspaces(secondTransWorkspaces, True)
         nominal_specular_pixel = self.getProperty(Prop.NOMINAL_SPECULAR_PIXEL).value
+        if self.getProperty(Prop.NOMINAL_SPECULAR_PIXEL).isDefault:
+            nominal_specular_pixel = self.getProperty(Prop.ACTUAL_SPECULAR_PIXEL).value
         inputWorkspace, adjusted_theta = self._calibrate_workspace(inputWorkspace, adjust_theta=True)
         firstTransWorkspace, _ = self._calibrate_workspace(
             firstTransWorkspace, experiment_angle=0, specular_spectrum_no=nominal_specular_pixel
@@ -183,8 +187,16 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self.declareProperty(Prop.HIDE_INPUT, False, doc="If true, make the input workspaces invisible in the ADS.")
 
     def _declareCalibrationProperties(self):
-        """Copy properties from the calibration algorithm."""
+        """Declare properties controlling detector calibration."""
         self.copyProperties("ReflectometryISISCalibration", ["CalibrationFile", Prop.NOMINAL_SPECULAR_PIXEL])
+        self.declareProperty(
+            Prop.ACTUAL_SPECULAR_PIXEL,
+            Property.EMPTY_DBL,
+            FloatBoundedValidator(lower=0.0),
+            "For POLREF calibration, the actual specular pixel spectrum number, which may be fractional. "
+            "If provided, this replaces peak fitting. If the nominal spectrum number is omitted or equal to this value, "
+            "the experiment angle is not corrected. Otherwise the calibration-map angular difference is used to correct it.",
+        )
 
     def _declareSumBanksProperties(self):
         """Copy properties from the child sum banks algorithm"""
@@ -675,8 +687,10 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             calibrated_member = alg.getProperty("OutputWorkspace").value
             calibrated_member.run().addProperty(self._CALIBRATION_FILE_LOG, calibration_filepath, True)
             #  Only return the adjusted theta from the first member of a group, since it should be the same for all members
-            if has_angle_dependent_geometry and member_index == 0 and adjust_theta:
-                adjusted_theta = calibrated_member.run().getProperty(self._ADJUSTED_THETA_LOG).value
+            if has_angle_dependent_geometry and member_index == 0:
+                adjusted_theta = experiment_angle
+                if adjust_theta and calibrated_member.run().hasProperty(self._ADJUSTED_THETA_LOG):
+                    adjusted_theta = calibrated_member.run().getProperty(self._ADJUSTED_THETA_LOG).value
             calibrated_members.append(calibrated_member)
 
         calibrated_workspace = self._create_workspace_group_from_members(calibrated_members) if is_group else calibrated_members[0]
@@ -693,21 +707,33 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         if workspace.getInstrumentName() != self._POLREF:
             return experiment_angle, False
 
+        nominal_specular_pixel = self.getProperty(Prop.NOMINAL_SPECULAR_PIXEL).value
+        if self.getProperty(Prop.NOMINAL_SPECULAR_PIXEL).isDefault:
+            nominal_specular_pixel = self.getProperty(Prop.ACTUAL_SPECULAR_PIXEL).value
         if specular_spectrum_no is None:
-            specular_spectrum_no = self._find_specular_pixel_spectrum_no(workspace)
+            actual_specular_pixel = self.getProperty(Prop.ACTUAL_SPECULAR_PIXEL)
+            specular_spectrum_no = (
+                self._find_specular_pixel_spectrum_no(workspace) if actual_specular_pixel.isDefault else actual_specular_pixel.value
+            )
         if experiment_angle is None:
             experiment_angle = self._experiment_angle(workspace)
 
         calibration_alg.setProperty("InstrumentWorkflow", self._POLREF)
         calibration_alg.setProperty("SpecularPixelSpectrumNo", specular_spectrum_no)
         calibration_alg.setProperty("ExperimentAngle", experiment_angle)
-        calibration_alg.setProperty("AdjustExperimentAngle", adjust_theta)
-        calibration_alg.setProperty(Prop.NOMINAL_SPECULAR_PIXEL, self.getProperty(Prop.NOMINAL_SPECULAR_PIXEL).value)
+        calibration_alg.setProperty("AdjustExperimentAngle", adjust_theta and specular_spectrum_no != nominal_specular_pixel)
+        calibration_alg.setProperty(Prop.NOMINAL_SPECULAR_PIXEL, nominal_specular_pixel)
         return experiment_angle, True
 
     def _validate_instrument_specific_calibration_properties(self, workspace):
-        if workspace.getInstrumentName() == self._POLREF and self.getProperty("CorrectDetectors").value:
+        if workspace.getInstrumentName() != self._POLREF:
+            return
+        if self.getProperty("CorrectDetectors").value:
             raise RuntimeError("CorrectDetectors must be False when CalibrationFile is provided for POLREF data")
+        if self.getProperty(Prop.ACTUAL_SPECULAR_PIXEL).isDefault and self.getProperty(Prop.NOMINAL_SPECULAR_PIXEL).isDefault:
+            raise RuntimeError(
+                "ActualSpecularPixelSpectrumNumber or NominalSpecularPixelSpectrumNo must be provided for POLREF calibration"
+            )
 
     def _find_specular_pixel_spectrum_no(self, workspace):
         lines_alg = self.createChildAlgorithm("FindReflectometryLines")
