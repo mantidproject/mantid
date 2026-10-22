@@ -269,7 +269,6 @@ class GeneralSettings(SettingsPresenterBase):
             self.notify_changes()
             self._view.new_layout_name.clear()
             self.fill_layout_display()
-            self.parent.populate_layout_menu()
 
     def load_layout(self):
         item = self._view.layout_display.currentItem()
@@ -287,7 +286,6 @@ class GeneralSettings(SettingsPresenterBase):
             self._model.set_user_layout(layout_dict)
             self.notify_changes()
             self.fill_layout_display()
-            self.parent.populate_layout_menu()
 
     def focus_layout_box(self):
         # scroll the settings to the layout box. High yMargin ensures the box is always at the top of the window.
