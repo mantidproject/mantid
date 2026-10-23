@@ -146,12 +146,11 @@ Instrument::Instrument(const Instrument &instr)
  * @param copyCache a flag that signals to select this constructor from the vtable
  * @note the copyCache flag is not used, except to identify this constructor as the one to use
  */
-Instrument::Instrument(const Instrument &instr, bool copyCache)
+Instrument::Instrument(const Instrument &instr, [[maybe_unused]] bool copyCache)
     : CompAssembly(), m_sourceCache(nullptr), m_sampleCache(nullptr), /* Should only be temporarily null */
       m_logfileCache(instr.m_logfileCache), m_logfileUnit(instr.m_logfileUnit), m_defaultView(instr.m_defaultView),
       m_defaultViewAxis(instr.m_defaultViewAxis), m_instr(), m_map_nonconst(), /* Should not be parameterized */
       m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo), m_referenceFrame(instr.m_referenceFrame) {
-  UNUSED_ARG(copyCache);
   setName(instr.getName() + "_clone");
   // add in the sample and the source
   auto sampleComp = instr.getSample();

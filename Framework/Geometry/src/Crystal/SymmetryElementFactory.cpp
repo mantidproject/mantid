@@ -13,8 +13,8 @@
 namespace Mantid::Geometry {
 
 /// Generates an instance of SymmetryElementIdentity.
-SymmetryElement_sptr SymmetryElementIdentityGenerator::generateElement(const SymmetryOperation &operation) const {
-  UNUSED_ARG(operation);
+SymmetryElement_sptr
+SymmetryElementIdentityGenerator::generateElement([[maybe_unused]] const SymmetryOperation &operation) const {
 
   return std::make_shared<SymmetryElementIdentity>();
 }

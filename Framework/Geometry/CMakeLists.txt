@@ -525,7 +525,7 @@ add_subdirectory(test)
 target_include_directories(
   Geometry PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Geometry> $<INSTALL_INTERFACE:include/Mantid>
 )
-generate_mantid_export_header(Geometry TRUE GENERATE_UNUSED_ARG)
+generate_mantid_export_header(Geometry TRUE)
 
 # Installation settings
 set(TARGET_EXPORT_NAME "MantidGeometryTargets")

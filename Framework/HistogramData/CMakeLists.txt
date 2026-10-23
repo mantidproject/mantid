@@ -133,7 +133,7 @@ target_include_directories(
   HistogramData PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/HistogramData>
                        $<INSTALL_INTERFACE:include/Mantid>
 )
-generate_mantid_export_header(HistogramData FALSE GENERATE_UNUSED_ARG)
+generate_mantid_export_header(HistogramData FALSE)
 
 # Installation settings
 set(TARGET_EXPORT_NAME "MantidHistogramDataTargets")
