@@ -9,12 +9,15 @@
 #include "MantidAPI/SpectrumInfoIterator.h"
 #include "MantidBeamline/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Tolerance.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <algorithm>
@@ -390,7 +393,13 @@ void SpectrumInfo::setMasked(const size_t index, bool masked) {
 
 /// Return a const reference to the detector or detector group of the spectrum
 /// with given index.
-const Geometry::IDetector &SpectrumInfo::detector(const size_t index) const { return getDetector(index); }
+const Geometry::IDetector &SpectrumInfo::detector(const size_t index) const {
+  GNU_DIAG_OFF("deprecated-declarations")
+  MSVC_DIAG_OFF(4996)
+  return getDetector(index);
+  MSVC_DIAG_ON(4996)
+  GNU_DIAG_ON("deprecated-declarations")
+}
 
 /// Returns the source position.
 Kernel::V3D SpectrumInfo::sourcePosition() const { return m_detectorInfo.sourcePosition(); }
@@ -431,6 +440,37 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
   }
   m_lastIndex[thread] = index;
   return *m_lastDetector[thread];
+}
+
+/** Returns the detector ID of the first detector of the spectrum with given index.
+ *
+ * For spectra with more than one detector this is the ID of the first entry in the spectrum definition.
+ * Throws Kernel::Exception::NotFoundError if the spectrum has no detectors.
+ */
+detid_t SpectrumInfo::firstDetectorID(const size_t index) const {
+  return m_detectorInfo.detid(checkAndGetSpectrumDefinition(index)[0].first);
+}
+
+/** Returns the detector index of the first detector of the spectrum with given index.
+ *
+ * For spectra with more than one detector this is the first entry in the spectrum definition. The index is valid for
+ * both DetectorInfo and ComponentInfo. Throws Kernel::Exception::NotFoundError if the spectrum has no detectors.
+ */
+size_t SpectrumInfo::firstDetectorIndex(const size_t index) const {
+  return checkAndGetSpectrumDefinition(index)[0].first;
+}
+
+/** Returns the bounding box of the detector(s) of the spectrum with given index.
+ *
+ * For spectra with more than one detector this is the union of the bounding boxes of the detectors.
+ * Throws Kernel::Exception::NotFoundError if the spectrum has no detectors.
+ */
+Geometry::BoundingBox SpectrumInfo::boundingBox(const size_t index) const {
+  const auto &componentInfo = m_experimentInfo.componentInfo();
+  Geometry::BoundingBox bbox;
+  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
+    bbox.grow(componentInfo.boundingBox(detIndex.first));
+  return bbox;
 }
 
 const SpectrumDefinition &SpectrumInfo::checkAndGetSpectrumDefinition(const size_t index) const {
