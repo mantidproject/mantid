@@ -147,8 +147,8 @@ class TestSideBySideProjection(unittest.TestCase):
         ws = side_by_side._workspace
         mock_bank = MagicMock()
         mock_bank.getPos.return_value = [2, 2, 2]
-        mock_bank.getRotation.return_value = Quat(1, 1, 0, 0)
         component_info = ws.componentInfo()
+        component_info.rotation.return_value = Quat(1, 1, 0, 0)
         component_info.pixelGridMinDetectorID.return_value = 5
         component_info.pixelGridMaxDetectorID.return_value = 5
         component_info.pixelGridNX.return_value = 1
