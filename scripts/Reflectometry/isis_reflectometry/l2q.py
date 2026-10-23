@@ -46,7 +46,7 @@ def l2q(ws, whichDet, theta, sample_component_name):
     theta = theta * math.pi / 180.0  # convert to radians
 
     # Fetch the reference frame to determine the instrument orientation.
-    reference_frame = first_ws.getInstrument().getReferenceFrame()
+    reference_frame = first_ws.componentInfo().referenceFrame()
 
     sample_to_detector_along_beam = sample2detector.scalar_prod(reference_frame.vecPointingAlongBeam())
 
