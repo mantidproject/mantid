@@ -197,7 +197,6 @@ set(SRC_FILES
     src/MaskBinsFromWorkspace.cpp
     src/MaskBinsIf.cpp
     src/MaskDetectorsIf.cpp
-    src/MaskInstrument.cpp
     src/MaskNonOverlappingBins.cpp
     src/MatrixWorkspaceAccess.cpp
     src/Max.cpp
@@ -550,7 +549,6 @@ set(INC_FILES
     inc/MantidAlgorithms/MaskBinsFromWorkspace.h
     inc/MantidAlgorithms/MaskBinsIf.h
     inc/MantidAlgorithms/MaskDetectorsIf.h
-    inc/MantidAlgorithms/MaskInstrument.h
     inc/MantidAlgorithms/MaskNonOverlappingBins.h
     inc/MantidAlgorithms/MatrixWorkspaceAccess.h
     inc/MantidAlgorithms/Max.h
@@ -906,7 +904,6 @@ set(TEST_FILES
     MaskBinsIfTest.h
     MaskBinsTest.h
     MaskDetectorsIfTest.h
-    MaskInstrumentTest.h
     MaskNonOverlappingBinsTest.h
     MaxEnt/MaxentCalculatorTest.h
     MaxEnt/MaxentEntropyNegativeValuesTest.h
