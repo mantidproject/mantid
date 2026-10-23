@@ -17,6 +17,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
@@ -93,21 +94,23 @@ public:
 
     // Test third pixel in main detector bank, which has indices (2,0)
     const auto &detectorInfo = output->detectorInfo();
-    const auto &ptrDetMain = detectorInfo.detector(detectorInfo.indexOf(5));
-    TS_ASSERT_EQUALS(ptrDetMain.getID(), 5);
-    TS_ASSERT_EQUALS(ptrDetMain.getName(), "main-detector-bank(2,0)");
-    TS_ASSERT_EQUALS(ptrDetMain.type(), "GridDetectorPixel");
-    TS_ASSERT_DELTA(ptrDetMain.getPos().X(), -0.3035, 0.0001);
-    TS_ASSERT_DELTA(ptrDetMain.getPos().Y(), -0.3124, 0.0001);
-    TS_ASSERT_DELTA(detectorInfo.l2(detectorInfo.indexOf(5)), 4.1727, 0.0001);
+    const auto &componentInfo = output->componentInfo();
+    const auto detMainIndex = detectorInfo.indexOf(5);
+    TS_ASSERT_EQUALS(detectorInfo.detid(detMainIndex), 5);
+    TS_ASSERT_EQUALS(componentInfo.name(detMainIndex), "main-detector-bank(2,0)");
+    // A grid pixel sits in a column assembly whose parent is the grid bank
+    TS_ASSERT(componentInfo.isGridDetector(componentInfo.parent(componentInfo.parent(detMainIndex))));
+    TS_ASSERT_DELTA(detectorInfo.position(detMainIndex).X(), -0.3035, 0.0001);
+    TS_ASSERT_DELTA(detectorInfo.position(detMainIndex).Y(), -0.3124, 0.0001);
+    TS_ASSERT_DELTA(detectorInfo.l2(detMainIndex), 4.1727, 0.0001);
 
     // Test a HAB pixel detector
-    const auto &ptrDetHab = detectorInfo.detector(detectorInfo.indexOf(16734));
-    TS_ASSERT_EQUALS(ptrDetHab.getID(), 16734);
-    TS_ASSERT_EQUALS(ptrDetHab.getName(), "HAB-pixel");
+    const auto detHabIndex = detectorInfo.indexOf(16734);
+    TS_ASSERT_EQUALS(detectorInfo.detid(detHabIndex), 16734);
+    TS_ASSERT_EQUALS(componentInfo.name(detHabIndex), "HAB-pixel");
 
     // Test a non-existant detector
-    TS_ASSERT_THROWS(detectorInfo.detector(detectorInfo.indexOf(16735)), const std::out_of_range &);
+    TS_ASSERT_THROWS(detectorInfo.indexOf(16735), const std::out_of_range &);
 
     // Check the monitors are correctly marked
     const auto &detInfo = output->detectorInfo();
