@@ -168,6 +168,7 @@ set(PYTHON_PLUGINS
     algorithms/PoldiCreatePeaksFromFile.py
     algorithms/PoldiLoadRuns.py
     algorithms/PoldiMerge.py
+    algorithms/poldi_calibration_utils.py
     algorithms/poldi_utils.py
     algorithms/PowderReduceP2D.py
     algorithms/RebinRagged.py
