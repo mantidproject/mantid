@@ -83,6 +83,7 @@ double getQSign() {
  *
  * @param compInfo :: the Geometry::ComponentInfo object for this instrument
  * @param detInfo :: the Geometry::DetectorInfo object for this instrument
+ * @param compInfo :: the Geometry::ComponentInfo object for this instrument
  */
 DetectorSearcher::DetectorSearcher(const Geometry::ComponentInfo &compInfo, const Geometry::DetectorInfo &detInfo)
     : m_usingFullRayTrace(containsOnlyRectDetectors(compInfo, detInfo)), m_crystallography_convention(getQSign()),
