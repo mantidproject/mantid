@@ -10,6 +10,9 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
+#include <utility>
+#include <vector>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
@@ -64,16 +67,15 @@ public:
   virtual void setFitRangeBounds(std::pair<double, double> const &bounds) = 0;
 
   virtual void setBackgroundRangeVisible(bool visible) = 0;
-  virtual void setHWHMRangeVisible(bool visible) = 0;
 
   virtual void displayMessage(const std::string &message) const = 0;
 
   virtual void allowRedraws(bool state) = 0;
   virtual void redrawPlots() = 0;
 
-  virtual void setHWHMMinimum(double minimum) = 0;
-  virtual void setHWHMMaximum(double maximum) = 0;
-  virtual void setHWHMRange(double minimum, double maximum) = 0;
+  virtual void setHWHMMinimum(std::size_t peakIndex, double minimum) = 0;
+  virtual void setHWHMMaximum(std::size_t peakIndex, double maximum) = 0;
+  virtual void setHWHMRanges(std::vector<std::pair<double, double>> const &ranges) = 0;
 
   virtual void clearPreviews() = 0;
 };
