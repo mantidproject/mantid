@@ -36,7 +36,7 @@ public:
     TS_ASSERT_EQUALS(atom.coh_scatt_length_img, 0.);
     TS_ASSERT_EQUALS(atom.inc_scatt_length_real, 0);
     TS_ASSERT_EQUALS(atom.inc_scatt_length_img, 0.);
-    TS_ASSERT_EQUALS(atom.coh_scatt_xs, 0.0184);
+    TS_ASSERT_EQUALS(atom.coh_scatt_xs, 0.01838);
     TS_ASSERT_EQUALS(atom.inc_scatt_xs, 5.08);
     TS_ASSERT_EQUALS(atom.tot_scatt_xs, 5.1);
     TS_ASSERT_EQUALS(atom.abs_scatt_xs, 5.08);
