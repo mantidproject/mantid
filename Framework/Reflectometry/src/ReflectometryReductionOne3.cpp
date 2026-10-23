@@ -12,7 +12,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -245,8 +245,7 @@ void ReflectometryReductionOne3::initalizeMembers() {
 
   // Cache the spectrum info and reference frame
   m_spectrumInfo = &m_runWS->spectrumInfo();
-  auto instrument = m_runWS->getInstrument();
-  m_refFrame = instrument->getReferenceFrame();
+  m_refFrame = m_runWS->componentInfo().referenceFrame();
   m_partialBins = getProperty("IncludePartialBins");
 
   // Find and cache detector groups and theta0

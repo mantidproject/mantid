@@ -337,7 +337,7 @@ def set_perspective(plot_axes, workspace=None, beam_direction=None):
         plot_axes.view_init(vertical_axis="y", elev=30, azim=-135)
         raise Exception("set_perspective must be called with either beam_direction or a workspace")
     if direction_not_valid(beam_direction):
-        frame = workspace.getInstrument().getReferenceFrame()
+        frame = workspace.componentInfo().referenceFrame()
         if frame.pointingUpAxis() == "Y" and frame.pointingAlongBeamAxis() == "Z":
             # almost all instruments have this instrument reference frame
             beam_direction = "Z"

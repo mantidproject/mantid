@@ -7,6 +7,7 @@
 #include "MantidReflectometry/SpecularReflectionPositionCorrect.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -127,9 +128,11 @@ void SpecularReflectionPositionCorrect::moveDetectors(const API::MatrixWorkspace
                                                       IComponent_const_sptr detector,
                                                       const IComponent_const_sptr &sample, const double &upOffset,
                                                       const double &acrossOffset, const V3D &detectorPosition) {
-  auto instrument = toCorrect->getInstrument();
-  const V3D samplePosition = sample->getPos();
-  auto referenceFrame = instrument->getReferenceFrame();
+
+  auto const &compInfo = toCorrect->componentInfo();
+  auto const referenceFrame = compInfo.referenceFrame();
+  V3D const samplePosition = compInfo.samplePosition();
+
   if (auto groupDetector = std::dynamic_pointer_cast<const DetectorGroup>(detector)) // Do we have a group of detectors
   {
     const std::vector<IDetector_const_sptr> detectors = groupDetector->getDetectors();
@@ -184,23 +187,16 @@ void SpecularReflectionPositionCorrect::correctPosition(const API::MatrixWorkspa
                                                         const IComponent_const_sptr &sample,
                                                         const IComponent_const_sptr &detector) {
 
-  auto instrument = toCorrect->getInstrument();
-
-  const V3D detectorPosition = detector->getPos();
-
-  const V3D samplePosition = sample->getPos();
-
-  const V3D sampleToDetector = detectorPosition - samplePosition;
-
-  auto referenceFrame = instrument->getReferenceFrame();
+  auto const &compInfo = toCorrect->componentInfo();
+  V3D const alongBeam = compInfo.referenceFrame()->vecPointingAlongBeam();
+  V3D const detectorPosition = compInfo.position(compInfo.indexOfOrInvalid(detector.get()));
+  V3D const samplePosition = compInfo.samplePosition();
+  V3D const sampleToDetector = detectorPosition - samplePosition;
 
   const double twoThetaInRad = twoThetaInDeg * (M_PI / 180.0);
 
   double acrossOffset = 0;
-
-  double beamOffset =
-      sampleToDetector.scalar_prod(referenceFrame->vecPointingAlongBeam()); // We just recalculate beam offset.
-
+  double beamOffset = sampleToDetector.scalar_prod(alongBeam);    // We just recalculate beam offset.
   double upOffset = (beamOffset * std::tan(0.5 * twoThetaInRad)); // We only correct vertical position
 
   // Apply the movements.

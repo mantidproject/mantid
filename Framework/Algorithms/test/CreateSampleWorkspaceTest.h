@@ -18,6 +18,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -155,14 +156,12 @@ public:
     alg.execute();
     MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
 
-    const auto instrument = outWS->getInstrument();
-    const auto bank1 = instrument->getComponentByName("bank1");
-    const auto bank2 = instrument->getComponentByName("bank2");
-    const auto sample = instrument->getComponentByName("sample");
+    auto const &compInfo = outWS->componentInfo();
+    V3D const sample_pos = compInfo.samplePosition();
+    V3D const bank1ToSample = compInfo.position(compInfo.indexOfAny("bank1")) - sample_pos;
+    V3D const bank2ToSample = compInfo.position(compInfo.indexOfAny("bank2")) - sample_pos;
 
-    const V3D bank1ToSample = bank1->getPos() - sample->getPos();
-    const V3D bank2ToSample = bank2->getPos() - sample->getPos();
-    auto refFrame = instrument->getReferenceFrame();
+    auto refFrame = outWS->componentInfo().referenceFrame();
     TSM_ASSERT_EQUALS("By default bank1 should be offset from the sample in the beam "
                       "direction by 5m",
                       5.0, refFrame->vecPointingAlongBeam().scalar_prod(bank1ToSample));
@@ -183,14 +182,12 @@ public:
     alg.execute();
     MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
 
-    const auto instrument = outWS->getInstrument();
-    const auto bank1 = instrument->getComponentByName("bank1");
-    const auto bank2 = instrument->getComponentByName("bank2");
-    const auto sample = instrument->getComponentByName("sample");
+    auto const &compInfo = outWS->componentInfo();
+    V3D const sample_pos = compInfo.samplePosition();
+    V3D const bank1ToSample = compInfo.position(compInfo.indexOfAny("bank1")) - sample_pos;
+    V3D const bank2ToSample = compInfo.position(compInfo.indexOfAny("bank2")) - sample_pos;
 
-    const V3D bank1ToSample = bank1->getPos() - sample->getPos();
-    const V3D bank2ToSample = bank2->getPos() - sample->getPos();
-    auto refFrame = instrument->getReferenceFrame();
+    auto refFrame = outWS->componentInfo().referenceFrame();
     TSM_ASSERT_EQUALS("Wrong offset applied for bank1", bankToSampleDistance,
                       refFrame->vecPointingAlongBeam().scalar_prod(bank1ToSample));
     TSM_ASSERT_EQUALS("Wrong offset applied for bank2", bankToSampleDistance * 2,

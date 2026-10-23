@@ -48,14 +48,12 @@ IComponent_const_sptr getSampleDeprecated(const Instrument &self) {
 }
 
 IComponent_const_sptr getSourceDeprecated(const Instrument &self) {
-  /** TODO Uncomment this block for Mantid 7.1
   if (PyErr_Warn(PyExc_DeprecationWarning,
                  "'Instrument.getSource' is deprecated in Mantid 7.0, "
                  "use 'ComponentInfo.source'/'sourcePosition' instead. "
                  "For more information, see the instrument access layers concept page: "
                  "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html") < 0)
     throw boost::python::error_already_set();
-  */
   return self.getSource();
 }
 
@@ -118,6 +116,16 @@ std::vector<GridDetector_const_sptr> findGridDetectorsDeprecated(const Instrumen
   return self.findGridDetectors();
 }
 
+std::shared_ptr<ReferenceFrame const> getReferenceFrameDeprecated(const Instrument &self) {
+  if (PyErr_Warn(PyExc_DeprecationWarning,
+                 "'Instrument.getReferenceFrame' is deprecated in Mantid 7.0, "
+                 "use 'ComponentInfo.referenceFrame' instead. "
+                 "For more information, see the instrument access layers concept page: "
+                 "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html") < 0)
+    throw boost::python::error_already_set();
+  return self.getReferenceFrame();
+}
+
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
@@ -160,8 +168,7 @@ void export_Instrument() {
            Instrument_getNumberDetectors("Return the number of detectors (deprecated, use DetectorInfo.size)",
                                          (arg("self"), arg("skipMonitors") = false)))
 
-      .def("getReferenceFrame", (std::shared_ptr<const ReferenceFrame> (Instrument::*)())&Instrument::getReferenceFrame,
-           arg("self"), return_value_policy<RemoveConstSharedPtr>(),
+      .def("getReferenceFrame", &getReferenceFrameDeprecated, arg("self"), return_value_policy<RemoveConstSharedPtr>(),
            "Returns the :class:`~mantid.geometry.ReferenceFrame` attached that "
            "defines the instrument "
            "axes")

@@ -17,6 +17,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -289,11 +290,10 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
   MatrixWorkspace &simulationWS = useSparseInstrument ? *sparseWS : *outputWS;
   const MatrixWorkspace &instrumentWS = useSparseInstrument ? simulationWS : inputWS;
   // Cache information about the workspace that will be used repeatedly
-  auto instrument = instrumentWS.getInstrument();
   const auto nhists = static_cast<int64_t>(instrumentWS.getNumberHistograms());
 
   EFixedProvider efixed(instrumentWS);
-  auto beamProfile = BeamProfileFactory::createBeamProfile(*instrument, inputWS.sample());
+  auto beamProfile = BeamProfileFactory::createBeamProfile(instrumentWS.componentInfo(), inputWS.sample());
 
   // Configure progress
   Progress prog(this, 0.0, 1.0, nhists);
@@ -421,7 +421,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::createOutputWorkspace(const MatrixWor
 void MonteCarloAbsorption::interpolateFromSparse(MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
                                                  const Mantid::Algorithms::InterpolationOption &interpOpt) {
   const auto &spectrumInfo = targetWS.spectrumInfo();
-  const auto refFrame = targetWS.getInstrument()->getReferenceFrame();
+  const auto refFrame = targetWS.componentInfo().referenceFrame();
   PARALLEL_FOR_IF(Kernel::threadSafe(targetWS, sparseWS))
   for (int64_t i = 0; i < static_cast<decltype(i)>(spectrumInfo.size()); ++i) {
     PARALLEL_START_INTERRUPT_REGION

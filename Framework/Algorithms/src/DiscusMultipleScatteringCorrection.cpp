@@ -19,6 +19,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
@@ -205,8 +206,7 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
     issues["InputWorkspace"] = "Input workspace must be a matrix workspace";
     return issues;
   }
-  Geometry::IComponent_const_sptr sample = inputWS->getInstrument()->getSample();
-  if (!sample)
+  if (!inputWS->componentInfo().hasSample())
     issues["InputWorkspace"] = "Input workspace does not have a Sample";
 
   bool atLeastOneValidShape = inputWS->sample().getShape().hasValidShape();
@@ -2100,7 +2100,7 @@ void DiscusMultipleScatteringCorrection::interpolateFromSparse(
     MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
     const Mantid::Algorithms::InterpolationOption &interpOpt) {
   const auto &spectrumInfo = targetWS.spectrumInfo();
-  const auto refFrame = targetWS.getInstrument()->getReferenceFrame();
+  const auto refFrame = targetWS.componentInfo().referenceFrame();
   PARALLEL_FOR_IF(Kernel::threadSafe(targetWS, sparseWS))
   for (int64_t i = 0; i < static_cast<decltype(i)>(spectrumInfo.size()); ++i) {
     PARALLEL_START_INTERRUPT_REGION
@@ -2192,9 +2192,10 @@ void DiscusMultipleScatteringCorrection::prepareSampleBeamGeometry(const API::Ma
     m_activeRegion.grow(envBox);
   }
   m_instrument = inputWS->getInstrument();
-  m_beamProfile = BeamProfileFactory::createBeamProfile(*m_instrument, inputWS->sample());
-  m_refframe = m_instrument->getReferenceFrame();
-  m_sourcePos = m_instrument->getSource()->getPos();
+  auto const &compInfo = inputWS->componentInfo();
+  m_beamProfile = BeamProfileFactory::createBeamProfile(compInfo, inputWS->sample());
+  m_refframe = compInfo.referenceFrame();
+  m_sourcePos = compInfo.sourcePosition();
 }
 
 } // namespace Mantid::Algorithms

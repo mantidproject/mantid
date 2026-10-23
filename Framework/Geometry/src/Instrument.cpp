@@ -1487,6 +1487,7 @@ Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
   compInfo->m_parameterInfo = pmap.sharedParameterInfo();
   // Take the frame from the instrument rather than the cached copy, in case it was set after the cache was built.
   compInfo->m_referenceFrame = getReferenceFrame();
+  detInfo->m_referenceFrame = compInfo->m_referenceFrame;
   const auto parInstrument = ParComponentFactory::createInstrument(
       std::shared_ptr<const Instrument>(this, NoDeleting()), std::shared_ptr<ParameterMap>(&pmap, NoDeleting()));
   detInfo->m_instrument = parInstrument;

@@ -11,6 +11,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidReflectometry/SpecularReflectionPositionCorrect2.h"
@@ -67,15 +68,14 @@ private:
     const auto &spectrumInfoOut = outWS->spectrumInfo();
     const auto nHisto = spectrumInfoOut.size();
     TS_ASSERT_DELTA(spectrumInfoOut.l2(0), spectrumInfoOut.l2(nHisto - 1), 1e-10)
-    auto instrIn = inWS->getInstrument();
-    auto detIn = instrIn->getComponentByName("detector");
-    const auto posIn = detIn->getPos();
+    auto const &compInfo = inWS->componentInfo();
+    const auto posIn = compInfo.position(compInfo.indexOfAny("detector"));
     const auto l2 = posIn.norm();
     auto instrOut = outWS->getInstrument();
     auto detOut = instrOut->getComponentByName("detector");
     const auto posOut = detOut->getPos();
     TS_ASSERT_DELTA(posOut.norm(), l2, 1e-10)
-    const auto thetaSignDir = instrIn->getReferenceFrame()->vecThetaSign();
+    const auto thetaSignDir = compInfo.referenceFrame()->vecThetaSign();
     const auto horizontal = thetaSignDir.X() != 0. ? true : false;
     const auto a = l2 * std::sin(twoTheta * degToRad);
     const auto x = horizontal ? a : 0.;
