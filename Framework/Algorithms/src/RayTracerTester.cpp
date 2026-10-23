@@ -7,7 +7,8 @@
 #include "MantidAlgorithms/RayTracerTester.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/V3D.h"
 
@@ -16,7 +17,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using Mantid::Geometry::IDetector_const_sptr;
+using Mantid::Geometry::ComponentInfo;
 using Mantid::Geometry::InstrumentRayTracer;
 
 namespace Mantid::Algorithms {
@@ -56,7 +57,8 @@ void RayTracerTester::exec() {
   int NumAzimuth = getProperty("NumAzimuth");
   int NumZenith = getProperty("NumZenith");
   Progress prog(this, 0.3, 1.0, NumAzimuth);
-  InstrumentRayTracer tracker(ws->getInstrument());
+  auto const &detInfo = ws->detectorInfo();
+  InstrumentRayTracer tracker(ws->componentInfo(), detInfo);
   for (int iaz = 0; iaz < NumAzimuth; iaz++) {
     prog.report();
     double az = double(iaz) * M_PI * 2.0 / double(NumAzimuth);
@@ -70,10 +72,11 @@ void RayTracerTester::exec() {
 
       // Create a ray tracer
       tracker.traceFromSample(beam);
-      IDetector_const_sptr det = tracker.getDetectorResult();
-      if (det) {
-        size_t wi = detTowi[det->getID()];
-        g_log.information() << "Found detector " << det->getID() << '\n';
+      auto const detIndex = tracker.getDetectorResult();
+      if (detIndex != ComponentInfo::invalidIndex) {
+        auto const detID = detInfo.detid(detIndex);
+        size_t wi = detTowi[detID];
+        g_log.information() << "Found detector " << detID << '\n';
         ws->mutableY(wi)[0] = double(int(az * 57.3) * 1000 + int(iz));
       }
     }

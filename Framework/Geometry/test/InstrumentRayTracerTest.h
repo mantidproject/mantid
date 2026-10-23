@@ -7,6 +7,9 @@
 #pragma once
 
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/ConfigService.h"
@@ -36,23 +39,20 @@ public:
     ObjComponent *source = new ObjComponent("moderator", nullptr);
     testInst->add(source);
     testInst->markAsSource(source);
-    InstrumentRayTracer *rayTracker(nullptr);
-    TS_ASSERT_THROWS_NOTHING(rayTracker = new InstrumentRayTracer(testInst));
-    delete rayTracker;
-  }
-
-  void test_That_Constructor_Throws_Invalid_Argument_On_Giving_A_Null_Instrument() {
-    TS_ASSERT_THROWS(new InstrumentRayTracer(std::shared_ptr<Instrument>()), const std::invalid_argument &);
+    auto const [compInfo, detInfo] = InstrumentVisitor::makeWrappers(*testInst);
+    TS_ASSERT_THROWS_NOTHING(InstrumentRayTracer(*compInfo, *detInfo));
   }
 
   void test_That_Constructor_Throws_Invalid_Argument_On_Giving_An_Instrument_With_No_Source() {
     Instrument_sptr testInst(new Instrument("empty"));
-    TS_ASSERT_THROWS(new InstrumentRayTracer(testInst), const std::invalid_argument &);
+    auto const [compInfo, detInfo] = InstrumentVisitor::makeWrappers(*testInst);
+    TS_ASSERT_THROWS(InstrumentRayTracer(*compInfo, *detInfo), const std::invalid_argument &);
   }
 
   void test_That_A_Trace_For_A_Ray_That_Intersects_Many_Components_Gives_These_Components_As_A_Result() {
     Instrument_sptr testInst = setupInstrument();
-    InstrumentRayTracer tracker(testInst);
+    auto const [compInfo, detInfo] = InstrumentVisitor::makeWrappers(*testInst);
+    InstrumentRayTracer tracker(*compInfo, *detInfo);
     tracker.trace(V3D(0., 0., 1));
     Links results = tracker.getResults();
     TS_ASSERT_EQUALS(results.size(), 2);
@@ -101,7 +101,8 @@ public:
 
   void test_That_A_Ray_Which_Just_Intersects_One_Component_Gives_This_Component_Only() {
     Instrument_sptr testInst = setupInstrument();
-    InstrumentRayTracer tracker(testInst);
+    auto const [compInfo, detInfo] = InstrumentVisitor::makeWrappers(*testInst);
+    InstrumentRayTracer tracker(*compInfo, *detInfo);
     V3D testDir(0.010, 0.0, 15.004);
     testDir.normalize();
     tracker.trace(testDir);
@@ -130,9 +131,35 @@ public:
     TS_ASSERT_EQUALS(results.size(), 0);
   }
 
+  void test_getDetectorResult_returns_index_of_intersected_detector() {
+    Instrument_sptr testInst = setupInstrument();
+    auto const [compInfo, detInfo] = InstrumentVisitor::makeWrappers(*testInst);
+    InstrumentRayTracer tracker(*compInfo, *detInfo);
+    V3D testDir(0.010, 0.0, 15.004);
+    testDir.normalize();
+    tracker.trace(testDir);
+    auto const detIndex = tracker.getDetectorResult();
+    TS_ASSERT_DIFFERS(detIndex, ComponentInfo::invalidIndex);
+    if (detIndex == ComponentInfo::invalidIndex)
+      return;
+
+    TS_ASSERT_EQUALS(compInfo->name(detIndex), "pixel-(1;0)");
+    TS_ASSERT_EQUALS(detInfo->detid(detIndex),
+                     std::dynamic_pointer_cast<const IDetector>(testInst->getComponentByName("pixel-(1;0)"))->getID());
+  }
+
+  void test_getDetectorResult_returns_invalidIndex_when_no_detector_is_intersected() {
+    Instrument_sptr testInst = setupInstrument();
+    auto const [compInfo, detInfo] = InstrumentVisitor::makeWrappers(*testInst);
+    InstrumentRayTracer tracker(*compInfo, *detInfo);
+    tracker.trace(V3D(0.0, 1.0, 0.0));
+    TS_ASSERT_EQUALS(tracker.getDetectorResult(), ComponentInfo::invalidIndex);
+  }
+
   void test_That_traceFromSample_throws_for_zero_dir() {
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
-    InstrumentRayTracer tracker(inst);
+    auto const [compInfo, detInfo] = InstrumentVisitor::makeWrappers(*inst);
+    InstrumentRayTracer tracker(*compInfo, *detInfo);
     constexpr V3D testDir(0., 0., 0.);
     TS_ASSERT_THROWS_ANYTHING(tracker.traceFromSample(testDir));
   }
@@ -146,7 +173,8 @@ public:
    */
   void doTestRectangularDetector(const std::string &message, const Instrument_sptr &inst, V3D testDir, int expectX,
                                  int expectY) {
-    InstrumentRayTracer tracker(inst);
+    auto const [compInfo, detInfo] = InstrumentVisitor::makeWrappers(*inst);
+    InstrumentRayTracer tracker(*compInfo, *detInfo);
     testDir.normalize();
     tracker.traceFromSample(testDir);
 
