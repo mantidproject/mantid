@@ -267,11 +267,9 @@ std::string readString(H5::H5File &file, const std::string &address) {
   try {
     auto data = file.openDataSet(address);
     return readString(data);
-  } catch (const H5::FileIException &e) {
-    UNUSED_ARG(e);
+  } catch (const H5::FileIException &) {
     return "";
-  } catch (const H5::GroupIException &e) {
-    UNUSED_ARG(e);
+  } catch (const H5::GroupIException &) {
     return "";
   }
 }
@@ -280,8 +278,7 @@ std::string readString(const H5::Group &group, const std::string &name) {
   try {
     const auto data = group.openDataSet(name);
     return readString(data);
-  } catch (const H5::GroupIException &e) {
-    UNUSED_ARG(e);
+  } catch (const H5::GroupIException &) {
     return "";
   }
 }

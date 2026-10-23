@@ -186,9 +186,8 @@ bool EnabledWhenProperty::isEnabled(const IPropertyManager *algo) const {
  * @param algo :: Pointer to the algorithm containing the property
  * @return :: True always
  */
-bool EnabledWhenProperty::isVisible(const IPropertyManager *algo) const {
+bool EnabledWhenProperty::isVisible([[maybe_unused]] const IPropertyManager *algo) const {
   // VisibleWhenProperty uses algo so we have to keep it to match interface
-  UNUSED_ARG(algo);
   return true;
 }
 
