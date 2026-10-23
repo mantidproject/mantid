@@ -8,7 +8,6 @@
 from mantid.api import (
     AlgorithmFactory,
     DataProcessorAlgorithm,
-    MatrixWorkspaceProperty,
     MatrixWorkspace,
     PropertyMode,
     WorkspaceGroup,
@@ -62,7 +61,7 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
             "they will be summed into a single output workspace.",
         )
         self.declareProperty(
-            MatrixWorkspaceProperty(self._MONITOR_WS, "", direction=Direction.Output, optional=PropertyMode.Optional),
+            WorkspaceProperty(self._MONITOR_WS, "", direction=Direction.Output, optional=PropertyMode.Optional),
             doc="The loaded monitors workspace. This is only output in event mode.",
         )
 

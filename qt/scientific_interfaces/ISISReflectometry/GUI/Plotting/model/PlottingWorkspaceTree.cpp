@@ -141,11 +141,10 @@ void PlottingWorkspaceTree::rebuild(RunsTable const &runsTable) {
     auto groupItem = PlottingWorkspaceTreeItem{
         group.name(), PlottingWorkspaceTreeItemType::ReductionGroup, ReducedWorkspaceOutputType::None, "", {}};
     if (group.success()) {
-      std::for_each(group.postprocessedWorkspaceNames().cbegin(), group.postprocessedWorkspaceNames().cend(),
-                    [&](auto const &workspaceName) -> void {
-                      appendWorkspaceItemIfPresent(groupItem, workspaceName, ReducedWorkspaceOutputType::IvsQBinned,
-                                                   m_plottingWorkspacesByName);
-                    });
+      for (auto const &workspaceName : group.postprocessedWorkspaceNames()) {
+        appendWorkspaceItemIfPresent(groupItem, workspaceName, ReducedWorkspaceOutputType::IvsQBinned,
+                                     m_plottingWorkspacesByName);
+      }
     }
 
     for (auto const &maybeRow : group.rows()) {
