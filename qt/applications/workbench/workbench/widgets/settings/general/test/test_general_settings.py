@@ -503,7 +503,7 @@ class GeneralSettingsTest(unittest.TestCase):
         self.mock_model.set_user_layout.assert_called_once_with({"a": 1, "key": "value"})
         mock_notify_changes.assert_called_once()
         mock_parent.saveState.assert_called_once_with(SAVE_STATE_VERSION)
-        mock_parent.populate_layout_menu.assert_called_once_with()
+        mock_parent.populate_layout_menu.assert_not_called()
 
     @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
     def test_load_layout(self, _):
@@ -548,7 +548,7 @@ class GeneralSettingsTest(unittest.TestCase):
         self.mock_model.get_user_layout.assert_has_calls(calls)
         self.mock_model.set_user_layout.assert_called_once_with({})
         mock_notify_changes.assert_called_once()
-        mock_parent.populate_layout_menu.assert_called_once_with()
+        mock_parent.populate_layout_menu.assert_not_called()
 
 
 if __name__ == "__main__":
