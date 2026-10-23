@@ -10,6 +10,7 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 
 #include <algorithm>
+#include <array>
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
 #include <fstream>
@@ -294,9 +295,10 @@ namespace {
  * @param A Output peak amplitude estimate.
  * @param b Output uniform background estimate.
  * @param sigA Output standard uncertainty of the peak amplitude.
+ * @param warmStart Start from the A and b passed in, if positive, rather than from crude estimates.
  */
 void solvePoissonMatchedFilter(const std::vector<double> &g, const std::vector<double> &w, double normG, double volume,
-                               double &A, double &b, double &sigA) {
+                               double &A, double &b, double &sigA, bool warmStart = false) {
   const auto n = g.size();
 
   auto logLikelihood = [&](double a, double bb) {
@@ -328,9 +330,11 @@ void solvePoissonMatchedFilter(const std::vector<double> &g, const std::vector<d
   // a flat background over the search volume, deliberately conservative so
   // the backtracking Newton solve below has a well-behaved starting point
   // regardless of the absolute scale of normG/volume/event counts
-  const double sumW = std::accumulate(w.begin(), w.end(), 0.0);
-  b = volume > 0 ? std::max(0.5 * sumW / volume, 1e-10) : 1e-10;
-  A = normG > 0 ? std::max(0.5 * sumW / normG, 1e-10) : 1e-10;
+  if (!(warmStart && A > 0.0 && b > 0.0)) {
+    const double sumW = std::accumulate(w.begin(), w.end(), 0.0);
+    b = volume > 0 ? std::max(0.5 * sumW / volume, 1e-10) : 1e-10;
+    A = normG > 0 ? std::max(0.5 * sumW / normG, 1e-10) : 1e-10;
+  }
 
   for (int iter = 0; iter < 100; ++iter) {
     double dA, dB, dAA, dBB, dAB;
@@ -409,6 +413,68 @@ bool solve3x3(const double H[3][3], const double g[3], double x[3]) {
   }
   return true;
 }
+
+/// a symmetric 3x3 matrix stored as xx, yy, zz, xy, xz, yz
+using SymMatrix = std::array<double, 6>;
+/// the (row, column) of each stored element of a SymMatrix
+constexpr std::array<std::array<size_t, 2>, 6> SYM_PAIRS{{{0, 0}, {1, 1}, {2, 2}, {0, 1}, {0, 2}, {1, 2}}};
+
+double determinant(const SymMatrix &m) {
+  return m[0] * (m[1] * m[2] - m[5] * m[5]) - m[3] * (m[3] * m[2] - m[5] * m[4]) + m[4] * (m[3] * m[5] - m[1] * m[4]);
+}
+
+SymMatrix inverse(const SymMatrix &m) {
+  const double det = determinant(m);
+  return {(m[1] * m[2] - m[5] * m[5]) / det, (m[0] * m[2] - m[4] * m[4]) / det, (m[0] * m[1] - m[3] * m[3]) / det,
+          (m[4] * m[5] - m[3] * m[2]) / det, (m[3] * m[5] - m[4] * m[1]) / det, (m[3] * m[4] - m[0] * m[5]) / det};
+}
+
+V3D multiply(const SymMatrix &m, const V3D &v) {
+  return V3D(m[0] * v.X() + m[3] * v.Y() + m[4] * v.Z(), m[3] * v.X() + m[1] * v.Y() + m[5] * v.Z(),
+             m[4] * v.X() + m[5] * v.Y() + m[2] * v.Z());
+}
+
+Kernel::DblMatrix toDblMatrix(const SymMatrix &m) {
+  Kernel::DblMatrix out(3, 3);
+  for (size_t e = 0; e < 6; ++e) {
+    out[SYM_PAIRS[e][0]][SYM_PAIRS[e][1]] = m[e];
+    out[SYM_PAIRS[e][1]][SYM_PAIRS[e][0]] = m[e];
+  }
+  return out;
+}
+
+/**
+ * @brief Solves the linear system A x = b in place by Gaussian elimination with partial pivoting.
+ *
+ * @param A Square matrix, overwritten.
+ * @param b Right-hand side, overwritten with the solution.
+ * @return false if A is singular.
+ */
+bool solveLinear(std::vector<std::vector<double>> &A, std::vector<double> &b) {
+  const size_t n = b.size();
+  for (size_t col = 0; col < n; ++col) {
+    size_t pivot = col;
+    for (size_t r = col + 1; r < n; ++r)
+      if (std::abs(A[r][col]) > std::abs(A[pivot][col]))
+        pivot = r;
+    if (!(std::abs(A[pivot][col]) > 1e-300))
+      return false;
+    std::swap(A[col], A[pivot]);
+    std::swap(b[col], b[pivot]);
+    for (size_t r = col + 1; r < n; ++r) {
+      const double f = A[r][col] / A[col][col];
+      for (size_t c = col; c < n; ++c)
+        A[r][c] -= f * A[col][c];
+      b[r] -= f * b[col];
+    }
+  }
+  for (size_t r = n; r-- > 0;) {
+    for (size_t c = r + 1; c < n; ++c)
+      b[r] -= A[r][c] * b[c];
+    b[r] /= A[r][r];
+  }
+  return true;
+}
 } // namespace
 
 /**
@@ -454,6 +520,34 @@ void Integrate3DEvents::integrateUsingShape(const PeakShapeEllipsoid &shape, con
 }
 
 /**
+ * Sum the weighted events inside a fixed ellipsoidal shape and its background
+ * shell, centered on peak_q, as integrateUsingShape does but without
+ * combining them, and without the one percent background correction.
+ *
+ * @param shape   The ellipsoid shape (directions, peak radii, background
+ *                inner/outer radii) to count with.
+ * @param peak_q  Q-vector at which to center the shape.
+ * @return The weighted counts and error-squared sums in the peak and shell.
+ */
+ShapeCounts Integrate3DEvents::countUsingShape(const PeakShapeEllipsoid &shape, const V3D &peak_q) {
+  ShapeCounts counts;
+  auto result = getEvents(peak_q);
+  if (!result)
+    return counts;
+
+  const auto &events = *result;
+  const auto &directions = shape.directions();
+  const auto peak = numInEllipsoid(events, directions, shape.abcRadii());
+  const auto shell =
+      numInEllipsoidBkg(events, directions, shape.abcRadiiBackgroundOuter(), shape.abcRadiiBackgroundInner(), false);
+  counts.peak = peak.first;
+  counts.peakErrorSq = peak.second;
+  counts.shell = shell.first;
+  counts.shellErrorSq = shell.second;
+  return counts;
+}
+
+/**
  * Fits a Gaussian peak and constant background within the search radius and
  * returns the integrated Gaussian intensity.
  *
@@ -469,9 +563,19 @@ void Integrate3DEvents::integrateUsingShape(const PeakShapeEllipsoid &shape, con
  *               incremental shift from shape.translation()) if true.
  * @param inti Receives the fitted integrated peak intensity.
  * @param sigi Receives the standard deviation of the fitted intensity.
+ * @param norm If given, weight the expected counts by flux and solid angle
+ *             along each pixel's trajectory through the fit region, so the
+ *             intensity is in normalized units.
+ * @param normalization If given with norm, receives diagnostics of the fit.
+ * @param shapeFit If given, refine the shape of a peak with at least its
+ *                 minSignalToNoise, within its maxChange of the supplied
+ *                 shape, and return the shape used.
  */
 void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &shape, const V3D &peak_q,
-                                                      bool adjustCenter, V3D &center, double &inti, double &sigi) {
+                                                      bool adjustCenter, V3D &center, double &inti, double &sigi,
+                                                      const EllipsoidTrajectoryNorm *norm,
+                                                      ProfileFitNormalization *normalization,
+                                                      ProfileFitShape *shapeFit) {
   inti = 0.0;
   sigi = 0.0;
   center = shape.translation();
@@ -514,10 +618,39 @@ void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &
   // sum(g) over all space is translation-invariant, so normG does not
   // depend on the center offset c
   const auto normG = pow(2.0 * M_PI, 1.5) * sigmas[0] * sigmas[1] * sigmas[2];
-  const auto volume = (4.0 / 3.0) * M_PI * m_radius * m_radius * m_radius;
+  auto volume = (4.0 / 3.0) * M_PI * m_radius * m_radius * m_radius;
+
+  // With normalization, the expected counts are the flux and solid angle
+  // weighted integrals over the fit region (the sphere of the search radius)
+  // of the background rate, b * volume, and of the Gaussian, A * peakNorm(c),
+  // which then depends on the center. The events' own exposure factors do
+  // not depend on the parameters, so the per-event terms are unchanged.
+  EllipsoidChords region;
+  if (norm) {
+    const PeakEllipsoidFrame axes{V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    region = norm->chords(peak_q, axes, {m_radius, m_radius, m_radius});
+    volume = region.result.norm;
+    if (volume <= 0.0)
+      return;
+  }
+  auto peakNorm = [&](const V3D &c, V3D *gradient) {
+    if (!norm) {
+      if (gradient)
+        *gradient = V3D();
+      return normG;
+    }
+    const auto exposure = norm->integrateGaussian(region, peak_q + c, directions, sigmas);
+    if (gradient)
+      *gradient = exposure.gradient;
+    return exposure.value;
+  };
+  V3D peakNormGradient;
+  double peakNormAtCenter = peakNorm(center, &peakNormGradient);
+  if (peakNormAtCenter <= 0.0)
+    return;
 
   auto logLikelihood = [&](const V3D &c, double A, double b) {
-    double ll = -(A * normG + b * volume);
+    double ll = -(A * peakNorm(c, nullptr) + b * volume);
     for (const auto &event : events) {
       const V3D qOff = event.second - c;
       const auto gi = exp(-0.5 * qOff.scalar_prod(applyInvS(qOff)));
@@ -526,14 +659,111 @@ void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &
     return ll;
   };
 
+  // the distance of an offset in standard deviations of the supplied shape
+  auto mahalanobis = [&](const V3D &v) { return std::sqrt(v.scalar_prod(applyInvS(v))); };
+
+  // The mode of the counts smoothed by the supplied shape, found by mean shift from c0, within maxShift
+  // standard deviations of c0: first with a kernel twice as wide, to reach a peak several standard deviations
+  // away, then with the shape itself. A uniform background is centered on the kernel, so it slows the shift but
+  // does not move where it ends up.
+  auto countsMode = [&](const V3D &c0, const double maxShift) {
+    V3D c = c0;
+    for (const double scale : {2.0, 1.0}) {
+      for (int iteration = 0; iteration < 50; ++iteration) {
+        double sumWeight = 0.0;
+        V3D sumQ;
+        for (const auto &event : events) {
+          const V3D qOff = event.second - c;
+          const double e = 0.5 * qOff.scalar_prod(applyInvS(qOff)) / (scale * scale);
+          if (e > 40.0)
+            continue;
+          const double weight = event.first.first * exp(-e);
+          sumWeight += weight;
+          sumQ += event.second * weight;
+        }
+        if (!(sumWeight > 0.0))
+          return c;
+        V3D next = sumQ * (1.0 / sumWeight);
+        const auto distance = mahalanobis(next - c0);
+        if (distance > maxShift)
+          next = c0 + (next - c0) * (maxShift / distance);
+        const auto move = mahalanobis(next - c);
+        c = next;
+        if (move < 1e-3)
+          break;
+      }
+    }
+    return c;
+  };
+
   std::vector<double> g, w;
   std::vector<V3D> invSq;
   computeKernel(center, g, w, invSq);
 
   double A = 0.0, b = 0.0, sigA = 0.0;
-  solvePoissonMatchedFilter(g, w, normG, volume, A, b, sigA);
+  solvePoissonMatchedFilter(g, w, peakNormAtCenter, volume, A, b, sigA);
 
-  if (adjustCenter) {
+  // refine the shape of a strong enough peak; a weaker one keeps the supplied shape
+  if (shapeFit) {
+    shapeFit->attempted = false;
+    shapeFit->adjusted = false;
+    shapeFit->directions = directions;
+    shapeFit->sigmas = sigmas;
+    // With the center refined too, the fit starts from the mode of the counts if the peak is more significant
+    // there than at its stored center, as a peak predicted several standard deviations away (e.g. from an
+    // imperfect calibration) is out of reach of the fit's local steps and looks weaker than it is.
+    V3D seedCenter = center;
+    double seedA = A, seedB = b, seedSigA = sigA;
+    if (adjustCenter) {
+      const auto mode = countsMode(center, shapeFit->maxCenterShift);
+      std::vector<double> gMode, wMode;
+      std::vector<V3D> invSqMode;
+      computeKernel(mode, gMode, wMode, invSqMode);
+      double modeA = 0.0, modeB = 0.0, modeSigA = 0.0;
+      const double modePeakNorm = peakNorm(mode, nullptr);
+      if (modePeakNorm > 0.0) {
+        solvePoissonMatchedFilter(gMode, wMode, modePeakNorm, volume, modeA, modeB, modeSigA);
+        if (std::isfinite(modeSigA) && modeSigA > 0.0 && (!(sigA > 0.0) || modeA / modeSigA > A / sigA)) {
+          seedCenter = mode;
+          seedA = modeA;
+          seedB = modeB;
+          seedSigA = modeSigA;
+        }
+      }
+    }
+    if (std::isfinite(seedSigA) && seedSigA > 0.0 && seedA / seedSigA >= shapeFit->minSignalToNoise) {
+      shapeFit->attempted = true;
+      double intensity = seedA * normG, background = seedB, sigma = seedSigA * normG, peakNormRefined = 0.0;
+      V3D refinedCenter = seedCenter;
+      PeakEllipsoidFrame refinedDirections;
+      PeakEllipsoidExtent refinedSigmas;
+      refineProfileShape(events, peak_q, norm, region, volume, adjustCenter, directions, sigmas, shapeFit->maxChange,
+                         center, shapeFit->maxCenterShift, refinedCenter, intensity, background, sigma, peakNormRefined,
+                         refinedDirections, refinedSigmas);
+      // keep the refinement only if the peak is still as significant with its refined shape (with that shape's
+      // uncertainty included); otherwise the supplied shape is kept, as for a weaker peak
+      if (std::isfinite(sigma) && sigma > 0.0 && intensity / sigma >= shapeFit->minSignalToNoise) {
+        shapeFit->adjusted = true;
+        shapeFit->directions = refinedDirections;
+        shapeFit->sigmas = refinedSigmas;
+        center = refinedCenter;
+        inti = intensity;
+        sigi = sigma;
+        if (norm && normalization) {
+          normalization->counts = std::accumulate(w.begin(), w.end(), 0.0);
+          normalization->backgroundCounts = background * volume;
+          normalization->peakNorm = peakNormRefined;
+          normalization->regionNorm = volume;
+          normalization->coverage = region.result;
+        }
+        return;
+      }
+    }
+  }
+
+  // with shape refinement, the center is refined only together with the
+  // shape of a strong enough peak, above; a weaker peak keeps its center
+  if (adjustCenter && !shapeFit) {
     const auto maxShift = *std::min_element(sigmas.begin(), sigmas.end());
     // seedCenter is where this call started (shape.translation()); maxShift
     // bounds the *incremental* correction made in this call, not the total
@@ -543,7 +773,8 @@ void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &
 
     for (int outer = 0; outer < 20; ++outer) {
       // Gauss-Newton step in the center, holding A, b fixed
-      double grad[3] = {0.0, 0.0, 0.0};
+      // the expected peak counts depend on the center only with normalization
+      double grad[3] = {-A * peakNormGradient.X(), -A * peakNormGradient.Y(), -A * peakNormGradient.Z()};
       double hess[3][3] = {{0.0}};
       for (size_t i = 0; i < g.size(); ++i) {
         const auto mu = std::max(A * g[i] + b, 1e-12);
@@ -585,9 +816,10 @@ void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &
 
       const auto converged = (newCenter - center).norm() < 1e-8 * (1.0 + maxShift);
       center = newCenter;
+      peakNormAtCenter = peakNorm(center, &peakNormGradient);
 
       computeKernel(center, g, w, invSq);
-      solvePoissonMatchedFilter(g, w, normG, volume, A, b, sigA);
+      solvePoissonMatchedFilter(g, w, peakNormAtCenter, volume, A, b, sigA);
 
       if (converged)
         break;
@@ -596,6 +828,287 @@ void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &
 
   inti = A * normG;
   sigi = sigA * normG;
+
+  if (norm && normalization) {
+    normalization->counts = std::accumulate(w.begin(), w.end(), 0.0);
+    normalization->backgroundCounts = b * volume;
+    normalization->peakNorm = peakNormAtCenter / normG;
+    normalization->regionNorm = volume;
+    normalization->coverage = region.result;
+  }
+}
+
+/**
+ * Refine a peak's shape, and optionally its center, by maximizing the
+ * profile likelihood of a normalized Gaussian of integrated intensity I on a
+ * flat background b,
+ *
+ *   ln L = sum_i w_i ln(I g(Q_i) + b) - I G(c, M) - b V,
+ *
+ * over the center c and inverse covariance M, where G is the expected counts
+ * per unit intensity (1 without normalization, as the Gaussian is
+ * normalized). Each step is a Levenberg-Marquardt step in (c, M) with I and b
+ * held fixed, kept only if it increases the likelihood and stays within the
+ * bounds -- the center within maxCenterShift of the supplied shape's
+ * standard deviations (in its own frame) of origin, and each principal
+ * standard deviation within maxChange of the supplied shape's (in the
+ * supplied shape's own frame) -- after which I and b are solved again.
+ *
+ * @param events Events about the peak, relative to peak_q.
+ * @param peak_q Q-vector of the peak.
+ * @param norm Flux and solid angle normalization, or nullptr.
+ * @param region Chords through the fit region, used with norm.
+ * @param volume Expected counts per unit background in the fit region.
+ * @param adjustCenter Whether to refine the center too.
+ * @param priorDirections Principal axes of the supplied shape.
+ * @param priorSigmas Principal standard deviations of the supplied shape.
+ * @param maxChange Largest factor by which a principal standard deviation may change.
+ * @param origin Center offset from peak_q the center is bounded about.
+ * @param maxCenterShift Largest distance of the center from origin, in standard deviations of the supplied shape.
+ * @param center Center offset from peak_q to start from; updated.
+ * @param intensity Integrated intensity; updated.
+ * @param background Background rate; updated.
+ * @param sigma Receives the standard deviation of the intensity, for the refined shape.
+ * @param peakNorm Receives the expected counts per unit intensity.
+ * @param directions Receives the principal axes of the refined shape.
+ * @param sigmas Receives the principal standard deviations of the refined shape.
+ */
+void Integrate3DEvents::refineProfileShape(const std::vector<std::pair<std::pair<double, double>, V3D>> &events,
+                                           const V3D &peak_q, const EllipsoidTrajectoryNorm *norm,
+                                           const EllipsoidChords &region, const double volume, const bool adjustCenter,
+                                           const PeakEllipsoidFrame &priorDirections,
+                                           const PeakEllipsoidExtent &priorSigmas, const double maxChange,
+                                           const V3D &origin, const double maxCenterShift, V3D &center,
+                                           double &intensity, double &background, double &sigma, double &peakNorm,
+                                           PeakEllipsoidFrame &directions, PeakEllipsoidExtent &sigmas) {
+  SymMatrix m{};
+  for (size_t k = 0; k < 3; ++k)
+    for (size_t e = 0; e < 6; ++e)
+      m[e] +=
+          priorDirections[k][SYM_PAIRS[e][0]] * priorDirections[k][SYM_PAIRS[e][1]] / (priorSigmas[k] * priorSigmas[k]);
+
+  const SymMatrix prior = m;
+  const size_t nCenter = adjustCenter ? 3 : 0;
+  const size_t n = nCenter + 6;
+  // an off-diagonal element of M appears twice in the matrix
+  constexpr std::array<double, 6> multiplicity{1.0, 1.0, 1.0, 2.0, 2.0, 2.0};
+
+  // the normalized Gaussian's height, 1 / int g over all space
+  auto height = [](const SymMatrix &mm) { return std::sqrt(determinant(mm)) / std::pow(2.0 * M_PI, 1.5); };
+
+  auto principal = [](const SymMatrix &mm, PeakEllipsoidFrame &dirs, PeakEllipsoidExtent &sig) {
+    std::array<V3D, 3> vectors;
+    std::array<double, 3> values;
+    getEigenVectors(toDblMatrix(inverse(mm)), vectors, values);
+    for (size_t k = 0; k < 3; ++k) {
+      dirs[k] = vectors[k];
+      sig[k] = std::sqrt(values[k]);
+    }
+  };
+
+  // within the bounds: in the supplied shape's frame, scaled by its standard
+  // deviations, the eigenvalues of M are between 1/maxChange^2 and maxChange^2
+  auto feasible = [&](const V3D &c, const SymMatrix &mm) {
+    const V3D shift = c - origin;
+    if (shift.scalar_prod(multiply(prior, shift)) > maxCenterShift * maxCenterShift)
+      return false;
+    Kernel::DblMatrix scaled(3, 3);
+    for (size_t k = 0; k < 3; ++k)
+      for (size_t l = 0; l < 3; ++l)
+        scaled[k][l] =
+            priorSigmas[k] * priorSigmas[l] * priorDirections[k].scalar_prod(multiply(mm, priorDirections[l]));
+    std::array<V3D, 3> vectors;
+    std::array<double, 3> values;
+    getEigenVectors(scaled, vectors, values);
+    return std::all_of(values.begin(), values.end(),
+                       [&](double v) { return v >= 1.0 / (maxChange * maxChange) && v <= maxChange * maxChange; });
+  };
+
+  // expected counts per unit intensity, and its gradients with respect to c and the elements of M
+  auto exposure = [&](const V3D &c, const SymMatrix &mm, V3D *gradC, SymMatrix *gradM) {
+    if (!norm) {
+      if (gradC)
+        *gradC = V3D();
+      if (gradM)
+        gradM->fill(0.0);
+      return 1.0;
+    }
+    PeakEllipsoidFrame dirs;
+    PeakEllipsoidExtent sig;
+    principal(mm, dirs, sig);
+    const auto unnormalized = norm->integrateGaussian(region, peak_q + c, dirs, sig);
+    const double h = height(mm);
+    const double value = unnormalized.value * h;
+    if (gradC)
+      *gradC = unnormalized.gradient * h;
+    if (gradM) {
+      const auto cov = inverse(mm);
+      for (size_t e = 0; e < 6; ++e)
+        (*gradM)[e] = -0.5 * unnormalized.secondMoment[e] * h + 0.5 * value * cov[e];
+    }
+    return value;
+  };
+
+  auto quadratic = [](const SymMatrix &mm, const V3D &q) { return q.scalar_prod(multiply(mm, q)); };
+
+  // an event where the Gaussian is below exp(-FAR_EXPONENT) of its height
+  // (about 4e-18) contributes to the likelihood only through the background
+  constexpr double FAR_EXPONENT = 40.0;
+  // parameters: intensity, background, then the center (with adjustCenter), then the elements of M
+  const size_t nAll = n + 2;
+
+  auto logLikelihood = [&](const V3D &c, const SymMatrix &mm, double I, double bkg) {
+    const double h = height(mm);
+    double ll = -(I * exposure(c, mm, nullptr, nullptr) + bkg * volume);
+    double farWeight = 0.0;
+    for (const auto &event : events) {
+      const double e = 0.5 * quadratic(mm, event.second - c);
+      if (e > FAR_EXPONENT) {
+        farWeight += event.first.first;
+        continue;
+      }
+      ll += event.first.first * std::log(std::max(I * h * std::exp(-e) + bkg, 1e-12));
+    }
+    return ll + farWeight * std::log(std::max(bkg, 1e-12));
+  };
+
+  // gradient of ln L, and its Gauss-Newton (Fisher) information, over all the parameters
+  auto accumulate = [&](double I, double bkg, const V3D &c, const SymMatrix &mm, std::vector<double> &grad,
+                        std::vector<std::vector<double>> &information) {
+    V3D gradC;
+    SymMatrix gradM;
+    const double G = exposure(c, mm, &gradC, &gradM);
+    const auto cov = inverse(mm);
+    const double h = height(mm);
+    grad.assign(nAll, 0.0);
+    information.assign(nAll, std::vector<double>(nAll, 0.0));
+    grad[0] = -G;
+    grad[1] = -volume;
+    for (size_t r = 0; r < nCenter; ++r)
+      grad[2 + r] -= I * gradC[r];
+    for (size_t e = 0; e < 6; ++e)
+      grad[2 + nCenter + e] -= I * gradM[e] * multiplicity[e];
+    std::vector<double> J(nAll, 0.0);
+    double farWeight = 0.0;
+    for (const auto &event : events) {
+      const double weight = event.first.first;
+      const V3D q = event.second - c;
+      const V3D Mq = multiply(mm, q);
+      const double e = 0.5 * q.scalar_prod(Mq);
+      if (e > FAR_EXPONENT) {
+        farWeight += weight;
+        continue;
+      }
+      const double gh = h * std::exp(-e);
+      const double peak = I * gh;
+      const double mu = std::max(peak + bkg, 1e-12);
+      J[0] = gh;
+      J[1] = 1.0;
+      for (size_t r = 0; r < nCenter; ++r)
+        J[2 + r] = peak * Mq[r];
+      for (size_t k = 0; k < 6; ++k)
+        J[2 + nCenter + k] = peak * multiplicity[k] * 0.5 * (cov[k] - q[SYM_PAIRS[k][0]] * q[SYM_PAIRS[k][1]]);
+      for (size_t a = 0; a < nAll; ++a) {
+        grad[a] += weight * J[a] / mu;
+        for (size_t col = a; col < nAll; ++col)
+          information[a][col] += weight * J[a] * J[col] / (mu * mu);
+      }
+    }
+    // far events depend only on the background
+    const double muFar = std::max(bkg, 1e-12);
+    grad[1] += farWeight / muFar;
+    information[1][1] += farWeight / (muFar * muFar);
+    for (size_t a = 0; a < nAll; ++a)
+      for (size_t col = 0; col < a; ++col)
+        information[a][col] = information[col][a];
+  };
+
+  std::vector<double> g(events.size()), w(events.size());
+  auto computeKernel = [&](const V3D &c, const SymMatrix &mm) {
+    const double h = height(mm);
+    for (size_t i = 0; i < events.size(); ++i) {
+      const double e = 0.5 * quadratic(mm, events[i].second - c);
+      g[i] = e > FAR_EXPONENT ? 0.0 : h * std::exp(-e);
+      w[i] = events[i].first.first;
+    }
+  };
+
+  computeKernel(center, m);
+  peakNorm = exposure(center, m, nullptr, nullptr);
+  solvePoissonMatchedFilter(g, w, peakNorm, volume, intensity, background, sigma, true);
+
+  // stop once an iteration gains less than this in ln L: the parameters are
+  // then well within a tenth of a standard deviation of the optimum, where
+  // ln L is within 1/2 of its maximum at one standard deviation
+  constexpr double LOG_LIKELIHOOD_TOLERANCE = 1e-3;
+
+  // damped Gauss-Newton steps in all the parameters at once, as the
+  // intensity, background and width are strongly correlated
+  double ll = logLikelihood(center, m, intensity, background);
+  double lambda = 1e-3;
+  std::vector<double> grad;
+  std::vector<std::vector<double>> information;
+  for (int iteration = 0; iteration < 50; ++iteration) {
+    accumulate(intensity, background, center, m, grad, information);
+
+    bool improved = false;
+    double gain = 0.0;
+    for (int attempt = 0; attempt < 4 && !improved; ++attempt) {
+      auto damped = information;
+      for (size_t a = 0; a < nAll; ++a)
+        damped[a][a] = information[a][a] * (1.0 + lambda) + 1e-300;
+      auto step = grad;
+      if (solveLinear(damped, step)) {
+        for (double alpha = 1.0; alpha > 1.0 / 64.0 && !improved; alpha *= 0.5) {
+          const double newIntensity = intensity + alpha * step[0];
+          const double newBackground = background + alpha * step[1];
+          if (newIntensity < 0.0 || newBackground < 0.0)
+            continue;
+          V3D newCenter = center;
+          if (adjustCenter)
+            newCenter += V3D(step[2], step[3], step[4]) * alpha;
+          SymMatrix newM = m;
+          for (size_t e = 0; e < 6; ++e)
+            newM[e] += alpha * step[2 + nCenter + e];
+          if (determinant(newM) <= 0.0 || !feasible(newCenter, newM))
+            continue;
+          const double newLL = logLikelihood(newCenter, newM, newIntensity, newBackground);
+          if (newLL > ll) {
+            gain = newLL - ll;
+            ll = newLL;
+            intensity = newIntensity;
+            background = newBackground;
+            center = newCenter;
+            m = newM;
+            improved = true;
+          }
+        }
+      }
+      if (!improved)
+        lambda *= 10.0;
+    }
+    if (!improved)
+      break;
+    lambda = std::max(lambda / 10.0, 1e-6);
+    if (gain < LOG_LIKELIHOOD_TOLERANCE)
+      break;
+  }
+
+  // the intensity and background for the refined shape
+  computeKernel(center, m);
+  peakNorm = exposure(center, m, nullptr, nullptr);
+  solvePoissonMatchedFilter(g, w, peakNorm, volume, intensity, background, sigma, true);
+
+  // The uncertainty of the intensity with the shape fitted too: from the
+  // information over all the parameters, as the 2x2 one over (I, b) alone
+  // leaves out how much a wider peak can trade intensity for background.
+  accumulate(intensity, background, center, m, grad, information);
+  std::vector<double> unit(nAll, 0.0);
+  unit[0] = 1.0;
+  if (solveLinear(information, unit) && unit[0] > 0.0 && std::isfinite(unit[0]))
+    sigma = std::max(sigma, std::sqrt(unit[0]));
+
+  principal(m, directions, sigmas);
 }
 
 /**
