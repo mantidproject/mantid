@@ -535,7 +535,7 @@ def calc_1st_absorption_corr_using_wksp(
             except ValueError:
                 pass
         elif container_gauge_vol and beam_height != Property.EMPTY_DBL:
-            ref_frame = donor_wksp.getInstrument().getReferenceFrame()
+            ref_frame = donor_wksp.componentInfo().referenceFrame()
             up_direction = ref_frame.pointingUpAxis()
             info_to_use = GV_VALS[up_direction]
 
@@ -713,7 +713,7 @@ def create_absorption_input(
     if beam_height != Property.EMPTY_DBL and not gauge_vol:
         # If the gauge volume is not defined, use the beam height to define it,
         # and we will be assuming a cylinder shape of the sample.
-        ref_frame = mtd[absName].getInstrument().getReferenceFrame()
+        ref_frame = mtd[absName].componentInfo().referenceFrame()
         up_direction = ref_frame.pointingUpAxis()
         info_to_use = GV_VALS[up_direction]
         gauge_vol = """<cylinder id="shape">

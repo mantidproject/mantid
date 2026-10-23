@@ -1522,7 +1522,7 @@ class TestShapeRenderer(_CuboidShapeInfoHelpers, unittest.TestCase):
 
         workspace.componentInfo.return_value = comp_info
         workspace.detectorInfo.return_value = det_info
-        workspace.getInstrument().getReferenceFrame().vecPointingAlongBeam.return_value = [0, 0, 1]
+        workspace.componentInfo().referenceFrame().vecPointingAlongBeam.return_value = [0, 0, 1]
 
         return workspace
 

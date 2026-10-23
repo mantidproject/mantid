@@ -101,7 +101,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.x.return_value = np.arange(len(detector_ids))
         mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = [100 * i for i in detector_ids]
         mock_workspace.clone.return_value = mock_workspace
-        mock_workspace.getInstrument().getReferenceFrame().vecPointingAlongBeam.return_value = [0, 0, 1]
+        mock_workspace.componentInfo().referenceFrame().vecPointingAlongBeam.return_value = [0, 0, 1]
         return mock_workspace
 
     def _setup_model(
@@ -140,9 +140,10 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.DetectorInfo")
     def test_picked_detectors_info_text(self, det_info_mock):
         model, mock_workspace = self._setup_model([1, 20, 300])
-        mock_workspace.getDetector.side_effect = lambda i: MagicMock(
-            getName=mock.Mock(return_value=str(i)), getFullName=mock.Mock(return_value=f"Full_{i}")
-        )
+        # one detector per spectrum, with the same index as the spectrum
+        mock_workspace.spectrumInfo().getSpectrumDefinition.side_effect = lambda i: [(i, 0)]
+        mock_workspace.componentInfo().name.side_effect = lambda i: str(i)
+        mock_workspace.componentInfo().fullName.side_effect = lambda i: f"Full_{i}"
         model._is_valid = np.array([False, True, True])
         model._detector_is_picked = np.array([False, False, True])
         model.picked_detectors_info_text()
@@ -161,14 +162,15 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._detector_is_picked = np.array([True, True, True, True])
         result = model.picked_detectors_info_text()
         self.assertEqual(result, [])
-        mock_workspace.getDetector.assert_not_called()
+        mock_workspace.componentInfo().name.assert_not_called()
 
     @mock.patch("instrumentview.FullInstrumentViewModel.DetectorInfo")
     def test_picked_detectors_info_text_at_max_returns_all(self, det_info_mock):
         model, mock_workspace = self._setup_model([1, 20, 300])
-        mock_workspace.getDetector.side_effect = lambda i: MagicMock(
-            getName=mock.Mock(return_value=str(i)), getFullName=mock.Mock(return_value=f"Full_{i}")
-        )
+        # one detector per spectrum, with the same index as the spectrum
+        mock_workspace.spectrumInfo().getSpectrumDefinition.side_effect = lambda i: [(i, 0)]
+        mock_workspace.componentInfo().name.side_effect = lambda i: str(i)
+        mock_workspace.componentInfo().fullName.side_effect = lambda i: f"Full_{i}"
         model._detector_is_picked = np.array([True, True, True])
         result = model.picked_detectors_info_text()
         self.assertEqual(det_info_mock.call_count, 3)
