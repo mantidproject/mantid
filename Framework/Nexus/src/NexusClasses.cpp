@@ -277,8 +277,7 @@ NXRoot::NXRoot(std::string fname) : m_filename(std::move(fname)) {
  *   @param fname :: The file name to create
  *   @param entry :: The name of the first entry in the new file
  */
-NXRoot::NXRoot(std::string fname, const std::string &entry) : m_filename(std::move(fname)) {
-  UNUSED_ARG(entry);
+NXRoot::NXRoot(std::string fname, [[maybe_unused]] const std::string &entry) : m_filename(std::move(fname)) {
   // Open Nexus file
   m_fileID = std::make_shared<File>(m_filename, NXaccess::CREATE5);
 }

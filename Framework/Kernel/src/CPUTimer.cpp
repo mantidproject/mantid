@@ -33,11 +33,9 @@ void CPUTimer::reset() {
  * @param doReset :: true to reset the timer
  * @return time in CPU seconds
  */
-float CPUTimer::elapsedCPU(bool doReset) {
+float CPUTimer::elapsedCPU([[maybe_unused]] bool doReset) {
   float retval = 0;
-#ifdef _WIN32
-  UNUSED_ARG(doReset);
-#else /* linux & mac */
+#ifndef _WIN32 /* linux & mac */
   clock_t end = clock();
   retval = (static_cast<float>(end - m_start)) / CLOCKS_PER_SEC;
   if (doReset)

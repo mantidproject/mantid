@@ -7,6 +7,8 @@
 #pragma once
 
 #include "MantidGeometry/DllConfig.h"
+#include <cstddef>
+#include <cstdint>
 #include <vector>
 
 namespace Mantid {
