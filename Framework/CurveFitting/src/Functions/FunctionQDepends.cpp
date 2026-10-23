@@ -131,7 +131,7 @@ std::vector<double> FunctionQDepends::extractQValues(const Mantid::API::MatrixWo
     size_t numHist = workspace.getNumberHistograms();
     for (size_t wi = 0; wi < numHist; wi++) {
       if (spectrumInfo.hasDetectors(wi)) {
-        const auto detID = spectrumInfo.detector(wi).getID();
+        const auto detID = spectrumInfo.firstDetectorID(wi);
         double efixed = workspace.getEFixed(detID);
         double usignTheta = 0.5 * spectrumInfo.twoTheta(wi);
         double q = Mantid::Kernel::UnitConversion::convertToElasticQ(usignTheta, efixed);

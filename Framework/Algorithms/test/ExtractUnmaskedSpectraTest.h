@@ -34,24 +34,22 @@ public:
 
   void test_embeded_mask() {
     auto inputWS = createInputWorkspace(10);
-    const auto &spectrumInfoIn = inputWS->spectrumInfo();
-    TS_ASSERT_EQUALS(spectrumInfoIn.detector(0).getID(), 1);
-    TS_ASSERT_EQUALS(spectrumInfoIn.detector(1).getID(), 2);
-    TS_ASSERT_EQUALS(spectrumInfoIn.detector(2).getID(), 3);
-    TS_ASSERT_EQUALS(spectrumInfoIn.detector(3).getID(), 4);
-    TS_ASSERT_EQUALS(spectrumInfoIn.detector(4).getID(), 5);
-    TS_ASSERT_EQUALS(spectrumInfoIn.detector(5).getID(), 6);
-    TS_ASSERT_EQUALS(spectrumInfoIn.detector(6).getID(), 7);
-    TS_ASSERT_EQUALS(spectrumInfoIn.detector(7).getID(), 8);
-    TS_ASSERT_EQUALS(spectrumInfoIn.detector(8).getID(), 9);
-    TS_ASSERT_EQUALS(spectrumInfoIn.detector(9).getID(), 10);
+    TS_ASSERT_EQUALS(detectorID(*inputWS, 0), 1);
+    TS_ASSERT_EQUALS(detectorID(*inputWS, 1), 2);
+    TS_ASSERT_EQUALS(detectorID(*inputWS, 2), 3);
+    TS_ASSERT_EQUALS(detectorID(*inputWS, 3), 4);
+    TS_ASSERT_EQUALS(detectorID(*inputWS, 4), 5);
+    TS_ASSERT_EQUALS(detectorID(*inputWS, 5), 6);
+    TS_ASSERT_EQUALS(detectorID(*inputWS, 6), 7);
+    TS_ASSERT_EQUALS(detectorID(*inputWS, 7), 8);
+    TS_ASSERT_EQUALS(detectorID(*inputWS, 8), 9);
+    TS_ASSERT_EQUALS(detectorID(*inputWS, 9), 10);
     auto outputWS = runAlgorithm(inputWS);
-    const auto &spectrumInfoOut = outputWS->spectrumInfo();
-    TS_ASSERT_EQUALS(spectrumInfoOut.detector(0).getID(), 2);
-    TS_ASSERT_EQUALS(spectrumInfoOut.detector(1).getID(), 4);
-    TS_ASSERT_EQUALS(spectrumInfoOut.detector(2).getID(), 6);
-    TS_ASSERT_EQUALS(spectrumInfoOut.detector(3).getID(), 8);
-    TS_ASSERT_EQUALS(spectrumInfoOut.detector(4).getID(), 10);
+    TS_ASSERT_EQUALS(detectorID(*outputWS, 0), 2);
+    TS_ASSERT_EQUALS(detectorID(*outputWS, 1), 4);
+    TS_ASSERT_EQUALS(detectorID(*outputWS, 2), 6);
+    TS_ASSERT_EQUALS(detectorID(*outputWS, 3), 8);
+    TS_ASSERT_EQUALS(detectorID(*outputWS, 4), 10);
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 5);
     TS_ASSERT_EQUALS(outputWS->y(0)[0], 2.0);
     TS_ASSERT_EQUALS(outputWS->y(1)[0], 2.0);
@@ -64,7 +62,7 @@ public:
     auto inputWS = createInputWorkspace(1);
     auto outputWS = runAlgorithm(inputWS);
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outputWS->spectrumInfo().detector(0).getID(), 1);
+    TS_ASSERT_EQUALS(detectorID(*outputWS, 0), 1);
   }
 
   void test_external_mask() {
@@ -77,12 +75,11 @@ public:
     TS_ASSERT_EQUALS(outputWS->y(2)[0], 2.0);
     TS_ASSERT_EQUALS(outputWS->y(3)[0], 2.0);
     TS_ASSERT_EQUALS(outputWS->y(4)[0], 2.0);
-    const auto &spectrumInfo = outputWS->spectrumInfo();
-    TS_ASSERT_EQUALS(spectrumInfo.detector(0).getID(), 2);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(1).getID(), 4);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(2).getID(), 6);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(3).getID(), 8);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(4).getID(), 10);
+    TS_ASSERT_EQUALS(detectorID(*outputWS, 0), 2);
+    TS_ASSERT_EQUALS(detectorID(*outputWS, 1), 4);
+    TS_ASSERT_EQUALS(detectorID(*outputWS, 2), 6);
+    TS_ASSERT_EQUALS(detectorID(*outputWS, 3), 8);
+    TS_ASSERT_EQUALS(detectorID(*outputWS, 4), 10);
   }
 
   void test_external_mask_workspace() {
@@ -95,15 +92,18 @@ public:
     TS_ASSERT_EQUALS(outputWS->y(2)[0], 2.0);
     TS_ASSERT_EQUALS(outputWS->y(3)[0], 2.0);
     TS_ASSERT_EQUALS(outputWS->y(4)[0], 2.0);
-    const auto &spectrumInfo = outputWS->spectrumInfo();
-    TS_ASSERT_EQUALS(spectrumInfo.detector(0).getID(), 2);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(1).getID(), 4);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(2).getID(), 6);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(3).getID(), 8);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(4).getID(), 10);
+    TS_ASSERT_EQUALS(detectorID(*outputWS, 0), 2);
+    TS_ASSERT_EQUALS(detectorID(*outputWS, 1), 4);
+    TS_ASSERT_EQUALS(detectorID(*outputWS, 2), 6);
+    TS_ASSERT_EQUALS(detectorID(*outputWS, 3), 8);
+    TS_ASSERT_EQUALS(detectorID(*outputWS, 4), 10);
   }
 
 private:
+  Mantid::detid_t detectorID(const Mantid::API::MatrixWorkspace &workspace, const size_t index) {
+    return workspace.spectrumInfo().firstDetectorID(index);
+  }
+
   Mantid::API::MatrixWorkspace_sptr createInputWorkspace(int n, bool isMasked = true) {
     auto workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(n, 3);
     if (isMasked) {

@@ -142,8 +142,8 @@ private:
       oldPos.setY(oldPos.Y() - m_y_offset * (i + 1));
       double l2, theta, phi;
       oldPos.getSpherical(l2, theta, phi);
-      const auto &detector = spectrumInfo.detector(i);
-      writer << detector.getID() << "\t" << -1 << "\t" << l2 << "\t" << -1 << "\t" << theta << "\t" << phi << "\n";
+      writer << spectrumInfo.firstDetectorID(i) << "\t" << -1 << "\t" << l2 << "\t" << -1 << "\t" << theta << "\t"
+             << phi << "\n";
     }
 
     writer.close();

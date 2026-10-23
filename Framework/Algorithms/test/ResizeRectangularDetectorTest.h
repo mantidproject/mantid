@@ -60,13 +60,12 @@ public:
     TS_ASSERT_EQUALS(pos, V3D(0.008 * 2, 0.008 * 0.5, 5.0));
     TS_ASSERT_DELTA(det->xstep(), 0.008 * 2, 1e-6);
 
-    // Check that accessing through spectrumInfo.detector() also works
+    // Check that accessing through spectrumInfo also works
     const auto &spectrumInfo = ws->spectrumInfo();
-    const auto &pixel = spectrumInfo.detector(11);
     detid_t recDetPixID = det->getDetectorIDAtXY(1, 1);
     TSM_ASSERT("getDetectorIDAtXY() returns a valid detector ID", recDetPixID > 0);
-    TS_ASSERT_EQUALS(recDetPixID, pixel.getID());
-    pos = pixel.getPos();
+    TS_ASSERT_EQUALS(recDetPixID, spectrumInfo.firstDetectorID(11));
+    pos = spectrumInfo.position(11);
     TS_ASSERT_EQUALS(pos, V3D(0.008 * 2, 0.008 * 0.5, 5.0));
 
     // Bank 2 did not get scaled

@@ -600,7 +600,7 @@ void DiscusMultipleScatteringCorrection::exec() {
 
     if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i) && !spectrumInfo.isMasked(i)) {
 
-      const double eFixedValue = efixed.value(spectrumInfo.detector(i).getID());
+      const double eFixedValue = efixed.value(spectrumInfo.firstDetectorID(i));
       const auto xPoints = instrumentWS.points(i);
 
       auto kInW = generateInputKOutputWList(eFixedValue, xPoints);

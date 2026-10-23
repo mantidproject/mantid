@@ -81,6 +81,7 @@ public:
   double difcUncalibrated(const size_t index) const;
   bool hasDetectors(const size_t index) const;
   bool hasUniqueDetector(const size_t index) const;
+  detid_t firstDetectorID(const size_t index) const;
 
   void setMasked(const size_t index, bool masked);
 

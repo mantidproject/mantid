@@ -523,14 +523,14 @@ public:
     // Check masking
     const auto &spectrumInfo = inputWS->spectrumInfo();
     for (size_t i = 0; i < inputWS->getNumberHistograms(); ++i) {
-      const auto &det = spectrumInfo.detector(i);
       TS_ASSERT(spectrumInfo.hasDetectors(i));
+      const auto detID = spectrumInfo.firstDetectorID(i);
       if (i == 0 || i == 2 || i == 5) {
-        TSM_ASSERT_EQUALS("Detector with id: " + boost::lexical_cast<std::string>(det.getID()) +
+        TSM_ASSERT_EQUALS("Detector with id: " + boost::lexical_cast<std::string>(detID) +
                               "; Spectra N: " + boost::lexical_cast<std::string>(i),
                           spectrumInfo.isMasked(i), true);
       } else {
-        TSM_ASSERT_EQUALS("Detector with id: " + boost::lexical_cast<std::string>(det.getID()) +
+        TSM_ASSERT_EQUALS("Detector with id: " + boost::lexical_cast<std::string>(detID) +
                               "; Spectra N: " + boost::lexical_cast<std::string>(i),
                           spectrumInfo.isMasked(i), false);
       }
@@ -578,14 +578,14 @@ public:
     // Check masking
     const auto &spectrumInfo = inputWS->spectrumInfo();
     for (size_t i = 0; i < inputWS->getNumberHistograms(); ++i) {
-      const auto &det = spectrumInfo.detector(i);
       TS_ASSERT(spectrumInfo.hasDetectors(i));
+      const auto detID = spectrumInfo.firstDetectorID(i);
       if (i == 1 || i == 2 || i == 5) {
-        TSM_ASSERT_EQUALS("Detector with id: " + boost::lexical_cast<std::string>(det.getID()) +
+        TSM_ASSERT_EQUALS("Detector with id: " + boost::lexical_cast<std::string>(detID) +
                               "; Spectra N: " + boost::lexical_cast<std::string>(i),
                           spectrumInfo.isMasked(i), true);
       } else {
-        TSM_ASSERT_EQUALS("Detector with id: " + boost::lexical_cast<std::string>(det.getID()) +
+        TSM_ASSERT_EQUALS("Detector with id: " + boost::lexical_cast<std::string>(detID) +
                               "; Spectra N: " + boost::lexical_cast<std::string>(i),
                           spectrumInfo.isMasked(i), false);
       }
@@ -642,14 +642,14 @@ public:
     // Check masking
     const auto &spectrumInfo = inputWS->spectrumInfo();
     for (size_t i = 0; i < inputWS->getNumberHistograms(); ++i) {
-      const auto &det = spectrumInfo.detector(i);
       TS_ASSERT(spectrumInfo.hasDetectors(i));
+      const auto detID = spectrumInfo.firstDetectorID(i);
       if (i == 1 || i == 2 || i == 5) {
-        TSM_ASSERT_EQUALS("Detector with id: " + boost::lexical_cast<std::string>(det.getID()) +
+        TSM_ASSERT_EQUALS("Detector with id: " + boost::lexical_cast<std::string>(detID) +
                               "; Spectra N: " + boost::lexical_cast<std::string>(i),
                           spectrumInfo.isMasked(i), true);
       } else {
-        TSM_ASSERT_EQUALS("Detector with id: " + boost::lexical_cast<std::string>(det.getID()) +
+        TSM_ASSERT_EQUALS("Detector with id: " + boost::lexical_cast<std::string>(detID) +
                               "; Spectra N: " + boost::lexical_cast<std::string>(i),
                           spectrumInfo.isMasked(i), false);
       }
@@ -705,15 +705,14 @@ public:
     // Check masking
     const auto &spectrumInfo = inputWS->spectrumInfo();
     for (size_t i = 0; i < inputWS->getNumberHistograms(); ++i) {
-      const auto &det = spectrumInfo.detector(i);
-
       TS_ASSERT(spectrumInfo.hasDetectors(i));
+      const auto detID = spectrumInfo.firstDetectorID(i);
       if (i == 2) {
-        TSM_ASSERT_EQUALS("Detector with id: " + boost::lexical_cast<std::string>(det.getID()) +
+        TSM_ASSERT_EQUALS("Detector with id: " + boost::lexical_cast<std::string>(detID) +
                               "; Spectra N: " + boost::lexical_cast<std::string>(i),
                           spectrumInfo.isMasked(i), true);
       } else {
-        TSM_ASSERT_EQUALS("Detector with id: " + boost::lexical_cast<std::string>(det.getID()) +
+        TSM_ASSERT_EQUALS("Detector with id: " + boost::lexical_cast<std::string>(detID) +
                               "; Spectra N: " + boost::lexical_cast<std::string>(i),
                           spectrumInfo.isMasked(i), false);
       }

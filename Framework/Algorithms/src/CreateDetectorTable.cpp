@@ -139,8 +139,7 @@ void CreateDetectorTable::setup() {
   calcQ = true;
   if (spectrumInfo->hasDetectors(0)) {
     try {
-      std::shared_ptr<const IDetector> detector(&spectrumInfo->detector(0), Mantid::NoDeleting());
-      ws->getEFixed(detector);
+      ws->getEFixed(spectrumInfo->firstDetectorID(0));
     } catch (std::invalid_argument &) {
       calcQ = false;
     } catch (std::runtime_error &) {

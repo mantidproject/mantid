@@ -101,7 +101,7 @@ void HRPDSlabCanAbsorption::exec() {
     // Get detector position
     V3D detectorPos = spectrumInfo.position(i);
 
-    const int detID = spectrumInfo.detector(i).getID();
+    const int detID = spectrumInfo.firstDetectorID(i);
     double angleFactor;
     // If the low angle or backscattering bank, want angle wrt beamline
     if (detID < 900000) {
