@@ -215,6 +215,32 @@ public:
     }
   }
 
+  void test_signedAndZeroCountsAreProjectedWithErrors() {
+    using namespace Mantid;
+    auto inputWS = detectorsOnly(convertToWavelength(testWorkspace()));
+    auto &counts = inputWS->mutableY(0);
+    auto &errors = inputWS->mutableE(0);
+    std::fill(counts.begin(), counts.end(), -1.0);
+    std::fill(errors.begin(), errors.end(), 2.0);
+    counts.front() = 0.0;
+
+    ReflectometrySumInQ alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setPropertyValue("InputWorkspaceIndexSet", "0");
+    alg.setPropertyValue("OutputWorkspace", "_unused_for_child");
+    alg.setProperty("BeamCentre", 0.0);
+    alg.setProperty("FlatSample", true);
+    alg.setProperty("IncludePartialBins", true);
+    alg.execute();
+
+    API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_DELTA(std::accumulate(outputWS->y(0).cbegin(), outputWS->y(0).cend(), 0.0), -49.0, 1e-10);
+    TS_ASSERT_DIFFERS(std::accumulate(outputWS->e(0).cbegin(), outputWS->e(0).cend(), 0.0), 0.0);
+  }
+
   void test_monitorNextToDetectorsThrows() {
     auto inputWS = testWorkspace();
     inputWS = convertToWavelength(inputWS);
