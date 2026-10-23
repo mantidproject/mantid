@@ -90,7 +90,11 @@ class LoadWANDSCD(PythonAlgorithm):
             StringListValidator(["None", "Counts", "Monitor", "Time"]),
             doc="Normalization flux. Valid options are Counts, Monitor, and Time.",
         )
-        self.declareProperty("NormalizeData", True, "When False, skip normalization even if vanadium data is provided.")
+        self.declareProperty(
+            "NormalizeData",
+            False,
+            "When True, divide the data by the normalization workspace built from the vanadium data. Requires vanadium data.",
+        )
         # group normalization properties
         self.setPropertyGroup("VanadiumIPTS", "Normalization")
         self.setPropertyGroup("VanadiumRunNumber", "Normalization")
@@ -150,7 +154,39 @@ class LoadWANDSCD(PythonAlgorithm):
         if self.getProperty("Grouping").value == "None" and not self.getProperty("OutputGroupingWorkspace").isDefault:
             issues["OutputGroupingWorkspace"] = "OutputGroupingWorkspace can only be produced when Grouping is '2x2' or '4x4'"
 
+        # case 4: NormalizeData requires vanadium data
+        # case 5: vanadium data must be used, either to normalize the data or to produce OutputNormalizationWorkspace
+        # case 6: OutputNormalizationWorkspace requires vanadium data
+        vanadium_options = "VanadiumIPTS and VanadiumRunNumber, VanadiumFile, or VanadiumWorkspace"
+        has_vanadium = self.has_vanadium()
+        normalize_data = self.getProperty("NormalizeData").value
+        output_normalization = not self.getProperty("OutputNormalizationWorkspace").isDefault
+        if normalize_data and not has_vanadium:
+            issues["NormalizeData"] = f"NormalizeData requires vanadium data: {vanadium_options}"
+        if has_vanadium and not normalize_data and not output_normalization:
+            issues["NormalizeData"] = (
+                "Vanadium data is provided but not used: set NormalizeData to True, or provide OutputNormalizationWorkspace"
+            )
+        if output_normalization and not has_vanadium:
+            output_normalization_name = self.getPropertyValue("OutputNormalizationWorkspace")
+            issues["OutputNormalizationWorkspace"] = (
+                f"OutputNormalizationWorkspace '{output_normalization_name}' requires vanadium data: {vanadium_options}"
+            )
+
         return issues
+
+    def has_vanadium(self) -> bool:
+        """
+        Whether vanadium data is provided, by IPTS and run number, by file, or as a workspace.
+
+        :returns: True if any of the vanadium properties is set.
+        """
+        return not (
+            self.getProperty("VanadiumIPTS").isDefault
+            and self.getProperty("VanadiumRunNumber").isDefault
+            and self.getProperty("VanadiumFile").isDefault
+            and self.getProperty("VanadiumWorkspace").isDefault
+        )
 
     def PyExec(self):
         # Process input data
@@ -161,16 +197,8 @@ class LoadWANDSCD(PythonAlgorithm):
         # load and group
         data, grouping_ws = self.load_and_group(runs, create_grouping_ws=create_grouping_ws)
 
-        # check if any normalization work needs to be performed
-        noVanadium = (
-            self.getProperty("VanadiumIPTS").isDefault
-            and self.getProperty("VanadiumRunNumber").isDefault
-            and self.getProperty("VanadiumFile").isDefault
-            and self.getProperty("VanadiumWorkspace").isDefault
-        )
-        if noVanadium:
-            self.log().warning("No Vanadium data provided, skip any normalization-related work")
-        else:
+        # normalization work is needed only when vanadium data is provided (see validateInputs)
+        if self.has_vanadium():
             norm = self.normalization_workspace(data, self.getProperty("NormalizedBy").value.lower())
             if self.getProperty("NormalizeData").value:
                 data = DivideMD(LHSWorkspace=data, RHSWorkspace=norm)

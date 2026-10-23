@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from mantid.api import AlgorithmManager, mtd
 from mantid.dataobjects import GroupingWorkspace
 from mantid.simpleapi import AddSampleLog, CreateMDHistoWorkspace, LoadEmptyInstrument, LoadWANDSCD
 import unittest
@@ -129,7 +130,9 @@ class LoadWANDGroupingTest(unittest.TestCase):
 
     def test_grouping_workspace_2x2(self):
         grouping = 2
-        ws, grp_ws = LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="2x2", OutputWorkspace="ws_2x2", OutputGroupingWorkspace="grp_ws_2x2")
+        # no unpacking of the result: simpleapi would assign the second name to OutputNormalizationWorkspace
+        LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="2x2", OutputWorkspace="ws_2x2", OutputGroupingWorkspace="grp_ws_2x2")
+        ws, grp_ws = mtd["ws_2x2"], mtd["grp_ws_2x2"]
 
         self.assertEqual(ws.getSignalArray().sum(), self.TOTAL_COUNTS)
 
@@ -175,7 +178,8 @@ class LoadWANDGroupingTest(unittest.TestCase):
 
     def test_grouping_workspace_4x4(self):
         grouping = 4
-        ws, grp_ws = LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="4x4", OutputGroupingWorkspace="grp_ws_4x4")
+        LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="4x4", OutputWorkspace="ws_4x4", OutputGroupingWorkspace="grp_ws_4x4")
+        ws, grp_ws = mtd["ws_4x4"], mtd["grp_ws_4x4"]
 
         self.assertEqual(ws.getSignalArray().sum(), self.TOTAL_COUNTS)
 
@@ -419,6 +423,48 @@ class LoadWANDOutputNormalizationTest(unittest.TestCase):
             self._assert_grouping_workspace(grouping, 4)
         finally:
             self._delete_workspaces(data, grouping, normalization)
+
+
+class LoadWANDNormalizeDataValidationTest(unittest.TestCase):
+    DATA_FILES = "HB2C_7000.nxs.h5,HB2C_7001.nxs.h5"
+
+    @classmethod
+    def setUpClass(cls):
+        cls.vanadium = LoadWANDOutputNormalizationTest._create_vanadium_workspace()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.vanadium.delete()
+
+    def test_normalize_data_default_is_false(self):
+        algorithm = AlgorithmManager.createUnmanaged("LoadWANDSCD")
+        algorithm.initialize()
+        self.assertFalse(algorithm.getProperty("NormalizeData").value)
+
+    def test_validation_rejects_normalize_data_without_vanadium(self):
+        with self.assertRaisesRegex(RuntimeError, "NormalizeData requires vanadium data"):
+            LoadWANDSCD(self.DATA_FILES, NormalizeData=True, OutputWorkspace="should_fail")
+
+    def test_validation_rejects_unused_vanadium(self):
+        with self.assertRaisesRegex(RuntimeError, "Vanadium data is provided but not used"):
+            LoadWANDSCD(self.DATA_FILES, VanadiumWorkspace=self.vanadium, OutputWorkspace="should_fail")
+
+    def test_validation_rejects_output_normalization_workspace_without_vanadium(self):
+        with self.assertRaisesRegex(RuntimeError, "OutputNormalizationWorkspace 'should_fail_normalization' requires vanadium data"):
+            LoadWANDSCD(self.DATA_FILES, OutputWorkspace="should_fail", OutputNormalizationWorkspace="should_fail_normalization")
+
+    def test_normalize_data_with_vanadium(self):
+        data = LoadWANDSCD(
+            self.DATA_FILES,
+            VanadiumWorkspace=self.vanadium,
+            NormalizedBy="None",
+            NormalizeData=True,
+            OutputWorkspace="normalized_data",
+        )
+        try:
+            self.assertAlmostEqual(data.getSignalArray().max(), 7 / LoadWANDOutputNormalizationTest.VANADIUM_SIGNAL)
+        finally:
+            data.delete()
 
 
 if __name__ == "__main__":
