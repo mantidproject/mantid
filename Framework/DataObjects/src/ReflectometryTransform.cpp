@@ -19,6 +19,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -219,6 +220,7 @@ DetectorAngularCache initAngularCaches(const MatrixWorkspace *const workspace) {
 
   const auto &spectrumInfo = workspace->spectrumInfo();
   const auto &detectorInfo = workspace->detectorInfo();
+  const auto &componentInfo = workspace->componentInfo();
   for (size_t i = 0; i < nhist; ++i) {
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i)) {
       // If no detector found, skip onto the next spectrum
@@ -239,12 +241,12 @@ DetectorAngularCache initAngularCaches(const MatrixWorkspace *const workspace) {
      */
     // If the spectrum is based on a group of detectors assume they all have
     // same shape and same r,twoTheta
-    // DetectorGroup::getID gives ID of first detector.
-    size_t detIndex = detectorInfo.indexOf(spectrumInfo.detector(i).getID());
+    // Use the first detector of the spectrum.
+    size_t detIndex = spectrumInfo.firstDetectorIndex(i);
     double l2 = detectorInfo.l2(detIndex);
     // Get the shape
-    auto shape = detectorInfo.detector(detIndex).shape(); // Defined in its own reference frame with centre at 0,0,0
-    BoundingBox bbox = shape->getBoundingBox();
+    // Get the shape, defined in its own reference frame with centre at 0,0,0
+    BoundingBox bbox = componentInfo.shape(detIndex).getBoundingBox();
     auto maxPoint(bbox.maxPoint());
     auto minPoint(bbox.minPoint());
     auto span = maxPoint - minPoint;
@@ -439,7 +441,8 @@ ReflectometryTransform::executeNormPoly(const MatrixWorkspace_const_sptr &inputW
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
       continue;
     }
-    const auto &detector = spectrumInfo.detector(i);
+    // ID of the (first) detector of the spectrum
+    const auto detID = spectrumInfo.firstDetectorID(i);
 
     // Compute polygon points
     const double twoTheta = twoThetas[i];
@@ -464,7 +467,7 @@ ReflectometryTransform::executeNormPoly(const MatrixWorkspace_const_sptr &inputW
       if (qIndex != 0 && qIndex < static_cast<int>(zBinsVec.size())) {
         // Add this spectra-detector pair to the mapping
         specNumberMapping.emplace_back(outWS->getSpectrum(qIndex - 1).getSpectrumNo());
-        detIDMapping.emplace_back(detector.getID());
+        detIDMapping.emplace_back(detID);
       }
       // Debugging
       if (dumpVertexes) {
