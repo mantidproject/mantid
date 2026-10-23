@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import AlgorithmManager, mtd
+from mantid.api import AlgorithmManager
 from mantid.dataobjects import GroupingWorkspace
 from mantid.simpleapi import AddSampleLog, CreateMDHistoWorkspace, LoadEmptyInstrument, LoadWANDSCD
 import unittest
@@ -126,75 +126,6 @@ class LoadWANDGroupingTest(unittest.TestCase):
     # Full detector grid dimensions for WAND (HB2C)
     N_ROWS = 480 * 8  # 3840
     N_COLS = 512
-    TOTAL_COUNTS = 128049  # number of events in file "HB2C_475936.nxs.h5"
-
-    def test_grouping_workspace_2x2(self):
-        grouping = 2
-        # no unpacking of the result: simpleapi would assign the second name to OutputNormalizationWorkspace
-        LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="2x2", OutputWorkspace="ws_2x2", OutputGroupingWorkspace="grp_ws_2x2")
-        ws, grp_ws = mtd["ws_2x2"], mtd["grp_ws_2x2"]
-
-        self.assertEqual(ws.getSignalArray().sum(), self.TOTAL_COUNTS)
-
-        # Type check
-        self.assertIsInstance(grp_ws, GroupingWorkspace)
-
-        # Total number of groups must equal (N_ROWS // g) * (N_COLS // g)
-        expected_groups = (self.N_ROWS // grouping) * (self.N_COLS // grouping)
-        y_values = grp_ws.extractY().flatten()
-        self.assertEqual(int(y_values.max()), expected_groups)
-
-        # Every workspace index lies in a valid group (1 .. expected_groups)
-        histogram_count = grp_ws.getNumberHistograms()
-        self.assertEqual(histogram_count, self.N_ROWS * self.N_COLS)
-        self.assertEqual(int(y_values.min()), 1)
-
-        # Spot-check: workspace index 0  → pixel (x=0, y=0) → group 1
-        self.assertEqual(int(grp_ws.y(0)[0]), 1)
-        # Spot-check: workspace index 1  → pixel (x=0, y=1) → group 1  (same 2×2 block as index 0)
-        self.assertEqual(int(grp_ws.y(1)[0]), 1)
-        # Spot-check: workspace index 2  → pixel (x=0, y=2) → group 2  (next 2×2 block along y)
-        self.assertEqual(int(grp_ws.y(2)[0]), 2)
-        # Spot-check: workspace index 512 → pixel (x=1, y=0) → shares 2×2 block with index 0 → group 1
-        self.assertEqual(int(grp_ws.y(512)[0]), 1)
-        # Spot-check: workspace index 1024 → pixel (x=2, y=0) → first group of x_idx=1 row → group (512//2)+1 = 257
-        self.assertEqual(int(grp_ws.y(1024)[0]), (self.N_COLS // grouping) + 1)
-
-        # detector ID stored
-        self.assertEqual(grp_ws.getSpectrum(0).getDetectorIDs()[0], 0)
-        self.assertEqual(grp_ws.getSpectrum(histogram_count - 1).getDetectorIDs()[0], histogram_count - 1)
-
-        # detectorID log must have one entry per group (same length as twotheta/azimuthal)
-        run = ws.getExperimentInfo(0).run()
-        detectorID = run.getProperty("detectorID").value
-        twotheta = run.getProperty("twotheta").value
-        self.assertEqual(len(detectorID), expected_groups)
-        self.assertEqual(len(detectorID), len(twotheta))
-        # each stored detector ID maps to a valid group (det_id == workspace index for WAND)
-        self.assertTrue(all(grp_ws.y(int(d))[0] >= 1 for d in detectorID))
-
-        ws.delete()
-        grp_ws.delete()
-
-    def test_grouping_workspace_4x4(self):
-        grouping = 4
-        LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="4x4", OutputWorkspace="ws_4x4", OutputGroupingWorkspace="grp_ws_4x4")
-        ws, grp_ws = mtd["ws_4x4"], mtd["grp_ws_4x4"]
-
-        self.assertEqual(ws.getSignalArray().sum(), self.TOTAL_COUNTS)
-
-        self.assertIsInstance(grp_ws, GroupingWorkspace)
-        expected_groups = (self.N_ROWS // grouping) * (self.N_COLS // grouping)
-        y_values = grp_ws.extractY().flatten()
-        self.assertEqual(int(y_values.max()), expected_groups)
-
-        # Group size: each group spans g×g = 16 detectors
-        group_size = grouping * grouping
-        indices_in_first_group = np.where(y_values == 1.0)[0]
-        self.assertEqual(len(indices_in_first_group), group_size)
-
-        ws.delete()
-        grp_ws.delete()
 
     def test_validation_rejects_grouping_ws_without_grouping(self):
         """Requesting OutputGroupingWorkspace while Grouping='None' must raise."""
@@ -209,19 +140,26 @@ class LoadWANDOutputNormalizationTest(unittest.TestCase):
     VANADIUM_DURATION = 42.0
     SAMPLE_MONITOR = np.array([907880.0, 908651.0])
     SAMPLE_DURATION = np.array([40.05, 40.05])
+    TOTAL_COUNTS = 462980  # number of events in files "HB2C_7000.nxs.h5" (231214) and "HB2C_7001.nxs.h5" (231766)
 
     @classmethod
     def setUpClass(cls):
-        cls.vanadium = cls._create_vanadium_workspace()
-        cls.vanadium_2x2 = cls._create_vanadium_workspace(grouping="2x2")
-        cls.vanadium_4x4 = cls._create_vanadium_workspace(grouping="4x4")
+        # Load the HB2C instrument once. addExperimentInfo does not copy, so the three vanadium workspaces share
+        # this ExperimentInfo and its flux logs, which are identical for all of them and only read by LoadWANDSCD.
+        hb2c = LoadEmptyInstrument(InstrumentName="HB2C", OutputWorkspace="vanadium_normalization_source")
+        for log_name, value in (("monitor_count", cls.VANADIUM_MONITOR), ("duration", cls.VANADIUM_DURATION)):
+            AddSampleLog(hb2c, LogName=log_name, LogText=str(value), LogType="Number Series", NumberType="Double")
+        cls.vanadium = cls._create_vanadium_workspace(hb2c)
+        cls.vanadium_2x2 = cls._create_vanadium_workspace(hb2c, grouping="2x2")
+        cls.vanadium_4x4 = cls._create_vanadium_workspace(hb2c, grouping="4x4")
+        hb2c.delete()
 
     @classmethod
     def tearDownClass(cls):
         cls._delete_workspaces(cls.vanadium, cls.vanadium_2x2, cls.vanadium_4x4)
 
     @classmethod
-    def _create_vanadium_workspace(cls, grouping="None"):
+    def _create_vanadium_workspace(cls, instrument_workspace, grouping="None"):
         grouping_factor = {"None": 1, "2x2": 2, "4x4": 4}[grouping]
         grouping_label = grouping.lower().replace("x", "")
         x_bins = LoadWANDGroupingTest.N_ROWS // grouping_factor
@@ -237,26 +175,7 @@ class LoadWANDOutputNormalizationTest(unittest.TestCase):
             Units="bin,bin",
             OutputWorkspace=f"vanadium_normalization_input_{grouping_label}",
         )
-        hb2c = LoadEmptyInstrument(
-            InstrumentName="HB2C",
-            OutputWorkspace=f"vanadium_normalization_source_{grouping_label}",
-        )
-        vanadium.addExperimentInfo(hb2c)
-        hb2c.delete()
-        AddSampleLog(
-            vanadium,
-            LogName="monitor_count",
-            LogText=str(cls.VANADIUM_MONITOR),
-            LogType="Number Series",
-            NumberType="Double",
-        )
-        AddSampleLog(
-            vanadium,
-            LogName="duration",
-            LogText=str(cls.VANADIUM_DURATION),
-            LogType="Number Series",
-            NumberType="Double",
-        )
+        vanadium.addExperimentInfo(instrument_workspace)
         return vanadium
 
     @staticmethod
@@ -273,16 +192,36 @@ class LoadWANDOutputNormalizationTest(unittest.TestCase):
         self.assertEqual(workspace.getDimension(2).name, "scanIndex")
         self.assertEqual(workspace.getDimension(2).getNBins(), expected_scan_bins)
 
-    def _assert_grouping_workspace(self, grouping_workspace, grouping):
+    def _assert_grouping_workspace(self, grouping_workspace, grouping, data):
         expected_groups = (LoadWANDGroupingTest.N_ROWS // grouping) * (LoadWANDGroupingTest.N_COLS // grouping)
         y_values = grouping_workspace.extractY().flatten()
+        histogram_count = grouping_workspace.getNumberHistograms()
         self.assertIsInstance(grouping_workspace, GroupingWorkspace)
-        self.assertEqual(grouping_workspace.getNumberHistograms(), LoadWANDGroupingTest.N_ROWS * LoadWANDGroupingTest.N_COLS)
+        self.assertEqual(histogram_count, LoadWANDGroupingTest.N_ROWS * LoadWANDGroupingTest.N_COLS)
         self.assertEqual(int(y_values.min()), 1)
         self.assertEqual(int(y_values.max()), expected_groups)
+        # each group spans grouping×grouping detectors
+        self.assertEqual(np.count_nonzero(y_values == 1.0), grouping * grouping)
+        # workspace index 0 → pixel (x=0, y=0) → group 1; indices 1 (x=0, y=1) and 512 (x=1, y=0) are in the same block
         self.assertEqual(int(grouping_workspace.y(0)[0]), 1)
+        self.assertEqual(int(grouping_workspace.y(1)[0]), 1)
+        self.assertEqual(int(grouping_workspace.y(512)[0]), 1)
+        # next block along y → group 2; first block of the next row of blocks → group (512 // grouping) + 1
         self.assertEqual(int(grouping_workspace.y(grouping)[0]), 2)
         self.assertEqual(int(grouping_workspace.y(grouping * 512)[0]), (LoadWANDGroupingTest.N_COLS // grouping) + 1)
+        # detector ID stored
+        self.assertEqual(grouping_workspace.getSpectrum(0).getDetectorIDs()[0], 0)
+        self.assertEqual(grouping_workspace.getSpectrum(histogram_count - 1).getDetectorIDs()[0], histogram_count - 1)
+
+        # grouping conserves the counts; the normalization is 1.0, so the data are still in counts
+        self.assertEqual(data.getSignalArray().sum(), self.TOTAL_COUNTS)
+        # detectorID log must have one entry per group (same length as twotheta/azimuthal)
+        run = data.getExperimentInfo(0).run()
+        detectorID = run.getProperty("detectorID").value
+        self.assertEqual(len(detectorID), expected_groups)
+        self.assertEqual(len(detectorID), len(run.getProperty("twotheta").value))
+        # each stored detector ID maps to a valid group (det_id == workspace index for WAND)
+        self.assertTrue(all(grouping_workspace.y(int(d))[0] >= 1 for d in detectorID))
 
     def test_output_normalization_workspace_for_counts(self):
         data = normalization = None
@@ -401,7 +340,7 @@ class LoadWANDOutputNormalizationTest(unittest.TestCase):
             np.testing.assert_allclose(normalization.getSignalArray(), 1.0)
             self.assertEqual(normalization.getSignalArray().shape, data.getSignalArray().shape)
             self._assert_workspace_dimensions(normalization, 256, 1920, 2)
-            self._assert_grouping_workspace(grouping, 2)
+            self._assert_grouping_workspace(grouping, 2, data)
         finally:
             self._delete_workspaces(data, grouping, normalization)
 
@@ -422,7 +361,7 @@ class LoadWANDOutputNormalizationTest(unittest.TestCase):
             np.testing.assert_allclose(normalization.getSignalArray(), 1.0)
             self.assertEqual(normalization.getSignalArray().shape, data.getSignalArray().shape)
             self._assert_workspace_dimensions(normalization, 128, 960, 2)
-            self._assert_grouping_workspace(grouping, 4)
+            self._assert_grouping_workspace(grouping, 4, data)
         finally:
             self._delete_workspaces(data, grouping, normalization)
 
