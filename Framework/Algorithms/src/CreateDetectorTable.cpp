@@ -259,8 +259,7 @@ double CreateDetectorTable::getQ(size_t wsIndex) {
   }
   try {
     // Get unsigned theta and efixed value
-    IDetector_const_sptr det{&spectrumInfo->detector(wsIndex), Mantid::NoDeleting()};
-    double efixed = ws->getEFixed(det);
+    double efixed = ws->getEFixed(spectrumInfo->firstDetectorID(wsIndex));
     double usignTheta = spectrumInfo->twoTheta(wsIndex) * 0.5;
     double q = UnitConversion::convertToElasticQ(usignTheta, efixed);
     return q;
