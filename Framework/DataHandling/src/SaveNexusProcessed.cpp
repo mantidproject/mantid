@@ -143,6 +143,14 @@ void SaveNexusProcessed::init() {
                   "This will make smaller files but takes much longer.");
   setPropertySettings("CompressNexus",
                       std::make_unique<EnabledWhenWorkspaceIsType<EventWorkspace>>("InputWorkspace", true));
+  declareProperty("CompressHistogramData", true,
+                  "Compress histogram values and uncertainties using LZW. Disable for faster saving at the cost "
+                  "of larger files. Does not affect preserved event data.");
+  auto positiveBlockSize = std::make_shared<BoundedValidator<int>>();
+  positiveBlockSize->setLower(1);
+  declareProperty("HistogramWriteBlockSize", 1, positiveBlockSize,
+                  "Maximum number of spectra packed into each histogram data write. Larger blocks reduce "
+                  "NeXus calls but require a temporary double-precision buffer. Ragged workspaces use one spectrum.");
 }
 
 /** Get the list of workspace indices to use
@@ -300,7 +308,8 @@ void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace, std::share
         workspaceTypeGroupName = "workspace";
 
       nexusFile->writeNexusProcessedData2D(matrixWorkspace, uniformSpectra, raggedSpectra, indices,
-                                           workspaceTypeGroupName.c_str(), true);
+                                           workspaceTypeGroupName.c_str(), true, getProperty("CompressHistogramData"),
+                                           static_cast<int>(getProperty("HistogramWriteBlockSize")));
     }
 
     if (saveLegacyInstrument()) {
