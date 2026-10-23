@@ -15,7 +15,7 @@
   </defaults>
   <!--SOURCE AND SAMPLE POSITION-->
   <component type="moderator">
-    <location z="-13.685"/>
+    <location z="-13.92"/>
   </component>
   <type is="Source" name="moderator"/>
   <component type="sample-position">
