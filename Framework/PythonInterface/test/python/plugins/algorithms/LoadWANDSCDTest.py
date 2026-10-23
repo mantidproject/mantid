@@ -362,6 +362,8 @@ class LoadWANDOutputNormalizationTest(unittest.TestCase):
             np.testing.assert_allclose(normalization.getSignalArray(), self.VANADIUM_SIGNAL)
             np.testing.assert_allclose(normalization.getErrorSquaredArray(), self.VANADIUM_SIGNAL)
             self.assertEqual(normalization.getSignalArray().shape, data.getSignalArray().shape)
+            # NormalizeData=True divides the raw counts (maximum 7) by the vanadium signal
+            self.assertAlmostEqual(data.getSignalArray().max(), 7 / self.VANADIUM_SIGNAL)
         finally:
             self._delete_workspaces(data, normalization)
 
@@ -430,7 +432,17 @@ class LoadWANDNormalizeDataValidationTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.vanadium = LoadWANDOutputNormalizationTest._create_vanadium_workspace()
+        # validation fails before the vanadium data are read, so a minimal workspace without instrument suffices
+        cls.vanadium = CreateMDHistoWorkspace(
+            Dimensionality=1,
+            Extents="0.5,1.5",
+            SignalInput=[1.0],
+            ErrorInput=[1.0],
+            NumberOfBins="1",
+            Names="x",
+            Units="bin",
+            OutputWorkspace="validation_vanadium",
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -452,19 +464,6 @@ class LoadWANDNormalizeDataValidationTest(unittest.TestCase):
     def test_validation_rejects_output_normalization_workspace_without_vanadium(self):
         with self.assertRaisesRegex(RuntimeError, "OutputNormalizationWorkspace 'should_fail_normalization' requires vanadium data"):
             LoadWANDSCD(self.DATA_FILES, OutputWorkspace="should_fail", OutputNormalizationWorkspace="should_fail_normalization")
-
-    def test_normalize_data_with_vanadium(self):
-        data = LoadWANDSCD(
-            self.DATA_FILES,
-            VanadiumWorkspace=self.vanadium,
-            NormalizedBy="None",
-            NormalizeData=True,
-            OutputWorkspace="normalized_data",
-        )
-        try:
-            self.assertAlmostEqual(data.getSignalArray().max(), 7 / LoadWANDOutputNormalizationTest.VANADIUM_SIGNAL)
-        finally:
-            data.delete()
 
 
 if __name__ == "__main__":
