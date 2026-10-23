@@ -8,6 +8,8 @@
 
 #include "MantidHistogramData/DllConfig.h"
 
+#include <cstddef>
+
 namespace Mantid {
 namespace HistogramData {
 
