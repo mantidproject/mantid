@@ -13,12 +13,14 @@
 #include "MantidDataHandling/LoadISISNexus2.h"
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidNexus/NexusDescriptorLazy.h"
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <H5Cpp.h>
 #include <algorithm>
@@ -26,6 +28,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <fstream>
+#include <set>
 
 namespace Mantid::DataHandling {
 
@@ -206,8 +209,8 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
     ++lineCount;
   }
 
-  Geometry::ParameterMap &pmap = m_workspace->instrumentParameters();
   auto &detectorInfo = m_workspace->mutableDetectorInfo();
+  auto &componentInfo = m_workspace->mutableComponentInfo();
   const auto &spectrumInfo = m_workspace->spectrumInfo();
 
   std::vector<double> colValues(header.colCount - 1, 0.0);
@@ -225,14 +228,11 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
 
     bool skip{false};
     auto index = static_cast<size_t>(-1);
-    const Geometry::IDetector *det{nullptr};
     if (isSpectrum) {
       auto it = specToIndex.find(detOrSpec);
       if (it != specToIndex.end()) {
         index = it->second;
-        if (spectrumInfo.hasDetectors(index)) {
-          det = &spectrumInfo.detector(index);
-        } else {
+        if (!spectrumInfo.hasDetectors(index)) {
           skip = true;
         }
       } else {
@@ -242,7 +242,6 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
     } else {
       try {
         index = detectorInfo.indexOf(detOrSpec);
-        det = &detectorInfo.detector(index);
       } catch (std::out_of_range &) {
         skip = true;
       }
@@ -254,13 +253,11 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
 
     std::vector<size_t> indices;
     if (isSpectrum) {
-      if (auto group = dynamic_cast<const Geometry::DetectorGroup *>(det)) {
-        const auto detIDs = group->getDetectorIDs();
-        std::transform(detIDs.cbegin(), detIDs.cend(), std::back_inserter(indices),
-                       [detectorInfo](const auto detID) { return detectorInfo.indexOf(detID); });
-      } else {
-        indices.emplace_back(detectorInfo.indexOf(det->getID()));
-      }
+      // all (unique) detectors of the spectrum
+      std::set<size_t> detIndices;
+      for (const auto &specDefItem : spectrumInfo.spectrumDefinition(index))
+        detIndices.insert(specDefItem.first);
+      indices.assign(detIndices.cbegin(), detIndices.cend());
     } else {
       indices.emplace_back(index);
     }
@@ -287,8 +284,7 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
         phi = value;
       else if (header.detParCols.count(i) == 1) {
         for (const auto detIndex : indices) {
-          auto id = detectorInfo.detector(detIndex).getComponentID();
-          pmap.addDouble(id, header.colToName[i], value);
+          componentInfo.addDouble(detIndex, header.colToName[i], value);
         }
       }
     }

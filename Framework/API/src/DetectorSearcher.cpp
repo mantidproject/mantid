@@ -8,7 +8,10 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NearestNeighbours.h"
 
@@ -80,6 +83,7 @@ double getQSign() {
  *
  * @param compInfo :: the Geometry::ComponentInfo object for this instrument
  * @param detInfo :: the Geometry::DetectorInfo object for this instrument
+ * @param compInfo :: the Geometry::ComponentInfo object for this instrument
  */
 DetectorSearcher::DetectorSearcher(const Geometry::ComponentInfo &compInfo, const Geometry::DetectorInfo &detInfo)
     : m_usingFullRayTrace(containsOnlyRectDetectors(compInfo, detInfo)), m_crystallography_convention(getQSign()),
@@ -267,17 +271,27 @@ std::tuple<bool, size_t> DetectorSearcher::checkInteceptWithNeighbours(
   // Find which of the neighbours we actually intersect with
   for (const auto &neighbour : neighbours) {
     const auto index = std::get<1>(neighbour);
-    const auto &det = m_detInfo.detector(m_indexMap[index]);
+    const auto detIndex = m_indexMap[index];
 
     Mantid::Geometry::BoundingBox bb;
     if (!bb.doesLineIntersect(track))
       continue;
 
-    const auto hitDetector = det.interceptSurface(track) > 0;
+    if (!m_compInfo.hasValidShape(detIndex))
+      throw Kernel::Exception::NullPointerException("DetectorSearcher::checkInteceptWithNeighbours", "shape");
+
+    // Express the track in the detector shape's frame: remove the detector position and rotation
+    auto unRotate = m_detInfo.rotation(detIndex);
+    unRotate.inverse();
+    auto trackStart = track.startPoint() - m_detInfo.position(detIndex);
+    unRotate.rotate(trackStart);
+    auto trackDirection = track.direction();
+    unRotate.rotate(trackDirection);
+    Geometry::Track probeTrack(trackStart, trackDirection);
+
+    const auto hitDetector = m_compInfo.shape(detIndex).interceptSurface(probeTrack) > 0;
     if (hitDetector)
       return std::make_tuple(hitDetector, index);
-
-    track.reset(m_detInfo.samplePosition(), direction);
   }
 
   return std::make_tuple(false, 0);

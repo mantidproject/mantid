@@ -13,7 +13,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidTypes/SpectrumDefinition.h"
@@ -232,16 +232,14 @@ double ScaleX::getScaleFactor(const API::MatrixWorkspace_const_sptr &inputWS,
     return 0.0;
   }
 
-  const auto &detectorInfo = inputWS->detectorInfo();
+  const auto &componentInfo = inputWS->componentInfo();
   const auto detIndex = spectrumInfo.spectrumDefinition(index)[0].first;
-  const auto &det = detectorInfo.detector(detIndex);
-  const auto &pmap = inputWS->constInstrumentParameters();
-  auto par = pmap.getRecursive(det.getComponentID(), m_parname);
-  if (par) {
+  const auto par = componentInfo.getNumberParameter(detIndex, m_parname);
+  if (!par.empty()) {
     if (!m_combine)
-      return par->value<double>();
+      return par.front();
     else
-      return m_binOp(m_algFactor, par->value<double>());
+      return m_binOp(m_algFactor, par.front());
   } else {
     std::ostringstream os;
     os << "Spectrum at index '" << index << "' has no parameter named '" << m_parname << "'\n";
