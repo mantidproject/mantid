@@ -79,7 +79,7 @@ public:
 
     const auto &spectrumInfo = ws->spectrumInfo();
 
-    int id = spectrumInfo.detector(0).getID();
+    int id = spectrumInfo.firstDetectorID(0);
     V3D newPos = spectrumInfo.position(0);
 
     TS_ASSERT_EQUALS(id, 1);
@@ -87,7 +87,7 @@ public:
     TS_ASSERT_DELTA(newPos.Y(), 0.0, 0.0001);
     TS_ASSERT_DELTA(newPos.Z(), 2.0, 0.0001);
 
-    id = spectrumInfo.detector(ndets - 1).getID();
+    id = spectrumInfo.firstDetectorID(ndets - 1);
     newPos = spectrumInfo.position(ndets - 1);
 
     TS_ASSERT_EQUALS(id, ndets);

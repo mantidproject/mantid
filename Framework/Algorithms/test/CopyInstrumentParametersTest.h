@@ -79,13 +79,13 @@ public:
     // Verify that the detectors in the output workspace have been moved as in
     // the input workspace before execution
     const auto &spectrumInfoWs2New = ws2->spectrumInfo();
-    int id1 = spectrumInfoWs2New.detector(0).getID();
+    int id1 = spectrumInfoWs2New.firstDetectorID(0);
     V3D newPos1 = spectrumInfoWs2New.position(0);
     TS_ASSERT_EQUALS(id1, 1);
     TS_ASSERT_DELTA(newPos1.X(), 6.0, 0.0001);
     TS_ASSERT_DELTA(newPos1.Y(), 0.0, 0.0001);
     TS_ASSERT_DELTA(newPos1.Z(), 0.7, 0.0001);
-    int id2 = spectrumInfoWs2New.detector(1).getID();
+    int id2 = spectrumInfoWs2New.firstDetectorID(1);
     V3D newPos2 = spectrumInfoWs2New.position(1);
     TS_ASSERT_EQUALS(id2, 2);
     TS_ASSERT_DELTA(newPos2.X(), 6.0, 0.0001);
@@ -157,18 +157,16 @@ public:
     const auto &spectrumInfoWs2New = ws2->spectrumInfo();
 
     // new detector allocation applied
-    const auto &deto1 = spectrumInfoWs2New.detector(0);
-    int id1 = deto1.getID();
-    V3D newPos1 = deto1.getPos();
+    int id1 = spectrumInfoWs2New.firstDetectorID(0);
+    V3D newPos1 = spectrumInfoWs2New.position(0);
     TS_ASSERT_EQUALS(id1, 1);
     TS_ASSERT_DELTA(newPos1.X(), 6.0, 0.0001);
     TS_ASSERT_DELTA(newPos1.Y(), 0.0, 0.0001);
     TS_ASSERT_DELTA(newPos1.Z(), 0.7, 0.0001);
 
     // previous detector placement rejected
-    const auto &deto2 = spectrumInfoWs2New.detector(1);
-    int id2 = deto2.getID();
-    V3D newPos2 = deto2.getPos();
+    int id2 = spectrumInfoWs2New.firstDetectorID(1);
+    V3D newPos2 = spectrumInfoWs2New.position(1);
     TS_ASSERT_EQUALS(id2, 2);
     TS_ASSERT_DELTA(newPos2.X(), 0.0, 0.0001);
     TS_ASSERT_DELTA(newPos2.Y(), 0.0, 0.0001);
@@ -263,7 +261,7 @@ public:
     size_t nDetectors = ws2->getNumberHistograms();
     const auto &spectrumInfo = ws2->spectrumInfo();
     for (size_t i = 0; i < nDetectors; i++) {
-      int id = spectrumInfo.detector(i).getID();
+      int id = spectrumInfo.firstDetectorID(i);
       V3D newPos1 = spectrumInfo.position(i);
       TS_ASSERT_EQUALS(id, i + 1);
       TS_ASSERT_DELTA(newPos1.X(), sin(M_PI * double(i)), 0.0001);

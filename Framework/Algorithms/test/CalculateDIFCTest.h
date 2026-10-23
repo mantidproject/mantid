@@ -84,8 +84,7 @@ public:
     auto offsetsWS = OffsetsWorkspace_sptr(new OffsetsWorkspace(inputWS->getInstrument()));
     const auto &spectrumInfo = offsetsWS->spectrumInfo();
     for (int i = 0; i < NUM_SPEC; ++i) {
-      const auto &det = spectrumInfo.detector(i);
-      offsetsWS->setValue(det.getID(), OFFSET);
+      offsetsWS->setValue(spectrumInfo.firstDetectorID(i), OFFSET);
     }
 
     runTest(inputWS, offsetsWS, outWSName);
@@ -136,8 +135,7 @@ public:
     auto offsetsWS = OffsetsWorkspace_sptr(new OffsetsWorkspace(inputWS->getInstrument()));
     const auto &spectrumInfo = offsetsWS->spectrumInfo();
     for (int i = 0; i < NUM_SPEC; ++i) {
-      const auto &det = spectrumInfo.detector(i);
-      offsetsWS->setValue(det.getID(), 1);
+      offsetsWS->setValue(spectrumInfo.firstDetectorID(i), 1);
     }
 
     CalculateDIFC alg;

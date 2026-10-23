@@ -433,6 +433,15 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
   return *m_lastDetector[thread];
 }
 
+/** Returns the detector ID of the first detector of the spectrum with given index.
+ *
+ * For spectra with more than one detector this is the ID of the first entry in the spectrum definition.
+ * Throws Kernel::Exception::NotFoundError if the spectrum has no detectors.
+ */
+detid_t SpectrumInfo::firstDetectorID(const size_t index) const {
+  return m_detectorInfo.detid(checkAndGetSpectrumDefinition(index)[0].first);
+}
+
 const SpectrumDefinition &SpectrumInfo::checkAndGetSpectrumDefinition(const size_t index) const {
   if (spectrumDefinition(index).size() == 0)
     throw Kernel::Exception::NotFoundError("SpectrumInfo: No detectors for this workspace index.",
