@@ -6,9 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IEventList.h"
 #include "MantidAPI/IEventWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 namespace Mantid {
 
@@ -62,3 +64,6 @@ private:
 };
 } // namespace API
 } // namespace Mantid
+
+// Instantiated and exported by API/src/PropertyWithValue.cpp
+MANTID_API_EXTERN_TEMPLATE(Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::API::IEventWorkspace>>);

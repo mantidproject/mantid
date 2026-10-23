@@ -13,6 +13,7 @@
 #include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidDataObjects/Workspace2D_fwd.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 namespace Mantid {
 
@@ -106,6 +107,10 @@ private:
 };
 } // namespace DataObjects
 } // Namespace Mantid
+
+// Instantiated and exported by DataObjects/src/PropertyWithValue.cpp
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::DataObjects::Workspace2D>>);
 
 #ifndef DataObjects_EXPORTS
 #include "MantidAPI/WorkspaceProperty.h"

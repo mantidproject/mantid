@@ -26,6 +26,6 @@ ScopedFileHelper::ScopedFile createGroupingXMLSinglePair(const std::string &pair
 ScopedFileHelper::ScopedFile createXMLwithPairsAndGroups(const int &nGroups = 1, const int &nDetectorsPerGroup = 1);
 
 // Saves grouping to the XML file specified
-DLLExport std::string groupingToXML(const Mantid::API::Grouping &grouping);
+std::string groupingToXML(const Mantid::API::Grouping &grouping);
 
 } // namespace MuonGroupingXMLHelper

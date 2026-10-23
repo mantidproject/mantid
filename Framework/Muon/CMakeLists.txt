@@ -131,7 +131,7 @@ add_subdirectory(test)
 target_include_directories(
   Muon PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Muon> $<INSTALL_INTERFACE:include/Mantid>
 )
-generate_mantid_export_header(Muon FALSE)
+generate_mantid_export_header(Muon FALSE GENERATE_UNUSED_ARG)
 
 # Installation settings
 set(TARGET_EXPORT_NAME "MantidMuonTargets")

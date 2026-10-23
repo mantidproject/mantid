@@ -6,10 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/IValidator_fwd.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/PropertyManager_fwd.h"
 
+#include <string>
 #include <vector>
 
 namespace Mantid {
@@ -29,7 +32,7 @@ namespace Kernel {
    http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 14/11/2007
 */
-template <typename TYPE> class DLLExport PropertyWithValue : public Property {
+template <typename TYPE> class PropertyWithValue : public Property {
 public:
   PropertyWithValue(std::string name, TYPE defaultValue, IValidator_sptr validator = nullptr,
                     const unsigned int direction = Direction::Input);
@@ -86,15 +89,44 @@ private:
   static Logger g_logger;
 };
 
-template <> MANTID_KERNEL_DLL void PropertyWithValue<float>::saveProperty(Nexus::File *file);
-template <> MANTID_KERNEL_DLL void PropertyWithValue<double>::saveProperty(Nexus::File *file);
-template <> MANTID_KERNEL_DLL void PropertyWithValue<int32_t>::saveProperty(Nexus::File *file);
-template <> MANTID_KERNEL_DLL void PropertyWithValue<uint32_t>::saveProperty(Nexus::File *file);
-template <> MANTID_KERNEL_DLL void PropertyWithValue<int64_t>::saveProperty(Nexus::File *file);
-template <> MANTID_KERNEL_DLL void PropertyWithValue<uint64_t>::saveProperty(Nexus::File *file);
-template <> MANTID_KERNEL_DLL void PropertyWithValue<std::string>::saveProperty(Nexus::File *file);
-template <> MANTID_KERNEL_DLL void PropertyWithValue<std::vector<double>>::saveProperty(Nexus::File *file);
-template <> MANTID_KERNEL_DLL void PropertyWithValue<std::vector<int32_t>>::saveProperty(Nexus::File *file);
+// Instantiated and exported by PropertyWithValue.cpp. OptionalBool and Matrix
+// are declared in OptionalBool.h and MatrixProperty.h.
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<float>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<double>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<int32_t>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<uint32_t>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<int64_t>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<uint64_t>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<uint16_t>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<bool>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<std::string>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<std::vector<float>>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<std::vector<double>>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<std::vector<int32_t>>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<std::vector<uint16_t>>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<std::vector<uint32_t>>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<std::vector<int64_t>>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<std::vector<uint64_t>>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<std::vector<bool>>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<std::vector<std::string>>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<std::vector<std::vector<int32_t>>>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<std::vector<std::vector<std::string>>>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<std::shared_ptr<PropertyManager>>);
+// The integer type of the same width that is not int64_t
+#if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<long>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<unsigned long>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<std::vector<long>>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<std::vector<unsigned long>>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<std::vector<std::vector<long>>>);
+#endif
+#ifdef __linux__
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<long long>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<unsigned long long>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<std::vector<long long>>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<std::vector<unsigned long long>>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<std::vector<std::vector<long long>>>);
+#endif
 
 template <typename TYPE> Logger PropertyWithValue<TYPE>::g_logger("PropertyWithValue");
 

@@ -217,8 +217,7 @@ std::optional<std::reference_wrapper<Item>> Group::getItemWithOutputWorkspaceOrN
   return std::nullopt;
 }
 
-void Group::renameOutputWorkspace(std::string const &oldName, std::string const &newName) {
-  UNUSED_ARG(oldName);
+void Group::renameOutputWorkspace([[maybe_unused]] std::string const &oldName, std::string const &newName) {
   m_postprocessedWorkspaceName = newName;
 }
 

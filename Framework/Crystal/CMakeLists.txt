@@ -262,7 +262,7 @@ add_subdirectory(test)
 target_include_directories(
   Crystal PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Crystal> $<INSTALL_INTERFACE:include/Mantid>
 )
-generate_mantid_export_header(Crystal FALSE)
+generate_mantid_export_header(Crystal FALSE GENERATE_UNUSED_ARG)
 
 # Installation settings
 mtd_install_framework_lib(TARGETS Crystal PLUGIN_LIB)

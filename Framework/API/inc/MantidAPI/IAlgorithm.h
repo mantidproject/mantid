@@ -12,6 +12,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 namespace Poco {
 class AbstractObserver;
@@ -194,3 +195,6 @@ private:
 
 } // namespace API
 } // namespace Mantid
+
+// Instantiated and exported by API/src/PropertyWithValue.cpp
+MANTID_API_EXTERN_TEMPLATE(Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::API::IAlgorithm>>);

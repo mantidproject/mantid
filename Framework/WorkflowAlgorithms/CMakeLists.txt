@@ -136,7 +136,7 @@ target_include_directories(
   WorkflowAlgorithms PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/WorkflowAlgorithms>
                             $<INSTALL_INTERFACE:include/Mantid>
 )
-generate_mantid_export_header(WorkflowAlgorithms FALSE)
+generate_mantid_export_header(WorkflowAlgorithms FALSE GENERATE_UNUSED_ARG)
 
 # Installation settings
 mtd_install_framework_lib(TARGETS WorkflowAlgorithms PLUGIN_LIB)

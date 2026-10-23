@@ -7,8 +7,10 @@
 #pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -51,6 +53,10 @@ using OffsetsWorkspace_const_sptr = std::shared_ptr<const OffsetsWorkspace>;
 
 } // namespace DataObjects
 } // namespace Mantid
+
+// Instantiated and exported by DataObjects/src/PropertyWithValue.cpp
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::DataObjects::OffsetsWorkspace>>);
 
 #ifndef DataObjects_EXPORTS
 #include "MantidAPI/WorkspaceProperty.h"

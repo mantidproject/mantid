@@ -16,6 +16,11 @@
 namespace Mantid {
 namespace Kernel {
 
+// Instantiated and exported by PropertyWithValue.cpp
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<Matrix<float>>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<Matrix<double>>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<Matrix<int>>);
+
 template <class TYPE = double> class MatrixProperty : public PropertyWithValue<Matrix<TYPE>> {
   /// Typedef the held type
   using HeldType = Kernel::Matrix<TYPE>;

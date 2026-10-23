@@ -12,6 +12,7 @@
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakColumn.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/V3D.h"
 
@@ -247,6 +248,10 @@ using PeaksWorkspace_sptr = std::shared_ptr<PeaksWorkspace>;
 using PeaksWorkspace_const_sptr = std::shared_ptr<const PeaksWorkspace>;
 } // namespace DataObjects
 } // namespace Mantid
+
+// Instantiated and exported by DataObjects/src/PropertyWithValue.cpp
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::DataObjects::PeaksWorkspace>>);
 
 #ifndef DataObjects_EXPORTS
 #include "MantidAPI/WorkspaceProperty.h"

@@ -7,7 +7,9 @@
 #pragma once
 
 #include "MantidAPI/ISpectrum.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -95,3 +97,7 @@ using RebinnedOutput_const_sptr = std::shared_ptr<const RebinnedOutput>;
 
 } // namespace DataObjects
 } // namespace Mantid
+
+// Instantiated and exported by DataObjects/src/PropertyWithValue.cpp
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::DataObjects::RebinnedOutput>>);
