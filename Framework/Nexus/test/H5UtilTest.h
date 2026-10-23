@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidNexus/H5Util.h"
+#include "MantidNexus/NexusException.h"
 #include "test_helper.h"
 #include <H5Cpp.h>
 #include <boost/numeric/conversion/cast.hpp>
@@ -30,6 +31,18 @@ public:
   void removeFile(const std::string &filename) {
     if (std::filesystem::exists(filename))
       std::filesystem::remove(filename);
+  }
+
+  void test_hasAttribute_throws_when_hdf5_cannot_query_the_object() {
+    const std::string filename("H5UtilTest_invalid_attribute_object.h5");
+    removeFile(filename);
+    H5File file(filename, H5F_ACC_EXCL, H5Util::defaultFileAcc());
+    auto group = file.createGroup("entry");
+    group.close();
+
+    TS_ASSERT_THROWS(H5Util::hasAttribute(group, "attribute"), const Mantid::Nexus::Exception &);
+    file.close();
+    removeFile(filename);
   }
 
   void test_strings() {
@@ -249,6 +262,27 @@ public:
     file_read.close();
 
     // remove the file
+    removeFile(filename);
+  }
+
+  void test_string_vector_preserves_unwritten_values_as_empty_strings() {
+    const std::string filename = "test_empty_string_vec.h5";
+    removeFile(filename);
+    {
+      H5File file(filename, H5F_ACC_TRUNC, H5Util::defaultFileAcc());
+      Group group = file.createGroup("entry");
+      const hsize_t dims[1]{2};
+      DataSpace dataspace(1, dims);
+      StrType datatype(0, H5T_VARIABLE);
+      group.createDataSet("values", datatype, dataspace);
+    }
+
+    {
+      H5File file(filename, H5F_ACC_RDONLY, H5Util::defaultFileAcc());
+      Group group = file.openGroup("entry");
+      const auto values = H5Util::readStringVector(group, "values");
+      TS_ASSERT_EQUALS(values, std::vector<std::string>({"", ""}));
+    }
     removeFile(filename);
   }
 

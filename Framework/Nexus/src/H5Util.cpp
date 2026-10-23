@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexus/H5Util.h"
+#include "MantidNexus/H5ValidatingAdapter.h"
 #include "MantidNexus/UniqueID.h"
 #include <Poco/Logger.h>
 
@@ -312,31 +313,24 @@ std::vector<std::string> readStringVector(Group &group, const std::string &name)
 }
 
 std::vector<std::string> readStringVector(DataSet &dataset) {
-  hsize_t dims[1];
-  char **rdata;
-  std::vector<std::string> result;
   DataSpace dataspace = dataset.getSpace();
-  DataType datatype = dataset.getDataType();
+  const H5ValidatingAdapter::Context context{"readStringVector", {}, {}};
 
-  dataspace.getSimpleExtentDims(dims, nullptr);
-  result.reserve(dims[0]);
-
-  rdata = new char *[dims[0]];
-  dataset.read(rdata, datatype);
-
-  for (size_t i = 0; i < dims[0]; ++i)
-    result.emplace_back(std::string(rdata[i]));
-
-  dataset.vlenReclaim(rdata, datatype, dataspace);
+  if (H5ValidatingAdapter::rank(dataspace.getId(), context) != 1)
+    throw DataSpaceIException("readStringVector requires a rank-one dataset");
+  const auto values = H5ValidatingAdapter::readVlenDataset(dataset.getId(), context);
+  std::vector<std::string> result;
+  result.reserve(values.size());
+  std::transform(values.cbegin(), values.cend(), std::back_inserter(result),
+                 [](const auto &value) { return value.value_or(std::string{}); });
   dataset.close();
-  delete[] rdata;
 
   return result;
 }
 
 bool hasAttribute(const H5::H5Object &object, const char *attributeName) {
-  const htri_t exists = H5Aexists(object.getId(), attributeName);
-  return exists > 0;
+  const H5ValidatingAdapter::Context context{"check attribute", {}, attributeName};
+  return H5ValidatingAdapter::checkTriState(H5Aexists(object.getId(), attributeName), context);
 }
 
 void readStringAttribute(const H5::H5Object &object, const std::string &attributeName, std::string &output) {
