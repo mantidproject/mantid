@@ -72,7 +72,7 @@ class TestCorrectionModel(unittest.TestCase):
     @patch(model_path + ".Load")
     @patch(model_path + ".ADS")
     def test_load_ref_no_path_does_nothing(self, mock_ads, mock_load, mock_logger):
-        self.model.load_ref("")
+        self.assertFalse(self.model.load_ref(""))
         mock_ads.doesExist.assert_not_called()
         mock_load.assert_not_called()
         mock_logger.notice.assert_not_called()
@@ -86,7 +86,7 @@ class TestCorrectionModel(unittest.TestCase):
         path = "some/dir/ref_ws.nxs"
         mock_ads.doesExist.return_value = True
 
-        self.model.load_ref(path)
+        self.assertTrue(self.model.load_ref(path))
 
         mock_logger.notice.assert_called_once_with('A workspace "ref_ws" already exists, loading some/dir/ref_ws.nxs has been skipped')
         mock_load.assert_not_called()
@@ -99,7 +99,7 @@ class TestCorrectionModel(unittest.TestCase):
         path = "/data/new_ref.nxs"
         mock_ads.doesExist.return_value = False
 
-        self.model.load_ref(path)
+        self.assertTrue(self.model.load_ref(path))
 
         mock_load.assert_called_once_with(Filename="/data/new_ref.nxs", OutputWorkspace="new_ref")
         self.model.set_reference_ws.assert_called_once_with("new_ref")
@@ -113,7 +113,7 @@ class TestCorrectionModel(unittest.TestCase):
         mock_ads.doesExist.return_value = False
         mock_load.side_effect = Exception("boom")
 
-        self.model.load_ref(path)
+        self.assertFalse(self.model.load_ref(path))
 
         mock_load.assert_called_once_with(Filename="/data/bad_ref.nxs", OutputWorkspace="bad_ref")
         mock_logger.warning.assert_called_once()

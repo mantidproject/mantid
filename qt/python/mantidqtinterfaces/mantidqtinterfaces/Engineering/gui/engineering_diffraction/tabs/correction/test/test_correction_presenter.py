@@ -86,6 +86,20 @@ class TestTextureCorrectionPresenter(unittest.TestCase):
         self.model.load_ref.assert_called_once_with("ref_file.nxs")
         self.presenter.update_reference_info.assert_called_once()
 
+    def test_failed_load_ref_leaves_the_reference_and_settings_alone(self):
+        # the previous reference stays selected, so adopting would re-apply its settings
+        self.model.load_ref = MagicMock(return_value=False)
+        self.presenter.update_reference_info = MagicMock()
+        self.presenter._get_setting = MagicMock(return_value=True)
+        self.presenter._adopt_reference_texture_directions = MagicMock()
+        self.presenter._adopt_reference_euler_settings = MagicMock()
+
+        self.presenter._on_load_ref_clicked()
+
+        self.presenter.update_reference_info.assert_not_called()
+        self.presenter._adopt_reference_texture_directions.assert_not_called()
+        self.presenter._adopt_reference_euler_settings.assert_not_called()
+
     def _load_ref_with_changes(self, directions_changed, euler_changed):
         self.presenter.update_reference_info = MagicMock()
         self.presenter._get_setting = MagicMock(return_value=True)

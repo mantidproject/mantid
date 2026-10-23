@@ -37,19 +37,22 @@ class CorrectionModel(TextureCorrectionModel):
                 logger.warning(f"Failed to load {path}: {e}")
         return wss
 
-    def load_ref(self, path: str | None) -> None:
+    def load_ref(self, path: str | None) -> bool:
+        """Select the reference workspace at path, returning whether one was selected."""
         if not path:
-            return
+            return False
         ws_name = os.path.splitext(os.path.basename(path))[0]
         if ADS.doesExist(ws_name):
             logger.notice(f'A workspace "{ws_name}" already exists, loading {path} has been skipped')
             self.set_reference_ws(ws_name)
-            return
+            return True
         try:
             Load(Filename=path, OutputWorkspace=ws_name)
-            self.set_reference_ws(ws_name)
         except Exception as e:
             logger.warning(f"Failed to load {path}: {e}")
+            return False
+        self.set_reference_ws(ws_name)
+        return True
 
     def get_reference_texture_directions(self) -> Tuple[np.ndarray, Tuple[str, str, str]] | None:
         """The sample directions saved on the current reference workspace, or None when it carries

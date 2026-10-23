@@ -140,7 +140,9 @@ class TextureCorrectionPresenter(RbScopeConsumer, InstrumentScopeConsumer, Algor
         self.model.save_reference_file(self.rb_num, self.current_calibration, output_settings.get_output_path())
 
     def _on_load_ref_clicked(self) -> None:
-        self.model.load_ref(self.view.get_reference_file())
+        # on failure the previous reference stays selected, and its settings must not be re-adopted
+        if not self.model.load_ref(self.view.get_reference_file()):
+            return
         self.update_reference_info()
         changed = False
         if self._get_setting("read_texture_dirs_from_ref", bool):
