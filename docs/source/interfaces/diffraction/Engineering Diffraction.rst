@@ -266,6 +266,9 @@ Euler Angle Scheme
 Euler Angles Sense
     The sense of the rotation around each euler axis where 1 is counter clockwise and -1 is clockwise
 
+Read Euler settings from a loaded reference workspace
+    If checked, loading a reference workspace saved by the Texture Planner replaces the Euler Angle Scheme and Euler Angles Sense with those saved on it (for the active RB number only)
+
 
 Buttons/Functions
 ^^^^^^^^^^^^^^^^^
