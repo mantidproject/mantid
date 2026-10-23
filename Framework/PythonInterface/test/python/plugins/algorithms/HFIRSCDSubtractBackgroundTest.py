@@ -8,12 +8,13 @@ import unittest
 
 import numpy as np
 
-from mantid.api import mtd
+from mantid.api import WorkspaceGroup, mtd
 from mantid.simpleapi import (
     CloneWorkspace,
     CreateMDHistoWorkspace,
     CreateSampleWorkspace,
     DeleteWorkspace,
+    GroupWorkspaces,
     HFIRSCDSubtractBackground,
     LoadEmptyInstrument,
 )
@@ -44,8 +45,9 @@ class HFIRSCDSubtractBackgroundTest(unittest.TestCase):
             DeleteWorkspace(workspace)
 
     def tearDown(self):
+        # deleting a group also deletes its members
         for name in mtd.getObjectNames():
-            if not name.startswith("__"):
+            if not name.startswith("__") and name in mtd:
                 DeleteWorkspace(name)
 
     @classmethod
@@ -153,28 +155,32 @@ class HFIRSCDSubtractBackgroundTest(unittest.TestCase):
 
     def test_validation_rejects_wrong_number_of_dimensions(self):
         two_dimensional = self._create_workspace("two_dimensional", self.SAMPLE_SIGNAL[:, :, 0], self.SAMPLE_ERROR_SQUARED[:, :, 0])
-        self._assert_rejected("InputWorkspace must have 3 dimensions", two_dimensional, self._create_background())
+        self._assert_rejected("InputWorkspace: must have 3 dimensions", two_dimensional, self._create_background())
 
     def test_validation_rejects_workspace_without_instrument(self):
         background = self._create_workspace("no_instrument", self.BACKGROUND_SIGNAL, self.BACKGROUND_ERROR_SQUARED, instrument=None)
-        self._assert_rejected("InputBackground must have an instrument", self._create_sample(), background)
+        self._assert_rejected("InputBackground: must have an instrument", self._create_sample(), background)
 
     def test_validation_rejects_unsupported_instrument(self):
         sample = self._create_workspace("other_instrument", self.SAMPLE_SIGNAL, self.SAMPLE_ERROR_SQUARED, instrument=None)
         sample.addExperimentInfo(CreateSampleWorkspace(NumBanks=1, BankPixelWidth=2, OutputWorkspace="other_instrument_source"))
-        self._assert_rejected("supported instruments are WAND", sample, self._create_background())
+        self._assert_rejected(
+            "InputWorkspace: has instrument basic_rect; supported instruments are WAND", sample, self._create_background()
+        )
 
     def test_validation_rejects_background_with_several_angles(self):
         background = self._create_workspace("several_angles", self.SAMPLE_SIGNAL, self.SAMPLE_ERROR_SQUARED)
-        self._assert_rejected("InputBackground must have exactly one goniometer angle, found 4", self._create_sample(), background)
+        self._assert_rejected("InputBackground: must have exactly one goniometer angle, found 4", self._create_sample(), background)
 
     def test_validation_rejects_pixel_mismatch(self):
         background = self._create_workspace("other_pixels", self.BACKGROUND_SIGNAL[:, :2, :], self.BACKGROUND_ERROR_SQUARED[:, :2, :])
-        self._assert_rejected(r"pixel dimensions of InputBackground \(2, 2\) do not match", self._create_sample(), background)
+        self._assert_rejected(
+            r"InputWorkspace: pixel dimensions \(2, 3\) do not match those of InputBackground \(2, 2\)", self._create_sample(), background
+        )
 
     def test_validation_rejects_instrument_mismatch(self):
         self._assert_rejected(
-            "InputBackground is from DEMAND but InputWorkspace is from WAND", self._create_sample(), self._create_background("DEMAND")
+            "InputWorkspace: is from WAND but InputBackground is from DEMAND", self._create_sample(), self._create_background("DEMAND")
         )
 
     def test_validation_rejects_missing_flux_log(self):
@@ -199,6 +205,107 @@ class HFIRSCDSubtractBackgroundTest(unittest.TestCase):
             self._create_sample("DEMAND", "Monitor"),
             self._create_background("DEMAND", "Monitor", flux=[0.0]),
             NormalizedBy="Monitor",
+        )
+
+    # WorkspaceGroup sample and OutputBackgroundWorkspace
+
+    # the two members of the group sample differ by their flux, hence by their flux ratio
+    MEMBER_FLUX = {"scan_1": [100.0, 200.0, 300.0, 400.0], "scan_2": [50.0, 50.0, 100.0, 100.0]}
+
+    def _create_group(self, name="scans"):
+        for member_name, flux in self.MEMBER_FLUX.items():
+            self._create_sample(normalized_by="Monitor", flux=flux, name=member_name)
+        return GroupWorkspaces(InputWorkspaces=list(self.MEMBER_FLUX), OutputWorkspace=name)
+
+    def _member_flux_ratio(self, member_name):
+        return np.array(self.MEMBER_FLUX[member_name]) / self.BACKGROUND_FLUX[0]
+
+    def _assert_scaled_background(self, scaled_background, flux_ratio):
+        np.testing.assert_allclose(scaled_background.getSignalArray(), self.BACKGROUND_SIGNAL * flux_ratio)
+        np.testing.assert_allclose(scaled_background.getErrorSquaredArray(), self.BACKGROUND_ERROR_SQUARED * flux_ratio**2)
+
+    def test_group_in_place(self):
+        group = self._create_group()
+        HFIRSCDSubtractBackground(
+            InputWorkspace="scans",
+            InputBackground=self._create_background(normalized_by="Monitor"),
+            NormalizedBy="Monitor",
+            NullifyNegativeValues=False,
+            OutputWorkspace="scans",
+        )
+        self.assertEqual(sorted(mtd.getObjectNames()), ["background", "scan_1", "scan_2", "scans"])
+        self.assertEqual(list(mtd["scans"].getNames()), list(group.getNames()))
+        for member_name in self.MEMBER_FLUX:
+            self._assert_subtraction(mtd[member_name], self._member_flux_ratio(member_name))
+
+    def test_group_new_output(self):
+        self._create_group()
+        output = HFIRSCDSubtractBackground(
+            InputWorkspace="scans",
+            InputBackground=self._create_background(normalized_by="Monitor"),
+            NormalizedBy="Monitor",
+            NullifyNegativeValues=False,
+            OutputWorkspace="output",
+        )
+        self.assertIsInstance(output, WorkspaceGroup)
+        self.assertEqual(sorted(output.getNames()), ["output_scan_1", "output_scan_2"])
+        for member_name in self.MEMBER_FLUX:
+            np.testing.assert_array_equal(mtd[member_name].getSignalArray(), self.SAMPLE_SIGNAL)
+            self._assert_subtraction(mtd[f"output_{member_name}"], self._member_flux_ratio(member_name))
+            self.assertEqual(mtd[f"output_{member_name}"].getExperimentInfo(0).getInstrumentName(), "WAND")
+
+    def test_output_background_workspace(self):
+        output, scaled_background = HFIRSCDSubtractBackground(
+            InputWorkspace=self._create_sample(normalized_by="Monitor"),
+            InputBackground=self._create_background(normalized_by="Monitor"),
+            NormalizedBy="Monitor",
+            OutputWorkspace="output",
+            OutputBackgroundWorkspace="scaled_background",
+        )
+        self._assert_scaled_background(scaled_background, self.FLUX_RATIO)
+        # the scaled background has the dimensions and the logs of the sample
+        self.assertEqual(scaled_background.getDimension(2).getNBins(), 4)
+        np.testing.assert_allclose(scaled_background.getExperimentInfo(0).run().getProperty("monitor_count").value, self.SAMPLE_FLUX)
+
+    def test_output_background_workspace_for_group(self):
+        self._create_group()
+        HFIRSCDSubtractBackground(
+            InputWorkspace="scans",
+            InputBackground=self._create_background(normalized_by="Monitor"),
+            NormalizedBy="Monitor",
+            OutputWorkspace="scans",
+            OutputBackgroundWorkspace="scaled_background",
+        )
+        self.assertIsInstance(mtd["scaled_background"], WorkspaceGroup)
+        self.assertEqual(sorted(mtd["scaled_background"].getNames()), ["scaled_background_scan_1", "scaled_background_scan_2"])
+        for member_name in self.MEMBER_FLUX:
+            self._assert_scaled_background(mtd[f"scaled_background_{member_name}"], self._member_flux_ratio(member_name))
+
+    def test_no_background_workspace_unless_requested(self):
+        self._create_group()
+        HFIRSCDSubtractBackground(InputWorkspace="scans", InputBackground=self._create_background(), OutputWorkspace="output")
+        self.assertEqual(
+            sorted(mtd.getObjectNames()),
+            [
+                "background",
+                "output",
+                "output_scan_1",
+                "output_scan_2",
+                "scan_1",
+                "scan_2",
+                "scans",
+            ],
+        )
+
+    def test_validation_names_the_invalid_members(self):
+        self._create_sample(name="scan_1")
+        self._create_sample("DEMAND", name="scan_2")
+        CreateSampleWorkspace(NumBanks=1, BankPixelWidth=2, OutputWorkspace="scan_3")
+        GroupWorkspaces(InputWorkspaces=["scan_1", "scan_2", "scan_3"], OutputWorkspace="scans")
+        self._assert_rejected(
+            "Member 'scan_2': is from DEMAND but InputBackground is from WAND; Member 'scan_3': must be an MDHistoWorkspace",
+            "scans",
+            self._create_background(),
         )
 
 

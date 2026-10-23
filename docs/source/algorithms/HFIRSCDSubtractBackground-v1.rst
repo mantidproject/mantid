@@ -16,8 +16,12 @@ before it is subtracted. The result, ``Sample - Background``, can then be conver
 
 ``InputWorkspace`` is an MDHistoWorkspace with dimensions (y, x, goniometer angle), as returned by
 :ref:`LoadWANDSCD <algm-LoadWANDSCD>` or by :ref:`HB3AAdjustSampleNorm <algm-HB3AAdjustSampleNorm>` with
-``OutputType="Detector"``. ``InputBackground`` has the same pixel dimensions and a single goniometer angle. Both must
-come from the same instrument.
+``OutputType="Detector"``, or a WorkspaceGroup of such workspaces, such as the output of
+:ref:`HB3AAdjustSampleNorm <algm-HB3AAdjustSampleNorm>` with ``OutputType="Detector"`` for several scans. With this
+output type, :ref:`HB3AAdjustSampleNorm <algm-HB3AAdjustSampleNorm>` always returns several scans as a WorkspaceGroup.
+Each member of a WorkspaceGroup is processed with its own flux logs.
+``InputBackground`` has the same pixel dimensions and a single goniometer angle.
+The sample and the background must come from the same instrument.
 
 The sample must not be normalized, because the background is in counts. The algorithm does not check this; load the
 sample with ``NormalizeData=False`` in :ref:`LoadWANDSCD <algm-LoadWANDSCD>` or
@@ -57,7 +61,20 @@ Output
 ######
 
 When ``OutputWorkspace`` is the same workspace as ``InputWorkspace``, the subtraction is done in place and no copy of
-the sample is made. Otherwise ``OutputWorkspace`` is a new workspace and ``InputWorkspace`` is left unchanged.
+the sample is made; for a WorkspaceGroup, each member is modified in place. Otherwise ``OutputWorkspace`` is a new
+workspace and ``InputWorkspace`` is left unchanged; for a WorkspaceGroup, ``OutputWorkspace`` is a new WorkspaceGroup
+whose members are named ``<OutputWorkspace>_<input member name>``, as in
+:ref:`HB3AAdjustSampleNorm <algm-HB3AAdjustSampleNorm>`.
+
+The optional ``OutputBackgroundWorkspace`` holds the background scaled to every goniometer angle of the sample,
+:math:`r(\theta)\,B`, with errors :math:`r(\theta)\,\sigma_B`, and the dimensions and sample logs of the sample. For a
+WorkspaceGroup sample, it is a WorkspaceGroup whose members are named ``<OutputBackgroundWorkspace>_<input member name>``.
+It is created only when a name is given.
+
+A sample of several scans can occupy a lot of memory. Doing the subtraction in place and leaving
+``OutputBackgroundWorkspace`` empty avoids creating any workspace of the size of the sample. The members of a
+WorkspaceGroup are processed one after the other, and the background is subtracted one goniometer angle at a time, so
+the additional memory used is that of one copy of the signal of one member.
 
 .. categories::
 
