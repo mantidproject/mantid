@@ -51,6 +51,11 @@ function(add_sphinx_build_target builder)
     set(target_name docs-${builder})
   endif()
 
+  # Mantid should not use deprecated APIs or produce warnings from its own Python modules while building docs.
+  if("${builder}" STREQUAL "html" OR "${builder}" STREQUAL "doctest")
+    set(python_warning_options -Werror::DeprecationWarning -Werror:::mantid -Werror:::mantidqt)
+  endif()
+
   set(output_dir ${SPHINX_BUILD_DIR}/${builder})
   if(EXISTS ${SPHINX_CONF_DIR}/conf-${builder}.py)
     set(conf_builder ${SPHINX_CONF_DIR}/conf-${builder}.py)
@@ -90,8 +95,8 @@ function(add_sphinx_build_target builder)
     COMMAND
       ${CMAKE_COMMAND} -E env SCREENSHOTS_DIR=${SCREENSHOTS_DIR} DIAGRAMS_DIR=${DIAGRAMS_DIR}
       DOT_EXECUTABLE=${DOT_EXECUTABLE} ENABLE_PLOTDIRECTIVE=${ENABLE_PLOTDIRECTIVE}
-      PYTHONPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} ${Python_EXECUTABLE} -m ${SPHINX_MAIN}
-      ${sphinx_options} ${SPHINX_CONF_DIR} ${output_dir}
+      PYTHONPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} ${Python_EXECUTABLE} ${python_warning_options} -m
+      ${SPHINX_MAIN} ${sphinx_options} ${SPHINX_CONF_DIR} ${output_dir}
     DEPENDS ${target_dependencies} ${SPHINX_CONF_DIR}/conf.py ${conf_builder}
     COMMENT "Building ${builder} documentation"
   )
