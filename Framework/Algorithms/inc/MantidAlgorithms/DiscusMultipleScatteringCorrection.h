@@ -27,8 +27,9 @@ namespace API {
 class Sample;
 }
 namespace Geometry {
+class ComponentInfo;
 class Instrument;
-}
+} // namespace Geometry
 
 namespace Algorithms {
 
@@ -123,7 +124,7 @@ protected:
   void getXMinMax(const Mantid::API::MatrixWorkspace &ws, double &xmin, double &xmax) const;
   void prepareSampleBeamGeometry(const API::MatrixWorkspace_sptr &inputWS);
   const std::shared_ptr<Geometry::CSGObject>
-  createCollimatorHexahedronShape(const Kernel::V3D &samplePos, const Mantid::Geometry::DetectorInfo &detectorInfo,
+  createCollimatorHexahedronShape(const Kernel::V3D &samplePos, const Mantid::Geometry::ComponentInfo &componentInfo,
                                   const size_t &histogramIndex);
 
 private:
@@ -136,12 +137,12 @@ private:
   simulatePaths(const int nEvents, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
                 const ComponentWorkspaceMappings &componentWorkspaces, const double kinc,
                 const std::vector<double> &wValues, bool specialSingleScatterCalc,
-                const Mantid::Geometry::DetectorInfo &detectorInfo, const size_t &histogramIndex);
+                const Mantid::Geometry::ComponentInfo &componentInfo, const size_t &histogramIndex);
   std::tuple<bool, std::vector<double>> scatter(const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
                                                 const ComponentWorkspaceMappings &componentWorkspaces,
                                                 const double kinc, const std::vector<double> &wValues,
                                                 bool specialSingleScatterCalc,
-                                                const Mantid::Geometry::DetectorInfo &detectorInfo,
+                                                const Mantid::Geometry::ComponentInfo &componentInfo,
                                                 const size_t &histogramIndex);
 
   Geometry::Track start_point(Kernel::PseudoRandomNumberGenerator &rng);
