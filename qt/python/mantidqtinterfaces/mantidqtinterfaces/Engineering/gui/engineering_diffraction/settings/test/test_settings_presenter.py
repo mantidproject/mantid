@@ -52,6 +52,7 @@ class SettingsPresenterTest(unittest.TestCase):
             "use_euler_angles": False,
             "auto_pop_texture": False,
             "read_texture_dirs_from_ref": True,
+            "read_euler_from_ref": True,
         }
 
     def setup_view_getters(self, blank_log=False):
@@ -81,6 +82,7 @@ class SettingsPresenterTest(unittest.TestCase):
         self.view.get_contour_kernel.return_value = self.settings["contour_kernel"]
         self.view.get_auto_populate_texture.return_value = self.settings["auto_pop_texture"]
         self.view.get_read_texture_dirs_from_ref.return_value = self.settings["read_texture_dirs_from_ref"]
+        self.view.get_read_euler_from_ref.return_value = self.settings["read_euler_from_ref"]
 
     @patch(dir_path + ".path.isfile")
     def test_load_existing_settings(self, mock_isfile):

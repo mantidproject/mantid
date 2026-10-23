@@ -39,6 +39,9 @@ from Engineering.texture.texture_helper import (
     has_texture_direction_info,
     read_texture_direction_info_from_log,
     write_texture_direction_info_to_log,
+    read_euler_orientation_info_from_log,
+    write_euler_orientation_info_to_log,
+    EULER_AXES_LOG,
     TEXTURE_DIRECTION_LABELS_LOG,
     TEXTURE_DIRECTION_MATRIX_LOG,
 )
@@ -1136,6 +1139,28 @@ class TestTextureDirectionLogIO(unittest.TestCase):
 
         self.assertEqual(names, ("D1", "D2", "D3"))
         mock_logger.warning.assert_called_once()
+
+
+class TestEulerOrientationLogIO(unittest.TestCase):
+    """The Euler convention the Texture Planner writes onto a reference workspace for Eng Diff to read back."""
+
+    def setUp(self):
+        self.ws_name = "__test_euler_orientation_log_ws"
+        self.ws = CreateWorkspace(DataX=[0, 1], DataY=[1], OutputWorkspace=self.ws_name)
+        self.addCleanup(lambda: ADS.remove(self.ws_name) if ADS.doesExist(self.ws_name) else None)
+
+    def test_round_trip_preserves_axes_and_senses(self):
+        write_euler_orientation_info_to_log(self.ws_name, "YXY", "-1,1,-1")
+
+        self.assertEqual(read_euler_orientation_info_from_log(self.ws), ("YXY", "-1,1,-1"))
+
+    def test_reads_none_unless_both_logs_are_present(self):
+        self.assertIsNone(read_euler_orientation_info_from_log(self.ws_name))
+        AddSampleLog(Workspace=self.ws_name, LogName=EULER_AXES_LOG, LogText="YXY")
+        self.assertIsNone(read_euler_orientation_info_from_log(self.ws_name))
+
+    def test_reads_none_for_a_missing_workspace(self):
+        self.assertIsNone(read_euler_orientation_info_from_log("__not_in_the_ads"))
 
 
 if __name__ == "__main__":
