@@ -27,7 +27,7 @@ jobs:
 
       - name: Publish unit test results (Linux)
         if: hashFiles('artifacts/junit-unit-Linux/*unittest.xml') != ''
-        uses: EnricoMi/publish-unit-test-result-action/linux@d0a4676d0e0b938bc201470d88276b7c74c712b3 # v2.24.0
+        uses: EnricoMi/publish-unit-test-result-action/linux@7622c5bf3d112a72ab4fa3951c2aa5723d8ab92d # v2.25.0
         with:
           check_name: "Unit test results (Linux)"
           commit: ${{ github.event.workflow_run.head_sha }}
@@ -39,7 +39,7 @@ jobs:
 
       - name: Publish unit test results (Windows)
         if: hashFiles('artifacts/junit-unit-Windows/*unittest.xml') != ''
-        uses: EnricoMi/publish-unit-test-result-action/linux@d0a4676d0e0b938bc201470d88276b7c74c712b3 # v2.24.0
+        uses: EnricoMi/publish-unit-test-result-action/linux@7622c5bf3d112a72ab4fa3951c2aa5723d8ab92d # v2.25.0
         with:
           check_name: "Unit test results (Windows)"
           commit: ${{ github.event.workflow_run.head_sha }}
@@ -51,7 +51,7 @@ jobs:
 
       - name: Publish system test results (Linux)
         if: hashFiles('artifacts/junit-system/**/TEST-systemtests*.xml') != ''
-        uses: EnricoMi/publish-unit-test-result-action/linux@d0a4676d0e0b938bc201470d88276b7c74c712b3 # v2.24.0
+        uses: EnricoMi/publish-unit-test-result-action/linux@7622c5bf3d112a72ab4fa3951c2aa5723d8ab92d # v2.25.0
         with:
           check_name: "System test results (Linux)"
           commit: ${{ github.event.workflow_run.head_sha }}
@@ -63,7 +63,7 @@ jobs:
 
       - name: Publish doctest results (Linux)
         if: hashFiles('artifacts/junit-doctest/TEST-doctest.xml') != ''
-        uses: EnricoMi/publish-unit-test-result-action/linux@d0a4676d0e0b938bc201470d88276b7c74c712b3 # v2.24.0
+        uses: EnricoMi/publish-unit-test-result-action/linux@7622c5bf3d112a72ab4fa3951c2aa5723d8ab92d # v2.25.0
         with:
           check_name: "Doctest results (Linux)"
           commit: ${{ github.event.workflow_run.head_sha }}
