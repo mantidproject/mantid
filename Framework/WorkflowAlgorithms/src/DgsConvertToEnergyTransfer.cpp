@@ -145,13 +145,6 @@ void DgsConvertToEnergyTransfer::exec() {
           fileProp = "Filename";
         }
 
-        if (runFileName.ends_with("_neutron_event.dat")) {
-          g_log.notice() << "Loading PreNeXus monitors\n";
-          loadAlgName = "LoadPreNexusMonitors";
-          boost::replace_first(runFileName, "_neutron_event.dat", "_runinfo.xml");
-          fileProp = "RunInfoFilename";
-        }
-
         // Load the monitors
         auto loadmon = createChildAlgorithm(loadAlgName);
         loadmon->setProperty(fileProp, runFileName);

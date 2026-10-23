@@ -19,24 +19,9 @@ namespace DataHandling {
 
   @date 2012-01-30
 */
-/// Make the code clearer by having this an explicit type
-using PixelType = int;
-/// Type for the DAS time of flight (data file)
-using DasTofType = int;
-
-/// Structure that matches the form in the binary event list.
-#pragma pack(push, 4) // Make sure the structure is 8 bytes.
-struct DasEvent {
-  /// Time of flight.
-  DasTofType tof;
-  /// Pixel identifier as published by the DAS/DAE/DAQ.
-  PixelType pid;
-};
-#pragma pack(pop)
 /// Allowed file types
 
 enum FileType {
-  PRENEXUS_FILE,    ///< PreNeXus files
   EVENT_NEXUS_FILE, ///< Event NeXus files
   HISTO_NEXUS_FILE, ///< Histogram NeXus files
   RAW_FILE          ///< ISIS raw files
@@ -48,7 +33,7 @@ public:
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Workflow algorithm to determine chunking strategy for event nexus, "
-           "runinfo.xml, raw, or histo nexus files.";
+           "raw, or histo nexus files.";
   }
 
   int version() const override;
