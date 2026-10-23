@@ -16,7 +16,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
@@ -258,6 +258,28 @@ using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
+namespace {
+/**
+ * Return the efixed for the given spectrum. For grouped spectra in indirect mode without a
+ * global EFixed no value can be found (the group itself carries no parameters), so this throws,
+ * matching the previous IDetector/DetectorGroup based lookup.
+ */
+double getEFixedForSpectrum(const SofQCommon &emodeProperties, const SpectrumInfo &spectrumInfo,
+                            const ComponentInfo &componentInfo, const size_t wsIndex) {
+  const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(wsIndex);
+  if (spectrumDefinition.size() == 1 || emodeProperties.m_emode == 1 || emodeProperties.m_efixedGiven) {
+    return emodeProperties.getEFixed(componentInfo, spectrumDefinition[0].first);
+  }
+  std::string groupName;
+  for (const auto &def : spectrumDefinition) {
+    groupName += componentInfo.name(def.first) + ";";
+  }
+  throw std::runtime_error("Cannot find EFixed parameter for component \"" + groupName +
+                           "\". This is required in indirect mode. Please check the IDF "
+                           "contains these values.");
+}
+} // namespace
+
 /**
  * @return the name of the Algorithm
  */
@@ -357,6 +379,7 @@ void SofQWNormalisedPolygon::exec() {
 
   const auto &inputIndices = inputWS->indexInfo();
   const auto &spectrumInfo = inputWS->spectrumInfo();
+  const auto &componentInfo = inputWS->componentInfo();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nHistos); ++i) {
@@ -365,7 +388,7 @@ void SofQWNormalisedPolygon::exec() {
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
       continue;
     }
-    const auto *det = m_EmodeProperties.m_emode == 1 ? nullptr : &spectrumInfo.detector(i);
+    const double efixed = getEFixedForSpectrum(m_EmodeProperties, spectrumInfo, componentInfo, i);
 
     const double thetaLower = m_twoThetaLowers[i];
     const double thetaUpper = m_twoThetaUppers[i];
@@ -379,12 +402,12 @@ void SofQWNormalisedPolygon::exec() {
       const double dE_j = X[j];
       const double dE_jp1 = X[j + 1];
 
-      const double lrQ = m_EmodeProperties.q(dE_jp1, thetaLower, det);
+      const double lrQ = m_EmodeProperties.q(dE_jp1, thetaLower, efixed);
 
-      const V2D ll(dE_j, m_EmodeProperties.q(dE_j, thetaLower, det));
+      const V2D ll(dE_j, m_EmodeProperties.q(dE_j, thetaLower, efixed));
       const V2D lr(dE_jp1, lrQ);
-      const V2D ur(dE_jp1, m_EmodeProperties.q(dE_jp1, thetaUpper, det));
-      const V2D ul(dE_j, m_EmodeProperties.q(dE_j, thetaUpper, det));
+      const V2D ur(dE_jp1, m_EmodeProperties.q(dE_jp1, thetaUpper, efixed));
+      const V2D ul(dE_j, m_EmodeProperties.q(dE_j, thetaUpper, efixed));
       if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
         logStream << "Spectrum=" << specNo << ", lower theta=" << thetaLower * rad2deg
                   << ", upper theta=" << thetaUpper * rad2deg << ". QE polygon: ll=" << ll << ", lr=" << lr
@@ -467,10 +490,9 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(const MatrixWorkspace &work
       continue;
     }
 
-    const auto &det = spectrumInfo.detector(i);
     // Check to see if there is an EFixed, if not skip it
     try {
-      m_EmodeProperties.getEFixed(det);
+      getEFixedForSpectrum(m_EmodeProperties, spectrumInfo, componentInfo, i);
     } catch (std::runtime_error &) {
       continue;
     }
@@ -567,29 +589,29 @@ void SofQWNormalisedPolygon::initAngularCachesTable(const MatrixWorkspace &works
   const auto &lowers = angleTable.getColVector<double>("Min two theta");
   const auto &uppers = angleTable.getColVector<double>("Max two theta");
   const auto &spectrumInfo = workspace.spectrumInfo();
+  const auto &detectorInfo = workspace.detectorInfo();
+  const auto &componentInfo = workspace.componentInfo();
   for (size_t i = 0; i < nhist; ++i) {
     m_progress->report("Reading detector angles");
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i)) {
       continue;
     }
-    const auto &det = spectrumInfo.detector(i);
     try {
-      m_EmodeProperties.getEFixed(det);
+      getEFixedForSpectrum(m_EmodeProperties, spectrumInfo, componentInfo, i);
     } catch (std::runtime_error &) {
       continue;
     }
 
+    const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(i);
     if (spectrumInfo.hasUniqueDetector(i)) {
       const auto twoThetas = twoThetasFromTable(spectrumInfo.firstDetectorID(i), detIDs, lowers, uppers);
       m_twoThetaLowers[i] = twoThetas.first;
       m_twoThetaUppers[i] = twoThetas.second;
     } else {
-      const auto &group = dynamic_cast<const DetectorGroup &>(det);
-      const auto ids = group.getDetectorIDs();
       double minTwoTheta{spectrumInfo.twoTheta(i)};
       double maxTwoTheta{minTwoTheta};
-      for (const auto id : ids) {
-        const auto twoThetas = twoThetasFromTable(id, detIDs, lowers, uppers);
+      for (const auto &def : spectrumDefinition) {
+        const auto twoThetas = twoThetasFromTable(detectorInfo.detid(def.first), detIDs, lowers, uppers);
         minTwoTheta = std::min(minTwoTheta, twoThetas.first);
         maxTwoTheta = std::max(maxTwoTheta, twoThetas.second);
       }
