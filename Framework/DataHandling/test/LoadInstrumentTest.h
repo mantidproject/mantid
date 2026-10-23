@@ -212,7 +212,6 @@ public:
 
     auto ids_from_map = output->getSpectrum(257).getDetectorIDs();
     const auto &spectrumInfo = output->spectrumInfo();
-    const auto &det_from_ws = spectrumInfo.detector(257);
     TS_ASSERT_EQUALS(ids_from_map.size(), 1);
     TS_ASSERT_EQUALS(*ids_from_map.begin(), 602);
     TS_ASSERT_EQUALS(spectrumInfo.firstDetectorID(257), 602);
