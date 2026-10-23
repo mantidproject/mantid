@@ -44,6 +44,26 @@ def _is_ancestor(ci, ancestor, idx):
     return False
 
 
+def _path_below_root(ci, idx):
+    """'/' path from the child of the instrument root down to idx, e.g. 'SouthBank/reference-sphere-1/block1'."""
+    names = []
+    while ci.hasParent(idx):
+        names.append(ci.name(idx))
+        idx = ci.parent(idx)
+    return "/".join(reversed(names))
+
+
+def _rotation_matrix(q):
+    w, x, y, z = q.real(), q.imagI(), q.imagJ(), q.imagK()
+    return np.array(
+        [
+            [1 - 2 * (y * y + z * z), 2 * (x * y - w * z), 2 * (x * z + w * y)],
+            [2 * (x * y + w * z), 1 - 2 * (x * x + z * z), 2 * (y * z - w * x)],
+            [2 * (x * z - w * y), 2 * (y * z + w * x), 1 - 2 * (x * x + y * y)],
+        ]
+    )
+
+
 def component_index(ci, path):
     """Component index from a name or '/' path (block names repeat in both banks: 'NorthBank/detector-bank/reference-sphere-1/block1')."""
     first, *rest = path.split("/")
@@ -54,7 +74,7 @@ def component_index(ci, path):
 
 
 class PixelGeometry:
-    """Pixel positions in the frame of their bank, so bank moves can be applied in numpy.
+    """Pixel positions in the frame of their bank, so bank and block moves can be applied in numpy.
 
     Pixels outside `banks` keep their starting DIFC. c_i is the starting Mantid value scaled by the geometric factor
     g = (L_cs + L2) sin(theta), so the absolute constant is always Mantid's."""
@@ -84,16 +104,39 @@ class PixelGeometry:
             sel = self.bank_of == ib
             rel = np.array([ci.position(int(d)) for d in self.det[sel]]) - np.array(ci.position(b))
             self.local[sel] = rel @ rot_y(self.q0[3 * ib + 2])  # R^T rel, row-wise
+        # detector blocks (modules) of the refined banks: each pixel's parent component
+        parents = [ci.parent(int(d)) if b >= 0 else -1 for d, b in zip(self.det, self.bank_of)]
+        block_idx = sorted({p for p in parents if p >= 0})
+        self.block_of = np.array([block_idx.index(p) if p >= 0 else -1 for p in parents])
+        self.blocks = [_path_below_root(ci, b) for b in block_idx]
+        self.block_bank = [int(self.bank_of[self.block_of == m][0]) for m in range(len(block_idx))]
+        # in the bank frame; the block component's own position, which is what RotateInstrumentComponent rotates about
+        self.block_centre = np.array(
+            [
+                (np.array(ci.position(b)) - ci.position(bank_idx[ib])) @ rot_y(self.q0[3 * ib + 2])
+                for b, ib in zip(block_idx, self.block_bank)
+            ]
+        )
         self.g0 = self._g(self.positions(self.q0))[0]
 
-    def positions(self, q_banks):
-        """Absolute pixel positions after bank moves (x, z, roty per bank)."""
-        out = np.zeros_like(self.local)
+    def positions(self, q_banks, q_blocks=None):
+        """Absolute pixel positions after bank moves (x, z, roty per bank) and optional block moves (shift along the
+        bank normal, tilt about the vertical through the block centre)."""
+        local = self.local if q_blocks is None else self._move_blocks(q_blocks)
+        out = np.zeros_like(local)
         for ib in range(len(self.banks)):
             sel = self.bank_of == ib
             x, z, roty = q_banks[3 * ib : 3 * ib + 3]
-            out[sel] = self.local[sel] @ rot_y(roty).T + [x, self.bank_y[ib], z]
+            out[sel] = local[sel] @ rot_y(roty).T + [x, self.bank_y[ib], z]
         return out
+
+    def _move_blocks(self, q_blocks):
+        local = self.local.copy()
+        for m, centre in enumerate(self.block_centre):
+            sel = self.block_of == m
+            normal, tilt = q_blocks[2 * m : 2 * m + 2]
+            local[sel] = (local[sel] - centre) @ rot_y(tilt).T + centre + [0.0, 0.0, normal]
+        return local
 
     def _g(self, positions):
         rel = positions - self.sample
@@ -101,9 +144,9 @@ class PixelGeometry:
         sin_t = np.sqrt(0.5 * (1.0 - rel @ self.beam / np.where(l2 > 0, l2, 1.0)))
         return (self.l_cs + l2) * sin_t, sin_t
 
-    def difc(self, q_banks):
+    def difc(self, q_banks, q_blocks=None):
         """Chopper-path DIFC c_i (us/A) and sin(theta_i) of every spectrum."""
-        g, sin_t = self._g(self.positions(q_banks))
+        g, sin_t = self._g(self.positions(q_banks, q_blocks))
         in_bank = self.bank_of >= 0
         return np.where(in_bank, self.c0 * g / np.where(in_bank, self.g0, 1.0), self.c0), sin_t
 
@@ -111,25 +154,42 @@ class PixelGeometry:
 class RigidBanks:
     """Geometry parameters (x, z, roty) per bank, mapped to (c, sin_t, dc/dq) for the fit."""
 
-    STEPS = (1e-5, 1e-5, 1e-4)  # m, m, deg
+    BANK_STEPS = (1e-5, 1e-5, 1e-4)  # m, m, deg
 
     def __init__(self, geom):
         self.geom = geom
         self.q0 = geom.q0.copy()
         self.labels = [f"{bank}.{par}" for bank in geom.banks for par in ("x", "z", "roty")]
+        self.steps = np.tile(self.BANK_STEPS, len(geom.banks))
 
     def __call__(self, q):
-        c, sin_t = self.geom.difc(q)
+        c, sin_t = self.geom.difc(*self.split(q))
         dc_dq = np.empty((c.size, q.size))
-        for a, step in enumerate(np.tile(self.STEPS, len(self.geom.banks))):
+        for a, step in enumerate(self.steps):
             dq = np.zeros(q.size)
             dq[a] = step
-            dc_dq[:, a] = (self.geom.difc(q + dq)[0] - self.geom.difc(q - dq)[0]) / (2 * step)
+            dc_dq[:, a] = (self.geom.difc(*self.split(q + dq))[0] - self.geom.difc(*self.split(q - dq))[0]) / (2 * step)
         return c, sin_t, dc_dq
 
     def split(self, q):
         """(bank parameters, block parameters or None)."""
         return q, None
+
+
+class BankModules(RigidBanks):
+    """Rigid banks plus, per detector block, a shift along the bank normal and a tilt about the vertical."""
+
+    BLOCK_STEPS = (1e-5, 1e-3)  # m, deg
+
+    def __init__(self, geom, q_banks):
+        super().__init__(geom)
+        self.n_bank_params = len(q_banks)
+        self.q0 = np.concatenate([q_banks, np.zeros(2 * len(geom.blocks))])
+        self.labels += [f"{block}.{par}" for block in geom.blocks for par in ("normal", "tilt")]
+        self.steps = np.concatenate([self.steps, np.tile(self.BLOCK_STEPS, len(geom.blocks))])
+
+    def split(self, q):
+        return q[: self.n_bank_params], q[self.n_bank_params :]
 
 
 class FoldedData:
@@ -235,9 +295,10 @@ def project_out(J, m, w):
 class CalibrationFit:
     """Levenberg-Marquardt fit of the forward model to folded counts.
 
-    Parameters, in order: geometry q | timing parameters | kappa, sigma_rel | reflection intensities A."""
+    Parameters, in order: geometry q | timing parameters | kappa, sigma_rel | reflection intensities A.
+    `start`, a previous fit of the same data, seeds everything after the geometry."""
 
-    def __init__(self, geom, datasets, geometry_model, d_hkl, timing, kappa=1e-3, srel=1.5e-3):
+    def __init__(self, geom, datasets, geometry_model, d_hkl, timing, kappa=1e-3, srel=1.5e-3, start=None):
         self.geom, self.datasets, self.gm, self.timing = geom, datasets, geometry_model, timing
         for ds in datasets:  # masked spectra must not contribute, even when the mask didn't zero their counts
             ds.w[~geom.live] = 0.0
@@ -248,7 +309,10 @@ class CalibrationFit:
         self.x = np.concatenate([geometry_model.q0, timing.x0, [kappa, srel], np.ones(self.d_hkl.size)])
         self.labels = list(geometry_model.labels) + timing.labels + ["kappa", "sigma_rel"] + [f"I(d={d:.4f})" for d in self.d_hkl]
         self.free = np.ones(self.x.size, bool)
-        self._init_intensities()
+        if start is None:
+            self._init_intensities()
+        else:
+            self.x[self.nq :], self.free[self.nq :] = start.x[start.nq :], start.free[start.nq :]
 
     def split(self, x):
         """(geometry q, timing parameters, kappa, sigma_rel, intensities)."""
@@ -362,9 +426,29 @@ class CalibrationFit:
         return self
 
 
-def apply_geometry(ws, geom, q_banks, exec_child):
-    """Apply absolute bank moves (x, z, roty) to ws."""
+def apply_geometry(ws, geom, q_banks, exec_child, q_blocks=None):
+    """Apply absolute bank moves (x, z, roty) to ws, then block moves (normal shift, tilt about the block centre)."""
     for ib, bank in enumerate(geom.banks):
         x, z, roty = q_banks[3 * ib : 3 * ib + 3]
         exec_child("RotateInstrumentComponent", Workspace=ws, ComponentName=bank, X=0, Y=1, Z=0, Angle=roty, RelativeRotation=False)
         exec_child("MoveInstrumentComponent", Workspace=ws, ComponentName=bank, X=x, Y=geom.bank_y[ib], Z=z, RelativePosition=False)
+    if q_blocks is None:
+        return
+    ci = ws.componentInfo()
+    for m, block in enumerate(geom.blocks):
+        normal, tilt = q_blocks[2 * m : 2 * m + 2]
+        nx, _, nz = rot_y(q_banks[3 * geom.block_bank[m] + 2]) @ [0.0, 0.0, 1.0]  # bank normal, global frame
+        exec_child("MoveInstrumentComponent", Workspace=ws, ComponentName=block, X=normal * nx, Y=0, Z=normal * nz, RelativePosition=True)
+        # a relative rotation turns about an axis in the component's own frame: NorthBank's blocks sit under a 180 deg
+        # rotation about z, so global Y is -Y there
+        axis = _rotation_matrix(ci.rotation(component_index(ci, block))).T @ [0.0, 1.0, 0.0]
+        exec_child(
+            "RotateInstrumentComponent",
+            Workspace=ws,
+            ComponentName=block,
+            X=axis[0],
+            Y=axis[1],
+            Z=axis[2],
+            Angle=tilt,
+            RelativeRotation=True,
+        )
