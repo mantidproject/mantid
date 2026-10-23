@@ -42,7 +42,7 @@ class Prop:
     OUTPUT_WS_LAM = "OutputWorkspaceWavelength"
     MULT_OUTPUT_WS = "OutputWorkspaces"
     MULT_OUTPUT_WS_BINNED = "OutputWorkspacesBinned"
-    MULT_OUTPUT_WS_LAM = "OuputWorkspacesWavelength"
+    MULT_OUTPUT_WS_LAM = "OutputWorkspacesWavelength"
     OUTPUT_WS_FIRST_TRANS = "OutputWorkspaceFirstTransmission"
     OUTPUT_WS_SECOND_TRANS = "OutputWorkspaceSecondTransmission"
     OUTPUT_WS_TRANS = "OutputWorkspaceTransmission"
@@ -848,7 +848,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _getSlicedWorkspaceGroupName(self, workspace):
         return workspace + "_sliced"
 
-    def _reduce(self, input_workspace, first_trans_workspace, second_trans_workspace, adjusted_theta=None, multi_reduction: bool= False):
+    def _reduce(self, input_workspace, first_trans_workspace, second_trans_workspace, adjusted_theta=None, multi_reduction: bool = False):
         """Run the child algorithm to do the reduction. Return the child algorithm."""
         self.log().information("Running ReflectometryReductionOneAuto on " + input_workspace)
         alg = self.createChildAlgorithm("ReflectometryReductionOneAuto")
