@@ -552,8 +552,7 @@ private:
     bool status = true;
     try {
       file.openGroup(groupAddress);
-    } catch (const H5::Exception &x) {
-      UNUSED_ARG(x);
+    } catch (const H5::Exception &) {
       status = false;
     }
     return status;

@@ -86,7 +86,9 @@ void General::setBaseEqn()
 */
 {}
 
-void General::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) {
+void General::getBoundingBox([[maybe_unused]] double &xmax, [[maybe_unused]] double &ymax,
+                             [[maybe_unused]] double &zmax, [[maybe_unused]] double &xmin,
+                             [[maybe_unused]] double &ymin, [[maybe_unused]] double &zmin) {
   /**
      General bounding box
      Intended to improve bounding box for a general quadratic surface
@@ -102,12 +104,6 @@ void General::getBoundingBox(double &xmax, double &ymax, double &zmax, double &x
      @param zmin :: as for xmin
      //TODO: Implement bounding box for General
      */
-  UNUSED_ARG(xmax);
-  UNUSED_ARG(ymax);
-  UNUSED_ARG(zmax);
-  UNUSED_ARG(xmin);
-  UNUSED_ARG(ymin);
-  UNUSED_ARG(zmin);
 }
 
 } // namespace Mantid::Geometry

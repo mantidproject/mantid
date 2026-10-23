@@ -223,16 +223,16 @@ Statistics getStatistics(std::span<double const> data, const unsigned int flags)
 }
 
 /// Getting statistics of a string array should just give a bunch of NaNs
-template <> MANTID_KERNEL_DLL Statistics getStatistics<string>(const vector<string> &data, const unsigned int flags) {
-  UNUSED_ARG(flags);
-  UNUSED_ARG(data);
+template <>
+MANTID_KERNEL_DLL Statistics getStatistics<string>([[maybe_unused]] const vector<string> &data,
+                                                   [[maybe_unused]] const unsigned int flags) {
   return Statistics(); // default is all nan
 }
 
 /// Getting statistics of a boolean array should just give a bunch of NaNs
-template <> MANTID_KERNEL_DLL Statistics getStatistics<bool>(const vector<bool> &data, const unsigned int flags) {
-  UNUSED_ARG(flags);
-  UNUSED_ARG(data);
+template <>
+MANTID_KERNEL_DLL Statistics getStatistics<bool>([[maybe_unused]] const vector<bool> &data,
+                                                 [[maybe_unused]] const unsigned int flags) {
   return Statistics(); // default is all nan
 }
 
