@@ -592,6 +592,7 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl, const DblMatrix &ori
     if (!peak->getDetector()) {
       return;
     }
+    peak->setDetPos(detInfo.samplePosition() + detectorDir * detInfo.l2(index));
   } else if (useExtendedDetectorSpace) {
     // use extended detector space to try and guess peak position
     const auto returnedComponent = m_inst->getComponentByName("extended-detector-space");

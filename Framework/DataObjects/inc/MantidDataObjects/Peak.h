@@ -119,6 +119,7 @@ public:
   void setFinalEnergy(double m_finalEnergy) override;
 
   virtual Mantid::Kernel::V3D getDetPos() const;
+  void setDetPos(const Mantid::Kernel::V3D &pos);
   double getL1() const override;
   double getL2() const override;
 
@@ -128,7 +129,7 @@ public:
   /// Assignment
   Peak &operator=(const Peak &other);
 
-  /// Get the approximate position of a peak that falls off the detectors
+  /// Get the approximate absolute position of a peak that falls off the detectors
   Kernel::V3D getVirtualDetectorPosition(const Kernel::V3D &detectorDir) const;
 
   double getValueByColName(std::string colName) const override;

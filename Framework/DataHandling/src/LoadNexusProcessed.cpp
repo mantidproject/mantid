@@ -1536,6 +1536,16 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
         double val = nxDouble[r];
         peakWS->getPeak(r).setMonitorCount(val);
       }
+    } else if (str == "column_22") {
+      // Offset from the detector centre (or from the sample position if there is no detector),
+      // so this must be read after the detector ID in column_1
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
+      nxDouble.load();
+      for (size_t r = 0; r < numberPeaks; ++r) {
+        auto &peak = peakWS->getPeak(r);
+        const V3D offset(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
+        peak.setDetPos((peak.getDetector() ? peak.getDetectorPosition() : peak.getSamplePos()) + offset);
+      }
     }
   }
   // After all columns read set IntHKL if not set

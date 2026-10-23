@@ -1,0 +1,1 @@
+- :ref:`algm-PredictPeaks` now gives peaks a Q-sample and d-spacing that agree with the :ref:`UB matrix <Lattice>` and HKL of the peak, rather than those of the centre of the nearest detector pixel. A saved ``PeaksWorkspace`` keeps these positions when it is reloaded.
