@@ -4,6 +4,7 @@
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd"
             name="POLDI"
             valid-from="2014-08-06 12:30:00"
+            valid-to="2014-09-05 09:25:59"
             last-modified="2015-06-19 11:30:00">
     
     <type name="source" is="Source" />
