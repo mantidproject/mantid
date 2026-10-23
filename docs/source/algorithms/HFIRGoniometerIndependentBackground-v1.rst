@@ -40,34 +40,43 @@ other instruments.
 Uncertainties
 -------------
 
-The percentile is an estimator built from the rotation steps that contribute to it, not a single
-measurement, so it is more precise than the value it selects. For :math:`n` contributing rotations
-whose values have standard deviation :math:`\sigma`, the output variance is
+The uncertainty on the output background is treated as the uncertainty of the percentile estimate,
+not just as the uncertainty of one selected input value. In other words, when several rotation steps
+contribute to the background, the algorithm assumes the combined estimate is more reliable than any
+single contributing point.
 
-.. math::
+The amount of this improvement depends on how many rotation steps are used. When
+``BackgroundWindowSize`` is unset, all rotations for that detector pixel contribute. When
+``BackgroundWindowSize`` is set, only the rotations inside the sliding window contribute. Larger
+windows therefore usually give smaller uncertainties, while smaller windows stay closer to the
+uncertainty of the selected input value.
 
-   \mathrm{Var}(\hat{q}_p) = \frac{p(1-p)}{\phi(z_p)^2} \frac{\sigma^2}{n}
+The calculation starts from the uncertainty of the input value selected by the percentile. This is
+intentional: the percentile is used to avoid Bragg peaks, so the uncertainty estimate also avoids
+using those rejected peak values.
 
-where :math:`p` is ``BackgroundLevel`` expressed as a fraction, :math:`z_p` is the standard normal
-quantile at :math:`p` and :math:`\phi` its density. The leading factor is :math:`\pi/2` for the
-median, giving the familiar :math:`1.2533\,\sigma/\sqrt{n}`. Here :math:`n` is the length of the
-rotation axis when ``BackgroundWindowSize`` is unset, and ``BackgroundWindowSize`` otherwise, while
-:math:`\sigma^2` is the input variance of the value the percentile selected. Taking :math:`\sigma`
-at the percentile rather than across all contributing rotations keeps the estimate free of the Bragg
-peaks that the percentile is chosen to reject.
+There are a few special cases and limitations:
 
-A ``BackgroundLevel`` of 0 or 100 selects the smallest or largest value, for which this limit does not
-apply; those cases keep the variance of the selected value, which is a conservative upper bound.
+- If the percentile selects the smallest or largest value, the algorithm keeps the uncertainty of
+  that selected input value. This includes ``BackgroundLevel`` values of 0 and 100, and can also
+  happen for low or high percentiles when a small sliding window is used.
+- For a sliding window, the algorithm uses the ranked value that is actually selected from the
+  window. With small windows, that rank may only approximate the requested ``BackgroundLevel``.
+- If the sliding window is padded by repeating values at the edge of an incomplete rotation, fewer
+  independent measurements contribute than the window size suggests, so the reported uncertainty may
+  be slightly too small.
+- Output uncertainties are correlated with one another. Without a sliding window, the same
+  background estimate is reused along the full rotation axis for each pixel. With a sliding window,
+  neighbouring rotations share most of the same input values. A ``MDHistoWorkspace`` cannot store
+  these correlations, so operations on the output workspace that combine values along the rotation
+  axis while propagating errors, such as :ref:`IntegrateMDHistoWorkspace <algm-IntegrateMDHistoWorkspace>`,
+  may report uncertainties that are too small.
 
-Two limitations are worth noting. Where the sliding window is padded at the ends of an incomplete
-rotation, it repeats values, so fewer than ``BackgroundWindowSize`` independent rotations contribute
-and the variance is slightly underestimated. More importantly, the output uncertainties are strongly
-correlated - completely so across the rotation axis when ``BackgroundWindowSize`` is unset, and
-between neighbouring rotations otherwise, since their windows overlap. A ``MDHistoWorkspace`` cannot
-represent that correlation, so any subsequent operation that combines these values along the rotation
-axis will underestimate the resulting uncertainty.
-
-
+These uncertainties are not carried into Q space by the usual single-crystal workflows.
+:ref:`ConvertHFIRSCDtoMDE <algm-ConvertHFIRSCDtoMDE>` assigns each event an error derived from its
+signal, and the ``BackgroundWorkspace`` path of :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ>`
+uses only the background signal. In both cases the background uncertainty in the result is a Poisson
+estimate based on the background signal, and the limitations above do not apply to it.
 
 Usage
 -----
