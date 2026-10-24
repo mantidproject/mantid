@@ -17,6 +17,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/V3D.h"
 #include <algorithm>
@@ -278,6 +279,47 @@ public:
                       ComponentType::Rectangular); //  A detector is never a
                                                    //  bank, let alone a
                                                    //  detector
+  }
+
+  void test_visitation_of_structured_detector() {
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(V3D(0, 0, -10), V3D(0, 0, 0), V3D(0, 0, 1));
+    auto bank = new StructuredDetector("structured_bank");
+    // An irregular 3 x 2 grid: (3 + 1) * (2 + 1) vertices, sheared along x as y increases.
+    std::vector<double> xVertices{0, 1, 2, 3, 0.5, 1.5, 2.5, 3.5, 1, 2, 3, 4};
+    std::vector<double> yVertices{0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
+    auto const expectedX = xVertices;
+    auto const expectedY = yVertices;
+    bank->initialize(3, 2, std::move(xVertices), std::move(yVertices), true, 100, true, 10, 2);
+    instrument->add(bank);
+    for (size_t x = 0; x < 3; ++x) {
+      for (size_t y = 0; y < 2; ++y) {
+        instrument->markAsDetector(bank->getAtXY(x, y).get());
+      }
+    }
+
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument, nullptr /*parameter map*/);
+    auto const &compInfo = *std::get<0>(wrappers);
+
+    auto const bankIndex = compInfo.indexOfAny("structured_bank");
+    TS_ASSERT_EQUALS(compInfo.componentType(bankIndex), Mantid::Beamline::ComponentType::Structured);
+    TS_ASSERT(compInfo.isStructuredDetector(bankIndex));
+    // A Structured bank is not a grid bank: its pixels have no regular start and step.
+    TS_ASSERT(!compInfo.isGridDetector(bankIndex));
+
+    auto const &grid = compInfo.structuredGridComponent(bankIndex);
+    TS_ASSERT_EQUALS(grid.nX, 3);
+    TS_ASSERT_EQUALS(grid.nY, 2);
+    TS_ASSERT_EQUALS(grid.idStart, bank->idStart());
+    TS_ASSERT_EQUALS(grid.idStep, bank->idStep());
+    TS_ASSERT_EQUALS(grid.idStepByRow, bank->idStepByRow());
+    TS_ASSERT_EQUALS(grid.idFillByFirstY, bank->idFillByFirstY());
+    TS_ASSERT_EQUALS(grid.xVertices, expectedX);
+    TS_ASSERT_EQUALS(grid.yVertices, expectedY);
+
+    // Anything else is not Structured.
+    TS_ASSERT(!compInfo.isStructuredDetector(compInfo.root()));
+    TS_ASSERT_THROWS(compInfo.structuredGridComponent(compInfo.root()), std::runtime_error &);
+    TS_ASSERT_THROWS(compInfo.structuredGridComponent(0), std::runtime_error &);
   }
 
   void test_visitation_of_non_rectangular_detectors() {

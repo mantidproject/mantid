@@ -312,6 +312,17 @@ Beamline::PixelGridComponent ComponentInfo::pixelGridComponent(const size_t comp
   return m_componentInfo->pixelGridComponent(componentIndex);
 }
 
+bool ComponentInfo::isStructuredDetector(size_t const componentIndex) const {
+  return m_componentInfo->isStructuredDetector(componentIndex);
+}
+
+const Beamline::StructuredGridComponent &ComponentInfo::structuredGridComponent(const size_t componentIndex) const {
+  if (!isStructuredDetector(componentIndex)) {
+    throw std::runtime_error("ComponentType is not Structured in ComponentInfo::structuredGridComponent.");
+  }
+  return m_componentInfo->structuredGridComponent(componentIndex);
+}
+
 size_t ComponentInfo::detectorIndexAtXYZ(const size_t componentIndex, const int x, const int y, const int z) const {
   return m_componentInfo->detectorIndexAtXYZ(componentIndex, x, y, z);
 }

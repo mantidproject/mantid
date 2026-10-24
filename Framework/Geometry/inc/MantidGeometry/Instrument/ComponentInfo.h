@@ -8,6 +8,7 @@
 
 #include "MantidBeamline/ComponentType.h"
 #include "MantidBeamline/PixelGridComponent.h"
+#include "MantidBeamline/StructuredGridComponent.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/ComponentInfoIterator.h"
@@ -157,6 +158,9 @@ public:
   size_t detectorIndexAtXYZ(const size_t componentIndex, const int x, const int y, const int z) const;
   std::tuple<int, int, int> xyzForDetectorID(const size_t componentIndex, const detid_t detectorID) const;
   bool isGridDetector(size_t const componentIndex) const;
+  /// The pixel counts, ID numbering and pixel vertices of a Structured bank. Throws if it is not one.
+  const Beamline::StructuredGridComponent &structuredGridComponent(const size_t componentIndex) const;
+  bool isStructuredDetector(size_t const componentIndex) const;
   size_t root() const;
   /// The instrument's reference frame: which axes point up and along the beam, and its handedness.
   /// A default frame (Y up, Z along the beam, right-handed) if this ComponentInfo was built without one.
