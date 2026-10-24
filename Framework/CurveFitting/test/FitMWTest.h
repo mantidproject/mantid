@@ -27,6 +27,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 
 #include "MantidGeometry/Instrument.h"
@@ -639,15 +640,14 @@ public:
     ws->setInstrument(instrument);
     ws->getSpectrum(0).setDetectorID(det->getID());
 
-    auto &pmap = ws->instrumentParameters();
-
     std::string value = "20.0 , ExpDecay , Lifetime , , , , , , , TOF ,";
-    pmap.add("fitting", det, "Lifetime", value);
+    auto &compInfo = ws->mutableComponentInfo();
     const auto &detectorInfo = ws->detectorInfo();
     const auto detIndex = detectorInfo.indexOf(det->getID());
-    const auto &detFromWS = detectorInfo.detector(detIndex);
+    compInfo.addParameter(detIndex, "fitting", "Lifetime", value);
 
-    Geometry::Parameter_sptr param = pmap.getRecursive(&detFromWS, "Lifetime", "fitting");
+    Geometry::Parameter_sptr param =
+        compInfo.sharedParameterInfo()->getRecursive(compInfo, detIndex, "Lifetime", "fitting");
     TS_ASSERT(param);
 
     API::IFunction_sptr expDecay(new ExpDecay);
