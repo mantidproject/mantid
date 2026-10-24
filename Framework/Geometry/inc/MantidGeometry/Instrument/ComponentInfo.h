@@ -68,6 +68,9 @@ private:
   /// The instrument's reference frame (up, along-beam and handedness), or null if none was given
   std::shared_ptr<const ReferenceFrame> m_referenceFrame;
 
+  /// The named parameter on this component (or, if recursive, its nearest ancestor), or null.
+  std::shared_ptr<Parameter> findParameter(size_t componentIndex, std::string const &name, bool recursive) const;
+
   template <class T> std::vector<T> getParameter(size_t componentIndex, const std::string &name, bool recursive) const;
 
   /// Shared implementation of the typed add*() methods.
@@ -197,9 +200,26 @@ public:
   std::vector<bool> getBoolParameter(const size_t componentIndex, const std::string &name, bool recursive = true) const;
   std::vector<std::string> getStringParameter(const size_t componentIndex, const std::string &name,
                                               bool recursive = true) const;
+  std::vector<Kernel::V3D> getPositionParameter(const size_t componentIndex, const std::string &name,
+                                                bool recursive = true) const;
+  std::vector<Kernel::Quat> getRotationParameter(const size_t componentIndex, const std::string &name,
+                                                 bool recursive = true) const;
+  /// The named parameter's value as a string, of whatever type it is, or an empty string if it is unset.
+  std::string getParameterAsString(const size_t componentIndex, const std::string &name, bool recursive = true) const;
+  /// The named parameter's visibility attribute, or false if it is unset.
+  bool getParameterVisible(const size_t componentIndex, const std::string &name, bool recursive = true) const;
   /// The type of the named parameter, or an empty string if the component has no such parameter.
   std::string getParameterType(const size_t componentIndex, const std::string &name, bool recursive = true) const;
   double getFittingParameter(const size_t componentIndex, const std::string &name, double xvalue) const;
+  /// The description of the named parameter, or an empty string if it is unset.
+  std::string getParamDescription(const size_t componentIndex, const std::string &name, bool recursive = true) const;
+  /// The short description (tooltip) of the named parameter, or an empty string if it is unset.
+  std::string getParamShortDescription(const size_t componentIndex, const std::string &name,
+                                       bool recursive = true) const;
+  /// The component's own description: that of the parameter named after the component, not inherited.
+  std::string getDescription(const size_t componentIndex) const;
+  /// The component's own short description: that of the parameter named after the component, not inherited.
+  std::string getShortDescription(const size_t componentIndex) const;
 
   /// Add or replace a named parameter at a specific component index
   void addParameter(const size_t componentIndex, const std::string &type, const std::string &name,
@@ -227,6 +247,9 @@ public:
   void addFittingParameter(const size_t componentIndex, const std::string &name, const std::string &fittingFunction,
                            const std::string &value, const std::string *const pDescription = nullptr,
                            const std::string &pVisible = "true");
+  /// Set the component's description, as Component::setDescription() does: on the parameter named
+  /// after the component (searched recursively), or on a new empty string parameter of that name.
+  void setDescription(const size_t componentIndex, const std::string &description);
   /// Remove every parameter of this name from this component. Matches the name case-sensitively,
   /// as ParameterMap::clearParametersByName() does.
   void clearParameter(const size_t componentIndex, const std::string &name);
