@@ -162,6 +162,7 @@ html_theme = "mantid_sphinx_theme"
 
 # Path to static files
 html_static_path = ["_static"]
+html_css_files = ["custom.css"]
 
 # -- Options for Epub output ---------------------------------------------------
 # This flag determines if a toc entry is inserted again at the beginning of its nested toc listing.
