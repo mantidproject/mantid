@@ -20,8 +20,33 @@ before it is subtracted. The result, ``Sample - Background``, can then be conver
 :ref:`HB3AAdjustSampleNorm <algm-HB3AAdjustSampleNorm>` with ``OutputType="Detector"`` for several scans. With this
 output type, :ref:`HB3AAdjustSampleNorm <algm-HB3AAdjustSampleNorm>` always returns several scans as a WorkspaceGroup.
 Each member of a WorkspaceGroup is processed with its own flux logs.
-``InputBackground`` has the same pixel dimensions and a single goniometer angle.
 The sample and the background must come from the same instrument.
+
+Background
+##########
+
+``InputBackground`` is in counts and takes one of two forms:
+
+- An MDHistoWorkspace with dimensions (y, x, goniometer angle) and a single goniometer angle, such as a background run
+  loaded with :ref:`LoadWANDSCD <algm-LoadWANDSCD>` or :ref:`HB3AAdjustSampleNorm <algm-HB3AAdjustSampleNorm>`.
+  Without ``InputGroupingWorkspace``, it has the pixel dimensions of the sample.
+- A Workspace2D with one value per spectrum, from the instrument of the sample. Its spectra are matched to the pixels
+  of the sample through their detector IDs, using the ``detectorID`` sample log of the sample, which
+  :ref:`LoadWANDSCD <algm-LoadWANDSCD>` and :ref:`HB3AAdjustSampleNorm <algm-HB3AAdjustSampleNorm>` write. Without
+  ``InputGroupingWorkspace``, it has one spectrum per pixel of the sample. Its flux is read from its own sample logs,
+  which hold a single value.
+
+When the sample was loaded with pixel grouping (``Grouping="2x2"`` or ``"4x4"``) and the background was not, provide
+the GroupingWorkspace that the loader returns in ``OutputGroupingWorkspace`` as ``InputGroupingWorkspace``. The
+intensities and errors squared of the background are then summed within each group before the subtraction. The group
+of each pixel or spectrum of the background is that of its detector ID, read from the ``detectorID`` log of an
+MDHistoWorkspace background or from the spectra of a Workspace2D background. The sample must have one pixel per
+group.
+
+For clarity, ``InputGroupingWorkspace`` is to be used only with an ungrouped background. The algorithm rejects a call
+that passes both a grouped background and ``InputGroupingWorkspace``, whatever the grouping of the background: the
+same as that of the sample, finer, or coarser. When the sample and the background were loaded with the same grouping,
+subtract them without ``InputGroupingWorkspace``.
 
 The sample must not be normalized, because the background is in counts. The algorithm does not check this; load the
 sample with ``NormalizeData=False`` in :ref:`LoadWANDSCD <algm-LoadWANDSCD>` or

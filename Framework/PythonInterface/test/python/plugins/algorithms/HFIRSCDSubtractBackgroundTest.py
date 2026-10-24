@@ -8,7 +8,7 @@ import unittest
 
 import numpy as np
 
-from mantid.api import WorkspaceGroup, mtd
+from mantid.api import WorkspaceFactory, WorkspaceGroup, mtd
 from mantid.simpleapi import (
     CloneWorkspace,
     CreateMDHistoWorkspace,
@@ -306,6 +306,156 @@ class HFIRSCDSubtractBackgroundTest(unittest.TestCase):
             "Member 'scan_2': is from DEMAND but InputBackground is from WAND; Member 'scan_3': must be an MDHistoWorkspace",
             "scans",
             self._create_background(),
+        )
+
+    # InputGroupingWorkspace and Workspace2D backgrounds, on synthetic workspaces
+
+    # ungrouped background: 4 x 6 pixels, pixel (i, j) holding detector i + 4 j, so that the detectorID log, ordered
+    # with the first dimension varying fastest, is 0, 1, ..., 23
+    UNGROUPED_SIGNAL = np.arange(1.0, 25.0).reshape((4, 6, 1), order="F")
+    UNGROUPED_ERROR_SQUARED = UNGROUPED_SIGNAL / 10.0
+    UNGROUPED_IDS = list(range(24))
+    # 2x2 grouping: detector i + 4 j belongs to group (i // 2) + 2 (j // 2) + 1, so that the 2 x 3 grouped pixel
+    # (row, col) holds group row + 2 col + 1, whose first detector is 2 row + 8 col
+    GROUPED_FIRST_IDS = [2 * row + 8 * col for col in range(3) for row in range(2)]
+
+    @staticmethod
+    def _create_grouping_workspace(name="grouping"):
+        """GroupingWorkspace without instrument, as built by LoadWANDSCD, for the 2x2 grouping of the 4 x 6 pixels."""
+        grouping = WorkspaceFactory.create("GroupingWorkspace", 24, 1, 1)
+        for detector_id in range(24):
+            i, j = detector_id % 4, detector_id // 4
+            grouping.mutableY(detector_id)[0] = float(i // 2 + 2 * (j // 2) + 1)
+            grouping.getSpectrum(detector_id).setDetectorID(detector_id)
+        mtd.addOrReplace(name, grouping)
+        return grouping
+
+    @staticmethod
+    def _grouped(array):
+        """Sum of a 4 x 6 x 1 array over 2x2 blocks of pixels, a 2 x 3 x 1 array."""
+        return array.reshape((2, 2, 3, 2, 1)).sum(axis=(1, 3))
+
+    def _create_grouped_sample(self, pixel_ids=None, name="sample"):
+        logs = {"detectorID": pixel_ids or self.GROUPED_FIRST_IDS}
+        return self._create_workspace(name, self.SAMPLE_SIGNAL, self.SAMPLE_ERROR_SQUARED, logs=logs)
+
+    def _create_ungrouped_background(self, with_ids=True, name="background"):
+        logs = {"detectorID": self.UNGROUPED_IDS} if with_ids else None
+        return self._create_workspace(name, self.UNGROUPED_SIGNAL, self.UNGROUPED_ERROR_SQUARED, logs=logs)
+
+    def test_grouping(self):
+        output, scaled_background = HFIRSCDSubtractBackground(
+            InputWorkspace=self._create_grouped_sample(),
+            InputBackground=self._create_ungrouped_background(),
+            InputGroupingWorkspace=self._create_grouping_workspace(),
+            NullifyNegativeValues=False,
+            OutputWorkspace="output",
+            OutputBackgroundWorkspace="scaled_background",
+        )
+        grouped_signal = self._grouped(self.UNGROUPED_SIGNAL)
+        grouped_error_squared = self._grouped(self.UNGROUPED_ERROR_SQUARED)
+        np.testing.assert_allclose(scaled_background.getSignalArray(), np.repeat(grouped_signal, 4, axis=2))
+        np.testing.assert_allclose(output.getSignalArray(), self.SAMPLE_SIGNAL - grouped_signal)
+        np.testing.assert_allclose(output.getErrorSquaredArray(), self.SAMPLE_ERROR_SQUARED + grouped_error_squared)
+
+    def _assert_grouping_rejected(self, message, sample, background):
+        self._assert_rejected(message, sample, background, InputGroupingWorkspace=self._create_grouping_workspace())
+
+    def test_validation_rejects_grouping_that_is_not_a_grouping_workspace(self):
+        CreateSampleWorkspace(NumBanks=1, BankPixelWidth=2, OutputWorkspace="not_grouping")
+        self._assert_rejected(
+            "InputGroupingWorkspace: must be a GroupingWorkspace",
+            self._create_grouped_sample(),
+            self._create_ungrouped_background(),
+            InputGroupingWorkspace="not_grouping",
+        )
+
+    def test_validation_rejects_grouped_background_with_grouping(self):
+        self._assert_grouping_rejected(
+            r"InputBackground: must not be grouped when InputGroupingWorkspace is provided: it has 6 pixels, but an "
+            r"ungrouped background has one pixel per spectrum of InputGroupingWorkspace \(24\). If InputBackground was "
+            "loaded with the same grouping as InputWorkspace, do not provide InputGroupingWorkspace",
+            self._create_grouped_sample(),
+            self._create_background(),
+        )
+
+    def test_validation_rejects_finely_grouped_background_with_grouping(self):
+        # 4 x 3 pixels: the 4 x 6 detectors grouped in pairs along the second dimension, finer than the 2x2 grouping
+        background = self._create_workspace(
+            "finely_grouped",
+            self.UNGROUPED_SIGNAL[:, ::2, :] + self.UNGROUPED_SIGNAL[:, 1::2, :],
+            self.UNGROUPED_ERROR_SQUARED[:, ::2, :] + self.UNGROUPED_ERROR_SQUARED[:, 1::2, :],
+            logs={"detectorID": [i + 8 * j for j in range(3) for i in range(4)]},
+        )
+        self._assert_grouping_rejected(
+            "InputBackground: must not be grouped when InputGroupingWorkspace is provided: it has 12 pixels",
+            self._create_grouped_sample(),
+            background,
+        )
+
+    def test_validation_rejects_workspace2d_with_other_spectra_than_grouping(self):
+        self._assert_grouping_rejected(
+            r"InputBackground: must have one spectrum per spectrum of InputGroupingWorkspace \(24\), found 1966080",
+            self._create_grouped_sample(),
+            self.instruments["WAND"],
+        )
+
+    def test_validation_rejects_background_without_detector_ids_with_grouping(self):
+        self._assert_grouping_rejected(
+            "InputBackground: the 'detectorID' log, required with InputGroupingWorkspace, is missing",
+            self._create_grouped_sample(),
+            self._create_ungrouped_background(with_ids=False),
+        )
+
+    def test_validation_rejects_sample_without_detector_ids_with_grouping(self):
+        self._assert_grouping_rejected(
+            "InputWorkspace: the 'detectorID' log, required with InputGroupingWorkspace, is missing",
+            self._create_sample(),
+            self._create_ungrouped_background(),
+        )
+
+    def test_validation_rejects_sample_with_other_number_of_groups(self):
+        sample = self._create_workspace("other_grouping", self.SAMPLE_SIGNAL[:, :2, :], self.SAMPLE_ERROR_SQUARED[:, :2, :])
+        self._assert_grouping_rejected(
+            "InputWorkspace: has 4 pixels but InputGroupingWorkspace has 6 groups", sample, self._create_ungrouped_background()
+        )
+
+    def test_detector_id_missing_from_grouping_raises(self):
+        with self.assertRaisesRegex(RuntimeError, "1 of 6 detector IDs are not found in InputGroupingWorkspace"):
+            HFIRSCDSubtractBackground(
+                InputWorkspace=self._create_grouped_sample(pixel_ids=self.GROUPED_FIRST_IDS[:5] + [999]),
+                InputBackground=self._create_ungrouped_background(),
+                InputGroupingWorkspace=self._create_grouping_workspace(),
+                OutputWorkspace="output",
+            )
+
+    def test_validation_rejects_workspace2d_with_several_bins(self):
+        background = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=2, OutputWorkspace="several_bins")
+        self._assert_rejected(
+            f"InputBackground: a Workspace2D background must have one value per spectrum, found {background.blocksize()}",
+            self._create_sample(),
+            background,
+        )
+
+    def test_validation_rejects_workspace2d_of_unsupported_instrument(self):
+        background = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=2, XMax=1.0, BinWidth=1.0, OutputWorkspace="one_bin")
+        self._assert_rejected(
+            "InputBackground: has instrument basic_rect; supported instruments are WAND", self._create_sample(), background
+        )
+
+    def test_validation_rejects_grouped_sample_with_workspace2d_and_no_grouping(self):
+        self._assert_rejected(
+            "InputWorkspace: has 6 pixels but InputBackground has 1966080 spectra; if InputWorkspace was grouped, "
+            "provide InputGroupingWorkspace",
+            self._create_grouped_sample(),
+            self.instruments["WAND"],
+        )
+
+    def test_validation_hints_at_grouping_on_pixel_mismatch(self):
+        self._assert_rejected(
+            "if InputWorkspace was grouped and InputBackground was not, provide InputGroupingWorkspace",
+            self._create_grouped_sample(),
+            self._create_ungrouped_background(),
         )
 
 

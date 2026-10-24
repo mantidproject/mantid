@@ -4,14 +4,15 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
 from mantid.api import (
     AlgorithmFactory,
+    ExperimentInfo,
     IMDHistoWorkspace,
-    IMDHistoWorkspaceProperty,
+    MatrixWorkspace,
     PropertyMode,
     PythonAlgorithm,
     Workspace,
@@ -19,7 +20,11 @@ from mantid.api import (
     WorkspaceProperty,
     mtd,
 )
+from mantid.dataobjects import GroupingWorkspace
 from mantid.kernel import Direction, StringListValidator
+
+# A background is either an MDHistoWorkspace with a single goniometer angle, or a Workspace2D with one value per spectrum
+Background = Union[IMDHistoWorkspace, MatrixWorkspace]
 
 
 class HFIRSCDSubtractBackground(PythonAlgorithm):
@@ -66,8 +71,17 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
             "for several scans. Each member of a WorkspaceGroup is processed with its own flux logs.",
         )
         self.declareProperty(
-            IMDHistoWorkspaceProperty("InputBackground", "", direction=Direction.Input),
-            doc="Background in counts, with dimensions (y, x, goniometer angle) and a single goniometer angle.",
+            WorkspaceProperty("InputBackground", "", direction=Direction.Input),
+            doc="Background in counts, from the instrument of the sample: either an MDHistoWorkspace with dimensions "
+            "(y, x, goniometer angle) and a single goniometer angle, or a Workspace2D with one value per spectrum, "
+            "whose spectra are matched to the pixels of the sample through their detector IDs.",
+        )
+        self.declareProperty(
+            WorkspaceProperty("InputGroupingWorkspace", "", direction=Direction.Input, optional=PropertyMode.Optional),
+            doc="Optional: GroupingWorkspace for a sample whose pixels were grouped while the background's were not, "
+            "such as the OutputGroupingWorkspace of LoadWANDSCD or HB3AAdjustSampleNorm. The intensities of the "
+            "background are summed within each group before the subtraction. To be used only with an ungrouped "
+            "background: a grouped background is rejected when InputGroupingWorkspace is provided.",
         )
         self.declareProperty(
             "NormalizedBy",
@@ -97,14 +111,18 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
         """
         Check the background first, then every member of the sample against it.
 
-        The background must have 3 dimensions, a supported instrument, a single goniometer angle and, unless
-        NormalizedBy is None, a valid flux log. When the background is invalid, the sample is not checked, since the
-        comparisons with the background would be meaningless. Each sample member must be an MDHistoWorkspace with 3
-        dimensions, a supported instrument, the pixel dimensions and instrument of the background, and a valid flux log.
-        The problems of all invalid members are reported together, each prefixed with the member name.
+        InputGroupingWorkspace, when given, must be a GroupingWorkspace. The background must have a supported instrument,
+        a single goniometer angle (MDHistoWorkspace) or a single value per spectrum (Workspace2D) and, unless NormalizedBy
+        is None, a valid flux log; with InputGroupingWorkspace, it must also be ungrouped (see _validate_background).
+        When the grouping workspace or the background is invalid, the sample is not checked, since the comparisons with
+        them would be meaningless. Each sample member must be an MDHistoWorkspace with 3 dimensions, a supported
+        instrument, pixels that match the background (see _validate_against_background), and a valid flux log. The
+        problems of all invalid members are reported together, each prefixed with the member name.
 
-        :returns: dictionary mapping "InputBackground" and/or "InputWorkspace" to a description of the problems found;
-            empty when the inputs are valid.
+        The detector IDs themselves are looked up only in PyExec, which raises if one is missing.
+
+        :returns: dictionary mapping "InputGroupingWorkspace", "InputBackground" and/or "InputWorkspace" to a
+            description of the problems found; empty when the inputs are valid.
         """
         issues = dict()
         sample = self.getProperty("InputWorkspace").value
@@ -113,9 +131,16 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
             return issues  # the missing mandatory property is reported by its own validator
         normalized_by = self.getProperty("NormalizedBy").value
 
-        background_issue = self._validate_workspace(background)
-        if background_issue is None and background.getDimension(2).getNBins() != 1:
-            background_issue = f"must have exactly one goniometer angle, found {background.getDimension(2).getNBins()}"
+        grouping = self.getProperty("InputGroupingWorkspace").value
+        n_groups = None
+        if grouping is not None:
+            if not isinstance(grouping, GroupingWorkspace):
+                issues["InputGroupingWorkspace"] = "InputGroupingWorkspace: must be a GroupingWorkspace"
+                return issues
+            group_ids = grouping.extractY()
+            n_groups = np.unique(group_ids[group_ids > 0]).size
+
+        background_issue = self._validate_background(background, grouping)
         if background_issue is None and normalized_by != "None":
             background_issue = self._validate_flux(background, normalized_by)
         if background_issue is not None:
@@ -132,7 +157,7 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
                 continue
             issue = self._validate_workspace(member)
             if issue is None:
-                issue = self._validate_against_background(member, background)
+                issue = self._validate_against_background(member, background, grouping, n_groups)
             if issue is None and normalized_by != "None":
                 issue = self._validate_flux(member, normalized_by)
             if issue is not None:
@@ -150,10 +175,17 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
         WorkspaceGroup sample produces a WorkspaceGroup output whose members are stored in the ADS as
         <OutputWorkspace>_<input member name>. OutputBackgroundWorkspace is created only when a name is given.
 
+        The background is first arranged in the pixel layout of each member (see _arranged_background); members with
+        the same pixel layout share this arrangement.
+
         The inputs are assumed valid, as checked by validateInputs.
+
+        :raises RuntimeError: if a detector ID of the sample or of the background is not found in InputBackground or in
+            InputGroupingWorkspace (see _workspace_indices).
         """
         sample = self.getProperty("InputWorkspace").value
         background = self.getProperty("InputBackground").value
+        grouping = self.getProperty("InputGroupingWorkspace").value
         normalized_by = self.getProperty("NormalizedBy").value
         nullify = self.getProperty("NullifyNegativeValues").value
         output_name = self.getPropertyValue("OutputWorkspace")
@@ -161,12 +193,14 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
         in_place = output_name == self.getPropertyValue("InputWorkspace")
 
         outputs, scaled_backgrounds = [], []
+        arrangements = dict()  # background arranged in the pixel layout of the members, by detectorID log
         for _, member in self._members(sample):
             flux_ratio = self._flux_ratio(member, background, normalized_by)
+            background_arrays = self._arranged_background(member, background, grouping, arrangements)
             if background_name:
-                scaled_backgrounds.append(self._scaled_background(member, background, flux_ratio))
+                scaled_backgrounds.append(self._scaled_background(member, *background_arrays, flux_ratio))
             output = member if in_place else self._clone(member)
-            self._subtract(member, background, flux_ratio, nullify, output)
+            self._subtract(member, *background_arrays, flux_ratio, nullify, output)
             outputs.append(output)
 
         if not isinstance(sample, WorkspaceGroup):
@@ -197,18 +231,42 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
         members = [workspace.getItem(i) for i in range(workspace.getNumberOfEntries())]
         return [(member.name() or str(i + 1), member) for i, member in enumerate(members)]
 
-    def _instrument(self, workspace: IMDHistoWorkspace) -> Optional[str]:
+    @staticmethod
+    def _experiment_info(workspace: Background) -> ExperimentInfo:
+        """
+        ExperimentInfo holding the instrument and the sample logs of a workspace.
+
+        :param workspace: an MDHistoWorkspace, whose first ExperimentInfo is returned, or a MatrixWorkspace, which is
+            itself an ExperimentInfo.
+        :returns: the ExperimentInfo of the workspace.
+        :raises RuntimeError: if an MDHistoWorkspace has no ExperimentInfo. Callers check getNumExperimentInfo() first.
+        """
+        if isinstance(workspace, MatrixWorkspace):
+            return workspace
+        return workspace.getExperimentInfo(0)
+
+    @staticmethod
+    def _n_angles(workspace: Background) -> int:
+        """
+        Number of goniometer angles of a workspace: the number of bins of the third dimension of an MDHistoWorkspace,
+        and 1 for a Workspace2D background.
+        """
+        if isinstance(workspace, MatrixWorkspace):
+            return 1
+        return workspace.getDimension(2).getNBins()
+
+    def _instrument(self, workspace: Background) -> Optional[str]:
         """
         Instrument of a workspace, as a key of the flux-log table.
 
-        The instrument name is read from the first ExperimentInfo of the workspace. Both names that a WAND or a DEMAND
-        workspace may carry are recognized: WAND or HB2C, and HB3A or DEMAND.
+        The instrument name is read from the ExperimentInfo of the workspace (see _experiment_info). Both names that a
+        WAND or a DEMAND workspace may carry are recognized: WAND or HB2C, and HB3A or DEMAND.
 
-        :param workspace: MDHistoWorkspace with at least one ExperimentInfo.
+        :param workspace: MDHistoWorkspace with at least one ExperimentInfo, or MatrixWorkspace.
         :returns: "WAND", "DEMAND", or None for any other instrument.
-        :raises RuntimeError: if the workspace has no ExperimentInfo. Callers check getNumExperimentInfo() first.
+        :raises RuntimeError: if an MDHistoWorkspace has no ExperimentInfo. Callers check getNumExperimentInfo() first.
         """
-        return self._INSTRUMENTS.get(workspace.getExperimentInfo(0).getInstrumentName())
+        return self._INSTRUMENTS.get(self._experiment_info(workspace).getInstrumentName())
 
     def _validate_workspace(self, workspace: IMDHistoWorkspace) -> Optional[str]:
         """
@@ -232,25 +290,126 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
             )
         return None
 
-    def _validate_against_background(self, member: IMDHistoWorkspace, background: IMDHistoWorkspace) -> Optional[str]:
+    def _validate_background(self, background: Workspace, grouping: Optional[GroupingWorkspace]) -> Optional[str]:
         """
-        Check that a sample member and the background have the same pixel dimensions and instrument.
+        Check the type, shape, instrument and, with a grouping workspace, the pixels of the background.
 
-        The pixel dimensions are the numbers of bins of the first two dimensions, (y, x). WAND and HB2C, and DEMAND and
-        HB3A, count as the same instrument.
+        An MDHistoWorkspace background must pass _validate_workspace and have a single goniometer angle. A Workspace2D
+        background must have one value per spectrum and a supported instrument. With a grouping workspace, the
+        background must not be grouped, in any way: it must have one pixel or spectrum per spectrum of the grouping
+        workspace, which has one spectrum per detector. A background grouped like the sample, more finely, or more
+        coarsely, has fewer pixels and is rejected. An MDHistoWorkspace background must also have a 'detectorID' log
+        identifying the detector of each pixel.
+
+        :param background: the InputBackground property value, of any workspace type.
+        :param grouping: the InputGroupingWorkspace, or None.
+        :returns: a description of the first problem found, without the name of the property, which the caller adds;
+            None when the background is valid.
+        """
+        if isinstance(background, MatrixWorkspace):
+            if background.blocksize() != 1:
+                return f"a Workspace2D background must have one value per spectrum, found {background.blocksize()}"
+            if self._instrument(background) is None:
+                return f"has instrument {background.getInstrumentName()}; supported instruments are WAND (HB2C) and DEMAND (HB3A)"
+            n_elements = background.getNumberHistograms()
+        elif isinstance(background, IMDHistoWorkspace):
+            issue = self._validate_workspace(background)
+            if issue is not None:
+                return issue
+            if background.getDimension(2).getNBins() != 1:
+                return f"must have exactly one goniometer angle, found {background.getDimension(2).getNBins()}"
+            n_elements = self._n_pixels(background)
+        else:
+            return "must be an MDHistoWorkspace or a Workspace2D"
+        if grouping is None:
+            return None
+        if n_elements != grouping.getNumberHistograms():
+            n_detectors = grouping.getNumberHistograms()
+            if isinstance(background, MatrixWorkspace):
+                return f"must have one spectrum per spectrum of InputGroupingWorkspace ({n_detectors}), found {n_elements}"
+            return (
+                "must not be grouped when InputGroupingWorkspace is provided: it has "
+                f"{n_elements} pixels, but an ungrouped background has one pixel per spectrum of InputGroupingWorkspace "
+                f"({n_detectors}). If InputBackground was loaded with the same grouping as InputWorkspace, do not "
+                "provide InputGroupingWorkspace"
+            )
+        if isinstance(background, IMDHistoWorkspace):
+            return self._validate_detector_ids(background, "required with InputGroupingWorkspace")
+        return None
+
+    @staticmethod
+    def _n_pixels(workspace: IMDHistoWorkspace) -> int:
+        """
+        Number of pixels of an MDHistoWorkspace with dimensions (y, x, goniometer angle): the product of the numbers of
+        bins of its first two dimensions.
+        """
+        return workspace.getDimension(0).getNBins() * workspace.getDimension(1).getNBins()
+
+    def _validate_detector_ids(self, workspace: IMDHistoWorkspace, reason: str) -> Optional[str]:
+        """
+        Check that an MDHistoWorkspace has a 'detectorID' log with one detector ID per pixel.
+
+        LoadWANDSCD and HB3AAdjustSampleNorm write this log; its entry k is the detector ID, or the first detector ID of
+        the group, of pixel k, the pixels being ordered with the first dimension varying fastest.
+
+        :param workspace: a sample member or an MDHistoWorkspace background, which passed _validate_workspace.
+        :param reason: why the log is required, appended to the message when it is missing.
+        :returns: a description of the problem, without the name of the workspace, which the caller adds; None when
+            the log is valid.
+        """
+        run = workspace.getExperimentInfo(0).run()
+        if not run.hasProperty("detectorID"):
+            return f"the 'detectorID' log, {reason}, is missing"
+        n_ids = np.asarray(run.getProperty("detectorID").value).size
+        if n_ids != self._n_pixels(workspace):
+            return f"the 'detectorID' log has {n_ids} values, expected one per pixel ({self._n_pixels(workspace)})"
+        return None
+
+    def _validate_against_background(
+        self, member: IMDHistoWorkspace, background: Background, grouping: Optional[GroupingWorkspace], n_groups: Optional[int]
+    ) -> Optional[str]:
+        """
+        Check that a sample member and the background have the same instrument and matching pixels.
+
+        WAND and HB2C, and DEMAND and HB3A, count as the same instrument. How the pixels must match depends on the
+        inputs:
+
+        - With a grouping workspace, the member must have one pixel per group, and a 'detectorID' log to find the
+          group of each pixel.
+        - With a Workspace2D background and no grouping workspace, the member must have one pixel per spectrum of the
+          background, and a 'detectorID' log to find the spectrum of each pixel.
+        - With an MDHistoWorkspace background and no grouping workspace, the member and the background must have the
+          same pixel dimensions, the numbers of bins of their first two dimensions (y, x).
 
         :param member: a sample member that passed _validate_workspace.
-        :param background: the background, which passed _validate_workspace.
+        :param background: the background, which passed _validate_background.
+        :param grouping: the InputGroupingWorkspace, or None.
+        :param n_groups: number of groups of the grouping workspace, or None without one.
         :returns: a description of the first problem found, without the name of the member, which the caller adds;
             None when the member matches the background.
-        :raises RuntimeError: if either workspace has no ExperimentInfo; this cannot happen after _validate_workspace.
+        :raises RuntimeError: if a workspace has no ExperimentInfo; this cannot happen after _validate_workspace.
         """
+        if self._instrument(member) != self._instrument(background):
+            return f"is from {self._instrument(member)} but InputBackground is from {self._instrument(background)}"
+        n_pixels = self._n_pixels(member)
+        if grouping is not None:
+            if n_pixels != n_groups:
+                return f"has {n_pixels} pixels but InputGroupingWorkspace has {n_groups} groups"
+            return self._validate_detector_ids(member, "required with InputGroupingWorkspace")
+        if isinstance(background, MatrixWorkspace):
+            if n_pixels != background.getNumberHistograms():
+                return (
+                    f"has {n_pixels} pixels but InputBackground has {background.getNumberHistograms()} spectra; "
+                    "if InputWorkspace was grouped, provide InputGroupingWorkspace"
+                )
+            return self._validate_detector_ids(member, "required with a Workspace2D background")
         member_pixels = tuple(member.getDimension(i).getNBins() for i in range(2))
         background_pixels = tuple(background.getDimension(i).getNBins() for i in range(2))
         if member_pixels != background_pixels:
-            return f"pixel dimensions {member_pixels} do not match those of InputBackground {background_pixels}"
-        if self._instrument(member) != self._instrument(background):
-            return f"is from {self._instrument(member)} but InputBackground is from {self._instrument(background)}"
+            return (
+                f"pixel dimensions {member_pixels} do not match those of InputBackground {background_pixels}; "
+                "if InputWorkspace was grouped and InputBackground was not, provide InputGroupingWorkspace"
+            )
         return None
 
     def _validate_flux(self, workspace: IMDHistoWorkspace, normalized_by: str) -> Optional[str]:
@@ -259,7 +418,8 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
 
         This wraps _flux, turning the ValueError it raises for an invalid log into a message for validateInputs.
 
-        :param workspace: a sample member or the background, which passed _validate_workspace.
+        :param workspace: a sample member that passed _validate_workspace, or the background, which passed
+            _validate_background.
         :param normalized_by: "Monitor" or "Time".
         :returns: a description of the problem, without the name of the workspace, which the caller adds; None when
             the log is valid.
@@ -270,15 +430,17 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
             return str(error)
         return None
 
-    def _flux(self, workspace: IMDHistoWorkspace, normalized_by: str) -> np.ndarray:
+    def _flux(self, workspace: Background, normalized_by: str) -> np.ndarray:
         """
         Integrated flux of each goniometer angle of a workspace, read from its sample logs.
 
         The log name depends on the instrument and on normalized_by (see _FLUX_LOGS). The log may be a single value or
         an array, such as the time series written by LoadWANDSCD; either way it must hold one value per goniometer
-        angle, the number of bins of the third dimension.
+        angle: the number of bins of the third dimension of an MDHistoWorkspace, and a single value for a Workspace2D
+        background.
 
-        :param workspace: MDHistoWorkspace from WAND or DEMAND, with at least one ExperimentInfo.
+        :param workspace: MDHistoWorkspace from WAND or DEMAND, with at least one ExperimentInfo, or Workspace2D
+            background from WAND or DEMAND.
         :param normalized_by: "Monitor" or "Time".
         :returns: one-dimensional array with one flux value per goniometer angle.
         :raises ValueError: if the log is missing, does not hold one value per goniometer angle, or holds values that
@@ -287,24 +449,24 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
             cannot happen after validateInputs.
         """
         log_name = self._FLUX_LOGS[self._instrument(workspace)][normalized_by]
-        run = workspace.getExperimentInfo(0).run()
+        run = self._experiment_info(workspace).run()
         if not run.hasProperty(log_name):
             raise ValueError(f"the '{log_name}' log required by NormalizedBy={normalized_by} is missing")
         flux = np.atleast_1d(np.asarray(run.getProperty(log_name).value, dtype=float))
-        n_angles = workspace.getDimension(2).getNBins()
+        n_angles = self._n_angles(workspace)
         if flux.size != n_angles:
             raise ValueError(f"the '{log_name}' log has {flux.size} values, expected one per goniometer angle ({n_angles})")
         if np.any(~np.isfinite(flux)) or np.any(flux <= 0):
             raise ValueError(f"the '{log_name}' log must contain finite, positive values")
         return flux
 
-    def _flux_ratio(self, member: IMDHistoWorkspace, background: IMDHistoWorkspace, normalized_by: str) -> np.ndarray:
+    def _flux_ratio(self, member: IMDHistoWorkspace, background: Background, normalized_by: str) -> np.ndarray:
         """
         Ratio r(θ) = F_S(θ) / F_B between the flux of each goniometer angle of a sample member and the flux of the
         background, the factor applied to the background before it is subtracted from angle θ of the member.
 
         :param member: a sample member.
-        :param background: the background, with a single goniometer angle.
+        :param background: the background, with a single goniometer angle or a single value per spectrum.
         :param normalized_by: "None", "Monitor" or "Time".
         :returns: one-dimensional array with one ratio per goniometer angle of the member; all ones when normalized_by
             is "None", in which case the flux logs are not read.
@@ -314,9 +476,108 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
             return np.ones(member.getDimension(2).getNBins())
         return self._flux(member, normalized_by) / self._flux(background, normalized_by)[0]
 
+    def _arranged_background(
+        self,
+        member: IMDHistoWorkspace,
+        background: Background,
+        grouping: Optional[GroupingWorkspace],
+        arrangements: Dict[bytes, Tuple[np.ndarray, np.ndarray]],
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Signal and error squared of the background, arranged in the pixel layout of a sample member.
+
+        - An MDHistoWorkspace background without a grouping workspace already has the pixel layout of the member.
+        - A Workspace2D background without a grouping workspace: pixel k of the member takes the value of the spectrum
+          whose detector ID is entry k of the 'detectorID' log of the member.
+        - With a grouping workspace: the intensities and errors squared of the background are summed within each
+          group, the group of each background pixel or spectrum being that of its detector ID. Pixel k of the member
+          then takes the sums of the group of entry k of its 'detectorID' log, the first detector ID of the group.
+
+        The arrangement depends only on the 'detectorID' log of the member, so it is computed once per distinct log and
+        stored in arrangements.
+
+        :param member: a sample member that passed validateInputs.
+        :param background: the background, which passed validateInputs.
+        :param grouping: the InputGroupingWorkspace, or None.
+        :param arrangements: cache of the arrangements already computed, by 'detectorID' log; updated in place.
+        :returns: the signal and the error squared of the background, two arrays with the shape of the first two
+            dimensions of the member.
+        :raises RuntimeError: if a detector ID is not found in the background or in the grouping workspace (see
+            _workspace_indices).
+        """
+        if grouping is None and isinstance(background, IMDHistoWorkspace):
+            return background.getSignalArray()[:, :, 0], background.getErrorSquaredArray()[:, :, 0]
+        pixel_ids = np.asarray(member.getExperimentInfo(0).run().getProperty("detectorID").value, dtype=int)
+        key = pixel_ids.tobytes()
+        if key not in arrangements:
+            if grouping is None:
+                indices = self._workspace_indices(background, pixel_ids, "InputBackground")
+                signal = background.extractY()[indices, 0]
+                error_squared = background.extractE()[indices, 0] ** 2
+            else:
+                element_signal, element_error_squared, element_ids = self._background_elements(background)
+                group_ids = grouping.extractY()[:, 0].astype(int)
+                element_groups = group_ids[self._workspace_indices(grouping, element_ids, "InputGroupingWorkspace")]
+                pixel_groups = group_ids[self._workspace_indices(grouping, pixel_ids, "InputGroupingWorkspace")]
+                n_bins = group_ids.max() + 1
+                signal = np.bincount(element_groups, weights=element_signal, minlength=n_bins)[pixel_groups]
+                error_squared = np.bincount(element_groups, weights=element_error_squared, minlength=n_bins)[pixel_groups]
+            shape = member.getSignalArray().shape[:2]
+            arrangements[key] = (signal.reshape(shape, order="F"), error_squared.reshape(shape, order="F"))
+        return arrangements[key]
+
+    def _background_elements(self, background: Background) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """
+        Signal, error squared and detector ID of every pixel or spectrum of an ungrouped background.
+
+        :param background: an MDHistoWorkspace background with a 'detectorID' log, whose pixels are ordered with the
+            first dimension varying fastest, or a Workspace2D background with one detector per spectrum.
+        :returns: three one-dimensional arrays with one entry per pixel or spectrum.
+        :raises RuntimeError: if a spectrum of a Workspace2D background does not have exactly one detector.
+        """
+        if isinstance(background, IMDHistoWorkspace):
+            signal = background.getSignalArray()[:, :, 0].ravel(order="F")
+            error_squared = background.getErrorSquaredArray()[:, :, 0].ravel(order="F")
+            ids = np.asarray(background.getExperimentInfo(0).run().getProperty("detectorID").value, dtype=int)
+            return signal, error_squared, ids
+        # detector ID of each spectrum, found by looking up the workspace index of every detector of the instrument
+        detector_ids = np.asarray(background.detectorInfo().detectorIDs(), dtype=int)
+        n_spectra = background.getNumberHistograms()
+        if detector_ids.size != n_spectra:
+            raise RuntimeError(
+                f"InputBackground has {n_spectra} spectra for {detector_ids.size} detectors; each spectrum must have exactly one detector"
+            )
+        ids = np.empty(n_spectra, dtype=int)
+        ids[self._workspace_indices(background, detector_ids, "InputBackground")] = detector_ids
+        return background.extractY()[:, 0], background.extractE()[:, 0] ** 2, ids
+
+    @staticmethod
+    def _workspace_indices(workspace: MatrixWorkspace, detector_ids: np.ndarray, name: str) -> np.ndarray:
+        """
+        Workspace index of the spectrum holding each detector ID.
+
+        :param workspace: a Workspace2D background or a GroupingWorkspace, whose spectra have detector IDs.
+        :param detector_ids: one-dimensional array of detector IDs.
+        :param name: property name of the workspace, for the error message.
+        :returns: one-dimensional array of workspace indices, in the order of detector_ids.
+        :raises RuntimeError: if a detector ID is not found in the workspace.
+        """
+        indices = np.asarray(workspace.getIndicesFromDetectorIDs(detector_ids.tolist()), dtype=int)
+        if indices.size != detector_ids.size:
+            raise RuntimeError(
+                f"{detector_ids.size - indices.size} of {detector_ids.size} detector IDs are not found in {name}; "
+                "the sample, the background and the grouping workspace must come from the same instrument"
+            )
+        return indices
+
     @staticmethod
     def _subtract(
-        member: IMDHistoWorkspace, background: IMDHistoWorkspace, flux_ratio: np.ndarray, nullify: bool, output: IMDHistoWorkspace
+        member: IMDHistoWorkspace,
+        background_signal: np.ndarray,
+        background_error_squared: np.ndarray,
+        flux_ratio: np.ndarray,
+        nullify: bool,
+        output: IMDHistoWorkspace,
     ) -> None:
         """
         Write member - flux_ratio * background into output, which may be the member itself.
@@ -329,7 +590,9 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
         member are read before output is written, so output may be the member itself.
 
         :param member: a sample member, with dimensions (y, x, goniometer angle).
-        :param background: the background, with the pixel dimensions of the member and a single goniometer angle.
+        :param background_signal: signal of the background in the pixel layout of the member (see
+            _arranged_background), an array with the shape of the first two dimensions of the member.
+        :param background_error_squared: error squared of the background, with the same shape.
         :param flux_ratio: one ratio per goniometer angle of the member (see _flux_ratio).
         :param nullify: whether to set negative signals to zero.
         :param output: workspace with the dimensions of the member that receives the result: the member itself, or a
@@ -337,7 +600,6 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
         :raises ValueError: if the dimensions of output do not match those of the member; this cannot happen for the
             member itself or a clone of it.
         """
-        background_signal = background.getSignalArray()[:, :, 0]
         signal = np.array(member.getSignalArray())
         for angle, ratio in enumerate(flux_ratio):
             signal[:, :, angle] -= ratio * background_signal
@@ -346,13 +608,14 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
         output.setSignalArray(signal)
         del signal
 
-        background_error_squared = background.getErrorSquaredArray()[:, :, 0]
         error_squared = np.array(member.getErrorSquaredArray())
         for angle, ratio in enumerate(flux_ratio):
             error_squared[:, :, angle] += ratio**2 * background_error_squared
         output.setErrorSquaredArray(error_squared)
 
-    def _scaled_background(self, member: IMDHistoWorkspace, background: IMDHistoWorkspace, flux_ratio: np.ndarray) -> IMDHistoWorkspace:
+    def _scaled_background(
+        self, member: IMDHistoWorkspace, background_signal: np.ndarray, background_error_squared: np.ndarray, flux_ratio: np.ndarray
+    ) -> IMDHistoWorkspace:
         """
         Background scaled to every goniometer angle of a sample member, for OutputBackgroundWorkspace.
 
@@ -360,7 +623,9 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
         member, with signal r(θ) B and error squared r(θ)² σ_B² at each goniometer angle θ. It is not added to the ADS.
 
         :param member: a sample member, with dimensions (y, x, goniometer angle).
-        :param background: the background, with the pixel dimensions of the member and a single goniometer angle.
+        :param background_signal: signal of the background in the pixel layout of the member (see
+            _arranged_background), an array with the shape of the first two dimensions of the member.
+        :param background_error_squared: error squared of the background, with the same shape.
         :param flux_ratio: one ratio per goniometer angle of the member (see _flux_ratio).
         :returns: new MDHistoWorkspace of the size of the member.
         :raises RuntimeError: if the member cannot be cloned (see _clone).
@@ -370,8 +635,8 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
         signal = np.empty(shape)
         error_squared = np.empty(shape)
         for angle, ratio in enumerate(flux_ratio):
-            signal[:, :, angle] = ratio * background.getSignalArray()[:, :, 0]
-            error_squared[:, :, angle] = ratio**2 * background.getErrorSquaredArray()[:, :, 0]
+            signal[:, :, angle] = ratio * background_signal
+            error_squared[:, :, angle] = ratio**2 * background_error_squared
         scaled.setSignalArray(signal)
         scaled.setErrorSquaredArray(error_squared)
         return scaled
