@@ -204,7 +204,11 @@ public:
     const V3D axis(0.0, 0.1, 1.0);
     const V3D up(0.3, 1.0, 0.0);
     for (size_t i = 0; i < detectorInfo.size(); ++i) {
+      GNU_DIAG_OFF("deprecated-declarations")
+      MSVC_DIAG_OFF(4996)
       const auto &det = detectorInfo.detector(i);
+      MSVC_DIAG_ON(4996)
+      GNU_DIAG_ON("deprecated-declarations")
       TS_ASSERT_DELTA(detectorInfo.twoTheta(i, observer, axis), det.getTwoTheta(observer, axis), 1e-12);
       TS_ASSERT_DELTA(detectorInfo.signedTwoTheta(i, observer, axis, up), det.getSignedTwoTheta(observer, axis, up),
                       1e-12);
