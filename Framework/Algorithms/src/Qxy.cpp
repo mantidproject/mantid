@@ -15,6 +15,7 @@
 #include "MantidAlgorithms/GravitySANSHelper.h"
 #include "MantidAlgorithms/Qhelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -125,6 +126,7 @@ void Qxy::exec() {
 
   const auto &spectrumInfo = inputWorkspace->spectrumInfo();
   const auto &detectorInfo = inputWorkspace->detectorInfo();
+  const auto &componentInfo = inputWorkspace->componentInfo();
 
   // the samplePos is often not (0, 0, 0) because the instruments components are
   // moved to account for the beam centre
@@ -172,7 +174,7 @@ void Qxy::exec() {
     for (const auto detID : inputWorkspace->getSpectrum(i).getDetectorIDs()) {
       const auto index = detectorInfo.indexOf(detID);
       if (!detectorInfo.isMasked(index))
-        angle += detectorInfo.detector(index).solidAngle({samplePos, numberOfCylinderSlices});
+        angle += componentInfo.solidAngle(index, {samplePos, numberOfCylinderSlices});
     }
 
     // some bins are masked completely or partially, the following vector will

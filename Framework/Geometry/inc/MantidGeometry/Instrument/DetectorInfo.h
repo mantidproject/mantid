@@ -114,6 +114,7 @@ public:
   void setRotation(const size_t index, const Kernel::Quat &rotation);
   void setRotation(const std::pair<size_t, size_t> &index, const Kernel::Quat &rotation);
 
+  [[deprecated("DetectorInfo::detector is deprecated in Mantid 7.1.")]]
   const Geometry::IDetector &detector(const size_t index) const;
 
   // This does not really belong into DetectorInfo, but it seems to be useful
@@ -140,7 +141,9 @@ public:
   const DetectorInfoIterator<const DetectorInfo> cend() const;
 
 private:
+  [[deprecated("DetectorInfo::getDetector is deprecated in Mantid 7.1.")]]
   const Geometry::IDetector &getDetector(const size_t index) const;
+  [[deprecated("DetectorInfo::getDetectorPtr is deprecated in Mantid 7.1.")]]
   std::shared_ptr<const Geometry::IDetector> getDetectorPtr(const size_t index) const;
   void clearPositionDependentParameters(const size_t index);
 

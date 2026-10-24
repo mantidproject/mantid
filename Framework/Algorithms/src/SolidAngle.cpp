@@ -109,7 +109,7 @@ struct GenericShape : public SolidAngleCalculator {
       : SolidAngleCalculator(componentInfo, detectorInfo, method, pixelArea),
         m_numberOfCylinderSlices(numberOfCylinderSlices) {}
   double solidAngle(size_t index) const override {
-    return m_detectorInfo.detector(index).solidAngle(Geometry::SolidAngleParams(m_samplePos, m_numberOfCylinderSlices));
+    return m_componentInfo.solidAngle(index, Geometry::SolidAngleParams(m_samplePos, m_numberOfCylinderSlices));
   }
 
 private:

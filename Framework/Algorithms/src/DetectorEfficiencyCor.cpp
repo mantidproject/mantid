@@ -13,6 +13,7 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/Track.h"
@@ -77,7 +78,7 @@ const std::string THICKNESS_PARAM = "TubeThickness";
 // this default constructor calls default constructors and sets other member
 // data to impossible (flag) values
 DetectorEfficiencyCor::DetectorEfficiencyCor()
-    : Algorithm(), m_inputWS(), m_outputWS(), m_paraMap(nullptr), m_Ei(-1.0), m_ki(-1.0), m_shapeCache(), m_samplePos(),
+    : Algorithm(), m_inputWS(), m_outputWS(), m_Ei(-1.0), m_ki(-1.0), m_shapeCache(), m_samplePos(),
       m_spectraSkipped() {
   m_shapeCache.clear();
 }
@@ -161,7 +162,6 @@ void DetectorEfficiencyCor::exec() {
 void DetectorEfficiencyCor::retrieveProperties() {
   // these first three properties are fully checked by validators
   m_inputWS = getProperty("InputWorkspace");
-  m_paraMap = &(m_inputWS->constInstrumentParameters());
 
   m_Ei = getProperty("IncidentEnergy");
   // If we're not given an Ei, see if one has been set.
@@ -211,30 +211,33 @@ void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn, const Spectr
   // correction proceeds
   std::vector<double> oneOverWaveVectors(yValues.size());
   const auto &detectorInfo = m_inputWS->detectorInfo();
+  const auto &componentInfo = m_inputWS->componentInfo();
   const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(spectraIn);
 
   for (const auto &index : spectrumDefinition) {
     const auto detIndex = index.first;
-    const auto &det_member = detectorInfo.detector(detIndex);
-    Parameter_sptr par = m_paraMap->getRecursive(det_member.getComponentID(), PRESSURE_PARAM);
-    if (!par) {
+    const auto pressure = componentInfo.getNumberParameter(detIndex, PRESSURE_PARAM);
+    if (pressure.empty()) {
       throw Exception::NotFoundError(PRESSURE_PARAM, spectraIn);
     }
-    const double atms = par->value<double>();
-    par = m_paraMap->getRecursive(det_member.getComponentID(), THICKNESS_PARAM);
-    if (!par) {
+    const double atms = pressure.front();
+    const auto thickness = componentInfo.getNumberParameter(detIndex, THICKNESS_PARAM);
+    if (thickness.empty()) {
       throw Exception::NotFoundError(THICKNESS_PARAM, spectraIn);
     }
-    const double wallThickness = par->value<double>();
+    const double wallThickness = thickness.front();
     double detRadius(0.0);
     V3D detAxis;
-    getDetectorGeometry(det_member, detRadius, detAxis);
+    if (!componentInfo.hasValidShape(detIndex)) {
+      throw Exception::NotFoundError("Shape", "Detector has no shape");
+    }
+    getDetectorGeometry(componentInfo.shape(detIndex), detRadius, detAxis);
 
     // now get the sin of the angle, it's the magnitude of the cross product of
     // unit vector along the detector tube axis and a unit vector directed from
     // the sample to the detector centre
-    const V3D vectorFromSample = normalize(det_member.getPos() - m_samplePos);
-    Quat rot = det_member.getRotation();
+    const V3D vectorFromSample = normalize(detectorInfo.position(detIndex) - m_samplePos);
+    Quat rot = detectorInfo.rotation(detIndex);
     // rotate the original cylinder object axis to get the detector axis in the
     // actual instrument
     rot.rotate(detAxis);
@@ -287,48 +290,38 @@ double DetectorEfficiencyCor::calculateOneOverK(double loBinBound, double uppBin
 }
 
 /** Update the shape cache if necessary
- * @param det :: a pointer to the detector to query
+ * @param shape :: the shape of the detector to query
  * @param detRadius :: An output parameter that contains the detector radius
  * @param detAxis :: An output parameter that contains the detector axis vector
  */
-void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IDetector &det, double &detRadius, V3D &detAxis) {
-  std::shared_ptr<const IObject> shape_sptr = det.shape();
-  if (!shape_sptr->hasValidShape()) {
-    throw Exception::NotFoundError("Shape", "Detector has no shape");
-  }
+void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IObject &shape, double &detRadius, V3D &detAxis) {
+  const IObject *shape_ptr = &shape;
 
-  std::map<const Geometry::IObject *, std::pair<double, Kernel::V3D>>::const_iterator it =
-      m_shapeCache.find(shape_sptr.get());
+  std::map<const Geometry::IObject *, std::pair<double, Kernel::V3D>>::const_iterator it = m_shapeCache.find(shape_ptr);
   if (it == m_shapeCache.end()) {
-    double xDist = distToSurface(V3D(DIST_TO_UNIVERSE_EDGE, 0, 0), shape_sptr.get());
-    double zDist = distToSurface(V3D(0, 0, DIST_TO_UNIVERSE_EDGE), shape_sptr.get());
+    double xDist = distToSurface(V3D(DIST_TO_UNIVERSE_EDGE, 0, 0), shape_ptr);
+    double zDist = distToSurface(V3D(0, 0, DIST_TO_UNIVERSE_EDGE), shape_ptr);
     if (withinAbsoluteDifference(zDist, xDist, 1e-6)) {
       detRadius = zDist / 2.0;
       detAxis = V3D(0, 1, 0);
       // assume radi in z and x and the axis is in the y
-      PARALLEL_CRITICAL(deteff_shapecachea) {
-        m_shapeCache.emplace(shape_sptr.get(), std::make_pair(detRadius, detAxis));
-      }
+      PARALLEL_CRITICAL(deteff_shapecachea) { m_shapeCache.emplace(shape_ptr, std::make_pair(detRadius, detAxis)); }
       return;
     }
-    double yDist = distToSurface(V3D(0, DIST_TO_UNIVERSE_EDGE, 0), shape_sptr.get());
+    double yDist = distToSurface(V3D(0, DIST_TO_UNIVERSE_EDGE, 0), shape_ptr);
     if (withinAbsoluteDifference(yDist, zDist, 1e-8)) {
       detRadius = yDist / 2.0;
       detAxis = V3D(1, 0, 0);
       // assume that y and z are radi of the cylinder's circular cross-section
       // and the axis is perpendicular, in the x direction
-      PARALLEL_CRITICAL(deteff_shapecacheb) {
-        m_shapeCache.emplace(shape_sptr.get(), std::make_pair(detRadius, detAxis));
-      }
+      PARALLEL_CRITICAL(deteff_shapecacheb) { m_shapeCache.emplace(shape_ptr, std::make_pair(detRadius, detAxis)); }
       return;
     }
 
     if (withinAbsoluteDifference(xDist, yDist, 1e-8)) {
       detRadius = xDist / 2.0;
       detAxis = V3D(0, 0, 1);
-      PARALLEL_CRITICAL(deteff_shapecachec) {
-        m_shapeCache.emplace(shape_sptr.get(), std::make_pair(detRadius, detAxis));
-      }
+      PARALLEL_CRITICAL(deteff_shapecachec) { m_shapeCache.emplace(shape_ptr, std::make_pair(detRadius, detAxis)); }
       return;
     }
   } else {

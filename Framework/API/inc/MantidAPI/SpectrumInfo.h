@@ -24,6 +24,7 @@ namespace Beamline {
 class SpectrumInfo;
 }
 namespace Geometry {
+class BoundingBox;
 class DetectorInfo;
 class IDetector;
 class Instrument;
@@ -81,6 +82,9 @@ public:
   double difcUncalibrated(const size_t index) const;
   bool hasDetectors(const size_t index) const;
   bool hasUniqueDetector(const size_t index) const;
+  detid_t firstDetectorID(const size_t index) const;
+  size_t firstDetectorIndex(const size_t index) const;
+  Geometry::BoundingBox boundingBox(const size_t index) const;
 
   void setMasked(const size_t index, bool masked);
 
@@ -108,6 +112,9 @@ public:
   friend class ExperimentInfo;
 
 private:
+  [[deprecated("SpectrumInfo::getDetector has been deprecated in Mantid 7.1."
+               "See the 'Instrument Access via SpectrumInfo, DetectorInfo, ComponentInfo' concept page, "
+               "located at: https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html")]]
   const Geometry::IDetector &getDetector(const size_t index) const;
   const SpectrumDefinition &checkAndGetSpectrumDefinition(const size_t index) const;
 
