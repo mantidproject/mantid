@@ -80,10 +80,24 @@ both of which can produce a matching normalization workspace).
 
 `MonoSCDNormalizationWorkspace` is binned with the exact same basis vectors, extents, and symmetry operations as
 `InputWorkspace`, so the two end up on identical grids before dividing. It cannot be used together with
-`SolidAngleWorkspace`/`FluxWorkspace` (the two normalization methods are mutually exclusive), or with
-`BackgroundWorkspace` (background subtraction is not yet supported for this mode). `InputWorkspace` must not have a
+`SolidAngleWorkspace`/`FluxWorkspace` (the two normalization methods are mutually exclusive). `InputWorkspace` must not have a
 `DeltaE` dimension (monochromatic single crystal diffraction is elastic only), and must carry a `wavelength` sample
 log -- set automatically by `ConvertHFIRSCDtoMDE` -- confirming it originates from a monochromatic instrument.
+
+MDNorm does not support a background for monochromatic single crystal diffraction: `BackgroundWorkspace` is rejected
+when `MonoSCDNormalizationWorkspace` is given, or when `InputWorkspace` comes from WAND (HB2C) or DEMAND (HB3A).
+Subtract the background in detector space instead, with
+:ref:`HFIRSCDSubtractBackground <algm-HFIRSCDSubtractBackground>`, before converting the data to `Q_sample` with
+:ref:`ConvertHFIRSCDtoMDE <algm-ConvertHFIRSCDtoMDE>`:
+
+#. Load the sample, unnormalized, with :ref:`LoadWANDSCD <algm-LoadWANDSCD>` or
+   :ref:`HB3AAdjustSampleNorm <algm-HB3AAdjustSampleNorm>` (`OutputType="Detector"`), together with its
+   normalization workspace.
+#. Load the background, measured at a single goniometer angle.
+#. Subtract the background with :ref:`HFIRSCDSubtractBackground <algm-HFIRSCDSubtractBackground>`.
+#. Convert `Sample - Background` and the normalization workspace to `Q_sample` with
+   :ref:`ConvertHFIRSCDtoMDE <algm-ConvertHFIRSCDtoMDE>`.
+#. Normalize with MDNorm, giving the converted normalization workspace as `MonoSCDNormalizationWorkspace`.
 
 Unlike the time-of-flight case, there is no `MDNorm_low`/`MDNorm_high` log requirement (those are set by
 :ref:`CropWorkspaceForMDNorm <algm-CropWorkspaceForMDNorm>`, a time-of-flight-only step), since each event already
@@ -155,6 +169,9 @@ DEMAND uses a single `HB3AAdjustSampleNorm` call (rather than WAND's `LoadWANDSC
 
 Using Background
 ----------------
+This section applies to time-of-flight data. For monochromatic single crystal diffraction, see
+`Monochromatic Single Crystal Diffraction`_.
+
 Starting with Mantid 6.1, the algorithm allows efficient processing of the background. In previous versions one used to
 create a background :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` by replicating data for each goniometer setting in the input workspace.
 The current implementation uses instead a :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` in the sample frame of the laboratory, so no need
