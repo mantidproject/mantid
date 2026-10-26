@@ -10,8 +10,8 @@
 #include "MantidCurveFitting/Functions/UserFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MuParserUtils.h"
-#include "MantidGeometry/muParser_Silent.h"
 #include <boost/tokenizer.hpp>
+#include <muParser.h>
 
 namespace Mantid::CurveFitting::Functions {
 

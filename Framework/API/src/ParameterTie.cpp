@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidGeometry/muParser_Silent.h"
+#include <muParser.h>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>

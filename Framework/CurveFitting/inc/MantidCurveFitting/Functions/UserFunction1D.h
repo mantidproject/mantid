@@ -10,7 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Algorithms/Fit1D.h"
-#include "MantidGeometry/muParser_Silent.h"
+#include <muParser.h>
 
 namespace Mantid {
 namespace CurveFitting {
