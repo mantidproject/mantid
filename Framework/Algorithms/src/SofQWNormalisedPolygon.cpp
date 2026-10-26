@@ -574,7 +574,7 @@ void SofQWNormalisedPolygon::initAngularCachesTable(const MatrixWorkspace &works
     }
 
     if (spectrumInfo.hasUniqueDetector(i)) {
-      const auto twoThetas = twoThetasFromTable(det.getID(), detIDs, lowers, uppers);
+      const auto twoThetas = twoThetasFromTable(spectrumInfo.firstDetectorID(i), detIDs, lowers, uppers);
       m_twoThetaLowers[i] = twoThetas.first;
       m_twoThetaUppers[i] = twoThetas.second;
     } else {

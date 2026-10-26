@@ -155,7 +155,7 @@ public:
     ads_instance.addOrReplace("DataWorkspaceInelastic", dataWorkspace);
     m_fitData->addWorkspace("DataWorkspaceInelastic", FunctionModelSpectra("0"));
     auto spectrumInfo = dataWorkspace->spectrumInfo();
-    auto detID = spectrumInfo.detector(0).getID();
+    auto detID = spectrumInfo.firstDetectorID(0);
     double efixed = dataWorkspace->getEFixed(detID);
     double usignTheta = 0.5 * spectrumInfo.twoTheta(0);
     double q = Mantid::Kernel::UnitConversion::convertToElasticQ(usignTheta, efixed);

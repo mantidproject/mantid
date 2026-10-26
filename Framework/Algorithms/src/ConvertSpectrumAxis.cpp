@@ -97,7 +97,9 @@ void ConvertSpectrumAxis::exec() {
       double efixedProp = getProperty("Efixed");
       if (efixedProp != EMPTY_DBL()) {
         pmap[UnitParams::efixed] = efixedProp;
-        g_log.debug() << "Detector: " << spectrumInfo.detector(i).getID() << " Efixed: " << efixedProp << "\n";
+        if (spectrumInfo.hasDetectors(i)) {
+          g_log.debug() << "Detector: " << spectrumInfo.firstDetectorID(i) << " Efixed: " << efixedProp << "\n";
+        }
       }
 
       spectrumInfo.getDetectorValues(*fromUnit, *toUnit, emode, false, i, pmap);

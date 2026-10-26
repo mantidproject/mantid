@@ -19,6 +19,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -559,8 +560,8 @@ ConvertSpiceDataToRealSpace::createDataMDWorkspace(const std::vector<MatrixWorks
       const auto &vecerror = thisWorkspace->e(i);
       auto signal = static_cast<float>(vecsignal[0]);
       auto error = static_cast<float>(vecerror[0]);
-      detid_t detid = specInfo.detector(i).getID() + detindex;
       const auto &detPos = specInfo.position(i);
+      detid_t detid = specInfo.firstDetectorID(i) + detindex;
       Mantid::coord_t data[3];
       data[0] = static_cast<float>(detPos.X());
       data[1] = static_cast<float>(detPos.Y());
@@ -631,8 +632,8 @@ ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(const std::vector<MatrixWo
     const auto &specInfo = thisWorkspace->spectrumInfo();
     for (std::size_t i = 0; i < nHist; ++i) {
       // For each spectrum/detector
-      detid_t detid = specInfo.detector(i).getID() + detindex;
       const auto &detPos = specInfo.position(i);
+      detid_t detid = specInfo.firstDetectorID(i) + detindex;
       Mantid::coord_t data[3];
       data[0] = static_cast<float>(detPos.X());
       data[1] = static_cast<float>(detPos.Y());
@@ -685,7 +686,9 @@ void ConvertSpiceDataToRealSpace::correctByDetectorEfficiency(std::vector<Matrix
     const auto &specInfo = ws->spectrumInfo();
     size_t numspec = ws->getNumberHistograms();
     for (size_t iws = 0; iws < numspec; ++iws) {
-      detid_t detid = specInfo.detector(iws).getID();
+      if (!specInfo.hasDetectors(iws))
+        throw Kernel::Exception::NotFoundError("No detector found for workspace index", iws);
+      detid_t detid = specInfo.firstDetectorID(iws);
       detiter = detEffMap.find(detid);
       if (detiter != detEffMap.end())
         ws->mutableY(iws)[0] /= detiter->second;

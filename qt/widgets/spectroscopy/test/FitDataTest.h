@@ -458,7 +458,7 @@ public:
         FunctionModelSpectra(WorkspaceIndex{0}, WorkspaceIndex{workspace->getNumberHistograms() - 1});
     auto data = std::make_unique<FitData>(FitData(workspace, spec));
     auto spectrumInfo = workspace->spectrumInfo();
-    auto detID = spectrumInfo.detector(0).getID();
+    auto detID = spectrumInfo.firstDetectorID(0);
     double efixed = workspace->getEFixed(detID);
     double usignTheta = 0.5 * spectrumInfo.twoTheta(0);
     double q = Mantid::Kernel::UnitConversion::convertToElasticQ(usignTheta, efixed);

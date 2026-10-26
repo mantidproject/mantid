@@ -345,7 +345,8 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
     }
     // Per spectrum values
     const auto &detPos = spectrumInfo.position(i);
-    const double lambdaFixed = toWavelength(efixed.value(spectrumInfo.detector(i).getID()));
+    const auto detID = spectrumInfo.firstDetectorID(i);
+    const double lambdaFixed = toWavelength(efixed.value(detID));
     MersenneTwister rng(seed + int(i));
 
     const auto lambdas = simulationWS.points(i);
@@ -366,7 +367,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
         j = nbins - lambdaStepSize - 1;
       }
     }
-    MCInteractionStatistics detStatistics(spectrumInfo.detector(i).getID(), inputWS.sample());
+    MCInteractionStatistics detStatistics(detID, inputWS.sample());
 
     strategy->calculate(rng, detPos, packedLambdas, lambdaFixed, packedAttFactors, packedAttFactorErrors,
                         detStatistics);

@@ -115,7 +115,7 @@ bool MonIDPropChanger::monitorIdReader(const MatrixWorkspace_const_sptr &inputWS
     // Loop over spectra, but finish early if we find everything
     while (i < specInfo.size() && idsInWorkspace.size() < monitorIDList.size()) {
       if (specInfo.isMonitor(i))
-        idsInWorkspace.insert(specInfo.detector(i).getID());
+        idsInWorkspace.insert(specInfo.firstDetectorID(i));
       ++i;
     }
     monitorIDList = std::vector<detid_t>(idsInWorkspace.begin(), idsInWorkspace.end());
