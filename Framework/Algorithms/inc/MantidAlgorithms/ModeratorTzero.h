@@ -12,8 +12,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include <muParser.h>
 
 namespace Mantid {
 namespace Algorithms {
