@@ -1,0 +1,1 @@
+- *Approximated Shapes* now draws every cuboid detector as a single flat face, whichever way the detector is defined: the face most visible from the sample, or in the side-by-side view the face that view looks at. Previously some detectors, for example on GEM, HRPD and LOQ, were drawn as full shapes in this mode.
