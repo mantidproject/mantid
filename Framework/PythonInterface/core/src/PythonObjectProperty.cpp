@@ -9,6 +9,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyWithValue.hxx"
 #include "MantidKernel/PropertyWithValueJSON.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/IsNone.h"
 
@@ -136,14 +137,9 @@ template <> Json::Value encodeAsJson(PythonObject const &) {
 /// @cond
 // PythonObjectProperty.h declares this with MANTID_PYTHONINTERFACE_CORE_EXTERN_TEMPLATE, which already carries the
 // export attribute, so gcc warns that the one here is ignored.
-#if defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wattributes"
-#endif
+GNU_DIAG_OFF("attributes")
 template class MANTID_PYTHONINTERFACE_CORE_DLL PropertyWithValue<PythonObject>;
-#if defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
+GNU_DIAG_ON("attributes")
 /// @endcond
 
 } // namespace Mantid::Kernel

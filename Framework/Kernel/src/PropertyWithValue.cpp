@@ -11,6 +11,7 @@
 // PropertyWithValue implementation
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyWithValue.hxx"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidNexus/NexusFile.h"
 
 namespace Mantid::Kernel {
@@ -18,10 +19,7 @@ namespace Mantid::Kernel {
 /// @cond
 // The headers declare these with MANTID_KERNEL_EXTERN_TEMPLATE, which already
 // carries the export attribute, so gcc warns that the one here is ignored.
-#if defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wattributes"
-#endif
+GNU_DIAG_OFF("attributes")
 template class MANTID_KERNEL_DLL PropertyWithValue<float>;
 template class MANTID_KERNEL_DLL PropertyWithValue<double>;
 template class MANTID_KERNEL_DLL PropertyWithValue<int32_t>;
@@ -62,9 +60,7 @@ template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<long long>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<unsigned long long>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<std::vector<long long>>>;
 #endif
-#if defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
+GNU_DIAG_ON("attributes")
 /// @endcond
 
 } // namespace Mantid::Kernel
