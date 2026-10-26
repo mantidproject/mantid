@@ -11,6 +11,9 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include <cxxtest/TestSuite.h>
 #include <memory>
@@ -61,7 +64,8 @@ public:
     // Directly in Z+ = towards the detector center
     V3D testDir(0.0, 0.0, 1.0);
     for (size_t i = 0; i < 100; i++) {
-      InstrumentRayTracer tracker(m_inst);
+      auto const [compInfo, detInfo] = InstrumentVisitor::makeWrappers(*m_inst);
+      InstrumentRayTracer tracker(*compInfo, *detInfo);
       tracker.traceFromSample(testDir);
       Links results = tracker.getResults();
       TS_ASSERT_EQUALS(results.size(), 2);
@@ -81,7 +85,7 @@ public:
         if (verbose)
           std::cout << testDir << " : ";
         // Track it
-        InstrumentRayTracer tracker(inst);
+        InstrumentRayTracer tracker(topazWS->componentInfo(), topazWS->detectorInfo());
         tracker.traceFromSample(testDir);
         Links results = tracker.getResults();
 

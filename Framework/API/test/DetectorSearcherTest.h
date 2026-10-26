@@ -31,8 +31,8 @@ public:
     ExperimentInfo expInfo2;
     expInfo2.setInstrument(inst2);
 
-    TS_ASSERT_THROWS_NOTHING(DetectorSearcher searcher(inst1, expInfo1.detectorInfo()))
-    TS_ASSERT_THROWS_NOTHING(DetectorSearcher searcher(inst2, expInfo2.detectorInfo()))
+    TS_ASSERT_THROWS_NOTHING(DetectorSearcher searcher(expInfo1.componentInfo(), expInfo1.detectorInfo()))
+    TS_ASSERT_THROWS_NOTHING(DetectorSearcher searcher(expInfo2.componentInfo(), expInfo2.detectorInfo()))
   }
 
   void test_search_cylindrical() {
@@ -41,7 +41,7 @@ public:
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
 
-    DetectorSearcher searcher(inst, expInfo.detectorInfo());
+    DetectorSearcher searcher(expInfo.componentInfo(), expInfo.detectorInfo());
     const auto checkResult = [&searcher](const V3D &q, size_t index) {
       const auto result = searcher.findDetectorIndex(q);
       TS_ASSERT(std::get<0>(result))
@@ -77,6 +77,27 @@ public:
     checkResult(V3D(-0.948717, -0.296474, 0.109725), 26);
   }
 
+  void test_search_cylindrical_uses_tube_gap_parameter() {
+    auto inst = ComponentCreationHelper::createTestInstrumentCylindrical(3, V3D(0, 0, -1), V3D(0, 0, 0), 1.6, 1.0);
+
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    auto &compInfo = expInfo.mutableComponentInfo();
+    // Move pixel 0 (at y = -1) down by half a tube height, opening a gap
+    // between it and pixel 3 (at y = 0) for -1 < y < -0.5
+    compInfo.setPosition(0, V3D(-3.2, -1.5, 5));
+    const auto q = convertDirectionToQ(V3D(-3.2, -0.75, 5));
+
+    DetectorSearcher searcherWithoutGap(compInfo, expInfo.detectorInfo());
+    TS_ASSERT(!std::get<0>(searcherWithoutGap.findDetectorIndex(q)))
+
+    compInfo.addDouble(compInfo.root(), "tube-gap", 0.06);
+    DetectorSearcher searcherWithGap(compInfo, expInfo.detectorInfo());
+    const auto result = searcherWithGap.findDetectorIndex(q);
+    TS_ASSERT(std::get<0>(result))
+    TS_ASSERT_EQUALS(std::get<1>(result), 3)
+  }
+
   void test_invalid_rectangular() {
     auto inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
 
@@ -84,7 +105,7 @@ public:
     expInfo.setInstrument(inst);
     const auto &info = expInfo.detectorInfo();
 
-    DetectorSearcher searcher(inst, info);
+    DetectorSearcher searcher(expInfo.componentInfo(), info);
     const auto resultNull = searcher.findDetectorIndex(V3D(0, 0, 0));
     TS_ASSERT(!std::get<0>(resultNull))
 
@@ -98,7 +119,7 @@ public:
     expInfo.setInstrument(inst);
     const auto &info = expInfo.detectorInfo();
 
-    DetectorSearcher searcher(inst, info);
+    DetectorSearcher searcher(expInfo.componentInfo(), info);
     const auto resultNull = searcher.findDetectorIndex(V3D(0, 0, 0));
     TS_ASSERT(!std::get<0>(resultNull))
 
@@ -112,7 +133,7 @@ public:
     expInfo.setInstrument(inst);
     const auto &info = expInfo.detectorInfo();
 
-    DetectorSearcher searcher(inst, info);
+    DetectorSearcher searcher(expInfo.componentInfo(), info);
     const auto checkResult = [&searcher](V3D q, size_t index) {
       const auto result = searcher.findDetectorIndex(q);
       TS_ASSERT(std::get<0>(result))
@@ -123,6 +144,12 @@ public:
       const auto q = convertDetectorPositionToQ(info, pointNo);
       checkResult(q, pointNo);
     }
+  }
+
+  V3D convertDirectionToQ(V3D direction) {
+    direction.normalize();
+    const auto E1 = V3D(-direction.X(), -direction.Y(), 1. - direction.Z());
+    return E1 * (1. / E1.norm());
   }
 
   V3D convertDetectorPositionToQ(const DetectorInfo &info, const size_t index) {
@@ -142,7 +169,7 @@ public:
     expInfo.setInstrument(inst);
     const auto &info = expInfo.detectorInfo();
 
-    DetectorSearcher searcher(inst, info);
+    DetectorSearcher searcher(expInfo.componentInfo(), info);
 
     std::vector<double> xDirections(100);
     std::vector<double> yDirections(100);
@@ -184,7 +211,7 @@ public:
     expInfo.setInstrument(inst);
     const auto &info = expInfo.detectorInfo();
 
-    DetectorSearcher searcher(inst, info);
+    DetectorSearcher searcher(expInfo.componentInfo(), info);
 
     std::vector<double> xDirections(50);
     std::vector<double> yDirections(50);

@@ -139,8 +139,7 @@ void CreateDetectorTable::setup() {
   calcQ = true;
   if (spectrumInfo->hasDetectors(0)) {
     try {
-      std::shared_ptr<const IDetector> detector(&spectrumInfo->detector(0), Mantid::NoDeleting());
-      ws->getEFixed(detector);
+      ws->getEFixed(spectrumInfo->firstDetectorID(0));
     } catch (std::invalid_argument &) {
       calcQ = false;
     } catch (std::runtime_error &) {
@@ -260,8 +259,7 @@ double CreateDetectorTable::getQ(size_t wsIndex) {
   }
   try {
     // Get unsigned theta and efixed value
-    IDetector_const_sptr det{&spectrumInfo->detector(wsIndex), Mantid::NoDeleting()};
-    double efixed = ws->getEFixed(det);
+    double efixed = ws->getEFixed(spectrumInfo->firstDetectorID(wsIndex));
     double usignTheta = spectrumInfo->twoTheta(wsIndex) * 0.5;
     double q = UnitConversion::convertToElasticQ(usignTheta, efixed);
     return q;

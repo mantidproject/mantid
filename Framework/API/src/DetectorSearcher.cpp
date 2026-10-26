@@ -5,11 +5,14 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/DetectorSearcher.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NearestNeighbours.h"
 
+#include <queue>
 #include <tuple>
 
 using Mantid::Geometry::InstrumentRayTracer;
@@ -19,7 +22,51 @@ using namespace Mantid::API;
 
 namespace {
 Kernel::Logger g_log("DetectorSearcher");
+
+/** Check whether all of the detectors in the instrument are in rectangular
+ * banks. Mirrors Instrument::containsRectDetectors, ignoring the source,
+ * sample, monitors, choppers, slits and supermirrors.
+ *
+ * @param compInfo :: the Geometry::ComponentInfo object for the instrument
+ * @param detInfo :: the Geometry::DetectorInfo object for the instrument
+ * @return true if only rectangular banks were found
+ */
+bool containsOnlyRectDetectors(const Geometry::ComponentInfo &compInfo, const Geometry::DetectorInfo &detInfo) {
+  using Beamline::ComponentType;
+  std::queue<size_t> compQueue;
+  for (auto const child : compInfo.children(compInfo.root()))
+    compQueue.push(child);
+
+  bool foundRect = false;
+  while (!compQueue.empty()) {
+    size_t const index = compQueue.front();
+    compQueue.pop();
+
+    if ((compInfo.hasSource() && index == compInfo.source()) || (compInfo.hasSample() && index == compInfo.sample()))
+      continue;
+    if (compInfo.isDetector(index) && detInfo.isMonitor(index))
+      continue;
+    // skip choppers, slits and supermirrors - HACK!
+    auto const &name = compInfo.name(index);
+    if (name == "chopper-position" || name.substr(0, 4) == "slit" || name == "supermirror")
+      continue;
+
+    auto const type = compInfo.componentType(index);
+    if (type == ComponentType::Rectangular) {
+      foundRect = true;
+    } else if (type == ComponentType::Unstructured || type == ComponentType::Grid ||
+               type == ComponentType::Structured || type == ComponentType::OutlineComposite) {
+      // An assembly, so check its children
+      for (auto const child : compInfo.children(index))
+        compQueue.push(child);
+    } else {
+      // Found a non-rectangular detector or component
+      return false;
+    }
+  }
+  return foundRect;
 }
+} // namespace
 
 double getQSign() {
   const auto convention = Kernel::ConfigService::Instance().getString("Q.convention");
@@ -31,13 +78,12 @@ double getQSign() {
  * The search strategy will be determined in the constructor based on the
  * given instrument geometry
  *
- * @param instrument :: the instrument to find detectors in
+ * @param compInfo :: the Geometry::ComponentInfo object for this instrument
  * @param detInfo :: the Geometry::DetectorInfo object for this instrument
  */
-DetectorSearcher::DetectorSearcher(const Geometry::Instrument_const_sptr &instrument,
-                                   const Geometry::DetectorInfo &detInfo)
-    : m_usingFullRayTrace(instrument->containsRectDetectors() == Geometry::Instrument::ContainsState::Full),
-      m_crystallography_convention(getQSign()), m_detInfo(detInfo), m_instrument(instrument) {
+DetectorSearcher::DetectorSearcher(const Geometry::ComponentInfo &compInfo, const Geometry::DetectorInfo &detInfo)
+    : m_usingFullRayTrace(containsOnlyRectDetectors(compInfo, detInfo)), m_crystallography_convention(getQSign()),
+      m_compInfo(compInfo), m_detInfo(detInfo) {
 
   /* Choose the search strategy to use
    * If the instrument uses rectangular detectors (e.g. TOPAZ) then it is faster
@@ -52,7 +98,7 @@ DetectorSearcher::DetectorSearcher(const Geometry::Instrument_const_sptr &instru
   if (!m_usingFullRayTrace) {
     createDetectorCache();
   } else {
-    m_rayTracer = std::make_unique<InstrumentRayTracer>(instrument);
+    m_rayTracer = std::make_unique<InstrumentRayTracer>(compInfo, detInfo);
   }
 }
 
@@ -63,7 +109,7 @@ void DetectorSearcher::createDetectorCache() {
   points.reserve(m_detInfo.size());
   m_indexMap.reserve(m_detInfo.size());
 
-  const auto frame = m_instrument->getReferenceFrame();
+  const auto frame = m_compInfo.referenceFrame();
   auto beam = frame->vecPointingAlongBeam();
   auto up = frame->vecPointingUp();
 
@@ -127,14 +173,9 @@ DetectorSearcher::DetectorSearchResult DetectorSearcher::findDetectorIndex(const
 DetectorSearcher::DetectorSearchResult DetectorSearcher::searchUsingInstrumentRayTracing(const V3D &q) {
   const auto direction = convertQtoDirection(q);
   m_rayTracer->traceFromSample(direction);
-  const auto det = m_rayTracer->getDetectorResult();
+  auto const detIndex = m_rayTracer->getDetectorResult();
 
-  if (!det)
-    return std::make_tuple(false, 0);
-
-  const auto detIndex = m_detInfo.indexOf(det->getID());
-
-  if (m_detInfo.isMasked(detIndex) || m_detInfo.isMonitor(detIndex))
+  if (detIndex == Geometry::ComponentInfo::invalidIndex || m_detInfo.isMasked(detIndex))
     return std::make_tuple(false, 0);
 
   return std::make_tuple(true, detIndex);
@@ -166,7 +207,7 @@ DetectorSearcher::DetectorSearchResult DetectorSearcher::searchUsingNearestNeigh
 
   if (hitDetector) {
     return std::make_tuple(true, m_indexMap[index]);
-  } else if (m_instrument->hasParameter("tube-gap")) {
+  } else if (m_compInfo.hasParameter(m_compInfo.root(), "tube-gap")) {
     // Tube Gap Parameter specifically applies to tube instruments
     return handleTubeGap(detectorDir, neighbours);
   }
@@ -186,7 +227,7 @@ DetectorSearcher::DetectorSearchResult DetectorSearcher::searchUsingNearestNeigh
 DetectorSearcher::DetectorSearchResult
 DetectorSearcher::handleTubeGap(const V3D &detectorDir,
                                 const Kernel::NearestNeighbours<3>::NearestNeighbourResults &neighbours) {
-  std::vector<double> gaps = m_instrument->getNumberParameter("tube-gap", true);
+  std::vector<double> gaps = m_compInfo.getNumberParameter(m_compInfo.root(), "tube-gap", true);
   if (!gaps.empty()) {
     const auto gap = static_cast<double>(gaps.front());
     // try adding and subtracting tube-gap in 3 q dimensions to see if you can
@@ -249,7 +290,7 @@ std::tuple<bool, size_t> DetectorSearcher::checkInteceptWithNeighbours(
  */
 V3D DetectorSearcher::convertQtoDirection(const V3D &q) const {
   const auto norm_q = q.norm();
-  const auto refFrame = m_instrument->getReferenceFrame();
+  const auto refFrame = m_compInfo.referenceFrame();
   const V3D refBeamDir = refFrame->vecPointingAlongBeam();
 
   const double qBeam = q.scalar_prod(refBeamDir) * m_crystallography_convention;

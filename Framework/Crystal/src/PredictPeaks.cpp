@@ -293,7 +293,7 @@ void PredictPeaks::exec() {
   prog.setNotifyStep(0.01);
 
   if (usingInstrument)
-    m_detectorCacheSearch = std::make_unique<DetectorSearcher>(m_inst, m_pw->detectorInfo());
+    m_detectorCacheSearch = std::make_unique<DetectorSearcher>(m_pw->componentInfo(), m_pw->detectorInfo());
 
   if (!usingInstrument) {
     for (auto const &possibleHKL : possibleHKLs) {

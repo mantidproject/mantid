@@ -439,7 +439,8 @@ ReflectometryTransform::executeNormPoly(const MatrixWorkspace_const_sptr &inputW
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
       continue;
     }
-    const auto &detector = spectrumInfo.detector(i);
+    // ID of the (first) detector of the spectrum
+    const auto detID = spectrumInfo.firstDetectorID(i);
 
     // Compute polygon points
     const double twoTheta = twoThetas[i];
@@ -464,7 +465,7 @@ ReflectometryTransform::executeNormPoly(const MatrixWorkspace_const_sptr &inputW
       if (qIndex != 0 && qIndex < static_cast<int>(zBinsVec.size())) {
         // Add this spectra-detector pair to the mapping
         specNumberMapping.emplace_back(outWS->getSpectrum(qIndex - 1).getSpectrumNo());
-        detIDMapping.emplace_back(detector.getID());
+        detIDMapping.emplace_back(detID);
       }
       // Debugging
       if (dumpVertexes) {

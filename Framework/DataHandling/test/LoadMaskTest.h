@@ -392,14 +392,12 @@ public:
     for (size_t i = 0; i < n_steps; ++i) {
       bool source_masked = spectrumInfoSource.isMasked(i);
       if (source_masked) {
-        const auto &detector = spectrumInfoSource.detector(i);
-        const auto detectorId = detector.getID();
+        const auto detectorId = spectrumInfoSource.firstDetectorID(i);
         maskSourceDet.emplace_back(detectorId);
       }
       bool targ_masked = (maskWs->getSpectrum(i).y()[0] > 0.5);
       if (targ_masked) {
-        const auto &detector = spectrumInfoTarget.detector(i);
-        const auto detectorId = detector.getID();
+        const auto detectorId = spectrumInfoTarget.firstDetectorID(i);
         maskTargDet.emplace_back(detectorId);
       }
     }

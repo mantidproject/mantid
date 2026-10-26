@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/NearestNeighbours.h"
@@ -43,7 +43,7 @@ public:
   using DetectorSearchResult = std::tuple<bool, size_t>;
 
   /// Create a new DetectorSearcher with the given instrument & detectors
-  DetectorSearcher(const Geometry::Instrument_const_sptr &instrument, const Geometry::DetectorInfo &detInfo);
+  DetectorSearcher(const Geometry::ComponentInfo &compInfo, const Geometry::DetectorInfo &detInfo);
   /// Find a detector that intsects with the given Qlab vector
   DetectorSearchResult findDetectorIndex(const Kernel::V3D &q);
 
@@ -71,10 +71,10 @@ private:
   const bool m_usingFullRayTrace;
   /// flag for whether the crystallography convention is to be used
   const double m_crystallography_convention;
+  /// component info for the instrument
+  const Geometry::ComponentInfo &m_compInfo;
   /// detector info for the instrument
   const Geometry::DetectorInfo &m_detInfo;
-  /// handle to the instrument to search for detectors in
-  Geometry::Instrument_const_sptr m_instrument;
   /// vector of detector indicies used in the search
   std::vector<size_t> m_indexMap;
   /// Detector search cache for fast look-up of detectors

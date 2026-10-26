@@ -26,14 +26,12 @@ namespace {
 // description accessors are intentionally not deprecated yet; they have no
 // ComponentInfo equivalent and await the parameter-map redesign.)
 Mantid::Kernel::Quat getRotationDeprecated(const Component &self) {
-  /** TODO Uncomment this block for Mantid 7.1
   if (PyErr_Warn(PyExc_DeprecationWarning,
                  "'Component.getRotation()' is deprecated in Mantid 7.0, "
                  "use 'ComponentInfo.rotation' instead. "
                  "For more information, see the instrument access layers concept page: "
                  "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html") < 0)
     throw boost::python::error_already_set();
-  */
   return self.getRotation();
 }
 
