@@ -72,8 +72,8 @@ void RotateSource::exec() {
 
   if (angle != 0.) {
 
-    // Need the reference frame to decide around which axis to
-    auto const &compInfo = inputP->componentInfo();
+    // Need the reference frame to decide around which axis to rotate
+    auto const &compInfo = inputW ? inputW->componentInfo() : inputP->componentInfo();
     auto refFrame = compInfo.referenceFrame();
     if (!refFrame) {
       throw std::runtime_error("Could not get a valid reference frame");
