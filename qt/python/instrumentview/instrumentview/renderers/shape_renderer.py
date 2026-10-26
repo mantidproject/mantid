@@ -36,6 +36,7 @@ from mantid.kernel import logger
 
 _AXIS_PARALLEL_TOLERANCE = 1e-12  # minimum norm to treat a vector as non-degenerate
 _CROSS_PRODUCT_TOLERANCE = 1e-6  # minimum cross-product norm before falling back to alternative axis
+_MIN_QUAD_FRACTION = 1e-4  # a cuboid quad narrower than this fraction of the cuboid's longest edge is an invisible sliver
 
 
 class ShapeRenderer(InstrumentRenderer):
@@ -874,7 +875,11 @@ def _extract_quad_from_cuboid_shapeinfo(si) -> tuple[np.ndarray, np.ndarray] | N
     ``leftBackBottom`` (x_min, y_min, z_back),
     ``rightFrontBottom`` (x_max, y_min, z_front).
 
-    Returns ``None`` when the corners have insufficient extent to form a valid quad.
+    Instrument definitions may point the width or height along another axis,
+    which leaves this quad as a line or a sliver: a side under
+    ``_MIN_QUAD_FRACTION`` of the cuboid's longest edge.  Returns ``None`` then,
+    and when the corners cannot form a quad, so the caller draws the full
+    cuboid instead.
     """
     try:
         cg = si.cuboidGeometry()
@@ -889,7 +894,10 @@ def _extract_quad_from_cuboid_shapeinfo(si) -> tuple[np.ndarray, np.ndarray] | N
     y_min, y_max = lfb.Y(), lft.Y()
     z_front, z_back = lfb.Z(), lbb.Z()
 
-    if abs(x_max - x_min) < _AXIS_PARALLEL_TOLERANCE and abs(y_max - y_min) < _AXIS_PARALLEL_TOLERANCE:
+    corner = np.array([lfb.X(), lfb.Y(), lfb.Z()])
+    longest_edge = max(np.linalg.norm(np.array([end.X(), end.Y(), end.Z()]) - corner) for end in (rfb, lft, lbb))
+    narrowest_side = max(_MIN_QUAD_FRACTION * longest_edge, _AXIS_PARALLEL_TOLERANCE)
+    if abs(x_max - x_min) < narrowest_side or abs(y_max - y_min) < narrowest_side:
         return None
 
     mid_z = (z_front + z_back) * 0.5
