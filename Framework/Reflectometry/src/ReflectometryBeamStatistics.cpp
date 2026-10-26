@@ -10,7 +10,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -34,6 +34,15 @@ const std::string SECOND_SLIT_SIZE_LOG{"SecondSlitSizeSampleLog"};
 } // namespace Prop
 /// A conversion factor from e.g. slit opening to FWHM of Gaussian equivalent.
 constexpr double FWHM_GAUSSIAN_EQUIVALENT{0.68};
+/// Return true if the instrument has a component with this name.
+bool hasComponent(Mantid::Geometry::ComponentInfo const &componentInfo, std::string const &name) {
+  try {
+    componentInfo.indexOfAny(name);
+  } catch (std::invalid_argument const &) {
+    return false;
+  }
+  return true;
+}
 } // namespace
 
 namespace Mantid::Reflectometry {
@@ -52,16 +61,16 @@ const std::string
 
 /** Give the gap between the two slits, in meters.
  *
- * @param instrument an instrument which containts the slit components
+ * @param componentInfo the component info of an instrument which contains the slit components
  * @param slit1Name name of the first slit component
  * @param slit2Name name of the second slit component
  * @return the slit gap, in meters
  */
-double ReflectometryBeamStatistics::slitSeparation(const Geometry::Instrument_const_sptr &instrument,
-                                                   const std::string &slit1Name, const std::string &slit2Name) {
-  auto slit1 = instrument->getComponentByName(slit1Name);
-  auto slit2 = instrument->getComponentByName(slit2Name);
-  return (slit1->getPos() - slit2->getPos()).norm();
+double ReflectometryBeamStatistics::slitSeparation(Geometry::ComponentInfo const &componentInfo,
+                                                   std::string const &slit1Name, std::string const &slit2Name) {
+  auto const slit1 = componentInfo.indexOfAny(slit1Name);
+  auto const slit2 = componentInfo.indexOfAny(slit2Name);
+  return (componentInfo.position(slit1) - componentInfo.position(slit2)).norm();
 }
 
 /// Algorithms name for identification. @see Algorithm::name
@@ -119,14 +128,12 @@ std::map<std::string, std::string> ReflectometryBeamStatistics::validateInputs()
   std::map<std::string, std::string> issues;
   API::MatrixWorkspace_const_sptr reflectedWS = getProperty(Prop::REFLECTED_WS);
   const std::string slit1Name = getProperty(Prop::FIRST_SLIT_NAME);
-  auto instrument = reflectedWS->getInstrument();
-  auto slit = instrument->getComponentByName(slit1Name);
-  if (!slit) {
+  auto const &componentInfo = reflectedWS->componentInfo();
+  if (!hasComponent(componentInfo, slit1Name)) {
     issues[Prop::FIRST_SLIT_NAME] = "No component called '" + slit1Name + "' found in " + Prop::REFLECTED_WS;
   }
   const std::string slit2Name = getProperty(Prop::SECOND_SLIT_NAME);
-  slit = instrument->getComponentByName(slit2Name);
-  if (!slit) {
+  if (!hasComponent(componentInfo, slit2Name)) {
     issues[Prop::SECOND_SLIT_NAME] = "No component called '" + slit2Name + "' found in " + Prop::REFLECTED_WS;
   }
   return issues;
@@ -245,10 +252,10 @@ ReflectometryBeamStatistics::createSetup(const API::MatrixWorkspace &ws, const A
   s.slit1Size = slitSize(ws, slit1SizeEntry);
   s.slit1SizeDirectBeam = slitSize(directWS, slit1SizeEntry);
   const std::string slit2Name = getProperty(Prop::SECOND_SLIT_NAME);
-  auto instrument = ws.getInstrument();
-  auto slit2 = instrument->getComponentByName(slit2Name);
+  auto const &componentInfo = ws.componentInfo();
+  auto const slit2 = componentInfo.indexOfAny(slit2Name);
   const auto samplePos = spectrumInfo.samplePosition();
-  s.slit2SampleDistance = (slit2->getPos() - samplePos).norm();
+  s.slit2SampleDistance = (componentInfo.position(slit2) - samplePos).norm();
   const std::string slit2SizeEntry = getProperty(Prop::SECOND_SLIT_SIZE_LOG);
   s.slit2Size = slitSize(ws, slit2SizeEntry);
   s.slit2SizeDirectBeam = slitSize(directWS, slit2SizeEntry);
@@ -301,8 +308,7 @@ double ReflectometryBeamStatistics::incidentAngularSpread(const Setup &setup) {
 double ReflectometryBeamStatistics::interslitDistance(const API::MatrixWorkspace &ws) {
   const std::string slit1Name = getProperty(Prop::FIRST_SLIT_NAME);
   const std::string slit2Name = getProperty(Prop::SECOND_SLIT_NAME);
-  auto instrument = ws.getInstrument();
-  return slitSeparation(instrument, slit1Name, slit2Name);
+  return slitSeparation(ws.componentInfo(), slit1Name, slit2Name);
 }
 
 /**

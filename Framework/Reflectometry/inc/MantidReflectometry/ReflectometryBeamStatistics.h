@@ -7,10 +7,12 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/Instrument_fwd.h"
 #include "MantidReflectometry/DllConfig.h"
 
 namespace Mantid {
+namespace Geometry {
+class ComponentInfo;
+}
 namespace Reflectometry {
 
 /** Calculates statistical quantities of a reflectometry workspace.
@@ -25,8 +27,8 @@ public:
     const static std::string SAMPLE_WAVINESS;
     const static std::string SECOND_SLIT_ANGULAR_SPREAD;
   };
-  static double slitSeparation(const Geometry::Instrument_const_sptr &instrument, const std::string &slit1Name,
-                               const std::string &slit2Name);
+  static double slitSeparation(Geometry::ComponentInfo const &componentInfo, std::string const &slit1Name,
+                               std::string const &slit2Name);
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
