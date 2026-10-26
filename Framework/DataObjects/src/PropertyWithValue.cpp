@@ -27,10 +27,6 @@
 #include "MantidKernel/WarningSuppressions.h"
 
 namespace Mantid {
-namespace DataObjects {
-template <size_t nd> using MDEventWS = MDEventWorkspace<MDEvent<nd>, nd>;
-template <size_t nd> using MDLeanEventWS = MDEventWorkspace<MDLeanEvent<nd>, nd>;
-} // namespace DataObjects
 namespace Kernel {
 
 /// @cond
