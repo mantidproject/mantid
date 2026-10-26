@@ -80,7 +80,7 @@ QVariant QtSearchModel::data(const QModelIndex &index, int role) const {
   auto const &run = m_runDetails[rowNumber];
 
   /*SETTING TOOL TIP AND BACKGROUND FOR INVALID RUNS*/
-  if (role != Qt::DisplayRole) {
+  if (role != Qt::DisplayRole && role != Qt::EditRole) {
     if (role == Qt::ToolTipRole) {
       // setting the tool tips for any unsuccessful transfers or user
       // annotations

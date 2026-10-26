@@ -48,6 +48,28 @@ public:
     TS_ASSERT_EQUALS(getTestCSV(), csv)
   }
 
+  void test_edit_role_returns_existing_text_so_it_is_not_cleared_on_edit() {
+    auto model = QtSearchModel();
+    model.replaceResults(getTestSearchResults());
+
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0), Qt::EditRole).toString(), QString("111111"))
+    TS_ASSERT_EQUALS(model.data(model.index(2, 2), Qt::EditRole).toString(), QString("it's bad"))
+    TS_ASSERT_EQUALS(model.data(model.index(2, 3), Qt::EditRole).toString(), QString("something"))
+    TS_ASSERT_EQUALS(model.data(model.index(0, 4), Qt::EditRole).toString(), QString("air | Ni 100 | SiO2 0.5 | Si"))
+  }
+
+  void test_edit_role_matches_display_role() {
+    auto model = QtSearchModel();
+    model.replaceResults(getTestSearchResults());
+
+    for (auto row = 0; row < model.rowCount(); ++row) {
+      for (auto column = 0; column < model.columnCount(); ++column) {
+        auto const index = model.index(row, column);
+        TS_ASSERT_EQUALS(model.data(index, Qt::EditRole), model.data(index, Qt::DisplayRole))
+      }
+    }
+  }
+
 private:
   static SearchResults getTestSearchResults() {
     auto results = SearchResults();
