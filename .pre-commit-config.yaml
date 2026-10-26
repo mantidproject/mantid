@@ -112,9 +112,11 @@ repos:
         pass_filenames: false
         # a note can be orphaned by a change to a page that the filter would not have matched, so always check
         always_run: true
-  
+
   - repo: https://github.com/codespell-project/codespell
-    # Configuration for codespell is in .pre-commit-config.yaml
+    # Configuration for codespell is in pyproject.toml
     rev: v2.4.3
     hooks:
-    - id: codespell
+      - id: codespell
+        # Initially limited to dev-docs/; extend as other areas get fixed
+        files: ^dev-docs/

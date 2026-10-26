@@ -98,7 +98,11 @@ distance-dirty = "{base_version}.dev{distance}+uncommitted"
 
 [tool.codespell]
 # Ref: https://github.com/codespell-project/codespell#using-a-config-file
-skip = '.git,.gitignore,.gitattributes,*.pdf,*.svg,*.lock,*.css,*-min.*'
+# Checks are initially limited to dev-docs/ (see .github/workflows/codespell.yml
+# and .pre-commit-config.yaml); run locally as: codespell dev-docs
+skip = '.git,.git-meta,.gitattributes,.*cache,.venv,.tox,.eggs,*.egg-info,__pycache__,.pixi,./build,*.pdf,*.svg,*.png,*.jpg,*.lock,*.css,*.min.*,*-min.*,.npm'
 check-hidden = true
-# ignore-regex = ''
-# ignore-words-list = ''
+# Ignore URLs, and camelCase and PascalCase identifiers (common in code)
+ignore-regex = 'https?://\S+|\b[a-z]+[A-Z]\w*\b|\b[A-Z][a-z]+[A-Z]\w*\b'
+# nd: ND (normal direction) and number of dimensions; others are valid spellings
+ignore-words-list = 'nd,re-use,re-used,co-ordinate,pre-empts'
