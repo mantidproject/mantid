@@ -188,10 +188,6 @@ std::deque<IConfiguredAlgorithm_sptr> BatchJobManager::algorithmForPostprocessin
   if (group.rows().size() < 2) {
     throw std::runtime_error("Must have at least two rows for post-processing a group.");
   }
-  // TODO
-  // for row in group
-  //   check each row has the same number of slices
-  //   if so, create one algorithm per slice, with the inputs being the slice workspace (unbinned/iVsQ) from each row
 
   auto const nSlices = group.rows()[0]->reducedWorkspaceNames().iVsQ().size();
   std::for_each(std::next(group.rows().cbegin()), group.rows().cend(), [nSlices](auto const &row) -> void {
