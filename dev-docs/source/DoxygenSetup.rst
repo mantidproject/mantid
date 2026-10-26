@@ -10,7 +10,7 @@ Unix Console Doxygen Setup
 |                 | If not, build from source                                                               |
 |                 | `here <http://www.stack.nl/~dimitri/doxygen/download.html#srcbin>`__.                   |
 +-----------------+-----------------------------------------------------------------------------------------+
-| Run cmake       | CMake will generate the doxygen config file                                            |
+| Run cmake       | CMake will generate the doxygen config file                                             |
 |                 | in ${CMAKE_DIR}/Framework/Doxygen/Mantid.doxyfile                                       |
 +-----------------+-----------------------------------------------------------------------------------------+
 | | You're done!  |  -  Type 'make doxygen'                                                                 |
