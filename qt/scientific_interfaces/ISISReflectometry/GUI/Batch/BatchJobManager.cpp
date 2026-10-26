@@ -202,7 +202,9 @@ std::deque<IConfiguredAlgorithm_sptr> BatchJobManager::algorithmForPostprocessin
     std::for_each(group.rows().cbegin(), group.rows().cend(), [&workspaces, i](auto const &row) -> void {
       workspaces.emplace_back(row->reducedWorkspaceNames().iVsQ()[i]);
     });
-    auto algorithm = GroupProcessing::createConfiguredAlgorithm(m_batch, group, std::move(workspaces));
+    // We only want to reset the group's outputs on the first of the slices. The rest get appended.
+    auto algorithm = i == 0 ? GroupProcessing::createConfiguredAlgorithm(m_batch, group, std::move(workspaces), true)
+                            : GroupProcessing::createConfiguredAlgorithm(m_batch, group, std::move(workspaces), false);
     algorithms.emplace_back(std::move(algorithm));
   }
   return algorithms;
@@ -261,7 +263,10 @@ void BatchJobManager::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
   auto item = getRunsTableItem(algorithm);
   assert(item);
   Item &itemRef = item->get();
-  itemRef.resetOutputs();
+  auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
+  if (jobAlgorithm->resetOutputsOnStart()) {
+    itemRef.resetOutputs();
+  }
   itemRef.setRunning();
 }
 
