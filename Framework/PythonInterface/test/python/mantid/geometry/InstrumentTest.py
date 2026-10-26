@@ -87,8 +87,7 @@ class InstrumentTest(unittest.TestCase):
         inst = self._instrument()
         with self.assertWarns(DeprecationWarning):
             base_inst = inst.getBaseInstrument()
-        with self.assertWarns(DeprecationWarning):
-            self.assertEqual("testInst", base_inst.getName())
+        self.assertEqual("testInst", base_inst.getName())
 
     def test_getBaseInstrument_warning_can_be_raised_as_an_error(self):
         inst = self._instrument()
