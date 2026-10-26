@@ -113,8 +113,9 @@ public:
   void setPosition(const std::pair<size_t, size_t> &index, const Kernel::V3D &position);
   void setRotation(const size_t index, const Kernel::Quat &rotation);
   void setRotation(const std::pair<size_t, size_t> &index, const Kernel::Quat &rotation);
-
-  [[deprecated("DetectorInfo::detector is deprecated in Mantid 7.1.")]]
+  [[deprecated("DetectorInfo::detector has been deprecated in Mantid 7.1."
+               "See the 'Instrument Access via SpectrumInfo, DetectorInfo, ComponentInfo' concept page, "
+               "located at: https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html")]]
   const Geometry::IDetector &detector(const size_t index) const;
 
   // This does not really belong into DetectorInfo, but it seems to be useful
@@ -141,9 +142,13 @@ public:
   const DetectorInfoIterator<const DetectorInfo> cend() const;
 
 private:
-  [[deprecated("DetectorInfo::getDetector is deprecated in Mantid 7.1.")]]
+  [[deprecated("DetectorInfo::getDetector has been deprecated in Mantid 7.1."
+               "See the 'Instrument Access via SpectrumInfo, DetectorInfo, ComponentInfo' concept page, "
+               "located at: https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html")]]
   const Geometry::IDetector &getDetector(const size_t index) const;
-  [[deprecated("DetectorInfo::getDetectorPtr is deprecated in Mantid 7.1.")]]
+  [[deprecated("DetectorInfo::getDetectorPtr has been deprecated in Mantid 7.1."
+               "See the 'Instrument Access via SpectrumInfo, DetectorInfo, ComponentInfo' concept page, "
+               "located at: https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html")]]
   std::shared_ptr<const Geometry::IDetector> getDetectorPtr(const size_t index) const;
   void clearPositionDependentParameters(const size_t index);
 
