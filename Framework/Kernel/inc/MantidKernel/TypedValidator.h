@@ -157,18 +157,14 @@ private:
   static const std::type_info &dataitemTypeID() { return typeid(std::shared_ptr<DataItem>); }
 };
 
+// Instantiated and exported by StartsWithValidator.cpp and ArrayLengthValidator.cpp. They are the bases of exported
+// validator classes, so consumers must not instantiate their own copy of the inline base members.
+MANTID_KERNEL_EXTERN_TEMPLATE(TypedValidator<std::string>);
+MANTID_KERNEL_EXTERN_TEMPLATE(TypedValidator<std::vector<double>>);
+
 /// @cond
 // This switch off an warning because oxygen could not figureout that this is a
 // specialized type of the general one.
 } // namespace Kernel
 /// @endcond
 } // namespace Mantid
-
-#if defined(_WIN32) && !defined(Kernel_EXPORTS)
-// These specializations are instantiated by exported validator classes. Keep
-// consumers from instantiating another copy of their inline base members.
-// Kernel itself provides the exported instantiations, and MSVC rejects extern
-// combined with dllexport.
-extern template class MANTID_KERNEL_DLL Mantid::Kernel::TypedValidator<std::string>;
-extern template class MANTID_KERNEL_DLL Mantid::Kernel::TypedValidator<std::vector<double>>;
-#endif
