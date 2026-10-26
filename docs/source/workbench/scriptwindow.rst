@@ -28,8 +28,7 @@ Editor Themes
 .. image:: ../images/Workbench/Editor/EditorDarkTheme.png
 
 The script window supports a dark theme in addition to the default theme. To enable the dark theme, go to :ref:`settings<WorkbenchSettings>` and check the
-"Apply dark theme" option under the Editor group in the General settings tab. Click Apply and close the settings window.
-Click the **+** button to open a new tab (or use the :code:`Ctrl+N` keyboard shortcut). A new tab will open with the dark theme applied.
+"Apply dark theme" option under the Editor group in the General settings tab. Click Apply and close the settings window. This should apply the dark theme to all currently open tabs, as well as to any newly opened ones.
 
 Editor Options
 --------------
