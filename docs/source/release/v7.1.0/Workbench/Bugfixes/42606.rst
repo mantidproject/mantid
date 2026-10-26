@@ -1,0 +1,1 @@
+- Fixed the UI elements for Mac users while :ref:`fitting models to data <_01_fitting_models_to_data>` using the :ref:`UserFunction <_func-UserFunction>` and :ref:`TabulatedFunction <_func-TabulatedFunction>`.
