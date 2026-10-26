@@ -385,7 +385,8 @@ void export_ComponentInfo() {
            "Rectangular/Grid bank identified by 'index'.")
 
       .def("indexOfAny", &ComponentInfo::indexOfAny, (arg("self"), arg("name")),
-           "Returns the index of any component matching name. Raises "
+           "Returns the index of the component matching name. Where several components share the name, "
+           "returns the one closest to the root, as Instrument.getComponentByName() did. Raises "
            "ValueError if name not found")
 
       .def("uniqueName", &ComponentInfo::uniqueName, (arg("self"), arg("name")),

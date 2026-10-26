@@ -118,6 +118,8 @@ public:
   size_t indexOf(Geometry::IComponent const *id) const;
   /// The index for a component ID, or invalidIndex if it is not part of this instrument.
   size_t indexOfOrInvalid(Geometry::IComponent const *id) const;
+  /// The first component with this name in a breadth-first search, as Instrument::getComponentByName() finds it.
+  /// Throws std::invalid_argument if there is none.
   size_t indexOfAny(const std::string &name) const;
   bool uniqueName(const std::string &name) const;
   bool isDetector(const size_t componentIndex) const;

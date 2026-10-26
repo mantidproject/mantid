@@ -7,11 +7,17 @@
 #pragma once
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidReflectometry/DllConfig.h"
 
+#include <vector>
+
 namespace Mantid {
+namespace Geometry {
+class ComponentInfo;
+}
+namespace Kernel {
+class V3D;
+}
 namespace Reflectometry {
 
 /** SpecularReflectionAlgorithm : Algorithm base class implementing generic
@@ -23,13 +29,16 @@ protected:
   /// Constructor
   SpecularReflectionAlgorithm() = default;
 
-  /// Get the surface sample component
-  Mantid::Geometry::IComponent_const_sptr
-  getSurfaceSampleComponent(const Mantid::Geometry::Instrument_const_sptr &inst) const;
+  /// Get the component index of the surface sample component
+  size_t getSurfaceSampleComponentIndex(Geometry::ComponentInfo const &componentInfo) const;
 
-  /// Get the detector component
-  Mantid::Geometry::IComponent_const_sptr getDetectorComponent(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                                                               const bool isPointDetector) const;
+  /// Get the component indices making up the detector
+  std::vector<size_t> getDetectorComponentIndices(API::MatrixWorkspace const &workspace,
+                                                  bool const isPointDetector) const;
+
+  /// Get the mean position of a set of components
+  static Kernel::V3D meanPosition(Geometry::ComponentInfo const &componentInfo,
+                                  std::vector<size_t> const &componentIndices);
 
   /// Does the property have a default value.
   bool isPropertyDefault(const std::string &propertyName) const;

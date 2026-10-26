@@ -10,6 +10,8 @@
 #include "MantidReflectometry/DllConfig.h"
 #include "MantidReflectometry/SpecularReflectionAlgorithm.h"
 
+#include <vector>
+
 namespace Mantid {
 namespace Reflectometry {
 
@@ -33,13 +35,13 @@ private:
   void exec() override;
 
   /// Correct detector positions.
-  void correctPosition(const API::MatrixWorkspace_sptr &toCorrect, const double &twoThetaInDeg,
-                       const Geometry::IComponent_const_sptr &sample, const Geometry::IComponent_const_sptr &detector);
+  void correctPosition(API::MatrixWorkspace_sptr const &toCorrect, double const twoThetaInDeg, size_t const sampleIndex,
+                       std::vector<size_t> const &detectorIndices);
 
   /// Move detectors.
-  void moveDetectors(const API::MatrixWorkspace_sptr &toCorrect, Geometry::IComponent_const_sptr detector,
-                     const Geometry::IComponent_const_sptr &sample, const double &upOffset, const double &acrossOffset,
-                     const Mantid::Kernel::V3D &detectorPosition);
+  void moveDetectors(API::MatrixWorkspace_sptr const &toCorrect, std::vector<size_t> const &detectorIndices,
+                     size_t const sampleIndex, double const upOffset, double const acrossOffset,
+                     Kernel::V3D const &detectorPosition);
 };
 
 } // namespace Reflectometry

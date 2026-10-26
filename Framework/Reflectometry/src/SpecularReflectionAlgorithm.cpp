@@ -8,7 +8,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -16,6 +16,7 @@
 #include "MantidKernel/ListValidator.h"
 
 #include <memory>
+#include <set>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -51,6 +52,21 @@ void checkSpectrumNumbers(const std::vector<int> &spectrumNumbers, bool strictSp
         logger.warning(message);
       }
     }
+  }
+}
+
+/**
+ * Look up a component by name.
+ * @param componentInfo : Component info to search through
+ * @param name : Name of the component
+ * @return : The component index
+ * @throw std::invalid_argument if no component has this name
+ */
+size_t componentIndexByName(ComponentInfo const &componentInfo, std::string const &name) {
+  try {
+    return componentInfo.indexOfAny(name);
+  } catch (std::invalid_argument const &) {
+    throw std::invalid_argument(name + " does not exist. Check input properties.");
   }
 }
 } // namespace
@@ -105,43 +121,38 @@ void SpecularReflectionAlgorithm::initCommonProperties() {
  *for the lookup as a priority.
  *
  * Throws if the name is invalid.
- * @param inst : Instrument to search through
- * @return : The component : The component object found.
+ * @param componentInfo : Component info to search through
+ * @return : The component index of the component found.
  */
-Mantid::Geometry::IComponent_const_sptr
-SpecularReflectionAlgorithm::getSurfaceSampleComponent(const Mantid::Geometry::Instrument_const_sptr &inst) const {
+size_t SpecularReflectionAlgorithm::getSurfaceSampleComponentIndex(ComponentInfo const &componentInfo) const {
   std::string sampleComponent = "some-surface-holder";
   if (!isPropertyDefault("SampleComponentName")) {
     sampleComponent = this->getPropertyValue("SampleComponentName");
   }
-  auto searchResult = inst->getComponentByName(sampleComponent);
-  if (searchResult == nullptr) {
-    throw std::invalid_argument(sampleComponent + " does not exist. Check input properties.");
-  }
-  return searchResult;
+  return componentIndexByName(componentInfo, sampleComponent);
 }
 
 /**
- * Get the detector component. Use the name provided as a property as the basis
- *for the lookup as a priority.
+ * Get the detector component. Use the spectrum numbers or the name provided
+ *as properties as the basis for the lookup as a priority.
  *
  * Throws if the name is invalid.
  * @param workspace : Workspace from instrument with detectors
  * @param isPointDetector : True if this is a point detector. Used to guess a
  *name.
- * @return The component : The component object found.
+ * @return : The component indices of the detectors of the given spectra, or
+ *the single index of the named component.
  */
-std::shared_ptr<const Mantid::Geometry::IComponent>
-SpecularReflectionAlgorithm::getDetectorComponent(const MatrixWorkspace_sptr &workspace,
-                                                  const bool isPointDetector) const {
-  std::shared_ptr<const IComponent> searchResult;
+std::vector<size_t> SpecularReflectionAlgorithm::getDetectorComponentIndices(MatrixWorkspace const &workspace,
+                                                                             bool const isPointDetector) const {
   if (!isPropertyDefault("SpectrumNumbersOfDetectors")) {
     const std::vector<int> spectrumNumbers = this->getProperty("SpectrumNumbersOfDetectors");
     const bool strictSpectrumChecking = this->getProperty("StrictSpectrumChecking");
     checkSpectrumNumbers(spectrumNumbers, strictSpectrumChecking, g_log);
-    auto specToWorkspaceIndex = workspace->getSpectrumToWorkspaceIndexMap();
-    DetectorGroup_sptr allDetectors = std::make_shared<DetectorGroup>();
-    const auto &spectrumInfo = workspace->spectrumInfo();
+    auto specToWorkspaceIndex = workspace.getSpectrumToWorkspaceIndexMap();
+    auto const &spectrumInfo = workspace.spectrumInfo();
+    // Detector indices are also component indices
+    std::set<size_t> detectorIndices;
     for (auto index : spectrumNumbers) {
       const size_t spectrumNumber{static_cast<size_t>(index)};
       auto it = specToWorkspaceIndex.find(index);
@@ -151,26 +162,36 @@ SpecularReflectionAlgorithm::getDetectorComponent(const MatrixWorkspace_sptr &wo
         throw std::invalid_argument(message.str());
       }
       const size_t workspaceIndex = it->second;
-      auto detector = workspace->getDetector(workspaceIndex);
       if (spectrumInfo.isMasked(workspaceIndex))
-        g_log.warning() << "Adding a detector (ID:" << detector->getID() << ") that is flagged as masked.\n";
-      allDetectors->addDetector(detector);
+        g_log.warning() << "Adding a detector (ID:" << spectrumInfo.firstDetectorID(workspaceIndex)
+                        << ") that is flagged as masked.\n";
+      for (auto const &[detectorIndex, timeIndex] : spectrumInfo.spectrumDefinition(workspaceIndex)) {
+        detectorIndices.insert(detectorIndex);
+      }
     }
-    searchResult = allDetectors;
-  } else {
-    Mantid::Geometry::Instrument_const_sptr inst = workspace->getInstrument();
-    std::string componentToCorrect = isPointDetector ? "point-detector" : "linedetector";
-
-    if (!isPropertyDefault("DetectorComponentName")) {
-      componentToCorrect = this->getPropertyValue("DetectorComponentName");
-    }
-    searchResult = inst->getComponentByName(componentToCorrect);
-    if (searchResult == nullptr) {
-      throw std::invalid_argument(componentToCorrect + " does not exist. Check input properties.");
-    }
+    return {detectorIndices.cbegin(), detectorIndices.cend()};
   }
 
-  return searchResult;
+  std::string componentToCorrect = isPointDetector ? "point-detector" : "linedetector";
+  if (!isPropertyDefault("DetectorComponentName")) {
+    componentToCorrect = this->getPropertyValue("DetectorComponentName");
+  }
+  return {componentIndexByName(workspace.componentInfo(), componentToCorrect)};
+}
+
+/**
+ * Get the mean position of a set of components.
+ * @param componentInfo : Component info holding the components
+ * @param componentIndices : Indices of the components
+ * @return : The mean position
+ */
+V3D SpecularReflectionAlgorithm::meanPosition(ComponentInfo const &componentInfo,
+                                              std::vector<size_t> const &componentIndices) {
+  V3D position;
+  for (auto const componentIndex : componentIndices) {
+    position += componentInfo.position(componentIndex);
+  }
+  return position / static_cast<double>(componentIndices.size());
 }
 
 /**
@@ -193,15 +214,15 @@ double SpecularReflectionAlgorithm::calculateTwoTheta() const {
 
   const std::string analysisMode = this->getProperty("AnalysisMode");
 
-  Instrument_const_sptr instrument = inWS->getInstrument();
+  auto const &componentInfo = inWS->componentInfo();
 
-  IComponent_const_sptr detector = this->getDetectorComponent(inWS, analysisMode == pointDetectorAnalysis);
+  auto const detectorIndices = this->getDetectorComponentIndices(*inWS, analysisMode == pointDetectorAnalysis);
 
-  IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
+  auto const sampleIndex = this->getSurfaceSampleComponentIndex(componentInfo);
 
-  const V3D detSample = detector->getPos() - sample->getPos();
+  V3D const detSample = meanPosition(componentInfo, detectorIndices) - componentInfo.position(sampleIndex);
 
-  std::shared_ptr<const ReferenceFrame> refFrame = instrument->getReferenceFrame();
+  auto const refFrame = componentInfo.referenceFrame();
 
   const double upoffset = refFrame->vecPointingUp().scalar_prod(detSample);
   const double beamoffset = refFrame->vecPointingAlongBeam().scalar_prod(detSample);

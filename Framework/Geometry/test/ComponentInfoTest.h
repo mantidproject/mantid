@@ -1123,6 +1123,19 @@ public:
     TS_ASSERT_EQUALS(componentInfo.indexOfFullName(componentInfo.name(bankIndex)), ComponentInfo::invalidIndex);
   }
 
+  void test_indexOfAny_matches_the_legacy_getComponentByName() {
+    // Every bank holds pixels with the same names, so the lookup order matters
+    auto instrument = ComponentCreationHelper::createTestInstrumentCylindrical(2);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    auto const &componentInfo = *std::get<0>(wrappers);
+
+    for (size_t i = 0; i < componentInfo.size(); ++i) {
+      auto const &name = componentInfo.name(i);
+      auto const legacy = instrument->getComponentByName(name);
+      TSM_ASSERT_EQUALS(name, componentInfo.indexOfAny(name), componentInfo.indexOf(legacy.get()));
+    }
+  }
+
   void test_fullName_matches_the_legacy_getFullName() {
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
     auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
