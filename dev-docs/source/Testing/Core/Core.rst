@@ -57,7 +57,7 @@ This was last updated for Release 6.2. Check if the organiser has considered if 
     Settings (Preferences on Mac), "Check all options work. Some may need restart."
     Script Editor / Interpreter, "Check basic functionality, such as checking the buttons/options at the top of SE, running algorithms, accessing workspace properties in both environments. Also, check that closing a tab, while it's script is running, aborts the script properly. Does autocompletion work for mantid algorithms/numpy/matplotlib? :ref:`02_scripts`"
     Access mantid framework in Python and Jupyter Notebook, "Follow the instructions on :ref:`PythonNotebook` and check you can import mantid.simpleapi and run a script/notebook."
-    System Memory Usage Widget, "Check that the System Memory Usage Widget updates at a frequency of no more than once every two seconds, ideally on a system with limited resourses. Check that the default position of the widget is in the top right, in the same column as the Messages widget."
+    System Memory Usage Widget, "Check that the System Memory Usage Widget updates at a frequency of no more than once every two seconds, ideally on a system with limited resources. Check that the default position of the widget is in the top right, in the same column as the Messages widget."
     Script Repository, "Test downloading and uploading scripts to the Script Repository. Try to move the Script Repository to another folder. Check out :ref:`this <WorkbenchScriptRepository>` page for more information."
 
 .. csv-table:: Larger tasks

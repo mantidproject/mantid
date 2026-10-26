@@ -24,11 +24,11 @@ This is installed by the mantid-developer conda metapackage and will eventually 
 black automatically finds the configuration in the ``pyproject.toml`` file when executed inside the Mantid source directory.
 To format a given file you may use ``python -m black path/to/file.py``.
 
-To automatically format any Python files you have changed prior to commiting you may use the command: ``git diff --name-only --cached | grep '\.py' | xargs python -m black``.
+To automatically format any Python files you have changed prior to committing you may use the command: ``git diff --name-only --cached | grep '\.py' | xargs python -m black``.
 This will in place format any files with the ``.py`` extension that you have staged.
 Adding configuration of black into pre-commit is planned.
 
-The `editor integration <https://black.readthedocs.io/en/stable/integrations/editors.html>`_ from black's docuementation provide details.
+The `editor integration <https://black.readthedocs.io/en/stable/integrations/editors.html>`_ from black's documentation provide details.
 
 None checks
 -----------
