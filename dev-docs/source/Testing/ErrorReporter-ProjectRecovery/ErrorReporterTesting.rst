@@ -114,7 +114,7 @@ Error Reporter test
 - This should cause an error reporter dialog saying Mantid has thrown an unexpected exception
 - The shared contact details from test 5 should be displayed and the ``Remember Me`` checkbox ticked
 - Make sure the ``Continue`` radio button is checked
-- Untick the ``Remember Me`` checkbox and click the ``Dont' share any information`` button
+- Untick the ``Remember Me`` checkbox and click the ``Don't share any information`` button
 - MantidWorkbench should still be opened
 - Run the ``NormaliseToMonitor`` algorithm again
 - This should cause an error reporter dialog saying Mantid has thrown an unexpected exception
