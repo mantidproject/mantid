@@ -511,9 +511,8 @@ public:
     addInstrumentWithParameter(*exptInfo, "a", "b");
 
     const auto &spectrumInfo = exptInfo->spectrumInfo();
-    const auto *detGroup = dynamic_cast<const Geometry::DetectorGroup *>(&spectrumInfo.detector(0));
-    TS_ASSERT(!detGroup);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(0).getID(), 1);
+    TS_ASSERT(spectrumInfo.hasUniqueDetector(0));
+    TS_ASSERT_EQUALS(spectrumInfo.firstDetectorID(0), 1);
   }
 
   void test_nexus() {
@@ -750,13 +749,11 @@ public:
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
     const auto &compInfo = expInfo.componentInfo();
-    const auto &detInfo = expInfo.detectorInfo();
     // Test one of the detectors
     const auto targetDetectorIndex = 0;
-    const auto detCompId = detInfo.detector(targetDetectorIndex).getComponentID();
     TSM_ASSERT_EQUALS("Detector should report the detector index of itself",
-                      compInfo.detectorsInSubtree(compInfo.indexOf(detCompId)).size(), 1);
-    TS_ASSERT_EQUALS(compInfo.detectorsInSubtree(compInfo.indexOf(detCompId))[0], targetDetectorIndex);
+                      compInfo.detectorsInSubtree(targetDetectorIndex).size(), 1);
+    TS_ASSERT_EQUALS(compInfo.detectorsInSubtree(targetDetectorIndex)[0], targetDetectorIndex);
 
     size_t detectorIndex = 0; // interchangeable as either component or detector index
     TSM_ASSERT_EQUALS("Gurantee violated of detectorindex == componentIndex",

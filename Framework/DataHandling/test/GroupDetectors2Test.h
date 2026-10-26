@@ -840,7 +840,7 @@ public:
 
     const auto &spectrumInfo = output->spectrumInfo();
     const auto &spectrumInfoGrp = outputGrp->spectrumInfo();
-    TS_ASSERT_EQUALS(spectrumInfo.detector(0).getID(), spectrumInfoGrp.detector(0).getID());
+    TS_ASSERT_EQUALS(spectrumInfo.firstDetectorID(0), spectrumInfoGrp.firstDetectorID(0));
 
     AnalysisDataService::Instance().remove(nxsWSname);
     AnalysisDataService::Instance().remove(groupWSName);

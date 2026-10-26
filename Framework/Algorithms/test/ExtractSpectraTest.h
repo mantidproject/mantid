@@ -877,9 +877,9 @@ private:
         TS_ASSERT_EQUALS(ws.y(2)[0], 3.0);
       } else if (wsType == "event") {
         const auto &specrumInfo = ws.spectrumInfo();
-        TS_ASSERT_EQUALS(specrumInfo.detector(0).getID(), 2);
-        TS_ASSERT_EQUALS(specrumInfo.detector(1).getID(), 3);
-        TS_ASSERT_EQUALS(specrumInfo.detector(2).getID(), 4);
+        TS_ASSERT_EQUALS(specrumInfo.firstDetectorID(0), 2);
+        TS_ASSERT_EQUALS(specrumInfo.firstDetectorID(1), 3);
+        TS_ASSERT_EQUALS(specrumInfo.firstDetectorID(2), 4);
       }
     }
 
@@ -899,9 +899,9 @@ private:
         TS_ASSERT_EQUALS(ws.y(2)[0], 4.0);
       } else if (wsType == "event") {
         const auto &specrumInfo = ws.spectrumInfo();
-        TS_ASSERT_EQUALS(specrumInfo.detector(0).getID(), 1);
-        TS_ASSERT_EQUALS(specrumInfo.detector(1).getID(), 3);
-        TS_ASSERT_EQUALS(specrumInfo.detector(2).getID(), 5);
+        TS_ASSERT_EQUALS(specrumInfo.firstDetectorID(0), 1);
+        TS_ASSERT_EQUALS(specrumInfo.firstDetectorID(1), 3);
+        TS_ASSERT_EQUALS(specrumInfo.firstDetectorID(2), 5);
       }
     }
 
@@ -921,9 +921,9 @@ private:
         TS_ASSERT_EQUALS(ws.y(2)[0], 4.0);
       } else if (wsType == "event-detector") {
         const auto &specrumInfo = ws.spectrumInfo();
-        TS_ASSERT_EQUALS(specrumInfo.detector(0).getID(), 1);
-        TS_ASSERT_EQUALS(specrumInfo.detector(1).getID(), 3);
-        TS_ASSERT_EQUALS(specrumInfo.detector(2).getID(), 5);
+        TS_ASSERT_EQUALS(specrumInfo.firstDetectorID(0), 1);
+        TS_ASSERT_EQUALS(specrumInfo.firstDetectorID(1), 3);
+        TS_ASSERT_EQUALS(specrumInfo.firstDetectorID(2), 5);
       }
     }
 
