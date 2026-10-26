@@ -14,10 +14,10 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidGeometry/muParser_Silent.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
+#include <muParser.h>
 
 namespace Mantid::Algorithms {
 

@@ -9,7 +9,6 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/LogParser.h"
 #include "MantidKernel/Logger.h"
@@ -18,6 +17,7 @@
 #include <boost/regex.hpp>
 #include <ctime>
 #include <fstream>
+#include <muParser.h>
 #include <string>
 #include <string_view>
 #include <utility>
