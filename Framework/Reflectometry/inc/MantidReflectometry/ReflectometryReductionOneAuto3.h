@@ -131,13 +131,13 @@ private:
   /// Optionally crop a workspace in Q
   MatrixWorkspace_sptr cropQ(MatrixWorkspace_sptr inputWS, const RebinParams &params);
   /// Populate algorithmic correction properties
-  void determineCorrectionAlgorithm(const Instrument_const_sptr &instrument);
+  void determineCorrectionAlgorithm(Mantid::Geometry::ComponentInfo const &componentInfo);
   void populateAlgorithmicCorrectionProperties(const Mantid::API::IAlgorithm_sptr &alg);
   std::tuple<API::MatrixWorkspace_sptr, std::string, std::string, std::string>
   getPolarizationEfficiencies(const WorkspaceGroup_sptr &groupIvsLam);
   WorkspaceGroup_sptr applyPolarizationCorrection(const WorkspaceGroup_sptr &outputIvsLam,
                                                   const std::string &outputGroupName);
-  API::MatrixWorkspace_sptr getFloodWorkspace(const Instrument_const_sptr &instrument);
+  API::MatrixWorkspace_sptr getFloodWorkspace(Mantid::Geometry::ComponentInfo const &componentInfo);
   std::string getSummedWorkspaceName(const Workspace_sptr &workspace, const bool isTransWs = false);
   Workspace_sptr sumBanksForWorkspace(const std::string &roiDetectorIDs, const Workspace_sptr &inputWorkspace,
                                       const std::string &outputWorkspaceName);

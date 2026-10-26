@@ -8,8 +8,11 @@
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidGeometry/Instrument_fwd.h"
 #include "MantidReflectometry/DllConfig.h"
+
+namespace Mantid::Geometry {
+class ComponentInfo;
+}
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -137,9 +140,9 @@ protected:
                                                              const Mantid::API::MatrixWorkspace_sptr &monitorWS);
   // Read monitor properties from instrument
   void populateMonitorProperties(const Mantid::API::IAlgorithm_sptr &alg,
-                                 const Mantid::Geometry::Instrument_const_sptr &instrument);
+                                 Mantid::Geometry::ComponentInfo const &componentInfo);
   /// Populate processing instructions
-  std::string findProcessingInstructions(const Mantid::Geometry::Instrument_const_sptr &instrument,
+  std::string findProcessingInstructions(Mantid::Geometry::ComponentInfo const &componentInfo,
                                          const Mantid::API::MatrixWorkspace_sptr &inputWS) const;
   /// Populate transmission properties
   bool populateTransmissionProperties(const Mantid::API::IAlgorithm_sptr &alg,
@@ -159,7 +162,8 @@ protected:
   // Retrieve the run number from the logs of the input workspace.
   std::string getRunNumber(Mantid::API::MatrixWorkspace const &ws) const;
 
-  void convertProcessingInstructions(const Instrument_const_sptr &instrument, const MatrixWorkspace_sptr &inputWS);
+  void convertProcessingInstructions(Mantid::Geometry::ComponentInfo const &componentInfo,
+                                     MatrixWorkspace_sptr const &inputWS);
   void convertProcessingInstructions(const MatrixWorkspace_sptr &inputWS);
   std::string m_processingInstructionsWorkspaceIndex;
   std::string m_processingInstructions;

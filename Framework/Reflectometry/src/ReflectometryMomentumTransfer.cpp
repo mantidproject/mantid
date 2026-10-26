@@ -11,7 +11,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -68,6 +68,15 @@ double fromLogs(const Mantid::API::Run &run, const std::string &entry) {
   } catch (std::invalid_argument &) {
     throw std::runtime_error("Could not parse a number from log entry " + entry);
   }
+}
+/// Return true if the instrument has a component with this name.
+bool hasComponent(Mantid::Geometry::ComponentInfo const &componentInfo, std::string const &name) {
+  try {
+    componentInfo.indexOfAny(name);
+  } catch (std::invalid_argument const &) {
+    return false;
+  }
+  return true;
 }
 } // namespace
 
@@ -158,14 +167,12 @@ std::map<std::string, std::string> ReflectometryMomentumTransfer::validateInputs
     }
   }
   const std::string slit1Name = getProperty(Prop::SLIT1_NAME);
-  auto instrument = inWS->getInstrument();
-  auto slit = instrument->getComponentByName(slit1Name);
-  if (!slit) {
+  auto const &componentInfo = inWS->componentInfo();
+  if (!hasComponent(componentInfo, slit1Name)) {
     issues[Prop::SLIT1_NAME] = "No component called '" + slit1Name + "' found in " + Prop::INPUT_WS;
   }
   const std::string slit2Name = getProperty(Prop::SLIT1_NAME);
-  slit = instrument->getComponentByName(slit2Name);
-  if (!slit) {
+  if (!hasComponent(componentInfo, slit2Name)) {
     issues[Prop::SLIT2_NAME] = "No component called '" + slit2Name + "' found in " + Prop::INPUT_WS;
   }
   return issues;
@@ -313,10 +320,10 @@ const ReflectometryMomentumTransfer::Setup ReflectometryMomentumTransfer::create
   const std::string slit1SizeEntry = getProperty(Prop::SLIT1_SIZE_LOG);
   s.slit1Size = slitSize(ws, slit1SizeEntry);
   const std::string slit2Name = getProperty(Prop::SLIT2_NAME);
-  auto instrument = ws.getInstrument();
-  auto slit2 = instrument->getComponentByName(slit2Name);
+  auto const &componentInfo = ws.componentInfo();
+  auto const slit2 = componentInfo.indexOfAny(slit2Name);
   const auto samplePos = spectrumInfo.samplePosition();
-  s.slit2SampleDistance = (slit2->getPos() - samplePos).norm();
+  s.slit2SampleDistance = (componentInfo.position(slit2) - samplePos).norm();
   const std::string slit2SizeEntry = getProperty(Prop::SLIT2_SIZE_LOG);
   s.slit2Size = slitSize(ws, slit2SizeEntry);
   const std::string sumType = getProperty(Prop::SUM_TYPE);
@@ -333,8 +340,7 @@ const ReflectometryMomentumTransfer::Setup ReflectometryMomentumTransfer::create
 double ReflectometryMomentumTransfer::interslitDistance(const API::MatrixWorkspace &ws) {
   const std::string slit1Name = getProperty(Prop::SLIT1_NAME);
   const std::string slit2Name = getProperty(Prop::SLIT2_NAME);
-  auto instrument = ws.getInstrument();
-  return ReflectometryBeamStatistics::slitSeparation(instrument, slit1Name, slit2Name);
+  return ReflectometryBeamStatistics::slitSeparation(ws.componentInfo(), slit1Name, slit2Name);
 }
 
 /** Read the slit size from samle logs.

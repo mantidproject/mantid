@@ -19,7 +19,7 @@
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidFrameworkTestHelpers/ReflectometryHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
@@ -277,28 +277,28 @@ public:
     TS_ASSERT_DELTA(qMax, out->x(0).back(), 1e-6);
 
     // Compare instrument components before and after
-    auto instIn = inter->getInstrument();
-    auto instOut = out->getInstrument();
+    auto const &componentInfoIn = inter->componentInfo();
+    auto const &componentInfoOut = out->componentInfo();
 
     // The following components should not have been moved
-    TS_ASSERT_EQUALS(instIn->getComponentByName("monitor1")->getPos(),
-                     instOut->getComponentByName("monitor1")->getPos());
-    TS_ASSERT_EQUALS(instIn->getComponentByName("monitor2")->getPos(),
-                     instOut->getComponentByName("monitor2")->getPos());
-    TS_ASSERT_EQUALS(instIn->getComponentByName("monitor3")->getPos(),
-                     instOut->getComponentByName("monitor3")->getPos());
-    TS_ASSERT_EQUALS(instIn->getComponentByName("linear-detector")->getPos(),
-                     instOut->getComponentByName("linear-detector")->getPos());
+    TS_ASSERT_EQUALS(componentInfoIn.position(componentInfoIn.indexOfAny("monitor1")),
+                     componentInfoOut.position(componentInfoOut.indexOfAny("monitor1")));
+    TS_ASSERT_EQUALS(componentInfoIn.position(componentInfoIn.indexOfAny("monitor2")),
+                     componentInfoOut.position(componentInfoOut.indexOfAny("monitor2")));
+    TS_ASSERT_EQUALS(componentInfoIn.position(componentInfoIn.indexOfAny("monitor3")),
+                     componentInfoOut.position(componentInfoOut.indexOfAny("monitor3")));
+    TS_ASSERT_EQUALS(componentInfoIn.position(componentInfoIn.indexOfAny("linear-detector")),
+                     componentInfoOut.position(componentInfoOut.indexOfAny("linear-detector")));
 
     // Only 'point-detector' should have been moved vertically (along Y)
 
-    auto point1In = instIn->getComponentByName("point-detector")->getPos();
-    auto point1Out = instOut->getComponentByName("point-detector")->getPos();
+    auto point1In = componentInfoIn.position(componentInfoIn.indexOfAny("point-detector"));
+    auto point1Out = componentInfoOut.position(componentInfoOut.indexOfAny("point-detector"));
 
     TS_ASSERT_EQUALS(point1In.X(), point1Out.X());
     TS_ASSERT_EQUALS(point1In.Z(), point1Out.Z());
     TS_ASSERT_DIFFERS(point1In.Y(), point1Out.Y());
-    TS_ASSERT_DELTA(point1Out.Y() / (point1Out.Z() - instOut->getSample()->getPos().Z()),
+    TS_ASSERT_DELTA(point1Out.Y() / (point1Out.Z() - componentInfoOut.samplePosition().Z()),
                     std::tan(theta * 2 * M_PI / 180), 1e-4);
   }
 
@@ -323,26 +323,26 @@ public:
     MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
 
     // Compare instrument components before and after
-    auto instIn = polref->getInstrument();
-    auto instOut = out->getInstrument();
+    auto const &componentInfoIn = polref->componentInfo();
+    auto const &componentInfoOut = out->componentInfo();
 
     // The following components should not have been moved
-    TS_ASSERT_EQUALS(instIn->getComponentByName("monitor1")->getPos(),
-                     instOut->getComponentByName("monitor1")->getPos());
-    TS_ASSERT_EQUALS(instIn->getComponentByName("monitor2")->getPos(),
-                     instOut->getComponentByName("monitor2")->getPos());
-    TS_ASSERT_EQUALS(instIn->getComponentByName("monitor3")->getPos(),
-                     instOut->getComponentByName("monitor3")->getPos());
-    TS_ASSERT_EQUALS(instIn->getComponentByName("point-detector")->getPos(),
-                     instOut->getComponentByName("point-detector")->getPos());
-    TS_ASSERT_EQUALS(instIn->getComponentByName("lineardetector")->getPos(),
-                     instOut->getComponentByName("lineardetector")->getPos());
+    TS_ASSERT_EQUALS(componentInfoIn.position(componentInfoIn.indexOfAny("monitor1")),
+                     componentInfoOut.position(componentInfoOut.indexOfAny("monitor1")));
+    TS_ASSERT_EQUALS(componentInfoIn.position(componentInfoIn.indexOfAny("monitor2")),
+                     componentInfoOut.position(componentInfoOut.indexOfAny("monitor2")));
+    TS_ASSERT_EQUALS(componentInfoIn.position(componentInfoIn.indexOfAny("monitor3")),
+                     componentInfoOut.position(componentInfoOut.indexOfAny("monitor3")));
+    TS_ASSERT_EQUALS(componentInfoIn.position(componentInfoIn.indexOfAny("point-detector")),
+                     componentInfoOut.position(componentInfoOut.indexOfAny("point-detector")));
+    TS_ASSERT_EQUALS(componentInfoIn.position(componentInfoIn.indexOfAny("lineardetector")),
+                     componentInfoOut.position(componentInfoOut.indexOfAny("lineardetector")));
 
     // Only 'OSMOND' should have been moved both vertically and in the beam
     // direction (along X and Z)
 
-    auto detectorIn = instIn->getComponentByName("OSMOND")->getPos();
-    auto detectorOut = instOut->getComponentByName("OSMOND")->getPos();
+    auto detectorIn = componentInfoIn.position(componentInfoIn.indexOfAny("OSMOND"));
+    auto detectorOut = componentInfoOut.position(componentInfoOut.indexOfAny("OSMOND"));
 
     TS_ASSERT_DELTA(detectorOut.X(), 25.99589, 1e-5);
     TS_ASSERT_EQUALS(detectorIn.Y(), detectorOut.Y());
@@ -371,25 +371,25 @@ public:
     MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
 
     // Compare instrument components before and after
-    auto instIn = polref->getInstrument();
-    auto instOut = out->getInstrument();
+    auto const &componentInfoIn = polref->componentInfo();
+    auto const &componentInfoOut = out->componentInfo();
 
     // The following components should not have been moved
-    TS_ASSERT_EQUALS(instIn->getComponentByName("monitor1")->getPos(),
-                     instOut->getComponentByName("monitor1")->getPos());
-    TS_ASSERT_EQUALS(instIn->getComponentByName("monitor2")->getPos(),
-                     instOut->getComponentByName("monitor2")->getPos());
-    TS_ASSERT_EQUALS(instIn->getComponentByName("linear-detector")->getPos(),
-                     instOut->getComponentByName("linear-detector")->getPos());
+    TS_ASSERT_EQUALS(componentInfoIn.position(componentInfoIn.indexOfAny("monitor1")),
+                     componentInfoOut.position(componentInfoOut.indexOfAny("monitor1")));
+    TS_ASSERT_EQUALS(componentInfoIn.position(componentInfoIn.indexOfAny("monitor2")),
+                     componentInfoOut.position(componentInfoOut.indexOfAny("monitor2")));
+    TS_ASSERT_EQUALS(componentInfoIn.position(componentInfoIn.indexOfAny("linear-detector")),
+                     componentInfoOut.position(componentInfoOut.indexOfAny("linear-detector")));
 
     // Only 'point-detector' should have been moved vertically (along Y)
 
-    auto detectorIn = instIn->getComponentByName("point-detector")->getPos();
-    auto detectorOut = instOut->getComponentByName("point-detector")->getPos();
+    auto detectorIn = componentInfoIn.position(componentInfoIn.indexOfAny("point-detector"));
+    auto detectorOut = componentInfoOut.position(componentInfoOut.indexOfAny("point-detector"));
 
     TS_ASSERT_EQUALS(detectorIn.X(), detectorOut.X());
     TS_ASSERT_EQUALS(detectorIn.Z(), detectorOut.Z());
-    TS_ASSERT_DELTA(detectorOut.Y() / (detectorOut.Z() - instOut->getSample()->getPos().Z()),
+    TS_ASSERT_DELTA(detectorOut.Y() / (detectorOut.Z() - componentInfoOut.samplePosition().Z()),
                     std::tan(0.25 * 2 * M_PI / 180), 1e-4);
   }
 
@@ -413,29 +413,29 @@ public:
     MatrixWorkspace_sptr corrected = alg.getProperty("OutputWorkspace");
 
     // Compare instrument components before and after
-    auto instIn = inter->getInstrument();
-    auto instOut = corrected->getInstrument();
+    auto const &componentInfoIn = inter->componentInfo();
+    auto const &componentInfoOut = corrected->componentInfo();
 
     // The following components should not have been moved
-    TS_ASSERT_EQUALS(instIn->getComponentByName("monitor1")->getPos(),
-                     instOut->getComponentByName("monitor1")->getPos());
-    TS_ASSERT_EQUALS(instIn->getComponentByName("monitor2")->getPos(),
-                     instOut->getComponentByName("monitor2")->getPos());
-    TS_ASSERT_EQUALS(instIn->getComponentByName("monitor3")->getPos(),
-                     instOut->getComponentByName("monitor3")->getPos());
-    TS_ASSERT_EQUALS(instIn->getComponentByName("linear-detector")->getPos(),
-                     instOut->getComponentByName("linear-detector")->getPos());
+    TS_ASSERT_EQUALS(componentInfoIn.position(componentInfoIn.indexOfAny("monitor1")),
+                     componentInfoOut.position(componentInfoOut.indexOfAny("monitor1")));
+    TS_ASSERT_EQUALS(componentInfoIn.position(componentInfoIn.indexOfAny("monitor2")),
+                     componentInfoOut.position(componentInfoOut.indexOfAny("monitor2")));
+    TS_ASSERT_EQUALS(componentInfoIn.position(componentInfoIn.indexOfAny("monitor3")),
+                     componentInfoOut.position(componentInfoOut.indexOfAny("monitor3")));
+    TS_ASSERT_EQUALS(componentInfoIn.position(componentInfoIn.indexOfAny("linear-detector")),
+                     componentInfoOut.position(componentInfoOut.indexOfAny("linear-detector")));
 
     // Only 'point-detector' should have been moved
     // vertically (along Y)
 
-    auto point1In = instIn->getComponentByName("point-detector")->getPos();
-    auto point1Out = instOut->getComponentByName("point-detector")->getPos();
+    auto point1In = componentInfoIn.position(componentInfoIn.indexOfAny("point-detector"));
+    auto point1Out = componentInfoOut.position(componentInfoOut.indexOfAny("point-detector"));
 
     TS_ASSERT_EQUALS(point1In.X(), point1Out.X());
     TS_ASSERT_EQUALS(point1In.Z(), point1Out.Z());
     TS_ASSERT_DIFFERS(point1In.Y(), point1Out.Y());
-    TS_ASSERT_DELTA(point1Out.Y() / (point1Out.Z() - instOut->getSample()->getPos().Z()),
+    TS_ASSERT_DELTA(point1Out.Y() / (point1Out.Z() - componentInfoOut.samplePosition().Z()),
                     std::tan(theta * 2 * M_PI / 180), 1e-4);
   }
 
@@ -457,13 +457,13 @@ public:
     MatrixWorkspace_sptr corrected = alg.getProperty("OutputWorkspace");
 
     // Compare instrument components before and after
-    auto instIn = inter->getInstrument();
-    auto instOut = corrected->getInstrument();
+    auto const &componentInfoIn = inter->componentInfo();
+    auto const &componentInfoOut = corrected->componentInfo();
 
     // the detectors should not have been moved
 
-    auto point1In = instIn->getComponentByName("point-detector")->getPos();
-    auto point1Out = instOut->getComponentByName("point-detector")->getPos();
+    auto point1In = componentInfoIn.position(componentInfoIn.indexOfAny("point-detector"));
+    auto point1Out = componentInfoOut.position(componentInfoOut.indexOfAny("point-detector"));
 
     TS_ASSERT_EQUALS(point1In, point1Out);
   }
@@ -1459,7 +1459,7 @@ public:
 
   void test_flood_correction() {
     auto inputWS = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
-    auto flood = createFloodWorkspace(inputWS->getInstrument());
+    auto flood = createFloodWorkspace(*inputWS);
 
     // Correct by rotating detectors around the sample
     ReflectometryReductionOneAuto2 alg;
@@ -1488,7 +1488,7 @@ public:
       auto &y = transWS->mutableY(i);
       y.assign(y.size(), 10.0 * double(i + 1));
     }
-    auto flood = createFloodWorkspace(inputWS->getInstrument());
+    auto flood = createFloodWorkspace(*inputWS);
 
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
@@ -1518,7 +1518,7 @@ public:
     group->addWorkspace(inputWS1);
     group->addWorkspace(inputWS2);
     AnalysisDataService::Instance().addOrReplace("input", group);
-    auto flood = createFloodWorkspace(inputWS1->getInstrument());
+    auto flood = createFloodWorkspace(*inputWS1);
 
     // Correct by rotating detectors around the sample
     ReflectometryReductionOneAuto2 alg;
@@ -1550,7 +1550,7 @@ public:
     prepareInputGroup(name, "Fredrikze");
     applyPolarizationEfficiencies(name);
     auto const inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name + "_1");
-    auto flood = createFloodWorkspace(inputWS->getInstrument(), 257);
+    auto flood = createFloodWorkspace(*inputWS, 257);
 
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
@@ -1586,7 +1586,7 @@ public:
     std::string const name = "input";
     prepareInputGroup(name, "Flood");
     auto const inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name + "_1");
-    auto flood = createFloodWorkspace(inputWS->getInstrument(), 257);
+    auto flood = createFloodWorkspace(*inputWS, 257);
 
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
@@ -1639,7 +1639,7 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr createFloodWorkspace(const Mantid::Geometry::Instrument_const_sptr &instrument, size_t n = 4) {
+  MatrixWorkspace_sptr createFloodWorkspace(MatrixWorkspace const &parent, size_t n = 4) {
     size_t detid = 1;
     auto flood = create2DWorkspace(int(n), 1);
     if (n == 4) {
@@ -1653,7 +1653,7 @@ private:
       }
       detid = 1000;
     }
-    flood->setInstrument(instrument);
+    flood->copyExperimentInfoFrom(&parent);
     for (size_t i = 0; i < flood->getNumberHistograms(); ++i) {
       flood->getSpectrum(i).setDetectorID(Mantid::detid_t(i + detid));
     }

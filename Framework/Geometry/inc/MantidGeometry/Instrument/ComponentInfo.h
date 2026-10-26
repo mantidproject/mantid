@@ -201,6 +201,9 @@ public:
                                               bool recursive = true) const;
   /// The type of the named parameter, or an empty string if the component has no such parameter.
   std::string getParameterType(const size_t componentIndex, const std::string &name, bool recursive = true) const;
+  /// The value of the named parameter as a string, whatever its type, or an empty string if it is unset.
+  std::string getParameterAsString(size_t const componentIndex, std::string const &name,
+                                   bool const recursive = true) const;
   double getFittingParameter(const size_t componentIndex, const std::string &name, double xvalue) const;
 
   /// Add or replace a named parameter at a specific component index

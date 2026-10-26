@@ -8,7 +8,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidFrameworkTestHelpers/ReflectometryHelper.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidReflectometry/ReflectometryWorkflowBase2.h"
 
 #include <cxxtest/TestSuite.h>
@@ -42,7 +42,7 @@ public:
     ReflectometryWorkflowBase2Stub alg;
     alg.initAnalysisProperties();
 
-    auto instructions = alg.findProcessingInstructions(workspace->getInstrument(), workspace);
+    auto instructions = alg.findProcessingInstructions(workspace->componentInfo(), workspace);
 
     TS_ASSERT_EQUALS(instructions, "2");
   }
@@ -53,7 +53,7 @@ public:
     alg.initAnalysisProperties();
     alg.setProperty("AnalysisMode", "PointDetectorAnalysis");
 
-    auto instructions = alg.findProcessingInstructions(workspace->getInstrument(), workspace);
+    auto instructions = alg.findProcessingInstructions(workspace->componentInfo(), workspace);
 
     TS_ASSERT_EQUALS(instructions, "2-3");
   }
@@ -67,7 +67,7 @@ public:
     alg.initAnalysisProperties();
     alg.setProperty("AnalysisMode", "PointDetectorAnalysis");
 
-    TS_ASSERT_THROWS(alg.findProcessingInstructions(workspace->getInstrument(), workspace), std::runtime_error const &);
+    TS_ASSERT_THROWS(alg.findProcessingInstructions(workspace->componentInfo(), workspace), std::runtime_error const &);
   }
 
   void test_find_processing_instructions_from_IPF_for_point_detector_with_invalid_start_throws() {
@@ -79,7 +79,7 @@ public:
     alg.initAnalysisProperties();
     alg.setProperty("AnalysisMode", "PointDetectorAnalysis");
 
-    TS_ASSERT_THROWS(alg.findProcessingInstructions(workspace->getInstrument(), workspace), std::out_of_range const &);
+    TS_ASSERT_THROWS(alg.findProcessingInstructions(workspace->componentInfo(), workspace), std::out_of_range const &);
   }
 
   void test_find_processing_instructions_from_IPF_for_point_detector_with_invalid_stop_throws() {
@@ -91,7 +91,7 @@ public:
     alg.initAnalysisProperties();
     alg.setProperty("AnalysisMode", "PointDetectorAnalysis");
 
-    TS_ASSERT_THROWS(alg.findProcessingInstructions(workspace->getInstrument(), workspace), std::out_of_range const &);
+    TS_ASSERT_THROWS(alg.findProcessingInstructions(workspace->componentInfo(), workspace), std::out_of_range const &);
   }
 
   void test_find_processing_instructions_from_IPF_for_multi_detector() {
@@ -100,7 +100,7 @@ public:
     alg.initAnalysisProperties();
     alg.setProperty("AnalysisMode", "MultiDetectorAnalysis");
 
-    auto instructions = alg.findProcessingInstructions(workspace->getInstrument(), workspace);
+    auto instructions = alg.findProcessingInstructions(workspace->componentInfo(), workspace);
 
     TS_ASSERT_EQUALS(instructions, "2-3");
   }
@@ -114,7 +114,7 @@ public:
     alg.initAnalysisProperties();
     alg.setProperty("AnalysisMode", "MultiDetectorAnalysis");
 
-    auto instructions = alg.findProcessingInstructions(workspace->getInstrument(), workspace);
+    auto instructions = alg.findProcessingInstructions(workspace->componentInfo(), workspace);
 
     auto const expected = std::string("2-") + std::to_string(workspace->getNumberHistograms() - 1);
     TS_ASSERT_EQUALS(instructions, expected);
@@ -129,7 +129,7 @@ public:
     alg.initAnalysisProperties();
     alg.setProperty("AnalysisMode", "MultiDetectorAnalysis");
 
-    TS_ASSERT_THROWS(alg.findProcessingInstructions(workspace->getInstrument(), workspace), std::runtime_error const &);
+    TS_ASSERT_THROWS(alg.findProcessingInstructions(workspace->componentInfo(), workspace), std::runtime_error const &);
   }
 
   void test_find_processing_instructions_from_IPF_for_multi_detector_with_invalid_start_throws() {
@@ -141,7 +141,7 @@ public:
     alg.initAnalysisProperties();
     alg.setProperty("AnalysisMode", "MultiDetectorAnalysis");
 
-    TS_ASSERT_THROWS(alg.findProcessingInstructions(workspace->getInstrument(), workspace), std::out_of_range const &);
+    TS_ASSERT_THROWS(alg.findProcessingInstructions(workspace->componentInfo(), workspace), std::out_of_range const &);
   }
 
   void test_find_processing_instructions_from_IPF_for_multi_detector_with_invalid_stop_throws() {
@@ -153,6 +153,6 @@ public:
     alg.initAnalysisProperties();
     alg.setProperty("AnalysisMode", "MultiDetectorAnalysis");
 
-    TS_ASSERT_THROWS(alg.findProcessingInstructions(workspace->getInstrument(), workspace), std::out_of_range const &);
+    TS_ASSERT_THROWS(alg.findProcessingInstructions(workspace->componentInfo(), workspace), std::out_of_range const &);
   }
 };

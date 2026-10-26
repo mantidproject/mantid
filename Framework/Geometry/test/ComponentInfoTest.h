@@ -964,6 +964,28 @@ public:
     TS_ASSERT_EQUALS(componentInfo.getParameterType(detectorIndex, "a_double", false), "");
   }
 
+  void test_getParameterAsString_reads_any_type() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    ParameterMap pmap;
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
+    auto &componentInfo = *std::get<0>(wrappers);
+    size_t const bankIndex = componentInfo.root() - 3;
+    size_t const detectorIndex = componentInfo.children(componentInfo.children(bankIndex)[0])[0];
+
+    componentInfo.addInt(bankIndex, "an_int", 7);
+    componentInfo.addString(bankIndex, "a_string", "hello");
+
+    TS_ASSERT_EQUALS(componentInfo.getParameterAsString(bankIndex, "an_int"), "7");
+    TS_ASSERT_EQUALS(componentInfo.getParameterAsString(bankIndex, "a_string"), "hello");
+    TS_ASSERT_EQUALS(componentInfo.getParameterAsString(bankIndex, "no_such_parameter"), "");
+
+    // Recursive by default, like the other read accessors, and matching the legacy API.
+    TS_ASSERT_EQUALS(componentInfo.getParameterAsString(detectorIndex, "a_string"), "hello");
+    TS_ASSERT_EQUALS(componentInfo.getParameterAsString(detectorIndex, "a_string", false), "");
+    TS_ASSERT_EQUALS(componentInfo.getParameterAsString(detectorIndex, "a_string"),
+                     pmap.getString(componentInfo.componentID(detectorIndex), "a_string", true));
+  }
+
   /// The whole point of writing through ComponentInfo: it lands in the same store the owning
   /// ParameterMap reads, so the legacy pointer-keyed API sees it immediately.
   void test_parameters_written_through_ComponentInfo_are_visible_in_the_ParameterMap() {
