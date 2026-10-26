@@ -173,28 +173,8 @@ It is a common practice to have one measurement in a scan for a peak.  The only 
 Peak Integration with automatic background subtraction by approximation
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-This is an easy approximation to integrate a peak with background subtraction
-by specified region of interest.
-
-The pre-requisit is that all events are normalized by monitor counts
-and scaled up by same factor (e.g, 1500).
-
-1.  Set up region of interest
-
-    - define region of interest on the detector
-    - check whether the ROI does not exclude any peak
-
-2.  Specify background Pts.
-
-    - specify the Pts. in the scan that are used to estimate background
-
-3.  Integrate peaks
-
-    -  select peaks to integrate
-    -  integrate peaks
-
-4.  Review the integration result
-5.  Export to Fullprof peak integration (.int) file.
+This workflow is no longer available. It relied on the ``IntegratePeaksCWSD`` algorithm,
+which was deprecated in :ref:`Release 6.13.0 <v6.13.0>` and removed in :ref:`Release 7.1.0 <v7.1.0>`.
 
 
 

@@ -25,7 +25,7 @@ public:
   }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override { return {"PeakIntegration"}; }
+  const std::vector<std::string> seeAlso() const override { return {"IntegratePeaksMD"}; }
   const std::string category() const override;
 
 private:

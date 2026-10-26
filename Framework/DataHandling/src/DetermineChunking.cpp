@@ -10,10 +10,8 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataHandling/LoadPreNexus.h"
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidDataHandling/LoadTOFRawNexus.h"
-#include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
@@ -31,8 +29,6 @@ using std::string;
 using std::vector;
 
 namespace Mantid::DataHandling {
-/// Valid extensions for prenexus files
-const std::vector<std::string> PRENEXUS_EXT = {"_runinfo.xml"};
 /// Valid extensions for event nexus files
 const std::vector<std::string> EVENT_NEXUS_EXT = {"_event.nxs", ".nxs", ".nxs.h5"};
 /// Valid extensions for histogram nexus files
@@ -55,20 +51,19 @@ const std::string DetermineChunking::name() const { return "DetermineChunking"; 
 int DetermineChunking::version() const { return 1; }
 
 /// @copydoc Mantid::API::IAlgorithm::category()
-const std::string DetermineChunking::category() const { return "DataHandling\\PreNexus;Workflow\\DataHandling"; }
+const std::string DetermineChunking::category() const { return "Workflow\\DataHandling"; }
 
 //----------------------------------------------------------------------------------------------
 /// @copydoc Mantid::API::Algorithm::init()
 void DetermineChunking::init() {
   // runfile to read in
   std::set<std::string> exts_set;
-  exts_set.insert(PRENEXUS_EXT.cbegin(), PRENEXUS_EXT.cend());
   exts_set.insert(EVENT_NEXUS_EXT.cbegin(), EVENT_NEXUS_EXT.cend());
   exts_set.insert(HISTO_NEXUS_EXT.cbegin(), HISTO_NEXUS_EXT.cend());
   exts_set.insert(RAW_EXT.cbegin(), RAW_EXT.end());
   std::vector<std::string> exts(exts_set.begin(), exts_set.end());
   this->declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-                        "The name of the event nexus, runinfo.xml, raw, or histo nexus file to "
+                        "The name of the event nexus, raw, or histo nexus file to "
                         "read, including its full or relative path. The Event NeXus file name is "
                         "typically of the form INST_####_event.nxs (N.B. case sensitive if "
                         "running on Linux).");
@@ -100,7 +95,7 @@ void DetermineChunking::exec() {
 
   // setup the chunking table with the correct column headings
   Mantid::API::ITableWorkspace_sptr strategy = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-  if (fileType == PRENEXUS_FILE || fileType == EVENT_NEXUS_FILE) {
+  if (fileType == EVENT_NEXUS_FILE) {
     strategy->addColumn("int", "ChunkNumber");
     strategy->addColumn("int", "TotalChunks");
   } else if (fileType == RAW_FILE || fileType == HISTO_NEXUS_FILE) {
@@ -117,28 +112,13 @@ void DetermineChunking::exec() {
   const double fileSizeGiB = static_cast<double>(std::filesystem::file_size(fileinfo)) * BYTES_TO_GiB;
 
   // don't bother opening the file if its size is "small"
-  // note that prenexus "_runinfo.xml" files don't represent what
-  // is actually loaded
-  if (fileType != PRENEXUS_FILE && 6. * fileSizeGiB < maxChunk)
+  if (6. * fileSizeGiB < maxChunk)
     return;
 
   // --------------------- DETERMINE NUMBER OF CHUNKS
   double wkspSizeGiB = 0;
-  // PreNexus
-  if (fileType == PRENEXUS_FILE) {
-    vector<string> eventFilenames;
-    string dataDir;
-    LoadPreNexus lp;
-    lp.parseRuninfo(filename, dataDir, eventFilenames);
-    std::filesystem::path dataPath(dataDir);
-    for (const auto &eventFilename : eventFilenames) {
-      BinaryFile<DasEvent> eventfile(dataPath / eventFilename);
-      // Factor of 2 for compression
-      wkspSizeGiB += static_cast<double>(eventfile.getNumElements()) * 48.0 * BYTES_TO_GiB;
-    }
-  }
   // Event Nexus
-  else if (fileType == EVENT_NEXUS_FILE) {
+  if (fileType == EVENT_NEXUS_FILE) {
 
     // top level file information
     Nexus::File file(filename);
@@ -232,7 +212,7 @@ void DetermineChunking::exec() {
   // --------------------- FILL IN THE CHUNKING TABLE
   for (int i = 1; i <= numChunks; i++) {
     Mantid::API::TableRow row = strategy->appendRow();
-    if (fileType == PRENEXUS_FILE || fileType == EVENT_NEXUS_FILE) {
+    if (fileType == EVENT_NEXUS_FILE) {
       row << i << numChunks;
     } else if (fileType == RAW_FILE || fileType == HISTO_NEXUS_FILE) {
       int spectraPerChunk = m_numberOfSpectra / numChunks;
@@ -279,12 +259,6 @@ std::string DetermineChunking::setTopEntryName(const std::string &filename) {
  * @return The file type.
  */
 FileType DetermineChunking::getFileType(const string &filename) {
-  // check for prenexus
-  if (filenameHasExtension(filename, PRENEXUS_EXT)) {
-    g_log.information() << "Determined \'" << filename << "\' is a prenexus file\n";
-    return PRENEXUS_FILE;
-  }
-
   // check for histogram nexus
   if (filenameHasExtension(filename, HISTO_NEXUS_EXT)) {
     g_log.information() << "Determined \'" << filename << "\' is a  histogram nexus file\n";
