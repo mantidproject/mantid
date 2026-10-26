@@ -17,7 +17,7 @@ data:
 -  PulseTime: An absolute time of the pulse that generated this neutron.
    This is saved as an INT64 of the number of nanoseconds since Jan 1,
    1990; this can be converted to other date and time formats as needed.
-   Internall the PulseTime is represented as a Kernel::DateAndTime type.
+   Internally the PulseTime is represented as a Kernel::DateAndTime type.
 -  tof: Time-of-flight of the neutron, in microseconds, as a double.
    Note that this field can be converted to other units, e.g. d-spacing.
 
