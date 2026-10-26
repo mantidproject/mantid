@@ -54,11 +54,21 @@ CompAssembly::CompAssembly(const std::string &n, IComponent *reference)
 /** Copy constructor
  *  @param assem :: assembly to copy
  */
-CompAssembly::CompAssembly(const CompAssembly &assem) : ICompAssembly(assem), Component(assem) { *this = assem; }
+CompAssembly::CompAssembly(const CompAssembly &assem)
+    : ICompAssembly(assem), Component(assem), m_children(), m_cachedBoundingBox(nullptr) {
+  *this = assem;
+}
 
 CompAssembly &CompAssembly::operator=(const CompAssembly &assem) {
+  if (this == &assem)
+    return *this;
+  for (auto const *child : m_children) {
+    delete child;
+  }
+  // The bounding box is not copied: each assembly owns its cache, which is rebuilt on demand
+  delete m_cachedBoundingBox;
+  m_cachedBoundingBox = nullptr;
   m_children = assem.m_children;
-  m_cachedBoundingBox = assem.m_cachedBoundingBox;
 
   // Need to do a deep copy
   comp_it it;
@@ -314,7 +324,7 @@ std::shared_ptr<const IComponent> CompAssembly::getComponentByName(const std::st
       if (child)
         return child;
     } else if (bool(structDet) && (node != thisNode)) {
-      auto child = rectDet->getComponentByName(cname, nlevels);
+      auto child = structDet->getComponentByName(cname, nlevels);
       if (child != nullptr)
         return child;
     } else {

@@ -281,6 +281,37 @@ public:
                                                    //  detector
   }
 
+  void test_makeWrappers_of_a_parametrized_instrument_leaves_its_parameter_map_alone() {
+    // As for an indirect-geometry workspace's physical instrument: a second instrument, with its own
+    // components, parametrized with the workspace's map, whose parameters are on the first.
+    auto neutronic = createMinimalInstrument(V3D(0, 0, -10), V3D(0, 0, 0), V3D(0, 0, 1));
+    auto const physical = std::make_shared<const Instrument>(*neutronic);
+    auto pmap = std::make_shared<ParameterMap>();
+    auto const sample = neutronic->getSample();
+    pmap->addDouble(sample.get(), "a-double", 1.5);
+    Instrument const parametrizedPhysical(physical, pmap);
+
+    InstrumentVisitor::makeWrappers(parametrizedPhysical);
+
+    TS_ASSERT(pmap->contains(sample.get(), "a-double"));
+    TS_ASSERT_EQUALS(pmap->get(sample.get(), "a-double")->value<double>(), 1.5);
+  }
+
+  void test_makeWrappers_of_a_parametrized_instrument_keeps_its_legacy_position_parameters() {
+    auto instrument = createMinimalInstrument(V3D(0, 0, -10), V3D(0, 0, 0), V3D(0, 0, 1));
+    auto pmap = std::make_shared<ParameterMap>();
+    auto const sample = instrument->getSample();
+    pmap->addV3D(sample.get(), ParameterMap::pos(), V3D(0, 0, 0.5));
+    Instrument const parametrized(instrument, pmap);
+
+    auto const wrappers = InstrumentVisitor::makeWrappers(parametrized);
+
+    // The wrappers see the moved sample...
+    TS_ASSERT_EQUALS(std::get<0>(wrappers)->samplePosition(), V3D(0, 0, 0.5));
+    // ...without the visitor removing the parameter from a map it was only lent.
+    TS_ASSERT(pmap->contains(sample.get(), ParameterMap::pos()));
+  }
+
   void test_visitation_of_structured_detector() {
     auto instrument = ComponentCreationHelper::createMinimalInstrument(V3D(0, 0, -10), V3D(0, 0, 0), V3D(0, 0, 1));
     auto bank = new StructuredDetector("structured_bank");

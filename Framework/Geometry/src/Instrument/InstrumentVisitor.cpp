@@ -458,11 +458,20 @@ std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> Instrum
 
 std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
 InstrumentVisitor::makeWrappers(const Instrument &instrument, ParameterMap *pmap) {
-  // Visitee instrument is base instrument if no ParameterMap
-  const auto visiteeInstrument =
-      pmap ? ParComponentFactory::createInstrument(std::shared_ptr<const Instrument>(&instrument, NoDeleting()),
-                                                   std::shared_ptr<ParameterMap>(pmap, NoDeleting()))
-           : std::shared_ptr<const Instrument>(&instrument, NoDeleting());
+  std::shared_ptr<const Instrument> visiteeInstrument;
+  if (pmap) {
+    visiteeInstrument =
+        ParComponentFactory::createInstrument(std::shared_ptr<const Instrument>(&instrument, NoDeleting()),
+                                              std::shared_ptr<ParameterMap>(pmap, NoDeleting()));
+  } else if (instrument.isParametrized()) {
+    // Walk a copy of the instrument's map. The visitor rekeys the map it walks and strips the legacy
+    // position parameters from it, which must not happen to a map the caller has only lent with the
+    // instrument, e.g. a workspace's map lent with its physical instrument.
+    auto const mapCopy = std::make_shared<ParameterMap>(*instrument.getParameterMap());
+    visiteeInstrument = ParComponentFactory::createInstrument(instrument.baseInstrument(), mapCopy);
+  } else {
+    visiteeInstrument = std::shared_ptr<const Instrument>(&instrument, NoDeleting());
+  }
   InstrumentVisitor visitor(visiteeInstrument);
   visitor.walkInstrument();
   return visitor.makeWrappers();
