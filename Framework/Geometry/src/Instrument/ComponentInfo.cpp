@@ -783,6 +783,16 @@ void ComponentInfo::addFittingParameter(const size_t componentIndex, const std::
   mutableParameterInfo().addFittingParameter(componentIndex, parameter, fittingFunction);
 }
 
+const ParameterInfo::LogfileParameters &ComponentInfo::logfileParameters() const {
+  static ParameterInfo::LogfileParameters const empty;
+  return m_parameterInfo ? m_parameterInfo->logfileParameters() : empty;
+}
+
+void ComponentInfo::addLogfileParameter(const size_t componentIndex, const std::string &cacheKey,
+                                        std::shared_ptr<const XMLInstrumentParameter> parameter) {
+  mutableParameterInfo().addLogfileParameter(componentIndex, cacheKey, std::move(parameter));
+}
+
 void ComponentInfo::clearParameter(const size_t componentIndex, const std::string &name) {
   if (m_parameterInfo) {
     m_parameterInfo->clearParametersByName(componentIndex, name);

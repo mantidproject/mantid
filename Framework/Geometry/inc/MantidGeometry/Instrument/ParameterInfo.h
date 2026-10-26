@@ -15,11 +15,13 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <utility>
 
 namespace Mantid {
 namespace Geometry {
 
 class ComponentInfo;
+class XMLInstrumentParameter;
 
 /** ParameterInfo : the named parameters of an instrument, addressed by component index.
  *
@@ -43,6 +45,13 @@ public:
    */
   using ComponentParameters =
       std::multimap<std::string, std::shared_ptr<Parameter>, Kernel::CaseInsensitiveStringComparator>;
+
+  /** Parameters whose values are taken from the sample logs when ExperimentInfo::populateInstrumentParameters()
+   * runs, as declared in the instrument definition and parameter files. Keyed by (component index, cache key),
+   * where the cache key is the parameter name qualified by its fitting function if it has one
+   * ("IkedaCarpenterPV:Alpha0"), so that two functions on one component do not collide.
+   */
+  using LogfileParameters = std::map<std::pair<size_t, std::string>, std::shared_ptr<const XMLInstrumentParameter>>;
 
   /// Add a parameter, replacing any existing parameter of the same name on the same component.
   /// Matches the legacy ParameterMap::add() add-or-replace behaviour.
@@ -98,8 +107,16 @@ public:
   /// Remove every parameter of this name from one component.
   void clearParametersByName(size_t const componentIndex, std::string const &name);
 
-  /// Remove all parameters.
+  /// Remove all parameters. The logfile parameters are kept: they say where values come from rather
+  /// than being values themselves, and populateInstrumentParameters() may need them again.
   void clear();
+
+  /// Add a logfile parameter, replacing any existing one with the same cache key on the same component.
+  void addLogfileParameter(size_t const componentIndex, std::string const &cacheKey,
+                           std::shared_ptr<const XMLInstrumentParameter> parameter);
+
+  /// All logfile parameters, in ascending component-index order.
+  LogfileParameters const &logfileParameters() const;
 
   bool empty() const;
 
@@ -115,6 +132,7 @@ public:
 
 private:
   std::map<size_t, ComponentParameters> m_store;
+  LogfileParameters m_logfileParameters;
 };
 
 } // namespace Geometry

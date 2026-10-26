@@ -260,6 +260,13 @@ public:
   /// Remove every parameter from every component.
   void clearParameters();
 
+  /// Parameters whose values are taken from the sample logs by ExperimentInfo::populateInstrumentParameters().
+  const ParameterInfo::LogfileParameters &logfileParameters() const;
+  /// Add or replace a logfile parameter on a component. 'cacheKey' is the parameter name, qualified by
+  /// its fitting function if it has one.
+  void addLogfileParameter(const size_t componentIndex, const std::string &cacheKey,
+                           std::shared_ptr<const XMLInstrumentParameter> parameter);
+
   /// This allows ParameterMap to delegate to ParameterInfo,
   /// rather than keeping a parallel copy that would silently diverge.
   const std::shared_ptr<ParameterInfo> &sharedParameterInfo() const { return m_parameterInfo; }

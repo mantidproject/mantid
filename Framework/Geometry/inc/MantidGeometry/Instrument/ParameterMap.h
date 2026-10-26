@@ -357,6 +357,8 @@ private:
   ParameterMap &operator=(ParameterMap *rhs);
   /// Builds m_instrumentMetadata from m_instrument. Requires m_instrument to be set.
   void buildInstrumentMetadata();
+  /// Copies m_instrument's logfile parameters into the store. Requires the beamline to be built.
+  void seedLogfileParameters();
   /// calculate relative error for use in diff
   bool relErr(double x1, double x2, double errorVal) const;
 

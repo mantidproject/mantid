@@ -141,6 +141,7 @@ public:
   /// Get information about the units used for parameters described in the IDF
   /// and associated parameter files
   std::map<std::string, std::string> &getLogfileUnit() { return m_logfileUnit; }
+  const std::map<std::string, std::string> &getLogfileUnit() const { return m_logfileUnit; }
 
   /// Get the default type of the instrument view. The possible values are:
   /// 3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X, SPHERICAL_Y,

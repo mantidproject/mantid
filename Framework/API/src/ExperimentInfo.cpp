@@ -369,10 +369,11 @@ void ExperimentInfo::populateInstrumentParameters() {
   Geometry::PositionAndRotationAccumulator posAndRot;
 
   auto &compInfo = mutableComponentInfo();
-  // sptr_instrument is always the base instrument, which holds the parameters read from the IDF
-  const auto &paramInfoFromIDF = sptr_instrument->getLogfileCache();
+  // The logfile parameters of this workspace: those of the instrument definition, plus any added
+  // since from parameter files
+  const auto &paramInfoFromIDF = compInfo.logfileParameters();
 
-  std::map<const IComponent *, RTP> rtpParams;
+  std::map<size_t, RTP> rtpParams;
 
   // In this loop position and rotation parameters are inserted into the
   // temporary map paramMapForPosAndRot. In the subsequent loop, after all
@@ -382,8 +383,8 @@ void ExperimentInfo::populateInstrumentParameters() {
   // individual position or rotation components into a vector or quaternion. In
   // particular, we cannot directly change DetectorInfo since the order of
   // rotation components is not guaranteed.
-  for (const auto &item : paramInfoFromIDF) {
-    const auto &paramInfo = item.second;
+  for (const auto &[key, paramInfo] : paramInfoFromIDF) {
+    const auto compIndex = key.first;
     // Use the parameter's short name (e.g. "Alpha0"), not the cache key. The cache key may be
     // function-qualified (e.g. "IkedaCarpenterPV:Alpha0") to keep two functions on the same
     // component from clobbering each other, but downstream consumers always look up by short name.
@@ -394,9 +395,7 @@ void ExperimentInfo::populateInstrumentParameters() {
       // p-position.
       // We need to know all three first to calculate a set of X,Y,Z
       if (paramN.compare(1, 9, "-position") == 0) {
-        auto &rtpValues = rtpParams[paramInfo->m_component]; // If not found,
-                                                             // constructs
-                                                             // default
+        auto &rtpValues = rtpParams[compIndex]; // If not found, constructs default
         double value = ParameterValue(*paramInfo, runData);
         if (paramN.compare(0, 1, "r") == 0) {
           rtpValues.radius = value;
@@ -408,13 +407,10 @@ void ExperimentInfo::populateInstrumentParameters() {
         if (rtpValues.haveRadius) {
           V3D pos;
           pos.spherical(rtpValues.radius, rtpValues.theta, rtpValues.phi);
-          const auto compIndex = compInfo.indexOfOrInvalid(paramInfo->m_component->getComponentID());
-          if (compIndex != Geometry::ComponentInfo::invalidIndex) {
-            posAndRot.setPosition(compIndex, pos);
-          }
+          posAndRot.setPosition(compIndex, pos);
         }
       } else {
-        populateWithParameter(paramMap, posAndRot, paramN, *paramInfo, runData);
+        populateWithParameter(compInfo, posAndRot, compIndex, paramN, *paramInfo, runData);
       }
     } catch (std::exception &exc) {
       g_log.information() << "Unable to add component parameter '" << paramN << "'. Error: " << exc.what();
@@ -1397,9 +1393,10 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
  * @param paramInfo A reference to the object describing this parameter
  * @param runData A reference to the run object, which stores log value entries
  */
-void ExperimentInfo::populateWithParameter(Geometry::ParameterMap &paramMap,
-                                           Geometry::PositionAndRotationAccumulator &posAndRot, const std::string &name,
-                                           const Geometry::XMLInstrumentParameter &paramInfo, const Run &runData) {
+void ExperimentInfo::populateWithParameter(Geometry::ComponentInfo &compInfo,
+                                           Geometry::PositionAndRotationAccumulator &posAndRot, const size_t compIndex,
+                                           const std::string &name, const Geometry::XMLInstrumentParameter &paramInfo,
+                                           const Run &runData) {
   const std::string &category = paramInfo.m_type;
   ParameterValue paramValue(paramInfo,
                             runData); // Defines implicit conversion operator
@@ -1416,28 +1413,21 @@ void ExperimentInfo::populateWithParameter(Geometry::ParameterMap &paramMap,
     bool value(paramValue);
     if (value) {
       // Do not add masking to ParameterMap, it is stored in DetectorInfo
-
-      const auto componentIndex = componentInfo().indexOf(paramInfo.m_component->getComponentID());
-      if (!componentInfo().isDetector(componentIndex))
+      if (!compInfo.isDetector(compIndex))
         throw std::runtime_error("Found masking for a non-detector component. This is not possible");
-      mutableDetectorInfo().setMasked(componentIndex,
+      mutableDetectorInfo().setMasked(compIndex,
                                       paramValue); // all detector indexes have
                                                    // same component index
                                                    // (guarantee)
     }
   } else if (name == "x" || name == "y" || name == "z") {
-    const auto compIndex = componentInfo().indexOfOrInvalid(paramInfo.m_component->getComponentID());
-    if (compIndex != Geometry::ComponentInfo::invalidIndex) {
-      // Seeded from the component's current position relative to its parent, so specifying one
-      // coordinate leaves the other two alone. It must be the relative position: the accumulated
-      // value is applied as a parent-relative one, so seeding with the absolute position would
-      // re-apply the parent's rotation and translation on every call.
-      posAndRot.setCoordinate(compIndex, name, paramValue, componentInfo().relativePosition(compIndex));
-    }
+    // Seeded from the component's current position relative to its parent, so specifying one
+    // coordinate leaves the other two alone. It must be the relative position: the accumulated
+    // value is applied as a parent-relative one, so seeding with the absolute position would
+    // re-apply the parent's rotation and translation on every call.
+    posAndRot.setCoordinate(compIndex, name, paramValue, compInfo.relativePosition(compIndex));
   } else if (name == "rot" || name == "rotx" || name == "roty" || name == "rotz") {
-    const auto compIndex = componentInfo().indexOfOrInvalid(paramInfo.m_component->getComponentID());
-    if (compIndex != Geometry::ComponentInfo::invalidIndex &&
-        !posAndRot.setRotationAngle(compIndex, name, paramValue)) {
+    if (!posAndRot.setRotationAngle(compIndex, name, paramValue)) {
       // "rot" itself names no axis and is deliberately dropped, as it always has been.
       g_log.warning() << "Ignoring instrument parameter '" << name << "': it does not name a rotation axis.\n";
     }
@@ -1451,16 +1441,15 @@ void ExperimentInfo::populateWithParameter(Geometry::ParameterMap &paramMap,
     // Dedupe by (name, fitting function) — otherwise two functions on the same component sharing
     // a parameter short name (e.g. Bk2BkExpConvPV:Gamma and IkedaCarpenterPV:Gamma) would clobber
     // each other in the map.
-    paramMap.addFittingParameter(paramInfo.m_component, name, paramInfo.m_fittingFunction, str.str(), pDescription,
-                                 pVisible);
+    compInfo.addFittingParameter(compIndex, name, paramInfo.m_fittingFunction, str.str(), pDescription, pVisible);
   } else if (category == "string") {
-    paramMap.addString(paramInfo.m_component, name, paramInfo.m_value, pDescription, pVisible);
+    compInfo.addString(compIndex, name, paramInfo.m_value, pDescription, pVisible);
   } else if (category == "bool") {
-    paramMap.addBool(paramInfo.m_component, name, paramValue, pDescription, pVisible);
+    compInfo.addBool(compIndex, name, paramValue, pDescription, pVisible);
   } else if (category == "int") {
-    paramMap.addInt(paramInfo.m_component, name, paramValue, pDescription, pVisible);
+    compInfo.addInt(compIndex, name, paramValue, pDescription, pVisible);
   } else { // assume double
-    paramMap.addDouble(paramInfo.m_component, name, paramValue, pDescription, pVisible);
+    compInfo.addDouble(compIndex, name, paramValue, pDescription, pVisible);
   }
 }
 
