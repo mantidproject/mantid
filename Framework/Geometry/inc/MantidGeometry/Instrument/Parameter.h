@@ -7,11 +7,14 @@
 #pragma once
 
 #include "MantidGeometry/DllConfig.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
 #include <iomanip>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <typeinfo>
 #include <vector>
 
@@ -105,11 +108,7 @@ private:
 };
 
 /// Templated class for parameters of type \c Type
-#if !defined(_WIN32)
-template <class Type> class MANTID_GEOMETRY_DLL ParameterType : public Parameter {
-#else
 template <class Type> class ParameterType : public Parameter {
-#endif
 public:
   /// Constructor
   ParameterType() : Parameter(), m_value() {}
@@ -174,14 +173,13 @@ template <class T> void Parameter::set(const T &t) {
  * @param value :: A string representation of the parameter's value
  */
 template <class Type> void ParameterType<Type>::fromString(const std::string &value) {
-  std::istringstream istr(value);
-  istr >> m_value;
+  if constexpr (std::is_same_v<Type, std::string>) {
+    m_value = value;
+  } else {
+    std::istringstream istr(value);
+    istr >> m_value;
+  }
 }
-
-/**
- * Specialization for a string.
- */
-template <> inline void ParameterType<std::string>::fromString(const std::string &value) { m_value = value; }
 
 /** Set the value of the parameter via the assignment operator
  * @tparam The parameter type
@@ -200,6 +198,14 @@ template <class Type> ParameterType<Type> &ParameterType<Type>::operator=(const 
 
 /// Typedef for the shared pointer
 using Parameter_sptr = std::shared_ptr<Parameter>;
+
+// Instantiated and exported by Parameter.cpp. FitParameter is declared in FitParameter.h.
+MANTID_GEOMETRY_EXTERN_TEMPLATE(ParameterType<int>);
+MANTID_GEOMETRY_EXTERN_TEMPLATE(ParameterType<double>);
+MANTID_GEOMETRY_EXTERN_TEMPLATE(ParameterType<bool>);
+MANTID_GEOMETRY_EXTERN_TEMPLATE(ParameterType<std::string>);
+MANTID_GEOMETRY_EXTERN_TEMPLATE(ParameterType<Kernel::V3D>);
+MANTID_GEOMETRY_EXTERN_TEMPLATE(ParameterType<Kernel::Quat>);
 
 } // namespace Geometry
 } // namespace Mantid

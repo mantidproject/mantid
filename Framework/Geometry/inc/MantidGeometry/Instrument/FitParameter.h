@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidKernel/Interpolation.h"
 
 namespace Mantid {
@@ -101,6 +102,9 @@ private:
 // defining operator << and >>
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &, const FitParameter &);
 MANTID_GEOMETRY_DLL std::istream &operator>>(std::istream &, FitParameter &);
+
+// Instantiated and exported by Parameter.cpp
+MANTID_GEOMETRY_EXTERN_TEMPLATE(ParameterType<FitParameter>);
 
 } // namespace Geometry
 } // namespace Mantid
