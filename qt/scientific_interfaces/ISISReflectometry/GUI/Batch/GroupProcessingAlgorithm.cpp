@@ -153,7 +153,8 @@ void updateUseValidDataOnly(AlgorithmRuntimeProps &properties) {
  * @param group : the row from the runs table
  */
 IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Group &group,
-                                                    std::vector<std::string> const workspaces) {
+                                                    std::vector<std::string> const workspaces,
+                                                    bool resetOutputsOnStart) {
   // Create the algorithm
   auto alg = Mantid::API::AlgorithmManager::Instance().create("Stitch1DMany");
   alg->setRethrows(true);
@@ -163,7 +164,7 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Group &
 
   // Return the configured algorithm
   auto jobAlgorithm = std::make_shared<BatchJobAlgorithm>(std::move(alg), std::move(properties),
-                                                          updateGroupFromOutputProperties, &group);
+                                                          updateGroupFromOutputProperties, &group, resetOutputsOnStart);
   return jobAlgorithm;
 }
 

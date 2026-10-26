@@ -133,7 +133,7 @@ void Group::setOutputNames(std::vector<std::vector<std::string>> const &outputNa
   if (outputNames.size() != 1)
     throw std::runtime_error("Invalid number of output workspace lists for group");
 
-  m_postprocessedWorkspaceNames = outputNames[0];
+  m_postprocessedWorkspaceNames.emplace_back(outputNames[0][0]);
 }
 
 void Group::resetOutputs() { m_postprocessedWorkspaceNames = {}; }

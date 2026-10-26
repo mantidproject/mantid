@@ -18,9 +18,9 @@ using Mantid::API::IAlgorithm_sptr;
 
 BatchJobAlgorithm::BatchJobAlgorithm(Mantid::API::IAlgorithm_sptr algorithm,
                                      std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> properties,
-                                     UpdateFunction updateFunction, Item *item)
-    : ConfiguredAlgorithm(std::move(algorithm), std::move(properties)), m_item(item), m_updateFunction(updateFunction) {
-}
+                                     UpdateFunction updateFunction, Item *item, bool resetOutputsOnStart)
+    : ConfiguredAlgorithm(std::move(algorithm), std::move(properties)), m_item(item), m_updateFunction(updateFunction),
+      m_resetOutputsOnStart(resetOutputsOnStart) {}
 
 Item *BatchJobAlgorithm::item() { return m_item; }
 
@@ -28,4 +28,7 @@ void BatchJobAlgorithm::updateItem() {
   if (m_item)
     m_updateFunction(m_algorithm, *m_item);
 }
+
+bool BatchJobAlgorithm::resetOutputsOnStart() { return m_resetOutputsOnStart; }
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
