@@ -16,6 +16,7 @@
 #include "MantidKernel/ListValidator.h"
 
 #include <memory>
+#include <numeric>
 #include <set>
 
 using namespace Mantid::Kernel;
@@ -187,11 +188,11 @@ std::vector<size_t> SpecularReflectionAlgorithm::getDetectorComponentIndices(Mat
  */
 V3D SpecularReflectionAlgorithm::meanPosition(ComponentInfo const &componentInfo,
                                               std::vector<size_t> const &componentIndices) {
-  V3D position;
-  for (auto const componentIndex : componentIndices) {
-    position += componentInfo.position(componentIndex);
-  }
-  return position / static_cast<double>(componentIndices.size());
+  V3D const sum = std::accumulate(componentIndices.cbegin(), componentIndices.cend(), V3D(),
+                                  [&componentInfo](V3D const &total, size_t const componentIndex) {
+                                    return total + componentInfo.position(componentIndex);
+                                  });
+  return sum / static_cast<double>(componentIndices.size());
 }
 
 /**
