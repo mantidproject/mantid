@@ -20,7 +20,7 @@ New developers should use pixi.
 
 - [Develop on Windows](GettingStartedCondaWindows)
 - [Develop on Linux](GettingStartedCondaLinux)
-- [Develop on MacOSX](GettingStartedCondaOSX)
+- [Develop on macOS](GettingStartedCondaOSX)
 - [Develop without conda](GettingStartedNoneConda)
 
 ## Custom git setup for inside the ORNL firewall:
