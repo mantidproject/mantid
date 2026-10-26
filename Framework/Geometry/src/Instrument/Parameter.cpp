@@ -10,7 +10,9 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/RegistrationHelper.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <sstream>
+#include <type_traits>
 
 /* Register classes into the factory
  *
@@ -29,25 +31,26 @@ namespace Mantid::Geometry {
  */
 template <class Type> std::string ParameterType<Type>::asString() const {
   std::ostringstream str;
+  if constexpr (std::is_same_v<Type, double> || std::is_same_v<Type, Kernel::V3D>) {
+    str << std::setprecision(std::numeric_limits<double>::digits10);
+  }
   str << m_value;
   return str.str();
 }
 
-/// Specialization for doubles
-template <> std::string ParameterType<double>::asString() const {
-  std::ostringstream str;
-  str << std::setprecision(std::numeric_limits<double>::digits10);
-  str << m_value;
-  return str.str();
-}
-
-/// Specialization for V3D
-template <> std::string ParameterType<Kernel::V3D>::asString() const {
-  std::ostringstream str;
-  str << std::setprecision(std::numeric_limits<double>::digits10);
-  str << m_value;
-  return str.str();
-}
+/// @cond
+// The headers declare these with MANTID_GEOMETRY_EXTERN_TEMPLATE, which already carries the export
+// attribute, so gcc warns that the one here is ignored.
+GNU_DIAG_OFF("attributes")
+template class MANTID_GEOMETRY_DLL ParameterType<int>;
+template class MANTID_GEOMETRY_DLL ParameterType<double>;
+template class MANTID_GEOMETRY_DLL ParameterType<bool>;
+template class MANTID_GEOMETRY_DLL ParameterType<std::string>;
+template class MANTID_GEOMETRY_DLL ParameterType<Kernel::V3D>;
+template class MANTID_GEOMETRY_DLL ParameterType<Kernel::Quat>;
+template class MANTID_GEOMETRY_DLL ParameterType<FitParameter>;
+GNU_DIAG_ON("attributes")
+/// @endcond
 
 // Initialize the static map
 ParameterFactory::FactoryMap ParameterFactory::s_map;
