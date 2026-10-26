@@ -69,6 +69,7 @@ Bugfixes
 - (`#42396 <https://github.com/mantidproject/mantid/pull/42396>`_) Fixed a memory leak that could occur when the Instrument View was closed.
 - (`#42407 <https://github.com/mantidproject/mantid/pull/42407>`_) Zooming with the mouse wheel in the 3D projection now keeps the point under the cursor in place rather than zooming into the centre of the view. Zooming out now stops at the full view of the instrument while preserving the current viewing direction.
 - (`#42407 <https://github.com/mantidproject/mantid/pull/42407>`_) Mouse-wheel zooming now starts at the same rate in all projections. Previously, the initial zoom in the spherical and cylindrical projections was much larger than in the other projections.
+- (`#42609 <https://github.com/mantidproject/mantid/pull/42609>`_) Shape drawing controls are now disabled when the Instrument View opens in the 3D projection.
 
 
 SliceViewer
