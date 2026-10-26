@@ -111,6 +111,7 @@ class FullInstrumentViewPresenter:
         self._populate_unit_combo_boxes(sliders_unit=self._model.workspace_base_unit)
         self._view.set_projection_combo_options(self._model.get_projection_options())
         self._view.set_default_projection(self._model.get_default_projection())
+        self._on_projection_option_changed()
         self._view.setup_connections_to_presenter()
         self._view.set_contour_range_limits(self._model.counts_limits)
         self._view.set_integration_range_limits(self._model.integration_limits)
