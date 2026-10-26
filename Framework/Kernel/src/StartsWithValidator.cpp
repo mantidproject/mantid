@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/StartsWithValidator.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <algorithm>
 #ifndef Q_MOC_RUN
 #include <memory>
@@ -27,17 +28,12 @@ template <> std::string ListValidator<std::string>::checkValidity(const std::str
 }
 
 /// @cond
-#if defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wattributes"
-#endif
+GNU_DIAG_OFF("attributes")
 template class MANTID_KERNEL_DLL ListValidator<std::string>;
 #ifdef _WIN32
 template class MANTID_KERNEL_DLL TypedValidator<std::string>;
 #endif
-#if defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
+GNU_DIAG_ON("attributes")
 /// @endcond
 
 /**
