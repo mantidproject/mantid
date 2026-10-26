@@ -33,11 +33,11 @@ Error Reporter test
 - Click the ``Show More Details`` button to open the Show More Details dialog. This should show user details such as OS.
   The python stacktrace should be empty as the Workbench unhandled exception occurred in C++. Close this dialog.
 - Test that the ``Yes, share information`` is disabled and the ``Email`` box is outlined in red until a valid email
-  (``something@something.somthing``) is entered in the ``Email`` box.
+  (``something@something.something``) is entered in the ``Email`` box.
 - In the ``Name`` box enter ``Private`` and in the ``Email`` box enter ``private@private.com``
 - Input some additional information into the main textbox. Check that the character count label updates as you type, copy paste etc.
 - Check that the character count label changes to red and the button to send the report are disabled if you exceed the character limit.
-- Check that these changes revert when brining the number of characters back within the limit.
+- Check that these changes revert when bringing the number of characters back within the limit.
 - Input some additional information into the main textbox. Try to include characters that need to be escaped such as ``"``
 - Tick the ``Remember Me`` checkbox
 - Click the ``Don't share any information`` button
