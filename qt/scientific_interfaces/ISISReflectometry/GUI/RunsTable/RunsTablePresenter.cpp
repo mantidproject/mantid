@@ -854,9 +854,11 @@ void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
   const auto groups = m_model.selectedGroups();
 
   for (const auto *group : groups) {
-    if (group->state() == State::ITEM_SUCCESS)
-      std::for_each(group->postprocessedWorkspaceNames().cbegin(), group->postprocessedWorkspaceNames().cend(),
-                    [&workspaces](auto const &workspaceName) { workspaces.emplace_back(workspaceName); });
+    if (group->state() == State::ITEM_SUCCESS) {
+      for (const auto &stitchedWs : group->postprocessedWorkspaceNames()) {
+        workspaces.emplace_back(stitchedWs);
+      }
+    }
   }
 
   if (workspaces.empty())
