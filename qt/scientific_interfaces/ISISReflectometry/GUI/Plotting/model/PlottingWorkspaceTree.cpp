@@ -160,11 +160,6 @@ void PlottingWorkspaceTree::rebuild(RunsTable const &runsTable) {
                                                {}};
       auto const &outputs = row.reducedWorkspaceNames();
 
-      std::for_each(outputs.iVsLambda().cbegin(), outputs.iVsLambda().cend(), [&](std::string const &wsName) {
-        appendWorkspaceItemIfPresent(runItem, wsName, ReducedWorkspaceOutputType::IvsLambda,
-                                     m_plottingWorkspacesByName);
-      });
-
       for (size_t i = 0; i < outputs.iVsQ().size(); ++i) {
         appendWorkspaceItemIfPresent(runItem, outputs.iVsLambda()[i], ReducedWorkspaceOutputType::IvsLambda,
                                      m_plottingWorkspacesByName);
