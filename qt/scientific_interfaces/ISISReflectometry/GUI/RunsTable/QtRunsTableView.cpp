@@ -29,7 +29,6 @@ QtRunsTableView::QtRunsTableView(std::vector<std::string> instruments)
   // Keep logical column indices stable for validation and row data. Only the
   // visual order changes: Adjusted Angle appears immediately after Angle.
   m_jobs->header()->moveSection(adjustedAngleColumn, 2);
-  setAdjustedAngleColumnVisible(false);
   constexpr double runColScaleFactor = 1.5;
   m_jobs->setColumnWidth(0, int(m_jobs->columnWidth(0) * runColScaleFactor));
   m_ui.mainLayout->insertWidget(2, m_jobs.get());
@@ -43,7 +42,9 @@ QtRunsTableView::QtRunsTableView(std::vector<std::string> instruments)
   connect(m_ui.filterBox, SIGNAL(textChanged(QString const &)), this, SLOT(onFilterChanged(QString const &)));
   connect(m_ui.instrumentSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(onInstrumentChanged(int)));
 
-  setAdjustedAngleColumnVisible(instrumentCategory(getInstrumentName()) == InstrumentCategory::POLREF);
+  m_jobs->setColumnHidden(adjustedAngleColumn,
+                          instrumentCategory(m_ui.instrumentSelector->currentText().toStdString()) !=
+                              InstrumentCategory::POLREF);
 
   // Set up the icon
   m_ui.processButton->setIcon(MantidQt::Icons::getIcon("mdi.sigma", "black", 1.3));
