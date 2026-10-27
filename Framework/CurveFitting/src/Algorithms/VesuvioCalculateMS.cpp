@@ -18,6 +18,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/Track.h"
@@ -168,11 +169,11 @@ void VesuvioCalculateMS::cacheInputs() {
   m_nevents = static_cast<size_t>(nevents);
 
   // -- Geometry --
-  const auto instrument = m_inputWS->getInstrument();
-  m_beamDir = instrument->getSample()->getPos() - instrument->getSource()->getPos();
+  auto const &compInfo = m_inputWS->componentInfo();
+  m_beamDir = compInfo.samplePosition() - compInfo.sourcePosition();
   m_beamDir.normalize();
 
-  const auto rframe = instrument->getReferenceFrame();
+  const auto rframe = compInfo.referenceFrame();
   m_acrossIdx = rframe->pointingHorizontal();
   m_upIdx = rframe->pointingUp();
   m_beamIdx = rframe->pointingAlongBeam();
@@ -264,15 +265,17 @@ void VesuvioCalculateMS::cacheInputs() {
   m_detThick = detBoxWidth[m_beamIdx];
 
   // Foil resolution
-  auto foil = instrument->getComponentByName("foil-pos0");
-  if (!foil) {
+  std::size_t foil_index;
+  try {
+    foil_index = compInfo.indexOfAny("foil-pos0");
+  } catch (std::invalid_argument const &) {
     throw std::runtime_error("Workspace has no gold foil component defined.");
   }
-  auto param = m_inputWS->constInstrumentParameters().get(foil.get(), "hwhm_lorentz");
-  if (!param) {
+  auto param = compInfo.getNumberParameter(foil_index, "hwhm_lorentz");
+  if (param.empty()) {
     throw std::runtime_error("Foil component has no hwhm_lorentz parameter defined.");
   }
-  m_foilRes = param->value<double>();
+  m_foilRes = param.front();
 }
 
 /**

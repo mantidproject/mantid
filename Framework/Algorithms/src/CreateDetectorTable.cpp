@@ -12,6 +12,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/Unit.h"
@@ -152,7 +153,7 @@ void CreateDetectorTable::setup() {
 
   hasDiffConstants = (ws->getEMode() == DeltaEMode::Elastic);
 
-  beamAxisIndex = ws->getInstrument()->getReferenceFrame()->pointingAlongBeam();
+  beamAxisIndex = ws->componentInfo().referenceFrame()->pointingAlongBeam();
   sampleDist = ws->getInstrument()->getSample()->getPos()[beamAxisIndex];
 
   if (workspaceIndices.empty()) {

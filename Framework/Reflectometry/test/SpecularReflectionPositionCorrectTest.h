@@ -10,6 +10,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/V3D.h"
@@ -100,7 +101,7 @@ public:
 
   void test_correct_point_detector_to_current_position() {
     auto toConvert = pointDetectorWS;
-    auto referenceFrame = toConvert->getInstrument()->getReferenceFrame();
+    auto referenceFrame = toConvert->componentInfo().referenceFrame();
     auto moveComponentAlg = AlgorithmManager::Instance().create("MoveInstrumentComponent");
     moveComponentAlg->initialize();
     moveComponentAlg->setProperty("Workspace", toConvert);

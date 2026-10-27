@@ -22,7 +22,7 @@ class ReflectometryInstrumentSignedThetaTest(systemtesting.MantidSystemTest):
         # Load instrument definition
         instrument_workspace = LoadEmptyInstrument(os.path.join(idf_dir, idf_name))
         # Get the reference frame from loaded IDF
-        ref_frame = instrument_workspace.getInstrument().getReferenceFrame()
+        ref_frame = instrument_workspace.componentInfo().referenceFrame()
         # Create translation vector for detector
         movements = dict()
         movements[ref_frame.pointingUpAxis()] = detector_vertical_position
