@@ -29,6 +29,6 @@ void BatchJobAlgorithm::updateItem() {
     m_updateFunction(m_algorithm, *m_item);
 }
 
-bool BatchJobAlgorithm::resetOutputsOnStart() { return m_resetOutputsOnStart; }
+bool BatchJobAlgorithm::resetOutputsOnStart() const { return m_resetOutputsOnStart; }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

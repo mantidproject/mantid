@@ -32,7 +32,7 @@ public:
 
   Item *item() override;
   void updateItem() override;
-  bool resetOutputsOnStart() override;
+  bool resetOutputsOnStart() const override;
 
 private:
   // The data is an item in the table (i.e. a row or group)

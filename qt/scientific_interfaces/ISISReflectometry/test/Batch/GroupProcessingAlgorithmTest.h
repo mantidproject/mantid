@@ -49,27 +49,35 @@ public:
   void testThrowsIfInputWorkspaceGroupHasSingleRow() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithOneRow();
-    TS_ASSERT_THROWS_ANYTHING(createAlgorithmRuntimeProps(model, group));
+    auto workspaceNames = {group.rows()[0]->reducedWorkspaceNames().iVsQ()[0]};
+    TS_ASSERT_THROWS_EQUALS(createAlgorithmRuntimeProps(model, group, workspaceNames), std::runtime_error & e,
+                            std::string(e.what()), "Must have at least two workspaces for stitching");
   }
 
   void testInputWorkspaceListForTwoRowGroup() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRows();
-    auto result = createAlgorithmRuntimeProps(model, group);
+    auto workspaceNames = {group.rows()[0]->reducedWorkspaceNames().iVsQ()[0],
+                           group.rows()[1]->reducedWorkspaceNames().iVsQ()[0]};
+    auto result = createAlgorithmRuntimeProps(model, group, workspaceNames);
     TS_ASSERT_EQUALS(result->getPropertyValue("InputWorkspaces"), "IvsQ_1, IvsQ_2");
   }
 
   void testInputWorkspaceListForRowsWithNonStandardNames() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRowsWithNonstandardNames();
-    auto result = createAlgorithmRuntimeProps(model, group);
+    auto workspaceNames = {group.rows()[0]->reducedWorkspaceNames().iVsQ()[0],
+                           group.rows()[1]->reducedWorkspaceNames().iVsQ()[0]};
+    auto result = createAlgorithmRuntimeProps(model, group, workspaceNames);
     TS_ASSERT_EQUALS(result->getPropertyValue("InputWorkspaces"), "testQ1, testQ2");
   }
 
   void testOutputNameForTwoRowGroup() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRows();
-    auto result = createAlgorithmRuntimeProps(model, group);
+    auto workspaceNames = {group.rows()[0]->reducedWorkspaceNames().iVsQ()[0],
+                           group.rows()[1]->reducedWorkspaceNames().iVsQ()[0]};
+    auto result = createAlgorithmRuntimeProps(model, group, workspaceNames);
     // The standard IvsQ_ prefix is removed from the individual names so it
     // only appears once at the beginning.
     TS_ASSERT_EQUALS(result->getPropertyValue("OutputWorkspace"), "IvsQ_1_2");
@@ -78,7 +86,9 @@ public:
   void testOutputNameForRowsWithNonStandardNames() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRowsWithNonstandardNames();
-    auto result = createAlgorithmRuntimeProps(model, group);
+    auto workspaceNames = {group.rows()[0]->reducedWorkspaceNames().iVsQ()[0],
+                           group.rows()[1]->reducedWorkspaceNames().iVsQ()[0]};
+    auto result = createAlgorithmRuntimeProps(model, group, workspaceNames);
     // The output is constructed from an IvsQ_ prefix and the original
     // output workspace names
     TS_ASSERT_EQUALS(result->getPropertyValue("OutputWorkspace"), "IvsQ_testQ1_testQ2");
@@ -90,8 +100,10 @@ public:
     const auto experiment = makeEmptyExperiment();
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRows();
-    group.mutableRows()[0]->setOutputNames({"IvsLam_12345", "IvsQ_12345", "IvsQ_binned_12345"});
-    auto result = createAlgorithmRuntimeProps(model, group);
+    group.mutableRows()[0]->setOutputNames({{"IvsLam_12345"}, {"IvsQ_12345"}, {"IvsQ_binned_12345"}});
+    auto workspaceNames = {group.rows()[0]->reducedWorkspaceNames().iVsQ()[0],
+                           group.rows()[1]->reducedWorkspaceNames().iVsQ()[0]};
+    auto result = createAlgorithmRuntimeProps(model, group, workspaceNames);
 
     TS_ASSERT_EQUALS(result->getPropertyValue("OutputWorkspaceSuffixes"), "++, --");
   }
@@ -103,10 +115,11 @@ public:
     const auto experiment = makeEmptyExperiment();
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRows();
-    group.mutableRows()[0]->setOutputNames({"IvsLam_12345", "IvsQ_12345", "IvsQ_binned_12345"});
-    group.mutableRows()[1]->setOutputNames({"IvsLam_23456", "IvsQ_23456", "IvsQ_binned_23456"});
-
-    auto configuredAlgorithm = createConfiguredAlgorithm(model, group);
+    group.mutableRows()[0]->setOutputNames({{"IvsLam_12345"}, {"IvsQ_12345"}, {"IvsQ_binned_12345"}});
+    group.mutableRows()[1]->setOutputNames({{"IvsLam_23456"}, {"IvsQ_23456"}, {"IvsQ_binned_23456"}});
+    auto workspaceNames = {group.rows()[0]->reducedWorkspaceNames().iVsQ()[0],
+                           group.rows()[1]->reducedWorkspaceNames().iVsQ()[0]};
+    auto configuredAlgorithm = createConfiguredAlgorithm(model, group, workspaceNames);
     executeConfiguredAlgorithm(configuredAlgorithm);
     std::dynamic_pointer_cast<IBatchJobAlgorithm>(configuredAlgorithm)->updateItem();
 
@@ -116,7 +129,7 @@ public:
     TS_ASSERT(ads.doesExist("IvsQ_12345_23456_--"));
     TS_ASSERT(!ads.doesExist("IvsQ_12345_23456_1"));
     TS_ASSERT(!ads.doesExist("IvsQ_12345_23456_2"));
-    TS_ASSERT_EQUALS(group.postprocessedWorkspaceName(), "IvsQ_12345_23456");
+    TS_ASSERT_EQUALS(group.postprocessedWorkspaceNames(), std::vector<std::string>{"IvsQ_12345_23456"});
   }
 
   void testStitchParamsSetFromStitchingOptions() {
@@ -127,7 +140,9 @@ public:
                    std::vector<LookupRow>(), false);
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRows();
-    auto result = createAlgorithmRuntimeProps(model, group);
+    auto workspaceNames = {group.rows()[0]->reducedWorkspaceNames().iVsQ()[0],
+                           group.rows()[1]->reducedWorkspaceNames().iVsQ()[0]};
+    auto result = createAlgorithmRuntimeProps(model, group, workspaceNames);
     TS_ASSERT_EQUALS(result->getPropertyValue("key1"), "value1");
     TS_ASSERT_EQUALS(result->getPropertyValue("key2"), "value2");
     TS_ASSERT(!result->existsProperty("Params"));
@@ -136,7 +151,9 @@ public:
   void testUseValidDataOnlySetForStitching() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRows();
-    auto result = createAlgorithmRuntimeProps(model, group);
+    auto workspaceNames = {group.rows()[0]->reducedWorkspaceNames().iVsQ()[0],
+                           group.rows()[1]->reducedWorkspaceNames().iVsQ()[0]};
+    auto result = createAlgorithmRuntimeProps(model, group, workspaceNames);
     assertProperty(*result, "UseValidDataOnly", true);
   }
 
@@ -149,7 +166,9 @@ public:
                    std::map<std::string, std::string>(), std::move(lookupTable), false);
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRows();
-    auto result = createAlgorithmRuntimeProps(model, group);
+    auto workspaceNames = {group.rows()[0]->reducedWorkspaceNames().iVsQ()[0],
+                           group.rows()[1]->reducedWorkspaceNames().iVsQ()[0]};
+    auto result = createAlgorithmRuntimeProps(model, group, workspaceNames);
     assertProperty(*result, "Params", -0.01);
   }
 
@@ -161,7 +180,9 @@ public:
                    std::map<std::string, std::string>(), makeLookupTableWithTwoAnglesAndWildcard(), false);
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRowsWithMixedQResolutions();
-    auto result = createAlgorithmRuntimeProps(model, group);
+    auto workspaceNames = {group.rows()[2]->reducedWorkspaceNames().iVsQ()[0],
+                           group.rows()[3]->reducedWorkspaceNames().iVsQ()[0]};
+    auto result = createAlgorithmRuntimeProps(model, group, workspaceNames);
     assertProperty(*result, "Params", -0.015);
   }
 
@@ -173,7 +194,9 @@ public:
                    std::map<std::string, std::string>(), makeLookupTableWithTwoAnglesAndWildcard(), false);
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRowsWithOutputQResolutions();
-    auto result = createAlgorithmRuntimeProps(model, group);
+    auto workspaceNames = {group.rows()[2]->reducedWorkspaceNames().iVsQ()[0],
+                           group.rows()[3]->reducedWorkspaceNames().iVsQ()[0]};
+    auto result = createAlgorithmRuntimeProps(model, group, workspaceNames);
     assertProperty(*result, "Params", -0.016);
   }
 

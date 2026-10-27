@@ -320,7 +320,7 @@ public:
     PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
     addWorkspaceWithPeriod("IvsQ_binned_12345_2", 2, 2);
     auto row = successfulRow("12345");
-    row.setOutputNames({"", "", "IvsQ_binned_12345_2"});
+    row.setOutputNames({{""}, {""}, {"IvsQ_binned_12345_2"}});
     auto const expectedPlottingWorkspaces = std::vector<PlottingWorkspace>{{"IvsQ_binned_12345_2", {"12345"}, "", 2}};
     auto const outputSelection = PlotOutputSelection{PlotOutputType::Alignment};
 
@@ -348,7 +348,7 @@ public:
     addWorkspaceWithRunNumberAndPeriod("IvsQ_binned_12345_2", "12345", 2, 2);
     groupExistingWorkspaces("IvsQ_binned_12345", {"IvsQ_binned_12345_1", "IvsQ_binned_12345_2"});
     auto row = successfulRow("12345");
-    row.setOutputNames({"", "", "IvsQ_binned_12345"});
+    row.setOutputNames({{""}, {""}, {"IvsQ_binned_12345"}});
     auto const selectedPlottingWorkspaceNames = std::vector<std::string>{"IvsQ_binned_12345_1", "IvsQ_binned_12345_2"};
     auto const expectedPlottingWorkspaces =
         std::vector<PlottingWorkspace>{{"IvsQ_binned_12345_1", {"12345"}, "IvsQ_binned_12345", 1},
@@ -375,7 +375,7 @@ public:
     PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
     addWorkspaceWithPeriodsLog("IvsQ_binned_12345_2", 2, 2);
     auto row = successfulRow("12345");
-    row.setOutputNames({"", "", "IvsQ_binned_12345_2"});
+    row.setOutputNames({{""}, {""}, {"IvsQ_binned_12345_2"}});
     auto const expectedPlottingWorkspaces =
         std::vector<PlottingWorkspace>{{"IvsQ_binned_12345_2", {"12345"}, "", std::nullopt}};
     auto const outputSelection = PlotOutputSelection{PlotOutputType::Alignment};
@@ -402,7 +402,7 @@ public:
     PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
     addWorkspaceWithRunNumber("IvsQ_POLREF12345", "12345");
     auto row = successfulRow("POLREF12345");
-    row.setOutputNames({"", "IvsQ_POLREF12345", ""});
+    row.setOutputNames({{""}, {"IvsQ_POLREF12345"}, {""}});
     auto const expectedPlottingWorkspaces =
         std::vector<PlottingWorkspace>{{"IvsQ_POLREF12345", {"12345"}, "", std::nullopt}};
     auto const outputSelection = PlotOutputSelection{PlotOutputType::Alignment};
@@ -430,7 +430,7 @@ public:
     Mantid::API::AnalysisDataService::Instance().addOrReplace("IvsQ_12345",
                                                               WorkspaceCreationHelper::create2DWorkspace(1, 1));
     auto row = successfulRow("12345");
-    row.setOutputNames({"", "IvsQ_12345", ""});
+    row.setOutputNames({{""}, {"IvsQ_12345"}, {""}});
     auto const expectedPlottingWorkspaces = std::vector<PlottingWorkspace>{{"IvsQ_12345", {}, "", std::nullopt}};
     auto const outputSelection = PlotOutputSelection{PlotOutputType::Alignment};
 
@@ -870,7 +870,7 @@ private:
                                                         std::string const &workspaceName) {
     addWorkspaceWithRunNumber(workspaceName, "12345");
     auto row = successfulRow("12345");
-    row.setOutputNames({"", "", workspaceName});
+    row.setOutputNames({{""}, {""}, {workspaceName}});
 
     EXPECT_CALL(view, setPlottingWorkspaceTreeItemStates(testing::_)).Times(1);
     presenter.notifyRunsTableChanged(RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", {row})})));
@@ -900,7 +900,7 @@ private:
   Row successfulRow(std::string const &run) {
     auto row = Row({run}, 0.5, TransmissionRunPair(), RangeInQ(), std::nullopt, ReductionOptionsMap(),
                    ReductionWorkspaces({run}, TransmissionRunPair()));
-    row.setOutputNames({"IvsLam_" + run, "IvsQ_" + run, "IvsQ_binned_" + run});
+    row.setOutputNames({{"IvsLam_" + run}, {"IvsQ_" + run}, {"IvsQ_binned_" + run}});
     row.setSuccess();
     return row;
   }
@@ -909,7 +909,7 @@ private:
                         std::string const &outputWorkspace = "") {
     auto group = Group(groupName, std::move(rows));
     if (!outputWorkspace.empty()) {
-      group.setOutputNames({outputWorkspace});
+      group.setOutputNames({{outputWorkspace}});
     }
     group.setSuccess();
     return group;

@@ -106,22 +106,29 @@ Group makeGroupWithTwoRowsWithMixedQResolutions() {
   auto group1 = Group("Test group 1");
   group1.appendRow(std::nullopt);
   group1.appendRow(makeRow());
-  group1.appendRow(Row({"22222"}, 0.5, TransmissionRunPair({}), RangeInQ(0.5, 0.015, 0.9), std::nullopt,
-                       ReductionOptionsMap(), ReductionWorkspaces({"22222"}, TransmissionRunPair({}))));
-  group1.appendRow(Row({"33333"}, 0.5, TransmissionRunPair({}), RangeInQ(0.5, 0.016, 0.9), std::nullopt,
-                       ReductionOptionsMap(), ReductionWorkspaces({"33333"}, TransmissionRunPair({}))));
+  auto row3 = Row({"22222"}, 0.5, TransmissionRunPair({}), RangeInQ(0.5, 0.015, 0.9), std::nullopt,
+                  ReductionOptionsMap(), ReductionWorkspaces({"22222"}, TransmissionRunPair({})));
+  row3.setOutputNames({{"IvsLam_2222"}, {"IvsQ_2222"}, {"IvsQBinned_2222"}});
+  group1.appendRow(row3);
+  auto row4 = Row({"33333"}, 0.5, TransmissionRunPair({}), RangeInQ(0.5, 0.016, 0.9), std::nullopt,
+                  ReductionOptionsMap(), ReductionWorkspaces({"33333"}, TransmissionRunPair({})));
+  row4.setOutputNames({{"IvsLam_3333"}, {"IvsQ_3333"}, {"IvsQBinned_3333"}});
+  group1.appendRow(row4);
   return group1;
 }
 
 Group makeGroupWithTwoRowsWithOutputQResolutions() {
   auto group1 = Group("Test group 1");
   group1.appendRow(makeRow());
-  group1.appendRow(Row({"22222"}, 0.5, TransmissionRunPair({}), RangeInQ(), std::nullopt, ReductionOptionsMap(),
-                       ReductionWorkspaces({"22222"}, TransmissionRunPair({}))));
-  auto row = Row({"33333"}, 0.5, TransmissionRunPair({}), RangeInQ(), std::nullopt, ReductionOptionsMap(),
-                 ReductionWorkspaces({"33333"}, TransmissionRunPair({})));
-  row.setOutputQRange(RangeInQ(0.5, 0.016, 0.9));
-  group1.appendRow(row);
+  auto row3 = Row({"22222"}, 0.5, TransmissionRunPair({}), RangeInQ(), std::nullopt, ReductionOptionsMap(),
+                  ReductionWorkspaces({"22222"}, TransmissionRunPair({})));
+  row3.setOutputNames({{"IvsLam_2222"}, {"IvsQ_2222"}, {"IvsQBinned_2222"}});
+  group1.appendRow(row3);
+  auto row4 = Row({"33333"}, 0.5, TransmissionRunPair({}), RangeInQ(), std::nullopt, ReductionOptionsMap(),
+                  ReductionWorkspaces({"33333"}, TransmissionRunPair({})));
+  row4.setOutputQRange(RangeInQ(0.5, 0.016, 0.9));
+  row4.setOutputNames({{"IvsLam_3333"}, {"IvsQ_3333"}, {"IvsQBinned_3333"}});
+  group1.appendRow(row4);
   return group1;
 }
 
