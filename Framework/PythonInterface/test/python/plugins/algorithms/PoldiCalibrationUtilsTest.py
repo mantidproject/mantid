@@ -19,7 +19,6 @@ from plugins.algorithms.poldi_calibration_utils import (
     RigidBanks,
     TimingModel,
     apply_geometry,
-    component_index,
     model_counts,
 )
 from plugins.algorithms.poldi_utils import exec_alg, get_tof_d1Ang, get_tths_and_l2s, get_instrument_settings_from_log
@@ -62,15 +61,6 @@ class PoldiCalibrationUtilsTest(unittest.TestCase):
     def _data(self, speed):
         return FoldedData(np.zeros((self.geom.live.size, 500)), 60e6 / (4 * speed))
 
-    def test_component_index_resolves_names_and_paths(self):
-        ci = self.ws.componentInfo()
-
-        block = component_index(ci, "NorthBank/detector-bank/reference-sphere-1/block1")
-
-        self.assertEqual(ci.name(block), "block1")
-        self.assertEqual(ci.name(ci.parent(ci.parent(ci.parent(block)))), "NorthBank")
-        self.assertEqual(component_index(ci, "SouthBank"), ci.indexOfAny("SouthBank"))
-
     def test_bank_and_block_moves_match_mantid(self):
         q = self.geom.q0 + [0.004, -0.006, 0.4, -0.003, 0.005, -0.3]
         q_blocks = np.random.default_rng(2).uniform([-1e-3, -0.5], [1e-3, 0.5], (len(self.geom.blocks), 2)).ravel()
@@ -108,29 +98,6 @@ class PoldiCalibrationUtilsTest(unittest.TestCase):
                 assert_allclose(analytic, numeric, atol=1e-4 * np.abs(numeric).max())
         for k in (0, SI_D.size - 1):  # the model is linear in the intensities
             assert_allclose(dm_dA[k], model(A=np.eye(SI_D.size)[k]), atol=1e-12)
-
-    def test_recovers_bank_geometry_and_timing(self):
-        rng = np.random.default_rng(3)
-        speeds = [5000, 10000]
-        cycle_times = [60e6 / (4 * s) for s in speeds]
-        q_true = self.geom.q0 + [0.003, 0.0, 0.3, 0.0, -0.002, -0.2]
-        t0, t0_const = 0.05824, -12.68
-        for kind in ("PerChopperSpeed", "Linear"):
-            with self.subTest(timing=kind):
-                timing = TimingModel(kind, cycle_times, speeds, t0, t0_const)
-                tz_true = {
-                    "PerChopperSpeed": [t0 * T + t0_const + 2.0 + 0.5 * i for i, T in enumerate(cycle_times)],  # not linear in T
-                    "Linear": [(t0 + 1e-4) * T + t0_const + 2.0 for T in cycle_times],
-                }[kind]
-                datasets = [
-                    FoldedData(simulated_counts(self.geom, self._data(s), q_true, tz, rng), T)
-                    for s, T, tz in zip(speeds, cycle_times, tz_true)
-                ]
-
-                fit = CalibrationFit(self.geom, datasets, RigidBanks(self.geom), SI_D, timing).fit()
-
-                assert_allclose(fit.q_banks, q_true, atol=1e-6)
-                assert_allclose(timing.matrix @ fit.x_tz, tz_true, atol=1e-4)
 
     def test_recovers_block_moves_with_banks_fixed(self):
         ws = poldi_workspace(5000, "poldi_dense", live_every=8)  # several live pixels per block

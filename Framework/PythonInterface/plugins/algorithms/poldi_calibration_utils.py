@@ -4,14 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-"""Forward model of POLDI folded counts for calibrating the chopper timing and detector geometry.
-
-Pixel i, reflection k and chopper slit s give a Gaussian in folded time, centred on (c_i d_k + tz + x_s T) mod T,
-with width sigma^2 = (kappa T)^2 + (sigma_rel c_i d_k)^2 (chopper opening and d-resolution), integrated over the
-time bins and weighted by A_k flux(2 d_k sin(theta_i)). Here c_i = K (L_cs + L2_i) sin(theta_i) is the chopper-path
-DIFC. The data are fitted as y_ib = s_i m_ib + b_i, with the per-pixel scale s_i and background b_i solved in closed
-form and projected out of the Jacobian (variable projection).
-"""
+"""Forward model of POLDI folded counts and its fit, used by PoldiCalibrateForwardModel (whose docs give the model)."""
 
 from __future__ import annotations
 
@@ -172,8 +165,7 @@ class RigidBanks:
         return c, sin_t, dc_dq
 
     def split(self, q):
-        """(bank parameters, block parameters or None)."""
-        return q, None
+        return q, None  # bank parameters, block parameters
 
 
 class BankModules(RigidBanks):
@@ -315,7 +307,6 @@ class CalibrationFit:
             self.x[self.nq :], self.free[self.nq :] = start.x[start.nq :], start.free[start.nq :]
 
     def split(self, x):
-        """(geometry q, timing parameters, kappa, sigma_rel, intensities)."""
         nq, ntz = self.nq, self.ntz
         return x[:nq], x[nq : nq + ntz], x[nq + ntz], x[nq + ntz + 1], x[nq + ntz + 2 :]
 
