@@ -21,9 +21,11 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/InstrumentMetadata.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Quat.h"
 #include "MantidKernel/Strings.h"
 
 #include <cxxtest/TestSuite.h>
@@ -191,12 +193,12 @@ public:
     TS_ASSERT_DELTA(samplePos.Z(), 0.0, 0.01);
 
     const auto &detectorInfo = output->detectorInfo();
-    const auto &ptrDet103 = detectorInfo.detector(detectorInfo.indexOf(103));
-    TS_ASSERT_EQUALS(ptrDet103.getID(), 103);
-    TS_ASSERT_EQUALS(ptrDet103.getName(), "HET_non_PSDtube");
-    TS_ASSERT_DELTA(ptrDet103.getPos().X(), 0.3826351418, 0.01);
-    TS_ASSERT_DELTA(ptrDet103.getPos().Z(), 2.4470, 0.01);
-    double d = ptrDet103.getPos().distance(samplePos);
+    const auto det103Index = detectorInfo.indexOf(103);
+    TS_ASSERT_EQUALS(detectorInfo.detid(det103Index), 103);
+    TS_ASSERT_EQUALS(baseComponentInfo.name(det103Index), "HET_non_PSDtube");
+    TS_ASSERT_DELTA(detectorInfo.position(det103Index).X(), 0.3826351418, 0.01);
+    TS_ASSERT_DELTA(detectorInfo.position(det103Index).Z(), 2.4470, 0.01);
+    double d = detectorInfo.position(det103Index).distance(samplePos);
     TS_ASSERT_DELTA(d, 2.512, 0.0001);
     double cmpDistance = detectorInfo.l2(detectorInfo.indexOf(103));
     TS_ASSERT_DELTA(cmpDistance, 2.512, 0.0001);
@@ -218,9 +220,9 @@ public:
 
     // also a few tests on the last detector and a test for the one beyond the
     // last
-    const auto &ptrDetLast = detectorInfo.detector(detectorInfo.indexOf(413256));
-    TS_ASSERT_EQUALS(ptrDetLast.getID(), 413256);
-    TS_ASSERT_EQUALS(ptrDetLast.getName(), "pixel");
+    const auto detLastIndex = detectorInfo.indexOf(413256);
+    TS_ASSERT_EQUALS(detectorInfo.detid(detLastIndex), 413256);
+    TS_ASSERT_EQUALS(baseComponentInfo.name(detLastIndex), "pixel");
     TS_ASSERT_THROWS(detectorInfo.indexOf(413257), const std::out_of_range &);
 
     // Test input data is unchanged
@@ -282,15 +284,22 @@ public:
     TS_ASSERT_DELTA(samplepos->getPos().Y(), 0.0, 0.01);
 
     const auto &detectorInfo = output->detectorInfo();
-    const auto &ptrDet = detectorInfo.detector(detectorInfo.indexOf(101));
-    TS_ASSERT_EQUALS(ptrDet.getID(), 101);
+    const auto &componentInfo = output->componentInfo();
+    TS_ASSERT_EQUALS(detectorInfo.detid(detectorInfo.indexOf(101)), 101);
 
     TS_ASSERT(output->detectorInfo().isMonitor(0));
 
-    const auto &ptrDetShape = detectorInfo.detector(detectorInfo.indexOf(102));
-    TS_ASSERT(ptrDetShape.isValid(V3D(0.0, 0.0, 0.0) + ptrDetShape.getPos()));
-    TS_ASSERT(ptrDetShape.isValid(V3D(0.0, 0.0, 0.000001) + ptrDetShape.getPos()));
-    TS_ASSERT(ptrDetShape.isValid(V3D(0.005, 0.1, 0.000002) + ptrDetShape.getPos()));
+    const auto detShapeIndex = detectorInfo.indexOf(102);
+    // Test whether a point, given as an offset from the detector position, lies inside the detector shape
+    const auto isValidOffset = [&componentInfo, detShapeIndex](V3D offset) {
+      Quat unRotate = componentInfo.rotation(detShapeIndex);
+      unRotate.inverse();
+      unRotate.rotate(offset);
+      return componentInfo.shape(detShapeIndex).isValid(offset / componentInfo.scaleFactor(detShapeIndex));
+    };
+    TS_ASSERT(isValidOffset(V3D(0.0, 0.0, 0.0)));
+    TS_ASSERT(isValidOffset(V3D(0.0, 0.0, 0.000001)));
+    TS_ASSERT(isValidOffset(V3D(0.005, 0.1, 0.000002)));
   }
 
   void testExecNIMROD() {
@@ -315,12 +324,12 @@ public:
     TS_ASSERT(loaderNIMROD.isExecuted());
 
     const auto &detectorInfo = ws2D->detectorInfo();
-    const auto &ptrDet = detectorInfo.detector(detectorInfo.indexOf(20103001));
-    TS_ASSERT_EQUALS(ptrDet.getName(), "pixel");
-    TS_ASSERT_EQUALS(ptrDet.getID(), 20103001);
-    TS_ASSERT_DELTA(ptrDet.getPos().X(), 0.0254, 0.0001);
-    TS_ASSERT_DELTA(ptrDet.getPos().Y(), -0.2084, 0.0001);
-    TS_ASSERT_DELTA(ptrDet.getPos().Z(), 5.5258, 0.0001);
+    const auto detIndex = detectorInfo.indexOf(20103001);
+    TS_ASSERT_EQUALS(ws2D->componentInfo().name(detIndex), "pixel");
+    TS_ASSERT_EQUALS(detectorInfo.detid(detIndex), 20103001);
+    TS_ASSERT_DELTA(detectorInfo.position(detIndex).X(), 0.0254, 0.0001);
+    TS_ASSERT_DELTA(detectorInfo.position(detIndex).Y(), -0.2084, 0.0001);
+    TS_ASSERT_DELTA(detectorInfo.position(detIndex).Z(), 5.5258, 0.0001);
   }
 
   void testExecNIMRODandRetrieveFromIDS() {
@@ -384,19 +393,19 @@ public:
     TS_ASSERT_EQUALS(1, detectorInfo.detectorIDs()[0]);
     TS_ASSERT_EQUALS(4816, detectorInfo.detectorIDs()[920]);
 
-    const auto &ptrDet1 = detectorInfo.detector(detectorInfo.indexOf(1));
-    TS_ASSERT_EQUALS(ptrDet1.getName(), "monitor");
-    TS_ASSERT_EQUALS(ptrDet1.getID(), 1);
-    TS_ASSERT_DELTA(ptrDet1.getPos().X(), 0.0000, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1.getPos().Y(), 0.0000, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1.getPos().Z(), -3.2500, 0.0001);
+    const auto det1Index = detectorInfo.indexOf(1);
+    TS_ASSERT_EQUALS(componentInfo.name(det1Index), "monitor");
+    TS_ASSERT_EQUALS(detectorInfo.detid(det1Index), 1);
+    TS_ASSERT_DELTA(detectorInfo.position(det1Index).X(), 0.0000, 0.0001);
+    TS_ASSERT_DELTA(detectorInfo.position(det1Index).Y(), 0.0000, 0.0001);
+    TS_ASSERT_DELTA(detectorInfo.position(det1Index).Z(), -3.2500, 0.0001);
 
-    const auto &ptrDet2 = detectorInfo.detector(detectorInfo.indexOf(4816));
-    TS_ASSERT_EQUALS(ptrDet2.getName(), "tall He3 element");
-    TS_ASSERT_EQUALS(ptrDet2.getID(), 4816);
-    TS_ASSERT_DELTA(ptrDet2.getPos().X(), 0.6330, 0.0001);
-    TS_ASSERT_DELTA(ptrDet2.getPos().Y(), 0.6330, 0.0001);
-    TS_ASSERT_DELTA(ptrDet2.getPos().Z(), 3.9211, 0.0001);
+    const auto det2Index = detectorInfo.indexOf(4816);
+    TS_ASSERT_EQUALS(componentInfo.name(det2Index), "tall He3 element");
+    TS_ASSERT_EQUALS(detectorInfo.detid(det2Index), 4816);
+    TS_ASSERT_DELTA(detectorInfo.position(det2Index).X(), 0.6330, 0.0001);
+    TS_ASSERT_DELTA(detectorInfo.position(det2Index).Y(), 0.6330, 0.0001);
+    TS_ASSERT_DELTA(detectorInfo.position(det2Index).Z(), 3.9211, 0.0001);
   }
 
   /// Common initialisation for Nexus loading tests
@@ -576,12 +585,11 @@ public:
     // instrument...
     TS_ASSERT_EQUALS(physicalInst->getDetector(1000)->shape(), physicalInst->getDetector(1001)->shape())
     // ...but not in the neutronic instrument
-    TS_ASSERT_DIFFERS(detectorInfo.detector(detectorInfo.indexOf(1000)).shape(),
-                      neutronicInst->getDetector(1001)->shape())
+    const auto &componentInfo = ws->componentInfo();
+    TS_ASSERT_DIFFERS(&componentInfo.shape(detectorInfo.indexOf(1000)), neutronicInst->getDetector(1001)->shape().get())
     // Also, the same shape is shared between the corresponding '1000'
     // detectors
-    TS_ASSERT_EQUALS(physicalInst->getDetector(1000)->shape(),
-                     detectorInfo.detector(detectorInfo.indexOf(1000)).shape())
+    TS_ASSERT_EQUALS(physicalInst->getDetector(1000)->shape().get(), &componentInfo.shape(detectorInfo.indexOf(1000)))
 
     // Check the monitor is in the same place in each instrument
     TS_ASSERT_EQUALS(physicalInst->getDetector(1)->getPos(), detectorInfo.position(detectorInfo.indexOf(1)));

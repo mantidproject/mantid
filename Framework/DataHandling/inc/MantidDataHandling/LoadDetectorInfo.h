@@ -61,9 +61,9 @@ private:
   void readNXSDotDat(Nexus::File &nxsFile, DetectorInfo &detInfo) const;
 
   /// Update the parameter map with the new values for the given detector
-  void updateParameterMap(Geometry::DetectorInfo &detectorInfo, const size_t detIndex, Geometry::ParameterMap &pmap,
-                          const double l2, const double theta, const double phi, const double delay,
-                          const double pressure, const double thickness) const;
+  void updateParameterMap(Geometry::DetectorInfo &detectorInfo, const size_t detIndex,
+                          Geometry::ComponentInfo &componentInfo, const double l2, const double theta, const double phi,
+                          const double delay, const double pressure, const double thickness) const;
 
   /// Cached sample position for this workspace
   Kernel::V3D m_samplePos;

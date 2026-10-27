@@ -19,6 +19,7 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -161,9 +162,8 @@ public:
       }
 
       if (hasDetector) {
-        const auto &detector103 = detectorInfo.detector(detectorIndex);
-        TS_ASSERT_EQUALS(detector103.getID(), 103);
-        TS_ASSERT_EQUALS(detector103.getName(), "linear-detector-pixel");
+        TS_ASSERT_EQUALS(detectorInfo.detid(detectorIndex), 103);
+        TS_ASSERT_EQUALS(output->componentInfo().name(detectorIndex), "linear-detector-pixel");
         TS_ASSERT_DELTA(detectorInfo.position(detectorIndex).Z(), 12.403, 0.01);
         TS_ASSERT_DELTA(detectorInfo.position(detectorIndex).Y(), 0.1164, 0.01);
         const auto d = detectorInfo.l2(detectorIndex);

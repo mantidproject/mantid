@@ -583,12 +583,11 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl, const DblMatrix &ori
   }
 
   const auto &detInfo = m_pw->detectorInfo();
-  const auto &det = detInfo.detector(index);
   std::unique_ptr<Peak> peak;
 
   if (hitDetector) {
     // peak hit a detector to add it to the list
-    peak = std::make_unique<Peak>(m_inst, det.getID(), wl);
+    peak = std::make_unique<Peak>(m_inst, detInfo.detid(index), wl);
     if (!peak->getDetector()) {
       return;
     }
