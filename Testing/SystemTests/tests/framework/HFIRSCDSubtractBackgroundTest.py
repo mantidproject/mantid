@@ -11,19 +11,30 @@ Grouping a background through HFIRSCDSubtractBackground must reproduce the group
 file loaded with 4x4 grouping, and the background is the same file loaded without grouping, as an MDHistoWorkspace or
 as a Workspace2D. Both files have a single goniometer angle. With NormalizedBy=None, the scaled background must then
 equal the grouped sample, and the subtraction must give zero, with errors squared doubled.
+
+Scaling by the flux logs is checked on WAND data with many goniometer angles, against the flux ratio computed from the
+logs. An ungrouped WAND background, the mean of 100 runs, is also subtracted from a 4x4 sample with many goniometer
+angles, through a GroupingWorkspace built from the group ID formula.
 """
 
 import numpy as np
 import systemtesting
+from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.simpleapi import (
+    CloneMDWorkspace,
     CreateWorkspace,
     DeleteWorkspace,
     HB3AAdjustSampleNorm,
     HFIRSCDSubtractBackground,
     LoadEmptyInstrument,
+    LoadMD,
     LoadWANDSCD,
+    SliceMDHisto,
     mtd,
 )
+
+# Sample logs holding the flux of each goniometer angle of WAND data
+WAND_FLUX_LOGS = {"Time": "duration", "Monitor": "monitor_count"}
 
 
 def create_workspace2d(name):
@@ -84,6 +95,61 @@ def assert_reproduces(sample, background, grouping=None):
     np.testing.assert_allclose(output.getErrorSquaredArray(), 2 * expected.getErrorSquaredArray())
 
 
+def slice_angles(name, start, stop, output):
+    """
+    MDHistoWorkspace <output> holding goniometer angles start to stop - 1 of the WAND MDHistoWorkspace <name>, with the
+    flux logs cut to these angles: a single value for one angle, an array otherwise.
+
+    SliceMDHisto shares the ExperimentInfo of its input, so the slice is cloned before its logs are changed.
+
+    :param name: name of an MDHistoWorkspace with dimensions (y, x, goniometer angle) and the WAND flux logs.
+    :param start: index of the first goniometer angle kept.
+    :param stop: index after the last goniometer angle kept.
+    :param output: name of the new MDHistoWorkspace.
+    """
+    data = mtd[name]
+    n_y, n_x = data.getDimension(0).getNBins(), data.getDimension(1).getNBins()
+    SliceMDHisto(InputWorkspace=name, Start=f"0,0,{start}", End=f"{n_y},{n_x},{stop}", OutputWorkspace="__slice")
+    CloneMDWorkspace(InputWorkspace="__slice", OutputWorkspace=output)
+    DeleteWorkspace("__slice")
+    run = mtd[output].getExperimentInfo(0).mutableRun()
+    for log in WAND_FLUX_LOGS.values():
+        values = np.asarray(data.getExperimentInfo(0).run().getProperty(log).value)[start:stop]
+        run.addProperty(log, float(values[0]) if len(values) == 1 else values.tolist(), True)
+
+
+def flux(name, normalized_by):
+    """
+    Flux of each goniometer angle of a WAND MDHistoWorkspace, read from its sample logs.
+
+    :param name: name of an MDHistoWorkspace with the WAND flux logs.
+    :param normalized_by: "Time" or "Monitor".
+    :returns: numpy array with one value per goniometer angle.
+    """
+    return np.atleast_1d(mtd[name].getExperimentInfo(0).run().getProperty(WAND_FLUX_LOGS[normalized_by]).value).astype(float)
+
+
+def wand_grouping(pixels, output):
+    """
+    GroupingWorkspace <output> grouping the WAND pixels in squares of pixels x pixels, as LoadWANDSCD does with
+    Grouping="2x2" or "4x4", built from the group ID formula rather than by LoadWANDSCD.
+
+    Workspace index w = y + 512 x, of the pixel in row y of detector column x, holds detector ID w and belongs to group
+    (x // pixels) (512 // pixels) + y // pixels + 1.
+
+    :param pixels: number of pixels on each side of a group, 2 or 4.
+    :param output: name of the new GroupingWorkspace.
+    """
+    n_y, n_x = 512, 480 * 8
+    grouping = WorkspaceFactory.create("GroupingWorkspace", n_y * n_x, 1, 1)
+    index = np.arange(n_y * n_x)
+    group_ids = (index // n_y // pixels) * (n_y // pixels) + (index % n_y) // pixels + 1.0
+    for i, group_id in enumerate(group_ids):
+        grouping.mutableY(i)[0] = group_id
+        grouping.getSpectrum(i).setDetectorID(i)
+    AnalysisDataService.addOrReplace(output, grouping)
+
+
 class HFIRSCDSubtractBackgroundWANDGroupingTest(systemtesting.MantidSystemTest):
     """Grouping of WAND backgrounds, MDHistoWorkspace and Workspace2D, reproduces the 4x4 grouping of LoadWANDSCD."""
 
@@ -119,6 +185,109 @@ class HFIRSCDSubtractBackgroundDEMANDGroupingTest(systemtesting.MantidSystemTest
         assert_reproduces("demand_4x4", "demand", "demand_grouping")
         assert_reproduces("demand_4x4", "demand_2d", "demand_grouping")
         assert_reproduces("demand", "demand_2d")
+
+    def cleanup(self):
+        mtd.clear()
+
+
+class HFIRSCDSubtractBackgroundWANDFluxTest(systemtesting.MantidSystemTest):
+    """
+    Scaling by the WAND flux logs: one goniometer angle of HB2C_WANDSCD_data.nxs, used as the background, is subtracted
+    from the first 100 angles of the same file, and the result is compared with S - r B, where r is the ratio of the
+    flux of each angle of the sample to the flux of the background.
+    """
+
+    def requiredFiles(self):
+        return ["HB2C_WANDSCD_data.nxs"]
+
+    def requiredMemoryMB(self):
+        return 4000
+
+    def runTest(self):
+        LoadMD("HB2C_WANDSCD_data.nxs", LoadHistory=False, OutputWorkspace="data")
+        slice_angles("data", 0, 100, "sample")
+        slice_angles("data", 650, 651, "background")
+        DeleteWorkspace("data")
+        sample, background = mtd["sample"], mtd["background"]
+        for normalized_by in WAND_FLUX_LOGS:
+            ratio = flux("sample", normalized_by) / flux("background", normalized_by)
+            assert np.ptp(ratio) > 0, f"the {normalized_by} flux ratio is the same for every angle"
+            expected = sample.getSignalArray() - ratio * background.getSignalArray()
+            expected_error_squared = sample.getErrorSquaredArray() + ratio**2 * background.getErrorSquaredArray()
+            assert (expected < 0).any(), "no bin is negative after the subtraction"
+            for nullify in (False, True):
+                output = HFIRSCDSubtractBackground(
+                    InputWorkspace="sample",
+                    InputBackground="background",
+                    NormalizedBy=normalized_by,
+                    NullifyNegativeValues=nullify,
+                    OutputWorkspace="output",
+                )
+                np.testing.assert_allclose(output.getSignalArray(), np.maximum(expected, 0) if nullify else expected, atol=1e-9)
+                np.testing.assert_allclose(output.getErrorSquaredArray(), expected_error_squared)
+
+    def cleanup(self):
+        mtd.clear()
+
+
+class HFIRSCDSubtractBackgroundWANDMeanBackgroundTest(systemtesting.MantidSystemTest):
+    """
+    Subtraction of an ungrouped WAND background, grouped 4x4 by InputGroupingWorkspace, from a sample with many
+    goniometer angles.
+
+    HB2C_WANDSCD_background.nxs is the mean count rate of each ungrouped pixel over runs 26640-26739 of IPTS-7776, in
+    counts for the duration of run 26640, with the flux logs of that run. HB2C_WANDSCD_data.nxs holds the same runs, as
+    its first 100 angles, grouped 4x4. The expected grouped background is computed from these 100 angles, independently
+    of the background file and of the grouping done by HFIRSCDSubtractBackground. The sample is the next 100 angles,
+    runs 26740-26839, which are not part of the background. The GroupingWorkspace is built from the group ID formula, and
+    the 'detectorID' log of the sample, which HB2C_WANDSCD_data.nxs lacks, from the formula of LoadWANDSCD.
+    """
+
+    def requiredFiles(self):
+        return ["HB2C_WANDSCD_data.nxs", "HB2C_WANDSCD_background.nxs"]
+
+    def requiredMemoryMB(self):
+        return 4000
+
+    def runTest(self):
+        LoadMD("HB2C_WANDSCD_data.nxs", LoadHistory=False, OutputWorkspace="data")
+        slice_angles("data", 0, 100, "background_runs")
+        slice_angles("data", 100, 200, "sample")
+        DeleteWorkspace("data")
+        # HB2C_WANDSCD_data.nxs predates the 'detectorID' log. Add the one LoadWANDSCD writes with Grouping="4x4": the
+        # first detector ID of the group of each pixel, the pixels being ordered with the first dimension varying fastest.
+        pixel = np.arange(128 * 960)
+        detector_ids = 4 * (pixel % 128) + 4 * 512 * (pixel // 128)
+        mtd["sample"].getExperimentInfo(0).mutableRun().addProperty("detectorID", detector_ids.tolist(), True)
+        LoadMD("HB2C_WANDSCD_background.nxs", LoadHistory=False, OutputWorkspace="background")
+        wand_grouping(4, "grouping")
+        for normalized_by in WAND_FLUX_LOGS:
+            np.testing.assert_allclose(flux("background", normalized_by), flux("background_runs", normalized_by)[:1])
+        # Mean count rate of the 4x4 groups over the background runs, in counts for the duration of the first run
+        duration = flux("background_runs", "Time")
+        scale = duration[0] / duration.sum()
+        runs = mtd["background_runs"]
+        background = scale * runs.getSignalArray().sum(axis=2, keepdims=True)
+        background_error_squared = scale**2 * runs.getErrorSquaredArray().sum(axis=2, keepdims=True)
+        DeleteWorkspace("background_runs")
+        sample = mtd["sample"]
+        for normalized_by in WAND_FLUX_LOGS:
+            ratio = flux("sample", normalized_by) / flux("background", normalized_by)
+            expected = sample.getSignalArray() - ratio * background
+            assert (expected < 0).any(), "no bin is negative after the subtraction"
+            output, scaled_background = HFIRSCDSubtractBackground(
+                InputWorkspace="sample",
+                InputBackground="background",
+                InputGroupingWorkspace="grouping",
+                NormalizedBy=normalized_by,
+                NullifyNegativeValues=False,
+                OutputWorkspace="output",
+                OutputBackgroundWorkspace="scaled_background",
+            )
+            np.testing.assert_allclose(scaled_background.getSignalArray(), ratio * background)
+            np.testing.assert_allclose(scaled_background.getErrorSquaredArray(), ratio**2 * background_error_squared)
+            np.testing.assert_allclose(output.getSignalArray(), expected, atol=1e-9)
+            np.testing.assert_allclose(output.getErrorSquaredArray(), sample.getErrorSquaredArray() + ratio**2 * background_error_squared)
 
     def cleanup(self):
         mtd.clear()
