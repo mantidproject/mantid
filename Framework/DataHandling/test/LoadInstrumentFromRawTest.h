@@ -15,6 +15,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 
@@ -78,19 +79,19 @@ public:
     TS_ASSERT_DELTA(samplepos->getPos().Y(), 0.0, 0.01);
 
     const auto &detectorInfo = output->detectorInfo();
-    const auto &ptrDetSp = detectorInfo.detector(detectorInfo.indexOf(5));
-    TS_ASSERT_EQUALS(ptrDetSp.getID(), 5);
-    TS_ASSERT_EQUALS(ptrDetSp.getName(), "det");
-    TS_ASSERT_EQUALS(ptrDetSp.type(), "DetectorComponent");
+    const auto &componentInfo = output->componentInfo();
+    const auto detSpIndex = detectorInfo.indexOf(5);
+    TS_ASSERT_EQUALS(detectorInfo.detid(detSpIndex), 5);
+    TS_ASSERT_EQUALS(componentInfo.name(detSpIndex), "det");
+    TS_ASSERT(componentInfo.isDetector(detSpIndex));
     // using phi values from raw file changes sign of this
-    TS_ASSERT_DELTA(ptrDetSp.getPos().X(), 0, 0.01);
-    TS_ASSERT_DELTA(ptrDetSp.getPos().Z(), -11.1499, 0.01);
-    TS_ASSERT_DELTA(detectorInfo.l2(detectorInfo.indexOf(5)), 11.1499, 0.0001);
+    TS_ASSERT_DELTA(detectorInfo.position(detSpIndex).X(), 0, 0.01);
+    TS_ASSERT_DELTA(detectorInfo.position(detSpIndex).Z(), -11.1499, 0.01);
+    TS_ASSERT_DELTA(detectorInfo.l2(detSpIndex), 11.1499, 0.0001);
 
     // also a few tests on the last detector and a test for the one beyond the
     // last
-    const auto &ptrDetLast = detectorInfo.detector(detectorInfo.indexOf(8));
-    TS_ASSERT_EQUALS(ptrDetLast.getID(), 8);
+    TS_ASSERT_EQUALS(detectorInfo.detid(detectorInfo.indexOf(8)), 8);
     TS_ASSERT_THROWS(detectorInfo.indexOf(9), const std::out_of_range &);
 
     // Check the monitors are correctly marked

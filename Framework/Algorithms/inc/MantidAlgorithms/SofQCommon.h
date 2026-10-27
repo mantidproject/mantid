@@ -13,6 +13,9 @@
 // Routines used by all SofQW algorithms intended to provide united
 // user interface to all SofQ algorihtms.
 namespace Mantid {
+namespace Geometry {
+class ComponentInfo;
+}
 namespace Algorithms {
 
 struct MANTID_ALGORITHMS_DLL SofQCommon {
@@ -31,9 +34,13 @@ struct MANTID_ALGORITHMS_DLL SofQCommon {
 
   /// Get the efixed value for the given detector
   double getEFixed(const Geometry::IDetector &det) const;
+  /// Get the efixed value for the given component index
+  double getEFixed(const Geometry::ComponentInfo &componentInfo, const size_t componentIndex) const;
 
   /// Calculate the Q value
   double q(const double deltaE, const double twoTheta, const Geometry::IDetector *det) const;
+  /// Calculate the Q value using the given efixed (ignored in direct mode)
+  double q(const double deltaE, const double twoTheta, const double efixed) const;
 
   /// Estimate minimum and maximum momentum transfer.
   std::pair<double, double> qBinHints(const API::MatrixWorkspace &ws, const double minE, const double maxE) const;
@@ -41,6 +48,7 @@ struct MANTID_ALGORITHMS_DLL SofQCommon {
 private:
   double directQ(const double deltaE, const double twoTheta) const;
   double indirectQ(const double deltaE, const double twoTheta, const Geometry::IDetector *det) const;
+  static double indirectQFromEFixed(const double deltaE, const double twoTheta, const double efixed);
   std::pair<double, double> qBinHintsDirect(const API::MatrixWorkspace &ws, const double minE, const double maxE) const;
   std::pair<double, double> qBinHintsIndirect(const API::MatrixWorkspace &ws, const double minE,
                                               const double maxE) const;

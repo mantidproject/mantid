@@ -21,6 +21,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -381,8 +382,9 @@ void Q1D2::calculateNormalization(const size_t wavStart, const size_t wsIndex,
  */
 void Q1D2::pixelWeight(const API::MatrixWorkspace_const_sptr &pixelAdj, const size_t wsIndex, double &weight,
                        double &error) const {
-  const auto &detectorInfo = m_dataWS->detectorInfo();
-  const V3D samplePos = detectorInfo.samplePosition();
+  Geometry::ComponentInfo const &componentInfo = m_dataWS->componentInfo();
+  Geometry::DetectorInfo const &detectorInfo = m_dataWS->detectorInfo();
+  V3D const samplePos = componentInfo.samplePosition();
 
   if (m_doSolidAngle) {
     const int numberOfCylinderSlices = getProperty("SolidAngleNumberOfCylinderSlices");
@@ -390,7 +392,7 @@ void Q1D2::pixelWeight(const API::MatrixWorkspace_const_sptr &pixelAdj, const si
     for (const auto detID : m_dataWS->getSpectrum(wsIndex).getDetectorIDs()) {
       const auto index = detectorInfo.indexOf(detID);
       if (!detectorInfo.isMasked(index))
-        weight += detectorInfo.detector(index).solidAngle({samplePos, numberOfCylinderSlices});
+        weight += componentInfo.solidAngle(index, {samplePos, numberOfCylinderSlices});
     }
   } else
     weight = 1.0;

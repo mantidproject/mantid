@@ -15,8 +15,9 @@
 #include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -269,26 +270,22 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     { // reduce scope
       const double sourceTerm = m_sourceDeltaLMetersSq;
       term2Sq = std::accumulate(spectrumDefinition.cbegin(), spectrumDefinition.cend(), 0.,
-                                [&detectorInfo, &sourceTerm, &l1](const auto sum, const auto &index) {
+                                [&componentInfo, &detectorInfo, &sourceTerm, &l1](const auto sum, const auto &index) {
                                   if (detectorInfo.isMasked(index.first) || detectorInfo.isMonitor(index.first)) {
                                     return sum;
                                   } else {
-                                    const auto &detector = detectorInfo.detector(index.first);
-                                    const auto realdet = dynamic_cast<const Detector *>(&detector);
-                                    if (realdet) {
-                                      const auto l2 = detectorInfo.l2(index.first);
-                                      const auto l_total = (l1 + l2);
-                                      realdet->shape();
-                                      const double dx = realdet->getWidth();
-                                      const double dy = realdet->getHeight();
-                                      const double dz = realdet->getDepth();
-                                      // not sure why divide by 4, but it has always been there
-                                      const double detdimSq = (dx * dx + dy * dy + dz * dz) * 0.25;
-                                      const double term = (detdimSq + sourceTerm) / (l_total * l_total);
-                                      return sum + term;
-                                    } else {
-                                      return sum;
-                                    }
+                                    const auto l2 = detectorInfo.l2(index.first);
+                                    const auto l_total = (l1 + l2);
+                                    // detector dimensions from the unscaled shape, as in ObjComponent::getWidth etc.
+                                    const auto &bbox = componentInfo.shape(index.first).getBoundingBox();
+                                    const auto scale = componentInfo.scaleFactor(index.first);
+                                    const double dx = (bbox.xMax() - bbox.xMin()) / scale.X();
+                                    const double dy = (bbox.yMax() - bbox.yMin()) / scale.Y();
+                                    const double dz = (bbox.zMax() - bbox.zMin()) / scale.Z();
+                                    // not sure why divide by 4, but it has always been there
+                                    const double detdimSq = (dx * dx + dy * dy + dz * dz) * 0.25;
+                                    const double term = (detdimSq + sourceTerm) / (l_total * l_total);
+                                    return sum + term;
                                   }
                                 });
       term2Sq = term2Sq / numDet;
@@ -346,9 +343,10 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     if (g_log.getLevelOffset() > 6) {
       // central two-theta
       const double twotheta = spectrumInfo.isMonitor(specNum) ? 0.0 : spectrumInfo.twoTheta(specNum);
-      const auto &det = spectrumInfo.detector(specNum);
+      // component type as reported by IDetector::type() for a single detector or a DetectorGroup
+      const std::string detType = spectrumInfo.hasUniqueDetector(specNum) ? "DetectorComponent" : "LogicalComponent";
 
-      g_log.debug() << det.type() << " " << specNum << "\t\t" << twotheta << "\t\tdT/T = " << sqrt(term1Sq)
+      g_log.debug() << detType << " " << specNum << "\t\t" << twotheta << "\t\tdT/T = " << sqrt(term1Sq)
                     << "\t\tdL/L = " << sqrt(term2Sq) << "\t\tdTheta*cotTheta = " << sqrt(term3Sq) << "\n";
     }
   }

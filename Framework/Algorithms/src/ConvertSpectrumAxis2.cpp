@@ -13,7 +13,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/HistogramBuilder.h"
@@ -217,7 +217,7 @@ void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress, const std:
     emode = 2;
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
-  const auto &detectorInfo = inputWS->detectorInfo();
+  const auto &componentInfo = inputWS->componentInfo();
   const size_t nHist = spectrumInfo.size();
   for (size_t i = 0; i < nHist; i++) {
     double theta(0.0), efixed(0.0);
@@ -232,7 +232,7 @@ void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress, const std:
        * supported at the time of writing.
        */
       const auto detectorIndex = spectrumInfo.spectrumDefinition(i)[0].first;
-      efixed = getEfixed(detectorIndex, detectorInfo, *inputWS,
+      efixed = getEfixed(detectorIndex, componentInfo, *inputWS,
                          emode); // get efixed
     } else {
       theta = DBL_MIN;
@@ -316,14 +316,13 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(API::Progress &
   return outputWorkspace;
 }
 
-double ConvertSpectrumAxis2::getEfixed(const size_t detectorIndex, const Geometry::DetectorInfo &detectorInfo,
+double ConvertSpectrumAxis2::getEfixed(const size_t detectorIndex, const Geometry::ComponentInfo &componentInfo,
                                        const Mantid::API::MatrixWorkspace &inputWS, const int emode) const {
   double efixed(0);
   double efixedProp = getProperty("Efixed");
-  Mantid::detid_t detectorID = detectorInfo.detid(detectorIndex);
   if (efixedProp != EMPTY_DBL()) {
     efixed = efixedProp;
-    g_log.debug() << "Detector: " << detectorID << " Efixed: " << efixed << "\n";
+    g_log.debug() << "Detector index: " << detectorIndex << " Efixed: " << efixed << "\n";
   } else {
     if (emode == 1) {
       if (inputWS.run().hasProperty("Ei")) {
@@ -333,16 +332,14 @@ double ConvertSpectrumAxis2::getEfixed(const size_t detectorIndex, const Geometr
                                     "workspace. Please provide a value.");
       }
     } else if (emode == 2) {
-
-      const auto &detectorSingle = detectorInfo.detector(detectorIndex);
-
-      std::vector<double> efixedVec = detectorSingle.getNumberParameter("Efixed");
+      std::vector<double> efixedVec = componentInfo.getNumberParameter(detectorIndex, "Efixed");
 
       if (!efixedVec.empty()) {
         efixed = efixedVec.at(0);
-        g_log.debug() << "Detector: " << detectorID << " EFixed: " << efixed << "\n";
+        g_log.debug() << "Detector index: " << detectorIndex << " EFixed: " << efixed << "\n";
       } else {
-        g_log.warning() << "Efixed could not be found for detector " << detectorID << ", please provide a value\n";
+        g_log.warning() << "Efixed could not be found for detector with index " << detectorIndex
+                        << ", please provide a value\n";
         throw std::invalid_argument("Could not retrieve Efixed from the "
                                     "detector. Please provide a value.");
       }
