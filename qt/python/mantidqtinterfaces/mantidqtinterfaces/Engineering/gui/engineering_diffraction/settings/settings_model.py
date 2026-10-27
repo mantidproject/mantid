@@ -15,6 +15,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.setting
 from typing import Any, Type, Sequence, TypeAlias
 
 SettingDict: TypeAlias = dict[str, Any]
+MAX_EULER_AXES = 6  # SetGoniometer takes Axis0 to Axis5
 
 
 class SettingsModel(object):
@@ -71,6 +72,8 @@ class SettingsModel(object):
         error_msg = "" if euler_sense_valid else (sense_msg or "Euler Senses should be comma separated +/-1s. ")
         if not all(v in ("x", "y", "z") for v in euler_scheme.lower()):
             error_msg += "Euler Scheme should be defined in terms of X, Y and Z (eg. XYZ or YZY). "
+        if len(euler_scheme) > MAX_EULER_AXES:
+            error_msg += f"Euler Scheme should have at most {MAX_EULER_AXES} Rotation Axes (the limit of SetGoniometer). "
         if len(euler_scheme) != len(sense_vals):
             error_msg += "Should be an equal number of Rotation Axes defined as euler senses. "
         return error_msg

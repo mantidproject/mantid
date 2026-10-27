@@ -127,6 +127,8 @@ class SettingsModelTest(unittest.TestCase):
         self.assertEqual("", self.model.euler_settings_error("YZY", "1,-1,1"))
         self.assertIn("X, Y and Z", self.model.euler_settings_error("YQY", "1,-1,1"))
         self.assertIn("equal number", self.model.euler_settings_error("YZ", "1,-1,1"))
+        self.assertEqual("", self.model.euler_settings_error("XYZXYZ", "1,1,1,1,1,1"))
+        self.assertIn("at most 6", self.model.euler_settings_error("XYZXYZX", "1,1,1,1,1,1,1"))
         self.assertIn("+/-1", self.model.euler_settings_error("YZY", "a,b,c"))
         # parses as integers but not +/-1, which used to be reported with an empty message
         self.assertIn("+/-1", self.model.euler_settings_error("YZY", "1,2,1"))
