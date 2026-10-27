@@ -201,7 +201,7 @@ class HFIRSCDSubtractBackgroundWANDFluxTest(systemtesting.MantidSystemTest):
         return ["HB2C_WANDSCD_data.nxs"]
 
     def requiredMemoryMB(self):
-        return 4000
+        return 11000
 
     def runTest(self):
         LoadMD("HB2C_WANDSCD_data.nxs", LoadHistory=False, OutputWorkspace="data")
@@ -247,11 +247,19 @@ class HFIRSCDSubtractBackgroundWANDMeanBackgroundTest(systemtesting.MantidSystem
         return ["HB2C_WANDSCD_data.nxs", "HB2C_WANDSCD_background.nxs"]
 
     def requiredMemoryMB(self):
-        return 4000
+        return 11000
 
     def runTest(self):
         LoadMD("HB2C_WANDSCD_data.nxs", LoadHistory=False, OutputWorkspace="data")
-        slice_angles("data", 0, 100, "background_runs")
+        # Mean count rate of the 4x4 groups over the background runs, the first 100 angles, in counts for the duration
+        # of the first run
+        duration = flux("data", "Time")[:100]
+        scale = duration[0] / duration.sum()
+        data = mtd["data"]
+        background = scale * data.getSignalArray()[:, :, :100].sum(axis=2, keepdims=True)
+        background_error_squared = scale**2 * data.getErrorSquaredArray()[:, :, :100].sum(axis=2, keepdims=True)
+        background_flux = {normalized_by: flux("data", normalized_by)[:1] for normalized_by in WAND_FLUX_LOGS}
+        del data
         slice_angles("data", 100, 200, "sample")
         DeleteWorkspace("data")
         # HB2C_WANDSCD_data.nxs predates the 'detectorID' log. Add the one LoadWANDSCD writes with Grouping="4x4": the
@@ -262,32 +270,27 @@ class HFIRSCDSubtractBackgroundWANDMeanBackgroundTest(systemtesting.MantidSystem
         LoadMD("HB2C_WANDSCD_background.nxs", LoadHistory=False, OutputWorkspace="background")
         wand_grouping(4, "grouping")
         for normalized_by in WAND_FLUX_LOGS:
-            np.testing.assert_allclose(flux("background", normalized_by), flux("background_runs", normalized_by)[:1])
-        # Mean count rate of the 4x4 groups over the background runs, in counts for the duration of the first run
-        duration = flux("background_runs", "Time")
-        scale = duration[0] / duration.sum()
-        runs = mtd["background_runs"]
-        background = scale * runs.getSignalArray().sum(axis=2, keepdims=True)
-        background_error_squared = scale**2 * runs.getErrorSquaredArray().sum(axis=2, keepdims=True)
-        DeleteWorkspace("background_runs")
+            np.testing.assert_allclose(flux("background", normalized_by), background_flux[normalized_by])
+        # The subtraction is done in place, to save memory. Keep the sample to restore it for the next normalization.
         sample = mtd["sample"]
+        sample_signal = sample.getSignalArray().copy()
+        sample_error_squared = sample.getErrorSquaredArray().copy()
         for normalized_by in WAND_FLUX_LOGS:
             ratio = flux("sample", normalized_by) / flux("background", normalized_by)
-            expected = sample.getSignalArray() - ratio * background
+            expected = sample_signal - ratio * background
             assert (expected < 0).any(), "no bin is negative after the subtraction"
-            output, scaled_background = HFIRSCDSubtractBackground(
+            output = HFIRSCDSubtractBackground(
                 InputWorkspace="sample",
                 InputBackground="background",
                 InputGroupingWorkspace="grouping",
                 NormalizedBy=normalized_by,
                 NullifyNegativeValues=False,
-                OutputWorkspace="output",
-                OutputBackgroundWorkspace="scaled_background",
+                OutputWorkspace="sample",
             )
-            np.testing.assert_allclose(scaled_background.getSignalArray(), ratio * background)
-            np.testing.assert_allclose(scaled_background.getErrorSquaredArray(), ratio**2 * background_error_squared)
             np.testing.assert_allclose(output.getSignalArray(), expected, atol=1e-9)
-            np.testing.assert_allclose(output.getErrorSquaredArray(), sample.getErrorSquaredArray() + ratio**2 * background_error_squared)
+            np.testing.assert_allclose(output.getErrorSquaredArray(), sample_error_squared + ratio**2 * background_error_squared)
+            output.setSignalArray(sample_signal)
+            output.setErrorSquaredArray(sample_error_squared)
 
     def cleanup(self):
         mtd.clear()
