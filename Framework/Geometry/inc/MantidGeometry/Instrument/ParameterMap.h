@@ -84,9 +84,9 @@ public:
 
   /// Clears the map
   inline void clear() {
+    // The translation tables are kept: they describe the instrument, not the parameters, and an
+    // attached map shares its index domain with ComponentInfo, which may still write by index.
     m_parameterInfo->clear();
-    m_idToIndex.clear();
-    m_indexToId.clear();
     clearPositionSensitiveCaches();
   }
   /// method swaps two parameter maps contents  each other. All caches contents
