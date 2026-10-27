@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import annotations
-from mantid.api import AlgorithmManager, AnalysisDataService as ADS
+from mantid.api import AlgorithmManager, AnalysisDataService as ADS, InstrumentFileFinder
 import numpy as np
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams, UnitParametersMap
 from typing import Tuple, Sequence, Optional, TYPE_CHECKING
@@ -74,7 +74,7 @@ def load_poldi(
 
 def load_poldi_h5f(
     fpath_data: str,
-    fpath_idf: str,
+    fpath_idf: str | None = None,
     t0: float | None = None,
     t0_const: float | None = None,
     output_workspace: str = "ws",
@@ -82,7 +82,7 @@ def load_poldi_h5f(
     """
     Function to load POLDI v2 data from ASCII file containing array of counts
     :param fpath_data: filepath of ASCII file with counts
-    :param fpath_idf: filepath to instrument definition file
+    :param fpath_idf: filepath to instrument definition file, if None the definition valid at the run start time is used
     :param t0: time offset applied to slit openings (fraction of cycle time), overrides the parameter file if given
     :param t0_const: TZERO diffractometer constant for instrument, overrides the parameter file if given
     :param output_workspace: output workspace name
@@ -94,6 +94,8 @@ def load_poldi_h5f(
         for bank_name in ["south", "north"]:
             dat.append(np.asarray(f.get(f"entry1/POLDI/detector_{bank_name}/histogram_folded")))
         chopper_speed = f.get("entry1/POLDI/chopper/rotation_speed_target")[0]
+        if fpath_idf is None:
+            fpath_idf = InstrumentFileFinder.getInstrumentFilename("POLDI", f.get("entry1/start_time")[0].decode())
         if np.allclose([bank.sum() for bank in dat], 0):
             monitor_count = 0  # can be error in detector electronics where no data but erroneous monitor counts
         else:
