@@ -905,11 +905,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         alg = ReflectometryISISLoadAndProcess()
         alg.initialize()
 
-<<<<<<< HEAD
         self.assertTrue(alg.getProperty("ActualSpecularPixelSpectrumNo").isDefault)
-=======
-        self.assertTrue(alg.getProperty("ActualSpecularPixelSpectrumNumber").isDefault)
->>>>>>> 0c6fb7a72d5 (Add actual specular pixel override for POLREF calibration)
 
     def test_actual_specular_pixel_rejects_negative_values(self):
         alg = ReflectometryISISLoadAndProcess()
