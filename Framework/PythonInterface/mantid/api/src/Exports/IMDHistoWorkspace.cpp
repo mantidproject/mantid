@@ -17,6 +17,7 @@
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
+#include <algorithm>
 #include <vector>
 
 using namespace Mantid::API;
@@ -142,8 +143,32 @@ void throwIfSizeIncorrect(const IMDHistoWorkspace &self, const NDArray &signal, 
 }
 
 /**
- * Set the signal array from a numpy array. This simply loops over the array &
- * sets each value
+ * Copy a numpy array into a buffer of the workspace, in the order of the
+ * workspace's linear index: the first dimension varies fastest, which is
+ * Fortran order for an array of the workspace's shape.
+ * The array is converted once to a contiguous float64 array in Fortran order;
+ * no copy is made if it already is one. The conversion is done before the
+ * buffer is written, so a failed conversion leaves the workspace unchanged.
+ * Arrays of Python objects are converted element by element, as float() does;
+ * other arrays only by casts that numpy considers safe.
+ * @param values :: The numpy array, whose shape matches the workspace
+ * @param dest :: The buffer of the workspace that receives the values
+ */
+void copyToBuffer(const NDArray &values, Mantid::signal_t *dest) {
+  int flags = NPY_ARRAY_F_CONTIGUOUS | NPY_ARRAY_ALIGNED;
+  if (PyArray_TYPE(reinterpret_cast<PyArrayObject *>(values.ptr())) == NPY_OBJECT)
+    flags |= NPY_ARRAY_FORCECAST;
+  PyObject *converted = PyArray_FROMANY(values.ptr(), NPY_DOUBLE, 0, 0, flags);
+  if (!converted)
+    throw_error_already_set();
+  handle<> owner(converted); // releases the converted array, also if std::copy throws
+  auto *array = reinterpret_cast<PyArrayObject *>(converted);
+  const auto *source = static_cast<const double *>(PyArray_DATA(array));
+  std::copy(source, source + PyArray_SIZE(array), dest);
+}
+
+/**
+ * Set the signal array from a numpy array.
  * It does not allow the workspace dimensions to be resized, it will throw if
  * the sizes are not
  * correct. Any link to the original workspace(s) is cleared so downstream
@@ -151,18 +176,12 @@ void throwIfSizeIncorrect(const IMDHistoWorkspace &self, const NDArray &signal, 
  */
 void setSignalArray(IMDHistoWorkspace &self, const NDArray &signalValues) {
   throwIfSizeIncorrect(self, signalValues, "setSignalArray");
-  object rav = signalValues.attr("ravel")("F");
-  object flattened = rav.attr("flat");
-  auto length = len(flattened);
-  for (auto i = 0; i < length; ++i) {
-    self.setSignalAt(i, extract<double>(flattened[i])());
-  }
+  copyToBuffer(signalValues, self.mutableSignalArray());
   self.clearOriginalWorkspaces();
 }
 
 /**
- * Set the square of the errors array from a numpy array. This simply loops over
- * the array & sets each value
+ * Set the square of the errors array from a numpy array.
  * It does not allow the workspace dimensions to be resized, it will throw if
  * the sizes are not
  * correct. Any link to the original workspace(s) is cleared so downstream
@@ -170,37 +189,19 @@ void setSignalArray(IMDHistoWorkspace &self, const NDArray &signalValues) {
  */
 void setErrorSquaredArray(IMDHistoWorkspace &self, const NDArray &errorSquared) {
   throwIfSizeIncorrect(self, errorSquared, "setErrorSquaredArray");
-  object rav = errorSquared.attr("ravel")("F");
-  object flattened = rav.attr("flat");
-  auto length = len(flattened);
-  for (auto i = 0; i < length; ++i) {
-    self.setErrorSquaredAt(i, extract<double>(flattened[i])());
-  }
+  copyToBuffer(errorSquared, self.mutableErrorSquaredArray());
   self.clearOriginalWorkspaces();
 }
 
 /**
- * Set the number of events array from a numpy array. This simply loops over the
- * array & sets each value. It does not allow the workspace dimensions to be
- * resized, it will throw if the sizes are not correct. Any link to the original
- * workspace(s) is cleared so downstream rebinning/slicing cannot bypass the
- * manually-set values.
+ * Set the number of events array from a numpy array. It does not allow the
+ * workspace dimensions to be resized, it will throw if the sizes are not
+ * correct. Any link to the original workspace(s) is cleared so downstream
+ * rebinning/slicing cannot bypass the manually-set values.
  */
 void setNumEventsArray(IMDHistoWorkspace &self, const NDArray &numEvents) {
   throwIfSizeIncorrect(self, numEvents, "setNumEventsArray");
-  object rav = numEvents.attr("ravel")("F");
-  object flattened = rav.attr("flat");
-  const auto length = static_cast<size_t>(len(flattened));
-  // Buffer conversions first so a failed Python-to-double extraction cannot partially modify the workspace.
-  std::vector<double> values;
-  values.reserve(length);
-  for (size_t i = 0; i < length; ++i) {
-    values.emplace_back(extract<double>(flattened[i])());
-  }
-  auto *dest = self.mutableNumEventsArray();
-  for (size_t i = 0; i < values.size(); ++i) {
-    dest[i] = values[i];
-  }
+  copyToBuffer(numEvents, self.mutableNumEventsArray());
   self.clearOriginalWorkspaces();
 }
 
