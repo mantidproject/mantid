@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsTablePresenter.h"
 #include "Common/Map.h"
+#include "GUI/Common/InstrumentCategory.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "Reduction/Group.h"
 #include "Reduction/RowLocation.h"
@@ -287,6 +288,8 @@ void RunsTablePresenter::notifyAnyBatchAutoreductionPaused() { updateWidgetEnabl
 
 void RunsTablePresenter::notifyInstrumentChanged(std::string const &instrumentName) {
   m_view->setInstrumentName(instrumentName);
+  m_view->setAdjustedAngleColumnVisible(instrumentCategory(instrumentName) == InstrumentCategory::POLREF);
+  notifyRowModelChanged();
 }
 
 void RunsTablePresenter::setTablePrecision(int &precision) { m_jobViewUpdater.setPrecision(precision); }
@@ -299,9 +302,18 @@ void RunsTablePresenter::settingsChanged() {
   notifyRowModelChanged();
 }
 
+void RunsTablePresenter::resetReadOnlyCells(MantidWidgets::Batch::RowLocation const &location) {
+  // Empty rows use the editable default style. Disable these fields immediately,
+  // before a valid Row exists to supply its output cells through JobsViewUpdater.
+  for (auto const column : readOnlyColumns)
+    m_view->jobs().setCellAt(location, column, m_view->jobs().deadCell());
+}
+
 void RunsTablePresenter::appendRowsToGroupsInView(std::vector<int> const &groupIndices) {
-  for (auto const &groupIndex : groupIndices)
-    m_view->jobs().appendChildRowOf(MantidWidgets::Batch::RowLocation({groupIndex}));
+  for (auto const &groupIndex : groupIndices) {
+    auto const location = m_view->jobs().appendChildRowOf(MantidWidgets::Batch::RowLocation({groupIndex}));
+    resetReadOnlyCells(location);
+  }
 }
 
 void RunsTablePresenter::appendRowsToGroupsInModel(std::vector<int> const &groupIndices) {
@@ -409,6 +421,8 @@ void RunsTablePresenter::notifyFillDown() {
 
   auto const topRow = selected[0];
   auto const column = m_view->jobs().currentColumn();
+  if (!isUserEditableColumn(column))
+    return;
   auto const cellContent = m_view->jobs().cellAt(topRow, column).contentText();
 
   for (auto const &rowLocation : selected) {
@@ -475,6 +489,8 @@ void RunsTablePresenter::updateGroupName(MantidWidgets::Batch::RowLocation const
 
 void RunsTablePresenter::updateRowField(MantidWidgets::Batch::RowLocation const &itemIndex, int column,
                                         std::string const &, std::string const &) {
+  if (!isUserEditableColumn(column))
+    return;
   // User has edited the text so reset the output-value flag as it now contains
   // an input
   auto cell = m_view->jobs().cellAt(itemIndex, column);
@@ -492,6 +508,7 @@ void RunsTablePresenter::updateRowField(MantidWidgets::Batch::RowLocation const 
     Item const &row = m_model.reductionJobs().groups()[groupIndex].rows()[rowIndex].value();
     notifyRowModelChanged(row);
   } else {
+    resetReadOnlyCells(itemIndex);
     showCellsAsInvalidInView(itemIndex, rowValidationResult.assertError());
   }
 }
@@ -539,6 +556,7 @@ void RunsTablePresenter::notifyRowInserted(MantidWidgets::Batch::RowLocation con
     applyGroupStylingToRow(newRowLocation);
   } else if (isRowLocation(newRowLocation)) {
     insertEmptyRowInModel(groupOf(newRowLocation), rowOf(newRowLocation));
+    resetReadOnlyCells(newRowLocation);
   }
   notifyTableChanged();
   notifyRowStateChanged();
