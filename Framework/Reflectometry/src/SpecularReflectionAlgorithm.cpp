@@ -55,21 +55,6 @@ void checkSpectrumNumbers(const std::vector<int> &spectrumNumbers, bool strictSp
     }
   }
 }
-
-/**
- * Look up a component by name.
- * @param componentInfo : Component info to search through
- * @param name : Name of the component
- * @return : The component index
- * @throw std::invalid_argument if no component has this name
- */
-size_t componentIndexByName(ComponentInfo const &componentInfo, std::string const &name) {
-  try {
-    return componentInfo.indexOfAny(name);
-  } catch (std::invalid_argument const &) {
-    throw std::invalid_argument(name + " does not exist. Check input properties.");
-  }
-}
 } // namespace
 
 namespace Mantid::Reflectometry {
@@ -130,7 +115,7 @@ size_t SpecularReflectionAlgorithm::getSurfaceSampleComponentIndex(ComponentInfo
   if (!isPropertyDefault("SampleComponentName")) {
     sampleComponent = this->getPropertyValue("SampleComponentName");
   }
-  return componentIndexByName(componentInfo, sampleComponent);
+  return componentInfo.indexOfAny(sampleComponent);
 }
 
 /**
@@ -177,7 +162,7 @@ std::vector<size_t> SpecularReflectionAlgorithm::getDetectorComponentIndices(Mat
   if (!isPropertyDefault("DetectorComponentName")) {
     componentToCorrect = this->getPropertyValue("DetectorComponentName");
   }
-  return {componentIndexByName(workspace.componentInfo(), componentToCorrect)};
+  return {workspace.componentInfo().indexOfAny(componentToCorrect)};
 }
 
 /**
