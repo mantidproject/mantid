@@ -894,8 +894,7 @@ def _extract_quad_from_cuboid_shapeinfo(si) -> tuple[np.ndarray, np.ndarray] | N
     y_min, y_max = lfb.Y(), lft.Y()
     z_front, z_back = lfb.Z(), lbb.Z()
 
-    corner = np.array([lfb.X(), lfb.Y(), lfb.Z()])
-    longest_edge = max(np.linalg.norm(np.array([end.X(), end.Y(), end.Z()]) - corner) for end in (rfb, lft, lbb))
+    longest_edge = max(abs(x_max - x_min), abs(y_max - y_min), abs(z_back - z_front))
     narrowest_side = max(_MIN_QUAD_FRACTION * longest_edge, _AXIS_PARALLEL_TOLERANCE)
     if abs(x_max - x_min) < narrowest_side or abs(y_max - y_min) < narrowest_side:
         return None
