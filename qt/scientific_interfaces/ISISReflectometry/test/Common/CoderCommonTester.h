@@ -165,8 +165,8 @@ private:
   void testGroup(const MantidQt::CustomInterfaces::ISISReflectometry::Group &group,
                  const QMap<QString, QVariant> &map) {
     TS_ASSERT_EQUALS(group.name(), map[QString("name")].toString().toStdString());
-    TS_ASSERT_EQUALS(group.postprocessedWorkspaceName(),
-                     map[QString("postProcessedWorkspaceName")].toString().toStdString());
+    TS_ASSERT_EQUALS(group.postprocessedWorkspaceNames(),
+                     getStringVectorFromQList(map[QString("postProcessedWorkspaceName")].toList()));
     testRows(group, map[QString("rows")].toList());
   }
 
@@ -254,9 +254,9 @@ private:
     }
     TS_ASSERT_EQUALS(redWs.inputRunNumbers(), inputRunNumbers);
     testTransmissionRunPair(redWs.transmissionRuns(), map[QString("transPair")].toMap());
-    TS_ASSERT_EQUALS(redWs.iVsLambda(), map[QString("iVsLambda")].toString().toStdString());
-    TS_ASSERT_EQUALS(redWs.iVsQ(), map[QString("iVsQ")].toString().toStdString());
-    TS_ASSERT_EQUALS(redWs.iVsQBinned(), map[QString("iVsQBinned")].toString().toStdString());
+    TS_ASSERT_EQUALS(redWs.iVsLambda(), getStringVectorFromQList(map[QString("iVsLambda")].toList()));
+    TS_ASSERT_EQUALS(redWs.iVsQ(), getStringVectorFromQList(map[QString("iVsQ")].toList()));
+    TS_ASSERT_EQUALS(redWs.iVsQBinned(), getStringVectorFromQList(map[QString("iVsQBinned")].toList()));
   }
 
   void testReductionOptions(const ReductionOptionsMap &rom, const QMap<QString, QVariant> &map) {
@@ -298,6 +298,14 @@ private:
     TS_ASSERT_EQUALS(gui->m_ui.logValueButton->isChecked(), map[QString("logValueButton")].toBool());
     TS_ASSERT_EQUALS(gui->m_ui.logValueEdit->text(), map[QString("logValueEdit")].toString());
     TS_ASSERT_EQUALS(gui->m_ui.logValueTypeEdit->text(), map[QString("logValueTypeEdit")].toString());
+  }
+
+  std::vector<std::string> getStringVectorFromQList(QList<QVariant> listToConvert) {
+    std::vector<std::string> toReturn;
+    toReturn.reserve(listToConvert.size());
+    std::transform(listToConvert.cbegin(), listToConvert.cend(), std::back_inserter(toReturn),
+                   [](const auto &element) { return element.toString().toStdString(); });
+    return toReturn;
   }
 };
 

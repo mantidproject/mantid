@@ -263,9 +263,22 @@ public:
 
     jobManager.algorithmStarted(m_jobAlgorithm);
     TS_ASSERT_EQUALS(row.state(), State::ITEM_RUNNING);
-    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsLambda(), "");
-    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQ(), "");
-    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQBinned(), "");
+    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsLambda(), std::vector<std::string>{});
+    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQ(), std::vector<std::string>{});
+    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQBinned(), std::vector<std::string>{});
+  }
+
+  void testAlgorithmStartedWithoutResetFlag() {
+    auto group = makeGroupWithOneRow();
+    group.setOutputNames({{"test_workspace_name"}});
+    auto jobManager = makeJobManager();
+
+    EXPECT_CALL(*m_jobAlgorithm, item()).Times(AtLeast(1)).WillRepeatedly(Return(&group));
+    EXPECT_CALL(*m_jobAlgorithm, resetOutputsOnStart()).Times(AtLeast(1)).WillRepeatedly(Return(false));
+
+    jobManager.algorithmStarted(m_jobAlgorithm);
+    TS_ASSERT_EQUALS(group.state(), State::ITEM_RUNNING);
+    TS_ASSERT_EQUALS(group.postprocessedWorkspaceNames(), std::vector<std::string>{"test_workspace_name"});
   }
 
   void testAlgorithmComplete() {
@@ -291,9 +304,9 @@ public:
     jobManager.algorithmError(m_jobAlgorithm, message);
     TS_ASSERT_EQUALS(row.state(), State::ITEM_ERROR);
     TS_ASSERT_EQUALS(row.message(), message);
-    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsLambda(), "");
-    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQ(), "");
-    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQBinned(), "");
+    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsLambda(), std::vector<std::string>{});
+    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQ(), std::vector<std::string>{});
+    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQBinned(), std::vector<std::string>{});
   }
 
   void testAlgorithmCompleteSetsParentsSingleRow() {

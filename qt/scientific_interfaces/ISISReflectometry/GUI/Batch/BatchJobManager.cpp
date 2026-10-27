@@ -319,7 +319,7 @@ std::vector<std::string> BatchJobManager::getWorkspacesToSave(Group const &group
     for (auto &row : rows) {
       if (row) {
         auto const &binnedWorkspaces = row.value().reducedWorkspaceNames().iVsQBinned();
-        workspaces.reserve(workspaces.size() + std::distance(binnedWorkspaces.cbegin(), binnedWorkspaces.cend()));
+        workspaces.reserve(workspaces.size() + binnedWorkspaces.size());
         workspaces.insert(workspaces.end(), binnedWorkspaces.cbegin(), binnedWorkspaces.cend());
       }
     }
