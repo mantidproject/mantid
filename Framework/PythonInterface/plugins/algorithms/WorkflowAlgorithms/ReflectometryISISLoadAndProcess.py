@@ -45,7 +45,7 @@ class Prop:
     OUTPUT_WS_SECOND_TRANS = "OutputWorkspaceSecondTransmission"
     OUTPUT_WS_TRANS = "OutputWorkspaceTransmission"
     NOMINAL_SPECULAR_PIXEL = "NominalSpecularPixelSpectrumNo"
-    ACTUAL_SPECULAR_PIXEL = "ActualSpecularPixelSpectrumNumber"
+    ACTUAL_SPECULAR_PIXEL = "ActualSpecularPixelSpectrumNo"
 
 
 class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
@@ -731,9 +731,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         if self.getProperty("CorrectDetectors").value:
             raise RuntimeError("CorrectDetectors must be False when CalibrationFile is provided for POLREF data")
         if self.getProperty(Prop.ACTUAL_SPECULAR_PIXEL).isDefault and self.getProperty(Prop.NOMINAL_SPECULAR_PIXEL).isDefault:
-            raise RuntimeError(
-                "ActualSpecularPixelSpectrumNumber or NominalSpecularPixelSpectrumNo must be provided for POLREF calibration"
-            )
+            raise RuntimeError("ActualSpecularPixelSpectrumNo or NominalSpecularPixelSpectrumNo must be provided for POLREF calibration")
 
     def _find_specular_pixel_spectrum_no(self, workspace):
         lines_alg = self.createChildAlgorithm("FindReflectometryLines")
