@@ -395,7 +395,7 @@ class CalibrationFit:
         normal[self.nq :, self.nq :] = G_other
         return cost, normal, np.concatenate([dc_dq.T @ gc, g_other])
 
-    def fit(self, max_iter=50, tol=1e-9, lam=1e-3):
+    def fit(self, max_iter=50, tol=1e-9, step_tol=1e-6, lam=1e-3):
         cost, normal, grad = self.evaluate(self.x, deriv=True)
         f = self.free
         for _ in range(max_iter):
@@ -414,7 +414,8 @@ class CalibrationFit:
             rel = (cost - trial_cost) / cost
             self.x = self.x + step
             cost, normal, grad = self.evaluate(self.x, deriv=True)
-            if rel < tol:
+            # steps far below the statistical uncertainties: stops noise-free fits, whose cost falls without plateauing
+            if rel < tol or np.abs(step[f] * scale).max() < step_tol:
                 break
         self.cost = cost
         n_data = sum(int(self.geom.live.sum()) * ds.y.shape[1] for ds in self.datasets)
