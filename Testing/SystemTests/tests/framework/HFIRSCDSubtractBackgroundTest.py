@@ -14,7 +14,9 @@ equal the grouped sample, and the subtraction must give zero, with errors square
 
 Scaling by the flux logs is checked on WAND data with many goniometer angles, against the flux ratio computed from the
 logs. An ungrouped WAND background, the mean of 100 runs, is also subtracted from a 4x4 sample with many goniometer
-angles, through a GroupingWorkspace built from the group ID formula.
+angles, through a GroupingWorkspace built from the group ID formula. An ungrouped DEMAND background, the mean of the
+frames of a scan without a Bragg peak, is subtracted from the same scan grouped 4x4 and split into a WorkspaceGroup of
+two members.
 """
 
 import numpy as np
@@ -24,6 +26,7 @@ from mantid.simpleapi import (
     CloneMDWorkspace,
     CreateWorkspace,
     DeleteWorkspace,
+    GroupWorkspaces,
     HB3AAdjustSampleNorm,
     HFIRSCDSubtractBackground,
     LoadEmptyInstrument,
@@ -35,6 +38,8 @@ from mantid.simpleapi import (
 
 # Sample logs holding the flux of each goniometer angle of WAND data
 WAND_FLUX_LOGS = {"Time": "duration", "Monitor": "monitor_count"}
+# Sample logs holding the flux of each goniometer angle of DEMAND data
+DEMAND_FLUX_LOGS = {"Time": "time", "Monitor": "monitor"}
 
 
 def create_workspace2d(name):
@@ -95,17 +100,18 @@ def assert_reproduces(sample, background, grouping=None):
     np.testing.assert_allclose(output.getErrorSquaredArray(), 2 * expected.getErrorSquaredArray())
 
 
-def slice_angles(name, start, stop, output):
+def slice_angles(name, start, stop, output, flux_logs=WAND_FLUX_LOGS):
     """
-    MDHistoWorkspace <output> holding goniometer angles start to stop - 1 of the WAND MDHistoWorkspace <name>, with the
+    MDHistoWorkspace <output> holding goniometer angles start to stop - 1 of the MDHistoWorkspace <name>, with the
     flux logs cut to these angles: a single value for one angle, an array otherwise.
 
     SliceMDHisto shares the ExperimentInfo of its input, so the slice is cloned before its logs are changed.
 
-    :param name: name of an MDHistoWorkspace with dimensions (y, x, goniometer angle) and the WAND flux logs.
+    :param name: name of an MDHistoWorkspace with dimensions (y, x, goniometer angle) and the flux logs.
     :param start: index of the first goniometer angle kept.
     :param stop: index after the last goniometer angle kept.
     :param output: name of the new MDHistoWorkspace.
+    :param flux_logs: WAND_FLUX_LOGS or DEMAND_FLUX_LOGS.
     """
     data = mtd[name]
     n_y, n_x = data.getDimension(0).getNBins(), data.getDimension(1).getNBins()
@@ -113,20 +119,21 @@ def slice_angles(name, start, stop, output):
     CloneMDWorkspace(InputWorkspace="__slice", OutputWorkspace=output)
     DeleteWorkspace("__slice")
     run = mtd[output].getExperimentInfo(0).mutableRun()
-    for log in WAND_FLUX_LOGS.values():
+    for log in flux_logs.values():
         values = np.asarray(data.getExperimentInfo(0).run().getProperty(log).value)[start:stop]
         run.addProperty(log, float(values[0]) if len(values) == 1 else values.tolist(), True)
 
 
-def flux(name, normalized_by):
+def flux(name, normalized_by, flux_logs=WAND_FLUX_LOGS):
     """
-    Flux of each goniometer angle of a WAND MDHistoWorkspace, read from its sample logs.
+    Flux of each goniometer angle of an MDHistoWorkspace, read from its sample logs.
 
-    :param name: name of an MDHistoWorkspace with the WAND flux logs.
+    :param name: name of an MDHistoWorkspace with the flux logs.
     :param normalized_by: "Time" or "Monitor".
+    :param flux_logs: WAND_FLUX_LOGS or DEMAND_FLUX_LOGS.
     :returns: numpy array with one value per goniometer angle.
     """
-    return np.atleast_1d(mtd[name].getExperimentInfo(0).run().getProperty(WAND_FLUX_LOGS[normalized_by]).value).astype(float)
+    return np.atleast_1d(mtd[name].getExperimentInfo(0).run().getProperty(flux_logs[normalized_by]).value).astype(float)
 
 
 def wand_grouping(pixels, output):
@@ -291,6 +298,86 @@ class HFIRSCDSubtractBackgroundWANDMeanBackgroundTest(systemtesting.MantidSystem
             np.testing.assert_allclose(output.getErrorSquaredArray(), sample_error_squared + ratio**2 * background_error_squared)
             output.setSignalArray(sample_signal)
             output.setErrorSquaredArray(sample_error_squared)
+
+    def cleanup(self):
+        mtd.clear()
+
+
+class HFIRSCDSubtractBackgroundDEMANDMeanBackgroundTest(systemtesting.MantidSystemTest):
+    """
+    Subtraction of an ungrouped DEMAND background, grouped 4x4 by InputGroupingWorkspace, from a WorkspaceGroup sample.
+
+    HB3A_exp0724_scan0182.nxs is a phi scan of 123 goniometer angles at 2theta = 28 deg. The background is the mean
+    count rate per monitor count of each ungrouped pixel over the frames without a Bragg peak, those whose count rate
+    is below 1.1 times the median count rate of the scan, in counts for the monitor of the first of these frames, with
+    the flux logs of that frame. The sample is the scan grouped 4x4 by HB3AAdjustSampleNorm, split into two members,
+    angles 0-61 and 62-122, as two scans at the same 2theta would be. The expected grouped background is the sum of
+    the background over each 4x4 group, computed independently of the grouping done by HFIRSCDSubtractBackground.
+    """
+
+    def requiredFiles(self):
+        return ["HB3A_exp0724_scan0182.nxs"]
+
+    def requiredMemoryMB(self):
+        return 10000
+
+    def runTest(self):
+        LoadMD("HB3A_exp0724_scan0182.nxs", LoadHistory=False, OutputWorkspace="scan0182")
+        common = dict(InputWorkspaces="scan0182", OutputType="Detector", NormalizeData=False)
+        # The grouped scan first, before the ungrouped one exists, to lower the peak memory
+        HB3AAdjustSampleNorm(Grouping="4x4", OutputWorkspace="scan_4x4", OutputGroupingWorkspace="grouping", **common)
+        frames = HB3AAdjustSampleNorm(OutputWorkspace="frames", **common)
+        DeleteWorkspace("scan0182")
+        # Mean count rate per monitor count over the frames without a Bragg peak, in counts for the monitor of the
+        # first of these frames
+        monitor = flux("frames", "Monitor", DEMAND_FLUX_LOGS)
+        rate = frames.getSignalArray().sum(axis=(0, 1)) / monitor
+        quiet = np.flatnonzero(rate < 1.1 * np.median(rate))
+        first = int(quiet[0])
+        slice_angles("frames", first, first + 1, "background", DEMAND_FLUX_LOGS)
+        scale = monitor[first] / monitor[quiet].sum()
+        background = mtd["background"]
+        background.setSignalArray(scale * frames.getSignalArray()[:, :, quiet].sum(axis=2, keepdims=True))
+        background.setErrorSquaredArray(scale**2 * frames.getErrorSquaredArray()[:, :, quiet].sum(axis=2, keepdims=True))
+        del frames
+        DeleteWorkspace("frames")
+        # Sum over each 4x4 group, the first two dimensions of the ungrouped pixels being split into groups of 4
+        n_0, n_1, _ = background.getSignalArray().shape
+        grouped_background, grouped_error_squared = (
+            array.reshape(n_0 // 4, 4, n_1 // 4, 4, 1).sum(axis=(1, 3))
+            for array in (background.getSignalArray(), background.getErrorSquaredArray())
+        )
+        slice_angles("scan_4x4", 0, 62, "sample_0", DEMAND_FLUX_LOGS)
+        slice_angles("scan_4x4", 62, 123, "sample_1", DEMAND_FLUX_LOGS)
+        DeleteWorkspace("scan_4x4")
+        GroupWorkspaces(InputWorkspaces="sample_0,sample_1", OutputWorkspace="sample")
+        members = mtd["sample"].getNames()
+        # The subtraction is done in place, to save memory. Keep the sample to restore it for the next normalization.
+        sample_signal = {member: mtd[member].getSignalArray().copy() for member in members}
+        sample_error_squared = {member: mtd[member].getErrorSquaredArray().copy() for member in members}
+        for normalized_by in DEMAND_FLUX_LOGS:
+            ratio = {
+                member: flux(member, normalized_by, DEMAND_FLUX_LOGS) / flux("background", normalized_by, DEMAND_FLUX_LOGS)
+                for member in members
+            }
+            expected = {member: sample_signal[member] - ratio[member] * grouped_background for member in members}
+            assert all((expected[member] < 0).any() for member in members), "no bin is negative after the subtraction"
+            HFIRSCDSubtractBackground(
+                InputWorkspace="sample",
+                InputBackground="background",
+                InputGroupingWorkspace="grouping",
+                NormalizedBy=normalized_by,
+                NullifyNegativeValues=False,
+                OutputWorkspace="sample",
+            )
+            for member in members:
+                output = mtd[member]
+                np.testing.assert_allclose(output.getSignalArray(), expected[member], atol=1e-9)
+                np.testing.assert_allclose(
+                    output.getErrorSquaredArray(), sample_error_squared[member] + ratio[member] ** 2 * grouped_error_squared
+                )
+                output.setSignalArray(sample_signal[member])
+                output.setErrorSquaredArray(sample_error_squared[member])
 
     def cleanup(self):
         mtd.clear()
