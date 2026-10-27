@@ -70,6 +70,7 @@ Bugfixes
 - (`#42407 <https://github.com/mantidproject/mantid/pull/42407>`_) Zooming with the mouse wheel in the 3D projection now keeps the point under the cursor in place rather than zooming into the centre of the view. Zooming out now stops at the full view of the instrument while preserving the current viewing direction.
 - (`#42407 <https://github.com/mantidproject/mantid/pull/42407>`_) Mouse-wheel zooming now starts at the same rate in all projections. Previously, the initial zoom in the spherical and cylindrical projections was much larger than in the other projections.
 - (`#42609 <https://github.com/mantidproject/mantid/pull/42609>`_) Shape drawing controls are now disabled when the Instrument View opens in the 3D projection.
+- (`#42598 <https://github.com/mantidproject/mantid/issues/42598>`_) In the ``Approximated Shapes (Fast)`` render mode, box-shaped detectors defined with their width or height along a different axis, for example on MUSR, EMU, NIMROD, INTER and the OSIRIS silicon analyser, are now drawn in full. Previously they were not drawn.
 
 
 SliceViewer

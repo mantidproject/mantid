@@ -437,7 +437,8 @@ Render mode
     How much detector geometry is drawn:
 
     - ``Points (Fastest)``: each detector is a single point.
-    - ``Approximated Shapes (Fast)``: detector shapes are drawn, approximated by simple quads.
+    - ``Approximated Shapes (Fast)``: detector shapes are drawn, approximated by simple quads. Box-shaped detectors
+      that a single quad cannot represent are drawn in full.
     - ``Raw Shapes (Slowest)``: the full detector geometry is drawn. This can take noticeably longer for larger instruments.
 
 Count scale
