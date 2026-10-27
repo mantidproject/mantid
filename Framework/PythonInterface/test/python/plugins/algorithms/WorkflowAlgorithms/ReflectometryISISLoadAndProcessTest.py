@@ -905,14 +905,14 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         alg = ReflectometryISISLoadAndProcess()
         alg.initialize()
 
-        self.assertTrue(alg.getProperty("ActualSpecularPixelSpectrumNumber").isDefault)
+        self.assertTrue(alg.getProperty("ActualSpecularPixelSpectrumNo").isDefault)
 
     def test_actual_specular_pixel_rejects_negative_values(self):
         alg = ReflectometryISISLoadAndProcess()
         alg.initialize()
 
         with self.assertRaises(ValueError):
-            alg.setProperty("ActualSpecularPixelSpectrumNumber", -0.5)
+            alg.setProperty("ActualSpecularPixelSpectrumNo", -0.5)
 
     def test_actual_specular_pixel_bypasses_fitting_and_controls_angle_correction(self):
         for nominal, expected_nominal, correct_angle in [(None, 282.5, False), (282.5, 282.5, False), (281.0, 281.0, True)]:
@@ -923,7 +923,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
                 alg = ReflectometryISISLoadAndProcess()
                 alg.initialize()
                 alg.setProperty("CorrectDetectors", False)
-                alg.setProperty("ActualSpecularPixelSpectrumNumber", 282.5)
+                alg.setProperty("ActualSpecularPixelSpectrumNo", 282.5)
                 if nominal is not None:
                     alg.setProperty("NominalSpecularPixelSpectrumNo", nominal)
 
@@ -952,7 +952,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
                     alg.setProperty("CorrectDetectors", False)
                     alg.setProperty("ThetaIn", 0.5)
                     if actual is not None:
-                        alg.setProperty("ActualSpecularPixelSpectrumNumber", actual)
+                        alg.setProperty("ActualSpecularPixelSpectrumNo", actual)
                     if nominal is not None:
                         alg.setProperty("NominalSpecularPixelSpectrumNo", nominal)
 
@@ -977,7 +977,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         alg.initialize()
         alg.setProperty("CorrectDetectors", False)
 
-        with self.assertRaisesRegex(RuntimeError, "ActualSpecularPixelSpectrumNumber or NominalSpecularPixelSpectrumNo must be provided"):
+        with self.assertRaisesRegex(RuntimeError, "ActualSpecularPixelSpectrumNo or NominalSpecularPixelSpectrumNo must be provided"):
             alg._validate_instrument_specific_calibration_properties(workspace)
 
     def test_transmission_calibration_uses_nominal_pixel_without_fitting_or_angle_correction(self):
@@ -986,7 +986,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         calibration_alg = MagicMock()
         alg = ReflectometryISISLoadAndProcess()
         alg.initialize()
-        alg.setProperty("ActualSpecularPixelSpectrumNumber", 282.5)
+        alg.setProperty("ActualSpecularPixelSpectrumNo", 282.5)
         alg.setProperty("NominalSpecularPixelSpectrumNo", 280.0)
 
         with patch.object(alg, "_find_specular_pixel_spectrum_no") as fit:

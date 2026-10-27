@@ -27,13 +27,13 @@ Input runs and transmission runs are loaded if required, or existing workspaces 
 
 If a value is provided for the ``CalibrationFile`` property, input runs are summed before the resulting workspace is calibrated using :ref:`algm-ReflectometryISISCalibration`. Existing workspaces carrying a matching ``reflectometry_calibration_file`` run log can be reused when their geometry has not already received angle correction (see below).
 
-If a calibration file is provided for POLREF data, a specific POLREF calibration workflow is invoked via :ref:`algm-ReflectometryISISCalibration`. In this case, ``CorrectDetectors`` must be set to ``False`` as the detector position correction is applied as part of the calibration workflow. For this workflow, the experiment angle is taken from ``ThetaIn`` or, when ``ThetaIn`` is not supplied, from the run log selected by ``ThetaLogName``. At least one of ``NominalSpecularPixelSpectrumNo`` and ``ActualSpecularPixelSpectrumNumber`` must be supplied (can be fractional):
+If a calibration file is provided for POLREF data, a specific POLREF calibration workflow is invoked via :ref:`algm-ReflectometryISISCalibration`. In this case, ``CorrectDetectors`` must be set to ``False`` as the detector position correction is applied as part of the calibration workflow. For this workflow, the experiment angle is taken from ``ThetaIn`` or, when ``ThetaIn`` is not supplied, from the run log selected by ``ThetaLogName``. At least one of ``NominalSpecularPixelSpectrumNo`` and ``ActualSpecularPixelSpectrumNo`` must be supplied (can be fractional):
 
  (``reflectometry_adjusted_theta`` log). The geometry of these workspaces depends on an earlier experiment angle and fitted specular position.
 
-- If both ``NominalSpecularPixelSpectrumNo`` and ``ActualSpecularPixelSpectrumNumber`` are supplied, the experiment angle is corrected by the difference between their angular positions.
+- If both ``NominalSpecularPixelSpectrumNo`` and ``ActualSpecularPixelSpectrumNo`` are supplied, the experiment angle is corrected by the difference between their angular positions.
 - If only ``NominalSpecularPixelSpectrumNo`` is supplied the actual specular pixel is obtained by fitting the specular peak on the summed sample workspace, then the experiment angle is corrected by the difference between actual and nominal angular positions.
-- If only ``ActualSpecularPixelSpectrumNumber`` is supplied the nominal pixel is set to equal this supplied value, making angle correction redundant.
+- If only ``ActualSpecularPixelSpectrumNo`` is supplied the nominal pixel is set to equal this supplied value, making angle correction redundant.
 
 The corrected experiment angle is used both for detector calibration and reduction. Transmission workspaces are aligned at zero experiment angle using the nominal pixel.
 
