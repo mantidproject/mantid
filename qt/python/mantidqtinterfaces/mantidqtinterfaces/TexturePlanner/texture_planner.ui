@@ -1372,6 +1372,13 @@
           <widget class="QComboBox" name="cmbExportFormat"/>
          </item>
          <item>
+          <widget class="QCheckBox" name="chkSaveEulerOnRef">
+           <property name="text">
+            <string>Save Euler Settings on Reference</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="exportSpacer">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>

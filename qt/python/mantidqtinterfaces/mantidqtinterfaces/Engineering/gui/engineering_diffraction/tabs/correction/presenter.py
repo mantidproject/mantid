@@ -16,13 +16,13 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.rb_scope import RbScope, RbScopeConsumer
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.instrument_scope import InstrumentScope, InstrumentScopeConsumer
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting, set_setting
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_model import SettingsModel
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_presenter import ShowSamplePresenter
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.correction.model import CorrectionModel
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.correction.view import TextureCorrectionView
 
 from functools import wraps
-from numpy import ndarray
 from typing import Callable, Type, List, Dict, Tuple, Sequence, Any
 
 
@@ -55,7 +55,7 @@ class TextureCorrectionPresenter(RbScopeConsumer, InstrumentScopeConsumer, Algor
         self.current_calibration = CalibrationInfo(instrument=self.instrument)
 
         self.correction_notifier = GenericObservable()
-        # fired when a loaded reference workspace rewrites the sample directions, so the settings
+        # fired when a loaded reference workspace rewrites the sample directions or Euler settings, so the settings
         # dialog can drop its cached copy rather than saving the pre-load values back over them
         self.reference_frame_notifier = GenericObservable()
 
@@ -140,13 +140,21 @@ class TextureCorrectionPresenter(RbScopeConsumer, InstrumentScopeConsumer, Algor
         self.model.save_reference_file(self.rb_num, self.current_calibration, output_settings.get_output_path())
 
     def _on_load_ref_clicked(self) -> None:
-        self.model.load_ref(self.view.get_reference_file())
+        # on failure the previous reference stays selected, and its settings must not be re-adopted
+        if not self.model.load_ref(self.view.get_reference_file()):
+            return
         self.update_reference_info()
+        changed = False
         if self._get_setting("read_texture_dirs_from_ref", bool):
-            self._adopt_reference_texture_directions()
+            changed |= self._adopt_reference_texture_directions()
+        if self._get_setting("read_euler_from_ref", bool):
+            changed |= self._adopt_reference_euler_settings()
+        if changed:
+            self.reference_frame_notifier.notify_subscribers()
 
-    def _adopt_reference_texture_directions(self) -> None:
-        """Replace the sample directions with the ones saved on the just-loaded reference workspace.
+    def _adopt_reference_texture_directions(self) -> bool:
+        """Replace the sample directions with the ones saved on the just-loaded reference workspace,
+        returning whether any setting changed.
 
         The directions are written under the active RB number, so this only re-frames the current
         experiment and leaves the user's global defaults intact. A reference carrying no direction
@@ -157,49 +165,71 @@ class TextureCorrectionPresenter(RbScopeConsumer, InstrumentScopeConsumer, Algor
                 f"Reference workspace '{self.model.get_reference_ws()}' carries no texture direction "
                 "information; the configured sample directions are unchanged."
             )
-            return
+            return False
         ax_transform, dir_names = directions
-        changes = self._write_texture_direction_settings(ax_transform, dir_names)
-        if not changes:
-            # the reference agrees with what is already set, so there is nothing worth reporting
-            return
-        scope = f"RB {self.rb_num}" if self.rb_num else "the default settings"
-        logger.notice(
-            f"Sample directions for {scope} were overwritten from reference workspace "
-            f"'{self.model.get_reference_ws()}': " + "; ".join(changes)
-        )
-        self.reference_frame_notifier.notify_subscribers()
-
-    def _write_texture_direction_settings(self, ax_transform: ndarray, dir_names: Sequence[str]) -> List[str]:
-        """Write the six direction settings under the active RB, returning a description of each
-        value that actually changed (so an unchanged reload stays silent)."""
         # ax_transform holds one direction per COLUMN (see TexturePlannerModel.set_ax_transform)
-        new_values = {}
-        for i, key in enumerate(("rd_dir", "nd_dir", "td_dir")):
-            new_values[key] = ",".join(str(round(float(x), 6)) for x in ax_transform[:, i])
-        for i, key in enumerate(("rd_name", "nd_name", "td_name")):
-            new_values[key] = dir_names[i]
+        new_values = {
+            key: ",".join(str(round(float(x), 6)) for x in ax_transform[:, i]) for i, key in enumerate(("rd_dir", "nd_dir", "td_dir"))
+        }
+        new_values.update(zip(("rd_name", "nd_name", "td_name"), dir_names))
+        return self._adopt_settings("Sample directions", new_values, self._same_direction_setting)
 
+    def _adopt_reference_euler_settings(self) -> bool:
+        """Replace the Euler scheme and sense with the ones saved on the just-loaded reference workspace,
+        returning whether any setting changed. Whether the orientation file is Euler is left alone."""
+        euler = self.model.get_reference_euler_settings()
+        if euler is None:
+            logger.notice(
+                f"Reference workspace '{self.model.get_reference_ws()}' carries no Euler orientation settings; "
+                "the configured Euler scheme and sense are unchanged."
+            )
+            return False
+        scheme, sense = euler
+        if error := SettingsModel.euler_settings_error(scheme, sense):
+            logger.warning(f"The Euler settings on reference workspace '{self.model.get_reference_ws()}' were not adopted: {error}")
+            return False
+        new_values = {"euler_angles_scheme": scheme, "euler_angles_sense": sense}
+        return self._adopt_settings("Euler settings", new_values, self._same_euler_setting)
+
+    def _adopt_settings(self, description: str, new_values: Dict[str, str], is_same: Callable[[str, str, str], bool]) -> bool:
+        """Write new_values under the active RB, logging each value that actually changed so an
+        unchanged reload stays silent. Returns whether any did."""
         changes = []
         for key, new_value in new_values.items():
             old_value = self._get_setting(key)
-            unchanged = self._same_direction(old_value, new_value) if key.endswith("_dir") else old_value == new_value
-            if not unchanged:
+            if not is_same(key, old_value, new_value):
                 changes.append(f"{key} {old_value} -> {new_value}")
             set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, key, new_value, rb=self.rb_num)
-        return changes
+        if changes:
+            scope = f"RB {self.rb_num}" if self.rb_num else "the default settings"
+            logger.notice(
+                f"{description} for {scope} were overwritten from reference workspace "
+                f"'{self.model.get_reference_ws()}': " + "; ".join(changes)
+            )
+        return bool(changes)
 
     @staticmethod
-    def _same_direction(old_value: str, new_value: str) -> bool:
+    def _same_direction_setting(key: str, old_value: str, new_value: str) -> bool:
         """Whether two direction settings describe the same vector at the precision written here.
 
         The stored value may have been typed by hand ("1,0,0") while these are always written as
-        floats ("1.0,0.0,0.0"), so a string comparison would report an unchanged frame as a change."""
+        floats ("1.0,0.0,0.0"), so a string comparison would report an unchanged frame as a change.
+        Names compare as plain strings."""
+        if not key.endswith("_dir"):
+            return old_value == new_value
         try:
             old = [round(float(x), 6) for x in old_value.split(",")]
         except (AttributeError, ValueError):
             return False  # unreadable (or unset) settings are always worth overwriting
         return old == [float(x) for x in new_value.split(",")]
+
+    @staticmethod
+    def _same_euler_setting(_key: str, old_value: str, new_value: str) -> bool:
+        # "zxz" and "ZXZ", or "1, -1" and "1,-1", configure the same convention
+        def normalise(value):
+            return (value or "").replace(" ", "").upper()
+
+        return normalise(old_value) == normalise(new_value)
 
     def on_apply_clicked(self) -> None:
         wss = self.view.get_selected_workspaces()

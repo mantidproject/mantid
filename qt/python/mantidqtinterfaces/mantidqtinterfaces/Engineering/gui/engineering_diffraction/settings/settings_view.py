@@ -103,6 +103,11 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
             "- expect string of comma separated values, one value per axis, eg."
             "'1,-1,-1' "
         )
+        self.readEulerFromRef_checkBox.setToolTip(
+            "If checked, loading a reference workspace on the Absorption Correction tab replaces the "
+            "Euler scheme and sense above with the ones saved on it (only for the active RB number, and "
+            "only if the reference workspace carries them)"
+        )
 
         self.cost_func_thresh_lineedit.setToolTip(
             "The maximum cost function value for a given spectra's fit to be plotted in the pole figure"
@@ -231,6 +236,9 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def get_read_texture_dirs_from_ref(self):
         return self.readDirsFromRef_checkBox.isChecked()
 
+    def get_read_euler_from_ref(self):
+        return self.readEulerFromRef_checkBox.isChecked()
+
     # =================
     # Component Setters
     # =================
@@ -348,6 +356,9 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
     def set_read_texture_dirs_from_ref(self, val):
         self.readDirsFromRef_checkBox.setChecked(val)
+
+    def set_read_euler_from_ref(self, val):
+        self.readEulerFromRef_checkBox.setChecked(val)
 
     # =================
     # Force Actions

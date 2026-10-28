@@ -929,12 +929,13 @@ class TestTexturePlannerPresenter_SelectionAndDeletion(unittest.TestCase):
 @patch(file_path + ".TexturePlannerSettingsPresenter")
 @patch(file_path + ".TexturePlannerSettingsView")
 class TestTexturePlannerPresenter_Exports(unittest.TestCase):
-    def _export_with_format(self, fmt):
+    def _export_with_format(self, fmt, save_euler=False):
         model = _make_model()
         view = _make_view()
         view.get_save_dir.return_value = "/out"
         view.get_save_filename.return_value = "name"
         view.get_export_format.return_value = fmt
+        view.get_save_euler_on_ref.return_value = save_euler
         presenter = TexturePlannerPresenter(model, view)
 
         presenter.on_export_clicked()
@@ -952,9 +953,17 @@ class TestTexturePlannerPresenter_Exports(unittest.TestCase):
         model = self._export_with_format("Matrix Orientation File")
         model.exporter.output_as_matrix.assert_called_once_with("/out", "name")
 
-    def test_export_reference_workspace_format_delegates_to_exporter(self, mock_settings_view, mock_settings_presenter):
-        model = self._export_with_format("Reference Workspace")
-        model.exporter.output_as_reference_workspace.assert_called_once_with("/out", "name")
+    def test_export_reference_workspace_passes_the_save_euler_choice(self, mock_settings_view, mock_settings_presenter):
+        model = self._export_with_format("Reference Workspace", save_euler=True)
+        model.exporter.output_as_reference_workspace.assert_called_once_with("/out", "name", save_euler=True)
+
+    def test_save_euler_checkbox_only_shown_for_reference_workspace(self, mock_settings_view, mock_settings_presenter):
+        view = _make_view()
+        presenter = TexturePlannerPresenter(_make_model(), view)
+        for fmt, visible in (("Reference Workspace", True), ("Euler Orientation File", False)):
+            view.get_export_format.return_value = fmt
+            presenter.update_save_euler_on_ref_visible()
+            view.set_save_euler_on_ref_visible.assert_called_with(visible)
 
     def test_export_transmission_weighting_format_delegates_to_exporter(self, mock_settings_view, mock_settings_presenter):
         model = self._export_with_format("Transmission Weighting")
