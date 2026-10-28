@@ -37,6 +37,11 @@ enum class DetectorMapYAxis { DetectorId, Theta };
 /// The horizontal axis available when generating alignment plot workspaces.
 enum class AlignmentXAxis { DetectorId, Theta };
 
+/// The suffix appended to the name of a workspace generated for an alignment profile plot, used in the plotting model.
+inline constexpr auto alignmentProfileWorkspaceSuffix = "_profile";
+inline constexpr auto alignmentFittedPeakWorkspaceSuffix = "_fitted_peak";
+inline constexpr auto alignmentPeakCentreWorkspaceSuffix = "_peak_centre";
+
 /// User-facing plot output selection collected from the plotting tab controls.
 struct MANTIDQT_ISISREFLECTOMETRY_DLL PlotOutputSelection {
   PlotOutputSelection() = default;
@@ -82,6 +87,8 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL PlotRequest {
   QWidget *parentWidget{nullptr};
   bool addToExistingPlot{false};
   bool tiledVertically{false};
+  bool shareXAxisWhenTiled{false};
+  bool shareYAxisWhenTiled{false};
 };
 
 /// Create plot options for a reflectivity-curve style output.

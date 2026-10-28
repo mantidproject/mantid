@@ -175,6 +175,7 @@ PlotActionState PlottingViewStateProvider::plotActionState(bool outputSelectionE
               (!addToExistingChecked || activePlotOverplotCompatible) && hasEnoughSelectedItems,
           outputSelectionEnabled && hasEnoughSelectedItems,
           outputSelectionEnabled && hasSelectedItems(selectedPlottingWorkspaceCount),
+          outputSelectionEnabled && hasSelectedItems(selectedPlottingWorkspaceCount),
           addToExistingEnabled,
           addToExistingChecked};
 }

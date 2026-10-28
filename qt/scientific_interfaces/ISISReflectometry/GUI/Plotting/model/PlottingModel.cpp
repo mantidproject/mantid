@@ -21,6 +21,7 @@
 #include <exception>
 #include <iterator>
 #include <memory>
+#include <numeric>
 #include <optional>
 #include <stdexcept>
 #include <unordered_map>
@@ -113,7 +114,7 @@ Mantid::API::MatrixWorkspace_sptr extractSpectrum(Mantid::API::MatrixWorkspace_s
 }
 
 double theta(Mantid::API::MatrixWorkspace const &workspace, size_t const workspaceIndex) {
-  return workspace.spectrumInfo().twoTheta(workspaceIndex) * 90.0 / M_PI;
+  return workspace.spectrumInfo().signedTwoTheta(workspaceIndex) * 90.0 / M_PI;
 }
 
 double xValueForFractionalWorkspaceIndex(Mantid::API::MatrixWorkspace const &workspace, double const workspaceIndex,
@@ -139,7 +140,9 @@ void setDetectorMapYAxisValues(Mantid::API::MatrixWorkspace_sptr const &workspac
   for (size_t workspaceIndex = 0; workspaceIndex < workspace->getNumberHistograms(); ++workspaceIndex) {
     values.emplace_back(detectorMapYAxisValue(*workspace, workspaceIndex, yAxis));
   }
-  workspace->replaceAxis(1, std::make_unique<Mantid::API::NumericAxis>(std::move(values)));
+  auto axis = std::make_unique<Mantid::API::NumericAxis>(std::move(values));
+  axis->setUnit(yAxis == DetectorMapYAxis::Theta ? "Degrees" : "Empty");
+  workspace->replaceAxis(1, std::move(axis));
 }
 
 Mantid::API::MatrixWorkspace_sptr createPointWorkspace(size_t const numberOfPoints) {
@@ -148,6 +151,7 @@ Mantid::API::MatrixWorkspace_sptr createPointWorkspace(size_t const numberOfPoin
 
 void setAlignmentXAxisValues(Mantid::API::MatrixWorkspace_sptr const &profileWorkspace,
                              Mantid::API::MatrixWorkspace const &rawWorkspace, AlignmentXAxis const xAxis) {
+  profileWorkspace->getAxis(0)->setUnit(xAxis == AlignmentXAxis::Theta ? "Degrees" : "Empty");
   if (xAxis == AlignmentXAxis::DetectorId) {
     return;
   }
@@ -177,6 +181,7 @@ SpecularPeakFit fitSpecularPeak(Mantid::API::MatrixWorkspace_sptr const &workspa
 Mantid::API::MatrixWorkspace_sptr createPeakCentreWorkspace(Mantid::API::MatrixWorkspace_sptr const &profileWorkspace,
                                                             double const peakCentre) {
   auto peakCentreWorkspace = createPointWorkspace(2);
+  peakCentreWorkspace->getAxis(0)->unit() = profileWorkspace->getAxis(0)->unit();
   auto const &profileY = profileWorkspace->y(0);
   auto const firstFinite =
       std::find_if(profileY.cbegin(), profileY.cend(), [](double value) { return std::isfinite(value); });
@@ -204,14 +209,6 @@ Mantid::API::MatrixWorkspace_sptr createPeakCentreWorkspace(Mantid::API::MatrixW
   return peakCentreWorkspace;
 }
 
-Mantid::API::WorkspaceGroup_sptr workspaceGroupFromADS(std::string const &workspaceName) {
-  auto &ads = Mantid::API::AnalysisDataService::Instance();
-  if (!ads.doesExist(workspaceName)) {
-    return nullptr;
-  }
-  return std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ads.retrieveWS<Mantid::API::Workspace>(workspaceName));
-}
-
 bool workspaceHasRunNumber(Mantid::API::MatrixWorkspace const &workspace, std::string const &runNumber) {
   auto const &run = workspace.run();
   return run.hasProperty("run_number") && run.getProperty("run_number")->value() == runNumber;
@@ -234,22 +231,44 @@ bool workspaceMatchesRunAndPeriod(Mantid::API::MatrixWorkspace const &workspace,
   return !plottingWorkspace.periodNumber || workspaceHasCurrentPeriod(workspace, *plottingWorkspace.periodNumber);
 }
 
+Mantid::API::MatrixWorkspace_sptr matchingTOFWorkspace(Mantid::API::Workspace_sptr const &workspace,
+                                                       PlottingWorkspace const &plottingWorkspace,
+                                                       std::string const &expectedRunNumber) {
+  if (auto matrixWorkspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace)) {
+    return workspaceMatchesRunAndPeriod(*matrixWorkspace, plottingWorkspace, expectedRunNumber) ? matrixWorkspace
+                                                                                                : nullptr;
+  }
+  if (auto group = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(workspace)) {
+    for (size_t index = 0; index < group->size(); ++index) {
+      if (auto match = matchingTOFWorkspace(group->getItem(index), plottingWorkspace, expectedRunNumber)) {
+        return match;
+      }
+    }
+  }
+  return nullptr;
+}
+
 Mantid::API::MatrixWorkspace_sptr rawTOFWorkspaceFor(PlottingWorkspace const &plottingWorkspace) {
-  if (plottingWorkspace.runNumbers.size() != 1) {
+  if (plottingWorkspace.runNumbers.empty()) {
     return nullptr;
   }
 
-  auto const &expectedRunNumber = plottingWorkspace.runNumbers.front();
-  for (auto const &groupName : std::vector<std::string>{"TOF", "__TOF"}) {
-    auto const workspaceGroup = workspaceGroupFromADS(groupName);
-    if (!workspaceGroup) {
+  auto const expectedRunNumber =
+      std::accumulate(std::next(plottingWorkspace.runNumbers.begin()), plottingWorkspace.runNumbers.end(),
+                      plottingWorkspace.runNumbers.front(), [](std::string joined, std::string const &run) {
+                        joined += '+';
+                        joined += run;
+                        return joined;
+                      });
+  auto &ads = Mantid::API::AnalysisDataService::Instance();
+  // Summed inputs remain outside the TOF groups after reduction.
+  for (auto const &name :
+       std::vector<std::string>{"TOF", "__TOF", "TOF_" + expectedRunNumber, "__TOF_" + expectedRunNumber}) {
+    if (!ads.doesExist(name)) {
       continue;
     }
-    for (auto index = 0u; index < workspaceGroup->size(); ++index) {
-      auto const groupMember = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspaceGroup->getItem(index));
-      if (groupMember && workspaceMatchesRunAndPeriod(*groupMember, plottingWorkspace, expectedRunNumber)) {
-        return groupMember;
-      }
+    if (auto match = matchingTOFWorkspace(ads.retrieve(name), plottingWorkspace, expectedRunNumber)) {
+      return match;
     }
   }
   return nullptr;
@@ -280,10 +299,6 @@ std::string createSpinAsymmetryWorkspace(WorkspaceGroupInputs const &inputs) {
   }
 
   auto const outputWorkspace = std::string{spinAsymmetryWorkspacePrefix} + inputs.key;
-  if (workspaceExists(outputWorkspace)) {
-    return outputWorkspace;
-  }
-
   auto &ads = Mantid::API::AnalysisDataService::Instance();
   auto const upWorkspace = ads.retrieveWS<Mantid::API::MatrixWorkspace>(upDownWorkspaces->first);
   auto const downWorkspace = ads.retrieveWS<Mantid::API::MatrixWorkspace>(upDownWorkspaces->second);
@@ -382,9 +397,9 @@ std::string createAlignmentWorkspace(PlottingWorkspace const &workspace, Alignme
     return outputWorkspace;
   }
 
-  auto const rawProfileWorkspace = outputWorkspace + "_profile";
-  auto const fittedPeakWorkspace = outputWorkspace + "_fitted_peak";
-  auto const peakCentreWorkspace = outputWorkspace + "_peak_centre";
+  auto const rawProfileWorkspace = outputWorkspace + alignmentProfileWorkspaceSuffix;
+  auto const fittedPeakWorkspace = outputWorkspace + alignmentFittedPeakWorkspaceSuffix;
+  auto const peakCentreWorkspace = outputWorkspace + alignmentPeakCentreWorkspaceSuffix;
 
   auto detectorSpectraWorkspace = extractDetectorSpectra(rawWorkspace, instrumentName);
   auto peakFit = fitSpecularPeak(detectorSpectraWorkspace);

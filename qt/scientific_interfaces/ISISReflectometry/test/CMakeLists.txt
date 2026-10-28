@@ -37,6 +37,7 @@ set(TEST_FILES
     Common/DetectorTest.h
     Common/EncoderTest.h
     Common/PlotOptionsProviderTest.h
+    Common/GroupHelperTest.h
     Common/PlotterTest.h
     Experiment/ExperimentPresenterTest.h
     Experiment/LookupTableValidatorTest.h

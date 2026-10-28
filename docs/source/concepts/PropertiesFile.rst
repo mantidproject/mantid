@@ -45,6 +45,10 @@ General properties
 |                                  | ``Log`` causes a log message at error level.     |                        |
 |                                  | ``Raise`` causes a ``RuntimError``.              |                        |
 +----------------------------------+--------------------------------------------------+------------------------+
+| ``algorithms.memorycheck``       | Whether algorithms such as Rebin and BinMD check | ``On`` or ``Off``      |
+|                                  | that their output fits in memory before they     |                        |
+|                                  | run.                                             |                        |
++----------------------------------+--------------------------------------------------+------------------------+
 | ``curvefitting.guiExclude``      | A semicolon separated list of function names     | ``ExpDecay;Gaussian;`` |
 |                                  | that should be hidden in Mantid.                 |                        |
 +----------------------------------+--------------------------------------------------+------------------------+

@@ -60,9 +60,13 @@ public:
   /// Return the full output selection, including output-specific axes.
   virtual PlotOutputSelection selectedPlotOutputSelection() const = 0;
   /// Return true if plotting should target the active figure.
-  virtual bool addToExistingPlot() const = 0;
+  virtual bool shouldAddToExistingPlot() const = 0;
   /// Return true if tiled plots should be arranged vertically first.
-  virtual bool plotTiledVertically() const = 0;
+  virtual bool shouldPlotTiledVertically() const = 0;
+  /// Return true if compatible X axes should be shared between tiles.
+  virtual bool shouldShareXAxisWhenTiled() const = 0;
+  /// Return true if compatible Y axes should be shared between tiles.
+  virtual bool shouldShareYAxisWhenTiled() const = 0;
   /// Return the parent widget for plot windows.
   virtual QWidget *plotParent() = 0;
   /// Confirm large plot requests with the user.

@@ -69,6 +69,9 @@ std::size_t Mantid::Kernel::MemoryStats::availMem() const {
 }
 
 std::string Mantid::Kernel::MemoryStats::checkAvailableMemory(std::size_t const requestedMemory) const {
+  if (!memoryCheckEnabled()) {
+    return "";
+  }
   if (g_override_availMem.load()) {
     std::size_t avail = g_value.load() * 1024;
     if (requestedMemory > avail) {

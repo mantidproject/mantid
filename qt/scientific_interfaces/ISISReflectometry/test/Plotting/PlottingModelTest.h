@@ -15,6 +15,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/V3D.h"
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>
@@ -86,21 +88,6 @@ public:
     TS_ASSERT_EQUALS(workspacesForPlotting.size(), 1);
     TS_ASSERT_EQUALS(workspacesForPlotting[0], "__isis_refl_spin_asym_polarized_group");
     assertYValue("__isis_refl_spin_asym_polarized_group", 0.6);
-  }
-
-  void testSpinAsymmetryReusesExistingGeneratedWorkspace() {
-    createConstantWorkspace("up", 6.0);
-    createConstantWorkspace("down", 2.0);
-    auto model = PlottingModel{};
-    auto const workspaces = plottingWorkspaces({"up", "down"}, "polarized_group");
-    model.workspacesForPlotting(workspaces, PlotOutputSelection{PlotOutputType::SpinAsymmetry});
-    auto const firstWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
-        "__isis_refl_spin_asym_polarized_group");
-    model.workspacesForPlotting(workspaces, PlotOutputSelection{PlotOutputType::SpinAsymmetry});
-    auto const secondWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
-        "__isis_refl_spin_asym_polarized_group");
-
-    TS_ASSERT_EQUALS(firstWorkspace.get(), secondWorkspace.get());
   }
 
   void testSpinAsymmetryReturnsNoWorkspacesForUnsupportedSelectionSize() {
@@ -182,7 +169,32 @@ public:
     auto const expectedCentreTheta = lowerTheta + 0.35 * (upperTheta - lowerTheta);
     assertXValue("__isis_refl_align_IvsQ_12345_theta_profile", lowerTheta, 96);
     assertXValue("__isis_refl_align_IvsQ_12345_theta_peak_centre", expectedCentreTheta, 0, 1e-6);
+    auto const profile = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+        "__isis_refl_align_IvsQ_12345_theta_profile");
+    auto const peakCentre = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+        "__isis_refl_align_IvsQ_12345_theta_peak_centre");
+    TS_ASSERT_EQUALS(profile->getAxis(0)->unit()->unitID(), "Degrees");
+    TS_ASSERT_EQUALS(peakCentre->getAxis(0)->unit()->unitID(), "Degrees");
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_theta_fitted_peak"));
+  }
+
+  void testAlignmentMapsDetectorPositionsOnEitherSideOfBeamCentreToSignedTheta() {
+    createConstantWorkspace("IvsQ_12345", -100.0);
+    createAlignmentInputWorkspace("raw_input_name", "12345", alignmentYValues(100.35, 7.0));
+    auto const rawWorkspace =
+        Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("raw_input_name");
+    setSpectrumDetectorYPosition(rawWorkspace, 100, -0.1);
+    setSpectrumDetectorYPosition(rawWorkspace, 101, 0.1);
+    createTOFGroup({"raw_input_name"});
+    auto outputSelection = alignmentOutputSelection();
+    outputSelection.alignmentXAxis = AlignmentXAxis::Theta;
+
+    PlottingModel{}.workspacesForPlotting(plottingWorkspaces({"IvsQ_12345"}), outputSelection);
+
+    auto const profileWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+        "__isis_refl_align_IvsQ_12345_theta_profile");
+    TS_ASSERT_LESS_THAN(profileWorkspace->x(0)[96], 0.0);
+    TS_ASSERT_LESS_THAN(0.0, profileWorkspace->x(0)[97]);
   }
 
   void testAlignmentPeakCentreMarkerIgnoresInvalidProfileValues() {
@@ -222,15 +234,57 @@ public:
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_22345_profile"));
   }
 
-  void testAlignmentDoesNotCreateWorkspaceForAddedRuns() {
+  void testAlignmentCreatesWorkspaceForAddedRuns() {
     createConstantWorkspace("IvsQ_12345+12346", -100.0);
-    createAlignmentInputWorkspace("summed_raw_input_name", "12345+12346", {1.0, 3.0, 6.0, 3.0, 1.0});
-    createTOFGroup({"summed_raw_input_name"});
+    createAlignmentInputWorkspace("TOF_12345+12346", "12345+12346", alignmentYValues(100, 10.0));
+    createAlignmentInputWorkspace("TOF_12345", "12345", alignmentYValues(100, 3.0));
+    createAlignmentInputWorkspace("TOF_12346", "12346", alignmentYValues(100, 7.0));
+    createTOFGroup({"TOF_12345", "TOF_12346"});
     auto model = PlottingModel{};
     auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345+12346", {"12345", "12346"})};
     auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, alignmentOutputSelection());
 
-    TS_ASSERT(workspacesForPlotting.empty());
+    TS_ASSERT_EQUALS(workspacesForPlotting, std::vector<std::string>{"__isis_refl_align_IvsQ_12345+12346"});
+    assertYValue("__isis_refl_align_IvsQ_12345+12346_profile", 10.0, 96);
+  }
+
+  void testAlignmentFindsSummedRunLogOutsideTOFGroup() {
+    createAlignmentInputWorkspace("TOF_12345+12346", "12345+12346", alignmentYValues(100, 10.0));
+    auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345+12346", {"12345+12346"})};
+    auto const outputs = PlottingModel{}.workspacesForPlotting(workspaces, alignmentOutputSelection());
+    TS_ASSERT_EQUALS(outputs, std::vector<std::string>{"__isis_refl_align_IvsQ_12345+12346"});
+    assertYValue("__isis_refl_align_IvsQ_12345+12346_profile", 10.0, 96);
+  }
+
+  void testDetectorMapFindsSummedWorkspaceOutsideTOFGroup() {
+    createDetectorMapInputWorkspace("TOF_12345", "12345", 10.0);
+    createDetectorMapInputWorkspace("TOF_12346", "12346", 20.0);
+    createTOFGroup({"TOF_12345", "TOF_12346"});
+    createDetectorMapInputWorkspace("TOF_12345+12346", "12345+12346", 30.0);
+    auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345+12346", {"12345+12346"})};
+    auto const outputs = PlottingModel{}.workspacesForPlotting(workspaces, detectorMapOutputSelection());
+    TS_ASSERT_EQUALS(outputs, std::vector<std::string>{"__isis_refl_det_map_IvsQ_12345+12346"});
+    assertYValue("__isis_refl_det_map_IvsQ_12345+12346", 34.0);
+  }
+
+  void testBothPlotTypesFindHiddenSummedWorkspace() {
+    createAlignmentInputWorkspace("__TOF_12345+12346", "12345+12346", alignmentYValues(100, 10.0));
+    auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345+12346", {"12345+12346"})};
+    TS_ASSERT_EQUALS(PlottingModel{}.workspacesForPlotting(workspaces, alignmentOutputSelection()).size(), 1);
+    TS_ASSERT_EQUALS(PlottingModel{}.workspacesForPlotting(workspaces, detectorMapOutputSelection()).size(), 1);
+    assertYValue("__isis_refl_align_IvsQ_12345+12346_profile", 10.0, 96);
+    assertYValue("__isis_refl_det_map_IvsQ_12345+12346", 10.0, 0, 96);
+  }
+
+  void testBothPlotTypesFindSelectedPeriodInSummedWorkspaceGroup() {
+    createAlignmentInputWorkspace("TOF_12345+12346_1", "12345+12346", alignmentYValues(100, 3.0), 1);
+    createAlignmentInputWorkspace("TOF_12345+12346_2", "12345+12346", alignmentYValues(100, 10.0), 2);
+    createTOFGroup({"TOF_12345+12346_1", "TOF_12345+12346_2"}, "TOF_12345+12346");
+    auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345+12346_2", {"12345+12346"}, 2)};
+    TS_ASSERT_EQUALS(PlottingModel{}.workspacesForPlotting(workspaces, alignmentOutputSelection()).size(), 1);
+    TS_ASSERT_EQUALS(PlottingModel{}.workspacesForPlotting(workspaces, detectorMapOutputSelection()).size(), 1);
+    assertYValue("__isis_refl_align_IvsQ_12345+12346_2_profile", 10.0, 96);
+    assertYValue("__isis_refl_det_map_IvsQ_12345+12346_2", 10.0, 0, 96);
   }
 
   void testAlignmentFindsPeriodSpecificTOFWorkspaceInTOFGroup() {
@@ -352,6 +406,7 @@ public:
     auto outputWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
         "__isis_refl_det_map_IvsQ_12345_theta");
     TS_ASSERT_DIFFERS((*(outputWorkspace->getAxis(1)))(0), 0.0);
+    TS_ASSERT_EQUALS(outputWorkspace->getAxis(1)->unit()->unitID(), "Degrees");
   }
 
   void testDetectorMapReusesExistingGeneratedWorkspace() {
@@ -481,19 +536,30 @@ private:
     Mantid::API::AnalysisDataService::Instance().addOrReplace(name, workspace);
   }
 
-  void createTOFGroup(std::vector<std::string> const &workspaceNames) {
+  void setSpectrumDetectorYPosition(Mantid::API::MatrixWorkspace_sptr const &workspace, size_t const workspaceIndex,
+                                    double const yPosition) {
+    auto &detectorInfo = workspace->mutableDetectorInfo();
+    for (auto const detectorId : workspace->getSpectrum(workspaceIndex).getDetectorIDs()) {
+      auto const detectorIndex = detectorInfo.indexOf(detectorId);
+      auto const position = detectorInfo.position(detectorIndex);
+      detectorInfo.setPosition(detectorIndex, {position.X(), yPosition, position.Z()});
+    }
+  }
+
+  void createTOFGroup(std::vector<std::string> const &workspaceNames, std::string const &groupName = "TOF") {
     auto group = std::make_shared<Mantid::API::WorkspaceGroup>();
     for (auto const &workspaceName : workspaceNames) {
       group->addWorkspace(
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName));
     }
-    Mantid::API::AnalysisDataService::Instance().addOrReplace("TOF", group);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(groupName, group);
   }
 
-  void assertYValue(std::string const &workspaceName, double expected, size_t const workspaceIndex = 0) {
+  void assertYValue(std::string const &workspaceName, double expected, size_t const binIndex = 0,
+                    size_t const workspaceIndex = 0) {
     auto workspace =
         Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
-    TS_ASSERT_DELTA(workspace->y(0)[workspaceIndex], expected, 1e-12);
+    TS_ASSERT_DELTA(workspace->y(workspaceIndex)[binIndex], expected, 1e-12);
   }
 
   void assertXValue(std::string const &workspaceName, double expected, size_t const workspaceIndex,

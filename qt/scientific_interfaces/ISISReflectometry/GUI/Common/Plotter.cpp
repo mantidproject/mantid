@@ -7,7 +7,6 @@
 #include "Plotter.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #pragma push_macro("slots")
@@ -153,6 +152,35 @@ void applyAxisLabels(MantidQt::Widgets::Common::Python::Object const &figure, Pl
         axis.attr("set_xlabel")(xLabel);
       if (!yLabel.empty())
         axis.attr("set_ylabel")(yLabel);
+    });
+  } catch (Python::ErrorAlreadySet &) {
+    throw Mantid::PythonInterface::PythonException();
+  }
+}
+
+/// Apply role-specific line styles to generated alignment workspace curves.
+void applyAlignmentLineStyles(MantidQt::Widgets::Common::Python::Object const &figure) {
+  using namespace MantidQt::Widgets::Common;
+
+  try {
+    forEachAxis(figure, [](Python::Object const &axis) {
+      auto const containers = axis.attr("containers");
+      auto const containerCount = Python::Len(containers);
+      // Loop through error bar containers
+      for (auto index = 0; index < containerCount; ++index) {
+        auto const container = Python::Object(containers[index]);
+        auto const workspaceName =
+            boost::python::extract<std::string>(axis.attr("get_workspace_name_from_artist")(container))();
+        auto const lineStyle = workspaceName.ends_with(alignmentProfileWorkspaceSuffix)      ? "-"
+                               : workspaceName.ends_with(alignmentFittedPeakWorkspaceSuffix) ? "--"
+                               : workspaceName.ends_with(alignmentPeakCentreWorkspaceSuffix) ? ":"
+                                                                                             : nullptr;
+        if (!lineStyle)
+          continue;
+
+        // index 0 contains data
+        Python::Object(container[0]).attr("set_linestyle")(lineStyle);
+      }
     });
   } catch (Python::ErrorAlreadySet &) {
     throw Mantid::PythonInterface::PythonException();
@@ -385,6 +413,20 @@ struct PlottedFigure {
   PostPlotTarget postPlotTarget;
 };
 
+/// Ask MantidQt to share compatible axes between tiles.
+void shareTiledAxes(PlottedFigure const &plottedFigure, bool shareX, bool shareY) {
+  using namespace MantidQt::Widgets::Common;
+
+  try {
+    auto const plottingFunctions = Python::Object(Python::NewRef(PyImport_ImportModule("mantidqt.plotting.functions")));
+    auto const newAxes =
+        plottedFigure.postPlotTarget == PostPlotTarget::NewAxes ? plottedFigure.newAxes : Python::Object();
+    plottingFunctions.attr("share_tiled_axes")(plottedFigure.figure, newAxes, shareX, shareY);
+  } catch (Python::ErrorAlreadySet &) {
+    throw Mantid::PythonInterface::PythonException();
+  }
+}
+
 /// Plot a tiled line output by adding axes to an existing figure.
 ExistingTiledPlot plotTiledOnExistingFigure(MantidQt::Widgets::Common::Python::Object const &figure,
                                             std::vector<std::string> const &workspaces, PlotOptions const &options,
@@ -478,6 +520,8 @@ PlottedFigure plotFigure(PlotRequest const &request, EvaluatedPlotRequest const 
 void applyPostPlotting(PlotRequest const &request, PlottedFigure const &plottedFigure) {
   auto const &options = request.options;
   markReflectometryFigure(plottedFigure.figure);
+  if (options.outputType == PlotOutputType::Alignment)
+    applyAlignmentLineStyles(plottedFigure.figure);
   if (plottedFigure.postPlotTarget == PostPlotTarget::ColorfillAxes) {
     applyColorfillAxisLabels(plottedFigure.figure, options);
   } else if (plottedFigure.postPlotTarget == PostPlotTarget::NewAxes) {
@@ -489,7 +533,10 @@ void applyPostPlotting(PlotRequest const &request, PlottedFigure const &plottedF
     if (options.horizontalMarker)
       addHorizontalMarkers(plottedFigure.figure, *options.horizontalMarker);
   }
+  if ((request.shareXAxisWhenTiled || request.shareYAxisWhenTiled) && options.layout == PlotLayout::Tiled)
+    shareTiledAxes(plottedFigure, request.shareXAxisWhenTiled, request.shareYAxisWhenTiled);
   setPlotWindowParent(plottedFigure.figure, request.parentWidget);
+  plottedFigure.figure.attr("canvas").attr("draw_idle")();
 }
 } // namespace
 
