@@ -836,9 +836,8 @@ void RunsTablePresenter::notifyPlotSelectedPressed() {
 
   for (const auto &row : rows) {
     if (row.state() == State::ITEM_SUCCESS) {
-      for (const auto &ws : row.reducedWorkspaceNames().iVsQBinned()) {
-        workspaces.emplace_back(ws);
-      }
+      std::copy(row.reducedWorkspaceNames().iVsQBinned().cbegin(), row.reducedWorkspaceNames().iVsQBinned().cend(),
+                std::back_inserter(workspaces));
     }
   }
 
@@ -855,9 +854,8 @@ void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
 
   for (const auto *group : groups) {
     if (group->state() == State::ITEM_SUCCESS) {
-      for (const auto &stitchedWs : group->postprocessedWorkspaceNames()) {
-        workspaces.emplace_back(stitchedWs);
-      }
+      auto const &postprocessed = group->postprocessedWorkspaceNames();
+      std::copy(postprocessed.cbegin(), postprocessed.cend(), std::back_inserter(workspaces));
     }
   }
 
