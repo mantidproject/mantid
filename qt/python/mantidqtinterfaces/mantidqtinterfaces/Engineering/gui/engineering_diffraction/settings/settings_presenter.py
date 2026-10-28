@@ -39,6 +39,7 @@ SETTINGS_DICT = {
     "contour_kernel": str,
     "auto_pop_texture": bool,
     "read_texture_dirs_from_ref": bool,
+    "read_euler_from_ref": bool,
 }
 
 
@@ -67,6 +68,7 @@ DEFAULT_SETTINGS = {
     "contour_kernel": "2.0",
     "auto_pop_texture": False,
     "read_texture_dirs_from_ref": True,
+    "read_euler_from_ref": True,
 }
 
 for instr in INSTRUMENT_DICT.values():
@@ -236,6 +238,7 @@ class SettingsPresenter(RbScopeConsumer, InstrumentScopeConsumer):
         self.settings["contour_kernel"] = self.view.get_contour_kernel()
         self.settings["auto_pop_texture"] = self.view.get_auto_populate_texture()
         self.settings["read_texture_dirs_from_ref"] = self.view.get_read_texture_dirs_from_ref()
+        self.settings["read_euler_from_ref"] = self.view.get_read_euler_from_ref()
         self._validate_settings(set_nullables_to_default=False)
 
     def _show_settings_in_view(self):
@@ -266,6 +269,7 @@ class SettingsPresenter(RbScopeConsumer, InstrumentScopeConsumer):
         self.view.set_contour_kernel(self.settings["contour_kernel"])
         self.view.set_auto_populate_texture(self.settings["auto_pop_texture"])
         self.view.set_read_texture_dirs_from_ref(self.settings["read_texture_dirs_from_ref"])
+        self.view.set_read_euler_from_ref(self.settings["read_euler_from_ref"])
         self._find_files()
 
     def update_full_calib_with_instrument(self):

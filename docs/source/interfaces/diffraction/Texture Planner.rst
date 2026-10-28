@@ -314,7 +314,9 @@ Reference Workspace
     Write the defined sample onto a reference workspace ``.nxs`` file. This can be
     loaded directly into the Absorption Correction tab of the
     :ref:`Engineering Diffraction interface <Engineering_Diffraction-ref>` to start
-    processing results.
+    processing results. Tick **Save Euler Settings on Reference** to also save the
+    orientation file axes and senses from the settings menu, so the Engineering
+    Diffraction interface can pick them up.
 
 Transmission Weighting
     Write a ``.txt`` file with one line per included orientation. For each line the

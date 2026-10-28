@@ -187,18 +187,20 @@ class EngDiffGuiTestBase(AutomatedUITestBase):
     # ------------------------------------------------------------------ settings
 
     @staticmethod
-    def set_engineering_setting(name, value):
+    def set_engineering_setting(name, value, rb=None):
         from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import set_setting
         from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 
-        set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, name, value)
+        set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, name, value, rb=rb)
 
     @staticmethod
-    def get_engineering_setting(name, return_type=str):
+    def get_engineering_setting(name, return_type=str, rb=None):
         from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
         from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 
-        return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, name, return_type=return_type)
+        return get_setting(
+            output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, name, return_type=return_type, rb=rb
+        )
 
     def open_settings(self):
         """Open the settings dialog the way a user does, via the cog in the bottom left.

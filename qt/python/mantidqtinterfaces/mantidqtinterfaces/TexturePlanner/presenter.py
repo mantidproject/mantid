@@ -93,6 +93,8 @@ class TexturePlannerPresenter(TutorialPresenter, AlgorithmObserver):
         self.view.set_on_deselect_all_clicked(self.deselect_all)
         self.view.set_on_delete_selected_clicked(self.delete_selected)
         self.view.set_on_export_clicked(self.on_export_clicked)
+        self.view.set_on_export_format_changed(self.update_save_euler_on_ref_visible)
+        self.update_save_euler_on_ref_visible()
         self.view.set_on_save_dir_changed(self.enable_outputs)
         self.view.set_on_save_file_changed(self.enable_outputs)
         self.view.set_on_show_transmission_toggled(self.set_show_transmission)
@@ -480,10 +482,15 @@ class TexturePlannerPresenter(TutorialPresenter, AlgorithmObserver):
             EXPORT_SSCANSS: exporter.output_as_sscanss,
             EXPORT_EULER: exporter.output_as_euler,
             EXPORT_MATRIX: exporter.output_as_matrix,
-            EXPORT_REFERENCE_WS: exporter.output_as_reference_workspace,
+            EXPORT_REFERENCE_WS: lambda save_dir, filename: exporter.output_as_reference_workspace(
+                save_dir, filename, save_euler=self.view.get_save_euler_on_ref()
+            ),
             EXPORT_TRANSMISSION_WEIGHTING: exporter.output_transmission_weighting,
         }
         handlers[self.view.get_export_format()](self.view.get_save_dir(), self.view.get_save_filename())
+
+    def update_save_euler_on_ref_visible(self) -> None:
+        self.view.set_save_euler_on_ref_visible(self.view.get_export_format() == EXPORT_REFERENCE_WS)
 
     def set_show_transmission(self) -> None:
         self.update_custom_shape_finder_enabled()

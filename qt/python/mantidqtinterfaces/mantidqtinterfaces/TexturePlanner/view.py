@@ -296,6 +296,10 @@ class TexturePlannerView(TutorialViewMixin, QMainWindow, Ui_texplan):
         self.finder_save_dir.setToolTip("Directory to save the output files into.")
         self.saveFileLine.setToolTip("File name for the output file.")
         self.cmbExportFormat.setToolTip("Type of file to write.")
+        self.chkSaveEulerOnRef.setToolTip(
+            "Also write the Euler orientation axes and senses (from the settings menu) onto the reference "
+            "workspace, so Engineering Diffraction can read them when it loads the reference."
+        )
         self.btnExport.setToolTip("Write the selected export file to the save directory.")
 
     def set_on_num_gonio_updated(self, slot: Callable) -> None:
@@ -393,6 +397,15 @@ class TexturePlannerView(TutorialViewMixin, QMainWindow, Ui_texplan):
 
     def get_export_format(self) -> str:
         return self.cmbExportFormat.currentText()
+
+    def set_on_export_format_changed(self, slot: Callable) -> None:
+        self.cmbExportFormat.currentTextChanged.connect(slot)
+
+    def get_save_euler_on_ref(self) -> bool:
+        return self.chkSaveEulerOnRef.isChecked()
+
+    def set_save_euler_on_ref_visible(self, visible: bool) -> None:
+        self.chkSaveEulerOnRef.setVisible(visible)
 
     def set_transmission_weighting_available(self, available: bool) -> None:
         # the transmission weighting export only makes sense once transmission has been estimated,
