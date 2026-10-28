@@ -59,6 +59,12 @@ public:
   void setComponentLinks(std::shared_ptr<Geometry::Instrument> &instrument, Poco::XML::Element *pRootElem,
                          Kernel::ProgressBase *progress = nullptr, const std::string &requestedDate = std::string());
 
+  /// As above, but collect the parameters into 'logfileCache' rather than into the instrument's own
+  /// cache, so that the instrument is not modified
+  void setComponentLinks(const std::shared_ptr<const Geometry::Instrument> &instrument, Poco::XML::Element *pRootElem,
+                         InstrumentParameterCache &logfileCache, Kernel::ProgressBase *progress = nullptr,
+                         const std::string &requestedDate = std::string());
+
   std::string getMangledName();
 
   /// Get parent component element of location element
