@@ -31,13 +31,12 @@ corrected dataset) without re-deriving the peak shapes each time, or for
 comparing intensities obtained with a shape held fixed across multiple
 datasets.
 
-Peaks must be indexed with integral HKL values, in the same way as for
-:ref:`algm-IntegrateEllipsoidsTwoStep`: the indexed peaks are used to
-determine a :ref:`UB matrix <Lattice>`, whose inverse is used to assign each
-event to the nearest peak in reciprocal space. Only events within
-*RegionRadius* of a peak's Q-vector are considered; this should be at least as
-large as the largest background outer radius among the peaks being
-integrated, or the background shell will be truncated.
+Peaks need not be indexed: each event is assigned to the peak whose Q-vector
+is nearest to it, so satellite and unindexed peaks are integrated as any
+other. Only events within *RegionRadius* of a peak's Q-vector are
+considered; this should be at least as large as the largest background outer
+radius among the peaks being integrated, or the background shell will be
+truncated.
 
 If *UseOnePercentBackgroundCorrection* is enabled (the default), the top 1% of
 the background events are removed before background subtraction, to reduce

@@ -115,6 +115,10 @@ public:
   Integrate3DEvents(const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> &peak_q_list,
                     Kernel::DblMatrix UBinv, double radius, const bool useOnePercentBackgroundCorrection = true);
 
+  /// Construct object to store events around peaks, each with its nearest peak, without indexing them
+  Integrate3DEvents(const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> &peak_q_list,
+                    double radius, const bool useOnePercentBackgroundCorrection = true);
+
   Integrate3DEvents(const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> &peak_q_list,
                     std::vector<Mantid::Kernel::V3D> const &hkl_list, std::vector<Mantid::Kernel::V3D> const &mnp_list,
                     Kernel::DblMatrix UBinv, Kernel::DblMatrix ModHKL, double radius_m, double radius_s, int MaxO,
@@ -248,6 +252,13 @@ private:
   int64_t getHklKey2(Mantid::Kernel::V3D const &hkl);
   int64_t getHklMnpKey2(Mantid::Kernel::V3D const &hkl);
 
+  /// Form a map key for the peak of a q_vector: its h,k,l, or the nearest peak's index without indexing
+  int64_t getPeakKey(Mantid::Kernel::V3D const &q_vector);
+  /// One more than the index of the nearest peak within the radius of q_vector, or 0 if none
+  int64_t getNearestPeakKey(Mantid::Kernel::V3D const &q_vector) const;
+  /// Key of the cell of the grid of peak centers with integer coordinates i, j, k
+  static int64_t getCellKey(int64_t i, int64_t j, int64_t k);
+
   /// Add an event to the vector of events for the closest h,k,l
   void addEvent(std::pair<std::pair<double, double>, Mantid::Kernel::V3D> event_Q, bool hkl_integ);
   void addModEvent(std::pair<std::pair<double, double>, Mantid::Kernel::V3D> event_Q, bool hkl_integ);
@@ -279,6 +290,10 @@ private:
   const bool crossterm;
   const bool m_useOnePercentBackgroundCorrection =
       true; // if one perecent culling of the background should be performed.
+  // assign events to the nearest peak (within m_radius) instead of the nearest h,k,l
+  bool m_nearestPeak{false};
+  std::vector<Kernel::V3D> m_peakCenters;                       // peak Q-vectors, by index
+  std::unordered_map<int64_t, std::vector<size_t>> m_peakCells; // peak indices in cells of side m_radius
 };
 
 } // namespace MDAlgorithms

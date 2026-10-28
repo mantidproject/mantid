@@ -61,6 +61,39 @@ Integrate3DEvents::Integrate3DEvents(
 }
 
 /**
+ * Construct an object to store events around peaks without indexing them:
+ * each event is stored with the peak whose center is nearest to it, if that
+ * is within the specified radius. Satellite and unindexed peaks are then
+ * treated as any other.
+ *
+ * @overload
+ * @param   peak_q_list  List of Q-vectors for peak centers.
+ * @param   radius       The maximum distance from a peak's Q-vector, for
+ *                       an event to be stored in the list associated with
+ *                       that peak.
+ * @param   useOnePercentBackgroundCorrection flag if one percent background
+ *                       correction should be used.
+ */
+Integrate3DEvents::Integrate3DEvents(
+    const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> &peak_q_list, double radius,
+    const bool useOnePercentBackgroundCorrection)
+    : m_radius(radius), s_radius(radius), maxOrder(0), crossterm(false),
+      m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection), m_nearestPeak(true) {
+  if (!(m_radius > 0.0))
+    return;
+  m_peakCenters.reserve(peak_q_list.size());
+  for (size_t it = 0; it != peak_q_list.size(); ++it) {
+    const auto &q = peak_q_list[it].second;
+    m_peakCenters.emplace_back(q);
+    const auto i = static_cast<int64_t>(std::floor(q.X() / m_radius));
+    const auto j = static_cast<int64_t>(std::floor(q.Y() / m_radius));
+    const auto k = static_cast<int64_t>(std::floor(q.Z() / m_radius));
+    m_peakCells[getCellKey(i, j, k)].emplace_back(it);
+    m_peak_qs[static_cast<int64_t>(it) + 1] = q;
+  }
+}
+
+/**
  * With modulation vectors, construct an object to store events that correspond
  * to a peak and are within the specified radius of the specified peak centers,
  * and to integrate the peaks.
@@ -1185,7 +1218,7 @@ double Integrate3DEvents::estimateSignalToNoiseRatio(const IntegrationParameters
 }
 
 const std::vector<std::pair<std::pair<double, double>, V3D>> *Integrate3DEvents::getEvents(const V3D &peak_q) {
-  auto hkl_key = getHklKey(peak_q);
+  auto hkl_key = getPeakKey(peak_q);
   if (maxOrder)
     hkl_key = getHklMnpKey(peak_q);
 
@@ -1277,7 +1310,7 @@ Integrate3DEvents::ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D con
   inti = 0.0; // default values, in case something
   sigi = 0.0; // is wrong with the peak.
 
-  int64_t hkl_key = getHklKey(peak_q);
+  int64_t hkl_key = getPeakKey(peak_q);
 
   if (hkl_key == 0) {
     return std::make_shared<NoShape>();
@@ -1683,6 +1716,57 @@ int64_t Integrate3DEvents::getHklMnpKey2(V3D const &hkl) {
   return 0;
 }
 /**
+ * Form a map key for the peak that the specified q_vector belongs to: its
+ * h,k,l, or without indexing, the nearest peak's index.
+ *
+ * @param q_vector  The q_vector to be mapped to a peak.
+ */
+int64_t Integrate3DEvents::getPeakKey(V3D const &q_vector) {
+  return m_nearestPeak ? getNearestPeakKey(q_vector) : getHklKey(q_vector);
+}
+
+/**
+ * One more than the index of the peak whose center is nearest to the
+ * specified q_vector, if within the radius, found among the peaks in the
+ * cells of the grid around it; 0 if there is none.
+ *
+ * @param q_vector  The q_vector to be mapped to a peak.
+ */
+int64_t Integrate3DEvents::getNearestPeakKey(V3D const &q_vector) const {
+  if (m_peakCenters.empty())
+    return 0;
+  const auto i = static_cast<int64_t>(std::floor(q_vector.X() / m_radius));
+  const auto j = static_cast<int64_t>(std::floor(q_vector.Y() / m_radius));
+  const auto k = static_cast<int64_t>(std::floor(q_vector.Z() / m_radius));
+  int64_t key = 0;
+  double nearest = m_radius * m_radius;
+  for (int64_t di = -1; di <= 1; ++di)
+    for (int64_t dj = -1; dj <= 1; ++dj)
+      for (int64_t dk = -1; dk <= 1; ++dk) {
+        const auto cell = m_peakCells.find(getCellKey(i + di, j + dj, k + dk));
+        if (cell == m_peakCells.end())
+          continue;
+        for (const auto index : cell->second) {
+          const double distance = (q_vector - m_peakCenters[index]).norm2();
+          if (distance < nearest) {
+            nearest = distance;
+            key = static_cast<int64_t>(index) + 1;
+          }
+        }
+      }
+  return key;
+}
+
+/**
+ * Key of the cell of the grid of peak centers with the specified integer
+ * coordinates, each within +-2^20.
+ */
+int64_t Integrate3DEvents::getCellKey(int64_t i, int64_t j, int64_t k) {
+  constexpr int64_t offset = int64_t(1) << 20;
+  return ((i + offset) << 42) | ((j + offset) << 21) | (k + offset);
+}
+
+/**
  *  Form a map key for the specified q_vector.  The q_vector is mapped to
  *  h,k,l by UBinv and the map key is then formed from those rounded h,k,l
  *  values.
@@ -1811,7 +1895,7 @@ void Integrate3DEvents::addEvent(std::pair<std::pair<double, double>, V3D> event
   if (hkl_integ)
     hkl_key = getHklKey2(event_Q.second);
   else
-    hkl_key = getHklKey(event_Q.second);
+    hkl_key = getPeakKey(event_Q.second);
 
   if (hkl_key == 0) // don't keep events associated with 0,0,0
     return;

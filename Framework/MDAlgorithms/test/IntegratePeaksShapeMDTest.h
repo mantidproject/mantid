@@ -341,7 +341,9 @@ public:
     TS_ASSERT(!alg.isExecuted());
   }
 
-  void test_exec_throws_with_fewer_than_three_indexed_peaks() {
+  // Peaks need not be indexed: each event is assigned to the nearest peak, so
+  // unindexed peaks are integrated as they are when indexed.
+  void test_exec_integrates_unindexed_peaks() {
     const auto sigmas = std::make_tuple(.002, .002, .1);
     WorkspaceBuilder builder;
     builder.setRandomSeed(1);
@@ -358,19 +360,60 @@ public:
     const PeakEllipsoidExtent radii{.35, .35, .35};
     for (auto &peak : peaksWS->getPeaks())
       peak.setPeakShape(new PeakShapeEllipsoid(directions, radii, radii, radii, Kernel::QLab));
-    peaksWS->getPeak(2).setHKL(0, 0, 0);
 
-    IntegratePeaksShapeMD alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", eventWS);
-    alg.setProperty("PeaksWorkspace", peaksWS);
-    alg.setPropertyValue("OutputWorkspace", "dummy");
+    auto integrate = [&](const PeaksWorkspace_sptr &peaks) {
+      IntegratePeaksShapeMD alg;
+      alg.setChild(true);
+      alg.setRethrows(true);
+      alg.initialize();
+      alg.setProperty("InputWorkspace", eventWS);
+      alg.setProperty("PeaksWorkspace", peaks);
+      alg.setPropertyValue("OutputWorkspace", "dummy");
+      alg.execute();
+      TS_ASSERT(alg.isExecuted());
+      PeaksWorkspace_sptr out = alg.getProperty("OutputWorkspace");
+      return out;
+    };
 
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &error, std::string(error.what()),
-                            "At least three linearly independent indexed peaks are needed.");
-    TS_ASSERT(!alg.isExecuted());
+    const auto indexed = integrate(peaksWS);
+    PeaksWorkspace_sptr unindexedWS = peaksWS->clone();
+    for (auto &peak : unindexedWS->getPeaks())
+      peak.setHKL(0, 0, 0);
+    const auto unindexed = integrate(unindexedWS);
+    for (int i = 0; i < indexed->getNumberPeaks(); ++i) {
+      TS_ASSERT_LESS_THAN(0.0, indexed->getPeak(i).getIntensity());
+      TS_ASSERT_DELTA(unindexed->getPeak(i).getIntensity(), indexed->getPeak(i).getIntensity(), 1e-9);
+      TS_ASSERT_DELTA(unindexed->getPeak(i).getSigmaIntensity(), indexed->getPeak(i).getSigmaIntensity(), 1e-9);
+    }
+  }
+
+  // A satellite near a nuclear peak, close enough to round to its h,k,l, is
+  // integrated as a peak of its own, and the nuclear peak as without it.
+  void test_satellite_peaks_are_integrated_as_peaks_of_their_own() {
+    auto [eventWS, peaksWS] = buildEmptyPeaks();
+    const double sigma = 0.07, height = 6000.0, background = 10.0, region = 0.35;
+    const auto satellite = peaksWS->createPeakHKL(peaksWS->getPeak(0).getHKL() + V3D(0.45, 0.45, 0.45));
+    peaksWS->addPeak(*satellite);
+    std::vector<V3D> centers;
+    for (int i = 0; i < peaksWS->getNumberPeaks(); ++i)
+      centers.emplace_back(peaksWS->getPeak(i).getQLabFrame());
+    // clear of the other peaks' regions
+    for (int i = 0; i < 3; ++i)
+      TS_ASSERT_LESS_THAN(2 * (region + 0.05), (centers[3] - centers[i]).norm());
+    generateEvents(*eventWS, centers, std::vector<double>(centers.size(), height), sigma, background, region + 0.05,
+                   1.0);
+    addMDNormLogs(*eventWS, 1.0, 40.0, 1.0);
+    setSphericalShapes(*peaksWS, sigma, sigma, sigma);
+    const auto [profile, diagnostics] = integrateProfile(
+        eventWS, peaksWS, region, createSolidAngleWorkspace(*eventWS, 1.0), createFluxWorkspace(*eventWS, 1.0, 50.0));
+
+    const double trueIntensity = height * std::pow(2.0 * M_PI, 1.5) * sigma * sigma * sigma;
+    for (int i = 0; i < profile->getNumberPeaks(); ++i) {
+      TS_ASSERT_LESS_THAN(0, diagnostics->cell<int>(i, 5));
+      const auto &peak = profile->getPeak(i);
+      TSM_ASSERT_DELTA("Intensity of peak " + std::to_string(i), peak.getIntensity(), trueIntensity,
+                       4 * peak.getSigmaIntensity() + 0.005 * trueIntensity);
+    }
   }
 
   void test_exec_does_not_modify_input_events() {
@@ -379,8 +422,7 @@ public:
     builder.setRandomSeed(1);
     builder.setNumPixels(100);
     builder.addBackground(false);
-    // Six well-separated peaks (matching test_exec_events_reuses_existing_shape),
-    // rather than the minimum of three, so Optimize_UB has a well-conditioned fit.
+    // Six well-separated peaks (matching test_exec_events_reuses_existing_shape).
     builder.addPeakByHKL(V3D(1, -5, -3), 100, sigmas);
     builder.addPeakByHKL(V3D(1, -4, -4), 100, sigmas);
     builder.addPeakByHKL(V3D(1, -3, -5), 100, sigmas);

@@ -209,11 +209,9 @@ void IntegratePeaksShapeMD::exec() {
   std::vector<Peak> &peaks = peak_ws->getPeaks();
   size_t n_peaks = peak_ws->getNumberPeaks();
 
-  // Integrate3DEvents uses UBinv to assign each event to its nearest peak
-  // (by rounding UBinv*Q to the nearest h,k,l), so it must be derived from
-  // the indexed peaks even though integration itself stays in Q-lab.
-  std::vector<V3D> peak_q_list;
-  std::vector<V3D> hkl_vectors;
+  // Each event is assigned to the peak whose center is nearest to it, within
+  // RegionRadius, without indexing: satellite and unindexed peaks are
+  // integrated as any other.
   std::vector<std::pair<std::pair<double, double>, V3D>> qList;
   for (size_t i = 0; i < n_peaks; i++) {
     const auto *shape = dynamic_cast<const PeakShapeEllipsoid *>(&peaks[i].getPeakShape());
@@ -224,28 +222,12 @@ void IntegratePeaksShapeMD::exec() {
                                "so that every peak has a shape to reuse.");
     if (shape->frame() != Kernel::QLab)
       throw std::runtime_error("Peak " + std::to_string(i) + " has an ellipsoidal shape that is not in QLab.");
-
-    V3D hkl(peaks[i].getH(), peaks[i].getK(), peaks[i].getL());
-    if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) { // tolerance == 1 just checks for (0,0,0)
-      peak_q_list.emplace_back(peaks[i].getQLabFrame());
-      hkl_vectors.emplace_back(static_cast<double>(boost::math::iround<double>(hkl[0])),
-                               static_cast<double>(boost::math::iround<double>(hkl[1])),
-                               static_cast<double>(boost::math::iround<double>(hkl[2])));
-    }
     qList.emplace_back(std::pair<double, double>(1.0, 1.0), V3D(peaks[i].getQLabFrame()));
   }
 
-  if (peak_q_list.size() < 3)
-    throw std::runtime_error("At least three linearly independent indexed peaks are needed.");
-
-  Matrix<double> UB(3, 3, false);
-  Geometry::IndexingUtils::Optimize_UB(UB, hkl_vectors, peak_q_list);
-  Matrix<double> UBinv(UB);
-  UBinv.Invert();
-  UBinv *= (1.0 / (2.0 * M_PI));
-
+  const double regionRadius = getProperty("RegionRadius");
   const bool useOnePercentBackgroundCorrection = getProperty("UseOnePercentBackgroundCorrection");
-  Integrate3DEvents integrator(qList, UBinv, getProperty("RegionRadius"), useOnePercentBackgroundCorrection);
+  Integrate3DEvents integrator(qList, regionRadius, useOnePercentBackgroundCorrection);
 
   using Clock = std::chrono::steady_clock;
   auto seconds = [](Clock::time_point start) { return std::chrono::duration<double>(Clock::now() - start).count(); };
