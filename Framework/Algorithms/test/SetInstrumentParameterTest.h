@@ -11,6 +11,7 @@
 #include "MantidAlgorithms/SetInstrumentParameter.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include <string>
 
@@ -68,12 +69,11 @@ public:
     ExecuteAlgorithm(ws, cmptName, detList, paramName, paramValue);
 
     const auto &detectorInfo = ws->detectorInfo();
+    const auto &componentInfo = ws->componentInfo();
     const auto index1 = detectorInfo.indexOf(1);
-    const auto &cmpt1 = detectorInfo.detector(index1);
-    TS_ASSERT_EQUALS(paramValue, cmpt1.getStringParameter(paramName)[0]);
+    TS_ASSERT_EQUALS(paramValue, componentInfo.getStringParameter(index1, paramName)[0]);
     const auto index2 = detectorInfo.indexOf(2);
-    const auto &cmpt2 = detectorInfo.detector(index2);
-    TS_ASSERT_EQUALS(paramValue, cmpt2.getStringParameter(paramName)[0]);
+    TS_ASSERT_EQUALS(paramValue, componentInfo.getStringParameter(index2, paramName)[0]);
   }
 
   void test_cmpt_int_value() {

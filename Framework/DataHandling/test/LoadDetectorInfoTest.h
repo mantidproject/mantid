@@ -289,20 +289,19 @@ public:
     TS_ASSERT_THROWS_NOTHING(grouper.execute());
     TS_ASSERT(grouper.isExecuted());
 
-    const auto &pmap = WS->constInstrumentParameters();
+    const auto &compInfo = WS->componentInfo();
     const auto &detInfo = WS->detectorInfo();
+    const auto &pinfo = *(compInfo.sharedParameterInfo());
 
     // read the parameters from some random detectors, they're parameters are
     // all set to the same thing
     for (int detector : DETECTS) {
       const size_t detIndex = detInfo.indexOf(detector);
-
-      const auto &det = detInfo.detector(detIndex);
-      Parameter_sptr par = pmap.getRecursive(&det, "TubePressure");
+      Parameter_sptr par = pinfo.getRecursive(compInfo, detIndex, "TubePressure");
 
       TS_ASSERT(par);
       TS_ASSERT_DELTA(par->value<double>(), 10.0, 1.e-6);
-      par = pmap.getRecursive(&det, "TubeThickness");
+      par = pinfo.getRecursive(compInfo, detIndex, "TubeThickness");
       TS_ASSERT(par);
 
       TS_ASSERT_DELTA(par->value<double>(), 0.0008, 1.e-6);
@@ -368,15 +367,14 @@ public:
     MatrixWorkspace_const_sptr WS =
         std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(m_InoutWS));
 
-    const auto &pmap = WS->constInstrumentParameters();
+    const auto &pinfo = *(WS->componentInfo().sharedParameterInfo());
     const auto &detInfo = WS->detectorInfo();
 
     for (Mantid::detid_t j = 0; j < SmallTestDatFile::NDETECTS; ++j) {
 
       const size_t detIndex = detInfo.indexOf(j);
-      const IComponent *baseComp = detInfo.detector(detIndex).getComponentID();
 
-      Parameter_sptr par = pmap.get(baseComp, "TubePressure");
+      Parameter_sptr par = pinfo.get(detIndex, "TubePressure");
       // this is only for PSD detectors, code 3
       if (code[j] == "3") {
         TS_ASSERT(par);
@@ -384,7 +382,7 @@ public:
           return;
         TS_ASSERT_DELTA(par->value<double>(), boost::lexical_cast<double>(pressure[j]), 1.e-3);
 
-        par = pmap.get(baseComp, "TubeThickness");
+        par = pinfo.get(detIndex, "TubeThickness");
         TS_ASSERT(par);
         if (!par)
           return;

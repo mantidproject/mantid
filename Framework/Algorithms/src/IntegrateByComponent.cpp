@@ -8,6 +8,7 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidTypes/SpectrumDefinition.h"
@@ -167,7 +168,8 @@ std::vector<std::vector<size_t>> IntegrateByComponent::makeInstrumentMap(const A
  * group
  */
 std::vector<std::vector<size_t>> IntegrateByComponent::makeMap(const API::MatrixWorkspace_sptr &countsWS, int parents) {
-  std::unordered_multimap<Mantid::Geometry::ComponentID, size_t> mymap;
+  // keyed by the component index of the ancestor
+  std::unordered_multimap<size_t, size_t> mymap;
 
   if (parents == 0) // this should not happen in this file, but if one reuses
                     // the function and parents==0, the program has a sudden end
@@ -177,21 +179,23 @@ std::vector<std::vector<size_t>> IntegrateByComponent::makeMap(const API::Matrix
   }
 
   const auto spectrumInfo = countsWS->spectrumInfo();
-  const auto &detectorInfo = countsWS->detectorInfo();
+  const auto &componentInfo = countsWS->componentInfo();
   for (size_t i = 0; i < countsWS->getNumberHistograms(); i++) {
     if (!spectrumInfo.hasDetectors(i)) {
       g_log.debug("Spectrum has no detector, skipping");
       continue;
     }
 
-    const auto detIdx = spectrumInfo.spectrumDefinition(i)[0].first;
-    std::vector<std::shared_ptr<const Mantid::Geometry::IComponent>> anc = detectorInfo.detector(detIdx).getAncestors();
-
-    if (anc.size() < static_cast<size_t>(parents)) {
-      g_log.warning("Too many levels up. Will ignore LevelsUp");
-      return makeInstrumentMap(countsWS);
+    // walk up the component tree to the requested ancestor
+    size_t ancestor = spectrumInfo.firstDetectorIndex(i);
+    for (int level = 0; level < parents; ++level) {
+      if (!componentInfo.hasParent(ancestor)) {
+        g_log.warning("Too many levels up. Will ignore LevelsUp");
+        return makeInstrumentMap(countsWS);
+      }
+      ancestor = componentInfo.parent(ancestor);
     }
-    mymap.emplace(anc[parents - 1]->getComponentID(), i);
+    mymap.emplace(ancestor, i);
   }
 
   std::vector<std::vector<size_t>> speclist;
@@ -199,7 +203,7 @@ std::vector<std::vector<size_t>> IntegrateByComponent::makeMap(const API::Matrix
 
   auto s_it = mymap.begin();
   for (auto m_it = mymap.begin(); m_it != mymap.end(); m_it = s_it) {
-    Mantid::Geometry::ComponentID theKey = (*m_it).first;
+    const size_t theKey = (*m_it).first;
     auto keyRange = mymap.equal_range(theKey);
 
     // Iterate over all map elements with key == theKey

@@ -296,8 +296,9 @@ void SmoothNeighbours::findNeighboursUbiquitous() {
   // Go through every input workspace pixel
   m_outWI = 0;
   int sum = getProperty("SumNumberOfNeighbours");
-  std::shared_ptr<const Geometry::IComponent> parent, neighbParent, grandparent, neighbGParent;
+  size_t parent{ComponentInfo::invalidIndex}, grandparent{ComponentInfo::invalidIndex};
   std::vector<bool> used(m_inWS->getNumberHistograms(), false);
+  const auto &componentInfo = m_inWS->componentInfo();
   const auto &detectorInfo = m_inWS->detectorInfo();
   for (size_t wi = 0; wi < m_inWS->getNumberHistograms(); wi++) {
     if (sum > 1)
@@ -318,10 +319,11 @@ void SmoothNeighbours::findNeighboursUbiquitous() {
         continue; // skip masked detectors
       }
       if (sum > 1) {
-        const auto &det = detectorInfo.detector(index);
-        parent = det.getParent();
-        if (parent)
-          grandparent = parent->getParent();
+        if (componentInfo.hasParent(index)) {
+          parent = componentInfo.parent(index);
+          if (componentInfo.hasParent(parent))
+            grandparent = componentInfo.parent(parent);
+        }
       }
     } catch (Kernel::Exception::NotFoundError &) {
       continue; // skip missing detector
@@ -360,11 +362,10 @@ void SmoothNeighbours::findNeighboursUbiquitous() {
           if (sum > 1) {
             // Get the list of detectors in this pixel
             const std::set<detid_t> &dets = m_inWS->getSpectrum(neighWI).getDetectorIDs();
-            const auto &det = detectorInfo.detector(*dets.begin());
-            neighbParent = det.getParent();
-            neighbGParent = neighbParent->getParent();
-            if (noNeigh >= sum || neighbParent->getName() != parent->getName() ||
-                neighbGParent->getName() != grandparent->getName() || used[neighWI])
+            const auto neighbParent = componentInfo.parent(detectorInfo.indexOf(*dets.begin()));
+            const auto neighbGParent = componentInfo.parent(neighbParent);
+            if (noNeigh >= sum || componentInfo.name(neighbParent) != componentInfo.name(parent) ||
+                componentInfo.name(neighbGParent) != componentInfo.name(grandparent) || used[neighWI])
               continue;
             noNeigh++;
             used[neighWI] = true;

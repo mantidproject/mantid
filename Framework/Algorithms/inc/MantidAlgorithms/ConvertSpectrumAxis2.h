@@ -12,7 +12,7 @@
 
 namespace Mantid {
 namespace Geometry {
-class DetectorInfo;
+class ComponentInfo;
 }
 namespace API {
 class MatrixWorkspace;
@@ -82,7 +82,7 @@ private:
   void emplaceIndexMap(double value, size_t wsIndex);
 
   /// Getting Efixed
-  double getEfixed(const size_t detectorIndex, const Mantid::Geometry::DetectorInfo &detectorInfo,
+  double getEfixed(const size_t detectorIndex, const Mantid::Geometry::ComponentInfo &componentInfo,
                    const API::MatrixWorkspace &inputWS, const int emode) const;
 };
 

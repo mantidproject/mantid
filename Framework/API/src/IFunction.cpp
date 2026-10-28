@@ -18,9 +18,11 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/Instrument/ParameterInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/Exception.h"
@@ -1190,50 +1192,19 @@ void IFunction::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> w
 
     // check if parameter are specified in instrument definition file
 
-    const auto &paramMap = workspace->constInstrumentParameters();
-
-    Geometry::IDetector const *detectorPtr = nullptr;
-    size_t numDetectors = workspace->getSpectrum(wi).getDetectorIDs().size();
-    if (numDetectors > 1) {
-      // Note JZ oct 2011 - I'm not sure why the code uses the first detector
-      // and not the group. Ask Roman.
-      // Use the first detector ID that is actually present in the instrument;
-      // a spectrum may reference detector IDs that are absent from the
-      // instrument definition, in which case getDetector() throws.
-      const auto &detectorInfo = workspace->detectorInfo();
-      const auto &specDef = workspace->spectrumInfo().spectrumDefinition(wi);
-      for (size_t k = 0; k < specDef.size(); ++k) {
-        try {
-          // detector() throws NotFoundError if the ID is absent from the instrument
-          detectorPtr = &detectorInfo.detector(specDef[k].first);
-          break;
-        } catch (const Kernel::Exception::NotFoundError &) {
-          // This detector is not present in the instrument; try the next one
-        }
-      }
-      if (!detectorPtr) {
-        g_log.information() << "MatrixWorkspace has not been set for index: " << std::to_string(wi)
-                            << " as none of the detector ids can be found on the instrument\n";
-        return;
-      }
-    } else {
-      // Get the detector (single) at this workspace index
-      const auto &spectrumInfo = workspace->spectrumInfo();
-      if (!spectrumInfo.hasDetectors(wi)) {
-        g_log.information() << "MatrixWorkspace has not been set for index: " << std::to_string(wi)
-                            << " as no detector ids can be found for this workspace on the instrument\n";
-        return;
-      }
-      try {
-        detectorPtr = &spectrumInfo.detector(wi);
-      } catch (const Kernel::Exception::NotFoundError &) {
-        // hasDetectors() does not validate IDs against the instrument;
-        // the detector ID exists in the spectrum but not in the instrument.
-        g_log.information() << "MatrixWorkspace has not been set for index: " << std::to_string(wi)
-                            << " as the detector id for this workspace can't be found on the instrument\n";
-        return;
-      }
+    // Note JZ oct 2011 - I'm not sure why the code uses the first detector
+    // and not the group. Ask Roman.
+    // Note RB oct 2026 - Roman was not asked. And now, he never will be.
+    const auto &specDef = workspace->spectrumInfo().spectrumDefinition(wi);
+    if (specDef.size() == 0) {
+      g_log.information() << "MatrixWorkspace has not been set for index: " << std::to_string(wi)
+                          << " as no detector ids can be found for this workspace on the instrument\n";
+      return;
     }
+    // Detector indices in ComponentInfo match those in the SpectrumDefinition
+    const auto &componentInfo = workspace->componentInfo();
+    const auto &paramInfo = *(componentInfo.sharedParameterInfo());
+    const auto detIndex = specDef[0].first;
 
     for (size_t i = 0; i < nParams(); i++) {
       if (!isExplicitlySet(i)) {
@@ -1241,10 +1212,10 @@ void IFunction::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> w
         // parameter with the same short name (e.g. Bk2BkExpConvPV:Gamma and IkedaCarpenterPV:Gamma).
         // The plain getRecursive() short-circuits on the first match and would pick the wrong one.
         Geometry::Parameter_sptr param =
-            paramMap.getRecursiveFittingParameter(detectorPtr, parameterName(i), this->name());
+            paramInfo.getRecursiveFittingParameter(componentInfo, detIndex, parameterName(i), this->name());
         if (!param) {
           // Fall back for IDFs that omit the function prefix (no embedded function name to match).
-          param = paramMap.getRecursive(detectorPtr, parameterName(i), "fitting");
+          param = paramInfo.getRecursive(componentInfo, detIndex, parameterName(i), "fitting");
         }
         if (param != Geometry::Parameter_sptr()) {
           // get FitParameter
