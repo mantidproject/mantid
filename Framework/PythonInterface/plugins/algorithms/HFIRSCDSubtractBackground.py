@@ -193,7 +193,7 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
         in_place = output_name == self.getPropertyValue("InputWorkspace")
 
         outputs, scaled_backgrounds = [], []
-        arrangements = dict()  # background arranged in the pixel layout of the members, by detectorID log
+        arrangements = dict()  # background arranged in the pixel layout of the members, by detectorID log or None
         for _, member in self._members(sample):
             flux_ratio = self._flux_ratio(member, background, normalized_by)
             background_arrays = self._arranged_background(member, background, grouping, arrangements)
@@ -481,12 +481,14 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
         member: IMDHistoWorkspace,
         background: Background,
         grouping: Optional[GroupingWorkspace],
-        arrangements: Dict[bytes, Tuple[np.ndarray, np.ndarray]],
+        arrangements: Dict[Optional[bytes], Tuple[np.ndarray, np.ndarray]],
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Signal and error squared of the background, arranged in the pixel layout of a sample member.
 
-        - An MDHistoWorkspace background without a grouping workspace already has the pixel layout of the member.
+        - An MDHistoWorkspace background without a grouping workspace already has the pixel layout of the member. Its
+          signal and errors are copied, so that a subtraction in place does not change them when the background is
+          also a member of the sample.
         - A Workspace2D background without a grouping workspace: pixel k of the member takes the value of the spectrum
           whose detector ID is entry k of the 'detectorID' log of the member.
         - With a grouping workspace: the intensities and errors squared of the background are summed within each
@@ -494,19 +496,23 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
           then takes the sums of the group of entry k of its 'detectorID' log, the first detector ID of the group.
 
         The arrangement depends only on the 'detectorID' log of the member, so it is computed once per distinct log and
-        stored in arrangements.
+        stored in arrangements. The copy of an MDHistoWorkspace background without a grouping workspace is the same
+        for all members, and is stored under the key None.
 
         :param member: a sample member that passed validateInputs.
         :param background: the background, which passed validateInputs.
         :param grouping: the InputGroupingWorkspace, or None.
-        :param arrangements: cache of the arrangements already computed, by 'detectorID' log; updated in place.
+        :param arrangements: cache of the arrangements already computed, by 'detectorID' log, or None for the copy of
+            an MDHistoWorkspace background without a grouping workspace; updated in place.
         :returns: the signal and the error squared of the background, two arrays with the shape of the first two
             dimensions of the member.
         :raises RuntimeError: if a detector ID is not found in the background or in the grouping workspace (see
             _workspace_indices).
         """
         if grouping is None and isinstance(background, IMDHistoWorkspace):
-            return background.getSignalArray()[:, :, 0], background.getErrorSquaredArray()[:, :, 0]
+            if None not in arrangements:
+                arrangements[None] = (np.array(background.getSignalArray()[:, :, 0]), np.array(background.getErrorSquaredArray()[:, :, 0]))
+            return arrangements[None]
         pixel_ids = np.asarray(member.getExperimentInfo(0).run().getProperty("detectorID").value, dtype=int)
         key = pixel_ids.tobytes()
         if key not in arrangements:

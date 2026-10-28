@@ -254,6 +254,17 @@ class HFIRSCDSubtractBackgroundTest(unittest.TestCase):
             self._assert_subtraction(mtd[f"output_{member_name}"], self._member_flux_ratio(member_name))
             self.assertEqual(mtd[f"output_{member_name}"].getExperimentInfo(0).getInstrumentName(), "WAND")
 
+    def test_group_in_place_with_background_as_member(self):
+        # the background, subtracted first, must not change the background subtracted from the next member
+        self._create_background()
+        sample = self._create_sample()
+        GroupWorkspaces(InputWorkspaces=["background", "sample"], OutputWorkspace="scans")
+        HFIRSCDSubtractBackground(
+            InputWorkspace="scans", InputBackground="background", NullifyNegativeValues=False, OutputWorkspace="scans"
+        )
+        np.testing.assert_array_equal(mtd["background"].getSignalArray(), np.zeros(self.BACKGROUND_SIGNAL.shape))
+        self._assert_subtraction(sample, np.ones(4))
+
     def test_output_background_workspace(self):
         output, scaled_background = HFIRSCDSubtractBackground(
             InputWorkspace=self._create_sample(normalized_by="Monitor"),
