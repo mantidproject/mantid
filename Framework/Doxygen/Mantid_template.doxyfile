@@ -236,14 +236,6 @@ PERLMOD_LATEX          = NO
 PERLMOD_PRETTY         = YES
 PERLMOD_MAKEVAR_PREFIX =
 #---------------------------------------------------------------------------
-# Configuration options related to the qtcreator output
-#---------------------------------------------------------------------------
-GENERATE_QHP           = @GENERATE_QHELP@
-QCH_FILE               = "@CMAKE_CURRENT_BINARY_DIR@/../../doxygen/mantid.qch"
-QHP_NAMESPACE          = "mantidproject.org"
-QHP_VIRTUAL_FOLDER     = "mantidQtHelp"
-QHG_LOCATION           = @QHELP_EXECUTABLE@
-#---------------------------------------------------------------------------
 # Configuration options related to the preprocessor
 #---------------------------------------------------------------------------
 ENABLE_PREPROCESSING   = YES
