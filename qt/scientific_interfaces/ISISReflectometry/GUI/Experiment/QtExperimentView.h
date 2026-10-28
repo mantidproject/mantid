@@ -55,6 +55,7 @@ public:
   void setDiagnosticsOption(bool enable) override;
 
   std::vector<LookupRow::ValueArray> getLookupTable() const override;
+  void setInstrumentColumnsVisible(std::string const &instrumentName) override;
   void setLookupTable(std::vector<LookupRow::ValueArray> rows) override;
   void showLookupRowAsInvalid(int row, int column) override;
   void showLookupRowAsValid(int row) override;

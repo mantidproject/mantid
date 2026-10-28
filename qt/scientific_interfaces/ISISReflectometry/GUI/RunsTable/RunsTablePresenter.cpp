@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsTablePresenter.h"
 #include "Common/Map.h"
-#include "GUI/Common/InstrumentCategory.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "Reduction/Group.h"
 #include "Reduction/RowLocation.h"
@@ -288,7 +287,6 @@ void RunsTablePresenter::notifyAnyBatchAutoreductionPaused() { updateWidgetEnabl
 
 void RunsTablePresenter::notifyInstrumentChanged(std::string const &instrumentName) {
   m_view->setInstrumentName(instrumentName);
-  m_view->setAdjustedAngleColumnVisible(instrumentCategory(instrumentName) == InstrumentCategory::POLREF);
   notifyRowModelChanged();
 }
 

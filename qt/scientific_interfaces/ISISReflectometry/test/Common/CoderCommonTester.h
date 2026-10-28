@@ -55,6 +55,21 @@ public:
     testSave(gui->m_save.get(), map[QString("saveView")].toMap());
   }
 
+  void populateSpecularPixels(QtBatchView *gui, QtMainWindowView *mwv) {
+    Decoder batchFinder;
+    auto batchPresenter = batchFinder.findBatchPresenter(gui, mwv);
+    auto runsPresenter = dynamic_cast<RunsPresenter *>(batchPresenter->m_runsPresenter.get());
+    auto runsTablePresenter = dynamic_cast<RunsTablePresenter *>(runsPresenter->m_tablePresenter.get());
+    auto &rows = runsTablePresenter->mutableRunsTable().mutableReductionJobs().mutableGroups()[0].mutableRows();
+    rows[0] = Row({"12345"}, 0.5, TransmissionRunPair(), RangeInQ(), std::nullopt, {},
+                  workspaceNames({"12345"}, TransmissionRunPair()), 280.5, 282.25);
+    auto lookup = gui->experiment()->getLookupTable();
+    lookup[0][LookupRow::NOMINAL_SPECULAR_PIXEL] = "281.5";
+    lookup[0][LookupRow::ACTUAL_SPECULAR_PIXEL] = "283.25";
+    gui->experiment()->setLookupTable(lookup);
+    TS_ASSERT_EQUALS(gui->experiment()->getLookupTable(), lookup);
+  }
+
   void checkPerAngleDefaultsRowEquals(const QtBatchView *gui, const QList<QVariant> &list, int rowIndex) {
     testPerAngleDefaultsRow(gui->m_experiment->m_ui.optionsTable, list, rowIndex);
   }
@@ -104,7 +119,8 @@ private:
 
   void testPerAngleDefaults(const QTableWidget *tab, const QMap<QString, QVariant> &map) {
     TS_ASSERT_EQUALS(tab->rowCount(), map[QString("rowsNum")].toInt());
-    TS_ASSERT_EQUALS(tab->columnCount(), map[QString("columnsNum")].toInt());
+    TS_ASSERT_EQUALS(tab->columnCount(), LookupRow::OPTIONS_TABLE_COLUMN_COUNT);
+    TS_ASSERT_LESS_THAN_EQUALS(map[QString("columnsNum")].toInt(), tab->columnCount());
     testPerAngleDefaultsRows(tab, map[QString("rows")].toList());
   }
 
@@ -117,7 +133,8 @@ private:
   void testPerAngleDefaultsRow(const QTableWidget *tab, const QList<QVariant> &list, int rowIndex) {
     for (auto columnIndex = 0; columnIndex < tab->columnCount(); ++columnIndex) {
       auto guiText = tab->item(rowIndex, columnIndex)->text();
-      TS_ASSERT_EQUALS(guiText.toStdString(), list[columnIndex].toString().toStdString());
+      TS_ASSERT_EQUALS(guiText.toStdString(),
+                       (columnIndex < list.size() ? list[columnIndex].toString().toStdString() : std::string()));
     }
   }
 
@@ -192,6 +209,12 @@ private:
       if (scaleFactorPresent) {
         TS_ASSERT_EQUALS(row.value().scaleFactor().value(), map[QString("scaleFactor")].toDouble());
       }
+      TS_ASSERT_EQUALS(row->nominalSpecularPixel().has_value(), map.contains("nominalSpecularPixel"));
+      if (row->nominalSpecularPixel())
+        TS_ASSERT_EQUALS(*row->nominalSpecularPixel(), map["nominalSpecularPixel"].toDouble());
+      TS_ASSERT_EQUALS(row->actualSpecularPixel().has_value(), map.contains("actualSpecularPixel"));
+      if (row->actualSpecularPixel())
+        TS_ASSERT_EQUALS(*row->actualSpecularPixel(), map["actualSpecularPixel"].toDouble());
       testTransmissionRunPair(row.value().transmissionWorkspaceNames(), map[QString("transRunNums")].toMap());
       testReductionWorkspaces(row.value().reducedWorkspaceNames(), map[QString("reductionWorkspaces")].toMap());
       testReductionOptions(row.value().reductionOptions(), map[QString("reductionOptions")].toMap());
@@ -357,6 +380,7 @@ public:
     declareProperty("ROIDetectorIDs", "");
     declareProperty("CalibrationFile", "");
     declareProperty("NominalSpecularPixelSpectrumNo", 0.0);
+    declareProperty("ActualSpecularPixelSpectrumNo", 0.0);
   }
   void exec() override {}
 };

@@ -30,15 +30,6 @@ public:
 
   static void destroySuite(RunsTablePresenterDisplayTest *suite) { delete suite; }
 
-  void testAdjustedAngleVisibilityFollowsInstrument() {
-    auto presenter = makePresenter(m_view, oneGroupWithARowModel());
-    EXPECT_CALL(m_view, setAdjustedAngleColumnVisible(true)).Times(1);
-    EXPECT_CALL(m_view, setAdjustedAngleColumnVisible(false)).Times(4);
-    for (auto const &instrument : {"POLREF", "INTER", "OFFSPEC", "CRISP", "SURF"})
-      presenter.notifyInstrumentChanged(instrument);
-    verifyAndClearExpectations();
-  }
-
   void testAdjustedAngleCannotBeFilledDown() {
     auto presenter = makePresenter(m_view, oneGroupWithTwoSimpleRowsModel());
     selectedRowLocationsAre(m_jobs, {location(0, 0), location(0, 1)});
@@ -316,6 +307,8 @@ public:
          MantidQt::MantidWidgets::Batch::Cell(MantidQt::MantidWidgets::optionsToString(ReductionOptionsMap())),
          MantidQt::MantidWidgets::Batch::Cell("")});
     roundedCells.emplace_back(adjustedAngleCell(makeSimpleRow("12345"), precision));
+    roundedCells.emplace_back("");
+    roundedCells.emplace_back("");
     EXPECT_CALL(m_jobs, setCellsAt(rowLocation, roundedCells)).Times(1);
     presenter.notifyRowModelChanged();
 
