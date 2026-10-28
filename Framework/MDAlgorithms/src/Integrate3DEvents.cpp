@@ -752,9 +752,9 @@ void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &
       std::vector<double> gMode, wMode;
       std::vector<V3D> invSqMode;
       computeKernel(mode, gMode, wMode, invSqMode);
-      double modeA = 0.0, modeB = 0.0, modeSigA = 0.0;
       const double modePeakNorm = peakNorm(mode, nullptr);
       if (modePeakNorm > 0.0) {
+        double modeA = 0.0, modeB = 0.0, modeSigA = 0.0;
         solvePoissonMatchedFilter(gMode, wMode, modePeakNorm, volume, modeA, modeB, modeSigA);
         if (std::isfinite(modeSigA) && modeSigA > 0.0 && (!(sigA > 0.0) || modeA / modeSigA > A / sigA)) {
           seedCenter = mode;
