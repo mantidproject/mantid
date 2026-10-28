@@ -135,8 +135,6 @@ private:
 
   void markAsSourceOrSample(Mantid::Geometry::IComponent *componentId, const size_t componentIndex);
 
-  std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> makeWrappers() const;
-
   /// Rekey the ParameterMap's parameters from legacy component pointers to component indices.
   std::shared_ptr<ParameterInfo> makeParameterInfo() const;
 
@@ -181,6 +179,10 @@ public:
   std::unique_ptr<Beamline::DetectorInfo> detectorInfo() const;
 
   std::shared_ptr<std::vector<detid_t>> detectorIds() const;
+
+  /// Make the wrappers from the data collected by walkInstrument(), which must be called first.
+  /// The DetectorInfo shares ownership of the visited instrument.
+  std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> makeWrappers() const;
 
   static std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeWrappers(const Instrument &instrument, ParameterMap *pmap = nullptr);

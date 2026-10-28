@@ -102,7 +102,9 @@ public:
     TS_ASSERT_EQUALS(metadata.validFromDate(), validFrom);
     TS_ASSERT_EQUALS(metadata.defaultView(), "3D");
     TS_ASSERT_EQUALS(metadata.defaultAxis(), "Z-");
-    TSM_ASSERT("No physical instrument was set", !metadata.physicalInstrument());
+    TSM_ASSERT("No physical instrument was set", !metadata.hasPhysicalInstrument());
+    TS_ASSERT_THROWS(metadata.physicalComponentInfo(), const std::runtime_error &);
+    TS_ASSERT_THROWS(metadata.physicalDetectorInfo(), const std::runtime_error &);
   }
 
   void test_GetInstrumentMetadata_physicalInstrument() {
@@ -114,10 +116,34 @@ public:
     inst1->setPhysicalInstrument(std::move(physInst));
     ws.setInstrument(inst1);
 
-    const auto physical = ws.instrumentMetadata().physicalInstrument();
-    TSM_ASSERT("Physical instrument should be present", physical);
-    TS_ASSERT_EQUALS(physical->getName(), "MyPhysicalInst");
-    TSM_ASSERT("Physical instrument should share the owning instrument's ParameterMap", physical->isParametrized());
+    const auto &metadata = ws.instrumentMetadata();
+    TSM_ASSERT("Physical instrument should be present", metadata.hasPhysicalInstrument());
+    const auto &physicalComponentInfo = metadata.physicalComponentInfo();
+    TS_ASSERT_EQUALS(physicalComponentInfo.name(physicalComponentInfo.root()), "MyPhysicalInst");
+    TS_ASSERT_EQUALS(metadata.physicalDetectorInfo().size(), 0);
+  }
+
+  void test_GetInstrumentMetadata_physicalInstrument_leaves_neutronic_parameters_intact() {
+    ExperimentInfo ws;
+    auto inst1 = std::make_shared<Instrument>();
+    inst1->setName("MyTestInst");
+    auto physInst = std::make_unique<Instrument>();
+    physInst->setName("MyPhysicalInst");
+    inst1->setPhysicalInstrument(std::move(physInst));
+    ws.setInstrument(inst1);
+    auto &pmap = ws.instrumentParameters();
+    pmap.addDouble(inst1->getComponentID(), "neutronicParam", 1.5);
+
+    // Building the physical wrappers must not have rekeyed the workspace's own map
+    // into the physical instrument's index domain
+    const auto &componentInfo = ws.componentInfo();
+    TS_ASSERT(ws.instrumentMetadata().hasPhysicalInstrument());
+    TS_ASSERT_EQUALS(componentInfo.parameters(componentInfo.root()).count("neutronicParam"), 1);
+    TS_ASSERT_EQUALS(pmap.getDouble("MyTestInst", "neutronicParam"), std::vector<double>{1.5});
+
+    // A copy shares the read-only metadata of its source
+    ExperimentInfo copy(ws);
+    TS_ASSERT_EQUALS(&copy.instrumentMetadata(), &ws.instrumentMetadata());
   }
 
   void test_GetSetSample() {
