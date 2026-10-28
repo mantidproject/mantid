@@ -13,6 +13,7 @@ from mantid.simpleapi import (
     CloneWorkspace,
     CreateMDHistoWorkspace,
     CreateSampleWorkspace,
+    CreateWorkspace,
     DeleteWorkspace,
     GroupWorkspaces,
     HFIRSCDSubtractBackground,
@@ -454,6 +455,76 @@ class HFIRSCDSubtractBackgroundTest(unittest.TestCase):
             )
         np.testing.assert_array_equal(first.getSignalArray(), self.SAMPLE_SIGNAL)
         np.testing.assert_allclose(first.getErrorSquaredArray(), self.SAMPLE_ERROR_SQUARED)
+
+    def _create_workspace2d(self, detectors_per_spectrum, signal, error_squared, name="background"):
+        """Workspace2D background with the WAND instrument, one bin per spectrum, and the given detector IDs in each spectrum."""
+        n_spectra = len(detectors_per_spectrum)
+        workspace = CreateWorkspace(
+            DataX=[0.0, 1.0] * n_spectra,
+            DataY=signal,
+            DataE=np.sqrt(error_squared),
+            NSpec=n_spectra,
+            ParentWorkspace=self.instruments["WAND"],
+            OutputWorkspace=name,
+        )
+        for index, detector_ids in enumerate(detectors_per_spectrum):
+            spectrum = workspace.getSpectrum(index)
+            spectrum.clearDetectorIDs()
+            for detector_id in detector_ids:
+                spectrum.addDetectorID(detector_id)
+        return workspace
+
+    def test_workspace2d_grouped_like_sample(self):
+        # spectrum row + 2 col holds the detectors of group row + 2 col + 1 of the 2x2 grouping, as does sample pixel (row, col)
+        detectors = [[i + 4 * j for j in (2 * col, 2 * col + 1) for i in (2 * row, 2 * row + 1)] for col in range(3) for row in range(2)]
+        grouped_signal = self._grouped(self.UNGROUPED_SIGNAL)
+        grouped_error_squared = self._grouped(self.UNGROUPED_ERROR_SQUARED)
+        output = HFIRSCDSubtractBackground(
+            InputWorkspace=self._create_grouped_sample(),
+            InputBackground=self._create_workspace2d(detectors, grouped_signal.ravel(order="F"), grouped_error_squared.ravel(order="F")),
+            NullifyNegativeValues=False,
+            OutputWorkspace="output",
+        )
+        np.testing.assert_allclose(output.getSignalArray(), self.SAMPLE_SIGNAL - grouped_signal)
+        np.testing.assert_allclose(output.getErrorSquaredArray(), self.SAMPLE_ERROR_SQUARED + grouped_error_squared)
+
+    def test_workspace2d_grouped_unlike_sample_raises(self):
+        # spectrum j holds the 4 detectors i + 4 j of column j: the first detectors 0 and 2, 8 and 10, 16 and 18 of the
+        # 2x2 groups of the sample share a spectrum
+        detectors = [[i + 4 * j for i in range(4)] for j in range(6)]
+        with self.assertRaisesRegex(
+            RuntimeError,
+            "3 of 6 detector IDs share a spectrum of InputBackground with another one; a grouped InputBackground must be "
+            "grouped like InputWorkspace",
+        ):
+            HFIRSCDSubtractBackground(
+                InputWorkspace=self._create_grouped_sample(),
+                InputBackground=self._create_workspace2d(detectors, np.ones(6), np.ones(6)),
+                OutputWorkspace="output",
+            )
+
+    def test_workspace2d_with_detectors_sharing_a_spectrum_raises_with_grouping(self):
+        # as many spectra as detectors, but the detector of spectrum 1 moved to spectrum 0, leaving spectrum 1 without one
+        background = CloneWorkspace(self.instruments["WAND"], OutputWorkspace="background")
+        detector_id = list(background.getSpectrum(1).getDetectorIDs())[0]
+        background.getSpectrum(0).addDetectorID(detector_id)
+        background.getSpectrum(1).clearDetectorIDs()
+        # the detector IDs of the background are checked before those of the grouping workspace, which needs only one
+        # spectrum per detector and 6 groups, one per pixel of the sample
+        grouping = WorkspaceFactory.create("GroupingWorkspace", background.getNumberHistograms(), 1, 1)
+        for group in range(6):
+            grouping.mutableY(group)[0] = group + 1.0
+        mtd.addOrReplace("grouping", grouping)
+        with self.assertRaisesRegex(
+            RuntimeError,
+            "1 of 1966080 detector IDs share a spectrum of InputBackground with another one; each spectrum must have exactly one detector",
+        ):
+            HFIRSCDSubtractBackground(
+                InputWorkspace=self._create_grouped_sample(),
+                InputBackground=background,
+                InputGroupingWorkspace=grouping,
+                OutputWorkspace="output",
+            )
 
     def test_validation_rejects_workspace2d_with_several_bins(self):
         background = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=2, OutputWorkspace="several_bins")

@@ -120,7 +120,7 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
         problems of all invalid members are reported together, each prefixed with the member name.
 
         The detector IDs themselves are looked up only in PyExec, which raises before modifying any member if one is
-        missing.
+        missing or does not have a spectrum of its own.
 
         :returns: dictionary mapping "InputGroupingWorkspace", "InputBackground" and/or "InputWorkspace" to a
             description of the problems found; empty when the inputs are valid.
@@ -182,7 +182,8 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
         The inputs are assumed valid, as checked by validateInputs.
 
         :raises RuntimeError: if a detector ID of the sample or of the background is not found in InputBackground or in
-            InputGroupingWorkspace (see _workspace_indices). No member is modified then.
+            InputGroupingWorkspace, or does not have a spectrum of its own there (see _workspace_indices). No member is
+            modified then.
         """
         sample = self.getProperty("InputWorkspace").value
         background = self.getProperty("InputBackground").value
@@ -515,8 +516,8 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
             an MDHistoWorkspace background without a grouping workspace; updated in place.
         :returns: the signal and the error squared of the background, two arrays with the shape of the first two
             dimensions of the member.
-        :raises RuntimeError: if a detector ID is not found in the background or in the grouping workspace (see
-            _workspace_indices).
+        :raises RuntimeError: if a detector ID is not found in the background or in the grouping workspace, or does not
+            have a spectrum of its own there (see _workspace_indices).
         """
         if grouping is None and isinstance(background, IMDHistoWorkspace):
             if None not in arrangements:
@@ -526,7 +527,9 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
         key = pixel_ids.tobytes()
         if key not in arrangements:
             if grouping is None:
-                indices = self._workspace_indices(background, pixel_ids, "InputBackground")
+                indices = self._workspace_indices(
+                    background, pixel_ids, "InputBackground", "; a grouped InputBackground must be grouped like InputWorkspace"
+                )
                 signal = background.extractY()[indices, 0]
                 error_squared = background.extractE()[indices, 0] ** 2
             else:
@@ -562,27 +565,40 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
             raise RuntimeError(
                 f"InputBackground has {n_spectra} spectra for {detector_ids.size} detectors; each spectrum must have exactly one detector"
             )
+        # with as many detectors as spectra, and each detector in a spectrum of its own, every spectrum gets one ID
         ids = np.empty(n_spectra, dtype=int)
-        ids[self._workspace_indices(background, detector_ids, "InputBackground")] = detector_ids
+        ids[self._workspace_indices(background, detector_ids, "InputBackground", "; each spectrum must have exactly one detector")] = (
+            detector_ids
+        )
         return background.extractY()[:, 0], background.extractE()[:, 0] ** 2, ids
 
     @staticmethod
-    def _workspace_indices(workspace: MatrixWorkspace, detector_ids: np.ndarray, name: str) -> np.ndarray:
+    def _workspace_indices(workspace: MatrixWorkspace, detector_ids: np.ndarray, name: str, hint: str = "") -> np.ndarray:
         """
-        Workspace index of the spectrum holding each detector ID.
+        Workspace index of the spectrum holding each detector ID, each detector ID having a spectrum of its own.
+
+        The detector IDs looked up are those of distinct pixels, groups or detectors, so two of them in the same
+        spectrum mean that the workspace is grouped differently from what the caller expects.
 
         :param workspace: a Workspace2D background or a GroupingWorkspace, whose spectra have detector IDs.
-        :param detector_ids: one-dimensional array of detector IDs.
+        :param detector_ids: one-dimensional array of distinct detector IDs.
         :param name: property name of the workspace, for the error message.
-        :returns: one-dimensional array of workspace indices, in the order of detector_ids.
-        :raises RuntimeError: if a detector ID is not found in the workspace.
+        :param hint: what the workspace must be, appended to the error message when detector IDs share a spectrum.
+        :returns: one-dimensional array of distinct workspace indices, in the order of detector_ids.
+        :raises RuntimeError: if a detector ID is not found in the workspace, is in several spectra, or shares a
+            spectrum with another detector ID.
         """
         indices = np.asarray(workspace.getIndicesFromDetectorIDs(detector_ids.tolist()), dtype=int)
-        if indices.size != detector_ids.size:
+        if indices.size < detector_ids.size:
             raise RuntimeError(
                 f"{detector_ids.size - indices.size} of {detector_ids.size} detector IDs are not found in {name}; "
                 "the sample, the background and the grouping workspace must come from the same instrument"
             )
+        if indices.size > detector_ids.size:
+            raise RuntimeError(f"{indices.size - detector_ids.size} detector IDs are in several spectra of {name}")
+        n_shared = indices.size - np.unique(indices).size
+        if n_shared > 0:
+            raise RuntimeError(f"{n_shared} of {detector_ids.size} detector IDs share a spectrum of {name} with another one{hint}")
         return indices
 
     @staticmethod
