@@ -9,9 +9,11 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include <boost/lexical_cast.hpp>
 #include <optional>
 #include <string>
+#include <type_traits>
 
 namespace Mantid {
 namespace API {
@@ -80,6 +82,84 @@ std::optional<T> checkForOptionalInstrumentDefault(const Mantid::API::Algorithm 
   } else {
     double value = boost::lexical_cast<double, std::string>(algProperty->value());
     return std::optional<T>(static_cast<T>(value));
+  }
+}
+
+/**
+ * Checks for the default values of a mandatory algorithm property associated
+ * with the instrument, read from the root component's parameters.
+ *
+ * @param alg : A pointer to the algorithm to which the property belongs
+ * @param propName : The name of the property in the algorithm
+ * @param componentInfo : The instrument's component info
+ * @param idf_name : The name of the property in the Instrument Defintion
+ * @return A value of type T that is either the default value or the user
+ * supplied value.
+ */
+template <typename T>
+T checkForMandatoryInstrumentDefault(Mantid::API::Algorithm const *const alg, std::string const &propName,
+                                     Mantid::Geometry::ComponentInfo const &componentInfo,
+                                     std::string const &idf_name) {
+  auto const *algProperty = alg->getPointerToProperty(propName);
+  if constexpr (std::is_same_v<T, std::string>) {
+    if (!algProperty->isDefault()) {
+      return algProperty->value();
+    }
+    auto const defaults = componentInfo.getStringParameter(componentInfo.root(), idf_name);
+    if (defaults.empty()) {
+      throw std::runtime_error("No data could be retrieved from the parameters "
+                               "and argument wasn't provided: " +
+                               propName);
+    }
+    return defaults[0];
+  } else {
+    if (!algProperty->isDefault()) {
+      return static_cast<T>(boost::lexical_cast<double, std::string>(algProperty->value()));
+    }
+    auto const defaults = componentInfo.getNumberParameter(componentInfo.root(), idf_name);
+    if (defaults.empty()) {
+      throw std::runtime_error("No data could be retrieved from the parameters "
+                               "and argument wasn't provided: " +
+                               propName);
+    }
+    return static_cast<T>(defaults[0]);
+  }
+}
+
+/**
+ * Checks for the default values of an optional algorithm property associated
+ * with the instrument, read from the root component's parameters.
+ *
+ * @param alg : A pointer to the algorithm to which the property belongs
+ * @param propName : The name of the property in the algorithm
+ * @param componentInfo : The instrument's component info
+ * @param idf_name : The name of the property in the Instrument Defintion
+ * @return A std::optional value of type T that is either the default value,
+ * the user supplied value or an uninitialized std::optional.
+ */
+template <typename T>
+std::optional<T> checkForOptionalInstrumentDefault(Mantid::API::Algorithm const *const alg, std::string const &propName,
+                                                   Mantid::Geometry::ComponentInfo const &componentInfo,
+                                                   std::string const &idf_name) {
+  auto const *algProperty = alg->getPointerToProperty(propName);
+  if constexpr (std::is_same_v<T, std::string>) {
+    if (!algProperty->isDefault()) {
+      return algProperty->value();
+    }
+    auto const defaults = componentInfo.getStringParameter(componentInfo.root(), idf_name);
+    if (defaults.empty()) {
+      return std::nullopt;
+    }
+    return defaults[0];
+  } else {
+    if (!algProperty->isDefault()) {
+      return static_cast<T>(boost::lexical_cast<double, std::string>(algProperty->value()));
+    }
+    auto const defaults = componentInfo.getNumberParameter(componentInfo.root(), idf_name);
+    if (defaults.empty()) {
+      return std::nullopt;
+    }
+    return static_cast<T>(defaults[0]);
   }
 }
 

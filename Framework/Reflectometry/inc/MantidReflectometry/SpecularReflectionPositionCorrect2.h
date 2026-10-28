@@ -13,7 +13,8 @@
 
 namespace Mantid {
 namespace Geometry {
-class Instrument;
+class ComponentInfo;
+class DetectorInfo;
 class ReferenceFrame;
 } // namespace Geometry
 namespace Kernel {
@@ -46,8 +47,9 @@ private:
                                const detid_t detectorID, const double twoThetaInRad, const std::string &correctionType,
                                const Geometry::ReferenceFrame &referenceFrame, const Kernel::V3D &samplePosition,
                                const Kernel::V3D &sampleToDetector, const double beamOffsetOld);
-  static Kernel::V3D declareDetectorPosition(const Geometry::Instrument &inst, const std::string &detectorName,
-                                             const detid_t detectorID);
+  static Kernel::V3D declareDetectorPosition(Geometry::ComponentInfo const &componentInfo,
+                                             Geometry::DetectorInfo const &detectorInfo,
+                                             std::string const &detectorName, detid_t const detectorID);
   Kernel::V3D declareSamplePosition(const API::MatrixWorkspace &ws);
   double twoThetaFromProperties(const API::MatrixWorkspace &inWS, const double l2);
 };

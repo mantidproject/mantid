@@ -1,0 +1,1 @@
+- :class:`~mantid.geometry.ComponentInfo` method ``indexOfAny(name)`` now returns the same component as ``Instrument.getComponentByName(name)`` when several components share a name: the one closest to the root of the instrument. Previously it could return a different component with that name.

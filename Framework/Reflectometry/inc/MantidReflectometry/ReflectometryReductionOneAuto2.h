@@ -85,7 +85,7 @@ private:
   MatrixWorkspace_sptr cropQ(const MatrixWorkspace_sptr &inputWS, RebinParams const &params);
   /// Populate algorithmic correction properties
   void populateAlgorithmicCorrectionProperties(const Mantid::API::IAlgorithm_sptr &alg,
-                                               const Mantid::Geometry::Instrument_const_sptr &instrument);
+                                               Mantid::Geometry::ComponentInfo const &componentInfo);
   /// Get a polarization efficiencies workspace.
   std::tuple<API::MatrixWorkspace_sptr, std::string, std::string> getPolarizationEfficiencies();
   void applyPolarizationCorrection(std::string const &outputIvsLam);

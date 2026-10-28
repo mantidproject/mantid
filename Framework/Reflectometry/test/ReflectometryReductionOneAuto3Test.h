@@ -24,7 +24,7 @@
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
 #include "MantidFrameworkTestHelpers/ReflectometryHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/Points.h"
 
@@ -152,7 +152,7 @@ public:
     TS_ASSERT_DELTA(qMax, out->x(0).back(), 1e-6);
 
     // Compare instrument components before and after
-    compare_detectors_in_out(inter->getInstrument(), out->getInstrument(),
+    compare_detectors_in_out(inter->componentInfo(), out->componentInfo(),
                              {"monitor1", "monitor2", "monitor3", "linear-detector"}, "point-detector",
                              {std::tan(theta * 2 * M_PI / 180)});
   }
@@ -169,7 +169,7 @@ public:
     alg->execute();
     MatrixWorkspace_sptr out = getMatrixOutput(alg, "OutputWorkspace");
     // Compare instrument components before and after
-    compare_detectors_in_out(polref->getInstrument(), out->getInstrument(),
+    compare_detectors_in_out(polref->componentInfo(), out->componentInfo(),
                              {"monitor1", "monitor2", "monitor3", "point-detector", "lineardetector"}, "OSMOND",
                              {25.99589, 0.1570});
   }
@@ -188,7 +188,7 @@ public:
     MatrixWorkspace_sptr out = getMatrixOutput(alg, "OutputWorkspace");
 
     // Compare instrument components before and after
-    compare_detectors_in_out(crisp->getInstrument(), out->getInstrument(), {"monitor1", "monitor2", "linear-detector"},
+    compare_detectors_in_out(crisp->componentInfo(), out->componentInfo(), {"monitor1", "monitor2", "linear-detector"},
                              "point-detector", {std::tan(theta * 2 * M_PI / 180)});
   }
 
@@ -202,7 +202,7 @@ public:
     MatrixWorkspace_sptr corrected = getMatrixOutput(alg, "OutputWorkspace");
 
     // Compare instrument components before and after
-    compare_detectors_in_out(inter->getInstrument(), corrected->getInstrument(),
+    compare_detectors_in_out(inter->componentInfo(), corrected->componentInfo(),
                              {"monitor1", "monitor2", "monitor3", "linear-detector"}, "point-detector",
                              {std::tan(0.7 * 2 * M_PI / 180)});
   }
@@ -215,7 +215,7 @@ public:
     alg->execute();
     MatrixWorkspace_sptr corrected = getMatrixOutput(alg, "OutputWorkspace");
     // Compare instrument components before and after
-    compare_detectors_in_out(inter->getInstrument(), corrected->getInstrument(), {"point-detector"});
+    compare_detectors_in_out(inter->componentInfo(), corrected->componentInfo(), {"point-detector"});
   }
 
   void test_IvsQ_linear_binning() {
@@ -802,8 +802,8 @@ public:
     prepareInputGroup(TEST_GROUP_NAME, "Wildes");
     const auto input_group = retrieveOutWS(TEST_GROUP_NAME);
     // We're setting this to an invalid value to catch it on purpose later.
-    input_group[0]->instrumentParameters().addString(input_group[0]->getInstrument()->getComponentID(),
-                                                     "WildesFlipperConfig", "01,01,10");
+    input_group[0]->mutableComponentInfo().addString(input_group[0]->componentInfo().root(), "WildesFlipperConfig",
+                                                     "01,01,10");
     auto efficiencies = createPolarizationEfficienciesWorkspace("Wildes");
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0);
     setup_optional_properties(
@@ -835,8 +835,8 @@ public:
   void test_error_occurs_when_fredrikze_spin_states_used_with_Wildes() {
     prepareInputGroup(TEST_GROUP_NAME, "Wildes");
     const auto input_group = retrieveOutWS(TEST_GROUP_NAME);
-    input_group[0]->instrumentParameters().addString(input_group[0]->getInstrument()->getComponentID(),
-                                                     "WildesFlipperConfig", "00,11,01,10");
+    input_group[0]->mutableComponentInfo().addString(input_group[0]->componentInfo().root(), "WildesFlipperConfig",
+                                                     "00,11,01,10");
     auto efficiencies = createPolarizationEfficienciesWorkspace("Wildes");
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0);
     setup_optional_properties(alg, {{"MomentumTransferStep", 0.04},
@@ -883,7 +883,7 @@ public:
   void test_polarization_correction_with_efficiency_workspace_Fredrikze_uses_parameter_file_input_spin_state_order() {
     prepareInputGroup(TEST_GROUP_NAME, "Fredrikze", 2);
     const auto input_group = retrieveOutWS(TEST_GROUP_NAME);
-    input_group[0]->instrumentParameters().addString(input_group[0]->getInstrument()->getComponentID(),
+    input_group[0]->mutableComponentInfo().addString(input_group[0]->componentInfo().root(),
                                                      "FredrikzeInputSpinStateOrderPNR", "a,p");
     auto efficiencies = createPolarizationEfficienciesWorkspace("Fredrikze");
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0);
@@ -1002,7 +1002,7 @@ public:
   void test_polarization_correction_with_invalid_efficiencies_workspace_format() {
     prepareInputGroup(TEST_GROUP_NAME, "Wildes");
     auto const inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(TEST_GROUP_NAME + "_1");
-    auto invalid_format = createFloodWorkspace(inputWS->getInstrument());
+    auto invalid_format = createFloodWorkspace(*inputWS);
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0);
     setup_optional_properties(
         alg,
@@ -1205,7 +1205,7 @@ public:
 
   void test_flood_correction() {
     auto inputWS = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
-    auto flood = createFloodWorkspace(inputWS->getInstrument());
+    auto flood = createFloodWorkspace(*inputWS);
     const auto alg = create_refl_algorithm(inputWS, 1.5, "2+3");
     // Correct by rotating detectors around the sample
     setup_optional_properties(alg, {{"CorrectionAlgorithm", "None"},
@@ -1227,7 +1227,7 @@ public:
       auto &y = transWS->mutableY(i);
       y.assign(y.size(), 10.0 * static_cast<double>(i + 1));
     }
-    auto flood = createFloodWorkspace(inputWS->getInstrument());
+    auto flood = createFloodWorkspace(*inputWS);
 
     const auto alg = create_refl_algorithm(inputWS, 1.5, "2+3");
     // Correct by rotating detectors around the sample
@@ -1252,7 +1252,7 @@ public:
     group->addWorkspace(inputWS1);
     group->addWorkspace(inputWS2);
     AnalysisDataService::Instance().addOrReplace(TEST_GROUP_NAME, group);
-    auto flood = createFloodWorkspace(inputWS1->getInstrument());
+    auto flood = createFloodWorkspace(*inputWS1);
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 1.5, "2+3", 1.0, 15.0, true, false);
     setup_optional_properties(alg, {{"MomentumTransferStep", 0.01},
                                     {"AnalysisMode", "MultiDetectorAnalysis"},
@@ -1278,7 +1278,7 @@ public:
     AnalysisDataService::Instance().addOrReplace(TEST_GROUP_NAME, group);
 
     auto transWS = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
-    auto flood = createFloodWorkspace(inputWS1->getInstrument());
+    auto flood = createFloodWorkspace(*inputWS1);
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 1.5, "2+3", 1.0, 15.0, true, false);
     setup_optional_properties(alg, {{"MomentumTransferStep", 0.01},
                                     {"AnalysisMode", "MultiDetectorAnalysis"},
@@ -1297,7 +1297,7 @@ public:
     prepareInputGroup(TEST_GROUP_NAME, "Fredrikze");
     applyPolarizationEfficiencies(TEST_GROUP_NAME);
     auto const inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(TEST_GROUP_NAME + "_1");
-    auto flood = createFloodWorkspace(inputWS->getInstrument(), 257);
+    auto flood = createFloodWorkspace(*inputWS, 257);
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0, true, false);
     setup_optional_properties(
         alg, {{"PolarizationAnalysis", true}, {"MomentumTransferStep", 0.04}, {"FloodWorkspace", flood}});
@@ -1475,7 +1475,7 @@ private:
     return {};
   };
 
-  MatrixWorkspace_sptr createFloodWorkspace(const Mantid::Geometry::Instrument_const_sptr &instrument, size_t n = 4) {
+  MatrixWorkspace_sptr createFloodWorkspace(MatrixWorkspace const &parent, size_t n = 4) {
     size_t detid = 1;
     auto flood = create2DWorkspace(static_cast<int>(n), 1);
     if (n == 4) {
@@ -1489,7 +1489,7 @@ private:
       }
       detid = 1000;
     }
-    flood->setInstrument(instrument);
+    flood->copyExperimentInfoFrom(&parent);
     for (size_t i = 0; i < flood->getNumberHistograms(); ++i) {
       flood->getSpectrum(i).setDetectorID(Mantid::detid_t(i + detid));
     }
@@ -1580,24 +1580,26 @@ private:
     return alg;
   }
 
-  void compare_detectors_in_out(const Instrument_const_sptr &instIn, const Instrument_const_sptr &instOut,
+  void compare_detectors_in_out(Mantid::Geometry::ComponentInfo const &componentInfoIn,
+                                Mantid::Geometry::ComponentInfo const &componentInfoOut,
                                 const std::vector<std::string> &unmovedComponents,
                                 const std::optional<std::string> &movedComponent = std::nullopt,
                                 const std::vector<double> &movedPositions = {0.0}) {
     // The following components should not have been moved
     for (const auto &componentName : unmovedComponents) {
-      TS_ASSERT_EQUALS(instIn->getComponentByName(componentName)->getPos(),
-                       instOut->getComponentByName(componentName)->getPos())
+      TS_ASSERT_EQUALS(componentInfoIn.position(componentInfoIn.indexOfAny(componentName)),
+                       componentInfoOut.position(componentInfoOut.indexOfAny(componentName)))
     }
     if (movedComponent) {
-      const auto movedIn = instIn->getComponentByName(*movedComponent)->getPos();
-      const auto movedOut = instOut->getComponentByName(*movedComponent)->getPos();
+      auto const movedIn = componentInfoIn.position(componentInfoIn.indexOfAny(*movedComponent));
+      auto const movedOut = componentInfoOut.position(componentInfoOut.indexOfAny(*movedComponent));
       if (movedComponent == "point-detector") {
         // Only 'point-detector' should have been moved vertically (along Y)
         TS_ASSERT_EQUALS(movedIn.X(), movedOut.X());
         TS_ASSERT_EQUALS(movedIn.Z(), movedOut.Z());
         TS_ASSERT_DIFFERS(movedIn.Y(), movedOut.Y());
-        TS_ASSERT_DELTA(movedIn.Y() / (movedOut.Z() - instOut->getSample()->getPos().Z()), movedPositions.at(0), 1e-4);
+        TS_ASSERT_DELTA(movedIn.Y() / (movedOut.Z() - componentInfoOut.samplePosition().Z()), movedPositions.at(0),
+                        1e-4);
       } else if (movedComponent == "OSMOND") {
         // 'OSMOND' should have been moved both vertically and in the beam direction (along X and Z)
         TS_ASSERT_DELTA(movedOut.X(), movedPositions.at(0), 1e-4);

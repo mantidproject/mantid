@@ -8,8 +8,7 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <cmath>
@@ -85,20 +84,21 @@ void NRCalculateSlitResolution::exec() {
     g_log.notice() << "Found '" << theta << "' as value for theta in log.\n";
   }
 
-  Instrument_const_sptr instrument = ws->getInstrument();
-  IComponent_const_sptr slit1 = instrument->getComponentByName(slit1Name);
-  IComponent_const_sptr slit2 = instrument->getComponentByName(slit2Name);
+  auto const &componentInfo = ws->componentInfo();
+  auto const slitIndex = [&componentInfo](std::string const &slitName) {
+    try {
+      return componentInfo.indexOfAny(slitName);
+    } catch (std::invalid_argument const &) {
+      throw std::runtime_error("Could not find component in instrument with name: '" + slitName + "'");
+    }
+  };
+  auto const slit1 = slitIndex(slit1Name);
+  auto const slit2 = slitIndex(slit2Name);
 
-  if (!slit1)
-    throw std::runtime_error("Could not find component in instrument with name: '" + slit1Name + "'");
+  V3D const slitDiff = (componentInfo.position(slit2) - componentInfo.position(slit1)) * 1000; // Convert from m to mm.
 
-  if (!slit2)
-    throw std::runtime_error("Could not find component in instrument with name: '" + slit2Name + "'");
-
-  const V3D slitDiff = (slit2->getPos() - slit1->getPos()) * 1000; // Convert from m to mm.
-
-  std::vector<double> slit1VGParam = slit1->getNumberParameter(vGapParam);
-  std::vector<double> slit2VGParam = slit2->getNumberParameter(vGapParam);
+  std::vector<double> const slit1VGParam = componentInfo.getNumberParameter(slit1, vGapParam);
+  std::vector<double> const slit2VGParam = componentInfo.getNumberParameter(slit2, vGapParam);
 
   if (slit1VGParam.empty())
     throw std::runtime_error("Could not find a value for the first slit's "

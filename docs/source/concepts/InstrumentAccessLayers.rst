@@ -269,7 +269,9 @@ and so on. The root component is where the parameters that the legacy code read 
 ``ws.getInstrument()`` live, so those call sites drop the index entirely.
 ``ComponentInfo.invalidIndex`` is the sentinel returned by ``indexOfFullName()`` for an unknown name,
 and ``indexOfAny()`` raises a ``ValueError`` rather than returning ``None`` as
-``Instrument.getComponentByName()`` did.
+``Instrument.getComponentByName()`` did. Where several components share a name, both return the
+same one: the component closest to the root, searching breadth-first. Unlike
+``getComponentByName()``, ``indexOfAny()`` does not treat ``/`` as a path separator.
 
 **Before refactoring**
 

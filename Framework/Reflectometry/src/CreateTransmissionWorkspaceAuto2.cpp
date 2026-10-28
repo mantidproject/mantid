@@ -75,19 +75,19 @@ void CreateTransmissionWorkspaceAuto2::exec() {
   populateTransmissionProperties(alg);
 
   // Instrument
-  auto instrument = firstWS->getInstrument();
+  auto const &componentInfo = firstWS->componentInfo();
 
   // Other mandatory properties
-  auto wavMin = checkForMandatoryInstrumentDefault<double>(this, "WavelengthMin", instrument, "LambdaMin");
+  auto wavMin = checkForMandatoryInstrumentDefault<double>(this, "WavelengthMin", componentInfo, "LambdaMin");
   alg->setProperty("WavelengthMin", wavMin);
-  auto wavMax = checkForMandatoryInstrumentDefault<double>(this, "WavelengthMax", instrument, "LambdaMax");
+  auto wavMax = checkForMandatoryInstrumentDefault<double>(this, "WavelengthMax", componentInfo, "LambdaMax");
   alg->setProperty("WavelengthMax", wavMax);
 
   // Monitor properties
-  populateMonitorProperties(alg, instrument);
+  populateMonitorProperties(alg, componentInfo);
 
   // Processing instructions
-  convertProcessingInstructions(instrument, firstWS);
+  convertProcessingInstructions(componentInfo, firstWS);
   alg->setProperty("ProcessingInstructions", m_processingInstructions);
 
   alg->execute();

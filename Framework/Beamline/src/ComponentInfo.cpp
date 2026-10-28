@@ -9,6 +9,7 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/make_cow.h"
 #include <algorithm>
+#include <deque>
 #include <iterator>
 #include <memory>
 #include <numeric>
@@ -658,15 +659,29 @@ size_t ComponentInfo::detectorIndexAtXYZ(const size_t componentIndex, const int 
 
 bool ComponentInfo::uniqueName(const std::string &name) const { return unique_if_exists((*m_names), name); }
 
+/** The first component with this name found in a breadth-first search from the root.
+ *
+ * Where several components share a name this is the one closest to the root, and among those
+ * the first child in order, matching Geometry::Instrument::getComponentByName().
+ * Unlike that method, a '/' is not treated as a path separator.
+ * @throw std::invalid_argument if no component has this name
+ */
 size_t ComponentInfo::indexOfAny(const std::string &name) const {
-  // Reverse iterate to hit top level components sooner
-  auto it = std::find(m_names->rbegin(), m_names->rend(), name);
-  if (it == m_names->rend()) {
-    std::stringstream buffer;
-    buffer << name << " does not exist";
-    throw std::invalid_argument(buffer.str());
+  if (size() > 0) {
+    std::deque<size_t> queue{root()};
+    while (!queue.empty()) {
+      auto const index = queue.front();
+      queue.pop_front();
+      if ((*m_names)[index] == name) {
+        return index;
+      }
+      auto const &childIndices = children(index);
+      queue.insert(queue.end(), childIndices.cbegin(), childIndices.cend());
+    }
   }
-  return std::distance(m_names->begin(), it.base() - 1);
+  std::stringstream buffer;
+  buffer << name << " does not exist";
+  throw std::invalid_argument(buffer.str());
 }
 
 void ComponentInfo::setScaleFactor(const size_t componentIndex, const Eigen::Vector3d &scaleFactor) {

@@ -11,8 +11,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -228,8 +227,7 @@ void ReflectometryReductionOne2::exec() {
 
   // Cache the spectrum info and reference frame
   m_spectrumInfo = &m_runWS->spectrumInfo();
-  auto instrument = m_runWS->getInstrument();
-  m_refFrame = instrument->getReferenceFrame();
+  m_refFrame = m_runWS->componentInfo().referenceFrame();
   m_partialBins = getProperty("IncludePartialBins");
 
   // Find and cache detector groups and theta0
@@ -276,9 +274,7 @@ double ReflectometryReductionOne2::getDetectorTwoThetaRange(const size_t spectru
   const V3D detSample = m_spectrumInfo->position(spectrumIdx) - m_spectrumInfo->samplePosition();
   const double beamOffset = m_refFrame->vecPointingAlongBeam().scalar_prod(detSample);
   // Get the bounding box for this detector/group
-  BoundingBox boundingBox;
-  auto detector = m_runWS->getDetector(spectrumIdx);
-  detector->getBoundingBox(boundingBox);
+  BoundingBox const boundingBox = m_spectrumInfo->boundingBox(spectrumIdx);
   // Get the top and bottom on the axis pointing up
   const double top = getBoundingBoxExtent(boundingBox, m_refFrame->pointingUp(), true);
   const double bottom = getBoundingBoxExtent(boundingBox, m_refFrame->pointingUp(), false);
@@ -625,7 +621,7 @@ bool ReflectometryReductionOne2::useDetectorAngleForQConversion(const MatrixWork
   // Note that when summing in lambda it is not allowed to pass ThetaIn with
   // multiple groups, so we can assume we only have one group (i.e. one output
   // spectrum) here.
-  bool const singleDetector = ws->getDetector(0)->nDets() <= 1;
+  bool const singleDetector = ws->spectrumInfo().spectrumDefinition(0).size() <= 1;
   if (singleDetector)
     return true;
 

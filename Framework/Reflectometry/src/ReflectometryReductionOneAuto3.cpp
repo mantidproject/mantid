@@ -7,9 +7,11 @@
 #include "MantidReflectometry/ReflectometryReductionOneAuto3.h"
 #include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -19,6 +21,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
 #include "MantidReflectometry/ReflectometryPolarizationCorrectionISIS.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/join.hpp>
@@ -348,13 +351,13 @@ ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputW
   alg->setProperty("Diagnostics", getPropertyValue("Diagnostics"));
   alg->setProperty("Debug", isDebug);
 
-  const auto instrument = inputWS->getInstrument();
-  double wavMin = checkForMandatoryInstrumentDefault<double>(this, "WavelengthMin", instrument, "LambdaMin");
+  auto const &componentInfo = inputWS->componentInfo();
+  double wavMin = checkForMandatoryInstrumentDefault<double>(this, "WavelengthMin", componentInfo, "LambdaMin");
   alg->setProperty("WavelengthMin", wavMin);
-  double wavMax = checkForMandatoryInstrumentDefault<double>(this, "WavelengthMax", instrument, "LambdaMax");
+  double wavMax = checkForMandatoryInstrumentDefault<double>(this, "WavelengthMax", componentInfo, "LambdaMax");
   alg->setProperty("WavelengthMax", wavMax);
 
-  convertProcessingInstructions(instrument, inputWS);
+  convertProcessingInstructions(componentInfo, inputWS);
 
   alg->setProperty("ProcessingInstructions", m_processingInstructions);
   // Now that we know the detectors of interest, we can move them if
@@ -382,7 +385,7 @@ ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputW
   // Optional properties
 
   alg->setPropertyValue("TransmissionProcessingInstructions", getPropertyValue("TransmissionProcessingInstructions"));
-  populateMonitorProperties(alg, instrument);
+  populateMonitorProperties(alg, componentInfo);
   alg->setPropertyValue("NormalizeByIntegratedMonitors", getPropertyValue("NormalizeByIntegratedMonitors"));
 
   const auto &[firstTransRun, secondTransRun] = getTransmissionRuns();
@@ -501,7 +504,7 @@ void ReflectometryReductionOneAuto3::exec() {
   applyFloodCorrectionToTransmissionRuns();
 
   setDefaultOutputWorkspaceNames();
-  determineCorrectionAlgorithm(inputWS->getInstrument());
+  determineCorrectionAlgorithm(inputWS->componentInfo());
   RROOutputs out = performCoreReduction(inputWS);
   const auto params = getRebinParams(out.IvsQ, out.theta);
   const auto binnedWS = postReductionProcessing(out, params);
@@ -523,18 +526,24 @@ std::vector<std::string> ReflectometryReductionOneAuto3::getDetectorNames(const 
   // vector of components
   std::vector<std::string> detectors;
 
+  auto const &spectrumInfo = inputWS->spectrumInfo();
+  auto const &componentInfo = inputWS->componentInfo();
   try {
     for (const auto &wsIndex : wsIndices) {
 
       size_t index = boost::lexical_cast<size_t>(wsIndex);
 
-      auto detector = inputWS->getDetector(index);
-      auto parent = detector->getParent();
-
-      if (parent) {
-        auto parentType = parent->type();
-        auto detectorName = (parentType == "Instrument") ? detector->getName() : parent->getName();
-        detectors.emplace_back(detectorName);
+      auto const &spectrumDefinition = spectrumInfo.spectrumDefinition(index);
+      if (spectrumDefinition.size() == 0) {
+        throw Exception::NotFoundError("No detectors for this workspace index", wsIndex);
+      }
+      // A spectrum made of several detectors has no parent component
+      if (spectrumDefinition.size() == 1) {
+        auto const detectorIndex = spectrumDefinition[0].first;
+        if (componentInfo.hasParent(detectorIndex)) {
+          auto const parent = componentInfo.parent(detectorIndex);
+          detectors.emplace_back(componentInfo.name(parent == componentInfo.root() ? detectorIndex : parent));
+        }
       }
     }
   } catch (const boost::bad_lexical_cast &) {
@@ -605,7 +614,7 @@ double ReflectometryReductionOneAuto3::calculateTheta(const MatrixWorkspace_sptr
   return theta * 0.5;
 }
 
-void ReflectometryReductionOneAuto3::determineCorrectionAlgorithm(const Instrument_const_sptr &instrument) {
+void ReflectometryReductionOneAuto3::determineCorrectionAlgorithm(ComponentInfo const &componentInfo) {
   CorrectionProperties corrProps;
   // if a trans workspace is provided, algorithmic correction not performed.
   const auto &firstWS = getWorkspaceFromProperty("FirstTransmissionRun");
@@ -626,7 +635,7 @@ void ReflectometryReductionOneAuto3::determineCorrectionAlgorithm(const Instrume
   } else if (correctionAlgorithm == "AutoDetect") {
     // Figure out what to do from the instrument
     try {
-      const auto corrVec = instrument->getStringParameter("correction");
+      auto const corrVec = componentInfo.getStringParameter(componentInfo.root(), "correction");
       if (corrVec.empty()) {
         throw std::runtime_error("Could not find parameter 'correction' in "
                                  "parameter file. Cannot auto detect the type of "
@@ -635,7 +644,7 @@ void ReflectometryReductionOneAuto3::determineCorrectionAlgorithm(const Instrume
 
       const std::string correctionStr = corrVec[0];
       if (correctionStr == "polynomial") {
-        const auto polyVec = instrument->getStringParameter("polystring");
+        auto const polyVec = componentInfo.getStringParameter(componentInfo.root(), "polystring");
         if (polyVec.empty())
           throw std::runtime_error("Could not find parameter 'polystring' in "
                                    "parameter file. Cannot apply polynomial "
@@ -643,11 +652,11 @@ void ReflectometryReductionOneAuto3::determineCorrectionAlgorithm(const Instrume
         corrProps.type = "PolynomialCorrection";
         corrProps.polynomial = polyVec[0];
       } else if (correctionStr == "exponential") {
-        const auto c0Vec = instrument->getNumberParameter("C0");
+        auto const c0Vec = componentInfo.getNumberParameter(componentInfo.root(), "C0");
         if (c0Vec.empty())
           throw std::runtime_error("Could not find parameter 'C0' in parameter "
                                    "file. Cannot apply exponential correction.");
-        const auto c1Vec = instrument->getNumberParameter("C1");
+        auto const c1Vec = componentInfo.getNumberParameter(componentInfo.root(), "C1");
         if (c1Vec.empty())
           throw std::runtime_error("Could not find parameter 'C1' in parameter "
                                    "file. Cannot apply exponential correction.");
@@ -971,7 +980,7 @@ bool ReflectometryReductionOneAuto3::processGroups() {
   std::string const runNumber = getRunNumberForWorkspaceGroup(groupName);
   inputGroup = applyFloodCorrection(inputGroup);
   const auto groupMembers = inputGroup->getAllItems();
-  determineCorrectionAlgorithm(std::dynamic_pointer_cast<MatrixWorkspace>(groupMembers[0])->getInstrument());
+  determineCorrectionAlgorithm(std::dynamic_pointer_cast<MatrixWorkspace>(groupMembers[0])->componentInfo());
   applyFloodCorrectionToTransmissionRuns();
 
   const bool polarizationAnalysisOn = getProperty("PolarizationAnalysis");
@@ -1058,7 +1067,7 @@ WorkspaceGroup_sptr ReflectometryReductionOneAuto3::applyPolarizationCorrection(
  * FloodWorkspace property return it. Otherwise create it using parameters
  * in the instrument parameter file.
  */
-MatrixWorkspace_sptr ReflectometryReductionOneAuto3::getFloodWorkspace(const Instrument_const_sptr &instrument) {
+MatrixWorkspace_sptr ReflectometryReductionOneAuto3::getFloodWorkspace(ComponentInfo const &componentInfo) {
   const std::string method = getProperty("FloodCorrection");
   if (method == "None") {
     return MatrixWorkspace_sptr();
@@ -1074,7 +1083,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::getFloodWorkspace(const Ins
                          "ignored."
                       << std::endl;
     }
-    const auto floodRunParam = instrument->getParameterAsString("Flood_Run");
+    auto const floodRunParam = componentInfo.getParameterAsString(componentInfo.root(), "Flood_Run");
     if (floodRunParam.empty()) {
       throw std::invalid_argument("Instrument parameter file doesn't have the Flood_Run parameter.");
     }
@@ -1085,7 +1094,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::getFloodWorkspace(const Ins
       try {
         // If the first part is a number treat all parts as run numbers
         boost::lexical_cast<size_t>(parts.front());
-        fileName = instrument->getName() + Strings::toString(parts);
+        fileName = componentInfo.name(componentInfo.root()) + Strings::toString(parts);
       } catch (const boost::bad_lexical_cast &) {
         // Do nothing fileName == floodRunParam
       }
@@ -1095,7 +1104,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::getFloodWorkspace(const Ins
       const std::string prefix("Flood_");
       for (const auto prop : {"StartSpectrum", "EndSpectrum", "ExcludeSpectra", "Background", "CentralPixelSpectrum",
                               "RangeLower", "RangeUpper"}) {
-        const auto param = instrument->getParameterAsString(prefix + prop);
+        auto const param = componentInfo.getParameterAsString(componentInfo.root(), prefix + prop);
         if (!param.empty()) {
           alg->setPropertyValue(prop, param);
         }
@@ -1192,7 +1201,7 @@ bool ReflectometryReductionOneAuto3::sumBanks(Workspace_sptr &inputWorkspace) {
 }
 
 MatrixWorkspace_sptr ReflectometryReductionOneAuto3::applyFloodCorrection(const MatrixWorkspace_sptr &ws) {
-  const auto &flood = getFloodWorkspace(ws->getInstrument());
+  auto const &flood = getFloodWorkspace(ws->componentInfo());
   if (!flood)
     return ws;
   return runFloodCorrectionAlg(flood, ws);
@@ -1216,8 +1225,8 @@ void ReflectometryReductionOneAuto3::clearCaches() {
 }
 
 WorkspaceGroup_sptr ReflectometryReductionOneAuto3::applyFloodCorrection(const WorkspaceGroup_sptr &group) {
-  const auto &instrument = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0))->getInstrument();
-  const auto &flood = getFloodWorkspace(instrument);
+  auto const &componentInfo = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0))->componentInfo();
+  auto const &flood = getFloodWorkspace(componentInfo);
   if (!flood)
     return group;
 

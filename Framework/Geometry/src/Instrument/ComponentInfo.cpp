@@ -818,6 +818,18 @@ std::string ComponentInfo::getParameterType(const size_t componentIndex, const s
   return std::string();
 }
 
+std::string ComponentInfo::getParameterAsString(size_t const componentIndex, std::string const &name,
+                                                bool const recursive) const {
+  if (m_parameterInfo) {
+    Parameter_sptr const parameter = recursive ? m_parameterInfo->getRecursive(*this, componentIndex, name)
+                                               : m_parameterInfo->get(componentIndex, name);
+    if (parameter) {
+      return parameter->asString();
+    }
+  }
+  return std::string();
+}
+
 double ComponentInfo::getFittingParameter(const size_t componentIndex, const std::string &name, double xvalue) const {
   if (!m_parameterInfo)
     throw std::runtime_error("Parameters are not available in component=" + this->name(componentIndex));

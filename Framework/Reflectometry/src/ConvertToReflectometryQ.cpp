@@ -16,6 +16,8 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidGeometry/MDGeometry/QLab.h"
 
@@ -397,14 +399,14 @@ MatrixWorkspace_sptr ConvertToReflectometryQ::correctDetectors(MatrixWorkspace_s
 
   // Move the parent component of the selected detectors
   std::set<std::string> componentsToMove;
-  const auto &instrument = inputWs->getInstrument();
+  auto const &componentInfo = inputWs->componentInfo();
+  auto const &detectorInfo = inputWs->detectorInfo();
   for (const auto &id : detectorIDs) {
-    auto detector = instrument->getDetector(id);
-    auto parent = detector->getParent();
-    if (parent) {
-      auto parentType = parent->type();
-      auto detectorName = (parentType == "Instrument") ? detector->getName() : parent->getName();
-      componentsToMove.insert(std::move(detectorName));
+    // Detector indices are also component indices
+    auto const detectorIndex = detectorInfo.indexOf(id);
+    if (componentInfo.hasParent(detectorIndex)) {
+      auto const parent = componentInfo.parent(detectorIndex);
+      componentsToMove.insert(componentInfo.name(parent == componentInfo.root() ? detectorIndex : parent));
     }
   }
 
