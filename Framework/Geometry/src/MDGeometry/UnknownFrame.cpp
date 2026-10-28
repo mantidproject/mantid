@@ -37,8 +37,7 @@ bool UnknownFrame::isQ() const { return false; }
 bool UnknownFrame::isSameType(const MDFrame &frame) const {
   auto isSameType = true;
   try {
-    const auto &tmp = dynamic_cast<const UnknownFrame &>(frame);
-    UNUSED_ARG(tmp);
+    [[maybe_unused]] const auto &tmp = dynamic_cast<const UnknownFrame &>(frame);
   } catch (std::bad_cast &) {
     isSameType = false;
   }

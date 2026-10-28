@@ -95,7 +95,7 @@ add_subdirectory(test)
 target_include_directories(
   Nexus PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Nexus> $<INSTALL_INTERFACE:include/Mantid>
 )
-generate_mantid_export_header(Nexus FALSE GENERATE_UNUSED_ARG)
+generate_mantid_export_header(Nexus FALSE)
 
 # Installation settings
 set(TARGET_EXPORT_NAME "MantidNexusTargets")

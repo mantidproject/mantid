@@ -491,10 +491,8 @@ NXstatus NX5close(NXhandle *fid) {
 
 /*------------------------------------------------------------------------*/
 
-herr_t attr_check(hid_t loc_id, const char *member_name, const H5A_info_t *unused, void *opdata) {
-  UNUSED_ARG(loc_id);
-  UNUSED_ARG(unused);
-  UNUSED_ARG(opdata);
+herr_t attr_check([[maybe_unused]] hid_t loc_id, const char *member_name, [[maybe_unused]] const H5A_info_t *unused,
+                  [[maybe_unused]] void *opdata) {
   char attr_name[8 + 1]; /* need to leave space for \0 as well */
 
   strcpy(attr_name, "NX_class");
@@ -765,8 +763,7 @@ NXstatus NX5getdataID(NXhandle fid, NXlink *sRes) {
 
 /* Operator function. */
 
-herr_t nxgroup_info(hid_t loc_id, const char *name, const H5L_info_t *statbuf, void *op_data) {
-  UNUSED_ARG(statbuf);
+herr_t nxgroup_info(hid_t loc_id, const char *name, [[maybe_unused]] const H5L_info_t *statbuf, void *op_data) {
   pinfo self = static_cast<pinfo>(op_data);
   H5O_info1_t object_info;
   // TODO use new version of method rather than v2
@@ -792,8 +789,7 @@ herr_t nxgroup_info(hid_t loc_id, const char *name, const H5L_info_t *statbuf, v
 
 /* Operator function. */
 
-herr_t group_info(hid_t loc_id, const char *name, const H5L_info_t *statbuf, void *opdata) {
-  UNUSED_ARG(statbuf);
+herr_t group_info(hid_t loc_id, const char *name, [[maybe_unused]] const H5L_info_t *statbuf, void *opdata) {
   int iNX = *(static_cast<int *>(opdata));
   H5O_info1_t object_info;
   // TODO use new version of method rather than v2
@@ -1176,11 +1172,6 @@ NXstatus NX5getinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *i
     myDim[0] = 1;
   } else {
     H5Sget_simple_extent_dims(pFile->iCurrentS, myDim, NULL);
-    hsize_t total_dims_size = 1;
-    for (i = 0; i < iRank; ++i) {
-      total_dims_size *= myDim[i];
-    }
-    UNUSED_ARG(total_dims_size);
   }
   /* conversion to proper ints for the platform */
   *iType = static_cast<NXnumtype>(mType);
@@ -1210,9 +1201,8 @@ NXstatus NX5getinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *i
 
 /* Operator function. */
 
-herr_t attr_info(hid_t loc_id, const char *name, const H5A_info_t *unused, void *opdata) {
-  UNUSED_ARG(loc_id);
-  UNUSED_ARG(unused);
+herr_t attr_info([[maybe_unused]] hid_t loc_id, const char *name, [[maybe_unused]] const H5A_info_t *unused,
+                 void *opdata) {
   *(static_cast<char **>(opdata)) = strdup(name);
 
   return 1;

@@ -8,6 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#define UNUSED_ARG(...) (void)(__VA_ARGS__)
+
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/Frequencies.h"

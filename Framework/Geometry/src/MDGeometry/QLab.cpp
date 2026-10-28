@@ -46,8 +46,7 @@ bool QLab::isQ() const { return true; }
 bool QLab::isSameType(const MDFrame &frame) const {
   auto isSameType = true;
   try {
-    const auto &tmp = dynamic_cast<const QLab &>(frame);
-    UNUSED_ARG(tmp);
+    [[maybe_unused]] const auto &tmp = dynamic_cast<const QLab &>(frame);
   } catch (std::bad_cast &) {
     isSameType = false;
   }
