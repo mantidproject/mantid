@@ -65,9 +65,9 @@ public:
     EXPECT_CALL(m_jobs, setCellsAt(location(0, 0), _)).Times(4).WillRepeatedly(testing::SaveArg<1>(&cells));
     presenter.notifyRowModelChanged(row);
     TS_ASSERT(cells.at(adjustedAngleColumn).contentText().empty());
-    workspace->mutableRun().addProperty("reflectometry_adjusted_theta", 0.625);
+    workspace->mutableRun().addProperty("reflectometry_adjusted_theta", 0.626);
     presenter.notifyRowModelChanged(row);
-    TS_ASSERT_EQUALS(cells.at(adjustedAngleColumn).contentText(), "0.62");
+    TS_ASSERT_EQUALS(cells.at(adjustedAngleColumn).contentText(), "0.63");
     TS_ASSERT(!cells.at(adjustedAngleColumn).isEditable());
     workspace->mutableRun().addProperty("reflectometry_adjusted_theta", 0.75, true);
     presenter.notifyRowModelChanged(row);
