@@ -50,10 +50,12 @@ class ReflectometryISISPreprocessTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "proton_charge"):
             ReflectometryISISPreprocess._validate_event_ws(ws)
 
-    def test_validation_of_event_workspace_group_throws(self):
+    def test_validation_of_event_workspace_checks_members(self):
         ws = WorkspaceGroup()
-
-        with self.assertRaisesRegex(RuntimeError, "Workspace Groups"):
+        member_ws = CreateSampleWorkspace()
+        ws.addWorkspace(member_ws)
+        # Check that the member workspaces are validated.
+        with self.assertRaisesRegex(RuntimeError, "proton_charge"):
             ReflectometryISISPreprocess._validate_event_ws(ws)
 
     def test_monitors_are_not_loaded_in_histo_mode(self):
