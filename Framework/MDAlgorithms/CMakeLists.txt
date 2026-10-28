@@ -302,6 +302,7 @@ set(TEST_FILES
     IntegrateMDHistoWorkspaceTest.h
     IntegratePeaksMD2Test.h
     IntegratePeaksMDHKLTest.h
+    IntegratePeaksShapeMDTest.h
     IntegrateQLabEventsTest.h
     InvalidParameterParserTest.h
     InvalidParameterTest.h
