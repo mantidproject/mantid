@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import annotations
-from mantid.api import AlgorithmManager, AnalysisDataService as ADS
+from mantid.api import AlgorithmManager, AnalysisDataService as ADS, InstrumentFileFinder
 import numpy as np
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams, UnitParametersMap
 from typing import Tuple, Sequence, Optional, TYPE_CHECKING
@@ -83,18 +83,17 @@ def load_poldi(
 
 def load_poldi_h5f(
     fpath_data: str,
-    fpath_idf: str,
-    t0: float = 0.025701,
-    t0_const: float = 85.0,
+    fpath_idf: str | None = None,
+    t0: float | None = None,
+    t0_const: float | None = None,
     output_workspace: str = "ws",
 ):
     """
     Function to load POLDI v2 data from ASCII file containing array of counts
     :param fpath_data: filepath of ASCII file with counts
-    :param fpath_idf: filepath to instrument definition file
-    :param chopper_speed: chopper speed used on instrument (rpm)
-    :param t0: time offset applied to slit openings (fraction of cycle time)
-    :param t0_const: TZERO diffractometer constant for instrument
+    :param fpath_idf: filepath to instrument definition file, if None the definition valid at the run start time is used
+    :param t0: time offset applied to slit openings (fraction of cycle time), overrides the parameter file if given
+    :param t0_const: TZERO diffractometer constant for instrument, overrides the parameter file if given
     :param output_workspace: output workspace name
     :return ws: workspace containing POLDI data
     """
@@ -104,6 +103,8 @@ def load_poldi_h5f(
         for bank_name in ["south", "north"]:
             dat.append(np.asarray(f.get(f"entry1/POLDI/detector_{bank_name}/histogram_folded")))
         chopper_speed = f.get("entry1/POLDI/chopper/rotation_speed_target")[0]
+        if fpath_idf is None:
+            fpath_idf = InstrumentFileFinder.getInstrumentFilename("POLDI", f.get("entry1/start_time")[0].decode())
         if np.allclose([bank.sum() for bank in dat], 0):
             monitor_count = 0  # can be error in detector electronics where no data but erroneous monitor counts
         else:
@@ -124,23 +125,16 @@ def load_poldi_h5f(
     ws = exec_alg("ConvertToPointData", InputWorkspace=ws)
     # add some logs (will eventually be set in file)
     exec_alg("AddSampleLog", Workspace=ws, LogName="chopperspeed", LogText=str(chopper_speed), LogType="Number")
-    # set t0 (would normally live in parameter file)
-    exec_alg(
-        "SetInstrumentParameter",
-        Workspace=ws,
-        ComponentName="chopper",
-        ParameterName="t0",
-        ParameterType="Number",
-        Value=str(t0),
-    )
-    exec_alg(
-        "SetInstrumentParameter",
-        Workspace=ws,
-        ComponentName="chopper",
-        ParameterName="t0_const",
-        ParameterType="Number",
-        Value=str(t0_const),
-    )
+    for name, value in (("t0", t0), ("t0_const", t0_const)):
+        if value is not None:
+            exec_alg(
+                "SetInstrumentParameter",
+                Workspace=ws,
+                ComponentName="chopper",
+                ParameterName=name,
+                ParameterType="Number",
+                Value=str(value),
+            )
     # add monitor counts
     exec_alg("AddSampleLog", Workspace=ws, LogName="gd_prtn_chrg", LogText=str(monitor_count), LogType="Number")
     ADS.addOrReplace(output_workspace, ws)

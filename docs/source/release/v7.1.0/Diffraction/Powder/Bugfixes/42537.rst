@@ -1,0 +1,2 @@
+- When loading POLDI data recorded from December 2025 onwards, the chopper calibration constants ``t0`` and ``t0_const`` can now be taken from a :ref:`instrument parameter file <InstrumentParameterFile>`.
+- The current POLDI :ref:`instrument definition file <InstrumentDefinitionFile>` has been renamed from ``POLDI_Definition_896.xml`` to ``POLDI_Definition.xml``. Scripts that load this file by name need updating; loading POLDI data by instrument name or run date is unaffected.
