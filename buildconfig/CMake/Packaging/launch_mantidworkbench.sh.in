@@ -61,6 +61,11 @@ if [ -z "${QT_QPA_PLATFORM}" ]; then
     export QT_QPA_PLATFORM=xcb
 fi
 
+# Let Qt find the system cursor themes (conda's libxcb-cursor only searches the environment)
+if [ -z "${XCURSOR_PATH}" ]; then
+    export XCURSOR_PATH="${HOME}/.local/share/icons:${HOME}/.icons:@ROOT_DIR@/share/icons:@ROOT_DIR@/share/pixmaps:/usr/share/icons:/usr/share/pixmaps"
+fi
+
 # Launch the workbench
 LD_PRELOAD=${LOCAL_PRELOAD} \
     PYTHONPATH=${LOCAL_PYTHONPATH} \
