@@ -440,6 +440,21 @@ class HFIRSCDSubtractBackgroundTest(unittest.TestCase):
                 OutputWorkspace="output",
             )
 
+    def test_detector_id_missing_from_grouping_leaves_group_unchanged_in_place(self):
+        # the second member has a detector ID that is not in the grouping workspace; the first one must not be subtracted
+        first = self._create_grouped_sample(name="scan_1")
+        self._create_grouped_sample(pixel_ids=self.GROUPED_FIRST_IDS[:5] + [999], name="scan_2")
+        GroupWorkspaces(InputWorkspaces=["scan_1", "scan_2"], OutputWorkspace="scans")
+        with self.assertRaisesRegex(RuntimeError, "1 of 6 detector IDs are not found in InputGroupingWorkspace"):
+            HFIRSCDSubtractBackground(
+                InputWorkspace="scans",
+                InputBackground=self._create_ungrouped_background(),
+                InputGroupingWorkspace=self._create_grouping_workspace(),
+                OutputWorkspace="scans",
+            )
+        np.testing.assert_array_equal(first.getSignalArray(), self.SAMPLE_SIGNAL)
+        np.testing.assert_allclose(first.getErrorSquaredArray(), self.SAMPLE_ERROR_SQUARED)
+
     def test_validation_rejects_workspace2d_with_several_bins(self):
         background = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=2, OutputWorkspace="several_bins")
         self._assert_rejected(

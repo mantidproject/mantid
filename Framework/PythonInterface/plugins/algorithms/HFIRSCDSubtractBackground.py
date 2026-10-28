@@ -119,7 +119,8 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
         instrument, pixels that match the background (see _validate_against_background), and a valid flux log. The
         problems of all invalid members are reported together, each prefixed with the member name.
 
-        The detector IDs themselves are looked up only in PyExec, which raises if one is missing.
+        The detector IDs themselves are looked up only in PyExec, which raises before modifying any member if one is
+        missing.
 
         :returns: dictionary mapping "InputGroupingWorkspace", "InputBackground" and/or "InputWorkspace" to a
             description of the problems found; empty when the inputs are valid.
@@ -175,13 +176,13 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
         WorkspaceGroup sample produces a WorkspaceGroup output whose members are stored in the ADS as
         <OutputWorkspace>_<input member name>. OutputBackgroundWorkspace is created only when a name is given.
 
-        The background is first arranged in the pixel layout of each member (see _arranged_background); members with
-        the same pixel layout share this arrangement.
+        The background is first arranged in the pixel layout of every member (see _arranged_background), before any
+        member is subtracted; members with the same pixel layout share this arrangement.
 
         The inputs are assumed valid, as checked by validateInputs.
 
         :raises RuntimeError: if a detector ID of the sample or of the background is not found in InputBackground or in
-            InputGroupingWorkspace (see _workspace_indices).
+            InputGroupingWorkspace (see _workspace_indices). No member is modified then.
         """
         sample = self.getProperty("InputWorkspace").value
         background = self.getProperty("InputBackground").value
@@ -192,11 +193,19 @@ class HFIRSCDSubtractBackground(PythonAlgorithm):
         background_name = self.getPropertyValue("OutputBackgroundWorkspace")
         in_place = output_name == self.getPropertyValue("InputWorkspace")
 
-        outputs, scaled_backgrounds = [], []
+        # Arrange the background for every member before the first subtraction, so that a detector ID that is not found
+        # raises before any member is modified in place
         arrangements = dict()  # background arranged in the pixel layout of the members, by detectorID log or None
-        for _, member in self._members(sample):
-            flux_ratio = self._flux_ratio(member, background, normalized_by)
-            background_arrays = self._arranged_background(member, background, grouping, arrangements)
+        arranged = [
+            (
+                member,
+                self._flux_ratio(member, background, normalized_by),
+                self._arranged_background(member, background, grouping, arrangements),
+            )
+            for _, member in self._members(sample)
+        ]
+        outputs, scaled_backgrounds = [], []
+        for member, flux_ratio, background_arrays in arranged:
             if background_name:
                 scaled_backgrounds.append(self._scaled_background(member, *background_arrays, flux_ratio))
             output = member if in_place else self._clone(member)
