@@ -24,7 +24,8 @@ QtRunsTableView::QtRunsTableView(std::vector<std::string> instruments)
   m_ui.progressBar->setRange(0, 100);
   m_jobs = std::make_unique<MantidQt::MantidWidgets::Batch::JobTreeView>(
       QStringList({"Run(s)", "Angle", "1st Trans Run(s)", "2nd Trans Run(s)", "Q min", "Q max", "dQ/Q", "Scale",
-                   "Options", "Lookup Index", "Adjusted Angle"}),
+                   "Options", "Lookup Index", "Adjusted Angle", "Nominal Specular Pixel No.",
+                   "Actual Specular Pixel No."}),
       MantidQt::MantidWidgets::Batch::Cell(""), this);
   // Keep logical column indices stable for validation and row data. Only the
   // visual order changes: Adjusted Angle appears immediately after Angle.
@@ -42,9 +43,7 @@ QtRunsTableView::QtRunsTableView(std::vector<std::string> instruments)
   connect(m_ui.filterBox, SIGNAL(textChanged(QString const &)), this, SLOT(onFilterChanged(QString const &)));
   connect(m_ui.instrumentSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(onInstrumentChanged(int)));
 
-  m_jobs->setColumnHidden(adjustedAngleColumn,
-                          instrumentCategory(m_ui.instrumentSelector->currentText().toStdString()) !=
-                              InstrumentCategory::POLREF);
+  setInstrumentColumnsVisible(getInstrumentName());
 
   // Set up the icon
   m_ui.processButton->setIcon(MantidQt::Icons::getIcon("mdi.sigma", "black", 1.3));
@@ -91,7 +90,7 @@ std::string QtRunsTableView::getInstrumentName() const { return m_ui.instrumentS
 
 void QtRunsTableView::setInstrumentName(std::string const &instrumentName) {
   setSelected(*m_ui.instrumentSelector, instrumentName);
-  setAdjustedAngleColumnVisible(instrumentCategory(instrumentName) == InstrumentCategory::POLREF);
+  setInstrumentColumnsVisible(instrumentName);
 }
 
 void QtRunsTableView::resetFilterBox() { m_ui.filterBox->clear(); }
@@ -107,8 +106,11 @@ void QtRunsTableView::showAlgorithmPropertyHintsInOptionsColumn() {
                              "MomentumTransferMin", "MomentumTransferMax", "MomentumTransferStep", "ScaleFactor"}));
 }
 
-void QtRunsTableView::setAdjustedAngleColumnVisible(bool visible) {
-  m_jobs->setColumnHidden(adjustedAngleColumn, !visible);
+void QtRunsTableView::setInstrumentColumnsVisible(std::string const &instrumentName) {
+  updateInstrumentColumns(*m_jobs, instrumentName,
+                          {{adjustedAngleColumn, InstrumentCategory::POLREF},
+                           {nominalSpecularPixelColumn, InstrumentCategory::POLREF},
+                           {actualSpecularPixelColumn, InstrumentCategory::POLREF}});
 }
 
 void QtRunsTableView::setJobsTableEnabled(bool enabled) {

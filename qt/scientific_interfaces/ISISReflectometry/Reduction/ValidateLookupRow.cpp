@@ -122,6 +122,13 @@ std::optional<std::string> LookupRowValidator::parseROIDetectorIDs(CellText cons
   return optionalROIDetectors;
 }
 
+std::optional<double> LookupRowValidator::parsePixel(CellText const &cellText, LookupRow::Column column) {
+  auto [value, valid] = parseSpecularPixel(cellText[column]);
+  if (!valid)
+    m_invalidColumns.insert(column);
+  return value;
+}
+
 void LookupRowValidator::validateThetaAndRegex() {
   // Check we have a theta value, when we have a titleMatcher
   if (m_titleMatcherOrInvalid.has_value() && !m_thetaOrInvalid.has_value()) {
@@ -144,16 +151,19 @@ ValidationResult<LookupRow, std::unordered_set<int>> LookupRowValidator::operato
   auto optionalProcessingInstructions = parseProcessingInstructions(cellText);
   auto optionalBackgroundProcessingInstructions = parseBackgroundProcessingInstructions(cellText);
   auto optionalROIDetectorIDs = parseROIDetectorIDs(cellText);
+  auto nominalPixel = parsePixel(cellText, LookupRow::NOMINAL_SPECULAR_PIXEL);
+  auto actualPixel = parsePixel(cellText, LookupRow::ACTUAL_SPECULAR_PIXEL);
   if (!m_invalidColumns.empty()) {
     return ValidationResult<LookupRow, std::unordered_set<int>>(m_invalidColumns);
   }
 
   // if we reach this point, no column is invalid, but there may be empty columns.
   // We just need to pass on the values (Even though they are nullopt) of each column
-  auto lookupRow = LookupRow(m_thetaOrInvalid, m_titleMatcherOrInvalid, optionalTransmissionRuns.value(),
-                             std::move(optionalTransmissionProcessingInstructions), optionalQRange.value(),
-                             optionalScaleFactor, std::move(optionalProcessingInstructions),
-                             std::move(optionalBackgroundProcessingInstructions), std::move(optionalROIDetectorIDs));
+  auto lookupRow =
+      LookupRow(m_thetaOrInvalid, m_titleMatcherOrInvalid, optionalTransmissionRuns.value(),
+                std::move(optionalTransmissionProcessingInstructions), optionalQRange.value(), optionalScaleFactor,
+                std::move(optionalProcessingInstructions), std::move(optionalBackgroundProcessingInstructions),
+                std::move(optionalROIDetectorIDs), nominalPixel, actualPixel);
 
   return ValidationResult<LookupRow, std::unordered_set<int>>(std::move(lookupRow));
 }
