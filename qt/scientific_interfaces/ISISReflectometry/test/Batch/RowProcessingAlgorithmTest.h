@@ -13,6 +13,8 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "Reduction/ValidateLookupRow.h"
+#include "Reduction/ValidateRow.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -28,6 +30,32 @@ void assertProperty(IAlgorithmRuntimeProps const &props, std::string const &name
 
 class RowProcessingAlgorithmTest : public CxxTest::TestSuite {
 public:
+  void testSpecularPixelPrecedenceAndBlankActualRemainsUnset() {
+    auto experiment = Experiment();
+    auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
+    auto cells = std::vector<std::string>{"12345", "0.5", "", "", "", "", "", "", "", "", "", "", ""};
+    auto row = RowValidator{}(cells).assertValid();
+    auto props = RowProcessing::createAlgorithmRuntimeProps(model, row);
+    assertProperty(*props, "NominalSpecularPixelSpectrumNo", 280.0);
+    auto names = props->getDeclaredPropertyNames();
+    TS_ASSERT(std::find(names.begin(), names.end(), "ActualSpecularPixelSpectrumNo") == names.end());
+
+    auto lookupCells = LookupRow::ValueArray{};
+    lookupCells[LookupRow::NOMINAL_SPECULAR_PIXEL] = "281.5";
+    lookupCells[LookupRow::ACTUAL_SPECULAR_PIXEL] = "282.5";
+    experiment.updateLookupRow(LookupRowValidator{}(lookupCells).assertValid(), m_thetaTolerance);
+    props = RowProcessing::createAlgorithmRuntimeProps(model, row);
+    assertProperty(*props, "NominalSpecularPixelSpectrumNo", 281.5);
+    assertProperty(*props, "ActualSpecularPixelSpectrumNo", 282.5);
+
+    cells[11] = "283.5";
+    cells[12] = "284.5";
+    row = RowValidator{}(cells).assertValid();
+    props = RowProcessing::createAlgorithmRuntimeProps(model, row);
+    assertProperty(*props, "NominalSpecularPixelSpectrumNo", 283.5);
+    assertProperty(*props, "ActualSpecularPixelSpectrumNo", 284.5);
+  }
+
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static RowProcessingAlgorithmTest *createSuite() { return new RowProcessingAlgorithmTest(); }

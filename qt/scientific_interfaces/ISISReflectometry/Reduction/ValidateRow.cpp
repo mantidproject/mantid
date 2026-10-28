@@ -24,7 +24,9 @@ enum ColumnNumber {
   QMAX_COLUMN = 5,
   QSTEP_COLUMN = 6,
   SCALE_COLUMN = 7,
-  OPTIONS_COLUMN = 8
+  OPTIONS_COLUMN = 8,
+  NOMINAL_SPECULAR_PIXEL_COLUMN = 11,
+  ACTUAL_SPECULAR_PIXEL_COLUMN = 12
 };
 }
 
@@ -98,6 +100,13 @@ std::optional<ReductionOptionsMap> RowValidator::parseOptions(std::vector<std::s
   return options;
 }
 
+std::optional<double> RowValidator::parsePixel(std::vector<std::string> const &cellText, size_t column) {
+  auto [value, valid] = parseSpecularPixel(column < cellText.size() ? cellText[column] : "");
+  if (!valid)
+    m_invalidColumns.emplace_back(static_cast<int>(column));
+  return value;
+}
+
 ValidationResult<Row, std::vector<int>> RowValidator::operator()(std::vector<std::string> const &cellText) {
   auto optionalRunNumbers = parseRunNumbers(cellText);
   auto optionalTheta = parseTheta(cellText);
@@ -106,13 +115,16 @@ ValidationResult<Row, std::vector<int>> RowValidator::operator()(std::vector<std
   auto optionalScaleFactor = parseScaleFactor(cellText);
   auto optionalOptions = parseOptions(cellText);
 
+  auto nominalPixel = parsePixel(cellText, NOMINAL_SPECULAR_PIXEL_COLUMN);
+  auto actualPixel = parsePixel(cellText, ACTUAL_SPECULAR_PIXEL_COLUMN);
+
   if (!m_invalidColumns.empty()) {
     return RowValidationResult(m_invalidColumns);
   }
   auto wsNames = workspaceNames(optionalRunNumbers.value(), optionalTransmissionRuns.value());
-  auto optionalRow =
-      Row(optionalRunNumbers.value(), optionalTheta.value(), optionalTransmissionRuns.value(), optionalQRange.value(),
-          optionalScaleFactor, optionalOptions.value(), ReductionWorkspaces(std::move(wsNames)));
+  auto optionalRow = Row(optionalRunNumbers.value(), optionalTheta.value(), optionalTransmissionRuns.value(),
+                         optionalQRange.value(), optionalScaleFactor, optionalOptions.value(),
+                         ReductionWorkspaces(std::move(wsNames)), nominalPixel, actualPixel);
   return RowValidationResult(optionalRow);
 }
 

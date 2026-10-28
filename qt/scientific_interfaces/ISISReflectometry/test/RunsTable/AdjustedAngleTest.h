@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "../Common/CoderCommonTester.h"
 #include "../ReflMockObjects.h"
 #include "GUI/Common/PlotOptionsProvider.h"
 #include "GUI/Common/RunWorkspaceResolver.h"
@@ -37,11 +38,18 @@ public:
     auto &tree = dynamic_cast<MantidQt::MantidWidgets::Batch::JobTreeView &>(view.jobs());
     TS_ASSERT_EQUALS(tree.header()->visualIndex(adjustedAngleColumn), tree.header()->visualIndex(1) + 1);
     TS_ASSERT_EQUALS(tree.model()->headerData(adjustedAngleColumn, Qt::Horizontal).toString(), "Adjusted Angle");
-    TS_ASSERT(tree.isColumnHidden(adjustedAngleColumn));
-    view.setInstrumentName("POLREF");
-    TS_ASSERT(!tree.isColumnHidden(adjustedAngleColumn));
-    view.setInstrumentName("INTER");
-    TS_ASSERT(tree.isColumnHidden(adjustedAngleColumn));
+    auto algorithm = std::make_shared<ReflectometryISISLoadAndProcess>();
+    algorithm->initialize();
+    QtExperimentView lookupView(algorithm);
+    auto lookupTable = lookupView.findChild<QTableWidget *>("optionsTable");
+    for (auto const &instrument : {"INTER", "POLREF", "INTER"}) {
+      view.setInstrumentName(instrument);
+      lookupView.setInstrumentColumnsVisible(instrument);
+      for (auto column : {LookupRow::NOMINAL_SPECULAR_PIXEL, LookupRow::ACTUAL_SPECULAR_PIXEL})
+        TS_ASSERT_EQUALS(lookupTable->isColumnHidden(column), std::string(instrument) != "POLREF");
+      for (auto column : {adjustedAngleColumn, nominalSpecularPixelColumn, actualSpecularPixelColumn})
+        TS_ASSERT_EQUALS(tree.isColumnHidden(column), std::string(instrument) != "POLREF");
+    }
   }
 
   void testColumnInitiallyVisibleForPOLREF() {

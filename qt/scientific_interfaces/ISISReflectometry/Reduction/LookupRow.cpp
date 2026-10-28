@@ -18,10 +18,12 @@ LookupRow::LookupRow(std::optional<double> theta, std::optional<boost::regex> ti
                      std::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
                      std::optional<double> scaleFactor, std::optional<ProcessingInstructions> processingInstructions,
                      std::optional<ProcessingInstructions> backgroundProcessingInstructions,
-                     std::optional<ProcessingInstructions> roiDetectorIDs)
+                     std::optional<ProcessingInstructions> roiDetectorIDs, std::optional<double> nominalSpecularPixel,
+                     std::optional<double> actualSpecularPixel)
     : m_theta(std::move(theta)), m_titleMatcher(std::move(titleMatcher)),
       m_transmissionRuns(std::move(transmissionRuns)), m_qRange(std::move(qRange)),
-      m_scaleFactor(std::move(scaleFactor)),
+      m_scaleFactor(std::move(scaleFactor)), m_nominalSpecularPixel(nominalSpecularPixel),
+      m_actualSpecularPixel(actualSpecularPixel),
       m_transmissionProcessingInstructions(std::move(transmissionProcessingInstructions)),
       m_processingInstructions(std::move(processingInstructions)),
       m_backgroundProcessingInstructions(std::move(backgroundProcessingInstructions)),
@@ -38,6 +40,10 @@ std::optional<boost::regex> LookupRow::titleMatcher() const { return m_titleMatc
 RangeInQ const &LookupRow::qRange() const { return m_qRange; }
 
 std::optional<double> LookupRow::scaleFactor() const { return m_scaleFactor; }
+
+std::optional<double> LookupRow::nominalSpecularPixel() const { return m_nominalSpecularPixel; }
+
+std::optional<double> LookupRow::actualSpecularPixel() const { return m_actualSpecularPixel; }
 
 std::optional<ProcessingInstructions> LookupRow::processingInstructions() const { return m_processingInstructions; }
 
@@ -85,7 +91,8 @@ bool LookupRow::hasEqualThetaAndTitle(LookupRow const &lookupRow, double toleran
 bool operator==(LookupRow const &lhs, LookupRow const &rhs) {
   return (lhs.m_theta == rhs.m_theta && lhs.m_titleMatcher == rhs.m_titleMatcher &&
           lhs.m_transmissionRuns == rhs.m_transmissionRuns && lhs.m_qRange == rhs.m_qRange &&
-          lhs.m_scaleFactor == rhs.m_scaleFactor &&
+          lhs.m_scaleFactor == rhs.m_scaleFactor && lhs.m_nominalSpecularPixel == rhs.m_nominalSpecularPixel &&
+          lhs.m_actualSpecularPixel == rhs.m_actualSpecularPixel &&
           lhs.m_transmissionProcessingInstructions == rhs.m_transmissionProcessingInstructions &&
           lhs.m_processingInstructions == rhs.m_processingInstructions &&
           lhs.m_backgroundProcessingInstructions == rhs.m_backgroundProcessingInstructions &&
@@ -118,6 +125,10 @@ LookupRow::ValueArray lookupRowToArray(LookupRow const &lookupRow) {
     result[LookupRow::Column::BACKGROUND_SPECTRA] = *lookupRow.backgroundProcessingInstructions();
   if (lookupRow.roiDetectorIDs())
     result[LookupRow::Column::ROI_DETECTOR_IDS] = *lookupRow.roiDetectorIDs();
+  if (lookupRow.nominalSpecularPixel())
+    result[LookupRow::NOMINAL_SPECULAR_PIXEL] = std::to_string(*lookupRow.nominalSpecularPixel());
+  if (lookupRow.actualSpecularPixel())
+    result[LookupRow::ACTUAL_SPECULAR_PIXEL] = std::to_string(*lookupRow.actualSpecularPixel());
   return result;
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

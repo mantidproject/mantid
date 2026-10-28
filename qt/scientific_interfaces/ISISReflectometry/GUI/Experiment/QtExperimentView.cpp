@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtExperimentView.h"
+#include "GUI/Common/InstrumentCategory.h"
 #include "MantidKernel/UsageService.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include "Reduction/LookupRow.h"
@@ -34,7 +35,9 @@ std::unordered_map<int, std::string> ColumnPropertyNames{
     {LookupRow::SCALE, "ScaleFactor"},
     {LookupRow::RUN_SPECTRA, "ProcessingInstructions"},
     {LookupRow::BACKGROUND_SPECTRA, "BackgroundProcessingInstructions"},
-    {LookupRow::ROI_DETECTOR_IDS, "ROIDetectorIDs"}};
+    {LookupRow::ROI_DETECTOR_IDS, "ROIDetectorIDs"},
+    {LookupRow::NOMINAL_SPECULAR_PIXEL, "NominalSpecularPixelSpectrumNo"},
+    {LookupRow::ACTUAL_SPECULAR_PIXEL, "ActualSpecularPixelSpectrumNo"}};
 
 // Changing the palette for spin boxes doesn't work but we can
 // change the background colour with a style sheet. This also changes
@@ -209,6 +212,7 @@ void QtExperimentView::initOptionsTable(const Mantid::API::IAlgorithm_sptr &algo
   // Set angle and scale columns to a small width so everything fits
   table->resizeColumnsToContents();
   table->setColumnCount(LookupRow::OPTIONS_TABLE_COLUMN_COUNT);
+  setInstrumentColumnsVisible("");
   table->setRowCount(1);
   initializeTableColumns(*table, algorithmForTooltips);
   initializeTableItems(*table);
@@ -741,17 +745,19 @@ std::vector<LookupRow::ValueArray> QtExperimentView::getLookupTable() const {
   auto const &table = *m_ui.optionsTable;
   auto rows = std::vector<LookupRow::ValueArray>();
   rows.reserve(table.rowCount());
-  using Col = LookupRow::Column;
   for (auto row = 0; row < table.rowCount(); ++row) {
-    rows.emplace_back(LookupRow::ValueArray{
-        textFromCell(table.item(row, Col::THETA)), textFromCell(table.item(row, Col::TITLE)),
-        textFromCell(table.item(row, Col::FIRST_TRANS)), textFromCell(table.item(row, Col::SECOND_TRANS)),
-        textFromCell(table.item(row, Col::TRANS_SPECTRA)), textFromCell(table.item(row, Col::QMIN)),
-        textFromCell(table.item(row, Col::QMAX)), textFromCell(table.item(row, Col::QSTEP)),
-        textFromCell(table.item(row, Col::SCALE)), textFromCell(table.item(row, Col::RUN_SPECTRA)),
-        textFromCell(table.item(row, Col::BACKGROUND_SPECTRA)), textFromCell(table.item(row, Col::ROI_DETECTOR_IDS))});
+    auto values = LookupRow::ValueArray{};
+    for (auto column = 0; column < table.columnCount(); ++column)
+      values[column] = textFromCell(table.item(row, column));
+    rows.emplace_back(std::move(values));
   }
   return rows;
+}
+
+void QtExperimentView::setInstrumentColumnsVisible(std::string const &instrumentName) {
+  updateInstrumentColumns(*m_ui.optionsTable, instrumentName,
+                          {{LookupRow::NOMINAL_SPECULAR_PIXEL, InstrumentCategory::POLREF},
+                           {LookupRow::ACTUAL_SPECULAR_PIXEL, InstrumentCategory::POLREF}});
 }
 
 void QtExperimentView::setLookupTable(std::vector<LookupRow::ValueArray> rows) {

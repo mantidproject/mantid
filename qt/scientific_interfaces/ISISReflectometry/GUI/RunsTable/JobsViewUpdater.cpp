@@ -43,6 +43,8 @@ std::optional<size_t> incrementIndex(const Row &row) {
   return lookupIndex.has_value() ? std::optional<size_t>(lookupIndex.value() + 1) : std::nullopt;
 }
 
+} // namespace
+
 std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, std::optional<int> precision) {
   auto lookupIndex = incrementIndex(row);
   return std::vector<MantidQt::MantidWidgets::Batch::Cell>(
@@ -56,9 +58,10 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, s
        MantidQt::MantidWidgets::Batch::Cell(optionalToString(row.scaleFactor(), precision)),
        MantidQt::MantidWidgets::Batch::Cell(MantidWidgets::optionsToString(row.reductionOptions())),
        MantidQt::MantidWidgets::Batch::Cell(optionalToString(lookupIndex, precision)),
-       adjustedAngleCell(row, precision)});
+       adjustedAngleCell(row, precision),
+       MantidWidgets::Batch::Cell(optionalToString(row.nominalSpecularPixel(), precision)),
+       MantidWidgets::Batch::Cell(optionalToString(row.actualSpecularPixel(), precision))});
 }
-} // namespace
 
 MantidWidgets::Batch::Cell adjustedAngleCell(Row const &row, std::optional<int> precision) {
   auto cell = MantidWidgets::Batch::Cell("");

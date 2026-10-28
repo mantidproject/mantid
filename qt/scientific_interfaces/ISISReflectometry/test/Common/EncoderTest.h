@@ -48,6 +48,7 @@ public:
     QtMainWindowView mwv;
     mwv.initLayout();
     auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);
+    tester.populateSpecularPixels(gui, &mwv);
     Encoder encoder;
     auto map = encoder.encodeBatch(&mwv, 0);
 

@@ -622,6 +622,7 @@ public:
   }
 
   void testInstrumentChangedUpdatesAnalysisModeInView() {
+    EXPECT_CALL(m_view, setInstrumentColumnsVisible("POLREF")).Times(1);
     auto model = makeModelWithAnalysisMode(AnalysisMode::MultiDetector);
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
