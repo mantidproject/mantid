@@ -144,7 +144,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             "TimeInterval",
             "LogValueInterval",
             "LogName",
-            "UseNewFilterAlgorithm",
+            "FilterByLogValue",
             "ReloadInvalidWorkspaces",
             "GroupTOFWorkspaces",
             "CalibrationFile",
