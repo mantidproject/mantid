@@ -202,9 +202,9 @@ protected:
 
 private:
   /// Fill with given instrument parameter
-  void populateWithParameter(Geometry::ParameterMap &paramMap, Geometry::PositionAndRotationAccumulator &posAndRot,
-                             const std::string &name, const Geometry::XMLInstrumentParameter &paramInfo,
-                             const Run &runData);
+  void populateWithParameter(Geometry::ComponentInfo &compInfo, Geometry::PositionAndRotationAccumulator &posAndRot,
+                             const size_t compIndex, const std::string &name,
+                             const Geometry::XMLInstrumentParameter &paramInfo, const Run &runData);
 
   /// Attempt to load instrument embedded in Nexus file. *file must have instrument group open.
   void loadEmbeddedInstrumentInfoNexus(Nexus::File *file, std::string &instrumentName, std::string &instrumentXml);
