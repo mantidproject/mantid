@@ -43,7 +43,7 @@ QtRunsTableView::QtRunsTableView(std::vector<std::string> instruments)
   connect(m_ui.filterBox, SIGNAL(textChanged(QString const &)), this, SLOT(onFilterChanged(QString const &)));
   connect(m_ui.instrumentSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(onInstrumentChanged(int)));
 
-  setInstrumentColumnsVisible(getInstrumentName());
+  setInstrumentColumnsVisible(m_ui.instrumentSelector->currentText().toStdString());
 
   // Set up the icon
   m_ui.processButton->setIcon(MantidQt::Icons::getIcon("mdi.sigma", "black", 1.3));

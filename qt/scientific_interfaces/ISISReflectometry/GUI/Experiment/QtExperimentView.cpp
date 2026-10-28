@@ -39,6 +39,12 @@ std::unordered_map<int, std::string> ColumnPropertyNames{
     {LookupRow::NOMINAL_SPECULAR_PIXEL, "NominalSpecularPixelSpectrumNo"},
     {LookupRow::ACTUAL_SPECULAR_PIXEL, "ActualSpecularPixelSpectrumNo"}};
 
+void updateLookupTableColumns(QTableWidget &table, std::string const &instrumentName) {
+  updateInstrumentColumns(table, instrumentName,
+                          {{LookupRow::NOMINAL_SPECULAR_PIXEL, InstrumentCategory::POLREF},
+                           {LookupRow::ACTUAL_SPECULAR_PIXEL, InstrumentCategory::POLREF}});
+}
+
 // Changing the palette for spin boxes doesn't work but we can
 // change the background colour with a style sheet. This also changes
 // the font slightly on Ubuntu so there may be a better way to do this,
@@ -212,7 +218,7 @@ void QtExperimentView::initOptionsTable(const Mantid::API::IAlgorithm_sptr &algo
   // Set angle and scale columns to a small width so everything fits
   table->resizeColumnsToContents();
   table->setColumnCount(LookupRow::OPTIONS_TABLE_COLUMN_COUNT);
-  setInstrumentColumnsVisible("");
+  updateLookupTableColumns(*table, "");
   table->setRowCount(1);
   initializeTableColumns(*table, algorithmForTooltips);
   initializeTableItems(*table);
@@ -755,9 +761,7 @@ std::vector<LookupRow::ValueArray> QtExperimentView::getLookupTable() const {
 }
 
 void QtExperimentView::setInstrumentColumnsVisible(std::string const &instrumentName) {
-  updateInstrumentColumns(*m_ui.optionsTable, instrumentName,
-                          {{LookupRow::NOMINAL_SPECULAR_PIXEL, InstrumentCategory::POLREF},
-                           {LookupRow::ACTUAL_SPECULAR_PIXEL, InstrumentCategory::POLREF}});
+  updateLookupTableColumns(*m_ui.optionsTable, instrumentName);
 }
 
 void QtExperimentView::setLookupTable(std::vector<LookupRow::ValueArray> rows) {

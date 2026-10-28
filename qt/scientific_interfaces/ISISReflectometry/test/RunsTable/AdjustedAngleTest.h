@@ -42,6 +42,10 @@ public:
     algorithm->initialize();
     QtExperimentView lookupView(algorithm);
     auto lookupTable = lookupView.findChild<QTableWidget *>("optionsTable");
+    for (auto column : {LookupRow::NOMINAL_SPECULAR_PIXEL, LookupRow::ACTUAL_SPECULAR_PIXEL})
+      TS_ASSERT(lookupTable->isColumnHidden(column));
+    for (auto column : {adjustedAngleColumn, nominalSpecularPixelColumn, actualSpecularPixelColumn})
+      TS_ASSERT(tree.isColumnHidden(column));
     for (auto const &instrument : {"INTER", "POLREF", "INTER"}) {
       view.setInstrumentName(instrument);
       lookupView.setInstrumentColumnsVisible(instrument);
@@ -55,7 +59,8 @@ public:
   void testColumnInitiallyVisibleForPOLREF() {
     QtRunsTableView view({"POLREF", "INTER"});
     auto &tree = dynamic_cast<MantidQt::MantidWidgets::Batch::JobTreeView &>(view.jobs());
-    TS_ASSERT(!tree.isColumnHidden(adjustedAngleColumn));
+    for (auto column : {adjustedAngleColumn, nominalSpecularPixelColumn, actualSpecularPixelColumn})
+      TS_ASSERT(!tree.isColumnHidden(column));
   }
 
   void testNewRowsHaveReadOnlyAdjustedAngleCells() {
