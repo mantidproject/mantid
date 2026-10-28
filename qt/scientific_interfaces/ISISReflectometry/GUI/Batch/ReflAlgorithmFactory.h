@@ -18,7 +18,7 @@ class ReflAlgorithmFactory : public IReflAlgorithmFactory {
 public:
   explicit ReflAlgorithmFactory(IBatch const &batch);
   MantidQt::API::IConfiguredAlgorithm_sptr
-  makePostprocessingAlgorithm(Group &group, std::vector<std::string> const workspaces) const override;
+  makePostprocessingAlgorithm(Group &group, std::vector<std::string> const &workspaces) const override;
   MantidQt::API::IConfiguredAlgorithm_sptr makeRowProcessingAlgorithm(Row &row) const override;
   MantidQt::API::IConfiguredAlgorithm_sptr makePreprocessingAlgorithm(PreviewRow &row) const override;
   MantidQt::API::IConfiguredAlgorithm_sptr makeSumBanksAlgorithm(PreviewRow &row) const override;

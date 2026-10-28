@@ -45,7 +45,7 @@ std::optional<std::string> suffixForWorkspaceGroupMember(std::string const &memb
   return memberName.substr(prefix.size());
 }
 
-std::vector<std::string> suffixesFromFirstInputWorkspaceGroup(std::vector<std::string> workspaceNames) {
+std::vector<std::string> suffixesFromFirstInputWorkspaceGroup(std::vector<std::string> const &workspaceNames) {
   auto const &ads = AnalysisDataService::Instance();
   for (auto const &groupWSName : workspaceNames) {
     if (!ads.doesExist(groupWSName))
@@ -153,7 +153,7 @@ void updateUseValidDataOnly(AlgorithmRuntimeProps &properties) {
  * @param group : the row from the runs table
  */
 IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Group &group,
-                                                    std::vector<std::string> const workspaces,
+                                                    std::vector<std::string> const &workspaces,
                                                     bool resetOutputsOnStart) {
   // Create the algorithm
   auto alg = Mantid::API::AlgorithmManager::Instance().create("Stitch1DMany");
@@ -169,7 +169,7 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Group &
 }
 
 std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps>
-createAlgorithmRuntimeProps(IBatch const &model, Group const &group, std::vector<std::string> const workspaces) {
+createAlgorithmRuntimeProps(IBatch const &model, Group const &group, std::vector<std::string> const &workspaces) {
   auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   updateWorkspaceProperties(*properties, workspaces);
   // Set the rebin Params from the lookup row resolution, if given
