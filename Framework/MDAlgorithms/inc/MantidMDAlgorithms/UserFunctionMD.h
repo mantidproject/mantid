@@ -11,8 +11,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidGeometry/muParser_Silent.h"
 #include "MantidMDAlgorithms/DllConfig.h"
+#include <muParser.h>
 
 namespace Mantid {
 namespace MDAlgorithms {

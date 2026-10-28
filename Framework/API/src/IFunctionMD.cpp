@@ -16,8 +16,8 @@
 #include "MantidAPI/Jacobian.h"
 #include "MantidKernel/Exception.h"
 
-#include "MantidGeometry/muParser_Silent.h"
 #include <boost/lambda/lambda.hpp>
+#include <muParser.h>
 
 #include <algorithm>
 #include <cfloat>

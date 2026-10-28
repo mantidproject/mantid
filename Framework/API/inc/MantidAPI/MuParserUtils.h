@@ -10,7 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidGeometry/muParser_Silent.h"
+#include <muParser.h>
 
 namespace Mantid {
 namespace API {
