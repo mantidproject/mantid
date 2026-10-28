@@ -44,11 +44,11 @@ void ReductionWorkspaces::resetOutputNames() {
 
 bool ReductionWorkspaces::hasOutputName(std::string const &wsName) const {
   return std::any_of(m_iVsLambda.cbegin(), m_iVsLambda.cend(),
-                     [&wsName](std::string lamWsName) { return lamWsName == wsName; }) ||
+                     [&wsName](std::string const &lamWsName) { return lamWsName == wsName; }) ||
          std::any_of(m_iVsQ.cbegin(), m_iVsQ.cend(),
-                     [&wsName](std::string lamWsName) { return lamWsName == wsName; }) ||
+                     [&wsName](std::string const &lamWsName) { return lamWsName == wsName; }) ||
          std::any_of(m_iVsQBinned.cbegin(), m_iVsQBinned.cend(),
-                     [&wsName](std::string lamWsName) { return lamWsName == wsName; });
+                     [&wsName](std::string const &lamWsName) { return lamWsName == wsName; });
 }
 
 void ReductionWorkspaces::renameOutput(std::string const &oldName, std::string const &newName) {

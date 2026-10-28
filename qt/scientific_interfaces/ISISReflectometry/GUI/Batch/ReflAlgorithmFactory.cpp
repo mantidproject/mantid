@@ -19,7 +19,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 ReflAlgorithmFactory::ReflAlgorithmFactory(IBatch const &batch) : m_batch(batch) {}
 
 MantidQt::API::IConfiguredAlgorithm_sptr
-ReflAlgorithmFactory::makePostprocessingAlgorithm(Group &group, std::vector<std::string> const workspaces) const {
+ReflAlgorithmFactory::makePostprocessingAlgorithm(Group &group, std::vector<std::string> const &workspaces) const {
   return GroupProcessing::createConfiguredAlgorithm(m_batch, group, workspaces);
 }
 

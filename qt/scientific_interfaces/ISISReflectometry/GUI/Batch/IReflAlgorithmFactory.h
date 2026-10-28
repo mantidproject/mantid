@@ -20,7 +20,7 @@ public:
 
   // These functions create the algorithm for a group or row in the Runs tab table
   virtual MantidQt::API::IConfiguredAlgorithm_sptr
-  makePostprocessingAlgorithm(Group &group, std::vector<std::string> const workspaces) const = 0;
+  makePostprocessingAlgorithm(Group &group, std::vector<std::string> const &workspaces) const = 0;
   virtual MantidQt::API::IConfiguredAlgorithm_sptr makeRowProcessingAlgorithm(Row &row) const = 0;
   // These functions create the algorithm for a particular processing step and are used by the Preview tab
   // to perform an on-the-fly reduction
