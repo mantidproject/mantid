@@ -180,8 +180,13 @@ public:
                    std::map<std::string, std::string>(), makeLookupTableWithTwoAnglesAndWildcard(), false);
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRowsWithMixedQResolutions();
-    auto workspaceNames = {group.rows()[2]->reducedWorkspaceNames().iVsQ()[0],
-                           group.rows()[3]->reducedWorkspaceNames().iVsQ()[0]};
+    auto workspaceNames = std::vector<std::string>();
+    for (auto const &row : group.rows()) {
+      if (!row->reducedWorkspaceNames().iVsQ().empty()) {
+        auto const workspaceName = row->reducedWorkspaceNames().iVsQ()[0];
+        workspaceNames.emplace_back(workspaceName);
+      }
+    }
     auto result = createAlgorithmRuntimeProps(model, group, workspaceNames);
     assertProperty(*result, "Params", -0.015);
   }
@@ -194,8 +199,12 @@ public:
                    std::map<std::string, std::string>(), makeLookupTableWithTwoAnglesAndWildcard(), false);
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRowsWithOutputQResolutions();
-    auto workspaceNames = {group.rows()[2]->reducedWorkspaceNames().iVsQ()[0],
-                           group.rows()[3]->reducedWorkspaceNames().iVsQ()[0]};
+    auto workspaceNames = std::vector<std::string>();
+    for (auto const &row : group.rows()) {
+      if (!row->reducedWorkspaceNames().iVsQ().empty()) {
+        workspaceNames.emplace_back(row->reducedWorkspaceNames().iVsQ()[0]);
+      }
+    }
     auto result = createAlgorithmRuntimeProps(model, group, workspaceNames);
     assertProperty(*result, "Params", -0.016);
   }
