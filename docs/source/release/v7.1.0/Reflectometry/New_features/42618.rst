@@ -1,0 +1,1 @@
+- :ref:`ReflectometryISISLoadAndProcess <algm-ReflectometryISISLoadAndProcess>` now accepts ``ActualSpecularPixelSpectrumNo`` for POLREF calibration to replace specular-peak fitting. A different nominal pixel enables angle correction from the calibration map; an equal or omitted nominal pixel disables angle correction.
