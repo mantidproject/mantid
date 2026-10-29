@@ -17,27 +17,34 @@ jobs:
     # Do not run in forks
     if: ${{ github.repository_owner == 'mantidproject' }}
 
-    steps:
-      - name: Checkout ${{ github.ref_name}}
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 100
+    env:
+      SOURCE_BRANCH: ${{ github.head_ref || github.ref_name }}
 
-      - name: Checkout main
+    steps:
+      - name: Checkout ${{ env.SOURCE_BRANCH }}
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: main
-          fetch-depth: 1
+          fetch-depth: 0
+          filter: blob:none # get commits but not the blobs until needed
+
+      - name: Record commit to merge
+        id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Switch to main
+        run: git switch -C main origin/main
 
       - name: Set committer information
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Merge ${{ github.ref_name }} into main
+      - name: Merge ${{ env.SOURCE_BRANCH }} into main
+        env:
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
         run: |
-          git merge --no-ff "origin/${{ github.ref_name }}" \
-            -m "Merge ${{ github.ref_name }} into main"
+          git merge --no-ff "${SOURCE_SHA}" \
+            -m "Merge ${SOURCE_BRANCH} into main"
 
       - name: Push merge commit
         if: ${{ github.event_name != 'pull_request' }}
