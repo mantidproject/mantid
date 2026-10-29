@@ -7,7 +7,9 @@
 #pragma once
 
 #include "../../../ISISReflectometry/GUI/Plotting/view/QtPlottingView.h"
+#include "../../../ISISReflectometry/GUI/Plotting/view/QtPlottingWorkspaceTreeAdapterView.h"
 #include "../../../ISISReflectometry/GUI/Plotting/view/QtPlottingWorkspaceTreeView.h"
+#include "PlottingWorkspaceTreeTestHelpers.h"
 
 #include <QApplication>
 #include <QBrush>
@@ -28,7 +30,7 @@
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
-class QtPlottingViewTest : public CxxTest::TestSuite {
+class QtPlottingViewTest : public CxxTest::TestSuite, private PlottingWorkspaceTreeTestHelpers {
 public:
   void testNoPlotOutputTypesAreAvailableBeforePresenterSetsThem() {
     QtPlottingView view;
@@ -225,17 +227,14 @@ public:
     TS_ASSERT_EQUALS(tree->model()->headerData(2, Qt::Horizontal).toString().toStdString(), "Item");
   }
 
-  void testPlottingWorkspaceTreeShowsItemTypeOutputTypeAndItemColumns() {
-    QtPlottingView view;
-    view.setPlottingWorkspaceTreeItemStates(plottingWorkspaceTreeItemStates());
-    auto tree = plottingWorkspaceTree(view);
+  void testPlottingWorkspaceTreeShowsPreparedColumnLabels() {
+    QtPlottingWorkspaceTreeView tree;
+    QtPlottingWorkspaceTreeAdapterView view(&tree);
+    view.setItems({{"item type label", "output type label", "item label", {}}});
 
-    TS_ASSERT_EQUALS(tree->model()->data(groupIndex(tree)).toString().toStdString(), "Group");
-    TS_ASSERT_EQUALS(tree->model()->data(groupOutputTypeIndex(tree)).toString().toStdString(), "");
-    TS_ASSERT_EQUALS(tree->model()->data(groupItemIndex(tree)).toString().toStdString(), "Group 1");
-    TS_ASSERT_EQUALS(tree->model()->data(workspaceIndex(tree)).toString().toStdString(), "Workspace");
-    TS_ASSERT_EQUALS(tree->model()->data(workspaceOutputTypeIndex(tree)).toString().toStdString(), "IvsQ");
-    TS_ASSERT_EQUALS(tree->model()->data(workspaceItemIndex(tree)).toString().toStdString(), "IvsQ_12345");
+    TS_ASSERT_EQUALS(tree.model()->index(0, 0).data().toString().toStdString(), "item type label");
+    TS_ASSERT_EQUALS(tree.model()->index(0, 1).data().toString().toStdString(), "output type label");
+    TS_ASSERT_EQUALS(tree.model()->index(0, 2).data().toString().toStdString(), "item label");
   }
 
   void testPlottingWorkspaceTreeItemsAreEnabledByDefault() {
@@ -512,20 +511,6 @@ public:
     TS_ASSERT(!tree->selectionModel()->isSelected(workspace2));
   }
 
-  void testSelectedWorkspaceItemsReturnsOnlyWorkspaceItems() {
-    QtPlottingView view;
-    view.findChild<QCheckBox *>("filterIvsQ")->setChecked(true);
-    view.setPlottingWorkspaceTreeItemStates(plottingWorkspaceTreeItemStates());
-    auto tree = plottingWorkspaceTree(view);
-
-    click(tree, groupIndex(tree));
-
-    auto const selectedWorkspaces = view.selectedPlottingWorkspaceNames();
-    TS_ASSERT_EQUALS(selectedWorkspaces.size(), 2);
-    TS_ASSERT_EQUALS(selectedWorkspaces[0], "IvsQ_12345");
-    TS_ASSERT_EQUALS(selectedWorkspaces[1], "IvsQ_binned_12345");
-  }
-
   void testMutedWorkspaceItemsUseMutedRowPresentation() {
     QtPlottingView view;
     view.setPlottingWorkspaceTreeItemStates(plottingWorkspaceTreeItemStatesWithMutedIvsLambda());
@@ -585,33 +570,6 @@ public:
     click(tree, workspace);
 
     TS_ASSERT(!tree->selectionModel()->isSelected(workspace));
-  }
-
-  void testSelectingParentReturnsOnlySelectableChildWorkspaces() {
-    QtPlottingView view;
-    view.setPlottingWorkspaceTreeItemStates(plottingWorkspaceTreeItemStatesForSpinAsymmetry());
-    auto tree = plottingWorkspaceTree(view);
-
-    click(tree, runIndex(tree));
-
-    auto const selectedWorkspaces = view.selectedPlottingWorkspaceNames();
-    TS_ASSERT(tree->selectionModel()->isSelected(runIndex(tree)));
-    TS_ASSERT_EQUALS(selectedWorkspaces.size(), 1);
-    TS_ASSERT_EQUALS(selectedWorkspaces[0], "IvsQ_binned_12345");
-  }
-
-  void testSelectableWorkspaceGroupReturnsWorkspaceGroupName() {
-    QtPlottingView view;
-    view.setPlottingWorkspaceTreeItemStates(plottingWorkspaceTreeItemStatesWithWorkspaceGroupsForSpinAsymmetry());
-    auto tree = plottingWorkspaceTree(view);
-    auto workspaceGroup = workspaceIndex(tree, 0, 0, 1);
-
-    click(tree, workspaceGroup);
-
-    auto const selectedWorkspaces = view.selectedPlottingWorkspaceNames();
-    TS_ASSERT(tree->selectionModel()->isSelected(workspaceGroup));
-    TS_ASSERT_EQUALS(selectedWorkspaces.size(), 1);
-    TS_ASSERT_EQUALS(selectedWorkspaces[0], "IvsQ_binned_group_1");
   }
 
   void testMutedStitchedDisplayItemsUseMutedRowPresentation() {
@@ -682,19 +640,6 @@ public:
     TS_ASSERT(view.selectedPlottingWorkspaceNames().empty());
   }
 
-  void testSelectedWorkspaceNamesReturnsWorkspaceGroupChildren() {
-    QtPlottingView view;
-    view.setPlottingWorkspaceTreeItemStates(plottingWorkspaceTreeItemStatesWithWorkspaceGroups());
-    auto tree = plottingWorkspaceTree(view);
-    auto workspaceGroup = workspaceIndex(tree, 0, 0, 1);
-
-    click(tree, workspaceGroup);
-
-    auto const selectedWorkspaces = view.selectedPlottingWorkspaceNames();
-    TS_ASSERT_EQUALS(selectedWorkspaces.size(), 1);
-    TS_ASSERT_EQUALS(selectedWorkspaces[0], "IvsQ_binned_group_1");
-  }
-
   void testPlotButtonsNotifySubscriber() {
     QtPlottingView view;
     TestPlottingViewSubscriber subscriber;
@@ -724,64 +669,6 @@ public:
     TS_ASSERT(!view.findChild<QCheckBox *>("filterIvsQ")->isChecked());
   }
 
-  void testWorkspaceOutputTypeAndRegexFiltersHideRowsAndEmptyParents() {
-    QtPlottingView view;
-    view.setPlottingWorkspaceTreeItemStates(
-        {groupItem("sample", {runItem("12345", {workspaceItem("lambda", ReducedWorkspaceOutputType::IvsLambda),
-                                                workspaceItem("q", ReducedWorkspaceOutputType::IvsQ),
-                                                workspaceItem("binned", ReducedWorkspaceOutputType::IvsQBinned)}),
-                              runItem("67890", {workspaceItem("other", ReducedWorkspaceOutputType::IvsQBinned)})}),
-         groupItem("empty", {})});
-    auto *tree = plottingWorkspaceTree(view);
-
-    TS_ASSERT(tree->isRowHidden(0, runIndex(tree)));
-    TS_ASSERT(tree->isRowHidden(1, runIndex(tree)));
-    TS_ASSERT(!tree->isRowHidden(2, runIndex(tree)));
-    TS_ASSERT(tree->isRowHidden(1, {}));
-
-    view.findChild<QCheckBox *>("filterIvsQ")->setChecked(true);
-    view.findChild<QLineEdit *>("workspaceFilter")->setText("^12345$");
-
-    TS_ASSERT(!tree->isRowHidden(0, {}));
-    TS_ASSERT(!tree->isRowHidden(0, groupIndex(tree)));
-    TS_ASSERT(tree->isRowHidden(0, runIndex(tree)));
-    TS_ASSERT(!tree->isRowHidden(1, runIndex(tree)));
-    TS_ASSERT(!tree->isRowHidden(2, runIndex(tree)));
-    TS_ASSERT(tree->isRowHidden(1, groupIndex(tree)));
-  }
-
-  void testInvalidRegexRetainsLastValidExpressionWhileOutputTypesStillUpdate() {
-    QtPlottingView view;
-    view.setPlottingWorkspaceTreeItemStates(plottingWorkspaceTreeItemStatesWithBinnedOutput());
-    auto *tree = plottingWorkspaceTree(view);
-    view.findChild<QLineEdit *>("workspaceFilter")->setText("binned");
-    TS_ASSERT(!tree->isRowHidden(2, runIndex(tree)));
-
-    view.findChild<QLineEdit *>("workspaceFilter")->setText("[");
-    view.findChild<QCheckBox *>("filterIvsQ")->setChecked(true);
-    TS_ASSERT(tree->isRowHidden(1, runIndex(tree)));
-    view.findChild<QCheckBox *>("filterIvsQBinned")->setChecked(false);
-
-    TS_ASSERT(tree->isRowHidden(2, runIndex(tree)));
-    view.findChild<QCheckBox *>("filterIvsQBinned")->setChecked(true);
-    TS_ASSERT(!tree->isRowHidden(2, runIndex(tree)));
-  }
-
-  void testWorkspaceFilterIsReappliedWhenTreeIsRebuilt() {
-    QtPlottingView view;
-    view.setPlottingWorkspaceTreeItemStates(
-        {groupItem("original", {runItem("12345", {workspaceItem("first", ReducedWorkspaceOutputType::IvsQBinned),
-                                                  workspaceItem("second", ReducedWorkspaceOutputType::IvsQBinned)})})});
-    view.findChild<QLineEdit *>("workspaceFilter")->setText("second");
-    view.setPlottingWorkspaceTreeItemStates({groupItem(
-        "replacement", {runItem("67890", {workspaceItem("second", ReducedWorkspaceOutputType::IvsQBinned),
-                                          workspaceItem("first", ReducedWorkspaceOutputType::IvsQBinned)})})});
-    auto *tree = plottingWorkspaceTree(view);
-
-    TS_ASSERT(!tree->isRowHidden(0, runIndex(tree)));
-    TS_ASSERT(tree->isRowHidden(1, runIndex(tree)));
-  }
-
   void testRemovingFilterRestoresExpandedTree() {
     QtPlottingView view;
     view.setPlottingWorkspaceTreeItemStates(plottingWorkspaceTreeItemStates());
@@ -792,24 +679,6 @@ public:
 
     TS_ASSERT(tree->isExpanded(groupIndex(tree)));
     TS_ASSERT(tree->isExpanded(runIndex(tree)));
-  }
-
-  void testFilteringPreservesHiddenSelectionsAndAllowsSelectionToAccumulate() {
-    QtPlottingView view;
-    view.findChild<QCheckBox *>("filterIvsQ")->setChecked(true);
-    view.setPlottingWorkspaceTreeItemStates(plottingWorkspaceTreeItemStates());
-    auto *tree = plottingWorkspaceTree(view);
-    auto const q = workspaceIndex(tree, 0, 0, 0);
-    auto const binned = workspaceIndex(tree, 0, 0, 1);
-    click(tree, q);
-
-    view.findChild<QCheckBox *>("filterIvsQ")->setChecked(false);
-    click(tree, binned, Qt::ShiftModifier);
-
-    TS_ASSERT(tree->isRowHidden(q.row(), q.parent()));
-    TS_ASSERT(tree->selectionModel()->isSelected(q));
-    TS_ASSERT(tree->selectionModel()->isSelected(binned));
-    TS_ASSERT_EQUALS(view.selectedPlottingWorkspaceNames().size(), 2);
   }
 
   void testSelectingAndDeselectingPartiallyVisibleParentAffectsOnlyVisibleChildren() {
@@ -827,91 +696,6 @@ public:
     click(tree, run);
     TS_ASSERT(!tree->selectionModel()->isSelected(hiddenQ));
     TS_ASSERT(!tree->selectionModel()->isSelected(visibleBinned));
-  }
-
-  void testPartiallyFilteredCompleteWorkspaceGroupSelectionReturnsAllWorkspaceNames() {
-    QtPlottingView view;
-    auto spinGroup =
-        workspaceGroupItem("spin_group", {workspaceItem("spin_up", ReducedWorkspaceOutputType::IvsQBinned),
-                                          workspaceItem("spin_down", ReducedWorkspaceOutputType::IvsQBinned)});
-    for (auto &child : spinGroup.children) {
-      child = mutedItem(std::move(child), true);
-    }
-    view.setPlottingWorkspaceTreeItemStates({groupItem("Group 1", {runItem("12345", {std::move(spinGroup)})})});
-    view.findChild<QLineEdit *>("workspaceFilter")->setText("^spin_up$");
-    auto *tree = plottingWorkspaceTree(view);
-    auto const workspaceGroup = workspaceIndex(tree, 0, 0, 0);
-    auto const visibleSpin = tree->model()->index(0, 0, workspaceGroup);
-    auto const hiddenSpin = tree->model()->index(1, 0, workspaceGroup);
-
-    click(tree, workspaceGroup);
-
-    TS_ASSERT(tree->selectionModel()->isSelected(workspaceGroup));
-    TS_ASSERT(tree->selectionModel()->isSelected(visibleSpin));
-    TS_ASSERT(!tree->selectionModel()->isSelected(hiddenSpin));
-    TS_ASSERT_EQUALS(view.selectedPlottingWorkspaceNames(), std::vector<std::string>({"spin_up", "spin_down"}));
-  }
-
-  void testDeselectingAndReselectingCompleteWorkspaceGroupCannotReturnPartialOrReorderedSpinStates() {
-    QtPlottingView view;
-    auto spinGroup =
-        workspaceGroupItem("spin_group", {workspaceItem("spin_1", ReducedWorkspaceOutputType::IvsQBinned),
-                                          workspaceItem("spin_2", ReducedWorkspaceOutputType::IvsQBinned),
-                                          workspaceItem("spin_3", ReducedWorkspaceOutputType::IvsQBinned),
-                                          workspaceItem("spin_4", ReducedWorkspaceOutputType::IvsQBinned)});
-    for (auto &child : spinGroup.children) {
-      child = mutedItem(std::move(child), true);
-    }
-    view.setPlottingWorkspaceTreeItemStates({groupItem("Group 1", {runItem("12345", {std::move(spinGroup)})})});
-    auto *tree = plottingWorkspaceTree(view);
-    auto const workspaceGroup = workspaceIndex(tree, 0, 0, 0);
-    click(tree, workspaceGroup);
-    view.findChild<QLineEdit *>("workspaceFilter")->setText("^spin_[12]$");
-
-    click(tree, workspaceGroup);
-
-    TS_ASSERT(tree->selectionModel()->isSelected(tree->model()->index(2, 0, workspaceGroup)));
-    TS_ASSERT(tree->selectionModel()->isSelected(tree->model()->index(3, 0, workspaceGroup)));
-    TS_ASSERT(view.selectedPlottingWorkspaceNames().empty());
-
-    click(tree, workspaceGroup, Qt::ShiftModifier);
-
-    TS_ASSERT_EQUALS(view.selectedPlottingWorkspaceNames(),
-                     std::vector<std::string>({"spin_1", "spin_2", "spin_3", "spin_4"}));
-  }
-
-  void testPartiallyFilteredOrdinaryWorkspaceGroupReturnsOnlyVisibleSelectedWorkspaceNames() {
-    QtPlottingView view;
-    view.setPlottingWorkspaceTreeItemStates({groupItem(
-        "Group 1",
-        {runItem("12345", {workspaceGroupItem("workspace_group",
-                                              {workspaceItem("first", ReducedWorkspaceOutputType::IvsQBinned),
-                                               workspaceItem("second", ReducedWorkspaceOutputType::IvsQBinned)})})})});
-    view.findChild<QLineEdit *>("workspaceFilter")->setText("^first$");
-    auto *tree = plottingWorkspaceTree(view);
-    auto const workspaceGroup = workspaceIndex(tree, 0, 0, 0);
-    auto const visibleWorkspace = tree->model()->index(0, 0, workspaceGroup);
-    auto const hiddenWorkspace = tree->model()->index(1, 0, workspaceGroup);
-
-    click(tree, workspaceGroup);
-
-    TS_ASSERT(tree->selectionModel()->isSelected(visibleWorkspace));
-    TS_ASSERT(!tree->selectionModel()->isSelected(hiddenWorkspace));
-    TS_ASSERT_EQUALS(view.selectedPlottingWorkspaceNames(), std::vector<std::string>({"first"}));
-  }
-
-  void testHiddenSelectedWorkspaceGroupStillContributesToSelectionCount() {
-    QtPlottingView view;
-    view.setPlottingWorkspaceTreeItemStates(plottingWorkspaceTreeItemStatesWithWorkspaceGroups());
-    auto *tree = plottingWorkspaceTree(view);
-    auto const group = workspaceIndex(tree, 0, 0, 1);
-    click(tree, group);
-
-    view.findChild<QCheckBox *>("filterIvsQBinned")->setChecked(false);
-
-    TS_ASSERT(tree->selectionModel()->isSelected(group));
-    TS_ASSERT_EQUALS(view.selectedPlottingWorkspaceGroupCount(), 1);
-    TS_ASSERT_EQUALS(view.selectedPlottingWorkspaceNames(), std::vector<std::string>{"IvsQ_binned_group_1"});
   }
 
   void testFilteringDoesNotNotifyPresenterOfSelectionChanges() {
@@ -991,141 +775,6 @@ private:
     return items;
   }
 
-  std::vector<PlottingWorkspaceTreeItemState> plottingWorkspaceTreeItemStates() const {
-    return {groupItem(
-        "Group 1", {runItem("12345", {workspaceItem("IvsQ_12345", ReducedWorkspaceOutputType::IvsQ),
-                                      workspaceItem("IvsQ_binned_12345", ReducedWorkspaceOutputType::IvsQBinned)})})};
-  }
-
-  std::vector<PlottingWorkspaceTreeItemState> plottingWorkspaceTreeItemStatesWithGroups(int groups) const {
-    std::vector<PlottingWorkspaceTreeItemState> items;
-    for (auto group = 1; group <= groups; ++group) {
-      auto const run = std::to_string(group) + "2345";
-      items.emplace_back(
-          groupItem("Group " + std::to_string(group),
-                    {runItem(run, {workspaceItem("IvsQ_binned_" + run, ReducedWorkspaceOutputType::IvsQBinned)})}));
-    }
-    return items;
-  }
-
-  std::vector<PlottingWorkspaceTreeItemState> plottingWorkspaceTreeItemStatesWithBinnedOutput() const {
-    return {groupItem(
-        "Group 1", {runItem("12345", {workspaceItem("IvsLam_12345", ReducedWorkspaceOutputType::IvsLambda),
-                                      workspaceItem("IvsQ_12345", ReducedWorkspaceOutputType::IvsQ),
-                                      workspaceItem("IvsQ_binned_12345", ReducedWorkspaceOutputType::IvsQBinned)})})};
-  }
-
-  std::vector<PlottingWorkspaceTreeItemState> plottingWorkspaceTreeItemStatesWithMutedIvsLambda() const {
-    auto items = plottingWorkspaceTreeItemStatesWithBinnedOutput();
-    items[0].children[0].children[0] = mutedItem(std::move(items[0].children[0].children[0]), false);
-    return items;
-  }
-
-  std::vector<PlottingWorkspaceTreeItemState>
-  plottingWorkspaceTreeItemStatesWithBinnedWorkspaces(int workspaceCount) const {
-    auto workspaces = std::vector<PlottingWorkspaceTreeItemState>{};
-    for (auto workspace = 1; workspace <= workspaceCount; ++workspace) {
-      workspaces.emplace_back(
-          workspaceItem("IvsQ_binned_" + std::to_string(workspace), ReducedWorkspaceOutputType::IvsQBinned));
-    }
-    return {groupItem("Group 1", {runItem("12345", std::move(workspaces))})};
-  }
-
-  std::vector<PlottingWorkspaceTreeItemState>
-  plottingWorkspaceTreeItemStatesWithBinnedWorkspaceGroups(int workspaceGroupCount) const {
-    auto workspaceGroups = std::vector<PlottingWorkspaceTreeItemState>{};
-    for (auto workspaceGroup = 1; workspaceGroup <= workspaceGroupCount; ++workspaceGroup) {
-      workspaceGroups.emplace_back(
-          workspaceGroupItem("IvsQ_binned_group_" + std::to_string(workspaceGroup),
-                             {workspaceItem("IvsQ_binned_group_" + std::to_string(workspaceGroup) + "_1",
-                                            ReducedWorkspaceOutputType::IvsQBinned)}));
-    }
-    return {groupItem("Group 1", {runItem("12345", std::move(workspaceGroups))})};
-  }
-
-  std::vector<PlottingWorkspaceTreeItemState> plottingWorkspaceTreeItemStatesWithWorkspaceGroups() const {
-    return {groupItem(
-        "Group 1",
-        {runItem("12345",
-                 {workspaceGroupItem("IvsLam_group",
-                                     {workspaceItem("IvsLam_group_1", ReducedWorkspaceOutputType::IvsLambda)}),
-                  workspaceGroupItem("IvsQ_binned_group", {workspaceItem("IvsQ_binned_group_1",
-                                                                         ReducedWorkspaceOutputType::IvsQBinned)})})})};
-  }
-
-  std::vector<PlottingWorkspaceTreeItemState> plottingWorkspaceTreeItemStatesWithMutedIvsLambdaWorkspaceGroup() const {
-    auto items = plottingWorkspaceTreeItemStatesWithWorkspaceGroups();
-    items[0].children[0].children[0] = mutedItem(std::move(items[0].children[0].children[0]), false);
-    items[0].children[0].children[0].children[0] =
-        mutedItem(std::move(items[0].children[0].children[0].children[0]), false);
-    return items;
-  }
-
-  std::vector<PlottingWorkspaceTreeItemState> plottingWorkspaceTreeItemStatesForSpinAsymmetry() const {
-    auto items = plottingWorkspaceTreeItemStatesWithBinnedOutput();
-    auto &workspaces = items[0].children[0].children;
-    workspaces[0] = mutedItem(std::move(workspaces[0]), false);
-    workspaces[1] = mutedItem(std::move(workspaces[1]), false);
-    workspaces[2] = mutedItem(std::move(workspaces[2]), true);
-    return items;
-  }
-
-  std::vector<PlottingWorkspaceTreeItemState>
-  plottingWorkspaceTreeItemStatesWithWorkspaceGroupsForSpinAsymmetry() const {
-    auto items = plottingWorkspaceTreeItemStatesWithWorkspaceGroups();
-    auto &workspaceGroups = items[0].children[0].children;
-    workspaceGroups[0] = mutedItem(std::move(workspaceGroups[0]), false);
-    workspaceGroups[0].children[0] = mutedItem(std::move(workspaceGroups[0].children[0]), false);
-    workspaceGroups[1].children[0] = mutedItem(std::move(workspaceGroups[1].children[0]), true);
-    return items;
-  }
-
-  std::vector<PlottingWorkspaceTreeItemState> plottingWorkspaceTreeItemStatesWithStitchedOutput() const {
-    return {groupItem(
-        "Group 1", {workspaceItem("stitched_12345", ReducedWorkspaceOutputType::IvsQBinned),
-                    workspaceGroupItem("stitched_group",
-                                       {workspaceItem("stitched_group_1", ReducedWorkspaceOutputType::IvsQBinned)})})};
-  }
-
-  std::vector<PlottingWorkspaceTreeItemState> plottingWorkspaceTreeItemStatesWithMutedStitchedOutput() const {
-    auto items = plottingWorkspaceTreeItemStatesWithStitchedOutput();
-    items[0].children[0] = mutedItem(std::move(items[0].children[0]), false);
-    items[0].children[1] = mutedItem(std::move(items[0].children[1]), false);
-    items[0].children[1].children[0] = mutedItem(std::move(items[0].children[1].children[0]), false);
-    return items;
-  }
-
-  PlottingWorkspaceTreeItemState groupItem(std::string label,
-                                           std::vector<PlottingWorkspaceTreeItemState> children) const {
-    return {std::move(label), PlottingWorkspaceTreeItemType::ReductionGroup, ReducedWorkspaceOutputType::None, "",
-            std::move(children)};
-  }
-
-  PlottingWorkspaceTreeItemState runItem(std::string label,
-                                         std::vector<PlottingWorkspaceTreeItemState> children) const {
-    return {std::move(label), PlottingWorkspaceTreeItemType::Run, ReducedWorkspaceOutputType::None, "",
-            std::move(children)};
-  }
-
-  PlottingWorkspaceTreeItemState workspaceGroupItem(std::string label,
-                                                    std::vector<PlottingWorkspaceTreeItemState> children) const {
-    auto const workspaceName = label;
-    return {std::move(label), PlottingWorkspaceTreeItemType::WorkspaceGroup, ReducedWorkspaceOutputType::None,
-            workspaceName, std::move(children)};
-  }
-
-  PlottingWorkspaceTreeItemState workspaceItem(std::string label, ReducedWorkspaceOutputType outputType) const {
-    auto const workspaceName = label;
-    return {std::move(label), PlottingWorkspaceTreeItemType::Workspace, outputType, workspaceName, {}};
-  }
-
-  PlottingWorkspaceTreeItemState mutedItem(PlottingWorkspaceTreeItemState item, bool selectableAsChild) const {
-    item.muted = true;
-    item.selectionMode =
-        selectableAsChild ? PlottingWorkspaceTreeSelectionMode::ParentOnly : PlottingWorkspaceTreeSelectionMode::None;
-    return item;
-  }
-
   QTreeView *plottingWorkspaceTree(QtPlottingView &view) const {
     return view.findChild<QTreeView *>("plottingWorkspaceTree");
   }
@@ -1163,8 +812,6 @@ private:
 
   QModelIndex groupIndex(QTreeView *tree, int group) const { return tree->model()->index(group, 0); }
 
-  QModelIndex groupOutputTypeIndex(QTreeView *tree) const { return tree->model()->index(0, 1); }
-
   QModelIndex groupItemIndex(QTreeView *tree) const { return tree->model()->index(0, 2); }
 
   QModelIndex runIndex(QTreeView *tree) const { return tree->model()->index(0, 0, groupIndex(tree)); }
@@ -1182,8 +829,6 @@ private:
     auto const runModelIndex = tree->model()->index(run, 0, groupModelIndex);
     return tree->model()->index(workspace, 1, runModelIndex);
   }
-
-  QModelIndex workspaceItemIndex(QTreeView *tree) const { return tree->model()->index(0, 2, runIndex(tree)); }
 
   QModelIndex workspaceItemIndex(QTreeView *tree, int group, int run, int workspace) const {
     auto const groupModelIndex = tree->model()->index(group, 0);
