@@ -101,6 +101,19 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         config["default.facility"] = self._oldFacility
         config["default.instrument"] = self._oldInstrument
 
+    def test_all_property_settings_can_be_evaluated(self):
+        alg = create_algorithm("ReflectometryISISLoadAndProcess")
+        for prop in alg.getProperties():
+            settings = prop.settings
+            if settings is None:
+                continue
+            if not isinstance(settings, list):
+                settings = [settings]
+            for setting in settings:
+                with self.subTest(property=prop.name):
+                    self.assertIsInstance(setting.isEnabled(alg), bool)
+                    self.assertIsInstance(setting.isVisible(alg), bool)
+
     def test_missing_input_runs(self):
         self._assert_run_algorithm_throws()
 
