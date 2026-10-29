@@ -16,6 +16,7 @@
 #include "GUI/Plotting/presenter/PlottingViewStateProvider.h"
 #include "GUI/Plotting/presenter/QtActiveFigureMonitor.h"
 #include "GUI/Plotting/view/IPlottingView.h"
+#include "PlottingWorkspaceTreePresenter.h"
 
 #include <string>
 
@@ -49,6 +50,7 @@ public:
   void notifyPlotOutputTypeChanged() override;
   /// Refresh action state after the workspace tree selection changes.
   void notifyPlottingWorkspaceTreeSelectionChanged() override;
+  void notifyWorkspaceFilterChanged() override;
   /// Refresh action state for controls that depend on the active figure.
   void notifyActiveFigureChanged();
 
@@ -82,6 +84,7 @@ private:
   IPlotOptionsProvider const *m_plotOptionsProvider;
   IPlottingModel const *m_plottingModel;
   IActiveFigureMonitor *m_activeFigureMonitor;
+  PlottingWorkspaceTreePresenter m_plottingWorkspaceTreePresenter;
   PlottingWorkspaceTree m_plottingWorkspaceTree;
   PlottingViewStateProvider m_viewStateProvider;
   std::string m_instrumentName;

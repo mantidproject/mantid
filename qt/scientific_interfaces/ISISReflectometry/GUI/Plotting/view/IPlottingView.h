@@ -8,6 +8,7 @@
 
 #include "Common/DllConfig.h"
 #include "GUI/Common/PlotOptions.h"
+#include "GUI/Plotting/view/IPlottingWorkspaceTreeView.h"
 #include "GUI/Plotting/view/PlottingViewState.h"
 #include <optional>
 #include <string>
@@ -31,6 +32,8 @@ public:
   virtual void notifyAddToExistingPlotChanged() = 0;
   /// Notify that the selected plot output type changed.
   virtual void notifyPlotOutputTypeChanged() = 0;
+  /// Notify that the workspace tree filter controls changed.
+  virtual void notifyWorkspaceFilterChanged() = 0;
   /// Notify that the workspace tree selection changed.
   virtual void notifyPlottingWorkspaceTreeSelectionChanged() = 0;
 };
@@ -49,12 +52,12 @@ public:
   virtual void setPlotOutputControlsState(PlotOutputControlsState const &state) = 0;
   /// Enable, disable and update plotting action controls.
   virtual void setPlotActionState(PlotActionState const &state) = 0;
-  /// Replace the displayed plotting workspace tree state.
-  virtual void setPlottingWorkspaceTreeItemStates(std::vector<PlottingWorkspaceTreeItemState> const &itemStates) = 0;
-  /// Return selected workspace leaf names.
-  virtual std::vector<std::string> selectedPlottingWorkspaceNames() const = 0;
-  /// Return the number of selected workspace-group rows.
-  virtual size_t selectedPlottingWorkspaceGroupCount() const = 0;
+  /// Return the child tree view owned by this view.
+  virtual IPlottingWorkspaceTreeView &workspaceTreeView() = 0;
+  /// Return the workspace name filter expression.
+  virtual std::string workspaceFilterText() const = 0;
+  /// Return the enabled workspace output filters.
+  virtual std::vector<ReducedWorkspaceOutputType> workspaceFilterOutputTypes() const = 0;
   /// Return the selected output type, or empty if no output type is available.
   virtual std::optional<PlotOutputType> selectedPlotOutputType() const = 0;
   /// Return the full output selection, including output-specific axes.
