@@ -185,6 +185,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _declareCalibrationProperties(self):
         """Copy properties from the calibration algorithm."""
         self.copyProperties("ReflectometryISISCalibration", ["CalibrationFile", Prop.NOMINAL_SPECULAR_PIXEL])
+        self.getProperty(Prop.NOMINAL_SPECULAR_PIXEL).clearSettings()
 
     def _declareSumBanksProperties(self):
         """Copy properties from the child sum banks algorithm"""
