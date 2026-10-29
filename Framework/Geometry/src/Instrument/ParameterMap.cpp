@@ -162,6 +162,12 @@ std::shared_ptr<ParameterInfo> ParameterMap::rekey(const std::unordered_map<ICom
       rekeyed->insert(found->second, parameter);
     }
   }
+  for (auto const &[key, parameter] : m_parameterInfo->logfileParameters()) {
+    auto const found = idToIndex.find(componentIdAt(key.first));
+    if (found != idToIndex.end()) {
+      rekeyed->addLogfileParameter(found->second, key.second, parameter);
+    }
+  }
 
   // Adopt the rekeyed store and the instrument's index domain, so that this map and the
   // ComponentInfo built alongside it share one set of parameters from here on.
@@ -1189,8 +1195,21 @@ void ParameterMap::setInstrument(const Instrument *instrument) {
   // makeBeamlineNew() path, where there were no parameters to rekey.
   if (m_componentInfo) {
     m_parameterInfo = m_componentInfo->sharedParameterInfo();
+    seedLogfileParameters();
   }
   buildInstrumentMetadata();
+}
+
+/// Copies the instrument definition's logfile parameters into this map's store, by component index.
+/// Only a newly attached map is seeded; a copied map already carries its source's logfile parameters,
+/// including any added since from a parameter file.
+void ParameterMap::seedLogfileParameters() {
+  for (auto const &[key, parameter] : m_instrument->getLogfileCache()) {
+    auto const index = m_componentInfo->indexOfOrInvalid(key.second);
+    if (index != ComponentInfo::invalidIndex) {
+      m_parameterInfo->addLogfileParameter(index, key.first, parameter);
+    }
+  }
 }
 
 /// Builds m_instrumentMetadata from m_instrument. Requires m_instrument to be set.

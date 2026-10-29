@@ -1,0 +1,1 @@
+- :ref:`algm-LoadParameterFile` now adds parameters whose values come from sample logs to the given workspace only. Previously they were also applied to every other workspace with the same instrument, including workspaces loaded later in the session, the next time their instrument parameters were refreshed from their logs.

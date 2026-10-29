@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
@@ -14,6 +16,8 @@
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Material.h"
+#include "MantidKernel/NeutronAtom.h"
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/Timer.h"
@@ -25,6 +29,15 @@ using namespace Mantid::Geometry;
 
 class ObjComponentTest : public CxxTest::TestSuite {
 public:
+  void test_material_of_a_parametrized_component_is_that_of_its_shape() {
+    auto shape = ComponentCreationHelper::createCuboid(0.5);
+    shape->setMaterial(Material("vanadium", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.07));
+    ObjComponent base("obj", shape);
+    ParameterMap pmap;
+    ObjComponent parametrized(&base, &pmap);
+    TS_ASSERT_EQUALS(parametrized.material().name(), "vanadium");
+  }
+
   void testNameConstructor() {
     ObjComponent objComp("objComp1");
     TS_ASSERT_EQUALS(objComp.getName(), "objComp1");
