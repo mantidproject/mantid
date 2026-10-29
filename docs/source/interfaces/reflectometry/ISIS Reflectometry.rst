@@ -167,26 +167,6 @@ plots the stitched output for the selected group(s)
   *Plotting the results of the reduction*
 
 
-Combined reflectivity and spin-asymmetry plots
-------------------------------------------------------------
-
-In the **Plotting** tab, select **Reflectivity + Spin Asymmetry** as the plot
-output type, select the required reduction groups, runs or workspace groups,
-then click **Plot**. This output is available for POLREF, OFFSPEC and CRISP and
-uses the same selection rules as **Spin Asymmetry**, including binned Q outputs
-and complete polarization workspace groups.
-
-The new figure contains overplotted reflectivity curves and tiled spin-asymmetry
-plots. This repeats plotting reflectivity with **Plot over**, then plotting spin
-asymmetry with **Add to existing plot**, **Plot tiled vertically** and shared X
-axes. There is one spin-asymmetry tile per generated workspace. A single
-spin-asymmetry tile sits below reflectivity; larger selections use the existing
-grid layout, filling down columns before moving across. The plots share Q axes
-and retain independent Y axes: logarithmic reflectivity and linear spin
-asymmetry. Layout, axis-sharing and **Add to existing plot** controls are hidden
-because this output has a fixed layout.
-
-
 Layout
 ------
 

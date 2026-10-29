@@ -152,7 +152,7 @@ PlottingViewStateProvider::outputTypeViewItems(std::vector<PlotOutputType> const
 PlotOutputControlsState PlottingViewStateProvider::outputControlsState(PlotOutputType outputType) const {
   auto const &plotProperties = plotOutputTypeProperties(outputType);
   return {plotProperties.showsPlotProperties(), plotProperties.showsDetectorMapProperties(),
-          plotProperties.showsAlignmentProperties(), plotProperties.plotRequests().size() > 1};
+          plotProperties.showsAlignmentProperties()};
 }
 
 PlotActionState PlottingViewStateProvider::plotActionState(bool outputSelectionEnabled,

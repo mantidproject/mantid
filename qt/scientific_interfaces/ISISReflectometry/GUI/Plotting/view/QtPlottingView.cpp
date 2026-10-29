@@ -117,18 +117,6 @@ void QtPlottingView::setPlotActionState(PlotActionState const &state) {
 }
 
 void QtPlottingView::setPlotOutputControlsState(PlotOutputControlsState const &state) {
-  QWidget *layoutControls[]{m_ui.plotOverplot,
-                            m_ui.plotTiled,
-                            m_ui.addToExistingPlot,
-                            m_ui.plotTiledVertically,
-                            m_ui.shareAxesWhenTiledLabel,
-                            m_ui.shareXAxisWhenTiled,
-                            m_ui.shareYAxisWhenTiled};
-  for (auto *control : layoutControls) {
-    control->setVisible(!state.fixedLayout);
-  }
-  m_ui.plotIndividual->setToolTip(state.fixedLayout ? "Plot reflectivity above spin asymmetry with shared X axes"
-                                                    : "Plot each selection in an individual plot window");
   m_ui.plotPropertiesTopSeparator->setVisible(state.plotPropertiesVisible);
   m_ui.plotPropertiesBottomSeparator->setVisible(state.plotPropertiesVisible);
   m_ui.detectorMapYAxisLabel->setVisible(state.detectorMapControlsVisible);
