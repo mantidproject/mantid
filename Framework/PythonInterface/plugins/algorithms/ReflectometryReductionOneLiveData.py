@@ -149,6 +149,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             "GroupTOFWorkspaces",
             "CalibrationFile",
             "NominalSpecularPixelSpectrumNo",
+            "ActualSpecularPixelSpectrumNo",
             "OutputWorkspace",
             "PolarizationEfficiencies",
             "PolarizationCorrectionInputSpinStateOrder",
