@@ -57,6 +57,8 @@ public:
 private:
   /// Connect the presenter to view and active-figure notifications.
   void initialise();
+  /// Apply the current workspace filter controls to the tree.
+  void updateWorkspaceFilter();
   /// Evaluate selected workspaces and dispatch a plot request for the chosen layout.
   void plotSelectedWorkspaces(PlotLayout layout);
   /// Update view state for active-figure overplot compatibility.
