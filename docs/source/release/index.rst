@@ -55,16 +55,16 @@ Release Notes
 * v3.6.1 - 2016-03-31 - :doc:`release notes <v3.6.1/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.6.1>`__
 * v3.6.0 - 2016-02-15 - :doc:`release notes <v3.6.0/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.6.0>`__
 * v3.5.2 - 2016-03-31 :doc:`release notes <v3.5.2/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.5.2>`__
-* v3.5.1 - 2015-11-23 -`release notes <https://archive.mantidproject.org/Release_Notes_3.5.html>`__ - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.5.1>`__
-* v3.5.0 - 2015-10-05 - `release notes <https://archive.mantidproject.org/Release_Notes_3-6.html>`__ - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.5.0>`__
-* v3.4.1 - 2015-08-28 - `release notes <https://archive.mantidproject.org/Release_Notes_3.4.html>`__ - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.4.1>`__
-* v3.4.0 - 2015-05-18 - `release notes <https://archive.mantidproject.org/Release_Notes_3-5.html>`__ - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.4.0>`__
-* v3.3.0 - 2015-01-19 - `release notes <https://archive.mantidproject.org/Release_Notes_3-4.html>`__ - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.3.0>`__
-* v3.2.1 - 2014-08-22 - `release notes <https://archive.mantidproject.org/Release_Notes_3.2.html>`__ - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.2.1>`__
-* v3.2.0 - 2014-07-14 - `release notes <https://archive.mantidproject.org/Release_Notes_3-3.html>`__ - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.2.0>`__
-* v3.1.1 - 2014-02-28 - `release notes <https://archive.mantidproject.org/Release_Notes_3.1.html>`__ - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.1.1>`__
-* v3.1.0 - 2014-02-06 - `release notes <https://archive.mantidproject.org/Release_Notes_3-2.html>`__ - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.1.0>`__
-* v3.0.0 - 2013-11-04 - `release notes <https://archive.mantidproject.org/Release_Notes_3.html>`__ - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.0.0>`__ - mantid python API v2
+* v3.5.1 - 2015-11-23 - :doc:`release notes <v3.5.1/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.5.1>`__
+* v3.5.0 - 2015-10-05 - :doc:`release notes <v3.5.0/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.5.0>`__
+* v3.4.1 - 2015-08-28 - :doc:`release notes <v3.4.1/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.4.1>`__
+* v3.4.0 - 2015-05-18 - :doc:`release notes <v3.4.0/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.4.0>`__
+* v3.3.0 - 2015-01-19 - :doc:`release notes <v3.3.0/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.3.0>`__
+* v3.2.1 - 2014-08-22 - :doc:`release notes <v3.2.1/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.2.1>`__
+* v3.2.0 - 2014-07-14 - :doc:`release notes <v3.2.0/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.2.0>`__
+* v3.1.1 - 2014-02-28 - :doc:`release notes <v3.1.1/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.1.1>`__
+* v3.1.0 - 2014-02-06 - :doc:`release notes <v3.1.0/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.1.0>`__
+* v3.0.0 - 2013-11-04 - :doc:`release notes <v3.0.0/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v3.0.0>`__ - mantid python API v2
 * v2.6.1 - 2013-08-20 - `release notes <https://archive.mantidproject.org/Release_Notes_2.6.html>`__ - `github tag <https://github.com/mantidproject/mantid/releases/tag/v2.6.1>`__
 * v2.6.0 - 2013-08-02 - `release notes <https://archive.mantidproject.org/Release_Notes_2-7.html>`__ - `github tag <https://github.com/mantidproject/mantid/releases/tag/v2.6>`__
 * v2.5.3 - 2013-07-10 - `release notes <https://archive.mantidproject.org/Release_Notes_2.5.html>`__ - `github tag <https://github.com/mantidproject/mantid/releases/tag/v2.5.3>`__

@@ -5,7 +5,7 @@ Mantid 3.5.2 Release Notes
 ==========================
 
 
-This is a patch of `version 3.5.1 <http://archive.mantidproject.org/Release_Notes_3.5.1>`_ with changes to support Poco 1.4.2-1.7.2.
+This is a patch of :ref:`version 3.5.1 <v3.5.1>` with changes to support Poco 1.4.2-1.7.2.
 
 Citation
 --------
