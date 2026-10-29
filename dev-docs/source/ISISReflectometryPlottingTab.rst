@@ -46,11 +46,11 @@ The principal dependencies are:
        |
        `-- updates --> IPlottingView (QtPlottingView)
                                       |
-                                      v
-                         QtPlottingWorkspaceTreeViewAdapter
+                                      +-- owns --> PlottingWorkspaceTreePresenter
+                                      |                |
+                                      |                `-- uses --> IPlottingWorkspaceTreeView
                                       |
-                                      v
-                         QtPlottingWorkspaceTreeView
+                                      `-- owns --> QtPlottingWorkspaceTreeView
 
 Names in parentheses are the production implementations of the preceding
 interfaces. :code:`PlottingViewStateProvider` and
@@ -61,9 +61,12 @@ therefore do not have interfaces.
 tree model. The presenter converts this state into
 :code:`PlottingWorkspaceTreeItemState` objects through
 :code:`PlottingViewStateProvider` before passing it to the view. The provider
-uses :code:`PlotOutputTypeProperties` to determine display and selection state.
-This keeps output-type selection policy out of the model and Qt-specific tree
-handling out of the presenter.
+uses :code:`PlotOutputTypeProperties` to determine selection eligibility and
+muted state.
+The tree presenter applies filtering and selection rules through
+:code:`IPlottingWorkspaceTreeView`; :code:`QtPlottingWorkspaceTreeView` implements
+that interface. It receives prepared labels and visual state, keeping tree
+policy and Qt rendering separate.
 
 The two providers perform different transformations:
 
@@ -214,6 +217,22 @@ Its responsibilities are to:
 An individual layout is submitted as one request per workspace. Overplot and
 tiled layouts are submitted as one request containing all selected workspaces.
 
+:code:`presenter/PlottingWorkspaceTreePresenter.h/.cpp`
+#######################################################
+
+:code:`PlottingWorkspaceTreePresenter` owns the evaluated tree and filter state.
+It:
+
+* prepares column labels as :code:`std::string` values;
+* applies regular-expression and reduced-output filters, retaining the last
+  valid expression while incomplete syntax is edited;
+* propagates selection to visible, eligible descendants; and
+* resolves selected workspace names and ADS workspace-group counts, including
+  complete groups required for spin asymmetry.
+
+Filtering preserves hidden selections. The presenter uses row paths and
+:code:`IPlottingWorkspaceTreeView`, with no Qt types.
+
 :code:`presenter/PlottingPresenterFactory.h`
 ################################################
 
@@ -244,8 +263,8 @@ type.
 :code:`presenter/PlottingViewStateProvider.h/.cpp`
 ##################################################
 
-Defines :code:`PlottingViewStateProvider`, the stateless provider for all state
-passed from the presenter to the view. For the plotting workspace tree, it
+Defines :code:`PlottingViewStateProvider`, the stateless provider for tab control
+state and output-specific tree eligibility. For the plotting workspace tree, it
 converts model-side :code:`PlottingWorkspaceTreeItem` objects into view-facing
 :code:`PlottingWorkspaceTreeItemState` objects for the selected output type. It
 evaluates whether each node:
@@ -326,6 +345,15 @@ Defines the toolkit-independent types produced by
 These types let the presenter update related controls without exposing Qt
 types. The Qt view applies the decisions but does not recalculate them.
 
+:code:`view/IPlottingWorkspaceTreeView.h`
+#########################################
+
+Defines the toolkit-independent tree contract and its click/selection
+notifications. Nodes are identified by row paths.
+:code:`PlottingWorkspaceTreeViewItem` contains prepared column labels, children,
+and muted state. The view renders these values and applies visibility and
+selection commands.
+
 :code:`view/QtPlottingView.h/.cpp`
 ##################################
 
@@ -335,60 +363,27 @@ Defines :code:`QtPlottingView`, the :code:`QWidget` implementation of
 * initialises controls defined in :code:`PlottingWidget.ui`;
 * connects Qt signals to :code:`PlottingViewSubscriber` notifications;
 * applies presenter-provided control state;
-* applies workspace output-type and regular-expression filters directly to the
-  populated Qt tree;
+* forwards tree state and filter inputs to its
+  :code:`PlottingWorkspaceTreePresenter`;
 * reads the current plot output, axes, layout options, and plotting workspace
   tree selection;
-* owns :code:`QtPlottingWorkspaceTreeViewAdapter`; and
+* owns the tree presenter and :code:`QtPlottingWorkspaceTreeView`; and
 * displays the confirmation dialog for large plot requests.
 
 The view reports user actions but does not decide which actions or tree entries
 are valid.
 
-:code:`view/QtPlottingWorkspaceTreeViewAdapter.h/.cpp`
-################################################################################
-
-Defines :code:`QtPlottingWorkspaceTreeViewAdapter`, which adapts
-:code:`PlottingWorkspaceTreeItemState` objects to a
-:code:`QStandardItemModel` displayed by :code:`QtPlottingWorkspaceTreeView`. It
-owns the Qt-specific details of:
-
-* columns and custom data roles;
-* output and item type display names;
-* palette-aware muted rendering;
-* recursively hiding filtered rows after the complete tree has been built;
-* row and subtree selection propagation;
-* direct-selection and parent-selection modes; and
-* extracting selected leaf workspace names and selected ADS workspace-group
-  counts.
-
-The adapter applies selection behavior already specified by the presenter. It
-does not determine whether a particular plot output type permits a workspace.
-The workspace filter is a presentation-only pass: it matches the Item column,
-propagates a matching parent to its descendants, applies the checked reduced
-workspace output types to workspace leaves, and hides parents with no visible
-children. Filtering does not remove model rows or selections. This allows a
-user to retain a selection while changing filters and add another visible
-workspace to it. Filter updates expand the visible tree, including when a
-filter is cleared.
-
-Selecting or deselecting a parent propagates only to descendants that are
-currently visible. For spin asymmetry, a directly selected ADS workspace group whose
-children are parent-selectable only requires complete group selection. The Qt
-selection contains only its visible rows, while the selected-workspace query
-returns every eligible member required to calculate the spin asymmetry.
-
-The regular expression is compiled when the text changes. If the expression is
-temporarily invalid while being edited, the adapter keeps the last valid
-expression. Checkbox changes still take effect in this state.
-
 :code:`view/QtPlottingWorkspaceTreeView.h/.cpp`
-################################################
+###############################################
 
-Defines :code:`QtPlottingWorkspaceTreeView`, the specialised
-:code:`QTreeView` used by the tab. Its painting logic extends selected-row
-backgrounds across muted cells and obtains disabled colors from the active Qt
-palette, allowing the tree to work in light and dark themes.
+:code:`QtPlottingWorkspaceTreeView` implements :code:`IPlottingWorkspaceTreeView`
+and owns the :code:`QStandardItemModel`. It converts prepared strings to
+:code:`QString`, creates rows, and reuses palette-aware muted-row styling.
+
+It translates Qt indexes and input events into row paths and presenter
+notifications using :code:`viewportEvent`. After handling a selection change,
+it emits :code:`workspaceSelectionChanged`, which :code:`QtPlottingView`
+forwards to the tab presenter without accessing the selection model.
 
 :code:`view/PlottingWidget.ui`
 ##############################
@@ -508,8 +503,10 @@ The focused test files are:
 * :code:`test/Plotting/PlottingPresenterTest.h`, covering Batch and view
   notifications, display-state updates, request construction, and plotting
   orchestration;
-* :code:`test/Plotting/QtPlottingViewTest.h`, covering Qt control and plotting
-  workspace tree behavior;
+* :code:`test/Plotting/PlottingWorkspaceTreePresenterTest.h`, covering prepared
+  labels, filtering, and tree selection rules;
+* :code:`test/Plotting/QtPlottingViewTest.h`, covering Qt controls, tree rendering,
+  input translation, and selection notifications;
 * :code:`test/Common/PlotOptionsProviderTest.h`, covering instrument output
   availability and output-to-options conversion; and
 * :code:`test/Common/PlotterTest.h`, covering plot route selection and
@@ -518,6 +515,8 @@ The focused test files are:
 :code:`TestHelpers/PlottingTestHelpers.h` provides readable equality matchers
 and formatted diagnostics for plotting workspace tree expectations. The test
 files are registered in :code:`test/CMakeLists.txt`.
+:code:`test/Plotting/PlottingWorkspaceTreeTestHelpers.h` shares tree fixtures
+between presenter and Qt integration tests.
 
 End-to-End Operation
 --------------------
@@ -525,7 +524,8 @@ End-to-End Operation
 Construction
 ############
 
-#. :code:`QtBatchView` constructs the Plotting tab view.
+#. :code:`QtBatchView` constructs :code:`QtPlottingView`, which owns the tree
+   widget and :code:`PlottingWorkspaceTreePresenter`.
 #. :code:`BatchPresenterFactory` asks :code:`PlottingPresenterFactory` to create
    the presenter for that view.
 #. :code:`PlottingPresenterFactory` injects its :code:`PlottingModel`,
@@ -567,10 +567,11 @@ Updating the plotting workspace tree
    evaluate the hierarchy using :code:`PlotOutputTypeProperties`.
 #. The resulting item states are passed to
    :code:`IPlottingView::setPlottingWorkspaceTreeItemStates`.
-#. :code:`QtPlottingWorkspaceTreeViewAdapter` rebuilds its
-   :code:`QStandardItemModel`, applies muted state and selection modes, and
-   applies the current workspace filters as a final visibility pass before
-   expanding the tree.
+#. :code:`QtPlottingView` forwards the states to
+   :code:`PlottingWorkspaceTreePresenter`, which prepares display labels and
+   passes them to the tree widget.
+#. The widget rebuilds its :code:`QStandardItemModel`. The tree presenter then
+   applies filters through :code:`IPlottingWorkspaceTreeView` and expands the tree.
 
 User interaction
 ################
@@ -582,15 +583,14 @@ User interaction
 #. Changing output type clears the current tree selection. The presenter then
    asks :code:`PlottingViewStateProvider` to rebuild the plotting workspace tree
    item states, output-control visibility, and plotting action state.
-#. Clicking a selectable tree row is handled by
-   :code:`QtPlottingWorkspaceTreeViewAdapter`. Parent selection is propagated
-   only to visible descendants whose presenter-supplied selection mode permits
-   it. Spin workspace groups requiring complete selection still resolve all
-   required members when the plotting selection is read.
+#. The tree widget forwards row clicks to :code:`PlottingWorkspaceTreePresenter`.
+   Parent selection propagates only to visible, eligible descendants. Workspace
+   groups requiring complete selection resolve all required members when read.
 #. Changing a workspace output-type checkbox or the Item-column regular
    expression immediately reapplies row visibility and expands the visible
    tree. Hidden rows remain in the model and retain their selection state.
-#. A selection change notifies :code:`PlottingPresenter`. The presenter obtains
+#. The widget's :code:`workspaceSelectionChanged` signal reaches
+   :code:`PlottingPresenter` through :code:`QtPlottingView`. The presenter obtains
    selected leaf names and ADS workspace-group counts from the view and asks
    :code:`PlottingViewStateProvider::plotActionState` for a new
    :code:`PlotActionState`.

@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IPlottingWorkspaceTreeAdapterView.h"
+#include "IPlottingWorkspaceTreeView.h"
 #include <QBrush>
 #include <QItemSelection>
 #include <QPalette>
@@ -26,8 +26,7 @@ inline QBrush mutedBackgroundBrush(QPalette const &palette) { return palette.bru
 } // namespace PlottingWorkspaceTreeView
 
 /// Renders the plotting workspace tree and translates Qt input into presenter notifications.
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtPlottingWorkspaceTreeView : public QTreeView,
-                                                                   public IPlottingWorkspaceTreeAdapterView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtPlottingWorkspaceTreeView : public QTreeView, public IPlottingWorkspaceTreeView {
   Q_OBJECT
 public:
   explicit QtPlottingWorkspaceTreeView(QWidget *parent = nullptr);
@@ -35,7 +34,7 @@ public:
   using QTreeView::isVisible;
   using QTreeView::setVisible;
 
-  void subscribe(PlottingWorkspaceTreeAdapterViewSubscriber *notifyee) override;
+  void subscribe(PlottingWorkspaceTreeViewSubscriber *notifyee) override;
   void setItems(std::vector<PlottingWorkspaceTreeViewItem> const &items) override;
   void expandAll() override;
   void setVisible(PlottingWorkspaceTreePath const &path, bool visible) override;
@@ -64,7 +63,7 @@ private:
   bool handlePlottingWorkspaceTreeClick(QMouseEvent const &event);
 
   QStandardItemModel m_model;
-  PlottingWorkspaceTreeAdapterViewSubscriber *m_notifyee{nullptr};
+  PlottingWorkspaceTreeViewSubscriber *m_notifyee{nullptr};
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
