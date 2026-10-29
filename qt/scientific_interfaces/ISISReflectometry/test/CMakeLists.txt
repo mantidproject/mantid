@@ -49,6 +49,7 @@ set(TEST_FILES
     Plotting/PlottingWorkspaceTreeTest.h
     Plotting/QtActiveFigureMonitorTest.h
     Plotting/QtPlottingViewTest.h
+    Plotting/PlottingWorkspaceTreeAdapterPresenterTest.h
     Reduction/BatchLookupIndexTest.h
     Reduction/LookupTableTest.h
     Reduction/ReductionJobsMergeTest.h
@@ -83,6 +84,11 @@ mtd_add_qt_tests(
 )
 
 add_framework_test_helpers(MantidScientificInterfacesISISReflectometryTestQt${MANTID_QT_VERSION})
+
+target_sources(
+  MantidScientificInterfacesISISReflectometryTestQt${MANTID_QT_VERSION}
+  PRIVATE Plotting/PlottingWorkspaceTreeTestHelpers.h
+)
 
 if(TARGET GTest::gmock AND TARGET GTest::gtest)
 

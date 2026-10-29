@@ -3,11 +3,12 @@ set(PLOTTING_SRC_FILES
     model/PlottingWorkspaceTree.cpp
     presenter/PlotOutputTypeProperties.cpp
     presenter/PlottingPresenter.cpp
+    presenter/PlottingWorkspaceTreeAdapterPresenter.cpp
     presenter/PlottingViewStateProvider.cpp
     presenter/QtActiveFigureMonitor.cpp
     view/QtPlottingView.cpp
     view/QtPlottingWorkspaceTreeView.cpp
-    view/QtPlottingWorkspaceTreeViewAdapter.cpp
+    view/QtPlottingWorkspaceTreeAdapterView.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio IMPORTANT: Include files are required in
@@ -20,14 +21,16 @@ set(PLOTTING_INC_FILES
     presenter/IPlottingPresenter.h
     presenter/PlotOutputTypeProperties.h
     presenter/PlottingPresenter.h
+    presenter/PlottingWorkspaceTreeAdapterPresenter.h
     presenter/PlottingPresenterFactory.h
     presenter/PlottingViewStateProvider.h
     presenter/QtActiveFigureMonitor.h
     view/IPlottingView.h
+    view/IPlottingWorkspaceTreeAdapterView.h
     view/PlottingViewState.h
     view/QtPlottingView.h
     view/QtPlottingWorkspaceTreeView.h
-    view/QtPlottingWorkspaceTreeViewAdapter.h
+    view/QtPlottingWorkspaceTreeAdapterView.h
 )
 
 set(PLOTTING_MOC_FILES presenter/QtActiveFigureMonitor.h view/QtPlottingView.h)
