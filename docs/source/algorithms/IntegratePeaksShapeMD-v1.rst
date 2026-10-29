@@ -191,6 +191,27 @@ from the mode of the counts smoothed by the stored shape (found by mean
 shift, first with a kernel twice as wide) if the peak is more significant
 there.
 
+With *AdjustShape* and normalization, the input intensities of the peaks, if
+any are positive, say how strong each peak is expected to be, e.g. the
+squared structure factors set by :ref:`algm-PredictPeaks` with
+*CalculateStructureFactors*. They are scaled by the median ratio of the
+intensities of the strong peaks, fitted with their stored shapes, to their
+input intensities, and the signal to noise expected of each peak is that of
+a Gaussian of its stored shape and expected intensity on the fitted
+background, from the Fisher information of the fit with the exposure at the
+peak. How far its shape and center may move is scaled by
+:math:`w = \log(\mathrm{S/N} / 3) / \log 10`, clipped to between 0 and 1: each
+principal standard deviation within a factor
+:math:`1 + w\,(\mathit{MaxShapeChange} - 1)` of the stored shape's, and the
+center within :math:`w\,\mathit{MaxCenterShift}` standard deviations. A peak
+expected to have a signal to noise below 3, such as a satellite or a
+systematic absence with no input intensity, or a weak reflection that
+contamination (e.g. from the sample environment) makes look strong, keeps
+its stored shape and center, and the intensity of its fit with them. Only
+the shapes depend on the input intensities; the intensities are always
+fitted from the events. If no input intensity is positive, or fewer than
+three peaks are strong enough to scale them, they are not used.
+
 The events in the fit region are those nearest to the peak in reciprocal
 space, so *RegionRadius* should be less than half the shortest distance
 between peaks for the fit region to be the sphere assumed above. The

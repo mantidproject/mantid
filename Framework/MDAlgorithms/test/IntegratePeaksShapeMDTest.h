@@ -1204,6 +1204,49 @@ public:
     }
   }
 
+  // With input intensities, e.g. squared structure factors, a peak expected
+  // to be too weak keeps its stored shape and center however strong it looks,
+  // with the intensity of its fit with them, while the others are refined as
+  // without input intensities.
+  void test_adjust_shape_uses_input_intensities_as_prior() {
+    auto [eventWS, peaksWS] = buildEmptyPeaks();
+    const double sigma = 0.1, background = 10.0, region = 0.4;
+    std::vector<V3D> centers;
+    for (int i = 0; i < peaksWS->getNumberPeaks(); ++i)
+      centers.emplace_back(peaksWS->getPeak(i).getQLabFrame());
+    generateEvents(*eventWS, centers, std::vector<double>(centers.size(), 6000.0), sigma, background, region + 0.05,
+                   1.0);
+    addMDNormLogs(*eventWS, 1.0, 40.0, 1.0);
+    setSphericalShapes(*peaksWS, 0.04, 0.04, 0.04);
+    const auto sa = createSolidAngleWorkspace(*eventWS, 1.0);
+    const auto fl = createFluxWorkspace(*eventWS, 1.0, 50.0);
+
+    const auto stored = integrateProfile(eventWS, peaksWS, region, sa, fl).first;
+    const auto unscaled = integrateProfile(eventWS, peaksWS, region, sa, fl, true, true).first;
+    // peak 0 is expected to be ten thousand times weaker than it is
+    const std::vector<double> expected{1e-4, 1.0, 1.0};
+    for (int i = 0; i < peaksWS->getNumberPeaks(); ++i)
+      peaksWS->getPeak(i).setIntensity(expected[i]);
+    const auto [profile, diagnostics] = integrateProfile(eventWS, peaksWS, region, sa, fl, true, true);
+
+    TS_ASSERT(!diagnostics->cell<Boolean>(0, 8));
+    const auto *kept = dynamic_cast<const PeakShapeEllipsoid *>(&profile->getPeak(0).getPeakShape());
+    for (size_t k = 0; k < 3; ++k)
+      TS_ASSERT_EQUALS(kept->abcRadii()[k], 0.04);
+    TS_ASSERT_EQUALS(kept->translation(), V3D());
+    TS_ASSERT_DELTA(profile->getPeak(0).getIntensity(), stored->getPeak(0).getIntensity(),
+                    1e-6 * stored->getPeak(0).getIntensity());
+    TS_ASSERT_DELTA(profile->getPeak(0).getSigmaIntensity(), stored->getPeak(0).getSigmaIntensity(),
+                    1e-6 * stored->getPeak(0).getSigmaIntensity());
+    for (int i = 1; i < profile->getNumberPeaks(); ++i) {
+      TS_ASSERT(diagnostics->cell<Boolean>(i, 8));
+      TS_ASSERT_DELTA(profile->getPeak(i).getIntensity(), unscaled->getPeak(i).getIntensity(),
+                      1e-6 * unscaled->getPeak(i).getIntensity());
+      const auto *shape = dynamic_cast<const PeakShapeEllipsoid *>(&profile->getPeak(i).getPeakShape());
+      TS_ASSERT_LESS_THAN(0.07, shape->abcRadii()[0]);
+    }
+  }
+
   // A refinement that leaves the peak less significant than the threshold,
   // once the uncertainty of its shape is included, is not kept: here peak 1,
   // whose shape is poorly constrained, while peaks 0 and 2 are refined.

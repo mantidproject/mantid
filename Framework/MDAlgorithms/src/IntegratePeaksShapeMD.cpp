@@ -24,11 +24,13 @@
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
 
+#include <algorithm>
 #include <boost/math/special_functions/round.hpp>
 #include <chrono>
 #include <cmath>
 #include <optional>
 #include <string>
+#include <vector>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -38,6 +40,51 @@ namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IntegratePeaksShapeMD)
+
+namespace {
+// expected signal to noise below which a peak's shape is not refined, and above which it may move as far as the
+// bounds allow, with the bounds scaled by its logarithm between them
+constexpr double MIN_EXPECTED_SIGNAL_TO_NOISE = 3.0;
+constexpr double MAX_EXPECTED_SIGNAL_TO_NOISE = 30.0;
+
+/**
+ * @brief The signal to noise of the intensity of a Gaussian peak on a flat background, from the Fisher information
+ * of a Poisson fit of its intensity.
+ *
+ * @param intensity Integrated intensity of the peak.
+ * @param background Background, per unit normalization, in the units of the intensity per unit volume.
+ * @param exposure Expected counts per unit intensity at the peak.
+ * @param sigmas Principal standard deviations of the peak.
+ * @return The intensity over its standard deviation; 0 for a peak with no intensity or exposure.
+ */
+double expectedSignalToNoise(const double intensity, const double background, const double exposure,
+                             const PeakEllipsoidExtent &sigmas) {
+  if (!(intensity > 0.0) || !(exposure > 0.0))
+    return 0.0;
+  // integrated over the Mahalanobis radius u, with dV = 4 pi sigma_a sigma_b sigma_c u^2 du
+  const double volume = sigmas[0] * sigmas[1] * sigmas[2];
+  const double norm = 1.0 / (std::pow(2.0 * M_PI, 1.5) * volume);
+  constexpr int n = 240;
+  constexpr double du = 6.0 / n;
+  double information = 0.0;
+  for (int k = 0; k <= n; ++k) {
+    const double u = k * du;
+    const double g = norm * std::exp(-0.5 * u * u);
+    const double weight = (k == 0 || k == n) ? 0.5 : 1.0;
+    information += weight * 4.0 * M_PI * volume * u * u * g * g / (intensity * g + background) * du;
+  }
+  return intensity * std::sqrt(exposure * information);
+}
+
+/// A peak's profile fit with its stored shape and center
+struct StoredShapeFit {
+  double intensity{0.0};
+  double sigma{0.0};
+  double seconds{0.0};
+  V3D center;
+  ProfileFitNormalization normalization;
+};
+} // namespace
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string IntegratePeaksShapeMD::name() const { return "IntegratePeaksShapeMD"; }
@@ -105,7 +152,11 @@ void IntegratePeaksShapeMD::init() {
                   "output peak. With AdjustCenter too, the center is refined only together with the "
                   "shape, within MaxCenterShift of the stored center, starting from the mode of the "
                   "counts if the peak is more significant there, so peaks that keep their stored "
-                  "shape keep their stored center.");
+                  "shape keep their stored center. With normalization, if any input intensities are "
+                  "positive (e.g. structure factors from PredictPeaks), how far each peak's shape and "
+                  "center may move is scaled by the signal to noise expected of it from them, and peaks "
+                  "expected to be too weak keep their stored shapes; the intensities are always fitted "
+                  "from the events.");
 
   auto atLeastOne = std::make_shared<BoundedValidator<double>>();
   atLeastOne->setLower(1.0);
@@ -293,6 +344,70 @@ void IntegratePeaksShapeMD::exec() {
   double fixedSeconds = 0.0, refinedSeconds = 0.0, rejectedSeconds = 0.0;
   int numFixed = 0, numRefined = 0, numRejected = 0;
 
+  // With AdjustShape and normalization, the peaks' input intensities, if any are positive (e.g. the squared
+  // structure factors from PredictPeaks), say how strong each peak is expected to be: scaled to the intensities of
+  // the strong peaks fitted with their stored shapes, they give the signal to noise expected of each peak, from
+  // which how far its shape and center may move is scaled. A peak expected to be too weak keeps its stored shape
+  // and center. Only the shapes depend on it; the intensities are always fitted from the events.
+  const double minSignalToNoise = getProperty("AdjustShapeMinSignalToNoise");
+  const double maxShapeChange = getProperty("MaxShapeChange");
+  const double maxCenterShift = getProperty("MaxCenterShift");
+  std::vector<double> relaxation;
+  std::vector<StoredShapeFit> storedFits;
+  if (profileFit && adjustShape && norm) {
+    std::vector<double> expected(n_peaks);
+    for (size_t i = 0; i < n_peaks; ++i)
+      expected[i] = std::max(peaks[i].getIntensity(), 0.0);
+    if (std::any_of(expected.begin(), expected.end(), [](double value) { return value > 0.0; })) {
+      storedFits.resize(n_peaks);
+      for (size_t i = 0; i < n_peaks; ++i) {
+        const auto *shape = dynamic_cast<const PeakShapeEllipsoid *>(&peaks[i].getPeakShape());
+        auto &fit = storedFits[i];
+        const auto fitStart = Clock::now();
+        integrator.integrateUsingShapeProfileFit(*shape, peaks[i].getQLabFrame(), false, fit.center, fit.intensity,
+                                                 fit.sigma, &(*norm), &fit.normalization, nullptr);
+        fit.seconds = seconds(fitStart);
+      }
+      // the scale of the input intensities, from the strong peaks
+      std::vector<double> ratios;
+      for (const double threshold : {10.0, 3.0}) {
+        ratios.clear();
+        for (size_t i = 0; i < n_peaks; ++i)
+          if (expected[i] > 0.0 && storedFits[i].sigma > 0.0 &&
+              storedFits[i].intensity > threshold * storedFits[i].sigma)
+            ratios.emplace_back(storedFits[i].intensity / expected[i]);
+        if (ratios.size() >= 3)
+          break;
+      }
+      if (ratios.size() >= 3) {
+        const auto middle = ratios.begin() + ratios.size() / 2;
+        std::nth_element(ratios.begin(), middle, ratios.end());
+        const double scale = *middle;
+        relaxation.resize(n_peaks);
+        int numExpectedWeak = 0;
+        for (size_t i = 0; i < n_peaks; ++i) {
+          const auto *shape = dynamic_cast<const PeakShapeEllipsoid *>(&peaks[i].getPeakShape());
+          const auto &normalization = storedFits[i].normalization;
+          const double background =
+              normalization.regionNorm > 0.0 ? normalization.backgroundCounts / normalization.regionNorm : 0.0;
+          const double signalToNoise =
+              expectedSignalToNoise(scale * expected[i], background, normalization.peakNorm, shape->abcRadii());
+          const double w = signalToNoise > 0.0
+                               ? std::log(signalToNoise / MIN_EXPECTED_SIGNAL_TO_NOISE) /
+                                     std::log(MAX_EXPECTED_SIGNAL_TO_NOISE / MIN_EXPECTED_SIGNAL_TO_NOISE)
+                               : 0.0;
+          relaxation[i] = std::clamp(w, 0.0, 1.0);
+          if (!(relaxation[i] > 0.0))
+            ++numExpectedWeak;
+        }
+        g_log.notice() << "Scaled the input intensities by " << scale << " from " << ratios.size() << " strong peaks; "
+                       << numExpectedWeak << " peaks are expected too weak to refine\n";
+      } else {
+        g_log.warning() << "Too few strong peaks to scale the input intensities; they are not used\n";
+      }
+    }
+  }
+
   for (size_t i = 0; i < n_peaks; i++) {
     auto &peak = peaks[i];
     const auto *shape = dynamic_cast<const PeakShapeEllipsoid *>(&peak.getPeakShape());
@@ -303,14 +418,29 @@ void IntegratePeaksShapeMD::exec() {
       V3D center;
       ProfileFitNormalization fitNormalization;
       ProfileFitShape shapeFit;
-      shapeFit.minSignalToNoise = getProperty("AdjustShapeMinSignalToNoise");
-      shapeFit.maxChange = getProperty("MaxShapeChange");
-      shapeFit.maxCenterShift = getProperty("MaxCenterShift");
-      const auto fitStart = Clock::now();
-      integrator.integrateUsingShapeProfileFit(*shape, peak.getQLabFrame(), adjustCenter, center, inti, sigi,
-                                               norm ? &(*norm) : nullptr, &fitNormalization,
-                                               adjustShape ? &shapeFit : nullptr);
-      const double fitSeconds = seconds(fitStart);
+      shapeFit.minSignalToNoise = minSignalToNoise;
+      shapeFit.maxChange = maxShapeChange;
+      shapeFit.maxCenterShift = maxCenterShift;
+      double fitSeconds = 0.0;
+      if (!relaxation.empty() && !(relaxation[i] > 0.0)) {
+        // expected too weak to refine: the fit with its stored shape and center
+        const auto &fit = storedFits[i];
+        center = fit.center;
+        inti = fit.intensity;
+        sigi = fit.sigma;
+        fitNormalization = fit.normalization;
+        fitSeconds = fit.seconds;
+      } else {
+        if (!relaxation.empty()) {
+          shapeFit.maxChange = 1.0 + relaxation[i] * (maxShapeChange - 1.0);
+          shapeFit.maxCenterShift = relaxation[i] * maxCenterShift;
+        }
+        const auto fitStart = Clock::now();
+        integrator.integrateUsingShapeProfileFit(*shape, peak.getQLabFrame(), adjustCenter, center, inti, sigi,
+                                                 norm ? &(*norm) : nullptr, &fitNormalization,
+                                                 adjustShape ? &shapeFit : nullptr);
+        fitSeconds = seconds(fitStart) + (storedFits.empty() ? 0.0 : storedFits[i].seconds);
+      }
       const bool shapeAdjusted = adjustShape && shapeFit.adjusted;
       if (shapeAdjusted) {
         refinedSeconds += fitSeconds;
