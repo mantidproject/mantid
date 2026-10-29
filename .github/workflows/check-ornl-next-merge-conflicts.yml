@@ -1,0 +1,112 @@
+name: Check ornl-next merge conflicts
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check-merge:
+    # Do not run in forks.
+    if: ${{ github.repository_owner == 'mantidproject' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the triggering main commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          filter: blob:none
+
+      - name: Fetch ornl-next
+        id: source
+        shell: bash
+        run: |
+          git fetch --no-tags origin ornl-next
+          echo "sha=$(git rev-parse FETCH_HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Check whether the merge is conflict-free
+        id: merge_check
+        env:
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+        shell: bash
+        run: |
+          set +e
+          git merge --no-commit --no-ff "$SOURCE_SHA" > merge-output.txt 2>&1
+          result=$?
+          set -e
+
+          if [[ "$result" -eq 0 ]]; then
+            echo "has_conflicts=false" >> "$GITHUB_OUTPUT"
+            echo "The latest ornl-next tip merges cleanly into this main commit." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          conflicts="$(git diff --name-only --diff-filter=U)"
+          if [[ -n "$conflicts" ]]; then
+            echo "has_conflicts=true" >> "$GITHUB_OUTPUT"
+            delimiter="conflicts_$(uuidgen)"
+            {
+              echo "conflicting_paths<<$delimiter"
+              printf '%s\n' "$conflicts"
+              echo "$delimiter"
+            } >> "$GITHUB_OUTPUT"
+            printf '%s\n' "$conflicts" > merge-conflicts.txt
+            {
+              echo "## Merge conflicts detected"
+              echo
+              echo "The latest \`ornl-next\` tip conflicts with the \`main\` commit that triggered this run."
+              echo
+              echo '```text'
+              cat merge-conflicts.txt
+              echo '```'
+              echo
+              echo '```text'
+              cat merge-output.txt
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            # Conflicts are reported as information; they do not fail this workflow.
+            exit 0
+          fi
+
+          echo "Merge check failed with git exit code $result." >> "$GITHUB_STEP_SUMMARY"
+          cat merge-output.txt >> "$GITHUB_STEP_SUMMARY"
+          exit "$result"
+
+      - name: Report conflicts to Slack
+        if: ${{ steps.merge_check.outputs.has_conflicts == 'true' }}
+        uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2.4.0
+        env:
+          SLACK_WEBHOOK: ${{ secrets.ORNL_NEXT_MERGE_CONFLICT_REPORT_SLACK_WEBHOOK }}
+          SLACK_TITLE: Merge conflict check
+          SLACK_MESSAGE: |
+            `Merge conflicts detected: ornl-next into main`
+
+            Main commit: ${{ github.sha }}
+            ornl-next commit: ${{ steps.source.outputs.sha }}
+            Conflicting paths:
+            ${{ steps.merge_check.outputs.conflicting_paths }}
+
+            Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SLACK_COLOR: '#f0ad4e'
+          MSG_MINIMAL: true
+
+      - name: Report clean merge to Slack
+        if: ${{ steps.merge_check.outputs.has_conflicts == 'false' }}
+        uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2.4.0
+        env:
+          SLACK_WEBHOOK: ${{ secrets.ORNL_NEXT_MERGE_CONFLICT_REPORT_SLACK_WEBHOOK }}
+          SLACK_TITLE: Merge conflict check
+          SLACK_MESSAGE: |
+            `No merge conflicts detected: ornl-next into main`
+
+            Main commit: ${{ github.sha }}
+            ornl-next commit: ${{ steps.source.outputs.sha }}
+            Result: clean merge check
+
+            Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SLACK_COLOR: good
+          MSG_MINIMAL: true
