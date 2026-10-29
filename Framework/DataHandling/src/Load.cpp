@@ -144,8 +144,8 @@ void Load::setPropertyValue(const std::string &name, const std::string &value) {
           // extensions only.
           if ((ifl && ifl->loadMutipleAsOne()) || (iflNexus && iflNexus->loadMutipleAsOne())) {
             // Currently disabled for ticket
-            // http://trac.mantidproject.org/mantid/ticket/10397 : should be put
-            // back in when completing 10231
+            // https://github.com/mantidproject/mantid/issues/11239 : should be put
+            // back in when completing https://github.com/mantidproject/mantid/issues/11073
             /*  if( fileNames[i].substr(fileNames[i].find_last_of(".")) != ext)
             {
               throw std::runtime_error("Cannot load multiple files when more
