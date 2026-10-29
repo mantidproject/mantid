@@ -212,25 +212,16 @@ Its responsibilities are to:
 * warn before creating five or more plot items; and
 * submit one or more :code:`PlotRequest` objects to :code:`IPlotter`.
 
+A plot output type owns an ordered vector of :code:`PlotRequestDefinition` entries,
+allowing multiple plot requests to be submitted for one output type, each with a
+individual sub plot output type. In each definition, a settings override
+can also be specified to customize the view controls.
+
+For outputs with multiple :code:`PlotRequestDefinition` entries, the
+:code:`PlotActionState` enables only Plot;
+
 An individual layout is submitted as one request per workspace. Overplot and
 tiled layouts are submitted as one request containing all selected workspaces.
-
-Each :code:`PlotOutputTypeProperties` owns an ordered vector of
-:code:`PlotRequestDefinition` entries. Ordinary outputs have one entry with no
-settings override, so they use the current view controls. Combined outputs
-declare their component output types and fixed :code:`PlotRequestSettings`.
-The presenter resolves every entry through the existing model and options
-provider, expands Individual layouts, and prepares all requests before asking
-for confirmation or rendering. If any component has no workspaces, nothing is
-plotted. The five-item confirmation threshold counts workspaces across all
-components. Requests are then submitted in order through the unchanged plotter.
-
-:code:`ReflectivityAndSpinAsymmetry` reuses the spin-asymmetry selection
-properties and defines two entries: a reflectivity overplot in a new figure,
-then tiled spin asymmetry added with vertical tiling and shared X axes. These
-are the same requests as the corresponding manual actions. The view exposes
-only Plot for outputs with multiple definitions. Neither the presenter request
-loop nor the view-state calculation needs to identify specific combinations.
 
 :code:`presenter/PlottingWorkspaceTreePresenter.h/.cpp`
 #######################################################

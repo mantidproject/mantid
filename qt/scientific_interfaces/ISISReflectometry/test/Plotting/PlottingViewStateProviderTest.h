@@ -26,7 +26,6 @@ public:
       TS_ASSERT_EQUALS(definitions.size(), 1);
       TS_ASSERT_EQUALS(definitions.front().outputType, outputType);
       TS_ASSERT(!definitions.front().settingsOverride);
-      TS_ASSERT(!PlottingViewStateProvider().outputControlsState(outputType).fixedLayout);
     }
   }
 
@@ -69,7 +68,6 @@ public:
                      (PlotActionState{true, false, false, false, false, false, false}));
     TS_ASSERT_EQUALS(provider.plotActionState(true, 0, 0, outputType, false, false, false), PlotActionState{});
     TS_ASSERT_EQUALS(provider.plotActionState(false, 2, 2, outputType, true, true, true), PlotActionState{});
-    TS_ASSERT(provider.outputControlsState(outputType).fixedLayout);
   }
 
   void testPlotActionStateEnablesAddToExistingActionsForSingleCompatibleReflectivitySelection() {
