@@ -392,6 +392,19 @@ The processing table contains the following columns:
 |                     |           |                                                                                 |
 |                     |           | Example: ``RegionOfDirectBeam="0,2", Params="1,2,3"``                           |
 +---------------------+-----------+---------------------------------------------------------------------------------+
+| Nominal Specular    | No        | Nominal specular pixel spectrum number for POLREF calibration. Visible only     |
+| Pixel No.           |           | for POLREF. Accepts non-negative fractional values and sets                     |
+|                     |           | ``NominalSpecularPixelSpectrumNo``. If blank, uses the matching Experiment      |
+|                     |           | lookup value, then **Default Nominal Specular Pixel** on the Instrument tab.    |
+|                     |           | Example: ``280.5``                                                              |
++---------------------+-----------+---------------------------------------------------------------------------------+
+| Actual Specular     | No        | Actual specular pixel spectrum number for POLREF calibration. Visible only      |
+| Pixel No.           |           | for POLREF. Accepts non-negative fractional values and sets                     |
+|                     |           | ``ActualSpecularPixelSpectrumNo``. If blank, uses the matching Experiment       |
+|                     |           | lookup value. If neither table supplies a value, the algorithm obtains one      |
+|                     |           | by means of fitting the specular peak during calibration.                       |
+|                     |           | Example: ``282.25``                                                             |
++---------------------+-----------+---------------------------------------------------------------------------------+
 
 Toolbar
 =======
