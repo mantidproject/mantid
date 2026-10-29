@@ -30,4 +30,12 @@ const std::string &InstrumentMetadata::defaultAxis() const { return m_defaultAxi
 
 Instrument_const_sptr InstrumentMetadata::physicalInstrument() const { return m_physicalInstrument; }
 
+void InstrumentMetadata::setFileName(std::string filename) { m_filename = std::move(filename); }
+
+void InstrumentMetadata::setXmlText(std::string xmlText) { m_xmlText = std::move(xmlText); }
+
+void InstrumentMetadata::setDefaultView(std::string defaultView) { m_defaultView = std::move(defaultView); }
+
+void InstrumentMetadata::setDefaultViewAxis(std::string defaultAxis) { m_defaultAxis = std::move(defaultAxis); }
+
 } // namespace Mantid::Geometry
