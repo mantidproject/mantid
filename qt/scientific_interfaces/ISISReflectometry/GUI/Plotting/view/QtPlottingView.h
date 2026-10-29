@@ -14,7 +14,7 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-class PlottingWorkspaceTreeAdapterPresenter;
+class PlottingWorkspaceTreePresenter;
 
 /// Qt implementation of the ISIS Reflectometry plotting tab.
 class MANTIDQT_ISISREFLECTOMETRY_DLL QtPlottingView : public QWidget, public IPlottingView {
@@ -68,7 +68,7 @@ private:
   void filterPlottingWorkspaces();
 
   Ui::PlottingWidget m_ui;
-  std::unique_ptr<PlottingWorkspaceTreeAdapterPresenter> m_plottingWorkspaceTreeAdapterPresenter;
+  std::unique_ptr<PlottingWorkspaceTreePresenter> m_plottingWorkspaceTreePresenter;
   PlottingViewSubscriber *m_notifyee;
 };
 

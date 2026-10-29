@@ -49,7 +49,7 @@ set(TEST_FILES
     Plotting/PlottingWorkspaceTreeTest.h
     Plotting/QtActiveFigureMonitorTest.h
     Plotting/QtPlottingViewTest.h
-    Plotting/PlottingWorkspaceTreeAdapterPresenterTest.h
+    Plotting/PlottingWorkspaceTreePresenterTest.h
     Reduction/BatchLookupIndexTest.h
     Reduction/LookupTableTest.h
     Reduction/ReductionJobsMergeTest.h

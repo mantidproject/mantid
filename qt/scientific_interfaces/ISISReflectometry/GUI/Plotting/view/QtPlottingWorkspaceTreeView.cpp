@@ -110,9 +110,7 @@ void QtPlottingWorkspaceTreeView::addItem(QStandardItem *parent, PlottingWorkspa
   }
 }
 
-void QtPlottingWorkspaceTreeView::subscribe(PlottingWorkspaceTreeAdapterViewSubscriber *notifyee) {
-  m_notifyee = notifyee;
-}
+void QtPlottingWorkspaceTreeView::subscribe(PlottingWorkspaceTreeViewSubscriber *notifyee) { m_notifyee = notifyee; }
 
 void QtPlottingWorkspaceTreeView::setItems(std::vector<PlottingWorkspaceTreeViewItem> const &items) {
   m_model.removeRows(0, m_model.rowCount());
