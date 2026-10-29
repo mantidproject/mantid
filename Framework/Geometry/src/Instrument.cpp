@@ -1483,9 +1483,10 @@ Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
   auto compInfo = componentInfo.cloneWithoutDetectorInfo();
   auto detInfo = std::make_unique<DetectorInfo>(detectorInfo);
   compInfo->m_componentInfo->setDetectorInfo(detInfo->m_detectorInfo.get());
-  // Point the clone at THIS map's parameter store.
-  compInfo->m_parameterInfo = pmap.sharedParameterInfo();
-  detInfo->m_parameterInfo = pmap.sharedParameterInfo();
+  // Point the clone at THIS map's parameter store, attaching the map to the clone's index domain if
+  // it is not already: the map is either empty or a copy of one attached to that domain.
+  compInfo->m_parameterInfo = pmap.rekey(compInfo->m_componentIds, compInfo->m_compIDToIndex);
+  detInfo->m_parameterInfo = compInfo->m_parameterInfo;
   // Take the frame from the instrument rather than the cached copy, in case it was set after the cache was built.
   compInfo->m_referenceFrame = getReferenceFrame();
   detInfo->m_referenceFrame = compInfo->m_referenceFrame;

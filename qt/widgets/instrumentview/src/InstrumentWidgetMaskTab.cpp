@@ -517,8 +517,8 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
       m_instrWidget->updateInfoText(QString("Pixel %0 picked for grouping").arg(pickID));
 
     } else if (m_tube->isChecked()) {
-      QString message = QString("Component %0 picked for grouping")
-                            .arg(QString::fromStdString(componentInfo.componentID(parentIndex)->getName()));
+      QString message =
+          QString("Component %0 picked for grouping").arg(QString::fromStdString(componentInfo.name(parentIndex)));
       m_instrWidget->updateInfoText(message);
     }
   }

@@ -11,6 +11,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentMetadata.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 
@@ -71,8 +73,11 @@ void SaveParameterFile::exec() {
   // from DetectorInfo.
   const ParameterMap_sptr params = instrument->makeLegacyParameterMap();
 
-  // maps components to a tuple of parameters' name, type, and value
-  std::map<ComponentID, std::vector<boost::tuple<std::string, std::string, std::string>>> toSave;
+  const auto &componentInfo = ws->componentInfo();
+  const auto &detectorInfo = ws->detectorInfo();
+
+  // maps component indices to a tuple of parameters' name, type, and value
+  std::map<size_t, std::vector<boost::tuple<std::string, std::string, std::string>>> toSave;
 
   // Set up a progress bar
   Progress prog(this, 0.0, 0.3, params->size());
@@ -82,7 +87,7 @@ void SaveParameterFile::exec() {
     if (prog.hasCancellationBeenRequested())
       break;
     prog.report("Generating parameters");
-    const ComponentID cID = paramsIt.first;
+    const size_t cID = paramsIt.first;
     const std::string pName = paramsIt.second->name();
     const std::string pType = paramsIt.second->type();
     const std::string pValue = paramsIt.second->asString();
@@ -148,10 +153,9 @@ void SaveParameterFile::exec() {
       break;
     prog.report("Saving parameters");
     // Component data
-    const ComponentID cID = comp.first;
-    const std::string cFullName = cID->getFullName();
-    const IDetector *cDet = dynamic_cast<IDetector *>(cID);
-    const detid_t cDetID = (cDet) ? cDet->getID() : 0;
+    const size_t cID = comp.first;
+    const std::string cFullName = componentInfo.fullName(cID);
+    const detid_t cDetID = componentInfo.isDetector(cID) ? detectorInfo.detectorIDs()[cID] : 0;
 
     file << "	<component-link";
     if (cDetID != 0)

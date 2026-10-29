@@ -73,8 +73,8 @@ ParameterMap::ParameterMap(const ParameterMap &other)
     // The store is deep-copied, not shared: a copied ParameterMap is an independent map, and
     // sharing would make a write through either one visible to the other.
     : m_parameterFileNames(other.m_parameterFileNames),
-      m_parameterInfo(std::make_shared<ParameterInfo>(*other.m_parameterInfo)), m_idToIndex(other.m_idToIndex),
-      m_indexToId(other.m_indexToId),
+      m_parameterInfo(std::make_shared<ParameterInfo>(*other.m_parameterInfo)), m_domainIds(other.m_domainIds),
+      m_domainIndices(other.m_domainIndices), m_stagedIndices(other.m_stagedIndices), m_stagedIds(other.m_stagedIds),
       m_cacheLocMap(std::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>(*other.m_cacheLocMap)),
       m_cacheRotMap(std::make_unique<Kernel::Cache<const ComponentID, Kernel::Quat>>(*other.m_cacheRotMap)),
       m_instrument(other.m_instrument) {
@@ -103,8 +103,10 @@ ParameterMap::~ParameterMap() = default;
 size_t ParameterMap::indexOf(const IComponent *comp) const {
   size_t result = ComponentInfo::invalidIndex;
   if (comp) {
-    auto const found = m_idToIndex.find(comp->getComponentID());
-    if (found != m_idToIndex.end()) {
+    // An attached map is keyed by component index, a detached one by staging index
+    const auto &indices = m_domainIndices ? *m_domainIndices : m_stagedIndices;
+    auto const found = indices.find(comp->getComponentID());
+    if (found != indices.end()) {
       result = found->second;
     }
   }
@@ -112,34 +114,58 @@ size_t ParameterMap::indexOf(const IComponent *comp) const {
 }
 
 size_t ParameterMap::indexForWrite(const IComponent *comp) {
-  size_t result = ComponentInfo::invalidIndex;
-  if (comp) {
-    const ComponentID id = comp->getComponentID();
-    auto const found = m_idToIndex.find(id);
-    if (found != m_idToIndex.end()) {
-      result = found->second;
-    } else {
-      // First time this component has been written to
-      result = m_indexToId.size();
-      m_indexToId.emplace_back(id);
-      m_idToIndex.emplace(id, result);
+  size_t result = indexOf(comp);
+  if (comp && result == ComponentInfo::invalidIndex) {
+    if (m_domainIndices) {
+      throw std::invalid_argument("ParameterMap: cannot add a parameter to component '" + comp->getFullName() +
+                                  "', which is not part of the instrument this map belongs to");
     }
+    // First time this component has been written to
+    const ComponentID id = comp->getComponentID();
+    result = m_stagedIds.size();
+    m_stagedIds.emplace_back(id);
+    m_stagedIndices.emplace(id, result);
   }
   return result;
 }
 
 ComponentID ParameterMap::componentIdAt(const size_t index) const {
-  return index < m_indexToId.size() ? m_indexToId[index] : nullptr;
+  const auto &ids = m_domainIds ? *m_domainIds : m_stagedIds;
+  return index < ids.size() ? ids[index] : nullptr;
+}
+
+bool ParameterMap::isInComponentInfo(const size_t index) const {
+  // m_componentInfo, when set, was built alongside the index domain
+  return m_componentInfo && index < domainSize();
+}
+
+std::string ParameterMap::componentName(const size_t index) const {
+  if (isInComponentInfo(index)) {
+    return m_componentInfo->name(index);
+  }
+  const ComponentID id = componentIdAt(index);
+  return id ? id->getName() : std::string();
+}
+
+std::string ParameterMap::componentFullName(const size_t index) const {
+  if (isInComponentInfo(index)) {
+    return m_componentInfo->fullName(index);
+  }
+  const ComponentID id = componentIdAt(index);
+  return id ? id->getFullName() : std::string();
 }
 
 std::vector<ParameterMap::Entry> ParameterMap::entries() const {
+  if (!m_domainIds) {
+    throw std::logic_error("ParameterMap::entries: the map is not attached to an instrument, so its components "
+                           "have no component indices");
+  }
   std::vector<Entry> result;
   result.reserve(m_parameterInfo->size());
   for (auto const &[index, parameters] : *m_parameterInfo) {
-    const ComponentID id = componentIdAt(index);
     for (auto const &[parameterName, parameter] : parameters) {
       static_cast<void>(parameterName);
-      result.emplace_back(id, parameter);
+      result.emplace_back(index, parameter);
     }
   }
   return result;
@@ -147,12 +173,15 @@ std::vector<ParameterMap::Entry> ParameterMap::entries() const {
 
 //--------------------------------------------------------------------------------------------
 
-std::shared_ptr<ParameterInfo> ParameterMap::rekey(const std::unordered_map<IComponent const *, size_t> &idToIndex) {
+std::shared_ptr<ParameterInfo> ParameterMap::rekey(std::shared_ptr<const ComponentIDs> componentIds,
+                                                   std::shared_ptr<const ComponentIndices> componentIndices) {
+  if (componentIds == m_domainIds) {
+    return m_parameterInfo;
+  }
   auto rekeyed = std::make_shared<ParameterInfo>();
-  for (auto const &[stagingIndex, parameters] : *m_parameterInfo) {
-    const ComponentID id = componentIdAt(stagingIndex);
-    auto const found = idToIndex.find(id);
-    if (found == idToIndex.end()) {
+  for (auto const &[oldIndex, parameters] : *m_parameterInfo) {
+    auto const found = componentIndices->find(componentIdAt(oldIndex));
+    if (found == componentIndices->end()) {
       continue;
     }
     for (auto const &[parameterName, parameter] : parameters) {
@@ -163,8 +192,8 @@ std::shared_ptr<ParameterInfo> ParameterMap::rekey(const std::unordered_map<ICom
     }
   }
   for (auto const &[key, parameter] : m_parameterInfo->logfileParameters()) {
-    auto const found = idToIndex.find(componentIdAt(key.first));
-    if (found != idToIndex.end()) {
+    auto const found = componentIndices->find(componentIdAt(key.first));
+    if (found != componentIndices->end()) {
       rekeyed->addLogfileParameter(found->second, key.second, parameter);
     }
   }
@@ -172,11 +201,10 @@ std::shared_ptr<ParameterInfo> ParameterMap::rekey(const std::unordered_map<ICom
   // Adopt the rekeyed store and the instrument's index domain, so that this map and the
   // ComponentInfo built alongside it share one set of parameters from here on.
   m_parameterInfo = rekeyed;
-  m_idToIndex = idToIndex;
-  m_indexToId.assign(idToIndex.size(), nullptr);
-  for (auto const &[id, index] : idToIndex) {
-    m_indexToId[index] = const_cast<ComponentID>(id);
-  }
+  m_domainIds = std::move(componentIds);
+  m_domainIndices = std::move(componentIndices);
+  m_stagedIndices.clear();
+  m_stagedIds.clear();
   return m_parameterInfo;
 }
 
@@ -242,9 +270,10 @@ bool ParameterMap::operator==(const ParameterMap &rhs) const { return diff(rhs, 
  */
 const std::string ParameterMap::getDescription(const std::string &compName, const std::string &name) const {
   std::string result;
-  for (auto const &entry : entries()) {
-    if (compName == entry.first->getName()) {
-      std::shared_ptr<Parameter> const param = get(entry.first, name);
+  for (auto const &[index, parameters] : *m_parameterInfo) {
+    static_cast<void>(parameters);
+    if (compName == componentName(index)) {
+      std::shared_ptr<Parameter> const param = m_parameterInfo->get(index, name);
       if (param) {
         result = param->getDescription();
         if (!result.empty())
@@ -263,9 +292,10 @@ const std::string ParameterMap::getDescription(const std::string &compName, cons
  */
 const std::string ParameterMap::getShortDescription(const std::string &compName, const std::string &name) const {
   std::string result;
-  for (auto const &entry : entries()) {
-    if (compName == entry.first->getName()) {
-      std::shared_ptr<Parameter> const param = get(entry.first, name);
+  for (auto const &[index, parameters] : *m_parameterInfo) {
+    static_cast<void>(parameters);
+    if (compName == componentName(index)) {
+      std::shared_ptr<Parameter> const param = m_parameterInfo->get(index, name);
       if (param) {
         result = param->getShortDescription();
         if (!result.empty())
@@ -326,16 +356,21 @@ const std::string ParameterMap::diff(const ParameterMap &rhs, const bool &firstD
   }
 
   // The map is unordered and the key is only valid at runtime. The
-  // asString method turns the ComponentIDs to full-qualified name identifiers
+  // asString method turns the components to full-qualified name identifiers
   // so we will use the same approach to compare them
 
   std::unordered_multimap<std::string, Parameter_sptr> thisMap, rhsMap;
-  for (auto const &entry : entries()) {
-    thisMap.emplace(entry.first->getFullName(), entry.second);
-  }
-  for (auto const &entry : rhs.entries()) {
-    rhsMap.emplace(entry.first->getFullName(), entry.second);
-  }
+  auto const byFullName = [](ParameterMap const &map, std::unordered_multimap<std::string, Parameter_sptr> &result) {
+    for (auto const &[index, parameters] : *map.m_parameterInfo) {
+      auto const fullName = map.componentFullName(index);
+      for (auto const &[parameterName, parameter] : parameters) {
+        static_cast<void>(parameterName);
+        result.emplace(fullName, parameter);
+      }
+    }
+  };
+  byFullName(*this, thisMap);
+  byFullName(rhs, rhsMap);
 
   std::stringstream strOutput;
   for (auto thisIt = thisMap.cbegin(); thisIt != thisMap.cend(); ++thisIt) {
@@ -988,19 +1023,25 @@ std::set<std::string> ParameterMap::names(const IComponent *comp) const {
  */
 std::string ParameterMap::asString() const {
   std::stringstream out;
-  for (auto const &entry : entries()) {
-    const std::shared_ptr<Parameter> &p = entry.second;
-    if (p && entry.first) {
-      const auto *comp = dynamic_cast<const IComponent *>(entry.first);
+  for (auto const &[index, parameters] : *m_parameterInfo) {
+    // Identify the component: a detector by its ID, anything else by its full path name, which
+    // is unambiguous
+    std::string component;
+    if (isInComponentInfo(index) && m_detectorInfo) {
+      component = m_componentInfo->isDetector(index) ? "detID:" + std::to_string(m_detectorInfo->detectorIDs()[index])
+                                                     : m_componentInfo->fullName(index);
+    } else if (const auto *comp = componentIdAt(index)) {
       const auto *det = dynamic_cast<const IDetector *>(comp);
-      if (det) {
-        out << "detID:" << det->getID();
-      } else if (comp) {
-        out << comp->getFullName(); // Use full path name to ensure unambiguous
-                                    // naming
+      component = det ? "detID:" + std::to_string(det->getID()) : comp->getFullName();
+    } else {
+      continue;
+    }
+    for (auto const &[parameterName, p] : parameters) {
+      static_cast<void>(parameterName);
+      if (p) {
+        const auto paramVisible = "visible:" + std::string(p->visible() == 1 ? "true" : "false");
+        out << component << ';' << p->type() << ';' << p->name() << ';' << p->asString() << ';' << paramVisible << '|';
       }
-      const auto paramVisible = "visible:" + std::string(p->visible() == 1 ? "true" : "false");
-      out << ';' << p->type() << ';' << p->name() << ';' << p->asString() << ';' << paramVisible << '|';
     }
   }
   return out.str();
@@ -1235,9 +1276,11 @@ size_t ParameterMap::getMemorySize() const {
   // store may be shared with the owning ComponentInfo, which reports it too, so summing this
   // with ComponentInfo::getMemorySize() double-counts it.
   const size_t mapMem = m_parameterInfo->getMemorySize();
-  // The pointer/index translation tables, which exist only here.
-  const size_t translationMem = m_idToIndex.size() * (sizeof(std::pair<const ComponentID, size_t>) + sizeof(void *)) +
-                                m_indexToId.capacity() * sizeof(ComponentID);
+  // The staging tables, which exist only here. The index domain is shared with ComponentInfo,
+  // which reports it.
+  const size_t translationMem =
+      m_stagedIndices.size() * (sizeof(std::pair<const ComponentID, size_t>) + sizeof(void *)) +
+      m_stagedIds.capacity() * sizeof(ComponentID);
   // m_parameterFileNames: vector of strings; sizeof(*this) covers the vector object, count the heap buffer
   const size_t fileNamesMem = m_parameterFileNames.size() * sizeof(std::string) +
                               std::accumulate(m_parameterFileNames.cbegin(), m_parameterFileNames.cend(), size_t{0},

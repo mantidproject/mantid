@@ -218,7 +218,7 @@ public:
   Mantid::detid_t getDetID(size_t pickID) const override;
   std::vector<Mantid::detid_t> getDetIDs(const std::vector<size_t> &dets) const;
   /// Get a component ID for a non-detector.
-  Mantid::Geometry::ComponentID getComponentID(size_t pickID) const;
+  Mantid::Geometry::IComponent const *getComponentID(size_t pickID) const;
   /// Get position of a detector by a pick ID converted form a color in the pick
   /// image.
   const Mantid::Kernel::V3D getDetPos(size_t pickID) const override;

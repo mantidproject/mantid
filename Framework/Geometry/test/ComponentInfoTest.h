@@ -942,6 +942,34 @@ public:
     TS_ASSERT_EQUALS(componentInfo.getStringParameter(bankIndex, "a_string").at(0), "hello");
   }
 
+  void test_parameter_and_parameterByType() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    ParameterMap pmap;
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
+    auto &componentInfo = *std::get<0>(wrappers);
+    auto const bankIndex = componentInfo.root() - 3;
+    auto const detectorIndex = componentInfo.children(componentInfo.children(bankIndex)[0])[0];
+    componentInfo.addDouble(bankIndex, "a_double", 2.5);
+    componentInfo.addString(bankIndex, "a_string", "hello");
+
+    auto const found = componentInfo.parameter(bankIndex, "a_double");
+    TS_ASSERT(found);
+    TS_ASSERT_EQUALS(found->value<double>(), 2.5);
+    // A type, if given, must match.
+    TS_ASSERT(componentInfo.parameter(bankIndex, "a_double", "double"));
+    TS_ASSERT(!componentInfo.parameter(bankIndex, "a_double", "string"));
+    // Recursive by default.
+    TS_ASSERT(componentInfo.parameter(detectorIndex, "a_double"));
+    TS_ASSERT(!componentInfo.parameter(detectorIndex, "a_double", "", false));
+    TS_ASSERT(!componentInfo.parameter(bankIndex, "no_such_parameter"));
+
+    auto const byType = componentInfo.parameterByType(detectorIndex, "string");
+    TS_ASSERT(byType);
+    TS_ASSERT_EQUALS(byType->value<std::string>(), "hello");
+    TS_ASSERT(!componentInfo.parameterByType(detectorIndex, "string", false));
+    TS_ASSERT(!componentInfo.parameterByType(bankIndex, "fitting"));
+  }
+
   void test_getParameterType_reports_the_stored_type() {
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
     ParameterMap pmap;

@@ -43,8 +43,8 @@ class InstrumentMetadata;
 
 class MANTID_GEOMETRY_DLL ParameterMap {
 public:
-  /// A stored parameter together with the component it belongs to.
-  using Entry = std::pair<ComponentID, std::shared_ptr<Parameter>>;
+  /// A stored parameter together with the component index of the component it belongs to.
+  using Entry = std::pair<size_t, std::shared_ptr<Parameter>>;
 
   /// Default constructor
   ParameterMap();
@@ -92,10 +92,12 @@ public:
   /// method swaps two parameter maps contents  each other. All caches contents
   /// is nullified (TO DO: it can be efficiently swapped too)
   void swap(ParameterMap &other) {
-    // The translation tables must travel with the store: an index is meaningless without them.
+    // The index domain and staging tables must travel with the store: an index is meaningless without them.
     m_parameterInfo.swap(other.m_parameterInfo);
-    m_idToIndex.swap(other.m_idToIndex);
-    m_indexToId.swap(other.m_indexToId);
+    m_domainIds.swap(other.m_domainIds);
+    m_domainIndices.swap(other.m_domainIndices);
+    m_stagedIndices.swap(other.m_stagedIndices);
+    m_stagedIds.swap(other.m_stagedIds);
     clearPositionSensitiveCaches();
   }
   /// Clear any parameters with the given name
@@ -238,10 +240,11 @@ public:
    */
   template <class T> std::vector<T> getType(const std::string &compName, const std::string &name) const {
     std::vector<T> retval;
-    // Iterate every stored parameter because the match is on component name rather than key
-    for (auto const &entry : entries()) {
-      if (compName == entry.first->getName()) {
-        std::shared_ptr<Parameter> const param = get(entry.first, name);
+    // Iterate every component with parameters because the match is on component name rather than key
+    for (auto const &[index, parameters] : *m_parameterInfo) {
+      static_cast<void>(parameters);
+      if (compName == componentName(index)) {
+        std::shared_ptr<Parameter> const param = m_parameterInfo->get(index, name);
         if (param) {
           retval.emplace_back(param->value<T>());
         }
@@ -308,7 +311,8 @@ public:
   /// adds a parameter filename that has been loaded
   void addParameterFilename(const std::string &filename);
 
-  /** Every stored parameter with its owning component, in component-index order.*/
+  /** Every stored parameter with its component's index in the instrument this map belongs to, in
+   * component-index order. Throws for a detached map, which has no component indices yet.*/
   std::vector<Entry> entries() const;
 
   bool hasDetectorInfo(const Instrument *instrument) const;
@@ -345,9 +349,16 @@ public:
   const std::shared_ptr<Geometry::InstrumentMetadata> &sharedInstrumentMetadata() const { return m_instrumentMetadata; }
   //@}
 
-  /** Rekey this map's parameters from the synthetic staging indices onto an instrument's real
-   * component indices, returning the resulting store. */
-  std::shared_ptr<ParameterInfo> rekey(const std::unordered_map<Geometry::IComponent const *, size_t> &idToIndex);
+  /// The components of one instrument, by index, as held by its ComponentInfo
+  using ComponentIDs = std::vector<Geometry::IComponent *>;
+  /// The reverse of ComponentIDs
+  using ComponentIndices = std::unordered_map<Geometry::IComponent const *, size_t>;
+
+  /** Attach this map to an instrument's component index domain, rekeying its parameters onto the
+   * instrument's component indices, and return the resulting store. Parameters of components outside
+   * the domain are dropped. A map already attached to this domain is left as it is. */
+  std::shared_ptr<ParameterInfo> rekey(std::shared_ptr<const ComponentIDs> componentIds,
+                                       std::shared_ptr<const ComponentIndices> componentIndices);
 
 private:
   std::shared_ptr<Parameter> create(const std::string &className, const std::string &name,
@@ -362,12 +373,21 @@ private:
   /// calculate relative error for use in diff
   bool relErr(double x1, double x2, double errorVal) const;
 
+  /// The number of components in the index domain
+  size_t domainSize() const { return m_domainIds ? m_domainIds->size() : 0; }
   /// Index for a component, or ComponentInfo::invalidIndex if this map holds nothing for it.
   size_t indexOf(const IComponent *comp) const;
-  /// As indexOf(), but allocating a new index for a component seen for the first time.
+  /// As indexOf(), but allocating a staging index for a component of a detached map seen for the
+  /// first time. Throws for a component outside the index domain of an attached map.
   size_t indexForWrite(const IComponent *comp);
   /// The component an index refers to. Only valid for an index this map issued.
   ComponentID componentIdAt(const size_t index) const;
+  /// Whether m_componentInfo can be asked about the component with this store index
+  bool isInComponentInfo(const size_t index) const;
+  /// The name of the component with this store index
+  std::string componentName(const size_t index) const;
+  /// The full name of the component with this store index
+  std::string componentFullName(const size_t index) const;
 
   /// internal list of parameter files loaded
   std::vector<std::string> m_parameterFileNames;
@@ -375,11 +395,16 @@ private:
   /** The parameter store, owner of the parameter info*/
   std::shared_ptr<ParameterInfo> m_parameterInfo;
 
-  /// Component pointer to index translation.
-  std::unordered_map<Geometry::IComponent const *, size_t> m_idToIndex;
-  /// Reverse of m_idToIndex. Needed because several accessors (asString, diff, getType) must
-  /// recover the component from a stored parameter to report its name.
-  std::vector<ComponentID> m_indexToId;
+  /** The index domain: the components of the instrument this map is attached to, shared with that
+   * instrument's ComponentInfo. Within it, a component's store index is its component index. Both
+   * null for a detached map. */
+  std::shared_ptr<const ComponentIDs> m_domainIds;
+  std::shared_ptr<const ComponentIndices> m_domainIndices;
+
+  /** Staging indices, for the components of a detached map, which has no component indices yet.
+   * Staging index i is m_stagedIds[i]. rekey() converts them to component indices and clears them. */
+  std::unordered_map<Geometry::IComponent const *, size_t> m_stagedIndices;
+  std::vector<ComponentID> m_stagedIds;
   /// internal cache map instance for cached position values
   std::unique_ptr<Kernel::Cache<const ComponentID, Kernel::V3D>> m_cacheLocMap;
   /// internal cache map instance for cached rotation values

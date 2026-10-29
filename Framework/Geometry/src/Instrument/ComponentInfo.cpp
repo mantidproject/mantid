@@ -811,6 +811,24 @@ const ParameterInfo::ComponentParameters &ComponentInfo::parameters(const size_t
   return m_parameterInfo ? m_parameterInfo->parameters(componentIndex) : empty;
 }
 
+std::shared_ptr<const Parameter> ComponentInfo::parameter(const size_t componentIndex, const std::string &name,
+                                                          const std::string &type, bool recursive) const {
+  if (!m_parameterInfo) {
+    return nullptr;
+  }
+  return recursive ? m_parameterInfo->getRecursive(*this, componentIndex, name, type)
+                   : m_parameterInfo->get(componentIndex, name, type);
+}
+
+std::shared_ptr<const Parameter> ComponentInfo::parameterByType(const size_t componentIndex, const std::string &type,
+                                                                bool recursive) const {
+  if (!m_parameterInfo) {
+    return nullptr;
+  }
+  return recursive ? m_parameterInfo->getRecursiveByType(*this, componentIndex, type)
+                   : m_parameterInfo->getByType(componentIndex, type);
+}
+
 std::vector<double> ComponentInfo::getNumberParameter(const size_t componentIndex, const std::string &name,
                                                       bool recursive) const {
   return getParameter<double>(componentIndex, name, recursive);
