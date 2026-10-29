@@ -6,10 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtPlottingView.h"
 #include "GUI/Plotting/presenter/PlottingWorkspaceTreeAdapterPresenter.h"
-#include "QtPlottingWorkspaceTreeAdapterView.h"
+#include "QtPlottingWorkspaceTreeView.h"
 #include <QCheckBox>
 #include <QComboBox>
-#include <QItemSelectionModel>
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
@@ -36,16 +35,14 @@ void QtPlottingView::initLayout() {
   m_ui.detectorMapXAxis->addItem("Lambda", enumIndex(DetectorMapXAxis::Lambda));
   m_ui.alignmentXAxis->addItem("Detector Index", enumIndex(AlignmentXAxis::DetectorId));
   m_ui.alignmentXAxis->addItem("Detector angle, theta", enumIndex(AlignmentXAxis::Theta));
-  m_plottingWorkspaceTreeAdapterView =
-      std::make_unique<QtPlottingWorkspaceTreeAdapterView>(m_ui.plottingWorkspaceTree, this);
   m_plottingWorkspaceTreeAdapterPresenter =
-      std::make_unique<PlottingWorkspaceTreeAdapterPresenter>(*m_plottingWorkspaceTreeAdapterView);
+      std::make_unique<PlottingWorkspaceTreeAdapterPresenter>(*m_ui.plottingWorkspaceTree);
   for (auto *checkbox : {m_ui.filterIvsQBinned, m_ui.filterIvsLambda, m_ui.filterIvsQ}) {
     connect(checkbox, &QCheckBox::toggled, this, &QtPlottingView::filterPlottingWorkspaces);
   }
   connect(m_ui.workspaceFilter, &QLineEdit::textChanged, this, &QtPlottingView::filterPlottingWorkspaces);
   filterPlottingWorkspaces();
-  connect(m_ui.plottingWorkspaceTree->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this]() {
+  connect(m_ui.plottingWorkspaceTree, &QtPlottingWorkspaceTreeView::workspaceSelectionChanged, this, [this]() {
     if (m_notifyee) {
       m_notifyee->notifyPlottingWorkspaceTreeSelectionChanged();
     }
