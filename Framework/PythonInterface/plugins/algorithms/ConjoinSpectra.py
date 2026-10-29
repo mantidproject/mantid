@@ -27,7 +27,7 @@ class ConjoinSpectra(PythonAlgorithm):
     def name(self):
         return "ConjoinSpectra"
 
-    def summmary(self):
+    def summary(self):
         return "Joins individual spectra from a range of workspaces into a single workspace for plotting or further analysis."
 
     def PyInit(self):
