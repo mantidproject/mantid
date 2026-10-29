@@ -4,6 +4,9 @@ on:
   workflow_dispatch:
   push:
     branches: [ornl-next, release-next]
+  pull_request:
+    paths:
+      - .github/workflows/automerge.yml
 
 permissions:
   contents: read
@@ -15,20 +18,27 @@ jobs:
     if: ${{ github.repository_owner == 'mantidproject' }}
 
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Checkout ${{ github.ref_name}}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
-          token: ${{ secrets.AUTOMERGE_TOKEN }}
+          fetch-depth: 100
 
-      - name: Merge ${{ github.ref_name }} into main
+      - name: Checkout main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Set committer information
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git fetch origin main "${{ github.ref_name }}"
-
-          git checkout main
+      - name: Merge ${{ github.ref_name }} into main
+        run: |
           git merge --no-ff "origin/${{ github.ref_name }}" \
             -m "Merge ${{ github.ref_name }} into main"
 
-          git push origin main
+      - name: Push merge commit
+        if: ${{ github.event_name != 'pull_request' }}
+        run: git push origin main
