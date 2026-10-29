@@ -59,7 +59,7 @@ PlottingPresenter::PlottingPresenter(IPlottingView *view, IPlotter const &plotte
 
 void PlottingPresenter::initialise() {
   m_view->subscribe(this);
-  notifyWorkspaceFilterChanged();
+  updateWorkspaceFilter();
   m_activeFigureMonitor->subscribe([this]() { notifyActiveFigureChanged(); });
   updateWidgetEnabledState();
 }
@@ -104,7 +104,9 @@ void PlottingPresenter::notifyPlotOutputTypeChanged() {
 
 void PlottingPresenter::notifyPlottingWorkspaceTreeSelectionChanged() { updatePlotActionState(); }
 
-void PlottingPresenter::notifyWorkspaceFilterChanged() {
+void PlottingPresenter::notifyWorkspaceFilterChanged() { updateWorkspaceFilter(); }
+
+void PlottingPresenter::updateWorkspaceFilter() {
   m_plottingWorkspaceTreePresenter.filterWorkspaces(m_view->workspaceFilterText(),
                                                     m_view->workspaceFilterOutputTypes());
 }
