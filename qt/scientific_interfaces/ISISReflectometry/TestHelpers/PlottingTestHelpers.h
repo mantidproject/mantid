@@ -160,7 +160,7 @@ inline bool operator!=(PlotOutputTypeViewItem const &lhs, PlotOutputTypeViewItem
 inline bool operator==(PlotOutputControlsState const &lhs, PlotOutputControlsState const &rhs) {
   return lhs.plotPropertiesVisible == rhs.plotPropertiesVisible &&
          lhs.detectorMapControlsVisible == rhs.detectorMapControlsVisible &&
-         lhs.alignmentControlsVisible == rhs.alignmentControlsVisible;
+         lhs.alignmentControlsVisible == rhs.alignmentControlsVisible && lhs.fixedLayout == rhs.fixedLayout;
 }
 
 inline bool operator!=(PlotOutputControlsState const &lhs, PlotOutputControlsState const &rhs) { return !(lhs == rhs); }

@@ -8,10 +8,26 @@
 
 #include "GUI/Common/PlotOptions.h"
 #include "GUI/Plotting/model/PlottingWorkspace.h"
+#include <optional>
 #include <string>
 #include <vector>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
+
+/// Plot controls supplied by the view or overridden by an output's request definition.
+struct PlotRequestSettings {
+  PlotLayout layout;
+  bool addToExistingPlot{false};
+  bool tiledVertically{false};
+  bool shareXAxisWhenTiled{false};
+  bool shareYAxisWhenTiled{false};
+};
+
+/// One scientific output to prepare, optionally with fixed plot controls.
+struct PlotRequestDefinition {
+  PlotOutputType outputType;
+  std::optional<PlotRequestSettings> settingsOverride{std::nullopt};
+};
 
 /// Capability flags used to enable plotting controls for an output type.
 struct PlotOutputTypeCapabilities {
@@ -24,12 +40,15 @@ struct PlotOutputTypeCapabilities {
 /// Describes how one plot output type behaves in the plotting tab.
 class MANTIDQT_ISISREFLECTOMETRY_DLL PlotOutputTypeProperties {
 public:
-  /// Create properties from selectable tree item types, included workspace outputs and capabilities.
+  /// Create properties, defaulting to one request for this output using the view settings.
   PlotOutputTypeProperties(PlotOutputType plotOutputType,
                            std::vector<PlottingWorkspaceTreeItemType> selectableItemTypes,
                            std::vector<ReducedWorkspaceOutputType> includedReducedWorkspaceOutputTypes,
-                           PlotOutputTypeCapabilities capabilities);
+                           PlotOutputTypeCapabilities capabilities,
+                           std::vector<PlotRequestDefinition> plotRequests = {});
 
+  /// Return the ordered request definitions; ordinary outputs have one entry using the view controls.
+  std::vector<PlotRequestDefinition> const &plotRequests() const;
   /// Return the label shown in the plot output selector.
   std::string const &displayName() const;
   /// Return true if tree items of this type may be selected.
@@ -56,6 +75,7 @@ private:
   std::vector<PlottingWorkspaceTreeItemType> m_selectableItemTypes;
   std::vector<ReducedWorkspaceOutputType> m_includedReducedWorkspaceOutputTypes;
   PlotOutputTypeCapabilities m_capabilities;
+  std::vector<PlotRequestDefinition> m_plotRequests;
 };
 
 /// Return the configured plotting-tab behavior for an output type.
