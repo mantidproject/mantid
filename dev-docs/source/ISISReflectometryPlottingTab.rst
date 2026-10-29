@@ -32,6 +32,8 @@ The principal dependencies are:
        v
    PlottingPresenter
        |
+       +-- owns --> PlottingWorkspaceTreePresenter --> IPlottingWorkspaceTreeView
+       |
        +-- owns --> PlottingWorkspaceTree
        |
        +-- owns --> PlottingViewStateProvider --> PlotOutputTypeProperties
@@ -45,10 +47,6 @@ The principal dependencies are:
        +-- uses --> IActiveFigureMonitor (QtActiveFigureMonitor)
        |
        `-- updates --> IPlottingView (QtPlottingView)
-                                      |
-                                      +-- owns --> PlottingWorkspaceTreePresenter
-                                      |                |
-                                      |                `-- uses --> IPlottingWorkspaceTreeView
                                       |
                                       `-- owns --> QtPlottingWorkspaceTreeView
 
@@ -220,7 +218,8 @@ tiled layouts are submitted as one request containing all selected workspaces.
 :code:`presenter/PlottingWorkspaceTreePresenter.h/.cpp`
 #######################################################
 
-:code:`PlottingWorkspaceTreePresenter` owns the evaluated tree and filter state.
+:code:`PlottingPresenter` owns :code:`PlottingWorkspaceTreePresenter`, which
+owns the evaluated tree and filter state.
 It:
 
 * prepares column labels as :code:`std::string` values;
@@ -363,11 +362,8 @@ Defines :code:`QtPlottingView`, the :code:`QWidget` implementation of
 * initialises controls defined in :code:`PlottingWidget.ui`;
 * connects Qt signals to :code:`PlottingViewSubscriber` notifications;
 * applies presenter-provided control state;
-* forwards tree state and filter inputs to its
-  :code:`PlottingWorkspaceTreePresenter`;
-* reads the current plot output, axes, layout options, and plotting workspace
-  tree selection;
-* owns the tree presenter and :code:`QtPlottingWorkspaceTreeView`; and
+* exposes the child tree view and reads filter, output, axes, and layout inputs;
+* owns :code:`QtPlottingWorkspaceTreeView`; and
 * displays the confirmation dialog for large plot requests.
 
 The view reports user actions but does not decide which actions or tree entries
@@ -525,13 +521,14 @@ Construction
 ############
 
 #. :code:`QtBatchView` constructs :code:`QtPlottingView`, which owns the tree
-   widget and :code:`PlottingWorkspaceTreePresenter`.
+   widget.
 #. :code:`BatchPresenterFactory` asks :code:`PlottingPresenterFactory` to create
    the presenter for that view.
 #. :code:`PlottingPresenterFactory` injects its :code:`PlottingModel`,
    :code:`PlotOptionsProvider`, and :code:`Plotter` into the presenter. The
-   presenter directly owns its :code:`PlottingWorkspaceTree` and
-   :code:`PlottingViewStateProvider`.
+   presenter directly owns its :code:`PlottingWorkspaceTree`,
+   :code:`PlottingViewStateProvider`, and :code:`PlottingWorkspaceTreePresenter`.
+   The tree presenter uses the child view exposed by :code:`IPlottingView`.
 #. The plotting presenter subscribes to the view and to active-figure changes
    through :code:`QtActiveFigureMonitor`.
 #. :code:`BatchPresenter` takes ownership of the plotting presenter and passes
@@ -565,9 +562,7 @@ Updating the plotting workspace tree
 #. The presenter reads the currently selected :code:`PlotOutputType` and asks
    :code:`PlottingViewStateProvider::plottingWorkspaceTreeItemStates` to
    evaluate the hierarchy using :code:`PlotOutputTypeProperties`.
-#. The resulting item states are passed to
-   :code:`IPlottingView::setPlottingWorkspaceTreeItemStates`.
-#. :code:`QtPlottingView` forwards the states to
+#. The presenter passes the resulting item states to its
    :code:`PlottingWorkspaceTreePresenter`, which prepares display labels and
    passes them to the tree widget.
 #. The widget rebuilds its :code:`QStandardItemModel`. The tree presenter then
@@ -587,12 +582,13 @@ User interaction
    Parent selection propagates only to visible, eligible descendants. Workspace
    groups requiring complete selection resolve all required members when read.
 #. Changing a workspace output-type checkbox or the Item-column regular
-   expression immediately reapplies row visibility and expands the visible
-   tree. Hidden rows remain in the model and retain their selection state.
+   expression notifies :code:`PlottingPresenter`, which passes the filter inputs
+   to its tree presenter. This reapplies visibility and expands the tree.
+   Hidden rows retain their selection state.
 #. The widget's :code:`workspaceSelectionChanged` signal reaches
    :code:`PlottingPresenter` through :code:`QtPlottingView`. The presenter obtains
-   selected leaf names and ADS workspace-group counts from the view and asks
-   :code:`PlottingViewStateProvider::plotActionState` for a new
+   selected leaf names and ADS workspace-group counts from its tree presenter
+   and asks :code:`PlottingViewStateProvider::plotActionState` for a new
    :code:`PlotActionState`.
 #. The active-figure monitor causes the same action-state calculation when the
    current matplotlib figure changes. Add-to-existing is enabled only for a

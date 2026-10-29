@@ -9,12 +9,9 @@
 #include "IPlottingView.h"
 #include "ui_PlottingWidget.h"
 
-#include <memory>
 #include <optional>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
-
-class PlottingWorkspaceTreePresenter;
 
 /// Qt implementation of the ISIS Reflectometry plotting tab.
 class MANTIDQT_ISISREFLECTOMETRY_DLL QtPlottingView : public QWidget, public IPlottingView {
@@ -34,12 +31,9 @@ public:
   void setPlotOutputControlsState(PlotOutputControlsState const &state) override;
   /// Apply enabled and checked state for plotting action controls.
   void setPlotActionState(PlotActionState const &state) override;
-  /// Replace the plotting workspace tree contents.
-  void setPlottingWorkspaceTreeItemStates(std::vector<PlottingWorkspaceTreeItemState> const &itemStates) override;
-  /// Return names of selected workspace leaf nodes.
-  std::vector<std::string> selectedPlottingWorkspaceNames() const override;
-  /// Return the number of selected workspace-group rows.
-  size_t selectedPlottingWorkspaceGroupCount() const override;
+  IPlottingWorkspaceTreeView &workspaceTreeView() override;
+  std::string workspaceFilterText() const override;
+  std::vector<ReducedWorkspaceOutputType> workspaceFilterOutputTypes() const override;
   /// Return the selected plot output type.
   std::optional<PlotOutputType> selectedPlotOutputType() const override;
   /// Return the full output selection, including output-specific axis controls.
@@ -58,17 +52,11 @@ public:
   bool confirmPlottingMultipleItems(size_t plotCount) const override;
 
 private:
-  /// Set up controls, tree controller and signal-slot connections.
+  /// Set up controls and signal-slot connections.
   void initLayout();
   /// Enable or disable output selectors.
   void setOutputSelectionControlsEnabled(bool enabled);
-  /// Clear selected tree rows.
-  void clearPlottingWorkspaceTreeSelection();
-  /// Apply the current filter controls to the workspace tree.
-  void filterPlottingWorkspaces();
-
   Ui::PlottingWidget m_ui;
-  std::unique_ptr<PlottingWorkspaceTreePresenter> m_plottingWorkspaceTreePresenter;
   PlottingViewSubscriber *m_notifyee;
 };
 

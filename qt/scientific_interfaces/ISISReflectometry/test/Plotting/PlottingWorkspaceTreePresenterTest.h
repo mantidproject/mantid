@@ -11,7 +11,6 @@
 
 #include <algorithm>
 #include <cxxtest/TestSuite.h>
-#include <set>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
@@ -236,58 +235,4 @@ public:
     TS_ASSERT_EQUALS(presenter.selectedPlottingWorkspaceGroupCount(), 1);
     TS_ASSERT_EQUALS(presenter.selectedPlottingWorkspaceNames(), std::vector<std::string>{"IvsQ_binned_group_1"});
   }
-
-private:
-  class TestTreeView : public IPlottingWorkspaceTreeView {
-  public:
-    void subscribe(PlottingWorkspaceTreeViewSubscriber *subscriber) override { m_subscriber = subscriber; }
-    void setItems(std::vector<PlottingWorkspaceTreeViewItem> const &items) override {
-      displayedItems = items;
-      clearSelection();
-      m_hidden.clear();
-    }
-    void expandAll() override {}
-    void setVisible(PlottingWorkspaceTreePath const &path, bool visible) override {
-      if (visible) {
-        m_hidden.erase(path);
-      } else {
-        m_hidden.insert(path);
-      }
-    }
-    bool isVisible(PlottingWorkspaceTreePath const &path) const override { return m_hidden.count(path) == 0; }
-    void clearSelection() override {
-      auto previous = std::move(m_selected);
-      m_selected.clear();
-      if (m_subscriber && !previous.empty()) {
-        m_subscriber->notifySelectionChanged(previous, {});
-      }
-    }
-    void setSelected(PlottingWorkspaceTreePath const &path, bool selected) override {
-      auto found = std::find(m_selected.begin(), m_selected.end(), path);
-      if (selected == (found != m_selected.end())) {
-        return;
-      }
-      if (selected) {
-        m_selected.emplace_back(path);
-      } else {
-        m_selected.erase(found);
-      }
-      if (m_subscriber) {
-        m_subscriber->notifySelectionChanged(
-            selected ? std::vector<PlottingWorkspaceTreePath>{} : std::vector<PlottingWorkspaceTreePath>{path},
-            selected ? std::vector<PlottingWorkspaceTreePath>{path} : std::vector<PlottingWorkspaceTreePath>{});
-      }
-    }
-    bool isSelected(PlottingWorkspaceTreePath const &path) const override {
-      return std::find(m_selected.cbegin(), m_selected.cend(), path) != m_selected.cend();
-    }
-    std::vector<PlottingWorkspaceTreePath> selectedItems() const override { return m_selected; }
-
-    std::vector<PlottingWorkspaceTreeViewItem> displayedItems;
-
-  private:
-    PlottingWorkspaceTreeViewSubscriber *m_subscriber{nullptr};
-    std::vector<PlottingWorkspaceTreePath> m_selected;
-    std::set<PlottingWorkspaceTreePath> m_hidden;
-  };
 };
