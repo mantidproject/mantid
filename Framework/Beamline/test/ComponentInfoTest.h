@@ -11,6 +11,7 @@
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidBeamline/PixelGridComponent.h"
+#include "MantidBeamline/StructuredGridComponent.h"
 #include "MantidKernel/EmptyValues.h"
 #include <Eigen/Geometry>
 #include <Eigen/StdVector>
@@ -29,6 +30,7 @@ using RotVec = std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Q
 using StrVec = std::vector<std::string>;
 using SideBySideMap = std::map<size_t, Eigen::Vector2d>;
 using PixelGridMap = std::map<size_t, PixelGridComponent>;
+using StructuredGridMap = std::map<size_t, StructuredGridComponent>;
 
 /// Sentinel returned by ComponentInfo::sideBySideViewPosition() to mean "not set"
 Eigen::Vector2d unsetSideBySideViewPos() { return Eigen::Vector2d(Mantid::EMPTY_DBL(), Mantid::EMPTY_DBL()); }
@@ -224,7 +226,8 @@ std::tuple<std::shared_ptr<ComponentInfo>, std::shared_ptr<DetectorInfo>> makeTr
  * nested outside y-pixels, independent of idFillOrder). Returns the
  * ComponentInfo/DetectorInfo pair plus the bank's own component index.
  */
-std::tuple<std::shared_ptr<ComponentInfo>, std::shared_ptr<DetectorInfo>, size_t> makeRectangularBankTree() {
+std::tuple<std::shared_ptr<ComponentInfo>, std::shared_ptr<DetectorInfo>, size_t>
+makeRectangularBankTree(std::shared_ptr<const StructuredGridMap> structuredGridComponents = nullptr) {
   const size_t bankIndex = 8;
   auto bankSortedDetectorIndices = std::make_shared<const std::vector<size_t>>(std::vector<size_t>{0, 1, 2, 3, 4, 5});
   auto bankSortedComponentIndices = std::make_shared<const std::vector<size_t>>(std::vector<size_t>{6, 7, 8});
@@ -261,7 +264,8 @@ std::tuple<std::shared_ptr<ComponentInfo>, std::shared_ptr<DetectorInfo>, size_t
 
   auto componentInfo = std::make_shared<ComponentInfo>(
       bankSortedDetectorIndices, detectorRanges, bankSortedComponentIndices, componentRanges, parentIndices, children,
-      positions, rotations, scaleFactors, componentType, names, sideBySideViewPositions, pixelGridComponents, -1, -1);
+      positions, rotations, scaleFactors, componentType, names, sideBySideViewPositions, pixelGridComponents, -1, -1,
+      std::move(structuredGridComponents));
 
   PosVec detPositions(6);
   RotVec detRotations(6);
@@ -1401,6 +1405,53 @@ public:
     TSM_ASSERT("Bank is Rectangular/Grid", compInfo->isGridDetector(bankIndex));
     TSM_ASSERT("xCol0 is a plain Unstructured assembly", !compInfo->isGridDetector(6));
     TSM_ASSERT("xCol1 is a plain Unstructured assembly", !compInfo->isGridDetector(7));
+  }
+
+  void test_structured_grid_component_default_when_absent() {
+    auto [compInfo, detInfo, bankIndex] = makeRectangularBankTree();
+    TS_ASSERT(!compInfo->isStructuredDetector(bankIndex));
+    TS_ASSERT_EQUALS(compInfo->structuredGridComponent(bankIndex).nX, 0);
+    TS_ASSERT(compInfo->structuredGridComponent(bankIndex).xVertices.empty());
+  }
+
+  void test_structured_grid_component_reads_constructed_value() {
+    StructuredGridComponent bankGrid;
+    bankGrid.nX = 2;
+    bankGrid.nY = 3;
+    bankGrid.idStart = 100;
+    bankGrid.idStep = 1;
+    bankGrid.idStepByRow = 10;
+    bankGrid.idFillByFirstY = true;
+    bankGrid.xVertices = std::vector<double>(12, 1.0);
+    bankGrid.yVertices = std::vector<double>(12, 2.0);
+    auto [compInfo, detInfo, bankIndex] =
+        makeRectangularBankTree(std::make_shared<const StructuredGridMap>(StructuredGridMap{{8, bankGrid}}));
+
+    TS_ASSERT(compInfo->isStructuredDetector(bankIndex));
+    TS_ASSERT(!compInfo->isStructuredDetector(6));
+    const auto &grid = compInfo->structuredGridComponent(bankIndex);
+    TS_ASSERT_EQUALS(grid.nX, 2);
+    TS_ASSERT_EQUALS(grid.nY, 3);
+    TS_ASSERT_EQUALS(grid.idStart, 100);
+    TS_ASSERT_EQUALS(grid.idStep, 1);
+    TS_ASSERT_EQUALS(grid.idStepByRow, 10);
+    TS_ASSERT(grid.idFillByFirstY);
+    TS_ASSERT_EQUALS(grid.xVertices, bankGrid.xVertices);
+    TS_ASSERT_EQUALS(grid.yVertices, bankGrid.yVertices);
+
+    // Clones share the (immutable) structured-grid data.
+    auto const clone = compInfo->cloneWithoutDetectorInfo();
+    TS_ASSERT_EQUALS(&clone->structuredGridComponent(bankIndex), &grid);
+  }
+
+  void test_getMemorySize_counts_structured_grid_vertices() {
+    auto [plainInfo, plainDetInfo, plainBankIndex] = makeRectangularBankTree();
+    StructuredGridComponent bankGrid;
+    bankGrid.xVertices = std::vector<double>(1000, 0.0);
+    bankGrid.yVertices = std::vector<double>(1000, 0.0);
+    auto [compInfo, detInfo, bankIndex] =
+        makeRectangularBankTree(std::make_shared<const StructuredGridMap>(StructuredGridMap{{8, bankGrid}}));
+    TS_ASSERT_LESS_THAN_EQUALS(plainInfo->getMemorySize() + 2000 * sizeof(double), compInfo->getMemorySize());
   }
 
   void test_detector_index_at_xyz() {

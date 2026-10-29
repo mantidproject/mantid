@@ -2405,11 +2405,26 @@ void InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp, co
 void InstrumentDefinitionParser::setComponentLinks(std::shared_ptr<Geometry::Instrument> &instrument,
                                                    Poco::XML::Element *pRootElem, Kernel::ProgressBase *progress,
                                                    const std::string &requestedDate) {
+  setComponentLinks(instrument, pRootElem, instrument->getLogfileCache(), progress, requestedDate);
+}
+
+/** Apply parameters that may be specified in \<component-link\> XML elements, collecting them into a
+ *  given cache rather than into the instrument's own.
+ *
+ *  @param instrument :: Instrument
+ *  @param pRootElem ::  Associated Poco::XML element that may contain \<component-link\> elements
+ *  @param logfileCache :: Cache to add the parameters to, keyed by base component
+ *  @param progress :: Optional progress object for reporting progress to an algorithm
+ *  @param requestedDate :: Optional Date against which to check the validity of an IPF parameter
+ */
+void InstrumentDefinitionParser::setComponentLinks(const std::shared_ptr<const Geometry::Instrument> &instrument,
+                                                   Poco::XML::Element *pRootElem,
+                                                   InstrumentParameterCache &logfileCache,
+                                                   Kernel::ProgressBase *progress, const std::string &requestedDate) {
   // check if any logfile cache units set. As of this writing the only unit to
   // check is if "angle=radian"
-  std::map<std::string, std::string> &units = instrument->getLogfileUnit();
-  std::map<std::string, std::string>::iterator unit_it;
-  unit_it = units.find("angle");
+  const auto &units = instrument->getLogfileUnit();
+  const auto unit_it = units.find("angle");
   if (unit_it != units.end())
     if (unit_it->second == "radian")
       m_angleConvertConst = 180.0 / M_PI;
@@ -2482,9 +2497,9 @@ void InstrumentDefinitionParser::setComponentLinks(std::shared_ptr<Geometry::Ins
             std::dynamic_pointer_cast<const Geometry::Component>(ptr);
         if (sharedComp) { // Not empty Component
           if (sharedComp->isParametrized()) {
-            setLogfile(sharedComp->base(), curElem, instrument->getLogfileCache(), requestedDate);
+            setLogfile(sharedComp->base(), curElem, logfileCache, requestedDate);
           } else {
-            setLogfile(ptr.get(), curElem, instrument->getLogfileCache(), requestedDate);
+            setLogfile(ptr.get(), curElem, logfileCache, requestedDate);
           }
         }
       }

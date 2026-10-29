@@ -154,6 +154,14 @@ void clearParameter(ComponentInfo &self, const std::string &name, const object &
   self.clearParameter(indexOrRoot(self, componentIndex), name);
 }
 
+template <auto Method> std::string readDescription(const ComponentInfo &self, const object &componentIndex) {
+  return (self.*Method)(indexOrRoot(self, componentIndex));
+}
+
+void setDescription(ComponentInfo &self, const std::string &description, const object &componentIndex) {
+  self.setDescription(indexOrRoot(self, componentIndex), description);
+}
+
 dict shapeToComponentIndices(const ComponentInfo &componentInfo) {
   dict result;
   const auto shapeMap = componentInfo.shapeToComponentIndices();
@@ -447,6 +455,47 @@ void export_ComponentInfo() {
            (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
            "Returns the type of the named parameter of the component identified by 'index' "
            "(the root component by default), or an empty string if it is unset.")
+
+      .def("getPositionParameter", &readNamedParameter<&ComponentInfo::getPositionParameter>,
+           (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
+           "Returns the named V3D parameter of the component identified by 'index' "
+           "(the root component by default), or an empty sequence if it is unset.")
+
+      .def("getRotationParameter", &readNamedParameter<&ComponentInfo::getRotationParameter>,
+           (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
+           "Returns the named Quat parameter of the component identified by 'index' "
+           "(the root component by default), or an empty sequence if it is unset.")
+
+      .def("getParameterAsString", &readNamedParameter<&ComponentInfo::getParameterAsString>,
+           (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
+           "Returns the value of the named parameter of the component identified by 'index' "
+           "(the root component by default) as a string, whatever its type, or an empty string if it is unset.")
+
+      .def("getParameterVisible", &readNamedParameter<&ComponentInfo::getParameterVisible>,
+           (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
+           "Returns the visibility attribute of the named parameter of the component identified by 'index' "
+           "(the root component by default), or False if it is unset.")
+
+      .def("getParamDescription", &readNamedParameter<&ComponentInfo::getParamDescription>,
+           (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
+           "Returns the description of the named parameter of the component identified by 'index' "
+           "(the root component by default), or an empty string if it is unset.")
+
+      .def("getParamShortDescription", &readNamedParameter<&ComponentInfo::getParamShortDescription>,
+           (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
+           "Returns the short description (tooltip) of the named parameter of the component identified by "
+           "'index' (the root component by default), or an empty string if it is unset.")
+
+      .def("getDescription", &readDescription<&ComponentInfo::getDescription>, (arg("self"), arg("index") = object()),
+           "Returns the description of the component identified by 'index' (the root component by default).")
+
+      .def("getShortDescription", &readDescription<&ComponentInfo::getShortDescription>,
+           (arg("self"), arg("index") = object()),
+           "Returns the short description (tooltip) of the component identified by 'index' "
+           "(the root component by default).")
+
+      .def("setDescription", &setDescription, (arg("self"), arg("description"), arg("index") = object()),
+           "Sets the description of the component identified by 'index' (the root component by default).")
 
       .def("getFittingParameter", &getFittingParameter,
            (arg("self"), arg("name"), arg("xvalue"), arg("index") = object()),
