@@ -440,6 +440,8 @@ WorkspaceCreator workspaceCreatorFor(PlotOutputType const outputType) {
     return spinAsymmetryWorkspaces;
   case PlotOutputType::Alignment:
     return alignmentWorkspaces;
+  default:
+    break;
   }
   throw std::runtime_error("Unexpected reflectometry plot output type.");
 }

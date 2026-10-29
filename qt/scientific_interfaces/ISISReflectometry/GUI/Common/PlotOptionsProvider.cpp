@@ -23,7 +23,7 @@ bool supportsInstrumentSpecificPlotTypes(std::string const &instrumentName) {
 std::vector<PlotOutputType> PlotOptionsProvider::availableTypes(std::string const &instrumentName) const {
   if (supportsInstrumentSpecificPlotTypes(instrumentName)) {
     return {PlotOutputType::ReflectivityCurve, PlotOutputType::DetectorMap, PlotOutputType::SpinAsymmetry,
-            PlotOutputType::Alignment};
+            PlotOutputType::Alignment, PlotOutputType::ReflectivityAndSpinAsymmetry};
   }
   return {PlotOutputType::ReflectivityCurve};
 }
@@ -43,6 +43,8 @@ PlotOptions PlotOptionsProvider::optionsFor(PlotOutputSelection const &outputSel
     return alignmentPlotOptions(outputSelection.alignmentXAxis, layout);
   case PlotOutputType::ReflectivityCurve:
     return reflectivityCurvePlotOptions(outputType, layout);
+  default:
+    break;
   }
   throw std::runtime_error("Unexpected reflectometry plot output type.");
 }

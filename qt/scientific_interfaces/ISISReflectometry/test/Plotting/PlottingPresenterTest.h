@@ -173,10 +173,12 @@ public:
   void testInstrumentChangedUpdatesAvailablePlotOutputTypes() {
     NiceMock<MockPlottingView> view;
     PlottingPresenter presenter(&view);
-    auto const expected = std::vector<PlotOutputTypeViewItem>{{PlotOutputType::ReflectivityCurve, "Reflectivity Curve"},
-                                                              {PlotOutputType::DetectorMap, "Detector Map"},
-                                                              {PlotOutputType::SpinAsymmetry, "Spin Asymmetry"},
-                                                              {PlotOutputType::Alignment, "Alignment"}};
+    auto const expected = std::vector<PlotOutputTypeViewItem>{
+        {PlotOutputType::ReflectivityCurve, "Reflectivity Curve"},
+        {PlotOutputType::DetectorMap, "Detector Map"},
+        {PlotOutputType::SpinAsymmetry, "Spin Asymmetry"},
+        {PlotOutputType::Alignment, "Alignment"},
+        {PlotOutputType::ReflectivityAndSpinAsymmetry, "Reflectivity + Spin Asymmetry"}};
 
     EXPECT_CALL(view, setAvailablePlotOutputTypes(expected)).Times(1);
 
@@ -872,6 +874,80 @@ public:
     EXPECT_CALL(plotter, plot(testing::_)).Times(0);
 
     presenter.notifyPlotOverplotClicked();
+  }
+
+  void testCombinedOutputSubmitsManualReflectivityAndSpinAsymmetryRequestsInOrder() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider optionsProvider;
+    NiceMock<MockPlottingModel> model;
+    PlottingPresenter presenter(&view, plotter, optionsProvider, model);
+    auto const workspaces = std::vector<std::string>{"IvsQ_binned_12345"};
+    populatePlottingWorkspaceTreeWithBinnedWorkspace(presenter, view, workspaces.front());
+    view.selectWorkspaces(workspaces);
+    auto const selection = PlotOutputSelection{PlotOutputType::ReflectivityAndSpinAsymmetry};
+    EXPECT_CALL(view, selectedPlotOutputSelection()).WillOnce(Return(selection));
+    ON_CALL(view, shouldAddToExistingPlot()).WillByDefault(Return(true));
+    EXPECT_CALL(model, workspacesForPlotting(plottingWorkspaces(workspaces),
+                                             PlotOutputSelection{PlotOutputType::ReflectivityCurve}))
+        .WillOnce(Return(workspaces));
+    EXPECT_CALL(model, workspacesForPlotting(plottingWorkspaces(workspaces),
+                                             PlotOutputSelection{PlotOutputType::SpinAsymmetry}))
+        .WillOnce(Return(std::vector<std::string>{"spin_asymmetry"}));
+    testing::InSequence sequence;
+    EXPECT_CALL(plotter, plot(PlotRequest{workspaces, reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve,
+                                                                                   PlotLayout::Overplot)}));
+    EXPECT_CALL(
+        plotter,
+        plot(PlotRequest{
+            {"spin_asymmetry"}, spinAsymmetryPlotOptions(PlotLayout::Tiled), nullptr, true, true, true, false}));
+
+    presenter.notifyPlotIndividualClicked();
+  }
+
+  void testCombinedOutputDoesNotPlotWhenSpinAsymmetryIsUnavailable() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider optionsProvider;
+    NiceMock<MockPlottingModel> model;
+    PlottingPresenter presenter(&view, plotter, optionsProvider, model);
+    auto const workspaces = std::vector<std::string>{"IvsQ_binned_12345"};
+    populatePlottingWorkspaceTreeWithBinnedWorkspace(presenter, view, workspaces.front());
+    view.selectWorkspaces(workspaces);
+    auto const selection = PlotOutputSelection{PlotOutputType::ReflectivityAndSpinAsymmetry};
+    EXPECT_CALL(view, selectedPlotOutputSelection()).WillOnce(Return(selection));
+    EXPECT_CALL(model, workspacesForPlotting(plottingWorkspaces(workspaces),
+                                             PlotOutputSelection{PlotOutputType::ReflectivityCurve}))
+        .WillOnce(Return(workspaces));
+    EXPECT_CALL(model, workspacesForPlotting(plottingWorkspaces(workspaces),
+                                             PlotOutputSelection{PlotOutputType::SpinAsymmetry}))
+        .WillOnce(Return(std::vector<std::string>{}));
+    EXPECT_CALL(plotter, plot(testing::_)).Times(0);
+
+    presenter.notifyPlotIndividualClicked();
+  }
+
+  void testCombinedOutputWarnsForAllComponentsAndCancelsBeforePlotting() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider optionsProvider;
+    NiceMock<MockPlottingModel> model;
+    PlottingPresenter presenter(&view, plotter, optionsProvider, model);
+    auto const workspaces = std::vector<std::string>{"IvsQ_binned_12345"};
+    populatePlottingWorkspaceTreeWithBinnedWorkspace(presenter, view, workspaces.front());
+    view.selectWorkspaces(workspaces);
+    EXPECT_CALL(view, selectedPlotOutputSelection())
+        .WillOnce(Return(PlotOutputSelection{PlotOutputType::ReflectivityAndSpinAsymmetry}));
+    EXPECT_CALL(model, workspacesForPlotting(plottingWorkspaces(workspaces),
+                                             PlotOutputSelection{PlotOutputType::ReflectivityCurve}))
+        .WillOnce(Return(std::vector<std::string>{"up_up", "up_down", "down_up", "down_down"}));
+    EXPECT_CALL(model, workspacesForPlotting(plottingWorkspaces(workspaces),
+                                             PlotOutputSelection{PlotOutputType::SpinAsymmetry}))
+        .WillOnce(Return(std::vector<std::string>{"spin_asymmetry"}));
+    EXPECT_CALL(view, confirmPlottingMultipleItems(5)).WillOnce(Return(false));
+    EXPECT_CALL(plotter, plot(testing::_)).Times(0);
+
+    presenter.notifyPlotIndividualClicked();
   }
 
 private:

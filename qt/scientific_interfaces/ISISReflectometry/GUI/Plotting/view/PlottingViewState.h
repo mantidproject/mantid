@@ -26,6 +26,7 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL PlotOutputControlsState {
   bool plotPropertiesVisible{false};
   bool detectorMapControlsVisible{false};
   bool alignmentControlsVisible{false};
+  bool fixedLayout{false};
 };
 
 /// Enabled and checked state for plotting action controls.

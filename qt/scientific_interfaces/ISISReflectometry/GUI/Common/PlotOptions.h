@@ -17,7 +17,7 @@ class QWidget;
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 /// The scientific output type selected in the plotting tab.
-enum class PlotOutputType { ReflectivityCurve, DetectorMap, SpinAsymmetry, Alignment };
+enum class PlotOutputType { ReflectivityCurve, DetectorMap, SpinAsymmetry, Alignment, ReflectivityAndSpinAsymmetry };
 
 /// The matplotlib rendering style used for the selected output.
 enum class PlotStyle { Line, Colorfill };

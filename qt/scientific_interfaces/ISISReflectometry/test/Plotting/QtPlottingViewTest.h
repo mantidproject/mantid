@@ -33,6 +33,27 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
 class QtPlottingViewTest : public CxxTest::TestSuite, private PlottingWorkspaceTreeTestHelpers {
 public:
+  void testCombinedOutputShowsOnlyPlotAndRestoresLayoutControlsWhenChanged() {
+    QtPlottingView view;
+    PlottingPresenter presenter(&view);
+    presenter.notifyInstrumentChanged("POLREF");
+    auto *selector = view.findChild<QComboBox *>("plotPreset");
+    selector->setCurrentIndex(selector->findData(static_cast<int>(PlotOutputType::ReflectivityAndSpinAsymmetry)));
+
+    TS_ASSERT_EQUALS(selector->currentText().toStdString(), "Reflectivity + Spin Asymmetry");
+    TS_ASSERT(!view.findChild<QPushButton *>("plotIndividual")->isHidden());
+    for (auto const *name : {"plotOverplot", "plotTiled", "addToExistingPlot", "plotTiledVertically",
+                             "shareAxesWhenTiledLabel", "shareXAxisWhenTiled", "shareYAxisWhenTiled"}) {
+      TS_ASSERT(view.findChild<QWidget *>(name)->isHidden());
+    }
+
+    selector->setCurrentIndex(selector->findData(static_cast<int>(PlotOutputType::SpinAsymmetry)));
+    for (auto const *name : {"plotOverplot", "plotTiled", "addToExistingPlot", "plotTiledVertically",
+                             "shareAxesWhenTiledLabel", "shareXAxisWhenTiled", "shareYAxisWhenTiled"}) {
+      TS_ASSERT(!view.findChild<QWidget *>(name)->isHidden());
+    }
+  }
+
   void testNoPlotOutputTypesAreAvailableBeforePresenterSetsThem() {
     QtPlottingView view;
     auto plotPreset = view.findChild<QComboBox *>("plotPreset");
@@ -832,6 +853,9 @@ private:
         break;
       case PlotOutputType::Alignment:
         items.push_back({outputType, "Alignment"});
+        break;
+      case PlotOutputType::ReflectivityAndSpinAsymmetry:
+        items.push_back({outputType, "Reflectivity + Spin Asymmetry"});
         break;
       }
     }

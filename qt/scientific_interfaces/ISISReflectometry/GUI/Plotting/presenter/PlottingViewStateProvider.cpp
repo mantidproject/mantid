@@ -152,7 +152,7 @@ PlottingViewStateProvider::outputTypeViewItems(std::vector<PlotOutputType> const
 PlotOutputControlsState PlottingViewStateProvider::outputControlsState(PlotOutputType outputType) const {
   auto const &plotProperties = plotOutputTypeProperties(outputType);
   return {plotProperties.showsPlotProperties(), plotProperties.showsDetectorMapProperties(),
-          plotProperties.showsAlignmentProperties()};
+          plotProperties.showsAlignmentProperties(), plotProperties.plotRequests().size() > 1};
 }
 
 PlotActionState PlottingViewStateProvider::plotActionState(bool outputSelectionEnabled,
@@ -162,6 +162,9 @@ PlotActionState PlottingViewStateProvider::plotActionState(bool outputSelectionE
                                                            bool hasActiveReflectometryFigure,
                                                            bool activePlotOverplotCompatible) const {
   auto const &plotProperties = plotOutputTypeProperties(outputType);
+  if (plotProperties.plotRequests().size() > 1) {
+    return {.plotIndividualEnabled = outputSelectionEnabled && hasSelectedItems(selectedPlottingWorkspaceCount)};
+  }
   auto const addToExistingEnabled =
       outputSelectionEnabled && hasActiveReflectometryFigure && plotProperties.supportsAddToExistingPlot();
   auto const addToExistingChecked = addToExistingPlot && addToExistingEnabled;

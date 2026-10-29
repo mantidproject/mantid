@@ -215,6 +215,23 @@ Its responsibilities are to:
 An individual layout is submitted as one request per workspace. Overplot and
 tiled layouts are submitted as one request containing all selected workspaces.
 
+Each :code:`PlotOutputTypeProperties` owns an ordered vector of
+:code:`PlotRequestDefinition` entries. Ordinary outputs have one entry with no
+settings override, so they use the current view controls. Combined outputs
+declare their component output types and fixed :code:`PlotRequestSettings`.
+The presenter resolves every entry through the existing model and options
+provider, expands Individual layouts, and prepares all requests before asking
+for confirmation or rendering. If any component has no workspaces, nothing is
+plotted. The five-item confirmation threshold counts workspaces across all
+components. Requests are then submitted in order through the unchanged plotter.
+
+:code:`ReflectivityAndSpinAsymmetry` reuses the spin-asymmetry selection
+properties and defines two entries: a reflectivity overplot in a new figure,
+then tiled spin asymmetry added with vertical tiling and shared X axes. These
+are the same requests as the corresponding manual actions. The view exposes
+only Plot for outputs with multiple definitions. Neither the presenter request
+loop nor the view-state calculation needs to identify specific combinations.
+
 :code:`presenter/PlottingWorkspaceTreePresenter.h/.cpp`
 #######################################################
 
