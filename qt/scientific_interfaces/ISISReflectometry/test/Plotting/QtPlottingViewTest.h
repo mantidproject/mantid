@@ -7,7 +7,6 @@
 #pragma once
 
 #include "../../../ISISReflectometry/GUI/Plotting/view/QtPlottingView.h"
-#include "../../../ISISReflectometry/GUI/Plotting/view/QtPlottingWorkspaceTreeAdapterView.h"
 #include "../../../ISISReflectometry/GUI/Plotting/view/QtPlottingWorkspaceTreeView.h"
 #include "PlottingWorkspaceTreeTestHelpers.h"
 
@@ -229,8 +228,7 @@ public:
 
   void testPlottingWorkspaceTreeShowsPreparedColumnLabels() {
     QtPlottingWorkspaceTreeView tree;
-    QtPlottingWorkspaceTreeAdapterView view(&tree);
-    view.setItems({{"item type label", "output type label", "item label", {}}});
+    tree.setItems({{"item type label", "output type label", "item label", {}}});
 
     TS_ASSERT_EQUALS(tree.model()->index(0, 0).data().toString().toStdString(), "item type label");
     TS_ASSERT_EQUALS(tree.model()->index(0, 1).data().toString().toStdString(), "output type label");
@@ -255,6 +253,8 @@ public:
 
   void testSelectingGroupSelectsChildRunsAndWorkspaces() {
     QtPlottingView view;
+    TestPlottingViewSubscriber subscriber;
+    view.subscribe(&subscriber);
     view.findChild<QCheckBox *>("filterIvsQ")->setChecked(true);
     view.setPlottingWorkspaceTreeItemStates(plottingWorkspaceTreeItemStates());
     auto tree = plottingWorkspaceTree(view);
@@ -267,6 +267,7 @@ public:
     TS_ASSERT(tree->selectionModel()->isSelected(group));
     TS_ASSERT(tree->selectionModel()->isSelected(run));
     TS_ASSERT(tree->selectionModel()->isSelected(workspace));
+    TS_ASSERT(subscriber.workspaceSelectionChanged > 0);
   }
 
   void testSelectingRunSelectsChildWorkspaces() {
