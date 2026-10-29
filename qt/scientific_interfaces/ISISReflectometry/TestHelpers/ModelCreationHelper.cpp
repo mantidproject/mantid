@@ -104,8 +104,6 @@ Group makeGroupWithTwoRowsWithNonstandardNames() {
 
 Group makeGroupWithTwoRowsWithMixedQResolutions() {
   auto group1 = Group("Test group 1");
-  group1.appendRow(std::nullopt);
-  group1.appendRow(makeRow());
   auto row3 = Row({"22222"}, 0.5, TransmissionRunPair({}), RangeInQ(0.5, 0.015, 0.9), std::nullopt,
                   ReductionOptionsMap(), ReductionWorkspaces({"22222"}, TransmissionRunPair({})));
   row3.setOutputNames({{"IvsLam_2222"}, {"IvsQ_2222"}, {"IvsQBinned_2222"}});
