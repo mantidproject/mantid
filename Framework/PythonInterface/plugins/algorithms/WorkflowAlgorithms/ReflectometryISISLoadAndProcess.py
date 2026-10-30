@@ -811,10 +811,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         if alg.getProperty("TimeInterval").isDefault:
             return
         workspace = AnalysisDataService.retrieve(workspace_name)
-        if isinstance(workspace, WorkspaceGroup):
-            run = workspace[0].run()
-        else:
-            run = workspace.run()
+        run = workspace[0].run() if workspace.isGroup() else workspace.run()
         alg.setProperty("StartTime", str(run.startTime()))
         alg.setProperty("StopTime", str(run.endTime()))
 
@@ -842,7 +839,6 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             # We've sliced a group into one group for each slice. This is a list of their names.
             return slice_output
         # We've sliced a matrix into a group.
-        workspace = slice_output
         return [sliced_workspace_name]
 
     def _getSlicedWorkspaceGroupName(self, workspace):
