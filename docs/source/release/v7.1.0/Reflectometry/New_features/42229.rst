@@ -1,0 +1,1 @@
+- Filtering has been added to the ``Plotting`` tab of the ISIS Reflectometry interface to aid comprehension of the workspace tree.
