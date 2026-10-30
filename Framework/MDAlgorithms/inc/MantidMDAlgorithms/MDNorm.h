@@ -39,6 +39,7 @@ private:
   std::string QDimensionNameQSample(int i);
   std::map<std::string, std::string> getBinParameters();
   void createBackgroundNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
+  void createMonoSCDBackgroundNormalizationWS();
 
   /// Bin(MD) input MDE workspace
   DataObjects::MDHistoWorkspace_sptr binInputWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
@@ -58,6 +59,10 @@ private:
   /// Bin(MD) MonoSCDNormalizationWorkspace (monochromatic single crystal diffraction)
   DataObjects::MDHistoWorkspace_sptr
   binMonoSCDNormalizationWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
+
+  /// Bin(MD) mono-SCD input Background workspace
+  DataObjects::MDHistoWorkspace_sptr
+  binMonoSCDBackgroundWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
 
   /// build symmetry matrix
   Mantid::Kernel::DblMatrix buildSymmetryMatrix(const Geometry::SymmetryOperation &so);
