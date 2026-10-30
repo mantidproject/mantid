@@ -39,6 +39,11 @@ heading-offset: 1
 - Inside of your mantid source directory run `cmake --preset=osx`
   - Alternatively if you don't want to have your build folder in your mantid source then pass the `-B` argument, overriding the preset, to cmake: `cmake {PATH_TO_SOURCE} --preset=osx -B {BUILD_DIR}`
 
+```{tip}
+On some macOS devices, the `osx` preset still allows some amount of compiler optimisation, which can make debugging difficult.
+In order build mantid without these optimisations, you may need to configure CMake with `--preset=osx-debug-max`.
+```
+
 ## How to build
 
 - Navigate to the build directory.
