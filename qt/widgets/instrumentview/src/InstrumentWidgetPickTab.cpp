@@ -1133,7 +1133,7 @@ QString ComponentInfoController::displayDetectorInfo(size_t index) {
  * choppers, etc).
  * @param compID :: A component ID for a component to display.
  */
-QString ComponentInfoController::displayNonDetectorInfo(Mantid::Geometry::ComponentID compID) {
+QString ComponentInfoController::displayNonDetectorInfo(Mantid::Geometry::IComponent const *compID) {
   const auto &actor = m_instrWidget->getInstrumentActor();
   const auto &componentInfo = actor.componentInfo();
   auto component = componentInfo.indexOf(compID);

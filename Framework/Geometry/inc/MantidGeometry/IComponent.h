@@ -33,6 +33,7 @@ class ParameterMap;
 
 /// Define a type for a unique component identifier.
 using ComponentID = IComponent *;
+using ComponentID_const = IComponent const *;
 
 /** @class IComponent
 @brief base class for Geometric IComponent

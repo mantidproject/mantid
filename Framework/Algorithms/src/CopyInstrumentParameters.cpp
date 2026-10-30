@@ -11,6 +11,7 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 
 #include <algorithm>
+#include <unordered_map>
 
 namespace Mantid::Algorithms {
 
@@ -47,41 +48,55 @@ void CopyInstrumentParameters::exec() {
   this->checkProperties();
 
   if (m_different_instrument_sp) {
-    Instrument_const_sptr inst1 = m_givingWorkspace->getInstrument();
-    Instrument_const_sptr inst2 = m_receivingWorkspace->getInstrument();
     auto Name1 = m_givingWorkspace->getInstrumentName();
     auto Name2 = m_receivingWorkspace->getInstrumentName();
+    const auto &componentInfoGiv = m_givingWorkspace->componentInfo();
+    const auto &detectorInfoGiv = m_givingWorkspace->detectorInfo();
+    const auto &componentInfoRec = m_receivingWorkspace->componentInfo();
+    const auto &detectorInfoRec = m_receivingWorkspace->detectorInfo();
+
+    // The receiving components that are not detectors, by full name, built when first needed
+    std::unordered_map<std::string, size_t> nonDetectorsRec;
+    auto const nonDetectorRec = [&](std::string const &fullName) {
+      if (nonDetectorsRec.empty()) {
+        for (size_t index = 0; index < componentInfoRec.size(); ++index) {
+          if (!componentInfoRec.isDetector(index)) {
+            nonDetectorsRec.try_emplace(componentInfoRec.fullName(index), index);
+          }
+        }
+      }
+      auto const found = nonDetectorsRec.find(fullName);
+      return found != nonDetectorsRec.end() ? found->second : ComponentInfo::invalidIndex;
+    };
 
     Geometry::ParameterMap targMap;
 
     // Get legacy ParameterMap, i.e., including masking, positions, rotations
     // stored in map (instead of DetectorInfo).
-    const auto &givParams = inst1->makeLegacyParameterMap();
+    const auto &givParams = m_givingWorkspace->getInstrument()->makeLegacyParameterMap();
     for (const auto &item : givParams->entries()) {
-      IComponent *oldComponent = item.first;
+      const size_t oldIndex = item.first;
 
-      const Geometry::IComponent *targComp = nullptr;
-
-      auto *pOldDet = dynamic_cast<IDetector *>(oldComponent);
-      if (pOldDet) {
-        detid_t detID = pOldDet->getID();
-        targComp = inst2->getBaseDetector(detID);
-        if (!targComp) {
+      size_t targIndex = ComponentInfo::invalidIndex;
+      if (componentInfoGiv.isDetector(oldIndex)) {
+        const detid_t detID = detectorInfoGiv.detectorIDs()[oldIndex];
+        try {
+          targIndex = detectorInfoRec.indexOf(detID);
+        } catch (const std::out_of_range &) {
           g_log.warning() << "Target instrument does not have detector with ID " << detID << '\n';
           continue;
         }
       } else {
-        std::string source_name = oldComponent->getFullName();
+        std::string source_name = componentInfoGiv.fullName(oldIndex);
         size_t nameStart = source_name.find(Name1);
         std::string targ_name = source_name.replace(nameStart, nameStart + Name1.size(), Name2);
-        // existingComponents.
-        auto spTargComp = inst2->getComponentByName(targ_name);
-        if (!spTargComp) {
+        targIndex = nonDetectorRec(targ_name);
+        if (targIndex == ComponentInfo::invalidIndex) {
           g_log.warning() << "Target instrument does not have component with full name: " << targ_name << '\n';
           continue;
         }
-        targComp = spTargComp->getBaseComponent();
       }
+      const auto *targComp = componentInfoRec.componentID(targIndex);
 
       // create shared pointer to independent copy of original parameter. Would
       // be easy and nice to have cow_pointer instead of shared_ptr in the

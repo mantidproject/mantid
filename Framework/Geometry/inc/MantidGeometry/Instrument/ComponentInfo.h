@@ -198,6 +198,12 @@ public:
   std::set<std::string> getParameterNames(const size_t componentIndex, bool recursive = true) const;
   /// All parameters on one component, non-recursive, ordered by name.
   const ParameterInfo::ComponentParameters &parameters(const size_t componentIndex) const;
+  /// The named parameter, of the given type if one is given, or null if the component has none.
+  std::shared_ptr<const Parameter> parameter(const size_t componentIndex, const std::string &name,
+                                             const std::string &type = "", bool recursive = true) const;
+  /// The first parameter of the given type, or null if the component has none.
+  std::shared_ptr<const Parameter> parameterByType(const size_t componentIndex, const std::string &type,
+                                                   bool recursive = true) const;
   std::vector<double> getNumberParameter(const size_t componentIndex, const std::string &name,
                                          bool recursive = true) const;
   std::vector<int> getIntParameter(const size_t componentIndex, const std::string &name, bool recursive = true) const;

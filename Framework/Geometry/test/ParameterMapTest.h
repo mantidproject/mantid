@@ -9,6 +9,7 @@
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -25,6 +26,7 @@
 
 using Mantid::Geometry::IComponent;
 using Mantid::Geometry::IComponent_sptr;
+using Mantid::Geometry::Instrument;
 using Mantid::Geometry::Instrument_sptr;
 using Mantid::Geometry::InstrumentVisitor;
 using Mantid::Geometry::Parameter_sptr;
@@ -489,6 +491,76 @@ public:
     TS_ASSERT(parameter);
     if (parameter)
       TS_ASSERT_EQUALS(parameter->value<int>(), 2);
+  }
+
+  void test_attached_map_writes_by_component_at_its_component_index() {
+    ParameterMap pmap;
+    auto [componentInfo, detectorInfo] = InstrumentVisitor::makeWrappers(*m_testInstrument, &pmap);
+    const auto comp = m_testInstrument->getChild(0);
+    pmap.addInt(comp.get(), "P", 3);
+
+    const auto parameter = componentInfo->parameter(componentInfo->indexOf(comp->getComponentID()), "P", "", false);
+    TS_ASSERT(parameter);
+    if (parameter)
+      TS_ASSERT_EQUALS(parameter->value<int>(), 3);
+  }
+
+  void test_attached_map_rejects_components_of_another_instrument() {
+    // A copy of an instrument, such as the physical instrument, has components of its own
+    ParameterMap pmap;
+    auto [componentInfo, detectorInfo] = InstrumentVisitor::makeWrappers(*m_testInstrument, &pmap);
+    const Instrument copy(*m_testInstrument);
+    const auto comp = m_testInstrument->getChild(0);
+    const auto copyComp = copy.getChild(0);
+    pmap.addInt(comp.get(), "P", 1);
+
+    TS_ASSERT_THROWS(pmap.addInt(copyComp.get(), "P", 2), const std::invalid_argument &);
+    TS_ASSERT(!pmap.get(copyComp.get(), "P"));
+    TS_ASSERT_EQUALS(pmap.get(comp.get(), "P")->value<int>(), 1);
+  }
+
+  void test_entries_of_an_attached_map_give_component_indices() {
+    ParameterMap pmap;
+    auto [componentInfo, detectorInfo] = InstrumentVisitor::makeWrappers(*m_testInstrument, &pmap);
+    const auto comp = m_testInstrument->getChild(0);
+    pmap.addInt(comp.get(), "P", 3);
+
+    const auto entries = pmap.entries();
+    TS_ASSERT_EQUALS(entries.size(), 1);
+    TS_ASSERT_EQUALS(entries[0].first, componentInfo->indexOf(comp->getComponentID()));
+    TS_ASSERT_EQUALS(entries[0].second->value<int>(), 3);
+  }
+
+  void test_entries_of_a_detached_map_throw() {
+    ParameterMap pmap;
+    pmap.addInt(m_testInstrument->getChild(0).get(), "P", 3);
+
+    TS_ASSERT_THROWS(pmap.entries(), const std::logic_error &);
+  }
+
+  void test_map_attached_from_cached_beamline_shares_its_index_domain() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    instrument->parseTreeAndCacheBeamline();
+    ParameterMap pmap;
+    // An empty map takes a copy of the cached beamline rather than walking the tree
+    auto [componentInfo, detectorInfo] = instrument->makeBeamline(pmap);
+    const auto comp = instrument->getChild(0);
+    pmap.addInt(comp.get(), "P", 4);
+
+    const auto parameter = componentInfo->parameter(componentInfo->indexOf(comp->getComponentID()), "P", "", false);
+    TS_ASSERT(parameter);
+    if (parameter)
+      TS_ASSERT_EQUALS(parameter->value<int>(), 4);
+  }
+
+  void test_asString_names_components_of_an_attached_map() {
+    auto pmap = std::make_shared<ParameterMap>();
+    const auto comp = m_testInstrument->getChild(0);
+    pmap->addInt(comp.get(), "P", 5);
+    const Instrument parametrized(m_testInstrument, pmap);
+    pmap->setInstrument(m_testInstrument.get());
+
+    TS_ASSERT_EQUALS(pmap->asString(), comp->getFullName() + ";int;P;5;visible:true|");
   }
 
   void test_lookup_via_type_returns_null_if_fails() {

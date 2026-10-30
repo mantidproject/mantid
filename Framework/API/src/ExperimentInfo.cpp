@@ -430,10 +430,7 @@ void ExperimentInfo::populateInstrumentParameters() {
   // positions.
   for (const auto &item : paramMap.entries()) {
     if (isScaleParameter(item.second->name())) {
-      const auto compIndex = compInfo.indexOfOrInvalid(item.first);
-      if (compIndex != Geometry::ComponentInfo::invalidIndex) {
-        adjustPositionsFromScaleFactor(compInfo, compIndex, item.second->name(), item.second->value<double>());
-      }
+      adjustPositionsFromScaleFactor(compInfo, item.first, item.second->name(), item.second->value<double>());
     }
   }
   // paramMapForPosAndRot goes out of scope, dropping all position and rotation
@@ -555,7 +552,8 @@ Kernel::Property *ExperimentInfo::getLog(const std::string &log) const {
   }
   // If the instrument has a parameter with that name then take the value as a
   // log name
-  const std::string logName = constInstrumentParameters().getString(sptr_instrument.get(), log);
+  const auto &compInfo = componentInfo();
+  const std::string logName = compInfo.getParameterAsString(compInfo.root(), log, false);
   if (logName.empty()) {
     throw std::invalid_argument("ExperimentInfo::getLog - No instrument parameter named \"" + log +
                                 "\". Cannot access full log name");
@@ -580,7 +578,8 @@ double ExperimentInfo::getLogAsSingleValue(const std::string &log) const {
   }
   // If the instrument has a parameter with that name then take the value as a
   // log name
-  const std::string logName = constInstrumentParameters().getString(sptr_instrument.get(), log);
+  const auto &compInfo = componentInfo();
+  const std::string logName = compInfo.getParameterAsString(compInfo.root(), log, false);
   if (logName.empty()) {
     throw std::invalid_argument("ExperimentInfo::getLog - No instrument parameter named \"" + log +
                                 "\". Cannot access full log name");
@@ -627,9 +626,8 @@ Kernel::DeltaEMode::Type ExperimentInfo::getEMode() const {
   std::string emodeStr;
   if (run().hasProperty(emodeTag)) {
     emodeStr = run().getPropertyValueAsType<std::string>(emodeTag);
-  } else if (sptr_instrument && constInstrumentParameters().contains(sptr_instrument.get(), emodeTag)) {
-    Geometry::Parameter_sptr param = constInstrumentParameters().get(sptr_instrument.get(), emodeTag);
-    emodeStr = param->asString();
+  } else if (sptr_instrument && componentInfo().hasParameter(componentInfo().root(), emodeTag, false)) {
+    emodeStr = componentInfo().getParameterAsString(componentInfo().root(), emodeTag, false);
   } else {
     return Kernel::DeltaEMode::Elastic;
   }
@@ -727,9 +725,14 @@ double ExperimentInfo::getEFixedGivenEMode(const std::shared_ptr<const Geometry:
 
 void ExperimentInfo::setEFixed(const detid_t detID, const double value) {
   populateIfNotLoaded();
-  IDetector_const_sptr det = getInstrument()->getDetector(detID);
-  Geometry::ParameterMap &pmap = instrumentParameters();
-  pmap.addDouble(det.get(), "Efixed", value);
+  size_t detIndex;
+  try {
+    detIndex = detectorInfo().indexOf(detID);
+  } catch (const std::out_of_range &) {
+    throw Kernel::Exception::NotFoundError("Instrument: Detector with ID " + std::to_string(detID) + " not found.", "");
+  }
+  // Detector indices are also component indices
+  mutableComponentInfo().addDouble(detIndex, "Efixed", value);
 }
 
 /** Return workspace start date as an ISO 8601 string. If this info not stored
@@ -866,6 +869,7 @@ SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
 }
 
 const Geometry::ComponentInfo &ExperimentInfo::componentInfo() const {
+  populateIfNotLoaded();
   if (!m_componentInfo) {
     throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
   }
@@ -873,6 +877,7 @@ const Geometry::ComponentInfo &ExperimentInfo::componentInfo() const {
 }
 
 ComponentInfo &ExperimentInfo::mutableComponentInfo() {
+  populateIfNotLoaded();
   if (!m_componentInfo) {
     throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
   }
@@ -898,6 +903,7 @@ Geometry::ComponentInfo const &ExperimentInfo::baseComponentInfo() const {
 }
 
 Geometry::InstrumentMetadata const &ExperimentInfo::instrumentMetadata() const {
+  populateIfNotLoaded();
   if (!m_instrumentMetadata) {
     throw std::runtime_error("Cannot return reference to NULL InstrumentMetadata");
   }

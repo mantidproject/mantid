@@ -716,30 +716,30 @@ template <class T>
 void ComponentInfo::addTypedParameter(const size_t componentIndex, const std::string &type, const std::string &name,
                                       const T &value, const std::string *const pDescription,
                                       const std::string &pVisible) {
-  auto parameter = ParameterFactory::create(type, name, pVisible);
-  auto typedParameter = std::dynamic_pointer_cast<ParameterType<T>>(parameter);
+  auto param = ParameterFactory::create(type, name, pVisible);
+  auto typedParameter = std::dynamic_pointer_cast<ParameterType<T>>(param);
   if (!typedParameter) {
     throw std::invalid_argument("ComponentInfo: parameter type '" + type + "' does not match the value supplied for '" +
                                 name + "'");
   }
   typedParameter->setValue(value);
   if (pDescription) {
-    parameter->setDescription(*pDescription);
+    param->setDescription(*pDescription);
   }
-  mutableParameterInfo().add(componentIndex, parameter);
+  mutableParameterInfo().add(componentIndex, param);
 }
 
 void ComponentInfo::addParameter(const size_t componentIndex, const std::string &type, const std::string &name,
                                  const std::string &value, const std::string *const pDescription,
                                  const std::string &pVisible) {
-  auto parameter = ParameterFactory::create(type, name, pVisible);
+  auto param = ParameterFactory::create(type, name, pVisible);
   // fromString rather than setValue: the value arrives already serialised, and the concrete
   // parameter type knows how to parse its own form.
-  parameter->fromString(value);
+  param->fromString(value);
   if (pDescription) {
-    parameter->setDescription(*pDescription);
+    param->setDescription(*pDescription);
   }
-  mutableParameterInfo().add(componentIndex, parameter);
+  mutableParameterInfo().add(componentIndex, param);
 }
 
 void ComponentInfo::addDouble(const size_t componentIndex, const std::string &name, double value,
@@ -775,12 +775,12 @@ void ComponentInfo::addQuat(const size_t componentIndex, const std::string &name
 void ComponentInfo::addFittingParameter(const size_t componentIndex, const std::string &name,
                                         const std::string &fittingFunction, const std::string &value,
                                         const std::string *const pDescription, const std::string &pVisible) {
-  auto parameter = ParameterFactory::create("fitting", name, pVisible);
-  parameter->fromString(value);
+  auto param = ParameterFactory::create("fitting", name, pVisible);
+  param->fromString(value);
   if (pDescription) {
-    parameter->setDescription(*pDescription);
+    param->setDescription(*pDescription);
   }
-  mutableParameterInfo().addFittingParameter(componentIndex, parameter, fittingFunction);
+  mutableParameterInfo().addFittingParameter(componentIndex, param, fittingFunction);
 }
 
 const ParameterInfo::LogfileParameters &ComponentInfo::logfileParameters() const {
@@ -809,6 +809,24 @@ void ComponentInfo::clearParameters() {
 const ParameterInfo::ComponentParameters &ComponentInfo::parameters(const size_t componentIndex) const {
   static ParameterInfo::ComponentParameters const empty;
   return m_parameterInfo ? m_parameterInfo->parameters(componentIndex) : empty;
+}
+
+std::shared_ptr<const Parameter> ComponentInfo::parameter(const size_t componentIndex, const std::string &name,
+                                                          const std::string &type, bool recursive) const {
+  if (!m_parameterInfo) {
+    return nullptr;
+  }
+  return recursive ? m_parameterInfo->getRecursive(*this, componentIndex, name, type)
+                   : m_parameterInfo->get(componentIndex, name, type);
+}
+
+std::shared_ptr<const Parameter> ComponentInfo::parameterByType(const size_t componentIndex, const std::string &type,
+                                                                bool recursive) const {
+  if (!m_parameterInfo) {
+    return nullptr;
+  }
+  return recursive ? m_parameterInfo->getRecursiveByType(*this, componentIndex, type)
+                   : m_parameterInfo->getByType(componentIndex, type);
 }
 
 std::vector<double> ComponentInfo::getNumberParameter(const size_t componentIndex, const std::string &name,
@@ -843,31 +861,31 @@ std::vector<Kernel::Quat> ComponentInfo::getRotationParameter(const size_t compo
 
 std::string ComponentInfo::getParameterAsString(const size_t componentIndex, const std::string &name,
                                                 bool recursive) const {
-  auto const parameter = findParameter(componentIndex, name, recursive);
-  return parameter ? parameter->asString() : std::string();
+  auto const param = findParameter(componentIndex, name, recursive);
+  return param ? param->asString() : std::string();
 }
 
 bool ComponentInfo::getParameterVisible(const size_t componentIndex, const std::string &name, bool recursive) const {
-  auto const parameter = findParameter(componentIndex, name, recursive);
-  return parameter && parameter->visible();
+  auto const param = findParameter(componentIndex, name, recursive);
+  return param && param->visible();
 }
 
 std::string ComponentInfo::getParameterType(const size_t componentIndex, const std::string &name,
                                             bool recursive) const {
-  auto const parameter = findParameter(componentIndex, name, recursive);
-  return parameter ? std::string(parameter->type()) : std::string();
+  auto const param = findParameter(componentIndex, name, recursive);
+  return param ? std::string(param->type()) : std::string();
 }
 
 std::string ComponentInfo::getParamDescription(const size_t componentIndex, const std::string &name,
                                                bool recursive) const {
-  auto const parameter = findParameter(componentIndex, name, recursive);
-  return parameter ? parameter->getDescription() : std::string();
+  auto const param = findParameter(componentIndex, name, recursive);
+  return param ? param->getDescription() : std::string();
 }
 
 std::string ComponentInfo::getParamShortDescription(const size_t componentIndex, const std::string &name,
                                                     bool recursive) const {
-  auto const parameter = findParameter(componentIndex, name, recursive);
-  return parameter ? parameter->getShortDescription() : std::string();
+  auto const param = findParameter(componentIndex, name, recursive);
+  return param ? param->getShortDescription() : std::string();
 }
 
 std::string ComponentInfo::getDescription(const size_t componentIndex) const {
@@ -880,8 +898,8 @@ std::string ComponentInfo::getShortDescription(const size_t componentIndex) cons
 
 void ComponentInfo::setDescription(const size_t componentIndex, const std::string &description) {
   auto const &componentName = name(componentIndex);
-  if (auto const parameter = findParameter(componentIndex, componentName, true)) {
-    parameter->setDescription(description);
+  if (auto const param = findParameter(componentIndex, componentName, true)) {
+    param->setDescription(description);
   } else {
     addString(componentIndex, componentName, "", &description);
   }
@@ -890,12 +908,12 @@ void ComponentInfo::setDescription(const size_t componentIndex, const std::strin
 double ComponentInfo::getFittingParameter(const size_t componentIndex, const std::string &name, double xvalue) const {
   if (!m_parameterInfo)
     throw std::runtime_error("Parameters are not available in component=" + this->name(componentIndex));
-  Parameter_sptr parameter = m_parameterInfo->getRecursive(*this, componentIndex, name, "fitting");
-  if (!parameter)
+  Parameter_sptr param = m_parameterInfo->getRecursive(*this, componentIndex, name, "fitting");
+  if (!param)
     throw std::runtime_error("Fitting parameter=" + name +
                              " could not be extracted from component=" + this->name(componentIndex));
   try {
-    const auto &fitParam = parameter->value<FitParameter>();
+    const auto &fitParam = param->value<FitParameter>();
     return fitParam.getValue(xvalue);
   } catch (...) {
     throw std::runtime_error("Unable to get lookup table for parameter=" + name +
