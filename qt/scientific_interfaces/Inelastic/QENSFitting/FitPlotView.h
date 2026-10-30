@@ -108,8 +108,7 @@ public:
   void allowRedraws(bool state) override;
   void redrawPlots() override;
 
-  void setHWHMMinimum(std::size_t peakIndex, double minimum) override;
-  void setHWHMMaximum(std::size_t peakIndex, double maximum) override;
+  void setHWHMRange(std::size_t peakIndex, double minimum, double maximum) override;
   void setHWHMRanges(std::vector<std::pair<double, double>> const &ranges) override;
 
   void clearPreviews() override;
@@ -131,9 +130,7 @@ private slots:
   void notifyBackgroundChanged(double value);
 
 private:
-  void notifyHWHMMinimumChanged(std::size_t peakIndex, double value);
-  void notifyHWHMMaximumChanged(std::size_t peakIndex, double value);
-  void notifyFWHMChanged(std::size_t peakIndex, double minimum, double maximum);
+  void notifyHWHMChanged(std::size_t peakIndex, double minimum, double maximum);
 
   void createSplitterWithPlots();
   void createSplitter();
@@ -159,7 +156,7 @@ private:
   std::unique_ptr<MantidQt::MantidWidgets::PreviewPlot> m_bottomPlot;
   std::unique_ptr<QSplitter> m_splitter;
   IFitPlotPresenter *m_presenter;
-  std::size_t m_numberOfHWHMSelectors;
+  std::vector<std::pair<double, double>> m_hwhmRanges;
 };
 
 } // namespace Inelastic

@@ -83,12 +83,10 @@ void FitPlotPresenter::handleStartXChanged(double value) { m_tab->handleStartXCh
 
 void FitPlotPresenter::handleEndXChanged(double value) { m_tab->handleEndXChanged(value); }
 
-void FitPlotPresenter::handleHWHMMaximumChanged(std::size_t peakIndex, double minimum) {
-  m_view->setHWHMMaximum(peakIndex, m_model->calculateHWHMMaximum(peakIndex, minimum));
-}
-
-void FitPlotPresenter::handleHWHMMinimumChanged(std::size_t peakIndex, double maximum) {
-  m_view->setHWHMMinimum(peakIndex, m_model->calculateHWHMMinimum(peakIndex, maximum));
+void FitPlotPresenter::handleHWHMChanged(std::size_t peakIndex, double linePosition) {
+  auto const [minimum, maximum] = m_model->calculateHWHMRange(peakIndex, linePosition);
+  m_view->setHWHMRange(peakIndex, minimum, maximum);
+  m_tab->handleFwhmChanged(peakIndex, maximum - minimum);
 }
 
 void FitPlotPresenter::appendLastDataToSelection(std::vector<std::string> const &displayNames) {
@@ -284,10 +282,6 @@ void FitPlotPresenter::plotSpectrum(WorkspaceIndex spectrum) const {
 }
 
 void FitPlotPresenter::handleFitSingleSpectrum() { m_tab->handleSingleFitClicked(); }
-
-void FitPlotPresenter::handleFWHMChanged(std::size_t peakIndex, double minimum, double maximum) {
-  m_tab->handleFwhmChanged(peakIndex, maximum - minimum);
-}
 
 void FitPlotPresenter::handleBackgroundChanged(double value) { m_tab->handleBackgroundChanged(value); }
 

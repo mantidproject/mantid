@@ -95,8 +95,7 @@ public:
   MOCK_CONST_METHOD0(getHWHMs, std::vector<double>());
   MOCK_CONST_METHOD0(getPeakCentres, std::vector<double>());
   MOCK_CONST_METHOD0(getFirstBackgroundLevel, std::optional<double>());
-  MOCK_CONST_METHOD2(calculateHWHMMaximum, double(std::size_t peakIndex, double maximum));
-  MOCK_CONST_METHOD2(calculateHWHMMinimum, double(std::size_t peakIndex, double minimum));
+  MOCK_CONST_METHOD2(calculateHWHMRange, std::pair<double, double>(std::size_t peakIndex, double linePosition));
   MOCK_CONST_METHOD0(canCalculateGuess, bool());
 
   MOCK_METHOD1(setActiveIndex, void(WorkspaceID workspaceID));
@@ -162,8 +161,7 @@ public:
 
   MOCK_CONST_METHOD1(displayMessage, void(std::string const &message));
 
-  MOCK_METHOD2(setHWHMMinimum, void(std::size_t peakIndex, double minimum));
-  MOCK_METHOD2(setHWHMMaximum, void(std::size_t peakIndex, double maximum));
+  MOCK_METHOD3(setHWHMRange, void(std::size_t peakIndex, double minimum, double maximum));
   MOCK_METHOD1(setHWHMRanges, void(std::vector<std::pair<double, double>> const &ranges));
 
   MOCK_METHOD0(clearPreviews, void());

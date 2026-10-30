@@ -39,10 +39,8 @@ public:
   virtual void handleStartXChanged(double value) = 0;
   virtual void handleEndXChanged(double value) = 0;
 
-  virtual void handleHWHMMinimumChanged(std::size_t peakIndex, double maximum) = 0;
-  virtual void handleHWHMMaximumChanged(std::size_t peakIndex, double minimum) = 0;
+  virtual void handleHWHMChanged(std::size_t peakIndex, double linePosition) = 0;
 
-  virtual void handleFWHMChanged(std::size_t peakIndex, double minimum, double maximum) = 0;
   virtual void handleBackgroundChanged(double value) = 0;
 };
 
@@ -86,10 +84,8 @@ public:
   void handleStartXChanged(double value) override;
   void handleEndXChanged(double value) override;
 
-  void handleHWHMMinimumChanged(std::size_t peakIndex, double maximum) override;
-  void handleHWHMMaximumChanged(std::size_t peakIndex, double minimum) override;
+  void handleHWHMChanged(std::size_t peakIndex, double linePosition) override;
 
-  void handleFWHMChanged(std::size_t peakIndex, double minimum, double maximum) override;
   void handleBackgroundChanged(double value) override;
 
 private:

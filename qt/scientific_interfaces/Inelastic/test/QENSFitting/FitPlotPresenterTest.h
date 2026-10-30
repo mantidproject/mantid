@@ -201,30 +201,14 @@ public:
     m_presenter->handlePlotGuess(false);
   }
 
-  void test_that_handleHWHMMinimumChanged_will_set_the_hwhm_minimum() {
-    double hwhmMin{2.0};
+  void test_that_handleHWHMChanged_will_set_the_hwhm_range_and_the_fwhm_of_the_peak() {
     std::size_t peakIndex{1};
 
-    ON_CALL(*m_model, calculateHWHMMinimum(peakIndex, hwhmMin)).WillByDefault(Return(-hwhmMin));
-    EXPECT_CALL(*m_view, setHWHMMinimum(peakIndex, -hwhmMin)).Times(1);
+    ON_CALL(*m_model, calculateHWHMRange(peakIndex, -1.0)).WillByDefault(Return(std::make_pair(-1.0, 2.0)));
+    EXPECT_CALL(*m_view, setHWHMRange(peakIndex, -1.0, 2.0)).Times(1);
+    EXPECT_CALL(*m_tab, handleFwhmChanged(peakIndex, 3.0)).Times(1);
 
-    m_presenter->handleHWHMMinimumChanged(peakIndex, hwhmMin);
-  }
-
-  void test_that_handleHWHMMaximumChanged_will_set_the_hwhm_maximum() {
-    double hwhmMax{2.0};
-    std::size_t peakIndex{1};
-
-    ON_CALL(*m_model, calculateHWHMMaximum(peakIndex, hwhmMax)).WillByDefault(Return(-hwhmMax));
-    EXPECT_CALL(*m_view, setHWHMMaximum(peakIndex, -hwhmMax)).Times(1);
-
-    m_presenter->handleHWHMMaximumChanged(peakIndex, 2.0);
-  }
-
-  void test_that_handleFWHMChanged_will_set_the_fwhm_of_the_matching_peak() {
-    EXPECT_CALL(*m_tab, handleFwhmChanged(2u, 0.5)).Times(1);
-
-    m_presenter->handleFWHMChanged(2u, -0.25, 0.25);
+    m_presenter->handleHWHMChanged(peakIndex, -1.0);
   }
 
   ///----------------------------------------------------------------------

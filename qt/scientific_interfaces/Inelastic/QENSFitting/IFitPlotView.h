@@ -73,8 +73,7 @@ public:
   virtual void allowRedraws(bool state) = 0;
   virtual void redrawPlots() = 0;
 
-  virtual void setHWHMMinimum(std::size_t peakIndex, double minimum) = 0;
-  virtual void setHWHMMaximum(std::size_t peakIndex, double maximum) = 0;
+  virtual void setHWHMRange(std::size_t peakIndex, double minimum, double maximum) = 0;
   virtual void setHWHMRanges(std::vector<std::pair<double, double>> const &ranges) = 0;
 
   virtual void clearPreviews() = 0;

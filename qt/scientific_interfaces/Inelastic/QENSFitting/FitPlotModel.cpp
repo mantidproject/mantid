@@ -202,14 +202,10 @@ std::optional<double> FitPlotModel::getFirstBackgroundLevel() const {
   return findFirstBackgroundLevel(m_activeFunction->getFunction(index.value));
 }
 
-double FitPlotModel::calculateHWHMMaximum(std::size_t peakIndex, double minimum) const {
+std::pair<double, double> FitPlotModel::calculateHWHMRange(std::size_t peakIndex, double linePosition) const {
   const auto peakCentre = valueOrZero(getPeakCentres(), peakIndex);
-  return peakCentre + (peakCentre - minimum);
-}
-
-double FitPlotModel::calculateHWHMMinimum(std::size_t peakIndex, double maximum) const {
-  const auto peakCentre = valueOrZero(getPeakCentres(), peakIndex);
-  return peakCentre - (maximum - peakCentre);
+  const auto mirroredPosition = 2.0 * peakCentre - linePosition;
+  return {std::min(linePosition, mirroredPosition), std::max(linePosition, mirroredPosition)};
 }
 
 bool FitPlotModel::canCalculateGuess() const {

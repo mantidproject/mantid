@@ -38,7 +38,7 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 using namespace MantidWidgets;
 
 FitPlotView::FitPlotView(QWidget *parent)
-    : API::MantidWidget(parent), m_plotForm(new Ui::FitPreviewPlot), m_presenter(), m_numberOfHWHMSelectors(0) {
+    : API::MantidWidget(parent), m_plotForm(new Ui::FitPreviewPlot), m_presenter(), m_hwhmRanges() {
   m_plotForm->setupUi(this);
 
   connect(m_plotForm->cbDataSelection, qOverload<int>(&QComboBox::currentIndexChanged), this,
@@ -252,30 +252,22 @@ void FitPlotView::clearPreviews() {
 }
 
 void FitPlotView::setHWHMRanges(std::vector<std::pair<double, double>> const &ranges) {
-  while (m_numberOfHWHMSelectors < ranges.size())
+  while (m_hwhmRanges.size() < ranges.size())
     addHWHMRangeSelector();
 
-  for (auto peakIndex = 0u; peakIndex < m_numberOfHWHMSelectors; ++peakIndex) {
-    auto selector = getHWHMRangeSelector(peakIndex);
+  for (auto peakIndex = 0u; peakIndex < m_hwhmRanges.size(); ++peakIndex) {
     auto const isVisible = peakIndex < ranges.size();
-    if (isVisible) {
-      QSignalBlocker blocker(selector);
-      selector->setRange(ranges[peakIndex].first, ranges[peakIndex].second);
-    }
-    selector->setVisible(isVisible);
+    if (isVisible)
+      setHWHMRange(peakIndex, ranges[peakIndex].first, ranges[peakIndex].second);
+    getHWHMRangeSelector(peakIndex)->setVisible(isVisible);
   }
 }
 
-void FitPlotView::setHWHMMinimum(std::size_t peakIndex, double minimum) {
+void FitPlotView::setHWHMRange(std::size_t peakIndex, double minimum, double maximum) {
   auto selector = getHWHMRangeSelector(peakIndex);
   QSignalBlocker blocker(selector);
-  selector->setMinimum(minimum);
-}
-
-void FitPlotView::setHWHMMaximum(std::size_t peakIndex, double maximum) {
-  auto selector = getHWHMRangeSelector(peakIndex);
-  QSignalBlocker blocker(selector);
-  selector->setMaximum(maximum);
+  selector->setRange(minimum, maximum);
+  m_hwhmRanges[peakIndex] = selector->getRange();
 }
 
 void FitPlotView::addFitRangeSelector() {
@@ -304,19 +296,16 @@ void FitPlotView::setBackgroundBounds() {
 }
 
 void FitPlotView::addHWHMRangeSelector() {
-  auto const peakIndex = m_numberOfHWHMSelectors++;
+  auto const peakIndex = m_hwhmRanges.size();
+  m_hwhmRanges.emplace_back(0.0, 0.0);
   auto hwhmRangeSelector = m_topPlot->addRangeSelector(hwhmSelectorName(peakIndex));
   hwhmRangeSelector->setBounds(-DBL_MAX, DBL_MAX);
   hwhmRangeSelector->setColour(HWHM_COLOURS[peakIndex % HWHM_COLOURS.size()]);
   hwhmRangeSelector->setRange(0.0, 0.0);
   hwhmRangeSelector->setVisible(false);
 
-  connect(hwhmRangeSelector, &RangeSelector::minValueChanged, this,
-          [this, peakIndex](double value) { notifyHWHMMinimumChanged(peakIndex, value); });
-  connect(hwhmRangeSelector, &RangeSelector::maxValueChanged, this,
-          [this, peakIndex](double value) { notifyHWHMMaximumChanged(peakIndex, value); });
   connect(hwhmRangeSelector, &RangeSelector::selectionChanged, this,
-          [this, peakIndex](double minimum, double maximum) { notifyFWHMChanged(peakIndex, minimum, maximum); });
+          [this, peakIndex](double minimum, double maximum) { notifyHWHMChanged(peakIndex, minimum, maximum); });
 }
 
 RangeSelector *FitPlotView::getHWHMRangeSelector(std::size_t peakIndex) const {
@@ -374,16 +363,10 @@ void FitPlotView::notifyStartXChanged(double value) { m_presenter->handleStartXC
 
 void FitPlotView::notifyEndXChanged(double value) { m_presenter->handleEndXChanged(value); }
 
-void FitPlotView::notifyHWHMMinimumChanged(std::size_t peakIndex, double value) {
-  m_presenter->handleHWHMMinimumChanged(peakIndex, value);
-}
-
-void FitPlotView::notifyHWHMMaximumChanged(std::size_t peakIndex, double value) {
-  m_presenter->handleHWHMMaximumChanged(peakIndex, value);
-}
-
-void FitPlotView::notifyFWHMChanged(std::size_t peakIndex, double minimum, double maximum) {
-  m_presenter->handleFWHMChanged(peakIndex, minimum, maximum);
+void FitPlotView::notifyHWHMChanged(std::size_t peakIndex, double minimum, double maximum) {
+  auto const previousMinimum = m_hwhmRanges[peakIndex].first;
+  m_hwhmRanges[peakIndex] = {minimum, maximum};
+  m_presenter->handleHWHMChanged(peakIndex, minimum != previousMinimum ? minimum : maximum);
 }
 
 void FitPlotView::notifyBackgroundChanged(double value) { m_presenter->handleBackgroundChanged(value); }
