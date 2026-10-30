@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitPlotModel.h"
 
+#include <algorithm>
+#include <iterator>
 #include <utility>
 
 #include "ConvolutionModel.h"
@@ -56,12 +58,27 @@ std::optional<double> firstParameterValue(const IFunction_sptr &function, const 
   return std::nullopt;
 }
 
-std::optional<double> findFirstPeakCentre(const IFunction_sptr &function) {
-  return firstParameterValue(function, "Peak", "PeakCentre");
+void findFunctionsWithParameter(const IFunction_sptr &function, const std::string &category,
+                                const std::string &parameterName, std::vector<IFunction_sptr> &functions) {
+  if (function->category().find(category) != std::string::npos && function->hasParameter(parameterName)) {
+    functions.emplace_back(function);
+    return;
+  }
+  if (const auto composite = std::dynamic_pointer_cast<CompositeFunction>(function)) {
+    for (auto i = 0u; i < composite->nFunctions(); ++i)
+      findFunctionsWithParameter(composite->getFunction(i), category, parameterName, functions);
+  }
 }
 
-std::optional<double> findFirstFWHM(const IFunction_sptr &function) {
-  return firstParameterValue(function, "Peak", "FWHM");
+std::vector<IFunction_sptr> findPeaks(const MultiDomainFunction_sptr &function) {
+  std::vector<IFunction_sptr> peaks;
+  if (function && function->nFunctions() > 0)
+    findFunctionsWithParameter(function->getFunction(0), "Peak", "FWHM", peaks);
+  return peaks;
+}
+
+double valueOrZero(const std::vector<double> &values, std::size_t index) {
+  return index < values.size() ? values[index] : 0.0;
 }
 
 std::optional<double> findFirstBackgroundLevel(const IFunction_sptr &function) {
@@ -158,15 +175,22 @@ FitDomainIndex FitPlotModel::getActiveDomainIndex() const {
   return index;
 }
 
-std::optional<double> FitPlotModel::getFirstHWHM() const {
-  auto fwhm = findFirstFWHM(m_activeFunction);
-  if (fwhm) {
-    return *fwhm / 2.0;
-  }
-  return std::nullopt;
+std::vector<double> FitPlotModel::getHWHMs() const {
+  auto const peaks = findPeaks(m_activeFunction);
+  std::vector<double> hwhms;
+  std::transform(peaks.cbegin(), peaks.cend(), std::back_inserter(hwhms),
+                 [](auto const &peak) { return peak->getParameter("FWHM") / 2.0; });
+  return hwhms;
 }
 
-std::optional<double> FitPlotModel::getFirstPeakCentre() const { return findFirstPeakCentre(m_activeFunction); }
+std::vector<double> FitPlotModel::getPeakCentres() const {
+  auto const peaks = findPeaks(m_activeFunction);
+  std::vector<double> centres;
+  std::transform(peaks.cbegin(), peaks.cend(), std::back_inserter(centres), [](auto const &peak) {
+    return peak->hasParameter("PeakCentre") ? peak->getParameter("PeakCentre") : 0.0;
+  });
+  return centres;
+}
 
 std::optional<double> FitPlotModel::getFirstBackgroundLevel() const {
   auto const spectra = getSpectra(m_activeWorkspaceID);
@@ -178,14 +202,10 @@ std::optional<double> FitPlotModel::getFirstBackgroundLevel() const {
   return findFirstBackgroundLevel(m_activeFunction->getFunction(index.value));
 }
 
-double FitPlotModel::calculateHWHMMaximum(double minimum) const {
-  const auto peakCentre = getFirstPeakCentre().value_or(0.);
-  return peakCentre + (peakCentre - minimum);
-}
-
-double FitPlotModel::calculateHWHMMinimum(double maximum) const {
-  const auto peakCentre = getFirstPeakCentre().value_or(0.);
-  return peakCentre - (maximum - peakCentre);
+std::pair<double, double> FitPlotModel::calculateHWHMRange(std::size_t peakIndex, double linePosition) const {
+  const auto peakCentre = valueOrZero(getPeakCentres(), peakIndex);
+  const auto mirroredPosition = 2.0 * peakCentre - linePosition;
+  return {std::min(linePosition, mirroredPosition), std::max(linePosition, mirroredPosition)};
 }
 
 bool FitPlotModel::canCalculateGuess() const {
