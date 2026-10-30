@@ -66,6 +66,8 @@ public:
     std::vector<double> timeZeroVector = ld.getProperty("TimeZeroList");
     TS_ASSERT_EQUALS(timeZeroVector.size(), 96);
     TS_ASSERT_DELTA(timeZeroVector[0], 0.1599999, 1e-5);
+    // The FirstGoodData log is relative to time zero
+    TS_ASSERT_DELTA(run.getPropertyAsSingleValue("FirstGoodData"), 0.224, 1e-5);
 
     // Check that timeZero has been applied to the output spectra
     // as LoadISISNexus does not do this.
@@ -296,6 +298,8 @@ public:
     TS_ASSERT_DELTA(output_ws->x(3)[0], 0.0, 1e-5);
     TS_ASSERT_DELTA(output_ws->x(67)[0], 0.0, 1e-5);
     TS_ASSERT_DELTA(output_ws->x(81)[0], 0.0, 1e-5);
+    // The FirstGoodData log is not shifted by time zero either
+    TS_ASSERT_DELTA(output_ws->run().getPropertyAsSingleValue("FirstGoodData"), 0.384, 1e-5);
   }
 
   void test_time_zero_list_is_loaded_correctly_when_only_single_time_zero_in_file() {
@@ -346,6 +350,8 @@ public:
     TS_ASSERT_EQUALS(lastGoodData, 32.768);
     double timeZero = ld.getProperty("TimeZero");
     TS_ASSERT_DELTA(timeZero, 0.1599999, 1e-5);
+    // The FirstGoodData log is relative to time zero
+    TS_ASSERT_DELTA(run.getPropertyAsSingleValue("FirstGoodData"), 0.224, 1e-5);
 
     // Check that timeZero has been applied to the output spectra
     // as LoadISISNexus does not do this.
@@ -422,6 +428,8 @@ public:
       TS_ASSERT_EQUALS(lastGoodData, 32.768);
       double timeZero = ld.getProperty("TimeZero");
       TS_ASSERT_DELTA(timeZero, 0.1599999, 1e-5);
+      // The FirstGoodData log is relative to time zero
+      TS_ASSERT_DELTA(run.getPropertyAsSingleValue("FirstGoodData"), 0.224, 1e-5);
 
       // Check that timeZero has been applied to the output spectra
       // as LoadISISNexus does not do this.
