@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 # Constructs a standalone windows MantidWorkbench installer using NSIS.
 # The package is created from a pre-packaged version of Mantid from conda
@@ -195,7 +195,13 @@ COPY_DIR="$SCRIPT_DRIVE_LETTER:${COPY_DIR:2}"
 NSIS_SCRIPT=${NSIS_SCRIPT////\\}
 NSIS_SCRIPT="$SCRIPT_DRIVE_LETTER:${NSIS_SCRIPT:2}"
 
-NSIS_OUTPUT_LOG=$PWD/nsis_log.txt
+LOG_DIR="$PWD/env_logs/nsislog"
+mkdir -p "$LOG_DIR"
+
+NSIS_LOG_UNIX="$LOG_DIR/nsis_log.txt"      # bash path, used to print the log on failure
+rm -f "$NSIS_LOG_UNIX"                     # don't show a stale log from a previous run
+
+NSIS_OUTPUT_LOG="$NSIS_LOG_UNIX"
 NSIS_OUTPUT_LOG=${NSIS_OUTPUT_LOG////\\}
 NSIS_OUTPUT_LOG="$SCRIPT_DRIVE_LETTER:${NSIS_OUTPUT_LOG:2}"
 
@@ -224,11 +230,18 @@ OUTFILE_NAME=${OUTFILE_NAME////\\}
 OUTFILE_NAME="$SCRIPT_DRIVE_LETTER:${OUTFILE_NAME:2}"
 
 # Run the makensis command from our nsis conda environment
-echo makensis /V4 /O\"$NSIS_OUTPUT_LOG\" /DVERSION=$MANTID_VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\"
-cmd.exe //C "START /wait "" $MAKENSIS_COMMAND /V4 /DVERSION=$MANTID_VERSION /O"$NSIS_OUTPUT_LOG" /DPACKAGE_DIR="$COPY_DIR" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH "$NSIS_SCRIPT""
+echo makensis /V1 /O\"$NSIS_OUTPUT_LOG\" /DVERSION=$MANTID_VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\"
+cmd.exe //C "START /wait "" $MAKENSIS_COMMAND /V1 /DVERSION=$MANTID_VERSION /O"$NSIS_OUTPUT_LOG" /DPACKAGE_DIR="$COPY_DIR" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH "$NSIS_SCRIPT""
 
 if [ ! -f "$OUTFILE_NAME" ]; then
   echo "Error creating package, no file found at $OUTFILE_NAME"
+  if [ -s "$NSIS_LOG_UNIX" ]; then
+    echo "---- makensis log ($NSIS_LOG_UNIX) ----"
+    cat "$NSIS_LOG_UNIX"
+    echo "---- end of makensis log ----"
+  else
+    echo "makensis log is missing or empty at $NSIS_LOG_UNIX; makensis may not have started"
+  fi
   exit 1
 fi
 

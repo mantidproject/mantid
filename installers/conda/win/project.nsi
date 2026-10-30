@@ -3,6 +3,7 @@
 
 # This must be set for long paths to work properly.
 # Unicode only defaults to true in NSIS 3.07 onwards.
+
 Unicode True
 
 !include MUI2.nsh
