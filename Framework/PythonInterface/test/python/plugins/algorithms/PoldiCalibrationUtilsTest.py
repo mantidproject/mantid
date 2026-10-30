@@ -43,10 +43,10 @@ def poldi_workspace(speed, name, live_every=28):
 
 def simulated_counts(geom, data, q_banks, tz, rng):
     """Model counts at a known geometry and tz, with per-spectrum scale and background, no noise."""
-    c, sin_t = geom.difc(q_banks)
+    c, sin_t = geom.difc_and_sin_theta(q_banks)
     m = model_counts(geom, data, c, sin_t, tz, TRUTH["kappa"], TRUTH["srel"], TRUTH["A"], SI_D)
     scale = rng.uniform(5e3, 1e4, (m.shape[0], 1))
-    return np.where(geom.live[:, None], scale * m + rng.uniform(5, 20, (m.shape[0], 1)), 0.0)
+    return np.where(geom.live_spectra[:, None], scale * m + rng.uniform(5, 20, (m.shape[0], 1)), 0.0)
 
 
 class PoldiCalibrationUtilsTest(unittest.TestCase):
@@ -60,27 +60,27 @@ class PoldiCalibrationUtilsTest(unittest.TestCase):
         ADS.clear()
 
     def _data(self, speed):
-        return FoldedData(np.zeros((self.geom.live.size, 500)), 60e6 / (4 * speed))
+        return FoldedData(np.zeros((self.geom.live_spectra.size, 500)), 60e6 / (4 * speed))
 
     def test_bank_and_block_moves_match_mantid(self):
-        q = self.geom.q0 + [0.004, -0.006, 0.4, -0.003, 0.005, -0.3]
-        q_blocks = np.random.default_rng(2).uniform([-1e-3, -0.5], [1e-3, 0.5], (len(self.geom.blocks), 2)).ravel()
+        q = self.geom.initial_bank_params + [0.004, -0.006, 0.4, -0.003, 0.005, -0.3]
+        q_blocks = np.random.default_rng(2).uniform([-1e-3, -0.5], [1e-3, 0.5], (len(self.geom.block_names), 2)).ravel()
         for blocks in (None, q_blocks):
             with self.subTest(blocks=blocks is not None):
                 ws = CloneWorkspace(self.ws, OutputWorkspace="moved")
 
                 apply_geometry(ws, self.geom, q, exec_alg, blocks)
 
-                live = np.flatnonzero(self.geom.live)
+                live = np.flatnonzero(self.geom.live_spectra)
                 si = ws.spectrumInfo()
-                assert_allclose([si.position(int(i)) for i in live], self.geom.positions(q, blocks)[live], atol=1e-9)
+                assert_allclose([si.position(int(i)) for i in live], self.geom.pixel_positions(q, blocks)[live], atol=1e-9)
                 l1_chop = get_instrument_settings_from_log(ws)[3]
-                c_mantid = get_tof_d1Ang(ws, get_tths_and_l2s(ws, self.geom.live)[1], l1_chop, self.geom.live)
-                assert_allclose(self.geom.difc(q, blocks)[0][live], c_mantid[live], rtol=1e-12)
+                c_mantid = get_tof_d1Ang(ws, get_tths_and_l2s(ws, self.geom.live_spectra)[1], l1_chop, self.geom.live_spectra)
+                assert_allclose(self.geom.difc_and_sin_theta(q, blocks)[0][live], c_mantid[live], rtol=1e-12)
 
     def test_analytic_derivatives_match_finite_differences(self):
         data = self._data(5000)
-        c, sin_t = self.geom.difc(self.geom.q0)
+        c, sin_t = self.geom.difc_and_sin_theta(self.geom.initial_bank_params)
         args = dict(tz=160.0, kappa=TRUTH["kappa"], srel=TRUTH["srel"], A=TRUTH["A"])
 
         def model(**changes):
@@ -103,36 +103,36 @@ class PoldiCalibrationUtilsTest(unittest.TestCase):
     def test_recovers_block_moves_with_banks_fixed(self):
         ws = poldi_workspace(5000, "poldi_dense", live_every=8)  # several live pixels per block
         geom = PixelGeometry(ws, BANKS)
-        q_blocks = np.random.default_rng(6).uniform([-1e-3, -0.5], [1e-3, 0.5], (len(geom.blocks), 2)).ravel()
+        q_blocks = np.random.default_rng(6).uniform([-1e-3, -0.5], [1e-3, 0.5], (len(geom.block_names), 2)).ravel()
         timing = TimingModel("PerChopperSpeed", [3000.0], [5000], 0.05824, -12.68)
-        c, sin_t = geom.difc(geom.q0, q_blocks)
+        c, sin_t = geom.difc_and_sin_theta(geom.initial_bank_params, q_blocks)
         m = model_counts(geom, self._data(5000), c, sin_t, 160.0, TRUTH["kappa"], TRUTH["srel"], TRUTH["A"], SI_D)
-        y = np.where(geom.live[:, None], 1e4 * m + 10.0, 0.0)
-        modules = BankModules(geom, geom.q0)
+        y = np.where(geom.live_spectra[:, None], 1e4 * m + 10.0, 0.0)
+        modules = BankModules(geom, geom.initial_bank_params)
         fit = CalibrationFit(geom, [FoldedData(y, 3000.0)], modules, SI_D, timing)
-        fit.free[: modules.n_bank_params] = False
+        fit.is_free[: modules.n_bank_params] = False
 
         fit.fit()
 
-        assert_allclose(fit.q_blocks, q_blocks, atol=1e-6)
+        assert_allclose(fit.block_params, q_blocks, atol=1e-6)
 
     def test_masked_spectra_do_not_contribute(self):
         rng = np.random.default_rng(4)
-        y = simulated_counts(self.geom, self._data(5000), self.geom.q0, 160.0, rng)
-        masked = int(np.flatnonzero(~self.geom.live)[0])
+        y = simulated_counts(self.geom, self._data(5000), self.geom.initial_bank_params, 160.0, rng)
+        masked = int(np.flatnonzero(~self.geom.live_spectra)[0])
         timing = TimingModel("PerChopperSpeed", [3000.0], [5000], 0.05824, -12.68)
         costs = []
         for extra in (0.0, 1e4):
             y_masked = y.copy()
             y_masked[masked] += extra
             fit = CalibrationFit(self.geom, [FoldedData(y_masked, 3000.0)], RigidBanks(self.geom), SI_D, timing)
-            costs.append(fit.evaluate(fit.x))
+            costs.append(fit.evaluate_cost(fit.params))
 
         self.assertEqual(costs[0], costs[1])
 
     def test_unreachable_reflection_is_dropped(self):
         timing = TimingModel("PerChopperSpeed", [3000.0], [5000], 0.05824, -12.68)
-        y = simulated_counts(self.geom, self._data(5000), self.geom.q0, 160.0, np.random.default_rng(5))
+        y = simulated_counts(self.geom, self._data(5000), self.geom.initial_bank_params, 160.0, np.random.default_rng(5))
 
         fit = CalibrationFit(self.geom, [FoldedData(y, 3000.0)], RigidBanks(self.geom), np.append(SI_D, 20.0), timing)
 
