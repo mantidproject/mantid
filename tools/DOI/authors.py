@@ -362,6 +362,7 @@ _translations = {
     "Ian Gibbs": "Gibbs, Ian",
     "Victoria-Hawkins": "Hawkins, Victoria",
     "Mark Abraham": "Abraham, Mark",
+    "shervin86": "Nourbakhsh, Shervin",
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
