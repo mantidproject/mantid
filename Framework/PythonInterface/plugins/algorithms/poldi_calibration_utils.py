@@ -306,7 +306,7 @@ def model_counts(
     shape = (nspec, n_bins)
     if not deriv:
         return m.reshape(shape)
-    # kappa before srel, the order CalibrationFit.evaluate_cost unpacks them in
+    # kappa before srel, the order CalibrationFit._projected_jacobian takes them in
     return (*(v.reshape(shape) for v in (m, dm_dc, dm_dtz, dm_dkappa, dm_dsrel)), dm_dA.reshape((d_hkl.size, *shape)))
 
 
@@ -320,6 +320,12 @@ def scale_bg(y: np.ndarray[float], m: np.ndarray[float], w: np.ndarray[float]) -
     s = np.where(ok, (s_w * s_xy - s_x * s_y) / np.where(ok, det, 1.0), 0.0)
     b = np.where(ok, (s_y - s * s_x) / np.where(s_w > 0, s_w, 1.0), 0.0)
     return s, b
+
+
+def weighted_residuals(data: FoldedData, m: np.ndarray[float]) -> tuple[np.ndarray[float], np.ndarray[float]]:
+    """Residuals r = w (y - s m - b) (nspec, nbins) at each spectrum's best scale s and background b, and s."""
+    scale, bg = scale_bg(data.counts, m, data.weights)
+    return data.weights * (data.counts - scale[:, None] * m - bg[:, None]), scale
 
 
 def project_out(derivative: np.ndarray[float], model: np.ndarray[float], weights: np.ndarray[float]) -> np.ndarray[float]:
@@ -371,6 +377,47 @@ def project_out(derivative: np.ndarray[float], model: np.ndarray[float], weights
     weighted_derivative = weights * derivative
     in_plane = dot(weighted_derivative, scale_dir) * scale_dir + dot(weighted_derivative, background_dir) * background_dir
     return weighted_derivative - in_plane
+
+
+class NormalEquationSums:
+    """Running sums over datasets of the Gauss-Newton normal matrix J^T J and gradient J^T r.
+
+    The geometry q reaches the counts only through each pixel's DIFC c_i, and c_i only affects spectrum i. So the
+    Jacobian columns for c are stored compactly as Jc (nspec, nbins), row i being the only nonzero part of c_i's column,
+    and the sums involving them are kept per pixel. `assemble` converts those to q once, by the chain rule through dc/dq.
+    The other parameters (timing, kappa, sigma_rel, intensities) affect every spectrum, so their columns J_other are
+    dense."""
+
+    def __init__(self, n_pixels: int, n_other: int):
+        self.pixel_diagonal = np.zeros(n_pixels)  # Jc^T Jc, diagonal as no two pixels' columns share a row
+        self.pixel_other = np.zeros((n_pixels, n_other))  # Jc^T J_other
+        self.other_other = np.zeros((n_other, n_other))  # J_other^T J_other
+        self.pixel_gradient = np.zeros(n_pixels)  # Jc^T r
+        self.other_gradient = np.zeros(n_other)  # J_other^T r
+
+    def add(self, Jc: np.ndarray[float], J_other: np.ndarray[float], r: np.ndarray[float]) -> None:
+        """Add one dataset's contribution: Jc and r are (nspec, nbins), J_other (n_other, nspec, nbins)."""
+        self.pixel_diagonal += np.sum(Jc**2, axis=1)
+        self.pixel_other += np.sum(J_other * Jc, axis=2).T
+        self.pixel_gradient += np.sum(Jc * r, axis=1)
+        J_other_flat = J_other.reshape(len(J_other), -1)
+        self.other_other += J_other_flat @ J_other_flat.T
+        self.other_gradient += J_other_flat @ r.ravel()
+
+    def assemble(self, dc_dq: np.ndarray[float]) -> tuple[np.ndarray[float], np.ndarray[float]]:
+        """Normal matrix and gradient over (q, other parameters), with dc_dq (nspec, nq):
+
+                  q                                       other
+        q      [  dc_dq^T diag(pixel_diagonal) dc_dq      dc_dq^T pixel_other  ]
+        other  [  (transpose)                             other_other          ]
+        """
+        nq = dc_dq.shape[1]
+        normal = np.zeros((nq + self.other_gradient.size,) * 2)
+        normal[:nq, :nq] = dc_dq.T @ (self.pixel_diagonal[:, None] * dc_dq)
+        normal[:nq, nq:] = dc_dq.T @ self.pixel_other
+        normal[nq:, :nq] = normal[:nq, nq:].T
+        normal[nq:, nq:] = self.other_other
+        return normal, np.concatenate([dc_dq.T @ self.pixel_gradient, self.other_gradient])
 
 
 class CalibrationFit:
@@ -447,53 +494,61 @@ class CalibrationFit:
         self.params[first_intensity:] = A / A.max()
         self.is_free[first_intensity + int(np.argmax(A))] = False
 
-    def evaluate_cost(self, x: np.ndarray[float], deriv: bool = False) -> float | tuple[float, np.ndarray[float], np.ndarray[float]]:
-        """Cost 0.5 |r|^2, and with deriv the Gauss-Newton normal matrix and gradient over all of x."""
+    def evaluate_cost(self, x: np.ndarray[float]) -> float:
+        """Cost 0.5 |r|^2 over every dataset, r being the weighted residuals at each spectrum's best scale and
+        background."""
         q, x_tz, kappa, srel, A = self.split_params(x)
-        c, sin_t, dc_dq = self.geometry_model.difc_and_derivatives(q)
-        nq = self.n_geometry_params
-        n_other = x.size - nq
+        c, sin_t = self.geometry.difc_and_sin_theta(*self.geometry_model.split_bank_and_block_params(q))
         cost = 0.0
-        if deriv:
-            Dc, gc = np.zeros(c.size), np.zeros(c.size)
-            C, G_other, g_other = np.zeros((c.size, n_other)), np.zeros((n_other, n_other)), np.zeros(n_other)
-            residuals = []
+        for ds, tz in zip(self.datasets, self.timing_model.params_to_tz @ x_tz):
+            m = model_counts(self.geometry, ds, c, sin_t, tz, kappa, srel, A, self.d_hkl)
+            cost += 0.5 * np.sum(weighted_residuals(ds, m)[0] ** 2)
+        return cost
+
+    def evaluate_cost_and_derivatives(self, x: np.ndarray[float]) -> tuple[float, np.ndarray[float], np.ndarray[float]]:
+        """Cost as evaluate_cost, with the Gauss-Newton normal matrix J^T J (approximating the Hessian) and gradient
+        J^T r over all of x. Also keeps the residuals at x, for the reduced chi-squared."""
+        q, x_tz, kappa, srel, A = self.split_params(x)
+        # the geometry acts on the counts only through each pixel's DIFC c, so its derivatives come in through dc_dq
+        c, sin_t, dc_dq = self.geometry_model.difc_and_derivatives(q)
+        sums = NormalEquationSums(c.size, x.size - self.n_geometry_params)
+        self.residuals = []
         for j, (ds, tz) in enumerate(zip(self.datasets, self.timing_model.params_to_tz @ x_tz)):
-            out = model_counts(self.geometry, ds, c, sin_t, tz, kappa, srel, A, self.d_hkl, deriv=deriv)
-            m = out[0] if deriv else out
-            scale, bg = scale_bg(ds.counts, m, ds.weights)
-            r = ds.weights * (ds.counts - scale[:, None] * m - bg[:, None])
-            cost += 0.5 * np.sum(r**2)
-            if not deriv:
-                continue
-            residuals.append(r)
-            _, dm_dc, dm_dtz, dm_dka, dm_dsr, dm_dA = out
+            m, *dm_dparams = model_counts(self.geometry, ds, c, sin_t, tz, kappa, srel, A, self.d_hkl, deriv=True)
+            r, scale = weighted_residuals(ds, m)
+            self.residuals.append(r)
+            sums.add(*self._projected_jacobian(j, ds, m, scale, *dm_dparams), r)
+        cost = sum(0.5 * np.sum(r**2) for r in self.residuals)
+        return cost, *sums.assemble(dc_dq)
 
-            def project(J):
-                return -scale[:, None] * project_out(J, m, ds.weights)
+    def _projected_jacobian(
+        self,
+        j: int,
+        data: FoldedData,
+        m: np.ndarray[float],
+        scale: np.ndarray[float],
+        dm_dc: np.ndarray[float],
+        dm_dtz: np.ndarray[float],
+        dm_dkappa: np.ndarray[float],
+        dm_dsrel: np.ndarray[float],
+        dm_dA: np.ndarray[float],
+    ) -> tuple[np.ndarray[float], np.ndarray[float]]:
+        """Jacobian dr/dparameter for dataset j: Jc (nspec, nbins), the compact columns for each pixel's c (see
+        NormalEquationSums), and J_other (n_other, nspec, nbins) for the timing parameters, kappa, sigma_rel and the
+        intensities, in the order of x."""
 
-            Jc = project(dm_dc)
-            J_tz = project(dm_dtz)
-            cols = [J_tz * self.timing_model.params_to_tz[j, a] for a in range(self.n_timing_params)]
-            cols += [project(dm_dka), project(dm_dsr)] + [project(dA) for dA in dm_dA]
-            J_other = np.stack(cols).reshape(len(cols), -1)
-            Dc += np.sum(Jc**2, axis=1)
-            gc += np.sum(Jc * r, axis=1)
-            C += (J_other.reshape(len(cols), *Jc.shape) * Jc).sum(2).T
-            G_other += J_other @ J_other.T
-            g_other += J_other @ r.ravel()
-        if not deriv:
-            return cost
-        self.residuals = residuals  # at x, for the reduced chi-squared
-        normal = np.zeros((x.size, x.size))
-        normal[:nq, :nq] = dc_dq.T @ (Dc[:, None] * dc_dq)
-        normal[:nq, nq:] = dc_dq.T @ C
-        normal[nq:, :nq] = normal[:nq, nq:].T
-        normal[nq:, nq:] = G_other
-        return cost, normal, np.concatenate([dc_dq.T @ gc, g_other])
+        def project(dm):
+            # r = w (y - s m - b), so dr = -s w dm, less the part a re-fitted s and b would cancel (see project_out)
+            return -scale[:, None] * project_out(dm, m, data.weights)
+
+        J_tz = project(dm_dtz)
+        # dataset j's tz = params_to_tz[j] @ timing parameters, so each timing column is dr/dtz times its entry
+        timing_cols = [J_tz * self.timing_model.params_to_tz[j, a] for a in range(self.n_timing_params)]
+        J_other = np.stack(timing_cols + [project(dm_dkappa), project(dm_dsrel)] + [project(dA) for dA in dm_dA])
+        return project(dm_dc), J_other
 
     def fit(self, max_iter: int = 50, tol: float = 1e-9, step_tol: float = 1e-6, lam: float = 1e-3) -> CalibrationFit:
-        cost, normal, grad = self.evaluate_cost(self.params, deriv=True)
+        cost, normal, grad = self.evaluate_cost_and_derivatives(self.params)
         f = self.is_free
         for _ in range(max_iter):
             Nf, gf = normal[np.ix_(f, f)], grad[f]
@@ -510,7 +565,7 @@ class CalibrationFit:
                 break  # no downhill step: converged to within numerical precision
             rel = (cost - trial_cost) / cost
             self.params = self.params + step
-            cost, normal, grad = self.evaluate_cost(self.params, deriv=True)
+            cost, normal, grad = self.evaluate_cost_and_derivatives(self.params)
             # steps far below the statistical uncertainties: stops noise-free fits, whose cost falls without plateauing
             if rel < tol or np.abs(step[f] * scale).max() < step_tol:
                 break
