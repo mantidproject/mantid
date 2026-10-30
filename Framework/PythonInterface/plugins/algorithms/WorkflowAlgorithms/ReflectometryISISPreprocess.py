@@ -88,7 +88,14 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
         monitor_ws = None
         if event_mode:
             alg = self.createChildAlgorithm("LoadEventNexus", Filename=run, LoadMonitors=True)
-            alg.execute()
+            try:
+                alg.execute()
+            except RuntimeError as err:
+                # This isn't a very helpful error message from LoadEventNexus, intercept it and replace with a better one.
+                if "The supplied group /entry does not exist" in str(err):
+                    raise RuntimeError(f"The supplied run, {run}, is not an event workspace and so cannot be sliced.")
+                else:
+                    raise err
             ws = alg.getProperty("OutputWorkspace").value
             monitor_ws = alg.getProperty("MonitorWorkspace").value
             self._validate_event_ws(ws)
