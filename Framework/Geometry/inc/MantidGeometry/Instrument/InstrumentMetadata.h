@@ -25,8 +25,8 @@ namespace Geometry {
 class MANTID_GEOMETRY_DLL InstrumentMetadata {
 public:
   InstrumentMetadata(const Types::Core::DateAndTime &validFromDate, const Types::Core::DateAndTime &validToDate,
-                     std::string filename, std::string xmlText, std::string defaultView, std::string defaultAxis,
-                     Instrument_const_sptr physicalInstrument);
+                     const std::string &filename, const std::string &xmlText, const std::string &defaultView,
+                     const std::string &defaultAxis, const Instrument_const_sptr &physicalInstrument);
 
   const Types::Core::DateAndTime &validFromDate() const;
   const Types::Core::DateAndTime &validToDate() const;
@@ -39,10 +39,10 @@ public:
   /// design (tracked separately).
   Instrument_const_sptr physicalInstrument() const;
 
-  void setFileName(std::string filename);
-  void setXmlText(std::string xmlText);
-  void setDefaultView(std::string defaultView);
-  void setDefaultViewAxis(std::string defaultAxis);
+  void setFileName(const std::string &filename);
+  void setXmlText(const std::string &xmlText);
+  void setDefaultView(const std::string &defaultView);
+  void setDefaultViewAxis(const std::string &defaultAxis);
 
 private:
   Types::Core::DateAndTime m_validFromDate;

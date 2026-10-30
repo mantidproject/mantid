@@ -9,12 +9,11 @@
 namespace Mantid::Geometry {
 
 InstrumentMetadata::InstrumentMetadata(const Types::Core::DateAndTime &validFromDate,
-                                       const Types::Core::DateAndTime &validToDate, std::string filename,
-                                       std::string xmlText, std::string defaultView, std::string defaultAxis,
-                                       Instrument_const_sptr physicalInstrument)
-    : m_validFromDate(validFromDate), m_validToDate(validToDate), m_filename(std::move(filename)),
-      m_xmlText(std::move(xmlText)), m_defaultView(std::move(defaultView)), m_defaultAxis(std::move(defaultAxis)),
-      m_physicalInstrument(std::move(physicalInstrument)) {}
+                                       const Types::Core::DateAndTime &validToDate, const std::string &filename,
+                                       const std::string &xmlText, const std::string &defaultView,
+                                       const std::string &defaultAxis, const Instrument_const_sptr &physicalInstrument)
+    : m_validFromDate(validFromDate), m_validToDate(validToDate), m_filename(filename), m_xmlText(xmlText),
+      m_defaultView(defaultView), m_defaultAxis(defaultAxis), m_physicalInstrument(physicalInstrument) {}
 
 const Types::Core::DateAndTime &InstrumentMetadata::validFromDate() const { return m_validFromDate; }
 
@@ -30,12 +29,12 @@ const std::string &InstrumentMetadata::defaultAxis() const { return m_defaultAxi
 
 Instrument_const_sptr InstrumentMetadata::physicalInstrument() const { return m_physicalInstrument; }
 
-void InstrumentMetadata::setFileName(std::string filename) { m_filename = std::move(filename); }
+void InstrumentMetadata::setFileName(const std::string &filename) { m_filename = filename; }
 
-void InstrumentMetadata::setXmlText(std::string xmlText) { m_xmlText = std::move(xmlText); }
+void InstrumentMetadata::setXmlText(const std::string &xmlText) { m_xmlText = xmlText; }
 
-void InstrumentMetadata::setDefaultView(std::string defaultView) { m_defaultView = std::move(defaultView); }
+void InstrumentMetadata::setDefaultView(const std::string &defaultView) { m_defaultView = defaultView; }
 
-void InstrumentMetadata::setDefaultViewAxis(std::string defaultAxis) { m_defaultAxis = std::move(defaultAxis); }
+void InstrumentMetadata::setDefaultViewAxis(const std::string &defaultAxis) { m_defaultAxis = defaultAxis; }
 
 } // namespace Mantid::Geometry
