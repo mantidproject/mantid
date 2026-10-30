@@ -356,8 +356,6 @@ private:
   std::vector<size_t> m_detIndex2WsIndex;
 
   bool m_isPhysicalInstrument;
-  std::unique_ptr<Mantid::Geometry::ComponentInfo> m_physicalComponentInfo;
-  std::unique_ptr<Mantid::Geometry::DetectorInfo> m_physicalDetectorInfo;
   std::unique_ptr<InstrumentRenderer> m_renderer;
   MantidWidgets::IMessageHandler &m_messageHandler;
 

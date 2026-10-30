@@ -24,7 +24,6 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentMetadata.h"
-#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
@@ -255,11 +254,7 @@ void InstrumentActor::setupPhysicalInstrumentIfExists() {
   auto sharedWorkspace = getWorkspace();
   Mantid::Kernel::ReadLock _lock(*sharedWorkspace);
 
-  auto instr = sharedWorkspace->instrumentMetadata().physicalInstrument();
-  if (instr) {
-    auto infos = InstrumentVisitor::makeWrappers(*instr);
-    m_physicalComponentInfo = std::move(infos.first);
-    m_physicalDetectorInfo = std::move(infos.second);
+  if (sharedWorkspace->instrumentMetadata().hasPhysicalInstrument()) {
     m_isPhysicalInstrument = true;
   }
 }
@@ -405,7 +400,7 @@ Instrument_const_sptr InstrumentActor::getInstrument() const {
   if (isPhysicalView()) {
     // First see if there is a 'physical' instrument available. Use it if there
     // is.
-    auto instr = sharedWorkspace->instrumentMetadata().physicalInstrument();
+    auto instr = sharedWorkspace->getInstrument()->getPhysicalInstrument();
     if (instr)
       return instr;
   }
@@ -1228,7 +1223,7 @@ const InstrumentRenderer &InstrumentActor::getInstrumentRenderer() const { retur
  */
 const Mantid::Geometry::ComponentInfo &InstrumentActor::componentInfo() const {
   if (m_isPhysicalInstrument)
-    return *m_physicalComponentInfo;
+    return getWorkspace()->instrumentMetadata().physicalComponentInfo();
   else
     return getWorkspace()->componentInfo();
 }
@@ -1239,7 +1234,7 @@ const Mantid::Geometry::ComponentInfo &InstrumentActor::componentInfo() const {
  */
 const Mantid::Geometry::DetectorInfo &InstrumentActor::detectorInfo() const {
   if (m_isPhysicalInstrument)
-    return *m_physicalDetectorInfo;
+    return getWorkspace()->instrumentMetadata().physicalDetectorInfo();
   else
     return getWorkspace()->detectorInfo();
 }
