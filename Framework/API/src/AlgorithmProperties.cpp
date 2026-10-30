@@ -69,4 +69,9 @@ std::string getOutputWorkspace(const IAlgorithm_sptr &algorithm, std::string con
   return workspaceName;
 }
 
+std::vector<std::string> getMultipleOutputWorkspaces(const IAlgorithm_sptr &algorithm, std::string const &property) {
+  std::vector<std::string> workspaceNames = algorithm->getProperty(property);
+  return workspaceNames;
+}
+
 } // namespace Mantid::API::AlgorithmProperties

@@ -21,7 +21,7 @@ public:
   virtual void setName(std::string const &name) = 0;
   virtual bool hasPostprocessing() const = 0;
   virtual bool requiresPostprocessing(bool reprocessFailed) const = 0;
-  virtual std::string postprocessedWorkspaceName() const = 0;
+  virtual std::vector<std::string> postprocessedWorkspaceNames() const = 0;
 
   virtual void appendEmptyRow() = 0;
   virtual void appendRow(std::optional<Row> const &row) = 0;

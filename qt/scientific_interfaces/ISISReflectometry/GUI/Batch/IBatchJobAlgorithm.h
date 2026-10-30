@@ -25,6 +25,7 @@ public:
 
   virtual Item *item() = 0;
   virtual void updateItem() = 0;
+  virtual bool resetOutputsOnStart() const = 0;
 };
 
 } // namespace ISISReflectometry

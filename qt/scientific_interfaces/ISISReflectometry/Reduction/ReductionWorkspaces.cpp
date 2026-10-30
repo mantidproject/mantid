@@ -23,35 +23,38 @@ std::vector<std::string> const &ReductionWorkspaces::inputRunNumbers() const { r
 
 TransmissionRunPair const &ReductionWorkspaces::transmissionRuns() const { return m_transmissionRuns; }
 
-std::string const &ReductionWorkspaces::iVsLambda() const { return m_iVsLambda; }
+std::vector<std::string> const &ReductionWorkspaces::iVsLambda() const { return m_iVsLambda; }
 
-std::string const &ReductionWorkspaces::iVsQ() const { return m_iVsQ; }
+std::vector<std::string> const &ReductionWorkspaces::iVsQ() const { return m_iVsQ; }
 
-std::string const &ReductionWorkspaces::iVsQBinned() const { return m_iVsQBinned; }
+std::vector<std::string> const &ReductionWorkspaces::iVsQBinned() const { return m_iVsQBinned; }
 
-void ReductionWorkspaces::setOutputNames(std::string iVsLambda, std::string iVsQ, std::string iVsQBinned) {
+void ReductionWorkspaces::setOutputNames(std::vector<std::string> iVsLambda, std::vector<std::string> iVsQ,
+                                         std::vector<std::string> iVsQBinned) {
   m_iVsLambda = std::move(iVsLambda);
   m_iVsQ = std::move(iVsQ);
   m_iVsQBinned = std::move(iVsQBinned);
 }
 
 void ReductionWorkspaces::resetOutputNames() {
-  m_iVsLambda = std::string();
-  m_iVsQ = std::string();
-  m_iVsQBinned = std::string();
+  m_iVsLambda = std::vector<std::string>();
+  m_iVsQ = std::vector<std::string>();
+  m_iVsQBinned = std::vector<std::string>();
 }
 
 bool ReductionWorkspaces::hasOutputName(std::string const &wsName) const {
-  return m_iVsLambda == wsName || m_iVsQ == wsName || m_iVsQBinned == wsName;
+  return std::any_of(m_iVsLambda.cbegin(), m_iVsLambda.cend(),
+                     [&wsName](std::string const &lamWsName) { return lamWsName == wsName; }) ||
+         std::any_of(m_iVsQ.cbegin(), m_iVsQ.cend(),
+                     [&wsName](std::string const &lamWsName) { return lamWsName == wsName; }) ||
+         std::any_of(m_iVsQBinned.cbegin(), m_iVsQBinned.cend(),
+                     [&wsName](std::string const &lamWsName) { return lamWsName == wsName; });
 }
 
 void ReductionWorkspaces::renameOutput(std::string const &oldName, std::string const &newName) {
-  if (m_iVsLambda == oldName)
-    m_iVsLambda = newName;
-  else if (m_iVsQ == oldName)
-    m_iVsQ = newName;
-  else if (m_iVsQBinned == oldName)
-    m_iVsQBinned = newName;
+  std::replace(m_iVsLambda.begin(), m_iVsLambda.end(), oldName, newName);
+  std::replace(m_iVsQ.begin(), m_iVsQ.end(), oldName, newName);
+  std::replace(m_iVsQBinned.begin(), m_iVsQBinned.end(), oldName, newName);
 }
 
 bool operator==(ReductionWorkspaces const &lhs, ReductionWorkspaces const &rhs) {

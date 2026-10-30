@@ -269,13 +269,26 @@ public:
 
   void test_setting_output_name() {
     auto group = makeEmptyGroup();
-    group.setOutputNames({"test name"});
-    TS_ASSERT_EQUALS(group.postprocessedWorkspaceName(), "test name");
+    group.setOutputNames({{"test name"}});
+    TS_ASSERT_EQUALS(group.postprocessedWorkspaceNames().size(), 1);
+    TS_ASSERT_EQUALS(group.postprocessedWorkspaceNames()[0], "test name");
   }
 
-  void test_setting_output_names_throws_if_more_than_one_name() {
+  void test_setting_output_names_handles_multiple_names() {
     auto group = makeEmptyGroup();
-    TS_ASSERT_THROWS(group.setOutputNames({"test name 1", "test name 2"}), const std::runtime_error &);
+    // Test call for the first slice's algorithm's completion.
+    group.setOutputNames({{"test_name_0_100"}});
+    // Test call for the second slice's algorithm's completion.
+    group.setOutputNames({{"test_name_100_200"}});
+    TS_ASSERT_EQUALS(group.postprocessedWorkspaceNames().size(), 2);
+    auto expected = std::vector<std::string>{"test_name_0_100", "test_name_100_200"};
+    TS_ASSERT_EQUALS(group.postprocessedWorkspaceNames(), expected);
+  }
+
+  void test_setting_output_names_throws_if_more_than_one_vector() {
+    auto group = makeEmptyGroup();
+    TS_ASSERT_THROWS_EQUALS(group.setOutputNames({{"test name 1"}, {"test name 2"}}), const std::runtime_error &e,
+                            std::string(e.what()), "Invalid number of output workspace lists for group");
   }
 
   void test_setting_output_names_throws_if_empty() {
@@ -285,9 +298,10 @@ public:
 
   void test_resetting_output_names() {
     auto group = makeEmptyGroup();
-    group.setOutputNames({"test name"});
+    group.setOutputNames({{"test name"}});
     group.resetOutputs();
-    TS_ASSERT_EQUALS(group.postprocessedWorkspaceName(), "");
+    TS_ASSERT_EQUALS(group.postprocessedWorkspaceNames().size(), 0);
+    TS_ASSERT_EQUALS(group.postprocessedWorkspaceNames(), std::vector<std::string>{});
   }
 
   /** Adding rows
@@ -520,7 +534,7 @@ public:
   void test_find_row_with_output_name() {
     auto group = makeGroupWithThreeRows();
     // mark the row complete as an easy way to check we find the right one
-    group.mutableRows()[1]->setOutputNames({"12346_Lam", "12346_Q", "12346_QBin"});
+    group.mutableRows()[1]->setOutputNames({{"12346_Lam"}, {"12346_Q"}, {"12346_QBin"}});
     group.mutableRows()[1]->setSuccess();
     auto maybeRow = group.getItemWithOutputWorkspaceOrNone("12346_Q");
     TS_ASSERT(maybeRow.has_value());

@@ -45,13 +45,9 @@ std::optional<std::string> suffixForWorkspaceGroupMember(std::string const &memb
   return memberName.substr(prefix.size());
 }
 
-std::vector<std::string> suffixesFromFirstInputWorkspaceGroup(Group const &group) {
+std::vector<std::string> suffixesFromFirstInputWorkspaceGroup(std::vector<std::string> const &workspaceNames) {
   auto const &ads = AnalysisDataService::Instance();
-  for (auto const &row : group.rows()) {
-    if (!row)
-      continue;
-
-    auto const &groupWSName = row->reducedWorkspaceNames().iVsQ();
+  for (auto const &groupWSName : workspaceNames) {
     if (!ads.doesExist(groupWSName))
       continue;
 
@@ -74,17 +70,12 @@ std::vector<std::string> suffixesFromFirstInputWorkspaceGroup(Group const &group
   return {};
 }
 
-void updateWorkspaceProperties(AlgorithmRuntimeProps &properties, Group const &group) {
+void updateWorkspaceProperties(AlgorithmRuntimeProps &properties, std::vector<std::string> const &workspaces) {
   // There must be more than workspace to stitch
-  if (group.rows().size() < 2)
+  if (workspaces.size() < 2) {
     throw std::runtime_error("Must have at least two workspaces for stitching");
+  }
 
-  // Get the list of input workspaces from the output of each row
-  auto workspaces = std::vector<std::string>();
-  std::for_each(group.rows().cbegin(), group.rows().cend(), [&workspaces](std::optional<Row> const &row) -> void {
-    if (row)
-      workspaces.emplace_back(row->reducedWorkspaceNames().iVsQ());
-  });
   AlgorithmProperties::update("InputWorkspaces", workspaces, properties);
 
   // The stitched name is the row output names concatenated but without the
@@ -98,14 +89,14 @@ void updateWorkspaceProperties(AlgorithmRuntimeProps &properties, Group const &g
   }
   AlgorithmProperties::update("OutputWorkspace", outputName, properties);
 
-  auto const suffixes = suffixesFromFirstInputWorkspaceGroup(group);
+  auto const suffixes = suffixesFromFirstInputWorkspaceGroup(workspaces);
   if (!suffixes.empty())
     AlgorithmProperties::update("OutputWorkspaceSuffixes", suffixes, properties);
 }
 
 void updateGroupFromOutputProperties(const IAlgorithm_sptr &algorithm, Item &item) {
   auto const stitched = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspace");
-  item.setOutputNames(std::vector<std::string>{stitched});
+  item.setOutputNames(std::vector<std::vector<std::string>>{{stitched}});
 }
 
 void updateParamsFromResolution(AlgorithmRuntimeProps &properties, std::optional<double> const &resolution) {
@@ -161,24 +152,26 @@ void updateUseValidDataOnly(AlgorithmRuntimeProps &properties) {
  * @param model : the reduction configuration model
  * @param group : the row from the runs table
  */
-IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Group &group) {
+IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Group &group,
+                                                    std::vector<std::string> const &workspaces,
+                                                    bool resetOutputsOnStart) {
   // Create the algorithm
   auto alg = Mantid::API::AlgorithmManager::Instance().create("Stitch1DMany");
   alg->setRethrows(true);
 
   // Set the algorithm properties from the model
-  auto properties = createAlgorithmRuntimeProps(model, group);
+  auto properties = createAlgorithmRuntimeProps(model, group, workspaces);
 
   // Return the configured algorithm
   auto jobAlgorithm = std::make_shared<BatchJobAlgorithm>(std::move(alg), std::move(properties),
-                                                          updateGroupFromOutputProperties, &group);
+                                                          updateGroupFromOutputProperties, &group, resetOutputsOnStart);
   return jobAlgorithm;
 }
 
-std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
-                                                                                 Group const &group) {
+std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps>
+createAlgorithmRuntimeProps(IBatch const &model, Group const &group, std::vector<std::string> const &workspaces) {
   auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
-  updateWorkspaceProperties(*properties, group);
+  updateWorkspaceProperties(*properties, workspaces);
   // Set the rebin Params from the lookup row resolution, if given
   updateLookupRowProperties(*properties, model.findWildcardLookupRow());
   // Override the lookup row with the group's rows' resolution,

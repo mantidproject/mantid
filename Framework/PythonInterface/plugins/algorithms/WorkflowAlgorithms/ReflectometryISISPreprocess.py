@@ -8,7 +8,6 @@
 from mantid.api import (
     AlgorithmFactory,
     DataProcessorAlgorithm,
-    MatrixWorkspaceProperty,
     MatrixWorkspace,
     PropertyMode,
     WorkspaceGroup,
@@ -62,7 +61,7 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
             "they will be summed into a single output workspace.",
         )
         self.declareProperty(
-            MatrixWorkspaceProperty(self._MONITOR_WS, "", direction=Direction.Output, optional=PropertyMode.Optional),
+            WorkspaceProperty(self._MONITOR_WS, "", direction=Direction.Output, optional=PropertyMode.Optional),
             doc="The loaded monitors workspace. This is only output in event mode.",
         )
 
@@ -89,7 +88,14 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
         monitor_ws = None
         if event_mode:
             alg = self.createChildAlgorithm("LoadEventNexus", Filename=run, LoadMonitors=True)
-            alg.execute()
+            try:
+                alg.execute()
+            except RuntimeError as err:
+                # This isn't a very helpful error message from LoadEventNexus, intercept it and replace with a better one.
+                if "The supplied group /entry does not exist" in str(err):
+                    raise RuntimeError(f"The supplied run, {run}, is not an event workspace and so cannot be sliced.")
+                else:
+                    raise err
             ws = alg.getProperty("OutputWorkspace").value
             monitor_ws = alg.getProperty("MonitorWorkspace").value
             self._validate_event_ws(ws)
@@ -104,9 +110,9 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
     @staticmethod
     def _validate_event_ws(workspace):
         if isinstance(workspace, WorkspaceGroup):
-            # Our reduction algorithm doesn't currently support this due to slicing
-            # (which would result in a group of groups)
-            raise RuntimeError("Loading Workspace Groups in event mode is not supported currently.")
+            for member in workspace:
+                ReflectometryISISPreprocess._validate_event_ws(member)
+            return
         if not workspace.run().hasProperty("proton_charge"):
             # Reduction algorithm requires proton_charge
             raise RuntimeError("Event workspaces must contain proton_charge")
