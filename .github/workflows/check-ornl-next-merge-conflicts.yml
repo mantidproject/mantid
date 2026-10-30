@@ -1,0 +1,120 @@
+name: Check ornl-next merge conflicts with main
+
+on:
+  pull_request:
+    branches: [ornl-next]
+
+permissions:
+  contents: read
+
+jobs:
+  check-merge:
+    # Do not run in forks.
+    if: ${{ github.repository_owner == 'mantidproject' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out ornl-next
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          fetch-depth: 0
+          filter: blob:none
+
+      - name: Merge the feature branch into ornl-next
+        id: ornl_next
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        shell: bash
+        run: |
+          # Fetch the tip of the feature branch through the base repository, so that feature branches in forks work too
+          git fetch --no-tags origin "pull/${PR_NUMBER}/head"
+          head_sha="$(git rev-parse FETCH_HEAD)"
+
+          set +e
+          git -c user.name="github-actions" -c user.email="github-actions@github.com" \
+            merge --no-ff --no-edit "$head_sha" > merge-output.txt 2>&1
+          result=$?
+          set -e
+
+          if [[ "$result" -eq 0 ]]; then
+            echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          conflicts="$(git diff --name-only --diff-filter=U)"
+          if [[ -z "$conflicts" ]]; then
+            {
+              echo "Merge of the feature branch into \`ornl-next\` failed with git exit code $result."
+              echo
+              echo '```text'
+              cat merge-output.txt
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit "$result"
+          fi
+
+          {
+            echo "## The feature branch does not merge cleanly into \`ornl-next\`"
+            echo
+            echo "Resolve the conflicts with \`ornl-next\` first. Conflicting files:"
+            echo
+            echo '```text'
+            printf '%s\n' "$conflicts"
+            echo '```'
+            echo
+            echo '```text'
+            cat merge-output.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          while IFS= read -r path; do
+            echo "::error file=${path}::Merge conflict with ornl-next. Resolve the conflicts with ornl-next first."
+          done <<< "$conflicts"
+          exit 1
+
+      - name: Merge the resulting ornl-next into main
+        env:
+          ORNL_NEXT_SHA: ${{ steps.ornl_next.outputs.sha }}
+        shell: bash
+        run: |
+          git checkout --quiet --detach origin/main
+
+          set +e
+          git merge --no-commit --no-ff "$ORNL_NEXT_SHA" > merge-output.txt 2>&1
+          result=$?
+          set -e
+
+          if [[ "$result" -eq 0 ]]; then
+            echo "ornl-next with the feature branch merged in merges cleanly into main." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          conflicts="$(git diff --name-only --diff-filter=U)"
+          if [[ -z "$conflicts" ]]; then
+            {
+              echo "Merge check failed with git exit code $result."
+              echo
+              echo '```text'
+              cat merge-output.txt
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit "$result"
+          fi
+
+          {
+            echo "## Merge conflicts detected"
+            echo
+            echo "\`ornl-next\` with the feature branch merged in conflicts with \`main\` in these files:"
+            echo
+            echo '```text'
+            printf '%s\n' "$conflicts"
+            echo '```'
+            echo
+            echo '```text'
+            cat merge-output.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          while IFS= read -r path; do
+            echo "::error file=${path}::Merge conflict with main"
+          done <<< "$conflicts"
+          exit 1
