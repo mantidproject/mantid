@@ -24,7 +24,6 @@ using Mantid::Crystal::PeakHKLErrors;
 using Mantid::DataObjects::PeaksWorkspace;
 using Mantid::DataObjects::PeaksWorkspace_sptr;
 using Mantid::Geometry::Goniometer;
-using Mantid::Geometry::Instrument;
 using Mantid::Kernel::Matrix;
 using Mantid::Kernel::V3D;
 
@@ -174,21 +173,9 @@ public:
 
   void test_SamplePosition() {
     auto modPeaksNoFix = calculateBasicPlacement();
-    auto peak = modPeaksNoFix->getPeak(0);
-    auto inst = peak.getInstrument();
-    const V3D sampPos(.0003, -.00025, .00015);
-    peak.setSamplePos(sampPos);
-
-    auto pmap = inst->getParameterMap();
-    auto sample = inst->getSample();
-    pmap->addPositionCoordinate(sample.get(), "x", sampPos.X());
-    pmap->addPositionCoordinate(sample.get(), "y", sampPos.Y());
-    pmap->addPositionCoordinate(sample.get(), "z", sampPos.Z());
-    auto newInst = std::make_shared<const Instrument>(inst->baseInstrument(), pmap);
-
-    for (int i = 0; i < modPeaksNoFix->getNumberPeaks(); ++i) {
-      modPeaksNoFix->getPeak(i).setInstrument(newInst);
-    }
+    V3D const sampPos(.0003, -.00025, .00015);
+    auto &componentInfo = modPeaksNoFix->mutableComponentInfo();
+    componentInfo.setPosition(componentInfo.sample(), sampPos);
 
     // optimize
     const auto resultsSamplePos =
