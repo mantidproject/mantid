@@ -162,8 +162,10 @@ Beta Testing Begins
 
   * ``git pull`` on ``release-next``.
   * Create a new branch using the `Mantid Git Workflow guidance <https://developer.mantidproject.org/GitWorkflow.html#new-branches>`__.
-  * Navigate to your Mantid 'build' directory and open ``command-prompt.bat``.
-  * In the new command prompt, navigate to the `release_editor.py script <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/release_editor.py>`__ and run, parsing the correct version number. The script copies all of the separate release notes under the correct heading of their upper level file, e.g. ``framework.rst``, and moves the original release notes into a 'Used' directory. The Git token is needed to query the git api for the pull request which added each release note.
+  * Create a `new fine-grained GitHub personal access token <https://github.com/settings/personal-access-tokens/new>`__. You don't need to change any settings, just generate the token.
+  * In a command prompt or terminal, navigate to the `release_editor.py script <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/release_editor.py>`__ and run it, passing the correct version number (see example below).
+    The script copies all of the separate release notes under the correct heading of their upper level file, e.g. ``framework.rst``, and moves the original release notes into a 'Used' directory.
+    The Git token is needed to query the git api for the pull request. A link to the pull request is automatically added to each release note.
 
     .. code-block:: bash
 
@@ -174,13 +176,13 @@ Beta Testing Begins
 
 * Initial changes:
 
-  * For each file which needs changes, create a new branch (example name ``6.5_workbench_release_notes``) and work on changes to then be merged back into ``release-next``.
+  * For each file that needs changes, create a new branch (example name ``6.5_workbench_release_notes``) and work on changes to be merged into ``release-next``.
 
 * Incoming release notes:
 
   * As the release sprint goes on, new release note files will be created (existing outside of the 'Used' directories). The text from these will need to be copped into the main release note pages (``diffraction.rst``, ``mantidworkbench.rst`` etc.) and the file itself moved to it's corresponding 'Used' directory.
   * It is best to wait until several of these have built up before making a new branch / pr.
-  * To help with finding the new release notes, use the `unused_release_note_finder.py script <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/unused_release_note_finder.py>`__ which will print the location of release notes not within a 'Used' directory.
+  * To help with finding the new release notes, use the `unused_release_note_finder.py script <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/unused_release_note_finder.py>`__, which will print the location of release notes not within a 'Used' directory.
 
     .. code-block:: bash
 
@@ -203,7 +205,7 @@ Just before release
 
   * Check for uncollected release notes using the `unused_release_note_finder.py script <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/unused_release_note_finder.py>`__.
   * Check ``main`` for any release notes that have been merged into the wrong branch.
-  * Remove any unused headings which have not already been removed from the release notes.
+  * Remove any unused headings that have not already been removed from the release notes.
   * Remove all the "Used" release note files and their sub-structure.
 
 .. _release-manager-checklist:
