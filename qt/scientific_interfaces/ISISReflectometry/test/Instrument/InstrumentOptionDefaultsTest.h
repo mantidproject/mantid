@@ -70,6 +70,7 @@ public:
   void testDefaultCalibrationFilePathOptions() {
     auto result = getDefaults();
     TS_ASSERT_EQUALS(result.calibrationFilePath(), "");
+    TS_ASSERT_EQUALS(result.specularPixel(), std::nullopt);
   }
 
   void testValidDetectorOptionsFromParamsFile() {
@@ -82,6 +83,7 @@ public:
     auto workspace = loadPOLREF();
     InstrumentOptionDefaults instrumentDefaults;
     auto result = instrumentDefaults.get(workspace->getInstrument());
+    TS_ASSERT_EQUALS(result.specularPixel(), std::optional<double>(280.0));
     auto expected = DetectorCorrections(false, DetectorCorrectionType::VerticalShift);
     TS_ASSERT_EQUALS(result.detectorCorrections(), expected);
   }

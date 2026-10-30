@@ -212,6 +212,14 @@ Its responsibilities are to:
 * warn before creating five or more plot items; and
 * submit one or more :code:`PlotRequest` objects to :code:`IPlotter`.
 
+A plot output type owns an ordered vector of :code:`PlotRequestDefinition` entries,
+allowing multiple plot requests to be submitted for one output type, each with a
+individual sub plot output type. In each definition, a settings override
+can also be specified to customize the view controls.
+
+For outputs with multiple :code:`PlotRequestDefinition` entries, the
+:code:`PlotActionState` enables only Plot;
+
 An individual layout is submitted as one request per workspace. Overplot and
 tiled layouts are submitted as one request containing all selected workspaces.
 

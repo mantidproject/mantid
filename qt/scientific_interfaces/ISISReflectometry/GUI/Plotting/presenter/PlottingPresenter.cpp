@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "PlottingPresenter.h"
 #include "GUI/Batch/IBatchPresenter.h"
+#include "PlotOutputTypeProperties.h"
 
 #include <utility>
 
@@ -17,12 +18,8 @@ auto constexpr multiplePlotItemWarningThreshold = 5;
 /// Presenter-local request state collected from the view before model evaluation.
 struct PresenterPlotRequest {
   PlotOutputSelection outputSelection;
-  PlotLayout layout;
+  PlotRequestSettings settings;
   QWidget *plotParent;
-  bool addToExistingPlot;
-  bool tiledVertically;
-  bool shareXAxisWhenTiled;
-  bool shareYAxisWhenTiled;
 };
 
 /// Collect selected output controls and plotting target options from the view.
@@ -30,12 +27,10 @@ PresenterPlotRequest plotRequestFor(IPlottingView &view, std::string const &inst
   auto outputSelection = view.selectedPlotOutputSelection();
   outputSelection.instrumentName = instrumentName;
   return {std::move(outputSelection),
-          layout,
-          view.plotParent(),
-          view.shouldAddToExistingPlot(),
-          layout == PlotLayout::Tiled && view.shouldPlotTiledVertically(),
-          layout == PlotLayout::Tiled && view.shouldShareXAxisWhenTiled(),
-          layout == PlotLayout::Tiled && view.shouldShareYAxisWhenTiled()};
+          {layout, view.shouldAddToExistingPlot(), layout == PlotLayout::Tiled && view.shouldPlotTiledVertically(),
+           layout == PlotLayout::Tiled && view.shouldShareXAxisWhenTiled(),
+           layout == PlotLayout::Tiled && view.shouldShareYAxisWhenTiled()},
+          view.plotParent()};
 }
 } // namespace
 
@@ -124,34 +119,42 @@ void PlottingPresenter::plotSelectedWorkspaces(PlotLayout layout) {
   }
 
   auto const request = plotRequestFor(*m_view, m_instrumentName, layout);
-  auto const workspacesToPlot =
-      m_plottingModel->workspacesForPlotting(selectedPlottingWorkspaces, request.outputSelection);
-  if (workspacesToPlot.empty()) {
-    return;
-  }
-
-  auto const options = m_plotOptionsProvider->optionsFor(request.outputSelection, request.layout);
-  if (workspacesToPlot.size() >= multiplePlotItemWarningThreshold &&
-      !m_view->confirmPlottingMultipleItems(workspacesToPlot.size())) {
-    return;
-  }
-
-  if (request.layout == PlotLayout::Individual) {
-    for (auto const &workspace : workspacesToPlot) {
-      m_plotter->plot({{workspace},
-                       options,
-                       request.plotParent,
-                       request.addToExistingPlot,
-                       request.tiledVertically,
-                       request.shareXAxisWhenTiled,
-                       request.shareYAxisWhenTiled});
+  auto preparedRequests = std::vector<PlotRequest>{};
+  auto plotItemCount = size_t{0};
+  for (auto const &definition : plotOutputTypeProperties(request.outputSelection.outputType).plotRequests()) {
+    auto outputSelection = request.outputSelection;
+    outputSelection.outputType = definition.outputType;
+    auto const settings = definition.settingsOverride.value_or(request.settings);
+    auto workspaces = m_plottingModel->workspacesForPlotting(selectedPlottingWorkspaces, outputSelection);
+    if (workspaces.empty()) {
+      return;
     }
-    updateActivePlotCompatibility();
-    return;
+    plotItemCount += workspaces.size();
+    auto const options = m_plotOptionsProvider->optionsFor(outputSelection, settings.layout);
+    auto plotRequest = PlotRequest{{},
+                                   options,
+                                   request.plotParent,
+                                   settings.addToExistingPlot,
+                                   settings.tiledVertically,
+                                   settings.shareXAxisWhenTiled,
+                                   settings.shareYAxisWhenTiled};
+    if (settings.layout == PlotLayout::Individual) {
+      for (auto const &workspace : workspaces) {
+        plotRequest.workspaces = {workspace};
+        preparedRequests.emplace_back(plotRequest);
+      }
+    } else {
+      plotRequest.workspaces = std::move(workspaces);
+      preparedRequests.emplace_back(std::move(plotRequest));
+    }
   }
 
-  m_plotter->plot({workspacesToPlot, options, request.plotParent, request.addToExistingPlot, request.tiledVertically,
-                   request.shareXAxisWhenTiled, request.shareYAxisWhenTiled});
+  if (plotItemCount >= multiplePlotItemWarningThreshold && !m_view->confirmPlottingMultipleItems(plotItemCount)) {
+    return;
+  }
+  for (auto const &plotRequest : preparedRequests) {
+    m_plotter->plot(plotRequest);
+  }
   updateActivePlotCompatibility();
 }
 

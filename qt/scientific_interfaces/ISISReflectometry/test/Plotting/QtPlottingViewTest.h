@@ -33,6 +33,35 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
 class QtPlottingViewTest : public CxxTest::TestSuite, private PlottingWorkspaceTreeTestHelpers {
 public:
+  void testCombinedOutputKeepsControlsVisibleAndOnlyEnablesPlot() {
+    QtPlottingView view;
+    PlottingPresenter presenter(&view);
+    presenter.notifyInstrumentChanged("POLREF");
+    auto *selector = view.findChild<QComboBox *>("plotPreset");
+    selector->setCurrentIndex(selector->findData(static_cast<int>(PlotOutputType::ReflectivityAndSpinAsymmetry)));
+
+    PlottingViewStateProvider provider;
+    view.setPlotActionState(
+        provider.plotActionState(true, 2, 2, PlotOutputType::ReflectivityAndSpinAsymmetry, true, true, true));
+    TS_ASSERT_EQUALS(selector->currentText().toStdString(), "Reflectivity + Spin Asymmetry");
+    TS_ASSERT(view.findChild<QPushButton *>("plotIndividual")->isEnabled());
+    TS_ASSERT(!view.shouldAddToExistingPlot());
+    TS_ASSERT(!view.findChild<QPushButton *>("plotIndividual")->isHidden());
+    for (auto const *name : {"plotOverplot", "plotTiled", "addToExistingPlot", "plotTiledVertically",
+                             "shareAxesWhenTiledLabel", "shareXAxisWhenTiled", "shareYAxisWhenTiled"}) {
+      TS_ASSERT(!view.findChild<QWidget *>(name)->isHidden());
+      TS_ASSERT(!view.findChild<QWidget *>(name)->isEnabled());
+    }
+
+    selector->setCurrentIndex(selector->findData(static_cast<int>(PlotOutputType::SpinAsymmetry)));
+    view.setPlotActionState(provider.plotActionState(true, 2, 2, PlotOutputType::SpinAsymmetry, false, true, true));
+    for (auto const *name : {"plotOverplot", "plotTiled", "addToExistingPlot", "plotTiledVertically",
+                             "shareAxesWhenTiledLabel", "shareXAxisWhenTiled", "shareYAxisWhenTiled"}) {
+      TS_ASSERT(!view.findChild<QWidget *>(name)->isHidden());
+      TS_ASSERT(view.findChild<QWidget *>(name)->isEnabled());
+    }
+  }
+
   void testNoPlotOutputTypesAreAvailableBeforePresenterSetsThem() {
     QtPlottingView view;
     auto plotPreset = view.findChild<QComboBox *>("plotPreset");
@@ -832,6 +861,9 @@ private:
         break;
       case PlotOutputType::Alignment:
         items.push_back({outputType, "Alignment"});
+        break;
+      case PlotOutputType::ReflectivityAndSpinAsymmetry:
+        items.push_back({outputType, "Reflectivity + Spin Asymmetry"});
         break;
       }
     }

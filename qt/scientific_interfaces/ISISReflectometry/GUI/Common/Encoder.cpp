@@ -213,6 +213,10 @@ QMap<QString, QVariant> Encoder::encodeRow(const MantidQt::CustomInterfaces::ISI
   }
   rowMap.insert(QString("runNumbers"), QVariant(runNumbers));
   rowMap.insert(QString("theta"), QVariant(row.m_theta));
+  if (row.nominalSpecularPixel())
+    rowMap.insert("nominalSpecularPixel", *row.nominalSpecularPixel());
+  if (row.actualSpecularPixel())
+    rowMap.insert("actualSpecularPixel", *row.actualSpecularPixel());
   rowMap.insert(QString("qRange"), QVariant(encodeRangeInQ(row.m_qRange)));
   rowMap.insert(QString("qRangeOutput"), QVariant(encodeRangeInQ(row.m_qRangeOutput)));
   rowMap.insert(QString("scaleFactorPresent"), QVariant(static_cast<bool>(row.m_scaleFactor)));

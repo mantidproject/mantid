@@ -71,6 +71,8 @@ void updateRowProperties(AlgorithmRuntimeProps &properties, Row const &row) {
   AlgorithmProperties::update("ThetaIn", row.theta(), properties);
   AlgorithmProperties::update("ScaleFactor", row.scaleFactor(), properties);
   AlgorithmProperties::updateFromMap(properties, row.reductionOptions());
+  AlgorithmProperties::update("NominalSpecularPixelSpectrumNo", row.nominalSpecularPixel(), properties);
+  AlgorithmProperties::update("ActualSpecularPixelSpectrumNo", row.actualSpecularPixel(), properties);
 }
 
 void updateTransmissionStitchProperties(AlgorithmRuntimeProps &properties, TransmissionStitchOptions const &options) {
@@ -151,6 +153,8 @@ void updateLookupRowProperties(AlgorithmRuntimeProps &properties, LookupRow cons
   AlgorithmProperties::update("BackgroundProcessingInstructions", lookupRow.backgroundProcessingInstructions(),
                               properties);
   AlgorithmProperties::update("ROIDetectorIDs", lookupRow.roiDetectorIDs(), properties);
+  AlgorithmProperties::update("NominalSpecularPixelSpectrumNo", lookupRow.nominalSpecularPixel(), properties);
+  AlgorithmProperties::update("ActualSpecularPixelSpectrumNo", lookupRow.actualSpecularPixel(), properties);
 }
 
 void updateWavelengthRangeProperties(AlgorithmRuntimeProps &properties,

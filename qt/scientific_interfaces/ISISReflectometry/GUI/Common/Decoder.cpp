@@ -17,6 +17,7 @@
 #include "../Runs/QtCatalogSearcher.h"
 #include "../Runs/QtRunsView.h"
 #include "../Runs/RunsPresenter.h"
+#include "../RunsTable/JobsViewUpdater.h"
 #include "../RunsTable/QtRunsTableView.h"
 #include "../RunsTable/RunsTablePresenter.h"
 #include "../Save/QtSaveView.h"
@@ -211,40 +212,6 @@ void Decoder::decodeRuns(QtRunsView *gui, ReductionJobs *redJobs, RunsTablePrese
   searcher->m_searchCriteria.instrument = map[QString("textInstrument")].toString().toStdString();
 }
 
-namespace {
-using ValueFunction = std::optional<double> (RangeInQ::*)() const;
-
-MantidWidgets::Batch::Cell qRangeCellOrDefault(RangeInQ const &qRangeInput, RangeInQ const &qRangeOutput,
-                                               ValueFunction valueFunction, std::optional<int> precision) {
-  auto maybeValue = (qRangeInput.*valueFunction)();
-  auto useOutputValue = false;
-  if (!maybeValue.has_value()) {
-    maybeValue = (qRangeOutput.*valueFunction)();
-    useOutputValue = true;
-  }
-  auto result = MantidWidgets::Batch::Cell(optionalToString(maybeValue, precision));
-  if (useOutputValue)
-    result.setOutput();
-  else
-    result.setInput();
-  return result;
-}
-
-std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, const std::optional<int> &precision) {
-  return std::vector<MantidQt::MantidWidgets::Batch::Cell>(
-      {MantidQt::MantidWidgets::Batch::Cell(boost::join(row.runNumbers(), "+")),
-       MantidQt::MantidWidgets::Batch::Cell(valueToString(row.theta(), precision)),
-       MantidQt::MantidWidgets::Batch::Cell(row.transmissionWorkspaceNames().firstRunList()),
-       MantidQt::MantidWidgets::Batch::Cell(row.transmissionWorkspaceNames().secondRunList()),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::min, precision),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::max, precision),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::step, precision),
-       MantidQt::MantidWidgets::Batch::Cell(optionalToString(row.scaleFactor(), precision)),
-       MantidQt::MantidWidgets::Batch::Cell(MantidWidgets::optionsToString(row.reductionOptions())),
-       MantidQt::MantidWidgets::Batch::Cell(optionalToString(row.lookupIndex(), precision))});
-}
-} // namespace
-
 void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view, const ReductionJobs *model,
                                            const std::optional<int> &precision) {
   auto jobTreeView = view->m_jobs.get();
@@ -365,7 +332,11 @@ Decoder::decodeRow(const QMap<QString, QVariant> &map) {
       number, map[QString("theta")].toDouble(), decodeTransmissionRunPair(map[QString("transRunNums")].toMap()),
       decodeRangeInQ(map[QString("qRange")].toMap()), maybeScaleFactor,
       decodeReductionOptions(map[QString("reductionOptions")].toMap()),
-      decodeReductionWorkspace(map[QString("reductionWorkspaces")].toMap()));
+      decodeReductionWorkspace(map[QString("reductionWorkspaces")].toMap()),
+      map.contains("nominalSpecularPixel") ? std::optional<double>(map["nominalSpecularPixel"].toDouble())
+                                           : std::nullopt,
+      map.contains("actualSpecularPixel") ? std::optional<double>(map["actualSpecularPixel"].toDouble())
+                                          : std::nullopt);
   if (m_projectSave) {
     auto itemState = map[QString("itemState")].toInt();
     row.setState(State(itemState));

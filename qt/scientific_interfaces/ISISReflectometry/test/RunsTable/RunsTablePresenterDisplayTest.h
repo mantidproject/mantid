@@ -8,6 +8,9 @@
 
 #include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h"
 #include "../../../ISISReflectometry/TestHelpers/PlottingTestHelpers.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "RunsTablePresenterTest.h"
 
 #include <cxxtest/TestSuite.h>
@@ -26,6 +29,71 @@ public:
   static RunsTablePresenterDisplayTest *createSuite() { return new RunsTablePresenterDisplayTest(); }
 
   static void destroySuite(RunsTablePresenterDisplayTest *suite) { delete suite; }
+
+  void testAdjustedAngleCannotBeFilledDown() {
+    auto presenter = makePresenter(m_view, oneGroupWithTwoSimpleRowsModel());
+    selectedRowLocationsAre(m_jobs, {location(0, 0), location(0, 1)});
+    selectedColumnIs(m_jobs, adjustedAngleColumn);
+    EXPECT_CALL(m_jobs, setCellAt(_, _, _)).Times(0);
+    presenter.notifyFillDown();
+    verifyAndClearExpectations();
+  }
+
+  void testRowRefreshPicksUpAddedChangedAndRemovedAdjustedAngle() {
+    auto presenter = makePresenter(m_view, oneGroupWithARowModel());
+    auto precision = 2;
+    presenter.setTablePrecision(precision);
+    auto workspace = WorkspaceCreationHelper::create2DWorkspace(1, 2);
+    workspace->mutableRun().addProperty("run_number", std::string("12345"));
+    auto &ads = Mantid::API::AnalysisDataService::Instance();
+    ads.addOrReplace("TOF_12345", workspace);
+    auto output = WorkspaceCreationHelper::create2DWorkspace(1, 2);
+    output->mutableRun().addProperty("run_number", std::string("12345"));
+    ads.addOrReplace("IvsQ_binned_12345", output);
+    getRow(presenter, 0, 0)->setOutputNames({"", "", "IvsQ_binned_12345"});
+    Item const &row = *getRow(presenter, 0, 0);
+    std::vector<Cell> cells;
+    EXPECT_CALL(m_jobs, setCellsAt(location(0, 0), _)).Times(4).WillRepeatedly(testing::SaveArg<1>(&cells));
+    presenter.notifyRowModelChanged(row);
+    TS_ASSERT(cells.at(adjustedAngleColumn).contentText().empty());
+    workspace->mutableRun().addProperty("reflectometry_adjusted_theta", 0.626);
+    presenter.notifyRowModelChanged(row);
+    TS_ASSERT_EQUALS(cells.at(adjustedAngleColumn).contentText(), "0.63");
+    TS_ASSERT(!cells.at(adjustedAngleColumn).isEditable());
+    workspace->mutableRun().addProperty("reflectometry_adjusted_theta", 0.75, true);
+    presenter.notifyRowModelChanged(row);
+    TS_ASSERT_EQUALS(cells.at(adjustedAngleColumn).contentText(), "0.75");
+    workspace->mutableRun().removeProperty("reflectometry_adjusted_theta");
+    presenter.notifyRowModelChanged(row);
+    TS_ASSERT(cells.at(adjustedAngleColumn).contentText().empty());
+    ads.remove("TOF_12345");
+    ads.remove("IvsQ_binned_12345");
+    verifyAndClearExpectations();
+  }
+
+  void testAdjustedAngleCannotBeEdited() {
+    auto presenter = makePresenter(m_view, oneGroupWithARowModel());
+    EXPECT_CALL(m_jobs, setCellAt(_, _, _)).Times(0);
+    presenter.notifyCellTextChanged(location(0, 0), adjustedAngleColumn, "0.6", "0.7");
+    verifyAndClearExpectations();
+  }
+
+  void testGeneratedQValueCanBeEditedToProvideAnInputOverride() {
+    auto presenter = makePresenter(m_view, oneGroupWithARowWithOutputQRangeModel());
+    auto const rowLocation = location(0, 0);
+    auto cells = cellsArray();
+    cells[4] = Cell("0.125");
+    cells[4].setOutput();
+    ON_CALL(m_jobs, cellAt(rowLocation, 4)).WillByDefault(testing::Invoke([&](auto const &, int) { return cells[4]; }));
+    ON_CALL(m_jobs, cellsAt(rowLocation)).WillByDefault(testing::Invoke([&](auto const &) { return cells; }));
+    EXPECT_CALL(m_jobs, setCellAt(rowLocation, 4, _))
+        .WillOnce(testing::Invoke([&](auto const &, int column, Cell const &cell) { cells[column] = cell; }));
+    EXPECT_CALL(m_mainPresenter, notifyRowContentChanged(_)).Times(1);
+    presenter.notifyCellTextChanged(rowLocation, 4, "0.5", "0.125");
+    TS_ASSERT(cells[4].isInput());
+    TS_ASSERT_EQUALS(getRow(presenter, 0, 0)->qRange().min(), std::optional<double>(0.125));
+    verifyAndClearExpectations();
+  }
 
   void testExpandsAllGroupsWhenRequested() {
     EXPECT_CALL(m_jobs, expandAll()).Times(2);
@@ -238,6 +306,9 @@ public:
          MantidQt::MantidWidgets::Batch::Cell("0.01"), MantidQt::MantidWidgets::Batch::Cell(""),
          MantidQt::MantidWidgets::Batch::Cell(MantidQt::MantidWidgets::optionsToString(ReductionOptionsMap())),
          MantidQt::MantidWidgets::Batch::Cell("")});
+    roundedCells.emplace_back(adjustedAngleCell(makeSimpleRow("12345"), precision));
+    roundedCells.emplace_back("");
+    roundedCells.emplace_back("");
     EXPECT_CALL(m_jobs, setCellsAt(rowLocation, roundedCells)).Times(1);
     presenter.notifyRowModelChanged();
 

@@ -39,6 +39,7 @@ private:
   std::optional<std::string> parseProcessingInstructions(LookupRow::ValueArray const &cellText);
   std::optional<std::string> parseBackgroundProcessingInstructions(LookupRow::ValueArray const &cellText);
   std::optional<std::string> parseROIDetectorIDs(LookupRow::ValueArray const &cellText);
+  std::optional<double> parsePixel(LookupRow::ValueArray const &cellText, LookupRow::Column column);
 
   void validateThetaAndRegex();
 

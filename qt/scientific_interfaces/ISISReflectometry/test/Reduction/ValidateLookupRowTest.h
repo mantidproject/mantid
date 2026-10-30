@@ -31,6 +31,8 @@ public:
     auto result = validator({""});
     TS_ASSERT(result.isValid());
     TS_ASSERT(!result.assertValid().thetaOrWildcard().has_value());
+    TS_ASSERT(!result.assertValid().nominalSpecularPixel().has_value());
+    TS_ASSERT(!result.assertValid().actualSpecularPixel().has_value());
   }
 
   void testParseThetaError() {
@@ -207,6 +209,23 @@ public:
     LookupRowValidator validator;
     auto result = validator({"", "", "", "", "", "", "", "", "", "", "", "bad"});
     std::unordered_set<int> errorCells = {LookupRow::Column::ROI_DETECTOR_IDS};
+    TS_ASSERT(result.isError());
+    TS_ASSERT_EQUALS(result.assertError(), errorCells);
+  }
+
+  void testParseSpecularPixels() {
+    LookupRowValidator validator;
+    auto result = validator({"", "", "", "", "", "", "", "", "", "", "", "", "280.5", "282.25"});
+    TS_ASSERT(result.isValid());
+    TS_ASSERT_EQUALS(result.assertValid().nominalSpecularPixel(), 280.5);
+    TS_ASSERT_EQUALS(result.assertValid().actualSpecularPixel(), 282.25);
+  }
+
+  void testParseSpecularPixelsError() {
+    LookupRowValidator validator;
+    auto result = validator({"", "", "", "", "", "", "", "", "", "", "", "", "-1", "bad"});
+    std::unordered_set<int> errorCells = {LookupRow::Column::NOMINAL_SPECULAR_PIXEL,
+                                          LookupRow::Column::ACTUAL_SPECULAR_PIXEL};
     TS_ASSERT(result.isError());
     TS_ASSERT_EQUALS(result.assertError(), errorCells);
   }

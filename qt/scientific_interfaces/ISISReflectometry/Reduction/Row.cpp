@@ -17,9 +17,11 @@ Row::Row(std::vector<std::string> runNumbers, double theta,
          TransmissionRunPair transmissionRuns, RangeInQ qRange, std::optional<double> scaleFactor,
          ReductionOptionsMap reductionOptions,
 
-         ReductionWorkspaces reducedWorkspaceNames)
+         ReductionWorkspaces reducedWorkspaceNames, std::optional<double> nominalSpecularPixel,
+         std::optional<double> actualSpecularPixel)
     : m_runNumbers(std::move(runNumbers)), m_theta(theta), m_qRange(std::move(qRange)), m_qRangeOutput(),
-      m_scaleFactor(std::move(scaleFactor)), m_transmissionRuns(std::move(transmissionRuns)),
+      m_scaleFactor(std::move(scaleFactor)), m_nominalSpecularPixel(nominalSpecularPixel),
+      m_actualSpecularPixel(actualSpecularPixel), m_transmissionRuns(std::move(transmissionRuns)),
       m_reducedWorkspaceNames(std::move(reducedWorkspaceNames)), m_reductionOptions(std::move(reductionOptions)),
       m_lookupIndex(std::nullopt), m_parent(nullptr) {
   std::sort(m_runNumbers.begin(), m_runNumbers.end());
@@ -40,6 +42,10 @@ RangeInQ const &Row::qRange() const { return m_qRange; }
 RangeInQ const &Row::qRangeOutput() const { return m_qRangeOutput; }
 
 std::optional<double> Row::scaleFactor() const { return m_scaleFactor; }
+
+std::optional<double> Row::nominalSpecularPixel() const { return m_nominalSpecularPixel; }
+
+std::optional<double> Row::actualSpecularPixel() const { return m_actualSpecularPixel; }
 
 ReductionOptionsMap const &Row::reductionOptions() const { return m_reductionOptions; }
 
@@ -90,8 +96,8 @@ Row Row::withExtraRunNumbers(std::vector<std::string> const &extraRunNumbers) co
   newRunNumbers.reserve(m_runNumbers.size() + extraRunNumbers.size());
   boost::range::set_union(m_runNumbers, extraRunNumbers, std::back_inserter(newRunNumbers));
   auto wsNames = workspaceNames(newRunNumbers, transmissionWorkspaceNames());
-  return Row(newRunNumbers, theta(), transmissionWorkspaceNames(), qRange(), scaleFactor(), reductionOptions(),
-             wsNames);
+  return Row(newRunNumbers, theta(), transmissionWorkspaceNames(), qRange(), scaleFactor(), reductionOptions(), wsNames,
+             nominalSpecularPixel(), actualSpecularPixel());
 }
 
 int Row::totalItems() const { return 1; }
@@ -132,7 +138,8 @@ bool operator!=(Row const &lhs, Row const &rhs) { return !(lhs == rhs); }
 
 bool operator==(Row const &lhs, Row const &rhs) {
   return lhs.runNumbers() == rhs.runNumbers() && lhs.theta() == rhs.theta() && lhs.qRange() == rhs.qRange() &&
-         lhs.scaleFactor() == rhs.scaleFactor() &&
+         lhs.scaleFactor() == rhs.scaleFactor() && lhs.nominalSpecularPixel() == rhs.nominalSpecularPixel() &&
+         lhs.actualSpecularPixel() == rhs.actualSpecularPixel() &&
          lhs.transmissionWorkspaceNames() == rhs.transmissionWorkspaceNames() &&
          lhs.reducedWorkspaceNames() == rhs.reducedWorkspaceNames() && lhs.reductionOptions() == rhs.reductionOptions();
 }

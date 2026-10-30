@@ -162,6 +162,9 @@ PlotActionState PlottingViewStateProvider::plotActionState(bool outputSelectionE
                                                            bool hasActiveReflectometryFigure,
                                                            bool activePlotOverplotCompatible) const {
   auto const &plotProperties = plotOutputTypeProperties(outputType);
+  if (plotProperties.plotRequests().size() > 1) {
+    return {.plotIndividualEnabled = outputSelectionEnabled && hasSelectedItems(selectedPlottingWorkspaceCount)};
+  }
   auto const addToExistingEnabled =
       outputSelectionEnabled && hasActiveReflectometryFigure && plotProperties.supportsAddToExistingPlot();
   auto const addToExistingChecked = addToExistingPlot && addToExistingEnabled;

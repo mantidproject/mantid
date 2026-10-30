@@ -10,6 +10,7 @@
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
+#include <cmath>
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace { // unnamed
@@ -105,6 +106,13 @@ TaggedOptional<std::string> parseProcessingInstructions(std::string const &instr
   } catch (std::runtime_error &) {
     return std::make_pair(std::nullopt, false);
   }
+}
+
+TaggedOptional<double> parseSpecularPixel(std::string const &pixel) {
+  if (isEntirelyWhitespace(pixel))
+    return {std::nullopt, true};
+  auto value = parseNonNegativeDouble(pixel);
+  return {value, value.has_value() && std::isfinite(*value)};
 }
 
 TaggedOptional<double> parseScaleFactor(std::string const &scaleFactor) {

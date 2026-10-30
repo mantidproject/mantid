@@ -384,7 +384,7 @@
         <number>3</number>
        </property>
        <property name="columnCount">
-        <number>12</number>
+        <number>14</number>
        </property>
        <attribute name="horizontalHeaderVisible">
         <bool>true</bool>
@@ -474,6 +474,16 @@
        <column>
         <property name="text">
          <string>ROI Detector IDs</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Nominal Specular Pixel No.</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Actual Specular Pixel No.</string>
         </property>
        </column>
       </widget>

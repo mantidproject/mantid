@@ -108,7 +108,7 @@ void ExperimentPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState
 void ExperimentPresenter::notifyAutoreductionResumed() { updateWidgetEnabledState(); }
 
 void ExperimentPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
-  UNUSED_ARG(instrumentName);
+  m_view->setInstrumentColumnsVisible(instrumentName);
   restoreDefaults();
 }
 

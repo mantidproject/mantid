@@ -1,0 +1,1 @@
+- The ``Runs`` table of the :ref:`ISIS Reflectometry Interface <interface-isis-refl>` now has two additional columns for ``POLREF`` reductions: ``Actual Specular Pixel No.`` and ``Nominal Specular Pixel No.``. These can be used to override the fitting of the specular peak that occurs during angle correction.

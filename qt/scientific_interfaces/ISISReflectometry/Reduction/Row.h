@@ -31,7 +31,8 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL Row : public Item {
 public:
   Row(std::vector<std::string> number, double theta, TransmissionRunPair tranmissionRuns, RangeInQ qRange,
       std::optional<double> scaleFactor, ReductionOptionsMap reductionOptions,
-      ReductionWorkspaces reducedWorkspaceNames);
+      ReductionWorkspaces reducedWorkspaceNames, std::optional<double> nominalSpecularPixel = std::nullopt,
+      std::optional<double> actualSpecularPixel = std::nullopt);
 
   bool isGroup() const override;
   bool isPreview() const override;
@@ -41,6 +42,8 @@ public:
   RangeInQ const &qRange() const;
   RangeInQ const &qRangeOutput() const;
   std::optional<double> scaleFactor() const;
+  std::optional<double> nominalSpecularPixel() const;
+  std::optional<double> actualSpecularPixel() const;
   ReductionOptionsMap const &reductionOptions() const;
   ReductionWorkspaces const &reducedWorkspaceNames() const;
   std::optional<size_t> const &lookupIndex() const;
@@ -72,6 +75,8 @@ private:
   RangeInQ m_qRange;       // user-defined Q values
   RangeInQ m_qRangeOutput; // output Q values if inputs were not specified
   std::optional<double> m_scaleFactor;
+  std::optional<double> m_nominalSpecularPixel;
+  std::optional<double> m_actualSpecularPixel;
   TransmissionRunPair m_transmissionRuns;
   ReductionWorkspaces m_reducedWorkspaceNames;
   ReductionOptionsMap m_reductionOptions;

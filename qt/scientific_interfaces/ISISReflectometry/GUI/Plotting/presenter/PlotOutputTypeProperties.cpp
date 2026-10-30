@@ -42,6 +42,7 @@ const std::unordered_map<PlotOutputType, std::string> plotOutputTypeDisplayNames
     {PlotOutputType::DetectorMap, "Detector Map"},
     {PlotOutputType::SpinAsymmetry, "Spin Asymmetry"},
     {PlotOutputType::Alignment, "Alignment"},
+    {PlotOutputType::ReflectivityAndSpinAsymmetry, "Reflectivity + Spin Asymmetry"},
 };
 
 PlotOutputTypeProperties const reflectivityCurveProperties{PlotOutputType::ReflectivityCurve,
@@ -60,13 +61,26 @@ PlotOutputTypeProperties const detectorMapProperties{PlotOutputType::DetectorMap
                                                       .excludesPostprocessedGroupOutputs = true,
                                                       .requiresWorkspaceGroupsForMultiPlot = false}};
 
-PlotOutputTypeProperties const spinAsymmetryProperties{PlotOutputType::SpinAsymmetry,
-                                                       groupOrRunItemTypes(),
-                                                       {ReducedWorkspaceOutputType::IvsQBinned},
-                                                       {.supportsOverplot = true,
-                                                        .supportsAddToExistingPlot = true,
-                                                        .excludesPostprocessedGroupOutputs = false,
-                                                        .requiresWorkspaceGroupsForMultiPlot = true}};
+PlotOutputTypeProperties spinAsymmetryPropertiesFor(PlotOutputType outputType,
+                                                    std::vector<PlotRequestDefinition> plotRequests = {}) {
+  return PlotOutputTypeProperties{outputType,
+                                  groupOrRunItemTypes(),
+                                  {ReducedWorkspaceOutputType::IvsQBinned},
+                                  {.supportsOverplot = true,
+                                   .supportsAddToExistingPlot = true,
+                                   .excludesPostprocessedGroupOutputs = false,
+                                   .requiresWorkspaceGroupsForMultiPlot = true},
+                                  std::move(plotRequests)};
+}
+
+auto const spinAsymmetryProperties = spinAsymmetryPropertiesFor(PlotOutputType::SpinAsymmetry);
+auto const reflectivityAndSpinAsymmetryProperties = spinAsymmetryPropertiesFor(
+    PlotOutputType::ReflectivityAndSpinAsymmetry,
+    {{PlotOutputType::ReflectivityCurve, PlotRequestSettings{.layout = PlotLayout::Overplot}},
+     {PlotOutputType::SpinAsymmetry, PlotRequestSettings{.layout = PlotLayout::Tiled,
+                                                         .addToExistingPlot = true,
+                                                         .tiledVertically = true,
+                                                         .shareXAxisWhenTiled = true}}});
 
 PlotOutputTypeProperties const alignmentProperties{PlotOutputType::Alignment,
                                                    allSelectableItemTypes(),
@@ -80,10 +94,14 @@ PlotOutputTypeProperties const alignmentProperties{PlotOutputType::Alignment,
 PlotOutputTypeProperties::PlotOutputTypeProperties(
     PlotOutputType plotOutputType, std::vector<PlottingWorkspaceTreeItemType> selectableItemTypes,
     std::vector<ReducedWorkspaceOutputType> includedReducedWorkspaceOutputTypes,
-    PlotOutputTypeCapabilities capabilities)
+    PlotOutputTypeCapabilities capabilities, std::vector<PlotRequestDefinition> plotRequests)
     : m_plotOutputType(plotOutputType), m_selectableItemTypes(std::move(selectableItemTypes)),
       m_includedReducedWorkspaceOutputTypes(std::move(includedReducedWorkspaceOutputTypes)),
-      m_capabilities(capabilities) {}
+      m_capabilities(capabilities),
+      m_plotRequests(plotRequests.empty() ? std::vector<PlotRequestDefinition>{{plotOutputType}}
+                                          : std::move(plotRequests)) {}
+
+std::vector<PlotRequestDefinition> const &PlotOutputTypeProperties::plotRequests() const { return m_plotRequests; }
 
 std::string const &PlotOutputTypeProperties::displayName() const {
   return plotOutputTypeDisplayNames.at(m_plotOutputType);
@@ -129,6 +147,8 @@ PlotOutputTypeProperties const &plotOutputTypeProperties(PlotOutputType outputTy
     return detectorMapProperties;
   case PlotOutputType::SpinAsymmetry:
     return spinAsymmetryProperties;
+  case PlotOutputType::ReflectivityAndSpinAsymmetry:
+    return reflectivityAndSpinAsymmetryProperties;
   case PlotOutputType::Alignment:
     return alignmentProperties;
   }
