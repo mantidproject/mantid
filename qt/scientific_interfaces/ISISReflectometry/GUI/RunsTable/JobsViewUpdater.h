@@ -9,10 +9,30 @@
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "Reduction/Group.h"
+#include <algorithm>
+#include <array>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
+
+// Keep input column indices stable; the view places this output column beside Angle.
+inline constexpr int adjustedAngleColumn = 10;
+inline constexpr int nominalSpecularPixelColumn = 11;
+inline constexpr int actualSpecularPixelColumn = 12;
+
+// Output provenance does not imply read-only: generated Q values can be overridden.
+inline constexpr std::array readOnlyColumns{adjustedAngleColumn};
+
+constexpr bool isUserEditableColumn(int column) {
+  return std::find(readOnlyColumns.begin(), readOnlyColumns.end(), column) == readOnlyColumns.end();
+}
+
+MANTIDQT_ISISREFLECTOMETRY_DLL MantidWidgets::Batch::Cell adjustedAngleCell(Row const &row,
+                                                                            std::optional<int> precision);
+
+MANTIDQT_ISISREFLECTOMETRY_DLL std::vector<MantidWidgets::Batch::Cell> cellsFromRow(Row const &row,
+                                                                                    std::optional<int> precision);
 
 class JobsViewUpdater {
 public:

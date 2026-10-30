@@ -32,6 +32,7 @@ private:
   std::optional<RangeInQ> parseQRange(std::vector<std::string> const &cellText);
   std::optional<double> parseScaleFactor(std::vector<std::string> const &cellText);
   std::optional<ReductionOptionsMap> parseOptions(std::vector<std::string> const &cellText);
+  std::optional<double> parsePixel(std::vector<std::string> const &cellText, size_t column);
 
   std::vector<int> m_invalidColumns;
 };
