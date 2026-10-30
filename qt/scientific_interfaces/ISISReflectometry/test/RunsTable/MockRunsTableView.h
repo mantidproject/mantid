@@ -19,6 +19,7 @@ namespace ISISReflectometry {
 class MockRunsTableView : public IRunsTableView {
 public:
   MOCK_METHOD1(subscribe, void(RunsTableViewSubscriber *));
+  MOCK_METHOD1(setAdjustedAngleColumnVisible, void(bool));
   MOCK_METHOD1(setProgress, void(int));
   MOCK_METHOD0(jobs, MantidQt::MantidWidgets::Batch::IJobTreeView &());
   MOCK_METHOD0(resetFilterBox, void());

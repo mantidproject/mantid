@@ -20,6 +20,7 @@ set(TEST_FILES
     RunsTable/RunsTablePresenterGroupInsertionTest.h
     RunsTable/RunsTablePresenterRowInsertionTest.h
     RunsTable/RunsTablePresenterProcessingTest.h
+    RunsTable/AdjustedAngleTest.h
     RunsTable/RunsTablePresenterDisplayTest.h
     RunsTable/RunsTablePresenterGroupDeletionTest.h
     RunsTable/RunsTablePresenterMergeJobsTest.h

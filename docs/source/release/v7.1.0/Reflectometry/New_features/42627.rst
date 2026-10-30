@@ -1,0 +1,1 @@
+- The ISIS Reflectometry Runs table now has a read-only ``Adjusted Angle`` column for POLREF. It displays the input workspace’s ``reflectometry_adjusted_theta`` sample log and refreshes after reduction. The column remains blank if the adjusted angle is not available.

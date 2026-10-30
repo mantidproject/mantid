@@ -6,6 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "JobsViewUpdater.h"
+#include "GUI/Common/RunWorkspaceResolver.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -52,9 +55,24 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, s
        qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::step, precision),
        MantidQt::MantidWidgets::Batch::Cell(optionalToString(row.scaleFactor(), precision)),
        MantidQt::MantidWidgets::Batch::Cell(MantidWidgets::optionsToString(row.reductionOptions())),
-       MantidQt::MantidWidgets::Batch::Cell(optionalToString(lookupIndex, precision))});
+       MantidQt::MantidWidgets::Batch::Cell(optionalToString(lookupIndex, precision)),
+       adjustedAngleCell(row, precision)});
 }
 } // namespace
+
+MantidWidgets::Batch::Cell adjustedAngleCell(Row const &row, std::optional<int> precision) {
+  auto cell = MantidWidgets::Batch::Cell("");
+  cell.setOutput();
+  cell.disableEditing();
+
+  auto const &names = row.reducedWorkspaceNames();
+  const auto &matrix =
+      findInputWorkspace(names.inputRunNumbers(), std::nullopt, {names.iVsQBinned(), names.iVsQ(), names.iVsLambda()});
+  if (matrix && matrix->run().hasProperty("reflectometry_adjusted_theta"))
+    cell.setContentText(
+        valueToString(matrix->run().getPropertyAsSingleValue("reflectometry_adjusted_theta"), precision));
+  return cell;
+}
 
 void JobsViewUpdater::groupAppended(int groupIndex, Group const &group) {
   m_view.appendChildRowOf(MantidQt::MantidWidgets::Batch::RowLocation(), cellsFromGroup(group, m_view.deadCell()));

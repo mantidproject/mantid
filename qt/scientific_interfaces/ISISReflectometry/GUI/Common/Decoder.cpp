@@ -17,6 +17,7 @@
 #include "../Runs/QtCatalogSearcher.h"
 #include "../Runs/QtRunsView.h"
 #include "../Runs/RunsPresenter.h"
+#include "../RunsTable/JobsViewUpdater.h"
 #include "../RunsTable/QtRunsTableView.h"
 #include "../RunsTable/RunsTablePresenter.h"
 #include "../Save/QtSaveView.h"
@@ -241,7 +242,8 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, c
        qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::step, precision),
        MantidQt::MantidWidgets::Batch::Cell(optionalToString(row.scaleFactor(), precision)),
        MantidQt::MantidWidgets::Batch::Cell(MantidWidgets::optionsToString(row.reductionOptions())),
-       MantidQt::MantidWidgets::Batch::Cell(optionalToString(row.lookupIndex(), precision))});
+       MantidQt::MantidWidgets::Batch::Cell(optionalToString(row.lookupIndex(), precision)),
+       adjustedAngleCell(row, precision)});
 }
 } // namespace
 
