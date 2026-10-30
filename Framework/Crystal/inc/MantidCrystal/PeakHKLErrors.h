@@ -19,7 +19,6 @@
 #include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Matrix.h"
 
 namespace Mantid {
@@ -47,28 +46,23 @@ public:
   void init() override;
 
   /**
-   * Creates a new peak, matching the old peak except for a different
-   *instrument.
+   * Creates a new peak, matching the old peak, with its source and detector
+   *positions re-read from the old peak's instrument and its sample at samplePos.
    *
    * The Time of flightis the same except offset by T0. L0 should be the L0
-   *for the new instrument.
+   *for the instrument.
    * It is added as a parameter in case the instrument will have the initial
    *flight path adjusted later.
    *  NOTE: the wavelength is changed.
    *
    * @param peak_old - The old peak
-   * @param instrNew -The new instrument
+   * @param samplePos - The sample position, normally the workspace's ComponentInfo sample position
    * @param T0 :
    * @param L0 :
-   * @return The new peak with the new instrument( adjusted with the
-   *parameters) and time adjusted.
+   * @return The new peak with time adjusted.
    */
-  static DataObjects::Peak createNewPeak(const DataObjects::Peak &peak_old, const Geometry::Instrument_sptr &instrNew,
-                                         double T0, double L0);
-
-  static void cLone(std::shared_ptr<Geometry::ParameterMap> &pmap,
-                    const std::shared_ptr<const Geometry::IComponent> &component,
-                    std::shared_ptr<const Geometry::ParameterMap> &pmapSv);
+  static DataObjects::Peak createNewPeak(DataObjects::Peak const &peak_old, Kernel::V3D const &samplePos, double T0,
+                                         double L0);
 
   void getRun2MatMap(DataObjects::PeaksWorkspace_sptr &Peaks, const std::string &OptRuns,
                      std::map<int, Mantid::Kernel::Matrix<double>> &Res) const;
@@ -77,8 +71,6 @@ public:
   static Kernel::Matrix<double> DerivRotationMatrixAboutRegAxis(double theta, char axis);
 
   static Kernel::Matrix<double> RotationMatrixAboutRegAxis(double theta, char axis);
-
-  std::shared_ptr<Geometry::Instrument> getNewInstrument(const DataObjects::PeaksWorkspace_sptr &peaksWs) const;
 
   std::vector<std::string> getAttributeNames() const override { return {"OptRuns", "PeakWorkspaceName"}; }
 
@@ -141,11 +133,6 @@ private:
                 // OptRuns setup
 
   void setUpOptRuns();
-
-  mutable std::shared_ptr<Geometry::Instrument> instChange;
-  mutable bool hasParameterMap = false;
-  mutable Kernel::V3D sampPos;
-  mutable std::shared_ptr<const Geometry::ParameterMap> pmapSv;
 };
 } // namespace Crystal
 } // namespace Mantid
