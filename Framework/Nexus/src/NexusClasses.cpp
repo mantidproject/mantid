@@ -208,20 +208,35 @@ std::string NXClass::getString(const std::string &name) const {
 
 double NXClass::getDouble(const std::string &name) const {
   NXDouble number = openNXDouble(name);
-  number.load();
-  return *number();
+  try {
+    number.load();
+    return *number();
+  } catch (std::runtime_error &) {
+    // deals with reading uninitialized/empty data
+    return 0.0;
+  }
 }
 
 float NXClass::getFloat(const std::string &name) const {
   NXFloat number = openNXFloat(name);
-  number.load();
-  return *number();
+  try {
+    number.load();
+    return *number();
+  } catch (std::runtime_error &) {
+    // deals with reading uninitialized/empty data
+    return 0.0f;
+  }
 }
 
 int32_t NXClass::getInt(const std::string &name) const {
   NXInt number = openNXInt(name);
-  number.load();
-  return *number();
+  try {
+    number.load();
+    return *number();
+  } catch (std::runtime_error &) {
+    // deals with reading uninitialized/empty data
+    return 0;
+  }
 }
 /** Returns whether an individual group (or group) is present
  *  @param query :: the class name to search for
