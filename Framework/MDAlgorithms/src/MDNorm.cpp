@@ -49,6 +49,14 @@ constexpr double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass 
 
 // compare absolute values of doubles
 static bool abs_compare(double a, double b) { return (std::fabs(a) < std::fabs(b)); }
+
+/// Whether a workspace comes from a monochromatic single crystal diffractometer, WAND (HB2C) or DEMAND (HB3A)
+bool isMonochromaticSCDInstrument(const IMDEventWorkspace &workspace) {
+  if (workspace.getNumExperimentInfo() == 0)
+    return false;
+  const std::string instrument = workspace.getExperimentInfo(0)->getInstrumentName();
+  return instrument == "WAND" || instrument == "HB2C" || instrument == "HB3A" || instrument == "DEMAND";
+}
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
@@ -272,6 +280,14 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
   API::MatrixWorkspace_const_sptr solidAngleWS = getProperty("SolidAngleWorkspace");
   API::MatrixWorkspace_const_sptr fluxWS = getProperty("FluxWorkspace");
 
+  // No background for monochromatic single crystal diffraction: it is subtracted in detector space instead. This
+  // message replaces any other problem found with BackgroundWorkspace, since the property is not to be used at all.
+  if (bkgdWS && (monochromatic || isMonochromaticSCDInstrument(*inputWS))) {
+    errorMessage["BackgroundWorkspace"] = "MDNorm does not support a background for monochromatic single crystal "
+                                          "diffraction. Subtract the background in detector space with "
+                                          "HFIRSCDSubtractBackground before ConvertHFIRSCDtoMDE.";
+  }
+
   if (monochromatic) {
     if (!diffraction) {
       errorMessage.emplace("MonoSCDNormalizationWorkspace", "MonoSCDNormalizationWorkspace can only be used for "
@@ -281,10 +297,6 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
     if (solidAngleWS || fluxWS) {
       errorMessage.emplace("MonoSCDNormalizationWorkspace", "MonoSCDNormalizationWorkspace cannot be used together "
                                                             "with SolidAngleWorkspace/FluxWorkspace");
-    }
-    if (bkgdWS) {
-      errorMessage.emplace("MonoSCDNormalizationWorkspace", "MonoSCDNormalizationWorkspace cannot currently be used "
-                                                            "together with BackgroundWorkspace");
     }
     if (monoNormWS->getNumDims() < 3) {
       errorMessage.emplace("MonoSCDNormalizationWorkspace", "MonoSCDNormalizationWorkspace must be at least 3D");

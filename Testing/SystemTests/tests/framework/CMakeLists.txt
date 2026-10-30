@@ -68,6 +68,7 @@ set(SYSTEST_NAMES
     HFIRBackgroundAPIv2.py
     HFIREffAPIv2.py
     HFIRReductionAPIv2.py
+    HFIRSCDSubtractBackgroundTest.py
     HFIRTestsAPIv2.py
     HFIRTransAPIv2.py
     HYSPECReductionTest.py

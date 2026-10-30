@@ -97,6 +97,7 @@ set(PYTHON_PLUGINS
     algorithms/HB3APredictPeaks.py
     algorithms/HFIRCalculateGoniometer.py
     algorithms/HFIRSANS2Wavelength.py
+    algorithms/HFIRSCDSubtractBackground.py
     algorithms/IndexSatellitePeaks.py
     algorithms/IndirectTransmission.py
     algorithms/InelasticEMUauReduction.py
