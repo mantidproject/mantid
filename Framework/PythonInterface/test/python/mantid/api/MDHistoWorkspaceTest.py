@@ -178,6 +178,103 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         new_errors = testWS.getErrorSquaredArray()
         self._verify_numpy_data(new_errors, errors)
 
+    def test_set_arrays_follow_the_linear_index_of_the_workspace(self):
+        # A non-square shape distinguishes the order of the dimensions: bin (i, j) is at linear index i + 3 j
+        run_algorithm(
+            "CreateMDHistoWorkspace",
+            SignalInput=",".join(["0"] * 12),
+            ErrorInput=",".join(["0"] * 12),
+            Dimensionality="2",
+            Extents="-1,1,-1,1",
+            NumberOfBins="3,4",
+            Names="A,B",
+            Units="U,T",
+            OutputWorkspace="demo",
+        )
+        testWS = mtd["demo"]
+        values = numpy.arange(12, dtype=numpy.float64).reshape((3, 4))
+        testWS.setSignalArray(values)
+        testWS.setErrorSquaredArray(2 * values)
+        testWS.setNumEventsArray(3 * values)
+        # the getters wrap the buffers of the workspace, which are in the order of the linear index
+        buffers = [array.ravel(order="F") for array in (testWS.getSignalArray(), testWS.getErrorSquaredArray(), testWS.getNumEventsArray())]
+        for i in range(3):
+            for j in range(4):
+                index = testWS.getLinearIndex(i, j)
+                for buffer, factor in zip(buffers, (1, 2, 3)):
+                    self.assertEqual(buffer[index], factor * values[i, j])
+        mtd.remove("demo")
+
+    def test_set_arrays_accept_non_contiguous_integer_arrays(self):
+        run_algorithm(
+            "CreateMDHistoWorkspace",
+            SignalInput=",".join(["0"] * 12),
+            ErrorInput=",".join(["0"] * 12),
+            Dimensionality="2",
+            Extents="-1,1,-1,1",
+            NumberOfBins="3,4",
+            Names="A,B",
+            Units="U,T",
+            OutputWorkspace="demo",
+        )
+        testWS = mtd["demo"]
+        # every second column of a (3, 8) integer array: a non-contiguous view of shape (3, 4)
+        values = numpy.arange(24, dtype=numpy.int64).reshape((3, 8))[:, ::2]
+        self.assertFalse(values.flags.c_contiguous or values.flags.f_contiguous)
+        testWS.setSignalArray(values)
+        testWS.setErrorSquaredArray(values)
+        testWS.setNumEventsArray(values)
+        self._verify_numpy_data(testWS.getSignalArray(), values)
+        self._verify_numpy_data(testWS.getErrorSquaredArray(), values)
+        self._verify_numpy_data(testWS.getNumEventsArray(), values)
+        mtd.remove("demo")
+
+    def test_set_arrays_accept_object_arrays_of_numbers(self):
+        run_algorithm(
+            "CreateMDHistoWorkspace",
+            SignalInput="1,2,3,4,5,6,7,8,9",
+            ErrorInput="1,1,1,1,1,1,1,1,1",
+            Dimensionality="2",
+            Extents="-1,1,-1,1",
+            NumberOfBins="3,3",
+            Names="A,B",
+            Units="U,T",
+            OutputWorkspace="demo",
+        )
+        testWS = mtd["demo"]
+        values = numpy.arange(9).reshape((3, 3)).astype(object)
+        testWS.setSignalArray(values)
+        testWS.setErrorSquaredArray(values)
+        testWS.setNumEventsArray(values)
+        expected = values.astype(numpy.float64)
+        self._verify_numpy_data(testWS.getSignalArray(), expected)
+        self._verify_numpy_data(testWS.getErrorSquaredArray(), expected)
+        self._verify_numpy_data(testWS.getNumEventsArray(), expected)
+        mtd.remove("demo")
+
+    def test_set_arrays_leave_the_workspace_unchanged_if_a_value_cannot_be_converted(self):
+        run_algorithm(
+            "CreateMDHistoWorkspace",
+            SignalInput="1,2,3,4,5,6,7,8,9",
+            ErrorInput="1,1,1,1,1,1,1,1,1",
+            Dimensionality="2",
+            Extents="-1,1,-1,1",
+            NumberOfBins="3,3",
+            Names="A,B",
+            Units="U,T",
+            OutputWorkspace="demo",
+        )
+        testWS = mtd["demo"]
+        before = [numpy.array(testWS.getSignalArray()), numpy.array(testWS.getErrorSquaredArray()), numpy.array(testWS.getNumEventsArray())]
+        values = numpy.full((3, 3), 1.0, dtype=object)
+        values[2, 2] = "not a number"
+        for setter in (testWS.setSignalArray, testWS.setErrorSquaredArray, testWS.setNumEventsArray):
+            self.assertRaises(ValueError, setter, values)
+        after = [testWS.getSignalArray(), testWS.getErrorSquaredArray(), testWS.getNumEventsArray()]
+        for array_before, array_after in zip(before, after):
+            self._verify_numpy_data(array_after, array_before)
+        mtd.remove("demo")
+
     def test_set_signal_array_clears_original_workspaces(self):
         # "A" is produced by BinMD from "mdw", so it is linked to an original workspace
         A = mtd["A"]
