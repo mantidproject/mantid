@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-import isis_instrument as instruments
+from sans.common import isis_instrument as instruments
 from mantid.api import mtd
 from mantid.simpleapi import CreateSampleWorkspace, DeleteWorkspace, SetInstrumentParameter
 
