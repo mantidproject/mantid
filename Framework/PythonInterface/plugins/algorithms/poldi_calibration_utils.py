@@ -316,14 +316,55 @@ def scale_bg(y: np.ndarray[float], m: np.ndarray[float], w: np.ndarray[float]) -
     return s, b
 
 
-def project_out(J: np.ndarray[float], m: np.ndarray[float], w: np.ndarray[float]) -> np.ndarray[float]:
-    """Per spectrum, remove from the weighted columns w J the part in span{w m, w} (Kaufman variable projection)."""
-    q2 = w / np.maximum(np.sqrt((w**2).sum(-1, keepdims=True)), 1e-300)
-    a1 = w * m
-    a1 = a1 - (a1 * q2).sum(-1, keepdims=True) * q2
-    q1 = a1 / np.maximum(np.sqrt((a1**2).sum(-1, keepdims=True)), 1e-300)
-    wJ = w * J
-    return wJ - (wJ * q1).sum(-1, keepdims=True) * q1 - (wJ * q2).sum(-1, keepdims=True) * q2
+def project_out(derivative: np.ndarray[float], model: np.ndarray[float], weights: np.ndarray[float]) -> np.ndarray[float]:
+    """Per spectrum, the part of weights * derivative that the spectrum's scale s and flat background b cannot cancel
+    (Kaufman variable projection).
+
+    scale_bg re-picks s and b whenever the fit parameters change, so it cancels any change to a spectrum along
+    weights * model (rescaling it) or along weights (lifting it). Treating a spectrum's bins as one vector, those two
+    directions span a plane, and only the part of the derivative perpendicular to that plane moves the residual:
+
+            returned    weights * derivative
+                ^      ^
+                |     /
+                |    /
+                |   /
+                |  /
+                | /
+              ==o======+===========  plane of the changes s and b can make
+                <-   ->
+                removed
+
+    NOTE: weights * model and weights are not perpendicular, so removing the part along each in turn would remove
+    some of the derivative twice. The same plane is instead described by two perpendicular unit directions, which can
+    be removed one at a time. background_dir stays parallel to weights, so only weights * model needs replacing:
+    scale_dir is what is left of it once its part along background_dir is removed.
+
+           scale_dir    weights * model
+                ^      ^
+                |     /
+                |    /
+                |   /
+                |  /
+                | /  )  <- not perpendicular
+                o-------------> background_dir AND weights
+                <-  ->
+                removed
+
+    Masked spectra have zero weights, so every vector of theirs is zero and stays zero.
+    """
+
+    def dot(a, b):  # one dot product per spectrum, over its bins
+        return (a * b).sum(-1, keepdims=True)
+
+    def unit(a):
+        return a / np.maximum(np.sqrt(dot(a, a)), 1e-300)
+
+    background_dir = unit(weights)
+    scale_dir = unit(weights * model - dot(weights * model, background_dir) * background_dir)
+    weighted_derivative = weights * derivative
+    in_plane = dot(weighted_derivative, scale_dir) * scale_dir + dot(weighted_derivative, background_dir) * background_dir
+    return weighted_derivative - in_plane
 
 
 class CalibrationFit:
