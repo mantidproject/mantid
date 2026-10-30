@@ -24,15 +24,15 @@
 
 // PropertyWithValue implementation
 #include "MantidKernel/PropertyWithValue.hxx"
+#include "MantidKernel/WarningSuppressions.h"
 
 namespace Mantid {
-namespace DataObjects {
-template <size_t nd> using MDEventWS = MDEventWorkspace<MDEvent<nd>, nd>;
-template <size_t nd> using MDLeanEventWS = MDEventWorkspace<MDLeanEvent<nd>, nd>;
-} // namespace DataObjects
 namespace Kernel {
 
 /// @cond
+// The headers of these types declare them with MANTID_DATAOBJECTS_EXTERN_TEMPLATE, which already carries the export
+// attribute, so gcc warns that the one here is ignored.
+GNU_DIAG_OFF("attributes")
 template class MANTID_DATAOBJECTS_DLL PropertyWithValue<std::shared_ptr<DataObjects::EventWorkspace>>;
 template class MANTID_DATAOBJECTS_DLL PropertyWithValue<std::shared_ptr<DataObjects::GroupingWorkspace>>;
 template class MANTID_DATAOBJECTS_DLL PropertyWithValue<std::shared_ptr<DataObjects::MaskWorkspace>>;
@@ -64,6 +64,7 @@ template class MANTID_DATAOBJECTS_DLL PropertyWithValue<std::shared_ptr<DataObje
 template class MANTID_DATAOBJECTS_DLL PropertyWithValue<std::shared_ptr<DataObjects::TableWorkspace>>;
 template class MANTID_DATAOBJECTS_DLL PropertyWithValue<std::shared_ptr<DataObjects::Workspace2D>>;
 template class MANTID_DATAOBJECTS_DLL PropertyWithValue<std::shared_ptr<DataObjects::WorkspaceSingleValue>>;
+GNU_DIAG_ON("attributes")
 /// @endcond
 
 } // namespace Kernel

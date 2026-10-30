@@ -171,6 +171,7 @@ target_include_directories(
 generate_mantid_export_header(
   PythonAPIModule
   FALSE
+  GENERATE_UNUSED_ARG
   BASE_NAME
   MANTID_PYTHON_API
   EXPORT_MACRO_NAME

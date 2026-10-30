@@ -8,8 +8,11 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/IValidator.h"
+#include <string>
 #include <typeinfo>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
@@ -22,7 +25,19 @@ directly.
 
 A specialised type exists for std::shared_ptr types
  */
-template <typename HeldType> class DLLExport TypedValidator : public IValidator {
+#if !defined(_WIN32)
+template <typename HeldType> class MANTID_KERNEL_DLL TypedValidator : public IValidator {
+#else
+template <typename HeldType> class TypedValidator : public IValidator {
+#endif
+public:
+  TypedValidator() = default;
+  TypedValidator(const TypedValidator &) = default;
+  TypedValidator(TypedValidator &&);
+  TypedValidator &operator=(const TypedValidator &) = default;
+  TypedValidator &operator=(TypedValidator &&);
+  ~TypedValidator() override = default;
+
 protected:
   /// Override this function to check the validity of the type
   virtual std::string checkValidity(const HeldType &) const = 0;
@@ -44,6 +59,12 @@ private:
   }
 };
 
+// The move operations are defaulted out of line so that they are user-provided:
+// an exported explicit instantiation then exports them, whereas MSVC does not
+// export implicitly-declared move members.
+template <typename HeldType> TypedValidator<HeldType>::TypedValidator(TypedValidator &&) = default;
+template <typename HeldType> TypedValidator<HeldType> &TypedValidator<HeldType>::operator=(TypedValidator &&) = default;
+
 /**
  * Specialization for std::shared_ptr<T> types.
  * boost::any_cast cannot convert between types, the type extracted must match
@@ -56,7 +77,12 @@ private:
  * The advantage of this is that Validator types then don't have to match
  * their types exactly.
  */
-template <typename ElementType> class DLLExport TypedValidator<std::shared_ptr<ElementType>> : public IValidator {
+#if !defined(_WIN32)
+template <typename ElementType>
+class MANTID_KERNEL_DLL TypedValidator<std::shared_ptr<ElementType>> : public IValidator {
+#else
+template <typename ElementType> class TypedValidator<std::shared_ptr<ElementType>> : public IValidator {
+#endif
   /// Shared ptr type
   using ElementType_sptr = std::shared_ptr<ElementType>;
 
@@ -91,9 +117,9 @@ private:
 // in Release mode
 // with clang and libc++. The simplest workaround is to compare hash codes.
 #ifdef __clang__
-    if (value.type().hash_code() == m_dataitemTypeID.hash_code())
+    if (value.type().hash_code() == dataitemTypeID().hash_code())
 #else
-    if (value.type() == m_dataitemTypeID)
+    if (value.type() == dataitemTypeID())
 #endif
     {
       return extractFromDataItem(value);
@@ -128,16 +154,17 @@ private:
     }
   }
   /// Typeid of DataItem_sptr
-  static const std::type_info &m_dataitemTypeID;
+  static const std::type_info &dataitemTypeID() { return typeid(std::shared_ptr<DataItem>); }
 };
+
+// Instantiated and exported by StartsWithValidator.cpp and ArrayLengthValidator.cpp. They are the bases of exported
+// validator classes, so consumers must not instantiate their own copy of the inline base members.
+MANTID_KERNEL_EXTERN_TEMPLATE(TypedValidator<std::string>);
+MANTID_KERNEL_EXTERN_TEMPLATE(TypedValidator<std::vector<double>>);
 
 /// @cond
 // This switch off an warning because oxygen could not figureout that this is a
 // specialized type of the general one.
-/** Intialize the DataItem_sptr typeinfo
- */
-template <typename T>
-const std::type_info &TypedValidator<std::shared_ptr<T>>::m_dataitemTypeID = typeid(std::shared_ptr<DataItem>);
 } // namespace Kernel
 /// @endcond
 } // namespace Mantid

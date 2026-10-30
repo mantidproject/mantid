@@ -14,6 +14,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/LogManager.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/V3D_fwd.h"
 
 #ifndef Q_MOC_RUN
@@ -385,3 +386,6 @@ private:
 
 } // namespace API
 } // Namespace Mantid
+
+// Instantiated and exported by API/src/PropertyWithValue.cpp
+MANTID_API_EXTERN_TEMPLATE(Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::API::ITableWorkspace>>);

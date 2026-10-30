@@ -8,6 +8,7 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include <memory>
 #include <set>
@@ -62,3 +63,6 @@ using IMaskWorkspace_sptr = std::shared_ptr<IMaskWorkspace>;
 using IMaskWorkspace_const_sptr = std::shared_ptr<const IMaskWorkspace>;
 } // namespace API
 } // namespace Mantid
+
+// Instantiated and exported by API/src/PropertyWithValue.cpp
+MANTID_API_EXTERN_TEMPLATE(Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::API::IMaskWorkspace>>);

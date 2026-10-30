@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidGeometry/Instrument_fwd.h"
@@ -248,3 +249,6 @@ using ExperimentInfo_const_sptr = std::shared_ptr<const ExperimentInfo>;
 
 } // namespace API
 } // namespace Mantid
+
+// Instantiated and exported by API/src/PropertyWithValue.cpp
+MANTID_API_EXTERN_TEMPLATE(Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::API::ExperimentInfo>>);

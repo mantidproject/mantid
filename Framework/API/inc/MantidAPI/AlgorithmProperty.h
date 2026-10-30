@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyWithValue.h"
 

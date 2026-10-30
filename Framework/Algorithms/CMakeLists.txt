@@ -1100,7 +1100,7 @@ add_subdirectory(test)
 target_include_directories(
   Algorithms PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Algorithms> $<INSTALL_INTERFACE:include/Mantid>
 )
-generate_mantid_export_header(Algorithms FALSE)
+generate_mantid_export_header(Algorithms FALSE GENERATE_UNUSED_ARG)
 
 # Installation settings
 mtd_install_framework_lib(TARGETS Algorithms PLUGIN_LIB)

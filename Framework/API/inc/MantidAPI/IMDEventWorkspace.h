@@ -19,6 +19,7 @@
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ProgressBase.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/ThreadScheduler.h"
 
 namespace Mantid {
@@ -121,3 +122,6 @@ private:
 } // namespace API
 
 } // namespace Mantid
+
+// Instantiated and exported by API/src/PropertyWithValue.cpp
+MANTID_API_EXTERN_TEMPLATE(Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::API::IMDEventWorkspace>>);

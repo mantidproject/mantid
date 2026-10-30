@@ -13,6 +13,7 @@
 #include <memory>
 #endif
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include <Poco/Notification.h>
@@ -54,7 +55,11 @@ struct CaseInsensitiveCmp {
    through writing scripts or directly
     through the API. It is implemented as a singleton class.
 */
-template <typename T> class DLLExport DataService {
+#if !defined(_WIN32)
+template <typename T> class MANTID_KERNEL_DLL DataService {
+#else
+template <typename T> class DataService {
+#endif
 private:
   /// Typedef for the map holding the names of and pointers to the data objects
   using svcmap = std::map<std::string, std::shared_ptr<T>, CaseInsensitiveCmp>;
