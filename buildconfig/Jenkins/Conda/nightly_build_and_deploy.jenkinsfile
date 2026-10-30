@@ -359,6 +359,7 @@ pipeline {
 
               package_conda("${PLATFORM}", "workbench")
               archive_conda_packages("${PLATFORM}")
+              archive_noarch_workbench_package("${PLATFORM}")
               package_standalone("${PLATFORM}")
               archive_standalone_package("${PLATFORM}")
             }
@@ -677,6 +678,19 @@ def archive_conda_packages(platform) {
   // Only archive the mantiddocs package if it was built.
   if(platform != 'noarch' || buildMantiddocs) {
     archiveArtifacts artifacts: "**/conda-bld/${platform}/*.conda",
+      allowEmptyArchive: false,
+      fingerprint: true,
+      onlyIfSuccessful: true
+  }
+}
+
+// mantidworkbench is a noarch package but it is built on every platform so that each
+// standalone installer is created from a locally built package. The builds are
+// equivalent, so only the package built on linux is archived, which means it is the only
+// one that gets published.
+def archive_noarch_workbench_package(platform) {
+  if(platform.startsWith('linux')) {
+    archiveArtifacts artifacts: "**/conda-bld/noarch/mantidworkbench-*.conda",
       allowEmptyArchive: false,
       fingerprint: true,
       onlyIfSuccessful: true
