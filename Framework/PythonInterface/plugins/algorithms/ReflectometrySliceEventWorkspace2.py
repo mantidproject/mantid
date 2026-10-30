@@ -53,7 +53,7 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
             direction=Direction.Input,
             doc="The name of the input monitor workspace or group of monitor workspaces.",
         )
-        self.declareProperty("OutputWorkspaceName", "", direction=Direction.Output, doc="(Base)Name for the output workspace(s).")
+        self.declareProperty("OutputWorkspaceName", "", doc="(Base)Name for the output workspace(s).")
         self.declareProperty(
             "FilterByLogValue", False, doc="If true, filter events via the FilterByLogValue algorithm. Uses FilterEvents otherwise."
         )
