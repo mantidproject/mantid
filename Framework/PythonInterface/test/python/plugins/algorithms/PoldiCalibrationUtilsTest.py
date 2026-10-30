@@ -21,7 +21,8 @@ from plugins.algorithms.poldi_calibration_utils import (
     apply_geometry,
     model_counts,
 )
-from plugins.algorithms.poldi_utils import exec_alg, get_tof_d1Ang, get_tths_and_l2s, get_instrument_settings_from_log
+from plugins.algorithms.diffraction_utils import get_tths_and_l2s
+from plugins.algorithms.poldi_utils import exec_alg, get_tof_d1Ang, get_instrument_settings_from_log
 
 BANKS = ["SouthBank", "NorthBank"]
 SI_D = np.array([3.1356, 1.9202, 1.6375, 1.3578, 1.2460, 1.1086, 1.0452, 0.9601, 0.9180, 0.8587])

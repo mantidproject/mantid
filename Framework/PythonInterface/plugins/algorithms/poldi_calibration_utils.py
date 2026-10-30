@@ -14,14 +14,8 @@ from typing import TYPE_CHECKING
 import numpy as np
 from scipy.special import erf
 
-from plugins.algorithms.poldi_utils import (
-    _get_flux_arrays,
-    get_instrument_settings_from_log,
-    get_live_spectra,
-    get_t0_parameters,
-    get_tof_d1Ang,
-    get_tths_and_l2s,
-)
+from plugins.algorithms.diffraction_utils import get_live_spectra, get_tths_and_l2s
+from plugins.algorithms.poldi_utils import _get_flux_arrays, get_instrument_settings_from_log, get_t0_parameters, get_tof_d1Ang
 
 if TYPE_CHECKING:
     from mantid.api import MatrixWorkspace
