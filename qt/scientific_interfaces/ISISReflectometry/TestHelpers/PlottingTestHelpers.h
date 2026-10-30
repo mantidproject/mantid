@@ -54,8 +54,6 @@ inline char const *toString(PlottingWorkspaceTreeSelectionMode mode) {
   switch (mode) {
   case PlottingWorkspaceTreeSelectionMode::None:
     return "None";
-  case PlottingWorkspaceTreeSelectionMode::Direct:
-    return "Direct";
   case PlottingWorkspaceTreeSelectionMode::ParentOnly:
     return "ParentOnly";
   case PlottingWorkspaceTreeSelectionMode::DirectAndParent:
