@@ -40,6 +40,7 @@ set(SRC_FILES
     src/DgsScatteredTransmissionCorrectionMD.cpp
     src/DisplayNormalizationSetter.cpp
     src/DivideMD.cpp
+    src/EllipsoidTrajectoryNorm.cpp
     src/EqualToMD.cpp
     src/EvaluateMDFunction.cpp
     src/ExponentialMD.cpp
@@ -159,6 +160,7 @@ set(INC_FILES
     inc/MantidMDAlgorithms/DgsScatteredTransmissionCorrectionMD.h
     inc/MantidMDAlgorithms/DisplayNormalizationSetter.h
     inc/MantidMDAlgorithms/DivideMD.h
+    inc/MantidMDAlgorithms/EllipsoidTrajectoryNorm.h
     inc/MantidMDAlgorithms/EqualToMD.h
     inc/MantidMDAlgorithms/EvaluateMDFunction.h
     inc/MantidMDAlgorithms/ExponentialMD.h
@@ -283,6 +285,7 @@ set(TEST_FILES
     DgsScatteredTransmissionCorrectionMDTest.h
     DisplayNormalizationSetterTest.h
     DivideMDTest.h
+    EllipsoidTrajectoryNormTest.h
     EqualToMDTest.h
     EvaluateMDFunctionTest.h
     ExponentialMDTest.h
