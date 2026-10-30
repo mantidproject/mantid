@@ -20,13 +20,13 @@ namespace Geometry {
  * - raw IDF XML text
  * - default instrument-view type/axis
  * - physical/neutronic instrument split for indirect-geometry instruments
- * Created at instrument load and read-only thereafter.
+ * Created at instrument load. The filename, XML text and default view/axis can be updated via setters.
  */
 class MANTID_GEOMETRY_DLL InstrumentMetadata {
 public:
   InstrumentMetadata(const Types::Core::DateAndTime &validFromDate, const Types::Core::DateAndTime &validToDate,
-                     std::string filename, std::string xmlText, std::string defaultView, std::string defaultAxis,
-                     Instrument_const_sptr physicalInstrument);
+                     const std::string &filename, const std::string &xmlText, const std::string &defaultView,
+                     const std::string &defaultAxis, const Instrument_const_sptr &physicalInstrument);
 
   const Types::Core::DateAndTime &validFromDate() const;
   const Types::Core::DateAndTime &validToDate() const;
@@ -38,6 +38,11 @@ public:
   /// This is a legacy Instrument 1.0 object. Replacing it needs its own nested ComponentInfo/DetectorInfo
   /// design (tracked separately).
   Instrument_const_sptr physicalInstrument() const;
+
+  void setFileName(const std::string &filename);
+  void setXmlText(const std::string &xmlText);
+  void setDefaultView(const std::string &defaultView);
+  void setDefaultViewAxis(const std::string &defaultAxis);
 
 private:
   Types::Core::DateAndTime m_validFromDate;
