@@ -40,3 +40,8 @@ def setup(app):
     # Define which methods are skipped when running autodoc
     # on a member
     app.connect("autodoc-skip-member", skip_member)
+
+    return {
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
+    }
