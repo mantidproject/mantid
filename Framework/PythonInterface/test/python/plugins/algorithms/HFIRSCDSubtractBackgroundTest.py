@@ -8,7 +8,7 @@ import unittest
 
 import numpy as np
 
-from mantid.api import WorkspaceFactory, WorkspaceGroup, mtd
+from mantid.api import AlgorithmManager, WorkspaceFactory, WorkspaceGroup, mtd
 from mantid.simpleapi import (
     CloneWorkspace,
     CreateMDHistoWorkspace,
@@ -50,6 +50,7 @@ class HFIRSCDSubtractBackgroundTest(unittest.TestCase):
         for name in mtd.getObjectNames():
             if not name.startswith("__") and name in mtd:
                 DeleteWorkspace(name)
+        AlgorithmManager.clear()
 
     @classmethod
     def _create_workspace(cls, name, signal, error_squared, instrument="WAND", logs=None):
