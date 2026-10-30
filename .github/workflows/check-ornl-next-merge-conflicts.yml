@@ -3,14 +3,15 @@ name: Check ornl-next merge conflicts
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   check-merge:
-    # Do not run in forks.
-    if: ${{ github.repository_owner == 'mantidproject' }}
+    # Do not run in forks; manual runs must target main, as the reports describe github.sha as the main commit.
+    if: ${{ github.repository_owner == 'mantidproject' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
 
     steps:
