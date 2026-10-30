@@ -1070,7 +1070,7 @@ will extract a slice based on a start and end time which are set in the state
 object. In addition, the data type, i.e. if the slice is to be taken from a sample
 or a can workspace, can be specified. Note that the monitor workspace is not
 being sliced but scaled by the ratio of the proton charge of the sliced
-workspace to the proton charnge of the full workspace.
+workspace to the proton charge of the full workspace.
 
 The sub-states of this algorithm are:
 

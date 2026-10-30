@@ -71,9 +71,9 @@ a link to the documentation you created. Also consider using images or a gif wal
 How to phrase a release note
 ----------------------------
 
-The phrasing of a release note is subjective, but here's our recomendations:
+The phrasing of a release note is subjective, but here's our recommendations:
 
-- Start with the Algorithm or Interface where the change has ocurred.
+- Start with the Algorithm or Interface where the change has occurred.
 - Use active voice: what is the Algorithm or Interface now doing?
 
 Here is a good template that will be applicable in most cases:

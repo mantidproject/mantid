@@ -221,7 +221,7 @@ Testing
    How to work with test data files in the mantid repository.
 
 :doc:`TestingUtilities`
-   Helper utlities used for testing.
+   Helper utilities used for testing.
 
 :doc:`RunningSanitizers`
    How to run the various sanitizers locally.

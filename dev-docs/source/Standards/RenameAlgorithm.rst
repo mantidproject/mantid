@@ -62,7 +62,7 @@ Renaming a C++ algorithm can be achieved via the following steps:
     corresponding CMake file. Still, the developer needs to dive into the source files
     to search and replace the class name manually.
 
-    Assumming our algorithm ``OldAlgName`` resides in the ``DataHandling`` namespace,
+    Assuming our algorithm ``OldAlgName`` resides in the ``DataHandling`` namespace,
     we would write:
 
   .. code-block:: bash

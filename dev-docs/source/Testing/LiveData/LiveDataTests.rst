@@ -145,9 +145,9 @@ Enter the following settings in the StartLiveData interface:
 - Instrument: ADARA_FakeEvent
 - Start Time: now
 - Update Every: 1 second
-- Processing: Algorthim
+- Processing: Algorithm
 
-  - Within the Processing step tab select the ``Rebin`` algorthm
+  - Within the Processing step tab select the ``Rebin`` algorithm
   - In the algorithm properties set ``Params`` to ``40e3,1000,60e3``
   - ``PreserveEvents`` should be unticked
 
@@ -176,14 +176,14 @@ Enter the following settings in the StartLiveData interface:
 - Update Every: 1 second
 - Processing: Algorithm
 
-  - Within the Processing step tab select the ``Rebin`` algorthm
-  - In the algorthim properties set ``Params`` to ``40e3,500,60e3``
+  - Within the Processing step tab select the ``Rebin`` algorithm
+  - In the algorithm properties set ``Params`` to ``40e3,500,60e3``
   - ``PreserveEvents`` should be unticked
 
 - Accumulation Method: Add
 - Post Processing: Algorithm
 
-  - Within the Post Processing step tab select the ``SumSpectra`` algorthm
+  - Within the Post Processing step tab select the ``SumSpectra`` algorithm
   - The options can be left as their defaults
 
 - AccumulationWorkspace: accumulation

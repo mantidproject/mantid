@@ -37,7 +37,7 @@ e.g. `TW_HEIGHT, TW_DIFFCOEFF, TW_TAU, TW_CENTRE`. Make sure to preserve the ord
 add the parameters of the function along with each other.
 
 Secondly, in ConvTypes.cpp add QDependency for the function as either true or false in the `FitTypeQDepends` map based on if
-the function is Q dependant.
+the function is Q dependent.
 
 .. code-block:: cpp
 

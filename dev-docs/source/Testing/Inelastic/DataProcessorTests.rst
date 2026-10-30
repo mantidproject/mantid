@@ -27,7 +27,7 @@ Symmetrise tab
 #. A Workspace named ``irs26176_graphite002_sym_pn_red`` should be created on the ADS.
 #. On the Output widget, click on ``Plot Spectra`` button. A new plot window should appear with the same plot as the preview.
 #. On the Symmetrise Property Browser: Change the value of ``Elow`` and ``Ehigh`` properties and see that the vertical green sliders.
-   respond accordingly, but only when the input values are within range. It shouldn't be possible to set ``Elow`` to the right of ``Ehigh`` and viceversa.
+   respond accordingly, but only when the input values are within range. It shouldn't be possible to set ``Elow`` to the right of ``Ehigh`` and vice-versa.
    At the same time, it shouldn't be possible to enter negative numbers, or positive numbers larger than the maximum data range.
 #. Change the value of ``Spectrum No`` property to 5 and see that the spectra on the plot is updated.
 #. Change the ``ReflectType`` property from ``Positive to Negative`` to ``Negative to Positive``, the sliders should move to the negative range of the spectra.

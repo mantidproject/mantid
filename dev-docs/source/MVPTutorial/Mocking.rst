@@ -39,7 +39,7 @@ The test class is then initialised:
 
 ``create_autospec`` mocks the class contained within the brackets. We
 then need to explicitly mock the methods using ``mock.Mock``. In
-addtion, when a return value is needed, this is provided in the call
+addition, when a return value is needed, this is provided in the call
 to ``mock.Mock``.
 
 A test is shown below:

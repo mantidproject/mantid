@@ -31,7 +31,7 @@ ALC peak fitting
 - Press the ``Load`` button, this can be slow
 - Once it is complete a plot will appear showing one dominant peak
 - Press the ``Baseline modelling`` button at the bottom of the interface
-- Right-click in the ``Funtion`` box to add a ``LinearBackground`` fitting function
+- Right-click in the ``Function`` box to add a ``LinearBackground`` fitting function
 - Add a section, drag the upper bound to be just before the start of the main peak
 - Add a second section, type into the ``Start X`` box to place it after the main peak
 - Press fit
