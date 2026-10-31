@@ -486,7 +486,7 @@ private:
   bool m_recordHistoryForChild;                             ///< Flag to indicate whether history should be
                                                             /// recorded. Applicable to child algs only
   bool m_alwaysStoreInADS;                                  ///< Always store in the ADS, even for child algos
-  bool m_runningAsync;                                      ///< Algorithm is running asynchronously
+  std::atomic_bool m_runningAsync;                          ///< Algorithm is scheduled or running asynchronously
   bool m_rethrow;                                           ///< Algorithm should rethrow exceptions while executing
   bool m_isAlgStartupLoggingEnabled;                        /// Whether to log alg startup and
                                                             /// closedown messages from the base class

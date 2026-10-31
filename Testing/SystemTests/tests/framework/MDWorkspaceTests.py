@@ -147,18 +147,18 @@ class PlusMDTest(systemtesting.MantidSystemTest):
         if self._saved_filename is not None:
             try:
                 os.remove(self._saved_filename)
-                Logger.get("MDWorkspaceTests").notice("Removed %s" % self._saved_filename)
+                Logger("MDWorkspaceTests").notice("Removed %s" % self._saved_filename)
             except OSError:
-                Logger.get("MDWorkspaceTests").notice("Failed to remove %s" % self._saved_filename)
+                Logger("MDWorkspaceTests").notice("Failed to remove %s" % self._saved_filename)
 
             # Plus the _clone version
             filename = os.path.splitext(self._saved_filename)[0]
             filename += "_clone.nxs"
             try:
                 os.remove(filename)
-                Logger.get("MDWorkspaceTests").notice("Removed %s " % filename)
+                Logger("MDWorkspaceTests").notice("Removed %s " % filename)
             except OSError:
-                Logger.get("MDWorkspaceTests").notice("Failed to remove %s" % self._saved_filename)
+                Logger("MDWorkspaceTests").notice("Failed to remove %s" % self._saved_filename)
 
 
 ###############################################################################
@@ -237,6 +237,6 @@ class MergeMDTest(systemtesting.MantidSystemTest):
         for filename in self._saved_filenames:
             try:
                 os.remove(filename)
-                Logger.get("MDWorkspaceTests").notice("Removed %s" % filename)
+                Logger("MDWorkspaceTests").notice("Removed %s" % filename)
             except OSError:
-                Logger.get("MDWorkspaceTests").notice("Failed to remove %s" % filename)
+                Logger("MDWorkspaceTests").notice("Failed to remove %s" % filename)

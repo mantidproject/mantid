@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllConfig.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "MantidQtWidgets/Spectroscopy/DllConfig.h"
 
 namespace DataValidationHelper {
 

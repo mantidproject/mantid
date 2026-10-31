@@ -8,6 +8,7 @@
 
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 
 #include "MantidKernel/IPropertyManager.h"
@@ -30,7 +31,7 @@ OffsetsWorkspace::OffsetsWorkspace(const Geometry::Instrument_const_sptr &inst) 
 namespace Mantid::Kernel {
 
 template <>
-DLLExport Mantid::DataObjects::OffsetsWorkspace_sptr
+MANTID_DATAOBJECTS_DLL Mantid::DataObjects::OffsetsWorkspace_sptr
 IPropertyManager::getValue<Mantid::DataObjects::OffsetsWorkspace_sptr>(const std::string &name) const {
   auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::DataObjects::OffsetsWorkspace_sptr> *>(getPointerToProperty(name));
@@ -44,7 +45,7 @@ IPropertyManager::getValue<Mantid::DataObjects::OffsetsWorkspace_sptr>(const std
 }
 
 template <>
-DLLExport Mantid::DataObjects::OffsetsWorkspace_const_sptr
+MANTID_DATAOBJECTS_DLL Mantid::DataObjects::OffsetsWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::DataObjects::OffsetsWorkspace_const_sptr>(const std::string &name) const {
   auto const *prop =
       dynamic_cast<PropertyWithValue<Mantid::DataObjects::OffsetsWorkspace_sptr> *>(getPointerToProperty(name));

@@ -9,7 +9,6 @@
 #include "Common/DllConfig.h"
 #include "GUI/RunsTable/QtRunsTableView.h"
 #include "IRunsView.h"
-#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 #include "QtSearchModel.h"
 

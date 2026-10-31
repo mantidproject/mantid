@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidKernel/V3D.h"
+#include "MantidKernel/V3D_fwd.h"
 
 namespace Mantid {
 namespace Algorithms {

@@ -309,7 +309,7 @@ double AlignAndFocusPowder::getVecPropertyFromPmOrSelf(const std::string &name, 
 void AlignAndFocusPowder::exec() {
   // retrieve the properties
   m_inputW = getProperty(PropertyNames::INPUT_WKSP);
-  m_instName = m_inputW->getInstrument()->getName();
+  m_instName = m_inputW->getInstrumentName();
   try {
     m_instName = Kernel::ConfigService::Instance().getInstrument(m_instName).shortName();
   } catch (Exception::NotFoundError &) {

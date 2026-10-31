@@ -24,7 +24,8 @@ namespace {
  * @param self A reference to calling object
  */
 const std::string deprecatedName(const Unit &self) {
-  PyErr_Warn(PyExc_DeprecationWarning, "'name' is deprecated, use 'caption' instead.");
+  if (PyErr_Warn(PyExc_DeprecationWarning, "'name' is deprecated, use 'caption' instead.") < 0)
+    throw boost::python::error_already_set();
   return self.caption();
 }
 
@@ -33,7 +34,8 @@ const std::string deprecatedName(const Unit &self) {
  * @param self A reference to calling object
  */
 const std::string deprecatedLabel(const Unit &self) {
-  PyErr_Warn(PyExc_DeprecationWarning, "'unit.label()' is deprecated, use 'str(unit.symbol())' instead.");
+  if (PyErr_Warn(PyExc_DeprecationWarning, "'unit.label()' is deprecated, use 'str(unit.symbol())' instead.") < 0)
+    throw boost::python::error_already_set();
   return self.label().ascii();
 }
 

@@ -103,7 +103,7 @@ class SampleLogsGroupWorkspace(object):
         # add run info
         run = ws.getRun()
         row = [
-            ws.getInstrument().getFullName(),
+            ws.getInstrumentName(),
             ws.getRunNumber(),
             str(run.getProperty("bankid").value),
             run.getProtonCharge(),

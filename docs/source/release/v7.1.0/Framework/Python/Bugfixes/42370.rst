@@ -1,0 +1,1 @@
+- Python algorithms no longer deadlock during ``AlgorithmManager.shutdown()`` when they need to reacquire Python's global interpreter lock (GIL) to finish.

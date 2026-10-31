@@ -16,6 +16,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Exception.h"
@@ -55,28 +56,31 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
 
     const auto &detectorInfo = output->detectorInfo();
-    const auto &det = detectorInfo.detector(detectorInfo.indexOf(1008));
-    TS_ASSERT_EQUALS(det.getID(), 1008);
-    TS_ASSERT_EQUALS(det.getName(), "combined translation6");
-    Parameter_sptr param = paramMap.get(&det, "fjols");
+    const auto &componentInfo = output->componentInfo();
+    const auto &paramInfo = *componentInfo.sharedParameterInfo();
+    const auto det1008Index = detectorInfo.indexOf(1008);
+    TS_ASSERT_EQUALS(detectorInfo.detid(det1008Index), 1008);
+    TS_ASSERT_EQUALS(componentInfo.name(det1008Index), "combined translation6");
+    Parameter_sptr param = paramInfo.get(det1008Index, "fjols");
     TS_ASSERT_DELTA(param->value<double>(), 20.0, 0.0001);
 
-    param = paramMap.get(&det, "nedtur");
+    param = paramInfo.get(det1008Index, "nedtur");
     TS_ASSERT_DELTA(param->value<double>(), 77.0, 0.0001);
-    param = paramMap.get(&det, "fjols-test-paramfile");
+    param = paramInfo.get(det1008Index, "fjols-test-paramfile");
     TS_ASSERT_DELTA(param->value<double>(), 50.0, 0.0001);
     descr = param->getDescription();
     TS_ASSERT_EQUALS(descr, "test description. Full test description.");
 
-    const auto &det2 = detectorInfo.detector(detectorInfo.indexOf(1301));
+    const auto det1301Index = detectorInfo.indexOf(1301);
 
-    TS_ASSERT_EQUALS(det2.getID(), 1301);
-    TS_ASSERT_EQUALS(det2.getName(), "pixel");
-    param = paramMap.get(&det2, "testDouble");
+    TS_ASSERT_EQUALS(detectorInfo.detid(det1301Index), 1301);
+    TS_ASSERT_EQUALS(componentInfo.name(det1301Index), "pixel");
+    param = paramInfo.get(det1301Index, "testDouble");
     TS_ASSERT_DELTA(param->value<double>(), 25.0, 0.0001);
-    TS_ASSERT_EQUALS(paramMap.getString(&det2, "testString"), "hello world");
+    TS_ASSERT_EQUALS(componentInfo.getStringParameter(det1301Index, "testString", false),
+                     std::vector<std::string>{"hello world"});
 
-    param = paramMap.get(&det2, "testString");
+    param = paramInfo.get(det1301Index, "testString");
     TS_ASSERT_EQUALS(param->getShortDescription(), "its test hello word.");
     TS_ASSERT_EQUALS(param->getDescription(), "its test hello word.");
     TS_ASSERT_EQUALS(paramMap.getDescription("pixel", "testString"), "its test hello word.");
@@ -142,26 +146,29 @@ public:
 
     const auto &paramMap = output->constInstrumentParameters();
     const auto &detectorInfo = output->detectorInfo();
-    const auto &det = detectorInfo.detector(detectorInfo.indexOf(1008));
-    TS_ASSERT_EQUALS(det.getID(), 1008);
-    TS_ASSERT_EQUALS(det.getName(), "combined translation6");
-    Parameter_sptr param = paramMap.get(&det, "fjols");
+    const auto &componentInfo = output->componentInfo();
+    const auto &paramInfo = *componentInfo.sharedParameterInfo();
+    const auto det1008Index = detectorInfo.indexOf(1008);
+    TS_ASSERT_EQUALS(detectorInfo.detid(det1008Index), 1008);
+    TS_ASSERT_EQUALS(componentInfo.name(det1008Index), "combined translation6");
+    Parameter_sptr param = paramInfo.get(det1008Index, "fjols");
     TS_ASSERT_DELTA(param->value<double>(), 20.0, 0.0001);
-    param = paramMap.get(&det, "nedtur");
+    param = paramInfo.get(det1008Index, "nedtur");
     TS_ASSERT_DELTA(param->value<double>(), 77.0, 0.0001);
-    param = paramMap.get(&det, "fjols-test-paramfile");
+    param = paramInfo.get(det1008Index, "fjols-test-paramfile");
     TS_ASSERT_DELTA(param->value<double>(), 52.0, 0.0001);
     std::string descr = param->getDescription();
     TS_ASSERT_EQUALS(descr, "test description2. Full test description2.");
 
-    const auto &det2 = detectorInfo.detector(detectorInfo.indexOf(1301));
-    TS_ASSERT_EQUALS(det2.getID(), 1301);
-    TS_ASSERT_EQUALS(det2.getName(), "pixel");
-    param = paramMap.get(&det2, "testDouble");
+    const auto det1301Index = detectorInfo.indexOf(1301);
+    TS_ASSERT_EQUALS(detectorInfo.detid(det1301Index), 1301);
+    TS_ASSERT_EQUALS(componentInfo.name(det1301Index), "pixel");
+    param = paramInfo.get(det1301Index, "testDouble");
     TS_ASSERT_DELTA(param->value<double>(), 27.0, 0.0001);
-    TS_ASSERT_EQUALS(paramMap.getString(&det2, "testString"), "goodbye world");
+    TS_ASSERT_EQUALS(componentInfo.getStringParameter(det1301Index, "testString", false),
+                     std::vector<std::string>{"goodbye world"});
 
-    param = paramMap.get(&det2, "testString");
+    param = paramInfo.get(det1301Index, "testString");
     TS_ASSERT_EQUALS(param->getShortDescription(), "its test goodbye world.");
     TS_ASSERT_EQUALS(param->getDescription(), "its test goodbye world.");
     TS_ASSERT_EQUALS(paramMap.getDescription("pixel", "testString"), "its test goodbye world.");
@@ -195,23 +202,60 @@ public:
     TS_ASSERT(!pLoaderPF->execute())
   }
 
+  void test_parameters_are_loaded_into_the_given_workspace_only() {
+    // Workspaces loaded from the same definition share one base instrument.
+    loadIDF2Into("LoadParameterFileTestOther");
+    const std::string targetName = "LoadParameterFileTestTarget";
+    loadIDF2Into(targetName);
+    const std::string parameterXML = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
+                                     "<parameter-file instrument=\"IDF_for_UNIT_TESTING2\" valid-from=\"blah...\">"
+                                     " <component-link name=\"nickel-holder\">"
+                                     "  <parameter name=\"only-in-one\"> <value val=\"2010.0\" /> </parameter>"
+                                     " </component-link>"
+                                     "</parameter-file>";
+    auto loadParameterFile = AlgorithmManager::Instance().create("LoadParameterFile");
+    loadParameterFile->initialize();
+    loadParameterFile->setPropertyValue("ParameterXML", parameterXML);
+    loadParameterFile->setPropertyValue("Workspace", targetName);
+    TS_ASSERT_THROWS_NOTHING(loadParameterFile->execute());
+    // A workspace given the same instrument afterwards.
+    loadIDF2Into("LoadParameterFileTestLater");
+
+    auto &ads = AnalysisDataService::Instance();
+    auto const loaded = ads.retrieveWS<MatrixWorkspace>(targetName);
+    auto const holderIndex = loaded->componentInfo().indexOfAny("nickel-holder");
+    TS_ASSERT_EQUALS(loaded->componentInfo().getNumberParameter(holderIndex, "only-in-one").at(0), 2010.0);
+    for (auto const &otherName : {"LoadParameterFileTestOther", "LoadParameterFileTestLater"}) {
+      auto const other = ads.retrieveWS<MatrixWorkspace>(otherName);
+      // Re-populating, as reloading logs does, must not pick the parameter up either.
+      other->populateInstrumentParameters();
+      TS_ASSERT(!other->componentInfo().hasParameter(holderIndex, "only-in-one"));
+      ads.remove(otherName);
+    }
+    ads.remove(targetName);
+  }
+
   void load_IDF2() {
+    wsName = "LoadParameterFileTestIDF2";
+    loadIDF2Into(wsName);
+  }
+
+  void loadIDF2Into(const std::string &name) {
     auto pLoadInstrument = AlgorithmManager::Instance().create("LoadInstrument");
 
     TS_ASSERT_THROWS_NOTHING(pLoadInstrument->initialize());
 
     // create a workspace with some sample data
-    wsName = "LoadParameterFileTestIDF2";
     Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
     Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
 
     // put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(name, ws2D));
 
     // Path to test input file assumes Test directory checked out from git
     pLoadInstrument->setPropertyValue("Filename", "unit_testing/IDF_for_UNIT_TESTING2.xml");
     // inputFile = loaderIDF2.getPropertyValue("Filename");
-    pLoadInstrument->setPropertyValue("Workspace", wsName);
+    pLoadInstrument->setPropertyValue("Workspace", name);
     pLoadInstrument->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     TS_ASSERT_THROWS_NOTHING(pLoadInstrument->execute());
     TS_ASSERT(pLoadInstrument->isExecuted());
@@ -237,23 +281,24 @@ public:
 
     // Get back the saved workspace
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
-    const auto &paramMap = output->constInstrumentParameters();
     const auto &detectorInfo = output->detectorInfo();
-    const auto &det = detectorInfo.detector(detectorInfo.indexOf(1008));
+    const auto &componentInfo = output->componentInfo();
+    const auto &paramInfo = *componentInfo.sharedParameterInfo();
+    const auto det1008Index = detectorInfo.indexOf(1008);
     Parameter_sptr param;
-    param = paramMap.get(&det, "date-most-recent");
+    param = paramInfo.get(det1008Index, "date-most-recent");
     TS_ASSERT_EQUALS(param->value<double>(), 1);
-    param = paramMap.get(&det, "date-within-bound");
+    param = paramInfo.get(det1008Index, "date-within-bound");
     TS_ASSERT_EQUALS(param->value<double>(), 1);
-    param = paramMap.get(&det, "date-no-bounds-vs-end");
+    param = paramInfo.get(det1008Index, "date-no-bounds-vs-end");
     TS_ASSERT_EQUALS(param->value<double>(), 1);
-    param = paramMap.get(&det, "date-same-start-no-end");
+    param = paramInfo.get(det1008Index, "date-same-start-no-end");
     TS_ASSERT_EQUALS(param->value<double>(), 1);
-    param = paramMap.get(&det, "date-no-bounds-vs-start");
+    param = paramInfo.get(det1008Index, "date-no-bounds-vs-start");
     TS_ASSERT_EQUALS(param->value<double>(), 1);
-    param = paramMap.get(&det, "date-same-start");
+    param = paramInfo.get(det1008Index, "date-same-start");
     TS_ASSERT_EQUALS(param->value<double>(), 1);
-    param = paramMap.get(&det, "date-no-bounds-vs-invalid");
+    param = paramInfo.get(det1008Index, "date-no-bounds-vs-invalid");
     TS_ASSERT_EQUALS(param->value<double>(), 1);
   }
 

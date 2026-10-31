@@ -19,6 +19,7 @@
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace API;
@@ -99,7 +100,7 @@ public:
   }
 
   void check_instrument(const MatrixWorkspace &ws) {
-    TS_ASSERT_EQUALS(ws.getInstrument()->baseInstrument(), m_instrument);
+    TS_ASSERT_EQUALS(WorkspaceCreationHelper::baseInstrumentID(ws), m_instrument->getComponentID());
   }
 
   void check_data(const MatrixWorkspace &ws) {

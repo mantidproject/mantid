@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/ThreadPool.h"
@@ -19,6 +20,8 @@
 
 #include <cstdlib>
 #include <memory>
+#include <set>
+#include <thread>
 
 using namespace Mantid::Kernel;
 
@@ -112,6 +115,44 @@ private:
   size_t depth;
 };
 
+//=======================================================================================
+/** Task that records which thread ran it, after waiting a while */
+class TaskThatRecordsThread : public Task {
+public:
+  TaskThatRecordsThread(std::set<std::thread::id> &threadIds, std::mutex &mutex)
+      : Task(), m_threadIds(threadIds), m_mutex(mutex) {}
+
+  void run() override {
+    Poco::Thread::sleep(100); // millisec
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_threadIds.insert(std::this_thread::get_id());
+  }
+
+private:
+  std::set<std::thread::id> &m_threadIds;
+  std::mutex &m_mutex;
+};
+
+/** Task that waits, so the other threads find the queue empty, then adds tasks to its scheduler */
+class TaskThatAddsTasksLater : public Task {
+public:
+  TaskThatAddsTasksLater(ThreadScheduler *scheduler, size_t numTasks, std::set<std::thread::id> &threadIds,
+                         std::mutex &mutex)
+      : Task(), m_scheduler(scheduler), m_numTasks(numTasks), m_threadIds(threadIds), m_mutex(mutex) {}
+
+  void run() override {
+    Poco::Thread::sleep(50); // millisec
+    for (size_t i = 0; i < m_numTasks; i++)
+      m_scheduler->push(std::make_shared<TaskThatRecordsThread>(m_threadIds, m_mutex));
+  }
+
+private:
+  ThreadScheduler *m_scheduler;
+  size_t m_numTasks;
+  std::set<std::thread::id> &m_threadIds;
+  std::mutex &m_mutex;
+};
+
 int ThreadPoolTest_TaskThatThrows_counter = 0;
 
 //=======================================================================================
@@ -139,6 +180,26 @@ public:
   }
 
   void test_Constructor() { ThreadPool p; }
+
+  void test_getNumPhysicalCores_is_limited_by_MaxCores() {
+    auto &config = ConfigService::Instance();
+    const std::string original = config.getString("MultiThreaded.MaxCores");
+
+    // 0 means use all the cores
+    config.setString("MultiThreaded.MaxCores", "0");
+    const size_t allCores = ThreadPool::getNumPhysicalCores();
+    TS_ASSERT_LESS_THAN(0, allCores);
+    // a limit above 0 is used, up to the number of cores there are
+    config.setString("MultiThreaded.MaxCores", "1");
+    TS_ASSERT_EQUALS(ThreadPool::getNumPhysicalCores(), 1);
+    config.setString("MultiThreaded.MaxCores", "100000");
+    TS_ASSERT_EQUALS(ThreadPool::getNumPhysicalCores(), allCores);
+    // a negative limit is ignored
+    config.setString("MultiThreaded.MaxCores", "-1");
+    TS_ASSERT_EQUALS(ThreadPool::getNumPhysicalCores(), allCores);
+
+    config.setString("MultiThreaded.MaxCores", original);
+  }
 
   void test_schedule() {
     ThreadPool p;
@@ -394,6 +455,22 @@ public:
 
   void test_StressTest_TasksThatCreateTasks_ThreadSchedulerMutexes() {
     do_StressTest_TasksThatCreateTasks(new ThreadSchedulerMutexes());
+  }
+
+  //--------------------------------------------------------------------
+  /** Threads that find the queue empty while another thread's task is still
+   * running must wait for the tasks it adds, rather than exit.
+   */
+  void test_tasks_added_later_run_on_several_threads() {
+    auto *scheduler = new ThreadSchedulerLargestCost();
+    ThreadPool p(scheduler, 4);
+    std::set<std::thread::id> threadIds;
+    std::mutex mutex;
+    p.schedule(std::make_shared<TaskThatAddsTasksLater>(scheduler, 4, threadIds, mutex));
+    TS_ASSERT_THROWS_NOTHING(p.joinAll());
+
+    // all added tasks ran, and on more than the one thread that added them
+    TS_ASSERT(threadIds.size() > 1);
   }
 
   //=======================================================================================

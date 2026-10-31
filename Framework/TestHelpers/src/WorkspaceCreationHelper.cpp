@@ -32,6 +32,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
@@ -65,6 +66,11 @@ using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
+
+const IComponent *baseInstrumentID(const ExperimentInfo &expInfo) {
+  const auto &baseComponentInfo = expInfo.baseComponentInfo();
+  return baseComponentInfo.componentID(baseComponentInfo.root());
+}
 
 StubAlgorithm::StubAlgorithm(size_t nSteps) : m_Progress(std::make_unique<API::Progress>(this, 0.0, 1.0, nSteps)) {}
 
@@ -1154,7 +1160,7 @@ createEventWorkspace3(const Mantid::DataObjects::EventWorkspace_const_sptr &sour
   // 4. Instrument
   Mantid::API::Algorithm_sptr loadInst = alg->createChildAlgorithm("LoadInstrument");
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-  loadInst->setPropertyValue("InstrumentName", sourceWS->getInstrument()->getName());
+  loadInst->setPropertyValue("InstrumentName", sourceWS->getInstrumentName());
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", outputWS);
   loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
   loadInst->executeAsChildAlg();

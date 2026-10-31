@@ -35,7 +35,7 @@ import pint
 pint.set_application_registry(ureg)
 
 
-def _iter_check_thresholds(items: Iterable[Tuple[int, int, np.ndarray]]) -> Generator[Tuple[int, int, float], None, None]:
+def _iter_check_thresholds(items: Iterable[Tuple[int, int, np.ndarray]]) -> Generator[Tuple[int, int, float]]:
     """Compare S data values to minimum thresholds, return items with low intensity
 
     Items have form (atom_index, quantum_order_index, s_array)

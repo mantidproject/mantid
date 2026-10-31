@@ -10,7 +10,7 @@
 //   Includes
 //----------------------------
 
-#include "DllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <QDialog>
 #include <QListWidget>
 #include <QStringList>

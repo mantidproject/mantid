@@ -48,7 +48,7 @@ public:
       return;
 
     // Checks that the instrument name and deltaE-mode is correct
-    TS_ASSERT_EQUALS(ws->getInstrument()->getName(), "IRIS");
+    TS_ASSERT_EQUALS(ws->getInstrumentName(), "IRIS");
     TS_ASSERT_EQUALS(ws->getEMode(), Kernel::DeltaEMode::Indirect);
 
     AnalysisDataService::Instance().remove(outWSName);

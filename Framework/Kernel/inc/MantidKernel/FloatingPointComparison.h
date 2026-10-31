@@ -10,7 +10,8 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/V3D.h"
+
+#include <type_traits>
 
 namespace Mantid {
 namespace Kernel {

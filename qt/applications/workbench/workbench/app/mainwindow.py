@@ -454,13 +454,13 @@ class MainWindow(QMainWindow):
         for item in layout_keys:
             layout_options.append(self.create_load_layout_action(item, layout_dict[item]))
         layout_options.append(None)
-        action_settings = create_action(self, "Settings", on_triggered=self.open_settings_layout_window)
+        action_settings = create_action(self.view_menu_layouts, "Settings", on_triggered=self.open_settings_layout_window)
         layout_options.append(action_settings)
 
         add_actions(self.view_menu_layouts, layout_options)
 
     def create_load_layout_action(self, layout_name, layout):
-        action_load_layout = create_action(self, layout_name, on_triggered=lambda: self.attempt_to_restore_state(layout))
+        action_load_layout = create_action(self.view_menu_layouts, layout_name, on_triggered=lambda: self.attempt_to_restore_state(layout))
         return action_load_layout
 
     def prep_window_for_reset(self):
@@ -712,6 +712,7 @@ class MainWindow(QMainWindow):
         self.algorithm_selector.refresh()
         self.populate_interfaces_menu()
         self.workspacewidget.refresh_workspaces()
+        self.populate_layout_menu()
 
     def open_algorithm_descriptions_help(self):
         self.interface_manager.showAlgorithmHelp("")

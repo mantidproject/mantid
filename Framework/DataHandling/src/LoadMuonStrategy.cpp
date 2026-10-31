@@ -12,6 +12,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/Logger.h"
 #include "MantidNexus/NexusClasses.h"
 #include <vector>
 

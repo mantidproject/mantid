@@ -391,6 +391,20 @@ QGroupBox:title {
           </property>
          </widget>
         </item>
+         <item row="6" column="2">
+         <widget class="QCheckBox" name="readEulerFromRef_checkBox">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1">
+         <widget class="QLabel" name="label_readEulerFromRef">
+          <property name="text">
+           <string>Read Euler settings from a loaded reference workspace</string>
+          </property>
+         </widget>
+        </item>
      </layout>
     </widget>
    </item>

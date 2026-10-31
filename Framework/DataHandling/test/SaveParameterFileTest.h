@@ -21,6 +21,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidKernel/Exception.h"
@@ -92,11 +93,9 @@ public:
   }
 
   void setParamByDetID(int id, const std::string &pName, double value) {
-    ParameterMap &paramMap = m_ws->instrumentParameters();
     const auto &detectorInfo = m_ws->detectorInfo();
     const auto detectorIndex = detectorInfo.indexOf(id);
-    const auto &detector = detectorInfo.detector(detectorIndex);
-    paramMap.addDouble(detector.getComponentID(), pName, value);
+    m_ws->mutableComponentInfo().addDouble(detectorIndex, pName, value);
   }
 
   void setFitParam(const std::string &cName, const std::string &pName, const std::string &value) {
@@ -125,10 +124,9 @@ public:
   }
 
   void checkParamByDetID(int id, const std::string &pName, double value) {
-    ParameterMap &paramMap = m_ws->instrumentParameters();
     const auto &detectorInfo = m_ws->detectorInfo();
-    const auto &detector = detectorInfo.detector(detectorInfo.indexOf(id));
-    Parameter_sptr param = paramMap.get(&detector, pName);
+    const auto &paramInfo = *m_ws->componentInfo().sharedParameterInfo();
+    Parameter_sptr param = paramInfo.get(detectorInfo.indexOf(id), pName);
     double pValue = param->value<double>();
     TS_ASSERT_DELTA(value, pValue, 0.0001);
   }

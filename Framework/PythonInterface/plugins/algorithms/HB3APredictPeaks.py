@@ -63,7 +63,13 @@ class HB3APredictPeaks(PythonAlgorithm):
         )
 
         self.declareProperty(
-            "Wavelength", FloatPropertyWithValue.EMPTY_DBL, doc="Wavelength value to use only if one was not found in the sample log"
+            "Wavelength",
+            FloatPropertyWithValue.EMPTY_DBL,
+            doc=(
+                "Optional wavelength in Angstroms. If specified, this value overrides "
+                "the 'wavelength' sample log, when present. An exception is raised if "
+                "neither value is available."
+            ),
         )
 
         self.declareProperty("SatellitePeaks", False, "If to Predict Satellite Peaks")

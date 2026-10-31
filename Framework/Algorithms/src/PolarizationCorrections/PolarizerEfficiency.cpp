@@ -17,6 +17,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/SpinStateHelpers.h"
 #include "MantidKernel/SpinStateValidator.h"
+#include "MantidKernel/Unit.h"
 
 #include <boost/algorithm/string/join.hpp>
 #include <filesystem>

@@ -1,0 +1,1 @@
+- The list of layouts on the :ref:`Main Window <main_window>` view menu is refreshed without restarting workbench after a layout has been added or deleted from the :ref:`General Settings <GeneralSettings>`.

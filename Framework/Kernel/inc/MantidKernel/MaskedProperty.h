@@ -27,7 +27,7 @@ namespace Kernel {
 template <typename TYPE = std::string> class MaskedProperty : public Kernel::PropertyWithValue<TYPE> {
 public:
   /// Constructor with a validator
-  MaskedProperty(std::string name, TYPE defaultvalue, IValidator_sptr validator = IValidator_sptr(new NullValidator),
+  MaskedProperty(std::string name, TYPE defaultvalue, IValidator_sptr validator = nullptr,
                  const unsigned int direction = Direction::Input);
   /// Constructor with a validator without validation
   MaskedProperty(std::string name, TYPE defaultvalue, const unsigned int direction);

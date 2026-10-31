@@ -7,7 +7,6 @@
 import unittest
 from mantid.api import MatrixWorkspace, WorkspaceGroup, Run
 from mantid.simpleapi import config, mtd, PolDiffILLReduction, CreateEmptyTableWorkspace
-from mantid.geometry import Instrument
 
 
 class PolDiffILLReductionTest(unittest.TestCase):
@@ -213,7 +212,8 @@ class PolDiffILLReductionTest(unittest.TestCase):
             self.assertEqual(entry.getAxis(1).getUnit().unitID(), y_unit_id)
             self.assertEqual(entry.blocksize(), blocksize)
             self.assertEqual(entry.getNumberHistograms(), spectra)
-            self.assertTrue(isinstance(entry.getInstrument(), Instrument))
+            # An attached instrument has components other than the root
+            self.assertGreater(entry.componentInfo().size(), 1)
             self.assertTrue(isinstance(entry.getRun(), Run))
             self.assertTrue(entry.getHistory())
 

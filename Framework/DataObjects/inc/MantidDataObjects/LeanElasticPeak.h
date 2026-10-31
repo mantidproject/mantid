@@ -9,7 +9,7 @@
 #include "MantidDataObjects/BasePeak.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger_fwd.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/V3D.h"

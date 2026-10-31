@@ -13,6 +13,27 @@
 
 namespace Mantid::Kernel {
 
+namespace {
+/// Marks a thread busy for its lifetime; idle again when it goes out of scope, so an exception cannot leave it busy
+class BusyGuard {
+public:
+  explicit BusyGuard(ThreadScheduler &scheduler) : m_scheduler(&scheduler) { m_scheduler->markBusy(); }
+  BusyGuard(const BusyGuard &) = delete;
+  BusyGuard &operator=(const BusyGuard &) = delete;
+  ~BusyGuard() { release(); }
+  /// Mark the thread idle now rather than at the end of the scope
+  void release() {
+    if (m_scheduler) {
+      m_scheduler->markIdle();
+      m_scheduler = nullptr;
+    }
+  }
+
+private:
+  ThreadScheduler *m_scheduler;
+};
+} // namespace
+
 //-----------------------------------------------------------------------------------
 /** Constructor
  *
@@ -47,7 +68,13 @@ void ThreadPoolRunnable::run() {
     m_waitSec -= 0.01;       // Subtract ten millisec from the time left to wait.
   }
 
-  while (!m_scheduler->empty()) {
+  // Keep going while there are tasks in the queue, or while another thread is
+  // running a task that may still add more.
+  while (!m_scheduler->empty() || m_scheduler->hasBusyThreads()) {
+    // Mark this thread busy before asking for a task so another thread never
+    // sees an empty queue and no busy threads while this one holds the last task.
+    BusyGuard busy(*m_scheduler);
+
     // Request the task from the scheduler.
     // Will be NULL if not found.
     task = m_scheduler->pop(m_threadnum);
@@ -80,10 +107,12 @@ void ThreadPoolRunnable::run() {
         mutex->unlock();
 
       // We now delete the task to free up memory
+      task.reset();
     } else {
-      // No appropriate task for this thread (perhaps a mutex is locked)
-      // but there are more tasks.
+      // No appropriate task for this thread (perhaps a mutex is locked, or
+      // another thread's task has not added its tasks yet).
       // So we wait a bit before checking again.
+      busy.release();
       Poco::Thread::sleep(10); // millisec
     }
   }

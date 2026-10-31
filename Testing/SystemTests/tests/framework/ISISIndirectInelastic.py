@@ -588,7 +588,7 @@ class ISISIndirectInelasticDiagnostics(ISISIndirectInelasticBase):
         # Construct the result ws name.
         Load(Filename=self.rawfiles[0], OutputWorkspace="__temp")
         resultWs = mtd["__temp"]
-        inst_name = resultWs.getInstrument().getFullName().lower()
+        inst_name = resultWs.getInstrumentName().lower()
         run_number = resultWs.run().getProperty("run_number").value
         self.result_names = [inst_name + run_number + self.suffix]
 

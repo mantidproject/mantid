@@ -8,6 +8,7 @@
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument.h"
@@ -82,7 +83,7 @@ void SaveBankScatteringAngles::exec() {
     const auto detectorVector = detectorPosition - samplePosition;
 
     const auto twoTheta = radToDeg(beamVector.angle(detectorVector));
-    const auto phi = radToDeg(detector->getPhi());
+    const auto phi = radToDeg(matrixWS->spectrumInfo().phi(0));
     const auto group = matrixWS->getSpectrum(0).getSpectrumNo();
 
     outFile << "bank :    " << i << "  "

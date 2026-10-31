@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllOption.h"
 #include "MantidAPI/ScriptRepository.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/MantidDialog.h"
 #include "ui_ScriptRepositoryView.h"
 #include <QDialog>

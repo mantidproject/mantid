@@ -56,7 +56,8 @@ class SANSTubeMerge(DataProcessorAlgorithm):
 
         # In the front detector calibration, move the pixels for the rear detector
         # so that both calibrations are now in a single workspace
-        rear_inst = rear_calib.getInstrument()
+        rear_component_info = rear_calib.componentInfo()
+        rear_detector_info = rear_calib.detectorInfo()
         det_ids = front_calib.detectorInfo().detectorIDs()
 
         move_alg = self._create_child_alg("MoveInstrumentComponent")
@@ -66,13 +67,15 @@ class SANSTubeMerge(DataProcessorAlgorithm):
         prog_report = Progress(self, start=0.5, end=0.75, nreports=det_ids.size)
         for det_id in det_ids:
             prog_report.report(f"Checking detector {det_id}")
-            det = rear_inst.getDetector(det_id.item())
-            if self._REAR_DET_NAME in det.getFullName():
+            # Detector index == component index for detectors
+            det_index = rear_detector_info.indexOf(det_id.item())
+            if self._REAR_DET_NAME in rear_component_info.fullName(det_index):
                 prog_report.report(f"Moving detector {det_id}")
+                det_pos = rear_detector_info.position(det_index)
                 move_alg.setProperty("DetectorID", det_id.item())
-                move_alg.setProperty("X", det.getPos().getX())
-                move_alg.setProperty("Y", det.getPos().getY())
-                move_alg.setProperty("Z", det.getPos().getZ())
+                move_alg.setProperty("X", det_pos.getX())
+                move_alg.setProperty("Y", det_pos.getY())
+                move_alg.setProperty("Z", det_pos.getZ())
                 move_alg.execute()
 
         prog_report = Progress(self, start=0.75, end=0.9, nreports=2)

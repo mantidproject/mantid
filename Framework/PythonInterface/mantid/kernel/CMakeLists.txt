@@ -121,7 +121,20 @@ target_precompile_headers(
 set_python_properties(PythonKernelModule _kernel)
 
 target_include_directories(
-  PythonKernelModule PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
+  PythonKernelModule PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include/Mantid>
+)
+
+# Auto-generate exports header
+generate_mantid_export_header(
+  PythonKernelModule
+  FALSE
+  BASE_NAME
+  MANTID_PYTHON_KERNEL
+  EXPORT_MACRO_NAME
+  PYTHON_KERNEL_DLL
+  EXPORT_FILE_NAME
+  MantidPythonInterface/kernel/DllConfig.h
 )
 
 # Add the required dependencies

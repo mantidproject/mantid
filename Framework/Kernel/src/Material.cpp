@@ -9,6 +9,7 @@
 #include "MantidKernel/AttenuationProfile.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidNexus/NexusFile.h"
+#include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <memory>
 #include <numeric>

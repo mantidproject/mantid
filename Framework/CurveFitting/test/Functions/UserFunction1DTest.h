@@ -67,6 +67,32 @@ public:
     AnalysisDataService::Instance().remove("UserFunction1D1_Workspace");
   }
 
+  void testFunctionWithoutParametersThrows() {
+    setupWS();
+
+    auto alg = AlgorithmManager::Instance().create("UserFunction1D");
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setPropertyValue("InputWorkspace", "UserFunction1DWS");
+    alg->setPropertyValue("Function", "x");
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
+    TS_ASSERT(!alg->isExecuted());
+    AnalysisDataService::Instance().remove("UserFunction1DWS");
+  }
+
+  void testAllParametersFixedThrows() {
+    setupWS();
+    auto alg = AlgorithmManager::Instance().create("UserFunction1D");
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setPropertyValue("InputWorkspace", "UserFunction1DWS");
+    alg->setPropertyValue("Function", "a+b*x");
+    alg->setPropertyValue("Fix", "a,b");
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
+    TS_ASSERT(!alg->isExecuted());
+    AnalysisDataService::Instance().remove("UserFunction1DWS");
+  }
+
 private:
   Mantid::DataObjects::Workspace2D_sptr setupWS() {
     Mantid::DataObjects::Workspace2D_sptr ws = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(

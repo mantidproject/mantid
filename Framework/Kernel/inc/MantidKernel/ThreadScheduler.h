@@ -9,6 +9,7 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Task.h"
+#include <atomic>
 #include <deque>
 #include <map>
 #include <memory>
@@ -101,6 +102,20 @@ public:
   /// Returns true if the execution was aborted.
   bool getAborted() { return m_aborted; }
 
+  //-------------------------------------------------------------------------------
+  /** Mark a thread as busy. A thread calls this before asking for a task and
+   * calls markIdle() once it has none, or once the task it got has finished.
+   */
+  void markBusy() { ++m_numBusyThreads; }
+
+  /// Mark a thread as no longer busy. See markBusy().
+  void markIdle() { --m_numBusyThreads; }
+
+  /** Returns true if any thread is busy. A running task may still add tasks to
+   * the queue, so threads should not exit while this is true.
+   */
+  bool hasBusyThreads() const { return m_numBusyThreads.load() > 0; }
+
 protected:
   /// Total cost of all tasks
   double m_cost;
@@ -112,6 +127,8 @@ protected:
   std::runtime_error m_abortException;
   /// The run was aborted due to an exception
   bool m_aborted;
+  /// Number of threads that are getting or running a task
+  std::atomic<size_t> m_numBusyThreads{0};
 };
 
 //===========================================================================

@@ -107,7 +107,7 @@ void FindDetectorsPar::exec() {
       continue;
 
     // valid detector has valid detID
-    Detectors[i].detID = spectrumInfo.detector(i).getID();
+    Detectors[i].detID = spectrumInfo.firstDetectorID(i);
 
     // calculate all parameters for current composite detector
     calcDetPar(spectrumInfo.detector(i), Observer, Detectors[i]);

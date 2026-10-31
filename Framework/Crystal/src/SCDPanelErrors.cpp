@@ -19,6 +19,7 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/DynamicPointerCastHelper.h"
 #include "MantidKernel/FileValidator.h"
+#include "MantidKernel/Unit.h"
 #include <algorithm>
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
@@ -81,7 +82,7 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx, dou
       Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<DataObjects::PeaksWorkspace, API::Workspace>(
           inputW);
   Geometry::Instrument_sptr inst = std::const_pointer_cast<Geometry::Instrument>(inputP->getInstrument());
-  if (inst->getName().compare("CORELLI") == 0.0 && detname != "moderator")
+  if (inputP->getInstrumentName().compare("CORELLI") == 0.0 && detname != "moderator")
     detname.append("/sixteenpack");
 
   if (x != 0.0 || y != 0.0 || z != 0.0) {

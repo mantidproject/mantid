@@ -9,7 +9,7 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "DllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <QDialog>
 #include <QTextDocument>
 #include <Qsci/qsciscintilla.h>
@@ -104,6 +104,9 @@ public:
 
   /// Get the current zoom factor
   int getZoom() const;
+
+  /// Apply color theme to the editor.
+  void applyTheme(bool isDarkTheme);
 
 public slots:
   /// Save the script, opening a dialog

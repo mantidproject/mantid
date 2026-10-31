@@ -16,19 +16,49 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/WarningSuppressions.h"
+
+#include <cmath>
 
 namespace Mantid::Geometry {
+namespace {
+double angleFromObserver(const Kernel::V3D &position, const Kernel::V3D &observer, const Kernel::V3D &axis) {
+  return (position - observer).angle(axis);
+}
+
+double signedAngleFromObserver(const Kernel::V3D &position, const Kernel::V3D &observer, const Kernel::V3D &axis,
+                               const Kernel::V3D &instrumentUp) {
+  const auto observerDetVec = position - observer;
+  double angle = observerDetVec.angle(axis);
+
+  const auto cross = axis.cross_prod(observerDetVec);
+  const auto normToSurface = axis.cross_prod(instrumentUp);
+  if (normToSurface.scalar_prod(cross) < 0) {
+    angle *= -1;
+  }
+  return angle;
+}
+
+double phiOfPosition(const Kernel::V3D &position) { return std::atan2(position.Y(), position.X()); }
+
+double applyPhiOffset(const double phi, const double offset) { return phi < 0 ? -(offset + phi) : offset - phi; }
+} // namespace
+
 /** Construct DetectorInfo based on an Instrument.
  *
  * The Instrument reference `instrument` must be the parameterized instrument
  * obtained from a workspace. Detector ID -> index map provided as constructor
- * argument. */
+ * argument. The ParameterInfo and ReferenceFrame must be the same objects held
+ * by the matching ComponentInfo. */
 DetectorInfo::DetectorInfo(std::unique_ptr<Beamline::DetectorInfo> detectorInfo,
                            std::shared_ptr<const Geometry::Instrument> instrument,
                            std::shared_ptr<const std::vector<detid_t>> detectorIds,
-                           std::shared_ptr<const std::unordered_map<detid_t, size_t>> detIdToIndexMap)
+                           std::shared_ptr<const std::unordered_map<detid_t, size_t>> detIdToIndexMap,
+                           std::shared_ptr<ParameterInfo> parameterInfo,
+                           std::shared_ptr<ReferenceFrame const> referenceFrame)
     : m_detectorInfo(std::move(detectorInfo)), m_instrument(std::move(instrument)),
       m_detectorIDs(std::move(detectorIds)), m_detIDToIndex(std::move(detIdToIndexMap)),
+      m_parameterInfo(std::move(parameterInfo)), m_referenceFrame(std::move(referenceFrame)),
       m_lastDetector(PARALLEL_GET_MAX_THREADS), m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
 
   // Note: This does not seem possible currently (the instrument objects is
@@ -47,8 +77,9 @@ DetectorInfo::DetectorInfo(std::unique_ptr<Beamline::DetectorInfo> detectorInfo,
  * ComponentInfo must be set up. */
 DetectorInfo::DetectorInfo(const DetectorInfo &other)
     : m_detectorInfo(std::make_unique<Beamline::DetectorInfo>(*other.m_detectorInfo)), m_instrument(other.m_instrument),
-      m_detectorIDs(other.m_detectorIDs), m_detIDToIndex(other.m_detIDToIndex),
-      m_lastDetector(PARALLEL_GET_MAX_THREADS), m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
+      m_detectorIDs(other.m_detectorIDs), m_detIDToIndex(other.m_detIDToIndex), m_parameterInfo(other.m_parameterInfo),
+      m_referenceFrame(other.m_referenceFrame), m_lastDetector(PARALLEL_GET_MAX_THREADS),
+      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
 
 /// Assigns the contents of the non-wrapping part of `rhs` to this.
 DetectorInfo &DetectorInfo::operator=(const DetectorInfo &rhs) {
@@ -168,7 +199,7 @@ double DetectorInfo::signedTwoTheta(const size_t index) const {
     throw Kernel::Exception::InstrumentDefinitionError("Source and sample are at same position!");
   }
   // Get the axis defining the sign
-  const auto &instrumentUpAxis = m_instrument->getReferenceFrame()->vecThetaSign();
+  const auto &instrumentUpAxis = m_referenceFrame->vecThetaSign();
 
   const auto sampleDetVec = position(index) - samplePos;
   double angle = sampleDetVec.angle(beamLine);
@@ -193,7 +224,7 @@ double DetectorInfo::signedTwoTheta(const std::pair<size_t, size_t> &index) cons
     throw Kernel::Exception::InstrumentDefinitionError("Source and sample are at same position!");
   }
   // Get the axis defining the sign
-  const auto &instrumentUpAxis = m_instrument->getReferenceFrame()->vecThetaSign();
+  const auto &instrumentUpAxis = m_referenceFrame->vecThetaSign();
 
   const auto sampleDetVec = position(index) - samplePos;
   double angle = sampleDetVec.angle(beamLine);
@@ -221,9 +252,9 @@ double DetectorInfo::azimuthal(const size_t index) const {
   const auto beamLineNormalized = Kernel::normalize(beamLine);
 
   // generate the vertical axis
-  const auto origHorizontal = m_instrument->getReferenceFrame()->vecPointingHorizontal();
+  const auto origHorizontal = m_referenceFrame->vecPointingHorizontal();
   const auto vertical = beamLineNormalized.cross_prod(origHorizontal);
-  if (vertical.scalar_prod(m_instrument->getReferenceFrame()->vecPointingUp()) <= 0.)
+  if (vertical.scalar_prod(m_referenceFrame->vecPointingUp()) <= 0.)
     throw std::runtime_error("Failed to create up axis orthogonal to the beam direction");
 
   // generate the horizontal axis perpendicular to the other two
@@ -252,9 +283,9 @@ double DetectorInfo::azimuthal(const std::pair<size_t, size_t> &index) const {
   const auto beamLineNormalized = Kernel::normalize(beamLine);
 
   // generate the vertical axis
-  const auto origHorizontal = m_instrument->getReferenceFrame()->vecPointingHorizontal();
+  const auto origHorizontal = m_referenceFrame->vecPointingHorizontal();
   const auto vertical = beamLineNormalized.cross_prod(origHorizontal);
-  if (vertical.scalar_prod(m_instrument->getReferenceFrame()->vecPointingUp()) <= 0.)
+  if (vertical.scalar_prod(m_referenceFrame->vecPointingUp()) <= 0.)
     throw std::runtime_error("Failed to create up axis orthogonal to the beam direction");
 
   // generate the horizontal axis perpendicular to the other two
@@ -268,21 +299,86 @@ double DetectorInfo::azimuthal(const std::pair<size_t, size_t> &index) const {
   return atan2(dotVertical, dotHorizontal);
 }
 
+/** Returns the angle between the vector from `observer` to the detector and `axis`.
+ *
+ * This is the Instrument-2.0 replacement for IDetector::getTwoTheta. Unlike twoTheta(index), the observer and axis are
+ * supplied by the caller rather than taken from the sample and beam, and no monitor check is performed.
+ */
+double DetectorInfo::twoTheta(const size_t index, const Kernel::V3D &observer, const Kernel::V3D &axis) const {
+  return angleFromObserver(position(index), observer, axis);
+}
+
+/// Returns the angle between the vector from `observer` to the detector and `axis`.
+double DetectorInfo::twoTheta(const std::pair<size_t, size_t> &index, const Kernel::V3D &observer,
+                              const Kernel::V3D &axis) const {
+  return angleFromObserver(position(index), observer, axis);
+}
+
+/** Returns the angle between the vector from `observer` to the detector and `axis`, signed according to the rotation
+ * direction relative to `axis` and `instrumentUp`.
+ *
+ * This is the Instrument-2.0 replacement for IDetector::getSignedTwoTheta. No monitor check is performed.
+ */
+double DetectorInfo::signedTwoTheta(const size_t index, const Kernel::V3D &observer, const Kernel::V3D &axis,
+                                    const Kernel::V3D &instrumentUp) const {
+  return signedAngleFromObserver(position(index), observer, axis, instrumentUp);
+}
+
+/// Returns the signed angle between the vector from `observer` to the detector and `axis`.
+double DetectorInfo::signedTwoTheta(const std::pair<size_t, size_t> &index, const Kernel::V3D &observer,
+                                    const Kernel::V3D &axis, const Kernel::V3D &instrumentUp) const {
+  return signedAngleFromObserver(position(index), observer, axis, instrumentUp);
+}
+
+/// Returns the signed angle between the vector from `observer` to the detector and `axis`, signed using the
+/// instrument's theta-sign axis (ReferenceFrame::vecThetaSign).
+double DetectorInfo::signedTwoTheta(const size_t index, const Kernel::V3D &observer, const Kernel::V3D &axis) const {
+  return signedTwoTheta(index, observer, axis, m_referenceFrame->vecThetaSign());
+}
+
+/// Returns the signed angle between the vector from `observer` to the detector and `axis`, signed using the
+/// instrument's theta-sign axis (ReferenceFrame::vecThetaSign).
+double DetectorInfo::signedTwoTheta(const std::pair<size_t, size_t> &index, const Kernel::V3D &observer,
+                                    const Kernel::V3D &axis) const {
+  return signedTwoTheta(index, observer, axis, m_referenceFrame->vecThetaSign());
+}
+
+/** Returns the angle of the detector position about the lab-frame z axis, atan2(y, x), in radians.
+ *
+ * This is the Instrument-2.0 replacement for IDetector::getPhi. It is measured from the lab origin and ignores the
+ * reference frame; see azimuthal() for the angle about the beam measured from the sample.
+ */
+double DetectorInfo::phi(const size_t index) const { return phiOfPosition(position(index)); }
+
+/// Returns the angle of the detector position about the lab-frame z axis, atan2(y, x), in radians.
+double DetectorInfo::phi(const std::pair<size_t, size_t> &index) const { return phiOfPosition(position(index)); }
+
+/** Returns phi() reflected about `offset` (radians): offset - phi for phi >= 0 and -(offset + phi) otherwise.
+ *
+ * This is the Instrument-2.0 replacement for IDetector::getPhiOffset.
+ */
+double DetectorInfo::phiOffset(const size_t index, const double offset) const {
+  return applyPhiOffset(phi(index), offset);
+}
+
+/// Returns phi() reflected about `offset` (radians).
+double DetectorInfo::phiOffset(const std::pair<size_t, size_t> &index, const double offset) const {
+  return applyPhiOffset(phi(index), offset);
+}
+
 std::tuple<double, double, double> DetectorInfo::diffractometerConstants(const size_t index,
                                                                          std::vector<detid_t> &calibratedDets,
                                                                          std::vector<detid_t> &uncalibratedDets) const {
   const detid_t detectorId = detid(index);
-  auto det = m_instrument->getDetector(detectorId);
-  auto pmap = m_instrument->getParameterMap();
-  auto par = pmap->get(det.get(), "DIFC");
+  auto par = m_parameterInfo->get(index, "DIFC", "double");
   if (par) {
     double difc = par->value<double>();
     calibratedDets.push_back(detectorId);
     double difa = 0., tzero = 0.;
-    par = pmap->get(det.get(), "DIFA");
+    par = m_parameterInfo->get(index, "DIFA", "double");
     if (par)
       difa = par->value<double>();
-    par = pmap->get(det.get(), "TZERO");
+    par = m_parameterInfo->get(index, "TZERO", "double");
     if (par)
       tzero = par->value<double>();
     return {difa, difc, tzero};
@@ -302,9 +398,9 @@ double DetectorInfo::difcUncalibrated(const size_t index) const {
 std::pair<double, double> DetectorInfo::geographicalAngles(const size_t index) const {
   const auto samplePos = samplePosition();
   const auto sampleDetVec = position(index) - samplePos;
-  const double upCoord = sampleDetVec[m_instrument->getReferenceFrame()->pointingUp()];
-  const double beamCoord = sampleDetVec[m_instrument->getReferenceFrame()->pointingAlongBeam()];
-  const double leftoverCoord = sampleDetVec[m_instrument->getReferenceFrame()->pointingHorizontal()];
+  const double upCoord = sampleDetVec[m_referenceFrame->pointingUp()];
+  const double beamCoord = sampleDetVec[m_referenceFrame->pointingAlongBeam()];
+  const double leftoverCoord = sampleDetVec[m_referenceFrame->pointingHorizontal()];
   const double lat = std::atan2(upCoord, std::hypot(leftoverCoord, beamCoord));
   const double lon = std::atan2(leftoverCoord, beamCoord);
   return std::pair<double, double>(lat, lon);
@@ -313,9 +409,9 @@ std::pair<double, double> DetectorInfo::geographicalAngles(const size_t index) c
 std::pair<double, double> DetectorInfo::geographicalAngles(const std::pair<size_t, size_t> &index) const {
   const auto samplePos = samplePosition();
   const auto sampleDetVec = position(index) - samplePos;
-  const double upCoord = sampleDetVec[m_instrument->getReferenceFrame()->pointingUp()];
-  const double beamCoord = sampleDetVec[m_instrument->getReferenceFrame()->pointingAlongBeam()];
-  const double leftoverCoord = sampleDetVec[m_instrument->getReferenceFrame()->pointingHorizontal()];
+  const double upCoord = sampleDetVec[m_referenceFrame->pointingUp()];
+  const double beamCoord = sampleDetVec[m_referenceFrame->pointingAlongBeam()];
+  const double leftoverCoord = sampleDetVec[m_referenceFrame->pointingHorizontal()];
   const double lat = std::atan2(upCoord, std::hypot(leftoverCoord, beamCoord));
   const double lon = std::atan2(leftoverCoord, beamCoord);
   return std::pair<double, double>(lat, lon);
@@ -403,11 +499,9 @@ void DetectorInfo::setPosition(const std::pair<size_t, size_t> &index, const Ker
 // Clear any parameters whose value is only valid for specific positions
 // Currently diffractometer constants
 void DetectorInfo::clearPositionDependentParameters(const size_t index) {
-  auto det = m_instrument->getDetector(detid(index));
-  auto pmap = m_instrument->getParameterMap();
-  pmap->clearParametersByName("DIFA", det.get());
-  pmap->clearParametersByName("DIFC", det.get());
-  pmap->clearParametersByName("TZERO", det.get());
+  m_parameterInfo->clearParametersByName(index, "DIFA");
+  m_parameterInfo->clearParametersByName(index, "DIFC");
+  m_parameterInfo->clearParametersByName(index, "TZERO");
 }
 
 /// Set the absolute rotation of the detector with given index. Not thread safe.
@@ -421,7 +515,13 @@ void DetectorInfo::setRotation(const std::pair<size_t, size_t> &index, const Ker
 }
 
 /// Return a const reference to the detector with given index.
-const Geometry::IDetector &DetectorInfo::detector(const size_t index) const { return getDetector(index); }
+const Geometry::IDetector &DetectorInfo::detector(const size_t index) const {
+  GNU_DIAG_OFF("deprecated-declarations")
+  MSVC_DIAG_OFF(4996)
+  return getDetector(index);
+  MSVC_DIAG_ON(4996)
+  GNU_DIAG_ON("deprecated-declarations")
+}
 
 /// Returns the source position.
 Kernel::V3D DetectorInfo::sourcePosition() const { return Kernel::toV3D(m_detectorInfo->sourcePosition()); }
@@ -448,7 +548,7 @@ std::size_t DetectorInfo::indexOf(const detid_t id) const {
 /// Returns the detector ID for the given logical detector index.
 /// Works without allocating the full ID vector.
 detid_t DetectorInfo::detid(const size_t index) const {
-  return (*m_detectorIDs)[m_detectorInfo->compactDetectorIndex(index)];
+  return (*m_detectorIDs).at(m_detectorInfo->compactDetectorIndex(index));
 }
 
 /// Returns the scan count of the detector with given detector index.
@@ -487,7 +587,11 @@ const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
 /// Helper used by SpectrumInfo.
 std::shared_ptr<const Geometry::IDetector> DetectorInfo::getDetectorPtr(const size_t index) const {
   auto thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
+  GNU_DIAG_OFF("deprecated-declarations")
+  MSVC_DIAG_OFF(4996)
   static_cast<void>(getDetector(index));
+  MSVC_DIAG_ON(4996)
+  GNU_DIAG_ON("deprecated-declarations")
   return m_lastDetector[thread];
 }
 
@@ -513,9 +617,14 @@ size_t DetectorInfo::getMemorySize() const {
   // m_lastDetector and m_lastIndex: one slot per OpenMP thread
   const size_t cacheMem = m_lastDetector.capacity() * sizeof(std::shared_ptr<const Geometry::IDetector>) +
                           m_lastIndex.capacity() * sizeof(size_t);
+
+  // m_parameterInfo is a shared_ptr to the ParameterMap already held in ComponentInfo; only count the pointer wrapper
+  const size_t paramInfoSize = sizeof(std::shared_ptr<Geometry::ParameterInfo>);
+  // m_referenceFrame is a shared_ptr to the ReferenceFrame already held by instrument; only count the pointer wrapper
+  const size_t refFrameSize = sizeof(std::shared_ptr<Geometry::ReferenceFrame const>);
   // m_instrument is a shared_ptr to an Instrument owned by the workspace; its memory is counted in
   // Instrument::getMemorySize() and excluded here to avoid double-counting.
-  return sizeof(*this) + beamlineMem + detectorIDsMem + detIDToIndexMem + cacheMem;
+  return sizeof(*this) + beamlineMem + detectorIDsMem + detIDToIndexMem + cacheMem + paramInfoSize + refFrameSize;
 }
 
 } // namespace Mantid::Geometry

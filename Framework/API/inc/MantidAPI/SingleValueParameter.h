@@ -7,11 +7,12 @@
 #pragma once
 
 #include "MantidAPI/ImplicitFunctionParameter.h"
-#include "MantidKernel/System.h"
 #ifndef Q_MOC_RUN
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #endif
+
+#include <string>
 
 namespace Mantid {
 namespace API {
@@ -24,7 +25,7 @@ in a very simple manner.
 @author Owen Arnold, Tessella plc
 @date 21/07/2011
 */
-template <typename Derived, typename ValType> class DLLExport SingleValueParameter : public ImplicitFunctionParameter {
+template <typename Derived, typename ValType> class SingleValueParameter : public ImplicitFunctionParameter {
 public:
   using ValueType = ValType;
   SingleValueParameter(ValType value);

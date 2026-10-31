@@ -9,7 +9,6 @@
 #include "DataReductionTab.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 
-#include "MantidKernel/System.h"
 #include "ui_ILLEnergyTransfer.h"
 
 namespace MantidQt {

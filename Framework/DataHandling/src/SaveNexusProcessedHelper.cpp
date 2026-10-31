@@ -23,6 +23,7 @@
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidKernel/Unit.h"
 
 #include <filesystem>
 #include <memory>

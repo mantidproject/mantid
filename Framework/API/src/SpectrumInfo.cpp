@@ -9,14 +9,19 @@
 #include "MantidAPI/SpectrumInfoIterator.h"
 #include "MantidBeamline/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/Tolerance.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <algorithm>
+#include <cmath>
 #include <limits>
 #include <memory>
 
@@ -112,10 +117,83 @@ double SpectrumInfo::signedTwoTheta(const size_t index) const {
  */
 double SpectrumInfo::azimuthal(const size_t index) const {
   const auto spectrumDef = checkAndGetSpectrumDefinition(index);
-  auto phi = std::accumulate(
+  auto azimuthalSum = std::accumulate(
       spectrumDef.cbegin(), spectrumDef.cend(), 0.0,
       [this](double x, const std::pair<size_t, size_t> &detIndex) { return x + m_detectorInfo.azimuthal(detIndex); });
-  return phi / static_cast<double>(spectrumDef.size());
+  return azimuthalSum / static_cast<double>(spectrumDef.size());
+}
+
+/** Returns the average angle between the vectors from `observer` to each detector of the spectrum and `axis`.
+ *
+ * This is the Instrument-2.0 replacement for IDetector::getTwoTheta. Unlike twoTheta(index), the observer and axis are
+ * supplied by the caller rather than taken from the sample and beam, and no monitor check is performed.
+ */
+double SpectrumInfo::twoTheta(const size_t index, const Kernel::V3D &observer, const Kernel::V3D &axis) const {
+  const auto &spectrumDef = checkAndGetSpectrumDefinition(index);
+  auto twoTheta = std::accumulate(spectrumDef.cbegin(), spectrumDef.cend(), 0.0,
+                                  [&](double x, const std::pair<size_t, size_t> &detIndex) {
+                                    return x + m_detectorInfo.twoTheta(detIndex, observer, axis);
+                                  });
+  return twoTheta / static_cast<double>(spectrumDef.size());
+}
+
+/** Returns the average signed angle between the vectors from `observer` to each detector of the spectrum and `axis`,
+ * signed according to the rotation direction relative to `axis` and `instrumentUp`.
+ *
+ * This is the Instrument-2.0 replacement for IDetector::getSignedTwoTheta. No monitor check is performed.
+ */
+double SpectrumInfo::signedTwoTheta(const size_t index, const Kernel::V3D &observer, const Kernel::V3D &axis,
+                                    const Kernel::V3D &instrumentUp) const {
+  const auto &spectrumDef = checkAndGetSpectrumDefinition(index);
+  auto signedTwoTheta = std::accumulate(
+      spectrumDef.cbegin(), spectrumDef.cend(), 0.0, [&](double x, const std::pair<size_t, size_t> &detIndex) {
+        return x + m_detectorInfo.signedTwoTheta(detIndex, observer, axis, instrumentUp);
+      });
+  return signedTwoTheta / static_cast<double>(spectrumDef.size());
+}
+
+/** Returns the average signed angle between the vectors from `observer` to each detector of the spectrum and `axis`,
+ * signed using the instrument's theta-sign axis (ReferenceFrame::vecThetaSign).
+ */
+double SpectrumInfo::signedTwoTheta(const size_t index, const Kernel::V3D &observer, const Kernel::V3D &axis) const {
+  const auto &spectrumDef = checkAndGetSpectrumDefinition(index);
+  auto signedTwoTheta = std::accumulate(spectrumDef.cbegin(), spectrumDef.cend(), 0.0,
+                                        [&](double x, const std::pair<size_t, size_t> &detIndex) {
+                                          return x + m_detectorInfo.signedTwoTheta(detIndex, observer, axis);
+                                        });
+  return signedTwoTheta / static_cast<double>(spectrumDef.size());
+}
+
+/** Returns the angle of the spectrum position about the lab-frame z axis, atan2(y, x), in radians.
+ *
+ * This is the Instrument-2.0 replacement for IDetector::getPhi. For a spectrum with several detectors the angle of the
+ * average position is returned, not the average of the angles. It is measured from the lab origin and ignores the
+ * reference frame; see azimuthal() for the angle about the beam measured from the sample.
+ */
+double SpectrumInfo::phi(const size_t index) const {
+  const auto &spectrumDef = checkAndGetSpectrumDefinition(index);
+  if (spectrumDef.size() == 1)
+    return m_detectorInfo.phi(spectrumDef[0]);
+  auto sumPos = std::accumulate(spectrumDef.cbegin(), spectrumDef.cend(), Kernel::V3D(),
+                                [this](const auto &x, const std::pair<size_t, size_t> &detIndex) {
+                                  return x + m_detectorInfo.position(detIndex);
+                                });
+  // Match DetectorGroup::getPos: tiny components should be zero, otherwise atan2 can flip between +pi and -pi
+  if (std::abs(sumPos[0]) < Kernel::Tolerance)
+    sumPos[0] = 0.0;
+  if (std::abs(sumPos[1]) < Kernel::Tolerance)
+    sumPos[1] = 0.0;
+  // Dividing by the detector count does not change the angle, so atan2 can use the sum directly
+  return std::atan2(sumPos[1], sumPos[0]);
+}
+
+/** Returns phi() reflected about `offset` (radians): offset - phi for phi >= 0 and -(offset + phi) otherwise.
+ *
+ * This is the Instrument-2.0 replacement for IDetector::getPhiOffset.
+ */
+double SpectrumInfo::phiOffset(const size_t index, const double offset) const {
+  const double phiValue = phi(index);
+  return phiValue < 0 ? -(offset + phiValue) : offset - phiValue;
 }
 
 /** Calculate latitude and longitude for given spectrum index.
@@ -315,7 +393,13 @@ void SpectrumInfo::setMasked(const size_t index, bool masked) {
 
 /// Return a const reference to the detector or detector group of the spectrum
 /// with given index.
-const Geometry::IDetector &SpectrumInfo::detector(const size_t index) const { return getDetector(index); }
+const Geometry::IDetector &SpectrumInfo::detector(const size_t index) const {
+  GNU_DIAG_OFF("deprecated-declarations")
+  MSVC_DIAG_OFF(4996)
+  return getDetector(index);
+  MSVC_DIAG_ON(4996)
+  GNU_DIAG_ON("deprecated-declarations")
+}
 
 /// Returns the source position.
 Kernel::V3D SpectrumInfo::sourcePosition() const { return m_detectorInfo.sourcePosition(); }
@@ -339,7 +423,11 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
   if (ndets == 1) {
     // If only 1 detector for the spectrum number, just return it
     const auto detIndex = specDef[0].first;
+    GNU_DIAG_OFF("deprecated-declarations")
+    MSVC_DIAG_OFF(4996)
     m_lastDetector[thread] = m_detectorInfo.getDetectorPtr(detIndex);
+    MSVC_DIAG_ON(4996)
+    GNU_DIAG_ON("deprecated-declarations")
   } else if (ndets == 0) {
     throw Kernel::Exception::NotFoundError("MatrixWorkspace::getDetector(): No "
                                            "detectors for this workspace "
@@ -350,12 +438,47 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
     std::vector<std::shared_ptr<const Geometry::IDetector>> det_ptrs;
     for (const auto &specDefIndex : specDef) {
       const auto detIndex = specDefIndex.first;
+      GNU_DIAG_OFF("deprecated-declarations")
+      MSVC_DIAG_OFF(4996)
       det_ptrs.emplace_back(m_detectorInfo.getDetectorPtr(detIndex));
+      MSVC_DIAG_ON(4996)
+      GNU_DIAG_ON("deprecated-declarations")
     }
     m_lastDetector[thread] = std::make_shared<Geometry::DetectorGroup>(det_ptrs);
   }
   m_lastIndex[thread] = index;
   return *m_lastDetector[thread];
+}
+
+/** Returns the detector ID of the first detector of the spectrum with given index.
+ *
+ * For spectra with more than one detector this is the ID of the first entry in the spectrum definition.
+ * Throws Kernel::Exception::NotFoundError if the spectrum has no detectors.
+ */
+detid_t SpectrumInfo::firstDetectorID(const size_t index) const {
+  return m_detectorInfo.detid(checkAndGetSpectrumDefinition(index)[0].first);
+}
+
+/** Returns the detector index of the first detector of the spectrum with given index.
+ *
+ * For spectra with more than one detector this is the first entry in the spectrum definition. The index is valid for
+ * both DetectorInfo and ComponentInfo. Throws Kernel::Exception::NotFoundError if the spectrum has no detectors.
+ */
+size_t SpectrumInfo::firstDetectorIndex(const size_t index) const {
+  return checkAndGetSpectrumDefinition(index)[0].first;
+}
+
+/** Returns the bounding box of the detector(s) of the spectrum with given index.
+ *
+ * For spectra with more than one detector this is the union of the bounding boxes of the detectors.
+ * Throws Kernel::Exception::NotFoundError if the spectrum has no detectors.
+ */
+Geometry::BoundingBox SpectrumInfo::boundingBox(const size_t index) const {
+  const auto &componentInfo = m_experimentInfo.componentInfo();
+  Geometry::BoundingBox bbox;
+  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
+    bbox.grow(componentInfo.boundingBox(detIndex.first));
+  return bbox;
 }
 
 const SpectrumDefinition &SpectrumInfo::checkAndGetSpectrumDefinition(const size_t index) const {

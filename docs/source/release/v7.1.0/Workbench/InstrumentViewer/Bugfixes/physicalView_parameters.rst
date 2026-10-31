@@ -1,0 +1,1 @@
+- Showing the physical instrument in the :ref:`InstrumentViewer` for instruments with separate physical and neutronic detector positions, such as BASIS, IN16B and EMU, no longer causes the workspace to lose its instrument parameters.

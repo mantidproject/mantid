@@ -136,7 +136,8 @@ std::vector<double> getZscoreNumpy(const NDArray &data) {
  */
 std::vector<double> getZscoreNumpyDeprecated(const NDArray &data, const bool sorted) {
   UNUSED_ARG(sorted);
-  PyErr_Warn(PyExc_DeprecationWarning, "getZScore no longer requires the second sorted argument.");
+  if (PyErr_Warn(PyExc_DeprecationWarning, "getZScore no longer requires the second sorted argument.") < 0)
+    throw boost::python::error_already_set();
   return getZscoreNumpy(data);
 }
 

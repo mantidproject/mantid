@@ -1,0 +1,2 @@
+- Removed ``MaskInstrument`` (deprecated since release 5.1.0), use :ref:`MaskDetectors <algm-MaskDetectors>` instead.
+- Removed version 1 of ``SCDCalibratePanels`` (deprecated since release 6.14.0), use :ref:`SCDCalibratePanels v2 <algm-SCDCalibratePanels-v2>` instead.

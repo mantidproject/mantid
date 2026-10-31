@@ -362,9 +362,8 @@ class PlotSampleShapeTest(TestCase):
 
     def test_beam_direction(self):
         workspace = setup_workspace_sample_container_and_components_from_mesh()
-        source = workspace.getInstrument().getSource()
-        sample = workspace.getInstrument().getSample()
-        beam_direction = sample_shape.calculate_beam_direction(source, sample)
+        component_info = workspace.componentInfo()
+        beam_direction = sample_shape.calculate_beam_direction(component_info.sourcePosition(), component_info.samplePosition())
         assert_array_equal([0, 0, 12.75], beam_direction)
 
     def test_lattice_vectors(self):

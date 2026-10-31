@@ -57,7 +57,7 @@ private:
   bool m_canLoadMonitors;     ///< A flag to turn off monitor loading for loaders
   /// that can
 
-  /// Future that holds the result of the latest call to LoadEventPreNexus
+  /// Future that holds the result of the latest call to LoadEventNexus
   std::unique_ptr<Poco::ActiveResult<bool>> m_chunkload;
   void loadChunk();
   /// Shared pointer to the correct file loader instance - it needs to be kept

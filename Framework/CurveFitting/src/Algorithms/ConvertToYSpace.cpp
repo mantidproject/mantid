@@ -14,11 +14,14 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 namespace Mantid::CurveFitting::Algorithms {
 
@@ -67,14 +70,14 @@ DetectorParams ConvertToYSpace::getDetectorParameters(const API::MatrixWorkspace
                                 std::to_string(index));
 
   DetectorParams detpar;
-  const auto &pmap = ws->constInstrumentParameters();
-  const auto &det = spectrumInfo.detector(index);
+  const auto &componentInfo = ws->componentInfo();
+  const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(index);
   detpar.l1 = spectrumInfo.l1();
   detpar.l2 = spectrumInfo.l2(index);
   detpar.pos = spectrumInfo.position(index);
   detpar.theta = spectrumInfo.twoTheta(index);
-  detpar.t0 = getComponentParameter(det, pmap, "t0") * 1e-6; // Convert to seconds
-  detpar.efixed = getComponentParameter(det, pmap, "efixed");
+  detpar.t0 = getComponentParameter(componentInfo, spectrumDefinition, "t0") * 1e-6; // Convert to seconds
+  detpar.efixed = getComponentParameter(componentInfo, spectrumDefinition, "efixed");
   return detpar;
 }
 
@@ -111,6 +114,33 @@ double ConvertToYSpace::getComponentParameter(const Geometry::IComponent &comp, 
     }
   }
   return result;
+}
+
+/**
+ * If the spectrum has more than one detector then the parameters are averaged
+ * over its detectors
+ * @param componentInfo A reference to the ComponentInfo of the workspace
+ * @param spectrumDefinition The definition of the spectrum giving its detector indices
+ * @param name The name of the parameter
+ * @returns The value of the parameter if it exists
+ * @throws A std::invalid_argument error if the parameter does not exist
+ */
+double ConvertToYSpace::getComponentParameter(const Geometry::ComponentInfo &componentInfo,
+                                              const SpectrumDefinition &spectrumDefinition, const std::string &name) {
+  const bool isGroup = spectrumDefinition.size() > 1;
+  double sum(0.0);
+  for (const auto &specDefItem : spectrumDefinition) {
+    const auto values = componentInfo.getNumberParameter(specDefItem.first, name);
+    if (!values.empty())
+      sum += values.front();
+    else if (isGroup)
+      throw std::invalid_argument("ComptonProfile - Unable to find "
+                                  "DetectorGroup component parameter \"" +
+                                  name + "\".");
+    else
+      throw std::invalid_argument("ComptonProfile - Unable to find component parameter \"" + name + "\".");
+  }
+  return sum / static_cast<double>(spectrumDefinition.size());
 }
 
 //----------------------------------------------------------------------------------------------

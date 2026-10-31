@@ -65,7 +65,8 @@ class IEventWorkspaceTest(unittest.TestCase):
         self.assertAlmostEqual(weightErrorList[len(weightErrorList) - 1], 1.0)  # last value
 
     def test_deprecated_getEventList(self):
-        el = self._test_ws.getEventList(0)
+        with self.assertWarns(DeprecationWarning):
+            el = self._test_ws.getEventList(0)
         self.assertTrue(isinstance(el, IEventList))
         self.assertEqual(el.getNumberEvents(), 200)
 

@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/CalibrationHelpers.h"
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
-#include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 
 using namespace Mantid::API;

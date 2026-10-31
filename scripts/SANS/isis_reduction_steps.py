@@ -50,7 +50,6 @@ from mantid.simpleapi import (
     SANSWideAngleCorrection,
     SumSpectra,
     TOFSANSResolutionByPixel,
-    UnwrapMonitorsInTOF,
     Qxy,
     Q1D,
 )
@@ -114,10 +113,6 @@ def is_prompt_peak_instrument(reducer):
         return True
     else:
         return False
-
-
-def get_wavelength_min_and_max(reducer):
-    return reducer.to_wavelen.wav_low, reducer.to_wavelen.wav_high
 
 
 class LoadRun(object):
@@ -1170,8 +1165,8 @@ class Mask_ISIS(ReductionStep):
             if instrument_name == "SANS2D" or instrument_name == "LOQ":
                 component_name = "rear-detector" if instrument_name == "SANS2D" else "main-detector-bank"
                 ws = mtd[str(workspace)]
-                det = ws.getInstrument().getComponentByName(component_name)
-                det_Z = det.getPos().getZ()
+                component_info = ws.componentInfo()
+                det_Z = component_info.position(component_info.indexOfAny(component_name)).getZ()
                 start_point = [self.arm_x, self.arm_y, det_Z]
                 MaskDetectorsInShape(Workspace=workspace, ShapeXML=self._mask_line(start_point, 100.0, self.arm_width, self.arm_angle))
 
@@ -1492,14 +1487,13 @@ class DarkRunSubtraction(object):
         @returns a list with monitor spectra
         """
         monitor_indices = []
+        spectrum_info = monitor_workspace.spectrumInfo()
         for ws_index in range(monitor_workspace.getNumberHistograms()):
-            try:
-                det = monitor_workspace.getDetector(ws_index)
-            except RuntimeError:
+            if not spectrum_info.hasDetectors(ws_index):
                 # Skip the rest after finding the first spectra with no detectors,
                 # which is a big speed increase for SANS2D.
                 break
-            if det.isMonitor():
+            if spectrum_info.isMonitor(ws_index):
                 monitor_indices.append(ws_index)
         return monitor_indices
 
@@ -2021,13 +2015,6 @@ class NormalizeToMonitor(ReductionStep):
         self.output_wksp = str(workspace) + INCIDENT_MONITOR_TAG
         mon = reducer.get_sample().get_monitor(normalization_spectrum - 1)
 
-        # Unwrap the monitors of the scatter workspace
-        if reducer.unwrap_monitors:
-            wavelength_min, wavelength_max = get_wavelength_min_and_max(reducer)
-            temp_mon = UnwrapMonitorsInTOF(InputWorkspace=mon, WavelengthMin=wavelength_min, WavelengthMax=wavelength_max)
-            DeleteWorkspace(mon)
-            mon = temp_mon
-
         if reducer.event2hist.scale != 1:
             mon *= reducer.event2hist.scale
 
@@ -2229,11 +2216,6 @@ class TransmissionCalc(ReductionStep):
         # problems if we don't.
         extract_spectra(mtd[inputWS], trans_det_ids, tmpWS)
 
-        # If the transmission and direct workspaces require an unwrapping of the monitors then do it here
-        if reducer.unwrap_monitors:
-            wavelength_min, wavelength_max = get_wavelength_min_and_max(reducer)
-            UnwrapMonitorsInTOF(InputWorkspace=tmpWS, OutputWorkspace=tmpWS, WavelengthMin=wavelength_min, WavelengthMax=wavelength_max)
-
         # Perform the a dark run background correction if one was specified
         self._correct_dark_run_background(reducer, tmpWS, trans_det_ids)
 
@@ -2254,8 +2236,9 @@ class TransmissionCalc(ReductionStep):
         # monitors
         if tmp.getNumberHistograms() > 0:
             ws_index = 0
+            spectrum_info = tmp.spectrumInfo()
             for ws_index in range(tmp.getNumberHistograms()):
-                if tmp.getDetector(ws_index).isMonitor():
+                if spectrum_info.isMonitor(ws_index):
                     spectrum_number = tmp.getSpectrum(ws_index).getSpectrumNo()
                     back_start_mon, back_end_mon = inst.get_TOFs(spectrum_number)
                     if back_start_mon and back_end_mon:
@@ -4160,23 +4143,17 @@ class UserFile(ReductionStep):
 
     def _read_unwrap_monitors_line(self, arguments, reducer):
         """
-        Checks if the montiors should be unwrapped. The arguments can be either ON or OFF. We don't care here about
+        Monitor unwrapping is no longer supported. The arguments can be either ON or OFF. We don't care here about
         any preceding slash
         Args:
             arguments: the arguments string
             reducer: a handle to the reducer (is not used)
         """
-        # Remove the slash if
-        if arguments.find("/") == -1:
-            arguments.replace("/", "")
-        # Remove white space
-        on_off = "".join(arguments.split())
+        # Remove the slash and white space
+        on_off = "".join(arguments.replace("/", "").split())
         if on_off == "ON":
-            reducer.unwrap_monitors = True
-        elif on_off == "OFF":
-            reducer.unwrap_monitors = False
-        else:
-            reducer.unwrap_monitors = False
+            return "Monitor unwrapping is no longer supported, ignoring UNWRAP command in line: "
+        elif on_off != "OFF":
             return "Unknown setting {0} UNWRAP command in line: ".format(on_off)
         return ""
 

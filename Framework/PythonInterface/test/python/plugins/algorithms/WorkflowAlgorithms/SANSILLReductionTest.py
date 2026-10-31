@@ -7,7 +7,7 @@
 import unittest
 from mantid.api import MatrixWorkspace, Run
 from mantid.simpleapi import SANSILLReduction, config, mtd
-from mantid.geometry import Instrument
+from mantid.geometry import ComponentInfo
 
 import numpy as np
 
@@ -138,7 +138,8 @@ class SANSILLReductionTest(unittest.TestCase):
         self.assertEqual(ws.getAxis(0).getUnit().unitID(), "Wavelength")
         self.assertEqual(ws.blocksize(), blocksize)
         self.assertEqual(ws.getNumberHistograms(), spectra)
-        self.assertTrue(isinstance(ws.getInstrument(), Instrument))
+        # Some outputs (e.g. TOF transmission) carry no instrument, so this can only check the type
+        self.assertTrue(isinstance(ws.componentInfo(), ComponentInfo))
         self.assertTrue(isinstance(ws.getRun(), Run))
         self.assertTrue(ws.getHistory())
         if logs:

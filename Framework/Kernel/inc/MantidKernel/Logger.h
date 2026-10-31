@@ -10,12 +10,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/Logger_fwd.h"
 #include "MantidKernel/ThreadSafeLogStream.h"
 
 #include <Poco/Message.h>
 #include <array>
 #include <iosfwd>
-#include <memory>
 #include <string>
 
 //----------------------------------------------------------------------

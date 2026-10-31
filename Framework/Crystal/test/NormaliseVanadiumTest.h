@@ -85,7 +85,7 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
   retVal->setAllX(BinEdges(numBins, LinearGenerator(0.0, binDelta)));
 
   // Some sanity checks
-  TS_ASSERT_EQUALS(retVal->getInstrument()->getName(), "MINITOPAZ");
+  TS_ASSERT_EQUALS(retVal->getInstrumentName(), "MINITOPAZ");
   std::map<int, Geometry::IDetector_const_sptr> dets;
   retVal->getInstrument()->getDetectors(dets);
   TS_ASSERT_EQUALS(dets.size(), 100 * 100 + 2);

@@ -16,6 +16,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/InstrumentMetadata.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -78,9 +79,9 @@ public:
     TS_ASSERT_EQUALS(inst2->getName(), "MyTestInst");
 
     // But the base instrument does!
-    std::shared_ptr<const Instrument> inst3 = inst2->baseInstrument();
-    TS_ASSERT_EQUALS(inst3.get(), inst1.get());
-    TS_ASSERT_EQUALS(inst3->getName(), "MyTestInst");
+    const auto &baseComponentInfo = ws.baseComponentInfo();
+    TS_ASSERT_EQUALS(baseComponentInfo.componentID(baseComponentInfo.root()), inst1->getComponentID());
+    TS_ASSERT_EQUALS(baseComponentInfo.name(baseComponentInfo.root()), "MyTestInst");
   }
 
   void test_GetInstrumentMetadata() {
@@ -220,7 +221,7 @@ public:
     TS_ASSERT_DELTA(ws2.sample().getOrientedLattice().b(), 2.0, 1e-4);
     TS_ASSERT_DELTA(ws2.sample().getOrientedLattice().c(), 3.0, 1e-4);
     TS_ASSERT_DELTA(ws2.run().getProtonCharge(), 1.234, 0.001);
-    TS_ASSERT_EQUALS(ws2.getInstrument()->getName(), "MyTestInst");
+    TS_ASSERT_EQUALS(ws2.getInstrumentName(), "MyTestInst");
 
     // Changing stuff in the original workspace...
     ws.mutableSample().setName("test1");
@@ -301,6 +302,79 @@ public:
 
     TS_ASSERT_EQUALS(clone->componentInfo().position(sampleIndex), movedTo);
     TS_ASSERT_EQUALS(original.componentInfo().position(sampleIndex), positionBefore);
+  }
+
+  void test_componentInfo_has_the_instruments_reference_frame() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    const auto frame = std::make_shared<ReferenceFrame>(X, Y, Left, "source");
+    instrument->setReferenceFrame(frame);
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(instrument);
+
+    TS_ASSERT_EQUALS(expInfo.componentInfo().referenceFrame(), frame);
+    TS_ASSERT_EQUALS(expInfo.baseComponentInfo().referenceFrame(), frame);
+    // and of a clone, which copies the parametrized instrument
+    std::unique_ptr<ExperimentInfo> const clone(expInfo.cloneExperimentInfo());
+    TS_ASSERT_EQUALS(clone->componentInfo().referenceFrame(), frame);
+  }
+
+  void test_baseComponentInfo_matches_componentInfo_before_any_move() {
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(1));
+
+    auto const &componentInfo = expInfo.componentInfo();
+    auto const &baseComponentInfo = expInfo.baseComponentInfo();
+    TS_ASSERT_EQUALS(baseComponentInfo.size(), componentInfo.size());
+    for (size_t index = 0; index < componentInfo.size(); ++index) {
+      TS_ASSERT_EQUALS(baseComponentInfo.name(index), componentInfo.name(index));
+      TS_ASSERT_EQUALS(baseComponentInfo.position(index), componentInfo.position(index));
+      TS_ASSERT_EQUALS(baseComponentInfo.rotation(index), componentInfo.rotation(index));
+    }
+  }
+
+  void test_baseComponentInfo_is_unaffected_by_moves_and_rotations() {
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(1));
+    size_t const sampleIndex = expInfo.componentInfo().sample();
+    constexpr size_t detectorIndex = 0;
+    V3D const samplePositionBefore = expInfo.componentInfo().position(sampleIndex);
+    V3D const detectorPositionBefore = expInfo.componentInfo().position(detectorIndex);
+    auto const detectorRotationBefore = expInfo.componentInfo().rotation(detectorIndex);
+    // build the base before moving, to check that it is not shared with the parametrized ComponentInfo
+    TS_ASSERT_EQUALS(expInfo.baseComponentInfo().position(sampleIndex), samplePositionBefore);
+
+    V3D const sampleMovedTo = samplePositionBefore + V3D(0.0, 0.0, 0.5);
+    expInfo.mutableComponentInfo().setPosition(sampleIndex, sampleMovedTo);
+    expInfo.mutableDetectorInfo().setPosition(detectorIndex, detectorPositionBefore + V3D(1.0, 2.0, 3.0));
+    expInfo.mutableComponentInfo().setRotation(detectorIndex, Quat(90.0, V3D(0.0, 1.0, 0.0)));
+
+    TS_ASSERT_EQUALS(expInfo.componentInfo().position(sampleIndex), sampleMovedTo);
+    auto const &baseComponentInfo = expInfo.baseComponentInfo();
+    TS_ASSERT_EQUALS(baseComponentInfo.position(sampleIndex), samplePositionBefore);
+    TS_ASSERT_EQUALS(baseComponentInfo.position(detectorIndex), detectorPositionBefore);
+    TS_ASSERT_EQUALS(baseComponentInfo.rotation(detectorIndex), detectorRotationBefore);
+  }
+
+  void test_baseComponentInfo_follows_setInstrument() {
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(1));
+    size_t const sizeOneBank = expInfo.baseComponentInfo().size();
+
+    expInfo.setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(2));
+    TS_ASSERT_EQUALS(expInfo.baseComponentInfo().size(), expInfo.componentInfo().size());
+    TS_ASSERT_DIFFERS(expInfo.baseComponentInfo().size(), sizeOneBank);
+  }
+
+  void test_baseComponentInfo_of_clone_ignores_moves_made_before_cloning() {
+    ExperimentInfo original;
+    original.setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(1));
+    size_t const sampleIndex = original.componentInfo().sample();
+    V3D const samplePositionBefore = original.componentInfo().position(sampleIndex);
+    original.mutableComponentInfo().setPosition(sampleIndex, samplePositionBefore + V3D(0.0, 0.0, 0.5));
+
+    std::unique_ptr<ExperimentInfo> const clone(original.cloneExperimentInfo());
+    TS_ASSERT_EQUALS(clone->baseComponentInfo().position(sampleIndex), samplePositionBefore);
+    TS_ASSERT_EQUALS(original.baseComponentInfo().position(sampleIndex), samplePositionBefore);
   }
 
   /// The parameter store must be copied too, not shared, or a parameter added to the clone
@@ -437,9 +511,8 @@ public:
     addInstrumentWithParameter(*exptInfo, "a", "b");
 
     const auto &spectrumInfo = exptInfo->spectrumInfo();
-    const auto *detGroup = dynamic_cast<const Geometry::DetectorGroup *>(&spectrumInfo.detector(0));
-    TS_ASSERT(!detGroup);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(0).getID(), 1);
+    TS_ASSERT(spectrumInfo.hasUniqueDetector(0));
+    TS_ASSERT_EQUALS(spectrumInfo.firstDetectorID(0), 1);
   }
 
   void test_nexus() {
@@ -461,7 +534,7 @@ public:
     th.reopenFile();
     TS_ASSERT_THROWS_NOTHING(ws2.loadExperimentInfoNexus(filename, th.file.get(), parameterStr));
     Instrument_const_sptr inst = ws2.getInstrument();
-    TS_ASSERT_EQUALS(inst->getName(), "GEM");
+    TS_ASSERT_EQUALS(ws2.getInstrumentName(), "GEM");
     TS_ASSERT(inst->getFilename().find("GEM_Definition.xml", 0) != std::string::npos);
     TS_ASSERT_EQUALS(parameterStr, "");
   }
@@ -484,8 +557,7 @@ public:
     std::string parameterStr;
     th.reopenFile();
     TS_ASSERT_THROWS_NOTHING(ws2.loadExperimentInfoNexus(filename, th.file.get(), parameterStr));
-    Instrument_const_sptr inst = ws2.getInstrument();
-    TS_ASSERT_EQUALS(inst->getName(), "");
+    TS_ASSERT_EQUALS(ws2.getInstrumentName(), "");
     TS_ASSERT_EQUALS(parameterStr, "");
   }
 
@@ -541,9 +613,8 @@ public:
     // Load the Nexus IDF info
     std::string params;
     TS_ASSERT_THROWS_NOTHING(ei.loadInstrumentInfoNexus(testFile, &nxFile, params));
-    Instrument_const_sptr inst = ei.getInstrument();
-    TS_ASSERT_EQUALS(inst->getName(), "LOQ"); // Check instrument name
-    TS_ASSERT_EQUALS(params.size(), 613);     // Check size of parameter string
+    TS_ASSERT_EQUALS(ei.getInstrumentName(), "LOQ"); // Check instrument name
+    TS_ASSERT_EQUALS(params.size(), 613);            // Check size of parameter string
   }
 
   void test_nexus_parameters() {
@@ -678,13 +749,11 @@ public:
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
     const auto &compInfo = expInfo.componentInfo();
-    const auto &detInfo = expInfo.detectorInfo();
     // Test one of the detectors
     const auto targetDetectorIndex = 0;
-    const auto detCompId = detInfo.detector(targetDetectorIndex).getComponentID();
     TSM_ASSERT_EQUALS("Detector should report the detector index of itself",
-                      compInfo.detectorsInSubtree(compInfo.indexOf(detCompId)).size(), 1);
-    TS_ASSERT_EQUALS(compInfo.detectorsInSubtree(compInfo.indexOf(detCompId))[0], targetDetectorIndex);
+                      compInfo.detectorsInSubtree(targetDetectorIndex).size(), 1);
+    TS_ASSERT_EQUALS(compInfo.detectorsInSubtree(targetDetectorIndex)[0], targetDetectorIndex);
 
     size_t detectorIndex = 0; // interchangeable as either component or detector index
     TSM_ASSERT_EQUALS("Gurantee violated of detectorindex == componentIndex",
@@ -803,8 +872,6 @@ public:
     // collide in the IDF cache; the fix function-qualifies the cache key, while the runtime
     // ParameterMap still stores entries under the short name "Gamma".
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
-    ExperimentInfo expt;
-    expt.setInstrument(inst);
 
     const auto comp = inst->getChild(0).get();
     auto makeXMLParam = [&](const std::string &fittingFunction, const std::string &value) {
@@ -821,10 +888,12 @@ public:
     };
 
     // Insert into the cache under function-qualified keys, mirroring what InstrumentDefinitionParser
-    // now does.
+    // now does. The parser fills the cache before the instrument is given to any workspace.
     auto &cache = inst->getLogfileCache();
     cache.insert({{"Bk2BkExpConvPV:Gamma", comp}, makeXMLParam("Bk2BkExpConvPV", "1.5")});
     cache.insert({{"IkedaCarpenterPV:Gamma", comp}, makeXMLParam("IkedaCarpenterPV", "2.5")});
+    ExperimentInfo expt;
+    expt.setInstrument(inst);
 
     expt.populateInstrumentParameters();
 
@@ -849,6 +918,64 @@ public:
     TS_ASSERT(fp.getFunction() == "Bk2BkExpConvPV" || fp.getFunction() == "IkedaCarpenterPV");
   }
 
+  void test_logfile_parameters_are_taken_from_the_instrument_by_component_index() {
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    const auto comp = inst->getChild(0).get();
+    inst->getLogfileCache().insert({{"a-double", comp}, makeLogfileParameter("a-double", "1.5", comp)});
+    ExperimentInfo expt;
+    expt.setInstrument(inst);
+
+    const auto &componentInfo = expt.componentInfo();
+    const auto compIndex = componentInfo.indexOf(comp->getComponentID());
+    const auto &logfileParameters = componentInfo.logfileParameters();
+    TS_ASSERT_EQUALS(logfileParameters.size(), 1);
+    TS_ASSERT_EQUALS(logfileParameters.begin()->first, std::make_pair(compIndex, std::string("a-double")));
+
+    expt.populateInstrumentParameters();
+    TS_ASSERT_EQUALS(componentInfo.getNumberParameter(compIndex, "a-double", false).at(0), 1.5);
+  }
+
+  void test_logfile_parameters_added_to_one_workspace_are_not_seen_by_another_sharing_its_instrument() {
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    const auto comp = inst->getChild(0).get();
+    ExperimentInfo withParameter;
+    withParameter.setInstrument(inst);
+    ExperimentInfo without;
+    without.setInstrument(inst);
+    const auto compIndex = withParameter.componentInfo().indexOf(comp->getComponentID());
+
+    withParameter.mutableComponentInfo().addLogfileParameter(compIndex, "a-double",
+                                                             makeLogfileParameter("a-double", "1.5", comp));
+    withParameter.populateInstrumentParameters();
+    without.populateInstrumentParameters();
+
+    TS_ASSERT(withParameter.componentInfo().hasParameter(compIndex, "a-double", false));
+    TS_ASSERT(!without.componentInfo().hasParameter(compIndex, "a-double", false));
+    TS_ASSERT(without.componentInfo().logfileParameters().empty());
+    // The instrument itself is untouched, so a workspace given it later does not see the parameter either.
+    TS_ASSERT(inst->getLogfileCache().empty());
+  }
+
+  void test_logfile_parameters_are_copied_with_the_workspace() {
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    const auto comp = inst->getChild(0).get();
+    ExperimentInfo original;
+    original.setInstrument(inst);
+    const auto compIndex = original.componentInfo().indexOf(comp->getComponentID());
+    original.mutableComponentInfo().addLogfileParameter(compIndex, "a-double",
+                                                        makeLogfileParameter("a-double", "1.5", comp));
+
+    auto const copy = original.cloneExperimentInfo();
+    TS_ASSERT_EQUALS(copy->componentInfo().logfileParameters().size(), 1);
+    copy->populateInstrumentParameters();
+    TS_ASSERT_EQUALS(copy->componentInfo().getNumberParameter(compIndex, "a-double", false).at(0), 1.5);
+
+    // ...and independently: adding to the copy does not add to the original.
+    copy->mutableComponentInfo().addLogfileParameter(compIndex, "another-double",
+                                                     makeLogfileParameter("another-double", "2.5", comp));
+    TS_ASSERT_EQUALS(original.componentInfo().logfileParameters().size(), 1);
+  }
+
   void test_getInstrumentName_NoInstrument() {
     ExperimentInfo expInfo;
     auto inst = expInfo.getInstrument();
@@ -867,6 +994,17 @@ public:
   }
 
 private:
+  /// A double-valued logfile parameter with a fixed value, as the instrument definition parser makes them.
+  static std::shared_ptr<XMLInstrumentParameter> makeLogfileParameter(const std::string &name, const std::string &value,
+                                                                      const IComponent *comp) {
+    std::string penaltyFactor;
+    return std::make_shared<XMLInstrumentParameter>(
+        /*logfileID*/ "", value, std::make_shared<Mantid::Kernel::Interpolation>(), /*formula*/ "", /*formulaUnit*/ "",
+        /*resultUnit*/ "", name, /*type*/ "double", /*tie*/ "", std::vector<std::string>(2, ""), penaltyFactor,
+        /*fitFunc*/ "", /*extractSingleValueAs*/ "", /*eq*/ "", comp, /*angleConvertConst*/ 1.0, /*description*/ "",
+        /*visible*/ "true");
+  }
+
   void addInstrumentWithParameter(ExperimentInfo &expt, const std::string &name, const std::string &value) {
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
     expt.setInstrument(inst);

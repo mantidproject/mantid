@@ -51,7 +51,7 @@ requirements:
         - libopenblas ${{ libopenblas }}
   run:
     - mantid == ${{ version }}
-    - matplotlib ${{ matplotlib }}
+    - matplotlib-base ${{ matplotlib }}
     - qscintilla2 ${{ qscintilla2 }}
     - qtpy ${{ qtpy }}
     - python ${{ python }}

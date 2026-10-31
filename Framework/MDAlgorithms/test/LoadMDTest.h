@@ -159,8 +159,8 @@ public:
       for (uint16_t i = 0; i < ws1->getNumExperimentInfo(); i++) {
         ExperimentInfo_sptr ei1 = ws1->getExperimentInfo(i);
         ExperimentInfo_sptr ei2 = ws2->getExperimentInfo(i);
-        // TS_ASSERT_EQUALS(ei1->getInstrument()->getName(),
-        // ei2->getInstrument()->getName());
+        // TS_ASSERT_EQUALS(ei1->getInstrumentName(),
+        // ei2->getInstrumentName());
       }
     }
   }

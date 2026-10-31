@@ -961,7 +961,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(const MatrixW
     // Set the detector ID from the twoThetaR detector.
     const size_t twoThetaRIdx = twoThetaRDetectorIdx(detectors);
     auto &outSpec = outputWS->getSpectrum(groupIdx);
-    const detid_t twoThetaRDetID = m_spectrumInfo->detector(twoThetaRIdx).getID();
+    const detid_t twoThetaRDetID = m_spectrumInfo->firstDetectorID(twoThetaRIdx);
     outSpec.clearDetectorIDs();
     outSpec.addDetectorID(twoThetaRDetID);
     // Set the spectrum number from the twoThetaR detector

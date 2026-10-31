@@ -1223,10 +1223,9 @@ void IntegratePeaksMD2::calculateE1(const Geometry::DetectorInfo &detectorInfo) 
     if (detectorInfo.isMonitor(i))
       continue; // skip monitor
     if (!detectorInfo.isMasked(i))
-      continue; // edge is masked so don't check if not masked
-    const auto &det = detectorInfo.detector(i);
-    double tt1 = det.getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)); // two theta
-    double ph1 = det.getPhi();                                // phi
+      continue;                                                        // edge is masked so don't check if not masked
+    double tt1 = detectorInfo.twoTheta(i, V3D(0, 0, 0), V3D(0, 0, 1)); // two theta
+    double ph1 = detectorInfo.phi(i);                                  // phi
     V3D E1 = V3D(-std::sin(tt1) * std::cos(ph1), -std::sin(tt1) * std::sin(ph1),
                  1. - std::cos(tt1)); // end of trajectory
     E1 = E1 * (1. / E1.norm());       // normalize
@@ -1257,7 +1256,7 @@ double IntegratePeaksMD2::calculateDistanceToEdge(const Mantid::Kernel::V3D &QLa
 void IntegratePeaksMD2::runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
                                          const std::string &property, const std::string &values) {
   // For CORELLI do not count as edge if next to another detector bank
-  if (property == "Tube" && peakWS->getInstrument()->getName() == "CORELLI") {
+  if (property == "Tube" && peakWS->getInstrumentName() == "CORELLI") {
     auto alg = createChildAlgorithm("MaskBTP");
     alg->setProperty<Workspace_sptr>("Workspace", peakWS);
     alg->setProperty("Bank", "1,7,12,17,22,27,30,59,63,69,74,79,84,89");

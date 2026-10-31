@@ -81,7 +81,7 @@ MuonSequentialFitDialog::MuonSequentialFitDialog(MuonFitPropertyBrowser *fitProp
   m_ui.runs->setText(QString::number(fitWS->getRunNumber()) + "-");
   // Set the file finder to the correct instrument (not Mantid's default
   // instrument)
-  const auto instName = fitWS->getInstrument()->getName();
+  const auto instName = fitWS->getInstrumentName();
   m_ui.runs->setInstrumentOverride(QString(instName.c_str()));
 
   // TODO: find a better initial one, e.g. previously used
@@ -136,7 +136,7 @@ std::string MuonSequentialFitDialog::getRunTitle(const Workspace_const_sptr &ws)
   if (!matrixWS)
     return "";
 
-  const std::string &instrName = matrixWS->getInstrument()->getName();
+  const std::string &instrName = matrixWS->getInstrumentName();
   const int runNumber = matrixWS->getRunNumber();
 
   if (instrName.empty() || runNumber == 0)

@@ -13,11 +13,6 @@
 
 namespace Mantid {
 namespace Kernel {
-//-------------------------------------------------------------------------
-// Forward declarations
-//-------------------------------------------------------------------------
-class Unit;
-
 /**
  * A set of static helper methods to perform conversions between units
  */

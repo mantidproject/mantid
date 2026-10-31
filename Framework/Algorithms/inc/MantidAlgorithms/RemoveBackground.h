@@ -10,6 +10,7 @@
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {

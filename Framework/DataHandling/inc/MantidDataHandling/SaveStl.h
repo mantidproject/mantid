@@ -12,7 +12,7 @@
 
 #include "MantidDataHandling/MeshFileIO.h"
 #include "MantidKernel/BinaryStreamWriter.h"
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger_fwd.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {

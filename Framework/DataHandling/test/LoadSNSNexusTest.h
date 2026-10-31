@@ -62,7 +62,7 @@ public:
     //------------ Instrument Loading Sub-Test -----------------------
     Instrument_sptr inst = ws->getInstrument();
 
-    TS_ASSERT_EQUALS(inst->getName(), "REF_L");
+    TS_ASSERT_EQUALS(ws->getInstrumentName(), "REF_L");
     std::map<int, Geometry::IDetector_sptr> detectors = inst->getDetectors();
     TS_ASSERT_EQUALS(detectors.size(), 304 * 256); // 304*256
 

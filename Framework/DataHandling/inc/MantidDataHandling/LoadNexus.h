@@ -13,7 +13,6 @@
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidKernel/Property.h"
 #include <climits>
 
 namespace Mantid {

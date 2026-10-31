@@ -37,7 +37,6 @@ set(INC_FILES
     ALCPeakFittingModel.h
     ALCPeakFittingPresenter.h
     ALCPeakFittingView.h
-    DllConfig.h
     IALCBaselineModellingModel.h
     IALCBaselineModellingView.h
     IALCBaselineModellingPresenter.h
@@ -57,7 +56,6 @@ set(UI_FILES ALCBaselineModellingView.ui ALCDataLoadingView.ui ALCInterface.ui A
 set(PRECOMP_HEADERS
     <MantidAPI/Algorithm.h>
     <MantidAPI/MatrixWorkspace_fwd.h>
-    <MantidKernel/System.h>
     <QDialog>
     <QString>
     <QWidget>
@@ -73,8 +71,8 @@ mtd_add_qt_library(
   SRC ${SRC_FILES}
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
-  UI ${UI_FILES}
-  DEFS IN_MANTIDQT_MUONINTERFACE PRECOMPILED ${PRECOMP_HEADERS}
+  UI ${UI_FILES} PRECOMPILED ${PRECOMP_HEADERS}
+  INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
   LINK_LIBS ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${JSONCPP_LIBRARIES}
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsMplCpp MantidQtWidgetsPlotting
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
@@ -86,3 +84,15 @@ mtd_add_qt_library(
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   add_subdirectory(test)
 endif()
+
+# Auto-generate exports header
+generate_mantid_export_header(
+  MantidScientificInterfacesMuonQt${MANTID_QT_VERSION}
+  TRUE
+  BASE_NAME
+  MANTIDQT_MUONINTERFACE
+  EXPORT_MACRO_NAME
+  MANTIDQT_MUONINTERFACE_DLL
+  EXPORT_FILE_NAME
+  DllConfig.h
+)

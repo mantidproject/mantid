@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+import warnings
 from mantid.kernel import DateAndTime
 from mantid.geometry import Component, Detector, Instrument, ObjComponent, ReferenceFrame
 from testhelpers import can_be_instantiated, WorkspaceCreationHelper
@@ -17,15 +18,23 @@ class InstrumentTest(unittest.TestCase):
         if self.__testws is None:
             self.__class__.__testws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(1, 1)
 
+    def _instrument(self):
+        # the Instrument is what is under test here, not the deprecation of fetching it
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            return self.__testws.getInstrument()
+
     def test_Instrument_cannot_be_instantiated(self):
         self.assertFalse(can_be_instantiated(Instrument))
 
     def test_getSample(self):
-        sample_pos = self.__testws.getInstrument().getSample()
+        with self.assertWarns(DeprecationWarning):
+            sample_pos = self._instrument().getSample()
         self.assertTrue(isinstance(sample_pos, Component))
 
     def test_getSource(self):
-        source_pos = self.__testws.getInstrument().getSource()
+        with self.assertWarns(DeprecationWarning):
+            source_pos = self._instrument().getSource()
         self.assertTrue(isinstance(source_pos, ObjComponent))
 
     def test_getComponentByName(self):
@@ -37,15 +46,16 @@ class InstrumentTest(unittest.TestCase):
         self.assertTrue(isinstance(comp, Detector))
 
     def test_getNumberDetectors(self):
-        num_detectors = self.__testws.getInstrument().getNumberDetectors()
+        with self.assertWarns(DeprecationWarning):
+            num_detectors = self._instrument().getNumberDetectors()
         self.assertEqual(num_detectors, 1)
 
     def test_getReferenceFrame(self):
-        frame = self.__testws.getInstrument().getReferenceFrame()
+        frame = self._instrument().getReferenceFrame()
         self.assertTrue(isinstance(frame, ReferenceFrame))
 
     def test_getFilename(self):
-        inst = self.__testws.getInstrument()
+        inst = self._instrument()
 
         # get the filename
         NAME_ORIG = inst.getFilename()
@@ -59,13 +69,13 @@ class InstrumentTest(unittest.TestCase):
         inst.setFilename(NAME_ORIG)
 
     def test_getXmlText(self):
-        inst = self.__testws.getInstrument()
+        inst = self._instrument()
         xml_text = inst.getXmlText()
         self.assertIsInstance(xml_text, str)
         self.assertEqual(xml_text, "Fake XML")
 
     def test_ValidDates(self):
-        inst = self.__testws.getInstrument()
+        inst = self._instrument()
         valid_from = inst.getValidFromDate()
         valid_to = inst.getValidToDate()
 
@@ -73,12 +83,21 @@ class InstrumentTest(unittest.TestCase):
         self.assertTrue(isinstance(valid_to, DateAndTime))
 
     def test_baseInstrument_Can_Be_Retrieved(self):
-        inst = self.__testws.getInstrument()
-        base_inst = inst.getBaseInstrument()
+        inst = self._instrument()
+        with self.assertWarns(DeprecationWarning):
+            base_inst = inst.getBaseInstrument()
         self.assertEqual("testInst", base_inst.getName())
 
+    def test_getBaseInstrument_warning_can_be_raised_as_an_error(self):
+        inst = self._instrument()
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", DeprecationWarning)
+            # raised as the warning itself, not as a SystemError from the binding
+            with self.assertRaises(DeprecationWarning):
+                inst.getBaseInstrument()
+
     def test_getMemorySize(self):
-        mem = self.__testws.getInstrument().getMemorySize()
+        mem = self._instrument().getMemorySize()
         self.assertIsInstance(mem, int)
         self.assertGreater(mem, 0)
 

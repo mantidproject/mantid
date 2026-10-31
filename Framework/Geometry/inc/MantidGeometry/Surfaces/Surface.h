@@ -8,6 +8,7 @@
 
 #include "BaseVisit.h"
 #include "MantidGeometry/DllConfig.h"
+#include "MantidKernel/V3D_fwd.h"
 #include <memory>
 #include <string>
 
@@ -15,7 +16,6 @@ class TopoDS_Shape;
 
 namespace Mantid {
 namespace Kernel {
-class V3D;
 template <class T> class Matrix;
 } // namespace Kernel
 namespace Geometry {

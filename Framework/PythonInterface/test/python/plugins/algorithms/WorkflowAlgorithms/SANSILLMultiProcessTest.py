@@ -47,7 +47,8 @@ class SANSILLMultiProcessTest(unittest.TestCase):
         self.assertEqual(realspace.getNumberHistograms(), 128 * 128 + 2)
         self.assertEqual(realspace.blocksize(), 1)
         self.assertFalse(realspace.isHistogramData())
-        self.assertTrue(realspace.getInstrument())
+        # An attached instrument has components other than the root
+        self.assertGreater(realspace.componentInfo().size(), 1)
         self.assertTrue(realspace.getRun())
         self.assertTrue(realspace.getHistory())
         iq = ws.getItem(1)

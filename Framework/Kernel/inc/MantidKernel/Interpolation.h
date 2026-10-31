@@ -10,7 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/Unit.h"
+#include "MantidKernel/Unit_fwd.h"
 #include <cstdlib>
 #include <sstream>
 #include <string>

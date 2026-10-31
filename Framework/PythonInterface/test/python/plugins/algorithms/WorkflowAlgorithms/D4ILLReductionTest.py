@@ -7,7 +7,7 @@
 import unittest
 from mantid.api import MatrixWorkspace, WorkspaceGroup, Run
 from mantid.simpleapi import config, mtd, D4ILLReduction, Integration
-from mantid.geometry import Instrument
+from mantid.geometry import ComponentInfo
 import numpy as np
 from os import remove, path
 
@@ -105,7 +105,8 @@ class D4ILLReductionTest(unittest.TestCase):
             self.assertEqual(entry.getAxis(1).getUnit().unitID(), y_unit_id)
             self.assertEqual(entry.blocksize(), blocksize)
             self.assertEqual(entry.getNumberHistograms(), spectra)
-            self.assertTrue(isinstance(entry.getInstrument(), Instrument))
+            # The diffractograms carry no instrument, so this can only check the type
+            self.assertTrue(isinstance(entry.componentInfo(), ComponentInfo))
             self.assertTrue(isinstance(entry.getRun(), Run))
             self.assertTrue(entry.getHistory())
 

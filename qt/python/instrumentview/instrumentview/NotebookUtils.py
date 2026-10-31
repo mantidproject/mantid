@@ -13,7 +13,12 @@ import pyvista as pv
 
 def _load_file(file_path: Path) -> Workspace2D:
     ws = Load(str(file_path))
-    if not ws.getInstrument() or not ws.getInstrumentName() or not ws.getAxis(1).isSpectra() or (ws.detectorInfo().detectorIDs().size == 0):
+    if (
+        ws.componentInfo().size() <= 1
+        or not ws.getInstrumentName()
+        or not ws.getAxis(1).isSpectra()
+        or (ws.detectorInfo().detectorIDs().size == 0)
+    ):
         raise RuntimeError(f"Could not open instrument for {file_path}. Check that instrument and detectors are present in the workspace.")
     return ws
 

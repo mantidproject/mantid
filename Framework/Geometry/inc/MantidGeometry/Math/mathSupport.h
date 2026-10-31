@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger_fwd.h"
 #include <complex>
 #include <functional>
 #include <vector>

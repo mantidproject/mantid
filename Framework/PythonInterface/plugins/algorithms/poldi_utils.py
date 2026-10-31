@@ -5,13 +5,22 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import annotations
-from mantid.api import AlgorithmManager, AnalysisDataService as ADS
+from mantid.api import AlgorithmManager, AnalysisDataService as ADS, InstrumentFileFinder
 import numpy as np
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams, UnitParametersMap
 from typing import Tuple, Sequence, Optional, TYPE_CHECKING
 from joblib import Parallel, delayed
 import h5py
 from multiprocessing import cpu_count
+
+# re-exported for backwards compatibility - these are instrument-agnostic and now live elsewhere
+from plugins.algorithms.diffraction_utils import (  # noqa: F401
+    get_dspac_limits,
+    get_dspac_limits_from_ws,
+    get_live_spectra,
+    get_tths_and_l2s,
+    get_live_tths_and_l2s,
+)
 
 if TYPE_CHECKING:
     from mantid.dataobjects import Workspace2D
@@ -74,18 +83,17 @@ def load_poldi(
 
 def load_poldi_h5f(
     fpath_data: str,
-    fpath_idf: str,
-    t0: float = 0.025701,
-    t0_const: float = 85.0,
+    fpath_idf: str | None = None,
+    t0: float | None = None,
+    t0_const: float | None = None,
     output_workspace: str = "ws",
 ):
     """
     Function to load POLDI v2 data from ASCII file containing array of counts
     :param fpath_data: filepath of ASCII file with counts
-    :param fpath_idf: filepath to instrument definition file
-    :param chopper_speed: chopper speed used on instrument (rpm)
-    :param t0: time offset applied to slit openings (fraction of cycle time)
-    :param t0_const: TZERO diffractometer constant for instrument
+    :param fpath_idf: filepath to instrument definition file, if None the definition valid at the run start time is used
+    :param t0: time offset applied to slit openings (fraction of cycle time), overrides the parameter file if given
+    :param t0_const: TZERO diffractometer constant for instrument, overrides the parameter file if given
     :param output_workspace: output workspace name
     :return ws: workspace containing POLDI data
     """
@@ -95,6 +103,8 @@ def load_poldi_h5f(
         for bank_name in ["south", "north"]:
             dat.append(np.asarray(f.get(f"entry1/POLDI/detector_{bank_name}/histogram_folded")))
         chopper_speed = f.get("entry1/POLDI/chopper/rotation_speed_target")[0]
+        if fpath_idf is None:
+            fpath_idf = InstrumentFileFinder.getInstrumentFilename("POLDI", f.get("entry1/start_time")[0].decode())
         if np.allclose([bank.sum() for bank in dat], 0):
             monitor_count = 0  # can be error in detector electronics where no data but erroneous monitor counts
         else:
@@ -115,23 +125,16 @@ def load_poldi_h5f(
     ws = exec_alg("ConvertToPointData", InputWorkspace=ws)
     # add some logs (will eventually be set in file)
     exec_alg("AddSampleLog", Workspace=ws, LogName="chopperspeed", LogText=str(chopper_speed), LogType="Number")
-    # set t0 (would normally live in parameter file)
-    exec_alg(
-        "SetInstrumentParameter",
-        Workspace=ws,
-        ComponentName="chopper",
-        ParameterName="t0",
-        ParameterType="Number",
-        Value=str(t0),
-    )
-    exec_alg(
-        "SetInstrumentParameter",
-        Workspace=ws,
-        ComponentName="chopper",
-        ParameterName="t0_const",
-        ParameterType="Number",
-        Value=str(t0_const),
-    )
+    for name, value in (("t0", t0), ("t0_const", t0_const)):
+        if value is not None:
+            exec_alg(
+                "SetInstrumentParameter",
+                Workspace=ws,
+                ComponentName="chopper",
+                ParameterName=name,
+                ParameterType="Number",
+                Value=str(value),
+            )
     # add monitor counts
     exec_alg("AddSampleLog", Workspace=ws, LogName="gd_prtn_chrg", LogText=str(monitor_count), LogType="Number")
     ADS.addOrReplace(output_workspace, ws)
@@ -173,31 +176,26 @@ def get_instrument_settings_from_log(ws: Workspace2D) -> Tuple[float, np.ndarray
     return cycle_time, slit_offsets, t0_const, l1_chop
 
 
-def get_dspac_limits(tth_min: float, tth_max: float, lambda_min: float, lambda_max: float) -> Tuple[float, float]:
+def get_tof_d1Ang(ws: Workspace2D, l2s: np.ndarray[float], l1_chop: float, is_live: np.ndarray[bool] | None = None) -> np.ndarray[float]:
     """
-    Function to calculate min and max d-spacing to consider in auto-correlation given two-theta coverage and wavelength range.
-    :param tth_min: minimum two theta to consider
-    :param tth_max: maximum two theta to consider
-    :param lambda_min: minimum wavelength to consider
-    :param lambda_max: maximum wavelength to consider
-    :return (dspac_min, dspac_max): min and max d-spacing
-    """
-    dspac_min = lambda_min / (2 * np.sin(tth_max / 2))
-    dspac_max = lambda_max / (2 * np.sin(tth_min / 2))
-    return dspac_min, dspac_max
-
-
-def get_dspac_limits_from_ws(ws: Workspace2D, lambda_min: float = 1.1, lambda_max: float = 5.0) -> Tuple[float, float]:
-    """
-    Function to calculate min and max d-spacing accessible in a workspace given its two-theta coverage
+    Function to get the time-of-flight from chopper to detector of a neutron with d = 1 Ang for every spectrum
     :param ws: MatrixWorkspace containing POLDI data (raw instrument)
-    :param lambda_min: minimum wavelength (Ang) to consider
-    :param lambda_max: maximum wavelength (Ang) to consider
-    :return (dspac_min, dspac_max): min and max d-spacing
+    :param l2s: sample to detector distance (m) of each spectrum
+    :param l1_chop: path length from source to chopper (m)
+    :param is_live: boolean array, True for spectra that are not masked (calculated from ws if not provided)
+    :return np.ndarray: time-of-flight (mus) of each spectrum - zero for masked spectra
     """
+    if is_live is None:
+        is_live = get_live_spectra(ws)
     si = ws.spectrumInfo()
-    tths = np.array([si.twoTheta(ispec) for ispec in range(ws.getNumberHistograms())])
-    return get_dspac_limits(tths.min(), tths.max(), lambda_min, lambda_max)
+    l1 = si.l1()
+    path_length_ratio = (l2s + l1 - l1_chop) / (l2s + l1)
+    return np.array(
+        [
+            si.diffractometerConstants(ispec)[UnitParams.difc] * path_length_ratio[ispec] if is_live[ispec] else 0.0
+            for ispec in range(len(is_live))
+        ]
+    )
 
 
 def get_final_dspac_array(bin_width: float, dspac_min: float, dspac_max: float, time_max: float) -> np.ndarray[float]:
@@ -223,12 +221,9 @@ def get_dspac_array_from_ws(ws: Workspace2D, lambda_min: float = 1.1, lambda_max
     :return np.ndarray: array of d-spacing bins
     """
     _, slit_offsets, _, l1_chop = get_instrument_settings_from_log(ws)
-    # get detector positions from IDF
-    si = ws.spectrumInfo()
-    nspec = ws.getNumberHistograms()
-    tths = np.array([si.twoTheta(ispec) for ispec in range(nspec)])
-    l2s = np.asarray([si.l2(ispec) for ispec in range(nspec)])
-    l1 = si.l1()
+    # get detector positions from IDF (masked spectra excluded as they don't contribute)
+    tths, l2s = get_live_tths_and_l2s(ws)
+    l1 = ws.spectrumInfo().l1()
     # determine npulses to include in calc
     time_max = get_max_tof_from_chopper(l1, l1_chop, l2s, tths, lambda_max) + slit_offsets[0]
     dspac_min, dspac_max = get_dspac_limits(tths.min(), tths.max(), lambda_min, lambda_max)
@@ -289,20 +284,18 @@ def simulate_2d_data(
         ws_sim = exec_alg("ExtractSpectra", InputWorkspace=ws_2d, DetectorList=np.array(ws_1d.getSpectrum(ispec).getDetectorIDs()))
     # get instrument settings
     cycle_time, slit_offsets, t0_const, l1_chop = get_instrument_settings_from_log(ws_sim)
-    si = ws_sim.spectrumInfo()
-    nspec = ws_sim.getNumberHistograms()
-    tths = np.asarray([si.twoTheta(ispec) for ispec in range(nspec)])
-    l2s = np.asarray([si.l2(ispec) for ispec in range(nspec)])
-    l1 = si.l1()
+    is_live = get_live_spectra(ws_sim)
+    tths, l2s = get_tths_and_l2s(ws_sim, is_live)
     # get npulses to include
-    time_max = get_max_tof_from_chopper(l1, l1_chop, l2s, tths, lambda_max) + slit_offsets[-1]
+    time_max = get_max_tof_from_chopper(ws_sim.spectrumInfo().l1(), l1_chop, l2s[is_live], tths[is_live], lambda_max) + slit_offsets[-1]
     npulses = int(time_max // cycle_time)
     # simulate detected spectra
     ipulses = np.arange(npulses)[:, None]
     offsets = (ipulses * cycle_time - slit_offsets - t0_const).flatten()  # note different sign to auto-corr!
     tofs = ws_sim.x(0)[:, None] + offsets  # same for all spectra
-    path_length_ratio = (l2s + l1 - l1_chop) / (l2s + l1)
-    tof_d1Ang = np.asarray([si.diffractometerConstants(ispec)[UnitParams.difc] * path_length_ratio[ispec] for ispec in range(nspec)])
+    tof_d1Ang = get_tof_d1Ang(ws_sim, l2s, l1_chop, is_live)
+
+    ilive = np.flatnonzero(is_live)
     if flux_sample_points:
         lam_grid, flux_vals = _get_flux_arrays(ws_sim, n_points=flux_sample_points)
         sin_thetas = np.sin(tths / 2.0)
@@ -310,15 +303,17 @@ def simulate_2d_data(
             delayed(_do_interp_with_flux_correction)(
                 tofs / tof_d1Ang[ispec], ws_1d.x(0), ws_1d.y(0), sin_thetas[ispec], lam_grid, flux_vals
             )
-            for ispec in range(nspec)
+            for ispec in ilive
         )
     else:
         out = Parallel(n_jobs=min(4, cpu_count()), prefer="threads", return_as="generator")(
-            delayed(_do_interp)(tofs / tof_d1Ang[ispec], ws_1d.x(0), ws_1d.y(0)) for ispec in range(nspec)
+            delayed(_do_interp)(tofs / tof_d1Ang[ispec], ws_1d.x(0), ws_1d.y(0)) for ispec in ilive
         )
-    # set y values
-    for ispec, yvec in enumerate(out):
-        ws_sim.setSharedY(ispec, yvec)
+    # set y values - masked spectra are zeroed rather than simulated
+    for ispec in np.flatnonzero(~is_live):
+        ws_sim.setSharedY(int(ispec), np.zeros(ws_sim.blocksize()))
+    for ispec, yvec in zip(ilive, out):
+        ws_sim.setSharedY(int(ispec), yvec)
     ADS.addOrReplace(output_workspace, ws_sim)
     return ws_sim
 

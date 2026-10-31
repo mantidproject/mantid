@@ -137,7 +137,7 @@ void SaveParameterFile::exec() {
   // Begin writing the XML manually
   std::ofstream file(filename.c_str(), std::ofstream::trunc);
   file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-  file << "<parameter-file instrument=\"" << instrument->getName() << "\"";
+  file << "<parameter-file instrument=\"" << ws->getInstrumentName() << "\"";
   file << " valid-from=\"" << ws->instrumentMetadata().validFromDate().toISO8601String() << "\">\n";
 
   prog.resetNumSteps(static_cast<int64_t>(toSave.size()), 0.6, 1.0);

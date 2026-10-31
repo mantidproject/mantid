@@ -65,7 +65,7 @@ public:
     // Check geometry for a monitor
     const auto &specInfo = WS->spectrumInfo();
     TS_ASSERT(specInfo.isMonitor(2));
-    TS_ASSERT_EQUALS(specInfo.detector(2).getID(), -3);
+    TS_ASSERT_EQUALS(specInfo.firstDetectorID(2), -3);
     TS_ASSERT_DELTA(specInfo.samplePosition().distance(specInfo.position(2)), 1.426, 1e-6);
     // Check if filename is saved
     TS_ASSERT_EQUALS(ld2.getPropertyValue("Filename"), WS->run().getProperty("Filename")->value());

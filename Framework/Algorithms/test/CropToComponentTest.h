@@ -235,7 +235,7 @@ private:
 
     const auto &spectrumInfo = workspace->spectrumInfo();
     for (const auto index : indices) {
-      Mantid::detid_t detectorID = spectrumInfo.detector(index).getID();
+      Mantid::detid_t detectorID = spectrumInfo.firstDetectorID(index);
       TSM_ASSERT_EQUALS("The detector IDs should match.", expectedIDs[index], detectorID);
     }
   }

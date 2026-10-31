@@ -14,7 +14,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/LogManager.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidKernel/V3D.h"
+#include "MantidKernel/V3D_fwd.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>

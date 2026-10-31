@@ -108,9 +108,7 @@ add_library(HistogramData ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::HistogramData ALIAS HistogramData)
 
 # Set the name of the generated library
-set_target_properties(
-  HistogramData PROPERTIES OUTPUT_NAME MantidHistogramData COMPILE_DEFINITIONS IN_MANTID_HISTOGRAMDATA
-)
+set_target_properties(HistogramData PROPERTIES OUTPUT_NAME MantidHistogramData)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(HistogramData PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")

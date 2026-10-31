@@ -36,7 +36,7 @@ namespace Kernel {
 /** Constructor
  *  @param name :: The name to assign to the property
  *  @param defaultValue :: Is stored initial default value of the property
- *  @param validator :: The validator to use for this property
+ *  @param validator :: The validator to use for this property. If empty, a NullValidator is used
  *  @param direction :: Whether this is a Direction::Input, Direction::Output
  * or Direction::InOut (Input & Output) property
  */
@@ -44,7 +44,8 @@ template <typename TYPE>
 PropertyWithValue<TYPE>::PropertyWithValue(std::string name, TYPE defaultValue, IValidator_sptr validator,
                                            unsigned int direction)
     : Property(std::move(name), typeid(TYPE), direction), m_value(defaultValue),
-      m_initialValue(std::move(defaultValue)), m_validator(std::move(validator)) {}
+      m_initialValue(std::move(defaultValue)),
+      m_validator(validator ? std::move(validator) : std::make_shared<NullValidator>()) {}
 
 /** Constructor
  *  @param name :: The name to assign to the property
@@ -67,7 +68,7 @@ PropertyWithValue<TYPE>::PropertyWithValue(std::string name, TYPE defaultValue, 
  * other definitions.
  *  @param defaultValueStr :: The numerical values you wish to assign to the
  * property
- *  @param validator :: The validator to use for this property
+ *  @param validator :: The validator to use for this property. If empty, a NullValidator is used
  *  @param direction :: Whether this is a Direction::Input, Direction::Output
  * or Direction::InOut (Input & Output) property
  */
@@ -76,7 +77,7 @@ PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name, const TYPE &
                                            const std::string &defaultValueStr, IValidator_sptr validator,
                                            unsigned int direction)
     : Property(name, typeid(TYPE), direction), m_value(extractToValueVector<TYPE>(defaultValueStr)),
-      m_initialValue(m_value), m_validator(std::move(validator)) {
+      m_initialValue(m_value), m_validator(validator ? std::move(validator) : std::make_shared<NullValidator>()) {
   UNUSED_ARG(defaultValue);
 }
 

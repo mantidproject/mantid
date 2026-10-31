@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from qtpy.QtWidgets import QApplication
-from qtpy.QtCore import Qt, QMetaObject
+from qtpy.QtWidgets import QAction, QApplication, QInputDialog, QMessageBox
+from qtpy.QtCore import QTimer
 
 from mantid import FrameworkManager
 from mantidqt.utils.qt.testing import start_qapplication
@@ -19,64 +19,63 @@ class TestFitPropertyBrowser(unittest.TestCase):
     def create_widget(self):
         return FitPropertyBrowserBase()
 
-    def start_setup_menu(self):
-        self.click_button("button_Setup")
-        return self.wait_for_popup()
+    def trigger_action(self, browser, name):
+        browser.findChild(QAction, name).trigger()
 
-    def start_find_peaks(self):
-        self.trigger_action("action_FindPeaks")
+    def when_modal_appears(self, dialog_type, handler, attempts=100):
+        """Run handler on the next modal dialog of dialog_type. The dialog's exec() blocks the caller,
+        so this must be scheduled before the action that opens it and is run by the dialog's event loop."""
 
-    def start_manage_setup(self):
-        a, pm = self.get_action("action_ManageSetup", get_menu=True)
-        pm.setActiveAction(a)
-        m = a.menu()
-        m.show()
-        return self.wait_for_popup()
+        def check(remaining):
+            dialog = QApplication.activeModalWidget()
+            if isinstance(dialog, dialog_type):
+                handler(dialog)
+            elif remaining > 0:
+                QTimer.singleShot(10, lambda: check(remaining - 1))
 
-    def start_load_from_string(self):
-        self.trigger_action("action_LoadFromString")
-        return self.wait_for_modal()
+        QTimer.singleShot(0, lambda: check(attempts))
 
-    def set_function_string_blah(self):
-        self.set_function_string("blah")
-        return self.wait_for_modal()
+    def close_message_box(self, messages):
+        def handler(box):
+            messages.append(box.text())
+            box.close()
 
-    def set_function_string_linear(self):
-        self.set_function_string("name=LinearBackground")
-        return self.wait_for_true(lambda: self.widget.sizeOfFunctionsGroup() == 3)
+        self.when_modal_appears(QMessageBox, handler)
 
-    def set_function_string(self, text):
-        box = self.get_active_modal_widget()
-        box.setTextValue(text)
-        QMetaObject.invokeMethod(box, "accept", Qt.QueuedConnection)
+    def enter_function_string(self, text):
+        def handler(dialog):
+            dialog.setTextValue(text)
+            dialog.accept()
+
+        self.when_modal_appears(QInputDialog, handler)
 
     def test_find_peaks_no_workspace(self):
-        yield self.start_setup_menu()
-        m = self.get_menu("menu_Setup")
-        self.assertTrue(m.isVisible())
-        self.start_find_peaks()
-        yield self.wait_for_modal()
-        box = self.get_active_modal_widget()
-        self.assertEqual(box.text(), "Workspace name is not set")
-        box.close()
+        property_browser = self.create_widget()
+        messages = []
+        self.close_message_box(messages)
+
+        self.trigger_action(property_browser, "action_FindPeaks")
+
+        self.assertEqual(messages, ["Workspace name is not set"])
 
     def test_load_from_string_blah(self):
-        yield self.start_setup_menu()
-        yield self.start_manage_setup()
-        yield self.start_load_from_string()
-        yield self.set_function_string_blah()
-        box = self.get_active_modal_widget()
-        self.assertEqual(box.text(), "Unexpected exception caught:\n\nError in input string to FunctionFactory\nblah")
-        box.close()
+        property_browser = self.create_widget()
+        messages = []
+        self.enter_function_string("blah")
+        self.close_message_box(messages)
+
+        self.trigger_action(property_browser, "action_LoadFromString")
+
+        self.assertEqual(messages, ["Unexpected exception caught:\n\nError in input string to FunctionFactory\nblah"])
 
     def test_load_from_string_lb(self):
-        yield self.start_setup_menu()
-        yield self.start_manage_setup()
-        yield self.start_load_from_string()
-        yield self.set_function_string_linear()
-        a = self.widget.getFittingFunction()
-        self.assertEqual(a, "name=LinearBackground,A0=0,A1=0")
-        self.assertEqual(self.widget.sizeOfFunctionsGroup(), 3)
+        property_browser = self.create_widget()
+        self.enter_function_string("name=LinearBackground")
+
+        self.trigger_action(property_browser, "action_LoadFromString")
+
+        self.assertEqual(property_browser.getFittingFunction(), "name=LinearBackground,A0=0,A1=0")
+        self.assertEqual(property_browser.sizeOfFunctionsGroup(), 3)
 
     def test_multiple_function_string_loaded_correctly(self):
         property_browser = self.create_widget()
@@ -115,22 +114,22 @@ class TestFitPropertyBrowser(unittest.TestCase):
             self.assertTrue(h.hasTies())
 
     def test_copy_to_clipboard(self):
-        self.widget.loadFunction("name=LinearBackground,A0=0,A1=0")
-        yield self.start_setup_menu()
-        yield self.start_manage_setup()
+        property_browser = self.create_widget()
+        property_browser.loadFunction("name=LinearBackground,A0=0,A1=0")
         QApplication.clipboard().clear()
-        self.trigger_action("action_CopyToClipboard")
-        yield self.wait_for_true(lambda: QApplication.clipboard().text() != "")
+
+        self.trigger_action(property_browser, "action_CopyToClipboard")
+
         self.assertEqual(QApplication.clipboard().text(), "name=LinearBackground,A0=0,A1=0")
 
     def test_clear_model(self):
-        self.widget.loadFunction("name=LinearBackground,A0=0,A1=0")
-        self.assertEqual(self.widget.sizeOfFunctionsGroup(), 3)
-        yield self.start_setup_menu()
-        yield self.start_manage_setup()
-        self.trigger_action("action_ClearModel")
-        yield self.wait_for_true(lambda: self.widget.sizeOfFunctionsGroup() == 2)
-        self.assertEqual(self.widget.sizeOfFunctionsGroup(), 2)
+        property_browser = self.create_widget()
+        property_browser.loadFunction("name=LinearBackground,A0=0,A1=0")
+        self.assertEqual(property_browser.sizeOfFunctionsGroup(), 3)
+
+        self.trigger_action(property_browser, "action_ClearModel")
+
+        self.assertEqual(property_browser.sizeOfFunctionsGroup(), 2)
 
 
 if __name__ == "__main__":

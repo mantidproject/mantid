@@ -10,11 +10,9 @@
 #include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/V3D_fwd.h"
 
 namespace Mantid {
-namespace Kernel {
-class V3D;
-}
 namespace Geometry {
 class IDetector;
 class BoundingBox;

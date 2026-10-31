@@ -18,6 +18,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/Track.h"
@@ -249,15 +250,12 @@ void VesuvioCalculateMS::cacheInputs() {
   }
   // If is a detector group then take shape of first pixel
   // All detectors in same bansk should be same shape anyway
-  // If the detector is a DetectorGroup, getID gives ID of first detector.
-  const auto &detectorInfo = m_inputWS->detectorInfo();
-  const size_t detIndex = detectorInfo.indexOf(spectrumInfo.detector(index).getID());
-  const auto pixelShape = detectorInfo.detector(detIndex).shape();
-
-  if (!pixelShape || !pixelShape->hasValidShape()) {
+  const size_t detIndex = spectrumInfo.spectrumDefinition(index)[0].first;
+  const auto &componentInfo = m_inputWS->componentInfo();
+  if (!componentInfo.hasValidShape(detIndex)) {
     throw std::invalid_argument("Detector pixel has no defined shape!");
   }
-  Geometry::BoundingBox detBounds = pixelShape->getBoundingBox();
+  Geometry::BoundingBox detBounds = componentInfo.shape(detIndex).getBoundingBox();
   V3D detBoxWidth = detBounds.width();
   m_detWidth = detBoxWidth[m_acrossIdx];
   m_detHeight = detBoxWidth[m_upIdx];

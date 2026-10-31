@@ -9,6 +9,10 @@ import unittest
 import numpy as np
 from unittest.mock import patch, MagicMock, call
 
+from mantid.api import AnalysisDataService as ADS
+from mantid.simpleapi import CreateWorkspace
+from Engineering.texture.texture_helper import write_euler_orientation_info_to_log
+
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.correction.model import (
     CorrectionModel,
 )
@@ -68,7 +72,7 @@ class TestCorrectionModel(unittest.TestCase):
     @patch(model_path + ".Load")
     @patch(model_path + ".ADS")
     def test_load_ref_no_path_does_nothing(self, mock_ads, mock_load, mock_logger):
-        self.model.load_ref("")
+        self.assertFalse(self.model.load_ref(""))
         mock_ads.doesExist.assert_not_called()
         mock_load.assert_not_called()
         mock_logger.notice.assert_not_called()
@@ -82,7 +86,7 @@ class TestCorrectionModel(unittest.TestCase):
         path = "some/dir/ref_ws.nxs"
         mock_ads.doesExist.return_value = True
 
-        self.model.load_ref(path)
+        self.assertTrue(self.model.load_ref(path))
 
         mock_logger.notice.assert_called_once_with('A workspace "ref_ws" already exists, loading some/dir/ref_ws.nxs has been skipped')
         mock_load.assert_not_called()
@@ -95,7 +99,7 @@ class TestCorrectionModel(unittest.TestCase):
         path = "/data/new_ref.nxs"
         mock_ads.doesExist.return_value = False
 
-        self.model.load_ref(path)
+        self.assertTrue(self.model.load_ref(path))
 
         mock_load.assert_called_once_with(Filename="/data/new_ref.nxs", OutputWorkspace="new_ref")
         self.model.set_reference_ws.assert_called_once_with("new_ref")
@@ -109,7 +113,7 @@ class TestCorrectionModel(unittest.TestCase):
         mock_ads.doesExist.return_value = False
         mock_load.side_effect = Exception("boom")
 
-        self.model.load_ref(path)
+        self.assertFalse(self.model.load_ref(path))
 
         mock_load.assert_called_once_with(Filename="/data/bad_ref.nxs", OutputWorkspace="bad_ref")
         mock_logger.warning.assert_called_once()
@@ -200,6 +204,24 @@ class TestReferenceTextureDirections(unittest.TestCase):
         mock_read.assert_called_once_with("ref_ws")
         np.testing.assert_allclose(matrix, np.eye(3))
         self.assertEqual(names, ("RD", "ND", "TD"))
+
+
+class TestReferenceEulerSettings(unittest.TestCase):
+    def setUp(self):
+        self.model = CorrectionModel()
+
+    def test_returns_none_when_no_reference_is_set(self):
+        self.model.set_reference_ws(None)
+
+        self.assertIsNone(self.model.get_reference_euler_settings())
+
+    def test_returns_the_settings_saved_on_the_reference(self):
+        ws = CreateWorkspace(DataX=[0, 1], DataY=[1], OutputWorkspace="__ref_euler_ws")
+        self.addCleanup(ADS.remove, "__ref_euler_ws")
+        write_euler_orientation_info_to_log(ws, "ZXZ", "1,-1,1")
+        self.model.set_reference_ws("__ref_euler_ws")
+
+        self.assertEqual(self.model.get_reference_euler_settings(), ("ZXZ", "1,-1,1"))
 
 
 if __name__ == "__main__":

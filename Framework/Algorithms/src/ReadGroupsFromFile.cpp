@@ -80,9 +80,6 @@ void ReadGroupsFromFile::init() {
 void ReadGroupsFromFile::exec() {
   MatrixWorkspace_const_sptr ws = getProperty("InstrumentWorkspace");
 
-  // Get the instrument.
-  Instrument_const_sptr inst = ws->getInstrument();
-
   // Create a copy (without the data) of the workspace - it will contain the
   Workspace2D_sptr localWorkspace =
       std::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create(ws, ws->getNumberHistograms(), 2, 1));
@@ -139,7 +136,8 @@ void ReadGroupsFromFile::exec() {
   if (!success) // Do some cleanup
   {
     localWorkspace.reset();
-    throw std::runtime_error("Fail to found a detector in " + groupfile + " existing in instrument " + inst->getName());
+    throw std::runtime_error("Fail to found a detector in " + groupfile + " existing in instrument " +
+                             ws->getInstrumentName());
   }
   setProperty("OutputWorkspace", localWorkspace);
 }

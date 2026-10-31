@@ -151,9 +151,9 @@ using the following python:
 .. testcode:: getInstrumentFilename
 
     # if no date is given it will default to returning the IDF filename that is currently valid.
-    from mantid.api import ExperimentInfo
-    currentIDF = ExperimentInfo.getInstrumentFilename("ARCS")
-    otherIDF = ExperimentInfo.getInstrumentFilename("ARCS", "2012-10-30T00:00:00")
+    from mantid.api import InstrumentFileFinder
+    currentIDF = InstrumentFileFinder.getInstrumentFilename("ARCS")
+    otherIDF = InstrumentFileFinder.getInstrumentFilename("ARCS", "2012-10-30T00:00:00")
 
 .. _InstrumentDefinitionFile_Directories:
 

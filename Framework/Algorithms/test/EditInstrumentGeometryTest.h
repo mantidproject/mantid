@@ -398,7 +398,7 @@ public:
 
     const auto &spectrumInfo = workspace->spectrumInfo();
     TS_ASSERT_EQUALS(spectrumInfo.hasUniqueDetector(wsindex), true);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(wsindex).getID(), detid);
+    TS_ASSERT_EQUALS(spectrumInfo.firstDetectorID(wsindex), detid);
   }
 
   /** Check spectrum number

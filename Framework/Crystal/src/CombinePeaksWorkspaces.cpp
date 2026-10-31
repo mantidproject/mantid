@@ -59,7 +59,7 @@ void CombinePeaksWorkspaces::exec() {
   const bool CombineMatchingPeaks = getProperty("CombineMatchingPeaks");
 
   // Warn if not the same instrument, sample
-  if (LHSWorkspace->getInstrument()->getName() != RHSWorkspace->getInstrument()->getName()) {
+  if (LHSWorkspace->getInstrumentName() != RHSWorkspace->getInstrumentName()) {
     g_log.warning("The two input workspaces do not appear to come from data "
                   "take on the same instrument");
   }

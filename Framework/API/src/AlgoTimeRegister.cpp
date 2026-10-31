@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgoTimeRegister.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
 #include <fstream>
 #include <time.h>

@@ -11,7 +11,11 @@ from typing import Sequence, Tuple, Dict, List, Any
 import numpy as np
 
 from Engineering.texture.correction.correction_model import TextureCorrectionModel
-from Engineering.texture.texture_helper import has_texture_direction_info, read_texture_direction_info_from_log
+from Engineering.texture.texture_helper import (
+    has_texture_direction_info,
+    read_euler_orientation_info_from_log,
+    read_texture_direction_info_from_log,
+)
 from mantid.kernel import logger
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import Load
@@ -33,19 +37,22 @@ class CorrectionModel(TextureCorrectionModel):
                 logger.warning(f"Failed to load {path}: {e}")
         return wss
 
-    def load_ref(self, path: str | None) -> None:
+    def load_ref(self, path: str | None) -> bool:
+        """Select the reference workspace at path, returning whether one was selected."""
         if not path:
-            return
+            return False
         ws_name = os.path.splitext(os.path.basename(path))[0]
         if ADS.doesExist(ws_name):
             logger.notice(f'A workspace "{ws_name}" already exists, loading {path} has been skipped')
             self.set_reference_ws(ws_name)
-            return
+            return True
         try:
             Load(Filename=path, OutputWorkspace=ws_name)
-            self.set_reference_ws(ws_name)
         except Exception as e:
             logger.warning(f"Failed to load {path}: {e}")
+            return False
+        self.set_reference_ws(ws_name)
+        return True
 
     def get_reference_texture_directions(self) -> Tuple[np.ndarray, Tuple[str, str, str]] | None:
         """The sample directions saved on the current reference workspace, or None when it carries
@@ -58,6 +65,11 @@ class CorrectionModel(TextureCorrectionModel):
         if not ref_ws or not has_texture_direction_info(ref_ws):
             return None
         return read_texture_direction_info_from_log(ref_ws)
+
+    def get_reference_euler_settings(self) -> Tuple[str, str] | None:
+        """The Euler (scheme, sense) saved on the current reference workspace, or None when it carries none."""
+        ref_ws = self.get_reference_ws()
+        return read_euler_orientation_info_from_log(ref_ws) if ref_ws else None
 
     @staticmethod
     def get_out_ws_names(wss: Sequence[str]) -> List[str]:

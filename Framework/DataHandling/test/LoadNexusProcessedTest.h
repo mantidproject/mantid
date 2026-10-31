@@ -105,7 +105,7 @@ public:
     doHistoryTest(matrix_ws);
 
     std::shared_ptr<const Mantid::Geometry::Instrument> inst = matrix_ws->getInstrument();
-    TS_ASSERT_EQUALS(inst->getName(), "GEM");
+    TS_ASSERT_EQUALS(matrix_ws->getInstrumentName(), "GEM");
     TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
   }
 
@@ -1471,7 +1471,7 @@ private:
     doHistoryTest(matrix_ws);
 
     std::shared_ptr<const Mantid::Geometry::Instrument> inst = matrix_ws->getInstrument();
-    TS_ASSERT_EQUALS(inst->getName(), "GEM");
+    TS_ASSERT_EQUALS(matrix_ws->getInstrumentName(), "GEM");
     TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
   }
 
@@ -1510,7 +1510,7 @@ private:
     doHistoryTest(matrix_ws);
 
     std::shared_ptr<const Mantid::Geometry::Instrument> inst = matrix_ws->getInstrument();
-    TS_ASSERT_EQUALS(inst->getName(), "GEM");
+    TS_ASSERT_EQUALS(matrix_ws->getInstrumentName(), "GEM");
     TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
   }
 

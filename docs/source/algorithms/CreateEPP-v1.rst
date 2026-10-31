@@ -59,13 +59,10 @@ Usage
         xs = (xs[:-1] + xs[1:]) * 0.5  # Convert bin edges to bin centres.
         ys = 10.0 * numpy.exp(-numpy.square((xs - centre) / 100))
         return ys
-    instrument = ws.getInstrument()
-    source = instrument.getSource()
-    sample = instrument.getSample()
-    L1 = sample.getDistance(source)
+    spectrum_info = ws.spectrumInfo()
+    L1 = spectrum_info.l1()
     for i in range(ws.getNumberHistograms()):
-        detector = ws.getDetector(i)
-        L2 = sample.getDistance(detector)
+        L2 = spectrum_info.l2(i)
         tof = UnitConversion.run('Energy', 'TOF', Ei, L1, L2, 0.0, DeltaEModeType.Direct, Ei)
         ys =ws.mutableY(i)
         ys += peak(ws.x(i), tof)

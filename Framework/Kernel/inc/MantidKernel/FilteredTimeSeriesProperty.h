@@ -7,8 +7,9 @@
 #pragma once
 
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
+#include <cstddef>
 
 namespace Mantid {
 using namespace Types::Core;
@@ -20,7 +21,7 @@ class SplittingInterval;
  * Templated class that defines a filtered time series but
  * still gives access to the original data.
  */
-template <typename HeldType> class DLLExport FilteredTimeSeriesProperty : public TimeSeriesProperty<HeldType> {
+template <typename HeldType> class MANTID_KERNEL_DLL FilteredTimeSeriesProperty : public TimeSeriesProperty<HeldType> {
 
 public:
   explicit FilteredTimeSeriesProperty(const std::string &name);

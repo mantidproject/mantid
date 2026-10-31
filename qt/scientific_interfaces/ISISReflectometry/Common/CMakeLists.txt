@@ -13,7 +13,6 @@ set(COMMON_SRC_FILES
 set(COMMON_INC_FILES
     Clipboard.h
     Detector.h
-    DllConfig.h
     First.h
     GetInstrumentParameter.h
     GroupHelper.h

@@ -454,6 +454,38 @@ public:
                                     "MultiDomainFunctionTest_Function,A=0,B=0))");
   }
 
+  void test_clone_preserves_domains_of_empty_composite_members() {
+    MultiDomainFunction mfun;
+    for (size_t i = 0; i < 2; ++i) {
+      mfun.addFunction(std::make_shared<CompositeFunction>());
+      mfun.setDomainIndex(i, i);
+    }
+
+    TS_ASSERT_EQUALS(mfun.asString(), "composite=MultiDomainFunction,NumDeriv=true;"
+                                      "(name=CompositeFunction,$domains=i);(name=CompositeFunction,$domains=i)");
+
+    const auto copy = std::dynamic_pointer_cast<MultiDomainFunction>(mfun.clone());
+    TS_ASSERT(copy);
+    TS_ASSERT_EQUALS(copy->getNumberDomains(), 2);
+    TS_ASSERT_EQUALS(copy->asString(), mfun.asString());
+    TS_ASSERT_EQUALS(copy->createEquivalentFunctions().size(), 2);
+  }
+
+  void test_clone_keeps_empty_composite_member_applied_to_all_domains() {
+    MultiDomainFunction mfun;
+    mfun.addFunction(std::make_shared<CompositeFunction>());
+    mfun.addFunction(std::make_shared<CompositeFunction>());
+    mfun.setDomainIndex(1, 1);
+
+    TS_ASSERT_EQUALS(mfun.asString(), "composite=MultiDomainFunction,NumDeriv=true;"
+                                      "(name=CompositeFunction,$domains=All);(name=CompositeFunction,$domains=i)");
+
+    const auto copy = std::dynamic_pointer_cast<MultiDomainFunction>(mfun.clone());
+    TS_ASSERT(copy);
+    TS_ASSERT_EQUALS(copy->getLocalAttribute(0, "domains").asString(), "All");
+    TS_ASSERT_EQUALS(copy->getLocalAttribute(1, "domains").asString(), "i");
+  }
+
 private:
   MultiDomainFunction multi;
   JointDomain domain;

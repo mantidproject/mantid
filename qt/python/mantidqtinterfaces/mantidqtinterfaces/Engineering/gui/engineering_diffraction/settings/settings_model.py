@@ -15,6 +15,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.setting
 from typing import Any, Type, Sequence, TypeAlias
 
 SettingDict: TypeAlias = dict[str, Any]
+MAX_EULER_AXES = 6  # SetGoniometer takes Axis0 to Axis5
 
 
 class SettingsModel(object):
@@ -60,27 +61,22 @@ class SettingsModel(object):
             logger.error("Invalid Reference Axes, values must all be able to be converted to floats. " + str(e))
 
     def validate_euler_settings(self, settings: SettingDict, use_euler_angles: bool) -> None:
-        if use_euler_angles:
-            error_msg = ""
-            euler_scheme = settings["euler_angles_scheme"]
-            euler_sense = settings["euler_angles_sense"]
-            # check sense is comma separated
-            euler_sense_valid, sense_vals, sense_msg = self._validate_euler_sense_string(euler_sense)
-            if not euler_sense_valid:
-                error_msg += sense_msg
+        if use_euler_angles and (error_msg := self.euler_settings_error(settings["euler_angles_scheme"], settings["euler_angles_sense"])):
+            logger.error(error_msg)
 
-            # validate euler_scheme
-            euler_scheme_valid = np.all([v in ("x", "y", "z") for v in euler_scheme.lower()])
-            if not euler_scheme_valid:
-                error_msg += "Euler Scheme should be defined in terms of X, Y and Z (eg. XYZ or YZY). "
-
-            # check euler_scheme has correct number of corresponding senses
-            sense_scheme_valid = len(euler_scheme) == len(sense_vals)
-            if not sense_scheme_valid:
-                error_msg += "Should be an equal number of Rotation Axes defined as euler senses. "
-            valid = euler_sense_valid and euler_scheme_valid and sense_scheme_valid
-            if not valid:
-                logger.error(error_msg)
+    @staticmethod
+    def euler_settings_error(euler_scheme: str, euler_sense: str) -> str:
+        """Why an Euler scheme/sense pair is invalid, or "" if it is valid."""
+        euler_sense_valid, sense_vals, sense_msg = SettingsModel._validate_euler_sense_string(euler_sense)
+        # sense_msg is empty when the senses parse but are not +/-1 (e.g. "1,2,1")
+        error_msg = "" if euler_sense_valid else (sense_msg or "Euler Senses should be comma separated +/-1s. ")
+        if not all(v in ("x", "y", "z") for v in euler_scheme.lower()):
+            error_msg += "Euler Scheme should be defined in terms of X, Y and Z (eg. XYZ or YZY). "
+        if len(euler_scheme) > MAX_EULER_AXES:
+            error_msg += f"Euler Scheme should have at most {MAX_EULER_AXES} Rotation Axes (the limit of SetGoniometer). "
+        if len(euler_scheme) != len(sense_vals):
+            error_msg += "Should be an equal number of Rotation Axes defined as euler senses. "
+        return error_msg
 
     @staticmethod
     def _validate_euler_sense_string(euler_sense: str) -> tuple[bool, Sequence[int], str]:

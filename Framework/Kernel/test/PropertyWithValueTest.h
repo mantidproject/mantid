@@ -10,6 +10,7 @@
 #include "MantidKernel/DataItem.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/NullValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include <cxxtest/TestSuite.h>
@@ -69,6 +70,20 @@ public:
     TS_ASSERT(!bProp->documentation().compare(""));
     TS_ASSERT(typeid(OptionalBool) == *bProp->type_info());
     TS_ASSERT(bProp->isDefault());
+  }
+
+  void testEmptyValidatorIsReplacedByNullValidator() {
+    PropertyWithValue<int> defaulted("defaulted", 1);
+    TS_ASSERT(std::dynamic_pointer_cast<NullValidator>(defaulted.getValidator()));
+
+    PropertyWithValue<int> explicitNull("explicitNull", 1, nullptr, Direction::Output);
+    TS_ASSERT(std::dynamic_pointer_cast<NullValidator>(explicitNull.getValidator()));
+    TS_ASSERT_EQUALS(explicitNull.direction(), Direction::Output);
+    TS_ASSERT_EQUALS(explicitNull.isValid(), "");
+
+    PropertyWithValue<std::vector<int>> fromString("fromString", std::vector<int>(), "1,2", nullptr, Direction::Input);
+    TS_ASSERT(std::dynamic_pointer_cast<NullValidator>(fromString.getValidator()));
+    TS_ASSERT_EQUALS(fromString.isValid(), "");
   }
 
   void testValue() {

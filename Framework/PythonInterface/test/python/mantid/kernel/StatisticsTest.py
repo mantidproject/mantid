@@ -55,7 +55,8 @@ class StatisticsTest(unittest.TestCase):
 
         # Test the sorted argument still works. Remove this when the function is removed
         # sorted=True only ever affected the order
-        zscore = Stats.getZscore(arr, sorted=True)
+        with self.assertWarns(DeprecationWarning):
+            zscore = Stats.getZscore(arr, sorted=True)
         self.assertAlmostEqual(1.63977, zscore[4], places=4)
         self.assertAlmostEqual(0.32235, zscore[6], places=4)
 

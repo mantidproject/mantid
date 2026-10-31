@@ -281,14 +281,6 @@ public:
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 397);
   }
 
-  void test_EventPreNeXus_WithNoExecute() {
-    Load loader;
-    loader.initialize();
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "CNCS_7860_neutron_event.dat"));
-    TS_ASSERT_EQUALS(loader.existsProperty("EventFilename"), false);
-    TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadEventPreNexus");
-  }
-
   void test_SNSEventNeXus_WithNoExecute() {
     Load loader;
     loader.initialize();

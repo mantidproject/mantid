@@ -76,7 +76,7 @@ void SaveIsawDetCal::exec() {
   // We cannot assume the peaks have bank type detector modules, so we have a
   // string to check this
   std::string bankPart = "bank";
-  if (inst->getName() == "WISH")
+  if (ws->getInstrumentName() == "WISH")
     bankPart = "WISHpanel";
 
   std::set<int> uniqueBanks;
@@ -156,7 +156,7 @@ void SaveIsawDetCal::exec() {
     std::string bankName = mess.str();
     // Retrieve it
     std::shared_ptr<const IComponent> det = inst->getComponentByName(bankName);
-    if (inst->getName() == "CORELLI") // for Corelli with sixteenpack under bank
+    if (ws->getInstrumentName() == "CORELLI") // for Corelli with sixteenpack under bank
     {
       const size_t bankIndex = componentInfo.indexOfAny(bankName);
       const auto children = componentInfo.children(bankIndex);

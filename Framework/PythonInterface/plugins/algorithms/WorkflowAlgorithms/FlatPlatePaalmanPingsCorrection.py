@@ -539,13 +539,18 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
     def _get_angles(self):
         num_hist = mtd[self._sample_ws_name].getNumberHistograms()
-        source_pos = mtd[self._sample_ws_name].getInstrument().getSource().getPos()
-        sample_pos = mtd[self._sample_ws_name].getInstrument().getSample().getPos()
+        component_info = mtd[self._sample_ws_name].componentInfo()
+        spectrum_info = mtd[self._sample_ws_name].spectrumInfo()
+        source_pos = component_info.sourcePosition()
+        sample_pos = component_info.samplePosition()
         beam_pos = sample_pos - source_pos
         self._angles = list()
         for index in range(0, num_hist):
-            detector = mtd[self._sample_ws_name].getDetector(index)
-            two_theta = detector.getTwoTheta(sample_pos, beam_pos) / self.PICONV  # calc angle
+            if spectrum_info.isMonitor(index):  # SpectrumInfo.twoTheta is not defined for monitors
+                two_theta = (spectrum_info.position(index) - sample_pos).angle(beam_pos)
+            else:
+                two_theta = spectrum_info.twoTheta(index)
+            two_theta /= self.PICONV  # calc angle
             self._angles.append(two_theta)
 
     # ------------------------------------------------------------------------------

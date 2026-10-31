@@ -582,8 +582,7 @@ SetSample::setSampleEnvironmentFromFile(API::ExperimentInfo &exptInfo, const Ker
   // The specifications need to be qualified by the facility and instrument.
   // Check instrument for name and then lookup facility if facility
   // is unknown then set to default facility & instrument.
-  auto instrument = exptInfo.getInstrument();
-  const auto &instOnWS = instrument->getName();
+  const auto instOnWS = exptInfo.getInstrumentName();
   const auto &config = ConfigService::Instance();
   std::string facilityName, instrumentName;
   try {

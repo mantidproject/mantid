@@ -27,14 +27,25 @@ from workbench.identity import APPNAME, ORG_DOMAIN, ORGANIZATION  # noqa: E402
 import workbench.app.workbench_process as wp  # noqa: E402
 
 
-def start_error_reporter(workbench_pid):
+def start_error_reporter(workbench_pid, exit_code):
     """
-    Used to start the error reporter if the program has segfaulted.
+    Used to start the error reporter if Workbench exits unexpectedly.
     """
     from mantidqt.dialogs.errorreports import main as errorreports_main
 
     errorreports_main.main(
-        ["--application", APPNAME, "--workbench_pid", workbench_pid, "--orgname", ORGANIZATION, "--orgdomain", ORG_DOMAIN]
+        [
+            "--application",
+            APPNAME,
+            "--workbench_pid",
+            workbench_pid,
+            "--exitcode",
+            str(exit_code),
+            "--orgname",
+            ORGANIZATION,
+            "--orgdomain",
+            ORG_DOMAIN,
+        ]
     )
 
 
@@ -98,21 +109,22 @@ def start(options: argparse.ArgumentParser):
         # handle exit information
         exit_code = workbench_process.returncode if workbench_process.returncode is not None else 1
         if exit_code != 0:
+            import signal
+
             # start error reporter if requested
             if not options.no_error_reporter:
-                start_error_reporter(workbench_pid)
+                start_error_reporter(workbench_pid, exit_code)
 
             # a signal was emited so raise the signal from the application
-            if exit_code < 0:
-                import signal
-
+            platform_is_windows = sys.platform == "win32"
+            if exit_code < 0 or (platform_is_windows and exit_code in signal.Signals):
                 try:
                     sig_code = signal.Signals(abs(exit_code))
                     name = sig_code.name
                     print("Received signal:", name)
                 except ValueError:
                     pass
-                signal.raise_signal(sig_code)  # this will exit the mainloop
+                not platform_is_windows and signal.raise_signal(sig_code)  # this will exit the mainloop
 
             # application returned non-zero that wasn't interpreted as a signal, return it as an exit code
             sys.exit(exit_code)

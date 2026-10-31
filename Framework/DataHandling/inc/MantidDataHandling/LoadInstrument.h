@@ -18,9 +18,6 @@ class Element;
 /// @endcond
 
 namespace Mantid {
-namespace Kernel {
-class V3D;
-}
 namespace API {
 class MatrixWorkspace;
 }

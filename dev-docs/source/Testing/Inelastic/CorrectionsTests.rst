@@ -18,7 +18,7 @@ Container Subtraction tab
 #. With the Sample combo box set to ``File`` click browse and select the file ``irs26176_graphite002_red`` from the Sample Data folder
 #. With the Container combo box set to ``File`` click browse and select the file ``irs26174_graphite002_red`` from the Sample Data folder
 #. Click ``Run``
-#. This should plot a blue subtracted line on the embedded plot. A workspace ending in ``_red`` should be produced
+#. This should plot a blue subtracted line on the embedded plot. A workspace containing the label ``Subtract`` and ending in ``_red`` should be produced
 #. Change the ``Spectrum`` value and the plot should be updated with the corresponding workspace index
 #. Check that when clicking ``Plot Current Preview``, it will open a pop-up window with the current preview plot
 #. In the ``Output Options``, select ``Open Slice Viewer`` using the down arrow, it should open the Slice Viewer with the generated dataset
@@ -26,15 +26,15 @@ Container Subtraction tab
 #. In the ``Output Options``, select indices ``50-51``. A red asterisk should appear, preventing you from using ``Plot Spectra``
 #. In the ``Output Options``, select indices ``49-50``. It should be possible to click ``Plot Spectra`` to plot a two spectra graph
 
-Calculate Monte Carlo Absorption Tab
-------------------------------------
+Absorption Corrections Tab
+--------------------------
 
 **Time required 3 - 5 minutes**
 
 --------------
 
 #. Go to ``Interfaces`` > ``Inelastic`` > ``Corrections``
-#. Go to the ``Calculate Monte Carlo Absorption`` tab
+#. Go to the ``Absorption Corrections`` tab
 #. With the Input Workspace set to ``File`` click browse and select the file ``irs26176_graphite002_red`` from the Sample Data folder
 #. Choose the Sample Shape to be ``Flat Plate``
 #. Sample Height & Width should be ``1.0``
@@ -59,7 +59,7 @@ Apply Absorption Corrections Tab
 #. With the Corrections combo box set to ``Workspace``, and select the workspace ending in ``_Corrections`` from the previous test.
 #. Tick ``Use Container`` and select the file ``irs26174_graphite002_red`` from the Sample Data folder.
 #. Click ``Run`` and wait.
-#. This should plot a blue corrected line on the embedded plot. A workspace ending in ``_red`` should be produced
+#. This should plot a blue corrected line on the embedded plot. A workspace containing the label ``Corrected`` and ending in ``_red`` should be produced
 #. In the ``Output Options``, select ``Open Slice Viewer`` using the down arrow, it should open the Slice Viewer with the generated dataset
 #. In the ``Output Options``, select ``Plot 3D Surface`` using the down arrow, it should open a surface plot for the generated dataset
 #. In the ``Output Options``, select indices ``50-51``. A red asterisk should appear, preventing you from using ``Plot Spectra``

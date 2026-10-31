@@ -78,21 +78,24 @@ Usage
    import math
    import os
    # priting procedure
-   def print_10_detectors(instr_type,instr):
-       ''' print first 10 detectors from given instrument '''
+   def print_10_detectors(instr_type,ws):
+       ''' print first 10 detectors from the instrument of given workspace '''
         # get first 10 detectors using detector ID
 
-       print("{0} {1} instrument".format(instr_type, instr.getName()))
+       print("{0} {1} instrument".format(instr_type, ws.getInstrumentName()))
+       detector_info = ws.detectorInfo()
        for i in range(0,10):
          if i<3:
              detBase = 1
          else:
              detBase = 1101-3
          detID = detBase+i
-         det1 = instr.getDetector(detID);
-         pos = det1.getPos();
+         index = detector_info.indexOf(detID)
+         pos = detector_info.position(index)
+         # angle of the detector position about the z axis, measured from the x axis
+         phi = math.atan2(pos.Y(), pos.X())
          print('det with ID: {0:5} is monitor? {1:5}, polar angle: {2:10.3f}, position: | {3:<10.3f} | {4:<10.3f} | {5:<10.3f}|'.format(\
-                detID,det1.isMonitor(),(det1.getPhi()*(180/math.pi)),pos.X(),pos.Y(),pos.Z()))
+                detID,detector_info.isMonitor(index),(phi*(180/math.pi)),pos.X(),pos.Y(),pos.Z()))
        print('*********************************************************************************')
 
    #--------------------------------------------------------------------------------------
@@ -101,9 +104,8 @@ Usage
    #--------------------------------------------------------------------------------------
    # load MARI
    det=LoadInstrument(ws,InstrumentName='MARI', RewriteSpectraMap=True)
-   inst1=ws.getInstrument();
    #
-   print_10_detectors('unCalibrated',inst1);
+   print_10_detectors('unCalibrated',ws);
    #--------------------------------------------------------------------------------------
    # Prepare calibration file changing first 6 detectors & monitors
    file_name = os.path.join(config["defaultsave.directory"], "TestCalibration.dat")
@@ -118,10 +120,9 @@ Usage
    #--------------------------------------------------------------------------------------
    # CALIBRATE:
    UpdateInstrumentFromFile(ws,Filename=file_name,AsciiHeader='spectrum,theta,-,-,phi,R',MoveMonitors=True,SkipFirstNLines=2)
-   inst1=ws.getInstrument();
    #--------------------------------------------------------------------------------------
    # look at the result:
-   print_10_detectors('Calibrated',inst1);
+   print_10_detectors('Calibrated',ws);
 
 
 

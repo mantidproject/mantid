@@ -35,6 +35,17 @@ using namespace Mantid::DataHandling;
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
 
+namespace {
+size_t countMonitors(const DetectorInfo &detectorInfo) {
+  size_t count = 0;
+  for (size_t index = 0; index < detectorInfo.size(); ++index) {
+    if (detectorInfo.isMonitor(index))
+      ++count;
+  }
+  return count;
+}
+} // namespace
+
 class LoadEventNexusTest : public CxxTest::TestSuite {
 private:
   void do_test_filtering_start_and_end_filtered_loading(const bool metadataonly) {
@@ -538,63 +549,6 @@ public:
     TS_ASSERT_EQUALS(WS->getNumberEvents(), WS2->getNumberEvents());
     // Memory used should be lower (or the same at worst)
     TS_ASSERT_LESS_THAN_EQUALS(WS2->getMemorySize(), WS->getMemorySize());
-
-    // Longer, more thorough test
-    if (false) {
-      auto load = AlgorithmManager::Instance().create("LoadEventPreNexus", 1);
-      load->setPropertyValue("OutputWorkspace", "cncs_pre");
-      load->setPropertyValue("EventFilename", "CNCS_7860_neutron_event.dat");
-      load->setPropertyValue("PulseidFilename", "CNCS_7860_pulseid.dat");
-      load->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
-      load->execute();
-      TS_ASSERT(load->isExecuted());
-      EventWorkspace_sptr WS2 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("cncs_pre");
-      // Valid WS and it is an EventWorkspace
-      TS_ASSERT(WS2);
-
-      // Let's compare the proton_charge logs
-      TimeSeriesProperty<double> *log =
-          dynamic_cast<TimeSeriesProperty<double> *>(WS->mutableRun().getProperty("proton_charge"));
-      std::map<DateAndTime, double> logMap = log->valueAsCorrectMap();
-      TimeSeriesProperty<double> *log2 =
-          dynamic_cast<TimeSeriesProperty<double> *>(WS2->mutableRun().getProperty("proton_charge"));
-      std::map<DateAndTime, double> logMap2 = log2->valueAsCorrectMap();
-      std::map<DateAndTime, double>::iterator it, it2;
-
-      it = logMap.begin();
-      it2 = logMap2.begin();
-      for (; it != logMap.end();) {
-        // Same times within a millisecond
-        // TS_ASSERT_DELTA( it->first, it2->first,
-        // DateAndTime::durationFromSeconds(1e-3));
-        // Same times?
-        TS_ASSERT_LESS_THAN(fabs(DateAndTime::secondsFromDuration(it->first - it2->first)),
-                            1); // TODO: Fix the nexus file times here
-        // Same proton charge?
-        TS_ASSERT_DELTA(it->second, it2->second, 1e-5);
-        it++;
-        it2++;
-      }
-
-      constexpr std::size_t pixelID = 2000;
-
-      const std::vector<TofEvent> events1 = WS->getSpectrum(pixelID).getEvents();
-      const std::vector<TofEvent> events2 = WS2->getSpectrum(pixelID).getEvents();
-
-      // std::cout << events1.size() << '\n';
-      TS_ASSERT_EQUALS(events1.size(), events2.size());
-      if (events1.size() == events2.size()) {
-        for (size_t i = 0; i < events1.size(); i++) {
-          TS_ASSERT_DELTA(events1[i].tof(), events2[i].tof(), 0.05);
-          TS_ASSERT_DELTA(events1[i].pulseTime(), events2[i].pulseTime(),
-                          1e9); // TODO:: Fix nexus start times
-          // std::cout << (events1[i].pulseTime()-start)/1e9 << " - " <<
-          // (events2[i].pulseTime()-start)/1e9 << " sec\n";
-          // std::cout << "Pulse time diff " << (events1[i].pulseTime() -
-          // events2[i].pulseTime())/1e9 << " sec\n";
-        }
-      }
-    }
   }
 
   void test_TOF_filtered_loading() {
@@ -877,7 +831,7 @@ public:
     // Check geometry for a monitor
     const auto &specInfo = WS->spectrumInfo();
     TS_ASSERT(specInfo.isMonitor(2));
-    TS_ASSERT_EQUALS(specInfo.detector(2).getID(), -3);
+    TS_ASSERT_EQUALS(specInfo.firstDetectorID(2), -3);
     TS_ASSERT_DELTA(specInfo.samplePosition().distance(specInfo.position(2)), 1.426, 1e-6);
 
     // Check monitor workspace pointer held in main workspace
@@ -1352,10 +1306,10 @@ public:
 
     auto ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws);
     auto inst = ws->getInstrument();
-    TS_ASSERT_EQUALS(inst->getName(), "HYSPECA");
+    TS_ASSERT_EQUALS(ws->getInstrumentName(), "HYSPECA");
     TS_ASSERT_EQUALS(inst->getValidFromDate(), std::string("2011-Jul-20 17:02:48.437294000"));
     TS_ASSERT_EQUALS(inst->getNumberDetectors(), 20483);
-    TS_ASSERT_EQUALS(inst->baseInstrument()->getMonitorIDs().size(), 3);
+    TS_ASSERT_EQUALS(countMonitors(ws->detectorInfo()), 3);
     auto params = inst->getParameterMap();
     // Previously this was 49. Position/rotations are now stored in
     // ComponentInfo and DetectorInfo so the following four parameters are no
@@ -1385,9 +1339,9 @@ public:
     TS_ASSERT(!inst->getFilename().empty()); // This is how we know we didn't
                                              // get it from inside the nexus
                                              // file
-    TS_ASSERT_EQUALS(inst->getName(), "CNCS");
+    TS_ASSERT_EQUALS(ws->getInstrumentName(), "CNCS");
     TS_ASSERT_EQUALS(inst->getNumberDetectors(), 51203);
-    TS_ASSERT_EQUALS(inst->baseInstrument()->getMonitorIDs().size(), 3);
+    TS_ASSERT_EQUALS(countMonitors(ws->detectorInfo()), 3);
 
     // check that CNCS_Parameters.xml has been loaded
     auto params = inst->getParameterMap();
@@ -1767,8 +1721,8 @@ public:
     TS_ASSERT(wksp);
     auto instr = wksp->getInstrument();
     TS_ASSERT(instr);
-    TS_ASSERT_EQUALS(instr->getName(), "MANDI_clone_bank26");
-    size_t monitors = instr->baseInstrument()->getMonitorIDs().size();
+    TS_ASSERT_EQUALS(wksp->getInstrumentName(), "MANDI_clone_bank26");
+    size_t monitors = countMonitors(wksp->detectorInfo());
     TS_ASSERT_EQUALS(instr->getNumberDetectors(/*skip monitors*/ true), bankSize);
     TS_ASSERT_EQUALS(instr->getNumberDetectors(/*skip monitors*/ false), bankSize + monitors);
 
@@ -1783,7 +1737,7 @@ public:
     time2 = clock() - time2;
     EventWorkspace_sptr wksp_full = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsname_full);
     auto instr_full = wksp_full->getInstrument();
-    TS_ASSERT_EQUALS(instr_full->getName(), "MANDI");
+    TS_ASSERT_EQUALS(wksp_full->getInstrumentName(), "MANDI");
     TS_ASSERT_EQUALS(bankSize * numBanks + monitors, instr_full->getNumberDetectors());
 
     // ensure that loading only one bank does not take substantially longer than full instrument

@@ -220,8 +220,14 @@ so migrating a call site is close to a rename once the index is in hand.
 * ``getIntParameter(componentIndex, name, recursive)``
 * ``getBoolParameter(componentIndex, name, recursive)``
 * ``getStringParameter(componentIndex, name, recursive)``
+* ``getPositionParameter(componentIndex, name, recursive)``
+* ``getRotationParameter(componentIndex, name, recursive)``
+* ``getParameterAsString(componentIndex, name, recursive)`` - the value of any type as a string, or an empty string if unset
+* ``getParameterVisible(componentIndex, name, recursive)`` - ``false`` if unset
 * ``getParameterType(componentIndex, name, recursive)`` - the stored type, or an empty string if unset
 * ``getFittingParameter(componentIndex, name, xvalue)``
+* ``getParamDescription(componentIndex, name, recursive)`` and ``getParamShortDescription(componentIndex, name, recursive)``
+* ``getDescription(componentIndex)`` and ``getShortDescription(componentIndex)`` - the component's own description, not inherited
 * ``parameters(componentIndex)`` - every parameter on one component, non-recursive, ordered by name (C++ only)
 
 **Before refactoring**
@@ -337,6 +343,8 @@ Almost every legacy accessor already has a modern Python home:
      - ``detectorInfo().indexOf(id)``
    * - ``Instrument.getSample()`` / ``getSource()``
      - ``componentInfo().sample()`` / ``source()`` (+ ``samplePosition``/``sourcePosition``)
+   * - ``Instrument.getReferenceFrame()``
+     - ``componentInfo().referenceFrame()``
    * - tree nav ``nelements`` / ``[]`` / ``len()``
      - ``componentInfo().children`` / ``parent`` / ``componentsInSubtree`` / ``detectorsInSubtree`` / iteration
    * - ``IObjComponent.shape()``
@@ -345,8 +353,14 @@ Almost every legacy accessor already has a modern Python home:
      - ``componentInfo().position(index)`` / ``rotation(index)`` / ``relativePosition``/``relativeRotation``
    * - ``IDetector.getID()``
      - ``detectorInfo().detectorIDs()``
-   * - ``IDetector.getTwoTheta()`` / ``getPhi()``
-     - ``detectorInfo().twoTheta(index)`` / ``azimuthal(index)``
+   * - ``Instrument.getBaseInstrument()`` (geometry before any moves or calibration)
+     - ``baseComponentInfo()`` on the workspace; it has the same component indices as ``componentInfo()`` (already deprecated)
+   * - ``IDetector.getTwoTheta(observer, axis)`` / ``getSignedTwoTheta(observer, axis, up)``
+     - ``detectorInfo().twoTheta(index, observer, axis)`` / ``signedTwoTheta(index, observer, axis, up)``; omit the
+       observer and axis for the scattering angle from the sample w.r.t. the beam (raises for monitors)
+   * - ``IDetector.getPhi()`` / ``getPhiOffset(offset)``
+     - ``detectorInfo().phi(index)`` / ``phiOffset(index, offset)``: the lab-frame ``atan2(y, x)``, not
+       ``azimuthal(index)``, which is measured about the beam from the sample
    * - ``Detector.isMasked()`` / ``isMonitor()``
      - ``detectorInfo().isMasked(index)`` / ``isMonitor(index)`` (already deprecated)
 

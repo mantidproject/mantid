@@ -12,7 +12,7 @@
 #include <sstream>
 #include <vector>
 
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger_fwd.h"
 
 #include "MantidKernel/RegexStrings.h"
 #include <boost/regex.hpp>

@@ -7,12 +7,14 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidBeamline/ComponentType.h"
 #include "MantidBeamline/PixelGridComponent.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SolidAngleParams.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
+#include "MantidPythonInterface/core/Policies/RemoveConst.h"
 #include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
 #include "MantidPythonInterface/geometry/ComponentInfoPythonIterator.h"
 
@@ -61,6 +63,34 @@ template <auto Field> auto pixelGridField(ComponentInfo const &self, size_t cons
 std::string pixelGridIdFillOrder(ComponentInfo const &self, size_t const componentIndex) {
   auto const order = self.pixelGridComponent(componentIndex).idFillOrder;
   return std::string(order.begin(), order.end());
+}
+
+/// Get the x-size of a Rectangular/Grid bank, possibly scaled.
+/// Raises RuntimeError if the component is not a Rectangular or Grid bank.
+double pixelGridXSize(ComponentInfo const &self, size_t const componentIndex) {
+  if (!self.isGridDetector(componentIndex)) {
+    throw std::runtime_error("ComponentInfo::pixelgridXSize: component is not a Rectangular or Grid bank");
+  }
+  double scalex = 1.0;
+  if (self.hasParameter(componentIndex, "scalex")) {
+    scalex = self.getNumberParameter(componentIndex, "scalex", false)[0];
+  }
+  PixelGridComponent const grid = self.pixelGridComponent(componentIndex);
+  return grid.nX * grid.xStep * scalex;
+}
+
+/// Get the y-size of a Rectangular/Grid bank, possibly scaled.
+/// Raises RuntimeError if the component is not a Rectangular or Grid bank.
+double pixelGridYSize(ComponentInfo const &self, size_t const componentIndex) {
+  if (!self.isGridDetector(componentIndex)) {
+    throw std::runtime_error("ComponentInfo::pixelgridYSize: component is not a Rectangular or Grid bank");
+  }
+  double scaley = 1.0;
+  if (self.hasParameter(componentIndex, "scaley")) {
+    scaley = self.getNumberParameter(componentIndex, "scaley", false)[0];
+  }
+  PixelGridComponent const grid = self.pixelGridComponent(componentIndex);
+  return grid.nY * grid.yStep * scaley;
 }
 
 // The C++ add*() methods take the description as an optional pointer. Python passes a
@@ -122,6 +152,14 @@ void addFittingParameter(ComponentInfo &self, const std::string &name, const std
 
 void clearParameter(ComponentInfo &self, const std::string &name, const object &componentIndex) {
   self.clearParameter(indexOrRoot(self, componentIndex), name);
+}
+
+template <auto Method> std::string readDescription(const ComponentInfo &self, const object &componentIndex) {
+  return (self.*Method)(indexOrRoot(self, componentIndex));
+}
+
+void setDescription(ComponentInfo &self, const std::string &description, const object &componentIndex) {
+  self.setDescription(indexOrRoot(self, componentIndex), description);
 }
 
 dict shapeToComponentIndices(const ComponentInfo &componentInfo) {
@@ -339,6 +377,16 @@ void export_ComponentInfo() {
            "permutation of 'x', 'y' and 'z'. Raises RuntimeError if the component is not "
            "a Rectangular or Grid bank.")
 
+      .def("pixelGridXSize", &pixelGridXSize, (arg("self"), arg("index")),
+           "Returns the x-size (width) in the Rectangular/Grid bank identified "
+           "by 'index'. Raises RuntimeError if the component is not a Rectangular or Grid "
+           "bank.")
+
+      .def("pixelGridYSize", &pixelGridYSize, (arg("self"), arg("index")),
+           "Returns the y-size (height) in the Rectangular/Grid bank identified "
+           "by 'index'. Raises RuntimeError if the component is not a Rectangular or Grid "
+           "bank.")
+
       .def("detectorIndexAtXYZ", &ComponentInfo::detectorIndexAtXYZ,
            (arg("self"), arg("index"), arg("x"), arg("y"), arg("z")),
            "Returns the detector index of the pixel at (x, y, z) within the "
@@ -352,6 +400,10 @@ void export_ComponentInfo() {
            "Returns True if the name is a unique single occurance. Zero occurances yields False.")
 
       .def("root", &ComponentInfo::root, arg("self"), "Returns the index of the root component")
+      .def("referenceFrame", &ComponentInfo::referenceFrame, arg("self"), return_value_policy<RemoveConstSharedPtr>(),
+           "Returns the instrument's :class:`~mantid.geometry.ReferenceFrame`, which defines the axes pointing up "
+           "and along the beam, and the handedness. A default frame (Y up, Z along the beam, right-handed) if the "
+           "instrument has none.")
       .def("getMemorySize", &ComponentInfo::getMemorySize, arg("self"),
            "Return the memory footprint of the component info in bytes.")
       .def("shapeToComponentIndices", &shapeToComponentIndices, arg("self"),
@@ -403,6 +455,47 @@ void export_ComponentInfo() {
            (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
            "Returns the type of the named parameter of the component identified by 'index' "
            "(the root component by default), or an empty string if it is unset.")
+
+      .def("getPositionParameter", &readNamedParameter<&ComponentInfo::getPositionParameter>,
+           (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
+           "Returns the named V3D parameter of the component identified by 'index' "
+           "(the root component by default), or an empty sequence if it is unset.")
+
+      .def("getRotationParameter", &readNamedParameter<&ComponentInfo::getRotationParameter>,
+           (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
+           "Returns the named Quat parameter of the component identified by 'index' "
+           "(the root component by default), or an empty sequence if it is unset.")
+
+      .def("getParameterAsString", &readNamedParameter<&ComponentInfo::getParameterAsString>,
+           (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
+           "Returns the value of the named parameter of the component identified by 'index' "
+           "(the root component by default) as a string, whatever its type, or an empty string if it is unset.")
+
+      .def("getParameterVisible", &readNamedParameter<&ComponentInfo::getParameterVisible>,
+           (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
+           "Returns the visibility attribute of the named parameter of the component identified by 'index' "
+           "(the root component by default), or False if it is unset.")
+
+      .def("getParamDescription", &readNamedParameter<&ComponentInfo::getParamDescription>,
+           (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
+           "Returns the description of the named parameter of the component identified by 'index' "
+           "(the root component by default), or an empty string if it is unset.")
+
+      .def("getParamShortDescription", &readNamedParameter<&ComponentInfo::getParamShortDescription>,
+           (arg("self"), arg("name"), arg("index") = object(), arg("recursive") = true),
+           "Returns the short description (tooltip) of the named parameter of the component identified by "
+           "'index' (the root component by default), or an empty string if it is unset.")
+
+      .def("getDescription", &readDescription<&ComponentInfo::getDescription>, (arg("self"), arg("index") = object()),
+           "Returns the description of the component identified by 'index' (the root component by default).")
+
+      .def("getShortDescription", &readDescription<&ComponentInfo::getShortDescription>,
+           (arg("self"), arg("index") = object()),
+           "Returns the short description (tooltip) of the component identified by 'index' "
+           "(the root component by default).")
+
+      .def("setDescription", &setDescription, (arg("self"), arg("description"), arg("index") = object()),
+           "Sets the description of the component identified by 'index' (the root component by default).")
 
       .def("getFittingParameter", &getFittingParameter,
            (arg("self"), arg("name"), arg("xvalue"), arg("index") = object()),

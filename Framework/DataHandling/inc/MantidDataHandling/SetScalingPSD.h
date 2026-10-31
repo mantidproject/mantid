@@ -11,15 +11,12 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
+#include "MantidKernel/V3D_fwd.h"
 
 namespace Mantid {
 
 namespace Geometry {
 class IComponent;
-}
-
-namespace Kernel {
-class V3D;
 }
 
 namespace DataHandling {

@@ -10,7 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -27,6 +27,9 @@
 #include <boost/lexical_cast.hpp>
 #endif
 
+#include <stdexcept>
+#include <string>
+
 namespace Mantid {
 namespace API {
 /**
@@ -38,7 +41,7 @@ namespace API {
  */
 
 template <class SingleValueParameterType>
-class DLLExport SingleValueParameterParser : public Mantid::API::ImplicitFunctionParameterParser {
+class SingleValueParameterParser : public Mantid::API::ImplicitFunctionParameterParser {
 public:
   Mantid::API::ImplicitFunctionParameter *createParameter(Poco::XML::Element *parameterElement) override;
 

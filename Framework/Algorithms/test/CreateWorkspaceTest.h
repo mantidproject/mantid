@@ -12,6 +12,7 @@
 #include "MantidAlgorithms/CreateWorkspace.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/Memory.h"
+#include "MantidKernel/Unit.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

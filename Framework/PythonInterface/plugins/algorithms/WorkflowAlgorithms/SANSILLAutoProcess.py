@@ -459,7 +459,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         for i in range(len(outputSamples)):
             if isinstance(mtd[outputSamples[i]], WorkspaceGroup):  # kinetic
                 for ws in mtd[outputSamples[i]]:
-                    ws_name = ws.getName()
+                    ws_name = ws.name()
                     suffix = self.createCustomSuffix(ws_name)
                     RenameWorkspace(InputWorkspace=ws_name, OutputWorkspace=ws_name + suffix)
             else:
@@ -543,7 +543,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                     Stitch(
                         InputWorkspaces=group_name,
                         OutputWorkspace=stitched,
-                        ReferenceWorkspace=mtd[group_name][self.stitch_reference_index].getName(),
+                        ReferenceWorkspace=mtd[group_name][self.stitch_reference_index].name(),
                     )
                     GroupWorkspaces(InputWorkspaces=[group_name, stitched], OutputWorkspace=group_name)
                 except RuntimeError as re:

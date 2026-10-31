@@ -491,7 +491,7 @@ public:
     TS_ASSERT(!inst->getFilename().empty()); // This is how we know we didn't
                                              // get it from inside the nexus
                                              // file
-    TS_ASSERT_EQUALS(inst->getName(), "POLREF");
+    TS_ASSERT_EQUALS(ws1->getInstrumentName(), "POLREF");
     TS_ASSERT_EQUALS(inst->getNumberDetectors(), 885);
 
     // check that POLREF_Parameters.xml has been loaded
@@ -754,9 +754,9 @@ public:
     const auto &spectrumInfo = ws->spectrumInfo();
 
     TSM_ASSERT_EQUALS("Detector at WS index 142 should have a detector ID of 143", 143,
-                      spectrumInfo.detector(142).getID());
+                      spectrumInfo.firstDetectorID(142));
     TSM_ASSERT_EQUALS("Detector at WS index 143 should have a detector ID of 144", 144,
-                      spectrumInfo.detector(143).getID());
+                      spectrumInfo.firstDetectorID(143));
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -827,7 +827,7 @@ public:
                       ws->getSpectrum(24).getSpectrumNo());
 
     const auto &spectrumInfo = ws->spectrumInfo();
-    TSM_ASSERT_EQUALS("Detector at WS index 24 should have a detector ID of 73", 73, spectrumInfo.detector(24).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 24 should have a detector ID of 73", 73, spectrumInfo.firstDetectorID(24));
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -890,9 +890,9 @@ public:
 
     const auto &spectrumInfo = ws->spectrumInfo();
     TSM_ASSERT_EQUALS("Detector at WS index 142 should have a detector ID of 143", 143,
-                      spectrumInfo.detector(142).getID());
+                      spectrumInfo.firstDetectorID(142));
     TSM_ASSERT_EQUALS("Detector at WS index 144 should have a detector ID of 145", 145,
-                      spectrumInfo.detector(144).getID());
+                      spectrumInfo.firstDetectorID(144));
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -971,12 +971,12 @@ public:
 
     TSM_ASSERT_EQUALS("Detector at WS index 24 should have a spectrum number of 73", 73,
                       ws->getSpectrum(24).getSpectrumNo());
-    TSM_ASSERT_EQUALS("Detector at WS index 24 should have a detector ID of 73", 73, spectrumInfo.detector(24).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 24 should have a detector ID of 73", 73, spectrumInfo.firstDetectorID(24));
 
     TSM_ASSERT_EQUALS("Monitor at WS index 25 should have a spectrum number of 145", 145,
                       ws->getSpectrum(25).getSpectrumNo());
     TSM_ASSERT_EQUALS("Detector at WS index 25 should have a detector ID of 145", 145,
-                      spectrumInfo.detector(25).getID());
+                      spectrumInfo.firstDetectorID(25));
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -1056,16 +1056,16 @@ public:
 
     const auto &spectrumInfo = ws->spectrumInfo();
     TSM_ASSERT_EQUALS("Detector at WS index 142 should have a detector ID of 143", 143,
-                      spectrumInfo.detector(142).getID());
+                      spectrumInfo.firstDetectorID(142));
     TSM_ASSERT_EQUALS("Detector at WS index 143 should have a detector ID of 144", 144,
-                      spectrumInfo.detector(143).getID());
+                      spectrumInfo.firstDetectorID(143));
 
     TSM_ASSERT_EQUALS("Monitor at WS index 0 should have a spectrum number of 145", 145,
                       mon_ws->getSpectrum(0).getSpectrumNo());
 
     const auto &monSpectrumInfo = mon_ws->spectrumInfo();
     TSM_ASSERT_EQUALS("Monitor at WS index 0 should have a detector ID of 145", 145,
-                      monSpectrumInfo.detector(0).getID());
+                      monSpectrumInfo.firstDetectorID(0));
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -1141,14 +1141,14 @@ public:
     TSM_ASSERT_EQUALS("Detector at WS index 2 should have a spectrum number of 51", 51,
                       ws->getSpectrum(2).getSpectrumNo());
     const auto &spectrumInfo = ws->spectrumInfo();
-    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 51", 51, spectrumInfo.detector(2).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 51", 51, spectrumInfo.firstDetectorID(2));
 
     // Test the monitor workspace
     TSM_ASSERT_EQUALS("Detector at WS index 0 should have a spectrum number of 145", 145,
                       mon_ws->getSpectrum(0).getSpectrumNo());
     const auto &monSpectrumInfo = mon_ws->spectrumInfo();
     TSM_ASSERT_EQUALS("Detector at WS index 0 should have a detector ID of 145", 145,
-                      monSpectrumInfo.detector(0).getID());
+                      monSpectrumInfo.firstDetectorID(0));
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -1223,14 +1223,14 @@ public:
     TSM_ASSERT_EQUALS("Detector at WS index 2 should have a spectrum number of 51", 51,
                       ws->getSpectrum(2).getSpectrumNo());
     const auto &spectrumInfo = ws->spectrumInfo();
-    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 51", 51, spectrumInfo.detector(2).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 51", 51, spectrumInfo.firstDetectorID(2));
 
     // Test the monitor workspace
     TSM_ASSERT_EQUALS("Detector at WS index 2 should have a spectrum number of 147", 147,
                       mon_ws->getSpectrum(2).getSpectrumNo());
     const auto &monSpectrumInfo = mon_ws->spectrumInfo();
     TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 147", 147,
-                      monSpectrumInfo.detector(2).getID());
+                      monSpectrumInfo.firstDetectorID(2));
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -1269,10 +1269,10 @@ public:
 
     TSM_ASSERT_EQUALS("Monitor at WS index 0 should have a spectrum number of 145", 145,
                       ws->getSpectrum(0).getSpectrumNo());
-    TSM_ASSERT_EQUALS("Monitor at WS index 0 should have a detector ID of 145", 145, spectrumInfo.detector(0).getID());
+    TSM_ASSERT_EQUALS("Monitor at WS index 0 should have a detector ID of 145", 145, spectrumInfo.firstDetectorID(0));
     TSM_ASSERT_EQUALS("Monitor at WS index 1 should have a spectrum number of 147", 147,
                       ws->getSpectrum(1).getSpectrumNo());
-    TSM_ASSERT_EQUALS("Monitor at WS index 1 should have a detector ID of 147", 147, spectrumInfo.detector(1).getID());
+    TSM_ASSERT_EQUALS("Monitor at WS index 1 should have a detector ID of 147", 147, spectrumInfo.firstDetectorID(1));
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -1336,7 +1336,7 @@ public:
                       ws->getSpectrum(2).getSpectrumNo());
 
     const auto &spectrumInfo = ws->spectrumInfo();
-    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 52", 52, spectrumInfo.detector(2).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 52", 52, spectrumInfo.firstDetectorID(2));
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -1377,15 +1377,15 @@ public:
     const auto &spectrumInfo = ws->spectrumInfo();
     TSM_ASSERT_EQUALS("Detector at WS index 2 should have a spectrum number of 5", 5,
                       ws->getSpectrum(2).getSpectrumNo());
-    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 5", 5, spectrumInfo.detector(2).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 5", 5, spectrumInfo.firstDetectorID(2));
     TSM_ASSERT_EQUALS("Detector at WS index 3 should have a spectrum number of 6", 6,
                       ws->getSpectrum(3).getSpectrumNo());
-    TSM_ASSERT_EQUALS("Detector at WS index 3 should have a detector ID of 6", 6, spectrumInfo.detector(3).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 3 should have a detector ID of 6", 6, spectrumInfo.firstDetectorID(3));
 
     TSM_ASSERT_EQUALS("Detector at WS index 0 should have a spectrum number of 2", 2,
                       mon_ws->getSpectrum(0).getSpectrumNo());
     const auto &monSpectrumInfo = mon_ws->spectrumInfo();
-    TSM_ASSERT_EQUALS("Detector at WS index 0 should have a detector ID of 2", 2, monSpectrumInfo.detector(0).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 0 should have a detector ID of 2", 2, monSpectrumInfo.firstDetectorID(0));
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");

@@ -10,6 +10,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 

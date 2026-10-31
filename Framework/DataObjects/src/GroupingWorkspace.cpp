@@ -8,6 +8,7 @@
 
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 
 #include "MantidKernel/IPropertyManager.h"
@@ -136,7 +137,7 @@ std::vector<detid_t> GroupingWorkspace::getDetectorIDsOfGroup(const int groupID)
 namespace Mantid::Kernel {
 
 template <>
-DLLExport Mantid::DataObjects::GroupingWorkspace_sptr
+MANTID_DATAOBJECTS_DLL Mantid::DataObjects::GroupingWorkspace_sptr
 IPropertyManager::getValue<Mantid::DataObjects::GroupingWorkspace_sptr>(const std::string &name) const {
   auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::DataObjects::GroupingWorkspace_sptr> *>(getPointerToProperty(name));
@@ -150,7 +151,7 @@ IPropertyManager::getValue<Mantid::DataObjects::GroupingWorkspace_sptr>(const st
 }
 
 template <>
-DLLExport Mantid::DataObjects::GroupingWorkspace_const_sptr
+MANTID_DATAOBJECTS_DLL Mantid::DataObjects::GroupingWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::DataObjects::GroupingWorkspace_const_sptr>(const std::string &name) const {
   auto const *prop =
       dynamic_cast<PropertyWithValue<Mantid::DataObjects::GroupingWorkspace_sptr> *>(getPointerToProperty(name));

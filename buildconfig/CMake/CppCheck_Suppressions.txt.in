@@ -60,7 +60,7 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:97
 // endX is reassigned to XValues.back() in the out-of-range branch but m_maxX is set directly afterward;
 // the assignment is dead in that branch but kept for consistency with the warning message
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/Fit1D.cpp:379
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/Fit1D.cpp:385
 
 // ----------- Internal cppcheck errors from cppcheck 2.18.1 -------------
 internalError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/BitInterleaving.h:169

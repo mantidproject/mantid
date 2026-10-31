@@ -25,7 +25,8 @@ namespace {
  * @param index Workspace index
  */
 IEventList &deprecatedGetEventList(IEventWorkspace &self, const size_t index) {
-  PyErr_Warn(PyExc_DeprecationWarning, "'getEventList' is deprecated, use 'getSpectrum' instead.");
+  if (PyErr_Warn(PyExc_DeprecationWarning, "'getEventList' is deprecated, use 'getSpectrum' instead.") < 0)
+    throw boost::python::error_already_set();
   return self.getSpectrum(index);
 }
 } // namespace

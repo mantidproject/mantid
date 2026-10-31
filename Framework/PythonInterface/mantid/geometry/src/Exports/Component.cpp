@@ -23,25 +23,25 @@ namespace {
 // Deprecation wrappers. Absolute/relative placement is available from the
 // index-based ComponentInfo access layer. See the 'Instrument Access via
 // SpectrumInfo, DetectorInfo, ComponentInfo' concept page. (The parameter and
-// description accessors are intentionally not deprecated yet; they have no
-// ComponentInfo equivalent and await the parameter-map redesign.)
+// description accessors are not deprecated yet, although ComponentInfo now has
+// an equivalent of each, taking a component index.)
 Mantid::Kernel::Quat getRotationDeprecated(const Component &self) {
-  /** TODO Uncomment this block for Mantid 7.1
-  PyErr_Warn(PyExc_DeprecationWarning, "'Component.getRotation()' is deprecated in Mantid 7.0, "
-                                       "use 'ComponentInfo.rotation' instead. "
-                                       "For more information, see the instrument access layers concept page: "
-                                       "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html");
-  */
+  if (PyErr_Warn(PyExc_DeprecationWarning,
+                 "'Component.getRotation()' is deprecated in Mantid 7.0, "
+                 "use 'ComponentInfo.rotation' instead. "
+                 "For more information, see the instrument access layers concept page: "
+                 "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html") < 0)
+    throw boost::python::error_already_set();
   return self.getRotation();
 }
 
 Mantid::Kernel::V3D getRelativePosDeprecated(const Component &self) {
-  /** TODO Uncomment this block for Mantid 7.1
-  PyErr_Warn(PyExc_DeprecationWarning, "'Component.getRelativePos' is deprecated in Mantid 7.0, "
-                                       "use 'ComponentInfo.relativePosition' instead. "
-                                       "For more information, see the instrument access layers concept page: "
-                                       "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html");
-  */
+  if (PyErr_Warn(PyExc_DeprecationWarning,
+                 "'Component.getRelativePos' is deprecated in Mantid 7.0, "
+                 "use 'ComponentInfo.relativePosition' instead. "
+                 "For more information, see the instrument access layers concept page: "
+                 "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html") < 0)
+    throw boost::python::error_already_set();
   return self.getRelativePos();
 }
 

@@ -1,0 +1,1 @@
+- :ref:`Append Spectra <algm-AppendSpectra>` has a new property ``RewriteSpectraMap`` to append two workspaces with spectra having same detector IDs at different positions by rewriting the spectrum to detector mapping.

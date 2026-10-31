@@ -10,8 +10,8 @@ from testhelpers import WorkspaceCreationHelper
 from mantid.kernel import V3D
 from mantid.kernel import Quat
 import mantid.geometry
-from mantid.geometry import ComponentInfo, ComponentType, CSGObject
-from mantid.simpleapi import CloneWorkspace, CreateWorkspace
+from mantid.geometry import ComponentInfo, ComponentType, CSGObject, ReferenceFrame
+from mantid.simpleapi import CloneWorkspace, CreateWorkspace, LoadEmptyInstrument
 
 
 class ComponentInfoTest(unittest.TestCase):
@@ -34,6 +34,19 @@ class ComponentInfoTest(unittest.TestCase):
 
     The following test cases test normal usage of the exposed methods.
     """
+
+    def test_referenceFrame(self):
+        frame = self._ws.componentInfo().referenceFrame()
+        self.assertIsInstance(frame, ReferenceFrame)
+        self.assertEqual(frame.vecPointingUp(), V3D(0, 1, 0))
+        self.assertEqual(frame.vecPointingAlongBeam(), V3D(0, 0, 1))
+
+    def test_referenceFrame_is_the_instruments_own(self):
+        # POLREF's frame has Z up and X along the beam, unlike the default
+        ws = LoadEmptyInstrument(InstrumentName="POLREF", StoreInADS=False)
+        frame = ws.componentInfo().referenceFrame()
+        self.assertEqual(frame.pointingUpAxis(), "Z")
+        self.assertEqual(frame.pointingAlongBeamAxis(), "X")
 
     def test_len(self):
         """Check that there are only 6 components"""
@@ -341,6 +354,45 @@ class ComponentInfoTest(unittest.TestCase):
         info = ws.componentInfo()
         self.assertEqual(info.getParameterType("a-v3d"), "V3D")
         self.assertEqual(info.getParameterType("a-quat"), "Quat")
+        self.assertEqual(info.getPositionParameter("a-v3d")[0], V3D(1, 2, 3))
+        self.assertEqual(info.getRotationParameter("a-quat")[0], Quat(1, 0, 0, 0))
+        self.assertEqual(len(info.getPositionParameter("not-set")), 0)
+
+    def test_getParameterAsString(self):
+        ws = CloneWorkspace(self._ws, StoreInADS=False)
+        ws.componentInfo().addInt("an-int", 7)
+        info = ws.componentInfo()
+        self.assertEqual(info.getParameterAsString("an-int"), "7")
+        self.assertEqual(info.getParameterAsString("not-set"), "")
+
+    def test_getParameterVisible(self):
+        ws = CloneWorkspace(self._ws, StoreInADS=False)
+        ws.componentInfo().addDouble("shown", 1.0)
+        ws.componentInfo().addParameter("double", "hidden", "1.0", visible="false")
+        info = ws.componentInfo()
+        self.assertTrue(info.getParameterVisible("shown"))
+        self.assertFalse(info.getParameterVisible("hidden"))
+        self.assertFalse(info.getParameterVisible("not-set"))
+
+    def test_parameter_descriptions(self):
+        ws = CloneWorkspace(self._ws, StoreInADS=False)
+        ws.componentInfo().addDouble("described", 1.0, description="Short. And long.")
+        info = ws.componentInfo()
+        self.assertEqual(info.getParamDescription("described"), "Short. And long.")
+        self.assertEqual(info.getParamShortDescription("described"), "Short.")
+        self.assertEqual(info.getParamDescription("not-set"), "")
+
+    def test_setDescription_and_getDescription(self):
+        ws = CloneWorkspace(self._ws, StoreInADS=False)
+        root = ws.componentInfo().root()
+        child = int(ws.componentInfo().children(root)[0])
+        self.assertEqual(ws.componentInfo().getDescription(), "")
+        ws.componentInfo().setDescription("The instrument. It is described.")
+        ws.componentInfo().setDescription("A child.", child)
+        info = ws.componentInfo()
+        self.assertEqual(info.getDescription(root), "The instrument. It is described.")
+        self.assertEqual(info.getShortDescription(), "The instrument.")
+        self.assertEqual(info.getDescription(child), "A child.")
 
     def test_addParameter_takes_the_value_as_a_string(self):
         ws = CloneWorkspace(self._ws, StoreInADS=False)
@@ -814,6 +866,39 @@ class ComponentInfoTest(unittest.TestCase):
             continue
         # All component indices expected including self
         self.assertTrue(np.array_equal(root.componentsInSubtree, np.array([0, 1, 2, 3, 4, 5], dtype="uint64")))
+
+    def test_pixel_grid_xy_size(self):
+        info = self._ws_rect.componentInfo()
+
+        # check that the method fails on non-grid detectors
+        source = info.source()
+        with self.assertRaises(RuntimeError):
+            info.pixelGridXSize(source)
+        with self.assertRaises(RuntimeError):
+            info.pixelGridYSize(source)
+
+        # now try it on the grid detector bank
+        bank_index = info.indexOfAny("bank1")
+        sizeX = self._RECT_NUM_PIXELS * 0.008  # Each pixel is 8 mm in size, in WorkspaceCreationHelper
+        sizeY = self._RECT_NUM_PIXELS * 0.008  # Each pixel is 8 mm in size, in WorkspaceCreationHelper
+        self.assertEqual(info.pixelGridXSize(bank_index), sizeX)
+        self.assertEqual(info.pixelGridYSize(bank_index), sizeY)
+
+    def test_pixel_grid_xy_size_parametrized(self):
+        info = CloneWorkspace(self._ws_rect, StoreInADS=False).componentInfo()
+        bank_index = info.indexOfAny("bank1")
+
+        # add this parameter to the bank to rescale it
+        SCALE = 0.5
+        info.addDouble("scalex", SCALE, bank_index)
+        info.addDouble("scaley", SCALE, bank_index)
+
+        # now check it scaled
+        scaledSizeX = self._RECT_NUM_PIXELS * 0.008 * SCALE  # Each pixel is 8 mm in size, in WorkspaceCreationHelper
+        scaledSizeY = self._RECT_NUM_PIXELS * 0.008 * SCALE  # Each pixel is 8 mm in size, in WorkspaceCreationHelper
+
+        self.assertEqual(info.pixelGridXSize(bank_index), scaledSizeX)
+        self.assertEqual(info.pixelGridYSize(bank_index), scaledSizeY)
 
 
 if __name__ == "__main__":

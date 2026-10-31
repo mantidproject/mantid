@@ -8,8 +8,11 @@
 
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/Property.h"
 #include <mutex>
+
+namespace Mantid::Nexus {
+class File;
+}
 
 namespace Mantid::DataHandling {
 /** This class defines the pulse times for a specific bank.

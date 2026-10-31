@@ -40,10 +40,10 @@ Usage
     print("The algorithm has masked {} detectors".format(mask.size))
 
     #to test check a couple of detectors
-    inst = ws.getInstrument()
-    print("Is the minimum element in the mask list (detector {}) masked?  {}".format(mask.min(), inst.getDetector(int(mask.min())).isMasked()))
-    print("Is the maximum element in the mask list (detector {}) masked?  {}".format(mask.max(), inst.getDetector(int(mask.max())).isMasked()))
-    print("Is a detector outside the list masked (for example detector 100)?  {}".format(inst.getDetector(100).isMasked()  ))
+    detector_info = ws.detectorInfo()
+    print("Is the minimum element in the mask list (detector {}) masked?  {}".format(mask.min(), detector_info.isMasked(detector_info.indexOf(int(mask.min())))))
+    print("Is the maximum element in the mask list (detector {}) masked?  {}".format(mask.max(), detector_info.isMasked(detector_info.indexOf(int(mask.max())))))
+    print("Is a detector outside the list masked (for example detector 100)?  {}".format(detector_info.isMasked(detector_info.indexOf(100))))
 
 .. testcleanup:: MaskAngle
 
@@ -76,10 +76,10 @@ The instrument view would look like:
     print("The algorithm has masked {} detectors".format(mask.size))
 
     #to test check a couple of detectors
-    inst = ws.getInstrument()
-    print("Is the minimum element in the mask list (detector {}) masked?  {}".format(mask.min(), inst.getDetector(int(mask.min())).isMasked()))
-    print("Is the maximum element in the mask list (detector {}) masked?  {}".format(mask.max(), inst.getDetector(int(mask.max())).isMasked()))
-    print("Is a detector outside the list masked (for example detector 100)?  {}".format(inst.getDetector(100).isMasked()  ))
+    detector_info = ws.detectorInfo()
+    print("Is the minimum element in the mask list (detector {}) masked?  {}".format(mask.min(), detector_info.isMasked(detector_info.indexOf(int(mask.min())))))
+    print("Is the maximum element in the mask list (detector {}) masked?  {}".format(mask.max(), detector_info.isMasked(detector_info.indexOf(int(mask.max())))))
+    print("Is a detector outside the list masked (for example detector 100)?  {}".format(detector_info.isMasked(detector_info.indexOf(100))))
 
 .. testcleanup:: MaskAngle_phi
 

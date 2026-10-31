@@ -9,11 +9,11 @@
 //------------------------
 // Includes
 //------------------------
-#include "DllOption.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidQtWidgets/Common/BaseDecoder.h"
 #include "MantidQtWidgets/Common/BaseEncoder.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <QHash>
 #include <QSetIterator>
 #include <QStringList>

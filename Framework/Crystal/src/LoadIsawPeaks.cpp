@@ -7,12 +7,12 @@
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCrystal/CalibrationHelpers.h"
-#include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -202,7 +202,7 @@ std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS, std::ifs
   // We cannot assume the peaks have bank type detector modules, so we have a
   // string to check this
   std::string bankPart = "bank";
-  if (instr->getName() == "WISH")
+  if (tempWS->getInstrumentName() == "WISH")
     bankPart = "WISHpanel";
   // Get all children
   const auto &componentInfo = outWS->componentInfo();
@@ -232,7 +232,7 @@ std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS, std::ifs
       Algorithm_sptr alg = createChildAlgorithm("MaskBTP");
       alg->setProperty<Workspace_sptr>("Workspace", outWS);
       alg->setProperty("Bank", maskBanks);
-      alg->setProperty("Instrument", instr->getName());
+      alg->setProperty("Instrument", tempWS->getInstrumentName());
       if (!alg->execute())
         throw std::runtime_error("MaskDetectors Child Algorithm has not executed successfully");
     } catch (...) {
@@ -476,7 +476,7 @@ void LoadIsawPeaks::appendFile(const PeaksWorkspace_sptr &outWS, const std::stri
 
     std::ostringstream oss;
     std::string bankString = "bank";
-    if (outWS->getInstrument()->getName() == "WISH") {
+    if (outWS->getInstrumentName() == "WISH") {
       if (bankNum < 10)
         bankString = "WISHpanel0";
       else

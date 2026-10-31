@@ -8,13 +8,13 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidKernel/V3D_fwd.h"
 namespace Mantid {
 //-----------------------------------------------------------------------------------------------
 // Forward declarations
 //-----------------------------------------------------------------------------------------------
 namespace Kernel {
 class Material;
-class V3D;
 } // namespace Kernel
 
 namespace Algorithms {

@@ -115,7 +115,7 @@ bool MonIDPropChanger::monitorIdReader(const MatrixWorkspace_const_sptr &inputWS
     // Loop over spectra, but finish early if we find everything
     while (i < specInfo.size() && idsInWorkspace.size() < monitorIDList.size()) {
       if (specInfo.isMonitor(i))
-        idsInWorkspace.insert(specInfo.detector(i).getID());
+        idsInWorkspace.insert(specInfo.firstDetectorID(i));
       ++i;
     }
     monitorIDList = std::vector<detid_t>(idsInWorkspace.begin(), idsInWorkspace.end());
@@ -329,7 +329,7 @@ std::map<std::string, std::string> NormaliseToMonitor::validateInputs() {
       issues["MonitorWorkspaceIndex"] = "The MonitorWorkspace must contain the MonitorWorkspaceIndex.";
     }
     MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
-    if (monWS->getInstrument()->getName() != inWS->getInstrument()->getName()) {
+    if (monWS->getInstrumentName() != inWS->getInstrumentName()) {
       issues["MonitorWorkspace"] = "The Input and Monitor workspaces must come "
                                    "from the same instrument.";
     }

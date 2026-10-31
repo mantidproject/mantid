@@ -9,7 +9,6 @@
 /** Converter to generate a python dictionary from a std::map
  */
 
-#include "MantidKernel/System.h"
 #include <boost/python/dict.hpp>
 #include <boost/python/object.hpp>
 #include <map>
@@ -18,7 +17,7 @@ namespace Mantid {
 namespace PythonInterface {
 namespace Converters {
 
-template <typename KeyType, typename ValueType> struct DLLExport MapToPyDictionary {
+template <typename KeyType, typename ValueType> struct MapToPyDictionary {
 
 public:
   using MapType = std::map<KeyType, ValueType>;

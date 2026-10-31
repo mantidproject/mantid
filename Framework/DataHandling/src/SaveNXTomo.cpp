@@ -203,7 +203,7 @@ void SaveNXTomo::setupFile() {
   // NXinstrument
   m_nxFile->makeGroup("instrument", "NXinstrument", true);
   // Write the instrument name | could add short_name attribute to name
-  m_nxFile->writeData("name", m_workspaces[0]->getInstrument()->getName());
+  m_nxFile->writeData("name", m_workspaces[0]->getInstrumentName());
 
   // detector group - diamond example file contains
   // {data,distance,image_key,x_pixel_size,y_pixel_size}

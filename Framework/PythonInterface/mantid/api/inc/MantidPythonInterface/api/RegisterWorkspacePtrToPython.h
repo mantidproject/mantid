@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/api/DllConfig.h"
 #include "MantidPythonInterface/core/WeakPtr.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
@@ -18,8 +19,9 @@ namespace Mantid::PythonInterface::Registry {
 
 // Specialization for shared_ptr<Workspace> and derived types.
 template <typename T>
-struct DLLExport TypedPropertyValueHandler<std::shared_ptr<T>,
-                                           typename std::enable_if<std::is_base_of<API::Workspace, T>::value>::type>
+struct PYTHON_API_DLL
+    TypedPropertyValueHandler<std::shared_ptr<T>,
+                              typename std::enable_if<std::is_base_of<API::Workspace, T>::value>::type>
     : public PropertyValueHandler {
   /// Type required by TypeRegistry framework
   using HeldType = std::shared_ptr<T>;
@@ -83,7 +85,7 @@ struct DLLExport TypedPropertyValueHandler<std::shared_ptr<T>,
  *    - Calls register_ptr_to_python<boost::weak_ptr<T>>
  *    - Registers a new PropertyValueHandler for a boost::shared_ptr<T>
  */
-template <typename IType> struct DLLExport RegisterWorkspacePtrToPython {
+template <typename IType> struct RegisterWorkspacePtrToPython {
   using IType_sptr = std::shared_ptr<IType>;
   using IType_wptr = std::weak_ptr<IType>;
   /// Constructor

@@ -9,13 +9,11 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/Instrument_fwd.h"
+#include "MantidKernel/V3D_fwd.h"
 
 namespace Mantid {
 namespace Geometry {
 class ComponentInfo;
-}
-namespace Kernel {
-class V3D;
 }
 namespace DataHandling {
 
