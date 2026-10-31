@@ -39,6 +39,9 @@ from Engineering.texture.texture_helper import (
     has_texture_direction_info,
     read_texture_direction_info_from_log,
     write_texture_direction_info_to_log,
+    read_euler_orientation_info_from_log,
+    write_euler_orientation_info_to_log,
+    EULER_AXES_LOG,
     TEXTURE_DIRECTION_LABELS_LOG,
     TEXTURE_DIRECTION_MATRIX_LOG,
 )
@@ -394,10 +397,11 @@ class TestHelperPoleFigurePlots(BaseTextureTestClass):
         mock_get_debug.assert_called_once_with(ws_obj, "I")
         mock_plot_exp.assert_called_once_with(test_pfi, ("Dir1", "Dir2"), "I", None, ["row0", "row1"])
 
+    @patch(texture_utils_path + ".get_debug_info", return_value=[])
     @patch(texture_utils_path + "._retrieve_ws_object")
     @patch(texture_utils_path + ".get_pole_figure_data")
     @patch(texture_utils_path + ".plot_contour_pf")
-    def test_plot_pole_figure_contour_calls_plot_contour(self, mock_plot_contour, mock_get, mock_retrieve):
+    def test_plot_pole_figure_contour_calls_plot_contour(self, mock_plot_contour, mock_get, mock_retrieve, _mock_get_debug):
         test_pfi = np.ones((2, 3))
         mock_get.return_value = test_pfi
         mock_retrieve.return_value = self.mock_ws
@@ -408,10 +412,11 @@ class TestHelperPoleFigurePlots(BaseTextureTestClass):
         mock_plot_contour.assert_called_once_with(test_pfi, ("Dir1", "Dir2"), "I", None, 2.0)
         fig.savefig.assert_called_once_with(str(path.join("outdir", "test_ws_contour_2.0.png")))
 
+    @patch(texture_utils_path + ".get_debug_info", return_value=[])
     @patch(texture_utils_path + "._retrieve_ws_object")
     @patch(texture_utils_path + ".get_pole_figure_data", return_value=np.array([[0.0, 0.0, 1.0]]))
     @patch(texture_utils_path + ".plot_exp_pf")
-    def test_plot_pole_figure_save_dirs_string_only_saves_once(self, mock_plot_exp, mock_get, mock_retrieve):
+    def test_plot_pole_figure_save_dirs_string_only_saves_once(self, mock_plot_exp, mock_get, mock_retrieve, _mock_get_debug):
         fig = MagicMock()
         ax = MagicMock()
         mock_plot_exp.return_value = (fig, ax)
@@ -1134,6 +1139,28 @@ class TestTextureDirectionLogIO(unittest.TestCase):
 
         self.assertEqual(names, ("D1", "D2", "D3"))
         mock_logger.warning.assert_called_once()
+
+
+class TestEulerOrientationLogIO(unittest.TestCase):
+    """The Euler convention the Texture Planner writes onto a reference workspace for Eng Diff to read back."""
+
+    def setUp(self):
+        self.ws_name = "__test_euler_orientation_log_ws"
+        self.ws = CreateWorkspace(DataX=[0, 1], DataY=[1], OutputWorkspace=self.ws_name)
+        self.addCleanup(lambda: ADS.remove(self.ws_name) if ADS.doesExist(self.ws_name) else None)
+
+    def test_round_trip_preserves_axes_and_senses(self):
+        write_euler_orientation_info_to_log(self.ws_name, "YXY", "-1,1,-1")
+
+        self.assertEqual(read_euler_orientation_info_from_log(self.ws), ("YXY", "-1,1,-1"))
+
+    def test_reads_none_unless_both_logs_are_present(self):
+        self.assertIsNone(read_euler_orientation_info_from_log(self.ws_name))
+        AddSampleLog(Workspace=self.ws_name, LogName=EULER_AXES_LOG, LogText="YXY")
+        self.assertIsNone(read_euler_orientation_info_from_log(self.ws_name))
+
+    def test_reads_none_for_a_missing_workspace(self):
+        self.assertIsNone(read_euler_orientation_info_from_log("__not_in_the_ads"))
 
 
 if __name__ == "__main__":

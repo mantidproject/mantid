@@ -24,6 +24,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include <span>
 

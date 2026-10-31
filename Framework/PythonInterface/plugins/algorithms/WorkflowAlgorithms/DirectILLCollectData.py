@@ -30,6 +30,8 @@ from mantid.kernel import (
     Property,
     StringListValidator,
     UnitConversion,
+    UnitParametersMap,
+    UnitParams,
 )
 from mantid.simpleapi import (
     AddSampleLog,
@@ -68,7 +70,11 @@ def _applyIncidentEnergyCalibration(ws, eiWS, wsNames, report, algorithmLogging)
     originalEnergy = ws.getRun().getLogData("Ei").value
     originalWavelength = ws.getRun().getLogData("wavelength").value
     energy = eiWS.y(0)[0]
-    wavelength = UnitConversion.run("Energy", "Wavelength", energy, 0, 0, 0, Direct, 5)
+    params = UnitParametersMap()
+    params[UnitParams.l2] = 0
+    params[UnitParams.twoTheta] = 0
+    params[UnitParams.efixed] = 5
+    wavelength = UnitConversion.run("Energy", "Wavelength", energy, 0, Direct, params)
     AddSampleLog(
         Workspace=ws,
         LogName="Ei",
@@ -193,8 +199,7 @@ def _fitEPP(ws, wsType, wsNames, algorithmLogging):
 def _monitorCounts(ws):
     """Return the total monitor counts from the sample logs"""
     logs = ws.run()
-    instrument = ws.getInstrument()
-    if instrument.getName() == "IN6":
+    if ws.getInstrumentName() == "IN6":
         return logs.getProperty("monitor1.monsum").value
     else:
         return logs.getProperty("monitor.monsum").value
@@ -269,10 +274,10 @@ def _sumDetectorsAtDistance(ws, distance, tolerance):
     histogramCount = ws.getNumberHistograms()
     ySums = np.zeros(ws.blocksize())
     detectorInfo = ws.detectorInfo()
-    sample = ws.getInstrument().getSample()
+    spectrumInfo = ws.spectrumInfo()
+    samplePos = ws.componentInfo().samplePosition()
     for i in range(histogramCount):
-        det = ws.getDetector(i)
-        sampleToDetector = sample.getDistance(det)
+        sampleToDetector = spectrumInfo.position(i).distance(samplePos)
         if abs(distance - sampleToDetector) < tolerance:
             if detectorInfo.isMonitor(i) or detectorInfo.isMasked(i):
                 continue

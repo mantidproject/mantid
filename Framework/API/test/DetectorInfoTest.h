@@ -154,6 +154,69 @@ public:
     TS_ASSERT_THROWS(detectorInfo.signedTwoTheta(4), const std::logic_error &);
   }
 
+  void test_twoTheta_with_observer_and_axis() {
+    auto ws = makeWorkspace(1, false, V3D(1.0, 0.0, 1.0));
+    const auto &detectorInfo = ws->detectorInfo();
+    TS_ASSERT_DELTA(detectorInfo.twoTheta(0, V3D(0, 0, 0), V3D(0, 0, 1)), M_PI / 4, 1e-12);
+    TS_ASSERT_DELTA(detectorInfo.twoTheta(0, V3D(0, 0, 1), V3D(0, 0, 1)), M_PI / 2, 1e-12);
+    TS_ASSERT_DELTA(detectorInfo.twoTheta(0, V3D(0, 0, 0), V3D(1, 0, 0)), M_PI / 4, 1e-12);
+  }
+
+  void test_signedTwoTheta_with_observer_and_axis() {
+    const V3D axis(0, 0, 1);
+    const V3D up(1, 0, 0);
+    auto ws = makeWorkspace(1, false, V3D(1.0, 0.0, 1.0));
+    TS_ASSERT_DELTA(ws->detectorInfo().signedTwoTheta(0, V3D(0, 0, 0), axis, up), M_PI / 4, 1e-12);
+    auto ws2 = makeWorkspace(1, false, V3D(-1.0, 0.0, 1.0));
+    TS_ASSERT_DELTA(ws2->detectorInfo().signedTwoTheta(0, V3D(0, 0, 0), axis, up), -M_PI / 4, 1e-12);
+  }
+
+  void test_signedTwoTheta_with_observer_and_axis_uses_theta_sign_axis() {
+    const auto &detectorInfo = m_workspace.detectorInfo();
+    const auto sample = detectorInfo.samplePosition();
+    const auto beam = sample - detectorInfo.sourcePosition();
+    for (size_t i = 0; i < detectorInfo.size(); ++i) {
+      if (detectorInfo.isMonitor(i)) {
+        TS_ASSERT_THROWS_NOTHING(detectorInfo.signedTwoTheta(i, sample, beam));
+      } else {
+        TS_ASSERT_DELTA(detectorInfo.signedTwoTheta(i, sample, beam), detectorInfo.signedTwoTheta(i), 1e-12);
+      }
+    }
+  }
+
+  void test_phi() {
+    auto ws = makeWorkspace(1, false, V3D(1.0, 1.0, 5.0));
+    TS_ASSERT_DELTA(ws->detectorInfo().phi(0), M_PI / 4, 1e-12);
+    auto ws2 = makeWorkspace(1, false, V3D(0.0, -1.0, 5.0));
+    TS_ASSERT_DELTA(ws2->detectorInfo().phi(0), -M_PI / 2, 1e-12);
+  }
+
+  void test_phiOffset() {
+    auto ws = makeWorkspace(1, false, V3D(1.0, 1.0, 5.0));
+    TS_ASSERT_DELTA(ws->detectorInfo().phiOffset(0, M_PI), M_PI - M_PI / 4, 1e-12);
+    auto ws2 = makeWorkspace(1, false, V3D(0.0, -1.0, 5.0));
+    TS_ASSERT_DELTA(ws2->detectorInfo().phiOffset(0, M_PI), -(M_PI - M_PI / 2), 1e-12);
+  }
+
+  void test_angles_with_observer_match_legacy_including_monitors() {
+    const auto &detectorInfo = m_workspace.detectorInfo();
+    const V3D observer(0.1, -0.2, 0.3);
+    const V3D axis(0.0, 0.1, 1.0);
+    const V3D up(0.3, 1.0, 0.0);
+    for (size_t i = 0; i < detectorInfo.size(); ++i) {
+      GNU_DIAG_OFF("deprecated-declarations")
+      MSVC_DIAG_OFF(4996)
+      const auto &det = detectorInfo.detector(i);
+      MSVC_DIAG_ON(4996)
+      GNU_DIAG_ON("deprecated-declarations")
+      TS_ASSERT_DELTA(detectorInfo.twoTheta(i, observer, axis), det.getTwoTheta(observer, axis), 1e-12);
+      TS_ASSERT_DELTA(detectorInfo.signedTwoTheta(i, observer, axis, up), det.getSignedTwoTheta(observer, axis, up),
+                      1e-12);
+      TS_ASSERT_DELTA(detectorInfo.phi(i), det.getPhi(), 1e-12);
+      TS_ASSERT_DELTA(detectorInfo.phiOffset(i, M_PI), det.getPhiOffset(M_PI), 1e-12);
+    }
+  }
+
   void test_geographicalAngles_casualAngles() {
     V3D v;
     v[m_standardRefFrame->pointingHorizontal()] = 1.0;

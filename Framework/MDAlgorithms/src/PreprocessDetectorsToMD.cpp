@@ -175,8 +175,6 @@ void PreprocessDetectorsToMD::processDetectorsPositions(const API::MatrixWorkspa
   g_log.information() << "Preprocessing detector locations in a target reciprocal space\n";
   //
   Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
-  // this->pBaseInstr                = instrument->baseInstrument();
-  //
   Geometry::IComponent_const_sptr source = instrument->getSource();
   Geometry::IComponent_const_sptr sample = instrument->getSample();
   if ((!source) || (!sample)) {
@@ -197,7 +195,7 @@ void PreprocessDetectorsToMD::processDetectorsPositions(const API::MatrixWorkspa
                                                        inputWS->getTitle());
   }
   // Instrument name
-  std::string InstrName = instrument->getName();
+  std::string InstrName = inputWS->getInstrumentName();
   targWS->logs()->addProperty<std::string>("InstrumentName", InstrName,
                                            true); // "The name which should unique identify current instrument");
   targWS->logs()->addProperty<bool>("FakeDetectors", false, true);
@@ -262,7 +260,7 @@ void PreprocessDetectorsToMD::processDetectorsPositions(const API::MatrixWorkspa
     L2[liveDetectorsCount] = spectrumInfo.l2(i);
 
     double polar = spectrumInfo.twoTheta(i);
-    double azim = spDet.getPhi();
+    double azim = spectrumInfo.phi(i);
     TwoTheta[liveDetectorsCount] = polar;
     Azimuthal[liveDetectorsCount] = azim;
 

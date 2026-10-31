@@ -12,9 +12,9 @@
 # This script will reduce one SCD run.  The configuration  is set up in the
 # first few lines in the method runTest.  This script will load, find peaks,
 # index and integrate either found or predicted peaks for the specified run.
-# Either sphere integration or the Mantid PeakIntegration algorithms are
-# currently supported, but it may be updated to support other integration
-# methods.  Users should make a directory to hold the output of this script,
+# Sphere integration is currently supported, but it may be updated to support
+# other integration methods.  Users should make a directory to hold the
+# output of this script,
 # and must specify that output directory with the other configuration
 # information.
 #
@@ -40,11 +40,9 @@ from mantid.simpleapi import (
     LoadIsawUB,
     LoadNexus,
     LoadNexusMonitors,
-    PeakIntegration,
     PredictPeaks,
     SaveIsawUB,
     SelectCellOfType,
-    Rebin,
 )
 from mantid import config
 
@@ -97,17 +95,10 @@ class ReduceOneSCD_Run(systemtesting.MantidSystemTest):
         min_pred_dspacing = ".2"
         max_pred_dspacing = "2.5"
         use_sphere_integration = True
-        use_fit_peaks_integration = False
         peak_radius = ".2"
         bkg_inner_radius = ".2"
         bkg_outer_radius = ".25"
         integrate_if_edge_peak = False
-        rebin_step = "-.004"
-        preserve_events = True
-        use_ikeda_carpenter = False
-        n_bad_edge_pixels = "10"
-
-        rebin_params = min_tof + "," + rebin_step + "," + max_tof
         run = "3132"
         self.saved = False
         #
@@ -189,7 +180,7 @@ class ReduceOneSCD_Run(systemtesting.MantidSystemTest):
         #
         # Get complete list of peaks to be integrated and load the UB matrix into
         # the predicted peaks workspace, so that information can be used by the
-        # PeakIntegration algorithm.
+        # integration algorithm.
         #
         if integrate_predicted_peaks:
             print("PREDICTING peaks to integrate....")
@@ -237,16 +228,6 @@ class ReduceOneSCD_Run(systemtesting.MantidSystemTest):
             )
             DeleteWorkspace(MDEW)
             del MDEW
-
-        elif use_fit_peaks_integration:
-            event_ws = Rebin(InputWorkspace=event_ws, Params=rebin_params, PreserveEvents=preserve_events)
-            peaks_ws = PeakIntegration(
-                InPeaksWorkspace=peaks_ws,
-                InputWorkspace=event_ws,
-                IkedaCarpenterTOF=use_ikeda_carpenter,
-                MatchingRunNo=True,
-                NBadEdgePixels=n_bad_edge_pixels,
-            )
 
         #
         # Save the final integrated peaks, using the Niggli reduced cell.

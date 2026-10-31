@@ -9,6 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
@@ -91,6 +92,26 @@ double SofQCommon::getEFixed(const Geometry::IDetector &det) const {
 }
 
 /**
+ * Return the efixed for the component at the given index. In Direct mode this
+ * has to be property set up earlier and in Indirect mode it may be the property
+ * of a component if not specified globally for the instrument.
+ * @param componentInfo The ComponentInfo holding the component
+ * @param componentIndex The index of the component (detector) within componentInfo
+ * @return The value of efixed
+ */
+double SofQCommon::getEFixed(const Geometry::ComponentInfo &componentInfo, const size_t componentIndex) const {
+  if (m_emode == 1 || m_efixedGiven) {
+    return m_efixed;
+  }
+  const std::vector<double> param = componentInfo.getNumberParameter(componentIndex, "EFixed");
+  if (param.empty())
+    throw std::runtime_error("Cannot find EFixed parameter for component \"" + componentInfo.name(componentIndex) +
+                             "\". This is required in indirect mode. Please check the IDF "
+                             "contains these values.");
+  return param[0];
+}
+
+/**
  * Calculate the Q value
  * @param deltaE The energy transfer in meV
  * @param twoTheta The scattering angle in radians
@@ -103,6 +124,21 @@ double SofQCommon::q(const double deltaE, const double twoTheta, const Geometry:
     return directQ(deltaE, twoTheta);
   }
   return indirectQ(deltaE, twoTheta, det);
+}
+
+/**
+ * Calculate the Q value
+ * @param deltaE The energy transfer in meV
+ * @param twoTheta The scattering angle in radians
+ * @param efixed The final energy in meV for indirect emode, e.g. from getEFixed().
+ *        Ignored for direct emode, where the cached incident energy is used.
+ * @return The momentum transfer in A-1
+ */
+double SofQCommon::q(const double deltaE, const double twoTheta, const double efixed) const {
+  if (m_emode == 1) {
+    return directQ(deltaE, twoTheta);
+  }
+  return indirectQFromEFixed(deltaE, twoTheta, efixed);
 }
 
 /**
@@ -141,11 +177,21 @@ double SofQCommon::directQ(const double deltaE, const double twoTheta) const {
  * @return The value of Q
  */
 double SofQCommon::indirectQ(const double deltaE, const double twoTheta, const Geometry::IDetector *det) const {
-  using Mantid::PhysicalConstants::E_mev_toNeutronWavenumberSq;
   if (!det) {
     throw std::runtime_error("indirectQ: det is nullptr.");
   }
-  const auto efixed = getEFixed(*det);
+  return indirectQFromEFixed(deltaE, twoTheta, getEFixed(*det));
+}
+
+/**
+ * Calculate the Q value for an indirect instrument
+ * @param deltaE The energy change
+ * @param twoTheta The value of the scattering angle
+ * @param efixed The final energy
+ * @return The value of Q
+ */
+double SofQCommon::indirectQFromEFixed(const double deltaE, const double twoTheta, const double efixed) {
+  using Mantid::PhysicalConstants::E_mev_toNeutronWavenumberSq;
   const double ki = std::sqrt((efixed + deltaE) / E_mev_toNeutronWavenumberSq);
   const double kf = std::sqrt(efixed / E_mev_toNeutronWavenumberSq);
   return std::sqrt(ki * ki + kf * kf - 2. * ki * kf * std::cos(twoTheta));
@@ -207,14 +253,15 @@ std::pair<double, double> SofQCommon::qBinHintsIndirect(const API::MatrixWorkspa
   auto minQ = std::numeric_limits<double>::max();
   auto maxQ = std::numeric_limits<double>::lowest();
   const auto &detectorInfo = ws.detectorInfo();
+  const auto &componentInfo = ws.componentInfo();
   for (size_t i = 0; i < detectorInfo.size(); ++i) {
     if (detectorInfo.isMasked(i) || detectorInfo.isMonitor(i)) {
       continue;
     }
     const auto twoTheta = detectorInfo.twoTheta(i);
-    const auto &det = detectorInfo.detector(i);
-    const auto Q1 = indirectQ(minE, twoTheta, &det);
-    const auto Q2 = indirectQ(maxE, twoTheta, &det);
+    const auto efixed = getEFixed(componentInfo, i);
+    const auto Q1 = indirectQFromEFixed(minE, twoTheta, efixed);
+    const auto Q2 = indirectQFromEFixed(maxE, twoTheta, efixed);
     if (!std::isfinite(Q1) || !std::isfinite(Q2)) {
       throw std::invalid_argument("Cannot compute Q binning range: non-finite "
                                   "Q found for detector ID " +

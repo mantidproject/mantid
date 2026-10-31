@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/PropertyWidget.h"
 #include <QLabel>
 #include <QLineEdit>
@@ -19,7 +19,7 @@ namespace API {
 
   @date 2012-02-16
 */
-class DLLExport TextPropertyWidget : public PropertyWidget {
+class EXPORT_OPT_MANTIDQT_COMMON TextPropertyWidget : public PropertyWidget {
   Q_OBJECT
 
 public:

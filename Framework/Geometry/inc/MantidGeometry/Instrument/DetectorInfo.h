@@ -28,6 +28,8 @@ class SpectrumInfo;
 namespace Geometry {
 class IDetector;
 class Instrument;
+class ReferenceFrame;
+class ParameterInfo;
 
 /** Geometry::DetectorInfo is an intermediate step towards a DetectorInfo that
   is part of Instrument-2.0. The aim is to provide a nearly identical interface
@@ -51,7 +53,8 @@ public:
   DetectorInfo(std::unique_ptr<Beamline::DetectorInfo> detectorInfo,
                std::shared_ptr<const Geometry::Instrument> instrument,
                std::shared_ptr<const std::vector<detid_t>> detectorIds,
-               std::shared_ptr<const std::unordered_map<detid_t, size_t>> detIdToIndexMap);
+               std::shared_ptr<const std::unordered_map<detid_t, size_t>> detIdToIndexMap,
+               std::shared_ptr<ParameterInfo> parameterInfo, std::shared_ptr<ReferenceFrame const> referenceFrame);
   DetectorInfo(const DetectorInfo &other);
   DetectorInfo &operator=(const DetectorInfo &rhs);
   ~DetectorInfo();
@@ -76,6 +79,19 @@ public:
   double signedTwoTheta(const std::pair<size_t, size_t> &index) const;
   double azimuthal(const size_t index) const;
   double azimuthal(const std::pair<size_t, size_t> &index) const;
+  double twoTheta(const size_t index, const Kernel::V3D &observer, const Kernel::V3D &axis) const;
+  double twoTheta(const std::pair<size_t, size_t> &index, const Kernel::V3D &observer, const Kernel::V3D &axis) const;
+  double signedTwoTheta(const size_t index, const Kernel::V3D &observer, const Kernel::V3D &axis,
+                        const Kernel::V3D &instrumentUp) const;
+  double signedTwoTheta(const size_t index, const Kernel::V3D &observer, const Kernel::V3D &axis) const;
+  double signedTwoTheta(const std::pair<size_t, size_t> &index, const Kernel::V3D &observer,
+                        const Kernel::V3D &axis) const;
+  double signedTwoTheta(const std::pair<size_t, size_t> &index, const Kernel::V3D &observer, const Kernel::V3D &axis,
+                        const Kernel::V3D &instrumentUp) const;
+  double phi(const size_t index) const;
+  double phi(const std::pair<size_t, size_t> &index) const;
+  double phiOffset(const size_t index, const double offset) const;
+  double phiOffset(const std::pair<size_t, size_t> &index, const double offset) const;
   std::tuple<double, double, double> diffractometerConstants(const size_t index, std::vector<detid_t> &calibratedDets,
                                                              std::vector<detid_t> &uncalibratedDets) const;
   double difcUncalibrated(const size_t index) const;
@@ -97,7 +113,9 @@ public:
   void setPosition(const std::pair<size_t, size_t> &index, const Kernel::V3D &position);
   void setRotation(const size_t index, const Kernel::Quat &rotation);
   void setRotation(const std::pair<size_t, size_t> &index, const Kernel::Quat &rotation);
-
+  [[deprecated("DetectorInfo::detector has been deprecated in Mantid 7.1."
+               "See the 'Instrument Access via SpectrumInfo, DetectorInfo, ComponentInfo' concept page, "
+               "located at: https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html")]]
   const Geometry::IDetector &detector(const size_t index) const;
 
   // This does not really belong into DetectorInfo, but it seems to be useful
@@ -124,16 +142,24 @@ public:
   const DetectorInfoIterator<const DetectorInfo> cend() const;
 
 private:
+  [[deprecated("DetectorInfo::getDetector has been deprecated in Mantid 7.1."
+               "See the 'Instrument Access via SpectrumInfo, DetectorInfo, ComponentInfo' concept page, "
+               "located at: https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html")]]
   const Geometry::IDetector &getDetector(const size_t index) const;
+  [[deprecated("DetectorInfo::getDetectorPtr has been deprecated in Mantid 7.1."
+               "See the 'Instrument Access via SpectrumInfo, DetectorInfo, ComponentInfo' concept page, "
+               "located at: https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html")]]
   std::shared_ptr<const Geometry::IDetector> getDetectorPtr(const size_t index) const;
   void clearPositionDependentParameters(const size_t index);
 
   /// Pointer to the actual DetectorInfo object (non-wrapping part).
   std::unique_ptr<Beamline::DetectorInfo> m_detectorInfo;
 
-  std::shared_ptr<const Geometry::Instrument> m_instrument;
-  std::shared_ptr<const std::vector<detid_t>> m_detectorIDs;
-  std::shared_ptr<const std::unordered_map<detid_t, size_t>> m_detIDToIndex;
+  std::shared_ptr<Geometry::Instrument const> m_instrument;
+  std::shared_ptr<std::vector<detid_t> const> m_detectorIDs;
+  std::shared_ptr<std::unordered_map<detid_t, size_t> const> m_detIDToIndex;
+  std::shared_ptr<Geometry::ParameterInfo> m_parameterInfo;
+  std::shared_ptr<Geometry::ReferenceFrame const> m_referenceFrame;
 
   mutable std::vector<std::shared_ptr<const Geometry::IDetector>> m_lastDetector;
   mutable std::vector<size_t> m_lastIndex;

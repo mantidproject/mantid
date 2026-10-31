@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
+#include "MantidPythonInterface/core/DllConfig.h"
 #include <boost/python/object.hpp>
 
 namespace Mantid {
@@ -19,7 +19,7 @@ namespace Converters {
  * attempt to convert a Kernel::V3D object from
  * it
  */
-struct DLLExport PyObjectToV3D {
+struct MANTID_PYTHONINTERFACE_CORE_DLL PyObjectToV3D {
   PyObjectToV3D(const boost::python::object &p);
   /// Produces a V3D object from the given PyObject
   Kernel::V3D operator()();

@@ -13,6 +13,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -80,8 +81,9 @@ public:
     auto ws = create2DWorkspaceWithFullInstrument(13, 1);
     s.initCachedValues(*ws, &alg);
     const auto &detectorInfo = ws->detectorInfo();
+    const auto &componentInfo = ws->componentInfo();
     for (size_t i = 0; i < detectorInfo.size(); ++i) {
-      TS_ASSERT_EQUALS(s.getEFixed(detectorInfo.detector(i)), Ei);
+      TS_ASSERT_EQUALS(s.getEFixed(componentInfo, i), Ei);
     }
   }
 
@@ -101,9 +103,10 @@ public:
     }
     s.initCachedValues(*ws, &alg);
     const auto &detectorInfo = ws->detectorInfo();
+    const auto &componentInfo = ws->componentInfo();
     for (size_t i = 0; i < detectorInfo.size(); ++i) {
       const auto E = static_cast<double>(i) + 0.38;
-      TS_ASSERT_EQUALS(s.getEFixed(detectorInfo.detector(i)), E);
+      TS_ASSERT_EQUALS(s.getEFixed(componentInfo, i), E);
     }
   }
 
@@ -125,8 +128,9 @@ public:
     }
     s.initCachedValues(*ws, &alg);
     const auto &detectorInfo = ws->detectorInfo();
+    const auto &componentInfo = ws->componentInfo();
     for (size_t i = 0; i < detectorInfo.size(); ++i) {
-      TS_ASSERT_EQUALS(s.getEFixed(detectorInfo.detector(i)), Ef);
+      TS_ASSERT_EQUALS(s.getEFixed(componentInfo, i), Ef);
     }
   }
 
@@ -222,12 +226,12 @@ public:
     setEFixed(ws, "pixel-1)", Ef[1]);
     s.initCachedValues(*ws, &alg);
     const auto &detectorInfo = ws->detectorInfo();
+    const auto &componentInfo = ws->componentInfo();
     const auto testDeltaE = -1.8;
     for (size_t i = 0; i < detectorInfo.size(); ++i) {
-      const auto &det = detectorInfo.detector(i);
       const auto twoTheta = detectorInfo.twoTheta(i);
       const auto expected = indirectQ(Ef[i], testDeltaE, twoTheta);
-      TS_ASSERT_DELTA(s.q(testDeltaE, twoTheta, &det), expected, 1e-12)
+      TS_ASSERT_DELTA(s.q(testDeltaE, twoTheta, s.getEFixed(componentInfo, i)), expected, 1e-12)
     }
   }
 

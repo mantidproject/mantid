@@ -214,6 +214,8 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
         self._check_orientations()
         self._check_copy_sample()
         self._check_deleting()
+        # last: it writes RB-scoped Euler settings, which would override the global ones _check_orientations sets
+        self._check_reference_euler_settings()
 
     def _check_loading(self):
         runs = self.load_runs()
@@ -469,6 +471,49 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
             self.assertTrue(ADS.doesExist(VANADIUM_WS))
 
     # ------------------------------------------------------------------ dialog helpers
+
+    def _euler_settings(self):
+        return tuple(self.get_engineering_setting(key, rb=RB_NUMBER) for key in ("euler_angles_scheme", "euler_angles_sense"))
+
+    def _check_reference_euler_settings(self):
+        from mantid.simpleapi import Load, SaveNexus
+        from Engineering.texture.texture_helper import write_euler_orientation_info_to_log
+
+        view = self.correction_view
+        saved = os.path.join(self.output_dir("ReferenceWorkspaces", RB_NUMBER), f"{RB_NUMBER}_reference_workspace.nxs")
+        # stands in for a Texture Planner export with "Save Euler Settings on Reference" ticked; saved
+        # under a new name so Load Reference really reads the file rather than finding it in the ADS
+        tagged = os.path.join(self.tmp_root, "euler_reference.nxs")
+        ws = Load(Filename=saved, OutputWorkspace="__euler_reference_source")
+        write_euler_orientation_info_to_log(ws, "ZYZ", "-1,1,-1")
+        SaveNexus(InputWorkspace=ws, Filename=tagged)
+
+        before = self._euler_settings()
+        use_euler_before = self.get_engineering_setting("use_euler_angles", bool, rb=RB_NUMBER)
+        set_finder_text(view.finder_reference, tagged)
+
+        with self.subTest("Correction / with the setting off, loading a reference leaves the Euler settings alone"):
+            self.set_engineering_setting("read_euler_from_ref", False)
+            click(view.btn_loadRef)
+            process_events(2)
+            self.assertEqual(before, self._euler_settings())
+
+        self.set_engineering_setting("read_euler_from_ref", True)
+        click(view.btn_loadRef)
+        process_events(2)
+
+        with self.subTest("Correction / with the setting on, the reference's Euler settings are adopted for the RB"):
+            self.assertEqual(("ZYZ", "-1,1,-1"), self._euler_settings())
+
+        with self.subTest("Correction / adopting Euler settings does not change whether the file is Euler"):
+            self.assertEqual(use_euler_before, self.get_engineering_setting("use_euler_angles", bool, rb=RB_NUMBER))
+
+        with self.subTest("Correction / the settings dialog shows the adopted Euler settings"):
+            # proves the dialog's cache was dropped rather than holding the pre-load values
+            settings_view = self.open_settings()
+            self.assertEqual("ZYZ", settings_view.eulerAngles_lineedit.text())
+            self.assertEqual("-1,1,-1", settings_view.eulerAnglesSense_lineedit.text())
+            settings_view.close()
 
     def _set_shape_from_stl(self, workspaces):
         from mantid.simpleapi import LoadSampleShape
@@ -783,5 +828,6 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
         set_checkbox(view.check_divergence, divergence)
         set_checkbox(view.check_attenTab, attenuation)
         click(view.btn_applyCorrections)
-        self.wait_for_async_task(self.correction_presenter.worker, what="corrections")
+        # MonteCarloAbsorption takes 2-4s locally and over twice that on the CI runners
+        self.wait_for_async_task(self.correction_presenter.worker, timeout=60.0, what="corrections")
         process_events(2)

@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/Property.h"
-#include "MantidKernel/System.h"
+#include "MantidKernel/Property_fwd.h"
 
 #include <QGridLayout>
 #include <QLabel>
@@ -16,7 +15,7 @@
 #include <QString>
 #include <QWidget>
 
-#include "DllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 
 class QLineEdit;
 

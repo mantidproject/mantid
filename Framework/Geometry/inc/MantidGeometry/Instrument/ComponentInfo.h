@@ -8,6 +8,7 @@
 
 #include "MantidBeamline/ComponentType.h"
 #include "MantidBeamline/PixelGridComponent.h"
+#include "MantidBeamline/StructuredGridComponent.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/ComponentInfoIterator.h"
@@ -33,6 +34,7 @@ class V3D;
 namespace Geometry {
 class IComponent;
 class IObject;
+class ReferenceFrame;
 } // namespace Geometry
 
 namespace Beamline {
@@ -63,6 +65,12 @@ private:
 
   /// The instrument's named parameters, keyed by component index
   std::shared_ptr<ParameterInfo> m_parameterInfo;
+
+  /// The instrument's reference frame (up, along-beam and handedness), or null if none was given
+  std::shared_ptr<const ReferenceFrame> m_referenceFrame;
+
+  /// The named parameter on this component (or, if recursive, its nearest ancestor), or null.
+  std::shared_ptr<Parameter> findParameter(size_t componentIndex, std::string const &name, bool recursive) const;
 
   template <class T> std::vector<T> getParameter(size_t componentIndex, const std::string &name, bool recursive) const;
 
@@ -99,7 +107,8 @@ public:
                 std::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>> componentIds,
                 std::shared_ptr<const std::unordered_map<Geometry::IComponent const *, size_t>> componentIdToIndexMap,
                 std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> shapes,
-                std::shared_ptr<ParameterInfo> parameterInfo = nullptr);
+                std::shared_ptr<ParameterInfo> parameterInfo = nullptr,
+                std::shared_ptr<const ReferenceFrame> referenceFrame = nullptr);
   ~ComponentInfo();
   /// Copy assignment is not possible for ComponentInfo
   ComponentInfo &operator=(const ComponentInfo &) = delete;
@@ -149,7 +158,13 @@ public:
   size_t detectorIndexAtXYZ(const size_t componentIndex, const int x, const int y, const int z) const;
   std::tuple<int, int, int> xyzForDetectorID(const size_t componentIndex, const detid_t detectorID) const;
   bool isGridDetector(size_t const componentIndex) const;
+  /// The pixel counts, ID numbering and pixel vertices of a Structured bank. Throws if it is not one.
+  const Beamline::StructuredGridComponent &structuredGridComponent(const size_t componentIndex) const;
+  bool isStructuredDetector(size_t const componentIndex) const;
   size_t root() const;
+  /// The instrument's reference frame: which axes point up and along the beam, and its handedness.
+  /// A default frame (Y up, Z along the beam, right-handed) if this ComponentInfo was built without one.
+  std::shared_ptr<const ReferenceFrame> referenceFrame() const;
 
   const IComponent *componentID(const size_t componentIndex) const { return (*m_componentIds)[componentIndex]; }
   bool hasValidShape(const size_t componentIndex) const;
@@ -189,9 +204,26 @@ public:
   std::vector<bool> getBoolParameter(const size_t componentIndex, const std::string &name, bool recursive = true) const;
   std::vector<std::string> getStringParameter(const size_t componentIndex, const std::string &name,
                                               bool recursive = true) const;
+  std::vector<Kernel::V3D> getPositionParameter(const size_t componentIndex, const std::string &name,
+                                                bool recursive = true) const;
+  std::vector<Kernel::Quat> getRotationParameter(const size_t componentIndex, const std::string &name,
+                                                 bool recursive = true) const;
+  /// The named parameter's value as a string, of whatever type it is, or an empty string if it is unset.
+  std::string getParameterAsString(const size_t componentIndex, const std::string &name, bool recursive = true) const;
+  /// The named parameter's visibility attribute, or false if it is unset.
+  bool getParameterVisible(const size_t componentIndex, const std::string &name, bool recursive = true) const;
   /// The type of the named parameter, or an empty string if the component has no such parameter.
   std::string getParameterType(const size_t componentIndex, const std::string &name, bool recursive = true) const;
   double getFittingParameter(const size_t componentIndex, const std::string &name, double xvalue) const;
+  /// The description of the named parameter, or an empty string if it is unset.
+  std::string getParamDescription(const size_t componentIndex, const std::string &name, bool recursive = true) const;
+  /// The short description (tooltip) of the named parameter, or an empty string if it is unset.
+  std::string getParamShortDescription(const size_t componentIndex, const std::string &name,
+                                       bool recursive = true) const;
+  /// The component's own description: that of the parameter named after the component, not inherited.
+  std::string getDescription(const size_t componentIndex) const;
+  /// The component's own short description: that of the parameter named after the component, not inherited.
+  std::string getShortDescription(const size_t componentIndex) const;
 
   /// Add or replace a named parameter at a specific component index
   void addParameter(const size_t componentIndex, const std::string &type, const std::string &name,
@@ -219,9 +251,21 @@ public:
   void addFittingParameter(const size_t componentIndex, const std::string &name, const std::string &fittingFunction,
                            const std::string &value, const std::string *const pDescription = nullptr,
                            const std::string &pVisible = "true");
+  /// Set the component's description, as Component::setDescription() does: on the parameter named
+  /// after the component (searched recursively), or on a new empty string parameter of that name.
+  void setDescription(const size_t componentIndex, const std::string &description);
   /// Remove every parameter of this name from this component. Matches the name case-sensitively,
   /// as ParameterMap::clearParametersByName() does.
   void clearParameter(const size_t componentIndex, const std::string &name);
+  /// Remove every parameter from every component.
+  void clearParameters();
+
+  /// Parameters whose values are taken from the sample logs by ExperimentInfo::populateInstrumentParameters().
+  const ParameterInfo::LogfileParameters &logfileParameters() const;
+  /// Add or replace a logfile parameter on a component. 'cacheKey' is the parameter name, qualified by
+  /// its fitting function if it has one.
+  void addLogfileParameter(const size_t componentIndex, const std::string &cacheKey,
+                           std::shared_ptr<const XMLInstrumentParameter> parameter);
 
   /// This allows ParameterMap to delegate to ParameterInfo,
   /// rather than keeping a parallel copy that would silently diverge.

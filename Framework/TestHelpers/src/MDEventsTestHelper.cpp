@@ -107,7 +107,7 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents, int numPixels
   WorkspaceCreationHelper::setOrientedLattice(retVal, 1., 1., 1.);
 
   // Some sanity checks
-  if (retVal->getInstrument()->getName() != "MINITOPAZ")
+  if (retVal->getInstrumentName() != "MINITOPAZ")
     throw std::runtime_error("MDEventsTestHelper::"
                              "createDiffractionEventWorkspace(): Wrong "
                              "instrument loaded.");

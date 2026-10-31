@@ -189,26 +189,25 @@ def set_selected_components_to_original_position(workspace, component_names):
     :param component_names: the name of the component which is to be moved.
     """
     # First get the original rotation and position of the unaltered instrument components. This information
-    # is stored in the base instrument
-    instrument = workspace.getInstrument()
-    base_instrument = instrument.getBaseInstrument()
+    # is stored in the base instrument, which has the same component indices as the moved instrument
+    base_component_info = workspace.baseComponentInfo()
+    component_info = workspace.componentInfo()
 
     # Get the original position and rotation
     for component_name in component_names:
-        base_component = base_instrument.getComponentByName(component_name)
-        moved_component = instrument.getComponentByName(component_name)
-
         # It can be that monitors are already defined in the IDF but they cannot be found on the workspace. They
         # are buffer monitor names which the experiments might use in the future. Hence we need to check if a component
-        # is zero at this point
-        if base_component is None or moved_component is None:
+        # is missing at this point
+        try:
+            component_index = component_info.indexOfAny(component_name)
+        except ValueError:
             continue
 
-        base_position = base_component.getPos()
-        base_rotation = base_component.getRotation()
+        base_position = base_component_info.position(component_index)
+        base_rotation = base_component_info.rotation(component_index)
 
-        moved_position = moved_component.getPos()
-        moved_rotation = moved_component.getRotation()
+        moved_position = component_info.position(component_index)
+        moved_rotation = component_info.rotation(component_index)
 
         move_alg = None
         if base_position != moved_position:
@@ -786,8 +785,7 @@ class SANSMoveZOOM(SANSMove):
 def create_mover(workspace, state):
     # Get selection
     run_number = workspace.getRunNumber()
-    instrument = workspace.getInstrument()
-    instrument_name = instrument.getName()
+    instrument_name = workspace.getInstrumentName()
     instrument_name = sanitise_instrument_name(instrument_name)
     instrument_type = SANSInstrument[instrument_name]
     if SANSMoveLOQ.is_correct(instrument_type, run_number):

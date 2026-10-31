@@ -25,12 +25,10 @@ Usage
 
     evs_ws = LoadEmptyVesuvio()
 
-    evs = evs_ws.getInstrument()
+    sample_pos = evs_ws.componentInfo().samplePosition()
+    b_det_1_pos = evs_ws.spectrumInfo().position(2)
 
-    sample = evs.getSample()
-    b_det_1 = evs_ws.getDetector(2)
-
-    b_det_1_l1 = sample.getPos().distance(b_det_1.getPos())
+    b_det_1_l1 = sample_pos.distance(b_det_1_pos)
 
     print("First backscattering detector L1 = {:.5f}m".format(b_det_1_l1))
 
@@ -46,12 +44,10 @@ Output:
 
     evs_ws = LoadEmptyVesuvio(InstrumentParFile='IP0005.dat')
 
-    evs = evs_ws.getInstrument()
+    sample_pos = evs_ws.componentInfo().samplePosition()
+    b_det_1_pos = evs_ws.spectrumInfo().position(2)
 
-    sample = evs.getSample()
-    b_det_1 = evs_ws.getDetector(2)
-
-    b_det_1_l1 = sample.getPos().distance(b_det_1.getPos())
+    b_det_1_l1 = sample_pos.distance(b_det_1_pos)
 
     print("First backscattering detector L1 = {:.5f}m".format(b_det_1_l1))
 

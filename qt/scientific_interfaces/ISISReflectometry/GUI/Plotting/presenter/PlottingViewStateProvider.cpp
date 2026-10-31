@@ -102,11 +102,8 @@ bool allWorkspaceDescendantsIncluded(PlottingWorkspaceTreeItem const &item, Plot
 }
 
 PlottingWorkspaceTreeSelectionMode selectionMode(bool canSelectDirectly, bool canSelectViaParent) {
-  if (canSelectDirectly && canSelectViaParent) {
-    return PlottingWorkspaceTreeSelectionMode::DirectAndParent;
-  }
   if (canSelectDirectly) {
-    return PlottingWorkspaceTreeSelectionMode::Direct;
+    return PlottingWorkspaceTreeSelectionMode::DirectAndParent;
   }
   if (canSelectViaParent) {
     return PlottingWorkspaceTreeSelectionMode::ParentOnly;
@@ -174,6 +171,7 @@ PlotActionState PlottingViewStateProvider::plotActionState(bool outputSelectionE
           outputSelectionEnabled && plotProperties.supportsOverplot() &&
               (!addToExistingChecked || activePlotOverplotCompatible) && hasEnoughSelectedItems,
           outputSelectionEnabled && hasEnoughSelectedItems,
+          outputSelectionEnabled && hasSelectedItems(selectedPlottingWorkspaceCount),
           outputSelectionEnabled && hasSelectedItems(selectedPlottingWorkspaceCount),
           addToExistingEnabled,
           addToExistingChecked};

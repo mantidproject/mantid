@@ -466,7 +466,6 @@ target_precompile_headers(
   <MantidKernel/Logger.h>
   <MantidKernel/Matrix.h>
   <MantidKernel/Quat.h>
-  <MantidKernel/System.h>
   <MantidKernel/V2D.h>
   <MantidKernel/V3D.h>
   <cfloat>
@@ -489,7 +488,7 @@ target_include_directories(
 )
 
 # Set the name of the generated library
-set_target_properties(Geometry PROPERTIES OUTPUT_NAME MantidGeometry COMPILE_DEFINITIONS IN_MANTID_GEOMETRY)
+set_target_properties(Geometry PROPERTIES OUTPUT_NAME MantidGeometry)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Geometry PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")

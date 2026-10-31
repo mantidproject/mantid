@@ -9,7 +9,7 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "DllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 // #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Instantiator.h"
 

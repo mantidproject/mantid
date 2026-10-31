@@ -19,7 +19,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCrystal/CalibrationHelpers.h"
 #include "MantidCrystal/PeakHKLErrors.h"
-#include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"

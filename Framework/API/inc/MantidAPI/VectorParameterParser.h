@@ -9,7 +9,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 
 #include "MantidAPI/ImplicitFunctionParameterParser.h"
 
@@ -25,6 +25,11 @@
 #include <boost/lexical_cast.hpp>
 #endif
 
+#include <cstddef>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
 namespace Mantid {
 namespace API {
 /**
@@ -35,7 +40,7 @@ namespace API {
  @date 21/07/2011
  */
 template <class VectorValueParameterType>
-class DLLExport VectorParameterParser : public Mantid::API::ImplicitFunctionParameterParser {
+class VectorParameterParser : public Mantid::API::ImplicitFunctionParameterParser {
 public:
   VectorValueParameterType *parseVectorParameter(std::string sValue);
 

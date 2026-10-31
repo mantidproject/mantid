@@ -180,7 +180,6 @@ void PaalmanPingsAbsorptionCorrection::exec() {
     if (spectrumInfo.isMasked(i)) {
       continue;
     }
-    const auto &det = spectrumInfo.detector(i);
 
     // scattering and self-absorption in sample L2 distances, used for A_s,s and
     // A_s,sc
@@ -195,7 +194,7 @@ void PaalmanPingsAbsorptionCorrection::exec() {
     // distances, used for A_c,sc
     std::vector<double> container_sample_L2s(m_numContainerVolumeElements);
 
-    calculateDistances(det, sample_L2s, sample_container_L2s, container_L2s, container_sample_L2s);
+    calculateDistances(spectrumInfo, i, sample_L2s, sample_container_L2s, container_L2s, container_sample_L2s);
 
     const auto wavelengths = m_inputWS->points(i);
     // these need to have the minus sign applied still
@@ -401,16 +400,17 @@ void PaalmanPingsAbsorptionCorrection::constructSample(API::Sample &sample) {
 }
 
 /// Calculate the distances traversed by the neutrons within the sample
-void PaalmanPingsAbsorptionCorrection::calculateDistances(const IDetector &detector, std::vector<double> &sample_L2s,
+void PaalmanPingsAbsorptionCorrection::calculateDistances(const API::SpectrumInfo &spectrumInfo, const size_t index,
+                                                          std::vector<double> &sample_L2s,
                                                           std::vector<double> &sample_container_L2s,
                                                           std::vector<double> &container_L2s,
                                                           std::vector<double> &container_sample_L2s) const {
-  V3D detectorPos(detector.getPos());
-  if (detector.nDets() > 1) {
+  V3D detectorPos(spectrumInfo.position(index));
+  if (spectrumInfo.spectrumDefinition(index).size() > 1) {
     // We need to make sure this is right for grouped detectors - should use
     // average theta & phi
-    detectorPos.spherical(detectorPos.norm(), detector.getTwoTheta(V3D(), V3D(0, 0, 1)) * 180.0 / M_PI,
-                          detector.getPhi() * 180.0 / M_PI);
+    detectorPos.spherical(detectorPos.norm(), spectrumInfo.twoTheta(index, V3D(), V3D(0, 0, 1)) * 180.0 / M_PI,
+                          spectrumInfo.phi(index) * 180.0 / M_PI);
   }
 
   for (size_t i = 0; i < m_numSampleVolumeElements; ++i) {

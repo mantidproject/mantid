@@ -929,12 +929,13 @@ class TestTexturePlannerPresenter_SelectionAndDeletion(unittest.TestCase):
 @patch(file_path + ".TexturePlannerSettingsPresenter")
 @patch(file_path + ".TexturePlannerSettingsView")
 class TestTexturePlannerPresenter_Exports(unittest.TestCase):
-    def _export_with_format(self, fmt):
+    def _export_with_format(self, fmt, save_euler=False):
         model = _make_model()
         view = _make_view()
         view.get_save_dir.return_value = "/out"
         view.get_save_filename.return_value = "name"
         view.get_export_format.return_value = fmt
+        view.get_save_euler_on_ref.return_value = save_euler
         presenter = TexturePlannerPresenter(model, view)
 
         presenter.on_export_clicked()
@@ -952,9 +953,17 @@ class TestTexturePlannerPresenter_Exports(unittest.TestCase):
         model = self._export_with_format("Matrix Orientation File")
         model.exporter.output_as_matrix.assert_called_once_with("/out", "name")
 
-    def test_export_reference_workspace_format_delegates_to_exporter(self, mock_settings_view, mock_settings_presenter):
-        model = self._export_with_format("Reference Workspace")
-        model.exporter.output_as_reference_workspace.assert_called_once_with("/out", "name")
+    def test_export_reference_workspace_passes_the_save_euler_choice(self, mock_settings_view, mock_settings_presenter):
+        model = self._export_with_format("Reference Workspace", save_euler=True)
+        model.exporter.output_as_reference_workspace.assert_called_once_with("/out", "name", save_euler=True)
+
+    def test_save_euler_checkbox_only_shown_for_reference_workspace(self, mock_settings_view, mock_settings_presenter):
+        view = _make_view()
+        presenter = TexturePlannerPresenter(_make_model(), view)
+        for fmt, visible in (("Reference Workspace", True), ("Euler Orientation File", False)):
+            view.get_export_format.return_value = fmt
+            presenter.update_save_euler_on_ref_visible()
+            view.set_save_euler_on_ref_visible.assert_called_with(visible)
 
     def test_export_transmission_weighting_format_delegates_to_exporter(self, mock_settings_view, mock_settings_presenter):
         model = self._export_with_format("Transmission Weighting")
@@ -1077,37 +1086,12 @@ class TestTexturePlannerPresenter_Settings(unittest.TestCase):
         mock_settings_presenter.return_value.show.assert_called_with()
 
 
-@patch(file_path + ".run_tutorial")
+@patch("mantidqt.widgets.tutorial.presenter.run_tutorial")
 @patch(file_path + ".TexturePlannerSettingsPresenter")
 @patch(file_path + ".TexturePlannerSettingsView")
 class TestTexturePlannerPresenter_Tutorial(unittest.TestCase):
-    """The tutorial builds a whole second planner, so every test here stubs ``run_tutorial`` out.
-    What is under test is when the presenter asks for one, not what the tour then does."""
-
-    def test_opening_it_from_the_toolbar_does_not_mark_it_as_already_seen(
-        self, mock_settings_view, mock_settings_presenter, mock_run_tutorial
-    ):
-        # asking for the tutorial should not change whether it appears on startup. The slot the
-        # button gets takes no arguments, so ``clicked(bool)`` cannot be what decides that
-        view = _make_view()
-        with patch(file_path + ".should_show_on_startup", return_value=False):
-            TexturePlannerPresenter(_make_model(), view)
-
-        view.set_on_tutorial_clicked.call_args.args[0]()
-
-        self.assertFalse(mock_run_tutorial.call_args.kwargs["mark_as_seen"])
-
-    def test_a_second_request_raises_the_running_tutorial_rather_than_starting_another(
-        self, mock_settings_view, mock_settings_presenter, mock_run_tutorial
-    ):
-        presenter = TexturePlannerPresenter(_make_model(), _make_view(), offer_tutorial=False)
-        presenter.open_tutorial()
-
-        presenter.open_tutorial()
-
-        mock_run_tutorial.assert_called_once()
-        # the shell is the window; the sandbox interface inside it is only a child widget
-        mock_run_tutorial.return_value.shell.raise_.assert_called_once_with()
+    """When the tutorial is offered is tested on ``TutorialPresenter``; these check the planner
+    hooks into it."""
 
     def test_closing_the_planner_closes_a_tutorial_it_started(self, mock_settings_view, mock_settings_presenter, mock_run_tutorial):
         # the tour drives a second planner, which would otherwise be left with nothing to return to
@@ -1118,28 +1102,7 @@ class TestTexturePlannerPresenter_Tutorial(unittest.TestCase):
 
         mock_run_tutorial.return_value.close.assert_called_once_with()
 
-    @patch(file_path + ".should_show_on_startup", return_value=True)
-    def test_closing_the_planner_before_the_offer_arrives_cancels_it(
-        self, mock_should_show, mock_settings_view, mock_settings_presenter, mock_run_tutorial
-    ):
-        # the first-open offer is deferred to the event loop, so it can arrive after the planner has
-        # been closed - at which point there is no window left to run a tour over
-        presenter = TexturePlannerPresenter(_make_model(), _make_view())
-        presenter.on_close()
-
-        presenter.open_tutorial(mark_as_seen=True)  # what the deferred timer would do
-
-        mock_run_tutorial.assert_not_called()
-
-    @patch(file_path + ".should_show_on_startup", return_value=False)
-    def test_it_is_not_offered_once_it_has_been_seen(
-        self, mock_should_show, mock_settings_view, mock_settings_presenter, mock_run_tutorial
-    ):
-        TexturePlannerPresenter(_make_model(), _make_view())
-
-        mock_run_tutorial.assert_not_called()
-
-    @patch(file_path + ".should_show_on_startup", return_value=True)
+    @patch("mantidqt.widgets.tutorial.presenter.should_show_on_startup", return_value=True)
     def test_it_is_not_offered_when_the_planner_is_the_tutorials_own(
         self, mock_should_show, mock_settings_view, mock_settings_presenter, mock_run_tutorial
     ):

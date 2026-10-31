@@ -76,7 +76,7 @@ public:
     if (!hb2a)
       return;
 
-    TS_ASSERT_EQUALS(hb2a->getName(), "HB2A");
+    TS_ASSERT_EQUALS(outws->getInstrumentName(), "HB2A");
 
     Mantid::Geometry::IComponent_const_sptr source = hb2a->getSource();
     TS_ASSERT(source);

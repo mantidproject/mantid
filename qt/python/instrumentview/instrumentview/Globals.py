@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class CurrentTab(str, Enum):
+class CurrentTab(StrEnum):
     Grouping = "Grouping"
     Masking = "Masking"

@@ -71,6 +71,7 @@ class NParameterCommandId(object):
     PHI_LIMIT = "phi_limit"
     QXY_LIMIT = "qxy_limit"
     SAMPLE_OFFSET = "sample_offset"
+    SAMPLE_THICKNESS = "sample_thickness"
     SAVE = "save"
     TRANS_FIT = "trans_fit"
     USER_FILE = "user_file"
@@ -297,6 +298,7 @@ class CommandInterfaceStateDirector(object):
             NParameterCommandId.CLEAN: self._process_clean,
             NParameterCommandId.REDUCTION_DIMENSIONALITY: self._process_reduction_dimensionality,
             NParameterCommandId.SAMPLE_OFFSET: self._process_sample_offset,
+            NParameterCommandId.SAMPLE_THICKNESS: self._process_sample_thickness,
             NParameterCommandId.DETECTOR: self._process_detector,
             NParameterCommandId.GRAVITY: self._process_gravity,
             NParameterCommandId.CENTRE: self._process_centre,
@@ -434,6 +436,11 @@ class CommandInterfaceStateDirector(object):
     def _process_sample_offset(self, command):
         sample_offset = command.values[0]
         new_state_entries = {SampleId.OFFSET: sample_offset}
+        self.add_to_processed_state_settings(new_state_entries)
+
+    def _process_sample_thickness(self, command):
+        sample_thickness = command.values[0]
+        new_state_entries = {OtherId.SAMPLE_THICKNESS: sample_thickness}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_detector(self, command):

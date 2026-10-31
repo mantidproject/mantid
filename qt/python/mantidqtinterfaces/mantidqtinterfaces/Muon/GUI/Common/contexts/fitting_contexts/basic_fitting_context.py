@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist
 from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FittingContext
-from mantid.api import CompositeFunction
 
 SINGLE_FITS_KEY = "SingleFits"
 X_FROM_FIT_RANGE = "x from fit range"
@@ -141,19 +140,9 @@ class BasicFittingContext(FittingContext):
     @single_fit_functions.setter
     def single_fit_functions(self, fit_functions: list) -> None:
         """Sets all of the single fit functions stored in the model."""
-        if len(fit_functions) == self.number_of_datasets:
-            self._single_fit_functions = fit_functions
-            return
+        assert len(fit_functions) == self.number_of_datasets, "The number of functions is not equal to the number of datasets."
 
-        if len(fit_functions) == 1 and type(fit_functions[0]) is CompositeFunction:
-            assert fit_functions[0].nFunctions() == self.number_of_datasets, (
-                f"The number of functions inside CompositeFunction={fit_functions[0].nFunctions()} "
-                f"is not equal to the number of datasets={self.number_of_datasets}."
-            )
-            self._single_fit_functions = fit_functions
-            return
-
-        assert False, f"The number of functions={len(fit_functions)} is not equal to the number of datasets={self.number_of_datasets}."
+        self._single_fit_functions = fit_functions
 
     @property
     def single_fit_functions_for_undo(self) -> list:

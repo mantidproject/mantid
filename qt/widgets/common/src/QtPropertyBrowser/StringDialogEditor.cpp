@@ -10,8 +10,8 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
-#include <QPushButton>
 #include <QSettings>
+#include <QToolButton>
 
 /**
  * Do nothing to connect a manager.
@@ -39,8 +39,9 @@ StringDialogEditor::StringDialogEditor(QtProperty *property, QWidget *parent) : 
     m_lineEdit->setText(mgr->value(property));
   }
 
-  auto *button = new QPushButton("...", this);
-  button->setMaximumSize(20, 1000000);
+  auto *button = new QToolButton(this);
+  button->setText("...");
+  button->setFixedWidth(20);
   connect(button, SIGNAL(clicked()), this, SLOT(runDialog()));
   layout->addWidget(button);
   layout->setContentsMargins(0, 0, 20, 0);

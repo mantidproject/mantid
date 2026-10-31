@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/FindSXPeaksHelper.h"
 #include "MantidAPI/Progress.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FloatingPointComparison.h"
 #include "MantidKernel/Logger.h"
@@ -332,29 +332,13 @@ BoundsIterator PeakFindingStrategy::getBounds(const HistogramData::HistogramX &x
 }
 
 /**
- * Calculates the average phi value if the workspace contains
- * multiple detectors per spectrum, or returns the value
- * of phi if it is a single detector to spectrum mapping.
+ * Calculates phi for the workspace index. If the spectrum contains
+ * multiple detectors, phi of their average position is used.
  * @param workspaceIndex :: The index to return the phi value of
- * @return :: The averaged or exact value of phi
+ * @return :: The value of phi in the range [0, 2pi)
  */
 double PeakFindingStrategy::calculatePhi(size_t workspaceIndex) const {
-  double phi;
-
-  // Get the detectors for the workspace index
-  const auto &spectrumDefinition = m_spectrumInfo.spectrumDefinition(workspaceIndex);
-  const auto numberOfDetectors = spectrumDefinition.size();
-  const auto &det = m_spectrumInfo.detector(workspaceIndex);
-  if (numberOfDetectors == 1) {
-    phi = det.getPhi();
-  } else {
-    // Have to average the value for phi
-    auto detectorGroup = dynamic_cast<const Mantid::Geometry::DetectorGroup *>(&det);
-    if (!detectorGroup) {
-      throw std::runtime_error("Could not cast to detector group");
-    }
-    phi = detectorGroup->getPhi();
-  }
+  double phi = m_spectrumInfo.phi(workspaceIndex);
 
   if (phi < 0) {
     phi += 2.0 * M_PI;

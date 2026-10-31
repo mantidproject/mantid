@@ -85,7 +85,8 @@ Usage
    for i in range(3):
         print(round(coefs.y(i),2))
 
-   print("Is first detector masked? {}".format(coefs.getInstrument().getDetector(1).isMasked()))
+   detector_info = coefs.detectorInfo()
+   print("Is first detector masked? {}".format(detector_info.isMasked(detector_info.indexOf(1))))
 
    # load sample data
    rawdata = LoadDNSLegacy('oi196012pbi.d_dat', Normalization='duration', CoilCurrentsTable=curtable)

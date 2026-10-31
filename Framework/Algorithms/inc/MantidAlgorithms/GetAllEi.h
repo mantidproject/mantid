@@ -10,16 +10,13 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/TimeROI.h"
+#include "MantidKernel/Unit_fwd.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 
 namespace Geometry {
 class IComponent;
-}
-
-namespace Kernel {
-class Unit;
 }
 
 namespace Algorithms {

@@ -399,7 +399,7 @@ void MDBoxFlatTree::saveExperimentInfos(Mantid::Nexus::File *const file, const A
       }
 
       if (max > 16777216) {
-        g_log.warning() << "This instrument (" << ei->getInstrument()->getName()
+        g_log.warning() << "This instrument (" << ei->getInstrumentName()
                         << ") has detector IDs that are higher than can be "
                            "saved in the .NXS file as single-precision floats."
                         << '\n';

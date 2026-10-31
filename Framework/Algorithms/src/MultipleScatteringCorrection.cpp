@@ -305,11 +305,10 @@ void MultipleScatteringCorrection::calculateSingleComponent(const API::MatrixWor
     if (spectrumInfo.isMasked(workspaceIndex)) {
       continue;
     }
-    const auto &det = spectrumInfo.detector(workspaceIndex);
 
     // compute L2D
     std::vector<double> L2Ds(numVolumeElements, 0.0);
-    calculateL2Ds(distGraber, det, L2Ds, shape);
+    calculateL2Ds(distGraber, spectrumInfo, workspaceIndex, L2Ds, shape);
 
     const auto wavelengths = m_inputWS->points(workspaceIndex);
     // these need to have the minus sign applied still
@@ -484,13 +483,13 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(const API::Matrix
     if (spectrumInfo.isMasked(workspaceIndex)) {
       continue;
     }
-    const auto &det = spectrumInfo.detector(workspaceIndex);
 
     // calculate L2D (2_element -> detector)
     // 1. container
     std::vector<double> L2D_container(numVolumeElements, 0.0);
     std::vector<double> L2D_sample(numVolumeElements, 0.0);
-    calculateL2Ds(distGraberContainer, distGraberSample, det, L2D_container, L2D_sample, containerShape, sampleShape);
+    calculateL2Ds(distGraberContainer, distGraberSample, spectrumInfo, workspaceIndex, L2D_container, L2D_sample,
+                  containerShape, sampleShape);
 
     // prepare material wise linear coefficient
     const auto wavelengths = m_inputWS->points(workspaceIndex);
@@ -747,19 +746,20 @@ void MultipleScatteringCorrection::calculateL12s(const MultipleScatteringCorrect
  * @brief Calculate distance between exiting element to the detector for single component case
  *
  * @param distGraber Pointer of distGraber that helps discretize the shape
- * @param detector Pointer of the detector object (pixel)
+ * @param spectrumInfo Spectrum info of the input workspace
+ * @param index Workspace index of the spectrum
  * @param L2Ds Vector to container the distance from 2nd scattering element to detector within the material
  * @param shape Pointer of the shape object
  */
 void MultipleScatteringCorrection::calculateL2Ds(const MultipleScatteringCorrectionDistGraber &distGraber,
-                                                 const IDetector &detector, std::vector<double> &L2Ds,
-                                                 const Geometry::IObject &shape) const {
-  V3D detectorPos(detector.getPos());
-  if (detector.nDets() > 1) {
+                                                 const API::SpectrumInfo &spectrumInfo, const size_t index,
+                                                 std::vector<double> &L2Ds, const Geometry::IObject &shape) const {
+  V3D detectorPos(spectrumInfo.position(index));
+  if (spectrumInfo.spectrumDefinition(index).size() > 1) {
     // We need to make sure this is right for grouped detectors - should use
     // average theta & phi
-    detectorPos.spherical(detectorPos.norm(), detector.getTwoTheta(V3D(), V3D(0, 0, 1)) * RAD2DEG,
-                          detector.getPhi() * RAD2DEG);
+    detectorPos.spherical(detectorPos.norm(), spectrumInfo.twoTheta(index, V3D(), V3D(0, 0, 1)) * RAD2DEG,
+                          spectrumInfo.phi(index) * RAD2DEG);
   }
 
   // calculate the distance between the detector and the shape (sample or container)
@@ -775,17 +775,17 @@ void MultipleScatteringCorrection::calculateL2Ds(const MultipleScatteringCorrect
 
 void MultipleScatteringCorrection::calculateL2Ds(const MultipleScatteringCorrectionDistGraber &distGraberContainer, //
                                                  const MultipleScatteringCorrectionDistGraber &distGraberSample,    //
-                                                 const IDetector &detector,                                         //
+                                                 const API::SpectrumInfo &spectrumInfo, const size_t index,         //
                                                  std::vector<double> &container_L2Ds,                               //
                                                  std::vector<double> &sample_L2Ds,                                  //
                                                  const Geometry::IObject &shapeContainer,                           //
                                                  const Geometry::IObject &shapeSample) const {
-  V3D detectorPos(detector.getPos());
-  if (detector.nDets() > 1) {
+  V3D detectorPos(spectrumInfo.position(index));
+  if (spectrumInfo.spectrumDefinition(index).size() > 1) {
     // We need to make sure this is right for grouped detectors - should use
     // average theta & phi
-    detectorPos.spherical(detectorPos.norm(), detector.getTwoTheta(V3D(), V3D(0, 0, 1)) * RAD2DEG,
-                          detector.getPhi() * RAD2DEG);
+    detectorPos.spherical(detectorPos.norm(), spectrumInfo.twoTheta(index, V3D(), V3D(0, 0, 1)) * RAD2DEG,
+                          spectrumInfo.phi(index) * RAD2DEG);
   }
 
   const int64_t numVolumeElementsSample = distGraberSample.m_numVolumeElements;

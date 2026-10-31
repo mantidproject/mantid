@@ -928,7 +928,7 @@ void Instrument::removeDetectorFinalize() {
 void Instrument::getBoundingBox(BoundingBox &assemblyBox) const {
   if (m_map) {
 
-    if (m_map->hasComponentInfo(this->baseInstrument().get())) {
+    if (m_map->hasComponentInfo(m_instr.get())) {
       assemblyBox = m_map->componentInfo().boundingBox(index(), &assemblyBox);
       return;
     }
@@ -1485,6 +1485,10 @@ Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
   compInfo->m_componentInfo->setDetectorInfo(detInfo->m_detectorInfo.get());
   // Point the clone at THIS map's parameter store.
   compInfo->m_parameterInfo = pmap.sharedParameterInfo();
+  detInfo->m_parameterInfo = pmap.sharedParameterInfo();
+  // Take the frame from the instrument rather than the cached copy, in case it was set after the cache was built.
+  compInfo->m_referenceFrame = getReferenceFrame();
+  detInfo->m_referenceFrame = compInfo->m_referenceFrame;
   const auto parInstrument = ParComponentFactory::createInstrument(
       std::shared_ptr<const Instrument>(this, NoDeleting()), std::shared_ptr<ParameterMap>(&pmap, NoDeleting()));
   detInfo->m_instrument = parInstrument;

@@ -28,6 +28,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   automated-ui-tests:
     # scheduled runs on a fork would only queue against runners that do not exist there
@@ -64,7 +67,7 @@ jobs:
       EXTRA_CMAKE_FLAGS: "-DENABLE_PRECOMMIT=OFF"
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # Needed to fetch the tags for versioningit
           fetch-depth: 100
@@ -112,7 +115,7 @@ jobs:
           pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/run-tests ${GITHUB_WORKSPACE} false false false false ${BUILD_THREADS} true
 
       - name: Archive automated UI test output
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: junit-automated-ui-${{ matrix.os }}
@@ -120,7 +123,7 @@ jobs:
           path: ${{ github.workspace }}/build/Testing/junit-uitest.xml
 
       - name: Upload build and test log artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: test_logs_${{ matrix.os }}
@@ -151,14 +154,14 @@ jobs:
 
     steps:
       - name: Checkout the Slack summary script
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           sparse-checkout: .github/scripts/
           sparse-checkout-cone-mode: false
           persist-credentials: false
 
       - name: Download JUnit results
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         # nothing to publish is a normal outcome here, e.g. if every build failed
         continue-on-error: true
         with:
@@ -166,7 +169,7 @@ jobs:
           path: artifacts
 
       - name: Publish results (Linux)
-        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        uses: EnricoMi/publish-unit-test-result-action/linux@d0a4676d0e0b938bc201470d88276b7c74c712b3 # v2.24.0
         if: ${{ hashFiles('artifacts/junit-automated-ui-Linux/junit-uitest.xml') != '' }}
         with:
           check_name: "Automated UI test results (Linux)"
@@ -178,7 +181,7 @@ jobs:
           action_fail_on_inconclusive: false
 
       - name: Publish results (Windows)
-        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        uses: EnricoMi/publish-unit-test-result-action/linux@d0a4676d0e0b938bc201470d88276b7c74c712b3 # v2.24.0
         if: ${{ hashFiles('artifacts/junit-automated-ui-Windows/junit-uitest.xml') != '' }}
         with:
           check_name: "Automated UI test results (Windows)"

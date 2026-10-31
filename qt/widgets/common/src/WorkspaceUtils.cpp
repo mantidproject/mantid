@@ -13,6 +13,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Unit.h"
 #include <boost/algorithm/string.hpp>
 #include <regex>
 

@@ -64,7 +64,7 @@ public:
     if (!ws)
       return;
     TS_ASSERT_EQUALS(ws->blocksize(), 501);
-    TS_ASSERT_EQUALS(ws->getInstrument()->getName(), "REF_L");
+    TS_ASSERT_EQUALS(ws->getInstrumentName(), "REF_L");
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 77824);
 
     auto &spec = ws->getSpectrum(27955);

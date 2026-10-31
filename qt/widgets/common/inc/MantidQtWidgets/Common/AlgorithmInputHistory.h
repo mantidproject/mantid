@@ -9,9 +9,9 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "DllOption.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidQtWidgets/Common/Configurable.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <QHash>
 #include <QString>
 

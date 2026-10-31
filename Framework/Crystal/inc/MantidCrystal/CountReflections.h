@@ -11,7 +11,6 @@
 #include "MantidCrystal/PeakStatisticsTools.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
-#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 namespace Crystal {

@@ -328,7 +328,7 @@ void GenerateGroupingPowder::createGroups() {
     const double groupId = (double)(*label)(spectrumInfo, i);
 
     if (spectrumInfo.hasUniqueDetector(i)) {
-      this->m_groupWS->setValue(det.getID(), groupId);
+      this->m_groupWS->setValue(spectrumInfo.firstDetectorID(i), groupId);
     } else {
       const auto &group = dynamic_cast<const DetectorGroup &>(det);
       const auto idv = group.getDetectorIDs();
@@ -365,7 +365,7 @@ void GenerateGroupingPowder::saveAsXML() {
   AutoPtr<Document> pDoc = new Document;
   AutoPtr<Element> pRoot = pDoc->createElement("detector-grouping");
   pDoc->appendChild(pRoot);
-  pRoot->setAttribute("instrument", this->m_groupWS->getInstrument()->getName());
+  pRoot->setAttribute("instrument", this->m_groupWS->getInstrumentName());
 
   const double step = getProperty("AngleStep");
   const auto numSteps = int(180. / step + 1);
@@ -458,7 +458,7 @@ void GenerateGroupingPowder::saveAsPAR() {
     twoThetaAverage[where] += tt;
     rAverage[where] += spectrumInfo.l2(i);
     if (spectrumInfo.hasUniqueDetector(i)) {
-      groups[where].emplace_back(det.getID());
+      groups[where].emplace_back(spectrumInfo.firstDetectorID(i));
     } else {
       const auto &group = dynamic_cast<const DetectorGroup &>(det);
       const auto idv = group.getDetectorIDs();

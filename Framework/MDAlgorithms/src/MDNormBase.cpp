@@ -497,11 +497,10 @@ void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i)) {
       continue;
     }
-    const auto &detector = spectrumInfo.detector(i);
-    double theta = detector.getTwoTheta(m_samplePos, m_beamDir);
-    double phi = detector.getPhi();
+    double theta = spectrumInfo.twoTheta(i, m_samplePos, m_beamDir);
+    double phi = spectrumInfo.phi(i);
     // If the detector is a group, this should be the ID of the first detector
-    const auto detID = detector.getID();
+    const auto detID = spectrumInfo.firstDetectorID(i);
 
     // Get the flux spectrum spectrum number for diffraction
     size_t wsIdx = 0;

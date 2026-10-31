@@ -10,7 +10,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
-#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Unit.h"
@@ -49,8 +49,8 @@ void AddPeak::exec() {
   MatrixWorkspace_sptr runWS = getProperty("RunWorkspace");
 
   // Check the instruments match before attempting to add a peak.
-  auto runInst = runWS->getInstrument()->getName();
-  auto peakInst = peaksWS->getInstrument()->getName();
+  auto runInst = runWS->getInstrumentName();
+  auto peakInst = peaksWS->getInstrumentName();
   if (peaksWS->getNumberPeaks() > 0 && (runInst != peakInst)) {
     throw std::runtime_error("The peak from " + runWS->getName() + " comes from a different instrument (" + runInst +
                              ") to the peaks "
@@ -64,11 +64,11 @@ void AddPeak::exec() {
   const double count = getProperty("BinCount");
 
   const auto &detectorInfo = runWS->detectorInfo();
+  const auto &componentInfo = runWS->componentInfo();
   const size_t detectorIndex = detectorInfo.indexOf(detID);
 
   double theta2 = detectorInfo.twoTheta(detectorIndex);
-  const Mantid::Geometry::IDetector &det = detectorInfo.detector(detectorIndex);
-  double phi = det.getPhi();
+  double phi = detectorInfo.phi(detectorIndex);
 
   // In the inelastic convention, Q = ki - kf.
   // qSign later in algorithm will change to kf - ki for Crystallography
@@ -89,15 +89,14 @@ void AddPeak::exec() {
     if (run.hasProperty("Ei")) {
       emode = 1; // direct
       efixed = run.getPropertyValueAsType<double>("Ei");
-    } else if (det.hasParameter("Efixed")) {
+    } else if (componentInfo.hasParameter(detectorIndex, "Efixed")) {
       emode = 2; // indirect
       try {
-        const Mantid::Geometry::ParameterMap &pmap = runWS->constInstrumentParameters();
-        Mantid::Geometry::Parameter_sptr par = pmap.getRecursive(&det, "Efixed");
-        if (par) {
-          efixed = par->value<double>();
+        const auto efixedValues = componentInfo.getNumberParameter(detectorIndex, "Efixed");
+        if (!efixedValues.empty()) {
+          efixed = efixedValues.front();
         }
-      } catch (std::runtime_error &) { /* Throws if a DetectorGroup, use single
+      } catch (std::runtime_error &) { /* Throws if the parameter is not a double, use single
                                           provided value */
       }
     } else {

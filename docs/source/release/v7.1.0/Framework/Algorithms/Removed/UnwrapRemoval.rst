@@ -1,0 +1,1 @@
+- Removed UnwrapMonitorsInTOF and UnwrapSNS (deprecated since release 6.13.0).

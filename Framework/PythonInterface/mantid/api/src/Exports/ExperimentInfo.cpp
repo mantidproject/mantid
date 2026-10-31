@@ -47,18 +47,20 @@ list getResourceFilenames(const std::string &prefix, const list &fileFormats, co
 
 Mantid::Geometry::Instrument_const_sptr getInstrumentDeprecated(const ExperimentInfo &self) {
   /** TODO Uncomment this block for Mantid 7.1
-  PyErr_Warn(PyExc_DeprecationWarning,
-             "'ExperimentInfo.getInstrument()' is deprecated in Mantid 7.0. "
-             "Use the componentInfo(), detectorInfo() and spectrumInfo() access layers instead. "
-             "See the 'Instrument Access via SpectrumInfo, DetectorInfo, ComponentInfo' concept page, "
-             "located at: https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html");
+  if (PyErr_Warn(PyExc_DeprecationWarning,
+                 "'ExperimentInfo.getInstrument()' is deprecated in Mantid 7.0. "
+                 "Use the componentInfo(), detectorInfo() and spectrumInfo() access layers instead. "
+                 "See the 'Instrument Access via SpectrumInfo, DetectorInfo, ComponentInfo' concept page, "
+                 "located at: https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html") < 0)
+    throw boost::python::error_already_set();
   */
   return self.getInstrument();
 }
 
 std::string getInstrumentFilenameWarn(const std::string &instName, const std::string &date = "") {
-  PyErr_Warn(PyExc_DeprecationWarning, "ExperimentInfo.getInstrumentFilename() is deprecated.\n"
-                                       "Use InstrumentFileFinder.getInstrumentFilename() instead.");
+  if (PyErr_Warn(PyExc_DeprecationWarning, "ExperimentInfo.getInstrumentFilename() is deprecated.\n"
+                                           "Use InstrumentFileFinder.getInstrumentFilename() instead.") < 0)
+    throw boost::python::error_already_set();
   return InstrumentFileFinder::getInstrumentFilename(instName, date);
 }
 
@@ -149,6 +151,11 @@ void export_ExperimentInfo() {
            "Return a const reference to the "
            ":class:`~mantid.geometry.ComponentInfo` "
            "object.")
+      .def("baseComponentInfo", &ExperimentInfo::baseComponentInfo, return_value_policy<reference_existing_object>(),
+           args("self"),
+           "Return a const reference to a :class:`~mantid.geometry.ComponentInfo` "
+           "describing the base instrument: the geometry as loaded from the instrument "
+           "definition, before any moves, rotations or other parameters were applied.")
       .def("instrumentValidFromDate", &instrumentValidFromDate, args("self"),
            "Return the valid-from :class:`~mantid.kernel.DateAndTime` of the instrument.")
       .def("instrumentValidToDate", &instrumentValidToDate, args("self"),

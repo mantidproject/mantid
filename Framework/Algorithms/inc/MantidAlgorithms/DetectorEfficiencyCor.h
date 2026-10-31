@@ -96,7 +96,7 @@ private:
   /// Calculate one over the wave vector for 2 bin bounds
   double calculateOneOverK(double loBinBound, double uppBinBound) const;
   /// Sets the detector geometry cache if necessary
-  void getDetectorGeometry(const Geometry::IDetector &det, double &detRadius, Kernel::V3D &detAxis);
+  void getDetectorGeometry(const Geometry::IObject &shape, double &detRadius, Kernel::V3D &detAxis);
   /// Computes the distance to the given shape from a starting point
   double distToSurface(const Kernel::V3D &start, const Geometry::IObject *shape) const;
   /// Computes the detector efficiency for a given paramater
@@ -111,8 +111,6 @@ private:
   API::MatrixWorkspace_const_sptr m_inputWS;
   /// output workspace, maybe the same as the input one
   API::MatrixWorkspace_sptr m_outputWS;
-  /// points the map that stores additional properties for detectors in that map
-  const Geometry::ParameterMap *m_paraMap;
 
   /// stores the user selected value for incidient energy of the neutrons
   double m_Ei;

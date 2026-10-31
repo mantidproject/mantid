@@ -11,6 +11,7 @@
 #include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/FloatingPointComparison.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"

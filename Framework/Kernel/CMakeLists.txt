@@ -200,6 +200,7 @@ set(INC_FILES
     inc/MantidKernel/ISaveable.h
     inc/MantidKernel/ITimeSeriesProperty.h
     inc/MantidKernel/IValidator.h
+    inc/MantidKernel/IValidator_fwd.h
     inc/MantidKernel/IndexSet.h
     inc/MantidKernel/Instantiator.h
     inc/MantidKernel/InstrumentInfo.h
@@ -215,6 +216,7 @@ set(INC_FILES
     inc/MantidKernel/LogFilter.h
     inc/MantidKernel/LogParser.h
     inc/MantidKernel/Logger.h
+    inc/MantidKernel/Logger_fwd.h
     inc/MantidKernel/MDAxisValidator.h
     inc/MantidKernel/MDUnit.h
     inc/MantidKernel/MRUList.h
@@ -248,6 +250,7 @@ set(INC_FILES
     inc/MantidKernel/PocoVersion.h
     inc/MantidKernel/ProgressBase.h
     inc/MantidKernel/Property.h
+    inc/MantidKernel/Property_fwd.h
     inc/MantidKernel/PropertyHelper.h
     inc/MantidKernel/PropertyHistory.h
     inc/MantidKernel/PropertyManager.h
@@ -282,7 +285,6 @@ set(INC_FILES
     inc/MantidKernel/StringContainsValidator.h
     inc/MantidKernel/StringTokenizer.h
     inc/MantidKernel/Strings.h
-    inc/MantidKernel/System.h
     inc/MantidKernel/Task.h
     inc/MantidKernel/TestChannel.h
     inc/MantidKernel/ThreadPool.h
@@ -297,6 +299,7 @@ set(INC_FILES
     inc/MantidKernel/TopicInfo.h
     inc/MantidKernel/TypedValidator.h
     inc/MantidKernel/Unit.h
+    inc/MantidKernel/Unit_fwd.h
     inc/MantidKernel/UnitConversion.h
     inc/MantidKernel/UnitFactory.h
     inc/MantidKernel/UnitLabel.h
@@ -307,6 +310,7 @@ set(INC_FILES
     inc/MantidKernel/Utils.h
     inc/MantidKernel/V2D.h
     inc/MantidKernel/V3D.h
+    inc/MantidKernel/V3D_fwd.h
     inc/MantidKernel/VMD.h
     inc/MantidKernel/VectorHelper.h
     inc/MantidKernel/VisibleWhenProperty.h
@@ -488,7 +492,6 @@ set_target_properties(Kernel PROPERTIES OUTPUT_NAME MantidKernel COMPILE_DEFINIT
 target_precompile_headers(
   Kernel
   PRIVATE
-  inc/MantidKernel/System.h
   <cstddef>
   <cstdint>
   <cstdio>

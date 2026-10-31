@@ -24,6 +24,9 @@ on:
         default: false
         type: boolean
 
+permissions:
+  contents: read
+
 env:
   # the secrets are only available on branches in the main repository
   RELEASES_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN || 'unset_token' }}
@@ -34,6 +37,8 @@ env:
 jobs:
   github-releases:
     if: ${{ github.repository_owner == 'mantidproject' && (github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'github-releases') }}
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: fail if GITHUB_TOKEN is unavailable
@@ -41,7 +46,7 @@ jobs:
         run: |
           echo "RELEASES_GITHUB_TOKEN is unset_token. The GITHUB_TOKEN secret is not available in this workflow context."
           exit 1
-      - uses: thomashampson/delete-older-releases@main
+      - uses: thomashampson/delete-older-releases@2ff234dfe6ad2757ac7e53d96e298fbe82b0fd56 # main
         with:
           keep_latest: 3
           # Nightly tags are of the form v{major}.{minor}.{date}.{time}
@@ -66,7 +71,7 @@ jobs:
           - mantiddocs
     steps:
       - name: check out setup-pixi action
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           sparse-checkout: |
             .github/actions/setup-pixi/
@@ -75,7 +80,7 @@ jobs:
             pixi.toml
           sparse-checkout-cone-mode: false
       - uses: ./.github/actions/setup-pixi
-      - uses: neutrons/gh-actions/pkg-remove@eb7a7c6fcfd0cda1a7b238329afc0afd09a4f4af # v2
+      - uses: neutrons/gh-actions/pkg-remove@46e28a74c8872901c571e0493d26871afe2662fb # v2
         with:
           anaconda-token: ${{ env.ANACONDA_TOKEN }}
           organization: mantid
@@ -99,7 +104,7 @@ jobs:
           - mantiddocs
     steps:
       - name: check out setup-pixi action
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           sparse-checkout: |
             .github/actions/setup-pixi/
@@ -108,7 +113,7 @@ jobs:
             pixi.toml
           sparse-checkout-cone-mode: false
       - uses: ./.github/actions/setup-pixi
-      - uses: neutrons/gh-actions/pkg-remove@eb7a7c6fcfd0cda1a7b238329afc0afd09a4f4af # v2
+      - uses: neutrons/gh-actions/pkg-remove@46e28a74c8872901c571e0493d26871afe2662fb # v2
         with:
           anaconda-token: ${{ env.ANACONDA_TOKEN_MANTIDORNL }}
           organization: mantid-ornl

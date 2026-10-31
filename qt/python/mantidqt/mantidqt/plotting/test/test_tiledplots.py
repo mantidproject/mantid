@@ -29,7 +29,7 @@ from mantid.plots.plotfunctions import (
     manage_workspace_names,
     stored_mantid_tiled_axis_position,
 )
-from mantidqt.plotting.functions import plot_from_names
+from mantidqt.plotting.functions import plot_from_names, share_tiled_axes
 
 
 # Avoid importing the whole of mantid for a single mock of the workspace class
@@ -68,6 +68,12 @@ class TiledPlotsTest(TestCase):
 
         AnalysisDataService.addOrReplace("test_ws", self._test_ws)
         AnalysisDataService.addOrReplace("test_ws_2", self._test_ws_2)
+        self._test_ws.getAxis(0).setUnit("TOF")
+        self._test_ws_2.getAxis(0).setUnit("TOF")
+        self._test_ws.getAxis(1).setUnit("Empty")
+        self._test_ws_2.getAxis(1).setUnit("Empty")
+        self._test_ws.setYUnit("Counts")
+        self._test_ws_2.setYUnit("Counts")
 
         self.get_spectra_selection_patcher = mock.patch("mantidqt.plotting.functions.get_spectra_selection")
         self.addCleanup(self.get_spectra_selection_patcher.stop)
@@ -201,6 +207,64 @@ class TiledPlotsTest(TestCase):
         self.assertEqual([artist.workspace_index for artist in fig.axes[0].tracked_workspaces["test_ws"]], [0])
         self.assertEqual(list(fig.axes[2].tracked_workspaces.keys()), ["test_ws_2"])
         self.assertEqual([artist.workspace_index for artist in fig.axes[2].tracked_workspaces["test_ws_2"]], [0])
+
+    def test_share_tiled_axes_shares_both_axes_across_tiles_and_preserves_combined_limits(self):
+        fig = self._create_plot(names=["test_ws", "test_ws_2"], errors=False, overplot=False)
+        fig.axes[0].set_xlim(1, 2)
+        fig.axes[1].set_xlim(10, 20)
+        fig.axes[0].set_ylim(1, 2)
+        fig.axes[1].set_ylim(10, 20)
+
+        share_tiled_axes(fig)
+
+        self.assertTrue(fig.axes[0].get_shared_y_axes().joined(fig.axes[0], fig.axes[1]))
+        self.assertTrue(fig.axes[0].get_shared_x_axes().joined(fig.axes[0], fig.axes[1]))
+        self.assertEqual((1, 20), fig.axes[0].get_xlim())
+        self.assertEqual((1, 20), fig.axes[0].get_ylim())
+
+    def test_share_tiled_axes_requires_matching_units(self):
+        self._test_ws_2.getAxis(0).setUnit("Wavelength")
+        x_mismatch_figure = self._create_plot(names=["test_ws", "test_ws_2"], errors=False, overplot=False)
+
+        share_tiled_axes(x_mismatch_figure)
+
+        self.assertFalse(x_mismatch_figure.axes[0].get_shared_x_axes().joined(x_mismatch_figure.axes[0], x_mismatch_figure.axes[1]))
+        self.assertTrue(x_mismatch_figure.axes[0].get_shared_y_axes().joined(x_mismatch_figure.axes[0], x_mismatch_figure.axes[1]))
+
+        self._test_ws_2.getAxis(0).setUnit("TOF")
+        self._test_ws_2.setYUnit("Events")
+        y_mismatch_figure = self._create_plot(names=["test_ws", "test_ws_2"], errors=False, overplot=False)
+
+        share_tiled_axes(y_mismatch_figure)
+
+        self.assertTrue(y_mismatch_figure.axes[0].get_shared_x_axes().joined(y_mismatch_figure.axes[0], y_mismatch_figure.axes[1]))
+        self.assertFalse(y_mismatch_figure.axes[0].get_shared_y_axes().joined(y_mismatch_figure.axes[0], y_mismatch_figure.axes[1]))
+
+    def test_share_tiled_axes_makes_new_axis_inherit_existing_scale_and_limits(self):
+        fig = self._create_plot(names=["test_ws", "test_ws_2"], errors=False, overplot=False)
+        fig.axes[0].set_ylim(2, 8)
+        fig.axes[1].set_yscale("log")
+        fig.axes[1].set_ylim(0.1, 100)
+
+        share_tiled_axes(fig, new_axes=[fig.axes[1]])
+
+        self.assertTrue(fig.axes[0].get_shared_y_axes().joined(fig.axes[0], fig.axes[1]))
+        self.assertEqual("linear", fig.axes[1].get_yscale())
+        self.assertEqual((2, 8), fig.axes[1].get_ylim())
+
+    def test_share_tiled_axes_preserves_existing_limits_across_multiple_new_axes(self):
+        third_workspace = WorkspaceFactory.Instance().create("Workspace2D", NVectors=2, YLength=5, XLength=5)
+        third_workspace.getAxis(0).setUnit("TOF")
+        third_workspace.setYUnit("Counts")
+        AnalysisDataService.addOrReplace("test_ws_3", third_workspace)
+        fig = self._create_plot(names=["test_ws", "test_ws_2", "test_ws_3"], errors=False, overplot=False)
+        fig.axes[0].set_ylim(2, 8)
+        fig.axes[1].set_ylim(10, 20)
+        fig.axes[2].set_ylim(30, 40)
+
+        share_tiled_axes(fig, new_axes=fig.axes[1:3])
+
+        self.assertEqual((2, 8), fig.axes[2].get_ylim())
 
     def _create_plot(self, names, errors, overplot, wksp_indices=None, plot_type=SpectraSelection.Tiled, fig=None):
         selection = SpectraSelection(names)

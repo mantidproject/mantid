@@ -6,11 +6,16 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/NoShape.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
 #include "boost/make_shared.hpp"
@@ -25,6 +30,25 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 namespace Mantid::DataObjects {
+
+namespace {
+/**
+ * Calls func with an InstrumentRayTracer for the given instrument. The
+ * instrument's own ComponentInfo/DetectorInfo are used if it is parametrized,
+ * otherwise they are built for the duration of the call.
+ * @param inst :: The instrument to trace
+ * @param func :: Callable taking a const InstrumentRayTracer &
+ * @return The result of func
+ */
+template <typename Func> bool withRayTracer(Instrument const &inst, Func const &func) {
+  if (inst.isParametrized()) {
+    auto const &pmap = *inst.getParameterMap();
+    return func(InstrumentRayTracer(pmap.componentInfo(), pmap.detectorInfo()));
+  }
+  auto const [compInfo, detInfo] = InstrumentVisitor::makeWrappers(inst);
+  return func(InstrumentRayTracer(*compInfo, *detInfo));
+}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /** Default constructor */
@@ -577,8 +601,8 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &qLab, std::optional<double> d
     // client seems to know better.
   } else {
     // Find the detector
-    InstrumentRayTracer tracer(m_inst);
-    const bool found = findDetector(detectorDir, tracer);
+    const bool found = withRayTracer(
+        *m_inst, [this, &detectorDir](InstrumentRayTracer const &tracer) { return findDetector(detectorDir, tracer); });
     if (!found) {
       // This is important, so we ought to log when this fails to happen.
       g_log.debug("Could not find detector after setting qLab via setQLab with "
@@ -621,8 +645,7 @@ double Peak::getValueByColName(std::string name) const {
  * @return true if the detector ID was found.
  */
 bool Peak::findDetector() {
-  InstrumentRayTracer tracer(m_inst);
-  return findDetector(tracer);
+  return withRayTracer(*m_inst, [this](InstrumentRayTracer const &tracer) { return findDetector(tracer); });
 }
 
 /**
@@ -650,14 +673,15 @@ bool Peak::findDetector(const InstrumentRayTracer &tracer) {
 bool Peak::findDetector(const Mantid::Kernel::V3D &beam, const InstrumentRayTracer &tracer) {
   bool found = false;
   // Create a ray tracer
+  auto const &detInfo = tracer.detectorInfo();
   tracer.traceFromSample(beam);
-  IDetector_const_sptr det = tracer.getDetectorResult();
-  if (det) {
+  auto const detIndex = tracer.getDetectorResult();
+  if (detIndex != ComponentInfo::invalidIndex) {
     // Set the detector ID, the row, col, etc.
-    this->setDetectorID(det->getID());
+    this->setDetectorID(detInfo.detid(detIndex));
     // The old detector position is not more precise if it comes from
     // FindPeaksMD
-    detPos = det->getPos();
+    detPos = detInfo.position(detIndex);
     found = true;
   }
   // Use tube-gap parameter in instrument parameter file  to find peaks with
@@ -673,20 +697,20 @@ bool Peak::findDetector(const Mantid::Kernel::V3D &beam, const InstrumentRayTrac
         gapDir[i] = gap;
         V3D beam1 = beam + gapDir;
         tracer.traceFromSample(normalize(beam1));
-        IDetector_const_sptr det1 = tracer.getDetectorResult();
+        auto const detIndex1 = tracer.getDetectorResult();
         V3D beam2 = beam - gapDir;
         tracer.traceFromSample(normalize(beam2));
-        IDetector_const_sptr det2 = tracer.getDetectorResult();
-        if (det1 && det2) {
+        auto const detIndex2 = tracer.getDetectorResult();
+        if (detIndex1 != ComponentInfo::invalidIndex && detIndex2 != ComponentInfo::invalidIndex) {
           // compute the cosAngle to select the detector closes to beam
           if (beam1.cosAngle(beam) > beam2.cosAngle(beam)) {
             // det1 is closer, use det1
-            this->setDetectorID(static_cast<int>(det1->getID()));
-            detPos = det1->getPos();
+            this->setDetectorID(detInfo.detid(detIndex1));
+            detPos = detInfo.position(detIndex1);
           } else {
             // det2 is closer, let's use det2
-            this->setDetectorID(static_cast<int>(det2->getID()));
-            detPos = det2->getPos();
+            this->setDetectorID(detInfo.detid(detIndex2));
+            detPos = detInfo.position(detIndex2);
           }
           found = true;
           break;

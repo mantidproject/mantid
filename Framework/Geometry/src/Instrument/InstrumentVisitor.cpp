@@ -18,6 +18,7 @@
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 
@@ -81,6 +82,21 @@ Beamline::PixelGridComponent makePixelGridComponent(const GridDetector &grid) {
   pixelGrid.maxDetectorID = grid.maxDetectorID();
   return pixelGrid;
 }
+
+/// Captures the metadata of a Structured bank once, at instrument-build time. As for
+/// makePixelGridComponent(), none of it is ever parametrized.
+Beamline::StructuredGridComponent makeStructuredGridComponent(const StructuredDetector &bank) {
+  Beamline::StructuredGridComponent structuredGrid;
+  structuredGrid.nX = static_cast<int>(bank.xPixels());
+  structuredGrid.nY = static_cast<int>(bank.yPixels());
+  structuredGrid.idStart = bank.idStart();
+  structuredGrid.idStep = bank.idStep();
+  structuredGrid.idStepByRow = bank.idStepByRow();
+  structuredGrid.idFillByFirstY = bank.idFillByFirstY();
+  structuredGrid.xVertices = bank.getXValues();
+  structuredGrid.yVertices = bank.getYValues();
+  return structuredGrid;
+}
 } // namespace
 
 /**
@@ -114,7 +130,8 @@ InstrumentVisitor::InstrumentVisitor(std::shared_ptr<const Instrument> instrumen
       m_componentType(std::make_shared<std::vector<Beamline::ComponentType>>()),
       m_names(std::make_shared<std::vector<std::string>>(m_orderedDetectorIds->size())),
       m_sideBySideViewPositions(std::make_shared<std::map<size_t, Eigen::Vector2d>>()),
-      m_pixelGridComponents(std::make_shared<std::map<size_t, Beamline::PixelGridComponent>>()) {
+      m_pixelGridComponents(std::make_shared<std::map<size_t, Beamline::PixelGridComponent>>()),
+      m_structuredGridComponents(std::make_shared<std::map<size_t, Beamline::StructuredGridComponent>>()) {
   if (m_instrument->isParametrized()) {
     m_pmap = m_instrument->getParameterMap().get();
   }
@@ -305,6 +322,7 @@ size_t InstrumentVisitor::registerStructuredBank(const ICompAssembly &bank) {
   auto index = registerComponentAssembly(bank);
   size_t rangesIndex = index - m_orderedDetectorIds->size();
   (*m_componentType)[rangesIndex] = Beamline::ComponentType::Structured;
+  (*m_structuredGridComponents)[index] = makeStructuredGridComponent(dynamic_cast<const StructuredDetector &>(bank));
   return index;
 }
 
@@ -405,7 +423,7 @@ std::unique_ptr<Beamline::ComponentInfo> InstrumentVisitor::componentInfo() cons
   return std::make_unique<Mantid::Beamline::ComponentInfo>(
       m_assemblySortedDetectorIndices, m_detectorRanges, m_assemblySortedComponentIndices, m_componentRanges,
       m_parentComponentIndices, m_children, m_positions, m_rotations, m_scaleFactors, m_componentType, m_names,
-      m_sideBySideViewPositions, m_pixelGridComponents, m_sourceIndex, m_sampleIndex);
+      m_sideBySideViewPositions, m_pixelGridComponents, m_sourceIndex, m_sampleIndex, m_structuredGridComponents);
 }
 
 std::unique_ptr<Beamline::DetectorInfo> InstrumentVisitor::detectorInfo() const {
@@ -427,21 +445,33 @@ std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> Instrum
   // Cross link Component and Detector info objects
   compInfo->setDetectorInfo(detInfo.get());
 
+  // Both wrappers must share the same parameter store and reference frame
+  auto const parameterInfo = makeParameterInfo();
+  auto const referenceFrame = m_instrument->getReferenceFrame();
   auto compInfoWrapper = std::make_unique<ComponentInfo>(std::move(compInfo), componentIds(), componentIdToIndexMap(),
-                                                         m_shapes, makeParameterInfo());
-  auto detInfoWrapper =
-      std::make_unique<DetectorInfo>(std::move(detInfo), m_instrument, detectorIds(), detectorIdToIndexMap());
+                                                         m_shapes, parameterInfo, referenceFrame);
+  auto detInfoWrapper = std::make_unique<DetectorInfo>(std::move(detInfo), m_instrument, detectorIds(),
+                                                       detectorIdToIndexMap(), parameterInfo, referenceFrame);
 
   return {std::move(compInfoWrapper), std::move(detInfoWrapper)};
 }
 
 std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
 InstrumentVisitor::makeWrappers(const Instrument &instrument, ParameterMap *pmap) {
-  // Visitee instrument is base instrument if no ParameterMap
-  const auto visiteeInstrument =
-      pmap ? ParComponentFactory::createInstrument(std::shared_ptr<const Instrument>(&instrument, NoDeleting()),
-                                                   std::shared_ptr<ParameterMap>(pmap, NoDeleting()))
-           : std::shared_ptr<const Instrument>(&instrument, NoDeleting());
+  std::shared_ptr<const Instrument> visiteeInstrument;
+  if (pmap) {
+    visiteeInstrument =
+        ParComponentFactory::createInstrument(std::shared_ptr<const Instrument>(&instrument, NoDeleting()),
+                                              std::shared_ptr<ParameterMap>(pmap, NoDeleting()));
+  } else if (instrument.isParametrized()) {
+    // Walk a copy of the instrument's map. The visitor rekeys the map it walks and strips the legacy
+    // position parameters from it, which must not happen to a map the caller has only lent with the
+    // instrument, e.g. a workspace's map lent with its physical instrument.
+    auto const mapCopy = std::make_shared<ParameterMap>(*instrument.getParameterMap());
+    visiteeInstrument = ParComponentFactory::createInstrument(instrument.baseInstrument(), mapCopy);
+  } else {
+    visiteeInstrument = std::shared_ptr<const Instrument>(&instrument, NoDeleting());
+  }
   InstrumentVisitor visitor(visiteeInstrument);
   visitor.walkInstrument();
   return visitor.makeWrappers();

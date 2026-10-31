@@ -13,6 +13,7 @@
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
@@ -57,16 +58,17 @@ const Kernel::V3D toShapeFrame(const Kernel::V3D &point, const Beamline::Compone
  * @param componentIdToIndexMap : ID -> index translation map
  * @param shapes : Shapes for each component
  * @param parameterInfo : Index-keyed parameter store
+ * @param referenceFrame: A reference frame
  * */
 ComponentInfo::ComponentInfo(
     std::unique_ptr<Beamline::ComponentInfo> componentInfo,
     std::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>> componentIds,
     std::shared_ptr<const std::unordered_map<Geometry::IComponent const *, size_t>> componentIdToIndexMap,
     std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> shapes,
-    std::shared_ptr<ParameterInfo> parameterInfo)
+    std::shared_ptr<ParameterInfo> parameterInfo, std::shared_ptr<const ReferenceFrame> referenceFrame)
     : m_componentInfo(std::move(componentInfo)), m_componentIds(std::move(componentIds)),
       m_compIDToIndex(std::move(componentIdToIndexMap)), m_shapes(std::move(shapes)),
-      m_parameterInfo(std::move(parameterInfo)) {
+      m_parameterInfo(std::move(parameterInfo)), m_referenceFrame(std::move(referenceFrame)) {
 
   if (m_componentIds->size() != m_compIDToIndex->size()) {
     throw std::invalid_argument("Inconsistent ID and Mapping input containers "
@@ -94,7 +96,8 @@ std::unique_ptr<Geometry::ComponentInfo> ComponentInfo::cloneWithoutDetectorInfo
  * ComponentInfo must be set up. */
 ComponentInfo::ComponentInfo(const ComponentInfo &other)
     : m_componentInfo(other.m_componentInfo->cloneWithoutDetectorInfo()), m_componentIds(other.m_componentIds),
-      m_compIDToIndex(other.m_compIDToIndex), m_shapes(other.m_shapes), m_parameterInfo(other.m_parameterInfo) {}
+      m_compIDToIndex(other.m_compIDToIndex), m_shapes(other.m_shapes), m_parameterInfo(other.m_parameterInfo),
+      m_referenceFrame(other.m_referenceFrame) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 ComponentInfo::~ComponentInfo() = default;
@@ -252,6 +255,13 @@ void ComponentInfo::setPosition(const size_t componentIndex, const Kernel::V3D &
   m_componentInfo->setPosition(componentIndex, Kernel::toVector3d(newPosition));
 }
 
+std::shared_ptr<const ReferenceFrame> ComponentInfo::referenceFrame() const {
+  if (m_referenceFrame)
+    return m_referenceFrame;
+  static const auto defaultFrame = std::make_shared<const ReferenceFrame>();
+  return defaultFrame;
+}
+
 void ComponentInfo::setRotation(const size_t componentIndex, const Kernel::Quat &newRotation) {
   m_componentInfo->setRotation(componentIndex, Kernel::toQuaterniond(newRotation));
 }
@@ -300,6 +310,17 @@ Beamline::PixelGridComponent ComponentInfo::pixelGridComponent(const size_t comp
     throw std::runtime_error("ComponentType is not Rectangular or Grid in ComponentInfo::pixelGridComponent.");
   }
   return m_componentInfo->pixelGridComponent(componentIndex);
+}
+
+bool ComponentInfo::isStructuredDetector(size_t const componentIndex) const {
+  return m_componentInfo->isStructuredDetector(componentIndex);
+}
+
+const Beamline::StructuredGridComponent &ComponentInfo::structuredGridComponent(const size_t componentIndex) const {
+  if (!isStructuredDetector(componentIndex)) {
+    throw std::runtime_error("ComponentType is not Structured in ComponentInfo::structuredGridComponent.");
+  }
+  return m_componentInfo->structuredGridComponent(componentIndex);
 }
 
 size_t ComponentInfo::detectorIndexAtXYZ(const size_t componentIndex, const int x, const int y, const int z) const {
@@ -644,15 +665,19 @@ size_t ComponentInfo::indexOfFullName(const std::string &fullName) const {
   return current;
 }
 
+Parameter_sptr ComponentInfo::findParameter(size_t componentIndex, std::string const &name, bool recursive) const {
+  if (!m_parameterInfo) {
+    return nullptr;
+  }
+  return recursive ? m_parameterInfo->getRecursive(*this, componentIndex, name)
+                   : m_parameterInfo->get(componentIndex, name);
+}
+
 template <class T>
 std::vector<T> ComponentInfo::getParameter(size_t componentIndex, const std::string &name, bool recursive) const {
   std::vector<T> result;
-  if (m_parameterInfo) {
-    Parameter_sptr const param = recursive ? m_parameterInfo->getRecursive(*this, componentIndex, name)
-                                           : m_parameterInfo->get(componentIndex, name);
-    if (param) {
-      result.emplace_back(param->value<T>());
-    }
+  if (auto const param = findParameter(componentIndex, name, recursive)) {
+    result.emplace_back(param->value<T>());
   }
   return result;
 }
@@ -758,9 +783,26 @@ void ComponentInfo::addFittingParameter(const size_t componentIndex, const std::
   mutableParameterInfo().addFittingParameter(componentIndex, parameter, fittingFunction);
 }
 
+const ParameterInfo::LogfileParameters &ComponentInfo::logfileParameters() const {
+  static ParameterInfo::LogfileParameters const empty;
+  return m_parameterInfo ? m_parameterInfo->logfileParameters() : empty;
+}
+
+void ComponentInfo::addLogfileParameter(const size_t componentIndex, const std::string &cacheKey,
+                                        std::shared_ptr<const XMLInstrumentParameter> parameter) {
+  mutableParameterInfo().addLogfileParameter(componentIndex, cacheKey, std::move(parameter));
+}
+
 void ComponentInfo::clearParameter(const size_t componentIndex, const std::string &name) {
   if (m_parameterInfo) {
     m_parameterInfo->clearParametersByName(componentIndex, name);
+  }
+}
+
+void ComponentInfo::clearParameters() {
+  // Cleared in place, not replaced: the store is shared with the owning ParameterMap.
+  if (m_parameterInfo) {
+    m_parameterInfo->clear();
   }
 }
 
@@ -789,16 +831,60 @@ std::vector<std::string> ComponentInfo::getStringParameter(const size_t componen
   return getParameter<std::string>(componentIndex, name, recursive);
 }
 
+std::vector<Kernel::V3D> ComponentInfo::getPositionParameter(const size_t componentIndex, const std::string &name,
+                                                             bool recursive) const {
+  return getParameter<Kernel::V3D>(componentIndex, name, recursive);
+}
+
+std::vector<Kernel::Quat> ComponentInfo::getRotationParameter(const size_t componentIndex, const std::string &name,
+                                                              bool recursive) const {
+  return getParameter<Kernel::Quat>(componentIndex, name, recursive);
+}
+
+std::string ComponentInfo::getParameterAsString(const size_t componentIndex, const std::string &name,
+                                                bool recursive) const {
+  auto const parameter = findParameter(componentIndex, name, recursive);
+  return parameter ? parameter->asString() : std::string();
+}
+
+bool ComponentInfo::getParameterVisible(const size_t componentIndex, const std::string &name, bool recursive) const {
+  auto const parameter = findParameter(componentIndex, name, recursive);
+  return parameter && parameter->visible();
+}
+
 std::string ComponentInfo::getParameterType(const size_t componentIndex, const std::string &name,
                                             bool recursive) const {
-  if (m_parameterInfo) {
-    Parameter_sptr const parameter = recursive ? m_parameterInfo->getRecursive(*this, componentIndex, name)
-                                               : m_parameterInfo->get(componentIndex, name);
-    if (parameter) {
-      return std::string(parameter->type());
-    }
+  auto const parameter = findParameter(componentIndex, name, recursive);
+  return parameter ? std::string(parameter->type()) : std::string();
+}
+
+std::string ComponentInfo::getParamDescription(const size_t componentIndex, const std::string &name,
+                                               bool recursive) const {
+  auto const parameter = findParameter(componentIndex, name, recursive);
+  return parameter ? parameter->getDescription() : std::string();
+}
+
+std::string ComponentInfo::getParamShortDescription(const size_t componentIndex, const std::string &name,
+                                                    bool recursive) const {
+  auto const parameter = findParameter(componentIndex, name, recursive);
+  return parameter ? parameter->getShortDescription() : std::string();
+}
+
+std::string ComponentInfo::getDescription(const size_t componentIndex) const {
+  return getParamDescription(componentIndex, name(componentIndex), false);
+}
+
+std::string ComponentInfo::getShortDescription(const size_t componentIndex) const {
+  return getParamShortDescription(componentIndex, name(componentIndex), false);
+}
+
+void ComponentInfo::setDescription(const size_t componentIndex, const std::string &description) {
+  auto const &componentName = name(componentIndex);
+  if (auto const parameter = findParameter(componentIndex, componentName, true)) {
+    parameter->setDescription(description);
+  } else {
+    addString(componentIndex, componentName, "", &description);
   }
-  return std::string();
 }
 
 double ComponentInfo::getFittingParameter(const size_t componentIndex, const std::string &name, double xvalue) const {

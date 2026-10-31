@@ -197,7 +197,6 @@ set(SRC_FILES
     src/MaskBinsFromWorkspace.cpp
     src/MaskBinsIf.cpp
     src/MaskDetectorsIf.cpp
-    src/MaskInstrument.cpp
     src/MaskNonOverlappingBins.cpp
     src/MatrixWorkspaceAccess.cpp
     src/Max.cpp
@@ -337,8 +336,6 @@ set(SRC_FILES
     src/UnGroupWorkspace.cpp
     src/UnaryOperation.cpp
     src/UnwrapMonitor.cpp
-    src/UnwrapMonitorsInTOF.cpp
-    src/UnwrapSNS.cpp
     src/UpdateScriptRepository.cpp
     src/VesuvioL1ThetaResolution.cpp
     src/WeightedMean.cpp
@@ -552,7 +549,6 @@ set(INC_FILES
     inc/MantidAlgorithms/MaskBinsFromWorkspace.h
     inc/MantidAlgorithms/MaskBinsIf.h
     inc/MantidAlgorithms/MaskDetectorsIf.h
-    inc/MantidAlgorithms/MaskInstrument.h
     inc/MantidAlgorithms/MaskNonOverlappingBins.h
     inc/MantidAlgorithms/MatrixWorkspaceAccess.h
     inc/MantidAlgorithms/Max.h
@@ -697,8 +693,6 @@ set(INC_FILES
     inc/MantidAlgorithms/UnGroupWorkspace.h
     inc/MantidAlgorithms/UnaryOperation.h
     inc/MantidAlgorithms/UnwrapMonitor.h
-    inc/MantidAlgorithms/UnwrapMonitorsInTOF.h
-    inc/MantidAlgorithms/UnwrapSNS.h
     inc/MantidAlgorithms/UpdateScriptRepository.h
     inc/MantidAlgorithms/VesuvioL1ThetaResolution.h
     inc/MantidAlgorithms/WeightedMean.h
@@ -910,7 +904,6 @@ set(TEST_FILES
     MaskBinsIfTest.h
     MaskBinsTest.h
     MaskDetectorsIfTest.h
-    MaskInstrumentTest.h
     MaskNonOverlappingBinsTest.h
     MaxEnt/MaxentCalculatorTest.h
     MaxEnt/MaxentEntropyNegativeValuesTest.h
@@ -1035,8 +1028,6 @@ set(TEST_FILES
     UnGroupWorkspaceTest.h
     UnaryOperationTest.h
     UnwrapMonitorTest.h
-    UnwrapMonitorsInTOFTest.h
-    UnwrapSNSTest.h
     VesuvioL1ThetaResolutionTest.h
     WeightedMeanOfWorkspaceTest.h
     WeightedMeanTest.h
@@ -1085,7 +1076,7 @@ target_include_directories(
   Algorithms PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 # Set the name of the generated library
-set_target_properties(Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms COMPILE_DEFINITIONS "IN_MANTID_ALGORITHMS")
+set_target_properties(Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Algorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")

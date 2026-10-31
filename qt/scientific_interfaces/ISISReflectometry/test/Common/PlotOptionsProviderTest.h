@@ -41,6 +41,10 @@ public:
     TS_ASSERT_EQUALS(options.outputType, PlotOutputType::ReflectivityCurve);
     TS_ASSERT_EQUALS(options.plotStyle, PlotStyle::Line);
     TS_ASSERT_EQUALS(options.layout, PlotLayout::Individual);
+    TS_ASSERT_EQUALS(options.xAxis.label, "Q");
+    TS_ASSERT_EQUALS(options.xAxis.unit, R"($\AA^{-1}$)");
+    TS_ASSERT_EQUALS(options.yAxis.label, "Reflectivity");
+    TS_ASSERT_EQUALS(options.yAxis.unit, "");
     TS_ASSERT_EQUALS(options.xAxis.scale, AxisScale::Log);
     TS_ASSERT_EQUALS(options.yAxis.scale, AxisScale::Log);
     TS_ASSERT(options.showErrors);
@@ -55,8 +59,10 @@ public:
     TS_ASSERT_EQUALS(options.plotStyle, PlotStyle::Colorfill);
     TS_ASSERT_EQUALS(options.layout, PlotLayout::Tiled);
     TS_ASSERT_EQUALS(options.xAxis.label, "Time of Flight");
+    TS_ASSERT_EQUALS(options.xAxis.unit, R"($\mu s$)");
     TS_ASSERT_EQUALS(options.yAxis.label, "Detector Index");
-    TS_ASSERT_EQUALS(options.zAxis.label, "Intensity");
+    TS_ASSERT_EQUALS(options.yAxis.unit, "");
+    TS_ASSERT_EQUALS(options.zAxis.label, "");
   }
 
   void testDetectorMapOptionsUseSelectedAxisUnits() {
@@ -66,8 +72,10 @@ public:
         PlotOutputSelection{PlotOutputType::DetectorMap, DetectorMapXAxis::Lambda, DetectorMapYAxis::Theta},
         PlotLayout::Tiled);
 
-    TS_ASSERT_EQUALS(options.xAxis.label, "Lambda");
-    TS_ASSERT_EQUALS(options.yAxis.label, "Theta");
+    TS_ASSERT_EQUALS(options.xAxis.label, "Wavelength");
+    TS_ASSERT_EQUALS(options.xAxis.unit, R"($\AA$)");
+    TS_ASSERT_EQUALS(options.yAxis.label, R"($\theta$)");
+    TS_ASSERT_EQUALS(options.yAxis.unit, R"($^\circ$)");
   }
 
   void testSpinAsymmetryOptionsUseQAndAsymmetryAxes() {
@@ -79,6 +87,7 @@ public:
     TS_ASSERT_EQUALS(options.plotStyle, PlotStyle::Line);
     TS_ASSERT_EQUALS(options.layout, PlotLayout::Overplot);
     TS_ASSERT_EQUALS(options.xAxis.label, "Q");
+    TS_ASSERT_EQUALS(options.xAxis.unit, R"($\AA^{-1}$)");
     TS_ASSERT_EQUALS(options.yAxis.label, "Spin Asymmetry");
     TS_ASSERT_EQUALS(options.yAxis.unit, "");
     TS_ASSERT_EQUALS(options.xAxis.scale, AxisScale::Log);
@@ -87,7 +96,7 @@ public:
     TS_ASSERT_EQUALS(*options.horizontalMarker, 0.0);
   }
 
-  void testAlignmentOptionsUseDetectorIdAndIntegratedIntensityAxes() {
+  void testAlignmentOptionsUseDetectorIndexAndIntegratedIntensityAxes() {
     auto provider = PlotOptionsProvider{};
 
     auto const options = provider.optionsFor(PlotOutputType::Alignment, PlotLayout::Individual);
@@ -95,8 +104,11 @@ public:
     TS_ASSERT_EQUALS(options.outputType, PlotOutputType::Alignment);
     TS_ASSERT_EQUALS(options.plotStyle, PlotStyle::Line);
     TS_ASSERT_EQUALS(options.layout, PlotLayout::Individual);
-    TS_ASSERT_EQUALS(options.xAxis.label, "Detector ID");
+    TS_ASSERT_EQUALS(options.xAxis.label, "Detector Index");
+    TS_ASSERT_EQUALS(options.xAxis.unit, "");
     TS_ASSERT_EQUALS(options.yAxis.label, "Integrated Intensity");
+    TS_ASSERT_EQUALS(options.yAxis.unit, "Counts");
+    TS_ASSERT(options.showErrors);
   }
 
   void testAlignmentOptionsUseSelectedXAxisUnits() {
@@ -107,6 +119,7 @@ public:
                                                 DetectorMapYAxis::DetectorId, AlignmentXAxis::Theta},
                             PlotLayout::Individual);
 
-    TS_ASSERT_EQUALS(options.xAxis.label, "Theta");
+    TS_ASSERT_EQUALS(options.xAxis.label, R"($\theta$)");
+    TS_ASSERT_EQUALS(options.xAxis.unit, R"($^\circ$)");
   }
 };

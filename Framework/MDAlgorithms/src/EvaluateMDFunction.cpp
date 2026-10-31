@@ -9,6 +9,7 @@
 #include "MantidAPI/FunctionDomainMD.h"
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 

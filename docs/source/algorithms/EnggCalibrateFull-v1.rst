@@ -99,7 +99,8 @@ Usage
    print("Det ID: {}".format(det_id))
    print("Calibrated position: (%.3f,%.3f,%.3f)" % (cal_pos.getX(), cal_pos.getY(), cal_pos.getZ()))
    ws = mtd[ws_name]
-   posInWSInst = ws.getInstrument().getDetector(det_id).getPos()
+   detector_info = ws.detectorInfo()
+   posInWSInst = detector_info.position(detector_info.indexOf(det_id))
    print("Is the detector position calibrated now in the original workspace instrument? {}".format(cal_pos == posInWSInst))
 
 .. testcleanup:: ExCalFull

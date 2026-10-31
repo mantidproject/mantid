@@ -243,6 +243,23 @@ class MainWindowTest(unittest.TestCase):
 
             mock_interfaces_menu.addMenu.assert_not_called()
 
+    def test_config_updated_populates_user_layout_menu(self):
+        self.main_window.editor = Mock()
+        self.main_window.project = Mock()
+        self.main_window.algorithm_selector = Mock()
+        self.main_window.workspacewidget = Mock()
+        self.main_window.populate_interfaces_menu = Mock()
+        self.main_window.view_menu_layouts = QMenu(self.main_window)
+
+        with patch("workbench.app.mainwindow.CONF") as mock_conf:
+            mock_conf.get.return_value = {"MyFavouriteLayout": "layout1", "BetterLayout": "layout2"}
+
+            self.main_window.config_updated()
+
+        menu_items_ordered = [action.text() for action in self.main_window.view_menu_layouts.actions()]
+
+        self.assertEqual(["BetterLayout", "MyFavouriteLayout", "", "Settings"], menu_items_ordered)
+
     def test_main_window_does_not_close_when_project_is_saving(self):
         mock_event = Mock()
         mock_project = Mock()

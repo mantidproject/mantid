@@ -395,7 +395,7 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(const Matrix
 
     // Calculate Q-sample and new detector ID in virtual instrument.
     Kernel::V3D qlab = convertToQSample(samplePos, ki, detpos, momentum, q_sample, rotationMatrix);
-    detid_t native_detid = specInfo.detector(iws).getID();
+    detid_t native_detid = specInfo.firstDetectorID(iws);
     detid_t detid = native_detid + startdetid;
 
     // Insert

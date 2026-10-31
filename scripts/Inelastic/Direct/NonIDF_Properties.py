@@ -298,8 +298,9 @@ class NonIDF_Properties(object):
         """Obtain default instrument and facility and store it in properties"""
 
         if run_workspace:
+            # The Instrument object is kept because the public `instrument` property returns it
             instrument = run_workspace.getInstrument()
-            instr_name = instrument.getFullName()
+            instr_name = run_workspace.getInstrumentName()
             new_name, full_name, facility_ = prop_helpers.check_instrument_name(None, instr_name)
         else:
             # pylint: disable=protected-access

@@ -7,13 +7,14 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidPythonInterface/api/DllConfig.h"
 
 #include <boost/python/dict.hpp>
 
 namespace Mantid {
 namespace PythonInterface {
 
-class DLLExport RunPythonScript final : public API::Algorithm {
+class PYTHON_API_DLL RunPythonScript final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

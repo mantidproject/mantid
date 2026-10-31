@@ -12,6 +12,7 @@
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/NullValidator.h"
 #include "MantidLiveData/LoadLiveData.h"
 #include "MantidLiveData/MonitorLiveData.h"
 #include "MantidTypes/Core/DateAndTime.h"

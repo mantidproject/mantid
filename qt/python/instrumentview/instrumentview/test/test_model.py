@@ -982,8 +982,8 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_peaks_workspace = PeaksWorkspaceMock()
         instrument = "MyFirstInstrument"
         model, mock_workspace = self._setup_model([1, 2, 3])
-        mock_workspace.getInstrument().getFullName.return_value = instrument
-        mock_peaks_workspace.getInstrument().getFullName.return_value = instrument
+        mock_workspace.getInstrumentName.return_value = instrument
+        mock_peaks_workspace.getInstrumentName.return_value = instrument
         mock_ads_instance.retrieveWorkspaces.return_value = [mock_peaks_workspace, mock_workspace]
         peaks_workspaces = model.get_workspaces_in_ads_of_type(PeaksWorkspace)
         self.assertEqual(1, len(peaks_workspaces))

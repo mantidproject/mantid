@@ -8,7 +8,7 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidKernel/V3D.h"
+#include "MantidKernel/V3D_fwd.h"
 
 #include <map>
 #include <memory>

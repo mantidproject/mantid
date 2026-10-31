@@ -11,7 +11,6 @@
 //--------------------------------------
 #include "InstrumentTreeModel.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidQtWidgets/Common/WidgetDllOption.h"
 #include <QTreeView>
 
 namespace MantidQt {

@@ -165,7 +165,8 @@ Saving the Detector Positions to Text File
 
     def savePositions2TxtFileFromWorkspace( ws, file_path):
       tofile = open(file_path, 'w')
-      det_pos = [ws.getDetector(i).getPos() for i in range(ws.getNumberHistograms()) if not ws.getDetector(i).isMonitor()]
+      spectrum_info = ws.spectrumInfo()
+      det_pos = [spectrum_info.position(i) for i in range(ws.getNumberHistograms()) if not spectrum_info.isMonitor(i)]
       for det in det_pos:
         print >> tofile, det
       tofile.close()

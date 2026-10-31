@@ -86,15 +86,50 @@ class TestTextureCorrectionPresenter(unittest.TestCase):
         self.model.load_ref.assert_called_once_with("ref_file.nxs")
         self.presenter.update_reference_info.assert_called_once()
 
-    def test_load_ref_adopts_directions_when_the_setting_is_on(self):
+    def test_failed_load_ref_leaves_the_reference_and_settings_alone(self):
+        # the previous reference stays selected, so adopting would re-apply its settings
+        self.model.load_ref = MagicMock(return_value=False)
         self.presenter.update_reference_info = MagicMock()
-        self.presenter._adopt_reference_texture_directions = MagicMock()
         self.presenter._get_setting = MagicMock(return_value=True)
+        self.presenter._adopt_reference_texture_directions = MagicMock()
+        self.presenter._adopt_reference_euler_settings = MagicMock()
 
         self.presenter._on_load_ref_clicked()
 
-        self.presenter._get_setting.assert_called_once_with("read_texture_dirs_from_ref", bool)
+        self.presenter.update_reference_info.assert_not_called()
+        self.presenter._adopt_reference_texture_directions.assert_not_called()
+        self.presenter._adopt_reference_euler_settings.assert_not_called()
+
+    def _load_ref_with_changes(self, directions_changed, euler_changed):
+        self.presenter.update_reference_info = MagicMock()
+        self.presenter._get_setting = MagicMock(return_value=True)
+        self.presenter._adopt_reference_texture_directions = MagicMock(return_value=directions_changed)
+        self.presenter._adopt_reference_euler_settings = MagicMock(return_value=euler_changed)
+        self.presenter.reference_frame_notifier = MagicMock()
+
+        self.presenter._on_load_ref_clicked()
+
+    def test_load_ref_adopts_both_when_the_settings_are_on(self):
+        self._load_ref_with_changes(False, False)
+
+        self.presenter._get_setting.assert_any_call("read_texture_dirs_from_ref", bool)
+        self.presenter._get_setting.assert_any_call("read_euler_from_ref", bool)
         self.presenter._adopt_reference_texture_directions.assert_called_once_with()
+        self.presenter._adopt_reference_euler_settings.assert_called_once_with()
+
+    def test_load_ref_tells_the_settings_dialog_to_drop_its_cache_when_settings_change(self):
+        # otherwise the dialog's pre-load cache would be written back over the adopted values on Apply
+        for directions_changed, euler_changed in ((True, False), (False, True), (True, True)):
+            with self.subTest(directions_changed=directions_changed, euler_changed=euler_changed):
+                self._load_ref_with_changes(directions_changed, euler_changed)
+
+                # once, even when both change
+                self.presenter.reference_frame_notifier.notify_subscribers.assert_called_once_with()
+
+    def test_load_ref_does_not_notify_when_nothing_changed(self):
+        self._load_ref_with_changes(False, False)
+
+        self.presenter.reference_frame_notifier.notify_subscribers.assert_not_called()
 
     def test_update_reference_info_calls_view_update(self):
         self.view.reset_mock()
@@ -190,7 +225,6 @@ class TestAdoptReferenceTextureDirections(unittest.TestCase):
         self.view = MagicMock()
         self.presenter = TextureCorrectionPresenter(self.model, self.view)
         self.presenter.set_rb_num("RB123")
-        self.presenter.reference_frame_notifier = MagicMock()
         self.model.get_reference_ws.return_value = "ref_ws"
         # every direction setting currently holds the default frame
         self._stored = {"rd_dir": "1,0,0", "nd_dir": "0,1,0", "td_dir": "0,0,1", "rd_name": "RD", "nd_name": "ND", "td_name": "TD"}
@@ -221,10 +255,9 @@ class TestAdoptReferenceTextureDirections(unittest.TestCase):
         # nothing about the sample frame and must not wipe a configured one
         self.model.get_reference_texture_directions.return_value = None
 
-        self.presenter._adopt_reference_texture_directions()
+        self.assertFalse(self.presenter._adopt_reference_texture_directions())
 
         mock_set_setting.assert_not_called()
-        self.presenter.reference_frame_notifier.notify_subscribers.assert_not_called()
         mock_logger.notice.assert_called_once()
 
     @patch(presenter_path + ".logger")
@@ -244,10 +277,9 @@ class TestAdoptReferenceTextureDirections(unittest.TestCase):
         self.model.get_reference_texture_directions.return_value = (np.eye(3), ("RD", "ND", "TD"))
         self._stored.update({"rd_dir": "1.0,0.0,0.0", "nd_dir": "0.0,1.0,0.0", "td_dir": "0.0,0.0,1.0"})
 
-        self.presenter._adopt_reference_texture_directions()
+        self.assertFalse(self.presenter._adopt_reference_texture_directions())
 
         mock_logger.notice.assert_not_called()
-        self.presenter.reference_frame_notifier.notify_subscribers.assert_not_called()
 
     @patch(presenter_path + ".logger")
     def test_the_default_direction_strings_are_not_reported_as_a_change(self, mock_logger, mock_set_setting):
@@ -255,18 +287,15 @@ class TestAdoptReferenceTextureDirections(unittest.TestCase):
         # comparing the strings would report an identity reference as a re-framing
         self.model.get_reference_texture_directions.return_value = (np.eye(3), ("RD", "ND", "TD"))
 
-        self.presenter._adopt_reference_texture_directions()
+        self.assertFalse(self.presenter._adopt_reference_texture_directions())
 
         mock_logger.notice.assert_not_called()
-        self.presenter.reference_frame_notifier.notify_subscribers.assert_not_called()
 
-    def test_the_settings_dialog_is_told_to_drop_its_cache(self, mock_set_setting):
-        # otherwise the dialog's pre-load cache would be written back over these values on Apply
+    def test_a_change_is_reported_to_the_caller(self, mock_set_setting):
+        # the caller uses this to tell the settings dialog to drop its cache
         self.model.get_reference_texture_directions.return_value = (self._AX_TRANSFORM, self._DIR_NAMES)
 
-        self.presenter._adopt_reference_texture_directions()
-
-        self.presenter.reference_frame_notifier.notify_subscribers.assert_called_once_with()
+        self.assertTrue(self.presenter._adopt_reference_texture_directions())
 
     def test_without_an_rb_the_directions_are_written_globally(self, mock_set_setting):
         self.presenter.set_rb_num(None)
@@ -284,6 +313,69 @@ class TestAdoptReferenceTextureDirections(unittest.TestCase):
 
         rd_value, _ = self._written(mock_set_setting)["rd_dir"]
         np.testing.assert_allclose([float(x) for x in rd_value.split(",")], rotated[:, 0], atol=1e-6)
+
+
+@patch(presenter_path + ".set_setting")
+class TestAdoptReferenceEulerSettings(unittest.TestCase):
+    """Loading a reference workspace adopts the Euler convention its orientation file was written in."""
+
+    def setUp(self):
+        self.model = MagicMock()
+        self.presenter = TextureCorrectionPresenter(self.model, MagicMock())
+        self.presenter.set_rb_num("RB123")
+        self.model.get_reference_ws.return_value = "ref_ws"
+        self._stored = {"euler_angles_scheme": "YZY", "euler_angles_sense": "1,-1,1"}
+        self.presenter._get_setting = MagicMock(side_effect=lambda name, *a: self._stored.get(name, ""))
+
+    @staticmethod
+    def _written(mock_set_setting):
+        return {c.args[2]: (c.args[3], c.kwargs.get("rb")) for c in mock_set_setting.call_args_list}
+
+    def test_scheme_and_sense_are_written_under_the_active_rb(self, mock_set_setting):
+        self.model.get_reference_euler_settings.return_value = ("ZXZ", "-1,-1,1")
+
+        self.assertTrue(self.presenter._adopt_reference_euler_settings())
+
+        # only these two: whether the orientation file is Euler is left alone
+        self.assertEqual(
+            self._written(mock_set_setting), {"euler_angles_scheme": ("ZXZ", "RB123"), "euler_angles_sense": ("-1,-1,1", "RB123")}
+        )
+
+    @patch(presenter_path + ".logger")
+    def test_a_reference_without_euler_logs_leaves_the_settings_alone(self, mock_logger, mock_set_setting):
+        self.model.get_reference_euler_settings.return_value = None
+
+        self.assertFalse(self.presenter._adopt_reference_euler_settings())
+
+        mock_set_setting.assert_not_called()
+        mock_logger.notice.assert_called_once()
+
+    @patch(presenter_path + ".logger")
+    def test_invalid_settings_are_not_adopted(self, mock_logger, mock_set_setting):
+        self.model.get_reference_euler_settings.return_value = ("YXY", "1,1")
+
+        self.assertFalse(self.presenter._adopt_reference_euler_settings())
+
+        mock_set_setting.assert_not_called()
+        mock_logger.warning.assert_called_once()
+
+    @patch(presenter_path + ".logger")
+    def test_equivalent_settings_are_not_reported(self, mock_logger, mock_set_setting):
+        self.model.get_reference_euler_settings.return_value = ("yzy", "1, -1, 1")
+
+        self.assertFalse(self.presenter._adopt_reference_euler_settings())
+
+        mock_logger.notice.assert_not_called()
+
+    @patch(presenter_path + ".logger")
+    def test_only_changed_values_are_logged(self, mock_logger, mock_set_setting):
+        self.model.get_reference_euler_settings.return_value = ("ZXZ", "1,-1,1")
+
+        self.presenter._adopt_reference_euler_settings()
+
+        message = mock_logger.notice.call_args.args[0]
+        self.assertIn("euler_angles_scheme YZY -> ZXZ", message)
+        self.assertNotIn("euler_angles_sense", message)
 
 
 if __name__ == "__main__":

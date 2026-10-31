@@ -5,15 +5,17 @@ on:
     branches: [main, release-next]
 
 permissions:
-  pull-requests: write
+  contents: read
 
 jobs:
   add-milestone:
     # Do not run in forks.
     if: ${{ github.repository_owner == 'mantidproject' }}
+    permissions:
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      - uses: benelan/milestone-action@v3
+      - uses: benelan/milestone-action@ae503769af66e741a9d7f76052058e1c3054fd7e # v3.1.0
         with:
           # When the target branch == vars.BRANCH_TO_PUBLISH, set the current milestone. Otherwise set the next milestone
           farthest: ${{ github.base_ref != vars.BRANCH_TO_PUBLISH }}

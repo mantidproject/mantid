@@ -13,14 +13,16 @@
 #include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
+class SpectrumDefinition;
 
 namespace Kernel {
 class V3D;
 }
 
 namespace Geometry {
+class ComponentInfo;
 class ParameterMap;
-}
+} // namespace Geometry
 
 namespace CurveFitting {
 namespace Algorithms {
@@ -62,6 +64,9 @@ public:
   /// Retrieve a component parameter
   static double getComponentParameter(const Geometry::IComponent &det, const Geometry::ParameterMap &pmap,
                                       const std::string &name);
+  /// Retrieve a component parameter for the detector(s) of a spectrum
+  static double getComponentParameter(const Geometry::ComponentInfo &componentInfo,
+                                      const SpectrumDefinition &spectrumDefinition, const std::string &name);
   /// Convert single time value to Y,Q & Ei values
   static void calculateY(double &yspace, double &qspace, double &ei, const double mass, const double tsec,
                          const double k1, const double v1, const DetectorParams &detpar);

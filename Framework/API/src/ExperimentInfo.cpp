@@ -21,6 +21,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/InstrumentMetadata.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -183,6 +184,11 @@ void checkDetectorInfoSize(const Instrument &instr, const Geometry::DetectorInfo
  */
 void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_spectrumInfoWrapper = nullptr;
+  {
+    std::lock_guard<std::mutex> lock{m_baseComponentInfoMutex};
+    m_baseComponentInfo = nullptr;
+    m_baseDetectorInfo = nullptr;
+  }
 
   // Detector IDs that were previously dropped because they were not part of the
   // instrument may now suddenly be valid, so we have to reinitialize the
@@ -362,13 +368,12 @@ void ExperimentInfo::populateInstrumentParameters() {
   Geometry::ParameterMap &paramMap = instrumentParameters();
   Geometry::PositionAndRotationAccumulator posAndRot;
 
-  // Get instrument and sample
   auto &compInfo = mutableComponentInfo();
-  const auto parInstrument = getInstrument();
-  const auto instrument = parInstrument->baseInstrument();
-  const auto &paramInfoFromIDF = instrument->getLogfileCache();
+  // The logfile parameters of this workspace: those of the instrument definition, plus any added
+  // since from parameter files
+  const auto &paramInfoFromIDF = compInfo.logfileParameters();
 
-  std::map<const IComponent *, RTP> rtpParams;
+  std::map<size_t, RTP> rtpParams;
 
   // In this loop position and rotation parameters are inserted into the
   // temporary map paramMapForPosAndRot. In the subsequent loop, after all
@@ -378,8 +383,8 @@ void ExperimentInfo::populateInstrumentParameters() {
   // individual position or rotation components into a vector or quaternion. In
   // particular, we cannot directly change DetectorInfo since the order of
   // rotation components is not guaranteed.
-  for (const auto &item : paramInfoFromIDF) {
-    const auto &paramInfo = item.second;
+  for (const auto &[key, paramInfo] : paramInfoFromIDF) {
+    const auto compIndex = key.first;
     // Use the parameter's short name (e.g. "Alpha0"), not the cache key. The cache key may be
     // function-qualified (e.g. "IkedaCarpenterPV:Alpha0") to keep two functions on the same
     // component from clobbering each other, but downstream consumers always look up by short name.
@@ -390,9 +395,7 @@ void ExperimentInfo::populateInstrumentParameters() {
       // p-position.
       // We need to know all three first to calculate a set of X,Y,Z
       if (paramN.compare(1, 9, "-position") == 0) {
-        auto &rtpValues = rtpParams[paramInfo->m_component]; // If not found,
-                                                             // constructs
-                                                             // default
+        auto &rtpValues = rtpParams[compIndex]; // If not found, constructs default
         double value = ParameterValue(*paramInfo, runData);
         if (paramN.compare(0, 1, "r") == 0) {
           rtpValues.radius = value;
@@ -404,13 +407,10 @@ void ExperimentInfo::populateInstrumentParameters() {
         if (rtpValues.haveRadius) {
           V3D pos;
           pos.spherical(rtpValues.radius, rtpValues.theta, rtpValues.phi);
-          const auto compIndex = compInfo.indexOfOrInvalid(paramInfo->m_component->getComponentID());
-          if (compIndex != Geometry::ComponentInfo::invalidIndex) {
-            posAndRot.setPosition(compIndex, pos);
-          }
+          posAndRot.setPosition(compIndex, pos);
         }
       } else {
-        populateWithParameter(paramMap, posAndRot, paramN, *paramInfo, runData);
+        populateWithParameter(compInfo, posAndRot, compIndex, paramN, *paramInfo, runData);
       }
     } catch (std::exception &exc) {
       g_log.information() << "Unable to add component parameter '" << paramN << "'. Error: " << exc.what();
@@ -879,6 +879,24 @@ ComponentInfo &ExperimentInfo::mutableComponentInfo() {
   return *m_componentInfo;
 }
 
+/** Return a reference to a ComponentInfo describing the base (unparametrized) instrument.
+ *
+ * This is the geometry as it was loaded from the instrument definition, before any parameters
+ * (e.g. moves or rotations by MoveInstrumentComponent/RotateInstrumentComponent, or calibration)
+ * were applied. It is built by walking the base instrument tree on first use, and is invalidated
+ * by setInstrument(), as is any reference obtained from componentInfo().
+ */
+Geometry::ComponentInfo const &ExperimentInfo::baseComponentInfo() const {
+  populateIfNotLoaded();
+  std::lock_guard<std::mutex> lock{m_baseComponentInfoMutex};
+  if (!m_baseComponentInfo) {
+    // The wrappers refer to sptr_instrument without owning it. That is safe because setInstrument() resets them
+    // before replacing sptr_instrument, and they are declared after it, so are destroyed before it.
+    std::tie(m_baseComponentInfo, m_baseDetectorInfo) = InstrumentVisitor::makeWrappers(*sptr_instrument);
+  }
+  return *m_baseComponentInfo;
+}
+
 Geometry::InstrumentMetadata const &ExperimentInfo::instrumentMetadata() const {
   if (!m_instrumentMetadata) {
     throw std::runtime_error("Cannot return reference to NULL InstrumentMetadata");
@@ -1223,8 +1241,6 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
   Geometry::ParameterMap &pmap = this->instrumentParameters();
   auto &compInfo = mutableComponentInfo();
   auto &detInfo = mutableDetectorInfo();
-  const auto parInstrument = getInstrument();
-  const auto instr = parInstrument->baseInstrument();
 
   int options = Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY;
   options += Mantid::Kernel::StringTokenizer::TOK_TRIM;
@@ -1264,7 +1280,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
         // more lenient -- it accepts a bare name anywhere in the tree and lets path segments be
         // skipped -- so fall back to it rather than rejecting strings the old code accepted.
         // Reproducing that leniency on ComponentInfo is its own piece of work.
-        const auto *comp = instr->getComponentByName(comp_name).get();
+        const auto *comp = sptr_instrument->getComponentByName(comp_name).get();
         if (comp) {
           compIndex = compInfo.indexOfOrInvalid(comp->getComponentID());
         }
@@ -1371,15 +1387,17 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
  * Fill map with instrument parameter first set in xml file
  * Where this is appropriate a parameter value is dependent on values in a log
  * entry
- * @param paramMap Map to populate (except for position and rotation parameters)
+ * @param compInfo ComponentInfo to add the parameter to (except for position and rotation parameters)
  * @param posAndRot Accumulator collecting positions and rotations
+ * @param compIndex Index of the component the parameter belongs to
  * @param name The name of the parameter
  * @param paramInfo A reference to the object describing this parameter
  * @param runData A reference to the run object, which stores log value entries
  */
-void ExperimentInfo::populateWithParameter(Geometry::ParameterMap &paramMap,
-                                           Geometry::PositionAndRotationAccumulator &posAndRot, const std::string &name,
-                                           const Geometry::XMLInstrumentParameter &paramInfo, const Run &runData) {
+void ExperimentInfo::populateWithParameter(Geometry::ComponentInfo &compInfo,
+                                           Geometry::PositionAndRotationAccumulator &posAndRot, const size_t compIndex,
+                                           const std::string &name, const Geometry::XMLInstrumentParameter &paramInfo,
+                                           const Run &runData) {
   const std::string &category = paramInfo.m_type;
   ParameterValue paramValue(paramInfo,
                             runData); // Defines implicit conversion operator
@@ -1396,28 +1414,21 @@ void ExperimentInfo::populateWithParameter(Geometry::ParameterMap &paramMap,
     bool value(paramValue);
     if (value) {
       // Do not add masking to ParameterMap, it is stored in DetectorInfo
-
-      const auto componentIndex = componentInfo().indexOf(paramInfo.m_component->getComponentID());
-      if (!componentInfo().isDetector(componentIndex))
+      if (!compInfo.isDetector(compIndex))
         throw std::runtime_error("Found masking for a non-detector component. This is not possible");
-      mutableDetectorInfo().setMasked(componentIndex,
+      mutableDetectorInfo().setMasked(compIndex,
                                       paramValue); // all detector indexes have
                                                    // same component index
                                                    // (guarantee)
     }
   } else if (name == "x" || name == "y" || name == "z") {
-    const auto compIndex = componentInfo().indexOfOrInvalid(paramInfo.m_component->getComponentID());
-    if (compIndex != Geometry::ComponentInfo::invalidIndex) {
-      // Seeded from the component's current position relative to its parent, so specifying one
-      // coordinate leaves the other two alone. It must be the relative position: the accumulated
-      // value is applied as a parent-relative one, so seeding with the absolute position would
-      // re-apply the parent's rotation and translation on every call.
-      posAndRot.setCoordinate(compIndex, name, paramValue, componentInfo().relativePosition(compIndex));
-    }
+    // Seeded from the component's current position relative to its parent, so specifying one
+    // coordinate leaves the other two alone. It must be the relative position: the accumulated
+    // value is applied as a parent-relative one, so seeding with the absolute position would
+    // re-apply the parent's rotation and translation on every call.
+    posAndRot.setCoordinate(compIndex, name, paramValue, compInfo.relativePosition(compIndex));
   } else if (name == "rot" || name == "rotx" || name == "roty" || name == "rotz") {
-    const auto compIndex = componentInfo().indexOfOrInvalid(paramInfo.m_component->getComponentID());
-    if (compIndex != Geometry::ComponentInfo::invalidIndex &&
-        !posAndRot.setRotationAngle(compIndex, name, paramValue)) {
+    if (!posAndRot.setRotationAngle(compIndex, name, paramValue)) {
       // "rot" itself names no axis and is deliberately dropped, as it always has been.
       g_log.warning() << "Ignoring instrument parameter '" << name << "': it does not name a rotation axis.\n";
     }
@@ -1431,16 +1442,15 @@ void ExperimentInfo::populateWithParameter(Geometry::ParameterMap &paramMap,
     // Dedupe by (name, fitting function) — otherwise two functions on the same component sharing
     // a parameter short name (e.g. Bk2BkExpConvPV:Gamma and IkedaCarpenterPV:Gamma) would clobber
     // each other in the map.
-    paramMap.addFittingParameter(paramInfo.m_component, name, paramInfo.m_fittingFunction, str.str(), pDescription,
-                                 pVisible);
+    compInfo.addFittingParameter(compIndex, name, paramInfo.m_fittingFunction, str.str(), pDescription, pVisible);
   } else if (category == "string") {
-    paramMap.addString(paramInfo.m_component, name, paramInfo.m_value, pDescription, pVisible);
+    compInfo.addString(compIndex, name, paramInfo.m_value, pDescription, pVisible);
   } else if (category == "bool") {
-    paramMap.addBool(paramInfo.m_component, name, paramValue, pDescription, pVisible);
+    compInfo.addBool(compIndex, name, paramValue, pDescription, pVisible);
   } else if (category == "int") {
-    paramMap.addInt(paramInfo.m_component, name, paramValue, pDescription, pVisible);
+    compInfo.addInt(compIndex, name, paramValue, pDescription, pVisible);
   } else { // assume double
-    paramMap.addDouble(paramInfo.m_component, name, paramValue, pDescription, pVisible);
+    compInfo.addDouble(compIndex, name, paramValue, pDescription, pVisible);
   }
 }
 

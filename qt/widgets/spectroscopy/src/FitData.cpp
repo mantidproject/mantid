@@ -51,7 +51,7 @@ std::vector<double> extractQValues(const MatrixWorkspace_sptr &workspace, const 
     const auto &spectrumInfo = workspace->spectrumInfo();
     for (const auto &spectrum : spectra) {
       if (spectrumInfo.hasDetectors(spectrum.value)) {
-        const auto detID = spectrumInfo.detector(spectrum.value).getID();
+        const auto detID = spectrumInfo.firstDetectorID(spectrum.value);
         double efixed = workspace->getEFixed(detID);
         double usignTheta = 0.5 * spectrumInfo.twoTheta(spectrum.value);
         double q = Mantid::Kernel::UnitConversion::convertToElasticQ(usignTheta, efixed);

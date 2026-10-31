@@ -1,0 +1,1 @@
+- Deprecation and other warnings raised by Mantid's Python API are now raised as the warning itself when Python is set to treat warnings as errors (for example with ``-W error`` or ``warnings.simplefilter("error")``), making it possible to find deprecated calls this way. Previously they caused a ``SystemError`` instead.

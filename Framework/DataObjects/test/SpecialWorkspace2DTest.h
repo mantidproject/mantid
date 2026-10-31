@@ -107,7 +107,7 @@ public:
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 45);
     TS_ASSERT_EQUALS(ws->blocksize(), 1);
-    TS_ASSERT_EQUALS(ws->getInstrument()->getName(),
+    TS_ASSERT_EQUALS(ws->getInstrumentName(),
                      "basic"); // Name of the test instrument
     const auto &dets = ws->getSpectrum(0).getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);

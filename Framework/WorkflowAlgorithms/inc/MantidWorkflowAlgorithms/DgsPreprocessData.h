@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -18,7 +18,7 @@ namespace WorkflowAlgorithms {
 
 @date 2012-07-16
  */
-class DLLExport DgsPreprocessData final : public API::Algorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL DgsPreprocessData final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

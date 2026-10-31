@@ -445,7 +445,6 @@ private:
     EXPECT_CALL(*m_instrumentActor, getWorkspace()).WillRepeatedly(Return(m_loadedWs));
     EXPECT_CALL(*m_instrumentActor, componentInfo()).WillRepeatedly(ReturnRef(m_loadedWs->componentInfo()));
     EXPECT_CALL(*m_instrumentActor, detectorInfo()).WillOnce(ReturnRef(m_loadedWs->detectorInfo()));
-    EXPECT_CALL(*m_instrumentActor, getInstrument()).WillOnce(Return(m_loadedWs->getInstrument()));
     EXPECT_CALL(*m_instrumentActor, getWorkspaceIndex(_)).WillRepeatedly(Return(workspaceIndex));
     EXPECT_CALL(*m_instrumentActor, getBinMinMaxIndex(workspaceIndex, _, _))
         .WillRepeatedly(DoAll(SetArgReferee<1>(0u), SetArgReferee<2>(50u)));

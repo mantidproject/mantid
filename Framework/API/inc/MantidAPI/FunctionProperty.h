@@ -10,7 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyWithValue.h"

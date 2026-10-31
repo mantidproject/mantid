@@ -538,8 +538,8 @@ template <typename MDE, size_t nd> void FindPeaksMD::findPeaks(typename MDEventW
       ExperimentInfo_sptr ei = ws->getExperimentInfo(iexp);
       this->readExperimentInfo(ei);
 
-      Geometry::InstrumentRayTracer tracer(m_inst);
       Geometry::ComponentInfo const &compInfo = ei->componentInfo();
+      Geometry::InstrumentRayTracer tracer(compInfo, ei->detectorInfo());
       // Copy the instrument, sample, run to the peaks workspace.
       peakWS->copyExperimentInfoFrom(ei.get());
 
@@ -745,8 +745,8 @@ void FindPeaksMD::findPeaksHisto(const Mantid::DataObjects::MDHistoWorkspace_spt
     for (uint16_t iexp = 0; iexp < ws->getNumExperimentInfo(); iexp++) {
       ExperimentInfo_sptr ei = ws->getExperimentInfo(iexp);
       this->readExperimentInfo(ei);
-      Geometry::InstrumentRayTracer tracer(m_inst);
       Geometry::ComponentInfo const &compInfo = ei->componentInfo();
+      Geometry::InstrumentRayTracer tracer(compInfo, ei->detectorInfo());
 
       // Copy the instrument, sample, run to the peaks workspace.
       peakWS->copyExperimentInfoFrom(ei.get());

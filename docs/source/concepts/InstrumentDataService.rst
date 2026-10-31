@@ -26,17 +26,18 @@ Extracting an instrument from the Instrument Data Service
 
 This is rarely something that a user or an algorithm writer would need
 to do as it is all handled by the framework internals. Normally you
-would access the instrument relating to a workspace directly though that
-workspace.
+would access the instrument relating to a workspace directly through that
+workspace, using its :ref:`instrument access layers <InstrumentAccessLayers>`
+(``spectrumInfo()``, ``detectorInfo()`` and ``componentInfo()``).
 
 
-**Example: Getting the instrument from a workspace**
+**Example: Getting instrument geometry from a workspace**
 
 .. testcode:: GetInstrument
 
     ws = CreateSampleWorkspace("Event",NumBanks=1,BankPixelWidth=1)
-    inst = ws.getInstrument()
-    print(inst.getSource().getPos())
+    component_info = ws.componentInfo()
+    print(component_info.sourcePosition())
 
 Output:
 

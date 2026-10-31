@@ -60,9 +60,9 @@ ThreadPool::ThreadPool(ThreadScheduler *scheduler, size_t numThreads, ProgressBa
 ThreadPool::~ThreadPool() = default;
 
 //--------------------------------------------------------------------------------
-/** Return the number of physical cores available on the system.
+/** Return the number of physical cores available on the system, limited by MultiThreaded.MaxCores when that is above 0.
  * NOTE: Uses OPENMP or Poco::Environment::processorCount() to find the number.
- * @return how many cores are present.
+ * @return how many cores to use.
  */
 size_t ThreadPool::getNumPhysicalCores() {
 // windows hangs with openmp for some reason
@@ -72,12 +72,11 @@ size_t ThreadPool::getNumPhysicalCores() {
   int physicalCores = PARALLEL_GET_MAX_THREADS;
 #endif
 
-  auto maxCores = Kernel::ConfigService::Instance().getValue<int>("MultiThreaded.MaxCores");
-
-  if (!maxCores.has_value())
-    return std::min(maxCores.value_or(0), physicalCores);
-  else
-    return physicalCores;
+  // MultiThreaded.MaxCores limits the number of cores when it is above 0; otherwise all of them are used
+  const auto maxCores = Kernel::ConfigService::Instance().getValue<int>("MultiThreaded.MaxCores");
+  if (maxCores.value_or(0) > 0)
+    return static_cast<size_t>(std::min(maxCores.value(), physicalCores));
+  return static_cast<size_t>(physicalCores);
 }
 
 //--------------------------------------------------------------------------------

@@ -81,7 +81,6 @@ class PeakProcessRecord(object):
         # peak integration result: all the fitted parameters such as Sigma are in this dictionary
         self._integrationDict = None
         # pt-based Gaussian integration result dictionary.
-        # details can be found in peak_integration_utility.integrate_peak_full_version
         self._gaussIntegrationInfoDict = None
 
         # some motor/goniometer information for further correction

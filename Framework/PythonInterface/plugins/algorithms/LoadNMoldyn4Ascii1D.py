@@ -177,7 +177,7 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
             logger.information("Axis {0} will be converted to wave number in cm^-1".format(name))
             unit = "Energy_inWavenumber"
             data *= sc.tera
-            data *= sc.value("Planck constant in eV s")
+            data *= sc.value("Planck constant in eV/Hz")
             data *= 8065.54
         elif name == "time" and unit == "ps":
             logger.information("Axis {0} will be converted to time in microsecond".format(name))

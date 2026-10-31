@@ -187,18 +187,20 @@ class EngDiffGuiTestBase(AutomatedUITestBase):
     # ------------------------------------------------------------------ settings
 
     @staticmethod
-    def set_engineering_setting(name, value):
+    def set_engineering_setting(name, value, rb=None):
         from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import set_setting
         from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 
-        set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, name, value)
+        set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, name, value, rb=rb)
 
     @staticmethod
-    def get_engineering_setting(name, return_type=str):
+    def get_engineering_setting(name, return_type=str, rb=None):
         from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
         from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 
-        return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, name, return_type=return_type)
+        return get_setting(
+            output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, name, return_type=return_type, rb=rb
+        )
 
     def open_settings(self):
         """Open the settings dialog the way a user does, via the cog in the bottom left.
@@ -468,8 +470,8 @@ def _write_synthetic_run(instrument, template, full_calib, run_number, out_dir, 
         y = 800.0 + 400.0 * np.exp(-(((tof - tof_centre) / (0.5 * (tof_max - tof_min))) ** 2))
         e = np.sqrt(y)
         for index in range(ws.getNumberHistograms()):
-            ws.setY(index, y)
-            ws.setE(index, e)
+            ws.setSharedY(index, y)
+            ws.setSharedE(index, e)
     else:
         _fill_ceria_peaks(ws, tof, full_calib, default_ceria_expected_peaks(final=True))
 
@@ -514,8 +516,8 @@ def _fill_ceria_peaks(ws, tof, full_calib, expected_d_values):
         difc = difc_by_detid.get(ws.getDetector(index).getID())
         if difc is None:
             # no calibration entry for this detector, so leave it as background only
-            ws.setY(index, background)
-            ws.setE(index, np.sqrt(background))
+            ws.setSharedY(index, background)
+            ws.setSharedE(index, np.sqrt(background))
             continue
         y = background.copy()
         for d in d_values:
@@ -524,5 +526,5 @@ def _fill_ceria_peaks(ws, tof, full_calib, expected_d_values):
                 continue
             sigma = _REL_SIGMA * centre
             y += (_PEAK_INTENSITY_PER_D * d / (sigma * np.sqrt(2.0 * np.pi))) * np.exp(-0.5 * ((tof - centre) / sigma) ** 2)
-        ws.setY(index, y)
-        ws.setE(index, np.sqrt(y))
+        ws.setSharedY(index, y)
+        ws.setSharedE(index, np.sqrt(y))

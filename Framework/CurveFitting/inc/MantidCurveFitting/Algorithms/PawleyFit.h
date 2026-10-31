@@ -11,7 +11,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/Functions/PawleyFunction.h"
-#include "MantidKernel/Unit.h"
+#include "MantidKernel/Unit_fwd.h"
 
 namespace Mantid {
 namespace CurveFitting {

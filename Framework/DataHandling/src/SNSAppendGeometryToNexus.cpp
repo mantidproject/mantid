@@ -10,6 +10,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
@@ -207,10 +208,11 @@ void SNSAppendGeometryToNexus::exec() {
                 polar_angle.reserve(dets.size());
                 azimuthal_angle.reserve(dets.size());
 
+                const auto &detectorInfo = ws->detectorInfo();
                 for (auto &det : dets) {
                   pixel_id.emplace_back(det->getID());
                   distance.emplace_back(det->getDistance(*sample));
-                  azimuthal_angle.emplace_back(det->getPhi());
+                  azimuthal_angle.emplace_back(detectorInfo.phi(detectorInfo.indexOf(det->getID())));
                   polar_angle.emplace_back(ws->detectorTwoTheta(*det));
                 }
 

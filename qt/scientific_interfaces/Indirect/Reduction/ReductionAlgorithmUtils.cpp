@@ -71,10 +71,8 @@ void loadFile(const std::string &filename, const std::string &ipfFilename, bool 
   loadParameters->setPropertyValue("Filename", ipfFilename);
   loadParameters->execute();
 
-  const auto inst = workspace->getInstrument();
-
   if (sumData.instrumentName.empty()) {
-    sumData.instrumentName = inst->getName();
+    sumData.instrumentName = workspace->getInstrumentName();
   }
   sumData.wsNames.emplace_back(workspaceName);
   sumData.runNo.emplace_back(workspace->getRunNumber());

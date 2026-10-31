@@ -12,13 +12,14 @@
 #include "MantidGeometry/Instrument_fwd.h"
 
 #include "MantidKernel/DeltaEMode.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
 
 #include <mutex>
 
 namespace Mantid {
+namespace Nexus {
+class File;
+}
 class SpectrumDefinition;
 namespace Kernel {
 class Property;
@@ -161,6 +162,10 @@ public:
   const Geometry::ComponentInfo &componentInfo() const;
   Geometry::ComponentInfo &mutableComponentInfo();
 
+  /// Returns a ComponentInfo for the base (unparametrized) instrument, i.e. the geometry as loaded from the
+  /// instrument definition, before any moves, rotations or other parameters were applied.
+  Geometry::ComponentInfo const &baseComponentInfo() const;
+
   Geometry::InstrumentMetadata const &instrumentMetadata() const;
 
   std::string getInstrumentName() const;
@@ -197,9 +202,9 @@ protected:
 
 private:
   /// Fill with given instrument parameter
-  void populateWithParameter(Geometry::ParameterMap &paramMap, Geometry::PositionAndRotationAccumulator &posAndRot,
-                             const std::string &name, const Geometry::XMLInstrumentParameter &paramInfo,
-                             const Run &runData);
+  void populateWithParameter(Geometry::ComponentInfo &compInfo, Geometry::PositionAndRotationAccumulator &posAndRot,
+                             const size_t compIndex, const std::string &name,
+                             const Geometry::XMLInstrumentParameter &paramInfo, const Run &runData);
 
   /// Attempt to load instrument embedded in Nexus file. *file must have instrument group open.
   void loadEmbeddedInstrumentInfoNexus(Nexus::File *file, std::string &instrumentName, std::string &instrumentXml);
@@ -224,6 +229,13 @@ private:
   mutable std::unique_ptr<Beamline::SpectrumInfo> m_spectrumInfo;
   mutable std::unique_ptr<SpectrumInfo> m_spectrumInfoWrapper;
   mutable std::mutex m_spectrumInfoMutex;
+
+  /// Lazily-built 2.0 layers of the base instrument, reset whenever the instrument is set.
+  /// The Beamline ComponentInfo holds a raw pointer into the DetectorInfo, so the DetectorInfo is
+  /// kept alive alongside it and declared first so that it is destroyed last.
+  mutable std::unique_ptr<Geometry::DetectorInfo> m_baseDetectorInfo;
+  mutable std::unique_ptr<Geometry::ComponentInfo> m_baseComponentInfo;
+  mutable std::mutex m_baseComponentInfoMutex;
   // This vector stores boolean flags but uses char to do so since std::vector<bool> is not thread-safe.
   mutable std::vector<char> m_spectrumDefinitionNeedsUpdate;
 };

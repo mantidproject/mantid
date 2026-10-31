@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="POLDI" valid-from="2025-12-03 23:59:59" valid-to="2100-01-31 23:59:59">
+
+    <component-link name="chopper">
+        <parameter name="t0" type="number">
+            <value val="5.824e-02" />
+        </parameter>
+        <parameter name="t0_const" type="number">
+            <value val="-12.68" />
+        </parameter>
+    </component-link>
+
+</parameter-file>

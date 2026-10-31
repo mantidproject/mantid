@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/OptionalBool.h"
 
@@ -35,11 +36,11 @@ namespace Mantid::Kernel {
 // assign to an existing string
 // via the getProperty() method, you can construct a local variable by saying,
 // e.g.: std::string s = getProperty("myProperty")
-template <> DLLExport std::string IPropertyManager::getValue<std::string>(const std::string &name) const {
+template <> MANTID_KERNEL_DLL std::string IPropertyManager::getValue<std::string>(const std::string &name) const {
   return getPropertyValue(name);
 }
 
-template <> DLLExport Property *IPropertyManager::getValue<Property *>(const std::string &name) const {
+template <> MANTID_KERNEL_DLL Property *IPropertyManager::getValue<Property *>(const std::string &name) const {
   return getPointerToProperty(name);
 }
 

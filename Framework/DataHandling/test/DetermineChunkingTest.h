@@ -31,18 +31,14 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void do_test_CNCS(bool events) {
+  void test_CNCS() {
     // Name of the output workspace.
     std::string outWSName("DetermineChunkingTest_OutputWS");
 
     DetermineChunking alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    if (events) {
-      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "CNCS_7860_event.nxs"));
-    } else {
-      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "CNCS_7860_runinfo.xml"));
-    }
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "CNCS_7860_event.nxs"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxChunkSize", 0.0005));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
@@ -71,9 +67,5 @@ public:
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
-  }
-  void test_CNCS() {
-    do_test_CNCS(true);
-    do_test_CNCS(false);
   }
 };

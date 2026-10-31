@@ -8,6 +8,7 @@
 #include "LoadRaw/isisraw2.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
 #include "MantidNexus/NexusFile.h"
@@ -37,8 +38,8 @@ DECLARE_ALGORITHM(LoadDetectorInfo)
 
 /// Empty default constructor
 LoadDetectorInfo::LoadDetectorInfo()
-    : Algorithm(), m_baseInstrument(), m_samplePos(), m_moveDets(false), m_workspace(), m_instDelta(-1.0),
-      m_instPressure(-1.0), m_instThickness(-1.0) {}
+    : Algorithm(), m_samplePos(), m_moveDets(false), m_workspace(), m_instDelta(-1.0), m_instPressure(-1.0),
+      m_instThickness(-1.0) {}
 
 void LoadDetectorInfo::init() {
 
@@ -82,27 +83,25 @@ void LoadDetectorInfo::cacheInputs() {
   m_workspace = getProperty("Workspace");
   m_moveDets = getProperty("RelocateDets");
 
-  // Cache base instrument
-  m_baseInstrument = m_workspace->getInstrument()->baseInstrument();
-  Geometry::IComponent_const_sptr sample = m_workspace->getInstrument()->getSample();
-  if (sample)
-    m_samplePos = sample->getPos();
+  const auto &componentInfo = m_workspace->componentInfo();
+  if (componentInfo.hasSample())
+    m_samplePos = componentInfo.samplePosition();
 
   // cache values of instrument level parameters so we only change then if they
   // are different
-  const auto &pmap = m_workspace->constInstrumentParameters();
+  const size_t root = componentInfo.root();
   // delay
-  auto param = pmap.get(m_baseInstrument->getComponentID(), DELAY_PARAM);
-  if (param)
-    m_instDelta = param->value<double>();
+  auto values = componentInfo.getNumberParameter(root, DELAY_PARAM, false);
+  if (!values.empty())
+    m_instDelta = values.front();
   // pressure
-  param = pmap.get(m_baseInstrument->getComponentID(), PRESSURE_PARAM);
-  if (param)
-    m_instPressure = param->value<double>();
+  values = componentInfo.getNumberParameter(root, PRESSURE_PARAM, false);
+  if (!values.empty())
+    m_instPressure = values.front();
   // thickness
-  param = pmap.get(m_baseInstrument->getComponentID(), THICKNESS_PARAM);
-  if (param)
-    m_instThickness = param->value<double>();
+  values = componentInfo.getNumberParameter(root, THICKNESS_PARAM, false);
+  if (!values.empty())
+    m_instThickness = values.front();
 }
 
 /**
@@ -121,7 +120,7 @@ void LoadDetectorInfo::loadFromDAT(const std::string &filename) {
     getline(datFile, line);
 
   // start loop over file
-  auto &pmap = m_workspace->instrumentParameters();
+  auto &componentInfo = m_workspace->mutableComponentInfo();
   auto &wsDetInfo = m_workspace->mutableDetectorInfo();
   while (getline(datFile, line)) {
     if (line.empty() || line[0] == '#')
@@ -150,7 +149,7 @@ void LoadDetectorInfo::loadFromDAT(const std::string &filename) {
       float pressure(0.0), thickness(0.0);
       is >> pressure >> thickness;
 
-      updateParameterMap(wsDetInfo, index, pmap, l2, theta, phi, delta, pressure, thickness);
+      updateParameterMap(wsDetInfo, index, componentInfo, l2, theta, phi, delta, pressure, thickness);
     } catch (std::out_of_range &) {
       continue;
     }
@@ -185,7 +184,7 @@ void LoadDetectorInfo::loadFromRAW(const std::string &filename) {
   bool phiPresent = (iraw.ut[0] != 1.0 && iraw.ut[0] != 2.0);
 
   // Start loop over detectors
-  auto &pmap = m_workspace->instrumentParameters();
+  auto &componentInfo = m_workspace->mutableComponentInfo();
   auto &wsDetInfo = m_workspace->mutableDetectorInfo();
   for (int i = 0; i < numDets; ++i) {
     auto detID = static_cast<detid_t>(iraw.udet[i]);
@@ -208,7 +207,7 @@ void LoadDetectorInfo::loadFromRAW(const std::string &filename) {
       float pressure = iraw.ut[i + pressureTabNum * numDets];
       float thickness = iraw.ut[i + thicknessTabNum * numDets];
 
-      updateParameterMap(wsDetInfo, index, pmap, l2, theta, phi, delta, pressure, thickness);
+      updateParameterMap(wsDetInfo, index, componentInfo, l2, theta, phi, delta, pressure, thickness);
     } catch (std::out_of_range &) {
       continue;
     }
@@ -246,7 +245,7 @@ void LoadDetectorInfo::loadFromIsisNXS(const std::string &filename) {
   nxsFile.close();
 
   // Start loop over detectors
-  auto &pmap = m_workspace->instrumentParameters();
+  auto &componentInfo = m_workspace->mutableComponentInfo();
   auto &wsDetInfo = m_workspace->mutableDetectorInfo();
   auto numDets = static_cast<int>(detInfo.ids.size());
   for (int i = 0; i < numDets; ++i) {
@@ -270,7 +269,7 @@ void LoadDetectorInfo::loadFromIsisNXS(const std::string &filename) {
       double pressure = detInfo.pressures[i];
       double thickness = detInfo.thicknesses[i];
 
-      updateParameterMap(wsDetInfo, index, pmap, l2, theta, phi, delta, pressure, thickness);
+      updateParameterMap(wsDetInfo, index, componentInfo, l2, theta, phi, delta, pressure, thickness);
     } catch (std::out_of_range &) {
       continue;
     }
@@ -383,7 +382,7 @@ void LoadDetectorInfo::readNXSDotDat(Nexus::File &nxsFile, DetectorInfo &detInfo
  *
  * @param detectorInfo A reference to the workspace's detector info
  * @param detIndex The index of the detector whose parameters should be updated
- * @param pmap A reference to the ParameterMap instance to update
+ * @param componentInfo A reference to the workspace's component info, holding the parameters to update
  * @param l2 The new l2 value
  * @param theta The new theta value
  * @param phi The new phi value
@@ -392,19 +391,17 @@ void LoadDetectorInfo::readNXSDotDat(Nexus::File &nxsFile, DetectorInfo &detInfo
  * @param thickness The new thickness value
  */
 void LoadDetectorInfo::updateParameterMap(Geometry::DetectorInfo &detectorInfo, const size_t detIndex,
-                                          Geometry::ParameterMap &pmap, const double l2, const double theta,
+                                          Geometry::ComponentInfo &componentInfo, const double l2, const double theta,
                                           const double phi, const double delay, const double pressure,
                                           const double thickness) const {
 
-  const auto detCompID = detectorInfo.detector(detIndex).getComponentID();
-
   // store detector params that are different to instrument level
   if (fabs(delay - m_instDelta) > 1e-06)
-    pmap.addDouble(detCompID, DELAY_PARAM, delay);
+    componentInfo.addDouble(detIndex, DELAY_PARAM, delay);
   if (fabs(pressure - m_instPressure) > 1e-06)
-    pmap.addDouble(detCompID, PRESSURE_PARAM, pressure);
+    componentInfo.addDouble(detIndex, PRESSURE_PARAM, pressure);
   if (fabs(thickness - m_instThickness) > 1e-06)
-    pmap.addDouble(detCompID, THICKNESS_PARAM, thickness);
+    componentInfo.addDouble(detIndex, THICKNESS_PARAM, thickness);
 
   // move
   if (m_moveDets) {

@@ -40,6 +40,10 @@ class SideBySideShapeRenderer(ShapeRenderer):
     def precompute(self):
         super().precompute()
 
+    def _cuboid_view_directions(self, det_indices: np.ndarray) -> np.ndarray:
+        """Grid banks are laid flat without turning their detectors, so a cuboid is seen down its local Z axis."""
+        return np.array([[0.0, 0.0, 1.0]])
+
     def build_detector_mesh(self, positions: np.ndarray, flip_beam: bool, model) -> pv.PolyData:
         if not self._precomputed:
             self.precompute()

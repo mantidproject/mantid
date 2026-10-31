@@ -31,7 +31,8 @@ std::string ISO8601StringPlusSpace(const DateAndTime &self) {
 }
 
 int64_t total_nanoseconds(const DateAndTime &self) {
-  PyErr_Warn(PyExc_DeprecationWarning, ".total_nanoseconds() is deprecated. Use .totalNanoseconds() instead.");
+  if (PyErr_Warn(PyExc_DeprecationWarning, ".total_nanoseconds() is deprecated. Use .totalNanoseconds() instead.") < 0)
+    throw boost::python::error_already_set();
   return self.totalNanoseconds();
 }
 
@@ -72,7 +73,8 @@ void export_DateAndTime() {
 }
 
 int64_t time_duration_total_nanoseconds(time_duration &self) {
-  PyErr_Warn(PyExc_DeprecationWarning, ".total_nanoseconds() is deprecated. Use .totalNanoseconds() instead.");
+  if (PyErr_Warn(PyExc_DeprecationWarning, ".total_nanoseconds() is deprecated. Use .totalNanoseconds() instead.") < 0)
+    throw boost::python::error_already_set();
   return self.total_nanoseconds();
 }
 

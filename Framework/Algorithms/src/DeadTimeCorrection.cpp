@@ -11,6 +11,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/Unit.h"
 
 #include <limits>
 

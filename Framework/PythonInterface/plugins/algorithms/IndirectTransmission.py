@@ -210,8 +210,7 @@ class IndirectTransmission(PythonAlgorithm):
             spectra_list = list(range(0, wsHandle.getNumberHistograms()))
             GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, SpectraList=spectra_list)
             wsHandle = mtd[workspace]
-            det = wsHandle.getDetector(0)
-            efixed = wsHandle.getEFixed(det.getID())
+            efixed = wsHandle.getEFixed(wsHandle.getSpectrum(0).getDetectorIDs()[0])
 
         return efixed
 

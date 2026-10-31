@@ -27,6 +27,8 @@ from mantid.kernel import (
     Logger,
     Elastic,
     UnitConversion,
+    UnitParametersMap,
+    UnitParams,
 )
 from mantid.dataobjects import MaskWorkspaceProperty
 from mantid.simpleapi import (
@@ -1642,7 +1644,11 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
     def _to_spectrum_axis(self, workspace_in, workspace_out, mask, instrument_donor=None):
         target = self.getProperty("XUnits").value
         wavelength = self.getProperty("Wavelength").value
-        e_fixed = UnitConversion.run("Wavelength", "Energy", wavelength, 0, 0, 0, Elastic, 0)
+        params = UnitParametersMap()
+        params[UnitParams.l2] = 0
+        params[UnitParams.twoTheta] = 0
+        params[UnitParams.efixed] = 0
+        e_fixed = UnitConversion.run("Wavelength", "Energy", wavelength, 0, Elastic, params)
         _targetMap = {"d-spacing": "ElasticDSpacing", "2Theta": "Theta", "Q": "ElasticQ"}
         target = _targetMap[target]
 

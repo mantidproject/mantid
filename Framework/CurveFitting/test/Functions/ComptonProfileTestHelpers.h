@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Axis.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -168,19 +169,18 @@ static Mantid::Geometry::Instrument_sptr createTestInstrumentWithNoFoilChanger(c
 
 static void addResolutionParameters(const Mantid::API::MatrixWorkspace_sptr &ws, const Mantid::detid_t detID) {
   // Parameters
-  auto &pmap = ws->instrumentParameters();
   const auto &detectorInfo = ws->detectorInfo();
   const auto detIndex = detectorInfo.indexOf(detID);
-  const auto compID = detectorInfo.detector(detIndex).getComponentID();
+  auto &componentInfo = ws->mutableComponentInfo();
 
-  pmap.addDouble(compID, "sigma_l1", 0.021);
-  pmap.addDouble(compID, "sigma_l2", 0.023);
-  pmap.addDouble(compID, "sigma_theta", 0.028);
-  pmap.addDouble(compID, "efixed", 4908);
-  pmap.addDouble(compID, "t0", -0.32);
-  pmap.addDouble(compID, "hwhm_lorentz", 24);
-  pmap.addDouble(compID, "sigma_gauss", 73);
-  pmap.addDouble(compID, "sigma_tof", 0.3);
+  componentInfo.addDouble(detIndex, "sigma_l1", 0.021);
+  componentInfo.addDouble(detIndex, "sigma_l2", 0.023);
+  componentInfo.addDouble(detIndex, "sigma_theta", 0.028);
+  componentInfo.addDouble(detIndex, "efixed", 4908);
+  componentInfo.addDouble(detIndex, "t0", -0.32);
+  componentInfo.addDouble(detIndex, "hwhm_lorentz", 24);
+  componentInfo.addDouble(detIndex, "sigma_gauss", 73);
+  componentInfo.addDouble(detIndex, "sigma_tof", 0.3);
 }
 
 static void addFoilResolution(const Mantid::API::MatrixWorkspace_sptr &ws, const std::string &name) {

@@ -415,7 +415,7 @@ class DirectEnergyConversion(object):
         # not been modified from input parameters.
         # E.g.  detector number have changed
         old_changes = self.prop_man.getChangedProperties()
-        all_changes = self.prop_man.update_defaults_from_instrument(sample_ws.getInstrument())
+        all_changes = self.prop_man.update_defaults_from_instrument(sample_ws)
         workspace_defined_prop = all_changes.difference(old_changes)
         if len(workspace_defined_prop) > 0:
             prop_man.log("****************************************************************")
@@ -959,7 +959,8 @@ class DirectEnergyConversion(object):
         spec_num = monitor_ws.getIndexFromSpectrumNumber(ei_mon_spectra[0])
         mon1_det = monitor_ws.getDetector(spec_num)
         mon1_pos = mon1_det.getPos()
-        src_name = data_ws.getInstrument().getSource().getName()
+        component_info = data_ws.componentInfo()
+        src_name = component_info.name(component_info.source())
         MoveInstrumentComponent(
             Workspace=resultws_name,
             ComponentName=src_name,
@@ -1272,7 +1273,7 @@ class DirectEnergyConversion(object):
                     )
                     mon1_det = monitor_ws.getDetector(mon1_index)
                     mon1_pos = mon1_det.getPos()
-                    src_name = monitor_ws.getInstrument().getSource().name()
+                    src_name = monitor_ws.componentInfo().name(monitor_ws.componentInfo().source())
                 # pylint: disable=bare-except
                 except:
                     src_name = None
@@ -1760,8 +1761,7 @@ class DirectEnergyConversion(object):
 
     def setup_instrument_properties(self, workspace=None, reload_instrument=False):
         if workspace is not None:
-            instrument = workspace.getInstrument()
-            name = instrument.name()
+            name = workspace.getInstrumentName()
             if name != self.prop_man.instr_name:
                 self.prop_man = PropertyManager(name, workspace)
 

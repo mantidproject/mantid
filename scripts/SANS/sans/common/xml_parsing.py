@@ -9,7 +9,7 @@
 # pylint: disable=invalid-name
 
 try:
-    import xml.etree.cElementTree as eTree
+    import xml.etree.ElementTree as eTree
 except ImportError:
     import xml.etree.ElementTree as eTree
 from mantid.kernel import DateAndTime

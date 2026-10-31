@@ -20,9 +20,12 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/Instrument/InstrumentMetadata.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Quat.h"
 #include "MantidKernel/Strings.h"
 
 #include <cxxtest/TestSuite.h>
@@ -106,7 +109,7 @@ public:
       std::filesystem::remove(filePath);
 
       MatrixWorkspace_sptr output = loader.getProperty("Workspace");
-      const std::string loadedName = output->getInstrument()->getName();
+      const std::string loadedName = output->getInstrumentName();
       TS_ASSERT_EQUALS(expected, loadedName);
     };
 
@@ -174,24 +177,30 @@ public:
     // Get back the saved workspace
     MatrixWorkspace_sptr output = loader.getProperty("Workspace");
 
-    std::shared_ptr<const Instrument> i = output->getInstrument()->baseInstrument();
-    std::shared_ptr<const IComponent> source = i->getSource();
-    TS_ASSERT_EQUALS(source->getName(), "undulator");
-    TS_ASSERT_DELTA(source->getPos().Y(), 0.0, 0.01);
+    const auto *loadedInstrumentID = WorkspaceCreationHelper::baseInstrumentID(*output);
+    // The ID is the instrument's address, so keep the instrument alive: if it were freed, a reload could be allocated
+    // at the same address and the caching check below would pass even without caching.
+    // A cloned ExperimentInfo shares the base instrument, without copying any histogram data.
+    const std::unique_ptr<ExperimentInfo> keepLoadedInstrumentAlive(output->cloneExperimentInfo());
+    const auto &baseComponentInfo = output->baseComponentInfo();
+    const size_t sourceIndex = baseComponentInfo.source();
+    TS_ASSERT_EQUALS(baseComponentInfo.name(sourceIndex), "undulator");
+    TS_ASSERT_DELTA(baseComponentInfo.position(sourceIndex).Y(), 0.0, 0.01);
 
-    std::shared_ptr<const IComponent> samplepos = i->getSample();
-    TS_ASSERT_EQUALS(samplepos->getName(), "nickel-holder");
-    TS_ASSERT_DELTA(samplepos->getPos().Z(), 0.0, 0.01);
+    const size_t sampleIndex = baseComponentInfo.sample();
+    TS_ASSERT_EQUALS(baseComponentInfo.name(sampleIndex), "nickel-holder");
+    const V3D samplePos = baseComponentInfo.position(sampleIndex);
+    TS_ASSERT_DELTA(samplePos.Z(), 0.0, 0.01);
 
     const auto &detectorInfo = output->detectorInfo();
-    const auto &ptrDet103 = detectorInfo.detector(detectorInfo.indexOf(103));
-    TS_ASSERT_EQUALS(ptrDet103.getID(), 103);
-    TS_ASSERT_EQUALS(ptrDet103.getName(), "HET_non_PSDtube");
-    TS_ASSERT_DELTA(ptrDet103.getPos().X(), 0.3826351418, 0.01);
-    TS_ASSERT_DELTA(ptrDet103.getPos().Z(), 2.4470, 0.01);
-    double d = ptrDet103.getPos().distance(samplepos->getPos());
+    const auto det103Index = detectorInfo.indexOf(103);
+    TS_ASSERT_EQUALS(detectorInfo.detid(det103Index), 103);
+    TS_ASSERT_EQUALS(baseComponentInfo.name(det103Index), "HET_non_PSDtube");
+    TS_ASSERT_DELTA(detectorInfo.position(det103Index).X(), 0.3826351418, 0.01);
+    TS_ASSERT_DELTA(detectorInfo.position(det103Index).Z(), 2.4470, 0.01);
+    double d = detectorInfo.position(det103Index).distance(samplePos);
     TS_ASSERT_DELTA(d, 2.512, 0.0001);
-    double cmpDistance = ptrDet103.getDistance(*samplepos);
+    double cmpDistance = detectorInfo.l2(detectorInfo.indexOf(103));
     TS_ASSERT_DELTA(cmpDistance, 2.512, 0.0001);
 
     // test if detector with det_id=603 has been marked as a monitor
@@ -205,16 +214,15 @@ public:
 
     auto ids_from_map = output->getSpectrum(257).getDetectorIDs();
     const auto &spectrumInfo = output->spectrumInfo();
-    const auto &det_from_ws = spectrumInfo.detector(257);
     TS_ASSERT_EQUALS(ids_from_map.size(), 1);
     TS_ASSERT_EQUALS(*ids_from_map.begin(), 602);
-    TS_ASSERT_EQUALS(det_from_ws.getID(), 602);
+    TS_ASSERT_EQUALS(spectrumInfo.firstDetectorID(257), 602);
 
     // also a few tests on the last detector and a test for the one beyond the
     // last
-    const auto &ptrDetLast = detectorInfo.detector(detectorInfo.indexOf(413256));
-    TS_ASSERT_EQUALS(ptrDetLast.getID(), 413256);
-    TS_ASSERT_EQUALS(ptrDetLast.getName(), "pixel");
+    const auto detLastIndex = detectorInfo.indexOf(413256);
+    TS_ASSERT_EQUALS(detectorInfo.detid(detLastIndex), 413256);
+    TS_ASSERT_EQUALS(baseComponentInfo.name(detLastIndex), "pixel");
     TS_ASSERT_THROWS(detectorInfo.indexOf(413257), const std::out_of_range &);
 
     // Test input data is unchanged
@@ -226,20 +234,20 @@ public:
     // being attached
     std::shared_ptr<Instrument> instr = std::make_shared<Instrument>();
     output->setInstrument(instr);
-    TS_ASSERT_EQUALS(output->getInstrument()->baseInstrument(), instr);
+    TS_ASSERT_EQUALS(WorkspaceCreationHelper::baseInstrumentID(*output), instr->getComponentID());
     LoadInstrument loadAgain;
     loadAgain.initialize();
     loadAgain.setPropertyValue("Filename", instrFilename);
     loadAgain.setProperty("Workspace", ws2D);
     loadAgain.setProperty("RewriteSpectraMap", OptionalBool(true));
     loadAgain.execute();
-    TS_ASSERT_EQUALS(output->getInstrument()->baseInstrument(), i);
+    TS_ASSERT_EQUALS(WorkspaceCreationHelper::baseInstrumentID(*output), loadedInstrumentID);
 
     // Valid-from/to1951-01-01 00:00:01
     Types::Core::DateAndTime validFrom("1951-01-01T00:00:01");
     Types::Core::DateAndTime validTo("2100-01-31 23:59:59");
-    TS_ASSERT_EQUALS(i->getValidFromDate(), validFrom);
-    TS_ASSERT_EQUALS(i->getValidToDate(), validTo);
+    TS_ASSERT_EQUALS(output->instrumentMetadata().validFromDate(), validFrom);
+    TS_ASSERT_EQUALS(output->instrumentMetadata().validToDate(), validTo);
   }
 
   void testExecSLS() {
@@ -276,15 +284,22 @@ public:
     TS_ASSERT_DELTA(samplepos->getPos().Y(), 0.0, 0.01);
 
     const auto &detectorInfo = output->detectorInfo();
-    const auto &ptrDet = detectorInfo.detector(detectorInfo.indexOf(101));
-    TS_ASSERT_EQUALS(ptrDet.getID(), 101);
+    const auto &componentInfo = output->componentInfo();
+    TS_ASSERT_EQUALS(detectorInfo.detid(detectorInfo.indexOf(101)), 101);
 
     TS_ASSERT(output->detectorInfo().isMonitor(0));
 
-    const auto &ptrDetShape = detectorInfo.detector(detectorInfo.indexOf(102));
-    TS_ASSERT(ptrDetShape.isValid(V3D(0.0, 0.0, 0.0) + ptrDetShape.getPos()));
-    TS_ASSERT(ptrDetShape.isValid(V3D(0.0, 0.0, 0.000001) + ptrDetShape.getPos()));
-    TS_ASSERT(ptrDetShape.isValid(V3D(0.005, 0.1, 0.000002) + ptrDetShape.getPos()));
+    const auto detShapeIndex = detectorInfo.indexOf(102);
+    // Test whether a point, given as an offset from the detector position, lies inside the detector shape
+    const auto isValidOffset = [&componentInfo, detShapeIndex](V3D offset) {
+      Quat unRotate = componentInfo.rotation(detShapeIndex);
+      unRotate.inverse();
+      unRotate.rotate(offset);
+      return componentInfo.shape(detShapeIndex).isValid(offset / componentInfo.scaleFactor(detShapeIndex));
+    };
+    TS_ASSERT(isValidOffset(V3D(0.0, 0.0, 0.0)));
+    TS_ASSERT(isValidOffset(V3D(0.0, 0.0, 0.000001)));
+    TS_ASSERT(isValidOffset(V3D(0.005, 0.1, 0.000002)));
   }
 
   void testExecNIMROD() {
@@ -309,12 +324,12 @@ public:
     TS_ASSERT(loaderNIMROD.isExecuted());
 
     const auto &detectorInfo = ws2D->detectorInfo();
-    const auto &ptrDet = detectorInfo.detector(detectorInfo.indexOf(20103001));
-    TS_ASSERT_EQUALS(ptrDet.getName(), "pixel");
-    TS_ASSERT_EQUALS(ptrDet.getID(), 20103001);
-    TS_ASSERT_DELTA(ptrDet.getPos().X(), 0.0254, 0.0001);
-    TS_ASSERT_DELTA(ptrDet.getPos().Y(), -0.2084, 0.0001);
-    TS_ASSERT_DELTA(ptrDet.getPos().Z(), 5.5258, 0.0001);
+    const auto detIndex = detectorInfo.indexOf(20103001);
+    TS_ASSERT_EQUALS(ws2D->componentInfo().name(detIndex), "pixel");
+    TS_ASSERT_EQUALS(detectorInfo.detid(detIndex), 20103001);
+    TS_ASSERT_DELTA(detectorInfo.position(detIndex).X(), 0.0254, 0.0001);
+    TS_ASSERT_DELTA(detectorInfo.position(detIndex).Y(), -0.2084, 0.0001);
+    TS_ASSERT_DELTA(detectorInfo.position(detIndex).Z(), 5.5258, 0.0001);
   }
 
   void testExecNIMRODandRetrieveFromIDS() {
@@ -378,19 +393,19 @@ public:
     TS_ASSERT_EQUALS(1, detectorInfo.detectorIDs()[0]);
     TS_ASSERT_EQUALS(4816, detectorInfo.detectorIDs()[920]);
 
-    const auto &ptrDet1 = detectorInfo.detector(detectorInfo.indexOf(1));
-    TS_ASSERT_EQUALS(ptrDet1.getName(), "monitor");
-    TS_ASSERT_EQUALS(ptrDet1.getID(), 1);
-    TS_ASSERT_DELTA(ptrDet1.getPos().X(), 0.0000, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1.getPos().Y(), 0.0000, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1.getPos().Z(), -3.2500, 0.0001);
+    const auto det1Index = detectorInfo.indexOf(1);
+    TS_ASSERT_EQUALS(componentInfo.name(det1Index), "monitor");
+    TS_ASSERT_EQUALS(detectorInfo.detid(det1Index), 1);
+    TS_ASSERT_DELTA(detectorInfo.position(det1Index).X(), 0.0000, 0.0001);
+    TS_ASSERT_DELTA(detectorInfo.position(det1Index).Y(), 0.0000, 0.0001);
+    TS_ASSERT_DELTA(detectorInfo.position(det1Index).Z(), -3.2500, 0.0001);
 
-    const auto &ptrDet2 = detectorInfo.detector(detectorInfo.indexOf(4816));
-    TS_ASSERT_EQUALS(ptrDet2.getName(), "tall He3 element");
-    TS_ASSERT_EQUALS(ptrDet2.getID(), 4816);
-    TS_ASSERT_DELTA(ptrDet2.getPos().X(), 0.6330, 0.0001);
-    TS_ASSERT_DELTA(ptrDet2.getPos().Y(), 0.6330, 0.0001);
-    TS_ASSERT_DELTA(ptrDet2.getPos().Z(), 3.9211, 0.0001);
+    const auto det2Index = detectorInfo.indexOf(4816);
+    TS_ASSERT_EQUALS(componentInfo.name(det2Index), "tall He3 element");
+    TS_ASSERT_EQUALS(detectorInfo.detid(det2Index), 4816);
+    TS_ASSERT_DELTA(detectorInfo.position(det2Index).X(), 0.6330, 0.0001);
+    TS_ASSERT_DELTA(detectorInfo.position(det2Index).Y(), 0.6330, 0.0001);
+    TS_ASSERT_DELTA(detectorInfo.position(det2Index).Z(), 3.9211, 0.0001);
   }
 
   /// Common initialisation for Nexus loading tests
@@ -554,7 +569,7 @@ public:
     TS_ASSERT_EQUALS(physicalInst->getDetector(1005)->getPos(), V3D(2, 1, 0));
 
     // Check the right instrument ended up on the workspace
-    TS_ASSERT_EQUALS(neutronicInst.get(), ws->getInstrument()->baseInstrument().get());
+    TS_ASSERT_EQUALS(neutronicInst->getComponentID(), WorkspaceCreationHelper::baseInstrumentID(*ws));
     // Check the neutronic positions
     const auto &detectorInfo = ws->detectorInfo();
     TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1000)), V3D(2, 2, 0));
@@ -570,12 +585,11 @@ public:
     // instrument...
     TS_ASSERT_EQUALS(physicalInst->getDetector(1000)->shape(), physicalInst->getDetector(1001)->shape())
     // ...but not in the neutronic instrument
-    TS_ASSERT_DIFFERS(detectorInfo.detector(detectorInfo.indexOf(1000)).shape(),
-                      neutronicInst->getDetector(1001)->shape())
+    const auto &componentInfo = ws->componentInfo();
+    TS_ASSERT_DIFFERS(&componentInfo.shape(detectorInfo.indexOf(1000)), neutronicInst->getDetector(1001)->shape().get())
     // Also, the same shape is shared between the corresponding '1000'
     // detectors
-    TS_ASSERT_EQUALS(physicalInst->getDetector(1000)->shape(),
-                     detectorInfo.detector(detectorInfo.indexOf(1000)).shape())
+    TS_ASSERT_EQUALS(physicalInst->getDetector(1000)->shape().get(), &componentInfo.shape(detectorInfo.indexOf(1000)))
 
     // Check the monitor is in the same place in each instrument
     TS_ASSERT_EQUALS(physicalInst->getDetector(1)->getPos(), detectorInfo.position(detectorInfo.indexOf(1)));

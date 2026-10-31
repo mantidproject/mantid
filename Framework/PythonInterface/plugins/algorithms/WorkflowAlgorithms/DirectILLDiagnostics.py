@@ -633,13 +633,13 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         """Return true if beam stop diagnostics are enabled, false otherwise."""
         beamStopDiagnostics = self.getProperty(common.PROP_BEAM_STOP_DIAGNOSTICS).value
         if beamStopDiagnostics == common.BEAM_STOP_DIAGNOSTICS_AUTO:
-            instrument = mainWS.getInstrument()
-            if instrument.hasParameter("beam_stop_diagnostics_spectra"):
+            componentInfo = mainWS.componentInfo()
+            if componentInfo.hasParameter("beam_stop_diagnostics_spectra"):
                 return True
             return False
         elif beamStopDiagnostics == common.BEAM_STOP_DIAGNOSTICS_ON:
-            instrument = mainWS.getInstrument()
-            if not instrument.hasParameter("beam_stop_diagnostics_spectra"):
+            componentInfo = mainWS.componentInfo()
+            if not componentInfo.hasParameter("beam_stop_diagnostics_spectra"):
                 self._report.error(
                     "'beam_stop_diagnostics_spectra' missing from instrument parameters. " + "Beam stop diagnostics disabled."
                 )

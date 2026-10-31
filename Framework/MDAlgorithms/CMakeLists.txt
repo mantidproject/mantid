@@ -60,8 +60,6 @@ set(SRC_FILES
     src/IntegrateEllipsoidsV2.cpp
     src/IntegrateFlux.cpp
     src/IntegrateMDHistoWorkspace.cpp
-    src/IntegratePeaksCWSD.cpp
-    src/IntegratePeaksMD.cpp
     src/IntegratePeaksMD2.cpp
     src/IntegratePeaksMDHKL.cpp
     src/IntegratePeaksShapeMD.cpp
@@ -182,8 +180,6 @@ set(INC_FILES
     inc/MantidMDAlgorithms/IntegrateEllipsoidsV2.h
     inc/MantidMDAlgorithms/IntegrateFlux.h
     inc/MantidMDAlgorithms/IntegrateMDHistoWorkspace.h
-    inc/MantidMDAlgorithms/IntegratePeaksCWSD.h
-    inc/MantidMDAlgorithms/IntegratePeaksMD.h
     inc/MantidMDAlgorithms/IntegratePeaksMD2.h
     inc/MantidMDAlgorithms/IntegratePeaksMDHKL.h
     inc/MantidMDAlgorithms/IntegratePeaksShapeMD.h
@@ -304,10 +300,8 @@ set(TEST_FILES
     IntegrateEllipsoidsWithSatellitesTest.h
     IntegrateFluxTest.h
     IntegrateMDHistoWorkspaceTest.h
-    IntegratePeaksCWSDTest.h
     IntegratePeaksMD2Test.h
     IntegratePeaksMDHKLTest.h
-    IntegratePeaksMDTest.h
     IntegratePeaksShapeMDTest.h
     IntegrateQLabEventsTest.h
     InvalidParameterParserTest.h
@@ -387,7 +381,7 @@ target_include_directories(
 )
 
 # Set the name of the generated library
-set_target_properties(MDAlgorithms PROPERTIES OUTPUT_NAME MantidMDAlgorithms COMPILE_DEFINITIONS IN_MANTID_MDALGORITHMS)
+set_target_properties(MDAlgorithms PROPERTIES OUTPUT_NAME MantidMDAlgorithms)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(MDAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")

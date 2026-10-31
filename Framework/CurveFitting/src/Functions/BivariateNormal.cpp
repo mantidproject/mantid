@@ -14,6 +14,7 @@
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidHistogramData/HistogramY.h"
 
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <algorithm>

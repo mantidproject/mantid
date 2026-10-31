@@ -275,7 +275,7 @@ QMenu *WorkspaceTreeWidgetSimple::createWorkspaceContextMenu(const QStringList &
   const auto it = std::find(combinedActions.cbegin(), combinedActions.cend(), m_showInstrument);
   if (it != combinedActions.cend()) {
     const auto showInstrumentViewCheck = [](const MatrixWorkspace_const_sptr &workspace) {
-      return workspace->getInstrument() && !workspace->getInstrument()->getName().empty() &&
+      return workspace->getInstrument() && !workspace->getInstrumentName().empty() &&
              workspace->getAxis(1)->isSpectra();
     };
     const bool enabled =

@@ -73,12 +73,12 @@ std::string getBankName(const std::string &bankPart, const int idnum) {
 std::string getInstName(const API::Workspace_const_sptr &wksp) {
   MatrixWorkspace_const_sptr matrixWksp = std::dynamic_pointer_cast<const MatrixWorkspace>(wksp);
   if (matrixWksp) {
-    return matrixWksp->getInstrument()->getName();
+    return matrixWksp->getInstrumentName();
   }
 
   PeaksWorkspace_const_sptr peaksWksp = std::dynamic_pointer_cast<const PeaksWorkspace>(wksp);
   if (peaksWksp) {
-    return peaksWksp->getInstrument()->getName();
+    return peaksWksp->getInstrumentName();
   }
 
   throw std::runtime_error("Failed to determine instrument name");

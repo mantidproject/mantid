@@ -10,8 +10,39 @@
     <height>420</height>
    </rect>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout">
+  <layout class="QHBoxLayout" name="horizontalLayout" stretch="3,1">
    <item>
+    <layout class="QVBoxLayout" name="workspaceLayout">
+     <item>
+      <layout class="QHBoxLayout" name="workspaceFilterLayout">
+       <item>
+        <widget class="QCheckBox" name="filterIvsLambda">
+         <property name="text"><string>IvsLambda</string></property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="filterIvsQ">
+         <property name="text"><string>IvsQ</string></property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="filterIvsQBinned">
+         <property name="text"><string>IvsQBinned</string></property>
+         <property name="checked"><bool>true</bool></property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="workspaceFilter">
+         <property name="placeholderText"><string>Filter by Item (regex)</string></property>
+         <property name="toolTip">
+          <string>Case-sensitive regular expression matched against the Item column. Matching a parent includes its children of the checked output types. Invalid expressions keep the last valid filter.</string>
+         </property>
+         <property name="clearButtonEnabled"><bool>true</bool></property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
     <widget class="MantidQt::CustomInterfaces::ISISReflectometry::QtPlottingWorkspaceTreeView" name="plottingWorkspaceTree">
      <property name="selectionMode">
       <enum>QAbstractItemView::ExtendedSelection</enum>
@@ -20,6 +51,8 @@
       <bool>false</bool>
      </property>
     </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <layout class="QVBoxLayout" name="optionsLayout">
@@ -79,6 +112,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="plotIndividual">
+       <property name="toolTip">
+        <string>Plot each selection in an individual plot window</string>
+       </property>
        <property name="text">
         <string>Plot</string>
        </property>
@@ -86,6 +122,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="plotOverplot">
+       <property name="toolTip">
+        <string>Plot all selections in a single plot window</string>
+       </property>
        <property name="text">
         <string>Plot over</string>
        </property>
@@ -100,17 +139,70 @@
      </item>
      <item>
       <widget class="QCheckBox" name="addToExistingPlot">
+       <property name="toolTip">
+        <string>Add selection to the most recent plot window created by this interface</string>
+       </property>
        <property name="text">
         <string>Add to existing plot</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="plotTiledVertically">
-       <property name="text">
-        <string>Plot tiled vertically</string>
+      <layout class="QVBoxLayout" name="tiledPlotOptionsLayout">
+       <property name="spacing">
+        <number>6</number>
        </property>
-      </widget>
+       <item>
+        <widget class="QCheckBox" name="plotTiledVertically">
+         <property name="text">
+          <string>Plot tiled vertically</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="shareAxesWhenTiledLayout">
+         <item>
+          <widget class="QLabel" name="shareAxesWhenTiledLabel">
+           <property name="text">
+            <string>Share tiled axes:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="shareXAxisWhenTiled">
+           <property name="toolTip">
+            <string>Share X axes with the top-left tiled plot when their units match</string>
+           </property>
+           <property name="text">
+            <string>X</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="shareYAxisWhenTiled">
+           <property name="toolTip">
+            <string>Share Y axes with the top-left tiled plot when their units match</string>
+           </property>
+           <property name="text">
+            <string>Y</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="shareAxesWhenTiledSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>60</width>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
      </item>
      <item>
       <spacer name="verticalSpacer">

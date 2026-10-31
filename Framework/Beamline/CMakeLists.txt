@@ -1,7 +1,9 @@
 set(SRC_FILES src/ComponentInfo.cpp src/DetectorInfo.cpp src/SpectrumInfo.cpp)
 
-set(INC_FILES inc/MantidBeamline/ComponentInfo.h inc/MantidBeamline/ComponentType.h inc/MantidBeamline/DetectorInfo.h
-              inc/MantidBeamline/PixelGridComponent.h inc/MantidBeamline/SpectrumInfo.h
+set(INC_FILES
+    inc/MantidBeamline/ComponentInfo.h inc/MantidBeamline/ComponentType.h inc/MantidBeamline/DetectorInfo.h
+    inc/MantidBeamline/PixelGridComponent.h inc/MantidBeamline/SpectrumInfo.h
+    inc/MantidBeamline/StructuredGridComponent.h
 )
 
 set(TEST_FILES ComponentInfoTest.h DetectorInfoTest.h SpectrumInfoTest.h)
@@ -16,7 +18,7 @@ endif()
 add_library(Beamline ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::Beamline ALIAS Beamline)
 # Set the name of the generated library
-set_target_properties(Beamline PROPERTIES OUTPUT_NAME MantidBeamline COMPILE_DEFINITIONS IN_MANTID_BEAMLINE)
+set_target_properties(Beamline PROPERTIES OUTPUT_NAME MantidBeamline)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Beamline PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")

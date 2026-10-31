@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidGeometry/Math/Triple.h"
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger_fwd.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;

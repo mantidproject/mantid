@@ -7,6 +7,7 @@
 #include "MantidDataObjects/PeakColumn.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
 

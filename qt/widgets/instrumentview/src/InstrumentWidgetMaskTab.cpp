@@ -1298,8 +1298,7 @@ Mantid::API::MatrixWorkspace_sptr InstrumentWidgetMaskTab::loadMask(const std::s
   // build path and input properties etc.
   const auto &actor = m_instrWidget->getInstrumentActor();
   auto workspace = actor.getWorkspace();
-  auto instrument = workspace->getInstrument();
-  auto instrumentName = instrument->getName();
+  auto instrumentName = workspace->getInstrumentName();
   auto tempName = "__" + workspace->getName() + "MaskView";
 
   // load the mask from the project folder

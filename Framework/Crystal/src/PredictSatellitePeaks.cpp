@@ -409,7 +409,7 @@ void PredictSatellitePeaks::addPeakToOutputWorkspace(const std::shared_ptr<IPeak
   const workspace_type_enum workspace_type = determineWorkspaceType(Peaks);
 
   if (workspace_type == workspace_type_enum::regular_peaks) {
-    const Geometry::InstrumentRayTracer tracer(Peaks->getInstrument());
+    const Geometry::InstrumentRayTracer tracer(Peaks->componentInfo(), Peaks->detectorInfo());
 
     const std::shared_ptr<Peak> peak = std::dynamic_pointer_cast<Peak>(satellite_iPeak);
 

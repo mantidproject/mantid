@@ -11,7 +11,6 @@
 #include "IALCDataLoadingPresenter.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/System.h"
 #include <atomic>
 
 namespace MantidQt {

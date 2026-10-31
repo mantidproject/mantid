@@ -190,21 +190,17 @@ public:
     TS_ASSERT_DELTA(det_center.Y(), 0.0, 0.0000001);
 
     // check the sequence of the detector to each ws index
-    const auto &detector0 = spectrumInfo.detector(0);
-    const auto det0id = detector0.getID();
+    const auto det0id = spectrumInfo.firstDetectorID(0);
     TS_ASSERT_EQUALS(det0id, 0);
-    const auto &detector1 = spectrumInfo.detector(1);
-    const auto det1id = detector1.getID();
+    const auto det1id = spectrumInfo.firstDetectorID(1);
     TS_ASSERT_EQUALS(det1id, 1);
-    const auto &detectorLast = spectrumInfo.detector(256 * 255 + 255);
-    const auto detlastid = detectorLast.getID();
+    const auto detlastid = spectrumInfo.firstDetectorID(256 * 255 + 255);
     TS_ASSERT_EQUALS(detlastid, 255 * 256 + 255);
     // test the whole sequence
     for (size_t irow = 1; irow < 250; ++irow)
       for (size_t jcol = 10; jcol < 20; ++jcol) {
         size_t iws = irow + jcol * 256;
-        const auto &detector = spectrumInfo.detector(iws);
-        const auto detid = detector.getID();
+        const auto detid = spectrumInfo.firstDetectorID(iws);
         TS_ASSERT_EQUALS(detid, static_cast<detid_t>(iws));
       }
 

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitDataPresenter.h"
 #include "FitTab.h"
+#include "MantidKernel/Unit.h"
 
 #include <algorithm>
 #include <map>

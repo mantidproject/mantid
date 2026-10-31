@@ -6,13 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <cstddef>
+
 #include "DllConfig.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
+#include "MantidKernel/Logger_fwd.h"
 
 #include <QDoubleValidator>
 #include <QLineEdit>

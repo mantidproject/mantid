@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "../DllConfig.h"
-#include "MantidKernel/System.h"
+#include "DllConfig.h"
 #include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
 #include <MantidQtWidgets/Common/FileFinderWidget.h>
 #include <QWidget>

@@ -1,8 +1,7 @@
 name: Update pixi
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 on:
   pull_request:
@@ -20,12 +19,15 @@ env:
 jobs:
   pixi-update-version:
     if: ${{ github.repository_owner == 'mantidproject' }}
+    permissions:
+      contents: write
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - if: github.event_name == 'pull_request'
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - if: github.event_name != 'pull_request'
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ env.UPDATE_BRANCH }}  # start from this branch
       - name: Update pixi version
@@ -56,7 +58,7 @@ jobs:
           fi
       - name: Create pull request
         if: github.event_name != 'pull_request' && steps.update-pixi-version.outputs.updated == 'true'
-        uses: peter-evans/create-pull-request@v8
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           token: ${{ secrets.MANTID_BUILDER_TOKEN }}
           author: mantid-builder <mantid-builder@users.noreply.github.com>
@@ -75,12 +77,15 @@ jobs:
 
   pixi-update-lockfile:
     if: ${{ github.repository_owner == 'mantidproject' }}
+    permissions:
+      contents: write
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - if: github.event_name == 'pull_request'
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - if: github.event_name != 'pull_request'
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ env.UPDATE_BRANCH }}  # start from this branch
       - uses: ./.github/actions/setup-pixi
@@ -113,7 +118,7 @@ jobs:
           fi
       - name: Create pull request
         if: github.event_name != 'pull_request'
-        uses: peter-evans/create-pull-request@v8
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           token: ${{ secrets.MANTID_BUILDER_TOKEN }}
           author: mantid-builder <mantid-builder@users.noreply.github.com>

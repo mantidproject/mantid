@@ -6,10 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
 #include <boost/python/extract.hpp>
 #include <boost/python/object.hpp>
 #include <vector>
+
+#include <string>
 
 namespace Mantid {
 namespace PythonInterface {
@@ -46,7 +47,7 @@ namespace Converters {
  * Converts a Python sequence type to a C++ std::vector, where the element
  * type is defined by the template type
  */
-template <typename DestElementType> struct DLLExport PySequenceToVector {
+template <typename DestElementType> struct PySequenceToVector {
   // Alias definitions
   using TypedVector = std::vector<DestElementType>;
 

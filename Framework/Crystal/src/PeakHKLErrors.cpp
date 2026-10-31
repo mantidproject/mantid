@@ -19,6 +19,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/Unit.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>

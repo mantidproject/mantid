@@ -441,8 +441,7 @@ void SaveAscii2::populateQMetaData() {
     if (!spectrumInfo.isMonitor(i)) {
       theta = 0.5 * spectrumInfo.twoTheta(i);
       try {
-        std::shared_ptr<const Geometry::IDetector> detector(&spectrumInfo.detector(i), NoDeleting());
-        efixed = m_ws->getEFixed(detector);
+        efixed = m_ws->getEFixed(spectrumInfo.firstDetectorID(i));
       } catch (std::runtime_error &) {
         throw;
       }

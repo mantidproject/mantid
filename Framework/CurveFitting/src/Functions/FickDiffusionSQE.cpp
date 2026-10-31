@@ -8,6 +8,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/Jacobian.h"
+#include "MantidKernel/Logger.h"
 #include <cmath>
 #include <limits>
 

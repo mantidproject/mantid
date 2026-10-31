@@ -25,8 +25,9 @@ namespace {
  * @return A new logger instance
  */
 std::shared_ptr<Logger> getLogger(const std::string &name) {
-  PyErr_Warn(PyExc_DeprecationWarning, "Logger.get(\"name\") is deprecated. "
-                                       "Simply use Logger(\"name\") instead");
+  if (PyErr_Warn(PyExc_DeprecationWarning, "Logger.get(\"name\") is deprecated. "
+                                           "Simply use Logger(\"name\") instead") < 0)
+    throw boost::python::error_already_set();
   return std::make_shared<Logger>(name);
 }
 

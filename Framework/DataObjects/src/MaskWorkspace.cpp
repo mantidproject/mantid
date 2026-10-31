@@ -9,6 +9,7 @@
 
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidKernel/IPropertyManager.h"
 
@@ -401,7 +402,7 @@ bool MaskWorkspace::hasInstrument() const {
 namespace Mantid::Kernel {
 
 template <>
-DLLExport Mantid::DataObjects::MaskWorkspace_sptr
+MANTID_DATAOBJECTS_DLL Mantid::DataObjects::MaskWorkspace_sptr
 IPropertyManager::getValue<Mantid::DataObjects::MaskWorkspace_sptr>(const std::string &name) const {
   auto *prop = dynamic_cast<PropertyWithValue<Mantid::DataObjects::MaskWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
@@ -414,7 +415,7 @@ IPropertyManager::getValue<Mantid::DataObjects::MaskWorkspace_sptr>(const std::s
 }
 
 template <>
-DLLExport Mantid::DataObjects::MaskWorkspace_const_sptr
+MANTID_DATAOBJECTS_DLL Mantid::DataObjects::MaskWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::DataObjects::MaskWorkspace_const_sptr>(const std::string &name) const {
   const auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::DataObjects::MaskWorkspace_sptr> *>(getPointerToProperty(name));

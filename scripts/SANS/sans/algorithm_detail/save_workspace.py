@@ -124,7 +124,7 @@ def remove_zero_errors_from_workspace(workspace):
 
     # Iterate over the workspace and replace the zero values with a large default value
     number_of_spectra = workspace.getNumberHistograms()
-    errors = workspace.dataE
+    errors = workspace.mutableE
     for index in range(0, number_of_spectra):
         spectrum = errors(index)
         spectrum[spectrum <= 0.0] = ZERO_ERROR_DEFAULT

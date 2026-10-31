@@ -831,9 +831,9 @@ bool CompareWorkspaces::checkSpectraMap(const MatrixWorkspace_const_sptr &ws1, c
 bool CompareWorkspaces::checkInstrument(const API::MatrixWorkspace_const_sptr &ws1,
                                         const API::MatrixWorkspace_const_sptr &ws2) {
   // First check the name matches
-  if (ws1->getInstrument()->getName() != ws2->getInstrument()->getName()) {
-    g_log.debug() << "Instrument names: WS1 = " << ws1->getInstrument()->getName()
-                  << " WS2 = " << ws2->getInstrument()->getName() << "\n";
+  if (ws1->getInstrumentName() != ws2->getInstrumentName()) {
+    g_log.debug() << "Instrument names: WS1 = " << ws1->getInstrumentName() << " WS2 = " << ws2->getInstrumentName()
+                  << "\n";
     recordMismatch("Instrument name mismatch");
     return false;
   }

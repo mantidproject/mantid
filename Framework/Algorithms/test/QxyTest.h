@@ -13,6 +13,7 @@
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/Qxy.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidKernel/Unit.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;

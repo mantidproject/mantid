@@ -7,7 +7,8 @@
 #include "MantidAlgorithms/ClearInstrumentParameters.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 
 namespace Mantid::Algorithms {
 
@@ -43,13 +44,27 @@ void ClearInstrumentParameters::init() {
  */
 void ClearInstrumentParameters::exec() {
   const MatrixWorkspace_sptr ws = getProperty("Workspace");
-  // Clear old parameters. We also want to clear fields stored in DetectorInfo
-  // (masking, positions, rotations). By setting the base instrument (which
-  // does not include a ParameterMap or DetectorInfo) we make use of the
-  // mechanism in ExperimentInfo that builds a clean DetectorInfo from the
-  // instrument being set.
-  const auto instrument = ws->getInstrument();
-  ws->setInstrument(instrument->baseInstrument());
+  auto &detectorInfo = ws->mutableDetectorInfo();
+  if (detectorInfo.isScanning()) {
+    // The base instrument has a single time index, so there is no unparametrized geometry to restore each scan
+    // point to, and the scan positions are data rather than parameters.
+    throw std::runtime_error("ClearInstrumentParameters cannot be used on a workspace with a detector scan.");
+  }
+
+  auto &componentInfo = ws->mutableComponentInfo();
+  componentInfo.clearParameters();
+  detectorInfo.clearMaskFlags();
+
+  // Restore the geometry as loaded from the instrument definition. Moving or rotating a component carries its
+  // subtree with it, so parents must be restored before their children. Every parent has a higher component index
+  // than its children, so walking down from the root visits them in that order.
+  const auto &baseComponentInfo = ws->baseComponentInfo();
+  // Set unconditionally: V3D and Quat compare with a tolerance, which would leave small calibration offsets behind.
+  for (size_t index = componentInfo.size(); index-- > 0;) {
+    componentInfo.setRotation(index, baseComponentInfo.rotation(index));
+    componentInfo.setPosition(index, baseComponentInfo.position(index));
+    componentInfo.setScaleFactor(index, baseComponentInfo.scaleFactor(index));
+  }
 }
 
 } // namespace Mantid::Algorithms

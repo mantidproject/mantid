@@ -554,11 +554,11 @@ void DgsReduction::exec() {
   Workspace_sptr sampleWS = this->loadInputData("Sample");
   MatrixWorkspace_sptr WS = std::dynamic_pointer_cast<MatrixWorkspace>(sampleWS);
   this->reductionManager->declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>("InstrumentName", WS->getInstrument()->getName()));
+      std::make_unique<PropertyWithValue<std::string>>("InstrumentName", WS->getInstrumentName()));
 
   // Check the facility for the loaded file and make sure it's the
   // same as the default.
-  const InstrumentInfo info = ConfigService::Instance().getInstrument(WS->getInstrument()->getName());
+  const InstrumentInfo info = ConfigService::Instance().getInstrument(WS->getInstrumentName());
   if (defaultFacility.name() != info.facility().name()) {
     std::ostringstream mess;
     mess << "Default facility must be set to " << info.facility().name();

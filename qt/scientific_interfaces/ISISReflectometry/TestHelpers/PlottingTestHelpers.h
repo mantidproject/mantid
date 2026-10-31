@@ -54,8 +54,6 @@ inline char const *toString(PlottingWorkspaceTreeSelectionMode mode) {
   switch (mode) {
   case PlottingWorkspaceTreeSelectionMode::None:
     return "None";
-  case PlottingWorkspaceTreeSelectionMode::Direct:
-    return "Direct";
   case PlottingWorkspaceTreeSelectionMode::ParentOnly:
     return "ParentOnly";
   case PlottingWorkspaceTreeSelectionMode::DirectAndParent:
@@ -147,7 +145,8 @@ inline bool operator!=(PlotOptions const &lhs, PlotOptions const &rhs) { return 
 
 inline bool operator==(PlotRequest const &lhs, PlotRequest const &rhs) {
   return lhs.workspaces == rhs.workspaces && lhs.options == rhs.options && lhs.parentWidget == rhs.parentWidget &&
-         lhs.addToExistingPlot == rhs.addToExistingPlot && lhs.tiledVertically == rhs.tiledVertically;
+         lhs.addToExistingPlot == rhs.addToExistingPlot && lhs.tiledVertically == rhs.tiledVertically &&
+         lhs.shareXAxisWhenTiled == rhs.shareXAxisWhenTiled && lhs.shareYAxisWhenTiled == rhs.shareYAxisWhenTiled;
 }
 
 inline bool operator!=(PlotRequest const &lhs, PlotRequest const &rhs) { return !(lhs == rhs); }
@@ -170,6 +169,7 @@ inline bool operator==(PlotActionState const &lhs, PlotActionState const &rhs) {
   return lhs.plotIndividualEnabled == rhs.plotIndividualEnabled && lhs.plotOverplotEnabled == rhs.plotOverplotEnabled &&
          lhs.plotTiledEnabled == rhs.plotTiledEnabled &&
          lhs.plotTiledVerticallyEnabled == rhs.plotTiledVerticallyEnabled &&
+         lhs.shareAxesWhenTiledEnabled == rhs.shareAxesWhenTiledEnabled &&
          lhs.addToExistingPlotEnabled == rhs.addToExistingPlotEnabled &&
          lhs.addToExistingPlotChecked == rhs.addToExistingPlotChecked;
 }

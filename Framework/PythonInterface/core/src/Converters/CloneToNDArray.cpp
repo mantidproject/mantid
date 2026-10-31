@@ -11,6 +11,7 @@
 #include "MantidPythonInterface/core/Converters/DateAndTime.h"
 #include "MantidPythonInterface/core/Converters/NDArrayTypeIndex.h"
 #include "MantidPythonInterface/core/Converters/NumpyFunctions.h"
+#include "MantidPythonInterface/core/DllConfig.h"
 #include "MantidTypes/Core/DateAndTime.h"
 #include <boost/python/list.hpp>
 #include <string>
@@ -143,10 +144,11 @@ template <> PyObject *cloneND(const std::string *carray, const int ndims, Py_int
 // Explicit instantiations
 //-----------------------------------------------------------------------
 #define INSTANTIATE_CLONE1D(ElementType)                                                                               \
-  template DLLExport PyObject *clone1D<ElementType>(const std::vector<ElementType> &cvector);
+  template MANTID_PYTHONINTERFACE_CORE_DLL PyObject *clone1D<ElementType>(const std::vector<ElementType> &cvector);
 
 #define INSTANTIATE_CLONEND(ElementType)                                                                               \
-  template DLLExport PyObject *cloneND<ElementType>(const ElementType *, const int ndims, Py_intptr_t *dims);
+  template MANTID_PYTHONINTERFACE_CORE_DLL PyObject *cloneND<ElementType>(const ElementType *, const int ndims,        \
+                                                                          Py_intptr_t *dims);
 
 #define INSTANTIATE_CLONE(ElementType)                                                                                 \
   INSTANTIATE_CLONE1D(ElementType)                                                                                     \

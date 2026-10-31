@@ -20,6 +20,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <cmath>

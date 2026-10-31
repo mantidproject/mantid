@@ -10,7 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidKernel/Unit.h"
+#include "MantidKernel/Unit_fwd.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 
 namespace Mantid {

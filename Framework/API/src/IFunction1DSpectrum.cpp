@@ -8,8 +8,6 @@
 
 namespace Mantid::API {
 
-Kernel::Logger IFunction1DSpectrum::g_log("IFunction1DSpectrum");
-
 void IFunction1DSpectrum::function(const FunctionDomain &domain, FunctionValues &values) const {
   try {
     const auto &spectrumDomain = dynamic_cast<const FunctionDomain1DSpectrum &>(domain);

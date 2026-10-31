@@ -201,7 +201,7 @@ MatrixWorkspace_sptr LoadCanSAS1D2::loadEntry(Poco::XML::Node *const workspaceDa
       }
     }
 
-    runLoadInstrument(main_out->getInstrument()->getName(), dataWS);
+    runLoadInstrument(main_out->getInstrumentName(), dataWS);
     dataWS->getAxis(0)->setUnit("Wavelength");
 
     // add to group

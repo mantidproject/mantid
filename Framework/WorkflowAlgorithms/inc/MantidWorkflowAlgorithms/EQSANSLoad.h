@@ -12,6 +12,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidWorkflowAlgorithms/DllConfig.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 
 namespace Mantid {
@@ -21,7 +22,7 @@ namespace WorkflowAlgorithms {
     Subtract dark current for EQSANS.
 */
 
-class DLLExport EQSANSLoad final : public API::Algorithm {
+class MANTID_WORKFLOWALGORITHMS_DLL EQSANSLoad final : public API::Algorithm {
 public:
   /// Constructor
   EQSANSLoad()

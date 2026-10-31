@@ -46,6 +46,8 @@ from mantid.kernel import (
     IntBoundedValidator,
     StringArrayProperty,
     UnitConversion,
+    UnitParametersMap,
+    UnitParams,
 )
 import numpy as np
 
@@ -333,7 +335,11 @@ class WANDPowderReduction(DataProcessorAlgorithm):
     def _to_spectrum_axis(self, workspace_in, workspace_out, mask, instrument_donor=None):
         target = self.getProperty("Target").value
         wavelength = self.getProperty("Wavelength").value
-        e_fixed = UnitConversion.run("Wavelength", "Energy", wavelength, 0, 0, 0, Elastic, 0)
+        params = UnitParametersMap()
+        params[UnitParams.l2] = 0
+        params[UnitParams.twoTheta] = 0
+        params[UnitParams.efixed] = 0
+        e_fixed = UnitConversion.run("Wavelength", "Energy", wavelength, 0, Elastic, params)
         filtered_eve = self.getProperty("FilteredInput").value
 
         if instrument_donor or not filtered_eve:

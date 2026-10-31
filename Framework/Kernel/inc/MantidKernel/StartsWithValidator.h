@@ -6,9 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/System.h"
+
+#include <cstddef>
 #include <set>
 #include <string>
 #include <vector>

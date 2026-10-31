@@ -38,7 +38,6 @@ from mantid.simpleapi import (
     SortEvents,
     StripVanadiumPeaks,
     Subtract,
-    UnwrapSNS,
 )
 
 import os
@@ -209,7 +208,7 @@ class PG3AbsorptionCorrection(systemtesting.MantidSystemTest):
         Integration(InputWorkspace="top", OutputWorkspace="top")
 
         Divide(LHSWorkspace="top", RHSWorkspace="bottom", OutputWorkspace="Rval")
-        Rval = mtd["Rval"].y(0)
+        Rval = mtd["Rval"].y(0)[0]
 
         self.assertLessThan(Rval, self.tolerance)
 
@@ -245,7 +244,6 @@ class PG3StripPeaks(systemtesting.MantidSystemTest):
         ConvertUnits(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", Target="dSpacing")
         ApplyDiffCal(InstrumentWorkspace="PG3_4866", ClearCalibration=True)
         ConvertUnits(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", Target="TOF")
-        UnwrapSNS(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", LRef=62)
         RemoveLowResTOF(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", ReferenceDIFC=1500)
         ConvertUnits(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", Target="dSpacing")
         SortEvents(InputWorkspace="PG3_4866")

@@ -349,6 +349,7 @@ set(QT${MANTID_QT_VERSION}_INC_FILES
     inc/MantidQtWidgets/Common/Python/Sip.h
     inc/MantidQtWidgets/Common/Python/Object.h
     inc/MantidQtWidgets/Common/Python/QHashToDict.h
+    inc/MantidQtWidgets/Common/ColorTheme.h
 )
 
 set(QT${MANTID_QT_VERSION}_UI_FILES
@@ -484,7 +485,6 @@ set(INC_FILES
     inc/MantidQtWidgets/Common/AlgorithmDialogFactory.h
     inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
     inc/MantidQtWidgets/Common/Configurable.h
-    inc/MantidQtWidgets/Common/DllOption.h
     inc/MantidQtWidgets/Common/DropEventHelper.h
     inc/MantidQtWidgets/Common/FileDialogHandler.h
     inc/MantidQtWidgets/Common/FlowLayout.h
@@ -670,8 +670,8 @@ mtd_add_qt_library(
   MOC ${QT${MANTID_QT_VERSION}_MOC_FILES}
   NOMOC ${QT${MANTID_QT_VERSION}_INC_FILES} ${_sip_include_dir}/sip.h
   UI ${QT${MANTID_QT_VERSION}_UI_FILES}
-  DEFS IN_MANTIDQT_COMMON QSCINTILLA_DLL PRECOMPILED ${PRECOMP_HEADERS}
-  INCLUDE_DIRS inc
+  DEFS QSCINTILLA_DLL PRECOMPILED ${PRECOMP_HEADERS}
+  INCLUDE_DIRS inc ${CMAKE_CURRENT_BINARY_DIR}
   SYSTEM_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${_sip_include_dir}
   LINK_LIBS ${TARGET_LIBRARIES}
             PUBLIC
@@ -686,6 +686,18 @@ mtd_add_qt_library(
   INSTALL_DIR ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH @loader_path/../MacOS @loader_path/../Frameworks
   LINUX_INSTALL_RPATH "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
+)
+
+# Auto-generate exports header
+generate_mantid_export_header(
+  MantidQtWidgetsCommonQt${MANTID_QT_VERSION}
+  TRUE
+  BASE_NAME
+  MANTIDQT_COMMON
+  EXPORT_MACRO_NAME
+  EXPORT_OPT_MANTIDQT_COMMON
+  EXPORT_FILE_NAME
+  MantidQtWidgets/Common/DllOption.h
 )
 
 # For the new help system target_link_libraries(MantidQtWidgetsCommon PRIVATE Mantid::Framework PythonInterface::mantid)
