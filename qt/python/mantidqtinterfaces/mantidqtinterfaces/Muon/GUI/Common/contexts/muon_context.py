@@ -29,6 +29,7 @@ from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import (
     rebin_ws,
     apply_deadtime,
     run_minus,
+    get_crop_start_time,
     run_crop_workspace,
     run_create_workspace,
     run_convert_to_points,
@@ -303,7 +304,7 @@ class MuonContext(object):
 
         if runs:
             parameters["InputWorkspace"] = run_crop_workspace(
-                parameters["InputWorkspace"], self.first_good_data(runs[0]), self.last_good_data(runs[0])
+                parameters["InputWorkspace"], get_crop_start_time(self.first_good_data(runs[0])), self.last_good_data(runs[0])
             )
 
         phase_quad = run_PhaseQuad(parameters, ws_name)

@@ -58,7 +58,7 @@ def _get_pre_processing_params(context, run, rebin):
             time_min = context.data_context.get_loaded_data_for_run(run)["FirstGoodData"]
         else:
             time_min = context.gui_context["FirstGoodData"]
-        pre_process_params["TimeMin"] = time_min
+        pre_process_params["TimeMin"] = algorithm_utils.get_crop_start_time(time_min)
     except KeyError:
         pass
 

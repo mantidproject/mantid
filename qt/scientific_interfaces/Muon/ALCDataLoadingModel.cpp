@@ -40,6 +40,12 @@ bool isCustomGroupingInvalid(const std::string &group) {
 
 namespace MantidQt::CustomInterfaces {
 
+namespace {
+// In microseconds. First good data usually lies on a bin edge, where float rounding in the edge would otherwise
+// decide whether that bin is used. Offsetting the start time means the bin is consistently included.
+constexpr double FIRST_GOOD_DATA_TOLERANCE = 1e-5;
+} // namespace
+
 ALCDataLoadingModel::ALCDataLoadingModel()
     : m_numDetectors(0), m_loadingData(false), m_directoryChanged(false), m_lastRunLoadedAuto(-2),
       m_wasLastAutoRange(false), m_minTime(0) {}
@@ -166,7 +172,7 @@ void ALCDataLoadingModel::load(const std::string &log, const std::string &functi
     if (timeMin >= timeMax) {
       throw std::invalid_argument("Invalid time limits");
     }
-    alg->setProperty("TimeMin", timeMin);
+    alg->setProperty("TimeMin", timeMin - FIRST_GOOD_DATA_TOLERANCE);
     alg->setProperty("TimeMax", timeMax);
   }
 

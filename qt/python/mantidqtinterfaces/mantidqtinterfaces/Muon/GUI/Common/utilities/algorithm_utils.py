@@ -14,6 +14,17 @@ from mantid.kernel import PhysicalConstants as const
 
 muon_logger = Logger("Muon-Algs")
 
+# In microseconds. Larger than the float rounding in loaded bin edges and smaller than any bin width.
+FIRST_GOOD_DATA_TOLERANCE = 1e-5
+
+
+def get_crop_start_time(first_good_data):
+    """
+    First good data usually lies on a bin edge, where float rounding in the edge would otherwise decide
+    whether a crop keeps that bin. Offsetting the start time means the bin is consistently included.
+    """
+    return first_good_data - FIRST_GOOD_DATA_TOLERANCE
+
 
 def create_empty_table(name):
     alg = mantid.AlgorithmManager.create("CreateEmptyTableWorkspace")
