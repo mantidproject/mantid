@@ -1260,13 +1260,9 @@ void ParameterMap::buildInstrumentMetadata() {
   std::shared_ptr<const ComponentInfo> physicalComponentInfo;
   std::shared_ptr<const DetectorInfo> physicalDetectorInfo;
   if (const auto &basePhysicalInstrument = m_instrument->getPhysicalInstrument()) {
-    // The physical instrument is parametrized with a private copy of this map, not this map itself:
-    // building the wrappers rekeys the map into the physical instrument's index domain, which would
-    // otherwise detach this map from the neutronic ComponentInfo. The visitor keeps the parametrized
-    // instrument, and with it the copy, alive inside the DetectorInfo.
-    auto parametrizedPhysical =
-        std::make_shared<const Instrument>(basePhysicalInstrument, std::make_shared<ParameterMap>(*this));
-    InstrumentVisitor visitor(parametrizedPhysical);
+    // This map's parameters are keyed by the neutronic instrument's components, so none apply to the
+    // physical one and it is walked unparametrized. The visitor keeps it alive inside the DetectorInfo.
+    InstrumentVisitor visitor(basePhysicalInstrument);
     visitor.walkInstrument();
     std::tie(physicalComponentInfo, physicalDetectorInfo) = visitor.makeWrappers();
   }
