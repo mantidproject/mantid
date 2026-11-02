@@ -46,6 +46,8 @@ Mantid::API::MatrixWorkspace_sptr findInputWorkspace(std::vector<std::string> co
   if (expectedRun.empty())
     return nullptr;
 
+  auto const expectedNumber = parseNonNegativeInt(expectedRun);
+
   std::vector<std::string> candidates;
   if (inputs.size() == 1)
     candidates = {inputs.front(), "TOF_" + inputs.front(),
@@ -60,7 +62,6 @@ Mantid::API::MatrixWorkspace_sptr findInputWorkspace(std::vector<std::string> co
       if (number.empty())
         continue;
       if (number != expectedRun) {
-        auto const expectedNumber = parseNonNegativeInt(expectedRun);
         if (!parseNonNegativeInt(number) || !expectedNumber || workspace->getRunNumber() != *expectedNumber)
           continue;
       }
