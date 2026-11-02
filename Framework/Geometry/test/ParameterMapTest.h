@@ -502,10 +502,8 @@ public:
     const auto comp = m_testInstrument->getChild(0);
     pmap.addInt(comp.get(), "P", 3);
 
-    const auto parameter = componentInfo->parameter(componentInfo->indexOf(comp->getComponentID()), "P", "", false);
-    TS_ASSERT(parameter);
-    if (parameter)
-      TS_ASSERT_EQUALS(parameter->value<int>(), 3);
+    TS_ASSERT_EQUALS(componentInfo->getIntParameter(componentInfo->indexOf(comp->getComponentID()), "P", false),
+                     std::vector<int>{3});
   }
 
   void test_attached_map_rejects_components_of_another_instrument() {
@@ -550,10 +548,8 @@ public:
     const auto comp = instrument->getChild(0);
     pmap.addInt(comp.get(), "P", 4);
 
-    const auto parameter = componentInfo->parameter(componentInfo->indexOf(comp->getComponentID()), "P", "", false);
-    TS_ASSERT(parameter);
-    if (parameter)
-      TS_ASSERT_EQUALS(parameter->value<int>(), 4);
+    TS_ASSERT_EQUALS(componentInfo->getIntParameter(componentInfo->indexOf(comp->getComponentID()), "P", false),
+                     std::vector<int>{4});
   }
 
   void test_asString_names_components_of_an_attached_map() {
