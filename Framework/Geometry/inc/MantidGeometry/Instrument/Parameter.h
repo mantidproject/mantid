@@ -25,6 +25,7 @@ namespace Geometry {
 //--------------------------------------------------------------------------
 // Forward declarations
 //--------------------------------------------------------------------------
+class Instrument;
 class ParameterMap;
 class ParameterInfo;
 
@@ -81,6 +82,8 @@ protected:
   friend class ParameterMap;
   /// Instrument 2.0 replacement for ParameterMap's storage
   friend class ParameterInfo;
+  /// For Instrument::legacyParameters(), which makes parameters of the positions and masking
+  friend class Instrument;
 
   /** Sets the value of type T to the parameter if it has type ParameterType<T>
       Throws an exception if the types don't match.

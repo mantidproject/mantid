@@ -9,6 +9,7 @@
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -25,6 +26,7 @@
 
 using Mantid::Geometry::IComponent;
 using Mantid::Geometry::IComponent_sptr;
+using Mantid::Geometry::Instrument;
 using Mantid::Geometry::Instrument_sptr;
 using Mantid::Geometry::InstrumentVisitor;
 using Mantid::Geometry::Parameter_sptr;
@@ -65,105 +67,108 @@ public:
     const std::string name("TestName");
     const double value(5.1);
 
-    ParameterMap pmapA;
-    ParameterMap pmapB;
-    ParameterMap pmapG;
+    auto pmapA = attachedMap();
+    auto pmapB = attachedMap();
+    auto pmapG = attachedMap();
     // Empty
-    TS_ASSERT_EQUALS(pmapA, pmapB);
+    TS_ASSERT(*pmapA == *pmapB);
 
-    pmapA.addDouble(m_testInstrument.get(), name, value);
+    pmapA->addDouble(m_testInstrument.get(), name, value);
     // Map equals itself
-    TS_ASSERT_EQUALS(pmapA, pmapA);
+    TS_ASSERT(*pmapA == *pmapA);
     // Differs from other
-    TS_ASSERT_DIFFERS(pmapA, pmapB);
-    TS_ASSERT_DIFFERS(pmapA, pmapG);
+    TS_ASSERT(*pmapA != *pmapB);
+    TS_ASSERT(*pmapA != *pmapG);
 
-    auto par = pmapA.getRecursive(m_testInstrument.get(), name);
-    pmapG.add(m_testInstrument.get(), par);
-    TS_ASSERT_EQUALS(pmapA, pmapG);
+    auto par = pmapA->getRecursive(m_testInstrument.get(), name);
+    pmapG->add(m_testInstrument.get(), par);
+    TS_ASSERT(*pmapA == *pmapG);
 
     // Same name/value/component
-    pmapB.addDouble(m_testInstrument.get(), name, value);
+    pmapB->addDouble(m_testInstrument.get(), name, value);
     // Now equal
-    TS_ASSERT_EQUALS(pmapA, pmapB);
-    TS_ASSERT_EQUALS(pmapA, pmapG);
+    TS_ASSERT(*pmapA == *pmapB);
+    TS_ASSERT(*pmapA == *pmapG);
 
     //---  C
-    ParameterMap pmapC, pmapC1;
+    auto pmapC = attachedMap();
+    auto pmapC1 = attachedMap();
     // Same name/value different component
     IComponent_sptr comp = m_testInstrument->getChild(0);
-    pmapC.addDouble(comp.get(), name, value);
-    auto par1 = pmapC.getRecursive(comp.get(), name);
-    pmapC1.add(comp.get(), par1);
+    pmapC->addDouble(comp.get(), name, value);
+    auto par1 = pmapC->getRecursive(comp.get(), name);
+    pmapC1->add(comp.get(), par1);
     // Differs from other
-    TS_ASSERT_DIFFERS(pmapA, pmapC);
+    TS_ASSERT(*pmapA != *pmapC);
     // Equal
-    TS_ASSERT_EQUALS(pmapC, pmapC1);
+    TS_ASSERT(*pmapC == *pmapC1);
 
     //---  D
     // Same name/component different value
-    ParameterMap pmapD;
-    pmapD.addDouble(m_testInstrument.get(), name, value + 1.0);
+    auto pmapD = attachedMap();
+    pmapD->addDouble(m_testInstrument.get(), name, value + 1.0);
     // Differs from other
-    TS_ASSERT_DIFFERS(pmapA, pmapD);
+    TS_ASSERT(*pmapA != *pmapD);
     // Adding the same replaces the same par
-    pmapD.add(m_testInstrument.get(), par1);
+    pmapD->add(m_testInstrument.get(), par1);
     // Equal
-    TS_ASSERT_EQUALS(pmapA, pmapD);
+    TS_ASSERT(*pmapA == *pmapD);
 
     //---  E
     // Same value/component different name
-    ParameterMap pmapE;
-    pmapE.addDouble(m_testInstrument.get(), name + "_differ", value);
+    auto pmapE = attachedMap();
+    pmapE->addDouble(m_testInstrument.get(), name + "_differ", value);
     // Differs from other
-    TS_ASSERT_DIFFERS(pmapA, pmapE);
+    TS_ASSERT(*pmapA != *pmapE);
 
     //---  F
     // Different type
-    ParameterMap pmapF;
-    pmapF.addInt(m_testInstrument.get(), name, 5);
+    auto pmapF = attachedMap();
+    pmapF->addInt(m_testInstrument.get(), name, 5);
     // Differs from other
-    TS_ASSERT_DIFFERS(pmapA, pmapF);
+    TS_ASSERT(*pmapA != *pmapF);
     // Adding the same replaces the same par regardless of type
-    pmapF.add(m_testInstrument.get(), par1);
+    pmapF->add(m_testInstrument.get(), par1);
     // Equal
-    TS_ASSERT_EQUALS(pmapA, pmapF);
+    TS_ASSERT(*pmapA == *pmapF);
   }
 
   void test_Diff_Method() {
     const std::string name("TestName");
     const double value(5.1);
 
-    ParameterMap pmapA;
-    ParameterMap pmapB;
+    auto pmapA = attachedMap();
+    auto pmapB = attachedMap();
     // Empty
-    TS_ASSERT_EQUALS(pmapA.diff(pmapB), "");
-    TS_ASSERT_EQUALS(pmapA.diff(pmapA), "");
+    TS_ASSERT_EQUALS(pmapA->diff(*pmapB), "");
+    TS_ASSERT_EQUALS(pmapA->diff(*pmapA), "");
 
-    pmapA.addDouble(m_testInstrument.get(), name, value);
-    TS_ASSERT_DIFFERS(pmapA.diff(pmapB), "");
+    pmapA->addDouble(m_testInstrument.get(), name, value);
+    TS_ASSERT_DIFFERS(pmapA->diff(*pmapB), "");
 
-    pmapB.addDouble(m_testInstrument.get(), name, value);
-    TS_ASSERT_EQUALS(pmapA.diff(pmapB), "");
+    pmapB->addDouble(m_testInstrument.get(), name, value);
+    TS_ASSERT_EQUALS(pmapA->diff(*pmapB), "");
 
-    pmapA.addDouble(m_testInstrument.get(), name, value);
-    pmapB.addDouble(m_testInstrument.get(), name, 5.2);
-    pmapA.addDouble(m_testInstrument.get(), name + "2", value);
-    pmapB.addDouble(m_testInstrument.get(), name + "2", 5.3);
-    TS_ASSERT_DIFFERS(pmapA.diff(pmapB), "");
-    TS_ASSERT_DIFFERS(pmapA.diff(pmapB), "");
+    pmapA->addDouble(m_testInstrument.get(), name, value);
+    pmapB->addDouble(m_testInstrument.get(), name, 5.2);
+    pmapA->addDouble(m_testInstrument.get(), name + "2", value);
+    pmapB->addDouble(m_testInstrument.get(), name + "2", 5.3);
+    TS_ASSERT_DIFFERS(pmapA->diff(*pmapB), "");
+    TS_ASSERT_DIFFERS(pmapA->diff(*pmapB), "");
   }
 
   void testClone() {
     const double value(5.1);
 
-    ParameterMap pmapA, pmapB;
+    auto pmapA = attachedMap();
 
-    pmapA.addDouble(m_testInstrument.get(), "testDouble", value);
-    pmapA.addV3D(m_testInstrument.get(), "testV3D", Mantid::Kernel::V3D(1, 2, 3));
+    auto pmapB = attachedMap();
 
-    auto parD = pmapA.getRecursive(m_testInstrument.get(), "testDouble");
-    auto parV3 = pmapA.getRecursive(m_testInstrument.get(), "testV3D");
+    pmapA->addDouble(m_testInstrument.get(), "testDouble", value);
+    pmapA->addV3D(m_testInstrument.get(), "testV3D", Mantid::Kernel::V3D(1, 2, 3));
+
+    auto parD = pmapA->getRecursive(m_testInstrument.get(), "testDouble");
+    auto parV3 = pmapA->getRecursive(m_testInstrument.get(), "testV3D");
 
     Mantid::Geometry::Parameter *pParD = parD->clone();
     Mantid::Geometry::Parameter *pParV = parV3->clone();
@@ -171,17 +176,17 @@ public:
     TS_ASSERT_EQUALS(pParD->asString(), parD->asString())
     TS_ASSERT_EQUALS(pParV->asString(), parV3->asString())
 
-    pmapB.add(m_testInstrument.get(), Parameter_sptr(pParD));
-    pmapB.add(m_testInstrument.get(), Parameter_sptr(pParV));
+    pmapB->add(m_testInstrument.get(), Parameter_sptr(pParD));
+    pmapB->add(m_testInstrument.get(), Parameter_sptr(pParV));
 
-    TS_ASSERT_EQUALS(pmapA, pmapB);
+    TS_ASSERT(*pmapA == *pmapB);
   }
 
   void testHelpString() {
-    ParameterMap pmapA;
+    auto pmapA = attachedMap();
     std::string descr("Test description");
-    pmapA.addDouble(m_testInstrument.get(), "testDouble", 4.2, &descr);
-    auto parD = pmapA.getRecursive(m_testInstrument.get(), "testDouble");
+    pmapA->addDouble(m_testInstrument.get(), "testDouble", 4.2, &descr);
+    auto parD = pmapA->getRecursive(m_testInstrument.get(), "testDouble");
     TS_ASSERT_EQUALS(parD->getDescription(), descr);
     TS_ASSERT_EQUALS(parD->getShortDescription(), "Test description");
 
@@ -189,9 +194,9 @@ public:
     TS_ASSERT_EQUALS(parD->getDescription(), "Short description. LongDescription.");
     TS_ASSERT_EQUALS(parD->getShortDescription(), "Short description.");
 
-    descr = pmapA.getDescription("basic", "testDouble");
+    descr = pmapA->getDescription("basic", "testDouble");
     TS_ASSERT_EQUALS(descr, "Short description. LongDescription.");
-    descr = pmapA.getShortDescription("basic", "testDouble");
+    descr = pmapA->getShortDescription("basic", "testDouble");
     TS_ASSERT_EQUALS(descr, "Short description.");
   }
 
@@ -491,6 +496,76 @@ public:
       TS_ASSERT_EQUALS(parameter->value<int>(), 2);
   }
 
+  void test_attached_map_writes_by_component_at_its_component_index() {
+    ParameterMap pmap;
+    auto [componentInfo, detectorInfo] = InstrumentVisitor::makeWrappers(*m_testInstrument, &pmap);
+    const auto comp = m_testInstrument->getChild(0);
+    pmap.addInt(comp.get(), "P", 3);
+
+    const auto parameter = componentInfo->parameter(componentInfo->indexOf(comp->getComponentID()), "P", "", false);
+    TS_ASSERT(parameter);
+    if (parameter)
+      TS_ASSERT_EQUALS(parameter->value<int>(), 3);
+  }
+
+  void test_attached_map_rejects_components_of_another_instrument() {
+    // A copy of an instrument, such as the physical instrument, has components of its own
+    ParameterMap pmap;
+    auto [componentInfo, detectorInfo] = InstrumentVisitor::makeWrappers(*m_testInstrument, &pmap);
+    const Instrument copy(*m_testInstrument);
+    const auto comp = m_testInstrument->getChild(0);
+    const auto copyComp = copy.getChild(0);
+    pmap.addInt(comp.get(), "P", 1);
+
+    TS_ASSERT_THROWS(pmap.addInt(copyComp.get(), "P", 2), const std::invalid_argument &);
+    TS_ASSERT(!pmap.get(copyComp.get(), "P"));
+    TS_ASSERT_EQUALS(pmap.get(comp.get(), "P")->value<int>(), 1);
+  }
+
+  void test_entries_of_an_attached_map_give_component_indices() {
+    ParameterMap pmap;
+    auto [componentInfo, detectorInfo] = InstrumentVisitor::makeWrappers(*m_testInstrument, &pmap);
+    const auto comp = m_testInstrument->getChild(0);
+    pmap.addInt(comp.get(), "P", 3);
+
+    const auto entries = pmap.entries();
+    TS_ASSERT_EQUALS(entries.size(), 1);
+    TS_ASSERT_EQUALS(entries[0].first, componentInfo->indexOf(comp->getComponentID()));
+    TS_ASSERT_EQUALS(entries[0].second->value<int>(), 3);
+  }
+
+  void test_entries_of_a_detached_map_throw() {
+    ParameterMap pmap;
+    pmap.addInt(m_testInstrument->getChild(0).get(), "P", 3);
+
+    TS_ASSERT_THROWS(pmap.entries(), const std::logic_error &);
+  }
+
+  void test_map_attached_from_cached_beamline_shares_its_index_domain() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    instrument->parseTreeAndCacheBeamline();
+    ParameterMap pmap;
+    // An empty map takes a copy of the cached beamline rather than walking the tree
+    auto [componentInfo, detectorInfo] = instrument->makeBeamline(pmap);
+    const auto comp = instrument->getChild(0);
+    pmap.addInt(comp.get(), "P", 4);
+
+    const auto parameter = componentInfo->parameter(componentInfo->indexOf(comp->getComponentID()), "P", "", false);
+    TS_ASSERT(parameter);
+    if (parameter)
+      TS_ASSERT_EQUALS(parameter->value<int>(), 4);
+  }
+
+  void test_asString_names_components_of_an_attached_map() {
+    auto pmap = std::make_shared<ParameterMap>();
+    const auto comp = m_testInstrument->getChild(0);
+    pmap->addInt(comp.get(), "P", 5);
+    const Instrument parametrized(m_testInstrument, pmap);
+    pmap->setInstrument(m_testInstrument.get());
+
+    TS_ASSERT_EQUALS(pmap->asString(), comp->getFullName() + ";int;P;5;visible:true|");
+  }
+
   void test_lookup_via_type_returns_null_if_fails() {
     // Add a parameter for the first component of the instrument
     IComponent_sptr comp = m_testInstrument->getChild(0);
@@ -706,6 +781,13 @@ public:
   }
 
 private:
+  /// A map attached to m_testInstrument, so that its components have names to compare by
+  std::shared_ptr<ParameterMap> attachedMap() const {
+    auto pmap = std::make_shared<ParameterMap>();
+    pmap->setInstrument(m_testInstrument.get());
+    return pmap;
+  }
+
   template <typename ValueType>
   void doCopyAndUpdateTestUsingGenericAdd(const std::string &type, const ValueType &origValue,
                                           const ValueType &newValue) {

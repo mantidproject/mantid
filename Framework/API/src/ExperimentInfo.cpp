@@ -430,10 +430,7 @@ void ExperimentInfo::populateInstrumentParameters() {
   // positions.
   for (const auto &item : paramMap.entries()) {
     if (isScaleParameter(item.second->name())) {
-      const auto compIndex = compInfo.indexOfOrInvalid(item.first);
-      if (compIndex != Geometry::ComponentInfo::invalidIndex) {
-        adjustPositionsFromScaleFactor(compInfo, compIndex, item.second->name(), item.second->value<double>());
-      }
+      adjustPositionsFromScaleFactor(compInfo, item.first, item.second->name(), item.second->value<double>());
     }
   }
   // paramMapForPosAndRot goes out of scope, dropping all position and rotation
