@@ -9,11 +9,13 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 
+#include <string>
+#include <vector>
+
 namespace Mantid {
 
 namespace Geometry {
-class ParameterMap;
-class IComponent;
+class ComponentInfo;
 } // namespace Geometry
 
 namespace Algorithms {
@@ -40,7 +42,9 @@ private:
   void init() override;
   void exec() override;
 
-  void addParameter(Mantid::Geometry::ParameterMap &pmap, const Mantid::Geometry::IComponent *cmptId,
+  static std::vector<size_t> componentsWithName(const Mantid::Geometry::ComponentInfo &componentInfo,
+                                                const std::string &name);
+  void addParameter(Mantid::Geometry::ComponentInfo &componentInfo, const size_t componentIndex,
                     const std::string &paramName, const std::string &paramType, const std::string &paramValue) const;
 };
 

@@ -10,12 +10,14 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
 #include "MantidAPI/Sample.h"
+#include "MantidBeamline/ComponentType.h"
 #include "MantidCrystal/IndexPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/DynamicPointerCastHelper.h"
 #include "MantidKernel/FileValidator.h"
@@ -81,7 +83,6 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx, dou
   DataObjects::PeaksWorkspace_sptr inputP =
       Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<DataObjects::PeaksWorkspace, API::Workspace>(
           inputW);
-  Geometry::Instrument_sptr inst = std::const_pointer_cast<Geometry::Instrument>(inputP->getInstrument());
   if (inputP->getInstrumentName().compare("CORELLI") == 0.0 && detname != "moderator")
     detname.append("/sixteenpack");
 
@@ -145,23 +146,28 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx, dou
     algz->execute();
   }
   if (scalex != 1.0 || scaley != 1.0) {
-    Geometry::IComponent_const_sptr comp = inst->getComponentByName(detname);
-    std::shared_ptr<const Geometry::RectangularDetector> rectDet =
-        std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
-    if (rectDet) {
+    auto &componentInfo = inputP->mutableComponentInfo();
+    // A path (as for CORELLI) or an unknown name finds no bank to scale
+    size_t bankIndex = Geometry::ComponentInfo::invalidIndex;
+    try {
+      bankIndex = componentInfo.indexOfAny(detname);
+    } catch (const std::invalid_argument &) {
+      // No component of this name, so nothing to scale
+    }
+    if (bankIndex != Geometry::ComponentInfo::invalidIndex &&
+        componentInfo.componentType(bankIndex) == Beamline::ComponentType::Rectangular) {
       Geometry::ParameterMap &pmap = inputP->instrumentParameters();
-      auto oldscalex = pmap.getDouble(rectDet->getName(), "scalex");
-      auto oldscaley = pmap.getDouble(rectDet->getName(), "scaley");
+      auto oldscalex = pmap.getDouble(detname, "scalex");
+      auto oldscaley = pmap.getDouble(detname, "scaley");
       double relscalex = scalex;
       double relscaley = scaley;
       if (!oldscalex.empty())
         relscalex /= oldscalex[0];
       if (!oldscaley.empty())
         relscaley /= oldscaley[0];
-      pmap.addDouble(rectDet.get(), "scalex", scalex);
-      pmap.addDouble(rectDet.get(), "scaley", scaley);
-      applyRectangularDetectorScaleToComponentInfo(inputP->mutableComponentInfo(), rectDet->getComponentID(), relscalex,
-                                                   relscaley);
+      componentInfo.addDouble(bankIndex, "scalex", scalex);
+      componentInfo.addDouble(bankIndex, "scaley", scaley);
+      applyRectangularDetectorScaleToComponentInfo(componentInfo, bankIndex, relscalex, relscaley);
     }
   }
 }

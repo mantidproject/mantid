@@ -12,8 +12,9 @@
 
 namespace Mantid {
 namespace Geometry {
-class ParameterMap;
-}
+class ComponentInfo;
+class DetectorInfo;
+} // namespace Geometry
 namespace API {
 class MatrixWorkspace;
 class SpectrumInfo;
@@ -31,7 +32,8 @@ private:
   const API::SpectrumInfo &m_spectrumInfo;
   const double m_L1s;
   const Kernel::V3D m_beamDir;
-  const Geometry::ParameterMap &m_paramMap;
+  const Geometry::ComponentInfo &m_componentInfo;
+  const Geometry::DetectorInfo &m_detectorInfo;
 };
 
 } // namespace API
