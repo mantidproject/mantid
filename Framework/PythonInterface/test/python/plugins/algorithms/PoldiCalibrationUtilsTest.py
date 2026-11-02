@@ -171,6 +171,15 @@ class PoldiCalibrationUtilsTest(unittest.TestCase):
 
         assert_allclose(fit.d_hkl, SI_D)
 
+    def test_raises_when_no_reflection_can_be_fitted(self):
+        y = simulated_counts(self.geom, self._data(5000), self.geom.initial_bank_params, 160.0, np.random.default_rng(5))
+        for case, counts, d_hkl, message in (
+            ("unreachable", y, np.array([20.0]), "None of the reflections reaches"),
+            ("flat counts", np.ones_like(y), SI_D, "no peaks"),
+        ):
+            with self.subTest(case), self.assertRaisesRegex(ValueError, message):
+                CalibrationFit(self.geom, [FoldedData(counts, 3000.0)], RigidBanks(self.geom), d_hkl, TIMING)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -443,6 +443,8 @@ class CalibrationFit:
         lam = 2 * np.outer(d_hkl, sin_t[geometry.live_spectra])
         reachable = ((lam >= geometry.flux_wavelengths[0]) & (lam <= geometry.flux_wavelengths[-1])).any(axis=1)
         self.d_hkl = np.asarray(d_hkl)[reachable]
+        if not self.d_hkl.size:
+            raise ValueError("None of the reflections reaches a live pixel inside the flux wavelength range.")
         self.n_geometry_params, self.n_timing_params = geometry_model.initial_params.size, timing_model.initial_params.size
         self.params = np.concatenate([geometry_model.initial_params, timing_model.initial_params, [kappa, srel], np.ones(self.d_hkl.size)])
         self.param_names = (
@@ -488,6 +490,8 @@ class CalibrationFit:
             normal += B @ B.T
             rhs += B @ (ds.weights * y_centred).ravel()
         A = np.linalg.lstsq(normal, rhs, rcond=None)[0]
+        if not A.any():  # only when every spectrum is flat; otherwise the clip below keeps A positive
+            raise ValueError("The counts have no peaks to estimate the reflection intensities from.")
         A = np.clip(A, 1e-3 * np.abs(A).max(), None)
         first_intensity = self.n_geometry_params + self.n_timing_params + 2
         self.params[first_intensity:] = A / A.max()
