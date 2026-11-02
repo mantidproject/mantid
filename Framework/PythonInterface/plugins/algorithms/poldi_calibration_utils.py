@@ -465,6 +465,8 @@ class CalibrationFit:
             self._estimate_initial_intensities()
         else:
             n_geom = self.n_geometry_params
+            if start.param_names[start.n_geometry_params :] != self.param_names[n_geom:]:
+                raise ValueError("start must be a fit of the same timing parameters and reflections.")
             self.params[n_geom:], self.is_free[n_geom:] = start.params[start.n_geometry_params :], start.is_free[start.n_geometry_params :]
 
     def split_params(self, x: np.ndarray[float]) -> tuple[np.ndarray[float], np.ndarray[float], float, float, np.ndarray[float]]:

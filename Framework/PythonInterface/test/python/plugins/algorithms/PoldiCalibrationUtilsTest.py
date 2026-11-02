@@ -223,6 +223,14 @@ class PoldiCalibrationUtilsTest(unittest.TestCase):
             with self.subTest(case), self.assertRaisesRegex(ValueError, message):
                 CalibrationFit(self.geom, [FoldedData(counts, 3000.0)], RigidBanks(self.geom), d_hkl, TIMING)
 
+    def test_start_must_fit_the_same_reflections(self):
+        y = simulated_counts(self.geom, self._data(5000), self.geom.initial_bank_params, 160.0, np.random.default_rng(5))
+        datasets = [FoldedData(y, 3000.0)]
+        start = CalibrationFit(self.geom, datasets, RigidBanks(self.geom), SI_D[:-1], TIMING)
+
+        with self.assertRaisesRegex(ValueError, "same timing parameters and reflections"):
+            CalibrationFit(self.geom, datasets, BankModules(self.geom, self.geom.initial_bank_params), SI_D, TIMING, start=start)
+
 
 if __name__ == "__main__":
     unittest.main()
