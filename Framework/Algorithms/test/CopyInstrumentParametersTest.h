@@ -119,6 +119,7 @@ public:
     auto &detectorInfoWs1 = ws1->mutableDetectorInfo();
     detectorInfoWs1.setPosition(0, V3D(6.0, 0.0, 0.7));
     detectorInfoWs1.setPosition(3, V3D(6.0, 0.1, 0.7));
+    detectorInfoWs1.setMasked(1, true);
 
     // Create output workspace with another parameterized instrument and put
     // into data store
@@ -172,7 +173,8 @@ public:
     TS_ASSERT_DELTA(newPos2.Y(), 0.0, 0.0001);
     TS_ASSERT_DELTA(newPos2.Z(), -9.0, 0.0001);
 
-    // previous masking rejected
+    // new masking applied, previous masking rejected
+    TS_ASSERT(ws2->detectorInfo().isMasked(1));
     TS_ASSERT(!ws2->detectorInfo().isMasked(2));
 
     dataStore.remove(wsName1);

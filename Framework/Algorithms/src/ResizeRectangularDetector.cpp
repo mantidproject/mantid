@@ -102,7 +102,6 @@ void ResizeRectangularDetector::exec() {
   auto *componentID = const_cast<IComponent *>(componentInfo.componentID(componentIndex));
   pmap.addDouble(componentID, "scalex", ScaleX);
   pmap.addDouble(componentID, "scaley", ScaleY);
-  pmap.clearPositionSensitiveCaches();
 
   // Positions of detectors are now stored in DetectorInfo, so we must update
   // positions there.

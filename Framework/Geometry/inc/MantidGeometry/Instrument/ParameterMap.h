@@ -21,9 +21,6 @@
 #include <vector>
 
 namespace Mantid {
-namespace Kernel {
-template <class KEYTYPE, class VALUETYPE> class Cache;
-}
 namespace Geometry {
 class ComponentInfo;
 class DetectorInfo;
@@ -87,10 +84,8 @@ public:
     // The translation tables are kept: they describe the instrument, not the parameters, and an
     // attached map shares its index domain with ComponentInfo, which may still write by index.
     m_parameterInfo->clear();
-    clearPositionSensitiveCaches();
   }
-  /// method swaps two parameter maps contents  each other. All caches contents
-  /// is nullified (TO DO: it can be efficiently swapped too)
+  /// method swaps two parameter maps contents  each other
   void swap(ParameterMap &other) {
     // The index domain and staging tables must travel with the store: an index is meaningless without them.
     m_parameterInfo.swap(other.m_parameterInfo);
@@ -98,7 +93,6 @@ public:
     m_domainIndices.swap(other.m_domainIndices);
     m_stagedIndices.swap(other.m_stagedIndices);
     m_stagedIds.swap(other.m_stagedIds);
-    clearPositionSensitiveCaches();
   }
   /// Clear any parameters with the given name
   void clearParametersByName(const std::string &name);
@@ -295,16 +289,6 @@ public:
   /// Returns the asString() entry for one parameter of a component, given as "detID:<id>" or by full name
   static std::string asStringEntry(const std::string &component, const Parameter &parameter);
 
-  /// Clears the location, rotation & bounding box caches
-  void clearPositionSensitiveCaches();
-  /// Sets a cached location on the location cache
-  void setCachedLocation(const IComponent *comp, const Kernel::V3D &location) const;
-  /// Attempts to retrieve a location from the location cache
-  bool getCachedLocation(const IComponent *comp, Kernel::V3D &location) const;
-  /// Sets a cached rotation on the rotation cache
-  void setCachedRotation(const IComponent *comp, const Kernel::Quat &rotation) const;
-  /// Attempts to retrieve a rotation from the rotation cache
-  bool getCachedRotation(const IComponent *comp, Kernel::Quat &rotation) const;
   /// Persist a representation of a Parameter map, as given by asString(), to the open Nexus file
   static void saveNexus(Nexus::File *file, const std::string &group, const std::string &contents);
   /// Copy pairs (oldComp->id,Parameter) to the m_map assigning the new
@@ -406,10 +390,6 @@ private:
    * Staging index i is m_stagedIds[i]. rekey() converts them to component indices and clears them. */
   std::unordered_map<Geometry::IComponent const *, size_t> m_stagedIndices;
   std::vector<ComponentID> m_stagedIds;
-  /// internal cache map instance for cached position values
-  std::unique_ptr<Kernel::Cache<const ComponentID, Kernel::V3D>> m_cacheLocMap;
-  /// internal cache map instance for cached rotation values
-  std::unique_ptr<Kernel::Cache<const ComponentID, Kernel::Quat>> m_cacheRotMap;
 
   /** The 2.0 instrument layers, co-owned with the ExperimentInfo that built them.
    *
