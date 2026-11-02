@@ -313,7 +313,7 @@ def scale_bg(y: np.ndarray[float], m: np.ndarray[float], w: np.ndarray[float]) -
     det = s_w * s_xx - s_x**2
     ok = det > 1e-12 * np.maximum(s_w * s_xx, 1e-300)
     s = np.where(ok, (s_w * s_xy - s_x * s_y) / np.where(ok, det, 1.0), 0.0)
-    b = np.where(ok, (s_y - s * s_x) / np.where(s_w > 0, s_w, 1.0), 0.0)
+    b = (s_y - s * s_x) / np.where(s_w > 0, s_w, 1.0)  # the weighted mean of y where s = 0
     return s, b
 
 

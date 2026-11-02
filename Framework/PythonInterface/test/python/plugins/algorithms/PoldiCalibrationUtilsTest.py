@@ -20,6 +20,7 @@ from plugins.algorithms.poldi_calibration_utils import (
     TimingModel,
     apply_geometry,
     model_counts,
+    scale_bg,
 )
 from plugins.algorithms.diffraction_utils import get_tths_and_l2s
 from plugins.algorithms.poldi_utils import exec_alg, get_tof_d1Ang, get_instrument_settings_from_log
@@ -146,6 +147,14 @@ class PoldiCalibrationUtilsTest(unittest.TestCase):
             costs.append(fit.evaluate_cost(fit.params))
 
         self.assertEqual(costs[0], costs[1])
+
+    def test_background_alone_takes_the_counts_where_the_model_is_zero(self):
+        y = np.array([[3.0, 5.0, 4.0]])
+        w = 1.0 / np.sqrt(y + 1.0)
+
+        s, b = scale_bg(y, np.zeros_like(y), w)
+
+        assert_allclose([s[0], b[0]], [0.0, np.sum(w**2 * y) / np.sum(w**2)])
 
     def test_unreachable_reflection_is_dropped(self):
         timing = TimingModel("PerChopperSpeed", [3000.0], [5000], 0.05824, -12.68)
