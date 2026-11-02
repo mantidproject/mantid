@@ -602,7 +602,8 @@ def apply_geometry(
     block_params: np.ndarray[float] | None = None,
 ) -> None:
     """Move the banks of ws to (x, z, roty), then the blocks to their normal shift and tilt about the block centre from
-    the state geom was built from. All moves are absolute, so they do not depend on what was applied to ws before."""
+    the state geom was built from. All moves are absolute, so they do not depend on what was applied to ws before.
+    Without block_params the blocks are not moved, so they keep any earlier block moves relative to their bank."""
     for ib, bank in enumerate(geom.bank_names):
         x, z, roty = bank_params[3 * ib : 3 * ib + 3]
         exec_child("RotateInstrumentComponent", Workspace=ws, ComponentName=bank, X=0, Y=1, Z=0, Angle=roty, RelativeRotation=False)
