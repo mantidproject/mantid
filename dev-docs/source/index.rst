@@ -243,6 +243,7 @@ GUI Development
    MVPDesign
    MVPTutorial/index
    QtDesignerForPython
+   CustomAlgorithmDialogs
    GuiTutorialFramework
    BalsamiqWireframes
    MantidUsedIconsTable
@@ -257,6 +258,9 @@ GUI Development
 
 :doc:`QtDesignerForPython`
    Describes how to use the Qt designer to produce GUI views.
+
+:doc:`CustomAlgorithmDialogs`
+   How to replace the automatically generated dialog for an algorithm with a custom one.
 
 :doc:`GuiTutorialFramework`
    How to add a guided, automated tutorial that walks a user through a Qt interface.
