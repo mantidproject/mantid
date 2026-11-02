@@ -276,7 +276,8 @@ def model_counts(
         centre = np.mod(c_i[:, None] * d_k + tz + geom.slit_cycle_fractions[None, :] * T, T)
         # bins within nsig of each centre, sized for the widest peak so every window has W bins, (n, S, W).
         # Left unwrapped: near the cycle ends they run below 0 or past n_bins and still measure the true distance to the centre
-        half_window = int(np.ceil(nsig * sig.max() / bin_width)) + 1
+        # and capped at half a cycle, so a wild trial step on a width parameter cannot allocate huge arrays
+        half_window = min(int(np.ceil(nsig * sig.max() / bin_width)) + 1, n_bins // 2)
         bins = np.floor(centre / bin_width).astype(int)[..., None] + np.arange(-half_window, half_window + 1)
         # left and right bin edges, in standard deviations from the peak centre
         u_lo = (bins * bin_width - centre[..., None]) / sig[:, None, None]
