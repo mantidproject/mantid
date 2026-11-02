@@ -81,3 +81,45 @@ Eclipse Doxygen Setup
 |                 | - The documentation will go into a subdir doxygen/html of the directory where cmake was |
 |                 |   run from.                                                                             |
 +-----------------+-----------------------------------------------------------------------------------------+
+
+Fixing Common Warnings
+----------------------
+
+**Found unknown command**
+
+Doxygen reads a backslash in a comment as the start of a command, so text
+such as ``\lambda`` gives ``Found unknown command '\lambda'``. Write ``\\`` if
+you need a literal backslash:
+
+.. code-block:: c++
+
+   /// Neutron velocity: v = h / (m_n \\lambda)
+
+**Argument of command @param is not found in the argument list**
+
+Doxygen matches ``@param`` names against the parameter names in the
+declaration. If the header leaves a parameter unnamed, or names it differently
+from the source file, Doxygen cannot match it. Use the same name in both (see
+also :ref:`CppCodingStandards`, which requires parameters in declarations to be
+named):
+
+.. code-block:: c++
+
+   // .h
+   void setInstrument(const Geometry::Instrument_const_sptr &instr);
+   // .cpp
+   void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) { ... }
+
+**The following parameters are not documented**
+
+A function's documentation lists some parameters but not all of them. Add the
+missing ``@param``:
+
+.. code-block:: c++
+
+   /**
+    * Add a number to a calculated value.
+    * @param i :: An index of a value 0 <= i < size()
+    * @param value :: The value to add at the given index
+    */
+   void addToCalculated(size_t i, double value);
