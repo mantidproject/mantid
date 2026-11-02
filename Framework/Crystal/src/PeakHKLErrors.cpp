@@ -18,6 +18,7 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Unit.h"
 
@@ -29,9 +30,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Kernel::Units;
-using Mantid::Geometry::CompAssembly;
-using Mantid::Geometry::IComponent_const_sptr;
-using Mantid::Geometry::IObjComponent_const_sptr;
 using Mantid::Geometry::IPeak;
 
 namespace Mantid::Crystal {
@@ -79,143 +77,6 @@ void PeakHKLErrors::setUpOptRuns() {
     declareParameter("chi" + OptRunNum, 0.0, "Chi sample orientation value");
     declareParameter("omega" + OptRunNum, 0.0, "Omega sample orientation value");
   }
-}
-
-/**
- * "Clones" a parameter map duplicating all Parameters with double,V3D,int and
- *string parameter
- * values that apply to the given component and all(most) of the components
- *children.
- *
- * If the component is an instrument, this parameter map can be used to create
- * a separate parameterized instrument close to the original instrument.
- *
- * NOTE: For speed purposes, if a component( or subcomponent) has too many
- *children(180
- * or more),the parameters corresponding to these children( and subchildren)
- *will not
- * be added to the parameter map
- *
- *
- * @param pmap       The new parameter map to which the new Parameters are to be
- *added
- *
- * @param component  The component along with most of its children and
- *subchildren for
- *                   which Parameters that correspond to these will be
- *considered.
- *
- * @param pmapSv     The old parameter map from which copies of the parameters
- *corresponding
- *                   to the given component or subchild are added to pmap
- */
-void PeakHKLErrors::cLone(std::shared_ptr<Geometry::ParameterMap> &pmap,
-                          const std::shared_ptr<const Geometry::IComponent> &component,
-                          std::shared_ptr<const Geometry::ParameterMap> &pmapSv) {
-  if (!component)
-    return;
-  if (component->isParametrized()) {
-
-    auto nms = pmapSv->names(component.get());
-    for (const auto &nm : nms) {
-
-      if (pmapSv->contains(component.get(), nm, "double")) {
-        std::vector<double> dparams = pmapSv->getDouble(component->getName(), nm);
-        pmap->addDouble(component.get(), nm, dparams[0]);
-        continue;
-      }
-
-      if (pmapSv->contains(component.get(), nm, "V3D")) {
-        std::vector<V3D> V3Dparams = pmapSv->getV3D(component->getName(), nm);
-        pmap->addV3D(component.get(), nm, V3Dparams[0]);
-        continue;
-      }
-
-      if (pmapSv->contains(component.get(), nm, "int")) {
-        std::vector<int> iparams = pmapSv->getType<int>(component->getName(), nm);
-        pmap->addInt(component.get(), nm, iparams[0]);
-        continue;
-      }
-
-      if (pmapSv->contains(component.get(), nm, "string")) {
-        std::vector<std::string> sparams = pmapSv->getString(component->getName(), nm);
-        pmap->addString(component.get(), nm, sparams[0]);
-        continue;
-      }
-
-      if (pmapSv->contains(component.get(), nm, "Quat")) {
-        std::vector<Kernel::Quat> sparams = pmapSv->getType<Kernel::Quat>(component->getName(), nm);
-        pmap->addQuat(component.get(), nm, sparams[0]);
-        continue;
-      }
-    }
-
-    std::shared_ptr<const CompAssembly> parent = std::dynamic_pointer_cast<const CompAssembly>(component);
-    if (parent && parent->nelements() < 180) // # need speed up. Assume pixel
-      // elements of a Panel have no
-      // attributes
-      for (int child = 0; child < parent->nelements(); child++) {
-        std::shared_ptr<const Geometry::IComponent> kid =
-            std::const_pointer_cast<const Geometry::IComponent>(parent->getChild(child));
-        if (kid)
-          cLone(pmap, kid, pmapSv);
-      }
-  }
-}
-
-/**
- * Creates a new parameterized instrument for which the parameter values can be
- *changed
- *
- * @param peaksWs - a PeaksWorkspace used to get the original instrument.  The instrument from the 0th peak is the one
- * that is used.
- *
- * NOTE: All the peaks in the PeaksWorkspace must use the same instrument.
- */
-std::shared_ptr<Geometry::Instrument> PeakHKLErrors::getNewInstrument(const PeaksWorkspace_sptr &peaksWs) const {
-  Geometry::Instrument_const_sptr instSave = peaksWs->getPeak(0).getInstrument();
-
-  if (!instSave) {
-    g_log.error(" Peaks workspace does not have an instrument");
-    throw std::invalid_argument(" Not all peaks have an instrument");
-  }
-
-  auto pmap = std::make_shared<Geometry::ParameterMap>();
-  if (!hasParameterMap) {
-    pmapSv = instSave->getParameterMap();
-    hasParameterMap = true;
-    if (!instSave->isParametrized()) {
-
-      std::shared_ptr<Geometry::Instrument> instClone(instSave->clone());
-      auto Pinsta = std::make_shared<Geometry::Instrument>(instSave, pmap);
-
-      instChange = Pinsta;
-      IComponent_const_sptr sample = instChange->getSample();
-      sampPos = sample->getRelativePos();
-    } else // catch(... )
-    {
-      auto P1 = std::make_shared<Geometry::Instrument>(instSave->baseInstrument(), instSave->makeLegacyParameterMap());
-      instChange = P1;
-      IComponent_const_sptr sample = instChange->getSample();
-      sampPos = sample->getRelativePos();
-    }
-  }
-
-  if (!instChange) {
-    g_log.error("Cannot 'clone' instrument");
-    throw std::logic_error("Cannot clone instrument");
-  }
-  //------------------"clone" orig instruments pmap -------------------
-
-  cLone(pmap, instSave, pmapSv);
-  V3D sampOffsets(getParameter("SampleXOffset"), getParameter("SampleYOffset"), getParameter("SampleZOffset"));
-
-  IComponent_const_sptr sample = instChange->getSample();
-  pmap->addPositionCoordinate(sample.get(), std::string("x"), sampPos.X() + sampOffsets.X());
-  pmap->addPositionCoordinate(sample.get(), std::string("y"), sampPos.Y() + sampOffsets.Y());
-  pmap->addPositionCoordinate(sample.get(), std::string("z"), sampPos.Z() + sampOffsets.Z());
-
-  return instChange;
 }
 
 /**
@@ -335,7 +196,7 @@ void PeakHKLErrors::function1D(double *out, const double *xValues, const size_t 
   if (!peaksWs)
     throw std::invalid_argument("Peaks not stored under the name " + PeakWorkspaceName);
 
-  std::shared_ptr<Geometry::Instrument> instNew = getNewInstrument(peaksWs);
+  V3D const samplePosition = peaksWs->componentInfo().samplePosition();
 
   std::map<int, Mantid::Kernel::Matrix<double>> RunNum2GonMatrixMap;
   getRun2MatMap(peaksWs, OptRuns, RunNum2GonMatrixMap);
@@ -358,7 +219,7 @@ void PeakHKLErrors::function1D(double *out, const double *xValues, const size_t 
 
     int runNum = peak_old.getRunNumber();
     std::string runNumStr = std::to_string(runNum);
-    Peak peak = createNewPeak(peak_old, instNew, 0, peak_old.getL1());
+    Peak peak = createNewPeak(peak_old, samplePosition, 0, peak_old.getL1());
 
     size_t N = OptRuns.find("/" + runNumStr + "/");
     if (N < OptRuns.size()) {
@@ -408,8 +269,6 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues, const 
   if (!peaksWs)
     throw std::invalid_argument("Peaks not stored under the name " + PeakWorkspaceName);
 
-  std::shared_ptr<Geometry::Instrument> instNew = getNewInstrument(peaksWs);
-
   const DblMatrix &UB = peaksWs->sample().getOrientedLattice().getUB();
   DblMatrix UBinv(UB);
   UBinv.Invert();
@@ -432,13 +291,14 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues, const 
 
   g_log.debug() << "----------------------------Derivative------------------------\n";
 
-  V3D samplePosition = instNew->getSample()->getPos();
+  auto const &componentInfo = peaksWs->componentInfo();
+  V3D const samplePosition = componentInfo.samplePosition();
   const IPeak &ppeak = peaksWs->getPeak(0);
   double L0 = ppeak.getL1();
   double velocity = (L0 + ppeak.getL2()) / ppeak.getTOF();
 
   double K = 2 * M_PI / ppeak.getWavelength() / velocity; // 2pi/lambda = K* velocity
-  V3D beamDir = instNew->getBeamDirection();
+  V3D const beamDir = normalize(samplePosition - componentInfo.sourcePosition());
 
   const size_t paramNums[] = {parameterIndex(std::string("SampleXOffset")),
                               parameterIndex(std::string("SampleYOffset")),
@@ -447,7 +307,7 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues, const 
   for (size_t i = 0; i < nData; i += 3) {
     int peakNum = boost::math::iround(xValues[i]);
     const Peak &peak_old = peaksWs->getPeak(peakNum);
-    Peak peak = createNewPeak(peak_old, instNew, 0, peak_old.getL1());
+    Peak peak = createNewPeak(peak_old, samplePosition, 0, peak_old.getL1());
 
     int runNum = peak_old.getRunNumber();
     std::string runNumStr = std::to_string(runNum);
@@ -598,21 +458,15 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues, const 
   }
 }
 
-Peak PeakHKLErrors::createNewPeak(const DataObjects::Peak &peak_old, const Geometry::Instrument_sptr &instrNew,
-                                  double T0, double L0) {
-  Geometry::Instrument_const_sptr inst = peak_old.getInstrument();
-  if (inst->getComponentID() != instrNew->getComponentID()) {
-    g_log.error("All peaks must have the same instrument");
-    throw std::invalid_argument("All peaks must have the same instrument");
-  }
-
+Peak PeakHKLErrors::createNewPeak(DataObjects::Peak const &peak_old, V3D const &samplePos, double T0, double L0) {
   double T = peak_old.getTOF() + T0;
 
   int ID = peak_old.getDetectorID();
 
   Kernel::V3D hkl = peak_old.getHKL();
   // peak_old.setDetectorID(ID); //set det positions
-  Peak peak(instrNew, ID, peak_old.getWavelength(), hkl, peak_old.getGoniometerMatrix());
+  Peak peak(peak_old.getInstrument(), ID, peak_old.getWavelength(), hkl, peak_old.getGoniometerMatrix());
+  peak.setSamplePos(samplePos);
 
   Wavelength wl;
 

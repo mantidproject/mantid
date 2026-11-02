@@ -25,6 +25,7 @@ namespace Geometry {
 //--------------------------------------------------------------------------
 // Forward declarations
 //--------------------------------------------------------------------------
+class Instrument;
 class ParameterMap;
 class ParameterInfo;
 
@@ -60,7 +61,7 @@ public:
 
   /// Returns the parameter value of type T if the parameter has type
   /// ParameterType<T>
-  template <class T> const T &value();
+  template <class T> const T &value() const;
   /// set description:
   virtual void setDescription(const std::string &source) { m_description.assign(source); }
   /// get description
@@ -81,6 +82,8 @@ protected:
   friend class ParameterMap;
   /// Instrument 2.0 replacement for ParameterMap's storage
   friend class ParameterInfo;
+  /// For Instrument::legacyParameters(), which makes parameters of the positions and masking
+  friend class Instrument;
 
   /** Sets the value of type T to the parameter if it has type ParameterType<T>
       Throws an exception if the types don't match.
@@ -143,8 +146,8 @@ private:
  * @tparam T The concrete type
  * @returns A const reference to the value of the parameter
  */
-template <class T> const T &Parameter::value() {
-  ParameterType<T> *p = dynamic_cast<ParameterType<T> *>(this);
+template <class T> const T &Parameter::value() const {
+  auto const *p = dynamic_cast<ParameterType<T> const *>(this);
   if (!p)
     throw std::runtime_error("Wrong type of parameter.");
   return p->ParameterType<T>::value();
