@@ -33,14 +33,6 @@ def rot_y(deg: float) -> np.ndarray[float]:
     return np.array([[np.cos(a), 0.0, np.sin(a)], [0.0, 1.0, 0.0], [-np.sin(a), 0.0, np.cos(a)]])
 
 
-def _is_ancestor(comp_info: ComponentInfo, ancestor: int, idx: int) -> bool:
-    while comp_info.hasParent(idx):
-        idx = comp_info.parent(idx)
-        if idx == ancestor:
-            return True
-    return False
-
-
 def _path_below_root(comp_info: ComponentInfo, idx: int) -> str:
     """'/' path from the child of the instrument root down to idx, e.g. 'SouthBank/reference-sphere-1/block1'."""
     names = []
@@ -80,9 +72,9 @@ class PixelGeometry:
         self.bank_names = list(bank_names)
         self.detector_indices = np.array([det_info.indexOf(ws.getSpectrum(i).getDetectorIDs()[0]) for i in range(ws.getNumberHistograms())])
         bank_idx = [resolve_component_index(bank, comp_info) for bank in self.bank_names]
-        self.bank_of_spectrum = np.array(
-            [next((ib for ib, b in enumerate(bank_idx) if _is_ancestor(comp_info, b, int(d))), -1) for d in self.detector_indices]
-        )
+        self.bank_of_spectrum = np.full(self.detector_indices.size, -1)
+        for ib, b in enumerate(bank_idx):
+            self.bank_of_spectrum[np.isin(self.detector_indices, comp_info.detectorsInSubtree(b))] = ib
         # banks are rotated about Y only, so (x, z, roty) with y fixed describes them
         self.bank_y_positions = np.array([comp_info.position(b)[1] for b in bank_idx])
         self.initial_bank_params = np.concatenate(
