@@ -171,6 +171,20 @@ Fit Functions
 Standards to following when implementing a fitting function (both C++
 & Python).
 
+Implementation
+--------------
+
+Fit functions that are generally useful should be added to Mantid,
+with documentation and unit tests, rather than kept as user plugins.
+Users who only need a function for their own analysis can write one in
+Python, see :ref:`mantid:emwp_py_fit_funcs`.
+
+Peak functions should implement ``centre()``, ``height()`` and
+``fwhm()`` from ``IPeakFunction``, calculated from the function's
+parameters. The fitting GUI uses these so that users can adjust the
+peak with the mouse. For example, for a Lorentzian the centre is simply
+the ``PeakCentre`` parameter.
+
 Naming
 ------
 
@@ -198,6 +212,22 @@ Parameter names must:
 
 Notable exceptions to these rules are lattice constants (i.e. a, b, c,
 alpha, beta, gamma).
+
+Fit function parameters are part of the public interface, so changing
+the parameters of an existing function must be done with care:
+
+- Renaming a parameter, or changing what it represents, breaks any
+  Python or C++ code that refers to it.
+- Adding a parameter is not safe either. A new parameter is fitted by
+  default, which changes the fitted values of the other parameters and
+  may be the wrong thing to vary for some uses of the function. Scripts
+  also often read the fitted parameters by their row in the output
+  parameters table, and a new parameter changes those rows.
+
+Only change the parameters of a function that was added in the current
+release cycle. For older functions, treat the change like renaming or
+deprecating an algorithm (see :ref:`RenameAlgorithm` and
+:ref:`DeprecateAlgorithm`) and mention it in the release notes.
 
 Workspace Names
 ^^^^^^^^^^^^^^^

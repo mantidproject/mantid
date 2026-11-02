@@ -108,7 +108,7 @@ Development Process
    How to perform a patch release of Mantid.
 
 :doc:`TSC`
-   Overview of the role of the technical steering committee.
+   Overview of the role of the Technical Working Group.
 
 :doc:`DesignDocumentGuides`
    When and how to write a good design document.
