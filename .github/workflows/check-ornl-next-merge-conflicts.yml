@@ -44,6 +44,7 @@ jobs:
 
           conflicts="$(git diff --name-only --diff-filter=U)"
           if [[ -z "$conflicts" ]]; then
+            # The merge failed but no files are conflicted, so git failed for another reason
             {
               echo "Merge of the feature branch into \`ornl-next\` failed with git exit code $result."
               echo
@@ -91,6 +92,7 @@ jobs:
 
           conflicts="$(git diff --name-only --diff-filter=U)"
           if [[ -z "$conflicts" ]]; then
+            # The merge failed but no files are conflicted, so git failed for another reason
             {
               echo "Merge check failed with git exit code $result."
               echo
