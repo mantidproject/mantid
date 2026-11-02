@@ -251,7 +251,7 @@ void updateRowFromOutputProperties(const IAlgorithm_sptr &algorithm, Item &item)
   auto const iVsLam = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspaceWavelength");
   auto const iVsQ = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspace");
   auto const iVsQBin = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspaceBinned");
-  if (iVsQ.empty() && iVsLam.empty() && iVsQBin.empty()) {
+  if (iVsQ.empty() || iVsLam.empty() || iVsQBin.empty()) {
     iVsLams = AlgorithmProperties::getMultipleOutputWorkspaces(algorithm, "OutputWorkspacesWavelength");
     iVsQs = AlgorithmProperties::getMultipleOutputWorkspaces(algorithm, "OutputWorkspaces");
     iVsQBins = AlgorithmProperties::getMultipleOutputWorkspaces(algorithm, "OutputWorkspacesBinned");

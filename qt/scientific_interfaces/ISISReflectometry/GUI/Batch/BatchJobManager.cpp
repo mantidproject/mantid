@@ -170,7 +170,11 @@ std::deque<IConfiguredAlgorithm_sptr> BatchJobManager::getAlgorithms() {
       algorithms = algorithmsForProcessingRowsInGroup(group, false);
     } else if (isSelected(group) && group.requiresPostprocessing(m_reprocessFailed)) {
       // If the group's requires postprocessing, do it
-      algorithms = algorithmForPostprocessingGroup(group);
+      try {
+        algorithms = algorithmForPostprocessingGroup(group);
+      } catch (std::runtime_error &err) {
+        group.setError(err.what());
+      }
     }
     // If we have valid algorithms, return now; otherwise continue to the next group
     if (algorithms.size() > 0) {
