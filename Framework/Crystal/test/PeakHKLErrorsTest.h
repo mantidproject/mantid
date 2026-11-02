@@ -98,25 +98,25 @@ public:
     //       std::cout<<out[0]<<","<<out[4]<<","<<out[8]<<","<<out[12]<<","<<out[16]<<",";
     // std::cout<<'\n';
 
-    TS_ASSERT_DELTA(-0.0074152, out[0], .01);
-    TS_ASSERT_DELTA(-0.00969701, out[4], .01);
-    TS_ASSERT_DELTA(0.0120299, out[8], .01);
-    TS_ASSERT_DELTA(-0.0060874, out[12], .01);
-    TS_ASSERT_DELTA(-0.0103673, out[16], .01);
+    TS_ASSERT_DELTA(-0.0074152019155562243, out[0], 1e-10);
+    TS_ASSERT_DELTA(-0.0096970128407134482, out[4], 1e-10);
+    TS_ASSERT_DELTA(0.012029918447158394, out[8], 1e-10);
+    TS_ASSERT_DELTA(-0.0069087373756087089, out[12], 1e-10);
+    TS_ASSERT_DELTA(-0.0103672693484409, out[16], 1e-10);
 
     std::shared_ptr<Jacob> Jac(new Jacob((int)peakErrs.nParams(), (int)(3 * NPeaks)));
     peakErrs.functionDeriv1D(Jac.get(), xValues.data(), (size_t)(3 * NPeaks));
 
-    TS_ASSERT_DELTA(Jac->get(1, 0), -1.39557, .4);
-    TS_ASSERT_DELTA(Jac->get(3, 1), 2.24071, .4);
-    TS_ASSERT_DELTA(Jac->get(10, 2), -6.80222, .4);
-    TS_ASSERT_DELTA(Jac->get(55, 3), .188203, .1);
-    TS_ASSERT_DELTA(Jac->get(85, 3), .127, .1);
-    TS_ASSERT_DELTA(Jac->get(235, 4), -.05, .1);
-    TS_ASSERT_DELTA(Jac->get(110, 5), .0678, .1);
-    TS_ASSERT_DELTA(Jac->get(100, 0), -1.4782, .4);
-    TS_ASSERT_DELTA(Jac->get(200, 1), -8.24138, .4);
-    TS_ASSERT_DELTA(Jac->get(160, 2), -12.7745, .1);
-    TS_ASSERT_DELTA(Jac->get(80, 4), -.0943, .1);
+    TS_ASSERT_DELTA(Jac->get(1, 0), -1.3955661103280184, 1e-10);
+    TS_ASSERT_DELTA(Jac->get(3, 1), 2.2407106656625229, 1e-10);
+    TS_ASSERT_DELTA(Jac->get(10, 2), -6.8022177639755403, 1e-10);
+    TS_ASSERT_DELTA(Jac->get(55, 3), 0.18820267687715025, 1e-10);
+    TS_ASSERT_DELTA(Jac->get(85, 3), 0.12735233498609333, 1e-10);
+    TS_ASSERT_DELTA(Jac->get(235, 4), -0.050041366550665503, 1e-10);
+    TS_ASSERT_DELTA(Jac->get(110, 5), 0.067876666198063804, 1e-10);
+    TS_ASSERT_DELTA(Jac->get(100, 0), -1.4781950411241356, 1e-10);
+    TS_ASSERT_DELTA(Jac->get(200, 1), -8.2413846551922543, 1e-10);
+    TS_ASSERT_DELTA(Jac->get(160, 2), -12.774495036711505, 1e-10);
+    TS_ASSERT_DELTA(Jac->get(80, 4), -0.094348423161765685, 1e-10);
   }
 };
