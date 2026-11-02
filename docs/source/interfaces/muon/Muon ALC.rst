@@ -12,7 +12,7 @@ muoniated radical system, and can be used to elucidate the regiochemistry of
 muonium addition, dynamic processes, and reaction kinetics, through measurement
 of the muon and proton hyperfine coupling interactions. Examples of how the ALC
 technique can be used are presented in this
-`brochure <http://archive.mantidproject.org/images/3/39/Muon_level_crossing_resonance_leaflet.pdf>`__.
+`brochure <https://github.com/mantidproject/documents/blob/main/Presentations/Muon/Muon_level_crossing_resonance_leaflet.pdf>`__.
 
 Radical systems are formed during muon thermalisation, during which a portion of
 the implanted muons are able to capture electrons to form muonium (:math:`\mu+e`). Muonium

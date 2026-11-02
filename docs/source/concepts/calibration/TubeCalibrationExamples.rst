@@ -16,7 +16,7 @@ used to calibrate three different real instruments inside ISIS facility
 `WISH <http://www.isis.stfc.ac.uk/instruments/wish/>`__). There is also
 a presentation about the tube calibration where you may also find
 interesting examples on how to use the calibration tools
-(`Tube_Calibration.pdf <http://archive.mantidproject.org/images/b/bc/Tube_Calibration.pdf>`__).
+(`Tube_Calibration.pdf <https://github.com/mantidproject/documents/blob/main/Presentations/TubeCalibration/Tube_Calibration.pdf>`__).
 
 In what follows, it will be shown how you can use some of these
 examples. Mantid needs to know where the files are in order to execute
