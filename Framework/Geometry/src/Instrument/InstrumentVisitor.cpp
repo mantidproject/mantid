@@ -436,7 +436,7 @@ std::shared_ptr<std::vector<detid_t>> InstrumentVisitor::detectorIds() const { r
 /// Rekey the ParameterMap's parameters from legacy component pointers to component indices.
 std::shared_ptr<ParameterInfo> InstrumentVisitor::makeParameterInfo() const {
   // The ParameterMap does the rekeying itself
-  return m_pmap ? m_pmap->rekey(*m_componentIdToIndexMap) : std::make_shared<ParameterInfo>();
+  return m_pmap ? m_pmap->rekey(m_componentIds, m_componentIdToIndexMap) : std::make_shared<ParameterInfo>();
 }
 
 std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> InstrumentVisitor::makeWrappers() const {

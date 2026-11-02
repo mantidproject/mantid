@@ -279,7 +279,7 @@ public:
     // get detector corresponding to workspace index 0
     const auto &spectrumInfo = ws->spectrumInfo();
     const auto &detectorInfo = ws->detectorInfo();
-    const auto det = spectrumInfo.spectrumDefinition(0)[0].first;
+    const auto det = spectrumInfo.firstDetectorIndex(0);
 
     TS_ASSERT_EQUALS(detectorInfo.detid(det), 1001);
     TS_ASSERT_EQUALS(componentInfo.name(det), "upstream_monitor_det");
@@ -664,7 +664,7 @@ public:
     const auto &detectorInfo = ws->detectorInfo();
     const auto &componentInfo = ws->componentInfo();
     const auto &paramInfo = *componentInfo.sharedParameterInfo();
-    const auto det = spectrumInfo.spectrumDefinition(69)[0].first;
+    const auto det = spectrumInfo.firstDetectorIndex(69);
 
     TS_ASSERT_EQUALS(detectorInfo.detid(det), 78);
     TS_ASSERT_EQUALS(componentInfo.name(det), "Detector #70");
@@ -693,7 +693,7 @@ public:
     const auto &detectorInfoAfter = ws->detectorInfo();
     const auto &componentInfoAfter = ws->componentInfo();
     const auto &paramInfoAfter = *componentInfoAfter.sharedParameterInfo();
-    const auto detAfter = spectrumInfoAfter.spectrumDefinition(69)[0].first;
+    const auto detAfter = spectrumInfoAfter.firstDetectorIndex(69);
 
     TS_ASSERT_EQUALS(detectorInfoAfter.detid(detAfter), 78);
     TS_ASSERT_EQUALS(componentInfoAfter.name(detAfter), "Detector #70");
@@ -783,20 +783,20 @@ public:
     const auto &detectorInfo = ws->detectorInfo();
     const auto &componentInfo = ws->componentInfo();
     const auto &paramInfo = *componentInfo.sharedParameterInfo();
-    const auto det = spectrumInfo.spectrumDefinition(101)[0].first;
+    const auto det = spectrumInfo.firstDetectorIndex(101);
     TS_ASSERT_EQUALS(detectorInfo.detid(det), 102046);
     TS_ASSERT_EQUALS(componentInfo.name(det), "Det45");
     Parameter_sptr param = paramInfo.getRecursive(componentInfo, det, "Alpha0", "fitting");
     const FitParameter &fitParam = param->value<FitParameter>();
     TS_ASSERT_DELTA(fitParam.getValue(0.0), 0.734079, 0.0001);
 
-    const auto det1 = spectrumInfo.spectrumDefinition(501)[0].first;
+    const auto det1 = spectrumInfo.firstDetectorIndex(501);
     TS_ASSERT_EQUALS(detectorInfo.detid(det1), 211001);
     Parameter_sptr param1 = paramInfo.getRecursive(componentInfo, det1, "Alpha0", "fitting");
     const FitParameter &fitParam1 = param1->value<FitParameter>();
     TS_ASSERT_DELTA(fitParam1.getValue(0.0), 0.734079, 0.0001);
 
-    const auto det2 = spectrumInfo.spectrumDefinition(341)[0].first;
+    const auto det2 = spectrumInfo.firstDetectorIndex(341);
     TS_ASSERT_EQUALS(detectorInfo.detid(det2), 201001);
     Parameter_sptr param2 = paramInfo.getRecursive(componentInfo, det2, "Alpha0", "fitting");
     const FitParameter &fitParam2 = param2->value<FitParameter>();
@@ -852,7 +852,7 @@ public:
     const auto &detectorInfo = ws->detectorInfo();
     const auto &componentInfo = ws->componentInfo();
     const auto &paramInfo = *componentInfo.sharedParameterInfo();
-    const auto det = spectrumInfo.spectrumDefinition(1)[0].first;
+    const auto det = spectrumInfo.firstDetectorIndex(1);
     TS_ASSERT_EQUALS(detectorInfo.detid(det), 1);
     TS_ASSERT_EQUALS(componentInfo.name(det), "pixel");
     Parameter_sptr param = paramInfo.get(det, "tube_pressure");
@@ -866,18 +866,18 @@ public:
     TS_ASSERT_DELTA((componentInfo.getNumberParameter(det, "tube_pressure"))[0], 10.0, 0.0001);
     TS_ASSERT_DELTA((componentInfo.getNumberParameter(det, "tube_thickness"))[0], 0.0008, 0.0001);
     TS_ASSERT_DELTA((componentInfo.getNumberParameter(det, "tube_temperature"))[0], 290.0, 0.0001);
-    const auto det2 = spectrumInfo.spectrumDefinition(2)[0].first;
+    const auto det2 = spectrumInfo.firstDetectorIndex(2);
     TS_ASSERT_DELTA((componentInfo.getNumberParameter(det2, "tube_pressure"))[0], 10.0, 0.0001);
     TS_ASSERT_DELTA((componentInfo.getNumberParameter(det2, "tube_thickness"))[0], 0.0008, 0.0001);
     TS_ASSERT_DELTA((componentInfo.getNumberParameter(det2, "tube_temperature"))[0], 290.0, 0.0001);
-    const auto det3 = spectrumInfo.spectrumDefinition(3)[0].first;
+    const auto det3 = spectrumInfo.firstDetectorIndex(3);
     TS_ASSERT_DELTA((componentInfo.getNumberParameter(det3, "tube_pressure"))[0], 10.0, 0.0001);
     TS_ASSERT_DELTA((componentInfo.getNumberParameter(det3, "tube_thickness"))[0], 0.0008, 0.0001);
     TS_ASSERT_DELTA((componentInfo.getNumberParameter(det3, "tube_temperature"))[0], 290.0, 0.0001);
 
     // demonstrate recursive look-up: tube_pressure2 defined in 'dummy' but
     // accessed from 'pixel'
-    const auto det1 = spectrumInfo.spectrumDefinition(1)[0].first;
+    const auto det1 = spectrumInfo.firstDetectorIndex(1);
     TS_ASSERT_DELTA((componentInfo.getNumberParameter(det1, "tube_pressure2"))[0], 35.0, 0.0001);
 
     // Alternative way of doing a recursive look-up
@@ -912,7 +912,7 @@ public:
 
     const auto &spectrumInfo = ws->spectrumInfo();
     const auto &componentInfo = ws->componentInfo();
-    const auto det = spectrumInfo.spectrumDefinition(1)[0].first;
+    const auto det = spectrumInfo.firstDetectorIndex(1);
     TS_ASSERT_EQUALS((componentInfo.getNumberParameter(det, "number-of-x-pixels"))[0], 192);
 
     Instrument_const_sptr inst = ws->getInstrument();
