@@ -68,23 +68,23 @@ diagnose(self, white, **kwargs) unbound DirectEnergyConversion.DirectEnergyConve
 - The 2D rebinning of SofQW2 has been improved in both speed and accuracy. The gaps on the MARI instrument can be seen clearly and the algorithm appears to do a good job on rebinning on a variety of inelastic instruments (both Direct & Indirect).
 - The image below shows a MARI dataset that has been converted to energy transfer and rebinned with Q bins [0,0.03,12] using SofQW2
 
-```{figure} ../../images/2_0_release/SofQW2_MARI.png
+```{figure} ../../images/2_0_release/SofQW2_MARI.webp
 ---
 class: screenshot
 width: 650px
 align: right
-alt: SofQW2 MARI.png
+alt: SofQW2 MARI
 ---
 ```
 
 - The output from SofQW2 can fed into ConvertToMDEvents and then display in the SliceViewer where more complex cuts can be made.
 
-```{figure} ../../images/2_0_release/SofQW2_SliceViewer.png
+```{figure} ../../images/2_0_release/SofQW2_SliceViewer.webp
 ---
 class: screenshot
 width: 650px
 align: right
-alt: SofQW2 SliceViewer.png
+alt: SofQW2 SliceViewer
 ---
 ```
 

@@ -6,7 +6,7 @@
 These release notes were migrated from the retired Mantid wiki (archive.mantidproject.org). Trac ticket numbers are given for reference alongside the GitHub issue the ticket was migrated to.
 ```
 
-```{figure} ../../images/2_6_release/DGSInterface.png
+```{figure} ../../images/2_6_release/DGSInterface.webp
 ---
 class: screenshot
 width: 415px

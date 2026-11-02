@@ -6,7 +6,7 @@
 These release notes were migrated from the retired Mantid wiki (archive.mantidproject.org).
 ```
 
-```{figure} ../../images/2_2_release/QxQz2.png
+```{figure} ../../images/2_2_release/QxQz2.webp
 ---
 class: screenshot
 width: 400px

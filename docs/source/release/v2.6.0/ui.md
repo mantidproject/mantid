@@ -8,7 +8,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 ## New Features
 
-```{figure} ../../images/2_6_release/PickSharedTools.png
+```{figure} ../../images/2_6_release/PickSharedTools.webp
 ---
 class: screenshot
 width: 400px
@@ -25,7 +25,7 @@ The shape tools are now shared between the Pick, mask and group tabs.
 
 ### 1D & 2D graphs
 
-- The screen reader tool ![ScreenReaderIcon.png](../../images/2_6_release/ScreenReaderIcon.png) will now use scientific format if the values in the graph are very high or low.
+- The screen reader tool ![ScreenReaderIcon](../../images/2_6_release/ScreenReaderIcon.webp) will now use scientific format if the values in the graph are very high or low.
 
 ### Renaming Workspaces
 
@@ -35,7 +35,7 @@ The shape tools are now shared between the Pick, mask and group tabs.
 
 - An 'Ask for Help' option has added to the Help menu and project webpage to email the development team for help and make suggestions.
 
-```{figure} ../../images/2_6_release/ScriptRepository2.png
+```{figure} ../../images/2_6_release/ScriptRepository2.webp
 ---
 class: screenshot
 width: 350px
@@ -68,7 +68,7 @@ The Script Repository with autoupdate and delete functionality.
 - The performance of the sliceviewer has been improved so it can now handle overlaying peaks lists with thousands of peaks.
 - Many more columns of information in the peaks list. Which ones are shown are dynamically determined and can be selected via the "Visible Columns" item in the "Peak" menu.
 
-```{figure} ../../images/2_6_release/Cluster.png
+```{figure} ../../images/2_6_release/Cluster.webp
 ---
 class: screenshot
 width: 550px

@@ -12,7 +12,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 - **Matplotlib users required reading**: A guide to using matplotlib from within MantidPlot is given here
 
-```{figure} ../../images/2_3_release/MatplotlibDemo.png
+```{figure} ../../images/2_3_release/MatplotlibDemo.webp
 ---
 class: screenshot
 width: 1100px

@@ -14,4 +14,4 @@ The new point of reference wiki is Muon, i.e. Muon with capital M. The purpose o
 
 For muon RF experiments time zero is different from the number specified in nexus files. Here allowed this value to be custom edited which will shift the location of the origin for the data accordingly.
 
-![Muon screenshot timezero.PNG](../../images/2_5_release/Muon_screenshot_timezero.png)
+![Muon screenshot timezero](../../images/2_5_release/Muon_screenshot_timezero.webp)

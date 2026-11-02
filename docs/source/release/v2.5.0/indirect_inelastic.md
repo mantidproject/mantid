@@ -25,7 +25,7 @@ Now reads a temperature parameter - currently default ‘sample’. It first che
 - **eq1** is Intensity v Q
 - **eq2** is log(Intensity) v Q2 - primarily for use as input to msdFit.
 
-![Elwin Axes](../../images/2_5_release/Examples_IDA_2.png)
+![Elwin Axes](../../images/2_5_release/Examples_IDA_2.webp)
 
 Both WS have the histograms labelled by Temperature (or run-number) and can be plotted as a contour or in 3D.
 
@@ -45,7 +45,7 @@ Both WS have the histograms labelled by Temperature (or run-number) and can be p
 - New option to scale the container intensity.
 - New 'Save Result' option.
 
-![Completed Apply Corrections Tab](../../images/2_5_release/Examples_IDA_9.png)
+![Completed Apply Corrections Tab](../../images/2_5_release/Examples_IDA_9.webp)
 
 ## Indirect Diffraction
 

@@ -6,12 +6,12 @@
 These release notes were migrated from the retired Mantid wiki (archive.mantidproject.org).
 ```
 
-```{figure} ../../images/2_3_release/ImageViewer.jpg
+```{figure} ../../images/2_1_release/ImageViewer.jpg
 ---
 class: screenshot
 width: 400px
 align: right
-alt: ImageViewer.jpg
+alt: ImageViewer
 ---
 ```
 
@@ -25,12 +25,12 @@ The MantidPlot ImageViewer, has been further enhanced in this release, to start 
 
 ## Algorithm Selection
 
-```{figure} ../../images/2_3_release/AlgorithmSelection.png
+```{figure} ../../images/2_3_release/AlgorithmSelection.webp
 ---
 class: screenshot
 width: 300px
 align: right
-alt: AlgorithmSelection.png
+alt: AlgorithmSelection
 ---
 ```
 

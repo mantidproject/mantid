@@ -6,12 +6,12 @@
 These release notes were migrated from the retired Mantid wiki (archive.mantidproject.org).
 ```
 
-```{figure} ../../images/2_4_release/Vates_release_notes_2_4.png
+```{figure} ../../images/2_4_release/Vates_release_notes_2_4.webp
 ---
 class: screenshot
 width: 400px
 align: right
-alt: Vates release notes 2 4.png
+alt: Vates release notes 2 4
 ---
 ```
 
@@ -21,7 +21,7 @@ alt: Vates release notes 2 4.png
 
 This is a new addition to the SliceViewer for working with PeaksWorkspaces.
 
-![Peaks view outline unannotated.png](../../images/2_4_release/Peaks_view_outline_unannotated.png)
+![Peaks view outline unannotated](../../images/2_4_release/Peaks_view_outline_unannotated.webp)
 
 Features include:
 
@@ -33,7 +33,7 @@ Features include:
 - Customisation of peak foreground and background colours
 - Features for easy management of multiple PeaksWorkspaces, such as the ability to temporarily hide a given PeaksWorkspace in the plot
 
-![AnyPeaksWorkspace.png](../../images/2_4_release/AnyPeaksWorkspace.png)
+![AnyPeaksWorkspace](../../images/2_4_release/AnyPeaksWorkspace.webp)
 
 ## ParaView 3D Visualisation Enhancements
 
@@ -41,7 +41,7 @@ Features include:
 - Plotting of cross-hairs for any PeaksWorkspace
 - Supported loading of the PeaksWorkspace nxs format files
 
-![Combined peaks overlay release 2 4.png](../../images/2_4_release/Combined_peaks_overlay_release_2_4.png)
+![Combined peaks overlay release 2 4](../../images/2_4_release/Combined_peaks_overlay_release_2_4.webp)
 
 ### Migration Progress
 

@@ -6,12 +6,12 @@
 These release notes were migrated from the retired Mantid wiki (archive.mantidproject.org).
 ```
 
-```{figure} ../../images/2_5_release/NonOrthogonalProjection.png
+```{figure} ../../images/2_5_release/NonOrthogonalProjection.webp
 ---
 class: screenshot
 width: 415px
 align: right
-alt: NonOrthogonalProjection.png
+alt: NonOrthogonalProjection
 ---
 ```
 

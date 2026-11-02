@@ -23,12 +23,12 @@ We have implemented a whole collection of improvements to file loading and archi
 - Mantid can now successfully load older Nexus files from the SNS.
 - Changes to Instrument definition files are now automatically detected using the file modification time. It is no longer necessary to change the modification date in the header to ensure the updates are used for newly loaded files.
 
-```{figure} ../../images/2_4_release/BackToBackExponentialWithConstBackground.png
+```{figure} ../../images/2_4_release/BackToBackExponentialWithConstBackground.webp
 ---
 class: screenshot
 width: 200px
 align: right
-alt: BackToBackExponentialWithConstBackground.png
+alt: BackToBackExponentialWithConstBackground
 ---
 ```
 
@@ -42,7 +42,7 @@ alt: BackToBackExponentialWithConstBackground.png
 
 - The {ref}`Fit <algm-Fit>` algorithm now takes an extra argument, `OutputCompositeMembers`. If the main function is a CompositeFunction and this argugment is set to `True` the output will contain an additional spectrum for each function contained within the main composite function.
 
-```{figure} ../../images/2_4_release/CompositeFunctionPlot.png
+```{figure} ../../images/2_4_release/CompositeFunctionPlot.webp
 ---
 class: screenshot
 width: 850px

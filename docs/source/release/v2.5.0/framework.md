@@ -8,7 +8,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 ## Important News
 
-```{figure} ../../images/2_5_release/PythonRetirementTimeline.png
+```{figure} ../../images/2_5_release/PythonRetirementTimeline.webp
 ---
 class: screenshot
 width: 500px
@@ -32,7 +32,7 @@ Python Retirement Timeline.
 
 ## New Features
 
-```{figure} ../../images/2_5_release/MERLINCalibration.png
+```{figure} ../../images/2_5_release/MERLINCalibration.webp
 ---
 class: screenshot
 width: 500px

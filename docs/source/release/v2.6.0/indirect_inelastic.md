@@ -10,7 +10,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 - Has been updated so that the name of the sample environment parameter, temperature for example, can be changed from its default value of 'sample'. There is a new option to Normalise to Lowest Temperature, if selected the \*\_eq1 workspace is normalised to the intensity of the lowest Q value of the lowest temperature run. This will allow better comparisons between different samples and instruments.
 
-```{figure} ../../images/2_6_release/FuryFitWithError.png
+```{figure} ../../images/2_6_release/FuryFitWithError.webp
 ---
 class: screenshot
 width: 500px
@@ -36,7 +36,7 @@ FuryFit with error bars
 
 - Both the IDA and C2E interface have been updated to automatically refresh when new workspaces are added or created. This has led to the removal of the refresh button from the C2E SofQ tab.
 
-```{figure} ../../images/2_6_release/C2EReferesh2.5.png
+```{figure} ../../images/2_6_release/C2EReferesh2.5.webp
 ---
 class: screenshot
 width: 100px
@@ -44,7 +44,7 @@ width: 100px
 C2E interface 2.5 with refresh button removed in 2.6
 ```
 
-```{figure} ../../images/2_6_release/C2ERefresh2.6.png
+```{figure} ../../images/2_6_release/C2ERefresh2.6.webp
 ---
 class: screenshot
 width: 101px

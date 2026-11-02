@@ -8,7 +8,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 ## Cross-Platform Support
 
-As well as supporting Mantid on the same platforms we used to, we now build and ship a version of Mantid that supports VATES on OS X. ![VatesOnMac.png](../../images/2_2_release/VatesOnMac.png)
+As well as supporting Mantid on the same platforms we used to, we now build and ship a version of Mantid that supports VATES on OS X. ![VatesOnMac](../../images/2_2_release/VatesOnMac.webp)
 
 ### Quantification
 

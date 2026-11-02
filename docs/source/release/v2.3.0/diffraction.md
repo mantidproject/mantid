@@ -11,7 +11,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 - New WISH IDF for the new 6-panel set-up
 - {ref}`RebinByPulseTimes <algm-RebinByPulseTimes>` diagnostic algorithm added
 
-![RebinByPulseTimes used for diagnosis on WISH](../../images/2_3_release/RebinByPulseTime.png)
+![RebinByPulseTimes used for diagnosis on WISH](../../images/2_3_release/RebinByPulseTime.webp)
 
 - New scripts for Thermo-Diffractogram plots of GEM data
 - More robust version of GetDetOffsetsMultiPeaks ([c++ source](http://github.com/mantidproject/mantid/blob/master/Code/Mantid/Framework/Algorithms/src/GetDetOffsetsMultiPeaks.cpp))

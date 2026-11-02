@@ -10,7 +10,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 - IPython can be accessed on these platforms using the `View->Launch IPython Console` menu item or by simply pressing `F5`.
 
-```{figure} ../../images/2_3_release/BasicIPython.png
+```{figure} ../../images/2_3_release/BasicIPython.webp
 ---
 class: screenshot
 width: 1000px

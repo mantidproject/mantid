@@ -6,12 +6,12 @@
 These release notes were migrated from the retired Mantid wiki (archive.mantidproject.org).
 ```
 
-```{figure} ../../images/2_3_release/LiveDataMonitoring.png
+```{figure} ../../images/2_2_release/LiveDataMonitoring.webp
 ---
 class: screenshot
 width: 400px
 align: right
-alt: LiveDataMonitoring.png
+alt: LiveDataMonitoring
 ---
 ```
 
@@ -31,12 +31,12 @@ alt: LiveDataMonitoring.png
 
 ## Model Optimisation
 
-```{figure} ../../images/2_3_release/Voigt.png
+```{figure} ../../images/2_3_release/Voigt.webp
 ---
 class: screenshot
 width: 400px
 align: right
-alt: Voigt.png
+alt: Voigt
 ---
 ```
 

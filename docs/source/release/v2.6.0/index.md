@@ -6,7 +6,7 @@
 These release notes were migrated from the retired Mantid wiki (archive.mantidproject.org).
 ```
 
-```{figure} ../../images/2_6_release/Fly.png
+```{figure} ../../images/2_6_release/Fly.webp
 ---
 class: screenshot
 width: 300px

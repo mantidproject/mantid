@@ -8,12 +8,12 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 The {ref}`Vates release notes <v2.4.0-vates>` contain other information about single crystal diffraction changes.
 
-```{figure} ../../images/2_4_release/ImageViewer.jpg
+```{figure} ../../images/2_1_release/ImageViewer.jpg
 ---
 class: screenshot
 width: 400px
 align: right
-alt: ImageViewer.jpg
+alt: ImageViewer
 ---
 ```
 

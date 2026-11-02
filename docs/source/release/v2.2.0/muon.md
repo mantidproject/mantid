@@ -20,4 +20,4 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 The screenshot below shows an example where variable rebinning has been selected as "0.11, -0.01, 6" which from 0.11 rebin in Logarithmic bins of 0.01 up to 6.
 
-![MuonVariableBinning.PNG](../../images/2_2_release/MuonVariableBinning.png)
+![MuonVariableBinning](../../images/2_2_release/MuonVariableBinning.webp)

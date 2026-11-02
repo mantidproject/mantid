@@ -6,7 +6,7 @@
 These release notes were migrated from the retired Mantid wiki (archive.mantidproject.org).
 ```
 
-```{figure} ../../images/2_5_release/TIBsuggestion.png
+```{figure} ../../images/2_5_release/TIBsuggestion.webp
 ---
 class: screenshot
 width: 415px

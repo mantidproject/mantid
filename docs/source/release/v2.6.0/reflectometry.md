@@ -8,10 +8,10 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 ## ISIS Reflectometry
 
-| ![Qx vs Qz as Multi-Dimensional Workspace](../../images/2_6_release/QxQy_rebinned.png)                             | ![Qx vs Qz as Matrix Workspace](../../images/2_6_release/QxQy2D.png)                             |
-| ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
-| ![Ki vs Kf as Multi-Dimensional Workspace](../../images/2_6_release/KiKf_rebinned.png)                             | ![Ki vs Kf as Matrix Workspace](../../images/2_6_release/KiKf2D.png)                             |
-| ![Momentum difference, vs momentum sum as Multi-Dimensional Workspace](../../images/2_6_release/PiPf_rebinned.png) | ![Momentum difference, vs momentum sum as Matrix Workspace](../../images/2_6_release/PiPf2D.png) |
+| ![Qx vs Qz as Multi-Dimensional Workspace](../../images/2_6_release/QxQy_rebinned.webp)                             | ![Qx vs Qz as Matrix Workspace](../../images/2_6_release/QxQy2D.webp)                             |
+| ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| ![Ki vs Kf as Multi-Dimensional Workspace](../../images/2_6_release/KiKf_rebinned.webp)                             | ![Ki vs Kf as Matrix Workspace](../../images/2_6_release/KiKf2D.webp)                             |
+| ![Momentum difference, vs momentum sum as Multi-Dimensional Workspace](../../images/2_6_release/PiPf_rebinned.webp) | ![Momentum difference, vs momentum sum as Matrix Workspace](../../images/2_6_release/PiPf2D.webp) |
 
 ### ConvertToReflectometryQ
 

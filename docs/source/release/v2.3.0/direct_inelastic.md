@@ -6,12 +6,12 @@
 These release notes were migrated from the retired Mantid wiki (archive.mantidproject.org).
 ```
 
-```{figure} ../../images/2_3_release/SampleSetup.png
+```{figure} ../../images/2_3_release/SampleSetup.webp
 ---
 class: screenshot
 width: 450px
 align: right
-alt: SampleSetup.png
+alt: SampleSetup
 ---
 ```
 

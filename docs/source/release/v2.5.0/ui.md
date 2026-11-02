@@ -8,7 +8,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 ## New Features
 
-```{figure} ../../images/2_5_release/InstViewNonDetectorComponents.png
+```{figure} ../../images/2_5_release/InstViewNonDetectorComponents.webp
 ---
 class: screenshot
 width: 563px
@@ -27,7 +27,7 @@ The Instrument View can now display slots, guides, choppers and other components
 
 #### Masking and Grouping
 
-```{figure} ../../images/2_5_release/MaskandGroup.png
+```{figure} ../../images/2_5_release/MaskandGroup.webp
 ---
 class: screenshot
 width: 350px
@@ -60,7 +60,7 @@ Masking and Grouping tab
 - We have for the first time this release included offline help packaged within the Mantidplot installer. For this release it provides offline access to all of the Algorithm help pages, in future releases further help pages will be added to the help available offline.
   - If you wish to see the on-line help for an algorithm, for example to see the most recent details, then a link is provided at the top of each off line page.
 
-```{figure} ../../images/2_5_release/ScriptRepository.png
+```{figure} ../../images/2_5_release/ScriptRepository.webp
 ---
 class: screenshot
 width: 420px

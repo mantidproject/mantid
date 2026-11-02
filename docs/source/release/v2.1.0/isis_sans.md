@@ -20,4 +20,4 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 - Made units of Rcut mm consistent across C++ and Python interfaces
 - Fix bug when displaying masking instrument view. Horizontal masked lines now display as:
 
-![Horizontal line masking isis sans.PNG](../../images/2_1_release/Horizontal_line_masking_isis_sans.png)
+![Horizontal line masking isis sans](../../images/2_1_release/Horizontal_line_masking_isis_sans.webp)

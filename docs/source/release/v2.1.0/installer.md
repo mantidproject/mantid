@@ -30,7 +30,7 @@ Changes have been focused on making the VATES integration much easier for users.
 1. Select through the install wizard. Agree to the licence and the download location. When it completes, you should have a MantidPlot shortcut on your desktop and in your start menu.
 1. Start up MantidPlot. You'll see a one-time only startup dialog (see below). More information on this can be found at Paraview Setup
 
-![PVSetup.png](../../images/2_1_release/PVSetup.png)
+![PVSetup](../../images/2_1_release/PVSetup.webp)
 
 As a technical aside, we no longer use WxS, which will significantly reduces the effort associated with future releases.
 

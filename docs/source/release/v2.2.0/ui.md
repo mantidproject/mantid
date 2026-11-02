@@ -6,12 +6,12 @@
 These release notes were migrated from the retired Mantid wiki (archive.mantidproject.org).
 ```
 
-```{figure} ../../images/2_2_release/ImageViewer.jpg
+```{figure} ../../images/2_1_release/ImageViewer.jpg
 ---
 class: screenshot
 width: 400px
 align: right
-alt: ImageViewer.jpg
+alt: ImageViewer
 ---
 ```
 
@@ -28,12 +28,12 @@ The MantidPlot ImageViewer, which was prototyped during the last iteration, is n
 
 See the ImageViewer page for specific improvements to this tool.
 
-```{figure} ../../images/2_2_release/TofConverter.png
+```{figure} ../../images/2_2_release/TofConverter.webp
 ---
 class: screenshot
 width: 400px
 align: right
-alt: TofConverter.png
+alt: TofConverter
 ---
 ```
 
@@ -49,12 +49,12 @@ A new unit conversion interface has been added to perform simple single value un
 - You can also convert QtiPlot tables direct to TableWorkspaces, using the Table menu "Convert To Table Workspace" option.
 - Several new colour maps have been added.
 
-```{figure} ../../images/2_2_release/Plot2DAxes.png
+```{figure} ../../images/2_2_release/Plot2DAxes.webp
 ---
 class: screenshot
 width: 400px
 align: right
-alt: Plot2DAxes.png
+alt: Plot2DAxes
 ---
 ```
 

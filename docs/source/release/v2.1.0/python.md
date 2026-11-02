@@ -23,12 +23,12 @@ Notable changes to be aware of:
 - each script now has its own output window rather each script sharing a single window;
 - a script cannot be edited while it is being executed. You can of course still edit other scripts;
 
-```{figure} ../../images/2_1_release/MultipleScriptsZoomed.png
+```{figure} ../../images/2_1_release/MultipleScriptsZoomed.webp
 ---
 class: screenshot
 width: 1000px
 align: right
-alt: MultipleScriptsZoomed.png
+alt: MultipleScriptsZoomed
 ---
 ```
 

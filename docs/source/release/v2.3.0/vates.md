@@ -19,7 +19,7 @@ In version 2.2 the quantification portion of the Vates framework was {ref}`intro
 
 Version 2.3 has included some fixes to the framework surrounding conversion to Q-space along with dealing with the UB matrix within the foreground model. These fixes have brought the output of a simulation from Mantid much closer to that produced by Tobyfit (see image below). However, verification & improvement is an ongoing task and this area remains in active development.
 
-```{figure} ../../images/2_3_release/MantidVsTobyFit.png
+```{figure} ../../images/2_3_release/MantidVsTobyFit.webp
 ---
 class: screenshot
 width: 1000px

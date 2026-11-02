@@ -6,12 +6,12 @@
 These release notes were migrated from the retired Mantid wiki (archive.mantidproject.org).
 ```
 
-```{figure} ../../images/2_2_release/LiveDataMonitoring.png
+```{figure} ../../images/2_2_release/LiveDataMonitoring.webp
 ---
 class: screenshot
 width: 400px
 align: right
-alt: LiveDataMonitoring.png
+alt: LiveDataMonitoring
 ---
 ```
 

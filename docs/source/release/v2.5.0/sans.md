@@ -14,12 +14,12 @@ We have created a wiki page to show users when they first have to use Mantid to 
 
 For this release, we have given some attention to the High Angle detector, to process with some functionalities that were able only to the Small Angle detector.
 
-```{figure} ../../images/2_5_release/SANSFloodCorrectionFront.png
+```{figure} ../../images/2_5_release/SANSFloodCorrectionFront.webp
 ---
 class: screenshot
 width: 400px
 align: right
-alt: SANSFloodCorrectionFront.png
+alt: SANSFloodCorrectionFront
 ---
 ```
 
@@ -34,16 +34,16 @@ alt: SANSFloodCorrectionFront.png
 - CanSAS now add \<SASdetector> field.
 - New version of CanSAS format ([v1.1](http://www.cansas.org/formats/canSAS1d/1.1/doc/index.html)) that is able to Save/Load transmission data (picture)
 
-![CanSASFormat.png](../../images/2_5_release/CanSASFormat.png)
+![CanSASFormat](../../images/2_5_release/CanSASFormat.webp)
 
 ## Important Fixes
 
-```{figure} ../../images/2_5_release/SANSBeamCentreFinderFront.png
+```{figure} ../../images/2_5_release/SANSBeamCentreFinderFront.webp
 ---
 class: screenshot
 width: 400px
 align: right
-alt: SANSBeamCentreFinderFront.png
+alt: SANSBeamCentreFinderFront
 ---
 ```
 
@@ -66,11 +66,11 @@ to
 - Applies the suffix “\_front”, ”\_rear” or ”\_merged” onto output workspaces in BatchMode
 - Show Rectangular banks for SANS2D Event data
 
-```{figure} ../../images/2_5_release/DiagnosticsSANSEventMode.png
+```{figure} ../../images/2_5_release/DiagnosticsSANSEventMode.webp
 ---
 class: screenshot
 width: 400px
 align: right
-alt: DiagnosticsSANSEventMode.png
+alt: DiagnosticsSANSEventMode
 ---
 ```

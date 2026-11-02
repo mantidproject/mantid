@@ -10,12 +10,12 @@ Simply select MuonAnalysis from the MantidPlot Interfaces menu to run. Below is 
 
 ## Home
 
-```{figure} ../../images/2_0_release/MuonAnalysisHome.png
+```{figure} ../../images/2_0_release/MuonAnalysisHome.webp
 ---
 class: screenshot
 width: 400px
 align: right
-alt: MuonAnalysisHome.png
+alt: MuonAnalysisHome
 ---
 ```
 
@@ -29,12 +29,12 @@ One of the major changes to this page is the fact that it is now synced to the h
 
 ## Settings
 
-```{figure} ../../images/2_0_release/MuonAnalysisSettings.png
+```{figure} ../../images/2_0_release/MuonAnalysisSettings.webp
 ---
 class: screenshot
 width: 400px
 align: right
-alt: MuonAnalysisSettings.png
+alt: MuonAnalysisSettings
 ---
 ```
 

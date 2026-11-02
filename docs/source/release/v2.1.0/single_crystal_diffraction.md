@@ -18,7 +18,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 This release includes a "preview" version of a viewer for a large collection of spectra. This viewer can be started from the right-click menu of an event workspace by selecting "Show Image Viewer". Each row of the image represents one spectrum. For more details see Image Viewer
 
-![ImageViewer.jpg](../../images/2_1_release/ImageViewer.jpg)
+![ImageViewer](../../images/2_1_release/ImageViewer.jpg)
 
 ## Chunking
 

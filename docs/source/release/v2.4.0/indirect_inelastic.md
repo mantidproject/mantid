@@ -16,13 +16,13 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 - ‘Verbose’ option activated throughout the interface, apart from the ‘Calculate Corrections’ and ‘Apply Corrections’ tabs.
 
-![Release 2 4 ConvFit.png](../../images/2_4_release/Release_2_4_ConvFit.png)
+![Release 2 4 ConvFit](../../images/2_4_release/Release_2_4_ConvFit.webp)
 
 ### Elwin
 
 - Instead of creating **eq1** and **eq2** workspaces and **.nxs** files for each run individually, a single workspace and file are now created with a histogram for each run. There is a temporary workspace **elw** to enable plotting of intensity by run-number.
 
-![Release 2 4 Elwin.png](../../images/2_4_release/Release_2_4_Elwin.png)
+![Release 2 4 Elwin](../../images/2_4_release/Release_2_4_Elwin.webp)
 
 ### MSD Fit
 

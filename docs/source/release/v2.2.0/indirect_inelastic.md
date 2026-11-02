@@ -18,7 +18,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 - Modifications and additions made to the list of MIDAS PythonAlgorithms available to Indirect users (which will eventually have their own tabs in the IDA interface itself). These algorithms are now accessible via Workflow->MIDAS in the Algorithms menu:
 
-![Release Notes 2 2 MIDAS algs.png](../../images/2_2_release/Release_Notes_2_2_MIDAS_algs.png)
+![Release Notes 2 2 MIDAS algs](../../images/2_2_release/Release_Notes_2_2_MIDAS_algs.webp)
 
 - Correct naming of result workspaces for FuryFit/ConvFit.
 - Fitting property values update properly in FuryFit/ConvFit.

@@ -8,7 +8,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 ## New Features
 
-```{figure} ../../images/2_4_release/Lesstoolbars.png
+```{figure} ../../images/2_4_release/Lesstoolbars.webp
 ---
 class: screenshot
 width: 500px
@@ -23,7 +23,7 @@ We have listened to your comments that there were far to many tool bars and butt
 
 #### Instrument View improvements
 
-```{figure} ../../images/2_4_release/Erasepeaks.png
+```{figure} ../../images/2_4_release/Erasepeaks.webp
 ---
 class: screenshot
 width: 141px
@@ -42,7 +42,7 @@ Previously, the detector table for a workspace with grouped detectors would simp
 - All of the IDs of the group if there are 10 or fewer or
 - An elided set of IDs if there are more than 10 in the format *1{sup}`st`,2{sup}`nd`...(N-4 more)...N-1{sup}`th`,N{sup}`th`*
 
-```{figure} ../../images/2_4_release/GroupDetectorsInTable.png
+```{figure} ../../images/2_4_release/GroupDetectorsInTable.webp
 ---
 class: screenshot
 width: 700px

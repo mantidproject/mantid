@@ -10,7 +10,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 ## Single Crystal Diffraction
 
-```{figure} ../../images/2_5_release/NaCl_VSI.png
+```{figure} ../../images/2_5_release/NaCl_VSI.webp
 ---
 class: screenshot
 width: 614px
@@ -56,6 +56,6 @@ The PeaksViewer on the SliceViewer can now identify if you are viewing an integr
 
 We have been stress testing our new SC diffraction workflows on real data. Standard results have been incorporated into our nightly system test runs to ensure that these standard results are never affected by the ongoing development work on Mantid.
 
-![NaCl quadview.png](../../images/2_5_release/NaCl_quadview.png)
+![NaCl quadview](../../images/2_5_release/NaCl_quadview.webp)
 
 NaCl single crystal, measured on SXD at ISIS. Synchronised plane slices through the data. Image was created using the new Mantid 3D VATES visualisation tools.

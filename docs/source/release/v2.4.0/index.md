@@ -6,7 +6,7 @@
 These release notes were migrated from the retired Mantid wiki (archive.mantidproject.org).
 ```
 
-```{figure} ../../images/2_4_release/TopazPeakOveraly.png
+```{figure} ../../images/2_4_release/TopazPeakOveraly.webp
 ---
 class: screenshot
 width: 500px

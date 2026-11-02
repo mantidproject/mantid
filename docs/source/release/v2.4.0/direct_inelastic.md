@@ -6,12 +6,12 @@
 These release notes were migrated from the retired Mantid wiki (archive.mantidproject.org).
 ```
 
-```{figure} ../../images/2_4_release/MultiRotation_Split_Zoom_Sliceviewer.png
+```{figure} ../../images/2_4_release/MultiRotation_Split_Zoom_Sliceviewer.webp
 ---
 class: screenshot
 width: 400px
 align: right
-alt: MultiRotation Split Zoom Sliceviewer.png
+alt: MultiRotation Split Zoom Sliceviewer
 ---
 ```
 

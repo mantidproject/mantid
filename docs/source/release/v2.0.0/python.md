@@ -12,12 +12,12 @@ This release provides a brand new API with many improvements that make scripting
 
 - For example, the simple algorithm functions now return their output workspace
 
-```{figure} ../../images/2_0_release/NewPythonAPI_Snapshot.png
+```{figure} ../../images/2_0_release/NewPythonAPI_Snapshot.webp
 ---
 class: screenshot
 width: 600px
 align: right
-alt: NewPythonAPI Snapshot.png
+alt: NewPythonAPI Snapshot
 ---
 ```
 

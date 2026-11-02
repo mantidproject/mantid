@@ -41,12 +41,12 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 The SliceViewer shows 2D slices of multi-dimensions workspaces, allowing the user to choose which dimensions to visualize, at what points.
 
-```{figure} ../../images/2_0_release/SliceViewer_SlicePoint_Animation.gif
+```{figure} ../../images/2_0_release/SliceViewer_SlicePoint_Animation.webp
 ---
 class: screenshot
 width: 611px
 align: right
-alt: SliceViewer SlicePoint Animation.gif
+alt: SliceViewer SlicePoint Animation
 ---
 ```
 
@@ -56,12 +56,12 @@ Right-click on an arrow in the multi-slice view in the VatesSimpleInterface to o
 
 The LineViewer is used within the SliceViewer to integrate 1D lines through multi-dimensional data sets:
 
-```{figure} ../../images/2_0_release/LineViewerAnimation.gif
+```{figure} ../../images/2_0_release/LineViewerAnimation.webp
 ---
 class: screenshot
 width: 1091px
 align: right
-alt: LineViewerAnimation.gif
+alt: LineViewerAnimation
 ---
 ```
 
@@ -71,45 +71,45 @@ alt: LineViewerAnimation.gif
 
 ### Three Slice
 
-```{figure} ../../images/2_0_release/VSI-Threeslice.png
+```{figure} ../../images/2_0_release/VSI-Threeslice.webp
 ---
 class: screenshot
 width: 700px
 align: right
-alt: VSI-Threeslice.png
+alt: VSI-Threeslice
 ---
 ```
 
 ### Multi Slice
 
-```{figure} ../../images/2_0_release/Multislice_Animation.gif
+```{figure} ../../images/2_0_release/Multislice_Animation.webp
 ---
 class: screenshot
 width: 700px
 align: right
-alt: Multislice Animation.gif
+alt: Multislice Animation
 ---
 ```
 
 ### Peaks Overlay
 
-```{figure} ../../images/2_0_release/Vates_Simple_Interface_Splatter_with_PeakOverlay.png
+```{figure} ../../images/2_0_release/Vates_Simple_Interface_Splatter_with_PeakOverlay.webp
 ---
 class: screenshot
 width: 700px
 align: right
-alt: Vates Simple Interface Splatter with PeakOverlay.png
+alt: Vates Simple Interface Splatter with PeakOverlay
 ---
 ```
 
 ### Orthographic Mode
 
-```{figure} ../../images/2_0_release/Ortho_View_Animation.gif
+```{figure} ../../images/2_0_release/Ortho_View_Animation.webp
 ---
 class: screenshot
 width: 700px
 align: right
-alt: Ortho View Animation.gif
+alt: Ortho View Animation
 ---
 ```
 
@@ -122,11 +122,11 @@ Create Multi-Dimensional Workspace GUI
 - Can work either directly on your processed files, or on workspaces already in the MantidPlot Workspace List.
 - Allows modifications to individual workspaces without leaving the GUI, such as adding missing log values.
 
-```{figure} ../../images/2_0_release/Createmdworkspacegui.png
+```{figure} ../../images/2_0_release/Createmdworkspacegui.webp
 ---
 class: screenshot
 width: 917px
 align: right
-alt: Createmdworkspacegui.png
+alt: Createmdworkspacegui
 ---
 ```

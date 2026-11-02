@@ -28,7 +28,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 </parameter>
 ```
 
-```{figure} ../../images/2_1_release/ConvertToEnergyInfoTable.png
+```{figure} ../../images/2_1_release/ConvertToEnergyInfoTable.webp
 ---
 class: screenshot
 width: 668px
@@ -45,7 +45,7 @@ Removal of Absorption tab.
 
 Updated and fuller support for OSIRIS has been added, with more robust input parsing. See Indirect Diffraction for more details.
 
-```{figure} ../../images/2_1_release/IndirectDiffraction_OSIRIS.png
+```{figure} ../../images/2_1_release/IndirectDiffraction_OSIRIS.webp
 ---
 class: screenshot
 width: 511px

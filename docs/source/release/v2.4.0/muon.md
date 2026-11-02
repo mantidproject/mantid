@@ -6,12 +6,12 @@
 These release notes were migrated from the retired Mantid wiki (archive.mantidproject.org).
 ```
 
-```{figure} ../../images/2_4_release/PISMuon.png
+```{figure} ../../images/2_4_release/PISMuon.webp
 ---
 class: screenshot
 width: 500px
 align: right
-alt: PISMuon.png
+alt: PISMuon
 ---
 ```
 

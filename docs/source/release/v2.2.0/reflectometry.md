@@ -30,7 +30,7 @@ A new {ref}`FindReflectometryLines <algm-FindReflectometryLines>` Calibration al
 
 This graphical interface has been developed to simplify the calculation of the various scaling factor that will be used during the reduction process of the SNS Liquids Reflectometer instrument.\
 Please look at the complete description of this application at this location.\
-![Liquids Reflectometer Automatic Scaling Factor Calculation Graphical Interface](../../images/2_2_release/REFSFReduction.png)
+![Liquids Reflectometer Automatic Scaling Factor Calculation Graphical Interface](../../images/2_2_release/REFSFReduction.webp)
 
 #### Liquids Reflectometer Data Reduction Graphical Interface
 

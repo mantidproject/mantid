@@ -8,7 +8,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 - This release ships with the [NeXus](http://www.nexusformat.org/) project's python package, which allows general access to a NeXus file from Python from within Mantid.
 
-```{figure} ../../images/2_3_release/MantidPlotNxsPackage.png
+```{figure} ../../images/2_3_release/MantidPlotNxsPackage.webp
 ---
 class: screenshot
 width: 1100px

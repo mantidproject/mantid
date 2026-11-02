@@ -8,12 +8,12 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 ## Default File Type
 
-```{figure} ../../images/2_0_release/FileExt.png
+```{figure} ../../images/2_0_release/FileExt.webp
 ---
 class: screenshot
 width: 400px
 align: right
-alt: FileExt.png
+alt: FileExt
 ---
 ```
 
@@ -25,12 +25,12 @@ A new button has been added to the workspace list that allows you to specify how
 
 ## Plot Spectra Dialog
 
-```{figure} ../../images/2_0_release/PlotSpectrum.png
+```{figure} ../../images/2_0_release/PlotSpectrum.webp
 ---
 class: screenshot
 width: 250px
 align: right
-alt: PlotSpectrum.png
+alt: PlotSpectrum
 ---
 ```
 
@@ -44,7 +44,7 @@ For Example:
 
 ## Floating windows
 
-```{figure} ../../images/2_0_release/FloatingPreferences.png
+```{figure} ../../images/2_0_release/FloatingPreferences.webp
 ---
 class: screenshot
 width: 400px
@@ -65,7 +65,7 @@ The categories for the algorithms in Mantid were in dire need for an overhaul, w
 
 ## Instrument view changes
 
-```{figure} ../../images/2_0_release/IntrumentStorePlot.png
+```{figure} ../../images/2_0_release/IntrumentStorePlot.webp
 ---
 class: screenshot
 width: 500px

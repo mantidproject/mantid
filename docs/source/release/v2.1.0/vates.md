@@ -21,13 +21,13 @@ User feedback has indicated that the Slice Viewer SliceViewer had been a popular
 
 Should allow users to dynamically rebin their data, with a given thickness and number of bins, in the region they are viewing in the SliceViewer. For more information see MantidPlot:\_SliceViewer
 
-![SliceViewer DynamicRebinOn.png](../../images/2_1_release/SliceViewer_DynamicRebinOn.png)
+![SliceViewer DynamicRebinOn](../../images/2_1_release/SliceViewer_DynamicRebinOn.webp)
 
 ### Left-click Zooming
 
 Left-click and drag a rectangle to zoom into a region.
 
-![SliceViewerZooming.png](../../images/2_1_release/SliceViewerZooming.png)
+![SliceViewerZooming](../../images/2_1_release/SliceViewerZooming.webp)
 
 ### Other Notable Improvements
 
@@ -45,7 +45,7 @@ Most of the work conducted on the Vates Simple Interface during his iteration ha
 1. Can dynamically rebin either to a histogrammed/image representation or a full event based repesentation visually
 1. Progress reporting includes time taken to construct visualisation dataset
 
-![VSI.png](../../images/2_1_release/VSI.png)
+![VSI](../../images/2_1_release/VSI.webp)
 
 ### Stability
 
@@ -59,7 +59,7 @@ Most of the work conducted on the Vates Simple Interface during his iteration ha
 
 SliceMD and BinMD will query the input workspace and pre-populate the required rebinning fields based on the input. This makes the rebinning algorithms much easier and faster to use. Other checks are provided to help steer the user toward a valid input set.
 
-![SliceMD.png](../../images/2_1_release/SliceMD.png)
+![SliceMD](../../images/2_1_release/SliceMD.webp)
 
 Example shows the ability to select only workspaces currently in the WorkspaceList (1). In example, inputs (2) are dynamically determined from the selected workspace.
 
@@ -82,8 +82,8 @@ There are two parts to this.
 
 On Windows, users will get a setup dialog (see below), which can be used to point to the ParaView install. This is a one-time setup step \[[Paraview_setup]|Paraview Setup\]. On Ubuntu, we've repackaged ParaView such that our distributed versions will put all the ParaView libraries in locations whereby they will be immediately detected by MantidPlot. On other linux platforms, you must install ParaView 3.10.1 and then ensure that the LD_LIBRARY_PATH includes the location of the paraview libs.
 
-![PVSetup.png](../../images/2_1_release/PVSetup.png)
+![PVSetup](../../images/2_1_release/PVSetup.webp)
 
 ## Preview of the Image Viewer
 
-This is fully covered elsewhere in these release notes {ref}`Single Crystal Diffraction <v2.1.0-single_crystal_diffraction>`, but deserves a mention here too. ![ImageViewer.jpg](../../images/2_1_release/ImageViewer.jpg)
+This is fully covered elsewhere in these release notes {ref}`Single Crystal Diffraction <v2.1.0-single_crystal_diffraction>`, but deserves a mention here too. ![ImageViewer](../../images/2_1_release/ImageViewer.jpg)

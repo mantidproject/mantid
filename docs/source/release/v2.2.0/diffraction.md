@@ -27,7 +27,7 @@ The MantidPlot ImageViewer , which was prototyped during the last iteration, is 
 
 See the ImageViewer page for specific improvements to this tool.
 
-![ImageViewer.jpg](../../images/2_2_release/ImageViewer.jpg)
+![ImageViewer](../../images/2_1_release/ImageViewer.jpg)
 
 ## Other Improvements
 

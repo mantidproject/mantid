@@ -10,11 +10,11 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 A new option from the combobox which allows users to enter custom values for the start time. This is available from the "Settings" tab within the Muon Analysis interface.
 
-![Users can now enter custom values.](../../images/2_3_release/Custom_Value.png)
+![Users can now enter custom values.](../../images/2_3_release/Custom_Value.webp)
 
 ## Other changes
 
-```{figure} ../../images/2_3_release/Muon_Analysis_Check_Box.png
+```{figure} ../../images/2_3_release/Muon_Analysis_Check_Box.webp
 ---
 class: screenshot
 width: 200px

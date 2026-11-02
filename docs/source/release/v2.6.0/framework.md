@@ -8,7 +8,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 ## Important News
 
-```{figure} ../../images/2_6_release/PythonRetirementTimeline.png
+```{figure} ../../images/2_5_release/PythonRetirementTimeline.webp
 ---
 class: screenshot
 width: 500px
@@ -42,7 +42,7 @@ Python Retirement Timeline.
 - LoadPSI has been added to allow data from SINQ to be loaded, although at present it only supports FOCUS.
 - LoadLLB has been added to allow data from LLB to be loaded, although at present it only supports Mibemol.
 
-```{figure} ../../images/2_6_release/MERLINCalibration.png
+```{figure} ../../images/2_5_release/MERLINCalibration.webp
 ---
 class: screenshot
 width: 500px

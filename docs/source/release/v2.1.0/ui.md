@@ -6,12 +6,12 @@
 These release notes were migrated from the retired Mantid wiki (archive.mantidproject.org).
 ```
 
-```{figure} ../../images/2_1_release/StartLiveData.png
+```{figure} ../../images/2_1_release/StartLiveData.webp
 ---
 class: screenshot
 width: 712px
 align: right
-alt: StartLiveData.png
+alt: StartLiveData
 ---
 ```
 
@@ -33,12 +33,12 @@ Previously you had to open the Python window to be able to load python script fi
 
 If there are interfaces you really aren't interested in seeing you can now remove them in the Manage Custom Menus.
 
-```{figure} ../../images/2_1_release/ManageCustomMenus.png
+```{figure} ../../images/2_1_release/ManageCustomMenus.webp
 ---
 class: screenshot
 width: 250px
 align: right
-alt: ManageCustomMenus.png
+alt: ManageCustomMenus
 ---
 ```
 

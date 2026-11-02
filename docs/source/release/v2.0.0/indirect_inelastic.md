@@ -35,11 +35,11 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
   - A third, "average", spectra is generated when loading a run.
   - Support for saving to "Aclimax" format, and to output in cm-1.
 
-```{figure} ../../images/2_0_release/Release_Notes_2_0_CTE_UI_Changes.png
+```{figure} ../../images/2_0_release/Release_Notes_2_0_CTE_UI_Changes.webp
 ---
 class: screenshot
 width: 800px
 align: right
-alt: Release Notes 2 0 CTE UI Changes.png
+alt: Release Notes 2 0 CTE UI Changes
 ---
 ```
