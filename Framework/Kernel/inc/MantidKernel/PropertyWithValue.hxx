@@ -97,18 +97,12 @@ template <typename TYPE> PropertyWithValue<TYPE> *PropertyWithValue<TYPE>::clone
 }
 
 template <typename TYPE> void PropertyWithValue<TYPE>::saveProperty(Nexus::File *file) {
-  // nexus does not support writeData for long where it is distinct from int64_t, so it is saved as int64_t
-  constexpr bool saveAsInt64 = std::is_same_v<TYPE, long> && !std::is_same_v<long, int64_t>;
   if constexpr (std::is_same_v<TYPE, float> || std::is_same_v<TYPE, double> || std::is_same_v<TYPE, int32_t> ||
                 std::is_same_v<TYPE, uint32_t> || std::is_same_v<TYPE, int64_t> || std::is_same_v<TYPE, uint64_t> ||
-                std::is_same_v<TYPE, std::string> || std::is_same_v<TYPE, std::vector<double>> ||
-                std::is_same_v<TYPE, std::vector<int32_t>> || saveAsInt64) {
+                std::is_same_v<TYPE, long> || std::is_same_v<TYPE, std::string> ||
+                std::is_same_v<TYPE, std::vector<double>> || std::is_same_v<TYPE, std::vector<int32_t>>) {
     file->makeGroup(this->name(), "NXlog", true);
-    if constexpr (saveAsInt64) {
-      file->writeData("value", static_cast<int64_t>(m_value));
-    } else {
-      file->writeData("value", m_value);
-    }
+    file->writeData("value", m_value);
     file->openData("value");
     file->putAttr("units", this->units());
     file->closeData();

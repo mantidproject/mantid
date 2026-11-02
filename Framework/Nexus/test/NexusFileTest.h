@@ -652,6 +652,36 @@ public:
     TS_ASSERT_EQUALS(ind, outd);
   }
 
+  void test_writeData_long_as_int64() {
+    cout << "\ntest writeData -- long\n" << std::flush;
+
+    FileResource resource("test_nexus_file_long.h5");
+    std::string filename = resource.fullPath();
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+
+    // scalar
+    long const in = -42;
+    file.writeData("scalar_long", in);
+    file.openData("scalar_long");
+    Mantid::Nexus::Info info = file.getInfo();
+    vector<int64_t> out;
+    file.getData(out);
+    file.closeData();
+    TS_ASSERT_EQUALS(info.type, NXnumtype::INT64);
+    TS_ASSERT_EQUALS(out, vector<int64_t>{in});
+
+    // vector
+    vector<long> const inv{11, -8, 9, 12};
+    file.writeData("vector_long", inv);
+    file.openData("vector_long");
+    info = file.getInfo();
+    file.getData(out);
+    file.closeData();
+    TS_ASSERT_EQUALS(info.type, NXnumtype::INT64);
+    TS_ASSERT_EQUALS(out, vector<int64_t>(inv.begin(), inv.end()));
+  }
+
   void test_data_string_array_as_char_array() {
     // this test checks that string arrays saved a block char arrays can be read back
     // this guards against a regression that would otherwise occur within PropertyNexusTest
