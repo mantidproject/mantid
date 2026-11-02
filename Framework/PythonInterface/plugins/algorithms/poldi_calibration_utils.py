@@ -4,7 +4,16 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-"""Forward model of POLDI folded counts and its fit, used by PoldiCalibrateForwardModel (whose docs give the model)."""
+"""Forward model of POLDI folded counts and its fit, used by PoldiCalibrateForwardModel.
+
+Each pixel i sees every reflection k through every chopper slit s as a Gaussian peak in time, folded onto one chopper
+cycle of length T, and fitted with a per-spectrum scale s_i and flat background b_i:
+
+    y_i(t) = s_i * sum_k A_k phi(2 d_k sin(theta_i)) sum_s G(t; (c_i d_k + tz + f_s T) mod T, sigma_ik) + b_i
+    sigma_ik^2 = (kappa T)^2 + (sigma_rel c_i d_k)^2
+
+phi is the incident flux, c_i the pixel's chopper-path DIFC, f_s the slit's offset as a fraction of the cycle and tz
+the timing offset. The geometry enters only through c_i and theta_i."""
 
 from __future__ import annotations
 
