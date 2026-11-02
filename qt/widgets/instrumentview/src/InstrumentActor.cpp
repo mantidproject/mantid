@@ -279,8 +279,6 @@ bool InstrumentActor::hasChildVisible() const {
 }
 
 /** Returns the workspace relating to this instrument view.
- *  !!!! DON'T USE THIS TO GET HOLD OF THE INSTRUMENT !!!!
- *  !!!! USE InstrumentActor::getInstrument() BELOW !!!!
  */
 MatrixWorkspace_const_sptr InstrumentActor::getWorkspace() const { return m_workspace; }
 
@@ -391,21 +389,6 @@ void InstrumentActor::clearMasks() {
   if (needColorRecalc) {
     resetColors();
   }
-}
-
-Instrument_const_sptr InstrumentActor::getInstrument() const {
-  auto sharedWorkspace = getWorkspace();
-  Mantid::Kernel::ReadLock _lock(*sharedWorkspace);
-
-  if (isPhysicalView()) {
-    // First see if there is a 'physical' instrument available. Use it if there
-    // is.
-    auto instr = sharedWorkspace->getInstrument()->getPhysicalInstrument();
-    if (instr)
-      return instr;
-  }
-
-  return sharedWorkspace->getInstrument();
 }
 
 const ColorMap &InstrumentActor::getColorMap() const { return m_renderer->getColorMap(); }
@@ -1170,9 +1153,9 @@ QString InstrumentActor::getParameterInfo(size_t index) const {
   return text;
 }
 
-std::string InstrumentActor::getDefaultAxis() const { return getInstrument()->getDefaultAxis(); }
+std::string InstrumentActor::getDefaultAxis() const { return m_workspace->getInstrument()->getDefaultAxis(); }
 
-std::string InstrumentActor::getDefaultView() const { return getInstrument()->getDefaultView(); }
+std::string InstrumentActor::getDefaultView() const { return m_workspace->getInstrument()->getDefaultView(); }
 
 std::string InstrumentActor::getInstrumentName() const {
   const auto &compInfo = componentInfo();
@@ -1180,7 +1163,7 @@ std::string InstrumentActor::getInstrumentName() const {
 }
 
 std::vector<std::string> InstrumentActor::getStringParameter(const std::string &name, bool recursive) const {
-  return getInstrument()->getStringParameter(name, recursive);
+  return m_workspace->getInstrument()->getStringParameter(name, recursive);
 }
 /**
  * Save the state of the instrument actor to a project file.

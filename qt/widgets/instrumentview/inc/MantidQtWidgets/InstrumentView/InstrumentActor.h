@@ -77,7 +77,6 @@ public:
   virtual void draw(bool picking = false) const = 0;
   virtual void getBoundingBox(Mantid::Kernel::V3D &minBound, Mantid::Kernel::V3D &maxBound,
                               const bool excludeMonitors) const = 0;
-  virtual std::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const = 0;
   virtual std::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const = 0;
   virtual const Mantid::Geometry::ComponentInfo &componentInfo() const = 0;
   virtual const Mantid::Geometry::DetectorInfo &detectorInfo() const = 0;
@@ -142,7 +141,6 @@ public:
   /// Check if any child is visible
   bool hasChildVisible() const;
   /// Get the underlying instrument
-  std::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const override;
   /// Get the associated data workspace
   std::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const override;
   const Mantid::Geometry::ComponentInfo &componentInfo() const override;
