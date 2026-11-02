@@ -1,0 +1,1 @@
+- On Linux, cursors not matching the desktop cursor theme (such as the pointing hand shown when hovering over a plot marker) are now using the correct system path.

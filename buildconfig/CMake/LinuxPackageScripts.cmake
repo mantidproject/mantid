@@ -90,6 +90,7 @@ set(ERROR_CMD "-m mantidqt.dialogs.errorreports.main --exitcode=\$?")
 # Local dev version
 set(PYTHON_ARGS " -Wdefault::DeprecationWarning -Werror:::mantid -Werror:::mantidqt")
 
+set(ROOT_DIR "\${CONDA_PREFIX}")
 set(PYTHON_EXEC_LOCAL "\${CONDA_PREFIX}/bin/python")
 set(PREAMBLE "${CONDA_PREAMBLE_TEXT}")
 set(LOCAL_PYPATH "${CMAKE_CURRENT_BINARY_DIR}/bin/")
