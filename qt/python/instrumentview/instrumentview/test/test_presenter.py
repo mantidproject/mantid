@@ -190,6 +190,8 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model.projection_type = ProjectionType.CYLINDRICAL_X
         self._presenter._update_interactor_style = MagicMock()
         self._mock_view.is_hover_pick_mode_toggled.return_value = True
+        self._mock_view.is_hover_pick_mode_checked.return_value = True
+        self._model._detector_is_picked = np.full(self._ws.getNumberHistograms(), True)
 
         self._presenter.on_hover_pick_toggled(True)
 
@@ -218,10 +220,19 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.set_clear_point_picked_detectors_disabled.assert_called_once_with(False)
         self._mock_view.set_sum_spectra_checkbox_disabled.assert_called_once_with(False)
         self._mock_view.set_select_bank_tube_disabled.assert_not_called()
-        self._mock_view.set_export_workspace_button_disabled.assert_called_once_with(False)
         self._mock_view.set_overlaid_shape_controls_enabled.assert_called_once_with(True)
         self._presenter._update_interactor_style.assert_called_once()
         self._presenter.update_picked_detectors_on_view.assert_called_once()
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_line_plot_ws_and_draw")
+    def test_on_hover_pick_toggled_off_enables_export_workspace_with_picked_detectors(self, _):
+        self._presenter._update_interactor_style = MagicMock()
+        self._model._detector_is_picked = np.full(self._ws.getNumberHistograms(), False)
+        self._model._detector_is_picked[0] = True
+
+        self._presenter.on_hover_pick_toggled(False)
+
+        self._mock_view.set_export_workspace_button_disabled.assert_called_once_with(False)
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.extract_spectra_for_line_plot")
     def test_update_hover_pick_plot_single_detector(self, mock_extract_spectra):
@@ -709,6 +720,39 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter.refresh_create_from_selection_enabled()
 
         self._mock_view.set_create_from_selection_buttons_enabled.assert_called_once_with(False)
+
+    def test_export_workspace_enabled_only_while_detectors_are_selected(self):
+        self._model._detector_is_picked = np.full(self._ws.getNumberHistograms(), False)
+        self._presenter.refresh_export_workspace_enabled()
+        self._mock_view.set_export_workspace_button_disabled.assert_called_once_with(True)
+
+        self._mock_view.reset_mock()
+        self._model._detector_is_picked[0] = True
+        self._presenter.refresh_export_workspace_enabled()
+        self._mock_view.set_export_workspace_button_disabled.assert_called_once_with(False)
+
+    def test_export_workspace_disabled_in_hover_pick_mode(self):
+        self._model._detector_is_picked = np.full(self._ws.getNumberHistograms(), True)
+        self._mock_view.is_hover_pick_mode_checked.return_value = True
+
+        self._presenter.refresh_export_workspace_enabled()
+
+        self._mock_view.set_export_workspace_button_disabled.assert_called_once_with(True)
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_line_plot_ws_and_draw")
+    def test_export_workspace_disabled_after_clearing_picked_detectors(self, _):
+        self._model.update_point_picked_detectors(0, False, False)
+
+        self._presenter._on_clear_point_picked_detectors_clicked()
+
+        self._mock_view.set_export_workspace_button_disabled.assert_called_once_with(True)
+
+    def test_update_plotter_refreshes_export_workspace_enabled(self):
+        self._model._detector_is_picked = np.full(self._ws.getNumberHistograms(), False)
+
+        self._presenter.update_plotter()
+
+        self._mock_view.set_export_workspace_button_disabled.assert_called_with(True)
 
     def test_adding_a_shape_forces_summed_spectra(self):
         """A shape covers too many detectors to plot individually, so the choice is taken away."""
