@@ -1236,7 +1236,8 @@ void ParameterMap::buildInstrumentMetadata() {
   }
   m_instrumentMetadata = std::make_shared<InstrumentMetadata>(
       m_instrument->getValidFromDate(), m_instrument->getValidToDate(), m_instrument->getFilename(),
-      m_instrument->getXmlText(), m_instrument->getDefaultView(), m_instrument->getDefaultAxis(), physicalInstrument);
+      m_instrument->getXmlText(), m_instrument->getDefaultView(), m_instrument->getDefaultAxis(), physicalComponentInfo,
+      physicalDetectorInfo);
 }
 
 /** Return memory used by the parameter map, in bytes.

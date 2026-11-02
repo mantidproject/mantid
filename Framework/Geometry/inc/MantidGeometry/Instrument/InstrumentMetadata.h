@@ -28,7 +28,9 @@ class MANTID_GEOMETRY_DLL InstrumentMetadata {
 public:
   InstrumentMetadata(const Types::Core::DateAndTime &validFromDate, const Types::Core::DateAndTime &validToDate,
                      const std::string &filename, const std::string &xmlText, const std::string &defaultView,
-                     const std::string &defaultAxis, const Instrument_const_sptr &physicalInstrument);
+                     const std::string &defaultAxis,
+                     const std::shared_ptr<const ComponentInfo> &physicalComponentInfo = nullptr,
+                     const std::shared_ptr<const DetectorInfo> &physicalDetectorInfo = nullptr);
 
   const Types::Core::DateAndTime &validFromDate() const;
   const Types::Core::DateAndTime &validToDate() const;

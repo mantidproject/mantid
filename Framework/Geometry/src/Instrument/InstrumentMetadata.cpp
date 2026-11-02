@@ -15,9 +15,12 @@ namespace Mantid::Geometry {
 InstrumentMetadata::InstrumentMetadata(const Types::Core::DateAndTime &validFromDate,
                                        const Types::Core::DateAndTime &validToDate, const std::string &filename,
                                        const std::string &xmlText, const std::string &defaultView,
-                                       const std::string &defaultAxis, const Instrument_const_sptr &physicalInstrument)
+                                       const std::string &defaultAxis,
+                                       const std::shared_ptr<const ComponentInfo> &physicalComponentInfo,
+                                       const std::shared_ptr<const DetectorInfo> &physicalDetectorInfo)
     : m_validFromDate(validFromDate), m_validToDate(validToDate), m_filename(filename), m_xmlText(xmlText),
-      m_defaultView(defaultView), m_defaultAxis(defaultAxis), m_physicalInstrument(physicalInstrument) {}
+      m_defaultView(defaultView), m_defaultAxis(defaultAxis), m_physicalComponentInfo(physicalComponentInfo),
+      m_physicalDetectorInfo(physicalDetectorInfo) {}
 
 const Types::Core::DateAndTime &InstrumentMetadata::validFromDate() const { return m_validFromDate; }
 
