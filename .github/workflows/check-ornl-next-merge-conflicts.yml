@@ -12,6 +12,13 @@ jobs:
     # Do not run in forks.
     if: ${{ github.repository_owner == 'mantidproject' }}
     runs-on: ubuntu-latest
+    env:
+      # Both merges need an identity, even though nothing is pushed: git records a merge commit with it, and refuses
+      # to start a merge without one, even with --no-commit, unless it can infer one from the runner
+      GIT_AUTHOR_NAME: github-actions
+      GIT_AUTHOR_EMAIL: github-actions@github.com
+      GIT_COMMITTER_NAME: github-actions
+      GIT_COMMITTER_EMAIL: github-actions@github.com
 
     steps:
       - name: Check out ornl-next
@@ -32,8 +39,7 @@ jobs:
           head_sha="$(git rev-parse FETCH_HEAD)"
 
           set +e
-          git -c user.name="github-actions" -c user.email="github-actions@github.com" \
-            merge --no-ff --no-edit "$head_sha" > merge-output.txt 2>&1
+          git merge --no-ff --no-edit "$head_sha" > merge-output.txt 2>&1
           result=$?
           set -e
 
