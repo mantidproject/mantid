@@ -1159,7 +1159,7 @@ class SANS2D(ISISInstrument):
         This is done to allow the function move_components to use the correct values and not to use
         all the values for TRANS ans SAMPLE the same, as sometimes, this assumption is not valid.
 
-        The reason for this method is explained at the ticket http://trac.mantidproject.org/mantid/ticket/7314.
+        The reason for this method is explained at the ticket https://github.com/mantidproject/mantid/issues/8160.
         """
         # set the default value for these variables
         values = [self.FRONT_DET_Z, self.FRONT_DET_X, self.FRONT_DET_ROT, self.REAR_DET_Z, self.REAR_DET_X]
@@ -1540,7 +1540,7 @@ class LARMOR(ISISInstrument):
         at apply_detector_log.
         This is done to allow the function move_components to use the correct values and not to use
         all the values for TRANS ans SAMPLE the same, as sometimes, this assumption is not valid.
-        The reason for this method is explained at the ticket http://trac.mantidproject.org/mantid/ticket/7314.
+        The reason for this method is explained at the ticket https://github.com/mantidproject/mantid/issues/8160.
         """
         # set the default value for these variables
         values = [self.BENCH_ROT]

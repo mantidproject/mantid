@@ -55,7 +55,7 @@ class ExampleReducer(Reducer):
           The arguments follow the signature of the mantid.simpleapi function.
 
           See original ticket for more details:
-            http://trac.mantidproject.org/mantid/ticket/2129l
+            https://github.com/mantidproject/mantid/issues/2976
         """
         self._first_step = step
 
