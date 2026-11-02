@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+import copy
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING
 
@@ -432,9 +433,11 @@ class CalibrationFit:
         srel: float = 1.5e-3,
         start: CalibrationFit | None = None,
     ):
-        self.geometry, self.datasets, self.geometry_model, self.timing_model = geometry, datasets, geometry_model, timing_model
-        for ds in datasets:  # masked spectra must not contribute, even when the mask didn't zero their counts
-            ds.weights[~geometry.live_spectra] = 0.0
+        self.geometry, self.geometry_model, self.timing_model = geometry, geometry_model, timing_model
+        # copies whose masked spectra have zero weight, so they do not contribute even when the mask didn't zero their counts
+        self.datasets = [copy.copy(ds) for ds in datasets]
+        for ds in self.datasets:
+            ds.weights = np.where(geometry.live_spectra[:, None], ds.weights, 0.0)
         # drop reflections no live pixel can reach: their intensity column would be all zero
         _, sin_t = geometry.difc_and_sin_theta(geometry.initial_bank_params)
         lam = 2 * np.outer(d_hkl, sin_t[geometry.live_spectra])

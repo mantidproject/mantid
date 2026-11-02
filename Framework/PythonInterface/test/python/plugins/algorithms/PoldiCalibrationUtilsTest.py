@@ -7,7 +7,7 @@
 import unittest
 
 import numpy as np
-from numpy.testing import assert_allclose
+from numpy.testing import assert_allclose, assert_array_equal
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import AddSampleLog, CloneWorkspace, ConvertToPointData, LoadEmptyInstrument, MaskDetectors, Rebin
@@ -28,6 +28,7 @@ from plugins.algorithms.poldi_utils import exec_alg, get_tof_d1Ang, get_instrume
 BANKS = ["SouthBank", "NorthBank"]
 SI_D = np.array([3.1356, 1.9202, 1.6375, 1.3578, 1.2460, 1.1086, 1.0452, 0.9601, 0.9180, 0.8587])
 TRUTH = dict(kappa=0.0035, srel=0.0009, A=np.linspace(1.0, 0.2, SI_D.size))
+TIMING = TimingModel("PerChopperSpeed", [3000.0], [5000], 0.05824, -12.68)
 
 
 def poldi_workspace(speed, name, live_every=28):
@@ -122,12 +123,11 @@ class PoldiCalibrationUtilsTest(unittest.TestCase):
         ws = poldi_workspace(5000, "poldi_dense", live_every=8)  # several live pixels per block
         geom = PixelGeometry(ws, BANKS)
         q_blocks = np.random.default_rng(6).uniform([-1e-3, -0.5], [1e-3, 0.5], (len(geom.block_names), 2)).ravel()
-        timing = TimingModel("PerChopperSpeed", [3000.0], [5000], 0.05824, -12.68)
         c, sin_t = geom.difc_and_sin_theta(geom.initial_bank_params, q_blocks)
         m = model_counts(geom, self._data(5000), c, sin_t, 160.0, TRUTH["kappa"], TRUTH["srel"], TRUTH["A"], SI_D)
         y = np.where(geom.live_spectra[:, None], 1e4 * m + 10.0, 0.0)
         modules = BankModules(geom, geom.initial_bank_params)
-        fit = CalibrationFit(geom, [FoldedData(y, 3000.0)], modules, SI_D, timing)
+        fit = CalibrationFit(geom, [FoldedData(y, 3000.0)], modules, SI_D, TIMING)
         fit.is_free[: modules.n_bank_params] = False
 
         fit.fit()
@@ -138,15 +138,23 @@ class PoldiCalibrationUtilsTest(unittest.TestCase):
         rng = np.random.default_rng(4)
         y = simulated_counts(self.geom, self._data(5000), self.geom.initial_bank_params, 160.0, rng)
         masked = int(np.flatnonzero(~self.geom.live_spectra)[0])
-        timing = TimingModel("PerChopperSpeed", [3000.0], [5000], 0.05824, -12.68)
         costs = []
         for extra in (0.0, 1e4):
             y_masked = y.copy()
             y_masked[masked] += extra
-            fit = CalibrationFit(self.geom, [FoldedData(y_masked, 3000.0)], RigidBanks(self.geom), SI_D, timing)
+            fit = CalibrationFit(self.geom, [FoldedData(y_masked, 3000.0)], RigidBanks(self.geom), SI_D, TIMING)
             costs.append(fit.evaluate_cost(fit.params))
 
         self.assertEqual(costs[0], costs[1])
+
+    def test_callers_weights_are_left_unchanged(self):
+        y = simulated_counts(self.geom, self._data(5000), self.geom.initial_bank_params, 160.0, np.random.default_rng(4))
+        data = FoldedData(y, 3000.0)
+        weights = data.weights.copy()
+
+        CalibrationFit(self.geom, [data], RigidBanks(self.geom), SI_D, TIMING)
+
+        assert_array_equal(data.weights, weights)
 
     def test_background_alone_takes_the_counts_where_the_model_is_zero(self):
         y = np.array([[3.0, 5.0, 4.0]])
@@ -157,10 +165,9 @@ class PoldiCalibrationUtilsTest(unittest.TestCase):
         assert_allclose([s[0], b[0]], [0.0, np.sum(w**2 * y) / np.sum(w**2)])
 
     def test_unreachable_reflection_is_dropped(self):
-        timing = TimingModel("PerChopperSpeed", [3000.0], [5000], 0.05824, -12.68)
         y = simulated_counts(self.geom, self._data(5000), self.geom.initial_bank_params, 160.0, np.random.default_rng(5))
 
-        fit = CalibrationFit(self.geom, [FoldedData(y, 3000.0)], RigidBanks(self.geom), np.append(SI_D, 20.0), timing)
+        fit = CalibrationFit(self.geom, [FoldedData(y, 3000.0)], RigidBanks(self.geom), np.append(SI_D, 20.0), TIMING)
 
         assert_allclose(fit.d_hkl, SI_D)
 
