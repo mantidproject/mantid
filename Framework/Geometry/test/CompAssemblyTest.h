@@ -8,7 +8,10 @@
 
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/StructuredDetector.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 #include <cmath>
@@ -221,6 +224,43 @@ public:
     TS_ASSERT_EQUALS(q.getRelativePos(), copy.getRelativePos());
     TS_ASSERT_EQUALS(q.getPos(), copy.getPos());
     TS_ASSERT_EQUALS(q.getRelativeRot(), copy.getRelativeRot());
+  }
+
+  void test_copy_has_its_own_cached_bounding_box() {
+    auto original = std::make_unique<CompAssembly>("assembly");
+    original->add(new ObjComponent("child", ComponentCreationHelper::createCuboid(0.5)));
+    BoundingBox originalBox;
+    // Fills the original's bounding-box cache before it is copied.
+    original->getBoundingBox(originalBox);
+    {
+      CompAssembly copy(*original);
+      BoundingBox copyBox;
+      copy.getBoundingBox(copyBox);
+      TS_ASSERT_EQUALS(copyBox.minPoint(), originalBox.minPoint());
+      TS_ASSERT_EQUALS(copyBox.maxPoint(), originalBox.maxPoint());
+    }
+    // The copy has gone, and with it any cache it held, so this must still be readable.
+    BoundingBox again;
+    original->getBoundingBox(again);
+    TS_ASSERT_EQUALS(again.maxPoint(), originalBox.maxPoint());
+  }
+
+  void test_getComponentByName_searches_past_a_structured_detector() {
+    CompAssembly root("root");
+    auto bank = new StructuredDetector("structured");
+    std::vector<double> x{0, 1, 0, 1};
+    std::vector<double> y{0, 0, 1, 1};
+    bank->initialize(1, 1, std::move(x), std::move(y), true, 0, true, 1, 1);
+    root.add(bank);
+    auto other = new CompAssembly("other");
+    auto middle = new CompAssembly("middle");
+    middle->add(new Component("target"));
+    other->add(middle);
+    root.add(other);
+
+    auto const found = root.getComponentByName("target");
+    TS_ASSERT(found);
+    TS_ASSERT_EQUALS(found->getName(), "target");
   }
 
   void testCopyAssignmentOperator() {

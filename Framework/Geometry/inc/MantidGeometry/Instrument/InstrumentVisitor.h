@@ -8,6 +8,7 @@
 
 #include "MantidBeamline/ComponentType.h"
 #include "MantidBeamline/PixelGridComponent.h"
+#include "MantidBeamline/StructuredGridComponent.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include <Eigen/Geometry>
@@ -132,6 +133,9 @@ private:
 
   /// Rectangular/Grid bank pixel-grid metadata
   std::shared_ptr<std::map<size_t, Beamline::PixelGridComponent>> m_pixelGridComponents;
+
+  /// Pixel counts, ID numbering and pixel vertices of Structured banks, keyed by component index
+  std::shared_ptr<std::map<size_t, Beamline::StructuredGridComponent>> m_structuredGridComponents;
 
   void markAsSourceOrSample(Mantid::Geometry::IComponent *componentId, const size_t componentIndex);
 

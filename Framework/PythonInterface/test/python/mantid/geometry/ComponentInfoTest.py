@@ -354,6 +354,45 @@ class ComponentInfoTest(unittest.TestCase):
         info = ws.componentInfo()
         self.assertEqual(info.getParameterType("a-v3d"), "V3D")
         self.assertEqual(info.getParameterType("a-quat"), "Quat")
+        self.assertEqual(info.getPositionParameter("a-v3d")[0], V3D(1, 2, 3))
+        self.assertEqual(info.getRotationParameter("a-quat")[0], Quat(1, 0, 0, 0))
+        self.assertEqual(len(info.getPositionParameter("not-set")), 0)
+
+    def test_getParameterAsString(self):
+        ws = CloneWorkspace(self._ws, StoreInADS=False)
+        ws.componentInfo().addInt("an-int", 7)
+        info = ws.componentInfo()
+        self.assertEqual(info.getParameterAsString("an-int"), "7")
+        self.assertEqual(info.getParameterAsString("not-set"), "")
+
+    def test_getParameterVisible(self):
+        ws = CloneWorkspace(self._ws, StoreInADS=False)
+        ws.componentInfo().addDouble("shown", 1.0)
+        ws.componentInfo().addParameter("double", "hidden", "1.0", visible="false")
+        info = ws.componentInfo()
+        self.assertTrue(info.getParameterVisible("shown"))
+        self.assertFalse(info.getParameterVisible("hidden"))
+        self.assertFalse(info.getParameterVisible("not-set"))
+
+    def test_parameter_descriptions(self):
+        ws = CloneWorkspace(self._ws, StoreInADS=False)
+        ws.componentInfo().addDouble("described", 1.0, description="Short. And long.")
+        info = ws.componentInfo()
+        self.assertEqual(info.getParamDescription("described"), "Short. And long.")
+        self.assertEqual(info.getParamShortDescription("described"), "Short.")
+        self.assertEqual(info.getParamDescription("not-set"), "")
+
+    def test_setDescription_and_getDescription(self):
+        ws = CloneWorkspace(self._ws, StoreInADS=False)
+        root = ws.componentInfo().root()
+        child = int(ws.componentInfo().children(root)[0])
+        self.assertEqual(ws.componentInfo().getDescription(), "")
+        ws.componentInfo().setDescription("The instrument. It is described.")
+        ws.componentInfo().setDescription("A child.", child)
+        info = ws.componentInfo()
+        self.assertEqual(info.getDescription(root), "The instrument. It is described.")
+        self.assertEqual(info.getShortDescription(), "The instrument.")
+        self.assertEqual(info.getDescription(child), "A child.")
 
     def test_addParameter_takes_the_value_as_a_string(self):
         ws = CloneWorkspace(self._ws, StoreInADS=False)

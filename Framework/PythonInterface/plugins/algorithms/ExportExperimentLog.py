@@ -34,7 +34,7 @@ class ExportExperimentLog(PythonAlgorithm):
     _headerTitles = None
     _filemode = None
 
-    def summmary(self):
+    def summary(self):
         return "Exports experimental log."
 
     def category(self):

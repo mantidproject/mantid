@@ -9,6 +9,7 @@
 #include "MantidBeamline/ComponentType.h"
 #include "MantidBeamline/DllConfig.h"
 #include "MantidBeamline/PixelGridComponent.h"
+#include "MantidBeamline/StructuredGridComponent.h"
 #include "MantidKernel/cow_ptr.h"
 #include <Eigen/Geometry>
 #include <Eigen/StdVector>
@@ -45,6 +46,7 @@ private:
   std::shared_ptr<const std::map<size_t, Eigen::Vector2d>> m_sideBySideViewPositions;
   /// Rectangular/Grid bank pixel-grid metadata (indices/IDs) for Rectangular/Grid components
   std::shared_ptr<const std::map<size_t, PixelGridComponent>> m_pixelGridComponents;
+  std::shared_ptr<const std::map<size_t, StructuredGridComponent>> m_structuredGridComponents;
 
   const size_t m_size;
   const int64_t m_sourceIndex;
@@ -85,7 +87,8 @@ public:
       std::shared_ptr<std::vector<ComponentType>> componentType, std::shared_ptr<const std::vector<std::string>> names,
       std::shared_ptr<const std::map<size_t, Eigen::Vector2d>> sideBySideViewPositions,
       std::shared_ptr<const std::map<size_t, PixelGridComponent>> pixelGridComponents, int64_t sourceIndex,
-      int64_t sampleIndex);
+      int64_t sampleIndex,
+      std::shared_ptr<const std::map<size_t, StructuredGridComponent>> structuredGridComponents = nullptr);
   /// Copy assignment not permitted because of the way DetectorInfo stored
   ComponentInfo &operator=(const ComponentInfo &other) = delete;
   /// Clone method
@@ -155,6 +158,8 @@ public:
   Eigen::Vector2d const &sideBySideViewPosition(size_t const componentIndex) const;
   PixelGridComponent const &pixelGridComponent(size_t const componentIndex) const;
   bool isGridDetector(size_t const componentIndex) const;
+  StructuredGridComponent const &structuredGridComponent(size_t const componentIndex) const;
+  bool isStructuredDetector(size_t const componentIndex) const;
   size_t detectorIndexAtXYZ(size_t const componentIndex, int const x, int const y, int const z) const;
 
   size_t scanCount() const;

@@ -36,7 +36,7 @@ from mantid.kernel import logger
 
 _AXIS_PARALLEL_TOLERANCE = 1e-12  # minimum norm to treat a vector as non-degenerate
 _CROSS_PRODUCT_TOLERANCE = 1e-6  # minimum cross-product norm before falling back to alternative axis
-_MIN_QUAD_FRACTION = 1e-4  # a cuboid quad narrower than this fraction of the cuboid's longest edge is an invisible sliver
+_MIN_FACE_AREA_FRACTION = 0.01  # cuboid faces smaller than this fraction of the largest are never drawn as its quad
 
 
 class ShapeRenderer(InstrumentRenderer):
@@ -110,6 +110,13 @@ class ShapeRenderer(InstrumentRenderer):
         det_info = self._workspace.detectorInfo()
         n_det = det_info.size()
 
+        # Detector transforms come first: which face of a cuboid to draw depends
+        # on how the detectors sharing it sit relative to the sample.
+        all_rotations = np.asarray(det_info.allRotations())
+        self._det_rotations = Rotation.from_quat(all_rotations).as_matrix()
+        self._det_scales = det_info.allScaleFactors()
+        self._all_positions_3d = det_info.allPositions()
+
         shape_cache: dict[int, tuple[np.ndarray, np.ndarray, int]] = {}
         # 0 is reserved for the fallback shape (no valid shape).
         det_shape_keys = np.zeros(n_det, dtype=np.int64)
@@ -143,7 +150,10 @@ class ShapeRenderer(InstrumentRenderer):
                                 shape_obj, shape_type, si, _extract_quad_from_cylinder_shapeinfo
                             )
                         elif shape_type == GeometryShape.CUBOID:
-                            shape_cache[key] = self._extract_optimised_shape(shape_obj, shape_type, si, _extract_quad_from_cuboid_shapeinfo)
+                            directions = self._cuboid_view_directions(det_indices)
+                            shape_cache[key] = self._extract_optimised_shape(
+                                shape_obj, shape_type, si, lambda shape_info: _extract_quad_from_cuboid_shapeinfo(shape_info, directions)
+                            )
                         else:
                             shape_cache[key] = self._shape_from_raw_mesh(shape_obj)
                 except Exception:
@@ -157,11 +167,7 @@ class ShapeRenderer(InstrumentRenderer):
 
         self._shape_cache = shape_cache
         self._det_shape_keys = det_shape_keys
-        all_rotations = np.asarray(det_info.allRotations())
-        self._det_rotations = Rotation.from_quat(all_rotations).as_matrix()
-        self._det_scales = det_info.allScaleFactors()
         self._shape_depths = _shape_depths(shape_cache)
-        self._all_positions_3d = det_info.allPositions()
         self._beam_axis = get_beam_axis(self._workspace)
 
         # Build sorted lookup for _resolve_detector_indices — avoids a Python
@@ -186,6 +192,19 @@ class ShapeRenderer(InstrumentRenderer):
         if quad is not None:
             return quad[0], quad[1], 4
         return self._shape_from_raw_mesh(shape)
+
+    def _cuboid_view_directions(self, det_indices: np.ndarray) -> np.ndarray | None:
+        """Directions, in each detector's own frame, that the cuboid shared by *det_indices* is seen from.
+
+        From the detectors towards the sample, as the sample-centred projections see them.
+        """
+        comp_info = self._workspace.componentInfo()
+        if not comp_info.hasSample():
+            return None
+        to_sample = np.asarray(comp_info.samplePosition()) - self._all_positions_3d[det_indices]
+        to_sample /= np.maximum(np.linalg.norm(to_sample, axis=1), _AXIS_PARALLEL_TOLERANCE)[:, np.newaxis]
+        # A detector's rotation R takes its own frame to the world, so R^T takes world directions back.
+        return np.einsum("nij,ni->nj", self._det_rotations[det_indices], to_sample)
 
     def _shape_from_raw_mesh(self, shape_obj) -> tuple[np.ndarray, np.ndarray, int]:
         """Convert the mesh from ``shapeObj.getMesh()`` to
@@ -862,52 +881,43 @@ def _extract_quad_from_cylinder_shapeinfo(si: ShapeInfo) -> tuple[np.ndarray, np
     return quad_verts, quad_faces
 
 
-def _extract_quad_from_cuboid_shapeinfo(si) -> tuple[np.ndarray, np.ndarray] | None:
+def _extract_quad_from_cuboid_shapeinfo(si, view_directions: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray] | None:
     """Extract a compact 4-vertex, 1-quad-face representation from cuboid ShapeInfo.
 
-    Places four corners in the local XY plane (the detector face plane) at the
-    mid-depth Z coordinate, derived directly from the ShapeInfo corner points
-    rather than from a triangulated mesh.
+    The quad is the face with the largest projected area seen along
+    *view_directions* (unit vectors in the shape's frame, averaged over), or the
+    largest face without them, placed half-way through the cuboid.  Instrument
+    definitions point a cuboid's edges along any local axes, so the face is not
+    assumed to lie in the XY plane.  Faces under ``_MIN_FACE_AREA_FRACTION`` of
+    the largest are never chosen, so a vanishingly thin side is not drawn.
 
-    The Mantid cuboid convention stores corners as:
-    ``leftFrontBottom`` (x_min, y_min, z_front),
-    ``leftFrontTop`` (x_min, y_max, z_front),
-    ``leftBackBottom`` (x_min, y_min, z_back),
-    ``rightFrontBottom`` (x_max, y_min, z_front).
-
-    Instrument definitions may point the width or height along another axis,
-    which leaves this quad as a line or a sliver: a side under
-    ``_MIN_QUAD_FRACTION`` of the cuboid's longest edge.  Returns ``None`` then,
-    and when the corners cannot form a quad, so the caller draws the full
-    cuboid instead.
+    Returns ``None`` when the corners have insufficient extent to form a valid quad.
     """
     try:
         cg = si.cuboidGeometry()
-        lfb = cg["leftFrontBottom"]
-        lft = cg["leftFrontTop"]
-        lbb = cg["leftBackBottom"]
-        rfb = cg["rightFrontBottom"]
+        corner, *ends = (
+            np.array([cg[name].X(), cg[name].Y(), cg[name].Z()], dtype=np.float64)
+            for name in ("leftFrontBottom", "rightFrontBottom", "leftFrontTop", "leftBackBottom")
+        )
     except Exception:
         return None
 
-    x_min, x_max = lfb.X(), rfb.X()
-    y_min, y_max = lfb.Y(), lft.Y()
-    z_front, z_back = lfb.Z(), lbb.Z()
-
-    longest_edge = max(abs(x_max - x_min), abs(y_max - y_min), abs(z_back - z_front))
-    narrowest_side = max(_MIN_QUAD_FRACTION * longest_edge, _AXIS_PARALLEL_TOLERANCE)
-    if abs(x_max - x_min) < narrowest_side or abs(y_max - y_min) < narrowest_side:
+    # Width, height and depth edges; each face is (edge, next edge, edge across it) in that cyclic order.
+    edges = [end - corner for end in ends]
+    faces = [(edges[i], edges[(i + 1) % 3], edges[(i + 2) % 3]) for i in range(3)]
+    normals = np.array([np.cross(first, second) for first, second, _ in faces])
+    areas = np.linalg.norm(normals, axis=1)
+    if areas.max() < _AXIS_PARALLEL_TOLERANCE**2:
         return None
 
-    mid_z = (z_front + z_back) * 0.5
-    quad_verts = np.array(
-        [
-            [x_min, y_min, mid_z],
-            [x_max, y_min, mid_z],
-            [x_max, y_max, mid_z],
-            [x_min, y_max, mid_z],
-        ],
-        dtype=np.float64,
-    )
+    scores = areas.copy()
+    if view_directions is not None and len(view_directions):
+        # |direction . normal| is the face's area times |cos| of the angle it is seen at.
+        scores = np.mean(np.abs(view_directions @ normals.T), axis=0)
+    scores[areas < _MIN_FACE_AREA_FRACTION * areas.max()] = -1.0
+    first, second, across = faces[int(np.argmax(scores))]
+
+    start = corner + 0.5 * across
+    quad_verts = np.array([start, start + first, start + first + second, start + second], dtype=np.float64)
     quad_faces = np.array([[0, 1, 2, 3]], dtype=np.int64)
     return quad_verts, quad_faces

@@ -3,6 +3,15 @@
 
 <component-link name="REFL" >
 
+  <!-- A valid wavelength range, which is mandatory, so that only the option under test is invalid -->
+  <parameter name="LambdaMin">
+    <value val="1.5"/>
+  </parameter>
+
+  <parameter name="LambdaMax">
+    <value val="17.0"/>
+  </parameter>
+
   <parameter name="CorrectDetectors">
       <value val="1"/>
   </parameter>

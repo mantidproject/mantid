@@ -17,6 +17,7 @@ from scipy.spatial.transform import Rotation
 from vtkmodules.vtkFiltersHybrid import vtkPolyDataSilhouette
 from vtkmodules.vtkRenderingCore import vtkCamera
 
+from mantid.geometry import GeometryShape
 from instrumentview.renderers.base_renderer import InstrumentRenderer
 from instrumentview.renderers.point_cloud_renderer import PointCloudRenderer
 from instrumentview.renderers.shape_renderer import (
@@ -402,8 +403,8 @@ class TestOrientFacesConsistently(unittest.TestCase):
         self.assertEqual(silhouette_edges(_orient_faces_consistently(verts, faces)), 6)
 
 
-class TestExtractQuadFromCuboidShapeinfo(unittest.TestCase):
-    """Tests for _extract_quad_from_cuboid_shapeinfo."""
+class _CuboidShapeInfoHelpers:
+    """Builders for mock cuboid ShapeInfo and checks on the quads made from it."""
 
     def _make_v3d(self, x, y, z):
         v = MagicMock()
@@ -421,6 +422,36 @@ class TestExtractQuadFromCuboidShapeinfo(unittest.TestCase):
             "rightFrontBottom": self._make_v3d(x_max, y_min, z_front),
         }
         return si
+
+    def _make_cuboid_si_from_corners(self, lfb, rfb, lft, lbb):
+        si = MagicMock()
+        si.cuboidGeometry.return_value = {
+            "leftFrontBottom": self._make_v3d(*lfb),
+            "rightFrontBottom": self._make_v3d(*rfb),
+            "leftFrontTop": self._make_v3d(*lft),
+            "leftBackBottom": self._make_v3d(*lbb),
+        }
+        return si
+
+    def _make_musr_si(self):
+        """MUSR scintillator: 170 mm width along Z, 25 mm height along Y, 10 mm depth along X."""
+        return self._make_cuboid_si_from_corners(
+            lfb=(0.0, -0.0125, -0.085),
+            rfb=(0.0, -0.0125, 0.085),
+            lft=(0.0, 0.0125, -0.085),
+            lbb=(0.01, -0.0125, -0.085),
+        )
+
+    def _quad_area(self, quad_verts):
+        return np.linalg.norm(np.cross(quad_verts[1] - quad_verts[0], quad_verts[3] - quad_verts[0]))
+
+    def _assert_quad_spans(self, quad_verts, expected_ranges):
+        for axis, expected in enumerate(expected_ranges):
+            np.testing.assert_allclose([quad_verts[:, axis].min(), quad_verts[:, axis].max()], expected, atol=1e-10)
+
+
+class TestExtractQuadFromCuboidShapeinfo(_CuboidShapeInfoHelpers, unittest.TestCase):
+    """Tests for _extract_quad_from_cuboid_shapeinfo."""
 
     def test_rectangular_cuboid_returns_quad(self):
         si = self._make_cuboid_si()
@@ -469,39 +500,78 @@ class TestExtractQuadFromCuboidShapeinfo(unittest.TestCase):
         si.cuboidGeometry.side_effect = RuntimeError("bad shape")
         self.assertIsNone(_extract_quad_from_cuboid_shapeinfo(si))
 
-    def _make_cuboid_si_from_corners(self, lfb, rfb, lft, lbb):
-        si = MagicMock()
-        si.cuboidGeometry.return_value = {
-            "leftFrontBottom": self._make_v3d(*lfb),
-            "rightFrontBottom": self._make_v3d(*rfb),
-            "leftFrontTop": self._make_v3d(*lft),
-            "leftBackBottom": self._make_v3d(*lbb),
-        }
-        return si
+    def test_standard_layout_vertices_unchanged(self):
+        """Width along X, height along Y, depth along Z keeps the original vertex order."""
+        si = self._make_cuboid_si(x_min=-0.01, x_max=0.01, y_min=-0.005, y_max=0.005, z_front=-0.001, z_back=0.001)
+        quad_verts, quad_faces = _extract_quad_from_cuboid_shapeinfo(si)
+        expected = [[-0.01, -0.005, 0.0], [0.01, -0.005, 0.0], [0.01, 0.005, 0.0], [-0.01, 0.005, 0.0]]
+        np.testing.assert_allclose(quad_verts, expected, atol=1e-10)
+        np.testing.assert_array_equal(quad_faces, [[0, 1, 2, 3]])
 
-    def test_width_not_along_x_returns_none(self):
-        """OSIRIS silicon pixel: its 1 mm width runs along Z, so an XY quad would be a line."""
+    def test_without_view_directions_the_largest_face_is_used(self):
+        """OSIRIS silicon pixel: 1 mm wide along Z, so its 12.7 x 10.9 mm plate is drawn half-way across that."""
         si = self._make_cuboid_si_from_corners(
             lfb=(0.00635, -0.0054367, 0.0),
             rfb=(0.00635, -0.0054367, 0.001),
             lft=(0.00635, 0.0054367, 0.0),
             lbb=(-0.00635, -0.0054367, 0.0),
         )
-        self.assertIsNone(_extract_quad_from_cuboid_shapeinfo(si))
+        quad_verts, _ = _extract_quad_from_cuboid_shapeinfo(si)
+        self._assert_quad_spans(quad_verts, [(-0.00635, 0.00635), (-0.0054367, 0.0054367), (0.0005, 0.0005)])
+        self.assertAlmostEqual(self._quad_area(quad_verts), 0.0127 * 0.0108734, places=12)
 
-    def test_misplaced_top_corner_keeps_its_quad(self):
-        """FIGARO pixel: its top corner sits along the width too, but the 473.6 x 1.2 mm quad is still drawn."""
+    def test_the_face_seen_along_the_view_directions_is_chosen(self):
+        """MUSR scintillator: seen along X it shows its 170 x 25 mm side, seen along Z its 25 x 10 mm end."""
+        along_x = np.tile([-1.0, 0.0, 0.0], (5, 1))
+        quad_verts, _ = _extract_quad_from_cuboid_shapeinfo(self._make_musr_si(), along_x)
+        self._assert_quad_spans(quad_verts, [(0.005, 0.005), (-0.0125, 0.0125), (-0.085, 0.085)])
+
+        along_z = np.tile([0.0, 0.0, 1.0], (5, 1))
+        quad_verts, _ = _extract_quad_from_cuboid_shapeinfo(self._make_musr_si(), along_z)
+        self._assert_quad_spans(quad_verts, [(0.0, 0.01), (-0.0125, 0.0125), (0.0, 0.0)])
+
+    def test_larger_projected_area_beats_a_squarer_view_of_a_smaller_face(self):
+        """A 4 x 92 mm plate seen almost edge-on loses to the 92 x 1 mm side facing the sample."""
         si = self._make_cuboid_si_from_corners(
-            lfb=(0.0, 0.0, 0.0), rfb=(0.4736, 0.0, 0.0), lft=(0.4736, 0.0012, 0.0), lbb=(0.0, 0.0, -0.0074)
+            lfb=(0.0, 0.0, 0.0),
+            rfb=(0.004, 0.0, 0.0),
+            lft=(0.0, 0.0921, 0.0),
+            lbb=(0.0, 0.0, 0.001),
+        )
+        # Projected areas: about 368 mm2 x 0.13 = 48 mm2 against 92 mm2 x 0.99 = 91 mm2.
+        direction = np.array([-0.99, 0.0, -0.13]) / np.linalg.norm([-0.99, 0.0, -0.13])
+        quad_verts, _ = _extract_quad_from_cuboid_shapeinfo(si, np.tile(direction, (3, 1)))
+        self._assert_quad_spans(quad_verts, [(0.002, 0.002), (0.0, 0.0921), (0.0, 0.001)])
+
+    def test_faces_under_one_percent_of_the_largest_are_never_chosen(self):
+        """INTER pixel: its 0.3 um x 1 mm face points at the sample, but the 1 x 20 mm side is drawn."""
+        si = self._make_cuboid_si_from_corners(
+            lfb=(0.0, 0.0, 0.0),
+            rfb=(-3e-7, 0.0, 0.0),
+            lft=(0.0, 0.001, 0.0),
+            lbb=(0.0, 0.0, -0.02),
+        )
+        quad_verts, _ = _extract_quad_from_cuboid_shapeinfo(si, np.tile([0.0, 0.0, 1.0], (3, 1)))
+        self._assert_quad_spans(quad_verts, [(-1.5e-7, -1.5e-7), (0.0, 0.001), (-0.02, 0.0)])
+
+    def test_rotated_cuboid_quad_lies_mid_thickness_across_face(self):
+        """An off-axis cuboid gives a quad of the face's area, normal to the thin edge, through the centre."""
+        rotation = Rotation.from_euler("xyz", [25.0, -40.0, 70.0], degrees=True)
+        width, height, depth = np.array([0.02, 0.0, 0.0]), np.array([0.0, 0.03, 0.0]), np.array([0.0, 0.0, 0.004])
+        lfb = np.array([0.1, -0.2, 0.3])
+        si = self._make_cuboid_si_from_corners(
+            lfb=lfb,
+            rfb=lfb + rotation.apply(width),
+            lft=lfb + rotation.apply(height),
+            lbb=lfb + rotation.apply(depth),
         )
         quad_verts, _ = _extract_quad_from_cuboid_shapeinfo(si)
-        expected = [[0.0, 0.0, -0.0037], [0.4736, 0.0, -0.0037], [0.4736, 0.0012, -0.0037], [0.0, 0.0012, -0.0037]]
-        np.testing.assert_allclose(quad_verts, expected, atol=1e-12)
-
-    def test_sliver_quad_returns_none(self):
-        """INTER pixel: 0.3 um wide against its 20 mm depth, so its XY quad would be invisible."""
-        si = self._make_cuboid_si_from_corners(lfb=(0.0, 0.0, 0.0), rfb=(-3e-7, 0.0, 0.0), lft=(0.0, 0.001, 0.0), lbb=(0.0, 0.0, -0.02))
-        self.assertIsNone(_extract_quad_from_cuboid_shapeinfo(si))
+        self.assertAlmostEqual(self._quad_area(quad_verts), 0.02 * 0.03, places=12)
+        normal = np.cross(quad_verts[1] - quad_verts[0], quad_verts[3] - quad_verts[0])
+        thin_axis = rotation.apply(depth)
+        self.assertAlmostEqual(abs(np.dot(normal, thin_axis)) / (np.linalg.norm(normal) * np.linalg.norm(thin_axis)), 1.0, places=10)
+        box_centre = lfb + rotation.apply(width + height + depth) / 2.0
+        np.testing.assert_allclose(quad_verts.mean(axis=0), box_centre, atol=1e-12)
 
 
 class TestExtractQuadFromCylinderShapeinfo(unittest.TestCase):
@@ -594,7 +664,7 @@ class TestExtractQuadFromCylinderShapeinfo(unittest.TestCase):
         np.testing.assert_array_equal(quad_faces[0], [0, 1, 2, 3])
 
 
-class TestShapeRenderer(unittest.TestCase):
+class TestShapeRenderer(_CuboidShapeInfoHelpers, unittest.TestCase):
     """Tests for the ShapeRenderer class."""
 
     def setUp(self):
@@ -673,6 +743,22 @@ class TestShapeRenderer(unittest.TestCase):
         for det_idx, expected in enumerate(counts):
             mask = c2d == det_idx
             np.testing.assert_array_equal(cell_scalars[mask], expected)
+
+    def test_cuboid_face_follows_the_detector_rotation(self):
+        """On the Z axis the scintillators show their end, unless turned so their side faces the sample."""
+        positions = [[0.0, 0.0, 2.0], [0.0, 0.0, 3.0]]
+        workspace = self._create_cuboid_workspace(self._make_musr_si(), positions, [Rotation.identity()] * 2)
+        self._assert_quad_spans(self._cached_cuboid_quad(workspace), [(0.0, 0.01), (-0.0125, 0.0125), (0.0, 0.0)])
+
+        # Turned 90 degrees about Y, each scintillator's local X axis points back at the sample.
+        turned = [Rotation.from_euler("y", 90, degrees=True)] * 2
+        workspace = self._create_cuboid_workspace(self._make_musr_si(), positions, turned)
+        self._assert_quad_spans(self._cached_cuboid_quad(workspace), [(0.005, 0.005), (-0.0125, 0.0125), (-0.085, 0.085)])
+
+    def test_cuboid_without_a_sample_is_drawn_as_its_largest_face(self):
+        workspace = self._create_cuboid_workspace(self._make_musr_si(), [[0.0, 0.0, 2.0]], [Rotation.identity()])
+        workspace.componentInfo().hasSample.return_value = False
+        self._assert_quad_spans(self._cached_cuboid_quad(workspace), [(0.005, 0.005), (-0.0125, 0.0125), (-0.085, 0.085)])
 
     def test_empty_positions_returns_empty_mesh(self):
         self._refresh_render_with_mock_workspace(n_detectors=2)
@@ -1346,6 +1432,40 @@ class TestShapeRenderer(unittest.TestCase):
         self.renderer = ShapeRenderer(mock_ws)
         self.renderer.precompute()
         return mock_ws
+
+    _CUBOID_XML = "<cuboid id='pixel'/>"
+
+    def _create_cuboid_workspace(self, shape_info, positions, rotations):
+        """A workspace whose detectors all share one cuboid shape, with the sample at the origin."""
+        n_detectors = len(positions)
+        det_info = MagicMock()
+        det_info.size.return_value = n_detectors
+        det_info.detectorIDs.return_value = list(range(n_detectors))
+        det_info.allRotations.return_value = np.array([rotation.as_quat() for rotation in rotations])
+        det_info.allScaleFactors.return_value = np.ones((n_detectors, 3))
+        det_info.allPositions.return_value = np.asarray(positions, dtype=np.float64)
+
+        shape_info.shape.return_value = GeometryShape.CUBOID
+        shape = MagicMock()
+        shape.shapeInfo.return_value = shape_info
+        comp_info = MagicMock()
+        comp_info.shape.return_value = shape
+        comp_info.shapeToComponentIndices.return_value = {self._CUBOID_XML: list(range(n_detectors))}
+        comp_info.hasSample.return_value = True
+        comp_info.samplePosition.return_value = np.zeros(3)
+
+        workspace = MagicMock()
+        workspace.componentInfo.return_value = comp_info
+        workspace.detectorInfo.return_value = det_info
+        workspace.getInstrument().getReferenceFrame().vecPointingAlongBeam.return_value = [0, 0, 1]
+        return workspace
+
+    def _cached_cuboid_quad(self, workspace):
+        renderer = ShapeRenderer(workspace)
+        renderer.precompute()
+        verts, _, face_size = renderer._shape_cache[hash(self._CUBOID_XML)]
+        self.assertEqual(face_size, 4)
+        return verts
 
     def _create_mock_workspace(self, n_detectors=4, same_shape=False):
         """Create a mock workspace with mock componentInfo and detectorInfo."""

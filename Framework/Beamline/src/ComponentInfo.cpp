@@ -21,6 +21,7 @@ namespace {
 
 Eigen::Vector2d const EMPTY_VEC2D(Mantid::EMPTY_DBL(), Mantid::EMPTY_DBL());
 PixelGridComponent const EMPTY_PIXEL_GRID{};
+StructuredGridComponent const EMPTY_STRUCTURED_GRID{};
 
 void failMerge(const std::string &what) {
   throw std::runtime_error(std::string("Cannot merge ComponentInfo: ") + what);
@@ -59,7 +60,7 @@ ComponentInfo::ComponentInfo(
     std::shared_ptr<std::vector<ComponentType>> componentType, std::shared_ptr<const std::vector<std::string>> names,
     std::shared_ptr<const std::map<size_t, Eigen::Vector2d>> sideBySideViewPositions,
     std::shared_ptr<const std::map<size_t, PixelGridComponent>> pixelGridComponents, int64_t sourceIndex,
-    int64_t sampleIndex)
+    int64_t sampleIndex, std::shared_ptr<const std::map<size_t, StructuredGridComponent>> structuredGridComponents)
     : m_assemblySortedDetectorIndices(std::move(assemblySortedDetectorIndices)),
       m_assemblySortedComponentIndices(std::move(assemblySortedComponentIndices)),
       m_detectorRanges(std::move(detectorRanges)), m_componentRanges(std::move(componentRanges)),
@@ -68,6 +69,7 @@ ComponentInfo::ComponentInfo(
       m_componentType(std::move(componentType)), m_names(std::move(names)),
       m_sideBySideViewPositions(std::move(sideBySideViewPositions)),
       m_pixelGridComponents(std::move(pixelGridComponents)),
+      m_structuredGridComponents(std::move(structuredGridComponents)),
       m_size(ComponentInfo::computeTotalSize(*m_assemblySortedDetectorIndices, *m_detectorRanges)),
       m_sourceIndex(sourceIndex), m_sampleIndex(sampleIndex), m_detectorInfo(nullptr) {
   if (m_rotations->size() != m_positions->size()) {
@@ -630,6 +632,20 @@ bool ComponentInfo::isGridDetector(const size_t componentIndex) const {
   return m_pixelGridComponents && m_pixelGridComponents->contains(componentIndex);
 }
 
+const StructuredGridComponent &ComponentInfo::structuredGridComponent(const size_t componentIndex) const {
+  if (m_structuredGridComponents) {
+    const auto it = m_structuredGridComponents->find(componentIndex);
+    if (it != m_structuredGridComponents->end()) {
+      return it->second;
+    }
+  }
+  return EMPTY_STRUCTURED_GRID;
+}
+
+bool ComponentInfo::isStructuredDetector(const size_t componentIndex) const {
+  return m_structuredGridComponents && m_structuredGridComponents->contains(componentIndex);
+}
+
 /**
  * Given the component index of a Rectangular/Grid bank, and pixel indices
  * (x, y[, z]) into it, return the detector index of that pixel.
@@ -850,6 +866,14 @@ size_t ComponentInfo::getMemorySize() const {
   if (m_pixelGridComponents) {
     mem += sizeof(*m_pixelGridComponents) +
            m_pixelGridComponents->size() * sizeof(std::pair<const size_t, PixelGridComponent>);
+  }
+  // m_structuredGridComponents: map object, its key-value pairs, and each bank's vertex buffers
+  if (m_structuredGridComponents) {
+    mem += sizeof(*m_structuredGridComponents);
+    for (const auto &[index, grid] : *m_structuredGridComponents) {
+      mem += sizeof(std::pair<const size_t, StructuredGridComponent>) +
+             (grid.xVertices.capacity() + grid.yVertices.capacity()) * sizeof(double);
+    }
   }
 
   // m_scanIntervals: inline vector's heap buffer

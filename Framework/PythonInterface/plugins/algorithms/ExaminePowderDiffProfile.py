@@ -48,7 +48,7 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
         """ """
         return "ExaminePowderDiffProfile"
 
-    def summmary(self):
+    def summary(self):
         return "Examine peak profile parameters by Le Bail fit."
 
     def PyInit(self):

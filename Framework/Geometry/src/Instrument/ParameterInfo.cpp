@@ -253,6 +253,13 @@ size_t ParameterInfo::size() const {
                          [](size_t acc, auto const &component) { return acc + component.second.size(); });
 }
 
+void ParameterInfo::addLogfileParameter(size_t const componentIndex, std::string const &cacheKey,
+                                        std::shared_ptr<const XMLInstrumentParameter> parameter) {
+  m_logfileParameters.insert_or_assign({componentIndex, cacheKey}, std::move(parameter));
+}
+
+ParameterInfo::LogfileParameters const &ParameterInfo::logfileParameters() const { return m_logfileParameters; }
+
 size_t ParameterInfo::getMemorySize() const {
   size_t storeMem = 0;
   size_t parameterObjectsMem = 0;
@@ -269,7 +276,10 @@ size_t ParameterInfo::getMemorySize() const {
       }
     }
   }
-  return sizeof(*this) + storeMem + parameterObjectsMem;
+  // The XMLInstrumentParameter objects are shared with the instrument that declared them, so only
+  // the map nodes are counted.
+  size_t const logfileMem = m_logfileParameters.size() * (sizeof(LogfileParameters::value_type) + 4 * sizeof(void *));
+  return sizeof(*this) + storeMem + parameterObjectsMem + logfileMem;
 }
 
 } // namespace Mantid::Geometry

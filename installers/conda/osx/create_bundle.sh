@@ -225,7 +225,7 @@ if [ -z "$mantid_version" ]; then
 fi
 
 echo "Creating conda environment in '$bundle_conda_prefix'"
-CONDA_SUBDIR="$platform" "$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy \
+CONDA_SUBDIR="$platform" "$CONDA_EXE" create --prefix "$bundle_conda_prefix" --copy \
   --channel "$conda_channel" --channel conda-forge --channel $mantid_channel --yes \
   "mantidworkbench==${mantid_version}" \
   "mantiddocs==${mantid_version}" \

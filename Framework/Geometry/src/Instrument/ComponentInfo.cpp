@@ -312,6 +312,17 @@ Beamline::PixelGridComponent ComponentInfo::pixelGridComponent(const size_t comp
   return m_componentInfo->pixelGridComponent(componentIndex);
 }
 
+bool ComponentInfo::isStructuredDetector(size_t const componentIndex) const {
+  return m_componentInfo->isStructuredDetector(componentIndex);
+}
+
+const Beamline::StructuredGridComponent &ComponentInfo::structuredGridComponent(const size_t componentIndex) const {
+  if (!isStructuredDetector(componentIndex)) {
+    throw std::runtime_error("ComponentType is not Structured in ComponentInfo::structuredGridComponent.");
+  }
+  return m_componentInfo->structuredGridComponent(componentIndex);
+}
+
 size_t ComponentInfo::detectorIndexAtXYZ(const size_t componentIndex, const int x, const int y, const int z) const {
   return m_componentInfo->detectorIndexAtXYZ(componentIndex, x, y, z);
 }
@@ -654,15 +665,19 @@ size_t ComponentInfo::indexOfFullName(const std::string &fullName) const {
   return current;
 }
 
+Parameter_sptr ComponentInfo::findParameter(size_t componentIndex, std::string const &name, bool recursive) const {
+  if (!m_parameterInfo) {
+    return nullptr;
+  }
+  return recursive ? m_parameterInfo->getRecursive(*this, componentIndex, name)
+                   : m_parameterInfo->get(componentIndex, name);
+}
+
 template <class T>
 std::vector<T> ComponentInfo::getParameter(size_t componentIndex, const std::string &name, bool recursive) const {
   std::vector<T> result;
-  if (m_parameterInfo) {
-    Parameter_sptr const param = recursive ? m_parameterInfo->getRecursive(*this, componentIndex, name)
-                                           : m_parameterInfo->get(componentIndex, name);
-    if (param) {
-      result.emplace_back(param->value<T>());
-    }
+  if (auto const param = findParameter(componentIndex, name, recursive)) {
+    result.emplace_back(param->value<T>());
   }
   return result;
 }
@@ -768,6 +783,16 @@ void ComponentInfo::addFittingParameter(const size_t componentIndex, const std::
   mutableParameterInfo().addFittingParameter(componentIndex, parameter, fittingFunction);
 }
 
+const ParameterInfo::LogfileParameters &ComponentInfo::logfileParameters() const {
+  static ParameterInfo::LogfileParameters const empty;
+  return m_parameterInfo ? m_parameterInfo->logfileParameters() : empty;
+}
+
+void ComponentInfo::addLogfileParameter(const size_t componentIndex, const std::string &cacheKey,
+                                        std::shared_ptr<const XMLInstrumentParameter> parameter) {
+  mutableParameterInfo().addLogfileParameter(componentIndex, cacheKey, std::move(parameter));
+}
+
 void ComponentInfo::clearParameter(const size_t componentIndex, const std::string &name) {
   if (m_parameterInfo) {
     m_parameterInfo->clearParametersByName(componentIndex, name);
@@ -806,16 +831,60 @@ std::vector<std::string> ComponentInfo::getStringParameter(const size_t componen
   return getParameter<std::string>(componentIndex, name, recursive);
 }
 
+std::vector<Kernel::V3D> ComponentInfo::getPositionParameter(const size_t componentIndex, const std::string &name,
+                                                             bool recursive) const {
+  return getParameter<Kernel::V3D>(componentIndex, name, recursive);
+}
+
+std::vector<Kernel::Quat> ComponentInfo::getRotationParameter(const size_t componentIndex, const std::string &name,
+                                                              bool recursive) const {
+  return getParameter<Kernel::Quat>(componentIndex, name, recursive);
+}
+
+std::string ComponentInfo::getParameterAsString(const size_t componentIndex, const std::string &name,
+                                                bool recursive) const {
+  auto const parameter = findParameter(componentIndex, name, recursive);
+  return parameter ? parameter->asString() : std::string();
+}
+
+bool ComponentInfo::getParameterVisible(const size_t componentIndex, const std::string &name, bool recursive) const {
+  auto const parameter = findParameter(componentIndex, name, recursive);
+  return parameter && parameter->visible();
+}
+
 std::string ComponentInfo::getParameterType(const size_t componentIndex, const std::string &name,
                                             bool recursive) const {
-  if (m_parameterInfo) {
-    Parameter_sptr const parameter = recursive ? m_parameterInfo->getRecursive(*this, componentIndex, name)
-                                               : m_parameterInfo->get(componentIndex, name);
-    if (parameter) {
-      return std::string(parameter->type());
-    }
+  auto const parameter = findParameter(componentIndex, name, recursive);
+  return parameter ? std::string(parameter->type()) : std::string();
+}
+
+std::string ComponentInfo::getParamDescription(const size_t componentIndex, const std::string &name,
+                                               bool recursive) const {
+  auto const parameter = findParameter(componentIndex, name, recursive);
+  return parameter ? parameter->getDescription() : std::string();
+}
+
+std::string ComponentInfo::getParamShortDescription(const size_t componentIndex, const std::string &name,
+                                                    bool recursive) const {
+  auto const parameter = findParameter(componentIndex, name, recursive);
+  return parameter ? parameter->getShortDescription() : std::string();
+}
+
+std::string ComponentInfo::getDescription(const size_t componentIndex) const {
+  return getParamDescription(componentIndex, name(componentIndex), false);
+}
+
+std::string ComponentInfo::getShortDescription(const size_t componentIndex) const {
+  return getParamShortDescription(componentIndex, name(componentIndex), false);
+}
+
+void ComponentInfo::setDescription(const size_t componentIndex, const std::string &description) {
+  auto const &componentName = name(componentIndex);
+  if (auto const parameter = findParameter(componentIndex, componentName, true)) {
+    parameter->setDescription(description);
+  } else {
+    addString(componentIndex, componentName, "", &description);
   }
-  return std::string();
 }
 
 double ComponentInfo::getFittingParameter(const size_t componentIndex, const std::string &name, double xvalue) const {

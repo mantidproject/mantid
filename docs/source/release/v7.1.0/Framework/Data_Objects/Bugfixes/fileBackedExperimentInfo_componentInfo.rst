@@ -1,0 +1,1 @@
+- ``componentInfo()`` and ``instrumentMetadata()`` now return the instrument of an experiment info that has not yet been read from its file, such as one in an MD workspace loaded with ``FileBackEnd`` in :ref:`algm-LoadMD`, instead of an empty instrument.

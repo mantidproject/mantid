@@ -220,8 +220,14 @@ so migrating a call site is close to a rename once the index is in hand.
 * ``getIntParameter(componentIndex, name, recursive)``
 * ``getBoolParameter(componentIndex, name, recursive)``
 * ``getStringParameter(componentIndex, name, recursive)``
+* ``getPositionParameter(componentIndex, name, recursive)``
+* ``getRotationParameter(componentIndex, name, recursive)``
+* ``getParameterAsString(componentIndex, name, recursive)`` - the value of any type as a string, or an empty string if unset
+* ``getParameterVisible(componentIndex, name, recursive)`` - ``false`` if unset
 * ``getParameterType(componentIndex, name, recursive)`` - the stored type, or an empty string if unset
 * ``getFittingParameter(componentIndex, name, xvalue)``
+* ``getParamDescription(componentIndex, name, recursive)`` and ``getParamShortDescription(componentIndex, name, recursive)``
+* ``getDescription(componentIndex)`` and ``getShortDescription(componentIndex)`` - the component's own description, not inherited
 * ``parameters(componentIndex)`` - every parameter on one component, non-recursive, ordered by name (C++ only)
 
 **Before refactoring**

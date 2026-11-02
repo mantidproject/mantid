@@ -110,7 +110,7 @@ jobs:
           echo "::endgroup::"
       - name: Scan with Grype
         id: scan
-        uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
+        uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
         with:
           path: ${{ steps.pixi-project.outputs.environment_dir }}
           fail-build: false
@@ -175,7 +175,7 @@ jobs:
 
       - name: Upload vulnerability report
         if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.dry_run != 'true' }}
-        uses: github/codeql-action/upload-sarif@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
           sarif_file: ${{ runner.temp }}/grype.sarif
           # one category for all platforms, so the merged results are a single analysis

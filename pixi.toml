@@ -68,7 +68,7 @@ anaconda-client = "*"
 # Keep the standalone solver stack aligned with newer local channel metadata.
 conda = ">=26.5,<27"
 rattler-index = ">=0.31.5,<1.0"
-mamba = ">=2.9,<3"
+mamba = ">=2.9,<2.10"
 
 [feature.docs-migration.dependencies]
 # rst-to-myst doesn't play nice with dependencies in the default environment

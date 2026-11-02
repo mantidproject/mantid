@@ -20,16 +20,25 @@ The steps this algorithm performs are:
 - Apply detector calibration to each summed workspace, if requested.
 - Perform background subtraction, if requested.
 - Perform time-slicing of the input run, if requested.
-- Perform the reduction.
+- Perform the reduction (including polarization correction if requested).
 - Clean up the TOF workspaces into a group.
 
 Input runs and transmission runs are loaded if required, or existing workspaces are used if they are already loaded. When runs are loaded, they are named based on the run number with a ``TOF_`` or ``TRANS_`` prefix. To determine whether workspaces are already loaded, workspace names are matched based on the run number with or without this prefix. Other naming formats are not considered to match.
 
-If a value is provided for the ``CalibrationFile`` property, input runs are summed before the resulting workspace is calibrated using :ref:`algm-ReflectometryISISCalibration`. Existing workspaces carrying a matching ``reflectometry_calibration_file`` run log can be reused when their geometry has not already received angle correction. Workspaces carrying the ``reflectometry_adjusted_theta`` run log are reloaded before post-summation calibration because their geometry depends on an earlier experiment angle and fitted specular position.
+If a value is provided for the ``CalibrationFile`` property, input runs are summed before the resulting workspace is calibrated using :ref:`algm-ReflectometryISISCalibration`. Existing workspaces carrying a matching ``reflectometry_calibration_file`` run log can be reused when their geometry has not already received angle correction (see below).
 
-If a calibration file is provided for POLREF data, a specific POLREF calibration workflow is invoked via :ref:`algm-ReflectometryISISCalibration`. In this case, ``CorrectDetectors`` must be set to ``False`` as the detector position correction is applied as part of the calibration workflow.
+If a calibration file is provided for POLREF data, a specific POLREF calibration workflow is invoked via :ref:`algm-ReflectometryISISCalibration`. In this case, ``CorrectDetectors`` must be set to ``False`` as the detector position correction is applied as part of the calibration workflow. For this workflow, the experiment angle is taken from ``ThetaIn`` or, when ``ThetaIn`` is not supplied, from the run log selected by ``ThetaLogName``. At least one of ``NominalSpecularPixelSpectrumNo`` and ``ActualSpecularPixelSpectrumNo`` must be supplied (can be fractional):
 
-For the POLREF calibration workflow, the experiment angle is taken from ``ThetaIn`` or, when ``ThetaIn`` is not supplied, from the run log selected by ``ThetaLogName``. The nominal specular pixel spectrum number must be supplied using ``NominalSpecularPixelSpectrumNo``. The fractional measured specular-pixel index is obtained through fitting the specular peak on the summed sample workspace. The experiment angle is then corrected by the difference between the angular positions of the nominal and measured specular pixels. This adjusted angle is used both for detector calibration and reduction.
+ (``reflectometry_adjusted_theta`` log). The geometry of these workspaces depends on an earlier experiment angle and fitted specular position.
+
+- If both ``NominalSpecularPixelSpectrumNo`` and ``ActualSpecularPixelSpectrumNo`` are supplied, the experiment angle is corrected by the difference between their angular positions.
+- If only ``NominalSpecularPixelSpectrumNo`` is supplied the actual specular pixel is obtained by fitting the specular peak on the summed sample workspace, then the experiment angle is corrected by the difference between actual and nominal angular positions.
+- If only ``ActualSpecularPixelSpectrumNo`` is supplied the nominal pixel is set to equal this supplied value, making angle correction redundant.
+
+The corrected experiment angle is used both for detector calibration and reduction. Transmission workspaces are aligned at zero experiment angle using the nominal pixel.
+
+If angle correction is applied, a ``reflectometry_adjusted_theta`` log is added to the workspace. These workspaces cannot be reused in further reductions as post-correction the geometry of these workspaces depends on a specific experiment angle and fitted specular position.
+
 If time slicing is enabled, the input run must be an event workspace and have monitors loaded; otherwise, it must be a histogram workspace. If the workspace already exists but is the incorrect type or is missing monitors, it will be reloaded.
 
 Input runs can be combined before reduction by supplying a comma-separated list of run numbers. They will be summed using the :ref:`algm-MergeRuns` algorithm. Similarly, multiple input workspaces for the first and/or second transmission inputs can be summed prior to reduction.

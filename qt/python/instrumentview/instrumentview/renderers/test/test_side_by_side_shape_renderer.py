@@ -13,6 +13,7 @@ import numpy as np
 import pyvista as pv
 from scipy.spatial.transform import Rotation
 
+from mantid.geometry import GeometryShape
 from instrumentview.renderers.shape_renderer import ShapeRenderer
 from instrumentview.renderers.side_by_side_shape_renderer import SideBySideShapeRenderer
 from instrumentview.Projections.ProjectionType import ProjectionType
@@ -45,6 +46,16 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         renderer = SideBySideShapeRenderer(ws)
         mesh = renderer.build_masked_mesh(np.empty((0, 3)), False)
         self.assertEqual(mesh.number_of_points, 0)
+
+    def test_cuboid_is_drawn_as_its_face_seen_down_local_z(self):
+        """MUSR scintillators facing the sample side-on still show their end, as side-by-side looks down local Z."""
+        ws = self._create_cuboid_workspace(positions=[[1.0, 0.0, 0.0], [2.0, 0.0, 0.0]])
+        renderer = SideBySideShapeRenderer(ws)
+        renderer.precompute()
+        verts, _, face_size = renderer._shape_cache[hash(self._CUBOID_XML)]
+        self.assertEqual(face_size, 4)
+        np.testing.assert_allclose(verts.min(axis=0), [0.0, -0.0125, 0.0], atol=1e-12)
+        np.testing.assert_allclose(verts.max(axis=0), [0.01, 0.0125, 0.0], atol=1e-12)
 
     # ------------------------------------------------------------------
     # build_detector_mesh with bank groups
@@ -404,6 +415,44 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
 
         workspace.getInstrument().getReferenceFrame().vecPointingAlongBeam.return_value = np.array([0.0, 0.0, 1.0])
 
+        return workspace
+
+    _CUBOID_XML = "<cuboid id='pixel'/>"
+
+    def _create_cuboid_workspace(self, positions):
+        """Detectors sharing a MUSR scintillator: 170 mm along local Z, 25 mm along Y, 10 mm along X."""
+
+        def v3d(x, y, z):
+            v = MagicMock()
+            v.X.return_value, v.Y.return_value, v.Z.return_value = x, y, z
+            return v
+
+        n_detectors = len(positions)
+        det_info = MagicMock()
+        det_info.size.return_value = n_detectors
+        det_info.detectorIDs.return_value = list(range(n_detectors))
+        det_info.allPositions.return_value = np.asarray(positions, dtype=np.float64)
+        det_info.allRotations.return_value = np.array([Rotation.identity().as_quat() for _ in range(n_detectors)])
+        det_info.allScaleFactors.return_value = np.ones((n_detectors, 3))
+
+        shape_info = MagicMock()
+        shape_info.shape.return_value = GeometryShape.CUBOID
+        shape_info.cuboidGeometry.return_value = {
+            "leftFrontBottom": v3d(0.0, -0.0125, -0.085),
+            "rightFrontBottom": v3d(0.0, -0.0125, 0.085),
+            "leftFrontTop": v3d(0.0, 0.0125, -0.085),
+            "leftBackBottom": v3d(0.01, -0.0125, -0.085),
+        }
+        shape = MagicMock()
+        shape.shapeInfo.return_value = shape_info
+        comp_info = MagicMock()
+        comp_info.shape.return_value = shape
+        comp_info.shapeToComponentIndices.return_value = {self._CUBOID_XML: list(range(n_detectors))}
+
+        workspace = MagicMock()
+        workspace.componentInfo.return_value = comp_info
+        workspace.detectorInfo.return_value = det_info
+        workspace.getInstrument().getReferenceFrame().vecPointingAlongBeam.return_value = np.array([0.0, 0.0, 1.0])
         return workspace
 
     def _make_position_side_effect(self, n_detectors):

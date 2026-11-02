@@ -427,7 +427,7 @@ int StructuredDetector::maxDetectorID() {
 std::shared_ptr<const IComponent> StructuredDetector::getComponentByName(const std::string &cname, int nlevels) const {
   // exact matches
   if (cname == this->getName())
-    return std::shared_ptr<const IComponent>(this);
+    return std::shared_ptr<const IComponent>(this, NoDeleting());
 
   // cache the detector's name as all the other names are longer
   // The extra ( is because all children of this have that as the next character
@@ -482,7 +482,7 @@ int StructuredDetector::getPointInObject(V3D & /*point*/) const {
  * @param assemblyBox :: A BoundingBox object that will be overwritten
  */
 void StructuredDetector::getBoundingBox(BoundingBox &assemblyBox) const {
-  if (hasComponentInfo()) {
+  if (m_map && hasComponentInfo()) {
     assemblyBox = m_map->componentInfo().boundingBox(index(), &assemblyBox);
     return;
   }
