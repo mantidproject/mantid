@@ -196,12 +196,12 @@ QMap<QString, QVariant> Encoder::encodeReductionWorkspace(const ReductionWorkspa
     iVsLambdas.append(QVariant(QString::fromStdString(iVsLambda)));
   }
   QList<QVariant> iVsQs;
-  for (const auto &iVsQs : redWs.m_iVsQ) {
-    iVsLambdas.append(QVariant(QString::fromStdString(iVsQs)));
+  for (const auto &iVsQ : redWs.m_iVsQ) {
+    iVsQs.append(QVariant(QString::fromStdString(iVsQ)));
   }
   QList<QVariant> iVsQBinneds;
-  for (const auto &iVsQBinned : redWs.m_iVsLambda) {
-    iVsLambdas.append(QVariant(QString::fromStdString(iVsQBinned)));
+  for (const auto &iVsQBinned : redWs.m_iVsQBinned) {
+    iVsQBinneds.append(QVariant(QString::fromStdString(iVsQBinned)));
   }
 
   QMap<QString, QVariant> reductionMap;
