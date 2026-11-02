@@ -437,15 +437,9 @@ std::vector<Mantid::detid_t> InstrumentActor::getDetIDs(const std::vector<size_t
 /**
  * Get a component id of a picked component.
  */
-Mantid::Geometry::ComponentID InstrumentActor::getComponentID(size_t pickID) const {
-  auto compID = Mantid::Geometry::ComponentID();
+Mantid::Geometry::IComponent const *InstrumentActor::getComponentID(size_t pickID) const {
   const auto &compInfo = componentInfo();
-  if (pickID < compInfo.size()) {
-    const auto *comp = compInfo.componentID(pickID);
-    if (comp)
-      compID = comp->getComponentID();
-  }
-  return compID;
+  return pickID < compInfo.size() ? compInfo.componentID(pickID) : nullptr;
 }
 
 /** Retrieve the workspace index corresponding to a particular detector

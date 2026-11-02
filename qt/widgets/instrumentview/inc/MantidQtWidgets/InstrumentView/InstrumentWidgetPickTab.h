@@ -266,7 +266,7 @@ public slots:
 
 private:
   QString displayDetectorInfo(size_t index);
-  QString displayNonDetectorInfo(Mantid::Geometry::ComponentID compID);
+  QString displayNonDetectorInfo(Mantid::Geometry::IComponent const *compID);
   QString displayPeakInfo(Mantid::Geometry::IPeak *peak);
   QString displayPeakAngles(const std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> &peaks);
   QString getPeakOverlayInfo();

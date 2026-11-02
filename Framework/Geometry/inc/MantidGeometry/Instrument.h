@@ -31,6 +31,7 @@ namespace Geometry {
 class ComponentInfo;
 class DetectorInfo;
 class XMLInstrumentParameter;
+class Parameter;
 class ParameterMap;
 class ReferenceFrame;
 class InstrumentVisitor;
@@ -214,7 +215,8 @@ public:
 
   bool isMonitorViaIndex(const size_t index) const;
   size_t detectorIndex(const detid_t detID) const;
-  std::shared_ptr<ParameterMap> makeLegacyParameterMap() const;
+  /// The parameters in their legacy form, by component index, as ParameterMap::Entry
+  std::vector<std::pair<size_t, std::shared_ptr<Parameter>>> legacyParameters() const;
 
   bool isEmptyInstrument() const;
 

@@ -57,7 +57,8 @@ public:
   void test_getInstrument_populates_object() {
     auto fileBacked = createTestObject();
 
-    TS_ASSERT_EQUALS(fileBacked->constInstrumentParameters(), m_inMemoryExptInfo->constInstrumentParameters());
+    // Compared in place: TS_ASSERT_EQUALS would compare copies, which have no ComponentInfo to name components by
+    TS_ASSERT(fileBacked->constInstrumentParameters() == m_inMemoryExptInfo->constInstrumentParameters());
   }
 
   void test_instrumentParameters_const_ref_method_populate_object() {
