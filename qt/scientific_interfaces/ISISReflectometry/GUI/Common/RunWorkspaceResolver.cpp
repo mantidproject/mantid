@@ -22,12 +22,32 @@ auto members(std::string const &name) {
   return result;
 }
 
-std::string runNumber(std::string const &name) {
-  for (auto const &workspace : members(name))
-    if (workspace->run().hasProperty("run_number"))
-      if (auto value = workspace->run().getProperty("run_number")->value(); !value.empty())
-        return value;
-  return "";
+std::optional<std::pair<std::string, Mantid::API::MatrixWorkspace_sptr>>
+getFirstValidRun(std::string const &name, const std::optional<int> period,
+                 const std::optional<std::string> expectedRunNumber) {
+  for (auto const &workspace : members(name)) {
+    auto const &run = workspace->run();
+    if (!run.hasProperty("run_number"))
+      continue;
+
+    if (period) {
+      if (!run.hasProperty("current_period"))
+        continue;
+      auto const currentPeriod = parseNonNegativeInt(run.getProperty("current_period")->value());
+      if (currentPeriod != period)
+        continue;
+    }
+
+    if (auto const &value = run.getProperty("run_number")->value(); !value.empty()) {
+      if (expectedRunNumber && value != *expectedRunNumber) {
+        auto const expectedNumber = parseNonNegativeInt(*expectedRunNumber);
+        if (!expectedNumber || parseNonNegativeInt(value) != expectedNumber)
+          continue;
+      }
+      return std::pair{value, workspace};
+    }
+  }
+  return std::nullopt;
 }
 
 } // namespace
@@ -40,13 +60,12 @@ Mantid::API::MatrixWorkspace_sptr findInputWorkspace(std::vector<std::string> co
   // Completed reductions provide the authoritative run identity.
   std::string expectedRun;
   for (auto const &name : reducedWorkspaces)
-    if (expectedRun = runNumber(name); !expectedRun.empty())
+    if (auto const &validRun = getFirstValidRun(name, std::nullopt, std::nullopt); validRun) {
+      expectedRun = validRun.value().first;
       break;
-
+    }
   if (expectedRun.empty())
     return nullptr;
-
-  auto const expectedNumber = parseNonNegativeInt(expectedRun);
 
   std::vector<std::string> candidates;
   if (inputs.size() == 1)
@@ -54,25 +73,8 @@ Mantid::API::MatrixWorkspace_sptr findInputWorkspace(std::vector<std::string> co
                   "__TOF_" + inputs.front()}; // if only single run, these are valid candidates
   candidates.insert(candidates.end(), {"TOF_" + expectedRun, "__TOF_" + expectedRun, "TOF", "__TOF"});
   for (auto const &name : candidates) {
-    for (auto const &workspace : members(name)) {
-      auto const &run = workspace->run();
-      if (!run.hasProperty("run_number"))
-        continue;
-      auto const number = run.getProperty("run_number")->value();
-      if (number.empty())
-        continue;
-      if (number != expectedRun) {
-        if (!parseNonNegativeInt(number) || !expectedNumber || workspace->getRunNumber() != *expectedNumber)
-          continue;
-      }
-      try {
-        // If a period is specified, check that the workspace has the correct period metadata.
-        if (!period ||
-            (run.hasProperty("current_period") && run.getPropertyAsIntegerValue("current_period") == *period))
-          return workspace;
-      } catch (std::exception const &) {
-        // Ignore a workspace with invalid period metadata.
-      }
+    if (auto const &validRun = getFirstValidRun(name, period, expectedRun); validRun) {
+      return validRun.value().second;
     }
   }
   return nullptr;

@@ -129,6 +129,24 @@ public:
     TS_ASSERT_EQUALS(adjustedAngleCell(row, 3).contentText(), "0.625");
   }
 
+  void testSummedRunFindsMatchingMemberAmongUnrelatedRuns() {
+    auto single = addRunWorkspace("single", "12345", 0.875);
+    auto otherSum = addRunWorkspace("other_sum", "12345+99999", 0.875);
+    auto input = addRunWorkspace("summed_input", "12345+12346", 0.625);
+    addGroup("TOF", {single, otherSum, input});
+    auto row = withReductionOutput(makeRow(std::vector<std::string>{"12345", "12346"}), "12345+12346");
+    TS_ASSERT_EQUALS(findInputWorkspace(row.runNumbers(), std::nullopt, {row.reducedWorkspaceNames().iVsQBinned()}),
+                     input);
+  }
+
+  void testMissingSummedAliasDoesNotMatchUnrelatedRuns() {
+    auto single = addRunWorkspace("single", "12345", 0.875);
+    auto otherSum = addRunWorkspace("other_sum", "sampleA+sampleC", 0.875);
+    addGroup("TOF", {single, otherSum});
+    auto row = withReductionOutput(makeRow(std::vector<std::string>{"sampleA", "sampleB"}), "sampleA+sampleB");
+    TS_ASSERT(!findInputWorkspace(row.runNumbers(), std::nullopt, {row.reducedWorkspaceNames().iVsQBinned()}));
+  }
+
   void testExistingPaddedSingleInputMatchesItsNumericRunLog() {
     addRunWorkspace("TOF_0012345", "12345", 0.625);
     TS_ASSERT_EQUALS(adjustedAngleCell(withReductionOutput(makeSimpleRow("0012345")), 3).contentText(), "0.625");
