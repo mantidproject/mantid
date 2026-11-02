@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 from scipy.special import erf
 
+from plugins.algorithms.component_info_utils import resolve_component_index
 from plugins.algorithms.diffraction_utils import get_live_spectra, get_tths_and_l2s
 from plugins.algorithms.poldi_utils import _get_flux_arrays, get_instrument_settings_from_log, get_t0_parameters, get_tof_d1Ang
 
@@ -59,15 +60,6 @@ def _rotation_matrix(q: Quat) -> np.ndarray[float]:
     )
 
 
-def component_index(comp_info: ComponentInfo, path: str) -> int:
-    """Component index from a name or '/' path (block names repeat in both banks: 'NorthBank/detector-bank/reference-sphere-1/block1')."""
-    first, *rest = path.split("/")
-    idx = comp_info.indexOfAny(first)
-    for name in rest:
-        idx = next(int(c) for c in comp_info.children(idx) if comp_info.name(int(c)) == name)
-    return idx
-
-
 class PixelGeometry:
     """Pixel positions in the frame of their bank, so bank and block moves can be applied in numpy.
 
@@ -89,7 +81,7 @@ class PixelGeometry:
         self.beam_direction = beam / np.linalg.norm(beam)
         self.bank_names = list(bank_names)
         self.detector_indices = np.array([det_info.indexOf(ws.getSpectrum(i).getDetectorIDs()[0]) for i in range(ws.getNumberHistograms())])
-        bank_idx = [component_index(comp_info, bank) for bank in self.bank_names]
+        bank_idx = [resolve_component_index(bank, comp_info) for bank in self.bank_names]
         self.bank_of_spectrum = np.array(
             [next((ib for ib, b in enumerate(bank_idx) if _is_ancestor(comp_info, b, int(d))), -1) for d in self.detector_indices]
         )
@@ -603,7 +595,7 @@ def apply_geometry(
         exec_child("MoveInstrumentComponent", Workspace=ws, ComponentName=block, X=normal * nx, Y=0, Z=normal * nz, RelativePosition=True)
         # a relative rotation turns about an axis in the component's own frame: NorthBank's blocks sit under a 180 deg
         # rotation about z, so global Y is -Y there
-        axis = _rotation_matrix(comp_info.rotation(component_index(comp_info, block))).T @ [0.0, 1.0, 0.0]
+        axis = _rotation_matrix(comp_info.rotation(resolve_component_index(block, comp_info))).T @ [0.0, 1.0, 0.0]
         exec_child(
             "RotateInstrumentComponent",
             Workspace=ws,
