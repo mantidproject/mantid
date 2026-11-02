@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../../ISISReflectometry/GUI/Common/Plotter.h"
+#include "../../../ISISReflectometry/GUI/Plotting/model/PlottingModel.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ConfigService.h"
@@ -15,6 +16,7 @@
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include <QWidget>
 #include <boost/python/extract.hpp>
+#include <boost/python/import.hpp>
 #include <cxxtest/TestSuite.h>
 #include <map>
 #include <utility>
@@ -28,7 +30,39 @@ public:
 
   PlotterTest() { Mantid::API::FrameworkManager::Instance(); }
 
+  void setUp() override {
+    Mantid::PythonInterface::GlobalInterpreterLock lock;
+    boost::python::import("mantid.api").attr("FrameworkManager").attr("Instance")();
+  }
+
   void tearDown() override { closeAllFigures(); }
+
+  void testAlignmentPlotEventWorkspace() {
+    using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+    closeAllFigures();
+    LoadEventWorkspace();
+    auto model = PlottingModel{};
+    auto const outputs = model.workspacesForPlotting({{"IvsQ_31832_1", {"31832"}, "", 1}},
+                                                     PlotOutputSelection{PlotOutputType::Alignment});
+    TS_ASSERT_EQUALS(outputs.size(), 1);
+    TS_ASSERT_THROWS_NOTHING(
+        Plotter{}.plot({outputs, alignmentPlotOptions(AlignmentXAxis::DetectorId, PlotLayout::Individual)}));
+    TS_ASSERT_EQUALS(figureCount(), 1);
+  }
+
+  void testDetectorMapPlotEventWorkspace() {
+    using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+    closeAllFigures();
+    LoadEventWorkspace();
+    auto model = PlottingModel{};
+    auto const outputs = model.workspacesForPlotting({{"IvsQ_31832_1", {"31832"}, "", 1}},
+                                                     PlotOutputSelection{PlotOutputType::DetectorMap});
+    TS_ASSERT_EQUALS(outputs.size(), 1);
+    TS_ASSERT_THROWS_NOTHING(
+        Plotter{}.plot({outputs, detectorMapPlotOptions(DetectorMapXAxis::TimeOfFlight, DetectorMapYAxis::DetectorId,
+                                                        PlotLayout::Individual)}));
+    TS_ASSERT_EQUALS(figureCount(), 1);
+  }
 
   void testReflectometryPlot() {
     // Just test that it doesn't segfault when plotting as nothing is returned
@@ -313,6 +347,15 @@ public:
   }
 
 private:
+  void LoadEventWorkspace() {
+    auto load = Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadEventNexus");
+    load->initialize();
+    load->setPropertyValue("Filename", "POLREF00031832.nxs");
+    load->setPropertyValue("OutputWorkspace", "TOF");
+    load->setProperty("LoadMonitors", true);
+    load->execute();
+  }
+
   void createWorkspace(std::string const &name, std::string const &xUnit = "TOF") {
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
     alg->initialize();

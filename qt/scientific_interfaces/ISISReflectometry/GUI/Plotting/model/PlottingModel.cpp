@@ -9,6 +9,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
@@ -24,7 +25,6 @@
 #include <numeric>
 #include <optional>
 #include <stdexcept>
-#include <unordered_map>
 #include <utility>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -34,7 +34,6 @@ auto constexpr spinAsymmetryWorkspacePrefix = "__isis_refl_spin_asym_";
 auto constexpr alignmentWorkspacePrefix = "__isis_refl_align_";
 auto constexpr detectorMapWorkspacePrefix = "__isis_refl_det_map_";
 
-using IndexRegion = std::pair<int, int>;
 using WorkspaceCreator = std::vector<std::string> (*)(std::vector<PlottingWorkspace> const &,
                                                       PlotOutputSelection const &);
 
@@ -42,24 +41,6 @@ struct WorkspaceGroupInputs {
   std::string key;
   std::vector<std::string> workspaceNames;
 };
-
-const std::unordered_map<std::string, IndexRegion> instrumentDetectorIndexRegions{
-    {"INTER", {0, 0}}, {"POLREF", {4, 643}}, {"OFFSPEC", {0, 0}}, {"SURF", {0, 0}}, {"CRISP", {0, 0}},
-};
-
-IndexRegion configuredInstrumentRegion(std::unordered_map<std::string, IndexRegion> const &regions,
-                                       std::string const &instrumentName, std::string const &regionName) {
-  auto const region = regions.find(instrumentName);
-  if (region == regions.cend()) {
-    throw std::invalid_argument("Reflectometry plotting " + regionName + " region is not configured for instrument '" +
-                                instrumentName + "'.");
-  }
-  return region->second;
-}
-
-IndexRegion detectorIndexRegion(std::string const &instrumentName) {
-  return configuredInstrumentRegion(instrumentDetectorIndexRegions, instrumentName, "detector");
-}
 
 Mantid::API::IAlgorithm_sptr createAlgorithm(std::string const &name, int const version = -1) {
   auto algorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged(name, version);
@@ -81,16 +62,21 @@ Mantid::API::MatrixWorkspace_sptr executeBinaryAlgorithm(std::string const &algo
   return algorithm->getProperty("OutputWorkspace");
 }
 
-Mantid::API::MatrixWorkspace_sptr extractDetectorSpectra(Mantid::API::MatrixWorkspace_sptr const &workspace,
-                                                         std::string const &instrumentName) {
-  auto algorithm = createAlgorithm("ExtractSpectra");
+Mantid::API::MatrixWorkspace_sptr extractDetectorSpectra(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  auto algorithm = createAlgorithm("ExtractMonitors");
   algorithm->setProperty("InputWorkspace", workspace);
-  auto const [idxMin, idxMax] = detectorIndexRegion(instrumentName);
-  algorithm->setProperty("StartWorkspaceIndex", idxMin);
-  algorithm->setProperty("EndWorkspaceIndex", idxMax);
-  algorithm->setProperty("OutputWorkspace", "__NotUsed__");
+  algorithm->setProperty("DetectorWorkspace", "__NotUsed__");
   algorithm->execute();
-  return algorithm->getProperty("OutputWorkspace");
+  Mantid::API::MatrixWorkspace_sptr detectorSpectra = algorithm->getProperty("DetectorWorkspace");
+  if (!std::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(detectorSpectra)) {
+    return detectorSpectra;
+  }
+
+  auto conversion = createAlgorithm("ConvertToMatrixWorkspace");
+  conversion->setProperty("InputWorkspace", detectorSpectra);
+  conversion->setProperty("OutputWorkspace", "__NotUsed__");
+  conversion->execute();
+  return conversion->getProperty("OutputWorkspace");
 }
 
 Mantid::API::MatrixWorkspace_sptr convertToWavelength(Mantid::API::MatrixWorkspace_sptr const &workspace) {
@@ -384,8 +370,7 @@ std::string detectorMapWorkspaceName(PlottingWorkspace const &workspace, Detecto
   return std::string{detectorMapWorkspacePrefix} + workspace.workspaceName + detectorMapAxisSuffix(xAxis, yAxis);
 }
 
-std::string createAlignmentWorkspace(PlottingWorkspace const &workspace, AlignmentXAxis const xAxis,
-                                     std::string const &instrumentName) {
+std::string createAlignmentWorkspace(PlottingWorkspace const &workspace, AlignmentXAxis const xAxis) {
   auto &ads = Mantid::API::AnalysisDataService::Instance();
   auto const rawWorkspace = rawTOFWorkspaceFor(workspace);
   if (!rawWorkspace) {
@@ -401,7 +386,7 @@ std::string createAlignmentWorkspace(PlottingWorkspace const &workspace, Alignme
   auto const fittedPeakWorkspace = outputWorkspace + alignmentFittedPeakWorkspaceSuffix;
   auto const peakCentreWorkspace = outputWorkspace + alignmentPeakCentreWorkspaceSuffix;
 
-  auto detectorSpectraWorkspace = extractDetectorSpectra(rawWorkspace, instrumentName);
+  auto detectorSpectraWorkspace = extractDetectorSpectra(rawWorkspace);
   auto peakFit = fitSpecularPeak(detectorSpectraWorkspace);
   auto fittedWorkspace = peakFit.fitWorkspace ? extractSpectrum(peakFit.fitWorkspace, 1) : nullptr;
   auto const peakCentre = xValueForFractionalWorkspaceIndex(*detectorSpectraWorkspace, peakFit.peakCentre, xAxis);
@@ -426,10 +411,10 @@ std::string createAlignmentWorkspace(PlottingWorkspace const &workspace, Alignme
 }
 
 std::vector<std::string> createAlignmentWorkspaces(std::vector<PlottingWorkspace> const &workspaces,
-                                                   AlignmentXAxis const xAxis, std::string const &instrumentName) {
+                                                   AlignmentXAxis const xAxis) {
   auto outputWorkspaces = std::vector<std::string>{};
   for (auto const &workspace : workspaces) {
-    auto outputWorkspace = createAlignmentWorkspace(workspace, xAxis, instrumentName);
+    auto outputWorkspace = createAlignmentWorkspace(workspace, xAxis);
     if (!outputWorkspace.empty()) {
       outputWorkspaces.emplace_back(std::move(outputWorkspace));
     }
@@ -438,7 +423,7 @@ std::vector<std::string> createAlignmentWorkspaces(std::vector<PlottingWorkspace
 }
 
 std::string createDetectorMapWorkspace(PlottingWorkspace const &workspace, DetectorMapXAxis const xAxis,
-                                       DetectorMapYAxis const yAxis, std::string const &instrumentName) {
+                                       DetectorMapYAxis const yAxis) {
   auto &ads = Mantid::API::AnalysisDataService::Instance();
   auto const rawWorkspace = rawTOFWorkspaceFor(workspace);
   if (!rawWorkspace) {
@@ -450,7 +435,7 @@ std::string createDetectorMapWorkspace(PlottingWorkspace const &workspace, Detec
     return outputWorkspace;
   }
 
-  auto detectorMapWorkspace = extractDetectorSpectra(rawWorkspace, instrumentName);
+  auto detectorMapWorkspace = extractDetectorSpectra(rawWorkspace);
   if (xAxis == DetectorMapXAxis::Lambda) {
     detectorMapWorkspace = convertToWavelength(detectorMapWorkspace);
   }
@@ -461,11 +446,10 @@ std::string createDetectorMapWorkspace(PlottingWorkspace const &workspace, Detec
 }
 
 std::vector<std::string> createDetectorMapWorkspaces(std::vector<PlottingWorkspace> const &workspaces,
-                                                     DetectorMapXAxis const xAxis, DetectorMapYAxis const yAxis,
-                                                     std::string const &instrumentName) {
+                                                     DetectorMapXAxis const xAxis, DetectorMapYAxis const yAxis) {
   auto outputWorkspaces = std::vector<std::string>{};
   for (auto const &workspace : workspaces) {
-    auto outputWorkspace = createDetectorMapWorkspace(workspace, xAxis, yAxis, instrumentName);
+    auto outputWorkspace = createDetectorMapWorkspace(workspace, xAxis, yAxis);
     if (!outputWorkspace.empty()) {
       outputWorkspaces.emplace_back(std::move(outputWorkspace));
     }
@@ -485,14 +469,13 @@ std::vector<std::string> spinAsymmetryWorkspaces(std::vector<PlottingWorkspace> 
 
 std::vector<std::string> alignmentWorkspaces(std::vector<PlottingWorkspace> const &selectedPlottingWorkspaces,
                                              PlotOutputSelection const &outputSelection) {
-  return createAlignmentWorkspaces(selectedPlottingWorkspaces, outputSelection.alignmentXAxis,
-                                   outputSelection.instrumentName);
+  return createAlignmentWorkspaces(selectedPlottingWorkspaces, outputSelection.alignmentXAxis);
 }
 
 std::vector<std::string> detectorMapWorkspaces(std::vector<PlottingWorkspace> const &selectedPlottingWorkspaces,
                                                PlotOutputSelection const &outputSelection) {
   return createDetectorMapWorkspaces(selectedPlottingWorkspaces, outputSelection.detectorMapXAxis,
-                                     outputSelection.detectorMapYAxis, outputSelection.instrumentName);
+                                     outputSelection.detectorMapYAxis);
 }
 
 WorkspaceCreator workspaceCreatorFor(PlotOutputType const outputType) {

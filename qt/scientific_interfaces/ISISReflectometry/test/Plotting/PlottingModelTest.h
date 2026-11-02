@@ -14,10 +14,14 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/V3D.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 
+#include <boost/python/import.hpp>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <limits>
@@ -27,6 +31,11 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
 class PlottingModelTest : public CxxTest::TestSuite {
 public:
+  void setUp() override {
+    Mantid::PythonInterface::GlobalInterpreterLock gil;
+    boost::python::import("mantid.simpleapi");
+  }
+
   void tearDown() override { Mantid::API::AnalysisDataService::Instance().clear(); }
 
   void testReturnsSelectedWorkspacesForNonSpinAsymmetryPlotOutputTypes() {
@@ -318,18 +327,6 @@ public:
     TS_ASSERT_EQUALS(firstWorkspace.get(), secondWorkspace.get());
   }
 
-  void testAlignmentThrowsForUnsupportedInstrument() {
-    createConstantWorkspace("IvsQ_12345", -100.0);
-    createAlignmentInputWorkspace("raw_input_name", "12345", alignmentYValues(100, 7.0));
-    createTOFGroup({"raw_input_name"});
-    auto model = PlottingModel{};
-    auto outputSelection = PlotOutputSelection{PlotOutputType::Alignment};
-    outputSelection.instrumentName = "UNKNOWN";
-
-    TS_ASSERT_THROWS(model.workspacesForPlotting(plottingWorkspaces({"IvsQ_12345"}), outputSelection),
-                     std::invalid_argument const &);
-  }
-
   void testDetectorMapCreatesPlotWorkspaceFromSelectedWorkspacesRawTOFWorkspace() {
     createConstantWorkspace("IvsQ_12345", -100.0);
     createDetectorMapInputWorkspace("raw_input_name", "12345", 10.0);
@@ -443,18 +440,6 @@ public:
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist(expected[1]));
   }
 
-  void testDetectorMapThrowsForUnsupportedInstrument() {
-    createConstantWorkspace("IvsQ_12345", -100.0);
-    createDetectorMapInputWorkspace("raw_input_name", "12345", 10.0);
-    createTOFGroup({"raw_input_name"});
-    auto model = PlottingModel{};
-    auto outputSelection = detectorMapOutputSelection();
-    outputSelection.instrumentName = "UNKNOWN";
-
-    TS_ASSERT_THROWS(model.workspacesForPlotting(plottingWorkspaces({"IvsQ_12345"}), outputSelection),
-                     std::invalid_argument const &);
-  }
-
 private:
   PlotOutputSelection alignmentOutputSelection() {
     auto outputSelection = PlotOutputSelection{PlotOutputType::Alignment};
@@ -517,6 +502,7 @@ private:
       workspace->mutableE(workspaceIndex)[0] = 1.0;
       workspace->getSpectrum(workspaceIndex).addDetectorID(static_cast<int>(100 + workspaceIndex));
     }
+    addMonitors(workspace);
     Mantid::API::AnalysisDataService::Instance().addOrReplace(name, workspace);
   }
 
@@ -533,7 +519,20 @@ private:
         workspace->mutableE(workspaceIndex)[bin] = 1.0;
       }
     }
+    addMonitors(workspace);
     Mantid::API::AnalysisDataService::Instance().addOrReplace(name, workspace);
+  }
+
+  void addMonitors(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+    auto instrument =
+        std::shared_ptr<Mantid::Geometry::Instrument>(workspace->getInstrument()->baseInstrument()->clone());
+    for (int index = 0; index < 4; ++index) {
+      auto const detectorId = -index - 1;
+      InstrumentCreationHelper::addMonitor(instrument, Mantid::Kernel::V3D(0.0, 0.0, -1.0), detectorId,
+                                           "monitor" + std::to_string(index));
+      workspace->getSpectrum(index).setDetectorID(detectorId);
+    }
+    workspace->setInstrument(instrument);
   }
 
   void setSpectrumDetectorYPosition(Mantid::API::MatrixWorkspace_sptr const &workspace, size_t const workspaceIndex,
