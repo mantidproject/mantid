@@ -18,6 +18,7 @@ Guides
    GettingStarted/GettingStarted
    Packaging
    Architecture
+   InstrumentGeometry
    BuildingOnOSX
    BuildingWithCMake
    LocalMantidBuildWithPixi
@@ -40,6 +41,9 @@ Guides
 
 :doc:`Architecture`
    Describes the architecture of the mantid libraries and applications.
+
+:doc:`InstrumentGeometry`
+   How instrument geometry is built and stored, including the Instrument 2.0 layers.
 
 :doc:`LocalMantidBuildWithPixi`
    How to set up a pixi environment to use a local Mantid build instead of conda packages in other projects.
