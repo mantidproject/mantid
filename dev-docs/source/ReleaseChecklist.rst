@@ -487,7 +487,8 @@ have been fixed. Then:
 * Ensure that all changes, including release notes, have been merged into the ``release-next`` branch.
 * Make sure the ``release-next`` branch is fully merged into ``main``. If required, manually run the `GitHub workflow
   <https://github.com/mantidproject/mantid/actions/workflows/automerge.yml/>`__ using the ``release-next`` branch to
-  merge the changes.
+  merge the changes. If needed see the document on :ref:`Fixing a merge conflict between main and a protected branch <FixProtectedBranchMergeConflict>`.
+
 
 **Create the Release Candidates For Smoke Testing**
 
@@ -557,8 +558,8 @@ Anaconda channel.
 *  Publish the GitHub release. This will publish the tag required to generate the DOI.
 *  Remove the smoke testing release from the GitHub releases page (the one tagged with ``vX.Y.ZrcN``).
 *  Change the labels for the release candidates on our `Anaconda site <https://anaconda.org/mantid/mantid/files>`__
-   from ``draft-vX.Y.Z`` to ``main``. You may need to ask a member of the ISIS core or DevOps team to do this.
-*  Remove the smoke testing release candidates from our Anaconda channel (those with the ``vX.Y.ZrcN`` label).
+   from ``draft-vX.Y.Z`` to ``main``. You may need to ask a member of the ISIS core or DevOps team to do this. This needs to be done for the packages ``mantid``, ``mantidqt``, ``mantidworkbench`` and ``mantiddocs``.
+*  For the same conda packages remove the smoke testing release candidates from our Anaconda channel (those with the ``vX.Y.ZrcN`` label).
 *  Update the `download page <https://download.mantidproject.org>`__ by running the `Update latest release links
    <https://github.com/mantidproject/www/actions/workflows/update-latest-release.yml>`__ workflow in the
    `mantidproject/www repository <https://github.com/mantidproject/www>`__.
@@ -606,11 +607,22 @@ This action runs on a push to the ``main`` branch of the repository.
 
 To do this:
 
-* On a clone of the mantid repository, check out the commit tagged as the relevant release number: ``git checkout tags/<vX.Y.Z> -b <new branch name>``.
-* On this branch, build the ``docs-html`` target (this target is produced by ``CMake``).
+* Fetch the docs from the mantiddocs package, make sure that it is the up to date version
+
+.. code-block:: bash
+
+    mamba create -n mantiddocs -c mantid mantiddocs
+    mamba activate mantiddocs
+
+
 * Clone the repository: https://github.com/mantidproject/docs-versioned.
 * Remaining on the ``main`` branch, create a directory for the relevant release in the form ``vX.Y.Z``.
-* Copy the built documentation into this new directory. The built documentation will be in your mantid build directory at ``<build directory>/docs/html``.
+* Copy the documentation from the ``mantiddocs`` environment to the versioned directory, e.g.
+
+.. code-block:: bash
+
+    cp -a ${CONDA_PREFIX}/share/doc/html/* v7.0.0/
+
 * Stage the newly created directory and commit it to your branch.
 * After double-checking that these instructions have been followed correctly, push your branch to the main repository to deploy.
 
