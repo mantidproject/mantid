@@ -343,6 +343,7 @@ set(TEST_FILES
     IMDDimensionTest.h
     IndexingUtilsTest.h
     InstrumentDefinitionParserTest.h
+    InstrumentMetadataTest.h
     InstrumentRayTracerTest.h
     InstrumentTest.h
     InstrumentVisitorTest.h
