@@ -56,6 +56,7 @@ class PoldiCalibrationUtilsTest(unittest.TestCase):
     def setUpClass(cls):
         cls.ws = poldi_workspace(5000, "poldi")
         cls.geom = PixelGeometry(cls.ws, BANKS)
+        cls.dense_geom = PixelGeometry(poldi_workspace(5000, "poldi_dense", live_every=8), BANKS)  # several live pixels per block
 
     @classmethod
     def tearDownClass(cls):
@@ -135,9 +136,35 @@ class PoldiCalibrationUtilsTest(unittest.TestCase):
         numeric = [(cost(fit.params + h * e) - cost(fit.params - h * e)) / (2 * h) for h, e in zip(steps, np.eye(steps.size))]
         assert_allclose(gradient, numeric, rtol=1e-5)
 
+    def test_recovers_bank_moves_and_linear_timing_from_noisy_counts(self):
+        geom, speeds = self.dense_geom, [4000, 6000]
+        cycle_times = [60e6 / (4 * speed) for speed in speeds]
+        timing = TimingModel("Linear", cycle_times, speeds, 0.05824, -12.68)
+        true_banks = geom.initial_bank_params + [0.002, -0.003, 0.2, -0.002, 0.003, -0.15]
+        true_timing = timing.initial_params + [1e-3, 2.0]
+        rng = np.random.default_rng(7)
+        datasets = []
+        for speed, cycle_time, tz in zip(speeds, cycle_times, timing.params_to_tz @ true_timing):
+            y = simulated_counts(geom, self._data(speed), true_banks, tz, rng)
+            datasets.append(FoldedData(rng.poisson(y).astype(float), cycle_time))
+
+        fit = CalibrationFit(geom, datasets, RigidBanks(geom), SI_D, timing).fit()
+
+        truth = np.concatenate([true_banks, true_timing])
+        np.testing.assert_array_less(np.abs(fit.params[: truth.size] - truth), 4 * fit.errors[: truth.size])
+
+    def test_calibration_table_rows(self):
+        linear = TimingModel("Linear", [3000.0, 2000.0], [5000, 7500], 0.05, -12.0)
+        per_speed = TimingModel("PerChopperSpeed", [3000.0, 2000.0, 3000.0], [5000, 7500, 5000], 0.05, -12.0)
+
+        self.assertEqual(linear.calibration_table_rows(np.array([0.06, -11.0])), [("t0", 0.06, 0.0), ("t0_const", -11.0, 0.0)])
+        self.assertEqual(
+            per_speed.calibration_table_rows(np.array([140.0, 90.0])),
+            [("t0", 0.0, 0.0), ("t0_const", 140.0, 5000), ("t0_const", 90.0, 7500)],
+        )
+
     def test_recovers_block_moves_with_banks_fixed(self):
-        ws = poldi_workspace(5000, "poldi_dense", live_every=8)  # several live pixels per block
-        geom = PixelGeometry(ws, BANKS)
+        geom = self.dense_geom
         q_blocks = np.random.default_rng(6).uniform([-1e-3, -0.5], [1e-3, 0.5], (len(geom.block_names), 2)).ravel()
         c, sin_t = geom.difc_and_sin_theta(geom.initial_bank_params, q_blocks)
         m = model_counts(geom, self._data(5000), c, sin_t, 160.0, TRUTH["kappa"], TRUTH["srel"], TRUTH["A"], SI_D)
