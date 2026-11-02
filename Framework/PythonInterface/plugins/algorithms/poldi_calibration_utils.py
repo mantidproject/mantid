@@ -77,6 +77,7 @@ class PixelGeometry:
         self.chopper_sample_distance = spec_info.l1() - l1_chop
         self.initial_difc = get_tof_d1Ang(ws, l2s, l1_chop, self.live_spectra)
         self.flux_wavelengths, self.flux = _get_flux_arrays(ws, *LAMBDA_RANGE, n_points=500)
+        self.flux_slopes = np.diff(self.flux) / np.diff(self.flux_wavelengths)  # dflux/dlambda on each table segment
         self.sample_position = np.array(comp_info.samplePosition())
         beam = self.sample_position - np.array(comp_info.sourcePosition())
         self.beam_direction = beam / np.linalg.norm(beam)
@@ -149,7 +150,7 @@ class PixelGeometry:
 
 
 class RigidBanks:
-    """Geometry parameters (x, z, roty) per bank, mapped to (c, sin_t, dc/dq) for the fit."""
+    """Geometry parameters (x, z, roty) per bank, mapped to (c, sin_t) and their derivatives for the fit."""
 
     BANK_FINITE_DIFF_STEPS = (1e-5, 1e-5, 1e-4)  # m, m, deg
 
@@ -160,15 +161,16 @@ class RigidBanks:
         self.finite_diff_steps = np.tile(self.BANK_FINITE_DIFF_STEPS, len(geometry.bank_names))
 
     def difc_and_derivatives(self, q: np.ndarray[float]) -> tuple[np.ndarray[float], np.ndarray[float], np.ndarray[float]]:
+        """c and sin_t of every spectrum, and d(c, sin_t)/dq (nspec, 2, nq) by central differences."""
         c, sin_t = self.geometry.difc_and_sin_theta(*self.split_bank_and_block_params(q))
-        dc_dq = np.empty((c.size, q.size))
+        dpixel_dq = np.empty((c.size, 2, q.size))
         for a, step in enumerate(self.finite_diff_steps):
             dq = np.zeros(q.size)
             dq[a] = step
-            c_plus = self.geometry.difc_and_sin_theta(*self.split_bank_and_block_params(q + dq))[0]
-            c_minus = self.geometry.difc_and_sin_theta(*self.split_bank_and_block_params(q - dq))[0]
-            dc_dq[:, a] = (c_plus - c_minus) / (2 * step)
-        return c, sin_t, dc_dq
+            plus = np.array(self.geometry.difc_and_sin_theta(*self.split_bank_and_block_params(q + dq)))  # (2, nspec)
+            minus = np.array(self.geometry.difc_and_sin_theta(*self.split_bank_and_block_params(q - dq)))
+            dpixel_dq[:, :, a] = ((plus - minus) / (2 * step)).T
+        return c, sin_t, dpixel_dq
 
     def split_bank_and_block_params(self, q: np.ndarray[float]) -> tuple[np.ndarray[float], np.ndarray[float] | None]:
         return q, None
@@ -242,8 +244,8 @@ def model_counts(
     deriv: bool = False,
     nsig: float = 5.0,
 ) -> np.ndarray[float] | tuple[np.ndarray[float], ...]:
-    """Predicted counts m (nspec, nbins). With deriv, also dm/dc (nspec, nbins), dm/dtz, dm/dkappa, dm/dsrel and
-    dm/dA (K, nspec, nbins).
+    """Predicted counts m (nspec, nbins). With deriv, also dm/dc (nspec, nbins), dm/dsin_t (nspec, nbins), dm/dtz,
+    dm/dkappa, dm/dsrel and dm/dA (K, nspec, nbins).
 
     c and sin_t are per spectrum, A and d_hkl per reflection. In the shapes below, n is the number of pixels a reflection
     reaches, S the number of chopper slits and W the number of bins evaluated around each peak."""
@@ -254,14 +256,15 @@ def model_counts(
     live = np.flatnonzero(geom.live_spectra)  # spectrum indices of the unmasked pixels
     m = np.zeros(n_flat)  # predicted counts
     if deriv:
-        # c_i only affects spectrum i, so dm/dc needs one value per (spectrum, bin), like m
-        dm_dc, dm_dtz, dm_dkappa, dm_dsrel = (np.zeros(n_flat) for _ in range(4))
+        # c_i and sin_t_i only affect spectrum i, so dm/dc and dm/dsin_t need one value per (spectrum, bin), like m
+        dm_dc, dm_dsin, dm_dtz, dm_dkappa, dm_dsrel = (np.zeros(n_flat) for _ in range(5))
         dm_dA = np.zeros((d_hkl.size, n_flat))
     sig_chopper = kappa * T  # chopper-opening part of the peak width, the same for every pixel
     for k, d_k in enumerate(d_hkl):
         # phi: incident flux at the wavelength each live pixel sees reflection k at, lambda = 2 d_k sin(theta_i) by
         # Bragg's law; zero outside the flux table
-        phi = np.interp(2.0 * d_k * sin_t[live], geom.flux_wavelengths, geom.flux, left=0.0, right=0.0)
+        wavelengths = 2.0 * d_k * sin_t[live]
+        phi = np.interp(wavelengths, geom.flux_wavelengths, geom.flux, left=0.0, right=0.0)
         reached = phi > 0
         if not reached.any():
             continue
@@ -296,6 +299,9 @@ def model_counts(
             dm_dtz += _sum_into_bins(flat_bins, peak_area * dG_dcentre, n_flat)  # dcentre/dtz = 1
             # c both moves the peak (dcentre/dc = d_k) and widens it
             dm_dc += _sum_into_bins(flat_bins, peak_area * (dG_dcentre * d_k + dG_dsig * dsig_dc), n_flat)
+            # sin_t sets the wavelength the pixel sees the reflection at, and so its flux: dphi/dsin_t = 2 d_k dphi/dlambda
+            segment = np.maximum(np.searchsorted(geom.flux_wavelengths, wavelengths[reached]) - 1, 0)
+            dm_dsin += _sum_into_bins(flat_bins, (A[k] * 2.0 * d_k * geom.flux_slopes[segment])[:, None, None] * G, n_flat)
             # the width parameters act only through sig
             dm_dsrel += _sum_into_bins(flat_bins, peak_area * dG_dsig * dsig_dsrel, n_flat)
             dm_dkappa += _sum_into_bins(flat_bins, peak_area * dG_dsig * dsig_dkappa, n_flat)
@@ -303,7 +309,7 @@ def model_counts(
     if not deriv:
         return m.reshape(shape)
     # kappa before srel, the order CalibrationFit._projected_jacobian takes them in
-    return (*(v.reshape(shape) for v in (m, dm_dc, dm_dtz, dm_dkappa, dm_dsrel)), dm_dA.reshape((d_hkl.size, *shape)))
+    return (*(v.reshape(shape) for v in (m, dm_dc, dm_dsin, dm_dtz, dm_dkappa, dm_dsrel)), dm_dA.reshape((d_hkl.size, *shape)))
 
 
 def scale_bg(y: np.ndarray[float], m: np.ndarray[float], w: np.ndarray[float]) -> tuple[np.ndarray[float], np.ndarray[float]]:
@@ -378,42 +384,44 @@ def project_out(derivative: np.ndarray[float], model: np.ndarray[float], weights
 class NormalEquationSums:
     """Running sums over datasets of the Gauss-Newton normal matrix J^T J and gradient J^T r.
 
-    The geometry q reaches the counts only through each pixel's DIFC c_i, and c_i only affects spectrum i. So the
-    Jacobian columns for c are stored compactly as Jc (nspec, nbins), row i being the only nonzero part of c_i's column,
-    and the sums involving them are kept per pixel. `assemble` converts those to q once, by the chain rule through dc/dq.
-    The other parameters (timing, kappa, sigma_rel, intensities) affect every spectrum, so their columns J_other are
-    dense."""
+    The geometry q reaches the counts only through each pixel's DIFC c_i and sin(theta_i), which only affect spectrum
+    i. So the Jacobian columns for (c, sin_t) are stored compactly as J_pixel (2, nspec, nbins), row i being the only
+    nonzero part of pixel i's columns, and the sums involving them are kept per pixel as small blocks. `assemble`
+    converts those to q once, by the chain rule through d(c, sin_t)/dq. The other parameters (timing, kappa,
+    sigma_rel, intensities) affect every spectrum, so their columns J_other are dense."""
 
     def __init__(self, n_pixels: int, n_other: int):
-        self.pixel_diagonal = np.zeros(n_pixels)  # Jc^T Jc, diagonal as no two pixels' columns share a row
-        self.pixel_other = np.zeros((n_pixels, n_other))  # Jc^T J_other
+        self.pixel_pixel = np.zeros((n_pixels, 2, 2))  # J_pixel^T J_pixel, block diagonal as no two pixels' columns share a row
+        self.pixel_other = np.zeros((n_pixels, 2, n_other))  # J_pixel^T J_other
         self.other_other = np.zeros((n_other, n_other))  # J_other^T J_other
-        self.pixel_gradient = np.zeros(n_pixels)  # Jc^T r
+        self.pixel_gradient = np.zeros((n_pixels, 2))  # J_pixel^T r
         self.other_gradient = np.zeros(n_other)  # J_other^T r
 
-    def add(self, Jc: np.ndarray[float], J_other: np.ndarray[float], r: np.ndarray[float]) -> None:
-        """Add one dataset's contribution: Jc and r are (nspec, nbins), J_other (n_other, nspec, nbins)."""
-        self.pixel_diagonal += np.sum(Jc**2, axis=1)
-        self.pixel_other += np.sum(J_other * Jc, axis=2).T
-        self.pixel_gradient += np.sum(Jc * r, axis=1)
+    def add(self, J_pixel: np.ndarray[float], J_other: np.ndarray[float], r: np.ndarray[float]) -> None:
+        """Add one dataset's contribution: J_pixel is (2, nspec, nbins), r (nspec, nbins), J_other (n_other, nspec, nbins)."""
+        # indices: i pixel, b bin, u and v the pixel's (c, sin_t), o the other parameters
+        self.pixel_pixel += np.einsum("uib,vib->iuv", J_pixel, J_pixel)
+        self.pixel_other += np.einsum("uib,oib->iuo", J_pixel, J_other)
+        self.pixel_gradient += np.einsum("uib,ib->iu", J_pixel, r)
         J_other_flat = J_other.reshape(len(J_other), -1)
         self.other_other += J_other_flat @ J_other_flat.T
         self.other_gradient += J_other_flat @ r.ravel()
 
-    def assemble(self, dc_dq: np.ndarray[float]) -> tuple[np.ndarray[float], np.ndarray[float]]:
-        """Normal matrix and gradient over (q, other parameters), with dc_dq (nspec, nq):
+    def assemble(self, dpixel_dq: np.ndarray[float]) -> tuple[np.ndarray[float], np.ndarray[float]]:
+        """Normal matrix and gradient over (q, other parameters), with dpixel_dq = d(c, sin_t)/dq (nspec, 2, nq), summed
+        over pixels:
 
-                  q                                       other
-        q      [  dc_dq^T diag(pixel_diagonal) dc_dq      dc_dq^T pixel_other  ]
-        other  [  (transpose)                             other_other          ]
+                  q                                             other
+        q      [  dpixel_dq^T pixel_pixel dpixel_dq             dpixel_dq^T pixel_other  ]
+        other  [  (transpose)                                   other_other              ]
         """
-        nq = dc_dq.shape[1]
+        nq = dpixel_dq.shape[2]
         normal = np.zeros((nq + self.other_gradient.size,) * 2)
-        normal[:nq, :nq] = dc_dq.T @ (self.pixel_diagonal[:, None] * dc_dq)
-        normal[:nq, nq:] = dc_dq.T @ self.pixel_other
+        normal[:nq, :nq] = np.einsum("iuq,iuv,ivp->qp", dpixel_dq, self.pixel_pixel, dpixel_dq, optimize=True)
+        normal[:nq, nq:] = np.einsum("iuq,iuo->qo", dpixel_dq, self.pixel_other)
         normal[nq:, :nq] = normal[:nq, nq:].T
         normal[nq:, nq:] = self.other_other
-        return normal, np.concatenate([dc_dq.T @ self.pixel_gradient, self.other_gradient])
+        return normal, np.concatenate([np.einsum("iuq,iu->q", dpixel_dq, self.pixel_gradient), self.other_gradient])
 
 
 class CalibrationFit:
@@ -512,8 +520,8 @@ class CalibrationFit:
         """Cost as evaluate_cost, with the Gauss-Newton normal matrix J^T J (approximating the Hessian) and gradient
         J^T r over all of x. Also keeps the residuals at x, for the reduced chi-squared."""
         q, x_tz, kappa, srel, A = self.split_params(x)
-        # the geometry acts on the counts only through each pixel's DIFC c, so its derivatives come in through dc_dq
-        c, sin_t, dc_dq = self.geometry_model.difc_and_derivatives(q)
+        # the geometry acts on the counts only through each pixel's c and sin_t (see NormalEquationSums)
+        c, sin_t, dpixel_dq = self.geometry_model.difc_and_derivatives(q)
         sums = NormalEquationSums(c.size, x.size - self.n_geometry_params)
         self.residuals = []
         for j, (ds, tz) in enumerate(zip(self.datasets, self.timing_model.params_to_tz @ x_tz)):
@@ -522,7 +530,7 @@ class CalibrationFit:
             self.residuals.append(r)
             sums.add(*self._projected_jacobian(j, ds, m, scale, *dm_dparams), r)
         cost = sum(0.5 * np.sum(r**2) for r in self.residuals)
-        return cost, *sums.assemble(dc_dq)
+        return cost, *sums.assemble(dpixel_dq)
 
     def _projected_jacobian(
         self,
@@ -531,14 +539,15 @@ class CalibrationFit:
         m: np.ndarray[float],
         scale: np.ndarray[float],
         dm_dc: np.ndarray[float],
+        dm_dsin: np.ndarray[float],
         dm_dtz: np.ndarray[float],
         dm_dkappa: np.ndarray[float],
         dm_dsrel: np.ndarray[float],
         dm_dA: np.ndarray[float],
     ) -> tuple[np.ndarray[float], np.ndarray[float]]:
-        """Jacobian dr/dparameter for dataset j: Jc (nspec, nbins), the compact columns for each pixel's c (see
-        NormalEquationSums), and J_other (n_other, nspec, nbins) for the timing parameters, kappa, sigma_rel and the
-        intensities, in the order of x."""
+        """Jacobian dr/dparameter for dataset j: J_pixel (2, nspec, nbins), the compact columns for each pixel's c and
+        sin_t (see NormalEquationSums), and J_other (n_other, nspec, nbins) for the timing parameters, kappa, sigma_rel
+        and the intensities, in the order of x."""
 
         def project(dm):
             # r = w (y - s m - b), so dr = -s w dm, less the part a re-fitted s and b would cancel (see project_out)
@@ -548,7 +557,7 @@ class CalibrationFit:
         # dataset j's tz = params_to_tz[j] @ timing parameters, so each timing column is dr/dtz times its entry
         timing_cols = [J_tz * self.timing_model.params_to_tz[j, a] for a in range(self.n_timing_params)]
         J_other = np.stack(timing_cols + [project(dm_dkappa), project(dm_dsrel)] + [project(dA) for dA in dm_dA])
-        return project(dm_dc), J_other
+        return np.stack([project(dm_dc), project(dm_dsin)]), J_other
 
     def fit(self, max_iter: int = 50, tol: float = 1e-9, step_tol: float = 1e-6, lam: float = 1e-3) -> CalibrationFit:
         cost, normal, grad = self.evaluate_cost_and_derivatives(self.params)

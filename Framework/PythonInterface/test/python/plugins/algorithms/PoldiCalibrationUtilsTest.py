@@ -104,11 +104,12 @@ class PoldiCalibrationUtilsTest(unittest.TestCase):
 
         def model(**changes):
             kw = {**args, **changes}
-            return model_counts(self.geom, data, kw.pop("c", c), sin_t, d_hkl=SI_D, **kw)
+            return model_counts(self.geom, data, kw.pop("c", c), kw.pop("sin_t", sin_t), d_hkl=SI_D, **kw)
 
-        _, dm_dc, dm_dtz, dm_dka, dm_dsr, dm_dA = model_counts(self.geom, data, c, sin_t, d_hkl=SI_D, deriv=True, **args)
+        _, dm_dc, dm_dsin, dm_dtz, dm_dka, dm_dsr, dm_dA = model_counts(self.geom, data, c, sin_t, d_hkl=SI_D, deriv=True, **args)
         for name, analytic, value, step in (
-            ("c", dm_dc, c, 1e-3),  # each pixel's counts depend only on its own c
+            ("c", dm_dc, c, 1e-3),  # each pixel's counts depend only on its own c and sin_t
+            ("sin_t", dm_dsin, sin_t, 1e-6),
             ("tz", dm_dtz, args["tz"], 1e-3),
             ("kappa", dm_dka, args["kappa"], 1e-7),
             ("srel", dm_dsr, args["srel"], 1e-7),
@@ -118,6 +119,20 @@ class PoldiCalibrationUtilsTest(unittest.TestCase):
                 assert_allclose(analytic, numeric, atol=1e-4 * np.abs(numeric).max())
         for k in (0, SI_D.size - 1):  # the model is linear in the intensities
             assert_allclose(dm_dA[k], model(A=np.eye(SI_D.size)[k]), atol=1e-12)
+
+    def test_gradient_matches_finite_differences_of_cost(self):
+        # Poisson noise makes r != 0, so a Jacobian missing a term gives a wrong gradient J^T r
+        rng = np.random.default_rng(8)
+        y = rng.poisson(simulated_counts(self.geom, self._data(5000), self.geom.initial_bank_params, 160.0, rng)).astype(float)
+        modules = BankModules(self.geom, self.geom.initial_bank_params)
+        fit = CalibrationFit(self.geom, [FoldedData(y, 3000.0)], modules, SI_D, TIMING)
+        steps = np.concatenate([modules.finite_diff_steps, np.full(fit.params.size - fit.n_geometry_params, 1e-6)])
+
+        gradient = fit.evaluate_cost_and_derivatives(fit.params)[2]
+
+        cost = fit.evaluate_cost
+        numeric = [(cost(fit.params + h * e) - cost(fit.params - h * e)) / (2 * h) for h, e in zip(steps, np.eye(steps.size))]
+        assert_allclose(gradient, numeric, rtol=1e-5)
 
     def test_recovers_block_moves_with_banks_fixed(self):
         ws = poldi_workspace(5000, "poldi_dense", live_every=8)  # several live pixels per block
