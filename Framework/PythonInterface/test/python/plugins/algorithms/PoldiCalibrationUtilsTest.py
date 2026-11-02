@@ -87,6 +87,14 @@ class PoldiCalibrationUtilsTest(unittest.TestCase):
 
         assert_allclose(sin_t[live], np.sin(tths[live] / 2), rtol=1e-12)
 
+    def test_blocks_without_live_pixels_are_not_refined(self):
+        ws = CloneWorkspace(self.ws, OutputWorkspace="block_masked")
+        MaskDetectors(ws, WorkspaceIndexList=np.flatnonzero(self.geom.block_of_spectrum == 0).tolist())
+
+        geom = PixelGeometry(ws, BANKS)
+
+        self.assertEqual(geom.block_names, self.geom.block_names[1:])
+
     def test_analytic_derivatives_match_finite_differences(self):
         data = self._data(5000)
         c, sin_t = self.geom.difc_and_sin_theta(self.geom.initial_bank_params)

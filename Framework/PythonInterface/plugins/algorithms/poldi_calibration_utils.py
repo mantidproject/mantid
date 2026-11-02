@@ -96,8 +96,10 @@ class PixelGeometry:
             sel = self.bank_of_spectrum == ib
             rel = self.initial_positions[sel] - np.array(comp_info.position(b))
             self.positions_in_bank[sel] = rel @ rot_y(self.initial_bank_params[3 * ib + 2])  # R^T rel, row-wise
-        # detector blocks (modules) of the refined banks: each pixel's parent component
-        parents = [comp_info.parent(int(d)) if b >= 0 else -1 for d, b in zip(self.detector_indices, self.bank_of_spectrum)]
+        # detector blocks (modules) holding live pixels of the refined banks, as each such pixel's parent component.
+        # The data cannot constrain a block with no live pixel, so it is not refined
+        live_in_bank = self.live_spectra & (self.bank_of_spectrum >= 0)
+        parents = [comp_info.parent(int(d)) if live else -1 for d, live in zip(self.detector_indices, live_in_bank)]
         block_idx = sorted({p for p in parents if p >= 0})
         self.block_of_spectrum = np.array([block_idx.index(p) if p >= 0 else -1 for p in parents])
         self.block_names = [_path_below_root(comp_info, b) for b in block_idx]
