@@ -475,11 +475,12 @@ class CalibrationFit:
         """Linear least-squares estimate of A (with per-spectrum backgrounds and unit scales). The strongest reflection
         is then fixed: the overall scale lives in the per-spectrum scales."""
         q, x_tz, kappa, srel, _ = self.split_params(self.params)
-        c, sin_t, _ = self.geometry_model.difc_and_derivatives(q)
+        c, sin_t = self.geometry.difc_and_sin_theta(*self.geometry_model.split_bank_and_block_params(q))
         K = self.d_hkl.size
         normal, rhs = np.zeros((K, K)), np.zeros(K)
         for ds, tz in zip(self.datasets, self.timing_model.params_to_tz @ x_tz):
-            dA = model_counts(self.geometry, ds, c, sin_t, tz, kappa, srel, np.ones(K), self.d_hkl, deriv=True)[-1]
+            # dm/dA_k is reflection k's model at unit intensity
+            dA = np.stack([model_counts(self.geometry, ds, c, sin_t, tz, kappa, srel, np.ones(1), self.d_hkl[k : k + 1]) for k in range(K)])
             w2 = ds.weights**2
             w_sum = np.maximum(w2.sum(1, keepdims=True), 1e-300)
             y_centred = ds.counts - (w2 * ds.counts).sum(1, keepdims=True) / w_sum
