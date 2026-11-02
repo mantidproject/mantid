@@ -229,6 +229,29 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         self._verify_numpy_data(testWS.getNumEventsArray(), values)
         mtd.remove("demo")
 
+    def test_set_arrays_accept_longdouble_arrays(self):
+        run_algorithm(
+            "CreateMDHistoWorkspace",
+            SignalInput=",".join(["0"] * 9),
+            ErrorInput=",".join(["0"] * 9),
+            Dimensionality="2",
+            Extents="-1,1,-1,1",
+            NumberOfBins="3,3",
+            Names="A,B",
+            Units="U,T",
+            OutputWorkspace="demo",
+        )
+        testWS = mtd["demo"]
+        values = numpy.arange(1, 10, dtype=numpy.longdouble).reshape((3, 3))
+        expected = values.astype(numpy.float64)
+        testWS.setSignalArray(values)
+        testWS.setErrorSquaredArray(values)
+        testWS.setNumEventsArray(values)
+        self._verify_numpy_data(testWS.getSignalArray(), expected)
+        self._verify_numpy_data(testWS.getErrorSquaredArray(), expected)
+        self._verify_numpy_data(testWS.getNumEventsArray(), expected)
+        mtd.remove("demo")
+
     def test_set_arrays_accept_object_arrays_of_numbers(self):
         run_algorithm(
             "CreateMDHistoWorkspace",
@@ -266,7 +289,9 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         )
         testWS = mtd["demo"]
         before = [numpy.array(testWS.getSignalArray()), numpy.array(testWS.getErrorSquaredArray()), numpy.array(testWS.getNumEventsArray())]
-        values = numpy.full((3, 3), 1.0, dtype=object)
+        # Distinct from the initial contents of all three workspace buffers,
+        # so a partial write is detected.
+        values = numpy.full((3, 3), 99.0, dtype=object)
         values[2, 2] = "not a number"
         for setter in (testWS.setSignalArray, testWS.setErrorSquaredArray, testWS.setNumEventsArray):
             self.assertRaises(ValueError, setter, values)

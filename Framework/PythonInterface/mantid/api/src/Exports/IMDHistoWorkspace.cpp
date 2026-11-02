@@ -156,7 +156,8 @@ void throwIfSizeIncorrect(const IMDHistoWorkspace &self, const NDArray &signal, 
  */
 void copyToBuffer(const NDArray &values, Mantid::signal_t *dest) {
   int flags = NPY_ARRAY_F_CONTIGUOUS | NPY_ARRAY_ALIGNED;
-  if (PyArray_TYPE(reinterpret_cast<PyArrayObject *>(values.ptr())) == NPY_OBJECT)
+  const int type = PyArray_TYPE(reinterpret_cast<PyArrayObject *>(values.ptr()));
+  if (type == NPY_OBJECT || PyTypeNum_ISFLOAT(type))
     flags |= NPY_ARRAY_FORCECAST;
   PyObject *converted = PyArray_FROMANY(values.ptr(), NPY_DOUBLE, 0, 0, flags);
   if (!converted)
