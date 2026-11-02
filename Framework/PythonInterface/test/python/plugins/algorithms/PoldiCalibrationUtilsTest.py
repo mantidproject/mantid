@@ -78,6 +78,15 @@ class PoldiCalibrationUtilsTest(unittest.TestCase):
                 c_mantid = get_tof_d1Ang(ws, get_tths_and_l2s(ws, self.geom.live_spectra)[1], l1_chop, self.geom.live_spectra)
                 assert_allclose(self.geom.difc_and_sin_theta(q, blocks)[0][live], c_mantid[live], rtol=1e-12)
 
+    def test_pixels_outside_refined_banks_keep_their_angle(self):
+        geom = PixelGeometry(self.ws, ["SouthBank"])
+        live = geom.live_spectra
+        tths = get_tths_and_l2s(self.ws, live)[0]
+
+        sin_t = geom.difc_and_sin_theta(geom.initial_bank_params)[1]
+
+        assert_allclose(sin_t[live], np.sin(tths[live] / 2), rtol=1e-12)
+
     def test_analytic_derivatives_match_finite_differences(self):
         data = self._data(5000)
         c, sin_t = self.geom.difc_and_sin_theta(self.geom.initial_bank_params)

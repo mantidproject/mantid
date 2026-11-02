@@ -63,7 +63,7 @@ def _rotation_matrix(q: Quat) -> np.ndarray[float]:
 class PixelGeometry:
     """Pixel positions in the frame of their bank, so bank and block moves can be applied in numpy.
 
-    Pixels outside `bank_names` keep their starting DIFC. c_i is the starting Mantid value scaled by the geometric factor
+    Pixels outside `bank_names` keep their starting position and DIFC. c_i is the starting Mantid value scaled by the geometric factor
     g = (L_cs + L2) sin(theta), so the absolute constant is always Mantid's."""
 
     def __init__(self, ws: MatrixWorkspace, bank_names: Sequence[str]):
@@ -90,10 +90,11 @@ class PixelGeometry:
         self.initial_bank_params = np.concatenate(
             [[comp_info.position(b)[0], comp_info.position(b)[2], comp_info.rotation(b).getEulerAngles("YZX")[0]] for b in bank_idx]
         )
-        self.positions_in_bank = np.zeros((self.detector_indices.size, 3))
+        self.initial_positions = np.array([comp_info.position(int(d)) for d in self.detector_indices])
+        self.positions_in_bank = np.zeros_like(self.initial_positions)
         for ib, b in enumerate(bank_idx):
             sel = self.bank_of_spectrum == ib
-            rel = np.array([comp_info.position(int(d)) for d in self.detector_indices[sel]]) - np.array(comp_info.position(b))
+            rel = self.initial_positions[sel] - np.array(comp_info.position(b))
             self.positions_in_bank[sel] = rel @ rot_y(self.initial_bank_params[3 * ib + 2])  # R^T rel, row-wise
         # detector blocks (modules) of the refined banks: each pixel's parent component
         parents = [comp_info.parent(int(d)) if b >= 0 else -1 for d, b in zip(self.detector_indices, self.bank_of_spectrum)]
@@ -114,7 +115,7 @@ class PixelGeometry:
         """Absolute pixel positions after bank moves (x, z, roty per bank) and optional block moves (shift along the
         bank normal, tilt about the vertical through the block centre)."""
         local = self.positions_in_bank if block_params is None else self._positions_in_bank_after_block_moves(block_params)
-        out = np.zeros_like(local)
+        out = self.initial_positions.copy()  # pixels outside the refined banks stay where they are
         for ib in range(len(self.bank_names)):
             sel = self.bank_of_spectrum == ib
             x, z, roty = bank_params[3 * ib : 3 * ib + 3]
