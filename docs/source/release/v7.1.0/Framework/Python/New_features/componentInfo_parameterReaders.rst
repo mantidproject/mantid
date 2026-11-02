@@ -1,0 +1,2 @@
+- :class:`~mantid.geometry.ComponentInfo` has new methods ``getPositionParameter``, ``getRotationParameter``, ``getParameterAsString``, ``getParameterVisible``, ``getParamDescription``, ``getParamShortDescription``, ``getDescription``, ``getShortDescription`` and ``setDescription``.
+  They give the same results as the methods of the same name on instrument components, so they can be used in their place. See :ref:`InstrumentAccessLayers`.

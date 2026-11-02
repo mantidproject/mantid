@@ -10,6 +10,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidKernel/ConfigService.h"
 
@@ -36,7 +37,7 @@ DECLARE_ALGORITHM(LoadParameterFile)
 using namespace Kernel;
 using namespace API;
 using Geometry::Instrument;
-using Geometry::Instrument_sptr;
+using Geometry::InstrumentParameterCache;
 
 /// Initialisation method.
 void LoadParameterFile::init() {
@@ -76,8 +77,7 @@ void LoadParameterFile::exec() {
   // Get the input workspace
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
-  // TODO: Refactor to remove the need for the const cast (ticket #8521)
-  Instrument_sptr instrument = std::const_pointer_cast<Instrument>(localWorkspace->getInstrument()->baseInstrument());
+  const auto instrument = localWorkspace->getInstrument()->baseInstrument();
 
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
@@ -128,7 +128,16 @@ void LoadParameterFile::exec() {
   // Set all parameters that specified in all component-link elements of pRootElem
   const auto linkStartTime = std::chrono::high_resolution_clock::now();
   InstrumentDefinitionParser loadInstr;
-  loadInstr.setComponentLinks(instrument, pRootElem, &prog, localWorkspace->getWorkspaceStartDate());
+  InstrumentParameterCache logfileCache;
+  loadInstr.setComponentLinks(instrument, pRootElem, logfileCache, &prog, localWorkspace->getWorkspaceStartDate());
+  // The parameters belong to this workspace only, not to the instrument it shares with others
+  auto &componentInfo = localWorkspace->mutableComponentInfo();
+  for (const auto &[key, parameter] : logfileCache) {
+    const auto index = componentInfo.indexOfOrInvalid(key.second);
+    if (index != Geometry::ComponentInfo::invalidIndex) {
+      componentInfo.addLogfileParameter(index, key.first, parameter);
+    }
+  }
   addTimer("setComponentLinks", linkStartTime, std::chrono::high_resolution_clock::now());
 
   // populate parameter map of workspace

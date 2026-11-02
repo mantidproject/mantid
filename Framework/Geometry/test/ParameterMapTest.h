@@ -9,8 +9,11 @@
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -23,6 +26,7 @@
 using Mantid::Geometry::IComponent;
 using Mantid::Geometry::IComponent_sptr;
 using Mantid::Geometry::Instrument_sptr;
+using Mantid::Geometry::InstrumentVisitor;
 using Mantid::Geometry::Parameter_sptr;
 using Mantid::Geometry::ParameterMap;
 using Mantid::Geometry::ParameterMap_sptr;
@@ -468,6 +472,23 @@ public:
     pmap.clear();
     TS_ASSERT_EQUALS(pmap.size(), 0);
     TSM_ASSERT("Cleared parameter map should be empty", pmap.empty())
+  }
+
+  void testClear_Keeps_Index_Domain_Shared_With_ComponentInfo() {
+    ParameterMap pmap;
+    const auto comp = m_testInstrument->getChild(0);
+    pmap.addInt(comp.get(), "P1", 1);
+    auto [componentInfo, detectorInfo] = InstrumentVisitor::makeWrappers(*m_testInstrument, &pmap);
+    pmap.clear();
+    TS_ASSERT(pmap.empty());
+
+    // A write by component index after clearing must still be visible through the component
+    const auto index = componentInfo->indexOf(comp->getComponentID());
+    componentInfo->addInt(index, "P2", 2);
+    const auto parameter = pmap.get(comp.get(), "P2");
+    TS_ASSERT(parameter);
+    if (parameter)
+      TS_ASSERT_EQUALS(parameter->value<int>(), 2);
   }
 
   void test_lookup_via_type_returns_null_if_fails() {

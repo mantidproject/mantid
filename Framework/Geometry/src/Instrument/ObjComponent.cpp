@@ -69,7 +69,10 @@ void ObjComponent::setShape(std::shared_ptr<const IObject> newShape) {
  * Return the material of the component. Currently
  * unaffected by parametrization
  */
-const Kernel::Material ObjComponent::material() const { return m_shape->material(); }
+const Kernel::Material ObjComponent::material() const {
+  auto const objectShape = shape();
+  return objectShape ? objectShape->material() : Kernel::Material();
+}
 
 /// Does the point given lie within this object component?
 bool ObjComponent::isValid(const V3D &point) const {

@@ -872,8 +872,6 @@ public:
     // collide in the IDF cache; the fix function-qualifies the cache key, while the runtime
     // ParameterMap still stores entries under the short name "Gamma".
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
-    ExperimentInfo expt;
-    expt.setInstrument(inst);
 
     const auto comp = inst->getChild(0).get();
     auto makeXMLParam = [&](const std::string &fittingFunction, const std::string &value) {
@@ -890,10 +888,12 @@ public:
     };
 
     // Insert into the cache under function-qualified keys, mirroring what InstrumentDefinitionParser
-    // now does.
+    // now does. The parser fills the cache before the instrument is given to any workspace.
     auto &cache = inst->getLogfileCache();
     cache.insert({{"Bk2BkExpConvPV:Gamma", comp}, makeXMLParam("Bk2BkExpConvPV", "1.5")});
     cache.insert({{"IkedaCarpenterPV:Gamma", comp}, makeXMLParam("IkedaCarpenterPV", "2.5")});
+    ExperimentInfo expt;
+    expt.setInstrument(inst);
 
     expt.populateInstrumentParameters();
 
@@ -918,6 +918,64 @@ public:
     TS_ASSERT(fp.getFunction() == "Bk2BkExpConvPV" || fp.getFunction() == "IkedaCarpenterPV");
   }
 
+  void test_logfile_parameters_are_taken_from_the_instrument_by_component_index() {
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    const auto comp = inst->getChild(0).get();
+    inst->getLogfileCache().insert({{"a-double", comp}, makeLogfileParameter("a-double", "1.5", comp)});
+    ExperimentInfo expt;
+    expt.setInstrument(inst);
+
+    const auto &componentInfo = expt.componentInfo();
+    const auto compIndex = componentInfo.indexOf(comp->getComponentID());
+    const auto &logfileParameters = componentInfo.logfileParameters();
+    TS_ASSERT_EQUALS(logfileParameters.size(), 1);
+    TS_ASSERT_EQUALS(logfileParameters.begin()->first, std::make_pair(compIndex, std::string("a-double")));
+
+    expt.populateInstrumentParameters();
+    TS_ASSERT_EQUALS(componentInfo.getNumberParameter(compIndex, "a-double", false).at(0), 1.5);
+  }
+
+  void test_logfile_parameters_added_to_one_workspace_are_not_seen_by_another_sharing_its_instrument() {
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    const auto comp = inst->getChild(0).get();
+    ExperimentInfo withParameter;
+    withParameter.setInstrument(inst);
+    ExperimentInfo without;
+    without.setInstrument(inst);
+    const auto compIndex = withParameter.componentInfo().indexOf(comp->getComponentID());
+
+    withParameter.mutableComponentInfo().addLogfileParameter(compIndex, "a-double",
+                                                             makeLogfileParameter("a-double", "1.5", comp));
+    withParameter.populateInstrumentParameters();
+    without.populateInstrumentParameters();
+
+    TS_ASSERT(withParameter.componentInfo().hasParameter(compIndex, "a-double", false));
+    TS_ASSERT(!without.componentInfo().hasParameter(compIndex, "a-double", false));
+    TS_ASSERT(without.componentInfo().logfileParameters().empty());
+    // The instrument itself is untouched, so a workspace given it later does not see the parameter either.
+    TS_ASSERT(inst->getLogfileCache().empty());
+  }
+
+  void test_logfile_parameters_are_copied_with_the_workspace() {
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    const auto comp = inst->getChild(0).get();
+    ExperimentInfo original;
+    original.setInstrument(inst);
+    const auto compIndex = original.componentInfo().indexOf(comp->getComponentID());
+    original.mutableComponentInfo().addLogfileParameter(compIndex, "a-double",
+                                                        makeLogfileParameter("a-double", "1.5", comp));
+
+    auto const copy = original.cloneExperimentInfo();
+    TS_ASSERT_EQUALS(copy->componentInfo().logfileParameters().size(), 1);
+    copy->populateInstrumentParameters();
+    TS_ASSERT_EQUALS(copy->componentInfo().getNumberParameter(compIndex, "a-double", false).at(0), 1.5);
+
+    // ...and independently: adding to the copy does not add to the original.
+    copy->mutableComponentInfo().addLogfileParameter(compIndex, "another-double",
+                                                     makeLogfileParameter("another-double", "2.5", comp));
+    TS_ASSERT_EQUALS(original.componentInfo().logfileParameters().size(), 1);
+  }
+
   void test_getInstrumentName_NoInstrument() {
     ExperimentInfo expInfo;
     auto inst = expInfo.getInstrument();
@@ -936,6 +994,17 @@ public:
   }
 
 private:
+  /// A double-valued logfile parameter with a fixed value, as the instrument definition parser makes them.
+  static std::shared_ptr<XMLInstrumentParameter> makeLogfileParameter(const std::string &name, const std::string &value,
+                                                                      const IComponent *comp) {
+    std::string penaltyFactor;
+    return std::make_shared<XMLInstrumentParameter>(
+        /*logfileID*/ "", value, std::make_shared<Mantid::Kernel::Interpolation>(), /*formula*/ "", /*formulaUnit*/ "",
+        /*resultUnit*/ "", name, /*type*/ "double", /*tie*/ "", std::vector<std::string>(2, ""), penaltyFactor,
+        /*fitFunc*/ "", /*extractSingleValueAs*/ "", /*eq*/ "", comp, /*angleConvertConst*/ 1.0, /*description*/ "",
+        /*visible*/ "true");
+  }
+
   void addInstrumentWithParameter(ExperimentInfo &expt, const std::string &name, const std::string &value) {
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
     expt.setInstrument(inst);

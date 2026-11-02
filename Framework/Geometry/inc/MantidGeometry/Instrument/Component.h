@@ -175,6 +175,10 @@ public:
    * is not found
    */
   std::string getParameterType(const std::string &pname, bool recursive = true) const override {
+    if (!m_map) {
+      // Not parametrized = no parameters
+      return std::string("");
+    }
     Parameter_sptr param;
     if (recursive) {
       param = m_map->getRecursive(this, pname);

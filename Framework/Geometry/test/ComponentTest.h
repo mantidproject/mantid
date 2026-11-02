@@ -20,6 +20,12 @@ using Mantid::Kernel::V3D;
 
 class ComponentTest : public CxxTest::TestSuite {
 public:
+  void test_getParameterType_of_an_unparametrized_component_is_empty() {
+    Component component("unparametrized");
+    TS_ASSERT_EQUALS(component.getParameterType("anything"), "");
+    TS_ASSERT_EQUALS(component.getParameterType("anything", false), "");
+  }
+
   void testEmptyConstructor() {
     Component q;
     TS_ASSERT_EQUALS(q.getName(), "");

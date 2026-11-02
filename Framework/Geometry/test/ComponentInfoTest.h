@@ -10,10 +10,12 @@
 
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/CSGObject.h"
@@ -24,6 +26,8 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
 
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include <Eigen/Geometry>
@@ -962,6 +966,113 @@ public:
     // ...and the lookup is recursive by default, like the other read accessors.
     TS_ASSERT_EQUALS(componentInfo.getParameterType(detectorIndex, "a_double"), "double");
     TS_ASSERT_EQUALS(componentInfo.getParameterType(detectorIndex, "a_double", false), "");
+  }
+
+  void test_position_and_rotation_parameters_read_back() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    ParameterMap pmap;
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
+    auto &componentInfo = *std::get<0>(wrappers);
+    auto const bankIndex = componentInfo.root() - 3;
+    auto const detectorIndex = componentInfo.children(componentInfo.children(bankIndex)[0])[0];
+    V3D const offset(1.0, 2.0, 3.0);
+    Quat const tilt(30.0, V3D(0, 0, 1));
+
+    componentInfo.addV3D(bankIndex, "an_offset", offset);
+    componentInfo.addQuat(bankIndex, "a_tilt", tilt);
+
+    TS_ASSERT_EQUALS(componentInfo.getPositionParameter(bankIndex, "an_offset").at(0), offset);
+    TS_ASSERT_EQUALS(componentInfo.getRotationParameter(bankIndex, "a_tilt").at(0), tilt);
+    TS_ASSERT_EQUALS(componentInfo.getPositionParameter(detectorIndex, "an_offset").at(0), offset);
+    TS_ASSERT(componentInfo.getPositionParameter(detectorIndex, "an_offset", false).empty());
+    TS_ASSERT(componentInfo.getRotationParameter(bankIndex, "no_such_parameter").empty());
+  }
+
+  void test_getParameterAsString_matches_the_legacy_component() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    auto bank = instrument->getComponentByName("bank1");
+    ParameterMap pmap;
+    pmap.addDouble(bank.get(), "a_double", 2.5);
+    pmap.addInt(bank.get(), "an_int", 7);
+    pmap.addString(bank.get(), "a_string", "hello");
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
+    auto const &componentInfo = *std::get<0>(wrappers);
+    auto const bankIndex = componentInfo.indexOf(bank->getComponentID());
+    auto const detectorIndex = componentInfo.children(componentInfo.children(bankIndex)[0])[0];
+    auto const parametrizedBank = ParComponentFactory::create(bank, &pmap);
+
+    for (auto const &name : {"a_double", "an_int", "a_string", "no_such_parameter"}) {
+      TS_ASSERT_EQUALS(componentInfo.getParameterAsString(bankIndex, name),
+                       parametrizedBank->getParameterAsString(name));
+    }
+    TS_ASSERT_EQUALS(componentInfo.getParameterAsString(bankIndex, "no_such_parameter"), "");
+    TS_ASSERT_EQUALS(componentInfo.getParameterAsString(detectorIndex, "a_string"), "hello");
+    TS_ASSERT_EQUALS(componentInfo.getParameterAsString(detectorIndex, "a_string", false), "");
+  }
+
+  void test_getParameterVisible() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    ParameterMap pmap;
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
+    auto &componentInfo = *std::get<0>(wrappers);
+    auto const bankIndex = componentInfo.root() - 3;
+    auto const detectorIndex = componentInfo.children(componentInfo.children(bankIndex)[0])[0];
+
+    componentInfo.addDouble(bankIndex, "shown", 1.0);
+    componentInfo.addDouble(bankIndex, "hidden", 1.0, nullptr, "false");
+
+    TS_ASSERT(componentInfo.getParameterVisible(bankIndex, "shown"));
+    TS_ASSERT(!componentInfo.getParameterVisible(bankIndex, "hidden"));
+    TS_ASSERT(componentInfo.getParameterVisible(detectorIndex, "shown"));
+    TS_ASSERT(!componentInfo.getParameterVisible(detectorIndex, "shown", false));
+    // An unset parameter is reported as not visible, as on the legacy API.
+    TS_ASSERT(!componentInfo.getParameterVisible(bankIndex, "no_such_parameter"));
+  }
+
+  void test_parameter_descriptions() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    ParameterMap pmap;
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
+    auto &componentInfo = *std::get<0>(wrappers);
+    auto const bankIndex = componentInfo.root() - 3;
+    auto const detectorIndex = componentInfo.children(componentInfo.children(bankIndex)[0])[0];
+    // The short description is the description up to and including its first full stop.
+    std::string const description = "A described parameter. With more detail.";
+
+    componentInfo.addDouble(bankIndex, "described", 1.0, &description);
+
+    TS_ASSERT_EQUALS(componentInfo.getParamDescription(bankIndex, "described"), description);
+    TS_ASSERT_EQUALS(componentInfo.getParamShortDescription(bankIndex, "described"), "A described parameter.");
+    TS_ASSERT_EQUALS(componentInfo.getParamDescription(detectorIndex, "described"), description);
+    TS_ASSERT_EQUALS(componentInfo.getParamDescription(detectorIndex, "described", false), "");
+    TS_ASSERT_EQUALS(componentInfo.getParamDescription(bankIndex, "no_such_parameter"), "");
+    TS_ASSERT_EQUALS(componentInfo.getParamShortDescription(bankIndex, "no_such_parameter"), "");
+  }
+
+  void test_setDescription_round_trips_through_ComponentInfo_and_the_legacy_component() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    auto bank = instrument->getComponentByName("bank1");
+    ParameterMap pmap;
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
+    auto &componentInfo = *std::get<0>(wrappers);
+    auto const bankIndex = componentInfo.indexOf(bank->getComponentID());
+    auto const detectorIndex = componentInfo.children(componentInfo.children(bankIndex)[0])[0];
+
+    TS_ASSERT_EQUALS(componentInfo.getDescription(bankIndex), "");
+    componentInfo.setDescription(bankIndex, "The first bank. It has pixels.");
+
+    TS_ASSERT_EQUALS(componentInfo.getDescription(bankIndex), "The first bank. It has pixels.");
+    TS_ASSERT_EQUALS(componentInfo.getShortDescription(bankIndex), "The first bank.");
+    // A component's own description is not inherited by its children.
+    TS_ASSERT_EQUALS(componentInfo.getDescription(detectorIndex), "");
+
+    auto const parametrizedBank = std::dynamic_pointer_cast<const Component>(ParComponentFactory::create(bank, &pmap));
+    TS_ASSERT_EQUALS(parametrizedBank->getDescription(), componentInfo.getDescription(bankIndex));
+
+    // Setting it again replaces the description in place rather than adding a second parameter.
+    componentInfo.setDescription(bankIndex, "Renamed.");
+    TS_ASSERT_EQUALS(componentInfo.getDescription(bankIndex), "Renamed.");
+    TS_ASSERT_EQUALS(componentInfo.getParameterNames(bankIndex, false).count("bank1"), 1);
   }
 
   /// The whole point of writing through ComponentInfo: it lands in the same store the owning

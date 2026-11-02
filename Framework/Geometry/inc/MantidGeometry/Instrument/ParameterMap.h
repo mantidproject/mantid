@@ -84,9 +84,9 @@ public:
 
   /// Clears the map
   inline void clear() {
+    // The translation tables are kept: they describe the instrument, not the parameters, and an
+    // attached map shares its index domain with ComponentInfo, which may still write by index.
     m_parameterInfo->clear();
-    m_idToIndex.clear();
-    m_indexToId.clear();
     clearPositionSensitiveCaches();
   }
   /// method swaps two parameter maps contents  each other. All caches contents
@@ -357,6 +357,8 @@ private:
   ParameterMap &operator=(ParameterMap *rhs);
   /// Builds m_instrumentMetadata from m_instrument. Requires m_instrument to be set.
   void buildInstrumentMetadata();
+  /// Copies m_instrument's logfile parameters into the store. Requires the beamline to be built.
+  void seedLogfileParameters();
   /// calculate relative error for use in diff
   bool relErr(double x1, double x2, double errorVal) const;
 

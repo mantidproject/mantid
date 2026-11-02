@@ -1,7 +1,9 @@
 set(SRC_FILES src/ComponentInfo.cpp src/DetectorInfo.cpp src/SpectrumInfo.cpp)
 
-set(INC_FILES inc/MantidBeamline/ComponentInfo.h inc/MantidBeamline/ComponentType.h inc/MantidBeamline/DetectorInfo.h
-              inc/MantidBeamline/PixelGridComponent.h inc/MantidBeamline/SpectrumInfo.h
+set(INC_FILES
+    inc/MantidBeamline/ComponentInfo.h inc/MantidBeamline/ComponentType.h inc/MantidBeamline/DetectorInfo.h
+    inc/MantidBeamline/PixelGridComponent.h inc/MantidBeamline/SpectrumInfo.h
+    inc/MantidBeamline/StructuredGridComponent.h
 )
 
 set(TEST_FILES ComponentInfoTest.h DetectorInfoTest.h SpectrumInfoTest.h)

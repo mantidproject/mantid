@@ -23,6 +23,26 @@ using Mantid::Kernel::V3D;
 
 class StructuredDetectorTest : public CxxTest::TestSuite {
 public:
+  void test_getComponentByName_of_its_own_name_does_not_take_ownership() {
+    auto det = makeOnePixelDetector();
+    {
+      auto const self = det->getComponentByName("structured");
+      TS_ASSERT_EQUALS(self.get(), det.get());
+    }
+    // The returned pointer has gone; the detector must still be alive.
+    TS_ASSERT_EQUALS(det->getName(), "structured");
+  }
+
+  void test_getBoundingBox_of_an_unparametrized_detector() {
+    auto det = makeOnePixelDetector();
+    BoundingBox box;
+    TS_ASSERT_THROWS_NOTHING(det->getBoundingBox(box));
+    TS_ASSERT_DELTA(box.xMin(), 0.0, 1e-9);
+    TS_ASSERT_DELTA(box.xMax(), 1.0, 1e-9);
+    TS_ASSERT_DELTA(box.yMin(), 0.0, 1e-9);
+    TS_ASSERT_DELTA(box.yMax(), 1.0, 1e-9);
+  }
+
   void testEmptyConstructor() {
     StructuredDetector q;
     TS_ASSERT_EQUALS(q.nelements(), 0);
@@ -238,5 +258,15 @@ public:
     // Name
     TS_ASSERT_EQUALS(det->getAtXY(0, 1)->getName(), "MyStructuredDetector(0,1)");
     TS_ASSERT_EQUALS(det->getChild(1)->getName(), "MyStructuredDetector(x=1)");
+  }
+
+private:
+  /// A detector of a single unit-square pixel with corners at (0, 0) and (1, 1).
+  static std::unique_ptr<StructuredDetector> makeOnePixelDetector() {
+    auto det = std::make_unique<StructuredDetector>("structured");
+    std::vector<double> x{0, 1, 0, 1};
+    std::vector<double> y{0, 0, 1, 1};
+    det->initialize(1, 1, std::move(x), std::move(y), true, 0, true, 1, 1);
+    return det;
   }
 };

@@ -23,6 +23,18 @@ using Mantid::Kernel::V3D;
 
 class RectangularDetectorTest : public CxxTest::TestSuite {
 public:
+  void test_getComponentByName_of_its_own_name_does_not_take_ownership() {
+    auto det = std::make_unique<RectangularDetector>("bank");
+    det->initialize(ComponentCreationHelper::createCuboid(0.5), 2, 0.0, 1.0, 2, 0.0, 1.0, 0, true, 2);
+    {
+      auto const self = det->getComponentByName("bank");
+      TS_ASSERT_EQUALS(self.get(), det.get());
+    }
+    // The returned pointer has gone; the detector must still be alive.
+    TS_ASSERT_EQUALS(det->getName(), "bank");
+    TS_ASSERT_EQUALS(det->nelements(), 2);
+  }
+
   void testNameValueConstructor() {
     RectangularDetector q("Name");
     TS_ASSERT_EQUALS(q.nelements(), 0);
