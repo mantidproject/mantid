@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 from scipy.special import erf
 
+from mantid.kernel import Quat, V3D
 from plugins.algorithms.component_info_utils import resolve_component_index
 from plugins.algorithms.diffraction_utils import get_live_spectra, get_tths_and_l2s
 from plugins.algorithms.poldi_utils import _get_flux_arrays, get_instrument_settings_from_log, get_t0_parameters, get_tof_d1Ang
@@ -22,7 +23,6 @@ from plugins.algorithms.poldi_utils import _get_flux_arrays, get_instrument_sett
 if TYPE_CHECKING:
     from mantid.api import MatrixWorkspace
     from mantid.geometry import ComponentInfo
-    from mantid.kernel import Quat
 
 CHOPPER = "chopper"
 LAMBDA_RANGE = (1.0, 5.99)  # Angstrom, inside the IDF's WavelengthDistribution table (0.986 - 5.994)
@@ -50,15 +50,11 @@ def _path_below_root(comp_info: ComponentInfo, idx: int) -> str:
     return "/".join(reversed(names))
 
 
-def _rotation_matrix(q: Quat) -> np.ndarray[float]:
-    w, x, y, z = q.real(), q.imagI(), q.imagJ(), q.imagK()
-    return np.array(
-        [
-            [1 - 2 * (y * y + z * z), 2 * (x * y - w * z), 2 * (x * z + w * y)],
-            [2 * (x * y + w * z), 1 - 2 * (x * x + z * z), 2 * (y * z - w * x)],
-            [2 * (x * z - w * y), 2 * (y * z + w * x), 1 - 2 * (x * x + y * y)],
-        ]
-    )
+def _angle_axis(q: Quat) -> tuple[float, np.ndarray[float]]:
+    """Angle (deg) and unit axis of q. Not Quat.getAngleAxis, which rounds rotations under ~0.5 deg to none."""
+    v = np.array([q.imagI(), q.imagJ(), q.imagK()])
+    norm = np.linalg.norm(v)
+    return np.rad2deg(2 * np.arctan2(norm, q.real())), v / norm if norm > 0 else np.array([0.0, 1.0, 0.0])
 
 
 class PixelGeometry:
@@ -113,6 +109,11 @@ class PixelGeometry:
                 for b, ib in zip(block_idx, self.bank_of_block)
             ]
         )
+        # (angle, axis) of each block's fixed rotation within its bank, so apply_geometry can set block rotations absolutely
+        self.block_rotations_in_bank = [
+            _angle_axis(Quat(-self.initial_bank_params[3 * ib + 2], V3D(0, 1, 0)) * comp_info.rotation(b))
+            for b, ib in zip(block_idx, self.bank_of_block)
+        ]
         self.initial_geometric_factor = self._geometric_factor_and_sin_theta(self.pixel_positions(self.initial_bank_params))[0]
 
     def pixel_positions(self, bank_params: np.ndarray[float], block_params: np.ndarray[float] | None = None) -> np.ndarray[float]:
@@ -599,7 +600,8 @@ def apply_geometry(
     exec_child: Callable[..., object],
     block_params: np.ndarray[float] | None = None,
 ) -> None:
-    """Apply absolute bank moves (x, z, roty) to ws, then block moves (normal shift, tilt about the block centre)."""
+    """Move the banks of ws to (x, z, roty), then the blocks to their normal shift and tilt about the block centre from
+    the state geom was built from. All moves are absolute, so they do not depend on what was applied to ws before."""
     for ib, bank in enumerate(geom.bank_names):
         x, z, roty = bank_params[3 * ib : 3 * ib + 3]
         exec_child("RotateInstrumentComponent", Workspace=ws, ComponentName=bank, X=0, Y=1, Z=0, Angle=roty, RelativeRotation=False)
@@ -608,21 +610,15 @@ def apply_geometry(
         )
     if block_params is None:
         return
-    comp_info = ws.componentInfo()
     for m, block in enumerate(geom.block_names):
+        ib = geom.bank_of_block[m]
+        x, z, roty = bank_params[3 * ib : 3 * ib + 3]
         normal, tilt = block_params[2 * m : 2 * m + 2]
-        nx, _, nz = rot_y(bank_params[3 * geom.bank_of_block[m] + 2]) @ [0.0, 0.0, 1.0]  # bank normal, global frame
-        exec_child("MoveInstrumentComponent", Workspace=ws, ComponentName=block, X=normal * nx, Y=0, Z=normal * nz, RelativePosition=True)
-        # a relative rotation turns about an axis in the component's own frame: NorthBank's blocks sit under a 180 deg
-        # rotation about z, so global Y is -Y there
-        axis = _rotation_matrix(comp_info.rotation(resolve_component_index(block, comp_info))).T @ [0.0, 1.0, 0.0]
-        exec_child(
-            "RotateInstrumentComponent",
-            Workspace=ws,
-            ComponentName=block,
-            X=axis[0],
-            Y=axis[1],
-            Z=axis[2],
-            Angle=tilt,
-            RelativeRotation=True,
-        )
+        x_block, y_block, z_block = rot_y(roty) @ (geom.block_centres[m] + [0.0, 0.0, normal]) + [x, geom.bank_y_positions[ib], z]
+        exec_child("MoveInstrumentComponent", Workspace=ws, ComponentName=block, X=x_block, Y=y_block, Z=z_block, RelativePosition=False)
+        # the bank's rotation plus the tilt about Y, then the block's fixed rotation within its bank on top, as a relative
+        # rotation is current * Quat(angle, axis). Turning the fitted angle about Y alone also keeps clear of
+        # RotateInstrumentComponent rejecting any axis with X + Y + Z = 0
+        exec_child("RotateInstrumentComponent", Workspace=ws, ComponentName=block, X=0, Y=1, Z=0, Angle=roty + tilt, RelativeRotation=False)
+        angle, (ax, ay, az) = geom.block_rotations_in_bank[m]
+        exec_child("RotateInstrumentComponent", Workspace=ws, ComponentName=block, X=ax, Y=ay, Z=az, Angle=angle, RelativeRotation=True)

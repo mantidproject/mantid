@@ -71,7 +71,8 @@ class PoldiCalibrationUtilsTest(unittest.TestCase):
             with self.subTest(blocks=blocks is not None):
                 ws = CloneWorkspace(self.ws, OutputWorkspace="moved")
 
-                apply_geometry(ws, self.geom, q, exec_alg, blocks)
+                for _ in range(2):  # the moves are absolute, so applying them again changes nothing
+                    apply_geometry(ws, self.geom, q, exec_alg, blocks)
 
                 live = np.flatnonzero(self.geom.live_spectra)
                 si = ws.spectrumInfo()
