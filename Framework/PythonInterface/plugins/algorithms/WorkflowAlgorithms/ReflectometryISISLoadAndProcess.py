@@ -866,6 +866,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         return [sliced_workspace_name]
 
     def _getSlicedWorkspaceGroupName(self, workspace):
+        if not self.getProperty("OutputWorkspace").isDefault:
+            return self.getPropertyValue("OutputWorkspace")
         return workspace + "_sliced"
 
     def _reduce(self, input_workspace, first_trans_workspace, second_trans_workspace, adjusted_theta=None, multi_reduction: bool = False):
