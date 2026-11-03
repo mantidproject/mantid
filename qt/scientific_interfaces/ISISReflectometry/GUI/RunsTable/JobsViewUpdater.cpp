@@ -66,8 +66,15 @@ MantidWidgets::Batch::Cell adjustedAngleCell(Row const &row, std::optional<int> 
   cell.disableEditing();
 
   auto const &names = row.reducedWorkspaceNames();
+  auto const &iVsQBinnedNames = names.iVsQBinned();
+  auto const &iVsQNames = names.iVsQ();
+  auto const &iVsLambdaNames = names.iVsLambda();
+
+  if (iVsQBinnedNames.empty() || iVsQNames.empty() || iVsLambdaNames.empty())
+    return cell;
+
   auto const &matrix =
-      findInputWorkspace(names.inputRunNumbers(), std::nullopt, {names.iVsQBinned(), names.iVsQ(), names.iVsLambda()});
+      findInputWorkspace(names.inputRunNumbers(), std::nullopt, {iVsQBinnedNames[0], iVsQNames[0], iVsLambdaNames[0]});
   if (matrix && matrix->run().hasProperty("reflectometry_adjusted_theta"))
     cell.setContentText(
         valueToString(matrix->run().getPropertyAsSingleValue("reflectometry_adjusted_theta"), precision));
