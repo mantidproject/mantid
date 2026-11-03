@@ -440,6 +440,22 @@ public:
     TS_ASSERT_EQUALS(loaded.getShape().getAppliedRotation(), Mantid::Kernel::Matrix<double>(3, 3, true));
   }
 
+  void test_nexus_mesh_shape_with_a_malformed_applied_rotation_does_not_load() {
+    NexusTestHelper th(true);
+    th.createFile("SampleTestMeshMalformedRotation.nxs");
+    const auto mesh = std::dynamic_pointer_cast<MeshObject>(getSimpleMesh());
+
+    th.file->makeGroup("shape_mesh", "NXoff_geometry", true);
+    th.file->writeData("vertices", mesh->getVertices());
+    th.file->writeData("winding_order", mesh->getTriangles());
+    th.file->writeData("faces", std::vector<uint32_t>{0, 3, 6, 9});
+    th.file->writeData("applied_goniometer_rotation", std::vector<double>(8, 0.0));
+    th.file->closeGroup();
+    th.reopenFile();
+
+    TS_ASSERT_THROWS(MeshObject::loadNexus(th.file.get(), "shape_mesh", Material()), const std::invalid_argument &);
+  }
+
   void test_load_nexus_with_square_faces() {
     NexusTestHelper th(true);
     th.createFile("SampleTestMesh.nxs");

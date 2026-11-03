@@ -660,7 +660,12 @@ std::shared_ptr<MeshObject> MeshObject::loadNexus(Nexus::File *file, const std::
   }
 
   auto object = std::make_shared<MeshObject>(std::move(triangles), std::move(vertices), material);
-  if (hasAppliedRotation && appliedRotation.size() == 9) {
+  if (hasAppliedRotation) {
+    // skipping it instead would leave the rotated vertices looking unrotated, to be rotated again
+    if (appliedRotation.size() != 9) {
+      throw std::invalid_argument("applied_goniometer_rotation in '" + group + "' must hold 9 values, not " +
+                                  std::to_string(appliedRotation.size()));
+    }
     // Record only - the vertices just read are already rotated, so baking here would double it
     object->setAppliedGoniometerRotation(Kernel::Matrix<double>(appliedRotation));
   }
