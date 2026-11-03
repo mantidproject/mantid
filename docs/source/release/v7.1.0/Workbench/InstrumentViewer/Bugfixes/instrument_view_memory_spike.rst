@@ -1,0 +1,1 @@
+- Fixed a large temporary rise in memory use, and the long pause that came with it, in the new Instrument View for workspaces whose spectra do not all share the same bin edges, such as data in d-spacing. It occurred when changing the projection, masking detectors, or opening the view.

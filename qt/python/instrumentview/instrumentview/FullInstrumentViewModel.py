@@ -384,14 +384,12 @@ class FullInstrumentViewModel:
         if len(workspace_indices) == 0:
             return (0, 0)
 
-        if workspace.isRaggedWorkspace():
-            first_last = np.array([workspace.x(int(i))[[0, -1]] for i in workspace_indices])
-            limits = (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
-        elif workspace.isCommonBins():
+        if not workspace.isRaggedWorkspace() and workspace.isCommonBins():
             limits = tuple(workspace.x(int(workspace_indices[0]))[[0, -1]])
         else:
-            data_x = workspace.extractX()[workspace_indices]
-            limits = (np.min(data_x[:, 0]), np.max(data_x[:, -1]))
+            # Only the ends of each spectrum are needed, and extractX would copy every bin edge in the workspace
+            first_last = np.array([workspace.x(int(i))[[0, -1]] for i in workspace_indices])
+            limits = (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
 
         if np.isfinite(limits).all():
             return limits
