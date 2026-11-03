@@ -329,6 +329,11 @@ The processing table contains the following columns:
 |                     |           |                                                                                 |
 |                     |           | Example: ``0.7``                                                                |
 +---------------------+-----------+---------------------------------------------------------------------------------+
+| Adjusted Angle      | No        | Read-only adjusted angle in degrees from the input workspace's                  |
+|                     |           | ``reflectometry_adjusted_theta`` sample log. Visible only for POLREF.           |
+|                     |           | Refreshed after reduction; blank when the log or reduction output is absent.    |
+|                     |           | The input and output require non-empty ``run_number`` metadata.                 |
++---------------------+-----------+---------------------------------------------------------------------------------+
 | 1st Trans Run(s)    | No        | Contains the transmission run(s) used to                                        |
 |                     |           | normalise the sample runs. To specify two                                       |
 | 2nd Trans Run(s)    |           | transmission runs, enter them in each input box.                                |

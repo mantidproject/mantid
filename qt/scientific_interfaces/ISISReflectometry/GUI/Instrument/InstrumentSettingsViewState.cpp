@@ -6,24 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InstrumentSettingsViewState.h"
 
-#include <unordered_map>
+#include "GUI/Common/InstrumentCategory.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 namespace {
-enum class InstrumentSettingsCategory { POLREF, OTHER };
-
-InstrumentSettingsCategory categoryFor(std::string const &instrumentName) {
-  static auto const categories =
-      std::unordered_map<std::string, InstrumentSettingsCategory>{{"POLREF", InstrumentSettingsCategory::POLREF}};
-  auto const category = categories.find(instrumentName);
-  return category == categories.cend() ? InstrumentSettingsCategory::OTHER : category->second;
-}
-
-InstrumentSettingsViewState viewStateFor(InstrumentSettingsCategory const category) {
+InstrumentSettingsViewState viewStateFor(InstrumentCategory const category) {
   switch (category) {
-  case InstrumentSettingsCategory::POLREF:
+  case InstrumentCategory::POLREF:
     return {.detectorCorrectionControlsVisible = false, .specularPixelVisible = true};
-  case InstrumentSettingsCategory::OTHER:
+  case InstrumentCategory::OTHER:
     return {.detectorCorrectionControlsVisible = true, .specularPixelVisible = false};
   }
   return {};
@@ -31,7 +22,7 @@ InstrumentSettingsViewState viewStateFor(InstrumentSettingsCategory const catego
 } // namespace
 
 InstrumentSettingsViewState instrumentSettingsViewState(std::string const &instrumentName) {
-  return viewStateFor(categoryFor(instrumentName));
+  return viewStateFor(instrumentCategory(instrumentName));
 }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
