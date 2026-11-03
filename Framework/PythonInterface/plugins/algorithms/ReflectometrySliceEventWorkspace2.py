@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspace
-from mantid.kernel import DateAndTime, Direction
+from mantid.kernel import DateAndTime, Direction, StringArrayProperty
 from mantid.simpleapi import AddSampleLog
 
 import re
@@ -53,9 +53,13 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
             direction=Direction.Input,
             doc="The name of the input monitor workspace or group of monitor workspaces.",
         )
-        self.declareProperty("OutputWorkspaceName", "", direction=Direction.Output, doc="(Base)Name for the output workspace(s).")
+        self.declareProperty("OutputWorkspaceName", "", doc="(Base)Name for the output workspace(s).")
         self.declareProperty(
             "FilterByLogValue", False, doc="If true, filter events via the FilterByLogValue algorithm. Uses FilterEvents otherwise."
+        )
+        self.declareProperty(
+            StringArrayProperty("OutputWorkspaceNames", values=[], direction=Direction.Output),
+            doc="A list containing the names of slice groups now present in the ADS.",
         )
 
     def validateInputs(self):
@@ -98,31 +102,39 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         output_ws_base_name = self.getPropertyValue("OutputWorkspaceName")
 
         if input_ws.isGroup():
-            if not input_monitor_ws.isGroup():
-                input_monitor_ws = [input_monitor_ws] * len(input_ws)
-            sliced_workspaces = []
-            for i, (input_ws, monitor_ws) in enumerate(zip(input_ws, input_monitor_ws)):
-                self._output_ws_group_name = f"{input_ws.name()}_{monitor_ws.name()}_{output_ws_base_name}"
-                output_ws_group, monitor_ws_group = self._exec_single_workspace(input_ws, monitor_ws, output_workspace_suffix=f"_{i}")
-                sliced_workspaces.append(output_ws_group)
-                self._clean_up(monitor_ws_group)
-            # Transform the workspace groups so that each slice has a workspace group with the same shape as the original input workspace.
-            if not all(len(sliced_workspaces[0]) == len(ws) for ws in sliced_workspaces[1:]):
-                raise RuntimeError(
-                    f"All input workspaces must produce the same number of workspaces when sliced."
-                    f"FilterEvents will silently produce fewer than the prescribed number of slices if those slices would be empty."
-                    f"Check your slicing parameters and try again. Slices per input: {str([len(ws) for ws in sliced_workspaces])}"
-                )
-            for slice in zip(*sliced_workspaces):
-                slice_group = self._group_workspaces(list(slice))
-                mtd.addOrReplace(self._create_name_for_slice_group(output_ws_base_name, slice_group), slice_group)
-            for ws in sliced_workspaces:
-                self._ungroup_ws(ws)
+            self._exec_group(input_ws, input_monitor_ws, output_ws_base_name)
         else:
             self._output_ws_group_name = output_ws_base_name
             output_ws_group, monitor_ws_group = self._exec_single_workspace(input_ws, input_monitor_ws)
             self._clean_up(monitor_ws_group)
             mtd.addOrReplace(output_ws_group.name(), output_ws_group)
+            self.setProperty("OutputWorkspaceNames", [output_ws_group.name()])
+
+    def _exec_group(self, input_ws, input_monitor_ws, output_ws_base_name):
+        if not input_monitor_ws.isGroup():
+            input_monitor_ws = [input_monitor_ws] * len(input_ws)
+        sliced_workspaces = []
+        for i, (input_ws, monitor_ws) in enumerate(zip(input_ws, input_monitor_ws)):
+            self._output_ws_group_name = f"{input_ws.name()}_{monitor_ws.name()}_{output_ws_base_name}"
+            output_ws_group, monitor_ws_group = self._exec_single_workspace(input_ws, monitor_ws, output_workspace_suffix=f"_{i}")
+            sliced_workspaces.append(output_ws_group)
+            self._clean_up(monitor_ws_group)
+        # Transform the workspace groups so that each slice has a workspace group with the same shape as the original input workspace.
+        if not all(len(sliced_workspaces[0]) == len(ws) for ws in sliced_workspaces[1:]):
+            raise RuntimeError(
+                f"All input workspaces must produce the same number of workspaces when sliced."
+                f"FilterEvents will silently produce fewer than the prescribed number of slices if those slices would be empty."
+                f"Check your slicing parameters and try again. Slices per input: {str([len(ws) for ws in sliced_workspaces])}"
+            )
+        output_names = []
+        for slice in zip(*sliced_workspaces):
+            slice_group = self._group_workspaces(list(slice))
+            slice_group_name = self._create_name_for_slice_group(output_ws_base_name, slice_group)
+            mtd.addOrReplace(slice_group_name, slice_group)
+            output_names.append(slice_group_name)
+        for ws in sliced_workspaces:
+            self._ungroup_ws(ws)
+        self.setProperty("OutputWorkspaceNames", output_names)
 
     def _exec_single_workspace(self, input_ws, input_monitor_ws, output_workspace_suffix=""):
         output_ws_group = self._slice_input_workspace(input_ws, output_workspace_suffix)

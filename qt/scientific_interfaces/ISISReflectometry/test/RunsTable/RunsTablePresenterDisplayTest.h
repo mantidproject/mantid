@@ -88,7 +88,8 @@ public:
     selectedRowLocationsAre(m_jobs, {location(0)});
     presenter.notifySelectionChanged();
     getGroup(presenter, 0).setSuccess();
-    getGroup(presenter, 0).setOutputNames(std::vector<std::string>{"stitched_group"});
+    getGroup(presenter, 0).resetOutputs();
+    getGroup(presenter, 0).setOutputNames({{"stitched_group"}});
 
     auto const expected = std::vector<std::string>{"stitched_group"};
     EXPECT_CALL(m_plotter, plot(PlotRequest{expected, reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve,

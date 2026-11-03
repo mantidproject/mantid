@@ -18,7 +18,7 @@ public:
   MOCK_METHOD(bool, isGroup, (), (const, override));
   MOCK_METHOD(bool, isPreview, (), (const, override));
   MOCK_METHOD(void, renameOutputWorkspace, (std::string const &, std::string const &), (override));
-  MOCK_METHOD(void, setOutputNames, (std::vector<std::string> const &), (override));
+  MOCK_METHOD(void, setOutputNames, (std::vector<std::vector<std::string>> const &), (override));
   MOCK_METHOD(int, totalItems, (), (const, override));
   MOCK_METHOD(int, completedItems, (), (const, override));
   MOCK_METHOD(void, notifyChildStateChanged, (), (override));
@@ -28,7 +28,7 @@ public:
   MOCK_METHOD(void, setName, (std::string const &), (override));
   MOCK_METHOD(bool, hasPostprocessing, (), (const, override));
   MOCK_METHOD(bool, requiresPostprocessing, (bool), (const, override));
-  MOCK_METHOD(std::string, postprocessedWorkspaceName, (), (const, override));
+  MOCK_METHOD(std::vector<std::string>, postprocessedWorkspaceNames, (), (const, override));
 
   MOCK_METHOD(void, appendEmptyRow, (), (override));
   MOCK_METHOD(void, appendRow, (std::optional<Row> const &), (override));

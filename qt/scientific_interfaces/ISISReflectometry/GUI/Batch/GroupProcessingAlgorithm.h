@@ -22,8 +22,9 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry::GroupProcessing {
 
 using AlgorithmRuntimeProps = Mantid::API::IAlgorithmRuntimeProps;
 
-MANTIDQT_ISISREFLECTOMETRY_DLL MantidQt::API::IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model,
-                                                                                                  Group &group);
+MANTIDQT_ISISREFLECTOMETRY_DLL MantidQt::API::IConfiguredAlgorithm_sptr
+createConfiguredAlgorithm(IBatch const &model, Group &group, std::vector<std::string> const &workspaces,
+                          bool resetOutputsOnStart = true);
 MANTIDQT_ISISREFLECTOMETRY_DLL std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps>
-createAlgorithmRuntimeProps(IBatch const &model, Group const &group);
+createAlgorithmRuntimeProps(IBatch const &model, Group const &group, std::vector<std::string> const &workspaces);
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::GroupProcessing

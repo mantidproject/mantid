@@ -47,9 +47,9 @@ ReductionWorkspaces const &Row::reducedWorkspaceNames() const { return m_reduced
 
 const std::optional<size_t> &Row::lookupIndex() const { return m_lookupIndex; }
 
-void Row::setOutputNames(std::vector<std::string> const &outputNames) {
+void Row::setOutputNames(std::vector<std::vector<std::string>> const &outputNames) {
   if (outputNames.size() != 3)
-    throw std::runtime_error("Invalid number of output workspaces for row");
+    throw std::runtime_error("Invalid number of output workspace vectors for row");
 
   m_reducedWorkspaceNames.setOutputNames(outputNames[0], outputNames[1], outputNames[2]);
 }
