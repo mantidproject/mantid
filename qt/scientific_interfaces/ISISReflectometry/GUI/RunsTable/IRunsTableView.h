@@ -74,6 +74,8 @@ public:
   virtual std::string getInstrumentName() const = 0;
   virtual void setInstrumentName(std::string const &instrumentName) = 0;
 
+  virtual void setAdjustedAngleColumnVisible(bool visible) = 0;
+
   virtual void setJobsTableEnabled(bool enable) = 0;
   virtual void setInstrumentSelectorEnabled(bool enable) = 0;
   virtual void setProcessButtonEnabled(bool enable) = 0;

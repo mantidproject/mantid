@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "PlottingModel.h"
+#include "GUI/Common/RunWorkspaceResolver.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -21,7 +22,6 @@
 #include <exception>
 #include <iterator>
 #include <memory>
-#include <numeric>
 #include <optional>
 #include <stdexcept>
 #include <unordered_map>
@@ -209,71 +209,6 @@ Mantid::API::MatrixWorkspace_sptr createPeakCentreWorkspace(Mantid::API::MatrixW
   return peakCentreWorkspace;
 }
 
-bool workspaceHasRunNumber(Mantid::API::MatrixWorkspace const &workspace, std::string const &runNumber) {
-  auto const &run = workspace.run();
-  return run.hasProperty("run_number") && run.getProperty("run_number")->value() == runNumber;
-}
-
-bool workspaceHasCurrentPeriod(Mantid::API::MatrixWorkspace const &workspace, int const period) {
-  auto const &run = workspace.run();
-  try {
-    return run.hasProperty("current_period") && run.getPropertyAsIntegerValue("current_period") == period;
-  } catch (std::exception const &) {
-    return false;
-  }
-}
-
-bool workspaceMatchesRunAndPeriod(Mantid::API::MatrixWorkspace const &workspace,
-                                  PlottingWorkspace const &plottingWorkspace, std::string const &expectedRunNumber) {
-  if (!workspaceHasRunNumber(workspace, expectedRunNumber)) {
-    return false;
-  }
-  return !plottingWorkspace.periodNumber || workspaceHasCurrentPeriod(workspace, *plottingWorkspace.periodNumber);
-}
-
-Mantid::API::MatrixWorkspace_sptr matchingTOFWorkspace(Mantid::API::Workspace_sptr const &workspace,
-                                                       PlottingWorkspace const &plottingWorkspace,
-                                                       std::string const &expectedRunNumber) {
-  if (auto matrixWorkspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace)) {
-    return workspaceMatchesRunAndPeriod(*matrixWorkspace, plottingWorkspace, expectedRunNumber) ? matrixWorkspace
-                                                                                                : nullptr;
-  }
-  if (auto group = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(workspace)) {
-    for (size_t index = 0; index < group->size(); ++index) {
-      if (auto match = matchingTOFWorkspace(group->getItem(index), plottingWorkspace, expectedRunNumber)) {
-        return match;
-      }
-    }
-  }
-  return nullptr;
-}
-
-Mantid::API::MatrixWorkspace_sptr rawTOFWorkspaceFor(PlottingWorkspace const &plottingWorkspace) {
-  if (plottingWorkspace.runNumbers.empty()) {
-    return nullptr;
-  }
-
-  auto const expectedRunNumber =
-      std::accumulate(std::next(plottingWorkspace.runNumbers.begin()), plottingWorkspace.runNumbers.end(),
-                      plottingWorkspace.runNumbers.front(), [](std::string joined, std::string const &run) {
-                        joined += '+';
-                        joined += run;
-                        return joined;
-                      });
-  auto &ads = Mantid::API::AnalysisDataService::Instance();
-  // Summed inputs remain outside the TOF groups after reduction.
-  for (auto const &name :
-       std::vector<std::string>{"TOF", "__TOF", "TOF_" + expectedRunNumber, "__TOF_" + expectedRunNumber}) {
-    if (!ads.doesExist(name)) {
-      continue;
-    }
-    if (auto match = matchingTOFWorkspace(ads.retrieve(name), plottingWorkspace, expectedRunNumber)) {
-      return match;
-    }
-  }
-  return nullptr;
-}
-
 std::optional<std::pair<std::string, std::string>>
 spinAsymmetryUpDownWorkspaces(std::vector<std::string> const &workspaces) {
   // Reflectometry polarization correction algorithms output workspace groups in canonical spin-state order,
@@ -387,7 +322,7 @@ std::string detectorMapWorkspaceName(PlottingWorkspace const &workspace, Detecto
 std::string createAlignmentWorkspace(PlottingWorkspace const &workspace, AlignmentXAxis const xAxis,
                                      std::string const &instrumentName) {
   auto &ads = Mantid::API::AnalysisDataService::Instance();
-  auto const rawWorkspace = rawTOFWorkspaceFor(workspace);
+  auto const rawWorkspace = findInputWorkspace(workspace.runNumbers, workspace.periodNumber, {workspace.workspaceName});
   if (!rawWorkspace) {
     return "";
   }
@@ -440,7 +375,7 @@ std::vector<std::string> createAlignmentWorkspaces(std::vector<PlottingWorkspace
 std::string createDetectorMapWorkspace(PlottingWorkspace const &workspace, DetectorMapXAxis const xAxis,
                                        DetectorMapYAxis const yAxis, std::string const &instrumentName) {
   auto &ads = Mantid::API::AnalysisDataService::Instance();
-  auto const rawWorkspace = rawTOFWorkspaceFor(workspace);
+  auto const rawWorkspace = findInputWorkspace(workspace.runNumbers, workspace.periodNumber, {workspace.workspaceName});
   if (!rawWorkspace) {
     return "";
   }
