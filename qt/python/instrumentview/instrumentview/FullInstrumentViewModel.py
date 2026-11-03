@@ -384,6 +384,9 @@ class FullInstrumentViewModel:
         if len(workspace_indices) == 0:
             return (0, 0)
 
+        # Several detectors can share a spectrum, and each spectrum only needs reading once
+        workspace_indices = np.unique(workspace_indices)
+
         if not workspace.isRaggedWorkspace() and workspace.isCommonBins():
             limits = tuple(workspace.x(int(workspace_indices[0]))[[0, -1]])
         else:
