@@ -1712,35 +1712,23 @@ std::string ShapeFactory::addAppliedGoniometerTag(const Kernel::Matrix<double> &
   return insertMatrixTag("applied-goniometer", bakedRotation, std::move(xml));
 }
 
-namespace {
-/// The matrix held in the named tag of a shape XML string, or nullopt when the tag is absent.
-/// Attributes missing or malformed are left at their identity value.
-std::optional<Kernel::Matrix<double>> matrixFromXMLTag(const std::string &xml, const std::string &tagName) {
-  constexpr auto npos = std::string::npos;
-  const std::size_t foundTag = xml.find("<" + tagName);
-  if (foundTag == npos) {
+/// The matrix held in the named tag of a shape XML string, read as createShape reads it, or nullopt
+/// when there is no such tag or the XML does not parse.
+std::optional<Kernel::Matrix<double>> ShapeFactory::matrixFromXMLTag(const std::string &xml,
+                                                                     const std::string &tagName) {
+  Poco::AutoPtr<Document> pDoc;
+  try {
+    // wrapped as createShape(std::string) does, so a bare list of primitives parses too
+    pDoc = DOMParser().parseString("<type name=\"userShape\"> " + xml + " </type>");
+  } catch (...) {
     return std::nullopt;
   }
-  const std::string tag = xml.substr(foundTag, xml.find(">", foundTag + 1) - foundTag);
-
-  Kernel::Matrix<double> matrix(3, 3, true);
-  for (size_t i = 0; i < 3; ++i) {
-    for (size_t j = 0; j < 3; ++j) {
-      const std::string name = "a" + std::to_string(i + 1) + std::to_string(j + 1);
-      const std::size_t attr = tag.find(name);
-      const std::size_t equals = attr == npos ? npos : tag.find("=", attr + name.size());
-      // Either quote character: written here with single quotes, but createShape sends the XML back
-      // through Poco's writer, whose quoting style is not ours to assume.
-      const std::size_t open = equals == npos ? npos : tag.find_first_of("'\"", equals);
-      const std::size_t close = open == npos ? npos : tag.find(tag[open], open + 1);
-      if (close != npos) {
-        matrix[i][j] = std::stod(tag.substr(open + 1, close - open - 1));
-      }
-    }
+  Poco::AutoPtr<NodeList> pNL = pDoc->getElementsByTagName(tagName);
+  if (pNL->length() == 0) {
+    return std::nullopt;
   }
-  return matrix;
+  return parseMatrixElement(static_cast<Element *>(pNL->item(0)));
 }
-} // namespace
 
 Kernel::Matrix<double> ShapeFactory::goniometerFromXML(const std::string &xml) {
   return matrixFromXMLTag(xml, "goniometer").value_or(Kernel::Matrix<double>(3, 3, true));

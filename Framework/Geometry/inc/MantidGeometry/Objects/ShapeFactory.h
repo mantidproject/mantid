@@ -14,6 +14,7 @@
 #include "MantidKernel/V3D.h"
 #ifndef Q_MOC_RUN
 #include <memory>
+#include <optional>
 #endif
 #include <map>
 
@@ -139,11 +140,12 @@ private:
 
   Poco::XML::Element *getShapeElement(Poco::XML::Element *pElem, const std::string &name);
   Poco::XML::Element *getOptionalShapeElement(Poco::XML::Element *pElem, const std::string &name);
-  double getDoubleAttribute(Poco::XML::Element *pElem, const std::string &name);
+  static double getDoubleAttribute(Poco::XML::Element *pElem, const std::string &name);
   Kernel::V3D parsePosition(Poco::XML::Element *pElem);
   void createGeometryHandler(Poco::XML::Element *, const std::shared_ptr<CSGObject> &);
   static std::string insertMatrixTag(const std::string &tagName, const Kernel::Matrix<double> &matrix, std::string xml);
-  Kernel::Matrix<double> parseMatrixElement(Poco::XML::Element *pElem);
+  static Kernel::Matrix<double> parseMatrixElement(Poco::XML::Element *pElem);
+  static std::optional<Kernel::Matrix<double>> matrixFromXMLTag(const std::string &xml, const std::string &tagName);
 
   Kernel::Matrix<double> m_gonioRotateMatrix = Kernel::Matrix<double>(3, 3, 1);
   Kernel::Matrix<double> m_rotateAllMatrix = Kernel::Matrix<double>(3, 3, 1);
