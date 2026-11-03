@@ -522,8 +522,6 @@ void MeshObject::scale(const double scaleFactor) {
  */
 void MeshObject::multiply(const Kernel::Matrix<double> &matrix) {
   if ((matrix.numCols() != 4) || (matrix.numRows() != 4)) {
-    // a bare string literal here cannot be caught by the std::exception handlers used everywhere
-    // else, so it escapes as an unhandled exception rather than an algorithm error
     throw std::invalid_argument("Transformation matrix must be 4 x 4");
   }
 

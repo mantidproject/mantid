@@ -148,8 +148,9 @@ std::shared_ptr<CSGObject> ShapeFactory::createShape(Poco::XML::Element *pElem) 
   } else if (pElemApplied) {
     bakedRotation = parseMatrixElement(pElemApplied);
   } else {
-    // Shapes written before the tag existed used <goniometer> only for a bake, so treat the whole
-    // of it as one. This keeps XML saved by earlier versions reading back the way it used to.
+    // No <applied-goniometer>: read the whole <goniometer> as a bake, which is what CopySample and
+    // SetSample wrote. RotateSampleShape also wrote a lone tag, holding Rs * R, and that cannot be told
+    // apart here, so its Rs is misread as part of the bake.
     bakedRotation = m_gonioRotateMatrix;
   }
   retVal->setAppliedGoniometerRotation(bakedRotation);
@@ -1741,7 +1742,7 @@ Kernel::Matrix<double> ShapeFactory::appliedGoniometerFromXML(const std::string 
     // On its own the tag describes nothing and createShape ignores it, so nothing has been baked.
     return matrixFromXMLTag(xml, "goniometer") ? *applied : Kernel::Matrix<double>(3, 3, true);
   }
-  // Shapes written before <applied-goniometer> existed used <goniometer> only for a bake.
+  // the whole of a lone <goniometer> is taken to be a bake, as in createShape
   return goniometerFromXML(xml);
 }
 

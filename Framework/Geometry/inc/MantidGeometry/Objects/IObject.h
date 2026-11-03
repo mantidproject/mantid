@@ -49,24 +49,12 @@ public:
   virtual void setFiniteGeometryFlag(bool) {}
   virtual bool hasValidShape() const = 0;
 
-  /** The goniometer rotation baked into this shape.
+  /** The goniometer rotation baked into this shape, i.e. how far it has been turned into the lab frame.
    *
-   * A shape may be stored in its own frame or already rotated into the lab frame - CopySample bakes
-   * the destination workspace's goniometer in, SetGoniometer alone leaves the shape untouched - and
-   * both leave a goniometer on the run, so this matrix is the only way to tell which, and so to
-   * avoid rotating the shape a second time.
-   *
-   * It reports which frame the shape is in, NOT every rotation it has ever had. Definition-frame
-   * rotations - the file-load orientation of LoadSampleShape and the sample environment spec,
-   * "rotate-all" and per-primitive "rotate" tags, and RotateSampleShape - re-express the shape
-   * within its own frame and are deliberately excluded. Identity therefore means the shape is
-   * expressed in its own frame, however much its definition has been rotated within that frame.
-   *
-   * Precisely, it is the ordered product of the bakes the shape has been given: outermost among
-   * those, but not necessarily outermost overall, since a definition-frame rotation applied after a
-   * bake ends up outside it. A mesh cannot record anything finer - its vertices are the only account
-   * of how far it has turned - and the CSG side composes to match. Re-baking stays correct: stripping
-   * the old bake and applying the new one conjugates that later rotation into the new frame.
+   * CopySample bakes the goniometer in but SetGoniometer leaves the shape alone, so this is what stops
+   * getLabFrameShape rotating a shape twice. Rotations within the shape's own frame (LoadSampleShape
+   * orientation, rotate-all and rotate tags, RotateSampleShape) are excluded, so identity means the
+   * shape is in its own frame. Successive bakes compose with the later one outermost.
    */
   virtual const Kernel::Matrix<double> &getAppliedRotation() const {
     static const Kernel::Matrix<double> identity(3, 3, true);
