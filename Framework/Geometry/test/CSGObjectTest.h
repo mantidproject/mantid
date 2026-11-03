@@ -79,6 +79,27 @@ public:
     TS_ASSERT_EQUALS(copy.getSurfaceIndex(), original.getSurfaceIndex());
   }
 
+  void testCopiesKeepTheRotationAlreadyApplied() {
+    // the copy's surfaces are already rotated, so it must report the same rotation as its source
+    auto original_ptr = ComponentCreationHelper::createSphere(1.0);
+    auto &original = dynamic_cast<CSGObject &>(*original_ptr);
+    const Kernel::Matrix<double> goniometer(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+    original.setAppliedGoniometerRotation(goniometer);
+
+    CSGObject copy(original);
+    TS_ASSERT_EQUALS(copy.getAppliedRotation(), goniometer);
+
+    CSGObject assigned;
+    assigned = original;
+    TS_ASSERT_EQUALS(assigned.getAppliedRotation(), goniometer);
+
+    std::unique_ptr<IObject> cloned(original.clone());
+    TS_ASSERT_EQUALS(cloned->getAppliedRotation(), goniometer);
+
+    std::unique_ptr<IObject> clonedWithMaterial(original.cloneWithMaterial(Kernel::Material()));
+    TS_ASSERT_EQUALS(clonedWithMaterial->getAppliedRotation(), goniometer);
+  }
+
   void testAssignmentOperatorGivesObjectWithSameAttributes() {
     auto original_ptr = ComponentCreationHelper::createSphere(1.0);
     auto &original = dynamic_cast<CSGObject &>(*original_ptr);

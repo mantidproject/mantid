@@ -9,6 +9,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/SolidAngleParams.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
+#include "MantidKernel/Matrix.h"
 #include <map>
 #include <memory>
 #include <optional>
@@ -47,6 +48,18 @@ public:
   virtual bool isFiniteGeometry() const { return true; }
   virtual void setFiniteGeometryFlag(bool) {}
   virtual bool hasValidShape() const = 0;
+
+  /** The goniometer rotation baked into this shape, i.e. how far it has been turned into the lab frame.
+   *
+   * CopySample bakes the goniometer in but SetGoniometer leaves the shape alone, so this is what stops
+   * getLabFrameShape rotating a shape twice. Rotations within the shape's own frame (LoadSampleShape
+   * orientation, rotate-all and rotate tags, RotateSampleShape) are excluded, so identity means the
+   * shape is in its own frame. Successive bakes compose with the later one outermost.
+   */
+  virtual const Kernel::Matrix<double> &getAppliedRotation() const {
+    static const Kernel::Matrix<double> identity(3, 3, true);
+    return identity;
+  }
   virtual IObject *clone() const = 0;
   virtual IObject *cloneWithMaterial(const Kernel::Material &material) const = 0;
 

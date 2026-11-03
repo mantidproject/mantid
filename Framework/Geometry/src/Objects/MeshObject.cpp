@@ -471,12 +471,26 @@ std::shared_ptr<GeometryHandler> MeshObject::getGeometryHandler() const {
 }
 
 /**
- * Rotate the mesh according to the supplied rotation matrix
+ * Rotate the mesh according to the supplied rotation matrix.
+ *
+ * Definition-frame only, so getAppliedRotation() is deliberately left alone. Use
+ * bakeGoniometerRotation to move into the lab frame.
+ *
  * @param rotationMatrix Rotation matrix to be applied
  */
 void MeshObject::rotate(const Kernel::Matrix<double> &rotationMatrix) {
   std::for_each(m_vertices.begin(), m_vertices.end(),
                 [&rotationMatrix](auto &vertex) { vertex.rotate(rotationMatrix); });
+}
+
+/// The later bake goes on the outside - see IObject::getAppliedRotation.
+void MeshObject::bakeGoniometerRotation(const Kernel::Matrix<double> &rotationMatrix) {
+  rotate(rotationMatrix);
+  m_appliedRotation = rotationMatrix * m_appliedRotation;
+}
+
+void MeshObject::setAppliedGoniometerRotation(const Kernel::Matrix<double> &bakedRotation) {
+  m_appliedRotation = bakedRotation;
 }
 
 /**
@@ -499,12 +513,16 @@ void MeshObject::scale(const double scaleFactor) {
 
 /**
  * Transform the mesh (scale, translate, rotate) according to the
- * supplied transformation matrix
+ * supplied transformation matrix.
+ *
+ * Definition-frame only: a general affine may scale, shear or translate, so it cannot be expressed
+ * as a goniometer bake at all.
+ *
  * @param matrix 4 x 4 transformation matrix
  */
 void MeshObject::multiply(const Kernel::Matrix<double> &matrix) {
   if ((matrix.numCols() != 4) || (matrix.numRows() != 4)) {
-    throw "Transformation matrix must be 4 x 4";
+    throw std::invalid_argument("Transformation matrix must be 4 x 4");
   }
 
   // create homogenous coordinates for the input vector with 4th element
@@ -585,6 +603,11 @@ void MeshObject::saveNexus(Nexus::File *file, const std::string &group) const {
     faceIndices[i] = static_cast<uint32_t>(i * 3);
   }
   file->writeData("faces", faceIndices);
+
+  // Written only when non-identity, so files of a shape in its own frame are byte-for-byte as before
+  if (m_appliedRotation != Kernel::Matrix<double>(3, 3, true)) {
+    file->writeData("applied_goniometer_rotation", m_appliedRotation.getVector());
+  }
   file->closeGroup();
 }
 
@@ -600,6 +623,14 @@ std::shared_ptr<MeshObject> MeshObject::loadNexus(Nexus::File *file, const std::
 
   std::vector<uint32_t> faceIndices;
   file->readData("faces", faceIndices);
+
+  // Absent for a shape in its own frame and for any file written before this was saved, both of
+  // which mean identity. Has to be read before the group is closed.
+  std::vector<double> appliedRotation;
+  const bool hasAppliedRotation = file->hasData("applied_goniometer_rotation");
+  if (hasAppliedRotation) {
+    file->readData("applied_goniometer_rotation", appliedRotation);
+  }
 
   file->closeGroup();
 
@@ -626,7 +657,17 @@ std::shared_ptr<MeshObject> MeshObject::loadNexus(Nexus::File *file, const std::
     }
   }
 
-  return std::make_shared<MeshObject>(std::move(triangles), std::move(vertices), material);
+  auto object = std::make_shared<MeshObject>(std::move(triangles), std::move(vertices), material);
+  if (hasAppliedRotation) {
+    // skipping it instead would leave the rotated vertices looking unrotated, to be rotated again
+    if (appliedRotation.size() != 9) {
+      throw std::invalid_argument("applied_goniometer_rotation in '" + group + "' must hold 9 values, not " +
+                                  std::to_string(appliedRotation.size()));
+    }
+    // Record only - the vertices just read are already rotated, so baking here would double it
+    object->setAppliedGoniometerRotation(Kernel::Matrix<double>(appliedRotation));
+  }
+  return object;
 }
 
 } // namespace Mantid::Geometry
