@@ -548,6 +548,13 @@ class TestFullInstrumentViewModel(unittest.TestCase):
 
                 self.assertEqual(expected, model._extract_limits_from_workspace(workspace))
 
+    def test_limits_read_a_spectrum_shared_by_several_detectors_once(self):
+        model, _ = self._setup_model([1, 2, 3])
+        workspace = self._workspace_with_x(np.array([[1.0, 2.0, 3.0], [10.0, 20.0, 30.0]]), ragged=False, common_bins=False)
+
+        self.assertEqual((1.0, 30.0), model._extract_limits_from_workspace(workspace, np.array([0, 0, 1, 1])))
+        self.assertEqual(2, workspace.x.call_count)
+
     def test_limits_are_zero_when_no_x_value_is_finite(self):
         model, _ = self._setup_model([1, 2, 3])
         workspace = self._workspace_with_x(np.array([[np.inf, np.inf]]), ragged=False, common_bins=True)
