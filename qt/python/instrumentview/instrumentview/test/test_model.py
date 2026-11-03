@@ -97,7 +97,6 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.componentInfo.return_value = MagicMock()
         mock_workspace.y.return_value = MagicMock()
         mock_workspace.getNumberHistograms.return_value = len(detector_ids)
-        mock_workspace.extractX.return_value = np.tile(np.arange(len(detector_ids)), (len(detector_ids), 1))
         mock_workspace.x.return_value = np.arange(len(detector_ids))
         mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = [100 * i for i in detector_ids]
         mock_workspace.clone.return_value = mock_workspace
@@ -519,7 +518,8 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     def test_integration_limits_on_non_ragged_workspace(self):
         model, mock_workspace = self._setup_model([1, 2, 3])
         mock_workspace.isRaggedWorkspace.return_value = False
-        mock_workspace.extractX.return_value = np.array([[1, 2, 3], [10, 20, 30], [10, 20, 50]])
+        data_x = np.array([[1, 2, 3], [10, 20, 30], [10, 20, 50]])
+        mock_workspace.x.side_effect = lambda i: data_x[i]
         model.setup()
         model._integration_workspace = mock_workspace
         self.assertEqual(model.integration_limits, (1, 50))
@@ -529,7 +529,6 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         workspace.getNumberHistograms.return_value = len(data_x)
         workspace.isRaggedWorkspace.return_value = ragged
         workspace.isCommonBins.return_value = common_bins
-        workspace.extractX.return_value = data_x
         workspace.x.side_effect = lambda i: data_x[i]
         return workspace
 
@@ -1537,15 +1536,18 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self.assertEqual(model.full_integration_limits, (5.0, 200.0))
 
     def test_calculate_and_set_full_integration_range_non_ragged_non_common(self):
-        """Test that _calculate_and_set_full_integration_range uses extractX for non-ragged, non-common bins."""
+        """Test that _calculate_and_set_full_integration_range reads the spectra one at a time for non-ragged, non-common bins,
+        as extractX would copy every bin edge in the workspace."""
         model, mock_workspace = self._setup_model([1, 2, 3])
         mock_workspace.isRaggedWorkspace.return_value = False
         mock_workspace.isCommonBins.return_value = False
-        mock_workspace.extractX.return_value = np.array([[1.0, 2.0, 3.0], [10.0, 20.0, 30.0], [5.0, 15.0, 50.0]])
+        data_x = np.array([[1.0, 2.0, 3.0], [10.0, 20.0, 30.0], [5.0, 15.0, 50.0]])
+        mock_workspace.x.side_effect = lambda i: data_x[i]
         valid_mask = np.array([True, True, True])
         model._calculate_and_set_full_integration_range(valid_mask)
         self.assertEqual(model.integration_limits, (1.0, 50.0))
         self.assertEqual(model.full_integration_limits, (1.0, 50.0))
+        mock_workspace.extractX.assert_not_called()
 
     def test_calculate_and_set_full_integration_range_excludes_masked_detectors_ragged(self):
         """Test that masking detectors with a wider x range narrows the integration range on a ragged workspace."""
@@ -1569,7 +1571,8 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.isRaggedWorkspace.return_value = False
         mock_workspace.isCommonBins.return_value = False
         # Detector 0 has range 1-500, detector 2 has range 5-50
-        mock_workspace.extractX.return_value = np.array([[1.0, 250.0, 500.0], [10.0, 50.0, 100.0], [5.0, 25.0, 50.0]])
+        data_x = np.array([[1.0, 250.0, 500.0], [10.0, 50.0, 100.0], [5.0, 25.0, 50.0]])
+        mock_workspace.x.side_effect = lambda i: data_x[i]
         all_valid = np.array([True, True, True])
         model._calculate_and_set_full_integration_range(all_valid)
         self.assertEqual(model.integration_limits, (1.0, 500.0))
