@@ -5,20 +5,31 @@ on:
   push:
     branches: [ornl-next, release-next]
   pull_request:
+    branches: [main]
     paths:
       - .github/workflows/automerge.yml
 
 permissions:
   contents: read
 
+# One run per source branch; a newer pending run supersedes an older one as it contains the same commits.
+# Races with other pushes to main make the push fail (see the merge step).
+concurrency:
+  group: automerge-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   merge-into-main:
     runs-on: ubuntu-latest
-    # Do not run in forks
-    if: ${{ github.repository_owner == 'mantidproject' }}
+    # Only merge release-next or ornl-next (PRs do a dry run) and do not run in forks
+    if: >-
+      github.repository_owner == 'mantidproject' &&
+      (github.event_name == 'pull_request' ||
+       contains(fromJSON('["release-next", "ornl-next"]'), github.ref_name))
 
     env:
       SOURCE_BRANCH: ${{ github.head_ref || github.ref_name }}
+      SOURCE_SHA: ${{ github.sha }}
 
     steps:
       - name: Checkout ${{ env.SOURCE_BRANCH }}
@@ -27,25 +38,20 @@ jobs:
           fetch-depth: 0
           filter: blob:none # get commits but not the blobs until needed
 
-      - name: Record commit to merge
-        id: source
-        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-
-      - name: Switch to main
-        run: git switch -C main origin/main
-
       - name: Set committer information
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Merge ${{ env.SOURCE_BRANCH }} into main
+      - name: Merge ${{ env.SOURCE_BRANCH }} into main and push
         env:
-          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+          DRY_RUN: ${{ github.event_name == 'pull_request' && '--dry-run' || '' }}
+        # If main changes between checkout and push, the push is rejected and the job fails.
+        # Recover by re-running this workflow (or wait for the next push to the source branch).
         run: |
-          git merge --no-ff "${SOURCE_SHA}" \
-            -m "Merge ${SOURCE_BRANCH} into main"
-
-      - name: Push merge commit
-        if: ${{ github.event_name != 'pull_request' }}
-        run: git push origin main
+          git switch -C main origin/main
+          git merge --no-ff "${SOURCE_SHA}" -m "Merge ${SOURCE_BRANCH} into main"
+          if ! git push ${DRY_RUN} origin main; then
+            echo "::error::Failed to push the merge of ${SOURCE_BRANCH} into main. If main changed during this run, re-run this workflow."
+            exit 1
+          fi
