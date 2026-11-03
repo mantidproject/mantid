@@ -59,7 +59,7 @@ public:
     auto output = WorkspaceCreationHelper::create2DWorkspace(1, 2);
     output->mutableRun().addProperty("run_number", std::string("12345"));
     ads.addOrReplace("IvsQ_binned_12345", output);
-    getRow(presenter, 0, 0)->setOutputNames({"", "", "IvsQ_binned_12345"});
+    getRow(presenter, 0, 0)->setOutputNames({{""}, {""}, {"IvsQ_binned_12345"}});
     Item const &row = *getRow(presenter, 0, 0);
     std::vector<Cell> cells;
     EXPECT_CALL(m_jobs, setCellsAt(location(0, 0), _)).Times(4).WillRepeatedly(testing::SaveArg<1>(&cells));
