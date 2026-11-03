@@ -67,6 +67,7 @@ public:
   IObject *clone() const override { return cloneWithMaterial(m_material); }
   IObject *cloneWithMaterial(const Kernel::Material &material) const override {
     auto *copy = new MeshObject(m_triangles, m_vertices, material);
+    copy->m_id = m_id;
     // the copied vertices are already turned, so the copy is baked just as far as this mesh is
     copy->m_appliedRotation = m_appliedRotation;
     return copy;

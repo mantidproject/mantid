@@ -264,6 +264,18 @@ public:
     TS_ASSERT_EQUALS(getLabFrameShape(*meshShape, rotation)->material().name(), meshShape->material().name());
   }
 
+  void test_id_survives_the_move_to_the_lab_frame() {
+    const auto csgShape = createOffsetSphere();
+    csgShape->setID("sample-sphere");
+    TS_ASSERT_EQUALS(getLabFrameShape(*csgShape, rotationZ(90.0))->id(), "sample-sphere");
+
+    const auto meshShape = createCube(2.0);
+    meshShape->setID("sample-mesh");
+    // both mesh paths: one rotates the clone, the other returns it as it is
+    TS_ASSERT_EQUALS(getLabFrameShape(*meshShape, rotationZ(90.0))->id(), "sample-mesh");
+    TS_ASSERT_EQUALS(getLabFrameShape(*meshShape, IDENTITY)->id(), "sample-mesh");
+  }
+
   void test_a_csg_shape_without_xml_cannot_be_moved_to_the_lab_frame() {
     // createSphere assembles surfaces directly rather than parsing, so there is no XML to rewrite
     const auto sphere = ShapeFactory::createSphere(V3D(2.0, 0.0, 0.0), 0.5);
