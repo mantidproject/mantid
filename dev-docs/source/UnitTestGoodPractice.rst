@@ -215,7 +215,7 @@ Suppose this function needs testing:
      const auto posA = a.position();
      const auto posB = b.position();
      double sumSq = 0.0;
-     for (size_t i = 0; i < posA.size(); ++i)
+     for (std::size_t i = 0; i < posA.size(); ++i)
        sumSq += (posA[i] - posB[i]) * (posA[i] - posB[i]);
      return std::sqrt(sumSq);
    }

@@ -440,7 +440,7 @@ are fixes for some common warnings.
 
 .. code-block:: c++
 
-   const size_t numberOfSpectra = inputWS->getNumberHistograms();
+   const std::size_t numberOfSpectra = inputWS->getNumberHistograms();
    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
    for (int64_t i = 0; i < numberOfSpectra; ++i) {
 
