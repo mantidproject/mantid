@@ -15,7 +15,8 @@
 
 class MockReflAlgorithmFactory : public IReflAlgorithmFactory {
 public:
-  MOCK_METHOD(MantidQt::API::IConfiguredAlgorithm_sptr, makePostprocessingAlgorithm, (Group &), (const, override));
+  MOCK_METHOD(MantidQt::API::IConfiguredAlgorithm_sptr, makePostprocessingAlgorithm,
+              (Group &, std::vector<std::string> const &), (const, override));
   MOCK_METHOD(MantidQt::API::IConfiguredAlgorithm_sptr, makeRowProcessingAlgorithm, (Row &), (const, override));
   MOCK_METHOD(MantidQt::API::IConfiguredAlgorithm_sptr, makePreprocessingAlgorithm, (PreviewRow &), (const, override));
   MOCK_METHOD(MantidQt::API::IConfiguredAlgorithm_sptr, makeSumBanksAlgorithm, (PreviewRow &), (const, override));

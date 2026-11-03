@@ -28,15 +28,17 @@ public:
 
   BatchJobAlgorithm(Mantid::API::IAlgorithm_sptr algorithm,
                     std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> properties, UpdateFunction updateFunction,
-                    Item *item);
+                    Item *item, bool resetOutputsOnStart = true);
 
   Item *item() override;
   void updateItem() override;
+  bool resetOutputsOnStart() const override;
 
 private:
   // The data is an item in the table (i.e. a row or group)
   Item *m_item;
   UpdateFunction m_updateFunction;
+  bool m_resetOutputsOnStart;
 };
 
 using BatchJobAlgorithm_sptr = std::shared_ptr<BatchJobAlgorithm>;

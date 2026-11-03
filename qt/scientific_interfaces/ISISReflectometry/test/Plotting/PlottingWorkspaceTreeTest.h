@@ -30,7 +30,7 @@ public:
     addWorkspaceWithRunNumber("IvsQ_12345", "12345");
     auto tree = PlottingWorkspaceTree{};
 
-    tree.rebuild(runsTableWith(successfulRow("12345", {"", "IvsQ_12345", ""})));
+    tree.rebuild(runsTableWith(successfulRow("12345", {{""}, {"IvsQ_12345"}, {""}})));
 
     TS_ASSERT_EQUALS(tree.items().size(), 1);
     TS_ASSERT_EQUALS(tree.items()[0].itemType, PlottingWorkspaceTreeItemType::ReductionGroup);
@@ -47,7 +47,7 @@ public:
     addWorkspaceWithRunNumber("IvsQ_12345+12346", "12345+12346");
     auto row = Row({"12345", "12346"}, 0.5, TransmissionRunPair(), RangeInQ(), std::nullopt, ReductionOptionsMap(),
                    ReductionWorkspaces({}, TransmissionRunPair()));
-    row.setOutputNames({"", "IvsQ_12345+12346", ""});
+    row.setOutputNames({{""}, {"IvsQ_12345+12346"}, {""}});
     row.setSuccess();
     auto tree = PlottingWorkspaceTree{};
     tree.rebuild(runsTableWith(std::move(row)));
@@ -65,7 +65,7 @@ public:
     Mantid::API::AnalysisDataService::Instance().addOrReplace("IvsQ_binned_12345", workspaceGroup);
     auto tree = PlottingWorkspaceTree{};
 
-    tree.rebuild(runsTableWith(successfulRow("12345", {"", "", "IvsQ_binned_12345"})));
+    tree.rebuild(runsTableWith(successfulRow("12345", {{""}, {""}, {"IvsQ_binned_12345"}})));
 
     auto const plottingWorkspaces = tree.plottingWorkspacesForNames({"IvsQ_binned_12345_2"});
     TS_ASSERT_EQUALS(plottingWorkspaces.size(), 1);
@@ -76,7 +76,7 @@ public:
   void testRebuildReplacesExistingItemsAndPlottingWorkspaces() {
     addWorkspaceWithRunNumber("IvsQ_12345", "12345");
     auto tree = PlottingWorkspaceTree{};
-    tree.rebuild(runsTableWith(successfulRow("12345", {"", "IvsQ_12345", ""})));
+    tree.rebuild(runsTableWith(successfulRow("12345", {{""}, {"IvsQ_12345"}, {""}})));
 
     tree.rebuild(RunsTable({}, 0.0, ReductionJobs{}));
 
@@ -91,7 +91,7 @@ private:
     return RunsTable({}, 0.0, ReductionJobs({std::move(group)}));
   }
 
-  Row successfulRow(std::string runNumber, std::vector<std::string> outputs) const {
+  Row successfulRow(std::string runNumber, std::vector<std::vector<std::string>> outputs) const {
     auto row = Row({std::move(runNumber)}, 0.5, TransmissionRunPair(), RangeInQ(), std::nullopt, ReductionOptionsMap(),
                    ReductionWorkspaces({}, TransmissionRunPair()));
     row.setOutputNames(std::move(outputs));

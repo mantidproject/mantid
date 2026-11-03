@@ -274,14 +274,24 @@ private:
     auto cells =
         std::vector<Cell>{Cell("12345"),    Cell("0.500000"), Cell("Trans A"), Cell("Trans B"), Cell("0.500000"),
                           Cell("0.900000"), Cell("0.010000"), Cell(""),        Cell(""),        Cell("")};
+    cells.emplace_back(adjustedAngleCell(makeSimpleRow("12345"), std::nullopt));
     for (auto &cell : cells)
       cell.setBackgroundColor(colour);
     return cells;
   }
 
   std::vector<Cell> rowCellsWithSomeValues() {
-    return std::vector<Cell>{Cell("12345"), Cell("0.500000"), Cell("Trans A"), Cell("Trans B"), Cell(""),
-                             Cell(""),      Cell(""),         Cell(""),        Cell(""),        Cell("")};
+    return std::vector<Cell>{Cell("12345"),
+                             Cell("0.500000"),
+                             Cell("Trans A"),
+                             Cell("Trans B"),
+                             Cell(""),
+                             Cell(""),
+                             Cell(""),
+                             Cell(""),
+                             Cell(""),
+                             Cell(""),
+                             adjustedAngleCell(makeSimpleRow("12345"), std::nullopt)};
   }
 
   void expectGroupStateCleared() {

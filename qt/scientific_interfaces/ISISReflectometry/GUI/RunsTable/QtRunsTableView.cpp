@@ -6,9 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtRunsTableView.h"
 #include "Common/IndexOf.h"
+#include "GUI/Common/InstrumentCategory.h"
+#include "JobsViewUpdater.h"
 #include "MantidKernel/UsageService.h"
 #include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
+#include <QHeaderView>
 #include <QMessageBox>
 #include <QString>
 #include <utility>
@@ -21,8 +24,11 @@ QtRunsTableView::QtRunsTableView(std::vector<std::string> instruments)
   m_ui.progressBar->setRange(0, 100);
   m_jobs = std::make_unique<MantidQt::MantidWidgets::Batch::JobTreeView>(
       QStringList({"Run(s)", "Angle", "1st Trans Run(s)", "2nd Trans Run(s)", "Q min", "Q max", "dQ/Q", "Scale",
-                   "Options", "Lookup Index"}),
+                   "Options", "Lookup Index", "Adjusted Angle"}),
       MantidQt::MantidWidgets::Batch::Cell(""), this);
+  // Keep logical column indices stable for validation and row data. Only the
+  // visual order changes: Adjusted Angle appears immediately after Angle.
+  m_jobs->header()->moveSection(adjustedAngleColumn, 2);
   constexpr double runColScaleFactor = 1.5;
   m_jobs->setColumnWidth(0, int(m_jobs->columnWidth(0) * runColScaleFactor));
   m_ui.mainLayout->insertWidget(2, m_jobs.get());
@@ -35,6 +41,10 @@ QtRunsTableView::QtRunsTableView(std::vector<std::string> instruments)
 
   connect(m_ui.filterBox, SIGNAL(textChanged(QString const &)), this, SLOT(onFilterChanged(QString const &)));
   connect(m_ui.instrumentSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(onInstrumentChanged(int)));
+
+  m_jobs->setColumnHidden(adjustedAngleColumn,
+                          instrumentCategory(m_ui.instrumentSelector->currentText().toStdString()) !=
+                              InstrumentCategory::POLREF);
 
   // Set up the icon
   m_ui.processButton->setIcon(MantidQt::Icons::getIcon("mdi.sigma", "black", 1.3));
@@ -81,6 +91,7 @@ std::string QtRunsTableView::getInstrumentName() const { return m_ui.instrumentS
 
 void QtRunsTableView::setInstrumentName(std::string const &instrumentName) {
   setSelected(*m_ui.instrumentSelector, instrumentName);
+  setAdjustedAngleColumnVisible(instrumentCategory(instrumentName) == InstrumentCategory::POLREF);
 }
 
 void QtRunsTableView::resetFilterBox() { m_ui.filterBox->clear(); }
@@ -94,6 +105,10 @@ void QtRunsTableView::showAlgorithmPropertyHintsInOptionsColumn() {
                              "ThetaIn", "ThetaOut", "InputWorkspace", "OutputWorkspace", "OutputWorkspaceBinned",
                              "OutputWorkspaceWavelength", "FirstTransmissionRun", "SecondTransmissionRun",
                              "MomentumTransferMin", "MomentumTransferMax", "MomentumTransferStep", "ScaleFactor"}));
+}
+
+void QtRunsTableView::setAdjustedAngleColumnVisible(bool visible) {
+  m_jobs->setColumnHidden(adjustedAngleColumn, !visible);
 }
 
 void QtRunsTableView::setJobsTableEnabled(bool enabled) {

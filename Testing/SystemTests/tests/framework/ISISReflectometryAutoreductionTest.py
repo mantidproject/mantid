@@ -182,7 +182,7 @@ def AutoReduce(transRun=[], runRange=[], oldList=[]):
                 if not mtd.doesExist(runno + "_IvsQ"):
                     th = angle
                     if len(transRun) > 1 and angle > 2.25:
-                        wq, wq_unbinned, wlam, wtrans = ReflectometryISISLoadAndProcess(
+                        wq, wq_unbinned, wlam, wtrans, _, _, _ = ReflectometryISISLoadAndProcess(
                             InputRunList=ws,
                             FirstTransmissionRunList=transRun[1],
                             thetaIn=angle,
@@ -192,7 +192,7 @@ def AutoReduce(transRun=[], runRange=[], oldList=[]):
                             OutputWorkspaceBinned=runno + "_IvsQ_binned",
                         )
                     else:
-                        wq, wq_unbinned, wlam, wtrans = ReflectometryISISLoadAndProcess(
+                        wq, wq_unbinned, wlam, wtrans, _, _, _ = ReflectometryISISLoadAndProcess(
                             InputRunList=ws,
                             FirstTransmissionRunList=transRun[0],
                             thetaIn=angle,

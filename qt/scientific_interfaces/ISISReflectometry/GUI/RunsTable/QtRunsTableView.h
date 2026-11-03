@@ -36,6 +36,8 @@ public:
   std::string getInstrumentName() const override;
   void setInstrumentName(std::string const &instrumentName) override;
 
+  void setAdjustedAngleColumnVisible(bool visible) override;
+
   void setJobsTableEnabled(bool enable) override;
   void setInstrumentSelectorEnabled(bool enable) override;
   void setProcessButtonEnabled(bool enable) override;
