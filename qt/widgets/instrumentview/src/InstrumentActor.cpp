@@ -1153,9 +1153,9 @@ QString InstrumentActor::getParameterInfo(size_t index) const {
   return text;
 }
 
-std::string InstrumentActor::getDefaultAxis() const { return m_workspace->getInstrument()->getDefaultAxis(); }
+std::string InstrumentActor::getDefaultAxis() const { return m_workspace->instrumentMetadata().defaultAxis(); }
 
-std::string InstrumentActor::getDefaultView() const { return m_workspace->getInstrument()->getDefaultView(); }
+std::string InstrumentActor::getDefaultView() const { return m_workspace->instrumentMetadata().defaultView(); }
 
 std::string InstrumentActor::getInstrumentName() const {
   const auto &compInfo = componentInfo();
@@ -1163,7 +1163,9 @@ std::string InstrumentActor::getInstrumentName() const {
 }
 
 std::vector<std::string> InstrumentActor::getStringParameter(const std::string &name, bool recursive) const {
-  return m_workspace->getInstrument()->getStringParameter(name, recursive);
+  // Not componentInfo(): in the physical view that is the physical instrument, which carries no parameters.
+  auto const &compInfo = m_workspace->componentInfo();
+  return compInfo.getStringParameter(compInfo.root(), name, recursive);
 }
 /**
  * Save the state of the instrument actor to a project file.
