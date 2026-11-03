@@ -28,11 +28,12 @@ public:
 
   std::vector<std::string> const &inputRunNumbers() const;
   TransmissionRunPair const &transmissionRuns() const;
-  std::string const &iVsLambda() const;
-  std::string const &iVsQ() const;
-  std::string const &iVsQBinned() const;
+  std::vector<std::string> const &iVsLambda() const;
+  std::vector<std::string> const &iVsQ() const;
+  std::vector<std::string> const &iVsQBinned() const;
 
-  void setOutputNames(std::string iVsLambda, std::string iVsQ, std::string iVsQBinned);
+  void setOutputNames(std::vector<std::string> iVsLambda, std::vector<std::string> iVsQ,
+                      std::vector<std::string> iVsQBinned);
   void resetOutputNames();
   bool hasOutputName(std::string const &wsName) const;
   void renameOutput(std::string const &oldName, std::string const &newName);
@@ -40,9 +41,9 @@ public:
 private:
   std::vector<std::string> m_inputRunNumbers;
   TransmissionRunPair m_transmissionRuns;
-  std::string m_iVsLambda;
-  std::string m_iVsQ;
-  std::string m_iVsQBinned;
+  std::vector<std::string> m_iVsLambda;
+  std::vector<std::string> m_iVsQ;
+  std::vector<std::string> m_iVsQBinned;
 
   friend class Encoder;
 };

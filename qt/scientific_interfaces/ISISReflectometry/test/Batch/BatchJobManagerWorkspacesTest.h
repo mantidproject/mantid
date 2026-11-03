@@ -25,7 +25,7 @@ public:
   void testGetWorkspacesToSaveForOnlyRowInGroup() {
     auto jobManager = makeJobManager(oneGroupWithARowModel());
     auto *row = getRow(jobManager, 0, 0);
-    row->setOutputNames({"", "IvsQ", "IvsQBin"});
+    row->setOutputNames({{""}, {"IvsQ"}, {{"IvsQBin"}}});
 
     EXPECT_CALL(*m_jobAlgorithm, item()).Times(AtLeast(1)).WillRepeatedly(Return(row));
 
@@ -37,7 +37,7 @@ public:
   void testGetWorkspacesToSaveForRowInMultiRowGroup() {
     auto jobManager = makeJobManager(oneGroupWithTwoRowsModel());
     auto *row = getRow(jobManager, 0, 0);
-    row->setOutputNames({"", "IvsQ", "IvsQBin"});
+    row->setOutputNames({{""}, {"IvsQ"}, {"IvsQBin"}});
 
     EXPECT_CALL(*m_jobAlgorithm, item()).Times(AtLeast(1)).WillRepeatedly(Return(row));
 
@@ -50,7 +50,7 @@ public:
     auto jobManager = makeJobManager(oneGroupWithTwoRowsModel());
     auto &group = getGroup(jobManager, 0);
     group.setOutputNames({
-        "stitched_test",
+        {"stitched_test"},
     });
 
     EXPECT_CALL(*m_jobAlgorithm, item()).Times(AtLeast(1)).WillRepeatedly(Return(&group));
@@ -63,12 +63,12 @@ public:
     auto jobManager = makeJobManager(oneGroupWithTwoRowsModel());
     auto &group = getGroup(jobManager, 0);
     group.setOutputNames({
-        "stitched_test",
+        {"stitched_test"},
     });
     auto *row1 = getRow(jobManager, 0, 0);
-    row1->setOutputNames({"", "test1", "row_bin_test01"});
+    row1->setOutputNames({{""}, {"test1"}, {"row_bin_test01"}});
     auto *row2 = getRow(jobManager, 0, 1);
-    row2->setOutputNames({"", "test2", "row_bin_test02"});
+    row2->setOutputNames({{""}, {"test2"}, {"row_bin_test02"}});
 
     EXPECT_CALL(*m_jobAlgorithm, item()).Times(AtLeast(1)).WillRepeatedly(Return(&group));
 
@@ -78,11 +78,35 @@ public:
     TS_ASSERT_EQUALS(workspacesToSave, std::vector<std::string>({"stitched_test", "row_bin_test01", "row_bin_test02"}));
   }
 
+  void testGetWorkspacesToSaveForGroupWithIncludeRowsAndSlices() {
+    auto jobManager = makeJobManager(oneGroupWithTwoRowsModel());
+    auto &group = getGroup(jobManager, 0);
+    group.setOutputNames({
+        {"stitched_test_0_1"},
+    });
+    group.setOutputNames({
+        {"stitched_test_1_2"},
+    });
+    auto *row1 = getRow(jobManager, 0, 0);
+    row1->setOutputNames({{"", ""}, {"test1_0_1", "test1_1_2"}, {"row_bin_test01_0_1", "row_bin_test01_1_2"}});
+    auto *row2 = getRow(jobManager, 0, 1);
+    row2->setOutputNames({{"", ""}, {"test2_0_1", "test2_0_1"}, {"row_bin_test02_0_1", "row_bin_test02_1_2"}});
+
+    EXPECT_CALL(*m_jobAlgorithm, item()).Times(AtLeast(1)).WillRepeatedly(Return(&group));
+
+    auto workspacesToSave = jobManager.algorithmOutputWorkspacesToSave(m_jobAlgorithm, true);
+    // The order of items in the vector of workspace names is important - the stitched workspace name must be the first
+    // one to ensure that it is picked up as the filename if saving all workspaces to a single file
+    TS_ASSERT_EQUALS(workspacesToSave,
+                     std::vector<std::string>({"stitched_test_0_1", "stitched_test_1_2", "row_bin_test01_0_1",
+                                               "row_bin_test01_1_2", "row_bin_test02_0_1", "row_bin_test02_1_2"}));
+  }
+
   void testGetWorkspacesToSaveForGroupHasNoRowsWithIncludeRows() {
     auto jobManager = makeJobManager(oneEmptyGroupModel());
     auto &group = getGroup(jobManager, 0);
     group.setOutputNames({
-        "stitched_test",
+        {"stitched_test"},
     });
 
     EXPECT_CALL(*m_jobAlgorithm, item()).Times(AtLeast(1)).WillRepeatedly(Return(&group));
@@ -95,7 +119,7 @@ public:
     auto jobManager = makeJobManager(oneGroupWithAnInvalidRowModel());
     auto &group = getGroup(jobManager, 0);
     group.setOutputNames({
-        "stitched_test",
+        {"stitched_test"},
     });
 
     EXPECT_CALL(*m_jobAlgorithm, item()).Times(AtLeast(1)).WillRepeatedly(Return(&group));
@@ -108,7 +132,7 @@ public:
     auto jobManager = makeJobManager(oneGroupWithTwoRowsModel());
     auto *row = getRow(jobManager, 0, 1);
     row->setSuccess();
-    row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
+    row->setOutputNames({{""}, {"IvsQ_test"}, {"IvsQBin_test"}});
 
     jobManager.notifyWorkspaceDeleted("IvsQBin_test");
     TS_ASSERT_EQUALS(row->state(), State::ITEM_NOT_STARTED);
@@ -118,19 +142,19 @@ public:
     auto jobManager = makeJobManager(oneGroupWithTwoRowsModel());
     auto *row = getRow(jobManager, 0, 1);
     row->setSuccess();
-    row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
+    row->setOutputNames({{""}, {"IvsQ_test"}, {"IvsQBin_test"}});
 
     jobManager.notifyWorkspaceDeleted("IvsQBin_test");
-    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsLambda(), "");
-    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQ(), "");
-    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQBinned(), "");
+    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsLambda(), std::vector<std::string>{});
+    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQ(), std::vector<std::string>{});
+    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQBinned(), std::vector<std::string>{});
   }
 
   void testDeleteWorkspaceResetsStateForGroup() {
     auto jobManager = makeJobManager(oneGroupWithTwoRowsModel());
     auto &group = getGroup(jobManager, 0);
     group.setSuccess();
-    group.setOutputNames({"stitched_test"});
+    group.setOutputNames({{"stitched_test"}});
 
     jobManager.notifyWorkspaceDeleted("stitched_test");
     TS_ASSERT_EQUALS(group.state(), State::ITEM_NOT_STARTED);
@@ -140,17 +164,17 @@ public:
     auto jobManager = makeJobManager(oneGroupWithTwoRowsModel());
     auto &group = getGroup(jobManager, 0);
     group.setSuccess();
-    group.setOutputNames({"stitched_test"});
+    group.setOutputNames({{"stitched_test"}});
 
     jobManager.notifyWorkspaceDeleted("stitched_test");
-    TS_ASSERT_EQUALS(group.postprocessedWorkspaceName(), "");
+    TS_ASSERT_EQUALS(group.postprocessedWorkspaceNames(), std::vector<std::string>{});
   }
 
   void testRenameWorkspaceDoesNotResetStateForRow() {
     auto jobManager = makeJobManager(oneGroupWithTwoRowsModel());
     auto *row = getRow(jobManager, 0, 1);
     row->setSuccess();
-    row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
+    row->setOutputNames({{""}, {"IvsQ_test"}, {"IvsQBin_test"}});
 
     jobManager.notifyWorkspaceRenamed("IvsQBin_test", "IvsQBin_new");
     TS_ASSERT_EQUALS(row->state(), State::ITEM_SUCCESS);
@@ -160,7 +184,7 @@ public:
     auto jobManager = makeJobManager(oneGroupWithTwoRowsModel());
     auto *row = getRow(jobManager, 0, 1);
     row->setSuccess();
-    row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
+    row->setOutputNames({{""}, {"IvsQ_test"}, {"IvsQBin_test"}});
 
     jobManager.notifyWorkspaceRenamed("IvsQBin_new", "IvsQBin_test");
     TS_ASSERT_DIFFERS(row->state(), State::ITEM_SUCCESS);
@@ -170,19 +194,19 @@ public:
     auto jobManager = makeJobManager(oneGroupWithTwoRowsModel());
     auto *row = getRow(jobManager, 0, 1);
     row->setSuccess();
-    row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
+    row->setOutputNames({{""}, {"IvsQ_test"}, {"IvsQBin_test"}});
 
     jobManager.notifyWorkspaceRenamed("IvsQBin_test", "IvsQBin_new");
-    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsLambda(), "");
-    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQ(), "IvsQ_test");
-    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQBinned(), "IvsQBin_new");
+    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsLambda(), std::vector<std::string>{""});
+    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQ(), std::vector<std::string>{"IvsQ_test"});
+    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQBinned(), std::vector<std::string>{"IvsQBin_new"});
   }
 
   void testRenameWorkspaceDoesNotResetStateForGroup() {
     auto jobManager = makeJobManager(oneGroupWithTwoRowsModel());
     auto &group = getGroup(jobManager, 0);
     group.setSuccess();
-    group.setOutputNames({"stitched_test"});
+    group.setOutputNames({{"stitched_test"}});
 
     jobManager.notifyWorkspaceRenamed("stitched_test", "stitched_new");
     TS_ASSERT_EQUALS(group.state(), State::ITEM_SUCCESS);
@@ -192,10 +216,10 @@ public:
     auto jobManager = makeJobManager(oneGroupWithTwoRowsModel());
     auto &group = getGroup(jobManager, 0);
     group.setSuccess();
-    group.setOutputNames({"stitched_test"});
+    group.setOutputNames({{"stitched_test"}});
 
     jobManager.notifyWorkspaceRenamed("stitched_test", "stitched_new");
-    TS_ASSERT_EQUALS(group.postprocessedWorkspaceName(), "stitched_new");
+    TS_ASSERT_EQUALS(group.postprocessedWorkspaceNames()[0], "stitched_new");
   }
 
   void testDeleteAllWorkspacesResetsStateForRowAndGroup() {
@@ -203,9 +227,9 @@ public:
     auto *row = getRow(jobManager, 0, 1);
     auto &group = getGroup(jobManager, 0);
     row->setSuccess();
-    row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
+    row->setOutputNames({{""}, {"IvsQ_test"}, {"IvsQBin_test"}});
     group.setSuccess();
-    group.setOutputNames({"stitched_test"});
+    group.setOutputNames({{"stitched_test"}});
 
     jobManager.notifyAllWorkspacesDeleted();
     TS_ASSERT_EQUALS(row->state(), State::ITEM_NOT_STARTED);
@@ -217,14 +241,14 @@ public:
     auto *row = getRow(jobManager, 0, 1);
     auto &group = getGroup(jobManager, 0);
     row->setSuccess();
-    row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
+    row->setOutputNames({{""}, {"IvsQ_test"}, {"IvsQBin_test"}});
     group.setSuccess();
-    group.setOutputNames({"stitched_test"});
+    group.setOutputNames({{"stitched_test"}});
 
     jobManager.notifyAllWorkspacesDeleted();
-    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsLambda(), "");
-    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQ(), "");
-    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQBinned(), "");
-    TS_ASSERT_EQUALS(group.postprocessedWorkspaceName(), "");
+    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsLambda(), std::vector<std::string>{});
+    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQ(), std::vector<std::string>{});
+    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQBinned(), std::vector<std::string>{});
+    TS_ASSERT_EQUALS(group.postprocessedWorkspaceNames().size(), 0);
   }
 };

@@ -400,6 +400,7 @@ public:
   MOCK_METHOD0(updateItem, void());
   MOCK_CONST_METHOD0(outputWorkspaceNames, std::vector<std::string>());
   MOCK_CONST_METHOD0(outputWorkspaceNameToWorkspace, std::map<std::string, Workspace_sptr>());
+  MOCK_METHOD(bool, resetOutputsOnStart, (), (const, override));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

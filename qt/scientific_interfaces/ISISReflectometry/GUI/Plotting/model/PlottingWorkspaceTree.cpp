@@ -141,8 +141,10 @@ void PlottingWorkspaceTree::rebuild(RunsTable const &runsTable) {
     auto groupItem = PlottingWorkspaceTreeItem{
         group.name(), PlottingWorkspaceTreeItemType::ReductionGroup, ReducedWorkspaceOutputType::None, "", {}};
     if (group.success()) {
-      appendWorkspaceItemIfPresent(groupItem, group.postprocessedWorkspaceName(),
-                                   ReducedWorkspaceOutputType::IvsQBinned, m_plottingWorkspacesByName);
+      for (auto const &workspaceName : group.postprocessedWorkspaceNames()) {
+        appendWorkspaceItemIfPresent(groupItem, workspaceName, ReducedWorkspaceOutputType::IvsQBinned,
+                                     m_plottingWorkspacesByName);
+      }
     }
 
     for (auto const &maybeRow : group.rows()) {
@@ -157,12 +159,15 @@ void PlottingWorkspaceTree::rebuild(RunsTable const &runsTable) {
                                                "",
                                                {}};
       auto const &outputs = row.reducedWorkspaceNames();
-      appendWorkspaceItemIfPresent(runItem, outputs.iVsLambda(), ReducedWorkspaceOutputType::IvsLambda,
-                                   m_plottingWorkspacesByName);
-      appendWorkspaceItemIfPresent(runItem, outputs.iVsQ(), ReducedWorkspaceOutputType::IvsQ,
-                                   m_plottingWorkspacesByName);
-      appendWorkspaceItemIfPresent(runItem, outputs.iVsQBinned(), ReducedWorkspaceOutputType::IvsQBinned,
-                                   m_plottingWorkspacesByName);
+
+      for (size_t i = 0; i < outputs.iVsQ().size(); ++i) {
+        appendWorkspaceItemIfPresent(runItem, outputs.iVsLambda()[i], ReducedWorkspaceOutputType::IvsLambda,
+                                     m_plottingWorkspacesByName);
+        appendWorkspaceItemIfPresent(runItem, outputs.iVsQ()[i], ReducedWorkspaceOutputType::IvsQ,
+                                     m_plottingWorkspacesByName);
+        appendWorkspaceItemIfPresent(runItem, outputs.iVsQBinned()[i], ReducedWorkspaceOutputType::IvsQBinned,
+                                     m_plottingWorkspacesByName);
+      }
 
       if (!runItem.children.empty()) {
         groupItem.children.emplace_back(std::move(runItem));
