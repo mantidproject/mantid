@@ -125,7 +125,7 @@ public:
     addRunWorkspace("TOF_0012345+0012346", "0012345+0012346", 0.625);
     addRunWorkspace("IvsQ_binned", "0012345+0012346", 0.875);
     auto row = makeRow(std::vector<std::string>{"first.nxs", "second.nxs"});
-    row.setOutputNames({"IvsLam", "IvsQ", "IvsQ_binned"});
+    row.setOutputNames({{"IvsLam"}, {"IvsQ"}, {"IvsQ_binned"}});
     TS_ASSERT_EQUALS(adjustedAngleCell(row, 3).contentText(), "0.625");
   }
 
@@ -158,14 +158,14 @@ public:
     auto output = addRunWorkspace("IvsQ_binned_12345_1", "12345", 0.875);
     addGroup("IvsQ_binned_12345", {output});
     auto row = makeSimpleRow("/data/POLREF00012345.nxs");
-    row.setOutputNames({"IvsLam_12345", "IvsQ_12345", "IvsQ_binned_12345"});
+    row.setOutputNames({{"IvsLam_12345"}, {"IvsQ_12345"}, {"IvsQ_binned_12345"}});
     TS_ASSERT_EQUALS(adjustedAngleCell(row, 3).contentText(), "0.625");
   }
 
   void testMissingInputDoesNotUseReducedWorkspaceAdjustedAngle() {
     addRunWorkspace("IvsQ_binned_12345", "12345", 0.875);
     auto row = makeSimpleRow("12345");
-    row.setOutputNames({"IvsLam_12345", "IvsQ_12345", "IvsQ_binned_12345"});
+    row.setOutputNames({{"IvsLam_12345"}, {"IvsQ_12345"}, {"IvsQ_binned_12345"}});
     auto cell = adjustedAngleCell(row, std::nullopt);
     TS_ASSERT(cell.contentText().empty());
     TS_ASSERT(!cell.isEditable());
@@ -216,7 +216,7 @@ private:
   Row withReductionOutput(Row row, std::string const &runNumber = "12345") {
     auto output = addWorkspace("IvsQ_binned");
     output->mutableRun().addProperty("run_number", runNumber);
-    row.setOutputNames({"", "", "IvsQ_binned"});
+    row.setOutputNames({{""}, {""}, {"IvsQ_binned"}});
     return row;
   }
 
