@@ -112,18 +112,18 @@ over the whole workspace:
     plugin->initialize(WorkspaceDescription);
     /** calculate generic variables, which are usually placed in logs and do not depend on detectors positions
        or neutron counts (e.g. temperature) and place these values into proper position in the coordinates vector. */
-    if(!plugin->calcGenericVariables(std::vector<coord_t> &Coord, size_t N_Dimensions))
+    if(!plugin->calcGenericVariables(std::vector<coord_t> &Coord, std::size_t N_Dimensions))
         return; // finish if these data are out of range requested
 
     for(i in array of detectors)
     {
          /** Here we calculate all MD coordinates which depend on detectors position only. The plugin also
          changes the internal plugin values which depend on detector's position e.g. sets up the unit conversion */
-         if(!plugin->calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i))
+         if(!plugin->calcYDepCoordinates(std::vector<coord_t> &Coord,std::size_t i))
              continue;  // skip detector if these data are out of range requested
 
          /** obtain signal and error, array, corresponding to the i-th detector */
-         spectra[i] = InputWorkspace->getSpectraCorrespondingToTheDetector(size_t i);
+         spectra[i] = InputWorkspace->getSpectraCorrespondingToTheDetector(std::size_t i);
 
          /**Convert units into the units, requested by the plugin */
          MantidVector X = convertUnits(spectra[i].X_coordinates);
@@ -133,7 +133,7 @@ over the whole workspace:
             Error  = spectra[i].Error[j];
             /**Calculate remaining MD coordinates and put them into vector of coordinates.
                Modify Signal and error if the signal and error depends on Coord */
-            plugin->calcMatrixCoordinates(const MantidVec& X, size_t i, size_t j,
+            plugin->calcMatrixCoordinates(const MantidVec& X, std::size_t i, std::size_t j,
                                           std::vector<coord_t> &Coord, Signal, Error);
 
             /**Convert Coord signal and error to MD event with coordinate Coord and add the MDEvent to MD workspace*/

@@ -431,4 +431,4 @@ Clang can be used to provide live warnings and runs clang-tidy continuously. Thi
 - Install the clangd extension
 - Install the latest stable clangd, e.g. `clang-tools-n` (where n is the latest version)
 - Go to the clangd settings in VS Code and ensure the correct binary is manually specified
-- Restart VS Code - attempt to write: `int i = (size_t) 1;` and check a warning appears.
+- Restart VS Code - attempt to write: `int i = (std::size_t) 1;` and check a warning appears.

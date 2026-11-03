@@ -23,7 +23,7 @@ General
   - date_time
   - python
   - serialization
-  - others required must be discussed with the TSC
+  - others required must be discussed with the TWG
 
 - Eigen is used for fast linear algebra calculations
 - Poco is also used for:

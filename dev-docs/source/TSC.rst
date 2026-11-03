@@ -1,13 +1,19 @@
 .. _TSC:
 
-============================
-Technical Steering Committee
-============================
+=======================
+Technical Working Group
+=======================
 
-Please see the `TSC terms <https://github.com/mantidproject/documents/blob/main/Project-Management/TechnicalSteeringCommittee/TSC-Terms.md>`__
-for a description of the aims of this committee including a list of current members.
+The Technical Working Group (TWG), formerly the Technical Steering
+Committee (TSC), is described in the `Mantid governance repository
+<https://github.com/mantidproject/governance/tree/main/technical-working-group>`__,
+which includes its `members
+<https://github.com/mantidproject/governance/blob/main/technical-working-group/people.md>`__
+and the `governance document
+<https://github.com/mantidproject/governance/blob/main/governance.md>`__
+that sets out its role.
 
 Contact email: mantid-tech@mantidproject.org
 
-Minutes and reports from Technical Steering Committee meetings can be found
-`here <https://github.com/mantidproject/documents/tree/main/Project-Management/TechnicalSteeringCommittee>`__.
+Minutes of TWG meetings can be found
+`here <https://github.com/mantidproject/governance/tree/main/technical-working-group/minutes>`__.

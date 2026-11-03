@@ -152,7 +152,7 @@ For example, we attempt to time the sum of a value after many calls to an operat
 
       void test_slow_performance() {
         double value(0.0);
-        for(size_t i = 0; i < 1000000) {
+        for(std::size_t i = 0; i < 1000000) {
           value += my_op();
           CxxTest::doNotOptimize(&value);
         }

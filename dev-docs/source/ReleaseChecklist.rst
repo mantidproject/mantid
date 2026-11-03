@@ -83,7 +83,7 @@ management, and other people at their sponsoring facility.
 1 week before Code Freeze
 #########################
 
-*  Before the code freeze is in place the PM and Technical Steering Committee (TSC)
+*  Before the code freeze is in place the Technical Working Group (TWG)
    need to agree the maintenance tasks for the next release period.
 
 Code Freeze

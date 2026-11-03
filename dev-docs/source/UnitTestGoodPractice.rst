@@ -179,11 +179,125 @@ Mocking is a very powerful tool that allows you to simulate components
 in your unit environment and check how your code operates within this
 environment. Mocking allows you to avoid creating Fake objects of any
 kind, and results in fast executing code with a very high test coverage.
-See `Mocking <MVPTutorial/Mocking>`__ in Mantid to find out what it is and how it
+See :doc:`Mocking <MVPTutorial/Mocking>` in Mantid to find out what it is and how it
 works in Python. Once you are familiar with the general concept, C++ has mocking too - see
-`Dependency Injection and Basic Mocking <https://vladris.com/blog/2016/07/06/dependency-injection-in-c.html>`.
+`Dependency Injection and Basic Mocking <https://vladris.com/blog/2016/07/06/dependency-injection-in-c.html>`__
+and the C++ examples below.
 
 .. figure:: images/Mocking.png
    :alt: Object under test using Mocking to isolate the testing.|400px
 
    Object under test using Mocking to isolate the testing.|400px
+
+Mocking isolates the code being tested from its dependencies. Mantid has
+many complex types, which pushes code towards being tightly coupled;
+mocking the dependencies keeps tests focused and highlights missing
+abstractions in a design. Used with test-driven development, mocks let
+you write and test code against an interface before any concrete
+implementation exists.
+
+Fakes and mocks in C++
+----------------------
+
+Suppose this function needs testing:
+
+.. code-block:: c++
+
+   class Detector {
+   public:
+     virtual ~Detector() = default;
+     virtual std::vector<double> position() const = 0;
+     virtual double height() const = 0;
+     virtual double width() const = 0;
+   };
+
+   double detectorDistance(const Detector &a, const Detector &b) {
+     const auto posA = a.position();
+     const auto posB = b.position();
+     double sumSq = 0.0;
+     for (std::size_t i = 0; i < posA.size(); ++i)
+       sumSq += (posA[i] - posB[i]) * (posA[i] - posB[i]);
+     return std::sqrt(sumSq);
+   }
+
+``Detector`` is abstract, so a test needs a concrete type. A hand-written
+fake has to implement every method and, to put two detectors at
+different positions, also needs constructors, setters and member
+variables. A GoogleMock mock needs none of that:
+
+.. code-block:: c++
+
+   class MockDetector : public Detector {
+   public:
+     MOCK_METHOD(std::vector<double>, position, (), (const, override));
+     MOCK_METHOD(double, height, (), (const, override));
+     MOCK_METHOD(double, width, (), (const, override));
+   };
+
+Each test then sets the behaviour it needs:
+
+.. code-block:: c++
+
+   void test_detectorDistance() {
+     using namespace testing;
+     MockDetector a;
+     MockDetector b;
+     EXPECT_CALL(a, position()).WillRepeatedly(Return(std::vector<double>(3, 2)));
+     EXPECT_CALL(b, position()).WillRepeatedly(Return(std::vector<double>(3, 0)));
+
+     TS_ASSERT_DELTA(std::sqrt(12.0), detectorDistance(a, b), 1e-12);
+   }
+
+Checking how dependencies are used
+----------------------------------
+
+As well as checking the result (state), a mock can check that the code
+uses its dependencies as expected (behaviour):
+
+.. code-block:: c++
+
+   void test_detectorDistance_reads_each_position_once() {
+     using namespace testing;
+     MockDetector a;
+     MockDetector b;
+     EXPECT_CALL(a, position()).Times(1).WillOnce(Return(std::vector<double>(3, 2)));
+     EXPECT_CALL(b, position()).Times(1).WillOnce(Return(std::vector<double>(3, 0)));
+
+     TS_ASSERT_DELTA(std::sqrt(12.0), detectorDistance(a, b), 1e-12);
+
+     TSM_ASSERT("First detector not used as expected", Mock::VerifyAndClearExpectations(&a));
+     TSM_ASSERT("Second detector not used as expected", Mock::VerifyAndClearExpectations(&b));
+   }
+
+If the expectations are not met, the test fails with a message such as:
+
+.. code-block:: none
+
+   Actual function call count doesn't match EXPECT_CALL(a, position())...
+            Expected: to be called once
+              Actual: never called - unsatisfied and active
+
+Note that none of this needed a concrete ``Detector`` implementation.
+
+Adding mocks to a C++ unit test
+-------------------------------
+
+#. Include ``<gmock/gmock.h>`` in the test header.
+#. Declare the mock class using ``MOCK_METHOD`` for each virtual method
+   that will be called. Older tests use the ``MOCK_METHODn`` and
+   ``MOCK_CONST_METHODn`` macros, which still work, but new code should
+   use ``MOCK_METHOD``.
+#. Create the mock in the test method and set expectations on the
+   methods the code under test should call.
+#. Build and run the test.
+
+Examples in Mantid:
+
+- `NDRandomNumberGeneratorTest.h <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/test/NDRandomNumberGeneratorTest.h>`__ - a mocked random number generator
+- `BinaryOperationMDTest.h <https://github.com/mantidproject/mantid/blob/main/Framework/MDAlgorithms/test/BinaryOperationMDTest.h>`__ - stubbing out binary MD operations
+- `ALCBaselineModellingPresenterTest.h <https://github.com/mantidproject/mantid/blob/main/qt/scientific_interfaces/Muon/test/ALCBaselineModellingPresenterTest.h>`__ - testing an MVP presenter with a mocked view and model
+
+The `gMock for Dummies <https://google.github.io/googletest/gmock_for_dummies.html>`__,
+`gMock Cookbook <https://google.github.io/googletest/gmock_cook_book.html>`__ and
+`gMock Cheat Sheet <https://google.github.io/googletest/gmock_cheat_sheet.html>`__
+cover GoogleMock in more depth.
