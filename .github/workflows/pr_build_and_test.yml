@@ -242,6 +242,11 @@ jobs:
         if: ${{ matrix.os == 'Windows' }}
         run: echo "::add-matcher::.github/matchers/msvc.json"
 
+      - name: Install pixi environment
+        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
+        run: |
+          pixi install --frozen -v
+
       - name: Build code
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
         run: |
@@ -389,6 +394,11 @@ jobs:
             CLEAN_ARGS="--clean-build"
           fi
           ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE} ${CLEAN_ARGS}
+
+      - name: Install pixi environment
+        if: ${{ needs.check-filters.outputs.user_docs == 'true' }}
+        run: |
+          pixi install --frozen -v
 
       - name: Build code and user docs
         if: ${{ needs.check-filters.outputs.user_docs == 'true' }}
