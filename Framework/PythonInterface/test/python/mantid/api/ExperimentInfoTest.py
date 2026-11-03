@@ -167,6 +167,17 @@ class ExperimentInfoTest(unittest.TestCase):
         # Nothing outstanding, so it stays on +y rather than turning on to -x.
         self._assert_centred_on(lab_shape, [0.0, 2.0, 0.0])
 
+    def test_applied_rotation_is_a_copy_that_outlives_its_shape(self):
+        rotation = np.array([[0.0, -1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]])
+        ws = self._ws_with_offset_sphere()
+        ws.run().getGoniometer().setR(rotation)
+
+        applied = ws.getLabFrameSampleShape().getAppliedRotation()
+
+        np.testing.assert_allclose(applied, rotation, atol=1e-6)
+        # a view of the temporary shape's matrix would be read-only
+        self.assertTrue(applied.flags.writeable)
+
 
 if __name__ == "__main__":
     unittest.main()

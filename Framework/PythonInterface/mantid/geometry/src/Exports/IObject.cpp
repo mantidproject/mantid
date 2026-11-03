@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Objects/IObject.h"
-#include "MantidPythonInterface/core/Converters/MatrixToNDArray.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/Policies/MatrixToNumpy.h"
 
@@ -21,10 +20,11 @@ GET_POINTER_SPECIALIZATION(IObject)
 void export_IObject() {
   register_ptr_to_python<std::shared_ptr<IObject>>();
 
-  using return_readonly_numpy = return_value_policy<Policies::MatrixRefToNumpy<Converters::WrapReadOnly>>;
+  // a copy, not a view: getLabFrameSampleShape hands back a new shape that Python may free first
+  using return_cloned_numpy = return_value_policy<Policies::MatrixRefToNumpy<Converters::Clone>>;
 
   class_<IObject, boost::noncopyable>("IObject", no_init)
-      .def("getAppliedRotation", &IObject::getAppliedRotation, arg("self"), return_readonly_numpy(),
+      .def("getAppliedRotation", &IObject::getAppliedRotation, arg("self"), return_cloned_numpy(),
            "Return the goniometer rotation baked into this shape.\n\n"
            "This reports which frame the shape is in, not every rotation it has ever had. "
            "Definition-frame rotations - the file-load orientation of :ref:`algm-LoadSampleShape`, "
