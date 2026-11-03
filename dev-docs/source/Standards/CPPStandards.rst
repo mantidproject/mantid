@@ -242,7 +242,7 @@ further level namespaces may be used to section code to further
 improve readability and maintenance.
 
 Library Dependencies
---------------------
+^^^^^^^^^^^^^^^^^^^^
 
 The framework is split into libraries (``Kernel``, ``API``,
 ``Geometry``, ``DataObjects``, ...) that form a hierarchy, with

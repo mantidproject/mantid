@@ -181,7 +181,9 @@ Python, see :ref:`mantid:emwp_py_fit_funcs`.
 
 Peak functions should implement ``centre()``, ``height()`` and
 ``fwhm()`` from ``IPeakFunction``, calculated from the function's
-parameters. The fitting GUI uses these so that users can adjust the
+parameters.
+``IPeakFunction`` also requires ``setFwhm()`` while ``IFunctionWithLocation`` requires ``setCentre()`` and ``setHeight()``.
+The fitting GUI uses these so that users can adjust the
 peak with the mouse. For example, for a Lorentzian the centre is simply
 the ``PeakCentre`` parameter.
 
