@@ -875,6 +875,21 @@ public:
     TS_ASSERT_THROWS_NOTHING(getObject(xml));
   }
 
+  void testIgnoredShapeGetsNoShapeInfo() {
+    // the cylinder's two <rotate> tags get it ignored, leaving the plane as the only primitive
+    const std::string xml = "<cylinder id=\"c\"><centre-of-bottom-base x=\"0\" y=\"0\" z=\"0\"/>"
+                            "<axis x=\"0\" y=\"1\" z=\"0\"/><radius val=\"1.0\"/><height val=\"2.0\"/>"
+                            "<rotate x=\"90\" y=\"0\" z=\"0\" /><rotate x=\"0\" y=\"90\" z=\"0\" /></cylinder>"
+                            "<infinite-plane id=\"p\"><point-in-plane x=\"0\" y=\"0\" z=\"0\"/>"
+                            "<normal-to-plane x=\"0\" y=\"0\" z=\"1\"/></infinite-plane><algebra val=\"p\"/> ";
+    const auto shape = getObject(xml);
+    detail::ShapeInfo::GeometryShape type;
+    std::vector<V3D> points;
+    double innerRadius, radius, height;
+    shape->GetObjectGeom(type, points, innerRadius, radius, height);
+    TS_ASSERT_EQUALS(type, detail::ShapeInfo::GeometryShape::NOSHAPE);
+  }
+
   void testRotateInfinitePlane() {
     std::string xmlInfinitePlaneStart = "<infinite-plane id=\"InfinitePlane\"> ";
     xmlInfinitePlaneStart += "<point-in-plane x=\"0.0\" y=\"0.0\" z=\"20.0\" /> ";

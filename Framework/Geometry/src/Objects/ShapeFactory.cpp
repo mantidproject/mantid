@@ -196,9 +196,10 @@ std::shared_ptr<CSGObject> ShapeFactory::createShape(Poco::XML::Element *pElem) 
         // shapes are ignored
         // this way an empty object is returned to the user.
         try {
+          // set lastElement only after a successful parse, so createGeometryHandler skips ignored shapes
           if (primitiveName == "sphere") {
-            lastElement = pE;
             idMatching[idFromUser] = parseSphere(pE, primitives, l_id);
+            lastElement = pE;
             numPrimitives++;
           } else if (primitiveName == "infinite-plane") {
             idMatching[idFromUser] = parseInfinitePlane(pE, primitives, l_id);
@@ -209,28 +210,28 @@ std::shared_ptr<CSGObject> ShapeFactory::createShape(Poco::XML::Element *pElem) 
             retVal->setFiniteGeometryFlag(false);
             numPrimitives++;
           } else if (primitiveName == "cylinder") {
-            lastElement = pE;
             idMatching[idFromUser] = parseCylinder(pE, primitives, l_id);
+            lastElement = pE;
             numPrimitives++;
           } else if (primitiveName == "hollow-cylinder") {
-            lastElement = pE;
             idMatching[idFromUser] = parseHollowCylinder(pE, primitives, l_id);
+            lastElement = pE;
             numPrimitives++;
           } else if (primitiveName == "cuboid") {
-            lastElement = pE;
             idMatching[idFromUser] = parseCuboid(pE, primitives, l_id);
+            lastElement = pE;
             numPrimitives++;
           } else if (primitiveName == "infinite-cone") {
             idMatching[idFromUser] = parseInfiniteCone(pE, primitives, l_id);
             retVal->setFiniteGeometryFlag(false);
             numPrimitives++;
           } else if (primitiveName == "cone") {
-            lastElement = pE;
             idMatching[idFromUser] = parseCone(pE, primitives, l_id);
+            lastElement = pE;
             numPrimitives++;
           } else if (primitiveName == "hexahedron") {
-            lastElement = pE;
             idMatching[idFromUser] = parseHexahedron(pE, primitives, l_id);
+            lastElement = pE;
             numPrimitives++;
           } else if (primitiveName == "tapered-guide") {
             idMatching[idFromUser] = parseTaperedGuide(pE, primitives, l_id);
