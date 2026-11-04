@@ -187,19 +187,19 @@ double coneSolidAngle(const V3D &observer, const Mantid::Kernel::V3D &centre, co
   }
 
   // Top section
-  V3D top_centre = V3D(0.0, 0.0, height) + centre;
+  V3D top_centre = V3D(0.0, 0.0, height);
   transform.rotate(top_centre);
   top_centre += centre;
 
   for (int sl = 0; sl < Cone::g_NSLICES; ++sl) {
     int vertex = sl;
-    V3D pt2 = V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], height);
+    V3D pt2 = V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], z0);
 
     if (sl < Mantid::Geometry::Cone::g_NSLICES - 1)
       vertex = sl + 1;
     else
       vertex = 0;
-    V3D pt3 = V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], height);
+    V3D pt3 = V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], z0);
 
     // Rotate them to the correct axis orientation
     transform.rotate(pt2);
@@ -1350,7 +1350,9 @@ double CSGObject::triangulatedSolidAngle(const SolidAngleParams &params) const {
                               params.cylinderSlices());
     break;
   case detail::ShapeInfo::GeometryShape::CONE:
-    return coneSolidAngle(observer, geometry_vectors[0], geometry_vectors[1], radius, height);
+    // coneSolidAngle builds the cone from the centre of its base towards the tip
+    return coneSolidAngle(observer, geometry_vectors[0] - geometry_vectors[1] * height, geometry_vectors[1], radius,
+                          height);
     break;
   default:
     if (nTri == 0) // Fall back to raytracing if there are no triangles
@@ -1819,8 +1821,8 @@ void CSGObject::calcBoundingBoxByGeometry() {
 
   case detail::ShapeInfo::GeometryShape::CONE: {
     const auto &tip = vectors[0];      // Tip-point of cone
-    const auto &axis = vectors[1];     // Normalized axis
-    auto base = tip + (axis * height); // Center of base
+    const auto &axis = vectors[1];     // Normalized axis, pointing from the base to the tip as in the XML
+    auto base = tip - (axis * height); // Center of base
 
     // How much of the radius must be considered for each axis
     // (If this ever becomes a performance issue, you could use just the radius
