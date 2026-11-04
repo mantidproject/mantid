@@ -145,6 +145,42 @@ Write a command line program that:
    #. Print out the Shapes in order of area descending
    #. Print out the Shapes in order of perimeter descending
 
+----------------------
+After your first month
+----------------------
+
+This checklist is useful to go through with a new developer after about a
+month in the team, to find any areas that were missed during their induction.
+
+The code and how to change it:
+
+-  Have you installed all the tools and dependencies needed to build and test
+   Mantid from source?
+-  Do you know roughly where the different parts of Mantid are in the source
+   tree (see :doc:`Architecture`)?
+-  Have you fixed an issue that needed code changes, following the
+   :ref:`GitWorkflow`?
+-  Have you reviewed or tested someone else's pull request (see
+   :ref:`ReviewingAPullRequest`)?
+-  Have you changed the ``.rst`` documentation of an algorithm (see
+   :ref:`AlgorithmDocumentation`)?
+-  Have you changed the Doxygen documentation of some C++ code?
+-  Do you understand what unit tests, documentation tests and system tests
+   check, and when to run each of them (see :ref:`RunningTheUnitTests` and
+   :ref:`SystemTests`)?
+-  Do you know how to add or change each type of test?
+
+Continuous integration:
+
+-  Do you understand the checks that run on a pull request, and what each one
+   builds and tests?
+-  Have you had a change that worked on your machine but failed or gave
+   warnings on another platform in the pull request checks?
+-  Do you know when and where the different types of tests are run?
+-  Do you understand the static analysis checks (Cppcheck, pre-commit and
+   Doxygen)?
+-  Have you changed a system test and seen it pass in the pull request checks?
+
 ---------------
 Further reading
 ---------------

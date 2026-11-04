@@ -18,6 +18,7 @@ Guides
    GettingStarted/GettingStarted
    Packaging
    Architecture
+   InstrumentGeometry
    BuildingOnOSX
    BuildingWithCMake
    LocalMantidBuildWithPixi
@@ -40,6 +41,9 @@ Guides
 
 :doc:`Architecture`
    Describes the architecture of the mantid libraries and applications.
+
+:doc:`InstrumentGeometry`
+   How instrument geometry is built and stored, including the Instrument 2.0 layers.
 
 :doc:`LocalMantidBuildWithPixi`
    How to set up a pixi environment to use a local Mantid build instead of conda packages in other projects.
@@ -239,6 +243,8 @@ GUI Development
    MVPDesign
    MVPTutorial/index
    QtDesignerForPython
+   CustomAlgorithmDialogs
+   GuiTutorialFramework
    BalsamiqWireframes
    MantidUsedIconsTable
    ISISReflectometryInterface
@@ -252,6 +258,12 @@ GUI Development
 
 :doc:`QtDesignerForPython`
    Describes how to use the Qt designer to produce GUI views.
+
+:doc:`CustomAlgorithmDialogs`
+   How to replace the automatically generated dialog for an algorithm with a custom one.
+
+:doc:`GuiTutorialFramework`
+   How to add a guided, automated tutorial that walks a user through a Qt interface.
 
 :doc:`BalsamiqWireframes`
    An introduction to mockups with Balsamiq Wireframes.

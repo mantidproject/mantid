@@ -6,8 +6,7 @@ Extensions and Improvements
 ---------------------------
 
 -  QResolution calculation for SANS: The q resolution can be calculated
-   for for 1D reductions. See here for
-   `details <https://archive.mantidproject.org/ISIS_SANS:_Reduction_Settings#QResolution>`_.
+   for for 1D reductions.
 
 .. figure:: ../../images/Sans_q_resolution_v1.png
    :align: center
@@ -17,7 +16,7 @@ Extensions and Improvements
 -  QResolution calculation user file commands: The q resolution
    calculation can be driven through the user file. For a comprehensive
    list of commands, see
-   `here <https://archive.mantidproject.org/SANS_User_File_Commands#QRESOLUTION>`_.
+   :ref:`here <ISIS_SANS_User_File_QRes-ref>`.
 
 -  Extended Beam Centre Finder for LARMOR: The beam centre finder takes
    the rotational movement of LARMOR's detector into account.
@@ -37,7 +36,7 @@ Extensions and Improvements
    SANS Beam Centre Finder Selection
 
 -  Expose AddRuns command for Python scripting : See here
-   (`here <https://archive.mantidproject.org/Scripting_SANS_Reductions#AddRuns.28runs.2C_instrument_.3D.27sans2d.27.2C_saveAsEvent.3DFalse.2C_binning_.3D_.22Monitors.22.2C_isOverlay_.3D_False.2C_time_shifts_.3D_None.2C_defType.3D.27.nxs.27.2C_rawTypes.3D.28.27.raw.27.2C_.27.s.2A.27.2C_.27add.27.2C.27.RAW.27.29.2C_lowMem.3DFalse.29>`__)
+   (:ref:`here <ScriptingSANSReductions>`)
    for details
 
 -  Handle cumulative sample logs for SANS: Adding files using the Add
