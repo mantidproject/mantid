@@ -250,7 +250,6 @@ pipeline {
           post {
             always {
               archive_env_logs('linux-64')
-              archive_env_logs('noarch')
             }
           }
         }
