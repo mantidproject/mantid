@@ -5,15 +5,22 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/InstrumentMetadata.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+
+#include <stdexcept>
 
 namespace Mantid::Geometry {
 
 InstrumentMetadata::InstrumentMetadata(const Types::Core::DateAndTime &validFromDate,
                                        const Types::Core::DateAndTime &validToDate, const std::string &filename,
                                        const std::string &xmlText, const std::string &defaultView,
-                                       const std::string &defaultAxis, const Instrument_const_sptr &physicalInstrument)
+                                       const std::string &defaultAxis,
+                                       const std::shared_ptr<const ComponentInfo> &physicalComponentInfo,
+                                       const std::shared_ptr<const DetectorInfo> &physicalDetectorInfo)
     : m_validFromDate(validFromDate), m_validToDate(validToDate), m_filename(filename), m_xmlText(xmlText),
-      m_defaultView(defaultView), m_defaultAxis(defaultAxis), m_physicalInstrument(physicalInstrument) {}
+      m_defaultView(defaultView), m_defaultAxis(defaultAxis), m_physicalComponentInfo(physicalComponentInfo),
+      m_physicalDetectorInfo(physicalDetectorInfo) {}
 
 const Types::Core::DateAndTime &InstrumentMetadata::validFromDate() const { return m_validFromDate; }
 
@@ -27,7 +34,21 @@ const std::string &InstrumentMetadata::defaultView() const { return m_defaultVie
 
 const std::string &InstrumentMetadata::defaultAxis() const { return m_defaultAxis; }
 
-Instrument_const_sptr InstrumentMetadata::physicalInstrument() const { return m_physicalInstrument; }
+bool InstrumentMetadata::hasPhysicalInstrument() const { return static_cast<bool>(m_physicalComponentInfo); }
+
+const ComponentInfo &InstrumentMetadata::physicalComponentInfo() const {
+  if (!m_physicalComponentInfo) {
+    throw std::runtime_error("Cannot return reference to NULL physical ComponentInfo");
+  }
+  return *m_physicalComponentInfo;
+}
+
+const DetectorInfo &InstrumentMetadata::physicalDetectorInfo() const {
+  if (!m_physicalDetectorInfo) {
+    throw std::runtime_error("Cannot return reference to NULL physical DetectorInfo");
+  }
+  return *m_physicalDetectorInfo;
+}
 
 void InstrumentMetadata::setFileName(const std::string &filename) { m_filename = filename; }
 

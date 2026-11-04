@@ -11,6 +11,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/InstrumentMetadata.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidKernel/Cache.h"
@@ -90,7 +91,13 @@ void ParameterMap::rebuildBeamlineFrom(const ParameterMap &source) {
   m_detectorInfo = std::move(newDetectorInfo);
   // Deliberately does NOT adopt m_componentInfo's store here, unlike setInstrument().
   // This map was copy-constructed and therefore already holds its own deep copy of the parameters
-  buildInstrumentMetadata();
+  // The metadata is read-only and refers to nothing in the source map, so it can be shared rather
+  // than rebuilt, which would walk the physical instrument again on every workspace copy.
+  if (source.m_instrumentMetadata) {
+    m_instrumentMetadata = source.m_instrumentMetadata;
+  } else {
+    buildInstrumentMetadata();
+  }
 }
 
 // Defined as default in source for forward declaration with std::unique_ptr.
@@ -1214,16 +1221,19 @@ void ParameterMap::seedLogfileParameters() {
 
 /// Builds m_instrumentMetadata from m_instrument. Requires m_instrument to be set.
 void ParameterMap::buildInstrumentMetadata() {
-  // Mirrors Instrument::getPhysicalInstrument()'s parametrized branch: a physical
-  // instrument must share the same ParameterMap as the owning (neutronic) instrument.
-  Instrument_const_sptr physicalInstrument;
+  std::shared_ptr<const ComponentInfo> physicalComponentInfo;
+  std::shared_ptr<const DetectorInfo> physicalDetectorInfo;
   if (const auto &basePhysicalInstrument = m_instrument->getPhysicalInstrument()) {
-    physicalInstrument =
-        std::make_shared<Instrument>(basePhysicalInstrument, std::shared_ptr<ParameterMap>(this, NoDeleting()));
+    // This map's parameters are keyed by the neutronic instrument's components, so none apply to the
+    // physical one and it is walked unparametrized. The visitor keeps it alive inside the DetectorInfo.
+    InstrumentVisitor visitor(basePhysicalInstrument);
+    visitor.walkInstrument();
+    std::tie(physicalComponentInfo, physicalDetectorInfo) = visitor.makeWrappers();
   }
   m_instrumentMetadata = std::make_shared<InstrumentMetadata>(
       m_instrument->getValidFromDate(), m_instrument->getValidToDate(), m_instrument->getFilename(),
-      m_instrument->getXmlText(), m_instrument->getDefaultView(), m_instrument->getDefaultAxis(), physicalInstrument);
+      m_instrument->getXmlText(), m_instrument->getDefaultView(), m_instrument->getDefaultAxis(), physicalComponentInfo,
+      physicalDetectorInfo);
 }
 
 /** Return memory used by the parameter map, in bytes.
