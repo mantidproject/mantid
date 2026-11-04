@@ -62,7 +62,7 @@ public:
     double height;
   };
   struct ConeGeometry {
-    const Kernel::V3D &centre;
+    const Kernel::V3D &tip;
     const Kernel::V3D &axis;
     double radius;
     double height;
@@ -110,8 +110,8 @@ public:
   void setSphere(const Kernel::V3D &center, double radius);
   /// sets the geometry handler for a cylinder
   void setCylinder(const Kernel::V3D &centerBottomBase, const Kernel::V3D &symmetryAxis, double radius, double height);
-  /// sets the geometry handler for a cone
-  void setCone(const Kernel::V3D &center, const Kernel::V3D &symmetryAxis, double radius, double height);
+  /// sets the geometry handler for a cone, whose symmetryAxis points from the centre of its base to its tip
+  void setCone(const Kernel::V3D &tip, const Kernel::V3D &symmetryAxis, double radius, double height);
   /// sets the geometry handler for a hollow cylinder
   void setHollowCylinder(const Kernel::V3D &centreBottomBase, const Kernel::V3D &symmetryAxis, double innerRadius,
                          double outerRadius, double height);
