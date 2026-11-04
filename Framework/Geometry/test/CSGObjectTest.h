@@ -1500,6 +1500,15 @@ public:
                     2 * M_PI, satol);
   }
 
+  void testSolidAngleCone() {
+    // checked against ray tracing the surfaces: facing the base, and side on to the slope
+    const auto cone = createCone();
+    for (const V3D &observer : {V3D(0, 0, -3), V3D(3, 0, -0.5)}) {
+      const double rayTraced = cone->rayTraceSolidAngle(observer);
+      TS_ASSERT_DELTA(cone->triangulatedSolidAngle(SolidAngleParams(observer, 10)), rayTraced, 0.1 * rayTraced);
+    }
+  }
+
   void testSolidAngleCubeTriangles()
   /**
   Test solid angle calculation for a cube using triangles
@@ -1651,6 +1660,14 @@ public:
     TS_ASSERT_DELTA(xmin, -3.2, 0.0001);
     TS_ASSERT_DELTA(ymin, -3.0, 0.0001);
     TS_ASSERT_DELTA(zmin, -3.0, 0.0001);
+  }
+
+  void testGetBoundingBoxForCone() {
+    // the XML axis points from the base to the tip, so the cone lies below its tip
+    const auto &box = createCone()->getBoundingBox();
+    TS_ASSERT_DELTA(box.minPoint().Z(), -1.0, 1e-9);
+    TS_ASSERT_DELTA(box.maxPoint().Z(), 0.0, 1e-9);
+    TS_ASSERT_DELTA(box.maxPoint().X(), 1.0, 1e-9);
   }
 
   void testGetBoundingBoxForCuboid() {
@@ -1825,6 +1842,13 @@ private:
     TS_ASSERT(retVal.get());
 
     return retVal;
+  }
+
+  /// A cone with its tip at the origin and its axis along +z, filling z from -1 to 0 with a base radius of 1
+  std::shared_ptr<CSGObject> createCone() {
+    return ShapeFactory().createShape("<cone id=\"k\"><tip-point x=\"0\" y=\"0\" z=\"0\"/>"
+                                      "<axis x=\"0\" y=\"0\" z=\"1\"/><angle val=\"45\"/><height val=\"1.0\"/>"
+                                      "</cone><algebra val=\"k\"/>");
   }
 
   // This creates a cylinder to test the solid angle that is more realistic in

@@ -273,7 +273,8 @@ void renderCone(const detail::ShapeInfo &shapeInfo) {
   glTranslated(center[0], center[1], center[2]);
   GLdouble mat[16];
   V3D unit(0, 0, 1);
-  auto axis = shapeInfo.points()[1];
+  // gluCylinder widens along +z, so turn +z onto the direction from the tip to the base
+  auto axis = shapeInfo.points()[1] * -1.0;
   Quat rot(unit, axis);
   rot.GLMatrix(&mat[0]);
   glMultMatrixd(mat);
