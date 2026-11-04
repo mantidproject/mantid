@@ -98,9 +98,9 @@ void ShapeInfo::setCylinder(const V3D &centerBottomBase, const V3D &symmetryAxis
   m_innerRadius = 0;
 }
 
-void ShapeInfo::setCone(const V3D &center, const V3D &symmetryAxis, double radius, double height) {
+void ShapeInfo::setCone(const V3D &tip, const V3D &symmetryAxis, double radius, double height) {
   m_shape = GeometryShape::CONE;
-  m_points.assign({center, symmetryAxis});
+  m_points.assign({tip, symmetryAxis});
   m_radius = radius;
   m_height = height;
   m_innerRadius = 0;

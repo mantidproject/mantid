@@ -94,18 +94,18 @@ public:
 
   void testSetCone() {
     ShapeInfo shapeInfo;
-    constexpr V3D center(0, 0, 0);
+    constexpr V3D tip(0, 0, 0);
     constexpr V3D axis(1, 0, 0);
     constexpr double radius = 10;
     constexpr double height = 5;
-    shapeInfo.setCone(center, axis, radius, height);
+    shapeInfo.setCone(tip, axis, radius, height);
 
     TS_ASSERT_EQUALS(shapeInfo.shape(), ShapeInfo::GeometryShape::CONE);
     TS_ASSERT_EQUALS(shapeInfo.radius(), radius);
     TS_ASSERT_EQUALS(shapeInfo.innerRadius(), 0);
     TS_ASSERT_EQUALS(shapeInfo.height(), height);
     TS_ASSERT_EQUALS(shapeInfo.points().size(), 2);
-    TS_ASSERT_EQUALS(shapeInfo.points()[0], center);
+    TS_ASSERT_EQUALS(shapeInfo.points()[0], tip);
     TS_ASSERT_EQUALS(shapeInfo.points()[1], axis);
   }
 
@@ -255,13 +255,13 @@ public:
 
   void testConeGeometry() {
     ShapeInfo shapeInfo;
-    constexpr V3D center(0, 0, 0);
+    constexpr V3D tip(0, 0, 0);
     constexpr V3D axis(1, 0, 0);
     constexpr double radius = 10;
     constexpr double height = 5;
-    shapeInfo.setCone(center, axis, radius, height);
+    shapeInfo.setCone(tip, axis, radius, height);
     const auto geometry = shapeInfo.coneGeometry();
-    TS_ASSERT_EQUALS(geometry.centre, center);
+    TS_ASSERT_EQUALS(geometry.tip, tip);
     TS_ASSERT_EQUALS(geometry.axis, axis);
     TS_ASSERT_EQUALS(geometry.radius, radius);
     TS_ASSERT_EQUALS(geometry.height, height);
