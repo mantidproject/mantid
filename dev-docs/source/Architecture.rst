@@ -99,6 +99,14 @@ workspace objects, instrument objects, algorithm interfaces,
 along with a set of plugin libraries that are loaded at runtime to register
 new capabilities such as algorithms for data treatment.
 
+Each library is a subdirectory of ``Framework``, e.g. ``Kernel``, ``API``,
+``Geometry``, ``DataObjects`` and ``HistogramData`` for the core libraries and
+``Algorithms``, ``DataHandling``, ``CurveFitting`` and ``MDAlgorithms`` for
+plugins. Within each library, header files are in ``inc``, source files in
+``src`` and unit tests in ``test``. Code shared between the tests of several
+libraries is in ``Framework/TestHelpers``. The rules for which libraries may
+depend on which are in :ref:`CppCodingStandards`.
+
 A Python package to the C++ libraries, called ``mantid``, is defined in
 ``Framework/PythonInterface`` and
 gives access to the C++-framework code from Python.
@@ -190,6 +198,62 @@ outside of workbench with the standard matplotlib backends,
 including `Jupyter notebooks <jupyter_>`_,
 only differing in how the final figure window is presented.
 
+Design Patterns
+---------------
+
+A design pattern is a general, reusable solution to a commonly occurring
+problem. The `SourceMaking catalogue <design-patterns_>`_ describes the
+classic patterns with examples in several languages, and the book
+*Design Patterns: Elements of Reusable Object-Oriented Software* (Gamma, Helm,
+Johnson & Vlissides) is the standard reference. The following patterns are
+used throughout Mantid.
+
+Singleton
+   Ensures only one instance of a class exists and provides a global point of
+   access to it. For example, the ``AnalysisDataService`` cannot be constructed
+   directly, it is accessed through the static ``Instance()`` method:
+
+   .. code-block:: c++
+
+      auto &ads = Mantid::API::AnalysisDataService::Instance();
+
+Factory
+   Creates objects without exposing how they are constructed, and returns them
+   through a common interface. For example, algorithms are created by name, and
+   optionally version, and used through ``IAlgorithm``:
+
+   .. code-block:: c++
+
+      auto rebin = Mantid::API::AlgorithmManager::Instance().create("Rebin");
+
+Observer
+   Defines a one-to-many dependency so that when one object changes state, its
+   dependents are notified. For example, ``AnalysisDataServiceObserver`` and the
+   ``WorkspaceObserver`` used by the GUI are notified when workspaces are added,
+   replaced or deleted.
+
+Template Method
+   Defines the skeleton of an operation and lets subclasses fill in some of the
+   steps. For example, ``Algorithm::initialize()`` and ``Algorithm::execute()``
+   do the common work and call the ``init()`` and ``exec()`` methods that each
+   algorithm implements.
+
+Strategy
+   Defines a family of interchangeable implementations behind one interface, so
+   the implementation can vary independently of the code that uses it. For
+   example, the ISIS Reflectometry interface searches for runs through the
+   ``ISearcher`` interface.
+
+Composite
+   Composes objects into trees so that single objects and groups of objects can
+   be treated the same way. For example, a ``CompositeFunction`` is a fit
+   function made of other fit functions.
+
+Model-View-Presenter
+   Separates the logic of a graphical interface from the widgets that display
+   it, so that the logic can be unit tested. See :ref:`MVPDesign`.
+
+.. _design-patterns: https://sourcemaking.com/design_patterns
 .. _C4Model: https://www.infoq.com/articles/C4-architecture-model/
 .. _sip-ref: https://www.riverbankcomputing.com/static/Docs/sip/
 .. _matplotlib: https://matplotlib.org/

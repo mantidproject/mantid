@@ -6,7 +6,7 @@ The Mantid project provides a framework that supports high-performance computing
 
 - Homepage: https://www.mantidproject.org
 - Download: https://download.mantidproject.org
-- Asking for help: https://www.mantidproject.org/Contact
+- Asking for help: https://www.mantidproject.org/contact
 - Issue tracking: https://github.com/mantidproject/mantid/issues
 - Build server: https://builds.mantidproject.org
 - Developer site: https://developer.mantidproject.org
