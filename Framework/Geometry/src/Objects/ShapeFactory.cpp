@@ -1561,17 +1561,15 @@ std::shared_ptr<CSGObject> ShapeFactory::createHexahedralShape(double xlb, doubl
   return shape;
 }
 
-/// create a special geometry handler for the known finite primitives
 /** Apply to a primitive's centre and axis every rotation its surfaces will have had applied to them.
  *
  * The three tags do not act on the same things. A per-primitive \<rotate\> turns the shape about its
  * own centre, so it moves the axis and leaves the centre alone; \<rotate-all\> and the automatic
  * \<goniometer\> reorient the whole shape about the origin, so they move both.
  *
- * Shared by createGeometryHandler and the parse* functions, which read the same XML separately and
- * so must not disagree about where the shape is.
+ * Shared by createGeometryHandler, parseCone and parseInfiniteCone, which read the same XML
+ * separately and so must not disagree about where the shape is.
  *
- * @param axis :: pass anything for a shape that has none, and ignore the result
  * @return the rotated centre and axis
  */
 std::pair<V3D, V3D> ShapeFactory::applyShapeRotations(Poco::XML::Element *pElem, V3D centre, V3D axis) {
@@ -1579,13 +1577,17 @@ std::pair<V3D, V3D> ShapeFactory::applyShapeRotations(Poco::XML::Element *pElem,
     const std::vector<double> rotateAngles = DegreesToRadians(parsePosition(pElemRotate));
     axis.rotate(generateMatrix(rotateAngles[0], rotateAngles[1], rotateAngles[2]));
   }
+  return {rotateWithWholeShape(centre), rotateWithWholeShape(axis)};
+}
+
+/// Turn a point or direction by \<rotate-all\> then the automatic \<goniometer\>, both about the origin.
+V3D ShapeFactory::rotateWithWholeShape(V3D vector) const {
   for (const auto &automaticRotation : {m_rotateAllMatrix, m_gonioRotateMatrix}) {
     if (automaticRotation != Kernel::Matrix<double>(3, 3, true)) {
-      centre.rotate(automaticRotation);
-      axis.rotate(automaticRotation);
+      vector.rotate(automaticRotation);
     }
   }
-  return {centre, axis};
+  return vector;
 }
 
 /** Apply the same rotations to a cylinder's base and axis that parseCylinder applies to its surfaces.
@@ -1602,6 +1604,7 @@ std::pair<V3D, V3D> ShapeFactory::rotatedCylinderBase(Poco::XML::Element *pElem,
   return {midpoint - normVec * (0.5 * height), normVec};
 }
 
+/// create a special geometry handler for the known finite primitives
 void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem, const std::shared_ptr<CSGObject> &Obj) {
 
   auto geomHandler = std::make_shared<GeometryHandler>(Obj);
@@ -1621,10 +1624,8 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem, const std::s
     V3D centre;
     if (pElemCentre)
       centre = parsePosition(pElemCentre);
-    // parseSphere deliberately ignores <rotate> - turning a sphere about its own centre is a no-op -
-    // so only the centre is taken from here, leaving the discarded axis to absorb it
-    centre = applyShapeRotations(pElem, centre, V3D()).first;
-    shapeInfo.setSphere(centre, std::stod(pElemRadius->getAttribute("val")));
+    // parseSphere never reads <rotate>, which cannot move a sphere, so neither does this
+    shapeInfo.setSphere(rotateWithWholeShape(centre), std::stod(pElemRadius->getAttribute("val")));
   } else if (pElem->tagName() == "cylinder") {
     Element *pElemCentre = getShapeElement(pElem, "centre-of-bottom-base");
     Element *pElemAxis = getShapeElement(pElem, "axis");

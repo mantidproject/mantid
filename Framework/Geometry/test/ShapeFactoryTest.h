@@ -841,6 +841,14 @@ public:
     TS_ASSERT(!sphereRotateAll_sptr->isValid(centre));
   }
 
+  void testSphereIgnoresItsRotateTags() {
+    // parseSphere never reads <rotate>, so even two of them, which no other shape allows, are not an error
+    const std::string xml = "<sphere id=\"s\"><centre x=\"0\" y=\"0\" z=\"0\"/><radius val=\"1.0\"/>"
+                            "<rotate x=\"90\" y=\"0\" z=\"0\" /><rotate x=\"0\" y=\"90\" z=\"0\" /></sphere>"
+                            "<algebra val=\"s\"/> ";
+    TS_ASSERT_THROWS_NOTHING(getObject(xml));
+  }
+
   void testRotateInfinitePlane() {
     std::string xmlInfinitePlaneStart = "<infinite-plane id=\"InfinitePlane\"> ";
     xmlInfinitePlaneStart += "<point-in-plane x=\"0.0\" y=\"0.0\" z=\"20.0\" /> ";
