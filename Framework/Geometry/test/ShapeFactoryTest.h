@@ -1167,6 +1167,48 @@ public:
                       "<algebra val=\"k\"/> ");
   }
 
+  /// <rotate>, then <rotate-all>, then the goniometer must reach the ShapeInfo and the surfaces in
+  /// that order. Turns about x then z do not commute, so applying them the other way round fails.
+  void testStackedRotationsMoveShapeInfoAndSurfacesInOrder() {
+    const std::string rotateAll = "<rotate-all x=\"90\" y=\"0\" z=\"0\" /> ";
+    const auto withGoniometer = [](const std::string &xml) {
+      return ShapeFactory().addGoniometerTag(NINETY_ABOUT_Z, xml);
+    };
+
+    // sphere: x then z takes 10 along +x to 10 along +y; z then x would take it to +z
+    assertShapesMatch(withGoniometer("<sphere id=\"s\"><centre x=\"10.0\" y=\"0\" z=\"0\"/><radius val=\"1.0\"/>"
+                                     "</sphere><algebra val=\"s\"/> " +
+                                     rotateAll),
+                      "<sphere id=\"s\"><centre x=\"0\" y=\"10.0\" z=\"0\"/><radius val=\"1.0\"/></sphere>"
+                      "<algebra val=\"s\"/> ");
+
+    // cylinder: <rotate> turns the axis onto +z about the midpoint (0, 11, 0); rotate-all takes them
+    // to -y and (0, 0, 11); the goniometer turns the axis onto +x, leaving the base at (-1, 0, 11)
+    const std::string rotate = "<rotate x=\"90\" y=\"0\" z=\"0\" /> ";
+    assertShapesMatch(withGoniometer("<cylinder id=\"c\"><centre-of-bottom-base x=\"0\" y=\"10.0\" z=\"0\"/>"
+                                     "<axis x=\"0\" y=\"1\" z=\"0\"/><radius val=\"1.0\"/><height val=\"2.0\"/>" +
+                                     rotate + "</cylinder><algebra val=\"c\"/> " + rotateAll),
+                      "<cylinder id=\"c\"><centre-of-bottom-base x=\"-1.0\" y=\"0\" z=\"11.0\"/>"
+                      "<axis x=\"1\" y=\"0\" z=\"0\"/><radius val=\"1.0\"/><height val=\"2.0\"/></cylinder>"
+                      "<algebra val=\"c\"/> ");
+
+    assertShapesMatch(withGoniometer("<hollow-cylinder id=\"h\"><centre-of-bottom-base x=\"0\" y=\"10.0\" z=\"0\"/>"
+                                     "<axis x=\"0\" y=\"1\" z=\"0\"/><inner-radius val=\"0.5\"/>"
+                                     "<outer-radius val=\"1.0\"/><height val=\"2.0\"/>" +
+                                     rotate + "</hollow-cylinder><algebra val=\"h\"/> " + rotateAll),
+                      "<hollow-cylinder id=\"h\"><centre-of-bottom-base x=\"-1.0\" y=\"0\" z=\"11.0\"/>"
+                      "<axis x=\"1\" y=\"0\" z=\"0\"/><inner-radius val=\"0.5\"/><outer-radius val=\"1.0\"/>"
+                      "<height val=\"2.0\"/></hollow-cylinder><algebra val=\"h\"/> ");
+
+    // cone: the tip moves only with the whole shape, to (0, 0, 10); the axis follows the cylinder's
+    assertShapesMatch(withGoniometer("<cone id=\"k\"><tip-point x=\"0\" y=\"10.0\" z=\"0\"/>"
+                                     "<axis x=\"0\" y=\"1\" z=\"0\"/><angle val=\"20\"/><height val=\"2.0\"/>" +
+                                     rotate + "</cone><algebra val=\"k\"/> " + rotateAll),
+                      "<cone id=\"k\"><tip-point x=\"0\" y=\"0\" z=\"10.0\"/>"
+                      "<axis x=\"1\" y=\"0\" z=\"0\"/><angle val=\"20\"/><height val=\"2.0\"/></cone>"
+                      "<algebra val=\"k\"/> ");
+  }
+
 private:
   static size_t countOccurrences(const std::string &haystack, const std::string &needle) {
     size_t count = 0;
