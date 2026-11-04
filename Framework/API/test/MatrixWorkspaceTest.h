@@ -1251,6 +1251,70 @@ public:
     TS_ASSERT_EQUALS(ws->getXMax(), 1.0);
   }
 
+  void test_getXMinMax_with_workspace_indices_only_uses_those_spectra() {
+    const auto workspace = createWorkspaceForXMinMax();
+    double xmin, xmax;
+    workspace->getXMinMax(xmin, xmax, {1});
+    TS_ASSERT_EQUALS(xmin, 10.0);
+    TS_ASSERT_EQUALS(xmax, 30.0);
+    workspace->getXMinMax(xmin, xmax, {0, 1});
+    TS_ASSERT_EQUALS(xmin, 1.0);
+    TS_ASSERT_EQUALS(xmax, 30.0);
+  }
+
+  void test_getXMinMax_with_repeated_workspace_indices() {
+    const auto workspace = createWorkspaceForXMinMax();
+    double xmin, xmax;
+    workspace->getXMinMax(xmin, xmax, {1, 1, 0, 0});
+    TS_ASSERT_EQUALS(xmin, 1.0);
+    TS_ASSERT_EQUALS(xmax, 30.0);
+  }
+
+  void test_getXMinMax_with_workspace_indices_of_ragged_spectra() {
+    const auto workspace = createWorkspaceForXMinMax();
+    workspace->setHistogram(1, HistogramData::BinEdges{10.0, 20.0, 30.0, 40.0}, HistogramData::Counts{1.0, 1.0, 1.0});
+    double xmin, xmax;
+    workspace->getXMinMax(xmin, xmax, {0, 1});
+    TS_ASSERT_EQUALS(xmin, 1.0);
+    TS_ASSERT_EQUALS(xmax, 40.0);
+  }
+
+  void test_getXMinMax_skips_spectra_with_a_non_finite_end_by_default() {
+    const auto workspace = createWorkspaceForXMinMax();
+    double xmin, xmax;
+    workspace->getXMinMax(xmin, xmax, {0, 2, 3});
+    TS_ASSERT_EQUALS(xmin, 1.0);
+    TS_ASSERT_EQUALS(xmax, 3.0);
+  }
+
+  void test_getXMinMax_can_include_the_finite_values_of_spectra_with_a_non_finite_end() {
+    const auto workspace = createWorkspaceForXMinMax();
+    double xmin, xmax;
+    // Spectrum 2 has an infinite last value, and spectrum 3 a NaN first value
+    workspace->getXMinMax(xmin, xmax, {2}, true);
+    TS_ASSERT_EQUALS(xmin, 0.5);
+    TS_ASSERT_EQUALS(xmax, 2.0);
+    workspace->getXMinMax(xmin, xmax, {0, 3}, true);
+    TS_ASSERT_EQUALS(xmin, 1.0);
+    TS_ASSERT_EQUALS(xmax, 8.0);
+  }
+
+  void test_getXMinMax_gets_no_range_from_spectra_with_no_finite_values() {
+    const auto workspace = createWorkspaceForXMinMax();
+    double xmin, xmax;
+    workspace->getXMinMax(xmin, xmax, {4}, true);
+    TS_ASSERT_LESS_THAN(xmax, xmin);
+    workspace->getXMinMax(xmin, xmax, {4});
+    TS_ASSERT_LESS_THAN(xmax, xmin);
+  }
+
+  void test_getXMinMax_gets_no_range_from_no_workspace_indices() {
+    const auto workspace = createWorkspaceForXMinMax();
+    double xmin, xmax;
+    workspace->getXMinMax(xmin, xmax, {}, true);
+    TS_ASSERT_LESS_THAN(xmax, xmin);
+  }
+
   void test_monitorWorkspace() {
     auto ws = std::make_shared<WorkspaceTester>();
     TSM_ASSERT("There should be no monitor workspace by default", !ws->monitorWorkspace())
@@ -2212,6 +2276,19 @@ public:
   }
 
 private:
+  std::shared_ptr<WorkspaceTester> createWorkspaceForXMinMax() {
+    const auto inf = std::numeric_limits<double>::infinity();
+    const auto nan = std::numeric_limits<double>::quiet_NaN();
+    const std::vector<std::vector<double>> binEdges{
+        {1.0, 2.0, 3.0}, {10.0, 20.0, 30.0}, {0.5, 2.0, inf}, {nan, 4.0, 8.0}, {inf, inf, inf}};
+    auto workspace = std::make_shared<WorkspaceTester>();
+    workspace->initialize(binEdges.size(), 3, 2);
+    for (size_t wsIndex = 0; wsIndex < binEdges.size(); ++wsIndex) {
+      std::copy(binEdges[wsIndex].cbegin(), binEdges[wsIndex].cend(), workspace->mutableX(wsIndex).begin());
+    }
+    return workspace;
+  }
+
   std::shared_ptr<WorkspaceTester> generateTestWorkspaceWithDistributionAndLabelSet(const bool distribution,
                                                                                     const std::string &yLabel) {
     auto testWS = std::make_shared<WorkspaceTester>();

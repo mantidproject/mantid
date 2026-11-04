@@ -384,37 +384,12 @@ class FullInstrumentViewModel:
         if len(workspace_indices) == 0:
             return (0, 0)
 
-        # Several detectors can share a spectrum, and each spectrum only needs reading once
-        workspace_indices = np.unique(workspace_indices)
-
-        if not workspace.isRaggedWorkspace() and workspace.isCommonBins():
-            limits = tuple(workspace.x(int(workspace_indices[0]))[[0, -1]])
-        else:
-            first_last = np.array([workspace.x(int(i))[[0, -1]] for i in workspace_indices])
-            limits = (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
-
-        if np.isfinite(limits).all():
-            return limits
-        return self._finite_limits_from_workspace(workspace, workspace_indices)
-
-    @staticmethod
-    def _finite_limits_from_workspace(workspace, workspace_indices) -> tuple:
-        """The x range of the given spectra, leaving out any edges that are not finite.
-
-        Converting units can turn an x value of zero into an infinite one, e.g. TOF into momentum
-        transfer, and neither the sliders nor the plot axes can take infinite limits.
-        """
-        min_x = np.inf
-        max_x = -np.inf
-        for ws_index in workspace_indices:
-            data_x = np.asarray(workspace.x(int(ws_index)))
-            data_x = data_x[np.isfinite(data_x)]
-            if data_x.size > 0:
-                min_x = min(min_x, data_x.min())
-                max_x = max(max_x, data_x.max())
-        if min_x > max_x:
+        # Converting units can turn an x value of zero into an infinite one, e.g. TOF into momentum
+        # transfer, and neither the sliders nor the plot axes can take infinite limits.
+        x_min, x_max = workspace.getXMinMax(workspace_indices, includeNonFiniteSpectra=True)
+        if x_min > x_max:
             return (0, 0)
-        return (min_x, max_x)
+        return (x_min, x_max)
 
     def _probe_unit_conversion(self) -> bool:
         """Whether ConvertUnits can usefully convert this workspace."""
