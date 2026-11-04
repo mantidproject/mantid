@@ -121,6 +121,8 @@ std::map<ConvTypes::LorentzianType, TemplateSubTypeDescriptor>
          {"One Lorentzian", "Lorentzian", {ParamID::LOR1_AMPLITUDE, ParamID::LOR1_FWHM}}},
         {ConvTypes::LorentzianType::TwoLorentzians,
          {"Two Lorentzians", "Lorentzian", {ParamID::LOR1_AMPLITUDE, ParamID::LOR2_FWHM}}},
+        {ConvTypes::LorentzianType::ThreeLorentzians,
+         {"Three Lorentzians", "Lorentzian", {ParamID::LOR1_AMPLITUDE, ParamID::LOR3_FWHM}}},
     };
 
 template <>

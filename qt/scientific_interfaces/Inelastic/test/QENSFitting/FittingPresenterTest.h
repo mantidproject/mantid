@@ -194,11 +194,12 @@ public:
 
   void test_setFWHM_calls_model_with_correct_arguments() {
     WorkspaceID workspaceID{0};
+    std::size_t peakIndex = 1;
     double fwhm = 1.0;
 
-    EXPECT_CALL(*m_model, setFWHM(fwhm, workspaceID)).Times(1);
+    EXPECT_CALL(*m_model, setFWHM(fwhm, peakIndex, workspaceID)).Times(1);
 
-    m_presenter->setFWHM(workspaceID, fwhm);
+    m_presenter->setFWHM(workspaceID, peakIndex, fwhm);
   }
 
   void test_setBackground_calls_model_and_browser_with_correct_arguments() {

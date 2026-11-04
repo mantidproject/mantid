@@ -201,22 +201,14 @@ public:
     m_presenter->handlePlotGuess(false);
   }
 
-  void test_that_handleHWHMMinimumChanged_will_set_the_hwhm_minimum() {
-    double hwhmMin{2.0};
+  void test_that_handleHWHMChanged_will_set_the_hwhm_range_and_the_fwhm_of_the_peak() {
+    std::size_t peakIndex{1};
 
-    ON_CALL(*m_model, calculateHWHMMinimum(hwhmMin)).WillByDefault(Return(-hwhmMin));
-    EXPECT_CALL(*m_view, setHWHMMinimum(-hwhmMin)).Times(1);
+    ON_CALL(*m_model, calculateHWHMRange(peakIndex, -1.0)).WillByDefault(Return(std::make_pair(-1.0, 2.0)));
+    EXPECT_CALL(*m_view, setHWHMRange(peakIndex, -1.0, 2.0)).Times(1);
+    EXPECT_CALL(*m_tab, handleFwhmChanged(peakIndex, 3.0)).Times(1);
 
-    m_presenter->handleHWHMMinimumChanged(hwhmMin);
-  }
-
-  void test_that_handleHWHMMaximumChanged_will_set_the_hwhm_maximum() {
-    double hwhmMax{2.0};
-
-    ON_CALL(*m_model, calculateHWHMMaximum(hwhmMax)).WillByDefault(Return(-hwhmMax));
-    EXPECT_CALL(*m_view, setHWHMMaximum(-hwhmMax)).Times(1);
-
-    m_presenter->handleHWHMMaximumChanged(2.0);
+    m_presenter->handleHWHMChanged(peakIndex, -1.0);
   }
 
   ///----------------------------------------------------------------------
@@ -272,12 +264,21 @@ public:
     auto const fitFunction = getFunctionWithWorkspaceName("WorkspaceName");
     m_presenter->setFitFunction(fitFunction);
 
-    ON_CALL(*m_model, getFirstHWHM()).WillByDefault(Return(0.00875));
-    ON_CALL(*m_model, getFirstPeakCentre()).WillByDefault(Return(0.0));
+    ON_CALL(*m_model, getHWHMs()).WillByDefault(Return(std::vector<double>{0.00875}));
+    ON_CALL(*m_model, getPeakCentres()).WillByDefault(Return(std::vector<double>{0.0}));
 
-    Expectation setVisible = EXPECT_CALL(*m_view, setHWHMRangeVisible(true)).Times(1);
-    EXPECT_CALL(*m_view, setHWHMMinimum(-0.00875)).Times(1).After(setVisible);
-    EXPECT_CALL(*m_view, setHWHMMaximum(0.00875)).Times(1).After(setVisible);
+    auto const expectedRanges = std::vector<std::pair<double, double>>{{-0.00875, 0.00875}};
+    EXPECT_CALL(*m_view, setHWHMRanges(expectedRanges)).Times(1);
+
+    m_presenter->updateRangeSelectors();
+  }
+
+  void test_that_updateRangeSelectors_will_update_a_hwhm_selector_for_each_peak() {
+    ON_CALL(*m_model, getHWHMs()).WillByDefault(Return(std::vector<double>{0.5, 1.0, 2.0}));
+    ON_CALL(*m_model, getPeakCentres()).WillByDefault(Return(std::vector<double>{0.0, 0.0, 1.0}));
+
+    auto const expectedRanges = std::vector<std::pair<double, double>>{{-0.5, 0.5}, {-1.0, 1.0}, {-1.0, 3.0}};
+    EXPECT_CALL(*m_view, setHWHMRanges(expectedRanges)).Times(1);
 
     m_presenter->updateRangeSelectors();
   }

@@ -43,6 +43,15 @@ std::string getFitFunctionString(std::string const &workspaceName) {
          "0175)))";
 }
 
+std::string getThreeLorentzianFunctionString(std::string const &workspaceName) {
+  return "composite=Convolution,FixResolution=true,NumDeriv=true;"
+         "name=Resolution,Workspace=" +
+         workspaceName +
+         ",WorkspaceIndex=0;(name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=1;"
+         "name=Lorentzian,Amplitude=1,PeakCentre=0.1,FWHM=2;"
+         "name=Lorentzian,Amplitude=1,PeakCentre=0.2,FWHM=3)";
+}
+
 MultiDomainFunction_sptr getFunction(std::string const &functionString, size_t numDomains) {
   return FunctionFactory::Instance().createInitializedMultiDomainFunction(functionString, numDomains);
 }
@@ -201,16 +210,35 @@ public:
     TS_ASSERT_DIFFERS(m_model->getResultRange().second, 10.0);
   }
 
-  void test_that_getFirstHWHM_returns_half_the_value_of_the_FWHM_in_the_fitting_function() {
+  void test_that_getHWHMs_returns_half_the_value_of_the_FWHM_in_the_fitting_function() {
     m_activeFunction = getFunction(getFitFunctionString("Name"), 1);
     m_model->setFitFunction(m_activeFunction);
-    TS_ASSERT_EQUALS(m_model->getFirstHWHM(), 0.0175 / 2);
+    TS_ASSERT_EQUALS(m_model->getHWHMs(), std::vector<double>{0.0175 / 2});
   }
 
-  void test_that_getFirstPeakCentre_returns_the_value_of_the_first_PeakCentre_in_the_fitting_function() {
+  void test_that_getPeakCentres_returns_the_value_of_the_PeakCentre_in_the_fitting_function() {
     m_activeFunction = getFunction(getFitFunctionString("Name"), 1);
     m_model->setFitFunction(m_activeFunction);
-    TS_ASSERT_EQUALS(m_model->getFirstPeakCentre(), 1.0);
+    TS_ASSERT_EQUALS(m_model->getPeakCentres(), std::vector<double>{1.0});
+  }
+
+  void test_that_getHWHMs_and_getPeakCentres_return_a_value_for_each_lorentzian() {
+    m_activeFunction = getFunction(getThreeLorentzianFunctionString("Name"), 1);
+    m_model->setFitFunction(m_activeFunction);
+
+    TS_ASSERT_EQUALS(m_model->getHWHMs(), std::vector<double>({0.5, 1.0, 1.5}));
+    TS_ASSERT_EQUALS(m_model->getPeakCentres(), std::vector<double>({0.0, 0.1, 0.2}));
+  }
+
+  void test_that_calculateHWHMRange_mirrors_either_line_about_the_peak_centre_of_the_given_peak() {
+    m_activeFunction = getFunction(getThreeLorentzianFunctionString("Name"), 1);
+    m_model->setFitFunction(m_activeFunction);
+
+    for (auto const linePosition : {-1.3, 1.7}) {
+      auto const [minimum, maximum] = m_model->calculateHWHMRange(2, linePosition);
+      TS_ASSERT_DELTA(minimum, -1.3, 1e-10);
+      TS_ASSERT_DELTA(maximum, 1.7, 1e-10);
+    }
   }
 
   void test_that_getFirstBackgroundLevel_returns_the_value_of_the_first_background_level_in_the_fitting_function() {
@@ -219,7 +247,7 @@ public:
     TS_ASSERT_EQUALS(m_model->getFirstBackgroundLevel(), 0.0);
   }
 
-  void test_that_calculateHWHMMaximum_returns_the_value_expected() {
+  void test_that_calculateHWHMRange_returns_the_value_expected() {
     auto alg = setupFitAlgorithm(m_workspace, getFitFunctionString("Name"));
     alg->execute();
     auto group = getWorkspaceOutput<WorkspaceGroup>(alg, "OutputWorkspaceGroup");
@@ -229,28 +257,12 @@ public:
     m_activeFunction = getFunction(getFitFunctionString("Name"), 1);
     m_model->setFitFunction(m_activeFunction);
 
-    auto const hwhm = m_model->getFirstHWHM();
-    auto const peakCentre = m_model->getFirstPeakCentre().value_or(0.);
+    auto const hwhm = m_model->getHWHMs().front();
+    auto const peakCentre = m_model->getPeakCentres().front();
 
-    auto const minimum = peakCentre + *hwhm;
-    TS_ASSERT_EQUALS(m_model->calculateHWHMMaximum(minimum), 0.99125);
-  }
-
-  void test_that_calculateHWHMMinimum_returns_the_value_expected() {
-    auto alg = setupFitAlgorithm(m_workspace, getFitFunctionString("Name"));
-    alg->execute();
-    auto group = getWorkspaceOutput<WorkspaceGroup>(alg, "OutputWorkspaceGroup");
-    auto parameters = getWorkspaceOutput<ITableWorkspace>(alg, "OutputParameterWorkspace");
-    auto result = getWorkspaceOutput<WorkspaceGroup>(alg, "OutputWorkspace");
-    m_fitOutput->addOutput(group, parameters, result, FitDomainIndex{0});
-    m_activeFunction = getFunction(getFitFunctionString("Name"), 1);
-    m_model->setFitFunction(m_activeFunction);
-
-    auto const hwhm = m_model->getFirstHWHM();
-    auto const peakCentre = m_model->getFirstPeakCentre().value_or(0.);
-
-    auto const maximum = peakCentre - *hwhm;
-    TS_ASSERT_EQUALS(m_model->calculateHWHMMinimum(maximum), 1.00875);
+    auto const [minimum, maximum] = m_model->calculateHWHMRange(0, peakCentre + hwhm);
+    TS_ASSERT_DELTA(minimum, 0.99125, 1e-10);
+    TS_ASSERT_DELTA(maximum, 1.00875, 1e-10);
   }
 
   void test_that_canCalculateGuess_returns_false_when_there_is_no_fitting_function() {
@@ -267,7 +279,7 @@ public:
     m_activeFunction = getFunction(getFitFunctionString("Name"), 1);
     m_model->setFitFunction(m_activeFunction);
     auto const fwhm = 0.0175;
-    TS_ASSERT_EQUALS(*m_model->getFirstHWHM(), fwhm / 2);
+    TS_ASSERT_EQUALS(m_model->getHWHMs().front(), fwhm / 2);
   }
 
   void test_that_setBackground_will_change_the_value_of_A0_in_the_fitting_function() {

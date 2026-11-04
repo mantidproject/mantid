@@ -253,29 +253,38 @@ IFunction_sptr firstFunctionWithParameter(IFunction_sptr function, const std::st
   return nullptr;
 }
 
-void setFunctionParameters(const IFunction_sptr &function, const std::string &category,
-                           const std::string &parameterName, double value);
-
-void setFunctionParameters(const CompositeFunction_sptr &composite, const std::string &category,
-                           const std::string &parameterName, double value) {
-  for (auto i = 0u; i < composite->nFunctions(); ++i)
-    setFunctionParameters(composite->getFunction(i), category, parameterName, value);
+bool hasCategory(const IFunction_sptr &function, const std::string &category) {
+  auto const categories = function->categories();
+  return std::find(categories.cbegin(), categories.cend(), category) != categories.cend();
 }
 
-void setFunctionParameters(const IFunction_sptr &function, const std::string &category,
-                           const std::string &parameterName, double value) {
-  if (function->category() == category && function->hasParameter(parameterName))
-    function->setParameter(parameterName, value);
+// n is decremented for each matching function skipped, so it can be shared across recursive calls
+bool setNthFunctionParameter(const IFunction_sptr &function, const std::string &category,
+                             const std::string &parameterName, double value, std::size_t &n) {
+  if (hasCategory(function, category) && function->hasParameter(parameterName)) {
+    if (n == 0) {
+      function->setParameter(parameterName, value);
+      return true;
+    }
+    --n;
+    return false;
+  }
 
-  auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
-  if (composite)
-    setFunctionParameters(composite, category, parameterName, value);
+  if (const auto composite = std::dynamic_pointer_cast<CompositeFunction>(function)) {
+    for (auto i = 0u; i < composite->nFunctions(); ++i) {
+      if (setNthFunctionParameter(composite->getFunction(i), category, parameterName, value, n))
+        return true;
+    }
+  }
+  return false;
 }
 
-void setFunctionParameters(const MultiDomainFunction_sptr &function, const std::string &category,
-                           const std::string &parameterName, double value) {
-  for (size_t i = 0u; i < function->nFunctions(); ++i)
-    setFunctionParameters(function->getFunction(i), category, parameterName, value);
+void setPeakParameter(const MultiDomainFunction_sptr &function, std::size_t peakIndex, const std::string &parameterName,
+                      double value) {
+  for (size_t i = 0u; i < function->nFunctions(); ++i) {
+    auto n = peakIndex;
+    setNthFunctionParameter(function->getFunction(i), "Peak", parameterName, value, n);
+  }
 }
 
 void setFirstBackground(IFunction_sptr function, double value) {
@@ -421,9 +430,11 @@ void FittingModel::setFitFunction(MultiDomainFunction_sptr function) {
   m_previousModelSelected = isPreviousModelSelected();
 }
 
-void FittingModel::setFWHM(double fwhm, WorkspaceID WorkspaceID) {
-  setDefaultParameterValue("FWHM", fwhm, WorkspaceID);
-  setFunctionParameters(getFitFunction(), "Peak", "FWHM", fwhm);
+void FittingModel::setFWHM(double fwhm, std::size_t peakIndex, WorkspaceID WorkspaceID) {
+  // The default FWHM is shared by all peaks, so only the first peak's selector updates it
+  if (peakIndex == 0)
+    setDefaultParameterValue("FWHM", fwhm, WorkspaceID);
+  setPeakParameter(getFitFunction(), peakIndex, "FWHM", fwhm);
 }
 
 void FittingModel::setBackground(double background, WorkspaceID WorkspaceID) {

@@ -58,8 +58,7 @@ private:
 
   void tiePeakCentres();
 
-  std::optional<std::string> getLor1Prefix() const;
-  std::optional<std::string> getLor2Prefix() const;
+  std::optional<std::string> getLorPrefix(std::size_t index) const;
   std::optional<std::string> getFitTypePrefix() const;
   std::optional<std::string> getDeltaPrefix() const;
   std::optional<std::string> getBackgroundPrefix() const;

@@ -84,7 +84,7 @@ public:
 
   bool isPreviouslyFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
 
-  void setFWHM(WorkspaceID WorkspaceID, double fwhm);
+  void setFWHM(WorkspaceID WorkspaceID, std::size_t peakIndex, double fwhm);
   void setBackground(WorkspaceID WorkspaceID, double background);
 
   void updateFitBrowserParameterValues(const std::unordered_map<std::string, ParameterValue> &params =
