@@ -27,7 +27,7 @@ class MDNormTest(unittest.TestCase):
         self._workspace_names.append(ws.name())
         return ws
 
-    def _make_mde(self, ndims=3, frame="QSample", wavelength=None, mdnorm_logs=False, oriented_lattice=False):
+    def _make_mde(self, ndims=3, frame="QSample", wavelength=None, mdnorm_logs=False, oriented_lattice=False, instrument="CORELLI"):
         if ndims == 3:
             names = "Q_x,Q_y,Q_z"
             units = "A^-1,A^-1,A^-1"
@@ -48,7 +48,7 @@ class MDNormTest(unittest.TestCase):
                 OutputWorkspace=mtd.unique_hidden_name(),
             )
         )
-        dummy = self._track(LoadEmptyInstrument(InstrumentName="CORELLI", OutputWorkspace=mtd.unique_hidden_name()))
+        dummy = self._track(LoadEmptyInstrument(InstrumentName=instrument, OutputWorkspace=mtd.unique_hidden_name()))
         ws.addExperimentInfo(dummy)
         if wavelength is not None:
             ws.getExperimentInfo(0).run().addProperty("wavelength", float(wavelength), True)
@@ -90,6 +90,11 @@ class MDNormTest(unittest.TestCase):
         issues = alg.validateInputs()
         self.assertIn("MonoSCDNormalizationWorkspace", issues)
 
+    MONOCHROMATIC_BACKGROUND_MESSAGE = (
+        "MDNorm does not support a background for monochromatic single crystal diffraction. Subtract the background in "
+        "detector space with HFIRSCDSubtractBackground before ConvertHFIRSCDtoMDE."
+    )
+
     def test_mutually_exclusive_with_background_workspace(self):
         data = self._make_mde(wavelength=1.5)
         norm = self._make_mde(wavelength=1.5)
@@ -99,7 +104,28 @@ class MDNormTest(unittest.TestCase):
         alg.setProperty("MonoSCDNormalizationWorkspace", norm)
         alg.setProperty("BackgroundWorkspace", background)
         issues = alg.validateInputs()
-        self.assertIn("MonoSCDNormalizationWorkspace", issues)
+        self.assertEqual(issues.get("BackgroundWorkspace"), self.MONOCHROMATIC_BACKGROUND_MESSAGE)
+
+    def test_rejects_background_for_wand_and_demand_input(self):
+        # the instrument alone identifies monochromatic data, even without MonoSCDNormalizationWorkspace
+        for instrument in ("HB2C", "HB3A"):
+            with self.subTest(instrument=instrument):
+                data = self._make_mde(wavelength=1.5, instrument=instrument)
+                background = self._make_mde(frame="QLab", wavelength=1.5)
+                alg = self._setup_alg()
+                alg.setProperty("InputWorkspace", data)
+                alg.setProperty("BackgroundWorkspace", background)
+                issues = alg.validateInputs()
+                self.assertEqual(issues.get("BackgroundWorkspace"), self.MONOCHROMATIC_BACKGROUND_MESSAGE)
+
+    def test_accepts_background_for_time_of_flight_input(self):
+        data = self._make_mde(mdnorm_logs=True)
+        background = self._make_mde(frame="QLab")
+        alg = self._setup_alg()
+        alg.setProperty("InputWorkspace", data)
+        alg.setProperty("BackgroundWorkspace", background)
+        issues = alg.validateInputs()
+        self.assertNotIn("BackgroundWorkspace", issues)
 
     def test_rejects_inelastic_input(self):
         data = self._make_mde(ndims=4, wavelength=1.5)
