@@ -471,6 +471,7 @@ The shapes that can be rotated are: Sphere_, `Cylinder (finite height) <Cylinder
 
 Use the ``rotate`` tag to rotate a shape **individually around its centre**: the middle of a cylinder's axis, or the
 tip of a cone.
+A cuboid given by its four corner points cannot take a ``rotate`` tag: write the corners already rotated instead.
 The shape is rotated by an angle in degrees around the x,y and z axes in that order. To rotate a
 cuboid 90° clockwise around x and 45° anti-clockwise around y:
 
@@ -508,7 +509,7 @@ sphere on the end of a cylinder (by 90° clockwise around x and 45° anti-clockw
       <algebra val="some-sphere (: stick)" />
       <rotate-all x="90" y="-45" z="0" />
 
-All these rotatable shapes (expect for `Infinite Plane`_, `Infinite Cylinder`_ and `Infinite Cone`_) can be plotted to check
+All these rotatable shapes (except for `Infinite Plane`_, `Infinite Cylinder`_ and `Infinite Cone`_) can be plotted to check
 your shape definition is correct. For more details see :ref:`Mesh_Plots`.
 
 Shapes will be automatically rotated, if a rotation is set using :ref:`algm-SetGoniometer`.
