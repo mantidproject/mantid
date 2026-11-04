@@ -16,6 +16,8 @@ It uses :ref:`algm-GenerateEventsFilter` to define the way splitting should be d
 
 The sliced workspaces are then rebinned to histogram data and combined with the given monitor workspace, to produce a workspace suitable for input to :ref:`algm-ReflectometryReductionOneAuto`. The monitors for each slice are scaled according to the percentage of ``proton_charge`` in that slice.
 
+If the input workspace contains a ``reflectometry_adjusted_theta`` sample log, its value is preserved in each output slice.
+
 WorkspaceGroup Processing
 #########################
 
