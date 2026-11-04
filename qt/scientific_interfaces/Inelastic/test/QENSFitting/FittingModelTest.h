@@ -14,6 +14,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 
@@ -144,6 +145,24 @@ public:
     m_model->setFitFunction(function);
 
     TS_ASSERT_EQUALS(m_model->getFitFunction(), function);
+  }
+
+  void test_that_setFWHM_only_changes_the_FWHM_of_the_given_peak_in_every_domain() {
+    auto const function = getFunction("composite=Convolution,FixResolution=true,NumDeriv=true;name=Resolution,"
+                                      "WorkspaceIndex=0,X=(),Y=();(name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=1;"
+                                      "name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=1;"
+                                      "name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=1)",
+                                      2);
+    m_model->setFitFunction(function);
+
+    m_model->setFWHM(0.5, 1, WorkspaceID{0});
+
+    for (auto domain = 0u; domain < function->nFunctions(); ++domain) {
+      auto const peaks = function->getFunction(domain)->getFunction(1);
+      TS_ASSERT_EQUALS(peaks->getFunction(0)->getParameter("FWHM"), 1.0);
+      TS_ASSERT_EQUALS(peaks->getFunction(1)->getParameter("FWHM"), 0.5);
+      TS_ASSERT_EQUALS(peaks->getFunction(2)->getParameter("FWHM"), 1.0);
+    }
   }
 
   void test_that_ConvolutionSequentialFit_algorithm_initializes() {

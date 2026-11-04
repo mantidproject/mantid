@@ -64,6 +64,32 @@ public:
     TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(), fun->asString())
   }
 
+  void test_setFunction_correctly_handles_three_lorentzians() {
+    auto fun = FunctionFactory::Instance().createInitialized(
+        "composite=Convolution,FixResolution=true,NumDeriv=true;name="
+        "Resolution,WorkspaceIndex=0,X=(),Y=();(name=Lorentzian,Amplitude=1,"
+        "PeakCentre=0,FWHM=1,constraints=(0<Amplitude,0<FWHM);name=Lorentzian,"
+        "Amplitude=1,PeakCentre=0,FWHM=1,constraints=(0<Amplitude,0<FWHM);name=Lorentzian,"
+        "Amplitude=1,PeakCentre=0,FWHM=1,constraints=(0<Amplitude,0<FWHM))");
+
+    m_model->setFunction(fun);
+
+    TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(), fun->asString())
+    TS_ASSERT_EQUALS(m_model->getSubTypes().at(ConvTypes::SubTypeIndex::Lorentzian),
+                     static_cast<int>(LorentzianType::ThreeLorentzians));
+  }
+
+  void test_setFunction_throws_for_four_lorentzians() {
+    auto fun = FunctionFactory::Instance().createInitialized(
+        "composite=Convolution,FixResolution=true,NumDeriv=true;name="
+        "Resolution,WorkspaceIndex=0,X=(),Y=();(name=Lorentzian,Amplitude=1,"
+        "PeakCentre=0,FWHM=1;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=1;"
+        "name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=1;name=Lorentzian,"
+        "Amplitude=1,PeakCentre=0,FWHM=1)");
+
+    TS_ASSERT_THROWS(m_model->setFunction(fun), std::runtime_error &)
+  }
+
   void test_setFunction_correctly_handles_one_lorentzian_and_background() {
     auto fun = FunctionFactory::Instance().createInitialized(
         "name=FlatBackground,A0=0,constraints=(0<A0);(composite=Convolution,"
@@ -171,6 +197,19 @@ public:
     TS_ASSERT_EQUALS(subTypes.at(ConvTypes::SubTypeIndex::Background), static_cast<int>(BackgroundType::None));
     TS_ASSERT_EQUALS(subTypes.at(ConvTypes::SubTypeIndex::Lorentzian),
                      static_cast<int>(LorentzianType::TwoLorentzians));
+  }
+
+  void test_setFunction_does_not_throw_for_valid_three_lorenztian_temperature_function() {
+    m_model->setSubType(ConvTypes::SubTypeIndex::Lorentzian, static_cast<int>(LorentzianType::ThreeLorentzians));
+    m_model->setSubType(ConvTypes::SubTypeIndex::TempCorrection, static_cast<int>(TempCorrectionType::Exponential));
+    auto func = m_model->getFitFunction();
+
+    m_model->setFunction(func);
+
+    auto const subTypes = m_model->getSubTypes();
+    TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(), func->asString())
+    TS_ASSERT_EQUALS(subTypes.at(ConvTypes::SubTypeIndex::Lorentzian),
+                     static_cast<int>(LorentzianType::ThreeLorentzians));
   }
 
 private:

@@ -102,16 +102,14 @@ public:
   void setFitRangeBounds(std::pair<double, double> const &bounds) override;
 
   void setBackgroundRangeVisible(bool visible) override;
-  void setHWHMRangeVisible(bool visible) override;
 
   void displayMessage(const std::string &message) const override;
 
   void allowRedraws(bool state) override;
   void redrawPlots() override;
 
-  void setHWHMMinimum(double minimum) override;
-  void setHWHMMaximum(double maximum) override;
-  void setHWHMRange(double minimum, double maximum) override;
+  void setHWHMRange(std::size_t peakIndex, double minimum, double maximum) override;
+  void setHWHMRanges(std::vector<std::pair<double, double>> const &ranges) override;
 
   void clearPreviews() override;
 
@@ -129,13 +127,11 @@ private slots:
   void notifyStartXChanged(double value);
   void notifyEndXChanged(double value);
 
-  void notifyHWHMMinimumChanged(double value);
-  void notifyHWHMMaximumChanged(double value);
-
-  void notifyFWHMChanged(double minimum, double maximum);
   void notifyBackgroundChanged(double value);
 
 private:
+  void notifyHWHMChanged(std::size_t peakIndex, double minimum, double maximum);
+
   void createSplitterWithPlots();
   void createSplitter();
   MantidWidgets::PreviewPlot *createTopPlot();
@@ -150,6 +146,7 @@ private:
   void addFitRangeSelector();
   void addBackgroundRangeSelector();
   void addHWHMRangeSelector();
+  MantidWidgets::RangeSelector *getHWHMRangeSelector(std::size_t peakIndex) const;
 
   void clearTopPreview();
   void clearBottomPreview();
@@ -159,6 +156,7 @@ private:
   std::unique_ptr<MantidQt::MantidWidgets::PreviewPlot> m_bottomPlot;
   std::unique_ptr<QSplitter> m_splitter;
   IFitPlotPresenter *m_presenter;
+  std::vector<std::pair<double, double>> m_hwhmRanges;
 };
 
 } // namespace Inelastic

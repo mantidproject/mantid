@@ -1,0 +1,1 @@
+- The :ref:`Convolution<convfit>` tab of the :ref:`QENS Fitting interface <interface-inelastic-qens-fitting>` can now fit up to three Lorentzians, previously limited to two. Each Lorentzian now has its own pair of HWHM lines in the preview plot, which can be dragged to change the FWHM of that Lorentzian only.

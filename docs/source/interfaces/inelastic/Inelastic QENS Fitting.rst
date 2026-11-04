@@ -301,10 +301,12 @@ A sequential fit is run by clicking the Run button at the bottom of the tab, a
 single fit can be done using the Fit Single Spectrum button underneath the
 preview plot.
 
-The fit types available in Convolution are One :ref:`Lorentzian <func-Lorentzian>`, Two Lorentzian,
+The fit types available in Convolution are one, two or three :ref:`Lorentzians <func-Lorentzian>`,
 :ref:`TeixeiraWater (SQE) <func-TeixeiraWaterSQE>`, :ref:`InelasticDiffSphere <func-InelasticDiffSphere>`,
 :ref:`InelasticDiffRotDiscreteCircle <func-InelasticDiffRotDiscreteCircle>`, :ref:`ElasticDiffSphere <func-ElasticDiffSphere>`,
 :ref:`ElasticDiffRotDiscreteCircle <func-ElasticDiffRotDiscreteCircle>` and :ref:`StretchedExpFT <func-StretchedExpFT>`.
+Each Lorentzian is shown in the preview plot by a pair of HWHM lines, which can be dragged to change the FWHM of
+that Lorentzian.
 
 .. interface:: QENS Fitting
   :width: 450

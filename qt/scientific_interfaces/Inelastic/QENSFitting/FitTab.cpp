@@ -126,8 +126,8 @@ void FitTab::handlePlotSpectrumChanged() {
   m_fittingPresenter->setCurrentDataset(index);
 }
 
-void FitTab::handleFwhmChanged(double fwhm) {
-  m_fittingPresenter->setFWHM(m_plotPresenter->getActiveWorkspaceID(), fwhm);
+void FitTab::handleFwhmChanged(std::size_t peakIndex, double fwhm) {
+  m_fittingPresenter->setFWHM(m_plotPresenter->getActiveWorkspaceID(), peakIndex, fwhm);
   m_fittingPresenter->updateFitBrowserParameterValues();
   m_plotPresenter->updateGuess();
 }
