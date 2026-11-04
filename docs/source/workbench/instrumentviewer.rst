@@ -211,7 +211,10 @@ curve per detector. Summing converts to d-spacing, sums, and converts back to th
 that detectors at different scattering angles add up correctly.
 
 ``Export Spectra to ADS`` saves whatever is currently plotted into a workspace named
-``instrument_view_selected_spectra_<workspace name>``.
+``instrument_view_selected_spectra_<workspace name>``. The button is enabled only while detectors
+are selected, either by clicking or from a ticked ``Grouping`` entry, and never while
+``Hover Pick`` is on. A shape that has not been added to the ``Grouping`` list does not count as a
+selection, so its preview cannot be exported on its own.
 
 .. figure:: ../images/Workbench/InstrumentViewer/LinePlot.png
     :align: center
