@@ -31,7 +31,6 @@ public:
   MOCK_CONST_METHOD1(draw, void(bool picking));
   MOCK_CONST_METHOD3(getBoundingBox,
                      void(Mantid::Kernel::V3D &minBound, Mantid::Kernel::V3D &maxBound, const bool excludeMonitors));
-  MOCK_CONST_METHOD0(getInstrument, std::shared_ptr<const Mantid::Geometry::Instrument>());
   MOCK_CONST_METHOD0(getWorkspace, std::shared_ptr<const Mantid::API::MatrixWorkspace>());
   MOCK_CONST_METHOD0(componentInfo, const Mantid::Geometry::ComponentInfo &());
   MOCK_CONST_METHOD0(detectorInfo, const Mantid::Geometry::DetectorInfo &());

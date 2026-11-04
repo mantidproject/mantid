@@ -608,6 +608,23 @@ public:
     TS_ASSERT_EQUALS(physInstFromWS->getDetector(1004)->getPos(), V3D(2, 0, 0));
     TS_ASSERT_EQUALS(physInstFromWS->getDetector(1005)->getPos(), V3D(2, 1, 0));
 
+    // Physical geometry obtained via the workspace's InstrumentMetadata
+    const auto &metadata = ws->instrumentMetadata();
+    TS_ASSERT(metadata.hasPhysicalInstrument());
+    const auto &physicalDetectorInfo = metadata.physicalDetectorInfo();
+    TS_ASSERT_EQUALS(physicalDetectorInfo.size(), 7);
+    TS_ASSERT_EQUALS(physicalDetectorInfo.position(physicalDetectorInfo.indexOf(1000)), V3D(0, 0, 0));
+    TS_ASSERT_EQUALS(physicalDetectorInfo.position(physicalDetectorInfo.indexOf(1001)), V3D(0, 1, 0));
+    TS_ASSERT_EQUALS(physicalDetectorInfo.position(physicalDetectorInfo.indexOf(1002)), V3D(1, 0, 0));
+    TS_ASSERT_EQUALS(physicalDetectorInfo.position(physicalDetectorInfo.indexOf(1003)), V3D(1, 1, 0));
+    TS_ASSERT_EQUALS(physicalDetectorInfo.position(physicalDetectorInfo.indexOf(1004)), V3D(2, 0, 0));
+    TS_ASSERT_EQUALS(physicalDetectorInfo.position(physicalDetectorInfo.indexOf(1005)), V3D(2, 1, 0));
+    TS_ASSERT_EQUALS(physicalDetectorInfo.position(physicalDetectorInfo.indexOf(1)),
+                     detectorInfo.position(detectorInfo.indexOf(1)));
+    const auto &physicalComponentInfo = metadata.physicalComponentInfo();
+    TS_ASSERT_EQUALS(&physicalComponentInfo.shape(physicalDetectorInfo.indexOf(1000)),
+                     &physicalComponentInfo.shape(physicalDetectorInfo.indexOf(1001)));
+
     // Clean up
     IDS.clear();
   }
