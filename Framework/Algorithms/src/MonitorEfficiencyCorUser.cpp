@@ -12,6 +12,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/HistogramMath.h"
@@ -119,11 +120,11 @@ double MonitorEfficiencyCorUser::calculateFormulaValue(const std::string &formul
  */
 std::string MonitorEfficiencyCorUser::getValFromInstrumentDef(const std::string &parameterName) {
 
-  const ParameterMap &pmap = m_inputWS->constInstrumentParameters();
-  Instrument_const_sptr instrument = m_inputWS->getInstrument();
-  Parameter_sptr par = pmap.getRecursive(instrument->getChild(0).get(), parameterName);
-  if (par) {
-    std::string ret = par->asString();
+  const auto &componentInfo = m_inputWS->componentInfo();
+  // Searched from the instrument's first component, so that parameters on it or on the instrument are found
+  const auto firstComponent = componentInfo.children(componentInfo.root()).front();
+  if (componentInfo.hasParameter(firstComponent, parameterName)) {
+    std::string ret = componentInfo.getParameterAsString(firstComponent, parameterName);
     g_log.debug() << "Parsed parameter " << parameterName << ": " << ret << "\n";
     return ret;
   } else {

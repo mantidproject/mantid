@@ -13,6 +13,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
@@ -159,7 +160,7 @@ void AbsorptionCorrection::exec() {
   // Cache the beam direction
   m_beamDirection = m_inputWS->getInstrument()->getBeamDirection();
   // Get a reference to the parameter map (used for indirect instruments)
-  const ParameterMap &pmap = m_inputWS->constInstrumentParameters();
+  const auto &componentInfo = m_inputWS->componentInfo();
 
   // Get the input parameters
   retrieveBaseProperties();
@@ -210,21 +211,21 @@ void AbsorptionCorrection::exec() {
     if (spectrumInfo.isMasked(i)) {
       continue;
     }
-    const auto &det = spectrumInfo.detector(i);
-
     std::vector<double> L2s(m_numVolumeElements);
     calculateDistances(spectrumInfo, i, L2s);
 
     // If an indirect instrument, see if there's an efixed in the parameter map
     double lambdaFixed = m_lambdaFixed;
     if (m_emode == DeltaEMode::Indirect) {
-      try {
-        Parameter_sptr par = pmap.get(&det, "Efixed");
-        if (par) {
-          lambdaFixed = energyToWavelength(par->value<double>());
+      // A spectrum of several detectors has no parameters of its own, so uses the single provided value
+      if (spectrumInfo.hasUniqueDetector(i)) {
+        try {
+          const auto eFixed = componentInfo.getNumberParameter(spectrumInfo.firstDetectorIndex(i), "Efixed", false);
+          if (!eFixed.empty()) {
+            lambdaFixed = energyToWavelength(eFixed.front());
+          }
+        } catch (std::runtime_error &) { /* Not a number, use single provided value */
         }
-      } catch (std::runtime_error &) { /* Throws if a DetectorGroup, use single
-                                          provided value */
       }
     }
 

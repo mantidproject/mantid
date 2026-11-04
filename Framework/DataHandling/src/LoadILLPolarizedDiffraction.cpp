@@ -362,8 +362,7 @@ void LoadILLPolarizedDiffraction::moveTwoTheta(const NXEntry &entry, const API::
       }
       for (auto pixel_no = 0; pixel_no < static_cast<int>(nPixelsPerBank); ++pixel_no) {
         auto const pixelIndex = bank_no * static_cast<int>(nPixelsPerBank) + pixel_no;
-        auto const pixel = componentInfo.componentID(pixelIndex);
-        V3D position = pixel->getPos();
+        V3D position = componentInfo.position(pixelIndex);
         double radius, theta, phi;
         position.getSpherical(radius, theta, phi);
         position.spherical(radius, bankParameters[0] * twoThetaBank[0] - bankParameters[1] - twoThetaPixels[pixel_no],

@@ -170,10 +170,14 @@ void LoadIsawDetCal::exec() {
       std::stringstream(line) >> count >> mL1 >> mT0;
       setProperty("TimeOffset", mT0);
       // Convert from cm to m
-      if (instname == "WISH")
-        center(0.0, 0.0, -mL1, "undulator", ws, componentInfo);
-      else
-        center(0.0, 0.0, -mL1, "moderator", ws, componentInfo);
+      const std::string sourceName = instname == "WISH" ? "undulator" : "moderator";
+      size_t sourceIndex;
+      try {
+        sourceIndex = componentInfo.indexOfAny(sourceName);
+      } catch (const std::invalid_argument &) {
+        throw std::runtime_error("Component with name " + sourceName + " was not found.");
+      }
+      center(0.0, 0.0, -mL1, sourceIndex, componentInfo);
       // mT0 and time of flight are both in microsec
       if (mT0 != 0.0) {
         if (inputW) {
@@ -229,7 +233,7 @@ void LoadIsawDetCal::exec() {
     if (matchingDetector != detList.end()) {
       const size_t bankIndex = *matchingDetector;
       detname = componentInfo.name(bankIndex);
-      center(x, y, z, detname, ws, componentInfo);
+      center(x, y, z, bankIndex, componentInfo);
 
       ComponentScaling detScaling;
       const auto grid = componentInfo.pixelGridComponent(bankIndex);
@@ -260,8 +264,7 @@ void LoadIsawDetCal::exec() {
 
       rectangularDetectorScalings.emplace_back(detScaling);
 
-      IComponent_const_sptr bankComponent(componentInfo.componentID(bankIndex), NoDeleting());
-      doRotation(rX, rY, componentInfo, bankComponent);
+      doRotation(rX, rY, componentInfo, bankIndex);
     }
     auto bank = uniqueBanks.find(id);
     if (bank == uniqueBanks.end())
@@ -270,23 +273,24 @@ void LoadIsawDetCal::exec() {
 
     bankName = getBankName(bankPart, idnum);
     // Retrieve it
-    auto comp = inst->getComponentByName(bankName);
+    size_t componentIndex;
+    try {
+      componentIndex = componentInfo.indexOfAny(bankName);
+    } catch (const std::invalid_argument &) {
+      continue;
+    }
     // for Corelli with sixteenpack under bank
     if (instname == "CORELLI") {
-      const size_t bankIndex = componentInfo.indexOfAny(bankName);
-      const auto children = componentInfo.children(bankIndex);
+      const auto children = componentInfo.children(componentIndex);
       if (!children.empty()) {
-        comp = IComponent_const_sptr(componentInfo.componentID(children[0]), NoDeleting());
+        componentIndex = children[0];
       }
     }
-    if (comp) {
-      // Omitted scaling tubes
-      detname = comp->getFullName();
-      center(x, y, z, detname, ws, componentInfo);
+    // Omitted scaling tubes
+    center(x, y, z, componentIndex, componentInfo);
 
-      bool doWishCorrection = (instname == "WISH"); // TODO: find out why this is needed for WISH
-      doRotation(rX, rY, componentInfo, comp, doWishCorrection);
-    }
+    bool doWishCorrection = (instname == "WISH"); // TODO: find out why this is needed for WISH
+    doRotation(rX, rY, componentInfo, componentIndex, doWishCorrection);
   }
 
   // Do this last, to avoid the issue of invalidating DetectorInfo
@@ -301,23 +305,12 @@ void LoadIsawDetCal::exec() {
  * @param x :: The shift along the X-axis
  * @param y :: The shift along the Y-axis
  * @param z :: The shift along the Z-axis
- * @param detname :: The detector name
- * @param ws :: The workspace
+ * @param componentIndex :: The index of the detector
  * @param componentInfo :: The component info object for the workspace
  */
-void LoadIsawDetCal::center(const double x, const double y, const double z, const std::string &detname,
-                            const API::Workspace_sptr &ws, Geometry::ComponentInfo &componentInfo) {
-
-  Instrument_sptr inst = getCheckInst(ws);
-
-  IComponent_const_sptr comp = inst->getComponentByName(detname);
-  if (comp == nullptr) {
-    throw std::runtime_error("Component with name " + detname + " was not found.");
-  }
-
+void LoadIsawDetCal::center(const double x, const double y, const double z, const size_t componentIndex,
+                            Geometry::ComponentInfo &componentInfo) {
   const V3D position(x * CM_TO_M, y * CM_TO_M, z * CM_TO_M);
-
-  const auto componentIndex = componentInfo.indexOf(comp->getComponentID());
   componentInfo.setPosition(componentIndex, position);
 }
 
@@ -377,11 +370,11 @@ std::vector<std::string> LoadIsawDetCal::getFilenames() {
  * @param rX the vector of (base_x, base_y, base_z) from the calibration file
  * @param rY the vector of (up_x, up_y, up_z) from the calibration file
  * @param componentInfo the ComponentInfo object from the workspace
- * @param comp the component to rotate
+ * @param componentIndex the index of the component to rotate
  * @param doWishCorrection if true apply a special correction for WISH
  */
-void LoadIsawDetCal::doRotation(V3D rX, V3D rY, ComponentInfo &componentInfo,
-                                const std::shared_ptr<const IComponent> &comp, bool doWishCorrection) {
+void LoadIsawDetCal::doRotation(V3D rX, V3D rY, ComponentInfo &componentInfo, const size_t componentIndex,
+                                bool doWishCorrection) {
   // These are the ISAW axes
   rX.normalize();
   rY.normalize();
@@ -414,9 +407,6 @@ void LoadIsawDetCal::doRotation(V3D rX, V3D rY, ComponentInfo &componentInfo,
   }
   // Final = those two rotations in succession; Q1 is done first.
   const Quat Rot = Q2 * Q1;
-
-  // Then find the corresponding relative position
-  const auto componentIndex = componentInfo.indexOf(comp->getComponentID());
 
   componentInfo.setRotation(componentIndex, Rot);
 }
