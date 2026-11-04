@@ -27,7 +27,7 @@ public:
     TS_ASSERT_EQUALS(metadata.xmlText(), "<instrument/>");
     TS_ASSERT_EQUALS(metadata.defaultView(), "3D");
     TS_ASSERT_EQUALS(metadata.defaultAxis(), "Z+");
-    TS_ASSERT(!metadata.physicalInstrument());
+    TS_ASSERT(!metadata.hasPhysicalInstrument());
   }
 
   void test_setFileName() {
@@ -62,12 +62,12 @@ public:
     metadata.setDefaultViewAxis("X-");
     TS_ASSERT_EQUALS(metadata.validFromDate(), DateAndTime("1900-01-31T23:59:59"));
     TS_ASSERT_EQUALS(metadata.validToDate(), DateAndTime("2100-01-31T23:59:59"));
-    TS_ASSERT(!metadata.physicalInstrument());
+    TS_ASSERT(!metadata.hasPhysicalInstrument());
   }
 
 private:
   InstrumentMetadata createMetadata() const {
     return InstrumentMetadata(DateAndTime("1900-01-31T23:59:59"), DateAndTime("2100-01-31T23:59:59"),
-                              "TEST_Definition.xml", "<instrument/>", "3D", "Z+", nullptr);
+                              "TEST_Definition.xml", "<instrument/>", "3D", "Z+");
   }
 };

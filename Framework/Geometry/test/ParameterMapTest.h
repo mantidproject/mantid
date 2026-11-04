@@ -14,6 +14,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/Instrument/InstrumentMetadata.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
@@ -518,6 +519,24 @@ public:
     TS_ASSERT_THROWS(pmap.addInt(copyComp.get(), "P", 2), const std::invalid_argument &);
     TS_ASSERT(!pmap.get(copyComp.get(), "P"));
     TS_ASSERT_EQUALS(pmap.get(comp.get(), "P")->value<int>(), 1);
+  }
+
+  void test_physical_instrument_metadata_carries_no_parameters_of_the_neutronic_instrument() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    instrument->setPhysicalInstrument(std::make_unique<Instrument>(*instrument));
+    ParameterMap pmap;
+    pmap.addDouble(instrument.get(), "P", 1.5);
+    pmap.addInt(instrument->getChild(0).get(), "Q", 2);
+    pmap.setInstrument(instrument.get());
+
+    const auto &metadata = pmap.instrumentMetadata();
+    TS_ASSERT(metadata.hasPhysicalInstrument());
+    const auto &physicalComponentInfo = metadata.physicalComponentInfo();
+    for (size_t index = 0; index < physicalComponentInfo.size(); ++index) {
+      TS_ASSERT(physicalComponentInfo.parameters(index).empty());
+    }
+    const auto &componentInfo = pmap.componentInfo();
+    TS_ASSERT_EQUALS(componentInfo.getNumberParameter(componentInfo.root(), "P", false), std::vector<double>{1.5});
   }
 
   void test_entries_of_an_attached_map_give_component_indices() {
