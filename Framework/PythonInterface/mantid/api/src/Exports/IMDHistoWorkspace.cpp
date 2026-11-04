@@ -18,6 +18,7 @@
 #include <numpy/arrayobject.h>
 
 #include <algorithm>
+#include <stdexcept>
 #include <vector>
 
 using namespace Mantid::API;
@@ -149,8 +150,9 @@ void throwIfSizeIncorrect(const IMDHistoWorkspace &self, const NDArray &signal, 
  * The array is converted once to a contiguous float64 array in Fortran order;
  * no copy is made if it already is one. The conversion is done before the
  * buffer is written, so a failed conversion leaves the workspace unchanged.
- * Arrays of Python objects are converted element by element, as float() does;
- * other arrays only by casts that numpy considers safe.
+ * Arrays of Python objects are converted element by element, as float() does,
+ * and floating point arrays by a forced cast, as numpy.asarray(dtype=float)
+ * does; other arrays only by casts that numpy considers safe.
  * @param values :: The numpy array, whose shape matches the workspace
  * @param dest :: The buffer of the workspace that receives the values
  */
@@ -164,6 +166,9 @@ void copyToBuffer(const NDArray &values, Mantid::signal_t *dest) {
     throw_error_already_set();
   handle<> owner(converted); // releases the converted array, also if std::copy throws
   auto *array = reinterpret_cast<PyArrayObject *>(converted);
+  // Raw pointer access below requires an aligned, native float64 array in Fortran order
+  if (PyArray_TYPE(array) != NPY_DOUBLE || !PyArray_ISFARRAY_RO(array) || !PyArray_ISNOTSWAPPED(array))
+    throw std::runtime_error("numpy did not convert the array to an aligned, native float64 array in Fortran order");
   const auto *source = static_cast<const double *>(PyArray_DATA(array));
   std::copy(source, source + PyArray_SIZE(array), dest);
 }
