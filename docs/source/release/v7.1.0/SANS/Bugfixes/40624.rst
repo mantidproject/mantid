@@ -1,0 +1,1 @@
+- :ref:`SaveSESANS <algm-SaveSESANS>` now writes the value of the ``Orientation`` property to the file header. Previously ``Z`` was always written, whatever orientation was selected.

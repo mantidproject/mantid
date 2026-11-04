@@ -16,6 +16,29 @@ where the X values are wavelength and the Y values are polarisation.
 The sample thickness from the run metadata is used to normalise the polarisation data.
 The :literal:`OverrideSampleThickness` parameter can be used to specify a different value for this if needed.
 
+Measurement metadata
+####################
+
+To help identify the measurement, the following entries are added to the file header after the
+mandatory SESANS headers:
+
+================== =====================================================================================
+Header             Value
+================== =====================================================================================
+Facility           The :literal:`Facility` property if set, otherwise the facility that the instrument
+                   belongs to, as defined in the Mantid facilities configuration
+Instrument         The :literal:`Instrument` property if set, otherwise the instrument name of the input
+                   workspace
+Run_number         The :literal:`RunNumber` property if set, otherwise the :literal:`run_number` sample log
+                   of the input workspace
+Reduction_software Always :literal:`Mantid`
+Software_version   The version of Mantid used to save the file
+Reduction_date     The date and time (UTC, ISO 8601) at which the file was saved
+================== =====================================================================================
+
+The :literal:`Facility`, :literal:`Instrument` and :literal:`Run_number` entries are omitted if no value
+can be determined.
+
 Usage
 -----
 
