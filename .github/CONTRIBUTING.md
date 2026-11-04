@@ -5,7 +5,7 @@ The [developer documentation](http://developer.mantidproject.org/) has informati
 1. Make changes as you see fit. Please still follow the guidelines for [running the unit tests](http://developer.mantidproject.org/RunningTheUnitTests.html) and the [build servers](http://developer.mantidproject.org/AutomatedBuildProcess.html).
 1. Submit a [pull request](https://help.github.com/articles/using-pull-requests) to this branch. This is a start to the conversation.
 
-If you need help, you can go to the [forum](https://forum.mantidproject.org/).
+If you need help, you can ask on [GitHub Discussions](https://github.com/mantidproject/mantid/discussions).
 
 Hints to make the integration of your changes easy (and happen faster):
 

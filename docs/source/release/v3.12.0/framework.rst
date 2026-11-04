@@ -114,7 +114,7 @@ Bugfixes
 - A `bug <https://github.com/mantidproject/mantid/pull/20953>`_ in the handling of fractional bin weights in a specialised form
   (``RebinnedOutput``) of :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` has been fixed.
   This mainly affects the algorithms :ref:`algm-SofQWNormalisedPolygon` and :ref:`algm-Rebin2D`,
-  which underlies the `SliceViewer <http://archive.mantidproject.org/MantidPlot:_SliceViewer>`_.
+  which underlies the SliceViewer.
 
 Python
 ------

@@ -9,6 +9,8 @@ Introduction
 
 There are three layers to access instrument information, :py:obj:`~mantid.api.SpectrumInfo`, :py:obj:`~mantid.geometry.DetectorInfo`, and :py:obj:`~mantid.geometry.ComponentInfo`, which are introduced to Mantid as part of Instrument 2.0. These classes  store all commonly accessed information about spectra and detectors, components, and the relationships between them. Masking, monitor flags, L1, L2, 2-theta and position are stored as part of :py:obj:`~mantid.geometry.DetectorInfo`. In addition, :py:obj:`~mantid.geometry.ComponentInfo` provides the API to tree and shape related operations historically performed by :py:obj:`Instrument <mantid.geometry.Instrument>` type.
 
+For how these layers are built and stored inside the framework, including how shapes are shared between components and how they relate to the legacy instrument tree, see `Instrument Geometry <https://developer.mantidproject.org/InstrumentGeometry.html>`__ in the developer documentation.
+
 A spectrum corresponds to (a group of) one or more detectors. Most algorithms work with spectra and thus :py:obj:`~mantid.api.SpectrumInfo` would be used. Some algorithms work on a lower level (with individual detectors) and thus :py:obj:`~mantid.geometry.DetectorInfo` would be used.
 
 The legacy :py:obj:`Instrument <mantid.geometry.Instrument>` largely consists of ``Detectors`` and ``Components`` - all detectors are also components. :py:obj:`~mantid.geometry.DetectorInfo` and :py:obj:`~mantid.geometry.ComponentInfo` are the respective replacements for these. :py:obj:`~mantid.geometry.ComponentInfo` introduces a **component index** for access, and :py:obj:`~mantid.geometry.DetectorInfo` introduces a **detector index**, these will be discussed further below. :py:obj:`~mantid.geometry.DetectorInfo` and :py:obj:`~mantid.geometry.ComponentInfo` share in-memory data. The difference between the two is best thought about in terms of their interfaces. The interface for :py:obj:`~mantid.geometry.DetectorInfo` is designed for working with detectors, and the interface for :py:obj:`~mantid.geometry.ComponentInfo` is designed for working with generic components.
@@ -77,6 +79,23 @@ and adding one replaces any existing parameter of that name.
 
 The parameter accessors on ``ComponentInfo`` are available from Python as well as C++,
 so Python code reaches named parameters through the access layer rather than the legacy component API.
+
+InstrumentMetadata
+__________________
+
+``InstrumentMetadata`` holds the information that describes the instrument as a whole rather than any one component:
+
+* the dates the instrument definition is valid from and to,
+* the name of the instrument definition file and its XML text,
+* the default view and view axis for the :ref:`instrument viewer <InstrumentViewer>`, and
+* for indirect geometry instruments, the separate physical instrument, if the definition has one.
+
+It is created when the instrument is loaded and is shared by workspaces that share the instrument.
+In C++ it is obtained from ``ExperimentInfo::instrumentMetadata()``, e.g.
+``ws->instrumentMetadata().validFromDate()`` replaces ``ws->getInstrument()->getValidFromDate()``.
+In Python the values are available directly on the workspace or ``ExperimentInfo``, see the table in `What to use instead`_.
+
+The physical instrument is still a legacy ``Instrument`` object.
 
 Changes for Rollout
 -------------------
@@ -363,6 +382,12 @@ Almost every legacy accessor already has a modern Python home:
        ``azimuthal(index)``, which is measured about the beam from the sample
    * - ``Detector.isMasked()`` / ``isMonitor()``
      - ``detectorInfo().isMasked(index)`` / ``isMonitor(index)`` (already deprecated)
+   * - ``Instrument.getValidFromDate()`` / ``getValidToDate()``
+     - ``instrumentValidFromDate()`` / ``instrumentValidToDate()`` on the workspace
+   * - ``Instrument.getFilename()`` / ``getXmlText()``
+     - ``instrumentFilename()`` / ``instrumentXmlText()`` on the workspace
+   * - ``Instrument.getDefaultView()``
+     - ``instrumentDefaultView()`` on the workspace, and ``instrumentDefaultAxis()`` for the view axis
 
 Remember that a detector's component index equals its detector index,
 so a single index moves freely between ``ComponentInfo`` and ``DetectorInfo``.

@@ -1,0 +1,16 @@
+/* Widen the centered documentation frame on desktop screens. */
+@media (min-width: 960px) {
+  .bd-page-width {
+    max-width: 100rem;
+  }
+
+  .bd-sidebar-primary {
+    --pst-sidebar-primary-width: 20%;
+    width: var(--pst-sidebar-primary-width);
+  }
+}
+
+/* Keep algorithm property tables compact enough for their descriptions. */
+.bd-article section#properties table {
+  font-size: 0.875rem;
+}

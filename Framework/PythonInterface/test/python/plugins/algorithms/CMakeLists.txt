@@ -79,6 +79,7 @@ set(TEST_PY_FILES
     HB3APredictPeaksTest.py
     HFIRCalculateGoniometerTest.py
     HFIRSANS2WavelengthTest.py
+    HFIRSCDSubtractBackgroundTest.py
     IndexPeaksTest.py
     IndirectTransmissionTest.py
     IndexSatellitePeaksTest.py

@@ -16,7 +16,8 @@ it is crucial to have the correct instrument attached to the first run.
 In addition the s1 (omega rotation), duration, run_number and monitor count is read from every
 file and included in the logs of the OutputWorkspace.
 
-Normalization can be optionally performed in the same process, provided that the necessary Vanadium data is specified.
+Normalization can be optionally performed in the same process, provided that the necessary Vanadium data is specified
+and ``NormalizeData`` is ``True``.
 There's also the posibility of not normalizing the data but saving the normalization workspace
 alongside the main data workspace for later use in MDNorm.
 
@@ -40,6 +41,13 @@ If option ``NormalizeData`` is ``True``, a normalization workspace is constructe
 
 If a workspace name is provided in ``OutputNormalizationWorkspace``,
 then ``normalization_workspace`` will be saved, irrespective of the value of ``NormalizeData``.
+
+``NormalizeData`` is ``False`` by default, and the output is then in raw counts.
+The algorithm rejects combinations of inputs where the vanadium data would be missing or unused:
+
+- ``NormalizeData=True`` requires vanadium data.
+- Vanadium data requires ``NormalizeData=True``, or a workspace name in ``OutputNormalizationWorkspace``.
+- ``OutputNormalizationWorkspace`` requires vanadium data.
 
 If the "HB2C:CS:CrystalAlign:UBMatrix" property exists and apply goniometer tilt is true,
 it will be converted into the OrientedLattice on the OutputWorkspace.

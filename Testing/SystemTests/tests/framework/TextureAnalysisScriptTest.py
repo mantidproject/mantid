@@ -115,7 +115,9 @@ class RunAStandardAbsorptionCorrectionEulerGoniometer(AbsCorrMixin, systemtestin
         self.corr_ws = ADS.retrieve("Corrected_ENGINX299080")
 
     def validate(self):
+        # relative: the reference predates full-precision goniometer tags, which move results by ~1e-7
         self.tolerance = 1e-6
+        self.tolerance_is_rel_err = True
         self.validate_expected_files()
         return self.corr_ws.name(), os.path.join(CWDIR, "Corrected_ENGINX299080_1cmFeCube_euler_rotated.nxs")
 
@@ -136,7 +138,9 @@ class RunAStandardAbsorptionCorrectionProvideGoniometerMatrix(AbsCorrMixin, syst
         self.corr_ws = ADS.retrieve("Corrected_ENGINX299080")
 
     def validate(self):
+        # relative, for the same reason as the euler goniometer test above
         self.tolerance = 1e-6
+        self.tolerance_is_rel_err = True
         self.validate_expected_files()
         return self.corr_ws.name(), os.path.join(CWDIR, "Corrected_ENGINX299080_1cmFeCube_matrix_rotated.nxs")
 

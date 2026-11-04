@@ -59,8 +59,7 @@ Improvements
 
     The instrument view showing data from WISH.
 
-The `Instrument View
-<https://archive.mantidproject.org/MantidPlot:_Instrument_View>`__ visualization
+The Instrument View visualization
 tool in Mantid has undergone some major changes under-the-hood which has
 resulted in a smoother, more responsive interface.  Instruments generally load
 faster as well. Below are a few noteworthy improvements to load times (as tested on Windows 10):

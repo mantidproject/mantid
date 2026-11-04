@@ -241,6 +241,33 @@ a namespace identifying the library that contains the code. Third and
 further level namespaces may be used to section code to further
 improve readability and maintenance.
 
+Library Dependencies
+^^^^^^^^^^^^^^^^^^^^
+
+The framework is split into libraries (``Kernel``, ``API``,
+``Geometry``, ``DataObjects``, ...) that form a hierarchy, with
+``Kernel`` at the bottom.
+
+#. Code should be placed in the lowest library in the hierarchy that it
+   can go in. Code with no dependencies on other Mantid libraries
+   belongs in ``Kernel``.
+#. Code may use classes from any library below it in the hierarchy, so
+   there is no need to write pass-through classes for objects in a lower
+   library. Code must not depend on a library above it.
+#. Pluggable items, such as algorithms, workspaces and fit functions,
+   should not reference other pluggable items directly. Create them
+   through the framework (e.g. ``Algorithm::createChildAlgorithm``,
+   ``WorkspaceFactory``, ``FunctionFactory``) and, where possible, use
+   them only through their abstract interface.
+
+A new library should only be created when the TWG agrees, and is
+appropriate when the code:
+
+- is a conceptually complete piece of functionality that is separate
+  from the existing libraries,
+- introduces a new third-party dependency that is not used elsewhere, or
+- comes from splitting a library that has become too large and diverse.
+
 Functions and Variables
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -263,6 +290,33 @@ Functions and Variables
    (e.g. ``<<`` and ``>>`` for serialisation).
 7. ‘Magic numbers’ must not be used in the code. Constants and
    enumerations must be used instead.
+
+.. _CppIntegerTypes:
+
+Integer and ID Types
+^^^^^^^^^^^^^^^^^^^^
+
+Several integer types are used throughout Mantid:
+
+- ``int`` - used for many general purpose values.
+- ``int64_t`` and the other fixed width integer types - from
+  ``<cstdint>``. Use these when the size of the type matters.
+- ``std::size_t`` - used for sizes and indices of containers, e.g. the
+  value returned by ``std::vector::size()`` or
+  ``MatrixWorkspace::getNumberHistograms()``. Always write the ``std::``
+  namespace.
+- ``specnum_t`` - a spectrum number, defined in
+  ``MantidGeometry/IDTypes.h``.
+- ``detid_t`` - a detector ID, defined in ``MantidGeometry/IDTypes.h``.
+
+Loops parallelised with OpenMP (e.g. using ``PARALLEL_FOR_IF``) must use a
+signed loop variable, because the MSVC compiler only supports OpenMP 2.0
+which does not allow unsigned loop variables. This is why such loops
+often cast an unsigned size to a signed type, see :ref:`CppCompilerWarnings`.
+The restriction comes from building with MSVC's default ``/openmp`` flag;
+it can be dropped if the Windows build switches to ``/openmp:llvm`` (e.g. by
+setting CMake's ``OpenMP_RUNTIME_MSVC`` to ``llvm``), which supports
+unsigned loop variables.
 
 Expressions and Statements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -374,6 +428,72 @@ of the following should take into account the use of the code.
    -  Check the XYZ input data and then repeat the process.
    -  Contact the system administrator.
 
+.. _CppCompilerWarnings:
+
+Compiler Warnings
+^^^^^^^^^^^^^^^^^
+
+Code should compile without warnings on all supported compilers. Below
+are fixes for some common warnings.
+
+**Comparison between signed and unsigned integers**
+
+.. code-block:: c++
+
+   const std::size_t numberOfSpectra = inputWS->getNumberHistograms();
+   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
+   for (int64_t i = 0; i < numberOfSpectra; ++i) {
+
+The loop variable is signed but the end value is unsigned. The loop
+variable must stay signed for OpenMP (see :ref:`CppIntegerTypes`), so cast
+the end value to the type of the loop variable instead:
+
+.. code-block:: c++
+
+   const auto numberOfSpectra = static_cast<int64_t>(inputWS->getNumberHistograms());
+   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
+   for (int64_t i = 0; i < numberOfSpectra; ++i) {
+
+**Conversion from an integer type to** ``double`` **may alter its value**
+
+.. code-block:: c++
+
+   const double numberOfSpectra = inputWS->getNumberHistograms();
+
+This is common when a count is needed in a floating point calculation.
+Make the conversion explicit:
+
+.. code-block:: c++
+
+   const auto numberOfSpectra = static_cast<double>(inputWS->getNumberHistograms());
+
+**Variable set but not used**
+
+Either the code changed so the variable is no longer needed, in which
+case remove it, or a different variable was used by mistake, in which
+case correct the code.
+
+**Variable may be used uninitialized**
+
+Built-in types, including pointers, are not initialized by default, so
+their value is whatever happens to be in memory. Initialize the variable
+when it is declared:
+
+.. code-block:: c++
+
+   int value(0);
+   value += 1;
+
+**Forcing value to bool 'true' or 'false' (MSVC)**
+
+Casting an integer to ``bool`` is not allowed (see
+`Expressions and Statements`_). Use a ``bool`` from the start if
+possible, otherwise use an explicit comparison:
+
+.. code-block:: c++
+
+   const bool hasBeenIntegrated = (integratedValue == 1);
+
 Cppcheck
 ^^^^^^^^
 
@@ -381,6 +501,27 @@ Cppcheck analyses all C++ code in the project to locate undefined behavior
 and poor coding practices. Updates to Cppcheck result in such a large number of
 these potential problems being found that it is impractical to solve them all
 in the Pull Request where the update takes place.
+
+Fixing Common Problems
+----------------------
+
+Most problems reported by Cppcheck should be fixed by changing the code.
+For example, ``uninitvar`` (uninitialized variable) is reported for:
+
+.. code-block:: c++
+
+   bool fitSuccess;
+   if (isExecute) {
+     parseFitResult(fitAlg, chi2, fitSuccess);
+   }
+   return fitSuccess;
+
+If ``isExecute`` is false, ``fitSuccess`` is returned without ever being
+set. Initialize it when it is declared:
+
+.. code-block:: c++
+
+   bool fitSuccess = false;
 
 Suppressions File
 -----------------
