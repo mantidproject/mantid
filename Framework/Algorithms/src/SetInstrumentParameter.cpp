@@ -8,13 +8,16 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Strings.h"
 
 #include <boost/algorithm/string.hpp>
+#include <deque>
 
 namespace Mantid::Algorithms {
 
@@ -92,24 +95,18 @@ void SetInstrumentParameter::exec() {
   Workspace_sptr ws = getProperty("Workspace");
   MatrixWorkspace_sptr inputW = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
   DataObjects::PeaksWorkspace_sptr inputP = std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
-  // Get some stuff from the input workspace
-  Instrument_sptr inst;
+  ExperimentInfo_sptr experimentInfo;
   if (inputW) {
-    inst = std::const_pointer_cast<Instrument>(inputW->getInstrument());
-    if (!inst)
-      throw std::runtime_error("Could not get a valid instrument from the "
-                               "MatrixWorkspace provided as input");
+    experimentInfo = inputW;
   } else if (inputP) {
-    inst = std::const_pointer_cast<Instrument>(inputP->getInstrument());
-    if (!inst)
-      throw std::runtime_error("Could not get a valid instrument from the "
-                               "PeaksWorkspace provided as input");
+    experimentInfo = inputP;
   } else {
     throw std::runtime_error("Could not get a valid instrument from the "
                              "workspace which does not seem to be valid as "
                              "input (must be either MatrixWorkspace or "
                              "PeaksWorkspace");
   }
+  auto &componentInfo = experimentInfo->mutableComponentInfo();
 
   // get the data that the user wants to add
   std::string cmptName = getProperty("ComponentName");
@@ -122,82 +119,91 @@ void SetInstrumentParameter::exec() {
   Strings::strip(paramName);
   Strings::strip(paramValue);
 
-  std::vector<IDetector_const_sptr> dets;
-  std::vector<IComponent_const_sptr> cmptList;
   // set default to whole instrument
-  cmptList.emplace_back(inst);
-
+  std::vector<size_t> componentIndices{componentInfo.root()};
   if (!detectorList.empty()) {
-    dets = inst->getDetectors(detectorList);
+    const auto &detectorInfo = experimentInfo->detectorInfo();
+    componentIndices.clear();
+    for (const auto detID : detectorList) {
+      try {
+        // Detector indices are also component indices
+        componentIndices.emplace_back(detectorInfo.indexOf(detID));
+      } catch (const std::out_of_range &) {
+        throw Kernel::Exception::NotFoundError("Instrument: Detector with ID " + std::to_string(detID) + " not found.",
+                                               "");
+      }
+    }
   } else if (cmptName.length() > 0) {
     // get all matching cmpts
-    cmptList = inst->getAllComponentsWithName(cmptName);
+    componentIndices = componentsWithName(componentInfo, cmptName);
   }
 
-  if (inputW) {
-    auto &paramMap = inputW->instrumentParameters();
-    if (!dets.empty()) {
-      for (auto &det : dets) {
-        addParameter(paramMap, det.get(), paramName, paramType, paramValue);
-      }
-    } else {
-      if (!cmptList.empty()) {
-        for (auto &cmpt : cmptList) {
-          addParameter(paramMap, cmpt.get(), paramName, paramType, paramValue);
-        }
-      } else {
-        g_log.warning("Could not find the component requested.");
-      }
-    }
+  if (componentIndices.empty()) {
+    g_log.warning("Could not find the component requested.");
   }
-  if (inputP) {
-    auto &paramMap = inputP->instrumentParameters();
-    if (!dets.empty()) {
-      for (auto &det : dets) {
-        addParameter(paramMap, det.get(), paramName, paramType, paramValue);
-      }
-    } else {
-      if (!cmptList.empty()) {
-        for (auto &cmpt : cmptList) {
-          addParameter(paramMap, cmpt.get(), paramName, paramType, paramValue);
-        }
-      } else {
-        g_log.warning("Could not find the component requested.");
-      }
-    }
+  for (const auto componentIndex : componentIndices) {
+    addParameter(componentInfo, componentIndex, paramName, paramType, paramValue);
   }
 }
 
+/** The components with the given name, as Instrument::getAllComponentsWithName() finds them: in breadth-first
+ * order, and without searching inside a component that matches.
+ *  @param componentInfo  The instrument to search
+ *  @param name  The name to look for
+ *  @return The indices of the components with that name
+ */
+std::vector<size_t> SetInstrumentParameter::componentsWithName(const ComponentInfo &componentInfo,
+                                                               const std::string &name) {
+  std::vector<size_t> matches;
+  const auto root = componentInfo.root();
+  if (componentInfo.name(root) == name) {
+    matches.emplace_back(root);
+  }
+  std::deque<size_t> toSearch{root};
+  while (!toSearch.empty()) {
+    const auto index = toSearch.front();
+    toSearch.pop_front();
+    for (const auto child : componentInfo.children(index)) {
+      if (componentInfo.name(child) == name) {
+        matches.emplace_back(child);
+      } else {
+        toSearch.emplace_back(child);
+      }
+    }
+  }
+  return matches;
+}
+
 /** Adds a parameter to the component
- *  @param pmap  The parameter map to use
- *  @param cmptId  The component id to add the parameter to
+ *  @param componentInfo  The instrument to add the parameter to
+ *  @param componentIndex  The index of the component to add the parameter to
  *  @param paramName  The parameter name to use
  *  @param paramType  The parameter type
  *  @param paramValue  The parameter value as a string
  */
-void SetInstrumentParameter::addParameter(Mantid::Geometry::ParameterMap &pmap,
-                                          const Mantid::Geometry::IComponent *cmptId, const std::string &paramName,
-                                          const std::string &paramType, const std::string &paramValue) const {
+void SetInstrumentParameter::addParameter(ComponentInfo &componentInfo, const size_t componentIndex,
+                                          const std::string &paramName, const std::string &paramType,
+                                          const std::string &paramValue) const {
 
   // remove existing parameters first
-  pmap.clearParametersByName(paramName, cmptId);
+  componentInfo.clearParameter(componentIndex, paramName);
   // then add the new one
   if (paramType == "String") {
-    pmap.addString(cmptId, paramName, paramValue);
+    componentInfo.addString(componentIndex, paramName, paramValue);
   } else if (paramType == "Number") {
     int intVal;
     if (Strings::convert(paramValue, intVal)) {
-      pmap.addInt(cmptId, paramName, intVal);
+      componentInfo.addInt(componentIndex, paramName, intVal);
     } else {
       double dblVal;
       Strings::convert(paramValue, dblVal);
-      pmap.addDouble(cmptId, paramName, dblVal);
+      componentInfo.addDouble(componentIndex, paramName, dblVal);
     }
   } else if (paramType == "Bool") {
     std::string paramValueLower(paramValue);
     boost::algorithm::to_lower(paramValueLower);
     bool paramBoolValue = (paramValueLower == "true" || paramValue == "1");
-    pmap.addBool(cmptId, paramName, paramBoolValue);
+    componentInfo.addBool(componentIndex, paramName, paramBoolValue);
   }
 }
 

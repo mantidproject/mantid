@@ -45,8 +45,9 @@ private:
   const bool m_parallelExecution;
   /// Try to parse a function parameter and extract the correctly typed
   /// parameter.
-  const Mantid::Geometry::FitParameter tryParseFunctionParameter(const Mantid::Geometry::Parameter_sptr &parameter,
-                                                                 const Geometry::IDetector &det);
+  const Mantid::Geometry::FitParameter
+  tryParseFunctionParameter(const std::shared_ptr<const Mantid::Geometry::Parameter> &parameter,
+                            const std::string &detectorName);
   /// Block to process histograms.
   std::shared_ptr<Mantid::API::MatrixWorkspace>
   processHistograms(const std::shared_ptr<Mantid::API::MatrixWorkspace> &inWS);

@@ -11,8 +11,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
@@ -94,7 +93,7 @@ void CorrectKiKf::exec() {
   }
 
   // Get the parameter map
-  const ParameterMap &pmap = outputWS->constInstrumentParameters();
+  const auto &componentInfo = outputWS->componentInfo();
   const auto &spectrumInfo = inputWS->spectrumInfo();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
@@ -109,7 +108,7 @@ void CorrectKiKf::exec() {
       // If a DetectorGroup is present should provide a value as a property
       // instead
       else if (spectrumInfo.hasUniqueDetector(i)) {
-        getEfixedFromParameterMap(Efi, i, spectrumInfo, pmap);
+        getEfixedFromParameterMap(Efi, i, spectrumInfo, componentInfo);
       } else {
         g_log.information() << "Workspace Index " << i << ": cannot find detector"
                             << "\n";
@@ -202,7 +201,7 @@ void CorrectKiKf::execEvent() {
   }
 
   // Get the parameter map
-  const ParameterMap &pmap = outputWS->constInstrumentParameters();
+  const auto &componentInfo = outputWS->componentInfo();
 
   auto numHistograms = static_cast<int64_t>(inputWS->getNumberHistograms());
   const auto &spectrumInfo = inputWS->spectrumInfo();
@@ -219,7 +218,7 @@ void CorrectKiKf::execEvent() {
         // If a DetectorGroup is present should provide a value as a property
         // instead
       } else if (spectrumInfo.hasUniqueDetector(i)) {
-        getEfixedFromParameterMap(Efi, i, spectrumInfo, pmap);
+        getEfixedFromParameterMap(Efi, i, spectrumInfo, componentInfo);
       } else {
         g_log.information() << "Workspace Index " << i << ": cannot find detector"
                             << "\n";
@@ -288,17 +287,17 @@ void CorrectKiKf::correctKiKfEventHelper(std::vector<T> &wevector, double efixed
 }
 
 void CorrectKiKf::getEfixedFromParameterMap(double &Efi, int64_t i, const SpectrumInfo &spectrumInfo,
-                                            const ParameterMap &pmap) {
+                                            const ComponentInfo &componentInfo) {
   Efi = 0;
 
-  if (spectrumInfo.isMonitor(i))
+  // A spectrum of several detectors has no parameters of its own
+  if (spectrumInfo.isMonitor(i) || !spectrumInfo.hasUniqueDetector(i))
     return;
 
-  const auto &det = spectrumInfo.detector(i);
-  Parameter_sptr par = pmap.getRecursive(&det, "Efixed");
-  if (par) {
-    Efi = par->value<double>();
-    g_log.debug() << "Detector: " << det.getID() << " EFixed: " << Efi << "\n";
+  const auto eFixed = componentInfo.getNumberParameter(spectrumInfo.spectrumDefinition(i)[0].first, "Efixed");
+  if (!eFixed.empty()) {
+    Efi = eFixed.front();
+    g_log.debug() << "Spectrum index: " << i << " EFixed: " << Efi << "\n";
   }
 }
 

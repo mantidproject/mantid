@@ -238,23 +238,25 @@ void SaveIsawPeaks::exec() {
 
       std::string bankName = mess.str();
       // Retrieve it
-      std::shared_ptr<const IComponent> det = inst->getComponentByName(bankName);
-      if (m_ws->getInstrumentName() == "CORELLI") // for Corelli with sixteenpack under bank
-      {
-        const size_t bankIndex = componentInfo.indexOfAny(bankName);
+      size_t bankIndex = ComponentInfo::invalidIndex;
+      try {
+        bankIndex = componentInfo.indexOfAny(bankName);
+      } catch (const std::invalid_argument &) {
+        // No such bank
+      }
+      if (bankIndex != ComponentInfo::invalidIndex && m_ws->getInstrumentName() == "CORELLI") {
+        // for Corelli with sixteenpack under bank
         const auto children = componentInfo.children(bankIndex);
         if (!children.empty()) {
-          det.reset(componentInfo.componentID(children[0]), NoDeleting());
+          bankIndex = children[0];
         }
       }
-      if (det) {
-        // Center of the detector.
-        // NOTE: componentID() above returns the *base* component, whose getPos() ignores the ParameterMap and so
-        //       reports uncalibrated IDF geometry. ComponentInfo is the parameterized view, so query it instead.
-        V3D center = componentInfo.position(componentInfo.indexOf(det->getComponentID()));
+      if (bankIndex != ComponentInfo::invalidIndex) {
+        // Center of the detector
+        V3D center = componentInfo.position(bankIndex);
 
         // Distance to center of detector
-        double detd = (center - inst->getSample()->getPos()).norm();
+        double detd = (center - componentInfo.samplePosition()).norm();
         int NCOLS, NROWS;
         double xsize, ysize;
         sizeBanks(bankName, NCOLS, NROWS, xsize, ysize);

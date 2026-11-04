@@ -14,6 +14,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -63,11 +64,12 @@ void NormaliseByDetector::init() {
                   "An output workspace.");
 }
 
-const Geometry::FitParameter NormaliseByDetector::tryParseFunctionParameter(const Geometry::Parameter_sptr &parameter,
-                                                                            const Geometry::IDetector &det) {
+const Geometry::FitParameter
+NormaliseByDetector::tryParseFunctionParameter(const std::shared_ptr<const Geometry::Parameter> &parameter,
+                                               const std::string &detectorName) {
   if (parameter == nullptr) {
     std::stringstream stream;
-    stream << det.getName()
+    stream << detectorName
            << " and all of it's parent components, have no "
               "fitting type parameters. This algorithm "
               "cannot be run without fitting parameters. See "
@@ -92,13 +94,16 @@ use.
 */
 void NormaliseByDetector::processHistogram(size_t wsIndex, const MatrixWorkspace_const_sptr &inWS,
                                            const MatrixWorkspace_sptr &denominatorWS, Progress &prog) {
-  const auto &paramMap = inWS->constInstrumentParameters();
+  const auto &componentInfo = inWS->componentInfo();
   const auto &spectrumInfo = inWS->spectrumInfo();
-  const auto &det = spectrumInfo.detector(wsIndex);
+  // A spectrum of several detectors has no parameters of its own
+  const bool hasParameters = spectrumInfo.hasUniqueDetector(wsIndex);
+  const auto detIndex = spectrumInfo.spectrumDefinition(wsIndex)[0].first;
+  const auto &detName = componentInfo.name(detIndex);
   const std::string type = "fitting";
-  Geometry::Parameter_sptr foundParam = paramMap.getRecursiveByType(&det, type);
+  const auto foundParam = hasParameters ? componentInfo.parameterByType(detIndex, type) : nullptr;
 
-  const Geometry::FitParameter &foundFittingParam = tryParseFunctionParameter(foundParam, det);
+  const Geometry::FitParameter &foundFittingParam = tryParseFunctionParameter(foundParam, detName);
 
   const std::string &fitFunctionName = foundFittingParam.getFunction();
   IFunction_sptr function = FunctionFactory::Instance().createFunction(fitFunctionName);
@@ -107,9 +112,9 @@ void NormaliseByDetector::processHistogram(size_t wsIndex, const MatrixWorkspace
 
   // Lookup each parameter name.
   for (auto &paramName : allParamNames) {
-    Geometry::Parameter_sptr param = paramMap.getRecursive(&det, paramName, type);
+    const auto param = componentInfo.parameter(detIndex, paramName, type);
 
-    const Geometry::FitParameter &fitParam = tryParseFunctionParameter(param, det);
+    const Geometry::FitParameter &fitParam = tryParseFunctionParameter(param, detName);
 
     if (fitParam.getFormula().empty()) {
       throw std::runtime_error("A Forumla has not been provided for a fit function");

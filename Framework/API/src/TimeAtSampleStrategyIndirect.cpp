@@ -7,11 +7,10 @@
 #include "MantidAPI/TimeAtSampleStrategyIndirect.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/V3D.h"
@@ -29,34 +28,40 @@ namespace Mantid::API {
  */
 TimeAtSampleStrategyIndirect::TimeAtSampleStrategyIndirect(MatrixWorkspace_const_sptr ws)
     : m_spectrumInfo(ws->spectrumInfo()), m_L1s(m_spectrumInfo.l1()),
-      m_beamDir(ws->getInstrument()->getReferenceFrame()->vecPointingAlongBeam()),
-      m_paramMap(ws->constInstrumentParameters()) {}
+      m_beamDir(ws->componentInfo().referenceFrame()->vecPointingAlongBeam()), m_componentInfo(ws->componentInfo()),
+      m_detectorInfo(ws->detectorInfo()) {}
 
 /**
  * This will throw an exception if efixed is not found or negative
  */
 double TimeAtSampleStrategyIndirect::getEfixed(const size_t &workspace_index) const {
-  const IDetector *det = &m_spectrumInfo.detector(workspace_index);
+  if (!m_spectrumInfo.hasDetectors(workspace_index)) {
+    throw Kernel::Exception::NotFoundError("TimeAtSampleStrategyIndirect: no detectors for spectrum",
+                                           std::to_string(workspace_index));
+  }
+  // The first detector, for a spectrum of several
+  const auto detIndex = m_spectrumInfo.spectrumDefinition(workspace_index)[0].first;
+  const auto noEfixed = [&]() {
+    std::stringstream errmsg;
+    errmsg << "Inelastic instrument detector " << m_detectorInfo.detid(detIndex) << " of spectrum " << workspace_index
+           << " does not have EFixed ";
+    return std::runtime_error(errmsg.str());
+  };
 
   double efixed{0.};
-  try {
-    // Get the parameter map
-    Parameter_sptr par = m_paramMap.getRecursive(det, "Efixed");
-    if (par) {
-      efixed = par->value<double>();
+  // A spectrum of several detectors has no parameters of its own
+  if (m_spectrumInfo.hasUniqueDetector(workspace_index)) {
+    try {
+      const auto values = m_componentInfo.getNumberParameter(detIndex, "Efixed");
+      if (!values.empty()) {
+        efixed = values.front();
+      }
+    } catch (std::runtime_error &) {
+      throw noEfixed();
     }
-  } catch (std::runtime_error &) {
-    // Throws if a DetectorGroup, use single provided value
-    std::stringstream errmsg;
-    errmsg << "Inelastic instrument detector " << det->getID() << " of spectrum " << workspace_index
-           << " does not have EFixed ";
-    throw std::runtime_error(errmsg.str());
   }
   if (efixed <= 0.) {
-    std::stringstream errmsg;
-    errmsg << "Inelastic instrument detector " << det->getID() << " of spectrum " << workspace_index
-           << " does not have EFixed ";
-    throw std::runtime_error(errmsg.str());
+    throw noEfixed();
   }
 
   return efixed;

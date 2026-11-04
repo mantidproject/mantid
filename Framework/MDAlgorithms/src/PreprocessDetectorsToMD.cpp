@@ -12,6 +12,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 
@@ -215,7 +217,8 @@ void PreprocessDetectorsToMD::processDetectorsPositions(const API::MatrixWorkspa
   // Efixed; do we need one and does one exist?
   auto Efi = targWS->getLogs()->getPropertyValueAsType<double>("Ei");
   float *pEfixedArray(nullptr);
-  const Geometry::ParameterMap &pmap = inputWS->constInstrumentParameters();
+  const auto &componentInfo = inputWS->componentInfo();
+  const auto &detectorInfo = inputWS->detectorInfo();
   if (m_getEFixed)
     pEfixedArray = targWS->getColDataArray<float>("eFixed");
 
@@ -251,11 +254,12 @@ void PreprocessDetectorsToMD::processDetectorsPositions(const API::MatrixWorkspa
     else if (maskDetector)
       continue;
 
-    const auto &spDet = spectrumInfo.detector(i);
+    // The first detector, for a spectrum of several
+    const auto firstDetIndex = spectrumInfo.firstDetectorIndex(i);
 
     // calculate the requested values;
     sp2detMap[i] = liveDetectorsCount;
-    detId[liveDetectorsCount] = int32_t(spDet.getID());
+    detId[liveDetectorsCount] = int32_t(detectorInfo.detid(firstDetIndex));
     detIDMap[liveDetectorsCount] = i;
     L2[liveDetectorsCount] = spectrumInfo.l2(i);
 
@@ -287,11 +291,14 @@ void PreprocessDetectorsToMD::processDetectorsPositions(const API::MatrixWorkspa
     // for indirect instrument but may be deployed on any code with Ei property
     // defined;
     if (pEfixedArray) {
-      try {
-        Geometry::Parameter_sptr par = pmap.getRecursive(&spDet, "eFixed");
-        if (par)
-          Efi = par->value<double>();
-      } catch (std::runtime_error &) {
+      // A spectrum of several detectors has no parameters of its own
+      if (spectrumInfo.hasUniqueDetector(i)) {
+        try {
+          const auto eFixed = componentInfo.getNumberParameter(firstDetIndex, "eFixed");
+          if (!eFixed.empty())
+            Efi = eFixed.front();
+        } catch (std::runtime_error &) {
+        }
       }
       // set efixed for each existing detector
       *(pEfixedArray + liveDetectorsCount) = static_cast<float>(Efi);

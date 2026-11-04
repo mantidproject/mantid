@@ -262,15 +262,17 @@ void VesuvioCalculateMS::cacheInputs() {
   m_detThick = detBoxWidth[m_beamIdx];
 
   // Foil resolution
-  auto foil = instrument->getComponentByName("foil-pos0");
-  if (!foil) {
+  size_t foilIndex;
+  try {
+    foilIndex = componentInfo.indexOfAny("foil-pos0");
+  } catch (const std::invalid_argument &) {
     throw std::runtime_error("Workspace has no gold foil component defined.");
   }
-  auto param = m_inputWS->constInstrumentParameters().get(foil.get(), "hwhm_lorentz");
-  if (!param) {
+  const auto foilRes = componentInfo.getNumberParameter(foilIndex, "hwhm_lorentz", false);
+  if (foilRes.empty()) {
     throw std::runtime_error("Foil component has no hwhm_lorentz parameter defined.");
   }
-  m_foilRes = param->value<double>();
+  m_foilRes = foilRes.front();
 }
 
 /**

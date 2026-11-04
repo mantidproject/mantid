@@ -14,6 +14,9 @@
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
+namespace Geometry {
+class ComponentInfo;
+}
 namespace Algorithms {
 /**	Multiplies the workspace with k_i/k_f
         The initial workspace must have energy transfer units.
@@ -75,7 +78,7 @@ private:
    */
   template <class T> void correctKiKfEventHelper(std::vector<T> &wevector, double efixed, const std::string &emodeStr);
   void getEfixedFromParameterMap(double &Efi, int64_t i, const Mantid::API::SpectrumInfo &spectrumInfo,
-                                 const Mantid::Geometry::ParameterMap &pmap);
+                                 const Mantid::Geometry::ComponentInfo &componentInfo);
 };
 
 } // namespace Algorithms
