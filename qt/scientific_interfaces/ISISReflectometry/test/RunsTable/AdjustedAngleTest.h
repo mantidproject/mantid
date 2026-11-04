@@ -120,6 +120,19 @@ public:
     TS_ASSERT_EQUALS(adjustedAngleCell(withReductionOutput(makeSimpleRow("12345")), 3).contentText(), "0.625");
   }
 
+  void testMonitorMembersAreSkippedWhenFindingRawInput() {
+    auto monitors = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(4, 2, true);
+    monitors->mutableRun().addProperty("run_number", std::string("12345"));
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("TOF_12345_monitors_1", monitors);
+    auto input = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 2);
+    input->mutableRun().addProperty("run_number", std::string("12345"));
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("input_period", input);
+    addGroup("TOF", {monitors, input});
+    auto row = withReductionOutput(makeSimpleRow("12345"));
+    TS_ASSERT_EQUALS(findInputWorkspace(row.runNumbers(), std::nullopt, {row.reducedWorkspaceNames().iVsQBinned()}),
+                     input);
+  }
+
   void testHiddenSummedWorkspaceIsFound() {
     addRunWorkspace("__TOF_12345+12346", "12345+12346", 0.625);
     auto row = withReductionOutput(makeRow(std::vector<std::string>{"12345", "12346"}), "12345+12346");
