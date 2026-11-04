@@ -565,6 +565,8 @@ A custom bounding-box can be added to shapes using the following notation:
 
 Note for the best effect this bounding box should be enclosing the shape
 as tight as possible.
+A custom bounding box is used as written: ``rotate``, ``rotate-all`` and the goniometer do not turn it,
+so it must enclose the rotated shape.
 
 
 .. categories:: Concepts

@@ -1501,11 +1501,14 @@ public:
   }
 
   void testSolidAngleCone() {
-    // checked against ray tracing the surfaces: facing the base, and side on to the slope
+    // checked against ray tracing the surfaces: facing the base, and side on to the slope, both for a cone
+    // at the origin and for one moved and tilted, which coneSolidAngle has to turn into place
     const auto cone = createCone();
-    for (const V3D &observer : {V3D(0, 0, -3), V3D(3, 0, -0.5)}) {
-      const double rayTraced = cone->rayTraceSolidAngle(observer);
-      TS_ASSERT_DELTA(cone->triangulatedSolidAngle(SolidAngleParams(observer, 10)), rayTraced, 0.1 * rayTraced);
+    const auto tilted = createCone(R"(x="1" y="2" z="3")", R"(x="1" y="1" z="0")", "30", "2.0");
+    for (const auto &[shape, observer] : std::vector<std::pair<std::shared_ptr<CSGObject>, V3D>>{
+             {cone, V3D(0, 0, -3)}, {cone, V3D(3, 0, -0.5)}, {tilted, V3D(-3, -2, 3)}, {tilted, V3D(0, 1, 6)}}) {
+      const double rayTraced = shape->rayTraceSolidAngle(observer);
+      TS_ASSERT_DELTA(shape->triangulatedSolidAngle(SolidAngleParams(observer, 10)), rayTraced, 0.1 * rayTraced);
     }
   }
 
@@ -1594,7 +1597,12 @@ public:
     TS_ASSERT_DELTA(cuboid->volume(), cylinderVolume, 1e-6)
   }
 
-  void testExactVolumeCone() { TS_ASSERT_DELTA(createCone()->volume(), M_PI / 3.0, 1e-9); }
+  void testExactVolumeCone() {
+    TS_ASSERT_DELTA(createCone()->volume(), M_PI / 3.0, 1e-9);
+    // radius 2 tan 30 = 2 / sqrt(3), unequal to the height so that swapping them would show
+    TS_ASSERT_DELTA(createCone(R"(x="0" y="0" z="0")", R"(x="0" y="0" z="1")", "30", "2.0")->volume(), 8.0 * M_PI / 9.0,
+                    1e-9);
+  }
 
   void testExactVolumeHollowCylinder() {
     using namespace Poco::XML;
@@ -1666,10 +1674,14 @@ public:
 
   void testGetBoundingBoxForCone() {
     // the XML axis points from the base to the tip, so the cone lies below its tip
-    const auto &box = createCone()->getBoundingBox();
+    const auto cone = createCone();
+    const auto &box = cone->getBoundingBox();
+    TS_ASSERT_DELTA(box.minPoint().X(), -1.0, 1e-9);
+    TS_ASSERT_DELTA(box.minPoint().Y(), -1.0, 1e-9);
     TS_ASSERT_DELTA(box.minPoint().Z(), -1.0, 1e-9);
-    TS_ASSERT_DELTA(box.maxPoint().Z(), 0.0, 1e-9);
     TS_ASSERT_DELTA(box.maxPoint().X(), 1.0, 1e-9);
+    TS_ASSERT_DELTA(box.maxPoint().Y(), 1.0, 1e-9);
+    TS_ASSERT_DELTA(box.maxPoint().Z(), 0.0, 1e-9);
   }
 
   void testGetBoundingBoxForCuboid() {
@@ -1847,10 +1859,11 @@ private:
   }
 
   /// A cone with its tip at the origin and its axis along +z, filling z from -1 to 0 with a base radius of 1
-  std::shared_ptr<CSGObject> createCone() {
-    return ShapeFactory().createShape("<cone id=\"k\"><tip-point x=\"0\" y=\"0\" z=\"0\"/>"
-                                      "<axis x=\"0\" y=\"0\" z=\"1\"/><angle val=\"45\"/><height val=\"1.0\"/>"
-                                      "</cone><algebra val=\"k\"/>");
+  std::shared_ptr<CSGObject> createCone(const std::string &tip = R"(x="0" y="0" z="0")",
+                                        const std::string &axis = R"(x="0" y="0" z="1")",
+                                        const std::string &angle = "45", const std::string &height = "1.0") {
+    return ShapeFactory().createShape("<cone id=\"k\"><tip-point " + tip + "/><axis " + axis + "/><angle val=\"" +
+                                      angle + "\"/><height val=\"" + height + "\"/></cone><algebra val=\"k\"/>");
   }
 
   // This creates a cylinder to test the solid angle that is more realistic in
