@@ -115,7 +115,7 @@ Done
 ^^^^
 - Options for changing line colours, fonts etc. This is done by python toolbar.
 - Exporting subplots as PNGs etc. This is done by python toolbar.
-- Removal of individual plots from a subplot (the way plotted lines are stored would have to be changed). Needed some rewritting but done now.
+- Removal of individual plots from a subplot (the way plotted lines are stored would have to be changed). Needed some rewriting but done now.
 
 Known Issues
 ^^^^^^^^^^^^

@@ -20,7 +20,7 @@ test should have a manual test added to this list. You may need to use the muon 
 Common setup
 ^^^^^^^^^^^^
 - Set your facility to ISIS
-- Ensure you can acces the files for the test (listed below).
+- Ensure you can access the files for the test (listed below).
 
 
 Group 1: MUSR data
