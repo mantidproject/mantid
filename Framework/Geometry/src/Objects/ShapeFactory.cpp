@@ -878,21 +878,12 @@ std::string ShapeFactory::parseInfiniteCone(Poco::XML::Element *pElem, std::map<
   Element *pElemAxis = getShapeElement(pElem, "axis");
   Element *pElemAngle = getShapeElement(pElem, "angle");
 
-  V3D normVec = normalize(parsePosition(pElemAxis));
-  V3D tipPoint = parsePosition(pElemTipPoint);
-
   // getDoubleAttribute can throw - put the calls above any new
   const double angle = getDoubleAttribute(pElemAngle, "val");
 
-  // Rotate the tip and the axis by the rotate-all and goniometer tags, as for the other primitives
-  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, true)) {
-    tipPoint.rotate(m_rotateAllMatrix);
-    normVec.rotate(m_rotateAllMatrix);
-  }
-  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, true)) {
-    tipPoint.rotate(m_gonioRotateMatrix);
-    normVec.rotate(m_gonioRotateMatrix);
-  }
+  // a cone turns about its tip, so <rotate> moves only the axis
+  const auto [tipPoint, normVec] =
+      applyShapeRotations(pElem, parsePosition(pElemTipPoint), normalize(parsePosition(pElemAxis)));
 
   // add infinite double cone
   auto pCone = std::make_shared<Cone>();
