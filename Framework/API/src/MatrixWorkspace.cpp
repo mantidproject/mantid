@@ -35,6 +35,7 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/regex.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <functional>
 #include <numeric>
@@ -784,6 +785,35 @@ void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
       if (xback > xmax)
         xmax = xback;
     }
+  }
+}
+
+/** Get the X range of the given spectra.
+ * @param xmin :: Set to the lowest X value, or the largest double if no spectrum contributes
+ * @param xmax :: Set to the highest X value, or the lowest double if no spectrum contributes
+ * @param workspaceIndices :: The spectra to include
+ * @param includeNonFiniteSpectra :: A spectrum with a non-finite first or last value contributes its finite values if
+ * true, and is skipped if false
+ */
+void MatrixWorkspace::getXMinMax(double &xmin, double &xmax, const std::vector<size_t> &workspaceIndices,
+                                 const bool includeNonFiniteSpectra) const {
+  xmin = std::numeric_limits<double>::max();
+  xmax = -1.0 * xmin;
+  const auto isFinite = [](const double value) { return std::isfinite(value); };
+
+  for (const auto workspaceIndex : workspaceIndices) {
+    const auto &xData = this->x(workspaceIndex);
+    auto xfront = xData.front();
+    auto xback = xData.back();
+    if (!isFinite(xfront) || !isFinite(xback)) {
+      const auto firstFinite = std::find_if(xData.cbegin(), xData.cend(), isFinite);
+      if (!includeNonFiniteSpectra || firstFinite == xData.cend())
+        continue;
+      xfront = *firstFinite;
+      xback = *std::find_if(xData.crbegin(), xData.crend(), isFinite);
+    }
+    xmin = std::min(xmin, xfront);
+    xmax = std::max(xmax, xback);
   }
 }
 

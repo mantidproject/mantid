@@ -605,6 +605,30 @@ class MatrixWorkspaceTest(unittest.TestCase):
         ws = Rebin(ws, "1,-0.1,10000")
         self.assertTrue(ws.isCommonLogBins())
 
+    def _workspace_for_x_min_max(self):
+        ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(3, 2, False)
+        for ws_index, x_values in enumerate(([1.0, 2.0, 3.0], [10.0, 20.0, 30.0], [0.5, 2.0, np.inf])):
+            ws.setSharedX(ws_index, np.array(x_values))
+        return ws
+
+    def test_getXMinMax_accepts_a_numpy_array_or_a_list_of_workspace_indices(self):
+        ws = self._workspace_for_x_min_max()
+        self.assertEqual((10.0, 30.0), ws.getXMinMax(np.array([1], dtype=np.int64)))
+        self.assertEqual((1.0, 30.0), ws.getXMinMax([0, 1, 1]))
+
+    def test_getXMinMax_skips_spectra_with_a_non_finite_end_by_default(self):
+        ws = self._workspace_for_x_min_max()
+        self.assertEqual((1.0, 3.0), ws.getXMinMax([0, 2]))
+
+    def test_getXMinMax_can_include_the_finite_values_of_spectra_with_a_non_finite_end(self):
+        ws = self._workspace_for_x_min_max()
+        self.assertEqual((0.5, 3.0), ws.getXMinMax([0, 2], includeNonFiniteSpectra=True))
+
+    def test_getXMinMax_on_a_ragged_workspace(self):
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=2, XMin=0, XMax=100, BinWidth=10, StoreInADS=False)
+        ragged = RebinRagged(InputWorkspace=ws, XMin=[0, 0, 0, 0], XMax=[100, 90, 80, 70], Delta=[10, 10, 10, 10], StoreInADS=False)
+        self.assertEqual((0.0, 90.0), ragged.getXMinMax([1, 3]))
+
     def test_hasMaskedBins(self):
         numBins = 10
         numHist = 11
