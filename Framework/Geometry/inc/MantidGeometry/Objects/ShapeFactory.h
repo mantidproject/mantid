@@ -145,6 +145,7 @@ private:
   Kernel::V3D parsePosition(Poco::XML::Element *pElem);
   std::pair<Kernel::V3D, Kernel::V3D> applyShapeRotations(Poco::XML::Element *pElem, Kernel::V3D centre,
                                                           Kernel::V3D axis);
+  Kernel::V3D rotateWithWholeShape(Kernel::V3D vector) const;
   std::pair<Kernel::V3D, Kernel::V3D> rotatedCylinderBase(Poco::XML::Element *pElem, const Kernel::V3D &base,
                                                           const Kernel::V3D &axis, const double height);
   void createGeometryHandler(Poco::XML::Element *, const std::shared_ptr<CSGObject> &);
