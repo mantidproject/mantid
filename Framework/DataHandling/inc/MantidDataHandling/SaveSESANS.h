@@ -31,6 +31,13 @@ namespace DataHandling {
                       probed by a 1A neutron</LI>
   </UL>
 
+  Optional properties:
+  <UL>
+  <LI> Facility - Overrides the facility determined from the instrument</LI>
+  <LI> Instrument - Overrides the instrument name from the workspace</LI>
+  <LI> RunNumber - Overrides the run_number log from the workspace</LI>
+  </UL>
+
   @author Joseph Ramsay, ISIS
   @date 19/07/2017
 */
@@ -58,6 +65,11 @@ private:
 
   void writeHeaders(std::ofstream &outfile, API::MatrixWorkspace_const_sptr &ws);
   void writeHeader(std::ofstream &outfile, const std::string &name, const std::string &value);
+  void writeOptionalHeader(std::ofstream &outfile, const std::string &name, const std::string &value);
+
+  std::string getInstrumentName(const API::MatrixWorkspace_const_sptr &ws) const;
+  std::string getFacilityName(const std::string &instrumentName) const;
+  std::string getRunNumber(const API::MatrixWorkspace_const_sptr &ws) const;
 
   std::vector<double> calculateSpinEchoLength(const HistogramData::Points &wavelength) const;
   std::vector<double> calculateDepolarisation(const HistogramData::HistogramY &yValues,
