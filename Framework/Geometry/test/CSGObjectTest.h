@@ -1594,6 +1594,8 @@ public:
     TS_ASSERT_DELTA(cuboid->volume(), cylinderVolume, 1e-6)
   }
 
+  void testExactVolumeCone() { TS_ASSERT_DELTA(createCone()->volume(), M_PI / 3.0, 1e-9); }
+
   void testExactVolumeHollowCylinder() {
     using namespace Poco::XML;
     constexpr double innerRadius = 0.98;
