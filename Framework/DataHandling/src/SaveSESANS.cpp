@@ -9,10 +9,18 @@
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/MantidVersion.h"
+#include "MantidTypes/Core/DateAndTime.h"
 
 #include <algorithm>
 #include <cmath>
@@ -89,6 +97,69 @@ void SaveSESANS::init() {
                   "The sample thickness in mm. If set, this value will be used instead of the thickness from the input "
                   "workspace sample",
                   Kernel::Direction::Input);
+
+  declareProperty<std::string>("Facility", "",
+                               "The facility where the data was measured. If not set, the facility is determined "
+                               "from the instrument",
+                               Kernel::Direction::Input);
+  declareProperty<std::string>("Instrument", "",
+                               "The instrument used to measure the data. If not set, the instrument name is taken "
+                               "from the input workspace",
+                               Kernel::Direction::Input);
+  declareProperty<std::string>("RunNumber", "",
+                               "The run number of the sample measurement. If not set, the run_number log of the "
+                               "input workspace is used",
+                               Kernel::Direction::Input);
+}
+
+/**
+ * Get the instrument name, either from the Instrument property or from the
+ * input workspace
+ * @param ws The workspace to save
+ * @return The instrument name, or an empty string if it cannot be determined
+ */
+std::string SaveSESANS::getInstrumentName(const API::MatrixWorkspace_const_sptr &ws) const {
+  const std::string instrument = getPropertyValue("Instrument");
+  if (!instrument.empty()) {
+    return instrument;
+  }
+  const auto wsInstrument = ws->getInstrument();
+  return wsInstrument ? wsInstrument->getName() : "";
+}
+
+/**
+ * Get the facility name, either from the Facility property or by looking up
+ * the instrument in the facilities definitions
+ * @param instrumentName The name of the instrument
+ * @return The facility name, or an empty string if it cannot be determined
+ */
+std::string SaveSESANS::getFacilityName(const std::string &instrumentName) const {
+  const std::string facility = getPropertyValue("Facility");
+  if (!facility.empty() || instrumentName.empty()) {
+    return facility;
+  }
+  try {
+    return Kernel::ConfigService::Instance().getInstrument(instrumentName).facility().name();
+  } catch (const Kernel::Exception::NotFoundError &) {
+    g_log.information("Could not determine the facility for instrument " + instrumentName +
+                      ". Use the Facility property to provide it.");
+    return "";
+  }
+}
+
+/**
+ * Get the run number, either from the RunNumber property or from the
+ * run_number log of the input workspace
+ * @param ws The workspace to save
+ * @return The run number, or an empty string if it cannot be determined
+ */
+std::string SaveSESANS::getRunNumber(const API::MatrixWorkspace_const_sptr &ws) const {
+  const std::string runNumber = getPropertyValue("RunNumber");
+  if (!runNumber.empty()) {
+    return runNumber;
+  }
+  const auto &run = ws->run();
+  return run.hasProperty("run_number") ? run.getLogData("run_number")->value() : "";
 }
 
 /**
@@ -163,11 +234,22 @@ void SaveSESANS::writeHeaders(std::ofstream &outfile, API::MatrixWorkspace_const
   writeHeader(outfile, "Theta_zmax_unit", getPropertyValue("ThetaZMaxUnit"));
   writeHeader(outfile, "Theta_ymax", getPropertyValue("ThetaYMax"));
   writeHeader(outfile, "Theta_ymax_unit", getPropertyValue("ThetaYMaxUnit"));
-  writeHeader(outfile, "Orientation", "Z");
+  writeHeader(outfile, "Orientation", getPropertyValue("Orientation"));
   writeHeader(outfile, "SpinEchoLength_unit", "A");
   writeHeader(outfile, "Depolarisation_unit", "A-2 cm-1");
   writeHeader(outfile, "Wavelength_unit", "A");
   writeHeader(outfile, "Echo_constant", getPropertyValue("EchoConstant"));
+
+  // Optional metadata identifying the measurement. These are only written if
+  // a value is available
+  const auto instrumentName = getInstrumentName(ws);
+  writeOptionalHeader(outfile, "Facility", getFacilityName(instrumentName));
+  writeOptionalHeader(outfile, "Instrument", instrumentName);
+  writeOptionalHeader(outfile, "Run_number", getRunNumber(ws));
+
+  writeHeader(outfile, "Reduction_software", "Mantid");
+  writeHeader(outfile, "Software_version", Kernel::MantidVersion::version());
+  writeHeader(outfile, "Reduction_date", Types::Core::DateAndTime::getCurrentTime().toISO8601String());
 }
 
 /**
@@ -178,6 +260,18 @@ void SaveSESANS::writeHeaders(std::ofstream &outfile, API::MatrixWorkspace_const
  */
 void SaveSESANS::writeHeader(std::ofstream &outfile, const std::string &name, const std::string &value) {
   outfile << std::setfill(' ') << std::setw(MAX_HDR_LENGTH) << std::left << name << value << "\n";
+}
+
+/**
+ * Write a single header to the output file, if it has a value
+ * @param outfile ofstream to the output file
+ * @param name The name of the attribute being written
+ * @param value The attribute's value. Nothing is written if this is empty
+ */
+void SaveSESANS::writeOptionalHeader(std::ofstream &outfile, const std::string &name, const std::string &value) {
+  if (!value.empty()) {
+    writeHeader(outfile, name, value);
+  }
 }
 
 /**
