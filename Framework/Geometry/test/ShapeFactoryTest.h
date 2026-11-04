@@ -896,6 +896,37 @@ public:
     TS_ASSERT(!cylinderRotateAll_sptr->isValid(centre));
   }
 
+  void testRotateInfiniteCone() {
+    std::string xmlConeStart = "<infinite-cone id=\"InfiniteCone\"> ";
+    xmlConeStart += "<tip-point x=\"0.0\" y=\"10.0\" z=\"0.0\" /> ";
+    xmlConeStart += "<axis x=\"0.0\" y=\"1.0\" z=\"0.0\" /> ";
+    xmlConeStart += "<angle val=\"20\" /> ";
+    std::string xmlConeEnd = "</infinite-cone> ";
+    xmlConeEnd += "<algebra val=\"InfiniteCone\"/> ";
+
+    // Each point lies 5 from the tip along -axis, where the cone opens out.
+    // <rotate> turns the axis onto +z about the tip; <rotate-all> also moves the tip to (0, 0, 10)
+    V3D inside = V3D(0.0, 5.0, 0.0);
+    V3D insideRotate = V3D(0.0, 10.0, -5.0);
+    V3D insideRotateAll = V3D(0.0, 0.0, 5.0);
+
+    std::string xmlCone = xmlConeStart + xmlConeEnd;
+    auto cone_sptr = getObject(xmlCone);
+    TS_ASSERT(cone_sptr->isValid(inside));
+    TS_ASSERT(!cone_sptr->isValid(insideRotate));
+    TS_ASSERT(!cone_sptr->isValid(insideRotateAll));
+
+    auto coneRotate_sptr = getObject(xmlConeStart + "<rotate x=\"90\" y=\"0\" z=\"0\" /> " + xmlConeEnd);
+    TS_ASSERT(coneRotate_sptr->isValid(insideRotate));
+    TS_ASSERT(!coneRotate_sptr->isValid(inside));
+    TS_ASSERT(!coneRotate_sptr->isValid(insideRotateAll));
+
+    auto coneRotateAll_sptr = getObject(xmlCone + "<rotate-all x=\"90\" y=\"0\" z=\"0\" /> ");
+    TS_ASSERT(coneRotateAll_sptr->isValid(insideRotateAll));
+    TS_ASSERT(!coneRotateAll_sptr->isValid(inside));
+    TS_ASSERT(!coneRotateAll_sptr->isValid(insideRotate));
+  }
+
   void testRotateSlice() {
     std::string xmlSliceStart = "<slice-of-cylinder-ring id=\"Slice\"> ";
     xmlSliceStart += "<depth val=\"1.0\" /> ";
