@@ -1516,6 +1516,8 @@ double CSGObject::volume() const {
     return M_PI * radius * radius * height;
   case detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER:
     return M_PI * height * (radius * radius - innerRadius * innerRadius);
+  case detail::ShapeInfo::GeometryShape::CONE:
+    return M_PI * radius * radius * height / 3.0;
   default:
     // Fall back to Monte Carlo method.
     return monteCarloVolume();
