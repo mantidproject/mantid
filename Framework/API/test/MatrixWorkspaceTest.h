@@ -1251,6 +1251,14 @@ public:
     TS_ASSERT_EQUALS(ws->getXMax(), 1.0);
   }
 
+  void test_getXMinMax_of_all_spectra_skips_spectra_with_a_non_finite_end() {
+    const auto workspace = createWorkspaceForXMinMax();
+    double xmin, xmax;
+    workspace->getXMinMax(xmin, xmax);
+    TS_ASSERT_EQUALS(xmin, 1.0);
+    TS_ASSERT_EQUALS(xmax, 30.0);
+  }
+
   void test_getXMinMax_with_workspace_indices_only_uses_those_spectra() {
     const auto workspace = createWorkspaceForXMinMax();
     double xmin, xmax;

@@ -769,23 +769,9 @@ double MatrixWorkspace::getXMax() const {
 }
 
 void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
-  // set to crazy values to start
-  xmin = std::numeric_limits<double>::max();
-  xmax = -1.0 * xmin;
-  size_t numberOfSpectra = this->getNumberHistograms();
-
-  // determine the data range
-  for (size_t workspaceIndex = 0; workspaceIndex < numberOfSpectra; workspaceIndex++) {
-    const auto &xData = this->x(workspaceIndex);
-    const double xfront = xData.front();
-    const double xback = xData.back();
-    if (std::isfinite(xfront) && std::isfinite(xback)) {
-      if (xfront < xmin)
-        xmin = xfront;
-      if (xback > xmax)
-        xmax = xback;
-    }
-  }
+  std::vector<size_t> workspaceIndices(this->getNumberHistograms());
+  std::iota(workspaceIndices.begin(), workspaceIndices.end(), 0);
+  this->getXMinMax(xmin, xmax, workspaceIndices);
 }
 
 /** Get the X range of the given spectra.
@@ -806,8 +792,10 @@ void MatrixWorkspace::getXMinMax(double &xmin, double &xmax, const std::vector<s
     auto xfront = xData.front();
     auto xback = xData.back();
     if (!isFinite(xfront) || !isFinite(xback)) {
+      if (!includeNonFiniteSpectra)
+        continue;
       const auto firstFinite = std::find_if(xData.cbegin(), xData.cend(), isFinite);
-      if (!includeNonFiniteSpectra || firstFinite == xData.cend())
+      if (firstFinite == xData.cend())
         continue;
       xfront = *firstFinite;
       xback = *std::find_if(xData.crbegin(), xData.crend(), isFinite);
