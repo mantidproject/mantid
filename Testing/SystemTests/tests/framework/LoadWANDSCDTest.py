@@ -18,18 +18,24 @@ class LoadWANDSCDTest(systemtesting.MantidSystemTest):
         AddSampleLog(van, LogName="duration", LogText="42", LogType="Number Series", NumberType="Double")
         AddSampleLog(van, LogName="monitor_count", LogText="420", LogType="Number Series", NumberType="Double")
         # NOTE: all reference values are copied from terminal after confirm the code is correct
-        LoadWANDTest_ws = LoadWANDSCD(Filename="HB2C_7000.nxs.h5,HB2C_7001.nxs.h5", VanadiumWorkspace=van, NormalizedBy="Monitor")
+        LoadWANDTest_ws = LoadWANDSCD(
+            Filename="HB2C_7000.nxs.h5,HB2C_7001.nxs.h5", VanadiumWorkspace=van, NormalizedBy="Monitor", NormalizeData=True
+        )
         ref_val = 0.00012953253733973653
         self.assertAlmostEqual(LoadWANDTest_ws.getSignalArray().max(), ref_val, 5)
         self.assertAlmostEqual(LoadWANDTest_ws.getErrorSquaredArray().max(), 0.0, 5)
         #
-        LoadWANDTest_ws = LoadWANDSCD(Filename="HB2C_7000.nxs.h5,HB2C_7001.nxs.h5", VanadiumWorkspace=van, NormalizedBy="Counts")
+        LoadWANDTest_ws = LoadWANDSCD(
+            Filename="HB2C_7000.nxs.h5,HB2C_7001.nxs.h5", VanadiumWorkspace=van, NormalizedBy="Counts", NormalizeData=True
+        )
         ref_val = 7.0
         self.assertAlmostEqual(LoadWANDTest_ws.getSignalArray().max(), ref_val, 2)
         ref_err = 8.96
         self.assertAlmostEqual(LoadWANDTest_ws.getErrorSquaredArray().max(), ref_err, 2)
         #
-        LoadWANDTest_ws = LoadWANDSCD(Filename="HB2C_7000.nxs.h5,HB2C_7001.nxs.h5", VanadiumWorkspace=van, NormalizedBy="Time")
+        LoadWANDTest_ws = LoadWANDSCD(
+            Filename="HB2C_7000.nxs.h5,HB2C_7001.nxs.h5", VanadiumWorkspace=van, NormalizedBy="Time", NormalizeData=True
+        )
         ref_val = 0.29363296439511044
         self.assertAlmostEqual(LoadWANDTest_ws.getSignalArray().max(), ref_val, 5)
         ref_err = 0.0157660
