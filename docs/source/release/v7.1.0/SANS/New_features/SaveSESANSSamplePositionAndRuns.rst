@@ -1,0 +1,1 @@
+- :ref:`SaveSESANS <algm-SaveSESANS>` now also writes the sample changer position to the file header, taken from the ``SamplePos`` log or the new ``SamplePosition`` property. The run numbers of the blank and of the sample and blank transmission measurements can be added with the new ``BlankRunNumber``, ``SampleTransmissionRunNumber`` and ``BlankTransmissionRunNumber`` properties.

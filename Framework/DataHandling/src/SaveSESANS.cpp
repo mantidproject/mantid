@@ -20,6 +20,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/MantidVersion.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTypes/Core/DateAndTime.h"
 
 #include <algorithm>
@@ -110,6 +111,18 @@ void SaveSESANS::init() {
                                "The run number of the sample measurement. If not set, the run_number log of the "
                                "input workspace is used",
                                Kernel::Direction::Input);
+  declareProperty<std::string>("SamplePosition", "",
+                               "The name of the sample changer position, e.g. AT or 1CT. If not set, the last value of "
+                               "the SamplePos log of the input workspace is used",
+                               Kernel::Direction::Input);
+  declareProperty<std::string>("BlankRunNumber", "", "The run number of the blank measurement. Optional.",
+                               Kernel::Direction::Input);
+  declareProperty<std::string>("SampleTransmissionRunNumber", "",
+                               "The run number of the sample transmission measurement. Optional.",
+                               Kernel::Direction::Input);
+  declareProperty<std::string>("BlankTransmissionRunNumber", "",
+                               "The run number of the blank transmission measurement. Optional.",
+                               Kernel::Direction::Input);
 }
 
 /**
@@ -160,6 +173,28 @@ std::string SaveSESANS::getRunNumber(const API::MatrixWorkspace_const_sptr &ws) 
   }
   const auto &run = ws->run();
   return run.hasProperty("run_number") ? run.getLogData("run_number")->value() : "";
+}
+
+/**
+ * Get the sample position, either from the SamplePosition property or from the
+ * last value of the SamplePos log of the input workspace
+ * @param ws The workspace to save
+ * @return The sample position, or an empty string if it cannot be determined
+ */
+std::string SaveSESANS::getSamplePosition(const API::MatrixWorkspace_const_sptr &ws) const {
+  const std::string samplePosition = getPropertyValue("SamplePosition");
+  if (!samplePosition.empty()) {
+    return samplePosition;
+  }
+  const auto &run = ws->run();
+  if (!run.hasProperty("SamplePos")) {
+    return "";
+  }
+  const auto *log = run.getLogData("SamplePos");
+  if (const auto *timeSeries = dynamic_cast<const Kernel::TimeSeriesProperty<std::string> *>(log)) {
+    return timeSeries->size() > 0 ? timeSeries->lastValue() : "";
+  }
+  return log->value();
 }
 
 /**
@@ -246,6 +281,10 @@ void SaveSESANS::writeHeaders(std::ofstream &outfile, API::MatrixWorkspace_const
   writeOptionalHeader(outfile, "Facility", getFacilityName(instrumentName));
   writeOptionalHeader(outfile, "Instrument", instrumentName);
   writeOptionalHeader(outfile, "Run_number", getRunNumber(ws));
+  writeOptionalHeader(outfile, "Sample_position", getSamplePosition(ws));
+  writeOptionalHeader(outfile, "Blank_run_number", getPropertyValue("BlankRunNumber"));
+  writeOptionalHeader(outfile, "Sample_transmission_run_number", getPropertyValue("SampleTransmissionRunNumber"));
+  writeOptionalHeader(outfile, "Blank_transmission_run_number", getPropertyValue("BlankTransmissionRunNumber"));
 
   writeHeader(outfile, "Reduction_software", "Mantid");
   writeHeader(outfile, "Software_version", Kernel::MantidVersion::version());
@@ -259,7 +298,12 @@ void SaveSESANS::writeHeaders(std::ofstream &outfile, API::MatrixWorkspace_const
  * @param value The attribute's value
  */
 void SaveSESANS::writeHeader(std::ofstream &outfile, const std::string &name, const std::string &value) {
-  outfile << std::setfill(' ') << std::setw(MAX_HDR_LENGTH) << std::left << name << value << "\n";
+  // Always separate the name from the value, even if the name is longer than the usual column width
+  outfile << std::setfill(' ') << std::setw(MAX_HDR_LENGTH) << std::left << name;
+  if (name.size() >= static_cast<size_t>(MAX_HDR_LENGTH)) {
+    outfile << " ";
+  }
+  outfile << value << "\n";
 }
 
 /**

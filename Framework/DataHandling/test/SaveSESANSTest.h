@@ -17,6 +17,7 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/MantidVersion.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <Poco/TemporaryFile.h>
 #include <boost/algorithm/string/predicate.hpp>
@@ -195,6 +196,10 @@ public:
     TS_ASSERT_EQUALS(headers.count("Facility"), 0u);
     TS_ASSERT_EQUALS(headers.count("Instrument"), 0u);
     TS_ASSERT_EQUALS(headers.count("Run_number"), 0u);
+    TS_ASSERT_EQUALS(headers.count("Sample_position"), 0u);
+    TS_ASSERT_EQUALS(headers.count("Blank_run_number"), 0u);
+    TS_ASSERT_EQUALS(headers.count("Sample_transmission_run_number"), 0u);
+    TS_ASSERT_EQUALS(headers.count("Blank_transmission_run_number"), 0u);
     checkSoftwareHeaders(headers);
   }
 
@@ -214,6 +219,50 @@ public:
     const auto headers = saveAndReadHeaders(ws, {{"Orientation", "Y"}});
 
     TS_ASSERT_EQUALS(headers.at("Orientation"), "Y");
+  }
+
+  void test_sample_position_is_last_value_of_sample_pos_log() {
+    auto ws = createTestWorkspace();
+    ws->mutableSample().setThickness(5);
+    addSamplePosLog(ws, {"1CT", "AT"});
+
+    const auto headers = saveAndReadHeaders(ws);
+
+    TS_ASSERT_EQUALS(headers.at("Sample_position"), "AT");
+  }
+
+  void test_sample_position_is_omitted_for_empty_sample_pos_log() {
+    auto ws = createTestWorkspace();
+    ws->mutableSample().setThickness(5);
+    addSamplePosLog(ws, {"", ""});
+
+    const auto headers = saveAndReadHeaders(ws);
+
+    TS_ASSERT_EQUALS(headers.count("Sample_position"), 0u);
+  }
+
+  void test_sample_position_property_overrides_sample_pos_log() {
+    auto ws = createTestWorkspace();
+    ws->mutableSample().setThickness(5);
+    addSamplePosLog(ws, {"AT"});
+
+    const auto headers = saveAndReadHeaders(ws, {{"SamplePosition", "1R"}});
+
+    TS_ASSERT_EQUALS(headers.at("Sample_position"), "1R");
+  }
+
+  void test_blank_and_transmission_run_numbers_are_written() {
+    auto ws = createTestWorkspace();
+    ws->mutableSample().setThickness(5);
+
+    const auto headers = saveAndReadHeaders(ws, {{"BlankRunNumber", "94001"},
+                                                 {"SampleTransmissionRunNumber", "94002"},
+                                                 {"BlankTransmissionRunNumber", "94003"}});
+
+    // The long header names must still be separated from their values
+    TS_ASSERT_EQUALS(headers.at("Blank_run_number"), "94001");
+    TS_ASSERT_EQUALS(headers.at("Sample_transmission_run_number"), "94002");
+    TS_ASSERT_EQUALS(headers.at("Blank_transmission_run_number"), "94003");
   }
 
 private:
@@ -290,6 +339,16 @@ private:
     std::filesystem::remove(outputPath);
     API::AnalysisDataService::Instance().remove("outWS");
     return headers;
+  }
+
+  /// Add a SamplePos string time series log, as written by IBEX, with one entry per value
+  void addSamplePosLog(const Workspace2D_sptr &ws, const std::vector<std::string> &values) {
+    auto log = std::make_unique<Kernel::TimeSeriesProperty<std::string>>("SamplePos");
+    int second = 0;
+    for (const auto &value : values) {
+      log->addValue("2026-01-01T00:00:0" + std::to_string(second++), value);
+    }
+    ws->mutableRun().addProperty(std::move(log));
   }
 
   void checkSoftwareHeaders(const std::map<std::string, std::string> &headers) {
