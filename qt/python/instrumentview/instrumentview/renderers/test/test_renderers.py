@@ -1457,7 +1457,7 @@ class TestShapeRenderer(_CuboidShapeInfoHelpers, unittest.TestCase):
         workspace = MagicMock()
         workspace.componentInfo.return_value = comp_info
         workspace.detectorInfo.return_value = det_info
-        workspace.getInstrument().getReferenceFrame().vecPointingAlongBeam.return_value = [0, 0, 1]
+        comp_info.referenceFrame().vecPointingAlongBeam.return_value = [0, 0, 1]
         return workspace
 
     def _cached_cuboid_quad(self, workspace):
