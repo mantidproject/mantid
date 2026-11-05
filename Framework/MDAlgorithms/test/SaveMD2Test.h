@@ -10,6 +10,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidFrameworkTestHelpers/MDAlgorithmsTestHelper.h"
 #include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/BinMD.h"
@@ -19,6 +20,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include <filesystem>
+#include <format>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -36,13 +38,19 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_exec() { do_test_exec(23, "SaveMD2Test.nxs"); }
+  void test_exec() { do_test_exec(23, std::format("SaveMD2Test_{}.nxs", MDAlgorithmsTestHelper::makeUniqueId())); }
 
-  void test_exec_noEvents() { do_test_exec(0, "SaveMD2Test_noEvents.nxs"); }
+  void test_exec_noEvents() {
+    do_test_exec(0, std::format("SaveMD2Test_noEvents_{}.nxs", MDAlgorithmsTestHelper::makeUniqueId()));
+  }
 
-  void test_MakeFileBacked() { do_test_exec(23, "SaveMD2Test.nxs", true); }
+  void test_MakeFileBacked() {
+    do_test_exec(23, std::format("SaveMD2Test_{}.nxs", MDAlgorithmsTestHelper::makeUniqueId()), true);
+  }
 
-  void test_MakeFileBacked_then_UpdateFileBackEnd() { do_test_exec(23, "SaveMD2Test_updating.nxs", true, true); }
+  void test_MakeFileBacked_then_UpdateFileBackEnd() {
+    do_test_exec(23, std::format("SaveMD2Test_updating_{}.nxs", MDAlgorithmsTestHelper::makeUniqueId()), true, true);
+  }
 
   void do_test_exec(size_t numPerBox, const std::string &filename, bool MakeFileBacked = false,
                     bool UpdateFileBackEnd = false) {
@@ -67,12 +75,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "SaveMD2Test_ws"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MakeFileBacked", MakeFileBacked));
-
-    // clean up possible rubbish from the previous runs
-    std::string fullName = alg.getPropertyValue("Filename");
-    if (fullName != "")
-      if (std::filesystem::exists(fullName))
-        std::filesystem::remove(fullName);
 
     alg.execute();
     TS_ASSERT(alg.isExecuted());
@@ -135,7 +137,7 @@ public:
   }
 
   void test_saveExpInfo() {
-    std::string filename("MultiExperSaveMD2Test.nxs");
+    const std::string filename = std::format("MultiExperSaveMD2Test_{}.nxs", MDAlgorithmsTestHelper::makeUniqueId());
     // Make a 1D MDEventWorkspace
     MDEventWorkspace1Lean::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 2);
     // Make sure it is split
@@ -176,7 +178,7 @@ public:
   }
 
   void test_saveOptions() {
-    std::string filename("OptionsSaveMD2Test.nxs");
+    const std::string filename = std::format("OptionsSaveMD2Test_{}.nxs", MDAlgorithmsTestHelper::makeUniqueId());
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.5, 2, 10, 10.0, 3.5, "histo2", 4.5);
 
     Mantid::Geometry::Goniometer gon;
@@ -227,7 +229,7 @@ public:
   }
 
   void test_saveAffine() {
-    std::string filename("MDAffineSaveMD2Test.nxs");
+    const std::string filename = std::format("MDAffineSaveMD2Test_{}.nxs", MDAlgorithmsTestHelper::makeUniqueId());
     // Make a 4D MDEventWorkspace
     MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(10, 0.0, 10.0, 2);
     AnalysisDataService::Instance().addOrReplace("SaveMD2Test_ws", ws);
@@ -267,7 +269,7 @@ public:
                                       "Extents", "0,10,0,20");
 
     // Save the masked workspace
-    const std::string saveFilename = "SaveMDTest_masked.nxs";
+    const std::string saveFilename = std::format("SaveMDTest_masked_{}.nxs", MDAlgorithmsTestHelper::makeUniqueId());
     SaveMD2 saveAlg;
     TS_ASSERT_THROWS_NOTHING(saveAlg.initialize())
     TS_ASSERT(saveAlg.isInitialized())
@@ -310,7 +312,7 @@ public:
 
   /** Run SaveMD with the MDHistoWorkspace */
   void doTestHisto(const MDHistoWorkspace_sptr &ws) {
-    std::string filename = "SaveMD2TestHisto.nxs";
+    std::string filename = std::format("SaveMD2TestHisto_{}.nxs", MDAlgorithmsTestHelper::makeUniqueId());
 
     SaveMD2 alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -350,12 +352,18 @@ public:
   }
 
   void test_exec_3D() {
+    const std::string filename = std::format("SaveMD2TestPerformance_{}.nxs", MDAlgorithmsTestHelper::makeUniqueId());
+
     SaveMD2 alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "SaveMD2TestPerformance_ws"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "SaveMD2TestPerformance.nxs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
     alg.execute();
     TS_ASSERT(alg.isExecuted());
+
+    const std::string fullPath = alg.getPropertyValue("Filename");
+    if (std::filesystem::exists(fullPath))
+      std::filesystem::remove(fullPath);
   }
 };
