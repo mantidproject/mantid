@@ -83,7 +83,7 @@ class TestTexturePlannerPresenter_Init(unittest.TestCase):
         self.assertIs(presenter.view, view)
 
     @patch(file_path + ".InterfaceManager")
-    def test_open_help_window_calls_interface_manager(self, interface_manager):
+    def test_open_help_window_calls_interface_manager(self, interface_manager, mock_settings_view, mock_settings_presenter):
         model = _make_model()
         view = _make_view()
         presenter = TexturePlannerPresenter(model, view)
