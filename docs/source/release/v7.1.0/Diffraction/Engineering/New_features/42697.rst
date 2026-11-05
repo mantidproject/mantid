@@ -1,0 +1,1 @@
+- In the :ref:`Texture Experiment Planner <Texture_Planner-ref>`, a new help button on the bottom toolbar opens the documentation for the interface.
