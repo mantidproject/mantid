@@ -16,22 +16,76 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/MantidVersion.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTypes/Core/DateAndTime.h"
+
+#include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <map>
+#include <optional>
 #include <set>
+#include <sstream>
 #include <string>
 
 namespace Mantid::DataHandling {
+
+namespace {
+/**
+ * Make a value fit on a single header line: replace line breaks with spaces
+ * and remove leading and trailing whitespace
+ * @param value The value to sanitise
+ * @return The sanitised value, which is empty if the value only contained whitespace
+ */
+std::string sanitiseHeaderValue(std::string value) {
+  std::replace_if(value.begin(), value.end(), [](const char c) { return c == '\n' || c == '\r'; }, ' ');
+  boost::algorithm::trim(value);
+  return value;
+}
+
+template <typename T> std::string toString(const T &value) {
+  std::ostringstream stream;
+  stream << value;
+  return stream.str();
+}
+
+/**
+ * Get the distinct values of a time series log within a time region of interest,
+ * in the order they occur. Consecutive repeats and blank values are dropped.
+ * @param log The log to read
+ * @param roi The time region of interest, e.g. as set by FilterByTime
+ * @return The values joined with ", ", or nullopt if the log is not a time
+ * series of type T
+ */
+template <typename T>
+std::optional<std::string> distinctValuesInTimeROI(const Kernel::Property *log, const Kernel::TimeROI &roi) {
+  const auto *timeSeries = dynamic_cast<const Kernel::TimeSeriesProperty<T> *>(log);
+  if (!timeSeries) {
+    return std::nullopt;
+  }
+  if (timeSeries->size() == 0) {
+    return std::string();
+  }
+  std::vector<std::string> values;
+  for (const auto &rawValue : timeSeries->filteredValuesAsVector(&roi)) {
+    const auto value = sanitiseHeaderValue(toString(rawValue));
+    if (!value.empty() && (values.empty() || values.back() != value)) {
+      values.emplace_back(value);
+    }
+  }
+  return boost::algorithm::join(values, ", ");
+}
+} // namespace
 
 // Register the algorithm with the AlgorithmFactory
 DECLARE_ALGORITHM(SaveSESANS)
@@ -112,8 +166,9 @@ void SaveSESANS::init() {
                                "input workspace is used",
                                Kernel::Direction::Input);
   declareProperty<std::string>("SamplePosition", "",
-                               "The name of the sample changer position, e.g. AT or 1CT. If not set, the last value of "
-                               "the SamplePos log of the input workspace is used",
+                               "The name of the sample changer position, e.g. AT or 1CT. If not set, the positions "
+                               "recorded in the SamplePos log of the input workspace during the selected time range "
+                               "are used",
                                Kernel::Direction::Input);
   declareProperty<std::string>("BlankRunNumber", "", "The run number of the blank measurement. Optional.",
                                Kernel::Direction::Input);
@@ -176,8 +231,36 @@ std::string SaveSESANS::getRunNumber(const API::MatrixWorkspace_const_sptr &ws) 
 }
 
 /**
+ * Get the time range to read the sample position for. This is the run's time
+ * region of interest if it has been filtered, e.g. by FilterByTime. Otherwise it
+ * is the time between the start and end of the run, because IBEX logs can start
+ * hours before the run. If the run has no valid start and end times, the whole
+ * log is used.
+ * @param run The run of the workspace to save
+ * @return The time region of interest
+ */
+Kernel::TimeROI SaveSESANS::getSamplePositionTimeROI(const API::Run &run) const {
+  const auto &roi = run.getTimeROI();
+  if (!roi.useAll()) {
+    return roi;
+  }
+  try {
+    const auto startTime = run.startTime();
+    const auto endTime = run.endTime();
+    if (startTime < endTime) {
+      return Kernel::TimeROI(startTime, endTime);
+    }
+  } catch (const std::runtime_error &) {
+    g_log.debug("The run has no valid start and end times, so the whole SamplePos log is used");
+  }
+  return roi;
+}
+
+/**
  * Get the sample position, either from the SamplePosition property or from the
- * last value of the SamplePos log of the input workspace
+ * SamplePos log of the input workspace. For a time series log, all distinct
+ * positions during the run, or during its filtered time range, are returned in
+ * order. The position in effect at the start of that time range is included.
  * @param ws The workspace to save
  * @return The sample position, or an empty string if it cannot be determined
  */
@@ -191,8 +274,28 @@ std::string SaveSESANS::getSamplePosition(const API::MatrixWorkspace_const_sptr 
     return "";
   }
   const auto *log = run.getLogData("SamplePos");
-  if (const auto *timeSeries = dynamic_cast<const Kernel::TimeSeriesProperty<std::string> *>(log)) {
-    return timeSeries->size() > 0 ? timeSeries->lastValue() : "";
+  const auto roi = getSamplePositionTimeROI(run);
+  // IBEX records the position as a string or a number, depending on how the block is configured
+  auto positions = distinctValuesInTimeROI<std::string>(log, roi);
+  if (!positions) {
+    positions = distinctValuesInTimeROI<double>(log, roi);
+  }
+  if (!positions) {
+    positions = distinctValuesInTimeROI<float>(log, roi);
+  }
+  if (!positions) {
+    positions = distinctValuesInTimeROI<int32_t>(log, roi);
+  }
+  if (!positions) {
+    positions = distinctValuesInTimeROI<int64_t>(log, roi);
+  }
+  if (positions) {
+    return *positions;
+  }
+  if (dynamic_cast<const Kernel::ITimeSeriesProperty *>(log)) {
+    g_log.warning("The SamplePos log has an unsupported type and is not written to the file. Use the SamplePosition "
+                  "property to provide the sample position.");
+    return "";
   }
   return log->value();
 }
@@ -310,11 +413,13 @@ void SaveSESANS::writeHeader(std::ofstream &outfile, const std::string &name, co
  * Write a single header to the output file, if it has a value
  * @param outfile ofstream to the output file
  * @param name The name of the attribute being written
- * @param value The attribute's value. Nothing is written if this is empty
+ * @param value The attribute's value. Line breaks are replaced with spaces and surrounding whitespace is
+ * removed. Nothing is written if the result is empty
  */
 void SaveSESANS::writeOptionalHeader(std::ofstream &outfile, const std::string &name, const std::string &value) {
-  if (!value.empty()) {
-    writeHeader(outfile, name, value);
+  const auto sanitisedValue = sanitiseHeaderValue(value);
+  if (!sanitisedValue.empty()) {
+    writeHeader(outfile, name, sanitisedValue);
   }
 }
 

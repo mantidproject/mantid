@@ -10,11 +10,15 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/cow_ptr.h"
 
 #include <map>
 
 namespace Mantid {
+namespace API {
+class Run;
+}
 namespace DataHandling {
 
 /** SaveSESANS : Save a workspace in the SESANS file format
@@ -75,6 +79,7 @@ private:
   std::string getFacilityName(const std::string &instrumentName) const;
   std::string getRunNumber(const API::MatrixWorkspace_const_sptr &ws) const;
   std::string getSamplePosition(const API::MatrixWorkspace_const_sptr &ws) const;
+  Kernel::TimeROI getSamplePositionTimeROI(const API::Run &run) const;
 
   std::vector<double> calculateSpinEchoLength(const HistogramData::Points &wavelength) const;
   std::vector<double> calculateDepolarisation(const HistogramData::HistogramY &yValues,
