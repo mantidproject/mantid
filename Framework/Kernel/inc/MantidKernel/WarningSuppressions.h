@@ -107,3 +107,12 @@
 #else
 #define GNU_UNUSED
 #endif
+
+/**
+ * Function arguments are sometimes unused in certain implementations
+ * but are required for documentation purposes.
+ * This is a macro to silence compiler warnings about the subject
+ */
+#ifndef UNUSED_ARG
+#define UNUSED_ARG(...) (void)(__VA_ARGS__)
+#endif

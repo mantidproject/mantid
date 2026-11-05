@@ -86,7 +86,7 @@ function(GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
     set(CUSTOM
         "${CUSTOM}\
 #ifndef UNUSED_ARG\n\
-    #define UNUSED_ARG(x) (void) x;\n\
+    #define UNUSED_ARG(...) (void)(__VA_ARGS__);\n\
 #endif\n\n\
 #include <cstdint>\n"
     )

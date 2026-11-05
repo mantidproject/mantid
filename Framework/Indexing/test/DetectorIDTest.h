@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#define UNUSED_ARG(...) (void)(__VA_ARGS__)
+#include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidIndexing/DetectorID.h"
 
