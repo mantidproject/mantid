@@ -281,32 +281,13 @@ void MemoryStats::process_mem_system(size_t &sys_avail, size_t &sys_total) {
  * Initialize platform-dependent options for memory management.
  * On Windows this enables the low-fragmentation heap described here:
  * http://msdn.microsoft.com/en-us/library/aa366750%28v=vs.85%29.aspx
- * On Linux this enables the mmap option for malloc calls to try and release
- * memory more frequently.
  * Note that this function can only be called once
  */
 void MemoryOptions::initAllocatorOptions() {
   static bool initialized(false);
   if (initialized)
     return;
-#ifdef __linux__
-  /* The line below tells malloc to use a different memory allocation system
-   * call (mmap) to the 'usual'
-   * one (sbrk) for requests above the threshold of the second argument (in
-   * bytes). The effect of this
-   * is that, for the current threshold value of 8*4096, storage for workspaces
-   * having 4096 or greater
-   * bins per spectrum will be allocated using mmap.
-   * This should have the effect that memory is returned to the kernel as soon
-   * as a workspace is deleted, preventing things going to managed workspaces
-   * when they shouldn't. This will also hopefully reduce memory fragmentation.
-   * Potential downsides to look out for are whether this memory allocation
-   * technique makes things
-   * noticeably slower and whether it wastes memory (mmap allocates in blocks of
-   * the system page size.
-   */
-  mallopt(M_MMAP_THRESHOLD, 8 * 4096);
-#elif _WIN32
+#ifdef _WIN32
   Logger memOptLogger("MemoryOptions");
   // Try to enable the Low Fragmentation Heap for all heaps
   // Bit of a brute force approach, but don't know which heap workspace data
