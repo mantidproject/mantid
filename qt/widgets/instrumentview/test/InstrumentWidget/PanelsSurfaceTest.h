@@ -60,7 +60,6 @@ public:
     EXPECT_CALL(*instrumentActor, ndetectors()).WillRepeatedly(Return(ndetectors));
     EXPECT_CALL(*instrumentActor, detectorInfo()).WillRepeatedly(ReturnRef(detInfo));
     EXPECT_CALL(*instrumentActor, componentInfo()).WillRepeatedly(ReturnRef(compInfo));
-    EXPECT_CALL(*instrumentActor, getInstrument()).WillRepeatedly(Return(ws->getInstrument()));
     return instrumentActor;
   }
 

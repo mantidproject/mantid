@@ -13,6 +13,7 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/IDetector_fwd.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -150,13 +151,13 @@ double GetEi2::calculateEi(const double initial_guess) {
   const specnum_t monitor2_spec = getProperty("Monitor2Spec");
   specnum_t mon1 = monitor1_spec, mon2 = monitor2_spec;
 
-  const ParameterMap &pmap = m_input_ws->constInstrumentParameters();
-  Instrument_const_sptr instrument = m_input_ws->getInstrument();
+  const auto &componentInfo = m_input_ws->componentInfo();
+  // Searched from the instrument's first component, so that parameters on it or on the instrument are found
+  const auto firstComponent = componentInfo.children(componentInfo.root()).front();
 
   // If we have a t0 formula, calculate t0 and return the initial guess
-  Parameter_sptr par = pmap.getRecursive(instrument->getChild(0).get(), "t0_formula");
-  if (par) {
-    std::string formula = par->asString();
+  if (componentInfo.hasParameter(firstComponent, "t0_formula")) {
+    std::string formula = componentInfo.getParameterAsString(firstComponent, "t0_formula");
     std::stringstream guess;
     guess << initial_guess;
 
@@ -180,17 +181,11 @@ double GetEi2::calculateEi(const double initial_guess) {
     }
   }
 
-  if (mon1 == EMPTY_INT()) {
-    par = pmap.getRecursive(instrument->getChild(0).get(), "ei-mon1-spec");
-    if (par) {
-      mon1 = boost::lexical_cast<specnum_t>(par->asString());
-    }
+  if (mon1 == EMPTY_INT() && componentInfo.hasParameter(firstComponent, "ei-mon1-spec")) {
+    mon1 = boost::lexical_cast<specnum_t>(componentInfo.getParameterAsString(firstComponent, "ei-mon1-spec"));
   }
-  if (mon2 == EMPTY_INT()) {
-    par = pmap.getRecursive(instrument->getChild(0).get(), "ei-mon2-spec");
-    if (par) {
-      mon2 = boost::lexical_cast<specnum_t>(par->asString());
-    }
+  if (mon2 == EMPTY_INT() && componentInfo.hasParameter(firstComponent, "ei-mon2-spec")) {
+    mon2 = boost::lexical_cast<specnum_t>(componentInfo.getParameterAsString(firstComponent, "ei-mon2-spec"));
   }
   if ((mon1 == EMPTY_INT()) || (mon2 == EMPTY_INT())) {
     throw std::invalid_argument("Could not determine spectrum number to use. Try to set it explicitly");

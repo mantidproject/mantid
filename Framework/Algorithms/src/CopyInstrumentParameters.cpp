@@ -47,48 +47,29 @@ void CopyInstrumentParameters::exec() {
   this->checkProperties();
 
   if (m_different_instrument_sp) {
-    Instrument_const_sptr inst1 = m_givingWorkspace->getInstrument();
-    Instrument_const_sptr inst2 = m_receivingWorkspace->getInstrument();
     auto Name1 = m_givingWorkspace->getInstrumentName();
     auto Name2 = m_receivingWorkspace->getInstrumentName();
+    const auto &componentInfoGiv = m_givingWorkspace->componentInfo();
+    const auto &detectorInfoGiv = m_givingWorkspace->detectorInfo();
 
-    Geometry::ParameterMap targMap;
-
-    // Get legacy ParameterMap, i.e., including masking, positions, rotations
-    // stored in map (instead of DetectorInfo).
-    const auto &givParams = inst1->makeLegacyParameterMap();
-    for (const auto &item : givParams->entries()) {
-      IComponent *oldComponent = item.first;
-
-      const Geometry::IComponent *targComp = nullptr;
-
-      auto *pOldDet = dynamic_cast<IDetector *>(oldComponent);
-      if (pOldDet) {
-        detid_t detID = pOldDet->getID();
-        targComp = inst2->getBaseDetector(detID);
-        if (!targComp) {
-          g_log.warning() << "Target instrument does not have detector with ID " << detID << '\n';
-          continue;
-        }
-      } else {
-        std::string source_name = oldComponent->getFullName();
-        size_t nameStart = source_name.find(Name1);
-        std::string targ_name = source_name.replace(nameStart, nameStart + Name1.size(), Name2);
-        // existingComponents.
-        auto spTargComp = inst2->getComponentByName(targ_name);
-        if (!spTargComp) {
-          g_log.warning() << "Target instrument does not have component with full name: " << targ_name << '\n';
-          continue;
-        }
-        targComp = spTargComp->getBaseComponent();
+    // The legacy parameters (including masking, positions and rotations), written as
+    // ParameterMap::asString() writes them but naming components in the receiving instrument.
+    // readParameterMap() warns about and skips any component the receiving instrument lacks.
+    std::string targParams;
+    for (const auto &[index, param] : m_givingWorkspace->getInstrument()->legacyParameters()) {
+      // As when this went through a ParameterMap, which refuses masking
+      if (param->name() == "masked") {
+        throw std::runtime_error(
+            "Masking data (\"masked\") cannot be stored in ParameterMap. Use DetectorInfo instead");
       }
-
-      // create shared pointer to independent copy of original parameter. Would
-      // be easy and nice to have cow_pointer instead of shared_ptr in the
-      // parameter map.
-      auto param = Parameter_sptr(item.second->clone());
-      // add new parameter to the maps for existing target component
-      targMap.add(targComp, param);
+      std::string targComponent;
+      if (componentInfoGiv.isDetector(index)) {
+        targComponent = "detID:" + std::to_string(detectorInfoGiv.detectorIDs()[index]);
+      } else {
+        targComponent = componentInfoGiv.fullName(index);
+        targComponent.replace(targComponent.find(Name1), Name1.size(), Name2);
+      }
+      targParams += ParameterMap::asStringEntry(targComponent, *param);
     }
 
     // Clear old parameters, and the fields stored in DetectorInfo and ComponentInfo (masking, positions, rotations),
@@ -98,7 +79,7 @@ void CopyInstrumentParameters::exec() {
     clear->executeAsChildAlg();
     // ExperimentInfo::readParameterMap deals with extracting legacy information
     // from ParameterMap.
-    m_receivingWorkspace->readParameterMap(targMap.asString());
+    m_receivingWorkspace->readParameterMap(targParams);
   } else {
     // Same base instrument, copying the instrument is equivalent to copying the
     // parameters in the ParameterMap and the DetectorInfo.

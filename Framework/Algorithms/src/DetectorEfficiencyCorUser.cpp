@@ -8,10 +8,12 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -140,12 +142,21 @@ mu::Parser DetectorEfficiencyCorUser::generateParser(const std::string &formula,
  */
 std::string DetectorEfficiencyCorUser::retrieveFormula(const size_t workspaceIndex) {
   const std::string formulaParamName("formula_eff");
-  const auto &paramMap = m_inputWS->constInstrumentParameters();
-  auto det = m_inputWS->getDetector(workspaceIndex);
-  auto param = paramMap.getRecursive(det.get(), formulaParamName, "string");
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  if (!spectrumInfo.hasDetectors(workspaceIndex)) {
+    throw Kernel::Exception::NotFoundError("MatrixWorkspace::getDetector(): No detectors for this workspace index.",
+                                           std::to_string(workspaceIndex));
+  }
+  const auto &componentInfo = m_inputWS->componentInfo();
+  const auto detIndex = spectrumInfo.firstDetectorIndex(workspaceIndex);
+  // A spectrum of several detectors has no parameters of its own
+  const auto param = spectrumInfo.hasUniqueDetector(workspaceIndex)
+                         ? componentInfo.parameter(detIndex, formulaParamName, "string")
+                         : nullptr;
   if (!param) {
     throw Kernel::Exception::InstrumentDefinitionError("No <" + formulaParamName + "> parameter found for component '" +
-                                                       det->getFullName() + "' in the instrument definition.");
+                                                       componentInfo.fullName(detIndex) +
+                                                       "' in the instrument definition.");
   }
   const auto ret = param->asString();
   g_log.debug() << "Found formula for workspace index " << workspaceIndex << ": " << ret << "\n";

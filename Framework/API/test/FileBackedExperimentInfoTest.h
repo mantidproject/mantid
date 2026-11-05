@@ -13,6 +13,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidNexus/NexusFile.h"
 #include <cxxtest/TestSuite.h>
+#include <utility>
 
 using Mantid::API::FileBackedExperimentInfo;
 
@@ -57,7 +58,8 @@ public:
   void test_getInstrument_populates_object() {
     auto fileBacked = createTestObject();
 
-    TS_ASSERT_EQUALS(fileBacked->constInstrumentParameters(), m_inMemoryExptInfo->constInstrumentParameters());
+    // Compared in place: TS_ASSERT_EQUALS would compare copies, which have no ComponentInfo to name components by
+    TS_ASSERT(fileBacked->constInstrumentParameters() == m_inMemoryExptInfo->constInstrumentParameters());
   }
 
   void test_instrumentParameters_const_ref_method_populate_object() {
@@ -79,6 +81,27 @@ public:
     const auto &pmap = fileBacked->constInstrumentParameters();
 
     TS_ASSERT(pmap.size() > 0);
+  }
+
+  void test_componentInfo_populates_object() {
+    auto fileBacked = createTestObject();
+    const auto &componentInfo = std::as_const(*fileBacked).componentInfo();
+
+    TS_ASSERT_EQUALS(componentInfo.size(), m_inMemoryExptInfo->componentInfo().size());
+  }
+
+  void test_mutableComponentInfo_populates_object() {
+    auto fileBacked = createTestObject();
+    auto &componentInfo = fileBacked->mutableComponentInfo();
+
+    TS_ASSERT_EQUALS(componentInfo.size(), m_inMemoryExptInfo->componentInfo().size());
+  }
+
+  void test_instrumentMetadata_populates_object() {
+    auto fileBacked = createTestObject();
+
+    TS_ASSERT_EQUALS(fileBacked->instrumentMetadata().filename(), m_inMemoryExptInfo->instrumentMetadata().filename());
+    TS_ASSERT(!fileBacked->instrumentMetadata().xmlText().empty());
   }
 
   void test_populateInstrumentParameters_method_populate_object() {

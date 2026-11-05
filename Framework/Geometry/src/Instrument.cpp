@@ -16,6 +16,8 @@
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
+#include "MantidGeometry/Instrument/ParameterFactory.h"
+#include "MantidGeometry/Instrument/ParameterInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -1102,8 +1104,12 @@ void Instrument::saveNexus(Nexus::File *file, const std::string &group) const {
   // Now the parameter map, as a NXnote via its saveNexus method
   if (isParametrized()) {
     // Map with data extracted from DetectorInfo -> legacy compatible files.
-    const auto &params = makeLegacyParameterMap();
-    params->saveNexus(file, "instrument_parameter_map");
+    const auto &pmap = *getParameterMap();
+    const auto parameters = legacyParameters();
+    ParameterMap::saveNexus(file, "instrument_parameter_map",
+                            parameters.empty()
+                                ? std::string()
+                                : ParameterMap::asString(parameters, pmap.componentInfo(), pmap.detectorInfo()));
   }
 
   // Add physical detector data
@@ -1339,22 +1345,25 @@ size_t Instrument::detectorIndex(const detid_t detID) const {
   return std::distance(in_dets.cbegin(), it);
 }
 
-/// Returns a legacy ParameterMap, containing information that is now stored in
-/// DetectorInfo (masking, positions, rotations, scale factors).
-std::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
+/// Returns the parameters in their legacy form, in which the information now stored in DetectorInfo
+/// and ComponentInfo (masking, positions, rotations, scale factors) is given as parameters too.
+std::vector<ParameterMap::Entry> Instrument::legacyParameters() const {
   if (!isFinalized())
-    throw std::runtime_error("Instrument definition is not finalized. Can't create legacy ParameterMap.");
+    throw std::runtime_error("Instrument definition is not finalized. Can't create legacy parameters.");
 
-  auto pmap = std::make_shared<ParameterMap>(*getParameterMap());
-  // Instrument is only needed for DetectorInfo access so it is not needed. This
-  // also clears DetectorInfo and ComponentInfo (information will be stored
-  // directly in pmap so we do not need them).
-  pmap->setInstrument(nullptr);
-
+  const auto &pmap = *getParameterMap();
   const auto &baseInstr = m_map ? *m_instr : *this;
 
-  if (!getParameterMap()->hasComponentInfo(&baseInstr))
-    return pmap;
+  if (!pmap.hasComponentInfo(&baseInstr))
+    return pmap.entries();
+
+  // Start from a copy of the instrument's parameters. add() replaces a parameter of the same name.
+  ParameterInfo legacy(*pmap.sharedParameterInfo());
+  auto const makeParameter = [](const std::string &type, const std::string &name, auto const &value) {
+    auto parameter = ParameterFactory::create(type, name);
+    parameter->set(value);
+    return parameter;
+  };
 
   // Tolerance 1e-9 m with rotation center at a distance of L = 1000 m as in
   // Beamline::DetectorInfo::isEquivalent.
@@ -1366,8 +1375,8 @@ std::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
   auto transformation = Eigen::Affine3d::Identity();
   int64_t oldParentIndex = -1;
 
-  const auto &componentInfo = getParameterMap()->componentInfo();
-  const auto &detectorInfo = getParameterMap()->detectorInfo();
+  const auto &componentInfo = pmap.componentInfo();
+  const auto &detectorInfo = pmap.detectorInfo();
   for (size_t i = 0; i < componentInfo.size(); ++i) {
 
     const int64_t parentIndex = componentInfo.parent(i);
@@ -1386,8 +1395,8 @@ std::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
     if (componentInfo.isDetector(i)) {
       isDetFixedInBank = ComponentInfoBankHelpers::isDetectorFixedInBank(componentInfo, i);
       if (detectorInfo.isMasked(i)) {
-        auto const &baseDet = baseInstr.m_detectorCache[i].detector();
-        pmap->forceUnsafeSetMasked(baseDet.get(), true);
+        // insert() rather than add(), as ParameterMap::forceUnsafeSetMasked() does
+        legacy.insert(i, makeParameter(ParameterMap::pBool(), "masked", true));
       }
 
       if (makeTransform) {
@@ -1395,24 +1404,22 @@ std::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
         if (isDetFixedInBank) {
 
           size_t panelIndex = componentInfo.parent(parentIndex);
-          const auto panelID = componentInfo.componentID(panelIndex);
 
           Eigen::Vector3d scale(1, 1, 1);
-          if (auto scalex = pmap->get(panelID, "scalex"))
+          if (auto scalex = legacy.get(panelIndex, "scalex"))
             scale[0] = 1.0 / scalex->value<double>();
-          if (auto scaley = pmap->get(panelID, "scaley"))
+          if (auto scaley = legacy.get(panelIndex, "scaley"))
             scale[1] = 1.0 / scaley->value<double>();
           transformation.prescale(scale);
         }
       }
     }
 
-    const auto componentId = componentInfo.componentID(i);
-    const IComponent *baseComponent = componentId->getBaseComponent();
+    const IComponent *baseComponent = componentInfo.componentID(i)->getBaseComponent();
     // Generic sca scale factors
     const auto newScaleFactor = Kernel::toVector3d(componentInfo.scaleFactor(i));
     if ((newScaleFactor - toVector3d(baseComponent->getScaleFactor())).norm() >= 1e-9) {
-      pmap->addV3D(componentId, ParameterMap::scale(), componentInfo.scaleFactor(i));
+      legacy.add(i, makeParameter(ParameterMap::pV3D(), ParameterMap::scale(), componentInfo.scaleFactor(i)));
     }
 
     // Undo parent transformation to obtain relative position/rotation.
@@ -1423,16 +1430,24 @@ std::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
     if ((relPos - toVector3d(baseComponent->getRelativePos())).norm() >= 1e-9) {
       if (isDetFixedInBank) {
         throw std::runtime_error(
-            "Cannot create legacy ParameterMap: Position parameters for GridDetectorPixel are not supported");
+            "Cannot create legacy parameters: Position parameters for GridDetectorPixel are not supported");
       }
-      pmap->addV3D(componentId, ParameterMap::pos(), Kernel::toV3D(relPos));
+      legacy.add(i, makeParameter(ParameterMap::pV3D(), ParameterMap::pos(), Kernel::toV3D(relPos)));
     }
     if ((relRot * toQuaterniond(baseComponent->getRelativeRot()).conjugate()).vec().norm() >= imag_norm_max) {
-      pmap->addQuat(componentId, ParameterMap::rot(), Kernel::toQuat(relRot));
+      legacy.add(i, makeParameter(ParameterMap::pQuat(), ParameterMap::rot(), Kernel::toQuat(relRot)));
     }
   }
 
-  return pmap;
+  std::vector<ParameterMap::Entry> result;
+  result.reserve(legacy.size());
+  for (auto const &[index, parameters] : legacy) {
+    for (auto const &[parameterName, parameter] : parameters) {
+      static_cast<void>(parameterName);
+      result.emplace_back(index, parameter);
+    }
+  }
+  return result;
 }
 
 /** Parse the instrument tree and create ComponentInfo and DetectorInfo.
@@ -1483,9 +1498,10 @@ Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
   auto compInfo = componentInfo.cloneWithoutDetectorInfo();
   auto detInfo = std::make_unique<DetectorInfo>(detectorInfo);
   compInfo->m_componentInfo->setDetectorInfo(detInfo->m_detectorInfo.get());
-  // Point the clone at THIS map's parameter store.
-  compInfo->m_parameterInfo = pmap.sharedParameterInfo();
-  detInfo->m_parameterInfo = pmap.sharedParameterInfo();
+  // Point the clone at THIS map's parameter store, attaching the map to the clone's index domain if
+  // it is not already: the map is either empty or a copy of one attached to that domain.
+  compInfo->m_parameterInfo = pmap.rekey(compInfo->m_componentIds, compInfo->m_compIDToIndex);
+  detInfo->m_parameterInfo = compInfo->m_parameterInfo;
   // Take the frame from the instrument rather than the cached copy, in case it was set after the cache was built.
   compInfo->m_referenceFrame = getReferenceFrame();
   detInfo->m_referenceFrame = compInfo->m_referenceFrame;

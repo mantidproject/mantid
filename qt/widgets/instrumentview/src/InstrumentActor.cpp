@@ -24,7 +24,6 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentMetadata.h"
-#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
@@ -255,11 +254,7 @@ void InstrumentActor::setupPhysicalInstrumentIfExists() {
   auto sharedWorkspace = getWorkspace();
   Mantid::Kernel::ReadLock _lock(*sharedWorkspace);
 
-  auto instr = sharedWorkspace->instrumentMetadata().physicalInstrument();
-  if (instr) {
-    auto infos = InstrumentVisitor::makeWrappers(*instr);
-    m_physicalComponentInfo = std::move(infos.first);
-    m_physicalDetectorInfo = std::move(infos.second);
+  if (sharedWorkspace->instrumentMetadata().hasPhysicalInstrument()) {
     m_isPhysicalInstrument = true;
   }
 }
@@ -284,8 +279,6 @@ bool InstrumentActor::hasChildVisible() const {
 }
 
 /** Returns the workspace relating to this instrument view.
- *  !!!! DON'T USE THIS TO GET HOLD OF THE INSTRUMENT !!!!
- *  !!!! USE InstrumentActor::getInstrument() BELOW !!!!
  */
 MatrixWorkspace_const_sptr InstrumentActor::getWorkspace() const { return m_workspace; }
 
@@ -398,21 +391,6 @@ void InstrumentActor::clearMasks() {
   }
 }
 
-Instrument_const_sptr InstrumentActor::getInstrument() const {
-  auto sharedWorkspace = getWorkspace();
-  Mantid::Kernel::ReadLock _lock(*sharedWorkspace);
-
-  if (isPhysicalView()) {
-    // First see if there is a 'physical' instrument available. Use it if there
-    // is.
-    auto instr = sharedWorkspace->instrumentMetadata().physicalInstrument();
-    if (instr)
-      return instr;
-  }
-
-  return sharedWorkspace->getInstrument();
-}
-
 const ColorMap &InstrumentActor::getColorMap() const { return m_renderer->getColorMap(); }
 
 size_t InstrumentActor::getDetectorByDetID(Mantid::detid_t detID) const {
@@ -437,15 +415,9 @@ std::vector<Mantid::detid_t> InstrumentActor::getDetIDs(const std::vector<size_t
 /**
  * Get a component id of a picked component.
  */
-Mantid::Geometry::ComponentID InstrumentActor::getComponentID(size_t pickID) const {
-  auto compID = Mantid::Geometry::ComponentID();
+Mantid::Geometry::IComponent const *InstrumentActor::getComponentID(size_t pickID) const {
   const auto &compInfo = componentInfo();
-  if (pickID < compInfo.size()) {
-    const auto *comp = compInfo.componentID(pickID);
-    if (comp)
-      compID = comp->getComponentID();
-  }
-  return compID;
+  return pickID < compInfo.size() ? compInfo.componentID(pickID) : nullptr;
 }
 
 /** Retrieve the workspace index corresponding to a particular detector
@@ -1181,9 +1153,9 @@ QString InstrumentActor::getParameterInfo(size_t index) const {
   return text;
 }
 
-std::string InstrumentActor::getDefaultAxis() const { return getInstrument()->getDefaultAxis(); }
+std::string InstrumentActor::getDefaultAxis() const { return m_workspace->instrumentMetadata().defaultAxis(); }
 
-std::string InstrumentActor::getDefaultView() const { return getInstrument()->getDefaultView(); }
+std::string InstrumentActor::getDefaultView() const { return m_workspace->instrumentMetadata().defaultView(); }
 
 std::string InstrumentActor::getInstrumentName() const {
   const auto &compInfo = componentInfo();
@@ -1191,7 +1163,9 @@ std::string InstrumentActor::getInstrumentName() const {
 }
 
 std::vector<std::string> InstrumentActor::getStringParameter(const std::string &name, bool recursive) const {
-  return getInstrument()->getStringParameter(name, recursive);
+  // Not componentInfo(): in the physical view that is the physical instrument, which carries no parameters.
+  auto const &compInfo = m_workspace->componentInfo();
+  return compInfo.getStringParameter(compInfo.root(), name, recursive);
 }
 /**
  * Save the state of the instrument actor to a project file.
@@ -1228,7 +1202,7 @@ const InstrumentRenderer &InstrumentActor::getInstrumentRenderer() const { retur
  */
 const Mantid::Geometry::ComponentInfo &InstrumentActor::componentInfo() const {
   if (m_isPhysicalInstrument)
-    return *m_physicalComponentInfo;
+    return getWorkspace()->instrumentMetadata().physicalComponentInfo();
   else
     return getWorkspace()->componentInfo();
 }
@@ -1239,7 +1213,7 @@ const Mantid::Geometry::ComponentInfo &InstrumentActor::componentInfo() const {
  */
 const Mantid::Geometry::DetectorInfo &InstrumentActor::detectorInfo() const {
   if (m_isPhysicalInstrument)
-    return *m_physicalDetectorInfo;
+    return getWorkspace()->instrumentMetadata().physicalDetectorInfo();
   else
     return getWorkspace()->detectorInfo();
 }

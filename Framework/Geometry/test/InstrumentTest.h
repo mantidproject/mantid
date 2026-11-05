@@ -570,7 +570,7 @@ public:
     TS_ASSERT_EQUALS(i->detectorIndex(7), 3);
   }
 
-  void test_makeLegacyParameterMap() {
+  void test_legacyParameters() {
     const auto &baseInstrument = ComponentCreationHelper::createTestInstrumentCylindrical(3);
     const auto bank1 = baseInstrument->getComponentByName("bank1");
     const auto bank2 = baseInstrument->getComponentByName("bank2");
@@ -621,11 +621,10 @@ public:
     // All position information should be purged
     TS_ASSERT_EQUALS(pmap->size(), 0);
 
-    const auto legacyMap = instr->makeLegacyParameterMap();
+    const auto legacy = instr->legacyParameters();
     // 3 bank parameters + 2 det parameters + 1 scale parameter
-    TS_ASSERT_EQUALS(legacyMap->size(), 6);
-    TS_ASSERT(!legacyMap->hasDetectorInfo(baseInstrument.get()));
-    Instrument legacyInstrument(baseInstrument, legacyMap);
+    TS_ASSERT_EQUALS(legacy.size(), 6);
+    Instrument legacyInstrument(baseInstrument, mapOf(legacy, compInfo));
 
     TS_ASSERT_EQUALS(legacyInstrument.getDetector(1)->getPos(), bankOffset + V3D(-0.008, -0.0002, 0.0) + detOffset);
     // Was shifted by something less than epsilon so this is the default
@@ -641,7 +640,7 @@ public:
                   .isApprox(toVector3d(newScaleFactor), 1e-10));
   }
 
-  void test_makeLegacyParameterMap_scaled_RectangularDetector() {
+  void test_legacyParameters_scaled_RectangularDetector() {
     const auto &baseInstrument = ComponentCreationHelper::createTestInstrumentRectangular(1, 2);
     const auto bank1 = baseInstrument->getComponentByName("bank1");
     auto pmap = std::make_shared<ParameterMap>();
@@ -669,18 +668,17 @@ public:
     // 2 bank parameters, det pos/rot is in DetectorInfo
     TS_ASSERT_EQUALS(pmap->size(), 2);
 
-    const auto legacyMap = instr->makeLegacyParameterMap();
+    const auto legacy = instr->legacyParameters();
 
     // Legacy instrument does not support positions in ParameterMap for
     // GridDetectorPixel (parameters ignored by
     // GridDetectorPixel::getRelativePos), so we cannot support this.
     detInfo.setPosition(3, detInfo.position(3) + detOffset);
-    TS_ASSERT_THROWS(instr->makeLegacyParameterMap(), const std::runtime_error &);
+    TS_ASSERT_THROWS(instr->legacyParameters(), const std::runtime_error &);
 
     // 2 bank parameters + 0 det parameters
-    TS_ASSERT_EQUALS(legacyMap->size(), 2);
-    TS_ASSERT(!legacyMap->hasDetectorInfo(baseInstrument.get()));
-    Instrument legacyInstrument(baseInstrument, legacyMap);
+    TS_ASSERT_EQUALS(legacy.size(), 2);
+    Instrument legacyInstrument(baseInstrument, mapOf(legacy, pmap->componentInfo()));
 
     TS_ASSERT_EQUALS(legacyInstrument.getDetector(4)->getPos(), V3D(0.0, 0.0, 5.0));
     TS_ASSERT_EQUALS(legacyInstrument.getDetector(5)->getPos(), V3D(0.0, scaley * pitch, 5.0));
@@ -749,6 +747,16 @@ public:
   }
 
 private:
+  /// A map holding the given legacy parameters, so that an instrument built on it reads its positions from them
+  static std::shared_ptr<ParameterMap> mapOf(const std::vector<ParameterMap::Entry> &entries,
+                                             const ComponentInfo &componentInfo) {
+    auto pmap = std::make_shared<ParameterMap>();
+    for (auto const &[index, parameter] : entries) {
+      pmap->add(componentInfo.componentID(index), parameter);
+    }
+    return pmap;
+  }
+
   Instrument_sptr createInstrumentWithSource() {
     using Mantid::Kernel::V3D;
     Instrument_sptr instr(new Instrument);

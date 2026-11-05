@@ -77,7 +77,6 @@ public:
   virtual void draw(bool picking = false) const = 0;
   virtual void getBoundingBox(Mantid::Kernel::V3D &minBound, Mantid::Kernel::V3D &maxBound,
                               const bool excludeMonitors) const = 0;
-  virtual std::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const = 0;
   virtual std::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const = 0;
   virtual const Mantid::Geometry::ComponentInfo &componentInfo() const = 0;
   virtual const Mantid::Geometry::DetectorInfo &detectorInfo() const = 0;
@@ -142,7 +141,6 @@ public:
   /// Check if any child is visible
   bool hasChildVisible() const;
   /// Get the underlying instrument
-  std::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const override;
   /// Get the associated data workspace
   std::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const override;
   const Mantid::Geometry::ComponentInfo &componentInfo() const override;
@@ -218,7 +216,7 @@ public:
   Mantid::detid_t getDetID(size_t pickID) const override;
   std::vector<Mantid::detid_t> getDetIDs(const std::vector<size_t> &dets) const;
   /// Get a component ID for a non-detector.
-  Mantid::Geometry::ComponentID getComponentID(size_t pickID) const;
+  Mantid::Geometry::IComponent const *getComponentID(size_t pickID) const;
   /// Get position of a detector by a pick ID converted form a color in the pick
   /// image.
   const Mantid::Kernel::V3D getDetPos(size_t pickID) const override;
@@ -356,8 +354,6 @@ private:
   std::vector<size_t> m_detIndex2WsIndex;
 
   bool m_isPhysicalInstrument;
-  std::unique_ptr<Mantid::Geometry::ComponentInfo> m_physicalComponentInfo;
-  std::unique_ptr<Mantid::Geometry::DetectorInfo> m_physicalDetectorInfo;
   std::unique_ptr<InstrumentRenderer> m_renderer;
   MantidWidgets::IMessageHandler &m_messageHandler;
 

@@ -11,6 +11,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -105,23 +106,23 @@ SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS, const size
   setInstrument(instrument);
 
   // Copy things needed for the simulation from the model workspace.
-  auto &paramMap = instrumentParameters();
-  auto parametrizedInstrument = getInstrument();
+  auto &componentInfo = mutableComponentInfo();
+  const auto &modelComponentInfo = modelWS.componentInfo();
   // Copy beam parameters.
-  const auto modelSource = modelWS.getInstrument()->getSource();
-  const auto parametrizedSource = parametrizedInstrument->getSource();
-  const auto beamShapeParam = modelSource->getParameterAsString("beam-shape");
+  const auto modelSource = modelComponentInfo.source();
+  const auto sourceIndex = componentInfo.source();
+  const auto beamShapeParam = modelComponentInfo.getParameterAsString(modelSource, "beam-shape");
   if (!beamShapeParam.empty())
-    paramMap.add("string", parametrizedSource.get(), "beam-shape", beamShapeParam);
-  const auto beamWidthParam = modelSource->getNumberParameter("beam-width");
-  const auto beamHeightParam = modelSource->getNumberParameter("beam-height");
+    componentInfo.addString(sourceIndex, "beam-shape", beamShapeParam);
+  const auto beamWidthParam = modelComponentInfo.getNumberParameter(modelSource, "beam-width");
+  const auto beamHeightParam = modelComponentInfo.getNumberParameter(modelSource, "beam-height");
   if (beamWidthParam.size() == 1 && beamHeightParam.size() == 1) {
-    paramMap.add("double", parametrizedSource.get(), "beam-width", beamWidthParam[0]);
-    paramMap.add("double", parametrizedSource.get(), "beam-height", beamHeightParam[0]);
+    componentInfo.addDouble(sourceIndex, "beam-width", beamWidthParam[0]);
+    componentInfo.addDouble(sourceIndex, "beam-height", beamHeightParam[0]);
   }
-  const auto beamRadiusParam = modelSource->getNumberParameter("beam-radius");
+  const auto beamRadiusParam = modelComponentInfo.getNumberParameter(modelSource, "beam-radius");
   if (beamRadiusParam.size() == 1) {
-    paramMap.add("double", parametrizedSource.get(), "beam-radius", beamRadiusParam[0]);
+    componentInfo.addDouble(sourceIndex, "beam-radius", beamRadiusParam[0]);
   }
   // Add information about EFixed in a proper place.
   const auto eMode = modelWS.getEMode();
