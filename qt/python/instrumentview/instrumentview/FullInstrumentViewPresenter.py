@@ -305,6 +305,7 @@ class FullInstrumentViewPresenter:
             self._update_view_main_plotter(refresh_limits=refresh_limits)
             self.refresh_plotter_peaks()
         self.refresh_create_from_selection_enabled()
+        self.refresh_export_workspace_enabled()
 
     def count_scale_combo_options(self) -> list[str]:
         return [self._LINEAR, self._LOGARITHMIC]
@@ -468,7 +469,6 @@ class FullInstrumentViewPresenter:
 
         self._view.set_clear_point_picked_detectors_disabled(checked)
         self._view.set_sum_spectra_checkbox_disabled(checked)
-        self._view.set_export_workspace_button_disabled(checked)
         self._view.set_overlaid_shape_controls_enabled(not checked)
 
         self._last_hovered_point_index = None
@@ -476,6 +476,7 @@ class FullInstrumentViewPresenter:
 
         if checked:
             self.refresh_create_from_selection_enabled()
+            self.refresh_export_workspace_enabled()
             return
 
         self.update_picked_detectors_on_view()
@@ -510,6 +511,7 @@ class FullInstrumentViewPresenter:
         )
         self.refresh_create_from_selection_enabled()
         self._update_line_plot_ws_and_draw(self._view.current_selected_lineplot_unit())
+        self.refresh_export_workspace_enabled()
 
     def _on_clear_point_picked_detectors_clicked(self) -> None:
         self._model.clear_point_picked_detectors()
@@ -659,6 +661,15 @@ class FullInstrumentViewPresenter:
             and bool(np.any(self._model.picked_detector_mask))
         )
         self._view.set_create_from_selection_buttons_enabled(can_create)
+
+    def refresh_export_workspace_enabled(self) -> None:
+        """Only offer to export the line plot spectra while there are picked detectors to export.
+
+        In hover pick mode the line plot follows the cursor rather than the picked detectors, so
+        there is nothing to export then either.
+        """
+        can_export = not self._view.is_hover_pick_mode_checked() and len(self._model.picked_workspace_indices) > 0
+        self._view.set_export_workspace_button_disabled(not can_export)
 
     def _on_list_item_selected(self, kind: CurrentTab) -> None:
         self._model.apply_detector_items(self._view.selected_items_in_list(kind), kind)
