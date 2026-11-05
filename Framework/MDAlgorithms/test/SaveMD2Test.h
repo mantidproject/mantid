@@ -351,6 +351,11 @@ public:
     ws->refreshCache();
   }
 
+  void tearDown() override {
+    if (!m_savedFilename.empty() && std::filesystem::exists(m_savedFilename))
+      std::filesystem::remove(m_savedFilename);
+  }
+
   void test_exec_3D() {
     const std::string filename = std::format("SaveMD2TestPerformance_{}.nxs", MDAlgorithmsTestHelper::makeUniqueId());
 
@@ -362,8 +367,9 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
-    const std::string fullPath = alg.getPropertyValue("Filename");
-    if (std::filesystem::exists(fullPath))
-      std::filesystem::remove(fullPath);
+    m_savedFilename = alg.getPropertyValue("Filename");
   }
+
+private:
+  std::string m_savedFilename;
 };
