@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../../ISISReflectometry/GUI/Common/Decoder.h"
+#include "../../../ISISReflectometry/GUI/Common/Encoder.h"
 #include "../ReflMockObjects.h"
 #include "CoderCommonTester.h"
 #include "MantidAPI/FileFinder.h"
@@ -92,6 +93,12 @@ public:
     decoder.decodeBatch(&mwv, 0, map);
 
     tester.testBatch(gui, &mwv, map);
+
+    tester.populateSpecularPixels(gui, &mwv);
+    Encoder encoder;
+    auto withPixels = encoder.encodeBatch(&mwv, 0);
+    decoder.decodeBatch(&mwv, 0, withPixels);
+    tester.testBatch(gui, &mwv, withPixels);
   }
 
   void test_decodeOldPopulatedBatchFile() {

@@ -36,8 +36,6 @@ public:
   std::string getInstrumentName() const override;
   void setInstrumentName(std::string const &instrumentName) override;
 
-  void setAdjustedAngleColumnVisible(bool visible) override;
-
   void setJobsTableEnabled(bool enable) override;
   void setInstrumentSelectorEnabled(bool enable) override;
   void setProcessButtonEnabled(bool enable) override;
@@ -62,6 +60,7 @@ private slots:
   void onFillDownPressed(bool);
 
 private:
+  void setInstrumentColumnsVisible(std::string const &instrumentName);
   void addToolbarActions();
   QAction *addToolbarItem(Action action, std::string const &iconPath, std::string const &description);
   void showAlgorithmPropertyHintsInOptionsColumn();

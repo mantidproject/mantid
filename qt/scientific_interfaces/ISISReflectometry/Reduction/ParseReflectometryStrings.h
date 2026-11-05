@@ -45,6 +45,9 @@ boost::variant<RangeInQ, std::vector<int>> parseQRange(std::string const &min, s
                                                        std::string const &step);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
+TaggedOptional<double> parseSpecularPixel(std::string const &pixel);
+
+MANTIDQT_ISISREFLECTOMETRY_DLL
 TaggedOptional<double> parseScaleFactor(std::string const &scaleFactor);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
