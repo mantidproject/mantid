@@ -216,8 +216,6 @@ public:
                                                 bool recursive = true) const;
   std::vector<Kernel::Quat> getRotationParameter(const size_t componentIndex, const std::string &name,
                                                  bool recursive = true) const;
-  /// The named parameter's value as a string, of whatever type it is, or an empty string if it is unset.
-  std::string getParameterAsString(const size_t componentIndex, const std::string &name, bool recursive = true) const;
   /// The named parameter's visibility attribute, or false if it is unset.
   bool getParameterVisible(const size_t componentIndex, const std::string &name, bool recursive = true) const;
   /// The type of the named parameter, or an empty string if the component has no such parameter.

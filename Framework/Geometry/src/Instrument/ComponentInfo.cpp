@@ -788,9 +788,9 @@ const ParameterInfo::LogfileParameters &ComponentInfo::logfileParameters() const
   return m_parameterInfo ? m_parameterInfo->logfileParameters() : empty;
 }
 
-void ComponentInfo::addLogfileParameter(const size_t componentIndex, const std::string &cacheKey,
-                                        std::shared_ptr<const XMLInstrumentParameter> parameter) {
-  mutableParameterInfo().addLogfileParameter(componentIndex, cacheKey, std::move(parameter));
+void ComponentInfo::addLogfileParameter(size_t const componentIndex, std::string const &cacheKey,
+                                        std::shared_ptr<const XMLInstrumentParameter> &param) {
+  mutableParameterInfo().addLogfileParameter(componentIndex, cacheKey, param);
 }
 
 void ComponentInfo::clearParameter(const size_t componentIndex, const std::string &name) {
@@ -903,18 +903,6 @@ void ComponentInfo::setDescription(const size_t componentIndex, const std::strin
   } else {
     addString(componentIndex, componentName, "", &description);
   }
-}
-
-std::string ComponentInfo::getParameterAsString(size_t const componentIndex, std::string const &name,
-                                                bool const recursive) const {
-  if (m_parameterInfo) {
-    Parameter_sptr const parameter = recursive ? m_parameterInfo->getRecursive(*this, componentIndex, name)
-                                               : m_parameterInfo->get(componentIndex, name);
-    if (parameter) {
-      return parameter->asString();
-    }
-  }
-  return std::string();
 }
 
 double ComponentInfo::getFittingParameter(const size_t componentIndex, const std::string &name, double xvalue) const {
