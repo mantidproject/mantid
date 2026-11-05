@@ -7,11 +7,13 @@
 #include "MantidReflectometry/SpecularReflectionPositionCorrect.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+
+#include <algorithm>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -22,36 +24,33 @@ namespace {
 const std::string pointDetectorAnalysis = "PointDetectorAnalysis";
 
 /**
- * Get the root component, that is not the instrument itself.
- * @param currentComponent : Some component in the tree
- * @return : Parent component.
+ * Get the component to move for a given component: its parent, unless that
+ *is the instrument itself.
+ * @param componentInfo : Component info holding the component
+ * @param componentIndex : Some component in the tree
+ * @return : Index of the component to move.
  */
-IComponent_const_sptr getParentComponent(IComponent_const_sptr &currentComponent) {
-  if (IComponent_const_sptr parent = currentComponent->getParent()) {
-    if (!dynamic_cast<Instrument *>(const_cast<IComponent *>(parent.get()))) {
-      currentComponent = parent;
+size_t getParentComponent(ComponentInfo const &componentInfo, size_t const componentIndex) {
+  if (componentInfo.hasParent(componentIndex)) {
+    auto const parent = componentInfo.parent(componentIndex);
+    if (parent != componentInfo.root()) {
+      return parent;
     }
   }
-  return currentComponent;
+  return componentIndex;
 }
 
 /**
  * Determine if there is a common parent component.
- * @param detectors : Detectors to evaluate.
+ * @param componentInfo : Component info holding the detectors
+ * @param detectorIndices : Detectors to evaluate.
  * @return True only if all detectors have the same immediate parent.
  */
-bool hasCommonParent(const std::vector<IDetector_const_sptr> &detectors) {
-  auto firstParent = detectors[0]->getParent();
-  if (!firstParent)
-    return false;
-  for (size_t i = 1; i < detectors.size(); ++i) {
-    auto parent = detectors[i]->getParent();
-    if (!parent)
-      return false;
-    if (firstParent->getComponentID() != parent->getComponentID())
-      return false;
-  }
-  return true;
+bool hasCommonParent(ComponentInfo const &componentInfo, std::vector<size_t> const &detectorIndices) {
+  return std::all_of(detectorIndices.cbegin(), detectorIndices.cend(), [&](size_t const detectorIndex) {
+    return componentInfo.hasParent(detectorIndex) &&
+           componentInfo.parent(detectorIndex) == componentInfo.parent(detectorIndices.front());
+  });
 }
 } // namespace
 // Register the algorithm into the AlgorithmFactory
@@ -105,11 +104,10 @@ void SpecularReflectionPositionCorrect::exec() {
 
   const double twoThetaIn = this->getProperty("TwoThetaIn");
 
-  auto instrument = outWS->getInstrument();
-  IComponent_const_sptr detector = this->getDetectorComponent(outWS, analysisMode == pointDetectorAnalysis);
-  IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
+  auto const detectorIndices = this->getDetectorComponentIndices(*outWS, analysisMode == pointDetectorAnalysis);
+  auto const sampleIndex = this->getSurfaceSampleComponentIndex(outWS->componentInfo());
 
-  correctPosition(outWS, twoThetaIn, sample, detector);
+  correctPosition(outWS, twoThetaIn, sampleIndex, detectorIndices);
 
   setProperty("OutputWorkspace", outWS);
 }
@@ -117,54 +115,43 @@ void SpecularReflectionPositionCorrect::exec() {
 /**
  * Execute the MoveInstrumentComponent on all (named) subcomponents
  * @param toCorrect : Workspace to correct
- * @param detector : Detector or DetectorGroup
- * @param sample : Sample Component
+ * @param detectorIndices : Component indices of the detector or detectors
+ * @param sampleIndex : Component index of the sample
  * @param upOffset : Up offset to apply
  * @param acrossOffset : Across offset to apply
  * @param detectorPosition: Actual detector or detector group position.
  */
-void SpecularReflectionPositionCorrect::moveDetectors(const API::MatrixWorkspace_sptr &toCorrect,
-                                                      IComponent_const_sptr detector,
-                                                      const IComponent_const_sptr &sample, const double &upOffset,
-                                                      const double &acrossOffset, const V3D &detectorPosition) {
-  auto instrument = toCorrect->getInstrument();
-  const V3D samplePosition = sample->getPos();
-  auto referenceFrame = instrument->getReferenceFrame();
-  if (auto groupDetector = std::dynamic_pointer_cast<const DetectorGroup>(detector)) // Do we have a group of detectors
-  {
-    const std::vector<IDetector_const_sptr> detectors = groupDetector->getDetectors();
-    const bool commonParent = hasCommonParent(detectors);
-    if (commonParent) {
-      /*
-       * Same parent component. So lets move that.
-       */
-      moveDetectors(toCorrect, detectors[0], sample, upOffset, acrossOffset,
-                    detectorPosition); // Recursive call
-    } else {
-      /*
-       * We have to move individual components.
-       */
-      for (const auto &det : detectors) {
-        moveDetectors(toCorrect, det, sample, upOffset, acrossOffset,
-                      detectorPosition); // Recursive call
-      }
-    }
-  } else {
+void SpecularReflectionPositionCorrect::moveDetectors(API::MatrixWorkspace_sptr const &toCorrect,
+                                                      std::vector<size_t> const &detectorIndices,
+                                                      size_t const sampleIndex, double const upOffset,
+                                                      double const acrossOffset, V3D const &detectorPosition) {
+  auto const &componentInfo = toCorrect->componentInfo();
+  auto const samplePosition = componentInfo.position(sampleIndex);
+  auto const referenceFrame = componentInfo.referenceFrame();
+  // With several detectors sharing a parent, moving that parent is enough.
+  // Otherwise we have to move the individual components.
+  auto const toMove = detectorIndices.size() > 1 && hasCommonParent(componentInfo, detectorIndices)
+                          ? std::vector<size_t>{detectorIndices.front()}
+                          : detectorIndices;
+  for (auto const detectorIndex : toMove) {
+    // Re-fetch, as each move updates the workspace's component positions
+    auto const &currentComponentInfo = toCorrect->componentInfo();
     auto moveComponentAlg = this->createChildAlgorithm("MoveInstrumentComponent");
     moveComponentAlg->initialize();
     moveComponentAlg->setProperty("Workspace", toCorrect);
-    IComponent_const_sptr root = getParentComponent(detector);
-    const std::string componentName = root->getName();
+    auto const root = getParentComponent(currentComponentInfo, detectorIndex);
+    auto const &componentName = currentComponentInfo.name(root);
     moveComponentAlg->setProperty("ComponentName", componentName);
     moveComponentAlg->setProperty("RelativePosition", false);
     // Movements
     moveComponentAlg->setProperty(referenceFrame->pointingAlongBeamAxis(),
                                   detectorPosition.scalar_prod(referenceFrame->vecPointingAlongBeam()));
     moveComponentAlg->setProperty(referenceFrame->pointingHorizontalAxis(), acrossOffset);
-    const double detectorVerticalPosition = detectorPosition.scalar_prod(referenceFrame->vecPointingUp());
-    const double rootVerticalPosition = root->getPos().scalar_prod(referenceFrame->vecPointingUp());
+    double const detectorVerticalPosition = detectorPosition.scalar_prod(referenceFrame->vecPointingUp());
+    double const rootVerticalPosition =
+        currentComponentInfo.position(root).scalar_prod(referenceFrame->vecPointingUp());
 
-    const double dm = rootVerticalPosition - detectorVerticalPosition;
+    double const dm = rootVerticalPosition - detectorVerticalPosition;
     moveComponentAlg->setProperty(referenceFrame->pointingUpAxis(),
                                   samplePosition.scalar_prod(referenceFrame->vecPointingUp()) + upOffset + dm);
     // Execute the movement.
@@ -176,35 +163,33 @@ void SpecularReflectionPositionCorrect::moveDetectors(const API::MatrixWorkspace
  * Correct the position of the detectors based on the input theta value.
  * @param toCorrect : Workspace to correct detector posisitions on.
  * @param twoThetaInDeg : 2* Theta in degrees to use in correction calculations.
- * @param sample : Pointer to the sample
- * @param detector : Pointer to a given detector
+ * @param sampleIndex : Component index of the sample
+ * @param detectorIndices : Component indices of the detector or detectors
  */
-void SpecularReflectionPositionCorrect::correctPosition(const API::MatrixWorkspace_sptr &toCorrect,
-                                                        const double &twoThetaInDeg,
-                                                        const IComponent_const_sptr &sample,
-                                                        const IComponent_const_sptr &detector) {
+void SpecularReflectionPositionCorrect::correctPosition(API::MatrixWorkspace_sptr const &toCorrect,
+                                                        double const twoThetaInDeg, size_t const sampleIndex,
+                                                        std::vector<size_t> const &detectorIndices) {
+  auto const &componentInfo = toCorrect->componentInfo();
 
-  auto instrument = toCorrect->getInstrument();
+  V3D const detectorPosition = meanPosition(componentInfo, detectorIndices);
 
-  const V3D detectorPosition = detector->getPos();
+  V3D const samplePosition = componentInfo.position(sampleIndex);
 
-  const V3D samplePosition = sample->getPos();
+  V3D const sampleToDetector = detectorPosition - samplePosition;
 
-  const V3D sampleToDetector = detectorPosition - samplePosition;
+  auto const referenceFrame = componentInfo.referenceFrame();
 
-  auto referenceFrame = instrument->getReferenceFrame();
+  double const twoThetaInRad = twoThetaInDeg * (M_PI / 180.0);
 
-  const double twoThetaInRad = twoThetaInDeg * (M_PI / 180.0);
+  double const acrossOffset = 0;
 
-  double acrossOffset = 0;
-
-  double beamOffset =
+  double const beamOffset =
       sampleToDetector.scalar_prod(referenceFrame->vecPointingAlongBeam()); // We just recalculate beam offset.
 
-  double upOffset = (beamOffset * std::tan(0.5 * twoThetaInRad)); // We only correct vertical position
+  double const upOffset = (beamOffset * std::tan(0.5 * twoThetaInRad)); // We only correct vertical position
 
   // Apply the movements.
-  moveDetectors(toCorrect, detector, sample, upOffset, acrossOffset, detector->getPos());
+  moveDetectors(toCorrect, detectorIndices, sampleIndex, upOffset, acrossOffset, detectorPosition);
 }
 
 } // namespace Mantid::Reflectometry

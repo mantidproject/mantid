@@ -10,7 +10,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidReflectometry/SpecularReflectionPositionCorrect2.h"
@@ -67,15 +67,13 @@ private:
     const auto &spectrumInfoOut = outWS->spectrumInfo();
     const auto nHisto = spectrumInfoOut.size();
     TS_ASSERT_DELTA(spectrumInfoOut.l2(0), spectrumInfoOut.l2(nHisto - 1), 1e-10)
-    auto instrIn = inWS->getInstrument();
-    auto detIn = instrIn->getComponentByName("detector");
-    const auto posIn = detIn->getPos();
+    auto const &componentInfoIn = inWS->componentInfo();
+    auto const posIn = componentInfoIn.position(componentInfoIn.indexOfAny("detector"));
     const auto l2 = posIn.norm();
-    auto instrOut = outWS->getInstrument();
-    auto detOut = instrOut->getComponentByName("detector");
-    const auto posOut = detOut->getPos();
+    auto const &componentInfoOut = outWS->componentInfo();
+    auto const posOut = componentInfoOut.position(componentInfoOut.indexOfAny("detector"));
     TS_ASSERT_DELTA(posOut.norm(), l2, 1e-10)
-    const auto thetaSignDir = instrIn->getReferenceFrame()->vecThetaSign();
+    auto const thetaSignDir = componentInfoIn.referenceFrame()->vecThetaSign();
     const auto horizontal = thetaSignDir.X() != 0. ? true : false;
     const auto a = l2 * std::sin(twoTheta * degToRad);
     const auto x = horizontal ? a : 0.;
@@ -97,13 +95,11 @@ private:
     const auto &spectrumInfoOut = outWS->spectrumInfo();
     const auto nHisto = spectrumInfoOut.size();
     TS_ASSERT_DELTA(spectrumInfoOut.l2(0), spectrumInfoOut.l2(nHisto - 1), 1e-10)
-    auto instrIn = inWS->getInstrument();
-    auto detIn = instrIn->getComponentByName("detector");
-    const auto posIn = detIn->getPos();
+    auto const &componentInfoIn = inWS->componentInfo();
+    auto const posIn = componentInfoIn.position(componentInfoIn.indexOfAny("detector"));
     const auto l2 = posIn.norm();
-    auto instrOut = outWS->getInstrument();
-    auto detOut = instrOut->getComponentByName("detector");
-    const auto posOut = detOut->getPos();
+    auto const &componentInfoOut = outWS->componentInfo();
+    auto const posOut = componentInfoOut.position(componentInfoOut.indexOfAny("detector"));
     TS_ASSERT_DELTA(posOut.norm(), l2, 1e-10)
     const auto lineTwoTheta = spectrumInfoOut.twoTheta(static_cast<size_t>(linePos));
     TS_ASSERT_DELTA(lineTwoTheta * radToDeg, twoTheta, 1e-10)
@@ -196,19 +192,19 @@ public:
     setupAlgorithm(alg, m_interWS, newTwoTheta, "", "", detID, true);
     MatrixWorkspace_const_sptr outWS = runAlgorithm(alg);
 
-    auto instrIn = m_interWS->getInstrument();
-    auto instrOut = outWS->getInstrument();
+    auto const &componentInfoIn = m_interWS->componentInfo();
+    auto const &componentInfoOut = outWS->componentInfo();
 
     // Sample should not have moved
-    auto sampleIn = instrIn->getSample()->getPos();
-    auto sampleOut = instrOut->getSample()->getPos();
+    auto sampleIn = componentInfoIn.samplePosition();
+    auto sampleOut = componentInfoOut.samplePosition();
     TS_ASSERT_EQUALS(sampleIn, sampleOut);
 
-    auto detIn = instrIn->getDetector(detID);
-    auto detOut = instrOut->getDetector(detID);
     // The pixels should have been moved
-    auto posIn = detIn->getPos();
-    auto posOut = detOut->getPos();
+    auto const &detectorInfoIn = m_interWS->detectorInfo();
+    auto const &detectorInfoOut = outWS->detectorInfo();
+    auto posIn = detectorInfoIn.position(detectorInfoIn.indexOf(detID));
+    auto posOut = detectorInfoOut.position(detectorInfoOut.indexOf(detID));
     TS_ASSERT_DIFFERS(posIn, posOut);
     // TwoTheta for the detector should have been changed
     auto thetaOut = getTwoTheta(detID, outWS->detectorInfo(), outWS->spectrumInfo());
@@ -221,19 +217,19 @@ public:
     setupAlgorithm(alg, m_interWS, 1.4, "", "", detID);
     MatrixWorkspace_const_sptr outWS = runAlgorithm(alg);
 
-    auto instrIn = m_interWS->getInstrument();
-    auto instrOut = outWS->getInstrument();
+    auto const &componentInfoIn = m_interWS->componentInfo();
+    auto const &componentInfoOut = outWS->componentInfo();
 
     // Sample should not have moved
-    auto sampleIn = instrIn->getSample()->getPos();
-    auto sampleOut = instrOut->getSample()->getPos();
+    auto sampleIn = componentInfoIn.samplePosition();
+    auto sampleOut = componentInfoOut.samplePosition();
     TS_ASSERT_EQUALS(sampleIn, sampleOut);
 
-    auto detIn = instrIn->getDetector(detID);
-    auto detOut = instrOut->getDetector(detID);
     // The pixel should not have been moved
-    auto posIn = detIn->getPos();
-    auto posOut = detOut->getPos();
+    auto const &detectorInfoIn = m_interWS->detectorInfo();
+    auto const &detectorInfoOut = outWS->detectorInfo();
+    auto posIn = detectorInfoIn.position(detectorInfoIn.indexOf(detID));
+    auto posOut = detectorInfoOut.position(detectorInfoOut.indexOf(detID));
     TS_ASSERT_EQUALS(posIn, posOut);
     // TwoTheta for the detector should be unchanged
     auto thetaIn = getTwoTheta(detID, m_interWS->detectorInfo(), m_interWS->spectrumInfo());
@@ -248,16 +244,16 @@ public:
     setupAlgorithm(alg, m_interWS, 1.4, "", "point-detector");
     MatrixWorkspace_const_sptr outWS = runAlgorithm(alg);
 
-    auto instrIn = m_interWS->getInstrument();
-    auto instrOut = outWS->getInstrument();
+    auto const &componentInfoIn = m_interWS->componentInfo();
+    auto const &componentInfoOut = outWS->componentInfo();
 
     // Sample should not have moved
-    auto sampleIn = instrIn->getSample()->getPos();
-    auto sampleOut = instrOut->getSample()->getPos();
+    auto sampleIn = componentInfoIn.samplePosition();
+    auto sampleOut = componentInfoOut.samplePosition();
     TS_ASSERT_EQUALS(sampleIn, sampleOut);
     // 'point-detector' should have been moved vertically only
-    auto detIn = instrIn->getComponentByName("point-detector")->getPos();
-    auto detOut = instrOut->getComponentByName("point-detector")->getPos();
+    auto detIn = componentInfoIn.position(componentInfoIn.indexOfAny("point-detector"));
+    auto detOut = componentInfoOut.position(componentInfoOut.indexOfAny("point-detector"));
     TS_ASSERT_EQUALS(detIn.X(), detOut.X());
     TS_ASSERT_EQUALS(detIn.Z(), detOut.Z());
     TS_ASSERT_DELTA(detOut.Y(), 0.06508, 1e-5);
@@ -270,16 +266,16 @@ public:
     setupAlgorithm(alg, m_interWS, 1.4, "", "", 4);
     MatrixWorkspace_const_sptr outWS = runAlgorithm(alg);
 
-    auto instrIn = m_interWS->getInstrument();
-    auto instrOut = outWS->getInstrument();
+    auto const &componentInfoIn = m_interWS->componentInfo();
+    auto const &componentInfoOut = outWS->componentInfo();
 
     // Sample should not have moved
-    auto sampleIn = instrIn->getSample()->getPos();
-    auto sampleOut = instrOut->getSample()->getPos();
+    auto sampleIn = componentInfoIn.samplePosition();
+    auto sampleOut = componentInfoOut.samplePosition();
     TS_ASSERT_EQUALS(sampleIn, sampleOut);
     // 'point-detector' should have been moved vertically only
-    auto detIn = instrIn->getComponentByName("point-detector")->getPos();
-    auto detOut = instrOut->getComponentByName("point-detector")->getPos();
+    auto detIn = componentInfoIn.position(componentInfoIn.indexOfAny("point-detector"));
+    auto detOut = componentInfoOut.position(componentInfoOut.indexOfAny("point-detector"));
     TS_ASSERT_EQUALS(detIn.X(), detOut.X());
     TS_ASSERT_EQUALS(detIn.Z(), detOut.Z());
     TS_ASSERT_DELTA(detOut.Y(), 0.06508, 1e-5);
@@ -290,17 +286,17 @@ public:
     setupAlgorithm(alg, m_interWS, 1.4, "RotateAroundSample", "point-detector");
     MatrixWorkspace_const_sptr outWS = runAlgorithm(alg);
 
-    auto instrIn = m_interWS->getInstrument();
-    auto instrOut = outWS->getInstrument();
+    auto const &componentInfoIn = m_interWS->componentInfo();
+    auto const &componentInfoOut = outWS->componentInfo();
 
     // Sample should not have moved
-    auto sampleIn = instrIn->getSample()->getPos();
-    auto sampleOut = instrOut->getSample()->getPos();
+    auto sampleIn = componentInfoIn.samplePosition();
+    auto sampleOut = componentInfoOut.samplePosition();
     TS_ASSERT_EQUALS(sampleIn, sampleOut);
     // 'point-detector' should have been moved  both vertically and in
     // the beam direction
-    auto detIn = instrIn->getComponentByName("point-detector")->getPos();
-    auto detOut = instrOut->getComponentByName("point-detector")->getPos();
+    auto detIn = componentInfoIn.position(componentInfoIn.indexOfAny("point-detector"));
+    auto detOut = componentInfoOut.position(componentInfoOut.indexOfAny("point-detector"));
     TS_ASSERT_EQUALS(detIn.X(), detOut.X());
     TS_ASSERT_DELTA(detOut.Z(), 2.66221, 1e-5);
     TS_ASSERT_DELTA(detOut.Y(), 0.06506, 1e-5);
@@ -311,17 +307,17 @@ public:
     setupAlgorithm(alg, m_interWS, 1.4, "RotateAroundSample", "", 4);
     MatrixWorkspace_const_sptr outWS = runAlgorithm(alg);
 
-    auto instrIn = m_interWS->getInstrument();
-    auto instrOut = outWS->getInstrument();
+    auto const &componentInfoIn = m_interWS->componentInfo();
+    auto const &componentInfoOut = outWS->componentInfo();
 
     // Sample should not have moved
-    auto sampleIn = instrIn->getSample()->getPos();
-    auto sampleOut = instrOut->getSample()->getPos();
+    auto sampleIn = componentInfoIn.samplePosition();
+    auto sampleOut = componentInfoOut.samplePosition();
     TS_ASSERT_EQUALS(sampleIn, sampleOut);
     // 'point-detector' should have been moved  both vertically and in
     // the beam direction
-    auto detIn = instrIn->getComponentByName("point-detector")->getPos();
-    auto detOut = instrOut->getComponentByName("point-detector")->getPos();
+    auto detIn = componentInfoIn.position(componentInfoIn.indexOfAny("point-detector"));
+    auto detOut = componentInfoOut.position(componentInfoOut.indexOfAny("point-detector"));
     TS_ASSERT_EQUALS(detIn.X(), detOut.X());
     TS_ASSERT_DELTA(detOut.Z(), 2.66221, 1e-5);
     TS_ASSERT_DELTA(detOut.Y(), 0.06506, 1e-5);
@@ -332,16 +328,16 @@ public:
     setupAlgorithm(alg, m_interWS, 1.4, "VerticalShift", "linear-detector");
     MatrixWorkspace_const_sptr outWS = runAlgorithm(alg);
 
-    auto instrIn = m_interWS->getInstrument();
-    auto instrOut = outWS->getInstrument();
+    auto const &componentInfoIn = m_interWS->componentInfo();
+    auto const &componentInfoOut = outWS->componentInfo();
 
     // Sample should not have moved
-    auto sampleIn = instrIn->getSample()->getPos();
-    auto sampleOut = instrOut->getSample()->getPos();
+    auto sampleIn = componentInfoIn.samplePosition();
+    auto sampleOut = componentInfoOut.samplePosition();
     TS_ASSERT_EQUALS(sampleIn, sampleOut);
     // 'linear-detector' should have been moved vertically only
-    auto detIn = instrIn->getComponentByName("linear-detector")->getPos();
-    auto detOut = instrOut->getComponentByName("linear-detector")->getPos();
+    auto detIn = componentInfoIn.position(componentInfoIn.indexOfAny("linear-detector"));
+    auto detOut = componentInfoOut.position(componentInfoOut.indexOfAny("linear-detector"));
     TS_ASSERT_EQUALS(detIn.X(), detOut.X());
     TS_ASSERT_EQUALS(detIn.Z(), detOut.Z());
     TS_ASSERT_DELTA(detOut.Y(), 0.07730, 1e-5);
@@ -352,17 +348,17 @@ public:
     setupAlgorithm(alg, m_interWS, 1.4, "RotateAroundSample", "linear-detector");
     MatrixWorkspace_const_sptr outWS = runAlgorithm(alg);
 
-    auto instrIn = m_interWS->getInstrument();
-    auto instrOut = outWS->getInstrument();
+    auto const &componentInfoIn = m_interWS->componentInfo();
+    auto const &componentInfoOut = outWS->componentInfo();
 
     // Sample should not have moved
-    auto sampleIn = instrIn->getSample()->getPos();
-    auto sampleOut = instrOut->getSample()->getPos();
+    auto sampleIn = componentInfoIn.samplePosition();
+    auto sampleOut = componentInfoOut.samplePosition();
     TS_ASSERT_EQUALS(sampleIn, sampleOut);
     // 'linear-detector' should have been moved both vertically and in
     // the beam direction
-    auto detIn = instrIn->getComponentByName("linear-detector")->getPos();
-    auto detOut = instrOut->getComponentByName("linear-detector")->getPos();
+    auto detIn = componentInfoIn.position(componentInfoIn.indexOfAny("linear-detector"));
+    auto detOut = componentInfoOut.position(componentInfoOut.indexOfAny("linear-detector"));
     TS_ASSERT_EQUALS(detIn.X(), detOut.X());
     TS_ASSERT_DELTA(detOut.Z(), 3.162055, 1e-5);
     TS_ASSERT_DELTA(detOut.Y(), 0.07728, 1e-5);

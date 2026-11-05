@@ -7,7 +7,9 @@
 #include "MantidReflectometry/ReflectometryReductionOneAuto2.h"
 #include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -15,6 +17,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RegexStrings.h"
 #include "MantidKernel/Strings.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -346,7 +349,7 @@ void ReflectometryReductionOneAuto2::exec() {
   setDefaultOutputWorkspaceNames();
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  auto instrument = inputWS->getInstrument();
+  auto const &componentInfo = inputWS->componentInfo();
 
   auto alg = createChildAlgorithm("ReflectometryReductionOne");
   alg->initialize();
@@ -356,12 +359,12 @@ void ReflectometryReductionOneAuto2::exec() {
   alg->setProperty("IncludePartialBins", getPropertyValue("IncludePartialBins"));
   alg->setProperty("Diagnostics", getPropertyValue("Diagnostics"));
   alg->setProperty("Debug", getPropertyValue("Debug"));
-  auto wavMin = checkForMandatoryInstrumentDefault<double>(this, "WavelengthMin", instrument, "LambdaMin");
+  auto wavMin = checkForMandatoryInstrumentDefault<double>(this, "WavelengthMin", componentInfo, "LambdaMin");
   alg->setProperty("WavelengthMin", wavMin);
-  auto wavMax = checkForMandatoryInstrumentDefault<double>(this, "WavelengthMax", instrument, "LambdaMax");
+  auto wavMax = checkForMandatoryInstrumentDefault<double>(this, "WavelengthMax", componentInfo, "LambdaMax");
   alg->setProperty("WavelengthMax", wavMax);
 
-  convertProcessingInstructions(instrument, inputWS);
+  convertProcessingInstructions(componentInfo, inputWS);
   alg->setProperty("ProcessingInstructions", m_processingInstructions);
   // Now that we know the detectors of interest, we can move them if
   // necessary (i.e. if theta is given). If not, we calculate theta from the
@@ -390,11 +393,11 @@ void ReflectometryReductionOneAuto2::exec() {
   // Optional properties
 
   alg->setPropertyValue("TransmissionProcessingInstructions", getPropertyValue("TransmissionProcessingInstructions"));
-  populateMonitorProperties(alg, instrument);
+  populateMonitorProperties(alg, componentInfo);
   alg->setPropertyValue("NormalizeByIntegratedMonitors", getPropertyValue("NormalizeByIntegratedMonitors"));
   bool transRunsFound = populateTransmissionProperties(alg);
   if (!transRunsFound)
-    populateAlgorithmicCorrectionProperties(alg, instrument);
+    populateAlgorithmicCorrectionProperties(alg, componentInfo);
 
   alg->setProperty("InputWorkspace", inputWS);
   alg->execute();
@@ -449,18 +452,24 @@ std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(const 
   // vector of comopnents
   std::vector<std::string> detectors;
 
+  auto const &spectrumInfo = inputWS->spectrumInfo();
+  auto const &componentInfo = inputWS->componentInfo();
   try {
     for (const auto &wsIndex : wsIndices) {
 
       auto index = boost::lexical_cast<size_t>(wsIndex);
 
-      auto detector = inputWS->getDetector(index);
-      auto parent = detector->getParent();
-
-      if (parent) {
-        auto parentType = parent->type();
-        auto detectorName = (parentType == "Instrument") ? detector->getName() : parent->getName();
-        detectors.emplace_back(detectorName);
+      auto const &spectrumDefinition = spectrumInfo.spectrumDefinition(index);
+      if (spectrumDefinition.size() == 0) {
+        throw Exception::NotFoundError("No detectors for this workspace index", wsIndex);
+      }
+      // A spectrum made of several detectors has no parent component
+      if (spectrumDefinition.size() == 1) {
+        auto const detectorIndex = spectrumDefinition[0].first;
+        if (componentInfo.hasParent(detectorIndex)) {
+          auto const parent = componentInfo.parent(detectorIndex);
+          detectors.emplace_back(componentInfo.name(parent == componentInfo.root() ? detectorIndex : parent));
+        }
       }
     }
   } catch (boost::bad_lexical_cast &) {
@@ -536,10 +545,10 @@ double ReflectometryReductionOneAuto2::calculateTheta(const MatrixWorkspace_sptr
 /** Set algorithmic correction properties
  *
  * @param alg :: ReflectometryReductionOne algorithm
- * @param instrument :: The instrument attached to the workspace
+ * @param componentInfo :: The component info of the instrument attached to the workspace
  */
 void ReflectometryReductionOneAuto2::populateAlgorithmicCorrectionProperties(const IAlgorithm_sptr &alg,
-                                                                             const Instrument_const_sptr &instrument) {
+                                                                             ComponentInfo const &componentInfo) {
 
   // With algorithmic corrections, monitors should not be integrated, see below
 
@@ -559,7 +568,7 @@ void ReflectometryReductionOneAuto2::populateAlgorithmicCorrectionProperties(con
   } else if (correctionAlgorithm == "AutoDetect") {
     // Figure out what to do from the instrument
     try {
-      const auto corrVec = instrument->getStringParameter("correction");
+      auto const corrVec = componentInfo.getStringParameter(componentInfo.root(), "correction");
       if (corrVec.empty()) {
         throw std::runtime_error("Could not find parameter 'correction' in "
                                  "parameter file. Cannot auto detect the type of "
@@ -569,7 +578,7 @@ void ReflectometryReductionOneAuto2::populateAlgorithmicCorrectionProperties(con
       const std::string correctionStr = corrVec[0];
 
       if (correctionStr == "polynomial") {
-        const auto polyVec = instrument->getStringParameter("polystring");
+        auto const polyVec = componentInfo.getStringParameter(componentInfo.root(), "polystring");
         if (polyVec.empty())
           throw std::runtime_error("Could not find parameter 'polystring' in "
                                    "parameter file. Cannot apply polynomial "
@@ -577,11 +586,11 @@ void ReflectometryReductionOneAuto2::populateAlgorithmicCorrectionProperties(con
         alg->setProperty("CorrectionAlgorithm", "PolynomialCorrection");
         alg->setProperty("Polynomial", polyVec[0]);
       } else if (correctionStr == "exponential") {
-        const auto c0Vec = instrument->getStringParameter("C0");
+        auto const c0Vec = componentInfo.getStringParameter(componentInfo.root(), "C0");
         if (c0Vec.empty())
           throw std::runtime_error("Could not find parameter 'C0' in parameter "
                                    "file. Cannot apply exponential correction.");
-        const auto c1Vec = instrument->getStringParameter("C1");
+        auto const c1Vec = componentInfo.getStringParameter(componentInfo.root(), "C1");
         if (c1Vec.empty())
           throw std::runtime_error("Could not find parameter 'C1' in parameter "
                                    "file. Cannot apply exponential correction.");
@@ -1046,8 +1055,8 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::getFloodWorkspace() {
                       << std::endl;
     }
     MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-    auto const instrument = inputWS->getInstrument();
-    auto const floodRunParam = instrument->getParameterAsString("Flood_Run");
+    auto const &componentInfo = inputWS->componentInfo();
+    auto const floodRunParam = componentInfo.getParameterAsString(componentInfo.root(), "Flood_Run");
     if (floodRunParam.empty()) {
       throw std::invalid_argument("Instrument parameter file doesn't have the Flood_Run parameter.");
     }
@@ -1068,7 +1077,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::getFloodWorkspace() {
       std::string const prefix("Flood_");
       for (auto const prop : {"StartSpectrum", "EndSpectrum", "ExcludeSpectra", "Background", "CentralPixelSpectrum",
                               "RangeLower", "RangeUpper"}) {
-        auto const param = instrument->getParameterAsString(prefix + prop);
+        auto const param = componentInfo.getParameterAsString(componentInfo.root(), prefix + prop);
         if (!param.empty()) {
           alg->setPropertyValue(prop, param);
         }
