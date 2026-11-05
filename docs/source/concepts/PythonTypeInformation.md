@@ -26,10 +26,12 @@ and is included in Mantid's conda package. When using a developer build, point
 your editor at the Python environment configured for that build so it can find
 both Mantid's Python sources and compiled modules.
 
-To use the declarations, configure a Python language server such as `ty` or
-Pyright in an editor that supports it, and select the same Python environment
-that you use to run Mantid. The exact setup depends on the editor and language
-server.
+To use the declarations, configure Pyright in an editor that supports Python
+language servers and select the same Python environment that you use to run
+Mantid. For a developer build, configure Pyright's import paths to include
+`Framework/PythonInterface` and the build's `bin` directory so it can find the
+Python package and compiled extension modules. Pyright is also used to check
+the declarations in Mantid's development tests.
 
 Coverage is being expanded. Type information for objects from compiled
 `mantid.kernel`, `mantid.api`, and `mantid.dataobjects` bindings is a separate
