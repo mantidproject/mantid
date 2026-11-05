@@ -789,7 +789,7 @@ const ParameterInfo::LogfileParameters &ComponentInfo::logfileParameters() const
 }
 
 void ComponentInfo::addLogfileParameter(size_t const componentIndex, std::string const &cacheKey,
-                                        std::shared_ptr<const XMLInstrumentParameter> &param) {
+                                        std::shared_ptr<const XMLInstrumentParameter> const &param) {
   mutableParameterInfo().addLogfileParameter(componentIndex, cacheKey, param);
 }
 

@@ -274,7 +274,7 @@ public:
   /// Add or replace a logfile parameter on a component. 'cacheKey' is the parameter name, qualified by
   /// its fitting function if it has one.
   void addLogfileParameter(size_t const componentIndex, std::string const &cacheKey,
-                           std::shared_ptr<const XMLInstrumentParameter> &parameter);
+                           std::shared_ptr<const XMLInstrumentParameter> const &parameter);
 
   /// This allows ParameterMap to delegate to ParameterInfo,
   /// rather than keeping a parallel copy that would silently diverge.

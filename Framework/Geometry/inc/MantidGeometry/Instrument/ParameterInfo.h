@@ -113,7 +113,7 @@ public:
 
   /// Add a logfile parameter, replacing any existing one with the same cache key on the same component.
   void addLogfileParameter(size_t const componentIndex, std::string const &cacheKey,
-                           std::shared_ptr<const XMLInstrumentParameter> parameter);
+                           std::shared_ptr<const XMLInstrumentParameter> const &parameter);
 
   /// All logfile parameters, in ascending component-index order.
   LogfileParameters const &logfileParameters() const;

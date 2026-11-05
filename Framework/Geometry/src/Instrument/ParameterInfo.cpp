@@ -254,8 +254,8 @@ size_t ParameterInfo::size() const {
 }
 
 void ParameterInfo::addLogfileParameter(size_t const componentIndex, std::string const &cacheKey,
-                                        std::shared_ptr<const XMLInstrumentParameter> parameter) {
-  m_logfileParameters.insert_or_assign({componentIndex, cacheKey}, std::move(parameter));
+                                        std::shared_ptr<const XMLInstrumentParameter> const &parameter) {
+  m_logfileParameters.insert_or_assign({componentIndex, cacheKey}, parameter);
 }
 
 ParameterInfo::LogfileParameters const &ParameterInfo::logfileParameters() const { return m_logfileParameters; }
