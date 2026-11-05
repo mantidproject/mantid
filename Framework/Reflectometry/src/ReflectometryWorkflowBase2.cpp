@@ -12,7 +12,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -88,14 +88,14 @@ std::vector<size_t> getProcessingInstructionsAsIndices(std::string const &instru
 
 /** Get a detector parameter from an instrument
  *
- * @param instrument : the instrument containing the parameters
+ * @param componentInfo : the component info of the instrument containing the parameters
  * @param param : the parameter name
  * @return : the parameter value converted to an integer, or std::nullopt if it was not found
  * @throw : if the detector index is invalid
  */
-std::optional<size_t> getDetectorParamOrNone(const Instrument_const_sptr &instrument,
-                                             const MatrixWorkspace_sptr &inputWS, const std::string &param) {
-  const std::vector<double> value = instrument->getNumberParameter(param);
+std::optional<size_t> getDetectorParamOrNone(ComponentInfo const &componentInfo, MatrixWorkspace_sptr const &inputWS,
+                                             std::string const &param) {
+  std::vector<double> const value = componentInfo.getNumberParameter(componentInfo.root(), param);
   if (value.empty()) {
     return std::nullopt;
   }
@@ -668,75 +668,75 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase2::rebinDetectorsToMonitors(const 
 /** Set monitor properties
  *
  * @param alg :: ReflectometryReductionOne algorithm
- * @param instrument :: the instrument attached to the workspace
+ * @param componentInfo :: the component info of the instrument attached to the workspace
  */
 void ReflectometryWorkflowBase2::populateMonitorProperties(const IAlgorithm_sptr &alg,
-                                                           const Instrument_const_sptr &instrument) {
+                                                           ComponentInfo const &componentInfo) {
 
   const auto startOverlap =
-      checkForOptionalInstrumentDefault<double>(this, "StartOverlap", instrument, "TransRunStartOverlap");
+      checkForOptionalInstrumentDefault<double>(this, "StartOverlap", componentInfo, "TransRunStartOverlap");
   if (startOverlap.has_value())
     alg->setProperty("StartOverlap", startOverlap.value());
 
   const auto endOverlap =
-      checkForOptionalInstrumentDefault<double>(this, "EndOverlap", instrument, "TransRunEndOverlap");
+      checkForOptionalInstrumentDefault<double>(this, "EndOverlap", componentInfo, "TransRunEndOverlap");
   if (endOverlap.has_value())
     alg->setProperty("EndOverlap", endOverlap.value());
 
   const auto monitorIndex =
-      checkForOptionalInstrumentDefault<int>(this, "I0MonitorIndex", instrument, "I0MonitorIndex");
+      checkForOptionalInstrumentDefault<int>(this, "I0MonitorIndex", componentInfo, "I0MonitorIndex");
   if (monitorIndex.has_value())
     alg->setProperty("I0MonitorIndex", monitorIndex.value());
 
   const auto backgroundMin = checkForOptionalInstrumentDefault<double>(this, "MonitorBackgroundWavelengthMin",
-                                                                       instrument, "MonitorBackgroundMin");
+                                                                       componentInfo, "MonitorBackgroundMin");
   if (backgroundMin.has_value())
     alg->setProperty("MonitorBackgroundWavelengthMin", backgroundMin.value());
 
   const auto backgroundMax = checkForOptionalInstrumentDefault<double>(this, "MonitorBackgroundWavelengthMax",
-                                                                       instrument, "MonitorBackgroundMax");
+                                                                       componentInfo, "MonitorBackgroundMax");
   if (backgroundMax.has_value())
     alg->setProperty("MonitorBackgroundWavelengthMax", backgroundMax.value());
 
   const auto integrationMin = checkForOptionalInstrumentDefault<double>(this, "MonitorIntegrationWavelengthMin",
-                                                                        instrument, "MonitorIntegralMin");
+                                                                        componentInfo, "MonitorIntegralMin");
   if (integrationMin.has_value())
     alg->setProperty("MonitorIntegrationWavelengthMin", integrationMin.value());
 
   const auto integrationMax = checkForOptionalInstrumentDefault<double>(this, "MonitorIntegrationWavelengthMax",
-                                                                        instrument, "MonitorIntegralMax");
+                                                                        componentInfo, "MonitorIntegralMax");
   if (integrationMax.has_value())
     alg->setProperty("MonitorIntegrationWavelengthMax", integrationMax.value());
 
   const auto integrationBool = checkForOptionalInstrumentDefault<bool>(this, "NormalizeByIntegratedMonitors",
-                                                                       instrument, "NormalizeByIntegratedMonitors");
+                                                                       componentInfo, "NormalizeByIntegratedMonitors");
   if (integrationBool.has_value())
     alg->setProperty("NormalizeByIntegratedMonitors", integrationBool.value());
 }
 
 /** Finding processing instructions from the parameters file
- * @param instrument :: the instrument attached to the workspace
+ * @param componentInfo :: the component info of the instrument attached to the workspace
  * @param inputWS :: the input workspace
  * @return :: processing instructions as a string
  */
-std::string ReflectometryWorkflowBase2::findProcessingInstructions(const Instrument_const_sptr &instrument,
+std::string ReflectometryWorkflowBase2::findProcessingInstructions(ComponentInfo const &componentInfo,
                                                                    const MatrixWorkspace_sptr &inputWS) const {
-  assert(instrument && inputWS && inputWS->getNumberHistograms() > 0);
+  assert(inputWS && inputWS->getNumberHistograms() > 0);
   const std::string analysisMode = getProperty("AnalysisMode");
 
   std::optional<size_t> maybeStart;
   std::optional<size_t> maybeStop;
   if (analysisMode == "PointDetectorAnalysis") {
-    maybeStart = getDetectorParamOrNone(instrument, inputWS, "PointDetectorStart");
-    maybeStop = getDetectorParamOrNone(instrument, inputWS, "PointDetectorStop");
+    maybeStart = getDetectorParamOrNone(componentInfo, inputWS, "PointDetectorStart");
+    maybeStop = getDetectorParamOrNone(componentInfo, inputWS, "PointDetectorStop");
     if (!maybeStart || !maybeStop) {
       throw std::runtime_error(
           "Could not find 'PointDetectorStart' and/or 'PointDetectorStop' in parameter file. Please provide processing "
           "instructions manually or set analysis mode to 'MultiDetectorAnalysis'.");
     }
   } else {
-    maybeStart = getDetectorParamOrNone(instrument, inputWS, "MultiDetectorStart");
-    maybeStop = getDetectorParamOrNone(instrument, inputWS, "MultiDetectorStop");
+    maybeStart = getDetectorParamOrNone(componentInfo, inputWS, "MultiDetectorStart");
+    maybeStop = getDetectorParamOrNone(componentInfo, inputWS, "MultiDetectorStop");
     if (!maybeStart) {
       throw std::runtime_error("Could not find 'MultiDetectorStart' in parameter file. Please provide processing "
                                "instructions manually or set analysis mode to 'PointDetectorAnalysis'.");
@@ -912,14 +912,14 @@ ReflectometryWorkflowBase2::convertToSpectrumNumber(const std::string &workspace
   return specId;
 }
 
-void ReflectometryWorkflowBase2::convertProcessingInstructions(const Instrument_const_sptr &instrument,
+void ReflectometryWorkflowBase2::convertProcessingInstructions(ComponentInfo const &componentInfo,
                                                                const MatrixWorkspace_sptr &inputWS) {
   m_processingInstructions = getPropertyValue("ProcessingInstructions");
   if (!getPointerToProperty("ProcessingInstructions")->isDefault()) {
     m_processingInstructionsWorkspaceIndex =
         convertProcessingInstructionsToWorkspaceIndices(m_processingInstructions, inputWS);
   } else {
-    m_processingInstructionsWorkspaceIndex = findProcessingInstructions(instrument, inputWS);
+    m_processingInstructionsWorkspaceIndex = findProcessingInstructions(componentInfo, inputWS);
     m_processingInstructions =
         convertProcessingInstructionsToSpectrumNumbers(m_processingInstructionsWorkspaceIndex, inputWS);
   }

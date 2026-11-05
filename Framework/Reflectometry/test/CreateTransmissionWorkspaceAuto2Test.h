@@ -11,7 +11,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidReflectometry/CreateTransmissionWorkspaceAuto2.h"
 #include <boost/algorithm/string/classification.hpp>
@@ -110,17 +110,22 @@ public:
     std::vector<std::string> processingInstructionsList;
     boost::split(processingInstructionsList, processingInstructionsString, boost::is_any_of(":"));
 
-    auto inst = m_dataWS->getInstrument();
-    TS_ASSERT_EQUALS(inst->getNumberParameter("TransRunStartOverlap").at(0), startOverlap);
-    TS_ASSERT_EQUALS(inst->getNumberParameter("TransRunEndOverlap").at(0), endOverlap);
-    TS_ASSERT_EQUALS(inst->getNumberParameter("LambdaMin").at(0), wavelengthMin);
-    TS_ASSERT_EQUALS(inst->getNumberParameter("LambdaMax").at(0), wavelengthMax);
-    TS_ASSERT_EQUALS(inst->getNumberParameter("MonitorBackgroundMin").at(0), monitorBackgroundWavelengthMin);
-    TS_ASSERT_EQUALS(inst->getNumberParameter("MonitorBackgroundMax").at(0), monitorBackgroundWavelengthMax);
-    TS_ASSERT_EQUALS(inst->getNumberParameter("MonitorIntegralMin").at(0), monitorIntegrationWavelengthMin);
-    TS_ASSERT_EQUALS(inst->getNumberParameter("MonitorIntegralMax").at(0), monitorIntegrationWavelengthMax);
-    TS_ASSERT_EQUALS(inst->getNumberParameter("I0MonitorIndex").at(0), i0MonitorIndex);
-    TS_ASSERT_EQUALS(inst->getNumberParameter("PointDetectorStart").at(0),
+    auto const &componentInfo = m_dataWS->componentInfo();
+    TS_ASSERT_EQUALS(componentInfo.getNumberParameter(componentInfo.root(), "TransRunStartOverlap").at(0),
+                     startOverlap);
+    TS_ASSERT_EQUALS(componentInfo.getNumberParameter(componentInfo.root(), "TransRunEndOverlap").at(0), endOverlap);
+    TS_ASSERT_EQUALS(componentInfo.getNumberParameter(componentInfo.root(), "LambdaMin").at(0), wavelengthMin);
+    TS_ASSERT_EQUALS(componentInfo.getNumberParameter(componentInfo.root(), "LambdaMax").at(0), wavelengthMax);
+    TS_ASSERT_EQUALS(componentInfo.getNumberParameter(componentInfo.root(), "MonitorBackgroundMin").at(0),
+                     monitorBackgroundWavelengthMin);
+    TS_ASSERT_EQUALS(componentInfo.getNumberParameter(componentInfo.root(), "MonitorBackgroundMax").at(0),
+                     monitorBackgroundWavelengthMax);
+    TS_ASSERT_EQUALS(componentInfo.getNumberParameter(componentInfo.root(), "MonitorIntegralMin").at(0),
+                     monitorIntegrationWavelengthMin);
+    TS_ASSERT_EQUALS(componentInfo.getNumberParameter(componentInfo.root(), "MonitorIntegralMax").at(0),
+                     monitorIntegrationWavelengthMax);
+    TS_ASSERT_EQUALS(componentInfo.getNumberParameter(componentInfo.root(), "I0MonitorIndex").at(0), i0MonitorIndex);
+    TS_ASSERT_EQUALS(componentInfo.getNumberParameter(componentInfo.root(), "PointDetectorStart").at(0),
                      boost::lexical_cast<double>(processingInstructionsList.at(0)) - 1);
     TS_ASSERT_EQUALS(processingInstructionsList.size(), 1);
 

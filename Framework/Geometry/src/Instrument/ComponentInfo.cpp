@@ -788,9 +788,9 @@ const ParameterInfo::LogfileParameters &ComponentInfo::logfileParameters() const
   return m_parameterInfo ? m_parameterInfo->logfileParameters() : empty;
 }
 
-void ComponentInfo::addLogfileParameter(const size_t componentIndex, const std::string &cacheKey,
-                                        std::shared_ptr<const XMLInstrumentParameter> parameter) {
-  mutableParameterInfo().addLogfileParameter(componentIndex, cacheKey, std::move(parameter));
+void ComponentInfo::addLogfileParameter(size_t const componentIndex, std::string const &cacheKey,
+                                        std::shared_ptr<const XMLInstrumentParameter> const &param) {
+  mutableParameterInfo().addLogfileParameter(componentIndex, cacheKey, param);
 }
 
 void ComponentInfo::clearParameter(const size_t componentIndex, const std::string &name) {

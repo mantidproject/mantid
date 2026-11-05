@@ -6,15 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidReflectometry/SpecularReflectionCalculateTheta.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 #include <cmath>
 
 using namespace Mantid::Kernel;
-using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
 namespace Mantid::Reflectometry {
