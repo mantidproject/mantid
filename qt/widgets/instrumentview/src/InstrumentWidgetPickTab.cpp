@@ -1048,8 +1048,8 @@ void ComponentInfoController::displayInfo(size_t pickID) {
   QString text = "";
   if (componentInfo.isDetector(pickID)) {
     text += displayDetectorInfo(pickID);
-  } else if (auto componentID = actor.getComponentID(pickID)) {
-    text += displayNonDetectorInfo(componentID);
+  } else if (pickID < componentInfo.size()) {
+    text += displayNonDetectorInfo(pickID);
   } else {
     clear();
   }
@@ -1131,12 +1131,11 @@ QString ComponentInfoController::displayDetectorInfo(size_t index) {
 /**
  * string with information about a selected non-detector component (such as
  * choppers, etc).
- * @param compID :: A component ID for a component to display.
+ * @param component :: The index of the component to display.
  */
-QString ComponentInfoController::displayNonDetectorInfo(Mantid::Geometry::IComponent const *compID) {
+QString ComponentInfoController::displayNonDetectorInfo(size_t component) {
   const auto &actor = m_instrWidget->getInstrumentActor();
   const auto &componentInfo = actor.componentInfo();
-  auto component = componentInfo.indexOf(compID);
   QString text = "Selected component: ";
   text += QString::fromStdString(componentInfo.name(component)) + '\n';
   Mantid::Kernel::V3D pos = componentInfo.position(component);

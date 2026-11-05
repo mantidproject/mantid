@@ -5,17 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
-#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 
 namespace Mantid::API {
-
-void applyRectangularDetectorScaleToComponentInfo(Geometry::ComponentInfo &componentInfo,
-                                                  const Geometry::ComponentID componentId, const double scaleX,
-                                                  const double scaleY) {
-  applyRectangularDetectorScaleToComponentInfo(componentInfo, componentInfo.indexOf(componentId), scaleX, scaleY);
-}
 
 void applyRectangularDetectorScaleToComponentInfo(Geometry::ComponentInfo &componentInfo, const size_t componentIndex,
                                                   const double scaleX, const double scaleY) {

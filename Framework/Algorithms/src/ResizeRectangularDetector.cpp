@@ -94,14 +94,11 @@ void ResizeRectangularDetector::exec() {
   if (!componentInfo.isGridDetector(componentIndex)) {
     throw std::runtime_error("Component with name " + ComponentName + " is not a RectangularDetector.");
   }
-  Geometry::ParameterMap &pmap = input->instrumentParameters();
-  const std::string &resolvedName = componentInfo.name(componentIndex);
-  auto oldscalex = pmap.getDouble(resolvedName, std::string("scalex"));
-  auto oldscaley = pmap.getDouble(resolvedName, std::string("scaley"));
+  auto oldscalex = componentInfo.getNumberParameter(componentIndex, "scalex", false);
+  auto oldscaley = componentInfo.getNumberParameter(componentIndex, "scaley", false);
   // Add a parameter for the new scale factors
-  auto *componentID = const_cast<IComponent *>(componentInfo.componentID(componentIndex));
-  pmap.addDouble(componentID, "scalex", ScaleX);
-  pmap.addDouble(componentID, "scaley", ScaleY);
+  componentInfo.addDouble(componentIndex, "scalex", ScaleX);
+  componentInfo.addDouble(componentIndex, "scaley", ScaleY);
 
   // Positions of detectors are now stored in DetectorInfo, so we must update
   // positions there.
@@ -113,7 +110,7 @@ void ResizeRectangularDetector::exec() {
     relscalex /= oldscalex[0];
   if (!oldscaley.empty())
     relscaley /= oldscaley[0];
-  applyRectangularDetectorScaleToComponentInfo(componentInfo, componentID, relscalex, relscaley);
+  applyRectangularDetectorScaleToComponentInfo(componentInfo, componentIndex, relscalex, relscaley);
 }
 
 } // namespace Mantid::Algorithms

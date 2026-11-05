@@ -69,9 +69,8 @@ public:
     const double heightScale = 1.0;
     const double widthScale = 1.0;
     std::vector<std::string> bankNames = {"bank1", "bank3"};
-    auto newInstr = wsNew->getInstrument();
 
-    CalibrationHelpers::adjustBankPositionsAndSizes(bankNames, *newInstr, newPos, newRot, heightScale, widthScale,
+    CalibrationHelpers::adjustBankPositionsAndSizes(bankNames, newPos, newRot, heightScale, widthScale,
                                                     componentInfoWsNew);
 
     const auto &detectorInfoWsNew = wsNew->detectorInfo();
@@ -94,9 +93,7 @@ public:
     const double heightScale = 2.0;
     const double widthScale = 3.0;
 
-    auto newInstr = wsNew->getInstrument();
-
-    CalibrationHelpers::adjustBankPositionsAndSizes(bankNames, *newInstr, newPos, newRot, heightScale, widthScale,
+    CalibrationHelpers::adjustBankPositionsAndSizes(bankNames, newPos, newRot, heightScale, widthScale,
                                                     componentInfoWsNew);
 
     const auto &detectorInfoWsNew = wsNew->detectorInfo();
@@ -113,14 +110,13 @@ public:
     setUpFixUpBankParameterMap();
 
     auto &componentInfoWsNew = wsNew->mutableComponentInfo();
-    const auto &instNew = wsNew->getInstrument();
     const auto &newPos = V3D(0.0, 0.0, 0.0);
     auto newRot = Quat(0.2, 0.2, 0.2, 0.2);
     newRot.normalize();
     const double heightScale = 1.0;
     const double widthScale = 1.0;
 
-    CalibrationHelpers::adjustBankPositionsAndSizes(bankNames, *instNew, newPos, newRot, heightScale, widthScale,
+    CalibrationHelpers::adjustBankPositionsAndSizes(bankNames, newPos, newRot, heightScale, widthScale,
                                                     componentInfoWsNew);
 
     const auto &detectorInfoWsNew = wsNew->detectorInfo();
@@ -137,7 +133,6 @@ public:
     setUpFixUpBankParameterMap();
 
     auto &componentInfoWsNew = wsNew->mutableComponentInfo();
-    const auto &instNew = wsNew->getInstrument();
     const auto &newPos = V3D(1.0, 2.0, 3.0);
     auto newRot = Quat(0.2, 0.2, 0.2, 0.2);
     newRot.normalize();
@@ -146,7 +141,7 @@ public:
 
     std::vector<std::string> bankNames = {"bank1", "bank3"};
 
-    CalibrationHelpers::adjustBankPositionsAndSizes(bankNames, *instNew, newPos, newRot, heightScale, widthScale,
+    CalibrationHelpers::adjustBankPositionsAndSizes(bankNames, newPos, newRot, heightScale, widthScale,
                                                     componentInfoWsNew);
 
     const auto &detectorInfoWsNew = wsNew->detectorInfo();

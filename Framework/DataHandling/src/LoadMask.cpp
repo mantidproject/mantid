@@ -385,7 +385,7 @@ void LoadMask::componentToDetectors(const std::vector<std::string> &componentnam
     size_t componentIndex;
     try {
       componentIndex = componentInfo.indexOfAny(componentname);
-      g_log.debug() << "Component ID = " << componentInfo.componentID(componentIndex) << '\n';
+      g_log.debug() << "Component index = " << componentIndex << '\n';
     } catch (const std::exception &) {
       // A non-exiting component.  Ignore
       g_log.warning() << "Component " << componentname << " does not exist!\n";

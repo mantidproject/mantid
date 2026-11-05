@@ -15,7 +15,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/Unit.h"
 
 #include <boost/math/special_functions/round.hpp>
@@ -305,22 +305,23 @@ SCDCalibratePanels2ObjFunc::scaleRectagularDetectorSize(const double &scalex, co
                                                         const std::string &componentName,
                                                         Mantid::API::IPeaksWorkspace_sptr &pws) const {
 
-  Geometry::Instrument_sptr inst = std::const_pointer_cast<Geometry::Instrument>(pws->getInstrument());
-  Geometry::IComponent_const_sptr comp = inst->getComponentByName(componentName);
-  std::shared_ptr<const Geometry::RectangularDetector> rectDet =
-      std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
-  if (rectDet) {
-    // get instrument parameter map and find out whether the
-    const Geometry::ParameterMap &pmap = pws->instrumentParameters();
-    auto oldscalex = pmap.getDouble(rectDet->getName(), "scalex");
-    auto oldscaley = pmap.getDouble(rectDet->getName(), "scaley");
+  auto &componentInfo = pws->mutableComponentInfo();
+  size_t componentIndex;
+  try {
+    componentIndex = componentInfo.indexOfAny(componentName);
+  } catch (std::invalid_argument &) {
+    return pws;
+  }
+  if (componentInfo.componentType(componentIndex) == Beamline::ComponentType::Rectangular) {
+    // find out whether the bank has already been scaled
+    auto oldscalex = componentInfo.getNumberParameter(componentIndex, "scalex", false);
+    auto oldscaley = componentInfo.getNumberParameter(componentIndex, "scaley", false);
     double relscalex{scalex}, relscaley{scaley};
     if (!oldscalex.empty())
       relscalex /= oldscalex[0];
     if (!oldscaley.empty())
       relscaley /= oldscaley[0];
-    applyRectangularDetectorScaleToComponentInfo(pws->mutableComponentInfo(), rectDet->getComponentID(), relscalex,
-                                                 relscaley);
+    applyRectangularDetectorScaleToComponentInfo(componentInfo, componentIndex, relscalex, relscaley);
   }
 
   return pws;
