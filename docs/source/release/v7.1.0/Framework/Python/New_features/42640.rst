@@ -1,0 +1,1 @@
+- :class:`~mantid.api.IMDHistoWorkspace` methods ``setSignalArray``, ``setErrorSquaredArray`` and ``setNumEventsArray`` are now much faster for large arrays: setting the 160 million bins of a WAND scan takes 0.16 s instead of 19 s.
