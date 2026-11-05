@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "../Common/CoderCommonTester.h"
 #include "../ReflMockObjects.h"
 #include "GUI/Common/PlotOptionsProvider.h"
 #include "GUI/Common/RunWorkspaceResolver.h"
@@ -37,17 +38,29 @@ public:
     auto &tree = dynamic_cast<MantidQt::MantidWidgets::Batch::JobTreeView &>(view.jobs());
     TS_ASSERT_EQUALS(tree.header()->visualIndex(adjustedAngleColumn), tree.header()->visualIndex(1) + 1);
     TS_ASSERT_EQUALS(tree.model()->headerData(adjustedAngleColumn, Qt::Horizontal).toString(), "Adjusted Angle");
-    TS_ASSERT(tree.isColumnHidden(adjustedAngleColumn));
-    view.setInstrumentName("POLREF");
-    TS_ASSERT(!tree.isColumnHidden(adjustedAngleColumn));
-    view.setInstrumentName("INTER");
-    TS_ASSERT(tree.isColumnHidden(adjustedAngleColumn));
+    auto algorithm = std::make_shared<ReflectometryISISLoadAndProcess>();
+    algorithm->initialize();
+    QtExperimentView lookupView(algorithm);
+    auto lookupTable = lookupView.findChild<QTableWidget *>("optionsTable");
+    for (auto column : {LookupRow::NOMINAL_SPECULAR_PIXEL, LookupRow::ACTUAL_SPECULAR_PIXEL})
+      TS_ASSERT(lookupTable->isColumnHidden(column));
+    for (auto column : {adjustedAngleColumn, nominalSpecularPixelColumn, actualSpecularPixelColumn})
+      TS_ASSERT(tree.isColumnHidden(column));
+    for (auto const &instrument : {"INTER", "POLREF", "INTER"}) {
+      view.setInstrumentName(instrument);
+      lookupView.setInstrumentColumnsVisible(instrument);
+      for (auto column : {LookupRow::NOMINAL_SPECULAR_PIXEL, LookupRow::ACTUAL_SPECULAR_PIXEL})
+        TS_ASSERT_EQUALS(lookupTable->isColumnHidden(column), std::string(instrument) != "POLREF");
+      for (auto column : {adjustedAngleColumn, nominalSpecularPixelColumn, actualSpecularPixelColumn})
+        TS_ASSERT_EQUALS(tree.isColumnHidden(column), std::string(instrument) != "POLREF");
+    }
   }
 
   void testColumnInitiallyVisibleForPOLREF() {
     QtRunsTableView view({"POLREF", "INTER"});
     auto &tree = dynamic_cast<MantidQt::MantidWidgets::Batch::JobTreeView &>(view.jobs());
-    TS_ASSERT(!tree.isColumnHidden(adjustedAngleColumn));
+    for (auto column : {adjustedAngleColumn, nominalSpecularPixelColumn, actualSpecularPixelColumn})
+      TS_ASSERT(!tree.isColumnHidden(column));
   }
 
   void testNewRowsHaveReadOnlyAdjustedAngleCells() {
@@ -105,6 +118,19 @@ public:
     auto period = addRunWorkspace("__TOF_12345_1", "12345", 0.625);
     addGroup("__TOF", {period});
     TS_ASSERT_EQUALS(adjustedAngleCell(withReductionOutput(makeSimpleRow("12345")), 3).contentText(), "0.625");
+  }
+
+  void testMonitorMembersAreSkippedWhenFindingRawInput() {
+    auto monitors = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(4, 2, true);
+    monitors->mutableRun().addProperty("run_number", std::string("12345"));
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("TOF_12345_monitors_1", monitors);
+    auto input = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 2);
+    input->mutableRun().addProperty("run_number", std::string("12345"));
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("input_period", input);
+    addGroup("TOF", {monitors, input});
+    auto row = withReductionOutput(makeSimpleRow("12345"));
+    TS_ASSERT_EQUALS(findInputWorkspace(row.runNumbers(), std::nullopt, {row.reducedWorkspaceNames().iVsQBinned()}),
+                     input);
   }
 
   void testHiddenSummedWorkspaceIsFound() {

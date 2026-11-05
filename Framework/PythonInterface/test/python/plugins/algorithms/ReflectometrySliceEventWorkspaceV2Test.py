@@ -40,6 +40,20 @@ class ReflectometrySliceEventWorkspaceV2Test(unittest.TestCase):
         self._check_slices(output, ["output_0_4200"])
         self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[14, 16, 8])
 
+    def test_slices_preserve_adjusted_theta_without_merging_charge_logs(self):
+        self._input_ws.run().addProperty("reflectometry_adjusted_theta", 0.626, True)
+        self._monitor_ws.run().addProperty("gd_prtn_chrg", 42.0, True)
+        args = dict(self._default_args, TimeInterval=600)
+
+        output = self._assert_run_algorithm_succeeds(args)
+
+        self.assertEqual(len(output), 7)
+        for slice_ws in output:
+            self.assertAlmostEqual(slice_ws.run().getProperty("reflectometry_adjusted_theta").value, 0.626)
+            self.assertAlmostEqual(slice_ws.run().getProtonCharge(), 42.0)
+            for index in range(self._monitor_ws.getNumberHistograms()):
+                self.assertTrue(slice_ws.spectrumInfo().isMonitor(index))
+
     def test_setting_time_interval(self):
         args = self._default_args
         args["TimeInterval"] = 600

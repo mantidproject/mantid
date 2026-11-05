@@ -39,11 +39,18 @@ getFirstValidRun(std::string const &name, const std::optional<int> period,
     }
 
     if (auto const &value = run.getProperty("run_number")->value(); !value.empty()) {
-      if (expectedRunNumber && value != *expectedRunNumber) {
-        auto const expectedNumber = parseNonNegativeInt(*expectedRunNumber);
-        if (!expectedNumber || parseNonNegativeInt(value) != expectedNumber)
+      if (!expectedRunNumber)
+        return std::pair{value, workspace};
+
+      if (value != *expectedRunNumber)
+        if (auto const expectedNumber = parseNonNegativeInt(*expectedRunNumber);
+            !expectedNumber || parseNonNegativeInt(value) != expectedNumber)
           continue;
-      }
+
+      // Do not return monitor workspaces, as they do not contain angle correction metadata.
+      if (workspace->getName().find("_monitors") != std::string::npos)
+        continue;
+
       return std::pair{value, workspace};
     }
   }

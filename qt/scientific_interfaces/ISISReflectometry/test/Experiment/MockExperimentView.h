@@ -48,6 +48,7 @@ public:
   MOCK_METHOD1(setDebugOption, void(bool));
   MOCK_CONST_METHOD0(getDiagnosticsOption, bool());
   MOCK_METHOD1(setDiagnosticsOption, void(bool));
+  MOCK_METHOD1(setInstrumentColumnsVisible, void(std::string const &));
   MOCK_CONST_METHOD0(getLookupTable, std::vector<LookupRow::ValueArray>());
   MOCK_METHOD1(setLookupTable, void(std::vector<LookupRow::ValueArray>));
   MOCK_METHOD2(showLookupRowAsInvalid, void(int row, int column));

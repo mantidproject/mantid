@@ -8,6 +8,7 @@
 
 #include <utility>
 
+#include "Common/GetInstrumentParameter.h"
 #include "Common/OptionDefaults.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "Reduction/Instrument.h"
@@ -19,6 +20,8 @@ namespace {
 Mantid::Kernel::Logger g_log("Reflectometry GUI");
 
 Instrument getInstrumentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
+  auto pixels = getInstrumentParameter<double>(instrument, "DefaultNominalSpecularPixel");
+  auto nominalPixel = pixels.empty() ? std::nullopt : std::optional<double>(pixels.front());
   auto defaults = OptionDefaults(std::move(instrument), "ReflectometryReductionOneAuto");
 
   auto wavelengthRange = RangeInLambda(defaults.getValue<double>("WavelengthMin", "LambdaMin"),
@@ -52,7 +55,8 @@ Instrument getInstrumentDefaults(Mantid::Geometry::Instrument_const_sptr instrum
   // For now, we're not providing a default for the CalibrationFilePath in the parameter file, so use an empty string
   auto calibrationFilePath = "";
 
-  return Instrument(wavelengthRange, std::move(monitorCorrections), detectorCorrections, calibrationFilePath);
+  return Instrument(wavelengthRange, std::move(monitorCorrections), detectorCorrections, calibrationFilePath,
+                    nominalPixel);
 }
 } // unnamed namespace
 

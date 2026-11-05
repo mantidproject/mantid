@@ -256,6 +256,10 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
             mtd.addOrReplace(slice_monitor_ws_name, slice_monitor_ws)
             monitors_ws_list.append(slice_monitor_ws_name)
             self._copy_run_number_to_sample_log(slice, slice_monitor_ws)
+            # AppendSpectra keeps the monitor logs, so carry the corrected angle across before appending.
+            if slice.run().hasProperty("reflectometry_adjusted_theta"):
+                adjusted_theta = slice.run().getProperty("reflectometry_adjusted_theta").value
+                slice_monitor_ws.run().addProperty("reflectometry_adjusted_theta", adjusted_theta, True)
 
         monitor_ws_group_name = input_monitor_ws.name() + "_sliced"
         monitor_ws_group = self._group_workspaces(monitors_ws_list)

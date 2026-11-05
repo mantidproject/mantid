@@ -176,6 +176,27 @@ public:
     TS_ASSERT_EQUALS(0.1, parseScaleFactor("0.1").first.value());
   }
 
+  void testParseSpecularPixel() {
+    TS_ASSERT_EQUALS(280.5, parseSpecularPixel("280.5").first.value());
+    TS_ASSERT(parseSpecularPixel("280.5").second);
+    TS_ASSERT(parseSpecularPixel("").second);
+    TS_ASSERT_EQUALS(std::nullopt, parseSpecularPixel("").first);
+    TS_ASSERT(parseSpecularPixel(" ").second);
+    TS_ASSERT_EQUALS(std::nullopt, parseSpecularPixel(" ").first);
+    TS_ASSERT(!parseSpecularPixel("bad").second);
+    TS_ASSERT(!parseSpecularPixel("-1").second);
+    TS_ASSERT(!parseSpecularPixel("inf").second);
+    TS_ASSERT(!parseSpecularPixel("nan").second);
+  }
+
+  void testParseSpecularPixelsError() {
+    RowValidator validator;
+    auto result = validator({"12345", "0.5", "", "", "", "", "", "", "", "", "", "bad", "-1"});
+    std::vector<int> errorCells = {11, 12};
+    TS_ASSERT(result.isError());
+    TS_ASSERT_EQUALS(result.assertError(), errorCells);
+  }
+
   void testParsesFirstTransmissionRun() {
     auto const expected = TransmissionRunPair({"1000"}, std::vector<std::string>());
     auto const result = boost::get<TransmissionRunPair>(parseTransmissionRuns("1000", ""));
