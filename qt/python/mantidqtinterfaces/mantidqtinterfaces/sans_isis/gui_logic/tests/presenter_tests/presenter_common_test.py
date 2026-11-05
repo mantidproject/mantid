@@ -46,6 +46,13 @@ class PresenterCommonTest(unittest.TestCase):
             presenter._set_on_view(attr_name)  # Presenter should copy model->view
             self.assertEqual(val, self.mocked_view.test_attr, "Val was incorrectly rejected")
 
+    def test_set_on_view_with_decimal_places_keeps_precision(self):
+        presenter = self._get_mocked_presenter()
+        for val in [10.47, 10.456, 0.00015, 1234.5678]:
+            self.presenter_model.test_attr = val
+            presenter._set_on_view("test_attr", 6)
+            self.assertEqual(val, self.mocked_view.test_attr)
+
     def test_set_on_model(self):
         mocked_presenter = self._get_mocked_presenter()
         custom_model = mock.Mock()
