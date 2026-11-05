@@ -13,27 +13,34 @@ Use the Mantid developer environment and a completed build that can import
 its output with the repository's Ruff formatter through `prek` or
 `pre-commit`; one of those commands must be available in the environment.
 
-## Configure import paths for `ty`
+## Configure Pyright import paths
 
-When checking code from a developer build, make both the Python source root and
-the build's binary directory visible to `ty`:
+When checking code from a developer build, configure Pyright to search both the
+Python source root and the build's binary directory. For a fixture saved in the
+build directory, create a `pyrightconfig.json` there with paths for your
+checkout and build:
 
-```sh
-export PYTHONPATH="/path/to/mantid/Framework/PythonInterface:/path/to/mantid-build/bin${PYTHONPATH:+:$PYTHONPATH}"
+```json
+{
+  "include": ["check_mantid_types.py"],
+  "extraPaths": [
+    "/path/to/mantid/Framework/PythonInterface",
+    "/path/to/mantid-build/bin"
+  ],
+  "pythonVersion": "3.13",
+  "typeCheckingMode": "basic"
+}
 ```
 
 `Framework/PythonInterface` contains the `mantid` package and
 `simpleapi.pyi`; `mantid-build/bin` contains the compiled extension modules.
-If the build environment already adds its `bin` directory, add the source root
-while preserving the existing path. Launch the editor from this environment,
-or set the same paths in the environment used to launch its `ty` language
-server.
+Use the matching Python environment when running Pyright or launching its
+language server from an editor.
 
 Python may import Mantid through a setuptools editable-install `.pth` file that
-installs a custom import finder mapping `mantid` to the source tree. `ty` does
-not use that Python import hook to find source modules, so the source root must
-also be a direct search path. The same requirement applies to `ty check` and
-the `ty` language server.
+installs a custom import finder mapping `mantid` to the source tree. Pyright
+does not use that Python import hook to find source modules, so both paths must
+be configured directly in `extraPaths`.
 
 ## Generate the declarations
 
@@ -68,9 +75,21 @@ From the configured build directory, run the focused tests with:
 ctest -R 'tools\.python_typing\.' --output-on-failure
 ```
 
-The tests cover generator behavior, stub freshness, and a smoke check that
-requires both `ty` and Pyright to recognize the `ConvertUnits` signature. The
-PR workflow runs these tests as part of its `UnitTest` selection.
+The tests cover generator behavior, stub freshness, and an analyzer smoke check
+for the `ConvertUnits` signature. The PR workflow runs these tests as part of
+its `UnitTest` selection. In the current branch, that smoke test still invokes
+both Pyright and ty; if ty is removed from the development dependencies, update
+the test to require and run Pyright only.
+
+For an interactive fixture named `check_mantid_types.py` in the configured
+build directory, run:
+
+```sh
+pyright check_mantid_types.py
+```
+
+`check` is not a Pyright subcommand. The command above uses the project's
+`pyrightconfig.json` automatically when run from its directory.
 
 Keep stub freshness and analyzer checks in CTest/CI. They need the Mantid
 bindings and registered algorithms from the build; pre-commit remains

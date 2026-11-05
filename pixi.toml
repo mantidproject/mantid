@@ -144,7 +144,6 @@ myst-parser = ">=5.0.0,<6"
 sphinx = ">=9.0,<10"
 agent-skill-rattler-build = ">=0.0.2,<0.0.3"
 wcwidth = "<0.9"
-ty = ">=0.0.97,<0.0.98"
 pyright = ">=1.1.407,<2"
 
 [target.linux-64.dependencies]
