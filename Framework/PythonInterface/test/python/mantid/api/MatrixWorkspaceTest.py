@@ -616,6 +616,11 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEqual((10.0, 30.0), ws.getXMinMax(np.array([1], dtype=np.int64)))
         self.assertEqual((1.0, 30.0), ws.getXMinMax([0, 1, 1]))
 
+    def test_getXMinMax_uses_all_spectra_without_workspace_indices(self):
+        ws = self._workspace_for_x_min_max()
+        self.assertEqual((1.0, 30.0), ws.getXMinMax())
+        self.assertEqual((0.5, 30.0), ws.getXMinMax(includeNonFiniteSpectra=True))
+
     def test_getXMinMax_skips_spectra_with_a_non_finite_end_by_default(self):
         ws = self._workspace_for_x_min_max()
         self.assertEqual((1.0, 3.0), ws.getXMinMax([0, 2]))

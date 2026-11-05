@@ -39,6 +39,7 @@
 #include <cmath>
 #include <functional>
 #include <numeric>
+#include <ranges>
 #include <utility>
 
 using Mantid::Kernel::StringListValidator;
@@ -105,6 +106,39 @@ std::string replacePerWithLatex(std::string yLabel) {
     yLabel += "(" + unitString + ")$^{-1}$";
   }
   return yLabel;
+}
+
+/** Get the X range of the given spectra.
+ * @param workspace :: The workspace
+ * @param xmin :: Set to the lowest X value, or the largest double if no spectrum contributes
+ * @param xmax :: Set to the highest X value, or the lowest double if no spectrum contributes
+ * @param workspaceIndices :: A range of the spectra to include
+ * @param includeNonFiniteSpectra :: A spectrum with a non-finite first or last value contributes its finite values if
+ * true, and is skipped if false
+ */
+template <typename WorkspaceIndices>
+void findXMinMax(const MatrixWorkspace &workspace, double &xmin, double &xmax, const WorkspaceIndices &workspaceIndices,
+                 const bool includeNonFiniteSpectra) {
+  xmin = std::numeric_limits<double>::max();
+  xmax = -1.0 * xmin;
+  const auto isFinite = [](const double value) { return std::isfinite(value); };
+
+  for (const auto workspaceIndex : workspaceIndices) {
+    const auto &xData = workspace.x(workspaceIndex);
+    auto xfront = xData.front();
+    auto xback = xData.back();
+    if (!isFinite(xfront) || !isFinite(xback)) {
+      if (!includeNonFiniteSpectra)
+        continue;
+      const auto firstFinite = std::find_if(xData.cbegin(), xData.cend(), isFinite);
+      if (firstFinite == xData.cend())
+        continue;
+      xfront = *firstFinite;
+      xback = *std::find_if(xData.crbegin(), xData.crend(), isFinite);
+    }
+    xmin = std::min(xmin, xfront);
+    xmax = std::max(xmax, xback);
+  }
 }
 
 } // namespace
@@ -769,9 +803,7 @@ double MatrixWorkspace::getXMax() const {
 }
 
 void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
-  std::vector<size_t> workspaceIndices(this->getNumberHistograms());
-  std::iota(workspaceIndices.begin(), workspaceIndices.end(), 0);
-  this->getXMinMax(xmin, xmax, workspaceIndices);
+  findXMinMax(*this, xmin, xmax, std::views::iota(size_t{0}, this->getNumberHistograms()), false);
 }
 
 /** Get the X range of the given spectra.
@@ -783,26 +815,7 @@ void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
  */
 void MatrixWorkspace::getXMinMax(double &xmin, double &xmax, const std::vector<size_t> &workspaceIndices,
                                  const bool includeNonFiniteSpectra) const {
-  xmin = std::numeric_limits<double>::max();
-  xmax = -1.0 * xmin;
-  const auto isFinite = [](const double value) { return std::isfinite(value); };
-
-  for (const auto workspaceIndex : workspaceIndices) {
-    const auto &xData = this->x(workspaceIndex);
-    auto xfront = xData.front();
-    auto xback = xData.back();
-    if (!isFinite(xfront) || !isFinite(xback)) {
-      if (!includeNonFiniteSpectra)
-        continue;
-      const auto firstFinite = std::find_if(xData.cbegin(), xData.cend(), isFinite);
-      if (firstFinite == xData.cend())
-        continue;
-      xfront = *firstFinite;
-      xback = *std::find_if(xData.crbegin(), xData.crend(), isFinite);
-    }
-    xmin = std::min(xmin, xfront);
-    xmax = std::max(xmax, xback);
-  }
+  findXMinMax(*this, xmin, xmax, workspaceIndices, includeNonFiniteSpectra);
 }
 
 /** Integrate all the spectra in the matrix workspace within the range given.

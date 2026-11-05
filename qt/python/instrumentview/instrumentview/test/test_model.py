@@ -100,7 +100,9 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.getNumberHistograms.return_value = len(detector_ids)
         mock_workspace.x.return_value = np.arange(len(detector_ids))
 
-        def get_x_min_max(workspace_indices, includeNonFiniteSpectra=False):
+        def get_x_min_max(workspace_indices=None, includeNonFiniteSpectra=False):
+            if workspace_indices is None:
+                workspace_indices = range(mock_workspace.getNumberHistograms())
             spectra = [mock_workspace.x(int(i)) for i in workspace_indices]
             return min(x[0] for x in spectra), max(x[-1] for x in spectra)
 
@@ -530,7 +532,6 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     def test_limits_are_zero_when_no_x_value_is_finite(self):
         model, _ = self._setup_model([1, 2, 3])
         workspace = MagicMock()
-        workspace.getNumberHistograms.return_value = 1
         workspace.getXMinMax.return_value = (sys.float_info.max, -sys.float_info.max)
 
         self.assertEqual((0, 0), model._extract_limits_from_workspace(workspace))

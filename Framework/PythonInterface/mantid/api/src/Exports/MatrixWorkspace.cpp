@@ -37,6 +37,8 @@
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
 #include <boost/python/tuple.hpp>
 
+#include <numeric>
+
 #define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
@@ -448,7 +450,10 @@ boost::python::tuple getXMinMaxForWorkspaceIndices(const MatrixWorkspace &self,
                                                    const boost::python::object &workspaceIndices,
                                                    const bool includeNonFiniteSpectra) {
   std::vector<size_t> sWorkspaceIndices;
-  if (NDArray::check(workspaceIndices)) {
+  if (workspaceIndices.is_none()) {
+    sWorkspaceIndices.resize(self.getNumberHistograms());
+    std::iota(sWorkspaceIndices.begin(), sWorkspaceIndices.end(), 0);
+  } else if (NDArray::check(workspaceIndices)) {
     NDArrayToVector<size_t> converter(workspaceIndices);
     sWorkspaceIndices = converter();
   } else {
@@ -849,10 +854,11 @@ void export_MatrixWorkspace() {
            args("self", "workspaceIndices", "numberOfWorkspaces", "minX", "maxX", "entireRange"),
            "Return a vector with the integrated counts within the given range for the given workspace indices")
       .def("getXMinMax", &getXMinMaxForWorkspaceIndices,
-           (arg("self"), arg("workspaceIndices"), arg("includeNonFiniteSpectra") = false),
-           "Return a tuple of the lowest and highest X values of the given workspace indices. A spectrum with a "
-           "non-finite first or last value contributes its finite values if includeNonFiniteSpectra is True, and is "
-           "skipped otherwise. The lowest value is greater than the highest if no spectrum contributes.")
+           (arg("self"), arg("workspaceIndices") = boost::python::object(), arg("includeNonFiniteSpectra") = false),
+           "Return a tuple of the lowest and highest X values of the given workspace indices, or of all spectra if "
+           "workspaceIndices is None. A spectrum with a non-finite first or last value contributes its finite values "
+           "if includeNonFiniteSpectra is True, and is skipped otherwise. The lowest value is greater than the "
+           "highest if no spectrum contributes.")
       //-------------------------------------- Operators
       //-----------------------------------
       .def("equals", &Mantid::API::equals, args("self", "other", "tolerance"),

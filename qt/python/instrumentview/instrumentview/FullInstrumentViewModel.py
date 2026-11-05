@@ -378,10 +378,7 @@ class FullInstrumentViewModel:
         self.full_integration_limits = self._integration_limits
 
     def _extract_limits_from_workspace(self, workspace, workspace_indices=None) -> tuple:
-        if workspace_indices is None:
-            workspace_indices = np.arange(0, workspace.getNumberHistograms())
-
-        if len(workspace_indices) == 0:
+        if workspace_indices is not None and len(workspace_indices) == 0:
             return (0, 0)
 
         # Converting units can turn an x value of zero into an infinite one, e.g. TOF into momentum
