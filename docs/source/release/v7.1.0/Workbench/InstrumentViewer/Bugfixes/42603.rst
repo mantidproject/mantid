@@ -1,0 +1,1 @@
+- The *Export Spectra to ADS* button in the new :ref:`InstrumentViewer` is now disabled when no detectors are selected, as there are no spectra to export.
