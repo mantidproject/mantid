@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import SANSadd2
+from sans.common.run_adder import add_runs
 from mantidqt.utils.async_qt_adaptor import qt_async_task, IQtAsync
 
 
@@ -33,7 +33,7 @@ class SumRunsModel(IQtAsync):
         file_name = base_file_name + ".nxs"
         monitors_file_name = base_file_name + "_monitors.nxs"
 
-        SANSadd2.add_runs(
+        add_runs(
             tuple(run_selection),
             settings.instrument(),
             lowMem=True,

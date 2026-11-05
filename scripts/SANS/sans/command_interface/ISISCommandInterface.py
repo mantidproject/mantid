@@ -11,7 +11,7 @@ import re
 import types
 from typing import Union, Dict
 
-from SANSadd2 import add_runs
+from sans.common.run_adder import add_runs
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.kernel import config
 from sans.command_interface.batch_csv_parser import BatchCsvParser
