@@ -12,14 +12,9 @@ set(TEST_PY_FILES
     IndirectReductionCommonTest.py
     InelasticDirectDetpackmapTest.py
     ISISDirecInelasticConfigTest.py
-    ReductionSettingsTest.py
     ReductionWrapperTest.py
     ReflectometryQuickAuxiliaryTest.py
     RunDescriptorTest.py
-    SANSDarkRunCorrectionTest.py
-    SANSIsisInstrumentTest.py
-    SANSUserFileParserTest.py
-    SANSUtilityTest.py
     SettingsTest.py
     StitchingTest.py
     VesuvioBackgroundTest.py

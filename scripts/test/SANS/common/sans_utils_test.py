@@ -12,7 +12,7 @@ from unittest.mock import patch
 
 import numpy as np
 
-import SANSUtility as su
+import sans.common.utils as su
 from mantid.api import mtd, WorkspaceGroup, AlgorithmManager, AnalysisDataService, FileFinder
 from mantid.kernel import (
     DateAndTime,
@@ -248,9 +248,9 @@ class SANSUtilityTest(unittest.TestCase):
         self.assertEqual([[1, 3], [5, 5], [7, 9]], su._merge_to_ranges([1, 2, 3, 5, 7, 8, 9]))
         self.assertEqual([[1, 1]], su._merge_to_ranges([1]))
 
-    @patch("SANSUtility.os.getcwd")
-    @patch("SANSUtility.config")
-    @patch("SANSUtility.os.path.isfile")
+    @patch("sans.common.utils.os.getcwd")
+    @patch("sans.common.utils.config")
+    @patch("sans.common.utils.os.path.isfile")
     def test_get_full_path_for_added_event_data(self, mock_isfile, mock_config, mock_getcwd):
         mock_isfile.side_effect = [True, False, True, True, True, True]
         mock_config.__getitem__.side_effect = ["config_path", "", "", "config_path"]
