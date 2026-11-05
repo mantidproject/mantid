@@ -82,6 +82,19 @@ class TestTexturePlannerPresenter_Init(unittest.TestCase):
         self.assertIs(presenter.model, model)
         self.assertIs(presenter.view, view)
 
+    @patch(file_path + ".InterfaceManager")
+    def test_open_help_window_calls_interface_manager(self, interface_manager):
+        model = _make_model()
+        view = _make_view()
+        presenter = TexturePlannerPresenter(model, view)
+
+        mgr = MagicMock()
+        interface_manager.return_value = mgr
+
+        presenter.open_help_window()
+
+        mgr.showCustomInterfaceHelp.assert_called_once_with(presenter.DOC_TITLE, presenter.DOC_FOLDER)
+
     def test_constructs_settings_presenter_with_settings_view(self, mock_settings_view, mock_settings_presenter):
         model = _make_model()
         view = _make_view()
