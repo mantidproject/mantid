@@ -8,6 +8,7 @@ import mantid.simpleapi as mantid  # Have to import Mantid to setup paths
 import unittest
 
 from Diffraction.isis_powder.routines import common, common_enums
+from Diffraction.isis_powder.routines.instrument_settings import expand_parameter_list
 
 
 class ISISPowderCommonTest(unittest.TestCase):
@@ -223,6 +224,23 @@ class ISISPowderCommonTest(unittest.TestCase):
             self.assertEqual(val, expected_val)
         except KeyError:
             self.fail("dictionary_key_helper did not perform case insensitive lookup")
+
+    def test_expand_parameter_list_expand_case(self):
+        for raw_param, count in ((1, 2), (None, 3), ("abc", 5), ((1, 2), 6)):
+            expanded_param = expand_parameter_list(raw_param, count)
+            self.assertEqual(len(expanded_param), count)
+            self.assertEqual(set(expanded_param), {raw_param})
+
+    def test_expand_parameter_list_existing_list(self):
+        for raw_param, count in (([1, 2], 2), ([None, None, None], 3), (["ab", "cd"], 2), ([(1, 2), (3, 4), (5, 6)], 3)):
+            expanded_param = expand_parameter_list(raw_param, count)
+            self.assertEqual(len(expanded_param), count)
+            self.assertListEqual(expanded_param, raw_param)
+
+    def test_expand_parameter_list_wrong_length(self):
+        for raw_param, count in (([1, 2], 1), ([None, None, None], 2), (["ab", "cd"], 3), ([(1, 2), (3, 4), (5, 6)], 4)):
+            with self.assertRaisesRegex(RuntimeError, "Expected [0-9]* values in parameter, but received [0-9]*"):
+                expand_parameter_list(raw_param, count)
 
     def test_extract_ws_spectra(self):
         number_of_expected_banks = 5
