@@ -17,6 +17,9 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/MantidVersion.h"
+#include "MantidKernel/TimeROI.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidTypes/Core/DateAndTime.h"
 
 #include <Poco/TemporaryFile.h>
 #include <boost/algorithm/string/predicate.hpp>
@@ -195,6 +198,10 @@ public:
     TS_ASSERT_EQUALS(headers.count("Facility"), 0u);
     TS_ASSERT_EQUALS(headers.count("Instrument"), 0u);
     TS_ASSERT_EQUALS(headers.count("Run_number"), 0u);
+    TS_ASSERT_EQUALS(headers.count("Sample_position"), 0u);
+    TS_ASSERT_EQUALS(headers.count("Blank_run_number"), 0u);
+    TS_ASSERT_EQUALS(headers.count("Sample_transmission_run_number"), 0u);
+    TS_ASSERT_EQUALS(headers.count("Blank_transmission_run_number"), 0u);
     checkSoftwareHeaders(headers);
   }
 
@@ -216,6 +223,116 @@ public:
     TS_ASSERT_EQUALS(headers.at("Orientation"), "Y");
   }
 
+  void test_sample_position_lists_distinct_positions_in_order() {
+    auto ws = createTestWorkspace();
+    ws->mutableSample().setThickness(5);
+    addSamplePosLog<std::string>(ws, {"1CT", "1CT", "AT", "AT"});
+
+    const auto headers = saveAndReadHeaders(ws);
+
+    TS_ASSERT_EQUALS(headers.at("Sample_position"), "1CT, AT");
+  }
+
+  void test_sample_position_is_omitted_for_empty_sample_pos_log() {
+    auto ws = createTestWorkspace();
+    ws->mutableSample().setThickness(5);
+    addSamplePosLog<std::string>(ws, {"", ""});
+
+    const auto headers = saveAndReadHeaders(ws);
+
+    TS_ASSERT_EQUALS(headers.count("Sample_position"), 0u);
+  }
+
+  void test_sample_position_is_omitted_for_sample_pos_log_padded_with_spaces() {
+    // A blank position loaded from NeXus can be padded with spaces
+    auto ws = createTestWorkspace();
+    ws->mutableSample().setThickness(5);
+    addSamplePosLog<std::string>(ws, {"    ", "    "});
+
+    const auto headers = saveAndReadHeaders(ws);
+
+    TS_ASSERT_EQUALS(headers.count("Sample_position"), 0u);
+  }
+
+  void test_sample_position_from_number_log() {
+    auto ws = createTestWorkspace();
+    ws->mutableSample().setThickness(5);
+    addSamplePosLog<double>(ws, {-308.7, -308.7, 12.5});
+
+    const auto headers = saveAndReadHeaders(ws);
+
+    TS_ASSERT_EQUALS(headers.at("Sample_position"), "-308.7, 12.5");
+  }
+
+  void test_sample_position_respects_time_roi() {
+    // FilterByTime sets the time region of interest on the run, without removing log values
+    auto ws = createTestWorkspace();
+    ws->mutableSample().setThickness(5);
+    addSamplePosLog<std::string>(ws, {"1CT", "AT"});
+    ws->mutableRun().setTimeROI(Kernel::TimeROI(logStartTime, logStartTime + 300.0));
+
+    const auto headers = saveAndReadHeaders(ws);
+
+    TS_ASSERT_EQUALS(headers.at("Sample_position"), "1CT");
+  }
+
+  void test_sample_position_ignores_positions_logged_before_the_run() {
+    // IBEX logs can start hours before the run, as in LARMOR00101015
+    auto ws = createTestWorkspace();
+    ws->mutableSample().setThickness(5);
+    addSamplePosLog<std::string>(ws, {"OT", "AT", "  "});
+    setRunStartAndEnd(ws, 1800.0, 1900.0);
+
+    const auto headers = saveAndReadHeaders(ws);
+
+    TS_ASSERT_EQUALS(headers.count("Sample_position"), 0u);
+  }
+
+  void test_sample_position_includes_position_at_run_start() {
+    auto ws = createTestWorkspace();
+    ws->mutableSample().setThickness(5);
+    addSamplePosLog<std::string>(ws, {"OT", "AT", "1CT"});
+    setRunStartAndEnd(ws, 900.0, 1500.0);
+
+    const auto headers = saveAndReadHeaders(ws);
+
+    TS_ASSERT_EQUALS(headers.at("Sample_position"), "AT, 1CT");
+  }
+
+  void test_optional_headers_with_only_whitespace_are_omitted() {
+    auto ws = createTestWorkspace();
+    ws->mutableSample().setThickness(5);
+
+    const auto headers = saveAndReadHeaders(ws, {{"SamplePosition", "   "}, {"BlankRunNumber", "  "}});
+
+    TS_ASSERT_EQUALS(headers.count("Sample_position"), 0u);
+    TS_ASSERT_EQUALS(headers.count("Blank_run_number"), 0u);
+  }
+
+  void test_sample_position_property_overrides_sample_pos_log() {
+    auto ws = createTestWorkspace();
+    ws->mutableSample().setThickness(5);
+    addSamplePosLog<std::string>(ws, {"AT"});
+
+    const auto headers = saveAndReadHeaders(ws, {{"SamplePosition", "1R"}});
+
+    TS_ASSERT_EQUALS(headers.at("Sample_position"), "1R");
+  }
+
+  void test_blank_and_transmission_run_numbers_are_written() {
+    auto ws = createTestWorkspace();
+    ws->mutableSample().setThickness(5);
+
+    const auto headers = saveAndReadHeaders(ws, {{"BlankRunNumber", "94001"},
+                                                 {"SampleTransmissionRunNumber", "94002"},
+                                                 {"BlankTransmissionRunNumber", "94003"}});
+
+    // The long header names must still be separated from their values
+    TS_ASSERT_EQUALS(headers.at("Blank_run_number"), "94001");
+    TS_ASSERT_EQUALS(headers.at("Sample_transmission_run_number"), "94002");
+    TS_ASSERT_EQUALS(headers.at("Blank_transmission_run_number"), "94003");
+  }
+
 private:
   SaveSESANS testAlg;
   const double root2 = std::sqrt(2.0);
@@ -224,6 +341,7 @@ private:
   const std::string workspaceTitle = "Sample workspace";
   const std::string sampleName = "Sample set in SaveSESANSTest";
   const double withinTolerance = 1e-10;
+  const Types::Core::DateAndTime logStartTime{"2026-01-01T00:00:00"};
 
   Workspace2D_sptr createTestWorkspace() {
     // Set up workspace
@@ -290,6 +408,21 @@ private:
     std::filesystem::remove(outputPath);
     API::AnalysisDataService::Instance().remove("outWS");
     return headers;
+  }
+
+  /// Add a SamplePos time series log, as written by IBEX, with one entry every 10 minutes from logStartTime
+  template <typename T> void addSamplePosLog(const Workspace2D_sptr &ws, const std::vector<T> &values) {
+    auto log = std::make_unique<Kernel::TimeSeriesProperty<T>>("SamplePos");
+    for (size_t i = 0; i < values.size(); ++i) {
+      log->addValue(logStartTime + 600.0 * static_cast<double>(i), values[i]);
+    }
+    ws->mutableRun().addProperty(std::move(log));
+  }
+
+  /// Set the run start and end times, in seconds after logStartTime
+  void setRunStartAndEnd(const Workspace2D_sptr &ws, const double start, const double end) {
+    ws->mutableRun().addProperty("start_time", (logStartTime + start).toISO8601String());
+    ws->mutableRun().addProperty("end_time", (logStartTime + end).toISO8601String());
   }
 
   void checkSoftwareHeaders(const std::map<std::string, std::string> &headers) {
