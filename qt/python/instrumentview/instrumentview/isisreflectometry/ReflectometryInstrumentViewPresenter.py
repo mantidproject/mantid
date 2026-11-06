@@ -107,7 +107,7 @@ class ReflectometryInstrumentViewPresenter:
             return
 
         plotter = self.view.main_plotter
-        plotter.clear()
+        plotter.clear_actors()
 
         self._detector_mesh = self._renderer.build_detector_mesh(self._model.detector_positions, self._model.flip_beam, self._model)
         self._renderer.set_detector_scalars(self._detector_mesh, self._model.detector_counts, self._COUNTS_LABEL)

@@ -22,6 +22,8 @@ public:
   virtual void subscribe(std::shared_ptr<Mantid::API::RegionSelectorObserver> const &notifyee) = 0;
   virtual void clearWorkspace() = 0;
   virtual void updateWorkspace(Mantid::API::Workspace_sptr const &workspace) = 0;
+  virtual void updateWorkspaceForGroupMember(Mantid::API::Workspace_sptr const &workspace,
+                                             std::string const &groupMemberName) = 0;
   virtual void addRectangularRegion(const std::string &regionType, const std::string &color,
                                     const std::string &hatch) = 0;
   virtual void deselectAllSelectors() = 0;

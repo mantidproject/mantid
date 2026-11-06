@@ -10,7 +10,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/SpinStateValidator.h"
 
@@ -123,9 +123,10 @@ std::string ReflectometryPolarizationCorrectionISIS::findCorrectionOption(const 
   }
 
   if (correctionMethod == CorrectionMethod::WILDES) {
-    auto const &correctionOption = std::dynamic_pointer_cast<MatrixWorkspace>(m_inputWorkspaces->getItem(0))
-                                       ->getInstrument()
-                                       ->getParameterAsString(ParameterFile::WILDES_FLIPPER_CONFIG);
+    auto const &componentInfo =
+        std::dynamic_pointer_cast<MatrixWorkspace>(m_inputWorkspaces->getItem(0))->componentInfo();
+    auto const correctionOption =
+        componentInfo.getParameterAsString(componentInfo.root(), ParameterFile::WILDES_FLIPPER_CONFIG);
 
     if (!correctionOption.empty()) {
       return correctionOption;
@@ -158,9 +159,9 @@ ReflectometryPolarizationCorrectionISIS::findFredrikzeInputSpinStateOrder(const 
   auto const parameterName = correctionOption == CorrectionOption::PNR
                                  ? ParameterFile::FREDRIKZE_INPUT_SPIN_STATE_ORDER_PNR
                                  : ParameterFile::FREDRIKZE_INPUT_SPIN_STATE_ORDER_PA;
-  auto const inputSpinStateOrder = std::dynamic_pointer_cast<MatrixWorkspace>(m_inputWorkspaces->getItem(0))
-                                       ->getInstrument()
-                                       ->getParameterAsString(parameterName);
+  auto const &componentInfo =
+      std::dynamic_pointer_cast<MatrixWorkspace>(m_inputWorkspaces->getItem(0))->componentInfo();
+  auto const inputSpinStateOrder = componentInfo.getParameterAsString(componentInfo.root(), parameterName);
   if (inputSpinStateOrder.empty()) {
     g_log.warning() << parameterName
                     << " is not specified in the instrument parameter file. Falling back to the default Fredrikze "

@@ -10,6 +10,8 @@
 #include "../../../ISISReflectometry/Reduction/LookupTable.h"
 #include "../../../ISISReflectometry/Reduction/PreviewRow.h"
 #include "../../../ISISReflectometry/Reduction/RowExceptions.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "TestHelpers/ModelCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
@@ -142,6 +144,28 @@ public:
     auto title = "El Em En Oh"s;
     auto row = ModelCreationHelper::makePreviewRow(angle, title);
     const auto foundLookupRow = table.findLookupRow(row, m_exactMatchTolerance);
+    TS_ASSERT(foundLookupRow)
+    if (foundLookupRow)
+      TS_ASSERT_EQUALS(*foundLookupRow, expectedLookupRow)
+  }
+
+  void test_searching_by_theta_and_title_for_preview_group_uses_first_member_title() {
+    auto constexpr angle = 2.3;
+    auto expectedLookupRow = ModelCreationHelper::makeLookupRow(angle, boost::regex("El"));
+    auto table = LookupTable{ModelCreationHelper::makeLookupRow(angle, boost::regex("Ay")), expectedLookupRow};
+    auto first = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    first->setTitle("El Em En Oh");
+    auto second = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    second->setTitle("Ay Bee Sea");
+    auto group = std::make_shared<Mantid::API::WorkspaceGroup>();
+    group->addWorkspace(first);
+    group->addWorkspace(second);
+    auto row = PreviewRow({});
+    row.setTheta(angle);
+    row.setLoadedWs(group);
+
+    auto const foundLookupRow = table.findLookupRow(row, m_exactMatchTolerance);
+
     TS_ASSERT(foundLookupRow)
     if (foundLookupRow)
       TS_ASSERT_EQUALS(*foundLookupRow, expectedLookupRow)

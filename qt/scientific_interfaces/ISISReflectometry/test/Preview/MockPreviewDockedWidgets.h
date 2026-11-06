@@ -20,6 +20,7 @@ class MockPreviewDockedWidgets : public IPreviewDockedWidgets {
 public:
   MOCK_METHOD(void, subscribe, (PreviewDockedWidgetsSubscriber *), (noexcept, override));
   MOCK_METHOD(void, updateWorkspace, (Mantid::API::MatrixWorkspace_sptr &), (override));
+  MOCK_METHOD(void, updateWorkspacePreservingSelection, (Mantid::API::MatrixWorkspace_sptr &), (override));
   MOCK_METHOD(void, resetInstView, (), (override));
   MOCK_METHOD(void, plotInstView, (), (override));
   MOCK_METHOD(void, setInstViewZoomState, (bool), (override));
@@ -36,6 +37,8 @@ public:
   MOCK_METHOD(std::string, getRegionType, (), (const, override));
   MOCK_METHOD(double, getLinthresh, (), (const, override));
   MOCK_METHOD(bool, getSymlogEnabled, (), (const, override));
+  MOCK_METHOD(bool, getPlotAllGroupMembers, (), (const, override));
+  MOCK_METHOD(void, setPlotAllGroupMembersCheckboxVisible, (bool), (override));
   MOCK_METHOD(QLayout *, getRegionSelectorLayout, (), (const, override));
   MOCK_METHOD(MantidQt::MantidWidgets::IPlotView *, getLinePlotView, (), (const, override));
 };

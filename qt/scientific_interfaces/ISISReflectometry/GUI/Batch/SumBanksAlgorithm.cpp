@@ -11,7 +11,7 @@
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IAlgorithmRuntimeProps.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "Reduction/IBatch.h"
 #include "Reduction/Item.h"
@@ -26,9 +26,10 @@ using MantidQt::API::IConfiguredAlgorithm;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 
 namespace {
-void updateInputProperties(Mantid::API::IAlgorithmRuntimeProps &properties, MatrixWorkspace_sptr const &workspace,
+void updateInputProperties(Mantid::API::IAlgorithmRuntimeProps &properties, Workspace_sptr const &workspace,
                            std::optional<ProcessingInstructions> const &detIDsStr) {
-  properties.setProperty("InputWorkspace", workspace);
+  Workspace_sptr inputWorkspace = workspace;
+  properties.setProperty("InputWorkspace", inputWorkspace);
   if (detIDsStr) {
     AlgorithmProperties::update("ROIDetectorIDs", *detIDsStr, properties);
   }
@@ -73,7 +74,7 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Preview
 
 void updateRowOnAlgorithmComplete(const IAlgorithm_sptr &algorithm, Item &item) {
   auto &row = dynamic_cast<PreviewRow &>(item);
-  MatrixWorkspace_sptr outputWs = algorithm->getProperty("OutputWorkspace");
-  row.setSummedWs(outputWs);
+  Workspace_sptr outputWorkspace = algorithm->getProperty("OutputWorkspace");
+  row.setSummedWs(outputWorkspace);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::SumBanks

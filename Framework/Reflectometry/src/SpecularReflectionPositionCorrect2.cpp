@@ -7,9 +7,11 @@
 #include "MantidReflectometry/SpecularReflectionPositionCorrect2.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::API;
@@ -159,15 +161,15 @@ void SpecularReflectionPositionCorrect2::exec() {
   // Type of movement (vertical shift or rotation around the sample)
   const std::string correctionType = getProperty("DetectorCorrectionType");
   // Detector
-  const auto inst = inWS->getInstrument();
+  auto const &componentInfo = inWS->componentInfo();
   const detid_t detectorID = static_cast<int>(getProperty("DetectorID"));
   const std::string detectorName = getProperty("DetectorComponentName");
-  const V3D detectorPosition = declareDetectorPosition(*inst, detectorName, detectorID);
+  V3D const detectorPosition = declareDetectorPosition(componentInfo, inWS->detectorInfo(), detectorName, detectorID);
 
   // Sample-to-detector
   const V3D sampleToDetector = detectorPosition - samplePosition;
   const double l2 = sampleToDetector.norm();
-  const auto referenceFrame = inst->getReferenceFrame();
+  auto const referenceFrame = componentInfo.referenceFrame();
   const auto alongDir = referenceFrame->vecPointingAlongBeam();
   const double beamOffsetOld = sampleToDetector.scalar_prod(alongDir);
 
@@ -265,24 +267,28 @@ void SpecularReflectionPositionCorrect2::correctDetectorPosition(
 
 /**
  * Return the detector's position
- * @param inst an instrument
+ * @param componentInfo the component info
+ * @param detectorInfo the detector info
  * @param detectorName detector component's name
  * @param detectorID detector's id
  * @return a position
  */
-Kernel::V3D SpecularReflectionPositionCorrect2::declareDetectorPosition(const Geometry::Instrument &inst,
-                                                                        const std::string &detectorName,
-                                                                        const detid_t detectorID) {
-  // Detector
-  IComponent_const_sptr detector;
+Kernel::V3D SpecularReflectionPositionCorrect2::declareDetectorPosition(ComponentInfo const &componentInfo,
+                                                                        DetectorInfo const &detectorInfo,
+                                                                        std::string const &detectorName,
+                                                                        detid_t const detectorID) {
   if (detectorName.empty()) {
-    detector = inst.getDetector(detectorID);
-  } else {
-    detector = inst.getComponentByName(detectorName);
-    if (!detector)
-      throw Exception::NotFoundError("Detector component not found", detectorName);
+    try {
+      return detectorInfo.position(detectorInfo.indexOf(detectorID));
+    } catch (std::out_of_range const &) {
+      throw Exception::NotFoundError("Detector not found", detectorID);
+    }
   }
-  return detector->getPos();
+  try {
+    return componentInfo.position(componentInfo.indexOfAny(detectorName));
+  } catch (std::invalid_argument const &) {
+    throw Exception::NotFoundError("Detector component not found", detectorName);
+  }
 }
 
 /**
@@ -291,15 +297,13 @@ Kernel::V3D SpecularReflectionPositionCorrect2::declareDetectorPosition(const Ge
  * @return a position
  */
 V3D SpecularReflectionPositionCorrect2::declareSamplePosition(const MatrixWorkspace &ws) {
-  V3D position;
   const std::string sampleName = getProperty("SampleComponentName");
-  const auto inst = ws.getInstrument();
-  IComponent_const_sptr sample = inst->getComponentByName(sampleName);
-  if (sample)
-    position = sample->getPos();
-  else
-    position = ws.spectrumInfo().samplePosition();
-  return position;
+  auto const &componentInfo = ws.componentInfo();
+  try {
+    return componentInfo.position(componentInfo.indexOfAny(sampleName));
+  } catch (std::invalid_argument const &) {
+    return componentInfo.samplePosition();
+  }
 }
 
 /**
