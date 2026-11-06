@@ -8,7 +8,7 @@
 #include "Common/Parse.h"
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/tokenizer.hpp>
-#include <boost/variant.hpp>
+#include <variant>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -30,7 +30,7 @@ enum ColumnNumber {
 };
 }
 
-template <typename T> class AppendErrorIfNotType : public boost::static_visitor<std::optional<T>> {
+template <typename T> class AppendErrorIfNotType {
 public:
   AppendErrorIfNotType(std::vector<int> &invalidParams, int baseColumn)
       : m_invalidParams(invalidParams), m_baseColumn(baseColumn) {}
@@ -72,14 +72,14 @@ std::optional<double> RowValidator::parseTheta(std::vector<std::string> const &c
 std::optional<TransmissionRunPair> RowValidator::parseTransmissionRuns(std::vector<std::string> const &cellText) {
   auto transmissionRunsOrError =
       ISISReflectometry::parseTransmissionRuns(cellText[FIRST_TRANS_COLUMN], cellText[SECOND_TRANS_COLUMN]);
-  return boost::apply_visitor(AppendErrorIfNotType<TransmissionRunPair>(m_invalidColumns, FIRST_TRANS_COLUMN),
-                              transmissionRunsOrError);
+  return std::visit(AppendErrorIfNotType<TransmissionRunPair>(m_invalidColumns, FIRST_TRANS_COLUMN),
+                    transmissionRunsOrError);
 }
 
 std::optional<RangeInQ> RowValidator::parseQRange(std::vector<std::string> const &cellText) {
   auto qRangeOrError = ::MantidQt::CustomInterfaces::ISISReflectometry::parseQRange(
       cellText[QMIN_COLUMN], cellText[QMAX_COLUMN], cellText[QSTEP_COLUMN]);
-  return boost::apply_visitor(AppendErrorIfNotType<RangeInQ>(m_invalidColumns, QMIN_COLUMN), qRangeOrError);
+  return std::visit(AppendErrorIfNotType<RangeInQ>(m_invalidColumns, QMIN_COLUMN), qRangeOrError);
 }
 
 std::optional<double> RowValidator::parseScaleFactor(std::vector<std::string> const &cellText) {

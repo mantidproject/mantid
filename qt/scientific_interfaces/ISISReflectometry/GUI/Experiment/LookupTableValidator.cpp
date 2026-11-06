@@ -45,10 +45,10 @@ auto LookupTableValidator::operator()(ContentType const &lookupTableContent, dou
       LookupTableValidationError(std::move(validationErrors), searchCriteriaValidationResult.assertError()));
 }
 
-ValidationResult<boost::blank, LookupCriteriaError>
+ValidationResult<std::monostate, LookupCriteriaError>
 LookupTableValidator::validateSearchCriteria(LookupTableRows lookupTable, double tolerance) const {
-  using Result = ValidationResult<boost::blank, LookupCriteriaError>;
-  auto ok = Result(boost::blank());
+  using Result = ValidationResult<std::monostate, LookupCriteriaError>;
+  auto ok = Result(std::monostate());
   // If the table is empty there's nothing to check
   if (lookupTable.empty()) {
     return ok;
