@@ -768,7 +768,8 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
-    loader.setPropertyValue("Filename", "GEM_Definition.xml");
+    // By full path: a bare name could find an older copy elsewhere in the data search directories
+    loader.setPropertyValue("Filename", ConfigService::Instance().getInstrumentDirectory() + "/GEM_Definition.xml");
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParamGemTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
@@ -784,8 +785,8 @@ public:
     const auto &componentInfo = ws->componentInfo();
     const auto &paramInfo = *componentInfo.sharedParameterInfo();
     const auto det = spectrumInfo.firstDetectorIndex(101);
-    TS_ASSERT_EQUALS(detectorInfo.detid(det), 102046);
-    TS_ASSERT_EQUALS(componentInfo.name(det), "Det45");
+    TS_ASSERT_EQUALS(detectorInfo.detid(det), 102031);
+    TS_ASSERT_EQUALS(componentInfo.name(det), "Det31");
     Parameter_sptr param = paramInfo.getRecursive(componentInfo, det, "Alpha0", "fitting");
     const FitParameter &fitParam = param->value<FitParameter>();
     TS_ASSERT_DELTA(fitParam.getValue(0.0), 0.734079, 0.0001);

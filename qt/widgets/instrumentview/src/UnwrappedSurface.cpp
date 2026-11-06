@@ -293,21 +293,12 @@ void UnwrappedSurface::setColor(size_t index, bool picking) const {
   }
 }
 
-bool hasParent(const std::shared_ptr<const Mantid::Geometry::IComponent> &comp, Mantid::Geometry::ComponentID id) {
-  std::shared_ptr<const Mantid::Geometry::IComponent> parent = comp->getParent();
-  if (!parent)
-    return false;
-  if (parent->getComponentID() == id)
-    return true;
-  return hasParent(parent, id);
-}
-
 //------------------------------------------------------------------------------
 /** This method is called when a component is selected in the
  *InstrumentTreeWidget
  * and zooms into that spot on the view.
  *
- * @param id :: ComponentID to zoom to.
+ * @param componentIndex :: Index of the component to zoom to.
  */
 void UnwrappedSurface::componentSelected(size_t componentIndex) {
   const auto &componentInfo = m_instrActor->componentInfo();

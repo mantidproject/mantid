@@ -57,11 +57,6 @@ void CopyInstrumentParameters::exec() {
     // readParameterMap() warns about and skips any component the receiving instrument lacks.
     std::string targParams;
     for (const auto &[index, param] : m_givingWorkspace->getInstrument()->legacyParameters()) {
-      // As when this went through a ParameterMap, which refuses masking
-      if (param->name() == "masked") {
-        throw std::runtime_error(
-            "Masking data (\"masked\") cannot be stored in ParameterMap. Use DetectorInfo instead");
-      }
       std::string targComponent;
       if (componentInfoGiv.isDetector(index)) {
         targComponent = "detID:" + std::to_string(detectorInfoGiv.detectorIDs()[index]);

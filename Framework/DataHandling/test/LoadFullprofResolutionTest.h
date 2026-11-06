@@ -18,6 +18,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/OptionalBool.h"
 #include <filesystem>
 #include <fstream>
@@ -743,7 +744,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(workspaceName, gws));
 
     // Path to test input file
-    loaderGEM.setPropertyValue("Filename", "GEM_Definition.xml");
+    // By full path: a bare name could find an older copy elsewhere in the data search directories
+    loaderGEM.setPropertyValue("Filename", ConfigService::Instance().getInstrumentDirectory() + "/GEM_Definition.xml");
     loaderGEM.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     // inputFile = loaderIDF2.getPropertyValue("Filename");
     loaderGEM.setPropertyValue("Workspace", workspaceName);

@@ -23,6 +23,7 @@
 #include "MantidGeometry/Instrument/InstrumentMetadata.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Quat.h"
@@ -883,7 +884,8 @@ public:
     }
   }
 
-  void test_GEM() { doTest("GEM_Definition.xml", 10); }
+  // By full path: a bare name could find an older copy elsewhere in the data search directories
+  void test_GEM() { doTest(ConfigService::Instance().getInstrumentDirectory() + "/GEM_Definition.xml", 10); }
 
   void test_WISH() { doTest("WISH_Definition.xml", 1); }
 

@@ -285,40 +285,6 @@ void ObjCompAssembly::printTree(std::ostream &os) const {
   }
 }
 
-/** Gets the absolute position of the Parametrized ObjCompAssembly
- * This attempts to read the cached position value from the parameter map, and
- * creates it if it is not available.
- * @returns A vector of the absolute position
- */
-V3D ObjCompAssembly::getPos() const {
-  if (m_map && !hasComponentInfo()) {
-    V3D pos;
-    if (!m_map->getCachedLocation(m_base, pos)) {
-      pos = Component::getPos();
-      m_map->setCachedLocation(m_base, pos);
-    }
-    return pos;
-  } else
-    return Component::getPos();
-}
-
-/** Gets the absolute position of the Parametrized ObjCompAssembly
- * This attempts to read the cached position value from the parameter map, and
- * creates it if it is not available.
- * @returns A vector of the absolute position
- */
-Quat ObjCompAssembly::getRotation() const {
-  if (m_map && !hasComponentInfo()) {
-    Quat rot;
-    if (!m_map->getCachedRotation(m_base, rot)) {
-      rot = Component::getRotation();
-      m_map->setCachedRotation(m_base, rot);
-    }
-    return rot;
-  } else
-    return Component::getRotation();
-}
-
 //------------------------------------------------------------------------------------------------
 /** Test the intersection of the ray with the children of the component
  *assembly, for InstrumentRayTracer.
