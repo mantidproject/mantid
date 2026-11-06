@@ -508,3 +508,8 @@ def setup(app):
 
     # connect document clean up to purge information about this page
     app.connect("env-purge-doc", purge_categories)
+
+    return {
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
+    }
