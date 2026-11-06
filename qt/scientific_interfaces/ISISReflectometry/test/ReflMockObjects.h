@@ -114,6 +114,7 @@ public:
   MOCK_CONST_METHOD0(getMatchingProcessingInstructionsForPreviewRow, std::map<ROIType, ProcessingInstructions>());
   MOCK_CONST_METHOD0(getMatchingROIDetectorIDsForPreviewRow, std::optional<ProcessingInstructions>());
   MOCK_CONST_METHOD1(getBatchState, std::string(const std::vector<std::string> &));
+  MOCK_METHOD((std::map<std::string, std::string>), searchResultModels, (), (const, override));
 };
 
 class MockRunsPresenter : public IRunsPresenter {
@@ -159,6 +160,7 @@ public:
   MOCK_METHOD0(resetRoundPrecision, void());
   MOCK_METHOD0(notifySearchComplete, void());
   MOCK_CONST_METHOD0(instrumentName, std::string());
+  MOCK_METHOD((std::map<std::string, std::string>), searchResultModels, (), (const, override));
 };
 
 class MockEventPresenter : public IEventPresenter {

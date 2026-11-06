@@ -442,6 +442,19 @@ public:
     presenter->notifySearchComplete();
   }
 
+  void testSearchResultModelsReturnsModelsForRunsThatHaveOne() {
+    auto presenter = makePresenter();
+    auto searchModel = NiceMock<MockSearchModel>();
+    auto const searchResults = SearchResults{SearchResult("13460", "", "", "", "", "", "", "air | Ni 100 | Si"),
+                                             SearchResult("13461", "", "", "", "", "", "", ""),
+                                             SearchResult("13462", "", "", "", "", "", "", "air | Si")};
+    EXPECT_CALL(m_view, searchResults()).Times(1).WillOnce(ReturnRef(searchModel));
+    EXPECT_CALL(searchModel, getRows()).Times(1).WillOnce(ReturnRef(searchResults));
+
+    auto const expected = std::map<std::string, std::string>{{"13460", "air | Ni 100 | Si"}, {"13462", "air | Si"}};
+    TS_ASSERT_EQUALS(presenter->searchResultModels(), expected);
+  }
+
   void testTransferWithNoRowsSelected() {
     auto presenter = makePresenter();
     auto const selectedRows = std::set<int>({});

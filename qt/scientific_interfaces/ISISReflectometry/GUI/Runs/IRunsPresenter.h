@@ -7,6 +7,7 @@
 #pragma once
 
 #include "Reduction/RunsTable.h"
+#include <map>
 #include <string>
 
 namespace MantidQt {
@@ -66,6 +67,7 @@ public:
   virtual void notifySearchComplete() = 0;
 
   virtual std::string instrumentName() const = 0;
+  virtual std::map<std::string, std::string> searchResultModels() const = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
