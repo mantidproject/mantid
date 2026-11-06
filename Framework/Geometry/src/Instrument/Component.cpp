@@ -339,21 +339,13 @@ Kernel::V3D Component::getPos() const {
       if (!baseParent) {
         return this->getRelativePos();
       } else {
-        // Avoid instantiation of parent shared pointer if we can
         V3D absPos = this->getRelativePos();
-        // get the parent rotation, try to get it from the cache first to avoid
-        // instantiaing the class
-
         Quat parentRot;
         V3D parentPos;
-        if (!(m_map->getCachedLocation(baseParent, parentPos) && m_map->getCachedRotation(baseParent, parentRot))) {
-          // Couldn't get them from the cache, so I have to instantiate the
-          // class
-          std::shared_ptr<const IComponent> parParent = getParent();
-          if (parParent) {
-            parentRot = parParent->getRotation();
-            parentPos = parParent->getPos();
-          }
+        std::shared_ptr<const IComponent> parParent = getParent();
+        if (parParent) {
+          parentRot = parParent->getRotation();
+          parentPos = parParent->getPos();
         }
         parentRot.rotate(absPos);
         absPos += parentPos;
@@ -416,12 +408,9 @@ Kernel::Quat Component::getRotation() const {
         return getRelativeRot();
       } else {
         Quat parentRot;
-        if (!m_map->getCachedRotation(baseParent, parentRot)) {
-          // Get the parent's rotation
-          std::shared_ptr<const IComponent> parParent = getParent();
-          if (parParent) {
-            parentRot = parParent->getRotation();
-          }
+        std::shared_ptr<const IComponent> parParent = getParent();
+        if (parParent) {
+          parentRot = parParent->getRotation();
         }
         return parentRot * getRelativeRot();
       }
