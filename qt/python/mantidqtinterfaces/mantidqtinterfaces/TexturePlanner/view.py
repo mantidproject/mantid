@@ -180,6 +180,12 @@ class TexturePlannerView(TutorialViewMixin, QMainWindow, Ui_texplan):
         self.btn_settings.setToolTip("Settings")
         self.toolbar.addWidget(self.btn_settings)
 
+        # help button
+        self.btn_help = QPushButton()
+        self.btn_help.setIcon(get_icon("mdi.help", "black", 1.2))
+        self.btn_help.setToolTip("Get Help Documentation")
+        self.toolbar.addWidget(self.btn_help)
+
         # an expanding blank widget is how a QToolBar is split into a left and a right group; it
         # has no actions of its own for aligning what comes after it
         spacer = QWidget()
@@ -191,6 +197,9 @@ class TexturePlannerView(TutorialViewMixin, QMainWindow, Ui_texplan):
 
     def set_on_settings_clicked(self, slot: Callable) -> None:
         self.btn_settings.clicked.connect(slot)
+
+    def set_on_help_clicked(self, slot: Callable) -> None:
+        self.btn_help.clicked.connect(slot)
 
     def set_on_close(self, slot: Callable) -> None:
         self._on_close = slot

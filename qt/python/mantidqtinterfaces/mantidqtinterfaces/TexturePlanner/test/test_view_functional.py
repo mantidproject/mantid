@@ -867,6 +867,11 @@ class TestMaterialAndSettings(_FunctionalTestBase):
         self._click(self.view.btn_settings)
         self.mock_TexturePlannerSettingsPresenter.return_value.show.assert_called_once_with()
 
+    def test_help_button_opens_interface_docs(self):
+        with mock.patch(f"{PRESENTER}.InterfaceManager") as mock_mgr:
+            self._click(self.view.btn_help)
+        mock_mgr.return_value.showCustomInterfaceHelp.assert_called_once_with("Texture Planner", "diffraction")
+
 
 class TestWindowClose(_FunctionalTestBase):
     def test_closing_window_removes_this_instances_workspaces(self):
