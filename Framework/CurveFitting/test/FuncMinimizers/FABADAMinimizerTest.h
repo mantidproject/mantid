@@ -19,6 +19,8 @@
 #include "MantidCurveFitting/Functions/ExpDecay.h"
 #include "MantidFrameworkTestHelpers/FakeObjects.h"
 
+#include <vector>
+
 using Mantid::CurveFitting::FuncMinimisers::FABADAMinimizer;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting::Algorithms;
@@ -28,6 +30,32 @@ using namespace Mantid::CurveFitting::Functions;
 namespace {
 
 std::string const DEFAULT_PDF_GROUP_NAME = "__PDF_Workspace";
+
+void assertPdfWorkspaceOutputs(const std::vector<std::string> &workspaceNames,
+                               const std::string &pdfGroupName = DEFAULT_PDF_GROUP_NAME) {
+  auto const pdfGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(pdfGroupName);
+  TS_ASSERT(pdfGroup);
+  TS_ASSERT_EQUALS(pdfGroup->size(), workspaceNames.size());
+
+  for (size_t i = 0; i < workspaceNames.size(); ++i) {
+    auto const workspaceName = pdfGroupName + "_" + workspaceNames[i];
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(workspaceName));
+
+    auto const workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
+    TS_ASSERT(workspace);
+    TS_ASSERT_EQUALS(workspace->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(workspace->x(0).size(), 21);
+    TS_ASSERT_EQUALS(workspace->y(0).size(), 20);
+    TS_ASSERT_EQUALS(pdfGroup->getItem(i), workspace);
+  }
+}
+
+void removeWorkspaceIfPresent(const std::string &workspaceName) {
+  auto &ads = AnalysisDataService::Instance();
+  if (ads.doesExist(workspaceName)) {
+    ads.remove(workspaceName);
+  }
+}
 
 MatrixWorkspace_sptr createTestWorkspace(size_t NVectors = 2, size_t XYLength = 20) {
   MatrixWorkspace_sptr ws2(new WorkspaceTester);
@@ -79,11 +107,9 @@ void doTestExpDecay(const MatrixWorkspace_sptr &ws2) {
   size_t n = fun->nParams();
 
   TS_ASSERT(AnalysisDataService::Instance().doesExist(DEFAULT_PDF_GROUP_NAME));
-  auto const pdfGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(DEFAULT_PDF_GROUP_NAME);
-  TS_ASSERT(pdfGroup);
-  auto const wsPDF = std::dynamic_pointer_cast<MatrixWorkspace>(pdfGroup->getItem(0));
-  TS_ASSERT_EQUALS(wsPDF->getNumberHistograms(), n + 1);
+  assertPdfWorkspaceOutputs({"Height", "Lifetime", "Chi_Squared"});
 
+  auto const wsPDF = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(DEFAULT_PDF_GROUP_NAME + "_Height");
   const auto &X = wsPDF->mutableX(0);
   const auto &Y = wsPDF->mutableY(0);
   TS_ASSERT_EQUALS(X.size(), 21);
@@ -190,15 +216,17 @@ public:
     size_t nParams = fun->nParams();
 
     // Test PDF workspace
-    auto const PDFGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(DEFAULT_PDF_GROUP_NAME);
-    TS_ASSERT(PDFGroup);
-    auto const PDF = std::dynamic_pointer_cast<MatrixWorkspace>(PDFGroup->getItem(0));
-    TS_ASSERT_EQUALS(PDF->getNumberHistograms(), nParams + 1);
-    TS_ASSERT_EQUALS(PDF->x(0).size(), 21);
-    TS_ASSERT_EQUALS(PDF->y(0).size(), 20);
-    TS_ASSERT_DELTA(PDF->y(0)[7], 0.41, 0.3);
-    TS_ASSERT_DELTA(PDF->y(1)[8], 3.5, 1.0);
-    TS_ASSERT_DELTA(PDF->y(2)[0], 0.44, 0.3);
+    assertPdfWorkspaceOutputs({"Height", "Lifetime", "Chi_Squared"});
+
+    TS_ASSERT_DELTA(
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(DEFAULT_PDF_GROUP_NAME + "_Height")->y(0)[8], 0.41,
+        0.3);
+    TS_ASSERT_DELTA(
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(DEFAULT_PDF_GROUP_NAME + "_Lifetime")->y(0)[8], 3.5,
+        1.0);
+    TS_ASSERT_DELTA(
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(DEFAULT_PDF_GROUP_NAME + "_Chi_Squared")->y(0)[0],
+        0.44, 0.3);
 
     //  Test CostFunction table
     ITableWorkspace_sptr costFunctTable = fit.getProperty("CostFunctionTable");
@@ -271,6 +299,56 @@ public:
     TS_ASSERT_THROWS(fit.execute(), const std::length_error &);
 
     TS_ASSERT(!fit.isExecuted());
+  }
+
+  void test_repeated_runs_with_same_pdf_name_do_not_retain_stale_group_members() {
+    auto ws2 = createExpDecayWorkspace();
+    const std::string pdfGroupName = "FABADA_PDF_RepeatedRuns";
+    const std::vector<std::string> pdfWorkspaceNames = {"Height", "Lifetime", "Chi_Squared"};
+
+    removeWorkspaceIfPresent(pdfGroupName);
+    for (const auto &name : pdfWorkspaceNames) {
+      removeWorkspaceIfPresent(pdfGroupName + "_" + name);
+    }
+
+    auto runFit = [&ws2, &pdfGroupName]() {
+      Mantid::API::IFunction_sptr fun(new ExpDecay);
+      fun->setParameter("Height", 8.);
+      fun->setParameter("Lifetime", 1.0);
+
+      Fit fit;
+      fit.initialize();
+      fit.setChild(true);
+      fit.setProperty("Function", fun);
+      fit.setProperty("InputWorkspace", ws2);
+      fit.setProperty("WorkspaceIndex", 0);
+      fit.setProperty("CreateOutput", true);
+      fit.setProperty("MaxIterations", 100000);
+      fit.setProperty("Minimizer",
+                      "FABADA,ChainLength=10000,StepsBetweenValues=10,ConvergenceCriteria=0.1,PDF=" + pdfGroupName);
+
+      TS_ASSERT_THROWS_NOTHING(fit.execute());
+      TS_ASSERT(fit.isExecuted());
+      TS_ASSERT_EQUALS(fit.getPropertyValue("OutputStatus"), "success");
+    };
+
+    runFit();
+    auto const firstPdfGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(pdfGroupName);
+    TS_ASSERT(firstPdfGroup);
+    TS_ASSERT_EQUALS(firstPdfGroup->size(), pdfWorkspaceNames.size());
+    assertPdfWorkspaceOutputs(pdfWorkspaceNames, pdfGroupName);
+
+    runFit();
+    auto const secondPdfGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(pdfGroupName);
+    TS_ASSERT(secondPdfGroup);
+    TS_ASSERT(firstPdfGroup != secondPdfGroup);
+    TS_ASSERT_EQUALS(secondPdfGroup->size(), pdfWorkspaceNames.size());
+    assertPdfWorkspaceOutputs(pdfWorkspaceNames, pdfGroupName);
+
+    removeWorkspaceIfPresent(pdfGroupName);
+    for (const auto &name : pdfWorkspaceNames) {
+      removeWorkspaceIfPresent(pdfGroupName + "_" + name);
+    }
   }
 
   //  void test_cosineWithConstraint() {
