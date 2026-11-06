@@ -1779,6 +1779,8 @@ bool Algorithm::isCompoundProperty(const std::string &name) const {
   return std::find(m_reservedList.cbegin(), m_reservedList.cend(), name) != m_reservedList.cend();
 }
 
+void Algorithm::enableCheckForMultiOutputs(const bool enabled) { m_checkForMultiOutputs = enabled; }
+
 //---------------------------------------------------------------------------
 // Algorithm's inner classes
 //---------------------------------------------------------------------------
