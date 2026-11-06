@@ -6,14 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ValidateLookupRow.h"
 #include "Common/Parse.h"
-#include <boost/variant.hpp>
 #include <unordered_set>
+#include <variant>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-template <typename T> class InsertErrorIfNotType : public boost::static_visitor<std::optional<T>> {
+template <typename T> class InsertErrorIfNotType {
 public:
   InsertErrorIfNotType(std::unordered_set<int> &invalidParams, int baseColumn)
       : m_invalidParams(invalidParams), m_baseColumn(baseColumn) {}
@@ -67,9 +67,8 @@ std::optional<boost::regex> LookupRowValidator::parseTitleMatcherOrWhitespace(Ce
 std::optional<TransmissionRunPair> LookupRowValidator::parseTransmissionRuns(CellText const &cellText) {
   auto transmissionRunsOrError = ISISReflectometry::parseTransmissionRuns(cellText[LookupRow::Column::FIRST_TRANS],
                                                                           cellText[LookupRow::Column::SECOND_TRANS]);
-  return boost::apply_visitor(
-      InsertErrorIfNotType<TransmissionRunPair>(m_invalidColumns, LookupRow::Column::FIRST_TRANS),
-      transmissionRunsOrError);
+  return std::visit(InsertErrorIfNotType<TransmissionRunPair>(m_invalidColumns, LookupRow::Column::FIRST_TRANS),
+                    transmissionRunsOrError);
 }
 
 std::optional<std::string> LookupRowValidator::parseTransmissionProcessingInstructions(CellText const &cellText) {
@@ -84,7 +83,7 @@ std::optional<std::string> LookupRowValidator::parseTransmissionProcessingInstru
 std::optional<RangeInQ> LookupRowValidator::parseQRange(CellText const &cellText) {
   auto qRangeOrError = ISISReflectometry::parseQRange(
       cellText[LookupRow::Column::QMIN], cellText[LookupRow::Column::QMAX], cellText[LookupRow::Column::QSTEP]);
-  return boost::apply_visitor(InsertErrorIfNotType<RangeInQ>(m_invalidColumns, LookupRow::Column::QMIN), qRangeOrError);
+  return std::visit(InsertErrorIfNotType<RangeInQ>(m_invalidColumns, LookupRow::Column::QMIN), qRangeOrError);
 }
 
 std::optional<double> LookupRowValidator::parseScaleFactor(CellText const &cellText) {

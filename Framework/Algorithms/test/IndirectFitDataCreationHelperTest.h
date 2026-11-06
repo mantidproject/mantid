@@ -26,7 +26,7 @@ void storeWorkspaceInADS(std::string const &workspaceName, const MatrixWorkspace
 }
 
 /// The classes TypeOne and TypeTwo are used to test AreSpectraEquals which
-/// compares the values of boost::variant types
+/// compares the values of std::variant types
 class TypeOne {
 public:
   explicit TypeOne(const std::string &value) : m_value(value) {}
@@ -51,7 +51,7 @@ private:
   std::size_t m_value;
 };
 
-using Types = boost::variant<TypeOne, TypeTwo>;
+using Types = std::variant<TypeOne, TypeTwo>;
 
 } // namespace
 
@@ -215,20 +215,20 @@ public:
   void test_that_AreSpectraEqual_returns_true_when_given_two_identical_values_of_same_type() {
     Types const value1 = TypeOne("SameValue");
     Types const value2 = TypeOne("SameValue");
-    TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), value1, value2));
+    TS_ASSERT(std::visit(AreSpectraEqual(), value1, value2));
   }
 
   void test_that_AreSpectraEqual_returns_false_when_given_two_different_values_of_the_same_type() {
     Types const value1 = TypeOne("Value");
     Types const value2 = TypeOne("DifferentValue");
 
-    TS_ASSERT(!boost::apply_visitor(AreSpectraEqual(), value1, value2));
+    TS_ASSERT(!std::visit(AreSpectraEqual(), value1, value2));
   }
 
   void test_that_AreSpectraEqual_returns_false_when_given_two_different_values_with_different_types() {
     Types const value1 = TypeOne("Value");
     Types const value2 = TypeTwo(2);
 
-    TS_ASSERT(!boost::apply_visitor(AreSpectraEqual(), value1, value2));
+    TS_ASSERT(!std::visit(AreSpectraEqual(), value1, value2));
   }
 };

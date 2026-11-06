@@ -8,7 +8,6 @@
 #include "Common/Map.h"
 #include "IGroup.h"
 #include <boost/algorithm/string.hpp>
-#include <boost/variant.hpp>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 

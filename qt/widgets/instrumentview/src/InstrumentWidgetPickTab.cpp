@@ -49,10 +49,9 @@
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
+#include <numbers>
 #include <numeric>
 #include <vector>
-
-#include <boost/math/constants/constants.hpp>
 
 using Mantid::API::AlgorithmManager;
 
@@ -80,11 +79,12 @@ void InstrumentWidgetPickTabSettings::saveSettings(QSettings &settings, const In
   writer.setValue("RebinKeeporiginal", values.rebinKeepOriginal());
 }
 
-using namespace boost::math;
-
 namespace {
 
 int constexpr N_TOOLBAR_COLUMNS(7);
+
+// Radians to degrees conversion factor
+constexpr double RAD_TO_DEG = 180.0 / std::numbers::pi;
 
 // Get the phi angle between the detector with reference to the origin
 // Makes assumptions about beam direction. Legacy code and not robust.
@@ -1157,7 +1157,7 @@ QString ComponentInfoController::displayPeakInfo(Mantid::Geometry::IPeak *ipeak)
   auto L1 = (sample - source);
 
   auto detector = peak->getDetector();
-  auto twoTheta = detector->getTwoTheta(sample, L1) * double_constants::radian;
+  auto twoTheta = detector->getTwoTheta(sample, L1) * RAD_TO_DEG;
   auto d = peak->getDSpacing();
 
   text << "d: " << d << "\n";
@@ -1177,7 +1177,7 @@ QString ComponentInfoController::displayPeakAngles(
   auto pos1 = peak1->getQSampleFrame();
   auto pos2 = peak2->getQSampleFrame();
   auto angle = pos1.angle(pos2);
-  angle *= double_constants::radian;
+  angle *= RAD_TO_DEG;
 
   text << "Angle: " << angle << "\n";
 
@@ -1261,8 +1261,8 @@ void ComponentInfoController::displayAlignPeaksInfo(const std::vector<Mantid::Ke
   auto phi = atan2(y, x);
 
   // convert angles to degrees
-  theta *= double_constants::radian;
-  phi *= double_constants::radian;
+  theta *= RAD_TO_DEG;
+  phi *= RAD_TO_DEG;
 
   std::stringstream text;
   text << " theta: " << theta << " phi: " << phi << "\n";

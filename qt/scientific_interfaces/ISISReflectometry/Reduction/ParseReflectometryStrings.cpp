@@ -126,8 +126,8 @@ TaggedOptional<double> parseScaleFactor(std::string const &scaleFactor) {
   return std::make_pair(std::nullopt, false);
 }
 
-boost::variant<RangeInQ, std::vector<int>> parseQRange(std::string const &min, std::string const &max,
-                                                       std::string const &step) {
+std::variant<RangeInQ, std::vector<int>> parseQRange(std::string const &min, std::string const &max,
+                                                     std::string const &step) {
   auto invalidParams = std::vector<int>();
   std::optional<double> minimum = std::nullopt;
   std::optional<double> maximum = std::nullopt;
@@ -185,8 +185,8 @@ std::optional<std::vector<std::string>> parseRunNumbers(std::string const &runNu
   return runNumbers;
 }
 
-boost::variant<TransmissionRunPair, std::vector<int>> parseTransmissionRuns(std::string const &firstTransmissionRun,
-                                                                            std::string const &secondTransmissionRun) {
+std::variant<TransmissionRunPair, std::vector<int>> parseTransmissionRuns(std::string const &firstTransmissionRun,
+                                                                          std::string const &secondTransmissionRun) {
   auto errorColumns = std::vector<int>();
   auto first = parseRunNumbersOrWhitespace(firstTransmissionRun);
   auto second = parseRunNumbersOrWhitespace(secondTransmissionRun);

@@ -149,7 +149,7 @@ void EventPresenter::setSlicingFromView() {
     setLogValueSlicingFromView();
     break;
   case SliceType::None:
-    m_slicing = boost::blank();
+    m_slicing = std::monostate();
     break;
   default:
     throw std::runtime_error("Unrecognized slice type.");

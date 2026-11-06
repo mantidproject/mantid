@@ -7,6 +7,7 @@
 #include "MantidCurveFitting/Functions/SimpleChebfun.h"
 #include "MantidAPI/IFunction.h"
 
+#include <cassert>
 #include <memory>
 #include <utility>
 
