@@ -418,7 +418,7 @@ public:
   virtual void registerFunctionUsage(bool internal);
   /// Set the workspace.
   /// @param ws :: Shared pointer to a workspace
-  virtual void setWorkspace(std::shared_ptr<const Workspace> ws) { UNUSED_ARG(ws); }
+  virtual void setWorkspace([[maybe_unused]] std::shared_ptr<const Workspace> ws) {}
   /// Set matrix workspace
   virtual void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, double startX,
                                   double endX);
