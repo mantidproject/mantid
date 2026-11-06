@@ -325,6 +325,18 @@ void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
 
 std::string RunsPresenter::instrumentName() const { return mainPresenter().instrumentName(); }
 
+/** Get the model descriptions entered in the search results table
+ * @return : a map of run number to model description, for all runs that have a model
+ */
+std::map<std::string, std::string> RunsPresenter::searchResultModels() const {
+  std::map<std::string, std::string> models;
+  for (auto const &result : m_view->searchResults().getRows()) {
+    if (result.hasModel())
+      models[result.runNumber()] = result.model();
+  }
+  return models;
+}
+
 void RunsPresenter::notifyTableChanged() {
   m_tableUnsaved = true;
   m_mainPresenter->notifyRunsTableChanged();
