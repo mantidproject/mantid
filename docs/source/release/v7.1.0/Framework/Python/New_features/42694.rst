@@ -1,0 +1,1 @@
+- On Linux, Python scripts and Jupyter notebooks run event data reductions about 5-10% faster, because Mantid no longer changes the default settings of the system memory allocator. MantidWorkbench is unaffected, as it already uses a different allocator. After large workspaces are deleted, Python may now keep more memory in reserve for reuse.
