@@ -996,6 +996,12 @@ for a description of the supported formats.
 |                               | ``Additional columns`` option to request             |
 |                               | Lambda, dLambda, Theta and dTheta columns for        |
 |                               | non-stitched datasets.                               |
+|                               | Each dataset in the file is given the model          |
+|                               | description entered in the ``Model`` column of the   |
+|                               | search results table on the Runs tab for its run. To |
+|                               | use the same model for every dataset instead, enter  |
+|                               | it in the ``Model Description`` box, which overrides |
+|                               | the search results table.                            |
 +-------------------------------+------------------------------------------------------+
 | Automatic Save                | Automatically save the main output workspace for     |
 |                               | groups in the runs table. Note that the stitched     |
