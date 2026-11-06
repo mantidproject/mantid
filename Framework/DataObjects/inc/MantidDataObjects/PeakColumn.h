@@ -10,8 +10,8 @@
 #include "MantidDataObjects/LeanElasticPeak.h"
 #include "MantidDataObjects/Peak.h"
 
-#include <boost/variant.hpp>
 #include <list>
+#include <variant>
 
 namespace Mantid {
 namespace DataObjects {
@@ -93,7 +93,7 @@ private:
   int m_hklPrec;
 
   /// Type of the row cache value
-  using CacheValueType = boost::variant<double, int, std::string, Kernel::V3D>;
+  using CacheValueType = std::variant<double, int, std::string, Kernel::V3D>;
   ///
   mutable std::list<CacheValueType> m_oldRows;
   /// Sets the correct value in the referenced peak.

@@ -15,9 +15,7 @@
 #include "MantidHistogramData/BinEdges.h"
 #include <string>
 
-#include <boost/variant.hpp>
-#include <boost/variant/apply_visitor.hpp>
-#include <boost/variant/static_visitor.hpp>
+#include <variant>
 
 namespace Mantid {
 namespace IndirectFitDataCreationHelper {
@@ -79,8 +77,8 @@ struct SetUpADSWithWorkspace {
   }
 };
 
-/// This is used to compare Spectra which is implemented as a boost::variant
-struct AreSpectraEqual : public boost::static_visitor<bool> {
+/// This is used to compare Spectra which is implemented as a std::variant
+struct AreSpectraEqual {
 
   template <typename T, typename U> bool operator()(const T &, const U &) const {
     return false; // cannot compare different types
