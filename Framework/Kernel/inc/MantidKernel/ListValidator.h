@@ -126,7 +126,10 @@ protected:
    * @param value :: The value to check
    * @return True if it is considered empty
    */
-  template <typename T> bool isEmpty(const T &value) const { UNUSED_ARG(value) return false; }
+  template <typename T> bool isEmpty(const T &value) const {
+    UNUSED_ARG(value);
+    return false;
+  }
   /**
    * Is the value considered empty. Specialized string version to use empty
    * @param value :: The value to check
@@ -163,18 +166,13 @@ protected:
 /// ListValidator<std::string> is used heavily
 using StringListValidator = ListValidator<std::string>;
 
-template <> inline std::string ListValidator<std::string>::checkValidity(const std::string &value) const {
-  if (m_allowedValues.end() != std::find(m_allowedValues.begin(), m_allowedValues.end(), value)) {
-    return "";
-  }
-  if (value.empty())
-    return "Select a value";
-  if (isAlias(value))
-    return "_alias";
-  std::ostringstream os;
-  os << "The value \"" << value << "\" is not in the list of allowed values";
-  return os.str();
-}
+template <> MANTID_KERNEL_DLL std::string ListValidator<std::string>::checkValidity(const std::string &value) const;
+
+#if defined(_WIN32) && !defined(Kernel_EXPORTS)
+// Kernel itself provides the exported instantiation, and MSVC rejects extern
+// combined with dllexport.
+extern template class MANTID_KERNEL_DLL ListValidator<std::string>;
+#endif
 
 } // namespace Kernel
 } // namespace Mantid

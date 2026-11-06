@@ -1218,7 +1218,7 @@ IntervalListValidator::IntervalListValidator(QObject *parent, IntervalList inter
     : QValidator(parent), m_intervalList(std::move(intervalList)) {}
 
 QValidator::State IntervalListValidator::validate(QString &input, int &pos) const {
-  UNUSED_ARG(pos)
+  UNUSED_ARG(pos);
   if (IntervalList::isParsable(input, m_intervalList))
     return QValidator::Acceptable;
 

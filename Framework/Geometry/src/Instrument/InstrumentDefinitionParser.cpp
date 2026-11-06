@@ -2683,7 +2683,7 @@ void InstrumentDefinitionParser::createNeutronicInstrument() {
  */
 void InstrumentDefinitionParser::adjust(Poco::XML::Element *pElem, const std::map<std::string, bool> &isTypeAssembly,
                                         std::map<std::string, Poco::XML::Element *> &getTypeElement) {
-  UNUSED_ARG(isTypeAssembly)
+  UNUSED_ARG(isTypeAssembly);
   // check if pElem is an element with tag name 'type'
   if (pElem->tagName() != "type")
     throw Exception::InstrumentDefinitionError("Argument to function adjust() "

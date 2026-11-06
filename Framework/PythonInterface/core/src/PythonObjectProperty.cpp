@@ -9,6 +9,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyWithValue.hxx"
 #include "MantidKernel/PropertyWithValueJSON.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/IsNone.h"
 
@@ -133,17 +134,13 @@ template <> Json::Value encodeAsJson(PythonObject const &) {
   throw Exception::NotImplementedError("encodeAsJson(const boost::python::object &)");
 }
 
-#if defined(__APPLE__) || (defined(__linux__) && defined(__clang__))
-/** NOTE:
- *  For mac builds, it is necessary the DLL export occur here.
- *  This declaration normally lives in Framework/Kernel/PropertyWithValue.cpp.  However, because the boost library is
- *  not linked in Kernel, this declaration can only occur in a file inside the PythonInterface layer
- *  For mac builds, this MUST occur inside a source file, and not in the header
- *  For Linux with clang, we also need it in the source file to avoid linking issues
- */
-// Instantiate a copy of the class with our template type so we generate the symbols for the methods in the hxx header.
+/// @cond
+// PythonObjectProperty.h declares this with MANTID_PYTHONINTERFACE_CORE_EXTERN_TEMPLATE, which already carries the
+// export attribute, so gcc warns that the one here is ignored.
+GNU_DIAG_OFF("attributes")
 template class MANTID_PYTHONINTERFACE_CORE_DLL PropertyWithValue<PythonObject>;
-#endif
+GNU_DIAG_ON("attributes")
+/// @endcond
 
 } // namespace Mantid::Kernel
 

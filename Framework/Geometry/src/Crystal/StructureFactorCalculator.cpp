@@ -72,7 +72,7 @@ std::vector<double> StructureFactorCalculator::getFsSquared(const std::vector<Ke
 /// StructureFactorCalculator::setCrystalStructure() and can be overriden to
 /// perform additional actions.
 void StructureFactorCalculator::crystalStructureSetHook(const CrystalStructure &crystalStructure) {
-  UNUSED_ARG(crystalStructure)
+  UNUSED_ARG(crystalStructure);
 }
 
 } // namespace Mantid::Geometry

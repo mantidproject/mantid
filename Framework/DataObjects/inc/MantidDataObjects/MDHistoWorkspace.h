@@ -16,6 +16,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -463,3 +464,7 @@ using MDHistoWorkspace_const_sptr = std::shared_ptr<const MDHistoWorkspace>;
 
 } // namespace DataObjects
 } // namespace Mantid
+
+// Instantiated and exported by DataObjects/src/PropertyWithValue.cpp
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::DataObjects::MDHistoWorkspace>>);

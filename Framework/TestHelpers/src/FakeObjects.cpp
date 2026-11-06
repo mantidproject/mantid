@@ -16,14 +16,14 @@ DECLARE_WORKSPACE(WorkspaceTester)
 namespace Mantid {
 namespace Kernel {
 ///@cond TEMPLATE
-template class DLLExport PropertyWithValue<std::shared_ptr<WorkspaceTester>>;
-template class DLLExport PropertyWithValue<std::shared_ptr<TableWorkspaceTester>>;
+template class PropertyWithValue<std::shared_ptr<WorkspaceTester>>;
+template class PropertyWithValue<std::shared_ptr<TableWorkspaceTester>>;
 ///@endcond TEMPLATE
 } // namespace Kernel
 namespace API {
 ///@cond TEMPLATE
-template class DLLExport Mantid::API::WorkspaceProperty<WorkspaceTester>;
-template class DLLExport Mantid::API::WorkspaceProperty<TableWorkspaceTester>;
+template class Mantid::API::WorkspaceProperty<WorkspaceTester>;
+template class Mantid::API::WorkspaceProperty<TableWorkspaceTester>;
 ///@endcond TEMPLATE
 } // namespace API
 } // namespace Mantid

@@ -10,8 +10,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include <Poco/NObserver.h>
 #include <iterator>
@@ -160,3 +162,6 @@ private:
 
 } // namespace API
 } // namespace Mantid
+
+// Instantiated and exported by API/src/PropertyWithValue.cpp
+MANTID_API_EXTERN_TEMPLATE(Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::API::WorkspaceGroup>>);

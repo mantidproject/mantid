@@ -560,7 +560,7 @@ add_subdirectory(test)
 target_include_directories(
   Kernel PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Kernel> $<INSTALL_INTERFACE:include/Mantid>
 )
-generate_mantid_export_header(Kernel TRUE)
+generate_mantid_export_header(Kernel TRUE GENERATE_UNUSED_ARG)
 
 # This section deals with creating the MantidVersion implementation
 
