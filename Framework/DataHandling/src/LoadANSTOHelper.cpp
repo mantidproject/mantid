@@ -13,9 +13,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 
-#include <boost/filesystem.hpp>
-
 #include <algorithm>
+#include <filesystem>
 #include <numeric>
 
 namespace Mantid::DataHandling::ANSTO {
@@ -521,7 +520,7 @@ int64_t epochRelDateTimeBase(int64_t epochInNanoSeconds) {
 }
 
 std::string extractWorkspaceTitle(const std::string &nxsFile) {
-  namespace fs = boost::filesystem;
+  namespace fs = std::filesystem;
   fs::path p = nxsFile;
   for (; !p.extension().empty();)
     p = p.stem();

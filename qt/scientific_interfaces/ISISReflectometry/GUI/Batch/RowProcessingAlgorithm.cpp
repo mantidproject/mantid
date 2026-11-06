@@ -198,10 +198,10 @@ void updateInstrumentProperties(AlgorithmRuntimeProps &properties, Instrument co
   AlgorithmProperties::update("NominalSpecularPixelSpectrumNo", instrument.specularPixel(), properties);
 }
 
-class UpdateEventPropertiesVisitor : public boost::static_visitor<> {
+class UpdateEventPropertiesVisitor {
 public:
   explicit UpdateEventPropertiesVisitor(AlgorithmRuntimeProps &properties) : m_properties(properties) {}
-  void operator()(boost::blank const &) const {
+  void operator()(std::monostate const &) const {
     // No slicing specified so there is nothing to do
   }
   void operator()(InvalidSlicing const &) const {
@@ -237,7 +237,7 @@ private:
 };
 
 void updateEventProperties(AlgorithmRuntimeProps &properties, Slicing const &slicing) {
-  boost::apply_visitor(UpdateEventPropertiesVisitor(properties), slicing);
+  std::visit(UpdateEventPropertiesVisitor(properties), slicing);
 }
 
 std::optional<double> getDouble(const IAlgorithm_sptr &algorithm, std::string const &property) {

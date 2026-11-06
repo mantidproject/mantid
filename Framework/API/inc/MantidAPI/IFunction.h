@@ -19,11 +19,10 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Unit_fwd.h"
-#include "MantidKernel/WarningSuppressions.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/variant.hpp>
 #include <memory>
+#include <variant>
 #endif
 
 #include <string>
@@ -201,19 +200,19 @@ public:
    * implement the virtual AttributeVisitor::apply methods. See
    * implementation of Attribute::value() method for an example.
    */
-  template <typename T = void> class AttributeVisitor : public boost::static_visitor<T> {
+  template <typename T = void> class AttributeVisitor {
   public:
     /// Virtual destructor
     virtual ~AttributeVisitor() = default;
-    /// implements static_visitor's operator() for std::string
+    /// visitor operator() for std::string
     T operator()(std::string &str) const { return apply(str); }
-    /// implements static_visitor's operator() for double
+    /// visitor operator() for double
     T operator()(double &d) const { return apply(d); }
-    /// implements static_visitor's operator() for int
+    /// visitor operator() for int
     T operator()(int &i) const { return apply(i); }
-    /// implements static_visitor's operator() for bool
+    /// visitor operator() for bool
     T operator()(bool &b) const { return apply(b); }
-    /// implements static_visitor's operator() for vector
+    /// visitor operator() for vector
     T operator()(std::vector<double> &v) const { return apply(v); }
 
   protected:
@@ -242,19 +241,19 @@ public:
   /**
    * Const version of AttributeVisitor.
    */
-  template <typename T = void> class ConstAttributeVisitor : public boost::static_visitor<T> {
+  template <typename T = void> class ConstAttributeVisitor {
   public:
     /// Virtual destructor
     virtual ~ConstAttributeVisitor() = default;
-    /// implements static_visitor's operator() for std::string
+    /// visitor operator() for std::string
     T operator()(const std::string &str) const { return apply(str); }
-    /// implements static_visitor's operator() for double
+    /// visitor operator() for double
     T operator()(const double &d) const { return apply(d); }
-    /// implements static_visitor's operator() for int
+    /// visitor operator() for int
     T operator()(const int &i) const { return apply(i); }
-    /// implements static_visitor's operator() for bool
+    /// visitor operator() for bool
     T operator()(const bool &b) const { return apply(b); }
-    /// implements static_visitor's operator() for vector
+    /// visitor operator() for vector
     T operator()(const std::vector<double> &v) const { return apply(v); }
 
   protected:
@@ -301,11 +300,11 @@ public:
     explicit Attribute(const std::vector<double> &v) : m_data(v), m_quoteValue(false) {}
 
     /// Apply an attribute visitor
-    template <typename T> T apply(AttributeVisitor<T> &v) { return boost::apply_visitor(v, m_data); }
+    template <typename T> T apply(AttributeVisitor<T> &v) { return std::visit(v, m_data); }
     /// Apply a const attribute visitor
-    template <typename T> T apply(ConstAttributeVisitor<T> &v) const { return boost::apply_visitor(v, m_data); }
+    template <typename T> T apply(ConstAttributeVisitor<T> &v) const { return std::visit(v, m_data); }
     /// Apply a lambda visitor
-    template <typename... Ts> void apply(AttributeLambdaVisitor<Ts...> &v) { boost::apply_visitor(v, m_data); }
+    template <typename... Ts> void apply(AttributeLambdaVisitor<Ts...> &v) { std::visit(v, m_data); }
 
     /// Set validator to enforce limits on attribute value
     void setValidator(const Kernel::IValidator_sptr &validator) const;
@@ -364,8 +363,8 @@ public:
     void fromString(const std::string &str);
 
   private:
-    /// The data holder as boost variant
-    mutable boost::variant<std::string, int, double, bool, std::vector<double>> m_data;
+    /// The data holder as a std::variant
+    mutable std::variant<std::string, int, double, bool, std::vector<double>> m_data;
     /// Flag indicating if the string value should be returned quoted
     bool m_quoteValue = false;
     /// Associated Validator
@@ -378,19 +377,19 @@ public:
    * evaluate the current value of the attribute against
    * the associated validator, for all allowed types.
    */
-  template <typename T = void> class AttributeValidatorVisitor : public boost::static_visitor<T> {
+  template <typename T = void> class AttributeValidatorVisitor {
   public:
     AttributeValidatorVisitor(const IFunction::Attribute *attrToValidate) : m_attrToValidate{attrToValidate} {}
 
-    /// implements static_visitor's operator() for std::string
+    /// visitor operator() for std::string
     T operator()(std::string &str) const { m_attrToValidate->evaluateValidator(str); }
-    /// implements static_visitor's operator() for double
+    /// visitor operator() for double
     T operator()(double &d) const { m_attrToValidate->evaluateValidator(d); }
-    /// implements static_visitor's operator() for int
+    /// visitor operator() for int
     T operator()(int &i) const { m_attrToValidate->evaluateValidator(i); }
-    /// implements static_visitor's operator() for bool
+    /// visitor operator() for bool
     T operator()(bool &b) const { m_attrToValidate->evaluateValidator(b); }
-    /// implements static_visitor's operator() for vector
+    /// visitor operator() for vector
     T operator()(std::vector<double> &v) const { m_attrToValidate->evaluateValidator(v); }
 
   protected:
@@ -598,7 +597,6 @@ public:
   /// Check if attribute attName exists
   [[nodiscard]] virtual bool hasAttribute(const std::string &name) const;
   /// Set an attribute value
-  GNU_DIAG_OFF("maybe-uninitialized")
   template <typename T> void setAttributeValue(const std::string &attName, const T &value) {
     // Since we can't know T and we would rather not create a universal setter
     // copy and replace in-place
@@ -606,7 +604,6 @@ public:
     attr.setValue(value);
     setAttribute(attName, attr);
   }
-  GNU_DIAG_ON("maybe-uninitialized")
   void setAttributeValue(const std::string &attName, const char *value);
   void setAttributeValue(const std::string &attName, const std::string &value);
   //@}

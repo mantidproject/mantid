@@ -170,42 +170,42 @@ public:
 
   void testParseQRange() {
     auto result = parseQRange("0.05", "0.16", "0.02");
-    TS_ASSERT_EQUALS(result.which(), asInt(Result::Value));
-    TS_ASSERT_EQUALS(boost::get<RangeInQ>(result), RangeInQ(0.05, 0.02, 0.16));
+    TS_ASSERT_EQUALS(result.index(), asInt(Result::Value));
+    TS_ASSERT_EQUALS(std::get<RangeInQ>(result), RangeInQ(0.05, 0.02, 0.16));
   }
 
   void testParseQRangeNegativeQStep() {
     auto result = parseQRange("0.05", "0.16", "-1");
-    TS_ASSERT_EQUALS(result.which(), asInt(Result::Value));
-    TS_ASSERT_EQUALS(boost::get<RangeInQ>(result), RangeInQ(0.05, -1, 0.16));
+    TS_ASSERT_EQUALS(result.index(), asInt(Result::Value));
+    TS_ASSERT_EQUALS(std::get<RangeInQ>(result), RangeInQ(0.05, -1, 0.16));
   }
 
   void testParseQRangeInvalidQMin() {
     auto result = parseQRange("bad", "0.16", "0.02");
     std::vector<int> expected = {0};
-    TS_ASSERT_EQUALS(result.which(), asInt(Result::Error));
-    TS_ASSERT_EQUALS(boost::get<std::vector<int>>(result), expected);
+    TS_ASSERT_EQUALS(result.index(), asInt(Result::Error));
+    TS_ASSERT_EQUALS(std::get<std::vector<int>>(result), expected);
   }
 
   void testParseQRangeInvalidQMax() {
     auto result = parseQRange("0.05", "bad", "0.02");
     std::vector<int> expected = {1};
-    TS_ASSERT_EQUALS(result.which(), asInt(Result::Error));
-    TS_ASSERT_EQUALS(boost::get<std::vector<int>>(result), expected);
+    TS_ASSERT_EQUALS(result.index(), asInt(Result::Error));
+    TS_ASSERT_EQUALS(std::get<std::vector<int>>(result), expected);
   }
 
   void testParseQRangeInvalidQStep() {
     auto result = parseQRange("0.05", "0.16", "bad");
     std::vector<int> expected = {2};
-    TS_ASSERT_EQUALS(result.which(), asInt(Result::Error));
-    TS_ASSERT_EQUALS(boost::get<std::vector<int>>(result), expected);
+    TS_ASSERT_EQUALS(result.index(), asInt(Result::Error));
+    TS_ASSERT_EQUALS(std::get<std::vector<int>>(result), expected);
   }
 
   void testParseQRangeInvalidQRange() {
     auto result = parseQRange("1.25", "0.01", "0.02");
     std::vector<int> expected = {0, 1};
-    TS_ASSERT_EQUALS(result.which(), asInt(Result::Error));
-    TS_ASSERT_EQUALS(boost::get<std::vector<int>>(result), expected);
+    TS_ASSERT_EQUALS(result.index(), asInt(Result::Error));
+    TS_ASSERT_EQUALS(std::get<std::vector<int>>(result), expected);
   }
 
   void testParseRunNumbersSingle() {
@@ -249,43 +249,43 @@ public:
   void testParseTransmissionRuns() {
     auto result = parseTransmissionRuns("13463", "13464");
     TransmissionRunPair expected = {"13463", "13464"};
-    TS_ASSERT_EQUALS(result.which(), asInt(Result::Value));
-    TS_ASSERT_EQUALS(boost::get<TransmissionRunPair>(result), expected);
+    TS_ASSERT_EQUALS(result.index(), asInt(Result::Value));
+    TS_ASSERT_EQUALS(std::get<TransmissionRunPair>(result), expected);
   }
 
   void testParseTransmissionRunsIgnoresWhitespace() {
     auto result = parseTransmissionRuns("  13463", " 13464\t ");
     TransmissionRunPair expected = {"13463", "13464"};
-    TS_ASSERT_EQUALS(result.which(), asInt(Result::Value));
-    TS_ASSERT_EQUALS(boost::get<TransmissionRunPair>(result), expected);
+    TS_ASSERT_EQUALS(result.index(), asInt(Result::Value));
+    TS_ASSERT_EQUALS(std::get<TransmissionRunPair>(result), expected);
   }
 
   void testParseTransmissionRunsFirstOnly() {
     auto result = parseTransmissionRuns("13463", "");
     TransmissionRunPair expected = {{"13463"}, std::vector<std::string>()};
-    TS_ASSERT_EQUALS(result.which(), asInt(Result::Value));
-    TS_ASSERT_EQUALS(boost::get<TransmissionRunPair>(result), expected);
+    TS_ASSERT_EQUALS(result.index(), asInt(Result::Value));
+    TS_ASSERT_EQUALS(std::get<TransmissionRunPair>(result), expected);
   }
 
   void testParseTransmissionRunsSecondOnly() {
     auto result = parseTransmissionRuns("", "13464");
     std::vector<int> expected = {0};
-    TS_ASSERT_EQUALS(result.which(), asInt(Result::Error));
-    TS_ASSERT_EQUALS(boost::get<std::vector<int>>(result), expected);
+    TS_ASSERT_EQUALS(result.index(), asInt(Result::Error));
+    TS_ASSERT_EQUALS(std::get<std::vector<int>>(result), expected);
   }
 
   void testParseTransmissionRunsHandlesFreeTextInputForFirst() {
     auto result = parseTransmissionRuns("some workspace", "13464");
     TransmissionRunPair expected = {"some workspace", "13464"};
-    TS_ASSERT_EQUALS(result.which(), asInt(Result::Value));
-    TS_ASSERT_EQUALS(boost::get<TransmissionRunPair>(result), expected);
+    TS_ASSERT_EQUALS(result.index(), asInt(Result::Value));
+    TS_ASSERT_EQUALS(std::get<TransmissionRunPair>(result), expected);
   }
 
   void testParseTransmissionRunsHandlesFreeTextInputForSecond() {
     auto result = parseTransmissionRuns("13463", "some workspace");
     TransmissionRunPair expected = {"13463", "some workspace"};
-    TS_ASSERT_EQUALS(result.which(), asInt(Result::Value));
-    TS_ASSERT_EQUALS(boost::get<TransmissionRunPair>(result), expected);
+    TS_ASSERT_EQUALS(result.index(), asInt(Result::Value));
+    TS_ASSERT_EQUALS(std::get<TransmissionRunPair>(result), expected);
   }
 
   void testParseTitleAndThetaFromRunTitle() {

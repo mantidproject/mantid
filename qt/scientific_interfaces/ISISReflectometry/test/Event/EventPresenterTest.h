@@ -59,8 +59,8 @@ public:
     expectChangeSliceType(SliceType::None, sliceType);
     presenter.notifySliceTypeChanged(sliceType);
 
-    TS_ASSERT_EQUALS(presenter.slicing().which(), 2);
-    auto const &uniformSlicingByTime = boost::get<UniformSlicingByTime>(presenter.slicing());
+    TS_ASSERT_EQUALS(presenter.slicing().index(), 2);
+    auto const &uniformSlicingByTime = std::get<UniformSlicingByTime>(presenter.slicing());
     TS_ASSERT(uniformSlicingByTime == UniformSlicingByTime(secondsPerSlice));
   }
 
@@ -73,8 +73,8 @@ public:
     expectChangeSliceType(SliceType::None, sliceType);
     presenter.notifySliceTypeChanged(sliceType);
 
-    TS_ASSERT_EQUALS(presenter.slicing().which(), 3);
-    auto const &uniformSlicingByNumberOfSlices = boost::get<UniformSlicingByNumberOfSlices>(presenter.slicing());
+    TS_ASSERT_EQUALS(presenter.slicing().index(), 3);
+    auto const &uniformSlicingByNumberOfSlices = std::get<UniformSlicingByNumberOfSlices>(presenter.slicing());
     TS_ASSERT(uniformSlicingByNumberOfSlices == UniformSlicingByNumberOfSlices(numberOfSlices));
   }
 
@@ -89,8 +89,8 @@ public:
     EXPECT_CALL(m_view, showCustomBreakpointsValid());
     presenter.notifySliceTypeChanged(sliceType);
 
-    TS_ASSERT_EQUALS(presenter.slicing().which(), 4);
-    auto const &sliceTimes = boost::get<CustomSlicingByList>(presenter.slicing());
+    TS_ASSERT_EQUALS(presenter.slicing().index(), 4);
+    auto const &sliceTimes = std::get<CustomSlicingByList>(presenter.slicing());
     TS_ASSERT(sliceTimes == CustomSlicingByList(expectedSliceTimes));
   }
 
@@ -107,8 +107,8 @@ public:
     expectChangeSliceType(SliceType::None, sliceType);
     presenter.notifySliceTypeChanged(sliceType);
 
-    TS_ASSERT_EQUALS(presenter.slicing().which(), 5);
-    auto const &sliceValues = boost::get<SlicingByEventLog>(presenter.slicing());
+    TS_ASSERT_EQUALS(presenter.slicing().index(), 5);
+    auto const &sliceValues = std::get<SlicingByEventLog>(presenter.slicing());
     TS_ASSERT(sliceValues == SlicingByEventLog(expectedSliceValues, logBlockName));
   }
 
@@ -122,7 +122,7 @@ public:
     presenter.notifySliceTypeChanged(sliceType);
 
     presenter.notifyUniformSliceCountChanged(expectedSliceCount);
-    auto const &sliceValues = boost::get<UniformSlicingByNumberOfSlices>(presenter.slicing());
+    auto const &sliceValues = std::get<UniformSlicingByNumberOfSlices>(presenter.slicing());
     TS_ASSERT(sliceValues == UniformSlicingByNumberOfSlices(expectedSliceCount));
   }
 
@@ -149,7 +149,7 @@ public:
     presenter.notifySliceTypeChanged(sliceType);
 
     presenter.notifyCustomSliceValuesChanged(invalidCustomBreakpoints);
-    auto const &slicing = boost::get<InvalidSlicing>(presenter.slicing());
+    auto const &slicing = std::get<InvalidSlicing>(presenter.slicing());
     TS_ASSERT(slicing == InvalidSlicing());
   }
 

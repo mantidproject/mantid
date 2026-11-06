@@ -11,8 +11,6 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
 
-#include <boost/variant/get.hpp>
-
 using namespace Mantid::Kernel;
 
 namespace Mantid::DataObjects {
@@ -301,31 +299,31 @@ template <class T> const void *PeakColumn<T>::void_pointer(size_t index) const {
 
   if (type() == "double") {
     value = peak.getValueByColName(m_name); // Assign the value to the store
-    return boost::get<double>(&value);      // Given a pointer it will return a pointer
+    return std::get_if<double>(&value);     // Given a pointer it will return a pointer
   } else if (m_name == "RunNumber") {
     value = peak.getRunNumber();
-    return boost::get<int>(&value);
+    return std::get_if<int>(&value);
   } else if (m_name == "PeakNumber") {
     value = peak.getPeakNumber();
-    return boost::get<int>(&value);
+    return std::get_if<int>(&value);
   } else if (m_name == "DetID" && fullPeak) {
     value = fullPeak->getDetectorID();
-    return boost::get<int>(&value);
+    return std::get_if<int>(&value);
   } else if (m_name == "BankName" && fullPeak) {
     value = fullPeak->getBankName();
-    return boost::get<std::string>(&value);
+    return std::get_if<std::string>(&value);
   } else if (m_name == "QLab") {
     value = peak.getQLabFrame();
-    return boost::get<Kernel::V3D>(&value);
+    return std::get_if<Kernel::V3D>(&value);
   } else if (m_name == "QSample") {
     value = peak.getQSampleFrame();
-    return boost::get<Kernel::V3D>(&value);
+    return std::get_if<Kernel::V3D>(&value);
   } else if (m_name == "IntHKL") {
     value = peak.getIntHKL();
-    return boost::get<Kernel::V3D>(&value);
+    return std::get_if<Kernel::V3D>(&value);
   } else if (m_name == "IntMNP") {
     value = peak.getIntMNP();
-    return boost::get<Kernel::V3D>(&value);
+    return std::get_if<Kernel::V3D>(&value);
   } else {
     throw std::runtime_error("void_pointer() - Unknown peak column name or type: " + m_name);
   }

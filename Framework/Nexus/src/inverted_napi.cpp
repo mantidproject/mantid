@@ -47,9 +47,8 @@ NXstatus NXclosegroup(NXhandle fid) {
 
 /* --------------------------------------------------------------------- */
 
-NXstatus NXmakedata64(NXhandle fid, std::string const &name, NXnumtype const datatype, std::size_t const rank,
-                      Mantid::Nexus::DimVector const &dims) {
-  UNUSED_ARG(rank);
+NXstatus NXmakedata64(NXhandle fid, std::string const &name, NXnumtype const datatype,
+                      [[maybe_unused]] std::size_t const rank, Mantid::Nexus::DimVector const &dims) {
   try {
     fid.makeData(name, datatype, dims, false);
   } catch (Mantid::Nexus::Exception const &) {
@@ -93,10 +92,8 @@ NXstatus NXputdata(NXhandle fid, char const *data) {
 
 /* ------------------------------------------------------------------- */
 
-NXstatus NXputattr(NXhandle fid, std::string const &name, char const *data, std::size_t const datalen,
-                   NXnumtype const iType) {
-  UNUSED_ARG(datalen);
-  UNUSED_ARG(iType);
+NXstatus NXputattr(NXhandle fid, std::string const &name, char const *data, [[maybe_unused]] std::size_t const datalen,
+                   [[maybe_unused]] NXnumtype const iType) {
   try {
     std::string value(data);
     fid.putAttr(name, value);

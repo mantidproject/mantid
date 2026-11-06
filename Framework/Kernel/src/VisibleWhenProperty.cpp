@@ -89,10 +89,7 @@ bool VisibleWhenProperty::checkComparison(const IPropertyManager *algo) const {
  * @param algo :: The pointer to the algorithm containing this property
  * @return :: True - Property is always enabled
  */
-bool VisibleWhenProperty::isEnabled(const IPropertyManager *algo) const {
-  UNUSED_ARG(algo);
-  return true;
-}
+bool VisibleWhenProperty::isEnabled([[maybe_unused]] const IPropertyManager *algo) const { return true; }
 
 /**
  * Returns true or false depending on whether the property
