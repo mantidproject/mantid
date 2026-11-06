@@ -1,0 +1,1 @@
+- The model descriptions entered in the ``Model`` column of the search results table on the Runs tab of the :ref:`ISIS Reflectometry <interface-isis-refl>` interface are now saved to ORSO files. Each dataset in the file is given the model for its run, unless a model is entered on the Save tab, which then applies to all the datasets.
