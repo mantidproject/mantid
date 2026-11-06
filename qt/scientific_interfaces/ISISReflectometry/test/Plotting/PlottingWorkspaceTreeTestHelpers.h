@@ -99,28 +99,6 @@ public:
     return items;
   }
 
-  std::vector<PlottingWorkspaceTreeItemState>
-  plottingWorkspaceTreeItemStatesWithBinnedWorkspaces(int workspaceCount) const {
-    auto workspaces = std::vector<PlottingWorkspaceTreeItemState>{};
-    for (auto workspace = 1; workspace <= workspaceCount; ++workspace) {
-      workspaces.emplace_back(
-          workspaceItem("IvsQ_binned_" + std::to_string(workspace), ReducedWorkspaceOutputType::IvsQBinned));
-    }
-    return {groupItem("Group 1", {runItem("12345", std::move(workspaces))})};
-  }
-
-  std::vector<PlottingWorkspaceTreeItemState>
-  plottingWorkspaceTreeItemStatesWithBinnedWorkspaceGroups(int workspaceGroupCount) const {
-    auto workspaceGroups = std::vector<PlottingWorkspaceTreeItemState>{};
-    for (auto workspaceGroup = 1; workspaceGroup <= workspaceGroupCount; ++workspaceGroup) {
-      workspaceGroups.emplace_back(
-          workspaceGroupItem("IvsQ_binned_group_" + std::to_string(workspaceGroup),
-                             {workspaceItem("IvsQ_binned_group_" + std::to_string(workspaceGroup) + "_1",
-                                            ReducedWorkspaceOutputType::IvsQBinned)}));
-    }
-    return {groupItem("Group 1", {runItem("12345", std::move(workspaceGroups))})};
-  }
-
   std::vector<PlottingWorkspaceTreeItemState> plottingWorkspaceTreeItemStatesWithWorkspaceGroups() const {
     return {groupItem(
         "Group 1",

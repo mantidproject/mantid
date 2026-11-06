@@ -245,27 +245,25 @@ std::string createSpinAsymmetryWorkspace(WorkspaceGroupInputs const &inputs) {
   return outputWorkspace;
 }
 
-std::optional<std::string> containingWorkspaceGroupName(PlottingWorkspace const &plottingWorkspace) {
-  if (plottingWorkspace.containingWorkspaceGroupName.empty()) {
-    return std::nullopt;
-  }
-  return plottingWorkspace.containingWorkspaceGroupName;
-}
-
 std::vector<WorkspaceGroupInputs>
 workspaceGroupInputs(std::vector<PlottingWorkspace> const &selectedPlottingWorkspaces) {
   auto workspaceGroupNames = std::vector<std::string>{};
   auto groupedWorkspaces = std::vector<WorkspaceGroupInputs>{};
   for (auto const &plottingWorkspace : selectedPlottingWorkspaces) {
-    auto const workspaceGroupName = containingWorkspaceGroupName(plottingWorkspace);
-    if (!workspaceGroupName) {
+    auto const &scopeItems = plottingWorkspace.context.scopeItems;
+    auto const workspaceGroupScopeItem = scopeItems.find(PlotSelectionScope::WorkspaceGroup);
+    if (workspaceGroupScopeItem == scopeItems.cend()) {
+      continue;
+    }
+    auto const &workspaceGroupName = workspaceGroupScopeItem->second.workspaceName;
+    if (workspaceGroupName.empty()) {
       continue;
     }
     auto const workspaceGroupNameIter =
-        std::find(workspaceGroupNames.cbegin(), workspaceGroupNames.cend(), *workspaceGroupName);
+        std::find(workspaceGroupNames.cbegin(), workspaceGroupNames.cend(), workspaceGroupName);
     if (workspaceGroupNameIter == workspaceGroupNames.cend()) {
-      workspaceGroupNames.emplace_back(*workspaceGroupName);
-      groupedWorkspaces.push_back({*workspaceGroupName, {plottingWorkspace.workspaceName}});
+      workspaceGroupNames.emplace_back(workspaceGroupName);
+      groupedWorkspaces.push_back({workspaceGroupName, {plottingWorkspace.workspaceName}});
     } else {
       groupedWorkspaces[std::distance(workspaceGroupNames.cbegin(), workspaceGroupNameIter)]
           .workspaceNames.emplace_back(plottingWorkspace.workspaceName);
@@ -440,6 +438,8 @@ WorkspaceCreator workspaceCreatorFor(PlotOutputType const outputType) {
     return spinAsymmetryWorkspaces;
   case PlotOutputType::Alignment:
     return alignmentWorkspaces;
+  default:
+    break;
   }
   throw std::runtime_error("Unexpected reflectometry plot output type.");
 }
