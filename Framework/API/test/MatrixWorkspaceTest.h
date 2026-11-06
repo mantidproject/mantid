@@ -1243,12 +1243,75 @@ public:
   }
 
   void test_getXMinMax() {
-    double xmin, xmax;
-    ws->getXMinMax(xmin, xmax);
+    const auto [xmin, xmax] = ws->getXMinMax();
     TS_ASSERT_EQUALS(xmin, 1.0);
     TS_ASSERT_EQUALS(xmax, 1.0);
     TS_ASSERT_EQUALS(ws->getXMin(), 1.0);
     TS_ASSERT_EQUALS(ws->getXMax(), 1.0);
+  }
+
+  void test_getXMinMax_of_all_spectra_skips_spectra_with_a_non_finite_end() {
+    const auto workspace = createWorkspaceForXMinMax();
+    const auto [xmin, xmax] = workspace->getXMinMax();
+    TS_ASSERT_EQUALS(xmin, 1.0);
+    TS_ASSERT_EQUALS(xmax, 30.0);
+  }
+
+  void test_getXMinMax_with_workspace_indices_only_uses_those_spectra() {
+    const auto workspace = createWorkspaceForXMinMax();
+    const auto [oneXMin, oneXMax] = workspace->getXMinMax({1});
+    TS_ASSERT_EQUALS(oneXMin, 10.0);
+    TS_ASSERT_EQUALS(oneXMax, 30.0);
+    const auto [bothXMin, bothXMax] = workspace->getXMinMax({0, 1});
+    TS_ASSERT_EQUALS(bothXMin, 1.0);
+    TS_ASSERT_EQUALS(bothXMax, 30.0);
+  }
+
+  void test_getXMinMax_with_repeated_workspace_indices() {
+    const auto workspace = createWorkspaceForXMinMax();
+    const auto [xmin, xmax] = workspace->getXMinMax({1, 1, 0, 0});
+    TS_ASSERT_EQUALS(xmin, 1.0);
+    TS_ASSERT_EQUALS(xmax, 30.0);
+  }
+
+  void test_getXMinMax_with_workspace_indices_of_ragged_spectra() {
+    const auto workspace = createWorkspaceForXMinMax();
+    workspace->setHistogram(1, HistogramData::BinEdges{10.0, 20.0, 30.0, 40.0}, HistogramData::Counts{1.0, 1.0, 1.0});
+    const auto [xmin, xmax] = workspace->getXMinMax({0, 1});
+    TS_ASSERT_EQUALS(xmin, 1.0);
+    TS_ASSERT_EQUALS(xmax, 40.0);
+  }
+
+  void test_getXMinMax_skips_spectra_with_a_non_finite_end_by_default() {
+    const auto workspace = createWorkspaceForXMinMax();
+    const auto [xmin, xmax] = workspace->getXMinMax({0, 2, 3});
+    TS_ASSERT_EQUALS(xmin, 1.0);
+    TS_ASSERT_EQUALS(xmax, 3.0);
+  }
+
+  void test_getXMinMax_can_include_the_finite_values_of_spectra_with_a_non_finite_end() {
+    const auto workspace = createWorkspaceForXMinMax();
+    // Spectrum 2 has an infinite last value, and spectrum 3 a NaN first value
+    const auto [infXMin, infXMax] = workspace->getXMinMax({2}, true);
+    TS_ASSERT_EQUALS(infXMin, 0.5);
+    TS_ASSERT_EQUALS(infXMax, 2.0);
+    const auto [nanXMin, nanXMax] = workspace->getXMinMax({0, 3}, true);
+    TS_ASSERT_EQUALS(nanXMin, 1.0);
+    TS_ASSERT_EQUALS(nanXMax, 8.0);
+  }
+
+  void test_getXMinMax_gets_no_range_from_spectra_with_no_finite_values() {
+    const auto workspace = createWorkspaceForXMinMax();
+    const auto [includedXMin, includedXMax] = workspace->getXMinMax({4}, true);
+    TS_ASSERT_LESS_THAN(includedXMax, includedXMin);
+    const auto [skippedXMin, skippedXMax] = workspace->getXMinMax({4});
+    TS_ASSERT_LESS_THAN(skippedXMax, skippedXMin);
+  }
+
+  void test_getXMinMax_gets_no_range_from_no_workspace_indices() {
+    const auto workspace = createWorkspaceForXMinMax();
+    const auto [xmin, xmax] = workspace->getXMinMax({}, true);
+    TS_ASSERT_LESS_THAN(xmax, xmin);
   }
 
   void test_monitorWorkspace() {
@@ -2212,6 +2275,19 @@ public:
   }
 
 private:
+  std::shared_ptr<WorkspaceTester> createWorkspaceForXMinMax() {
+    const auto inf = std::numeric_limits<double>::infinity();
+    const auto nan = std::numeric_limits<double>::quiet_NaN();
+    const std::vector<std::vector<double>> binEdges{
+        {1.0, 2.0, 3.0}, {10.0, 20.0, 30.0}, {0.5, 2.0, inf}, {nan, 4.0, 8.0}, {inf, inf, inf}};
+    auto workspace = std::make_shared<WorkspaceTester>();
+    workspace->initialize(binEdges.size(), 3, 2);
+    for (size_t wsIndex = 0; wsIndex < binEdges.size(); ++wsIndex) {
+      std::copy(binEdges[wsIndex].cbegin(), binEdges[wsIndex].cend(), workspace->mutableX(wsIndex).begin());
+    }
+    return workspace;
+  }
+
   std::shared_ptr<WorkspaceTester> generateTestWorkspaceWithDistributionAndLabelSet(const bool distribution,
                                                                                     const std::string &yLabel) {
     auto testWS = std::make_shared<WorkspaceTester>();

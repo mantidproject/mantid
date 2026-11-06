@@ -10,6 +10,8 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
+#include <tuple>
+
 using std::string;
 namespace Mantid::Algorithms {
 
@@ -83,7 +85,7 @@ void RemovePromptPulse::getTofRange(const MatrixWorkspace_const_sptr &wksp, doub
     if (const auto eventWksp = std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(wksp)) {
       eventWksp->getEventXMinMax(tmin, tmax);
     } else {
-      wksp->getXMinMax(tmin, tmax);
+      std::tie(tmin, tmax) = wksp->getXMinMax();
     }
   } else if (findTmin) {
     if (const auto eventWksp = std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(wksp)) {
