@@ -20,6 +20,7 @@ from mantid.api import AnalysisDataService
 from mantid.kernel import version, DateAndTime, Logger
 from mantid.utils.reflectometry.orso_helper import MantidORSODataset, MantidORSOSaver
 from mantid.utils.reflectometry import SpinStatesORSO
+from orsopy.fileio.orso import load_orso
 
 
 class SaveISISReflectometryORSOTest(unittest.TestCase):
@@ -1053,6 +1054,63 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
             included_header_values=[self._get_expected_additional_file_metadata(expected_additional_file_entries, self._REDUCTION_HEADING)],
             excluded_header_values=["#     - file: calib.nxs\n#       comment: Calibration file"],
         )
+
+    def test_model_description_is_used_for_all_datasets(self):
+        ws_names = ["ws_1", "ws_2"]
+        for ws_name in ws_names:
+            self._create_sample_workspace(ws_name=ws_name)
+
+        self._run_save_alg(ws_names, write_resolution=False, ModelDescription="air | Si")
+
+        self.assertEqual(["air | Si", "air | Si"], self._get_model_stacks_from_file())
+
+    def test_model_descriptions_are_set_for_each_dataset(self):
+        ws_names = ["ws_1", "ws_2"]
+        for ws_name in ws_names:
+            self._create_sample_workspace(ws_name=ws_name)
+
+        self._run_save_alg(ws_names, write_resolution=False, ModelDescriptions=["air | Ni 100 | Si", "air | Si"])
+
+        self.assertEqual(["air | Ni 100 | Si", "air | Si"], self._get_model_stacks_from_file())
+
+    def test_empty_model_descriptions_entry_falls_back_to_model_description(self):
+        ws_names = ["ws_1", "ws_2"]
+        for ws_name in ws_names:
+            self._create_sample_workspace(ws_name=ws_name)
+
+        self._run_save_alg(ws_names, write_resolution=False, ModelDescription="air | Si", ModelDescriptions=["air | Ni 100 | Si", ""])
+
+        self.assertEqual(["air | Ni 100 | Si", "air | Si"], self._get_model_stacks_from_file())
+
+    def test_empty_model_descriptions_entry_without_model_description_excludes_model(self):
+        ws_names = ["ws_1", "ws_2"]
+        for ws_name in ws_names:
+            self._create_sample_workspace(ws_name=ws_name)
+
+        self._run_save_alg(ws_names, write_resolution=False, ModelDescriptions=["", "air | Si"])
+
+        self.assertEqual([None, "air | Si"], self._get_model_stacks_from_file())
+
+    def test_model_descriptions_entry_is_used_for_all_workspace_group_members(self):
+        ws_grp = self._create_sample_workspace_group(["ws_1", "ws_2"])
+        self._create_sample_workspace(ws_name="ws_3")
+
+        self._run_save_alg([ws_grp.name(), "ws_3"], write_resolution=False, ModelDescriptions=["air | Ni 100 | Si", "air | Si"])
+
+        self.assertEqual(["air | Ni 100 | Si", "air | Ni 100 | Si", "air | Si"], self._get_model_stacks_from_file())
+
+    def test_model_descriptions_with_wrong_length_raises_error(self):
+        ws_names = ["ws_1", "ws_2"]
+        for ws_name in ws_names:
+            self._create_sample_workspace(ws_name=ws_name)
+
+        with self.assertRaisesRegex(RuntimeError, "ModelDescriptions must either be empty or contain one entry for each workspace"):
+            self._run_save_alg(ws_names, write_resolution=False, ModelDescriptions=["air | Si"])
+
+    def _get_model_stacks_from_file(self):
+        self.assertTrue(os.path.exists(self._output_filename))
+        datasets = load_orso(self._output_filename)
+        return [dataset.info.data_source.sample.model.stack if dataset.info.data_source.sample.model else None for dataset in datasets]
 
     def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER, instrument_name="", ws_name="ws"):
         # Create a single spectrum workspace in units of momentum transfer
