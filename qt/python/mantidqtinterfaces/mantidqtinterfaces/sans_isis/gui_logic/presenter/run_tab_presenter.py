@@ -122,7 +122,7 @@ class SaveDirectoryObserver(ConfigPropertyObserver):
 
 
 class RunTabPresenter(PresenterCommon):
-    DEFAULT_DECIMAL_PLACES_MM = 1
+    DEFAULT_DECIMAL_PLACES_MM = 6
 
     class ConcreteRunTabListener(SANSDataProcessorGui.RunTabListener):
         def __init__(self, presenter):
