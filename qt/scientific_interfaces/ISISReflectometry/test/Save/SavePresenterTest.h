@@ -177,6 +177,22 @@ public:
     presenter.notifySaveSelectedWorkspaces();
   }
 
+  void testNotifySaveSelectedWorkspacesPassesSearchResultModels() {
+    auto presenter = makePresenter();
+    auto const selectedWorkspaces = createWorkspaces({"test1"});
+    auto const runModels = std::map<std::string, std::string>{{"13460", "air | Ni 100 | Si"}};
+    EXPECT_CALL(m_view, getSelectedWorkspaces()).Times(1).WillOnce(Return(selectedWorkspaces));
+    EXPECT_CALL(m_mainPresenter, searchResultModels()).Times(1).WillOnce(Return(runModels));
+    EXPECT_CALL(m_view, getSelectedParameters()).Times(1).WillOnce(Return(std::vector<std::string>{}));
+    expectGetValidSaveDirectory();
+    expectGetSaveParametersFromView(false, false);
+    auto const fileFormatOptions =
+        FileFormatOptions(m_fileFormat, m_prefix, m_includeHeader, m_separator, m_includeQResolution,
+                          m_includeAdditionalColumns, false, m_model, m_validation, runModels);
+    EXPECT_CALL(*m_fileSaver, save(m_savePath, selectedWorkspaces, _, fileFormatOptions)).Times(1);
+    presenter.notifySaveSelectedWorkspaces();
+  }
+
   void testNotifySaveSelectedWorkspacesWhenNothingSelected() {
     auto presenter = makePresenter();
     auto emptyWorkspaceList = std::vector<std::string>{};

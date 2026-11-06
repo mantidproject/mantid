@@ -37,6 +37,10 @@ private:
   void runSaveORSOAlgorithm(std::string const &savePath, std::vector<std::string> const &workspaceNames,
                             FileFormatOptions const &fileFormat) const;
 
+  std::vector<std::string> modelsForWorkspaces(std::vector<std::string> const &workspaceNames,
+                                               FileFormatOptions const &fileFormat) const;
+  std::string runNumber(std::string const &workspaceName) const;
+
   std::string assembleSavePath(std::string const &saveDirectory, std::string const &prefix, std::string const &name,
                                std::string const &extension) const;
 

@@ -289,7 +289,8 @@ FileFormatOptions SavePresenter::getSaveParametersFromView(bool const isAutoSave
       /*includeAdditionalColumns=*/m_view->getAdditionalColumnsCheck(),
       /*shouldSaveToSingleFile=*/isAutoSave && m_view->getSaveToSingleFileCheck(),
       /*model=*/m_view->getModel(),
-      /*model_validation=*/m_view->getValidateModelCheck());
+      /*model_validation=*/m_view->getValidateModelCheck(),
+      /*runModels=*/m_mainPresenter ? m_mainPresenter->searchResultModels() : std::map<std::string, std::string>{});
 }
 
 void SavePresenter::saveWorkspaces(std::vector<std::string> const &workspaceNames,

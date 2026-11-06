@@ -7,9 +7,12 @@
 #include "FileSaver.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
+#include <algorithm>
 #include <filesystem>
 #include <utility>
 
@@ -91,7 +94,47 @@ void FileSaver::runSaveORSOAlgorithm(std::string const &savePath, std::vector<st
                                      FileFormatOptions const &fileFormat) const {
   m_saveAlgRunner->runSaveORSOAlgorithm(workspaceNames, savePath, fileFormat.shouldIncludeQResolution(),
                                         fileFormat.shouldIncludeAdditionalColumns(), fileFormat.model(),
-                                        fileFormat.validate());
+                                        modelsForWorkspaces(workspaceNames, fileFormat), fileFormat.validate());
+}
+
+/** Get the model description for each workspace from the models keyed by run number.
+ * @return : a list with one model for each workspace, or an empty list if the model
+ * given for all workspaces should be used instead
+ */
+std::vector<std::string> FileSaver::modelsForWorkspaces(std::vector<std::string> const &workspaceNames,
+                                                        FileFormatOptions const &fileFormat) const {
+  auto const &runModels = fileFormat.runModels();
+  if (!fileFormat.model().empty() || runModels.empty()) {
+    return {};
+  }
+
+  std::vector<std::string> models;
+  models.reserve(workspaceNames.size());
+  for (auto const &name : workspaceNames) {
+    auto const it = runModels.find(runNumber(name));
+    models.emplace_back(it != runModels.cend() ? it->second : "");
+  }
+
+  if (std::all_of(models.cbegin(), models.cend(), [](auto const &model) { return model.empty(); })) {
+    return {};
+  }
+  return models;
+}
+
+/** Get the run number from the logs of a workspace, or the first child of a workspace group.
+ * @return : the run number, or an empty string if it cannot be found
+ */
+std::string FileSaver::runNumber(std::string const &workspaceName) const {
+  auto ws = workspace(workspaceName);
+  if (auto const group = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
+    ws = group->size() > 0 ? group->getItem(0) : nullptr;
+  }
+
+  auto const matrixWs = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+  if (!matrixWs || !matrixWs->run().hasProperty("run_number")) {
+    return "";
+  }
+  return matrixWs->run().getProperty("run_number")->value();
 }
 
 void FileSaver::save(Mantid::API::Workspace_sptr const &workspace, std::string const &saveDirectory,
