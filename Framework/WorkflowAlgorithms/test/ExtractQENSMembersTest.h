@@ -40,9 +40,7 @@ public:
   ExtractQENSMembersTest() { FrameworkManager::Instance(); }
 
   void test_basic_extraction() {
-    std::string runName = "irs26173";
-    std::string runSample = "graphite002";
-    std::string fileName = runName + "_" + runSample;
+    const std::string fileName = "irs26173_graphite002";
 
     std::string outputName = "Extracted";
     std::vector<std::string> members = {"MemberA", "MemberB", "MemberC"};
@@ -61,9 +59,7 @@ public:
   }
 
   void test_extraction_rename_convolved() {
-    std::string runName = "irs26173";
-    std::string runSample = "graphite002";
-    std::string fileName = runName + "_" + runSample;
+    const std::string fileName = "irs26173_graphite002";
 
     std::string outputName = "Extracted";
     std::vector<std::string> original = {"MemberA", "MemberB", "MemberC", "MemberD"};

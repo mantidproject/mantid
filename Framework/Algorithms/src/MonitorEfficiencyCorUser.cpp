@@ -18,6 +18,7 @@
 #include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
+#include <muParser.h>
 
 namespace Mantid::Algorithms {
 

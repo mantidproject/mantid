@@ -28,10 +28,10 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
 
-#include <boost/math/constants/constants.hpp>
 #include <boost/math/special_functions/round.hpp>
 #include <cxxtest/TestSuite.h>
 #include <filesystem>
+#include <numbers>
 #include <stdexcept>
 
 using namespace Mantid::API;
@@ -436,7 +436,7 @@ public:
 
     // Adjust L1 and banks
     //-- source
-    const double dL1 = boost::math::constants::e<double>() / 100;
+    const double dL1 = std::numbers::e / 100;
     //-- bank27
     const std::string bank27 = "bank27";
     double dx1 = 1.1e-3;

@@ -8,9 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/WarningSuppressions.h"
-
 #include "MantidIndexing/DetectorID.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid;
 using namespace Indexing;

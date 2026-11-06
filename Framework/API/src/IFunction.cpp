@@ -24,7 +24,6 @@
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/ParameterInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/Logger.h"
@@ -33,6 +32,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UsageService.h"
+#include <muParser.h>
 
 #include <boost/lexical_cast.hpp>
 
@@ -744,7 +744,7 @@ std::string IFunction::Attribute::asString() const {
     return asQuotedString();
 
   try {
-    return boost::get<std::string>(m_data);
+    return std::get<std::string>(m_data);
   } catch (...) {
     throw std::runtime_error("Trying to access a " + type() +
                              " attribute "
@@ -759,7 +759,7 @@ std::string IFunction::Attribute::asQuotedString() const {
   std::string attr;
 
   try {
-    attr = boost::get<std::string>(m_data);
+    attr = std::get<std::string>(m_data);
   } catch (...) {
     throw std::runtime_error("Trying to access a " + type() +
                              " attribute "
@@ -785,7 +785,7 @@ std::string IFunction::Attribute::asUnquotedString() const {
   std::string attr;
 
   try {
-    attr = boost::get<std::string>(m_data);
+    attr = std::get<std::string>(m_data);
   } catch (...) {
     throw std::runtime_error("Trying to access a " + type() +
                              " attribute "
@@ -807,7 +807,7 @@ std::string IFunction::Attribute::asUnquotedString() const {
  */
 int IFunction::Attribute::asInt() const {
   try {
-    return boost::get<int>(m_data);
+    return std::get<int>(m_data);
   } catch (...) {
     throw std::runtime_error("Trying to access a " + type() +
                              " attribute "
@@ -820,7 +820,7 @@ int IFunction::Attribute::asInt() const {
  */
 double IFunction::Attribute::asDouble() const {
   try {
-    return boost::get<double>(m_data);
+    return std::get<double>(m_data);
   } catch (...) {
     throw std::runtime_error("Trying to access a " + type() +
                              " attribute "
@@ -833,7 +833,7 @@ double IFunction::Attribute::asDouble() const {
  */
 bool IFunction::Attribute::asBool() const {
   try {
-    return boost::get<bool>(m_data);
+    return std::get<bool>(m_data);
   } catch (...) {
     throw std::runtime_error("Trying to access a " + type() +
                              " attribute "
@@ -846,7 +846,7 @@ bool IFunction::Attribute::asBool() const {
  */
 std::vector<double> IFunction::Attribute::asVector() const {
   try {
-    return boost::get<std::vector<double>>(m_data);
+    return std::get<std::vector<double>>(m_data);
   } catch (...) {
     throw std::runtime_error("Trying to access a " + type() +
                              " attribute "
@@ -862,7 +862,7 @@ void IFunction::Attribute::setString(const std::string &str) {
   evaluateValidator(str);
 
   try {
-    boost::get<std::string>(m_data) = str;
+    std::get<std::string>(m_data) = str;
   } catch (...) {
     throw std::runtime_error("Trying to access a " + type() +
                              " attribute "
@@ -878,7 +878,7 @@ void IFunction::Attribute::setDouble(const double &d) {
   evaluateValidator(d);
 
   try {
-    boost::get<double>(m_data) = d;
+    std::get<double>(m_data) = d;
   } catch (...) {
     throw std::runtime_error("Trying to access a " + type() +
                              " attribute "
@@ -894,7 +894,7 @@ void IFunction::Attribute::setInt(const int &i) {
   evaluateValidator(i);
 
   try {
-    boost::get<int>(m_data) = i;
+    std::get<int>(m_data) = i;
   } catch (...) {
     throw std::runtime_error("Trying to access a " + type() +
                              " attribute "
@@ -910,7 +910,7 @@ void IFunction::Attribute::setBool(const bool &b) {
   evaluateValidator(b);
 
   try {
-    boost::get<bool>(m_data) = b;
+    std::get<bool>(m_data) = b;
   } catch (...) {
     throw std::runtime_error("Trying to access a " + type() +
                              " attribute "
@@ -927,7 +927,7 @@ void IFunction::Attribute::setVector(const std::vector<double> &v) {
   evaluateValidator(v);
 
   try {
-    auto &data = boost::get<std::vector<double>>(m_data);
+    auto &data = std::get<std::vector<double>>(m_data);
     data.assign(v.begin(), v.end());
   } catch (...) {
     throw std::runtime_error("Trying to access a " + type() +
@@ -939,7 +939,7 @@ void IFunction::Attribute::setVector(const std::vector<double> &v) {
 /// Check if a string attribute is empty
 bool IFunction::Attribute::isEmpty() const {
   try {
-    return boost::get<std::string>(m_data).empty();
+    return std::get<std::string>(m_data).empty();
   } catch (...) {
     throw std::runtime_error("Trying to access a " + type() + " attribute as string");
   }
@@ -1063,7 +1063,7 @@ void IFunction::Attribute::setValidator(const Kernel::IValidator_sptr &validator
 /**
  *  Evaluates the validator associated with this attribute.
  */
-void IFunction::Attribute::evaluateValidator() const { boost::apply_visitor(AttributeValidatorVisitor(this), m_data); }
+void IFunction::Attribute::evaluateValidator() const { std::visit(AttributeValidatorVisitor(this), m_data); }
 
 /// Value of i-th active parameter. Override this method to make fitted
 /// parameters different from the declared

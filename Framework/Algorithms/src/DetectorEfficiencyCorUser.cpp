@@ -18,6 +18,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Strings.h"
+#include <muParser.h>
 
 namespace Mantid::Algorithms {
 

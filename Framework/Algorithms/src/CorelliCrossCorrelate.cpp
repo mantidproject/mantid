@@ -12,11 +12,11 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include <muParser.h>
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
