@@ -617,11 +617,11 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &qLab, std::optional<double> d
 V3D Peak::getVirtualDetectorPosition(const V3D &detectorDir) const {
   const auto component = getInstrument()->getComponentByName("extended-detector-space");
   if (!component) {
-    return detectorDir; // the best idea we have is just the direction
+    return m_samplePos + detectorDir; // the best idea we have is 1 m along the direction
   }
   const auto object = std::dynamic_pointer_cast<const ObjComponent>(component);
   const auto distance = object->shape()->distance(Geometry::Track(m_samplePos, detectorDir));
-  return detectorDir * distance;
+  return m_samplePos + detectorDir * distance;
 }
 
 double Peak::getValueByColName(std::string name) const {
@@ -740,8 +740,14 @@ void Peak::setFinalEnergy(double m_finalEnergy) { this->m_finalEnergy = m_finalE
 void Peak::setInitialEnergy(double m_initialEnergy) { this->m_initialEnergy = m_initialEnergy; }
 
 // -------------------------------------------------------------------------------------
-/** Return the detector position vector */
+/** Return the detector position: the absolute position of the peak in the lab frame, in metres */
 Mantid::Kernel::V3D Peak::getDetPos() const { return detPos; }
+
+// -------------------------------------------------------------------------------------
+/** Set the detector position without changing the detector ID.
+ * Used when the peak is not at the centre of its detector, e.g. a predicted peak.
+ * @param pos :: absolute position of the peak in the lab frame, in metres   */
+void Peak::setDetPos(const Mantid::Kernel::V3D &pos) { detPos = pos; }
 
 // -------------------------------------------------------------------------------------
 /** Return the L1 flight path length (source to sample), in meters. */
