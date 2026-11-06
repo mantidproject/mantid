@@ -190,9 +190,8 @@ void ConvertToDetectorFaceMD::exec() {
   std::map<int, size_t> banks = this->getBanks();
 
   // Find the size in the TOF dimension
-  double tof_min, tof_max;
   Axis *ax0 = in_ws->getAxis(0);
-  in_ws->getXMinMax(tof_min, tof_max);
+  auto [tof_min, tof_max] = in_ws->getXMinMax();
   if (ax0->getValue(0) < tof_min)
     tof_min = ax0->getValue(0);
   if (ax0->getValue(ax0->length() - 1) > tof_max)

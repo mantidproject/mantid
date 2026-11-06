@@ -93,7 +93,7 @@ SofQW::setUpOutputWorkspace(const API::MatrixWorkspace &inputWorkspace, const st
   if (ebinParams.empty()) {
     xnew = inputWorkspace.binEdges(0).rawData();
   } else if (ebinParams.size() == 1) {
-    inputWorkspace.getXMinMax(eMin, eMax);
+    std::tie(eMin, eMax) = inputWorkspace.getXMinMax();
     createAxisFromRebinParams(ebinParams, xnew, true, true, eMin, eMax);
   } else {
     createAxisFromRebinParams(ebinParams, xnew);
@@ -104,7 +104,7 @@ SofQW::setUpOutputWorkspace(const API::MatrixWorkspace &inputWorkspace, const st
   size_t yLength;
   if (qbinParams.size() == 1) {
     if (std::isnan(eMin)) {
-      inputWorkspace.getXMinMax(eMin, eMax);
+      std::tie(eMin, eMax) = inputWorkspace.getXMinMax();
     }
     double qMin;
     double qMax;
