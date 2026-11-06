@@ -28,6 +28,7 @@
 #include <cfloat>
 #include <iterator>
 #include <numeric>
+#include <tuple>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -247,7 +248,7 @@ void DiffractionFocussing2::exec() {
       return; // <- return early!!!!!!!!!!!!!
     } else {
       // get the full d-spacing range
-      m_matrixInputW->getXMinMax(eventXMin, eventXMax);
+      std::tie(eventXMin, eventXMax) = m_matrixInputW->getXMinMax();
     }
   }
 

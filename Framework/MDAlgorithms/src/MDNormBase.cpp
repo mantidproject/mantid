@@ -13,6 +13,8 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
+#include <tuple>
+
 namespace Mantid::MDAlgorithms {
 
 using namespace Mantid::DataObjects;
@@ -465,7 +467,7 @@ void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const
   bool thread_safe = true;
   if (m_diffraction) {
     integrFlux = getProperty("FluxWorkspace"); // FluxWorkspace is mandatory for diffraction
-    integrFlux->getXMinMax(m_kfmin, m_kfmax);
+    std::tie(m_kfmin, m_kfmax) = integrFlux->getXMinMax();
     fluxDetToIdx = integrFlux->getDetectorIDToWorkspaceIndexMap();
     thread_safe = Kernel::threadSafe(*integrFlux);
   }

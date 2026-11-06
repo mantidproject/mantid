@@ -118,7 +118,7 @@ void shareCounts(const double inputCounts, const double inputErr,
       // Projection to a single value. Put all counts in the overlapping output
       // bin.
       outputY[outIdx] += inputCounts;
-      outputE[outIdx] += inputCounts;
+      outputE[outIdx] += inputErr;
     }
   }
 }
@@ -406,9 +406,8 @@ void ReflectometrySumInQ::processValue(const int inputIdx, const MinMax &twoThet
                                        const HistogramData::CountStandardDeviations &stdDevs,
                                        API::MatrixWorkspace &IvsLam, std::vector<double> &outputE) {
 
-  // Check whether there are any counts (if not, nothing to share)
   const double inputCounts = counts[inputIdx];
-  if (edges[inputIdx] < 0. || inputCounts <= 0.0 || std::isnan(inputCounts) || std::isinf(inputCounts)) {
+  if (edges[inputIdx] < 0. || std::isnan(inputCounts) || std::isinf(inputCounts)) {
     return;
   }
   // Get the bin width and the bin centre

@@ -34,6 +34,8 @@ if TYPE_CHECKING:
 class TexturePlannerPresenter(TutorialPresenter, AlgorithmObserver):
     TUTORIAL_SETTINGS_KEY = "TexturePlanner"
     TUTORIAL_TITLE = "Texture Planner — Tutorial"
+    DOC_FOLDER = "diffraction"
+    DOC_TITLE = "Texture Planner"
 
     def __init__(self, model: TexturePlannerModel, view: TexturePlannerView, offer_tutorial: bool = True):
         """:param offer_tutorial: whether this planner may show the guided tutorial on a first ever
@@ -51,6 +53,7 @@ class TexturePlannerPresenter(TutorialPresenter, AlgorithmObserver):
         self.settings_presenter.load_settings_from_file_or_default()
         self.settings_presenter.set_on_settings_applied(self.on_settings_applied)
         self.view.set_on_settings_clicked(self.open_settings)
+        self.view.set_on_help_clicked(self.open_help_window)
         self.view.set_on_close(self.on_close)
 
         self.set_instrument_options()
@@ -126,6 +129,9 @@ class TexturePlannerPresenter(TutorialPresenter, AlgorithmObserver):
 
     def open_settings(self) -> None:
         self.settings_presenter.show()
+
+    def open_help_window(self) -> None:
+        InterfaceManager().showCustomInterfaceHelp(self.DOC_TITLE, self.DOC_FOLDER)
 
     # ----------------------------------------------------------------------------------
     # Guided tutorial. The tour runs against a separate, throwaway planner (see

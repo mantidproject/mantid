@@ -192,8 +192,7 @@ MatrixWorkspace_sptr NormaliseByPeakArea::convertInputToY() {
     return tofInY;
 
   // Rebin to common grid
-  double xmin(0.0), xmax(0.0);
-  tofInY->getXMinMax(xmin, xmax);
+  const auto [xmin, xmax] = tofInY->getXMinMax();
   std::vector<double> params(3);
   params[0] = xmin;
   params[1] = SUMMEDY_BIN_WIDTH;

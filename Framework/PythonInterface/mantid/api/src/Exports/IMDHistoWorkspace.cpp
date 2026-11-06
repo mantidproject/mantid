@@ -162,8 +162,9 @@ void copyToBuffer(const NDArray &values, Mantid::signal_t *dest) {
   if (type == NPY_OBJECT || PyTypeNum_ISFLOAT(type))
     flags |= NPY_ARRAY_FORCECAST;
   PyObject *converted = PyArray_FROMANY(values.ptr(), NPY_DOUBLE, 0, 0, flags);
+  // Throw directly rather than through throw_error_already_set(), so static analysis sees that execution stops here
   if (!converted)
-    throw_error_already_set();
+    throw error_already_set();
   handle<> owner(converted); // releases the converted array, also if std::copy throws
   auto *array = reinterpret_cast<PyArrayObject *>(converted);
   // Raw pointer access below requires an aligned, native float64 array in Fortran order

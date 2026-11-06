@@ -186,7 +186,7 @@ class BeamCentrePresenter(object):
             setattr(self._view, attribute_name, attribute)
 
     def _round(self, val):
-        DECIMAL_PLACES_CENTRE_POS = 3
+        DECIMAL_PLACES_CENTRE_POS = 6
         try:
             val = float(val)
         except ValueError:

@@ -1,0 +1,1 @@
+- The :ref:`ISIS SANS GUI <ISIS_Sans_interface_contents>` no longer rounds lengths shown in millimetres to one decimal place (e.g. Z offset, radius cut, radius limits and Q resolution apertures and beam center shifts). The full value from the user file is now displayed and used in the reduction.
