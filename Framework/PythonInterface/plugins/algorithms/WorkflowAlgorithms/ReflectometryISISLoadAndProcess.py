@@ -506,6 +506,18 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         workspace if the user requested to reload invalid workspaces, or raises
         an error otherwise
         """
+
+        def check_for_monitors(ws_name):
+            if not AnalysisDataService.doesExist(_monitorWorkspace(ws_name)):
+                message = "Monitors workspace " + ws_name + "_monitors does not exist"
+                if self._reload:
+                    self.log().information(message)
+                    _removeWorkspace(ws_name)
+                    return False
+                else:
+                    raise RuntimeError(message)
+            return True
+
         if not _hasWorkspaceID(workspace_name, workspace_id):
             message = "Workspace " + workspace_name + " exists but is not a " + workspace_id
             if self._reload:
@@ -517,14 +529,10 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
         # For event workspaces, the monitors workspace must also exist, otherwise it's not valid
         if workspace_id == "EventWorkspace":
-            if not AnalysisDataService.doesExist(_monitorWorkspace(workspace_name)):
-                message = "Monitors workspace " + workspace_name + "_monitors does not exist"
-                if self._reload:
-                    self.log().information(message)
-                    _removeWorkspace(workspace_name)
-                    return False
-                else:
-                    raise RuntimeError(message)
+            workspace = AnalysisDataService.retrieve(workspace_name)
+            if workspace.isGroup():
+                return all([check_for_monitors(member.name()) for member in workspace])
+            return check_for_monitors(workspace_name)
         return True
 
     def _workspaceExistsAndIsValid(self, workspace_name, isTrans):
@@ -933,11 +941,13 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         if not finished_algs:
             return
         if len(finished_algs) == 1:
+            self.enableCheckForMultiOutputs(False)
             child_alg = finished_algs[0]
             self._setOutputProperty(Prop.OUTPUT_WS, child_alg)
             self._setOutputProperty(Prop.OUTPUT_WS_BINNED, child_alg)
             self._setOutputProperty(Prop.OUTPUT_WS_LAM, child_alg)
         else:
+            self.enableCheckForMultiOutputs(True)
             outputs = []
             binned_outputs = []
             lambda_outputs = []

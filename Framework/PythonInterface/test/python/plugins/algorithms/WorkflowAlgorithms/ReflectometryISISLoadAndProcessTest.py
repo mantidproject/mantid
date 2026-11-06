@@ -100,6 +100,38 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             "TOF",
         ]
 
+        self._expected_time_sliced_group_outputs = [
+            "TOF",
+            "TOF_38426_1",
+            "TOF_38426_2",
+            "TOF_38426_2_monitors",
+            "TOF_38426_1_monitors",
+            "TOF_38426_sliced_0_1800",
+            "TOF_38426_1_TOF_38426_1_monitors_TOF_38426_sliced_0_0_1800",
+            "TOF_38426_2_TOF_38426_2_monitors_TOF_38426_sliced_1_0_1800",
+            "TOF_38426_sliced_1800_3600",
+            "TOF_38426_1_TOF_38426_1_monitors_TOF_38426_sliced_0_1800_3600",
+            "TOF_38426_2_TOF_38426_2_monitors_TOF_38426_sliced_1_1800_3600",
+            "IvsQ_TOF_38426_sliced_0_1800",
+            "IvsQ_TOF_38426_sliced_0_1800_1_TOF_38426_1_monitors_TOF_38426_sliced_0_0_1800",
+            "IvsQ_TOF_38426_sliced_0_1800_2_TOF_38426_2_monitors_TOF_38426_sliced_1_0_1800",
+            "IvsQ_TOF_38426_sliced_1800_3600",
+            "IvsQ_TOF_38426_sliced_1800_3600_1_TOF_38426_1_monitors_TOF_38426_sliced_0_1800_3600",
+            "IvsQ_TOF_38426_sliced_1800_3600_2_TOF_38426_2_monitors_TOF_38426_sliced_1_1800_3600",
+            "IvsLam_TOF_38426_sliced_0_1800",
+            "IvsLam_TOF_38426_sliced_0_1800_2_TOF_38426_2_monitors_TOF_38426_sliced_1_0_1800",
+            "IvsLam_TOF_38426_sliced_0_1800_1_TOF_38426_1_monitors_TOF_38426_sliced_0_0_1800",
+            "IvsLam_TOF_38426_sliced_1800_3600",
+            "IvsLam_TOF_38426_sliced_1800_3600_1_TOF_38426_1_monitors_TOF_38426_sliced_0_1800_3600",
+            "IvsLam_TOF_38426_sliced_1800_3600_2_TOF_38426_2_monitors_TOF_38426_sliced_1_1800_3600",
+            "IvsQ_binned_TOF_38426_sliced_0_1800",
+            "IvsQ_binned_TOF_38426_sliced_0_1800_1_TOF_38426_1_monitors_TOF_38426_sliced_0_0_1800",
+            "IvsQ_binned_TOF_38426_sliced_0_1800_2_TOF_38426_2_monitors_TOF_38426_sliced_1_0_1800",
+            "IvsQ_binned_TOF_38426_sliced_1800_3600",
+            "IvsQ_binned_TOF_38426_sliced_1800_3600_1_TOF_38426_1_monitors_TOF_38426_sliced_0_1800_3600",
+            "IvsQ_binned_TOF_38426_sliced_1800_3600_2_TOF_38426_2_monitors_TOF_38426_sliced_1_1800_3600",
+        ]
+
     def tearDown(self):
         AnalysisDataService.clear()
         config["default.facility"] = self._oldFacility
@@ -477,7 +509,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._check_history(AnalysisDataService.retrieve("IvsQ_binned_38415_sliced_0_210"), history, False)
 
     def test_slicing_loads_input_run_if_monitor_ws_not_in_ADS(self):
-        self._create_event_workspace(38415, "TOF_", False)
+        self._create_event_workspace(38415, "TOF_", includeMonitors=False)
         args = self._default_options
         args.update(self._default_slice_options_real_run)
         args["InputRunList"] = "38415"
@@ -582,6 +614,22 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ["ReflectometryReductionOneAuto", "GroupWorkspaces"]
         self._check_history(AnalysisDataService.retrieve("IvsQ_binned_38415" + sliceName), history, False)
+
+    def test_slicing_by_number_of_slices_with_group_maintains_history(self):
+        self._create_workspace_group(38426, 2, "TOF_", self._create_event_workspace, has_monitors=True)
+        args = self._default_options
+        args["InputRunList"] = "38426"
+        args["SliceWorkspace"] = True
+        args["NumberOfSlices"] = 2
+        args["ProcessingInstructions"] = "4"
+        outputs = self._expected_time_sliced_group_outputs
+        self._assert_run_algorithm_succeeds(args, outputs)
+        history = ["ReflectometryReductionOneAuto", "ReflectometryReductionOneAuto", "ReflectometryReductionOneAuto", "GroupWorkspaces"]
+        self._check_history(
+            AnalysisDataService.retrieve("IvsQ_binned_TOF_38426_sliced_0_1800_2_TOF_38426_2_monitors_TOF_38426_sliced_1_0_1800"),
+            history,
+            False,
+        )
 
     def test_with_input_workspace_group(self):
         self._create_workspace_group(12345, 2, "TOF_")
@@ -1286,8 +1334,8 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         )
         AddSampleLog(Workspace=ws, LogName="run_number", LogText=str(run_number))
 
-    def _create_event_workspace(self, run_number, prefix="", includeMonitors=True):
-        name = prefix + str(run_number)
+    def _create_event_workspace(self, run_number, prefix="", suffix="", includeMonitors=True):
+        name = prefix + str(run_number) + suffix
         CreateSampleWorkspace(WorkspaceType="Event", NumBanks=1, NumMonitors=3, BankPixelWidth=1, XMin=200, OutputWorkspace=name)
         if includeMonitors:
             CropWorkspace(InputWorkspace=name, StartWorkspaceIndex=0, EndWorkspaceIndex=2, OutputWorkspace=name + "_monitors")
@@ -1301,7 +1349,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         AddTimeSeriesLog(Workspace=name, Name="proton_charge", Time="2010-01-01T00:40:00", Value=15)
         AddTimeSeriesLog(Workspace=name, Name="proton_charge", Time="2010-01-01T00:50:00", Value=100)
 
-    def _create_workspace_group(self, run_number, number_of_items, prefix="", workspace_creator=None):
+    def _create_workspace_group(self, run_number, number_of_items, prefix="", workspace_creator=None, has_monitors=False):
         group_name = prefix + str(run_number)
         child_names = list()
         workspace_creator = workspace_creator or self._create_workspace
@@ -1311,6 +1359,10 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             workspace_creator(run_number, prefix, child_suffix)
             child_names.append(child_name)
         GroupWorkspaces(InputWorkspaces=",".join(child_names), OutputWorkspace=group_name)
+        if has_monitors:
+            GroupWorkspaces(
+                InputWorkspaces=",".join([child_name + "_monitors" for child_name in child_names]), OutputWorkspace=group_name + "_monitors"
+            )
 
     def _check_history(self, ws, expected, unroll=True):
         """Return true if algorithm names listed in algorithmNames are found in the
