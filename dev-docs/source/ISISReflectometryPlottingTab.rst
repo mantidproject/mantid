@@ -133,7 +133,9 @@ Defines the domain types shared by the plotting model and presenter:
   contains domain data only and has no selection or display state.
 * :code:`PlottingWorkspace` contains the metadata needed to turn one reduced
   workspace into a requested plot output. This includes its ADS name, run
-  numbers, containing workspace group, and period number.
+  numbers, period number, and :code:`PlottingWorkspaceContext`. The context
+  records the item and its ancestors by selection scope, with root-to-item row
+  paths and ADS names where applicable, plus the reduction output origin.
 
 :code:`model/IPlottingModel.h` and :code:`model/PlottingModel.h/.cpp`
 ################################################################################
@@ -212,16 +214,25 @@ Its responsibilities are to:
 * warn before creating five or more plot items; and
 * submit one or more :code:`PlotRequest` objects to :code:`IPlotter`.
 
-A plot output type owns an ordered vector of :code:`PlotRequestDefinition` entries,
-allowing multiple plot requests to be submitted for one output type, each with a
-individual sub plot output type. In each definition, a settings override
-can also be specified to customize the view controls.
+A plot output type owns an ordered vector of :code:`PlotRequestDefinition`
+entries. Each definition specifies an output type and can override the request
+settings supplied by the view. These overrides apply to plot requests, rather
+than changing the view controls.
 
 For outputs with multiple :code:`PlotRequestDefinition` entries, the
-:code:`PlotActionState` enables only Plot;
+:code:`PlotActionState` enables only Plot when there is a selection and
+processing is idle. The other plot controls remain visible but disabled.
 
-An individual layout is submitted as one request per workspace. Overplot and
-tiled layouts are submitted as one request containing all selected workspaces.
+Selection scope determines eligible tree levels. Separately,
+:code:`splitPlotRequestByPlotSelectionScope` determines whether selected
+workspaces are grouped by their recorded scope paths. Without splitting, the
+selection forms one batch. With splitting, the complete request sequence is
+prepared for each batch in first-selected order. The combined reflectivity and
+spin asymmetry output splits by ADS workspace group.
+
+Within each batch and request definition, an individual layout is submitted as
+one request per plot-ready workspace. Overplot and tiled layouts are submitted
+as one request containing all plot-ready workspaces for that definition.
 
 :code:`presenter/PlottingWorkspaceTreePresenter.h/.cpp`
 #######################################################
@@ -255,10 +266,11 @@ Defines:
 
 * :code:`PlotOutputTypeCapabilities`, the flags describing support for
   overplotting, adding to an existing figure, postprocessed reduction-group
-  outputs, and multi-plot selection based on ADS workspace groups;
-* :code:`PlotOutputTypeProperties`, the display name, accepted plotting
-  workspace tree item types, accepted reduced workspace output types, and
-  capabilities for one :code:`PlotOutputType`; and
+  outputs, multi-plot selection based on ADS workspace groups, and splitting
+  request sequences by selection scope;
+* :code:`PlotOutputTypeProperties`, the display name, selection scope, accepted
+  reduced workspace output types, capabilities, and ordered request definitions
+  for one :code:`PlotOutputType`; and
 * :code:`plotOutputTypeProperties`, the lookup that returns the configured
   properties for an output type.
 
@@ -564,9 +576,9 @@ Updating the plotting workspace tree
    the runs table.
 #. The tree walks reduction groups and rows that completed successfully and
    checks each recorded output against the ADS.
-#. Existing ADS workspace groups are expanded. Each selectable leaf is recorded
-   as a :code:`PlottingWorkspace` with run, containing-group, and period
-   metadata.
+#. Existing ADS workspace groups are expanded. Each leaf is recorded as a
+   :code:`PlottingWorkspace` with run and period metadata and a context containing
+   scope paths, associated ADS names, and output origin.
 #. The presenter reads the currently selected :code:`PlotOutputType` and asks
    :code:`PlottingViewStateProvider::plottingWorkspaceTreeItemStates` to
    evaluate the hierarchy using :code:`PlotOutputTypeProperties`.
@@ -611,17 +623,24 @@ Creating the plot
 #. The presenter resolves selected leaf names through
    :code:`PlottingWorkspaceTree::plottingWorkspacesForNames` and reads the
    current plot output and axis selections from the view.
-#. :code:`PlottingModel::workspacesForPlotting` returns existing reduced
-   workspace names or creates the derived workspaces required for the selected
-   output.
-#. The presenter passes the view's :code:`PlotOutputSelection` and requested
-   layout to :code:`IPlotOptionsProvider::optionsFor`. The production
+#. The presenter forms workspace batches using the output type's selection
+   scope and splitting flag. For each batch, it processes the output type's
+   request definitions in order.
+#. For each definition, :code:`PlottingModel::workspacesForPlotting` returns
+   existing reduced workspace names or creates the required derived workspaces.
+   The presenter uses the definition's output type and any settings override,
+   falling back to the view's settings when no override is present.
+#. The presenter passes the resulting :code:`PlotOutputSelection` and layout
+   to :code:`IPlotOptionsProvider::optionsFor`. The production
    :code:`PlotOptionsProvider` returns the axis, style, marker, error-bar, and
    title configuration as :code:`PlotOptions`.
-#. For a request of five or more plot items, the view asks the user to confirm.
-#. The presenter creates :code:`PlotRequest` objects and calls
-   :code:`IPlotter::plot`. Individual plots are sent separately; overplot and
-   tiled outputs are sent together.
+#. The presenter prepares all :code:`PlotRequest` objects before rendering. If
+   any definition in any batch returns no workspaces, plotting stops. If the
+   total across all batches and definitions is five or more plot items, the
+   view asks the user to confirm before any request is rendered.
+#. The presenter calls :code:`IPlotter::plot` for each prepared request in order.
+   Individual plots are sent separately; overplot and tiled outputs are sent
+   together within each batch and definition.
 #. :code:`Plotter` evaluates and dispatches the request. Colorfill requests use
    Mantid's :code:`pcolormesh`; vertical or workspace-group tiling uses custom
    tiled axes; tiled additions create axes on the active Reflectometry figure;
@@ -641,10 +660,13 @@ its existing boundary:
 
 #. Add the scientific selection type and any required controls to
    :code:`PlotOptions.h` and the view.
-#. Add selection and action capabilities to
-   :code:`PlotOutputTypeProperties.cpp`.
-#. Add plot-ready workspace creation or selection to :code:`PlottingModel.cpp`.
-#. Add rendering options and instrument availability to
-   :code:`PlotOptions.cpp` and :code:`PlotOptionsProvider.cpp`.
+#. Configure selection scope, action capabilities, request definitions, and
+   whether to split requests by scope in :code:`PlotOutputTypeProperties.cpp`.
+#. If the output needs new workspace preparation, add it to
+   :code:`PlottingModel.cpp`. Outputs composed from existing request definitions
+   reuse the existing preparation.
+#. Update instrument availability in :code:`PlotOptionsProvider.cpp`. Add
+   rendering options to :code:`PlotOptions.cpp` and
+   :code:`PlotOptionsProvider.cpp` only where existing options cannot be reused.
 #. Add focused model, presenter/state-provider, options-provider, view, and
    plotter tests for behavior introduced at each boundary.
