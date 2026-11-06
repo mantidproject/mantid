@@ -18,6 +18,7 @@
 #include <map>
 #include <mutex>
 #include <span>
+#include <utility>
 
 namespace Mantid {
 
@@ -373,7 +374,9 @@ public:
 
   virtual double getXMin() const;
   virtual double getXMax() const;
-  virtual void getXMinMax(double &xmin, double &xmax) const;
+  [[nodiscard]] virtual std::pair<double, double> getXMinMax() const;
+  [[nodiscard]] std::pair<double, double> getXMinMax(const std::vector<size_t> &workspaceIndices,
+                                                     const bool includeNonFiniteSpectra = false) const;
 
   /// Deprecated, use sharedX() instead. Returns a pointer to the x data
   [[deprecated("use sharedX() instead")]]

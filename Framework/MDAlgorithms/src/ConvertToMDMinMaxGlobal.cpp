@@ -22,6 +22,8 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
 
+#include <tuple>
+
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -120,8 +122,7 @@ void ConvertToMDMinMaxGlobal::exec() {
   DataObjects::EventWorkspace_sptr evWS;
 
   if (QDimension == "CopyToMD") {
-    double xmin, xmax;
-    ws->getXMinMax(xmin, xmax);
+    const auto [xmin, xmax] = ws->getXMinMax();
     MinValues.emplace_back(xmin);
     MaxValues.emplace_back(xmax);
   } else // need to calculate the appropriate q values
@@ -153,7 +154,7 @@ void ConvertToMDMinMaxGlobal::exec() {
         deltaEmin = evWS->getTofMin();
         deltaEmax = evWS->getTofMax();
       } else {
-        wstemp->getXMinMax(deltaEmin, deltaEmax);
+        std::tie(deltaEmin, deltaEmax) = wstemp->getXMinMax();
       }
 
       // Deal with nonphysical energies - conversion to DeltaE yields +-DBL_MAX

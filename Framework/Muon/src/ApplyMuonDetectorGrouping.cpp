@@ -274,9 +274,7 @@ void ApplyMuonDetectorGrouping::clipXRangeToWorkspace(const WorkspaceGroup &ws, 
 
   MatrixWorkspace_sptr clipWS;
   clipWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws.getItem(0));
-  double dataXMin;
-  double dataXMax;
-  clipWS->getXMinMax(dataXMin, dataXMax);
+  const auto [dataXMin, dataXMax] = clipWS->getXMinMax();
 
   if (options.timeLimits.first < dataXMin) {
     const std::string message("Requested TimeMin outside of data range.");
