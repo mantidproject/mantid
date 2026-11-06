@@ -196,9 +196,10 @@ std::shared_ptr<CSGObject> ShapeFactory::createShape(Poco::XML::Element *pElem) 
         // shapes are ignored
         // this way an empty object is returned to the user.
         try {
+          // set lastElement only after a successful parse, so createGeometryHandler skips ignored shapes
           if (primitiveName == "sphere") {
-            lastElement = pE;
             idMatching[idFromUser] = parseSphere(pE, primitives, l_id);
+            lastElement = pE;
             numPrimitives++;
           } else if (primitiveName == "infinite-plane") {
             idMatching[idFromUser] = parseInfinitePlane(pE, primitives, l_id);
@@ -209,28 +210,28 @@ std::shared_ptr<CSGObject> ShapeFactory::createShape(Poco::XML::Element *pElem) 
             retVal->setFiniteGeometryFlag(false);
             numPrimitives++;
           } else if (primitiveName == "cylinder") {
-            lastElement = pE;
             idMatching[idFromUser] = parseCylinder(pE, primitives, l_id);
+            lastElement = pE;
             numPrimitives++;
           } else if (primitiveName == "hollow-cylinder") {
-            lastElement = pE;
             idMatching[idFromUser] = parseHollowCylinder(pE, primitives, l_id);
+            lastElement = pE;
             numPrimitives++;
           } else if (primitiveName == "cuboid") {
-            lastElement = pE;
             idMatching[idFromUser] = parseCuboid(pE, primitives, l_id);
+            lastElement = pE;
             numPrimitives++;
           } else if (primitiveName == "infinite-cone") {
             idMatching[idFromUser] = parseInfiniteCone(pE, primitives, l_id);
             retVal->setFiniteGeometryFlag(false);
             numPrimitives++;
           } else if (primitiveName == "cone") {
-            lastElement = pE;
             idMatching[idFromUser] = parseCone(pE, primitives, l_id);
+            lastElement = pE;
             numPrimitives++;
           } else if (primitiveName == "hexahedron") {
-            lastElement = pE;
             idMatching[idFromUser] = parseHexahedron(pE, primitives, l_id);
+            lastElement = pE;
             numPrimitives++;
           } else if (primitiveName == "tapered-guide") {
             idMatching[idFromUser] = parseTaperedGuide(pE, primitives, l_id);
@@ -387,29 +388,9 @@ std::string ShapeFactory::parseInfinitePlane(Poco::XML::Element *pElem, std::map
                                              int &l_id) {
   Element *pElemPip = getShapeElement(pElem, "point-in-plane");
   Element *pElemNormal = getShapeElement(pElem, "normal-to-plane");
-  Element *pElem_rot = getOptionalShapeElement(pElem, "rotate");
 
-  V3D normVec = normalize(parsePosition(pElemNormal));
-  V3D centre = parsePosition(pElemPip);
-
-  // Rotate the normal vector by the rotate, rotate-all and goniometer tags
-  // Rotate the centre by the rotate-all and goniometer tags
-  if (pElem_rot) {
-    // Apply manual rotation supplied to rotate tag
-    std::vector<double> rotateAngles = DegreesToRadians(parsePosition(pElem_rot));
-    const std::vector<double> rotateMatrix = generateMatrix(rotateAngles[0], rotateAngles[1], rotateAngles[2]);
-    normVec.rotate(rotateMatrix);
-  }
-  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, true)) {
-    // Apply automatic rotation due to the rotate-all tag
-    centre.rotate(m_rotateAllMatrix);
-    normVec.rotate(m_rotateAllMatrix);
-  }
-  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, true)) {
-    // Apply automatic rotation due to the goniometer that should NOT be manually defined by the user
-    centre.rotate(m_gonioRotateMatrix);
-    normVec.rotate(m_gonioRotateMatrix);
-  }
+  const auto [centre, normVec] =
+      applyShapeRotations(pElem, parsePosition(pElemPip), normalize(parsePosition(pElemNormal)));
 
   // create infinite-plane
   auto pPlane = std::make_shared<Plane>();
@@ -438,31 +419,11 @@ std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element *pElem,
   Element *pElemCentre = getShapeElement(pElem, "centre");
   Element *pElemAxis = getShapeElement(pElem, "axis");
   Element *pElemRadius = getShapeElement(pElem, "radius");
-  Element *pElem_rot = getOptionalShapeElement(pElem, "rotate");
 
   // getDoubleAttribute can throw - put the calls above any new
   const double radius = getDoubleAttribute(pElemRadius, "val");
-  V3D normVec = normalize(parsePosition(pElemAxis));
-  V3D centre = parsePosition(pElemCentre);
-
-  // Rotate the normal vector by the rotate, rotate-all and goniometer tags
-  // Rotate the centre by the rotate-all and goniometer tags
-  if (pElem_rot) {
-    // Apply manual rotation supplied to rotate tag
-    std::vector<double> rotateAngles = DegreesToRadians(parsePosition(pElem_rot));
-    const std::vector<double> rotateMatrix = generateMatrix(rotateAngles[0], rotateAngles[1], rotateAngles[2]);
-    normVec.rotate(rotateMatrix);
-  }
-  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, true)) {
-    // Apply automatic rotation due to the rotate-all tag
-    centre.rotate(m_rotateAllMatrix);
-    normVec.rotate(m_rotateAllMatrix);
-  }
-  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, true)) {
-    // Apply automatic rotation due to the goniometer that should NOT be manually defined by the user
-    centre.rotate(m_gonioRotateMatrix);
-    normVec.rotate(m_gonioRotateMatrix);
-  }
+  const auto [centre, normVec] =
+      applyShapeRotations(pElem, parsePosition(pElemCentre), normalize(parsePosition(pElemAxis)));
 
   // create infinite-cylinder
   auto pCylinder = std::make_shared<Cylinder>();
@@ -495,39 +456,19 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element *pElem, std::map<int,
   Element *pElemAxis = getShapeElement(pElem, "axis");
   Element *pElemRadius = getShapeElement(pElem, "radius");
   Element *pElemHeight = getShapeElement(pElem, "height");
-  Element *pElem_rot = getOptionalShapeElement(pElem, "rotate");
 
-  V3D normVec = normalize(parsePosition(pElemAxis));
+  const V3D axis = normalize(parsePosition(pElemAxis));
 
   // getDoubleAttribute can throw - put the calls above any new
   const double radius = getDoubleAttribute(pElemRadius, "val");
   const double height = getDoubleAttribute(pElemHeight, "val");
 
+  // <rotate> turns the cylinder about the midpoint of its axis
+  const auto [centre, normVec] = applyShapeRotations(pElem, parsePosition(pElemBase) + axis * (0.5 * height), axis);
+
   // add infinite cylinder
   auto pCylinder = std::make_shared<Cylinder>();
-  V3D centreOfBottomBase = parsePosition(pElemBase);
-  V3D centre = centreOfBottomBase + normVec * (0.5 * height);
   pCylinder->setRadius(radius);
-
-  // Rotate the normal vector by the rotate, rotate-all and goniometer tags
-  // Rotate the centre by the rotate-all and goniometer tags
-  if (pElem_rot) {
-    // Apply manual rotation supplied to rotate tag
-    std::vector<double> rotateAngles = DegreesToRadians(parsePosition(pElem_rot));
-    const std::vector<double> rotateMatrix = generateMatrix(rotateAngles[0], rotateAngles[1], rotateAngles[2]);
-    normVec.rotate(rotateMatrix);
-  }
-  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, true)) {
-    // Apply automatic rotation due to the rotate-all tag
-    centre.rotate(m_rotateAllMatrix);
-    normVec.rotate(m_rotateAllMatrix);
-  }
-  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, true)) {
-    // Apply automatic rotation due to the goniometer that should NOT be manually defined by the user
-    centre.rotate(m_gonioRotateMatrix);
-    normVec.rotate(m_gonioRotateMatrix);
-  }
-
   pCylinder->setNorm(normVec);
   pCylinder->setCentre(centre);
 
@@ -575,7 +516,6 @@ std::string ShapeFactory::parseHollowCylinder(Poco::XML::Element *pElem, std::ma
   Element *pElemInnerRadius = getShapeElement(pElem, "inner-radius");
   Element *pElemOuterRadius = getShapeElement(pElem, "outer-radius");
   Element *pElemHeight = getShapeElement(pElem, "height");
-  Element *pElem_rot = getOptionalShapeElement(pElem, "rotate");
 
   const double innerRadius = getDoubleAttribute(pElemInnerRadius, "val");
   if (innerRadius <= 0.0) {
@@ -592,28 +532,9 @@ std::string ShapeFactory::parseHollowCylinder(Poco::XML::Element *pElem, std::ma
   if (height <= 0.0) {
     throw std::runtime_error("ShapeFactory::parseHollowCylinder(): height < 0.0");
   }
-  V3D centreOfBottomBase = parsePosition(pElemBase);
-  V3D normVec = normalize(parsePosition(pElemAxis));
-  V3D centre = centreOfBottomBase + normVec * (0.5 * height);
-
-  // Rotate the normal vector by the rotate, rotate-all and goniometer tags
-  // Rotate the centre by the rotate-all and goniometer tags
-  if (pElem_rot) {
-    // Apply manual rotation supplied to rotate tag
-    std::vector<double> rotateAngles = DegreesToRadians(parsePosition(pElem_rot));
-    const std::vector<double> rotateMatrix = generateMatrix(rotateAngles[0], rotateAngles[1], rotateAngles[2]);
-    normVec.rotate(rotateMatrix);
-  }
-  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, true)) {
-    // Apply automatic rotation due to the rotate-all tag
-    centre.rotate(m_rotateAllMatrix);
-    normVec.rotate(m_rotateAllMatrix);
-  }
-  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, true)) {
-    // Apply automatic rotation due to the goniometer that should NOT be manually defined by the user
-    centre.rotate(m_gonioRotateMatrix);
-    normVec.rotate(m_gonioRotateMatrix);
-  }
+  const V3D axis = normalize(parsePosition(pElemAxis));
+  // <rotate> turns the cylinder about the midpoint of its axis
+  const auto [centre, normVec] = applyShapeRotations(pElem, parsePosition(pElemBase) + axis * (0.5 * height), axis);
 
   // add outer infinite cylinder surface
   auto outerCylinder = std::make_shared<Cylinder>();
@@ -710,7 +631,7 @@ CuboidCorners ShapeFactory::parseCuboid(Poco::XML::Element *pElem) {
     const double deltaW = getDoubleAttribute(pElem_width, "val") / 2;
     const double deltaD = getDoubleAttribute(pElem_depth, "val") / 2;
 
-    V3D centre = pElem_centre ? parsePosition(pElem_centre) : DEFAULT_CENTRE;
+    const V3D centre = pElem_centre ? parsePosition(pElem_centre) : DEFAULT_CENTRE;
 
     result.lfb = V3D(-deltaW, -deltaH, -deltaD);
     result.lft = V3D(-deltaW, deltaH, -deltaD);
@@ -730,23 +651,11 @@ CuboidCorners ShapeFactory::parseCuboid(Poco::XML::Element *pElem) {
       rotate.rotate(result.rfb);
     }
 
-    // Rotate the points by the rotate, rotate-all and goniometer tags
-    // Rotate the centre by the rotate-all and goniometer tags
     if (pElem_rot) {
       // Apply manual rotation supplied to rotate tag
       std::vector<double> rotateAngles = DegreesToRadians(parsePosition(pElem_rot));
       const std::vector<double> rotateMatrix = generateMatrix(rotateAngles[0], rotateAngles[1], rotateAngles[2]);
       result.rotatePoints(rotateMatrix);
-    }
-    if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, true)) {
-      // Apply automatic rotation due to the rotate-all tag
-      result.rotatePoints(m_rotateAllMatrix);
-      centre.rotate(m_rotateAllMatrix);
-    }
-    if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, true)) {
-      // Apply automatic rotation due to the goniometer that should NOT be manually defined by the user
-      result.rotatePoints(m_gonioRotateMatrix);
-      centre.rotate(m_gonioRotateMatrix);
     }
 
     result.lfb += centre;
@@ -757,6 +666,10 @@ CuboidCorners ShapeFactory::parseCuboid(Poco::XML::Element *pElem) {
     throw std::invalid_argument(SYNTAX_ERROR_MSG);
   }
 
+  // The corners are now absolute positions, so they turn with the whole shape about the origin
+  for (auto *corner : {&result.lfb, &result.lft, &result.lbb, &result.rfb}) {
+    *corner = rotateWithWholeShape(*corner);
+  }
   return result;
 }
 
@@ -869,14 +782,16 @@ std::string ShapeFactory::parseInfiniteCone(Poco::XML::Element *pElem, std::map<
   Element *pElemAxis = getShapeElement(pElem, "axis");
   Element *pElemAngle = getShapeElement(pElem, "angle");
 
-  const V3D normVec = normalize(parsePosition(pElemAxis));
-
   // getDoubleAttribute can throw - put the calls above any new
   const double angle = getDoubleAttribute(pElemAngle, "val");
 
+  // a cone turns about its tip, so <rotate> moves only the axis
+  const auto [tipPoint, normVec] =
+      applyShapeRotations(pElem, parsePosition(pElemTipPoint), normalize(parsePosition(pElemAxis)));
+
   // add infinite double cone
   auto pCone = std::make_shared<Cone>();
-  pCone->setCentre(parsePosition(pElemTipPoint));
+  pCone->setCentre(tipPoint);
   pCone->setNorm(normVec);
   pCone->setAngle(angle);
   prim[l_id] = pCone;
@@ -887,7 +802,7 @@ std::string ShapeFactory::parseInfiniteCone(Poco::XML::Element *pElem, std::map<
 
   // plane top cut of top part of double cone
   auto pPlaneBottom = std::make_shared<Plane>();
-  pPlaneBottom->setPlane(parsePosition(pElemTipPoint), normVec);
+  pPlaneBottom->setPlane(tipPoint, normVec);
   prim[l_id] = pPlaneBottom;
   retAlgebraMatch << "-" << l_id << ")";
   l_id++;
@@ -913,15 +828,18 @@ std::string ShapeFactory::parseCone(Poco::XML::Element *pElem, std::map<int, std
   Element *pElemAngle = getShapeElement(pElem, "angle");
   Element *pElemHeight = getShapeElement(pElem, "height");
 
-  const V3D normVec = normalize(parsePosition(pElemAxis));
-
   // getDoubleAttribute can throw - put the calls above any new
   const double angle = getDoubleAttribute(pElemAngle, "val");
   const double height = getDoubleAttribute(pElemHeight, "val");
 
+  // Rotate the tip and the axis exactly as createGeometryHandler rotates the ShapeInfo it builds from
+  // the same XML, so the surfaces and the metadata cannot describe the cone in two different places
+  const auto [tipPoint, normVec] =
+      applyShapeRotations(pElem, parsePosition(pElemTipPoint), normalize(parsePosition(pElemAxis)));
+
   // add infinite double cone
   auto pCone = std::make_shared<Cone>();
-  pCone->setCentre(parsePosition(pElemTipPoint));
+  pCone->setCentre(tipPoint);
   pCone->setNorm(normVec);
   pCone->setAngle(angle);
   prim[l_id] = pCone;
@@ -932,7 +850,7 @@ std::string ShapeFactory::parseCone(Poco::XML::Element *pElem, std::map<int, std
 
   // Plane to cut off cone from below
   auto pPlaneTop = std::make_shared<Plane>();
-  V3D pointInPlane = parsePosition(pElemTipPoint);
+  V3D pointInPlane = tipPoint;
   pointInPlane -= (normVec * height);
   pPlaneTop->setPlane(pointInPlane, normVec);
   prim[l_id] = pPlaneTop;
@@ -941,7 +859,7 @@ std::string ShapeFactory::parseCone(Poco::XML::Element *pElem, std::map<int, std
 
   // plane top cut of top part of double cone
   auto pPlaneBottom = std::make_shared<Plane>();
-  pPlaneBottom->setPlane(parsePosition(pElemTipPoint), normVec);
+  pPlaneBottom->setPlane(tipPoint, normVec);
   prim[l_id] = pPlaneBottom;
   retAlgebraMatch << "-" << l_id << ")";
   l_id++;
@@ -1547,6 +1465,50 @@ std::shared_ptr<CSGObject> ShapeFactory::createHexahedralShape(double xlb, doubl
   return shape;
 }
 
+/** Apply to a primitive's centre and axis every rotation its surfaces will have had applied to them.
+ *
+ * The three tags do not act on the same things. A per-primitive \<rotate\> turns the shape about its
+ * own centre, so it moves the axis and leaves the centre alone; \<rotate-all\> and the automatic
+ * \<goniometer\> reorient the whole shape about the origin, so they move both.
+ *
+ * Shared by createGeometryHandler and the parse functions, which read the same XML separately and
+ * so must not disagree about where the shape is.
+ *
+ * @return the rotated centre and axis
+ */
+std::pair<V3D, V3D> ShapeFactory::applyShapeRotations(Poco::XML::Element *pElem, V3D centre, V3D axis) {
+  if (Element *pElemRotate = getOptionalShapeElement(pElem, "rotate")) {
+    const std::vector<double> rotateAngles = DegreesToRadians(parsePosition(pElemRotate));
+    axis.rotate(generateMatrix(rotateAngles[0], rotateAngles[1], rotateAngles[2]));
+  }
+  return {rotateWithWholeShape(centre), rotateWithWholeShape(axis)};
+}
+
+/// Turn a point or direction by \<rotate-all\> then the automatic \<goniometer\>, both about the origin.
+V3D ShapeFactory::rotateWithWholeShape(V3D vector) const {
+  static const Kernel::Matrix<double> identity(3, 3, true);
+  for (const auto *automaticRotation : {&m_rotateAllMatrix, &m_gonioRotateMatrix}) {
+    if (*automaticRotation != identity) {
+      vector.rotate(*automaticRotation);
+    }
+  }
+  return vector;
+}
+
+/** Apply the same rotations to a cylinder's base and axis that parseCylinder applies to its surfaces.
+ *
+ * A cylinder is defined by its bottom base, but \<rotate\> turns it about the midpoint of its axis,
+ * which is what parseCylinder and parseHollowCylinder build their surfaces around. So the base is
+ * recovered from the rotated midpoint; rotating it directly would swing the cylinder about its end.
+ *
+ * @return the rotated base and axis
+ */
+std::pair<V3D, V3D> ShapeFactory::rotatedCylinderBase(Poco::XML::Element *pElem, const V3D &base, const V3D &axis,
+                                                      const double height) {
+  const auto [midpoint, normVec] = applyShapeRotations(pElem, base + axis * (0.5 * height), axis);
+  return {midpoint - normVec * (0.5 * height), normVec};
+}
+
 /// create a special geometry handler for the known finite primitives
 void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem, const std::shared_ptr<CSGObject> &Obj) {
 
@@ -1567,36 +1529,39 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem, const std::s
     V3D centre;
     if (pElemCentre)
       centre = parsePosition(pElemCentre);
-    shapeInfo.setSphere(centre, std::stod(pElemRadius->getAttribute("val")));
+    // parseSphere never reads <rotate>, which cannot move a sphere, so neither does this
+    shapeInfo.setSphere(rotateWithWholeShape(centre), std::stod(pElemRadius->getAttribute("val")));
   } else if (pElem->tagName() == "cylinder") {
     Element *pElemCentre = getShapeElement(pElem, "centre-of-bottom-base");
     Element *pElemAxis = getShapeElement(pElem, "axis");
     Element *pElemRadius = getShapeElement(pElem, "radius");
     Element *pElemHeight = getShapeElement(pElem, "height");
-    const V3D normVec = normalize(parsePosition(pElemAxis));
-    shapeInfo.setCylinder(parsePosition(pElemCentre), normVec, std::stod(pElemRadius->getAttribute("val")),
-                          std::stod(pElemHeight->getAttribute("val")));
+    const double height = std::stod(pElemHeight->getAttribute("val"));
+    const auto [base, normVec] =
+        rotatedCylinderBase(pElem, parsePosition(pElemCentre), normalize(parsePosition(pElemAxis)), height);
+    shapeInfo.setCylinder(base, normVec, std::stod(pElemRadius->getAttribute("val")), height);
   } else if (pElem->tagName() == "hollow-cylinder") {
     Element *pElemCentre = getShapeElement(pElem, "centre-of-bottom-base");
     Element *pElemAxis = getShapeElement(pElem, "axis");
     Element *pElemInnerRadius = getShapeElement(pElem, "inner-radius");
     Element *pElemOuterRadius = getShapeElement(pElem, "outer-radius");
     Element *pElemHeight = getShapeElement(pElem, "height");
-    V3D normVec = parsePosition(pElemAxis);
-    normVec.normalize();
-    shapeInfo.setHollowCylinder(parsePosition(pElemCentre), normVec, std::stod(pElemInnerRadius->getAttribute("val")),
-                                std::stod(pElemOuterRadius->getAttribute("val")),
-                                std::stod(pElemHeight->getAttribute("val")));
+    const double height = std::stod(pElemHeight->getAttribute("val"));
+    const auto [base, normVec] =
+        rotatedCylinderBase(pElem, parsePosition(pElemCentre), normalize(parsePosition(pElemAxis)), height);
+    shapeInfo.setHollowCylinder(base, normVec, std::stod(pElemInnerRadius->getAttribute("val")),
+                                std::stod(pElemOuterRadius->getAttribute("val")), height);
   } else if (pElem->tagName() == "cone") {
     Element *pElemTipPoint = getShapeElement(pElem, "tip-point");
     Element *pElemAxis = getShapeElement(pElem, "axis");
     Element *pElemAngle = getShapeElement(pElem, "angle");
     Element *pElemHeight = getShapeElement(pElem, "height");
 
-    const V3D normVec = normalize(parsePosition(pElemAxis));
+    const auto [tipPoint, normVec] =
+        applyShapeRotations(pElem, parsePosition(pElemTipPoint), normalize(parsePosition(pElemAxis)));
     const double height = std::stod(pElemHeight->getAttribute("val"));
     const double radius = height * tan(M_PI * std::stod(pElemAngle->getAttribute("val")) / 180.0);
-    shapeInfo.setCone(parsePosition(pElemTipPoint), normVec, radius, height);
+    shapeInfo.setCone(tipPoint, normVec, radius, height);
   }
 
   geomHandler->setShapeInfo(std::move(shapeInfo));
