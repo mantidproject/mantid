@@ -943,35 +943,10 @@ private:
     return grandchild < 0 ? childIndex : tree->model()->index(grandchild, 0, childIndex);
   }
 
-  QModelIndex groupChildItemIndex(QTreeView *tree, int child, int grandchild = -1) const {
-    auto const groupModelIndex = groupIndex(tree);
-    auto const childIndex = tree->model()->index(child, 0, groupModelIndex);
-    return grandchild < 0 ? tree->model()->index(child, 2, groupModelIndex)
-                          : tree->model()->index(grandchild, 2, childIndex);
-  }
-
   void click(QTreeView *tree, QModelIndex const &index, Qt::KeyboardModifiers modifiers = Qt::NoModifier) const {
     auto const position = tree->visualRect(index).center();
     auto event = QMouseEvent(QEvent::MouseButtonPress, position, position, Qt::LeftButton, Qt::LeftButton, modifiers);
     QApplication::sendEvent(tree->viewport(), &event);
-  }
-
-  void selectSpinAsymmetry(QtPlottingView &view) const {
-    view.setAvailablePlotOutputTypes(
-        outputTypeViewItems({PlotOutputType::ReflectivityCurve, PlotOutputType::SpinAsymmetry}));
-    view.findChild<QComboBox *>("plotPreset")->setCurrentIndex(1);
-  }
-
-  void selectAlignment(QtPlottingView &view) const {
-    view.setAvailablePlotOutputTypes(
-        outputTypeViewItems({PlotOutputType::ReflectivityCurve, PlotOutputType::Alignment}));
-    view.findChild<QComboBox *>("plotPreset")->setCurrentIndex(1);
-  }
-
-  void selectDetectorMap(QtPlottingView &view) const {
-    view.setAvailablePlotOutputTypes(
-        outputTypeViewItems({PlotOutputType::ReflectivityCurve, PlotOutputType::DetectorMap}));
-    view.findChild<QComboBox *>("plotPreset")->setCurrentIndex(1);
   }
 
   void doubleClick(QTreeView *tree, QModelIndex const &index, Qt::KeyboardModifiers modifiers = Qt::NoModifier) const {

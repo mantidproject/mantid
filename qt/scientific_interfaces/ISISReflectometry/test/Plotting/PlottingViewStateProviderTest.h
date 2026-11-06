@@ -26,6 +26,7 @@ public:
       TS_ASSERT_EQUALS(definitions.size(), 1);
       TS_ASSERT_EQUALS(definitions.front().outputType, outputType);
       TS_ASSERT(!definitions.front().settingsOverride);
+      TS_ASSERT(!plotOutputTypeProperties(outputType).splitPlotRequestByPlotSelectionScope());
     }
   }
 
@@ -48,12 +49,36 @@ public:
     TS_ASSERT(second.tiledVertically);
     TS_ASSERT(second.shareXAxisWhenTiled);
     TS_ASSERT(!second.shareYAxisWhenTiled);
+    TS_ASSERT_EQUALS(plotOutputTypeProperties(PlotOutputType::ReflectivityAndSpinAsymmetry).selectionScope(),
+                     PlotSelectionScope::WorkspaceGroup);
+    TS_ASSERT(
+        plotOutputTypeProperties(PlotOutputType::ReflectivityAndSpinAsymmetry).splitPlotRequestByPlotSelectionScope());
+  }
+
+  void testWorkspaceGroupScopeRequiresGroupMembershipForParentSelection() {
+    auto grouped = PlottingWorkspaceTreeItem{"polarized",
+                                             PlottingWorkspaceTreeItemType::WorkspaceGroup,
+                                             ReducedWorkspaceOutputType::None,
+                                             "polarized",
+                                             {workspaceItem("up", ReducedWorkspaceOutputType::IvsQBinned),
+                                              workspaceItem("down", ReducedWorkspaceOutputType::IvsQBinned)}};
+    auto const items = std::vector<PlottingWorkspaceTreeItem>{groupItem(
+        "Group", {runItem("Run", {grouped, workspaceItem("standalone", ReducedWorkspaceOutputType::IvsQBinned)})})};
+    auto const states =
+        PlottingViewStateProvider().plottingWorkspaceTreeItemStates(items, PlotOutputType::SpinAsymmetry);
+    auto const &groupState = states[0].children[0].children[0];
+
+    TS_ASSERT_EQUALS(groupState.selectionMode, PlottingWorkspaceTreeSelectionMode::DirectAndParent);
+    TS_ASSERT_EQUALS(groupState.children[0].selectionMode, PlottingWorkspaceTreeSelectionMode::ParentOnly);
+    TS_ASSERT_EQUALS(groupState.children[1].selectionMode, PlottingWorkspaceTreeSelectionMode::ParentOnly);
+    TS_ASSERT_EQUALS(states[0].children[0].children[1].selectionMode, PlottingWorkspaceTreeSelectionMode::None);
   }
 
   void testCombinedOutputUsesSpinAsymmetrySelectionRules() {
     PlottingViewStateProvider provider;
     auto const items = std::vector<PlottingWorkspaceTreeItem>{
-        groupItem("Group", {workspaceItem("stitched", ReducedWorkspaceOutputType::IvsQBinned),
+        groupItem("Group", {workspaceItem("stitched", ReducedWorkspaceOutputType::IvsQBinned,
+                                          PlottingWorkspaceOrigin::PostprocessedGroupOutput),
                             runItem("12345", {workspaceItem("binned", ReducedWorkspaceOutputType::IvsQBinned),
                                               workspaceItem("unbinned", ReducedWorkspaceOutputType::IvsQ),
                                               workspaceItem("lambda", ReducedWorkspaceOutputType::IvsLambda)})})};
@@ -115,7 +140,8 @@ public:
   void testPlottingWorkspaceTreeItemStatesMuteStitchedOutputsForAlignment() {
     PlottingViewStateProvider provider;
     auto const plottingWorkspaceTreeItems = std::vector<PlottingWorkspaceTreeItem>{groupItem(
-        "Group 1", {workspaceItem("stitched_12345", ReducedWorkspaceOutputType::IvsQBinned),
+        "Group 1", {workspaceItem("stitched_12345", ReducedWorkspaceOutputType::IvsQBinned,
+                                  PlottingWorkspaceOrigin::PostprocessedGroupOutput),
                     runItem("12345", {workspaceItem("IvsQ_binned_12345", ReducedWorkspaceOutputType::IvsQBinned)})})};
 
     auto const itemStates =
@@ -130,17 +156,26 @@ public:
 
 private:
   PlottingWorkspaceTreeItem groupItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) const {
-    return {std::move(label), PlottingWorkspaceTreeItemType::ReductionGroup, ReducedWorkspaceOutputType::None, "",
-            std::move(children)};
+    auto items =
+        std::vector<PlottingWorkspaceTreeItem>{{std::move(label), PlottingWorkspaceTreeItemType::ReductionGroup,
+                                                ReducedWorkspaceOutputType::None, "", std::move(children)}};
+    populateTreeItemContexts(items);
+    return std::move(items.front());
   }
 
   PlottingWorkspaceTreeItem runItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) const {
-    return {std::move(label), PlottingWorkspaceTreeItemType::Run, ReducedWorkspaceOutputType::None, "",
-            std::move(children)};
+    auto item = PlottingWorkspaceTreeItem{std::move(label), PlottingWorkspaceTreeItemType::Run,
+                                          ReducedWorkspaceOutputType::None, "", std::move(children)};
+    item.context.origin = PlottingWorkspaceOrigin::RunOutput;
+    return item;
   }
 
-  PlottingWorkspaceTreeItem workspaceItem(std::string label, ReducedWorkspaceOutputType reducedOutputType) const {
+  PlottingWorkspaceTreeItem workspaceItem(std::string label, ReducedWorkspaceOutputType reducedOutputType,
+                                          PlottingWorkspaceOrigin origin = PlottingWorkspaceOrigin::None) const {
     auto const workspaceName = label;
-    return {std::move(label), PlottingWorkspaceTreeItemType::Workspace, reducedOutputType, workspaceName, {}};
+    auto item = PlottingWorkspaceTreeItem{
+        std::move(label), PlottingWorkspaceTreeItemType::Workspace, reducedOutputType, workspaceName, {}};
+    item.context.origin = origin;
+    return item;
   }
 };
