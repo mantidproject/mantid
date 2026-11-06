@@ -8,6 +8,7 @@
 #include "Common/DllConfig.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include <map>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -21,7 +22,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL FileFormatOptions {
 public:
   FileFormatOptions(NamedFormat format, std::string prefix, bool includeHeader, std::string separator,
                     bool includeQResolution, bool includeAdditionalColumns, bool saveToSingleFile, std::string model,
-                    bool model_validation);
+                    bool model_validation, std::map<std::string, std::string> runModels = {});
   bool shouldIncludeHeader() const;
   bool shouldIncludeQResolution() const;
   bool shouldIncludeAdditionalColumns() const;
@@ -29,6 +30,7 @@ public:
   std::string const &separator() const;
   std::string const &prefix() const;
   std::string const &model() const;
+  std::map<std::string, std::string> const &runModels() const;
   bool validate() const;
   NamedFormat format() const;
   bool isORSOFormat() const;
@@ -37,6 +39,7 @@ private:
   NamedFormat m_format;
   std::string m_prefix;
   std::string m_model;
+  std::map<std::string, std::string> m_runModels;
   bool m_model_validation;
   bool m_includeHeader;
   std::string m_separator;
@@ -58,7 +61,7 @@ private:
 inline bool operator==(const FileFormatOptions &lhs, const FileFormatOptions &rhs) {
   return lhs.format() == rhs.format() && lhs.shouldIncludeHeader() == rhs.shouldIncludeHeader() &&
          lhs.shouldIncludeQResolution() == rhs.shouldIncludeQResolution() && lhs.separator() == rhs.separator() &&
-         lhs.prefix() == rhs.prefix();
+         lhs.prefix() == rhs.prefix() && lhs.runModels() == rhs.runModels();
 }
 
 inline bool operator!=(const FileFormatOptions &lhs, const FileFormatOptions &rhs) { return !(lhs == rhs); }
