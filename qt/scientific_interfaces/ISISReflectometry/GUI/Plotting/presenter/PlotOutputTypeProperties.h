@@ -35,20 +35,24 @@ struct PlotOutputTypeCapabilities {
   bool supportsAddToExistingPlot;
   bool excludesPostprocessedGroupOutputs;
   bool requiresWorkspaceGroupsForMultiPlot;
+  bool splitPlotRequestByPlotSelectionScope{false};
 };
 
 /// Describes how one plot output type behaves in the plotting tab.
 class MANTIDQT_ISISREFLECTOMETRY_DLL PlotOutputTypeProperties {
 public:
   /// Create properties, defaulting to one request for this output using the view settings.
-  PlotOutputTypeProperties(PlotOutputType plotOutputType,
-                           std::vector<PlottingWorkspaceTreeItemType> selectableItemTypes,
+  PlotOutputTypeProperties(PlotOutputType plotOutputType, PlotSelectionScope selectionScope,
                            std::vector<ReducedWorkspaceOutputType> includedReducedWorkspaceOutputTypes,
                            PlotOutputTypeCapabilities capabilities,
                            std::vector<PlotRequestDefinition> plotRequests = {});
 
   /// Return the ordered request definitions; ordinary outputs have one entry using the view controls.
   std::vector<PlotRequestDefinition> const &plotRequests() const;
+  /// Return the input unit required by this output, also used to determine selectable tree levels.
+  PlotSelectionScope selectionScope() const;
+  /// Return true if the complete request sequence should execute independently for each scope item.
+  bool splitPlotRequestByPlotSelectionScope() const;
   /// Return the label shown in the plot output selector.
   std::string const &displayName() const;
   /// Return true if tree items of this type may be selected.
@@ -72,7 +76,7 @@ public:
 
 private:
   PlotOutputType m_plotOutputType;
-  std::vector<PlottingWorkspaceTreeItemType> m_selectableItemTypes;
+  PlotSelectionScope m_selectionScope;
   std::vector<ReducedWorkspaceOutputType> m_includedReducedWorkspaceOutputTypes;
   PlotOutputTypeCapabilities m_capabilities;
   std::vector<PlotRequestDefinition> m_plotRequests;

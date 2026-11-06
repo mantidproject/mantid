@@ -18,19 +18,9 @@ template <typename T> bool contains(std::vector<T> const &values, T value) {
   return std::find(values.cbegin(), values.cend(), value) != values.cend();
 }
 
-std::vector<PlottingWorkspaceTreeItemType> allSelectableItemTypes() {
-  return {PlottingWorkspaceTreeItemType::ReductionGroup, PlottingWorkspaceTreeItemType::Run,
-          PlottingWorkspaceTreeItemType::WorkspaceGroup, PlottingWorkspaceTreeItemType::Workspace};
-}
-
 std::vector<ReducedWorkspaceOutputType> allReducedWorkspaceOutputTypes() {
   return {ReducedWorkspaceOutputType::IvsQ, ReducedWorkspaceOutputType::IvsLambda,
           ReducedWorkspaceOutputType::IvsQBinned};
-}
-
-std::vector<PlottingWorkspaceTreeItemType> groupOrRunItemTypes() {
-  return {PlottingWorkspaceTreeItemType::ReductionGroup, PlottingWorkspaceTreeItemType::Run,
-          PlottingWorkspaceTreeItemType::WorkspaceGroup};
 }
 
 std::vector<ReducedWorkspaceOutputType> reflectivityReducedWorkspaceOutputTypes() {
@@ -46,7 +36,7 @@ const std::unordered_map<PlotOutputType, std::string> plotOutputTypeDisplayNames
 };
 
 PlotOutputTypeProperties const reflectivityCurveProperties{PlotOutputType::ReflectivityCurve,
-                                                           allSelectableItemTypes(),
+                                                           PlotSelectionScope::Workspace,
                                                            reflectivityReducedWorkspaceOutputTypes(),
                                                            {.supportsOverplot = true,
                                                             .supportsAddToExistingPlot = true,
@@ -54,7 +44,7 @@ PlotOutputTypeProperties const reflectivityCurveProperties{PlotOutputType::Refle
                                                             .requiresWorkspaceGroupsForMultiPlot = false}};
 
 PlotOutputTypeProperties const detectorMapProperties{PlotOutputType::DetectorMap,
-                                                     allSelectableItemTypes(),
+                                                     PlotSelectionScope::Workspace,
                                                      allReducedWorkspaceOutputTypes(),
                                                      {.supportsOverplot = false,
                                                       .supportsAddToExistingPlot = false,
@@ -62,14 +52,16 @@ PlotOutputTypeProperties const detectorMapProperties{PlotOutputType::DetectorMap
                                                       .requiresWorkspaceGroupsForMultiPlot = false}};
 
 PlotOutputTypeProperties spinAsymmetryPropertiesFor(PlotOutputType outputType,
-                                                    std::vector<PlotRequestDefinition> plotRequests = {}) {
+                                                    std::vector<PlotRequestDefinition> plotRequests = {},
+                                                    bool splitByScope = false) {
   return PlotOutputTypeProperties{outputType,
-                                  groupOrRunItemTypes(),
+                                  PlotSelectionScope::WorkspaceGroup,
                                   {ReducedWorkspaceOutputType::IvsQBinned},
                                   {.supportsOverplot = true,
                                    .supportsAddToExistingPlot = true,
                                    .excludesPostprocessedGroupOutputs = false,
-                                   .requiresWorkspaceGroupsForMultiPlot = true},
+                                   .requiresWorkspaceGroupsForMultiPlot = true,
+                                   .splitPlotRequestByPlotSelectionScope = splitByScope},
                                   std::move(plotRequests)};
 }
 
@@ -80,10 +72,11 @@ auto const reflectivityAndSpinAsymmetryProperties = spinAsymmetryPropertiesFor(
      {PlotOutputType::SpinAsymmetry, PlotRequestSettings{.layout = PlotLayout::Tiled,
                                                          .addToExistingPlot = true,
                                                          .tiledVertically = true,
-                                                         .shareXAxisWhenTiled = true}}});
+                                                         .shareXAxisWhenTiled = true}}},
+    true);
 
 PlotOutputTypeProperties const alignmentProperties{PlotOutputType::Alignment,
-                                                   allSelectableItemTypes(),
+                                                   PlotSelectionScope::Workspace,
                                                    allReducedWorkspaceOutputTypes(),
                                                    {.supportsOverplot = true,
                                                     .supportsAddToExistingPlot = true,
@@ -92,10 +85,10 @@ PlotOutputTypeProperties const alignmentProperties{PlotOutputType::Alignment,
 } // namespace
 
 PlotOutputTypeProperties::PlotOutputTypeProperties(
-    PlotOutputType plotOutputType, std::vector<PlottingWorkspaceTreeItemType> selectableItemTypes,
+    PlotOutputType plotOutputType, PlotSelectionScope selectionScope,
     std::vector<ReducedWorkspaceOutputType> includedReducedWorkspaceOutputTypes,
     PlotOutputTypeCapabilities capabilities, std::vector<PlotRequestDefinition> plotRequests)
-    : m_plotOutputType(plotOutputType), m_selectableItemTypes(std::move(selectableItemTypes)),
+    : m_plotOutputType(plotOutputType), m_selectionScope(selectionScope),
       m_includedReducedWorkspaceOutputTypes(std::move(includedReducedWorkspaceOutputTypes)),
       m_capabilities(capabilities),
       m_plotRequests(plotRequests.empty() ? std::vector<PlotRequestDefinition>{{plotOutputType}}
@@ -103,12 +96,18 @@ PlotOutputTypeProperties::PlotOutputTypeProperties(
 
 std::vector<PlotRequestDefinition> const &PlotOutputTypeProperties::plotRequests() const { return m_plotRequests; }
 
+PlotSelectionScope PlotOutputTypeProperties::selectionScope() const { return m_selectionScope; }
+
+bool PlotOutputTypeProperties::splitPlotRequestByPlotSelectionScope() const {
+  return m_capabilities.splitPlotRequestByPlotSelectionScope;
+}
+
 std::string const &PlotOutputTypeProperties::displayName() const {
   return plotOutputTypeDisplayNames.at(m_plotOutputType);
 }
 
 bool PlotOutputTypeProperties::allowsItemType(PlottingWorkspaceTreeItemType itemType) const {
-  return contains(m_selectableItemTypes, itemType);
+  return itemType <= m_selectionScope;
 }
 
 bool PlotOutputTypeProperties::includesReducedWorkspaceOutput(ReducedWorkspaceOutputType outputType) const {
