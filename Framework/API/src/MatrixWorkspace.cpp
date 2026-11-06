@@ -110,17 +110,16 @@ std::string replacePerWithLatex(std::string yLabel) {
 
 /** Get the X range of the given spectra.
  * @param workspace :: The workspace
- * @param xmin :: Set to the lowest X value, or the largest double if no spectrum contributes
- * @param xmax :: Set to the highest X value, or the lowest double if no spectrum contributes
  * @param workspaceIndices :: A range of the spectra to include
  * @param includeNonFiniteSpectra :: A spectrum with a non-finite first or last value contributes its finite values if
  * true, and is skipped if false
+ * @return The lowest and highest X values, or the largest and lowest doubles if no spectrum contributes
  */
 template <typename WorkspaceIndices>
-void findXMinMax(const MatrixWorkspace &workspace, double &xmin, double &xmax, const WorkspaceIndices &workspaceIndices,
-                 const bool includeNonFiniteSpectra) {
-  xmin = std::numeric_limits<double>::max();
-  xmax = -1.0 * xmin;
+std::pair<double, double> findXMinMax(const MatrixWorkspace &workspace, const WorkspaceIndices &workspaceIndices,
+                                      const bool includeNonFiniteSpectra) {
+  double xmin = std::numeric_limits<double>::max();
+  double xmax = -1.0 * xmin;
   const auto isFinite = [](const double value) { return std::isfinite(value); };
 
   for (const auto workspaceIndex : workspaceIndices) {
@@ -139,6 +138,7 @@ void findXMinMax(const MatrixWorkspace &workspace, double &xmin, double &xmax, c
     xmin = std::min(xmin, xfront);
     xmax = std::max(xmax, xback);
   }
+  return {xmin, xmax};
 }
 
 } // namespace
@@ -788,34 +788,26 @@ std::vector<specnum_t> MatrixWorkspace::getSpectraFromDetectorIDs(const std::vec
   return spectraList;
 }
 
-double MatrixWorkspace::getXMin() const {
-  double xmin;
-  double xmax;
-  this->getXMinMax(xmin, xmax); // delegate to the proper code
-  return xmin;
-}
+double MatrixWorkspace::getXMin() const { return this->getXMinMax().first; }
 
-double MatrixWorkspace::getXMax() const {
-  double xmin;
-  double xmax;
-  this->getXMinMax(xmin, xmax); // delegate to the proper code
-  return xmax;
-}
+double MatrixWorkspace::getXMax() const { return this->getXMinMax().second; }
 
-void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
-  findXMinMax(*this, xmin, xmax, std::views::iota(size_t{0}, this->getNumberHistograms()), false);
+/** Get the X range of all spectra, skipping spectra with a non-finite first or last value.
+ * @return The lowest and highest X values, or the largest and lowest doubles if no spectrum contributes
+ */
+std::pair<double, double> MatrixWorkspace::getXMinMax() const {
+  return findXMinMax(*this, std::views::iota(size_t{0}, this->getNumberHistograms()), false);
 }
 
 /** Get the X range of the given spectra.
- * @param xmin :: Set to the lowest X value, or the largest double if no spectrum contributes
- * @param xmax :: Set to the highest X value, or the lowest double if no spectrum contributes
  * @param workspaceIndices :: The spectra to include
  * @param includeNonFiniteSpectra :: A spectrum with a non-finite first or last value contributes its finite values if
  * true, and is skipped if false
+ * @return The lowest and highest X values, or the largest and lowest doubles if no spectrum contributes
  */
-void MatrixWorkspace::getXMinMax(double &xmin, double &xmax, const std::vector<size_t> &workspaceIndices,
-                                 const bool includeNonFiniteSpectra) const {
-  findXMinMax(*this, xmin, xmax, workspaceIndices, includeNonFiniteSpectra);
+std::pair<double, double> MatrixWorkspace::getXMinMax(const std::vector<size_t> &workspaceIndices,
+                                                      const bool includeNonFiniteSpectra) const {
+  return findXMinMax(*this, workspaceIndices, includeNonFiniteSpectra);
 }
 
 /** Integrate all the spectra in the matrix workspace within the range given.

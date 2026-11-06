@@ -473,8 +473,7 @@ boost::python::tuple getXMinMaxForWorkspaceIndices(const MatrixWorkspace &self,
     sWorkspaceIndices = converter();
   }
 
-  double xmin, xmax;
-  self.getXMinMax(xmin, xmax, sWorkspaceIndices, includeNonFiniteSpectra);
+  const auto [xmin, xmax] = self.getXMinMax(sWorkspaceIndices, includeNonFiniteSpectra);
   return make_tuple(xmin, xmax);
 }
 
