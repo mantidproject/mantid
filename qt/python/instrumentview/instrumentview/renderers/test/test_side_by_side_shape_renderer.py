@@ -413,7 +413,7 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         workspace.componentInfo.return_value = comp_info
         workspace.detectorInfo.return_value = det_info
 
-        workspace.getInstrument().getReferenceFrame().vecPointingAlongBeam.return_value = np.array([0.0, 0.0, 1.0])
+        workspace.componentInfo().referenceFrame().vecPointingAlongBeam.return_value = np.array([0.0, 0.0, 1.0])
 
         return workspace
 
@@ -452,7 +452,7 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         workspace = MagicMock()
         workspace.componentInfo.return_value = comp_info
         workspace.detectorInfo.return_value = det_info
-        workspace.getInstrument().getReferenceFrame().vecPointingAlongBeam.return_value = np.array([0.0, 0.0, 1.0])
+        comp_info.referenceFrame().vecPointingAlongBeam.return_value = np.array([0.0, 0.0, 1.0])
         return workspace
 
     def _make_position_side_effect(self, n_detectors):

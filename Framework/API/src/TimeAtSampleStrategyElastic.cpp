@@ -10,7 +10,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TimeAtSampleStrategyElastic.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 using namespace Mantid::Kernel;
@@ -26,7 +26,7 @@ constexpr double ZERO_ADDITIVE_OFFSET{0.};
  */
 TimeAtSampleStrategyElastic::TimeAtSampleStrategyElastic(Mantid::API::MatrixWorkspace_const_sptr ws)
     : m_spectrumInfo(ws->spectrumInfo()), m_L1s(m_spectrumInfo.l1()),
-      m_beamDir(ws->getInstrument()->getReferenceFrame()->vecPointingAlongBeam()) {}
+      m_beamDir(ws->componentInfo().referenceFrame()->vecPointingAlongBeam()) {}
 
 /**
  * @brief Calculate correction

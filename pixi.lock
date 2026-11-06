@@ -5517,7 +5517,6 @@ packages:
   - __glibc >=2.17,<3.0.a0
   - libgcc >=15
   license: BSD-3-Clause
-  license_family: BSD
   run_exports:
     weak:
     - libuuid >=2.42.4,<3.0a0
@@ -6575,7 +6574,6 @@ packages:
   constrains:
   - __glibc >=2.17
   license: MIT
-  license_family: MIT
   run_exports: {}
   size: 2002934
   timestamp: 1793878750060
@@ -6591,7 +6589,6 @@ packages:
   constrains:
   - __glibc >=2.17
   license: MIT
-  license_family: MIT
   run_exports: {}
   size: 2011195
   timestamp: 1793878756071
@@ -6607,7 +6604,6 @@ packages:
   constrains:
   - __glibc >=2.17
   license: MIT
-  license_family: MIT
   run_exports: {}
   size: 2013756
   timestamp: 1793878749200
@@ -7225,7 +7221,6 @@ packages:
   - libidn2 >=2,<3.0a0
   - xxhash >=0.8.3,<0.8.4.0a0
   license: GPL-3.0-only
-  license_family: GPL
   run_exports: {}
   size: 485869
   timestamp: 1793898136633
@@ -8964,7 +8959,6 @@ packages:
   - python >=3.11
   - python
   license: MIT
-  license_family: MIT
   run_exports: {}
   size: 132730
   timestamp: 1793834561712
@@ -9965,7 +9959,6 @@ packages:
   - python >=3.11
   - python
   license: MIT
-  license_family: MIT
   run_exports: {}
   size: 35917
   timestamp: 1793824703254
@@ -10107,7 +10100,6 @@ packages:
   - pydantic-core ==2.50.4
   - python
   license: MIT
-  license_family: MIT
   run_exports: {}
   size: 362816
   timestamp: 1793902780292
@@ -10774,7 +10766,6 @@ packages:
   depends:
   - python >=3.11
   license: MIT
-  license_family: MIT
   run_exports: {}
   size: 50561
   timestamp: 1793849723725
@@ -13878,7 +13869,6 @@ packages:
   - intel-openmp <0.0a0
   - openmp 23.1.5|23.1.5.*
   license: Apache-2.0 WITH LLVM-exception
-  license_family: APACHE
   run_exports:
     strong:
     - llvm-openmp >=23.1.5
@@ -14483,7 +14473,6 @@ packages:
   constrains:
   - __osx >=11.0
   license: MIT
-  license_family: MIT
   run_exports: {}
   size: 1819468
   timestamp: 1793878788766
@@ -14498,7 +14487,6 @@ packages:
   constrains:
   - __osx >=11.0
   license: MIT
-  license_family: MIT
   run_exports: {}
   size: 1824777
   timestamp: 1793878779103
@@ -16663,7 +16651,6 @@ packages:
   - liblapack  3.11.0   12*_mkl
   - liblapacke 3.11.0   12*_mkl
   license: BSD-3-Clause
-  license_family: BSD
   run_exports:
     weak:
     - libblas >=3.11.0,<4.0a0
@@ -16793,7 +16780,6 @@ packages:
   - liblapack  3.11.0   12*_mkl
   - liblapacke 3.11.0   12*_mkl
   license: BSD-3-Clause
-  license_family: BSD
   run_exports:
     weak:
     - libcblas >=3.11.0,<4.0a0
@@ -17166,7 +17152,6 @@ packages:
   - libcblas   3.11.0   12*_mkl
   - liblapacke 3.11.0   12*_mkl
   license: BSD-3-Clause
-  license_family: BSD
   run_exports:
     weak:
     - liblapack >=3.11.0,<3.12.0a0
@@ -17787,7 +17772,6 @@ packages:
   - intel-openmp <0.0a0
   - openmp 23.1.5|23.1.5.*
   license: Apache-2.0 WITH LLVM-exception
-  license_family: APACHE
   run_exports:
     strong:
     - llvm-openmp >=23.1.5
@@ -18464,7 +18448,6 @@ packages:
   - ucrt >=10.0.20348.0
   - python_abi 3.13.* *_cp313
   license: MIT
-  license_family: MIT
   run_exports: {}
   size: 2014549
   timestamp: 1793878740913
@@ -18479,7 +18462,6 @@ packages:
   - ucrt >=10.0.20348.0
   - python_abi 3.14.* *_cp314
   license: MIT
-  license_family: MIT
   run_exports: {}
   size: 2016070
   timestamp: 1793878754263

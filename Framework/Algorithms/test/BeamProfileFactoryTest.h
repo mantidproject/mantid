@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAlgorithms/BeamProfileFactory.h"
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
@@ -39,8 +40,10 @@ public:
     instrument->markAsSource(source);
     Mantid::DataObjects::Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(5, 5);
     ws->mutableSample().setShape(sampleShape);
+    Mantid::API::ExperimentInfo experiment;
+    experiment.setInstrument(instrument);
     std::shared_ptr<IBeamProfile> beam;
-    TS_ASSERT_THROWS_NOTHING(beam = BeamProfileFactory::createBeamProfile(*instrument, ws->sample()));
+    TS_ASSERT_THROWS_NOTHING(beam = BeamProfileFactory::createBeamProfile(experiment.componentInfo(), ws->sample()));
     TS_ASSERT(std::dynamic_pointer_cast<RectangularBeamProfile>(beam)->maxPoint()[1] == 0.06);
   }
 };

@@ -8,7 +8,6 @@
 #include "MantidAlgorithms/BeamProfileFactory.h"
 #include "MantidAlgorithms/SampleCorrections/CircularBeamProfile.h"
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidKernel/V3D.h"
@@ -17,22 +16,24 @@
 #include <cmath>
 
 namespace Mantid::Algorithms {
-std::unique_ptr<IBeamProfile> BeamProfileFactory::createBeamProfile(const Geometry::Instrument &instrument,
-                                                                    const API::Sample &sample) {
-  const auto frame = instrument.getReferenceFrame();
-  const auto source = instrument.getSource();
+std::unique_ptr<IBeamProfile> BeamProfileFactory::createBeamProfile(Geometry::ComponentInfo const &componentInfo,
+                                                                    API::Sample const &sample) {
+  auto const frame = componentInfo.referenceFrame();
+  auto const source = componentInfo.source();
+  auto const sourcePos = componentInfo.sourcePosition();
 
-  const std::string beamShapeParam = source->getParameterAsString("beam-shape");
-  if (beamShapeParam == "Slit") {
-    const auto beamWidthParam = source->getNumberParameter("beam-width");
-    const auto beamHeightParam = source->getNumberParameter("beam-height");
+  auto const beamShapeParam = componentInfo.getStringParameter(source, "beam-shape");
+  std::string const beamShape = beamShapeParam.empty() ? "" : beamShapeParam.front();
+  if (beamShape == "Slit") {
+    auto const beamWidthParam = componentInfo.getNumberParameter(source, "beam-width");
+    auto const beamHeightParam = componentInfo.getNumberParameter(source, "beam-height");
     if (beamWidthParam.size() == 1 && beamHeightParam.size() == 1) {
-      return std::make_unique<RectangularBeamProfile>(*frame, source->getPos(), beamWidthParam[0], beamHeightParam[0]);
+      return std::make_unique<RectangularBeamProfile>(*frame, sourcePos, beamWidthParam[0], beamHeightParam[0]);
     }
-  } else if (beamShapeParam == "Circle") {
-    const auto beamRadiusParam = source->getNumberParameter("beam-radius");
+  } else if (beamShape == "Circle") {
+    auto const beamRadiusParam = componentInfo.getNumberParameter(source, "beam-radius");
     if (beamRadiusParam.size() == 1) {
-      return std::make_unique<CircularBeamProfile>(*frame, source->getPos(), beamRadiusParam[0]);
+      return std::make_unique<CircularBeamProfile>(*frame, sourcePos, beamRadiusParam[0]);
     }
   }
   // revert to rectangular profile enclosing sample dimensions if no return by this point
@@ -55,6 +56,6 @@ std::unique_ptr<IBeamProfile> BeamProfileFactory::createBeamProfile(const Geomet
   const auto up = frame->pointingUp();
   const double beamWidth = 2 * std::max(std::abs(bboxMin[hor]), std::abs(bboxMax[hor]));
   const double beamHeight = 2 * std::max(std::abs(bboxMin[up]), std::abs(bboxMax[up]));
-  return std::make_unique<RectangularBeamProfile>(*frame, source->getPos(), beamWidth, beamHeight);
+  return std::make_unique<RectangularBeamProfile>(*frame, sourcePos, beamWidth, beamHeight);
 }
 } // namespace Mantid::Algorithms
