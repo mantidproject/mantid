@@ -9,6 +9,7 @@
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusException.h"
 #include "test_helper.h"
+#include <H5Cpp.h>
 #include <cxxtest/TestSuite.h>
 #include <filesystem>
 
@@ -18,6 +19,24 @@ public:
   // This means the constructor isn't called when running other tests
   static NexusClassesTest *createSuite() { return new NexusClassesTest(); }
   static void destroySuite(NexusClassesTest *suite) { delete suite; }
+
+  void test_nexus_classes_reject_dataset_rank_greater_than_four() {
+    NexusTest::FileResource resource("NexusClasses_rank_five.h5");
+    {
+      H5::H5File file(resource.fullPath(), H5F_ACC_TRUNC);
+      auto entry = file.createGroup("entry");
+      H5::StrType stringType(H5::PredType::C_S1, 8);
+      H5::DataSpace scalar(H5S_SCALAR);
+      auto nxClass = entry.createAttribute("NX_class", stringType, scalar);
+      nxClass.write(stringType, "NXentry");
+      const hsize_t dims[5]{1, 1, 1, 1, 1};
+      H5::DataSpace dataSpace(5, dims);
+      entry.createDataSet("rank_five", H5::PredType::NATIVE_INT, dataSpace);
+    }
+
+    Mantid::Nexus::NXRoot root(resource.fullPath());
+    TS_ASSERT_THROWS(root.openFirstEntry(), const Mantid::Nexus::Exception &);
+  }
 
   void test_EQSANS_89157() {
     const std::string filename = NexusTest::getFullPath("EQSANS_89157.nxs.h5");
