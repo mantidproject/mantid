@@ -16,6 +16,7 @@ GNU_DIAG_OFF("unused-parameter")
 GNU_DIAG_OFF("strict-aliasing")
 GNU_DIAG_OFF("format")
 GNU_DIAG_OFF("vla")
+GNU_DIAG_OFF("string-compare")
 #if GCC_VERSION >= 40800 // 4.8.0
 GNU_DIAG_OFF("literal-suffix")
 #endif

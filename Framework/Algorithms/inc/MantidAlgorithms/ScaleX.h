@@ -14,7 +14,7 @@
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
 
-#include <boost/function.hpp>
+#include <functional>
 
 namespace Mantid {
 namespace Algorithms {
@@ -74,7 +74,7 @@ private:
   /// Flag whether we are combining input parameters
   bool m_combine;
   /// Function defining request operation
-  boost::function<double(double, double)> m_binOp;
+  std::function<double(double, double)> m_binOp;
   /// Start workspace index
   int m_wi_min;
   /// Stop workspace index

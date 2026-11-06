@@ -13,6 +13,7 @@
 
 #include "MantidKernel/Logger.h"
 
+#include <cassert>
 #include <cmath>
 #include <mutex>
 
