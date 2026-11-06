@@ -876,7 +876,7 @@ Typical usage of the tool is as follows:
 
 - Enter a **run** number and **angle**.
 
-  - The run is loaded, and a plot of the workspace is displayed, with pre-processing (e.g. calibration) applied.
+  - The run is loaded, and a plot of the raw workspace is displayed.
   - If the run contains a workspace group, use **Group Member** to choose which member is displayed in the detector
     image and TOF plot.
   - For **2D detectors**, a **detector image** is displayed
