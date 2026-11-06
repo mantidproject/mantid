@@ -39,7 +39,7 @@ BatchPresenter *Encoder::findBatchPresenter(const QtBatchView *gui, const IMainW
 }
 
 QMap<QString, QVariant> Encoder::encode(const QWidget *gui, const std::string &directory) {
-  UNUSED_ARG(directory)
+  UNUSED_ARG(directory);
   auto mwv = dynamic_cast<const QtMainWindowView *>(gui);
   QMap<QString, QVariant> topLevelMap;
   topLevelMap.insert(QString("tag"), QVariant(QString("ISIS Reflectometry")));

@@ -45,7 +45,7 @@ Axis *SpectraAxis::clone(const MatrixWorkspace *const parentWorkspace) {
  *  @return A pointer to a copy of the SpectraAxis on which the method is called
  */
 Axis *SpectraAxis::clone(const std::size_t length, const MatrixWorkspace *const parentWorkspace) {
-  UNUSED_ARG(length)
+  UNUSED_ARG(length);
   // In this implementation, there's no difference between the clone methods -
   // call the other one
   return clone(parentWorkspace);
@@ -61,7 +61,7 @@ std::size_t SpectraAxis::length() const { return m_parentWS->getNumberHistograms
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
 double SpectraAxis::operator()(const std::size_t &index, const std::size_t &verticalIndex) const {
-  UNUSED_ARG(verticalIndex)
+  UNUSED_ARG(verticalIndex);
   if (index >= length()) {
     throw Kernel::Exception::IndexError(index, length() - 1, "SpectraAxis: Index out of range.");
   }
@@ -75,8 +75,8 @@ double SpectraAxis::operator()(const std::size_t &index, const std::size_t &vert
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
 void SpectraAxis::setValue(const std::size_t &index, const double &value) {
-  UNUSED_ARG(index)
-  UNUSED_ARG(value)
+  UNUSED_ARG(index);
+  UNUSED_ARG(value);
   throw std::domain_error("setValue method cannot be used on a SpectraAxis.");
 }
 

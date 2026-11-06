@@ -32,7 +32,7 @@ void reader() {
   //  std::cout << "Read launching\n";
   // do work here, without anyone having exclusive access
   for (double val : shared_data) {
-    UNUSED_ARG(val)
+    UNUSED_ARG(val);
   }
   //  std::cout << "Read finished\n";
 }

@@ -52,7 +52,7 @@ BatchPresenter *Decoder::findBatchPresenter(const QtBatchView *gui, const IMainW
 }
 
 QWidget *Decoder::decode(const QMap<QString, QVariant> &map, const std::string &directory) {
-  UNUSED_ARG(directory)
+  UNUSED_ARG(directory);
   auto userSubWindow = MantidQt::API::InterfaceManager().createSubWindow("ISIS Reflectometry");
   auto mwv = dynamic_cast<QtMainWindowView *>(userSubWindow);
   auto batches = map["batches"].toList();

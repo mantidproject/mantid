@@ -75,8 +75,8 @@ public:
 
   /// Read in from stream and set the value at the given index
   virtual void read(const size_t index, std::istringstream &in) {
-    UNUSED_ARG(index)
-    UNUSED_ARG(in)
+    UNUSED_ARG(index);
+    UNUSED_ARG(in);
   }
 
   /// Specialized type check

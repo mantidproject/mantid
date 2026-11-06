@@ -24,16 +24,16 @@ class CostFuncMock : public CostFuncFitting {
 public:
   std::string name() const override { return "CostFuncMock"; }
   void addVal(FunctionDomain_sptr domain, FunctionValues_sptr values) const override {
-    UNUSED_ARG(domain)
-    UNUSED_ARG(values)
+    UNUSED_ARG(domain);
+    UNUSED_ARG(values);
   }
   void addValDerivHessian(IFunction_sptr function, FunctionDomain_sptr domain, FunctionValues_sptr values,
                           bool evalDeriv = true, bool evalHessian = true) const override {
-    UNUSED_ARG(domain)
-    UNUSED_ARG(values)
-    UNUSED_ARG(evalDeriv)
-    UNUSED_ARG(evalHessian)
-    UNUSED_ARG(function)
+    UNUSED_ARG(domain);
+    UNUSED_ARG(values);
+    UNUSED_ARG(evalDeriv);
+    UNUSED_ARG(evalHessian);
+    UNUSED_ARG(function);
   }
   double val() const override { return 0.0; }
   void deriv(std::vector<double> &) const override {}

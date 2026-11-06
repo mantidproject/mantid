@@ -13,7 +13,7 @@ AlgorithmObserverAdapter::AlgorithmObserverAdapter(PyObject *self) : API::Algori
 
 void AlgorithmObserverAdapter::progressHandle(const API::IAlgorithm *alg, double p, const std::string &msg,
                                               const double estimatedTime, const int progressPrecision) {
-  UNUSED_ARG(alg)
+  UNUSED_ARG(alg);
   try {
     return callMethod<void>(getSelf(), "progressHandle", p, msg, estimatedTime, progressPrecision);
   } catch (UndefinedAttributeError &) {
@@ -30,7 +30,7 @@ void AlgorithmObserverAdapter::startingHandle(API::IAlgorithm_sptr alg) {
 }
 
 void AlgorithmObserverAdapter::finishHandle(const API::IAlgorithm *alg) {
-  UNUSED_ARG(alg)
+  UNUSED_ARG(alg);
   try {
     return callMethod<void>(getSelf(), "finishHandle");
   } catch (UndefinedAttributeError &) {
@@ -39,7 +39,7 @@ void AlgorithmObserverAdapter::finishHandle(const API::IAlgorithm *alg) {
 }
 
 void AlgorithmObserverAdapter::errorHandle(const API::IAlgorithm *alg, const std::string &what) {
-  UNUSED_ARG(alg)
+  UNUSED_ARG(alg);
   try {
     return callMethod<void>(getSelf(), "errorHandle", what);
   } catch (UndefinedAttributeError &) {
