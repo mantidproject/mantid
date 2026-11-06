@@ -16,6 +16,7 @@ Pre-processing parameters
 it can be specified here in which case the specified time zero is used for all calculations.
 
 **First Good Data** This is the first good data value used. By default the first good data is taken from the file. However, the user can manually change the value.
+If the value falls on a bin boundary, the bin starting at that boundary is included.
 The specified first good data is used for all calculations.
 
 **Last Good Data** This is the Last good data value used. By default the last good data is taken from the file. However, the user can manually set the value.

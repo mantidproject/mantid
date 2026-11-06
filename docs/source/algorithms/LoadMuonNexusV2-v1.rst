@@ -61,6 +61,10 @@ In the table below details of the information loaded is shown, for more informat
 +----------------------------------+--------------------------------------------+----------------------------------------+
 | First good time                  | ``instrument/detector_1/first_good_bin``   | FirstGoodData property                 |
 |                                  | and ``instrument/detector_1/resolution``   |                                        |
+|                                  |                                            | Also goes in run object under the name |
+|                                  |                                            | ``FirstGoodData``. If CorrectTime is   |
+|                                  |                                            | true, this is (first good time - time  |
+|                                  |                                            | zero), otherwise the first good time.  |
 +----------------------------------+--------------------------------------------+----------------------------------------+
 | Nexus logs                       | ``/runlog`` entry                          | Sample logs, loaded using LoadNexusLogs|
 +----------------------------------+--------------------------------------------+----------------------------------------+

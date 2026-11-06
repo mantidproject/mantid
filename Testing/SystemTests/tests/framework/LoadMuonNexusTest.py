@@ -15,6 +15,10 @@ def get_loader_name(workspace: Workspace2D) -> str:
     return history[0].getPropertyValue("LoaderName")
 
 
+def get_first_good_data_log(workspace: Workspace2D) -> float:
+    return workspace.run().getLogData("FirstGoodData").value
+
+
 class LoadEMUWithFloatResolution(MantidSystemTest):
     """
     EMU03087 is an old data file produced by CONVERT_NEXUS from MCS binary files.
@@ -71,6 +75,7 @@ class LoadHDF4AndHDF5NexusWhenUsingV2Suffix(MantidSystemTest):
         self.assertDelta(0.56, first_good_data_hdf4, 0.0001)
         first_good_data_hdf5 = output_hdf5[3]
         self.assertDelta(0.56, first_good_data_hdf5, 0.0001)
+        self.assertDelta(get_first_good_data_log(workspace_hdf4), get_first_good_data_log(workspace_hdf5), 0.0001)
 
         result, _ = CompareWorkspaces(Workspace1=workspace_hdf4, Workspace2=workspace_hdf5, Tolerance=1e-5)
         self.assertTrue(result)
@@ -99,6 +104,7 @@ class LoadHDF4AndHDF5NexusWhenUsingV1Suffix(MantidSystemTest):
         self.assertDelta(0.56, first_good_data_hdf4, 0.0001)
         first_good_data_hdf5 = output_hdf5[3]
         self.assertDelta(0.56, first_good_data_hdf5, 0.0001)
+        self.assertDelta(get_first_good_data_log(workspace_hdf4), get_first_good_data_log(workspace_hdf5), 0.0001)
 
         result, _ = CompareWorkspaces(Workspace1=workspace_hdf4, Workspace2=workspace_hdf5, Tolerance=1e-5)
         self.assertTrue(result)
