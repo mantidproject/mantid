@@ -25,8 +25,8 @@
 #include "MantidKernel/UnitLabelTypes.h"
 
 #include "Eigen/Dense"
-#include "boost/math/constants/constants.hpp"
 
+#include <numbers>
 #include <sstream>
 #include <stdexcept>
 
@@ -458,7 +458,7 @@ API::IMDEventWorkspace_sptr ConvertHFIRSCDtoMDE::convertWorkspace(const API::IMD
   double cop = this->getProperty("ObliquityParallaxCoefficient");
   float coeff = static_cast<float>(cop);
 
-  float k = boost::math::float_constants::two_pi / static_cast<float>(wavelength);
+  float k = 2.0f * std::numbers::pi_v<float> / static_cast<float>(wavelength);
   float inv_wl_cube = static_cast<float>(1 / (wavelength * wavelength * wavelength));
   // check convention to determine the sign of k
   std::string convention = Kernel::ConfigService::Instance().getString("Q.convention");
