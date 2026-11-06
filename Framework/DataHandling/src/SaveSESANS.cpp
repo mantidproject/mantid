@@ -21,12 +21,10 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/MantidVersion.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTypes/Core/DateAndTime.h"
-
-#include <boost/algorithm/string/join.hpp>
-#include <boost/algorithm/string/trim.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -35,7 +33,6 @@
 #include <map>
 #include <optional>
 #include <set>
-#include <sstream>
 #include <string>
 
 namespace Mantid::DataHandling {
@@ -47,16 +44,8 @@ namespace {
  * @param value The value to sanitise
  * @return The sanitised value, which is empty if the value only contained whitespace
  */
-std::string sanitiseHeaderValue(std::string value) {
-  std::replace_if(value.begin(), value.end(), [](const char c) { return c == '\n' || c == '\r'; }, ' ');
-  boost::algorithm::trim(value);
-  return value;
-}
-
-template <typename T> std::string toString(const T &value) {
-  std::ostringstream stream;
-  stream << value;
-  return stream.str();
+std::string sanitiseHeaderValue(const std::string &value) {
+  return Kernel::Strings::strip(Kernel::Strings::replaceAll(value, "\n\r", " "));
 }
 
 /**
@@ -78,12 +67,12 @@ std::optional<std::string> distinctValuesInTimeROI(const Kernel::Property *log, 
   }
   std::vector<std::string> values;
   for (const auto &rawValue : timeSeries->filteredValuesAsVector(&roi)) {
-    const auto value = sanitiseHeaderValue(toString(rawValue));
+    const auto value = sanitiseHeaderValue(Kernel::Strings::toString(rawValue));
     if (!value.empty() && (values.empty() || values.back() != value)) {
       values.emplace_back(value);
     }
   }
-  return boost::algorithm::join(values, ", ");
+  return Kernel::Strings::join(values.cbegin(), values.cend(), ", ");
 }
 } // namespace
 
@@ -284,10 +273,7 @@ std::string SaveSESANS::getSamplePosition(const API::MatrixWorkspace_const_sptr 
     positions = distinctValuesInTimeROI<float>(log, roi);
   }
   if (!positions) {
-    positions = distinctValuesInTimeROI<int32_t>(log, roi);
-  }
-  if (!positions) {
-    positions = distinctValuesInTimeROI<int64_t>(log, roi);
+    positions = distinctValuesInTimeROI<int>(log, roi);
   }
   if (positions) {
     return *positions;
