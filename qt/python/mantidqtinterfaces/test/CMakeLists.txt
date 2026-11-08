@@ -1,4 +1,4 @@
-set(TEST_PY_FILES PyChopInstrumentTest.py reduction_application_test.py)
+set(TEST_PY_FILES PyChopInstrumentTest.py)
 
 if(ENABLE_WORKBENCH)
   set(PYUNITTEST_QT_API pyqt${MANTID_QT_VERSION}) # force to use the configured Qt version

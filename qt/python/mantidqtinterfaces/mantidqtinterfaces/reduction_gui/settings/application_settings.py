@@ -10,8 +10,8 @@ Notes:
 From the command line:
 $ cd ~/git/mantid/Code/Mantid/scripts/Interface
 $ python reduction_application.py
-With QSettings staging enabled it uses:
-.config/mantidproject/Mantid Reduction.ini
+It uses:
+.config/Mantid/Mantid Reduction.conf
 From mantidplot:
 .config/Mantid/MantidPlot.conf
 """

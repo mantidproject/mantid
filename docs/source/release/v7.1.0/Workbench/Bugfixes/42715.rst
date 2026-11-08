@@ -1,0 +1,1 @@
+- The change from Mantid 7.0.0 that made Workbench keep its ``QSettings`` files in the local cache directory, on Linux systems with an NFS-backed configuration directory, has been reverted. Workbench once again read and write their settings directly in the configuration directory.
