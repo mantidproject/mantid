@@ -1119,10 +1119,13 @@ void Algorithm::findWorkspaces(WorkspaceVector &workspaces, unsigned int directi
     if (const auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop)) {
       appendWS(workspaceFromWSProperty(*wsProp, ads, prop->value(), checkADS));
     }
-    if (m_checkForStringArrayWorkspaceOutputs) {
-      if (auto strArrProp = dynamic_cast<ArrayProperty<std::string> *>(prop)) {
-        const auto &wsNames((*strArrProp)());
-        for (const auto &wsName : wsNames) {
+    if (!m_checkForStringArrayWorkspaceOutputs) {
+      continue;
+    }
+    if (auto strArrProp = dynamic_cast<ArrayProperty<std::string> *>(prop)) {
+      const auto &wsNames((*strArrProp)());
+      for (const auto &wsName : wsNames) {
+        if (ads.doesExist(wsName)) {
           appendWS(ads.retrieve(wsName));
         }
       }
