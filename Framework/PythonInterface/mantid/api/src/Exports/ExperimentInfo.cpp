@@ -188,8 +188,8 @@ void export_ExperimentInfo() {
            "Return the axis the instrument view is wrapped around by default.")
       .def("getInstrumentName", &ExperimentInfo::getInstrumentName, args("self"),
            "Return the name of the instrument for this experiment.")
-      .def("getReferenceFrame", &ExperimentInfo::getReferenceFrame, args("self"),
-           "Return the reference frame of the instrument for this experiment.")
+      .def("getReferenceFrame", &ExperimentInfo::getReferenceFrame, return_value_policy<RemoveConstSharedPtr>(),
+           args("self"), "Return the reference frame of the instrument for this experiment.")
       .def("setSample", setSample, args("self", "sample"))
       .def("setRun", setRun, args("self", "run"))
       .def("populateInstrumentParameters", &ExperimentInfo::populateInstrumentParameters, (arg("self")),
