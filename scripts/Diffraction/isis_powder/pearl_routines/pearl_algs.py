@@ -173,6 +173,13 @@ def strip_bragg_peaks(ws_list_to_correct, peak_fwhm, peak_tolerance, strip_repea
 
     for i, ws in enumerate(ws_list_to_correct):
         for _ in range(strip_repeat[i]):
-            ws_list_to_correct[i] = mantid.StripPeaks(InputWorkspace=ws_list_to_correct[i], OutputWorkspace=ws_list_to_correct[i], FWHM=peak_fwhm[i], Tolerance=peak_tolerance[i])
+            ws_list_to_correct[i] = mantid.StripPeaks(
+                InputWorkspace=ws_list_to_correct[i],
+                OutputWorkspace=ws_list_to_correct[i],
+                FWHM=peak_fwhm[i],
+                Tolerance=peak_tolerance[i],
+                BackgroundType="Quadratic",
+                HighBackground=False,
+            )
 
     return ws_list_to_correct
