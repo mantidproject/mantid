@@ -1,7 +1,6 @@
 set(SRC_FILES
     src/H5Util.cpp
     src/NexusClasses.cpp
-    src/inverted_napi.cpp
     src/hdf5_type_helper.cpp
     src/NexusDescriptor.cpp
     src/NexusDescriptorLazy.cpp
@@ -16,7 +15,6 @@ set(INC_FILES
     inc/MantidNexus/NexusClasses.h
     inc/MantidNexus/NexusIOHelper.h
     inc/MantidNexus/NexusFile_fwd.h
-    inc/MantidNexus/inverted_napi.h
     inc/MantidNexus/hdf5_type_helper.h
     inc/MantidNexus/NexusDescriptor.h
     inc/MantidNexus/NexusDescriptorLazy.h
@@ -37,7 +35,6 @@ set(TEST_FILES
     NexusFileNapiTest.h
     NexusFileReadWriteTest.h
     NexusAddressTest.h
-    NapiUnitTest.h
     UniqueIDTest.h
 )
 
