@@ -69,13 +69,12 @@ public:
       tracker.traceFromSample(testDir);
       Links results = tracker.getResults();
       TS_ASSERT_EQUALS(results.size(), 2);
-      // showResults(results, m_inst);
+      // showResults(results, *compInfo);
     }
   }
 
   void test_TOPAZ() {
     bool verbose = false;
-    Instrument_const_sptr inst = topazWS->getInstrument();
     // Directly in Z+ = towards the detector center
     for (int azimuth = 0; azimuth < 360; azimuth += 3)
       for (int elev = -89; elev < 89; elev += 3) {
@@ -90,16 +89,15 @@ public:
         Links results = tracker.getResults();
 
         if (verbose)
-          showResults(results, inst);
+          showResults(results, topazWS->componentInfo());
       }
   }
 
 private:
-  void showResults(Links &results, const Instrument_const_sptr &inst) {
+  void showResults(Links &results, ComponentInfo const &componentInfo) {
     Links::const_iterator resultItr = results.begin();
     for (; resultItr != results.end(); ++resultItr) {
-      IComponent_const_sptr component = inst->getComponentByID(resultItr->componentID);
-      std::cout << component->getName() << ", ";
+      std::cout << componentInfo.name(resultItr->componentIndex) << ", ";
     }
     std::cout << "\n";
   }

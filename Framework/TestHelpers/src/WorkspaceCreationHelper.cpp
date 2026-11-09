@@ -67,9 +67,12 @@ using Mantid::MantidVecPtr;
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
 
-const IComponent *baseInstrumentID(const ExperimentInfo &expInfo) {
-  const auto &baseComponentInfo = expInfo.baseComponentInfo();
-  return baseComponentInfo.componentID(baseComponentInfo.root());
+bool hasBaseInstrument(const ExperimentInfo &expInfo, const Instrument &instrument) {
+  return expInfo.baseComponentInfo().hasSameBase(*instrument.makeBaseBeamline().first);
+}
+
+bool haveSameBaseInstrument(const ExperimentInfo &lhs, const ExperimentInfo &rhs) {
+  return lhs.baseComponentInfo().hasSameBase(rhs.baseComponentInfo());
 }
 
 StubAlgorithm::StubAlgorithm(size_t nSteps) : m_Progress(std::make_unique<API::Progress>(this, 0.0, 1.0, nSteps)) {}

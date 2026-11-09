@@ -621,7 +621,7 @@ public:
     const auto legacy = instr->legacyParameters();
     // 3 bank parameters + 2 det parameters + 1 scale parameter
     TS_ASSERT_EQUALS(legacy.size(), 6);
-    Instrument legacyInstrument(baseInstrument, mapOf(legacy, compInfo));
+    Instrument legacyInstrument(baseInstrument, mapOf(legacy, compInfo, *baseInstrument));
 
     TS_ASSERT_EQUALS(legacyInstrument.getDetector(1)->getPos(), bankOffset + V3D(-0.008, -0.0002, 0.0) + detOffset);
     // Was shifted by something less than epsilon so this is the default
@@ -675,7 +675,7 @@ public:
 
     // 2 bank parameters + 0 det parameters
     TS_ASSERT_EQUALS(legacy.size(), 2);
-    Instrument legacyInstrument(baseInstrument, mapOf(legacy, pmap->componentInfo()));
+    Instrument legacyInstrument(baseInstrument, mapOf(legacy, pmap->componentInfo(), *baseInstrument));
 
     TS_ASSERT_EQUALS(legacyInstrument.getDetector(4)->getPos(), V3D(0.0, 0.0, 5.0));
     TS_ASSERT_EQUALS(legacyInstrument.getDetector(5)->getPos(), V3D(0.0, scaley * pitch, 5.0));
@@ -746,10 +746,10 @@ public:
 private:
   /// A map holding the given legacy parameters, so that an instrument built on it reads its positions from them
   static std::shared_ptr<ParameterMap> mapOf(const std::vector<ParameterMap::Entry> &entries,
-                                             const ComponentInfo &componentInfo) {
+                                             const ComponentInfo &componentInfo, const Instrument &instrument) {
     auto pmap = std::make_shared<ParameterMap>();
     for (auto const &[index, parameter] : entries) {
-      pmap->add(componentInfo.componentID(index), parameter);
+      pmap->add(instrument.getComponentByName(componentInfo.fullName(index)).get(), parameter);
     }
     return pmap;
   }

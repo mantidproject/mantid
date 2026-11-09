@@ -80,7 +80,7 @@ public:
 
     // But the base instrument does!
     const auto &baseComponentInfo = ws.baseComponentInfo();
-    TS_ASSERT_EQUALS(baseComponentInfo.componentID(baseComponentInfo.root()), inst1->getComponentID());
+    TS_ASSERT(baseComponentInfo.hasSameBase(*inst1->makeBaseBeamline().first));
     TS_ASSERT_EQUALS(baseComponentInfo.name(baseComponentInfo.root()), "MyTestInst");
   }
 

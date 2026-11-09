@@ -46,7 +46,7 @@ public:
   void testAddLink() {
     Track A(V3D(1, 1, 1), V3D(1.0, 0.0, 0.0));
     CSGObject shape;
-    A.addLink(V3D(2, 2, 2), V3D(3, 3, 3), 2.0, shape, nullptr);
+    A.addLink(V3D(2, 2, 2), V3D(3, 3, 3), 2.0, shape, noComponent);
     const auto &linkFront = A.front();
     const auto &linkBack = A.back();
     TS_ASSERT_EQUALS(&linkFront, &linkBack);
@@ -93,7 +93,7 @@ public:
     for (Track::LType::const_iterator it = A.cbegin(); it != A.cend(); ++it) {
       TS_ASSERT_DELTA(it->distFromStart, 7, 0.0001);
       TS_ASSERT_DELTA(it->distInsideObject, 4, 0.0001);
-      TS_ASSERT_EQUALS(it->componentID, (Component *)nullptr);
+      TS_ASSERT_EQUALS(it->componentIndex, noComponent);
       TS_ASSERT_EQUALS(it->entryPoint, V3D(-5.0, -2.0, 0.0));
       TS_ASSERT_EQUALS(it->exitPoint, V3D(-5.0, 2.0, 0.0));
       index++;
