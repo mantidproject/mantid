@@ -256,8 +256,8 @@ class ReflectometryDatasetBase:
 
     @polarization_efficiencies_entry.setter
     @check_read_only
-    def polarization_efficiencies_entry(self, pol_corr_entry: Optional[str]) -> None:
-        self.polarization_efficiencies_entry = pol_corr_entry
+    def polarization_efficiencies_entry(self, pol_eff_entry: Optional[str]) -> None:
+        self._polarization_efficiencies_entry = pol_eff_entry
 
     @resolution.setter
     @check_read_only
@@ -942,6 +942,9 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             "reduction_timestamp", get_manual_property_value(Prop.REDUCTION_TIMESTAMP, default_value=None), Prop.REDUCTION_TIMESTAMP
         )
         set_simple_dataset_value_from_property("calibration_entry", get_manual_property_value(Prop.CALIB_FILE), Prop.CALIB_FILE)
+        set_simple_dataset_value_from_property(
+            "polarization_efficiencies_entry", get_manual_property_value(Prop.POL_EFF_FILE), Prop.POL_EFF_FILE
+        )
 
         first_trans_files, second_trans_files = dataset.transmission_files or ([], [])
         if use_default or not self.getProperty(Prop.TRANS_FILES_1).isDefault:

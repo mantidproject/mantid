@@ -39,6 +39,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     _FLOOD_WS_COMMENT = "Flood correction workspace or file"
     _FLOOD_RUN_COMMENT = "Flood correction run file"
     _CALIB_FILE_COMMENT = "Calibration file"
+    _POL_EFF_FILE_COMMENT = "Polarization efficiencies file"
     _STITCHED_DATASET_NAME = "Stitched"
 
     _NUM_COLS_BASIC = 3
@@ -438,7 +439,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         ws = self._create_sample_workspace(instrument_name="INTER")
         mock_alg_histories.return_value = self._create_hybrid_validation_history("calib.nxs")
 
-        self._run_save_alg(ws, MetadataSource="HistoryWherePossible")
+        self._run_save_alg(ws, MetadataSource="HistoryWherePossible", IgnoredProperties="PolarizationEfficienciesFile")
 
         self._check_file_header(["#     - file: flood_ws\n#       comment: Flood correction workspace or file"])
 
@@ -451,6 +452,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
             ws,
             MetadataSource="HistoryWherePossible",
             FloodCorrectionSource=["manual_flood.nxs", "Manual flood correction"],
+            IgnoredProperties="PolarizationEfficienciesFile",
         )
 
         self._check_file_header(
@@ -463,7 +465,9 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         ws = self._create_sample_workspace(instrument_name="INTER")
         mock_alg_histories.return_value = self._create_hybrid_validation_history("calib.nxs")
 
-        self._run_save_alg(ws, MetadataSource="HistoryWherePossible", FloodCorrectionSource=[""])
+        self._run_save_alg(
+            ws, MetadataSource="HistoryWherePossible", FloodCorrectionSource=[""], IgnoredProperties="PolarizationEfficienciesFile"
+        )
 
         self._check_file_header(excluded_header_values=["#     - file: flood_ws\n#       comment: Flood correction workspace or file"])
 
@@ -491,6 +495,31 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self._run_save_alg(ws)
 
         self._check_file_header(None, [self._CALIB_FILE_COMMENT])
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_polarization_efficiencies_file_included_in_additional_files(self, mock_alg_histories):
+        filename = "pol_corr_example.nxs"
+        test_path = Path(f"path/to/{filename}")
+        histories_to_create = [(self._REDUCTION_WORKFLOW_ALG, {"PolarizationEfficiencies": str(test_path)})]
+        ws = self._create_sample_workspace()
+
+        self._configure_mock_alg_history(mock_alg_histories, histories_to_create)
+
+        self._run_save_alg(ws)
+
+        self._check_file_header(
+            [self._get_expected_additional_file_metadata({filename: self._POL_EFF_FILE_COMMENT}, self._REDUCTION_HEADING)]
+        )
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_polarization_correction_file_excluded_if_not_in_history(self, mock_alg_histories):
+        histories_to_create = [(self._REDUCTION_WORKFLOW_ALG, {"PolarizationEfficiencies": ""})]
+        ws = self._create_sample_workspace()
+        self._configure_mock_alg_history(mock_alg_histories, histories_to_create)
+
+        self._run_save_alg(ws)
+
+        self._check_file_header(None, [self._POL_EFF_FILE_COMMENT])
 
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
     def test_stitched_data_has_correct_dataset_name(self, mock_alg_histories):
@@ -650,7 +679,13 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
             write_resolution=False,
             include_extra_cols=True,
             MetadataSource="HistoryWherePossible",
-            IgnoredProperties=["FirstTransmissionFileList", "SecondTransmissionFileList", "FloodCorrectionSource", "CalibrationFile"],
+            IgnoredProperties=[
+                "FirstTransmissionFileList",
+                "SecondTransmissionFileList",
+                "FloodCorrectionSource",
+                "CalibrationFile",
+                "PolarizationEfficienciesFile",
+            ],
         )
 
         orso_data = self._check_num_columns_in_file(self._NUM_COLS_EXTENDED)
@@ -733,7 +768,13 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
             write_resolution=False,
             include_extra_cols=True,
             MetadataSource="HistoryWherePossible",
-            IgnoredProperties=["FirstTransmissionFileList", "SecondTransmissionFileList", "FloodCorrectionSource", "CalibrationFile"],
+            IgnoredProperties=[
+                "FirstTransmissionFileList",
+                "SecondTransmissionFileList",
+                "FloodCorrectionSource",
+                "CalibrationFile",
+                "PolarizationEfficienciesFile",
+            ],
         )
 
         self._check_num_columns_in_file(self._NUM_COLS_BASIC)
@@ -978,7 +1019,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         alg_kwargs = {
             "MetadataSource": "HistoryWherePossible",
-            "IgnoredProperties": ["ReductionTimestamp", "SecondTransmissionFileList"],
+            "IgnoredProperties": ["ReductionTimestamp", "SecondTransmissionFileList", "PolarizationEfficienciesFile"],
             "FirstTransmissionFileList": ["manual_first.nxs"],
         }
         self._run_save_alg(ws, **alg_kwargs)
@@ -1010,7 +1051,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         alg_kwargs = {
             "MetadataSource": "HistoryWherePossible",
-            "IgnoredProperties": ["ReductionTimestamp"],
+            "IgnoredProperties": ["ReductionTimestamp", "PolarizationEfficienciesFile"],
             "FirstTransmissionFileList": [""],
         }
         self._run_save_alg(ws, **alg_kwargs)
@@ -1030,7 +1071,9 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         ws = self._create_sample_workspace(instrument_name="INTER")
         mock_alg_histories.return_value = self._create_hybrid_validation_history("calib.nxs")
 
-        self._run_save_alg(ws, MetadataSource="HistoryWherePossible", ReductionTimestamp="")
+        self._run_save_alg(
+            ws, MetadataSource="HistoryWherePossible", ReductionTimestamp="", IgnoredProperties="PolarizationEfficienciesFile"
+        )
 
         self._check_file_header(
             included_header_values=[f"{self._REDUCTION_TIMESTAMP_HEADING} ''"],
@@ -1048,10 +1091,29 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
             "INTER00013463": self._FIRST_TRANS_COMMENT,
             "INTER00013464": self._SECOND_TRANS_COMMENT,
             "flood_ws": self._FLOOD_WS_COMMENT,
+            "pol_corr.nxs": self._POL_EFF_FILE_COMMENT,
         }
         self._check_file_header(
             included_header_values=[self._get_expected_additional_file_metadata(expected_additional_file_entries, self._REDUCTION_HEADING)],
             excluded_header_values=["#     - file: calib.nxs\n#       comment: Calibration file"],
+        )
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_hybrid_source_allows_manual_polarization_correction_file_to_clear_history(self, mock_alg_histories):
+        ws = self._create_sample_workspace(instrument_name="INTER")
+        mock_alg_histories.return_value = self._create_hybrid_validation_history("calib.nxs")
+
+        self._run_save_alg(ws, MetadataSource="HistoryWherePossible", PolarizationEfficienciesFile="")
+
+        expected_additional_file_entries = {
+            "INTER00013463": self._FIRST_TRANS_COMMENT,
+            "INTER00013464": self._SECOND_TRANS_COMMENT,
+            "flood_ws": self._FLOOD_WS_COMMENT,
+            "calib.nxs": self._CALIB_FILE_COMMENT,
+        }
+        self._check_file_header(
+            included_header_values=[self._get_expected_additional_file_metadata(expected_additional_file_entries, self._REDUCTION_HEADING)],
+            excluded_header_values=["#     - file: pol_corr.nxs\n#       comment: Polarization efficiencies file"],
         )
 
     def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER, instrument_name="", ws_name="ws"):
@@ -1149,6 +1211,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
                 "SecondTransmissionRunList": "13464",
                 "FloodWorkspace": "flood_ws",
                 "CalibrationFile": calibration_file,
+                "PolarizationEfficiencies": "pol_corr.nxs",
             },
             [red_history],
         )
