@@ -1062,6 +1062,7 @@ Determines the spline coefficient to use after processing
 the vanadium in :ref:`create_vanadium_pearl_isis-powder-diffraction-ref`
 method. For more details see: :ref:`SplineBackground <algm-SplineBackground>`
 This value is lower on long-mode to deal with the increased noise.
+Can be passed as a single number, or a list with a value for each bank
 
 *Note that if this value is changed 'create_vanadium'
 will need to be called again.*
@@ -1071,7 +1072,7 @@ On PEARL this is set to the following:
 ..  code-block:: python
 
   # Long mode OFF:
-    spline_coefficient: 60
+    spline_coefficient: [45] * 9 + [50] * 3 + [20] * 2
 
   # Long mode ON:
     spline_coefficient: 5
@@ -1160,6 +1161,48 @@ On PEARL this is set to the following:
 ..  code-block:: python
 
   vanadium_absorb_filename: "pearl_absorp_sphere_10mm_newinst2_long.nxs"
+
+.. _vanadium_strip_peak_fwhm_pearl_isis-powder-diffraction-ref:
+
+vanadium_strip_peak_fwhm
+^^^^^^^^^^^^^^^^^^^^^^^^
+Set the full width half maximum used when calling :ref:`algm-StripPeaks-v1`. Can be passed as a single number, or a list with a value for each bank. E.g.
+
+..  code-block:: python
+
+  pearl_example.create_vanadium( ..., vanadium_strip_peak_fwhm = 15, ...)
+  # or
+  pearl_example.create_vanadium( ..., vanadium_strip_peak_fwhm = [15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 20, 20], ...)
+
+On PEARL this is set to the following:
+
+..  code-block:: python
+
+  vanadium_strip_peak_fwhm: [15] * 12 + [100, 60],
+
+.. _vanadium_strip_peak_tolerance_pearl_isis-powder-diffraction-ref:
+
+vanadium_strip_peak_tolerance
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Set the tolerance used when calling :ref:`algm-StripPeaks-v1`. Can be passed as a single number, or a list with a value for each bank.
+
+On PEARL this is set to the following:
+
+..  code-block:: python
+
+  vanadium_strip_peak_fwhm: [8] * 12 + [10, 10]
+
+.. _vanadium_strip_peak_repeat_pearl_isis-powder-diffraction-ref:
+
+vanadium_strip_peak_repeat
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Set the number of times to repeat :ref:`algm-StripPeaks-v1`. Can be passed as a single number, or a list with a value for each bank.
+
+On PEARL this is set to the following:
+
+..  code-block:: python
+
+  vanadium_strip_peak_repeat: [1] * 12 + [2, 2]
 
 .. _nxs_filename_pearl_isis-powder-diffraction-ref:
 
