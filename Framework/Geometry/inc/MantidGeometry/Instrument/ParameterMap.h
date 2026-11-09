@@ -311,8 +311,6 @@ public:
   const Geometry::ComponentInfo &componentInfo() const;
   Geometry::ComponentInfo &mutableComponentInfo();
   Geometry::InstrumentMetadata const &instrumentMetadata() const;
-  size_t detectorIndex(const detid_t detID) const;
-  size_t componentIndex(const Geometry::ComponentID componentId) const;
   const std::vector<Geometry::ComponentID> &componentIds() const;
   void setInstrument(const Instrument *instrument);
 

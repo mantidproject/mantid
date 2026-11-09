@@ -12,6 +12,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/GridDetector.h"
@@ -179,7 +180,18 @@ size_t InstrumentVisitor::commonRegistration(const IComponent &component) {
     (*m_sideBySideViewPositions)[componentIndex] = Kernel::toVector2d(*sideBySideViewPos);
   }
   clearLegacyParameters(m_pmap, component);
+  recordIndex(component, componentIndex);
   return componentIndex;
+}
+
+/// Stores the component index in an unparametrized component, so only the walk of a finished base tree sets it.
+void InstrumentVisitor::recordIndex(const IComponent &component, const size_t componentIndex) const {
+  if (m_pmap) {
+    return;
+  }
+  if (auto const *const comp = dynamic_cast<Component const *>(&component)) {
+    comp->m_index = componentIndex;
+  }
 }
 
 size_t InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
@@ -364,6 +376,7 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
   // Record the ID -> component index mapping
   (*m_componentIdToIndexMap)[detector.getComponentID()] = detectorIndex;
   (*m_componentIds)[detectorIndex] = detector.getComponentID();
+  recordIndex(detector, detectorIndex);
   m_assemblySortedDetectorIndices->emplace_back(detectorIndex);
   (*m_detectorPositions)[detectorIndex] = Kernel::toVector3d(detector.getPos());
   (*m_detectorRotations)[detectorIndex] = Kernel::toQuaterniond(detector.getRotation());

@@ -1485,6 +1485,8 @@ Instrument::makeBeamline(ParameterMap &pmap, const ParameterMap *source) const {
     auto const [componentInfo, detectorInfo] = cachedBeamline();
     return makeWrappers(pmap, *componentInfo, *detectorInfo);
   }
+  // Caching the beamline sets the component indices the detached map's walk relies on
+  cachedBeamline();
   return InstrumentVisitor::makeWrappers(*this, &pmap);
 }
 

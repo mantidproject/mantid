@@ -1143,13 +1143,6 @@ const Geometry::InstrumentMetadata &ParameterMap::instrumentMetadata() const {
   return *m_instrumentMetadata;
 }
 
-/// Only for use by Detector. Returns a detector index for a detector ID.
-size_t ParameterMap::detectorIndex(const detid_t detID) const { return m_instrument->detectorIndex(detID); }
-
-size_t ParameterMap::componentIndex(const ComponentID componentId) const {
-  return m_componentInfo->indexOf(componentId);
-}
-
 /// Only for use by Instrument. Sets the pointer to the owning instrument.
 void ParameterMap::setInstrument(const Instrument *instrument) {
   if (instrument == m_instrument)
