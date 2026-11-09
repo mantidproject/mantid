@@ -21,9 +21,9 @@ std::ostream &operator<<(std::ostream &os, UniformSlicingByTime const &slicing) 
   return (os << "even slices " << slicing.sliceLengthInSeconds() << " seconds long");
 }
 
-bool isNoSlicing(Slicing const &slicing) { return slicing.which() == 0; }
+bool isNoSlicing(Slicing const &slicing) { return slicing.index() == 0; }
 
-bool isInvalid(Slicing const &slicing) { return slicing.which() == 1; }
+bool isInvalid(Slicing const &slicing) { return slicing.index() == 1; }
 
 bool isValid(Slicing const &slicing) { return !isInvalid(slicing); }
 

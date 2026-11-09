@@ -5,14 +5,14 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include <boost/variant.hpp>
 #include <optional>
+#include <variant>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-template <typename Validated, typename Error = boost::blank> class ValidationResult {
+template <typename Validated, typename Error = std::monostate> class ValidationResult {
 public:
   explicit ValidationResult(Validated validItem);
   explicit ValidationResult(Error validationErrors);
@@ -25,11 +25,11 @@ public:
   std::optional<Validated> validElseNone() const;
 
 private:
-  boost::variant<Validated, Error> m_innerResult;
+  std::variant<Validated, Error> m_innerResult;
 };
 
 template <typename Validated, typename Error>
-ValidationResult<Validated, Error>::ValidationResult() : m_innerResult(boost::blank()) {}
+ValidationResult<Validated, Error>::ValidationResult() : m_innerResult(std::monostate()) {}
 
 template <typename Validated, typename Error>
 ValidationResult<Validated, Error>::ValidationResult(Validated validItem) : m_innerResult(std::move(validItem)) {}
@@ -39,19 +39,19 @@ ValidationResult<Validated, Error>::ValidationResult(Error validationErrors)
     : m_innerResult(std::move(validationErrors)) {}
 
 template <typename Validated, typename Error> bool ValidationResult<Validated, Error>::isValid() const {
-  return m_innerResult.which() == 0;
+  return m_innerResult.index() == 0;
 }
 
 template <typename Validated, typename Error> bool ValidationResult<Validated, Error>::isError() const {
-  return m_innerResult.which() == 1;
+  return m_innerResult.index() == 1;
 }
 
 template <typename Validated, typename Error> Validated const &ValidationResult<Validated, Error>::assertValid() const {
-  return boost::get<Validated>(m_innerResult);
+  return std::get<Validated>(m_innerResult);
 }
 
 template <typename Validated, typename Error> Error const &ValidationResult<Validated, Error>::assertError() const {
-  return boost::get<Error>(m_innerResult);
+  return std::get<Error>(m_innerResult);
 }
 
 template <typename Validated, typename Error>

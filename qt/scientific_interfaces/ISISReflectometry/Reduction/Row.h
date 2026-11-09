@@ -11,7 +11,6 @@
 #include "ReductionOptionsMap.h"
 #include "ReductionWorkspaces.h"
 #include <boost/range/algorithm/set_algorithm.hpp>
-#include <boost/variant.hpp>
 #include <optional>
 #include <string>
 #include <vector>
