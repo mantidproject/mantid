@@ -148,6 +148,7 @@ public:
   bool hasEquivalentSource(const ComponentInfo &other) const;
   bool hasSample() const;
   bool hasEquivalentSample(const ComponentInfo &other) const;
+  bool hasSameBase(ComponentInfo const &other) const;
   bool hasDetectors(const size_t componentIndex) const;
   size_t source() const;
   size_t sample() const;

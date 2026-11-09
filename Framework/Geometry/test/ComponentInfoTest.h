@@ -1210,6 +1210,27 @@ public:
     TS_ASSERT_EQUALS(std::get<0>(wrappers)->referenceFrame(), frame);
   }
 
+  void test_hasSameBase_for_clones_of_the_cached_beamline() {
+    auto const instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    auto const [base, baseDetectorInfo] = instrument->makeBaseBeamline();
+    ParameterMap pmap;
+    auto const [attached, attachedDetectorInfo] = instrument->makeBeamline(pmap);
+    auto const copy = attached->cloneWithoutDetectorInfo();
+
+    TS_ASSERT(base->hasSameBase(*attached));
+    TS_ASSERT(attached->hasSameBase(*base));
+    TS_ASSERT(copy->hasSameBase(*base));
+  }
+
+  void test_hasSameBase_is_false_for_another_instrument() {
+    auto const instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    auto const other = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    auto const [base, baseDetectorInfo] = instrument->makeBaseBeamline();
+    auto const [otherBase, otherDetectorInfo] = other->makeBaseBeamline();
+
+    TS_ASSERT(!base->hasSameBase(*otherBase));
+  }
+
   void test_referenceFrame_is_kept_by_a_copy() {
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
     const auto frame = std::make_shared<ReferenceFrame>(X, Y, Left, "source");
