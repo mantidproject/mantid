@@ -13,11 +13,11 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/muParser_Silent.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
+#include <muParser.h>
 
 namespace Mantid::Algorithms {
 

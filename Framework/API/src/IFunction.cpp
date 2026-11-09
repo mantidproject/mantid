@@ -24,7 +24,6 @@
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/ParameterInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/Logger.h"
@@ -33,6 +32,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UsageService.h"
+#include <muParser.h>
 
 #include <boost/lexical_cast.hpp>
 
