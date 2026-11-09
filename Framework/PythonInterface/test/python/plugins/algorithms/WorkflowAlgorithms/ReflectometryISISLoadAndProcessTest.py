@@ -5,10 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import math
+import numpy as np
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, patch
 
 from mantid import config, FileFinder
 from mantid.api import AnalysisDataService
@@ -171,7 +172,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         history = ["ReflectometryReductionOneAuto", "GroupWorkspaces"]
         self._check_history(AnalysisDataService.retrieve("IvsQ_binned_13460"), history)
 
-    def test_input_workspace_with_requested_calibration_is_reused(self):
+    def test_cache_reuse_does_not_depend_on_calibration_logs(self):
         self._create_workspace(13460, "TOF_")
         AddSampleLog(
             Workspace="TOF_13460",
@@ -184,7 +185,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
 
         workspace_name = alg._getRunFromADSOrNone("13460", False)
 
-        self.assertEqual(workspace_name, "TOF_13460")
+        self.assertEqual("TOF_13460", workspace_name)
 
     def test_input_run_that_is_in_ADS_without_prefix_is_not_reloaded(self):
         self._create_workspace(13460)
@@ -241,6 +242,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             "TOF_14966_2",
             "TOF",
         ]
+        outputs.append("TOF_14966")
         self._assert_run_algorithm_succeeds(args, outputs)
         # RROA is called for each member of the group and then they are grouped together to form the output group
         history = ["ReflectometryReductionOneAuto", "ReflectometryReductionOneAuto", "GroupWorkspaces"]
@@ -271,10 +273,10 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
     def test_hide_workspaces_option_hides_input_workspaces(self):
         args = self._default_options
         args["InputRunList"] = "13460"
-        args["FirstTransmissionRunList"] = "13460"
+        args["FirstTransmissionRunList"] = "13463"
         args["ProcessingInstructions"] = "4"
         args["HideInputWorkspaces"] = True
-        outputs = ["IvsQ_13460", "IvsQ_binned_13460", "TRANS_LAM_13460"]
+        outputs = ["IvsQ_13460", "IvsQ_binned_13460", "TRANS_LAM_13463"]
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ["ReflectometryISISPreprocess", "ReflectometryISISPreprocess", "ReflectometryReductionOneAuto", "GroupWorkspaces"]
         self._check_history(AnalysisDataService.retrieve("IvsQ_binned_13460"), history)
@@ -305,10 +307,13 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._create_workspace(13462, "TOF_")
         args = self._default_options
         args["InputRunList"] = "13461, 13462"
-        outputs = ["IvsQ_13461+13462", "IvsQ_binned_13461+13462", "TOF_13461", "TOF_13462", "TOF_13461+13462", "TOF"]
+        outputs = ["IvsQ_13461+13462", "IvsQ_binned_13461+13462", "TOF_13461", "TOF_13462", "TOF"]
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ["MergeRuns", "ReflectometryReductionOneAuto", "GroupWorkspaces"]
         self._check_history(AnalysisDataService.retrieve("IvsQ_binned_13461+13462"), history)
+
+        merged_history = AnalysisDataService.retrieve("IvsQ_binned_13461+13462").getHistory()
+        self.assertEqual(self._count_clones(merged_history.getAlgorithmHistory(merged_history.size() - 1)), 0)
 
     def test_trans_run_is_not_reloaded_if_in_ADS(self):
         self._create_workspace(13460, "TOF_")
@@ -441,7 +446,6 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             "TOF_13460",
             "TRANS_13463",
             "TRANS_13464",
-            "TRANS_13463+13464",
             "TRANS_LAM_13463+13464",
             "TOF",
         ]
@@ -662,6 +666,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             "TOF_12345_1",
             "TOF_12345_2",
         ]
+        outputs.append("TOF_12345")
         self._assert_run_algorithm_succeeds(args, outputs)
         history = [
             "CreateSampleWorkspace",
@@ -679,8 +684,9 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._create_workspace(13463, "TOF_")
         args = self._default_options
         args["InputRunList"] = "13460, 13463"
-        outputs = ["IvsQ_13460+13463", "IvsQ_binned_13460+13463", "TOF", "TOF_13460+13463", "TOF_13460_1", "TOF_13460_2", "TOF_13463"]
+        outputs = ["IvsQ_13460+13463", "IvsQ_binned_13460+13463", "TOF", "TOF_13460_1", "TOF_13460_2", "TOF_13463"]
 
+        outputs.append("TOF_13460")
         self._assert_run_algorithm_succeeds(args, outputs)
 
     def test_fails_with_mixed_unit_input_workspace_group(self):
@@ -698,7 +704,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         GroupWorkspaces("12345, 67890", OutputWorkspace="no_TOF_group")
         args = self._default_options
         args["InputRunList"] = "12345, 67890"
-        outputs = ["no_TOF_group", "TOF_12345+67890", "12345", "67890"]
+        outputs = ["no_TOF_group", "12345", "67890"]
         self._assert_run_algorithm_succeeds(args, outputs)
 
     def test_group_TOF_workspaces_succeeds_with_only_TOF_workspaces(self):
@@ -707,7 +713,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args["InputRunList"] = "13460, 13463"
         args["GroupTOFWorkspaces"] = True
-        outputs = ["IvsQ_13460+13463", "IvsQ_binned_13460+13463", "TOF", "TOF_13460+13463", "TOF_13460", "TOF_13463"]
+        outputs = ["IvsQ_13460+13463", "IvsQ_binned_13460+13463", "TOF", "TOF_13460", "TOF_13463"]
         self._assert_run_algorithm_succeeds(args, outputs)
 
     def test_group_TOF_workspaces_succeeds_with_TOF_group(self):
@@ -716,7 +722,8 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args["InputRunList"] = "13460, 13463"
         args["GroupTOFWorkspaces"] = True
-        outputs = ["IvsQ_13460+13463", "IvsQ_binned_13460+13463", "TOF", "TOF_13460+13463", "TOF_13460_1", "TOF_13460_2", "TOF_13463"]
+        outputs = ["IvsQ_13460+13463", "IvsQ_binned_13460+13463", "TOF", "TOF_13460_1", "TOF_13460_2", "TOF_13463"]
+        outputs.append("TOF_13460")
         self._assert_run_algorithm_succeeds(args, outputs)
 
     def test_group_TOF_workspaces_fails_with_mixed_unit_workspace_group(self):
@@ -727,7 +734,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args["InputRunList"] = "13460, mixed_unit_group"
         args["GroupTOFWorkspaces"] = True
-        outputs = ["IvsQ_13460+13463", "IvsQ_binned_13460+13463", "TOF", "TOF_13460+13463", "TOF_13460", "TOF_13463", "12345"]
+        outputs = ["IvsQ_13460+13463", "IvsQ_binned_13460+13463", "TOF", "TOF_13460", "TOF_13463", "12345"]
         self._assert_run_algorithm_fails(args, outputs)
 
     def test_group_TOF_workspaces_succeeds_with_no_TOF_input_workspace_groups_which_remain_unchanged(self):
@@ -737,7 +744,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args["InputRunList"] = "12345, 67890"
         args["GroupTOFWorkspaces"] = True
-        outputs = ["no_TOF_group", "TOF_12345+67890", "12345", "67890"]
+        outputs = ["no_TOF_group", "12345", "67890"]
         self._assert_run_algorithm_succeeds(args, outputs)
 
     def test_sum_banks_runs_for_2D_detector_workspace_when_detector_ROI_specified(self):
@@ -780,6 +787,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             "TOF_summed_segment",
         ]
 
+        outputs.append("TOF_38415")
         self._assert_run_algorithm_succeeds(args, outputs)
 
         self.assertEqual(list(AnalysisDataService.retrieve("IvsQ_38415").getNames()), ["IvsQ_38415_1", "IvsQ_38415_2"])
@@ -1018,7 +1026,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
                         alg.setProperty("NominalSpecularPixelSpectrumNo", nominal)
 
                     with patch.object(alg, "_find_specular_pixel_spectrum_no", return_value=280.5) as fit:
-                        _, angle = alg._calibrate_workspace("TOF_1", adjust_theta=True)
+                        _, angle = alg._calibrate_workspace(AnalysisDataService.retrieve("TOF_1"), adjust_theta=True)
 
                     if actual is None:
                         fit.assert_called_once()
@@ -1071,7 +1079,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             patch.object(alg, "createChildAlgorithm", return_value=calibration_alg),
             patch.object(alg, "_setInstrumentSpecificProperties", return_value=(0.5, True)),
         ):
-            _, angle = alg._calibrate_workspace("TOF_1", adjust_theta=True)
+            _, angle = alg._calibrate_workspace(AnalysisDataService.retrieve("TOF_1"), adjust_theta=True)
 
         self.assertEqual(0.5, angle)
         self.assertFalse(workspace.run().hasProperty("reflectometry_adjusted_theta"))
@@ -1122,71 +1130,106 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             patch.object(alg, "createChildAlgorithm", return_value=calibration_alg),
             patch.object(alg, "_setInstrumentSpecificProperties", return_value=(0.0, True)),
         ):
-            alg._calibrate_workspace("TOF_1", adjust_theta=False, experiment_angle=0.0, specular_spectrum_no=280.0)
+            alg._calibrate_workspace(
+                AnalysisDataService.retrieve("TOF_1"), adjust_theta=False, experiment_angle=0.0, specular_spectrum_no=280.0
+            )
 
         self.assertTrue(workspace.run().hasProperty("reflectometry_calibration_file"))
         self.assertFalse(workspace.run().hasProperty("reflectometry_adjusted_theta"))
-        self.assertFalse(alg._inputs_require_raw_reload(["TOF_1"]))
 
-    def test_mixed_calibration_states_require_raw_inputs_before_summing(self):
-        self._create_workspace(1, "TOF_")
-        self._create_workspace(2, "TOF_")
-        AddSampleLog(
-            Workspace="TOF_1",
-            LogName="reflectometry_calibration_file",
-            LogText=self._CALIBRATION_TEST_DATA,
+    def test_single_input_working_copy_stays_out_of_ads(self):
+        self._create_workspace(13460, "TOF_")
+        original_reduce = ReflectometryISISLoadAndProcess._reduce
+
+        def reduce(alg, workspace, *args):
+            for name in AnalysisDataService.getObjectNames():
+                self.assertIsNot(AnalysisDataService.retrieve(name), workspace)
+            return original_reduce(alg, workspace, *args)
+
+        with patch.object(ReflectometryISISLoadAndProcess, "_reduce", new=reduce):
+            self._assert_run_algorithm_succeeds(dict(self._default_options, InputRunList="13460"))
+        history = AnalysisDataService.retrieve("IvsQ_binned_13460").getHistory()
+        self.assertEqual(self._count_clones(history.getAlgorithmHistory(history.size() - 1)), 1)
+
+    @staticmethod
+    def _count_clones(history):
+        return int(history.name() == "CloneWorkspace") + sum(
+            ReflectometryISISLoadAndProcessTest._count_clones(child) for child in history.getChildHistories()
         )
-        alg = ReflectometryISISLoadAndProcess()
-        alg.initialize()
-        alg.setProperty("CalibrationFile", self._CALIBRATION_TEST_DATA)
 
-        self.assertTrue(alg._inputs_require_raw_reload(["TOF_1", "TOF_2"]))
-
-    def test_incompatible_calibration_requires_raw_inputs_before_summing(self):
-        self._create_workspace(1, "TOF_")
-        AddSampleLog(Workspace="TOF_1", LogName="reflectometry_calibration_file", LogText="a_different_calibration.dat")
-        alg = ReflectometryISISLoadAndProcess()
-        alg.initialize()
-        alg.setProperty("CalibrationFile", self._CALIBRATION_TEST_DATA)
-
-        self.assertTrue(alg._inputs_require_raw_reload(["TOF_1"]))
-
-    def test_angle_corrected_input_requires_raw_reload(self):
-        self._create_workspace(1, "TOF_")
-        AddSampleLog(
-            Workspace="TOF_1",
-            LogName="reflectometry_calibration_file",
-            LogText=self._CALIBRATION_TEST_DATA,
+    def test_repeated_calibration_uses_initial_cache_without_reloading(self):
+        args = dict(
+            self._default_options,
+            InputRunList="INTER45455",
+            CalibrationFile=self._CALIBRATION_TEST_DATA,
+            AnalysisMode="MultiDetectorAnalysis",
+            ROIDetectorIDs=self._INTER45455_DETECTOR_ROI,
         )
-        alg = ReflectometryISISLoadAndProcess()
-        alg.initialize()
-        alg.setProperty("CalibrationFile", self._CALIBRATION_TEST_DATA)
+        del args["ProcessingInstructions"]
+        self._assert_run_algorithm_succeeds(args)
+        output_history = AnalysisDataService.retrieve("IvsQ_binned_45455").getHistory()
+        self.assertEqual(self._count_clones(output_history.getAlgorithmHistory(output_history.size() - 1)), 1)
+        cached = AnalysisDataService.retrieve("TOF_45455")
+        original_y = cached.extractY().copy()
+        positions = [cached.detectorInfo().position(i) for i in range(cached.detectorInfo().size())]
+        baseline = AnalysisDataService.retrieve("IvsQ_binned_45455").extractY().copy()
+        with patch.object(ReflectometryISISLoadAndProcess, "_loadRun", side_effect=AssertionError("Cache should be reused")):
+            self._assert_run_algorithm_succeeds(dict(args, CalibrationFile=""))
+            self._assert_run_algorithm_succeeds(args)
+        np.testing.assert_allclose(AnalysisDataService.retrieve("IvsQ_binned_45455").extractY(), baseline)
+        np.testing.assert_array_equal(cached.extractY(), original_y)
+        self.assertFalse(cached.run().hasProperty("reflectometry_calibration_file"))
+        self.assertEqual([cached.detectorInfo().position(i) for i in range(cached.detectorInfo().size())], positions)
 
-        self.assertFalse(alg._inputs_require_raw_reload(["TOF_1"]))
-        AddSampleLog(Workspace="TOF_1", LogName="reflectometry_adjusted_theta", LogText="0.5", LogType="Number")
-        self.assertTrue(alg._inputs_require_raw_reload(["TOF_1"]))
-
-    def test_raw_cached_input_is_retained_when_another_input_requires_reload(self):
-        self._create_workspace(1, "cached_")
-        self._create_workspace(2, "cached_")
-        self._create_workspace(2, "raw_")
-        AddSampleLog(
-            Workspace="cached_2",
-            LogName="reflectometry_calibration_file",
-            LogText=self._CALIBRATION_TEST_DATA,
+    def test_event_reduction_preserves_cached_events_and_monitors(self):
+        self._create_event_workspace(38415, "TOF_", bank_pixel_width=2)
+        cached = AnalysisDataService.retrieve("TOF_38415")
+        monitors = AnalysisDataService.retrieve("TOF_38415_monitors")
+        event_count = cached.getNumberEvents()
+        monitor_y = monitors.extractY().copy()
+        args = dict(
+            self._default_options,
+            **self._default_slice_options_dummy_run,
+            InputRunList="38415",
+            ProcessingInstructions="4-7",
         )
-        alg = ReflectometryISISLoadAndProcess()
-        alg.initialize()
-        alg.setProperty("CalibrationFile", self._CALIBRATION_TEST_DATA)
+        self._assert_run_algorithm_succeeds(args)
+        self.assertEqual(cached.getNumberEvents(), event_count)
+        self.assertFalse(cached.spectrumInfo().isMasked(1))
+        np.testing.assert_array_equal(monitors.extractY(), monitor_y)
+        self.assertFalse(any(name.startswith("_refl_work_") for name in AnalysisDataService.getObjectNames()))
 
-        with (
-            patch.object(alg, "_getRunFromADSOrNone", side_effect=["cached_1", "cached_2"]),
-            patch.object(alg, "_loadRun", return_value="raw_2") as load_run,
-        ):
-            workspaces = alg._getInputWorkspaces(["1", "2"], isTrans=False)
+    def test_hidden_group_bank_summing_does_not_leave_working_copies(self):
+        self._create_workspace_group(38415, 2, "__TOF_", self._create_2D_detector_workspace)
+        args = dict(self._default_options, InputRunList="38415", HideInputWorkspaces=True, ROIDetectorIDs=self._TEST_2D_WS_DETECTOR_ROI)
+        alg = create_algorithm("ReflectometryISISLoadAndProcess", **args)
+        with patch.object(ReflectometryISISLoadAndProcess, "_loadRun", side_effect=AssertionError("Cache should be reused")):
+            for _ in range(2):
+                assertRaisesNothing(self, alg.execute)
+        self.assertTrue(AnalysisDataService.doesExist("__TOF_38415"))
+        self.assertTrue(AnalysisDataService.doesExist("__TOF_38415_1_summed_segment"))
+        self.assertFalse(any("_refl_work_" in name for name in AnalysisDataService.getObjectNames()))
 
-        self.assertEqual(["cached_1", "raw_2"], workspaces)
-        self.assertEqual([call("2", False)], load_run.call_args_list)
+    def test_overlapping_run_lists_are_rejected_before_loading(self):
+        cases = [
+            {"InputRunList": "1,2", "FirstTransmissionRunList": "2"},
+            {"InputRunList": "1,2", "SecondTransmissionRunList": "2"},
+            {"InputRunList": "1", "FirstTransmissionRunList": "2,3", "SecondTransmissionRunList": "3,4"},
+        ]
+        for inputs in cases:
+            with self.subTest(inputs=inputs):
+                alg = create_algorithm("ReflectometryISISLoadAndProcess", **dict(self._default_options, **inputs))
+                alg.setRethrows(True)
+                with patch.object(ReflectometryISISLoadAndProcess, "_loadRun") as load:
+                    with self.assertRaisesRegex(RuntimeError, "Some invalid properties found|same run"):
+                        alg.execute()
+                    load.assert_not_called()
+
+    def test_distinct_workspace_names_with_the_same_run_number_are_accepted(self):
+        self._create_workspace(1, "sample_")
+        self._create_workspace(1, "transmission_")
+        args = dict(self._default_options, InputRunList="sample_1", FirstTransmissionRunList="transmission_1")
+        self._assert_run_algorithm_succeeds(args)
 
     def test_uncalibrated_workspace_in_ads_is_reused_when_calibration_file_is_provided(self):
         self._create_workspace(45455, "custom_")
@@ -1310,6 +1353,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             "TOF",
         ]
 
+        outputs.append("TOF_14966")
         self._assert_run_algorithm_succeeds(args, outputs)
 
         self._check_polarized_group_history(AnalysisDataService.retrieve("IvsQ_binned_14966_1"))
@@ -1347,13 +1391,15 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         )
         AddSampleLog(Workspace=ws, LogName="run_number", LogText=str(run_number))
 
-    def _create_event_workspace(self, run_number, prefix="", suffix="", includeMonitors=True):
+    def _create_event_workspace(self, run_number, prefix="", suffix="", includeMonitors=True, bank_pixel_width=1):
         name = prefix + str(run_number) + suffix
-        CreateSampleWorkspace(WorkspaceType="Event", NumBanks=1, NumMonitors=3, BankPixelWidth=1, XMin=200, OutputWorkspace=name)
+        CreateSampleWorkspace(
+            WorkspaceType="Event", NumBanks=1, NumMonitors=3, BankPixelWidth=bank_pixel_width, XMin=200, OutputWorkspace=name
+        )
         if includeMonitors:
             CropWorkspace(InputWorkspace=name, StartWorkspaceIndex=0, EndWorkspaceIndex=2, OutputWorkspace=name + "_monitors")
             Rebin(InputWorkspace=name + "_monitors", Params="0,200,20000", OutputWorkspace=name + "_monitors", PreserveEvents=False)
-        CropWorkspace(InputWorkspace=name, StartWorkspaceIndex=3, EndWorkspaceIndex=3, OutputWorkspace=name)
+        CropWorkspace(InputWorkspace=name, StartWorkspaceIndex=3, EndWorkspaceIndex=2 + bank_pixel_width**2, OutputWorkspace=name)
         AddSampleLog(Workspace=name, LogName="run_number", LogText=str(run_number))
         AddTimeSeriesLog(Workspace=name, Name="proton_charge", Time="2010-01-01T00:00:00", Value=100)
         AddTimeSeriesLog(Workspace=name, Name="proton_charge", Time="2010-01-01T00:10:00", Value=100)
@@ -1418,7 +1464,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         """Check whether the given algorithm has run by checking the workspace child algorithm history"""
         history = ws.getHistory()
         reductionHistory = history.getAlgorithmHistory(history.size() - 1)
-        childHistory = reductionHistory.getChildHistories()[child_idx]
+        childHistory = next(child for child in reductionHistory.getChildHistories() if child.name() == "ReflectometryReductionOneAuto")
         childAlgs = childHistory.getChildHistories()
         algNames = [alg.name() for alg in childAlgs]
         self.assertEqual(alg_name in algNames, is_present)
@@ -1437,7 +1483,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
         actual = AnalysisDataService.getObjectNames()
         if expected is not None:
-            self.assertEqual(set(actual), set(expected))
+            self.assertEqual({name for name in actual if not name.startswith("__")}, set(expected))
 
     def _assert_run_algorithm_fails(self, args, namesNotExpected=None):
         """Run the algorithm with the given args and check it fails to produce output"""

@@ -53,6 +53,15 @@ The below is an example of a valid POLREF calibration file:
 
 For POLREF input, all non-monitor detector spectra in the input workspace are considered. Only spectrum numbers covered by the calibration file range are moved; monitors and spectrum numbers outside the calibration range are left unchanged. Spectrum numbers in the calibration file must be integer. Missing spectrum numbers inside the calibration range, for example dead pixels, are supported by linear interpolation between the neighbouring spectrum-number rows. Fractional specular pixel spectrum numbers are also supported by the same interpolation.
 
+Input preservation
+------------------
+
+``PreserveInputWorkspace`` defaults to ``True``: calibration creates a copy and
+preserves the input. Set it to ``False`` only for a disposable working copy;
+calibration then modifies that workspace in place. Child-algorithm callers can
+pass workspace objects without registering them in the ADS. In-place calibration
+changes detector geometry and may update the experiment-angle log.
+
 Usage
 -------
 

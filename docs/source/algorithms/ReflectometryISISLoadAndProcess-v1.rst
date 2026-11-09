@@ -15,6 +15,7 @@ This algorithm performs full preparation and processing for a single run or comb
 The steps this algorithm performs are:
 
 - Ensure workspaces are loaded and are of the correct type.
+- Create one working TOF copy for a single input, or use the merged result for multiple inputs.
 - Sum multiple input runs into a single workspace, if there is more than one.
 - Sum multiple transmission runs into a single workspace, if there is more than one.
 - Apply detector calibration to each summed workspace, if requested.
@@ -25,11 +26,11 @@ The steps this algorithm performs are:
 
 Input runs and transmission runs are loaded if required, or existing workspaces are used if they are already loaded. When runs are loaded, they are named based on the run number with a ``TOF_`` or ``TRANS_`` prefix. To determine whether workspaces are already loaded, workspace names are matched based on the run number with or without this prefix. Other naming formats are not considered to match.
 
-If a value is provided for the ``CalibrationFile`` property, input runs are summed before the resulting workspace is calibrated using :ref:`algm-ReflectometryISISCalibration`. Existing workspaces carrying a matching ``reflectometry_calibration_file`` run log can be reused when their geometry has not already received angle correction (see below).
+The sample, first transmission, and second transmission run lists must not contain identical input strings. This validation compares the supplied strings; it does not resolve aliases or compare workspace run numbers.
+
+If a value is provided for the ``CalibrationFile`` property, input runs are summed before the resulting workspace is calibrated using :ref:`algm-ReflectometryISISCalibration`. The initial TOF cache is preserved. Every reduction operates on fresh working copies, so changing calibration or angle correction settings does not require reloading the datasets. Existing TOF workspaces are assumed to contain the initial data; calibration logs are not used to decide whether to reload them.
 
 If a calibration file is provided for POLREF data, a specific POLREF calibration workflow is invoked via :ref:`algm-ReflectometryISISCalibration`. In this case, ``CorrectDetectors`` must be set to ``False`` as the detector position correction is applied as part of the calibration workflow. For this workflow, the experiment angle is taken from ``ThetaIn`` or, when ``ThetaIn`` is not supplied, from the run log selected by ``ThetaLogName``. At least one of ``NominalSpecularPixelSpectrumNo`` and ``ActualSpecularPixelSpectrumNo`` must be supplied (can be fractional):
-
- (``reflectometry_adjusted_theta`` log). The geometry of these workspaces depends on an earlier experiment angle and fitted specular position.
 
 - If both ``NominalSpecularPixelSpectrumNo`` and ``ActualSpecularPixelSpectrumNo`` are supplied, the experiment angle is corrected by the difference between their angular positions.
 - If only ``NominalSpecularPixelSpectrumNo`` is supplied the actual specular pixel is obtained by fitting the specular peak on the summed sample workspace, then the experiment angle is corrected by the difference between actual and nominal angular positions.
@@ -37,7 +38,20 @@ If a calibration file is provided for POLREF data, a specific POLREF calibration
 
 The corrected experiment angle is used both for detector calibration and reduction. Transmission workspaces are aligned at zero experiment angle using the nominal pixel.
 
-If angle correction is applied, a ``reflectometry_adjusted_theta`` log is added to the workspace. These workspaces cannot be reused in further reductions as post-correction the geometry of these workspaces depends on a specific experiment angle and fitted specular position.
+If angle correction is applied, a ``reflectometry_adjusted_theta`` log is added to the workspace. This log describes the processed working workspace; the initial cached workspace remains unchanged.
+
+Working workspaces are passed directly between child algorithms. Calibration and
+detector-position correction reuse these owned copies in place. For multiple runs,
+``MergeRuns`` creates the working result directly from the cached originals, without
+cloning each original first. Separate outputs needed for slicing, bank summation,
+and unit conversion are still created.
+
+Ordinary working copies remain outside the ADS. Temporary registrations are used
+only by the slicing and workspace-group paths that require workspace names, and
+are removed after processing, including on failure. Cached TOF data, geometry, and
+event monitors remain available for subsequent reductions. Intermediate summed
+TOF inputs are no longer retained in the ADS; reduced outputs and bank-summed
+outputs retain their existing names.
 
 If time slicing is enabled, the input run must be an event workspace and have monitors loaded; otherwise, it must be a histogram workspace. If the workspace already exists but is the incorrect type or is missing monitors, it will be reloaded.
 
@@ -88,7 +102,7 @@ Output:
 
 .. testoutput:: ExSumRuns
 
-    Workspaces in the ADS after reduction: ['IvsQ_13460+13462', 'IvsQ_binned_13460+13462', 'TOF', 'TOF_13460', 'TOF_13460+13462', 'TOF_13462']
+    Workspaces in the ADS after reduction: ['IvsQ_13460+13462', 'IvsQ_binned_13460+13462', 'TOF', 'TOF_13460', 'TOF_13462']
 
 **Example: Sum multiple transmission runs into a single input**
 
@@ -103,7 +117,7 @@ Output:
 
 .. testoutput:: ExSumTransmissionRuns
 
-	Workspaces in the ADS after reduction: ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF', 'TOF_13460', 'TRANS_13463', 'TRANS_13463+13464', 'TRANS_13464', 'TRANS_LAM_13463+13464']
+	Workspaces in the ADS after reduction: ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF', 'TOF_13460', 'TRANS_13463', 'TRANS_13464', 'TRANS_LAM_13463+13464']
 
 **Example: Two separate transmission run inputs**
 
