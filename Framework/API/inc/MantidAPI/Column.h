@@ -45,10 +45,7 @@ public:
   /// Type of the column data.
   const std::string &type() const { return m_type; }
   /// return value casted to double (should be pure virtual)
-  virtual double operator[](size_t i) const {
-    UNUSED_ARG(i);
-    return std::numeric_limits<double>::quiet_NaN();
-  }
+  virtual double operator[]([[maybe_unused]] size_t i) const { return std::numeric_limits<double>::quiet_NaN(); }
   /// Renames the column.
   void setName(const std::string &str) { m_name = str; }
 
@@ -78,8 +75,8 @@ public:
 
   /// Read in from stream and set the value at the given index
   virtual void read(const size_t index, std::istringstream &in) {
-    UNUSED_ARG(index)
-    UNUSED_ARG(in)
+    UNUSED_ARG(index);
+    UNUSED_ARG(in);
   }
 
   /// Specialized type check

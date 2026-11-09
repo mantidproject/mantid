@@ -154,7 +154,7 @@ void PawleyParameterFunction::function(const FunctionDomain &domain, FunctionVal
 
 /// This method does nothing.
 void PawleyParameterFunction::functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) {
-  UNUSED_ARG(domain)
+  UNUSED_ARG(domain);
   UNUSED_ARG(jacobian);
 }
 

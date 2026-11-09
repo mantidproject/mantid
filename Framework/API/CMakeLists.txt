@@ -565,7 +565,7 @@ add_subdirectory(test)
 target_include_directories(
   API PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/API> $<INSTALL_INTERFACE:include/Mantid>
 )
-generate_mantid_export_header(API TRUE)
+generate_mantid_export_header(API TRUE GENERATE_UNUSED_ARG)
 
 # Installation settings
 set(TARGET_EXPORT_NAME "MantidAPITargets")

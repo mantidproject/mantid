@@ -40,7 +40,7 @@ ITransformScale_sptr TransformScaleFactoryImpl::create(const std::string &type) 
  *  @throws Exception::NotImplementedError every time!
  */
 ITransformScale *TransformScaleFactoryImpl::createUnwrapped(const std::string &className) const {
-  UNUSED_ARG(className)
+  UNUSED_ARG(className);
   throw Kernel::Exception::NotImplementedError("Don't use this method - use the safe one!!!");
 }
 

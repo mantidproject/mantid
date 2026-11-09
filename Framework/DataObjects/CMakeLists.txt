@@ -256,7 +256,7 @@ add_subdirectory(test)
 target_include_directories(
   DataObjects PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/DataObjects> $<INSTALL_INTERFACE:include/Mantid>
 )
-generate_mantid_export_header(DataObjects FALSE)
+generate_mantid_export_header(DataObjects FALSE GENERATE_UNUSED_ARG)
 
 # Installation settings
 set(TARGET_EXPORT_NAME "MantidDataObjectsTargets")

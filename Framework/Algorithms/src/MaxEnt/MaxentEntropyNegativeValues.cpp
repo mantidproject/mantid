@@ -56,7 +56,7 @@ std::vector<double> MaxentEntropyNegativeValues::secondDerivative(const std::vec
  */
 std::vector<double> MaxentEntropyNegativeValues::correctValues(const std::vector<double> &values, double newValue) {
 
-  UNUSED_ARG(newValue)
+  UNUSED_ARG(newValue);
 
   // Nothing to correct
   return values;

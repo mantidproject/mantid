@@ -85,7 +85,7 @@ void QtRunsView::initLayout() {
  * according to whether processing is running or not.
  * @param isProcessing: Whether processing is running
  */
-void QtRunsView::updateMenuEnabledState(bool isProcessing) { UNUSED_ARG(isProcessing) }
+void QtRunsView::updateMenuEnabledState(bool isProcessing) { UNUSED_ARG(isProcessing); }
 
 /**
  * Sets the "Autoreduce" button enabled or disabled

@@ -15,6 +15,7 @@
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidDataObjects/TableWorkspace_fwd.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/V3D.h"
 #include <boost/tuple/tuple.hpp>
 
@@ -327,6 +328,10 @@ private:
 };
 } // namespace DataObjects
 } // namespace Mantid
+
+// Instantiated and exported by DataObjects/src/PropertyWithValue.cpp
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::DataObjects::TableWorkspace>>);
 
 #ifndef DataObjects_EXPORTS
 #include "MantidAPI/WorkspaceProperty.h"

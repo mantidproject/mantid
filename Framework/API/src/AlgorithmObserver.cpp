@@ -108,30 +108,30 @@ The default handler is provided (doing nothing).
 */
 void AlgorithmObserver::progressHandle(const IAlgorithm *alg, double p, const std::string &msg,
                                        const double estimatedTime, const int progressPrecision) {
-  UNUSED_ARG(alg)
-  UNUSED_ARG(p)
-  UNUSED_ARG(msg)
-  UNUSED_ARG(estimatedTime)
-  UNUSED_ARG(progressPrecision)
+  UNUSED_ARG(alg);
+  UNUSED_ARG(p);
+  UNUSED_ARG(msg);
+  UNUSED_ARG(estimatedTime);
+  UNUSED_ARG(progressPrecision);
 }
 
 /** Handler of the start notifications. Must be overriden in inherited classes.
 The default handler is provided (doing nothing).
 @param alg :: Shared Pointer to the algorithm sending the notification.
 */
-void AlgorithmObserver::startingHandle(IAlgorithm_sptr alg) { UNUSED_ARG(alg) }
+void AlgorithmObserver::startingHandle(IAlgorithm_sptr alg) { UNUSED_ARG(alg); }
 
 /** Handler of the start notifications. Must be overriden in inherited classes.
 The default handler is provided (doing nothing).
 @param alg :: Pointer to the algorithm sending the notification.
 */
-void AlgorithmObserver::startHandle(const IAlgorithm *alg) { UNUSED_ARG(alg) }
+void AlgorithmObserver::startHandle(const IAlgorithm *alg) { UNUSED_ARG(alg); }
 
 /** Handler of the finish notifications. Must be overriden in inherited classes.
  The default handler is provided (doing nothing).
  @param alg :: Pointer to the algorithm sending the notification.
 */
-void AlgorithmObserver::finishHandle(const IAlgorithm *alg) { UNUSED_ARG(alg) }
+void AlgorithmObserver::finishHandle(const IAlgorithm *alg) { UNUSED_ARG(alg); }
 
 /** Handler of the error notifications. Must be overriden in inherited classes.
 The default handler is provided (doing nothing).
@@ -139,8 +139,8 @@ The default handler is provided (doing nothing).
 @param what :: The error message
 */
 void AlgorithmObserver::errorHandle(const IAlgorithm *alg, const std::string &what) {
-  UNUSED_ARG(alg)
-  UNUSED_ARG(what)
+  UNUSED_ARG(alg);
+  UNUSED_ARG(what);
 }
 /// @endcond
 

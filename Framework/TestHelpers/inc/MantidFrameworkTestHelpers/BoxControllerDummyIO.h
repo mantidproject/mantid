@@ -30,7 +30,7 @@ namespace MantidTestHelpers {
 
     @date March 15, 2013
 */
-class DLLExport BoxControllerDummyIO : public Mantid::API::IBoxControllerIO {
+class BoxControllerDummyIO : public Mantid::API::IBoxControllerIO {
 public:
   BoxControllerDummyIO(const Mantid::API::BoxController *bc);
   ///@return true if the file to write events is opened and false otherwise

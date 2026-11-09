@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/PropertyWithValueJSON.h"
 
 #include <iosfwd>
@@ -70,6 +71,10 @@ template <> struct ToCpp<OptionalBool> {
 };
 
 } // namespace pwvjdetail
+
+// Instantiated and exported by PropertyWithValue.cpp
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<OptionalBool>);
+MANTID_KERNEL_EXTERN_TEMPLATE(PropertyWithValue<std::vector<OptionalBool>>);
 
 } // namespace Kernel
 } // namespace Mantid

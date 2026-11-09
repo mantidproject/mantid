@@ -10,7 +10,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/HistoWorkspace.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/Histogram1D.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 namespace Mantid {
 
@@ -88,6 +90,10 @@ using WorkspaceSingleValue_const_sptr = std::shared_ptr<const WorkspaceSingleVal
 
 } // namespace DataObjects
 } // namespace Mantid
+
+// Instantiated and exported by DataObjects/src/PropertyWithValue.cpp
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::DataObjects::WorkspaceSingleValue>>);
 
 #ifndef DataObjects_EXPORTS
 #include "MantidAPI/WorkspaceProperty.h"
