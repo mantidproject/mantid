@@ -10,6 +10,7 @@ import warnings
 
 import mantid.kernel as kernel
 import mantid.simpleapi as mantid
+from Diffraction.isis_powder.routines.instrument_settings import expand_parameter_list
 from mantid.api import AnalysisDataService, WorkspaceGroup, MatrixWorkspace
 from mantid.dataobjects import Workspace2D
 from Diffraction.isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
@@ -501,8 +502,9 @@ def spline_workspaces(focused_vanadium_spectra, num_splines):
         tof_ws_list.append(mantid.ConvertUnits(InputWorkspace=ws, Target="TOF", OutputWorkspace=out_name))
 
     splined_ws_list = []
-    for ws in tof_ws_list:
-        splined_ws_list.append(mantid.SplineBackground(InputWorkspace=ws, OutputWorkspace=ws, NCoeff=num_splines))
+    num_splines = expand_parameter_list(num_splines, len(tof_ws_list))
+    for bank_index, ws in enumerate(tof_ws_list):
+        splined_ws_list.append(mantid.SplineBackground(InputWorkspace=ws, OutputWorkspace=ws, NCoeff=num_splines[bank_index]))
 
     return splined_ws_list
 
