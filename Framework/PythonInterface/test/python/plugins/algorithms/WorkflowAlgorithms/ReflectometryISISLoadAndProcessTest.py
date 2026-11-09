@@ -1141,10 +1141,9 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._create_workspace(13460, "TOF_")
         original_reduce = ReflectometryISISLoadAndProcess._reduce
 
-        def reduce(alg, workspace, *args):
-            for name in AnalysisDataService.getObjectNames():
-                self.assertIsNot(AnalysisDataService.retrieve(name), workspace)
-            return original_reduce(alg, workspace, *args)
+        def reduce(alg, cloned_workspaces, *args):
+            self.assertEqual(cloned_workspaces[0][1].name(), "")
+            return original_reduce(alg, cloned_workspaces, *args)
 
         with patch.object(ReflectometryISISLoadAndProcess, "_reduce", new=reduce):
             self._assert_run_algorithm_succeeds(dict(self._default_options, InputRunList="13460"))
@@ -1193,43 +1192,94 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             InputRunList="38415",
             ProcessingInstructions="4-7",
         )
-        self._assert_run_algorithm_succeeds(args)
+        original_reduce = ReflectometryISISLoadAndProcess._reduce
+
+        def reduce(alg, *inputs):
+            self.assertFalse(any(name.startswith("_refl_work_") for name in AnalysisDataService.getObjectNames()))
+            return original_reduce(alg, *inputs)
+
+        with patch.object(ReflectometryISISLoadAndProcess, "_reduce", new=reduce):
+            self._assert_run_algorithm_succeeds(args)
         self.assertEqual(cached.getNumberEvents(), event_count)
         self.assertFalse(cached.spectrumInfo().isMasked(1))
         np.testing.assert_array_equal(monitors.extractY(), monitor_y)
         self.assertFalse(any(name.startswith("_refl_work_") for name in AnalysisDataService.getObjectNames()))
 
+    def test_slicing_failure_removes_temporary_inputs(self):
+        self._create_event_workspace(38415, "TOF_")
+        input_workspace = AnalysisDataService.retrieve("TOF_38415")
+        cached_names = set(AnalysisDataService.getObjectNames())
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        cloned_workspace = alg._clone_workspace(input_workspace)
+
+        def fail(cloned_workspace_name, cloned_monitor_workspace_name, output_workspace_name):
+            self.assertTrue(AnalysisDataService.doesExist(cloned_workspace_name))
+            self.assertTrue(AnalysisDataService.doesExist(cloned_monitor_workspace_name))
+            raise RuntimeError("Slicing failed")
+
+        with patch.object(alg, "_runSliceAlgorithm", side_effect=fail):
+            with self.assertRaisesRegex(RuntimeError, "Slicing failed"):
+                alg._sliceWorkspace(cloned_workspace, "TOF_38415")
+        self.assertEqual(set(AnalysisDataService.getObjectNames()), cached_names)
+
+    def test_grouped_reduction_failure_removes_temporary_inputs(self):
+        self._create_workspace_group(38415, 2, "TOF_", self._create_2D_detector_workspace)
+        self._create_workspace_group(38416, 2, "TRANS_", self._create_2D_detector_workspace)
+        cached_names = set(AnalysisDataService.getObjectNames())
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        cloned_workspace = alg._clone_workspace(AnalysisDataService.retrieve("TOF_38415"))
+        cloned_transmission_workspace = alg._clone_workspace(AnalysisDataService.retrieve("TRANS_38416"))
+        child = MagicMock()
+        child.execute.side_effect = RuntimeError("Reduction failed")
+        with patch.object(alg, "createChildAlgorithm", return_value=child):
+            with self.assertRaisesRegex(RuntimeError, "Reduction failed"):
+                alg._reduce(
+                    [
+                        ("TOF_38415", cloned_workspace),
+                        ("TRANS_38416", cloned_transmission_workspace),
+                        ("", None),
+                    ]
+                )
+        self.assertEqual(set(AnalysisDataService.getObjectNames()), cached_names)
+
     def test_hidden_group_bank_summing_does_not_leave_working_copies(self):
         self._create_workspace_group(38415, 2, "__TOF_", self._create_2D_detector_workspace)
         args = dict(self._default_options, InputRunList="38415", HideInputWorkspaces=True, ROIDetectorIDs=self._TEST_2D_WS_DETECTOR_ROI)
         alg = create_algorithm("ReflectometryISISLoadAndProcess", **args)
-        with patch.object(ReflectometryISISLoadAndProcess, "_loadRun", side_effect=AssertionError("Cache should be reused")):
+        original_finalize = ReflectometryISISLoadAndProcess._finalize
+
+        def finalize(alg, finished):
+            self.assertFalse(any("_refl_work_" in name for name in AnalysisDataService.getObjectNames()))
+            return original_finalize(alg, finished)
+
+        with (
+            patch.object(ReflectometryISISLoadAndProcess, "_loadRun", side_effect=AssertionError("Cache should be reused")),
+            patch.object(ReflectometryISISLoadAndProcess, "_finalize", new=finalize),
+        ):
             for _ in range(2):
                 assertRaisesNothing(self, alg.execute)
         self.assertTrue(AnalysisDataService.doesExist("__TOF_38415"))
         self.assertTrue(AnalysisDataService.doesExist("__TOF_38415_1_summed_segment"))
         self.assertFalse(any("_refl_work_" in name for name in AnalysisDataService.getObjectNames()))
 
-    def test_overlapping_run_lists_are_rejected_before_loading(self):
-        cases = [
-            {"InputRunList": "1,2", "FirstTransmissionRunList": "2"},
-            {"InputRunList": "1,2", "SecondTransmissionRunList": "2"},
-            {"InputRunList": "1", "FirstTransmissionRunList": "2,3", "SecondTransmissionRunList": "3,4"},
-        ]
-        for inputs in cases:
-            with self.subTest(inputs=inputs):
-                alg = create_algorithm("ReflectometryISISLoadAndProcess", **dict(self._default_options, **inputs))
-                alg.setRethrows(True)
-                with patch.object(ReflectometryISISLoadAndProcess, "_loadRun") as load:
-                    with self.assertRaisesRegex(RuntimeError, "Some invalid properties found|same run"):
-                        alg.execute()
-                    load.assert_not_called()
-
-    def test_distinct_workspace_names_with_the_same_run_number_are_accepted(self):
-        self._create_workspace(1, "sample_")
-        self._create_workspace(1, "transmission_")
-        args = dict(self._default_options, InputRunList="sample_1", FirstTransmissionRunList="transmission_1")
+    def test_same_workspace_can_be_used_for_sample_and_both_transmissions(self):
+        self._create_workspace(1, "shared_")
+        input_workspace = AnalysisDataService.retrieve("shared_1")
+        original_y = input_workspace.extractY().copy()
+        original_positions = [input_workspace.detectorInfo().position(i) for i in range(input_workspace.detectorInfo().size())]
+        args = dict(
+            self._default_options,
+            InputRunList="shared_1",
+            FirstTransmissionRunList="shared_1",
+            SecondTransmissionRunList="shared_1",
+        )
         self._assert_run_algorithm_succeeds(args)
+        np.testing.assert_array_equal(input_workspace.extractY(), original_y)
+        self.assertEqual(
+            [input_workspace.detectorInfo().position(i) for i in range(input_workspace.detectorInfo().size())], original_positions
+        )
 
     def test_uncalibrated_workspace_in_ads_is_reused_when_calibration_file_is_provided(self):
         self._create_workspace(45455, "custom_")

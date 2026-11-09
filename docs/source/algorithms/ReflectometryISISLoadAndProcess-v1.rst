@@ -26,8 +26,6 @@ The steps this algorithm performs are:
 
 Input runs and transmission runs are loaded if required, or existing workspaces are used if they are already loaded. When runs are loaded, they are named based on the run number with a ``TOF_`` or ``TRANS_`` prefix. To determine whether workspaces are already loaded, workspace names are matched based on the run number with or without this prefix. Other naming formats are not considered to match.
 
-The sample, first transmission, and second transmission run lists must not contain identical input strings. This validation compares the supplied strings; it does not resolve aliases or compare workspace run numbers.
-
 If a value is provided for the ``CalibrationFile`` property, input runs are summed before the resulting workspace is calibrated using :ref:`algm-ReflectometryISISCalibration`. The initial TOF cache is preserved. Every reduction operates on fresh working copies, so changing calibration or angle correction settings does not require reloading the datasets. Existing TOF workspaces are assumed to contain the initial data; calibration logs are not used to decide whether to reload them.
 
 If a calibration file is provided for POLREF data, a specific POLREF calibration workflow is invoked via :ref:`algm-ReflectometryISISCalibration`. In this case, ``CorrectDetectors`` must be set to ``False`` as the detector position correction is applied as part of the calibration workflow. For this workflow, the experiment angle is taken from ``ThetaIn`` or, when ``ThetaIn`` is not supplied, from the run log selected by ``ThetaLogName``. At least one of ``NominalSpecularPixelSpectrumNo`` and ``ActualSpecularPixelSpectrumNo`` must be supplied (can be fractional):
