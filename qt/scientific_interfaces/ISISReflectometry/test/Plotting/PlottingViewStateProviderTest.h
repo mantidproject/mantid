@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "../../../ISISReflectometry/GUI/Plotting/presenter/PlotOutputTypeProperties.h"
 #include "../../../ISISReflectometry/GUI/Plotting/presenter/PlottingViewStateProvider.h"
+#include "../../../ISISReflectometry/TestHelpers/PlottingTestHelpers.h"
 
 #include <cxxtest/TestSuite.h>
 #include <string>
@@ -17,6 +19,82 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
 class PlottingViewStateProviderTest : public CxxTest::TestSuite {
 public:
+  void testOrdinaryOutputsDefineOneRequestUsingViewSettings() {
+    for (auto const outputType : {PlotOutputType::ReflectivityCurve, PlotOutputType::SpinAsymmetry,
+                                  PlotOutputType::DetectorMap, PlotOutputType::Alignment}) {
+      auto const &definitions = plotOutputTypeProperties(outputType).plotRequests();
+      TS_ASSERT_EQUALS(definitions.size(), 1);
+      TS_ASSERT_EQUALS(definitions.front().outputType, outputType);
+      TS_ASSERT(!definitions.front().settingsOverride);
+      TS_ASSERT(!plotOutputTypeProperties(outputType).splitPlotRequestByPlotSelectionScope());
+    }
+  }
+
+  void testCombinedOutputDefinesOrderedRequestsWithFixedSettings() {
+    auto const &definitions = plotOutputTypeProperties(PlotOutputType::ReflectivityAndSpinAsymmetry).plotRequests();
+    TS_ASSERT_EQUALS(definitions.size(), 2);
+    TS_ASSERT_EQUALS(definitions[0].outputType, PlotOutputType::ReflectivityCurve);
+    TS_ASSERT_EQUALS(definitions[1].outputType, PlotOutputType::SpinAsymmetry);
+    TS_ASSERT(definitions[0].settingsOverride);
+    TS_ASSERT(definitions[1].settingsOverride);
+    auto const &first = definitions[0].settingsOverride.value();
+    auto const &second = definitions[1].settingsOverride.value();
+    TS_ASSERT_EQUALS(first.layout, PlotLayout::Overplot);
+    TS_ASSERT(!first.addToExistingPlot);
+    TS_ASSERT(!first.tiledVertically);
+    TS_ASSERT(!first.shareXAxisWhenTiled);
+    TS_ASSERT(!first.shareYAxisWhenTiled);
+    TS_ASSERT_EQUALS(second.layout, PlotLayout::Tiled);
+    TS_ASSERT(second.addToExistingPlot);
+    TS_ASSERT(second.tiledVertically);
+    TS_ASSERT(second.shareXAxisWhenTiled);
+    TS_ASSERT(!second.shareYAxisWhenTiled);
+    TS_ASSERT_EQUALS(plotOutputTypeProperties(PlotOutputType::ReflectivityAndSpinAsymmetry).selectionScope(),
+                     PlotSelectionScope::WorkspaceGroup);
+    TS_ASSERT(
+        plotOutputTypeProperties(PlotOutputType::ReflectivityAndSpinAsymmetry).splitPlotRequestByPlotSelectionScope());
+  }
+
+  void testWorkspaceGroupScopeRequiresGroupMembershipForParentSelection() {
+    auto grouped = PlottingWorkspaceTreeItem{"polarized",
+                                             PlottingWorkspaceTreeItemType::WorkspaceGroup,
+                                             ReducedWorkspaceOutputType::None,
+                                             "polarized",
+                                             {workspaceItem("up", ReducedWorkspaceOutputType::IvsQBinned),
+                                              workspaceItem("down", ReducedWorkspaceOutputType::IvsQBinned)}};
+    auto const items = std::vector<PlottingWorkspaceTreeItem>{groupItem(
+        "Group", {runItem("Run", {grouped, workspaceItem("standalone", ReducedWorkspaceOutputType::IvsQBinned)})})};
+    auto const states =
+        PlottingViewStateProvider().plottingWorkspaceTreeItemStates(items, PlotOutputType::SpinAsymmetry);
+    auto const &groupState = states[0].children[0].children[0];
+
+    TS_ASSERT_EQUALS(groupState.selectionMode, PlottingWorkspaceTreeSelectionMode::DirectAndParent);
+    TS_ASSERT_EQUALS(groupState.children[0].selectionMode, PlottingWorkspaceTreeSelectionMode::ParentOnly);
+    TS_ASSERT_EQUALS(groupState.children[1].selectionMode, PlottingWorkspaceTreeSelectionMode::ParentOnly);
+    TS_ASSERT_EQUALS(states[0].children[0].children[1].selectionMode, PlottingWorkspaceTreeSelectionMode::None);
+  }
+
+  void testCombinedOutputUsesSpinAsymmetrySelectionRules() {
+    PlottingViewStateProvider provider;
+    auto const items = std::vector<PlottingWorkspaceTreeItem>{
+        groupItem("Group", {workspaceItem("stitched", ReducedWorkspaceOutputType::IvsQBinned,
+                                          PlottingWorkspaceOrigin::PostprocessedGroupOutput),
+                            runItem("12345", {workspaceItem("binned", ReducedWorkspaceOutputType::IvsQBinned),
+                                              workspaceItem("unbinned", ReducedWorkspaceOutputType::IvsQ),
+                                              workspaceItem("lambda", ReducedWorkspaceOutputType::IvsLambda)})})};
+    TS_ASSERT_EQUALS(provider.plottingWorkspaceTreeItemStates(items, PlotOutputType::ReflectivityAndSpinAsymmetry),
+                     provider.plottingWorkspaceTreeItemStates(items, PlotOutputType::SpinAsymmetry));
+  }
+
+  void testCombinedOutputOnlyEnablesPlotForANonemptySelectionWhenIdle() {
+    PlottingViewStateProvider provider;
+    auto const outputType = PlotOutputType::ReflectivityAndSpinAsymmetry;
+    TS_ASSERT_EQUALS(provider.plotActionState(true, 1, 1, outputType, true, true, true),
+                     (PlotActionState{true, false, false, false, false, false, false}));
+    TS_ASSERT_EQUALS(provider.plotActionState(true, 0, 0, outputType, false, false, false), PlotActionState{});
+    TS_ASSERT_EQUALS(provider.plotActionState(false, 2, 2, outputType, true, true, true), PlotActionState{});
+  }
+
   void testPlotActionStateEnablesAddToExistingActionsForSingleCompatibleReflectivitySelection() {
     PlottingViewStateProvider provider;
 
@@ -62,7 +140,8 @@ public:
   void testPlottingWorkspaceTreeItemStatesMuteStitchedOutputsForAlignment() {
     PlottingViewStateProvider provider;
     auto const plottingWorkspaceTreeItems = std::vector<PlottingWorkspaceTreeItem>{groupItem(
-        "Group 1", {workspaceItem("stitched_12345", ReducedWorkspaceOutputType::IvsQBinned),
+        "Group 1", {workspaceItem("stitched_12345", ReducedWorkspaceOutputType::IvsQBinned,
+                                  PlottingWorkspaceOrigin::PostprocessedGroupOutput),
                     runItem("12345", {workspaceItem("IvsQ_binned_12345", ReducedWorkspaceOutputType::IvsQBinned)})})};
 
     auto const itemStates =
@@ -77,17 +156,26 @@ public:
 
 private:
   PlottingWorkspaceTreeItem groupItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) const {
-    return {std::move(label), PlottingWorkspaceTreeItemType::ReductionGroup, ReducedWorkspaceOutputType::None, "",
-            std::move(children)};
+    auto items =
+        std::vector<PlottingWorkspaceTreeItem>{{std::move(label), PlottingWorkspaceTreeItemType::ReductionGroup,
+                                                ReducedWorkspaceOutputType::None, "", std::move(children)}};
+    populateTreeItemContexts(items);
+    return std::move(items.front());
   }
 
   PlottingWorkspaceTreeItem runItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) const {
-    return {std::move(label), PlottingWorkspaceTreeItemType::Run, ReducedWorkspaceOutputType::None, "",
-            std::move(children)};
+    auto item = PlottingWorkspaceTreeItem{std::move(label), PlottingWorkspaceTreeItemType::Run,
+                                          ReducedWorkspaceOutputType::None, "", std::move(children)};
+    item.context.origin = PlottingWorkspaceOrigin::RunOutput;
+    return item;
   }
 
-  PlottingWorkspaceTreeItem workspaceItem(std::string label, ReducedWorkspaceOutputType reducedOutputType) const {
+  PlottingWorkspaceTreeItem workspaceItem(std::string label, ReducedWorkspaceOutputType reducedOutputType,
+                                          PlottingWorkspaceOrigin origin = PlottingWorkspaceOrigin::None) const {
     auto const workspaceName = label;
-    return {std::move(label), PlottingWorkspaceTreeItemType::Workspace, reducedOutputType, workspaceName, {}};
+    auto item = PlottingWorkspaceTreeItem{
+        std::move(label), PlottingWorkspaceTreeItemType::Workspace, reducedOutputType, workspaceName, {}};
+    item.context.origin = origin;
+    return item;
   }
 };

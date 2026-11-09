@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../../ISISReflectometry/GUI/Plotting/model/PlottingModel.h"
+#include "../../../ISISReflectometry/TestHelpers/PlottingTestHelpers.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -485,17 +486,23 @@ private:
 
   PlottingWorkspace plottingWorkspace(std::string workspaceName, std::vector<std::string> runNumbers,
                                       std::optional<int> periodNumber = std::nullopt,
-                                      std::string const &containingWorkspaceGroupName = "") {
-    return {std::move(workspaceName), std::move(runNumbers), containingWorkspaceGroupName, periodNumber};
+                                      std::string const &workspaceGroupName = "") {
+    auto context = runOutputContext(workspaceName,
+                                    workspaceGroupName.empty() ? PlottingWorkspaceTreePath{0, 0, 0}
+                                                               : PlottingWorkspaceTreePath{0, 0, 0, 0},
+                                    workspaceGroupName);
+    return {std::move(workspaceName), std::move(runNumbers), periodNumber, std::move(context)};
   }
 
   std::vector<PlottingWorkspace> plottingWorkspaces(std::vector<std::string> workspaceNames,
-                                                    std::string const &containingWorkspaceGroupName = "") {
+                                                    std::string const &workspaceGroupName = "") {
     auto plottingWorkspaces = std::vector<PlottingWorkspace>{};
     plottingWorkspaces.reserve(workspaceNames.size());
     for (auto const &workspaceName : workspaceNames) {
-      plottingWorkspaces.push_back(
-          plottingWorkspace(workspaceName, {"12345"}, std::nullopt, containingWorkspaceGroupName));
+      auto workspace = plottingWorkspace(workspaceName, {"12345"}, std::nullopt, workspaceGroupName);
+      workspace.context.scopeItems.at(PlotSelectionScope::Workspace).path.back() =
+          static_cast<int>(plottingWorkspaces.size());
+      plottingWorkspaces.emplace_back(std::move(workspace));
     }
     return plottingWorkspaces;
   }

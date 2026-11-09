@@ -1,0 +1,1 @@
+- The :ref:`ISIS Reflectometry Interface <ISISReflectometryInterface>` Plotting tab can now create combined ``Reflectivity + Spin Asymmetry`` plots through a single plot output type.

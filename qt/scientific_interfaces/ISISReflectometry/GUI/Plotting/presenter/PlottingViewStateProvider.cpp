@@ -33,72 +33,49 @@ bool hasEnoughSelectedItemsForMultiOutputPlot(size_t selectedItemCount, size_t s
                                                                 plotProperties);
 }
 
-bool isWorkspaceItem(PlottingWorkspaceTreeItem const &item) { return item.children.empty(); }
-
-bool isPostprocessedGroupOutputItem(PlottingWorkspaceTreeItem const &item, bool parentIsGroup,
-                                    bool parentIsWorkspaceGroup, bool grandparentIsGroup) {
-  if (item.itemType != PlottingWorkspaceTreeItemType::WorkspaceGroup &&
-      item.itemType != PlottingWorkspaceTreeItemType::Workspace) {
-    return false;
-  }
-  return parentIsGroup || (parentIsWorkspaceGroup && grandparentIsGroup);
-}
-
 bool isPostprocessedGroupOutputExcluded(PlottingWorkspaceTreeItem const &item,
-                                        PlotOutputTypeProperties const &properties, bool parentIsGroup,
-                                        bool parentIsWorkspaceGroup, bool grandparentIsGroup) {
+                                        PlotOutputTypeProperties const &properties) {
   return properties.excludesPostprocessedGroupOutputs() &&
-         isPostprocessedGroupOutputItem(item, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup);
+         item.context.origin == PlottingWorkspaceOrigin::PostprocessedGroupOutput;
 }
 
-bool isWorkspaceIncluded(PlottingWorkspaceTreeItem const &item, PlotOutputTypeProperties const &properties,
-                         bool parentIsGroup, bool parentIsWorkspaceGroup, bool grandparentIsGroup) {
-  if (isPostprocessedGroupOutputExcluded(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup)) {
+bool isWorkspaceIncluded(PlottingWorkspaceTreeItem const &item, PlotOutputTypeProperties const &properties) {
+  if (isPostprocessedGroupOutputExcluded(item, properties)) {
     return false;
   }
   return properties.includesReducedWorkspaceOutput(item.reducedOutputType);
 }
 
 bool hasWorkspaceDescendant(PlottingWorkspaceTreeItem const &item) {
-  if (isWorkspaceItem(item)) {
-    return item.itemType == PlottingWorkspaceTreeItemType::Workspace;
+  if (item.itemType == PlottingWorkspaceTreeItemType::Workspace) {
+    return true;
   }
   return std::any_of(item.children.cbegin(), item.children.cend(), hasWorkspaceDescendant);
 }
 
-bool allWorkspaceDescendantsIncluded(PlottingWorkspaceTreeItem const &item, PlotOutputTypeProperties const &properties,
-                                     bool parentIsGroup, bool parentIsWorkspaceGroup, bool grandparentIsGroup);
+bool allWorkspaceDescendantsIncluded(PlottingWorkspaceTreeItem const &item,
+                                     PlotOutputTypeProperties const &properties) {
+  if (item.itemType == PlottingWorkspaceTreeItemType::Workspace) {
+    return isWorkspaceIncluded(item, properties);
+  }
+  return std::all_of(item.children.cbegin(), item.children.cend(),
+                     [&](auto const &child) { return allWorkspaceDescendantsIncluded(child, properties); });
+}
 
-bool isSelectable(PlottingWorkspaceTreeItem const &item, PlotOutputTypeProperties const &properties, bool parentIsGroup,
-                  bool parentIsWorkspaceGroup, bool grandparentIsGroup) {
-  if (isPostprocessedGroupOutputExcluded(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup)) {
+bool isSelectable(PlottingWorkspaceTreeItem const &item, PlotOutputTypeProperties const &properties) {
+  if (isPostprocessedGroupOutputExcluded(item, properties)) {
     return false;
   }
   if (!properties.allowsItemType(item.itemType)) {
     return false;
   }
   if (item.itemType == PlottingWorkspaceTreeItemType::Workspace) {
-    return isWorkspaceIncluded(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup);
+    return isWorkspaceIncluded(item, properties);
   }
   if (item.itemType == PlottingWorkspaceTreeItemType::WorkspaceGroup) {
-    return hasWorkspaceDescendant(item) &&
-           allWorkspaceDescendantsIncluded(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup);
+    return hasWorkspaceDescendant(item) && allWorkspaceDescendantsIncluded(item, properties);
   }
   return true;
-}
-
-bool allWorkspaceDescendantsIncluded(PlottingWorkspaceTreeItem const &item, PlotOutputTypeProperties const &properties,
-                                     bool parentIsGroup, bool parentIsWorkspaceGroup, bool grandparentIsGroup) {
-  if (isWorkspaceItem(item)) {
-    return item.itemType != PlottingWorkspaceTreeItemType::Workspace ||
-           isWorkspaceIncluded(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup);
-  }
-
-  auto const itemIsGroup = item.itemType == PlottingWorkspaceTreeItemType::ReductionGroup;
-  auto const itemIsWorkspaceGroup = item.itemType == PlottingWorkspaceTreeItemType::WorkspaceGroup;
-  return std::all_of(item.children.cbegin(), item.children.cend(), [&](auto const &child) {
-    return allWorkspaceDescendantsIncluded(child, properties, itemIsGroup, itemIsWorkspaceGroup, parentIsGroup);
-  });
 }
 
 PlottingWorkspaceTreeSelectionMode selectionMode(bool canSelectDirectly, bool canSelectViaParent) {
@@ -112,23 +89,16 @@ PlottingWorkspaceTreeSelectionMode selectionMode(bool canSelectDirectly, bool ca
 }
 
 PlottingWorkspaceTreeItemState plottingWorkspaceTreeItemState(PlottingWorkspaceTreeItem const &item,
-                                                              PlotOutputTypeProperties const &properties,
-                                                              bool parentIsGroup = false,
-                                                              bool parentIsWorkspaceGroup = false,
-                                                              bool grandparentIsGroup = false) {
-  auto const itemIsGroup = item.itemType == PlottingWorkspaceTreeItemType::ReductionGroup;
-  auto const itemIsWorkspaceGroup = item.itemType == PlottingWorkspaceTreeItemType::WorkspaceGroup;
+                                                              PlotOutputTypeProperties const &properties) {
   auto childStates = std::vector<PlottingWorkspaceTreeItemState>{};
   childStates.reserve(item.children.size());
-  std::transform(item.children.cbegin(), item.children.cend(), std::back_inserter(childStates), [&](const auto &child) {
-    return plottingWorkspaceTreeItemState(child, properties, itemIsGroup, itemIsWorkspaceGroup, parentIsGroup);
-  });
-  auto const canSelectItemDirectly =
-      isSelectable(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup);
+  std::transform(item.children.cbegin(), item.children.cend(), std::back_inserter(childStates),
+                 [&](auto const &child) { return plottingWorkspaceTreeItemState(child, properties); });
+  auto const canSelectItemDirectly = isSelectable(item, properties);
+  auto const hasRequiredScope = item.context.scopeItems.contains(properties.selectionScope());
   auto const canSelectItemViaParent =
-      canSelectItemDirectly ||
-      (item.itemType == PlottingWorkspaceTreeItemType::Workspace &&
-       isWorkspaceIncluded(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup));
+      canSelectItemDirectly || (item.itemType == PlottingWorkspaceTreeItemType::Workspace && hasRequiredScope &&
+                                isWorkspaceIncluded(item, properties));
   return {item.label,
           item.itemType,
           item.reducedOutputType,
@@ -162,6 +132,9 @@ PlotActionState PlottingViewStateProvider::plotActionState(bool outputSelectionE
                                                            bool hasActiveReflectometryFigure,
                                                            bool activePlotOverplotCompatible) const {
   auto const &plotProperties = plotOutputTypeProperties(outputType);
+  if (plotProperties.plotRequests().size() > 1) {
+    return {.plotIndividualEnabled = outputSelectionEnabled && hasSelectedItems(selectedPlottingWorkspaceCount)};
+  }
   auto const addToExistingEnabled =
       outputSelectionEnabled && hasActiveReflectometryFigure && plotProperties.supportsAddToExistingPlot();
   auto const addToExistingChecked = addToExistingPlot && addToExistingEnabled;
