@@ -17,6 +17,21 @@ _workspace_import_names: dict[str, str] = {}
 _used_workspace_types: set[str] = set()
 _unsupported_property_types: set[str] = set()
 _used_function_types = False
+_used_array_aliases: set[str] = set()
+# Mantid array property type -> (stub alias, scalar element type accepted as a length-one array)
+_ARRAY_ALIASES = {
+    "dbl list": ("_Float1DArray", "float"),
+    "int list": ("_Int1DArray", "int"),
+    "long list": ("_Int1DArray", "int"),
+    "unsigned int list": ("_Int1DArray", "int"),
+    "St6vectorIjSaIjEE": ("_Int1DArray", "int"),
+    "str list": ("_Str1DArray", None),
+}
+_ARRAY_ALIAS_DEFINITIONS = {
+    "_Float1DArray": "Sequence[float] | numpy.ndarray",
+    "_Int1DArray": "Sequence[int] | numpy.ndarray",
+    "_Str1DArray": "Sequence[str]",
+}
 _MAX_OPTIONAL_OUTPUT_VARIANTS = 3
 _FITTING_ALGORITHMS = {
     "Fit",
@@ -49,6 +64,9 @@ def _type_for(prop) -> str:
         return "str | IFunction"
     if prop_class == "MultipleFileProperty":
         return "str | list[str]"
+    if prop_class == "FileProperty":
+        # allowedValues() holds the accepted file extensions, not the accepted values.
+        return "str"
     if prop_type == "string":
         allowed = list(prop.allowedValues)
         if allowed and len(allowed) <= 30:
@@ -73,6 +91,33 @@ def _type_for(prop) -> str:
         return "bool | None"
     _unsupported_property_types.add(prop_type)
     return "Any"
+
+
+def _parameter_type_for(prop) -> str:
+    """Widen a property type to everything simpleapi accepts as a call argument.
+
+    Any ``str`` argument is passed to ``setPropertyValue`` and parsed into the
+    property's type. Array properties accept any sequence or numpy array, and a
+    bare scalar becomes a one-element array (see SequenceTypeHandler::set).
+    """
+    annotation = _type_for(prop)
+    if annotation.startswith("list[") and prop.type in _ARRAY_ALIASES:
+        alias, scalar = _ARRAY_ALIASES[prop.type]
+        _used_array_aliases.add(alias)
+        return f"{alias} | {scalar} | str" if scalar else f"{alias} | str"
+    if annotation == "list[list[str]]":
+        _used_array_aliases.add("_Str1DArray")
+        return "Sequence[_Str1DArray] | str"
+    if annotation == "Any" or annotation.startswith("Literal["):
+        return annotation
+    members = annotation.split(" | ")
+    if "str" in members:
+        return annotation
+    widened = [member for member in members if member != "None"]
+    widened.append("str")
+    if "None" in members:
+        widened.append("None")
+    return " | ".join(widened)
 
 
 def _required(prop) -> bool:
@@ -105,10 +150,10 @@ def _stub_for_algorithm(name: str, version: int) -> tuple[list[str], str]:
     required = [prop for prop, _ in inputs if _required(prop)]
     optional = [prop for prop, _ in inputs if not _required(prop)]
 
-    parameters = [f"{prop.name}: {_type_for(prop)}" for prop in required]
-    parameters.extend(f"{prop.name}: {_type_for(prop)} | None = ..." for prop in optional)
+    parameters = [f"{prop.name}: {_parameter_type_for(prop)}" for prop in required]
+    parameters.extend(f"{prop.name}: {_parameter_type_for(prop)} | None = ..." for prop in optional)
     parameters.append("*")
-    parameters.extend(f"{prop.name}: {_type_for(prop)} | None = ..." for prop, _ in outputs)
+    parameters.extend(f"{prop.name}: {_parameter_type_for(prop)} | None = ..." for prop, _ in outputs)
     parameters.extend(
         [
             "Version: int = ...",
@@ -208,7 +253,7 @@ def _stub_for_fitting_algorithm(name: str, version: int) -> tuple[list[str], str
         prop = properties[property_name]
         if not property_name.isidentifier() or keyword.iskeyword(property_name):
             raise ValueError(f"Cannot emit Python parameter for {name}.{property_name}")
-        annotation = _type_for(prop)
+        annotation = _parameter_type_for(prop)
         if not _required(prop):
             annotation += " | None"
             parameters.append(f"{property_name}: {annotation} = ...")
@@ -222,7 +267,7 @@ def _stub_for_fitting_algorithm(name: str, version: int) -> tuple[list[str], str
         prop = properties[property_name]
         if not property_name.isidentifier() or keyword.iskeyword(property_name):
             raise ValueError(f"Cannot emit Python parameter for {name}.{property_name}")
-        annotation = _type_for(prop)
+        annotation = _parameter_type_for(prop)
         if _is_optional(prop):
             annotation += " | None"
         parameters.append(f"{property_name}: {annotation} = ...")
@@ -279,8 +324,8 @@ def _stub_for_custom_algorithm(name: str, version: int) -> tuple[list[str], list
     ]
 
     if name == "Load":
-        filename_type = _type_for(properties["Filename"])
-        output_type = _type_for(properties["OutputWorkspace"])
+        filename_type = _parameter_type_for(properties["Filename"])
+        output_type = _parameter_type_for(properties["OutputWorkspace"])
         signature = (
             f"def Load(Filename: {filename_type}, OutputWorkspace: {output_type} | None = ..., *, "
             f"{', '.join(controls)}, **kwargs: Any) -> Workspace: ..."
@@ -295,13 +340,13 @@ def _stub_for_custom_algorithm(name: str, version: int) -> tuple[list[str], list
             prop = properties[property_name]
             if not property_name.isidentifier() or keyword.iskeyword(property_name):
                 raise ValueError(f"Cannot emit Python parameter for {name}.{property_name}")
-            parameters.append(f"{property_name}: {_type_for(prop)} | None = ...")
+            parameters.append(f"{property_name}: {_parameter_type_for(prop)} | None = ...")
         parameters.extend(controls)
         parameters.append("**kwargs: Any")
         return [], [f"def StartLiveData({', '.join(parameters)}) -> Any: ..."]
 
     if name == "CutMD":
-        input_type = _type_for(properties["InputWorkspace"])
+        input_type = _parameter_type_for(properties["InputWorkspace"])
         output_type = _type_for(properties["OutputWorkspace"]).removesuffix(" | str")
         bin_parameters = []
         for property_name in algorithm.mandatoryProperties():
@@ -310,7 +355,7 @@ def _stub_for_custom_algorithm(name: str, version: int) -> tuple[list[str], list
             prop = properties[property_name]
             if not property_name.isidentifier() or keyword.iskeyword(property_name):
                 raise ValueError(f"Cannot emit Python parameter for {name}.{property_name}")
-            bin_parameters.append(f"{property_name}: {_type_for(prop)} | None = ...")
+            bin_parameters.append(f"{property_name}: {_parameter_type_for(prop)} | None = ...")
         bin_parameters.append("PBins: list[list[float]] | tuple[list[float], ...] | None = ...")
         parameters = [f"InputWorkspace: {input_type}", "*", *bin_parameters]
         single_parameters = [*parameters, "OutputWorkspace: str | None = ...", *controls]
@@ -327,10 +372,10 @@ def _stub_for_custom_algorithm(name: str, version: int) -> tuple[list[str], list
         ]
 
     if name == "RenameWorkspace":
-        input_type = _type_for(properties["InputWorkspace"])
-        output_type = _type_for(properties["OutputWorkspace"]) + " | None"
-        rename_monitors = f"RenameMonitors: {_type_for(properties['RenameMonitors'])} | None = ..."
-        overwrite_existing = f"OverwriteExisting: {_type_for(properties['OverwriteExisting'])} | None = ..."
+        input_type = _parameter_type_for(properties["InputWorkspace"])
+        output_type = _parameter_type_for(properties["OutputWorkspace"]) + " | None"
+        rename_monitors = f"RenameMonitors: {_parameter_type_for(properties['RenameMonitors'])} | None = ..."
+        overwrite_existing = f"OverwriteExisting: {_parameter_type_for(properties['OverwriteExisting'])} | None = ..."
         positional = [
             f"InputWorkspace: {input_type}",
             f"OutputWorkspace: {output_type} = ...",
@@ -482,13 +527,21 @@ def main() -> int:
             "Properties emitted as Any for unsupported Mantid types: " + ", ".join(sorted(_unsupported_property_types)),
             file=sys.stderr,
         )
+    alias_imports = []
+    if _used_array_aliases:
+        alias_imports = ["from collections.abc import Sequence"]
+        if any("numpy." in _ARRAY_ALIAS_DEFINITIONS[alias] for alias in _used_array_aliases):
+            import_lines.insert(0, "import numpy")
+    alias_declarations = [f"type {alias} = {_ARRAY_ALIAS_DEFINITIONS[alias]}" for alias in sorted(_used_array_aliases)]
     contents = "\n".join(
         [
             "# Generated by tools/python_typing/generate_simpleapi_stubs.py.",
             "# Run from a configured Mantid build environment; do not edit by hand.",
+            *alias_imports,
             "from typing import Any, Literal, NamedTuple, overload",
             *import_lines,
             "",
+            *alias_declarations,
             *return_declarations,
             *declarations,
             "def __getattr__(name: str) -> Any: ...",

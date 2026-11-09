@@ -95,6 +95,21 @@ class _PropertyAlgorithm:
         return self.properties[name]
 
 
+def _rebin_algorithm():
+    return _PropertyAlgorithm(
+        {
+            "InputWorkspace": _property("InputWorkspace", "MatrixWorkspace", valid="Required", class_name="MatrixWorkspaceProperty"),
+            "Params": _property("Params", "dbl list", valid="Required", class_name="FloatArrayProperty"),
+            "PreserveEvents": _property("PreserveEvents", "boolean", class_name="BoolPropertyWithValue"),
+            "Power": _property("Power", "number", class_name="FloatPropertyWithValue"),
+            "BinningMode": _property("BinningMode", "string", allowed=("Default", "Linear")),
+            "OutputWorkspace": _property("OutputWorkspace", "MatrixWorkspace", class_name="MatrixWorkspaceProperty"),
+        },
+        inputs=["InputWorkspace", "Params", "PreserveEvents", "Power", "BinningMode"],
+        outputs=["OutputWorkspace"],
+    )
+
+
 def _mantid_modules():
     mantid = types.ModuleType("mantid")
     mantid.__path__ = []
@@ -124,6 +139,7 @@ class GenerateSimpleAPIStubsTest(unittest.TestCase):
         generator._used_workspace_types.clear()
         generator._unsupported_property_types.clear()
         generator._used_function_types = False
+        generator._used_array_aliases.clear()
         generator._workspace_imports["MatrixWorkspace"] = "mantid.api"
         generator._workspace_import_names["MatrixWorkspace"] = "MatrixWorkspace"
 
@@ -137,6 +153,87 @@ class GenerateSimpleAPIStubsTest(unittest.TestCase):
         self.assertIn("OutputWorkspace: MatrixWorkspace | str | None = ...", stub)
         self.assertIn(") -> MatrixWorkspace: ...", stub)
         self.assertNotIn("Target: Literal['DeltaE', 'Wavelength'] =", stub)
+
+    def test_rebin_parameters_accept_strings_and_arrays(self):
+        algorithm = _rebin_algorithm()
+        modules = _mantid_modules()
+        modules["mantid.api"].AlgorithmManager = types.SimpleNamespace(createUnmanaged=lambda _name, _version: algorithm)
+
+        with patch.dict(sys.modules, modules):
+            _, stub = generator._stub_for_algorithm("Rebin", 1)
+
+        self.assertIn("Params: _Float1DArray | float | str,", stub)
+        self.assertIn("PreserveEvents: bool | str | None = ...", stub)
+        self.assertIn("Power: float | str | None = ...", stub)
+        self.assertIn("BinningMode: Literal['Default', 'Linear'] | None = ...", stub)
+        self.assertIn("InputWorkspace: MatrixWorkspace | str,", stub)
+        self.assertTrue(stub.endswith("-> MatrixWorkspace: ..."))
+        self.assertEqual(generator._used_array_aliases, {"_Float1DArray"})
+
+    def test_file_property_extensions_are_not_emitted_as_literals(self):
+        filename = _property("Filename", "string", valid="Required", allowed=(".nxs.h5", ".nxs", "_event.nxs"), class_name="FileProperty")
+        algorithm = _PropertyAlgorithm(
+            {
+                "Filename": filename,
+                "OutputWorkspace": _property("OutputWorkspace", "MatrixWorkspace", class_name="MatrixWorkspaceProperty"),
+            },
+            inputs=["Filename"],
+            outputs=["OutputWorkspace"],
+        )
+        modules = _mantid_modules()
+        modules["mantid.api"].AlgorithmManager = types.SimpleNamespace(createUnmanaged=lambda _name, _version: algorithm)
+
+        with patch.dict(sys.modules, modules):
+            _, stub = generator._stub_for_algorithm("LoadEventNexus", 1)
+
+        self.assertIn("Filename: str,", stub)
+        self.assertNotIn(".nxs", stub)
+
+    def test_array_aliases_are_declared_only_when_used(self):
+        def generate(name, algorithm):
+            modules = _mantid_modules()
+            modules["mantid.api"].AlgorithmFactory = types.SimpleNamespace(getRegisteredAlgorithms=lambda _include_hidden: {name: [1]})
+            modules["mantid.api"].AlgorithmManager = types.SimpleNamespace(createUnmanaged=lambda _name, _version: algorithm)
+            with tempfile.TemporaryDirectory() as temporary_directory:
+                output = Path(temporary_directory) / "simpleapi.pyi"
+                argv = ["generate_simpleapi_stubs.py", name, "--output", str(output)]
+                with (
+                    patch.dict(sys.modules, modules),
+                    patch.object(generator, "_format_with_ruff", side_effect=lambda contents: contents),
+                    patch.object(sys, "argv", argv),
+                ):
+                    self.assertEqual(generator.main(), 0)
+                return output.read_text()
+
+        rebin = generate("Rebin", _rebin_algorithm())
+        self.assertIn("from collections.abc import Sequence\n", rebin)
+        self.assertIn("import numpy\n", rebin)
+        self.assertIn("type _Float1DArray = Sequence[float] | numpy.ndarray\n", rebin)
+        self.assertNotIn("_Int1DArray =", rebin)
+
+        self.setUp()
+        convert_units = generate("ConvertUnits", _ConvertUnits())
+        self.assertNotIn("Sequence", convert_units)
+        self.assertNotIn("numpy", convert_units)
+        self.assertNotIn("1DArray", convert_units)
+
+    def test_parameter_types_widen_to_strings_without_duplicates(self):
+        cases = {
+            ("dbl list", "FloatArrayProperty"): "_Float1DArray | float | str",
+            ("int list", "ArrayProperty"): "_Int1DArray | int | str",
+            ("unsigned int list", "ArrayProperty"): "_Int1DArray | int | str",
+            ("str list", "ArrayProperty"): "_Str1DArray | str",
+            ("list of str lists", "ArrayProperty"): "Sequence[_Str1DArray] | str",
+            ("list of str lists", "MultipleFileProperty"): "str | list[str]",
+            ("number", "IntPropertyWithValue"): "int | str",
+            ("optional boolean", "PropertyWithValue"): "bool | str | None",
+            ("Dictionary", "PropertyManagerProperty"): "dict[str, Any] | str",
+            ("string", "PropertyWithValue"): "str",
+            ("Function", "FunctionProperty"): "str | IFunction",
+        }
+        for (type_name, class_name), expected in cases.items():
+            with self.subTest(type_name=type_name):
+                self.assertEqual(generator._parameter_type_for(_property("Prop", type_name, class_name=class_name)), expected)
 
     def test_function_properties_use_ifunction_and_wrapper_return(self):
         algorithm = _PropertyAlgorithm(
@@ -345,7 +442,7 @@ class GenerateSimpleAPIStubsTest(unittest.TestCase):
             _, stubs = generator._stub_for_custom_algorithm("StartLiveData", 1)
 
         self.assertIn("Instrument: str, *", stubs[0])
-        self.assertIn("FromNow: bool | None = ...", stubs[0])
+        self.assertIn("FromNow: bool | str | None = ...", stubs[0])
         self.assertIn("Listener: Literal['FakeEventDataListener', 'FileEventDataListener'] | None = ...", stubs[0])
         self.assertIn("**kwargs: Any) -> Any", stubs[0])
 
@@ -396,7 +493,7 @@ class GenerateSimpleAPIStubsTest(unittest.TestCase):
 
         self.assertEqual(decorators, ["@overload", "@overload"])
         self.assertIn("OutputWorkspace: Workspace | str | None = ...", stubs[0])
-        self.assertIn("RenameMonitors: bool | None = ...", stubs[0])
+        self.assertIn("RenameMonitors: bool | str | None = ...", stubs[0])
         self.assertIn("*, OutputWorkspace: Workspace | str | None = ...", stubs[1])
         self.assertTrue(all(stub.endswith("-> Workspace: ...") for stub in stubs))
 
