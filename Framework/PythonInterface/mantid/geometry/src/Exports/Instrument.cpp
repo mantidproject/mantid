@@ -119,7 +119,7 @@ std::vector<GridDetector_const_sptr> findGridDetectorsDeprecated(const Instrumen
 std::shared_ptr<ReferenceFrame const> getReferenceFrameDeprecated(const Instrument &self) {
   if (PyErr_Warn(PyExc_DeprecationWarning,
                  "'Instrument.getReferenceFrame' is deprecated in Mantid 7.0, "
-                 "use 'ComponentInfo.referenceFrame' instead. "
+                 "use 'mantid.geometry.ComponentInfo.referenceFrame' instead. "
                  "For more information, see the instrument access layers concept page: "
                  "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html") < 0)
     throw boost::python::error_already_set();
