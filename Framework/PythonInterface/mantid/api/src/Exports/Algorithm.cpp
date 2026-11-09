@@ -227,11 +227,6 @@ void export_leaf_classes() {
            "are given a dummy name.")
       .def("declareProperty", (declarePropertyType1)&PythonAlgorithm::declarePyAlgProperty,
            declarePropertyType1_Overload((arg("self"), arg("prop"), arg("doc") = "")))
-      .def("enableHistoryRecordingForChild", &Algorithm::enableHistoryRecordingForChild, (arg("self"), arg("on")),
-           "Turns history recording on or off for an algorithm.")
-      .def("enableHistoryRecordingForProcessGroups", &Algorithm::enableHistoryRecordingForProcessGroups,
-           (arg("self"), arg("on")),
-           "Turns parent history recording on or off for algorithms that handle group outputs directly.")
       .def("declareProperty", (declarePropertyType2)&PythonAlgorithm::declarePyAlgProperty,
            declarePropertyType2_Overload((arg("self"), arg("name"), arg("defaultValue"), arg("validator") = object(),
                                           arg("doc") = "", arg("direction") = Direction::Input),
@@ -254,6 +249,14 @@ void export_leaf_classes() {
            "Declares or replaces a named property where the type is taken from "
            "the type of the defaultValue and mapped to an appropriate C++ "
            "type")
+      .def("enableHistoryRecordingForChild", &Algorithm::enableHistoryRecordingForChild, (arg("self"), arg("on")),
+           "Turns history recording on or off for an algorithm.")
+      .def("enableHistoryRecordingForProcessGroups", &Algorithm::enableHistoryRecordingForProcessGroups,
+           (arg("self"), arg("on")),
+           "Turns parent history recording on or off for algorithms that handle group outputs directly.")
+      .def("enableCheckForStringArrayWorkspaceOutputs", &Algorithm::enableCheckForStringArrayWorkspaceOutputs,
+           (arg("self"), arg("enabled")),
+           "Enables/disables checking output StringArrayProperties for valid workspaces when assigning history.")
       .def("getLogger", &PythonAlgorithm::getLogger, arg("self"), return_value_policy<reference_existing_object>(),
            "Returns a reference to this algorithm's logger")
       .def("log", &PythonAlgorithm::getLogger, arg("self"), return_value_policy<reference_existing_object>(),
