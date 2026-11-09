@@ -338,7 +338,7 @@ public:
     expInfo.setInstrument(instrument);
 
     TS_ASSERT_EQUALS(expInfo.getReferenceFrame(), frame);
-    TS_ASSERT_EQUALS(expInfo.basegetReferenceFrame(), frame);
+    TS_ASSERT_EQUALS(expInfo.baseComponentInfo().referenceFrame(), frame);
     // and of a clone, which copies the parametrized instrument
     std::unique_ptr<ExperimentInfo> const clone(expInfo.cloneExperimentInfo());
     TS_ASSERT_EQUALS(clone->getReferenceFrame(), frame);
