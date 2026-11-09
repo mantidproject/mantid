@@ -736,7 +736,7 @@ void GridDetector::testIntersectionWithChildren(Track &testRay,
   std::shared_ptr<IObject> const &pixelShape = isParametrized() ? m_gridBase->m_shape : m_shape;
 
   auto comp = getAtXYZ(xIndex, yIndex, 0);
-  testRay.addLink(intersec, intersec, 0.0, *pixelShape, comp->getComponentID());
+  testRay.addLink(intersec, intersec, 0.0, *pixelShape, comp->index());
 }
 
 //-------------------------------------------------------------------------------------------------

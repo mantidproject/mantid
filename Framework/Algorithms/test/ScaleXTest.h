@@ -93,13 +93,13 @@ public:
     auto &pmap = inputWS->instrumentParameters();
     const std::string parname("factor");
 
+    auto &componentInfo = inputWS->mutableComponentInfo();
     const auto &spectrumInfo = inputWS->spectrumInfo();
-    auto const &componentInfo = inputWS->componentInfo();
     const double det1Factor(5);
-    pmap.addDouble(componentInfo.componentID(spectrumInfo.firstDetectorIndex(0)), parname, det1Factor);
+    componentInfo.addDouble(spectrumInfo.firstDetectorIndex(0), parname, det1Factor);
 
     const double det2Factor(-10);
-    pmap.addDouble(componentInfo.componentID(spectrumInfo.firstDetectorIndex(1)), parname, det2Factor);
+    componentInfo.addDouble(spectrumInfo.firstDetectorIndex(1), parname, det2Factor);
 
     const double instFactor(100);
     auto inst = inputWS->getInstrument();
@@ -135,13 +135,13 @@ public:
     auto &pmap = inputWS->instrumentParameters();
     const std::string parname("factor");
 
+    auto &componentInfo = inputWS->mutableComponentInfo();
     const auto &spectrumInfo = inputWS->spectrumInfo();
-    auto const &componentInfo = inputWS->componentInfo();
     const double det1Factor(5);
-    pmap.addDouble(componentInfo.componentID(spectrumInfo.firstDetectorIndex(0)), parname, det1Factor);
+    componentInfo.addDouble(spectrumInfo.firstDetectorIndex(0), parname, det1Factor);
 
     const double det2Factor(-10);
-    pmap.addDouble(componentInfo.componentID(spectrumInfo.firstDetectorIndex(1)), parname, det2Factor);
+    componentInfo.addDouble(spectrumInfo.firstDetectorIndex(1), parname, det2Factor);
 
     const double instFactor(100);
     auto inst = inputWS->getInstrument();

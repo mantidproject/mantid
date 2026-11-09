@@ -76,7 +76,7 @@ public:
     TS_ASSERT_DELTA(firstIntersect.exitPoint.X(), 0.0, 1e-6);
     TS_ASSERT_DELTA(firstIntersect.exitPoint.Y(), 0.0, 1e-6);
     TS_ASSERT_DELTA(firstIntersect.exitPoint.Z(), 5.004, 1e-6);
-    TS_ASSERT_EQUALS(firstIntersect.componentID, centralPixelBank1->getComponentID());
+    TS_ASSERT_EQUALS(firstIntersect.componentIndex, centralPixelBank1->index());
 
     ++resultItr;
     Link secondIntersect = *resultItr;
@@ -88,7 +88,7 @@ public:
     TS_ASSERT_DELTA(secondIntersect.exitPoint.X(), 0.0, 1e-6);
     TS_ASSERT_DELTA(secondIntersect.exitPoint.Y(), 0.0, 1e-6);
     TS_ASSERT_DELTA(secondIntersect.exitPoint.Z(), 10.004, 1e-6);
-    TS_ASSERT_EQUALS(secondIntersect.componentID, centralPixelBank2->getComponentID());
+    TS_ASSERT_EQUALS(secondIntersect.componentIndex, centralPixelBank2->index());
 
     // Results vector should be empty after first getResults call
     results = tracker.getResults();
@@ -120,7 +120,7 @@ public:
     TS_ASSERT_DELTA(intersect.exitPoint.X(), 0.01, 1e-6);
     TS_ASSERT_DELTA(intersect.exitPoint.Y(), 0.0, 1e-6);
     TS_ASSERT_DELTA(intersect.exitPoint.Z(), 5.003464, 1e-6);
-    TS_ASSERT_EQUALS(intersect.componentID, interceptedPixel->getComponentID());
+    TS_ASSERT_EQUALS(intersect.componentIndex, interceptedPixel->index());
 
     // Results vector should be empty after first getResults call
     results = tracker.getResults();
@@ -190,7 +190,7 @@ public:
 
     // Get the first result
     Link res = *results.begin();
-    IDetector_const_sptr det = std::dynamic_pointer_cast<const IDetector>(inst->getComponentByID(res.componentID));
+    IDetector_const_sptr det = inst->getDetector(detInfo->detectorIDs()[res.componentIndex]);
     // Parent bank
     RectangularDetector_const_sptr rect =
         std::dynamic_pointer_cast<const RectangularDetector>(det->getParent()->getParent());

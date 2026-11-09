@@ -95,8 +95,8 @@ size_t InstrumentRayTracer::getDetectorResult() const {
   auto const &detInfo = m_detectorInfo;
 
   for (auto const &result : results) {
-    size_t const index = compInfo.indexOf(result.componentID);
-    if (compInfo.isDetector(index) && !detInfo.isMonitor(index))
+    size_t const index = result.componentIndex;
+    if (index != ComponentInfo::invalidIndex && compInfo.isDetector(index) && !detInfo.isMonitor(index))
       return index;
   }
   return ComponentInfo::invalidIndex;
@@ -192,9 +192,7 @@ void InstrumentRayTracer::testIntersectionWithShape(size_t const index, Track &t
     rot.rotate(out);
     out *= scale;
     out += pos;
-    // ComponentID is only used as a handle, so this is never written through
-    testRay.addLink(in, out, out.distance(testRay.startPoint()), shape,
-                    const_cast<IComponent *>(compInfo.componentID(index)));
+    testRay.addLink(in, out, out.distance(testRay.startPoint()), shape, index);
   }
 }
 
@@ -247,9 +245,7 @@ void InstrumentRayTracer::testIntersectionWithGrid(size_t const index, Track &te
     return;
 
   size_t const pixel = compInfo.detectorIndexAtXYZ(index, xIndex, yIndex, 0);
-  // ComponentID is only used as a handle, so this is never written through
-  testRay.addLink(intersec, intersec, 0.0, compInfo.shape(pixel),
-                  const_cast<IComponent *>(compInfo.componentID(pixel)));
+  testRay.addLink(intersec, intersec, 0.0, compInfo.shape(pixel), pixel);
 }
 
 ///**

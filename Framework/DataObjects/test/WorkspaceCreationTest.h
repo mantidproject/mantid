@@ -100,7 +100,7 @@ public:
   }
 
   void check_instrument(const MatrixWorkspace &ws) {
-    TS_ASSERT_EQUALS(WorkspaceCreationHelper::baseInstrumentID(ws), m_instrument->getComponentID());
+    TS_ASSERT(WorkspaceCreationHelper::hasBaseInstrument(ws, *m_instrument));
   }
 
   void check_data(const MatrixWorkspace &ws) {

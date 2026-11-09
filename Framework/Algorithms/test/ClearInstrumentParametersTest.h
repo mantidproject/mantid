@@ -100,9 +100,14 @@ public:
     TS_ASSERT(!componentInfo.hasParameter(root, "before"));
     TS_ASSERT_EQUALS(componentInfo.getNumberParameter(root, "after"), std::vector<double>{2.0});
     // the legacy view shares the same store, so must agree
-    const auto *rootID = componentInfo.componentID(root);
-    TS_ASSERT(!ws->constInstrumentParameters().contains(rootID, "before"));
-    TS_ASSERT(ws->constInstrumentParameters().contains(rootID, "after"));
+    const auto entries = ws->constInstrumentParameters().entries();
+    const auto hasRootEntry = [&entries, root](const std::string &name) {
+      return std::any_of(entries.cbegin(), entries.cend(), [root, &name](const auto &entry) {
+        return entry.first == root && entry.second->name() == name;
+      });
+    };
+    TS_ASSERT(!hasRootEntry("before"));
+    TS_ASSERT(hasRootEntry("after"));
   }
 
   void test_workspace_with_detector_scan_is_rejected() {

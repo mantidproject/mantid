@@ -221,7 +221,7 @@ public:
     // --- Now make a parametrized version ----
     RectangularDetector *parDet = new RectangularDetector(det, pmap.get());
     auto &componentInfo = pmap->mutableComponentInfo();
-    auto const detIndex = componentInfo.indexOf(det);
+    auto const detIndex = det->index();
     componentInfo.addDouble(detIndex, "scalex", 12);
     componentInfo.addDouble(detIndex, "scaley", 23);
 

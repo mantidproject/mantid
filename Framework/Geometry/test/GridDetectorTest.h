@@ -120,7 +120,7 @@ public:
     // --- Now make a parametrized version ----
     auto parDet = std::make_unique<GridDetector>(det, pmap.get());
     auto &componentInfo = pmap->mutableComponentInfo();
-    auto const detIndex = componentInfo.indexOf(det);
+    auto const detIndex = det->index();
     componentInfo.addDouble(detIndex, "scalex", 3.0);
     componentInfo.addDouble(detIndex, "scaley", 5.0);
     componentInfo.addDouble(detIndex, "scalez", 2.0);

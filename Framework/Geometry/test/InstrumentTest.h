@@ -549,7 +549,7 @@ public:
     auto const [componentInfo, detectorInfo] = instrument->makeBaseBeamline();
 
     auto const bank = instrument->getComponentByName("bank2");
-    TS_ASSERT_EQUALS(bank->index(), componentInfo->indexOf(bank->getComponentID()));
+    TS_ASSERT_EQUALS(componentInfo->name(bank->index()), "bank2");
     auto const detector = instrument->getDetector(detectorInfo->detectorIDs()[1]);
     TS_ASSERT_EQUALS(detector->index(), 1);
 
@@ -557,6 +557,30 @@ public:
     auto const parametrized = std::make_shared<Instrument>(instrument, std::make_shared<ParameterMap>());
     TS_ASSERT_EQUALS(parametrized->getComponentByName("bank2")->index(), bank->index());
     TS_ASSERT_EQUALS(parametrized->getDetector(detectorInfo->detectorIDs()[1])->index(), 1);
+  }
+
+  void test_beamline_of_a_map_attached_elsewhere_has_the_same_base_and_no_parameters() {
+    auto const instrument = ComponentCreationHelper::createTestInstrumentRectangular2(2, 2);
+    auto const [baseComponentInfo, baseDetectorInfo] = instrument->makeBaseBeamline();
+    // A map with a parameter, attached to another instrument
+    auto const other = ComponentCreationHelper::createTestInstrumentRectangular2(2, 2);
+    ParameterMap pmap;
+    pmap.setInstrument(other.get());
+    auto &otherComponentInfo = pmap.mutableComponentInfo();
+    otherComponentInfo.addDouble(otherComponentInfo.root(), "a", 1.0);
+
+    auto const [componentInfo, detectorInfo] = instrument->makeBeamline(pmap);
+    TS_ASSERT(componentInfo->hasSameBase(*baseComponentInfo));
+    // None of the other instrument's parameters are for this one
+    TS_ASSERT(pmap.empty());
+  }
+
+  void test_ignored_mark_as_source_keeps_the_cached_beamline() {
+    auto const instrument = ComponentCreationHelper::createTestInstrumentRectangular2(2, 2);
+    auto const [componentInfo, detectorInfo] = instrument->makeBaseBeamline();
+    // The source is already marked, so this is ignored
+    instrument->markAsSource(instrument->getSource().get());
+    TS_ASSERT(instrument->makeBaseBeamline().first->hasSameBase(*componentInfo));
   }
 
   void test_detectorIndex() {

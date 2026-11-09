@@ -225,13 +225,13 @@ private:
     m_paramMap = std::make_shared<ParameterMap>();
     m_paramMap->setInstrument(m_instrument.get());
     auto &componentInfo = m_paramMap->mutableComponentInfo();
-    auto const parentIndex = componentInfo.indexOf(m_parentComp);
+    auto const parentIndex = m_parentComp->index();
     componentInfo.addString(parentIndex, m_strName, m_strValue);
     componentInfo.addDouble(parentIndex, m_dblName, m_dblValue);
     componentInfo.addV3D(parentIndex, m_posName, m_posValue);
     componentInfo.addQuat(parentIndex, m_quatName, m_quatValue);
-    componentInfo.addString(componentInfo.indexOf(m_childOneComp), m_strName + "_child1", m_strValue + "_child1");
-    componentInfo.addString(componentInfo.indexOf(m_childTwoComp), m_strName + "_child2", m_strValue + "_child2");
+    componentInfo.addString(m_childOneComp->index(), m_strName + "_child1", m_strValue + "_child1");
+    componentInfo.addString(m_childTwoComp->index(), m_strName + "_child2", m_strValue + "_child2");
   }
 
   /// The components are owned by the instrument

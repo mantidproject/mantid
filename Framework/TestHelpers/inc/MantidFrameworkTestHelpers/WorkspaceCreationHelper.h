@@ -64,10 +64,11 @@ public:
     return out;
   }
 };
-/// The base instrument a workspace was built from, as identified by the root of its base ComponentInfo.
-/// Two workspaces built from the same instrument return the same value. This is the instrument's address, so it is
-/// only unique while the instrument is alive: keep an owner of it for as long as the value is compared against.
-const Mantid::Geometry::IComponent *baseInstrumentID(const Mantid::API::ExperimentInfo &expInfo);
+/// Whether a workspace was built from the given unparametrized instrument, i.e. its base ComponentInfo is cloned
+/// from that instrument's cached beamline.
+bool hasBaseInstrument(const Mantid::API::ExperimentInfo &expInfo, const Mantid::Geometry::Instrument &instrument);
+/// Whether two workspaces were built from the same unparametrized instrument.
+bool haveSameBaseInstrument(const Mantid::API::ExperimentInfo &lhs, const Mantid::API::ExperimentInfo &rhs);
 
 /** Stub algorithm for doing logging/progress reporting*/
 class StubAlgorithm : public Mantid::API::Algorithm {

@@ -243,7 +243,7 @@ public:
     // The cylinder sits at (10, 0, 0), rotated, and is then moved to (11, 0, 0) through ComponentInfo
     auto const [instrument, pmap, A] = cylinderUnder(V3D(), Quat());
     auto &componentInfo = pmap->mutableComponentInfo();
-    componentInfo.setPosition(componentInfo.indexOf(A), V3D(11, 0, 0));
+    componentInfo.setPosition(A->index(), V3D(11, 0, 0));
     ObjComponent pA(A, pmap.get());
 
     BoundingBox absoluteBox;
@@ -255,7 +255,7 @@ public:
     auto const [instrumentWithParent, pmapWithParent, AWithParent] =
         cylinderUnder(V3D(0, 10, 0), Quat(90.0, V3D(0, 1, 0)));
     auto &componentInfoWithParent = pmapWithParent->mutableComponentInfo();
-    componentInfoWithParent.setPosition(componentInfoWithParent.indexOf(AWithParent), V3D(0, 10, -11));
+    componentInfoWithParent.setPosition(AWithParent->index(), V3D(0, 10, -11));
     ObjComponent pAWithParent(AWithParent, pmapWithParent.get());
     pAWithParent.getBoundingBox(absoluteBox);
     TS_ASSERT_DELTA(absoluteBox.zMax(), -10.5, 1e-08);
