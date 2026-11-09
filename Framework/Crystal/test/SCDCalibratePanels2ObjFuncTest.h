@@ -29,7 +29,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Unit.h"
 
-#include <boost/math/constants/constants.hpp>
 #include <boost/math/special_functions/round.hpp>
 #include <cxxtest/TestSuite.h>
 #include <stdexcept>

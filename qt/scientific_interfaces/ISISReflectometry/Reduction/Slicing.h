@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "Common/DllConfig.h"
-#include <boost/variant.hpp>
 #include <ostream>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace MantidQt {
@@ -79,8 +79,8 @@ MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &operator<<(std::ostream &os, Invali
 /** Slicing holds information about the type of event slicing
  * to be performed on the input workspace before reduction
  */
-using Slicing = boost::variant<boost::blank, InvalidSlicing, UniformSlicingByTime, UniformSlicingByNumberOfSlices,
-                               CustomSlicingByList, SlicingByEventLog>;
+using Slicing = std::variant<std::monostate, InvalidSlicing, UniformSlicingByTime, UniformSlicingByNumberOfSlices,
+                             CustomSlicingByList, SlicingByEventLog>;
 
 MANTIDQT_ISISREFLECTOMETRY_DLL bool isInvalid(Slicing const &slicing);
 MANTIDQT_ISISREFLECTOMETRY_DLL bool isValid(Slicing const &slicing);
