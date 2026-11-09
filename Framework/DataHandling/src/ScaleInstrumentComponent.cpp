@@ -83,7 +83,7 @@ std::map<std::string, std::string> ScaleInstrumentComponent::validateInputs() {
   }
 
   // Check if the component is a detector
-  const auto componentIndex = m_componentInfo->indexOf(m_comp->getComponentID());
+  const auto componentIndex = m_comp->index();
   if (m_componentInfo->isDetector(componentIndex)) {
     result["ComponentName"] = "Cannot scale a detector. Please provide a non-detector component name.";
   }

@@ -1322,7 +1322,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
         // Reproducing that leniency on ComponentInfo is its own piece of work.
         const auto *comp = sptr_instrument->getComponentByName(comp_name).get();
         if (comp) {
-          compIndex = compInfo.indexOfOrInvalid(comp->getComponentID());
+          compIndex = comp->index();
         }
         if (compIndex == Geometry::ComponentInfo::invalidIndex) {
           g_log.warning() << "Cannot find component " << comp_name << '\n';

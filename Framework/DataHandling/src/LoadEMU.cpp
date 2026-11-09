@@ -1043,7 +1043,7 @@ template <typename FD> void LoadEMU<FD>::updateNeutronicPostions(detid_t detID, 
     double scale = -(2 * sampleAnalyser + rho) / rho;
     position *= scale;
 
-    const auto componentIndex = compInfo.indexOf(component->getComponentID());
+    const auto componentIndex = component->index();
     compInfo.setPosition(componentIndex, position);
   } catch (const std::runtime_error &) {
     // just continue with the remainder

@@ -22,7 +22,7 @@ std::vector<size_t> getDetectorIndices(const Mantid::API::MatrixWorkspace &works
   std::vector<size_t> detIndices;
   for (const auto &componentName : componentNames) {
     const auto comp = instrument->getComponentByName(componentName);
-    const auto compIndex = compInfo.indexOf(comp->getComponentID());
+    const auto compIndex = comp->index();
     const auto indices = compInfo.detectorsInSubtree(compIndex);
     detIndices.insert(detIndices.end(), indices.begin(), indices.end());
   }
