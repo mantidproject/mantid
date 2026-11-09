@@ -254,7 +254,8 @@ void export_leaf_classes() {
       .def("enableHistoryRecordingForProcessGroups", &Algorithm::enableHistoryRecordingForProcessGroups,
            (arg("self"), arg("on")),
            "Turns parent history recording on or off for algorithms that handle group outputs directly.")
-      .def("enableCheckForMultiOutputs", &Algorithm::enableCheckForMultiOutputs, (arg("self"), arg("enabled")),
+      .def("enableCheckForStringArrayWorkspaceOutputs", &Algorithm::enableCheckForStringArrayWorkspaceOutputs,
+           (arg("self"), arg("enabled")),
            "Enables/disables checking output StringArrayProperties for valid workspaces when assigning history.")
       .def("getLogger", &PythonAlgorithm::getLogger, arg("self"), return_value_policy<reference_existing_object>(),
            "Returns a reference to this algorithm's logger")

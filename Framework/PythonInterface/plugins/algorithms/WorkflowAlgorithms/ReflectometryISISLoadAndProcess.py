@@ -941,13 +941,13 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         if not finished_algs:
             return
         if len(finished_algs) == 1:
-            self.enableCheckForMultiOutputs(False)
+            self.enableCheckForStringArrayWorkspaceOutputs(False)
             child_alg = finished_algs[0]
             self._setOutputProperty(Prop.OUTPUT_WS, child_alg)
             self._setOutputProperty(Prop.OUTPUT_WS_BINNED, child_alg)
             self._setOutputProperty(Prop.OUTPUT_WS_LAM, child_alg)
         else:
-            self.enableCheckForMultiOutputs(True)
+            self.enableCheckForStringArrayWorkspaceOutputs(True)
             outputs = []
             binned_outputs = []
             lambda_outputs = []

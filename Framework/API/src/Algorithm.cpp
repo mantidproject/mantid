@@ -113,7 +113,7 @@ Algorithm::Algorithm()
     : m_cancel(false), m_parallelException(false), m_log("Algorithm"), g_log(m_log), m_groupSize(0),
       m_executeAsync(nullptr), m_notificationCenter(nullptr), m_progressObserver(nullptr),
       m_executionState(ExecutionState::Uninitialized), m_resultState(ResultState::NotFinished),
-      m_isChildAlgorithm(false), m_recordHistoryForChild(false), m_checkForMultiOutputs(false),
+      m_isChildAlgorithm(false), m_recordHistoryForChild(false), m_checkForStringArrayWorkspaceOutputs(false),
       m_alwaysStoreInADS(true), m_runningAsync(false), m_rethrow(false), m_isAlgStartupLoggingEnabled(true),
       m_startChildProgress(0.), m_endChildProgress(0.), m_algorithmID(this), m_singleGroup(-1),
       m_groupsHaveSimilarNames(false), m_inputWorkspaceHistories(), m_properties() {}
@@ -1119,7 +1119,7 @@ void Algorithm::findWorkspaces(WorkspaceVector &workspaces, unsigned int directi
     if (const auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop)) {
       appendWS(workspaceFromWSProperty(*wsProp, ads, prop->value(), checkADS));
     }
-    if (m_checkForMultiOutputs) {
+    if (m_checkForStringArrayWorkspaceOutputs) {
       if (auto strArrProp = dynamic_cast<ArrayProperty<std::string> *>(prop)) {
         const auto &wsNames((*strArrProp)());
         for (const auto &wsName : wsNames) {
@@ -1787,7 +1787,9 @@ bool Algorithm::isCompoundProperty(const std::string &name) const {
   return std::find(m_reservedList.cbegin(), m_reservedList.cend(), name) != m_reservedList.cend();
 }
 
-void Algorithm::enableCheckForMultiOutputs(const bool enabled) { m_checkForMultiOutputs = enabled; }
+void Algorithm::enableCheckForStringArrayWorkspaceOutputs(const bool enabled) {
+  m_checkForStringArrayWorkspaceOutputs = enabled;
+}
 
 //---------------------------------------------------------------------------
 // Algorithm's inner classes
