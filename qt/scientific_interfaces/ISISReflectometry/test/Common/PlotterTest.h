@@ -312,6 +312,47 @@ public:
     TS_ASSERT(currentFigureAxesShare(0, 1, "get_shared_y_axes"));
   }
 
+  void testReflectivityOverplotThenTiledSpinAsymmetrySharesXAndPreservesIndependentY() {
+    using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+    closeAllFigures();
+    createWorkspace("reflectivity_up", "MomentumTransfer");
+    createWorkspace("reflectivity_down", "MomentumTransfer");
+    createWorkspace("asymmetry_one", "MomentumTransfer");
+    createWorkspace("asymmetry_two", "MomentumTransfer");
+    createPlainMatplotlibLineFigure();
+    Plotter plotter;
+    plotter.plot({{"reflectivity_up", "reflectivity_down"},
+                  reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve, PlotLayout::Overplot)});
+    plotter.plot({{"asymmetry_one", "asymmetry_two"},
+                  spinAsymmetryPlotOptions(PlotLayout::Tiled),
+                  nullptr,
+                  true,
+                  true,
+                  true,
+                  false});
+
+    TS_ASSERT_EQUALS(figureCount(), 2);
+    TS_ASSERT_EQUALS(currentFigureYAxisLabelsExcludingColorbars(),
+                     (std::vector<std::string>{"Reflectivity", "Spin Asymmetry", "Spin Asymmetry"}));
+    TS_ASSERT_EQUALS(currentFigureAxisPositionsExcludingColorbars(),
+                     (std::vector<std::pair<int, int>>{{0, 0}, {1, 0}, {0, 1}}));
+    TS_ASSERT(currentFigureAxesShare(0, 1, "get_shared_x_axes"));
+    TS_ASSERT(!currentFigureAxesShare(0, 1, "get_shared_y_axes"));
+    TS_ASSERT(currentFigureAxesShare(0, 2, "get_shared_x_axes"));
+    TS_ASSERT(!currentFigureAxesShare(0, 2, "get_shared_y_axes"));
+
+    Mantid::PythonInterface::GlobalInterpreterLock lock;
+    MantidQt::Widgets::Common::Python::Object pyplot{
+        MantidQt::Widgets::Common::Python::NewRef(PyImport_ImportModule("matplotlib.pyplot"))};
+    auto const axes = pyplot.attr("gcf")().attr("axes");
+    for (int index = 0; index < 3; ++index) {
+      auto const axis = MantidQt::Widgets::Common::Python::Object(axes[index]);
+      TS_ASSERT_EQUALS(MantidQt::Widgets::Common::Python::Len(axis.attr("tracked_workspaces")), index == 0 ? 2 : 1);
+      TS_ASSERT_EQUALS(boost::python::extract<std::string>(axis.attr("get_xscale")())(), "log");
+      TS_ASSERT_EQUALS(boost::python::extract<std::string>(axis.attr("get_yscale")())(), index == 0 ? "log" : "linear");
+    }
+  }
+
 private:
   void createWorkspace(std::string const &name, std::string const &xUnit = "TOF") {
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");

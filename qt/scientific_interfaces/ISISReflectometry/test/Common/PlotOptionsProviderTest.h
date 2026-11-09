@@ -26,7 +26,8 @@ public:
   void testAvailableTypesIncludesInstrumentSpecificPlotTypesForPolrefOffspecAndCrisp() {
     auto provider = PlotOptionsProvider{};
     auto const expected = std::vector<PlotOutputType>{PlotOutputType::ReflectivityCurve, PlotOutputType::DetectorMap,
-                                                      PlotOutputType::SpinAsymmetry, PlotOutputType::Alignment};
+                                                      PlotOutputType::SpinAsymmetry, PlotOutputType::Alignment,
+                                                      PlotOutputType::ReflectivityAndSpinAsymmetry};
 
     TS_ASSERT_EQUALS(provider.availableTypes("POLREF"), expected);
     TS_ASSERT_EQUALS(provider.availableTypes("OFFSPEC"), expected);

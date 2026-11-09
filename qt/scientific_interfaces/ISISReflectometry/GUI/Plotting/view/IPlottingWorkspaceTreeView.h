@@ -7,6 +7,7 @@
 #pragma once
 
 #include "Common/DllConfig.h"
+#include "GUI/Plotting/model/PlottingWorkspace.h"
 #include <string>
 #include <vector>
 
@@ -20,9 +21,6 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL PlottingWorkspaceTreeViewItem {
   std::vector<PlottingWorkspaceTreeViewItem> children;
   bool muted{false};
 };
-
-/// Row indices from the root to a workspace tree node. Empty denotes the root.
-using PlottingWorkspaceTreePath = std::vector<int>;
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL PlottingWorkspaceTreeViewSubscriber {
 public:
